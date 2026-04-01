@@ -1,14 +1,9 @@
-using Microsoft.EntityFrameworkCore;
-using Reaparr.BackgroundJobs.Contracts;
 using Reaparr.Data.Contracts;
 
 namespace Reaparr.BackgroundJobs.UnitTests;
 
 public class RefreshPlexMovieLibraryCommandUnitTests : BaseUnitTest<RefreshPlexMovieLibraryCommandHandler>
 {
-    public RefreshPlexMovieLibraryCommandUnitTests()
-        : base() { }
-
     [Test]
     public async Task ShouldSuccessfullyRefreshLibraryAndUpdateSyncedAt_WhenMoviesExist()
     {

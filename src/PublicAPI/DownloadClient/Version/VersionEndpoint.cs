@@ -1,5 +1,3 @@
-using FastEndpoints;
-
 namespace Reaparr.PublicAPI;
 
 public class VersionEndpoint : EndpointWithoutRequest<string>

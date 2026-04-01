@@ -5,9 +5,6 @@ namespace Reaparr.PlexApi.UnitTests.Converters;
 
 public class StringToBool : BaseUnitTest
 {
-    public StringToBool()
-        : base() { }
-
     [Test]
     [Arguments("{\"x\": \"1\"}", true)]
     [Arguments("{\"x\": \"0\"}", false)]

@@ -7,9 +7,6 @@ public class LogMaskingUnitTests : BaseUnitTest<LogMaskingUnitTests>
 {
     #region Setup/Teardown
 
-    public LogMaskingUnitTests()
-        : base() { }
-
     #endregion
 
     [Test]

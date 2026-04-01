@@ -1,8 +1,4 @@
-﻿using Microsoft.AspNetCore.SignalR;
-using Reaparr.Application.Contracts;
-using Reaparr.SignalR.Contracts;
-
-namespace Reaparr.SignalR;
+﻿namespace Reaparr.SignalR;
 
 /// <summary>
 ///  The ProgressHub class is a SignalR hub that sends progress updates to the front-end.

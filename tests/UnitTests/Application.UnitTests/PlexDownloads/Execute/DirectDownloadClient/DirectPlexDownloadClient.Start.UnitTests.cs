@@ -1,12 +1,5 @@
 using System.ComponentModel;
-using System.Reactive.Linq;
-using Autofac;
 using Downloader;
-using FastEndpoints;
-using Microsoft.EntityFrameworkCore;
-using Reaparr.Application.Contracts;
-using Reaparr.Data.Contracts;
-using Reaparr.Settings.Contracts;
 using DomainDownloadStatus = Reaparr.Domain.DownloadStatus;
 
 namespace Reaparr.Application.UnitTests;
@@ -615,7 +608,7 @@ public class DirectPlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDow
 
         SetupCommandExecutor();
 
-        var dlPackage = MakeDownloadPackage(10 * 1024);
+        var dlPackage = MakeDownloadPackage();
         var downloadServiceMock = new Mock<IDownloadService>();
         downloadServiceMock.Setup(x => x.Clear()).Returns(Task.CompletedTask);
         downloadServiceMock.Setup(x => x.CancelTaskAsync()).Returns(Task.CompletedTask);
@@ -1309,6 +1302,89 @@ public class DirectPlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDow
             x.LogLevel == NotificationLevel.Error
             && x.Status == DomainDownloadStatus.ServerUnreachable
             && x.Message.Contains("status 500 (InternalServerError)", StringComparison.Ordinal)
+        );
+    }
+
+    [Test]
+    public async Task ShouldSetSourceUnavailableStatus_WhenGetDirectDownloadUrlFailsWithNotFound()
+    {
+        // Arrange
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Setup(x =>
+                x.OnStatusChangedAsync(
+                    It.IsAny<DownloadTaskKey>(),
+                    It.IsAny<Domain.DownloadStatus>(),
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .ReturnsAsync(Result.Ok());
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Setup(x =>
+                x.OnProgressUpdated(
+                    It.IsAny<DownloadTaskKey>(),
+                    It.IsAny<DownloadTaskProgress>(),
+                    It.IsAny<DirectDownloadSnapshot?>()
+                )
+            )
+            .Returns(Result.Ok());
+        await SetupDatabase(
+            99994,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexAccountCount = 1;
+                config.MovieDownloadTasksCount = 1;
+            }
+        );
+
+        var dbContext = IDbContext;
+        var downloadTask = await dbContext.DownloadTaskMovieFile.FirstAsync(CancellationToken);
+        var serverMachineIdentifier = await dbContext.GetPlexServerMachineIdentifierById(
+            downloadTask.PlexServerId,
+            CancellationToken
+        );
+
+        SetupSpeedLimitMocks(serverMachineIdentifier);
+
+        Mock.Mock<ICommandExecutor>()
+            .Setup(m => m.Send(It.IsAny<GetDirectDownloadUrlCommand>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(
+                Result.Fail<string>("Plex download URL probe failed with status 404 (NotFound)").Add404NotFoundError()
+            );
+
+        // Act
+        var sut = CreateSut(BuildSuccessDownloadServiceMock());
+        var result = await sut.Start(downloadTask.ToKey(), CancellationToken);
+
+        // Assert
+        result.IsFailed.ShouldBeTrue();
+        Mock.Mock<ICommandExecutor>()
+            .Verify(x => x.Send(It.IsAny<GetDirectDownloadUrlCommand>(), It.IsAny<CancellationToken>()), Times.Once());
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Verify(
+                x =>
+                    x.OnStatusChangedAsync(
+                        It.Is<DownloadTaskKey>(key => key == downloadTask.ToKey()),
+                        DomainDownloadStatus.SourceUnavailable,
+                        It.IsAny<CancellationToken>()
+                    ),
+                Times.Once()
+            );
+        Mock.Mock<ICommandExecutor>()
+            .Verify(
+                x => x.Send(It.IsAny<EnsureDownloadDirectoryCommand>(), It.IsAny<CancellationToken>()),
+                Times.Never()
+            );
+
+        var logs = await dbContext
+            .DownloadTaskMovieFileLogs.Where(x => x.DownloadTaskFileId == downloadTask.Id)
+            .OrderBy(x => x.Id)
+            .ToListAsync(CancellationToken);
+
+        logs.ShouldContain(x =>
+            x.LogLevel == NotificationLevel.Error
+            && x.Status == DomainDownloadStatus.SourceUnavailable
+            && x.Message.Contains("status 404 (NotFound)", StringComparison.Ordinal)
         );
     }
 

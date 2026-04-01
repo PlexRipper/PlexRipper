@@ -1,5 +1,3 @@
-using Reaparr.Data.Contracts;
-
 namespace Reaparr.BaseTests;
 
 public static partial class DownloadTaskExtensions

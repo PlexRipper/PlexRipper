@@ -1,6 +1,3 @@
-using FastEndpoints;
-using Reaparr.Data.Contracts;
-
 namespace Reaparr.PublicAPI.GetPreferences;
 
 public class GetPreferencesEndpoint : EndpointWithoutRequest<object>

@@ -1,9 +1,7 @@
 using BencodeNET.Parsing;
 using BencodeNET.Torrents;
-using Microsoft.EntityFrameworkCore;
-using Reaparr.PublicAPI;
 
-namespace PublicApi.UnitTests;
+namespace Reaparr.PublicAPI.UnitTests;
 
 public class DownloadTorrentEndpointUnitTests : BaseUnitTest
 {

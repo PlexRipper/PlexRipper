@@ -1,7 +1,3 @@
-using FastEndpoints;
-using Flurl;
-using Reaparr.Settings.Contracts;
-
 namespace Reaparr.Application;
 
 public record SetupSonarrIndexerCommand : ICommand<Result<SetupSonarrIndexerCommandResult>>

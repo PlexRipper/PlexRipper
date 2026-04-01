@@ -1,8 +1,4 @@
 using System.Text.Json.Serialization;
-using FastEndpoints;
-using FluentValidation;
-using Microsoft.EntityFrameworkCore;
-using Reaparr.Data.Contracts;
 
 namespace Reaparr.PublicAPI;
 
@@ -53,9 +49,7 @@ public sealed class GetTorrentFilesEndpoint : Endpoint<GetTorrentFilesRequest, L
             .DownloadTaskTvShowEpisodeFile.Where(x => x.HashId == req.Hash)
             .ToListAsync(ct);
 
-        var movieFilesTask = _dbContext
-            .DownloadTaskMovieFile.Where(x => x.HashId == req.Hash)
-            .ToListAsync(ct);
+        var movieFilesTask = _dbContext.DownloadTaskMovieFile.Where(x => x.HashId == req.Hash).ToListAsync(ct);
 
         await Task.WhenAll(episodeFilesTask, movieFilesTask);
 

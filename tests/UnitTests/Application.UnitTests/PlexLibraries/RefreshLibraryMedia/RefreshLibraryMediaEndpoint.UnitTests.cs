@@ -4,9 +4,6 @@ namespace Reaparr.Application.UnitTests;
 
 public class RefreshLibraryMediaEndpointUnitTests : BaseUnitTest<RefreshLibraryMediaEndpoint>
 {
-    public RefreshLibraryMediaEndpointUnitTests()
-        : base() { }
-
     [Test]
     public async Task ShouldReturnSuccess_WhenLibrarySyncJobQueued()
     {

@@ -1,17 +1,7 @@
-using System.IO.Abstractions;
-using System.IO.Abstractions.TestingHelpers;
-using Microsoft.EntityFrameworkCore;
-using Reaparr.Application.Contracts;
-using Reaparr.Data.Contracts;
-using Reaparr.FileSystem.Contracts;
-
 namespace Reaparr.Application.UnitTests;
 
 public class StopDownloadTaskCommandUnitTests : BaseUnitTest<StopDownloadTaskCommandHandler>
 {
-    public StopDownloadTaskCommandUnitTests()
-        : base() { }
-
     [Test]
     public async Task ShouldHaveFailedResult_WhenGivenAnInvalidId()
     {
@@ -121,7 +111,6 @@ public class StopDownloadTaskCommandUnitTests : BaseUnitTest<StopDownloadTaskCom
 
         var dbContext = IDbContext;
         var allMovieFileTasks = await dbContext.DownloadTaskMovieFile.ToListAsync(CancellationToken);
-        var movieFileTasks = allMovieFileTasks.Where(f => f.ParentId == movieDownloadTasks.First().Id).ToList();
 
         SetupFileSystem(fs =>
         {

@@ -1,9 +1,4 @@
-using System.Diagnostics.CodeAnalysis;
 using System.Net.Http.Headers;
-using FastEndpoints;
-using FluentValidation;
-using Flurl;
-using Reaparr.Application.Contracts;
 
 namespace Reaparr.Application;
 

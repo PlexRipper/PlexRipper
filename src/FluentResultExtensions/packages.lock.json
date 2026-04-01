@@ -4,9 +4,9 @@
     "net10.0": {
       "CSharpier.MsBuild": {
         "type": "Direct",
-        "requested": "[1.2.5, )",
-        "resolved": "1.2.5",
-        "contentHash": "U9csejWXDk/ZXZpigcu22KAOINQj7qNujeJFj0HsHOqKzuW9xX+eaCFFHrfjOdIDQYzslQAe9e6Gt9HGMRC/aA=="
+        "requested": "[1.2.6, )",
+        "resolved": "1.2.6",
+        "contentHash": "KMSJG+jfk7vjP52QkWB99qWespXCPAzG/IaMCMRHYWumJEAGKQYm2HtyWG6eqnOwDitH96i1cqq5EVesyOtPmg=="
       },
       "FluentResults": {
         "type": "Direct",
@@ -25,8 +25,8 @@
       },
       "Autofac": {
         "type": "Transitive",
-        "resolved": "9.0.0",
-        "contentHash": "G8TpUMVIq1pEAMuAao8h5MKduY91SotjgK93wQb5LaxbJUVE0/XjCA6t2SOp+AkPC3GB/C2MAiF2D7krYjraFw=="
+        "resolved": "9.1.0",
+        "contentHash": "onT/BcnnfWcQNXiuC7R/0h8ALQzRdsAI20gpB7nfrudXpFMXdVZKz1umdtHXDwjc/bmWEsrCBAxck3+Arnk15g=="
       },
       "Microsoft.AspNetCore.Http.Abstractions": {
         "type": "Transitive",
@@ -56,13 +56,13 @@
       },
       "Serilog": {
         "type": "Transitive",
-        "resolved": "4.3.0",
-        "contentHash": "+cDryFR0GRhsGOnZSKwaDzRRl4MupvJ42FhCE4zhQRVanX0Jpg6WuCBk59OVhVDPmab1bB+nRykAnykYELA9qQ=="
+        "resolved": "4.3.1",
+        "contentHash": "savYe7h5yRlkqBVOwP8cIRDOdqKiPmYCU4W87JH38sBmcKD5EBoXvQIw6bNEvZ/pTe1gsiye3VFCzBsoppGkXQ=="
       },
       "Serilog.Enrichers.Sensitive": {
         "type": "Transitive",
-        "resolved": "1.7.3",
-        "contentHash": "U/38ICup0xDMDL8TjprLDCWI16MkQTPEJfWgPROFxtGjsBf+SW1W2fMfEhdiAYLGCTSFWNXmVGdVjU58Gyr0eQ=="
+        "resolved": "2.1.0",
+        "contentHash": "nlaEYMoHjJqncjQgc0Nv4LOIkAwUt4Nvmx3EMNjY4MKC7QqZs9zB0v/NwFnaWzLF7qztc7mna1bjn20Auohu0g=="
       },
       "Serilog.Expressions": {
         "type": "Transitive",
@@ -130,18 +130,18 @@
       "Reaparr.Environment": {
         "type": "Project",
         "dependencies": {
-          "Serilog": "[4.3.0, )"
+          "Serilog": "[4.3.1, )"
         }
       },
       "Reaparr.Logging": {
         "type": "Project",
         "dependencies": {
-          "Autofac": "[9.0.0, )",
+          "Autofac": "[9.1.0, )",
           "FluentResults": "[4.0.0, )",
           "Microsoft.AspNetCore.Http.Abstractions": "[2.3.9, )",
           "Reaparr.Environment": "[1.0.0, )",
-          "Serilog": "[4.3.0, )",
-          "Serilog.Enrichers.Sensitive": "[1.7.3, )",
+          "Serilog": "[4.3.1, )",
+          "Serilog.Enrichers.Sensitive": "[2.1.0, )",
           "Serilog.Expressions": "[5.0.0, )",
           "Serilog.Sinks.Console": "[6.1.1, )",
           "Serilog.Sinks.Console.LogThemes": "[0.4.0, )",

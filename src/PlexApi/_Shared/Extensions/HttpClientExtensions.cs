@@ -3,7 +3,6 @@ using System.Text.Json;
 using LukeHagar.PlexAPI.SDK.Models.Errors;
 using LukeHagar.PlexAPI.SDK.Models.Requests;
 using Newtonsoft.Json;
-using Reaparr.FluentResultExtensions;
 using JsonException = System.Text.Json.JsonException;
 using JsonSerializer = System.Text.Json.JsonSerializer;
 
@@ -11,8 +10,6 @@ namespace Reaparr.PlexApi;
 
 public static class HttpClientExtensions
 {
-    private static readonly ILogger _log = Log.ForContext(typeof(HttpClientExtensions));
-
     /// <summary>
     /// This will convert from SpeakEasy exceptions to the use of FluentResults
     /// </summary>

@@ -1,9 +1,5 @@
 using BencodeNET.Objects;
 using BencodeNET.Torrents;
-using FastEndpoints;
-using FluentValidation;
-using Microsoft.EntityFrameworkCore;
-using Reaparr.Data.Contracts;
 
 namespace Reaparr.PublicAPI;
 

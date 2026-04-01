@@ -1,6 +1,4 @@
-﻿using System.IO.Abstractions;
-using System.IO.Abstractions.TestingHelpers;
-using ByteSizeLib;
+﻿using System.IO.Abstractions.TestingHelpers;
 
 namespace Reaparr.BaseTests;
 

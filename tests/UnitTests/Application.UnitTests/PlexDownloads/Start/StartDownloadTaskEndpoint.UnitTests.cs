@@ -1,12 +1,7 @@
-using Reaparr.Application.Contracts;
-
 namespace Reaparr.Application.UnitTests;
 
 public class StartDownloadTaskEndpointUnitTests : BaseUnitTest
 {
-    public StartDownloadTaskEndpointUnitTests()
-        : base() { }
-
     [Test]
     public async Task ShouldReturnSuccessResult_WhenCommandSucceeds()
     {

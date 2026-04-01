@@ -1,8 +1,3 @@
-using FastEndpoints;
-using FluentValidation;
-using Reaparr.Application.Contracts;
-using Reaparr.Identity.Contracts;
-
 namespace Reaparr.Application;
 
 public record UpdateCredentialsEndpointRequest

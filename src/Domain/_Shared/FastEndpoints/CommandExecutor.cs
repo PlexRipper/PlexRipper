@@ -1,5 +1,3 @@
-using FastEndpoints;
-
 namespace Reaparr.Domain;
 
 public class CommandExecutor : ICommandExecutor

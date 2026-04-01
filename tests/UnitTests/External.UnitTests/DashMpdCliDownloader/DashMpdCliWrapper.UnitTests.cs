@@ -71,14 +71,14 @@ public class DashMpdCliWrapperUnitTests : BaseUnitTest
     {
         var fileSystem = new System.IO.Abstractions.FileSystem();
         var logger = new LoggerConfiguration().CreateLogger();
-        var wrapper = new DashMpdCliWrapper(logger, fileSystem.File, fileSystem.Directory);
+        var wrapper = new DashMpdCliWrapper(logger, fileSystem.File);
 
         var binaryPathField = typeof(DashMpdCliWrapper).GetField(
             "_binaryPath",
             BindingFlags.Instance | BindingFlags.NonPublic
         );
         binaryPathField.ShouldNotBeNull();
-        binaryPathField!.SetValue(wrapper, binaryPath);
+        binaryPathField.SetValue(wrapper, binaryPath);
 
         return wrapper;
     }

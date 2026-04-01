@@ -1,5 +1,3 @@
-using Reaparr.Domain;
-
 namespace Reaparr.Data.Contracts;
 
 public record DownloadProgressRow

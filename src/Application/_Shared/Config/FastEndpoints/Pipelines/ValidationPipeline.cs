@@ -1,6 +1,4 @@
-﻿using FastEndpoints;
-using FluentValidation;
-using FluentValidation.Results;
+﻿using FluentValidation.Results;
 using ValidationResult = FluentValidation.Results.ValidationResult;
 
 namespace Reaparr.Application;

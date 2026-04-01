@@ -2,7 +2,6 @@ using System.Data.Common;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using NaturalSort.Extension;
-using Reaparr.Domain;
 
 namespace Reaparr.Data.Contracts;
 

@@ -1,10 +1,5 @@
 ﻿using System.ComponentModel;
 using Autofac;
-using FastEndpoints;
-using Microsoft.EntityFrameworkCore;
-using Reaparr.Application;
-using Reaparr.Application.Contracts;
-using Reaparr.Data.Contracts;
 using DownloadConfiguration = Downloader.DownloadConfiguration;
 using DownloadPackage = Downloader.DownloadPackage;
 using DownloadProgressChangedEventArgs = Downloader.DownloadProgressChangedEventArgs;
@@ -35,8 +30,12 @@ public class StartDownloadTaskEndpointIntegrationTests : BaseIntegrationTests
                 config.OverrideServices = builder =>
                 {
                     builder
-                        .RegisterType<FakeGetDirectDownloadUrlCommandHandler>()
-                        .As<ICommandHandler<GetDirectDownloadUrlCommand, Result<string>>>()
+                        .Register(_ =>
+                            new FakeCommandExecutor().Intercept<GetDirectDownloadUrlCommand, Result<string>>(
+                                (_, _) => Task.FromResult(Result.Ok("http://mock/direct-file.mkv"))
+                            )
+                        )
+                        .As<ICommandExecutor>()
                         .InstancePerDependency();
 
                     builder
@@ -236,14 +235,5 @@ public class StartDownloadTaskEndpointIntegrationTests : BaseIntegrationTests
             );
 
         return mock.Object;
-    }
-
-    private sealed class FakeGetDirectDownloadUrlCommandHandler
-        : ICommandHandler<GetDirectDownloadUrlCommand, Result<string>>
-    {
-        public Task<Result<string>> ExecuteAsync(
-            GetDirectDownloadUrlCommand command,
-            CancellationToken cancellationToken
-        ) => Task.FromResult(Result.Ok("http://mock/direct-file.mkv"));
     }
 }

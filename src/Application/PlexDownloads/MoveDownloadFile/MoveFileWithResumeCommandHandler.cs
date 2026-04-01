@@ -1,8 +1,3 @@
-using System.Diagnostics;
-using System.IO.Abstractions;
-using FastEndpoints;
-using FluentValidation;
-
 namespace Reaparr.Application;
 
 public record MoveFileWithResumeCommand : ICommand<Result>

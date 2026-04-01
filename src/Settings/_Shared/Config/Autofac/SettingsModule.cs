@@ -1,5 +1,4 @@
 using Autofac;
-using Reaparr.Settings.Contracts;
 using Module = Autofac.Module;
 
 namespace Reaparr.Settings.Config;

@@ -1,5 +1,3 @@
-using System.Text.Json.Serialization;
-
 namespace Reaparr.Application;
 
 public sealed class SonarrDownloadContractDTO

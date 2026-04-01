@@ -1,6 +1,3 @@
-using System.IO.Abstractions;
-using Autofac;
-using Reaparr.Data.Contracts;
 using Reaparr.Settings.Contracts;
 
 namespace Reaparr.BaseTests;

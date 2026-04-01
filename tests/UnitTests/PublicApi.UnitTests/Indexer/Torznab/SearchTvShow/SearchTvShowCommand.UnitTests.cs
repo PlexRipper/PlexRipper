@@ -1,4 +1,3 @@
-using Microsoft.EntityFrameworkCore;
 using Reaparr.Settings.Contracts;
 
 namespace Reaparr.PublicAPI.UnitTests;
@@ -6,7 +5,6 @@ namespace Reaparr.PublicAPI.UnitTests;
 public class SearchTvShowCommandUnitTests : BaseUnitTest<SearchTvShowCommandHandler>
 {
     public SearchTvShowCommandUnitTests()
-        : base()
     {
         Mock.Mock<INetworkSettings>().SetupGet(x => x.Url).Returns("http://localhost");
     }
@@ -147,10 +145,14 @@ public class SearchTvShowCommandUnitTests : BaseUnitTest<SearchTvShowCommandHand
         result.Value.Channel.Items.ShouldNotBeEmpty();
         // All returned items should correspond to the selected episode
         result
-            .Value.Channel.Items.All(i => i.Attributes.Any(a => a.Name == "season" && a.Value == seasonNumber.ToString()))
+            .Value.Channel.Items.All(i =>
+                i.Attributes.Any(a => a.Name == "season" && a.Value == seasonNumber.ToString())
+            )
             .ShouldBeTrue();
         result
-            .Value.Channel.Items.All(i => i.Attributes.Any(a => a.Name == "episode" && a.Value == episodeNumber.ToString()))
+            .Value.Channel.Items.All(i =>
+                i.Attributes.Any(a => a.Name == "episode" && a.Value == episodeNumber.ToString())
+            )
             .ShouldBeTrue();
         result.Value.Channel.Items.All(i => i.Attributes.Any(a => a.Name == "imdb" && a.Value == imdb)).ShouldBeTrue();
 
@@ -215,10 +217,14 @@ public class SearchTvShowCommandUnitTests : BaseUnitTest<SearchTvShowCommandHand
         result.ShouldNotBeNull();
         result.Value.Channel.Items.ShouldNotBeEmpty();
         result
-            .Value.Channel.Items.All(i => i.Attributes.Any(a => a.Name == "season" && a.Value == seasonNumber.ToString()))
+            .Value.Channel.Items.All(i =>
+                i.Attributes.Any(a => a.Name == "season" && a.Value == seasonNumber.ToString())
+            )
             .ShouldBeTrue();
         result
-            .Value.Channel.Items.All(i => i.Attributes.Any(a => a.Name == "episode" && a.Value == episodeNumber.ToString()))
+            .Value.Channel.Items.All(i =>
+                i.Attributes.Any(a => a.Name == "episode" && a.Value == episodeNumber.ToString())
+            )
             .ShouldBeTrue();
         result
             .Value.Channel.Items.All(i => i.Attributes.Any(a => a.Name == "tmdbid" && a.Value == tmdb.ToString()))
@@ -270,10 +276,14 @@ public class SearchTvShowCommandUnitTests : BaseUnitTest<SearchTvShowCommandHand
         result.ShouldNotBeNull();
         result.Value.Channel.Items.ShouldNotBeEmpty();
         result
-            .Value.Channel.Items.All(i => i.Attributes.Any(a => a.Name == "season" && a.Value == seasonNumber.ToString()))
+            .Value.Channel.Items.All(i =>
+                i.Attributes.Any(a => a.Name == "season" && a.Value == seasonNumber.ToString())
+            )
             .ShouldBeTrue();
         result
-            .Value.Channel.Items.All(i => i.Attributes.Any(a => a.Name == "episode" && a.Value == episodeNumber.ToString()))
+            .Value.Channel.Items.All(i =>
+                i.Attributes.Any(a => a.Name == "episode" && a.Value == episodeNumber.ToString())
+            )
             .ShouldBeTrue();
         result
             .Value.Channel.Items.All(i => i.Attributes.Any(a => a.Name == "tvdbid" && a.Value == tvdb.ToString()))

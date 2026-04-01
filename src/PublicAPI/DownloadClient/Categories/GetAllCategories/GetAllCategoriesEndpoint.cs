@@ -1,7 +1,3 @@
-using FastEndpoints;
-using Reaparr.Data.Contracts;
-using Reaparr.PublicAPI.Contracts;
-
 namespace Reaparr.PublicAPI.GetAllCategories;
 
 public class GetAllCategoriesEndpoint : EndpointWithoutRequest<object>

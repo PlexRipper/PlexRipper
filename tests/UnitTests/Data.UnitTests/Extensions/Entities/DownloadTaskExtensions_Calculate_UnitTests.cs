@@ -1,13 +1,7 @@
-using Microsoft.EntityFrameworkCore;
-using Reaparr.Data.Contracts;
-
 namespace Reaparr.Data.UnitTests.Entities;
 
 public class DownloadTaskExtensionsCalculateUnitTests : BaseUnitTest
 {
-    public DownloadTaskExtensionsCalculateUnitTests()
-        : base() { }
-
     [Test]
     public async Task ShouldUpdateDownloadProgressAcrossAllLayers_WhenCallingCalculateOnRootDownloadTask()
     {

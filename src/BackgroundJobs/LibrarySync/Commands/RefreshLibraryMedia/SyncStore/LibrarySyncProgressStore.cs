@@ -1,6 +1,4 @@
 using System.Collections.Concurrent;
-using Reaparr.BackgroundJobs.Contracts;
-using Reaparr.SignalR.Contracts;
 
 namespace Reaparr.BackgroundJobs;
 
@@ -65,7 +63,8 @@ public class LibrarySyncProgressStore : ILibrarySyncProgressStore
         }
         else
         {
-            _log.Here().Warning("Unsupported PlexMediaType {PlexMediaType} for library {PlexLibraryId}", type, plexLibraryId);
+            _log.Here()
+                .Warning("Unsupported PlexMediaType {PlexMediaType} for library {PlexLibraryId}", type, plexLibraryId);
             return;
         }
 

@@ -1,8 +1,4 @@
 using System.Text.Json.Serialization;
-using FastEndpoints;
-using FluentValidation;
-using Microsoft.EntityFrameworkCore;
-using Reaparr.Data.Contracts;
 
 namespace Reaparr.PublicAPI;
 
@@ -75,11 +71,7 @@ public sealed class GetTorrentPropertiesEndpoint : Endpoint<GetTorrentProperties
             ? file.DownloadDirectory
             : file.DestinationDirectory;
 
-        var response = new QBittorrentTorrentProperties
-        {
-            SavePath = savePath,
-            SeedingTime = 0,
-        };
+        var response = new QBittorrentTorrentProperties { SavePath = savePath, SeedingTime = 0 };
 
         await Send.OkAsync(response, ct);
     }

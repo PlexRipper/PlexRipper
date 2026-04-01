@@ -1,16 +1,9 @@
-using System.IO;
-using System.IO.Abstractions;
-using System.IO.Abstractions.TestingHelpers;
-using Autofac;
 using ByteSizeLib;
 
 namespace Reaparr.Application.UnitTests;
 
 public class EnsureDownloadDirectoryCommandUnitTests : BaseCommandUnitTest<EnsureDownloadDirectoryCommand>
 {
-    public EnsureDownloadDirectoryCommandUnitTests()
-        : base() { }
-
     // -------------------------------------------------------------------------
     // Validator tests
     // -------------------------------------------------------------------------
@@ -110,8 +103,8 @@ public class EnsureDownloadDirectoryCommandUnitTests : BaseCommandUnitTest<Ensur
     {
         // Arrange — configure the drive with less free space than the requested file size
         const string directory = "/downloads/reaparr/Movies/Test Movie (2024)";
-        const long fileSize = (long)ByteSize.BytesInMegaByte * 500; // 500 MB
-        const long availableSpace = (long)ByteSize.BytesInMegaByte * 100; // 100 MB — not enough
+        const long fileSize = ByteSize.BytesInMegaByte * 500; // 500 MB
+        const long availableSpace = ByteSize.BytesInMegaByte * 100; // 100 MB — not enough
 
         var command = new EnsureDownloadDirectoryCommand(directory, fileSize);
 
@@ -141,7 +134,7 @@ public class EnsureDownloadDirectoryCommandUnitTests : BaseCommandUnitTest<Ensur
     {
         // Arrange
         const string directory = "/downloads/reaparr/Movies/Test Movie (2024)";
-        const long fileSize = (long)ByteSize.BytesInMegaByte * 500; // 500 MB
+        const long fileSize = ByteSize.BytesInMegaByte * 500; // 500 MB
 
         var command = new EnsureDownloadDirectoryCommand(directory, fileSize);
 
@@ -160,7 +153,7 @@ public class EnsureDownloadDirectoryCommandUnitTests : BaseCommandUnitTest<Ensur
     {
         // Arrange
         const string directory = "/downloads/reaparr/Movies/Test Movie (2024)";
-        const long fileSize = (long)ByteSize.BytesInMegaByte * 500; // 500 MB
+        const long fileSize = ByteSize.BytesInMegaByte * 500; // 500 MB
 
         var command = new EnsureDownloadDirectoryCommand(directory, fileSize);
 

@@ -1,25 +1,25 @@
 <Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
-        <TargetFramework>net10.0</TargetFramework>
-        <LangVersion>14</LangVersion>
-        <ImplicitUsings>enable</ImplicitUsings>
-        <Nullable>enable</Nullable>
         <RootNamespace>Reaparr.Data.Contracts</RootNamespace>
         <AssemblyName>Reaparr.Data.Contracts</AssemblyName>
-        <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
-        <ErrorOnDuplicatePublishOutputFiles>false</ErrorOnDuplicatePublishOutputFiles>
-        <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     </PropertyGroup>
     <ItemGroup>
         <ProjectReference Include="..\Application.Contracts\Application.Contracts.csproj" />
         <ProjectReference Include="..\Domain\Domain.csproj" />
     </ItemGroup>
     <ItemGroup>
-        <PackageReference Include="CSharpier.MsBuild" Version="1.2.5">
+        <PackageReference Include="CSharpier.MsBuild" Version="1.2.6">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="EFCore.BulkExtensions.SQLite" Version="10.0.0" />
-        <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.1" />
+        <PackageReference Include="EFCore.BulkExtensions.SQLite" Version="10.0.1" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.5" />
+    </ItemGroup>
+    <ItemGroup>
+        <Using Include="FluentResults" />
+        <Using Include="Microsoft.EntityFrameworkCore" />
+        <Using Include="Reaparr.Application.Contracts" />
+        <Using Include="Reaparr.Domain" />
+        <Using Include="Reaparr.Logging" />
     </ItemGroup>
 </Project>

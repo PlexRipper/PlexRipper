@@ -1,0 +1,19 @@
+<Project>
+    <Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)..'))" />
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <IsPackable>false</IsPackable>
+    </PropertyGroup>
+    <ItemGroup>
+        <Using Include="TUnit.Assertions" />
+        <Using Include="TUnit.Assertions.Extensions" />
+        <Using Include="TUnit.Core" />
+        <Using Include="TUnit.Core.HookType" Static="true" />
+        <Using Include="Autofac.Extras.Moq" />
+        <Using Include="Bogus" />
+        <Using Include="JetBrains.Annotations" />
+        <Using Include="Moq" />
+        <Using Include="Reaparr.BaseTests" />
+        <Using Include="Shouldly" />
+    </ItemGroup>
+</Project>

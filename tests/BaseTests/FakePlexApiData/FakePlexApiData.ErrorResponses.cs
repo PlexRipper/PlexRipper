@@ -1,5 +1,4 @@
 ﻿using Reaparr.FluentResultExtensions;
-using Reaparr.PlexApi;
 
 namespace Reaparr.BaseTests;
 

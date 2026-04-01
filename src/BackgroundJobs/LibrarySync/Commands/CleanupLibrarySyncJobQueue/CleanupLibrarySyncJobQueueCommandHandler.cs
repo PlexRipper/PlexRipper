@@ -1,10 +1,3 @@
-using FastEndpoints;
-using FluentValidation;
-using Microsoft.EntityFrameworkCore;
-using Reaparr.BackgroundJobs.Contracts;
-using Reaparr.Data.Contracts;
-using Reaparr.SignalR.Contracts;
-
 namespace Reaparr.BackgroundJobs;
 
 public class CleanupLibrarySyncJobQueueCommandValidator : AbstractValidator<CleanupLibrarySyncJobQueueCommand>

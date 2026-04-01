@@ -1,7 +1,3 @@
-using Microsoft.EntityFrameworkCore;
-using Reaparr.Domain;
-using Reaparr.Logging;
-
 namespace Reaparr.Data.Contracts;
 
 public static partial class DbContextExtensions
@@ -27,54 +23,62 @@ public static partial class DbContextExtensions
             var parentKey = key;
             while (parentKey is not null)
             {
-                switch (parentKey.Type)
+                var currentParentKey = parentKey;
+
+                switch (currentParentKey.Type)
                 {
                     case DownloadTaskType.Movie:
                     {
+                        var currentParentId = currentParentKey.Id;
+
                         var childStatuses = await dbContext
-                            .DownloadTaskMovieFile.Where(x => x.ParentId == parentKey.Id)
+                            .DownloadTaskMovieFile.Where(x => x.ParentId == currentParentId)
                             .Select(x => x.DownloadStatus)
                             .ToListAsync(cancellationToken);
                         var newStatus = DownloadTaskActions.Aggregate(childStatuses);
 
                         var changedCount = await dbContext
-                            .DownloadTaskMovie.Where(x => x.Id == parentKey.Id && x.DownloadStatus != newStatus)
+                            .DownloadTaskMovie.Where(x => x.Id == currentParentId && x.DownloadStatus != newStatus)
                             .ExecuteUpdateAsync(
                                 p => p.SetProperty(x => x.DownloadStatus, newStatus),
                                 cancellationToken
                             );
 
                         if (changedCount > 0)
-                            changedKeys.Add(parentKey);
+                            changedKeys.Add(currentParentKey);
 
                         parentKey = null;
                         break;
                     }
                     case DownloadTaskType.TvShow:
                     {
+                        var currentParentId = currentParentKey.Id;
+
                         var childStatuses = await dbContext
-                            .DownloadTaskTvShowSeason.Where(x => x.ParentId == parentKey.Id)
+                            .DownloadTaskTvShowSeason.Where(x => x.ParentId == currentParentId)
                             .Select(x => x.DownloadStatus)
                             .ToListAsync(cancellationToken);
                         var newStatus = DownloadTaskActions.Aggregate(childStatuses);
 
                         var changedCount = await dbContext
-                            .DownloadTaskTvShow.Where(x => x.Id == parentKey.Id && x.DownloadStatus != newStatus)
+                            .DownloadTaskTvShow.Where(x => x.Id == currentParentId && x.DownloadStatus != newStatus)
                             .ExecuteUpdateAsync(
                                 p => p.SetProperty(x => x.DownloadStatus, newStatus),
                                 cancellationToken
                             );
 
                         if (changedCount > 0)
-                            changedKeys.Add(parentKey);
+                            changedKeys.Add(currentParentKey);
 
                         parentKey = null;
                         break;
                     }
                     case DownloadTaskType.Season:
                     {
+                        var currentParentId = currentParentKey.Id;
+
                         var showId = await dbContext
-                            .DownloadTaskTvShowSeason.Where(x => x.Id == parentKey.Id)
+                            .DownloadTaskTvShowSeason.Where(x => x.Id == currentParentId)
                             .Select(x => (Guid?)x.ParentId)
                             .FirstOrDefaultAsync(cancellationToken);
 
@@ -85,20 +89,22 @@ public static partial class DbContextExtensions
                         }
 
                         var childStatuses = await dbContext
-                            .DownloadTaskTvShowEpisode.Where(x => x.ParentId == parentKey.Id)
+                            .DownloadTaskTvShowEpisode.Where(x => x.ParentId == currentParentId)
                             .Select(x => x.DownloadStatus)
                             .ToListAsync(cancellationToken);
                         var newStatus = DownloadTaskActions.Aggregate(childStatuses);
 
                         var changedCount = await dbContext
-                            .DownloadTaskTvShowSeason.Where(x => x.Id == parentKey.Id && x.DownloadStatus != newStatus)
+                            .DownloadTaskTvShowSeason.Where(x =>
+                                x.Id == currentParentId && x.DownloadStatus != newStatus
+                            )
                             .ExecuteUpdateAsync(
                                 p => p.SetProperty(x => x.DownloadStatus, newStatus),
                                 cancellationToken
                             );
 
                         if (changedCount > 0)
-                            changedKeys.Add(parentKey);
+                            changedKeys.Add(currentParentKey);
 
                         parentKey = new DownloadTaskKey
                         {
@@ -112,8 +118,10 @@ public static partial class DbContextExtensions
                     }
                     case DownloadTaskType.Episode:
                     {
+                        var currentParentId = currentParentKey.Id;
+
                         var seasonId = await dbContext
-                            .DownloadTaskTvShowEpisode.Where(x => x.Id == parentKey.Id)
+                            .DownloadTaskTvShowEpisode.Where(x => x.Id == currentParentId)
                             .Select(x => (Guid?)x.ParentId)
                             .FirstOrDefaultAsync(cancellationToken);
 
@@ -124,20 +132,22 @@ public static partial class DbContextExtensions
                         }
 
                         var childStatuses = await dbContext
-                            .DownloadTaskTvShowEpisodeFile.Where(x => x.ParentId == parentKey.Id)
+                            .DownloadTaskTvShowEpisodeFile.Where(x => x.ParentId == currentParentId)
                             .Select(x => x.DownloadStatus)
                             .ToListAsync(cancellationToken);
                         var newStatus = DownloadTaskActions.Aggregate(childStatuses);
 
                         var changedCount = await dbContext
-                            .DownloadTaskTvShowEpisode.Where(x => x.Id == parentKey.Id && x.DownloadStatus != newStatus)
+                            .DownloadTaskTvShowEpisode.Where(x =>
+                                x.Id == currentParentId && x.DownloadStatus != newStatus
+                            )
                             .ExecuteUpdateAsync(
                                 p => p.SetProperty(x => x.DownloadStatus, newStatus),
                                 cancellationToken
                             );
 
                         if (changedCount > 0)
-                            changedKeys.Add(parentKey);
+                            changedKeys.Add(currentParentKey);
 
                         parentKey = new DownloadTaskKey
                         {
@@ -154,9 +164,10 @@ public static partial class DbContextExtensions
                     case DownloadTaskType.MovieData:
                     case DownloadTaskType.MoviePart:
                     {
+                        var movieDataParentId = currentParentKey.Id;
+
                         parentKey = await dbContext
-                            // ReSharper disable once AccessToModifiedClosure
-                            .DownloadTaskMovieFile.Where(x => x.Id == parentKey.Id)
+                            .DownloadTaskMovieFile.Where(x => x.Id == movieDataParentId)
                             .ProjectToParentKey()
                             .FirstOrDefaultAsync(cancellationToken);
                         break;
@@ -166,9 +177,10 @@ public static partial class DbContextExtensions
                     case DownloadTaskType.EpisodeData:
                     case DownloadTaskType.EpisodePart:
                     {
+                        var episodeDataParentId = currentParentKey.Id;
+
                         parentKey = await dbContext
-                            // ReSharper disable once AccessToModifiedClosure
-                            .DownloadTaskTvShowEpisodeFile.Where(x => x.Id == parentKey.Id)
+                            .DownloadTaskTvShowEpisodeFile.Where(x => x.Id == episodeDataParentId)
                             .ProjectToParentKey()
                             .FirstOrDefaultAsync(cancellationToken);
                         break;
@@ -177,7 +189,7 @@ public static partial class DbContextExtensions
                         _log.Here()
                             .Error(
                                 "DownloadTaskType {DownloadTaskType} is not supported in {DetermineDownloadStatus}",
-                                parentKey.Type,
+                                currentParentKey.Type,
                                 nameof(DetermineDownloadStatus)
                             );
                         parentKey = null;

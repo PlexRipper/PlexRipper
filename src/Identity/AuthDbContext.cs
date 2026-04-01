@@ -1,9 +1,6 @@
 using FluentResults;
 using Microsoft.AspNetCore.DataProtection.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore;
-using Reaparr.Data.Contracts;
-using Reaparr.Identity.Contracts;
 
 namespace Reaparr.Identity;
 

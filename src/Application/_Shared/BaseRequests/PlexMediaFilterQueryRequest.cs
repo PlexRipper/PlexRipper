@@ -1,6 +1,3 @@
-using System.ComponentModel;
-using FastEndpoints;
-
 namespace Reaparr.Application;
 
 public abstract record PlexMediaFilterQueryRequest

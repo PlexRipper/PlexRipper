@@ -1,15 +1,9 @@
-using FastEndpoints;
-using Microsoft.EntityFrameworkCore;
-using Reaparr.BackgroundJobs.Contracts;
 using Reaparr.SignalR.Contracts;
 
 namespace Reaparr.BackgroundJobs.UnitTests;
 
 public class CleanupLibrarySyncJobQueueCommandHandlerUnitTests : BaseUnitTest<CleanupLibrarySyncJobQueueCommandHandler>
 {
-    public CleanupLibrarySyncJobQueueCommandHandlerUnitTests()
-        : base() { }
-
     private void SetupSignalRMock()
     {
         Mock.Mock<INotificationHubService>()

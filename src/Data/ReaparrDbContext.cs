@@ -3,11 +3,8 @@ using System.Reflection;
 using AppAny.Quartz.EntityFrameworkCore.Migrations;
 using AppAny.Quartz.EntityFrameworkCore.Migrations.SQLite;
 using EFCore.BulkExtensions;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.DependencyInjection;
-using Reaparr.Data.Contracts;
-using Reaparr.Environment;
 
 // ReSharper disable UnusedAutoPropertyAccessor.Global
 

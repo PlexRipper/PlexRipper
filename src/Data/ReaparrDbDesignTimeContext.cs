@@ -1,5 +1,4 @@
 using Microsoft.EntityFrameworkCore.Design;
-using Reaparr.Environment;
 
 namespace Reaparr.Data;
 

@@ -1,8 +1,3 @@
-using Microsoft.EntityFrameworkCore;
-using Reaparr.Application.Contracts;
-using Reaparr.BackgroundJobs.Contracts;
-using Reaparr.Data.Contracts;
-
 namespace Reaparr.Application;
 
 /// <summary>

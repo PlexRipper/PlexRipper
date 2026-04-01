@@ -1,5 +1,3 @@
-using System.Net;
-using System.Text.Json;
 using LukeHagar.PlexAPI.SDK.Models.Components;
 using LukeHagar.PlexAPI.SDK.Models.Requests;
 
@@ -84,7 +82,7 @@ public partial class FakePlexApiData
                     id = currentId,
                     key = $"/library/streams/{currentId}",
                     streamType = 1,
-                    decision = x.Decision?.ToString()?.ToLowerInvariant(),
+                    decision = x.Decision?.ToString().ToLowerInvariant(),
                     width = x.Width,
                     height = x.Height,
                 };
@@ -103,7 +101,7 @@ public partial class FakePlexApiData
                     id = currentId,
                     key = $"/library/streams/{currentId}",
                     streamType = 2,
-                    decision = config.AudioDecision?.ToString()?.ToLowerInvariant(),
+                    decision = config.AudioDecision?.ToString().ToLowerInvariant(),
                 }
             );
         }

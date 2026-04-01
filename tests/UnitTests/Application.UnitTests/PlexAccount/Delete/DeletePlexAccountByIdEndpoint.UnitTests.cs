@@ -1,12 +1,7 @@
-﻿using Reaparr.Data.Contracts;
-
-namespace Reaparr.Application.UnitTests;
+﻿namespace Reaparr.Application.UnitTests;
 
 public class DeletePlexAccountByIdEndpointUnitTests : BaseUnitTest
 {
-    public DeletePlexAccountByIdEndpointUnitTests()
-        : base() { }
-
     [Test]
     public async Task ShouldDeleteAllRelatedDataWhenAccountIsDeleted()
     {

@@ -1,8 +1,3 @@
-using FastEndpoints;
-using FluentValidation;
-using Reaparr.Application.Contracts;
-using Reaparr.SignalR.Contracts;
-
 namespace Reaparr.Application;
 
 public class CreateDownloadTasksCommandValidator : AbstractValidator<CreateDownloadTasksCommand>

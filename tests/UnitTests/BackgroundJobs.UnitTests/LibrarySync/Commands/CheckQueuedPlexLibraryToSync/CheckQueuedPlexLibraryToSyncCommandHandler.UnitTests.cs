@@ -1,6 +1,4 @@
-using Microsoft.EntityFrameworkCore;
 using Quartz;
-using Reaparr.BackgroundJobs.Contracts;
 using Reaparr.Data.Contracts;
 
 namespace Reaparr.BackgroundJobs.UnitTests;
@@ -8,9 +6,6 @@ namespace Reaparr.BackgroundJobs.UnitTests;
 public class CheckQueuedPlexLibraryToSyncCommandHandlerUnitTests
     : BaseUnitTest<CheckQueuedPlexLibraryToSyncCommandHandler>
 {
-    public CheckQueuedPlexLibraryToSyncCommandHandlerUnitTests()
-        : base() { }
-
     [Test]
     public async Task ShouldReturnOk_WhenNoQueuedLibrariesExist()
     {

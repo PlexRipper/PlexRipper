@@ -1,4 +1,3 @@
-using Autofac;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
@@ -20,6 +19,10 @@ public class ReaparrWebApplicationFactory : WebApplicationFactory<Program>
 
     public ReaparrWebApplicationFactory(Seed seed, string memoryDbName, Action<UnitTestDataConfig>? options = null)
     {
+        Seed = seed;
+        MemoryDbName = memoryDbName;
+        _config = UnitTestDataConfig.FromOptions(options);
+
         this.WithWebHostBuilder(builder =>
         {
             // Disable caching by using custom configurations
@@ -33,11 +36,6 @@ public class ReaparrWebApplicationFactory : WebApplicationFactory<Program>
                     .AddScheme<AuthenticationSchemeOptions, TestAuthHandler>("TestScheme", _ => { });
             });
         });
-
-        Seed = seed;
-
-        MemoryDbName = memoryDbName;
-        _config = UnitTestDataConfig.FromOptions(options);
     }
 
     protected override IHost CreateHost(IHostBuilder builder)

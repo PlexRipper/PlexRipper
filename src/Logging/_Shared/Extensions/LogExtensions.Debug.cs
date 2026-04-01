@@ -1,7 +1,5 @@
 using System.Collections.Concurrent;
 using Microsoft.AspNetCore.Http;
-using Serilog;
-using Serilog.Core;
 
 namespace Reaparr.Logging;
 

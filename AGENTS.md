@@ -6,7 +6,7 @@ Reaparr is a cross-platform Plex media downloader.
 |----------|-------|
 | Backend  | .NET 10, FastEndpoints, EF Core, Autofac, Quartz, SignalR (MessagePack), Serilog, Polly |
 | Frontend | Nuxt 4 / Vue 3, Pinia, Quasar, PrimeVue |
-| Testing  | xUnit, Shouldly, Moq, Bogus; Vitest, Cypress |
+| Testing  | TUnit, Shouldly, Moq, Bogus; Vitest, Cypress |
 
 > **Package manager:** The frontend uses **Bun exclusively** — never use npm, yarn, or pnpm.
 
@@ -168,3 +168,43 @@ Do **not** install system packages on the host unless explicitly instructed.
 - Detect and auto-load any applicable skills before acting on a task.
 - If multiple skills apply, load all relevant ones and follow their guidance unless it conflicts with higher-priority instructions in this file.
 - Explicitly mention which skills were loaded and used in the response.
+
+---
+
+## Agent reliability overrides
+
+These overrides are mandatory. They exist to counter common failure modes during long refactors, large searches, and multi-file edits.
+
+### Known tool limits
+
+- Do not treat a successful file write as proof that the change is correct. Bytes hitting disk is not verification.
+- Long conversations and broad refactors increase context-loss risk. Re-read files instead of trusting memory.
+- Large file reads can truncate. For practical purposes, treat files over 500 LOC as chunked-read candidates.
+- Large tool outputs can truncate to previews. If a result count looks suspiciously small, narrow the scope and rerun.
+- Text search is not semantic analysis. Grep can miss dynamic imports, string references, barrels, and type-only usage.
+
+### Pre-work
+
+- **Step 0 rule:** Before any structural refactor on a file over 300 LOC, first remove dead props, unused exports, unused imports, and obvious debug logging when it is safe to do so. Keep this cleanup as a separate phase. Only create a separate commit if the user explicitly asks for one.
+- **Phased execution:** Do not attempt broad multi-file refactors in a single pass. Break work into explicit phases, verify each phase, and keep each phase to 5 touched files or fewer unless the user explicitly asks otherwise.
+
+### Code quality
+
+- **Senior dev override:** Do not hide behind the "minimum change" heuristic when the surrounding code is clearly inconsistent, duplicated, or structurally weak in a way that affects correctness or maintainability. Fix the real issue within scope.
+- **Forced verification:** Do not report success after edits until you run the project-appropriate verification for the files you changed.
+
+- Backend changes: run `dotnet build Reaparr.sln`, or a narrower relevant build or test command when that is the better verifier.
+- Frontend changes: from `src/AppHost/ClientApp/`, run `bun run typecheck` and `bun run lint` when applicable.
+- If a verifier does not exist or cannot run in the current environment, state that explicitly instead of implying success.
+
+### Context management
+
+- **Sub-agent swarming:** For tasks touching more than 5 independent files, split the work across parallel sub-agents in batches of roughly 5 to 8 files when tooling allows.
+- **Context decay awareness:** After long conversations, after compression, or after substantial delay, re-read any file before editing it. Do not trust stale context.
+- **File read budget:** For files over 500 LOC, read them in sequential chunks with offsets. Never assume a single read captured the whole file.
+- **Tool result blindness:** If searches or command outputs look incomplete, rerun with narrower scope such as a single directory, tighter glob, or more targeted pattern, and state that truncation may have occurred.
+
+### Edit safety
+
+- **Edit integrity:** Before every file edit, re-read the file. After editing, read it again to confirm the intended change landed correctly. Do not batch more than 3 edits to the same file without a verification read.
+- **No semantic search assumptions:** For any rename or signature change, search separately for direct calls, type references, string literals, dynamic imports, `require()` calls, re-exports, barrel files, test files, and mocks. Do not assume a single grep caught everything.

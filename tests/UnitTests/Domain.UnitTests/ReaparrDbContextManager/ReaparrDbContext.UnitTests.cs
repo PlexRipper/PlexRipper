@@ -11,9 +11,6 @@ public class ReaparrDbContextManagerUnitTests : BaseUnitTest<ReaparrDbContextMan
 {
     private string DatabasePath => "/Config/" + PathProvider.DatabaseName;
 
-    public ReaparrDbContextManagerUnitTests()
-        : base() { }
-
     [Test]
     public void ShouldConnectToDatabaseAndCheckToMigrate_WhenDatabaseAlreadyExists()
     {

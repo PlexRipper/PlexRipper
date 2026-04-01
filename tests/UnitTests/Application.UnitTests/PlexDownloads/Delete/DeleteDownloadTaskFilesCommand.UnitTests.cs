@@ -1,16 +1,9 @@
-using System.IO.Abstractions.TestingHelpers;
-using Microsoft.EntityFrameworkCore;
-using Reaparr.Application.Contracts;
-using Reaparr.Data.Contracts;
 using Reaparr.Environment;
 
 namespace Reaparr.Application.UnitTests;
 
 public class DeleteDownloadTaskFilesCommandUnitTests : BaseUnitTest<DeleteDownloadTaskFilesCommandHandler>
 {
-    public DeleteDownloadTaskFilesCommandUnitTests()
-        : base() { }
-
     [Test]
     public async Task ShouldDeletePlainFileFromDownloadDirectory_WhenTaskIsCompleted()
     {
@@ -37,7 +30,7 @@ public class DeleteDownloadTaskFilesCommandUnitTests : BaseUnitTest<DeleteDownlo
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
-        var file = Mock.Create<System.IO.Abstractions.IFile>();
+        var file = Mock.Create<IFile>();
         file.Exists(plainFilePath).ShouldBeFalse();
     }
 
@@ -67,7 +60,7 @@ public class DeleteDownloadTaskFilesCommandUnitTests : BaseUnitTest<DeleteDownlo
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
-        var file = Mock.Create<System.IO.Abstractions.IFile>();
+        var file = Mock.Create<IFile>();
         file.Exists(reapTempPath).ShouldBeFalse();
     }
 
@@ -125,7 +118,7 @@ public class DeleteDownloadTaskFilesCommandUnitTests : BaseUnitTest<DeleteDownlo
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
-        var file = Mock.Create<System.IO.Abstractions.IFile>();
+        var file = Mock.Create<IFile>();
         foreach (var path in plainPaths)
             file.Exists(path).ShouldBeFalse();
     }
@@ -155,7 +148,7 @@ public class DeleteDownloadTaskFilesCommandUnitTests : BaseUnitTest<DeleteDownlo
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
-        var directory = Mock.Create<System.IO.Abstractions.IDirectory>();
+        var directory = Mock.Create<IDirectory>();
         directory.Exists(movieFileTask.DownloadDirectory).ShouldBeFalse();
     }
 
@@ -192,12 +185,12 @@ public class DeleteDownloadTaskFilesCommandUnitTests : BaseUnitTest<DeleteDownlo
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
-        var file = Mock.Create<System.IO.Abstractions.IFile>();
+        var file = Mock.Create<IFile>();
         file.Exists(pathToDelete).ShouldBeFalse();
         file.Exists(siblingPath).ShouldBeTrue();
 
         // Directory still exists because siblingPath is still there.
-        var directory = Mock.Create<System.IO.Abstractions.IDirectory>();
+        var directory = Mock.Create<IDirectory>();
         directory.Exists(movieFileTask.DownloadDirectory).ShouldBeTrue();
     }
 
@@ -226,7 +219,7 @@ public class DeleteDownloadTaskFilesCommandUnitTests : BaseUnitTest<DeleteDownlo
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
-        var file = Mock.Create<System.IO.Abstractions.IFile>();
+        var file = Mock.Create<IFile>();
         file.Exists(plainFilePath).ShouldBeFalse();
     }
 
@@ -263,8 +256,8 @@ public class DeleteDownloadTaskFilesCommandUnitTests : BaseUnitTest<DeleteDownlo
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
-        var file = Mock.Create<System.IO.Abstractions.IFile>();
-        var directory = Mock.Create<System.IO.Abstractions.IDirectory>();
+        var file = Mock.Create<IFile>();
+        var directory = Mock.Create<IDirectory>();
         file.Exists(plainFilePath).ShouldBeFalse();
         directory.Exists(movieTaskFolder).ShouldBeFalse(); // task folder removed (was empty)
         directory.Exists(moviesCategoryFolder).ShouldBeTrue(); // stopRoot — must survive
@@ -307,8 +300,8 @@ public class DeleteDownloadTaskFilesCommandUnitTests : BaseUnitTest<DeleteDownlo
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
-        var file = Mock.Create<System.IO.Abstractions.IFile>();
-        var directory = Mock.Create<System.IO.Abstractions.IDirectory>();
+        var file = Mock.Create<IFile>();
+        var directory = Mock.Create<IDirectory>();
         file.Exists(plainFilePath).ShouldBeFalse();
         directory.Exists(seasonFolder).ShouldBeFalse(); // season folder removed (was empty)
         directory.Exists(showFolder).ShouldBeFalse(); // show folder removed (was empty)
@@ -366,8 +359,8 @@ public class DeleteDownloadTaskFilesCommandUnitTests : BaseUnitTest<DeleteDownlo
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
-        var file = Mock.Create<System.IO.Abstractions.IFile>();
-        var directory = Mock.Create<System.IO.Abstractions.IDirectory>();
+        var file = Mock.Create<IFile>();
+        var directory = Mock.Create<IDirectory>();
         file.Exists(season1PlainPath).ShouldBeFalse(); // season 1 file removed
         file.Exists(season2PlainPath).ShouldBeTrue(); // season 2 file untouched
         directory.Exists(season1Folder).ShouldBeFalse(); // season 1 folder removed (was empty)
@@ -424,8 +417,8 @@ public class DeleteDownloadTaskFilesCommandUnitTests : BaseUnitTest<DeleteDownlo
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
-        var file = Mock.Create<System.IO.Abstractions.IFile>();
-        var directory = Mock.Create<System.IO.Abstractions.IDirectory>();
+        var file = Mock.Create<IFile>();
+        var directory = Mock.Create<IDirectory>();
         file.Exists(moviePlainPath).ShouldBeFalse();
         file.Exists(episodePlainPath).ShouldBeFalse();
         directory.Exists(movieTaskFolder).ShouldBeFalse(); // movie task folder removed (was empty)

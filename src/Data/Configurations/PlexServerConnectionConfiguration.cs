@@ -1,7 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Builders;
-
-namespace Reaparr.Data.Configurations;
+﻿namespace Reaparr.Data.Configurations;
 
 public class PlexServerConnectionConfiguration : IEntityTypeConfiguration<PlexServerConnection>
 {

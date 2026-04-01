@@ -1,7 +1,3 @@
-using FastEndpoints;
-using Microsoft.EntityFrameworkCore;
-using Reaparr.Identity.Contracts;
-
 namespace Reaparr.PublicAPI;
 
 public class LogoutEndpoint : EndpointWithoutRequest

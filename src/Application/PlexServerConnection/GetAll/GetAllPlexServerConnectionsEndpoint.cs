@@ -1,7 +1,3 @@
-using Microsoft.EntityFrameworkCore;
-using Reaparr.Application.Contracts;
-using Reaparr.Data.Contracts;
-
 namespace Reaparr.Application;
 
 public class GetAllPlexServerConnectionsEndpoint : BaseEndpointWithoutRequest<List<PlexServerConnectionDTO>>

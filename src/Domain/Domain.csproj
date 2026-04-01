@@ -1,22 +1,15 @@
 <Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
-        <TargetFramework>net10.0</TargetFramework>
-        <LangVersion>14</LangVersion>
-        <ImplicitUsings>enable</ImplicitUsings>
         <RootNamespace>Reaparr.Domain</RootNamespace>
         <AssemblyName>Reaparr.Domain</AssemblyName>
-        <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
-        <ErrorOnDuplicatePublishOutputFiles>false</ErrorOnDuplicatePublishOutputFiles>
-        <Nullable>enable</Nullable>
-        <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     </PropertyGroup>
     <ItemGroup>
         <PackageReference Include="ByteSize" Version="2.1.2" />
-        <PackageReference Include="CSharpier.MsBuild" Version="1.2.5">
+        <PackageReference Include="CSharpier.MsBuild" Version="1.2.6">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="FastEndpoints" Version="7.1.1" />
+        <PackageReference Include="FastEndpoints" Version="8.1.0" />
         <PackageReference Include="Flurl" Version="4.0.0" />
         <PackageReference Include="JetBrains.Annotations" Version="2025.2.4" />
         <PackageReference Include="NaturalSort.Extension" Version="4.4.1" />
@@ -26,5 +19,20 @@
     </ItemGroup>
     <ItemGroup>
         <ProjectReference Include="..\FluentResultExtensions\FluentResultExtensions.csproj" />
+    </ItemGroup>
+    <ItemGroup>
+        <Using Include="System.ComponentModel.DataAnnotations" />
+        <Using Include="System.ComponentModel.DataAnnotations.Schema" />
+        <Using Include="System.Diagnostics.CodeAnalysis" />
+        <Using Include="System.Runtime.Serialization" />
+        <Using Include="System.Text.Json.Serialization" />
+        <Using Include="FastEndpoints" />
+        <Using Include="FluentResults" />
+        <Using Include="FluentValidation" />
+        <Using Include="Microsoft.AspNetCore.Http" />
+        <Using Include="Reaparr.Domain" />
+        <Using Include="Reaparr.FluentResultExtensions" />
+        <Using Include="Reaparr.Logging" />
+        <Using Include="Serilog" />
     </ItemGroup>
 </Project>

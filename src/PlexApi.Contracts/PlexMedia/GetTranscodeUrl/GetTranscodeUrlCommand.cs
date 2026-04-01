@@ -1,5 +1,3 @@
-using FastEndpoints;
-
 namespace Reaparr.PlexApi.Contracts;
 
 public record GetTranscodeUrlCommand : ICommand<Result<GetTranscodeUrlResult>>

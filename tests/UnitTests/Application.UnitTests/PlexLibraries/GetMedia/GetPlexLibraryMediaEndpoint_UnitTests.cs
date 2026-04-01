@@ -1,4 +1,3 @@
-using Reaparr.Application.Contracts;
 using Reaparr.Application.Contracts.Validators;
 
 namespace Reaparr.Application.UnitTests;
@@ -6,9 +5,6 @@ namespace Reaparr.Application.UnitTests;
 public class GetPlexLibraryMediaEndpointUnitTests : BaseUnitTest<GetPlexLibraryMediaEndpoint>
 {
     private PlexMediaSlimDTOValidator PlexMediaSlimDtoValidator => new();
-
-    public GetPlexLibraryMediaEndpointUnitTests()
-        : base() { }
 
     [Test]
     public async Task ShouldHaveAllThePlexLibraryMedia_WhenPageAndSizeAreNotSetAndMediaIsMovies()

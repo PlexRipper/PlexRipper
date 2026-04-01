@@ -1,11 +1,8 @@
 using System.Linq.Expressions;
-using System.Net;
 using System.Text;
-using FastEndpoints;
 using Moq.Contrib.HttpClient;
 using Moq.Language.Flow;
 using Newtonsoft.Json;
-using Reaparr.SignalR.Contracts;
 
 namespace Reaparr.BaseTests;
 

@@ -1,12 +1,7 @@
-using Reaparr.Data.Contracts;
-
 namespace Reaparr.Data.UnitTests;
 
 public class ReaparrDbContextExtensionsGetDownloadProgressTasksByServerAsyncUnitTests : BaseUnitTest
 {
-    public ReaparrDbContextExtensionsGetDownloadProgressTasksByServerAsyncUnitTests()
-        : base() { }
-
     [Test]
     public async Task ShouldPreserveFullTitles_WhenRetrievingDownloadProgressTasks()
     {

@@ -1,12 +1,7 @@
-using Reaparr.Data.Contracts;
-
 namespace Reaparr.Data.UnitTests;
 
 public class DbContextExtensionsPlexAccountUnitTests : BaseUnitTest
 {
-    public DbContextExtensionsPlexAccountUnitTests()
-        : base() { }
-
     [Test]
     public async Task ShouldGetAccessibleServers_WhenAccountHasServers()
     {

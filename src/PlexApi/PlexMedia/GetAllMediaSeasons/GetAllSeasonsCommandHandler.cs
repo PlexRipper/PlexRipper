@@ -1,6 +1,3 @@
-using FastEndpoints;
-using Reaparr.PlexApi.Contracts;
-
 namespace Reaparr.PlexApi.GetAllMediaSeasons;
 
 public class GetAllSeasonsCommandHandler : ICommandHandler<GetAllMediaSeasonsCommand, Result<List<PlexTvShowSeason>>>

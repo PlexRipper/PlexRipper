@@ -1,9 +1,4 @@
-using FastEndpoints;
-using FluentValidation;
 using Flurl;
-using Microsoft.EntityFrameworkCore;
-using Reaparr.Data.Contracts;
-using Reaparr.Settings.Contracts;
 
 // ReSharper disable InconsistentNaming
 

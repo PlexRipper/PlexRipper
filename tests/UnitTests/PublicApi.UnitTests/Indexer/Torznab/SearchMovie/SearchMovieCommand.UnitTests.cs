@@ -1,4 +1,3 @@
-using Microsoft.EntityFrameworkCore;
 using Reaparr.Settings.Contracts;
 
 namespace Reaparr.PublicAPI.UnitTests;
@@ -6,7 +5,6 @@ namespace Reaparr.PublicAPI.UnitTests;
 public class SearchMovieCommandUnitTests : BaseUnitTest<SearchMovieCommandHandler>
 {
     public SearchMovieCommandUnitTests()
-        : base()
     {
         Mock.Mock<INetworkSettings>().SetupGet(x => x.Url).Returns("http://localhost");
     }

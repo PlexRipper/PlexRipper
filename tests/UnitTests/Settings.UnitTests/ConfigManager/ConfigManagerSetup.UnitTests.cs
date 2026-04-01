@@ -7,9 +7,6 @@ namespace Reaparr.Settings.UnitTests;
 
 public class ConfigManagerSetupUnitTests : BaseUnitTest<ConfigManager>
 {
-    public ConfigManagerSetupUnitTests()
-        : base() { }
-
     [Test]
     public void ShouldLoadConfigDuringSetup_WhenConfigFileAlreadyExists()
     {

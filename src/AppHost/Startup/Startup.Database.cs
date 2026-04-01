@@ -1,4 +1,3 @@
-using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using Reaparr.Data.Contracts;
 

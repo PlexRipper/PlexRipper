@@ -1,4 +1,3 @@
-using Microsoft.EntityFrameworkCore;
 using Reaparr.Application.Contracts;
 
 namespace Reaparr.PublicAPI.UnitTests;
@@ -6,10 +5,11 @@ namespace Reaparr.PublicAPI.UnitTests;
 public class DeleteTorrentEndpointUnitTests : BaseUnitTest<DeleteTorrentEndpoint>
 {
     public DeleteTorrentEndpointUnitTests()
-        : base()
     {
         Mock.Mock<ICommandExecutor>()
-            .Setup(x => x.Send(It.IsAny<ClearCompletedDownloadTasksByDownloadTaskKeyCommand>(), It.IsAny<CancellationToken>()))
+            .Setup(x =>
+                x.Send(It.IsAny<ClearCompletedDownloadTasksByDownloadTaskKeyCommand>(), It.IsAny<CancellationToken>())
+            )
             .ReturnsAsync(Result.Ok());
     }
 
@@ -702,7 +702,10 @@ public class DeleteTorrentEndpointUnitTests : BaseUnitTest<DeleteTorrentEndpoint
         );
 
         var dbContext = IDbContext;
-        var movieFiles = await dbContext.DownloadTaskMovieFile.OrderBy(x => x.Id).Take(2).ToListAsync(CancellationToken);
+        var movieFiles = await dbContext
+            .DownloadTaskMovieFile.OrderBy(x => x.Id)
+            .Take(2)
+            .ToListAsync(CancellationToken);
         movieFiles.Count.ShouldBe(2);
 
         var downloadingTask = movieFiles[0];
@@ -780,7 +783,9 @@ public class DeleteTorrentEndpointUnitTests : BaseUnitTest<DeleteTorrentEndpoint
         await dbContext
             .DownloadTaskMovieFile.Where(x => x.Id == movieFile.Id)
             .ExecuteUpdateAsync(
-                x => x.SetProperty(p => p.HashId, "hash-stopped").SetProperty(p => p.DownloadStatus, DownloadStatus.Stopped),
+                x =>
+                    x.SetProperty(p => p.HashId, "hash-stopped")
+                        .SetProperty(p => p.DownloadStatus, DownloadStatus.Stopped),
                 CancellationToken
             );
 
@@ -807,7 +812,9 @@ public class DeleteTorrentEndpointUnitTests : BaseUnitTest<DeleteTorrentEndpoint
             .Verify(
                 x =>
                     x.Send(
-                        It.Is<DeleteDownloadTaskFilesCommand>(cmd => cmd.Keys.Count == 1 && cmd.Keys.Single().Id == movieFile.Id),
+                        It.Is<DeleteDownloadTaskFilesCommand>(cmd =>
+                            cmd.Keys.Count == 1 && cmd.Keys.Single().Id == movieFile.Id
+                        ),
                         It.IsAny<CancellationToken>()
                     ),
                 Times.Once
@@ -874,7 +881,9 @@ public class DeleteTorrentEndpointUnitTests : BaseUnitTest<DeleteTorrentEndpoint
             .Verify(
                 x =>
                     x.Send(
-                        It.Is<DeleteDownloadTaskFilesCommand>(cmd => cmd.Keys.Count == 1 && cmd.Keys.Single().Id == movieFile.Id),
+                        It.Is<DeleteDownloadTaskFilesCommand>(cmd =>
+                            cmd.Keys.Count == 1 && cmd.Keys.Single().Id == movieFile.Id
+                        ),
                         It.IsAny<CancellationToken>()
                     ),
                 Times.Once
@@ -912,7 +921,9 @@ public class DeleteTorrentEndpointUnitTests : BaseUnitTest<DeleteTorrentEndpoint
         await dbContext
             .DownloadTaskMovieFile.Where(x => x.Id == movieFile.Id)
             .ExecuteUpdateAsync(
-                x => x.SetProperty(p => p.HashId, "hash-moving").SetProperty(p => p.DownloadStatus, DownloadStatus.Moving),
+                x =>
+                    x.SetProperty(p => p.HashId, "hash-moving")
+                        .SetProperty(p => p.DownloadStatus, DownloadStatus.Moving),
                 CancellationToken
             );
 

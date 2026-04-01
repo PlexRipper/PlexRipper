@@ -5,9 +5,6 @@ namespace Reaparr.PlexApi.UnitTests;
 
 public class PlexMediaTypeMappersToPlexApiMediaTypeUnitTests : BaseUnitTest
 {
-    public PlexMediaTypeMappersToPlexApiMediaTypeUnitTests()
-        : base() { }
-
     [Test]
     [Arguments(PlexMediaType.Movie, MediaType.Movie)]
     [Arguments(PlexMediaType.TvShow, MediaType.TvShow)]

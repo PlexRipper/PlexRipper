@@ -1,9 +1,3 @@
-using FastEndpoints;
-using FluentValidation;
-using Reaparr.Application.Contracts;
-using Reaparr.Settings;
-using Reaparr.Settings.Contracts;
-
 namespace Reaparr.Application;
 
 public class UpdateUserSettingsEndpointRequest

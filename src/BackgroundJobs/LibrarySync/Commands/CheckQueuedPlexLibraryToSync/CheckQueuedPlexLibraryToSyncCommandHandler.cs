@@ -1,10 +1,3 @@
-using FastEndpoints;
-using FluentValidation;
-using Microsoft.EntityFrameworkCore;
-using Quartz;
-using Reaparr.BackgroundJobs.Contracts;
-using Reaparr.Data.Contracts;
-
 namespace Reaparr.BackgroundJobs;
 
 public class CheckQueuedPlexLibraryToSyncCommandValidator : AbstractValidator<CheckQueuedPlexLibraryToSyncCommand>

@@ -1,7 +1,4 @@
-﻿using System.Runtime.Serialization;
-using System.Text.Json.Serialization;
-
-namespace Reaparr.Domain;
+﻿namespace Reaparr.Domain;
 
 [JsonConverter(typeof(JsonStringEnumConverter))]
 public enum DownloadTaskPhase

@@ -1,11 +1,7 @@
 using BencodeNET.Exceptions;
 using BencodeNET.Parsing;
 using BencodeNET.Torrents;
-using FastEndpoints;
-using FluentValidation;
-using Microsoft.EntityFrameworkCore;
 using Reaparr.Application.Contracts;
-using Reaparr.Data.Contracts;
 
 namespace Reaparr.PublicAPI;
 
@@ -238,5 +234,4 @@ public class AddTorrentEndpoint : Endpoint<AddTorrentEndpointRequest>
         else
             _log.Debug("Set HashId on {Count} DownloadTasks for torrent with MetaData: {MetaData}", count, metaData);
     }
-
 }

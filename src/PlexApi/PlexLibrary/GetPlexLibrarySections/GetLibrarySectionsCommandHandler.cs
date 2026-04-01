@@ -1,7 +1,3 @@
-using FastEndpoints;
-using Reaparr.Data.Contracts;
-using Reaparr.PlexApi.Contracts;
-
 namespace Reaparr.PlexApi;
 
 public class GetLibrarySectionsCommandHandler : ICommandHandler<GetLibrarySectionsCommand, Result<List<PlexLibrary>>>

@@ -1,13 +1,7 @@
-using Microsoft.EntityFrameworkCore;
-using Reaparr.BackgroundJobs.Contracts;
-
 namespace Reaparr.BackgroundJobs.UnitTests;
 
 public class ResetFailedLibrarySyncJobsCommandHandlerUnitTests : BaseUnitTest<ResetFailedLibrarySyncJobsCommandHandler>
 {
-    public ResetFailedLibrarySyncJobsCommandHandlerUnitTests()
-        : base() { }
-
     [Test]
     public async Task ShouldResetFailedJobsToQueued_WhenFailedJobsExistForServer()
     {

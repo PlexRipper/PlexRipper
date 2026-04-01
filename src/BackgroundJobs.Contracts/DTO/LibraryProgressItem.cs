@@ -1,5 +1,3 @@
-using Reaparr.Domain;
-
 namespace Reaparr.BackgroundJobs.Contracts;
 
 public record LibraryProgressItem

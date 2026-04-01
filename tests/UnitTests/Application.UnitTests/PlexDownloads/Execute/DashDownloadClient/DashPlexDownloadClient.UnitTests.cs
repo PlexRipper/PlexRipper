@@ -1,23 +1,11 @@
-using System.Reactive.Linq;
 using System.Reactive.Subjects;
-using Autofac;
-using FastEndpoints;
-using Microsoft.EntityFrameworkCore;
-using Reaparr.Application.Contracts;
-using Reaparr.Data.Contracts;
 using Reaparr.External.Contracts;
-using Reaparr.PlexApi.Contracts;
-using Reaparr.Settings.Contracts;
-using Reaparr.SignalR.Contracts;
 using DomainDownloadStatus = Reaparr.Domain.DownloadStatus;
 
 namespace Reaparr.Application.UnitTests;
 
 public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClient>
 {
-    public DashPlexDownloadClientUnitTests()
-        : base() { }
-
     private DashPlexDownloadClient CreateSut(Mock<IDashMpdCliWrapper> dashWrapperMock)
     {
         Mock.Mock<INotificationHubService>()
@@ -78,7 +66,7 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
             CancellationToken
         );
 
-        SetupSpeedLimit(serverMachineIdentifier, 2000);
+        SetupSpeedLimit(serverMachineIdentifier);
 
         var progressSubject = new Subject<DashDownloadProgress>();
         var outputSubject = new Subject<string>();
@@ -106,7 +94,7 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
             .Setup(x =>
                 x.OnStatusChangedAsync(
                     It.IsAny<DownloadTaskKey>(),
-                    It.IsAny<Reaparr.Domain.DownloadStatus>(),
+                    It.IsAny<DownloadStatus>(),
                     It.IsAny<CancellationToken>()
                 )
             )
@@ -115,7 +103,7 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
             .Setup(x =>
                 x.OnStatusChangedAsync(
                     It.IsAny<DownloadTaskKey>(),
-                    It.IsAny<Reaparr.Domain.DownloadStatus>(),
+                    It.IsAny<DownloadStatus>(),
                     It.IsAny<Result>(),
                     It.IsAny<CancellationToken>()
                 )
@@ -186,7 +174,7 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
             .Setup(x =>
                 x.OnStatusChangedAsync(
                     It.IsAny<DownloadTaskKey>(),
-                    It.IsAny<Reaparr.Domain.DownloadStatus>(),
+                    It.IsAny<DownloadStatus>(),
                     It.IsAny<CancellationToken>()
                 )
             )
@@ -195,7 +183,7 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
             .Setup(x =>
                 x.OnStatusChangedAsync(
                     It.IsAny<DownloadTaskKey>(),
-                    It.IsAny<Reaparr.Domain.DownloadStatus>(),
+                    It.IsAny<DownloadStatus>(),
                     It.IsAny<Result>(),
                     It.IsAny<CancellationToken>()
                 )
@@ -262,7 +250,7 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
             .Setup(x =>
                 x.OnStatusChangedAsync(
                     It.IsAny<DownloadTaskKey>(),
-                    It.IsAny<Reaparr.Domain.DownloadStatus>(),
+                    It.IsAny<DownloadStatus>(),
                     It.IsAny<CancellationToken>()
                 )
             )
@@ -271,7 +259,7 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
             .Setup(x =>
                 x.OnStatusChangedAsync(
                     It.IsAny<DownloadTaskKey>(),
-                    It.IsAny<Reaparr.Domain.DownloadStatus>(),
+                    It.IsAny<DownloadStatus>(),
                     It.IsAny<Result>(),
                     It.IsAny<CancellationToken>()
                 )
@@ -336,7 +324,7 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
             .Setup(x =>
                 x.OnStatusChangedAsync(
                     It.IsAny<DownloadTaskKey>(),
-                    It.IsAny<Reaparr.Domain.DownloadStatus>(),
+                    It.IsAny<DownloadStatus>(),
                     It.IsAny<CancellationToken>()
                 )
             )
@@ -345,7 +333,7 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
             .Setup(x =>
                 x.OnStatusChangedAsync(
                     It.IsAny<DownloadTaskKey>(),
-                    It.IsAny<Reaparr.Domain.DownloadStatus>(),
+                    It.IsAny<DownloadStatus>(),
                     It.IsAny<Result>(),
                     It.IsAny<CancellationToken>()
                 )
@@ -410,6 +398,110 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
                 x => x.Send(It.IsAny<ICommand<Result<GetTranscodeUrlResult>>>(), It.IsAny<CancellationToken>()),
                 Times.Once()
             );
+        dashWrapperMock.Verify(x => x.StartAsync(It.IsAny<DashMpdCliOptions>()), Times.Once());
+    }
+
+    [Test]
+    public async Task ShouldSetSourceUnavailableStatus_WhenDashCompletesWithNotFoundError()
+    {
+        await SetupDatabase(
+            12010,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexAccountCount = 1;
+                config.MovieDownloadTasksCount = 1;
+            }
+        );
+
+        var dbContext = IDbContext;
+        var downloadTask = await dbContext.DownloadTaskMovieFile.FirstAsync(CancellationToken);
+        var serverMachineIdentifier = await dbContext.GetPlexServerMachineIdentifierById(
+            downloadTask.PlexServerId,
+            CancellationToken
+        );
+
+        SetupSpeedLimit(serverMachineIdentifier, 0);
+        SetupCommandExecutor();
+
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Setup(x =>
+                x.OnStatusChangedAsync(
+                    It.IsAny<DownloadTaskKey>(),
+                    It.IsAny<DownloadStatus>(),
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .ReturnsAsync(Result.Ok());
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Setup(x =>
+                x.OnStatusChangedAsync(
+                    It.IsAny<DownloadTaskKey>(),
+                    It.IsAny<DownloadStatus>(),
+                    It.IsAny<Result>(),
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .ReturnsAsync(Result.Ok());
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Setup(x =>
+                x.OnProgressUpdated(
+                    It.IsAny<DownloadTaskKey>(),
+                    It.IsAny<DownloadTaskProgress>(),
+                    It.IsAny<DirectDownloadSnapshot?>()
+                )
+            )
+            .Returns(Result.Ok());
+        Mock.Mock<INotificationHubService>()
+            .Setup(x => x.SendRefreshNotificationAsync(It.IsAny<RefreshDataType>(), It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask);
+
+        var progressSubject = new Subject<DashDownloadProgress>();
+        var outputSubject = new Subject<string>();
+        var completionSubject = new Subject<DashDownloadCompletedEventArgs>();
+
+        var notFoundResult = Result.Fail("dash-mpd-cli failed with not found").Add404NotFoundError();
+
+        var dashWrapperMock = new Mock<IDashMpdCliWrapper>();
+        dashWrapperMock.Setup(x => x.Progress).Returns(progressSubject.AsObservable());
+        dashWrapperMock.Setup(x => x.StandardOutput).Returns(outputSubject.AsObservable());
+        dashWrapperMock.Setup(x => x.DownloadCompleted).Returns(completionSubject.AsObservable());
+        dashWrapperMock
+            .Setup(x => x.StartAsync(It.IsAny<DashMpdCliOptions>()))
+            .Returns(() =>
+            {
+                completionSubject.OnNext(new DashDownloadCompletedEventArgs(false, 1, notFoundResult));
+                return Task.FromResult(notFoundResult);
+            });
+        dashWrapperMock.Setup(x => x.StopAsync()).ReturnsAsync(Result.Ok());
+        dashWrapperMock.Setup(x => x.DisposeAsync()).Returns(ValueTask.CompletedTask);
+
+        var sut = CreateSut(dashWrapperMock);
+        var result = await sut.Start(downloadTask.ToKey(), CancellationToken);
+
+        result.IsFailed.ShouldBeTrue();
+
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Verify(
+                x =>
+                    x.OnStatusChangedAsync(
+                        It.IsAny<DownloadTaskKey>(),
+                        DomainDownloadStatus.SourceUnavailable,
+                        It.IsAny<Result>(),
+                        It.IsAny<CancellationToken>()
+                    ),
+                Times.Once()
+            );
+        Mock.Mock<INotificationHubService>()
+            .Verify(
+                x => x.SendRefreshNotificationAsync(It.IsAny<RefreshDataType>(), It.IsAny<CancellationToken>()),
+                Times.Once()
+            );
+        Mock.Mock<ICommandExecutor>()
+            .Verify(
+                x => x.Send(It.IsAny<ICommand<Result<GetTranscodeUrlResult>>>(), It.IsAny<CancellationToken>()),
+                Times.Once()
+            );
     }
 
     [Test]
@@ -439,7 +531,7 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
             .Setup(x =>
                 x.OnStatusChangedAsync(
                     It.IsAny<DownloadTaskKey>(),
-                    It.IsAny<Reaparr.Domain.DownloadStatus>(),
+                    It.IsAny<DownloadStatus>(),
                     It.IsAny<CancellationToken>()
                 )
             )
@@ -448,7 +540,7 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
             .Setup(x =>
                 x.OnStatusChangedAsync(
                     It.IsAny<DownloadTaskKey>(),
-                    It.IsAny<Reaparr.Domain.DownloadStatus>(),
+                    It.IsAny<DownloadStatus>(),
                     It.IsAny<Result>(),
                     It.IsAny<CancellationToken>()
                 )
@@ -542,7 +634,7 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
             .Setup(x =>
                 x.OnStatusChangedAsync(
                     It.IsAny<DownloadTaskKey>(),
-                    It.IsAny<Reaparr.Domain.DownloadStatus>(),
+                    It.IsAny<DownloadStatus>(),
                     It.IsAny<CancellationToken>()
                 )
             )
@@ -571,7 +663,7 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
                 progressSubject.OnNext(
                     new DashDownloadProgress
                     {
-                        ETA = 1,
+                        Eta = 1,
                         Percent = 50,
                         DownloadedBytes = downloadTask.DataTotal / 2,
                         TotalBytes = downloadTask.DataTotal,
@@ -642,7 +734,7 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
             .Setup(x =>
                 x.OnStatusChangedAsync(
                     It.IsAny<DownloadTaskKey>(),
-                    It.IsAny<Reaparr.Domain.DownloadStatus>(),
+                    It.IsAny<DownloadStatus>(),
                     It.IsAny<CancellationToken>()
                 )
             )
@@ -671,7 +763,7 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
                 progressSubject.OnNext(
                     new DashDownloadProgress
                     {
-                        ETA = 42,
+                        Eta = 42,
                         Percent = 12,
                         DownloadedBytes = 3_000,
                         TotalBytes = 0,
@@ -741,7 +833,7 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
             .Setup(x =>
                 x.OnStatusChangedAsync(
                     It.IsAny<DownloadTaskKey>(),
-                    It.IsAny<Reaparr.Domain.DownloadStatus>(),
+                    It.IsAny<DownloadStatus>(),
                     It.IsAny<CancellationToken>()
                 )
             )
@@ -770,7 +862,7 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
                 progressSubject.OnNext(
                     new DashDownloadProgress
                     {
-                        ETA = 0,
+                        Eta = 0,
                         Percent = 100,
                         DownloadedBytes = downloadTask.DataTotal,
                         TotalBytes = downloadTask.DataTotal,
@@ -838,7 +930,7 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
             .Setup(x =>
                 x.OnStatusChangedAsync(
                     It.IsAny<DownloadTaskKey>(),
-                    It.IsAny<Reaparr.Domain.DownloadStatus>(),
+                    It.IsAny<DownloadStatus>(),
                     It.IsAny<CancellationToken>()
                 )
             )

@@ -1,13 +1,7 @@
-using Quartz;
-using Reaparr.Application.Contracts;
-
 namespace Reaparr.Application.UnitTests;
 
 public class MoveDownloadJobListenerUnitTests : BaseUnitTest<MoveDownloadJobListener>
 {
-    public MoveDownloadJobListenerUnitTests()
-        : base() { }
-
     [Test]
     public async Task ShouldCheckMoveQueue_AfterJobExecuted()
     {

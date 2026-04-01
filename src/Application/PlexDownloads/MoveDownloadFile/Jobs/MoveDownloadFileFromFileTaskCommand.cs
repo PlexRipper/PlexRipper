@@ -1,12 +1,5 @@
-using System.Diagnostics;
-using System.IO.Abstractions;
 using System.Reactive.Subjects;
 using System.Threading.Channels;
-using FastEndpoints;
-using FluentValidation;
-using Reaparr.Application.Contracts;
-using Reaparr.Data.Contracts;
-using Reaparr.Settings.Contracts;
 
 namespace Reaparr.Application;
 
@@ -40,8 +33,6 @@ public class MoveDownloadFileFromFileTaskCommandHandler : ICommandHandler<MoveDo
     private readonly IDirectory _directory;
     private readonly IPath _path;
     private readonly IDownloadManagerSettings _downloadManagerSettings;
-
-    private string _filename = string.Empty;
 
     private readonly Channel<IDownloadFileTransferProgress> _progressChannel =
         Channel.CreateBounded<IDownloadFileTransferProgress>(
@@ -93,7 +84,6 @@ public class MoveDownloadFileFromFileTaskCommandHandler : ICommandHandler<MoveDo
         // Resolve paths
         var downloadFilePath = downloadTask.DownloadFilePath;
         var destinationPath = downloadTask.DestinationFilePath;
-        _filename = _path.GetFileName(downloadTask.DownloadFilePath);
 
         _log.Here().Debug("Starting file move process for {DownloadFilePath}", downloadFilePath);
 

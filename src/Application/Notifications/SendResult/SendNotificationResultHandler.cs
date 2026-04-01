@@ -1,8 +1,3 @@
-using FastEndpoints;
-using Reaparr.Application.Contracts;
-using Reaparr.Data.Contracts;
-using Reaparr.SignalR.Contracts;
-
 namespace Reaparr.Application;
 
 public class SendNotificationResultHandler : IEventHandler<SendNotificationResult>

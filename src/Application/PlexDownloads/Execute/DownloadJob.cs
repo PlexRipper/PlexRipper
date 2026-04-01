@@ -1,10 +1,4 @@
-﻿using System.Reactive.Linq;
-using System.Reactive.Threading.Tasks;
-using Autofac.Features.Indexed;
-using Microsoft.EntityFrameworkCore;
-using Quartz;
-using Reaparr.Application.Contracts;
-using Reaparr.Data.Contracts;
+﻿using Autofac.Features.Indexed;
 
 namespace Reaparr.Application;
 
@@ -141,12 +135,18 @@ public class DownloadJob : IJob
             }
             else if (startResult.IsFailed)
             {
+                var failedStatus =
+                    startResult.Has404NotFoundError() ? DownloadStatus.SourceUnavailable
+                    : startResult.IsServerUnreachable() ? DownloadStatus.ServerUnreachable
+                    : DownloadStatus.DownloadClientError;
+
                 await _downloadTaskUpdateDispatcher.OnStatusChangedAsync(
                     downloadTask.ToKey(),
-                    DownloadStatus.DownloadClientError,
+                    failedStatus,
                     startResult,
                     CancellationToken.None
                 );
+
                 await _eventPublisher.PublishAsync(new SendNotificationResult(startResult), token);
             }
         }

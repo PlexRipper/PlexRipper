@@ -1,5 +1,4 @@
 ﻿using Autofac;
-using Reaparr.Data.Contracts;
 
 namespace Reaparr.Data;
 

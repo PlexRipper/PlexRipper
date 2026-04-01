@@ -1,7 +1,3 @@
-using System.Text.Json;
-using FastEndpoints;
-using FluentValidation;
-
 namespace Reaparr.Application;
 
 public record RadarrApiUpdateIndexerCommand : ICommand<Result<RadarrIndexerResourceDTO>>

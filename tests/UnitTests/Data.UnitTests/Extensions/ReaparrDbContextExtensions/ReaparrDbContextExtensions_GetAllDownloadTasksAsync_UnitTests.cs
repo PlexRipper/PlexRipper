@@ -1,12 +1,7 @@
-using Reaparr.Data.Contracts;
-
 namespace Reaparr.Data.UnitTests;
 
 public class ReaparrDbContextExtensionsGetAllDownloadTasksAsyncUnitTests : BaseUnitTest
 {
-    public ReaparrDbContextExtensionsGetAllDownloadTasksAsyncUnitTests()
-        : base() { }
-
     [Test]
     public async Task ShouldReturnNoDownloadTasks_WhenNoDownloadTasksAreInDb()
     {

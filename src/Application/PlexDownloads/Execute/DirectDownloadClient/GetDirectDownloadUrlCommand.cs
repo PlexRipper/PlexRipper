@@ -1,8 +1,4 @@
 using System.Net;
-using FastEndpoints;
-using FluentValidation;
-using Flurl;
-using Reaparr.Data.Contracts;
 using Reaparr.FluentResultExtensions;
 
 namespace Reaparr.Application;
@@ -69,7 +65,7 @@ public class GetDirectDownloadUrlCommandHandler : ICommandHandler<GetDirectDownl
 
         var statusCode = initialProbeResult.Value.StatusCode;
 
-        if (statusCode != System.Net.HttpStatusCode.Forbidden)
+        if (statusCode != HttpStatusCode.Forbidden)
         {
             fallbackProbeCancellationTokenSource.Cancel();
             return Result

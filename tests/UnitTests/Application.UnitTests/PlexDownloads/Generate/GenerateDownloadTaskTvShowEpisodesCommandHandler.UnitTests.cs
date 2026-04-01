@@ -1,7 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Reaparr.Application.Contracts;
-using Reaparr.Data.Contracts;
-using Reaparr.Domain.Validators;
+﻿using Reaparr.Domain.Validators;
 
 namespace Reaparr.Application.UnitTests;
 
@@ -9,9 +6,6 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandlerUnitTests
     : BaseCommandUnitTest<GenerateDownloadTaskTvShowEpisodesCommand>
 {
     private readonly DownloadTaskTvShowValidator _validator = new();
-
-    public GenerateDownloadTaskTvShowEpisodesCommandHandlerUnitTests()
-        : base() { }
 
     [Test]
     public async Task ShouldHaveFailedResult_WhenPlexTvShowsAreEmpty()

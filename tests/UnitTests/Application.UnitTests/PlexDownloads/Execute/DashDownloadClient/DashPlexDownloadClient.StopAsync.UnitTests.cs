@@ -1,23 +1,10 @@
-using System.IO.Abstractions;
-using System.Reactive.Linq;
-using Autofac;
-using FastEndpoints;
-using Microsoft.EntityFrameworkCore;
-using Reaparr.Application.Contracts;
-using Reaparr.Data.Contracts;
 using Reaparr.External.Contracts;
-using Reaparr.PlexApi.Contracts;
-using Reaparr.Settings.Contracts;
-using Reaparr.SignalR.Contracts;
 using DomainDownloadStatus = Reaparr.Domain.DownloadStatus;
 
 namespace Reaparr.Application.UnitTests;
 
 public class DashPlexDownloadClientStopAsyncUnitTests : BaseUnitTest<DashPlexDownloadClient>
 {
-    public DashPlexDownloadClientStopAsyncUnitTests()
-        : base() { }
-
     private DashPlexDownloadClient CreateSut(Mock<IDashMpdCliWrapper> dashWrapperMock)
     {
         var directoryMock = new Mock<IDirectory>();
@@ -68,7 +55,7 @@ public class DashPlexDownloadClientStopAsyncUnitTests : BaseUnitTest<DashPlexDow
             .Setup(x =>
                 x.OnStatusChangedAsync(
                     It.IsAny<DownloadTaskKey>(),
-                    It.IsAny<Reaparr.Domain.DownloadStatus>(),
+                    It.IsAny<DownloadStatus>(),
                     It.IsAny<CancellationToken>()
                 )
             )
@@ -141,7 +128,7 @@ public class DashPlexDownloadClientStopAsyncUnitTests : BaseUnitTest<DashPlexDow
             .Setup(x =>
                 x.OnStatusChangedAsync(
                     It.IsAny<DownloadTaskKey>(),
-                    It.IsAny<Reaparr.Domain.DownloadStatus>(),
+                    It.IsAny<DownloadStatus>(),
                     It.IsAny<CancellationToken>()
                 )
             )

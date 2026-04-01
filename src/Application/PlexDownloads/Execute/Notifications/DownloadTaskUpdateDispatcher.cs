@@ -1,11 +1,7 @@
 using System.Collections.Concurrent;
 using System.Threading.Channels;
 using ByteSizeLib;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Hosting;
-using Reaparr.Application.Contracts;
-using Reaparr.Data.Contracts;
-using Reaparr.SignalR.Contracts;
 
 namespace Reaparr.Application;
 
@@ -173,7 +169,7 @@ public class DownloadTaskUpdateDispatcher : BackgroundService, IDownloadTaskUpda
                 Snapshot = snapshot,
             };
 
-            _progressByNodeId.AddOrUpdate(key.Id, _ => update, (_, __) => update);
+            _progressByNodeId.AddOrUpdate(key.Id, _ => update, (_, _) => update);
 
             // On the first progress event for this node, bypass the periodic flush so the
             // front-end receives data immediately instead of waiting up to 1 second.
@@ -231,28 +227,16 @@ public class DownloadTaskUpdateDispatcher : BackgroundService, IDownloadTaskUpda
             await foreach (var request in _statusChannel.Reader.ReadAllAsync(stoppingToken))
             {
                 var changedByScope = new Dictionary<ProgressScopeKey, HashSet<Guid>>();
-                MergeRequest(request);
+                MergeImmediatePatchRequest(changedByScope, request);
 
                 while (_statusChannel.Reader.TryRead(out var queuedRequest))
-                    MergeRequest(queuedRequest);
+                    MergeImmediatePatchRequest(changedByScope, queuedRequest);
 
                 foreach (var pair in changedByScope)
                 {
                     var sendResult = await SendPatchAsync(pair.Key, pair.Value.ToList(), stoppingToken);
                     if (sendResult.IsFailed)
                         sendResult.LogError();
-                }
-
-                void MergeRequest(ImmediatePatchRequest patchRequest)
-                {
-                    if (!changedByScope.TryGetValue(patchRequest.Scope, out var changedIds))
-                    {
-                        changedIds = [];
-                        changedByScope[patchRequest.Scope] = changedIds;
-                    }
-
-                    foreach (var changedId in patchRequest.ChangedNodeIds)
-                        changedIds.Add(changedId);
                 }
             }
         });
@@ -261,6 +245,21 @@ public class DownloadTaskUpdateDispatcher : BackgroundService, IDownloadTaskUpda
         {
             result.LogIfFailed();
         }
+    }
+
+    private static void MergeImmediatePatchRequest(
+        Dictionary<ProgressScopeKey, HashSet<Guid>> changedByScope,
+        ImmediatePatchRequest patchRequest
+    )
+    {
+        if (!changedByScope.TryGetValue(patchRequest.Scope, out var changedIds))
+        {
+            changedIds = [];
+            changedByScope[patchRequest.Scope] = changedIds;
+        }
+
+        foreach (var changedId in patchRequest.ChangedNodeIds)
+            changedIds.Add(changedId);
     }
 
     /// <summary>
@@ -275,31 +274,7 @@ public class DownloadTaskUpdateDispatcher : BackgroundService, IDownloadTaskUpda
                 if (update.Progress is null)
                     continue;
 
-                var flushResult = await Result.Try(async Task () =>
-                {
-                    using var dbContext = await _dbContextFactory.CreateAsync();
-
-                    if (
-                        !_progressByNodeId.TryGetValue(update.NodeId, out var effectiveUpdate)
-                        || effectiveUpdate.Progress is null
-                    )
-                        return;
-
-                    await dbContext.UpdateDownloadProgress(
-                        effectiveUpdate.Key,
-                        effectiveUpdate.Progress,
-                        effectiveUpdate.Snapshot,
-                        stoppingToken
-                    );
-
-                    var scope = await ResolveScopeAsync(dbContext, effectiveUpdate.Key, stoppingToken);
-                    if (scope is null)
-                        return;
-
-                    var sendResult = await SendPatchAsync(scope, [effectiveUpdate.NodeId], stoppingToken, dbContext);
-                    if (sendResult.IsFailed)
-                        sendResult.LogError();
-                });
+                var flushResult = await TryProcessImmediateProgressAsync(update, stoppingToken);
 
                 if (flushResult.IsFailed)
                     flushResult.LogError();
@@ -328,57 +303,27 @@ public class DownloadTaskUpdateDispatcher : BackgroundService, IDownloadTaskUpda
             if (!_progressByNodeId.TryRemove(bufferedProgress.NodeId, out var latestBufferedProgress))
                 continue;
 
-            var flushedProgress = latestBufferedProgress;
-
-            var flushResult = await Result.Try(async Task () =>
-            {
-                if (flushedProgress.Progress is not null)
-                {
-                    await dbContext.UpdateDownloadProgress(
-                        flushedProgress.Key,
-                        flushedProgress.Progress,
-                        flushedProgress.Snapshot,
-                        cancellationToken
-                    );
-
-                    await LogProgressJourneyAsync(
-                        dbContext,
-                        flushedProgress.Key,
-                        flushedProgress.Progress,
-                        cancellationToken
-                    );
-                }
-
-                var scope = await ResolveScopeAsync(dbContext, flushedProgress.Key, cancellationToken);
-                if (scope is null)
-                    return;
-
-                if (!changedNodeIdsByScope.TryGetValue(scope, out var changedNodeIds))
-                {
-                    changedNodeIds = [];
-                    changedNodeIdsByScope[scope] = changedNodeIds;
-                }
-
-                changedNodeIds.Add(flushedProgress.NodeId);
-
-                if (!bufferedEntriesByScope.TryGetValue(scope, out var bufferedEntries))
-                {
-                    bufferedEntries = [];
-                    bufferedEntriesByScope[scope] = bufferedEntries;
-                }
-
-                bufferedEntries.Add(flushedProgress);
-            });
+            var flushResult = await TryFlushBufferedProgressAsync(
+                dbContext,
+                latestBufferedProgress,
+                changedNodeIdsByScope,
+                bufferedEntriesByScope,
+                cancellationToken
+            );
 
             if (flushResult.IsFailed)
             {
                 _log.Here()
                     .Error(
                         "Failed to flush buffered progress for {DownloadTaskKey}. Requeuing latest value.",
-                        flushedProgress.Key
+                        latestBufferedProgress.Key
                     );
                 flushResult.LogError();
-                _progressByNodeId.AddOrUpdate(flushedProgress.NodeId, _ => flushedProgress, (_, __) => flushedProgress);
+                _progressByNodeId.AddOrUpdate(
+                    latestBufferedProgress.NodeId,
+                    _ => latestBufferedProgress,
+                    (_, _) => latestBufferedProgress
+                );
             }
         }
 
@@ -394,11 +339,92 @@ public class DownloadTaskUpdateDispatcher : BackgroundService, IDownloadTaskUpda
                     _progressByNodeId.AddOrUpdate(
                         bufferedProgress.NodeId,
                         _ => bufferedProgress,
-                        (_, __) => bufferedProgress
+                        (_, _) => bufferedProgress
                     );
                 }
             }
         }
+    }
+
+    private async Task<Result> TryProcessImmediateProgressAsync(
+        BufferedProgressUpdate update,
+        CancellationToken stoppingToken
+    )
+    {
+        return await Result.Try(async Task () =>
+        {
+            using var dbContext = await _dbContextFactory.CreateAsync();
+
+            if (
+                !_progressByNodeId.TryGetValue(update.NodeId, out var effectiveUpdate)
+                || effectiveUpdate.Progress is null
+            )
+                return;
+
+            await dbContext.UpdateDownloadProgress(
+                effectiveUpdate.Key,
+                effectiveUpdate.Progress,
+                effectiveUpdate.Snapshot,
+                stoppingToken
+            );
+
+            var scope = await ResolveScopeAsync(dbContext, effectiveUpdate.Key, stoppingToken);
+            if (scope is null)
+                return;
+
+            var sendResult = await SendPatchAsync(scope, [effectiveUpdate.NodeId], stoppingToken, dbContext);
+            if (sendResult.IsFailed)
+                sendResult.LogError();
+        });
+    }
+
+    private async Task<Result> TryFlushBufferedProgressAsync(
+        IReaparrDbContext dbContext,
+        BufferedProgressUpdate bufferedProgress,
+        Dictionary<ProgressScopeKey, HashSet<Guid>> changedNodeIdsByScope,
+        Dictionary<ProgressScopeKey, List<BufferedProgressUpdate>> bufferedEntriesByScope,
+        CancellationToken cancellationToken
+    )
+    {
+        return await Result.Try(async Task () =>
+        {
+            if (bufferedProgress.Progress is not null)
+            {
+                await dbContext.UpdateDownloadProgress(
+                    bufferedProgress.Key,
+                    bufferedProgress.Progress,
+                    bufferedProgress.Snapshot,
+                    cancellationToken
+                );
+
+                await LogProgressJourneyAsync(
+                    dbContext,
+                    bufferedProgress.Key,
+                    bufferedProgress.Progress,
+                    cancellationToken
+                );
+            }
+
+            var scope = await ResolveScopeAsync(dbContext, bufferedProgress.Key, cancellationToken);
+            if (scope is null)
+                return;
+
+            if (!changedNodeIdsByScope.TryGetValue(scope, out var changedNodeIds))
+            {
+                changedNodeIds = [];
+                changedNodeIdsByScope[scope] = changedNodeIds;
+            }
+
+            changedNodeIds.Add(bufferedProgress.NodeId);
+
+            if (!bufferedEntriesByScope.TryGetValue(scope, out var bufferedEntries))
+            {
+                bufferedEntries = [];
+                bufferedEntriesByScope[scope] = bufferedEntries;
+            }
+
+            bufferedEntries.Add(bufferedProgress);
+        });
     }
 
     /// <summary>
@@ -735,48 +761,56 @@ public class DownloadTaskUpdateDispatcher : BackgroundService, IDownloadTaskUpda
 
         while (parentKey is not null)
         {
-            switch (parentKey.Type)
+            var currentParentKey = parentKey;
+
+            switch (currentParentKey.Type)
             {
                 case DownloadTaskType.Movie:
                 {
+                    var currentParentId = currentParentKey.Id;
+
                     var statuses = await dbContext
-                        .DownloadTaskMovieFile.Where(x => x.ParentId == parentKey.Id)
+                        .DownloadTaskMovieFile.Where(x => x.ParentId == currentParentId)
                         .Select(x => x.DownloadStatus)
                         .ToListAsync(cancellationToken);
                     var newStatus = DownloadTaskActions.Aggregate(statuses);
 
                     var changedCount = await dbContext
-                        .DownloadTaskMovie.Where(x => x.Id == parentKey.Id && x.DownloadStatus != newStatus)
+                        .DownloadTaskMovie.Where(x => x.Id == currentParentId && x.DownloadStatus != newStatus)
                         .ExecuteUpdateAsync(p => p.SetProperty(x => x.DownloadStatus, newStatus), cancellationToken);
 
                     if (changedCount > 0)
-                        changedKeys.Add(parentKey);
+                        changedKeys.Add(currentParentKey);
 
                     parentKey = null;
                     break;
                 }
                 case DownloadTaskType.TvShow:
                 {
+                    var currentParentId = currentParentKey.Id;
+
                     var statuses = await dbContext
-                        .DownloadTaskTvShowSeason.Where(x => x.ParentId == parentKey.Id)
+                        .DownloadTaskTvShowSeason.Where(x => x.ParentId == currentParentId)
                         .Select(x => x.DownloadStatus)
                         .ToListAsync(cancellationToken);
                     var newStatus = DownloadTaskActions.Aggregate(statuses);
 
                     var changedCount = await dbContext
-                        .DownloadTaskTvShow.Where(x => x.Id == parentKey.Id && x.DownloadStatus != newStatus)
+                        .DownloadTaskTvShow.Where(x => x.Id == currentParentId && x.DownloadStatus != newStatus)
                         .ExecuteUpdateAsync(p => p.SetProperty(x => x.DownloadStatus, newStatus), cancellationToken);
 
                     if (changedCount > 0)
-                        changedKeys.Add(parentKey);
+                        changedKeys.Add(currentParentKey);
 
                     parentKey = null;
                     break;
                 }
                 case DownloadTaskType.Season:
                 {
+                    var currentParentId = currentParentKey.Id;
+
                     var showId = await dbContext
-                        .DownloadTaskTvShowSeason.Where(x => x.Id == parentKey.Id)
+                        .DownloadTaskTvShowSeason.Where(x => x.Id == currentParentId)
                         .Select(x => (Guid?)x.ParentId)
                         .FirstOrDefaultAsync(cancellationToken);
                     if (showId is null)
@@ -786,17 +820,17 @@ public class DownloadTaskUpdateDispatcher : BackgroundService, IDownloadTaskUpda
                     }
 
                     var statuses = await dbContext
-                        .DownloadTaskTvShowEpisode.Where(x => x.ParentId == parentKey.Id)
+                        .DownloadTaskTvShowEpisode.Where(x => x.ParentId == currentParentId)
                         .Select(x => x.DownloadStatus)
                         .ToListAsync(cancellationToken);
                     var newStatus = DownloadTaskActions.Aggregate(statuses);
 
                     var changedCount = await dbContext
-                        .DownloadTaskTvShowSeason.Where(x => x.Id == parentKey.Id && x.DownloadStatus != newStatus)
+                        .DownloadTaskTvShowSeason.Where(x => x.Id == currentParentId && x.DownloadStatus != newStatus)
                         .ExecuteUpdateAsync(p => p.SetProperty(x => x.DownloadStatus, newStatus), cancellationToken);
 
                     if (changedCount > 0)
-                        changedKeys.Add(parentKey);
+                        changedKeys.Add(currentParentKey);
 
                     parentKey = new DownloadTaskKey
                     {
@@ -809,8 +843,10 @@ public class DownloadTaskUpdateDispatcher : BackgroundService, IDownloadTaskUpda
                 }
                 case DownloadTaskType.Episode:
                 {
+                    var currentParentId = currentParentKey.Id;
+
                     var seasonId = await dbContext
-                        .DownloadTaskTvShowEpisode.Where(x => x.Id == parentKey.Id)
+                        .DownloadTaskTvShowEpisode.Where(x => x.Id == currentParentId)
                         .Select(x => (Guid?)x.ParentId)
                         .FirstOrDefaultAsync(cancellationToken);
                     if (seasonId is null)
@@ -820,17 +856,17 @@ public class DownloadTaskUpdateDispatcher : BackgroundService, IDownloadTaskUpda
                     }
 
                     var statuses = await dbContext
-                        .DownloadTaskTvShowEpisodeFile.Where(x => x.ParentId == parentKey.Id)
+                        .DownloadTaskTvShowEpisodeFile.Where(x => x.ParentId == currentParentId)
                         .Select(x => x.DownloadStatus)
                         .ToListAsync(cancellationToken);
                     var newStatus = DownloadTaskActions.Aggregate(statuses);
 
                     var changedCount = await dbContext
-                        .DownloadTaskTvShowEpisode.Where(x => x.Id == parentKey.Id && x.DownloadStatus != newStatus)
+                        .DownloadTaskTvShowEpisode.Where(x => x.Id == currentParentId && x.DownloadStatus != newStatus)
                         .ExecuteUpdateAsync(p => p.SetProperty(x => x.DownloadStatus, newStatus), cancellationToken);
 
                     if (changedCount > 0)
-                        changedKeys.Add(parentKey);
+                        changedKeys.Add(currentParentKey);
 
                     parentKey = new DownloadTaskKey
                     {
@@ -844,14 +880,14 @@ public class DownloadTaskUpdateDispatcher : BackgroundService, IDownloadTaskUpda
                 case DownloadTaskType.MovieData:
                 case DownloadTaskType.MoviePart:
                     parentKey = await dbContext
-                        .DownloadTaskMovieFile.Where(x => x.Id == parentKey.Id)
+                        .DownloadTaskMovieFile.Where(x => x.Id == currentParentKey.Id)
                         .ProjectToParentKey()
                         .FirstOrDefaultAsync(cancellationToken);
                     break;
                 case DownloadTaskType.EpisodeData:
                 case DownloadTaskType.EpisodePart:
                     parentKey = await dbContext
-                        .DownloadTaskTvShowEpisodeFile.Where(x => x.Id == parentKey.Id)
+                        .DownloadTaskTvShowEpisodeFile.Where(x => x.Id == currentParentKey.Id)
                         .ProjectToParentKey()
                         .FirstOrDefaultAsync(cancellationToken);
                     break;
@@ -859,7 +895,7 @@ public class DownloadTaskUpdateDispatcher : BackgroundService, IDownloadTaskUpda
                     _log.Here()
                         .Error(
                             "DownloadTaskType {DownloadTaskType} is not supported in {DetermineDownloadStatus}",
-                            parentKey.Type,
+                            currentParentKey.Type,
                             nameof(DetermineDownloadStatusAsync)
                         );
                     parentKey = null;

@@ -1,6 +1,4 @@
 using FastEndpoints.Security;
-using Reaparr.Application.Contracts;
-using Reaparr.Identity.Contracts;
 
 namespace Reaparr.Application;
 

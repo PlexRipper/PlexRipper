@@ -1,5 +1,4 @@
 using System.Text;
-using Reaparr.External.Contracts;
 
 namespace Reaparr.External;
 

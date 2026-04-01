@@ -1,12 +1,7 @@
-﻿using Reaparr.Data.Contracts;
-
-namespace Reaparr.Data.UnitTests;
+﻿namespace Reaparr.Data.UnitTests;
 
 public class ReaparrDbContextExtensionsIncludeDownloadTasksUnitTests : BaseUnitTest
 {
-    public ReaparrDbContextExtensionsIncludeDownloadTasksUnitTests()
-        : base() { }
-
     [Test]
     public async Task ShouldHaveAllMovieDownloadTaskChildrenIncluded_WhenDbContainsNestedDownloadTasks()
     {

@@ -4,9 +4,6 @@ namespace Reaparr.Settings.UnitTests;
 
 public class UserSettingsResetUnitTests : BaseUnitTest
 {
-    public UserSettingsResetUnitTests()
-        : base() { }
-
     [Test]
     public void ShouldHaveDefaultSettingsValues_WhenResetHasBeenCalled()
     {

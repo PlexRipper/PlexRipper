@@ -1,6 +1,3 @@
-using Microsoft.AspNetCore.SignalR;
-using Reaparr.Application.Contracts;
-
 namespace Reaparr.SignalR;
 
 public class DownloadHub : Hub<IDownloadHub>, IDownloadHub

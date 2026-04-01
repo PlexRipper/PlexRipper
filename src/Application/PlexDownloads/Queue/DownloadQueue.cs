@@ -1,6 +1,4 @@
 using System.Threading.Channels;
-using Reaparr.Application.Contracts;
-using Reaparr.Data.Contracts;
 
 namespace Reaparr.Application;
 

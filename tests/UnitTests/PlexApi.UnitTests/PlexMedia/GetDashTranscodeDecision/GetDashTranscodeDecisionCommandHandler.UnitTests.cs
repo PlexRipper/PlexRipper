@@ -2,16 +2,12 @@ using System.Net;
 using LukeHagar.PlexAPI.SDK;
 using LukeHagar.PlexAPI.SDK.Models.Components;
 using LukeHagar.PlexAPI.SDK.Models.Requests;
-using Microsoft.EntityFrameworkCore;
 using Reaparr.PlexApi.Contracts;
 
 namespace Reaparr.PlexApi.UnitTests;
 
 public class GetDashTranscodeDecisionCommandHandlerUnitTests : BaseUnitTest<GetDashTranscodeDecisionCommandHandler>
 {
-    public GetDashTranscodeDecisionCommandHandlerUnitTests()
-        : base() { }
-
     private static GetDashTranscodeDecisionCommand CreateCommand(int plexServerId) =>
         new(plexServerId, new TranscodeDecisionRequest("/library/metadata/56828"));
 

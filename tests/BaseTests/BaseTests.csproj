@@ -1,37 +1,45 @@
 <Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
-        <TargetFramework>net10.0</TargetFramework>
-        <LangVersion>14</LangVersion>
-        <ImplicitUsings>enable</ImplicitUsings>
         <RootNamespace>Reaparr.BaseTests</RootNamespace>
         <AssemblyName>Reaparr.BaseTests</AssemblyName>
-        <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
-        <ErrorOnDuplicatePublishOutputFiles>false</ErrorOnDuplicatePublishOutputFiles>
-        <Nullable>enable</Nullable>
-        <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
         <OutputType>Exe</OutputType>
     </PropertyGroup>
     <ItemGroup>
-        <PackageReference Include="Autofac" Version="9.0.0" />
+        <PackageReference Include="Autofac" Version="9.1.0" />
         <PackageReference Include="Autofac.Extras.Moq" Version="7.0.0" />
         <PackageReference Include="Bogus" Version="35.6.5" />
         <PackageReference Include="Bogus.Hollywood" Version="35.6.5" />
-        <PackageReference Include="CSharpier.MsBuild" Version="1.2.5">
+        <PackageReference Include="CSharpier.MsBuild" Version="1.2.6">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="FastEndpoints.Testing" Version="7.1.1" />
-        <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="10.0.1" />
+        <PackageReference Include="FastEndpoints.Testing" Version="8.1.0" />
+        <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="10.0.5" />
         <PackageReference Include="Moq" Version="4.20.72" />
         <PackageReference Include="Moq.Contrib.HttpClient" Version="1.4.0" />
         <PackageReference Include="Shouldly" Version="4.3.0" />
-        <PackageReference Include="TUnit" Version="1.19.74" />
+        <PackageReference Include="TUnit" Version="1.24.0" />
         <PackageReference Include="TestableIO.System.IO.Abstractions.TestingHelpers" Version="22.1.0" />
     </ItemGroup>
     <ItemGroup>
         <ProjectReference Include="..\..\src\AppHost\AppHost.csproj" />
     </ItemGroup>
     <ItemGroup>
-        <Compile Include="..\..\src\Domain\GlobalUsings.cs" />
+        <Using Include="Autofac" />
+        <Using Include="Bogus.Premium" />
+        <Using Include="ByteSizeLib" />
+        <Using Include="Microsoft.EntityFrameworkCore" />
+        <Using Include="Reaparr.Application.Contracts" />
+        <Using Include="Reaparr.Data" />
+        <Using Include="Reaparr.Data.Contracts" />
+        <Using Include="Reaparr.Environment" />
+        <Using Include="Reaparr.Identity" />
+        <Using Include="Reaparr.Identity.Contracts" />
+        <Using Include="Reaparr.PlexApi" />
+        <Using Include="Reaparr.SignalR.Contracts" />
+        <Using Include="Serilog.Events" />
+        <Using Include="System.IO.Abstractions" />
+        <Using Include="System.Net" />
+        <Using Include="System.Text.Json" />
     </ItemGroup>
 </Project>

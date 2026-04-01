@@ -1,7 +1,3 @@
-using FastEndpoints;
-using FluentValidation;
-using Quartz;
-
 namespace Reaparr.BackgroundJobs;
 
 /// <summary>

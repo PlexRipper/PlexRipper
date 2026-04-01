@@ -1,13 +1,7 @@
-using Microsoft.EntityFrameworkCore;
-using Reaparr.FileSystem.Contracts;
-
 namespace Reaparr.Application.UnitTests;
 
 public class MoveDownloadFileJobQueueUnitTests : BaseUnitTest<MoveDownloadFileJobQueue>
 {
-    public MoveDownloadFileJobQueueUnitTests()
-        : base() { }
-
     [Test]
     public async Task ShouldReturnSuccessResult_WhenNoDownloadTaskIsReadyToMove()
     {

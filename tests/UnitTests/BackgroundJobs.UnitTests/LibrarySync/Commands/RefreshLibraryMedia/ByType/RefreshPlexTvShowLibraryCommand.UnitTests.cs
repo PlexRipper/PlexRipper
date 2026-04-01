@@ -1,6 +1,3 @@
-using FastEndpoints;
-using Microsoft.EntityFrameworkCore;
-using Reaparr.BackgroundJobs.Contracts;
 using Reaparr.Data.Contracts;
 using Reaparr.PlexApi.Contracts;
 
@@ -8,9 +5,6 @@ namespace Reaparr.BackgroundJobs.UnitTests;
 
 public class RefreshPlexTvShowLibraryCommandUnitTests : BaseUnitTest<RefreshPlexTvShowLibraryCommandHandler>
 {
-    public RefreshPlexTvShowLibraryCommandUnitTests()
-        : base() { }
-
     private void SetupProgressStoreMocks(List<LibraryProgressItem>? capturedItems = null)
     {
         Mock.Mock<ILibrarySyncProgressStore>()

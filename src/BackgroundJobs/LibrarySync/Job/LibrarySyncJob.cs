@@ -1,9 +1,3 @@
-using Microsoft.EntityFrameworkCore;
-using Quartz;
-using Reaparr.BackgroundJobs.Contracts;
-using Reaparr.Data.Contracts;
-using Reaparr.SignalR.Contracts;
-
 namespace Reaparr.BackgroundJobs;
 
 /// <summary>

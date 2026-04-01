@@ -1,10 +1,6 @@
 using Microsoft.Data.Sqlite;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using NaturalSort.Extension;
-using Reaparr.Data;
-using Reaparr.Data.Contracts;
-using Reaparr.Identity;
 
 namespace Reaparr.BaseTests;
 

@@ -2,9 +2,6 @@
 
 public class DownloadTaskActionsAggregateUnitTests : BaseUnitTest
 {
-    public DownloadTaskActionsAggregateUnitTests()
-        : base() { }
-
     [Test]
     public void ShouldBeStatusUnknown_WhenListIsEmpty()
     {

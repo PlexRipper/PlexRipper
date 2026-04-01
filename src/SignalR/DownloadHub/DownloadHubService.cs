@@ -1,7 +1,3 @@
-using Microsoft.AspNetCore.SignalR;
-using Reaparr.Application.Contracts;
-using Reaparr.SignalR.Contracts;
-
 namespace Reaparr.SignalR;
 
 /// <summary>

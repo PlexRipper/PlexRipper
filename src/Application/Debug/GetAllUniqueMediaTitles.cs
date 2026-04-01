@@ -1,8 +1,4 @@
-using System.Text.Json;
 using System.Text.RegularExpressions;
-using FastEndpoints;
-using Reaparr.Application.Contracts;
-using Reaparr.Data.Contracts;
 
 namespace Reaparr.Application;
 

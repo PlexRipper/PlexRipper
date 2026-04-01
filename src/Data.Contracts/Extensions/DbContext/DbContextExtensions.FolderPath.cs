@@ -1,5 +1,3 @@
-using Microsoft.EntityFrameworkCore;
-using Reaparr.Domain;
 using Serilog;
 
 namespace Reaparr.Data.Contracts;

@@ -1,15 +1,7 @@
-using System.Linq;
-using Microsoft.EntityFrameworkCore;
-using Reaparr.Application.Contracts;
-using Reaparr.Data.Contracts;
-
 namespace Reaparr.Application.UnitTests;
 
 public class RestartDownloadTaskCommandUnitTests : BaseUnitTest<RestartDownloadTaskCommandHandler>
 {
-    public RestartDownloadTaskCommandUnitTests()
-        : base() { }
-
     [Test]
     public async Task ShouldRequeueDownloadTasks_WhenRestartingValidId()
     {
@@ -18,7 +10,7 @@ public class RestartDownloadTaskCommandUnitTests : BaseUnitTest<RestartDownloadT
             .Setup(x =>
                 x.OnStatusChangedAsync(
                     It.IsAny<DownloadTaskKey>(),
-                    It.IsAny<Reaparr.Domain.DownloadStatus>(),
+                    It.IsAny<DownloadStatus>(),
                     It.IsAny<CancellationToken>()
                 )
             )
@@ -54,7 +46,7 @@ public class RestartDownloadTaskCommandUnitTests : BaseUnitTest<RestartDownloadT
         {
             var task = await IDbContext.GetDownloadTaskFileAsync(childKey, CancellationToken);
             task.ShouldNotBeNull();
-            task!.DownloadStatus.ShouldBe(DownloadStatus.Stopped);
+            task.DownloadStatus.ShouldBe(DownloadStatus.Stopped);
 
             Mock.VerifyEventPublished(() => new StopDownloadTaskCommand(childKey.Id), Times.Once());
             Mock.Mock<IDownloadTaskUpdateDispatcher>()

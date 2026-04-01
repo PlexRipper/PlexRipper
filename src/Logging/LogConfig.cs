@@ -1,10 +1,5 @@
-using Reaparr.Environment;
-using Serilog;
-using Serilog.Core;
 using Serilog.Enrichers.Sensitive;
-using Serilog.Events;
 using Serilog.Filters;
-using Serilog.Formatting.Display;
 using Serilog.Sinks.Console.LogThemes;
 using Serilog.Templates;
 
@@ -82,9 +77,7 @@ public class LogConfig
 
                 foreach (var property in sensitiveProperties)
                 {
-                    var firstChar = property[0];
-                    options.MaskProperties.Add(char.ToUpperInvariant(firstChar) + property[1..]);
-                    options.MaskProperties.Add(char.ToLowerInvariant(firstChar) + property[1..]);
+                    options.MaskProperties.Add(MaskProperty.WithDefaults(property));
                 }
             });
         }

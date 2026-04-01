@@ -4,15 +4,15 @@
     "net10.0": {
       "CSharpier.MsBuild": {
         "type": "Direct",
-        "requested": "[1.2.5, )",
-        "resolved": "1.2.5",
-        "contentHash": "U9csejWXDk/ZXZpigcu22KAOINQj7qNujeJFj0HsHOqKzuW9xX+eaCFFHrfjOdIDQYzslQAe9e6Gt9HGMRC/aA=="
+        "requested": "[1.2.6, )",
+        "resolved": "1.2.6",
+        "contentHash": "KMSJG+jfk7vjP52QkWB99qWespXCPAzG/IaMCMRHYWumJEAGKQYm2HtyWG6eqnOwDitH96i1cqq5EVesyOtPmg=="
       },
       "Serilog": {
         "type": "Direct",
-        "requested": "[4.3.0, )",
-        "resolved": "4.3.0",
-        "contentHash": "+cDryFR0GRhsGOnZSKwaDzRRl4MupvJ42FhCE4zhQRVanX0Jpg6WuCBk59OVhVDPmab1bB+nRykAnykYELA9qQ=="
+        "requested": "[4.3.1, )",
+        "resolved": "4.3.1",
+        "contentHash": "savYe7h5yRlkqBVOwP8cIRDOdqKiPmYCU4W87JH38sBmcKD5EBoXvQIw6bNEvZ/pTe1gsiye3VFCzBsoppGkXQ=="
       }
     }
   }

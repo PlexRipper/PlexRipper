@@ -7,9 +7,6 @@ namespace Reaparr.Settings.UnitTests;
 
 public class ConfigManagerResetConfigUnitTests : BaseUnitTest<ConfigManager>
 {
-    public ConfigManagerResetConfigUnitTests()
-        : base() { }
-
     [Test]
     public void ShouldReturnOkResult_WhenSettingsAreReset()
     {

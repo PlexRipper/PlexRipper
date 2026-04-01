@@ -1,5 +1,4 @@
 ﻿using Autofac;
-using Serilog;
 
 namespace Reaparr.Logging;
 

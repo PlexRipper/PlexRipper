@@ -1,14 +1,7 @@
-using Reaparr.Application.Contracts;
-using Reaparr.PlexApi.Contracts;
-using Reaparr.Settings.Contracts;
-
 namespace Reaparr.Application.UnitTests;
 
 public class DeterminePlexDownloadClientCommandUnitTests : BaseUnitTest<DeterminePlexDownloadClientCommandHandler>
 {
-    public DeterminePlexDownloadClientCommandUnitTests()
-        : base() { }
-
     [Test]
     public async Task ShouldReturnDirect_WhenStreamDownloaderIsDisabled()
     {

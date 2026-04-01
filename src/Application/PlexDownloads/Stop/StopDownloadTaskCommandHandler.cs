@@ -1,10 +1,3 @@
-using System.IO.Abstractions;
-using FastEndpoints;
-using FluentValidation;
-using Reaparr.Application.Contracts;
-using Reaparr.Data.Contracts;
-using Reaparr.FileSystem.Contracts;
-
 namespace Reaparr.Application;
 
 public class StopDownloadTaskCommandValidator : AbstractValidator<StopDownloadTaskCommand>
@@ -21,7 +14,6 @@ public class StopDownloadTaskCommandHandler : ICommandHandler<StopDownloadTaskCo
     private readonly IReaparrDbContext _dbContext;
     private readonly IDownloadTaskUpdateDispatcher _downloadTaskUpdateDispatcher;
     private readonly ICommandExecutor _commandExecutor;
-    private readonly IFile _file;
     private readonly IDownloadTaskScheduler _downloadTaskScheduler;
     private readonly IMoveDownloadFileScheduler _moveDownloadFileScheduler;
 
@@ -30,7 +22,6 @@ public class StopDownloadTaskCommandHandler : ICommandHandler<StopDownloadTaskCo
         IReaparrDbContext dbContext,
         IDownloadTaskUpdateDispatcher downloadTaskUpdateDispatcher,
         ICommandExecutor commandExecutor,
-        IFile file,
         IDownloadTaskScheduler downloadTaskScheduler,
         IMoveDownloadFileScheduler moveDownloadFileScheduler
     )
@@ -39,7 +30,6 @@ public class StopDownloadTaskCommandHandler : ICommandHandler<StopDownloadTaskCo
         _dbContext = dbContext;
         _downloadTaskUpdateDispatcher = downloadTaskUpdateDispatcher;
         _commandExecutor = commandExecutor;
-        _file = file;
         _downloadTaskScheduler = downloadTaskScheduler;
         _moveDownloadFileScheduler = moveDownloadFileScheduler;
     }

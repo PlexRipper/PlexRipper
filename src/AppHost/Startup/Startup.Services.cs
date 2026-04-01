@@ -1,8 +1,5 @@
-using System.Net.Security;
 using System.Reflection;
-using System.Security.Authentication;
 using System.Text.Json.Serialization;
-using FastEndpoints;
 using FastEndpoints.Security;
 using FastEndpoints.Swagger;
 using MessagePack;
@@ -13,14 +10,8 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Http;
 using NSwag;
 using NSwag.Generation.Processors.Security;
-using Reaparr.Application;
 using Reaparr.Application.Contracts;
-using Reaparr.BackgroundJobs;
-using Reaparr.Environment;
-using Reaparr.Identity;
 using Reaparr.Identity.Contracts;
-using Reaparr.PlexApi;
-using Reaparr.PublicAPI;
 
 namespace Reaparr.AppHost;
 

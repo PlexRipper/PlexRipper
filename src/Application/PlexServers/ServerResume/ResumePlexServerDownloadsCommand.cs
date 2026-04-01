@@ -1,9 +1,3 @@
-using FastEndpoints;
-using FluentValidation;
-using Microsoft.EntityFrameworkCore;
-using Reaparr.Data.Contracts;
-using Reaparr.Domain;
-
 namespace Reaparr.Application;
 
 public record ResumePlexServerDownloadsCommand(int PlexServerId) : ICommand<Result>;

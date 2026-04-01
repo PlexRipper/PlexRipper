@@ -1,13 +1,8 @@
-using Microsoft.EntityFrameworkCore;
-using Reaparr.Application.Contracts;
-using Reaparr.Data.Contracts;
-
 namespace Reaparr.Application.UnitTests;
 
 public class DeleteDownloadTasksByKeyCommandUnitTests : BaseUnitTest<DeleteDownloadTasksByKeyCommandHandler>
 {
     public DeleteDownloadTasksByKeyCommandUnitTests()
-        : base()
     {
         Mock.Mock<IDownloadTaskUpdateDispatcher>()
             .Setup(x =>

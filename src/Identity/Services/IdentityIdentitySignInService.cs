@@ -1,7 +1,6 @@
 using System.Security.Claims;
 using FastEndpoints.Security;
 using Microsoft.AspNetCore.Identity;
-using Reaparr.Identity.Contracts;
 
 namespace Reaparr.Identity.Services;
 

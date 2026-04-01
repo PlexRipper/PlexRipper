@@ -2,13 +2,6 @@ using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
-using Microsoft.EntityFrameworkCore;
-using Reaparr.Application.Contracts;
-using Reaparr.Data.Contracts;
-using Reaparr.External.Contracts;
-using Reaparr.PlexApi.Contracts;
-using Reaparr.Settings.Contracts;
-using Reaparr.SignalR.Contracts;
 
 namespace Reaparr.Application;
 
@@ -19,7 +12,6 @@ namespace Reaparr.Application;
 /// </summary>
 public class DashPlexDownloadClient : IPlexDownloadClient
 {
-    private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
     private readonly IDashMpdCliWrapper _dashWrapper;
     private readonly ICommandExecutor _commandExecutor;
@@ -34,7 +26,6 @@ public class DashPlexDownloadClient : IPlexDownloadClient
     private DownloadTaskProgress _lastProgressUpdate = new();
 
     public DashPlexDownloadClient(
-        ILogger log,
         IReaparrDbContextFactory dbContextFactory,
         IDashMpdCliWrapper dashWrapper,
         ICommandExecutor commandExecutor,
@@ -43,7 +34,6 @@ public class DashPlexDownloadClient : IPlexDownloadClient
         INotificationHubService notificationHubService
     )
     {
-        _log = log.ForContext<DashPlexDownloadClient>();
         _dashWrapper = dashWrapper;
         _commandExecutor = commandExecutor;
         _downloadTaskUpdateDispatcher = downloadTaskUpdateDispatcher;
@@ -221,7 +211,7 @@ public class DashPlexDownloadClient : IPlexDownloadClient
                         Percentage = Convert.ToDecimal(progress.Percent),
                         DataReceived = progress.DownloadedBytes,
                         DownloadSpeed = progress.DownloadSpeedInBytes,
-                        TimeRemaining = progress.ETA,
+                        TimeRemaining = progress.Eta,
                     };
 
                     _downloadTaskUpdateDispatcher.OnProgressUpdated(key, _lastProgressUpdate);
@@ -252,8 +242,9 @@ public class DashPlexDownloadClient : IPlexDownloadClient
 
         if (!completed.IsSuccess)
         {
-            var status = completed.Result.IsServerUnreachable()
-                ? DownloadStatus.ServerUnreachable
+            var status =
+                completed.Result.Has404NotFoundError() ? DownloadStatus.SourceUnavailable
+                : completed.Result.IsServerUnreachable() ? DownloadStatus.ServerUnreachable
                 : DownloadStatus.DownloadClientError;
             await SetDownloadStatusAsync(status, completed.Result);
             return;

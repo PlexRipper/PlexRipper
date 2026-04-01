@@ -1,8 +1,3 @@
-using FastEndpoints;
-using FluentValidation;
-using Reaparr.BackgroundJobs.Contracts;
-using Reaparr.Data.Contracts;
-
 namespace Reaparr.BackgroundJobs;
 
 public class ResetFailedLibrarySyncJobsCommandValidator : AbstractValidator<ResetFailedLibrarySyncJobsCommand>

@@ -1,22 +1,18 @@
 <Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
-        <TargetFramework>net10.0</TargetFramework>
-        <LangVersion>14</LangVersion>
-        <ImplicitUsings>enable</ImplicitUsings>
-        <IsPackable>false</IsPackable>
         <RootNamespace>Reaparr.Application.UnitTests</RootNamespace>
         <AssemblyName>Reaparr.Application.UnitTests</AssemblyName>
-        <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
-        <Nullable>enable</Nullable>
-        <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-        <OutputType>Exe</OutputType>
     </PropertyGroup>
     <ItemGroup>
-        <PackageReference Include="CSharpier.MsBuild" Version="1.2.5">
+        <PackageReference Include="coverlet.collector" Version="8.0.1">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="TUnit" Version="1.19.74" />
+        <PackageReference Include="CSharpier.MsBuild" Version="1.2.6">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="TUnit" Version="1.24.0" />
     </ItemGroup>
     <ItemGroup>
         <ProjectReference Include="..\..\..\src\Application\Application.csproj" />
@@ -24,7 +20,18 @@
         <ProjectReference Include="..\..\BaseTests\BaseTests.csproj" />
     </ItemGroup>
     <ItemGroup>
-        <Compile Include="..\..\..\src\Domain\GlobalUsings.cs" />
-        <Compile Include="..\..\BaseTests\GlobalTestsUsings.cs" />
+        <Using Include="Autofac" />
+        <Using Include="Microsoft.EntityFrameworkCore" />
+        <Using Include="Quartz" />
+        <Using Include="Reaparr.Application.Contracts" />
+        <Using Include="Reaparr.Data.Contracts" />
+        <Using Include="Reaparr.FileSystem.Contracts" />
+        <Using Include="Reaparr.PlexApi.Contracts" />
+        <Using Include="Reaparr.Settings.Contracts" />
+        <Using Include="Reaparr.SignalR.Contracts" />
+        <Using Include="System.IO.Abstractions" />
+        <Using Include="System.IO.Abstractions.TestingHelpers" />
+        <Using Include="System.Reactive.Linq" />
+        <Using Include="System.Text.Json" />
     </ItemGroup>
 </Project>

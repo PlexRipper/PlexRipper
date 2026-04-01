@@ -1,7 +1,3 @@
-using Quartz;
-using Reaparr.Application.Contracts;
-using Reaparr.SignalR.Contracts;
-
 namespace Reaparr.Application;
 
 public class AllJobListener : IAllJobListener

@@ -1,7 +1,4 @@
 using System.Collections.Concurrent;
-using Microsoft.EntityFrameworkCore;
-using Reaparr.Data.Contracts;
-using Reaparr.SignalR.Contracts;
 
 namespace Reaparr.Application.UnitTests;
 
@@ -139,7 +136,7 @@ public class DownloadTaskUpdateDispatcherUnitTests : BaseUnitTest<DownloadTaskUp
         var leafPatch = capturedPatches.SelectMany(x => x).FirstOrDefault(x => x.Id == episodeFile.Id);
 
         leafPatch.ShouldNotBeNull();
-        leafPatch!.DataReceived.ShouldBe(900);
+        leafPatch.DataReceived.ShouldBe(900);
         leafPatch.Percentage.ShouldBe(90);
         leafPatch.TimeRemaining.ShouldBe(12);
     }
@@ -837,9 +834,9 @@ public class DownloadTaskUpdateDispatcherUnitTests : BaseUnitTest<DownloadTaskUp
         var pauseLog = logs.LastOrDefault(x => x.Status == DownloadStatus.Paused);
         pauseLog.ShouldNotBeNull();
 
-        logs.ShouldContain(x => x.Status == DownloadStatus.Downloading && x.Id < pauseLog!.Id);
+        logs.ShouldContain(x => x.Status == DownloadStatus.Downloading && x.Id < pauseLog.Id);
 
-        logs.Where(x => x.Id > pauseLog!.Id && x.Status == DownloadStatus.Downloading).ShouldBeEmpty();
+        logs.Where(x => x.Id > pauseLog.Id && x.Status == DownloadStatus.Downloading).ShouldBeEmpty();
     }
 
     [Test]
@@ -896,7 +893,7 @@ public class DownloadTaskUpdateDispatcherUnitTests : BaseUnitTest<DownloadTaskUp
         capturedPatches.ShouldNotBeEmpty();
         var fileTaskPatch = capturedPatches.SelectMany(x => x).FirstOrDefault(x => x.Id == movieFile.Id);
         fileTaskPatch.ShouldNotBeNull();
-        fileTaskPatch!.Status.ShouldBe(DownloadStatus.Moving);
+        fileTaskPatch.Status.ShouldBe(DownloadStatus.Moving);
         fileTaskPatch.Percentage.ShouldBe(50.00m);
     }
 
@@ -962,7 +959,7 @@ public class DownloadTaskUpdateDispatcherUnitTests : BaseUnitTest<DownloadTaskUp
         // Assert
         var fileTaskPatch = capturedPatches.SelectMany(x => x).FirstOrDefault(x => x.Id == episodeFile.Id);
         fileTaskPatch.ShouldNotBeNull();
-        fileTaskPatch!.Status.ShouldBe(DownloadStatus.Completed);
+        fileTaskPatch.Status.ShouldBe(DownloadStatus.Completed);
         fileTaskPatch.Percentage.ShouldBe(100m);
     }
 
@@ -1019,7 +1016,7 @@ public class DownloadTaskUpdateDispatcherUnitTests : BaseUnitTest<DownloadTaskUp
         // Assert
         var fileTaskPatch = capturedPatches.SelectMany(x => x).FirstOrDefault(x => x.Id == movieFile.Id);
         fileTaskPatch.ShouldNotBeNull();
-        fileTaskPatch!.Status.ShouldBe(DownloadStatus.Completed);
+        fileTaskPatch.Status.ShouldBe(DownloadStatus.Completed);
         fileTaskPatch.Percentage.ShouldBe(100m);
     }
 
@@ -1062,7 +1059,7 @@ public class DownloadTaskUpdateDispatcherUnitTests : BaseUnitTest<DownloadTaskUp
         capturedDeletedIds.ShouldNotBeEmpty();
         var deletedPatch = capturedDeletedIds.Last();
         deletedPatch.ShouldNotBeNull();
-        deletedPatch!.ShouldContain(movieFile.Id);
+        deletedPatch.ShouldContain(movieFile.Id);
 
         capturedUpserts.Last().ShouldBeEmpty();
     }

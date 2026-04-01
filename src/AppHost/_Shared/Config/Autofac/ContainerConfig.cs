@@ -1,14 +1,4 @@
-using Autofac;
-using Reaparr.Application;
-using Reaparr.BackgroundJobs;
-using Reaparr.Data;
-using Reaparr.External;
-using Reaparr.FileSystem;
-using Reaparr.Identity;
-using Reaparr.PlexApi;
-using Reaparr.PublicAPI;
 using Reaparr.Settings.Config;
-using Reaparr.SignalR;
 
 namespace Reaparr.AppHost;
 

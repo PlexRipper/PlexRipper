@@ -1,11 +1,4 @@
-using FastEndpoints;
 using Microsoft.Extensions.DependencyInjection;
-using Reaparr.Application.Contracts;
-using Reaparr.Data.Contracts;
-using Reaparr.Environment;
-using Reaparr.Identity.Contracts;
-using Reaparr.SignalR.Contracts;
-using Serilog.Events;
 
 namespace Reaparr.BaseTests;
 
@@ -17,12 +10,11 @@ public partial class BaseUnitTest
     protected Mock<HttpMessageHandler> HttpHandlerMock = new(MockBehavior.Loose);
 
     protected CancellationToken CancellationToken =>
-        TUnit.Core.TestContext.Current?.Execution.CancellationToken ?? CancellationToken.None;
+        TestContext.Current?.Execution.CancellationToken ?? CancellationToken.None;
 
     /// <summary>
     /// This constructor is run before every test
     /// </summary>
-    /// <param name="output">Sets up the logging system for logging during testing.</param>
     /// <param name="logEventLevel"></param>
     protected BaseUnitTest(LogEventLevel logEventLevel = LogEventLevel.Verbose)
     {

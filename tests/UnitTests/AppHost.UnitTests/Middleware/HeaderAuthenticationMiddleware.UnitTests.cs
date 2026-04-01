@@ -1,8 +1,6 @@
 using System.Net;
 using System.Security.Claims;
-using System.Threading;
 using Autofac;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Primitives;
 using Reaparr.Identity.Contracts;
 using Reaparr.Settings.Contracts;
@@ -16,9 +14,6 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
     private const string TEST_USERNAME = "testuser";
     private const string TEST_EMAIL = "test@example.com";
     private const string TEST_USER_ID = "test-user-id";
-
-    public HeaderAuthenticationMiddlewareUnitTests()
-        : base() { }
 
     #region InvokeAsync - Early Exit Scenarios
 
@@ -1822,7 +1817,6 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
 
                     // Act
                     await sut.InvokeAsync(context);
-
                 },
                 CancellationToken
             );

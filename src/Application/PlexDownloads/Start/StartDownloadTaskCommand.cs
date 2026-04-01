@@ -1,9 +1,3 @@
-using FastEndpoints;
-using FluentValidation;
-using Reaparr.Application.Contracts;
-using Reaparr.Data.Contracts;
-using Reaparr.FileSystem.Contracts;
-
 namespace Reaparr.Application;
 
 public record StartDownloadTaskCommand(Guid DownloadTaskGuid) : ICommand<Result>;

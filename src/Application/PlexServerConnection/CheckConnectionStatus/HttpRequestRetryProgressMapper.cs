@@ -1,6 +1,3 @@
-using Reaparr.Application.Contracts;
-using Reaparr.SignalR.Contracts;
-
 namespace Reaparr.Application;
 
 internal static class HttpRequestRetryProgressMapper

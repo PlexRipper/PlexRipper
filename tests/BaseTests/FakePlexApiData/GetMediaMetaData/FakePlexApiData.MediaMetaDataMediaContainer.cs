@@ -1,7 +1,6 @@
 using Bogus.Hollywood;
 using LukeHagar.PlexAPI.SDK.Models.Components;
 using NodaTime;
-using Reaparr.PlexApi;
 using Stream = LukeHagar.PlexAPI.SDK.Models.Components.Stream;
 using StreamType = LukeHagar.PlexAPI.SDK.Models.Components.StreamType;
 

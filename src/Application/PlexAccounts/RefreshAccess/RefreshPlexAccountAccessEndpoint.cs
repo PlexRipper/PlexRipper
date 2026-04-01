@@ -1,10 +1,3 @@
-using FastEndpoints;
-using FluentValidation;
-using Microsoft.EntityFrameworkCore;
-using Reaparr.Application.Contracts;
-using Reaparr.Data.Contracts;
-using Reaparr.SignalR.Contracts;
-
 namespace Reaparr.Application;
 
 public record RefreshPlexAccountAccessEndpointRequest(int PlexAccountId = 0);

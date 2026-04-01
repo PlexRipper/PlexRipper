@@ -1,15 +1,8 @@
-using Microsoft.EntityFrameworkCore;
-using Reaparr.Application.Contracts;
-using Reaparr.Data.Contracts;
-
 namespace Reaparr.Application.UnitTests;
 
 public class ClearCompletedDownloadTasksByDownloadTaskKeyCommandUnitTests
     : BaseUnitTest<ClearCompletedDownloadTasksByDownloadTaskKeyCommandHandler>
 {
-    public ClearCompletedDownloadTasksByDownloadTaskKeyCommandUnitTests()
-        : base() { }
-
     [Test]
     public async Task ShouldReturnSuccessWithZeroCount_WhenNoneOfTheKeysAreCompleted()
     {

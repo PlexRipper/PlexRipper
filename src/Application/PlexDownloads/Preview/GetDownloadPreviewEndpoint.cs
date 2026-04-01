@@ -1,7 +1,3 @@
-using FastEndpoints;
-using FluentValidation;
-using Reaparr.Application.Contracts;
-
 namespace Reaparr.Application;
 
 public class GetDownloadPreviewEndpointRequestValidator : Validator<List<DownloadMediaDTO>>

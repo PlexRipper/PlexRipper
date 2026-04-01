@@ -1,8 +1,3 @@
-using Microsoft.EntityFrameworkCore;
-using Reaparr.Application.Contracts;
-using Reaparr.Data.Contracts;
-using Reaparr.FileSystem.Contracts;
-
 namespace Reaparr.Application;
 
 public class MoveDownloadFileJobQueue : IMoveDownloadFileQueue

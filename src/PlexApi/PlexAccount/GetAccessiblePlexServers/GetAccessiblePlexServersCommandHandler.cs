@@ -1,9 +1,5 @@
-using FastEndpoints;
 using LukeHagar.PlexAPI.SDK.Models.Components;
 using LukeHagar.PlexAPI.SDK.Models.Requests;
-using Reaparr.Data.Contracts;
-using Reaparr.PlexApi.Contracts;
-using Reaparr.Settings.Contracts;
 
 namespace Reaparr.PlexApi.GetAccessiblePlexServers;
 

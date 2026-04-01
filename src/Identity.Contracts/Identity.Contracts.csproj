@@ -1,21 +1,22 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
-        <TargetFramework>net10.0</TargetFramework>
-        <ImplicitUsings>enable</ImplicitUsings>
-        <Nullable>enable</Nullable>
         <AssemblyName>Reaparr.Identity.Contracts</AssemblyName>
         <RootNamespace>Reaparr.Identity.Contracts</RootNamespace>
-        <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     </PropertyGroup>
     <ItemGroup>
-        <PackageReference Include="CSharpier.MsBuild" Version="1.2.5">
+        <PackageReference Include="CSharpier.MsBuild" Version="1.2.6">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="Microsoft.AspNetCore.DataProtection.EntityFrameworkCore" Version="10.0.1" />
-        <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="10.0.1" />
+        <PackageReference Include="Microsoft.AspNetCore.DataProtection.EntityFrameworkCore" Version="10.0.5" />
+        <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="10.0.5" />
     </ItemGroup>
     <ItemGroup>
         <ProjectReference Include="..\Data.Contracts\Data.Contracts.csproj" />
+    </ItemGroup>
+    <ItemGroup>
+        <Using Include="Microsoft.AspNetCore.Identity" />
+        <Using Include="Microsoft.EntityFrameworkCore" />
+        <Using Include="Reaparr.Data.Contracts" />
     </ItemGroup>
 </Project>

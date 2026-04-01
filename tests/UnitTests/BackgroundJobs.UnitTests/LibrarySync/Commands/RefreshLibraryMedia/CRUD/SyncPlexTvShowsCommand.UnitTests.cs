@@ -1,5 +1,3 @@
-using Microsoft.EntityFrameworkCore;
-
 namespace Reaparr.BackgroundJobs.UnitTests;
 
 public class SyncPlexTvShowsCommandUnitTests : BaseUnitTest<SyncPlexTvShowsCommandHandler>
@@ -7,7 +5,6 @@ public class SyncPlexTvShowsCommandUnitTests : BaseUnitTest<SyncPlexTvShowsComma
     private readonly SyncPlexTvShowsCommandValidator _validator;
 
     public SyncPlexTvShowsCommandUnitTests()
-        : base()
     {
         _validator = new SyncPlexTvShowsCommandValidator(LogFactory.Create<SyncPlexTvShowsCommandValidator>());
     }

@@ -1,13 +1,7 @@
-﻿using Reaparr.Application.Contracts;
-using Reaparr.SignalR.Contracts;
-
-namespace Reaparr.Application.UnitTests;
+﻿namespace Reaparr.Application.UnitTests;
 
 public class CreateDownloadTasksCommandHandlerUnitTests : BaseUnitTest<CreateDownloadTasksCommandHandler>
 {
-    public CreateDownloadTasksCommandHandlerUnitTests()
-        : base() { }
-
     [Test]
     public async Task ShouldGenerateAllDownloadTaskTypes_WhenAllMediaTypesAreGiven()
     {

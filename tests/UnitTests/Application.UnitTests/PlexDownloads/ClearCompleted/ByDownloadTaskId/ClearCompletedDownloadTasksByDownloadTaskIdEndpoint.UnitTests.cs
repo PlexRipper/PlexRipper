@@ -1,14 +1,9 @@
-using Microsoft.EntityFrameworkCore;
-using Reaparr.Application;
-using Reaparr.Application.Contracts;
-
 namespace Reaparr.Application.UnitTests;
 
 public class ClearCompletedDownloadTasksByDownloadTaskIdEndpointUnitTests
     : BaseUnitTest<ClearCompletedDownloadTasksByDownloadTaskIdEndpoint>
 {
     public ClearCompletedDownloadTasksByDownloadTaskIdEndpointUnitTests()
-        : base()
     {
         Mock.Mock<IDownloadTaskUpdateDispatcher>()
             .Setup(x =>

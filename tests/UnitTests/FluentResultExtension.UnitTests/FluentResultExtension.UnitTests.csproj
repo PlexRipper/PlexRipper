@@ -1,32 +1,19 @@
 <Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
-        <TargetFramework>net10.0</TargetFramework>
-        <LangVersion>14</LangVersion>
-        <ImplicitUsings>enable</ImplicitUsings>
-        <IsPackable>false</IsPackable>
         <RootNamespace>Reaparr.FluentResultExtension.UnitTests</RootNamespace>
         <AssemblyName>Reaparr.FluentResultExtension.UnitTests</AssemblyName>
-        <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
-        <ErrorOnDuplicatePublishOutputFiles>false</ErrorOnDuplicatePublishOutputFiles>
-        <Nullable>enable</Nullable>
-        <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-        <OutputType>Exe</OutputType>
     </PropertyGroup>
     <ItemGroup>
-        <PackageReference Include="CSharpier.MsBuild" Version="1.2.5">
+        <PackageReference Include="CSharpier.MsBuild" Version="1.2.6">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="TUnit" Version="1.19.74" />
-        <PackageReference Include="coverlet.collector" Version="6.0.4">
+        <PackageReference Include="TUnit" Version="1.24.0" />
+        <PackageReference Include="coverlet.collector" Version="8.0.1">
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
     </ItemGroup>
     <ItemGroup>
         <ProjectReference Include="..\..\BaseTests\BaseTests.csproj" />
-    </ItemGroup>
-    <ItemGroup>
-        <Compile Include="..\..\..\src\Domain\GlobalUsings.cs" />
-        <Compile Include="..\..\BaseTests\GlobalTestsUsings.cs" />
     </ItemGroup>
 </Project>

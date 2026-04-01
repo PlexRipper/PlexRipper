@@ -1,16 +1,10 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Reaparr.Application.Contracts;
-using Reaparr.Data.Contracts;
-using Reaparr.Domain.Validators;
+﻿using Reaparr.Domain.Validators;
 
 namespace Reaparr.Application.UnitTests;
 
 public class GenerateDownloadTaskMoviesCommandHandlerUnitTests : BaseUnitTest<GenerateDownloadTaskMoviesCommandHandler>
 {
     private readonly DownloadTaskMovieValidator _validator = new();
-
-    public GenerateDownloadTaskMoviesCommandHandlerUnitTests()
-        : base() { }
 
     [Test]
     public async Task ShouldHaveInsertedValidDownloadTaskMoviesInDatabase_WhenGivenValidPlexMovies()

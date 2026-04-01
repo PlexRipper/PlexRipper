@@ -1,10 +1,7 @@
 ﻿using System.Collections.Specialized;
 using System.Reflection;
-using Autofac;
 using Autofac.Extras.Quartz;
-using Reaparr.Data.Contracts;
 using Reaparr.Domain.Autofac;
-using Reaparr.Environment;
 using Module = Autofac.Module;
 
 namespace Reaparr.Application;

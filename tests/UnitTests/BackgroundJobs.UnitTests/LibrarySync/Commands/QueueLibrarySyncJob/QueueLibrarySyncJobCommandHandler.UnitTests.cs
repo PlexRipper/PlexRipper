@@ -1,13 +1,7 @@
-using Microsoft.EntityFrameworkCore;
-using Reaparr.BackgroundJobs.Contracts;
-
 namespace Reaparr.BackgroundJobs.UnitTests;
 
 public class QueueLibrarySyncJobCommandHandlerUnitTests : BaseUnitTest<QueueLibrarySyncJobCommandHandler>
 {
-    public QueueLibrarySyncJobCommandHandlerUnitTests()
-        : base() { }
-
     [Test]
     public async Task ShouldQueueNewLibraries_WhenLibrariesDoNotExistInQueue()
     {

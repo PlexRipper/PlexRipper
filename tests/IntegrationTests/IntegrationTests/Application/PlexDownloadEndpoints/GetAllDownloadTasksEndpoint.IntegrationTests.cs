@@ -1,8 +1,4 @@
-﻿using FastEndpoints;
-using Reaparr.Application;
-using Reaparr.Application.Contracts;
-
-namespace Reaparr.IntegrationTests;
+﻿namespace Reaparr.IntegrationTests;
 
 public class GetAllDownloadTasksEndpointIntegrationTests : BaseIntegrationTests
 {

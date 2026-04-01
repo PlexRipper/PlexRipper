@@ -1,5 +1,3 @@
-using Quartz;
-
 namespace Reaparr.Application;
 
 public static class ISchedulerExtensions

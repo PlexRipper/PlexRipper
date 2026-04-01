@@ -1,6 +1,3 @@
-using ByteSizeLib;
-using Reaparr.Application;
-
 namespace Reaparr.BaseTests;
 
 public static partial class FakeData

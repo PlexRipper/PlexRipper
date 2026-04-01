@@ -1,7 +1,3 @@
-using FastEndpoints;
-using Reaparr.BackgroundJobs.Contracts;
-using Reaparr.PlexApi.Contracts;
-
 namespace Reaparr.PlexApi;
 
 /// <summary>

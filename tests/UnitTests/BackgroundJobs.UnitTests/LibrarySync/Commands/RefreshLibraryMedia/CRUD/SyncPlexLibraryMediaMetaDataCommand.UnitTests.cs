@@ -1,12 +1,7 @@
-using Microsoft.EntityFrameworkCore;
-
 namespace Reaparr.BackgroundJobs.UnitTests;
 
 public class SyncPlexLibraryMediaMetaDataCommandUnitTests : BaseCommandUnitTest<SyncPlexLibraryMediaMetaDataCommand>
 {
-    public SyncPlexLibraryMediaMetaDataCommandUnitTests()
-        : base() { }
-
     [Test]
     public async Task ShouldReturnNotFound_WhenLibraryDoesNotExist()
     {

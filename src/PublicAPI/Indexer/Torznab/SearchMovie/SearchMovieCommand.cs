@@ -1,10 +1,5 @@
-using FastEndpoints;
-using FluentValidation;
 using Flurl;
-using Microsoft.EntityFrameworkCore;
-using Reaparr.Data.Contracts;
 using Reaparr.Environment;
-using Reaparr.Settings.Contracts;
 
 // ReSharper disable InconsistentNaming
 // ReSharper disable ForeachCanBePartlyConvertedToQueryUsingAnotherGetEnumerator
@@ -34,7 +29,6 @@ public class SearchMovieCommandValidator : AbstractValidator<SearchMovieCommand>
         RuleFor(x => x.Offset).GreaterThanOrEqualTo(0);
 
         RuleFor(x => x.TMDB_ID).GreaterThanOrEqualTo(0);
-
     }
 }
 

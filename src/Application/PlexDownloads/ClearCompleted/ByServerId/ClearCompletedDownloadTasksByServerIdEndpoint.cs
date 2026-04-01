@@ -1,6 +1,3 @@
-using FastEndpoints;
-using Reaparr.Application.Contracts;
-
 namespace Reaparr.Application;
 
 /// <summary>

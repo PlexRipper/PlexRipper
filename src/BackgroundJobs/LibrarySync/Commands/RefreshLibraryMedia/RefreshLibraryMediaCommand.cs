@@ -1,9 +1,3 @@
-using FastEndpoints;
-using FluentValidation;
-using Microsoft.EntityFrameworkCore;
-using Reaparr.Data.Contracts;
-using Reaparr.PlexApi.Contracts;
-
 namespace Reaparr.BackgroundJobs;
 
 /// <summary>
@@ -44,7 +38,10 @@ public class RefreshLibraryMediaCommandHandler : ICommandHandler<RefreshLibraryM
             return ResultExtensions.EntityNotFound(nameof(plexLibrary), command.PlexLibraryId);
 
         // Phase 1: Retrieve top-level media belonging to this PlexLibrary
-        var syncLibraryMediaResult = await _commandExecutor.Send(new GetLibraryMediaFromPlexApiCommand(plexLibrary), ct);
+        var syncLibraryMediaResult = await _commandExecutor.Send(
+            new GetLibraryMediaFromPlexApiCommand(plexLibrary),
+            ct
+        );
 
         if (syncLibraryMediaResult.IsFailed)
             return syncLibraryMediaResult.ToResult();

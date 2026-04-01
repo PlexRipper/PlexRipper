@@ -1,9 +1,3 @@
-using System.IO.Abstractions;
-using FastEndpoints;
-using FluentValidation;
-using Reaparr.Application.Contracts;
-using Reaparr.FileSystem.Contracts;
-
 namespace Reaparr.Application;
 
 public class GetFolderPathDirectoryRequest

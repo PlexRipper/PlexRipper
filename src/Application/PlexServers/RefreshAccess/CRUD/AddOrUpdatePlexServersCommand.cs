@@ -1,8 +1,3 @@
-using FastEndpoints;
-using FluentValidation;
-using Microsoft.EntityFrameworkCore;
-using Reaparr.Data.Contracts;
-
 namespace Reaparr.Application;
 
 public record AddOrUpdatePlexServersCommand(List<PlexServer> PlexServers) : ICommand<Result<PlexServerRapport>>;

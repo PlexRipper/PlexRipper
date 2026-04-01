@@ -1,10 +1,5 @@
-using FastEndpoints;
-using FluentValidation;
 using Flurl;
 using LukeHagar.PlexAPI.SDK.Models.Components;
-using LukeHagar.PlexAPI.SDK.Models.Requests;
-using Reaparr.Data.Contracts;
-using Reaparr.PlexApi.Contracts;
 
 namespace Reaparr.PlexApi;
 
@@ -116,7 +111,7 @@ public class GetDashTranscodeDecisionCommandHandler
 
                 foreach (var part in media.Part ?? [])
                 {
-                    partDecisions.Add(part.Decision?.ToString()?.ToLowerInvariant() ?? "unknown");
+                    partDecisions.Add(part.Decision?.ToString().ToLowerInvariant() ?? "unknown");
 
                     foreach (var stream in part.Stream ?? [])
                     {

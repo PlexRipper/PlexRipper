@@ -1,8 +1,3 @@
-using System.Net;
-using FastEndpoints;
-using Reaparr.Application;
-using Reaparr.Application.Contracts;
-
 namespace Reaparr.IntegrationTests;
 
 public class RefreshPlexAccountAccessEndpointIntegrationTestsIntegrationTests : BaseIntegrationTests

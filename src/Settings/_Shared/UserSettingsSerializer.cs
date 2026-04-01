@@ -1,5 +1,4 @@
 using System.Text.Json;
-using Reaparr.Settings.Contracts;
 
 namespace Reaparr.Settings;
 

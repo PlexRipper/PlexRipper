@@ -1,13 +1,8 @@
-using System.ComponentModel;
-using System.Diagnostics;
 using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using Downloader;
-using Reaparr.Application.Contracts;
-using Reaparr.Data.Contracts;
-using Reaparr.Settings.Contracts;
 
 namespace Reaparr.Application;
 
@@ -92,8 +87,9 @@ public class DirectPlexDownloadClient : IPlexDownloadClient
         if (downloadUrlResult.IsFailed)
         {
             var failedResult = downloadUrlResult.ToResult();
-            var failureStatus = failedResult.IsServerUnreachable()
-                ? Domain.DownloadStatus.ServerUnreachable
+            var failureStatus =
+                failedResult.Has404NotFoundError() ? Domain.DownloadStatus.SourceUnavailable
+                : failedResult.IsServerUnreachable() ? Domain.DownloadStatus.ServerUnreachable
                 : Domain.DownloadStatus.Error;
 
             await SendDownloadClientLog(NotificationLevel.Error, failureStatus, failedResult.ToString());
@@ -253,8 +249,9 @@ public class DirectPlexDownloadClient : IPlexDownloadClient
                         if (args.Error != null)
                         {
                             var downloadErrorResult = Result.Fail(new ExceptionalError(args.Error)).LogError();
-                            var failedStatus = downloadErrorResult.IsServerUnreachable()
-                                ? Domain.DownloadStatus.ServerUnreachable
+                            var failedStatus =
+                                downloadErrorResult.Has404NotFoundError() ? Domain.DownloadStatus.SourceUnavailable
+                                : downloadErrorResult.IsServerUnreachable() ? Domain.DownloadStatus.ServerUnreachable
                                 : Domain.DownloadStatus.Error;
 
                             var statusResult = await SetDownloadStatusAsync(failedStatus, downloadErrorResult);

@@ -1,17 +1,10 @@
 using System.Net;
-using System.Net.Http;
-using Autofac;
-using Microsoft.EntityFrameworkCore;
 using Reaparr.Identity.Contracts;
-using Reaparr.Settings.Contracts;
 
 namespace Reaparr.Application.UnitTests;
 
 public class NotifyArrAppsOnStartupCommandHandlerUnitTests : BaseUnitTest<NotifyArrAppsOnStartupCommandHandler>
 {
-    public NotifyArrAppsOnStartupCommandHandlerUnitTests()
-        : base() { }
-
     // IRadarrSettings and ISonarrSettings inherit IBaseSettingsModule<T> which has a static abstract
     // member, making them incompatible with Moq. Inject concrete instances via TypedParameter instead.
 

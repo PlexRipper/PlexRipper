@@ -1,6 +1,8 @@
 using System.Reflection;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
+using JsonProperty = Newtonsoft.Json.Serialization.JsonProperty;
+using JsonSerializer = Newtonsoft.Json.JsonSerializer;
 
 namespace Reaparr.BaseTests;
 

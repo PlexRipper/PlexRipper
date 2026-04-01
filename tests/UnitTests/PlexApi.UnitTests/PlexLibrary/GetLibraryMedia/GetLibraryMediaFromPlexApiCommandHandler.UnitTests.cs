@@ -1,4 +1,3 @@
-using Microsoft.EntityFrameworkCore;
 using Reaparr.BackgroundJobs.Contracts;
 using Reaparr.PlexApi.Contracts;
 
@@ -6,9 +5,6 @@ namespace Reaparr.PlexApi.UnitTests;
 
 public class GetLibraryMediaFromPlexApiCommandHandlerUnitTests : BaseUnitTest<GetLibraryMediaFromPlexApiCommandHandler>
 {
-    public GetLibraryMediaFromPlexApiCommandHandlerUnitTests()
-        : base() { }
-
     private void SetupProgressStoreMocks()
     {
         Mock.Mock<ILibrarySyncProgressStore>()

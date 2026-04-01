@@ -1,9 +1,3 @@
-using FastEndpoints;
-using FluentValidation;
-using Reaparr.Application.Contracts;
-using Reaparr.BackgroundJobs.Contracts;
-using Reaparr.Data.Contracts;
-
 namespace Reaparr.Application;
 
 public record RefreshLibraryMediaEndpointRequest(int PlexLibraryId);

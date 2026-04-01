@@ -1,6 +1,3 @@
-using FluentResults;
-using Reaparr.Domain;
-
 namespace Reaparr.BackgroundJobs.Contracts;
 
 public interface ILibrarySyncProgressStore

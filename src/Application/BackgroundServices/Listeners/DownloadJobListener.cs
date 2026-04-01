@@ -1,7 +1,3 @@
-using Quartz;
-using Reaparr.Application.Contracts;
-using Reaparr.Data.Contracts;
-
 namespace Reaparr.Application;
 
 public class DownloadJobListener : IDownloadJobListener

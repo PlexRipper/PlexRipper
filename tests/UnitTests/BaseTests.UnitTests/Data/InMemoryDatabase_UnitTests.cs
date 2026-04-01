@@ -1,12 +1,7 @@
-using Microsoft.EntityFrameworkCore;
-
 namespace Reaparr.BaseTests.UnitTests.Data;
 
 public class InMemoryDatabaseUnitTests : BaseUnitTest
 {
-    public InMemoryDatabaseUnitTests()
-        : base() { }
-
     [Test]
     public async Task ShouldAddNotificationToInMemoryDatabase_WhenNotificationIsAdded()
     {

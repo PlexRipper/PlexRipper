@@ -1,15 +1,9 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Reaparr.Application.Contracts;
-using Reaparr.FluentResultExtensions;
-using Reaparr.PlexApi.Contracts;
+﻿using Reaparr.FluentResultExtensions;
 
 namespace Reaparr.Application.UnitTests;
 
 public class GenerateTokenEndpointUnitTests : BaseUnitTest
 {
-    public GenerateTokenEndpointUnitTests()
-        : base() { }
-
     [Test]
     public async Task ShouldGenerateToken_WhenSignInIsSuccessful()
     {

@@ -2,7 +2,6 @@ using System.Net;
 using System.Text.Json;
 using HttpClientToCurl.Extensions;
 using Reaparr.Application.Contracts;
-using Reaparr.PlexApi.Contracts;
 using Serilog.Events;
 
 namespace Reaparr.PlexApi;
@@ -61,7 +60,7 @@ public class PlexApiClient : IPlexApiClient
 
             if (!ReferenceEquals(replacementContent, originalContent))
             {
-                originalContent?.Dispose();
+                originalContent.Dispose();
                 response.Content = replacementContent;
             }
         }

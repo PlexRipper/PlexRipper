@@ -1,5 +1,3 @@
-using Reaparr.Domain;
-
 namespace Reaparr.FileSystem.Contracts;
 
 public static class FileInfoMappers

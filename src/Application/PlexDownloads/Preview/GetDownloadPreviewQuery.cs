@@ -1,10 +1,4 @@
-﻿using FastEndpoints;
-using FluentValidation;
-using Microsoft.EntityFrameworkCore;
-using Reaparr.Application.Contracts;
-using Reaparr.Data.Contracts;
-
-namespace Reaparr.Application;
+﻿namespace Reaparr.Application;
 
 public record GetDownloadPreviewQuery(List<DownloadMediaDTO> DownloadMedias) : ICommand<Result<List<DownloadPreview>>>;
 

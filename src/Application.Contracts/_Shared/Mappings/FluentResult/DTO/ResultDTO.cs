@@ -1,6 +1,4 @@
-﻿using FluentResults;
-
-namespace Reaparr.Application.Contracts;
+﻿namespace Reaparr.Application.Contracts;
 
 /// <summary>
 /// The <see cref="ResultDTO{T}"/> without the value.

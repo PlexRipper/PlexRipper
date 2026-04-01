@@ -7,9 +7,6 @@ public class ResultExtensionsLoggingTests : BaseUnitTest
 {
     #region Setup/Teardown
 
-    public ResultExtensionsLoggingTests()
-        : base() { }
-
     #endregion
 
     [Test]

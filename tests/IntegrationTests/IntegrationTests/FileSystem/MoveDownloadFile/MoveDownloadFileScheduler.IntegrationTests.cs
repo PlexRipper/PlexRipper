@@ -1,11 +1,7 @@
 using System.IO.Abstractions;
 using Autofac;
-using FastEndpoints;
-using Microsoft.EntityFrameworkCore;
-using Reaparr.Application;
-using Reaparr.Data.Contracts;
 
-namespace Reaparr.IntegrationTests.FileSystem;
+namespace Reaparr.IntegrationTests;
 
 public class MoveDownloadFileSchedulerIntegrationTests : BaseIntegrationTests
 {
@@ -118,8 +114,35 @@ public class MoveDownloadFileSchedulerIntegrationTests : BaseIntegrationTests
 
                 config.OverrideServices = builder =>
                     builder
-                        .RegisterType<FailingDeleteMoveFileWithResumeCommandHandler>()
-                        .As<ICommandHandler<MoveFileWithResumeCommand, Result>>()
+                        .Register(ctx =>
+                        {
+                            var file = ctx.Resolve<IFile>();
+
+                            return new FakeCommandExecutor().Intercept<MoveFileWithResumeCommand, Result>(
+                                async (moveCmd, ct) =>
+                                {
+                                    await using var writeStream = file.Open(
+                                        moveCmd.TargetPath,
+                                        FileMode.OpenOrCreate,
+                                        FileAccess.Write,
+                                        FileShare.ReadWrite
+                                    );
+                                    await using var readStream = file.Open(
+                                        moveCmd.SourcePath,
+                                        FileMode.Open,
+                                        FileAccess.Read,
+                                        FileShare.ReadWrite
+                                    );
+
+                                    await readStream.CopyToAsync(writeStream, ct);
+
+                                    return Result.Fail(
+                                        $"Failed to delete source file after move: {moveCmd.SourcePath}"
+                                    );
+                                }
+                            );
+                        })
+                        .As<ICommandExecutor>()
                         .InstancePerDependency();
             }
         );
@@ -148,29 +171,5 @@ public class MoveDownloadFileSchedulerIntegrationTests : BaseIntegrationTests
         var fileSystem = container.Resolve<IFileSystem>();
         fileSystem.File.Exists(sourcePath).ShouldBeTrue("Source file should remain when delete step fails");
         fileSystem.File.Exists(destinationPath).ShouldBeTrue("Destination file should still be present after copy");
-    }
-
-    private sealed class FailingDeleteMoveFileWithResumeCommandHandler(IFile file)
-        : ICommandHandler<MoveFileWithResumeCommand, Result>
-    {
-        public async Task<Result> ExecuteAsync(MoveFileWithResumeCommand command, CancellationToken cancellationToken)
-        {
-            await using var writeStream = file.Open(
-                command.TargetPath,
-                FileMode.OpenOrCreate,
-                FileAccess.Write,
-                FileShare.ReadWrite
-            );
-            await using var readStream = file.Open(
-                command.SourcePath,
-                FileMode.Open,
-                FileAccess.Read,
-                FileShare.ReadWrite
-            );
-
-            await readStream.CopyToAsync(writeStream, cancellationToken);
-
-            return Result.Fail($"Failed to delete source file after move: {command.SourcePath}");
-        }
     }
 }

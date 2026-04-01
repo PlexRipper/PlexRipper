@@ -1,7 +1,3 @@
-using System.Text.Json;
-using System.Text.Json.Serialization;
-using FastEndpoints;
-
 namespace Reaparr.Application;
 
 public record SonarrApiGetIndexersCommand : ICommand<Result<List<IndexerResourceDTO>>>;

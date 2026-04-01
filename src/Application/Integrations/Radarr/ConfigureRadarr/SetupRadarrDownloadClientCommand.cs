@@ -1,8 +1,3 @@
-using FastEndpoints;
-using Flurl;
-using Reaparr.PublicAPI.Contracts;
-using Reaparr.Settings.Contracts;
-
 namespace Reaparr.Application;
 
 public record SetupRadarrDownloadClientCommand : ICommand<Result<SetupRadarrDownloadClientCommandResult>>;

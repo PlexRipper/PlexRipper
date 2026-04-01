@@ -1,7 +1,3 @@
-using System.Text.Json;
-using Quartz;
-using Reaparr.Application.Contracts;
-
 namespace Reaparr.Application;
 
 public class DownloadTaskScheduler : IDownloadTaskScheduler

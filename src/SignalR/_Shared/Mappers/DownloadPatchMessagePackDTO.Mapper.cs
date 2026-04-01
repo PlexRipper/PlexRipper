@@ -1,5 +1,3 @@
-using Reaparr.SignalR.Contracts;
-
 namespace Reaparr.SignalR;
 
 public static class DownloadPatchMessagePackMapper

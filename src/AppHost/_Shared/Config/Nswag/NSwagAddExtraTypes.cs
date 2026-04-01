@@ -2,7 +2,6 @@ using NSwag.Generation.Processors;
 using NSwag.Generation.Processors.Contexts;
 using Reaparr.Application.Contracts;
 using Reaparr.BackgroundJobs.Contracts;
-using Reaparr.SignalR;
 using Reaparr.SignalR.Contracts;
 
 namespace Reaparr.AppHost;

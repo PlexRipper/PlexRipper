@@ -5,7 +5,6 @@ using System.Runtime.InteropServices;
 using System.Text.Json;
 using CliWrap;
 using CliWrap.EventStream;
-using Reaparr.External.Contracts;
 
 namespace Reaparr.External;
 

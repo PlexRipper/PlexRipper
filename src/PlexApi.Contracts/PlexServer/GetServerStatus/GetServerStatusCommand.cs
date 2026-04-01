@@ -1,5 +1,3 @@
-using Reaparr.Application.Contracts;
-
 namespace Reaparr.PlexApi.Contracts;
 
 /// <summary>

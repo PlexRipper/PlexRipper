@@ -1,6 +1,5 @@
 using Flurl;
 using Microsoft.EntityFrameworkCore;
-using Reaparr.Settings.Contracts;
 
 // ReSharper disable InconsistentNaming
 

@@ -11,11 +11,7 @@ using Microsoft.Extensions.Http;
 using NSwag;
 using NSwag.Generation.Processors.Security;
 using Reaparr.Application.Contracts;
-using Reaparr.BackgroundJobs;
-using Reaparr.Identity;
 using Reaparr.Identity.Contracts;
-using Reaparr.PlexApi;
-using Reaparr.PublicAPI;
 
 namespace Reaparr.AppHost;
 

@@ -1,5 +1,3 @@
-using Reaparr.Data.Contracts;
-
 namespace Reaparr.Data;
 
 public class ReaparrDbContextFactory : IReaparrDbContextFactory

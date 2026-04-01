@@ -1,5 +1,3 @@
-using Reaparr.BackgroundJobs.Contracts;
-
 namespace Reaparr.PlexApi;
 
 /// <summary>

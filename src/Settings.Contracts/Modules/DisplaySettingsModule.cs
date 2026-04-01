@@ -1,5 +1,3 @@
-using Reaparr.Domain;
-
 namespace Reaparr.Settings.Contracts;
 
 public record DisplaySettingsModule

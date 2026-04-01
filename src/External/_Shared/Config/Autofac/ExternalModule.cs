@@ -1,5 +1,4 @@
 using Autofac;
-using Reaparr.External.Contracts;
 
 namespace Reaparr.External;
 

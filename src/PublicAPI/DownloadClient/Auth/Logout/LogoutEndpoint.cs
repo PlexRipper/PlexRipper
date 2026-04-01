@@ -1,5 +1,4 @@
 using Microsoft.EntityFrameworkCore;
-using Reaparr.Identity.Contracts;
 
 namespace Reaparr.PublicAPI;
 

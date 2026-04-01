@@ -1,5 +1,3 @@
-using Reaparr.PublicAPI.Contracts;
-
 namespace Reaparr.PublicAPI.GetAllCategories;
 
 public class GetAllCategoriesEndpoint : EndpointWithoutRequest<object>

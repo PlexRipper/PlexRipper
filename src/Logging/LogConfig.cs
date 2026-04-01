@@ -1,4 +1,3 @@
-using Reaparr.Environment;
 using Serilog;
 using Serilog.Core;
 using Serilog.Enrichers.Sensitive;

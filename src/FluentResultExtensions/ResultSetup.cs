@@ -1,7 +1,6 @@
 using FluentResults;
 using FluentValidation;
 using Microsoft.Extensions.Logging;
-using Reaparr.Logging;
 
 namespace Reaparr.FluentResultExtensions;
 

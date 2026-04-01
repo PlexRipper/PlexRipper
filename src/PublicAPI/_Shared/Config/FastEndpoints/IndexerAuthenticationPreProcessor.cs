@@ -1,5 +1,3 @@
-using Reaparr.Settings.Contracts;
-
 namespace Reaparr.PublicAPI;
 
 public class IndexerAuthenticationPreProcessor<TRequest> : IPreProcessor<TRequest>

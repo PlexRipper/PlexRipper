@@ -1,6 +1,5 @@
 using LukeHagar.PlexAPI.SDK.Models.Components;
 using LukeHagar.PlexAPI.SDK.Models.Requests;
-using Reaparr.Settings.Contracts;
 
 namespace Reaparr.PlexApi.GetAccessiblePlexServers;
 

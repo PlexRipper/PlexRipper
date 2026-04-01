@@ -1,5 +1,3 @@
-using Reaparr.Settings;
-
 namespace Reaparr.Application;
 
 public class GetUserSettingsEndpoint : BaseEndpointWithoutRequest<SettingsModelDTO>

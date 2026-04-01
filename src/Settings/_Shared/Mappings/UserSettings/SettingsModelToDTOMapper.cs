@@ -1,5 +1,3 @@
-using Reaparr.Settings.Contracts;
-
 namespace Reaparr.Settings;
 
 public static class SettingsModelToDTOMapper

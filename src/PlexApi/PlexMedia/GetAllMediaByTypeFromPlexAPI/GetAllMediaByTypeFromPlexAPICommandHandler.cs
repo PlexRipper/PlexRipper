@@ -1,7 +1,6 @@
 using LukeHagar.PlexAPI.SDK;
 using LukeHagar.PlexAPI.SDK.Models.Components;
 using LukeHagar.PlexAPI.SDK.Models.Requests;
-using Reaparr.BackgroundJobs.Contracts;
 
 namespace Reaparr.PlexApi;
 

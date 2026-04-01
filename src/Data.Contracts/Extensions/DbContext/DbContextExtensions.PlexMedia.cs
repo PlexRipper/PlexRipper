@@ -1,6 +1,5 @@
 using FluentResults;
 using Microsoft.EntityFrameworkCore;
-using Reaparr.Application.Contracts;
 
 namespace Reaparr.Data.Contracts;
 

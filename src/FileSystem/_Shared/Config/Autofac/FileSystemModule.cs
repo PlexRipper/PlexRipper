@@ -3,7 +3,6 @@ using System.Reflection;
 using Autofac;
 using Autofac.Extras.Quartz;
 using Reaparr.Environment;
-using Reaparr.FileSystem.Contracts;
 using Module = Autofac.Module;
 
 namespace Reaparr.FileSystem;

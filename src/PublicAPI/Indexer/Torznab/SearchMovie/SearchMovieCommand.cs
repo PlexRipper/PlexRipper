@@ -1,7 +1,6 @@
 using Flurl;
 using Microsoft.EntityFrameworkCore;
 using Reaparr.Environment;
-using Reaparr.Settings.Contracts;
 
 // ReSharper disable InconsistentNaming
 // ReSharper disable ForeachCanBePartlyConvertedToQueryUsingAnotherGetEnumerator

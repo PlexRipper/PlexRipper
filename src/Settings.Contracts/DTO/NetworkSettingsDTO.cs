@@ -1,6 +1,5 @@
 using System.Text.Json.Serialization;
 using Flurl;
-using Reaparr.Environment;
 
 namespace Reaparr.Settings.Contracts;
 

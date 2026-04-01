@@ -1,6 +1,4 @@
-﻿using Reaparr.FileSystem.Contracts;
-
-namespace Reaparr.FileSystem;
+﻿namespace Reaparr.FileSystem;
 
 public sealed class DiskProvider : IDiskProvider
 {

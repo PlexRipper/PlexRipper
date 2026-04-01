@@ -135,6 +135,18 @@ public class DownloadJob : IJob
             }
             else if (startResult.IsFailed)
             {
+                var failedStatus =
+                    startResult.Has404NotFoundError() ? DownloadStatus.SourceUnavailable
+                    : startResult.IsServerUnreachable() ? DownloadStatus.ServerUnreachable
+                    : DownloadStatus.DownloadClientError;
+
+                await _downloadTaskUpdateDispatcher.OnStatusChangedAsync(
+                    downloadTask.ToKey(),
+                    failedStatus,
+                    startResult,
+                    CancellationToken.None
+                );
+
                 await _eventPublisher.PublishAsync(new SendNotificationResult(startResult), token);
             }
         }

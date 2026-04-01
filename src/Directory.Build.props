@@ -1,5 +1,5 @@
 <Project>
-    <Import Project="../Directory.Build.props" Condition="Exists('../Directory.Build.props')" />
+    <Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)..'))" />
     <ItemGroup Condition="'$(MSBuildProjectName)' == 'AppHost' Or '$(MSBuildProjectName)' == 'Application' Or '$(MSBuildProjectName)' == 'BackgroundJobs' Or '$(MSBuildProjectName)' == 'Data' Or '$(MSBuildProjectName)' == 'Domain' Or '$(MSBuildProjectName)' == 'External' Or '$(MSBuildProjectName)' == 'External.Contracts' Or '$(MSBuildProjectName)' == 'FileSystem' Or '$(MSBuildProjectName)' == 'PlexApi' Or '$(MSBuildProjectName)' == 'PlexApi.Contracts' Or '$(MSBuildProjectName)' == 'PublicAPI' Or '$(MSBuildProjectName)' == 'Settings' Or '$(MSBuildProjectName)' == 'SignalR' Or '$(MSBuildProjectName)' == 'SignalR.Contracts'">
         <Using Include="System.ComponentModel.DataAnnotations" />
         <Using Include="System.ComponentModel.DataAnnotations.Schema" />

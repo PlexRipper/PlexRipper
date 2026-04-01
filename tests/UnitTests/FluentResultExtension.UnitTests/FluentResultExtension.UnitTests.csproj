@@ -1,9 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
-        <IsPackable>false</IsPackable>
         <RootNamespace>Reaparr.FluentResultExtension.UnitTests</RootNamespace>
         <AssemblyName>Reaparr.FluentResultExtension.UnitTests</AssemblyName>
-        <OutputType>Exe</OutputType>
     </PropertyGroup>
     <ItemGroup>
         <PackageReference Include="CSharpier.MsBuild" Version="1.2.6">

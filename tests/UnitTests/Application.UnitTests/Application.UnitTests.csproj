@@ -1,9 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
-        <IsPackable>false</IsPackable>
         <RootNamespace>Reaparr.Application.UnitTests</RootNamespace>
         <AssemblyName>Reaparr.Application.UnitTests</AssemblyName>
-        <OutputType>Exe</OutputType>
     </PropertyGroup>
     <ItemGroup>
         <PackageReference Include="coverlet.collector" Version="8.0.1">

@@ -1,5 +1,9 @@
 <Project>
-    <Import Project="../Directory.Build.props" Condition="Exists('../Directory.Build.props')" />
+    <Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)..'))" />
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <IsPackable>false</IsPackable>
+    </PropertyGroup>
     <ItemGroup>
         <Using Include="TUnit.Assertions" />
         <Using Include="TUnit.Assertions.Extensions" />
@@ -11,17 +15,5 @@
         <Using Include="Moq" />
         <Using Include="Reaparr.BaseTests" />
         <Using Include="Shouldly" />
-    </ItemGroup>
-    <ItemGroup Condition="'$(MSBuildProjectName)' != 'AppHost.UnitTests'">
-        <Using Include="System.ComponentModel.DataAnnotations" />
-        <Using Include="System.ComponentModel.DataAnnotations.Schema" />
-        <Using Include="FastEndpoints" />
-        <Using Include="FluentResults" />
-        <Using Include="FluentValidation" />
-        <Using Include="Microsoft.AspNetCore.Http" />
-        <Using Include="Reaparr.Domain" />
-        <Using Include="Reaparr.Logging" />
-        <Using Include="Serilog" />
-        <Using Include="Xunit" />
     </ItemGroup>
 </Project>

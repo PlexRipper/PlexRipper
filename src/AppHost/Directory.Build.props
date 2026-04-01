@@ -1,9 +1,8 @@
 <Project>
-    <Import Project="../Directory.Build.props" Condition="Exists('../Directory.Build.props')" />
+    <Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)..'))" />
     <ItemGroup>
         <Using Include="Microsoft.AspNetCore.Builder" />
         <Using Include="Microsoft.AspNetCore.Hosting" />
-        <Using Include="Microsoft.AspNetCore.Http" />
         <Using Include="Microsoft.AspNetCore.Routing" />
         <Using Include="Microsoft.Extensions.Configuration" />
         <Using Include="Microsoft.Extensions.DependencyInjection" />

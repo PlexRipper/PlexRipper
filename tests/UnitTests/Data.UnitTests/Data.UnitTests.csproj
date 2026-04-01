@@ -1,9 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
-        <IsPackable>false</IsPackable>
         <RootNamespace>Reaparr.Data.UnitTests</RootNamespace>
         <AssemblyName>Reaparr.Data.UnitTests</AssemblyName>
-        <OutputType>Exe</OutputType>
     </PropertyGroup>
     <ItemGroup>
         <PackageReference Include="CSharpier.MsBuild" Version="1.2.6">

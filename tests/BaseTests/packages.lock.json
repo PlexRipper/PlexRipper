@@ -1153,6 +1153,19 @@
         "resolved": "2.1.0",
         "contentHash": "G70cCeAOYCk/uTuFw5PBGpYY9kmBZyzld7tphachvyU514PowMRDYyKwTefxIHNGWrhXY2d1DV5B1tDEnTtY3A=="
       },
+      "Photino.Native": {
+        "type": "Transitive",
+        "resolved": "4.0.22",
+        "contentHash": "VIHipEOe4CZ7HElZE8zTwcvANOsCZ2yak/4nQ4LXzjdlwIjdbY8htmHfNR6rRPgWlCfTfT349GCa6V6Id2/Xyg=="
+      },
+      "Photino.NET": {
+        "type": "Transitive",
+        "resolved": "4.0.16",
+        "contentHash": "2oTFsxt8XpLlVvtChlBD8HzLw6MgfHF+DQ4aLEDfgc4GbYjumEywB1JMfWDChm2Whfkr4ZF7DV2deRrpitiBcw==",
+        "dependencies": {
+          "Photino.Native": "4.0.22"
+        }
+      },
       "Polly": {
         "type": "Transitive",
         "resolved": "8.6.6",
@@ -1489,6 +1502,7 @@
           "Microsoft.AspNetCore.SignalR.Protocols.MessagePack": "[10.0.5, )",
           "Microsoft.AspNetCore.SpaServices.Extensions": "[10.0.5, )",
           "Microsoft.Extensions.Http.Polly": "[10.0.5, )",
+          "Photino.NET": "[4.0.16, )",
           "Quartz.Extensions.Hosting": "[3.17.0, )",
           "Reaparr.Application": "[1.0.0, )",
           "Reaparr.BackgroundJobs": "[1.0.0, )",

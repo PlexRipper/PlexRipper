@@ -24,4 +24,24 @@
     <ItemGroup>
         <ProjectReference Include="..\..\src\AppHost\AppHost.csproj" />
     </ItemGroup>
+    <ItemGroup>
+        <Using Include="Autofac" />
+        <Using Include="Bogus.Premium" />
+        <Using Include="ByteSizeLib" />
+        <Using Include="LukeHagar.PlexAPI.SDK.Models.Components" />
+        <Using Include="LukeHagar.PlexAPI.SDK.Models.Requests" />
+        <Using Include="Microsoft.EntityFrameworkCore" />
+        <Using Include="Reaparr.Application.Contracts" />
+        <Using Include="Reaparr.Data" />
+        <Using Include="Reaparr.Data.Contracts" />
+        <Using Include="Reaparr.Environment" />
+        <Using Include="Reaparr.Identity" />
+        <Using Include="Reaparr.Identity.Contracts" />
+        <Using Include="Reaparr.PlexApi" />
+        <Using Include="Reaparr.SignalR.Contracts" />
+        <Using Include="Serilog.Events" />
+        <Using Include="System.IO.Abstractions" />
+        <Using Include="System.Net" />
+        <Using Include="System.Text.Json" />
+    </ItemGroup>
 </Project>

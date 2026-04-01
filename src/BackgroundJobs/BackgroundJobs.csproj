@@ -22,10 +22,13 @@
     <ItemGroup>
         <Using Include="System.ComponentModel.DataAnnotations" />
         <Using Include="System.ComponentModel.DataAnnotations.Schema" />
+        <Using Include="System.Diagnostics" />
         <Using Include="FastEndpoints" />
         <Using Include="FluentResults" />
         <Using Include="FluentValidation" />
         <Using Include="Microsoft.AspNetCore.Http" />
+        <Using Include="Microsoft.EntityFrameworkCore" />
+        <Using Include="Quartz" />
         <Using Include="Reaparr.Application.Contracts" />
         <Using Include="Reaparr.BackgroundJobs.Contracts" />
         <Using Include="Reaparr.Data.Contracts" />

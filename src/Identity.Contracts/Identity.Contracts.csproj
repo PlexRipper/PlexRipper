@@ -15,6 +15,8 @@
         <ProjectReference Include="..\Data.Contracts\Data.Contracts.csproj" />
     </ItemGroup>
     <ItemGroup>
+        <Using Include="Microsoft.AspNetCore.Identity" />
+        <Using Include="Microsoft.EntityFrameworkCore" />
         <Using Include="Reaparr.Data.Contracts" />
     </ItemGroup>
 </Project>

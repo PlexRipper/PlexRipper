@@ -42,6 +42,7 @@
         <ProjectReference Include="..\SignalR\SignalR.csproj" />
     </ItemGroup>
     <ItemGroup>
+        <Using Include="Autofac" />
         <Using Include="System.ComponentModel.DataAnnotations" />
         <Using Include="System.ComponentModel.DataAnnotations.Schema" />
         <Using Include="FastEndpoints" />
@@ -55,6 +56,7 @@
         <Using Include="Microsoft.Extensions.DependencyInjection" />
         <Using Include="Microsoft.Extensions.Hosting" />
         <Using Include="Microsoft.Extensions.Logging" />
+        <Using Include="Microsoft.EntityFrameworkCore" />
         <Using Include="Reaparr.Application" />
         <Using Include="Reaparr.BackgroundJobs" />
         <Using Include="Reaparr.Data" />

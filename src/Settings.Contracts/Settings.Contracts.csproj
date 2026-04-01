@@ -16,5 +16,6 @@
     <ItemGroup>
         <Using Include="Reaparr.Domain" />
         <Using Include="Reaparr.Environment" />
+        <Using Include="System.Text.Json.Serialization" />
     </ItemGroup>
 </Project>

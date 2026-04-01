@@ -19,4 +19,19 @@
         <ProjectReference Include="..\..\..\src\FileSystem.Contracts\FileSystem.Contracts.csproj" />
         <ProjectReference Include="..\..\BaseTests\BaseTests.csproj" />
     </ItemGroup>
+    <ItemGroup>
+        <Using Include="Autofac" />
+        <Using Include="Microsoft.EntityFrameworkCore" />
+        <Using Include="Quartz" />
+        <Using Include="Reaparr.Application.Contracts" />
+        <Using Include="Reaparr.Data.Contracts" />
+        <Using Include="Reaparr.FileSystem.Contracts" />
+        <Using Include="Reaparr.PlexApi.Contracts" />
+        <Using Include="Reaparr.Settings.Contracts" />
+        <Using Include="Reaparr.SignalR.Contracts" />
+        <Using Include="System.IO.Abstractions" />
+        <Using Include="System.IO.Abstractions.TestingHelpers" />
+        <Using Include="System.Reactive.Linq" />
+        <Using Include="System.Text.Json" />
+    </ItemGroup>
 </Project>

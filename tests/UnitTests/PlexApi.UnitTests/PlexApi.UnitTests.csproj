@@ -17,4 +17,7 @@
     <ItemGroup>
         <ProjectReference Include="..\..\BaseTests\BaseTests.csproj" />
     </ItemGroup>
+    <ItemGroup>
+        <Using Include="Microsoft.EntityFrameworkCore" />
+    </ItemGroup>
 </Project>

@@ -17,6 +17,11 @@
         <PackageReference Include="Quartz" Version="3.17.0" />
     </ItemGroup>
     <ItemGroup>
+        <Using Include="FastEndpoints" />
+        <Using Include="FluentResults" />
+        <Using Include="FluentValidation" />
+        <Using Include="Quartz" />
         <Using Include="Reaparr.Domain" />
+        <Using Include="System.Text.Json.Serialization" />
     </ItemGroup>
 </Project>

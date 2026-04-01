@@ -24,4 +24,11 @@
         <Folder Include="Application\PlexAccounts\Create\" />
         <Folder Include="FileSystem" />
     </ItemGroup>
+    <ItemGroup>
+        <Using Include="Microsoft.EntityFrameworkCore" />
+        <Using Include="Reaparr.Application" />
+        <Using Include="Reaparr.Application.Contracts" />
+        <Using Include="Reaparr.Data.Contracts" />
+        <Using Include="System.Net" />
+    </ItemGroup>
 </Project>

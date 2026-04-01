@@ -18,4 +18,8 @@
         <ProjectReference Include="..\..\..\src\BackgroundJobs\BackgroundJobs.csproj" />
         <ProjectReference Include="..\..\BaseTests\BaseTests.csproj" />
     </ItemGroup>
+    <ItemGroup>
+        <Using Include="Microsoft.EntityFrameworkCore" />
+        <Using Include="Reaparr.BackgroundJobs.Contracts" />
+    </ItemGroup>
 </Project>

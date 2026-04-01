@@ -35,13 +35,24 @@
         <FrameworkReference Include="Microsoft.AspNetCore.App" />
     </ItemGroup>
     <ItemGroup>
+        <Using Include="Autofac" />
         <Using Include="System.ComponentModel.DataAnnotations" />
         <Using Include="System.ComponentModel.DataAnnotations.Schema" />
+        <Using Include="System.ComponentModel" />
+        <Using Include="System.Diagnostics" />
+        <Using Include="System.Diagnostics.CodeAnalysis" />
+        <Using Include="System.IO.Abstractions" />
+        <Using Include="System.Text.Json" />
+        <Using Include="System.Text.Json.Serialization" />
         <Using Include="FastEndpoints" />
         <Using Include="FluentResults" />
         <Using Include="FluentValidation" />
+        <Using Include="Flurl" />
         <Using Include="Microsoft.AspNetCore.Http" />
+        <Using Include="Microsoft.EntityFrameworkCore" />
+        <Using Include="Quartz" />
         <Using Include="Reaparr.Application.Contracts" />
+        <Using Include="Reaparr.Application.Contracts.Validators" />
         <Using Include="Reaparr.BackgroundJobs.Contracts" />
         <Using Include="Reaparr.Data.Contracts" />
         <Using Include="Reaparr.Domain" />

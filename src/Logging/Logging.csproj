@@ -26,5 +26,8 @@
     </ItemGroup>
     <ItemGroup>
         <Using Include="Reaparr.Environment" />
+        <Using Include="Serilog" />
+        <Using Include="Serilog.Core" />
+        <Using Include="Serilog.Events" />
     </ItemGroup>
 </Project>

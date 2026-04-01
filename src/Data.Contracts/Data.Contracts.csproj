@@ -16,7 +16,10 @@
         <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.5" />
     </ItemGroup>
     <ItemGroup>
+        <Using Include="FluentResults" />
+        <Using Include="Microsoft.EntityFrameworkCore" />
         <Using Include="Reaparr.Application.Contracts" />
         <Using Include="Reaparr.Domain" />
+        <Using Include="Reaparr.Logging" />
     </ItemGroup>
 </Project>

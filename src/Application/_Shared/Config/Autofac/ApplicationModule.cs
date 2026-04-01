@@ -1,4 +1,3 @@
-using Autofac;
 using Downloader;
 using Microsoft.Extensions.Hosting;
 using Module = Autofac.Module;

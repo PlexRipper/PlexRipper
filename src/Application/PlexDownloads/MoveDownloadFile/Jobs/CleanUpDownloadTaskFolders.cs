@@ -1,6 +1,3 @@
-using System.IO.Abstractions;
-using Microsoft.EntityFrameworkCore;
-
 namespace Reaparr.Application;
 
 public record CleanUpDownloadTaskFoldersCommand(DownloadTaskKey DownloadTaskKey) : ICommand<Result>;

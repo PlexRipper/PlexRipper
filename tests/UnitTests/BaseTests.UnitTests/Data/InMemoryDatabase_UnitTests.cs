@@ -1,5 +1,3 @@
-using Microsoft.EntityFrameworkCore;
-
 namespace Reaparr.BaseTests.UnitTests.Data;
 
 public class InMemoryDatabaseUnitTests : BaseUnitTest

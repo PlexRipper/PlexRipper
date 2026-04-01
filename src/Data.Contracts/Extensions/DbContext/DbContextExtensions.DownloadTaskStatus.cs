@@ -1,6 +1,3 @@
-using Microsoft.EntityFrameworkCore;
-using Reaparr.Logging;
-
 namespace Reaparr.Data.Contracts;
 
 public static partial class DbContextExtensions

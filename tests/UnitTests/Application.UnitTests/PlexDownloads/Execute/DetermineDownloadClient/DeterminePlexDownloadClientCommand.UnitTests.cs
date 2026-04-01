@@ -1,6 +1,3 @@
-using Reaparr.PlexApi.Contracts;
-using Reaparr.Settings.Contracts;
-
 namespace Reaparr.Application.UnitTests;
 
 public class DeterminePlexDownloadClientCommandUnitTests : BaseUnitTest<DeterminePlexDownloadClientCommandHandler>

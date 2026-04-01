@@ -1,7 +1,4 @@
 using System.Runtime.CompilerServices;
-using Serilog;
-using Serilog.Core;
-using Serilog.Events;
 
 namespace Reaparr.Logging;
 

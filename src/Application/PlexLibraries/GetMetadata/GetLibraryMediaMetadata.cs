@@ -1,6 +1,3 @@
-using System.ComponentModel;
-using Microsoft.EntityFrameworkCore;
-
 namespace Reaparr.Application;
 
 public record GetLibraryMediaMetadataRequest

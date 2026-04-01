@@ -1,5 +1,4 @@
 using Microsoft.Data.Sqlite;
-using Microsoft.EntityFrameworkCore;
 using Reaparr.Environment;
 
 namespace Reaparr.Data.Contracts;

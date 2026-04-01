@@ -1,6 +1,3 @@
-using System.Text.Json;
-using Flurl;
-
 namespace Reaparr.Application;
 
 public record RadarrApiUpdateDownloadClientCommand : ICommand<Result<RadarrDownloadClientResourceDTO>>

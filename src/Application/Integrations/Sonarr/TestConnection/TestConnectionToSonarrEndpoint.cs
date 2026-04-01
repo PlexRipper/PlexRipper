@@ -1,6 +1,4 @@
-using System.Diagnostics.CodeAnalysis;
 using System.Net.Http.Headers;
-using Flurl;
 
 namespace Reaparr.Application;
 

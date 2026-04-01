@@ -1,5 +1,4 @@
 using Flurl;
-using Microsoft.EntityFrameworkCore;
 
 // ReSharper disable InconsistentNaming
 

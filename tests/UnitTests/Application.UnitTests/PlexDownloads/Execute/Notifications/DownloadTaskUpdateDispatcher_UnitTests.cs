@@ -1,7 +1,4 @@
 using System.Collections.Concurrent;
-using Microsoft.EntityFrameworkCore;
-using Reaparr.Data.Contracts;
-using Reaparr.SignalR.Contracts;
 
 namespace Reaparr.Application.UnitTests;
 

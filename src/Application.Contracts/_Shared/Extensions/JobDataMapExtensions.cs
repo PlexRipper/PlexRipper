@@ -1,5 +1,4 @@
 using System.Text.Json;
-using Quartz;
 using Reaparr.Logging;
 using Serilog;
 

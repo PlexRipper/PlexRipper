@@ -1,5 +1,3 @@
-using Microsoft.EntityFrameworkCore;
-
 namespace Reaparr.PublicAPI;
 
 public class DownloadClientAuthenticationPreProcessor<TRequest> : IPreProcessor<TRequest>

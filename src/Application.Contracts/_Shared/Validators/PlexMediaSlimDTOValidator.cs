@@ -1,5 +1,3 @@
-using FluentValidation;
-
 namespace Reaparr.Application.Contracts.Validators;
 
 public class PlexMediaSlimDTOValidator : AbstractValidator<PlexMediaSlimDTO>

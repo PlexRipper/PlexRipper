@@ -1,5 +1,3 @@
-using Microsoft.EntityFrameworkCore;
-
 namespace Reaparr.BackgroundJobs;
 
 public class CleanupLibrarySyncJobQueueCommandValidator : AbstractValidator<CleanupLibrarySyncJobQueueCommand>

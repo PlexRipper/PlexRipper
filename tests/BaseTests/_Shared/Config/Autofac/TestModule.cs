@@ -1,12 +1,6 @@
-﻿using Autofac;
-using Autofac.Extras.Quartz;
+﻿using Autofac.Extras.Quartz;
 using Reaparr.Application;
-using Reaparr.Data;
-using Reaparr.Data.Contracts;
-using Reaparr.Identity;
-using Reaparr.Identity.Contracts;
 using Reaparr.Settings.Contracts;
-using Reaparr.SignalR.Contracts;
 
 namespace Reaparr.BaseTests;
 

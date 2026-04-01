@@ -1,5 +1,4 @@
 ﻿using LukeHagar.PlexAPI.SDK.Models.Components;
-using Reaparr.PlexApi;
 
 namespace Reaparr.BaseTests;
 

@@ -1,5 +1,3 @@
-using Microsoft.EntityFrameworkCore;
-
 namespace Reaparr.Application;
 
 public record PausePlexServerDownloadsCommand(int PlexServerId) : ICommand<Result>;

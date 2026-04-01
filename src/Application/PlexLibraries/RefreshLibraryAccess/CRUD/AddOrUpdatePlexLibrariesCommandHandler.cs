@@ -1,6 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
-
-namespace Reaparr.Application;
+﻿namespace Reaparr.Application;
 
 public record AddOrUpdatePlexLibrariesCommand : ICommand<Result<List<PlexLibraryAccessRapport>>>
 {

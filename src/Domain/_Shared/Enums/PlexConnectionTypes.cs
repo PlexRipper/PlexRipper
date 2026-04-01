@@ -1,7 +1,4 @@
-﻿using System.Runtime.Serialization;
-using System.Text.Json.Serialization;
-
-namespace Reaparr.Domain;
+﻿namespace Reaparr.Domain;
 
 /// <summary>
 /// The type of <see cref="PlexServerConnection"/>.

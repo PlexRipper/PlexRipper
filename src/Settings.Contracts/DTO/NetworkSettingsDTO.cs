@@ -1,4 +1,3 @@
-using System.Text.Json.Serialization;
 using Flurl;
 
 namespace Reaparr.Settings.Contracts;

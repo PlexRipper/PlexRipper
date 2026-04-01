@@ -1,5 +1,3 @@
-using FluentResults;
-
 namespace Reaparr.BackgroundJobs.Contracts;
 
 public record LibraryProgress

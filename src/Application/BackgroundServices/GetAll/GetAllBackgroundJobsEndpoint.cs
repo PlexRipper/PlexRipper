@@ -1,5 +1,3 @@
-using System.Diagnostics.CodeAnalysis;
-
 namespace Reaparr.Application;
 
 public record GetAllBackgroundJobsEndpointRequest

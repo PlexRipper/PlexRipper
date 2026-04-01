@@ -1,6 +1,4 @@
-﻿using Reaparr.Data.Contracts;
-
-namespace Reaparr.Data.UnitTests;
+﻿namespace Reaparr.Data.UnitTests;
 
 public class ReaparrDbContextExtensionsIncludeDownloadTasksUnitTests : BaseUnitTest
 {

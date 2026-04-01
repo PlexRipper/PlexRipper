@@ -1,5 +1,3 @@
-using System.Text.Json;
-
 namespace Reaparr.Application;
 
 public record RadarrApiUpdateIndexerCommand : ICommand<Result<RadarrIndexerResourceDTO>>

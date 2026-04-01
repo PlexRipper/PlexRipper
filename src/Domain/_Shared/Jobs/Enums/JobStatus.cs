@@ -1,6 +1,3 @@
-using System.Runtime.Serialization;
-using System.Text.Json.Serialization;
-
 namespace Reaparr.Domain;
 
 [JsonConverter(typeof(JsonStringEnumConverter))]

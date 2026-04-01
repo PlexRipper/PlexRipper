@@ -1,11 +1,4 @@
-using System.Text.Json;
-using Autofac;
 using Autofac.Features.Indexed;
-using Microsoft.EntityFrameworkCore;
-using Quartz;
-using Reaparr.Application.Contracts;
-using Reaparr.Data.Contracts;
-using Reaparr.Settings.Contracts;
 
 namespace Reaparr.Application.UnitTests;
 

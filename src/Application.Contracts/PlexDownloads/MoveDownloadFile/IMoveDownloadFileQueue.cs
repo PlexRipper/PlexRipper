@@ -1,5 +1,3 @@
-using FluentResults;
-
 namespace Reaparr.Application.Contracts;
 
 public interface IMoveDownloadFileQueue

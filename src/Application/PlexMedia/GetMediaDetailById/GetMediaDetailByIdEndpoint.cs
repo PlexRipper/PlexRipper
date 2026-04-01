@@ -1,6 +1,3 @@
-using System.Diagnostics.CodeAnalysis;
-using Microsoft.EntityFrameworkCore;
-
 namespace Reaparr.Application;
 
 /// <summary>

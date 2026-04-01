@@ -1,4 +1,3 @@
-using Microsoft.EntityFrameworkCore;
 using Serilog;
 
 namespace Reaparr.Data.Contracts;

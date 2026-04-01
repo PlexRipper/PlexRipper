@@ -1,6 +1,3 @@
-using FastEndpoints;
-using FluentResults;
-
 namespace Reaparr.Application.Contracts;
 
 /// <summary>

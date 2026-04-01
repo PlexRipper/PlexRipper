@@ -1,10 +1,4 @@
 using Microsoft.Extensions.DependencyInjection;
-using Reaparr.Application.Contracts;
-using Reaparr.Data.Contracts;
-using Reaparr.Environment;
-using Reaparr.Identity.Contracts;
-using Reaparr.SignalR.Contracts;
-using Serilog.Events;
 
 namespace Reaparr.BaseTests;
 

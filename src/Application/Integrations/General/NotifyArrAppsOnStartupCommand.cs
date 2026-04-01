@@ -1,4 +1,3 @@
-using Microsoft.EntityFrameworkCore;
 using Reaparr.FluentResultExtensions;
 
 namespace Reaparr.Application;

@@ -1,5 +1,3 @@
-using Bogus.Premium;
-
 namespace Reaparr.BaseTests;
 
 public static class PlexApiFaker

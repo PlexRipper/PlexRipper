@@ -1,6 +1,4 @@
-﻿using Autofac;
-
-namespace Reaparr.AppHost;
+﻿namespace Reaparr.AppHost;
 
 /// <summary>
 ///  Autofac module for the AppHost project.

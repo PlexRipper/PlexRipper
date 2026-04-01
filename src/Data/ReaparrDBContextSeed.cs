@@ -1,6 +1,3 @@
-using Microsoft.EntityFrameworkCore;
-using Reaparr.Environment;
-
 namespace Reaparr.Data;
 
 // ReSharper disable once InconsistentNaming

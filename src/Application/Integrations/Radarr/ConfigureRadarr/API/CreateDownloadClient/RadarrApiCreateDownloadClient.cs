@@ -1,5 +1,3 @@
-using System.Text.Json;
-
 namespace Reaparr.Application;
 
 public record RadarrApiCreateDownloadClientCommand : ICommand<Result<RadarrDownloadClientResourceDTO>>

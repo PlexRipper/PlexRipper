@@ -1,6 +1,3 @@
-using Microsoft.EntityFrameworkCore;
-using Reaparr.BackgroundJobs.Contracts;
-
 namespace Reaparr.BackgroundJobs.UnitTests;
 
 public class QueueLibrarySyncJobCommandHandlerUnitTests : BaseUnitTest<QueueLibrarySyncJobCommandHandler>

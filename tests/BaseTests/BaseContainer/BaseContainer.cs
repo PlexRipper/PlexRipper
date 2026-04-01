@@ -1,17 +1,9 @@
-using System.IO.Abstractions;
 using System.Net.Http.Headers;
-using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Mvc.Testing;
-using Microsoft.EntityFrameworkCore;
-using Reaparr.Application.Contracts;
-using Reaparr.Data;
-using Reaparr.Data.Contracts;
-using Reaparr.Environment;
 using Reaparr.FileSystem.Contracts;
 using Reaparr.PublicAPI;
 using Reaparr.Settings.Contracts;
-using Reaparr.SignalR.Contracts;
 
 namespace Reaparr.BaseTests;
 

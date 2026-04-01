@@ -1,8 +1,5 @@
 using System.Net;
-using Autofac;
-using Microsoft.EntityFrameworkCore;
 using Reaparr.Identity.Contracts;
-using Reaparr.Settings.Contracts;
 
 namespace Reaparr.Application.UnitTests;
 

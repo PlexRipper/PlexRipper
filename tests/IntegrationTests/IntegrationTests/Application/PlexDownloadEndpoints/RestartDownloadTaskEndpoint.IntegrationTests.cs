@@ -1,9 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Reaparr.Application;
-using Reaparr.Application.Contracts;
-using Reaparr.Data.Contracts;
-
-namespace Reaparr.IntegrationTests;
+﻿namespace Reaparr.IntegrationTests;
 
 public class RestartDownloadTaskEndpointIntegrationTests : BaseIntegrationTests
 {

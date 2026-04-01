@@ -1,4 +1,3 @@
-using Reaparr.Application.Contracts;
 using Reaparr.Application.Contracts.Validators;
 
 namespace Reaparr.Application.UnitTests;

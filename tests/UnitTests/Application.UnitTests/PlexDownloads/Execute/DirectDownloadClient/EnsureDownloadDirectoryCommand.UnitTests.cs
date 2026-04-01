@@ -1,6 +1,3 @@
-using System.IO.Abstractions;
-using System.IO.Abstractions.TestingHelpers;
-using Autofac;
 using ByteSizeLib;
 
 namespace Reaparr.Application.UnitTests;

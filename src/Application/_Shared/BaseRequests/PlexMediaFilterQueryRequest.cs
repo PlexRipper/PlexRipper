@@ -1,5 +1,3 @@
-using System.ComponentModel;
-
 namespace Reaparr.Application;
 
 public abstract record PlexMediaFilterQueryRequest

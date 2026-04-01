@@ -1,6 +1,3 @@
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Builders;
-
 namespace Reaparr.Data.Configurations;
 
 public class DownloadTaskEpisodeFileConfiguration : IEntityTypeConfiguration<DownloadTaskTvShowEpisodeFile>

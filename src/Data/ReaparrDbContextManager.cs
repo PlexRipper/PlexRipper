@@ -1,6 +1,5 @@
 using System.Globalization;
 using System.IO.Abstractions;
-using Reaparr.Environment;
 
 namespace Reaparr.Data;
 

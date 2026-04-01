@@ -1,6 +1,3 @@
-using Reaparr.Environment;
-using Serilog.Events;
-
 namespace Reaparr.BaseTests;
 
 [NotInParallel("IntegrationTests")]

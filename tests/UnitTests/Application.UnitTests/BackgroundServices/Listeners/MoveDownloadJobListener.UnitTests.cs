@@ -1,6 +1,3 @@
-using Quartz;
-using Reaparr.Application.Contracts;
-
 namespace Reaparr.Application.UnitTests;
 
 public class MoveDownloadJobListenerUnitTests : BaseUnitTest<MoveDownloadJobListener>

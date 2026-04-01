@@ -1,6 +1,3 @@
-using System.Diagnostics;
-using System.IO.Abstractions;
-
 namespace Reaparr.Application;
 
 public record MoveFileWithResumeCommand : ICommand<Result>

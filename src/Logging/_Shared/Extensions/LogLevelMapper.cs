@@ -1,5 +1,4 @@
 using Microsoft.Extensions.Logging;
-using Serilog.Events;
 
 namespace Reaparr.Logging;
 

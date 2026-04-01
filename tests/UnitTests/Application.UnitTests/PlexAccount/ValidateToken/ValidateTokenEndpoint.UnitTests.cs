@@ -1,7 +1,4 @@
-﻿using Reaparr.Application.Contracts;
-using Reaparr.PlexApi.Contracts;
-
-namespace Reaparr.Application.UnitTests;
+﻿namespace Reaparr.Application.UnitTests;
 
 public class ValidatePlexTokenEndpointUnitTests : BaseUnitTest
 {

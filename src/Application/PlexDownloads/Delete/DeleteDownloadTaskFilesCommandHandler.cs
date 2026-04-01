@@ -1,6 +1,3 @@
-using System.IO.Abstractions;
-using Microsoft.EntityFrameworkCore;
-
 namespace Reaparr.Application;
 
 public class DeleteDownloadTaskFilesCommandValidator : AbstractValidator<DeleteDownloadTaskFilesCommand>

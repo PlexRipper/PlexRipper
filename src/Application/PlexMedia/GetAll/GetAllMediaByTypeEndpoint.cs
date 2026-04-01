@@ -1,5 +1,3 @@
-using System.Diagnostics;
-
 namespace Reaparr.Application;
 
 public record GetAllMediaByTypeRequest : PlexMediaFilterQueryRequest

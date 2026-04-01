@@ -1,6 +1,5 @@
 using BencodeNET.Parsing;
 using BencodeNET.Torrents;
-using Microsoft.EntityFrameworkCore;
 
 namespace Reaparr.PublicAPI.UnitTests;
 

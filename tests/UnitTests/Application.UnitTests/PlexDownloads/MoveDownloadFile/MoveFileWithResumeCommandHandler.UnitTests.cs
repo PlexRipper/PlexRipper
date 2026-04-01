@@ -1,6 +1,3 @@
-using System.IO.Abstractions;
-using System.IO.Abstractions.TestingHelpers;
-
 namespace Reaparr.Application.UnitTests;
 
 public class MoveFileWithResumeCommandHandlerUnitTests : BaseUnitTest<MoveFileWithResumeCommandHandler>

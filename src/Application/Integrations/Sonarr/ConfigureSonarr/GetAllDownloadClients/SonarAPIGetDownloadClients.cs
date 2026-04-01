@@ -1,6 +1,3 @@
-using System.Text.Json;
-using System.Text.Json.Serialization;
-
 namespace Reaparr.Application;
 
 public record SonarApiGetDownloadClientsCommand : ICommand<Result<List<DownloadClientResourceDTO>>>;

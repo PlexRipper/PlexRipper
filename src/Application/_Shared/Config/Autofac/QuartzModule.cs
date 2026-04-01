@@ -1,6 +1,5 @@
 ﻿using System.Collections.Specialized;
 using System.Reflection;
-using Autofac;
 using Autofac.Extras.Quartz;
 using Reaparr.Domain.Autofac;
 using Module = Autofac.Module;

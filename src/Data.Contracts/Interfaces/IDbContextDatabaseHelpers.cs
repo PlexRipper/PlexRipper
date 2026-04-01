@@ -1,6 +1,4 @@
 using System.Data.Common;
-using FluentResults;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 
 namespace Reaparr.Data.Contracts;

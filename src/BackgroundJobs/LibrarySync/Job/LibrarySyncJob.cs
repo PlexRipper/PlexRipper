@@ -1,6 +1,3 @@
-using Microsoft.EntityFrameworkCore;
-using Quartz;
-
 namespace Reaparr.BackgroundJobs;
 
 /// <summary>

@@ -1,5 +1,3 @@
-using Microsoft.EntityFrameworkCore;
-
 namespace Reaparr.Application;
 
 public record RefreshPlexAccountAccessEndpointRequest(int PlexAccountId = 0);

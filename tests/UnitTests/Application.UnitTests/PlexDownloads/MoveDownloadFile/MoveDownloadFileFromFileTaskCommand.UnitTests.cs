@@ -1,12 +1,5 @@
-using System.IO.Abstractions;
-using System.IO.Abstractions.TestingHelpers;
-using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using ByteSizeLib;
-using Microsoft.EntityFrameworkCore;
-using Reaparr.Application.Contracts;
-using Reaparr.Data.Contracts;
-using Reaparr.Settings.Contracts;
 
 namespace Reaparr.Application.UnitTests;
 

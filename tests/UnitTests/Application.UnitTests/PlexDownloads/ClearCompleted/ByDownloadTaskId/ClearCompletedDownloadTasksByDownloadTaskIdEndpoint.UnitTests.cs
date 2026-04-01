@@ -1,6 +1,3 @@
-using Microsoft.EntityFrameworkCore;
-using Reaparr.Application.Contracts;
-
 namespace Reaparr.Application.UnitTests;
 
 public class ClearCompletedDownloadTasksByDownloadTaskIdEndpointUnitTests

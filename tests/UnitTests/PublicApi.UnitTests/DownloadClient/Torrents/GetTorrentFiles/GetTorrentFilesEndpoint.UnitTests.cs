@@ -1,5 +1,3 @@
-using Microsoft.EntityFrameworkCore;
-
 namespace Reaparr.PublicAPI.UnitTests;
 
 public class GetTorrentFilesEndpointUnitTests : BaseUnitTest<GetTorrentFilesEndpoint>

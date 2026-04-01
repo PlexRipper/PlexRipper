@@ -1,6 +1,4 @@
-﻿using Reaparr.Data.Contracts;
-
-namespace Reaparr.Application.UnitTests;
+﻿namespace Reaparr.Application.UnitTests;
 
 public class DeletePlexAccountByIdEndpointUnitTests : BaseUnitTest
 {

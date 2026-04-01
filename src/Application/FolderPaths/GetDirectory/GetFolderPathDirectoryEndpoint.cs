@@ -1,5 +1,3 @@
-using System.IO.Abstractions;
-
 namespace Reaparr.Application;
 
 public class GetFolderPathDirectoryRequest

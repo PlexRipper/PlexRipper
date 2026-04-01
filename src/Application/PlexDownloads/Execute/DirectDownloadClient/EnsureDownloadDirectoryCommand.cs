@@ -1,5 +1,3 @@
-using System.IO.Abstractions;
-
 namespace Reaparr.Application;
 
 public record EnsureDownloadDirectoryCommand(string Directory, long FileSize) : ICommand<Result>;

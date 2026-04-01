@@ -1,7 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Reaparr.Application.Contracts;
-using Reaparr.Data.Contracts;
-using Reaparr.Domain.Validators;
+﻿using Reaparr.Domain.Validators;
 
 namespace Reaparr.Application.UnitTests;
 

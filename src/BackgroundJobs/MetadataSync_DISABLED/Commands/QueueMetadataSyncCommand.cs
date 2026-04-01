@@ -1,5 +1,3 @@
-using Quartz;
-
 namespace Reaparr.BackgroundJobs;
 
 /// <summary>

@@ -1,6 +1,3 @@
-using Microsoft.EntityFrameworkCore;
-using Reaparr.Data.Contracts;
-
 namespace Reaparr.Application.UnitTests;
 
 public class ResumePlexServerDownloadsCommandUnitTests : BaseUnitTest<ResumePlexServerDownloadsCommandHandler>

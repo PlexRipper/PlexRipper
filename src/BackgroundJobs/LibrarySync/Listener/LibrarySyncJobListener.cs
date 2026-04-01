@@ -1,5 +1,3 @@
-using Microsoft.EntityFrameworkCore;
-using Quartz;
 using Quartz.Impl.Matchers;
 
 namespace Reaparr.BackgroundJobs;

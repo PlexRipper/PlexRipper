@@ -1,12 +1,4 @@
-using System.IO.Abstractions;
 using System.IO.Abstractions.TestingHelpers;
-using Autofac;
-using ByteSizeLib;
-using Reaparr.Data;
-using Reaparr.Data.Contracts;
-using Reaparr.Environment;
-using Reaparr.Identity;
-using Reaparr.Identity.Contracts;
 using Reaparr.PlexApi.Contracts;
 
 namespace Reaparr.BaseTests;

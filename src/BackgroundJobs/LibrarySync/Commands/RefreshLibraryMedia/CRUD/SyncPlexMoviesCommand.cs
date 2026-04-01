@@ -1,6 +1,4 @@
-using System.Diagnostics;
 using EFCore.BulkExtensions;
-using Microsoft.EntityFrameworkCore;
 
 namespace Reaparr.BackgroundJobs;
 

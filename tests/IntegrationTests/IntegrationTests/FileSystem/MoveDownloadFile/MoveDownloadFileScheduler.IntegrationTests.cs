@@ -1,8 +1,5 @@
 using System.IO.Abstractions;
 using Autofac;
-using Microsoft.EntityFrameworkCore;
-using Reaparr.Application;
-using Reaparr.Data.Contracts;
 
 namespace Reaparr.IntegrationTests;
 

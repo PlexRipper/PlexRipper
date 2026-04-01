@@ -1,6 +1,3 @@
-using Microsoft.EntityFrameworkCore;
-using Reaparr.Application.Contracts.Validators;
-
 namespace Reaparr.Application;
 
 public record GenerateDownloadTaskTvShowSeasonsCommand(CreateDownloadTasksRequest Request) : ICommand<Result>;

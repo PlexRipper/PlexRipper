@@ -1,5 +1,3 @@
-using Flurl;
-
 namespace Reaparr.Application;
 
 public record SetupRadarrIndexerCommand : ICommand<Result<SetupRadarrIndexerCommandResult>>

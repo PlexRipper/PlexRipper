@@ -1,7 +1,4 @@
-﻿using Reaparr.Application.Contracts;
-using Reaparr.SignalR.Contracts;
-
-namespace Reaparr.Application.UnitTests;
+﻿namespace Reaparr.Application.UnitTests;
 
 public class CreateDownloadTasksCommandHandlerUnitTests : BaseUnitTest<CreateDownloadTasksCommandHandler>
 {

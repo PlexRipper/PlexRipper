@@ -1,11 +1,5 @@
 using System.ComponentModel;
-using System.Reactive.Linq;
-using Autofac;
 using Downloader;
-using Microsoft.EntityFrameworkCore;
-using Reaparr.Application.Contracts;
-using Reaparr.Data.Contracts;
-using Reaparr.Settings.Contracts;
 using DomainDownloadStatus = Reaparr.Domain.DownloadStatus;
 
 namespace Reaparr.Application.UnitTests;

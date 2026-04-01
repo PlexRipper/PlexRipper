@@ -1,5 +1,3 @@
-using Serilog.Events;
-
 namespace Reaparr.BaseTests;
 
 public abstract class BaseCommandUnitTest<TCommand> : BaseUnitTest

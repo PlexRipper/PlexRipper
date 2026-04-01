@@ -1,4 +1,3 @@
-using System.Net;
 using System.Text;
 using LukeHagar.PlexAPI.SDK.Models.Components;
 using LukeHagar.PlexAPI.SDK.Models.Requests;

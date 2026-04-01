@@ -1,6 +1,5 @@
 using BencodeNET.Objects;
 using BencodeNET.Torrents;
-using Microsoft.EntityFrameworkCore;
 
 namespace Reaparr.PublicAPI;
 

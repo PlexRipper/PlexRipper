@@ -1,7 +1,5 @@
 // ReSharper disable InconsistentNaming
 
-using System.Diagnostics.CodeAnalysis;
-
 namespace Reaparr.Domain;
 
 public record LibraryMediaItemDTO

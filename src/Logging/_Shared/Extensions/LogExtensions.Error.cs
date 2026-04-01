@@ -1,6 +1,4 @@
 using FluentResults;
-using Serilog;
-using Serilog.Core;
 
 namespace Reaparr.Logging;
 

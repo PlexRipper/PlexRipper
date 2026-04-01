@@ -1,4 +1,3 @@
-using Microsoft.EntityFrameworkCore;
 using Reaparr.BackgroundJobs.Contracts;
 using Reaparr.PlexApi.Contracts;
 

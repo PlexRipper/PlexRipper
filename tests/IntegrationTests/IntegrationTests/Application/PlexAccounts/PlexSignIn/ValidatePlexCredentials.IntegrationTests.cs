@@ -1,7 +1,4 @@
-using System.Net;
 using Moq.Contrib.HttpClient;
-using Reaparr.Application;
-using Reaparr.Application.Contracts;
 
 namespace Reaparr.IntegrationTests;
 

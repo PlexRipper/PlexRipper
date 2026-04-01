@@ -1,6 +1,3 @@
-using System.IO.Abstractions;
-using Microsoft.EntityFrameworkCore;
-
 namespace Reaparr.Application;
 
 public record ValidateFolderPathsCommand(PlexMediaType MediaType = PlexMediaType.None) : ICommand<Result>;

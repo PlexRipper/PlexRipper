@@ -1,6 +1,3 @@
-using System.Text.Json;
-using Quartz;
-
 namespace Reaparr.Application;
 
 public static class JobExecutionContextExtensions

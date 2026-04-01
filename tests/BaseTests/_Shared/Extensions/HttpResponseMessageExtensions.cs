@@ -1,6 +1,4 @@
 ﻿using System.Net.Http.Json;
-using System.Text.Json;
-using Reaparr.Application.Contracts;
 
 namespace Reaparr.BaseTests;
 

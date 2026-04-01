@@ -1,6 +1,3 @@
-using System.IO.Abstractions;
-using Microsoft.EntityFrameworkCore;
-
 namespace Reaparr.Application.UnitTests;
 
 public class CleanUpDownloadTaskFoldersUnitTests : BaseUnitTest<CleanUpDownloadTaskFoldersHandler>

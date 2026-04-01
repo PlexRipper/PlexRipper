@@ -1,8 +1,4 @@
-﻿using System.Text.Json;
-using Microsoft.EntityFrameworkCore;
-using Quartz;
-
-namespace Reaparr.Application;
+﻿namespace Reaparr.Application;
 
 public record QueueInspectPlexServerJobCommand(List<int> PlexServerIds) : ICommand<Result>;
 

@@ -1,6 +1,4 @@
-﻿using Reaparr.Application.Contracts;
-using Reaparr.FluentResultExtensions;
-using Reaparr.PlexApi.Contracts;
+﻿using Reaparr.FluentResultExtensions;
 
 namespace Reaparr.Application.UnitTests;
 

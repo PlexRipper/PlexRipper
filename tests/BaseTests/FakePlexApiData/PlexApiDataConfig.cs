@@ -1,5 +1,3 @@
-using System.Net;
-
 namespace Reaparr.BaseTests;
 
 public class PlexApiDataConfig : BaseConfig<PlexApiDataConfig>

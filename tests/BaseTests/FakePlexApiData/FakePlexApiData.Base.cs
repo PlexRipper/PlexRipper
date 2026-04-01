@@ -1,6 +1,3 @@
-using System.Net;
-using System.Text.Json;
-
 namespace Reaparr.BaseTests;
 
 public static partial class FakePlexApiData

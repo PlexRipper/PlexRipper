@@ -1,6 +1,4 @@
 ﻿using Autofac.Features.Indexed;
-using Microsoft.EntityFrameworkCore;
-using Quartz;
 
 namespace Reaparr.Application;
 

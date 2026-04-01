@@ -1,5 +1,3 @@
-using Reaparr.Environment;
-
 namespace Reaparr.BaseTests;
 
 public static class IntegrationTestFileSystemSandbox

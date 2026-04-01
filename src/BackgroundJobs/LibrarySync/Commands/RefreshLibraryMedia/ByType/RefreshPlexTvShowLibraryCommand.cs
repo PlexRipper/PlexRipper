@@ -1,5 +1,3 @@
-using System.Diagnostics;
-
 namespace Reaparr.BackgroundJobs;
 
 public record RefreshPlexTvShowLibraryCommand(InsertMediaMetaDataCommandResponse LibraryMetadata)

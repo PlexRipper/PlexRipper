@@ -1,6 +1,3 @@
-using Reaparr.Application.Contracts;
-using Reaparr.PlexApi.Contracts;
-
 namespace Reaparr.Application.UnitTests;
 
 public class RefreshLibraryAccessCommandUnitTests : BaseUnitTest<RefreshLibraryAccessHandler>

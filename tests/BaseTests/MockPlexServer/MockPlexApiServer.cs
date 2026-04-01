@@ -1,8 +1,5 @@
-﻿using System.Net;
-using LukeHagar.PlexAPI.SDK.Models.Components;
+﻿using LukeHagar.PlexAPI.SDK.Models.Components;
 using Moq.Contrib.HttpClient;
-using Reaparr.Data.Contracts;
-using Reaparr.PlexApi;
 using Reaparr.PlexApi.Contracts;
 
 namespace Reaparr.BaseTests;

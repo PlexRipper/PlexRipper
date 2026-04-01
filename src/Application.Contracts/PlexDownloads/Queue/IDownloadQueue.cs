@@ -1,6 +1,4 @@
-﻿using FluentResults;
-
-namespace Reaparr.Application.Contracts;
+﻿namespace Reaparr.Application.Contracts;
 
 public interface IDownloadQueue : ISetup, IBusy
 {

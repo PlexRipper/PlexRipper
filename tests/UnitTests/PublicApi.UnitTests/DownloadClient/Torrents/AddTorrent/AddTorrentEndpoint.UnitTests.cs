@@ -1,6 +1,5 @@
 using BencodeNET.Objects;
 using BencodeNET.Torrents;
-using Microsoft.EntityFrameworkCore;
 using Reaparr.Application.Contracts;
 
 // ReSharper disable RedundantAssignment

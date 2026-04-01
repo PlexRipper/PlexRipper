@@ -42,6 +42,25 @@
         <ProjectReference Include="..\SignalR\SignalR.csproj" />
     </ItemGroup>
     <ItemGroup>
+        <Using Include="System.ComponentModel.DataAnnotations" />
+        <Using Include="System.ComponentModel.DataAnnotations.Schema" />
+        <Using Include="FastEndpoints" />
+        <Using Include="FluentResults" />
+        <Using Include="FluentValidation" />
+        <Using Include="Microsoft.AspNetCore.Http" />
+        <Using Include="Microsoft.AspNetCore.Builder" />
+        <Using Include="Microsoft.AspNetCore.Hosting" />
+        <Using Include="Microsoft.AspNetCore.Routing" />
+        <Using Include="Microsoft.Extensions.Configuration" />
+        <Using Include="Microsoft.Extensions.DependencyInjection" />
+        <Using Include="Microsoft.Extensions.Hosting" />
+        <Using Include="Microsoft.Extensions.Logging" />
+        <Using Include="Reaparr.Domain" />
+        <Using Include="Reaparr.Logging" />
+        <Using Include="Serilog" />
+        <Using Include="System.Net.Http.Json" />
+    </ItemGroup>
+    <ItemGroup>
         <None Remove="AppHost.csproj.DotSettings" />
         <None Remove="ClientApp\**" />
     </ItemGroup>

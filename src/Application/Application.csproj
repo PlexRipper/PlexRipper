@@ -35,6 +35,17 @@
         <FrameworkReference Include="Microsoft.AspNetCore.App" />
     </ItemGroup>
     <ItemGroup>
+        <Using Include="System.ComponentModel.DataAnnotations" />
+        <Using Include="System.ComponentModel.DataAnnotations.Schema" />
+        <Using Include="FastEndpoints" />
+        <Using Include="FluentResults" />
+        <Using Include="FluentValidation" />
+        <Using Include="Microsoft.AspNetCore.Http" />
+        <Using Include="Reaparr.Domain" />
+        <Using Include="Reaparr.Logging" />
+        <Using Include="Serilog" />
+    </ItemGroup>
+    <ItemGroup>
         <InternalsVisibleTo Include="Reaparr.Application.UnitTests" />
     </ItemGroup>
 </Project>

@@ -1,3 +1,5 @@
+# syntax=docker/dockerfile:1.20
+
 ARG VERSION=0.0.0
 ARG INFORMATIONAL_VERSION=0.0.0
 ARG PORT=7000
@@ -33,49 +35,8 @@ ENV DOTNET_CLI_TELEMETRY_OPTOUT=1 \
     DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1 \
     NUGET_XMLDOC_MODE=skip
 
-## Domain Projects
-COPY ["src/Domain/Domain.csproj", "src/Domain/"]
-COPY ["src/Environment/Environment.csproj", "src/Environment/"]
-COPY ["src/FluentResultExtensions/FluentResultExtensions.csproj", "src/FluentResultExtensions/"]
-COPY ["src/Logging/Logging.csproj", "src/Logging/"]
-
-## Core Projects
-### Application Projects
-COPY ["src/Application/Application.csproj", "src/Application/"]
-COPY ["src/Application.Contracts/Application.Contracts.csproj", "src/Application.Contracts/"]
-### Public API Projects
-COPY ["src/PublicAPI/PublicAPI.csproj", "src/PublicAPI/"]
-COPY ["src/PublicAPI.Contracts/PublicAPI.Contracts.csproj", "src/PublicAPI.Contracts/"]
-### Background Jobs Projects
-COPY ["src/BackgroundJobs/BackgroundJobs.csproj", "src/BackgroundJobs/"]
-COPY ["src/BackgroundJobs.Contracts/BackgroundJobs.Contracts.csproj", "src/BackgroundJobs.Contracts/"]
-
-## Infrastructure Projects
-### Data Access
-COPY ["src/Data/Data.csproj", "src/Data/"]
-COPY ["src/Data.Contracts/Data.Contracts.csproj", "src/Data.Contracts/"]
-### Data Identity Access
-COPY ["src/Identity/Identity.csproj", "src/Identity/"]
-COPY ["src/Identity.Contracts/Identity.Contracts.csproj", "src/Identity.Contracts/"]
-### File System
-COPY ["src/FileSystem/FileSystem.csproj", "src/FileSystem/"]
-COPY ["src/FileSystem.Contracts/FileSystem.Contracts.csproj", "src/FileSystem.Contracts/"]
-### Plex API
-COPY ["src/PlexApi/PlexApi.csproj", "src/PlexApi/"]
-COPY ["src/PlexApi.Contracts/PlexApi.Contracts.csproj", "src/PlexApi.Contracts/"]
-### Settings
-COPY ["src/Settings/Settings.csproj", "src/Settings/"]
-COPY ["src/Settings.Contracts/Settings.Contracts.csproj", "src/Settings.Contracts/"]
-### SignalR
-COPY ["src/SignalR/SignalR.csproj", "src/SignalR/"]
-COPY ["src/SignalR.Contracts/SignalR.Contracts.csproj", "src/SignalR.Contracts/"]
-
-## External Projects
-COPY ["src/External/External.csproj", "src/External/"]
-COPY ["src/External.Contracts/External.Contracts.csproj", "src/External.Contracts/"]
-
-## AppHost Projects
-COPY ["src/AppHost/AppHost.csproj", "src/AppHost/"]
+COPY ["Directory.Build.props", "."]
+COPY --parents src/*/*.csproj src/*/packages.lock.json /src/
 
 
 ## Restore Projects

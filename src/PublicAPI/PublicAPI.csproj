@@ -26,6 +26,7 @@
         <Using Include="FluentResults" />
         <Using Include="FluentValidation" />
         <Using Include="Microsoft.AspNetCore.Http" />
+        <Using Include="Reaparr.Data.Contracts" />
         <Using Include="Reaparr.Domain" />
         <Using Include="Reaparr.Logging" />
         <Using Include="Serilog" />

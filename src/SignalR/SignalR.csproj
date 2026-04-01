@@ -24,8 +24,10 @@
         <Using Include="FluentResults" />
         <Using Include="FluentValidation" />
         <Using Include="Microsoft.AspNetCore.Http" />
+        <Using Include="Reaparr.Application.Contracts" />
         <Using Include="Reaparr.Domain" />
         <Using Include="Reaparr.Logging" />
+        <Using Include="Reaparr.SignalR.Contracts" />
         <Using Include="Serilog" />
     </ItemGroup>
 </Project>

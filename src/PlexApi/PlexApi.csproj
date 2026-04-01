@@ -30,6 +30,7 @@
         <Using Include="Microsoft.AspNetCore.Http" />
         <Using Include="Reaparr.Domain" />
         <Using Include="Reaparr.Logging" />
+        <Using Include="Reaparr.PlexApi.Contracts" />
         <Using Include="Serilog" />
     </ItemGroup>
 </Project>

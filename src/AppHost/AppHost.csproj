@@ -55,7 +55,9 @@
         <Using Include="Microsoft.Extensions.DependencyInjection" />
         <Using Include="Microsoft.Extensions.Hosting" />
         <Using Include="Microsoft.Extensions.Logging" />
+        <Using Include="Reaparr.Application" />
         <Using Include="Reaparr.Domain" />
+        <Using Include="Reaparr.Environment" />
         <Using Include="Reaparr.Logging" />
         <Using Include="Serilog" />
         <Using Include="System.Net.Http.Json" />

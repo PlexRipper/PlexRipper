@@ -13,4 +13,7 @@
         </PackageReference>
         <PackageReference Include="Quartz" Version="3.17.0" />
     </ItemGroup>
+    <ItemGroup>
+        <Using Include="Reaparr.Domain" />
+    </ItemGroup>
 </Project>

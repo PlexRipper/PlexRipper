@@ -28,4 +28,7 @@
     <ItemGroup>
         <Folder Include="_Shared\" />
     </ItemGroup>
+    <ItemGroup>
+        <Using Include="Reaparr.Identity.Contracts" />
+    </ItemGroup>
 </Project>

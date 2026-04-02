@@ -21,6 +21,7 @@
             <env name="UNMASKED" value="true" />
             <env name="VERSION" value="9.9.9" />
             <env name="REAPARR_DATA_PATH" value="/mnt/DATA/ReaparrCache/" />
+            <env name="REAPARR_CONFIG_PATH" value="/mnt/DATA/ReaparrCache/" />
             <env name="REAPARR_PLATFORM" value="desktop" />
             <env name="SEQ_URL" value="http://localhost:5341" />
         </envs>

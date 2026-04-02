@@ -107,9 +107,7 @@ public class PathProvider : IPathProvider
         if (EnvironmentExtensions.IsDockerMode())
             return Path.Combine(GetDockerRootDirectory(), folderName);
 
-        var homeDirectory = GetHomeDirectory();
-
-        return Path.Combine(homeDirectory, folderName);
+        return Path.Combine(GetHomeDirectory(), folderName);
     }
 
     private static string GetAppDataDirectory() =>

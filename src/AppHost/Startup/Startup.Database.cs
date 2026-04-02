@@ -8,12 +8,12 @@ public static partial class Startup
     /// <summary>
     /// Set up the database.
     /// </summary>
-    public static Result SetupDatabase(this WebApplication app)
+    public static async Task<Result> SetupDatabase(this WebApplication app)
     {
         var container = app.Services.GetAutofacRoot();
 
         var dbContextManager = container.Resolve<IReaparrDbContextManager>();
 
-        return dbContextManager.Setup();
+        return await dbContextManager.SetupAsync();
     }
 }

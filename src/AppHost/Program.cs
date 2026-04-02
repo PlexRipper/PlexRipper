@@ -54,7 +54,7 @@ public class Program
                 return;
             }
 
-            var configureDatabase = app.SetupDatabase();
+            var configureDatabase = await app.SetupDatabase();
             if (configureDatabase.IsFailed)
             {
                 FailedToStart(configureDatabase);

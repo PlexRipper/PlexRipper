@@ -31,7 +31,10 @@ public class DesktopMode : IDesktopMode
             .SetTitle("Reaparr")
             .SetUseOsDefaultSize(true)
             .Center()
+            .SetMinSize(1920, 1080)
+            .SetMaximized(true)
             .SetResizable(true)
+            .SetLogVerbosity(0)
             .Load(uri);
 
         window.WaitForClose(); // Starts the application event loop

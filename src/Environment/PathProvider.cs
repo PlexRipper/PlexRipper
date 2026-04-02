@@ -74,22 +74,54 @@ public class PathProvider : IPathProvider
     {
         get
         {
+            if (EnvironmentExtensions.IsDesktopMode())
+            {
+                var desktopDataPath = EnvironmentExtensions.GetDesktopDataPath();
+                if (desktopDataPath is not null)
+                    return desktopDataPath;
+
+                var developmentRootPath = EnvironmentExtensions.GetDevelopmentRootPath();
+                if (developmentRootPath is not null)
+                    return developmentRootPath;
+
+                return GetDesktopRootDirectory();
+            }
+
             var devRootPath = EnvironmentExtensions.GetDevelopmentRootPath();
             if (devRootPath is not null)
                 return devRootPath;
 
-            switch (OsInfo.CurrentOS)
-            {
-                case OperatingSystemPlatform.Linux:
-                case OperatingSystemPlatform.Osx:
-                    return "/";
-                case OperatingSystemPlatform.Windows:
-                    return Path.GetPathRoot(Assembly.GetExecutingAssembly().Location) ?? @"C:\";
-                default:
-                    return "/";
-            }
+            return GetDockerRootDirectory();
         }
     }
+
+    private static string GetDesktopRootDirectory() =>
+        OsInfo.CurrentOS switch
+        {
+            OperatingSystemPlatform.Windows => Path.Combine(GetAppDataDirectory(), "Reaparr"),
+            OperatingSystemPlatform.Osx => Path.Combine(
+                GetHomeDirectory(),
+                "Library",
+                "Application Support",
+                "Reaparr"
+            ),
+            _ => Path.Combine(GetHomeDirectory(), ".config", "Reaparr"),
+        };
+
+    private static string GetAppDataDirectory() =>
+        System.Environment.GetEnvironmentVariable("APPDATA")
+        ?? System.Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData);
+
+    private static string GetHomeDirectory() =>
+        System.Environment.GetEnvironmentVariable("HOME")
+        ?? System.Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile);
+
+    private static string GetDockerRootDirectory() =>
+        OsInfo.CurrentOS switch
+        {
+            OperatingSystemPlatform.Windows => Path.GetPathRoot(Assembly.GetExecutingAssembly().Location) ?? @"C:\",
+            _ => "/",
+        };
 
     #region Interface Implementations
 

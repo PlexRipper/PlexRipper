@@ -4,6 +4,8 @@ namespace Reaparr.Environment;
 
 public static class EnvironmentExtensions
 {
+    #region Constants
+
     private const string INTEGRATION_TEST_MODE_KEY = "IntegrationTestMode";
 
     public const string UnmaskedModeKey = "UNMASKED";
@@ -18,61 +20,60 @@ public static class EnvironmentExtensions
 
     private const string DEVELOPMENT_ROOT_PATH_KEY = "DEVELOPMENT_ROOT_PATH";
 
+    private const string REAPARR_MODE_KEY = "REAPARR_MODE";
+
+    private const string REAPARR_DATA_PATH_KEY = "REAPARR_DATA_PATH";
+
     private const string AUTH_HEADER_TOKEN_NAME = "AUTH_HEADER_TOKEN";
 
     private const string SEQ_URL = "SEQ_URL";
 
-    private static readonly string _trueValue = Convert.ToString(true);
+    #endregion
 
-    /// <summary>
-    /// Determines if the value is true.
-    /// </summary>
-    /// <param name="value"></param>
-    /// <returns></returns>
-    private static bool IsTrue(string? value) =>
-        value == _trueValue || value == "1" || value == "true" || value == "TRUE";
+    #region Getters
 
     /// <summary>
     /// Returns true when <c>IntegrationTestMode</c> environment variable is set to a truthy value.
     /// </summary>
-    public static bool IsIntegrationTestMode() =>
-        System.Environment.GetEnvironmentVariable(INTEGRATION_TEST_MODE_KEY) == _trueValue;
+    public static bool IsIntegrationTestMode() => IsTrue(GetEnvironmentVariable(INTEGRATION_TEST_MODE_KEY));
 
     /// <summary>
     /// This is the path that is used to store the /config, /downloads, /movies and /tvshows folders required to boot Reaparr in development mode in a non-docker environment.
     /// </summary>
     /// <returns></returns>
-    public static string? GetDevelopmentRootPath() =>
-        System.Environment.GetEnvironmentVariable(DEVELOPMENT_ROOT_PATH_KEY);
+    public static string? GetDevelopmentRootPath() => GetEnvironmentVariable(DEVELOPMENT_ROOT_PATH_KEY);
+
+    public static string? GetDesktopDataPath() => GetEnvironmentVariable(REAPARR_DATA_PATH_KEY);
+
+    public static string GetReaparrMode() =>
+        GetEnvironmentVariable(REAPARR_MODE_KEY)?.ToLowerInvariant() == "desktop" ? "desktop" : "docker";
+
+    public static bool IsDesktopMode() => GetReaparrMode() == "desktop";
+
+    public static bool IsDockerMode() => GetReaparrMode() == "docker";
 
     /// <summary>
     /// Gets the name of the HTTP header used for bearer/auth token passing. Defaults to <c>X-Auth-User</c>.
     /// </summary>
-    public static string GetHeaderAuthTokenName() =>
-        System.Environment.GetEnvironmentVariable(AUTH_HEADER_TOKEN_NAME) ?? "X-Auth-User";
+    public static string GetHeaderAuthTokenName() => GetEnvironmentVariable(AUTH_HEADER_TOKEN_NAME) ?? "X-Auth-User";
 
     /// <summary>
     /// When set to true, the application will not mask/censor sensitive data in the logs.
     /// </summary>
-    public static bool IsUnmasked() => IsTrue(System.Environment.GetEnvironmentVariable(UnmaskedModeKey));
+    public static bool IsUnmasked() => IsTrue(GetEnvironmentVariable(UnmaskedModeKey));
 
     /// <summary>
     /// When set to true, the application will log all environment variables set on startup
     /// </summary>
     /// <returns></returns>
-    public static bool ShouldLogEnvVars() => IsTrue(System.Environment.GetEnvironmentVariable(LOG_ENV_VARS_KEY));
+    public static bool ShouldLogEnvVars() => IsTrue(GetEnvironmentVariable(LOG_ENV_VARS_KEY));
 
     /// <summary>
     /// Gets the configured Serilog log level from <c>LOG_LEVEL</c>. Defaults to <see cref="LogEventLevel.Debug"/>.
     /// </summary>
     public static LogEventLevel GetLogLevel()
     {
-        var success = Enum.TryParse<LogEventLevel>(
-            System.Environment.GetEnvironmentVariable(LOG_LEVEL_KEY),
-            true,
-            out var logLevel
-        );
-
+        var success = Enum.TryParse<LogEventLevel>(GetEnvironmentVariable(LOG_LEVEL_KEY), true, out var logLevel);
         return success ? logLevel : LogEventLevel.Debug;
     }
 
@@ -80,9 +81,7 @@ public static class EnvironmentExtensions
     /// Gets the application version from <c>INFORMATIONAL_VERSION</c> or <c>VERSION</c>. Defaults to <c>0.0.0</c>.
     /// </summary>
     public static string GetVersion() =>
-        System.Environment.GetEnvironmentVariable(INFORMATIONAL_VERSION_KEY)
-        ?? System.Environment.GetEnvironmentVariable(VERSION_KEY)
-        ?? "0.0.0";
+        GetEnvironmentVariable(INFORMATIONAL_VERSION_KEY) ?? GetEnvironmentVariable(VERSION_KEY) ?? "0.0.0";
 
     /// <summary>
     /// Returns true if the current version indicates a development build (contains <c>dev</c>).
@@ -93,20 +92,17 @@ public static class EnvironmentExtensions
     /// Returns true if the DOTNET_ENVIRONMENT is set to Development.
     /// </summary>
     /// <returns></returns>
-    public static bool IsDevelopmentEnvironment() =>
-        System.Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT") == "Development";
+    public static bool IsDevelopmentEnvironment() => GetEnvironmentVariable("DOTNET_ENVIRONMENT") == "Development";
 
     /// <summary>
     /// Gets the process user ID (PUID) from the environment. Returns -1 when not set or invalid.
     /// </summary>
-    public static int GetPuid() =>
-        int.TryParse(System.Environment.GetEnvironmentVariable("PUID"), out var puid) ? puid : -1;
+    public static int GetPuid() => int.TryParse(GetEnvironmentVariable("PUID"), out var puid) ? puid : -1;
 
     /// <summary>
     /// Gets the process group ID (PGID) from the environment. Returns -1 when not set or invalid.
     /// </summary>
-    public static int GetPgid() =>
-        int.TryParse(System.Environment.GetEnvironmentVariable("PGID"), out var pgid) ? pgid : -1;
+    public static int GetPgid() => int.TryParse(GetEnvironmentVariable("PGID"), out var pgid) ? pgid : -1;
 
     /// <summary>
     /// Gets the port number from the DOTNET_HTTP_PORTS environment variable.
@@ -114,8 +110,7 @@ public static class EnvironmentExtensions
     /// <returns>The port number or 5000 if not configured.</returns>
     public static int GetPort =>
         int.TryParse(
-            System
-                .Environment.GetEnvironmentVariable("DOTNET_HTTP_PORTS")
+            GetEnvironmentVariable("DOTNET_HTTP_PORTS")
                 ?.Split(';', StringSplitOptions.RemoveEmptyEntries)
                 .FirstOrDefault(),
             out var port
@@ -127,7 +122,14 @@ public static class EnvironmentExtensions
     /// Sets the SEQ_URL environment variable to the specified URL.
     /// Note: This is used for development and testing purposes to redirect logs to a hosted Docker instance of Seq.
     /// </summary>
-    public static string GetSeqUrl() => System.Environment.GetEnvironmentVariable(SEQ_URL) ?? "http://localhost:5341";
+    public static string GetSeqUrl() => GetEnvironmentVariable(SEQ_URL) ?? "http://localhost:5341";
+
+    #endregion
+
+    #region Setters
+
+    public static void SetPort(int port) =>
+        System.Environment.SetEnvironmentVariable("DOTNET_HTTP_PORTS", port.ToString());
 
     /// <summary>
     /// Sets the <c>LOG_LEVEL</c> environment variable to the specified level (upper-cased).
@@ -167,4 +169,23 @@ public static class EnvironmentExtensions
     {
         System.Environment.SetEnvironmentVariable(LOG_ENV_VARS_KEY, state.ToString());
     }
+
+    #endregion
+
+    #region Helpers
+
+    private static string? GetEnvironmentVariable(string key)
+    {
+        var value = System.Environment.GetEnvironmentVariable(key)?.Trim();
+        return string.IsNullOrWhiteSpace(value) ? null : value;
+    }
+
+    /// <summary>
+    /// Determines if the value is true.
+    /// </summary>
+    /// <param name="value"></param>
+    private static bool IsTrue(string? value) =>
+        value is not null || value == Convert.ToString(true) || value == "1" || value == "true" || value == "TRUE";
+
+    #endregion
 }

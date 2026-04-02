@@ -13,6 +13,7 @@ public class Program
     ///  The main method entry point for the application.
     /// </summary>
     /// <param name="args"></param>
+    [STAThread]
     public static void Main(string[] args)
     {
         try
@@ -39,9 +40,7 @@ public class Program
             var builder = WebApplication.CreateBuilder(args);
 
             builder.Host.ConfigureAutofacBuilder();
-
             builder.Services.ConfigureServices(builder.Environment);
-
             var app = builder.Build();
 
             var configResult = app.SetupConfigFile();

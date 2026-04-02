@@ -12,5 +12,7 @@ public class AppHostModule : Module
 
         // This needs to be registered in order to fire Boot on Application startup
         builder.RegisterType<Boot>().As<IHostedService>().SingleInstance();
+
+        builder.RegisterType<DesktopMode>().As<IDesktopMode>().SingleInstance();
     }
 }

@@ -185,7 +185,7 @@ public static class EnvironmentExtensions
     /// </summary>
     /// <param name="value"></param>
     private static bool IsTrue(string? value) =>
-        value is not null || value == Convert.ToString(true) || value == "1" || value == "true" || value == "TRUE";
+        value is not null && (value == Convert.ToString(true) || value == "1" || value == "true" || value == "TRUE");
 
     #endregion
 }

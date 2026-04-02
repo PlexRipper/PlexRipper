@@ -16,6 +16,7 @@
         </PackageReference>
     </ItemGroup>
     <ItemGroup>
+        <ProjectReference Include="..\..\..\src\Environment\Environment.csproj" />
         <ProjectReference Include="..\..\BaseTests\BaseTests.csproj" />
     </ItemGroup>
 </Project>

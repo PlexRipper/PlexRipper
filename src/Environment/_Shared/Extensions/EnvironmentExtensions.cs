@@ -18,11 +18,11 @@ public static class EnvironmentExtensions
 
     private const string INFORMATIONAL_VERSION_KEY = "INFORMATIONAL_VERSION";
 
-    private const string DEVELOPMENT_ROOT_PATH_KEY = "DEVELOPMENT_ROOT_PATH";
-
     private const string REAPARR_PLATFORM_KEY = "REAPARR_PLATFORM";
 
     private const string REAPARR_DATA_PATH_KEY = "REAPARR_DATA_PATH";
+
+    private const string REAPARR_CONFIG_PATH_KEY = "REAPARR_CONFIG_PATH";
 
     private const string AUTH_HEADER_TOKEN_NAME = "AUTH_HEADER_TOKEN";
 
@@ -37,13 +37,9 @@ public static class EnvironmentExtensions
     /// </summary>
     public static bool IsIntegrationTestMode() => IsTrue(GetEnvironmentVariable(INTEGRATION_TEST_MODE_KEY));
 
-    /// <summary>
-    /// This is the path that is used to store the /config, /downloads, /movies and /tvshows folders required to boot Reaparr in development mode in a non-docker environment.
-    /// </summary>
-    /// <returns></returns>
-    public static string? GetDevelopmentRootPath() => GetEnvironmentVariable(DEVELOPMENT_ROOT_PATH_KEY);
+    public static string? GetDataPath() => GetEnvironmentVariable(REAPARR_DATA_PATH_KEY);
 
-    public static string? GetDesktopDataPath() => GetEnvironmentVariable(REAPARR_DATA_PATH_KEY);
+    public static string? GetConfigPath() => GetEnvironmentVariable(REAPARR_CONFIG_PATH_KEY);
 
     public static string GetReaparrMode() =>
         GetEnvironmentVariable(REAPARR_PLATFORM_KEY)?.ToLowerInvariant() == "desktop" ? "desktop" : "docker";
@@ -139,12 +135,11 @@ public static class EnvironmentExtensions
         System.Environment.SetEnvironmentVariable(LOG_LEVEL_KEY, logLevel.ToString().ToUpper());
     }
 
-    /// <summary>
-    /// Sets the <c>DEVELOPMENT_ROOT_PATH</c> environment variable to the specified path.
-    /// </summary>
-    /// <param name="path">The development root path to set as <c>DEVELOPMENT_ROOT_PATH_KEY</c>.</param>
-    public static void SetDevelopmentRootPath(string path) =>
-        System.Environment.SetEnvironmentVariable(DEVELOPMENT_ROOT_PATH_KEY, path);
+    public static void SetDataPath(string path) =>
+        System.Environment.SetEnvironmentVariable(REAPARR_DATA_PATH_KEY, path);
+
+    public static void SetConfigPath(string path) =>
+        System.Environment.SetEnvironmentVariable(REAPARR_CONFIG_PATH_KEY, path);
 
     /// <summary>
     /// Enables or disables integration test mode by setting <c>IntegrationTestMode</c>.

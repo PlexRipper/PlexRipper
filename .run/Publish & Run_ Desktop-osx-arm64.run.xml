@@ -12,7 +12,6 @@
       <env name="SEQ_URL" value="http://localhost:5341" />
       <env name="UNMASKED" value="true" />
       <env name="DOTNET_HTTP_PORTS" value="5000" />
-      <env name="DEVELOPMENT_ROOT_PATH" value="$PROJECT_DIR$/../../DATA/ReaparrCache/" />
       <env name="LOG_ENV_VARS" value="false" />
       <env name="PGID" value="1000" />
       <env name="VERSION" value="9.9.9" />

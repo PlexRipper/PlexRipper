@@ -49,7 +49,11 @@ public class BaseContainer : IDisposable
         var memoryDbName = MockDatabase.GetMemoryDatabaseName();
 
         // Create isolated filesystem
-        EnvironmentExtensions.SetDevelopmentRootPath(IntegrationTestFileSystemSandbox.GetSandboxFolder(memoryDbName));
+        var sandboxFolder = IntegrationTestFileSystemSandbox.GetSandboxFolder(memoryDbName);
+        EnvironmentExtensions.SetDataPath(sandboxFolder);
+        EnvironmentExtensions.SetConfigPath(
+            Path.Combine(sandboxFolder, Environment.PathProvider.DefaultConfigFolderName)
+        );
         var testFileSystemRootPath = IntegrationTestFileSystemSandbox.Create(memoryDbName, log);
 
         var config = UnitTestDataConfig.FromOptions(options);

@@ -18,6 +18,7 @@ public static class IntegrationTestFileSystemSandbox
             var sandboxPath = GetSandboxFolder(memoryDbName);
             Directory.CreateDirectory(sandboxPath);
 
+            Directory.CreateDirectory(PathProvider.ConfigDirectory);
             Directory.CreateDirectory(PathProvider.DefaultDownloadsDestinationFolder);
             Directory.CreateDirectory(PathProvider.DefaultMovieDestinationFolder);
             Directory.CreateDirectory(PathProvider.DefaultTvShowsDestinationFolder);

@@ -8,7 +8,7 @@ public class PathProvider : IPathProvider
 
     #region DirectoryNames
 
-    private static readonly string _configFolder = "Config";
+    public static readonly string DefaultConfigFolderName = "Config";
 
     private static readonly string _logsFolder = "Logs";
 
@@ -26,19 +26,19 @@ public class PathProvider : IPathProvider
 
     public static string DefaultGamesFolderName => "Games";
 
-    public static string DefaultMovieDestinationFolder => Path.Combine(RootDirectory, DefaultMovieFolderName);
+    public static string DefaultMovieDestinationFolder => GetDefaultMediaDirectory(DefaultMovieFolderName);
 
-    public static string DefaultDownloadsDestinationFolder => Path.Combine(RootDirectory, DefaultDownloadsFolderName);
+    public static string DefaultDownloadsDestinationFolder => GetDefaultMediaDirectory(DefaultDownloadsFolderName);
 
-    public static string DefaultTvShowsDestinationFolder => Path.Combine(RootDirectory, DefaultTvShowsFolderName);
+    public static string DefaultTvShowsDestinationFolder => GetDefaultMediaDirectory(DefaultTvShowsFolderName);
 
-    public static string DefaultMusicDestinationFolder => Path.Combine(RootDirectory, DefaultMusicFolderName);
+    public static string DefaultMusicDestinationFolder => GetDefaultMediaDirectory(DefaultMusicFolderName);
 
-    public static string DefaultPhotosDestinationFolder => Path.Combine(RootDirectory, DefaultPhotosFolderName);
+    public static string DefaultPhotosDestinationFolder => GetDefaultMediaDirectory(DefaultPhotosFolderName);
 
-    public static string DefaultOtherDestinationFolder => Path.Combine(RootDirectory, DefaultOtherFolderName);
+    public static string DefaultOtherDestinationFolder => GetDefaultMediaDirectory(DefaultOtherFolderName);
 
-    public static string DefaultGamesDestinationFolder => Path.Combine(RootDirectory, DefaultGamesFolderName);
+    public static string DefaultGamesDestinationFolder => GetDefaultMediaDirectory(DefaultGamesFolderName);
 
     #endregion
 
@@ -52,7 +52,7 @@ public class PathProvider : IPathProvider
 
     #endregion
 
-    public static string ConfigDirectory => Path.Combine(RootDirectory, _configFolder);
+    public static string ConfigDirectory => EnvironmentExtensions.GetConfigPath() ?? GetDefaultConfigDirectory();
 
     public static string ConfigFileLocation => Path.Join(ConfigDirectory, ConfigFileName);
 
@@ -66,36 +66,26 @@ public class PathProvider : IPathProvider
     // ReSharper disable once InconsistentNaming
     public static string Database_WAL_Path => Path.Combine(ConfigDirectory, DatabaseWalName);
 
-    public static string LogsDirectory => Path.Combine(RootDirectory, _configFolder, _logsFolder);
+    public static string LogsDirectory => Path.Combine(ConfigDirectory, _logsFolder);
 
     public List<string> DatabaseFiles => [DatabasePath, Database_SHM_Path, Database_WAL_Path];
 
-    public static string RootDirectory
+    public static string DataDirectory
     {
         get
         {
-            if (EnvironmentExtensions.IsDesktopMode())
-            {
-                var desktopDataPath = EnvironmentExtensions.GetDesktopDataPath();
-                if (desktopDataPath is not null)
-                    return desktopDataPath;
+            var dataPath = EnvironmentExtensions.GetDataPath();
+            if (dataPath is not null)
+                return dataPath;
 
-                var developmentRootPath = EnvironmentExtensions.GetDevelopmentRootPath();
-                if (developmentRootPath is not null)
-                    return developmentRootPath;
-
-                return GetDesktopRootDirectory();
-            }
-
-            var devRootPath = EnvironmentExtensions.GetDevelopmentRootPath();
-            if (devRootPath is not null)
-                return devRootPath;
-
-            return GetDockerRootDirectory();
+            return EnvironmentExtensions.IsDesktopMode() ? GetHomeDirectory() : GetDockerRootDirectory();
         }
     }
 
-    private static string GetDesktopRootDirectory() =>
+    private static string GetDefaultConfigDirectory() =>
+        EnvironmentExtensions.IsDesktopMode() ? GetDesktopConfigDirectory() : GetDockerConfigDirectory();
+
+    private static string GetDesktopConfigDirectory() =>
         OsInfo.CurrentOS switch
         {
             OperatingSystemPlatform.Windows => Path.Combine(GetAppDataDirectory(), "Reaparr"),
@@ -107,6 +97,20 @@ public class PathProvider : IPathProvider
             ),
             _ => Path.Combine(GetHomeDirectory(), ".config", "Reaparr"),
         };
+
+    private static string GetDefaultMediaDirectory(string folderName)
+    {
+        var dataPath = EnvironmentExtensions.GetDataPath();
+        if (dataPath is not null)
+            return Path.Combine(dataPath, folderName);
+
+        if (EnvironmentExtensions.IsDockerMode())
+            return Path.Combine(GetDockerRootDirectory(), folderName);
+
+        var homeDirectory = GetHomeDirectory();
+
+        return Path.Combine(homeDirectory, folderName);
+    }
 
     private static string GetAppDataDirectory() =>
         System.Environment.GetEnvironmentVariable("APPDATA")
@@ -123,9 +127,11 @@ public class PathProvider : IPathProvider
             _ => "/",
         };
 
+    private static string GetDockerConfigDirectory() => Path.Combine(GetDockerRootDirectory(), DefaultConfigFolderName);
+
     #region Interface Implementations
 
-    string IPathProvider.RootDirectory => RootDirectory;
+    string IPathProvider.RootDirectory => DataDirectory;
 
     string IPathProvider.ConfigFileLocation => ConfigFileLocation;
 

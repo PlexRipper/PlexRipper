@@ -1,4 +1,5 @@
 using Reaparr.FluentResultExtensions;
+using Velopack;
 
 namespace Reaparr.AppHost;
 
@@ -16,6 +17,9 @@ public class Program
     [STAThread]
     public static async Task Main(string[] args)
     {
+        // Must be first: handles installer hooks (install, uninstall, update) and exits early when invoked by the Velopack installer.
+        VelopackApp.Build().Run();
+
         try
         {
             _log.Here().Information("Starting Reaparr!");

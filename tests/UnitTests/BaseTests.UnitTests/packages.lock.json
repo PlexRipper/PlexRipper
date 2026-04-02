@@ -1136,6 +1136,11 @@
           "Newtonsoft.Json": "13.0.3"
         }
       },
+      "NuGet.Versioning": {
+        "type": "Transitive",
+        "resolved": "6.14.0",
+        "contentHash": "4v4blkhCv8mpKtfx+z0G/X0daVCzdIaHSC51GkUspugi5JIMn2Bo8xm5PdZYF0U68gOBfz/+aPWMnpRd85Jbow=="
+      },
       "PasswordGenerator": {
         "type": "Transitive",
         "resolved": "2.1.0",
@@ -1469,6 +1474,14 @@
           "TUnit.Core": "1.24.0"
         }
       },
+      "Velopack": {
+        "type": "Transitive",
+        "resolved": "0.0.1298",
+        "contentHash": "PJ6Nm28qJ4ChsHYzgHUJ8g+DGyyHes2+bwxY709+znMhgi8fMp8M1FTF8x6pZMjnsPCWVwoMlxVEyq0NLeRZtA==",
+        "dependencies": {
+          "NuGet.Versioning": "6.14.0"
+        }
+      },
       "xunit.v3.common": {
         "type": "Transitive",
         "resolved": "3.2.2",
@@ -1511,7 +1524,8 @@
           "Reaparr.PublicAPI": "[1.0.0, )",
           "Reaparr.Settings": "[1.0.0, )",
           "Reaparr.SignalR": "[1.0.0, )",
-          "Serilog.AspNetCore": "[10.0.0, )"
+          "Serilog.AspNetCore": "[10.0.0, )",
+          "Velopack": "[0.0.1298, )"
         }
       },
       "Reaparr.Application": {

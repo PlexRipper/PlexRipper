@@ -64,6 +64,18 @@ jobs:
             new-release-version: ${{ steps.get-next-version.outputs.new-release-version }}
             new-release-notes: ${{ steps.get-next-version.outputs.new-release-notes }}
     
+    # Build and publish desktop apps for all platforms
+    build-desktop:
+        name: Build Desktop Apps
+        needs: [semantic-release]
+        if: needs.semantic-release.outputs.new-release-published == 'true'
+        uses: ./.github/workflows/desktop-build.yml
+        secrets: inherit
+        with:
+            push: true
+            version: ${{ needs.semantic-release.outputs.new-release-version }}
+            informational_version: ${{ needs.semantic-release.outputs.new-release-version }}
+
     # Build and publish multi-arch Docker images
     build-and-publish:
         name: Build and Publish Docker Images

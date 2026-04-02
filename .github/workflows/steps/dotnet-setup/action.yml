@@ -12,6 +12,14 @@ inputs:
         description: 'Whether to run dotnet build'
         required: false
         default: 'true'
+    locked-mode:
+        description: 'Whether to pass --locked-mode to dotnet restore'
+        required: false
+        default: 'true'
+    runtime:
+        description: 'Target RID for restore (e.g. win-x64). Leave empty for framework-dependent builds.'
+        required: false
+        default: ''
 runs:
     using: 'composite'
     steps:
@@ -25,14 +33,18 @@ runs:
             uses: actions/cache@v4
             with:
                 path: ~/.nuget/packages
-                key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj', '**/packages.lock.json') }}
+                key: ${{ runner.os }}-nuget-${{ inputs.runtime != '' && format('{0}-', inputs.runtime) || '' }}${{ hashFiles('**/*.csproj', '**/packages.lock.json') }}
                 restore-keys: |
+                    ${{ runner.os }}-nuget-${{ inputs.runtime != '' && format('{0}-', inputs.runtime) || '' }}
                     ${{ runner.os }}-nuget-
 
         -   name: Restore dependencies
             if: inputs.restore == 'true'
             shell: bash
-            run: dotnet restore ${{ inputs.project-path }} --locked-mode
+            run: >
+                dotnet restore ${{ inputs.project-path }}
+                ${{ inputs.runtime != '' && format('-r {0}', inputs.runtime) || '' }}
+                ${{ inputs.locked-mode == 'true' && '--locked-mode' || '' }}
 
         -   name: Build
             if: inputs.build == 'true'

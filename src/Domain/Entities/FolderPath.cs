@@ -1,5 +1,6 @@
 ﻿// ReSharper disable CollectionNeverUpdated.Global
 // ReSharper disable UnusedAutoPropertyAccessor.Global
+
 namespace Reaparr.Domain;
 
 public class FolderPath : BaseEntity
@@ -41,7 +42,7 @@ public class FolderPath : BaseEntity
     ///  Gets or sets the filesystem directory path of this <see cref="FolderPath"/>.
     /// </summary>
     [Column(Order = 4)]
-    public string DirectoryPath { get; init; } = string.Empty;
+    public string DirectoryPath { get; set; } = string.Empty;
 
     #endregion
 

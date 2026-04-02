@@ -3,93 +3,98 @@ namespace Reaparr.Data;
 // ReSharper disable once InconsistentNaming
 public static class ReaparrDBContextSeed
 {
-    public static ModelBuilder SeedDatabase(ModelBuilder builder)
+    public static List<FolderPath> GetDefaultFolderPaths()
     {
-        var list = new List<FolderPath>
-        {
-            new()
+        var rootPath = Path.AltDirectorySeparatorChar.ToString();
+
+        return
+        [
+            new FolderPath
             {
                 Id = PlexMediaType.None.ToDefaultDestinationFolderId(),
                 DisplayName = "Download Path",
-                DirectoryPath = PathProvider.DefaultDownloadsFolderName,
+                DirectoryPath = Path.Combine(rootPath, PathProvider.DefaultDownloadsFolderName),
                 FolderType = FolderType.DownloadFolder,
                 MediaType = PlexMediaType.None,
             },
-            new()
+            new FolderPath
             {
                 Id = PlexMediaType.Movie.ToDefaultDestinationFolderId(),
                 DisplayName = "Movie Destination Path",
-                DirectoryPath = PathProvider.DefaultMovieFolderName,
+                DirectoryPath = Path.Combine(rootPath, PathProvider.DefaultMovieFolderName),
                 FolderType = FolderType.MovieFolder,
                 MediaType = PlexMediaType.Movie,
             },
-            new()
+            new FolderPath
             {
                 Id = PlexMediaType.TvShow.ToDefaultDestinationFolderId(),
                 DisplayName = "Tv Show Destination Path",
-                DirectoryPath = PathProvider.DefaultTvShowsFolderName,
+                DirectoryPath = Path.Combine(rootPath, PathProvider.DefaultTvShowsFolderName),
                 FolderType = FolderType.TvShowFolder,
                 MediaType = PlexMediaType.TvShow,
             },
-            new()
+            new FolderPath
             {
                 Id = PlexMediaType.Music.ToDefaultDestinationFolderId(),
                 DisplayName = "Music Destination Path",
-                DirectoryPath = PathProvider.DefaultMusicFolderName,
+                DirectoryPath = Path.Combine(rootPath, PathProvider.DefaultMusicFolderName),
                 FolderType = FolderType.MusicFolder,
                 MediaType = PlexMediaType.Music,
             },
-            new()
+            new FolderPath
             {
                 Id = PlexMediaType.Photos.ToDefaultDestinationFolderId(),
                 DisplayName = "Photos Destination Path",
-                DirectoryPath = PathProvider.DefaultPhotosFolderName,
+                DirectoryPath = Path.Combine(rootPath, PathProvider.DefaultPhotosFolderName),
                 FolderType = FolderType.PhotosFolder,
                 MediaType = PlexMediaType.Photos,
             },
-            new()
+            new FolderPath
             {
                 Id = PlexMediaType.OtherVideos.ToDefaultDestinationFolderId(),
                 DisplayName = "Other Videos Destination Path",
-                DirectoryPath = PathProvider.DefaultOtherFolderName,
+                DirectoryPath = Path.Combine(rootPath, PathProvider.DefaultOtherFolderName),
                 FolderType = FolderType.OtherVideosFolder,
                 MediaType = PlexMediaType.OtherVideos,
             },
-            new()
+            new FolderPath
             {
                 Id = PlexMediaType.Games.ToDefaultDestinationFolderId(),
                 DisplayName = "Games Videos Destination Path",
-                DirectoryPath = PathProvider.DefaultGamesFolderName,
+                DirectoryPath = Path.Combine(rootPath, PathProvider.DefaultGamesFolderName),
                 FolderType = FolderType.GamesVideosFolder,
                 MediaType = PlexMediaType.Games,
             },
-            new()
+            new FolderPath
             {
                 Id = 8,
                 DisplayName = "Reserved #1 Destination Path",
-                DirectoryPath = PathProvider.RootDirectory,
+                DirectoryPath = rootPath,
                 FolderType = FolderType.None,
                 MediaType = PlexMediaType.None,
             },
-            new()
+            new FolderPath
             {
                 Id = 9,
                 DisplayName = "Reserved #2 Destination Path",
-                DirectoryPath = PathProvider.RootDirectory,
+                DirectoryPath = rootPath,
                 FolderType = FolderType.None,
                 MediaType = PlexMediaType.None,
             },
-            new()
+            new FolderPath
             {
                 Id = 10,
                 DisplayName = "Reserved #3 Destination Path",
-                DirectoryPath = PathProvider.RootDirectory,
+                DirectoryPath = rootPath,
                 FolderType = FolderType.None,
                 MediaType = PlexMediaType.None,
             },
-        };
+        ];
+    }
 
-        foreach (var folderPath in list)
+    public static ModelBuilder SeedDatabase(ModelBuilder builder)
+    {
+        foreach (var folderPath in GetDefaultFolderPaths())
             builder.Entity<FolderPath>().HasData(folderPath);
 
         return builder;

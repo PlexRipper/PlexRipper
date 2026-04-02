@@ -6,7 +6,7 @@ namespace Reaparr.Data;
 public class ReaparrDbContextManager : IReaparrDbContextManager
 {
     private readonly ILogger _log;
-    private readonly ICommandExecutor _commandExecutor;
+    private readonly IReaparrDbContext _dbContext;
 
     private readonly IReaparrDbContextDatabase _reaparrDbContextDatabase;
     private readonly IAuthDbContextDatabase _authDbContextDatabase;
@@ -20,7 +20,7 @@ public class ReaparrDbContextManager : IReaparrDbContextManager
 
     public ReaparrDbContextManager(
         ILogger log,
-        ICommandExecutor commandExecutor,
+        IReaparrDbContext dbContext,
         IReaparrDbContextDatabase reaparrDbContextDatabase,
         IAuthDbContextDatabase authDbContextDatabase,
         IGeneralSettings generalSettings,
@@ -30,7 +30,7 @@ public class ReaparrDbContextManager : IReaparrDbContextManager
     )
     {
         _log = log.ForContext<ReaparrDbContextManager>();
-        _commandExecutor = commandExecutor;
+        _dbContext = dbContext;
         _reaparrDbContextDatabase = reaparrDbContextDatabase;
         _authDbContextDatabase = authDbContextDatabase;
         _generalSettings = generalSettings;
@@ -168,9 +168,7 @@ public class ReaparrDbContextManager : IReaparrDbContextManager
             _reaparrDbContextDatabase.Migrate();
             _authDbContextDatabase.Migrate();
 
-            var initializeDefaultFolderPathsResult = await _commandExecutor.Send(
-                new InitializeDefaultFolderPathsOnCreateCommand()
-            );
+            var initializeDefaultFolderPathsResult = await InitializeDefaultFolderPathsOnCreate();
             if (initializeDefaultFolderPathsResult.IsFailed)
                 return initializeDefaultFolderPathsResult.LogError();
 
@@ -184,6 +182,51 @@ public class ReaparrDbContextManager : IReaparrDbContextManager
 
             return Result.Fail(new ExceptionalError(e)).LogError();
         }
+    }
+
+    public async Task<Result> InitializeDefaultFolderPathsOnCreate()
+    {
+        var defaultPathsById = ReaparrDBContextSeed.GetDefaultFolderPaths();
+        var targetIds = defaultPathsById.Select(x => x.Id).ToList();
+
+        var existingPaths = await _dbContext
+            .FolderPaths.AsTracking()
+            .Where(x => targetIds.Contains(x.Id))
+            .ToListAsync(CancellationToken.None);
+
+        _log.Here().Information("Initializing default FolderPath directory paths on database create.");
+
+        var updatedCount = 0;
+        foreach (var existingPath in existingPaths)
+        {
+            var oldPath = existingPath.DirectoryPath;
+            var newPath = existingPath.MediaType.ToDefaultDestinationLocation();
+            if (oldPath == newPath)
+                continue;
+
+            existingPath.DirectoryPath = newPath;
+            _log.Here()
+                .Debug(
+                    "Updating default FolderPath for MediaType {MediaType}, from \"{OldPath}\" to New Path: \"{NewPath}\".",
+                    existingPath.MediaType,
+                    oldPath,
+                    newPath
+                );
+            updatedCount++;
+        }
+
+        await _dbContext.SaveChangesAsync(CancellationToken.None);
+
+        if (updatedCount > 0)
+        {
+            _log.Here()
+                .Information(
+                    "Initialized default FolderPath directory paths on database create. Updated rows: {UpdatedCount}",
+                    updatedCount
+                );
+        }
+
+        return Result.Ok();
     }
 
     private async Task<Result> MigrateDatabase()

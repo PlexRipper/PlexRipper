@@ -19,7 +19,6 @@ public class Boot : IHostedService
 
     private readonly IDownloadQueue _downloadQueue;
     private readonly ILibrarySyncJobListener _librarySyncJobListener;
-    private readonly IDesktopMode _desktopMode;
 
     #endregion
 
@@ -34,8 +33,7 @@ public class Boot : IHostedService
         IHostApplicationLifetime appLifetime,
         ISchedulerService schedulerService,
         IDownloadQueue downloadQueue,
-        ILibrarySyncJobListener librarySyncJobListener,
-        IDesktopMode desktopMode
+        ILibrarySyncJobListener librarySyncJobListener
     )
     {
         _log = log.ForContext<Boot>();
@@ -44,7 +42,6 @@ public class Boot : IHostedService
         _schedulerService = schedulerService;
         _downloadQueue = downloadQueue;
         _librarySyncJobListener = librarySyncJobListener;
-        _desktopMode = desktopMode;
 
         // ReSharper disable once AsyncVoidMethod
         appLifetime.ApplicationStarted.Register(async void () => await OnStarted());
@@ -113,8 +110,6 @@ public class Boot : IHostedService
     private async Task OnStarted()
     {
         _log.Here().Debug("Boot.OnStarted has been called");
-
-        _desktopMode.Setup();
 
         await _commandExecutor.Send(new NotifyArrAppsOnStartupCommand(), CancellationToken.None);
     }

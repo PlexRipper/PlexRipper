@@ -20,7 +20,7 @@ public static class EnvironmentExtensions
 
     private const string DEVELOPMENT_ROOT_PATH_KEY = "DEVELOPMENT_ROOT_PATH";
 
-    private const string REAPARR_MODE_KEY = "REAPARR_MODE";
+    private const string REAPARR_PLATFORM_KEY = "REAPARR_PLATFORM";
 
     private const string REAPARR_DATA_PATH_KEY = "REAPARR_DATA_PATH";
 
@@ -46,7 +46,7 @@ public static class EnvironmentExtensions
     public static string? GetDesktopDataPath() => GetEnvironmentVariable(REAPARR_DATA_PATH_KEY);
 
     public static string GetReaparrMode() =>
-        GetEnvironmentVariable(REAPARR_MODE_KEY)?.ToLowerInvariant() == "desktop" ? "desktop" : "docker";
+        GetEnvironmentVariable(REAPARR_PLATFORM_KEY)?.ToLowerInvariant() == "desktop" ? "desktop" : "docker";
 
     public static bool IsDesktopMode() => GetReaparrMode() == "desktop";
 

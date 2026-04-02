@@ -14,7 +14,7 @@ public class Program
     /// </summary>
     /// <param name="args"></param>
     [STAThread]
-    public static void Main(string[] args)
+    public static async Task Main(string[] args)
     {
         try
         {
@@ -61,7 +61,16 @@ public class Program
 
             app.ConfigureApplication(app.Environment);
 
-            app.Run();
+            if (EnvironmentExtensions.IsDesktopMode())
+            {
+                await app.StartAsync();
+                app.Services.GetRequiredService<IDesktopMode>().Setup();
+                await app.StopAsync();
+            }
+            else
+            {
+                await app.RunAsync();
+            }
         }
         catch (Exception e)
         {

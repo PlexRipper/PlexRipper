@@ -22,7 +22,9 @@ public class DesktopMode : IDesktopMode
     {
         _log.Information("Starting DesktopMode");
 
-        var uri = _server.Features.Get<IServerAddressesFeature>()!.Addresses.Select(a => new Uri(a)).First();
+        var uri = EnvironmentExtensions.IsDevelopmentEnvironment()
+            ? new Uri("http://localhost:3000")
+            : _server.Features.Get<IServerAddressesFeature>()!.Addresses.Select(a => new Uri(a)).First();
 
         // Creating a new PhotinoWindow instance with the fluent API
         var window = new PhotinoWindow()

@@ -19,9 +19,14 @@ public class GenerateDownloadTaskTvShowsCommandValidator : AbstractValidator<Gen
 {
     public GenerateDownloadTaskTvShowsCommandValidator()
     {
-        RuleFor(x => x.Request.DownloadMedias).NotNull();
-        RuleFor(x => x.Request.DownloadMedias).NotEmpty();
-        RuleForEach(x => x.Request.DownloadMedias).SetValidator(new DownloadMediaDTOValidator());
+        RuleFor(x => x.Request)
+            .NotNull()
+            .DependentRules(() =>
+            {
+                RuleFor(x => x.Request.DownloadMedias).NotNull();
+                RuleFor(x => x.Request.DownloadMedias).NotEmpty();
+                RuleForEach(x => x.Request.DownloadMedias).SetValidator(new DownloadMediaDTOValidator());
+            });
     }
 }
 
@@ -101,7 +106,7 @@ public class GenerateDownloadTaskTvShowsCommandHandler : ICommandHandler<Generat
             await _dbContext.SaveChangesAsync(cancellationToken);
 
             // Create seasons downloadTasks
-            await _commandExecutor.Send(
+            var seasonsResult = await _commandExecutor.Send(
                 new GenerateDownloadTaskTvShowSeasonsCommand(
                     new CreateDownloadTasksRequest(
                         seasonsIds,
@@ -111,6 +116,8 @@ public class GenerateDownloadTaskTvShowsCommandHandler : ICommandHandler<Generat
                 ),
                 cancellationToken
             );
+            if (seasonsResult.IsFailed)
+                return seasonsResult.LogError();
         }
 
         return Result.Ok();

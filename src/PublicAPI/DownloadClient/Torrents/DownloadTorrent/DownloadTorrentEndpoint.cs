@@ -14,7 +14,9 @@ public class DownloadTorrentEndpointRequestValidator : Validator<DownloadTorrent
         RuleFor(x => x.LibraryId).GreaterThan(0);
         RuleFor(x => x.ServerId).GreaterThan(0);
         RuleFor(x => x.Quality).IsInEnum();
-        RuleFor(x => x.Type).IsInEnum();
+        RuleFor(x => x.Type)
+            .Must(type => type is PlexMediaType.Episode or PlexMediaType.Movie)
+            .WithMessage("Type must be Episode or Movie.");
         RuleFor(x => x)
             .Must(r => r.PartId > 0 && r.PlexApiPartId > 0)
             .WithMessage($"Both PartId and {nameof(TorrentMetadataDTO.PlexApiPartId)} must be provided.");

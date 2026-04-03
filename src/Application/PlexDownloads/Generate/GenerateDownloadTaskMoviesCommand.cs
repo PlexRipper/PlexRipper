@@ -23,9 +23,14 @@ public class GenerateDownloadTaskMoviesCommandValidator : AbstractValidator<Gene
 {
     public GenerateDownloadTaskMoviesCommandValidator()
     {
-        RuleFor(x => x.Request.DownloadMedias).NotNull();
-        RuleFor(x => x.Request.DownloadMedias).NotEmpty();
-        RuleForEach(x => x.Request.DownloadMedias).SetValidator(new DownloadMediaDTOValidator());
+        RuleFor(x => x.Request)
+            .NotNull()
+            .DependentRules(() =>
+            {
+                RuleFor(x => x.Request.DownloadMedias).NotNull();
+                RuleFor(x => x.Request.DownloadMedias).NotEmpty();
+                RuleForEach(x => x.Request.DownloadMedias).SetValidator(new DownloadMediaDTOValidator());
+            });
     }
 }
 
@@ -57,10 +62,11 @@ public class GenerateDownloadTaskMoviesCommandHandler : ICommandHandler<Generate
                 plexMoviesList.SelectMany(x => x.MediaIds).ToList().Count
             );
 
-        // Create downloadTasks
-        var downloadTasks = new List<DownloadTaskMovie>();
+        var allDownloadTasks = new List<DownloadTaskMovie>();
         foreach (var downloadMediaDto in plexMoviesList)
         {
+            var downloadTasks = new List<DownloadTaskMovie>();
+
             var plexLibrary = await _dbContext
                 .PlexLibraries.Include(x => x.PlexServer)
                 .Include(x => x.DefaultDestination)
@@ -112,14 +118,19 @@ public class GenerateDownloadTaskMoviesCommandHandler : ICommandHandler<Generate
                 downloadTasks.Add(movieDownloadTask);
             }
 
+            if (downloadTasks.Count == 0)
+                continue;
+
             downloadTasks.SetRelationshipIds(plexServer.Id, plexLibrary.Id);
 
             _dbContext.DownloadTaskMovie.AddRange(downloadTasks);
             await _dbContext.SaveChangesAsync(cancellationToken);
+
+            allDownloadTasks.AddRange(downloadTasks);
         }
 
         var logs = new List<DownloadTaskMovieFileLog>();
-        foreach (var downloadTaskMovie in downloadTasks)
+        foreach (var downloadTaskMovie in allDownloadTasks)
         {
             logs.AddRange(
                 downloadTaskMovie.Children.Select(downloadTaskMovieFile => new DownloadTaskMovieFileLog

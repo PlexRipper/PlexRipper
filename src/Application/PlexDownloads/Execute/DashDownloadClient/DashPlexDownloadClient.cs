@@ -66,7 +66,10 @@ public class DashPlexDownloadClient : IPlexDownloadClient
 
         if (downloadUrlResult.IsCancelled)
         {
-            await SetDownloadStatusAsync(DownloadStatus.Stopped, downloadUrlResult.ToResult());
+            var stoppedResult = await SetDownloadStatusAsync(DownloadStatus.Stopped, downloadUrlResult.ToResult());
+            if (stoppedResult.IsFailed)
+                return stoppedResult.LogError();
+
             return downloadUrlResult.ToResult();
         }
 
@@ -75,7 +78,10 @@ public class DashPlexDownloadClient : IPlexDownloadClient
             var status = downloadUrlResult.ToResult().IsServerUnreachable()
                 ? DownloadStatus.ServerUnreachable
                 : DownloadStatus.SourceUnavailable;
-            await SetDownloadStatusAsync(status, downloadUrlResult.ToResult());
+            var statusResult = await SetDownloadStatusAsync(status, downloadUrlResult.ToResult());
+            if (statusResult.IsFailed)
+                return statusResult.LogError();
+
             return downloadUrlResult.ToResult().LogError();
         }
 
@@ -86,7 +92,10 @@ public class DashPlexDownloadClient : IPlexDownloadClient
         );
         if (ensureDirectoryResult.IsFailed)
         {
-            await SetDownloadStatusAsync(DownloadStatus.StorageError, ensureDirectoryResult);
+            var storageErrorResult = await SetDownloadStatusAsync(DownloadStatus.StorageError, ensureDirectoryResult);
+            if (storageErrorResult.IsFailed)
+                return storageErrorResult.LogError();
+
             return ensureDirectoryResult;
         }
 
@@ -106,7 +115,10 @@ public class DashPlexDownloadClient : IPlexDownloadClient
         SetupDownloadListeners(downloadTaskKey);
 
         // Execute dash stream download
-        await SetDownloadStatusAsync(DownloadStatus.Downloading);
+        var downloadingResult = await SetDownloadStatusAsync(DownloadStatus.Downloading);
+        if (downloadingResult.IsFailed)
+            return downloadingResult.LogError();
+
         var options = await CreateDashOptions(downloadTask, downloadUrlResult.Value.DownloadUrl, cancellationToken);
         await using var cancellationRegistration = cancellationToken.Register(() =>
         {
@@ -130,7 +142,10 @@ public class DashPlexDownloadClient : IPlexDownloadClient
         if (_downloadTaskKey is null)
             return Result.Ok();
 
-        await SetDownloadStatusAsync(DownloadStatus.Stopped);
+        var stoppedResult = await SetDownloadStatusAsync(DownloadStatus.Stopped);
+        if (stoppedResult.IsFailed)
+            return stoppedResult.LogError();
+
         return Result.Ok();
     }
 
@@ -236,7 +251,9 @@ public class DashPlexDownloadClient : IPlexDownloadClient
     {
         if (completed.Cancelled)
         {
-            await SetDownloadStatusAsync(DownloadStatus.Stopped, completed.Result);
+            var stoppedResult = await SetDownloadStatusAsync(DownloadStatus.Stopped, completed.Result);
+            if (stoppedResult.IsFailed)
+                stoppedResult.LogError();
             return;
         }
 
@@ -246,7 +263,9 @@ public class DashPlexDownloadClient : IPlexDownloadClient
                 completed.Result.Has404NotFoundError() ? DownloadStatus.SourceUnavailable
                 : completed.Result.IsServerUnreachable() ? DownloadStatus.ServerUnreachable
                 : DownloadStatus.DownloadClientError;
-            await SetDownloadStatusAsync(status, completed.Result);
+            var statusResult = await SetDownloadStatusAsync(status, completed.Result);
+            if (statusResult.IsFailed)
+                statusResult.LogError();
             return;
         }
 
@@ -261,21 +280,20 @@ public class DashPlexDownloadClient : IPlexDownloadClient
         };
         _downloadTaskUpdateDispatcher.OnProgressUpdated(key, _lastProgressUpdate);
 
-        await SetDownloadStatusAsync(DownloadStatus.DownloadFinished);
+        var finishedResult = await SetDownloadStatusAsync(DownloadStatus.DownloadFinished);
+        if (finishedResult.IsFailed)
+            finishedResult.LogError();
     }
 
-    private async Task SetDownloadStatusAsync(DownloadStatus status, Result? errorResult = null)
+    private Task<Result> SetDownloadStatusAsync(DownloadStatus status, Result? errorResult = null)
     {
         if (_downloadTaskKey is null)
-            return;
+            return Task.FromResult(Result.Ok());
 
         if (errorResult is null)
-        {
-            await _downloadTaskUpdateDispatcher.OnStatusChangedAsync(_downloadTaskKey, status, CancellationToken.None);
-            return;
-        }
+            return _downloadTaskUpdateDispatcher.OnStatusChangedAsync(_downloadTaskKey, status, CancellationToken.None);
 
-        await _downloadTaskUpdateDispatcher.OnStatusChangedAsync(
+        return _downloadTaskUpdateDispatcher.OnStatusChangedAsync(
             _downloadTaskKey,
             status,
             errorResult,

@@ -190,6 +190,21 @@ public class AddTorrentEndpointUnitTests : BaseUnitTest
     }
 
     [Test]
+    public void TorrentMetadataDTOValidator_ShouldRejectUnsupportedMediaTypes()
+    {
+        // Arrange
+        var validator = new TorrentMetadataDTOValidator();
+        var request = CreateValidTorrentMetadata(PlexMediaType.Season);
+
+        // Act
+        var result = validator.Validate(request);
+
+        // Assert
+        result.IsValid.ShouldBeFalse();
+        result.Errors.ShouldContain(x => x.PropertyName == nameof(TorrentMetadataDTO.Type));
+    }
+
+    [Test]
     public async Task ShouldSetHashIdOnMovieDownloadTask_WhenTorrentIsMovieType()
     {
         // Arrange

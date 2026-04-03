@@ -3,6 +3,21 @@
 public class CreateDownloadTasksCommandHandlerUnitTests : BaseUnitTest<CreateDownloadTasksCommandHandler>
 {
     [Test]
+    public void CreateDownloadTasksCommandValidator_ShouldRejectNullRequest()
+    {
+        // Arrange
+        var validator = new CreateDownloadTasksCommandValidator();
+        var command = new CreateDownloadTasksCommand((CreateDownloadTasksRequest)null!);
+
+        // Act
+        var result = validator.Validate(command);
+
+        // Assert
+        result.IsValid.ShouldBeFalse();
+        result.Errors.ShouldContain(x => x.PropertyName == nameof(CreateDownloadTasksCommand.Request));
+    }
+
+    [Test]
     public async Task ShouldGenerateAllDownloadTaskTypes_WhenAllMediaTypesAreGiven()
     {
         // Arrange
@@ -189,6 +204,51 @@ public class CreateDownloadTasksCommandHandlerUnitTests : BaseUnitTest<CreateDow
                 x => x.Send(It.IsAny<GenerateDownloadTaskTvShowSeasonsCommand>(), It.IsAny<CancellationToken>()),
                 Times.Never()
             );
+        Mock.VerifyNotification(It.IsAny<CheckDownloadQueueEvent>, Times.Never);
+        Mock.Mock<INotificationHubService>()
+            .Verify(
+                x => x.SendRefreshNotificationAsync(It.IsAny<List<RefreshDataType>>(), It.IsAny<CancellationToken>()),
+                Times.Never()
+            );
+    }
+
+    [Test]
+    public async Task ShouldHaveFailedResult_WhenGeneratingMovieDownloadTasksFails()
+    {
+        // Arrange
+        Mock.SetupCommand(It.IsAny<GenerateDownloadTaskMoviesCommand>)
+            .ReturnsAsync(Result.Fail("Movie generation failed"))
+            .Verifiable(Times.Once());
+        Mock.SetupCommand(It.IsAny<GenerateDownloadTaskTvShowsCommand>).ReturnsAsync(Result.Ok());
+        Mock.SetupCommand(It.IsAny<GenerateDownloadTaskTvShowSeasonsCommand>).ReturnsAsync(Result.Ok());
+        Mock.SetupCommand(It.IsAny<GenerateDownloadTaskTvShowEpisodesCommand>).ReturnsAsync(Result.Ok());
+        Mock.PublishEvent(It.IsAny<CheckDownloadQueueEvent>).Returns(Task.CompletedTask);
+        Mock.Mock<INotificationHubService>()
+            .Setup(x =>
+                x.SendRefreshNotificationAsync(It.IsAny<List<RefreshDataType>>(), It.IsAny<CancellationToken>())
+            )
+            .Returns(Task.CompletedTask);
+
+        var downloadMediaDtos = new List<DownloadMediaDTO>
+        {
+            new()
+            {
+                Type = PlexMediaType.Movie,
+                MediaIds = [1, 2, 3],
+                PlexServerId = 1,
+                PlexLibraryId = 1,
+                Qualities = [],
+            },
+        };
+
+        // Act
+        var request = new CreateDownloadTasksCommand(downloadMediaDtos);
+        var handler = Mock.Create<CreateDownloadTasksCommandHandler>();
+        var result = await handler.ExecuteAsync(request, CancellationToken);
+
+        // Assert
+        result.IsFailed.ShouldBeTrue();
+        result.Errors.ShouldContain(x => x.Message.Contains("Movie generation failed"));
         Mock.VerifyNotification(It.IsAny<CheckDownloadQueueEvent>, Times.Never);
         Mock.Mock<INotificationHubService>()
             .Verify(

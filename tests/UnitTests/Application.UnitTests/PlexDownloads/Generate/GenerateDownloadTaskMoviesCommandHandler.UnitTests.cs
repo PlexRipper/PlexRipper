@@ -7,6 +7,21 @@ public class GenerateDownloadTaskMoviesCommandHandlerUnitTests : BaseUnitTest<Ge
     private readonly DownloadTaskMovieValidator _validator = new();
 
     [Test]
+    public void GenerateDownloadTaskMoviesCommandValidator_ShouldRejectNullRequest()
+    {
+        // Arrange
+        var validator = new GenerateDownloadTaskMoviesCommandValidator();
+        var command = new GenerateDownloadTaskMoviesCommand((CreateDownloadTasksRequest)null!);
+
+        // Act
+        var result = validator.Validate(command);
+
+        // Assert
+        result.IsValid.ShouldBeFalse();
+        result.Errors.ShouldContain(x => x.PropertyName == nameof(GenerateDownloadTaskMoviesCommand.Request));
+    }
+
+    [Test]
     public async Task ShouldHaveInsertedValidDownloadTaskMoviesInDatabase_WhenGivenValidPlexMovies()
     {
         // Arrange
@@ -158,5 +173,51 @@ public class GenerateDownloadTaskMoviesCommandHandlerUnitTests : BaseUnitTest<Ge
 
             downloadTaskMovie.Children.Count.ShouldBe(2);
         }
+    }
+
+    [Test]
+    public async Task ShouldKeepEachMovieBoundToItsOriginalLibrary_WhenGeneratingAcrossMultipleLibraries()
+    {
+        // Arrange
+        await SetupDatabase(
+            21123,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexMovieLibraryCount = 2;
+                config.MovieCount = 6;
+            }
+        );
+
+        var moviesByLibrary = await IDbContext
+            .PlexMovies.GroupBy(x => x.PlexLibraryId)
+            .Select(x => new { PlexLibraryId = x.Key, MovieId = x.Select(y => y.Id).First() })
+            .ToListAsync(CancellationToken);
+
+        moviesByLibrary.Count.ShouldBeGreaterThanOrEqualTo(2);
+
+        var movies = moviesByLibrary
+            .Take(2)
+            .Select(x => new DownloadMediaDTO
+            {
+                Type = PlexMediaType.Movie,
+                MediaIds = [x.MovieId],
+                PlexServerId = 1,
+                PlexLibraryId = x.PlexLibraryId,
+                Qualities = [],
+            })
+            .ToList();
+
+        // Act
+        var command = new GenerateDownloadTaskMoviesCommand(movies);
+        var result = await Sut.ExecuteAsync(command, CancellationToken);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+
+        var downloadTaskMovies = await IDbContext.DownloadTaskMovie.ToListAsync(CancellationToken);
+
+        downloadTaskMovies.Count.ShouldBe(2);
+        downloadTaskMovies.Select(x => x.PlexLibraryId).Distinct().Count().ShouldBe(2);
     }
 }

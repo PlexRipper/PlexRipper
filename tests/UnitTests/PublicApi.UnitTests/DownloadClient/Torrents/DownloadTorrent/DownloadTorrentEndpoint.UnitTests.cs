@@ -226,4 +226,29 @@ public class DownloadTorrentEndpointUnitTests : BaseUnitTest
         result.IsValid.ShouldBeFalse();
         result.Errors.Count.ShouldBeGreaterThan(0);
     }
+
+    [Test]
+    public void DownloadTorrentEndpointRequestValidator_ShouldRejectUnsupportedMediaTypes()
+    {
+        // Arrange
+        var validator = new DownloadTorrentEndpointRequestValidator();
+        var request = new DownloadTorrentEndpointRequest
+        {
+            Type = PlexMediaType.Season,
+            MediaId = 1,
+            DataId = 1,
+            PartId = 1,
+            PlexApiPartId = 1,
+            Quality = VideoQuality.HD,
+            LibraryId = 1,
+            ServerId = 1,
+        };
+
+        // Act
+        var result = validator.Validate(request);
+
+        // Assert
+        result.IsValid.ShouldBeFalse();
+        result.Errors.ShouldContain(x => x.PropertyName == "Type");
+    }
 }

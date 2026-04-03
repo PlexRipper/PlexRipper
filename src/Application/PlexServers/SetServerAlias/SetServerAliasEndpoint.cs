@@ -13,6 +13,7 @@ public class SetServerAliasRequestValidator : Validator<SetServerAliasRequest>
     public SetServerAliasRequestValidator()
     {
         RuleFor(x => x.PlexServerId).GreaterThan(0);
+        RuleFor(x => x.ServerAlias).Must(x => !string.IsNullOrWhiteSpace(x));
     }
 }
 

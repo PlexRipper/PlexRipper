@@ -11,16 +11,20 @@ public class UpdateUserSettingsEndpointRequestValidator : Validator<UpdateUserSe
     public UpdateUserSettingsEndpointRequestValidator()
     {
         RuleFor(x => x).NotNull();
-        RuleFor(x => x.SettingsModelDto).NotNull();
-        RuleFor(x => x.SettingsModelDto!.ConfirmationSettings).NotNull();
-        RuleFor(x => x.SettingsModelDto!.DateTimeSettings).NotNull();
-        RuleFor(x => x.SettingsModelDto!.DebugSettings).NotNull();
-        RuleFor(x => x.SettingsModelDto!.DisplaySettings).NotNull();
-        RuleFor(x => x.SettingsModelDto!.DownloadManagerSettings).NotNull();
-        RuleFor(x => x.SettingsModelDto!.GeneralSettings).NotNull();
-        RuleFor(x => x.SettingsModelDto!.LanguageSettings).NotNull();
-        RuleFor(x => x.SettingsModelDto!.ServerSettings).NotNull();
-        RuleFor(x => x.SettingsModelDto!.NetworkSettings).NotNull();
+        RuleFor(x => x.SettingsModelDto)
+            .NotNull()
+            .DependentRules(() =>
+            {
+                RuleFor(x => x.SettingsModelDto!.ConfirmationSettings).NotNull();
+                RuleFor(x => x.SettingsModelDto!.DateTimeSettings).NotNull();
+                RuleFor(x => x.SettingsModelDto!.DebugSettings).NotNull();
+                RuleFor(x => x.SettingsModelDto!.DisplaySettings).NotNull();
+                RuleFor(x => x.SettingsModelDto!.DownloadManagerSettings).NotNull();
+                RuleFor(x => x.SettingsModelDto!.GeneralSettings).NotNull();
+                RuleFor(x => x.SettingsModelDto!.LanguageSettings).NotNull();
+                RuleFor(x => x.SettingsModelDto!.ServerSettings).NotNull();
+                RuleFor(x => x.SettingsModelDto!.NetworkSettings).NotNull();
+            });
     }
 }
 

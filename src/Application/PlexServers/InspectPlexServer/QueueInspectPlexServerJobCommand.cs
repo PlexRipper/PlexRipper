@@ -6,7 +6,7 @@ public class QueueInspectPlexServerJobCommandValidator : AbstractValidator<Queue
 {
     public QueueInspectPlexServerJobCommandValidator()
     {
-        RuleFor(x => x.PlexServerIds.Count).GreaterThan(0);
+        RuleFor(x => x.PlexServerIds).NotNull().NotEmpty();
     }
 }
 

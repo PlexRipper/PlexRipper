@@ -10,7 +10,7 @@ public class SearchPlexMediaRequestValidator : Validator<SearchPlexMediaRequest>
 {
     public SearchPlexMediaRequestValidator()
     {
-        RuleFor(x => x.Query.Length).GreaterThan(0);
+        RuleFor(x => x.Query).NotEmpty();
     }
 }
 

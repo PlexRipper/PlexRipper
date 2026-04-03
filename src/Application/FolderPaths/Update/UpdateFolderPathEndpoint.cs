@@ -10,12 +10,18 @@ public class UpdateFolderPathEndpointRequestValidator : Validator<UpdateFolderPa
 {
     public UpdateFolderPathEndpointRequestValidator()
     {
-        RuleFor(x => x.FolderPathDto).NotNull();
-        RuleFor(x => x.FolderPathDto!.Id).GreaterThan(0);
-        RuleFor(x => x.FolderPathDto!.DisplayName).NotEmpty();
-        RuleFor(x => x.FolderPathDto!.Directory).NotEmpty();
-        RuleFor(x => x.FolderPathDto!.FolderType).NotEqual(FolderType.Unknown);
-        RuleFor(x => x.FolderPathDto!.MediaType).NotEqual(PlexMediaType.Unknown);
+        RuleFor(x => x.FolderPathDto)
+            .NotNull()
+            .DependentRules(() =>
+            {
+                RuleFor(x => x.FolderPathDto!.Id)
+                    .GreaterThanOrEqualTo(10)
+                    .WithMessage("Cannot update reserved folder paths with an Id less than 10");
+                RuleFor(x => x.FolderPathDto!.DisplayName).NotEmpty();
+                RuleFor(x => x.FolderPathDto!.Directory).NotEmpty();
+                RuleFor(x => x.FolderPathDto!.FolderType).NotEqual(FolderType.None).NotEqual(FolderType.Unknown);
+                RuleFor(x => x.FolderPathDto!.MediaType).NotEqual(PlexMediaType.None).NotEqual(PlexMediaType.Unknown);
+            });
     }
 }
 
@@ -46,7 +52,6 @@ public class UpdateFolderPathEndpoint : BaseEndpoint<UpdateFolderPathEndpointReq
     public override async Task HandleAsync(UpdateFolderPathEndpointRequest req, CancellationToken ct)
     {
         _log.Here().DebugApiCall(HttpContext, req);
-        // TODO: Should prevent updating reserved folder paths with id < 10
         var folderPath = req.FolderPathDto!.ToModel();
         var folderPathDb = await _dbContext
             .FolderPaths.AsTracking()

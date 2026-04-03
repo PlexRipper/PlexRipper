@@ -130,10 +130,13 @@ public class MoveFileWithResumeCommandHandler : ICommandHandler<MoveFileWithResu
                             sourcePath,
                             targetPath
                         );
-                    break;
+                    return ResultExtensions.TaskIsCancelled(nameof(MoveFileWithResumeCommandHandler));
                 }
             }
         }
+
+        if (cancellationToken.IsCancellationRequested)
+            return ResultExtensions.TaskIsCancelled(nameof(MoveFileWithResumeCommandHandler));
 
         if (!cancellationToken.IsCancellationRequested && _file.Exists(sourcePath))
         {

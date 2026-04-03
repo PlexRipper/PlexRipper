@@ -65,6 +65,42 @@ public class DeleteDownloadTaskFilesCommandUnitTests : BaseUnitTest<DeleteDownlo
     }
 
     [Test]
+    public async Task ShouldDeleteBothReapTempAndPlainFiles_WhenBothExist()
+    {
+        // Arrange
+        await SetupDatabase(
+            84014,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.MovieCount = 1;
+                config.MovieDownloadTasksCount = 1;
+            }
+        );
+        var dbContext = IDbContext;
+        var movieFileTask = await dbContext.DownloadTaskMovieFile.FirstAsync(CancellationToken);
+        var movieFileKey = await dbContext.DownloadTaskMovieFile.ProjectToKey().FirstAsync(CancellationToken);
+
+        var reapTempPath = movieFileTask.DownloadFilePath;
+        var plainPath = reapTempPath.RemoveReapTempSuffix();
+
+        SetupFileSystem(fs =>
+        {
+            fs.AddFile(reapTempPath, new MockFileData([]));
+            fs.AddFile(plainPath, new MockFileData([]));
+        });
+
+        // Act
+        var result = await Sut.ExecuteAsync(new DeleteDownloadTaskFilesCommand([movieFileKey]), CancellationToken);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        var file = Mock.Create<IFile>();
+        file.Exists(reapTempPath).ShouldBeFalse();
+        file.Exists(plainPath).ShouldBeFalse();
+    }
+
+    [Test]
     public async Task ShouldSucceed_WhenFileIsNotPresentOnDisk()
     {
         // Arrange — no files on disk; handler should succeed gracefully.

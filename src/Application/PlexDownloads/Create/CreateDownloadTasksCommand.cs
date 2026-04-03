@@ -5,7 +5,7 @@ public class CreateDownloadTasksCommandValidator : AbstractValidator<CreateDownl
     public CreateDownloadTasksCommandValidator()
     {
         RuleFor(x => x).NotNull();
-        RuleFor(x => x.Request.DownloadMedias).NotEmpty();
+        RuleFor(x => x.Request).NotNull().DependentRules(() => RuleFor(x => x.Request.DownloadMedias).NotEmpty());
     }
 }
 
@@ -35,7 +35,8 @@ public class CreateDownloadTasksCommandHandler : ICommandHandler<CreateDownloadT
         if (downloadMedias.Any(x => x.Type == PlexMediaType.Movie))
         {
             var result = await _commandExecutor.Send(new GenerateDownloadTaskMoviesCommand(request), cancellationToken);
-            result.LogIfFailed();
+            if (result.IsFailed)
+                return result.LogError();
             _generatedTasks = true;
         }
 
@@ -45,7 +46,8 @@ public class CreateDownloadTasksCommandHandler : ICommandHandler<CreateDownloadT
                 new GenerateDownloadTaskTvShowsCommand(request),
                 cancellationToken
             );
-            result.LogIfFailed();
+            if (result.IsFailed)
+                return result.LogError();
             _generatedTasks = true;
         }
 
@@ -55,7 +57,8 @@ public class CreateDownloadTasksCommandHandler : ICommandHandler<CreateDownloadT
                 new GenerateDownloadTaskTvShowSeasonsCommand(request),
                 cancellationToken
             );
-            result.LogIfFailed();
+            if (result.IsFailed)
+                return result.LogError();
             _generatedTasks = true;
         }
 
@@ -65,7 +68,8 @@ public class CreateDownloadTasksCommandHandler : ICommandHandler<CreateDownloadT
                 new GenerateDownloadTaskTvShowEpisodesCommand(request),
                 cancellationToken
             );
-            result.LogIfFailed();
+            if (result.IsFailed)
+                return result.LogError();
             _generatedTasks = true;
         }
 

@@ -30,6 +30,7 @@ public class GetAllMediaByTypeRequestValidator : Validator<GetAllMediaByTypeRequ
             .WithMessage(x => $"Media type {x.MediaType} is not allowed.");
         RuleFor(x => x.Page).GreaterThanOrEqualTo(0);
         RuleFor(x => x.Size).GreaterThanOrEqualTo(0);
+        RuleFor(x => x).Must(x => x.Size > 0 || x.Page == 0).WithMessage("Page must be 0 when size is 0.");
     }
 }
 

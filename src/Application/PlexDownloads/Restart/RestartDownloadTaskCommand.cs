@@ -87,11 +87,13 @@ public class RestartDownloadTaskCommandHandler : ICommandHandler<RestartDownload
                 $"Restart workflow: stop completed for child task {childKey.Id} ({downloadTask.FileName}), preparing to queue."
             );
 
-            await _downloadTaskUpdateDispatcher.OnStatusChangedAsync(
+            var queuedResult = await _downloadTaskUpdateDispatcher.OnStatusChangedAsync(
                 childKey,
                 DownloadStatus.Queued,
                 cancellationToken
             );
+            if (queuedResult.IsFailed)
+                return queuedResult.LogError();
 
             await _dbContext.CreateDownloadClientLog(
                 childKey,

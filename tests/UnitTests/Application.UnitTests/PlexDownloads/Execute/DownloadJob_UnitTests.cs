@@ -291,4 +291,23 @@ public class DownloadJobUnitTests : BaseUnitTest<DownloadJob>
         );
         downloadClientMock.Verify(x => x.DisposeAsync(), Times.Once());
     }
+
+    [Test]
+    public async Task ShouldNotThrow_WhenJobDataMapContainsInvalidDownloadTaskJson()
+    {
+        // Arrange
+        IDictionary<string, object> dict = new Dictionary<string, object>
+        {
+            { DownloadJob.DownloadTaskIdParameter, "not-json" },
+        };
+
+        Mock.Mock<IJobExecutionContext>().SetupGet(x => x.JobDetail.JobDataMap).Returns(new JobDataMap(dict));
+        Mock.Mock<IJobExecutionContext>().SetupGet(x => x.CancellationToken).Returns(CancellationToken);
+
+        // Act
+        var action = async () => await Sut.Execute(Mock.Create<IJobExecutionContext>());
+
+        // Assert
+        await action.ShouldNotThrowAsync();
+    }
 }

@@ -71,5 +71,4 @@ describe('AuthenticationStore.status()', () => {
 		// Assert
 		expect(authenticationStore.isLoggedIn).toEqual(true);
 	});
-
 });

@@ -64,14 +64,14 @@ export const useServerStore = defineStore(StoreNames.ServerStore, () => {
 				.setServerAlias(serverId, {
 					serverAlias,
 				})
-				.pipe(switchMap(() => settingsStore.refreshSettings()));
+				.pipe(switchMap((response) => response.isSuccess ? settingsStore.refreshSettings() : of(response)));
 		},
 		setServerHidden(serverId: number, hidden: boolean) {
 			return plexServerApi
 				.setServerHiddenRequestEndpoint(serverId, {
 					hidden,
 				})
-				.pipe(switchMap(() => settingsStore.refreshSettings()));
+				.pipe(switchMap((response) => response.isSuccess ? settingsStore.refreshSettings() : of(response)));
 		},
 		setServerPaused(serverId: number, paused: boolean) {
 			const request$ = paused
@@ -79,7 +79,7 @@ export const useServerStore = defineStore(StoreNames.ServerStore, () => {
 				: plexServerApi.resumePlexServerDownloadsEndpoint(serverId);
 
 			return request$.pipe(
-				tap(() => actions.refreshPlexServer(serverId)),
+				switchMap((response) => response.isSuccess ? actions.refreshPlexServer(serverId) : of(response)),
 			);
 		},
 		$reset() {

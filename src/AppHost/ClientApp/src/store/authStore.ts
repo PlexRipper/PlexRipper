@@ -98,11 +98,12 @@ export const useAuthenticationStore = defineStore(StoreNames.AuthenticationStore
 
 			return authenticationApi.appUserLogOutEndpoint().pipe(
 				tap((res) => Log.info('User logged out', res)),
+				tap(() => state.isLoggedIn = false),
 				tap(() => router.push('/login')),
 				tap(() => globalStore.$reset()));
 		},
 		status: () => authenticationApi.authenticationStatusEndpoint().pipe(
-			tap((res) => state.isLoggedIn = res.isSuccess),
+			tap((res) => state.isLoggedIn = res.isSuccess && !!res.value?.isLoggedIn),
 			catchError((err) => {
 				state.isLoggedIn = false;
 				return of(err);

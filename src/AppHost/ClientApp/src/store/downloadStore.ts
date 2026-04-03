@@ -47,7 +47,9 @@ export const useDownloadStore = defineStore(StoreNames.DownloadStore, () => {
 				.pipe(switchMap(() => actions.fetchDownloadList()))
 				.subscribe();
 
-			return actions.fetchDownloadList().pipe(switchMap(() => of({ name: StoreNames.DownloadStore, isSuccess: true })));
+			return actions.fetchDownloadList().pipe(
+				map((result) => ({ name: StoreNames.DownloadStore, isSuccess: result.isSuccess })),
+			);
 		},
 		/**
      * Fetch the download list from the API.
@@ -62,26 +64,23 @@ export const useDownloadStore = defineStore(StoreNames.DownloadStore, () => {
 			);
 		},
 		executeDownloadCommand(action: DownloadActions, downloadTaskIds: string[], plexServerId?: number): Observable<BaseResultDTO> {
+			const badRequestResult = (statusCode = 400): BaseResultDTO => ({
+				errors: [],
+				isSuccess: false,
+				statusCode,
+				successes: [],
+			});
+
 			if (downloadTaskIds.length === 0 && action !== DownloadActions.Clear) {
 				Log.error(`No downloadTaskIds provided for action: ${action}`);
-				return of({
-					errors: [],
-					isSuccess: false,
-					statusCode: 400,
-					successes: [],
-				} as BaseResultDTO);
+				return of(badRequestResult());
 			}
 
 			const downloadTaskId = downloadTaskIds[0];
 			// TODO verify if we need to re-fetch the download list after each action
 			if (!downloadTaskId && action !== DownloadActions.Clear && action !== DownloadActions.Delete) {
 				Log.error(`No downloadTaskId provided for action: ${action}`);
-				return of({
-					errors: [],
-					isSuccess: false,
-					statusCode: 400,
-					successes: [],
-				} as BaseResultDTO);
+				return of(badRequestResult());
 			}
 			const id = downloadTaskId as string;
 			switch (action) {
@@ -91,17 +90,17 @@ export const useDownloadStore = defineStore(StoreNames.DownloadStore, () => {
 					if (downloadTaskIds.length > 0) {
 						return downloadApi
 							.clearCompletedDownloadTasksByDownloadTaskIdEndpoint(downloadTaskIds)
-							.pipe(switchMap(actions.fetchDownloadList));
+							.pipe(switchMap((result) => result.isSuccess ? actions.fetchDownloadList() : of(result)));
 					}
 
 					return downloadApi
 						.clearCompletedDownloadTasksByServerIdEndpoint(plexServerId!)
-						.pipe(switchMap(actions.fetchDownloadList));
+						.pipe(switchMap((result) => result.isSuccess ? actions.fetchDownloadList() : of(result)));
 				}
 				case DownloadActions.Delete:
 					return downloadApi
 						.deleteDownloadTaskEndpoint(downloadTaskIds)
-						.pipe(switchMap(actions.fetchDownloadList));
+						.pipe(switchMap((result) => result.isSuccess ? actions.fetchDownloadList() : of(result)));
 				case DownloadActions.Stop:
 					return downloadApi.stopDownloadTaskEndpoint(id);
 				case DownloadActions.Restart:
@@ -110,7 +109,7 @@ export const useDownloadStore = defineStore(StoreNames.DownloadStore, () => {
 					return downloadApi.startDownloadTaskEndpoint(id);
 				default:
 					Log.error(`Action: ${action} does not have a assigned command with payload: ${downloadTaskIds}`);
-					return of();
+					return of(badRequestResult());
 			}
 		},
 		updateServerDownloadProgress(serverDownloadProgress: ServerDownloadProgressDTO | null): void {
@@ -322,7 +321,15 @@ export const useDownloadStore = defineStore(StoreNames.DownloadStore, () => {
 			}).filter((x) => x.downloads.length > 0);
 		}),
 		getActiveDownloadList(serverId = 0): DownloadProgressDTO[] {
-			return getters.getDownloadsByServerId(serverId).flatMap((x) => x.children).flatMap((x) => x.children).flatMap((x) => x.children).filter((x) => x.status != DownloadStatus.Completed && x.status != DownloadStatus.Error);
+			const flattenChildren = (downloads: DownloadProgressDTO[]): DownloadProgressDTO[] => {
+				return downloads.flatMap((download) => {
+					const children = download.children ?? [];
+					return [...children, ...flattenChildren(children)];
+				});
+			};
+
+			return flattenChildren(getters.getDownloadsByServerId(serverId))
+				.filter((x) => x.status != DownloadStatus.Completed && x.status != DownloadStatus.Error);
 		},
 		/**
      * Get the total number of download tasks that are downloadable in the download list.

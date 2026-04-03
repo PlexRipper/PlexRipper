@@ -89,8 +89,7 @@ export const useServerConnectionStore = defineStore(StoreNames.ServerConnectionS
 		checkServerStatus(plexServerId: number) {
 			actions.setConnectionsLoadingForServer(plexServerId, true);
 			return plexServerConnectionApi.checkAllConnectionsStatusByPlexServerEndpoint(plexServerId).pipe(
-				map((x) => x?.value ?? []),
-				switchMap(() => actions.refreshPlexServerConnections()),
+				switchMap((response) => response.isSuccess ? actions.refreshPlexServerConnections() : of(response)),
 				finalize(() => actions.setConnectionsLoadingForServer(plexServerId, false)),
 			);
 		},
@@ -131,7 +130,7 @@ export const useServerConnectionStore = defineStore(StoreNames.ServerConnectionS
 		setPreferredPlexServerConnection: (plexServerId: number, connectionId: number) =>
 			plexServerApi
 				.setPreferredPlexServerConnectionEndpoint(plexServerId, connectionId)
-				.pipe(switchMap(() => serverStore.refreshPlexServer(plexServerId))),
+				.pipe(switchMap((response) => response.isSuccess ? serverStore.refreshPlexServer(plexServerId) : of(response))),
 		$reset() {
 			Object.assign(state, cloneDeep(defaultState));
 		},

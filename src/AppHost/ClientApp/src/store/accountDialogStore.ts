@@ -168,7 +168,7 @@ export const useAccountDialogStore = defineStore(StoreNames.AccountDialogStore, 
 					// Always reset loading state
 					state.validateLoading = false;
 
-					if (!isSuccess || !value) {
+					if (!isSuccess || !value || value.isUnAuthorized) {
 						state.isValidated = false;
 						state.hasValidationErrors = true;
 						dialogStore.openDialog(DialogType.AccountTokenValidateDialog);
@@ -177,6 +177,7 @@ export const useAccountDialogStore = defineStore(StoreNames.AccountDialogStore, 
 
 					// Update state with validated credentials data
 					updateStateWithAccountData(value);
+					state.hasValidationErrors = false;
 
 					// Account has no 2FA and was valid
 					if (value.isValidated && !value.is2Fa) {
@@ -187,6 +188,8 @@ export const useAccountDialogStore = defineStore(StoreNames.AccountDialogStore, 
 					// Account has no 2FA and was invalid
 					if (!value.isValidated && !value.is2Fa) {
 						Log.info('Account has no 2FA and was invalid');
+						state.hasValidationErrors = true;
+						dialogStore.openDialog(DialogType.AccountTokenValidateDialog);
 						return;
 					}
 

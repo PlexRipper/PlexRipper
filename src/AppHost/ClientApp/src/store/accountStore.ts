@@ -68,14 +68,21 @@ export const useAccountStore = defineStore(StoreNames.AccountStore, () => {
 			return plexAccountApi
 				.updatePlexAccountByIdEndpoint(account)
 				.pipe(
-					switchMap(() =>
-						forkJoin([actions.refreshAccounts(), serverStore.refreshPlexServers(), libraryStore.refreshLibraries()]),
-					),
-					switchMap(() => of(actions.getAccount(account.id))),
+					switchMap((result) => {
+						if (!result.isSuccess) {
+							return of(result);
+						}
+
+						return forkJoin([actions.refreshAccounts(), serverStore.refreshPlexServers(), libraryStore.refreshLibraries()]).pipe(
+							switchMap(() => of(actions.getAccount(account.id))),
+						);
+					}),
 				);
 		},
 		deleteAccount(accountId: number) {
-			return plexAccountApi.deletePlexAccountByIdEndpoint(accountId).pipe(switchMap(() => actions.refreshAccounts()));
+			return plexAccountApi
+				.deletePlexAccountByIdEndpoint(accountId)
+				.pipe(switchMap((result) => result.isSuccess ? actions.refreshAccounts() : of(result)));
 		},
 		getAccount(id: number): PlexAccountDTO | undefined {
 			return state.accounts.find((x) => x.id === id);

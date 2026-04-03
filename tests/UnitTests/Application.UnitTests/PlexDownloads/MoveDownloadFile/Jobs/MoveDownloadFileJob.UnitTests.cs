@@ -59,9 +59,7 @@ public class MoveDownloadFileJobUnitTests : BaseUnitTest<MoveDownloadFileJob>
 
         var context = Mock.Create<IJobExecutionContext>();
 
-        Mock.SetupCommand(It.IsAny<MoveDownloadFileFromFileTaskCommand>)
-            .ReturnsAsync(Result.Ok())
-            .Verifiable(Times.Never);
+        Mock.SetupCommand(It.IsAny<MoveDownloadFileFromFileTaskCommand>).ReturnsAsync(Result.Ok());
 
         Mock.Mock<IMoveDownloadFileQueue>()
             .Setup(x => x.CheckMoveDownloadFileJobQueue())
@@ -99,9 +97,7 @@ public class MoveDownloadFileJobUnitTests : BaseUnitTest<MoveDownloadFileJob>
         downloadTask.DownloadStatus = DownloadStatus.DownloadFinished;
         await dbContext.SaveChangesAsync(CancellationToken);
 
-        Mock.SetupCommand(It.IsAny<MoveDownloadFileFromFileTaskCommand>)
-            .ReturnsAsync(Result.Ok())
-            .Verifiable(Times.Once);
+        Mock.SetupCommand(It.IsAny<MoveDownloadFileFromFileTaskCommand>).ReturnsAsync(Result.Ok());
 
         Mock.SetupCommand(It.IsAny<CleanUpDownloadTaskFoldersCommand>).ReturnsAsync(Result.Ok()).Verifiable(Times.Once);
 
@@ -118,8 +114,8 @@ public class MoveDownloadFileJobUnitTests : BaseUnitTest<MoveDownloadFileJob>
                     It.IsAny<CancellationToken>()
                 )
             )
-            .ReturnsAsync(Result.Ok())
-            .Verifiable(Times.Once);
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.Once());
 
         // Simulate the command handler setting MoveFinished status in the DB
         await dbContext.SetDownloadStatus(downloadTask.ToKey(), DownloadStatus.MoveFinished);
@@ -174,9 +170,7 @@ public class MoveDownloadFileJobUnitTests : BaseUnitTest<MoveDownloadFileJob>
         downloadTask.DownloadStatus = DownloadStatus.DownloadFinished;
         await dbContext.SaveChangesAsync(CancellationToken);
 
-        Mock.SetupCommand(It.IsAny<MoveDownloadFileFromFileTaskCommand>)
-            .ReturnsAsync(Result.Fail("Move failed"))
-            .Verifiable(Times.Once);
+        Mock.SetupCommand(It.IsAny<MoveDownloadFileFromFileTaskCommand>).ReturnsAsync(Result.Fail("Move failed"));
 
         // These should NOT be called when the move command fails
         Mock.SetupCommand(It.IsAny<CleanUpDownloadTaskFoldersCommand>)
@@ -196,8 +190,8 @@ public class MoveDownloadFileJobUnitTests : BaseUnitTest<MoveDownloadFileJob>
                     It.IsAny<CancellationToken>()
                 )
             )
-            .ReturnsAsync(Result.Ok())
-            .Verifiable(Times.Never);
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.Never());
 
         var context = SetupJobContext(downloadTask.ToKey());
 
@@ -250,9 +244,7 @@ public class MoveDownloadFileJobUnitTests : BaseUnitTest<MoveDownloadFileJob>
         downloadTask.DownloadStatus = DownloadStatus.MoveFinished;
         await dbContext.SaveChangesAsync(CancellationToken);
 
-        Mock.SetupCommand(It.IsAny<MoveDownloadFileFromFileTaskCommand>)
-            .ReturnsAsync(Result.Fail("Move failed"))
-            .Verifiable(Times.Once);
+        Mock.SetupCommand(It.IsAny<MoveDownloadFileFromFileTaskCommand>).ReturnsAsync(Result.Fail("Move failed"));
 
         Mock.SetupCommand(It.IsAny<CleanUpDownloadTaskFoldersCommand>)
             .ReturnsAsync(Result.Ok())
@@ -271,8 +263,8 @@ public class MoveDownloadFileJobUnitTests : BaseUnitTest<MoveDownloadFileJob>
                     It.IsAny<CancellationToken>()
                 )
             )
-            .ReturnsAsync(Result.Ok())
-            .Verifiable(Times.Never);
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.Never());
 
         var context = SetupJobContext(downloadTask.ToKey());
 
@@ -324,9 +316,7 @@ public class MoveDownloadFileJobUnitTests : BaseUnitTest<MoveDownloadFileJob>
         downloadTask.DownloadStatus = DownloadStatus.MoveFinished;
         await dbContext.SaveChangesAsync(CancellationToken);
 
-        Mock.SetupCommand(It.IsAny<MoveDownloadFileFromFileTaskCommand>)
-            .ReturnsAsync(Result.Ok())
-            .Verifiable(Times.Once);
+        Mock.SetupCommand(It.IsAny<MoveDownloadFileFromFileTaskCommand>).ReturnsAsync(Result.Ok());
 
         Mock.SetupCommand(It.IsAny<CleanUpDownloadTaskFoldersCommand>)
             .ReturnsAsync(Result.Ok())
@@ -340,12 +330,10 @@ public class MoveDownloadFileJobUnitTests : BaseUnitTest<MoveDownloadFileJob>
                     It.IsAny<CancellationToken>()
                 )
             )
-            .ThrowsAsync(new InvalidOperationException("dispatcher exploded"));
+            .ThrowsAsync(new InvalidOperationException("dispatcher exploded"))
+            .Verifiable(Times.Once());
 
-        Mock.Mock<IMoveDownloadFileQueue>()
-            .Setup(x => x.CheckMoveDownloadFileJobQueue())
-            .ReturnsAsync(Result.Ok())
-            .Verifiable(Times.Once);
+        Mock.Mock<IMoveDownloadFileQueue>().Setup(x => x.CheckMoveDownloadFileJobQueue()).ReturnsAsync(Result.Ok());
 
         var context = SetupJobContext(downloadTask.ToKey());
 
@@ -385,9 +373,7 @@ public class MoveDownloadFileJobUnitTests : BaseUnitTest<MoveDownloadFileJob>
         downloadTask.DownloadStatus = DownloadStatus.MoveFinished;
         await dbContext.SaveChangesAsync(CancellationToken);
 
-        Mock.SetupCommand(It.IsAny<MoveDownloadFileFromFileTaskCommand>)
-            .ReturnsAsync(Result.Ok())
-            .Verifiable(Times.Once);
+        Mock.SetupCommand(It.IsAny<MoveDownloadFileFromFileTaskCommand>).ReturnsAsync(Result.Ok());
 
         Mock.SetupCommand(It.IsAny<CleanUpDownloadTaskFoldersCommand>).ReturnsAsync(Result.Ok()).Verifiable(Times.Once);
 
@@ -403,8 +389,8 @@ public class MoveDownloadFileJobUnitTests : BaseUnitTest<MoveDownloadFileJob>
                     It.IsAny<CancellationToken>()
                 )
             )
-            .ReturnsAsync(Result.Ok())
-            .Verifiable(Times.Once);
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.Once());
 
         var context = SetupJobContext(downloadTask.ToKey());
 

@@ -68,13 +68,7 @@ public class DeleteDownloadTasksByKeyCommandHandler : ICommandHandler<DeleteDown
         var notified = new HashSet<(Guid Id, DownloadTaskType Type)>();
         foreach (var key in command.Keys)
         {
-            var deletedResult = await _downloadTaskUpdateDispatcher.OnStatusChangedAsync(
-                key,
-                DownloadStatus.Deleted,
-                ct
-            );
-            if (deletedResult.IsFailed)
-                return deletedResult.LogError();
+            await _downloadTaskUpdateDispatcher.OnStatusChangedAsync(key, DownloadStatus.Deleted, ct);
 
             notified.Add((key.Id, key.Type));
         }
@@ -83,13 +77,7 @@ public class DeleteDownloadTasksByKeyCommandHandler : ICommandHandler<DeleteDown
         {
             if (!notified.Contains((parentKey.Id, parentKey.Type)))
             {
-                var orphanDeletedResult = await _downloadTaskUpdateDispatcher.OnStatusChangedAsync(
-                    parentKey,
-                    DownloadStatus.Deleted,
-                    ct
-                );
-                if (orphanDeletedResult.IsFailed)
-                    return orphanDeletedResult.LogError();
+                await _downloadTaskUpdateDispatcher.OnStatusChangedAsync(parentKey, DownloadStatus.Deleted, ct);
             }
         }
 

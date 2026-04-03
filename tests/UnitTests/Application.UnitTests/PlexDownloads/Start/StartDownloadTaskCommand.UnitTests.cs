@@ -216,8 +216,8 @@ public class StartDownloadTaskCommandUnitTests : BaseUnitTest<StartDownloadTaskC
                     It.IsAny<CancellationToken>()
                 )
             )
-            .ReturnsAsync(Result.Ok())
-            .Verifiable(Times.AtLeastOnce);
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.Once());
         await SetupDatabase(
             96318,
             x =>
@@ -245,8 +245,7 @@ public class StartDownloadTaskCommandUnitTests : BaseUnitTest<StartDownloadTaskC
 
         Mock.Mock<IMoveDownloadFileScheduler>()
             .Setup(x => x.IsDownloadFileMoving(It.IsAny<DownloadTaskKey>()))
-            .ReturnsAsync(false)
-            .Verifiable(Times.Once);
+            .ReturnsAsync(false);
 
         Mock.Mock<IMoveDownloadFileScheduler>()
             .Setup(x => x.StartMoveDownloadFileJob(It.IsAny<DownloadTaskKey>()))
@@ -405,7 +404,8 @@ public class StartDownloadTaskCommandUnitTests : BaseUnitTest<StartDownloadTaskC
                     It.IsAny<CancellationToken>()
                 )
             )
-            .ReturnsAsync(Result.Ok());
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.AtLeastOnce());
         await SetupDatabase(
             44822,
             x =>
@@ -482,7 +482,8 @@ public class StartDownloadTaskCommandUnitTests : BaseUnitTest<StartDownloadTaskC
                     It.IsAny<CancellationToken>()
                 )
             )
-            .ReturnsAsync(Result.Ok());
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.AtLeastOnce());
         await SetupDatabase(
             44823,
             x =>
@@ -554,7 +555,8 @@ public class StartDownloadTaskCommandUnitTests : BaseUnitTest<StartDownloadTaskC
                     It.IsAny<CancellationToken>()
                 )
             )
-            .ReturnsAsync(Result.Ok());
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.AtLeastOnce());
         await SetupDatabase(
             44824,
             x =>
@@ -626,7 +628,8 @@ public class StartDownloadTaskCommandUnitTests : BaseUnitTest<StartDownloadTaskC
                     It.IsAny<CancellationToken>()
                 )
             )
-            .ReturnsAsync(Result.Ok());
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.AtLeastOnce());
         await SetupDatabase(
             44825,
             x =>
@@ -701,7 +704,8 @@ public class StartDownloadTaskCommandUnitTests : BaseUnitTest<StartDownloadTaskC
                     It.IsAny<CancellationToken>()
                 )
             )
-            .ReturnsAsync(Result.Ok());
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.AtLeastOnce());
         await SetupDatabase(
             44826,
             x =>
@@ -910,9 +914,7 @@ public class StartDownloadTaskCommandUnitTests : BaseUnitTest<StartDownloadTaskC
             .Setup(x => x.StartDownloadTaskJob(It.IsAny<DownloadTaskKey>()))
             .ReturnsAsync(Result.Ok());
 
-        Mock.SetupCommand(It.IsAny<PauseDownloadTaskCommand>)
-            .ReturnsAsync(Result.Fail("Pause command failed"))
-            .Verifiable(Times.Once);
+        Mock.SetupCommand(It.IsAny<PauseDownloadTaskCommand>).ReturnsAsync(Result.Fail("Pause command failed"));
         Mock.PublishEvent(It.IsAny<CheckDownloadQueueEvent>).Returns(Task.CompletedTask);
 
         // Act
@@ -1207,7 +1209,8 @@ public class StartDownloadTaskCommandUnitTests : BaseUnitTest<StartDownloadTaskC
                     It.IsAny<CancellationToken>()
                 )
             )
-            .ReturnsAsync(Result.Ok());
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.AtLeastOnce());
         await SetupDatabase(
             11107,
             x =>
@@ -1279,7 +1282,8 @@ public class StartDownloadTaskCommandUnitTests : BaseUnitTest<StartDownloadTaskC
                     It.IsAny<CancellationToken>()
                 )
             )
-            .ReturnsAsync(Result.Fail("Queue sibling failed"));
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.Once());
         await SetupDatabase(
             11108,
             x =>

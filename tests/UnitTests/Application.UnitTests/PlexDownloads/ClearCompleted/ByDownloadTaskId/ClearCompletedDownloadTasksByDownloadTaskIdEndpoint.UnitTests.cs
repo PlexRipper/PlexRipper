@@ -13,7 +13,8 @@ public class ClearCompletedDownloadTasksByDownloadTaskIdEndpointUnitTests
                     It.IsAny<CancellationToken>()
                 )
             )
-            .ReturnsAsync(Result.Ok());
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.Once());
     }
 
     [Test]
@@ -47,8 +48,8 @@ public class ClearCompletedDownloadTasksByDownloadTaskIdEndpointUnitTests
                     It.IsAny<CancellationToken>()
                 )
             )
-            .ReturnsAsync(Result.Ok())
-            .Verifiable(Times.Exactly(5));
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.Once());
 
         Mock.Mock<ICommandExecutor>()
             .Setup(x => x.Send(It.IsAny<DeleteDownloadTasksByKeyCommand>(), It.IsAny<CancellationToken>()))
@@ -205,7 +206,7 @@ public class ClearCompletedDownloadTasksByDownloadTaskIdEndpointUnitTests
                     It.IsAny<CancellationToken>()
                 )
             )
-            .ReturnsAsync(Result.Ok())
+            .Returns(Task.CompletedTask)
             .Verifiable(Times.Once());
 
         Mock.Mock<ICommandExecutor>()

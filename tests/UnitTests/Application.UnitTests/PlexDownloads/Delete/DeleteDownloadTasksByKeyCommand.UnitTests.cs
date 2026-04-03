@@ -12,7 +12,8 @@ public class DeleteDownloadTasksByKeyCommandUnitTests : BaseUnitTest<DeleteDownl
                     It.IsAny<CancellationToken>()
                 )
             )
-            .ReturnsAsync(Result.Ok());
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.Once());
     }
 
     [Test]
@@ -39,7 +40,7 @@ public class DeleteDownloadTasksByKeyCommandUnitTests : BaseUnitTest<DeleteDownl
                     It.IsAny<CancellationToken>()
                 )
             )
-            .ReturnsAsync(Result.Ok())
+            .Returns(Task.CompletedTask)
             .Verifiable(Times.Once());
 
         // Act
@@ -75,7 +76,7 @@ public class DeleteDownloadTasksByKeyCommandUnitTests : BaseUnitTest<DeleteDownl
                     It.IsAny<CancellationToken>()
                 )
             )
-            .ReturnsAsync(Result.Ok())
+            .Returns(Task.CompletedTask)
             .Verifiable(Times.Once());
 
         // Act
@@ -116,7 +117,7 @@ public class DeleteDownloadTasksByKeyCommandUnitTests : BaseUnitTest<DeleteDownl
                     It.IsAny<CancellationToken>()
                 )
             )
-            .ReturnsAsync(Result.Ok())
+            .Returns(Task.CompletedTask)
             .Verifiable(Times.Once());
 
         // Act
@@ -159,7 +160,7 @@ public class DeleteDownloadTasksByKeyCommandUnitTests : BaseUnitTest<DeleteDownl
                     It.IsAny<CancellationToken>()
                 )
             )
-            .ReturnsAsync(Result.Ok())
+            .Returns(Task.CompletedTask)
             .Verifiable(Times.Once());
 
         // Act — delete only the first episode file
@@ -203,8 +204,8 @@ public class DeleteDownloadTasksByKeyCommandUnitTests : BaseUnitTest<DeleteDownl
                     It.IsAny<CancellationToken>()
                 )
             )
-            .ReturnsAsync(Result.Ok())
-            .Verifiable(Times.Exactly(2));
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.Once());
 
         // Act
         var result = await Sut.ExecuteAsync(new DeleteDownloadTasksByKeyCommand(toDeleteKeys), CancellationToken);
@@ -245,7 +246,7 @@ public class DeleteDownloadTasksByKeyCommandUnitTests : BaseUnitTest<DeleteDownl
                     It.IsAny<CancellationToken>()
                 )
             )
-            .ReturnsAsync(Result.Ok())
+            .Returns(Task.CompletedTask)
             .Verifiable(Times.Once());
 
         // Act

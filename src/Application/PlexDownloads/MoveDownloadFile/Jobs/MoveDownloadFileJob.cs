@@ -117,30 +117,7 @@ public class MoveDownloadFileJob : IJob
 
             if (downloadTask.DownloadStatus is DownloadStatus.MoveFinished)
             {
-                var updateStatusResult = await _downloadTaskUpdateDispatcher.OnStatusChangedAsync(
-                    downloadTaskKey,
-                    DownloadStatus.Completed,
-                    ct
-                );
-
-                if (updateStatusResult.IsCancelled)
-                {
-                    _log.Here()
-                        .Warning(
-                            "{JobName} for {DownloadTaskKey} was cancelled",
-                            nameof(MoveDownloadFileJob),
-                            downloadTaskKey
-                        );
-                    await QueueNextAsync();
-                    return;
-                }
-
-                if (updateStatusResult.IsFailed)
-                {
-                    updateStatusResult.LogError();
-                    await QueueNextAsync();
-                    return;
-                }
+                await _downloadTaskUpdateDispatcher.OnStatusChangedAsync(downloadTaskKey, DownloadStatus.Completed, ct);
 
                 // Clean up the Download task folders
                 var cleanupResult = await Result.Try(() =>

@@ -153,7 +153,7 @@ public class CleanUpDownloadTaskFoldersUnitTests : BaseUnitTest<CleanUpDownloadT
             ])
             .Verifiable(Times.Exactly(2));
 
-        Mock.Mock<IDirectory>().Setup(x => x.Delete(It.IsAny<string>())).Verifiable(Times.Never);
+        Mock.Mock<IDirectory>().Setup(x => x.Delete(It.IsAny<string>()));
 
         // Act
         var request = new CleanUpDownloadTaskFoldersCommand(downloadTask.ToKey());

@@ -59,7 +59,8 @@ public class DashPlexDownloadClientStopAsyncUnitTests : BaseUnitTest<DashPlexDow
                     It.IsAny<CancellationToken>()
                 )
             )
-            .ReturnsAsync(Result.Ok());
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.Once());
         await SetupDatabase(
             13001,
             config =>
@@ -132,7 +133,7 @@ public class DashPlexDownloadClientStopAsyncUnitTests : BaseUnitTest<DashPlexDow
                     It.IsAny<CancellationToken>()
                 )
             )
-            .ReturnsAsync(Result.Fail("Stopped status update failed"))
+            .Returns(Task.CompletedTask)
             .Verifiable(Times.Once());
         Mock.Mock<IDownloadTaskUpdateDispatcher>()
             .Setup(x =>
@@ -142,7 +143,8 @@ public class DashPlexDownloadClientStopAsyncUnitTests : BaseUnitTest<DashPlexDow
                     It.IsAny<CancellationToken>()
                 )
             )
-            .ReturnsAsync(Result.Ok());
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.Once());
 
         await SetupDatabase(
             13003,
@@ -193,7 +195,8 @@ public class DashPlexDownloadClientStopAsyncUnitTests : BaseUnitTest<DashPlexDow
                     It.IsAny<CancellationToken>()
                 )
             )
-            .ReturnsAsync(Result.Ok());
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.Once());
         await SetupDatabase(
             13002,
             config =>

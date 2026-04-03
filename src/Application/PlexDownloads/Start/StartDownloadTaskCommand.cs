@@ -83,13 +83,11 @@ public class StartDownloadTaskCommandHandler : ICommandHandler<StartDownloadTask
                 )
             )
             {
-                var queueResult = await _downloadTaskUpdateDispatcher.OnStatusChangedAsync(
+                await _downloadTaskUpdateDispatcher.OnStatusChangedAsync(
                     waitingTask.ToKey(),
                     DownloadStatus.Queued,
                     cancellationToken
                 );
-                if (queueResult.IsFailed)
-                    return queueResult.LogError();
             }
         }
 

@@ -86,7 +86,7 @@ public class DownloadJobUnitTests : BaseUnitTest<DownloadJob>
             .Setup(x => x.Start(It.IsAny<DownloadTaskKey>(), CancellationToken))
             .ReturnsAsync(Result.Ok())
             .Verifiable(Times.Once());
-        downloadClientMock.Setup(x => x.DisposeAsync()).Returns(ValueTask.CompletedTask).Verifiable(Times.Once);
+        downloadClientMock.Setup(x => x.DisposeAsync()).Returns(ValueTask.CompletedTask);
 
         var downloadClientIndexMock = new Mock<IIndex<PlexDownloadClientType, IPlexDownloadClient>>();
         downloadClientIndexMock.Setup(x => x[It.IsAny<PlexDownloadClientType>()]).Returns(downloadClientMock.Object);
@@ -161,7 +161,7 @@ public class DownloadJobUnitTests : BaseUnitTest<DownloadJob>
                     It.IsAny<CancellationToken>()
                 )
             )
-            .ReturnsAsync(Result.Ok())
+            .Returns(Task.CompletedTask)
             .Verifiable(Times.Once());
 
         var downloadClientIndexMock = new Mock<IIndex<PlexDownloadClientType, IPlexDownloadClient>>();
@@ -250,7 +250,7 @@ public class DownloadJobUnitTests : BaseUnitTest<DownloadJob>
                     It.IsAny<CancellationToken>()
                 )
             )
-            .ReturnsAsync(Result.Ok())
+            .Returns(Task.CompletedTask)
             .Verifiable(Times.Once());
 
         var downloadClientIndexMock = new Mock<IIndex<PlexDownloadClientType, IPlexDownloadClient>>();

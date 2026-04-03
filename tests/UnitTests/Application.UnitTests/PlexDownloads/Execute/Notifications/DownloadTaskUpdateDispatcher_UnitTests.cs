@@ -41,7 +41,7 @@ public class DownloadTaskUpdateDispatcherUnitTests : BaseUnitTest<DownloadTaskUp
         var sut = Sut;
 
         // Act
-        var progressResult = sut.OnProgressUpdated(
+        sut.OnProgressUpdated(
             episodeFile.ToKey(),
             new DownloadTaskProgress
             {
@@ -51,8 +51,6 @@ public class DownloadTaskUpdateDispatcherUnitTests : BaseUnitTest<DownloadTaskUp
                 DownloadSpeed = 100,
             }
         );
-
-        progressResult.IsSuccess.ShouldBeTrue();
 
         await sut.StartAsync(CancellationToken.None);
 
@@ -161,7 +159,7 @@ public class DownloadTaskUpdateDispatcherUnitTests : BaseUnitTest<DownloadTaskUp
             .Returns(Task.CompletedTask);
 
         var sut = Sut;
-        var result = sut.OnProgressUpdated(
+        sut.OnProgressUpdated(
             new DownloadTaskKey
             {
                 Id = Guid.NewGuid(),
@@ -177,8 +175,6 @@ public class DownloadTaskUpdateDispatcherUnitTests : BaseUnitTest<DownloadTaskUp
                 DownloadSpeed = 1,
             }
         );
-
-        result.IsSuccess.ShouldBeTrue();
 
         await sut.StartAsync(CancellationToken.None);
         await Task.Delay(1500, CancellationToken);
@@ -254,14 +250,13 @@ public class DownloadTaskUpdateDispatcherUnitTests : BaseUnitTest<DownloadTaskUp
             .Callback<int, long, IReadOnlyCollection<DownloadPatchDTO>, IReadOnlyCollection<Guid>?, CancellationToken>(
                 (_, _, upserts, _, _) => capturedPatches.Add(upserts)
             )
-            .Returns(Task.CompletedTask);
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.Once());
 
         var sut = Sut;
         await sut.StartAsync(CancellationToken.None);
 
-        var result = await sut.OnStatusChangedAsync(episodeFile.ToKey(), DownloadStatus.Downloading, CancellationToken);
-
-        result.IsSuccess.ShouldBeTrue();
+        await sut.OnStatusChangedAsync(episodeFile.ToKey(), DownloadStatus.Downloading, CancellationToken);
         await WaitForPatchCount(capturedPatches, 1);
         await sut.StopAsync(CancellationToken.None);
 
@@ -376,7 +371,7 @@ public class DownloadTaskUpdateDispatcherUnitTests : BaseUnitTest<DownloadTaskUp
         var movieFile = await IDbContext.DownloadTaskMovieFile.AsNoTracking().FirstAsync(CancellationToken);
 
         var sut = Sut;
-        var progressResult = sut.OnProgressUpdated(
+        sut.OnProgressUpdated(
             movieFile.ToKey(),
             new DownloadTaskProgress
             {
@@ -387,11 +382,7 @@ public class DownloadTaskUpdateDispatcherUnitTests : BaseUnitTest<DownloadTaskUp
             }
         );
 
-        progressResult.IsSuccess.ShouldBeTrue();
-
-        var pauseResult = await sut.OnStatusChangedAsync(movieFile.ToKey(), DownloadStatus.Paused, CancellationToken);
-
-        pauseResult.IsSuccess.ShouldBeTrue();
+        await sut.OnStatusChangedAsync(movieFile.ToKey(), DownloadStatus.Paused, CancellationToken);
 
         var updatedMovieFile = await IDbContext.DownloadTaskMovieFile.AsNoTracking().FirstAsync(CancellationToken);
         updatedMovieFile.DownloadStatus.ShouldBe(DownloadStatus.Paused);
@@ -417,7 +408,7 @@ public class DownloadTaskUpdateDispatcherUnitTests : BaseUnitTest<DownloadTaskUp
         var createDbContextTcs = new TaskCompletionSource<IReaparrDbContext>(
             TaskCreationOptions.RunContinuationsAsynchronously
         );
-        delayedDbContextFactory.Setup(x => x.CreateAsync()).Returns(createDbContextTcs.Task);
+        delayedDbContextFactory.Setup(x => x.CreateAsync()).Returns(createDbContextTcs.Task).Verifiable(Times.Once());
 
         var downloadHubService = new Mock<IDownloadHubService>();
         downloadHubService
@@ -438,12 +429,11 @@ public class DownloadTaskUpdateDispatcherUnitTests : BaseUnitTest<DownloadTaskUp
             downloadHubService.Object
         );
 
-        var initialProgressResult = sut.OnProgressUpdated(movieFile.ToKey(), initialProgress);
-        initialProgressResult.IsSuccess.ShouldBeTrue();
+        sut.OnProgressUpdated(movieFile.ToKey(), initialProgress);
 
         var pauseTask = sut.OnStatusChangedAsync(movieFile.ToKey(), DownloadStatus.Paused, CancellationToken);
 
-        var progressResult = sut.OnProgressUpdated(
+        sut.OnProgressUpdated(
             movieFile.ToKey(),
             new DownloadTaskProgress
             {
@@ -454,11 +444,8 @@ public class DownloadTaskUpdateDispatcherUnitTests : BaseUnitTest<DownloadTaskUp
             }
         );
 
-        progressResult.IsSuccess.ShouldBeTrue();
-
         createDbContextTcs.SetResult(IDbContext);
-        var pauseResult = await pauseTask;
-        pauseResult.IsSuccess.ShouldBeTrue();
+        await pauseTask;
 
         await WaitUntilAsync(async () =>
         {
@@ -509,27 +496,17 @@ public class DownloadTaskUpdateDispatcherUnitTests : BaseUnitTest<DownloadTaskUp
             .Callback<int, long, IReadOnlyCollection<DownloadPatchDTO>, IReadOnlyCollection<Guid>?, CancellationToken>(
                 (_, _, upserts, _, _) => capturedPatches.Add(upserts)
             )
-            .Returns(Task.CompletedTask);
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.Once());
 
         var sut = Sut;
 
         await sut.StartAsync(CancellationToken.None);
 
-        var firstStatusResult = await sut.OnStatusChangedAsync(
-            completedEpisodeFile.ToKey(),
-            DownloadStatus.Downloading,
-            CancellationToken
-        );
-        var secondStatusResult = await sut.OnStatusChangedAsync(
-            siblingEpisodeFile.ToKey(),
-            DownloadStatus.Downloading,
-            CancellationToken
-        );
+        await sut.OnStatusChangedAsync(completedEpisodeFile.ToKey(), DownloadStatus.Downloading, CancellationToken);
+        await sut.OnStatusChangedAsync(siblingEpisodeFile.ToKey(), DownloadStatus.Downloading, CancellationToken);
 
-        firstStatusResult.IsSuccess.ShouldBeTrue();
-        secondStatusResult.IsSuccess.ShouldBeTrue();
-
-        var initialCompletedProgressResult = sut.OnProgressUpdated(
+        sut.OnProgressUpdated(
             completedEpisodeFile.ToKey(),
             new DownloadTaskProgress
             {
@@ -540,7 +517,7 @@ public class DownloadTaskUpdateDispatcherUnitTests : BaseUnitTest<DownloadTaskUp
                 TimeRemaining = 10,
             }
         );
-        var initialSiblingProgressResult = sut.OnProgressUpdated(
+        sut.OnProgressUpdated(
             siblingEpisodeFile.ToKey(),
             new DownloadTaskProgress
             {
@@ -552,12 +529,9 @@ public class DownloadTaskUpdateDispatcherUnitTests : BaseUnitTest<DownloadTaskUp
             }
         );
 
-        initialCompletedProgressResult.IsSuccess.ShouldBeTrue();
-        initialSiblingProgressResult.IsSuccess.ShouldBeTrue();
-
         await WaitForPatchCount(capturedPatches, 4);
 
-        var completedProgressResult = sut.OnProgressUpdated(
+        sut.OnProgressUpdated(
             completedEpisodeFile.ToKey(),
             new DownloadTaskProgress
             {
@@ -569,7 +543,7 @@ public class DownloadTaskUpdateDispatcherUnitTests : BaseUnitTest<DownloadTaskUp
             }
         );
 
-        var siblingProgressResult = sut.OnProgressUpdated(
+        sut.OnProgressUpdated(
             siblingEpisodeFile.ToKey(),
             new DownloadTaskProgress
             {
@@ -580,9 +554,6 @@ public class DownloadTaskUpdateDispatcherUnitTests : BaseUnitTest<DownloadTaskUp
                 TimeRemaining = 12,
             }
         );
-
-        completedProgressResult.IsSuccess.ShouldBeTrue();
-        siblingProgressResult.IsSuccess.ShouldBeTrue();
 
         await WaitUntilAsync(async () =>
         {
@@ -650,19 +621,8 @@ public class DownloadTaskUpdateDispatcherUnitTests : BaseUnitTest<DownloadTaskUp
 
         var sut = Sut;
 
-        var firstStatusResult = await sut.OnStatusChangedAsync(
-            completedEpisodeFile.ToKey(),
-            DownloadStatus.Downloading,
-            CancellationToken
-        );
-        var secondStatusResult = await sut.OnStatusChangedAsync(
-            siblingEpisodeFile.ToKey(),
-            DownloadStatus.Downloading,
-            CancellationToken
-        );
-
-        firstStatusResult.IsSuccess.ShouldBeTrue();
-        secondStatusResult.IsSuccess.ShouldBeTrue();
+        await sut.OnStatusChangedAsync(completedEpisodeFile.ToKey(), DownloadStatus.Downloading, CancellationToken);
+        await sut.OnStatusChangedAsync(siblingEpisodeFile.ToKey(), DownloadStatus.Downloading, CancellationToken);
 
         var runningSnapshot = new DirectDownloadSnapshot
         {
@@ -701,60 +661,56 @@ public class DownloadTaskUpdateDispatcherUnitTests : BaseUnitTest<DownloadTaskUp
         };
 
         sut.OnProgressUpdated(
-                completedEpisodeFile.ToKey(),
-                new DownloadTaskProgress
-                {
-                    DataTotal = 1_000,
-                    DataReceived = 300,
-                    Percentage = 30,
-                    DownloadSpeed = 30,
-                    TimeRemaining = 10,
-                },
-                runningSnapshot
-            )
-            .IsSuccess.ShouldBeTrue();
+            completedEpisodeFile.ToKey(),
+            new DownloadTaskProgress
+            {
+                DataTotal = 1_000,
+                DataReceived = 300,
+                Percentage = 30,
+                DownloadSpeed = 30,
+                TimeRemaining = 10,
+            },
+            runningSnapshot
+        );
 
         sut.OnProgressUpdated(
-                siblingEpisodeFile.ToKey(),
-                new DownloadTaskProgress
-                {
-                    DataTotal = 2_000,
-                    DataReceived = 400,
-                    Percentage = 20,
-                    DownloadSpeed = 40,
-                    TimeRemaining = 20,
-                },
-                siblingSnapshot
-            )
-            .IsSuccess.ShouldBeTrue();
+            siblingEpisodeFile.ToKey(),
+            new DownloadTaskProgress
+            {
+                DataTotal = 2_000,
+                DataReceived = 400,
+                Percentage = 20,
+                DownloadSpeed = 40,
+                TimeRemaining = 20,
+            },
+            siblingSnapshot
+        );
 
         sut.OnProgressUpdated(
-                completedEpisodeFile.ToKey(),
-                new DownloadTaskProgress
-                {
-                    DataTotal = 1_000,
-                    DataReceived = 1_000,
-                    Percentage = 100,
-                    DownloadSpeed = 0,
-                    TimeRemaining = 0,
-                },
-                completedSnapshot
-            )
-            .IsSuccess.ShouldBeTrue();
+            completedEpisodeFile.ToKey(),
+            new DownloadTaskProgress
+            {
+                DataTotal = 1_000,
+                DataReceived = 1_000,
+                Percentage = 100,
+                DownloadSpeed = 0,
+                TimeRemaining = 0,
+            },
+            completedSnapshot
+        );
 
         sut.OnProgressUpdated(
-                siblingEpisodeFile.ToKey(),
-                new DownloadTaskProgress
-                {
-                    DataTotal = 2_000,
-                    DataReceived = 500,
-                    Percentage = 25,
-                    DownloadSpeed = 123,
-                    TimeRemaining = 12,
-                },
-                siblingSnapshot
-            )
-            .IsSuccess.ShouldBeTrue();
+            siblingEpisodeFile.ToKey(),
+            new DownloadTaskProgress
+            {
+                DataTotal = 2_000,
+                DataReceived = 500,
+                Percentage = 25,
+                DownloadSpeed = 123,
+                TimeRemaining = 12,
+            },
+            siblingSnapshot
+        );
 
         await sut.StartAsync(CancellationToken.None);
         await Task.Delay(1500, CancellationToken);
@@ -797,8 +753,7 @@ public class DownloadTaskUpdateDispatcherUnitTests : BaseUnitTest<DownloadTaskUp
             }
         );
 
-        var pauseResult = await sut.OnStatusChangedAsync(movieFile.ToKey(), DownloadStatus.Paused, CancellationToken);
-        pauseResult.IsSuccess.ShouldBeTrue();
+        await sut.OnStatusChangedAsync(movieFile.ToKey(), DownloadStatus.Paused, CancellationToken);
 
         sut.OnProgressUpdated(
             movieFile.ToKey(),
@@ -1051,10 +1006,9 @@ public class DownloadTaskUpdateDispatcherUnitTests : BaseUnitTest<DownloadTaskUp
         var sut = Sut;
 
         // Act
-        var result = await sut.OnStatusChangedAsync(movieFile.ToKey(), DownloadStatus.Deleted, CancellationToken);
+        await sut.OnStatusChangedAsync(movieFile.ToKey(), DownloadStatus.Deleted, CancellationToken);
 
         // Assert
-        result.IsSuccess.ShouldBeTrue();
 
         capturedDeletedIds.ShouldNotBeEmpty();
         var deletedPatch = capturedDeletedIds.Last();

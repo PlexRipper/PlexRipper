@@ -12,7 +12,8 @@ public class DeleteDownloadTaskEndpointUnitTests : BaseUnitTest<DeleteDownloadTa
                     It.IsAny<CancellationToken>()
                 )
             )
-            .ReturnsAsync(Result.Ok());
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.Once());
     }
 
     [Test]
@@ -44,7 +45,7 @@ public class DeleteDownloadTaskEndpointUnitTests : BaseUnitTest<DeleteDownloadTa
                     It.IsAny<CancellationToken>()
                 )
             )
-            .ReturnsAsync(Result.Ok())
+            .Returns(Task.CompletedTask)
             .Verifiable(Times.Once());
 
         Mock.Mock<ICommandExecutor>()
@@ -123,7 +124,7 @@ public class DeleteDownloadTaskEndpointUnitTests : BaseUnitTest<DeleteDownloadTa
                     It.IsAny<CancellationToken>()
                 )
             )
-            .ReturnsAsync(Result.Ok())
+            .Returns(Task.CompletedTask)
             .Verifiable(Times.Once());
 
         Mock.Mock<ICommandExecutor>()
@@ -138,8 +139,7 @@ public class DeleteDownloadTaskEndpointUnitTests : BaseUnitTest<DeleteDownloadTa
                         dbContext,
                         Mock.Mock<IDownloadTaskUpdateDispatcher>().Object
                     ).ExecuteAsync(command, ct)
-            )
-            .Verifiable(Times.Once());
+            );
 
         // Act
         var ep = SetupEndpointUnitTest<DeleteDownloadTaskEndpoint>();

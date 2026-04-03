@@ -285,20 +285,25 @@ public class DashPlexDownloadClient : IPlexDownloadClient
             finishedResult.LogError();
     }
 
-    private Task<Result> SetDownloadStatusAsync(DownloadStatus status, Result? errorResult = null)
+    private async Task<Result> SetDownloadStatusAsync(DownloadStatus status, Result? errorResult = null)
     {
         if (_downloadTaskKey is null)
-            return Task.FromResult(Result.Ok());
+            return Result.Ok();
 
         if (errorResult is null)
-            return _downloadTaskUpdateDispatcher.OnStatusChangedAsync(_downloadTaskKey, status, CancellationToken.None);
+        {
+            await _downloadTaskUpdateDispatcher.OnStatusChangedAsync(_downloadTaskKey, status, CancellationToken.None);
+            return Result.Ok();
+        }
 
-        return _downloadTaskUpdateDispatcher.OnStatusChangedAsync(
+        await _downloadTaskUpdateDispatcher.OnStatusChangedAsync(
             _downloadTaskKey,
             status,
             errorResult,
             CancellationToken.None
         );
+
+        return Result.Ok();
     }
 
     public async ValueTask DisposeAsync()

@@ -2,7 +2,7 @@ import { reactive, computed, toRefs } from 'vue';
 import { acceptHMRUpdate, defineStore } from 'pinia';
 import type { Observable } from 'rxjs';
 import { forkJoin, of } from 'rxjs';
-import { switchMap, tap } from 'rxjs/operators';
+import { finalize, switchMap, tap } from 'rxjs/operators';
 import type { CreatePlexAccountEndpointRequest, PlexAccountDTO } from '@dto';
 import { RefreshDataType } from '@dto';
 import { StoreNames, type ISetupResult } from '@interfaces';
@@ -47,8 +47,18 @@ export const useAccountStore = defineStore(StoreNames.AccountStore, () => {
 		reSyncAccount(accountId: number) {
 			state.accessSyncLoading = true;
 			return plexAccountApi.refreshPlexAccountAccessEndpoint(accountId).pipe(
-				tap(() =>	forkJoin([actions.refreshAccounts(), serverStore.refreshPlexServers(), libraryStore.refreshLibraries()])),
-				tap(() => state.accessSyncLoading = false),
+				switchMap((result) => {
+					if (!result.isSuccess) {
+						return of(result);
+					}
+
+					return forkJoin([
+						actions.refreshAccounts(),
+						serverStore.refreshPlexServers(),
+						libraryStore.refreshLibraries(),
+					]).pipe(switchMap(() => of(result)));
+				}),
+				finalize(() => state.accessSyncLoading = false),
 			);
 		},
 		/**

@@ -125,9 +125,13 @@ function fetchLogs() {
 function onOpen(event: string) {
 	set(loading, true);
 	set(downloadTaskId, event);
+	set(downloadTask, null);
+	set(errors, []);
+	set(logs, []);
 
 	useSubscription(downloadApi.getDownloadTaskByGuidEndpoint(get(downloadTaskId)).subscribe((data) => {
 		if (data.isSuccess && data.value) {
+			set(errors, []);
 			set(downloadTask, data.value);
 			fetchLogs();
 		} else {

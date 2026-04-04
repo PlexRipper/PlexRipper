@@ -200,8 +200,13 @@ function onTableAction({ action, data }: { action: DownloadActions; data: IDownl
 	const newIds = getAllIds([data]);
 	get(loadingIds).push(...newIds.map((id) => ({ id, action })));
 
-	useSubscription(downloadStore.executeDownloadCommand(action, ids, props.plexServer.id).subscribe(() => {
-		set(loadingIds, get(loadingIds).filter((x) => !newIds.includes(x.id)));
+	useSubscription(downloadStore.executeDownloadCommand(action, ids, props.plexServer.id).subscribe({
+		next: () => {
+			set(loadingIds, get(loadingIds).filter((x) => !newIds.includes(x.id)));
+		},
+		error: () => {
+			set(loadingIds, get(loadingIds).filter((x) => !newIds.includes(x.id)));
+		},
 	}));
 }
 

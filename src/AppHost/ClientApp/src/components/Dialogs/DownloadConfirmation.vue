@@ -208,6 +208,9 @@ const folderPathDestinations = computed(() => folderPathStore.getFolderPaths().f
 
 function openDialog(data: DownloadMediaDTO[]): void {
 	set(loading, true);
+	set(downloadPreview, []);
+	set(totalSize, 0);
+	set(expandedKeys, {});
 
 	// This assumes that the data is always 1 category, either movie or tv show
 	if (data.some((x) => x.type === PlexMediaType.Movie)) {
@@ -225,6 +228,9 @@ function openDialog(data: DownloadMediaDTO[]): void {
 		downloadStore.previewDownload(data).subscribe((result) => {
 			if (!result) {
 				Log.error('Download preview failed, no data received');
+				set(downloadPreview, []);
+				set(totalSize, 0);
+				set(expandedKeys, {});
 				set(loading, false);
 				return;
 			}

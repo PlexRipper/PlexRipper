@@ -28,7 +28,6 @@
 </template>
 
 <script setup lang="ts">
-import { tap } from 'rxjs/operators';
 import { useSubscription } from '@vueuse/rxjs';
 
 const serverStore = useServerStore();
@@ -38,7 +37,6 @@ function onServerUnHide(plexServerId: number): void {
 	useSubscription(
 		serverStore
 			.setServerHidden(plexServerId, false)
-			.pipe(tap(() => close()))
 			.subscribe(),
 	);
 }

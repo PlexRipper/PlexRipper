@@ -100,7 +100,14 @@ function updateActiveAccountId(accountId: number): void {
 
 function runReSyncAccount(accountId = 0): void {
 	useSubscription(
-		accountStore.reSyncAccount(accountId).pipe(tap((data) => dialogStore.openRefreshPlexAccountAccessDialog(data.value ?? []))).subscribe(),
+		accountStore
+			.reSyncAccount(accountId)
+			.pipe(tap((data) => {
+				if (data.isSuccess) {
+					dialogStore.openRefreshPlexAccountAccessDialog(data.value ?? []);
+				}
+			}))
+			.subscribe(),
 	);
 }
 

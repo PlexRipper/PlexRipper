@@ -100,9 +100,15 @@ const getUsernameRules = computed(() => [
 function onUpdateCredentials() {
 	set(loading, true);
 	set(isValid, false);
-	useSubscription(authStore.updateCredentials().subscribe(() => {
-		set(loading, false);
-		set(isValid, true);
+	useSubscription(authStore.updateCredentials().subscribe({
+		next: (result) => {
+			set(loading, false);
+			set(isValid, result.isSuccess);
+		},
+		error: () => {
+			set(loading, false);
+			set(isValid, false);
+		},
 	}));
 }
 

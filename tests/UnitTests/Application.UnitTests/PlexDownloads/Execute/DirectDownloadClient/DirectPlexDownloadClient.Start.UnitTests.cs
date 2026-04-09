@@ -111,7 +111,7 @@ public class DirectPlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDow
                 )
             )
             .Returns(Task.CompletedTask)
-            .Verifiable(Times.Once());
+            .Verifiable(Times.Exactly(2));
         Mock.Mock<IDownloadTaskUpdateDispatcher>()
             .Setup(x =>
                 x.OnStatusChangedAsync(
@@ -122,7 +122,7 @@ public class DirectPlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDow
                 )
             )
             .Returns(Task.CompletedTask)
-            .Verifiable(Times.Once());
+            .Verifiable(Times.Never());
         Mock.Mock<IDownloadTaskUpdateDispatcher>()
             .Setup(x =>
                 x.OnProgressUpdated(
@@ -191,7 +191,7 @@ public class DirectPlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDow
                 )
             )
             .Returns(Task.CompletedTask)
-            .Verifiable(Times.Once());
+            .Verifiable(Times.Exactly(2));
         Mock.Mock<IDownloadTaskUpdateDispatcher>()
             .Setup(x =>
                 x.OnStatusChangedAsync(
@@ -202,7 +202,7 @@ public class DirectPlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDow
                 )
             )
             .Returns(Task.CompletedTask)
-            .Verifiable(Times.Once());
+            .Verifiable(Times.Never());
         Mock.Mock<IDownloadTaskUpdateDispatcher>()
             .Setup(x =>
                 x.OnProgressUpdated(
@@ -235,6 +235,18 @@ public class DirectPlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDow
 
         Mock.Mock<ICommandExecutor>()
             .Setup(m => m.Send(It.IsAny<ICommand<Result>>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result.Ok());
+
+        Mock.Mock<ICommandExecutor>()
+            .Setup(m =>
+                m.Send(
+                    It.Is<ICommand<Result>>(cmd => cmd is EnsureDownloadDirectoryCommand),
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .Callback<ICommand<Result>, CancellationToken>(
+                (command, _) => ensureDirectoryCommand = (EnsureDownloadDirectoryCommand)command
+            )
             .ReturnsAsync(Result.Ok());
 
         Mock.Mock<ICommandExecutor>()
@@ -272,7 +284,7 @@ public class DirectPlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDow
                 )
             )
             .Returns(Task.CompletedTask)
-            .Verifiable(Times.Once());
+            .Verifiable(Times.Exactly(2));
         Mock.Mock<IDownloadTaskUpdateDispatcher>()
             .Setup(x =>
                 x.OnStatusChangedAsync(
@@ -283,7 +295,7 @@ public class DirectPlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDow
                 )
             )
             .Returns(Task.CompletedTask)
-            .Verifiable(Times.Once());
+            .Verifiable(Times.Never());
         Mock.Mock<IDownloadTaskUpdateDispatcher>()
             .Setup(x =>
                 x.OnProgressUpdated(
@@ -580,7 +592,7 @@ public class DirectPlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDow
                 )
             )
             .Returns(Task.CompletedTask)
-            .Verifiable(Times.Once());
+            .Verifiable(Times.Exactly(2));
         Mock.Mock<IDownloadTaskUpdateDispatcher>()
             .Setup(x =>
                 x.OnProgressUpdated(
@@ -765,7 +777,7 @@ public class DirectPlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDow
                 )
             )
             .Returns(Task.CompletedTask)
-            .Verifiable(Times.Once());
+            .Verifiable(Times.Exactly(2));
         Mock.Mock<IDownloadTaskUpdateDispatcher>()
             .Setup(x =>
                 x.OnProgressUpdated(
@@ -863,7 +875,7 @@ public class DirectPlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDow
                 )
             )
             .Returns(Task.CompletedTask)
-            .Verifiable(Times.Once());
+            .Verifiable(Times.Exactly(2));
         Mock.Mock<IDownloadTaskUpdateDispatcher>()
             .Setup(x =>
                 x.OnProgressUpdated(
@@ -983,7 +995,7 @@ public class DirectPlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDow
                 )
             )
             .Returns(Task.CompletedTask)
-            .Verifiable(Times.Once());
+            .Verifiable(Times.Exactly(2));
         Mock.Mock<IDownloadTaskUpdateDispatcher>()
             .Setup(x =>
                 x.OnProgressUpdated(
@@ -1089,7 +1101,7 @@ public class DirectPlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDow
                 )
             )
             .Returns(Task.CompletedTask)
-            .Verifiable(Times.Once());
+            .Verifiable(Times.Exactly(2));
         Mock.Mock<IDownloadTaskUpdateDispatcher>()
             .Setup(x =>
                 x.OnProgressUpdated(
@@ -1153,7 +1165,7 @@ public class DirectPlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDow
                 )
             )
             .Returns(Task.CompletedTask)
-            .Verifiable(Times.Once());
+            .Verifiable(Times.Exactly(2));
         Mock.Mock<IDownloadTaskUpdateDispatcher>()
             .Setup(x =>
                 x.OnProgressUpdated(
@@ -1411,7 +1423,7 @@ public class DirectPlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDow
                 )
             )
             .Returns(Task.CompletedTask)
-            .Verifiable(Times.Once());
+            .Verifiable(Times.Exactly(2));
         Mock.Mock<IDownloadTaskUpdateDispatcher>()
             .Setup(x =>
                 x.OnProgressUpdated(

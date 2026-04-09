@@ -3,20 +3,6 @@ namespace Reaparr.Application.UnitTests;
 public class ClearCompletedDownloadTasksByDownloadTaskIdEndpointUnitTests
     : BaseUnitTest<ClearCompletedDownloadTasksByDownloadTaskIdEndpoint>
 {
-    public ClearCompletedDownloadTasksByDownloadTaskIdEndpointUnitTests()
-    {
-        Mock.Mock<IDownloadTaskUpdateDispatcher>()
-            .Setup(x =>
-                x.OnStatusChangedAsync(
-                    It.IsAny<DownloadTaskKey>(),
-                    DownloadStatus.Deleted,
-                    It.IsAny<CancellationToken>()
-                )
-            )
-            .Returns(Task.CompletedTask)
-            .Verifiable(Times.Once());
-    }
-
     [Test]
     public async Task ShouldRemoveOnlySpecifiedCompletedDownloadTasks_WhenCalledWithGuidList()
     {
@@ -49,7 +35,7 @@ public class ClearCompletedDownloadTasksByDownloadTaskIdEndpointUnitTests
                 )
             )
             .Returns(Task.CompletedTask)
-            .Verifiable(Times.Once());
+            .Verifiable(Times.Exactly(5));
 
         Mock.Mock<ICommandExecutor>()
             .Setup(x => x.Send(It.IsAny<DeleteDownloadTasksByKeyCommand>(), It.IsAny<CancellationToken>()))

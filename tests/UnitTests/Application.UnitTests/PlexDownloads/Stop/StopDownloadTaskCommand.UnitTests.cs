@@ -65,6 +65,10 @@ public class StopDownloadTaskCommandUnitTests : BaseUnitTest<StopDownloadTaskCom
         Mock.Mock<IMoveDownloadFileScheduler>()
             .Setup(x => x.IsDownloadFileMoving(It.IsAny<DownloadTaskKey>()))
             .ReturnsAsync(false);
+        Mock.Mock<ICommandExecutor>()
+            .Setup(x => x.Send(It.IsAny<DeleteDownloadTaskFilesCommand>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result.Fail("delete files boom"))
+            .Verifiable(Times.Once());
 
         // Act
         var result = await Sut.ExecuteAsync(
@@ -81,6 +85,8 @@ public class StopDownloadTaskCommandUnitTests : BaseUnitTest<StopDownloadTaskCom
             .Verify(x => x.StopDownloadTaskJob(It.IsAny<DownloadTaskKey>(), It.IsAny<CancellationToken>()), Times.Once);
         Mock.Mock<IMoveDownloadFileScheduler>()
             .Verify(x => x.IsDownloadFileMoving(It.IsAny<DownloadTaskKey>()), Times.Once);
+        Mock.Mock<ICommandExecutor>()
+            .Verify(x => x.Send(It.IsAny<DeleteDownloadTaskFilesCommand>(), It.IsAny<CancellationToken>()), Times.Once);
         Mock.Mock<IDownloadTaskUpdateDispatcher>()
             .Verify(
                 x =>
@@ -214,7 +220,7 @@ public class StopDownloadTaskCommandUnitTests : BaseUnitTest<StopDownloadTaskCom
 
         // Assert
         result.IsFailed.ShouldBeTrue();
-        result.Errors.ShouldContain(x => x.Message.Contains("Stopping status update failed"));
+        result.Errors.ShouldContain(x => x.Message.Contains("stopping status update boom"));
         Mock.Mock<IDownloadTaskUpdateDispatcher>()
             .Verify(
                 x =>
@@ -302,6 +308,7 @@ public class StopDownloadTaskCommandUnitTests : BaseUnitTest<StopDownloadTaskCom
                     ),
                 Times.Once
             );
+
         // File deletion is now delegated to DeleteDownloadTaskFilesCommand — verify dispatch instead of filesystem state.
         Mock.Mock<ICommandExecutor>()
             .Verify(x => x.Send(It.IsAny<DeleteDownloadTaskFilesCommand>(), It.IsAny<CancellationToken>()), Times.Once);
@@ -343,7 +350,16 @@ public class StopDownloadTaskCommandUnitTests : BaseUnitTest<StopDownloadTaskCom
             .ReturnsAsync(false);
         Mock.Mock<ICommandExecutor>()
             .Setup(x => x.Send(It.IsAny<DeleteDownloadTaskFilesCommand>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result.Ok());
+            .ReturnsAsync(Result.Fail("delete files boom"));
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Setup(x =>
+                x.OnStatusChangedAsync(
+                    It.IsAny<DownloadTaskKey>(),
+                    It.IsAny<DownloadStatus>(),
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .Returns(Task.CompletedTask);
 
         // Act
         var result = await Sut.ExecuteAsync(new StopDownloadTaskCommand(movieTask.Id), CancellationToken);
@@ -479,6 +495,7 @@ public class StopDownloadTaskCommandUnitTests : BaseUnitTest<StopDownloadTaskCom
                     ),
                 Times.Once
             );
+
         // File deletion is delegated to DeleteDownloadTaskFilesCommand for the one actively downloading child.
         Mock.Mock<ICommandExecutor>()
             .Verify(x => x.Send(It.IsAny<DeleteDownloadTaskFilesCommand>(), It.IsAny<CancellationToken>()), Times.Once);
@@ -574,6 +591,7 @@ public class StopDownloadTaskCommandUnitTests : BaseUnitTest<StopDownloadTaskCom
                     ),
                 Times.Once
             );
+
         // File deletion is delegated to DeleteDownloadTaskFilesCommand for the one actively downloading child only.
         Mock.Mock<ICommandExecutor>()
             .Verify(x => x.Send(It.IsAny<DeleteDownloadTaskFilesCommand>(), It.IsAny<CancellationToken>()), Times.Once);
@@ -610,10 +628,13 @@ public class StopDownloadTaskCommandUnitTests : BaseUnitTest<StopDownloadTaskCom
             .ReturnsAsync(true);
         Mock.Mock<IMoveDownloadFileScheduler>()
             .Setup(x => x.StopMoveDownloadFileJob(It.IsAny<DownloadTaskKey>()))
-            .ReturnsAsync(Result.Ok());
+            .ReturnsAsync(Result.Fail("stop move boom"));
 
         // Act
-        var result = await Sut.ExecuteAsync(new StopDownloadTaskCommand(movieTask.Id), CancellationToken);
+        var result = await Sut.ExecuteAsync(
+            new StopDownloadTaskCommand(movieTask.Id, DeleteFiles: false),
+            CancellationToken
+        );
 
         // Assert
         result.IsFailed.ShouldBeTrue();
@@ -820,6 +841,7 @@ public class StopDownloadTaskCommandUnitTests : BaseUnitTest<StopDownloadTaskCom
             )
             .Returns(Task.CompletedTask)
             .Verifiable(Times.Exactly(2));
+
         // Both children (downloading + moving) are in the FileTransfer phase so file deletion is dispatched for each.
         Mock.Mock<ICommandExecutor>()
             .Setup(x => x.Send(It.IsAny<DeleteDownloadTaskFilesCommand>(), It.IsAny<CancellationToken>()))

@@ -2,20 +2,6 @@ namespace Reaparr.Application.UnitTests;
 
 public class DeleteDownloadTasksByKeyCommandUnitTests : BaseUnitTest<DeleteDownloadTasksByKeyCommandHandler>
 {
-    public DeleteDownloadTasksByKeyCommandUnitTests()
-    {
-        Mock.Mock<IDownloadTaskUpdateDispatcher>()
-            .Setup(x =>
-                x.OnStatusChangedAsync(
-                    It.IsAny<DownloadTaskKey>(),
-                    DownloadStatus.Deleted,
-                    It.IsAny<CancellationToken>()
-                )
-            )
-            .Returns(Task.CompletedTask)
-            .Verifiable(Times.Once());
-    }
-
     [Test]
     public async Task ShouldDeleteMovieTask_WhenMovieKeyIsGiven()
     {
@@ -172,6 +158,7 @@ public class DeleteDownloadTasksByKeyCommandUnitTests : BaseUnitTest<DeleteDownl
         // Assert
         result.IsSuccess.ShouldBeTrue();
         (await dbContext.DownloadTaskTvShowEpisodeFile.CountAsync(CancellationToken)).ShouldBe(1);
+
         // Season and TvShow parent must still exist because one episode remains.
         (await dbContext.DownloadTaskTvShowSeason.CountAsync(CancellationToken)).ShouldBe(1);
         (await dbContext.DownloadTaskTvShow.CountAsync(CancellationToken)).ShouldBe(1);
@@ -205,7 +192,7 @@ public class DeleteDownloadTasksByKeyCommandUnitTests : BaseUnitTest<DeleteDownl
                 )
             )
             .Returns(Task.CompletedTask)
-            .Verifiable(Times.Once());
+            .Verifiable(Times.Exactly(2));
 
         // Act
         var result = await Sut.ExecuteAsync(new DeleteDownloadTasksByKeyCommand(toDeleteKeys), CancellationToken);

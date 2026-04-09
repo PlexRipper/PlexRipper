@@ -35,22 +35,23 @@ public class DownloadJob : IJob
 
     public async Task Execute(IJobExecutionContext context)
     {
-        var dataMap = context.JobDetail.JobDataMap;
-        var downloadTaskKey = dataMap.GetJsonValue<DownloadTaskKey>(DownloadTaskIdParameter);
-
+        DownloadTaskKey? downloadTaskKey = null;
         var token = context.CancellationToken;
-        _log.Here()
-            .Debug(
-                "Executing job: {DownloadJobName} for {DownloadTaskIdName} with id: {DownloadTaskId}",
-                nameof(DownloadJob),
-                nameof(downloadTaskKey),
-                downloadTaskKey
-            );
 
         // Jobs should swallow exceptions as otherwise Quartz will keep re-executing it
         // https://www.quartz-scheduler.net/documentation/best-practices.html#throwing-exceptions
         try
         {
+            var dataMap = context.JobDetail.JobDataMap;
+            downloadTaskKey = dataMap.GetJsonValue<DownloadTaskKey>(DownloadTaskIdParameter);
+
+            _log.Here()
+                .Debug(
+                    "Executing job: {DownloadJobName} for {DownloadTaskIdName} with id: {DownloadTaskId}",
+                    nameof(DownloadJob),
+                    nameof(downloadTaskKey),
+                    downloadTaskKey
+                );
             if (downloadTaskKey is null)
             {
                 ResultExtensions.IsNull(nameof(DownloadTaskKey)).LogError();

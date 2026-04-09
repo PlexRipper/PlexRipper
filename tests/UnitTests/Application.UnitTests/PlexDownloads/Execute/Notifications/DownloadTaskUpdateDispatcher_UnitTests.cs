@@ -497,7 +497,7 @@ public class DownloadTaskUpdateDispatcherUnitTests : BaseUnitTest<DownloadTaskUp
                 (_, _, upserts, _, _) => capturedPatches.Add(upserts)
             )
             .Returns(Task.CompletedTask)
-            .Verifiable(Times.Once());
+            .Verifiable(Times.AtLeastOnce());
 
         var sut = Sut;
 

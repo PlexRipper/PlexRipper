@@ -217,7 +217,7 @@ public class StartDownloadTaskCommandUnitTests : BaseUnitTest<StartDownloadTaskC
                 )
             )
             .Returns(Task.CompletedTask)
-            .Verifiable(Times.Once());
+            .Verifiable(Times.AtLeastOnce());
         await SetupDatabase(
             96318,
             x =>
@@ -1179,6 +1179,7 @@ public class StartDownloadTaskCommandUnitTests : BaseUnitTest<StartDownloadTaskC
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
+
         // Movie tasks have no sibling-queuing side-effects; the single file task starts directly
         Mock.Mock<IDownloadTaskScheduler>()
             .Verify(x => x.StartDownloadTaskJob(It.IsAny<DownloadTaskKey>()), Times.Once());

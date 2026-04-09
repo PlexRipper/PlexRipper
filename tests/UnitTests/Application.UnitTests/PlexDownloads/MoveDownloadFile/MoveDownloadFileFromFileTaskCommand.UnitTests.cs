@@ -138,7 +138,24 @@ public class MoveDownloadFileFromFileTaskCommandUnitTests : BaseUnitTest<MoveDow
             .Returns(Task.CompletedTask)
             .Verifiable(Times.Never);
 
-        Mock.SetupCommand(It.IsAny<MoveFileWithResumeCommand>).ReturnsAsync(Result.Ok()).Verifiable(Times.Once);
+        Mock.SetupCommand(It.IsAny<MoveFileWithResumeCommand>)
+            .Returns<MoveFileWithResumeCommand, CancellationToken>(
+                (moveCommand, _) =>
+                {
+                    moveCommand.Progress(
+                        new MoveFileTransferProgressDTO
+                        {
+                            Transferred = content.LongLength / 2,
+                            DataTotal = content.LongLength,
+                            FileTransferSpeed = 1024,
+                        }
+                    );
+
+                    cancellationTokenSource.Cancel();
+                    return Task.FromResult(Result.Ok());
+                }
+            )
+            .Verifiable(Times.Once);
 
         Mock.Mock<IDownloadTaskUpdateDispatcher>()
             .Setup(x =>
@@ -149,7 +166,7 @@ public class MoveDownloadFileFromFileTaskCommandUnitTests : BaseUnitTest<MoveDow
                 )
             )
             .Returns(Task.CompletedTask)
-            .Verifiable(Times.Once());
+            .Verifiable(Times.AtLeastOnce());
         Mock.Mock<IDownloadTaskUpdateDispatcher>()
             .Setup(x =>
                 x.OnStatusChangedAsync(
@@ -160,7 +177,7 @@ public class MoveDownloadFileFromFileTaskCommandUnitTests : BaseUnitTest<MoveDow
                 )
             )
             .Returns(Task.CompletedTask)
-            .Verifiable(Times.Once());
+            .Verifiable(Times.Never());
 
         // Act
         var command = new MoveDownloadFileFromFileTaskCommand(downloadFileTask.ToKey(), progress);
@@ -442,8 +459,25 @@ public class MoveDownloadFileFromFileTaskCommandUnitTests : BaseUnitTest<MoveDow
 
         Mock.Mock<IEventPublisher>()
             .Setup(m => m.PublishAsync(It.IsAny<SendNotificationResult>(), It.IsAny<CancellationToken>()))
-            .Returns(Task.CompletedTask);
-        Mock.SetupCommand(It.IsAny<MoveFileWithResumeCommand>).ReturnsAsync(Result.Ok()).Verifiable(Times.Once);
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.Never);
+        Mock.SetupCommand(It.IsAny<MoveFileWithResumeCommand>)
+            .Returns<MoveFileWithResumeCommand, CancellationToken>(
+                (moveCommand, _) =>
+                {
+                    moveCommand.Progress(
+                        new MoveFileTransferProgressDTO
+                        {
+                            Transferred = moveCommand.DataTotal,
+                            DataTotal = moveCommand.DataTotal,
+                            FileTransferSpeed = moveCommand.DataTotal,
+                        }
+                    );
+
+                    return Task.FromResult(Result.Ok());
+                }
+            )
+            .Verifiable(Times.Once);
         Mock.Mock<IDownloadManagerSettings>().Setup(x => x.KeepCompletedInDownloadFolder).Returns(false);
 
         Mock.Mock<IDownloadTaskUpdateDispatcher>()
@@ -455,7 +489,7 @@ public class MoveDownloadFileFromFileTaskCommandUnitTests : BaseUnitTest<MoveDow
                 )
             )
             .Returns(Task.CompletedTask)
-            .Verifiable(Times.Once());
+            .Verifiable(Times.AtLeastOnce());
         Mock.Mock<IDownloadTaskUpdateDispatcher>()
             .Setup(x =>
                 x.OnStatusChangedAsync(
@@ -466,7 +500,7 @@ public class MoveDownloadFileFromFileTaskCommandUnitTests : BaseUnitTest<MoveDow
                 )
             )
             .Returns(Task.CompletedTask)
-            .Verifiable(Times.Once());
+            .Verifiable(Times.Never());
 
         // Act
         var command = new MoveDownloadFileFromFileTaskCommand(downloadFileTask.ToKey(), progress);
@@ -544,7 +578,7 @@ public class MoveDownloadFileFromFileTaskCommandUnitTests : BaseUnitTest<MoveDow
                 )
             )
             .Returns(Task.CompletedTask)
-            .Verifiable(Times.Once());
+            .Verifiable(Times.Exactly(4));
         Mock.Mock<IDownloadTaskUpdateDispatcher>()
             .Setup(x =>
                 x.OnStatusChangedAsync(
@@ -555,7 +589,10 @@ public class MoveDownloadFileFromFileTaskCommandUnitTests : BaseUnitTest<MoveDow
                 )
             )
             .Returns(Task.CompletedTask)
-            .Verifiable(Times.Once());
+            .Verifiable(Times.Never());
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Setup(x => x.NotifyFileTransferProgress(It.IsAny<DownloadTaskKey>()))
+            .Verifiable(Times.Exactly(2));
 
         Mock.Mock<IReaparrDbContextFactory>().Setup(x => x.Create()).Returns(dbContext).Verifiable(Times.Exactly(2));
 
@@ -1355,7 +1392,23 @@ public class MoveDownloadFileFromFileTaskCommandUnitTests : BaseUnitTest<MoveDow
             .Returns(Task.CompletedTask)
             .Verifiable(Times.Never);
 
-        Mock.SetupCommand(It.IsAny<MoveFileWithResumeCommand>).ReturnsAsync(Result.Ok()).Verifiable(Times.Once);
+        Mock.SetupCommand(It.IsAny<MoveFileWithResumeCommand>)
+            .Returns<MoveFileWithResumeCommand, CancellationToken>(
+                (moveCommand, _) =>
+                {
+                    moveCommand.Progress(
+                        new MoveFileTransferProgressDTO
+                        {
+                            Transferred = moveCommand.DataTotal,
+                            DataTotal = moveCommand.DataTotal,
+                            FileTransferSpeed = moveCommand.DataTotal,
+                        }
+                    );
+
+                    return Task.FromResult(Result.Ok());
+                }
+            )
+            .Verifiable(Times.Once);
 
         Mock.Mock<IDownloadTaskUpdateDispatcher>()
             .Setup(x =>
@@ -1366,7 +1419,7 @@ public class MoveDownloadFileFromFileTaskCommandUnitTests : BaseUnitTest<MoveDow
                 )
             )
             .Returns(Task.CompletedTask)
-            .Verifiable(Times.Once());
+            .Verifiable(Times.Exactly(2));
         Mock.Mock<IDownloadTaskUpdateDispatcher>()
             .Setup(x =>
                 x.OnStatusChangedAsync(
@@ -1377,7 +1430,7 @@ public class MoveDownloadFileFromFileTaskCommandUnitTests : BaseUnitTest<MoveDow
                 )
             )
             .Returns(Task.CompletedTask)
-            .Verifiable(Times.Once());
+            .Verifiable(Times.Never());
 
         // Act
         var result = await Sut.ExecuteAsync(
@@ -1443,7 +1496,7 @@ public class MoveDownloadFileFromFileTaskCommandUnitTests : BaseUnitTest<MoveDow
                     It.IsAny<CancellationToken>()
                 )
             )
-            .Returns(Task.CompletedTask)
+            .ThrowsAsync(new Exception("moving status update boom"))
             .Verifiable(Times.Once());
         Mock.Mock<IDownloadTaskUpdateDispatcher>()
             .Setup(x =>
@@ -1454,7 +1507,7 @@ public class MoveDownloadFileFromFileTaskCommandUnitTests : BaseUnitTest<MoveDow
                 )
             )
             .Returns(Task.CompletedTask)
-            .Verifiable(Times.Once());
+            .Verifiable(Times.Never());
         Mock.Mock<IDownloadTaskUpdateDispatcher>()
             .Setup(x =>
                 x.OnStatusChangedAsync(
@@ -1475,7 +1528,7 @@ public class MoveDownloadFileFromFileTaskCommandUnitTests : BaseUnitTest<MoveDow
 
         // Assert
         result.IsFailed.ShouldBeTrue();
-        result.Errors.ShouldContain(x => x.Message.Contains("Moving status update failed"));
+        result.Errors.ShouldContain(x => x.Message.Contains("moving status update boom"));
 
         Mock.Mock<IDownloadTaskUpdateDispatcher>().Verify();
     }
@@ -1514,7 +1567,8 @@ public class MoveDownloadFileFromFileTaskCommandUnitTests : BaseUnitTest<MoveDow
 
         Mock.Mock<IEventPublisher>()
             .Setup(m => m.PublishAsync(It.IsAny<SendNotificationResult>(), It.IsAny<CancellationToken>()))
-            .Returns(Task.CompletedTask);
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.Once);
 
         Mock.Mock<ICommandExecutor>()
             .Setup(x => x.Send(It.IsAny<MoveFileWithResumeCommand>(), It.IsAny<CancellationToken>()))
@@ -1560,9 +1614,10 @@ public class MoveDownloadFileFromFileTaskCommandUnitTests : BaseUnitTest<MoveDow
 
         // Assert
         result.IsFailed.ShouldBeTrue();
-        result.Errors.ShouldContain(x => x.Message.Contains("Move finished status update failed"));
+        result.Errors.ShouldContain(x => x.Message.Contains("move finished status update boom"));
 
         Mock.Mock<IDownloadTaskUpdateDispatcher>().Verify();
+        Mock.Mock<IEventPublisher>().Verify();
     }
 
     [Test]
@@ -1685,7 +1740,8 @@ public class MoveDownloadFileFromFileTaskCommandUnitTests : BaseUnitTest<MoveDow
 
         Mock.Mock<IEventPublisher>()
             .Setup(m => m.PublishAsync(It.IsAny<SendNotificationResult>(), It.IsAny<CancellationToken>()))
-            .Returns(Task.CompletedTask);
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.Once);
 
         Mock.SetupCommand(It.IsAny<MoveFileWithResumeCommand>).ReturnsAsync(Result.Fail("boom")).Verifiable(Times.Once);
 
@@ -1720,7 +1776,7 @@ public class MoveDownloadFileFromFileTaskCommandUnitTests : BaseUnitTest<MoveDow
                 )
             )
             .Returns(Task.CompletedTask)
-            .Verifiable(Times.Once());
+            .Verifiable(Times.Never());
 
         // Act
         var result = await Sut.ExecuteAsync(
@@ -1730,7 +1786,7 @@ public class MoveDownloadFileFromFileTaskCommandUnitTests : BaseUnitTest<MoveDow
 
         // Assert
         result.IsFailed.ShouldBeTrue();
-        result.Errors.ShouldContain(x => x.Message.Contains("Move error status update failed"));
+        result.Errors.ShouldContain(x => x.Message.Contains("move error status update boom"));
 
         Mock.Mock<IDownloadTaskUpdateDispatcher>().Verify();
     }

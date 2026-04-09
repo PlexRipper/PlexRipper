@@ -60,7 +60,7 @@ jobs:
                         profile: Desktop-win-x64
                         main-exe: Reaparr.AppHost.exe
                     -   rid: win-arm64
-                        runner: windows-latest
+                        runner: windows-11-arm
                         profile: Desktop-win-arm64
                         main-exe: Reaparr.AppHost.exe
                     -   rid: linux-x64
@@ -68,15 +68,15 @@ jobs:
                         profile: Desktop-linux-x64
                         main-exe: Reaparr.AppHost
                     -   rid: linux-arm64
-                        runner: ubuntu-latest
+                        runner: ubuntu-24.04-arm
                         profile: Desktop-linux-arm64
                         main-exe: Reaparr.AppHost
                     -   rid: osx-x64
-                        runner: macos-13
+                        runner: macos-15-intel
                         profile: Desktop-osx-x64
                         main-exe: Reaparr.AppHost
                     -   rid: osx-arm64
-                        runner: macos-latest
+                        runner: macos-15
                         profile: Desktop-osx-arm64
                         main-exe: Reaparr.AppHost
 

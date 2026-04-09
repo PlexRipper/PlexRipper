@@ -2,7 +2,7 @@ import { reactive, computed, toRefs } from 'vue';
 import { acceptHMRUpdate, defineStore } from 'pinia';
 import type { Observable } from 'rxjs';
 import { forkJoin, of } from 'rxjs';
-import { finalize, switchMap, tap } from 'rxjs/operators';
+import { finalize, map, switchMap, tap } from 'rxjs/operators';
 import type { CreatePlexAccountEndpointRequest, PlexAccountDTO } from '@dto';
 import { RefreshDataType } from '@dto';
 import { StoreNames, type ISetupResult } from '@interfaces';
@@ -33,7 +33,9 @@ export const useAccountStore = defineStore(StoreNames.AccountStore, () => {
 			// Listen for refresh notifications
 			signalRStore.getRefreshNotification(RefreshDataType.PlexAccount).pipe(switchMap(() => actions.refreshAccounts())).subscribe();
 
-			return actions.refreshAccounts().pipe(switchMap(() => of({ name: StoreNames.AccountStore, isSuccess: true })));
+			return actions.refreshAccounts().pipe(
+				map((result) => ({ name: StoreNames.AccountStore, isSuccess: result.isSuccess })),
+			);
 		},
 		refreshAccounts() {
 			return plexAccountApi.getAllPlexAccountsEndpoint().pipe(

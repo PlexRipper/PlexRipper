@@ -48,7 +48,7 @@ const QInputStub = defineComponent({
 		},
 	},
 	setup(props) {
-		return () => h('div', { 'data-cy': 'token-input' }, props.modelValue);
+		return () => h('div', { 'data-cy': 'generate-token-dialog-token-input' }, props.modelValue);
 	},
 });
 
@@ -160,5 +160,21 @@ describe('AccountGenerateTokenDialog', () => {
 
 		// Assert
 		expect(wrapper.find('[data-cy="2fa-code-verification-input"]').exists()).toBe(true);
+	});
+
+	test('Should keep the dialog stable when generating a token hits a network error', async () => {
+		// Arrange
+		const mock = getAxiosMock();
+		mock.onGet('/api/PlexAccount/generate-token/0').networkError();
+		const wrapper = await mountDialog();
+		const dialog = wrapper.findComponent(QCardDialogStub);
+
+		// Act
+		dialog.vm.$emit('opened');
+		await flushPromises();
+
+		// Assert
+		expect(wrapper.find('[data-cy="2fa-code-verification-input"]').exists()).toBe(false);
+		expect(wrapper.find('[data-cy="generate-token-dialog-token-input"]').text()).toBe('');
 	});
 });

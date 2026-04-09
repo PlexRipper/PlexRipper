@@ -1,8 +1,17 @@
-﻿using Serilog.Events;
+﻿using Reaparr.Environment;
+using Serilog.Events;
 using Serilog.Sinks.TestCorrelator;
 
 namespace Reaparr.Logging.UnitTests;
 
+public record TestLoginRequest
+{
+    public required string Username { get; init; }
+    public required string Password { get; init; }
+    public required bool RememberMe { get; init; }
+}
+
+[NotInParallel]
 public class LogExtensionsUnitTests
 {
     [Test]
@@ -112,6 +121,97 @@ public class LogExtensionsUnitTests
             logMsg.ShouldContain(
                 $"This is a {logEvent.Level} string with a json object: \"{{ Latitude = 25, Longitude = 134 }}\", a number 9999, a bool: true"
             );
+        }
+    }
+
+    [Test]
+    public void ShouldUsePluginMasking_WhenLoggingDebugApiCallInMaskedMode()
+    {
+        // Arrange
+        var originalUnmaskedState = EnvironmentExtensions.IsUnmasked();
+        EnvironmentExtensions.EnableUnmaskedLog(false);
+
+        try
+        {
+            LogFactory.CloseAndFlush();
+            LogFactory.SetupLogging(LogEventLevel.Debug, new TestLogConfig());
+            var log = LogFactory.Create<LogExtensionsUnitTests>();
+            var httpContext = new DefaultHttpContext();
+            httpContext.Request.Method = HttpMethods.Post;
+            httpContext.Request.Scheme = "http";
+            httpContext.Request.Host = new HostString("localhost", 5000);
+            httpContext.Request.Path = "/api/Authentication/login";
+
+            var request = new TestLoginRequest
+            {
+                Username = "ReaparrRocksDEV",
+                Password = "TA%K3z3nr02AcI$0005N@88ps",
+                RememberMe = false,
+            };
+
+            using var context = TestCorrelator.CreateContext();
+
+            // Act
+            log.DebugApiCall(httpContext, request);
+
+            // Assert
+            var logEvent = TestCorrelator.GetLogEventsFromContextId(context.Id).Single();
+            var logMsg = logEvent.RenderMessage();
+
+            logMsg.ShouldContain("Password");
+            logMsg.ShouldContain("***MASKED***");
+            logMsg.ShouldNotContain("ReaparrRocksDEV");
+            logMsg.ShouldNotContain("TA%K3z3nr02AcI$0005N@88ps");
+        }
+        finally
+        {
+            LogFactory.CloseAndFlush();
+            EnvironmentExtensions.EnableUnmaskedLog(originalUnmaskedState);
+        }
+    }
+
+    [Test]
+    public void ShouldLeavePasswordUnmasked_WhenLoggingDebugApiCallInUnmaskedMode()
+    {
+        // Arrange
+        var originalUnmaskedState = EnvironmentExtensions.IsUnmasked();
+        EnvironmentExtensions.EnableUnmaskedLog(true);
+
+        try
+        {
+            LogFactory.CloseAndFlush();
+            LogFactory.SetupLogging(LogEventLevel.Debug, new TestLogConfig());
+            var log = LogFactory.Create<LogExtensionsUnitTests>();
+            var httpContext = new DefaultHttpContext();
+            httpContext.Request.Method = HttpMethods.Post;
+            httpContext.Request.Scheme = "http";
+            httpContext.Request.Host = new HostString("localhost", 5000);
+            httpContext.Request.Path = "/api/Authentication/login";
+
+            var request = new TestLoginRequest
+            {
+                Username = "ReaparrRocksDEV",
+                Password = "TA%K3z3nr02AcI$0005N@88ps",
+                RememberMe = false,
+            };
+
+            using var context = TestCorrelator.CreateContext();
+
+            // Act
+            log.DebugApiCall(httpContext, request);
+
+            // Assert
+            var logEvent = TestCorrelator.GetLogEventsFromContextId(context.Id).Single();
+            var logMsg = logEvent.RenderMessage();
+
+            logMsg.ShouldContain("ReaparrRocksDEV");
+            logMsg.ShouldContain("Password");
+            logMsg.ShouldContain("TA%K3z3nr02AcI$0005N@88ps");
+        }
+        finally
+        {
+            LogFactory.CloseAndFlush();
+            EnvironmentExtensions.EnableUnmaskedLog(originalUnmaskedState);
         }
     }
 }

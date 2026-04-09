@@ -1,4 +1,4 @@
-import { describe, beforeAll, beforeEach, test, expect } from 'vitest';
+import { describe, beforeAll, beforeEach, afterEach, test, expect, vi } from 'vitest';
 import { createPinia, setActivePinia } from 'pinia';
 import { subscribeSpyTo, baseSetup, baseVars, getAxiosMock } from '@services-test-base';
 import { generateFailedResultDTO, generateResultDTO, generateSettingsModel } from '@mock';
@@ -17,6 +17,11 @@ describe('SettingsStore.setup()', () => {
 	beforeEach(() => {
 		mock = getAxiosMock();
 		setActivePinia(createPinia());
+		vi.useFakeTimers();
+	});
+
+	afterEach(() => {
+		vi.useRealTimers();
 	});
 
 	test('Should return success and complete when setup is run', async () => {

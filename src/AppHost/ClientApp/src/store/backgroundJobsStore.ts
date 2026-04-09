@@ -3,7 +3,7 @@ import { acceptHMRUpdate, defineStore } from 'pinia';
 import { reactive } from 'vue';
 import type { Observable } from 'rxjs';
 import { ReplaySubject, forkJoin, of } from 'rxjs';
-import { filter, take, switchMap, tap } from 'rxjs/operators';
+import { catchError, filter, map, take, switchMap, tap } from 'rxjs/operators';
 import { StoreNames, type ISetupResult } from '@interfaces';
 import type {
 	CheckAllConnectionStatusUpdateDTO, InspectPlexServerJobUpdateDTO,
@@ -65,8 +65,16 @@ export const useBackgroundJobsStore = defineStore(StoreNames.BackgroundJobsStore
 						actions.setStatusJobUpdate(update);
 					}
 				}),
-				switchMap(() => of({ name: StoreNames.BackgroundJobsStore, isSuccess: true }),
-				), take(1));
+				map((response) => ({
+					name: StoreNames.BackgroundJobsStore,
+					isSuccess: !!response?.isSuccess,
+				})),
+				catchError((error) => {
+					Log.error('Failed to setup background jobs store', error);
+					return of({ name: StoreNames.BackgroundJobsStore, isSuccess: false });
+				}),
+				take(1),
+			);
 		},
 
 		setStatusJobUpdate(update: ApiJobStatusUpdateDTO) {

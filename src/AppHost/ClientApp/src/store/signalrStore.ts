@@ -33,7 +33,7 @@ import { MessagePackHubProtocol } from '@microsoft/signalr-protocol-msgpack';
 
 export enum HubName
 {
-	Progress = 'Progress',
+	Progress = 'progress',
 	Download = 'download',
 	Notifications = 'notifications',
 }

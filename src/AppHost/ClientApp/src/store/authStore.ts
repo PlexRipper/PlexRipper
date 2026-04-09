@@ -39,9 +39,9 @@ export const useAuthenticationStore = defineStore(StoreNames.AuthenticationStore
 
 	const actions = {
 		setup(): Observable<ISetupResult> {
-			return actions.status().pipe(map(() => ({
+			return actions.status().pipe(map((statusResult) => ({
 				name: StoreNames.AuthenticationStore,
-				isSuccess: state.isLoggedIn ?? false,
+				isSuccess: !!statusResult?.isSuccess,
 			})));
 		},
 		refreshCredentials() {

@@ -51,17 +51,15 @@ export const useServerConnectionStore = defineStore(StoreNames.ServerConnectionS
 				.pipe(switchMap(() => actions.refreshPlexServerConnections()))
 				.subscribe();
 
-			return actions
-				.refreshPlexServerConnections()
-				.pipe(switchMap(() => of({ name: StoreNames.ServerConnectionStore, isSuccess: true })));
+			return fetchAndSetPlexServerConnections().pipe(
+				switchMap((result) => of({
+					name: StoreNames.ServerConnectionStore,
+					isSuccess: !!result?.isSuccess,
+				})),
+			);
 		},
 		refreshPlexServerConnections(): Observable<PlexServerConnectionDTO[]> {
-			return plexServerConnectionApi.getAllPlexServerConnectionsEndpoint().pipe(
-				tap((serverConnections) => {
-					if (serverConnections.isSuccess) {
-						state.serverConnections = serverConnections.value ?? [];
-					}
-				}),
+			return fetchAndSetPlexServerConnections().pipe(
 				map(() => get(getters.getServerConnections)),
 			);
 		},
@@ -135,6 +133,16 @@ export const useServerConnectionStore = defineStore(StoreNames.ServerConnectionS
 			Object.assign(state, cloneDeep(defaultState));
 		},
 	};
+
+	function fetchAndSetPlexServerConnections() {
+		return plexServerConnectionApi.getAllPlexServerConnectionsEndpoint().pipe(
+			tap((serverConnections) => {
+				if (serverConnections.isSuccess) {
+					state.serverConnections = serverConnections.value ?? [];
+				}
+			}),
+		);
+	}
 	const getters = {
 		getServerConnectionsByServerId: (plexServerId = 0): PlexServerConnectionDTO[] =>
 			sortPlexServerConnections(

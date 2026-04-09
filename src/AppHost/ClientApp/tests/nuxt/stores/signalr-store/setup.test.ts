@@ -35,6 +35,7 @@ describe('SignalrStore.setup() failure handling', () => {
 
 	test('Should return success and complete when setup is run', async () => {
 		// Arrange
+		hubConnections.set(HubName.Download, createHub());
 		const signalrStore = useSignalrStore();
 
 		const setupResult: ISetupResult = {

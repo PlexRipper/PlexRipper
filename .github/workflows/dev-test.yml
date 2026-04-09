@@ -24,8 +24,8 @@ jobs:
             - run: echo "PR is not in draft, proceeding with tests"
 
     Actionlint:
-        needs: [Check-PR-Status]
-        if: always() && (needs.Check-PR-Status.result == 'success' || github.event_name == 'workflow_dispatch')
+        needs: [Check-PR-Status, Check-Github-Changes]
+        if: needs.Check-Github-Changes.outputs.should_run == 'true' && (needs.Check-PR-Status.result == 'success' || github.event_name == 'workflow_dispatch')
         runs-on: ubuntu-latest
         steps:
             -   uses: actions/checkout@v4
@@ -36,6 +36,23 @@ jobs:
                     matcher: true
                     shellcheck: true
                     pyflakes: true
+
+    # Check if .github workflows/actions have changed
+    Check-Github-Changes:
+        needs: [Check-PR-Status]
+        if: always() && (needs.Check-PR-Status.result == 'success' || github.event_name == 'workflow_dispatch')
+        runs-on: ubuntu-latest
+        outputs:
+            should_run: ${{ steps.check_changes.outputs.github }}
+        steps:
+            -   uses: actions/checkout@v4
+            -   name: Check if .github has changed
+                id: check_changes
+                uses: dorny/paths-filter@v3
+                with:
+                    filters: |
+                        github:
+                            - '.github/**'
 
     # Check if front-end has changed
     Check-Frontend-Changes:

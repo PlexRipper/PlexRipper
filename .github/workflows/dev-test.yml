@@ -92,11 +92,11 @@ jobs:
                 id: check_changes
                 uses: dorny/paths-filter@v3
                 with:
+                    predicate-quantifier: 'every'
                     filters: |
                         backend:
-                            - 'src/**'
+                            - '{src/**,tests/**}'
                             - '!src/AppHost/ClientApp/**'
-                            - 'tests/**'
 
     # Front-End-Type-Check:
     Front-End-Type-Check:

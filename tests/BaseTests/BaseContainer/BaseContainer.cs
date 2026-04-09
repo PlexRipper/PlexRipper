@@ -54,6 +54,27 @@ public class BaseContainer : IDisposable
         EnvironmentExtensions.SetConfigPath(
             Path.Combine(sandboxFolder, Environment.PathProvider.DefaultConfigFolderName)
         );
+        EnvironmentExtensions.SetDownloadsPath(
+            Path.Combine(sandboxFolder, Environment.PathProvider.DefaultDownloadsFolderName)
+        );
+        EnvironmentExtensions.SetMoviesPath(
+            Path.Combine(sandboxFolder, Environment.PathProvider.DefaultMovieFolderName)
+        );
+        EnvironmentExtensions.SetTvShowsPath(
+            Path.Combine(sandboxFolder, Environment.PathProvider.DefaultTvShowsFolderName)
+        );
+        EnvironmentExtensions.SetMusicPath(
+            Path.Combine(sandboxFolder, Environment.PathProvider.DefaultMusicFolderName)
+        );
+        EnvironmentExtensions.SetPhotosPath(
+            Path.Combine(sandboxFolder, Environment.PathProvider.DefaultPhotosFolderName)
+        );
+        EnvironmentExtensions.SetOtherPath(
+            Path.Combine(sandboxFolder, Environment.PathProvider.DefaultOtherFolderName)
+        );
+        EnvironmentExtensions.SetGamesPath(
+            Path.Combine(sandboxFolder, Environment.PathProvider.DefaultGamesFolderName)
+        );
         var testFileSystemRootPath = IntegrationTestFileSystemSandbox.Create(memoryDbName, log);
 
         var config = UnitTestDataConfig.FromOptions(options);

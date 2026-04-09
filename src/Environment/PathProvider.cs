@@ -109,7 +109,8 @@ public class PathProvider : IPathProvider
     #endregion
 
     /// <summary>
-    /// Gets the config directory from the environment when provided; otherwise falls back to the platform-specific default config location.
+    /// Gets the directory that stores Reaparr's own application state, such as settings, the SQLite database, backups, and logs.
+    /// This is distinct from <see cref="DataDirectory"/>, which is the root location for user media content like Movies, TV shows, and Downloads.
     /// </summary>
     public static string ConfigDirectory
     {
@@ -175,7 +176,8 @@ public class PathProvider : IPathProvider
     public List<string> DatabaseFiles => [DatabasePath, Database_SHM_Path, Database_WAL_Path];
 
     /// <summary>
-    /// Gets the root data directory from the environment when provided; otherwise falls back to the Docker root or the current user's home directory.
+    /// Gets the root directory for user media data, where default destination folders such as Movies, TV shows, Music, and Downloads are created.
+    /// This is distinct from <see cref="ConfigDirectory"/>, which stores Reaparr's internal application files rather than media content.
     /// </summary>
     public static string DataDirectory
     {

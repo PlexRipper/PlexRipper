@@ -32,26 +32,6 @@ export class Download {
   /**
    * No description
    * * @tags Download
-   * @name ClearCompletedDownloadTasksByServerIdEndpoint
-   * @request DELETE:/api/Download/clear/{PlexServerId}
-   * @secure
-   */
-  clearCompletedDownloadTasksByServerIdEndpoint = (
-    plexServerId: number,
-    params: RequestParams = {},
-  ) =>
-    axiosObservable<CountResponseDTO>({
-      url: `/api/Download/clear/${plexServerId}`,
-      method: "DELETE",
-      secure: true,
-      type: ContentType.Json,
-      responseType: "json",
-      ...params,
-    }).pipe(apiCheckPipe<CountResponseDTO>);
-
-  /**
-   * No description
-   * * @tags Download
    * @name ClearCompletedDownloadTasksByDownloadTaskIdEndpoint
    * @request DELETE:/api/Download/clear/tasks
    * @secure
@@ -66,6 +46,25 @@ export class Download {
       data: data,
       secure: true,
       type: ContentType.Json,
+      responseType: "json",
+      ...params,
+    }).pipe(apiCheckPipe<CountResponseDTO>);
+
+  /**
+   * No description
+   * * @tags Download
+   * @name ClearCompletedDownloadTasksByServerIdEndpoint
+   * @request DELETE:/api/Download/clear/{PlexServerId}
+   * @secure
+   */
+  clearCompletedDownloadTasksByServerIdEndpoint = (
+    plexServerId: number,
+    params: RequestParams = {},
+  ) =>
+    axiosObservable<CountResponseDTO>({
+      url: `/api/Download/clear/${plexServerId}`,
+      method: "DELETE",
+      secure: true,
       responseType: "json",
       ...params,
     }).pipe(apiCheckPipe<CountResponseDTO>);
@@ -306,11 +305,12 @@ export class Download {
 }
 
 export class DownloadPaths {
-  static clearCompletedDownloadTasksByServerIdEndpoint = (plexServerId: number) =>
-    queryString.stringifyUrl({ url: `/api/Download/clear/${plexServerId}` });
-
   static clearCompletedDownloadTasksByDownloadTaskIdEndpoint = () =>
     queryString.stringifyUrl({ url: `/api/Download/clear/tasks` });
+
+  static clearCompletedDownloadTasksByServerIdEndpoint = (
+    plexServerId: number,
+  ) => queryString.stringifyUrl({ url: `/api/Download/clear/${plexServerId}` });
 
   static createDownloadTasksEndpoint = () =>
     queryString.stringifyUrl({ url: `/api/Download/create` });

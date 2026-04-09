@@ -198,7 +198,7 @@ export interface DownloadPatchDTO {
   /** @format decimal */
   percentage: number;
   status: DownloadStatus;
-  /** @format int64 */
+  /** @format int32 */
   timeRemaining: number;
 }
 
@@ -216,7 +216,7 @@ export interface DownloadPatchEntryMessagePackDTO {
   /** @format decimal */
   percentage: number;
   status: DownloadStatus;
-  /** @format int64 */
+  /** @format int32 */
   timeRemaining: number;
 }
 
@@ -260,7 +260,7 @@ export interface DownloadProgressDTO {
   /** @format decimal */
   percentage: number;
   status: DownloadStatus;
-  /** @format int64 */
+  /** @format int32 */
   timeRemaining: number;
   title: string;
 }
@@ -279,7 +279,7 @@ export interface DownloadProgressMessagePackDTO {
   /** @format decimal */
   percentage: number;
   status: DownloadStatus;
-  /** @format int64 */
+  /** @format int32 */
   timeRemaining: number;
   title: string;
 }
@@ -340,7 +340,7 @@ export interface DownloadTaskDTO {
   /** @format int64 */
   ratingKey: number;
   status: DownloadStatus;
-  /** @format int64 */
+  /** @format int32 */
   timeRemaining: number;
   title: string;
 }

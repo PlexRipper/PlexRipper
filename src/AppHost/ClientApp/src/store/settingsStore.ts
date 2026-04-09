@@ -1,6 +1,6 @@
 import Log from 'consola';
 import { defineStore, acceptHMRUpdate } from 'pinia';
-import { of, Subject, type Observable, type Subscription } from 'rxjs';
+import { of, Subject, type Observable } from 'rxjs';
 import { debounceTime, switchMap, tap } from 'rxjs/operators';
 import { reactive, computed, toRefs } from 'vue';
 import { type IntegrationsSettingsDTO, PlexMediaType, type SettingsModelDTO, ViewMode } from '@dto';
@@ -69,62 +69,30 @@ export const useSettingsStore = defineStore(StoreNames.SettingsStore, () => {
 	};
 
 	const state = reactive<SettingsModelDTO>(cloneDeep(defaultState));
-	let settingsUpdated = new Subject<SettingsModelDTO>();
-	let settingsUpdatedSubscription: Subscription | null = null;
-	let stopStoreSubscription: (() => void) | null = null;
-	let isApplyingServerState = false;
-
-	function ensureSettingsUpdatedSubject(): Subject<SettingsModelDTO> {
-		if (settingsUpdated.closed) {
-			settingsUpdated = new Subject<SettingsModelDTO>();
-		}
-
-		return settingsUpdated;
-	}
-
-	function initializeAutosave() {
-		const settingsUpdatedSubject = ensureSettingsUpdatedSubject();
-
-		if (!settingsUpdatedSubscription || settingsUpdatedSubscription.closed) {
-			settingsUpdatedSubscription = settingsUpdatedSubject
-				.pipe(
-					debounceTime(500),
-					tap((settings) => Log.debug('Settings updated', settings)),
-					switchMap((settings) => settingsApi.updateUserSettingsEndpoint(settings)),
-				)
-				.subscribe();
-		}
-
-		if (!stopStoreSubscription) {
-			stopStoreSubscription = useSettingsStore().$subscribe((mutation, currentState) => {
-				if (mutation.type && !isApplyingServerState) {
-					settingsUpdatedSubject.next(cloneDeep(currentState));
-				}
-			});
-		}
-	}
+	const _settingsUpdated = new Subject<SettingsModelDTO>();
 
 	// Actions
 	const actions = {
 		setup(): Observable<ISetupResult> {
-			return actions.refreshSettings().pipe(
-				tap(() => {
-					initializeAutosave();
-				}),
-				switchMap(() => of({ name: StoreNames.SettingsStore, isSuccess: true })),
-			);
+			return actions.refreshSettings().pipe(tap(() => {
+				// Send the settings to the server when they change
+				_settingsUpdated
+					.pipe(debounceTime(500), tap((settings) => Log.debug('Settings updated', settings)), switchMap((settings) => settingsApi.updateUserSettingsEndpoint(settings)))
+					.subscribe();
+
+				useSettingsStore().$subscribe((mutation, state) => {
+					if (mutation.type) {
+						_settingsUpdated.next(state);
+					}
+				});
+			}), switchMap(() => of({ name: StoreNames.SettingsStore, isSuccess: true })));
 		},
 		refreshSettings(): Observable<SettingsModelDTO | null> {
-			return settingsApi.getUserSettingsEndpoint().pipe(
-				switchMap((settingsResult) => of(settingsResult?.value ?? null)),
-				tap((settings) => {
-					if (settings) {
-						isApplyingServerState = true;
-						actions.setSettingsState(settings);
-						isApplyingServerState = false;
-					}
-				}),
-			);
+			return settingsApi.getUserSettingsEndpoint().pipe(switchMap((settingsResult) => of(settingsResult?.value ?? null)), tap((settings) => {
+				if (settings) {
+					actions.setSettingsState(settings);
+				}
+			}));
 		},
 		saveSettings: (): Observable<SettingsModelDTO | null> => settingsApi.updateUserSettingsEndpoint(state).pipe(switchMap((settingsResult) => of(settingsResult?.value ?? null)), tap((settings) => {
 			if (settings) {
@@ -217,9 +185,8 @@ export const useSettingsStore = defineStore(StoreNames.SettingsStore, () => {
 			}
 		},
 		$reset() {
-			isApplyingServerState = true;
+			_settingsUpdated.complete();
 			actions.setSettingsState(cloneDeep(defaultState));
-			isApplyingServerState = false;
 		},
 	};
 

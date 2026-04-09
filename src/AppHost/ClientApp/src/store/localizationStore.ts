@@ -14,14 +14,6 @@ interface ILocalizationStoreState {
 	i18nRef: I18nObjectType;
 }
 
-const emptyLocaleConfig: ILocaleConfig = {
-	text: '',
-	code: '' as Locale,
-	iso: '',
-	bcp47Code: '',
-	img: '',
-};
-
 export const useLocalizationStore = defineStore(StoreNames.LocalizationStore, () => {
 	// State
 	const defaultState: ILocalizationStoreState = {
@@ -41,12 +33,12 @@ export const useLocalizationStore = defineStore(StoreNames.LocalizationStore, ()
 				return;
 			}
 
-			// @ts-expect-error - i18n type from plugin is narrower than runtime object.
+			// @ts-expect-error - This is a valid assignment, TypeScript is being retarted here.
 			state.i18nRef = i18n;
 			actions.changeLanguageLocale(get(i18n.locale));
 		},
 		changeLanguageLocale(isoCode: Locale) {
-			if (!state.i18nRef || typeof state.i18nRef.setLocale !== 'function') {
+			if (!state.i18nRef) {
 				Log.error('i18n object is not defined');
 				return;
 			}
@@ -72,27 +64,11 @@ export const useLocalizationStore = defineStore(StoreNames.LocalizationStore, ()
 	// Getters
 	const getters = {
 		getLanguageLocale: computed((): ILocaleConfig => {
-			const locales = state.i18nRef?.locales;
-			if (!Array.isArray(locales) || locales.length === 0) {
-				return emptyLocaleConfig;
-			}
-
-			const currentLocale = get(state.i18nRef.locale) as Locale;
-			const locale = locales.find((x) => x.code === currentLocale);
-
-			if (!locale) {
-				return emptyLocaleConfig;
-			}
-
-			return actions.toILocalConfig(locale as LocaleObject);
+			const locale = state.i18nRef.locales.find((locale) => locale.code === state.i18nRef.locale) as LocaleObject;
+			return actions.toILocalConfig(locale);
 		}),
 		getLanguageLocaleOptions: computed((): ILocaleConfig[] => {
-			const locales = state.i18nRef?.locales;
-			if (!Array.isArray(locales) || locales.length === 0) {
-				return [];
-			}
-
-			return locales.map((x) => (actions.toILocalConfig(x as LocaleObject)));
+			return state.i18nRef.locales.map((x) => (actions.toILocalConfig(x)));
 		}),
 	};
 

@@ -92,10 +92,6 @@ export const useAccountDialogStore = defineStore(StoreNames.AccountDialogStore, 
 		});
 	};
 
-	const isUnsuccessfulResult = (value: unknown): value is { isSuccess: boolean } => {
-		return typeof value === 'object' && value !== null && 'isSuccess' in value && (value as { isSuccess?: boolean }).isSuccess === false;
-	};
-
 	const actions = {
 		openDialog({ accountId }: IAccountDialog): void {
 			actions.$reset();
@@ -251,23 +247,13 @@ export const useAccountDialogStore = defineStore(StoreNames.AccountDialogStore, 
 					uuid: accountData.uuid,
 					validatedAt: accountData.validatedAt!,
 				}).pipe(
-					tap((result) => {
-						if (isUnsuccessfulResult(result) || !result) {
-							return;
-						}
-						dialogStore.closeDialog(DialogType.AccountDialog);
-					}),
+					tap(() => dialogStore.closeDialog(DialogType.AccountDialog)),
 					finalize(() => state.savingLoading = false),
 					switchMap(() => of(void 0)),
 				);
 			}
 			return accountStore.updatePlexAccount(get(getters.getAccountData)).pipe(
-				tap((result) => {
-					if (isUnsuccessfulResult(result) || !result) {
-						return;
-					}
-					dialogStore.closeDialog(DialogType.AccountDialog);
-				}),
+				tap(() => dialogStore.closeDialog(DialogType.AccountDialog)),
 				finalize(() => state.savingLoading = false),
 				switchMap(() => of(void 0)),
 			);

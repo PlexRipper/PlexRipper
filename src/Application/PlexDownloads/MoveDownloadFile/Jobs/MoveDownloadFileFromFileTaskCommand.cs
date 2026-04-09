@@ -379,7 +379,7 @@ public class MoveDownloadFileFromFileTaskCommandHandler : ICommandHandler<MoveDo
         CancellationToken cancellationToken
     )
     {
-        using var dbContextProgress = _dbContextFactory.Create();
+        using var dbContextProgress = await _dbContextFactory.CreateAsync();
         var progressChannel = Channel.CreateBounded<IDownloadFileTransferProgress>(
             new BoundedChannelOptions(1)
             {
@@ -396,7 +396,8 @@ public class MoveDownloadFileFromFileTaskCommandHandler : ICommandHandler<MoveDo
                 {
                     try
                     {
-                        await dbContextProgress.UpdateDownloadFileTransferProgress(
+                        using var contextProgress = await _dbContextFactory.CreateAsync();
+                        await contextProgress.UpdateDownloadFileTransferProgress(
                             key,
                             dto,
                             cancellationToken: cancellationToken

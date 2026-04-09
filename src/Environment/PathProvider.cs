@@ -1,5 +1,3 @@
-using System.Reflection;
-
 namespace Reaparr.Environment;
 
 public class PathProvider : IPathProvider

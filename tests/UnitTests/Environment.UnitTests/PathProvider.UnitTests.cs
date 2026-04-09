@@ -88,7 +88,7 @@ public class PathProviderUnitTests
             () =>
             {
                 // Act
-                var expected = GetExpectedDesktopConfigPath(home, appData);
+                var expected = GetExpectedDesktopConfigPath(home);
 
                 // Assert
                 PathProvider.ConfigDirectory.ShouldBe(expected);
@@ -133,7 +133,7 @@ public class PathProviderUnitTests
             () =>
             {
                 // Act
-                var expected = GetExpectedDesktopConfigPath(home, appData);
+                var expected = GetExpectedDesktopConfigPath(home);
 
                 // Assert
                 PathProvider.ConfigDirectory.ShouldBe(expected);
@@ -533,7 +533,7 @@ public class PathProviderUnitTests
         );
     }
 
-    private static string GetExpectedDesktopConfigPath(string _, string __) =>
+    private static string GetExpectedDesktopConfigPath(string _) =>
         OsInfo.CurrentOS switch
         {
             OperatingSystemPlatform.Windows => Path.Combine(

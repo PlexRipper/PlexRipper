@@ -7,7 +7,7 @@ public class GenerateDownloadTaskTvShowSeasonsCommandUnitTests
     public void GenerateDownloadTaskTvShowSeasonsCommandValidator_ShouldRejectNullRequest()
     {
         // Arrange
-        var command = new GenerateDownloadTaskTvShowSeasonsCommand((CreateDownloadTasksRequest)null!);
+        var command = new GenerateDownloadTaskTvShowSeasonsCommand(null!);
         var validator = new GenerateDownloadTaskTvShowSeasonsCommandValidator();
 
         // Act

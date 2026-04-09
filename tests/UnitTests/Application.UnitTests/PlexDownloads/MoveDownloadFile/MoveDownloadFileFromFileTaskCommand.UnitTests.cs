@@ -924,7 +924,7 @@ public class MoveDownloadFileFromFileTaskCommandUnitTests : BaseUnitTest<MoveDow
 
         // Act
         var result = await Sut.ExecuteAsync(
-            new MoveDownloadFileFromFileTaskCommand(downloadFileTask.ToKey(), null),
+            new MoveDownloadFileFromFileTaskCommand(downloadFileTask.ToKey()),
             cancellationTokenSource.Token
         );
 
@@ -1341,7 +1341,7 @@ public class MoveDownloadFileFromFileTaskCommandUnitTests : BaseUnitTest<MoveDow
 
         // Act
         var result = await Sut.ExecuteAsync(
-            new MoveDownloadFileFromFileTaskCommand(downloadFileTask.ToKey(), null),
+            new MoveDownloadFileFromFileTaskCommand(downloadFileTask.ToKey()),
             cancellationTokenSource.Token
         );
 

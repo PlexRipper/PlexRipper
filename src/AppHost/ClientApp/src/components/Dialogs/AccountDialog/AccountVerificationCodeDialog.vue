@@ -77,30 +77,12 @@ const accountDialogStore = useAccountDialogStore();
 const loading = ref(false);
 const errors = ref<ErrorDTO[]>([]);
 
-function getDefaultErrors(): ErrorDTO[] {
-	return [{
-		message: 'Verification failed',
-		metadata: {},
-		reasons: [],
-	}];
-}
-
 function onComplete() {
 	set(loading, true);
-	set(errors, []);
 	useSubscription(
 		accountDialogStore.validateVerificationCode().subscribe({
-			next(result) {
-				if (!result.isSuccess || !result.value?.isValidated) {
-					set(errors, getDefaultErrors());
-					return;
-				}
-
-				set(errors, []);
-			},
 			error(err) {
-				set(errors, Array.isArray(err) && err.length > 0 ? err : getDefaultErrors());
-				set(loading, false);
+				set(errors, err);
 			},
 			complete: () => {
 				set(loading, false);

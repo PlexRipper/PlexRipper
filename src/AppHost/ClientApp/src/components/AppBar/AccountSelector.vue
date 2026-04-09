@@ -62,6 +62,7 @@
 </template>
 
 <script setup lang="ts">
+import Log from 'consola';
 import { useSettingsStore, useAccountStore, useAuthenticationStore } from '@store';
 import { useI18n } from 'vue-i18n';
 import { tap } from 'rxjs/operators';
@@ -105,6 +106,8 @@ function runReSyncAccount(accountId = 0): void {
 			.pipe(tap((data) => {
 				if (data.isSuccess) {
 					dialogStore.openRefreshPlexAccountAccessDialog(data.value ?? []);
+				} else {
+					Log.error(`Failed to re-sync account with id ${accountId}: ${data.errors}`);
 				}
 			}))
 			.subscribe(),

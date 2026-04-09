@@ -77,14 +77,12 @@ const verificationCodeValue = ref<string>('');
 const needVerificationToken = ref<boolean>(false);
 
 function onOpen() {
-	set(generatedToken, '');
-	set(needVerificationToken, false);
-	set(verificationCodeValue, '');
 	requestToken();
 }
 
 function onComplete(verificationCode: string) {
 	requestToken(verificationCode);
+	set(needVerificationToken, false);
 	set(verificationCodeValue, '');
 }
 
@@ -92,19 +90,12 @@ function requestToken(verificationCode: string = '') {
 	useSubscription(accountDialogStore.generateToken(verificationCode).subscribe({
 		next({ isSuccess, value }) {
 			if (value?.needsVerificationCode) {
-				set(generatedToken, '');
 				set(needVerificationToken, true);
 				return;
 			}
 
 			if (isSuccess) {
-				set(needVerificationToken, false);
 				set(generatedToken, value?.plexAuthToken ?? '');
-				return;
-			}
-
-			if (verificationCode) {
-				set(needVerificationToken, true);
 			}
 		},
 	}));

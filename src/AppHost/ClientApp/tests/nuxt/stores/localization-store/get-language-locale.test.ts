@@ -39,7 +39,7 @@ describe('LocalizationStore.getLanguageLocale', () => {
 		expect(localizationStore.getLanguageLocale.text).toEqual('English');
 	});
 
-	test('Should return an empty fallback locale when i18n object is not set', () => {
+	test('Should return a safe fallback locale when i18n object is not set', () => {
 		// Arrange
 		const localizationStore = useLocalizationStore();
 
@@ -49,13 +49,13 @@ describe('LocalizationStore.getLanguageLocale', () => {
 			text: '',
 			code: '',
 			iso: '',
-			bcp47Code: '',
+			bcp47Code: 'en-US',
 			img: '',
 		});
 		expect(localizationStore.getLanguageLocaleOptions).toEqual([]);
 	});
 
-	test('Should return an empty fallback locale when current locale is not in available locales', () => {
+	test('Should return a safe fallback locale when current locale is not in available locales', () => {
 		// Arrange
 		const localizationStore = useLocalizationStore();
 		const i18n = {
@@ -75,7 +75,7 @@ describe('LocalizationStore.getLanguageLocale', () => {
 			text: '',
 			code: '',
 			iso: '',
-			bcp47Code: '',
+			bcp47Code: 'en-US',
 			img: '',
 		});
 	});

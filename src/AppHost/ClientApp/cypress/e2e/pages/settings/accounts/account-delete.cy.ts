@@ -39,7 +39,7 @@ describe('Remove Plex account from Reaparr', () => {
 
 			cy.getCy('confirmation-dialog-confirmation-button').click();
 			cy.wait('@deleteAccount');
- 			cy.wait('@getAccountsAfterDelete');
+			cy.wait('@getAccountsAfterDelete');
 
 			cy.getCy('account-dialog-form').should('not.exist');
 

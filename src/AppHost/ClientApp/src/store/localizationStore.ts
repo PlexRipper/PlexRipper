@@ -25,7 +25,7 @@ export const useLocalizationStore = defineStore(StoreNames.LocalizationStore, ()
 		text: '',
 		code: '' as Locale,
 		iso: '',
-		bcp47Code: '',
+		bcp47Code: 'en-US',
 		img: '',
 	};
 

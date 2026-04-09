@@ -1,5 +1,35 @@
 Reaparr Changelog
 
+# [0.38.0-dev.1](https://github.com/Reaparr/Reaparr/compare/v0.37.0...v0.38.0-dev.1) (2026-04-09)
+
+
+### Bug Fixes
+
+* **Web-UI:** Enforce auth status and logout consistency ([8020869](https://github.com/Reaparr/Reaparr/commit/802086997e5fbea4029e50928c3f27d4fd6ea446))
+* **Web-UI:** Guard failed Plex account mutations ([e3bb89a](https://github.com/Reaparr/Reaparr/commit/e3bb89a6aa47f16148b12cd7260e5ec902022bd0))
+* **Web-UI:** Guard failed server connection refreshes ([326d56f](https://github.com/Reaparr/Reaparr/commit/326d56f43a145e8c91691a636c362137e2cc4187))
+* **Web-UI:** Harden locale selection and i18n guards ([e29e72f](https://github.com/Reaparr/Reaparr/commit/e29e72fb5492b7b5b225f44dffa900cb8934be23))
+* **WebAPI:** Harden move download cancellation and job queueing ([efd281f](https://github.com/Reaparr/Reaparr/commit/efd281fd07403fc1ea6254d7019e3d2fcaa7a04c))
+* **Web-UI:** Preserve download command failure state ([b42d3cb](https://github.com/Reaparr/Reaparr/commit/b42d3cb112247a059d1ec854103ec3de7e0a7d22))
+* **Web-UI:** Refresh servers only after successful updates ([faffdd6](https://github.com/Reaparr/Reaparr/commit/faffdd63a52d060f222c671e063db342c7e9d777))
+* **Web-UI:** Reset integration loading state on errors ([d7f615c](https://github.com/Reaparr/Reaparr/commit/d7f615c2fc8c721c57f7adcbcca519a3c3f2a3ac))
+* **WebAPI:** Respect client-owned download failure statuses ([ccf8c42](https://github.com/Reaparr/Reaparr/commit/ccf8c42a89a0e91aab97fd5ed00d9dcd6328fa86))
+* **Web-UI:** Stabilize account dialog validation and save flows ([6d0d4a6](https://github.com/Reaparr/Reaparr/commit/6d0d4a6b35eb0fb9cdfd7c02a067686f3d02e910))
+* **Web-UI:** Stabilize settings autosave subscriptions ([e7c4a5c](https://github.com/Reaparr/Reaparr/commit/e7c4a5c057f5620d5cfa7d7dd34a8e012a83cd44))
+* **Web-UI:** Surface invalid Plex credentials in account dialog ([5067b2c](https://github.com/Reaparr/Reaparr/commit/5067b2cb77fd20f754e9d817bad14e085b4b0ed9))
+
+
+### Features
+
+* **WebAPI:** Add desktop build workflow and configuration for multiple platforms like Linux, MacOS and Windows ([e6a036d](https://github.com/Reaparr/Reaparr/commit/e6a036dbb0fa8d8205f0c6190547b6391853f7e7))
+* **WebAPI:** Add scripts and configurations for desktop builds on Linux, MacOS, and Windows ([3169fff](https://github.com/Reaparr/Reaparr/commit/3169fff04257dd84c4ca44a2a04b36ce3666c424))
+
+
+### Reverts
+
+* **Web-UI:** Revert "improvements" ([cb481da](https://github.com/Reaparr/Reaparr/commit/cb481da31a34e222af0c69daf0fedb742b7b282f))
+* **Web-UI:** Revert "improvements" ([359583a](https://github.com/Reaparr/Reaparr/commit/359583a165710fc0bfdfbe55729fac743e5202e5))
+
 # [0.37.0](https://github.com/Reaparr/Reaparr/compare/v0.36.0...v0.37.0) (2026-03-31)
 
 

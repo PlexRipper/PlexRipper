@@ -6,7 +6,15 @@ on:
         branches: [ dev ]
         types: [opened, ready_for_review, reopened, synchronize]
         paths-ignore:
+            - '.ai/**'
+            - '.agents/**'
+            - '.claude/**'
+            - '.cursor/**'
             - '.idea/**'
+            - '.junie/**'
+            - '.opencode/**'
+            - '.skillshare/**'
+            - '.slopwatch/**'
             - '.run/**'
             - '.vscode/**'
             - 'README.md'

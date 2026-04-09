@@ -178,6 +178,16 @@ public class DashPlexDownloadClientStopAsyncUnitTests : BaseUnitTest<DashPlexDow
                 x => x.SendRefreshNotificationAsync(It.IsAny<RefreshDataType>(), It.IsAny<CancellationToken>()),
                 Times.Once()
             );
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Verify(
+                x =>
+                    x.OnStatusChangedAsync(
+                        It.IsAny<DownloadTaskKey>(),
+                        It.IsAny<DownloadStatus>(),
+                        It.IsAny<CancellationToken>()
+                    ),
+                Times.Exactly(3)
+            );
         dashWrapperMock.VerifyGet(x => x.DownloadCompleted, Times.Once());
         dashWrapperMock.Verify(x => x.StopAsync(), Times.Exactly(2));
         Mock.Mock<ICommandExecutor>()

@@ -73,6 +73,8 @@ public class GenerateDownloadTaskTvShowsCommandHandler : ICommandHandler<Generat
             var seasonsIds = new List<DownloadMediaDTO>();
             var tvShowsToInsert = new List<DownloadTaskTvShow>();
 
+            await using var transaction = await _dbContext.BeginTransactionAsync(cancellationToken);
+
             foreach (var tvShow in plexTvShows)
             {
                 // Check if the tvShowDownloadTask has already been created
@@ -101,11 +103,15 @@ public class GenerateDownloadTaskTvShowsCommandHandler : ICommandHandler<Generat
                 }
             }
 
-            await using var transaction = await _dbContext.BeginTransactionAsync(cancellationToken);
-
             // Insert the tvShowDownloadTask into the database
             _dbContext.DownloadTaskTvShow.AddRange(tvShowsToInsert);
             await _dbContext.SaveChangesAsync(cancellationToken);
+
+            if (seasonsIds.Count == 0)
+            {
+                await transaction.CommitAsync(cancellationToken);
+                continue;
+            }
 
             // Create seasons downloadTasks
             var seasonsResult = await _commandExecutor.Send(

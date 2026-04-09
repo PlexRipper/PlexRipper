@@ -87,7 +87,21 @@ public class GenerateDownloadTaskMoviesCommandHandler : ICommandHandler<Generate
 
             foreach (var plexMovie in plexMovies)
             {
-                // TODO: Check for duplicate DownloadTasks already existing
+                var downloadTaskAlreadyExists = await _dbContext.DownloadTaskMovie.AnyAsync(
+                    x => x.PlexServerId == plexMovie.PlexServerId && x.PlexApiRatingKey == plexMovie.PlexApiRatingKey,
+                    cancellationToken
+                );
+                if (downloadTaskAlreadyExists)
+                {
+                    _log.Here()
+                        .Debug(
+                            "Skipping duplicate movie download task for {MovieTitle} ({MovieKey})",
+                            plexMovie.Title,
+                            plexMovie.PlexApiRatingKey
+                        );
+                    continue;
+                }
+
                 var movieDownloadTask = plexMovie.MapToDownloadTask();
 
                 var movieData = SelectMovieQuality(plexMovie, downloadMediaDto);

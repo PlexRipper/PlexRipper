@@ -83,6 +83,7 @@ ENV PORT=${PORT}
 ENV DOTNET_ENVIRONMENT=Production
 ENV DOTNET_URLS=http://+:${PORT}
 ENV S6_SERVICES_GRACETIME=15000
+ENV REAPARR_PLATFORM=docker
 
 # Install Alpine dependencies (.NET runtime deps + dash-mpd-cli helpers)
 RUN apk add --no-cache bash icu-libs krb5-libs libgcc libintl libssl3 libstdc++ zlib \

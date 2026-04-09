@@ -465,7 +465,7 @@ public class MoveDownloadFileFromFileTaskCommandUnitTests : BaseUnitTest<MoveDow
         });
 
         downloadFileTask.DataTotal = content.LongLength;
-        await IDbContext.SaveChangesAsync(CancellationToken);
+        await dbContext.SaveChangesAsync(CancellationToken);
 
         Mock.Mock<IEventPublisher>()
             .Setup(m => m.PublishAsync(It.IsAny<SendNotificationResult>(), It.IsAny<CancellationToken>()))
@@ -520,7 +520,7 @@ public class MoveDownloadFileFromFileTaskCommandUnitTests : BaseUnitTest<MoveDow
         result.IsSuccess.ShouldBeTrue();
         progressList.Any().ShouldBeTrue();
 
-        var fileTaskPaused = await IDbContext.GetDownloadTaskFileAsync(downloadFileTask.ToKey(), CancellationToken);
+        var fileTaskPaused = await dbContext.GetDownloadTaskFileAsync(downloadFileTask.ToKey(), CancellationToken);
         fileTaskPaused.ShouldNotBeNull();
         fileTaskPaused.CurrentFileTransferBytesOffset.ShouldBeGreaterThanOrEqualTo(0);
     }
@@ -604,7 +604,10 @@ public class MoveDownloadFileFromFileTaskCommandUnitTests : BaseUnitTest<MoveDow
             .Setup(x => x.NotifyFileTransferProgress(It.IsAny<DownloadTaskKey>()))
             .Verifiable(Times.Exactly(2));
 
-        Mock.Mock<IReaparrDbContextFactory>().Setup(x => x.Create()).Returns(dbContext).Verifiable(Times.Exactly(2));
+        Mock.Mock<IReaparrDbContextFactory>()
+            .SetupSequence(x => x.Create())
+            .Returns(() => IDbContext)
+            .Returns(() => IDbContext);
 
         Mock.Mock<ICommandExecutor>()
             .Setup(x => x.Send(It.IsAny<MoveFileWithResumeCommand>(), It.IsAny<CancellationToken>()))
@@ -732,6 +735,8 @@ public class MoveDownloadFileFromFileTaskCommandUnitTests : BaseUnitTest<MoveDow
         after.ShouldNotBeNull();
         after.FileDataTransferred.ShouldBe(after.DataTotal);
         after.CurrentFileTransferBytesOffset.ShouldBe(after.DataTotal);
+        Mock.Mock<ICommandExecutor>()
+            .Verify(x => x.Send(It.IsAny<MoveFileWithResumeCommand>(), It.IsAny<CancellationToken>()), Times.Never());
         Mock.Mock<IDownloadTaskUpdateDispatcher>()
             .Verify(
                 x =>
@@ -1540,6 +1545,8 @@ public class MoveDownloadFileFromFileTaskCommandUnitTests : BaseUnitTest<MoveDow
         result.IsFailed.ShouldBeTrue();
         result.Errors.ShouldContain(x => x.Message.Contains("moving status update boom"));
 
+        Mock.Mock<ICommandExecutor>()
+            .Verify(x => x.Send(It.IsAny<MoveFileWithResumeCommand>(), It.IsAny<CancellationToken>()), Times.Never());
         Mock.Mock<IDownloadTaskUpdateDispatcher>().Verify();
     }
 

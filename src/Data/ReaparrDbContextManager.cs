@@ -186,8 +186,8 @@ public class ReaparrDbContextManager : IReaparrDbContextManager
 
     public async Task<Result> InitializeDefaultFolderPathsOnCreate()
     {
-        var defaultPathsById = ReaparrDBContextSeed.GetDefaultFolderPaths();
-        var targetIds = defaultPathsById.Select(x => x.Id).ToList();
+        var defaultPathsById = ReaparrDBContextSeed.GetDefaultFolderPaths().ToDictionary(x => x.Id);
+        var targetIds = defaultPathsById.Keys.ToList();
 
         var existingPaths = await _dbContext
             .FolderPaths.AsTracking()
@@ -199,16 +199,19 @@ public class ReaparrDbContextManager : IReaparrDbContextManager
         var updatedCount = 0;
         foreach (var existingPath in existingPaths)
         {
+            if (!defaultPathsById.TryGetValue(existingPath.Id, out var defaultPath))
+                continue;
+
             var oldPath = existingPath.DirectoryPath;
-            var newPath = existingPath.MediaType.ToDefaultDestinationLocation();
+            var newPath = defaultPath.DirectoryPath;
             if (oldPath == newPath)
                 continue;
 
             existingPath.DirectoryPath = newPath;
             _log.Here()
                 .Debug(
-                    "Updating default FolderPath for MediaType {MediaType}, from \"{OldPath}\" to New Path: \"{NewPath}\".",
-                    existingPath.MediaType,
+                    "Updating default FolderPath {FolderPathId}, from \"{OldPath}\" to New Path: \"{NewPath}\".",
+                    existingPath.Id,
                     oldPath,
                     newPath
                 );

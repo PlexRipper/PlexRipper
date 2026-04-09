@@ -30,7 +30,14 @@ public static class EnvironmentExtensions
     public static string? GetGamesPath() => GetEnvironmentVariable(EnvKeys.ReaparrGamesPath);
 
     public static string GetReaparrMode() =>
-        GetEnvironmentVariable(EnvKeys.ReaparrPlatform)?.ToLowerInvariant() == "desktop" ? "desktop" : "docker";
+        GetEnvironmentVariable(EnvKeys.ReaparrPlatform)?.ToLowerInvariant() switch
+        {
+            "desktop" => "desktop",
+            "docker" => "docker",
+            _ => throw new InvalidOperationException(
+                $"Invalid REAPARR_PLATFORM environment value. Expected 'desktop' or 'docker', but got '{GetEnvironmentVariable(REAPARR_PLATFORM_KEY)}'."
+            ),
+        };
 
     public static bool IsDesktopMode() => GetReaparrMode() == "desktop";
 

@@ -49,7 +49,7 @@ public class LogMaskingUnitTests : BaseUnitTest<LogMaskingUnitTests>
                     "Test destructured request: {@Request}",
                     new
                     {
-                        Username = "ReaparrRocksDEV",
+                        UserName = "ReaparrRocksDEV",
                         Password = "TA%K3z05N@88p3nr02AcI$00s",
                         RememberMe = false,
                     }

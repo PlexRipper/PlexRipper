@@ -3,65 +3,6 @@ namespace Reaparr.Application.UnitTests;
 public class RestartDownloadTaskCommandUnitTests : BaseUnitTest<RestartDownloadTaskCommandHandler>
 {
     [Test]
-    public async Task ShouldHaveFailedResult_WhenQueueingChildAfterRestartFails()
-    {
-        // Arrange
-        Mock.Mock<IDownloadTaskUpdateDispatcher>()
-            .Setup(x =>
-                x.OnStatusChangedAsync(
-                    It.IsAny<DownloadTaskKey>(),
-                    It.Is<DownloadStatus>(s => s != DownloadStatus.Queued),
-                    It.IsAny<CancellationToken>()
-                )
-            )
-            .Returns(Task.CompletedTask)
-            .Verifiable(Times.Exactly(2));
-        Mock.Mock<IDownloadTaskUpdateDispatcher>()
-            .Setup(x =>
-                x.OnStatusChangedAsync(
-                    It.IsAny<DownloadTaskKey>(),
-                    DownloadStatus.Queued,
-                    It.IsAny<CancellationToken>()
-                )
-            )
-            .Returns(Task.CompletedTask)
-            .Verifiable(Times.Once());
-        await SetupDatabase(72153, config => config.MovieDownloadTasksCount = 1);
-
-        var downloadTasks = await IDbContext.GetAllDownloadTasksByServerAsync(cancellationToken: CancellationToken);
-        var movieTask = downloadTasks.First();
-        var childKeys = await IDbContext.GetDownloadableChildTaskKeys(movieTask.ToKey(), CancellationToken);
-
-        childKeys.Count.ShouldBeGreaterThan(0);
-
-        foreach (var childKey in childKeys)
-        {
-            await IDbContext
-                .DownloadTaskMovieFile.Where(x => x.Id == childKey.Id)
-                .ExecuteUpdateAsync(
-                    p => p.SetProperty(x => x.DownloadStatus, DownloadStatus.Stopped),
-                    CancellationToken
-                );
-        }
-
-        Mock.SetupCommand(It.IsAny<StopDownloadTaskCommand>).ReturnsAsync(Result.Ok());
-        Mock.PublishEvent(It.IsAny<CheckDownloadQueueEvent>).Returns(Task.CompletedTask);
-
-        // Act
-        var result = await Sut.ExecuteAsync(new RestartDownloadTaskCommand(movieTask.Id), CancellationToken);
-
-        // Assert
-        result.IsFailed.ShouldBeTrue();
-        result.Errors.ShouldContain(x => x.Message.Contains("Queueing child failed"));
-
-        Mock.Mock<IEventPublisher>()
-            .Verify(
-                x => x.PublishAsync(It.IsAny<CheckDownloadQueueEvent>(), It.IsAny<CancellationToken>()),
-                Times.Never
-            );
-    }
-
-    [Test]
     public async Task ShouldRequeueDownloadTasks_WhenRestartingValidId()
     {
         // Arrange

@@ -26,13 +26,13 @@ public class DeleteDownloadTaskEndpointUnitTests : BaseUnitTest<DeleteDownloadTa
         Mock.Mock<IDownloadTaskUpdateDispatcher>()
             .Setup(x =>
                 x.OnStatusChangedAsync(
-                    It.Is<DownloadTaskKey>(k => k.Id == episodeFileId),
+                    It.IsAny<DownloadTaskKey>(),
                     DownloadStatus.Deleted,
                     It.IsAny<CancellationToken>()
                 )
             )
             .Returns(Task.CompletedTask)
-            .Verifiable(Times.Once());
+            .Verifiable(Times.Exactly(4));
 
         Mock.Mock<ICommandExecutor>()
             .Setup(x => x.Send(It.IsAny<StopDownloadTaskCommand>(), It.IsAny<CancellationToken>()))

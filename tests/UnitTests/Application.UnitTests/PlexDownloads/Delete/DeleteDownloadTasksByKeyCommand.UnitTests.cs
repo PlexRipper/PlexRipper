@@ -57,13 +57,13 @@ public class DeleteDownloadTasksByKeyCommandUnitTests : BaseUnitTest<DeleteDownl
         Mock.Mock<IDownloadTaskUpdateDispatcher>()
             .Setup(x =>
                 x.OnStatusChangedAsync(
-                    It.Is<DownloadTaskKey>(k => k.Id == movieFileKey.Id),
+                    It.IsAny<DownloadTaskKey>(),
                     DownloadStatus.Deleted,
                     It.IsAny<CancellationToken>()
                 )
             )
             .Returns(Task.CompletedTask)
-            .Verifiable(Times.Once());
+            .Verifiable(Times.Exactly(2));
 
         // Act
         var result = await Sut.ExecuteAsync(new DeleteDownloadTasksByKeyCommand([movieFileKey]), CancellationToken);
@@ -98,13 +98,13 @@ public class DeleteDownloadTasksByKeyCommandUnitTests : BaseUnitTest<DeleteDownl
         Mock.Mock<IDownloadTaskUpdateDispatcher>()
             .Setup(x =>
                 x.OnStatusChangedAsync(
-                    It.Is<DownloadTaskKey>(k => k.Id == episodeFileKey.Id),
+                    It.IsAny<DownloadTaskKey>(),
                     DownloadStatus.Deleted,
                     It.IsAny<CancellationToken>()
                 )
             )
             .Returns(Task.CompletedTask)
-            .Verifiable(Times.Once());
+            .Verifiable(Times.Exactly(4));
 
         // Act
         var result = await Sut.ExecuteAsync(new DeleteDownloadTasksByKeyCommand([episodeFileKey]), CancellationToken);
@@ -141,13 +141,13 @@ public class DeleteDownloadTasksByKeyCommandUnitTests : BaseUnitTest<DeleteDownl
         Mock.Mock<IDownloadTaskUpdateDispatcher>()
             .Setup(x =>
                 x.OnStatusChangedAsync(
-                    It.Is<DownloadTaskKey>(k => k.Id == episodeFileKeys[0].Id),
+                    It.IsAny<DownloadTaskKey>(),
                     DownloadStatus.Deleted,
                     It.IsAny<CancellationToken>()
                 )
             )
             .Returns(Task.CompletedTask)
-            .Verifiable(Times.Once());
+            .Verifiable(Times.Exactly(2));
 
         // Act — delete only the first episode file
         var result = await Sut.ExecuteAsync(

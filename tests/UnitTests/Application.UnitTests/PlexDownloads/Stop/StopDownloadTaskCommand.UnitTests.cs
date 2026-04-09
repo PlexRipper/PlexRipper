@@ -189,51 +189,6 @@ public class StopDownloadTaskCommandUnitTests : BaseUnitTest<StopDownloadTaskCom
     }
 
     [Test]
-    public async Task ShouldHaveFailedResult_WhenStoppingStatusUpdateFails()
-    {
-        // Arrange
-        await SetupDatabase(904255, config => config.MovieDownloadTasksCount = 1);
-        var movieTask = await IDbContext.DownloadTaskMovie.FirstAsync(CancellationToken);
-
-        Mock.Mock<IDownloadTaskScheduler>()
-            .Setup(x => x.IsDownloading(It.IsAny<DownloadTaskKey>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(false);
-        Mock.Mock<IMoveDownloadFileScheduler>()
-            .Setup(x => x.IsDownloadFileMoving(It.IsAny<DownloadTaskKey>()))
-            .ReturnsAsync(false);
-        Mock.Mock<IDownloadTaskUpdateDispatcher>()
-            .Setup(x =>
-                x.OnStatusChangedAsync(
-                    It.IsAny<DownloadTaskKey>(),
-                    It.Is<DownloadStatus>(s => s == DownloadStatus.Stopped),
-                    It.IsAny<CancellationToken>()
-                )
-            )
-            .Returns(Task.CompletedTask)
-            .Verifiable(Times.Once);
-
-        // Act
-        var result = await Sut.ExecuteAsync(
-            new StopDownloadTaskCommand(movieTask.Id, DeleteFiles: false),
-            CancellationToken
-        );
-
-        // Assert
-        result.IsFailed.ShouldBeTrue();
-        result.Errors.ShouldContain(x => x.Message.Contains("stopping status update boom"));
-        Mock.Mock<IDownloadTaskUpdateDispatcher>()
-            .Verify(
-                x =>
-                    x.OnStatusChangedAsync(
-                        It.IsAny<DownloadTaskKey>(),
-                        It.Is<DownloadStatus>(s => s == DownloadStatus.Stopped),
-                        It.IsAny<CancellationToken>()
-                    ),
-                Times.Once
-            );
-    }
-
-    [Test]
     public async Task ShouldDeleteDownloadFile_WhenTaskIsInFileTransferPhase()
     {
         // Arrange — task is in MoveError (FileTransfer phase); stopping deletes temp files

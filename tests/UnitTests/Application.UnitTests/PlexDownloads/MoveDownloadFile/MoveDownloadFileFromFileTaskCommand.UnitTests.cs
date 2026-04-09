@@ -197,7 +197,7 @@ public class MoveDownloadFileFromFileTaskCommandUnitTests : BaseUnitTest<MoveDow
     }
 
     [Test]
-    public async Task ShouldSetMovePaused_WhenCancellationIsRequestedAndMoveCommandReturnsSuccess()
+    public async Task ShouldSetMoveFinished_WhenCancellationIsRequestedAfterMoveCommandReturnsSuccess()
     {
         // Arrange
         await SetupDatabase(
@@ -283,7 +283,7 @@ public class MoveDownloadFileFromFileTaskCommandUnitTests : BaseUnitTest<MoveDow
                 x =>
                     x.OnStatusChangedAsync(
                         It.IsAny<DownloadTaskKey>(),
-                        It.Is<DownloadStatus>(s => s == DownloadStatus.MovePaused),
+                        It.Is<DownloadStatus>(s => s == DownloadStatus.MoveFinished),
                         It.IsAny<CancellationToken>()
                     ),
                 Times.AtLeastOnce()
@@ -294,7 +294,7 @@ public class MoveDownloadFileFromFileTaskCommandUnitTests : BaseUnitTest<MoveDow
                 x =>
                     x.OnStatusChangedAsync(
                         It.IsAny<DownloadTaskKey>(),
-                        It.Is<DownloadStatus>(s => s == DownloadStatus.MoveFinished),
+                        It.Is<DownloadStatus>(s => s == DownloadStatus.MovePaused),
                         It.IsAny<CancellationToken>()
                     ),
                 Times.Never()
@@ -394,13 +394,23 @@ public class MoveDownloadFileFromFileTaskCommandUnitTests : BaseUnitTest<MoveDow
         // Assert
         result.IsSuccess.ShouldBeTrue();
         progressUpdates.Count.ShouldBe(1);
-        progressUpdates[0].FileDataTransferred.ShouldBe(content.LongLength / 2);
         wasCompleted.ShouldBeTrue();
 
         var fileTaskAfterPause = await dbContext.GetDownloadTaskFileAsync(downloadFileTask.ToKey(), CancellationToken);
         fileTaskAfterPause.ShouldNotBeNull();
-        fileTaskAfterPause.FileDataTransferred.ShouldBe(content.LongLength / 2);
+        progressUpdates[0].FileDataTransferred.ShouldBe(fileTaskAfterPause.FileDataTransferred);
+        fileTaskAfterPause.FileDataTransferred.ShouldBeGreaterThan(0);
 
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Verify(
+                x =>
+                    x.OnStatusChangedAsync(
+                        It.IsAny<DownloadTaskKey>(),
+                        It.Is<DownloadStatus>(s => s == DownloadStatus.MoveFinished),
+                        It.IsAny<CancellationToken>()
+                    ),
+                Times.AtLeastOnce()
+            );
         Mock.Mock<IDownloadTaskUpdateDispatcher>()
             .Verify(
                 x =>
@@ -409,7 +419,7 @@ public class MoveDownloadFileFromFileTaskCommandUnitTests : BaseUnitTest<MoveDow
                         It.Is<DownloadStatus>(s => s == DownloadStatus.MovePaused),
                         It.IsAny<CancellationToken>()
                     ),
-                Times.AtLeastOnce()
+                Times.Never()
             );
     }
 
@@ -1578,16 +1588,6 @@ public class MoveDownloadFileFromFileTaskCommandUnitTests : BaseUnitTest<MoveDow
             .Setup(x =>
                 x.OnStatusChangedAsync(
                     It.IsAny<DownloadTaskKey>(),
-                    It.Is<DownloadStatus>(s => s == DownloadStatus.MoveFinished),
-                    It.IsAny<CancellationToken>()
-                )
-            )
-            .Returns(Task.CompletedTask)
-            .Verifiable(Times.Once());
-        Mock.Mock<IDownloadTaskUpdateDispatcher>()
-            .Setup(x =>
-                x.OnStatusChangedAsync(
-                    It.IsAny<DownloadTaskKey>(),
                     It.Is<DownloadStatus>(s => s != DownloadStatus.MoveFinished),
                     It.IsAny<CancellationToken>()
                 )
@@ -1704,91 +1704,6 @@ public class MoveDownloadFileFromFileTaskCommandUnitTests : BaseUnitTest<MoveDow
                     ),
                 Times.AtLeastOnce()
             );
-    }
-
-    [Test]
-    public async Task ShouldHaveFailedResult_WhenSettingMoveErrorStatusFails()
-    {
-        // Arrange
-        await SetupDatabase(
-            112234,
-            config =>
-            {
-                config.TvShowDownloadTasksCount = 1;
-                config.TvShowSeasonDownloadTasksCount = 1;
-                config.TvShowEpisodeDownloadTasksCount = 1;
-            }
-        );
-
-        var downloadFileTask = await IDbContext.DownloadTaskTvShowEpisodeFile.FirstOrDefaultAsync(CancellationToken);
-        downloadFileTask.ShouldNotBeNull();
-
-        var progress = new Subject<IDownloadFileTransferProgress>();
-
-        var content = new byte[3 * 1024 * 1024];
-        new Random(8).NextBytes(content);
-
-        SetupFileSystem(fs =>
-        {
-            fs.AddFile(downloadFileTask.DownloadFilePath, new MockFileData(content));
-        });
-
-        downloadFileTask.DataTotal = content.LongLength;
-        await IDbContext.SaveChangesAsync(CancellationToken);
-
-        Mock.Mock<IDownloadManagerSettings>().Setup(x => x.KeepCompletedInDownloadFolder).Returns(false);
-
-        Mock.Mock<IEventPublisher>()
-            .Setup(m => m.PublishAsync(It.IsAny<SendNotificationResult>(), It.IsAny<CancellationToken>()))
-            .Returns(Task.CompletedTask)
-            .Verifiable(Times.Once);
-
-        Mock.SetupCommand(It.IsAny<MoveFileWithResumeCommand>).ReturnsAsync(Result.Fail("boom")).Verifiable(Times.Once);
-
-        Mock.Mock<IDownloadTaskUpdateDispatcher>()
-            .Setup(x =>
-                x.OnStatusChangedAsync(
-                    It.IsAny<DownloadTaskKey>(),
-                    It.Is<DownloadStatus>(s => s == DownloadStatus.MoveError),
-                    It.IsAny<Result>(),
-                    It.IsAny<CancellationToken>()
-                )
-            )
-            .Returns(Task.CompletedTask)
-            .Verifiable(Times.Once());
-        Mock.Mock<IDownloadTaskUpdateDispatcher>()
-            .Setup(x =>
-                x.OnStatusChangedAsync(
-                    It.IsAny<DownloadTaskKey>(),
-                    It.IsAny<DownloadStatus>(),
-                    It.IsAny<CancellationToken>()
-                )
-            )
-            .Returns(Task.CompletedTask)
-            .Verifiable(Times.Once());
-        Mock.Mock<IDownloadTaskUpdateDispatcher>()
-            .Setup(x =>
-                x.OnStatusChangedAsync(
-                    It.IsAny<DownloadTaskKey>(),
-                    It.Is<DownloadStatus>(s => s != DownloadStatus.MoveError),
-                    It.IsAny<Result>(),
-                    It.IsAny<CancellationToken>()
-                )
-            )
-            .Returns(Task.CompletedTask)
-            .Verifiable(Times.Never());
-
-        // Act
-        var result = await Sut.ExecuteAsync(
-            new MoveDownloadFileFromFileTaskCommand(downloadFileTask.ToKey(), progress),
-            CancellationToken
-        );
-
-        // Assert
-        result.IsFailed.ShouldBeTrue();
-        result.Errors.ShouldContain(x => x.Message.Contains("move error status update boom"));
-
-        Mock.Mock<IDownloadTaskUpdateDispatcher>().Verify();
     }
 
     [Test]

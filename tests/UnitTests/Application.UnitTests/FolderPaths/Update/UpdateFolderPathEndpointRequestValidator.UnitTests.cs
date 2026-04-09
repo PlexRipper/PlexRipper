@@ -70,8 +70,8 @@ public class UpdateFolderPathEndpointRequestValidatorUnitTests
 
         // Assert
         result.IsValid.ShouldBeFalse();
-        result.Errors.ShouldContain(x => x.PropertyName == "FolderPathDto.FolderType");
-        result.Errors.ShouldContain(x => x.PropertyName == "FolderPathDto.MediaType");
+        result.Errors.ShouldContain(x => x.PropertyName == "FolderPathDTO.FolderType");
+        result.Errors.ShouldContain(x => x.PropertyName == "FolderPathDTO.MediaType");
     }
 
     [Test]

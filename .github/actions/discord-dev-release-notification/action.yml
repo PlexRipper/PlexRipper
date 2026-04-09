@@ -1,4 +1,5 @@
 name: 'Notify Discord of build status'
+description: 'Send release status notification to Discord for dev/stable releases'
 inputs:
     webhook:
         description: 'The Discord webhook URL.'

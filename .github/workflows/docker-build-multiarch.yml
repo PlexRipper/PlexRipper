@@ -57,7 +57,7 @@ jobs:
 
             - name: Generate Docker metadata
               id: metadata
-              uses: ./.github/workflows/steps/docker-metadata
+              uses: ./.github/actions/docker-metadata
               with:
                   version: ${{ inputs.version }}
                   informational_version: ${{ inputs.informational_version }}
@@ -109,7 +109,7 @@ jobs:
 
             - name: Generate Docker metadata
               id: metadata
-              uses: ./.github/workflows/steps/docker-metadata
+              uses: ./.github/actions/docker-metadata
               with:
                   version: ${{ inputs.version }}
                   informational_version: ${{ inputs.informational_version }}
@@ -127,4 +127,3 @@ jobs:
                     reaparr/reaparr:${{ inputs.version }}-amd64
                     reaparr/reaparr:${{ inputs.version }}-arm64
                   index-annotations: ${{ steps.metadata.outputs.labels }}
-

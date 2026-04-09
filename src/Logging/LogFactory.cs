@@ -42,7 +42,7 @@ public static class LogFactory
                 .Here()
                 .Warning(
                     "Environment variable {UnmaskedKey} has been set to true, which means that sensitive data will be shown in the logs!",
-                    EnvironmentVariableKey.Unmasked.Value()
+                    EnvKeys.Unmasked
                 );
 
             Create().Here().Warning("This username should be shown: {Username}", "SomeSecretUsername");

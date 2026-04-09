@@ -1,52 +1,8 @@
-using Reaparr.Environment;
-
 namespace Reaparr.Environment.UnitTests;
 
 [NotInParallel]
 public class PathProviderUnitTests
 {
-    private static readonly string ReaparrPlatformKey = EnvironmentExtensions.EnvironmentVariableName(
-        EnvironmentVariableKey.ReaparrPlatform
-    );
-
-    private static readonly string ReaparrDataPathKey = EnvironmentExtensions.EnvironmentVariableName(
-        EnvironmentVariableKey.ReaparrDataPath
-    );
-
-    private static readonly string ReaparrConfigPathKey = EnvironmentExtensions.EnvironmentVariableName(
-        EnvironmentVariableKey.ReaparrConfigPath
-    );
-
-    private static readonly string ReaparrDownloadsPathKey = EnvironmentExtensions.EnvironmentVariableName(
-        EnvironmentVariableKey.ReaparrDownloadsPath
-    );
-
-    private static readonly string ReaparrMoviesPathKey = EnvironmentExtensions.EnvironmentVariableName(
-        EnvironmentVariableKey.ReaparrMoviesPath
-    );
-
-    private static readonly string ReaparrTvShowsPathKey = EnvironmentExtensions.EnvironmentVariableName(
-        EnvironmentVariableKey.ReaparrTvShowsPath
-    );
-
-    private static readonly string ReaparrMusicPathKey = EnvironmentExtensions.EnvironmentVariableName(
-        EnvironmentVariableKey.ReaparrMusicPath
-    );
-
-    private static readonly string ReaparrPhotosPathKey = EnvironmentExtensions.EnvironmentVariableName(
-        EnvironmentVariableKey.ReaparrPhotosPath
-    );
-
-    private static readonly string ReaparrOtherPathKey = EnvironmentExtensions.EnvironmentVariableName(
-        EnvironmentVariableKey.ReaparrOtherPath
-    );
-
-    private static readonly string ReaparrGamesPathKey = EnvironmentExtensions.EnvironmentVariableName(
-        EnvironmentVariableKey.ReaparrGamesPath
-    );
-    private const string HomeKey = "HOME";
-    private const string AppDataKey = "APPDATA";
-
     [Test]
     public void ShouldExposeExpectedDefaultNames_WhenReadingStaticNameProperties()
     {
@@ -609,51 +565,75 @@ public class PathProviderUnitTests
     {
         var originalValues = new Dictionary<string, string?>
         {
-            [ReaparrPlatformKey] = System.Environment.GetEnvironmentVariable(ReaparrPlatformKey),
-            [ReaparrDataPathKey] = System.Environment.GetEnvironmentVariable(ReaparrDataPathKey),
-            [ReaparrConfigPathKey] = System.Environment.GetEnvironmentVariable(ReaparrConfigPathKey),
-            [ReaparrDownloadsPathKey] = System.Environment.GetEnvironmentVariable(ReaparrDownloadsPathKey),
-            [ReaparrMoviesPathKey] = System.Environment.GetEnvironmentVariable(ReaparrMoviesPathKey),
-            [ReaparrTvShowsPathKey] = System.Environment.GetEnvironmentVariable(ReaparrTvShowsPathKey),
-            [ReaparrMusicPathKey] = System.Environment.GetEnvironmentVariable(ReaparrMusicPathKey),
-            [ReaparrPhotosPathKey] = System.Environment.GetEnvironmentVariable(ReaparrPhotosPathKey),
-            [ReaparrOtherPathKey] = System.Environment.GetEnvironmentVariable(ReaparrOtherPathKey),
-            [ReaparrGamesPathKey] = System.Environment.GetEnvironmentVariable(ReaparrGamesPathKey),
-            [HomeKey] = System.Environment.GetEnvironmentVariable(HomeKey),
-            [AppDataKey] = System.Environment.GetEnvironmentVariable(AppDataKey),
+            [EnvKeys.ReaparrPlatform] = System.Environment.GetEnvironmentVariable(EnvKeys.ReaparrPlatform),
+            [EnvKeys.ReaparrDataPath] = System.Environment.GetEnvironmentVariable(EnvKeys.ReaparrDataPath),
+            [EnvKeys.ReaparrConfigPath] = System.Environment.GetEnvironmentVariable(EnvKeys.ReaparrConfigPath),
+            [EnvKeys.ReaparrDownloadsPath] = System.Environment.GetEnvironmentVariable(EnvKeys.ReaparrDownloadsPath),
+            [EnvKeys.ReaparrMoviesPath] = System.Environment.GetEnvironmentVariable(EnvKeys.ReaparrMoviesPath),
+            [EnvKeys.ReaparrTvShowsPath] = System.Environment.GetEnvironmentVariable(EnvKeys.ReaparrTvShowsPath),
+            [EnvKeys.ReaparrMusicPath] = System.Environment.GetEnvironmentVariable(EnvKeys.ReaparrMusicPath),
+            [EnvKeys.ReaparrPhotosPath] = System.Environment.GetEnvironmentVariable(EnvKeys.ReaparrPhotosPath),
+            [EnvKeys.ReaparrOtherPath] = System.Environment.GetEnvironmentVariable(EnvKeys.ReaparrOtherPath),
+            [EnvKeys.ReaparrGamesPath] = System.Environment.GetEnvironmentVariable(EnvKeys.ReaparrGamesPath),
+            [EnvKeys.Home] = System.Environment.GetEnvironmentVariable(EnvKeys.Home),
+            [EnvKeys.AppData] = System.Environment.GetEnvironmentVariable(EnvKeys.AppData),
         };
 
         try
         {
-            System.Environment.SetEnvironmentVariable(ReaparrPlatformKey, platform);
-            System.Environment.SetEnvironmentVariable(ReaparrDataPathKey, dataPath);
-            System.Environment.SetEnvironmentVariable(ReaparrConfigPathKey, configPath);
-            System.Environment.SetEnvironmentVariable(ReaparrDownloadsPathKey, downloadsPath);
-            System.Environment.SetEnvironmentVariable(ReaparrMoviesPathKey, moviesPath);
-            System.Environment.SetEnvironmentVariable(ReaparrTvShowsPathKey, tvShowsPath);
-            System.Environment.SetEnvironmentVariable(ReaparrMusicPathKey, musicPath);
-            System.Environment.SetEnvironmentVariable(ReaparrPhotosPathKey, photosPath);
-            System.Environment.SetEnvironmentVariable(ReaparrOtherPathKey, otherPath);
-            System.Environment.SetEnvironmentVariable(ReaparrGamesPathKey, gamesPath);
-            System.Environment.SetEnvironmentVariable(HomeKey, home);
-            System.Environment.SetEnvironmentVariable(AppDataKey, appData);
+            System.Environment.SetEnvironmentVariable(EnvKeys.ReaparrPlatform, platform);
+            System.Environment.SetEnvironmentVariable(EnvKeys.ReaparrDataPath, dataPath);
+            System.Environment.SetEnvironmentVariable(EnvKeys.ReaparrConfigPath, configPath);
+            System.Environment.SetEnvironmentVariable(EnvKeys.ReaparrDownloadsPath, downloadsPath);
+            System.Environment.SetEnvironmentVariable(EnvKeys.ReaparrMoviesPath, moviesPath);
+            System.Environment.SetEnvironmentVariable(EnvKeys.ReaparrTvShowsPath, tvShowsPath);
+            System.Environment.SetEnvironmentVariable(EnvKeys.ReaparrMusicPath, musicPath);
+            System.Environment.SetEnvironmentVariable(EnvKeys.ReaparrPhotosPath, photosPath);
+            System.Environment.SetEnvironmentVariable(EnvKeys.ReaparrOtherPath, otherPath);
+            System.Environment.SetEnvironmentVariable(EnvKeys.ReaparrGamesPath, gamesPath);
+            System.Environment.SetEnvironmentVariable(EnvKeys.Home, home);
+            System.Environment.SetEnvironmentVariable(EnvKeys.AppData, appData);
 
             assertion();
         }
         finally
         {
-            System.Environment.SetEnvironmentVariable(ReaparrPlatformKey, originalValues[ReaparrPlatformKey]);
-            System.Environment.SetEnvironmentVariable(ReaparrDataPathKey, originalValues[ReaparrDataPathKey]);
-            System.Environment.SetEnvironmentVariable(ReaparrConfigPathKey, originalValues[ReaparrConfigPathKey]);
-            System.Environment.SetEnvironmentVariable(ReaparrDownloadsPathKey, originalValues[ReaparrDownloadsPathKey]);
-            System.Environment.SetEnvironmentVariable(ReaparrMoviesPathKey, originalValues[ReaparrMoviesPathKey]);
-            System.Environment.SetEnvironmentVariable(ReaparrTvShowsPathKey, originalValues[ReaparrTvShowsPathKey]);
-            System.Environment.SetEnvironmentVariable(ReaparrMusicPathKey, originalValues[ReaparrMusicPathKey]);
-            System.Environment.SetEnvironmentVariable(ReaparrPhotosPathKey, originalValues[ReaparrPhotosPathKey]);
-            System.Environment.SetEnvironmentVariable(ReaparrOtherPathKey, originalValues[ReaparrOtherPathKey]);
-            System.Environment.SetEnvironmentVariable(ReaparrGamesPathKey, originalValues[ReaparrGamesPathKey]);
-            System.Environment.SetEnvironmentVariable(HomeKey, originalValues[HomeKey]);
-            System.Environment.SetEnvironmentVariable(AppDataKey, originalValues[AppDataKey]);
+            System.Environment.SetEnvironmentVariable(EnvKeys.ReaparrPlatform, originalValues[EnvKeys.ReaparrPlatform]);
+            System.Environment.SetEnvironmentVariable(EnvKeys.ReaparrDataPath, originalValues[EnvKeys.ReaparrDataPath]);
+            System.Environment.SetEnvironmentVariable(
+                EnvKeys.ReaparrConfigPath,
+                originalValues[EnvKeys.ReaparrConfigPath]
+            );
+            System.Environment.SetEnvironmentVariable(
+                EnvKeys.ReaparrDownloadsPath,
+                originalValues[EnvKeys.ReaparrDownloadsPath]
+            );
+            System.Environment.SetEnvironmentVariable(
+                EnvKeys.ReaparrMoviesPath,
+                originalValues[EnvKeys.ReaparrMoviesPath]
+            );
+            System.Environment.SetEnvironmentVariable(
+                EnvKeys.ReaparrTvShowsPath,
+                originalValues[EnvKeys.ReaparrTvShowsPath]
+            );
+            System.Environment.SetEnvironmentVariable(
+                EnvKeys.ReaparrMusicPath,
+                originalValues[EnvKeys.ReaparrMusicPath]
+            );
+            System.Environment.SetEnvironmentVariable(
+                EnvKeys.ReaparrPhotosPath,
+                originalValues[EnvKeys.ReaparrPhotosPath]
+            );
+            System.Environment.SetEnvironmentVariable(
+                EnvKeys.ReaparrOtherPath,
+                originalValues[EnvKeys.ReaparrOtherPath]
+            );
+            System.Environment.SetEnvironmentVariable(
+                EnvKeys.ReaparrGamesPath,
+                originalValues[EnvKeys.ReaparrGamesPath]
+            );
+            System.Environment.SetEnvironmentVariable(EnvKeys.Home, originalValues[EnvKeys.Home]);
+            System.Environment.SetEnvironmentVariable(EnvKeys.AppData, originalValues[EnvKeys.AppData]);
         }
     }
 }

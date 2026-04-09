@@ -288,7 +288,7 @@ jobs:
                 id: sanitize
                 run: |
                     FILENAME=$(basename "${{ matrix.test_project }}" .csproj)
-                    echo "safe_name=$FILENAME" >> $GITHUB_OUTPUT
+                    echo "safe_name=$FILENAME" >> "$GITHUB_OUTPUT"
 
             -   name: Upload Test Results
                 if: always()

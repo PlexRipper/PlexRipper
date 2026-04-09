@@ -33,10 +33,7 @@ public static class EnvironmentExtensions
         GetEnvironmentVariable(EnvKeys.ReaparrPlatform)?.ToLowerInvariant() switch
         {
             "desktop" => "desktop",
-            "docker" => "docker",
-            _ => throw new InvalidOperationException(
-                $"Invalid REAPARR_PLATFORM environment value. Expected 'desktop' or 'docker', but got '{GetEnvironmentVariable(EnvKeys.ReaparrPlatform)}'."
-            ),
+            _ => "docker",
         };
 
     public static bool IsDesktopMode() => GetReaparrMode() == "desktop";

@@ -109,9 +109,9 @@ jobs:
                 shell: bash
                 run: |
                     dotnet publish src/AppHost/AppHost.csproj \
-                        /p:PublishProfile=${{ matrix.profile }} \
-                        /p:Version=${{ inputs.version }} \
-                        /p:InformationalVersion=${{ inputs.informational_version }} \
+                        -p:PublishProfile=${{ matrix.profile }} \
+                        -p:Version=${{ inputs.version }} \
+                        -p:InformationalVersion=${{ inputs.informational_version }} \
                         --no-restore
 
             -   name: Copy frontend to publish output

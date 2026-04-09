@@ -26,8 +26,31 @@ on:
                 default: false
 
 jobs:
+    prepare-frontend:
+        name: Prepare frontend assets
+        runs-on: ubuntu-latest
+        steps:
+            -   name: Checkout source code
+                uses: actions/checkout@v4
+
+            -   name: Client App Install
+                uses: ./.github/actions/client-app-install/
+
+            -   name: Generate frontend
+                shell: bash
+                working-directory: src/AppHost/ClientApp/
+                run: bun run generate --fail-on-error
+
+            -   name: Upload generated frontend artifact
+                uses: actions/upload-artifact@v4
+                with:
+                    name: frontend-public
+                    path: src/AppHost/ClientApp/.output/public
+                    retention-days: 1
+
     build:
         name: Build ${{ matrix.rid }}
+        needs: [prepare-frontend]
         strategy:
             fail-fast: false
             matrix:
@@ -36,9 +59,21 @@ jobs:
                         runner: windows-latest
                         profile: Desktop-win-x64
                         main-exe: Reaparr.AppHost.exe
+                    -   rid: win-arm64
+                        runner: windows-latest
+                        profile: Desktop-win-arm64
+                        main-exe: Reaparr.AppHost.exe
                     -   rid: linux-x64
                         runner: ubuntu-latest
                         profile: Desktop-linux-x64
+                        main-exe: Reaparr.AppHost
+                    -   rid: linux-arm64
+                        runner: ubuntu-latest
+                        profile: Desktop-linux-arm64
+                        main-exe: Reaparr.AppHost
+                    -   rid: osx-x64
+                        runner: macos-13
+                        profile: Desktop-osx-x64
                         main-exe: Reaparr.AppHost
                     -   rid: osx-arm64
                         runner: macos-latest
@@ -53,13 +88,11 @@ jobs:
             -   name: Checkout source code
                 uses: actions/checkout@v4
 
-            -   name: Client App Install
-                uses: ./.github/actions/client-app-install/
-
-            -   name: Generate frontend
-                shell: bash
-                working-directory: src/AppHost/ClientApp/
-                run: bun run generate --fail-on-error
+            -   name: Download generated frontend artifact
+                uses: actions/download-artifact@v4
+                with:
+                    name: frontend-public
+                    path: .tmp/frontend-public
 
             -   name: Dotnet Setup (Restore only)
                 uses: ./.github/actions/dotnet-setup/
@@ -85,7 +118,7 @@ jobs:
                 shell: bash
                 run: |
                     mkdir -p src/AppHost/bin/Publish/Desktop/${{ matrix.rid }}/wwwroot
-                    cp -r src/AppHost/ClientApp/.output/public/. src/AppHost/bin/Publish/Desktop/${{ matrix.rid }}/wwwroot/
+                    cp -r .tmp/frontend-public/. src/AppHost/bin/Publish/Desktop/${{ matrix.rid }}/wwwroot/
 
             -   name: Install Velopack CLI
                 run: dotnet tool install -g vpk

@@ -5,9 +5,45 @@ namespace Reaparr.Environment.UnitTests;
 [NotInParallel]
 public class PathProviderUnitTests
 {
-    private const string ReaparrPlatformKey = "REAPARR_PLATFORM";
-    private const string ReaparrDataPathKey = "REAPARR_DATA_PATH";
-    private const string ReaparrConfigPathKey = "REAPARR_CONFIG_PATH";
+    private static readonly string ReaparrPlatformKey = EnvironmentExtensions.EnvironmentVariableName(
+        EnvironmentVariableKey.ReaparrPlatform
+    );
+
+    private static readonly string ReaparrDataPathKey = EnvironmentExtensions.EnvironmentVariableName(
+        EnvironmentVariableKey.ReaparrDataPath
+    );
+
+    private static readonly string ReaparrConfigPathKey = EnvironmentExtensions.EnvironmentVariableName(
+        EnvironmentVariableKey.ReaparrConfigPath
+    );
+
+    private static readonly string ReaparrDownloadsPathKey = EnvironmentExtensions.EnvironmentVariableName(
+        EnvironmentVariableKey.ReaparrDownloadsPath
+    );
+
+    private static readonly string ReaparrMoviesPathKey = EnvironmentExtensions.EnvironmentVariableName(
+        EnvironmentVariableKey.ReaparrMoviesPath
+    );
+
+    private static readonly string ReaparrTvShowsPathKey = EnvironmentExtensions.EnvironmentVariableName(
+        EnvironmentVariableKey.ReaparrTvShowsPath
+    );
+
+    private static readonly string ReaparrMusicPathKey = EnvironmentExtensions.EnvironmentVariableName(
+        EnvironmentVariableKey.ReaparrMusicPath
+    );
+
+    private static readonly string ReaparrPhotosPathKey = EnvironmentExtensions.EnvironmentVariableName(
+        EnvironmentVariableKey.ReaparrPhotosPath
+    );
+
+    private static readonly string ReaparrOtherPathKey = EnvironmentExtensions.EnvironmentVariableName(
+        EnvironmentVariableKey.ReaparrOtherPath
+    );
+
+    private static readonly string ReaparrGamesPathKey = EnvironmentExtensions.EnvironmentVariableName(
+        EnvironmentVariableKey.ReaparrGamesPath
+    );
     private const string HomeKey = "HOME";
     private const string AppDataKey = "APPDATA";
 
@@ -117,7 +153,7 @@ public class PathProviderUnitTests
             () =>
             {
                 // Act
-                var expected = Path.Combine(GetExpectedDockerRootDirectory(), PathProvider.DefaultConfigFolderName);
+                var expected = Path.Combine(GetExpectedDockerRootDirectory(), "config");
 
                 // Assert
                 PathProvider.ConfigDirectory.ShouldBe(expected);
@@ -259,9 +295,7 @@ public class PathProviderUnitTests
             {
                 // Assert
                 PathProvider.DataDirectory.ShouldBe(GetExpectedDockerRootDirectory());
-                PathProvider.ConfigDirectory.ShouldBe(
-                    Path.Combine(GetExpectedDockerRootDirectory(), PathProvider.DefaultConfigFolderName)
-                );
+                PathProvider.ConfigDirectory.ShouldBe(Path.Combine(GetExpectedDockerRootDirectory(), "config"));
             }
         );
     }
@@ -288,7 +322,6 @@ public class PathProviderUnitTests
 
     [Test]
     [Arguments("Movies")]
-    [Arguments("Downloads")]
     [Arguments("TvShows")]
     [Arguments("Music")]
     [Arguments("Photos")]
@@ -338,7 +371,17 @@ public class PathProviderUnitTests
             () =>
             {
                 // Act
-                var expected = Path.Combine(home, folderName);
+                var expected = folderName switch
+                {
+                    "Downloads" => Path.Combine(home, "Downloads", "Reaparr"),
+                    "Movies" => Path.Combine(home, "Videos", PathProvider.DefaultMovieFolderName),
+                    "TvShows" => Path.Combine(home, "Videos", PathProvider.DefaultTvShowsFolderName),
+                    "Music" => Path.Combine(home, "Music"),
+                    "Photos" => Path.Combine(home, "Pictures"),
+                    "Other" => Path.Combine(home, PathProvider.DefaultOtherFolderName),
+                    "Games" => Path.Combine(home, PathProvider.DefaultGamesFolderName),
+                    _ => throw new InvalidOperationException($"Unsupported folder: {folderName}"),
+                };
 
                 // Assert
                 GetDefaultDestinationFolder(folderName).ShouldBe(expected);
@@ -368,7 +411,10 @@ public class PathProviderUnitTests
             () =>
             {
                 // Act
-                var expected = Path.Combine(GetExpectedDockerRootDirectory(), folderName);
+                var expected =
+                    folderName == "Downloads"
+                        ? Path.Combine(GetExpectedDockerRootDirectory(), "downloads")
+                        : Path.Combine(GetExpectedDockerRootDirectory(), "media", folderName);
 
                 // Assert
                 GetDefaultDestinationFolder(folderName).ShouldBe(expected);
@@ -438,6 +484,85 @@ public class PathProviderUnitTests
         );
     }
 
+    [Test]
+    public void ShouldUseConfiguredDownloadsPath_WhenDownloadsPathIsSet()
+    {
+        // Arrange
+        const string configuredDownloadsPath = "/test/custom-downloads";
+
+        WithEnvironment(
+            "desktop",
+            "/test/data-path-ignored",
+            null,
+            "/test/home",
+            "/unused/appdata",
+            () =>
+            {
+                // Assert
+                PathProvider.DefaultDownloadsDestinationFolder.ShouldBe(configuredDownloadsPath);
+            },
+            downloadsPath: configuredDownloadsPath
+        );
+    }
+
+    [Test]
+    [Arguments("Movies")]
+    [Arguments("TvShows")]
+    [Arguments("Music")]
+    [Arguments("Photos")]
+    [Arguments("Other")]
+    [Arguments("Games")]
+    public void ShouldUsePerTypePathOverride_WhenPerTypeEnvVarIsSet(string folderName)
+    {
+        // Arrange
+        const string perTypePath = "/test/per-type-path";
+
+        WithEnvironment(
+            "desktop",
+            "/test/data-fallback",
+            null,
+            "/unused/home",
+            "/unused/appdata",
+            () =>
+            {
+                // Assert
+                GetDefaultDestinationFolder(folderName).ShouldBe(perTypePath);
+            },
+            moviesPath: folderName == "Movies" ? perTypePath : null,
+            tvShowsPath: folderName == "TvShows" ? perTypePath : null,
+            musicPath: folderName == "Music" ? perTypePath : null,
+            photosPath: folderName == "Photos" ? perTypePath : null,
+            otherPath: folderName == "Other" ? perTypePath : null,
+            gamesPath: folderName == "Games" ? perTypePath : null
+        );
+    }
+
+    [Test]
+    [Arguments("Movies")]
+    [Arguments("TvShows")]
+    [Arguments("Music")]
+    [Arguments("Photos")]
+    [Arguments("Other")]
+    [Arguments("Games")]
+    public void ShouldFallbackToDataPathForLibraries_WhenPerTypeEnvVarIsUnset(string folderName)
+    {
+        // Arrange
+        const string dataPath = "/test/data-fallback";
+
+        WithEnvironment(
+            "desktop",
+            dataPath,
+            null,
+            "/unused/home",
+            "/unused/appdata",
+            () =>
+            {
+                // Assert
+                GetDefaultDestinationFolder(folderName).ShouldBe(Path.Combine(dataPath, folderName));
+            }
+        );
+    }
+
     private static string GetExpectedDesktopConfigPath(string home, string appData) =>
         OsInfo.CurrentOS switch
         {
@@ -472,7 +597,14 @@ public class PathProviderUnitTests
         string? configPath,
         string? home,
         string? appData,
-        Action assertion
+        Action assertion,
+        string? downloadsPath = null,
+        string? moviesPath = null,
+        string? tvShowsPath = null,
+        string? musicPath = null,
+        string? photosPath = null,
+        string? otherPath = null,
+        string? gamesPath = null
     )
     {
         var originalValues = new Dictionary<string, string?>
@@ -480,6 +612,13 @@ public class PathProviderUnitTests
             [ReaparrPlatformKey] = System.Environment.GetEnvironmentVariable(ReaparrPlatformKey),
             [ReaparrDataPathKey] = System.Environment.GetEnvironmentVariable(ReaparrDataPathKey),
             [ReaparrConfigPathKey] = System.Environment.GetEnvironmentVariable(ReaparrConfigPathKey),
+            [ReaparrDownloadsPathKey] = System.Environment.GetEnvironmentVariable(ReaparrDownloadsPathKey),
+            [ReaparrMoviesPathKey] = System.Environment.GetEnvironmentVariable(ReaparrMoviesPathKey),
+            [ReaparrTvShowsPathKey] = System.Environment.GetEnvironmentVariable(ReaparrTvShowsPathKey),
+            [ReaparrMusicPathKey] = System.Environment.GetEnvironmentVariable(ReaparrMusicPathKey),
+            [ReaparrPhotosPathKey] = System.Environment.GetEnvironmentVariable(ReaparrPhotosPathKey),
+            [ReaparrOtherPathKey] = System.Environment.GetEnvironmentVariable(ReaparrOtherPathKey),
+            [ReaparrGamesPathKey] = System.Environment.GetEnvironmentVariable(ReaparrGamesPathKey),
             [HomeKey] = System.Environment.GetEnvironmentVariable(HomeKey),
             [AppDataKey] = System.Environment.GetEnvironmentVariable(AppDataKey),
         };
@@ -489,6 +628,13 @@ public class PathProviderUnitTests
             System.Environment.SetEnvironmentVariable(ReaparrPlatformKey, platform);
             System.Environment.SetEnvironmentVariable(ReaparrDataPathKey, dataPath);
             System.Environment.SetEnvironmentVariable(ReaparrConfigPathKey, configPath);
+            System.Environment.SetEnvironmentVariable(ReaparrDownloadsPathKey, downloadsPath);
+            System.Environment.SetEnvironmentVariable(ReaparrMoviesPathKey, moviesPath);
+            System.Environment.SetEnvironmentVariable(ReaparrTvShowsPathKey, tvShowsPath);
+            System.Environment.SetEnvironmentVariable(ReaparrMusicPathKey, musicPath);
+            System.Environment.SetEnvironmentVariable(ReaparrPhotosPathKey, photosPath);
+            System.Environment.SetEnvironmentVariable(ReaparrOtherPathKey, otherPath);
+            System.Environment.SetEnvironmentVariable(ReaparrGamesPathKey, gamesPath);
             System.Environment.SetEnvironmentVariable(HomeKey, home);
             System.Environment.SetEnvironmentVariable(AppDataKey, appData);
 
@@ -499,6 +645,13 @@ public class PathProviderUnitTests
             System.Environment.SetEnvironmentVariable(ReaparrPlatformKey, originalValues[ReaparrPlatformKey]);
             System.Environment.SetEnvironmentVariable(ReaparrDataPathKey, originalValues[ReaparrDataPathKey]);
             System.Environment.SetEnvironmentVariable(ReaparrConfigPathKey, originalValues[ReaparrConfigPathKey]);
+            System.Environment.SetEnvironmentVariable(ReaparrDownloadsPathKey, originalValues[ReaparrDownloadsPathKey]);
+            System.Environment.SetEnvironmentVariable(ReaparrMoviesPathKey, originalValues[ReaparrMoviesPathKey]);
+            System.Environment.SetEnvironmentVariable(ReaparrTvShowsPathKey, originalValues[ReaparrTvShowsPathKey]);
+            System.Environment.SetEnvironmentVariable(ReaparrMusicPathKey, originalValues[ReaparrMusicPathKey]);
+            System.Environment.SetEnvironmentVariable(ReaparrPhotosPathKey, originalValues[ReaparrPhotosPathKey]);
+            System.Environment.SetEnvironmentVariable(ReaparrOtherPathKey, originalValues[ReaparrOtherPathKey]);
+            System.Environment.SetEnvironmentVariable(ReaparrGamesPathKey, originalValues[ReaparrGamesPathKey]);
             System.Environment.SetEnvironmentVariable(HomeKey, originalValues[HomeKey]);
             System.Environment.SetEnvironmentVariable(AppDataKey, originalValues[AppDataKey]);
         }

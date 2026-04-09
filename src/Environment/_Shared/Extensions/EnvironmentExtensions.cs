@@ -4,45 +4,36 @@ namespace Reaparr.Environment;
 
 public static class EnvironmentExtensions
 {
-    #region Constants
-
-    private const string INTEGRATION_TEST_MODE_KEY = "IntegrationTestMode";
-
-    public const string UnmaskedModeKey = "UNMASKED";
-
-    private const string LOG_ENV_VARS_KEY = "LOG_ENV_VARS";
-
-    private const string LOG_LEVEL_KEY = "LOG_LEVEL";
-
-    private const string VERSION_KEY = "VERSION";
-
-    private const string INFORMATIONAL_VERSION_KEY = "INFORMATIONAL_VERSION";
-
-    private const string REAPARR_PLATFORM_KEY = "REAPARR_PLATFORM";
-
-    private const string REAPARR_DATA_PATH_KEY = "REAPARR_DATA_PATH";
-
-    private const string REAPARR_CONFIG_PATH_KEY = "REAPARR_CONFIG_PATH";
-
-    private const string AUTH_HEADER_TOKEN_NAME = "AUTH_HEADER_TOKEN";
-
-    private const string SEQ_URL = "SEQ_URL";
-
-    #endregion
-
     #region Getters
 
     /// <summary>
     /// Returns true when <c>IntegrationTestMode</c> environment variable is set to a truthy value.
     /// </summary>
-    public static bool IsIntegrationTestMode() => IsTrue(GetEnvironmentVariable(INTEGRATION_TEST_MODE_KEY));
+    public static bool IsIntegrationTestMode() =>
+        IsTrue(GetEnvironmentVariable(EnvironmentVariableKey.IntegrationTestMode));
 
-    public static string? GetDataPath() => GetEnvironmentVariable(REAPARR_DATA_PATH_KEY);
+    public static string? GetDataPath() => GetEnvironmentVariable(EnvironmentVariableKey.ReaparrDataPath);
 
-    public static string? GetConfigPath() => GetEnvironmentVariable(REAPARR_CONFIG_PATH_KEY);
+    public static string? GetConfigPath() => GetEnvironmentVariable(EnvironmentVariableKey.ReaparrConfigPath);
+
+    public static string? GetDownloadsPath() => GetEnvironmentVariable(EnvironmentVariableKey.ReaparrDownloadsPath);
+
+    public static string? GetMoviesPath() => GetEnvironmentVariable(EnvironmentVariableKey.ReaparrMoviesPath);
+
+    public static string? GetTvShowsPath() => GetEnvironmentVariable(EnvironmentVariableKey.ReaparrTvShowsPath);
+
+    public static string? GetMusicPath() => GetEnvironmentVariable(EnvironmentVariableKey.ReaparrMusicPath);
+
+    public static string? GetPhotosPath() => GetEnvironmentVariable(EnvironmentVariableKey.ReaparrPhotosPath);
+
+    public static string? GetOtherPath() => GetEnvironmentVariable(EnvironmentVariableKey.ReaparrOtherPath);
+
+    public static string? GetGamesPath() => GetEnvironmentVariable(EnvironmentVariableKey.ReaparrGamesPath);
 
     public static string GetReaparrMode() =>
-        GetEnvironmentVariable(REAPARR_PLATFORM_KEY)?.ToLowerInvariant() == "desktop" ? "desktop" : "docker";
+        GetEnvironmentVariable(EnvironmentVariableKey.ReaparrPlatform)?.ToLowerInvariant() == "desktop"
+            ? "desktop"
+            : "docker";
 
     public static bool IsDesktopMode() => GetReaparrMode() == "desktop";
 
@@ -51,25 +42,30 @@ public static class EnvironmentExtensions
     /// <summary>
     /// Gets the name of the HTTP header used for bearer/auth token passing. Defaults to <c>X-Auth-User</c>.
     /// </summary>
-    public static string GetHeaderAuthTokenName() => GetEnvironmentVariable(AUTH_HEADER_TOKEN_NAME) ?? "X-Auth-User";
+    public static string GetHeaderAuthTokenName() =>
+        GetEnvironmentVariable(EnvironmentVariableKey.AuthHeaderTokenName) ?? "X-Auth-User";
 
     /// <summary>
     /// When set to true, the application will not mask/censor sensitive data in the logs.
     /// </summary>
-    public static bool IsUnmasked() => IsTrue(GetEnvironmentVariable(UnmaskedModeKey));
+    public static bool IsUnmasked() => IsTrue(GetEnvironmentVariable(EnvironmentVariableKey.Unmasked));
 
     /// <summary>
     /// When set to true, the application will log all environment variables set on startup
     /// </summary>
-    /// <returns></returns>
-    public static bool ShouldLogEnvVars() => IsTrue(GetEnvironmentVariable(LOG_ENV_VARS_KEY));
+    public static bool ShouldLogEnvVars() =>
+        IsTrue(GetEnvironmentVariable(EnvironmentVariableKey.LogEnvironmentVariables));
 
     /// <summary>
     /// Gets the configured Serilog log level from <c>LOG_LEVEL</c>. Defaults to <see cref="LogEventLevel.Debug"/>.
     /// </summary>
     public static LogEventLevel GetLogLevel()
     {
-        var success = Enum.TryParse<LogEventLevel>(GetEnvironmentVariable(LOG_LEVEL_KEY), true, out var logLevel);
+        var success = Enum.TryParse<LogEventLevel>(
+            GetEnvironmentVariable(EnvironmentVariableKey.LogLevel),
+            true,
+            out var logLevel
+        );
         return success ? logLevel : LogEventLevel.Debug;
     }
 
@@ -77,7 +73,9 @@ public static class EnvironmentExtensions
     /// Gets the application version from <c>INFORMATIONAL_VERSION</c> or <c>VERSION</c>. Defaults to <c>0.0.0</c>.
     /// </summary>
     public static string GetVersion() =>
-        GetEnvironmentVariable(INFORMATIONAL_VERSION_KEY) ?? GetEnvironmentVariable(VERSION_KEY) ?? "0.0.0";
+        GetEnvironmentVariable(EnvironmentVariableKey.InformationalVersion)
+        ?? GetEnvironmentVariable(EnvironmentVariableKey.Version)
+        ?? "0.0.0";
 
     /// <summary>
     /// Returns true if the current version indicates a development build (contains <c>dev</c>).
@@ -118,7 +116,8 @@ public static class EnvironmentExtensions
     /// Sets the SEQ_URL environment variable to the specified URL.
     /// Note: This is used for development and testing purposes to redirect logs to a hosted Docker instance of Seq.
     /// </summary>
-    public static string GetSeqUrl() => GetEnvironmentVariable(SEQ_URL) ?? "http://localhost:5341";
+    public static string GetSeqUrl() =>
+        GetEnvironmentVariable(EnvironmentVariableKey.SeqUrl) ?? "http://localhost:5341";
 
     #endregion
 
@@ -132,21 +131,45 @@ public static class EnvironmentExtensions
     /// </summary>
     public static void SetLogLevel(LogEventLevel logLevel)
     {
-        System.Environment.SetEnvironmentVariable(LOG_LEVEL_KEY, logLevel.ToString().ToUpper());
+        System.Environment.SetEnvironmentVariable(
+            EnvironmentVariableKey.LogLevel.Value(),
+            logLevel.ToString().ToUpper()
+        );
     }
 
     public static void SetDataPath(string path) =>
-        System.Environment.SetEnvironmentVariable(REAPARR_DATA_PATH_KEY, path);
+        System.Environment.SetEnvironmentVariable(EnvironmentVariableKey.ReaparrDataPath.Value(), path);
 
     public static void SetConfigPath(string path) =>
-        System.Environment.SetEnvironmentVariable(REAPARR_CONFIG_PATH_KEY, path);
+        System.Environment.SetEnvironmentVariable(EnvironmentVariableKey.ReaparrConfigPath.Value(), path);
+
+    public static void SetDownloadsPath(string path) =>
+        System.Environment.SetEnvironmentVariable(EnvironmentVariableKey.ReaparrDownloadsPath.Value(), path);
+
+    public static void SetMoviesPath(string path) =>
+        System.Environment.SetEnvironmentVariable(EnvironmentVariableKey.ReaparrMoviesPath.Value(), path);
+
+    public static void SetTvShowsPath(string path) =>
+        System.Environment.SetEnvironmentVariable(EnvironmentVariableKey.ReaparrTvShowsPath.Value(), path);
+
+    public static void SetMusicPath(string path) =>
+        System.Environment.SetEnvironmentVariable(EnvironmentVariableKey.ReaparrMusicPath.Value(), path);
+
+    public static void SetPhotosPath(string path) =>
+        System.Environment.SetEnvironmentVariable(EnvironmentVariableKey.ReaparrPhotosPath.Value(), path);
+
+    public static void SetOtherPath(string path) =>
+        System.Environment.SetEnvironmentVariable(EnvironmentVariableKey.ReaparrOtherPath.Value(), path);
+
+    public static void SetGamesPath(string path) =>
+        System.Environment.SetEnvironmentVariable(EnvironmentVariableKey.ReaparrGamesPath.Value(), path);
 
     /// <summary>
     /// Enables or disables integration test mode by setting <c>IntegrationTestMode</c>.
     /// </summary>
     public static void SetIntegrationTestMode(bool state)
     {
-        System.Environment.SetEnvironmentVariable(INTEGRATION_TEST_MODE_KEY, state.ToString());
+        System.Environment.SetEnvironmentVariable(EnvironmentVariableKey.IntegrationTestMode.Value(), state.ToString());
     }
 
     /// <summary>
@@ -154,7 +177,7 @@ public static class EnvironmentExtensions
     /// </summary>
     public static void EnableUnmaskedLog(bool state)
     {
-        System.Environment.SetEnvironmentVariable(UnmaskedModeKey, state.ToString());
+        System.Environment.SetEnvironmentVariable(EnvironmentVariableKey.Unmasked.Value(), state.ToString());
     }
 
     /// <summary>
@@ -162,12 +185,19 @@ public static class EnvironmentExtensions
     /// </summary>
     public static void EnableLogEnvVars(bool state)
     {
-        System.Environment.SetEnvironmentVariable(LOG_ENV_VARS_KEY, state.ToString());
+        System.Environment.SetEnvironmentVariable(
+            EnvironmentVariableKey.LogEnvironmentVariables.Value(),
+            state.ToString()
+        );
     }
 
     #endregion
 
     #region Helpers
+
+    public static string EnvironmentVariableName(EnvironmentVariableKey key) => key.Value();
+
+    private static string? GetEnvironmentVariable(EnvironmentVariableKey key) => GetEnvironmentVariable(key.Value());
 
     private static string? GetEnvironmentVariable(string key)
     {

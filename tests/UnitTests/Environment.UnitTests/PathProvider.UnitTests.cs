@@ -109,7 +109,7 @@ public class PathProviderUnitTests
             () =>
             {
                 // Act
-                var expected = Path.Combine(GetExpectedDockerRootDirectory(), "config");
+                var expected = Path.Combine(GetExpectedDockerRootDirectory(), PathProvider.DefaultConfigFolderName);
 
                 // Assert
                 PathProvider.ConfigDirectory.ShouldBe(expected);
@@ -196,7 +196,9 @@ public class PathProviderUnitTests
             () =>
             {
                 // Assert
-                PathProvider.DataDirectory.ShouldBe(home);
+                PathProvider.DataDirectory.ShouldBe(
+                    System.Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile)
+                );
             }
         );
     }
@@ -251,7 +253,9 @@ public class PathProviderUnitTests
             {
                 // Assert
                 PathProvider.DataDirectory.ShouldBe(GetExpectedDockerRootDirectory());
-                PathProvider.ConfigDirectory.ShouldBe(Path.Combine(GetExpectedDockerRootDirectory(), "config"));
+                PathProvider.ConfigDirectory.ShouldBe(
+                    Path.Combine(GetExpectedDockerRootDirectory(), PathProvider.DefaultConfigFolderName)
+                );
             }
         );
     }
@@ -271,7 +275,9 @@ public class PathProviderUnitTests
             () =>
             {
                 // Assert
-                PathProvider.DataDirectory.ShouldBe(home);
+                PathProvider.DataDirectory.ShouldBe(
+                    System.Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile)
+                );
             }
         );
     }
@@ -327,15 +333,23 @@ public class PathProviderUnitTests
             () =>
             {
                 // Act
+                var desktopMediaRoot = Path.Combine(
+                    System.Environment.GetFolderPath(System.Environment.SpecialFolder.MyVideos),
+                    PathProvider.DefaultReaparrFolderName
+                );
                 var expected = folderName switch
                 {
-                    "Downloads" => Path.Combine(home, "Downloads", "Reaparr"),
-                    "Movies" => Path.Combine(home, "Videos", PathProvider.DefaultMovieFolderName),
-                    "TvShows" => Path.Combine(home, "Videos", PathProvider.DefaultTvShowsFolderName),
-                    "Music" => Path.Combine(home, "Music"),
-                    "Photos" => Path.Combine(home, "Pictures"),
-                    "Other" => Path.Combine(home, PathProvider.DefaultOtherFolderName),
-                    "Games" => Path.Combine(home, PathProvider.DefaultGamesFolderName),
+                    "Downloads" => Path.Combine(
+                        System.Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile),
+                        PathProvider.DefaultDownloadsFolderName,
+                        PathProvider.DefaultReaparrFolderName
+                    ),
+                    "Movies" => Path.Combine(desktopMediaRoot, PathProvider.DefaultMovieFolderName),
+                    "TvShows" => Path.Combine(desktopMediaRoot, PathProvider.DefaultTvShowsFolderName),
+                    "Music" => Path.Combine(desktopMediaRoot, PathProvider.DefaultMusicFolderName),
+                    "Photos" => Path.Combine(desktopMediaRoot, PathProvider.DefaultPhotosFolderName),
+                    "Other" => Path.Combine(desktopMediaRoot, PathProvider.DefaultOtherFolderName),
+                    "Games" => Path.Combine(desktopMediaRoot, PathProvider.DefaultGamesFolderName),
                     _ => throw new InvalidOperationException($"Unsupported folder: {folderName}"),
                 };
 
@@ -367,10 +381,10 @@ public class PathProviderUnitTests
             () =>
             {
                 // Act
-                var expected =
-                    folderName == "Downloads"
-                        ? Path.Combine(GetExpectedDockerRootDirectory(), "downloads")
-                        : Path.Combine(GetExpectedDockerRootDirectory(), "media", folderName);
+                var expected = Path.Combine(
+                    "/",
+                    folderName == "Downloads" ? PathProvider.DefaultDownloadsFolderName : folderName
+                );
 
                 // Assert
                 GetDefaultDestinationFolder(folderName).ShouldBe(expected);
@@ -519,20 +533,27 @@ public class PathProviderUnitTests
         );
     }
 
-    private static string GetExpectedDesktopConfigPath(string home, string appData) =>
+    private static string GetExpectedDesktopConfigPath(string _, string __) =>
         OsInfo.CurrentOS switch
         {
-            OperatingSystemPlatform.Windows => Path.Combine(appData, "Reaparr"),
-            OperatingSystemPlatform.Osx => Path.Combine(home, "Library", "Application Support", "Reaparr"),
-            _ => Path.Combine(home, ".config", "Reaparr"),
+            OperatingSystemPlatform.Windows => Path.Combine(
+                System.Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData),
+                PathProvider.DefaultReaparrFolderName
+            ),
+            OperatingSystemPlatform.Osx => Path.Combine(
+                System.Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile),
+                "Library",
+                "Application Support",
+                PathProvider.DefaultReaparrFolderName
+            ),
+            _ => Path.Combine(
+                System.Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile),
+                ".config",
+                PathProvider.DefaultReaparrFolderName
+            ),
         };
 
-    private static string GetExpectedDockerRootDirectory() =>
-        OsInfo.CurrentOS switch
-        {
-            OperatingSystemPlatform.Windows => Path.GetPathRoot(typeof(PathProvider).Assembly.Location) ?? @"C:\\",
-            _ => "/",
-        };
+    private static string GetExpectedDockerRootDirectory() => "/";
 
     private static string GetDefaultDestinationFolder(string folderName) =>
         folderName switch

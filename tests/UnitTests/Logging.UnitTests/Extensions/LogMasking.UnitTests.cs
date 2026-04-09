@@ -45,6 +45,15 @@ public class LogMaskingUnitTests : BaseUnitTest<LogMaskingUnitTests>
                 log.Debug("Test DownloadUrl property: {DownloadUrl}", "FORBIDDEN");
                 log.Debug("Test AuthToken property: {AuthToken}", "FORBIDDEN");
                 log.Debug("Test MachineIdentifier property: {MachineIdentifier}", "FORBIDDEN");
+                log.Debug(
+                    "Test destructured request: {@Request}",
+                    new
+                    {
+                        UserName = "ReaparrRocksDEV",
+                        Password = "TA%K3z05N@88p3nr02AcI$00s",
+                        RememberMe = false,
+                    }
+                );
 
                 // Assert - check again right before the assertion to ensure it hasn't changed
                 EnvironmentExtensions.EnableUnmaskedLog(false);

@@ -20,9 +20,14 @@ public class GenerateDownloadTaskTvShowEpisodesCommandValidator
 {
     public GenerateDownloadTaskTvShowEpisodesCommandValidator()
     {
-        RuleFor(x => x.Request.DownloadMedias).NotNull();
-        RuleFor(x => x.Request.DownloadMedias).NotEmpty();
-        RuleForEach(x => x.Request.DownloadMedias).SetValidator(new DownloadMediaDTOValidator());
+        RuleFor(x => x.Request)
+            .NotNull()
+            .DependentRules(() =>
+            {
+                RuleFor(x => x.Request.DownloadMedias).NotNull();
+                RuleFor(x => x.Request.DownloadMedias).NotEmpty();
+                RuleForEach(x => x.Request.DownloadMedias).SetValidator(new DownloadMediaDTOValidator());
+            });
     }
 }
 

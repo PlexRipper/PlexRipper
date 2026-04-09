@@ -2,7 +2,7 @@ import { reactive, computed, toRefs } from 'vue';
 import { acceptHMRUpdate, defineStore } from 'pinia';
 import type { Observable } from 'rxjs';
 import { forkJoin, of } from 'rxjs';
-import { switchMap, tap } from 'rxjs/operators';
+import { finalize, map, switchMap, tap } from 'rxjs/operators';
 import type { CreatePlexAccountEndpointRequest, PlexAccountDTO } from '@dto';
 import { RefreshDataType } from '@dto';
 import { StoreNames, type ISetupResult } from '@interfaces';
@@ -33,7 +33,9 @@ export const useAccountStore = defineStore(StoreNames.AccountStore, () => {
 			// Listen for refresh notifications
 			signalRStore.getRefreshNotification(RefreshDataType.PlexAccount).pipe(switchMap(() => actions.refreshAccounts())).subscribe();
 
-			return actions.refreshAccounts().pipe(switchMap(() => of({ name: StoreNames.AccountStore, isSuccess: true })));
+			return actions.refreshAccounts().pipe(
+				map((result) => ({ name: StoreNames.AccountStore, isSuccess: result.isSuccess })),
+			);
 		},
 		refreshAccounts() {
 			return plexAccountApi.getAllPlexAccountsEndpoint().pipe(
@@ -47,8 +49,18 @@ export const useAccountStore = defineStore(StoreNames.AccountStore, () => {
 		reSyncAccount(accountId: number) {
 			state.accessSyncLoading = true;
 			return plexAccountApi.refreshPlexAccountAccessEndpoint(accountId).pipe(
-				tap(() =>	forkJoin([actions.refreshAccounts(), serverStore.refreshPlexServers(), libraryStore.refreshLibraries()])),
-				tap(() => state.accessSyncLoading = false),
+				switchMap((result) => {
+					if (!result.isSuccess) {
+						return of(result);
+					}
+
+					return forkJoin([
+						actions.refreshAccounts(),
+						serverStore.refreshPlexServers(),
+						libraryStore.refreshLibraries(),
+					]).pipe(switchMap(() => of(result)));
+				}),
+				finalize(() => state.accessSyncLoading = false),
 			);
 		},
 		/**
@@ -68,14 +80,21 @@ export const useAccountStore = defineStore(StoreNames.AccountStore, () => {
 			return plexAccountApi
 				.updatePlexAccountByIdEndpoint(account)
 				.pipe(
-					switchMap(() =>
-						forkJoin([actions.refreshAccounts(), serverStore.refreshPlexServers(), libraryStore.refreshLibraries()]),
-					),
-					switchMap(() => of(actions.getAccount(account.id))),
+					switchMap((result) => {
+						if (!result.isSuccess) {
+							return of(result);
+						}
+
+						return forkJoin([actions.refreshAccounts(), serverStore.refreshPlexServers(), libraryStore.refreshLibraries()]).pipe(
+							switchMap(() => of(actions.getAccount(account.id))),
+						);
+					}),
 				);
 		},
 		deleteAccount(accountId: number) {
-			return plexAccountApi.deletePlexAccountByIdEndpoint(accountId).pipe(switchMap(() => actions.refreshAccounts()));
+			return plexAccountApi
+				.deletePlexAccountByIdEndpoint(accountId)
+				.pipe(switchMap((result) => result.isSuccess ? actions.refreshAccounts() : of(result)));
 		},
 		getAccount(id: number): PlexAccountDTO | undefined {
 			return state.accounts.find((x) => x.id === id);

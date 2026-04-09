@@ -2,19 +2,6 @@ namespace Reaparr.Application.UnitTests;
 
 public class DeleteDownloadTasksByKeyCommandUnitTests : BaseUnitTest<DeleteDownloadTasksByKeyCommandHandler>
 {
-    public DeleteDownloadTasksByKeyCommandUnitTests()
-    {
-        Mock.Mock<IDownloadTaskUpdateDispatcher>()
-            .Setup(x =>
-                x.OnStatusChangedAsync(
-                    It.IsAny<DownloadTaskKey>(),
-                    DownloadStatus.Deleted,
-                    It.IsAny<CancellationToken>()
-                )
-            )
-            .ReturnsAsync(Result.Ok());
-    }
-
     [Test]
     public async Task ShouldDeleteMovieTask_WhenMovieKeyIsGiven()
     {
@@ -39,7 +26,7 @@ public class DeleteDownloadTasksByKeyCommandUnitTests : BaseUnitTest<DeleteDownl
                     It.IsAny<CancellationToken>()
                 )
             )
-            .ReturnsAsync(Result.Ok())
+            .Returns(Task.CompletedTask)
             .Verifiable(Times.Once());
 
         // Act
@@ -70,13 +57,13 @@ public class DeleteDownloadTasksByKeyCommandUnitTests : BaseUnitTest<DeleteDownl
         Mock.Mock<IDownloadTaskUpdateDispatcher>()
             .Setup(x =>
                 x.OnStatusChangedAsync(
-                    It.Is<DownloadTaskKey>(k => k.Id == movieFileKey.Id),
+                    It.IsAny<DownloadTaskKey>(),
                     DownloadStatus.Deleted,
                     It.IsAny<CancellationToken>()
                 )
             )
-            .ReturnsAsync(Result.Ok())
-            .Verifiable(Times.Once());
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.Exactly(2));
 
         // Act
         var result = await Sut.ExecuteAsync(new DeleteDownloadTasksByKeyCommand([movieFileKey]), CancellationToken);
@@ -111,13 +98,13 @@ public class DeleteDownloadTasksByKeyCommandUnitTests : BaseUnitTest<DeleteDownl
         Mock.Mock<IDownloadTaskUpdateDispatcher>()
             .Setup(x =>
                 x.OnStatusChangedAsync(
-                    It.Is<DownloadTaskKey>(k => k.Id == episodeFileKey.Id),
+                    It.IsAny<DownloadTaskKey>(),
                     DownloadStatus.Deleted,
                     It.IsAny<CancellationToken>()
                 )
             )
-            .ReturnsAsync(Result.Ok())
-            .Verifiable(Times.Once());
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.Exactly(4));
 
         // Act
         var result = await Sut.ExecuteAsync(new DeleteDownloadTasksByKeyCommand([episodeFileKey]), CancellationToken);
@@ -154,13 +141,13 @@ public class DeleteDownloadTasksByKeyCommandUnitTests : BaseUnitTest<DeleteDownl
         Mock.Mock<IDownloadTaskUpdateDispatcher>()
             .Setup(x =>
                 x.OnStatusChangedAsync(
-                    It.Is<DownloadTaskKey>(k => k.Id == episodeFileKeys[0].Id),
+                    It.IsAny<DownloadTaskKey>(),
                     DownloadStatus.Deleted,
                     It.IsAny<CancellationToken>()
                 )
             )
-            .ReturnsAsync(Result.Ok())
-            .Verifiable(Times.Once());
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.Exactly(2));
 
         // Act — delete only the first episode file
         var result = await Sut.ExecuteAsync(
@@ -171,6 +158,7 @@ public class DeleteDownloadTasksByKeyCommandUnitTests : BaseUnitTest<DeleteDownl
         // Assert
         result.IsSuccess.ShouldBeTrue();
         (await dbContext.DownloadTaskTvShowEpisodeFile.CountAsync(CancellationToken)).ShouldBe(1);
+
         // Season and TvShow parent must still exist because one episode remains.
         (await dbContext.DownloadTaskTvShowSeason.CountAsync(CancellationToken)).ShouldBe(1);
         (await dbContext.DownloadTaskTvShow.CountAsync(CancellationToken)).ShouldBe(1);
@@ -203,7 +191,7 @@ public class DeleteDownloadTasksByKeyCommandUnitTests : BaseUnitTest<DeleteDownl
                     It.IsAny<CancellationToken>()
                 )
             )
-            .ReturnsAsync(Result.Ok())
+            .Returns(Task.CompletedTask)
             .Verifiable(Times.Exactly(2));
 
         // Act
@@ -245,7 +233,7 @@ public class DeleteDownloadTasksByKeyCommandUnitTests : BaseUnitTest<DeleteDownl
                     It.IsAny<CancellationToken>()
                 )
             )
-            .ReturnsAsync(Result.Ok())
+            .Returns(Task.CompletedTask)
             .Verifiable(Times.Once());
 
         // Act

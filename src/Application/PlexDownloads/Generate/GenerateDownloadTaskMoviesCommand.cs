@@ -23,9 +23,14 @@ public class GenerateDownloadTaskMoviesCommandValidator : AbstractValidator<Gene
 {
     public GenerateDownloadTaskMoviesCommandValidator()
     {
-        RuleFor(x => x.Request.DownloadMedias).NotNull();
-        RuleFor(x => x.Request.DownloadMedias).NotEmpty();
-        RuleForEach(x => x.Request.DownloadMedias).SetValidator(new DownloadMediaDTOValidator());
+        RuleFor(x => x.Request)
+            .NotNull()
+            .DependentRules(() =>
+            {
+                RuleFor(x => x.Request.DownloadMedias).NotNull();
+                RuleFor(x => x.Request.DownloadMedias).NotEmpty();
+                RuleForEach(x => x.Request.DownloadMedias).SetValidator(new DownloadMediaDTOValidator());
+            });
     }
 }
 
@@ -57,10 +62,12 @@ public class GenerateDownloadTaskMoviesCommandHandler : ICommandHandler<Generate
                 plexMoviesList.SelectMany(x => x.MediaIds).ToList().Count
             );
 
-        // Create downloadTasks
-        var downloadTasks = new List<DownloadTaskMovie>();
+        var allDownloadTasks = new List<DownloadTaskMovie>();
+        await using var transaction = await _dbContext.BeginTransactionAsync(cancellationToken);
         foreach (var downloadMediaDto in plexMoviesList)
         {
+            var downloadTasks = new List<DownloadTaskMovie>();
+
             var plexLibrary = await _dbContext
                 .PlexLibraries.Include(x => x.PlexServer)
                 .Include(x => x.DefaultDestination)
@@ -80,7 +87,21 @@ public class GenerateDownloadTaskMoviesCommandHandler : ICommandHandler<Generate
 
             foreach (var plexMovie in plexMovies)
             {
-                // TODO: Check for duplicate DownloadTasks already existing
+                var downloadTaskAlreadyExists = await _dbContext.DownloadTaskMovie.AnyAsync(
+                    x => x.PlexServerId == plexMovie.PlexServerId && x.PlexApiRatingKey == plexMovie.PlexApiRatingKey,
+                    cancellationToken
+                );
+                if (downloadTaskAlreadyExists)
+                {
+                    _log.Here()
+                        .Debug(
+                            "Skipping duplicate movie download task for {MovieTitle} ({MovieKey})",
+                            plexMovie.Title,
+                            plexMovie.PlexApiRatingKey
+                        );
+                    continue;
+                }
+
                 var movieDownloadTask = plexMovie.MapToDownloadTask();
 
                 var movieData = SelectMovieQuality(plexMovie, downloadMediaDto);
@@ -112,14 +133,24 @@ public class GenerateDownloadTaskMoviesCommandHandler : ICommandHandler<Generate
                 downloadTasks.Add(movieDownloadTask);
             }
 
-            downloadTasks.SetRelationshipIds(plexServer.Id, plexLibrary.Id);
+            if (downloadTasks.Count == 0)
+                continue;
 
-            _dbContext.DownloadTaskMovie.AddRange(downloadTasks);
-            await _dbContext.SaveChangesAsync(cancellationToken);
+            downloadTasks.SetRelationshipIds(plexServer.Id, plexLibrary.Id);
+            allDownloadTasks.AddRange(downloadTasks);
         }
 
+        if (allDownloadTasks.Count == 0)
+        {
+            await transaction.CommitAsync(cancellationToken);
+            return Result.Ok();
+        }
+
+        _dbContext.DownloadTaskMovie.AddRange(allDownloadTasks);
+        await _dbContext.SaveChangesAsync(cancellationToken);
+
         var logs = new List<DownloadTaskMovieFileLog>();
-        foreach (var downloadTaskMovie in downloadTasks)
+        foreach (var downloadTaskMovie in allDownloadTasks)
         {
             logs.AddRange(
                 downloadTaskMovie.Children.Select(downloadTaskMovieFile => new DownloadTaskMovieFileLog
@@ -134,7 +165,9 @@ public class GenerateDownloadTaskMoviesCommandHandler : ICommandHandler<Generate
             );
         }
 
-        await _dbContext.CreateDownloadClientLogs(logs);
+        _dbContext.DownloadTaskMovieFileLogs.AddRange(logs);
+        await _dbContext.SaveChangesAsync(cancellationToken);
+        await transaction.CommitAsync(cancellationToken);
 
         return Result.Ok();
     }

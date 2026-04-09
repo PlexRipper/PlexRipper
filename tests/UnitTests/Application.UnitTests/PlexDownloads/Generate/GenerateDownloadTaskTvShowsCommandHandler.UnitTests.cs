@@ -4,6 +4,21 @@ public class GenerateDownloadTaskTvShowsCommandHandlerUnitTests
     : BaseUnitTest<GenerateDownloadTaskTvShowsCommandHandler>
 {
     [Test]
+    public void GenerateDownloadTaskTvShowsCommandValidator_ShouldRejectNullRequest()
+    {
+        // Arrange
+        var validator = new GenerateDownloadTaskTvShowsCommandValidator();
+        var command = new GenerateDownloadTaskTvShowsCommand((CreateDownloadTasksRequest)null!);
+
+        // Act
+        var result = validator.Validate(command);
+
+        // Assert
+        result.IsValid.ShouldBeFalse();
+        result.Errors.ShouldContain(x => x.PropertyName == nameof(GenerateDownloadTaskTvShowsCommand.Request));
+    }
+
+    [Test]
     public async Task ShouldHaveInsertedValidDownloadTaskTvShowsInDatabase_WhenGivenValidPlexTvShows()
     {
         // Arrange
@@ -114,6 +129,52 @@ public class GenerateDownloadTaskTvShowsCommandHandlerUnitTests
                         ),
                         It.IsAny<CancellationToken>()
                     ),
+                Times.Once()
+            );
+    }
+
+    [Test]
+    public async Task ShouldHaveFailedResult_WhenCreatingSeasonDownloadTasksFails()
+    {
+        // Arrange
+        await SetupDatabase(
+            5956,
+            config =>
+            {
+                config.TvShowCount = 1;
+                config.TvShowSeasonCount = 1;
+                config.TvShowEpisodeCount = 1;
+            }
+        );
+        var plexTvShows = await IDbContext.PlexTvShows.IncludeAll().ToListAsync(CancellationToken);
+
+        var tvShows = new List<DownloadMediaDTO>
+        {
+            new()
+            {
+                Type = PlexMediaType.TvShow,
+                MediaIds = plexTvShows.Select(x => x.Id).ToList(),
+                PlexServerId = 1,
+                PlexLibraryId = 1,
+                Qualities = [],
+            },
+        };
+
+        Mock.Mock<ICommandExecutor>()
+            .Setup(x => x.Send(It.IsAny<GenerateDownloadTaskTvShowSeasonsCommand>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result.Fail("Season task generation failed"));
+
+        // Act
+        var command = new GenerateDownloadTaskTvShowsCommand(tvShows);
+        var result = await Sut.ExecuteAsync(command, CancellationToken);
+
+        // Assert
+        result.IsFailed.ShouldBeTrue();
+        result.Errors.ShouldContain(x => x.Message.Contains("Season task generation failed"));
+
+        Mock.Mock<ICommandExecutor>()
+            .Verify(
+                x => x.Send(It.IsAny<GenerateDownloadTaskTvShowSeasonsCommand>(), It.IsAny<CancellationToken>()),
                 Times.Once()
             );
     }

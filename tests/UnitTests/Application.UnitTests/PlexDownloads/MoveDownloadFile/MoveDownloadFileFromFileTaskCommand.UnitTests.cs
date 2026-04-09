@@ -6,6 +6,21 @@ namespace Reaparr.Application.UnitTests;
 public class MoveDownloadFileFromFileTaskCommandUnitTests : BaseUnitTest<MoveDownloadFileFromFileTaskCommandHandler>
 {
     [Test]
+    public void MoveDownloadFileFromFileTaskCommandValidator_ShouldRejectNullKey()
+    {
+        // Arrange
+        var validator = new MoveDownloadFileFromFileTaskCommandValidator();
+        var command = new MoveDownloadFileFromFileTaskCommand(null!);
+
+        // Act
+        var result = validator.Validate(command);
+
+        // Assert
+        result.IsValid.ShouldBeFalse();
+        result.Errors.ShouldContain(x => x.PropertyName == nameof(MoveDownloadFileFromFileTaskCommand.Key));
+    }
+
+    [Test]
     public async Task ShouldReturnFailedResult_WhenDirectoryNameIsEmpty()
     {
         // Arrange
@@ -40,7 +55,8 @@ public class MoveDownloadFileFromFileTaskCommandUnitTests : BaseUnitTest<MoveDow
                     It.IsAny<CancellationToken>()
                 )
             )
-            .ReturnsAsync(Result.Ok());
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.Once());
         Mock.Mock<IDownloadTaskUpdateDispatcher>()
             .Setup(x =>
                 x.OnStatusChangedAsync(
@@ -50,7 +66,8 @@ public class MoveDownloadFileFromFileTaskCommandUnitTests : BaseUnitTest<MoveDow
                     It.IsAny<CancellationToken>()
                 )
             )
-            .ReturnsAsync(Result.Ok());
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.Once());
 
         // Act
         var command = new MoveDownloadFileFromFileTaskCommand(downloadTask.ToKey(), progress);
@@ -121,7 +138,24 @@ public class MoveDownloadFileFromFileTaskCommandUnitTests : BaseUnitTest<MoveDow
             .Returns(Task.CompletedTask)
             .Verifiable(Times.Never);
 
-        Mock.SetupCommand(It.IsAny<MoveFileWithResumeCommand>).ReturnsAsync(Result.Ok()).Verifiable(Times.Once);
+        Mock.SetupCommand(It.IsAny<MoveFileWithResumeCommand>)
+            .Returns<MoveFileWithResumeCommand, CancellationToken>(
+                (moveCommand, _) =>
+                {
+                    moveCommand.Progress(
+                        new MoveFileTransferProgressDTO
+                        {
+                            Transferred = content.LongLength / 2,
+                            DataTotal = content.LongLength,
+                            FileTransferSpeed = 1024,
+                        }
+                    );
+
+                    cancellationTokenSource.Cancel();
+                    return Task.FromResult(Result.Ok());
+                }
+            )
+            .Verifiable(Times.Once);
 
         Mock.Mock<IDownloadTaskUpdateDispatcher>()
             .Setup(x =>
@@ -131,7 +165,8 @@ public class MoveDownloadFileFromFileTaskCommandUnitTests : BaseUnitTest<MoveDow
                     It.IsAny<CancellationToken>()
                 )
             )
-            .ReturnsAsync(Result.Ok());
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.AtLeastOnce());
         Mock.Mock<IDownloadTaskUpdateDispatcher>()
             .Setup(x =>
                 x.OnStatusChangedAsync(
@@ -141,7 +176,8 @@ public class MoveDownloadFileFromFileTaskCommandUnitTests : BaseUnitTest<MoveDow
                     It.IsAny<CancellationToken>()
                 )
             )
-            .ReturnsAsync(Result.Ok());
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.Never());
 
         // Act
         var command = new MoveDownloadFileFromFileTaskCommand(downloadFileTask.ToKey(), progress);
@@ -158,6 +194,233 @@ public class MoveDownloadFileFromFileTaskCommandUnitTests : BaseUnitTest<MoveDow
         // Source should remain since operation paused before completion
         var file = Mock.Create<IFile>();
         file.Exists(downloadFileTask.DownloadFilePath).ShouldBeTrue();
+    }
+
+    [Test]
+    public async Task ShouldSetMoveFinished_WhenCancellationIsRequestedAfterMoveCommandReturnsSuccess()
+    {
+        // Arrange
+        await SetupDatabase(
+            52224,
+            config =>
+            {
+                config.TvShowDownloadTasksCount = 1;
+                config.TvShowSeasonDownloadTasksCount = 1;
+                config.TvShowEpisodeDownloadTasksCount = 1;
+            }
+        );
+
+        var dbContext = IDbContext;
+        var downloadFileTask = await dbContext.DownloadTaskTvShowEpisodeFile.FirstOrDefaultAsync(CancellationToken);
+        downloadFileTask.ShouldNotBeNull();
+
+        var cancellationTokenSource = new CancellationTokenSource();
+        var progress = new Subject<IDownloadFileTransferProgress>();
+
+        var content = new byte[2 * 1024 * 1024];
+        new Random(13).NextBytes(content);
+
+        SetupFileSystem(fs =>
+        {
+            fs.AddFile(downloadFileTask.DownloadFilePath, new MockFileData(content));
+            fs.AddFile(downloadFileTask.DestinationFilePath, new MockFileData([]));
+        });
+
+        downloadFileTask.DataTotal = content.LongLength;
+        await dbContext.SaveChangesAsync(CancellationToken);
+
+        Mock.Mock<IDownloadManagerSettings>()
+            .Setup(x => x.KeepCompletedInDownloadFolder)
+            .Returns(false)
+            .Verifiable(Times.Once);
+
+        Mock.Mock<IEventPublisher>()
+            .Setup(m => m.PublishAsync(It.IsAny<SendNotificationResult>(), It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.Never);
+
+        Mock.SetupCommand(It.IsAny<MoveFileWithResumeCommand>)
+            .ReturnsAsync(() =>
+            {
+                cancellationTokenSource.Cancel();
+                return Result.Ok();
+            })
+            .Verifiable(Times.Once);
+
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Setup(x =>
+                x.OnStatusChangedAsync(
+                    It.IsAny<DownloadTaskKey>(),
+                    It.IsAny<DownloadStatus>(),
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.AtLeastOnce());
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Setup(x =>
+                x.OnStatusChangedAsync(
+                    It.IsAny<DownloadTaskKey>(),
+                    It.IsAny<DownloadStatus>(),
+                    It.IsAny<Result>(),
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.Never());
+
+        // Act
+        var result = await Sut.ExecuteAsync(
+            new MoveDownloadFileFromFileTaskCommand(downloadFileTask.ToKey(), progress),
+            cancellationTokenSource.Token
+        );
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Verify(
+                x =>
+                    x.OnStatusChangedAsync(
+                        It.IsAny<DownloadTaskKey>(),
+                        It.Is<DownloadStatus>(s => s == DownloadStatus.MoveFinished),
+                        It.IsAny<CancellationToken>()
+                    ),
+                Times.AtLeastOnce()
+            );
+
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Verify(
+                x =>
+                    x.OnStatusChangedAsync(
+                        It.IsAny<DownloadTaskKey>(),
+                        It.Is<DownloadStatus>(s => s == DownloadStatus.MovePaused),
+                        It.IsAny<CancellationToken>()
+                    ),
+                Times.Never()
+            );
+    }
+
+    [Test]
+    public async Task ShouldEmitProgressAndCompleteSubject_WhenCancellationIsRequestedAfterMoveCommandReturnsSuccess()
+    {
+        // Arrange
+        await SetupDatabase(
+            52226,
+            config =>
+            {
+                config.TvShowDownloadTasksCount = 1;
+                config.TvShowSeasonDownloadTasksCount = 1;
+                config.TvShowEpisodeDownloadTasksCount = 1;
+            }
+        );
+
+        var dbContext = IDbContext;
+        var downloadFileTask = await dbContext.DownloadTaskTvShowEpisodeFile.FirstOrDefaultAsync(CancellationToken);
+        downloadFileTask.ShouldNotBeNull();
+
+        var cancellationTokenSource = new CancellationTokenSource();
+        var progress = new Subject<IDownloadFileTransferProgress>();
+        var progressUpdates = new List<IDownloadFileTransferProgress>();
+        var wasCompleted = false;
+
+        progress.AsObservable().Subscribe(x => progressUpdates.Add(x), _ => { }, () => wasCompleted = true);
+
+        var content = new byte[2 * 1024 * 1024];
+        new Random(14).NextBytes(content);
+
+        SetupFileSystem(fs =>
+        {
+            fs.AddFile(downloadFileTask.DownloadFilePath, new MockFileData(content));
+            fs.AddFile(downloadFileTask.DestinationFilePath, new MockFileData([]));
+        });
+
+        downloadFileTask.DataTotal = content.LongLength;
+        await dbContext.SaveChangesAsync(CancellationToken);
+
+        Mock.Mock<IDownloadManagerSettings>().Setup(x => x.KeepCompletedInDownloadFolder).Returns(false);
+
+        Mock.Mock<IEventPublisher>()
+            .Setup(m => m.PublishAsync(It.IsAny<SendNotificationResult>(), It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.Never);
+
+        Mock.SetupCommand(It.IsAny<MoveFileWithResumeCommand>)
+            .Returns<MoveFileWithResumeCommand, CancellationToken>(
+                (moveCommand, _) =>
+                {
+                    moveCommand.Progress(
+                        new MoveFileTransferProgressDTO
+                        {
+                            Transferred = content.LongLength / 2,
+                            DataTotal = content.LongLength,
+                            FileTransferSpeed = 1024,
+                        }
+                    );
+
+                    cancellationTokenSource.Cancel();
+                    return Task.FromResult(Result.Ok());
+                }
+            );
+
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Setup(x =>
+                x.OnStatusChangedAsync(
+                    It.IsAny<DownloadTaskKey>(),
+                    It.IsAny<DownloadStatus>(),
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.AtLeastOnce());
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Setup(x =>
+                x.OnStatusChangedAsync(
+                    It.IsAny<DownloadTaskKey>(),
+                    It.IsAny<DownloadStatus>(),
+                    It.IsAny<Result>(),
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.AtLeastOnce());
+
+        // Act
+        var result = await Sut.ExecuteAsync(
+            new MoveDownloadFileFromFileTaskCommand(downloadFileTask.ToKey(), progress),
+            cancellationTokenSource.Token
+        );
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        progressUpdates.Count.ShouldBe(1);
+        wasCompleted.ShouldBeTrue();
+
+        var fileTaskAfterPause = await dbContext.GetDownloadTaskFileAsync(downloadFileTask.ToKey(), CancellationToken);
+        fileTaskAfterPause.ShouldNotBeNull();
+        progressUpdates[0].FileDataTransferred.ShouldBe(fileTaskAfterPause.FileDataTransferred);
+        fileTaskAfterPause.FileDataTransferred.ShouldBeGreaterThan(0);
+
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Verify(
+                x =>
+                    x.OnStatusChangedAsync(
+                        It.IsAny<DownloadTaskKey>(),
+                        It.Is<DownloadStatus>(s => s == DownloadStatus.MoveFinished),
+                        It.IsAny<CancellationToken>()
+                    ),
+                Times.AtLeastOnce()
+            );
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Verify(
+                x =>
+                    x.OnStatusChangedAsync(
+                        It.IsAny<DownloadTaskKey>(),
+                        It.Is<DownloadStatus>(s => s == DownloadStatus.MovePaused),
+                        It.IsAny<CancellationToken>()
+                    ),
+                Times.Never()
+            );
     }
 
     [Test]
@@ -202,13 +465,29 @@ public class MoveDownloadFileFromFileTaskCommandUnitTests : BaseUnitTest<MoveDow
         });
 
         downloadFileTask.DataTotal = content.LongLength;
-        await IDbContext.SaveChangesAsync(CancellationToken);
+        await dbContext.SaveChangesAsync(CancellationToken);
 
         Mock.Mock<IEventPublisher>()
             .Setup(m => m.PublishAsync(It.IsAny<SendNotificationResult>(), It.IsAny<CancellationToken>()))
             .Returns(Task.CompletedTask)
             .Verifiable(Times.Never);
-        Mock.SetupCommand(It.IsAny<MoveFileWithResumeCommand>).ReturnsAsync(Result.Ok()).Verifiable(Times.Once);
+        Mock.SetupCommand(It.IsAny<MoveFileWithResumeCommand>)
+            .Returns<MoveFileWithResumeCommand, CancellationToken>(
+                (moveCommand, _) =>
+                {
+                    moveCommand.Progress(
+                        new MoveFileTransferProgressDTO
+                        {
+                            Transferred = moveCommand.DataTotal,
+                            DataTotal = moveCommand.DataTotal,
+                            FileTransferSpeed = moveCommand.DataTotal,
+                        }
+                    );
+
+                    return Task.FromResult(Result.Ok());
+                }
+            )
+            .Verifiable(Times.Once);
         Mock.Mock<IDownloadManagerSettings>().Setup(x => x.KeepCompletedInDownloadFolder).Returns(false);
 
         Mock.Mock<IDownloadTaskUpdateDispatcher>()
@@ -219,7 +498,8 @@ public class MoveDownloadFileFromFileTaskCommandUnitTests : BaseUnitTest<MoveDow
                     It.IsAny<CancellationToken>()
                 )
             )
-            .ReturnsAsync(Result.Ok());
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.AtLeastOnce());
         Mock.Mock<IDownloadTaskUpdateDispatcher>()
             .Setup(x =>
                 x.OnStatusChangedAsync(
@@ -229,7 +509,8 @@ public class MoveDownloadFileFromFileTaskCommandUnitTests : BaseUnitTest<MoveDow
                     It.IsAny<CancellationToken>()
                 )
             )
-            .ReturnsAsync(Result.Ok());
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.Never());
 
         // Act
         var command = new MoveDownloadFileFromFileTaskCommand(downloadFileTask.ToKey(), progress);
@@ -239,9 +520,139 @@ public class MoveDownloadFileFromFileTaskCommandUnitTests : BaseUnitTest<MoveDow
         result.IsSuccess.ShouldBeTrue();
         progressList.Any().ShouldBeTrue();
 
-        var fileTaskPaused = await IDbContext.GetDownloadTaskFileAsync(downloadFileTask.ToKey(), CancellationToken);
+        var fileTaskPaused = await dbContext.GetDownloadTaskFileAsync(downloadFileTask.ToKey(), CancellationToken);
         fileTaskPaused.ShouldNotBeNull();
         fileTaskPaused.CurrentFileTransferBytesOffset.ShouldBeGreaterThanOrEqualTo(0);
+    }
+
+    [Test]
+    public async Task ShouldCreateProgressResourcesPerExecution_WhenSameHandlerExecutesMultipleMoves()
+    {
+        // Arrange
+        await SetupDatabase(
+            52225,
+            config =>
+            {
+                config.TvShowDownloadTasksCount = 2;
+                config.TvShowSeasonDownloadTasksCount = 2;
+                config.TvShowEpisodeDownloadTasksCount = 2;
+            }
+        );
+
+        var dbContext = IDbContext;
+        var downloadFileTasks = await dbContext
+            .DownloadTaskTvShowEpisodeFile.AsTracking()
+            .Take(2)
+            .ToListAsync(CancellationToken);
+
+        downloadFileTasks.Count.ShouldBe(2);
+
+        var firstTask = downloadFileTasks[0];
+        var secondTask = downloadFileTasks[1];
+
+        var firstContent = new byte[2 * 1024 * 1024];
+        new Random(41).NextBytes(firstContent);
+
+        var secondContent = new byte[2 * 1024 * 1024];
+        new Random(42).NextBytes(secondContent);
+
+        SetupFileSystem(fs =>
+        {
+            fs.AddFile(firstTask.DownloadFilePath, new MockFileData(firstContent));
+            fs.AddFile(secondTask.DownloadFilePath, new MockFileData(secondContent));
+        });
+
+        firstTask.DataTotal = firstContent.LongLength;
+        secondTask.DataTotal = secondContent.LongLength;
+        await dbContext.SaveChangesAsync(CancellationToken);
+
+        var firstProgress = new Subject<IDownloadFileTransferProgress>();
+        var secondProgress = new Subject<IDownloadFileTransferProgress>();
+
+        Mock.Mock<IDownloadManagerSettings>()
+            .Setup(x => x.KeepCompletedInDownloadFolder)
+            .Returns(false)
+            .Verifiable(Times.Exactly(2));
+
+        Mock.Mock<IEventPublisher>()
+            .Setup(m => m.PublishAsync(It.IsAny<SendNotificationResult>(), It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.Never);
+
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Setup(x =>
+                x.OnStatusChangedAsync(
+                    It.IsAny<DownloadTaskKey>(),
+                    It.IsAny<DownloadStatus>(),
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.Exactly(4));
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Setup(x =>
+                x.OnStatusChangedAsync(
+                    It.IsAny<DownloadTaskKey>(),
+                    It.IsAny<DownloadStatus>(),
+                    It.IsAny<Result>(),
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.Never());
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Setup(x => x.NotifyFileTransferProgress(It.IsAny<DownloadTaskKey>()))
+            .Verifiable(Times.Exactly(2));
+
+        Mock.Mock<IReaparrDbContextFactory>()
+            .SetupSequence(x => x.Create())
+            .Returns(() => IDbContext)
+            .Returns(() => IDbContext);
+
+        Mock.Mock<ICommandExecutor>()
+            .Setup(x => x.Send(It.IsAny<MoveFileWithResumeCommand>(), It.IsAny<CancellationToken>()))
+            .Returns<MoveFileWithResumeCommand, CancellationToken>(
+                async (moveCommand, _) =>
+                {
+                    await Task.Delay(1100);
+                    moveCommand.Progress(
+                        new MoveFileTransferProgressDTO
+                        {
+                            Transferred = moveCommand.DataTotal,
+                            DataTotal = moveCommand.DataTotal,
+                            FileTransferSpeed = moveCommand.DataTotal,
+                        }
+                    );
+
+                    return Result.Ok();
+                }
+            );
+
+        var sut = Sut;
+
+        // Act
+        var firstResult = await sut.ExecuteAsync(
+            new MoveDownloadFileFromFileTaskCommand(firstTask.ToKey(), firstProgress),
+            CancellationToken
+        );
+
+        var secondResult = await sut.ExecuteAsync(
+            new MoveDownloadFileFromFileTaskCommand(secondTask.ToKey(), secondProgress),
+            CancellationToken
+        );
+
+        // Assert
+        firstResult.IsSuccess.ShouldBeTrue();
+        secondResult.IsSuccess.ShouldBeTrue();
+
+        Mock.Mock<IReaparrDbContextFactory>().Verify();
+        Mock.Mock<ICommandExecutor>().Verify();
+
+        var updatedTasks = await dbContext
+            .DownloadTaskTvShowEpisodeFile.AsNoTracking()
+            .Take(2)
+            .ToListAsync(CancellationToken);
+        updatedTasks.ShouldAllBe(x => x.FileDataTransferred == x.DataTotal);
     }
 
     [Test]
@@ -276,17 +687,16 @@ public class MoveDownloadFileFromFileTaskCommandUnitTests : BaseUnitTest<MoveDow
         await IDbContext.SaveChangesAsync(CancellationToken);
 
         // Keep in downloads triggers rename flow, not MoveFileWithResume
-        Mock.Mock<IDownloadManagerSettings>()
-            .Setup(x => x.KeepCompletedInDownloadFolder)
-            .Returns(true)
-            .Verifiable(Times.Once);
+        Mock.Mock<IDownloadManagerSettings>().Setup(x => x.KeepCompletedInDownloadFolder).Returns(true);
 
         Mock.Mock<IEventPublisher>()
             .Setup(m => m.PublishAsync(It.IsAny<SendNotificationResult>(), It.IsAny<CancellationToken>()))
             .Returns(Task.CompletedTask)
             .Verifiable(Times.Never);
 
-        Mock.SetupCommand(It.IsAny<MoveFileWithResumeCommand>).ReturnsAsync(Result.Ok()).Verifiable(Times.Never);
+        Mock.Mock<ICommandExecutor>()
+            .Setup(x => x.Send(It.IsAny<MoveFileWithResumeCommand>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result.Ok());
 
         Mock.Mock<IDownloadTaskUpdateDispatcher>()
             .Setup(x =>
@@ -296,7 +706,8 @@ public class MoveDownloadFileFromFileTaskCommandUnitTests : BaseUnitTest<MoveDow
                     It.IsAny<CancellationToken>()
                 )
             )
-            .ReturnsAsync(Result.Ok());
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.AtLeastOnce());
         Mock.Mock<IDownloadTaskUpdateDispatcher>()
             .Setup(x =>
                 x.OnStatusChangedAsync(
@@ -306,7 +717,8 @@ public class MoveDownloadFileFromFileTaskCommandUnitTests : BaseUnitTest<MoveDow
                     It.IsAny<CancellationToken>()
                 )
             )
-            .ReturnsAsync(Result.Ok());
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.AtLeastOnce());
 
         // Act
         var command = new MoveDownloadFileFromFileTaskCommand(downloadFileTask.ToKey(), progress);
@@ -323,6 +735,210 @@ public class MoveDownloadFileFromFileTaskCommandUnitTests : BaseUnitTest<MoveDow
         after.ShouldNotBeNull();
         after.FileDataTransferred.ShouldBe(after.DataTotal);
         after.CurrentFileTransferBytesOffset.ShouldBe(after.DataTotal);
+        Mock.Mock<ICommandExecutor>()
+            .Verify(x => x.Send(It.IsAny<MoveFileWithResumeCommand>(), It.IsAny<CancellationToken>()), Times.Never());
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Verify(
+                x =>
+                    x.OnStatusChangedAsync(
+                        It.IsAny<DownloadTaskKey>(),
+                        It.Is<DownloadStatus>(s => s == DownloadStatus.MoveFinished),
+                        It.IsAny<CancellationToken>()
+                    ),
+                Times.AtLeastOnce()
+            );
+    }
+
+    [Test]
+    public async Task ShouldRenameAndComplete_WhenDestinationMatchesSourceWithoutReapTempSuffix()
+    {
+        // Arrange
+        await SetupDatabase(
+            334456,
+            config =>
+            {
+                config.TvShowDownloadTasksCount = 1;
+                config.TvShowSeasonDownloadTasksCount = 1;
+                config.TvShowEpisodeDownloadTasksCount = 1;
+            }
+        );
+
+        var dbContext = IDbContext;
+        var downloadFileTask = await dbContext.DownloadTaskTvShowEpisodeFile.FirstOrDefaultAsync(CancellationToken);
+        downloadFileTask.ShouldNotBeNull();
+
+        var inPlaceDestinationRootPath = Path.Combine(downloadFileTask.DirectoryMeta.DownloadRootPath, "TvShows");
+        dbContext.Entry(downloadFileTask).Property(nameof(downloadFileTask.DirectoryMeta)).CurrentValue =
+            downloadFileTask.DirectoryMeta with
+            {
+                DestinationRootPath = inPlaceDestinationRootPath,
+            };
+        dbContext.Entry(downloadFileTask).Property(nameof(downloadFileTask.DirectoryMeta)).IsModified = true;
+
+        var progress = new Subject<IDownloadFileTransferProgress>();
+        var content = new byte[2 * 1024 * 1024];
+        new Random(12).NextBytes(content);
+
+        SetupFileSystem(fs =>
+        {
+            fs.AddFile(downloadFileTask.DownloadFilePath, new MockFileData(content));
+        });
+
+        downloadFileTask.DataTotal = content.LongLength;
+        await dbContext.SaveChangesAsync(CancellationToken);
+
+        var persistedTask = await dbContext.DownloadTaskTvShowEpisodeFile.AsNoTracking().FirstAsync(CancellationToken);
+        persistedTask.DownloadFilePath.RemoveReapTempSuffix().ShouldBe(persistedTask.DestinationFilePath);
+
+        Mock.Mock<IDownloadManagerSettings>().Setup(x => x.KeepCompletedInDownloadFolder).Returns(false);
+
+        Mock.Mock<IEventPublisher>()
+            .Setup(m => m.PublishAsync(It.IsAny<SendNotificationResult>(), It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask);
+
+        Mock.SetupCommand(It.IsAny<MoveFileWithResumeCommand>).ReturnsAsync(Result.Ok()).Verifiable(Times.Never);
+
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Setup(x =>
+                x.OnStatusChangedAsync(
+                    It.IsAny<DownloadTaskKey>(),
+                    It.IsAny<DownloadStatus>(),
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.AtLeastOnce());
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Setup(x =>
+                x.OnStatusChangedAsync(
+                    It.IsAny<DownloadTaskKey>(),
+                    It.IsAny<DownloadStatus>(),
+                    It.IsAny<Result>(),
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.AtLeastOnce());
+
+        // Act
+        var result = await Sut.ExecuteAsync(
+            new MoveDownloadFileFromFileTaskCommand(downloadFileTask.ToKey(), progress),
+            CancellationToken
+        );
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+
+        var file = Mock.Create<IFile>();
+        file.Exists(downloadFileTask.DownloadFilePath).ShouldBeFalse();
+        file.Exists(downloadFileTask.DestinationFilePath).ShouldBeTrue();
+
+        var after = await dbContext.DownloadTaskTvShowEpisodeFile.AsNoTracking().FirstAsync(CancellationToken);
+        after.FileDataTransferred.ShouldBe(after.DataTotal);
+        after.CurrentFileTransferBytesOffset.ShouldBe(after.DataTotal);
+
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Verify(
+                x =>
+                    x.OnStatusChangedAsync(
+                        It.IsAny<DownloadTaskKey>(),
+                        It.Is<DownloadStatus>(s => s == DownloadStatus.MoveFinished),
+                        It.IsAny<CancellationToken>()
+                    ),
+                Times.AtLeastOnce()
+            );
+    }
+
+    [Test]
+    public async Task ShouldRenameAndComplete_WhenDestinationMatchesSourceWithoutReapTempSuffixAndCancellationIsRequested()
+    {
+        // Arrange
+        await SetupDatabase(
+            334457,
+            config =>
+            {
+                config.TvShowDownloadTasksCount = 1;
+                config.TvShowSeasonDownloadTasksCount = 1;
+                config.TvShowEpisodeDownloadTasksCount = 1;
+            }
+        );
+
+        var dbContext = IDbContext;
+        var downloadFileTask = await dbContext.DownloadTaskTvShowEpisodeFile.FirstOrDefaultAsync(CancellationToken);
+        downloadFileTask.ShouldNotBeNull();
+
+        var inPlaceDestinationRootPath = Path.Combine(downloadFileTask.DirectoryMeta.DownloadRootPath, "TvShows");
+        dbContext.Entry(downloadFileTask).Property(nameof(downloadFileTask.DirectoryMeta)).CurrentValue =
+            downloadFileTask.DirectoryMeta with
+            {
+                DestinationRootPath = inPlaceDestinationRootPath,
+            };
+        dbContext.Entry(downloadFileTask).Property(nameof(downloadFileTask.DirectoryMeta)).IsModified = true;
+
+        var content = new byte[2 * 1024 * 1024];
+        new Random(63).NextBytes(content);
+
+        SetupFileSystem(fs =>
+        {
+            fs.AddFile(downloadFileTask.DownloadFilePath, new MockFileData(content));
+        });
+
+        downloadFileTask.DataTotal = content.LongLength;
+        await dbContext.SaveChangesAsync(CancellationToken);
+
+        var persistedTask = await dbContext.DownloadTaskTvShowEpisodeFile.AsNoTracking().FirstAsync(CancellationToken);
+        persistedTask.DownloadFilePath.RemoveReapTempSuffix().ShouldBe(persistedTask.DestinationFilePath);
+
+        Mock.Mock<IDownloadManagerSettings>().Setup(x => x.KeepCompletedInDownloadFolder).Returns(false);
+
+        Mock.Mock<IEventPublisher>()
+            .Setup(m => m.PublishAsync(It.IsAny<SendNotificationResult>(), It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask);
+
+        Mock.SetupCommand(It.IsAny<MoveFileWithResumeCommand>).ReturnsAsync(Result.Ok()).Verifiable(Times.Never);
+
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Setup(x =>
+                x.OnStatusChangedAsync(
+                    It.IsAny<DownloadTaskKey>(),
+                    It.IsAny<DownloadStatus>(),
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.AtLeastOnce());
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Setup(x =>
+                x.OnStatusChangedAsync(
+                    It.IsAny<DownloadTaskKey>(),
+                    It.IsAny<DownloadStatus>(),
+                    It.IsAny<Result>(),
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.AtLeastOnce());
+
+        var cancellationTokenSource = new CancellationTokenSource();
+        await cancellationTokenSource.CancelAsync();
+
+        // Act
+        var result = await Sut.ExecuteAsync(
+            new MoveDownloadFileFromFileTaskCommand(downloadFileTask.ToKey()),
+            cancellationTokenSource.Token
+        );
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+
+        var file = Mock.Create<IFile>();
+        file.Exists(downloadFileTask.DownloadFilePath).ShouldBeFalse();
+        file.Exists(downloadFileTask.DestinationFilePath).ShouldBeTrue();
+
+        var after = await dbContext.DownloadTaskTvShowEpisodeFile.AsNoTracking().FirstAsync(CancellationToken);
+        after.FileDataTransferred.ShouldBe(after.DataTotal);
+        after.CurrentFileTransferBytesOffset.ShouldBe(after.DataTotal);
+
         Mock.Mock<IDownloadTaskUpdateDispatcher>()
             .Verify(
                 x =>
@@ -367,10 +983,11 @@ public class MoveDownloadFileFromFileTaskCommandUnitTests : BaseUnitTest<MoveDow
 
         Mock.Mock<IEventPublisher>()
             .Setup(m => m.PublishAsync(It.IsAny<SendNotificationResult>(), It.IsAny<CancellationToken>()))
-            .Returns(Task.CompletedTask)
-            .Verifiable(Times.Never);
+            .Returns(Task.CompletedTask);
 
-        Mock.SetupCommand(It.IsAny<MoveFileWithResumeCommand>).ReturnsAsync(Result.Ok()).Verifiable(Times.Never);
+        Mock.Mock<ICommandExecutor>()
+            .Setup(x => x.Send(It.IsAny<MoveFileWithResumeCommand>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result.Ok());
 
         Mock.Mock<IDownloadTaskUpdateDispatcher>()
             .Setup(x =>
@@ -380,7 +997,8 @@ public class MoveDownloadFileFromFileTaskCommandUnitTests : BaseUnitTest<MoveDow
                     It.IsAny<CancellationToken>()
                 )
             )
-            .ReturnsAsync(Result.Ok());
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.Once());
         Mock.Mock<IDownloadTaskUpdateDispatcher>()
             .Setup(x =>
                 x.OnStatusChangedAsync(
@@ -390,7 +1008,8 @@ public class MoveDownloadFileFromFileTaskCommandUnitTests : BaseUnitTest<MoveDow
                     It.IsAny<CancellationToken>()
                 )
             )
-            .ReturnsAsync(Result.Ok());
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.Once());
 
         // Act
         var result = await Sut.ExecuteAsync(
@@ -426,8 +1045,7 @@ public class MoveDownloadFileFromFileTaskCommandUnitTests : BaseUnitTest<MoveDow
 
         Mock.Mock<IEventPublisher>()
             .Setup(m => m.PublishAsync(It.IsAny<SendNotificationResult>(), It.IsAny<CancellationToken>()))
-            .Returns(Task.CompletedTask)
-            .Verifiable(Times.Once);
+            .Returns(Task.CompletedTask);
 
         Mock.SetupCommand(It.IsAny<MoveFileWithResumeCommand>).ReturnsAsync(Result.Ok()).Verifiable(Times.Never);
 
@@ -439,7 +1057,8 @@ public class MoveDownloadFileFromFileTaskCommandUnitTests : BaseUnitTest<MoveDow
                     It.IsAny<CancellationToken>()
                 )
             )
-            .ReturnsAsync(Result.Ok());
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.AtLeastOnce());
         Mock.Mock<IDownloadTaskUpdateDispatcher>()
             .Setup(x =>
                 x.OnStatusChangedAsync(
@@ -449,7 +1068,8 @@ public class MoveDownloadFileFromFileTaskCommandUnitTests : BaseUnitTest<MoveDow
                     It.IsAny<CancellationToken>()
                 )
             )
-            .ReturnsAsync(Result.Ok());
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.AtLeastOnce());
 
         // Act
         var result = await Sut.ExecuteAsync(
@@ -507,10 +1127,7 @@ public class MoveDownloadFileFromFileTaskCommandUnitTests : BaseUnitTest<MoveDow
         downloadFileTask.DataTotal = content.LongLength;
         await IDbContext.SaveChangesAsync(CancellationToken);
 
-        Mock.Mock<IDownloadManagerSettings>()
-            .Setup(x => x.KeepCompletedInDownloadFolder)
-            .Returns(false)
-            .Verifiable(Times.AtLeastOnce);
+        Mock.Mock<IDownloadManagerSettings>().Setup(x => x.KeepCompletedInDownloadFolder).Returns(false);
 
         Mock.Mock<IEventPublisher>()
             .Setup(m => m.PublishAsync(It.IsAny<SendNotificationResult>(), It.IsAny<CancellationToken>()))
@@ -529,7 +1146,8 @@ public class MoveDownloadFileFromFileTaskCommandUnitTests : BaseUnitTest<MoveDow
                     It.IsAny<CancellationToken>()
                 )
             )
-            .ReturnsAsync(Result.Ok());
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.AtLeastOnce());
         Mock.Mock<IDownloadTaskUpdateDispatcher>()
             .Setup(x =>
                 x.OnStatusChangedAsync(
@@ -539,7 +1157,8 @@ public class MoveDownloadFileFromFileTaskCommandUnitTests : BaseUnitTest<MoveDow
                     It.IsAny<CancellationToken>()
                 )
             )
-            .ReturnsAsync(Result.Ok());
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.AtLeastOnce());
 
         // Act
         var result = await Sut.ExecuteAsync(
@@ -598,10 +1217,7 @@ public class MoveDownloadFileFromFileTaskCommandUnitTests : BaseUnitTest<MoveDow
         downloadFileTask.DataTotal = content.LongLength;
         await IDbContext.SaveChangesAsync(CancellationToken);
 
-        Mock.Mock<IDownloadManagerSettings>()
-            .Setup(x => x.KeepCompletedInDownloadFolder)
-            .Returns(true)
-            .Verifiable(Times.AtLeastOnce);
+        Mock.Mock<IDownloadManagerSettings>().Setup(x => x.KeepCompletedInDownloadFolder).Returns(true);
 
         Mock.Mock<IEventPublisher>()
             .Setup(m => m.PublishAsync(It.IsAny<SendNotificationResult>(), It.IsAny<CancellationToken>()))
@@ -620,7 +1236,8 @@ public class MoveDownloadFileFromFileTaskCommandUnitTests : BaseUnitTest<MoveDow
                     It.IsAny<CancellationToken>()
                 )
             )
-            .ReturnsAsync(Result.Ok());
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.AtLeastOnce());
         Mock.Mock<IDownloadTaskUpdateDispatcher>()
             .Setup(x =>
                 x.OnStatusChangedAsync(
@@ -630,7 +1247,8 @@ public class MoveDownloadFileFromFileTaskCommandUnitTests : BaseUnitTest<MoveDow
                     It.IsAny<CancellationToken>()
                 )
             )
-            .ReturnsAsync(Result.Ok());
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.AtLeastOnce());
 
         // Act
         var result = await Sut.ExecuteAsync(
@@ -645,6 +1263,95 @@ public class MoveDownloadFileFromFileTaskCommandUnitTests : BaseUnitTest<MoveDow
         after.ShouldNotBeNull();
         after.FileDataTransferred.ShouldBe(after.DataTotal);
         after.CurrentFileTransferBytesOffset.ShouldBe(after.DataTotal);
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Verify(
+                x =>
+                    x.OnStatusChangedAsync(
+                        It.IsAny<DownloadTaskKey>(),
+                        It.Is<DownloadStatus>(s => s == DownloadStatus.MoveFinished),
+                        It.IsAny<CancellationToken>()
+                    ),
+                Times.AtLeastOnce()
+            );
+    }
+
+    [Test]
+    public async Task ShouldTreatMoveAsFinished_WhenSourceIsMissingDestinationExistsAndCancellationIsRequested()
+    {
+        // Arrange
+        await SetupDatabase(
+            889900,
+            config =>
+            {
+                config.TvShowDownloadTasksCount = 1;
+                config.TvShowSeasonDownloadTasksCount = 1;
+                config.TvShowEpisodeDownloadTasksCount = 1;
+            }
+        );
+
+        var dbContext = IDbContext;
+        var downloadFileTask = await dbContext.DownloadTaskTvShowEpisodeFile.FirstOrDefaultAsync(CancellationToken);
+        downloadFileTask.ShouldNotBeNull();
+
+        var content = new byte[1024 * 1024];
+        new Random(61).NextBytes(content);
+
+        SetupFileSystem(fs =>
+        {
+            // Source .reaptemp is missing, destination already exists.
+            fs.AddFile(downloadFileTask.DestinationFilePath, new MockFileData(content));
+        });
+
+        downloadFileTask.DataTotal = content.LongLength;
+        await dbContext.SaveChangesAsync(CancellationToken);
+
+        Mock.Mock<IDownloadManagerSettings>().Setup(x => x.KeepCompletedInDownloadFolder).Returns(false);
+
+        Mock.Mock<IEventPublisher>()
+            .Setup(m => m.PublishAsync(It.IsAny<SendNotificationResult>(), It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.Never);
+
+        Mock.SetupCommand(It.IsAny<MoveFileWithResumeCommand>).ReturnsAsync(Result.Ok()).Verifiable(Times.Never);
+
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Setup(x =>
+                x.OnStatusChangedAsync(
+                    It.IsAny<DownloadTaskKey>(),
+                    It.IsAny<DownloadStatus>(),
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.AtLeastOnce());
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Setup(x =>
+                x.OnStatusChangedAsync(
+                    It.IsAny<DownloadTaskKey>(),
+                    It.IsAny<DownloadStatus>(),
+                    It.IsAny<Result?>(),
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.AtLeastOnce());
+
+        var cancellationTokenSource = new CancellationTokenSource();
+        await cancellationTokenSource.CancelAsync();
+
+        // Act
+        var result = await Sut.ExecuteAsync(
+            new MoveDownloadFileFromFileTaskCommand(downloadFileTask.ToKey()),
+            cancellationTokenSource.Token
+        );
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+
+        var after = await dbContext.DownloadTaskTvShowEpisodeFile.AsNoTracking().FirstAsync(CancellationToken);
+        after.FileDataTransferred.ShouldBe(after.DataTotal);
+        after.CurrentFileTransferBytesOffset.ShouldBe(after.DataTotal);
+
         Mock.Mock<IDownloadTaskUpdateDispatcher>()
             .Verify(
                 x =>
@@ -693,17 +1400,30 @@ public class MoveDownloadFileFromFileTaskCommandUnitTests : BaseUnitTest<MoveDow
 
         var progress = new Subject<IDownloadFileTransferProgress>();
 
-        Mock.Mock<IDownloadManagerSettings>()
-            .Setup(x => x.KeepCompletedInDownloadFolder)
-            .Returns(false)
-            .Verifiable(Times.Once);
+        Mock.Mock<IDownloadManagerSettings>().Setup(x => x.KeepCompletedInDownloadFolder).Returns(false);
 
         Mock.Mock<IEventPublisher>()
             .Setup(m => m.PublishAsync(It.IsAny<SendNotificationResult>(), It.IsAny<CancellationToken>()))
             .Returns(Task.CompletedTask)
             .Verifiable(Times.Never);
 
-        Mock.SetupCommand(It.IsAny<MoveFileWithResumeCommand>).ReturnsAsync(Result.Ok()).Verifiable(Times.Once);
+        Mock.SetupCommand(It.IsAny<MoveFileWithResumeCommand>)
+            .Returns<MoveFileWithResumeCommand, CancellationToken>(
+                (moveCommand, _) =>
+                {
+                    moveCommand.Progress(
+                        new MoveFileTransferProgressDTO
+                        {
+                            Transferred = moveCommand.DataTotal,
+                            DataTotal = moveCommand.DataTotal,
+                            FileTransferSpeed = moveCommand.DataTotal,
+                        }
+                    );
+
+                    return Task.FromResult(Result.Ok());
+                }
+            )
+            .Verifiable(Times.Once);
 
         Mock.Mock<IDownloadTaskUpdateDispatcher>()
             .Setup(x =>
@@ -713,7 +1433,8 @@ public class MoveDownloadFileFromFileTaskCommandUnitTests : BaseUnitTest<MoveDow
                     It.IsAny<CancellationToken>()
                 )
             )
-            .ReturnsAsync(Result.Ok());
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.Exactly(2));
         Mock.Mock<IDownloadTaskUpdateDispatcher>()
             .Setup(x =>
                 x.OnStatusChangedAsync(
@@ -723,7 +1444,8 @@ public class MoveDownloadFileFromFileTaskCommandUnitTests : BaseUnitTest<MoveDow
                     It.IsAny<CancellationToken>()
                 )
             )
-            .ReturnsAsync(Result.Ok());
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.Never());
 
         // Act
         var result = await Sut.ExecuteAsync(
@@ -736,6 +1458,96 @@ public class MoveDownloadFileFromFileTaskCommandUnitTests : BaseUnitTest<MoveDow
 
         var after = await dbContext.DownloadTaskTvShowEpisodeFile.AsNoTracking().FirstAsync(CancellationToken);
         after.Percentage.ShouldBe(100m);
+    }
+
+    [Test]
+    public async Task ShouldHaveFailedResult_WhenSettingMovingStatusFails()
+    {
+        // Arrange
+        await SetupDatabase(
+            445566,
+            config =>
+            {
+                config.TvShowDownloadTasksCount = 1;
+                config.TvShowSeasonDownloadTasksCount = 1;
+                config.TvShowEpisodeDownloadTasksCount = 1;
+            }
+        );
+
+        var downloadFileTask = await IDbContext.DownloadTaskTvShowEpisodeFile.FirstOrDefaultAsync(CancellationToken);
+        downloadFileTask.ShouldNotBeNull();
+
+        var progress = new Subject<IDownloadFileTransferProgress>();
+
+        var content = new byte[2 * 1024 * 1024];
+        new Random(77).NextBytes(content);
+
+        SetupFileSystem(fs =>
+        {
+            fs.AddFile(downloadFileTask.DownloadFilePath, new MockFileData(content));
+        });
+
+        downloadFileTask.DataTotal = content.LongLength;
+        await IDbContext.SaveChangesAsync(CancellationToken);
+
+        Mock.Mock<IDownloadManagerSettings>()
+            .Setup(x => x.KeepCompletedInDownloadFolder)
+            .Returns(false)
+            .Verifiable(Times.Once);
+
+        Mock.Mock<IEventPublisher>()
+            .Setup(m => m.PublishAsync(It.IsAny<SendNotificationResult>(), It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask);
+
+        Mock.Mock<ICommandExecutor>()
+            .Setup(x => x.Send(It.IsAny<MoveFileWithResumeCommand>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result.Ok());
+
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Setup(x =>
+                x.OnStatusChangedAsync(
+                    It.IsAny<DownloadTaskKey>(),
+                    It.Is<DownloadStatus>(s => s == DownloadStatus.Moving),
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .ThrowsAsync(new Exception("moving status update boom"))
+            .Verifiable(Times.Once());
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Setup(x =>
+                x.OnStatusChangedAsync(
+                    It.IsAny<DownloadTaskKey>(),
+                    It.Is<DownloadStatus>(s => s != DownloadStatus.Moving),
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.Never());
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Setup(x =>
+                x.OnStatusChangedAsync(
+                    It.IsAny<DownloadTaskKey>(),
+                    It.IsAny<DownloadStatus>(),
+                    It.IsAny<Result>(),
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.Once());
+
+        // Act
+        var result = await Sut.ExecuteAsync(
+            new MoveDownloadFileFromFileTaskCommand(downloadFileTask.ToKey(), progress),
+            CancellationToken
+        );
+
+        // Assert
+        result.IsFailed.ShouldBeTrue();
+        result.Errors.ShouldContain(x => x.Message.Contains("moving status update boom"));
+
+        Mock.Mock<ICommandExecutor>()
+            .Verify(x => x.Send(It.IsAny<MoveFileWithResumeCommand>(), It.IsAny<CancellationToken>()), Times.Never());
+        Mock.Mock<IDownloadTaskUpdateDispatcher>().Verify();
     }
 
     [Test]
@@ -768,10 +1580,7 @@ public class MoveDownloadFileFromFileTaskCommandUnitTests : BaseUnitTest<MoveDow
         downloadFileTask.DataTotal = content.LongLength;
         await IDbContext.SaveChangesAsync(CancellationToken);
 
-        Mock.Mock<IDownloadManagerSettings>()
-            .Setup(x => x.KeepCompletedInDownloadFolder)
-            .Returns(false)
-            .Verifiable(Times.Once);
+        Mock.Mock<IDownloadManagerSettings>().Setup(x => x.KeepCompletedInDownloadFolder).Returns(false);
 
         Mock.Mock<IEventPublisher>()
             .Setup(m => m.PublishAsync(It.IsAny<SendNotificationResult>(), It.IsAny<CancellationToken>()))
@@ -788,7 +1597,8 @@ public class MoveDownloadFileFromFileTaskCommandUnitTests : BaseUnitTest<MoveDow
                     It.IsAny<CancellationToken>()
                 )
             )
-            .ReturnsAsync(Result.Ok());
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.AtLeastOnce());
         Mock.Mock<IDownloadTaskUpdateDispatcher>()
             .Setup(x =>
                 x.OnStatusChangedAsync(
@@ -798,7 +1608,8 @@ public class MoveDownloadFileFromFileTaskCommandUnitTests : BaseUnitTest<MoveDow
                     It.IsAny<CancellationToken>()
                 )
             )
-            .ReturnsAsync(Result.Ok());
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.AtLeastOnce());
 
         // Act
         var result = await Sut.ExecuteAsync(
@@ -822,6 +1633,102 @@ public class MoveDownloadFileFromFileTaskCommandUnitTests : BaseUnitTest<MoveDow
                         It.IsAny<CancellationToken>()
                     ),
                 Times.AtLeastOnce()
+            );
+    }
+
+    [Test]
+    public async Task ShouldSetMovePaused_WhenMoveWithResumeIsCancelled()
+    {
+        // Arrange
+        await SetupDatabase(
+            112235,
+            config =>
+            {
+                config.TvShowDownloadTasksCount = 1;
+                config.TvShowSeasonDownloadTasksCount = 1;
+                config.TvShowEpisodeDownloadTasksCount = 1;
+            }
+        );
+
+        var downloadFileTask = await IDbContext.DownloadTaskTvShowEpisodeFile.FirstOrDefaultAsync(CancellationToken);
+        downloadFileTask.ShouldNotBeNull();
+
+        var progress = new Subject<IDownloadFileTransferProgress>();
+
+        var content = new byte[3 * 1024 * 1024];
+        new Random(9).NextBytes(content);
+
+        SetupFileSystem(fs =>
+        {
+            fs.AddFile(downloadFileTask.DownloadFilePath, new MockFileData(content));
+        });
+
+        downloadFileTask.DataTotal = content.LongLength;
+        await IDbContext.SaveChangesAsync(CancellationToken);
+
+        Mock.Mock<IDownloadManagerSettings>().Setup(x => x.KeepCompletedInDownloadFolder).Returns(false);
+
+        Mock.Mock<IEventPublisher>()
+            .Setup(m => m.PublishAsync(It.IsAny<SendNotificationResult>(), It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.Never);
+
+        Mock.SetupCommand(It.IsAny<MoveFileWithResumeCommand>)
+            .ReturnsAsync(ResultExtensions.TaskIsCancelled(nameof(MoveFileWithResumeCommandHandler)))
+            .Verifiable(Times.Once);
+
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Setup(x =>
+                x.OnStatusChangedAsync(
+                    It.IsAny<DownloadTaskKey>(),
+                    It.IsAny<DownloadStatus>(),
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.AtLeastOnce());
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Setup(x =>
+                x.OnStatusChangedAsync(
+                    It.IsAny<DownloadTaskKey>(),
+                    It.IsAny<DownloadStatus>(),
+                    It.IsAny<Result?>(),
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.Never());
+
+        // Act
+        var result = await Sut.ExecuteAsync(
+            new MoveDownloadFileFromFileTaskCommand(downloadFileTask.ToKey(), progress),
+            CancellationToken
+        );
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Verify(
+                x =>
+                    x.OnStatusChangedAsync(
+                        It.IsAny<DownloadTaskKey>(),
+                        It.Is<DownloadStatus>(s => s == DownloadStatus.MovePaused),
+                        It.IsAny<CancellationToken>()
+                    ),
+                Times.AtLeastOnce()
+            );
+
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Verify(
+                x =>
+                    x.OnStatusChangedAsync(
+                        It.IsAny<DownloadTaskKey>(),
+                        It.Is<DownloadStatus>(s => s == DownloadStatus.MoveError),
+                        It.IsAny<Result>(),
+                        It.IsAny<CancellationToken>()
+                    ),
+                Times.Never()
             );
     }
 }

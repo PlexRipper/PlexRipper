@@ -2,7 +2,7 @@ import Log from 'consola';
 import { acceptHMRUpdate, defineStore } from 'pinia';
 import { reactive, computed, toRefs } from 'vue';
 import { get } from '@vueuse/core';
-import { tap, catchError, switchMap } from 'rxjs/operators';
+import { tap, catchError, switchMap, finalize } from 'rxjs/operators';
 import { type Observable, of } from 'rxjs';
 import { DialogType } from '@enums';
 import { plexAccountApi } from '@api';
@@ -94,6 +94,7 @@ export const useAccountDialogStore = defineStore(StoreNames.AccountDialogStore, 
 
 	const actions = {
 		openDialog({ accountId }: IAccountDialog): void {
+			actions.$reset();
 			state.isNewAccount = accountId === 0;
 			if (!state.isNewAccount) {
 				const account = accountStore.getAccount(accountId);
@@ -163,7 +164,7 @@ export const useAccountDialogStore = defineStore(StoreNames.AccountDialogStore, 
 					// Always reset loading state
 					state.validateLoading = false;
 
-					if (!isSuccess || !value) {
+					if (!isSuccess || !value || value.isUnAuthorized) {
 						state.isValidated = false;
 						state.hasValidationErrors = true;
 						dialogStore.openDialog(DialogType.AccountTokenValidateDialog);
@@ -172,6 +173,7 @@ export const useAccountDialogStore = defineStore(StoreNames.AccountDialogStore, 
 
 					// Update state with validated credentials data
 					updateStateWithAccountData(value);
+					state.hasValidationErrors = false;
 
 					// Account has no 2FA and was valid
 					if (value.isValidated && !value.is2Fa) {
@@ -182,6 +184,8 @@ export const useAccountDialogStore = defineStore(StoreNames.AccountDialogStore, 
 					// Account has no 2FA and was invalid
 					if (!value.isValidated && !value.is2Fa) {
 						Log.info('Account has no 2FA and was invalid');
+						state.hasValidationErrors = true;
+						dialogStore.openDialog(DialogType.AccountTokenValidateDialog);
 						return;
 					}
 
@@ -192,7 +196,7 @@ export const useAccountDialogStore = defineStore(StoreNames.AccountDialogStore, 
 						return;
 					}
 
-					if (!value.isValidated && value.is2Fa) {
+					if (value.isValidated && value.is2Fa) {
 						Log.info('Account was valid and has 2FA enabled, this makes no sense and sounds like a bug');
 					}
 				}),
@@ -243,18 +247,14 @@ export const useAccountDialogStore = defineStore(StoreNames.AccountDialogStore, 
 					uuid: accountData.uuid,
 					validatedAt: accountData.validatedAt!,
 				}).pipe(
-					tap(() => {
-						state.savingLoading = false;
-						dialogStore.closeDialog(DialogType.AccountDialog);
-					}),
+					tap(() => dialogStore.closeDialog(DialogType.AccountDialog)),
+					finalize(() => state.savingLoading = false),
 					switchMap(() => of(void 0)),
 				);
 			}
 			return accountStore.updatePlexAccount(get(getters.getAccountData)).pipe(
-				tap(() => {
-					state.savingLoading = false;
-					dialogStore.closeDialog(DialogType.AccountDialog);
-				}),
+				tap(() => dialogStore.closeDialog(DialogType.AccountDialog)),
+				finalize(() => state.savingLoading = false),
 				switchMap(() => of(void 0)),
 			);
 		},
@@ -268,7 +268,16 @@ export const useAccountDialogStore = defineStore(StoreNames.AccountDialogStore, 
 		},
 		deleteAccount() {
 			state.deleteLoading = true;
-			return accountStore.deleteAccount(state.id).pipe(tap(() => dialogStore.closeDialog(DialogType.AccountDialog)));
+			return accountStore
+				.deleteAccount(state.id)
+				.pipe(
+					tap((res) => {
+						if (res.isSuccess) {
+							dialogStore.closeDialog(DialogType.AccountDialog);
+						}
+					}),
+					finalize(() => state.deleteLoading = false),
+				);
 		},
 		$reset() {
 			Object.assign(state, cloneDeep(defaultState));

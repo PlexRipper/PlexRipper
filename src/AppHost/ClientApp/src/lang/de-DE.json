@@ -225,7 +225,7 @@
                 "title": "Titel",
                 "username": "Nutzername"
             },
-            "invalid-token": "Das Token war ungültig und/oder ist abgelaufen.",
+            "invalid-token": "Die Zugangsdaten oder das Token waren ungültig und/oder sind abgelaufen.",
             "sub-header": "Das Token: {authToken} gehört zum Plex-Konto:",
             "title": "Validierung des Plex.tv-Authentifizierungstokens"
         },

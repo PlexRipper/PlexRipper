@@ -3,19 +3,6 @@ namespace Reaparr.Application.UnitTests;
 public class ClearCompletedDownloadTasksByDownloadTaskIdEndpointUnitTests
     : BaseUnitTest<ClearCompletedDownloadTasksByDownloadTaskIdEndpoint>
 {
-    public ClearCompletedDownloadTasksByDownloadTaskIdEndpointUnitTests()
-    {
-        Mock.Mock<IDownloadTaskUpdateDispatcher>()
-            .Setup(x =>
-                x.OnStatusChangedAsync(
-                    It.IsAny<DownloadTaskKey>(),
-                    DownloadStatus.Deleted,
-                    It.IsAny<CancellationToken>()
-                )
-            )
-            .ReturnsAsync(Result.Ok());
-    }
-
     [Test]
     public async Task ShouldRemoveOnlySpecifiedCompletedDownloadTasks_WhenCalledWithGuidList()
     {
@@ -47,7 +34,7 @@ public class ClearCompletedDownloadTasksByDownloadTaskIdEndpointUnitTests
                     It.IsAny<CancellationToken>()
                 )
             )
-            .ReturnsAsync(Result.Ok())
+            .Returns(Task.CompletedTask)
             .Verifiable(Times.Exactly(5));
 
         Mock.Mock<ICommandExecutor>()
@@ -200,13 +187,13 @@ public class ClearCompletedDownloadTasksByDownloadTaskIdEndpointUnitTests
         Mock.Mock<IDownloadTaskUpdateDispatcher>()
             .Setup(x =>
                 x.OnStatusChangedAsync(
-                    It.Is<DownloadTaskKey>(k => k.Id == episodeFileId),
+                    It.IsAny<DownloadTaskKey>(),
                     DownloadStatus.Deleted,
                     It.IsAny<CancellationToken>()
                 )
             )
-            .ReturnsAsync(Result.Ok())
-            .Verifiable(Times.Once());
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.Exactly(4));
 
         Mock.Mock<ICommandExecutor>()
             .Setup(x => x.Send(It.IsAny<DeleteDownloadTasksByKeyCommand>(), It.IsAny<CancellationToken>()))

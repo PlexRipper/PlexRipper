@@ -98,7 +98,8 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
                     It.IsAny<CancellationToken>()
                 )
             )
-            .ReturnsAsync(Result.Ok());
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.Exactly(2));
         Mock.Mock<IDownloadTaskUpdateDispatcher>()
             .Setup(x =>
                 x.OnStatusChangedAsync(
@@ -108,7 +109,8 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
                     It.IsAny<CancellationToken>()
                 )
             )
-            .ReturnsAsync(Result.Ok());
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.Never());
         Mock.Mock<IDownloadTaskUpdateDispatcher>()
             .Setup(x =>
                 x.OnProgressUpdated(
@@ -116,8 +118,8 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
                     It.IsAny<DownloadTaskProgress>(),
                     It.IsAny<DirectDownloadSnapshot?>()
                 )
-            )
-            .Returns(Result.Ok());
+            );
+
         Mock.Mock<INotificationHubService>()
             .Setup(x => x.SendRefreshNotificationAsync(It.IsAny<RefreshDataType>(), It.IsAny<CancellationToken>()))
             .Returns(Task.CompletedTask);
@@ -178,7 +180,8 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
                     It.IsAny<CancellationToken>()
                 )
             )
-            .ReturnsAsync(Result.Ok());
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.Once());
         Mock.Mock<IDownloadTaskUpdateDispatcher>()
             .Setup(x =>
                 x.OnStatusChangedAsync(
@@ -188,7 +191,8 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
                     It.IsAny<CancellationToken>()
                 )
             )
-            .ReturnsAsync(Result.Ok());
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.Once());
         Mock.Mock<IDownloadTaskUpdateDispatcher>()
             .Setup(x =>
                 x.OnProgressUpdated(
@@ -196,8 +200,7 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
                     It.IsAny<DownloadTaskProgress>(),
                     It.IsAny<DirectDownloadSnapshot?>()
                 )
-            )
-            .Returns(Result.Ok());
+            );
 
         var key = new DownloadTaskKey
         {
@@ -254,7 +257,8 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
                     It.IsAny<CancellationToken>()
                 )
             )
-            .ReturnsAsync(Result.Ok());
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.Once());
         Mock.Mock<IDownloadTaskUpdateDispatcher>()
             .Setup(x =>
                 x.OnStatusChangedAsync(
@@ -264,7 +268,8 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
                     It.IsAny<CancellationToken>()
                 )
             )
-            .ReturnsAsync(Result.Ok());
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.Once());
         Mock.Mock<IDownloadTaskUpdateDispatcher>()
             .Setup(x =>
                 x.OnProgressUpdated(
@@ -272,8 +277,7 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
                     It.IsAny<DownloadTaskProgress>(),
                     It.IsAny<DirectDownloadSnapshot?>()
                 )
-            )
-            .Returns(Result.Ok());
+            );
 
         var dashWrapperMock = new Mock<IDashMpdCliWrapper>();
         dashWrapperMock.Setup(x => x.Progress).Returns(Observable.Empty<DashDownloadProgress>());
@@ -328,7 +332,8 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
                     It.IsAny<CancellationToken>()
                 )
             )
-            .ReturnsAsync(Result.Ok());
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.Once());
         Mock.Mock<IDownloadTaskUpdateDispatcher>()
             .Setup(x =>
                 x.OnStatusChangedAsync(
@@ -338,7 +343,8 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
                     It.IsAny<CancellationToken>()
                 )
             )
-            .ReturnsAsync(Result.Ok());
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.Once());
         Mock.Mock<IDownloadTaskUpdateDispatcher>()
             .Setup(x =>
                 x.OnProgressUpdated(
@@ -346,8 +352,8 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
                     It.IsAny<DownloadTaskProgress>(),
                     It.IsAny<DirectDownloadSnapshot?>()
                 )
-            )
-            .Returns(Result.Ok());
+            );
+
         Mock.Mock<INotificationHubService>()
             .Setup(x => x.SendRefreshNotificationAsync(It.IsAny<RefreshDataType>(), It.IsAny<CancellationToken>()))
             .Returns(Task.CompletedTask);
@@ -432,7 +438,8 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
                     It.IsAny<CancellationToken>()
                 )
             )
-            .ReturnsAsync(Result.Ok());
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.Once());
         Mock.Mock<IDownloadTaskUpdateDispatcher>()
             .Setup(x =>
                 x.OnStatusChangedAsync(
@@ -442,7 +449,8 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
                     It.IsAny<CancellationToken>()
                 )
             )
-            .ReturnsAsync(Result.Ok());
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.Once());
         Mock.Mock<IDownloadTaskUpdateDispatcher>()
             .Setup(x =>
                 x.OnProgressUpdated(
@@ -450,8 +458,8 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
                     It.IsAny<DownloadTaskProgress>(),
                     It.IsAny<DirectDownloadSnapshot?>()
                 )
-            )
-            .Returns(Result.Ok());
+            );
+
         Mock.Mock<INotificationHubService>()
             .Setup(x => x.SendRefreshNotificationAsync(It.IsAny<RefreshDataType>(), It.IsAny<CancellationToken>()))
             .Returns(Task.CompletedTask);
@@ -535,7 +543,8 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
                     It.IsAny<CancellationToken>()
                 )
             )
-            .ReturnsAsync(Result.Ok());
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.Once());
         Mock.Mock<IDownloadTaskUpdateDispatcher>()
             .Setup(x =>
                 x.OnStatusChangedAsync(
@@ -545,7 +554,8 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
                     It.IsAny<CancellationToken>()
                 )
             )
-            .ReturnsAsync(Result.Ok());
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.Once());
         Mock.Mock<IDownloadTaskUpdateDispatcher>()
             .Setup(x =>
                 x.OnProgressUpdated(
@@ -553,8 +563,7 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
                     It.IsAny<DownloadTaskProgress>(),
                     It.IsAny<DirectDownloadSnapshot?>()
                 )
-            )
-            .Returns(Result.Ok());
+            );
 
         var progressSubject = new Subject<DashDownloadProgress>();
         var outputSubject = new Subject<string>();
@@ -638,7 +647,8 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
                     It.IsAny<CancellationToken>()
                 )
             )
-            .ReturnsAsync(Result.Ok());
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.Once());
         Mock.Mock<IDownloadTaskUpdateDispatcher>()
             .Setup(x =>
                 x.OnProgressUpdated(
@@ -646,8 +656,7 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
                     It.IsAny<DownloadTaskProgress>(),
                     It.IsAny<DirectDownloadSnapshot?>()
                 )
-            )
-            .Returns(Result.Ok());
+            );
 
         var progressSubject = new Subject<DashDownloadProgress>();
         var outputSubject = new Subject<string>();
@@ -738,7 +747,8 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
                     It.IsAny<CancellationToken>()
                 )
             )
-            .ReturnsAsync(Result.Ok());
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.Once());
         Mock.Mock<IDownloadTaskUpdateDispatcher>()
             .Setup(x =>
                 x.OnProgressUpdated(
@@ -746,8 +756,7 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
                     It.IsAny<DownloadTaskProgress>(),
                     It.IsAny<DirectDownloadSnapshot?>()
                 )
-            )
-            .Returns(Result.Ok());
+            );
 
         var progressSubject = new Subject<DashDownloadProgress>();
         var outputSubject = new Subject<string>();
@@ -837,7 +846,8 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
                     It.IsAny<CancellationToken>()
                 )
             )
-            .ReturnsAsync(Result.Ok());
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.Once());
         Mock.Mock<IDownloadTaskUpdateDispatcher>()
             .Setup(x =>
                 x.OnProgressUpdated(
@@ -845,8 +855,7 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
                     It.IsAny<DownloadTaskProgress>(),
                     It.IsAny<DirectDownloadSnapshot?>()
                 )
-            )
-            .Returns(Result.Ok());
+            );
 
         var progressSubject = new Subject<DashDownloadProgress>();
         var outputSubject = new Subject<string>();
@@ -934,7 +943,8 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
                     It.IsAny<CancellationToken>()
                 )
             )
-            .ReturnsAsync(Result.Ok());
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.Once());
         Mock.Mock<IDownloadTaskUpdateDispatcher>()
             .Setup(x =>
                 x.OnProgressUpdated(
@@ -942,8 +952,7 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
                     It.IsAny<DownloadTaskProgress>(),
                     It.IsAny<DirectDownloadSnapshot?>()
                 )
-            )
-            .Returns(Result.Ok());
+            );
 
         var progressSubject = new Subject<DashDownloadProgress>();
         var outputSubject = new Subject<string>();

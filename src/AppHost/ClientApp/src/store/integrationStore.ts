@@ -1,6 +1,6 @@
 import { acceptHMRUpdate, defineStore } from 'pinia';
 import { reactive, toRefs, computed } from 'vue';
-import { switchMap, tap, catchError } from 'rxjs/operators';
+import { switchMap, tap, catchError, finalize } from 'rxjs/operators';
 import { type Observable, of, forkJoin } from 'rxjs';
 import { cloneDeep } from 'lodash-es';
 import { type BaseResultDTO, TestConnectionStatus } from '@dto';
@@ -171,6 +171,7 @@ export const useIntegrationStore = defineStore(StoreNames.IntegrationStore, () =
 					state.sonarr.testStatus = null;
 					state.sonarr.error = response;
 				}
+			}), finalize(() => {
 				state.sonarr.isTesting = false;
 			}));
 		},
@@ -200,6 +201,7 @@ export const useIntegrationStore = defineStore(StoreNames.IntegrationStore, () =
 					state.radarr.testStatus = null;
 					state.radarr.error = response;
 				}
+			}), finalize(() => {
 				state.radarr.isTesting = false;
 			}));
 		},
@@ -215,7 +217,6 @@ export const useIntegrationStore = defineStore(StoreNames.IntegrationStore, () =
 			}).pipe(
 				tap((response) => {
 					state.sonarr.configuringSuccess = response.isSuccess;
-					state.sonarr.isConfiguring = false;
 					if (response.isSuccess) {
 						// This should overshoot to step 3 to show step 2 as done
 						state.sonarr.step = 3;
@@ -224,6 +225,9 @@ export const useIntegrationStore = defineStore(StoreNames.IntegrationStore, () =
 					}
 				}),
 				switchMap((response) => response.isSuccess ? settingsStore.refreshSettings() : of(response)),
+				finalize(() => {
+					state.sonarr.isConfiguring = false;
+				}),
 			);
 		},
 
@@ -238,7 +242,6 @@ export const useIntegrationStore = defineStore(StoreNames.IntegrationStore, () =
 			}).pipe(
 				tap((response) => {
 					state.radarr.configuringSuccess = response.isSuccess;
-					state.radarr.isConfiguring = false;
 					if (response.isSuccess) {
 						// This should overshoot to step 3 to show step 2 as done
 						state.radarr.step = 3;
@@ -247,15 +250,22 @@ export const useIntegrationStore = defineStore(StoreNames.IntegrationStore, () =
 					}
 				}),
 				switchMap((response) => response.isSuccess ? settingsStore.refreshSettings() : of(response)),
+				finalize(() => {
+					state.radarr.isConfiguring = false;
+				}),
 			);
 		},
 
 		clearRadarrConfiguration() {
-			return integrationApi.clearRadarrConfigurationEndpoint().pipe(switchMap(() => settingsStore.refreshSettings()));
+			return integrationApi.clearRadarrConfigurationEndpoint().pipe(
+				switchMap((response) => response.isSuccess ? settingsStore.refreshSettings() : of(response)),
+			);
 		},
 
 		clearSonarrConfiguration() {
-			return integrationApi.clearSonarrConfigurationEndpoint().pipe(switchMap(() => settingsStore.refreshSettings()));
+			return integrationApi.clearSonarrConfigurationEndpoint().pipe(
+				switchMap((response) => response.isSuccess ? settingsStore.refreshSettings() : of(response)),
+			);
 		},
 
 		$reset() {

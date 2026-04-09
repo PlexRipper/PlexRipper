@@ -69,13 +69,16 @@ public class DeleteDownloadTasksByKeyCommandHandler : ICommandHandler<DeleteDown
         foreach (var key in command.Keys)
         {
             await _downloadTaskUpdateDispatcher.OnStatusChangedAsync(key, DownloadStatus.Deleted, ct);
+
             notified.Add((key.Id, key.Type));
         }
 
         foreach (var parentKey in orphanDeletedParentKeys)
         {
             if (!notified.Contains((parentKey.Id, parentKey.Type)))
+            {
                 await _downloadTaskUpdateDispatcher.OnStatusChangedAsync(parentKey, DownloadStatus.Deleted, ct);
+            }
         }
 
         return Result.Ok();

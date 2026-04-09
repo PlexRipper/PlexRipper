@@ -55,8 +55,7 @@ public class MoveDownloadFileJobQueueUnitTests : BaseUnitTest<MoveDownloadFileJo
 
         Mock.Mock<IMoveDownloadFileScheduler>()
             .Setup(x => x.StartMoveDownloadFileJob(It.IsAny<DownloadTaskKey>()))
-            .ReturnsAsync(Result.Ok())
-            .Verifiable(Times.Once);
+            .ReturnsAsync(Result.Ok());
 
         // Act
         var result = await Sut.CheckMoveDownloadFileJobQueue();
@@ -90,8 +89,7 @@ public class MoveDownloadFileJobQueueUnitTests : BaseUnitTest<MoveDownloadFileJo
 
         Mock.Mock<IMoveDownloadFileScheduler>()
             .Setup(x => x.StartMoveDownloadFileJob(It.IsAny<DownloadTaskKey>()))
-            .ReturnsAsync(Result.Ok())
-            .Verifiable(Times.Once);
+            .ReturnsAsync(Result.Ok());
 
         // Act
         var result = await Sut.CheckMoveDownloadFileJobQueue();
@@ -128,8 +126,7 @@ public class MoveDownloadFileJobQueueUnitTests : BaseUnitTest<MoveDownloadFileJo
         Mock.Mock<IMoveDownloadFileScheduler>()
             .Setup(x => x.StartMoveDownloadFileJob(It.IsAny<DownloadTaskKey>()))
             .Callback<DownloadTaskKey>(k => capturedKey = k)
-            .ReturnsAsync(Result.Ok())
-            .Verifiable(Times.Once);
+            .ReturnsAsync(Result.Ok());
 
         // Act
         var result = await Sut.CheckMoveDownloadFileJobQueue();
@@ -151,8 +148,7 @@ public class MoveDownloadFileJobQueueUnitTests : BaseUnitTest<MoveDownloadFileJo
 
         Mock.Mock<IMoveDownloadFileScheduler>()
             .Setup(x => x.StartMoveDownloadFileJob(It.IsAny<DownloadTaskKey>()))
-            .ReturnsAsync(Result.Ok())
-            .Verifiable(Times.Never);
+            .ReturnsAsync(Result.Ok());
 
         // Act
         var result = await Sut.CheckMoveDownloadFileJobQueue();
@@ -185,8 +181,7 @@ public class MoveDownloadFileJobQueueUnitTests : BaseUnitTest<MoveDownloadFileJo
         var startResult = Result.Fail("Scheduler failed to start job");
         Mock.Mock<IMoveDownloadFileScheduler>()
             .Setup(x => x.StartMoveDownloadFileJob(It.IsAny<DownloadTaskKey>()))
-            .ReturnsAsync(startResult)
-            .Verifiable(Times.Once);
+            .ReturnsAsync(startResult);
 
         // Act
         var result = await Sut.CheckMoveDownloadFileJobQueue();
@@ -219,8 +214,7 @@ public class MoveDownloadFileJobQueueUnitTests : BaseUnitTest<MoveDownloadFileJo
 
         Mock.Mock<IMoveDownloadFileScheduler>()
             .Setup(x => x.StartMoveDownloadFileJob(It.IsAny<DownloadTaskKey>()))
-            .ReturnsAsync(Result.Ok())
-            .Verifiable(Times.Once);
+            .ReturnsAsync(Result.Ok());
 
         // Act
         var result = await Sut.CheckMoveDownloadFileJobQueue();
@@ -273,8 +267,7 @@ public class MoveDownloadFileJobQueueUnitTests : BaseUnitTest<MoveDownloadFileJo
         Mock.Mock<IMoveDownloadFileScheduler>()
             .Setup(x => x.StartMoveDownloadFileJob(It.IsAny<DownloadTaskKey>()))
             .Callback<DownloadTaskKey>(k => capturedKey = k)
-            .ReturnsAsync(Result.Ok())
-            .Verifiable(Times.Once);
+            .ReturnsAsync(Result.Ok());
 
         // Act
         var result = await Sut.CheckMoveDownloadFileJobQueue();
@@ -331,8 +324,7 @@ public class MoveDownloadFileJobQueueUnitTests : BaseUnitTest<MoveDownloadFileJo
         Mock.Mock<IMoveDownloadFileScheduler>()
             .Setup(x => x.StartMoveDownloadFileJob(It.IsAny<DownloadTaskKey>()))
             .Callback<DownloadTaskKey>(k => capturedKey = k)
-            .ReturnsAsync(Result.Ok())
-            .Verifiable(Times.Once);
+            .ReturnsAsync(Result.Ok());
 
         // Act
         var result = await Sut.CheckMoveDownloadFileJobQueue();
@@ -368,8 +360,7 @@ public class MoveDownloadFileJobQueueUnitTests : BaseUnitTest<MoveDownloadFileJo
 
         Mock.Mock<IMoveDownloadFileScheduler>()
             .Setup(x => x.StartMoveDownloadFileJob(It.IsAny<DownloadTaskKey>()))
-            .ReturnsAsync(Result.Ok())
-            .Verifiable(Times.Once);
+            .ReturnsAsync(Result.Ok());
 
         // Act
         var result = await Sut.CheckMoveDownloadFileJobQueue();

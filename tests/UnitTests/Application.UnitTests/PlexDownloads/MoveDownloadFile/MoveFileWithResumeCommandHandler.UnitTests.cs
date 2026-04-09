@@ -148,7 +148,7 @@ public class MoveFileWithResumeCommandHandlerUnitTests : BaseUnitTest<MoveFileWi
         };
 
         var result = await Sut.ExecuteAsync(command, cts.Token);
-        result.IsSuccess.ShouldBeTrue(); // handler returns Ok even on cancellation
+        result.IsCancelled.ShouldBeTrue();
 
         var file = Mock.Create<IFile>();
         using var targetStream = file.Open(targetPath, FileMode.Open, FileAccess.Read, FileShare.Read);
@@ -187,7 +187,7 @@ public class MoveFileWithResumeCommandHandlerUnitTests : BaseUnitTest<MoveFileWi
         };
 
         var result = await Sut.ExecuteAsync(command, cts.Token);
-        result.IsSuccess.ShouldBeTrue();
+        result.IsCancelled.ShouldBeTrue();
 
         var file = Mock.Create<IFile>();
         using var targetStream = file.Open(targetPath, FileMode.Open, FileAccess.Read, FileShare.Read);
@@ -432,7 +432,7 @@ public class MoveFileWithResumeCommandHandlerUnitTests : BaseUnitTest<MoveFileWi
 
         var result = await Sut.ExecuteAsync(command, cts.Token);
 
-        result.IsSuccess.ShouldBeTrue();
+        result.IsCancelled.ShouldBeTrue();
 
         var file = Mock.Create<IFile>();
         file.Exists(sourcePath).ShouldBeTrue();

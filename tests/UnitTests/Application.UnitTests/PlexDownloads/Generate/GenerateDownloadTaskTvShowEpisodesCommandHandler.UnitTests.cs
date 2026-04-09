@@ -8,6 +8,21 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandlerUnitTests
     private readonly DownloadTaskTvShowValidator _validator = new();
 
     [Test]
+    public void GenerateDownloadTaskTvShowEpisodesCommandValidator_ShouldRejectNullRequest()
+    {
+        // Arrange
+        var command = new GenerateDownloadTaskTvShowEpisodesCommand((CreateDownloadTasksRequest)null!);
+        var validator = new GenerateDownloadTaskTvShowEpisodesCommandValidator();
+
+        // Act
+        var result = validator.Validate(command);
+
+        // Assert
+        result.IsValid.ShouldBeFalse();
+        result.Errors.ShouldContain(x => x.PropertyName == nameof(GenerateDownloadTaskTvShowEpisodesCommand.Request));
+    }
+
+    [Test]
     public async Task ShouldHaveFailedResult_WhenPlexTvShowsAreEmpty()
     {
         // Arrange

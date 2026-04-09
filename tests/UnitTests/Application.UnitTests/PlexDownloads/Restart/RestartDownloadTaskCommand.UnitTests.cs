@@ -14,7 +14,8 @@ public class RestartDownloadTaskCommandUnitTests : BaseUnitTest<RestartDownloadT
                     It.IsAny<CancellationToken>()
                 )
             )
-            .ReturnsAsync(Result.Ok());
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.Exactly(3));
         await SetupDatabase(72153, config => config.MovieDownloadTasksCount = 1);
 
         var downloadTasks = await IDbContext.GetAllDownloadTasksByServerAsync(cancellationToken: CancellationToken);

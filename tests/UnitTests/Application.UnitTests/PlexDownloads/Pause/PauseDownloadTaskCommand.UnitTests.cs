@@ -14,7 +14,8 @@ public class PauseDownloadTaskCommandUnitTests : BaseUnitTest<PauseDownloadTaskC
                     It.IsAny<CancellationToken>()
                 )
             )
-            .ReturnsAsync(Result.Ok());
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.Once());
         await SetupDatabase(34006);
 
         // Act
@@ -37,7 +38,8 @@ public class PauseDownloadTaskCommandUnitTests : BaseUnitTest<PauseDownloadTaskC
                     It.IsAny<CancellationToken>()
                 )
             )
-            .ReturnsAsync(Result.Ok());
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.Once());
         await SetupDatabase(30082, config => config.MovieDownloadTasksCount = 2);
         var movieDownloadTasks = await IDbContext.DownloadTaskMovie.ToListAsync(CancellationToken);
 
@@ -71,7 +73,8 @@ public class PauseDownloadTaskCommandUnitTests : BaseUnitTest<PauseDownloadTaskC
                     It.IsAny<CancellationToken>()
                 )
             )
-            .ReturnsAsync(Result.Ok());
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.Once());
         await SetupDatabase(9999, config => config.MovieDownloadTasksCount = 2);
         var movieDownloadTasks = await IDbContext.GetAllDownloadTasksByServerAsync(
             cancellationToken: CancellationToken
@@ -113,7 +116,8 @@ public class PauseDownloadTaskCommandUnitTests : BaseUnitTest<PauseDownloadTaskC
                     It.IsAny<CancellationToken>()
                 )
             )
-            .ReturnsAsync(Result.Ok());
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.Exactly(4));
         await SetupDatabase(
             19965,
             config =>
@@ -179,7 +183,8 @@ public class PauseDownloadTaskCommandUnitTests : BaseUnitTest<PauseDownloadTaskC
                     It.IsAny<CancellationToken>()
                 )
             )
-            .ReturnsAsync(Result.Ok());
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.Once());
         await SetupDatabase(
             45112,
             config =>
@@ -221,6 +226,17 @@ public class PauseDownloadTaskCommandUnitTests : BaseUnitTest<PauseDownloadTaskC
                         .SetProperty(x => x.FileTransferSpeed, 4321),
                 CancellationToken
             );
+
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Setup(x =>
+                x.OnStatusChangedAsync(
+                    It.IsAny<DownloadTaskKey>(),
+                    It.IsAny<DownloadStatus>(),
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.Exactly(2));
 
         Mock.Mock<IDownloadTaskScheduler>()
             .Setup(x =>
@@ -313,7 +329,8 @@ public class PauseDownloadTaskCommandUnitTests : BaseUnitTest<PauseDownloadTaskC
                     It.IsAny<CancellationToken>()
                 )
             )
-            .ReturnsAsync(Result.Ok());
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.Once());
         await SetupDatabase(
             57001,
             config =>
@@ -337,8 +354,7 @@ public class PauseDownloadTaskCommandUnitTests : BaseUnitTest<PauseDownloadTaskC
         // These should never be called for a MoveFinished task
         Mock.Mock<IMoveDownloadFileScheduler>()
             .Setup(x => x.IsDownloadFileMoving(It.IsAny<DownloadTaskKey>()))
-            .ReturnsAsync(false)
-            .Verifiable(Times.Never);
+            .ReturnsAsync(false);
         Mock.Mock<IMoveDownloadFileScheduler>()
             .Setup(x => x.StopMoveDownloadFileJob(It.IsAny<DownloadTaskKey>()))
             .ReturnOk()
@@ -379,7 +395,8 @@ public class PauseDownloadTaskCommandUnitTests : BaseUnitTest<PauseDownloadTaskC
                     It.IsAny<CancellationToken>()
                 )
             )
-            .ReturnsAsync(Result.Ok());
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.Once());
         await SetupDatabase(
             57002,
             config =>
@@ -433,7 +450,8 @@ public class PauseDownloadTaskCommandUnitTests : BaseUnitTest<PauseDownloadTaskC
                     It.IsAny<CancellationToken>()
                 )
             )
-            .ReturnsAsync(Result.Ok());
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.Once);
         await SetupDatabase(57003, config => config.MovieDownloadTasksCount = 1);
 
         var dbContext = IDbContext;

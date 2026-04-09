@@ -110,6 +110,48 @@ public class StartDownloadTaskCommandUnitTests : BaseUnitTest<StartDownloadTaskC
     }
 
     [Test]
+    public async Task ShouldHaveFailedResult_WhenStartMoveDownloadFileJobFails()
+    {
+        // Arrange
+        await SetupDatabase(
+            11235,
+            x =>
+            {
+                x.MovieDownloadTasksCount = 1;
+            }
+        );
+
+        var dbContext = IDbContext;
+        var movieDownloadTasks = await dbContext.DownloadTaskMovieFile.AsTracking().ToListAsync(CancellationToken);
+        movieDownloadTasks.SetDownloadStatus(DownloadStatus.DownloadFinished);
+        await dbContext.SaveChangesAsync(CancellationToken);
+
+        var movieTask = await dbContext.DownloadTaskMovie.FirstAsync(CancellationToken);
+
+        Mock.Mock<IMoveDownloadFileScheduler>()
+            .Setup(x => x.IsDownloadFileMoving(It.IsAny<DownloadTaskKey>()))
+            .ReturnsAsync(false);
+
+        Mock.Mock<IMoveDownloadFileScheduler>()
+            .Setup(x => x.StartMoveDownloadFileJob(It.IsAny<DownloadTaskKey>()))
+            .ReturnsAsync(Result.Fail("Move scheduler error"));
+
+        Mock.PublishEvent(It.IsAny<CheckDownloadQueueEvent>).Returns(Task.CompletedTask);
+
+        // Act
+        var result = await Sut.ExecuteAsync(new StartDownloadTaskCommand(movieTask.Id), CancellationToken);
+
+        // Assert
+        result.IsFailed.ShouldBeTrue();
+        result.Errors.ShouldContain(x => x.Message.Contains("Move scheduler error"));
+        Mock.Mock<IDownloadTaskScheduler>()
+            .Verify(x => x.StartDownloadTaskJob(It.IsAny<DownloadTaskKey>()), Times.Never());
+        Mock.Mock<IMoveDownloadFileScheduler>()
+            .Verify(x => x.StartMoveDownloadFileJob(It.IsAny<DownloadTaskKey>()), Times.Once());
+        Mock.VerifyEventPublished(It.IsAny<CheckDownloadQueueEvent>, Times.Never());
+    }
+
+    [Test]
     public async Task ShouldStartMoveJob_WhenDownloadTaskIsInMoveErrorStatus()
     {
         // Arrange
@@ -174,8 +216,8 @@ public class StartDownloadTaskCommandUnitTests : BaseUnitTest<StartDownloadTaskC
                     It.IsAny<CancellationToken>()
                 )
             )
-            .ReturnsAsync(Result.Ok())
-            .Verifiable(Times.AtLeastOnce);
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.AtLeastOnce());
         await SetupDatabase(
             96318,
             x =>
@@ -203,8 +245,7 @@ public class StartDownloadTaskCommandUnitTests : BaseUnitTest<StartDownloadTaskC
 
         Mock.Mock<IMoveDownloadFileScheduler>()
             .Setup(x => x.IsDownloadFileMoving(It.IsAny<DownloadTaskKey>()))
-            .ReturnsAsync(false)
-            .Verifiable(Times.Once);
+            .ReturnsAsync(false);
 
         Mock.Mock<IMoveDownloadFileScheduler>()
             .Setup(x => x.StartMoveDownloadFileJob(It.IsAny<DownloadTaskKey>()))
@@ -363,7 +404,8 @@ public class StartDownloadTaskCommandUnitTests : BaseUnitTest<StartDownloadTaskC
                     It.IsAny<CancellationToken>()
                 )
             )
-            .ReturnsAsync(Result.Ok());
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.AtLeastOnce());
         await SetupDatabase(
             44822,
             x =>
@@ -440,7 +482,8 @@ public class StartDownloadTaskCommandUnitTests : BaseUnitTest<StartDownloadTaskC
                     It.IsAny<CancellationToken>()
                 )
             )
-            .ReturnsAsync(Result.Ok());
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.AtLeastOnce());
         await SetupDatabase(
             44823,
             x =>
@@ -512,7 +555,8 @@ public class StartDownloadTaskCommandUnitTests : BaseUnitTest<StartDownloadTaskC
                     It.IsAny<CancellationToken>()
                 )
             )
-            .ReturnsAsync(Result.Ok());
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.AtLeastOnce());
         await SetupDatabase(
             44824,
             x =>
@@ -584,7 +628,8 @@ public class StartDownloadTaskCommandUnitTests : BaseUnitTest<StartDownloadTaskC
                     It.IsAny<CancellationToken>()
                 )
             )
-            .ReturnsAsync(Result.Ok());
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.AtLeastOnce());
         await SetupDatabase(
             44825,
             x =>
@@ -659,7 +704,8 @@ public class StartDownloadTaskCommandUnitTests : BaseUnitTest<StartDownloadTaskC
                     It.IsAny<CancellationToken>()
                 )
             )
-            .ReturnsAsync(Result.Ok());
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.AtLeastOnce());
         await SetupDatabase(
             44826,
             x =>
@@ -813,6 +859,73 @@ public class StartDownloadTaskCommandUnitTests : BaseUnitTest<StartDownloadTaskC
                 Times.Never()
             );
         Mock.VerifyEventPublished(It.IsAny<CheckDownloadQueueEvent>, Times.Once());
+    }
+
+    [Test]
+    public async Task ShouldHaveFailedResult_WhenPausingActiveDownloadFails()
+    {
+        // Arrange
+        await SetupDatabase(
+            76277,
+            x =>
+            {
+                x.TvShowDownloadTasksCount = 5;
+                x.TvShowSeasonDownloadTasksCount = 2;
+                x.TvShowEpisodeCount = 2;
+            }
+        );
+
+        var dbContext = IDbContext;
+        var tvShowDownloadTasks = await dbContext
+            .DownloadTaskTvShow.AsTracking()
+            .Include(x => x.Children)
+                .ThenInclude(x => x.Children)
+                    .ThenInclude(x => x.Children)
+            .ToListAsync(CancellationToken.None);
+
+        tvShowDownloadTasks.SetDownloadStatus(DownloadStatus.Completed);
+        var lastDownloadTask = tvShowDownloadTasks.Last();
+        lastDownloadTask.SetDownloadStatus(DownloadStatus.Queued);
+        await dbContext.SaveChangesAsync(CancellationToken);
+
+        var orderedDownloadTasks = await IDbContext.GetDownloadableChildTasks(
+            lastDownloadTask.ToKey(),
+            CancellationToken
+        );
+        orderedDownloadTasks.Count.ShouldBeGreaterThan(1);
+        var downloadingTask = orderedDownloadTasks[1];
+
+        await IDbContext
+            .DownloadTaskTvShowEpisodeFile.Where(x => x.Id == downloadingTask.Id)
+            .ExecuteUpdateAsync(
+                p => p.SetProperty(x => x.DownloadStatus, DownloadStatus.Downloading),
+                CancellationToken
+            );
+
+        Mock.Mock<IDownloadTaskScheduler>()
+            .Setup(x => x.GetCurrentlyDownloadingKeysByServer(It.IsAny<int>()))
+            .ReturnsAsync([downloadingTask.ToKey()]);
+
+        Mock.Mock<IDownloadTaskScheduler>()
+            .Setup(x => x.IsDownloading(It.IsAny<DownloadTaskKey>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(false);
+
+        Mock.Mock<IDownloadTaskScheduler>()
+            .Setup(x => x.StartDownloadTaskJob(It.IsAny<DownloadTaskKey>()))
+            .ReturnsAsync(Result.Ok());
+
+        Mock.SetupCommand(It.IsAny<PauseDownloadTaskCommand>).ReturnsAsync(Result.Fail("Pause command failed"));
+        Mock.PublishEvent(It.IsAny<CheckDownloadQueueEvent>).Returns(Task.CompletedTask);
+
+        // Act
+        var result = await Sut.ExecuteAsync(new StartDownloadTaskCommand(lastDownloadTask.Id), CancellationToken);
+
+        // Assert
+        result.IsFailed.ShouldBeTrue();
+        result.Errors.ShouldContain(x => x.Message.Contains("Pause command failed"));
+        Mock.Mock<ICommandExecutor>()
+            .Verify(x => x.Send(It.IsAny<PauseDownloadTaskCommand>(), It.IsAny<CancellationToken>()), Times.Once());
+        Mock.VerifyEventPublished(It.IsAny<CheckDownloadQueueEvent>, Times.Never());
     }
 
     [Test]
@@ -1066,6 +1179,7 @@ public class StartDownloadTaskCommandUnitTests : BaseUnitTest<StartDownloadTaskC
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
+
         // Movie tasks have no sibling-queuing side-effects; the single file task starts directly
         Mock.Mock<IDownloadTaskScheduler>()
             .Verify(x => x.StartDownloadTaskJob(It.IsAny<DownloadTaskKey>()), Times.Once());
@@ -1096,7 +1210,8 @@ public class StartDownloadTaskCommandUnitTests : BaseUnitTest<StartDownloadTaskC
                     It.IsAny<CancellationToken>()
                 )
             )
-            .ReturnsAsync(Result.Ok());
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.AtLeastOnce());
         await SetupDatabase(
             11107,
             x =>

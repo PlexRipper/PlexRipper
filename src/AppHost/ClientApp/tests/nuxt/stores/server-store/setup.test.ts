@@ -2,7 +2,7 @@ import { describe, beforeAll, beforeEach, test, expect } from 'vitest';
 import { createPinia, setActivePinia } from 'pinia';
 import { subscribeSpyTo, baseSetup, baseVars, getAxiosMock } from '@services-test-base';
 import { PlexServerPaths } from '@api/api-paths';
-import { generatePlexServers, generateResultDTO } from '@mock';
+import { generateFailedResultDTO, generatePlexServers, generateResultDTO } from '@mock';
 import { StoreNames, type ISetupResult } from '@interfaces';
 import { useServerStore } from '@store';
 
@@ -29,6 +29,24 @@ describe('ServerStore.setup()', () => {
 		mock.onGet(PlexServerPaths.getAllPlexServersEndpoint()).reply(200, generateResultDTO(plexServers));
 		const setupResult: ISetupResult = {
 			isSuccess: true,
+			name: StoreNames.ServerStore,
+		};
+
+		// Act
+		const result = subscribeSpyTo(serverStore.setup());
+		await result.onComplete();
+
+		// Assert
+		expect(result.getFirstValue()).toEqual(setupResult);
+		expect(result.receivedComplete()).toEqual(true);
+	});
+
+	test('Should report failure when refreshing servers fails', async () => {
+		// Arrange
+		const serverStore = useServerStore();
+		mock.onGet(PlexServerPaths.getAllPlexServersEndpoint()).reply(500, generateFailedResultDTO());
+		const setupResult: ISetupResult = {
+			isSuccess: false,
 			name: StoreNames.ServerStore,
 		};
 

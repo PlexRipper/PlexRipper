@@ -261,8 +261,16 @@ function createConnection(close: () => void) {
 	set(loadingCreateConnection, true);
 	set(response, null);
 	useSubscription(connectionStore.createServerConnection(get(connection)).subscribe({
+		next: (result) => {
+			if (result.isSuccess) {
+				close();
+			}
+		},
+		error: () => {
+			set(loadingCreateConnection, false);
+		},
 		complete: () => {
-			close();
+			set(loadingCreateConnection, false);
 		},
 	}));
 }
@@ -274,8 +282,16 @@ function updateConnection(close: () => void) {
 		...get(connection),
 		id: get(plexServerConnectionId),
 	}).subscribe({
+		next: (result) => {
+			if (result.isSuccess) {
+				close();
+			}
+		},
+		error: () => {
+			set(loadingCreateConnection, false);
+		},
 		complete: () => {
-			close();
+			set(loadingCreateConnection, false);
 		},
 	}));
 }
@@ -283,8 +299,10 @@ function updateConnection(close: () => void) {
 function deleteConnection(close: () => void) {
 	set(response, null);
 	useSubscription(connectionStore.deleteServerConnection(get(plexServerConnectionId)).subscribe({
-		complete: () => {
-			close();
+		next: (result) => {
+			if (result.isSuccess) {
+				close();
+			}
 		},
 	}));
 }

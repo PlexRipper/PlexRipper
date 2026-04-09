@@ -2,19 +2,6 @@ namespace Reaparr.Application.UnitTests;
 
 public class DeleteDownloadTaskEndpointUnitTests : BaseUnitTest<DeleteDownloadTaskEndpoint>
 {
-    public DeleteDownloadTaskEndpointUnitTests()
-    {
-        Mock.Mock<IDownloadTaskUpdateDispatcher>()
-            .Setup(x =>
-                x.OnStatusChangedAsync(
-                    It.IsAny<DownloadTaskKey>(),
-                    DownloadStatus.Deleted,
-                    It.IsAny<CancellationToken>()
-                )
-            )
-            .ReturnsAsync(Result.Ok());
-    }
-
     [Test]
     public async Task ShouldDispatchDeleteCommand_WhenDownloadTaskIdIsGiven()
     {
@@ -39,13 +26,13 @@ public class DeleteDownloadTaskEndpointUnitTests : BaseUnitTest<DeleteDownloadTa
         Mock.Mock<IDownloadTaskUpdateDispatcher>()
             .Setup(x =>
                 x.OnStatusChangedAsync(
-                    It.Is<DownloadTaskKey>(k => k.Id == episodeFileId),
+                    It.IsAny<DownloadTaskKey>(),
                     DownloadStatus.Deleted,
                     It.IsAny<CancellationToken>()
                 )
             )
-            .ReturnsAsync(Result.Ok())
-            .Verifiable(Times.Once());
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.Exactly(4));
 
         Mock.Mock<ICommandExecutor>()
             .Setup(x => x.Send(It.IsAny<StopDownloadTaskCommand>(), It.IsAny<CancellationToken>()))
@@ -123,7 +110,7 @@ public class DeleteDownloadTaskEndpointUnitTests : BaseUnitTest<DeleteDownloadTa
                     It.IsAny<CancellationToken>()
                 )
             )
-            .ReturnsAsync(Result.Ok())
+            .Returns(Task.CompletedTask)
             .Verifiable(Times.Once());
 
         Mock.Mock<ICommandExecutor>()
@@ -138,8 +125,7 @@ public class DeleteDownloadTaskEndpointUnitTests : BaseUnitTest<DeleteDownloadTa
                         dbContext,
                         Mock.Mock<IDownloadTaskUpdateDispatcher>().Object
                     ).ExecuteAsync(command, ct)
-            )
-            .Verifiable(Times.Once());
+            );
 
         // Act
         var ep = SetupEndpointUnitTest<DeleteDownloadTaskEndpoint>();

@@ -51,17 +51,15 @@ export const useServerConnectionStore = defineStore(StoreNames.ServerConnectionS
 				.pipe(switchMap(() => actions.refreshPlexServerConnections()))
 				.subscribe();
 
-			return actions
-				.refreshPlexServerConnections()
-				.pipe(switchMap(() => of({ name: StoreNames.ServerConnectionStore, isSuccess: true })));
+			return fetchAndSetPlexServerConnections().pipe(
+				switchMap((result) => of({
+					name: StoreNames.ServerConnectionStore,
+					isSuccess: !!result?.isSuccess,
+				})),
+			);
 		},
 		refreshPlexServerConnections(): Observable<PlexServerConnectionDTO[]> {
-			return plexServerConnectionApi.getAllPlexServerConnectionsEndpoint().pipe(
-				tap((serverConnections) => {
-					if (serverConnections.isSuccess) {
-						state.serverConnections = serverConnections.value ?? [];
-					}
-				}),
+			return fetchAndSetPlexServerConnections().pipe(
 				map(() => get(getters.getServerConnections)),
 			);
 		},
@@ -89,8 +87,7 @@ export const useServerConnectionStore = defineStore(StoreNames.ServerConnectionS
 		checkServerStatus(plexServerId: number) {
 			actions.setConnectionsLoadingForServer(plexServerId, true);
 			return plexServerConnectionApi.checkAllConnectionsStatusByPlexServerEndpoint(plexServerId).pipe(
-				map((x) => x?.value ?? []),
-				switchMap(() => actions.refreshPlexServerConnections()),
+				switchMap((response) => response.isSuccess ? actions.refreshPlexServerConnections() : of(response)),
 				finalize(() => actions.setConnectionsLoadingForServer(plexServerId, false)),
 			);
 		},
@@ -131,11 +128,21 @@ export const useServerConnectionStore = defineStore(StoreNames.ServerConnectionS
 		setPreferredPlexServerConnection: (plexServerId: number, connectionId: number) =>
 			plexServerApi
 				.setPreferredPlexServerConnectionEndpoint(plexServerId, connectionId)
-				.pipe(switchMap(() => serverStore.refreshPlexServer(plexServerId))),
+				.pipe(switchMap((response) => response.isSuccess ? serverStore.refreshPlexServer(plexServerId) : of(response))),
 		$reset() {
 			Object.assign(state, cloneDeep(defaultState));
 		},
 	};
+
+	function fetchAndSetPlexServerConnections() {
+		return plexServerConnectionApi.getAllPlexServerConnectionsEndpoint().pipe(
+			tap((serverConnections) => {
+				if (serverConnections.isSuccess) {
+					state.serverConnections = serverConnections.value ?? [];
+				}
+			}),
+		);
+	}
 	const getters = {
 		getServerConnectionsByServerId: (plexServerId = 0): PlexServerConnectionDTO[] =>
 			sortPlexServerConnections(

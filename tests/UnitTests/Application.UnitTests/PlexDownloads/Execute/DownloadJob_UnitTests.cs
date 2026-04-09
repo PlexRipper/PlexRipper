@@ -86,7 +86,7 @@ public class DownloadJobUnitTests : BaseUnitTest<DownloadJob>
             .Setup(x => x.Start(It.IsAny<DownloadTaskKey>(), CancellationToken))
             .ReturnsAsync(Result.Ok())
             .Verifiable(Times.Once());
-        downloadClientMock.Setup(x => x.DisposeAsync()).Returns(ValueTask.CompletedTask).Verifiable(Times.Once);
+        downloadClientMock.Setup(x => x.DisposeAsync()).Returns(ValueTask.CompletedTask);
 
         var downloadClientIndexMock = new Mock<IIndex<PlexDownloadClientType, IPlexDownloadClient>>();
         downloadClientIndexMock.Setup(x => x[It.IsAny<PlexDownloadClientType>()]).Returns(downloadClientMock.Object);
@@ -161,7 +161,7 @@ public class DownloadJobUnitTests : BaseUnitTest<DownloadJob>
                     It.IsAny<CancellationToken>()
                 )
             )
-            .ReturnsAsync(Result.Ok())
+            .Returns(Task.CompletedTask)
             .Verifiable(Times.Once());
 
         var downloadClientIndexMock = new Mock<IIndex<PlexDownloadClientType, IPlexDownloadClient>>();
@@ -250,7 +250,7 @@ public class DownloadJobUnitTests : BaseUnitTest<DownloadJob>
                     It.IsAny<CancellationToken>()
                 )
             )
-            .ReturnsAsync(Result.Ok())
+            .Returns(Task.CompletedTask)
             .Verifiable(Times.Once());
 
         var downloadClientIndexMock = new Mock<IIndex<PlexDownloadClientType, IPlexDownloadClient>>();
@@ -290,5 +290,24 @@ public class DownloadJobUnitTests : BaseUnitTest<DownloadJob>
             Times.Once()
         );
         downloadClientMock.Verify(x => x.DisposeAsync(), Times.Once());
+    }
+
+    [Test]
+    public async Task ShouldNotThrow_WhenJobDataMapContainsInvalidDownloadTaskJson()
+    {
+        // Arrange
+        IDictionary<string, object> dict = new Dictionary<string, object>
+        {
+            { DownloadJob.DownloadTaskIdParameter, "not-json" },
+        };
+
+        Mock.Mock<IJobExecutionContext>().SetupGet(x => x.JobDetail.JobDataMap).Returns(new JobDataMap(dict));
+        Mock.Mock<IJobExecutionContext>().SetupGet(x => x.CancellationToken).Returns(CancellationToken);
+
+        // Act
+        var action = async () => await Sut.Execute(Mock.Create<IJobExecutionContext>());
+
+        // Assert
+        await action.ShouldNotThrowAsync();
     }
 }

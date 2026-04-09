@@ -24,7 +24,7 @@ const formattedString = computed(() => {
 		return '-';
 	}
 
-	const bytes = prettyBytes(props.size, { locale: localizationStore.getLanguageLocale.bcp47Code });
+	const bytes = prettyBytes(props.size, { locale: localizationStore.getLanguageLocale.bcp47Code || 'en-US' });
 	return `${bytes}${props.speed ? t('general.units.per-second') : ''}`;
 });
 </script>

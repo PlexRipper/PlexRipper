@@ -82,11 +82,13 @@ public class StartDownloadTaskCommandHandler : ICommandHandler<StartDownloadTask
                     x.Id != nextDownloadTask.Id && statusesToQueue.Contains(x.DownloadStatus)
                 )
             )
+            {
                 await _downloadTaskUpdateDispatcher.OnStatusChangedAsync(
                     waitingTask.ToKey(),
                     DownloadStatus.Queued,
                     cancellationToken
                 );
+            }
         }
 
         // Start the download task depending on the phase
@@ -106,7 +108,14 @@ public class StartDownloadTaskCommandHandler : ICommandHandler<StartDownloadTask
 
                     // Avoid pausing the download task that just started
                     foreach (var downloadKey in activeDownloadKeys.Where(x => x != nextDownloadTaskKey))
-                        await _commandExecutor.Send(new PauseDownloadTaskCommand(downloadKey.Id), cancellationToken);
+                    {
+                        var pauseResult = await _commandExecutor.Send(
+                            new PauseDownloadTaskCommand(downloadKey.Id),
+                            cancellationToken
+                        );
+                        if (pauseResult.IsFailed)
+                            return pauseResult.LogError();
+                    }
                 }
 
                 break;
@@ -115,7 +124,9 @@ public class StartDownloadTaskCommandHandler : ICommandHandler<StartDownloadTask
                 // Multiple merging tasks can be processing at the same time
                 if (!(await _moveDownloadFileScheduler.IsDownloadFileMoving(nextDownloadTaskKey)))
                 {
-                    await _moveDownloadFileScheduler.StartMoveDownloadFileJob(nextDownloadTaskKey);
+                    var moveResult = await _moveDownloadFileScheduler.StartMoveDownloadFileJob(nextDownloadTaskKey);
+                    if (moveResult.IsFailed)
+                        return moveResult.LogError();
                 }
 
                 break;

@@ -2,7 +2,7 @@ import { acceptHMRUpdate, defineStore } from 'pinia';
 import { reactive, toRefs } from 'vue';
 import type { Observable } from 'rxjs';
 import { from, of, tap, Subject } from 'rxjs';
-import { distinctUntilChanged, filter, map, switchMap, take } from 'rxjs/operators';
+import { catchError, distinctUntilChanged, filter, map, switchMap, take } from 'rxjs/operators';
 import Log from 'consola';
 import type { HubConnection, IHttpConnectionOptions } from '@microsoft/signalr';
 import { HttpTransportType, HubConnectionBuilder, HubConnectionState, LogLevel } from '@microsoft/signalr';
@@ -30,6 +30,13 @@ import type { IRetryPolicy } from '@microsoft/signalr/src/IRetryPolicy';
 import { useDownloadStore, useBackgroundJobsStore, useNotificationsStore, useLibraryStore } from '@store';
 import Axios from 'axios';
 import { MessagePackHubProtocol } from '@microsoft/signalr-protocol-msgpack';
+
+export enum HubName
+{
+	Progress = 'progress',
+	Download = 'download',
+	Notifications = 'notifications',
+}
 
 export const useSignalrStore = defineStore(StoreNames.SignalrStore, () => {
 	interface ISignalRStoreState {
@@ -74,13 +81,13 @@ export const useSignalrStore = defineStore(StoreNames.SignalrStore, () => {
 
 				const baseApiUrl = Axios.defaults.baseURL;
 				// Setup Connections
-				progressHubConnection = useCypressSignalRMock('progress', { enableForVitest: true }) ?? new HubConnectionBuilder()
+				progressHubConnection = useCypressSignalRMock(HubName.Progress, { enableForVitest: true }) ?? new HubConnectionBuilder()
 					.configureLogging(LogLevel.None)
 					.withUrl(`${baseApiUrl}/progress`, options)
 					.withAutomaticReconnect(retryPolicy)
 					.build();
 
-				const mock = useCypressSignalRMock('download', { enableForVitest: true });
+				const mock = useCypressSignalRMock(HubName.Download, { enableForVitest: true });
 				if (mock) {
 					downloadHubConnection = mock; // mock uses JSON internally
 				} else {
@@ -92,7 +99,7 @@ export const useSignalrStore = defineStore(StoreNames.SignalrStore, () => {
 						.build();
 				}
 
-				notificationHubConnection = useCypressSignalRMock('notifications', { enableForVitest: true }) ?? new HubConnectionBuilder()
+				notificationHubConnection = useCypressSignalRMock(HubName.Notifications, { enableForVitest: true }) ?? new HubConnectionBuilder()
 					.configureLogging(LogLevel.None)
 					.withUrl(`${baseApiUrl}/notifications`, options)
 					.withAutomaticReconnect(retryPolicy)
@@ -101,7 +108,14 @@ export const useSignalrStore = defineStore(StoreNames.SignalrStore, () => {
 				setupSubscriptions();
 
 				await Promise.all([startDownloadHubConnection(), startProgressHubConnection(), startNotificationHubConnection()]);
-			})()).pipe(switchMap(() => of({ name: StoreNames.SignalrStore, isSuccess: true })), take(1));
+			})()).pipe(
+				switchMap(() => of({ name: StoreNames.SignalrStore, isSuccess: true })),
+				catchError((error) => {
+					Log.error('Failed to setup SignalR Service', error);
+					return of({ name: StoreNames.SignalrStore, isSuccess: false });
+				}),
+				take(1),
+			);
 		},
 		clearServerConnectionCheckStatusProgress(plexServerConnectionId: number): void {
 			removeStateItem<ServerConnectionCheckStatusProgressDTO>(

@@ -129,8 +129,8 @@ Examples:
 - **Never simulate production state changes inside mocks.** If a mocked collaborator would normally update DB state, dispatch status transitions, queue work, or publish downstream side effects, do not reproduce that behavior in a callback/delegate. Return the expected `Result` only and verify the interaction contract instead.
 - **For mocked side-effecting collaborators, assert exact call contracts.** Prefer `It.Is<...>(...)` for important parameters and `Verifiable(Times.X())` and/or `Verify(..., Times.X())` for call counts rather than relying on mocked callbacks to make later assertions pass.
 - **Do not make database assertions that depend on mocked dependencies having executed real logic.** If the dependency is mocked, assert the SUT called it with the right values. Only assert persisted downstream state when the real implementation is part of the test.
-- **Mock setups must be inline per test.** Do not extract them into shared helper methods. Each test must be self-contained and readable without jumping elsewhere to understand what is mocked.
-- **Every mock setup must end with `.Verifiable(Times.X())`** to declare how many times it is expected to be called. This collocates the expectation with the setup and makes unmet expectations fail automatically.
+- **Mock setups must be inline per test.** Do not extract them into shared helper methods or place them in the test class constructor. Constructor-level mock configuration is an anti-pattern because it hides per-test expectations and makes tests harder to read and reason about. Each test must be self-contained and readable without jumping elsewhere to understand what is mocked.
+- **Every mock setup must end with `.Verifiable(Times.X())` using the exact expected invocation count.** Do not rely on broad shared setups or unstated defaults. Declare the precise number of calls on each mock inside the test that owns that expectation so unmet or extra invocations fail clearly.
 
 Bad:
 

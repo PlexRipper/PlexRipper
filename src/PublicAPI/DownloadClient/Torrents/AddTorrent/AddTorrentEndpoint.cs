@@ -49,7 +49,9 @@ public class TorrentMetadataDTOValidator : Validator<TorrentMetadataDTO>
             .GreaterThan(0)
             .WithMessage($"{nameof(TorrentMetadataDTO.PlexApiPartId)} must be greater than 0.");
 
-        RuleFor(x => x.Type).IsInEnum().WithMessage("Type must be a valid PlexMediaType value.");
+        RuleFor(x => x.Type)
+            .Must(type => type is PlexMediaType.Episode or PlexMediaType.Movie)
+            .WithMessage("Type must be Episode or Movie.");
 
         RuleFor(x => x.Quality).IsInEnum().WithMessage("Quality must be a valid VideoQuality value.");
     }

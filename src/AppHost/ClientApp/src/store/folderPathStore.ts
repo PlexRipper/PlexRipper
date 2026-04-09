@@ -1,9 +1,9 @@
 import { get } from '@vueuse/core';
 import { defineStore, acceptHMRUpdate } from 'pinia';
 import { reactive, computed, toRefs } from 'vue';
-import { switchMap, tap, map } from 'rxjs/operators';
+import { tap, map } from 'rxjs/operators';
 import type { Observable } from 'rxjs';
-import { of, throwError } from 'rxjs';
+import { throwError } from 'rxjs';
 import { type FolderPathDTO, FolderType, PlexMediaType } from '@dto';
 import { StoreNames, type ISetupResult, type IFolderPathGroup } from '@interfaces';
 import { folderPathApi } from '@api';
@@ -31,7 +31,12 @@ export const useFolderPathStore = defineStore(StoreNames.FolderPathStore, () => 
 	// Actions
 	const actions = {
 		setup(): Observable<ISetupResult> {
-			return actions.refreshFolderPaths().pipe(switchMap(() => of({ name: StoreNames.FolderPathStore, isSuccess: true })));
+			return actions.refreshFolderPaths().pipe(
+				map((result) => ({
+					name: StoreNames.FolderPathStore,
+					isSuccess: result.isSuccess,
+				})),
+			);
 		},
 		refreshFolderPaths() {
 			return folderPathApi.getAllFolderPathsEndpoint().pipe(
@@ -68,8 +73,6 @@ export const useFolderPathStore = defineStore(StoreNames.FolderPathStore, () => 
 			return throwError(() => 'Could not find folderPath with id: ' + folderPathId);
 		},
 		updateFolderPath(folderPath: FolderPathDTO): Observable<FolderPathDTO> {
-			updateFolderPathInState(folderPath);
-
 			return folderPathApi.updateFolderPathEndpoint(folderPath).pipe(
 				tap((x) => {
 					if (x.value) {
@@ -80,11 +83,18 @@ export const useFolderPathStore = defineStore(StoreNames.FolderPathStore, () => 
 			);
 		},
 		deleteFolderPath(folderPathId: number) {
-			const i = state.folderPaths.findIndex((x) => x.id === folderPathId);
-			if (i > -1) {
-				state.folderPaths.splice(i, 1);
-			}
-			return folderPathApi.deleteFolderPathEndpoint(folderPathId);
+			return folderPathApi.deleteFolderPathEndpoint(folderPathId).pipe(
+				tap((result) => {
+					if (!result.isSuccess) {
+						return;
+					}
+
+					const i = state.folderPaths.findIndex((x) => x.id === folderPathId);
+					if (i > -1) {
+						state.folderPaths.splice(i, 1);
+					}
+				}),
+			);
 		},
 		$reset() {
 			Object.assign(state, cloneDeep(defaultState));

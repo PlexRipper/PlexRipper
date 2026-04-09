@@ -3,19 +3,25 @@ namespace Reaparr.Application;
 public class UpdateFolderPathEndpointRequest
 {
     [FromBody]
-    public FolderPathDTO? FolderPathDto { get; init; }
+    public required FolderPathDTO FolderPathDTO { get; init; }
 }
 
 public class UpdateFolderPathEndpointRequestValidator : Validator<UpdateFolderPathEndpointRequest>
 {
     public UpdateFolderPathEndpointRequestValidator()
     {
-        RuleFor(x => x.FolderPathDto).NotNull();
-        RuleFor(x => x.FolderPathDto!.Id).GreaterThan(0);
-        RuleFor(x => x.FolderPathDto!.DisplayName).NotEmpty();
-        RuleFor(x => x.FolderPathDto!.Directory).NotEmpty();
-        RuleFor(x => x.FolderPathDto!.FolderType).NotEqual(FolderType.Unknown);
-        RuleFor(x => x.FolderPathDto!.MediaType).NotEqual(PlexMediaType.Unknown);
+        RuleFor(x => x.FolderPathDTO)
+            .NotNull()
+            .DependentRules(() =>
+            {
+                RuleFor(x => x.FolderPathDTO.Id)
+                    .GreaterThanOrEqualTo(10)
+                    .WithMessage("Cannot update reserved folder paths with an Id less than 10");
+                RuleFor(x => x.FolderPathDTO.DisplayName).NotEmpty();
+                RuleFor(x => x.FolderPathDTO.Directory).NotEmpty();
+                RuleFor(x => x.FolderPathDTO.FolderType).NotEqual(FolderType.None).NotEqual(FolderType.Unknown);
+                RuleFor(x => x.FolderPathDTO.MediaType).NotEqual(PlexMediaType.None).NotEqual(PlexMediaType.Unknown);
+            });
     }
 }
 
@@ -46,8 +52,7 @@ public class UpdateFolderPathEndpoint : BaseEndpoint<UpdateFolderPathEndpointReq
     public override async Task HandleAsync(UpdateFolderPathEndpointRequest req, CancellationToken ct)
     {
         _log.Here().DebugApiCall(HttpContext, req);
-        // TODO: Should prevent updating reserved folder paths with id < 10
-        var folderPath = req.FolderPathDto!.ToModel();
+        var folderPath = req.FolderPathDTO.ToModel();
         var folderPathDb = await _dbContext
             .FolderPaths.AsTracking()
             .FirstOrDefaultAsync(x => x.Id == folderPath.Id, ct);

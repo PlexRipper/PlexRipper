@@ -117,7 +117,7 @@ public class DirectPlexDownloadClientStopAsyncUnitTests : BaseUnitTest<DirectPle
                     It.IsAny<CancellationToken>()
                 )
             )
-            .ReturnsAsync(Result.Ok())
+            .Returns(Task.CompletedTask)
             .Verifiable(Times.Once());
 
         Mock.Mock<IDownloadTaskUpdateDispatcher>()
@@ -128,7 +128,7 @@ public class DirectPlexDownloadClientStopAsyncUnitTests : BaseUnitTest<DirectPle
                     It.IsAny<CancellationToken>()
                 )
             )
-            .ReturnsAsync(Result.Ok())
+            .Returns(Task.CompletedTask)
             .Verifiable(Times.Once());
 
         var downloadServiceMock = BuildInProgressDownloadServiceMock();
@@ -207,7 +207,7 @@ public class DirectPlexDownloadClientStopAsyncUnitTests : BaseUnitTest<DirectPle
                     It.IsAny<CancellationToken>()
                 )
             )
-            .ReturnsAsync(Result.Ok())
+            .Returns(Task.CompletedTask)
             .Verifiable(Times.Once());
 
         Mock.Mock<IDownloadTaskUpdateDispatcher>()
@@ -218,7 +218,7 @@ public class DirectPlexDownloadClientStopAsyncUnitTests : BaseUnitTest<DirectPle
                     It.IsAny<CancellationToken>()
                 )
             )
-            .ReturnsAsync(Result.Ok())
+            .Returns(Task.CompletedTask)
             .Verifiable(Times.Once());
 
         var downloadServiceMock = BuildInProgressDownloadServiceMock();
@@ -295,7 +295,7 @@ public class DirectPlexDownloadClientStopAsyncUnitTests : BaseUnitTest<DirectPle
                     It.IsAny<CancellationToken>()
                 )
             )
-            .ReturnsAsync(Result.Ok())
+            .Returns(Task.CompletedTask)
             .Verifiable(Times.Once());
 
         Mock.Mock<IDownloadTaskUpdateDispatcher>()
@@ -306,7 +306,7 @@ public class DirectPlexDownloadClientStopAsyncUnitTests : BaseUnitTest<DirectPle
                     It.IsAny<CancellationToken>()
                 )
             )
-            .ReturnsAsync(Result.Ok())
+            .Returns(Task.CompletedTask)
             .Verifiable(Times.Once());
 
         var downloadServiceMock = BuildInProgressDownloadServiceMock();
@@ -386,7 +386,7 @@ public class DirectPlexDownloadClientStopAsyncUnitTests : BaseUnitTest<DirectPle
                     It.IsAny<CancellationToken>()
                 )
             )
-            .ReturnsAsync(Result.Ok())
+            .Returns(Task.CompletedTask)
             .Verifiable(Times.Once());
 
         Mock.Mock<IDownloadTaskUpdateDispatcher>()
@@ -397,7 +397,7 @@ public class DirectPlexDownloadClientStopAsyncUnitTests : BaseUnitTest<DirectPle
                     It.IsAny<CancellationToken>()
                 )
             )
-            .ReturnsAsync(Result.Ok())
+            .Returns(Task.CompletedTask)
             .Verifiable(Times.Once());
 
         var downloadServiceMock = BuildInProgressDownloadServiceMock();
@@ -409,6 +409,7 @@ public class DirectPlexDownloadClientStopAsyncUnitTests : BaseUnitTest<DirectPle
             .Returns(() =>
             {
                 cancelCallCount++;
+
                 // Still need to unblock the infinite delay — grab the internal CTS via closure
                 return Task.CompletedTask;
             });

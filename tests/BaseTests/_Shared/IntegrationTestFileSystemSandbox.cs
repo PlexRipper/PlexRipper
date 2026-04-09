@@ -15,12 +15,30 @@ public static class IntegrationTestFileSystemSandbox
 
         try
         {
-            var sandboxPath = GetSandboxFolder(memoryDbName);
+            var sandboxPath = Path.GetFullPath(GetSandboxFolder(memoryDbName));
             Directory.CreateDirectory(sandboxPath);
 
-            Directory.CreateDirectory(PathProvider.DefaultDownloadsDestinationFolder);
-            Directory.CreateDirectory(PathProvider.DefaultMovieDestinationFolder);
-            Directory.CreateDirectory(PathProvider.DefaultTvShowsDestinationFolder);
+            var pathsToCreate = new[]
+            {
+                PathProvider.ConfigDirectory,
+                PathProvider.DefaultDownloadsDestinationFolder,
+                PathProvider.DefaultMovieDestinationFolder,
+                PathProvider.DefaultTvShowsDestinationFolder,
+                PathProvider.DefaultMusicDestinationFolder,
+                PathProvider.DefaultPhotosDestinationFolder,
+                PathProvider.DefaultOtherDestinationFolder,
+                PathProvider.DefaultGamesDestinationFolder,
+            }.Select(Path.GetFullPath);
+
+            foreach (var path in pathsToCreate)
+            {
+                if (!path.StartsWith(sandboxPath, StringComparison.Ordinal))
+                    throw new InvalidOperationException(
+                        $"Refusing to create integration test directory outside sandbox. Path: '{path}', Sandbox: '{sandboxPath}'."
+                    );
+
+                Directory.CreateDirectory(path);
+            }
 
             _log.Here()
                 .Information(

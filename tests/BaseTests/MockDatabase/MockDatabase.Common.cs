@@ -256,11 +256,8 @@ public static partial class MockDatabase
         // https://docs.microsoft.com/en-us/dotnet/standard/data/sqlite/in-memory-databases
         new SqliteConnectionStringBuilder
         {
-            // TODO:Should be set to in-memory for testing, flakey tests might be fixed now
-            Mode = SqliteOpenMode.ReadWriteCreate,
+            Mode = SqliteOpenMode.Memory,
             ForeignKeys = true,
-
-            // Database name
             DataSource = dbName,
             Cache = SqliteCacheMode.Shared,
         }.ToString();

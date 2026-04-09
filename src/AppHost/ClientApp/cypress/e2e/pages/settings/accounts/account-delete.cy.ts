@@ -15,6 +15,9 @@ describe('Remove Plex account from Reaparr', () => {
 	it('Should delete a Plex account when the delete button is clicked and confirmed', () => {
 		cy.getPageData().then(({ plexAccounts }) => {
 			const plexAccount = plexAccounts[1];
+			if (!plexAccount) {
+				throw new Error('Expected at least two accounts in test setup');
+			}
 
 			cy.getCy(`account-card-id-${plexAccount.id}`).click();
 
@@ -25,17 +28,20 @@ describe('Remove Plex account from Reaparr', () => {
 			// Delete Action
 			cy.intercept('DELETE', PlexAccountPaths.deletePlexAccountByIdEndpoint(plexAccount.id), {
 				statusCode: 200,
-			});
+				body: generateResultDTO(true),
+			}).as('deleteAccount');
 
 			// Return the accounts without the deleted one
 			cy.intercept('GET', PlexAccountPaths.getAllPlexAccountsEndpoint(), {
 				statusCode: 200,
 				body: generateResultDTO(plexAccounts.filter((x) => x.id !== plexAccount.id)),
-			});
+			}).as('getAccountsAfterDelete');
 
 			cy.getCy('confirmation-dialog-confirmation-button').click();
+			cy.wait('@deleteAccount');
+			cy.wait('@getAccountsAfterDelete');
 
-			cy.getCy('account-dialog-form').should('not.be.visible');
+			cy.getCy('account-dialog-form').should('not.exist');
 
 			cy.getCy(`account-card-id-${plexAccount.id}`).should('not.exist');
 		});
@@ -44,6 +50,9 @@ describe('Remove Plex account from Reaparr', () => {
 	it('Should close the confirmation dialog when the delete button is clicked and canceled', () => {
 		cy.getPageData().then(({ plexAccounts }) => {
 			const plexAccount = plexAccounts[1];
+			if (!plexAccount) {
+				throw new Error('Expected at least two accounts in test setup');
+			}
 
 			cy.getCy(`account-card-id-${plexAccount.id}`).click();
 

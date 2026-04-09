@@ -287,25 +287,16 @@ public class DirectPlexDownloadClient : IPlexDownloadClient
 
         if (errorResult is null)
         {
-            var updateResult = await _downloadTaskUpdateDispatcher.OnStatusChangedAsync(
-                _downloadTaskKey,
-                status,
-                CancellationToken.None
-            );
-            if (updateResult.IsFailed)
-                return updateResult;
-
+            await _downloadTaskUpdateDispatcher.OnStatusChangedAsync(_downloadTaskKey, status, CancellationToken.None);
             return Result.Ok();
         }
 
-        var erroredUpdateResult = await _downloadTaskUpdateDispatcher.OnStatusChangedAsync(
+        await _downloadTaskUpdateDispatcher.OnStatusChangedAsync(
             _downloadTaskKey,
             status,
             errorResult,
             CancellationToken.None
         );
-        if (erroredUpdateResult.IsFailed)
-            return erroredUpdateResult;
 
         return Result.Ok();
     }

@@ -310,6 +310,9 @@ export const useDownloadStore = defineStore(StoreNames.DownloadStore, () => {
 			}
 			return state.serverDownloads.find((server) => server.id === serverId)?.downloads ?? [];
 		},
+		getDownloadTaskById(downloadTaskId: string): DownloadProgressDTO | null {
+			return findNodeById(state.serverDownloads.flatMap((x) => x.downloads), downloadTaskId);
+		},
 		getServersWithDownloads: computed((): { plexServer: PlexServerDTO; downloads: DownloadProgressDTO[] }[] => {
 			const serverIds = state.serverDownloads.map((x) => x.id);
 			const plexServersWithDownloads = serverStore.servers.filter((x) => serverIds.includes(x.id));

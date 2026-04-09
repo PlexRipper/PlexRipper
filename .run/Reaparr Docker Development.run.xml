@@ -1,11 +1,10 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="Reaparr Back-End Development" type="DotNetProject" factoryName=".NET Project" activateToolWindowBeforeRun="false">
+  <configuration default="false" name="Reaparr Docker Development" type="DotNetProject" factoryName=".NET Project" activateToolWindowBeforeRun="false">
     <option name="EXE_PATH" value="$PROJECT_DIR$/src/AppHost/bin/Debug/net10.0/Reaparr.AppHost" />
     <option name="PROGRAM_PARAMETERS" value="" />
     <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/src/AppHost" />
     <option name="PASS_PARENT_ENVS" value="0" />
     <envs>
-      <env name="DEVELOPMENT_ROOT_PATH" value="$PROJECT_DIR$/../../DATA/ReaparrCache/" />
       <env name="DOTNET_ENVIRONMENT" value="Development" />
       <env name="DOTNET_HTTP_PORTS" value="5000" />
       <env name="INFORMATIONAL_VERSION" value="9.9.9-dev" />
@@ -13,9 +12,12 @@
       <env name="LOG_LEVEL" value="DEBUG" />
       <env name="PGID" value="1000" />
       <env name="PUID" value="1000" />
+      <env name="REAPARR_CONFIG_PATH" value="$PROJECT_DIR$/../../DATA/ReaparrCache/Config" />
+      <env name="REAPARR_DATA_PATH" value="$PROJECT_DIR$/../../DATA/ReaparrCache/" />
+      <env name="REAPARR_PLATFORM" value="docker" />
+      <env name="SEQ_URL" value="http://localhost:5341" />
       <env name="UNMASKED" value="true" />
       <env name="VERSION" value="9.9.9" />
-      <env name="SEQ_URL" value="http://localhost:5341" />
     </envs>
     <option name="ENV_FILE_PATHS" value="" />
     <option name="REDIRECT_INPUT_PATH" value="" />

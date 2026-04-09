@@ -12,7 +12,7 @@ public class ReaparrDbContextManagerUnitTests : BaseUnitTest<ReaparrDbContextMan
     private string DatabasePath => "/Config/" + PathProvider.DatabaseName;
 
     [Test]
-    public void ShouldConnectToDatabaseAndCheckToMigrate_WhenDatabaseAlreadyExists()
+    public async Task ShouldConnectToDatabaseAndCheckToMigrate_WhenDatabaseAlreadyExists()
     {
         // Arrange
 
@@ -26,7 +26,7 @@ public class ReaparrDbContextManagerUnitTests : BaseUnitTest<ReaparrDbContextMan
         Mock.Mock<IAuthDbContextDatabase>().Setup(x => x.GetPendingMigrations()).Returns([]);
 
         // Act
-        var result = Sut.Setup();
+        var result = await Sut.SetupAsync();
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -39,7 +39,7 @@ public class ReaparrDbContextManagerUnitTests : BaseUnitTest<ReaparrDbContextMan
     }
 
     [Test]
-    public void ShouldCreateDatabase_WhenDatabaseDoesNotExist()
+    public async Task ShouldCreateDatabase_WhenDatabaseDoesNotExist()
     {
         // Arrange
         Mock.Mock<IPathProvider>().SetupGet(x => x.DatabasePath).Returns(() => DatabasePath);
@@ -48,7 +48,7 @@ public class ReaparrDbContextManagerUnitTests : BaseUnitTest<ReaparrDbContextMan
         Mock.Mock<IAuthDbContextDatabase>().Setup(x => x.Migrate()).Returns(Result.Ok()).Verifiable(Times.Once);
 
         // Act
-        var result = Sut.Setup();
+        var result = await Sut.SetupAsync();
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -56,7 +56,7 @@ public class ReaparrDbContextManagerUnitTests : BaseUnitTest<ReaparrDbContextMan
     }
 
     [Test]
-    public void ShouldLogWarning_WhenDatabaseDoesNotExist()
+    public async Task ShouldLogWarning_WhenDatabaseDoesNotExist()
     {
         // Arrange
         Mock.Mock<IPathProvider>()
@@ -68,14 +68,14 @@ public class ReaparrDbContextManagerUnitTests : BaseUnitTest<ReaparrDbContextMan
         Mock.Mock<IAuthDbContextDatabase>().Setup(x => x.Migrate()).Returns(Result.Ok()).Verifiable(Times.Once);
 
         // Act
-        var result = Sut.Setup();
+        var result = await Sut.SetupAsync();
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
     }
 
     [Test]
-    public void ShouldFailToCreateDatabase_WhenExceptionIsThrown()
+    public async Task ShouldFailToCreateDatabase_WhenExceptionIsThrown()
     {
         // Arrange
         Mock.Mock<IPathProvider>().SetupGet(x => x.DatabasePath).Returns(() => DatabasePath);
@@ -87,14 +87,14 @@ public class ReaparrDbContextManagerUnitTests : BaseUnitTest<ReaparrDbContextMan
         Mock.Mock<IAuthDbContextDatabase>().Setup(x => x.Migrate()).Returns(Result.Ok()).Verifiable(Times.Never);
 
         // Act
-        var result = Sut.Setup();
+        var result = await Sut.SetupAsync();
 
         // Assert
         result.IsFailed.ShouldBeTrue();
     }
 
     [Test]
-    public void ShouldBackUpAndResetDatabase_WhenDatabaseCannotConnect()
+    public async Task ShouldBackUpAndResetDatabase_WhenDatabaseCannotConnect()
     {
         // Arrange
         Mock.Mock<IPathProvider>().SetupGet(x => x.DatabasePath).Returns(() => DatabasePath);
@@ -115,7 +115,7 @@ public class ReaparrDbContextManagerUnitTests : BaseUnitTest<ReaparrDbContextMan
         Mock.Mock<IGeneralSettings>().SetupSet(x => x.FirstTimeSetup = true).Verifiable(Times.Once);
 
         // Act
-        var result = Sut.Setup();
+        var result = await Sut.SetupAsync();
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -126,7 +126,7 @@ public class ReaparrDbContextManagerUnitTests : BaseUnitTest<ReaparrDbContextMan
     }
 
     [Test]
-    public void ShouldMigrateReaparrDatabase_WhenPendingMigrationsExist()
+    public async Task ShouldMigrateReaparrDatabase_WhenPendingMigrationsExist()
     {
         // Arrange
         Mock.Mock<IPathProvider>().SetupGet(x => x.DatabasePath).Returns(() => DatabasePath);
@@ -141,7 +141,7 @@ public class ReaparrDbContextManagerUnitTests : BaseUnitTest<ReaparrDbContextMan
         Mock.Mock<IAuthDbContextDatabase>().Setup(x => x.GetPendingMigrations()).Returns([]);
 
         // Act
-        var result = Sut.Setup();
+        var result = await Sut.SetupAsync();
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -150,7 +150,7 @@ public class ReaparrDbContextManagerUnitTests : BaseUnitTest<ReaparrDbContextMan
     }
 
     [Test]
-    public void ShouldMigrateAuthDatabase_WhenPendingMigrationsExist()
+    public async Task ShouldMigrateAuthDatabase_WhenPendingMigrationsExist()
     {
         // Arrange
         Mock.Mock<IPathProvider>().SetupGet(x => x.DatabasePath).Returns(() => DatabasePath);
@@ -163,7 +163,7 @@ public class ReaparrDbContextManagerUnitTests : BaseUnitTest<ReaparrDbContextMan
         Mock.Mock<IAuthDbContextDatabase>().Setup(x => x.Migrate()).Returns(Result.Ok()).Verifiable(Times.Once);
 
         // Act
-        var result = Sut.Setup();
+        var result = await Sut.SetupAsync();
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -172,7 +172,7 @@ public class ReaparrDbContextManagerUnitTests : BaseUnitTest<ReaparrDbContextMan
     }
 
     [Test]
-    public void ShouldSkipMigration_WhenDatabaseIsInMemory()
+    public async Task ShouldSkipMigration_WhenDatabaseIsInMemory()
     {
         // Arrange
         Mock.Mock<IPathProvider>().SetupGet(x => x.DatabasePath).Returns(() => DatabasePath);
@@ -184,7 +184,7 @@ public class ReaparrDbContextManagerUnitTests : BaseUnitTest<ReaparrDbContextMan
         Mock.Mock<IAuthDbContextDatabase>().Setup(x => x.GetPendingMigrations()).Returns(["AuthMigration1"]);
 
         // Act
-        var result = Sut.Setup();
+        var result = await Sut.SetupAsync();
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -193,7 +193,7 @@ public class ReaparrDbContextManagerUnitTests : BaseUnitTest<ReaparrDbContextMan
     }
 
     [Test]
-    public void ShouldResetDatabase_WhenReaparrMigrationFails()
+    public async Task ShouldResetDatabase_WhenReaparrMigrationFails()
     {
         // Arrange
         Mock.Mock<IPathProvider>().SetupGet(x => x.DatabasePath).Returns(() => DatabasePath);
@@ -220,7 +220,7 @@ public class ReaparrDbContextManagerUnitTests : BaseUnitTest<ReaparrDbContextMan
         Mock.Mock<IGeneralSettings>().SetupSet(x => x.FirstTimeSetup = true).Verifiable(Times.AtLeastOnce);
 
         // Act
-        var result = Sut.Setup();
+        var result = await Sut.SetupAsync();
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -229,7 +229,7 @@ public class ReaparrDbContextManagerUnitTests : BaseUnitTest<ReaparrDbContextMan
     }
 
     [Test]
-    public void ShouldResetDatabase_WhenAuthDatabaseMigrationFails()
+    public async Task ShouldResetDatabase_WhenAuthDatabaseMigrationFails()
     {
         // Arrange
         Mock.Mock<IPathProvider>().SetupGet(x => x.DatabasePath).Returns(() => DatabasePath);
@@ -257,7 +257,7 @@ public class ReaparrDbContextManagerUnitTests : BaseUnitTest<ReaparrDbContextMan
         Mock.Mock<IGeneralSettings>().SetupSet(x => x.FirstTimeSetup = true).Verifiable(Times.AtLeastOnce);
 
         // Act
-        var result = Sut.Setup();
+        var result = await Sut.SetupAsync();
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -266,7 +266,7 @@ public class ReaparrDbContextManagerUnitTests : BaseUnitTest<ReaparrDbContextMan
     }
 
     [Test]
-    public void ShouldResetDatabase_WhenMigrationThrowsException()
+    public async Task ShouldResetDatabase_WhenMigrationThrowsException()
     {
         // Arrange
         Mock.Mock<IPathProvider>().SetupGet(x => x.DatabasePath).Returns(() => DatabasePath);
@@ -293,7 +293,7 @@ public class ReaparrDbContextManagerUnitTests : BaseUnitTest<ReaparrDbContextMan
         Mock.Mock<IGeneralSettings>().SetupSet(x => x.FirstTimeSetup = true).Verifiable(Times.Once);
 
         // Act
-        var result = Sut.Setup();
+        var result = await Sut.SetupAsync();
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -301,7 +301,7 @@ public class ReaparrDbContextManagerUnitTests : BaseUnitTest<ReaparrDbContextMan
     }
 
     [Test]
-    public void ShouldFailBackup_WhenBackupDirectoryCannotBeCreated()
+    public async Task ShouldFailBackup_WhenBackupDirectoryCannotBeCreated()
     {
         // Arrange
         Mock.Mock<IPathProvider>().SetupGet(x => x.DatabasePath).Returns(() => DatabasePath);
@@ -313,14 +313,14 @@ public class ReaparrDbContextManagerUnitTests : BaseUnitTest<ReaparrDbContextMan
         Mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.CanConnect()).Returns(false);
 
         // Act
-        var result = Sut.Setup();
+        var result = await Sut.SetupAsync();
 
         // Assert
         result.IsFailed.ShouldBeTrue();
     }
 
     [Test]
-    public void ShouldHandlePartialBackup_WhenSomeDatabaseFilesAreMissing()
+    public async Task ShouldHandlePartialBackup_WhenSomeDatabaseFilesAreMissing()
     {
         // Arrange
         List<string> dbFiles = [DatabasePath, DatabasePath + "-shm", DatabasePath + "-wal"];
@@ -343,7 +343,7 @@ public class ReaparrDbContextManagerUnitTests : BaseUnitTest<ReaparrDbContextMan
         Mock.Mock<IGeneralSettings>().SetupSet(x => x.FirstTimeSetup = true).Verifiable(Times.Once);
 
         // Act
-        var result = Sut.Setup();
+        var result = await Sut.SetupAsync();
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -353,7 +353,7 @@ public class ReaparrDbContextManagerUnitTests : BaseUnitTest<ReaparrDbContextMan
     }
 
     [Test]
-    public void ShouldFailReset_WhenDatabaseDeletionFails()
+    public async Task ShouldFailReset_WhenDatabaseDeletionFails()
     {
         // Arrange
         Mock.Mock<IPathProvider>().SetupGet(x => x.DatabasePath).Returns(() => DatabasePath);
@@ -372,7 +372,7 @@ public class ReaparrDbContextManagerUnitTests : BaseUnitTest<ReaparrDbContextMan
             .Returns(Result.Fail("Database deletion failed"));
 
         // Act
-        var result = Sut.Setup();
+        var result = await Sut.SetupAsync();
 
         // Assert
         result.IsFailed.ShouldBeTrue();
@@ -381,7 +381,7 @@ public class ReaparrDbContextManagerUnitTests : BaseUnitTest<ReaparrDbContextMan
     }
 
     [Test]
-    public void ShouldFailReset_WhenDatabaseCreationFailsAfterReset()
+    public async Task ShouldFailReset_WhenDatabaseCreationFailsAfterReset()
     {
         // Arrange
         Mock.Mock<IPathProvider>().SetupGet(x => x.DatabasePath).Returns(() => DatabasePath);
@@ -401,7 +401,7 @@ public class ReaparrDbContextManagerUnitTests : BaseUnitTest<ReaparrDbContextMan
             .Throws(new Exception("Database creation failed"));
 
         // Act
-        var result = Sut.Setup();
+        var result = await Sut.SetupAsync();
 
         // Assert
         result.IsFailed.ShouldBeTrue();
@@ -410,7 +410,7 @@ public class ReaparrDbContextManagerUnitTests : BaseUnitTest<ReaparrDbContextMan
     }
 
     [Test]
-    public void ShouldHandleExceptionInResetDatabase_AndReturnFailure()
+    public async Task ShouldHandleExceptionInResetDatabase_AndReturnFailure()
     {
         // Arrange
         Mock.Mock<IPathProvider>().SetupGet(x => x.DatabasePath).Returns(() => DatabasePath);
@@ -421,14 +421,14 @@ public class ReaparrDbContextManagerUnitTests : BaseUnitTest<ReaparrDbContextMan
         Mock.Mock<IFile>().Setup(x => x.Exists(It.IsAny<string>())).Returns(true);
 
         // Act
-        var result = Sut.Setup();
+        var result = await Sut.SetupAsync();
 
         // Assert
         result.IsFailed.ShouldBeTrue();
     }
 
     [Test]
-    public void ShouldSetFirstTimeSetupToTrue_WhenDatabaseIsReset()
+    public async Task ShouldSetFirstTimeSetupToTrue_WhenDatabaseIsReset()
     {
         // Arrange
         Mock.Mock<IPathProvider>().SetupGet(x => x.DatabasePath).Returns(() => DatabasePath);
@@ -450,7 +450,7 @@ public class ReaparrDbContextManagerUnitTests : BaseUnitTest<ReaparrDbContextMan
         generalSettingsMock.SetupProperty(x => x.FirstTimeSetup);
 
         // Act
-        var result = Sut.Setup();
+        var result = await Sut.SetupAsync();
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -458,7 +458,7 @@ public class ReaparrDbContextManagerUnitTests : BaseUnitTest<ReaparrDbContextMan
     }
 
     [Test]
-    public void ShouldSkipBackup_WhenDatabaseDoesNotExistDuringReset()
+    public async Task ShouldSkipBackup_WhenDatabaseDoesNotExistDuringReset()
     {
         // Arrange
         Mock.Mock<IPathProvider>().SetupGet(x => x.DatabasePath).Returns(() => DatabasePath);
@@ -470,7 +470,7 @@ public class ReaparrDbContextManagerUnitTests : BaseUnitTest<ReaparrDbContextMan
         Mock.Mock<IAuthDbContextDatabase>().Setup(x => x.Migrate()).Returns(Result.Ok());
 
         // Act
-        var result = Sut.Setup();
+        var result = await Sut.SetupAsync();
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -479,7 +479,7 @@ public class ReaparrDbContextManagerUnitTests : BaseUnitTest<ReaparrDbContextMan
     }
 
     [Test]
-    public void ShouldFailAuthDatabaseCreation_WhenExceptionIsThrown()
+    public async Task ShouldFailAuthDatabaseCreation_WhenExceptionIsThrown()
     {
         // Arrange
         Mock.Mock<IPathProvider>().SetupGet(x => x.DatabasePath).Returns(() => DatabasePath);
@@ -490,7 +490,7 @@ public class ReaparrDbContextManagerUnitTests : BaseUnitTest<ReaparrDbContextMan
             .Throws(new Exception("Auth database creation failed"));
 
         // Act
-        var result = Sut.Setup();
+        var result = await Sut.SetupAsync();
 
         // Assert
         result.IsFailed.ShouldBeTrue();

@@ -1,4 +1,5 @@
 using Reaparr.FluentResultExtensions;
+using Velopack;
 
 namespace Reaparr.AppHost;
 
@@ -13,8 +14,12 @@ public class Program
     ///  The main method entry point for the application.
     /// </summary>
     /// <param name="args"></param>
-    public static void Main(string[] args)
+    [STAThread]
+    public static async Task Main(string[] args)
     {
+        // Must be first: handles installer hooks (install, uninstall, update) and exits early when invoked by the Velopack installer.
+        VelopackApp.Build().Run();
+
         try
         {
             _log.Here().Information("Starting Reaparr!");
@@ -39,9 +44,7 @@ public class Program
             var builder = WebApplication.CreateBuilder(args);
 
             builder.Host.ConfigureAutofacBuilder();
-
             builder.Services.ConfigureServices(builder.Environment);
-
             var app = builder.Build();
 
             var configResult = app.SetupConfigFile();
@@ -51,7 +54,7 @@ public class Program
                 return;
             }
 
-            var configureDatabase = app.SetupDatabase();
+            var configureDatabase = await app.SetupDatabase();
             if (configureDatabase.IsFailed)
             {
                 FailedToStart(configureDatabase);
@@ -62,7 +65,24 @@ public class Program
 
             app.ConfigureApplication(app.Environment);
 
-            app.Run();
+            if (EnvironmentExtensions.IsDesktopMode())
+            {
+                await app.StartAsync();
+                try
+                {
+                    var desktopModeResult = app.Services.GetRequiredService<IDesktopMode>().Setup();
+                    if (desktopModeResult.IsFailed)
+                        FailedToStart(desktopModeResult);
+                }
+                finally
+                {
+                    await app.StopAsync();
+                }
+            }
+            else
+            {
+                await app.RunAsync();
+            }
         }
         catch (Exception e)
         {

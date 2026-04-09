@@ -66,13 +66,11 @@ public class PauseDownloadTaskCommandHandler : ICommandHandler<PauseDownloadTask
             // It still needs to be marked paused so it is not picked up as runnable.
             if (downloadTask.DownloadStatus == DownloadStatus.DownloadFinished)
             {
-                var queuedPauseResult = await _downloadTaskUpdateDispatcher.OnStatusChangedAsync(
+                await _downloadTaskUpdateDispatcher.OnStatusChangedAsync(
                     downloadTaskKey,
                     DownloadStatus.Paused,
                     cancellationToken
                 );
-                if (queuedPauseResult.IsFailed)
-                    return queuedPauseResult.LogError();
                 continue;
             }
 
@@ -102,13 +100,11 @@ public class PauseDownloadTaskCommandHandler : ICommandHandler<PauseDownloadTask
             var isDownloading = await _downloadTaskScheduler.IsDownloading(downloadTaskKey, cancellationToken);
             if (!isDownloading)
             {
-                var inactivePauseResult = await _downloadTaskUpdateDispatcher.OnStatusChangedAsync(
+                await _downloadTaskUpdateDispatcher.OnStatusChangedAsync(
                     downloadTaskKey,
                     DownloadStatus.Paused,
                     cancellationToken
                 );
-                if (inactivePauseResult.IsFailed)
-                    return inactivePauseResult.LogError();
                 continue;
             }
 
@@ -116,13 +112,11 @@ public class PauseDownloadTaskCommandHandler : ICommandHandler<PauseDownloadTask
             if (stopResult.IsFailed)
                 return stopResult.LogError();
 
-            var statusUpdateResult = await _downloadTaskUpdateDispatcher.OnStatusChangedAsync(
+            await _downloadTaskUpdateDispatcher.OnStatusChangedAsync(
                 downloadTaskKey,
                 DownloadStatus.Paused,
                 cancellationToken
             );
-            if (statusUpdateResult.IsFailed)
-                return statusUpdateResult.LogError();
         }
 
         return Result.Ok();

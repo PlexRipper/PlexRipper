@@ -53,18 +53,18 @@ public class DownloadTaskUpdateDispatcher : BackgroundService, IDownloadTaskUpda
     }
 
     /// <inheritdoc />
-    public async Task<Result> OnStatusChangedAsync(
+    public async Task OnStatusChangedAsync(
         DownloadTaskKey key,
         DownloadStatus newStatus,
         CancellationToken cancellationToken = default
     ) => await OnStatusChangedAsync(key, newStatus, null, cancellationToken);
 
     /// <inheritdoc />
-    public async Task<Result> OnStatusChangedAsync(
+    public async Task OnStatusChangedAsync(
         DownloadTaskKey key,
         DownloadStatus newStatus,
         Result? errorResult,
-        CancellationToken cancellationToken = default
+        CancellationToken cancellationToken
     )
     {
         var result = await Result.Try(async Task () =>
@@ -145,37 +145,32 @@ public class DownloadTaskUpdateDispatcher : BackgroundService, IDownloadTaskUpda
 
         if (result.IsFailed)
             result.LogError();
-
-        return result.LogIfFailed();
     }
 
     /// <inheritdoc />
-    public Result OnProgressUpdated(
+    public void OnProgressUpdated(
         DownloadTaskKey key,
         DownloadTaskProgress progress,
         DirectDownloadSnapshot? snapshot = null
     )
     {
-        return Result.Try(() =>
+        if (_statusByNodeId.GetValueOrDefault(key.Id) is DownloadStatus.Paused or DownloadStatus.Deleted)
+            return;
+
+        var update = new BufferedProgressUpdate
         {
-            if (_statusByNodeId.GetValueOrDefault(key.Id) is DownloadStatus.Paused or DownloadStatus.Deleted)
-                return;
+            NodeId = key.Id,
+            Key = key,
+            Progress = progress,
+            Snapshot = snapshot,
+        };
 
-            var update = new BufferedProgressUpdate
-            {
-                NodeId = key.Id,
-                Key = key,
-                Progress = progress,
-                Snapshot = snapshot,
-            };
+        _progressByNodeId.AddOrUpdate(key.Id, _ => update, (_, _) => update);
 
-            _progressByNodeId.AddOrUpdate(key.Id, _ => update, (_, _) => update);
-
-            // On the first progress event for this node, bypass the periodic flush so the
-            // front-end receives data immediately instead of waiting up to 1 second.
-            if (_seenProgressNodes.TryAdd(key.Id, 0))
-                _firstProgressChannel.Writer.TryWrite(update);
-        });
+        // On the first progress event for this node, bypass the periodic flush so the
+        // front-end receives data immediately instead of waiting up to 1 second.
+        if (_seenProgressNodes.TryAdd(key.Id, 0))
+            _firstProgressChannel.Writer.TryWrite(update);
     }
 
     /// <inheritdoc />

@@ -12,9 +12,16 @@
 **/.idea/**
 **/.run
 **/.run/**
+**/.nuxt
+**/.output
+**/.nitro
 **/*.*proj.user
+**/.cache
+**/.eslintcache
 **/*.dbmdl
 **/*.jfm
+**/coverage
+**/dist
 **/azds.yaml
 **/bin
 **/charts
@@ -25,5 +32,9 @@
 **/obj
 **/secrets.dev.yaml
 **/values.dev.yaml
+/.test-artifacts
+/TestResults
+/export
+/tests
 LICENSE
 README.md

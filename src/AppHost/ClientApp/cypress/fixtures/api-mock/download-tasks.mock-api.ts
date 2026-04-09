@@ -35,15 +35,26 @@ export function setupMockDownloadTasksEndpoints(
 	// DownloadDetails call
 	if (config.setDownloadDetails) {
 		for (const serverDownload of this.serverDownloadProgress) {
-			const downloadTasks = this.serverDownloadProgress.flatMap((x) => x.downloads);
-			for (const downloadTask of downloadTasks) {
+			for (const downloadTask of serverDownload.downloads) {
 				const generatedDownloadTask = generateDownloadTask({
 					config,
 					id: downloadTask.id,
 					plexLibraryId: 1,
 					plexServerId: serverDownload.id,
 					type: Convert.toDownloadTaskType(downloadTask.mediaType),
-					// partial: downloadTask,
+					partial: {
+						title: downloadTask.title,
+						fullTitle: downloadTask.title,
+						mediaType: downloadTask.mediaType,
+						status: downloadTask.status,
+						percentage: downloadTask.percentage,
+						dataReceived: downloadTask.dataReceived,
+						dataTotal: downloadTask.dataTotal,
+						downloadSpeed: downloadTask.downloadSpeed,
+						timeRemaining: downloadTask.timeRemaining,
+						plexLibraryId: 1,
+						plexServerId: serverDownload.id,
+					},
 				});
 				this.detailDownloadTasks.push(generatedDownloadTask);
 				cy.intercept('GET', DownloadPaths.getDownloadTaskByGuidEndpoint(downloadTask.id), {

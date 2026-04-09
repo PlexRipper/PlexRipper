@@ -11,7 +11,7 @@ public static class FileInfoMappers
             Extension = source.Extension,
             Size = source.Length,
             Type = FileSystemEntityType.File,
-            HasReadPermission = source.IsReadOnly, // TODO: check if this is correct
+            HasReadPermission = true,
             HasWritePermission = !source.IsReadOnly,
         };
 }

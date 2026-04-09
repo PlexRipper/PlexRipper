@@ -159,7 +159,7 @@ import { get, set, useClipboard } from '@vueuse/core';
 import { useVirtualizer, type VirtualItem } from '@tanstack/vue-virtual';
 import { format } from 'date-fns';
 import { downloadApi } from '@api';
-import type { DownloadTaskDTO, DownloadTaskLogDTO } from '@dto';
+import type { BaseResultDTO, DownloadTaskDTO, DownloadTaskLogDTO } from '@dto';
 import { NotificationLevel } from '@dto';
 import Convert from '@class/Convert';
 import { translateDownloadStatus, showSuccessNotification } from '@composables';
@@ -302,13 +302,26 @@ function deleteLogs() {
 			type: props.downloadTask.downloadTaskType,
 			plexLibraryId: props.downloadTask.plexLibraryId,
 			plexServerId: props.downloadTask.plexServerId,
-		}).subscribe(() => {
-			set(logs, []);
-			set(highestSeenId, undefined);
-			emit('logs-deleted');
-			showSuccessNotification(t('components.download-details-dialog.logs.deleted'), 5000);
-			set(logsLoading, false);
-			logRefreshTimer.resume();
+		}).subscribe({
+			next: (result) => {
+				const deleteResult = result as BaseResultDTO;
+				if (!deleteResult.isSuccess) {
+					set(logsLoading, false);
+					logRefreshTimer.resume();
+					return;
+				}
+
+				set(logs, []);
+				set(highestSeenId, undefined);
+				emit('logs-deleted');
+				showSuccessNotification(t('components.download-details-dialog.logs.deleted'), 5000);
+				set(logsLoading, false);
+				logRefreshTimer.resume();
+			},
+			error: () => {
+				set(logsLoading, false);
+				logRefreshTimer.resume();
+			},
 		}),
 	);
 }

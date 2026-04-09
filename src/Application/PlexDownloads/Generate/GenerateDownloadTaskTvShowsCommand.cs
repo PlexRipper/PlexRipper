@@ -19,9 +19,14 @@ public class GenerateDownloadTaskTvShowsCommandValidator : AbstractValidator<Gen
 {
     public GenerateDownloadTaskTvShowsCommandValidator()
     {
-        RuleFor(x => x.Request.DownloadMedias).NotNull();
-        RuleFor(x => x.Request.DownloadMedias).NotEmpty();
-        RuleForEach(x => x.Request.DownloadMedias).SetValidator(new DownloadMediaDTOValidator());
+        RuleFor(x => x.Request)
+            .NotNull()
+            .DependentRules(() =>
+            {
+                RuleFor(x => x.Request.DownloadMedias).NotNull();
+                RuleFor(x => x.Request.DownloadMedias).NotEmpty();
+                RuleForEach(x => x.Request.DownloadMedias).SetValidator(new DownloadMediaDTOValidator());
+            });
     }
 }
 
@@ -68,6 +73,8 @@ public class GenerateDownloadTaskTvShowsCommandHandler : ICommandHandler<Generat
             var seasonsIds = new List<DownloadMediaDTO>();
             var tvShowsToInsert = new List<DownloadTaskTvShow>();
 
+            await using var transaction = await _dbContext.BeginTransactionAsync(cancellationToken);
+
             foreach (var tvShow in plexTvShows)
             {
                 // Check if the tvShowDownloadTask has already been created
@@ -100,8 +107,14 @@ public class GenerateDownloadTaskTvShowsCommandHandler : ICommandHandler<Generat
             _dbContext.DownloadTaskTvShow.AddRange(tvShowsToInsert);
             await _dbContext.SaveChangesAsync(cancellationToken);
 
+            if (seasonsIds.Count == 0)
+            {
+                await transaction.CommitAsync(cancellationToken);
+                continue;
+            }
+
             // Create seasons downloadTasks
-            await _commandExecutor.Send(
+            var seasonsResult = await _commandExecutor.Send(
                 new GenerateDownloadTaskTvShowSeasonsCommand(
                     new CreateDownloadTasksRequest(
                         seasonsIds,
@@ -111,6 +124,10 @@ public class GenerateDownloadTaskTvShowsCommandHandler : ICommandHandler<Generat
                 ),
                 cancellationToken
             );
+            if (seasonsResult.IsFailed)
+                return seasonsResult.LogError();
+
+            await transaction.CommitAsync(cancellationToken);
         }
 
         return Result.Ok();

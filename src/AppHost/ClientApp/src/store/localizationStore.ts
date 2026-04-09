@@ -1,6 +1,6 @@
 import Log from 'consola';
 import { acceptHMRUpdate, defineStore } from 'pinia';
-import { reactive, computed, toRefs } from 'vue';
+import { reactive, computed, toRefs, unref } from 'vue';
 import type { Observable } from 'rxjs';
 import { of } from 'rxjs';
 import { get } from '@vueuse/core';
@@ -21,14 +21,28 @@ export const useLocalizationStore = defineStore(StoreNames.LocalizationStore, ()
 	};
 
 	const state = reactive<ILocalizationStoreState>(cloneDeep(defaultState));
+	const emptyLocale: ILocaleConfig = {
+		text: '',
+		code: '' as Locale,
+		iso: '',
+		bcp47Code: 'en-US',
+		img: '',
+	};
+
+	function isI18nReady(i18n?: unknown): i18n is I18nObjectType {
+		const locales = unref((i18n as { locales?: unknown })?.locales);
+		return !!i18n
+			&& Array.isArray(locales)
+			&& typeof (i18n as { setLocale?: unknown }).setLocale === 'function';
+	}
 
 	// Actions
 	const actions = {
 		setup(): Observable<ISetupResult> {
 			return of({ name: StoreNames.LocalizationStore, isSuccess: true });
 		},
-		setI18nObject(i18n?: I18nObjectType) {
-			if (!i18n) {
+		setI18nObject(i18n?: unknown) {
+			if (!isI18nReady(i18n)) {
 				Log.error('i18n object is not defined');
 				return;
 			}
@@ -38,7 +52,7 @@ export const useLocalizationStore = defineStore(StoreNames.LocalizationStore, ()
 			actions.changeLanguageLocale(get(i18n.locale));
 		},
 		changeLanguageLocale(isoCode: Locale) {
-			if (!state.i18nRef) {
+			if (!isI18nReady(state.i18nRef)) {
 				Log.error('i18n object is not defined');
 				return;
 			}
@@ -48,7 +62,10 @@ export const useLocalizationStore = defineStore(StoreNames.LocalizationStore, ()
 				Log.info('Localization has been set to:', isoCode);
 			});
 		},
-		toILocalConfig(locale: LocaleObject): ILocaleConfig {
+		toILocalConfig(locale?: LocaleObject | null): ILocaleConfig {
+			if (!locale?.code || !locale?.name) {
+				return emptyLocale;
+			}
 			return {
 				text: locale.name!,
 				code: locale.code,
@@ -64,11 +81,20 @@ export const useLocalizationStore = defineStore(StoreNames.LocalizationStore, ()
 	// Getters
 	const getters = {
 		getLanguageLocale: computed((): ILocaleConfig => {
-			const locale = state.i18nRef.locales.find((locale) => locale.code === state.i18nRef.locale) as LocaleObject;
+			if (!isI18nReady(state.i18nRef)) {
+				return emptyLocale;
+			}
+
+			const locales = unref(state.i18nRef.locales) as LocaleObject[];
+			const locale = locales.find((locale) => locale.code === state.i18nRef.locale) as LocaleObject | undefined;
 			return actions.toILocalConfig(locale);
 		}),
 		getLanguageLocaleOptions: computed((): ILocaleConfig[] => {
-			return state.i18nRef.locales.map((x) => (actions.toILocalConfig(x)));
+			if (!isI18nReady(state.i18nRef)) {
+				return [];
+			}
+
+			return (unref(state.i18nRef.locales) as LocaleObject[]).map((x) => (actions.toILocalConfig(x)));
 		}),
 	};
 

@@ -93,8 +93,12 @@ describe('Downloads page', () => {
 		cy.url().should('eq', route('/downloads'));
 		cy.getPageData().then((data) => {
 			const downloadTask = data.detailDownloadTasks[0];
-			cy.intercept('GET', DownloadPaths.getDownloadTaskLogsByDownloadTaskIdEndpoint(downloadTask.id), generateResultDTO([]));
+			cy.intercept({
+				method: 'GET',
+				pathname: DownloadPaths.getDownloadTaskLogsByDownloadTaskIdEndpoint(downloadTask.id),
+			}, generateResultDTO([])).as('downloadTaskLogs');
 			cy.getCy(`column-actions-details-${downloadTask.id}`).click();
+			cy.wait('@downloadTaskLogs');
 			cy.getCy('download-details-dialog-status').should('contain.text', downloadTask.status);
 			cy.getCy('download-details-dialog-file-name').should('contain.text', downloadTask.fileName);
 			cy.getCy('download-details-dialog-download-path').should('contain.text', downloadTask.downloadDirectory);

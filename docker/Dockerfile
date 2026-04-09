@@ -38,7 +38,6 @@ ENV DOTNET_CLI_TELEMETRY_OPTOUT=1 \
 COPY ["Directory.Build.props", "."]
 COPY --parents src/*/*.csproj src/*/packages.lock.json /src/
 
-
 ## Restore Projects
 RUN dotnet restore "src/AppHost/AppHost.csproj" --locked-mode
 
@@ -84,6 +83,7 @@ ENV PORT=${PORT}
 ENV DOTNET_ENVIRONMENT=Production
 ENV DOTNET_URLS=http://+:${PORT}
 ENV S6_SERVICES_GRACETIME=15000
+ENV REAPARR_PLATFORM=docker
 
 # Install Alpine dependencies (.NET runtime deps + dash-mpd-cli helpers)
 RUN apk add --no-cache bash icu-libs krb5-libs libgcc libintl libssl3 libstdc++ zlib \

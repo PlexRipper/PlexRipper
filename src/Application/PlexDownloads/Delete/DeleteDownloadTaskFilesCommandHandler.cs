@@ -113,6 +113,7 @@ public class DeleteDownloadTaskFilesCommandHandler : ICommandHandler<DeleteDownl
         // DownloadFilePath includes the .reaptemp suffix — check it first.
         var reapTempPath = task.DownloadFilePath;
         var plainPath = reapTempPath.RemoveReapTempSuffix();
+        var deletedAny = false;
 
         foreach (var candidate in new[] { reapTempPath, plainPath })
         {
@@ -129,8 +130,11 @@ public class DeleteDownloadTaskFilesCommandHandler : ICommandHandler<DeleteDownl
                 return deleteResult.WithError($"Failed to delete download file '{candidate}' for '{task.FullTitle}'");
             }
 
-            return Result.Ok();
+            deletedAny = true;
         }
+
+        if (deletedAny)
+            return Result.Ok();
 
         _log.Here()
             .Debug(

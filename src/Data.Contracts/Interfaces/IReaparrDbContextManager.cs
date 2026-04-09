@@ -1,3 +1,3 @@
 namespace Reaparr.Data.Contracts;
 
-public interface IReaparrDbContextManager : ISetup { }
+public interface IReaparrDbContextManager : ISetupAsync { }

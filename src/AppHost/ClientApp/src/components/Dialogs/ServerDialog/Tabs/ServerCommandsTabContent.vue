@@ -50,10 +50,18 @@ function syncServerLibraries(): void {
 	useSubscription(
 		plexServerApi
 			.syncPlexServerMediaEndpoint(props.plexServer.id)
-			.subscribe(() => {
-				set(syncLoading, false);
-				dialogStore.closeDialog(DialogType.ServerSettingsDialog);
-				dialogStore.openDialog(DialogType.SyncServerMediaDialog);
+			.subscribe({
+				next: (result) => {
+					set(syncLoading, false);
+					if (!result.isSuccess) {
+						return;
+					}
+					dialogStore.closeDialog(DialogType.ServerSettingsDialog);
+					dialogStore.openDialog(DialogType.SyncServerMediaDialog);
+				},
+				error: () => {
+					set(syncLoading, false);
+				},
 			}),
 	);
 }
@@ -64,8 +72,13 @@ function inspectServer(): void {
 	}
 	set(inspectLoading, true);
 	useSubscription(
-		plexServerApi.queueInspectPlexServerJobEndpoint(props.plexServer.id).subscribe(() => {
-			set(inspectLoading, false);
+		plexServerApi.queueInspectPlexServerJobEndpoint(props.plexServer.id).subscribe({
+			next: () => {
+				set(inspectLoading, false);
+			},
+			error: () => {
+				set(inspectLoading, false);
+			},
 		}),
 	);
 }

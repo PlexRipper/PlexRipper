@@ -1,0 +1,115 @@
+name: Desktop Build
+
+# Reusable workflow that builds native installers for Windows, Linux, and macOS via Velopack.
+# Can be called with push=true (for releases) or push=false (for testing the build).
+
+on:
+    workflow_call:
+        inputs:
+            version:
+                description: 'Release version (e.g. 1.2.3)'
+                required: true
+                type: string
+            informational_version:
+                description: 'Informational version (e.g. 1.2.3-dev.1)'
+                required: true
+                type: string
+            push:
+                description: 'Upload installers to the GitHub Release'
+                required: false
+                type: boolean
+                default: false
+
+jobs:
+    build:
+        name: Build ${{ matrix.rid }}
+        strategy:
+            fail-fast: false
+            matrix:
+                include:
+                    -   rid: win-x64
+                        runner: windows-latest
+                        profile: Desktop-win-x64
+                        main-exe: Reaparr.AppHost.exe
+                    -   rid: linux-x64
+                        runner: ubuntu-latest
+                        profile: Desktop-linux-x64
+                        main-exe: Reaparr.AppHost
+                    -   rid: osx-arm64
+                        runner: macos-latest
+                        profile: Desktop-osx-arm64
+                        main-exe: Reaparr.AppHost
+
+        runs-on: ${{ matrix.runner }}
+        permissions:
+            contents: write
+
+        steps:
+            -   name: Checkout source code
+                uses: actions/checkout@v4
+
+            -   name: Client App Install
+                uses: ./.github/workflows/steps/client-app-install/
+
+            -   name: Generate frontend
+                shell: bash
+                working-directory: src/AppHost/ClientApp/
+                run: bun run generate --fail-on-error
+
+            -   name: Dotnet Setup (Restore only)
+                uses: ./.github/workflows/steps/dotnet-setup/
+                with:
+                    project-path: src/AppHost/AppHost.csproj
+                    restore: true
+                    build: false
+                    # No --locked-mode: the lock file targets the framework-dependent Docker build.
+                    # Self-contained desktop builds need RID-specific native packages.
+                    locked-mode: false
+                    runtime: ${{ matrix.rid }}
+
+            -   name: Publish
+                shell: bash
+                run: |
+                    dotnet publish src/AppHost/AppHost.csproj \
+                        /p:PublishProfile=${{ matrix.profile }} \
+                        /p:Version=${{ inputs.version }} \
+                        /p:InformationalVersion=${{ inputs.informational_version }} \
+                        --no-restore
+
+            -   name: Copy frontend to publish output
+                shell: bash
+                run: |
+                    mkdir -p src/AppHost/bin/Publish/Desktop/${{ matrix.rid }}/wwwroot
+                    cp -r src/AppHost/ClientApp/.output/public/. src/AppHost/bin/Publish/Desktop/${{ matrix.rid }}/wwwroot/
+
+            -   name: Install Velopack CLI
+                run: dotnet tool install -g vpk
+
+            -   name: Download previous release (for delta packages)
+                if: inputs.push
+                shell: bash
+                run: |
+                    vpk download github \
+                        --repoUrl https://github.com/${{ github.repository }} \
+                        --token ${{ secrets.GITHUB_TOKEN }}
+
+            -   name: Pack installer
+                shell: bash
+                run: |
+                    vpk pack \
+                        --packId Reaparr \
+                        --packTitle Reaparr \
+                        --packVersion ${{ inputs.version }} \
+                        --packDir src/AppHost/bin/Publish/Desktop/${{ matrix.rid }} \
+                        --mainExe ${{ matrix.main-exe }}
+
+            -   name: Upload to GitHub Release
+                if: inputs.push
+                shell: bash
+                run: |
+                    vpk upload github \
+                        --repoUrl https://github.com/${{ github.repository }} \
+                        --publish \
+                        --releaseName "Reaparr ${{ inputs.version }}" \
+                        --tag v${{ inputs.version }} \
+                        --token ${{ secrets.GITHUB_TOKEN }}

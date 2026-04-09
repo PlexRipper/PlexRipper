@@ -140,7 +140,7 @@ function toFileSize(size: number): string {
 	if (!size) {
 		return '-';
 	}
-	return prettyBytes(size, { locale: localizationStore.getLanguageLocale?.bcp47Code });
+	return prettyBytes(size, { locale: localizationStore.getLanguageLocale?.bcp47Code || 'en-US' });
 }
 
 function mediaTypeToAllText(mediaType: PlexMediaType): string {

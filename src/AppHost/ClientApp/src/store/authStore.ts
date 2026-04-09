@@ -5,7 +5,7 @@ import { StoreNames, type ISetupResult } from '@interfaces';
 import type { Observable } from 'rxjs';
 import { authenticationApi } from '@api';
 import { catchError, of } from 'rxjs';
-import { tap, switchMap } from 'rxjs/operators';
+import { map, tap, switchMap } from 'rxjs/operators';
 import { useGlobalStore } from '@store';
 import { get } from '@vueuse/core';
 import { cloneDeep } from 'lodash-es';
@@ -39,9 +39,9 @@ export const useAuthenticationStore = defineStore(StoreNames.AuthenticationStore
 
 	const actions = {
 		setup(): Observable<ISetupResult> {
-			return actions.status().pipe(switchMap(() => of({
+			return actions.status().pipe(map((statusResult) => ({
 				name: StoreNames.AuthenticationStore,
-				isSuccess: state.isLoggedIn ?? false,
+				isSuccess: !!statusResult?.isSuccess,
 			})));
 		},
 		refreshCredentials() {
@@ -98,11 +98,12 @@ export const useAuthenticationStore = defineStore(StoreNames.AuthenticationStore
 
 			return authenticationApi.appUserLogOutEndpoint().pipe(
 				tap((res) => Log.info('User logged out', res)),
+				tap(() => state.isLoggedIn = false),
 				tap(() => router.push('/login')),
 				tap(() => globalStore.$reset()));
 		},
 		status: () => authenticationApi.authenticationStatusEndpoint().pipe(
-			tap((res) => state.isLoggedIn = res.isSuccess),
+			tap((res) => state.isLoggedIn = res.isSuccess && !!res.value?.isLoggedIn),
 			catchError((err) => {
 				state.isLoggedIn = false;
 				return of(err);

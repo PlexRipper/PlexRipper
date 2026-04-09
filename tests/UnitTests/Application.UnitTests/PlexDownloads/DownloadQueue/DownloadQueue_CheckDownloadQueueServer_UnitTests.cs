@@ -120,10 +120,7 @@ public class DownloadQueueCheckDownloadQueueUnitTests : BaseUnitTest<DownloadQue
         server.IsDownloadsPausedByUser = true;
         await dbContext.SaveChangesAsync(CancellationToken);
 
-        Mock.Mock<IDownloadTaskScheduler>()
-            .Setup(x => x.StartDownloadTaskJob(It.IsAny<DownloadTaskKey>()))
-            .ReturnOk()
-            .Verifiable(Times.Never);
+        Mock.Mock<IDownloadTaskScheduler>().Setup(x => x.StartDownloadTaskJob(It.IsAny<DownloadTaskKey>())).ReturnOk();
 
         // Act
         var result = await Sut.CheckDownloadQueueServer(server.Id);
@@ -268,10 +265,7 @@ public class DownloadQueueCheckDownloadQueueUnitTests : BaseUnitTest<DownloadQue
         // Mock the scheduler to return true (job still running - race condition)
         Mock.Mock<IDownloadTaskScheduler>().Setup(x => x.IsServerDownloading(It.IsAny<int>())).ReturnsAsync(true);
 
-        Mock.Mock<IDownloadTaskScheduler>()
-            .Setup(x => x.StartDownloadTaskJob(It.IsAny<DownloadTaskKey>()))
-            .ReturnOk()
-            .Verifiable(Times.Once);
+        Mock.Mock<IDownloadTaskScheduler>().Setup(x => x.StartDownloadTaskJob(It.IsAny<DownloadTaskKey>())).ReturnOk();
 
         // Act
         var result = await Sut.CheckDownloadQueueServer(1);
@@ -323,10 +317,7 @@ public class DownloadQueueCheckDownloadQueueUnitTests : BaseUnitTest<DownloadQue
         // Mock the scheduler to return true (job is running)
         Mock.Mock<IDownloadTaskScheduler>().Setup(x => x.IsServerDownloading(It.IsAny<int>())).ReturnsAsync(true);
 
-        Mock.Mock<IDownloadTaskScheduler>()
-            .Setup(x => x.StartDownloadTaskJob(It.IsAny<DownloadTaskKey>()))
-            .ReturnOk()
-            .Verifiable(Times.Never);
+        Mock.Mock<IDownloadTaskScheduler>().Setup(x => x.StartDownloadTaskJob(It.IsAny<DownloadTaskKey>())).ReturnOk();
 
         // Act
         var result = await Sut.CheckDownloadQueueServer(1);

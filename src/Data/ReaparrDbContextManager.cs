@@ -6,6 +6,7 @@ namespace Reaparr.Data;
 public class ReaparrDbContextManager : IReaparrDbContextManager
 {
     private readonly ILogger _log;
+    private readonly IReaparrDbContext _dbContext;
 
     private readonly IReaparrDbContextDatabase _reaparrDbContextDatabase;
     private readonly IAuthDbContextDatabase _authDbContextDatabase;
@@ -19,6 +20,7 @@ public class ReaparrDbContextManager : IReaparrDbContextManager
 
     public ReaparrDbContextManager(
         ILogger log,
+        IReaparrDbContext dbContext,
         IReaparrDbContextDatabase reaparrDbContextDatabase,
         IAuthDbContextDatabase authDbContextDatabase,
         IGeneralSettings generalSettings,
@@ -28,6 +30,7 @@ public class ReaparrDbContextManager : IReaparrDbContextManager
     )
     {
         _log = log.ForContext<ReaparrDbContextManager>();
+        _dbContext = dbContext;
         _reaparrDbContextDatabase = reaparrDbContextDatabase;
         _authDbContextDatabase = authDbContextDatabase;
         _generalSettings = generalSettings;
@@ -36,7 +39,7 @@ public class ReaparrDbContextManager : IReaparrDbContextManager
         _file = file;
     }
 
-    public Result Setup()
+    public async Task<Result> SetupAsync()
     {
         if (EnvironmentExtensions.IsIntegrationTestMode())
         {
@@ -52,7 +55,7 @@ public class ReaparrDbContextManager : IReaparrDbContextManager
                 _log.Here().Information("Database was successfully connected!");
                 _log.Here().Information("Database connected at: {DatabasePath}", DatabasePath);
 
-                var migrateResult = MigrateDatabase();
+                var migrateResult = await MigrateDatabase();
                 if (migrateResult.IsFailed)
                     return migrateResult;
 
@@ -65,12 +68,12 @@ public class ReaparrDbContextManager : IReaparrDbContextManager
                     "Database exists at {DatabasePath} but could not be connected to, resetting database now",
                     DatabasePath
                 );
-            return ResetDatabase();
+            return await ResetDatabase();
         }
 
         _log.Here().Warning("Database does not exist, creating a new one now");
 
-        var createResult = CreateDatabase();
+        var createResult = await CreateDatabase();
         if (createResult.IsFailed)
             return createResult;
 
@@ -113,7 +116,7 @@ public class ReaparrDbContextManager : IReaparrDbContextManager
         }
     }
 
-    public Result ResetDatabase()
+    public async Task<Result> ResetDatabase()
     {
         try
         {
@@ -137,7 +140,7 @@ public class ReaparrDbContextManager : IReaparrDbContextManager
             if (deletedResult.Value)
                 _log.Here().Warning("Database was successfully deleted at: {DatabasePath}", DatabasePath);
 
-            var createdResult = CreateDatabase();
+            var createdResult = await CreateDatabase();
             if (createdResult.IsFailed)
             {
                 _log.Here().Error("Database could not be created at {DatabasePath}", DatabasePath);
@@ -157,13 +160,18 @@ public class ReaparrDbContextManager : IReaparrDbContextManager
         }
     }
 
-    private Result CreateDatabase()
+    private async Task<Result> CreateDatabase()
     {
         try
         {
             // Create the database while applying any pending migrations.
             _reaparrDbContextDatabase.Migrate();
             _authDbContextDatabase.Migrate();
+
+            var initializeDefaultFolderPathsResult = await InitializeDefaultFolderPathsOnCreate();
+            if (initializeDefaultFolderPathsResult.IsFailed)
+                return initializeDefaultFolderPathsResult.LogError();
+
             _log.Here().Information("The new database was successfully created at: {DatabasePath}", DatabasePath);
             return Result.Ok();
         }
@@ -176,7 +184,55 @@ public class ReaparrDbContextManager : IReaparrDbContextManager
         }
     }
 
-    private Result MigrateDatabase()
+    public async Task<Result> InitializeDefaultFolderPathsOnCreate()
+    {
+        var defaultPathsById = ReaparrDBContextSeed.GetDefaultFolderPaths().ToDictionary(x => x.Id);
+        var targetIds = defaultPathsById.Keys.ToList();
+
+        var existingPaths = await _dbContext
+            .FolderPaths.AsTracking()
+            .Where(x => targetIds.Contains(x.Id))
+            .ToListAsync(CancellationToken.None);
+
+        _log.Here().Information("Initializing default FolderPath directory paths on database create.");
+
+        var updatedCount = 0;
+        foreach (var existingPath in existingPaths)
+        {
+            if (!defaultPathsById.TryGetValue(existingPath.Id, out var defaultPath))
+                continue;
+
+            var oldPath = existingPath.DirectoryPath;
+            var newPath = defaultPath.DirectoryPath;
+            if (oldPath == newPath)
+                continue;
+
+            existingPath.DirectoryPath = newPath;
+            _log.Here()
+                .Debug(
+                    "Updating default FolderPath {FolderPathId}, from \"{OldPath}\" to New Path: \"{NewPath}\".",
+                    existingPath.Id,
+                    oldPath,
+                    newPath
+                );
+            updatedCount++;
+        }
+
+        await _dbContext.SaveChangesAsync(CancellationToken.None);
+
+        if (updatedCount > 0)
+        {
+            _log.Here()
+                .Information(
+                    "Initialized default FolderPath directory paths on database create. Updated rows: {UpdatedCount}",
+                    updatedCount
+                );
+        }
+
+        return Result.Ok();
+    }
+
+    private async Task<Result> MigrateDatabase()
     {
         try
         {
@@ -191,7 +247,9 @@ public class ReaparrDbContextManager : IReaparrDbContextManager
                 {
                     _log.Here().Error("Failed to migrate the database");
                     migrateResult.LogError();
-                    ResetDatabase();
+                    var resetResult = await ResetDatabase();
+                    if (resetResult.IsFailed)
+                        return resetResult;
                 }
                 else
                 {
@@ -208,7 +266,9 @@ public class ReaparrDbContextManager : IReaparrDbContextManager
                 {
                     _log.Here().Error("Failed to migrate Authentication tables database");
                     migrateResult.LogError();
-                    ResetDatabase();
+                    var resetResult = await ResetDatabase();
+                    if (resetResult.IsFailed)
+                        return resetResult;
                 }
                 else
                 {
@@ -223,7 +283,7 @@ public class ReaparrDbContextManager : IReaparrDbContextManager
             _log.Here().Error("Failed to migrate the database or the database is corrupted");
             _log.Here().ErrorResult(e);
 
-            return ResetDatabase();
+            return await ResetDatabase();
         }
     }
 

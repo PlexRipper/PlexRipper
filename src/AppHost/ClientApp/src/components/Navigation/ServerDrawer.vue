@@ -154,7 +154,14 @@ function openMediaPage(library: PlexLibraryDTO): void {
 
 function runReSyncAccount(): void {
 	useSubscription(
-		accountStore.reSyncAccount(0).pipe(tap((data) => dialogStore.openRefreshPlexAccountAccessDialog(data.value ?? []))).subscribe(),
+		accountStore
+			.reSyncAccount(0)
+			.pipe(tap((data) => {
+				if (data.isSuccess) {
+					dialogStore.openRefreshPlexAccountAccessDialog(data.value ?? []);
+				}
+			}))
+			.subscribe(),
 	);
 }
 </script>

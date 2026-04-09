@@ -6,7 +6,9 @@ public class DeleteFolderPathEndpointRequestValidator : Validator<DeleteFolderPa
 {
     public DeleteFolderPathEndpointRequestValidator()
     {
-        RuleFor(x => x.Id).GreaterThan(10).WithMessage("Cannot delete reserved folder paths with an Id less than 10");
+        RuleFor(x => x.Id)
+            .GreaterThanOrEqualTo(10)
+            .WithMessage("Cannot delete reserved folder paths with an Id less than 10");
     }
 }
 

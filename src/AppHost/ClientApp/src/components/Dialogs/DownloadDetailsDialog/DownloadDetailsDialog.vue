@@ -89,6 +89,9 @@ import { set, get } from '@vueuse/core';
 import type { DownloadTaskDTO, DownloadTaskLogDTO, ErrorDTO } from '@dto';
 import { downloadApi } from '@api';
 import { DialogType } from '@enums';
+import { useDownloadStore } from '@store';
+
+const downloadStore = useDownloadStore();
 
 const tabIndex = ref<string>('overview');
 
@@ -125,9 +128,13 @@ function fetchLogs() {
 function onOpen(event: string) {
 	set(loading, true);
 	set(downloadTaskId, event);
+	set(downloadTask, downloadStore.getDownloadTaskById(event) as DownloadTaskDTO | null);
+	set(errors, []);
+	set(logs, []);
 
 	useSubscription(downloadApi.getDownloadTaskByGuidEndpoint(get(downloadTaskId)).subscribe((data) => {
 		if (data.isSuccess && data.value) {
+			set(errors, []);
 			set(downloadTask, data.value);
 			fetchLogs();
 		} else {

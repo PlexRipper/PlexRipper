@@ -110,7 +110,8 @@ public class DirectPlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDow
                     It.IsAny<CancellationToken>()
                 )
             )
-            .ReturnsAsync(Result.Ok());
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.Exactly(2));
         Mock.Mock<IDownloadTaskUpdateDispatcher>()
             .Setup(x =>
                 x.OnStatusChangedAsync(
@@ -120,7 +121,8 @@ public class DirectPlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDow
                     It.IsAny<CancellationToken>()
                 )
             )
-            .ReturnsAsync(Result.Ok());
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.Never());
         Mock.Mock<IDownloadTaskUpdateDispatcher>()
             .Setup(x =>
                 x.OnProgressUpdated(
@@ -128,8 +130,8 @@ public class DirectPlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDow
                     It.IsAny<DownloadTaskProgress>(),
                     It.IsAny<DirectDownloadSnapshot?>()
                 )
-            )
-            .Returns(Result.Ok());
+            );
+
         await SetupDatabase(
             82345,
             config =>
@@ -188,7 +190,8 @@ public class DirectPlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDow
                     It.IsAny<CancellationToken>()
                 )
             )
-            .ReturnsAsync(Result.Ok());
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.Exactly(2));
         Mock.Mock<IDownloadTaskUpdateDispatcher>()
             .Setup(x =>
                 x.OnStatusChangedAsync(
@@ -198,7 +201,8 @@ public class DirectPlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDow
                     It.IsAny<CancellationToken>()
                 )
             )
-            .ReturnsAsync(Result.Ok());
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.Never());
         Mock.Mock<IDownloadTaskUpdateDispatcher>()
             .Setup(x =>
                 x.OnProgressUpdated(
@@ -206,8 +210,8 @@ public class DirectPlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDow
                     It.IsAny<DownloadTaskProgress>(),
                     It.IsAny<DirectDownloadSnapshot?>()
                 )
-            )
-            .Returns(Result.Ok());
+            );
+
         await SetupDatabase(
             82346,
             config =>
@@ -231,14 +235,19 @@ public class DirectPlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDow
 
         Mock.Mock<ICommandExecutor>()
             .Setup(m => m.Send(It.IsAny<ICommand<Result>>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result.Ok())
+            .ReturnsAsync(Result.Ok());
+
+        Mock.Mock<ICommandExecutor>()
+            .Setup(m =>
+                m.Send(
+                    It.Is<ICommand<Result>>(cmd => cmd is EnsureDownloadDirectoryCommand),
+                    It.IsAny<CancellationToken>()
+                )
+            )
             .Callback<ICommand<Result>, CancellationToken>(
-                (command, _) =>
-                {
-                    if (command is EnsureDownloadDirectoryCommand cmd)
-                        ensureDirectoryCommand = cmd;
-                }
-            );
+                (command, _) => ensureDirectoryCommand = (EnsureDownloadDirectoryCommand)command
+            )
+            .ReturnsAsync(Result.Ok());
 
         Mock.Mock<ICommandExecutor>()
             .Setup(m => m.Send(It.IsAny<GetDirectDownloadUrlCommand>(), It.IsAny<CancellationToken>()))
@@ -274,7 +283,8 @@ public class DirectPlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDow
                     It.IsAny<CancellationToken>()
                 )
             )
-            .ReturnsAsync(Result.Ok());
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.Exactly(2));
         Mock.Mock<IDownloadTaskUpdateDispatcher>()
             .Setup(x =>
                 x.OnStatusChangedAsync(
@@ -284,7 +294,8 @@ public class DirectPlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDow
                     It.IsAny<CancellationToken>()
                 )
             )
-            .ReturnsAsync(Result.Ok());
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.Never());
         Mock.Mock<IDownloadTaskUpdateDispatcher>()
             .Setup(x =>
                 x.OnProgressUpdated(
@@ -292,8 +303,8 @@ public class DirectPlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDow
                     It.IsAny<DownloadTaskProgress>(),
                     It.IsAny<DirectDownloadSnapshot?>()
                 )
-            )
-            .Returns(Result.Ok());
+            );
+
         await SetupDatabase(
             82347,
             config =>
@@ -372,7 +383,8 @@ public class DirectPlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDow
                     It.IsAny<CancellationToken>()
                 )
             )
-            .ReturnsAsync(Result.Ok());
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.Once());
         Mock.Mock<IDownloadTaskUpdateDispatcher>()
             .Setup(x =>
                 x.OnProgressUpdated(
@@ -380,8 +392,8 @@ public class DirectPlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDow
                     It.IsAny<DownloadTaskProgress>(),
                     It.IsAny<DirectDownloadSnapshot?>()
                 )
-            )
-            .Returns(Result.Ok());
+            );
+
         await SetupDatabase(
             11111,
             config =>
@@ -427,7 +439,8 @@ public class DirectPlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDow
                     It.IsAny<CancellationToken>()
                 )
             )
-            .ReturnsAsync(Result.Ok());
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.Once());
         Mock.Mock<IDownloadTaskUpdateDispatcher>()
             .Setup(x =>
                 x.OnProgressUpdated(
@@ -435,8 +448,8 @@ public class DirectPlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDow
                     It.IsAny<DownloadTaskProgress>(),
                     It.IsAny<DirectDownloadSnapshot?>()
                 )
-            )
-            .Returns(Result.Ok());
+            );
+
         await SetupDatabase(
             22222,
             config =>
@@ -464,7 +477,7 @@ public class DirectPlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDow
         SetupCommandExecutor();
         Mock.Mock<ICommandExecutor>()
             .Setup(m => m.Send(It.IsAny<GetDirectDownloadUrlCommand>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result.Fail<string>("No server connections"));
+            .ReturnsAsync(Result.Fail<string>("No available Plex server connection"));
 
         // Act
         var sut = CreateSut(BuildSuccessDownloadServiceMock());
@@ -488,7 +501,8 @@ public class DirectPlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDow
                     It.IsAny<CancellationToken>()
                 )
             )
-            .ReturnsAsync(Result.Ok());
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.Once());
         Mock.Mock<IDownloadTaskUpdateDispatcher>()
             .Setup(x =>
                 x.OnStatusChangedAsync(
@@ -498,7 +512,8 @@ public class DirectPlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDow
                     It.IsAny<CancellationToken>()
                 )
             )
-            .ReturnsAsync(Result.Ok());
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.Once());
         Mock.Mock<IDownloadTaskUpdateDispatcher>()
             .Setup(x =>
                 x.OnProgressUpdated(
@@ -506,8 +521,8 @@ public class DirectPlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDow
                     It.IsAny<DownloadTaskProgress>(),
                     It.IsAny<DirectDownloadSnapshot?>()
                 )
-            )
-            .Returns(Result.Ok());
+            );
+
         await SetupDatabase(
             33333,
             config =>
@@ -539,8 +554,7 @@ public class DirectPlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDow
         // Make EnsureDownloadDirectoryCommand fail (registered last to override the general ICommand<Result> setup)
         Mock.Mock<ICommandExecutor>()
             .Setup(m => m.Send(It.IsAny<EnsureDownloadDirectoryCommand>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result.Fail("Disk full"))
-            .Verifiable(Times.Once);
+            .ReturnsAsync(Result.Fail("Disk full"));
 
         // Act
         var sut = CreateSut(BuildSuccessDownloadServiceMock());
@@ -577,7 +591,8 @@ public class DirectPlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDow
                     It.IsAny<CancellationToken>()
                 )
             )
-            .ReturnsAsync(Result.Ok());
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.Exactly(2));
         Mock.Mock<IDownloadTaskUpdateDispatcher>()
             .Setup(x =>
                 x.OnProgressUpdated(
@@ -585,8 +600,8 @@ public class DirectPlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDow
                     It.IsAny<DownloadTaskProgress>(),
                     It.IsAny<DirectDownloadSnapshot?>()
                 )
-            )
-            .Returns(Result.Ok());
+            );
+
         await SetupDatabase(
             44444,
             config =>
@@ -685,7 +700,8 @@ public class DirectPlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDow
                         downloadingStatusWasSetBeforeDownloadStarted = true;
                 }
             )
-            .ReturnsAsync(Result.Ok());
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.Once());
         Mock.Mock<IDownloadTaskUpdateDispatcher>()
             .Setup(x =>
                 x.OnProgressUpdated(
@@ -693,8 +709,7 @@ public class DirectPlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDow
                     It.IsAny<DownloadTaskProgress>(),
                     It.IsAny<DirectDownloadSnapshot?>()
                 )
-            )
-            .Returns(Result.Ok());
+            );
 
         await SetupDatabase(
             84337,
@@ -761,7 +776,8 @@ public class DirectPlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDow
                     It.IsAny<CancellationToken>()
                 )
             )
-            .ReturnsAsync(Result.Ok());
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.Exactly(2));
         Mock.Mock<IDownloadTaskUpdateDispatcher>()
             .Setup(x =>
                 x.OnProgressUpdated(
@@ -769,8 +785,8 @@ public class DirectPlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDow
                     It.IsAny<DownloadTaskProgress>(),
                     It.IsAny<DirectDownloadSnapshot?>()
                 )
-            )
-            .Returns(Result.Ok());
+            );
+
         await SetupDatabase(
             55555,
             config =>
@@ -858,7 +874,8 @@ public class DirectPlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDow
                     It.IsAny<CancellationToken>()
                 )
             )
-            .ReturnsAsync(Result.Ok());
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.Exactly(2));
         Mock.Mock<IDownloadTaskUpdateDispatcher>()
             .Setup(x =>
                 x.OnProgressUpdated(
@@ -866,8 +883,8 @@ public class DirectPlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDow
                     It.IsAny<DownloadTaskProgress>(),
                     It.IsAny<DirectDownloadSnapshot?>()
                 )
-            )
-            .Returns(Result.Ok());
+            );
+
         await SetupDatabase(
             66666,
             config =>
@@ -977,7 +994,8 @@ public class DirectPlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDow
                     It.IsAny<CancellationToken>()
                 )
             )
-            .ReturnsAsync(Result.Ok());
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.Exactly(2));
         Mock.Mock<IDownloadTaskUpdateDispatcher>()
             .Setup(x =>
                 x.OnProgressUpdated(
@@ -985,8 +1003,8 @@ public class DirectPlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDow
                     It.IsAny<DownloadTaskProgress>(),
                     It.IsAny<DirectDownloadSnapshot?>()
                 )
-            )
-            .Returns(Result.Ok());
+            );
+
         await SetupDatabase(
             77777,
             config =>
@@ -1082,7 +1100,8 @@ public class DirectPlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDow
                     It.IsAny<CancellationToken>()
                 )
             )
-            .ReturnsAsync(Result.Ok());
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.Exactly(2));
         Mock.Mock<IDownloadTaskUpdateDispatcher>()
             .Setup(x =>
                 x.OnProgressUpdated(
@@ -1090,8 +1109,8 @@ public class DirectPlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDow
                     It.IsAny<DownloadTaskProgress>(),
                     It.IsAny<DirectDownloadSnapshot?>()
                 )
-            )
-            .Returns(Result.Ok());
+            );
+
         await SetupDatabase(
             88888,
             config =>
@@ -1145,7 +1164,8 @@ public class DirectPlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDow
                     It.IsAny<CancellationToken>()
                 )
             )
-            .ReturnsAsync(Result.Ok());
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.Exactly(2));
         Mock.Mock<IDownloadTaskUpdateDispatcher>()
             .Setup(x =>
                 x.OnProgressUpdated(
@@ -1153,8 +1173,8 @@ public class DirectPlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDow
                     It.IsAny<DownloadTaskProgress>(),
                     It.IsAny<DirectDownloadSnapshot?>()
                 )
-            )
-            .Returns(Result.Ok());
+            );
+
         await SetupDatabase(
             88889,
             config =>
@@ -1232,7 +1252,8 @@ public class DirectPlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDow
                     It.IsAny<CancellationToken>()
                 )
             )
-            .ReturnsAsync(Result.Ok());
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.Once());
         Mock.Mock<IDownloadTaskUpdateDispatcher>()
             .Setup(x =>
                 x.OnProgressUpdated(
@@ -1240,8 +1261,8 @@ public class DirectPlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDow
                     It.IsAny<DownloadTaskProgress>(),
                     It.IsAny<DirectDownloadSnapshot?>()
                 )
-            )
-            .Returns(Result.Ok());
+            );
+
         await SetupDatabase(
             99992,
             config =>
@@ -1317,7 +1338,8 @@ public class DirectPlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDow
                     It.IsAny<CancellationToken>()
                 )
             )
-            .ReturnsAsync(Result.Ok());
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.Once());
         Mock.Mock<IDownloadTaskUpdateDispatcher>()
             .Setup(x =>
                 x.OnProgressUpdated(
@@ -1325,8 +1347,8 @@ public class DirectPlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDow
                     It.IsAny<DownloadTaskProgress>(),
                     It.IsAny<DirectDownloadSnapshot?>()
                 )
-            )
-            .Returns(Result.Ok());
+            );
+
         await SetupDatabase(
             99994,
             config =>
@@ -1400,7 +1422,8 @@ public class DirectPlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDow
                     It.IsAny<CancellationToken>()
                 )
             )
-            .ReturnsAsync(Result.Ok());
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.Exactly(2));
         Mock.Mock<IDownloadTaskUpdateDispatcher>()
             .Setup(x =>
                 x.OnProgressUpdated(
@@ -1408,8 +1431,8 @@ public class DirectPlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDow
                     It.IsAny<DownloadTaskProgress>(),
                     It.IsAny<DirectDownloadSnapshot?>()
                 )
-            )
-            .Returns(Result.Ok());
+            );
+
         await SetupDatabase(
             99991,
             config =>

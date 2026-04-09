@@ -2,7 +2,7 @@ import { defineStore, acceptHMRUpdate } from 'pinia';
 import { reactive, computed, toRefs } from 'vue';
 import type { Observable } from 'rxjs';
 import { of } from 'rxjs';
-import { switchMap, tap, map } from 'rxjs/operators';
+import { switchMap, tap, map, catchError } from 'rxjs/operators';
 import type { PlexServerDTO } from '@dto';
 import { StoreNames, type ISetupResult } from '@interfaces';
 import { plexServerApi } from '@api';
@@ -32,7 +32,16 @@ export const useServerStore = defineStore(StoreNames.ServerStore, () => {
 			// Listen for refresh notifications
 			signalRStore.getRefreshNotification(RefreshDataType.PlexServer).pipe(switchMap(() => actions.refreshPlexServers())).subscribe();
 
-			return actions.refreshPlexServers().pipe(switchMap(() => of({ name: StoreNames.ServerStore, isSuccess: true })));
+			return fetchAndSetPlexServers().pipe(
+				map((result) => ({
+					name: StoreNames.ServerStore,
+					isSuccess: !!result?.isSuccess,
+				})),
+				catchError((error) => {
+					console.error(error);
+					return of({ name: StoreNames.ServerStore, isSuccess: false });
+				}),
+			);
 		},
 		refreshPlexServer(serverId: number) {
 			return plexServerApi.getPlexServerByIdEndpoint(serverId).pipe(
@@ -49,29 +58,22 @@ export const useServerStore = defineStore(StoreNames.ServerStore, () => {
 		/**
      * Forces a refresh of all the PlexServers currently in store by fetching it from the API.
      */
-		refreshPlexServers(): Observable<PlexServerDTO[]> {
-			return plexServerApi.getAllPlexServersEndpoint().pipe(
-				tap((plexServers) => {
-					if (plexServers.isSuccess) {
-						state.servers = plexServers?.value ?? [];
-					}
-				}),
-				map(() => state.servers),
-			);
+		refreshPlexServers() {
+			return fetchAndSetPlexServers().pipe(map(() => [...state.servers]));
 		},
 		setServerAlias(serverId: number, serverAlias: string) {
 			return plexServerApi
 				.setServerAlias(serverId, {
 					serverAlias,
 				})
-				.pipe(switchMap(() => settingsStore.refreshSettings()));
+				.pipe(switchMap((response) => response.isSuccess ? settingsStore.refreshSettings() : of(response)));
 		},
 		setServerHidden(serverId: number, hidden: boolean) {
 			return plexServerApi
 				.setServerHiddenRequestEndpoint(serverId, {
 					hidden,
 				})
-				.pipe(switchMap(() => settingsStore.refreshSettings()));
+				.pipe(switchMap((response) => response.isSuccess ? settingsStore.refreshSettings() : of(response)));
 		},
 		setServerPaused(serverId: number, paused: boolean) {
 			const request$ = paused
@@ -79,13 +81,23 @@ export const useServerStore = defineStore(StoreNames.ServerStore, () => {
 				: plexServerApi.resumePlexServerDownloadsEndpoint(serverId);
 
 			return request$.pipe(
-				tap(() => actions.refreshPlexServer(serverId)),
+				switchMap((response) => response.isSuccess ? actions.refreshPlexServer(serverId) : of(response)),
 			);
 		},
 		$reset() {
 			Object.assign(state, cloneDeep(defaultState));
 		},
 	};
+
+	function fetchAndSetPlexServers() {
+		return plexServerApi.getAllPlexServersEndpoint().pipe(
+			tap((plexServers) => {
+				if (plexServers.isSuccess) {
+					state.servers = plexServers?.value ?? [];
+				}
+			}),
+		);
+	}
 
 	// Getters
 	const getters = {

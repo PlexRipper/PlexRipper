@@ -1120,10 +1120,28 @@
           "Newtonsoft.Json": "13.0.3"
         }
       },
+      "NuGet.Versioning": {
+        "type": "Transitive",
+        "resolved": "6.14.0",
+        "contentHash": "4v4blkhCv8mpKtfx+z0G/X0daVCzdIaHSC51GkUspugi5JIMn2Bo8xm5PdZYF0U68gOBfz/+aPWMnpRd85Jbow=="
+      },
       "PasswordGenerator": {
         "type": "Transitive",
         "resolved": "2.1.0",
         "contentHash": "G70cCeAOYCk/uTuFw5PBGpYY9kmBZyzld7tphachvyU514PowMRDYyKwTefxIHNGWrhXY2d1DV5B1tDEnTtY3A=="
+      },
+      "Photino.Native": {
+        "type": "Transitive",
+        "resolved": "4.0.22",
+        "contentHash": "VIHipEOe4CZ7HElZE8zTwcvANOsCZ2yak/4nQ4LXzjdlwIjdbY8htmHfNR6rRPgWlCfTfT349GCa6V6Id2/Xyg=="
+      },
+      "Photino.NET": {
+        "type": "Transitive",
+        "resolved": "4.0.16",
+        "contentHash": "2oTFsxt8XpLlVvtChlBD8HzLw6MgfHF+DQ4aLEDfgc4GbYjumEywB1JMfWDChm2Whfkr4ZF7DV2deRrpitiBcw==",
+        "dependencies": {
+          "Photino.Native": "4.0.22"
+        }
       },
       "Polly": {
         "type": "Transitive",
@@ -1449,6 +1467,14 @@
           "TUnit.Core": "1.24.0"
         }
       },
+      "Velopack": {
+        "type": "Transitive",
+        "resolved": "0.0.1298",
+        "contentHash": "PJ6Nm28qJ4ChsHYzgHUJ8g+DGyyHes2+bwxY709+znMhgi8fMp8M1FTF8x6pZMjnsPCWVwoMlxVEyq0NLeRZtA==",
+        "dependencies": {
+          "NuGet.Versioning": "6.14.0"
+        }
+      },
       "xunit.v3.common": {
         "type": "Transitive",
         "resolved": "3.2.2",
@@ -1479,6 +1505,7 @@
           "Microsoft.AspNetCore.SignalR.Protocols.MessagePack": "[10.0.5, )",
           "Microsoft.AspNetCore.SpaServices.Extensions": "[10.0.5, )",
           "Microsoft.Extensions.Http.Polly": "[10.0.5, )",
+          "Photino.NET": "[4.0.16, )",
           "Quartz.Extensions.Hosting": "[3.17.0, )",
           "Reaparr.Application": "[1.0.0, )",
           "Reaparr.BackgroundJobs": "[1.0.0, )",
@@ -1490,7 +1517,8 @@
           "Reaparr.PublicAPI": "[1.0.0, )",
           "Reaparr.Settings": "[1.0.0, )",
           "Reaparr.SignalR": "[1.0.0, )",
-          "Serilog.AspNetCore": "[10.0.0, )"
+          "Serilog.AspNetCore": "[10.0.0, )",
+          "Velopack": "[0.0.1298, )"
         }
       },
       "Reaparr.Application": {

@@ -59,7 +59,8 @@ public class DashPlexDownloadClientStopAsyncUnitTests : BaseUnitTest<DashPlexDow
                     It.IsAny<CancellationToken>()
                 )
             )
-            .ReturnsAsync(Result.Ok());
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.Exactly(2));
         await SetupDatabase(
             13001,
             config =>
@@ -132,7 +133,8 @@ public class DashPlexDownloadClientStopAsyncUnitTests : BaseUnitTest<DashPlexDow
                     It.IsAny<CancellationToken>()
                 )
             )
-            .ReturnsAsync(Result.Ok());
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.Exactly(3));
         await SetupDatabase(
             13002,
             config =>
@@ -175,6 +177,16 @@ public class DashPlexDownloadClientStopAsyncUnitTests : BaseUnitTest<DashPlexDow
             .Verify(
                 x => x.SendRefreshNotificationAsync(It.IsAny<RefreshDataType>(), It.IsAny<CancellationToken>()),
                 Times.Once()
+            );
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Verify(
+                x =>
+                    x.OnStatusChangedAsync(
+                        It.IsAny<DownloadTaskKey>(),
+                        It.IsAny<DownloadStatus>(),
+                        It.IsAny<CancellationToken>()
+                    ),
+                Times.Exactly(3)
             );
         dashWrapperMock.VerifyGet(x => x.DownloadCompleted, Times.Once());
         dashWrapperMock.Verify(x => x.StopAsync(), Times.Exactly(2));

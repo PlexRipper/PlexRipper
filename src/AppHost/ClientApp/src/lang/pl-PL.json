@@ -225,7 +225,7 @@
                 "title": "Tytuł",
                 "username": "Nazwa użytkownika"
             },
-            "invalid-token": "Token był nieprawidłowy i/lub wygasł.",
+            "invalid-token": "Dane logowania lub token były nieprawidłowe i/lub wygasły.",
             "sub-header": "Token: {authToken} należy do konta Plex:",
             "title": "Walidacja tokena uwierzytelniającego Plex.tv"
         },

@@ -35,7 +35,7 @@ public static class EnvironmentExtensions
             "desktop" => "desktop",
             "docker" => "docker",
             _ => throw new InvalidOperationException(
-                $"Invalid REAPARR_PLATFORM environment value. Expected 'desktop' or 'docker', but got '{GetEnvironmentVariable(REAPARR_PLATFORM_KEY)}'."
+                $"Invalid REAPARR_PLATFORM environment value. Expected 'desktop' or 'docker', but got '{GetEnvironmentVariable(EnvKeys.ReaparrPlatform)}'."
             ),
         };
 

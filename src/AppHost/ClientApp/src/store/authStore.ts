@@ -5,7 +5,7 @@ import { StoreNames, type ISetupResult } from '@interfaces';
 import type { Observable } from 'rxjs';
 import { authenticationApi } from '@api';
 import { catchError, of } from 'rxjs';
-import { tap, switchMap } from 'rxjs/operators';
+import { map, tap, switchMap } from 'rxjs/operators';
 import { useGlobalStore } from '@store';
 import { get } from '@vueuse/core';
 import { cloneDeep } from 'lodash-es';
@@ -39,7 +39,7 @@ export const useAuthenticationStore = defineStore(StoreNames.AuthenticationStore
 
 	const actions = {
 		setup(): Observable<ISetupResult> {
-			return actions.status().pipe(switchMap(() => of({
+			return actions.status().pipe(map(() => ({
 				name: StoreNames.AuthenticationStore,
 				isSuccess: state.isLoggedIn ?? false,
 			})));

@@ -205,4 +205,18 @@ describe('AddConnectionDialog', () => {
 		// Assert
 		expect(closeSpy).not.toHaveBeenCalled();
 	});
+
+	test('Should stop validation loading when checking a connection errors', async () => {
+		// Arrange
+		mock.onPost('/api/PlexServerConnection/validate').networkError();
+		const { wrapper } = await mountDialog();
+
+		// Act
+		wrapper.findComponent(ValidationButtonStub).vm.$emit('click');
+		await flushPromises();
+		await nextTick();
+
+		// Assert
+		expect(wrapper.findComponent(ValidationButtonStub).props('loading')).toBe(false);
+	});
 });

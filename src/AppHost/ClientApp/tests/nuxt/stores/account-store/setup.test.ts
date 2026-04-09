@@ -3,7 +3,7 @@ import { createPinia, setActivePinia } from 'pinia';
 import { subscribeSpyTo, baseSetup, getAxiosMock, baseVars } from '@services-test-base';
 import { PlexAccountPaths } from '@api/api-paths';
 import { StoreNames, type ISetupResult } from '@interfaces';
-import { generateResultDTO } from '@mock';
+import { generateFailedResultDTO, generateResultDTO } from '@mock';
 import { useAccountStore } from '@store';
 
 describe('AccountStore.setup()', () => {
@@ -30,6 +30,24 @@ describe('AccountStore.setup()', () => {
 
 		// Act
 		const result = subscribeSpyTo(setup$);
+		await result.onComplete();
+
+		// Assert
+		expect(result.getFirstValue()).toEqual(setupResult);
+		expect(result.receivedComplete()).toEqual(true);
+	});
+
+	test('Should report failure when refreshing accounts fails', async () => {
+		// Arrange
+		const accountStore = useAccountStore();
+		mock.onGet(PlexAccountPaths.getAllPlexAccountsEndpoint()).reply(500, generateFailedResultDTO());
+		const setupResult: ISetupResult = {
+			isSuccess: false,
+			name: StoreNames.AccountStore,
+		};
+
+		// Act
+		const result = subscribeSpyTo(accountStore.setup());
 		await result.onComplete();
 
 		// Assert

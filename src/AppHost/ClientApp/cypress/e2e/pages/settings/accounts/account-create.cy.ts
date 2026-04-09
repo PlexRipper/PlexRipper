@@ -329,12 +329,15 @@ describe('Add Plex account to Reaparr', () => {
 					isValidated: false,
 					is2Fa: false,
 				},
-			});
+			}).as('validateCredentialsFailed');
 
 			cy.getCy('account-dialog-validate-button').click();
-
-			// Wait for validation to complete
-			cy.wait(500);
+			cy.wait('@validateCredentialsFailed');
+			cy.getCy('auth-token-validation-dialog').should('be.visible');
+			cy.getCy('auth-token-validation-dialog-hide-button').click();
+			cy.getCy('auth-token-validation-dialog').should('not.exist');
+			cy.getCy('account-dialog-form').should('exist');
+			cy.getCy('account-form-password-input').should('exist').and('be.enabled');
 
 			// Clear password and enter correct one
 			cy.getCy('account-form-password-input').clear();
@@ -346,12 +349,12 @@ describe('Add Plex account to Reaparr', () => {
 					isValidated: true,
 					is2Fa: false,
 				},
-			});
+			}).as('validateCredentialsSuccess');
 
 			cy.getCy('account-dialog-validate-button').click();
-
-			// Wait for validation
-			cy.wait(500);
+			cy.wait('@validateCredentialsSuccess');
+			cy.getCy('account-dialog-form').should('exist');
+			cy.getCy('account-form-password-input').should('exist').and('be.enabled');
 
 			// Create Action
 			cy.intercept('POST', PlexAccountPaths.createPlexAccountEndpoint(), {

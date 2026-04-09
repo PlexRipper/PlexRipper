@@ -1,6 +1,6 @@
 import Log from 'consola';
 import { acceptHMRUpdate, defineStore } from 'pinia';
-import { reactive, computed, toRefs } from 'vue';
+import { reactive, computed, toRefs, unref } from 'vue';
 import type { Observable } from 'rxjs';
 import { of } from 'rxjs';
 import { get } from '@vueuse/core';
@@ -30,8 +30,9 @@ export const useLocalizationStore = defineStore(StoreNames.LocalizationStore, ()
 	};
 
 	function isI18nReady(i18n?: unknown): i18n is I18nObjectType {
+		const locales = unref((i18n as { locales?: unknown })?.locales);
 		return !!i18n
-			&& Array.isArray((i18n as { locales?: unknown }).locales)
+			&& Array.isArray(locales)
 			&& typeof (i18n as { setLocale?: unknown }).setLocale === 'function';
 	}
 
@@ -84,7 +85,8 @@ export const useLocalizationStore = defineStore(StoreNames.LocalizationStore, ()
 				return emptyLocale;
 			}
 
-			const locale = state.i18nRef.locales.find((locale) => locale.code === state.i18nRef.locale) as LocaleObject | undefined;
+			const locales = unref(state.i18nRef.locales) as LocaleObject[];
+			const locale = locales.find((locale) => locale.code === state.i18nRef.locale) as LocaleObject | undefined;
 			return actions.toILocalConfig(locale);
 		}),
 		getLanguageLocaleOptions: computed((): ILocaleConfig[] => {
@@ -92,7 +94,7 @@ export const useLocalizationStore = defineStore(StoreNames.LocalizationStore, ()
 				return [];
 			}
 
-			return state.i18nRef.locales.map((x) => (actions.toILocalConfig(x)));
+			return (unref(state.i18nRef.locales) as LocaleObject[]).map((x) => (actions.toILocalConfig(x)));
 		}),
 	};
 

@@ -114,6 +114,25 @@ describe('LocalizationStore.getLanguageLocale', () => {
 		]);
 	});
 
+	test('Should map locale options when i18n locales are wrapped in a ref', () => {
+		// Arrange
+		const localizationStore = useLocalizationStore();
+		const i18n = {
+			locale: ref('en-US'),
+			locales: ref([
+				{ code: 'en-US', name: 'English' },
+				{ code: 'de-DE', name: 'Deutsch' },
+			] as LocaleObject[]),
+			setLocale: vi.fn().mockResolvedValue(undefined),
+		} as unknown as I18nObjectType;
+
+		// Act
+		localizationStore.setI18nObject(i18n);
+
+		// Assert
+		expect(localizationStore.getLanguageLocaleOptions.map((x) => x.code)).toEqual(['en-US', 'de-DE']);
+	});
+
 	test('Should log an error and not throw when changing language before i18n is initialized', () => {
 		// Arrange
 		const localizationStore = useLocalizationStore();

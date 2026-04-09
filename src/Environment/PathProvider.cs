@@ -78,12 +78,12 @@ public class PathProvider : IPathProvider
             if (dataPath is not null)
                 return dataPath;
 
-            return EnvironmentExtensions.IsDesktopMode() ? GetHomeDirectory() : GetDockerRootDirectory();
+            return EnvironmentExtensions.IsDockerMode() ? GetDockerRootDirectory() : GetHomeDirectory();
         }
     }
 
     private static string GetDefaultConfigDirectory() =>
-        EnvironmentExtensions.IsDesktopMode() ? GetDesktopConfigDirectory() : GetDockerConfigDirectory();
+        EnvironmentExtensions.IsDockerMode() ? GetDockerConfigDirectory() : GetDesktopConfigDirectory();
 
     private static string GetDesktopConfigDirectory() =>
         OsInfo.CurrentOS switch
@@ -121,7 +121,7 @@ public class PathProvider : IPathProvider
     private static string GetDockerRootDirectory() =>
         OsInfo.CurrentOS switch
         {
-            OperatingSystemPlatform.Windows => Path.GetPathRoot(Assembly.GetExecutingAssembly().Location) ?? @"C:\",
+            OperatingSystemPlatform.Windows => Path.GetPathRoot(Assembly.GetExecutingAssembly().Location) ?? @"C:",
             _ => "/",
         };
 

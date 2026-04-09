@@ -145,7 +145,7 @@ public class MoveDownloadFileJob : IJob
 
             await QueueNextAsync();
         }
-        catch (Exception ex) when (ex is not OperationCanceledException)
+        catch (Exception ex)
         {
             _log.Here()
                 .Error(

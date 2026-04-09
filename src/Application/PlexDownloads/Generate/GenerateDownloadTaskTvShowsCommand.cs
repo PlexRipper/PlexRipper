@@ -101,6 +101,8 @@ public class GenerateDownloadTaskTvShowsCommandHandler : ICommandHandler<Generat
                 }
             }
 
+            await using var transaction = await _dbContext.BeginTransactionAsync(cancellationToken);
+
             // Insert the tvShowDownloadTask into the database
             _dbContext.DownloadTaskTvShow.AddRange(tvShowsToInsert);
             await _dbContext.SaveChangesAsync(cancellationToken);
@@ -118,6 +120,8 @@ public class GenerateDownloadTaskTvShowsCommandHandler : ICommandHandler<Generat
             );
             if (seasonsResult.IsFailed)
                 return seasonsResult.LogError();
+
+            await transaction.CommitAsync(cancellationToken);
         }
 
         return Result.Ok();

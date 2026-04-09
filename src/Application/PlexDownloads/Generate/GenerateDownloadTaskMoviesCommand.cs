@@ -63,6 +63,7 @@ public class GenerateDownloadTaskMoviesCommandHandler : ICommandHandler<Generate
             );
 
         var allDownloadTasks = new List<DownloadTaskMovie>();
+        await using var transaction = await _dbContext.BeginTransactionAsync(cancellationToken);
         foreach (var downloadMediaDto in plexMoviesList)
         {
             var downloadTasks = new List<DownloadTaskMovie>();
@@ -122,12 +123,17 @@ public class GenerateDownloadTaskMoviesCommandHandler : ICommandHandler<Generate
                 continue;
 
             downloadTasks.SetRelationshipIds(plexServer.Id, plexLibrary.Id);
-
-            _dbContext.DownloadTaskMovie.AddRange(downloadTasks);
-            await _dbContext.SaveChangesAsync(cancellationToken);
-
             allDownloadTasks.AddRange(downloadTasks);
         }
+
+        if (allDownloadTasks.Count == 0)
+        {
+            await transaction.CommitAsync(cancellationToken);
+            return Result.Ok();
+        }
+
+        _dbContext.DownloadTaskMovie.AddRange(allDownloadTasks);
+        await _dbContext.SaveChangesAsync(cancellationToken);
 
         var logs = new List<DownloadTaskMovieFileLog>();
         foreach (var downloadTaskMovie in allDownloadTasks)
@@ -145,7 +151,9 @@ public class GenerateDownloadTaskMoviesCommandHandler : ICommandHandler<Generate
             );
         }
 
-        await _dbContext.CreateDownloadClientLogs(logs);
+        _dbContext.DownloadTaskMovieFileLogs.AddRange(logs);
+        await _dbContext.SaveChangesAsync(cancellationToken);
+        await transaction.CommitAsync(cancellationToken);
 
         return Result.Ok();
     }

@@ -244,7 +244,9 @@ public class ReaparrDbContextManager : IReaparrDbContextManager
                 {
                     _log.Here().Error("Failed to migrate the database");
                     migrateResult.LogError();
-                    await ResetDatabase();
+                    var resetResult = await ResetDatabase();
+                    if (resetResult.IsFailed)
+                        return resetResult;
                 }
                 else
                 {
@@ -261,7 +263,9 @@ public class ReaparrDbContextManager : IReaparrDbContextManager
                 {
                     _log.Here().Error("Failed to migrate Authentication tables database");
                     migrateResult.LogError();
-                    await ResetDatabase();
+                    var resetResult = await ResetDatabase();
+                    if (resetResult.IsFailed)
+                        return resetResult;
                 }
                 else
                 {

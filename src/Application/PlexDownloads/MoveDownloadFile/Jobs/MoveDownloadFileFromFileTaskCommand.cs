@@ -310,7 +310,7 @@ public class MoveDownloadFileFromFileTaskCommandHandler : ICommandHandler<MoveDo
                 key,
                 cancellationToken
             );
-            if (moveResult.IsCancelled || cancellationToken.IsCancellationRequested)
+            if (moveResult.IsCancelled)
             {
                 _log.Here().Warning("Move was cancelled for file task {FileTaskId}", key.Id);
 

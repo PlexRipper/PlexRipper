@@ -68,8 +68,16 @@ public class Program
             if (EnvironmentExtensions.IsDesktopMode())
             {
                 await app.StartAsync();
-                app.Services.GetRequiredService<IDesktopMode>().Setup();
-                await app.StopAsync();
+                try
+                {
+                    var desktopModeResult = app.Services.GetRequiredService<IDesktopMode>().Setup();
+                    if (desktopModeResult.IsFailed)
+                        FailedToStart(desktopModeResult);
+                }
+                finally
+                {
+                    await app.StopAsync();
+                }
             }
             else
             {

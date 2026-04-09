@@ -5,7 +5,7 @@ public static class ReaparrDBContextSeed
 {
     public static List<FolderPath> GetDefaultFolderPaths()
     {
-        var rootPath = Path.AltDirectorySeparatorChar.ToString();
+        var rootPath = Path.GetPathRoot(System.Environment.CurrentDirectory) ?? Path.DirectorySeparatorChar.ToString();
 
         return
         [

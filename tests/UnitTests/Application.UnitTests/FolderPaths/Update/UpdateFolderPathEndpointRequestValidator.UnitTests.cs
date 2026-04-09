@@ -7,14 +7,14 @@ public class UpdateFolderPathEndpointRequestValidatorUnitTests
     {
         // Arrange
         var validator = new UpdateFolderPathEndpointRequestValidator();
-        var request = new UpdateFolderPathEndpointRequest { FolderPathDto = null };
+        var request = new UpdateFolderPathEndpointRequest { FolderPathDTO = null! };
 
         // Act
         var result = validator.Validate(request);
 
         // Assert
         result.IsValid.ShouldBeFalse();
-        result.Errors.ShouldContain(x => x.PropertyName == nameof(UpdateFolderPathEndpointRequest.FolderPathDto));
+        result.Errors.ShouldContain(x => x.PropertyName == nameof(UpdateFolderPathEndpointRequest.FolderPathDTO));
     }
 
     [Test]
@@ -24,7 +24,7 @@ public class UpdateFolderPathEndpointRequestValidatorUnitTests
         var validator = new UpdateFolderPathEndpointRequestValidator();
         var request = new UpdateFolderPathEndpointRequest
         {
-            FolderPathDto = new FolderPathDTO
+            FolderPathDTO = new FolderPathDTO
             {
                 Id = 5,
                 DisplayName = "Reserved",
@@ -53,7 +53,7 @@ public class UpdateFolderPathEndpointRequestValidatorUnitTests
         var validator = new UpdateFolderPathEndpointRequestValidator();
         var request = new UpdateFolderPathEndpointRequest
         {
-            FolderPathDto = new FolderPathDTO
+            FolderPathDTO = new FolderPathDTO
             {
                 Id = 11,
                 DisplayName = "Invalid enum values",
@@ -81,7 +81,7 @@ public class UpdateFolderPathEndpointRequestValidatorUnitTests
         var validator = new UpdateFolderPathEndpointRequestValidator();
         var request = new UpdateFolderPathEndpointRequest
         {
-            FolderPathDto = new FolderPathDTO
+            FolderPathDTO = new FolderPathDTO
             {
                 Id = 10,
                 DisplayName = "Allowed boundary",

@@ -5,6 +5,7 @@ public static class ReaparrDBContextSeed
 {
     public static List<FolderPath> GetDefaultFolderPaths()
     {
+        // NOTE: Don't change the DirectoryPath to something dynamic, this will make the EF core migrations fail due to the seed data becoming inconsistent between migrations.
         var rootPath = PathProvider.DataDirectory;
 
         return

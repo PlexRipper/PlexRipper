@@ -87,16 +87,8 @@ jobs:
         steps:
             -   name: Checkout source code
                 uses: actions/checkout@v4
-
-            -   name: Normalize line endings for formatter checks
-                if: startsWith(matrix.runner, 'windows')
-                shell: bash
-                run: |
-                    git config --global core.autocrlf false
-                    git config --global core.eol lf
-                    git config --local core.autocrlf false
-                    git config --local core.eol lf
-                    git reset --hard HEAD
+                with:
+                    eol: lf
 
             -   name: Download generated frontend artifact
                 uses: actions/download-artifact@v4

@@ -146,6 +146,7 @@ jobs:
                 run: |
                     vpk download github \
                         --repoUrl https://github.com/${{ github.repository }} \
+                        --channel ${{ matrix.rid }} \
                         --token ${{ secrets.GITHUB_TOKEN }}
 
             -   name: Pack installer
@@ -156,7 +157,8 @@ jobs:
                         --packTitle Reaparr \
                         --packVersion ${{ inputs.version }} \
                         --packDir src/AppHost/bin/Publish/Desktop/${{ matrix.rid }} \
-                        --mainExe ${{ matrix.main-exe }}
+                        --mainExe ${{ matrix.main-exe }} \
+                        --channel ${{ matrix.rid }}
 
             -   name: Upload packed installer artifact
                 if: inputs.push
@@ -230,7 +232,7 @@ jobs:
                         --repoUrl https://github.com/${{ github.repository }} \
                         ${{ inputs.publish_release && '--publish' || '' }} \
                         --merge \
-                        --channel win \
+                        --channel win-x64 \
                         --outputDir Releases/win-x64 \
                         --releaseName "Reaparr ${{ inputs.version }}" \
                         --tag v${{ inputs.version }} \
@@ -243,7 +245,7 @@ jobs:
                         --repoUrl https://github.com/${{ github.repository }} \
                         ${{ inputs.publish_release && '--publish' || '' }} \
                         --merge \
-                        --channel win \
+                        --channel win-arm64 \
                         --outputDir Releases/win-arm64 \
                         --releaseName "Reaparr ${{ inputs.version }}" \
                         --tag v${{ inputs.version }} \
@@ -256,7 +258,7 @@ jobs:
                         --repoUrl https://github.com/${{ github.repository }} \
                         ${{ inputs.publish_release && '--publish' || '' }} \
                         --merge \
-                        --channel linux \
+                        --channel linux-x64 \
                         --outputDir Releases/linux-x64 \
                         --releaseName "Reaparr ${{ inputs.version }}" \
                         --tag v${{ inputs.version }} \
@@ -269,7 +271,7 @@ jobs:
                         --repoUrl https://github.com/${{ github.repository }} \
                         ${{ inputs.publish_release && '--publish' || '' }} \
                         --merge \
-                        --channel linux \
+                        --channel linux-arm64 \
                         --outputDir Releases/linux-arm64 \
                         --releaseName "Reaparr ${{ inputs.version }}" \
                         --tag v${{ inputs.version }} \
@@ -282,7 +284,7 @@ jobs:
                         --repoUrl https://github.com/${{ github.repository }} \
                         ${{ inputs.publish_release && '--publish' || '' }} \
                         --merge \
-                        --channel osx \
+                        --channel osx-x64 \
                         --outputDir Releases/osx-x64 \
                         --releaseName "Reaparr ${{ inputs.version }}" \
                         --tag v${{ inputs.version }} \
@@ -295,7 +297,7 @@ jobs:
                         --repoUrl https://github.com/${{ github.repository }} \
                         ${{ inputs.publish_release && '--publish' || '' }} \
                         --merge \
-                        --channel osx \
+                        --channel osx-arm64 \
                         --outputDir Releases/osx-arm64 \
                         --releaseName "Reaparr ${{ inputs.version }}" \
                         --tag v${{ inputs.version }} \

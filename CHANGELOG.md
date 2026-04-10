@@ -1,5 +1,13 @@
 Reaparr Changelog
 
+# [0.38.0-dev.2](https://github.com/Reaparr/Reaparr/compare/v0.38.0-dev.1...v0.38.0-dev.2) (2026-04-10)
+
+
+### Bug Fixes
+
+* **WebAPI:** Update Node.js version and improve CI workflow configurations ([285de8f](https://github.com/Reaparr/Reaparr/commit/285de8f5ff237884917a2eca9ea74b1b5211cf0c))
+* **WebAPI:** Update notification messages and Node.js version in release pipeline ([9ff413d](https://github.com/Reaparr/Reaparr/commit/9ff413d2a3b224c13b53e463795a86e08fce191f))
+
 # [0.38.0-dev.1](https://github.com/Reaparr/Reaparr/compare/v0.37.0...v0.38.0-dev.1) (2026-04-09)
 
 

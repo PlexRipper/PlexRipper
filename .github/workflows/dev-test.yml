@@ -237,9 +237,9 @@ jobs:
                     - test_project: tests/UnitTests/External.UnitTests/External.UnitTests.csproj
                       project_name: External.UnitTests
                     - test_project: tests/UnitTests/FileSystem.UnitTests/FileSystem.UnitTests.csproj
-                      project_name: Environment.UnitTests
-                    - test_project: tests/UnitTests/Environment.UnitTests/Environment.UnitTests.csproj
                       project_name: FileSystem.UnitTests
+                    - test_project: tests/UnitTests/Environment.UnitTests/Environment.UnitTests.csproj
+                      project_name: Environment.UnitTests
                     - test_project: tests/UnitTests/FluentResultExtension.UnitTests/FluentResultExtension.UnitTests.csproj
                       project_name: FluentResultExtension.UnitTests
                     - test_project: tests/UnitTests/Logging.UnitTests/Logging.UnitTests.csproj

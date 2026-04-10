@@ -1,4 +1,4 @@
-name: Create Reaparr Dev Container Release
+name: Create Reaparr Dev Release
 
 on:
     workflow_dispatch:

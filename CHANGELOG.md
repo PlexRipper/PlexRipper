@@ -1,5 +1,12 @@
 Reaparr Changelog
 
+# [0.38.0-dev.6](https://github.com/Reaparr/Reaparr/compare/v0.38.0-dev.5...v0.38.0-dev.6) (2026-04-10)
+
+
+### Bug Fixes
+
+* **WebAPI:** Use per-architecture vpk channels to prevent release asset collisions ([a072f88](https://github.com/Reaparr/Reaparr/commit/a072f883d4b7f6d6ba703cf05b91cee6b4ad8ddb))
+
 # [0.38.0-dev.5](https://github.com/Reaparr/Reaparr/compare/v0.38.0-dev.4...v0.38.0-dev.5) (2026-04-10)
 
 

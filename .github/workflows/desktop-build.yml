@@ -225,78 +225,78 @@ jobs:
 
             -   name: Upload win-x64 to GitHub Release
                 shell: bash
-                working-directory: Releases/win-x64
                 run: |
                     vpk upload github \
                         --repoUrl https://github.com/${{ github.repository }} \
                         ${{ inputs.publish_release && '--publish' || '' }} \
                         --merge \
-                        --outputDir . \
+                        --channel win \
+                        --outputDir Releases/win-x64 \
                         --releaseName "Reaparr ${{ inputs.version }}" \
                         --tag v${{ inputs.version }} \
                         --token ${{ secrets.GITHUB_TOKEN }}
 
             -   name: Upload win-arm64 to GitHub Release
                 shell: bash
-                working-directory: Releases/win-arm64
                 run: |
                     vpk upload github \
                         --repoUrl https://github.com/${{ github.repository }} \
                         ${{ inputs.publish_release && '--publish' || '' }} \
                         --merge \
-                        --outputDir . \
+                        --channel win \
+                        --outputDir Releases/win-arm64 \
                         --releaseName "Reaparr ${{ inputs.version }}" \
                         --tag v${{ inputs.version }} \
                         --token ${{ secrets.GITHUB_TOKEN }}
 
             -   name: Upload linux-x64 to GitHub Release
                 shell: bash
-                working-directory: Releases/linux-x64
                 run: |
                     vpk upload github \
                         --repoUrl https://github.com/${{ github.repository }} \
                         ${{ inputs.publish_release && '--publish' || '' }} \
                         --merge \
-                        --outputDir . \
+                        --channel linux \
+                        --outputDir Releases/linux-x64 \
                         --releaseName "Reaparr ${{ inputs.version }}" \
                         --tag v${{ inputs.version }} \
                         --token ${{ secrets.GITHUB_TOKEN }}
 
             -   name: Upload linux-arm64 to GitHub Release
                 shell: bash
-                working-directory: Releases/linux-arm64
                 run: |
                     vpk upload github \
                         --repoUrl https://github.com/${{ github.repository }} \
                         ${{ inputs.publish_release && '--publish' || '' }} \
                         --merge \
-                        --outputDir . \
+                        --channel linux \
+                        --outputDir Releases/linux-arm64 \
                         --releaseName "Reaparr ${{ inputs.version }}" \
                         --tag v${{ inputs.version }} \
                         --token ${{ secrets.GITHUB_TOKEN }}
 
             -   name: Upload osx-x64 to GitHub Release
                 shell: bash
-                working-directory: Releases/osx-x64
                 run: |
                     vpk upload github \
                         --repoUrl https://github.com/${{ github.repository }} \
                         ${{ inputs.publish_release && '--publish' || '' }} \
                         --merge \
-                        --outputDir . \
+                        --channel osx \
+                        --outputDir Releases/osx-x64 \
                         --releaseName "Reaparr ${{ inputs.version }}" \
                         --tag v${{ inputs.version }} \
                         --token ${{ secrets.GITHUB_TOKEN }}
 
             -   name: Upload osx-arm64 to GitHub Release
                 shell: bash
-                working-directory: Releases/osx-arm64
                 run: |
                     vpk upload github \
                         --repoUrl https://github.com/${{ github.repository }} \
                         ${{ inputs.publish_release && '--publish' || '' }} \
                         --merge \
-                        --outputDir . \
+                        --channel osx \
+                        --outputDir Releases/osx-arm64 \
                         --releaseName "Reaparr ${{ inputs.version }}" \
                         --tag v${{ inputs.version }} \
                         --token ${{ secrets.GITHUB_TOKEN }}

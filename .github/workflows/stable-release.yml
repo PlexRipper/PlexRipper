@@ -33,7 +33,7 @@ jobs:
             -   name: Setup Node.js
                 uses: actions/setup-node@v4
                 with:
-                    node-version: 21
+                    node-version: 22
             # This is required to be able to run semantic-release plugins
             -   name: Client App Install
                 uses: ./.github/actions/client-app-install/
@@ -90,10 +90,11 @@ jobs:
             informational_version: ${{ needs.semantic-release.outputs.new-release-version }}
             tags: "latest"
 
-    # Notifications (depends on build-and-publish)
+    # Notifications (depends on build-and-publish and build-desktop)
     notify-discord:
         name: Notify Discord
-        needs: [semantic-release, build-and-publish]
+        needs: [semantic-release, build-and-publish, build-desktop]
+        if: needs.semantic-release.outputs.new-release-published == 'true'
         runs-on: ubuntu-latest
         steps:
             -   name: Checkout source code

@@ -7,6 +7,11 @@ on:
             - README.md
             - export/
             - .github/workflows/dockerhub-description.yml
+
+concurrency:
+    group: dockerhub-description
+    cancel-in-progress: true
+
 jobs:
     dockerHubDescription:
         runs-on: ubuntu-latest

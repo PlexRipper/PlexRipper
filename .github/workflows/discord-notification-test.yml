@@ -16,3 +16,11 @@ jobs:
                 with:
                     webhook: ${{ secrets.DISCORD_RELEASES_CHANNEL_WEBHOOK }}
                     version: test-version
+                    is-dev: true
+
+            -   name: Notify Discord of Stable Release
+                uses: ./.github/actions/discord-dev-release-notification/
+                with:
+                    webhook: ${{ secrets.DISCORD_RELEASES_CHANNEL_WEBHOOK }}
+                    version: test-version
+                    is-dev: false

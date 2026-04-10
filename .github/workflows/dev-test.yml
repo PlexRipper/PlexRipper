@@ -237,9 +237,9 @@ jobs:
                     - test_project: tests/UnitTests/External.UnitTests/External.UnitTests.csproj
                       project_name: External.UnitTests
                     - test_project: tests/UnitTests/FileSystem.UnitTests/FileSystem.UnitTests.csproj
-                      project_name: Environment.UnitTests
-                    - test_project: tests/UnitTests/Environment.UnitTests/Environment.UnitTests.csproj
                       project_name: FileSystem.UnitTests
+                    - test_project: tests/UnitTests/Environment.UnitTests/Environment.UnitTests.csproj
+                      project_name: Environment.UnitTests
                     - test_project: tests/UnitTests/FluentResultExtension.UnitTests/FluentResultExtension.UnitTests.csproj
                       project_name: FluentResultExtension.UnitTests
                     - test_project: tests/UnitTests/Logging.UnitTests/Logging.UnitTests.csproj
@@ -345,6 +345,9 @@ jobs:
                     --results-directory TestResults/IntegrationTests
                     --report-trx
                     --report-trx-filename integration_test_results.trx
+                    --coverage
+                    --coverage-output-format cobertura
+                    --coverage-output coverage.cobertura.xml
 
             -   name: Upload Integration Test Results
                 if: always()
@@ -354,10 +357,18 @@ jobs:
                     path: TestResults/IntegrationTests/integration_test_results.trx
                     retention-days: 7
 
+            -   name: Upload Integration Code Coverage
+                if: always()
+                uses: actions/upload-artifact@v4
+                with:
+                    name: code-coverage-IntegrationTests
+                    path: TestResults/IntegrationTests/coverage.cobertura.xml
+                    retention-days: 7
+
     # Code Coverage Report
     Code-Coverage-Report:
-        needs: [Back-End-Unit-Tests, Check-PR-Status]
-        if: always() && needs.Back-End-Unit-Tests.result != 'skipped' && (needs.Check-PR-Status.result == 'success' || github.event_name == 'workflow_dispatch')
+        needs: [Back-End-Unit-Tests, Back-End-Integration-Tests, Check-PR-Status]
+        if: always() && (needs.Back-End-Unit-Tests.result != 'skipped' || needs.Back-End-Integration-Tests.result != 'skipped') && (needs.Check-PR-Status.result == 'success' || github.event_name == 'workflow_dispatch')
         runs-on: ubuntu-latest
         steps:
             -   name: Checkout Source Code

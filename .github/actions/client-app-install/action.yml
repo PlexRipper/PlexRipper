@@ -18,7 +18,7 @@ runs:
         -   name: Setup Node.js
             uses: actions/setup-node@v4
             with:
-                node-version: '24.10.0'
+                node-version: '24'
 
         -   name: Clean install node_modules
             shell: bash

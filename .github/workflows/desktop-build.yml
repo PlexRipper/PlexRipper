@@ -87,8 +87,6 @@ jobs:
         steps:
             -   name: Checkout source code
                 uses: actions/checkout@v4
-                with:
-                    eol: lf
 
             -   name: Download generated frontend artifact
                 uses: actions/download-artifact@v4
@@ -107,7 +105,19 @@ jobs:
                     locked-mode: false
                     runtime: ${{ matrix.rid }}
 
-            -   name: Publish
+            -   name: Publish (Windows)
+                if: startsWith(matrix.runner, 'windows')
+                shell: bash
+                run: |
+                    dotnet publish src/AppHost/AppHost.csproj \
+                        -p:PublishProfile=${{ matrix.profile }} \
+                        -p:Version=${{ inputs.version }} \
+                        -p:InformationalVersion=${{ inputs.informational_version }} \
+                        -p:CSharpier_Bypass=true \
+                        --no-restore
+
+            -   name: Publish (Non-Windows)
+                if: ${{ !startsWith(matrix.runner, 'windows') }}
                 shell: bash
                 run: |
                     dotnet publish src/AppHost/AppHost.csproj \

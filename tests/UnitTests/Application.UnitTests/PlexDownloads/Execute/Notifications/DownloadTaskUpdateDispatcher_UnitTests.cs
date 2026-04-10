@@ -555,25 +555,28 @@ public class DownloadTaskUpdateDispatcherUnitTests : BaseUnitTest<DownloadTaskUp
             }
         );
 
-        await WaitUntilAsync(async () =>
-        {
-            var persistedEpisodeFiles = await IDbContext
-                .DownloadTaskTvShowEpisodeFile.AsNoTracking()
-                .Where(x => x.Id == completedEpisodeFile.Id || x.Id == siblingEpisodeFile.Id)
-                .ToListAsync(CancellationToken);
+        await WaitUntilAsync(
+            async () =>
+            {
+                var persistedEpisodeFiles = await IDbContext
+                    .DownloadTaskTvShowEpisodeFile.AsNoTracking()
+                    .Where(x => x.Id == completedEpisodeFile.Id || x.Id == siblingEpisodeFile.Id)
+                    .ToListAsync(CancellationToken);
 
-            var persistedCompletedEpisodeFile = persistedEpisodeFiles.Single(x => x.Id == completedEpisodeFile.Id);
-            var persistedSiblingEpisodeFile = persistedEpisodeFiles.Single(x => x.Id == siblingEpisodeFile.Id);
+                var persistedCompletedEpisodeFile = persistedEpisodeFiles.Single(x => x.Id == completedEpisodeFile.Id);
+                var persistedSiblingEpisodeFile = persistedEpisodeFiles.Single(x => x.Id == siblingEpisodeFile.Id);
 
-            if (
-                persistedCompletedEpisodeFile
-                is not { DataReceived: 1_000, DataTotal: 1_000, Percentage: 100, DownloadSpeed: 0 }
-            )
-                return false;
+                if (
+                    persistedCompletedEpisodeFile
+                    is not { DataReceived: 1_000, DataTotal: 1_000, Percentage: 100, DownloadSpeed: 0 }
+                )
+                    return false;
 
-            return persistedSiblingEpisodeFile
-                is { DataReceived: 500, DataTotal: 2_000, Percentage: 25, DownloadSpeed: 123 };
-        });
+                return persistedSiblingEpisodeFile
+                    is { DataReceived: 500, DataTotal: 2_000, Percentage: 25, DownloadSpeed: 123 };
+            },
+            timeoutMs: 10_000
+        );
 
         await sut.StopAsync(CancellationToken.None);
 

@@ -19,10 +19,38 @@ on:
                 required: false
                 type: boolean
                 default: false
+            publish_release:
+                description: 'Publish/finalize the GitHub Release while uploading desktop assets'
+                required: false
+                type: boolean
+                default: false
 
 jobs:
+    prepare-frontend:
+        name: Prepare frontend assets
+        runs-on: ubuntu-latest
+        steps:
+            -   name: Checkout source code
+                uses: actions/checkout@v4
+
+            -   name: Client App Install
+                uses: ./.github/actions/client-app-install/
+
+            -   name: Generate frontend
+                shell: bash
+                working-directory: src/AppHost/ClientApp/
+                run: bun run generate --fail-on-error
+
+            -   name: Upload generated frontend artifact
+                uses: actions/upload-artifact@v4
+                with:
+                    name: frontend-public
+                    path: src/AppHost/ClientApp/.output/public
+                    retention-days: 1
+
     build:
         name: Build ${{ matrix.rid }}
+        needs: [prepare-frontend]
         strategy:
             fail-fast: false
             matrix:
@@ -31,12 +59,24 @@ jobs:
                         runner: windows-latest
                         profile: Desktop-win-x64
                         main-exe: Reaparr.AppHost.exe
+                    -   rid: win-arm64
+                        runner: windows-11-arm
+                        profile: Desktop-win-arm64
+                        main-exe: Reaparr.AppHost.exe
                     -   rid: linux-x64
                         runner: ubuntu-latest
                         profile: Desktop-linux-x64
                         main-exe: Reaparr.AppHost
+                    -   rid: linux-arm64
+                        runner: ubuntu-24.04-arm
+                        profile: Desktop-linux-arm64
+                        main-exe: Reaparr.AppHost
+                    -   rid: osx-x64
+                        runner: macos-15-intel
+                        profile: Desktop-osx-x64
+                        main-exe: Reaparr.AppHost
                     -   rid: osx-arm64
-                        runner: macos-latest
+                        runner: macos-15
                         profile: Desktop-osx-arm64
                         main-exe: Reaparr.AppHost
 
@@ -48,16 +88,14 @@ jobs:
             -   name: Checkout source code
                 uses: actions/checkout@v4
 
-            -   name: Client App Install
-                uses: ./.github/workflows/steps/client-app-install/
-
-            -   name: Generate frontend
-                shell: bash
-                working-directory: src/AppHost/ClientApp/
-                run: bun run generate --fail-on-error
+            -   name: Download generated frontend artifact
+                uses: actions/download-artifact@v4
+                with:
+                    name: frontend-public
+                    path: .tmp/frontend-public
 
             -   name: Dotnet Setup (Restore only)
-                uses: ./.github/workflows/steps/dotnet-setup/
+                uses: ./.github/actions/dotnet-setup/
                 with:
                     project-path: src/AppHost/AppHost.csproj
                     restore: true
@@ -67,20 +105,37 @@ jobs:
                     locked-mode: false
                     runtime: ${{ matrix.rid }}
 
-            -   name: Publish
+            -   name: Publish (Windows)
+                if: startsWith(matrix.runner, 'windows')
                 shell: bash
                 run: |
                     dotnet publish src/AppHost/AppHost.csproj \
-                        /p:PublishProfile=${{ matrix.profile }} \
-                        /p:Version=${{ inputs.version }} \
-                        /p:InformationalVersion=${{ inputs.informational_version }} \
+                        -p:PublishProfile=${{ matrix.profile }} \
+                        -p:Version=${{ inputs.version }} \
+                        -p:InformationalVersion=${{ inputs.informational_version }} \
+                        -p:CSharpier_Bypass=true \
+                        --no-restore
+
+            -   name: Publish (Non-Windows)
+                if: ${{ !startsWith(matrix.runner, 'windows') }}
+                shell: bash
+                run: |
+                    dotnet publish src/AppHost/AppHost.csproj \
+                        -p:PublishProfile=${{ matrix.profile }} \
+                        -p:Version=${{ inputs.version }} \
+                        -p:InformationalVersion=${{ inputs.informational_version }} \
                         --no-restore
 
             -   name: Copy frontend to publish output
                 shell: bash
                 run: |
                     mkdir -p src/AppHost/bin/Publish/Desktop/${{ matrix.rid }}/wwwroot
-                    cp -r src/AppHost/ClientApp/.output/public/. src/AppHost/bin/Publish/Desktop/${{ matrix.rid }}/wwwroot/
+                    cp -r .tmp/frontend-public/. src/AppHost/bin/Publish/Desktop/${{ matrix.rid }}/wwwroot/
+
+            -   name: Setup .NET 9 runtime for vpk
+                uses: actions/setup-dotnet@v4
+                with:
+                    dotnet-version: 9.0.x
 
             -   name: Install Velopack CLI
                 run: dotnet tool install -g vpk
@@ -103,13 +158,23 @@ jobs:
                         --packDir src/AppHost/bin/Publish/Desktop/${{ matrix.rid }} \
                         --mainExe ${{ matrix.main-exe }}
 
-            -   name: Upload to GitHub Release
-                if: inputs.push
+            -   name: Upload to GitHub Release (publish)
+                if: inputs.push && inputs.publish_release
                 shell: bash
                 run: |
                     vpk upload github \
                         --repoUrl https://github.com/${{ github.repository }} \
                         --publish \
+                        --releaseName "Reaparr ${{ inputs.version }}" \
+                        --tag v${{ inputs.version }} \
+                        --token ${{ secrets.GITHUB_TOKEN }}
+
+            -   name: Upload to GitHub Release (assets only)
+                if: inputs.push && !inputs.publish_release
+                shell: bash
+                run: |
+                    vpk upload github \
+                        --repoUrl https://github.com/${{ github.repository }} \
                         --releaseName "Reaparr ${{ inputs.version }}" \
                         --tag v${{ inputs.version }} \
                         --token ${{ secrets.GITHUB_TOKEN }}

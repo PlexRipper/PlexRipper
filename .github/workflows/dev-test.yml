@@ -6,8 +6,15 @@ on:
         branches: [ dev ]
         types: [opened, ready_for_review, reopened, synchronize]
         paths-ignore:
-            - '.github/**'
+            - '.ai/**'
+            - '.agents/**'
+            - '.claude/**'
+            - '.cursor/**'
             - '.idea/**'
+            - '.junie/**'
+            - '.opencode/**'
+            - '.skillshare/**'
+            - '.slopwatch/**'
             - '.run/**'
             - '.vscode/**'
             - 'README.md'
@@ -23,6 +30,37 @@ jobs:
         if: github.event.pull_request.draft == false
         steps:
             - run: echo "PR is not in draft, proceeding with tests"
+
+    Actionlint:
+        needs: [Check-PR-Status, Check-Github-Changes]
+        if: needs.Check-Github-Changes.outputs.should_run == 'true' && (needs.Check-PR-Status.result == 'success' || github.event_name == 'workflow_dispatch')
+        runs-on: ubuntu-latest
+        steps:
+            -   uses: actions/checkout@v4
+            -   name: Run actionlint
+                uses: raven-actions/actionlint@v2.1.2
+                with:
+                    fail-on-error: true
+                    matcher: true
+                    shellcheck: true
+                    pyflakes: true
+
+    # Check if .github workflows/actions have changed
+    Check-Github-Changes:
+        needs: [Check-PR-Status]
+        if: always() && (needs.Check-PR-Status.result == 'success' || github.event_name == 'workflow_dispatch')
+        runs-on: ubuntu-latest
+        outputs:
+            should_run: ${{ steps.check_changes.outputs.github }}
+        steps:
+            -   uses: actions/checkout@v4
+            -   name: Check if .github has changed
+                id: check_changes
+                uses: dorny/paths-filter@v3
+                with:
+                    filters: |
+                        github:
+                            - '.github/**'
 
     # Check if front-end has changed
     Check-Frontend-Changes:
@@ -54,11 +92,11 @@ jobs:
                 id: check_changes
                 uses: dorny/paths-filter@v3
                 with:
+                    predicate-quantifier: 'every'
                     filters: |
                         backend:
-                            - 'src/**'
+                            - '{src/**,tests/**}'
                             - '!src/AppHost/ClientApp/**'
-                            - 'tests/**'
 
     # Front-End-Type-Check:
     Front-End-Type-Check:
@@ -68,7 +106,7 @@ jobs:
         steps:
             -   uses: actions/checkout@v4
             -   name: Client App Install
-                uses: ./.github/workflows/steps/client-app-install/
+                uses: ./.github/actions/client-app-install/
             -   name: Run Typescript type check
                 run: bun run typecheck
                 working-directory: src/AppHost/ClientApp/
@@ -81,7 +119,7 @@ jobs:
         steps:
             -   uses: actions/checkout@v4
             -   name: Client App Install
-                uses: ./.github/workflows/steps/client-app-install/
+                uses: ./.github/actions/client-app-install/
             -   name: Run Vitest tests
                 run: bun run unit-test
                 working-directory: src/AppHost/ClientApp/
@@ -100,7 +138,7 @@ jobs:
         steps:
             -   uses: actions/checkout@v4
             -   name: Client App Install
-                uses: ./.github/workflows/steps/client-app-install/
+                uses: ./.github/actions/client-app-install/
             -   name: Run eslint check
                 run: bun run lint
                 working-directory: src/AppHost/ClientApp/
@@ -117,9 +155,9 @@ jobs:
         steps:
             -   uses: actions/checkout@v4
             -   name: Client App Install
-                uses: ./.github/workflows/steps/client-app-install/
+                uses: ./.github/actions/client-app-install/
             -   name: Cache Cypress binary
-                uses: actions/cache@v3
+                uses: actions/cache@v4
                 with:
                     path: ~/.cache/Cypress
                     key: ${{ runner.os }}-cypress-${{ hashFiles('**/package.json') }}
@@ -153,7 +191,7 @@ jobs:
                 uses: actions/checkout@v4
 
             -   name: Dotnet Setup (Restore only)
-                uses: ./.github/workflows/steps/dotnet-setup/
+                uses: ./.github/actions/dotnet-setup/
                 with:
                     project-path: Reaparr.sln
                     restore: true
@@ -218,7 +256,7 @@ jobs:
                 uses: actions/checkout@v4
 
             -   name: Dotnet Setup
-                uses: ./.github/workflows/steps/dotnet-setup/
+                uses: ./.github/actions/dotnet-setup/
                 with:
                     project-path: ${{ matrix.test_project }}
                     restore: false
@@ -250,7 +288,7 @@ jobs:
                 id: sanitize
                 run: |
                     FILENAME=$(basename "${{ matrix.test_project }}" .csproj)
-                    echo "safe_name=$FILENAME" >> $GITHUB_OUTPUT
+                    echo "safe_name=$FILENAME" >> "$GITHUB_OUTPUT"
 
             -   name: Upload Test Results
                 if: always()
@@ -283,7 +321,7 @@ jobs:
                 uses: actions/checkout@v4
 
             -   name: Dotnet Setup
-                uses: ./.github/workflows/steps/dotnet-setup/
+                uses: ./.github/actions/dotnet-setup/
                 with:
                     project-path: ${{ matrix.integration_test_project }}
                     restore: false
@@ -348,13 +386,27 @@ jobs:
 
     # Ensure Docker images can be built without errors (both amd64 and arm64)
     Test-Docker-Build:
-        needs: [Check-Frontend-Changes, Check-Backend-Changes, Back-End-Unit-Tests, Back-End-Integration-Tests, Front-End-Type-Check, Front-End-Unit-Tests, Front-End-Eslint-Check, Front-End-Integration-Tests, Check-PR-Status]
+        needs: [Check-Frontend-Changes, Check-Backend-Changes, Back-End-Unit-Tests, Back-End-Integration-Tests, Front-End-Type-Check, Front-End-Unit-Tests, Front-End-Eslint-Check, Front-End-Integration-Tests, Actionlint, Check-PR-Status]
         if: |
             always() &&
             (needs.Check-PR-Status.result == 'success' || github.event_name == 'workflow_dispatch') &&
             !contains(needs.*.result, 'failure') &&
             !contains(needs.*.result, 'cancelled')
         uses: ./.github/workflows/docker-build-multiarch.yml
+        with:
+            push: false
+            version: 9.9.9
+            informational_version: 9.9.9-dev
+
+    # Ensure desktop installers can be built without errors (Windows/Linux/macOS)
+    Test-Desktop-Build:
+        needs: [Check-Frontend-Changes, Check-Backend-Changes, Back-End-Unit-Tests, Back-End-Integration-Tests, Front-End-Type-Check, Front-End-Unit-Tests, Front-End-Eslint-Check, Front-End-Integration-Tests, Actionlint, Check-PR-Status]
+        if: |
+            always() &&
+            (needs.Check-PR-Status.result == 'success' || github.event_name == 'workflow_dispatch') &&
+            !contains(needs.*.result, 'failure') &&
+            !contains(needs.*.result, 'cancelled')
+        uses: ./.github/workflows/desktop-build.yml
         with:
             push: false
             version: 9.9.9

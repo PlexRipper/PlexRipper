@@ -36,7 +36,7 @@ jobs:
                     node-version: 21
             # This is required to be able to run semantic-release plugins
             -   name: Client App Install
-                uses: ./.github/workflows/steps/client-app-install/
+                uses: ./.github/actions/client-app-install/
             -   name: GitHub Release (Stable)
                 id: get-next-version
                 run: npx --prefix src/AppHost/ClientApp/ semantic-release
@@ -73,6 +73,7 @@ jobs:
         secrets: inherit
         with:
             push: true
+            publish_release: false
             version: ${{ needs.semantic-release.outputs.new-release-version }}
             informational_version: ${{ needs.semantic-release.outputs.new-release-version }}
 
@@ -99,7 +100,7 @@ jobs:
                 uses: actions/checkout@v4
 
             -   name: Notify Discord of Stable Release
-                uses: ./.github/workflows/steps/discord-dev-release-notification/
+                uses: ./.github/actions/discord-dev-release-notification/
                 with:
                     webhook: ${{ secrets.DISCORD_RELEASES_CHANNEL_WEBHOOK }}
                     version: ${{ needs.semantic-release.outputs.new-release-version }}
@@ -107,7 +108,7 @@ jobs:
                     changelog-url: "https://github.com/Reaparr/Reaparr/releases/tag/v${{ needs.semantic-release.outputs.new-release-version }}"
 
             -   name: Post Changelog to Discord
-                uses: ./.github/workflows/steps/discord-changelog-notification/
+                uses: ./.github/actions/discord-changelog-notification/
                 with:
                     webhook: ${{ secrets.DISCORD_CHANGELOG_CHANNEL_WEBHOOK }}
                     version: ${{ needs.semantic-release.outputs.new-release-version }}

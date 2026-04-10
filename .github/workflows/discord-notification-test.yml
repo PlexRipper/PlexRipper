@@ -12,6 +12,7 @@ jobs:
                 uses: actions/checkout@v4
 
             -   name: Notify Discord of Dev Release
-                uses: ./.github/workflows/steps/discord-dev-release-notification/
+                uses: ./.github/actions/discord-dev-release-notification/
                 with:
                     webhook: ${{ secrets.DISCORD_RELEASES_CHANNEL_WEBHOOK }}
+                    version: test-version

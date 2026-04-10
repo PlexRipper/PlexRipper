@@ -28,9 +28,10 @@ runs:
                 title: "A new Reaparr development version has been released!"
                 color: 0xFF8C00 # Amber / Dev
                 description: |
-                    A new **development** version `${{ inputs.version }}` of Reaparr is now available on Docker!
+                    A new **development** version `${{ inputs.version }}` of Reaparr is now available!
                     [Development changelog](${{ inputs.changelog-url }})
-                    Click [here](https://hub.docker.com/repository/docker/reaparr/reaparr/tags) to download the development version!
+                    🐳 [Docker Hub](https://hub.docker.com/repository/docker/reaparr/reaparr/tags) — pull the `dev` tag
+                    🖥️ [Desktop installers](https://github.com/Reaparr/Reaparr/releases/tag/v${{ inputs.version }}) — GitHub Releases
                 username: Reaparr
                 url: ${{ inputs.changelog-url }}
                 avatar_url: "https://raw.githubusercontent.com/Reaparr/Reaparr/refs/heads/dev/export/reaparr/logo/reaparr-full-1024.png"
@@ -44,9 +45,10 @@ runs:
                 title: "A new stable Reaparr version has been released!"
                 color: 0xff0000 # Red / Stable
                 description: |
-                    A new **stable** version `${{ inputs.version }}` of Reaparr is now available on Docker!
+                    A new **stable** version `${{ inputs.version }}` of Reaparr is now available!
                     [Release changelog](${{ inputs.changelog-url }})
-                    Click [here](https://hub.docker.com/repository/docker/reaparr/reaparr/tags) to download the stable version!
+                    🐳 [Docker Hub](https://hub.docker.com/repository/docker/reaparr/reaparr/tags) — pull the `latest` tag
+                    🖥️ [Desktop installers](https://github.com/Reaparr/Reaparr/releases/tag/v${{ inputs.version }}) — GitHub Releases
                 username: Reaparr
                 url: ${{ inputs.changelog-url }}
                 avatar_url: "https://raw.githubusercontent.com/Reaparr/Reaparr/refs/heads/dev/export/reaparr/logo/reaparr-full-1024.png"

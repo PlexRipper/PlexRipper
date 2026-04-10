@@ -165,6 +165,7 @@ jobs:
                     vpk upload github \
                         --repoUrl https://github.com/${{ github.repository }} \
                         --publish \
+                        --merge \
                         --releaseName "Reaparr ${{ inputs.version }}" \
                         --tag v${{ inputs.version }} \
                         --token ${{ secrets.GITHUB_TOKEN }}
@@ -175,6 +176,7 @@ jobs:
                 run: |
                     vpk upload github \
                         --repoUrl https://github.com/${{ github.repository }} \
+                        --merge \
                         --releaseName "Reaparr ${{ inputs.version }}" \
                         --tag v${{ inputs.version }} \
                         --token ${{ secrets.GITHUB_TOKEN }}

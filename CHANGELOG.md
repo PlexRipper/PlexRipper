@@ -1,5 +1,12 @@
 Reaparr Changelog
 
+# [0.38.0-dev.5](https://github.com/Reaparr/Reaparr/compare/v0.38.0-dev.4...v0.38.0-dev.5) (2026-04-10)
+
+
+### Bug Fixes
+
+* **WebAPI:** Add --channel flag to vpk upload steps to prevent OS auto-detection ([7278c40](https://github.com/Reaparr/Reaparr/commit/7278c40c0c8c369c619b0881afdfadf39fa44a24))
+
 # [0.38.0-dev.4](https://github.com/Reaparr/Reaparr/compare/v0.38.0-dev.3...v0.38.0-dev.4) (2026-04-10)
 
 

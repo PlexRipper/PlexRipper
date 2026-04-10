@@ -1,5 +1,12 @@
 Reaparr Changelog
 
+# [0.38.0-dev.4](https://github.com/Reaparr/Reaparr/compare/v0.38.0-dev.3...v0.38.0-dev.4) (2026-04-10)
+
+
+### Bug Fixes
+
+* **WebAPI:** Serialize desktop uploads via dedicated job to prevent asset conflicts ([5d8493e](https://github.com/Reaparr/Reaparr/commit/5d8493e8b5b75db30b76c84ee3b8eb47db9ed264))
+
 # [0.38.0-dev.3](https://github.com/Reaparr/Reaparr/compare/v0.38.0-dev.2...v0.38.0-dev.3) (2026-04-10)
 
 

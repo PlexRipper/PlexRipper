@@ -39,8 +39,6 @@ jobs:
         runs-on: ${{ matrix.runner }}
         permissions:
             contents: read
-            packages: write
-            id-token: write
         steps:
             - name: Checkout source code
               uses: actions/checkout@v6
@@ -82,6 +80,7 @@ jobs:
                   cache-from: |
                       type=registry,ref=reaparr/reaparr:buildcache-${{ matrix.arch }}
                       type=registry,ref=reaparr/reaparr:${{ inputs.version }}-${{ matrix.arch }}
+                  cache-to: ${{ inputs.push && format('type=registry,ref=reaparr/reaparr:buildcache-{0},mode=max', matrix.arch) || '' }}
                   load: ${{ !inputs.push }}
 
     # Create multi-arch manifests (only if push=true)
@@ -93,7 +92,6 @@ jobs:
         permissions:
             contents: read
             packages: write
-            id-token: write
         steps:
             - name: Checkout source code
               uses: actions/checkout@v6

@@ -1,5 +1,12 @@
 Reaparr Changelog
 
+# [0.38.0-dev.3](https://github.com/Reaparr/Reaparr/compare/v0.38.0-dev.2...v0.38.0-dev.3) (2026-04-10)
+
+
+### Bug Fixes
+
+* **WebAPI:** Add merge option to GitHub upload commands ([c17dbf0](https://github.com/Reaparr/Reaparr/commit/c17dbf02047d7773740e373abd6af864a03b5978))
+
 # [0.38.0-dev.2](https://github.com/Reaparr/Reaparr/compare/v0.38.0-dev.1...v0.38.0-dev.2) (2026-04-10)
 
 

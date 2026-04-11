@@ -81,6 +81,15 @@
           "Quartz": "3.17.0"
         }
       },
+      "Velopack": {
+        "type": "Direct",
+        "requested": "[0.0.1298, )",
+        "resolved": "0.0.1298",
+        "contentHash": "PJ6Nm28qJ4ChsHYzgHUJ8g+DGyyHes2+bwxY709+znMhgi8fMp8M1FTF8x6pZMjnsPCWVwoMlxVEyq0NLeRZtA==",
+        "dependencies": {
+          "NuGet.Versioning": "6.14.0"
+        }
+      },
       "Autofac": {
         "type": "Transitive",
         "resolved": "9.1.0",
@@ -429,6 +438,11 @@
           "Namotion.Reflection": "3.4.3",
           "Newtonsoft.Json": "13.0.3"
         }
+      },
+      "NuGet.Versioning": {
+        "type": "Transitive",
+        "resolved": "6.14.0",
+        "contentHash": "4v4blkhCv8mpKtfx+z0G/X0daVCzdIaHSC51GkUspugi5JIMn2Bo8xm5PdZYF0U68gOBfz/+aPWMnpRd85Jbow=="
       },
       "PasswordGenerator": {
         "type": "Transitive",

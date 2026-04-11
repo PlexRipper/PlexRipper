@@ -1553,7 +1553,8 @@
           "Reaparr.PublicAPI.Contracts": "[1.0.0, )",
           "Reaparr.Settings": "[1.0.0, )",
           "Reaparr.Settings.Contracts": "[1.0.0, )",
-          "Reaparr.SignalR.Contracts": "[1.0.0, )"
+          "Reaparr.SignalR.Contracts": "[1.0.0, )",
+          "Velopack": "[0.0.1298, )"
         }
       },
       "Reaparr.Application.Contracts": {

@@ -23,4 +23,7 @@ public enum RefreshDataType
 
     [EnumMember(Value = nameof(DownloadTasks))]
     DownloadTasks = 5,
+
+    [EnumMember(Value = nameof(UpdateAvailable))]
+    UpdateAvailable = 6,
 }

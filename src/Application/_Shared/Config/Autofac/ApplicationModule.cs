@@ -42,5 +42,7 @@ public class ApplicationModule : Module
             .As<IDownloadTaskUpdateDispatcher>()
             .As<IHostedService>()
             .SingleInstance();
+
+        builder.RegisterType<VelopackUpdateManager>().As<IVelopackUpdateManager>().SingleInstance();
     }
 }

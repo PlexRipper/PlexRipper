@@ -8,12 +8,12 @@ public record CheckForUpdatesCommand : ICommand<Result<AppUpdateCheckResult>>;
 public class CheckForUpdatesCommandHandler : ICommandHandler<CheckForUpdatesCommand, Result<AppUpdateCheckResult>>
 {
     private readonly ILogger _log;
-    private readonly IVelopackUpdateManager _updateManager;
+    private readonly IUpdateManager _updateManager;
     private readonly INotificationHubService _notificationHubService;
 
     public CheckForUpdatesCommandHandler(
         ILogger log,
-        IVelopackUpdateManager updateManager,
+        IUpdateManager updateManager,
         INotificationHubService notificationHubService
     )
     {
@@ -33,7 +33,7 @@ public class CheckForUpdatesCommandHandler : ICommandHandler<CheckForUpdatesComm
 
             if (result.IsUpdateAvailable)
             {
-                _log.Here().Information("Update available: {Version}", result.AvailableVersion);
+                _log.Here().Information("Update available: {Version}", result.NewestVersion);
                 await _notificationHubService.SendRefreshNotificationAsync(
                     RefreshDataType.UpdateAvailable,
                     CancellationToken.None

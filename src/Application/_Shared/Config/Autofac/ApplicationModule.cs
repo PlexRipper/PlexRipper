@@ -43,6 +43,6 @@ public class ApplicationModule : Module
             .As<IHostedService>()
             .SingleInstance();
 
-        builder.RegisterType<VelopackUpdateManager>().As<IVelopackUpdateManager>().SingleInstance();
+        builder.RegisterType<UpdateManager>().As<IUpdateManager>().SingleInstance();
     }
 }

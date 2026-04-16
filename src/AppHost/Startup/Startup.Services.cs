@@ -196,6 +196,7 @@ public static partial class Startup
         services.RegisterSonarrHttpClient();
         services.RegisterRadarrHttpClient();
         services.RegisterPlexThumbnailHttpClient();
+        services.RegisterGitHubHttpClient();
 
         // Removing all registered IHttpMessageHandlerBuilderFilter instances to disable built-in HttpClient logging
         services.RemoveAll<IHttpMessageHandlerBuilderFilter>();

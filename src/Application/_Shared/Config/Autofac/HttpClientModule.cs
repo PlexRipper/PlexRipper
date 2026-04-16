@@ -10,6 +10,7 @@ public static class HttpClientModule
     internal static readonly string SonarrClientName = "Sonarr";
     internal static readonly string RadarrClientName = "Radarr";
     public static readonly string PlexThumbnailClientName = "PlexThumbnail";
+    internal static readonly string GitHubClientName = "GitHub";
 
     public static void RegisterDefaultHttpClient(this IServiceCollection services)
     {
@@ -112,4 +113,25 @@ public static class HttpClientModule
                 }
             );
     }
+
+    public static void RegisterGitHubHttpClient(this IServiceCollection services)
+    {
+        services
+            .AddHttpClient(
+                GitHubClientName,
+                client =>
+                {
+                    client.BaseAddress = new Uri("https://api.github.com/");
+                    client.Timeout = TimeSpan.FromSeconds(15);
+                    client.DefaultRequestHeaders.Accept.Add(
+                        new MediaTypeWithQualityHeaderValue("application/vnd.github+json")
+                    );
+                    client.DefaultRequestHeaders.UserAgent.ParseAdd("Reaparr");
+                }
+            )
+            .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler { AllowAutoRedirect = false });
+    }
+
+    public static HttpClient CreateGitHubHttpClient(this IHttpClientFactory factory) =>
+        factory.CreateClient(GitHubClientName);
 }

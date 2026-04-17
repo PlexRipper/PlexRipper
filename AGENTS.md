@@ -34,13 +34,26 @@ bun run generate-ts  # Generate TypeScript types (requires backend running in de
 
 > **`generate-ts` prerequisite:** The backend must be running in dev mode before executing `bun run generate-ts`. Use the Rider run configuration at `.run/Reaparr Back-End Development.run.xml`, or start the backend manually with `dotnet run --project src/AppHost`.
 
-### Performance-constrained build (while gaming on Arch Linux)
+### Build and test commands (always throttled)
 
-Game performance takes priority over builds and tests. Use:
+> **ALWAYS assume gaming is active.** All build and test commands must be run throttled — no exceptions.
 
+**Backend build:**
 ```bash
-ionice -c2 -n7 nice -n 15 taskset -c 0-3 dotnet build -m:2
+ionice -c2 -n7 nice -n 15 taskset -c 0-3 dotnet build Reaparr.sln -m:2
 ```
+
+**Backend run:**
+```bash
+ionice -c2 -n7 nice -n 15 taskset -c 0-3 dotnet run --project src/AppHost
+```
+
+**Backend tests:**
+```bash
+ionice -c2 -n7 nice -n 15 taskset -c 0-3 dotnet run --project tests/UnitTests/<Project>.UnitTests/<Project>.UnitTests.csproj -- --no-ansi --disable-logo
+```
+
+Replace `<Project>` with the actual project name (e.g., `Application`, `BackgroundJobs`).
 
 If the game still lags, optionally raise its priority:
 

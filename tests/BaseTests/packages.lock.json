@@ -1227,6 +1227,14 @@
           "Quartz": "3.17.0"
         }
       },
+      "Semver": {
+        "type": "Transitive",
+        "resolved": "3.0.0",
+        "contentHash": "9jZCicsVgTebqkAujRWtC9J1A5EQVlu0TVKHcgoCuv345ve5DYf4D1MjhKEnQjdRZo6x/vdv6QQrYFs7ilGzLA==",
+        "dependencies": {
+          "Microsoft.Extensions.Primitives": "5.0.1"
+        }
+      },
       "Serilog": {
         "type": "Transitive",
         "resolved": "4.3.1",
@@ -1554,6 +1562,7 @@
           "Reaparr.Settings": "[1.0.0, )",
           "Reaparr.Settings.Contracts": "[1.0.0, )",
           "Reaparr.SignalR.Contracts": "[1.0.0, )",
+          "Semver": "[3.0.0, )",
           "Velopack": "[0.0.1298, )"
         }
       },

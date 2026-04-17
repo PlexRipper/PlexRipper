@@ -34,17 +34,11 @@
         },
         "update-available-dialog": {
             "title": "New Version Available",
+            "current-version": "Current: {version}",
+            "latest-version": "Latest: {version}",
             "update-now": "Update now",
             "docker-action": "View Docker update instructions",
-            "retry": "Retry",
-            "dev-badge": "DEV",
-            "no-releases": "No releases are currently available.",
-            "no-release-notes": "No release notes available for this release.",
-            "status": {
-                "downloading": "Downloading update...",
-                "applying": "Applying update...",
-                "restarting": "Restarting application..."
-            }
+            "no-releases": "No releases are currently available."
         },
         "details-overview": {
             "total-duration": "Total duration:",

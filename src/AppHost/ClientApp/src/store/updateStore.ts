@@ -1,8 +1,7 @@
 import { acceptHMRUpdate, defineStore } from 'pinia';
 import { computed, reactive, toRefs } from 'vue';
 import { of, type Observable, tap } from 'rxjs';
-import { switchMap, take } from 'rxjs/operators';
-import Log from 'consola';
+import { switchMap } from 'rxjs/operators';
 import { updateApi } from '@api';
 import type { ReleaseNoteDTO } from '@api/generated/data-contracts';
 import { RefreshDataType } from '@api/generated/data-contracts';

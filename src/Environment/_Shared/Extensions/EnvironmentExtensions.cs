@@ -49,6 +49,11 @@ public static class EnvironmentExtensions
         GetEnvironmentVariable(EnvKeys.AuthHeaderTokenName) ?? "X-Auth-User";
 
     /// <summary>
+    /// Gets the GitHub token from <c>GITHUB_TOKEN</c> for authenticated GitHub API requests.
+    /// </summary>
+    public static string? GetGitHubToken() => GetEnvironmentVariable(EnvKeys.GitHubToken);
+
+    /// <summary>
     /// When set to true, the application will not mask/censor sensitive data in the logs.
     /// </summary>
     public static bool IsUnmasked() => IsTrue(GetEnvironmentVariable(EnvKeys.Unmasked));

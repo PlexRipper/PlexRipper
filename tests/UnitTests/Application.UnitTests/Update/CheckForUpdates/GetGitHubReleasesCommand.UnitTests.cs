@@ -1,5 +1,6 @@
 using System.Net;
 using System.Text;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Reaparr.Application.UnitTests;
 
@@ -174,6 +175,46 @@ public class GetGitHubReleasesCommandUnitTests : BaseUnitTest<GetGitHubReleasesC
         // Assert
         result.IsFailed.ShouldBeTrue();
         Mock.Mock<IHttpClientFactory>().Verify();
+    }
+
+    [Test]
+    public void ShouldSetGitHubAuthorizationHeader_WhenGitHubTokenIsConfigured()
+    {
+        // Arrange
+        using var _ = WithEnvironmentVariablesAsync(
+            new Dictionary<string, string?> { [Environment.EnvKeys.GitHubToken] = "test-github-token" }
+        );
+        var services = new ServiceCollection();
+
+        // Act
+        services.RegisterGitHubHttpClient();
+        using var serviceProvider = services.BuildServiceProvider();
+        var httpClientFactory = serviceProvider.GetRequiredService<IHttpClientFactory>();
+        using var client = httpClientFactory.CreateClient(HttpClientModule.GitHubClientName);
+
+        // Assert
+        client.DefaultRequestHeaders.Authorization.ShouldNotBeNull();
+        client.DefaultRequestHeaders.Authorization.Scheme.ShouldBe("Bearer");
+        client.DefaultRequestHeaders.Authorization.Parameter.ShouldBe("test-github-token");
+    }
+
+    [Test]
+    public void ShouldNotSetGitHubAuthorizationHeader_WhenGitHubTokenIsMissing()
+    {
+        // Arrange
+        using var _ = WithEnvironmentVariablesAsync(
+            new Dictionary<string, string?> { [Environment.EnvKeys.GitHubToken] = null }
+        );
+        var services = new ServiceCollection();
+
+        // Act
+        services.RegisterGitHubHttpClient();
+        using var serviceProvider = services.BuildServiceProvider();
+        var httpClientFactory = serviceProvider.GetRequiredService<IHttpClientFactory>();
+        using var client = httpClientFactory.CreateClient(HttpClientModule.GitHubClientName);
+
+        // Assert
+        client.DefaultRequestHeaders.Authorization.ShouldBeNull();
     }
 
     [Test]

@@ -127,6 +127,10 @@ public static class HttpClientModule
                         new MediaTypeWithQualityHeaderValue("application/vnd.github+json")
                     );
                     client.DefaultRequestHeaders.UserAgent.ParseAdd("Reaparr");
+
+                    var token = EnvironmentExtensions.GetGitHubToken();
+                    if (!string.IsNullOrWhiteSpace(token))
+                        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
                 }
             )
             .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler { AllowAutoRedirect = false });

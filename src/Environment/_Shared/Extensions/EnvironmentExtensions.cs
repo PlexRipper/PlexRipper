@@ -4,6 +4,8 @@ namespace Reaparr.Environment;
 
 public static class EnvironmentExtensions
 {
+    private static readonly AsyncLocal<IReadOnlyDictionary<string, string?>?> _testOverrides = new();
+
     #region Getters
 
     /// <summary>
@@ -182,8 +184,26 @@ public static class EnvironmentExtensions
 
     #region Helpers
 
+    /// <summary>
+    /// Sets per-async-flow environment variable overrides for the duration of the returned scope.
+    /// Intended for use in tests only. Each async flow (test) gets its own isolated slot via <see cref="AsyncLocal{T}"/>.
+    /// </summary>
+    internal static IDisposable WithOverrides(IReadOnlyDictionary<string, string?> overrides)
+    {
+        _testOverrides.Value = overrides;
+        return new OverrideScope();
+    }
+
+    private sealed class OverrideScope : IDisposable
+    {
+        public void Dispose() => _testOverrides.Value = null;
+    }
+
     private static string? GetEnvironmentVariable(string key)
     {
+        if (_testOverrides.Value is { } overrides && overrides.TryGetValue(key, out var val))
+            return string.IsNullOrWhiteSpace(val) ? null : val?.Trim();
+
         var value = System.Environment.GetEnvironmentVariable(key)?.Trim();
         return string.IsNullOrWhiteSpace(value) ? null : value;
     }

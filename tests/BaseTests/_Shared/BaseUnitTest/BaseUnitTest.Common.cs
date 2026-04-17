@@ -7,42 +7,12 @@ public partial class BaseUnitTest
     protected readonly ILogger Log;
 
     /// <summary>
-    /// Serializes tests that mutate <see cref="System.Environment"/> variables.
+    /// Sets the given environment variable overrides for the duration of the test and then clears them. Uses <see cref="AsyncLocal{T}"/> inside <see cref="EnvironmentExtensions"/>
+    /// so parallel tests each get an isolated scope with no locking required.
     /// </summary>
-    protected static readonly SemaphoreSlim EnvironmentLock = new(1, 1);
-
-    /// <summary>
-    /// Sets the given environment variables for the duration of <paramref name="action"/>,
-    /// then restores the originals. Serialized via <see cref="EnvironmentLock"/> to keep
-    /// parallel tests from interfering with each other.
-    /// </summary>
-    protected static async Task WithEnvironmentVariablesAsync(
-        IReadOnlyDictionary<string, string?> environmentVariables,
-        Func<Task> action
-    )
-    {
-        await EnvironmentLock.WaitAsync();
-
-        var originalValues = environmentVariables.ToDictionary(
-            x => x.Key,
-            x => System.Environment.GetEnvironmentVariable(x.Key)
-        );
-
-        try
-        {
-            foreach (var environmentVariable in environmentVariables)
-                System.Environment.SetEnvironmentVariable(environmentVariable.Key, environmentVariable.Value);
-
-            await action();
-        }
-        finally
-        {
-            foreach (var originalValue in originalValues)
-                System.Environment.SetEnvironmentVariable(originalValue.Key, originalValue.Value);
-
-            EnvironmentLock.Release();
-        }
-    }
+    protected static IDisposable WithEnvironmentVariablesAsync(
+        IReadOnlyDictionary<string, string?> environmentVariables
+    ) => EnvironmentExtensions.WithOverrides(environmentVariables);
 
     // Use loose behavior here to avoid Dispose() not mocked exception
     protected Mock<HttpMessageHandler> HttpHandlerMock = new(MockBehavior.Loose);

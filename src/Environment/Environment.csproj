@@ -13,4 +13,7 @@
     <ItemGroup>
         <Folder Include="_Shared\" />
     </ItemGroup>
+    <ItemGroup>
+        <InternalsVisibleTo Include="Reaparr.BaseTests" />
+    </ItemGroup>
 </Project>

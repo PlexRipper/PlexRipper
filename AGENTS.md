@@ -89,10 +89,12 @@ Do **not** renice other processes unless explicitly requested.
 
 ### Rider-first workflow
 
-- When Rider MCP tools are available and `projectPath` is known, use Rider MCP search/index/navigation tools first for discovery and symbol lookup.
-- Prefer symbol-aware Rider tools (`find references`, `find symbol`, `symbol info`, `rename refactoring`) before plain text search for refactors.
-- Fall back to `grep`, `glob`, or `read` only if Rider MCP is unavailable, errors, or cannot provide the needed result.
-- If fallback is required, state it briefly in the response.
+> **MANDATORY**: At the start of every task, load the `jetbrains-skill` skill. This is non-negotiable — it enforces the correct tool selection order below.
+
+**NEVER use `grep`, `glob`, `read`, or bash file commands as a first tool.** Rider MCP tools are always first when available.
+
+- Fall back to `grep`, `glob`, or `read` **only** if Rider MCP is unavailable, errors, or cannot provide the needed result.
+- If fallback is required, **explicitly state it** before using the fallback tool.
 
 ---
 

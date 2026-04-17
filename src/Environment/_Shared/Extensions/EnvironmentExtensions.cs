@@ -207,7 +207,7 @@ public static class EnvironmentExtensions
     private static string? GetEnvironmentVariable(string key)
     {
         if (_testOverrides.Value is { } overrides && overrides.TryGetValue(key, out var val))
-            return string.IsNullOrWhiteSpace(val) ? null : val?.Trim();
+            return string.IsNullOrWhiteSpace(val) ? null : val.Trim();
 
         var value = System.Environment.GetEnvironmentVariable(key)?.Trim();
         return string.IsNullOrWhiteSpace(value) ? null : value;

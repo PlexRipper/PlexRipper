@@ -17,6 +17,7 @@ export enum StoreNames {
 	ServerStore = 'ServerStore',
 	SettingsStore = 'SettingsStore',
 	SignalrStore = 'SignalrStore',
+	UpdateStore = 'UpdateStore',
 	PageSetup = 'PageSetup',
 	AccountDialogStore = 'AccountDialogStore',
 	MediaOverviewStore = 'MediaOverviewStore',

@@ -18,3 +18,4 @@ export * from './serverConnection';
 export * from './serverStore';
 export * from './settingsStore';
 export * from './signalrStore';
+export * from './updateStore';

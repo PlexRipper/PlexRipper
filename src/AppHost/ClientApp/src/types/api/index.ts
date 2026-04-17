@@ -10,6 +10,7 @@ import { PlexServer } from '@api/generated/PlexServer';
 import { PlexServerConnection } from '@api/generated/PlexServerConnection';
 import { Settings } from '@api/generated/Settings';
 import { Integration } from '@api/generated/Integration';
+import { Update } from '@api/generated/Update';
 
 export * from './baseApi';
 export * from './custom';
@@ -26,6 +27,7 @@ const plexServerApi = new PlexServer();
 const plexServerConnectionApi = new PlexServerConnection();
 const integrationApi = new Integration();
 const settingsApi = new Settings();
+const updateApi = new Update();
 
 export {
 	authenticationApi,
@@ -40,4 +42,5 @@ export {
 	plexServerConnectionApi,
 	settingsApi,
 	integrationApi,
+	updateApi,
 };

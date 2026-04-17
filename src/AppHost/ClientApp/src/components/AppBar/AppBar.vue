@@ -25,6 +25,7 @@
 							style="height: 100%; width: auto; margin-left: 0.5rem; margin-top: 3px;">
 					</div>
 				</q-btn>
+				<!-- Copy Version Number -->
 				<q-btn
 					flat
 					round
@@ -36,6 +37,21 @@
 						self="top middle"
 						:offset="[10, 10]">
 						{{ $t('components.app-bar.copy-version', { version: globalStore.version }) }}
+					</q-tooltip>
+				</q-btn>
+				<!-- Update Button -->
+				<q-btn
+					icon="mdi-download-circle-outline"
+					flat
+					round
+					class="update-button q-mr-sm"
+					:class="{ 'update-button--pulse': updateStore.hasUpdateAvailable }"
+					@click="openUpdateDialog">
+					<q-tooltip
+						anchor="bottom middle"
+						self="top middle"
+						:offset="[10, 10]">
+						{{ $t('components.app-bar.update-available') }}
 					</q-tooltip>
 				</q-btn>
 			</q-toolbar-title>
@@ -69,12 +85,13 @@
 </template>
 
 <script setup lang="ts">
-import { useGlobalStore, useDialogStore } from '@store';
+import { useGlobalStore, useDialogStore, useUpdateStore } from '@store';
 import { DialogType } from '@enums';
 import { useClipboard } from '@vueuse/core';
 
 const globalStore = useGlobalStore();
 const dialogStore = useDialogStore();
+const updateStore = useUpdateStore();
 
 const { copy } = useClipboard({ legacy: true });
 
@@ -92,6 +109,10 @@ function showNavigationDrawer(): void {
 
 function showNotificationsDrawer(): void {
 	emit('show-notifications');
+}
+
+function openUpdateDialog(): void {
+	dialogStore.openDialog(DialogType.UpdateAvailableDialog);
 }
 </script>
 

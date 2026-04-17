@@ -23,6 +23,7 @@ import {
 	useServerStore,
 	useSettingsStore,
 	useSignalrStore,
+	useUpdateStore,
 	useAuthenticationStore,
 } from '@store';
 import { cloneDeep } from 'lodash-es';
@@ -90,6 +91,7 @@ export const useGlobalStore = defineStore(StoreNames.GlobalStore, () => {
 				useServerStore().setup(),
 				useSettingsStore().setup(),
 				useSignalrStore().setup(),
+				useUpdateStore().setup(),
 			]).pipe(
 				switchMap((results) => {
 					return useIntegrationStore().setup().pipe(
@@ -124,11 +126,13 @@ export const useGlobalStore = defineStore(StoreNames.GlobalStore, () => {
 			useServerStore().$reset();
 			useSettingsStore().$reset();
 			useSignalrStore().$reset();
+			useUpdateStore().$reset();
 			useIntegrationStore().$reset();
 		},
 	};
 	const getters = {
 		getPageSetupReady: computed((): Observable<boolean> => state.pageReadyObservable.asObservable()),
+		isDockerMode: computed(() => state.config.isDocker ?? false),
 	};
 	return {
 		...toRefs(state),

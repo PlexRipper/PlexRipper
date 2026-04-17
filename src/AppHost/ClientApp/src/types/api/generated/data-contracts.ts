@@ -16,6 +16,13 @@ export interface AppCredentialsDTO {
   userName: string;
 }
 
+export interface AppUpdateCheckDTO {
+  currentVersion: string;
+  isUpdateAvailable: boolean;
+  newestVersion: string;
+  releaseNotes: ReleaseNoteDTO[];
+}
+
 /** @example {"username":"ReaparrRocks","password":"R€Aℙℙ@rr69","rememberMe":false} */
 export interface AppUserLoginEndpointRequest {
   /**
@@ -975,6 +982,7 @@ export enum RefreshDataType {
   PlexLibrarySyncStatus = "PlexLibrarySyncStatus",
   PlexServerConnection = "PlexServerConnection",
   DownloadTasks = "DownloadTasks",
+  UpdateAvailable = "UpdateAvailable",
 }
 
 export interface RefreshPlexAccountAccessRapportDTO {
@@ -984,6 +992,14 @@ export interface RefreshPlexAccountAccessRapportDTO {
   plexAccountName: string;
 }
 
+export interface ReleaseNoteDTO {
+  isDevRelease: boolean;
+  notes: string;
+  /** @format date-time */
+  releaseDate: string;
+  version: string;
+}
+
 export interface ResultDTOOfAppCredentialsDTO {
   errors: ErrorDTO[];
   isSuccess: boolean;
@@ -991,6 +1007,15 @@ export interface ResultDTOOfAppCredentialsDTO {
   statusCode: number;
   successes: SuccessDTO[];
   value?: AppCredentialsDTO | null;
+}
+
+export interface ResultDTOOfAppUpdateCheckDTO {
+  errors: ErrorDTO[];
+  isSuccess: boolean;
+  /** @format int32 */
+  statusCode: number;
+  successes: SuccessDTO[];
+  value?: AppUpdateCheckDTO | null;
 }
 
 export interface ResultDTOOfBoolean {

@@ -34,6 +34,7 @@
     "lint:fix": "eslint . --fix"
   },
   "dependencies": {
+    "@crazydos/vue-markdown": "^1.1.4",
     "@microsoft/signalr": "^9.0.6",
     "@microsoft/signalr-protocol-msgpack": "^9.0.6",
     "@pinia/nuxt": "^0.11.3",

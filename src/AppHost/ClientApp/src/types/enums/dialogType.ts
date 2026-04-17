@@ -21,4 +21,5 @@ export enum DialogType {
 	ServerHideConfirmationDialog = 'server-hide-confirmation-dialog',
 	ServerSettingsDialog = 'server-settings-dialog',
 	SyncServerMediaDialog = 'sync-server-media-dialog',
+	UpdateAvailableDialog = 'update-available-dialog',
 }

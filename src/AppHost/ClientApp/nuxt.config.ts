@@ -56,6 +56,7 @@ export default defineNuxtConfig({
 			version: process.env.npm_package_version || '?',
 			apiPort: process.env.API_PORT || '5000',
 			isDocker: process.env.IS_DOCKER === 'true' || false,
+			isDesktop: process.env.IS_DESKTOP === 'true' || false,
 		},
 	},
 	dir: {

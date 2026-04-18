@@ -17,21 +17,22 @@ public class LogConfig
 
     public static string SourceContext => nameof(SourceContext);
 
-    // TemplateTheme.Code uses ANSI escape codes unconditionally, unlike SystemConsoleTheme
-    // which uses Console.ForegroundColor and produces no color when stdout is redirected (Rider Run mode).
-    // applyThemeWhenOutputIsRedirected: true forces ANSI codes even when Rider's test runner
-    // redirects stdout (which normally causes ExpressionTemplate to suppress the theme).
-    protected static readonly ExpressionTemplate Template = new(
-        // Template
+    private const string TemplateText =
         "{@t:HH:mm:ss} [{@l}] "
-            + "{#if FileName is not null}"
-            + "[{FileName}:{LineNumber}.{MethodName}()]"
-            + "{#else}"
-            + "[{SourceContext}]"
-            + "{#end} => {@m}\n{@x}\n",
+        + "{#if FileName is not null}"
+        + "[{FileName}:{LineNumber}.{MethodName}()]"
+        + "{#else}"
+        + "[{SourceContext}]"
+        + "{#end} => {@m}\n{@x}\n";
+
+    // Keep console/debug output colorized when Rider redirects stdout, but keep file logs plain text.
+    protected static readonly ExpressionTemplate ConsoleTemplate = new(
+        TemplateText,
         theme: LogThemes.SystemColored.ToTemplateTheme(),
         applyThemeWhenOutputIsRedirected: true
     );
+
+    protected static readonly ExpressionTemplate FileTemplate = new(TemplateText);
 
     protected static LoggerConfiguration GetBaseConfiguration()
     {
@@ -82,14 +83,14 @@ public class LogConfig
             });
         }
 
-        return config.Enrich.FromLogContext().WriteTo.Debug(Template).WriteTo.Console(Template);
+        return config.Enrich.FromLogContext().WriteTo.Debug(ConsoleTemplate).WriteTo.Console(ConsoleTemplate);
     }
 
     public virtual Logger GetLogger(LogEventLevel minimumLogLevel = LogEventLevel.Debug) =>
         GetBaseConfiguration()
             .WriteTo.Seq(EnvironmentExtensions.GetSeqUrl())
             .WriteTo.File(
-                Template,
+                FileTemplate,
                 Path.Combine(PathProvider.LogsDirectory, "log.txt"),
                 minimumLogLevel,
                 rollingInterval: RollingInterval.Day,

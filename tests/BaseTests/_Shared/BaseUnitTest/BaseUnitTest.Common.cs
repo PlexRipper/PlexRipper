@@ -39,7 +39,7 @@ public partial class BaseUnitTest
         Mock = AutoMock.GetStrict(SetDefaultBuilder);
     }
 
-    protected T SetupEndpointUnitTest<T>()
+    protected T SetupEndpointUnitTest<T>(Action<IServiceCollection>? extraServices = null)
         where T : class, IEndpoint
     {
         return Factory.Create<T>(ctx =>
@@ -58,6 +58,8 @@ public partial class BaseUnitTest
                 s.AddSingleton(_ => Mock.Mock<IDownloadHubService>().Object);
                 s.AddSingleton(_ => Mock.Mock<INotificationHubService>().Object);
                 s.AddSingleton(_ => Mock.Mock<IDownloadTaskScheduler>().Object);
+
+                extraServices?.Invoke(s);
             });
         });
     }

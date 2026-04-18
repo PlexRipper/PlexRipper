@@ -166,7 +166,7 @@ Do **not** install system packages on the host unless explicitly instructed.
 
 ### Context7 MCP
 
-- Use Context7 when you need library or API documentation.
+- **Always use Context7** for any library or API documentation lookup — no exceptions. Do not rely on training-time knowledge for library APIs; always fetch current docs via Context7.
 - Pin the library with slash syntax when known (e.g., `use library /supabase/supabase`).
 - Mention the target version.
 - Fetch minimal, targeted docs and summarize — no large dumps.
@@ -181,7 +181,8 @@ Do **not** install system packages on the host unless explicitly instructed.
 
 ## Skills usage
 
-- Detect and auto-load any applicable skills before acting on a task.
+- **Reaparr-specific skills take priority.** Before acting on any task in this project, check for a matching `reaparr-*` skill and load it first. These skills encode project-specific conventions that override generic guidance.
+- Detect and auto-load any other applicable skills before acting on a task.
 - If multiple skills apply, load all relevant ones and follow their guidance unless it conflicts with higher-priority instructions in this file.
 - Explicitly mention which skills were loaded and used in the response.
 

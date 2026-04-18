@@ -1290,6 +1290,14 @@
           "Serilog": "4.3.0"
         }
       },
+      "Serilog.Sinks.AspNetCore.App.SignalR": {
+        "type": "Transitive",
+        "resolved": "1.2.2",
+        "contentHash": "iXbJ3+HmQLZuOkRgmm1dAOFUX3AQx04AMh8CvJnmCtXnX7X9lPO+if0zxsOSomN0hUv3BIPMkZzk4/7W4jPGrA==",
+        "dependencies": {
+          "Serilog": "3.1.1"
+        }
+      },
       "Serilog.Sinks.Console": {
         "type": "Transitive",
         "resolved": "6.1.1",
@@ -1533,6 +1541,7 @@
           "Reaparr.Settings": "[1.0.0, )",
           "Reaparr.SignalR": "[1.0.0, )",
           "Serilog.AspNetCore": "[10.0.0, )",
+          "Serilog.Sinks.AspNetCore.App.SignalR": "[1.2.2, )",
           "Velopack": "[0.0.1298, )"
         }
       },

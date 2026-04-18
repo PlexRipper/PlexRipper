@@ -95,6 +95,15 @@
           "Serilog.Sinks.File": "7.0.0"
         }
       },
+      "Serilog.Sinks.AspNetCore.App.SignalR": {
+        "type": "Direct",
+        "requested": "[1.2.2, )",
+        "resolved": "1.2.2",
+        "contentHash": "iXbJ3+HmQLZuOkRgmm1dAOFUX3AQx04AMh8CvJnmCtXnX7X9lPO+if0zxsOSomN0hUv3BIPMkZzk4/7W4jPGrA==",
+        "dependencies": {
+          "Serilog": "3.1.1"
+        }
+      },
       "Velopack": {
         "type": "Direct",
         "requested": "[0.0.1298, )",

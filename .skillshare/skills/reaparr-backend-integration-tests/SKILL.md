@@ -154,11 +154,57 @@ Relevant files:
 
 ## Verification Commands
 
-Targeted iteration example:
+### TUnit test filtering
+
+Use `--treenode-filter` (not `--filter`). Syntax: `/<Assembly>/<Namespace>/<Class>/<Test>` — exactly 4 path segments separated by `/`.
+
+**CRITICAL: `[...]` bracket syntax is for property filters only (5th segment).** Never use brackets in the class or test name segments — doing so matches zero tests silently.
+
+| Segment | Position | Example value |
+|---------|----------|---------------|
+| Assembly | 1st (`/*`) | wildcard always |
+| Namespace | 2nd (`/*`) | `Reaparr.IntegrationTests.Api*` |
+| Class name | 3rd | `RefreshLibraryMediaEndpointIntegrationTests` or `*Endpoint*` |
+| Test name | 4th | `*` or exact method name |
+| Property filter | 5th (optional) | `[Category=Smoke]` |
+
+Filter by class name:
 
 ```bash
-dotnet run --project tests/IntegrationTests/IntegrationTests/IntegrationTests.csproj -- --no-ansi --disable-logo --treenode-filter "/*/*/*[RefreshLibraryMediaEndpointIntegrationTests*]"
+dotnet run --project tests/IntegrationTests/IntegrationTests/IntegrationTests.csproj -- --no-ansi --disable-logo --treenode-filter "/*/*/RefreshLibraryMediaEndpointIntegrationTests/*"
 ```
+
+Filter by class wildcard:
+
+```bash
+dotnet run --project tests/IntegrationTests/IntegrationTests/IntegrationTests.csproj -- --no-ansi --disable-logo --treenode-filter "/*/*/CheckForUpdate*/*"
+```
+
+Filter multiple classes with OR:
+
+```bash
+dotnet run --project tests/IntegrationTests/IntegrationTests/IntegrationTests.csproj -- --no-ansi --disable-logo --treenode-filter "/*/*/(RefreshLibraryMediaEndpointIntegrationTests)|(CheckForUpdateEndpointIntegrationTests)/*"
+```
+
+Filter by namespace prefix:
+
+```bash
+dotnet run --project tests/IntegrationTests/IntegrationTests/IntegrationTests.csproj -- --no-ansi --disable-logo --treenode-filter "/*/Reaparr.IntegrationTests.Api*/*/*"
+```
+
+Filter by specific test method:
+
+```bash
+dotnet run --project tests/IntegrationTests/IntegrationTests/IntegrationTests.csproj -- --no-ansi --disable-logo --treenode-filter "/*/*/*/ShouldReturn200_WhenLibraryRefreshSucceeds"
+```
+
+If you are unsure of exact names, list all tests first:
+
+```bash
+dotnet run --project tests/IntegrationTests/IntegrationTests/IntegrationTests.csproj -- --no-ansi --disable-logo --list-tests
+```
+
+**Anti-pattern (zero tests ran):** `"/*/*/*[CheckForUpdateEndpoint*]"` — this puts bracket property syntax in the class segment. Use `"/*/*/CheckForUpdateEndpoint*/*"` instead.
 
 Mandatory completion gate:
 

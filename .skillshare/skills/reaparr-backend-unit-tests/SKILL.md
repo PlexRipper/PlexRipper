@@ -265,6 +265,7 @@ dotnet run --project tests/UnitTests/Application.UnitTests/Application.UnitTests
 
 ## Common Mistakes
 
+- Using `[ClassName*]` bracket syntax in the class segment of `--treenode-filter` — this causes "Zero tests ran". Brackets are for property filters only (5th segment). Use plain wildcards: `"/*/*/MyClassUnitTests/*"` not `"/*/*/*[MyClass*]"`.
 - Putting tests in the wrong `*.UnitTests` project because of command location instead of handler location.
 - Using folder-based namespaces instead of `<SUTProjectNamespace>.UnitTests`.
 - Asserting only return values and not checking database state or mock interactions.

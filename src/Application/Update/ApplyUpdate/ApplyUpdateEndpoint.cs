@@ -5,15 +5,15 @@ namespace Reaparr.Application;
 /// </summary>
 public class ApplyUpdateEndpoint : BaseEndpointWithoutRequest
 {
+    private readonly UpdateManager _velopackManager;
     private readonly ILogger _log;
-    private readonly IUpdateManager _updateManager;
 
     public override string EndpointPath => ApiRoutes.UpdateController + "/execute";
 
-    public ApplyUpdateEndpoint(ILogger log, IUpdateManager updateManager)
+    public ApplyUpdateEndpoint(ILogger log, UpdateManager velopackManager)
     {
         _log = log.ForContext<ApplyUpdateEndpoint>();
-        _updateManager = updateManager;
+        _velopackManager = velopackManager;
     }
 
     public override void Configure()
@@ -38,6 +38,7 @@ public class ApplyUpdateEndpoint : BaseEndpointWithoutRequest
 
         await SendFluentResult(Result.Ok(), ct);
 
-        _updateManager.ApplyUpdateAndRestart();
+        var asset = _velopackManager.UpdatePendingRestart;
+        _velopackManager.ApplyUpdatesAndRestart(asset, []);
     }
 }

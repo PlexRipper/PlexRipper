@@ -8,17 +8,20 @@ public record CheckForUpdatesCommand : ICommand<Result<AppUpdateCheckResult>>;
 public class CheckForUpdatesCommandHandler : ICommandHandler<CheckForUpdatesCommand, Result<AppUpdateCheckResult>>
 {
     private readonly ILogger _log;
-    private readonly IUpdateManager _updateManager;
+    private readonly ICommandExecutor _commandExecutor;
+    private readonly UpdateManager _velopackManager;
     private readonly INotificationHubService _notificationHubService;
 
     public CheckForUpdatesCommandHandler(
         ILogger log,
-        IUpdateManager updateManager,
+        ICommandExecutor commandExecutor,
+        UpdateManager velopackManager,
         INotificationHubService notificationHubService
     )
     {
         _log = log.ForContext<CheckForUpdatesCommandHandler>();
-        _updateManager = updateManager;
+        _commandExecutor = commandExecutor;
+        _velopackManager = velopackManager;
         _notificationHubService = notificationHubService;
     }
 
@@ -27,24 +30,52 @@ public class CheckForUpdatesCommandHandler : ICommandHandler<CheckForUpdatesComm
         CancellationToken cancellationToken
     )
     {
-        try
-        {
-            var result = await _updateManager.CheckForUpdatesAsync();
+        var releasesResult = await _commandExecutor.Send(new GetGitHubReleasesCommand(), cancellationToken);
+        if (releasesResult.IsFailed)
+            return AppUpdateCheckResult.NoUpdate();
 
-            if (result.IsUpdateAvailable)
+        var releases = releasesResult.Value;
+
+        // Desktop mode
+        if (EnvironmentExtensions.IsDesktopMode())
+        {
+            var updateInfo = await _velopackManager.CheckForUpdatesAsync();
+            if (updateInfo is null)
             {
-                _log.Here().Information("Update available: {Version}", result.NewestVersion);
-                await _notificationHubService.SendRefreshNotificationAsync(
-                    RefreshDataType.UpdateAvailable,
-                    CancellationToken.None
-                );
+                _log.Here().Information("No update available");
+                return Result.Ok(AppUpdateCheckResult.NoUpdate());
             }
 
-            return Result.Ok(result);
+            var targetVersion = updateInfo.TargetFullRelease.Version.ToString();
+            _log.Here().Information("Update available: {Version}", targetVersion);
+
+            await _notificationHubService.SendRefreshNotificationAsync(
+                RefreshDataType.UpdateAvailable,
+                CancellationToken.None
+            );
+            return Result.Ok(AppUpdateCheckResult.UpdateAvailable(targetVersion, releases));
         }
-        catch (Exception e)
+
+        // Docker Mode
+        var isDevRelease = EnvironmentExtensions.IsDevRelease();
+        var latest = releases.FirstOrDefault(r => r.IsDevRelease == isDevRelease);
+        if (latest is null)
+            return Result.Ok(AppUpdateCheckResult.NoUpdate());
+
+        var latestVersion = latest.Version.TrimStart('v');
+
+        if (!releases.Any())
         {
-            return Result.Fail(new ExceptionalError(e)).LogError();
+            _log.Here().Information("No update available");
+            return Result.Ok(AppUpdateCheckResult.NoUpdate());
         }
+
+        _log.Here().Information("Update available: {Version}", latestVersion);
+
+        await _notificationHubService.SendRefreshNotificationAsync(
+            RefreshDataType.UpdateAvailable,
+            CancellationToken.None
+        );
+        return Result.Ok(AppUpdateCheckResult.UpdateAvailable(latestVersion, releases));
     }
 }

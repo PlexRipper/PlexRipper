@@ -51,10 +51,8 @@ public class ApplicationModule : Module
                     EnvironmentExtensions.GetGitHubToken(),
                     EnvironmentExtensions.IsDevRelease()
                 );
-                return new Velopack.UpdateManager(source);
+                return new UpdateManager(source);
             })
             .SingleInstance();
-
-        builder.RegisterType<UpdateManager>().As<IUpdateManager>().SingleInstance();
     }
 }

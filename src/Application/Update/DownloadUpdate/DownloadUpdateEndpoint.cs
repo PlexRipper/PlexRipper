@@ -5,15 +5,15 @@ namespace Reaparr.Application;
 /// </summary>
 public class DownloadUpdateEndpoint : BaseEndpointWithoutRequest
 {
-    private readonly IUpdateManager _updateManager;
+    private readonly UpdateManager _velopackManager;
     private readonly ILogger _log;
 
     public override string EndpointPath => ApiRoutes.UpdateController + "/download";
 
-    public DownloadUpdateEndpoint(ILogger log, IUpdateManager updateManager)
+    public DownloadUpdateEndpoint(ILogger log, UpdateManager velopackManager)
     {
         _log = log.ForContext<DownloadUpdateEndpoint>();
-        _updateManager = updateManager;
+        _velopackManager = velopackManager;
     }
 
     public override void Configure()
@@ -36,7 +36,15 @@ public class DownloadUpdateEndpoint : BaseEndpointWithoutRequest
             return;
         }
 
-        await _updateManager.DownloadUpdateAsync(ct);
+        // Single network call: fetch latest update info, then download it.
+        var updateInfo = await _velopackManager.CheckForUpdatesAsync();
+        if (updateInfo is null)
+        {
+            await SendFluentResult(Result.Ok(), ct);
+            return;
+        }
+
+        await _velopackManager.DownloadUpdatesAsync(updateInfo, null, ct);
 
         await SendFluentResult(Result.Ok(), ct);
     }

@@ -48,7 +48,9 @@ public class DownloadUpdateEndpointUnitTests : BaseUnitTest<DownloadUpdateEndpoi
         var mockManager = new Mock<UpdateManager>(mockSource.Object, null!, mockLocator.Object);
         mockManager.Setup(m => m.CheckForUpdatesAsync()).ReturnsAsync(updateInfo).Verifiable(Times.Once());
         mockManager
-            .Setup(m => m.DownloadUpdatesAsync(It.IsAny<UpdateInfo>(), null, It.IsAny<CancellationToken>()))
+            .Setup(m =>
+                m.DownloadUpdatesAsync(It.IsAny<UpdateInfo>(), It.IsAny<Action<int>?>(), It.IsAny<CancellationToken>())
+            )
             .Returns(Task.CompletedTask)
             .Verifiable(Times.Once());
 
@@ -62,5 +64,66 @@ public class DownloadUpdateEndpointUnitTests : BaseUnitTest<DownloadUpdateEndpoi
         result.IsSuccess.ShouldBeTrue();
 
         mockManager.Verify();
+    }
+
+    [Test]
+    public async Task ShouldSendProgressUpdates_WhenDownloadingUpdate()
+    {
+        // Arrange
+        using var _ = WithEnvironmentVariablesAsync(
+            new Dictionary<string, string?> { [Environment.EnvKeys.ReaparrPlatform] = "desktop" }
+        );
+
+        var asset = new VelopackAsset { PackageId = "Reaparr", Version = new SemanticVersion(9, 9, 9) };
+        var updateInfo = new UpdateInfo(asset, false, null!, null!);
+
+        var capturedDtos = new List<AppUpdateDownloadProgressDTO>();
+        Action<int>? capturedCallback = null;
+
+        var mockSource = new Mock<IUpdateSource>();
+        var mockLocator = new Mock<IVelopackLocator>();
+        var mockManager = new Mock<UpdateManager>(mockSource.Object, null!, mockLocator.Object);
+        mockManager.Setup(m => m.CheckForUpdatesAsync()).ReturnsAsync(updateInfo).Verifiable(Times.Once());
+        mockManager
+            .Setup(m =>
+                m.DownloadUpdatesAsync(It.IsAny<UpdateInfo>(), It.IsAny<Action<int>?>(), It.IsAny<CancellationToken>())
+            )
+            .Callback<UpdateInfo, Action<int>?, CancellationToken>(
+                (_, cb, ct) =>
+                {
+                    capturedCallback = cb;
+                    cb?.Invoke(50);
+                    cb?.Invoke(100);
+                }
+            )
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.Once());
+        Mock.Mock<IProgressHubService>()
+            .Setup(s =>
+                s.SendAppUpdateDownloadProgressAsync(
+                    It.IsAny<AppUpdateDownloadProgressDTO>(),
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .Callback<AppUpdateDownloadProgressDTO, CancellationToken>((dto, _) => capturedDtos.Add(dto))
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.Exactly(2));
+
+        // Act
+        var endpoint = SetupEndpointUnitTest<DownloadUpdateEndpoint>(s => s.AddSingleton(_ => mockManager.Object));
+        await endpoint.HandleAsync(CancellationToken);
+
+        // Assert
+        endpoint.Response.ShouldNotBeNull();
+        endpoint.Response.IsSuccess.ShouldBeTrue();
+
+        capturedDtos.Count.ShouldBe(2);
+        capturedDtos[0].Percentage.ShouldBe(50);
+        capturedDtos[0].IsComplete.ShouldBeFalse();
+        capturedDtos[1].Percentage.ShouldBe(100);
+        capturedDtos[1].IsComplete.ShouldBeTrue();
+
+        mockManager.Verify();
+        Mock.Mock<IProgressHubService>().Verify();
     }
 }

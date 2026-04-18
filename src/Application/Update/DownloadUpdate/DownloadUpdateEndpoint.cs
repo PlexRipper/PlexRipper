@@ -6,14 +6,16 @@ namespace Reaparr.Application;
 public class DownloadUpdateEndpoint : BaseEndpointWithoutRequest
 {
     private readonly UpdateManager _velopackManager;
+    private readonly IProgressHubService _progressHub;
     private readonly ILogger _log;
 
-    public override string EndpointPath => ApiRoutes.UpdateController + "/download";
+    public override string EndpointPath => ApiRoutes.UpdateController + "/DownloadUpdate";
 
-    public DownloadUpdateEndpoint(ILogger log, UpdateManager velopackManager)
+    public DownloadUpdateEndpoint(ILogger log, UpdateManager velopackManager, IProgressHubService progressHub)
     {
         _log = log.ForContext<DownloadUpdateEndpoint>();
         _velopackManager = velopackManager;
+        _progressHub = progressHub;
     }
 
     public override void Configure()
@@ -44,8 +46,19 @@ public class DownloadUpdateEndpoint : BaseEndpointWithoutRequest
             return;
         }
 
-        await _velopackManager.DownloadUpdatesAsync(updateInfo, null, ct);
+        var result = await Result.Try(async Task () =>
+        {
+            await _velopackManager.DownloadUpdatesAsync(
+                updateInfo,
+                progress =>
+                {
+                    var dto = new AppUpdateDownloadProgressDTO(progress);
+                    _progressHub.SendAppUpdateDownloadProgressAsync(dto, ct).GetAwaiter().GetResult();
+                },
+                ct
+            );
+        });
 
-        await SendFluentResult(Result.Ok(), ct);
+        await SendFluentResult(result, ct);
     }
 }

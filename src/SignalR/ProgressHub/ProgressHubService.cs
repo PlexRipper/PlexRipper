@@ -65,4 +65,20 @@ public class ProgressHubService : IProgressHubService
             _log.Here().Warning(ex, "Failed to send job status update");
         }
     }
+
+    /// <inheritdoc/>
+    public async Task SendAppUpdateDownloadProgressAsync(
+        AppUpdateDownloadProgressDTO progress,
+        CancellationToken cancellationToken = default
+    )
+    {
+        try
+        {
+            await _hub.Clients.All.AppUpdateDownloadProgress(progress, cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            _log.Here().Warning(ex, "Failed to send app download progress");
+        }
+    }
 }

@@ -10,6 +10,8 @@ public class MockProgressHubService : IProgressHubService
 
     public BlockingCollection<JobStatusUpdateDTO> JobStatusUpdateList { get; } = new();
 
+    public BlockingCollection<AppUpdateDownloadProgressDTO> AppDownloadProgressList { get; } = new();
+
     public MockProgressHubService(ILogger log)
     {
         _log = log.ForContext<MockProgressHubService>();
@@ -39,6 +41,16 @@ public class MockProgressHubService : IProgressHubService
         JobStatusUpdateList.Add(jobStatusUpdate.ToDTO());
         _log.Here().Verbose("{ClassName} => {@JobStatusUpdate}", nameof(MockProgressHubService), jobStatusUpdate);
 
+        return Task.CompletedTask;
+    }
+
+    public Task SendAppUpdateDownloadProgressAsync(
+        AppUpdateDownloadProgressDTO progress,
+        CancellationToken cancellationToken = default
+    )
+    {
+        AppDownloadProgressList.Add(progress, cancellationToken);
+        _log.Here().Verbose("{ClassName} => {@AppDownloadProgress}", nameof(MockProgressHubService), progress);
         return Task.CompletedTask;
     }
 }

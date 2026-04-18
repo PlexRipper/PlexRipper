@@ -60,4 +60,10 @@ public enum MessageTypes
     /// </summary>
     [EnumMember(Value = nameof(RefreshNotification))]
     RefreshNotification = 9,
+
+    /// <summary>
+    ///  App update download progress message type.
+    /// </summary>
+    [EnumMember(Value = nameof(AppUpdateDownloadProgress))]
+    AppUpdateDownloadProgress = 10,
 }

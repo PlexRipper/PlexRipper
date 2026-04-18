@@ -54,12 +54,12 @@ export class Update {
    * No description
    * * @tags Update
    * @name DownloadUpdateEndpoint
-   * @request POST:/api/Update/download
+   * @request POST:/api/Update/DownloadUpdate
    * @secure
    */
   downloadUpdateEndpoint = (params: RequestParams = {}) =>
     axiosObservable<BaseResultDTO>({
-      url: `/api/Update/download`,
+      url: `/api/Update/DownloadUpdate`,
       method: "POST",
       secure: true,
       responseType: "json",
@@ -75,5 +75,5 @@ export class UpdatePaths {
     queryString.stringifyUrl({ url: `/api/Update/Check` });
 
   static downloadUpdateEndpoint = () =>
-    queryString.stringifyUrl({ url: `/api/Update/download` });
+    queryString.stringifyUrl({ url: `/api/Update/DownloadUpdate` });
 }

@@ -1,6 +1,6 @@
 import { acceptHMRUpdate, defineStore } from 'pinia';
 import { computed, reactive, toRefs } from 'vue';
-import { of, type Observable, tap } from 'rxjs';
+import { of, type Observable, tap, finalize } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 import { updateApi } from '@api';
 import type { ReleaseNoteDTO } from '@api/generated/data-contracts';
@@ -13,6 +13,8 @@ interface IUpdateStoreState {
 	updateCheckError: string | null;
 	hasUpdateAvailable: boolean;
 	releaseNotes: ReleaseNoteDTO[];
+	downloadProgress: number;
+	isDownloading: boolean;
 }
 
 export const useUpdateStore = defineStore(StoreNames.UpdateStore, () => {
@@ -20,6 +22,8 @@ export const useUpdateStore = defineStore(StoreNames.UpdateStore, () => {
 		updateCheckError: null,
 		hasUpdateAvailable: false,
 		releaseNotes: [],
+		downloadProgress: 0,
+		isDownloading: false,
 	};
 
 	const state = reactive<IUpdateStoreState>(cloneDeep(defaultState));
@@ -30,6 +34,13 @@ export const useUpdateStore = defineStore(StoreNames.UpdateStore, () => {
 			signalrStore
 				.getRefreshNotification(RefreshDataType.UpdateAvailable)
 				.subscribe(() => actions.checkForUpdate());
+
+			signalrStore.getAppUpdateDownloadProgress().subscribe((data) => {
+				state.downloadProgress = data.percentage;
+				if (data.isComplete) {
+					state.isDownloading = false;
+				}
+			});
 
 			return actions.checkForUpdate().pipe(switchMap(() => of({ name: StoreNames.UpdateStore, isSuccess: true })));
 		},
@@ -42,7 +53,13 @@ export const useUpdateStore = defineStore(StoreNames.UpdateStore, () => {
 			}));
 		},
 		downloadUpdate() {
-			return updateApi.downloadUpdateEndpoint();
+			state.isDownloading = true;
+			state.downloadProgress = 0;
+			return updateApi.downloadUpdateEndpoint().pipe(
+				finalize(() => {
+					state.isDownloading = false;
+				}),
+			);
 		},
 		applyUpdate() {
 			return updateApi.applyUpdateEndpoint();

@@ -17,6 +17,7 @@ import {
 	type ServerDownloadProgressMessagePackTuple,
 } from '@interfaces';
 import type {
+	AppUpdateDownloadProgressDTO,
 	DownloadPatchMessagePackDTO,
 	DownloadPatchDTO,
 	LibrarySyncProgressDTO,
@@ -45,6 +46,7 @@ export const useSignalrStore = defineStore(StoreNames.SignalrStore, () => {
 		// Subjects
 		serverConnectionCheckStatusProgressSubject: Subject<ServerConnectionCheckStatusProgressDTO[]>;
 		refreshDataNotificationSubject: Subject<RefreshDataType>;
+		appUpdateDownloadProgressSubject: Subject<AppUpdateDownloadProgressDTO>;
 	}
 
 	const defaultState: ISignalRStoreState = {
@@ -54,6 +56,7 @@ export const useSignalrStore = defineStore(StoreNames.SignalrStore, () => {
 		// Subjects
 		serverConnectionCheckStatusProgressSubject: new Subject<ServerConnectionCheckStatusProgressDTO[]>(),
 		refreshDataNotificationSubject: new Subject<RefreshDataType>(),
+		appUpdateDownloadProgressSubject: new Subject<AppUpdateDownloadProgressDTO>(),
 	};
 
 	const state = reactive<ISignalRStoreState>(cloneDeep(defaultState));
@@ -152,6 +155,8 @@ export const useSignalrStore = defineStore(StoreNames.SignalrStore, () => {
 		progressHubConnection?.on(MessageTypes.ServerConnectionCheckStatusProgress, (data: ServerConnectionCheckStatusProgressDTO) => updateState<ServerConnectionCheckStatusProgressDTO>('serverConnectionCheckStatusProgress', data, 'plexServerConnectionId'));
 
 		progressHubConnection?.on(MessageTypes.JobStatusUpdate, (data) => backgroundStore.setStatusJobUpdate(data));
+
+		progressHubConnection?.on(MessageTypes.AppUpdateDownloadProgress, (data: AppUpdateDownloadProgressDTO) => state.appUpdateDownloadProgressSubject.next(data));
 
 		notificationHubConnection?.on(MessageTypes.Notification, (data: NotificationDTO) => notificationsStore.setNotification(data));
 
@@ -261,7 +266,11 @@ export const useSignalrStore = defineStore(StoreNames.SignalrStore, () => {
 		},
 		getRefreshNotification(filterOn: RefreshDataType): Observable<RefreshDataType> {
 			return state.refreshDataNotificationSubject.asObservable().pipe(filter((x) => x === filterOn), tap(() => Log.debug('Refreshing ' + filterOn)));
-		}, // endregion
+		},
+		getAppUpdateDownloadProgress(): Observable<AppUpdateDownloadProgressDTO> {
+			return state.appUpdateDownloadProgressSubject.asObservable();
+		},
+		// endregion
 	};
 	return {
 		...toRefs(state), ...actions, ...getters,

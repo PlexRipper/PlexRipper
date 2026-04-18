@@ -88,7 +88,13 @@
 			</div>
 		</template>
 
-		<template #actions="{ close }">
+		<template #actions>
+			<QLinearProgress
+				v-if="updateStore.isDownloading"
+				:value="updateStore.downloadProgress / 100"
+				color="primary"
+				class="update-dialog__progress" />
+
 			<q-btn
 				v-if="globalStore.isDockerMode"
 				unelevated
@@ -104,7 +110,8 @@
 				color="primary"
 				icon="mdi-update"
 				:label="t('components.update-available-dialog.update-now')"
-				@click="runDesktopUpdate" />
+				:disable="updateStore.isDownloading"
+				@click="runDesktopUpdate()" />
 		</template>
 	</QCardDialog>
 </template>
@@ -295,6 +302,11 @@ function runDesktopUpdate() {
 	width: 100%;
 	padding: 1rem;
 	text-align: center;
+}
+
+.update-dialog__progress {
+	width: 100%;
+	margin-bottom: 0.5rem;
 }
 
 :deep(.update-dialog__tab .q-tab__content) {

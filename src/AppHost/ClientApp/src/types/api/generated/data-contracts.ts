@@ -23,6 +23,12 @@ export interface AppUpdateCheckDTO {
   releaseNotes: ReleaseNoteDTO[];
 }
 
+export interface AppUpdateDownloadProgressDTO {
+  isComplete: boolean;
+  /** @format int32 */
+  percentage: number;
+}
+
 /** @example {"username":"ReaparrRocks","password":"R€Aℙℙ@rr69","rememberMe":false} */
 export interface AppUserLoginEndpointRequest {
   /**
@@ -516,6 +522,7 @@ export enum JobTypes {
   InspectPlexServerJob = "InspectPlexServerJob",
   LibrarySyncJob = "LibrarySyncJob",
   MetadataSyncJob = "MetadataSyncJob",
+  CheckForUpdateJob = "CheckForUpdateJob",
 }
 
 export interface LanguageSettingsDTO {
@@ -590,6 +597,7 @@ export enum MessageTypes {
   Notification = "Notification",
   JobStatusUpdate = "JobStatusUpdate",
   RefreshNotification = "RefreshNotification",
+  AppUpdateDownloadProgress = "AppUpdateDownloadProgress",
 }
 
 export interface MoveDownloadFileJobUpdateDTO {

@@ -8,6 +8,14 @@ public abstract class BaseIntegrationTests
     protected CancellationToken CancellationToken =>
         TestContext.Current?.Execution.CancellationToken ?? CancellationToken.None;
 
+    /// <summary>
+    /// Sets the given environment variable overrides for the duration of the test and then clears them. Uses <see cref="AsyncLocal{T}"/> inside <see cref="EnvironmentExtensions"/>
+    /// so parallel tests each get an isolated scope with no locking required.
+    /// </summary>
+    protected static IDisposable OverrideEnvironmentVariables(
+        IReadOnlyDictionary<string, string?> environmentVariables
+    ) => EnvironmentExtensions.WithOverrides(environmentVariables);
+
     protected BaseIntegrationTests(LogEventLevel logLevel = LogEventLevel.Debug)
     {
         EnvironmentExtensions.SetLogLevel(logLevel);

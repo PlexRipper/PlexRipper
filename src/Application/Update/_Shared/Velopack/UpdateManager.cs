@@ -9,17 +9,11 @@ public class UpdateManager : IUpdateManager
     private readonly ILogger _log;
     private readonly Velopack.UpdateManager _velopackManager;
 
-    public UpdateManager(ILogger log, ICommandExecutor commandExecutor)
+    public UpdateManager(ILogger log, ICommandExecutor commandExecutor, Velopack.UpdateManager velopackManager)
     {
         _log = log.ForContext<UpdateManager>();
         _commandExecutor = commandExecutor;
-
-        var source = new Velopack.Sources.GithubSource(
-            "https://github.com/Reaparr/Reaparr",
-            string.Empty,
-            EnvironmentExtensions.IsDevRelease()
-        );
-        _velopackManager = new Velopack.UpdateManager(source);
+        _velopackManager = velopackManager;
     }
 
     public async Task<AppUpdateCheckResult> CheckForUpdatesAsync()

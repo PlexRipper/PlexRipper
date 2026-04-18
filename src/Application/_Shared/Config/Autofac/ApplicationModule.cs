@@ -43,6 +43,18 @@ public class ApplicationModule : Module
             .As<IHostedService>()
             .SingleInstance();
 
+        builder
+            .Register(_ =>
+            {
+                var source = new Velopack.Sources.GithubSource(
+                    "https://github.com/Reaparr/Reaparr",
+                    EnvironmentExtensions.GetGitHubToken(),
+                    EnvironmentExtensions.IsDevRelease()
+                );
+                return new Velopack.UpdateManager(source);
+            })
+            .SingleInstance();
+
         builder.RegisterType<UpdateManager>().As<IUpdateManager>().SingleInstance();
     }
 }

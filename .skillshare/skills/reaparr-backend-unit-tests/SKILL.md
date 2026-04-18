@@ -29,7 +29,7 @@ Do not use this skill for frontend tests (Vitest/Cypress).
 - Test framework: `TUnit` with `[Test]`, `[Arguments]`, and `async Task` where needed.
 - Assertions: `Shouldly`.
 - Mocks: `Moq` with explicit verification (`Times.Once()` / `Times.Never()`).
-- Structure: Arrange -> Act -> Assert. Within Arrange, mock setups (`Mock.Mock<T>()`) must always be the **last step**, immediately before Act.
+- Structure: Arrange -> Act -> Assert. Every test method **must** include the three comment markers `// Arrange`, `// Act`, and `// Assert` — no exceptions. Within Arrange, mock setups (`Mock.Mock<T>()`) must always be the **last step**, immediately before Act.
 - Determinism: no random behavior in tests.
 
 ## Test Structure

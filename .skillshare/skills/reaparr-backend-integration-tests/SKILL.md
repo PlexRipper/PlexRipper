@@ -95,6 +95,20 @@ Reference files:
 
 Do not replace strict final assertions with long sleeps.
 
+## Test Structure
+
+Every integration test method **must** include the three AAA comment markers — no exceptions:
+
+```csharp
+// Arrange
+
+// Act
+
+// Assert
+```
+
+Place `// Arrange` before setup/seeding, `// Act` before the HTTP call or operation under test, and `// Assert` before all post-operation checks.
+
 ## Assertion Strictness Standard
 
 Prefer strict assertions in this order:

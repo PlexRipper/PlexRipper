@@ -57,6 +57,10 @@ public static class JobExecutionContextExtensions
             case JobTypes.LibrarySyncJob:
                 break;
 
+            // TODO ensure this converts to a JobUpdate
+            case JobTypes.CheckForUpdateJob:
+                break;
+
             default:
                 jsonString = "{}";
                 break;

@@ -20,8 +20,13 @@ public class DesktopMode : IDesktopMode
     /// <inheritdoc />
     public Result Setup()
     {
-        _log.Information("Starting DesktopMode");
+        if (EnvironmentExtensions.IsIntegrationTestMode())
+        {
+            _log.Warning("DesktopMode setup skipped in integration test mode to avoid launching the embedded window.");
+            return Result.Ok();
+        }
 
+        _log.Information("Starting DesktopMode");
         Uri uri;
         if (EnvironmentExtensions.IsDevelopmentEnvironment())
         {

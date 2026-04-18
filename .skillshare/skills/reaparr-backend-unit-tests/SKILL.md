@@ -182,10 +182,25 @@ When a dependency is mocked, prefer verifying exact interaction parameters and c
 - If SUT touches filesystem, use `SetupFileSystem` (MockFileSystem).
 - Do not manually mock `System.IO.Abstractions` interfaces in test files.
 
-### Endpoint unit tests and DbContext
+### Endpoint unit tests
 
-- `SetupEndpointUnitTest<T>()` provides a real in-memory `IReaparrDbContext`.
+- **Always inherit `BaseUnitTest<TEndpoint>`** — the generic form, with the endpoint as the type parameter. Do not use non-generic `BaseUnitTest` for endpoint tests even if `Sut` is not directly used; the generic form is the project standard.
+- `SetupEndpointUnitTest<T>()` provides a real in-memory `IReaparrDbContext` and registers: `ILogger`, `IReaparrDbContext`, `IReaparrDbContextFactory`, `IAuthDbContext`, `IAuthDbContextFactory`, `ICommandExecutor`, `ISchedulerService`, `IProgressHubService`, `IDownloadHubService`, `INotificationHubService`, `IDownloadTaskScheduler`.
 - Avoid mocking `IReaparrDbContext` in endpoint tests unless intentionally re-registering a mock.
+- **Endpoints with non-standard dependencies** (e.g. `UpdateManager`, custom services not in the list above): pass an `extraServices` action to `SetupEndpointUnitTest<T>()` — never call `Factory.Create<T>` directly. `ILogger` is always registered by `SetupEndpointUnitTest`, so only add what is missing:
+
+```csharp
+var endpoint = SetupEndpointUnitTest<MyEndpoint>(s =>
+    s.AddSingleton(_ => mockCustomDep.Object)
+);
+
+- **Accessing typed response DTOs**: `endpoint.Response` is declared as `BaseResultDTO`. For endpoints returning `ResultDTO<T>`, use a null-safe `as` cast — never a direct cast:
+
+```csharp
+var result = endpoint.Response as ResultDTO<MyDTO>;
+result.ShouldNotBeNull();
+result.Value!.SomeField.ShouldBe(expected);
+```
 
 ### Static abstract settings interfaces
 
@@ -276,3 +291,6 @@ dotnet run --project tests/UnitTests/Application.UnitTests/Application.UnitTests
 - Hiding real logic (DB writes, status updates) inside mock callbacks instead of returning the expected type and verifying with `Verify`.
 - Making post-Act DB assertions that only pass because a mocked dependency performed production logic in a callback.
 - Placing `Mock.Mock<T>()` setups before data setup or mixed in with DB seeding — mock setups must always be the last step of Arrange.
+- Using non-generic `BaseUnitTest` for endpoint tests — always use `BaseUnitTest<TEndpoint>` even when `Sut` is not directly referenced.
+- Direct-casting `endpoint.Response` to `ResultDTO<T>` — use `as ResultDTO<T>` (null-safe) and assert non-null, not `(ResultDTO<T>)endpoint.Response`.
+- Calling `Factory.Create<T>` directly for endpoint tests — always use `SetupEndpointUnitTest<T>()` instead. For non-standard dependencies, pass the `extraServices` parameter: `SetupEndpointUnitTest<MyEndpoint>(s => s.AddSingleton(_ => mockDep.Object))`. Never manually register `ILogger` — `SetupEndpointUnitTest` handles it.

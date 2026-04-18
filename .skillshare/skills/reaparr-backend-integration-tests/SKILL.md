@@ -81,6 +81,9 @@ Use `UnitTestDataConfig` in `CreateContainer(..., config => { ... })`:
 - `FileSystemOptions`: prepare expected source files/directories for filesystem flows.
 - `OverrideServices`: override Autofac dependencies for fault-injection scenarios.
 
+Use the narrowest seam that the hosted integration path actually honors:
+- Prefer overriding `ICommandExecutor` with `FakeCommandExecutor` when endpoint behavior depends on command dispatch. This is the most reliable way to intercept FastEndpoints command execution in integration tests.
+
 Reference files:
 - `tests/BaseTests/_Shared/UnitTestDataConfig.cs`
 - `tests/BaseTests/_Shared/Config/Autofac/TestModule.cs`

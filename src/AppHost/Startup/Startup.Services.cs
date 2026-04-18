@@ -211,7 +211,9 @@ public static partial class Startup
             options.AddPolicy("AuthenticatedUsers", x => x.RequireRole("Admin"));
 
             // Set a default policy that requires authentication
-            options.FallbackPolicy = new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build();
+            // When authentication is disabled for development, allow all requests through
+            if (!EnvironmentExtensions.IsAuthenticationDisabled())
+                options.FallbackPolicy = new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build();
         });
 
         services

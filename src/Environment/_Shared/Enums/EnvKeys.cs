@@ -27,4 +27,5 @@ public static class EnvKeys
     public const string Pgid = "PGID";
     public const string Home = "HOME";
     public const string AppData = "APPDATA";
+    public const string DisableAuthentication = "I_AM_DUMB_SO_DISABLE_AUTHENTICATION";
 }

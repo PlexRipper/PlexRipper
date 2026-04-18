@@ -90,6 +90,11 @@ public static class EnvironmentExtensions
     public static bool IsDevelopmentEnvironment() => GetEnvironmentVariable(EnvKeys.DotNetEnvironment) == "Development";
 
     /// <summary>
+    /// When set to a truthy value, disables all authentication. FOR DEVELOPMENT USE ONLY.
+    /// </summary>
+    public static bool IsAuthenticationDisabled() => IsTrue(GetEnvironmentVariable(EnvKeys.DisableAuthentication));
+
+    /// <summary>
     /// Gets the process user ID (PUID) from the environment. Returns -1 when not set or invalid.
     /// </summary>
     public static int GetPuid() => int.TryParse(GetEnvironmentVariable(EnvKeys.Puid), out var puid) ? puid : -1;

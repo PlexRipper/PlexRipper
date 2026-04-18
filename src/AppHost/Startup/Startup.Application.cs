@@ -65,6 +65,10 @@ public static partial class Startup
         // Use custom header authentication middleware
         app.UseMiddleware<HeaderAuthenticationMiddleware>();
 
+        // When I_AM_DUMB_SO_DISABLE_AUTHENTICATION is set, bypass all auth with a synthetic Admin principal
+        if (EnvironmentExtensions.IsAuthenticationDisabled())
+            app.UseMiddleware<DisableAuthenticationMiddleware>();
+
         app.UseAuthentication();
         app.UseAuthorization();
 

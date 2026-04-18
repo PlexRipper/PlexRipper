@@ -38,12 +38,12 @@ export class Update {
    * No description
    * * @tags Update
    * @name CheckForUpdateEndpoint
-   * @request GET:/api/Update/check
+   * @request GET:/api/Update/Check
    * @secure
    */
   checkForUpdateEndpoint = (params: RequestParams = {}) =>
     axiosObservable<AppUpdateCheckDTO>({
-      url: `/api/Update/check`,
+      url: `/api/Update/Check`,
       method: "GET",
       secure: true,
       responseType: "json",
@@ -72,7 +72,7 @@ export class UpdatePaths {
     queryString.stringifyUrl({ url: `/api/Update/execute` });
 
   static checkForUpdateEndpoint = () =>
-    queryString.stringifyUrl({ url: `/api/Update/check` });
+    queryString.stringifyUrl({ url: `/api/Update/Check` });
 
   static downloadUpdateEndpoint = () =>
     queryString.stringifyUrl({ url: `/api/Update/download` });

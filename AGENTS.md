@@ -226,9 +226,11 @@ multi-file edits.
 - **Forced verification:** Do not report success after edits until you run the project-appropriate verification for the
   files you changed.
 
-- Backend changes: run `dotnet build Reaparr.sln`, or a narrower relevant build or test command when that is the better
+- Backend changes: ALWAYS use Rider IDE diagnostics first through MCP to verify and use run `dotnet build Reaparr.sln` as a last resort, or a narrower relevant build or test command when that is the better
   verifier.
-- Frontend changes: from `src/AppHost/ClientApp/`, run `bun run typecheck` and `bun run lint` when applicable.
+- Frontend changes: ALWAYS use WebStorm IDE diagnostics first through MCP to verify. Prefer IDE diagnostics over a
+  full backend build when the task is frontend-only. From `src/AppHost/ClientApp/`, run `bun run typecheck` and
+  `bun run lint` only when a broader frontend verifier is still needed after IDE diagnostics.
 - If a verifier does not exist or cannot run in the current environment, state that explicitly instead of implying
   success.
 

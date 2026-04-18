@@ -95,7 +95,7 @@ Do **not** renice other processes unless explicitly requested.
 
 ## Interaction rules
 
-- Always ask me questions using clickable multiple-choice options via the question tool. Never ask questions in plain text. Bundle related questions together whenever possible. Include a recommended option when appropriate.
+- **All agents operating in this project** must ask questions using clickable multiple-choice options via the question tool — never plain-text lists. Bundle related questions together whenever possible. Include a recommended option when appropriate. If the `question` tool is unavailable (e.g., plan-mode or non-OpenCode client), fall back to a numbered list with a clear prompt asking the user to reply with a number.
 - Default to **read-only exploration and analysis**. Only write when edits are explicitly needed.
 - Keep write access **workspace-scoped** — all changes stay inside the repo.
 - Store all generated plans under this repository’s `plans/` directory. Do not place plans in any external `.claude` directory or other out-of-repo location, regardless of which AI agent creates them.

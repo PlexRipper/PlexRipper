@@ -3,12 +3,12 @@ namespace Reaparr.Application;
 /// <summary>
 /// Queues a one-shot <see cref="CheckForUpdateJob"/> to check for a Velopack application update.
 /// </summary>
-public class CheckForUpdateEndpoint : BaseEndpointWithoutRequest<AppUpdateCheckResult>
+public class CheckForUpdateEndpoint : BaseEndpointWithoutRequest<AppUpdateCheckDTO>
 {
     private readonly ILogger _log;
     private readonly ICommandExecutor _commandExecutor;
 
-    public override string EndpointPath => ApiRoutes.UpdateController + "/check";
+    public override string EndpointPath => ApiRoutes.UpdateController + "/Check";
 
     public CheckForUpdateEndpoint(ILogger log, ICommandExecutor commandExecutor)
     {
@@ -20,7 +20,7 @@ public class CheckForUpdateEndpoint : BaseEndpointWithoutRequest<AppUpdateCheckR
     {
         Get(EndpointPath);
         Description(x =>
-            x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<AppUpdateCheckResult>))
+            x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<AppUpdateCheckDTO>))
                 .Produces(StatusCodes.Status500InternalServerError, typeof(BaseResultDTO))
         );
     }
@@ -30,6 +30,6 @@ public class CheckForUpdateEndpoint : BaseEndpointWithoutRequest<AppUpdateCheckR
         _log.Here().DebugApiCall(HttpContext);
 
         var result = await _commandExecutor.Send(new CheckForUpdatesCommand(), ct);
-        await SendFluentResult(result, x => x, ct);
+        await SendFluentResult(result, x => x.ToDTO(), ct);
     }
 }

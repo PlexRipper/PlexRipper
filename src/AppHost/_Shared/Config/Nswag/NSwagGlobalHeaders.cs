@@ -25,6 +25,20 @@ internal sealed class NSwagGlobalHeaders : IOperationProcessor
                     Description = "Current Reaparr version",
                 },
             };
+
+            response.Headers["X-Reaparr-Platform"] = new OpenApiHeader
+            {
+                Kind = OpenApiParameterKind.Header,
+                Example = "Docker",
+                IsRequired = true,
+                Description = "Current Reaparr platform",
+                Schema = new JsonSchema
+                {
+                    Type = JsonObjectType.String,
+                    Example = "Docker",
+                    Description = "Current Reaparr platform",
+                },
+            };
         }
 
         return true;

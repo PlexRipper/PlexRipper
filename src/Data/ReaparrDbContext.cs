@@ -181,6 +181,9 @@ public sealed class ReaparrDbContext : DbContext, IReaparrDbContext, IReaparrDbC
         DatabaseName = PathProvider.DatabaseName;
     }
 
+    /// <summary>
+    /// Constructor for DbContextFactory with explicit database name - accepts pre-configured options used in unit and integration testing.
+    /// </summary>
     public ReaparrDbContext(DbContextOptions<ReaparrDbContext> options, string databaseName)
         : base(options)
     {

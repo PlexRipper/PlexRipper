@@ -1452,23 +1452,6 @@ namespace Reaparr.Data.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
-            migrationBuilder.InsertData(
-                table: "FolderPaths",
-                columns: new[] { "Id", "DirectoryPath", "DisplayName", "FolderType", "MediaType" },
-                values: new object[,]
-                {
-                    { 1, "/Downloads", "Download Path", "DownloadFolder", "None" },
-                    { 2, "/Movies", "Movie Destination Path", "MovieFolder", "Movie" },
-                    { 3, "/TvShows", "Tv Show Destination Path", "TvShowFolder", "TvShow" },
-                    { 4, "/Music", "Music Destination Path", "MusicFolder", "Music" },
-                    { 5, "/Photos", "Photos Destination Path", "PhotosFolder", "Photos" },
-                    { 6, "/Other", "Other Videos Destination Path", "OtherVideosFolder", "OtherVideos" },
-                    { 7, "/Games", "Games Videos Destination Path", "GamesVideosFolder", "Games" },
-                    { 8, "/", "Reserved #1 Destination Path", "None", "None" },
-                    { 9, "/", "Reserved #2 Destination Path", "None", "None" },
-                    { 10, "/", "Reserved #3 Destination Path", "None", "None" }
-                });
-
             migrationBuilder.CreateIndex(
                 name: "IX_BackgroundJobLibrarySyncJobQueues_PlexLibraryId",
                 table: "BackgroundJobLibrarySyncJobQueues",

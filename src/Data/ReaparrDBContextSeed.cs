@@ -101,30 +101,17 @@ public static class ReaparrDBContextSeed
             if (context is not ReaparrDbContext db)
                 return;
 
+            if (db.FolderPaths.Any())
+                return;
+
             foreach (var path in GetDefaultFolderPaths())
             {
-                var existing = db.FolderPaths.Find(path.Id);
-                if (existing == null)
-                {
-                    _log.Debug(
-                        "Seeding default folder path with id {Id} and directory {DirectoryPath}",
-                        path.Id,
-                        path.DirectoryPath
-                    );
-                    db.FolderPaths.Add(path);
-                }
-                else
-                {
-                    _log.Debug(
-                        "Updating existing folder path with id {Id} from {OldDirectory} to directory {DirectoryPath}",
-                        path.Id,
-                        existing.DirectoryPath,
-                        path.DirectoryPath
-                    );
-                    var entry = db.Entry(existing);
-                    entry.CurrentValues.SetValues(path);
-                    entry.State = EntityState.Modified;
-                }
+                _log.Debug(
+                    "Seeding default folder path with id {Id} and directory {DirectoryPath}",
+                    path.Id,
+                    path.DirectoryPath
+                );
+                db.FolderPaths.Add(path);
             }
 
             db.SaveChanges();
@@ -138,30 +125,17 @@ public static class ReaparrDBContextSeed
             if (context is not ReaparrDbContext db)
                 return;
 
+            if (await db.FolderPaths.AnyAsync(cancellationToken))
+                return;
+
             foreach (var path in GetDefaultFolderPaths())
             {
-                var existing = await db.FolderPaths.FindAsync([path.Id], cancellationToken);
-                if (existing == null)
-                {
-                    _log.Debug(
-                        "Seeding default folder path with id {Id} and directory {DirectoryPath}",
-                        path.Id,
-                        path.DirectoryPath
-                    );
-                    await db.FolderPaths.AddAsync(path, cancellationToken);
-                }
-                else
-                {
-                    _log.Debug(
-                        "Updating existing folder path with id {Id} from {OldDirectory} to directory {DirectoryPath}",
-                        path.Id,
-                        existing.DirectoryPath,
-                        path.DirectoryPath
-                    );
-                    var entry = db.Entry(existing);
-                    entry.CurrentValues.SetValues(path);
-                    entry.State = EntityState.Modified;
-                }
+                _log.Debug(
+                    "Seeding default folder path with id {Id} and directory {DirectoryPath}",
+                    path.Id,
+                    path.DirectoryPath
+                );
+                await db.FolderPaths.AddAsync(path, cancellationToken);
             }
 
             await db.SaveChangesAsync(cancellationToken);

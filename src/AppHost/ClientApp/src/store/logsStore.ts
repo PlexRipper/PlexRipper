@@ -8,6 +8,7 @@ import { StoreNames } from '@interfaces';
 import { cloneDeep } from 'lodash-es';
 import { useSignalrStore } from '@store';
 import type { LiveLogEventDTO } from '@dto';
+import { LogSeverity } from '@dto';
 import { debugApi } from '@api';
 import { SortDirection } from '@enums';
 
@@ -15,6 +16,7 @@ interface ILogsStoreState {
 	searchText: string;
 	logs: LiveLogEventDTO[];
 	sortDirection: SortDirection;
+	selectedLevels: LogSeverity[];
 }
 
 export const useLogsStore = defineStore(StoreNames.LogsStore, () => {
@@ -22,6 +24,7 @@ export const useLogsStore = defineStore(StoreNames.LogsStore, () => {
 		searchText: '',
 		sortDirection: SortDirection.Asc,
 		logs: [],
+		selectedLevels: [LogSeverity.Verbose, LogSeverity.Debug, LogSeverity.Information, LogSeverity.Warning, LogSeverity.Error, LogSeverity.Fatal],
 	};
 
 	const state = reactive<ILogsStoreState>(cloneDeep(defaultState));
@@ -54,8 +57,8 @@ export const useLogsStore = defineStore(StoreNames.LogsStore, () => {
 		clearLogs(): void {
 			state.logs = [];
 		},
-		setSortDirection(sortDirection: SortDirection): void {
-			state.sortDirection = sortDirection;
+		toggleSortDirection() {
+			state.sortDirection = state.sortDirection === SortDirection.Asc ? SortDirection.Desc : SortDirection.Asc;
 		},
 		$reset(): void {
 			Object.assign(state, cloneDeep(defaultState));
@@ -64,8 +67,11 @@ export const useLogsStore = defineStore(StoreNames.LogsStore, () => {
 	const getters = {
 		getLogs: computed((): LiveLogEventDTO[] => {
 			const query = state.searchText.trim().toLowerCase();
+			const levels = state.selectedLevels;
 
-			const filteredLogs = state.logs.filter((x) => x.message.includes(query));
+			const filteredLogs = state.logs.filter(
+				(x) => x.message.toLowerCase().includes(query) && levels.includes(x.level),
+			);
 
 			if (state.sortDirection === SortDirection.Desc) {
 				return [...filteredLogs].reverse();

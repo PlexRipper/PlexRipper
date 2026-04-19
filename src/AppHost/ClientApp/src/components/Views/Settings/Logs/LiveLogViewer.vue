@@ -25,8 +25,8 @@
 
 			<!-- Sort Logs -->
 			<IconButton
-				:icon="sortDirection === SortDirection.Asc ? 'mdi-sort-ascending' : 'mdi-sort-descending'"
-				:title="sortDirection === SortDirection.Asc ? t('pages.settings.logs.sort.oldest-first') : t('pages.settings.logs.sort.newest-first')"
+				:icon="logsStore.sortDirection === SortDirection.Asc ? 'mdi-sort-ascending' : 'mdi-sort-descending'"
+				:title="logsStore.sortDirection === SortDirection.Asc ? t('pages.settings.logs.sort.oldest-first') : t('pages.settings.logs.sort.newest-first')"
 				@click="onSortDirectionToggled" />
 
 			<!-- Clear Logs -->
@@ -40,8 +40,21 @@
 				icon="mdi-refresh"
 				:title="t('pages.settings.logs.refresh')"
 				@click="useSubscription(logsStore.refreshLogs().subscribe())" />
+
+			<!-- Copy Selected -->
+			<QBtn
+				v-if="selectedEntries.size > 0"
+				flat
+				dense
+				size="sm"
+				icon="mdi-content-copy"
+				:label="t('pages.settings.logs.copy-selected', { count: selectedEntries.size })"
+				color="primary"
+				class="q-ml-xs"
+				@click="copySelectedEntries" />
 		</QToolbar>
 
+		<!-- Search Bar -->
 		<div class="row q-col-gutter-md q-mb-md">
 			<div class="col-12 col-md-5">
 				<q-input
@@ -56,8 +69,9 @@
 				</q-input>
 			</div>
 			<div class="col-12 col-md-4">
+				<!-- Log Level Filter -->
 				<q-select
-					:model-value="selectedLevels"
+					:model-value="logsStore.selectedLevels"
 					:options="levelOptions"
 					option-label="label"
 					option-value="value"
@@ -110,7 +124,6 @@
 			<template v-else>
 				<QVirtualScroll
 					:items="logsStore.getLogs"
-					virtual-scroll-item-size="88"
 					separator>
 					<template #default="{ item }: {item: LiveLogEventDTO }">
 						<div
@@ -118,15 +131,29 @@
 							:class="levelClass(item.level)"
 							@click="copyLogEntry(item)">
 							<div class="live-log-viewer__row-header row items-center q-col-gutter-sm">
-								<div class="col-auto text-grey-5 live-log-viewer__timestamp">
-									{{ formatTimestamp(item.timestamp) }}
+								<!-- Selection Checkbox -->
+								<div class="col-auto">
+									<q-checkbox
+										:model-value="selectedEntries.has(item.sequence)"
+										dense
+										size="sm"
+										@update:model-value="onEntrySelectionChanged(item.sequence, $event)"
+										@click.stop />
 								</div>
+								<!-- Level Badge -->
 								<div class="col-auto">
 									<QBadge
 										:color="levelColor(item.level)"
 										text-color="black">
 										{{ levelLabel(item.level) }}
 									</QBadge>
+								</div>
+								<!-- TimeStamp -->
+								<div class="col-auto text-grey-5 live-log-viewer__timestamp">
+									<QDateTime
+										short-date
+										time
+										:text="item.timestamp" />
 								</div>
 								<div
 									v-if="item.sourceContext"
@@ -158,7 +185,6 @@
 </template>
 
 <script setup lang="ts">
-import Log from 'consola';
 import { get, set } from '@vueuse/core';
 import { format } from 'date-fns';
 import { useLogsStore } from '@store';
@@ -172,9 +198,8 @@ const helpStore = useHelpStore();
 const { t } = useI18n();
 
 const scrollElement = ref<HTMLElement | null>(null);
-const selectedLevels = ref<LogSeverity[]>([LogSeverity.Verbose, LogSeverity.Debug, LogSeverity.Information, LogSeverity.Warning, LogSeverity.Error, LogSeverity.Fatal]);
-const sortDirection = ref<SortDirection>(get(logsStore.sortDirection));
 const pauseScroll = ref(false);
+const selectedEntries = ref<Set<number>>(new Set());
 
 const levelOptions = computed(() => [
 	{ label: t('pages.settings.logs.levels.verbose'), value: LogSeverity.Verbose },
@@ -243,20 +268,38 @@ function formatLogEntry(item: LiveLogEventDTO): string {
 
 async function copyLogEntry(item: LiveLogEventDTO): Promise<void> {
 	await navigator.clipboard.writeText(formatLogEntry(item));
-	showSuccessNotification(t('pages.settings.logs.copied-to-clipboard'));
+	showSuccessNotification(t('pages.settings.logs.copied-to-clipboard'), 2000);
+}
+
+function onEntrySelectionChanged(sequence: number, selected: boolean): void {
+	const entries = get(selectedEntries);
+	const updated = new Set(entries);
+	if (selected) {
+		updated.add(sequence);
+	} else {
+		updated.delete(sequence);
+	}
+	set(selectedEntries, updated);
+}
+
+async function copySelectedEntries(): Promise<void> {
+	const sequences = get(selectedEntries);
+	const entries = logsStore.getLogs.filter((x) => sequences.has(x.sequence));
+	const text = entries.map(formatLogEntry).join('\n');
+	await navigator.clipboard.writeText(text);
+	showSuccessNotification(t('pages.settings.logs.copied-to-clipboard'), 2000);
 }
 
 function onSelectedLevelsChanged(value: LogSeverity[] | null): void {
-	set(selectedLevels, value ?? []);
+	logsStore.selectedLevels = value ?? [];
 }
 
 function onSortDirectionToggled(): void {
-	const next = get(sortDirection) === SortDirection.Asc ? SortDirection.Desc : SortDirection.Asc;
-	set(sortDirection, next);
-	logsStore.setSortDirection(next);
-
-	if (next === SortDirection.Asc) {
+	logsStore.toggleSortDirection();
+	if (logsStore.sortDirection === SortDirection.Asc) {
 		void scrollToBottom();
+	} else {
+		void scrollToTop();
 	}
 }
 
@@ -264,12 +307,16 @@ function onPauseScrollChanged(value: boolean): void {
 	set(pauseScroll, value);
 
 	if (!value) {
-		void scrollToBottom();
+		if (logsStore.sortDirection === SortDirection.Asc) {
+			void scrollToBottom();
+		} else {
+			void scrollToTop();
+		}
 	}
 }
 
 async function scrollToBottom(): Promise<void> {
-	if (get(sortDirection) !== SortDirection.Asc || get(pauseScroll)) {
+	if (logsStore.sortDirection !== SortDirection.Asc || get(pauseScroll)) {
 		return;
 	}
 
@@ -282,26 +329,38 @@ async function scrollToBottom(): Promise<void> {
 	element.scrollTop = element.scrollHeight;
 }
 
+async function scrollToTop(): Promise<void> {
+	if (logsStore.sortDirection !== SortDirection.Desc || get(pauseScroll)) {
+		return;
+	}
+
+	await nextTick();
+	const element = get(scrollElement);
+	if (!element) {
+		return;
+	}
+
+	element.scrollTop = 0;
+}
+
 watch(
 	() => logsStore.getLogs.length,
 	async () => {
-		await scrollToBottom();
+		if (logsStore.sortDirection === SortDirection.Asc) {
+			await scrollToBottom();
+		} else {
+			await scrollToTop();
+		}
 	},
 );
 
 onMounted(() => {
-	logsStore.setup().subscribe((result) => {
-		if (!result.isSuccess) {
-			Log.error('Failed to initialize live log viewer');
-		}
-	});
+	useSubscription(logsStore.refreshLogs().subscribe());
 
 	void scrollToBottom();
 });
 
-onUnmounted(() => {
-	logsStore.$reset();
-});
+onUnmounted(() => logsStore.$reset());
 </script>
 
 <style lang="scss">

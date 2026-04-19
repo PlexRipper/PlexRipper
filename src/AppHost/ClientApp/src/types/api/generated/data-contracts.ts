@@ -589,13 +589,24 @@ export interface LibrarySyncProgressItemDTO {
 
 export interface LiveLogEventDTO {
   exception?: string | null;
-  level: string;
+  level: LogSeverity;
   message: string;
   /** @format int64 */
   sequence: number;
   sourceContext?: string | null;
   /** @format date-time */
   timestamp: string;
+}
+
+export enum LogSeverity {
+  None = "None",
+  Verbose = "Verbose",
+  Debug = "Debug",
+  Information = "Information",
+  Success = "Success",
+  Warning = "Warning",
+  Error = "Error",
+  Fatal = "Fatal",
 }
 
 export enum MessageTypes {

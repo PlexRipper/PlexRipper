@@ -2,44 +2,54 @@
 	<div
 		class="live-log-viewer q-pa-md"
 		data-cy="live-log-viewer">
-		<div class="live-log-viewer__toolbar row items-center q-col-gutter-sm q-mb-md">
-			<div class="col-12 col-md-auto">
-				<QText
-					class="text-weight-bold"
-					:size="'h6'"
-					:value="t('pages.settings.logs.title')" />
-			</div>
-			<div class="col-12 col-md">
-				<QText
-					class="text-grey-6"
-					:value="t('pages.settings.logs.subtitle')" />
-			</div>
-			<div class="col-12 col-md-auto row items-center q-gutter-sm justify-end">
-				<q-btn-toggle
-					:model-value="sortDirection"
-					unelevated
-					toggle-color="primary"
-					:text-color="'white'"
-					:options="sortOptions"
-					@update:model-value="onSortDirectionChanged" />
-				<q-btn
-					dense
-					flat
-					icon="mdi-delete-sweep"
-					:label="t('pages.settings.logs.clear')"
-					@click="logsStore.clearLogs()" />
-			</div>
-		</div>
+		<QToolbar class="q-pa-none">
+			<QToolbarTitle>
+				{{ t('pages.settings.logs.title') }}
+
+				<!-- Help Icon -->
+				<HelpButton
+					icon="mdi-help-circle-outline"
+					class="q-ma-sm"
+					@click="helpStore.openHelpDialog({
+						label: t('pages.settings.logs.title'),
+						title: t('pages.settings.logs.help-title'),
+						text: t('pages.settings.logs.help-text'),
+					})" />
+			</QToolbarTitle>
+			<q-checkbox
+				:model-value="pauseScroll"
+				dense
+				size="sm"
+				:label="t('pages.settings.logs.pause-scroll')"
+				@update:model-value="onPauseScrollChanged" />
+
+			<!-- Sort Logs -->
+			<IconButton
+				:icon="sortDirection === SortDirection.Asc ? 'mdi-sort-ascending' : 'mdi-sort-descending'"
+				:title="sortDirection === SortDirection.Asc ? t('pages.settings.logs.sort.oldest-first') : t('pages.settings.logs.sort.newest-first')"
+				@click="onSortDirectionToggled" />
+
+			<!-- Clear Logs -->
+			<IconButton
+				icon="mdi-delete-sweep"
+				:title="t('pages.settings.logs.clear')"
+				@click="logsStore.clearLogs()" />
+
+			<!-- Refresh Logs -->
+			<IconButton
+				icon="mdi-refresh"
+				:title="t('pages.settings.logs.refresh')"
+				@click="useSubscription(logsStore.refreshLogs().subscribe())" />
+		</QToolbar>
 
 		<div class="row q-col-gutter-md q-mb-md">
 			<div class="col-12 col-md-5">
 				<q-input
-					:model-value="searchText"
+					v-model="logsStore.searchText"
 					dense
 					clearable
 					outlined
-					:label="t('pages.settings.logs.search')"
-					@update:model-value="onSearchTextChanged">
+					:label="t('pages.settings.logs.search')">
 					<template #prepend>
 						<q-icon name="mdi-magnify" />
 					</template>
@@ -57,32 +67,56 @@
 					dense
 					outlined
 					:label="t('pages.settings.logs.level-filter')"
-					@update:model-value="onSelectedLevelsChanged" />
+					@update:model-value="onSelectedLevelsChanged">
+					<template #option="{ itemProps, opt, selected, toggleOption }">
+						<q-item
+							v-bind="itemProps"
+							clickable
+							@click="toggleOption(opt)">
+							<q-item-section side>
+								<q-checkbox
+									:model-value="selected"
+									dense
+									@update:model-value="toggleOption(opt)" />
+							</q-item-section>
+							<q-item-section>
+								<q-item-label>{{ opt.label }}</q-item-label>
+							</q-item-section>
+							<q-item-section side>
+								<q-badge
+									:color="levelColor(opt.value)"
+									text-color="black">
+									{{ levelCount(opt.value) }}
+								</q-badge>
+							</q-item-section>
+						</q-item>
+					</template>
+				</q-select>
 			</div>
 		</div>
 
-		<div class="row items-center justify-between q-mb-sm text-caption text-grey-6">
-			<div>{{ t('pages.settings.logs.visible-count', { count: filteredLogs.length, total: logsStore.logs.length }) }}</div>
-			<div>{{ t('pages.settings.logs.security-note') }}</div>
+		<div class="row items-center q-mb-sm text-caption text-grey-6">
+			<div>{{ t('pages.settings.logs.visible-count', { count: logsStore.getLogs.length, total: logsStore.logs.length }) }}</div>
 		</div>
 
 		<div
 			ref="scrollElement"
 			class="live-log-viewer__scroll">
-			<template v-if="filteredLogs.length === 0">
+			<template v-if="logsStore.getLogs.length === 0">
 				<QAlert type="info">
 					{{ t('pages.settings.logs.empty') }}
 				</QAlert>
 			</template>
 			<template v-else>
 				<QVirtualScroll
-					:items="filteredLogs"
+					:items="logsStore.getLogs"
 					virtual-scroll-item-size="88"
 					separator>
-					<template #default="{ item }">
+					<template #default="{ item }: {item: LiveLogEventDTO }">
 						<div
 							class="live-log-viewer__row"
-							:class="levelClass(item.level)">
+							:class="levelClass(item.level)"
+							@click="copyLogEntry(item)">
 							<div class="live-log-viewer__row-header row items-center q-col-gutter-sm">
 								<div class="col-auto text-grey-5 live-log-viewer__timestamp">
 									{{ formatTimestamp(item.timestamp) }}
@@ -98,6 +132,17 @@
 									v-if="item.sourceContext"
 									class="col text-grey-6 ellipsis">
 									{{ item.sourceContext }}
+								</div>
+								<div class="col-auto">
+									<QBtn
+										flat
+										round
+										dense
+										size="xs"
+										icon="mdi-content-copy"
+										color="grey-6"
+										:title="t('pages.settings.logs.copy')"
+										@click.stop="copyLogEntry(item)" />
 								</div>
 							</div>
 							<pre class="live-log-viewer__message">{{ item.message }}</pre>
@@ -118,124 +163,113 @@ import { get, set } from '@vueuse/core';
 import { format } from 'date-fns';
 import { useLogsStore } from '@store';
 import type { LiveLogEventDTO } from '@dto';
+import { LogSeverity } from '@dto';
 import { SortDirection } from '@enums';
 
-type LogLevel = 'Verbose' | 'Debug' | 'Information' | 'Warning' | 'Error' | 'Fatal';
-
 const logsStore = useLogsStore();
+const helpStore = useHelpStore();
+
 const { t } = useI18n();
 
 const scrollElement = ref<HTMLElement | null>(null);
-const searchText = ref('');
-const selectedLevels = ref<LogLevel[]>(['Debug', 'Information', 'Warning', 'Error', 'Fatal']);
+const selectedLevels = ref<LogSeverity[]>([LogSeverity.Verbose, LogSeverity.Debug, LogSeverity.Information, LogSeverity.Warning, LogSeverity.Error, LogSeverity.Fatal]);
 const sortDirection = ref<SortDirection>(get(logsStore.sortDirection));
+const pauseScroll = ref(false);
 
 const levelOptions = computed(() => [
-	{ label: t('pages.settings.logs.levels.debug'), value: 'Debug' },
-	{ label: t('pages.settings.logs.levels.info'), value: 'Information' },
-	{ label: t('pages.settings.logs.levels.warning'), value: 'Warning' },
-	{ label: t('pages.settings.logs.levels.error'), value: 'Error' },
-	{ label: t('pages.settings.logs.levels.fatal'), value: 'Fatal' },
-] as { label: string; value: LogLevel }[]);
+	{ label: t('pages.settings.logs.levels.verbose'), value: LogSeverity.Verbose },
+	{ label: t('pages.settings.logs.levels.debug'), value: LogSeverity.Debug },
+	{ label: t('pages.settings.logs.levels.info'), value: LogSeverity.Information },
+	{ label: t('pages.settings.logs.levels.warning'), value: LogSeverity.Warning },
+	{ label: t('pages.settings.logs.levels.error'), value: LogSeverity.Error },
+	{ label: t('pages.settings.logs.levels.fatal'), value: LogSeverity.Fatal },
+] as { label: string; value: LogSeverity }[]);
 
-const sortOptions = computed(() => [
-	{ label: t('pages.settings.logs.sort.oldest-first'), value: SortDirection.Asc },
-	{ label: t('pages.settings.logs.sort.newest-first'), value: SortDirection.Desc },
-]);
+function levelCount(value: LogSeverity): number {
+	return get(logsStore.logs).filter((entry) => entry.level === value).length;
+}
 
-const filteredLogs = computed((): LiveLogEventDTO[] => {
-	const query = get(searchText).trim().toLowerCase();
-	const levels = new Set(get(selectedLevels));
-
-	return logsStore.getSortedLogs.filter((entry) => {
-		if (!levels.has(normalizeLevel(entry.level))) {
-			return false;
-		}
-
-		if (!query) {
-			return true;
-		}
-
-		const haystack = `${entry.message}\n${entry.exception ?? ''}\n${entry.sourceContext ?? ''}`.toLowerCase();
-		return haystack.includes(query);
-	});
-});
-
-function normalizeLevel(level: string): LogLevel {
+function levelLabel(level: LogSeverity): string {
 	switch (level) {
-		case 'Verbose':
-		case 'Debug':
-		case 'Information':
-		case 'Warning':
-		case 'Error':
-		case 'Fatal':
-			return level;
+		case LogSeverity.Debug:
+			return t('general.logs.level.debug');
+		case LogSeverity.Information:
+			return t('general.logs.level.information');
+		case LogSeverity.Warning:
+			return t('general.logs.level.warning');
+		case LogSeverity.Error:
+			return t('general.logs.level.error');
+		case LogSeverity.Fatal:
+			return t('general.logs.level.fatal');
 		default:
-			return 'Information';
+			return t('general.commands.unknown');
 	}
 }
 
-function levelLabel(level: string): string {
-	switch (normalizeLevel(level)) {
-		case 'Debug':
-			return t('pages.settings.logs.levels.debug');
-		case 'Information':
-			return t('pages.settings.logs.levels.info');
-		case 'Warning':
-			return t('pages.settings.logs.levels.warning');
-		case 'Error':
-			return t('pages.settings.logs.levels.error');
-		case 'Fatal':
-			return t('pages.settings.logs.levels.fatal');
-		default:
-			return t('pages.settings.logs.levels.info');
-	}
-}
-
-function levelColor(level: string): string {
-	switch (normalizeLevel(level)) {
-		case 'Debug':
+function levelColor(level: LogSeverity): string {
+	switch (level) {
+		case LogSeverity.Debug:
 			return 'grey-6';
-		case 'Information':
+		case LogSeverity.Information:
 			return 'blue-4';
-		case 'Warning':
+		case LogSeverity.Warning:
 			return 'yellow-6';
-		case 'Error':
+		case LogSeverity.Error:
 			return 'red-5';
-		case 'Fatal':
+		case LogSeverity.Fatal:
 			return 'red-8';
 		default:
-			return 'blue-4';
+			return 'black-1';
 	}
 }
 
-function levelClass(level: string): string {
-	return `live-log-viewer__row--${normalizeLevel(level).toLowerCase()}`;
+function levelClass(level: LogSeverity): string {
+	return `live-log-viewer__row--${level.toString().toLowerCase()}`;
 }
 
 function formatTimestamp(timestamp: string): string {
 	return format(new Date(timestamp), 'HH:mm:ss.SSS');
 }
 
-function onSearchTextChanged(value: string | number | null): void {
-	set(searchText, String(value ?? ''));
+function formatLogEntry(item: LiveLogEventDTO): string {
+	const parts = [
+		`[${formatTimestamp(item.timestamp)}] [${levelLabel(item.level)}]`,
+		item.sourceContext ? `[${item.sourceContext}]` : null,
+		item.message,
+		item.exception ? `\n${item.exception}` : null,
+	].filter(Boolean);
+	return parts.join(' ');
 }
 
-function onSelectedLevelsChanged(value: LogLevel[] | null): void {
+async function copyLogEntry(item: LiveLogEventDTO): Promise<void> {
+	await navigator.clipboard.writeText(formatLogEntry(item));
+	showSuccessNotification(t('pages.settings.logs.copied-to-clipboard'));
+}
+
+function onSelectedLevelsChanged(value: LogSeverity[] | null): void {
 	set(selectedLevels, value ?? []);
 }
 
-function onSortDirectionChanged(value: SortDirection): void {
-	set(sortDirection, value);
-	logsStore.setSortDirection(value);
+function onSortDirectionToggled(): void {
+	const next = get(sortDirection) === SortDirection.Asc ? SortDirection.Desc : SortDirection.Asc;
+	set(sortDirection, next);
+	logsStore.setSortDirection(next);
 
-	if (value === SortDirection.Asc) {
+	if (next === SortDirection.Asc) {
+		void scrollToBottom();
+	}
+}
+
+function onPauseScrollChanged(value: boolean): void {
+	set(pauseScroll, value);
+
+	if (!value) {
 		void scrollToBottom();
 	}
 }
 
 async function scrollToBottom(): Promise<void> {
-	if (get(sortDirection) !== SortDirection.Asc) {
+	if (get(sortDirection) !== SortDirection.Asc || get(pauseScroll)) {
 		return;
 	}
 
@@ -249,7 +283,7 @@ async function scrollToBottom(): Promise<void> {
 }
 
 watch(
-	() => filteredLogs.value.length,
+	() => logsStore.getLogs.length,
 	async () => {
 		await scrollToBottom();
 	},
@@ -276,7 +310,7 @@ onUnmounted(() => {
 .live-log-viewer {
   display: flex;
   flex-direction: column;
-  height: calc(100vh - 180px);
+  height: calc(100vh - 120px);
 
   &__scroll {
     flex: 1;
@@ -292,9 +326,15 @@ onUnmounted(() => {
   }
 
   &__row {
+    position: relative;
     padding: 0.75rem 1rem;
     border-bottom: 1px solid rgba(255, 255, 255, 0.05);
     font-family: monospace;
+    cursor: pointer;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.03);
+    }
 
     &--debug {
       border-left: 4px solid #9e9e9e;

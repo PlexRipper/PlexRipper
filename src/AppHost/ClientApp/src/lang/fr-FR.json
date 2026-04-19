@@ -29,7 +29,16 @@
         },
         "app-bar": {
             "no-accounts": "Pas de compte disponible",
-            "copy-version": "Copier la version Reaparr - { version }"
+            "copy-version": "Copier la version Reaparr - { version }",
+            "update-available": ""
+        },
+        "update-available-dialog": {
+            "title": "",
+            "current-version": "",
+            "latest-version": "",
+            "update-now": "",
+            "docker-action": "",
+            "no-releases": ""
         },
         "details-overview": {
             "total-duration": "Durée totale:",
@@ -84,14 +93,6 @@
                 "delete-confirmation": {
                     "title": "Supprimer tous les journaux",
                     "text": "Êtes-vous sûr de vouloir supprimer tous les journaux de cette tâche de téléchargement ?"
-                },
-                "levels": {
-                    "debug": "Débogage",
-                    "information": "Information",
-                    "success": "Succès",
-                    "warning": "Avertissement",
-                    "error": "Erreur",
-                    "fatal": "Fatal"
                 }
             }
         },
@@ -433,26 +434,17 @@
             "title": "Intégration Radarr"
         }
     },
-    "confirmation": {
-        "delete-account": {
-            "text": "Cela supprimera ce compte Plex de Reaparr !\n\nCela supprimera également tous les serveurs partagés Plex inaccessibles, les bibliothèques Plex et tous les médias qu'ils contiennent. Tous les téléchargements actifs démarrés ou mis en file d'attente avec ce compte seront annulés et supprimés. Les téléchargements terminés resteront intacts.",
-            "title": "Êtes vous sûr ?",
-            "warning": "Cela peut prendre environ 5 minutes ou plus, puis cette fenêtre se fermera d'elle-même!"
-        },
-        "hide-server": {
-            "text": "Cela masquera le serveur de la vue. Vous pouvez afficher ce serveur en accédant aux paramètres -> UI -> Afficher les serveurs Plex",
-            "title": "Êtes vous sûr ?"
-        },
-        "reset-db": {
-            "text": "Ca va backuper votre base de donnée vers \"config/Database Backup/\" et en créer une nouvelle, après vous serrez redirigé vers la page de configuration. Ca ne réinitialisera pas les paramètres qui sont stocké dans \"config/ReaparrSettings.json\"",
-            "title": "Êtes vous sûr ?"
-        },
-        "not-found": {
-            "text": "Impossible de trouver le texte de confirmation correct.",
-            "title": "Impossible de trouver le texte de confirmation correct."
-        }
-    },
     "general": {
+        "logs": {
+            "level": {
+                "debug": "Débogage",
+                "information": "Information",
+                "success": "Succès",
+                "warning": "Avertissement",
+                "error": "Erreur",
+                "fatal": "Fatal"
+            }
+        },
         "alerts": {
             "disabled-paths": "Modifier les chemins est impossible pendant un téléchargement. Vérifier que tout vos téléchargement sont arrété !",
             "invalid-directory": "Dossier n'est pas un chemin d'accès valide !",
@@ -546,6 +538,25 @@
             "quality-1440-qhd": "QHD (1440p)",
             "quality-2160-uhd-4k": "4K (2160p)",
             "quality-4320-uhd-8k": "8K (4320p)"
+        }
+    },
+    "confirmation": {
+        "delete-account": {
+            "text": "Cela supprimera ce compte Plex de Reaparr !\n\nCela supprimera également tous les serveurs partagés Plex inaccessibles, les bibliothèques Plex et tous les médias qu'ils contiennent. Tous les téléchargements actifs démarrés ou mis en file d'attente avec ce compte seront annulés et supprimés. Les téléchargements terminés resteront intacts.",
+            "title": "Êtes vous sûr ?",
+            "warning": "Cela peut prendre environ 5 minutes ou plus, puis cette fenêtre se fermera d'elle-même!"
+        },
+        "hide-server": {
+            "text": "Cela masquera le serveur de la vue. Vous pouvez afficher ce serveur en accédant aux paramètres -> UI -> Afficher les serveurs Plex",
+            "title": "Êtes vous sûr ?"
+        },
+        "reset-db": {
+            "text": "Ca va backuper votre base de donnée vers \"config/Database Backup/\" et en créer une nouvelle, après vous serrez redirigé vers la page de configuration. Ca ne réinitialisera pas les paramètres qui sont stocké dans \"config/ReaparrSettings.json\"",
+            "title": "Êtes vous sûr ?"
+        },
+        "not-found": {
+            "text": "Impossible de trouver le texte de confirmation correct.",
+            "title": "Impossible de trouver le texte de confirmation correct."
         }
     },
     "help": {
@@ -927,7 +938,14 @@
                     "warning": "Avertissement",
                     "error": "Erreur",
                     "fatal": "Fatal"
-                }
+                },
+                "refresh": "",
+                "copy": "",
+                "pause-scroll": "",
+                "help-tooltip": "",
+                "copied-to-clipboard": "",
+                "help-title": "",
+                "help-text": ""
             },
             "ui": {
                 "confirmation-settings": {

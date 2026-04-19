@@ -29,7 +29,16 @@
         },
         "app-bar": {
             "no-accounts": "Keine Konten verfügbar",
-            "copy-version": "Reaparr-Version kopieren - { version }"
+            "copy-version": "Reaparr-Version kopieren - { version }",
+            "update-available": ""
+        },
+        "update-available-dialog": {
+            "title": "",
+            "current-version": "",
+            "latest-version": "",
+            "update-now": "",
+            "docker-action": "",
+            "no-releases": ""
         },
         "details-overview": {
             "total-duration": "Gesamtdauer:",
@@ -84,14 +93,6 @@
                 "delete-confirmation": {
                     "title": "Alle Logs löschen",
                     "text": "Sind Sie sicher, dass Sie alle Logs für diese Download-Aufgabe löschen möchten?"
-                },
-                "levels": {
-                    "debug": "Debug",
-                    "information": "Information",
-                    "success": "Erfolg",
-                    "warning": "Warnung",
-                    "error": "Fehler",
-                    "fatal": "Fatal"
                 }
             }
         },
@@ -433,26 +434,17 @@
             "title": "Radarr-Integration"
         }
     },
-    "confirmation": {
-        "delete-account": {
-            "text": "Dadurch wird dieses Plex-Konto aus Reaparr gelöscht!\n\nDadurch werden auch alle unzugänglichen Plex-Shared-Server, Plex-Bibliotheken und alle darin enthaltenen Medien gelöscht. Alle aktiven Downloads, die mit diesem Konto gestartet oder in die Warteschlange gestellt werden, werden abgebrochen und gelöscht. Abgeschlossene Downloads bleiben unberührt.",
-            "title": "Sind Sie sicher?",
-            "warning": "Dies wird ca.5 Minuten oder mehr benötigen. Wenn der Vorgang abgeschlossen ist schließt sich das Fenster selbstständig."
-        },
-        "hide-server": {
-            "text": "Dadurch wird der Server ausgeblendet. Sie können diesen Server wieder einblenden, indem Sie zu Einstellungen -> Benutzeroberfläche -> Plex-Server einblenden gehen.",
-            "title": "Sind Sie sicher?"
-        },
-        "reset-db": {
-            "text": "Das erstellt ein Backup der Datenbank nach \"config/Database Backup/\" und erstellt eine neue. Danach werden Sie auf die Setup-Seite weitergeleitet. Einstellungen werden nicht zurückgesetzt. Diese befinden sich hier:  \"config/ReaparrSettings.json\"",
-            "title": "Sind Sie sicher?"
-        },
-        "not-found": {
-            "text": "Konnte den richtigen Bestätigungstext nicht finden..",
-            "title": "Konnte den richtigen Bestätigungstext nicht finden.."
-        }
-    },
     "general": {
+        "logs": {
+            "level": {
+                "debug": "Debug",
+                "information": "Information",
+                "success": "Erfolg",
+                "warning": "Warnung",
+                "error": "Fehler",
+                "fatal": "Fatal"
+            }
+        },
         "alerts": {
             "disabled-paths": "Das Editieren der Pfade ist gesperrt wenn Downloads aktiv sind. Stelle sicher, dass alle Downloads gestoppt oder gelöscht sind!",
             "invalid-directory": "ungültiger Pfad angegeben!",
@@ -546,6 +538,25 @@
             "quality-1440-qhd": "QHD (1440p)",
             "quality-2160-uhd-4k": "4K (2160p)",
             "quality-4320-uhd-8k": "8K (4320p)"
+        }
+    },
+    "confirmation": {
+        "delete-account": {
+            "text": "Dadurch wird dieses Plex-Konto aus Reaparr gelöscht!\n\nDadurch werden auch alle unzugänglichen Plex-Shared-Server, Plex-Bibliotheken und alle darin enthaltenen Medien gelöscht. Alle aktiven Downloads, die mit diesem Konto gestartet oder in die Warteschlange gestellt werden, werden abgebrochen und gelöscht. Abgeschlossene Downloads bleiben unberührt.",
+            "title": "Sind Sie sicher?",
+            "warning": "Dies wird ca.5 Minuten oder mehr benötigen. Wenn der Vorgang abgeschlossen ist schließt sich das Fenster selbstständig."
+        },
+        "hide-server": {
+            "text": "Dadurch wird der Server ausgeblendet. Sie können diesen Server wieder einblenden, indem Sie zu Einstellungen -> Benutzeroberfläche -> Plex-Server einblenden gehen.",
+            "title": "Sind Sie sicher?"
+        },
+        "reset-db": {
+            "text": "Das erstellt ein Backup der Datenbank nach \"config/Database Backup/\" und erstellt eine neue. Danach werden Sie auf die Setup-Seite weitergeleitet. Einstellungen werden nicht zurückgesetzt. Diese befinden sich hier:  \"config/ReaparrSettings.json\"",
+            "title": "Sind Sie sicher?"
+        },
+        "not-found": {
+            "text": "Konnte den richtigen Bestätigungstext nicht finden..",
+            "title": "Konnte den richtigen Bestätigungstext nicht finden.."
         }
     },
     "help": {
@@ -927,7 +938,14 @@
                     "warning": "Warnung",
                     "error": "Fehler",
                     "fatal": "Fatal"
-                }
+                },
+                "refresh": "",
+                "copy": "",
+                "pause-scroll": "",
+                "help-tooltip": "",
+                "copied-to-clipboard": "",
+                "help-title": "",
+                "help-text": ""
             },
             "ui": {
                 "confirmation-settings": {

@@ -12,14 +12,16 @@ import { debugApi } from '@api';
 import { SortDirection } from '@enums';
 
 interface ILogsStoreState {
+	searchText: string;
 	logs: LiveLogEventDTO[];
 	sortDirection: SortDirection;
 }
 
 export const useLogsStore = defineStore(StoreNames.LogsStore, () => {
 	const defaultState: ILogsStoreState = {
-		logs: [],
+		searchText: '',
 		sortDirection: SortDirection.Asc,
+		logs: [],
 	};
 
 	const state = reactive<ILogsStoreState>(cloneDeep(defaultState));
@@ -33,21 +35,20 @@ export const useLogsStore = defineStore(StoreNames.LogsStore, () => {
 			).subscribe();
 
 			return actions.refreshLogs().pipe(
-				map((result) => ({ name: StoreNames.LogsStore, isSuccess: result.length > 0 })),
+				map((result) => ({ name: StoreNames.LogsStore, isSuccess: result.isSuccess })),
 				catchError((error) => {
 					Log.error('Failed to load cached logs', error);
 					return of({ name: StoreNames.LogsStore, isSuccess: false });
 				}),
 			);
 		},
-		refreshLogs(): Observable<LiveLogEventDTO[]> {
+		refreshLogs() {
 			return debugApi.getAllLogsEndpoint().pipe(
 				tap((result) => {
 					if (result.isSuccess) {
 						mergeSnapshot(result.value ?? []);
 					}
 				}),
-				map(() => [...state.logs]),
 			);
 		},
 		clearLogs(): void {
@@ -60,6 +61,18 @@ export const useLogsStore = defineStore(StoreNames.LogsStore, () => {
 			Object.assign(state, cloneDeep(defaultState));
 		},
 	};
+	const getters = {
+		getLogs: computed((): LiveLogEventDTO[] => {
+			const query = state.searchText.trim().toLowerCase();
+
+			const filteredLogs = state.logs.filter((x) => x.message.includes(query));
+
+			if (state.sortDirection === SortDirection.Desc) {
+				return [...filteredLogs].reverse();
+			}
+			return filteredLogs;
+		}),
+	};
 
 	function mergeSnapshot(entries: LiveLogEventDTO[]): void {
 		if (state.logs.length === 0) {
@@ -67,27 +80,17 @@ export const useLogsStore = defineStore(StoreNames.LogsStore, () => {
 			return;
 		}
 
-		const existingSequences = new Set(state.logs.map((entry) => entry.sequence));
+		const snapshotSequences = new Set(entries.map((entry) => entry.sequence));
 		const mergedEntries = [...entries];
 
 		for (const entry of state.logs) {
-			if (!existingSequences.has(entry.sequence)) {
+			if (!snapshotSequences.has(entry.sequence)) {
 				mergedEntries.push(entry);
 			}
 		}
 
 		state.logs = mergedEntries.sort((left, right) => left.sequence - right.sequence);
 	}
-
-	const getters = {
-		getSortedLogs: computed((): LiveLogEventDTO[] => {
-			if (state.sortDirection === SortDirection.Desc) {
-				return [...state.logs].reverse();
-			}
-
-			return state.logs;
-		}),
-	};
 
 	return { ...toRefs(state), ...actions, ...getters };
 });

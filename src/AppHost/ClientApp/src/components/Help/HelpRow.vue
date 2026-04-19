@@ -22,7 +22,7 @@
 						<slot name="append" />
 					</QCol>
 					<!-- Help Icon -->
-					<IconButton
+					<HelpButton
 						v-else-if="hasHelpPage"
 						icon="mdi-help-circle-outline"
 						class="q-ma-sm"

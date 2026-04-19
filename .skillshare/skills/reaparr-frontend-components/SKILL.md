@@ -5,6 +5,14 @@ description: ALWAYS load for ANY frontend work in Reaparr — editing .vue files
 
 # Reaparr Frontend Component Standards
 
+## IDE Tool Requirement
+
+**All frontend file operations and diagnostics MUST use WebStorm MCP tools** (`webstorm-official-mcp_*`, `webstorm-index-mcp_*`, `webstorm-index_ide_*`).
+
+Never use Rider MCP tools for any work under `src/AppHost/ClientApp/`.
+
+---
+
 ## Overview
 
 Standards for Vue 3 SFC components in the Reaparr frontend (`src/AppHost/ClientApp/`). This is a **pure SPA** (SSR disabled), using Nuxt 4 auto-imports, Quasar + PrimeVue UI, Pinia stores, and RxJS for async data flow.

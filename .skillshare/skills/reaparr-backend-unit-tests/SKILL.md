@@ -5,6 +5,14 @@ description: Use when creating or updating C# backend unit tests in Reaparr, esp
 
 # Reaparr Backend Unit Tests
 
+## IDE Tool Requirement
+
+**All backend file operations and diagnostics MUST use Rider MCP tools** (`rider_*`, `rider-official-mcp_*`, `rider-index-mcp_*`).
+
+Never use WebStorm MCP tools for any work under `src/` (excluding `ClientApp/`) or `tests/`.
+
+---
+
 ## Overview
 
 Use this skill to write backend unit tests that match Reaparr conventions exactly.

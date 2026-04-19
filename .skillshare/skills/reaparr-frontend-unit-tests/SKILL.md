@@ -5,6 +5,14 @@ description: Use when creating or updating Vitest unit tests for the Reaparr fro
 
 # Reaparr Frontend Unit Tests
 
+## IDE Tool Requirement
+
+**All frontend file operations and diagnostics MUST use WebStorm MCP tools** (`webstorm-official-mcp_*`, `webstorm-index-mcp_*`, `webstorm-index_ide_*`).
+
+Never use Rider MCP tools for any work under `src/AppHost/ClientApp/`.
+
+---
+
 ## Overview
 
 Use this skill to write frontend unit tests that match Reaparr conventions exactly.

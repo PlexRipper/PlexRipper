@@ -102,16 +102,23 @@ Replace `<Project>` with the actual project name (e.g., `Application`, `Backgrou
 - Store all generated plans under this repository’s `plans/` directory. Do not place plans in any external `.claude`
   directory or other out-of-repo location, regardless of which AI agent creates them.
 
-### Rider-first workflow
+### IDE-first workflow (Rider for backend, WebStorm for frontend)
 
 > **MANDATORY**: At the start of every task, load the `jetbrains-skill` skill. This is non-negotiable — it enforces the
 > correct tool selection order below.
 
-**NEVER use `grep`, `glob`, `read`, or bash file commands as a first tool.** Rider MCP tools are always first when
-available.
+**NEVER use `grep`, `glob`, `read`, or bash file commands as a first tool.** Use the appropriate JetBrains IDE MCP tools
+first, based on the task type:
 
-- Fall back to `grep`, `glob`, or `read` **only** if Rider MCP is unavailable, errors, or cannot provide the needed
-  result.
+- **Backend work** (C#, .NET, `src/` excluding `ClientApp/`, `tests/`) → use **Rider MCP tools**
+  (`rider_*`, `rider-official-mcp_*`, `rider-index-mcp_*`, `rider-debugger*`)
+- **Frontend work** (Vue, TypeScript, `src/AppHost/ClientApp/`) → use **WebStorm MCP tools**
+  (`webstorm-official-mcp_*`, `webstorm-index-mcp_*`, `webstorm-index_ide_*`)
+
+Never use Rider MCP tools for frontend work, and never use WebStorm MCP tools for backend work.
+
+- Fall back to `grep`, `glob`, or `read` **only** if the appropriate IDE MCP is unavailable, errors, or cannot provide
+  the needed result.
 - If fallback is required, **explicitly state it** before using the fallback tool.
 
 ---

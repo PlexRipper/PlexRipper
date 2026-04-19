@@ -5,6 +5,14 @@ description: Use when creating or updating Pinia stores in the Reaparr frontend 
 
 # Reaparr Pinia Store
 
+## IDE Tool Requirement
+
+**All frontend file operations and diagnostics MUST use WebStorm MCP tools** (`webstorm-official-mcp_*`, `webstorm-index-mcp_*`, `webstorm-index_ide_*`).
+
+Never use Rider MCP tools for any work under `src/AppHost/ClientApp/`.
+
+---
+
 > **This skill overrides generic Pinia skills for this project.**  
 > Every store uses Composition API, RxJS Observables exclusively for async, and follows a strict internal declaration order.
 

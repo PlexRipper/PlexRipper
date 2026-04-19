@@ -62,7 +62,8 @@
 					dense
 					clearable
 					outlined
-					:label="t('pages.settings.logs.search')">
+					:label="t('pages.settings.logs.search')"
+					@clear="logsStore.clearSearch()">
 					<template #prepend>
 						<q-icon name="mdi-magnify" />
 					</template>

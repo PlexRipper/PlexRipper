@@ -57,6 +57,9 @@ export const useLogsStore = defineStore(StoreNames.LogsStore, () => {
 		clearLogs(): void {
 			state.logs = [];
 		},
+		clearSearch(): void {
+			state.searchText = '';
+		},
 		toggleSortDirection() {
 			state.sortDirection = state.sortDirection === SortDirection.Asc ? SortDirection.Desc : SortDirection.Asc;
 		},

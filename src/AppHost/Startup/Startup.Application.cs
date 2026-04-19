@@ -43,6 +43,7 @@ public static partial class Startup
         if (!EnvironmentExtensions.IsIntegrationTestMode())
         {
             // SignalR configuration
+            app.MapHub<LogHub>("/logs");
             app.MapHub<ProgressHub>("/progress");
             app.MapHub<DownloadHub>("/download");
             app.MapHub<NotificationHub>("/notifications");

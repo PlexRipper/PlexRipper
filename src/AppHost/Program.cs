@@ -13,20 +13,22 @@ public class Program
     /// <summary>
     ///  The main method entry point for the application.
     /// </summary>
-    /// <param name="args"></param>
+    /// <param name="args">Command-line arguments passed to the application.</param>
     [STAThread]
     public static async Task Main(string[] args)
     {
-        // Must be first: handles installer hooks (install, uninstall, update) and exits early when invoked by the Velopack installer.
-        VelopackApp.Build().Run();
-
         try
         {
-            _log.Here().Information("Starting Reaparr!");
+            var logBuffer = new LogBufferService();
+            var signalRLogConfig = new SignalRLogConfig(logBuffer);
 
             // Skip logger setup in integration test mode to preserve test logger
             if (!EnvironmentExtensions.IsIntegrationTestMode())
-                LogFactory.SetupLogging(EnvironmentExtensions.GetLogLevel());
+                LogFactory.SetupLogging(EnvironmentExtensions.GetLogLevel(), signalRLogConfig);
+
+            // Must be first: handles installer hooks (install, uninstall, update) and exits early when invoked by the Velopack installer.
+            VelopackApp.Build().Run();
+
             FluentResultConfiguration.Setup();
 
             _log.Here()
@@ -43,9 +45,11 @@ public class Program
 
             var builder = WebApplication.CreateBuilder(args);
 
-            builder.Host.ConfigureAutofacBuilder();
+            builder.Host.ConfigureAutofacBuilder(logBuffer);
             builder.Services.ConfigureServices(builder.Environment);
             var app = builder.Build();
+
+            signalRLogConfig.AttachSignalR(app);
 
             var configResult = app.SetupConfigFile();
             if (configResult.IsFailed)

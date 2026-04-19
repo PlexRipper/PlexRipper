@@ -12,6 +12,7 @@ using NSwag;
 using NSwag.Generation.Processors.Security;
 using Reaparr.Application.Contracts;
 using Reaparr.Identity.Contracts;
+using Serilog.Sinks.AspNetCore.App.SignalR.Extensions;
 
 namespace Reaparr.AppHost;
 
@@ -102,6 +103,8 @@ public static partial class Startup
                         MessagePackSecurity.UntrustedData
                     );
                 });
+
+            services.AddSerilogHub<LogHub>();
 
             services.SwaggerDocument(o =>
             {

@@ -39,7 +39,13 @@ public class CheckForUpdatesCommandHandler : ICommandHandler<CheckForUpdatesComm
         // Desktop mode
         if (EnvironmentExtensions.IsDesktopMode())
         {
-            var updateInfo = await _velopackManager.CheckForUpdatesAsync();
+            Result<UpdateInfo?> updateResult = await Result.Try(async Task () =>
+                await _velopackManager.CheckForUpdatesAsync()
+            );
+            if (updateResult.IsFailed)
+                return updateResult.LogError();
+
+            var updateInfo = updateResult.Value;
             if (updateInfo is null)
             {
                 _log.Here().Information("No update available");

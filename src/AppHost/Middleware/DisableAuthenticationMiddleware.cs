@@ -7,7 +7,7 @@ namespace Reaparr.AppHost;
 /// Development-only middleware that bypasses all authentication by injecting a synthetic Admin principal.
 /// Activated by setting <c>I_AM_DUMB_SO_DISABLE_AUTHENTICATION=true</c> in the environment.
 /// </summary>
-public sealed class DisableAuthenticationMiddleware(RequestDelegate next, Serilog.ILogger log)
+public sealed class DisableAuthenticationMiddleware(RequestDelegate next)
 {
     private static readonly ClaimsPrincipal _adminPrincipal = CreateAdminPrincipal();
 
@@ -16,11 +16,6 @@ public sealed class DisableAuthenticationMiddleware(RequestDelegate next, Serilo
     /// </summary>
     public async Task InvokeAsync(HttpContext context)
     {
-        log.ForContext<DisableAuthenticationMiddleware>()
-            .Warning(
-                "Authentication is DISABLED via I_AM_DUMB_SO_DISABLE_AUTHENTICATION — all requests are treated as Admin"
-            );
-
         context.User = _adminPrincipal;
         await context.SignInAsync(_adminPrincipal);
 

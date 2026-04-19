@@ -89,29 +89,36 @@
 		</template>
 
 		<template #actions>
-			<QLinearProgress
-				v-if="updateStore.isDownloading"
-				:value="updateStore.downloadProgress / 100"
-				color="primary"
-				class="update-dialog__progress" />
+			<QRow
+				justify="between"
+				gutter="sm">
+				<QCol>
+					<QLinearProgress
+						v-if="updateStore.isDownloading"
+						:value="updateStore.downloadProgress / 100"
+						color="primary"
+						class="update-dialog__progress" />
+				</QCol>
+				<QCol cols="auto">
+					<!-- Update On Docker -->
+					<BaseButton
+						v-if="globalStore.isDockerMode"
+						unelevated
+						icon="mdi-docker"
+						target="_blank"
+						href="https://hub.docker.com/r/reaparr/reaparr/tags"
+						:label="t('components.update-available-dialog.docker-action')" />
 
-			<q-btn
-				v-if="globalStore.isDockerMode"
-				unelevated
-				color="primary"
-				icon="mdi-docker"
-				target="_blank"
-				href="https://hub.docker.com/r/reaparr/reaparr"
-				:label="t('components.update-available-dialog.docker-action')" />
-
-			<q-btn
-				v-else
-				unelevated
-				color="primary"
-				icon="mdi-update"
-				:label="t('components.update-available-dialog.update-now')"
-				:disable="updateStore.isDownloading"
-				@click="runDesktopUpdate()" />
+					<!-- Update On Desktop -->
+					<BaseButton
+						v-else
+						unelevated
+						icon="mdi-update"
+						:label="t('components.update-available-dialog.download-update')"
+						:disable="updateStore.isDownloading"
+						@click="runDesktopUpdate()" />
+				</QCol>
+			</QRow>
 		</template>
 	</QCardDialog>
 </template>

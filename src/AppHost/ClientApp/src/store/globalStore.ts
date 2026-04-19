@@ -31,6 +31,7 @@ import { cloneDeep } from 'lodash-es';
 
 interface IAppConfigStoreState {
 	version: string;
+	platform: string;
 	config: IAppConfig;
 	pageReadyObservable: Subject<boolean>;
 }
@@ -38,6 +39,7 @@ interface IAppConfigStoreState {
 export const useGlobalStore = defineStore(StoreNames.GlobalStore, () => {
 	const defaultState: IAppConfigStoreState = {
 		version: '?',
+		platform: '?',
 		config: {} as IAppConfig,
 		pageReadyObservable: new ReplaySubject<boolean>(),
 	};
@@ -109,6 +111,13 @@ export const useGlobalStore = defineStore(StoreNames.GlobalStore, () => {
 			Log.info('Reaparr App Version:', version);
 			state.version = version;
 		},
+		setAppPlatform(platform: string): void {
+			if (!platform || state.platform === platform) {
+				return;
+			}
+			Log.info('Reaparr App Platform:', platform);
+			state.platform = platform;
+		},
 		$reset() {
 			useAccountDialogStore().$reset();
 			useAccountStore().$reset();
@@ -135,7 +144,8 @@ export const useGlobalStore = defineStore(StoreNames.GlobalStore, () => {
 	};
 	const getters = {
 		getPageSetupReady: computed((): Observable<boolean> => state.pageReadyObservable.asObservable()),
-		isDockerMode: computed(() => state.config.isDocker ?? false),
+		isDockerMode: computed(() => state.platform === 'docker'),
+		isDesktopMode: computed(() => state.platform === 'desktop'),
 	};
 	return {
 		...toRefs(state),

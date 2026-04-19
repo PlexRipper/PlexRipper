@@ -33,12 +33,12 @@
             "update-available": ""
         },
         "update-available-dialog": {
-            "title": "",
-            "current-version": "",
-            "latest-version": "",
-            "update-now": "",
-            "docker-action": "",
-            "no-releases": ""
+            "title": "Nouvelle version disponible",
+            "current-version": "Actuel : {version}",
+            "latest-version": "Dernière mise à jour : {version}",
+            "download-update": "Télécharger la mise à jour",
+            "docker-action": "Afficher les versions Docker",
+            "no-releases": "Aucune version n'est disponible pour le moment."
         },
         "details-overview": {
             "total-duration": "Durée totale:",

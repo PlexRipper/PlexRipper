@@ -22,7 +22,6 @@ export default defineNuxtPlugin((nuxtApp) => {
 		const appConfig: IAppConfig = {
 			nodeEnv: publicEnv.nodeEnv,
 			isProduction: publicEnv.nodeEnv === 'production',
-			isDocker: publicEnv.isDocker,
 			baseUrl,
 		};
 		setupAxios(appConfig, nuxtApp.$router as Router);
@@ -45,6 +44,7 @@ function setupAxios(appConfig: IAppConfig, router: Router) {
 	Axios.interceptors.response.use(
 		(config) => {
 			useGlobalStore().setAppVersion(config.headers['x-reaparr-version']);
+			useGlobalStore().setAppPlatform(config.headers['x-reaparr-platform']);
 			return config;
 		},
 		(error) => {

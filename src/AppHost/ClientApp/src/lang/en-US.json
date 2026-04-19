@@ -36,8 +36,8 @@
             "title": "New Version Available",
             "current-version": "Current: {version}",
             "latest-version": "Latest: {version}",
-            "update-now": "Update now",
-            "docker-action": "View Docker update instructions",
+            "download-update": "Download Update",
+            "docker-action": "View Docker Releases",
             "no-releases": "No releases are currently available."
         },
         "details-overview": {

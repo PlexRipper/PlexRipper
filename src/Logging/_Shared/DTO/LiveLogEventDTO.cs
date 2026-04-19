@@ -8,30 +8,30 @@ public class LiveLogEventDTO
     /// <summary>
     /// Monotonic sequence number assigned on the server.
     /// </summary>
-    public long Sequence { get; set; }
+    public required long Sequence { get; init; }
 
     /// <summary>
     /// UTC timestamp for when the event was written.
     /// </summary>
-    public DateTimeOffset Timestamp { get; set; }
+    public required DateTimeOffset Timestamp { get; init; }
 
     /// <summary>
     /// Serilog level name.
     /// </summary>
-    public string Level { get; set; } = string.Empty;
+    public required LogSeverity Severity { get; init; }
 
     /// <summary>
     /// Rendered log message.
     /// </summary>
-    public string Message { get; set; } = string.Empty;
+    public required string Message { get; init; }
 
     /// <summary>
     /// Optional exception string.
     /// </summary>
-    public string? Exception { get; set; }
+    public required string? Exception { get; init; }
 
     /// <summary>
     /// Optional source context.
     /// </summary>
-    public string? SourceContext { get; set; }
+    public required string? SourceContext { get; init; }
 }

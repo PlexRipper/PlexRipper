@@ -442,7 +442,8 @@
                 "success": "Sukces",
                 "warning": "Ostrzeżenie",
                 "error": "Błąd",
-                "fatal": "Krytyczny"
+                "fatal": "Krytyczny",
+                "verbose": "Gadatliwy"
             }
         },
         "alerts": {
@@ -845,6 +846,13 @@
                         "title": "Przetestuj połączenie z Radarr"
                     }
                 }
+            },
+            "logs": {
+                "title": {
+                    "title": "Dzienniki na żywo",
+                    "text": "Tutaj wyświetlane są tylko logi z bieżącego uruchomienia aplikacji. Starsze logi można znaleźć w katalogu /config.",
+                    "label": "Dzienniki aplikacji Reaparr"
+                }
             }
         },
         "media-options": {
@@ -920,32 +928,22 @@
                 }
             },
             "logs": {
-                "title": "Logi na żywo",
-                "subtitle": "Ładuje logi z pamięci podręcznej po odświeżeniu i przesyła nowe zdarzenia przez SignalR.",
+                "title": "Dzienniki aplikacji Reaparr",
                 "clear": "Wyczyść",
                 "search": "Szukaj w logach",
                 "level-filter": "Poziomy",
                 "visible-count": "Wyświetlanie {count} z {total} logów w pamięci podręcznej",
-                "security-note": "Widoczne tylko dla uwierzytelnionych administratorów",
                 "empty": "Żadne logi na żywo nie pasują do bieżących filtrów.",
                 "sort": {
                     "oldest-first": "Najstarsze najpierw",
                     "newest-first": "Najnowsze najpierw"
                 },
-                "levels": {
-                    "debug": "Debug",
-                    "info": "Info",
-                    "warning": "Ostrzeżenie",
-                    "error": "Błąd",
-                    "fatal": "Krytyczny"
-                },
                 "refresh": "",
                 "copy": "",
+                "copy-selected": "Kopiuj zaznaczone ({count})",
+                "copy-all": "Kopiuj wszystkie logi",
                 "pause-scroll": "",
-                "help-tooltip": "",
-                "copied-to-clipboard": "",
-                "help-title": "",
-                "help-text": ""
+                "copied-to-clipboard": ""
             },
             "ui": {
                 "confirmation-settings": {

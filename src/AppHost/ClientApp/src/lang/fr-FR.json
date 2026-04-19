@@ -442,7 +442,8 @@
                 "success": "Succès",
                 "warning": "Avertissement",
                 "error": "Erreur",
-                "fatal": "Fatal"
+                "fatal": "Fatal",
+                "verbose": "Verbeux"
             }
         },
         "alerts": {
@@ -845,6 +846,13 @@
                         "title": "Tester la connexion à Radarr"
                     }
                 }
+            },
+            "logs": {
+                "title": {
+                    "title": "Journaux en direct",
+                    "text": "Seuls les journaux de l'exécution actuelle de l'application sont affichés ici. Les journaux plus anciens se trouvent dans le répertoire /config.",
+                    "label": "Journaux de l'application Reaparr"
+                }
             }
         },
         "media-options": {
@@ -920,32 +928,22 @@
                 }
             },
             "logs": {
-                "title": "Journaux en direct",
-                "subtitle": "Charge les journaux en cache au rafraîchissement et diffuse les nouveaux événements via SignalR.",
+                "title": "Journaux de l'application Reaparr",
                 "clear": "Effacer",
                 "search": "Rechercher dans les journaux",
                 "level-filter": "Niveaux",
                 "visible-count": "Affichage de {count} journaux sur {total} en cache",
-                "security-note": "Visible uniquement pour les administrateurs authentifiés",
                 "empty": "Aucun journal en direct ne correspond aux filtres actuels.",
                 "sort": {
                     "oldest-first": "Plus anciens d'abord",
                     "newest-first": "Plus récents d'abord"
                 },
-                "levels": {
-                    "debug": "Débogage",
-                    "info": "Info",
-                    "warning": "Avertissement",
-                    "error": "Erreur",
-                    "fatal": "Fatal"
-                },
                 "refresh": "",
                 "copy": "",
+                "copy-selected": "Copier la sélection ({count})",
+                "copy-all": "Copier tous les journaux",
                 "pause-scroll": "",
-                "help-tooltip": "",
-                "copied-to-clipboard": "",
-                "help-title": "",
-                "help-text": ""
+                "copied-to-clipboard": ""
             },
             "ui": {
                 "confirmation-settings": {

@@ -30,9 +30,12 @@ export const useLogsStore = defineStore(StoreNames.LogsStore, () => {
 	const state = reactive<ILogsStoreState>(cloneDeep(defaultState));
 	const signalrStore = useSignalrStore();
 
+	function levelClass(level: LogSeverity): string {
+		return `live-log-viewer__row--${level.toString().toLowerCase()}`;
+	}
+
 	const actions = {
 		setup(): Observable<ISetupResult> {
-			// Subscribe to incoming live logs
 			signalrStore.getLogEvents().pipe(
 				tap((entry) => state.logs.push(entry)),
 			).subscribe();
@@ -60,6 +63,9 @@ export const useLogsStore = defineStore(StoreNames.LogsStore, () => {
 		clearSearch(): void {
 			state.searchText = '';
 		},
+		setSearch(value: string): void {
+			state.searchText = value;
+		},
 		toggleSortDirection() {
 			state.sortDirection = state.sortDirection === SortDirection.Asc ? SortDirection.Desc : SortDirection.Asc;
 		},
@@ -67,13 +73,14 @@ export const useLogsStore = defineStore(StoreNames.LogsStore, () => {
 			Object.assign(state, cloneDeep(defaultState));
 		},
 	};
+
 	const getters = {
 		getLogs: computed((): LiveLogEventDTO[] => {
 			const query = state.searchText.trim().toLowerCase();
 			const levels = state.selectedLevels;
 
 			const filteredLogs = state.logs.filter(
-				(x) => x.message.toLowerCase().includes(query) && levels.includes(x.level),
+				(x) => (x.message.toLowerCase().includes(query) || (x.exception ?? '').toLowerCase().includes(query)) && levels.includes(x.level),
 			);
 
 			if (state.sortDirection === SortDirection.Desc) {
@@ -81,6 +88,7 @@ export const useLogsStore = defineStore(StoreNames.LogsStore, () => {
 			}
 			return filteredLogs;
 		}),
+		levelCount: (value: LogSeverity): number => state.logs.filter((entry) => entry.level === value).length,
 	};
 
 	function mergeSnapshot(entries: LiveLogEventDTO[]): void {
@@ -101,7 +109,12 @@ export const useLogsStore = defineStore(StoreNames.LogsStore, () => {
 		state.logs = mergedEntries.sort((left, right) => left.sequence - right.sequence);
 	}
 
-	return { ...toRefs(state), ...actions, ...getters };
+	return {
+		...toRefs(state),
+		...actions,
+		...getters,
+		levelClass,
+	};
 });
 
 if (import.meta.hot) {

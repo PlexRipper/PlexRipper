@@ -442,7 +442,8 @@
                 "success": "Success",
                 "warning": "Warning",
                 "error": "Error",
-                "fatal": "Fatal"
+                "fatal": "Fatal",
+                "verbose": "Verbose"
             }
         },
         "alerts": {
@@ -845,6 +846,13 @@
                         "title": "Test the connection to Radarr"
                     }
                 }
+            },
+            "logs": {
+                "title": {
+                    "title": "Live Logs",
+                    "text": "Only logs from the current application run are shown here. Older logs can be found in the /config directory.",
+                    "label": "Reaparr App Logs"
+                }
             }
         },
         "media-options": {
@@ -920,33 +928,22 @@
                 }
             },
             "logs": {
-                "title": "Live logs",
-                "subtitle": "Loads cached logs on refresh and streams new events through SignalR.",
+                "title": "Reaparr App Logs",
                 "clear": "Clear",
                 "search": "Search logs",
                 "level-filter": "Levels",
                 "visible-count": "Showing {count} of {total} cached logs",
-                "security-note": "Visible to authenticated admins only",
                 "empty": "No live logs match the current filters.",
                 "sort": {
                     "oldest-first": "Oldest first",
                     "newest-first": "Newest first"
                 },
-                "levels": {
-                    "verbose": "Verbose",
-                    "debug": "Debug",
-                    "info": "Info",
-                    "warning": "Warning",
-                    "error": "Error",
-                    "fatal": "Fatal"
-                },
                 "refresh": "Refresh logs",
                 "copy": "Copy log entry",
+                "copy-selected": "Copy selected ({count})",
+                "copy-all": "Copy all logs",
                 "pause-scroll": "Pause",
-                "help-tooltip": "Only logs from the current application run are shown here. Older logs can be found in the /config directory.",
-                "copied-to-clipboard": "Log entry copied to clipboard",
-                "help-title": "Live Logs",
-                "help-text": "Only logs from the current application run are shown here. Older logs can be found in the /config directory."
+                "copied-to-clipboard": "Log entry copied to clipboard"
             },
             "ui": {
                 "confirmation-settings": {

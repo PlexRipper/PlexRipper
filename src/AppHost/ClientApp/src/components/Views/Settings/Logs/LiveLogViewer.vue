@@ -11,9 +11,9 @@
 					icon="mdi-help-circle-outline"
 					class="q-ma-sm"
 					@click="helpStore.openHelpDialog({
-						label: t('pages.settings.logs.title'),
-						title: t('pages.settings.logs.help-title'),
-						text: t('pages.settings.logs.help-text'),
+						label: t('help.settings.logs.title.label'),
+						title: t('help.settings.logs.title.title'),
+						text: t('help.settings.logs.title.text'),
 					})" />
 			</QToolbarTitle>
 			<q-checkbox
@@ -40,30 +40,19 @@
 				icon="mdi-refresh"
 				:title="t('pages.settings.logs.refresh')"
 				@click="useSubscription(logsStore.refreshLogs().subscribe())" />
-
-			<!-- Copy Selected -->
-			<QBtn
-				v-if="selectedEntries.size > 0"
-				flat
-				dense
-				size="sm"
-				icon="mdi-content-copy"
-				:label="t('pages.settings.logs.copy-selected', { count: selectedEntries.size })"
-				color="primary"
-				class="q-ml-xs"
-				@click="copySelectedEntries" />
 		</QToolbar>
 
 		<!-- Search Bar -->
 		<div class="row q-col-gutter-md q-mb-md">
 			<div class="col-12 col-md-5">
 				<q-input
-					v-model="logsStore.searchText"
+					:model-value="searchInput"
 					dense
 					clearable
 					outlined
 					:label="t('pages.settings.logs.search')"
-					@clear="logsStore.clearSearch()">
+					@update:model-value="onSearchInput"
+					@clear="onSearchClear">
 					<template #prepend>
 						<q-icon name="mdi-magnify" />
 					</template>
@@ -101,7 +90,7 @@
 								<q-badge
 									:color="levelColor(opt.value)"
 									text-color="black">
-									{{ levelCount(opt.value) }}
+									{{ logsStore.levelCount(opt.value) }}
 								</q-badge>
 							</q-item-section>
 						</q-item>
@@ -129,7 +118,7 @@
 					<template #default="{ item }: {item: LiveLogEventDTO }">
 						<div
 							class="live-log-viewer__row"
-							:class="levelClass(item.level)"
+							:class="logsStore.levelClass(item.level)"
 							@click="copyLogEntry(item)">
 							<div class="live-log-viewer__row-header row items-center q-col-gutter-sm">
 								<!-- Selection Checkbox -->
@@ -173,20 +162,40 @@
 										@click.stop="copyLogEntry(item)" />
 								</div>
 							</div>
-							<pre class="live-log-viewer__message">{{ item.message }}</pre>
+							<!-- eslint-disable-next-line vue/no-v-html -->
+							<pre
+								class="live-log-viewer__message"
+								v-html="highlightText(item.message)" />
+							<!-- eslint-disable-next-line vue/no-v-html -->
 							<pre
 								v-if="item.exception"
-								class="live-log-viewer__exception">{{ item.exception }}</pre>
+								class="live-log-viewer__exception"
+								v-html="highlightText(item.exception)" />
 						</div>
 					</template>
 				</QVirtualScroll>
 			</template>
 		</div>
+
+		<!-- Bottom action bar -->
+		<div class="live-log-viewer__bottom-bar row items-center justify-end q-mt-sm">
+			<BaseButton
+				v-if="selectedEntries.size > 0"
+				icon="mdi-content-copy"
+				:label="t('pages.settings.logs.copy-selected', { count: selectedEntries.size })"
+				class="q-mr-sm"
+				@click="copySelectedEntries" />
+			<BaseButton
+				v-else
+				icon="mdi-content-copy"
+				:label="t('pages.settings.logs.copy-all')"
+				@click="copyAllEntries" />
+		</div>
 	</div>
 </template>
 
 <script setup lang="ts">
-import { get, set } from '@vueuse/core';
+import { get, set, useDebounceFn } from '@vueuse/core';
 import { format } from 'date-fns';
 import { useLogsStore } from '@store';
 import type { LiveLogEventDTO } from '@dto';
@@ -201,26 +210,42 @@ const { t } = useI18n();
 const scrollElement = ref<HTMLElement | null>(null);
 const pauseScroll = ref(false);
 const selectedEntries = ref<Set<number>>(new Set());
+const searchInput = ref(logsStore.searchText);
+
+const applySearch = useDebounceFn((value: string) => {
+	logsStore.setSearch(value);
+}, 300);
+
+function onSearchInput(value: string | number | null): void {
+	const text = value?.toString() ?? '';
+	set(searchInput, text);
+	applySearch(text);
+}
+
+function onSearchClear(): void {
+	set(searchInput, '');
+	logsStore.clearSearch();
+}
 
 const levelOptions = computed(() => [
-	{ label: t('pages.settings.logs.levels.verbose'), value: LogSeverity.Verbose },
-	{ label: t('pages.settings.logs.levels.debug'), value: LogSeverity.Debug },
-	{ label: t('pages.settings.logs.levels.info'), value: LogSeverity.Information },
-	{ label: t('pages.settings.logs.levels.warning'), value: LogSeverity.Warning },
-	{ label: t('pages.settings.logs.levels.error'), value: LogSeverity.Error },
-	{ label: t('pages.settings.logs.levels.fatal'), value: LogSeverity.Fatal },
+	{ label: t('general.logs.level.verbose'), value: LogSeverity.Verbose },
+	{ label: t('general.logs.level.debug'), value: LogSeverity.Debug },
+	{ label: t('general.logs.level.information'), value: LogSeverity.Information },
+	{ label: t('general.logs.level.warning'), value: LogSeverity.Warning },
+	{ label: t('general.logs.level.error'), value: LogSeverity.Error },
+	{ label: t('general.logs.level.fatal'), value: LogSeverity.Fatal },
 ] as { label: string; value: LogSeverity }[]);
-
-function levelCount(value: LogSeverity): number {
-	return get(logsStore.logs).filter((entry) => entry.level === value).length;
-}
 
 function levelLabel(level: LogSeverity): string {
 	switch (level) {
+		case LogSeverity.Verbose:
+			return t('general.logs.level.verbose');
 		case LogSeverity.Debug:
 			return t('general.logs.level.debug');
 		case LogSeverity.Information:
 			return t('general.logs.level.information');
+		case LogSeverity.Success:
+			return t('general.logs.level.success');
 		case LogSeverity.Warning:
 			return t('general.logs.level.warning');
 		case LogSeverity.Error:
@@ -232,6 +257,15 @@ function levelLabel(level: LogSeverity): string {
 	}
 }
 
+function escapeHtml(text: string): string {
+	return text
+		.replace(/&/g, '&amp;')
+		.replace(/</g, '&lt;')
+		.replace(/>/g, '&gt;')
+		.replace(/"/g, '&quot;')
+		.replace(/'/g, '&#039;');
+}
+
 function levelColor(level: LogSeverity): string {
 	switch (level) {
 		case LogSeverity.Debug:
@@ -239,7 +273,7 @@ function levelColor(level: LogSeverity): string {
 		case LogSeverity.Information:
 			return 'blue-4';
 		case LogSeverity.Warning:
-			return 'yellow-6';
+			return 'orange-6';
 		case LogSeverity.Error:
 			return 'red-5';
 		case LogSeverity.Fatal:
@@ -249,8 +283,18 @@ function levelColor(level: LogSeverity): string {
 	}
 }
 
-function levelClass(level: LogSeverity): string {
-	return `live-log-viewer__row--${level.toString().toLowerCase()}`;
+function highlightText(text: string): string {
+	const query = logsStore.searchText.trim();
+	const escaped = escapeHtml(text);
+	if (!query) {
+		return escaped;
+	}
+
+	const escapedQuery = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+	return escaped.replace(
+		new RegExp(escapedQuery, 'gi'),
+		(match) => `<mark class="live-log-viewer__highlight">${match}</mark>`,
+	);
 }
 
 function formatTimestamp(timestamp: string): string {
@@ -287,6 +331,12 @@ async function copySelectedEntries(): Promise<void> {
 	const sequences = get(selectedEntries);
 	const entries = logsStore.getLogs.filter((x) => sequences.has(x.sequence));
 	const text = entries.map(formatLogEntry).join('\n');
+	await navigator.clipboard.writeText(text);
+	showSuccessNotification(t('pages.settings.logs.copied-to-clipboard'), 2000);
+}
+
+async function copyAllEntries(): Promise<void> {
+	const text = logsStore.getLogs.map(formatLogEntry).join('\n');
 	await navigator.clipboard.writeText(text);
 	showSuccessNotification(t('pages.settings.logs.copied-to-clipboard'), 2000);
 }
@@ -428,6 +478,17 @@ onUnmounted(() => logsStore.$reset());
 
   &__exception {
     color: #ef9a9a;
+  }
+
+  &__highlight {
+    background-color: #fdd835;
+    color: #000;
+    border-radius: 2px;
+    padding: 0 1px;
+  }
+
+  &__bottom-bar {
+    padding-top: 8px;
   }
 }
 </style>

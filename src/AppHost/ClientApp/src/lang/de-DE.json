@@ -442,7 +442,8 @@
                 "success": "Erfolg",
                 "warning": "Warnung",
                 "error": "Fehler",
-                "fatal": "Fatal"
+                "fatal": "Fatal",
+                "verbose": "Ausführlich"
             }
         },
         "alerts": {
@@ -845,6 +846,13 @@
                         "title": "Testen Sie die Verbindung zu Radarr."
                     }
                 }
+            },
+            "logs": {
+                "title": {
+                    "title": "Live-Protokolle",
+                    "text": "Hier werden nur die Protokolle des aktuellen Anwendungslaufs angezeigt. Ältere Protokolle finden Sie im Verzeichnis /config.",
+                    "label": "Reaparr-App-Protokolle"
+                }
             }
         },
         "media-options": {
@@ -920,32 +928,22 @@
                 }
             },
             "logs": {
-                "title": "Live-Logs",
-                "subtitle": "Lädt zwischengespeicherte Logs beim Aktualisieren und streamt neue Ereignisse über SignalR.",
+                "title": "Reaparr-App-Protokolle",
                 "clear": "Leeren",
                 "search": "Logs durchsuchen",
                 "level-filter": "Level",
                 "visible-count": "Zeige {count} von {total} zwischengespeicherten Logs",
-                "security-note": "Nur für authentifizierte Administratoren sichtbar",
                 "empty": "Keine Live-Logs entsprechen den aktuellen Filtern.",
                 "sort": {
                     "oldest-first": "Älteste zuerst",
                     "newest-first": "Neueste zuerst"
                 },
-                "levels": {
-                    "debug": "Debug",
-                    "info": "Info",
-                    "warning": "Warnung",
-                    "error": "Fehler",
-                    "fatal": "Fatal"
-                },
                 "refresh": "",
                 "copy": "",
+                "copy-selected": "Ausgewählte kopieren ({count})",
+                "copy-all": "Alle Logs kopieren",
                 "pause-scroll": "",
-                "help-tooltip": "",
-                "copied-to-clipboard": "",
-                "help-title": "",
-                "help-text": ""
+                "copied-to-clipboard": ""
             },
             "ui": {
                 "confirmation-settings": {

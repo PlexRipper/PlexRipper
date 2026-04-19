@@ -11,7 +11,7 @@ public static class LogEventMapper
         {
             Sequence = Interlocked.Increment(ref _sequence),
             Timestamp = logEvent.Timestamp,
-            Severity = logEvent.Level.ToLogLevel(),
+            Level = logEvent.Level.ToLogLevel(),
             Message = logEvent.RenderMessage(CultureInfo.InvariantCulture),
             Exception = logEvent.Exception?.ToString(),
             SourceContext =

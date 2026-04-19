@@ -18,7 +18,7 @@ public class LiveLogEventDTO
     /// <summary>
     /// Serilog level name.
     /// </summary>
-    public required LogSeverity Severity { get; init; }
+    public required LogSeverity Level { get; init; }
 
     /// <summary>
     /// Rendered log message.

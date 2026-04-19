@@ -162,15 +162,18 @@
 										@click.stop="copyLogEntry(item)" />
 								</div>
 							</div>
-							<!-- eslint-disable-next-line vue/no-v-html -->
-							<pre
-								class="live-log-viewer__message"
-								v-html="highlightText(item.message)" />
-							<!-- eslint-disable-next-line vue/no-v-html -->
+							<pre class="live-log-viewer__message"><template
+								v-for="(segment, index) in highlightSegments(item.message)"
+								:key="`message-${item.sequence}-${index}`"><mark
+									v-if="segment.isMatch"
+							class="live-log-viewer__highlight">{{ segment.text }}</mark><template v-else>{{ segment.text }}</template></template></pre>
 							<pre
 								v-if="item.exception"
-								class="live-log-viewer__exception"
-								v-html="highlightText(item.exception)" />
+								class="live-log-viewer__exception"><template
+									v-for="(segment, index) in highlightSegments(item.exception)"
+									:key="`exception-${item.sequence}-${index}`"><mark
+										v-if="segment.isMatch"
+							class="live-log-viewer__highlight">{{ segment.text }}</mark><template v-else>{{ segment.text }}</template></template></pre>
 						</div>
 					</template>
 				</QVirtualScroll>
@@ -257,15 +260,6 @@ function levelLabel(level: LogSeverity): string {
 	}
 }
 
-function escapeHtml(text: string): string {
-	return text
-		.replace(/&/g, '&amp;')
-		.replace(/</g, '&lt;')
-		.replace(/>/g, '&gt;')
-		.replace(/"/g, '&quot;')
-		.replace(/'/g, '&#039;');
-}
-
 function levelColor(level: LogSeverity): string {
 	switch (level) {
 		case LogSeverity.Debug:
@@ -283,18 +277,39 @@ function levelColor(level: LogSeverity): string {
 	}
 }
 
-function highlightText(text: string): string {
+type HighlightSegment = {
+	text: string;
+	isMatch: boolean;
+};
+
+function highlightSegments(text: string): HighlightSegment[] {
 	const query = logsStore.searchText.trim();
-	const escaped = escapeHtml(text);
 	if (!query) {
-		return escaped;
+		return [{ text, isMatch: false }];
 	}
 
 	const escapedQuery = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-	return escaped.replace(
-		new RegExp(escapedQuery, 'gi'),
-		(match) => `<mark class="live-log-viewer__highlight">${match}</mark>`,
-	);
+	const regex = new RegExp(escapedQuery, 'gi');
+	const segments: HighlightSegment[] = [];
+	let currentIndex = 0;
+	let match = regex.exec(text);
+
+	while (match) {
+		const matchIndex = match.index;
+		if (matchIndex > currentIndex) {
+			segments.push({ text: text.slice(currentIndex, matchIndex), isMatch: false });
+		}
+
+		segments.push({ text: match[0], isMatch: true });
+		currentIndex = matchIndex + match[0].length;
+		match = regex.exec(text);
+	}
+
+	if (currentIndex < text.length) {
+		segments.push({ text: text.slice(currentIndex), isMatch: false });
+	}
+
+	return segments.length > 0 ? segments : [{ text, isMatch: false }];
 }
 
 function formatTimestamp(timestamp: string): string {

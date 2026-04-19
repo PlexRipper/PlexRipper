@@ -110,6 +110,7 @@
             "debug": "Debugowanie",
             "dialogs": "Dialogi",
             "downloads": "Pobrania",
+            "logs": "Logi",
             "paths": "Ścieżki",
             "settings": "Ustawienia",
             "ui": "UI",
@@ -905,6 +906,27 @@
                 },
                 "setup": {
                     "header": "Konfiguracja Reaparr"
+                }
+            },
+            "logs": {
+                "title": "Logi na żywo",
+                "subtitle": "Ładuje logi z pamięci podręcznej po odświeżeniu i przesyła nowe zdarzenia przez SignalR.",
+                "clear": "Wyczyść",
+                "search": "Szukaj w logach",
+                "level-filter": "Poziomy",
+                "visible-count": "Wyświetlanie {count} z {total} logów w pamięci podręcznej",
+                "security-note": "Widoczne tylko dla uwierzytelnionych administratorów",
+                "empty": "Żadne logi na żywo nie pasują do bieżących filtrów.",
+                "sort": {
+                    "oldest-first": "Najstarsze najpierw",
+                    "newest-first": "Najnowsze najpierw"
+                },
+                "levels": {
+                    "debug": "Debug",
+                    "info": "Info",
+                    "warning": "Ostrzeżenie",
+                    "error": "Błąd",
+                    "fatal": "Krytyczny"
                 }
             },
             "ui": {

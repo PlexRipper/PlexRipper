@@ -119,6 +119,7 @@
             "debug": "Debug",
             "dialogs": "Dialogs",
             "downloads": "Downloads",
+            "logs": "Logs",
             "paths": "Paths",
             "settings": "Settings",
             "ui": "UI",
@@ -914,6 +915,27 @@
                 },
                 "setup": {
                     "header": "Reaparr Setup"
+                }
+            },
+            "logs": {
+                "title": "Live logs",
+                "subtitle": "Loads cached logs on refresh and streams new events through SignalR.",
+                "clear": "Clear",
+                "search": "Search logs",
+                "level-filter": "Levels",
+                "visible-count": "Showing {count} of {total} cached logs",
+                "security-note": "Visible to authenticated admins only",
+                "empty": "No live logs match the current filters.",
+                "sort": {
+                    "oldest-first": "Oldest first",
+                    "newest-first": "Newest first"
+                },
+                "levels": {
+                    "debug": "Debug",
+                    "info": "Info",
+                    "warning": "Warning",
+                    "error": "Error",
+                    "fatal": "Fatal"
                 }
             },
             "ui": {

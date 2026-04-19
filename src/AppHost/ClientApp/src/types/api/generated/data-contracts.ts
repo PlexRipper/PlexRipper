@@ -587,6 +587,17 @@ export interface LibrarySyncProgressItemDTO {
   total: number;
 }
 
+export interface LiveLogEventDTO {
+  exception?: string | null;
+  level: string;
+  message: string;
+  /** @format int64 */
+  sequence: number;
+  sourceContext?: string | null;
+  /** @format date-time */
+  timestamp: string;
+}
+
 export enum MessageTypes {
   LibraryProgress = "LibraryProgress",
   DownloadTaskUpdate = "DownloadTaskUpdate",
@@ -598,6 +609,7 @@ export enum MessageTypes {
   JobStatusUpdate = "JobStatusUpdate",
   RefreshNotification = "RefreshNotification",
   AppUpdateDownloadProgress = "AppUpdateDownloadProgress",
+  LogEvent = "LogEvent",
 }
 
 export interface MoveDownloadFileJobUpdateDTO {
@@ -1133,6 +1145,15 @@ export interface ResultDTOOfListOfLibrarySyncJobQueueDTO {
   statusCode: number;
   successes: SuccessDTO[];
   value?: LibrarySyncJobQueueDTO[] | null;
+}
+
+export interface ResultDTOOfListOfLiveLogEventDTO {
+  errors: ErrorDTO[];
+  isSuccess: boolean;
+  /** @format int32 */
+  statusCode: number;
+  successes: SuccessDTO[];
+  value?: LiveLogEventDTO[] | null;
 }
 
 export interface ResultDTOOfListOfNotificationDTO {

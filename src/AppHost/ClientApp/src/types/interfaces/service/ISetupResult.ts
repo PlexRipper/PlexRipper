@@ -11,6 +11,7 @@ export enum StoreNames {
 	IntegrationStore = 'IntegrationStore',
 	LibraryStore = 'LibraryStore',
 	LocalizationStore = 'LocalizationStore',
+	LogsStore = 'LogsStore',
 	MediaStore = 'MediaStore',
 	NotificationsStore = 'NotificationsStore',
 	ServerConnectionStore = 'ServerConnection',

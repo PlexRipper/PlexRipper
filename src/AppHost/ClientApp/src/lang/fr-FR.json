@@ -110,6 +110,7 @@
             "debug": "Déboguer",
             "dialogs": "Dialogues",
             "downloads": "Téléchargements",
+            "logs": "Journaux",
             "paths": "Chemins",
             "settings": "Paramètres",
             "ui": "Interface utilisateur",
@@ -905,6 +906,27 @@
                 },
                 "setup": {
                     "header": "Reaparr Configuration"
+                }
+            },
+            "logs": {
+                "title": "Journaux en direct",
+                "subtitle": "Charge les journaux en cache au rafraîchissement et diffuse les nouveaux événements via SignalR.",
+                "clear": "Effacer",
+                "search": "Rechercher dans les journaux",
+                "level-filter": "Niveaux",
+                "visible-count": "Affichage de {count} journaux sur {total} en cache",
+                "security-note": "Visible uniquement pour les administrateurs authentifiés",
+                "empty": "Aucun journal en direct ne correspond aux filtres actuels.",
+                "sort": {
+                    "oldest-first": "Plus anciens d'abord",
+                    "newest-first": "Plus récents d'abord"
+                },
+                "levels": {
+                    "debug": "Débogage",
+                    "info": "Info",
+                    "warning": "Avertissement",
+                    "error": "Erreur",
+                    "fatal": "Fatal"
                 }
             },
             "ui": {

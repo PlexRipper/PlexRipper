@@ -16,6 +16,7 @@ import {
 	useHelpStore,
 	useIntegrationStore,
 	useLibraryStore,
+	useLogsStore,
 	useLocalizationStore,
 	useMediaStore,
 	useNotificationsStore,
@@ -85,6 +86,7 @@ export const useGlobalStore = defineStore(StoreNames.GlobalStore, () => {
 				useHelpStore().setup(),
 				useLibraryStore().setup(),
 				useLocalizationStore().setup(),
+				useLogsStore().setup(),
 				useMediaStore().setup(),
 				useNotificationsStore().setup(),
 				useServerConnectionStore().setup(),
@@ -119,6 +121,7 @@ export const useGlobalStore = defineStore(StoreNames.GlobalStore, () => {
 			useHelpStore().$reset();
 			useLibraryStore().$reset();
 			useLocalizationStore().$reset();
+			useLogsStore().$reset();
 			useMediaOverviewStore().$reset();
 			useMediaStore().$reset();
 			useNotificationsStore().$reset();

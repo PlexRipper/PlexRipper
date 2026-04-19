@@ -25,6 +25,7 @@ import type {
 	ServerConnectionCheckStatusProgressDTO,
 	ServerDownloadProgressDTO,
 	ServerDownloadProgressMessagePackDTO,
+	LiveLogEventDTO,
 } from '@dto';
 import { RefreshDataType, MessageTypes } from '@dto';
 import type { IRetryPolicy } from '@microsoft/signalr/src/IRetryPolicy';
@@ -37,6 +38,7 @@ export enum HubName
 	Progress = 'progress',
 	Download = 'download',
 	Notifications = 'notifications',
+	Logs = 'logs',
 }
 
 export const useSignalrStore = defineStore(StoreNames.SignalrStore, () => {
@@ -47,6 +49,7 @@ export const useSignalrStore = defineStore(StoreNames.SignalrStore, () => {
 		serverConnectionCheckStatusProgressSubject: Subject<ServerConnectionCheckStatusProgressDTO[]>;
 		refreshDataNotificationSubject: Subject<RefreshDataType>;
 		appUpdateDownloadProgressSubject: Subject<AppUpdateDownloadProgressDTO>;
+		logEventSubject: Subject<LiveLogEventDTO>;
 	}
 
 	const defaultState: ISignalRStoreState = {
@@ -57,6 +60,7 @@ export const useSignalrStore = defineStore(StoreNames.SignalrStore, () => {
 		serverConnectionCheckStatusProgressSubject: new Subject<ServerConnectionCheckStatusProgressDTO[]>(),
 		refreshDataNotificationSubject: new Subject<RefreshDataType>(),
 		appUpdateDownloadProgressSubject: new Subject<AppUpdateDownloadProgressDTO>(),
+		logEventSubject: new Subject<LiveLogEventDTO>(),
 	};
 
 	const state = reactive<ISignalRStoreState>(cloneDeep(defaultState));
@@ -65,6 +69,7 @@ export const useSignalrStore = defineStore(StoreNames.SignalrStore, () => {
 	let progressHubConnection: HubConnection | null;
 	let downloadHubConnection: HubConnection | null;
 	let notificationHubConnection: HubConnection | null;
+	let logHubConnection: HubConnection | null;
 
 	const actions = {
 		setup(): Observable<ISetupResult> {
@@ -108,9 +113,15 @@ export const useSignalrStore = defineStore(StoreNames.SignalrStore, () => {
 					.withAutomaticReconnect(retryPolicy)
 					.build();
 
+				logHubConnection = useCypressSignalRMock(HubName.Logs, { enableForVitest: true }) ?? new HubConnectionBuilder()
+					.configureLogging(LogLevel.None)
+					.withUrl(`${baseApiUrl}/logs`, options)
+					.withAutomaticReconnect(retryPolicy)
+					.build();
+
 				setupSubscriptions();
 
-				await Promise.all([startDownloadHubConnection(), startProgressHubConnection(), startNotificationHubConnection()]);
+				await Promise.all([startDownloadHubConnection(), startProgressHubConnection(), startNotificationHubConnection(), startLogHubConnection()]);
 			})()).pipe(
 				switchMap(() => of({ name: StoreNames.SignalrStore, isSuccess: true })),
 				catchError((error) => {
@@ -137,6 +148,8 @@ export const useSignalrStore = defineStore(StoreNames.SignalrStore, () => {
 		const backgroundStore = useBackgroundJobsStore();
 		const notificationsStore = useNotificationsStore();
 		const libraryStore = useLibraryStore();
+
+		logHubConnection?.on('LogEvent', (data: LiveLogEventDTO) => state.logEventSubject.next(data));
 
 		downloadHubConnection?.on(MessageTypes.ServerDownloadProgress, (rawData: ServerDownloadProgressMessagePackDTO | ServerDownloadProgressMessagePackTuple) => {
 			Log.debug(rawData);
@@ -253,6 +266,13 @@ export const useSignalrStore = defineStore(StoreNames.SignalrStore, () => {
 		Log.info('NotificationHub connected');
 	}
 
+	async function startLogHubConnection() {
+		if (!logHubConnection || logHubConnection.state !== HubConnectionState.Disconnected) return;
+
+		await logHubConnection.start();
+		Log.info('LogHub connected');
+	}
+
 	// endregion
 
 	const getters = {
@@ -269,6 +289,9 @@ export const useSignalrStore = defineStore(StoreNames.SignalrStore, () => {
 		},
 		getAppUpdateDownloadProgress(): Observable<AppUpdateDownloadProgressDTO> {
 			return state.appUpdateDownloadProgressSubject.asObservable();
+		},
+		getLogEvents(): Observable<LiveLogEventDTO> {
+			return state.logEventSubject.asObservable();
 		},
 		// endregion
 	};

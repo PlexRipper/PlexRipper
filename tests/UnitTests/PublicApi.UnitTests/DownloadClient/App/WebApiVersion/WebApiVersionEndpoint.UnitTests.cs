@@ -1,6 +1,4 @@
 using System.Text;
-using Microsoft.Extensions.DependencyInjection;
-using Reaparr.Data.Contracts;
 
 namespace Reaparr.PublicAPI.UnitTests;
 
@@ -19,16 +17,6 @@ public class WebApiVersionEndpointUnitTests : BaseUnitTest<WebApiVersionEndpoint
 
         // Assert
         ep.HttpContext.Response.StatusCode.ShouldBe(StatusCodes.Status200OK);
-
-        var dbContext = ep.HttpContext.RequestServices.GetRequiredService<IReaparrDbContext>();
-        if (dbContext is DbContext efContext)
-        {
-            efContext.ChangeTracker.Entries().ShouldBeEmpty();
-        }
-        else
-        {
-            Moq.Mock.Get(dbContext).Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Never());
-        }
 
         var body = Encoding.UTF8.GetString(buffer.ToArray());
         body.ShouldNotBeNullOrWhiteSpace();

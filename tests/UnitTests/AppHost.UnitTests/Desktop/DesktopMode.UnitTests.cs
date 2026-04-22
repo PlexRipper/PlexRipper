@@ -236,8 +236,9 @@ public class DesktopModeUnitTests : BaseUnitTest<DesktopMode>
 
     private DesktopMode CreateSut(IServer server, Func<Uri, IDesktopWindow> windowFactory) =>
         Mock.Create<DesktopMode>(
+            new TypedParameter(typeof(ILogger), Log),
             new TypedParameter(typeof(IServer), server),
-            new TypedParameter(typeof(IDesktopWindowFactory), new FakeDesktopWindowFactory(windowFactory))
+            new TypedParameter(typeof(Func<Uri, IDesktopWindow>), windowFactory)
         );
 
     private static IServer CreateServer(string? address)
@@ -261,28 +262,23 @@ public class DesktopModeUnitTests : BaseUnitTest<DesktopMode>
             await Task.Delay(TimeSpan.FromMilliseconds(10), cancellationTokenSource.Token);
     }
 
-    private sealed class FakeDesktopWindowFactory : IDesktopWindowFactory
+    private sealed class FakeDesktopWindowFactory
     {
-        private readonly Func<Uri, IDesktopWindow> _createWindow;
+        private readonly FakeDesktopWindow _window;
 
         public FakeDesktopWindowFactory(FakeDesktopWindow window)
         {
-            _createWindow = uri =>
-            {
-                CreateCalls++;
-                window.LoadedUri = uri;
-                return window;
-            };
-        }
-
-        public FakeDesktopWindowFactory(Func<Uri, IDesktopWindow> createWindow)
-        {
-            _createWindow = createWindow;
+            _window = window;
         }
 
         public int CreateCalls { get; private set; }
 
-        public IDesktopWindow Create(Uri uri) => _createWindow(uri);
+        public IDesktopWindow Create(Uri uri)
+        {
+            CreateCalls++;
+            _window.LoadedUri = uri;
+            return _window;
+        }
     }
 
     private sealed class FakeDesktopWindow : IDesktopWindow

@@ -17,8 +17,7 @@ public class AppHostModule : Module
             .RegisterType<DesktopSingleInstanceCoordinator>()
             .As<IDesktopSingleInstanceCoordinator>()
             .SingleInstance();
-        builder.RegisterType<DesktopWindow>().As<IDesktopWindow>();
-        builder.RegisterType<PhotinoDesktopWindowFactory>().As<IDesktopWindowFactory>();
+        builder.RegisterType<DesktopWindow>().As<IDesktopWindow>().InstancePerDependency();
         builder.RegisterType<DesktopMode>().As<IDesktopMode>().SingleInstance();
     }
 }

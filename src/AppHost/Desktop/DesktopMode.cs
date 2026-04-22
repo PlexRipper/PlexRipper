@@ -8,14 +8,14 @@ public class DesktopMode : IDesktopMode
 {
     private readonly Serilog.ILogger _log;
     private readonly IServer _server;
-    private readonly IDesktopWindowFactory _windowFactory;
+    private readonly Func<Uri, IDesktopWindow> _windowFactory;
     private readonly TaskCompletionSource _exitCompletion = new(TaskCreationOptions.RunContinuationsAsynchronously);
 
     private IDesktopWindow? _window;
     private bool _isExiting;
 
     /// <summary>Initializes a new instance of <see cref="DesktopMode"/>.</summary>
-    public DesktopMode(Serilog.ILogger log, IServer server, IDesktopWindowFactory windowFactory)
+    public DesktopMode(Serilog.ILogger log, IServer server, Func<Uri, IDesktopWindow> windowFactory)
     {
         _log = log.ForContext<DesktopMode>();
         _server = server;
@@ -54,7 +54,7 @@ public class DesktopMode : IDesktopMode
         if (uriResult.IsFailed)
             return Task.FromResult(uriResult.ToResult());
 
-        _window = _windowFactory.Create(uriResult.Value);
+        _window = _windowFactory(uriResult.Value);
         _window.ConfigureWindow();
         _window.RegisterWindowClosingHandler(OnWindowClosing);
 
@@ -120,18 +120,4 @@ public class DesktopMode : IDesktopMode
             ? Result.Fail("Desktop mode could not determine the server address for the embedded window.")
             : Result.Ok(new Uri(serverAddress));
     }
-}
-
-/// <summary>Creates desktop windows for desktop mode.</summary>
-public interface IDesktopWindowFactory
-{
-    /// <summary>Creates a desktop window for the given URI.</summary>
-    IDesktopWindow Create(Uri uri);
-}
-
-/// <summary>Creates Photino-backed desktop windows.</summary>
-public class PhotinoDesktopWindowFactory : IDesktopWindowFactory
-{
-    /// <inheritdoc />
-    public IDesktopWindow Create(Uri uri) => new DesktopWindow(uri);
 }

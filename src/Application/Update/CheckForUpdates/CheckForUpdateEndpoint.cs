@@ -1,7 +1,7 @@
 namespace Reaparr.Application;
 
 /// <summary>
-/// Queues a one-shot <see cref="CheckForUpdateJob"/> to check for a Velopack application update.
+/// Sends a <see cref="CheckForUpdatesCommand"/> immediately to check for a Velopack application update.
 /// </summary>
 public class CheckForUpdateEndpoint : BaseEndpointWithoutRequest<AppUpdateCheckDTO>
 {

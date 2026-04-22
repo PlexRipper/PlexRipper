@@ -57,7 +57,7 @@ public static class JobExecutionContextExtensions
             case JobTypes.LibrarySyncJob:
                 break;
 
-            // TODO ensure this converts to a JobUpdate
+            // NOTE: CheckForUpdateJob emits update availability through RefreshDataType.UpdateAvailable notifications.
             case JobTypes.CheckForUpdateJob:
                 break;
 

@@ -1,5 +1,4 @@
 using System.Security.Claims;
-using Microsoft.AspNetCore.Authentication;
 
 namespace Reaparr.AppHost;
 
@@ -9,15 +8,12 @@ namespace Reaparr.AppHost;
 /// </summary>
 public sealed class DisableAuthenticationMiddleware(RequestDelegate next)
 {
-    private static readonly ClaimsPrincipal _adminPrincipal = CreateAdminPrincipal();
-
     /// <summary>
     /// Injects a synthetic Admin principal for every request, bypassing all authentication.
     /// </summary>
     public async Task InvokeAsync(HttpContext context)
     {
-        context.User = _adminPrincipal;
-        await context.SignInAsync(_adminPrincipal);
+        context.User = CreateAdminPrincipal();
 
         await next(context);
     }

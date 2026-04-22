@@ -28,4 +28,23 @@ public class CheckForUpdateJobUnitTests : BaseUnitTest<CheckForUpdateJob>
         Mock.Mock<ICommandExecutor>()
             .Verify(x => x.Send(It.IsAny<CheckForUpdatesCommand>(), CancellationToken), Times.Once());
     }
+
+    [Test]
+    public async Task ShouldSwallowException_WhenCommandExecutorThrows()
+    {
+        // Arrange
+        var context = SetupJobContext();
+
+        Mock.Mock<ICommandExecutor>()
+            .Setup(x => x.Send(It.IsAny<CheckForUpdatesCommand>(), CancellationToken))
+            .ThrowsAsync(new InvalidOperationException("Update check failed"))
+            .Verifiable(Times.Once());
+
+        // Act
+        await Should.NotThrowAsync(() => Sut.Execute(context));
+
+        // Assert
+        Mock.Mock<ICommandExecutor>()
+            .Verify(x => x.Send(It.IsAny<CheckForUpdatesCommand>(), CancellationToken), Times.Once());
+    }
 }

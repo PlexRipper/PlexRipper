@@ -78,8 +78,7 @@ public class DownloadUpdateEndpointUnitTests : BaseUnitTest<DownloadUpdateEndpoi
         var updateInfo = new UpdateInfo(asset, false, null!, null!);
 
         var capturedDtos = new List<AppUpdateDownloadProgressDTO>();
-        Action<int>? capturedCallback = null;
-
+        var progressSent = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
         var mockSource = new Mock<IUpdateSource>();
         var mockLocator = new Mock<IVelopackLocator>();
         var mockManager = new Mock<UpdateManager>(mockSource.Object, null!, mockLocator.Object);
@@ -91,7 +90,6 @@ public class DownloadUpdateEndpointUnitTests : BaseUnitTest<DownloadUpdateEndpoi
             .Callback<UpdateInfo, Action<int>?, CancellationToken>(
                 (_, cb, ct) =>
                 {
-                    capturedCallback = cb;
                     cb?.Invoke(50);
                     cb?.Invoke(100);
                 }
@@ -105,13 +103,21 @@ public class DownloadUpdateEndpointUnitTests : BaseUnitTest<DownloadUpdateEndpoi
                     It.IsAny<CancellationToken>()
                 )
             )
-            .Callback<AppUpdateDownloadProgressDTO, CancellationToken>((dto, _) => capturedDtos.Add(dto))
+            .Callback<AppUpdateDownloadProgressDTO, CancellationToken>(
+                (dto, _) =>
+                {
+                    capturedDtos.Add(dto);
+                    if (capturedDtos.Count == 2)
+                        progressSent.TrySetResult();
+                }
+            )
             .Returns(Task.CompletedTask)
             .Verifiable(Times.Exactly(2));
 
         // Act
         var endpoint = SetupEndpointUnitTest<DownloadUpdateEndpoint>(s => s.AddSingleton(_ => mockManager.Object));
         await endpoint.HandleAsync(CancellationToken);
+        await progressSent.Task.WaitAsync(TimeSpan.FromSeconds(5), CancellationToken);
 
         // Assert
         endpoint.Response.ShouldNotBeNull();

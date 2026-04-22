@@ -5,7 +5,7 @@ public static class ReleaseNoteMapper
     /// <summary>
     /// Maps a GitHub release DTO to a release note.
     /// </summary>
-    public static ReleaseNote ToReleaseNotes(this GitHubReleaseDTO source) =>
+    public static ReleaseNote ToReleaseNote(this GitHubReleaseDTO source) =>
         new()
         {
             Version = source.TagName,
@@ -15,5 +15,5 @@ public static class ReleaseNoteMapper
         };
 
     public static IReadOnlyList<ReleaseNote> ToReleaseNotes(this IReadOnlyList<GitHubReleaseDTO> source) =>
-        source.Select(x => x.ToReleaseNotes()).ToList();
+        source.Select(x => x.ToReleaseNote()).ToList();
 }

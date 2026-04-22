@@ -29,13 +29,13 @@ internal sealed class NSwagGlobalHeaders : IOperationProcessor
             response.Headers["X-Reaparr-Platform"] = new OpenApiHeader
             {
                 Kind = OpenApiParameterKind.Header,
-                Example = "Docker",
+                Example = "docker",
                 IsRequired = true,
                 Description = "Current Reaparr platform",
                 Schema = new JsonSchema
                 {
                     Type = JsonObjectType.String,
-                    Example = "Docker",
+                    Example = "docker",
                     Description = "Current Reaparr platform",
                 },
             };

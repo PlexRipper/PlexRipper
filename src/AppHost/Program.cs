@@ -26,7 +26,7 @@ public class Program
             if (!EnvironmentExtensions.IsIntegrationTestMode())
                 LogFactory.SetupLogging(EnvironmentExtensions.GetLogLevel(), signalRLogConfig);
 
-            // Must be first: handles installer hooks (install, uninstall, update) and exits early when invoked by the Velopack installer.
+            // Must be first after logging: handles installer hooks (install, uninstall, update) and exits early when invoked by the Velopack installer.
             VelopackApp.Build().Run();
 
             FluentResultConfiguration.Setup();
@@ -49,7 +49,8 @@ public class Program
             builder.Services.ConfigureServices(builder.Environment);
             var app = builder.Build();
 
-            signalRLogConfig.AttachSignalR(app);
+            if (!EnvironmentExtensions.IsIntegrationTestMode())
+                signalRLogConfig.AttachSignalR(app);
 
             var configResult = app.SetupConfigFile();
             if (configResult.IsFailed)
@@ -69,7 +70,7 @@ public class Program
 
             app.ConfigureApplication(app.Environment);
 
-            if (EnvironmentExtensions.IsDesktopMode())
+            if (EnvironmentExtensions.IsDesktopMode() && !EnvironmentExtensions.IsIntegrationTestMode())
             {
                 var desktopLifecycleResult = await RunDesktopLifecycleAsync(app);
                 if (desktopLifecycleResult.IsFailed)

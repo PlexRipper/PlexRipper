@@ -53,7 +53,7 @@ public class DownloadUpdateEndpoint : BaseEndpointWithoutRequest
                 progress =>
                 {
                     var dto = new AppUpdateDownloadProgressDTO(progress);
-                    _progressHub.SendAppUpdateDownloadProgressAsync(dto, ct).GetAwaiter().GetResult();
+                    _ = _progressHub.SendAppUpdateDownloadProgressAsync(dto, ct);
                 },
                 ct
             );

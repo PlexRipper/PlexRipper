@@ -6,7 +6,7 @@ namespace Reaparr.SignalR;
 /// SignalR hub for live log streaming.
 /// </summary>
 [Authorize(Policy = "AuthenticatedUsers")]
-public class LogHub : Hub<ILogHub>, ILogHub
+public class LogHub : Hub<ILogHub>
 {
     private readonly ILogger _log;
 
@@ -42,11 +42,5 @@ public class LogHub : Hub<ILogHub>, ILogHub
         }
 
         return base.OnDisconnectedAsync(exception);
-    }
-
-    /// <inheritdoc/>
-    public async Task LogEvent(LiveLogEventDTO logEvent, CancellationToken cancellationToken = default)
-    {
-        await Clients.All.LogEvent(logEvent, cancellationToken);
     }
 }

@@ -98,17 +98,16 @@ public class LogConfig
         LogEventLevel minimumLogLevel = LogEventLevel.Debug
     ) =>
         GetBaseConfiguration()
-            .WriteTo.Seq(EnvironmentExtensions.GetSeqUrl())
+            .WriteTo.Seq(EnvironmentExtensions.GetSeqUrl(), restrictedToMinimumLevel: minimumLogLevel)
             .WriteTo.File(
                 FileTemplate,
                 Path.Combine(PathProvider.LogsDirectory, "log.txt"),
-                minimumLogLevel,
+                restrictedToMinimumLevel: minimumLogLevel,
                 rollingInterval: RollingInterval.Day,
                 rollOnFileSizeLimit: true,
                 retainedFileCountLimit: 7
-            )
-            .MinimumLevel.Is(minimumLogLevel);
+            );
 
     public virtual Logger GetLogger(LogEventLevel minimumLogLevel = LogEventLevel.Debug) =>
-        GetExtendedConfiguration().CreateLogger();
+        GetExtendedConfiguration(minimumLogLevel).CreateLogger();
 }

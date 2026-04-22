@@ -49,16 +49,7 @@ public class ApplyUpdateEndpointUnitTests : BaseUnitTest<ApplyUpdateEndpoint>
 
         // Act
         var endpoint = SetupEndpointUnitTest<ApplyUpdateEndpoint>(s => s.AddSingleton(_ => mockManager.Object));
-        try
-        {
-            await endpoint.HandleAsync(CancellationToken);
-        }
-        catch
-        {
-            // ApplyUpdatesAndRestart is non-virtual and will throw in a unit test environment.
-            // The response is set to Ok before the call, so we assert it below.
-        }
-
+        await endpoint.HandleAsync(CancellationToken);
         var result = endpoint.Response;
 
         // Assert

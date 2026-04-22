@@ -200,13 +200,14 @@ public static class EnvironmentExtensions
     /// </summary>
     internal static IDisposable WithOverrides(IReadOnlyDictionary<string, string?> overrides)
     {
+        var previous = _testOverrides.Value;
         _testOverrides.Value = overrides;
-        return new OverrideScope();
+        return new OverrideScope(previous);
     }
 
-    private sealed class OverrideScope : IDisposable
+    private sealed class OverrideScope(IReadOnlyDictionary<string, string?>? previous) : IDisposable
     {
-        public void Dispose() => _testOverrides.Value = null;
+        public void Dispose() => _testOverrides.Value = previous;
     }
 
     private static string? GetEnvironmentVariable(string key)

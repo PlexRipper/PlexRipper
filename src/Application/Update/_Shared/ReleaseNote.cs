@@ -11,7 +11,7 @@ public sealed record ReleaseNote
     public required string Version { get; init; }
 
     /// <summary>
-    /// Markdown-formatted release notes, or <c>null</c> when not provided.
+    /// Markdown-formatted release notes; empty string when not provided.
     /// </summary>
     public required string Notes { get; init; }
 

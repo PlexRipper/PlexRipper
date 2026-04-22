@@ -16,7 +16,7 @@ public class LiveLogEventDTO
     public required DateTimeOffset Timestamp { get; init; }
 
     /// <summary>
-    /// Serilog level name.
+    /// LogSeverity value representing the log level.
     /// </summary>
     public required LogSeverity Level { get; init; }
 

@@ -66,15 +66,12 @@ public class CheckForUpdatesCommandHandler : ICommandHandler<CheckForUpdatesComm
         var isDevRelease = EnvironmentExtensions.IsDevRelease();
         var latest = releases.FirstOrDefault(r => r.IsDevRelease == isDevRelease);
         if (latest is null)
-            return Result.Ok(AppUpdateCheckResult.NoUpdate());
-
-        var latestVersion = latest.Version.TrimStart('v');
-
-        if (!releases.Any())
         {
             _log.Here().Information("No update available");
             return Result.Ok(AppUpdateCheckResult.NoUpdate());
         }
+
+        var latestVersion = latest.Version.TrimStart('v');
 
         _log.Here().Information("Update available: {Version}", latestVersion);
 

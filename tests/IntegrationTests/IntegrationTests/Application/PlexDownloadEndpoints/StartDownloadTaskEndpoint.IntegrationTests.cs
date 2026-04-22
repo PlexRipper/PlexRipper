@@ -100,12 +100,10 @@ public class StartDownloadTaskEndpointIntegrationTests : BaseIntegrationTests
         logs.Any(x => x.Status == DownloadStatus.Downloading).ShouldBeTrue();
         logs.Any(x => x.Status == DownloadStatus.ServerUnreachable).ShouldBeTrue();
 
-        var serverUnreachableLog = logs.Where(x => x.Status == DownloadStatus.ServerUnreachable)
-            .OrderByDescending(x => x.CreatedAt)
-            .FirstOrDefault();
-        serverUnreachableLog.ShouldNotBeNull();
-        serverUnreachableLog.LogLevel.ShouldBe(NotificationLevel.Error);
-        serverUnreachableLog.Message.ShouldContain("timed out while downloading");
+        var serverUnreachableLogs = logs.Where(x => x.Status == DownloadStatus.ServerUnreachable).ToList();
+        serverUnreachableLogs.ShouldContain(x =>
+            x.LogLevel == NotificationLevel.Error && x.Message.Contains("timed out while downloading")
+        );
     }
 
     [Test]

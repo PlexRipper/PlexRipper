@@ -21,7 +21,7 @@ public sealed record GitHubReleaseDTO
     public string? ZipballUrl { get; init; }
 
     [JsonPropertyName("id")]
-    public int Id { get; init; }
+    public long Id { get; init; }
 
     [JsonPropertyName("node_id")]
     public string NodeId { get; init; } = string.Empty;
@@ -156,7 +156,7 @@ public sealed record GitHubReleaseAsset
     public string BrowserDownloadUrl { get; init; } = string.Empty;
 
     [JsonPropertyName("id")]
-    public int Id { get; init; }
+    public long Id { get; init; }
 
     [JsonPropertyName("node_id")]
     public string NodeId { get; init; } = string.Empty;
@@ -174,7 +174,7 @@ public sealed record GitHubReleaseAsset
     public string ContentType { get; init; } = string.Empty;
 
     [JsonPropertyName("size")]
-    public int Size { get; init; }
+    public long Size { get; init; }
 
     [JsonPropertyName("digest")]
     public string? Digest { get; init; }

@@ -51,7 +51,7 @@ public static partial class Startup
 
         services.AddHttpContextAccessor();
 
-        services.ConfigureAuthenticationServices();
+        services.ConfigureAuthenticationServices(env);
 
         // Set up FastEndpoints
         services.AddFastEndpoints(options =>
@@ -206,7 +206,7 @@ public static partial class Startup
         services.RemoveAll<IHttpMessageHandlerBuilderFilter>();
     }
 
-    private static void ConfigureAuthenticationServices(this IServiceCollection services)
+    private static void ConfigureAuthenticationServices(this IServiceCollection services, IWebHostEnvironment env)
     {
         services.AddDataProtection().PersistKeysToDbContext<AuthDbContext>();
 
@@ -214,9 +214,9 @@ public static partial class Startup
         {
             options.AddPolicy("AuthenticatedUsers", x => x.RequireRole("Admin"));
 
-            // Set a default policy that requires authentication
-            // When authentication is disabled for development, allow all requests through
-            if (!EnvironmentExtensions.IsAuthenticationDisabled())
+            // Set a default policy that requires authentication.
+            // Only development may intentionally bypass the fallback policy.
+            if (!(env.IsDevelopment() && EnvironmentExtensions.IsAuthenticationDisabled()))
                 options.FallbackPolicy = new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build();
         });
 

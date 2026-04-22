@@ -8,7 +8,7 @@ public record AppUpdateCheckDTO
     public required bool IsUpdateAvailable { get; init; }
 
     /// <summary>
-    /// The latest available version when an update exists; otherwise <c>null</c>.
+    /// The latest available version when an update exists; otherwise the current version.
     /// </summary>
     public required string NewestVersion { get; init; }
 
@@ -35,7 +35,7 @@ public sealed record ReleaseNoteDTO
     public required string Version { get; init; }
 
     /// <summary>
-    /// Markdown-formatted release notes, or <c>null</c> when not provided.
+    /// Markdown-formatted release notes; empty string when not provided.
     /// </summary>
     public required string Notes { get; init; }
 

@@ -30,7 +30,7 @@ public interface IProgressHub
     Task LibraryProgress(LibrarySyncProgressDTO libraryProgress, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Sends an Reaparr update download progress update to the front-end.
+    /// Sends a Reaparr update download progress update to the front-end.
     /// </summary>
     /// <param name="appUpdateDownloadProgress"></param>
     /// <param name="cancellationToken"> The <see cref="CancellationToken"/> to use.</param>

@@ -6,17 +6,24 @@ public static class LogEventMapper
 {
     private static long _sequence;
 
-    public static LiveLogEventDTO ToLiveLogEvent(this LogEvent logEvent) =>
-        new()
+    public static LiveLogEventDTO ToLiveLogEvent(this LogEvent logEvent)
+    {
+        var fileName = logEvent.GetStringProperty(LogConfig.FileName);
+        var lineNumber = logEvent.GetIntProperty(LogConfig.LineNumber);
+        var methodName = logEvent.GetStringProperty(LogConfig.MethodName);
+        var hasSourceContext =
+            !string.IsNullOrWhiteSpace(fileName) || lineNumber != 0 || !string.IsNullOrWhiteSpace(methodName);
+
+        return new LiveLogEventDTO
         {
             Sequence = Interlocked.Increment(ref _sequence),
             Timestamp = logEvent.Timestamp,
             Level = logEvent.Level.ToLogLevel(),
             Message = logEvent.RenderMessage(CultureInfo.InvariantCulture),
             Exception = logEvent.Exception?.ToString(),
-            SourceContext =
-                $"{logEvent.GetStringProperty(LogConfig.FileName)}:{logEvent.GetIntProperty(LogConfig.LineNumber)}.{logEvent.GetStringProperty(LogConfig.MethodName)}()",
+            SourceContext = hasSourceContext ? $"{fileName}:{lineNumber}.{methodName}()" : null,
         };
+    }
 
     public static LogSeverity ToLogLevel(this LogEventLevel source)
     {

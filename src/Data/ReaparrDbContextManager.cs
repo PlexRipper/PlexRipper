@@ -162,8 +162,17 @@ public class ReaparrDbContextManager : IReaparrDbContextManager
         try
         {
             // Create the database while applying any pending migrations.
-            _reaparrDbContextDatabase.Migrate();
-            _authDbContextDatabase.Migrate();
+            var reaparrMigrateResult = _reaparrDbContextDatabase.Migrate();
+            var authMigrateResult = _authDbContextDatabase.Migrate();
+
+            if (reaparrMigrateResult.IsFailed || authMigrateResult.IsFailed)
+            {
+                _log.Here().Error("Failed to create the database because one or more migrations failed");
+                reaparrMigrateResult.LogError();
+                authMigrateResult.LogError();
+
+                return Result.Merge(reaparrMigrateResult, authMigrateResult).LogError();
+            }
 
             _log.Here().Information("The new database was successfully created at: {DatabasePath}", DatabasePath);
             return Result.Ok();

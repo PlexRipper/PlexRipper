@@ -40,7 +40,7 @@ public sealed record AppUpdateCheckResult
     public required bool IsUpdateAvailable { get; init; }
 
     /// <summary>
-    /// The latest available version when an update exists; otherwise <c>null</c>.
+    /// The latest available version when an update exists; otherwise the current version.
     /// </summary>
     public required string NewestVersion { get; init; }
 

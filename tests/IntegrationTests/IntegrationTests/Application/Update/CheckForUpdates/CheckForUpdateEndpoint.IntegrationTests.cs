@@ -155,13 +155,7 @@ public class CheckForUpdateEndpointIntegrationTests : BaseIntegrationTests
     public async Task ShouldReturnUpdateAvailable_WhenDesktopModeAndCommandExecutorReturnsUpdate()
     {
         // Arrange
-        using var environmentOverride = OverrideEnvironmentVariables(
-            new Dictionary<string, string?>
-            {
-                [EnvKeys.ReaparrPlatform] = "desktop",
-                [EnvKeys.InformationalVersion] = "0.38.0",
-            }
-        );
+        using var environmentOverride = CreateEnvironmentOverride("desktop", "0.38.0");
         var seed = new Seed(11004);
         var updateResult = AppUpdateCheckResult.UpdateAvailable(
             "9.9.9",
@@ -217,13 +211,7 @@ public class CheckForUpdateEndpointIntegrationTests : BaseIntegrationTests
     public async Task ShouldReturnNoUpdate_WhenDesktopModeAndCommandExecutorReturnsNoUpdate()
     {
         // Arrange
-        using var environmentOverride = OverrideEnvironmentVariables(
-            new Dictionary<string, string?>
-            {
-                [EnvKeys.ReaparrPlatform] = "desktop",
-                [EnvKeys.InformationalVersion] = "0.38.0",
-            }
-        );
+        using var environmentOverride = CreateEnvironmentOverride("desktop", "0.38.0");
         var seed = new Seed(11005);
 
         using var container = await CreateContainer(

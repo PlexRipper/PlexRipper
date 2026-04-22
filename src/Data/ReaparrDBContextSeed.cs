@@ -3,7 +3,7 @@ namespace Reaparr.Data;
 // ReSharper disable once InconsistentNaming
 public static class ReaparrDBContextSeed
 {
-    private static ILogger _log = Log.ForContext(typeof(ReaparrDBContextSeed));
+    private static readonly ILogger _log = Log.ForContext(typeof(ReaparrDBContextSeed));
 
     public static List<FolderPath> GetDefaultFolderPaths()
     {
@@ -137,7 +137,7 @@ public static class ReaparrDBContextSeed
                         path.Id,
                         path.DirectoryPath
                     );
-                await db.FolderPaths.AddAsync(path, cancellationToken);
+                db.FolderPaths.Add(path);
             }
 
             await db.SaveChangesAsync(cancellationToken);

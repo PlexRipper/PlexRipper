@@ -36,9 +36,19 @@ public class ApplyUpdateEndpoint : BaseEndpointWithoutRequest
             return;
         }
 
-        await SendFluentResult(Result.Ok(), ct);
-
         var asset = _velopackManager.UpdatePendingRestart;
-        _velopackManager.ApplyUpdatesAndRestart(asset, []);
+        if (asset is null)
+        {
+            await SendFluentResult(Result.Fail("No update staged"), ct);
+            return;
+        }
+
+        HttpContext.Response.OnCompleted(() =>
+        {
+            _velopackManager.ApplyUpdatesAndRestart(asset, []);
+            return Task.CompletedTask;
+        });
+
+        await SendFluentResult(Result.Ok(), ct);
     }
 }

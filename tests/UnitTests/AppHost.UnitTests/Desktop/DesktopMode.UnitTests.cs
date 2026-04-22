@@ -1,0 +1,336 @@
+using Autofac;
+using Microsoft.AspNetCore.Hosting.Server;
+using Microsoft.AspNetCore.Hosting.Server.Features;
+using Microsoft.AspNetCore.Http.Features;
+using Reaparr.Environment;
+
+namespace Reaparr.AppHost.UnitTests;
+
+public class DesktopModeUnitTests : BaseUnitTest<DesktopMode>
+{
+    [Test]
+    public async Task ShouldReturnFailure_WhenServerAddressIsMissingInProduction()
+    {
+        // Arrange
+        using var _ = WithEnvironmentVariablesAsync(
+            new Dictionary<string, string?>
+            {
+                [EnvKeys.ReaparrPlatform] = "desktop",
+                [EnvKeys.DotNetEnvironment] = "Production",
+            }
+        );
+
+        var windowFactory = new FakeDesktopWindowFactory(new FakeDesktopWindow());
+        var server = CreateServer(null);
+        var sut = CreateSut(server, windowFactory.Create);
+
+        // Act
+        var result = await sut.StartAsync(CancellationToken);
+
+        // Assert
+        result.IsFailed.ShouldBeTrue();
+        result.Errors.ShouldContain(x =>
+            x.Message.Contains("could not determine the server address", StringComparison.OrdinalIgnoreCase)
+        );
+        windowFactory.CreateCalls.ShouldBe(0);
+    }
+
+    [Test]
+    public async Task ShouldSkipWindowCreation_WhenIntegrationTestModeIsEnabled()
+    {
+        // Arrange
+        using var _ = WithEnvironmentVariablesAsync(
+            new Dictionary<string, string?>
+            {
+                [EnvKeys.ReaparrPlatform] = "desktop",
+                [EnvKeys.IntegrationTestMode] = "true",
+            }
+        );
+
+        var windowFactory = new FakeDesktopWindowFactory(new FakeDesktopWindow());
+        var server = CreateServer("http://localhost:5000");
+        var sut = CreateSut(server, windowFactory.Create);
+
+        // Act
+        var startResult = await sut.StartAsync(CancellationToken);
+        var showResult = await sut.ShowMainWindowAsync(CancellationToken);
+
+        // Assert
+        startResult.IsSuccess.ShouldBeTrue();
+        showResult.IsSuccess.ShouldBeTrue();
+        windowFactory.CreateCalls.ShouldBe(0);
+    }
+
+    [Test]
+    public async Task ShouldKeepDesktopRuntimeAlive_WhenMainWindowIsClosed()
+    {
+        // Arrange
+        using var _ = WithEnvironmentVariablesAsync(
+            new Dictionary<string, string?>
+            {
+                [EnvKeys.ReaparrPlatform] = "desktop",
+                [EnvKeys.DotNetEnvironment] = "Production",
+            }
+        );
+
+        var window = new FakeDesktopWindow();
+        var windowFactory = new FakeDesktopWindowFactory(window);
+        var server = CreateServer("http://localhost:5000");
+        var sut = CreateSut(server, windowFactory.Create);
+
+        await sut.StartAsync(CancellationToken);
+        var waitForExitTask = sut.WaitForExitAsync(CancellationToken);
+
+        // Act
+        var result = await sut.CloseMainWindowAsync(CancellationToken);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        waitForExitTask.IsCompleted.ShouldBeFalse();
+        window.IsClosedToBackground.ShouldBeTrue();
+    }
+
+    [Test]
+    public async Task ShouldStartWindowMessageLoop_WhenWaitingForExit()
+    {
+        // Arrange
+        using var _ = WithEnvironmentVariablesAsync(
+            new Dictionary<string, string?>
+            {
+                [EnvKeys.ReaparrPlatform] = "desktop",
+                [EnvKeys.DotNetEnvironment] = "Production",
+            }
+        );
+
+        var window = new FakeDesktopWindow();
+        var windowFactory = new FakeDesktopWindowFactory(window);
+        var server = CreateServer("http://localhost:5000");
+        var sut = CreateSut(server, windowFactory.Create);
+
+        // Act
+        var startResult = await sut.StartAsync(CancellationToken);
+        window.WaitForCloseCalls.ShouldBe(0);
+        var waitForExitTask = sut.WaitForExitAsync(CancellationToken);
+        await window.MessageLoopStarted.Task.WaitAsync(CancellationToken);
+        var exitResult = await sut.ExitAsync(CancellationToken);
+        await waitForExitTask;
+
+        // Assert
+        startResult.IsSuccess.ShouldBeTrue();
+        exitResult.IsSuccess.ShouldBeTrue();
+        window.WaitForCloseCalls.ShouldBe(1);
+    }
+
+    [Test]
+    public async Task ShouldRestoreExistingWindow_WhenShowMainWindowRunsAfterCloseToBackground()
+    {
+        // Arrange
+        using var _ = WithEnvironmentVariablesAsync(
+            new Dictionary<string, string?>
+            {
+                [EnvKeys.ReaparrPlatform] = "desktop",
+                [EnvKeys.DotNetEnvironment] = "Production",
+            }
+        );
+
+        var window = new FakeDesktopWindow();
+        var windowFactory = new FakeDesktopWindowFactory(window);
+        var server = CreateServer("http://localhost:5000");
+        var sut = CreateSut(server, windowFactory.Create);
+
+        await sut.StartAsync(CancellationToken);
+        await sut.CloseMainWindowAsync(CancellationToken);
+
+        // Act
+        var result = await sut.ShowMainWindowAsync(CancellationToken);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        window.IsRestored.ShouldBeTrue();
+        windowFactory.CreateCalls.ShouldBe(1);
+    }
+
+    [Test]
+    public async Task ShouldAllowNativeClose_WhenExitClosesNativeWindow()
+    {
+        // Arrange
+        using var _ = WithEnvironmentVariablesAsync(
+            new Dictionary<string, string?>
+            {
+                [EnvKeys.ReaparrPlatform] = "desktop",
+                [EnvKeys.DotNetEnvironment] = "Production",
+            }
+        );
+
+        var window = new FakeDesktopWindow();
+        var windowFactory = new FakeDesktopWindowFactory(window);
+        var server = CreateServer("http://localhost:5000");
+        var sut = CreateSut(server, windowFactory.Create);
+
+        await sut.StartAsync(CancellationToken);
+
+        // Act
+        var result = await sut.ExitAsync(CancellationToken);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        window.NativeClosePrevented.ShouldBeFalse();
+    }
+
+    [Test]
+    public async Task ShouldPreventNativeCloseAndCloseToBackground_WhenPhotinoWindowClosingRuns()
+    {
+        // Arrange
+        using var _ = WithEnvironmentVariablesAsync(
+            new Dictionary<string, string?>
+            {
+                [EnvKeys.ReaparrPlatform] = "desktop",
+                [EnvKeys.DotNetEnvironment] = "Production",
+            }
+        );
+
+        var window = new FakeDesktopWindow();
+        var windowFactory = new FakeDesktopWindowFactory(window);
+        var server = CreateServer("http://localhost:5000");
+        var sut = CreateSut(server, windowFactory.Create);
+
+        await sut.StartAsync(CancellationToken);
+        var waitForExitTask = sut.WaitForExitAsync(CancellationToken);
+
+        // Act
+        var preventNativeClose = window.WindowClosingHandler!.Invoke(window, EventArgs.Empty);
+
+        // Assert
+        preventNativeClose.ShouldBeTrue();
+        waitForExitTask.IsCompleted.ShouldBeFalse();
+        await WaitForWindowToCloseToBackground(window);
+    }
+
+    [Test]
+    public async Task ShouldCompleteDesktopRuntime_WhenExitCommandRuns()
+    {
+        // Arrange
+        using var _ = WithEnvironmentVariablesAsync(
+            new Dictionary<string, string?>
+            {
+                [EnvKeys.ReaparrPlatform] = "desktop",
+                [EnvKeys.DotNetEnvironment] = "Production",
+            }
+        );
+
+        var windowFactory = new FakeDesktopWindowFactory(new FakeDesktopWindow());
+        var server = CreateServer("http://localhost:5000");
+        var sut = CreateSut(server, windowFactory.Create);
+
+        await sut.StartAsync(CancellationToken);
+        var waitForExitTask = sut.WaitForExitAsync(CancellationToken);
+
+        // Act
+        var result = await sut.ExitAsync(CancellationToken);
+        await waitForExitTask;
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        waitForExitTask.IsCompleted.ShouldBeTrue();
+    }
+
+    private DesktopMode CreateSut(IServer server, Func<Uri, IDesktopWindow> windowFactory) =>
+        Mock.Create<DesktopMode>(
+            new TypedParameter(typeof(IServer), server),
+            new TypedParameter(typeof(IDesktopWindowFactory), new FakeDesktopWindowFactory(windowFactory))
+        );
+
+    private static IServer CreateServer(string? address)
+    {
+        var featureCollection = new FeatureCollection();
+        var serverAddresses = new ServerAddressesFeature();
+        if (!string.IsNullOrWhiteSpace(address))
+            serverAddresses.Addresses.Add(address);
+
+        featureCollection.Set<IServerAddressesFeature>(serverAddresses);
+
+        var server = new Mock<IServer>(MockBehavior.Strict);
+        server.SetupGet(x => x.Features).Returns(featureCollection);
+        return server.Object;
+    }
+
+    private static async Task WaitForWindowToCloseToBackground(FakeDesktopWindow window)
+    {
+        using var cancellationTokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(1));
+        while (!window.IsClosedToBackground)
+            await Task.Delay(TimeSpan.FromMilliseconds(10), cancellationTokenSource.Token);
+    }
+
+    private sealed class FakeDesktopWindowFactory : IDesktopWindowFactory
+    {
+        private readonly Func<Uri, IDesktopWindow> _createWindow;
+
+        public FakeDesktopWindowFactory(FakeDesktopWindow window)
+        {
+            _createWindow = uri =>
+            {
+                CreateCalls++;
+                window.LoadedUri = uri;
+                return window;
+            };
+        }
+
+        public FakeDesktopWindowFactory(Func<Uri, IDesktopWindow> createWindow)
+        {
+            _createWindow = createWindow;
+        }
+
+        public int CreateCalls { get; private set; }
+
+        public IDesktopWindow Create(Uri uri) => _createWindow(uri);
+    }
+
+    private sealed class FakeDesktopWindow : IDesktopWindow
+    {
+        public Uri? LoadedUri { get; set; }
+        public bool IsClosedToBackground { get; private set; }
+        public bool IsRestored { get; private set; }
+        public bool NativeClosePrevented { get; private set; }
+        public bool IsDisposed { get; private set; }
+        public int WaitForCloseCalls { get; private set; }
+        public bool IsInitialized { get; private set; }
+        public TaskCompletionSource MessageLoopStarted { get; } =
+            new(TaskCreationOptions.RunContinuationsAsynchronously);
+
+        public Func<object?, EventArgs, bool>? WindowClosingHandler { get; private set; }
+
+        public void ConfigureWindow() { }
+
+        public void RegisterWindowClosingHandler(Func<object?, EventArgs, bool> handler)
+        {
+            WindowClosingHandler = handler;
+        }
+
+        public void CloseToBackground()
+        {
+            IsClosedToBackground = true;
+        }
+
+        public void RestoreFromBackground()
+        {
+            IsRestored = true;
+        }
+
+        public void CloseNativeWindow()
+        {
+            NativeClosePrevented = WindowClosingHandler?.Invoke(this, EventArgs.Empty) ?? false;
+        }
+
+        public void DisposeWindow()
+        {
+            IsDisposed = true;
+        }
+
+        public void WaitForClose()
+        {
+            WaitForCloseCalls++;
+            IsInitialized = true;
+            MessageLoopStarted.SetResult();
+        }
+    }
+}

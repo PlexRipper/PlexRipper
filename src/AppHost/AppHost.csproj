@@ -16,6 +16,7 @@
     </PropertyGroup>
     <ItemGroup>
         <InternalsVisibleTo Include="FluentResultExtension.UnitTests" />
+        <InternalsVisibleTo Include="Reaparr.AppHost.UnitTests" />
         <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="11.0.0" />
         <PackageReference Include="CSharpier.MsBuild" Version="1.2.6">
             <PrivateAssets>all</PrivateAssets>

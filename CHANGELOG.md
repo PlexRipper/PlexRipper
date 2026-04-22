@@ -1,5 +1,30 @@
 Reaparr Changelog
 
+# [0.38.0-dev.7](https://github.com/Reaparr/Reaparr/compare/v0.38.0-dev.6...v0.38.0-dev.7) (2026-04-22)
+
+
+### Bug Fixes
+
+* **WebAPI:** Fixed an issue where the logging to log files contained a lot of noise making it unreadable ([8add639](https://github.com/Reaparr/Reaparr/commit/8add639722cdb087cdbebd431f0a82449b8baac1))
+* **WebAPI:** Fixed new database creation failing due to incorrect seed data ([4365743](https://github.com/Reaparr/Reaparr/commit/43657439f3e2b6657caa83f882ee65b5dc30d7fe))
+
+
+### Features
+
+* **Web-UI:** Add app update download progress tracking in the update dialog ([c478334](https://github.com/Reaparr/Reaparr/commit/c478334d3c32c6e76abd10755c806b63abaf04ed))
+* **WebAPI:** Add development middleware to disable authentication through environment variable I_AM_DUMB_SO_DISABLE_AUTHENTICATION ([990aa33](https://github.com/Reaparr/Reaparr/commit/990aa335565e65c3659ef553cc23aad631794348))
+* **Web-UI:** Added a update dialog when there is a new Reaparr release ([58da7db](https://github.com/Reaparr/Reaparr/commit/58da7dbbe6a3b9bab3bcaf6c1379fac594805b96))
+* **WebAPI:** Added option to add a GITHUB_TOKEN to Reaparr to circumvent the Github ratelimits ([15ca26a](https://github.com/Reaparr/Reaparr/commit/15ca26ae0f83b2106c61c10c87d4ac2e82e8430d))
+* **Web-UI:** Enhance log viewer with selection and copy functionality ([ecd0c0d](https://github.com/Reaparr/Reaparr/commit/ecd0c0daddb19dfc3ecaabc771937f5e7640ad4e))
+* **Web-UI:** Enhance log viewer with selection and copy functionality ([d26c577](https://github.com/Reaparr/Reaparr/commit/d26c577260ad5beea64415aa2c97b4f639c414d4))
+* **WebAPI:** Implement app update download progress tracking ([aec0c6e](https://github.com/Reaparr/Reaparr/commit/aec0c6eb93b6dd3b5bca7c7eff7f2528cb30fae2))
+* **WebAPI:** Implement desktop single-instance coordination and window lifecycle. This allows Reaparr to keep running in the background when the window closes on desktop ([fcbc34c](https://github.com/Reaparr/Reaparr/commit/fcbc34c1adccd969deff246356f1a082df6451b5))
+* **WebAPI:** Implement GitHub releases fetching and mapping to showcase new updates ([a750151](https://github.com/Reaparr/Reaparr/commit/a750151a4923ef4a667304867de29b2090565839))
+* **WebAPI:** Implement live log streaming via SignalR ([63a5492](https://github.com/Reaparr/Reaparr/commit/63a5492f9265208dccf0df4263d9de84e5fda11e))
+* **Web-UI:** Implement live log viewer under Settings => Logs with realtime updates ([6bc494e](https://github.com/Reaparr/Reaparr/commit/6bc494e9e0b6f8f8dd13827ad7ff7d129b1bcef9))
+* **WebAPI:** Implement update management endpoints for checking and applying updates ([0e32c45](https://github.com/Reaparr/Reaparr/commit/0e32c45673695c22162ecfe9d22adfb10e3c09fb))
+* **WebAPI:** Implement update Reaparr check endpoint and related background job to keep checking every hour ([bb0ed40](https://github.com/Reaparr/Reaparr/commit/bb0ed409a3b286ecfcbb58b36ac94aa41c3cd76a))
+
 # [0.38.0-dev.6](https://github.com/Reaparr/Reaparr/compare/v0.38.0-dev.5...v0.38.0-dev.6) (2026-04-10)
 
 

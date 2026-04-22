@@ -36,7 +36,7 @@ Rider MCP can briefly hiccup. Do not give up after one failed call.
 If a Rider MCP call fails, retry with the same tool once. If it still fails, try a narrower or adjacent Rider MCP tool before falling back:
 - File read fails -> try `rider_read_file` or `rider_get_file_text_by_path` with fewer lines.
 - Search fails -> try a narrower directory, exact text search, regex search, file-name search, or symbol search.
-- Diagnostics fail -> retry the same file, then try project build diagnostics or file problems through the alternate Rider MCP namespace if available.
+- Diagnostics fail -> retry the same file, then use Rider indexed file problems, diagnostics, symbol info, or alternate Rider MCP namespaces. Do not run a build to discover errors.
 
 Fallback to filesystem tools only after repeated Rider MCP attempts cannot provide the needed result. State the attempted Rider MCP tools and the fallback reason before using filesystem tools.
 
@@ -185,15 +185,11 @@ Rules:
 7. Keep behavior deterministic, especially in tests and background jobs.
 8. Before finishing any backend code file creation, check whether a new folder was introduced. If yes, use the root project namespace in the code file and update the owning `.csproj.DotSettings` `NamespaceFoldersToSkip` entry.
 9. Re-read changed files after edits to confirm the intended changes landed.
-10. Run Rider diagnostics and the narrowest meaningful verifier before claiming completion.
+10. Use Rider MCP intelligence/indexing to find errors that need fixing before claiming completion. Do not run a build as an error-discovery mechanism.
 
-## Build and Test Commands
+## Run and Test Commands
 
-Backend build:
-
-```bash
-dotnet build Reaparr.sln
-```
+Do not run `dotnet build` or project build commands for backend error discovery. Use Rider MCP diagnostics/indexing instead. Build-related execution is only allowed as part of running unit or integration tests.
 
 Run backend AppHost:
 
@@ -222,16 +218,29 @@ dotnet run --project tests/IntegrationTests/IntegrationTests/IntegrationTests.cs
 
 ## Verification Gates
 
-Always run Rider diagnostics first for changed backend files.
+Never rely on `dotnet build`, project builds, or solution builds to determine whether backend code has errors. Error discovery must come from Rider MCP intelligence/indexing.
 
-Then choose the narrowest meaningful verifier:
-- Command/handler or service changes: relevant unit tests first, then broader project tests or build if needed.
-- Unit test changes: run the relevant unit test project, preferably filtered first and then broader if risk warrants.
-- Integration test changes or integration failures: run targeted integration tests first, then the full integration suite before claiming done.
-- Cross-project or public contract changes: run affected tests plus `dotnet build Reaparr.sln` when compile impact is broader than one project.
-- Job, SignalR, EF Core, or endpoint changes: verify with tests covering the runtime path when available; otherwise explain the missing verifier and run build/diagnostics.
+Required error-checking flow:
+1. Run Rider MCP diagnostics/file problems for each changed backend file.
+2. If diagnostics are incomplete or fail, retry Rider MCP and use narrower or adjacent Rider indexed tools (`get_file_problems`, diagnostics, symbol info, indexed search, alternate Rider MCP namespace).
+3. Fix all relevant Rider-reported errors.
+4. Only after Rider MCP reports the changed files are clean, run tests when the change requires behavioral verification.
 
-Do not claim success unless verification was run and passed. If a verifier cannot run in the current environment, say so explicitly.
+Build commands are not verification for compile errors in this workflow. Do not run `dotnet build Reaparr.sln` or project builds as a substitute for Rider MCP diagnostics.
+
+Allowed build-related execution:
+- Running backend unit tests.
+- Running backend integration tests.
+- Running a test project may compile as part of test execution; that is acceptable because the purpose is executing tests, not discovering compile errors.
+
+Test routing:
+- Command/handler or service changes: Rider MCP diagnostics first, then relevant unit tests when behavior changed.
+- Unit test changes: Rider MCP diagnostics first, then the relevant unit test project, preferably filtered first and broader if risk warrants.
+- Integration test changes or integration failures: Rider MCP diagnostics first, then targeted integration tests, then the full integration suite before claiming done.
+- Cross-project or public contract changes: Rider MCP diagnostics/indexing across affected files and symbols first, then affected tests. Do not use solution build as the error detector.
+- Job, SignalR, EF Core, or endpoint changes: Rider MCP diagnostics first, then tests covering the runtime path when available; otherwise explain the missing behavioral verifier.
+
+Do not claim success unless Rider MCP diagnostics/indexing was used and required tests passed. If Rider MCP cannot run in the current environment after retries, state that explicitly instead of running a build to infer errors.
 
 ## Common Mistakes
 
@@ -239,6 +248,7 @@ Do not claim success unless verification was run and passed. If a verifier canno
 - Treating this skill as optional for small backend changes.
 - Using WebStorm MCP tools for backend files.
 - Falling back to filesystem tools after one Rider MCP hiccup instead of retrying Rider MCP and trying narrower Rider tools.
+- Running `dotnet build` or a project build to discover compile errors instead of using Rider MCP intelligence/indexing.
 - Creating backend code files in new folders without keeping the namespace at the project root and updating the owning `.csproj.DotSettings` `NamespaceFoldersToSkip` entry.
 - Creating new abstractions before checking existing Reaparr patterns.
 - Putting shared command records in implementation projects when they belong in `*.Contracts`.

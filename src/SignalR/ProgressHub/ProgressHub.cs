@@ -86,4 +86,19 @@ public class ProgressHub : Hub<IProgressHub>, IProgressHub
             );
         await Clients.All.LibraryProgress(libraryProgress, cancellationToken);
     }
+
+    /// <inheritdoc/>
+    public async Task AppUpdateDownloadProgress(
+        AppUpdateDownloadProgressDTO appUpdateDownloadProgress,
+        CancellationToken cancellationToken = default
+    )
+    {
+        _log.Here()
+            .Debug(
+                "Sending progress: {MessageTypesNotification} => {@AppDownloadProgress}",
+                nameof(MessageTypes.AppUpdateDownloadProgress),
+                appUpdateDownloadProgress
+            );
+        await Clients.All.AppUpdateDownloadProgress(appUpdateDownloadProgress, cancellationToken);
+    }
 }

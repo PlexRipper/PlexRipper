@@ -12,7 +12,7 @@
 
 import type { RequestParams } from "./http-client";
 
-import type { PlexMediaType } from "./data-contracts";
+import type { LiveLogEventDTO, PlexMediaType } from "./data-contracts";
 
 import { apiCheckPipe, axiosObservable } from "@api/base";
 import queryString from "query-string";
@@ -41,6 +41,22 @@ export class Debug {
       responseType: "json",
       ...params,
     }).pipe(apiCheckPipe<String[]>);
+
+  /**
+   * No description
+   * * @tags Debug
+   * @name GetAllLogsEndpoint
+   * @request GET:/api/Debug/logs
+   * @secure
+   */
+  getAllLogsEndpoint = (params: RequestParams = {}) =>
+    axiosObservable<LiveLogEventDTO[]>({
+      url: `/api/Debug/logs`,
+      method: "GET",
+      secure: true,
+      responseType: "json",
+      ...params,
+    }).pipe(apiCheckPipe<LiveLogEventDTO[]>);
 }
 
 export class DebugPaths {
@@ -50,4 +66,7 @@ export class DebugPaths {
     type: PlexMediaType;
   }) =>
     queryString.stringifyUrl({ url: `/api/Debug/unique-media-titles`, query });
+
+  static getAllLogsEndpoint = () =>
+    queryString.stringifyUrl({ url: `/api/Debug/logs` });
 }

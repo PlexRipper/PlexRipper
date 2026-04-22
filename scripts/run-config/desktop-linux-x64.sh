@@ -2,7 +2,8 @@
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
-DATA_ROOT="${REAPARR_DATA_PATH:-$HOME/.local/share/Reaparr/}"
+DATA_ROOT="${REAPARR_DATA_PATH:-$ROOT_DIR/.tmp}"
+
 CONFIG_ROOT="${REAPARR_CONFIG_PATH:-$DATA_ROOT/Config}"
 
 mkdir -p "$DATA_ROOT"
@@ -10,11 +11,6 @@ mkdir -p "$CONFIG_ROOT"
 
 export REAPARR_DATA_PATH="$DATA_ROOT"
 export REAPARR_CONFIG_PATH="$CONFIG_ROOT"
-export DOTNET_ENVIRONMENT="${DOTNET_ENVIRONMENT:-Development}"
-export DOTNET_HTTP_PORTS="${DOTNET_HTTP_PORTS:-5000}"
-export REAPARR_PLATFORM="desktop"
-export PUID="${PUID:-$(id -u)}"
-export PGID="${PGID:-$(id -g)}"
 
 (cd "$ROOT_DIR/src/AppHost/ClientApp" && bun run generate)
 

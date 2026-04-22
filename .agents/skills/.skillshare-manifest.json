@@ -1,9 +1,12 @@
 {
   "managed": {
+    "reaparr-backend": "symlink",
     "reaparr-backend-integration-tests": "symlink",
     "reaparr-backend-unit-tests": "symlink",
     "reaparr-command-handler-patterns": "symlink",
-    "reaparr-frontend-unit-tests": "symlink"
+    "reaparr-frontend-components": "symlink",
+    "reaparr-frontend-unit-tests": "symlink",
+    "reaparr-pinia-store": "symlink"
   },
-  "updated_at": "2026-03-31T17:08:37.396191511+02:00"
+  "updated_at": "2026-04-22T19:31:19.629250958+02:00"
 }

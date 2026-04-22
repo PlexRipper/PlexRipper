@@ -64,12 +64,13 @@ public class DeterminePlexDownloadClientCommandHandler
             return decisionResult.ToResult();
 
         var clientType = decisionResult.Value.SuggestedClientType;
-        _log.Debug(
-            "Determined Plex download client type {ClientType} for Plex server {PlexServerId} and media {MetaDataPath}",
-            clientType,
-            command.PlexServerId,
-            command.MetaDataPath
-        );
+        _log.Here()
+            .Debug(
+                "Determined Plex download client type {ClientType} for Plex server {PlexServerId} and media {MetaDataPath}",
+                clientType,
+                command.PlexServerId,
+                command.MetaDataPath
+            );
         return Result.Ok(clientType);
     }
 }

@@ -17,7 +17,7 @@ namespace Reaparr.Data.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .UseCollation("NATURALSORT")
-                .HasAnnotation("ProductVersion", "10.0.1");
+                .HasAnnotation("ProductVersion", "10.0.6");
 
             modelBuilder.Entity("AppAny.Quartz.EntityFrameworkCore.Migrations.QuartzBlobTrigger", b =>
                 {
@@ -589,88 +589,6 @@ namespace Reaparr.Data.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("FolderPaths");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            DirectoryPath = "/Downloads",
-                            DisplayName = "Download Path",
-                            FolderType = "DownloadFolder",
-                            MediaType = "None"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            DirectoryPath = "/Movies",
-                            DisplayName = "Movie Destination Path",
-                            FolderType = "MovieFolder",
-                            MediaType = "Movie"
-                        },
-                        new
-                        {
-                            Id = 3,
-                            DirectoryPath = "/TvShows",
-                            DisplayName = "Tv Show Destination Path",
-                            FolderType = "TvShowFolder",
-                            MediaType = "TvShow"
-                        },
-                        new
-                        {
-                            Id = 4,
-                            DirectoryPath = "/Music",
-                            DisplayName = "Music Destination Path",
-                            FolderType = "MusicFolder",
-                            MediaType = "Music"
-                        },
-                        new
-                        {
-                            Id = 5,
-                            DirectoryPath = "/Photos",
-                            DisplayName = "Photos Destination Path",
-                            FolderType = "PhotosFolder",
-                            MediaType = "Photos"
-                        },
-                        new
-                        {
-                            Id = 6,
-                            DirectoryPath = "/Other",
-                            DisplayName = "Other Videos Destination Path",
-                            FolderType = "OtherVideosFolder",
-                            MediaType = "OtherVideos"
-                        },
-                        new
-                        {
-                            Id = 7,
-                            DirectoryPath = "/Games",
-                            DisplayName = "Games Videos Destination Path",
-                            FolderType = "GamesVideosFolder",
-                            MediaType = "Games"
-                        },
-                        new
-                        {
-                            Id = 8,
-                            DirectoryPath = "/",
-                            DisplayName = "Reserved #1 Destination Path",
-                            FolderType = "None",
-                            MediaType = "None"
-                        },
-                        new
-                        {
-                            Id = 9,
-                            DirectoryPath = "/",
-                            DisplayName = "Reserved #2 Destination Path",
-                            FolderType = "None",
-                            MediaType = "None"
-                        },
-                        new
-                        {
-                            Id = 10,
-                            DirectoryPath = "/",
-                            DisplayName = "Reserved #3 Destination Path",
-                            FolderType = "None",
-                            MediaType = "None"
-                        });
                 });
 
             modelBuilder.Entity("Reaparr.Domain.LibrarySyncJobQueue", b =>

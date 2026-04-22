@@ -13,20 +13,22 @@ public class Program
     /// <summary>
     ///  The main method entry point for the application.
     /// </summary>
-    /// <param name="args"></param>
+    /// <param name="args">Command-line arguments passed to the application.</param>
     [STAThread]
     public static async Task Main(string[] args)
     {
-        // Must be first: handles installer hooks (install, uninstall, update) and exits early when invoked by the Velopack installer.
-        VelopackApp.Build().Run();
-
         try
         {
-            _log.Here().Information("Starting Reaparr!");
+            var logBuffer = new LogBufferService();
+            var signalRLogConfig = new SignalRLogConfig(logBuffer);
 
             // Skip logger setup in integration test mode to preserve test logger
             if (!EnvironmentExtensions.IsIntegrationTestMode())
-                LogFactory.SetupLogging(EnvironmentExtensions.GetLogLevel());
+                LogFactory.SetupLogging(EnvironmentExtensions.GetLogLevel(), signalRLogConfig);
+
+            // Must be first after logging: handles installer hooks (install, uninstall, update) and exits early when invoked by the Velopack installer.
+            VelopackApp.Build().Run();
+
             FluentResultConfiguration.Setup();
 
             _log.Here()
@@ -43,9 +45,12 @@ public class Program
 
             var builder = WebApplication.CreateBuilder(args);
 
-            builder.Host.ConfigureAutofacBuilder();
+            builder.Host.ConfigureAutofacBuilder(logBuffer);
             builder.Services.ConfigureServices(builder.Environment);
             var app = builder.Build();
+
+            if (!EnvironmentExtensions.IsIntegrationTestMode())
+                signalRLogConfig.AttachSignalR(app);
 
             var configResult = app.SetupConfigFile();
             if (configResult.IsFailed)
@@ -65,19 +70,11 @@ public class Program
 
             app.ConfigureApplication(app.Environment);
 
-            if (EnvironmentExtensions.IsDesktopMode())
+            if (EnvironmentExtensions.IsDesktopMode() && !EnvironmentExtensions.IsIntegrationTestMode())
             {
-                await app.StartAsync();
-                try
-                {
-                    var desktopModeResult = app.Services.GetRequiredService<IDesktopMode>().Setup();
-                    if (desktopModeResult.IsFailed)
-                        FailedToStart(desktopModeResult);
-                }
-                finally
-                {
-                    await app.StopAsync();
-                }
+                var desktopLifecycleResult = await RunDesktopLifecycleAsync(app);
+                if (desktopLifecycleResult.IsFailed)
+                    FailedToStart(desktopLifecycleResult);
             }
             else
             {
@@ -94,6 +91,49 @@ public class Program
         {
             // Ensure to flush and stop internal timers/threads before application-exit (Avoid segmentation fault on Linux)
             LogFactory.CloseAndFlush();
+        }
+    }
+
+    internal static async Task<Result> RunDesktopLifecycleAsync(
+        WebApplication app,
+        CancellationToken cancellationToken = default
+    )
+    {
+        var services = app.Services;
+        var singleInstanceCoordinator = services.GetRequiredService<IDesktopSingleInstanceCoordinator>();
+
+        if (!singleInstanceCoordinator.TryAcquirePrimaryOwnership())
+        {
+            _log.Here().Debug("Signaling the existing Reaparr desktop instance");
+            return await singleInstanceCoordinator.SignalPrimaryInstanceAsync(cancellationToken);
+        }
+
+        await app.StartAsync(cancellationToken);
+        try
+        {
+            _log.Here().Debug("Starting the Reaparr desktop single-instance listener");
+            var desktopMode = services.GetRequiredService<IDesktopMode>();
+            var listenerResult = singleInstanceCoordinator.StartListener(
+                ct =>
+                {
+                    _log.Here().Debug("Showing the Reaparr desktop window");
+                    return desktopMode.ShowMainWindowAsync(ct);
+                },
+                cancellationToken
+            );
+            if (listenerResult.IsFailed)
+                return listenerResult;
+
+            var desktopModeResult = await desktopMode.StartAsync(cancellationToken);
+            if (desktopModeResult.IsFailed)
+                return desktopModeResult;
+
+            await desktopMode.WaitForExitAsync(cancellationToken);
+            return Result.Ok();
+        }
+        finally
+        {
+            await app.StopAsync(cancellationToken);
         }
     }
 

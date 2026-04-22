@@ -42,5 +42,17 @@ public class ApplicationModule : Module
             .As<IDownloadTaskUpdateDispatcher>()
             .As<IHostedService>()
             .SingleInstance();
+
+        builder
+            .Register(_ =>
+            {
+                var source = new Velopack.Sources.GithubSource(
+                    "https://github.com/Reaparr/Reaparr",
+                    EnvironmentExtensions.GetGitHubToken(),
+                    EnvironmentExtensions.IsDevRelease()
+                );
+                return new UpdateManager(source);
+            })
+            .SingleInstance();
     }
 }

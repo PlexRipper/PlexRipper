@@ -4,6 +4,8 @@ namespace Reaparr.Environment;
 
 public static class EnvironmentExtensions
 {
+    private static readonly AsyncLocal<IReadOnlyDictionary<string, string?>?> _testOverrides = new();
+
     #region Getters
 
     /// <summary>
@@ -47,6 +49,11 @@ public static class EnvironmentExtensions
         GetEnvironmentVariable(EnvKeys.AuthHeaderTokenName) ?? "X-Auth-User";
 
     /// <summary>
+    /// Gets the GitHub token from <c>GITHUB_TOKEN</c> for authenticated GitHub API requests.
+    /// </summary>
+    public static string? GetGitHubToken() => GetEnvironmentVariable(EnvKeys.GitHubToken);
+
+    /// <summary>
     /// When set to true, the application will not mask/censor sensitive data in the logs.
     /// </summary>
     public static bool IsUnmasked() => IsTrue(GetEnvironmentVariable(EnvKeys.Unmasked));
@@ -81,6 +88,11 @@ public static class EnvironmentExtensions
     /// </summary>
     /// <returns></returns>
     public static bool IsDevelopmentEnvironment() => GetEnvironmentVariable(EnvKeys.DotNetEnvironment) == "Development";
+
+    /// <summary>
+    /// When set to a truthy value, disables all authentication. FOR DEVELOPMENT USE ONLY.
+    /// </summary>
+    public static bool IsAuthenticationDisabled() => IsTrue(GetEnvironmentVariable(EnvKeys.DisableAuthentication));
 
     /// <summary>
     /// Gets the process user ID (PUID) from the environment. Returns -1 when not set or invalid.
@@ -182,8 +194,27 @@ public static class EnvironmentExtensions
 
     #region Helpers
 
+    /// <summary>
+    /// Sets per-async-flow environment variable overrides for the duration of the returned scope.
+    /// Intended for use in tests only. Each async flow (test) gets its own isolated slot via <see cref="AsyncLocal{T}"/>.
+    /// </summary>
+    internal static IDisposable WithOverrides(IReadOnlyDictionary<string, string?> overrides)
+    {
+        var previous = _testOverrides.Value;
+        _testOverrides.Value = overrides;
+        return new OverrideScope(previous);
+    }
+
+    private sealed class OverrideScope(IReadOnlyDictionary<string, string?>? previous) : IDisposable
+    {
+        public void Dispose() => _testOverrides.Value = previous;
+    }
+
     private static string? GetEnvironmentVariable(string key)
     {
+        if (_testOverrides.Value is { } overrides && overrides.TryGetValue(key, out var val))
+            return string.IsNullOrWhiteSpace(val) ? null : val.Trim();
+
         var value = System.Environment.GetEnvironmentVariable(key)?.Trim();
         return string.IsNullOrWhiteSpace(value) ? null : value;
     }

@@ -8,13 +8,17 @@ public static partial class Startup
     ///  This method gets called by the runtime. Use this method to add services to the container.
     /// </summary>
     /// <param name="builder"></param>
-    public static void ConfigureAutofacBuilder(this IHostBuilder builder)
+    /// <param name="logBuffer">Pre-built log buffer instance to share with the DI container.</param>
+    public static void ConfigureAutofacBuilder(this IHostBuilder builder, ILogBufferService logBuffer)
     {
         // Use Autofac as the DI container
         builder.UseServiceProviderFactory(new AutofacServiceProviderFactory());
         builder.ConfigureContainer<ContainerBuilder>(containerBuilder =>
         {
             _log.Here().Debug("Setting up Autofac Containers");
+
+            containerBuilder.RegisterInstance(logBuffer).As<ILogBufferService>().SingleInstance();
+
             ContainerConfig.ConfigureContainer(containerBuilder);
         });
 

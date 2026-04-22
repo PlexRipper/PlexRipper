@@ -5,6 +5,10 @@ description: Use when creating or updating Reaparr backend FastEndpoints command
 
 # Reaparr Command/Handler Patterns
 
+## Required First Skill
+
+Load `reaparr-backend` before this skill. It owns shared backend tooling, architecture, build/test commands, and verification gates.
+
 ## Overview
 
 Use this skill for Reaparr's command pipeline built on FastEndpoints + FluentResults.

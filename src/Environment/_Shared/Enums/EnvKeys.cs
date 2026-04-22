@@ -19,6 +19,7 @@ public static class EnvKeys
     public const string ReaparrOtherPath = "REAPARR_OTHER_PATH";
     public const string ReaparrGamesPath = "REAPARR_GAMES_PATH";
     public const string AuthHeaderTokenName = "AUTH_HEADER_TOKEN";
+    public const string GitHubToken = "GITHUB_TOKEN";
     public const string SeqUrl = "SEQ_URL";
     public const string DotNetEnvironment = "DOTNET_ENVIRONMENT";
     public const string DotNetHttpPorts = "DOTNET_HTTP_PORTS";
@@ -26,4 +27,5 @@ public static class EnvKeys
     public const string Pgid = "PGID";
     public const string Home = "HOME";
     public const string AppData = "APPDATA";
+    public const string DisableAuthentication = "I_AM_DUMB_SO_DISABLE_AUTHENTICATION";
 }

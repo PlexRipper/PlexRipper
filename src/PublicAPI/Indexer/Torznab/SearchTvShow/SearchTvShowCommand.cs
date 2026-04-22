@@ -175,13 +175,13 @@ public class SearchTvShowCommandHandler : ICommandHandler<SearchTvShowCommand, R
 
         if (tvShow is null)
         {
-            _log.Warning("TvShow is null for episode {EpisodeId}", episode.Id);
+            _log.Here().Warning("TvShow is null for episode {EpisodeId}", episode.Id);
             yield break;
         }
 
         if (season is null)
         {
-            _log.Warning("Season is null for episode {EpisodeId}", episode.Id);
+            _log.Here().Warning("Season is null for episode {EpisodeId}", episode.Id);
             yield break;
         }
 

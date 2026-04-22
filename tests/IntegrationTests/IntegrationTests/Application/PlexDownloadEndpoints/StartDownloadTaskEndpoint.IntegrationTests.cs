@@ -66,6 +66,12 @@ public class StartDownloadTaskEndpointIntegrationTests : BaseIntegrationTests
             BaseResultDTO
         >(new StartDownloadTaskEndpointRequest(downloadTask.Id));
 
+        // Assert
+        testResult.Response.IsSuccessStatusCode.ShouldBeTrue(
+            await testResult.Response.Content.ReadAsStringAsync(CancellationToken)
+        );
+        testResult.Result.IsSuccess.ShouldBeTrue();
+
         await WaitForDatabaseConditionAsync(
             async () =>
             {
@@ -73,17 +79,22 @@ public class StartDownloadTaskEndpointIntegrationTests : BaseIntegrationTests
                     downloadTask.Id,
                     cancellationToken: CancellationToken
                 );
-                return dbTask?.DownloadStatus == DownloadStatus.ServerUnreachable;
+
+                if (dbTask?.DownloadStatus != DownloadStatus.ServerUnreachable)
+                    return false;
+
+                return await container.DbContext.DownloadTaskMovieFileLogs.AnyAsync(
+                    x =>
+                        x.DownloadTaskFileId == downloadTask.Id
+                        && x.Status == DownloadStatus.ServerUnreachable
+                        && x.LogLevel == NotificationLevel.Error
+                        && x.Message.Contains("timed out while downloading"),
+                    CancellationToken
+                );
             },
             maxRetries: 60,
             delayMs: 250
         );
-
-        // Assert
-        testResult.Response.IsSuccessStatusCode.ShouldBeTrue(
-            await testResult.Response.Content.ReadAsStringAsync(CancellationToken)
-        );
-        testResult.Result.IsSuccess.ShouldBeTrue();
 
         var downloadTaskDb = await container.DbContext.GetDownloadTaskAsync(
             downloadTask.Id,
@@ -100,12 +111,10 @@ public class StartDownloadTaskEndpointIntegrationTests : BaseIntegrationTests
         logs.Any(x => x.Status == DownloadStatus.Downloading).ShouldBeTrue();
         logs.Any(x => x.Status == DownloadStatus.ServerUnreachable).ShouldBeTrue();
 
-        var serverUnreachableLog = logs.Where(x => x.Status == DownloadStatus.ServerUnreachable)
-            .OrderByDescending(x => x.CreatedAt)
-            .FirstOrDefault();
-        serverUnreachableLog.ShouldNotBeNull();
-        serverUnreachableLog.LogLevel.ShouldBe(NotificationLevel.Error);
-        serverUnreachableLog.Message.ShouldContain("timed out while downloading");
+        var serverUnreachableLogs = logs.Where(x => x.Status == DownloadStatus.ServerUnreachable).ToList();
+        serverUnreachableLogs.ShouldContain(x =>
+            x.LogLevel == NotificationLevel.Error && x.Message.Contains("timed out while downloading")
+        );
     }
 
     [Test]

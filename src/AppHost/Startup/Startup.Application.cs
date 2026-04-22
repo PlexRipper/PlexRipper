@@ -43,6 +43,7 @@ public static partial class Startup
         if (!EnvironmentExtensions.IsIntegrationTestMode())
         {
             // SignalR configuration
+            app.MapHub<LogHub>("/logs");
             app.MapHub<ProgressHub>("/progress");
             app.MapHub<DownloadHub>("/download");
             app.MapHub<NotificationHub>("/notifications");
@@ -67,6 +68,11 @@ public static partial class Startup
 
         app.UseAuthentication();
         app.UseAuthorization();
+
+        // When I_AM_DUMB_SO_DISABLE_AUTHENTICATION is set, bypass all auth with a synthetic Admin principal.
+        // This must run after authentication/authorization so the synthetic principal is not overwritten.
+        if (EnvironmentExtensions.IsAuthenticationDisabled())
+            app.UseMiddleware<DisableAuthenticationMiddleware>();
 
         // Enable response caching for downstream caches (must be before FastEndpoints)
         // Doc: https://fast-endpoints.com/docs/response-caching

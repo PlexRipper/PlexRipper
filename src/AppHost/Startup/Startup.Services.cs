@@ -12,6 +12,7 @@ using NSwag;
 using NSwag.Generation.Processors.Security;
 using Reaparr.Application.Contracts;
 using Reaparr.Identity.Contracts;
+using Serilog.Sinks.AspNetCore.App.SignalR.Extensions;
 
 namespace Reaparr.AppHost;
 
@@ -39,7 +40,7 @@ public static partial class Startup
                         .AllowAnyHeader()
                         .AllowAnyMethod()
                         .AllowCredentials()
-                        .WithExposedHeaders("X-Reaparr-Version");
+                        .WithExposedHeaders("X-Reaparr-Version", "X-Reaparr-Platform");
                 }
             );
         });
@@ -50,7 +51,7 @@ public static partial class Startup
 
         services.AddHttpContextAccessor();
 
-        services.ConfigureAuthenticationServices();
+        services.ConfigureAuthenticationServices(env);
 
         // Set up FastEndpoints
         services.AddFastEndpoints(options =>
@@ -60,6 +61,7 @@ public static partial class Startup
             options.Assemblies =
             [
                 // Reference the assemblies that contain the FastEndpoints or ICommand implementations
+                Assembly.GetAssembly(typeof(AppHostModule))!,
                 Assembly.GetAssembly(typeof(ApplicationModule))!,
                 Assembly.GetAssembly(typeof(BackgroundJobsModule))!,
                 Assembly.GetAssembly(typeof(DataModule))!,
@@ -102,6 +104,8 @@ public static partial class Startup
                         MessagePackSecurity.UntrustedData
                     );
                 });
+
+            services.AddSerilogHub<LogHub>();
 
             services.SwaggerDocument(o =>
             {
@@ -196,12 +200,13 @@ public static partial class Startup
         services.RegisterSonarrHttpClient();
         services.RegisterRadarrHttpClient();
         services.RegisterPlexThumbnailHttpClient();
+        services.RegisterGitHubHttpClient();
 
         // Removing all registered IHttpMessageHandlerBuilderFilter instances to disable built-in HttpClient logging
         services.RemoveAll<IHttpMessageHandlerBuilderFilter>();
     }
 
-    private static void ConfigureAuthenticationServices(this IServiceCollection services)
+    private static void ConfigureAuthenticationServices(this IServiceCollection services, IWebHostEnvironment env)
     {
         services.AddDataProtection().PersistKeysToDbContext<AuthDbContext>();
 
@@ -209,8 +214,10 @@ public static partial class Startup
         {
             options.AddPolicy("AuthenticatedUsers", x => x.RequireRole("Admin"));
 
-            // Set a default policy that requires authentication
-            options.FallbackPolicy = new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build();
+            // Set a default policy that requires authentication.
+            // Only development may intentionally bypass the fallback policy.
+            if (!(env.IsDevelopment() && EnvironmentExtensions.IsAuthenticationDisabled()))
+                options.FallbackPolicy = new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build();
         });
 
         services

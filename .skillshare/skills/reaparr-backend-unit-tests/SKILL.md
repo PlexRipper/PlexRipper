@@ -5,6 +5,10 @@ description: Use when creating or updating C# backend unit tests in Reaparr, esp
 
 # Reaparr Backend Unit Tests
 
+## Required First Skill
+
+Load `reaparr-backend` before this skill. It owns shared backend tooling, architecture, build/test commands, and verification gates.
+
 ## Overview
 
 Use this skill to write backend unit tests that match Reaparr conventions exactly.
@@ -29,7 +33,7 @@ Do not use this skill for frontend tests (Vitest/Cypress).
 - Test framework: `TUnit` with `[Test]`, `[Arguments]`, and `async Task` where needed.
 - Assertions: `Shouldly`.
 - Mocks: `Moq` with explicit verification (`Times.Once()` / `Times.Never()`).
-- Structure: Arrange -> Act -> Assert. Within Arrange, mock setups (`Mock.Mock<T>()`) must always be the **last step**, immediately before Act.
+- Structure: Arrange -> Act -> Assert. Every test method **must** include the three comment markers `// Arrange`, `// Act`, and `// Assert` — no exceptions. Within Arrange, mock setups (`Mock.Mock<T>()`) must always be the **last step**, immediately before Act.
 - Determinism: no random behavior in tests.
 
 ## Test Structure
@@ -182,10 +186,26 @@ When a dependency is mocked, prefer verifying exact interaction parameters and c
 - If SUT touches filesystem, use `SetupFileSystem` (MockFileSystem).
 - Do not manually mock `System.IO.Abstractions` interfaces in test files.
 
-### Endpoint unit tests and DbContext
+### Endpoint unit tests
 
-- `SetupEndpointUnitTest<T>()` provides a real in-memory `IReaparrDbContext`.
+- **Always inherit `BaseUnitTest<TEndpoint>`** — the generic form, with the endpoint as the type parameter. Do not use non-generic `BaseUnitTest` for endpoint tests even if `Sut` is not directly used; the generic form is the project standard.
+- `SetupEndpointUnitTest<T>()` provides a real in-memory `IReaparrDbContext` and registers: `ILogger`, `IReaparrDbContext`, `IReaparrDbContextFactory`, `IAuthDbContext`, `IAuthDbContextFactory`, `ICommandExecutor`, `ISchedulerService`, `IProgressHubService`, `IDownloadHubService`, `INotificationHubService`, `IDownloadTaskScheduler`.
 - Avoid mocking `IReaparrDbContext` in endpoint tests unless intentionally re-registering a mock.
+- **Endpoints with non-standard dependencies** (e.g. `UpdateManager`, custom services not in the list above): pass an `extraServices` action to `SetupEndpointUnitTest<T>()` — never call `Factory.Create<T>` directly. `ILogger` is always registered by `SetupEndpointUnitTest`, so only add what is missing:
+
+```csharp
+var endpoint = SetupEndpointUnitTest<MyEndpoint>(s =>
+    s.AddSingleton(_ => mockCustomDep.Object)
+);
+```
+
+- **Accessing typed response DTOs**: `endpoint.Response` is declared as `BaseResultDTO`. For endpoints returning `ResultDTO<T>`, use a null-safe `as` cast — never a direct cast:
+
+```csharp
+var result = endpoint.Response as ResultDTO<MyDTO>;
+result.ShouldNotBeNull();
+result.Value!.SomeField.ShouldBe(expected);
+```
 
 ### Static abstract settings interfaces
 
@@ -211,27 +231,26 @@ var sut = Mock.Create<MyHandler>(
 6. Assert result + database state + mock interactions.
 7. Run the specific test project first, usually with a narrow TUnit `--treenode-filter`, then broaden the scope if needed.
 
-## Commands
+## Unit Test Verification
 
-Run a specific backend unit test project:
+Use the shared build/test commands from `reaparr-backend`.
 
-```bash
-dotnet run --project tests/UnitTests/<Project>.UnitTests/<Project>.UnitTests.csproj -- --no-ansi --disable-logo
+For unit test work:
+- Start with the relevant `tests/UnitTests/<Project>.UnitTests/<Project>.UnitTests.csproj` project.
+- Prefer a narrow `--treenode-filter` for fast iteration.
+- Broaden to the full affected unit test project before claiming completion when behavior or shared test infrastructure changed.
+
+### TUnit filtering for unit tests
+
+Use `--treenode-filter`, not `--filter`.
+
+Filter syntax is:
+
+```text
+/<Assembly>/<Namespace>/<Class>/<Test>
 ```
 
-Common projects:
-
-```bash
-dotnet run --project tests/UnitTests/Application.UnitTests/Application.UnitTests.csproj -- --no-ansi --disable-logo
-dotnet run --project tests/UnitTests/BackgroundJobs.UnitTests/BackgroundJobs.UnitTests.csproj -- --no-ansi --disable-logo
-```
-
-### TUnit test filtering
-
-- TUnit does **not** use `--filter` here. Use `--treenode-filter`.
-- Filter syntax is `/<Assembly>/<Namespace>/<Class>/<Test>`.
-- Use `*` as a wildcard for segments you do not want to pin exactly.
-- Use parentheses with `|` for OR conditions inside a single segment.
+Use `*` as a wildcard for segments you do not want to pin exactly. Use parentheses with `|` for OR conditions inside a single segment.
 
 Filter by class:
 
@@ -257,7 +276,7 @@ Filter by namespace prefix:
 dotnet run --project tests/UnitTests/Application.UnitTests/Application.UnitTests.csproj -- --no-ansi --disable-logo --treenode-filter "/*/Reaparr.Application.UnitTests.PlexDownloads*/*/*"
 ```
 
-If you need to discover the exact test names or class names before filtering, list tests first:
+If you need exact test or class names, list tests first:
 
 ```bash
 dotnet run --project tests/UnitTests/Application.UnitTests/Application.UnitTests.csproj -- --no-ansi --disable-logo --list-tests
@@ -265,6 +284,7 @@ dotnet run --project tests/UnitTests/Application.UnitTests/Application.UnitTests
 
 ## Common Mistakes
 
+- Using `[ClassName*]` bracket syntax in the class segment of `--treenode-filter` — this causes "Zero tests ran". Brackets are for property filters only (5th segment). Use plain wildcards: `"/*/*/MyClassUnitTests/*"` not `"/*/*/*[MyClass*]"`.
 - Putting tests in the wrong `*.UnitTests` project because of command location instead of handler location.
 - Using folder-based namespaces instead of `<SUTProjectNamespace>.UnitTests`.
 - Asserting only return values and not checking database state or mock interactions.
@@ -275,3 +295,6 @@ dotnet run --project tests/UnitTests/Application.UnitTests/Application.UnitTests
 - Hiding real logic (DB writes, status updates) inside mock callbacks instead of returning the expected type and verifying with `Verify`.
 - Making post-Act DB assertions that only pass because a mocked dependency performed production logic in a callback.
 - Placing `Mock.Mock<T>()` setups before data setup or mixed in with DB seeding — mock setups must always be the last step of Arrange.
+- Using non-generic `BaseUnitTest` for endpoint tests — always use `BaseUnitTest<TEndpoint>` even when `Sut` is not directly referenced.
+- Direct-casting `endpoint.Response` to `ResultDTO<T>` — use `as ResultDTO<T>` (null-safe) and assert non-null, not `(ResultDTO<T>)endpoint.Response`.
+- Calling `Factory.Create<T>` directly for endpoint tests — always use `SetupEndpointUnitTest<T>()` instead. For non-standard dependencies, pass the `extraServices` parameter: `SetupEndpointUnitTest<MyEndpoint>(s => s.AddSingleton(_ => mockDep.Object))`. Never manually register `ILogger` — `SetupEndpointUnitTest` handles it.

@@ -29,7 +29,16 @@
         },
         "app-bar": {
             "no-accounts": "Brak dostępnych kont",
-            "copy-version": "Kopiuj wersję Reaparr - { version }"
+            "copy-version": "Kopiuj wersję Reaparr - { version }",
+            "update-available": ""
+        },
+        "update-available-dialog": {
+            "title": "Nowa wersja dostępna",
+            "current-version": "Aktualny: {version}",
+            "latest-version": "Najnowsze: {version}",
+            "download-update": "Pobierz aktualizację",
+            "docker-action": "Wyświetl wydania Dockera",
+            "no-releases": "W tej chwili nie ma dostępnych żadnych wydań."
         },
         "details-overview": {
             "total-duration": "Całkowity czas trwania:",
@@ -84,14 +93,6 @@
                 "delete-confirmation": {
                     "title": "Usuń wszystkie logi",
                     "text": "Czy na pewno chcesz usunąć wszystkie logi dla tego zadania pobierania?"
-                },
-                "levels": {
-                    "debug": "Debugowanie",
-                    "information": "Informacja",
-                    "success": "Sukces",
-                    "warning": "Ostrzeżenie",
-                    "error": "Błąd",
-                    "fatal": "Krytyczny"
                 }
             }
         },
@@ -110,6 +111,7 @@
             "debug": "Debugowanie",
             "dialogs": "Dialogi",
             "downloads": "Pobrania",
+            "logs": "Logi",
             "paths": "Ścieżki",
             "settings": "Ustawienia",
             "ui": "UI",
@@ -432,26 +434,18 @@
             "title": "Integracja Radar"
         }
     },
-    "confirmation": {
-        "delete-account": {
-            "text": "Spowoduje to usunięcie tego konta Plex z Reaparr!\n\nSpowoduje to również usunięcie wszystkich niedostępnych serwerów współdzielonych Plex, bibliotek Plex i wszystkich zawartych w nich multimediów. Wszelkie aktywne pliki do pobrania, które zostały rozpoczęte lub ustawione w kolejce na tym koncie, zostaną anulowane i usunięte. Zakończone pobieranie pozostanie nietknięte.",
-            "title": "Jesteś pewny?",
-            "warning": "Może to potrwać około 5 minut lub dłużej, po czym okno zamknie się automatycznie!"
-        },
-        "hide-server": {
-            "text": "To ukryje serwer z widoku. Możesz odkryć ten serwer, przechodząc do ustawień -> UI -> Odkryj serwery Plex",
-            "title": "Jesteś pewny?"
-        },
-        "reset-db": {
-            "text": "Spowoduje to utworzenie kopii zapasowej bieżącej bazy danych w \"config/Database Backup/\" i utworzenie nowej, po czym nastąpi przekierowanie do strony konfiguracji. Nie spowoduje to zresetowania ustawień, ponieważ są one przechowywane w pliku \"config/ReaparrSettings.json\".",
-            "title": "Jesteś pewny?"
-        },
-        "not-found": {
-            "text": "Nie można znaleźć prawidłowego tekstu potwierdzenia.",
-            "title": "Nie można znaleźć prawidłowego tekstu potwierdzenia."
-        }
-    },
     "general": {
+        "logs": {
+            "level": {
+                "debug": "Debugowanie",
+                "information": "Informacja",
+                "success": "Sukces",
+                "warning": "Ostrzeżenie",
+                "error": "Błąd",
+                "fatal": "Krytyczny",
+                "verbose": "Gadatliwy"
+            }
+        },
         "alerts": {
             "disabled-paths": "Edycja ścieżek jest wyłączona, gdy są aktywne pobierania. Upewnij się, że wszystkie pobierania są zatrzymane lub wyczyszczone!",
             "invalid-directory": "Katalog nie jest prawidłową ścieżką!",
@@ -545,6 +539,25 @@
             "quality-1440-qhd": "QHD (1440p)",
             "quality-2160-uhd-4k": "4K (2160p)",
             "quality-4320-uhd-8k": "8K (4320p)"
+        }
+    },
+    "confirmation": {
+        "delete-account": {
+            "text": "Spowoduje to usunięcie tego konta Plex z Reaparr!\n\nSpowoduje to również usunięcie wszystkich niedostępnych serwerów współdzielonych Plex, bibliotek Plex i wszystkich zawartych w nich multimediów. Wszelkie aktywne pliki do pobrania, które zostały rozpoczęte lub ustawione w kolejce na tym koncie, zostaną anulowane i usunięte. Zakończone pobieranie pozostanie nietknięte.",
+            "title": "Jesteś pewny?",
+            "warning": "Może to potrwać około 5 minut lub dłużej, po czym okno zamknie się automatycznie!"
+        },
+        "hide-server": {
+            "text": "To ukryje serwer z widoku. Możesz odkryć ten serwer, przechodząc do ustawień -> UI -> Odkryj serwery Plex",
+            "title": "Jesteś pewny?"
+        },
+        "reset-db": {
+            "text": "Spowoduje to utworzenie kopii zapasowej bieżącej bazy danych w \"config/Database Backup/\" i utworzenie nowej, po czym nastąpi przekierowanie do strony konfiguracji. Nie spowoduje to zresetowania ustawień, ponieważ są one przechowywane w pliku \"config/ReaparrSettings.json\".",
+            "title": "Jesteś pewny?"
+        },
+        "not-found": {
+            "text": "Nie można znaleźć prawidłowego tekstu potwierdzenia.",
+            "title": "Nie można znaleźć prawidłowego tekstu potwierdzenia."
         }
     },
     "help": {
@@ -833,6 +846,13 @@
                         "title": "Przetestuj połączenie z Radarr"
                     }
                 }
+            },
+            "logs": {
+                "title": {
+                    "title": "Dzienniki na żywo",
+                    "text": "Tutaj wyświetlane są tylko logi z bieżącego uruchomienia aplikacji. Starsze logi można znaleźć w katalogu /config.",
+                    "label": "Dzienniki aplikacji Reaparr"
+                }
             }
         },
         "media-options": {
@@ -906,6 +926,24 @@
                 "setup": {
                     "header": "Konfiguracja Reaparr"
                 }
+            },
+            "logs": {
+                "title": "Dzienniki aplikacji Reaparr",
+                "clear": "Wyczyść",
+                "search": "Szukaj w logach",
+                "level-filter": "Poziomy",
+                "visible-count": "Wyświetlanie {count} z {total} logów w pamięci podręcznej",
+                "empty": "Żadne logi na żywo nie pasują do bieżących filtrów.",
+                "sort": {
+                    "oldest-first": "Najstarsze najpierw",
+                    "newest-first": "Najnowsze najpierw"
+                },
+                "refresh": "",
+                "copy": "",
+                "copy-selected": "Kopiuj zaznaczone ({count})",
+                "copy-all": "Kopiuj wszystkie logi",
+                "pause-scroll": "",
+                "copied-to-clipboard": ""
             },
             "ui": {
                 "confirmation-settings": {

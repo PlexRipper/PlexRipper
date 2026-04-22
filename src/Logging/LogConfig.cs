@@ -17,22 +17,26 @@ public class LogConfig
 
     public static string SourceContext => nameof(SourceContext);
 
-    // TemplateTheme.Code uses ANSI escape codes unconditionally, unlike SystemConsoleTheme
-    // which uses Console.ForegroundColor and produces no color when stdout is redirected (Rider Run mode).
-    // applyThemeWhenOutputIsRedirected: true forces ANSI codes even when Rider's test runner
-    // redirects stdout (which normally causes ExpressionTemplate to suppress the theme).
-    protected static readonly ExpressionTemplate Template = new(
-        // Template
+    private const string TemplateText =
         "{@t:HH:mm:ss} [{@l}] "
-            + "{#if FileName is not null}"
-            + "[{FileName}:{LineNumber}.{MethodName}()]"
-            + "{#else}"
-            + "[{SourceContext}]"
-            + "{#end} => {@m}\n{@x}\n",
-        theme: LogThemes.SystemColored.ToTemplateTheme(),
-        applyThemeWhenOutputIsRedirected: true
+        + "{#if FileName is not null}"
+        + "[{FileName}:{LineNumber}.{MethodName}()]"
+        + "{#else}"
+        + "[{SourceContext}]"
+        + "{#end} => {@m}\n{@x}\n";
+
+    // Keep interactive console/debug output colorized, but leave redirected CI/test output plain text.
+    protected static readonly ExpressionTemplate ConsoleTemplate = new(
+        TemplateText,
+        theme: LogThemes.SystemColored.ToTemplateTheme()
     );
 
+    protected static readonly ExpressionTemplate FileTemplate = new(TemplateText);
+
+    /// <summary>
+    /// Provides a base configuration with console and debug sinks, and allows for extension by derived classes (e.g. to add file or Seq sinks).
+    /// </summary>
+    /// <returns></returns>
     protected static LoggerConfiguration GetBaseConfiguration()
     {
         var config = new LoggerConfiguration()
@@ -82,20 +86,27 @@ public class LogConfig
             });
         }
 
-        return config.Enrich.FromLogContext().WriteTo.Debug(Template).WriteTo.Console(Template);
+        return config.Enrich.FromLogContext().WriteTo.Debug(ConsoleTemplate).WriteTo.Console(ConsoleTemplate);
     }
 
-    public virtual Logger GetLogger(LogEventLevel minimumLogLevel = LogEventLevel.Debug) =>
+    /// <summary>
+    /// Provides an extended sink configuration with file and Seq sinks.
+    /// </summary>
+    /// <param name="minimumLogLevel"> Minimum log level for the file and Seq sinks (console and debug sinks will still use the base configuration's minimum level).</param>
+    protected virtual LoggerConfiguration GetExtendedConfiguration(
+        LogEventLevel minimumLogLevel = LogEventLevel.Debug
+    ) =>
         GetBaseConfiguration()
-            .WriteTo.Seq(EnvironmentExtensions.GetSeqUrl())
+            .WriteTo.Seq(EnvironmentExtensions.GetSeqUrl(), restrictedToMinimumLevel: minimumLogLevel)
             .WriteTo.File(
-                Template,
+                FileTemplate,
                 Path.Combine(PathProvider.LogsDirectory, "log.txt"),
-                minimumLogLevel,
+                restrictedToMinimumLevel: minimumLogLevel,
                 rollingInterval: RollingInterval.Day,
                 rollOnFileSizeLimit: true,
                 retainedFileCountLimit: 7
-            )
-            .MinimumLevel.Is(minimumLogLevel)
-            .CreateLogger();
+            );
+
+    public virtual Logger GetLogger(LogEventLevel minimumLogLevel = LogEventLevel.Debug) =>
+        GetExtendedConfiguration(minimumLogLevel).CreateLogger();
 }

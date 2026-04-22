@@ -1,4 +1,4 @@
-﻿namespace Reaparr.AppHost;
+namespace Reaparr.AppHost;
 
 /// <summary>
 ///  Autofac module for the AppHost project.
@@ -13,6 +13,11 @@ public class AppHostModule : Module
         // This needs to be registered in order to fire Boot on Application startup
         builder.RegisterType<Boot>().As<IHostedService>().SingleInstance();
 
+        builder
+            .RegisterType<DesktopSingleInstanceCoordinator>()
+            .As<IDesktopSingleInstanceCoordinator>()
+            .SingleInstance();
+        builder.RegisterType<DesktopWindow>().As<IDesktopWindow>().InstancePerDependency();
         builder.RegisterType<DesktopMode>().As<IDesktopMode>().SingleInstance();
     }
 }

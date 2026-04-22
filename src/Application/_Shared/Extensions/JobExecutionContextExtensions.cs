@@ -57,6 +57,10 @@ public static class JobExecutionContextExtensions
             case JobTypes.LibrarySyncJob:
                 break;
 
+            // NOTE: CheckForUpdateJob emits update availability through RefreshDataType.UpdateAvailable notifications.
+            case JobTypes.CheckForUpdateJob:
+                break;
+
             default:
                 jsonString = "{}";
                 break;

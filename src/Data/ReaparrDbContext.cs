@@ -181,6 +181,9 @@ public sealed class ReaparrDbContext : DbContext, IReaparrDbContext, IReaparrDbC
         DatabaseName = PathProvider.DatabaseName;
     }
 
+    /// <summary>
+    /// Constructor for DbContextFactory with explicit database name - accepts pre-configured options used in unit and integration testing.
+    /// </summary>
     public ReaparrDbContext(DbContextOptions<ReaparrDbContext> options, string databaseName)
         : base(options)
     {
@@ -195,6 +198,10 @@ public sealed class ReaparrDbContext : DbContext, IReaparrDbContext, IReaparrDbC
         {
             optionsBuilder.DefaultConfiguration(typeof(ReaparrDbContext));
         }
+
+        optionsBuilder.UseSeeding(ReaparrDBContextSeed.Seed());
+
+        optionsBuilder.UseAsyncSeeding(ReaparrDBContextSeed.SeedAsync());
     }
 
     protected override void OnModelCreating(ModelBuilder builder)
@@ -203,9 +210,6 @@ public sealed class ReaparrDbContext : DbContext, IReaparrDbContext, IReaparrDbC
         builder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
 
         builder.AddQuartz(x => x.UseSqlite());
-
-        // TODO Make extensions methods
-        builder = ReaparrDBContextSeed.SeedDatabase(builder);
 
         base.OnModelCreating(builder);
     }

@@ -10,6 +10,8 @@ import { PlexServer } from '@api/generated/PlexServer';
 import { PlexServerConnection } from '@api/generated/PlexServerConnection';
 import { Settings } from '@api/generated/Settings';
 import { Integration } from '@api/generated/Integration';
+import { Update } from '@api/generated/Update';
+import { Debug } from '@api/generated/Debug';
 
 export * from './baseApi';
 export * from './custom';
@@ -17,6 +19,7 @@ export * from './custom';
 const authenticationApi = new Authentication();
 const backgroundJobsApi = new BackgroundJobs();
 const downloadApi = new Download();
+const debugApi = new Debug();
 const folderPathApi = new FolderPath();
 const notificationApi = new Notification();
 const plexAccountApi = new PlexAccount();
@@ -26,11 +29,13 @@ const plexServerApi = new PlexServer();
 const plexServerConnectionApi = new PlexServerConnection();
 const integrationApi = new Integration();
 const settingsApi = new Settings();
+const updateApi = new Update();
 
 export {
 	authenticationApi,
 	backgroundJobsApi,
 	downloadApi,
+	debugApi,
 	folderPathApi,
 	notificationApi,
 	plexAccountApi,
@@ -40,4 +45,5 @@ export {
 	plexServerConnectionApi,
 	settingsApi,
 	integrationApi,
+	updateApi,
 };

@@ -209,14 +209,14 @@ watch(
 const allLevels = Object.values(NotificationLevel).filter((v) => v !== NotificationLevel.None && v !== NotificationLevel.Verbose);
 
 const logLevelLabels = computed<Record<NotificationLevel, string>>(() => ({
-	[NotificationLevel.None]: '',
-	[NotificationLevel.Verbose]: '',
-	[NotificationLevel.Debug]: t('components.download-details-dialog.logs.levels.debug'),
-	[NotificationLevel.Information]: t('components.download-details-dialog.logs.levels.information'),
-	[NotificationLevel.Success]: t('components.download-details-dialog.logs.levels.success'),
-	[NotificationLevel.Warning]: t('components.download-details-dialog.logs.levels.warning'),
-	[NotificationLevel.Error]: t('components.download-details-dialog.logs.levels.error'),
-	[NotificationLevel.Fatal]: t('components.download-details-dialog.logs.levels.fatal'),
+	[NotificationLevel.None]: t('general.commands.unknown'),
+	[NotificationLevel.Verbose]: t('general.logs.level.verbose'),
+	[NotificationLevel.Debug]: t('general.logs.level.debug'),
+	[NotificationLevel.Information]: t('general.logs.level.information'),
+	[NotificationLevel.Success]: t('general.logs.level.success'),
+	[NotificationLevel.Warning]: t('general.logs.level.warning'),
+	[NotificationLevel.Error]: t('general.logs.level.error'),
+	[NotificationLevel.Fatal]: t('general.logs.level.fatal'),
 }));
 
 const filteredLogs = computed(() => {

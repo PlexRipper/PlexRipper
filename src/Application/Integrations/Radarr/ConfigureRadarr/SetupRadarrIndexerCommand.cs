@@ -47,7 +47,7 @@ public class SetupRadarrIndexerCommandHandler
         if (!_radarrSettings.IsValidUrl())
             return Result.Fail("Radarr settings are invalid: BaseUrl is invalid.").LogError();
 
-        _log.Information("Setting up Radarr indexer '{IndexerName}'...", _indexerName);
+        _log.Here().Information("Setting up Radarr indexer '{IndexerName}'...", _indexerName);
 
         // Check for existing indexers
         var getResult = await _commandExecutor.Send(new RadarrApiGetIndexersCommand(), ct);
@@ -63,7 +63,7 @@ public class SetupRadarrIndexerCommandHandler
 
         if (existing is not null)
         {
-            _log.Information("Indexer '{IndexerName}' already exists in Radarr. Updating...", _indexerName);
+            _log.Here().Information("Indexer '{IndexerName}' already exists in Radarr. Updating...", _indexerName);
             // Update existing indexer
             var updateResult = await _commandExecutor.Send(
                 new RadarrApiUpdateIndexerCommand
@@ -78,12 +78,12 @@ public class SetupRadarrIndexerCommandHandler
             if (updateResult.IsFailed)
                 return updateResult.LogError();
 
-            _log.Information("Successfully updated indexer '{IndexerName}' in Radarr.", _indexerName);
+            _log.Here().Information("Successfully updated indexer '{IndexerName}' in Radarr.", _indexerName);
             return Result.Ok(new SetupRadarrIndexerCommandResult { IndexerId = updateResult.Value.Id });
         }
 
         // Create a new indexer
-        _log.Information("Creating new indexer '{IndexerName}' in Radarr...", _indexerName);
+        _log.Here().Information("Creating new indexer '{IndexerName}' in Radarr...", _indexerName);
         var createResult = await _commandExecutor.Send(
             new RadarrApiCreateIndexerCommand
             {
@@ -96,7 +96,7 @@ public class SetupRadarrIndexerCommandHandler
         if (createResult.IsFailed)
             return createResult.LogError();
 
-        _log.Information("Successfully created indexer '{IndexerName}' in Radarr.", _indexerName);
+        _log.Here().Information("Successfully created indexer '{IndexerName}' in Radarr.", _indexerName);
         return Result.Ok(new SetupRadarrIndexerCommandResult { IndexerId = createResult.Value.Id });
     }
 

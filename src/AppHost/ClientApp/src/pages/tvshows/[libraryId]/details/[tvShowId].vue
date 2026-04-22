@@ -33,7 +33,7 @@
 											<td
 												colspan="2"
 												class="media-info-column media-title">
-												{{ mediaItemDetail?.title ?? 'unknown' }}
+												{{ mediaItemDetail?.title ?? t('general.commands.unknown') }}
 											</td>
 										</tr>
 										<tr>

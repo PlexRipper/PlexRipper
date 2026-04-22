@@ -3,6 +3,8 @@ namespace Reaparr.Data;
 // ReSharper disable once InconsistentNaming
 public static class ReaparrDBContextSeed
 {
+    private static readonly ILogger _log = Log.ForContext(typeof(ReaparrDBContextSeed));
+
     public static List<FolderPath> GetDefaultFolderPaths()
     {
         // NOTE: Don't change the DirectoryPath to something dynamic, this will make the EF core migrations fail due to the seed data becoming inconsistent between migrations.
@@ -93,11 +95,61 @@ public static class ReaparrDBContextSeed
         ];
     }
 
-    public static ModelBuilder SeedDatabase(ModelBuilder builder)
-    {
-        foreach (var folderPath in GetDefaultFolderPaths())
-            builder.Entity<FolderPath>().HasData(folderPath);
+    public static Action<DbContext, bool> Seed() =>
+        (context, _) =>
+        {
+            if (context is not ReaparrDbContext db)
+                return;
 
-        return builder;
+            var existingFolderPathIds = db.FolderPaths.Select(x => x.Id).ToHashSet();
+
+            foreach (var path in GetDefaultFolderPaths().Where(x => !existingFolderPathIds.Contains(x.Id)))
+            {
+                _log.Here()
+                    .Debug(
+                        "Seeding default folder path with id {Id} and directory {DirectoryPath}",
+                        path.Id,
+                        path.DirectoryPath
+                    );
+                db.FolderPaths.Add(path);
+            }
+
+            db.SaveChanges();
+
+            Verify(db);
+        };
+
+    public static Func<DbContext, bool, CancellationToken, Task> SeedAsync() =>
+        async (context, _, cancellationToken) =>
+        {
+            if (context is not ReaparrDbContext db)
+                return;
+
+            var existingFolderPathIds = await db.FolderPaths.Select(x => x.Id).ToHashSetAsync(cancellationToken);
+
+            foreach (var path in GetDefaultFolderPaths().Where(x => !existingFolderPathIds.Contains(x.Id)))
+            {
+                _log.Here()
+                    .Debug(
+                        "Seeding default folder path with id {Id} and directory {DirectoryPath}",
+                        path.Id,
+                        path.DirectoryPath
+                    );
+                await db.FolderPaths.AddAsync(path, cancellationToken);
+            }
+
+            await db.SaveChangesAsync(cancellationToken);
+
+            Verify(db);
+        };
+
+    private static void Verify(ReaparrDbContext db)
+    {
+        var verify = db.FolderPaths.AsNoTracking().ToList();
+
+        foreach (var v in verify)
+        {
+            _log.Here().Debug("DB AFTER SAVE: {Id} => {Path}", v.Id, v.DirectoryPath);
+        }
     }
 }

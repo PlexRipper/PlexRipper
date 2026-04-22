@@ -33,19 +33,21 @@ public static class LogFactory
     {
         MinimumLogLevel = minimumLogLevel;
         Log.Logger = (logConfig ?? new LogConfig()).GetLogger(minimumLogLevel);
+        var log = Create();
 
-        Create().Here().Information("Logging level set to {LogLevel}", MinimumLogLevel);
+        log.Here().Information("Starting Reaparr!");
+
+        log.Here().Information("Logging level set to {LogLevel}", MinimumLogLevel);
 
         if (EnvironmentExtensions.IsUnmasked())
         {
-            Create()
-                .Here()
+            log.Here()
                 .Warning(
                     "Environment variable {UnmaskedKey} has been set to true, which means that sensitive data will be shown in the logs!",
                     EnvKeys.Unmasked
                 );
 
-            Create().Here().Warning("This username should be shown: {Username}", "SomeSecretUsername");
+            log.Here().Warning("This username should be shown: {Username}", "SomeSecretUsername");
         }
     }
 

@@ -39,6 +39,7 @@ public class NSwagAddExtraTypes : IDocumentProcessor
             typeof(LibrarySyncProgressDTO),
             typeof(DownloadPatchDTO),
             typeof(DownloadPatchMessagePackDTO),
+            typeof(AppUpdateDownloadProgressDTO),
         ];
 
         foreach (var type in types.Where(type => !context.SchemaResolver.HasSchema(type, false)))

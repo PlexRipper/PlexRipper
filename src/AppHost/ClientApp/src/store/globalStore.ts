@@ -16,6 +16,7 @@ import {
 	useHelpStore,
 	useIntegrationStore,
 	useLibraryStore,
+	useLogsStore,
 	useLocalizationStore,
 	useMediaStore,
 	useNotificationsStore,
@@ -23,12 +24,14 @@ import {
 	useServerStore,
 	useSettingsStore,
 	useSignalrStore,
+	useUpdateStore,
 	useAuthenticationStore,
 } from '@store';
 import { cloneDeep } from 'lodash-es';
 
 interface IAppConfigStoreState {
 	version: string;
+	platform: string;
 	config: IAppConfig;
 	pageReadyObservable: Subject<boolean>;
 }
@@ -36,6 +39,7 @@ interface IAppConfigStoreState {
 export const useGlobalStore = defineStore(StoreNames.GlobalStore, () => {
 	const defaultState: IAppConfigStoreState = {
 		version: '?',
+		platform: '?',
 		config: {} as IAppConfig,
 		pageReadyObservable: new ReplaySubject<boolean>(),
 	};
@@ -84,12 +88,14 @@ export const useGlobalStore = defineStore(StoreNames.GlobalStore, () => {
 				useHelpStore().setup(),
 				useLibraryStore().setup(),
 				useLocalizationStore().setup(),
+				useLogsStore().setup(),
 				useMediaStore().setup(),
 				useNotificationsStore().setup(),
 				useServerConnectionStore().setup(),
 				useServerStore().setup(),
 				useSettingsStore().setup(),
 				useSignalrStore().setup(),
+				useUpdateStore().setup(),
 			]).pipe(
 				switchMap((results) => {
 					return useIntegrationStore().setup().pipe(
@@ -105,6 +111,13 @@ export const useGlobalStore = defineStore(StoreNames.GlobalStore, () => {
 			Log.info('Reaparr App Version:', version);
 			state.version = version;
 		},
+		setAppPlatform(platform: string): void {
+			if (!platform || state.platform === platform) {
+				return;
+			}
+			Log.info('Reaparr App Platform:', platform);
+			state.platform = platform;
+		},
 		$reset() {
 			useAccountDialogStore().$reset();
 			useAccountStore().$reset();
@@ -117,6 +130,7 @@ export const useGlobalStore = defineStore(StoreNames.GlobalStore, () => {
 			useHelpStore().$reset();
 			useLibraryStore().$reset();
 			useLocalizationStore().$reset();
+			useLogsStore().$reset();
 			useMediaOverviewStore().$reset();
 			useMediaStore().$reset();
 			useNotificationsStore().$reset();
@@ -124,11 +138,14 @@ export const useGlobalStore = defineStore(StoreNames.GlobalStore, () => {
 			useServerStore().$reset();
 			useSettingsStore().$reset();
 			useSignalrStore().$reset();
+			useUpdateStore().$reset();
 			useIntegrationStore().$reset();
 		},
 	};
 	const getters = {
 		getPageSetupReady: computed((): Observable<boolean> => state.pageReadyObservable.asObservable()),
+		isDockerMode: computed(() => state.platform === 'docker'),
+		isDesktopMode: computed(() => state.platform === 'desktop'),
 	};
 	return {
 		...toRefs(state),

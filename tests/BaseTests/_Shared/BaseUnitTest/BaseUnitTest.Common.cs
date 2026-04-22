@@ -6,6 +6,14 @@ public partial class BaseUnitTest
 {
     protected readonly ILogger Log;
 
+    /// <summary>
+    /// Sets the given environment variable overrides for the duration of the test and then clears them. Uses <see cref="AsyncLocal{T}"/> inside <see cref="EnvironmentExtensions"/>
+    /// so parallel tests each get an isolated scope with no locking required.
+    /// </summary>
+    protected static IDisposable WithEnvironmentVariablesAsync(
+        IReadOnlyDictionary<string, string?> environmentVariables
+    ) => EnvironmentExtensions.WithOverrides(environmentVariables);
+
     // Use loose behavior here to avoid Dispose() not mocked exception
     protected Mock<HttpMessageHandler> HttpHandlerMock = new(MockBehavior.Loose);
 
@@ -31,7 +39,7 @@ public partial class BaseUnitTest
         Mock = AutoMock.GetStrict(SetDefaultBuilder);
     }
 
-    protected T SetupEndpointUnitTest<T>()
+    protected T SetupEndpointUnitTest<T>(Action<IServiceCollection>? extraServices = null)
         where T : class, IEndpoint
     {
         return Factory.Create<T>(ctx =>
@@ -50,6 +58,8 @@ public partial class BaseUnitTest
                 s.AddSingleton(_ => Mock.Mock<IDownloadHubService>().Object);
                 s.AddSingleton(_ => Mock.Mock<INotificationHubService>().Object);
                 s.AddSingleton(_ => Mock.Mock<IDownloadTaskScheduler>().Object);
+
+                extraServices?.Invoke(s);
             });
         });
     }

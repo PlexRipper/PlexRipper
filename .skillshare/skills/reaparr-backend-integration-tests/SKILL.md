@@ -5,6 +5,10 @@ description: Use when creating, updating, debugging, or stabilizing Reaparr back
 
 # Reaparr Backend Integration Tests
 
+## Required First Skill
+
+Load `reaparr-backend` before this skill. It owns shared backend tooling, architecture, build/test commands, and verification gates.
+
 ## Overview
 
 Use this skill for backend integration tests in Reaparr.
@@ -81,6 +85,9 @@ Use `UnitTestDataConfig` in `CreateContainer(..., config => { ... })`:
 - `FileSystemOptions`: prepare expected source files/directories for filesystem flows.
 - `OverrideServices`: override Autofac dependencies for fault-injection scenarios.
 
+Use the narrowest seam that the hosted integration path actually honors:
+- Prefer overriding `ICommandExecutor` with `FakeCommandExecutor` when endpoint behavior depends on command dispatch. This is the most reliable way to intercept FastEndpoints command execution in integration tests.
+
 Reference files:
 - `tests/BaseTests/_Shared/UnitTestDataConfig.cs`
 - `tests/BaseTests/_Shared/Config/Autofac/TestModule.cs`
@@ -94,6 +101,20 @@ Reference files:
 - Use `await container.SchedulerService.AwaitScheduler(...)` after scheduling job-driven operations.
 
 Do not replace strict final assertions with long sleeps.
+
+## Test Structure
+
+Every integration test method **must** include the three AAA comment markers — no exceptions:
+
+```csharp
+// Arrange
+
+// Act
+
+// Assert
+```
+
+Place `// Arrange` before setup/seeding, `// Act` before the HTTP call or operation under test, and `// Assert` before all post-operation checks.
 
 ## Assertion Strictness Standard
 
@@ -138,15 +159,15 @@ Relevant files:
 - `tests/BaseTests/FakePlexApiData/GetLibrarySectionsAllResponse/FakePlexApiData.GetLibrarySectionsAllMediaContainer.cs`
 - `tests/BaseTests/FakePlexApiData/GetMediaMetaData/FakePlexApiData.MediaMetaDataMediaContainer.cs`
 
-## Verification Commands
+## Integration Test Verification
 
-Targeted iteration example:
+Use the shared build/test commands from `reaparr-backend`.
 
-```bash
-dotnet run --project tests/IntegrationTests/IntegrationTests/IntegrationTests.csproj -- --no-ansi --disable-logo --treenode-filter "/*/*/*[RefreshLibraryMediaEndpointIntegrationTests*]"
-```
-
-Mandatory completion gate:
+For integration test work:
+- Start with a targeted `--treenode-filter` when reproducing or iterating on a specific failing class or test.
+- Use `--list-tests` if exact names are unknown.
+- Do not stop at targeted-test green.
+- Mandatory completion gate for any integration test change or integration failure fix:
 
 ```bash
 dotnet run --project tests/IntegrationTests/IntegrationTests/IntegrationTests.csproj -- --no-ansi --disable-logo
@@ -154,6 +175,58 @@ dotnet run --project tests/IntegrationTests/IntegrationTests/IntegrationTests.cs
 
 CI alignment:
 - Workflow uses this same project in `.github/workflows/dev-test.yml`.
+
+### TUnit filtering for integration tests
+
+Use `--treenode-filter`, not `--filter`. Syntax: `/<Assembly>/<Namespace>/<Class>/<Test>` — exactly 4 path segments separated by `/`.
+
+**CRITICAL: `[...]` bracket syntax is for property filters only (5th segment).** Never use brackets in class or test-name segments; doing so matches zero tests silently.
+
+| Segment | Position | Example value |
+|---------|----------|---------------|
+| Assembly | 1st (`/*`) | wildcard always |
+| Namespace | 2nd (`/*`) | `Reaparr.IntegrationTests.Api*` |
+| Class name | 3rd | `RefreshLibraryMediaEndpointIntegrationTests` or `*Endpoint*` |
+| Test name | 4th | `*` or exact method name |
+| Property filter | 5th (optional) | `[Category=Smoke]` |
+
+Filter by class name:
+
+```bash
+dotnet run --project tests/IntegrationTests/IntegrationTests/IntegrationTests.csproj -- --no-ansi --disable-logo --treenode-filter "/*/*/RefreshLibraryMediaEndpointIntegrationTests/*"
+```
+
+Filter by class wildcard:
+
+```bash
+dotnet run --project tests/IntegrationTests/IntegrationTests/IntegrationTests.csproj -- --no-ansi --disable-logo --treenode-filter "/*/*/CheckForUpdate*/*"
+```
+
+Filter multiple classes with OR:
+
+```bash
+dotnet run --project tests/IntegrationTests/IntegrationTests/IntegrationTests.csproj -- --no-ansi --disable-logo --treenode-filter "/*/*/(RefreshLibraryMediaEndpointIntegrationTests)|(CheckForUpdateEndpointIntegrationTests)/*"
+```
+
+Filter by namespace prefix:
+
+```bash
+dotnet run --project tests/IntegrationTests/IntegrationTests/IntegrationTests.csproj -- --no-ansi --disable-logo --treenode-filter "/*/Reaparr.IntegrationTests.Api*/*/*"
+```
+
+Filter by specific test method:
+
+```bash
+dotnet run --project tests/IntegrationTests/IntegrationTests/IntegrationTests.csproj -- --no-ansi --disable-logo --treenode-filter "/*/*/*/ShouldReturn200_WhenLibraryRefreshSucceeds"
+```
+
+If exact names are unknown, list tests first:
+
+```bash
+dotnet run --project tests/IntegrationTests/IntegrationTests/IntegrationTests.csproj -- --no-ansi --disable-logo --list-tests
+```
+
+**Anti-pattern (zero tests ran):** `"/*/*/*[CheckForUpdateEndpoint*]"` puts bracket property syntax in the class segment. Use `"/*/*/CheckForUpdateEndpoint*/*"` instead.
 
 ## Definition of Done
 

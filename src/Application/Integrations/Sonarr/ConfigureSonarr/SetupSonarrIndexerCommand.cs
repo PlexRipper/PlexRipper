@@ -47,7 +47,7 @@ public class SetupSonarrIndexerCommandHandler
         if (!_sonarrSettings.IsValidUrl())
             return Result.Fail("Sonarr settings are invalid: BaseUrl is invalid.").LogError();
 
-        _log.Information("Setting up Sonarr indexer '{IndexerName}'...", _indexerName);
+        _log.Here().Information("Setting up Sonarr indexer '{IndexerName}'...", _indexerName);
 
         // Check for existing indexers
         var getResult = await _commandExecutor.Send(new SonarrApiGetIndexersCommand(), ct);
@@ -63,7 +63,7 @@ public class SetupSonarrIndexerCommandHandler
 
         if (existing is not null)
         {
-            _log.Information("Indexer '{IndexerName}' already exists in Sonarr. Updating...", _indexerName);
+            _log.Here().Information("Indexer '{IndexerName}' already exists in Sonarr. Updating...", _indexerName);
             // Update existing indexer
             var updateResult = await _commandExecutor.Send(
                 new SonarrApiUpdateIndexerCommand
@@ -78,12 +78,12 @@ public class SetupSonarrIndexerCommandHandler
             if (updateResult.IsFailed)
                 return updateResult.LogError();
 
-            _log.Information("Successfully updated indexer '{IndexerName}' in Sonarr.", _indexerName);
+            _log.Here().Information("Successfully updated indexer '{IndexerName}' in Sonarr.", _indexerName);
             return Result.Ok(new SetupSonarrIndexerCommandResult { IndexerId = updateResult.Value.Id });
         }
 
         // Create a new indexer
-        _log.Information("Creating new indexer '{IndexerName}' in Sonarr...", _indexerName);
+        _log.Here().Information("Creating new indexer '{IndexerName}' in Sonarr...", _indexerName);
         var createResult = await _commandExecutor.Send(
             new SonarrApiCreateIndexerCommand
             {
@@ -96,7 +96,7 @@ public class SetupSonarrIndexerCommandHandler
         if (createResult.IsFailed)
             return createResult.LogError();
 
-        _log.Information("Successfully created indexer '{IndexerName}' in Sonarr.", _indexerName);
+        _log.Here().Information("Successfully created indexer '{IndexerName}' in Sonarr.", _indexerName);
         return Result.Ok(new SetupSonarrIndexerCommandResult { IndexerId = createResult.Value.Id });
     }
 

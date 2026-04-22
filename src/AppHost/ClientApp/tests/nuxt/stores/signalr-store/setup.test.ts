@@ -31,6 +31,7 @@ describe('SignalrStore.setup() failure handling', () => {
 		hubConnections.set(HubName.Progress, createHub());
 		hubConnections.set(HubName.Download, createHub(new Error('Download hub failed')));
 		hubConnections.set(HubName.Notifications, createHub());
+		hubConnections.set(HubName.Logs, createHub());
 	});
 
 	test('Should return success and complete when setup is run', async () => {

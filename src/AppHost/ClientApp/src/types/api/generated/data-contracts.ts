@@ -16,6 +16,19 @@ export interface AppCredentialsDTO {
   userName: string;
 }
 
+export interface AppUpdateCheckDTO {
+  currentVersion: string;
+  isUpdateAvailable: boolean;
+  newestVersion: string;
+  releaseNotes: ReleaseNoteDTO[];
+}
+
+export interface AppUpdateDownloadProgressDTO {
+  isComplete: boolean;
+  /** @format int32 */
+  percentage: number;
+}
+
 /** @example {"username":"ReaparrRocks","password":"R€Aℙℙ@rr69","rememberMe":false} */
 export interface AppUserLoginEndpointRequest {
   /**
@@ -509,6 +522,7 @@ export enum JobTypes {
   InspectPlexServerJob = "InspectPlexServerJob",
   LibrarySyncJob = "LibrarySyncJob",
   MetadataSyncJob = "MetadataSyncJob",
+  CheckForUpdateJob = "CheckForUpdateJob",
 }
 
 export interface LanguageSettingsDTO {
@@ -573,6 +587,28 @@ export interface LibrarySyncProgressItemDTO {
   total: number;
 }
 
+export interface LiveLogEventDTO {
+  exception?: string | null;
+  level: LogSeverity;
+  message: string;
+  /** @format int64 */
+  sequence: number;
+  sourceContext?: string | null;
+  /** @format date-time */
+  timestamp: string;
+}
+
+export enum LogSeverity {
+  None = "None",
+  Verbose = "Verbose",
+  Debug = "Debug",
+  Information = "Information",
+  Success = "Success",
+  Warning = "Warning",
+  Error = "Error",
+  Fatal = "Fatal",
+}
+
 export enum MessageTypes {
   LibraryProgress = "LibraryProgress",
   DownloadTaskUpdate = "DownloadTaskUpdate",
@@ -583,6 +619,8 @@ export enum MessageTypes {
   Notification = "Notification",
   JobStatusUpdate = "JobStatusUpdate",
   RefreshNotification = "RefreshNotification",
+  AppUpdateDownloadProgress = "AppUpdateDownloadProgress",
+  LogEvent = "LogEvent",
 }
 
 export interface MoveDownloadFileJobUpdateDTO {
@@ -975,6 +1013,7 @@ export enum RefreshDataType {
   PlexLibrarySyncStatus = "PlexLibrarySyncStatus",
   PlexServerConnection = "PlexServerConnection",
   DownloadTasks = "DownloadTasks",
+  UpdateAvailable = "UpdateAvailable",
 }
 
 export interface RefreshPlexAccountAccessRapportDTO {
@@ -984,6 +1023,14 @@ export interface RefreshPlexAccountAccessRapportDTO {
   plexAccountName: string;
 }
 
+export interface ReleaseNoteDTO {
+  isDevRelease: boolean;
+  notes: string;
+  /** @format date-time */
+  releaseDate: string;
+  version: string;
+}
+
 export interface ResultDTOOfAppCredentialsDTO {
   errors: ErrorDTO[];
   isSuccess: boolean;
@@ -991,6 +1038,15 @@ export interface ResultDTOOfAppCredentialsDTO {
   statusCode: number;
   successes: SuccessDTO[];
   value?: AppCredentialsDTO | null;
+}
+
+export interface ResultDTOOfAppUpdateCheckDTO {
+  errors: ErrorDTO[];
+  isSuccess: boolean;
+  /** @format int32 */
+  statusCode: number;
+  successes: SuccessDTO[];
+  value?: AppUpdateCheckDTO | null;
 }
 
 export interface ResultDTOOfBoolean {
@@ -1100,6 +1156,15 @@ export interface ResultDTOOfListOfLibrarySyncJobQueueDTO {
   statusCode: number;
   successes: SuccessDTO[];
   value?: LibrarySyncJobQueueDTO[] | null;
+}
+
+export interface ResultDTOOfListOfLiveLogEventDTO {
+  errors: ErrorDTO[];
+  isSuccess: boolean;
+  /** @format int32 */
+  statusCode: number;
+  successes: SuccessDTO[];
+  value?: LiveLogEventDTO[] | null;
 }
 
 export interface ResultDTOOfListOfNotificationDTO {

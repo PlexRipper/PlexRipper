@@ -20,4 +20,12 @@ public interface IProgressHubService
     /// </summary>
     Task SendJobStatusUpdateAsync<T>(JobStatusUpdate<T> jobStatusUpdate, CancellationToken cancellationToken = default)
         where T : class;
+
+    /// <summary>
+    /// Sends an app download progress update to the front-end.
+    /// </summary>
+    Task SendAppUpdateDownloadProgressAsync(
+        AppUpdateDownloadProgressDTO progress,
+        CancellationToken cancellationToken = default
+    );
 }

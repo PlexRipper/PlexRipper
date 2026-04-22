@@ -74,6 +74,11 @@ const getNavItems = computed((): QExpansionListProps[] => {
 					icon: 'mdi-wrench',
 					link: '/settings/advanced',
 				},
+				{
+					title: t('components.navigation-drawer.logs'),
+					icon: 'mdi-text-box-search-outline',
+					link: '/settings/logs',
+				},
 			],
 		},
 	];

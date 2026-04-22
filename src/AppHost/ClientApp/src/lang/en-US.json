@@ -29,7 +29,16 @@
         },
         "app-bar": {
             "no-accounts": "No Accounts available",
-            "copy-version": "Copy Reaparr version - { version }"
+            "copy-version": "Copy Reaparr version - { version }",
+            "update-available": "Update available"
+        },
+        "update-available-dialog": {
+            "title": "New Version Available",
+            "current-version": "Current: {version}",
+            "latest-version": "Latest: {version}",
+            "download-update": "Download Update",
+            "docker-action": "View Docker Releases",
+            "no-releases": "No releases are currently available."
         },
         "details-overview": {
             "total-duration": "Total duration:",
@@ -84,14 +93,6 @@
                 "delete-confirmation": {
                     "title": "Delete all logs",
                     "text": "Are you sure you want to delete all logs for this download task?"
-                },
-                "levels": {
-                    "debug": "Debug",
-                    "information": "Information",
-                    "success": "Success",
-                    "warning": "Warning",
-                    "error": "Error",
-                    "fatal": "Fatal"
                 }
             }
         },
@@ -110,6 +111,7 @@
             "debug": "Debug",
             "dialogs": "Dialogs",
             "downloads": "Downloads",
+            "logs": "Logs",
             "paths": "Paths",
             "settings": "Settings",
             "ui": "UI",
@@ -432,26 +434,18 @@
             "title": "Radarr Integration"
         }
     },
-    "confirmation": {
-        "delete-account": {
-            "text": "This will delete this Plex account from Reaparr! \n\nThis will also delete all inaccessible Plex shared servers, Plex libraries and all media that is contained within. Any active downloads that are started or queued with this account will be canceled and deleted. Completed downloads will remain untouched.",
-            "title": "Are you sure?",
-            "warning": "This might take around 5 minutes or longer and then this window will close on its own!"
-        },
-        "hide-server": {
-            "text": "This will hide the server from view. You can unhide this server by going to settings -> UI -> Unhide Plex Servers",
-            "title": "Are you sure?"
-        },
-        "reset-db": {
-            "text": "This will back-up the current database to \"config/Database Backup/\" and create a new one, after which you will be redirected to the setup page. This will not reset settings since those are stored in \"config/ReaparrSettings.json\"",
-            "title": "Are you sure?"
-        },
-        "not-found": {
-            "text": "Could not find the correct confirmation text..",
-            "title": "Could not find the correct confirmation text.."
-        }
-    },
     "general": {
+        "logs": {
+            "level": {
+                "debug": "Debug",
+                "information": "Information",
+                "success": "Success",
+                "warning": "Warning",
+                "error": "Error",
+                "fatal": "Fatal",
+                "verbose": "Verbose"
+            }
+        },
         "alerts": {
             "disabled-paths": "Editing the paths is disabled when there are active downloads. Make sure all downloads are stopped or cleared!",
             "invalid-directory": "Directory is not a valid path!",
@@ -545,6 +539,25 @@
             "quality-1440-qhd": "QHD (1440p)",
             "quality-2160-uhd-4k": "4K (2160p)",
             "quality-4320-uhd-8k": "8K (4320p)"
+        }
+    },
+    "confirmation": {
+        "delete-account": {
+            "text": "This will delete this Plex account from Reaparr! \n\nThis will also delete all inaccessible Plex shared servers, Plex libraries and all media that is contained within. Any active downloads that are started or queued with this account will be canceled and deleted. Completed downloads will remain untouched.",
+            "title": "Are you sure?",
+            "warning": "This might take around 5 minutes or longer and then this window will close on its own!"
+        },
+        "hide-server": {
+            "text": "This will hide the server from view. You can unhide this server by going to settings -> UI -> Unhide Plex Servers",
+            "title": "Are you sure?"
+        },
+        "reset-db": {
+            "text": "This will back-up the current database to \"config/Database Backup/\" and create a new one, after which you will be redirected to the setup page. This will not reset settings since those are stored in \"config/ReaparrSettings.json\"",
+            "title": "Are you sure?"
+        },
+        "not-found": {
+            "text": "Could not find the correct confirmation text..",
+            "title": "Could not find the correct confirmation text.."
         }
     },
     "help": {
@@ -833,6 +846,13 @@
                         "title": "Test the connection to Radarr"
                     }
                 }
+            },
+            "logs": {
+                "title": {
+                    "title": "Live Logs",
+                    "text": "Only logs from the current application run are shown here. Older logs can be found in the /config directory.",
+                    "label": "Reaparr App Logs"
+                }
             }
         },
         "media-options": {
@@ -906,6 +926,24 @@
                 "setup": {
                     "header": "Reaparr Setup"
                 }
+            },
+            "logs": {
+                "title": "Reaparr App Logs",
+                "clear": "Clear",
+                "search": "Search logs",
+                "level-filter": "Levels",
+                "visible-count": "Showing {count} of {total} cached logs",
+                "empty": "No live logs match the current filters.",
+                "sort": {
+                    "oldest-first": "Oldest first",
+                    "newest-first": "Newest first"
+                },
+                "refresh": "Refresh logs",
+                "copy": "Copy log entry",
+                "copy-selected": "Copy selected ({count})",
+                "copy-all": "Copy all logs",
+                "pause-scroll": "Pause",
+                "copied-to-clipboard": "Log entry copied to clipboard"
             },
             "ui": {
                 "confirmation-settings": {

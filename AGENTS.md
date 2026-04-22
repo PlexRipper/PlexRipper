@@ -2,11 +2,11 @@
 
 Reaparr is a cross-platform Plex media downloader.
 
-| Layer    | Stack |
-|----------|-------|
+| Layer    | Stack                                                                                   |
+|----------|-----------------------------------------------------------------------------------------|
 | Backend  | .NET 10, FastEndpoints, EF Core, Autofac, Quartz, SignalR (MessagePack), Serilog, Polly |
-| Frontend | Nuxt 4 / Vue 3, Pinia, Quasar, PrimeVue |
-| Testing  | TUnit, Shouldly, Moq, Bogus; Vitest, Cypress |
+| Frontend | Nuxt 4 / Vue 3, Pinia, Quasar, PrimeVue                                                 |
+| Testing  | TUnit, Shouldly, Moq, Bogus; Vitest, Cypress                                            |
 
 > **Package manager:** The frontend uses **Bun exclusively** — never use npm, yarn, or pnpm.
 
@@ -32,23 +32,30 @@ bun run typecheck    # Type checking
 bun run generate-ts  # Generate TypeScript types (requires backend running in dev mode — see below)
 ```
 
-> **`generate-ts` prerequisite:** The backend must be running in dev mode before executing `bun run generate-ts`. Use the Rider run configuration at `.run/Reaparr Back-End Development.run.xml`, or start the backend manually with `dotnet run --project src/AppHost`.
+> **`generate-ts` prerequisite:** The backend must be running in dev mode before executing `bun run generate-ts`. Use
+> the Rider run configuration at `.run/Reaparr Back-End Development.run.xml`.
 
-### Performance-constrained build (while gaming on Arch Linux)
+### Build and test commands
 
-Game performance takes priority over builds and tests. Use:
-
-```bash
-ionice -c2 -n7 nice -n 15 taskset -c 0-3 dotnet build -m:2
-```
-
-If the game still lags, optionally raise its priority:
+**Backend build:**
 
 ```bash
-sudo renice -n -5 -p $(pidof GameThread)
+dotnet build Reaparr.sln
 ```
 
-Do **not** renice other processes unless explicitly requested.
+**Backend run:**
+
+```bash
+dotnet run --project src/AppHost
+```
+
+**Backend tests:**
+
+```bash
+dotnet run --project tests/UnitTests/<Project>.UnitTests/<Project>.UnitTests.csproj -- --no-ansi --disable-logo
+```
+
+Replace `<Project>` with the actual project name (e.g., `Application`, `BackgroundJobs`).
 
 ---
 
@@ -56,11 +63,15 @@ Do **not** renice other processes unless explicitly requested.
 
 ### Backend
 
-- **Endpoints:** Inherit from `BaseEndpoint<TRequest, TResponse>` (project-local base class). Never use `Endpoint<,>` directly.
-- **CQRS:** Command/query records implement `ICommand<Result<T>>`; handlers implement `ICommandHandler<TCommand, TResult>`; dispatch via `ICommandExecutor`.
+- **Endpoints:** Inherit from `BaseEndpoint<TRequest, TResponse>` (project-local base class). Never use `Endpoint<,>`
+  directly.
+- **CQRS:** Command/query records implement `ICommand<Result<T>>`; handlers implement
+  `ICommandHandler<TCommand, TResult>`; dispatch via `ICommandExecutor`.
 - **DI:** Autofac modules (`*Module : Module`) registered in `AppHost/_Shared/Config/Autofac/ContainerConfig.cs`.
-- **Realtime:** SignalR typed hubs with MessagePack serialization. Broadcast via `IHubContext<THub, TClientInterface>.Clients.All`.
-- **Jobs:** Quartz `IJob` with `[DisallowConcurrentExecution]`. Jobs use `JobDataMap` for parameters, dispatch via `ICommandExecutor`, and **must never throw** — swallow and log all exceptions.
+- **Realtime:** SignalR typed hubs with MessagePack serialization. Broadcast via
+  `IHubContext<THub, TClientInterface>.Clients.All`.
+- **Jobs:** Quartz `IJob` with `[DisallowConcurrentExecution]`. Jobs use `JobDataMap` for parameters, dispatch via
+  `ICommandExecutor`, and **must never throw** — swallow and log all exceptions.
 
 ### General
 
@@ -82,16 +93,33 @@ Do **not** renice other processes unless explicitly requested.
 
 ## Interaction rules
 
-- Always ask me questions using clickable multiple-choice options via the question tool. Never ask questions in plain text. Bundle related questions together whenever possible. Include a recommended option when appropriate.
+- **All agents operating in this project** must ask questions using clickable multiple-choice options via the question
+  tool — never plain-text lists. Bundle related questions together whenever possible. Include a recommended option when
+  appropriate. If the `question` tool is unavailable (e.g., plan-mode or non-OpenCode client), fall back to a numbered
+  list with a clear prompt asking the user to reply with a number.
 - Default to **read-only exploration and analysis**. Only write when edits are explicitly needed.
 - Keep write access **workspace-scoped** — all changes stay inside the repo.
+- Store all generated plans under this repository’s `plans/` directory. Do not place plans in any external `.claude`
+  directory or other out-of-repo location, regardless of which AI agent creates them.
 
-### Rider-first workflow
+### IDE-first workflow (Rider for backend, WebStorm for frontend)
 
-- When Rider MCP tools are available and `projectPath` is known, use Rider MCP search/index/navigation tools first for discovery and symbol lookup.
-- Prefer symbol-aware Rider tools (`find references`, `find symbol`, `symbol info`, `rename refactoring`) before plain text search for refactors.
-- Fall back to `grep`, `glob`, or `read` only if Rider MCP is unavailable, errors, or cannot provide the needed result.
-- If fallback is required, state it briefly in the response.
+> **MANDATORY**: At the start of every task, load the `jetbrains-skill` skill. This is non-negotiable — it enforces the
+> correct tool selection order below.
+
+**NEVER use `grep`, `glob`, `read`, or bash file commands as a first tool.** Use the appropriate JetBrains IDE MCP tools
+first, based on the task type:
+
+- **Backend work** (C#, .NET, `src/` excluding `ClientApp/`, `tests/`) → use **Rider MCP tools**
+  (`rider_*`, `rider-official-mcp_*`, `rider-index-mcp_*`, `rider-debugger*`)
+- **Frontend work** (Vue, TypeScript, `src/AppHost/ClientApp/`) → use **WebStorm MCP tools**
+  (`webstorm-official-mcp_*`, `webstorm-index-mcp_*`, `webstorm-index_ide_*`)
+
+Never use Rider MCP tools for frontend work, and never use WebStorm MCP tools for backend work.
+
+- Fall back to `grep`, `glob`, or `read` **only** if the appropriate IDE MCP is unavailable, errors, or cannot provide
+  the needed result.
+- If fallback is required, **explicitly state it** before using the fallback tool.
 
 ---
 
@@ -103,11 +131,11 @@ Do **not** renice other processes unless explicitly requested.
 
 Use `trash` instead:
 
-| Instead of             | Use                  |
-|------------------------|----------------------|
-| `rm <file>`            | `trash <file>`       |
-| `rm -rf <dir>`         | `trash <dir>`        |
-| `rmdir <dir>`          | `trash <dir>`        |
+| Instead of     | Use            |
+|----------------|----------------|
+| `rm <file>`    | `trash <file>` |
+| `rm -rf <dir>` | `trash <dir>`  |
+| `rmdir <dir>`  | `trash <dir>`  |
 
 On Linux, `trash` resolves to `gio trash` or `trash-cli`.
 
@@ -131,11 +159,11 @@ Do **not** install system packages on the host unless explicitly instructed.
 <type>(<scope>): <Imperative message>
 ```
 
-| Field   | Rules |
-|---------|-------|
+| Field   | Rules                                                                        |
+|---------|------------------------------------------------------------------------------|
 | Type    | `feat`, `fix`, `refactor`, `perf`, `test`, `docs`, `build`, `chore`, `style` |
-| Scope   | `WebAPI` for backend, `Web-UI` for frontend |
-| Message | Imperative present tense, capitalize first word, no trailing punctuation |
+| Scope   | `WebAPI` for backend, `Web-UI` for frontend                                  |
+| Message | Imperative present tense, capitalize first word, no trailing punctuation     |
 
 **Never** add AI attribution trailers (e.g., `Co-Authored-By: Claude ...`).
 
@@ -150,14 +178,16 @@ Do **not** install system packages on the host unless explicitly instructed.
 
 ### Context7 MCP
 
-- Use Context7 when you need library or API documentation.
+- **Always use Context7** for any library or API documentation lookup — no exceptions. Do not rely on training-time
+  knowledge for library APIs; always fetch current docs via Context7.
 - Pin the library with slash syntax when known (e.g., `use library /supabase/supabase`).
 - Mention the target version.
 - Fetch minimal, targeted docs and summarize — no large dumps.
 
 ### Web search
 
-- Use web search **only** when it materially improves correctness (e.g., up-to-date APIs, recent advisories, release notes).
+- Use web search **only** when it materially improves correctness (e.g., up-to-date APIs, recent advisories, release
+  notes).
 - Prefer official docs and primary sources; fall back to Context7 MCP or reputable, widely-cited references.
 - Record source dates (publish or release dates) when relevant.
 
@@ -165,15 +195,19 @@ Do **not** install system packages on the host unless explicitly instructed.
 
 ## Skills usage
 
-- Detect and auto-load any applicable skills before acting on a task.
-- If multiple skills apply, load all relevant ones and follow their guidance unless it conflicts with higher-priority instructions in this file.
+- **Reaparr-specific skills take priority.** Before acting on any task in this project, check for a matching `reaparr-*`
+  skill and load it first. These skills encode project-specific conventions that override generic guidance.
+- Detect and auto-load any other applicable skills before acting on a task.
+- If multiple skills apply, load all relevant ones and follow their guidance unless it conflicts with higher-priority
+  instructions in this file.
 - Explicitly mention which skills were loaded and used in the response.
 
 ---
 
 ## Agent reliability overrides
 
-These overrides are mandatory. They exist to counter common failure modes during long refactors, large searches, and multi-file edits.
+These overrides are mandatory. They exist to counter common failure modes during long refactors, large searches, and
+multi-file edits.
 
 ### Known tool limits
 
@@ -185,26 +219,43 @@ These overrides are mandatory. They exist to counter common failure modes during
 
 ### Pre-work
 
-- **Step 0 rule:** Before any structural refactor on a file over 300 LOC, first remove dead props, unused exports, unused imports, and obvious debug logging when it is safe to do so. Keep this cleanup as a separate phase. Only create a separate commit if the user explicitly asks for one.
-- **Phased execution:** Do not attempt broad multi-file refactors in a single pass. Break work into explicit phases, verify each phase, and keep each phase to 5 touched files or fewer unless the user explicitly asks otherwise.
+- **Step 0 rule:** Before any structural refactor on a file over 300 LOC, first remove dead props, unused exports,
+  unused imports, and obvious debug logging when it is safe to do so. Keep this cleanup as a separate phase. Only create
+  a separate commit if the user explicitly asks for one.
+- **Phased execution:** Do not attempt broad multi-file refactors in a single pass. Break work into explicit phases,
+  verify each phase, and keep each phase to 5 touched files or fewer unless the user explicitly asks otherwise.
 
 ### Code quality
 
-- **Senior dev override:** Do not hide behind the "minimum change" heuristic when the surrounding code is clearly inconsistent, duplicated, or structurally weak in a way that affects correctness or maintainability. Fix the real issue within scope.
-- **Forced verification:** Do not report success after edits until you run the project-appropriate verification for the files you changed.
+- **Senior dev override:** Do not hide behind the "minimum change" heuristic when the surrounding code is clearly
+  inconsistent, duplicated, or structurally weak in a way that affects correctness or maintainability. Fix the real
+  issue within scope.
+- **Forced verification:** Do not report success after edits until you run the project-appropriate verification for the
+  files you changed.
 
-- Backend changes: run `dotnet build Reaparr.sln`, or a narrower relevant build or test command when that is the better verifier.
-- Frontend changes: from `src/AppHost/ClientApp/`, run `bun run typecheck` and `bun run lint` when applicable.
-- If a verifier does not exist or cannot run in the current environment, state that explicitly instead of implying success.
+- Backend changes: ALWAYS use Rider IDE diagnostics first through MCP to verify and use run `dotnet build Reaparr.sln` as a last resort, or a narrower relevant build or test command when that is the better
+  verifier.
+- Frontend changes: ALWAYS use WebStorm IDE diagnostics first through MCP to verify. Prefer IDE diagnostics over a
+  full backend build when the task is frontend-only. From `src/AppHost/ClientApp/`, run `bun run typecheck` and
+  `bun run lint` only when a broader frontend verifier is still needed after IDE diagnostics.
+- If a verifier does not exist or cannot run in the current environment, state that explicitly instead of implying
+  success.
 
 ### Context management
 
-- **Sub-agent swarming:** For tasks touching more than 5 independent files, split the work across parallel sub-agents in batches of roughly 5 to 8 files when tooling allows.
-- **Context decay awareness:** After long conversations, after compression, or after substantial delay, re-read any file before editing it. Do not trust stale context.
-- **File read budget:** For files over 500 LOC, read them in sequential chunks with offsets. Never assume a single read captured the whole file.
-- **Tool result blindness:** If searches or command outputs look incomplete, rerun with narrower scope such as a single directory, tighter glob, or more targeted pattern, and state that truncation may have occurred.
+- **Sub-agent swarming:** For tasks touching more than 5 independent files, split the work across parallel sub-agents in
+  batches of roughly 5 to 8 files when tooling allows.
+- **Context decay awareness:** After long conversations, after compression, or after substantial delay, re-read any file
+  before editing it. Do not trust stale context.
+- **File read budget:** For files over 500 LOC, read them in sequential chunks with offsets. Never assume a single read
+  captured the whole file.
+- **Tool result blindness:** If searches or command outputs look incomplete, rerun with narrower scope such as a single
+  directory, tighter glob, or more targeted pattern, and state that truncation may have occurred.
 
 ### Edit safety
 
-- **Edit integrity:** Before every file edit, re-read the file. After editing, read it again to confirm the intended change landed correctly. Do not batch more than 3 edits to the same file without a verification read.
-- **No semantic search assumptions:** For any rename or signature change, search separately for direct calls, type references, string literals, dynamic imports, `require()` calls, re-exports, barrel files, test files, and mocks. Do not assume a single grep caught everything.
+- **Edit integrity:** Before every file edit, re-read the file. After editing, read it again to confirm the intended
+  change landed correctly. Do not batch more than 3 edits to the same file without a verification read.
+- **No semantic search assumptions:** For any rename or signature change, search separately for direct calls, type
+  references, string literals, dynamic imports, `require()` calls, re-exports, barrel files, test files, and mocks. Do
+  not assume a single grep caught everything.

@@ -5,13 +5,9 @@ description: Use when creating or updating Reaparr backend FastEndpoints command
 
 # Reaparr Command/Handler Patterns
 
-## IDE Tool Requirement
+## Required First Skill
 
-**All backend file operations and diagnostics MUST use Rider MCP tools** (`rider_*`, `rider-official-mcp_*`, `rider-index-mcp_*`).
-
-Never use WebStorm MCP tools for any work under `src/` (excluding `ClientApp/`) or `tests/`.
-
----
+Load `reaparr-backend` before this skill. It owns shared backend tooling, architecture, build/test commands, and verification gates.
 
 ## Overview
 

@@ -5,13 +5,9 @@ description: Use when creating or updating C# backend unit tests in Reaparr, esp
 
 # Reaparr Backend Unit Tests
 
-## IDE Tool Requirement
+## Required First Skill
 
-**All backend file operations and diagnostics MUST use Rider MCP tools** (`rider_*`, `rider-official-mcp_*`, `rider-index-mcp_*`).
-
-Never use WebStorm MCP tools for any work under `src/` (excluding `ClientApp/`) or `tests/`.
-
----
+Load `reaparr-backend` before this skill. It owns shared backend tooling, architecture, build/test commands, and verification gates.
 
 ## Overview
 
@@ -201,6 +197,7 @@ When a dependency is mocked, prefer verifying exact interaction parameters and c
 var endpoint = SetupEndpointUnitTest<MyEndpoint>(s =>
     s.AddSingleton(_ => mockCustomDep.Object)
 );
+```
 
 - **Accessing typed response DTOs**: `endpoint.Response` is declared as `BaseResultDTO`. For endpoints returning `ResultDTO<T>`, use a null-safe `as` cast — never a direct cast:
 
@@ -234,27 +231,26 @@ var sut = Mock.Create<MyHandler>(
 6. Assert result + database state + mock interactions.
 7. Run the specific test project first, usually with a narrow TUnit `--treenode-filter`, then broaden the scope if needed.
 
-## Commands
+## Unit Test Verification
 
-Run a specific backend unit test project:
+Use the shared build/test commands from `reaparr-backend`.
 
-```bash
-dotnet run --project tests/UnitTests/<Project>.UnitTests/<Project>.UnitTests.csproj -- --no-ansi --disable-logo
+For unit test work:
+- Start with the relevant `tests/UnitTests/<Project>.UnitTests/<Project>.UnitTests.csproj` project.
+- Prefer a narrow `--treenode-filter` for fast iteration.
+- Broaden to the full affected unit test project before claiming completion when behavior or shared test infrastructure changed.
+
+### TUnit filtering for unit tests
+
+Use `--treenode-filter`, not `--filter`.
+
+Filter syntax is:
+
+```text
+/<Assembly>/<Namespace>/<Class>/<Test>
 ```
 
-Common projects:
-
-```bash
-dotnet run --project tests/UnitTests/Application.UnitTests/Application.UnitTests.csproj -- --no-ansi --disable-logo
-dotnet run --project tests/UnitTests/BackgroundJobs.UnitTests/BackgroundJobs.UnitTests.csproj -- --no-ansi --disable-logo
-```
-
-### TUnit test filtering
-
-- TUnit does **not** use `--filter` here. Use `--treenode-filter`.
-- Filter syntax is `/<Assembly>/<Namespace>/<Class>/<Test>`.
-- Use `*` as a wildcard for segments you do not want to pin exactly.
-- Use parentheses with `|` for OR conditions inside a single segment.
+Use `*` as a wildcard for segments you do not want to pin exactly. Use parentheses with `|` for OR conditions inside a single segment.
 
 Filter by class:
 
@@ -280,7 +276,7 @@ Filter by namespace prefix:
 dotnet run --project tests/UnitTests/Application.UnitTests/Application.UnitTests.csproj -- --no-ansi --disable-logo --treenode-filter "/*/Reaparr.Application.UnitTests.PlexDownloads*/*/*"
 ```
 
-If you need to discover the exact test names or class names before filtering, list tests first:
+If you need exact test or class names, list tests first:
 
 ```bash
 dotnet run --project tests/UnitTests/Application.UnitTests/Application.UnitTests.csproj -- --no-ansi --disable-logo --list-tests

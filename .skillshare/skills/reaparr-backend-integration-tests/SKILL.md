@@ -5,13 +5,9 @@ description: Use when creating, updating, debugging, or stabilizing Reaparr back
 
 # Reaparr Backend Integration Tests
 
-## IDE Tool Requirement
+## Required First Skill
 
-**All backend file operations and diagnostics MUST use Rider MCP tools** (`rider_*`, `rider-official-mcp_*`, `rider-index-mcp_*`).
-
-Never use WebStorm MCP tools for any work under `src/` (excluding `ClientApp/`) or `tests/`.
-
----
+Load `reaparr-backend` before this skill. It owns shared backend tooling, architecture, build/test commands, and verification gates.
 
 ## Overview
 
@@ -163,13 +159,28 @@ Relevant files:
 - `tests/BaseTests/FakePlexApiData/GetLibrarySectionsAllResponse/FakePlexApiData.GetLibrarySectionsAllMediaContainer.cs`
 - `tests/BaseTests/FakePlexApiData/GetMediaMetaData/FakePlexApiData.MediaMetaDataMediaContainer.cs`
 
-## Verification Commands
+## Integration Test Verification
 
-### TUnit test filtering
+Use the shared build/test commands from `reaparr-backend`.
 
-Use `--treenode-filter` (not `--filter`). Syntax: `/<Assembly>/<Namespace>/<Class>/<Test>` — exactly 4 path segments separated by `/`.
+For integration test work:
+- Start with a targeted `--treenode-filter` when reproducing or iterating on a specific failing class or test.
+- Use `--list-tests` if exact names are unknown.
+- Do not stop at targeted-test green.
+- Mandatory completion gate for any integration test change or integration failure fix:
 
-**CRITICAL: `[...]` bracket syntax is for property filters only (5th segment).** Never use brackets in the class or test name segments — doing so matches zero tests silently.
+```bash
+dotnet run --project tests/IntegrationTests/IntegrationTests/IntegrationTests.csproj -- --no-ansi --disable-logo
+```
+
+CI alignment:
+- Workflow uses this same project in `.github/workflows/dev-test.yml`.
+
+### TUnit filtering for integration tests
+
+Use `--treenode-filter`, not `--filter`. Syntax: `/<Assembly>/<Namespace>/<Class>/<Test>` — exactly 4 path segments separated by `/`.
+
+**CRITICAL: `[...]` bracket syntax is for property filters only (5th segment).** Never use brackets in class or test-name segments; doing so matches zero tests silently.
 
 | Segment | Position | Example value |
 |---------|----------|---------------|
@@ -209,22 +220,13 @@ Filter by specific test method:
 dotnet run --project tests/IntegrationTests/IntegrationTests/IntegrationTests.csproj -- --no-ansi --disable-logo --treenode-filter "/*/*/*/ShouldReturn200_WhenLibraryRefreshSucceeds"
 ```
 
-If you are unsure of exact names, list all tests first:
+If exact names are unknown, list tests first:
 
 ```bash
 dotnet run --project tests/IntegrationTests/IntegrationTests/IntegrationTests.csproj -- --no-ansi --disable-logo --list-tests
 ```
 
-**Anti-pattern (zero tests ran):** `"/*/*/*[CheckForUpdateEndpoint*]"` — this puts bracket property syntax in the class segment. Use `"/*/*/CheckForUpdateEndpoint*/*"` instead.
-
-Mandatory completion gate:
-
-```bash
-dotnet run --project tests/IntegrationTests/IntegrationTests/IntegrationTests.csproj -- --no-ansi --disable-logo
-```
-
-CI alignment:
-- Workflow uses this same project in `.github/workflows/dev-test.yml`.
+**Anti-pattern (zero tests ran):** `"/*/*/*[CheckForUpdateEndpoint*]"` puts bracket property syntax in the class segment. Use `"/*/*/CheckForUpdateEndpoint*/*"` instead.
 
 ## Definition of Done
 

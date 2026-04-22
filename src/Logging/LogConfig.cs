@@ -25,11 +25,10 @@ public class LogConfig
         + "[{SourceContext}]"
         + "{#end} => {@m}\n{@x}\n";
 
-    // Keep console/debug output colorized when Rider redirects stdout, but keep file logs plain text.
+    // Keep interactive console/debug output colorized, but leave redirected CI/test output plain text.
     protected static readonly ExpressionTemplate ConsoleTemplate = new(
         TemplateText,
-        theme: LogThemes.SystemColored.ToTemplateTheme(),
-        applyThemeWhenOutputIsRedirected: true
+        theme: LogThemes.SystemColored.ToTemplateTheme()
     );
 
     protected static readonly ExpressionTemplate FileTemplate = new(TemplateText);

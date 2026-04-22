@@ -37,7 +37,7 @@ public class CheckConnectionStatusByIdEndpoint : BaseEndpoint<CheckConnectionSta
 
     public override async Task HandleAsync(CheckConnectionStatusByIdRequest req, CancellationToken ct)
     {
-        _log.DebugApiCall(HttpContext, req);
+        _log.Here().DebugApiCall(HttpContext, req);
         var result = await _commandExecutor.Send(new CheckConnectionStatusByIdCommand(req.PlexServerConnectionId), ct);
         if (result.IsFailed)
             await SendFluentResult(result.ToResult(), ct);

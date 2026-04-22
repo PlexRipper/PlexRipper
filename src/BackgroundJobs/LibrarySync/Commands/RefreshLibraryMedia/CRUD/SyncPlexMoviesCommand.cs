@@ -75,12 +75,13 @@ public class SyncPlexMoviesCommandHandler : ICommandHandler<SyncPlexMoviesComman
         );
         if (insertResult.IsCancelled)
         {
-            _log.Information(
-                "Insertion of movies was cancelled for library: {PlexLibraryName} with id: {PlexLibraryId}. Old media data has already been removed and cannot be restored. Cancellation was requested: {CancellationRequested}",
-                libraryName,
-                plexLibraryId,
-                cancellationToken.IsCancellationRequested
-            );
+            _log.Here()
+                .Information(
+                    "Insertion of movies was cancelled for library: {PlexLibraryName} with id: {PlexLibraryId}. Old media data has already been removed and cannot be restored. Cancellation was requested: {CancellationRequested}",
+                    libraryName,
+                    plexLibraryId,
+                    cancellationToken.IsCancellationRequested
+                );
             await RemoveMedia(plexLibraryId, CancellationToken.None);
             return insertResult;
         }

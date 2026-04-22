@@ -106,11 +106,12 @@ public static class ReaparrDBContextSeed
 
             foreach (var path in GetDefaultFolderPaths())
             {
-                _log.Debug(
-                    "Seeding default folder path with id {Id} and directory {DirectoryPath}",
-                    path.Id,
-                    path.DirectoryPath
-                );
+                _log.Here()
+                    .Debug(
+                        "Seeding default folder path with id {Id} and directory {DirectoryPath}",
+                        path.Id,
+                        path.DirectoryPath
+                    );
                 db.FolderPaths.Add(path);
             }
 
@@ -130,11 +131,12 @@ public static class ReaparrDBContextSeed
 
             foreach (var path in GetDefaultFolderPaths())
             {
-                _log.Debug(
-                    "Seeding default folder path with id {Id} and directory {DirectoryPath}",
-                    path.Id,
-                    path.DirectoryPath
-                );
+                _log.Here()
+                    .Debug(
+                        "Seeding default folder path with id {Id} and directory {DirectoryPath}",
+                        path.Id,
+                        path.DirectoryPath
+                    );
                 await db.FolderPaths.AddAsync(path, cancellationToken);
             }
 
@@ -149,7 +151,7 @@ public static class ReaparrDBContextSeed
 
         foreach (var v in verify)
         {
-            _log.Debug("DB AFTER SAVE: {Id} => {Path}", v.Id, v.DirectoryPath);
+            _log.Here().Debug("DB AFTER SAVE: {Id} => {Path}", v.Id, v.DirectoryPath);
         }
     }
 }

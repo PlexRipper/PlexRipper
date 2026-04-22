@@ -229,11 +229,13 @@ public class AddTorrentEndpoint : Endpoint<AddTorrentEndpointRequest>
         }
 
         if (count == 0)
-            _log.Warning(
-                "Could not find any DownloadTask to set HashId for torrent with MetaData: {MetaData}",
-                metaData
-            );
+            _log.Here()
+                .Warning(
+                    "Could not find any DownloadTask to set HashId for torrent with MetaData: {MetaData}",
+                    metaData
+                );
         else
-            _log.Debug("Set HashId on {Count} DownloadTasks for torrent with MetaData: {MetaData}", count, metaData);
+            _log.Here()
+                .Debug("Set HashId on {Count} DownloadTasks for torrent with MetaData: {MetaData}", count, metaData);
     }
 }

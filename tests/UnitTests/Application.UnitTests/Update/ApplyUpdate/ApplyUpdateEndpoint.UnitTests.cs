@@ -30,6 +30,8 @@ public class ApplyUpdateEndpointUnitTests : BaseUnitTest<ApplyUpdateEndpoint>
         result.IsSuccess.ShouldBeFalse();
         result.Errors.ShouldHaveSingleItem();
         result.Errors[0].Message.ShouldBe("Desktop updates are not supported in the current runtime mode");
+        mockManager.Verify(m => m.UpdatePendingRestart, Times.Never);
+        mockSource.VerifyNoOtherCalls();
     }
 
     [Test]
@@ -56,6 +58,7 @@ public class ApplyUpdateEndpointUnitTests : BaseUnitTest<ApplyUpdateEndpoint>
         result.ShouldNotBeNull();
         result.IsSuccess.ShouldBeTrue();
 
-        mockManager.Verify();
+        mockManager.Verify(m => m.UpdatePendingRestart, Times.Once);
+        mockSource.VerifyNoOtherCalls();
     }
 }

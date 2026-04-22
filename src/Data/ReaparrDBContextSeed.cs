@@ -101,10 +101,9 @@ public static class ReaparrDBContextSeed
             if (context is not ReaparrDbContext db)
                 return;
 
-            if (db.FolderPaths.Any())
-                return;
+            var existingFolderPathIds = db.FolderPaths.Select(x => x.Id).ToHashSet();
 
-            foreach (var path in GetDefaultFolderPaths())
+            foreach (var path in GetDefaultFolderPaths().Where(x => !existingFolderPathIds.Contains(x.Id)))
             {
                 _log.Here()
                     .Debug(
@@ -126,10 +125,9 @@ public static class ReaparrDBContextSeed
             if (context is not ReaparrDbContext db)
                 return;
 
-            if (await db.FolderPaths.AnyAsync(cancellationToken))
-                return;
+            var existingFolderPathIds = await db.FolderPaths.Select(x => x.Id).ToHashSetAsync(cancellationToken);
 
-            foreach (var path in GetDefaultFolderPaths())
+            foreach (var path in GetDefaultFolderPaths().Where(x => !existingFolderPathIds.Contains(x.Id)))
             {
                 _log.Here()
                     .Debug(
@@ -137,7 +135,7 @@ public static class ReaparrDBContextSeed
                         path.Id,
                         path.DirectoryPath
                     );
-                db.FolderPaths.Add(path);
+                await db.FolderPaths.AddAsync(path, cancellationToken);
             }
 
             await db.SaveChangesAsync(cancellationToken);

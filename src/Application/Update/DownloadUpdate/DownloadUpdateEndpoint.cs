@@ -38,16 +38,13 @@ public class DownloadUpdateEndpoint : BaseEndpointWithoutRequest
             return;
         }
 
-        // Single network call: fetch latest update info, then download it.
-        var updateInfo = await _velopackManager.CheckForUpdatesAsync();
-        if (updateInfo is null)
-        {
-            await SendFluentResult(Result.Ok(), ct);
-            return;
-        }
-
         var result = await Result.Try(async Task () =>
         {
+            // Single network call: fetch latest update info, then download it.
+            var updateInfo = await _velopackManager.CheckForUpdatesAsync();
+            if (updateInfo is null)
+                return;
+
             await _velopackManager.DownloadUpdatesAsync(
                 updateInfo,
                 progress =>

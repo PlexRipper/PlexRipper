@@ -28,10 +28,10 @@ public class LiveLogEventDTO
     /// <summary>
     /// Optional exception string.
     /// </summary>
-    public required string? Exception { get; init; }
+    public string? Exception { get; init; }
 
     /// <summary>
     /// Optional source context.
     /// </summary>
-    public required string? SourceContext { get; init; }
+    public string? SourceContext { get; init; }
 }

@@ -27,6 +27,7 @@ public class DesktopWindow : IDesktopWindow
             .SetResizable(true)
             .SetLogVerbosity(0)
             .Load(_uri);
+        _isInitialized = true;
     }
 
     /// <inheritdoc />
@@ -55,14 +56,18 @@ public class DesktopWindow : IDesktopWindow
     /// <inheritdoc />
     public void CloseNativeWindow()
     {
-        if (IsInitialized)
-            _window?.Close();
+        if (!IsInitialized)
+            return;
+
+        _window?.Close();
+        _isInitialized = false;
     }
 
     /// <inheritdoc />
     public void DisposeWindow()
     {
         _window = null;
+        _isInitialized = false;
     }
 
     /// <inheritdoc />
@@ -71,7 +76,6 @@ public class DesktopWindow : IDesktopWindow
         if (_window is null)
             return;
 
-        _isInitialized = true;
         _window.WaitForClose();
     }
 }

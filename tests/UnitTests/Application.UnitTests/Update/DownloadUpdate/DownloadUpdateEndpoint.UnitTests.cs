@@ -30,6 +30,22 @@ public class DownloadUpdateEndpointUnitTests : BaseUnitTest<DownloadUpdateEndpoi
         result.IsSuccess.ShouldBeFalse();
         result.Errors.ShouldHaveSingleItem();
         result.Errors[0].Message.ShouldBe("Desktop updates are not supported in the current runtime mode");
+        mockManager.Verify(m => m.CheckForUpdatesAsync(), Times.Never);
+        mockManager.Verify(
+            m =>
+                m.DownloadUpdatesAsync(It.IsAny<UpdateInfo>(), It.IsAny<Action<int>?>(), It.IsAny<CancellationToken>()),
+            Times.Never
+        );
+        Mock.Mock<IProgressHubService>()
+            .Verify(
+                x =>
+                    x.SendAppUpdateDownloadProgressAsync(
+                        It.IsAny<AppUpdateDownloadProgressDTO>(),
+                        It.IsAny<CancellationToken>()
+                    ),
+                Times.Never
+            );
+        mockSource.VerifyNoOtherCalls();
     }
 
     [Test]
@@ -63,7 +79,21 @@ public class DownloadUpdateEndpointUnitTests : BaseUnitTest<DownloadUpdateEndpoi
         result.ShouldNotBeNull();
         result.IsSuccess.ShouldBeTrue();
 
-        mockManager.Verify();
+        mockManager.Verify(m => m.CheckForUpdatesAsync(), Times.Once);
+        mockManager.Verify(
+            m => m.DownloadUpdatesAsync(updateInfo, It.IsAny<Action<int>?>(), It.IsAny<CancellationToken>()),
+            Times.Once
+        );
+        Mock.Mock<IProgressHubService>()
+            .Verify(
+                x =>
+                    x.SendAppUpdateDownloadProgressAsync(
+                        It.IsAny<AppUpdateDownloadProgressDTO>(),
+                        It.IsAny<CancellationToken>()
+                    ),
+                Times.Never
+            );
+        mockSource.VerifyNoOtherCalls();
     }
 
     [Test]
@@ -129,7 +159,12 @@ public class DownloadUpdateEndpointUnitTests : BaseUnitTest<DownloadUpdateEndpoi
         capturedDtos[1].Percentage.ShouldBe(100);
         capturedDtos[1].IsComplete.ShouldBeTrue();
 
-        mockManager.Verify();
+        mockManager.Verify(m => m.CheckForUpdatesAsync(), Times.Once);
+        mockManager.Verify(
+            m => m.DownloadUpdatesAsync(updateInfo, It.IsAny<Action<int>?>(), It.IsAny<CancellationToken>()),
+            Times.Once
+        );
         Mock.Mock<IProgressHubService>().Verify();
+        mockSource.VerifyNoOtherCalls();
     }
 }

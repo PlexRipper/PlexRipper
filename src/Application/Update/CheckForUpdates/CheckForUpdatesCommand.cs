@@ -57,7 +57,7 @@ public class CheckForUpdatesCommandHandler : ICommandHandler<CheckForUpdatesComm
 
             await _notificationHubService.SendRefreshNotificationAsync(
                 RefreshDataType.UpdateAvailable,
-                CancellationToken.None
+                cancellationToken
             );
             return Result.Ok(AppUpdateCheckResult.UpdateAvailable(targetVersion, releases));
         }
@@ -75,10 +75,7 @@ public class CheckForUpdatesCommandHandler : ICommandHandler<CheckForUpdatesComm
 
         _log.Here().Information("Update available: {Version}", latestVersion);
 
-        await _notificationHubService.SendRefreshNotificationAsync(
-            RefreshDataType.UpdateAvailable,
-            CancellationToken.None
-        );
+        await _notificationHubService.SendRefreshNotificationAsync(RefreshDataType.UpdateAvailable, cancellationToken);
         return Result.Ok(AppUpdateCheckResult.UpdateAvailable(latestVersion, releases));
     }
 }

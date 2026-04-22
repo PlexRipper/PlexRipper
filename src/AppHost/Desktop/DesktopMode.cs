@@ -116,8 +116,19 @@ public class DesktopMode : IDesktopMode
 
         var serverAddressesFeature = _server.Features.Get<IServerAddressesFeature>();
         var serverAddress = serverAddressesFeature?.Addresses.FirstOrDefault();
-        return string.IsNullOrWhiteSpace(serverAddress)
-            ? Result.Fail("Desktop mode could not determine the server address for the embedded window.")
-            : Result.Ok(new Uri(serverAddress));
+        if (string.IsNullOrWhiteSpace(serverAddress))
+            return Result.Fail("Desktop mode could not determine the server address for the embedded window.");
+
+        var uri = new Uri(serverAddress);
+        return Result.Ok(NormalizeWildcardHost(uri));
+    }
+
+    private static Uri NormalizeWildcardHost(Uri uri)
+    {
+        if (uri.Host is not ("0.0.0.0" or "::" or "[::]"))
+            return uri;
+
+        var builder = new UriBuilder(uri) { Host = "localhost" };
+        return builder.Uri;
     }
 }

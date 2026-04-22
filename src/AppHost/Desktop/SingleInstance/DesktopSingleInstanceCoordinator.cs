@@ -9,8 +9,11 @@ namespace Reaparr.AppHost;
 /// </summary>
 public sealed class DesktopSingleInstanceCoordinator : IDesktopSingleInstanceCoordinator
 {
-    private const string DefaultSingleInstanceName = "Reaparr.Desktop.SingleInstance";
-    private const string SignalMessage = "show";
+    private const string DEFAULT_SINGLE_INSTANCE_NAME = "Reaparr.Desktop.SingleInstance";
+    private const string SIGNAL_MESSAGE = "show";
+    private static readonly TimeSpan _signalRetryTimeout = TimeSpan.FromSeconds(5);
+    private static readonly TimeSpan _initialSignalRetryDelay = TimeSpan.FromMilliseconds(50);
+    private static readonly TimeSpan _maxSignalRetryDelay = TimeSpan.FromMilliseconds(250);
 
     private readonly Serilog.ILogger _log;
     private readonly string _instanceName;
@@ -22,7 +25,7 @@ public sealed class DesktopSingleInstanceCoordinator : IDesktopSingleInstanceCoo
     private bool _ownsMutex;
 
     /// <summary>Initializes a new instance of <see cref="DesktopSingleInstanceCoordinator"/>.</summary>
-    public DesktopSingleInstanceCoordinator(Serilog.ILogger log, string instanceName = DefaultSingleInstanceName)
+    public DesktopSingleInstanceCoordinator(Serilog.ILogger log, string instanceName = DEFAULT_SINGLE_INSTANCE_NAME)
     {
         _log = log.ForContext<DesktopSingleInstanceCoordinator>();
         _instanceName = instanceName;
@@ -53,8 +56,11 @@ public sealed class DesktopSingleInstanceCoordinator : IDesktopSingleInstanceCoo
                 PipeDirection.Out,
                 PipeOptions.Asynchronous
             );
-            await client.ConnectAsync(TimeSpan.FromSeconds(2), cancellationToken);
-            await client.WriteAsync(Encoding.UTF8.GetBytes(SignalMessage), cancellationToken);
+            var connectResult = await ConnectToPrimaryInstanceAsync(client, cancellationToken);
+            if (connectResult.IsFailed)
+                return connectResult;
+
+            await client.WriteAsync(Encoding.UTF8.GetBytes(SIGNAL_MESSAGE), cancellationToken);
             await client.FlushAsync(cancellationToken);
             return Result.Ok();
         }
@@ -106,6 +112,51 @@ public sealed class DesktopSingleInstanceCoordinator : IDesktopSingleInstanceCoo
         _mutex?.Dispose();
     }
 
+    private async Task<Result> ConnectToPrimaryInstanceAsync(
+        NamedPipeClientStream client,
+        CancellationToken cancellationToken
+    )
+    {
+        var retryDelay = _initialSignalRetryDelay;
+        using var timeoutTokenSource = new CancellationTokenSource(_signalRetryTimeout);
+        using var linkedTokenSource = CancellationTokenSource.CreateLinkedTokenSource(
+            cancellationToken,
+            timeoutTokenSource.Token
+        );
+
+        while (!linkedTokenSource.Token.IsCancellationRequested)
+        {
+            try
+            {
+                await client.ConnectAsync(retryDelay, linkedTokenSource.Token);
+                return Result.Ok();
+            }
+            catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+            {
+                throw;
+            }
+            catch (OperationCanceledException) when (timeoutTokenSource.IsCancellationRequested)
+            {
+                break;
+            }
+            catch (TimeoutException)
+            {
+                // The primary may still be starting its listener; retry until the total timeout expires.
+            }
+            catch (IOException)
+            {
+                // The pipe may not exist yet while the primary process is still starting.
+            }
+
+            await Task.Delay(retryDelay, cancellationToken);
+            retryDelay = TimeSpan.FromMilliseconds(
+                Math.Min(retryDelay.TotalMilliseconds * 2, _maxSignalRetryDelay.TotalMilliseconds)
+            );
+        }
+
+        return Result.Fail("Timed out while connecting to the primary desktop instance.");
+    }
+
     private async Task ListenAsync(Func<CancellationToken, Task<Result>> onSignal, CancellationToken cancellationToken)
     {
         while (!cancellationToken.IsCancellationRequested)
@@ -121,10 +172,10 @@ public sealed class DesktopSingleInstanceCoordinator : IDesktopSingleInstanceCoo
                 );
 
                 await server.WaitForConnectionAsync(cancellationToken);
-                var buffer = new byte[SignalMessage.Length];
+                var buffer = new byte[SIGNAL_MESSAGE.Length];
                 var bytesRead = await server.ReadAsync(buffer, cancellationToken);
                 var message = Encoding.UTF8.GetString(buffer, 0, bytesRead);
-                if (message != SignalMessage)
+                if (message != SIGNAL_MESSAGE)
                 {
                     _log.Here().Warning("Received unknown desktop relaunch signal: {Message}", message);
                     continue;

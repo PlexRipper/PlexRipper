@@ -88,6 +88,9 @@ public class DesktopModeUnitTests : BaseUnitTest<DesktopMode>
         result.IsSuccess.ShouldBeTrue();
         waitForExitTask.IsCompleted.ShouldBeFalse();
         window.IsClosedToBackground.ShouldBeTrue();
+
+        await sut.ExitAsync(CancellationToken);
+        await waitForExitTask;
     }
 
     [Test]

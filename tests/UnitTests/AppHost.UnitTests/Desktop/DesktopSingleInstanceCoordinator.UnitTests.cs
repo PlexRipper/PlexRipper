@@ -2,6 +2,8 @@ namespace Reaparr.AppHost.UnitTests;
 
 public class DesktopSingleInstanceCoordinatorUnitTests : BaseUnitTest<DesktopSingleInstanceCoordinator>
 {
+    private static int _instanceNameCounter;
+
     [Test]
     public void ShouldReturnSuccess_WhenStartListenerRunsMoreThanOnce()
     {
@@ -65,9 +67,13 @@ public class DesktopSingleInstanceCoordinatorUnitTests : BaseUnitTest<DesktopSin
 
         // Act
         var signalResult = await sut.SignalPrimaryInstanceAsync(CancellationToken);
-        await signalReceived.Task.WaitAsync(CancellationToken);
+        var signalTask = await Task.WhenAny(
+            signalReceived.Task,
+            Task.Delay(TimeSpan.FromSeconds(2), CancellationToken)
+        );
 
         // Assert
+        signalTask.ShouldBe(signalReceived.Task);
         listenerResult.IsSuccess.ShouldBeTrue();
         signalResult.IsSuccess.ShouldBeTrue();
     }
@@ -88,5 +94,6 @@ public class DesktopSingleInstanceCoordinatorUnitTests : BaseUnitTest<DesktopSin
     private DesktopSingleInstanceCoordinator CreateSut(string? instanceName = null) =>
         new(Log, instanceName ?? CreateInstanceName());
 
-    private static string CreateInstanceName() => $"Reaparr.Desktop.SingleInstance.Tests.{Guid.NewGuid():N}";
+    private static string CreateInstanceName() =>
+        $"Reaparr.Desktop.SingleInstance.Tests.{System.Environment.ProcessId}.{Interlocked.Increment(ref _instanceNameCounter)}";
 }

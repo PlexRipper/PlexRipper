@@ -197,7 +197,7 @@ public class PathProviderUnitTests
             {
                 // Assert
                 PathProvider.DataDirectory.ShouldBe(
-                    System.Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile)
+                    Path.Combine(home, PathProvider.DefaultDownloadsFolderName, PathProvider.DefaultReaparrFolderName)
                 );
             }
         );
@@ -276,7 +276,7 @@ public class PathProviderUnitTests
             {
                 // Assert
                 PathProvider.DataDirectory.ShouldBe(
-                    System.Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile)
+                    Path.Combine(home, PathProvider.DefaultDownloadsFolderName, PathProvider.DefaultReaparrFolderName)
                 );
             }
         );
@@ -564,7 +564,7 @@ public class PathProviderUnitTests
         );
     }
 
-    private static string GetExpectedDesktopConfigPath(string _) =>
+    private static string GetExpectedDesktopConfigPath(string home) =>
         OsInfo.CurrentOS switch
         {
             OperatingSystemPlatform.Windows => Path.Combine(
@@ -572,16 +572,12 @@ public class PathProviderUnitTests
                 PathProvider.DefaultReaparrFolderName
             ),
             OperatingSystemPlatform.Osx => Path.Combine(
-                System.Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile),
+                home,
                 "Library",
                 "Application Support",
                 PathProvider.DefaultReaparrFolderName
             ),
-            _ => Path.Combine(
-                System.Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile),
-                ".config",
-                PathProvider.DefaultReaparrFolderName
-            ),
+            _ => Path.Combine(home, ".config", PathProvider.DefaultReaparrFolderName),
         };
 
     private static string GetExpectedDockerRootDirectory() => "/";

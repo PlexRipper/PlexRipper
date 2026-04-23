@@ -160,6 +160,20 @@ export interface DebugSettingsDTO {
   maskServerNames: boolean;
 }
 
+/** Message sent from the front-end to the back-end in Desktop mode. This is for opening external links etc */
+export interface DesktopMessageDTO {
+  /** The type of the DesktopMessageDTO */
+  type: DesktopMessageType;
+  /** The value of the DesktopMessageDTO */
+  value: string;
+}
+
+/** The various types of Desktop messages that can be sent */
+export enum DesktopMessageType {
+  None = "None",
+  ExternalLink = "ExternalLink",
+}
+
 export interface DisplaySettingsDTO {
   allOverviewViewMode: PlexMediaType;
   movieViewMode: ViewMode;

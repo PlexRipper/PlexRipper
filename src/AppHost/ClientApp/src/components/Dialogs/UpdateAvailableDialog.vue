@@ -101,12 +101,10 @@
 				</QCol>
 				<QCol cols="auto">
 					<!-- Update On Docker -->
-					<BaseButton
+					<ExternalLinkButton
 						v-if="globalStore.isDockerMode"
-						unelevated
-						icon="mdi-docker"
-						target="_blank"
 						href="https://hub.docker.com/r/reaparr/reaparr/tags"
+						icon="mdi-docker"
 						:label="t('components.update-available-dialog.docker-action')" />
 
 					<!-- Update On Desktop -->

@@ -26,9 +26,7 @@
 					</div>
 				</q-btn>
 				<!-- Copy Version Number -->
-				<q-btn
-					flat
-					round
+				<IconButton
 					class="q-pa-none"
 					@click="copy(globalStore.version)">
 					<q-icon name="mdi-alpha-v-circle-outline" />
@@ -38,12 +36,10 @@
 						:offset="[10, 10]">
 						{{ $t('components.app-bar.copy-version', { version: globalStore.version }) }}
 					</q-tooltip>
-				</q-btn>
+				</IconButton>
 				<!-- Update Button -->
-				<q-btn
+				<IconButton
 					icon="mdi-download-circle-outline"
-					flat
-					round
 					class="update-button q-mr-sm"
 					:class="{ 'update-button--pulse': updateStore.hasUpdateAvailable }"
 					@click="openUpdateDialog">
@@ -53,24 +49,20 @@
 						:offset="[10, 10]">
 						{{ $t('components.app-bar.update-available') }}
 					</q-tooltip>
-				</q-btn>
+				</IconButton>
 			</q-toolbar-title>
 
-			<q-btn
-				icon="mdi-github"
-				flat
-				rounded
-				style="padding: 0.5rem"
-				href="https://github.com/Reaparr/Reaparr"
-				target="_blank" />
+			<ExternalLink href="https://github.com/Reaparr/Reaparr">
+				<IconButton
+					icon="mdi-github"
+					style="padding: 0.5rem" />
+			</ExternalLink>
 
-			<q-btn
-				flat
-				rounded
+			<IconButton
 				style="padding: 0.5rem"
 				@click="dialogStore.openDialog(DialogType.DiscordServerInviteDialog)">
 				<DiscordIcon />
-			</q-btn>
+			</IconButton>
 
 			<!-- Background Activity Toggle -->
 			<BackgroundActivityToggleButton />

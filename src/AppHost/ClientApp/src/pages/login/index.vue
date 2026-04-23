@@ -68,12 +68,11 @@
 					</QCol>
 					<QCol cols="auto">
 						<!-- Remember Me -->
-						<a
+						<ExternalLink
 							href="https://www.reaparr.rocks/docs/faq#forgot-creds"
-							target="_blank"
 							class="link">
-							<QText>{{ $t('pages.login.forgot-your-password') }}</QText>
-						</a>
+							<QText :value="$t('pages.login.forgot-your-password')" />
+						</ExternalLink>
 					</QCol>
 				</QRow>
 			</QCardSection>

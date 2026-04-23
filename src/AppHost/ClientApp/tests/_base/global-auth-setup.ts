@@ -21,6 +21,8 @@ const notificationMatcher = /\/api\/Notification$/;
 const plexServerConnectionMatcher = /\/api\/PlexServerConnection$/;
 const plexServerMatcher = /\/api\/PlexServer$/;
 const settingsMatcher = /\/api\/Settings$/;
+const debugLogsMatcher = /\/api\/Debug\/logs$/;
+const updateCheckMatcher = /\/api\/Update\/Check$/;
 
 // Default: user is authenticated
 mock.onGet(authStatusMatcher).reply(200, ok({
@@ -41,6 +43,9 @@ mock.onGet(plexServerConnectionMatcher).reply(200, ok([]));
 mock.onGet(plexServerMatcher).reply(200, ok([]));
 
 // Default settings model for initial store setup
+mock.onGet(debugLogsMatcher).reply(200, ok([]));
+mock.onGet(updateCheckMatcher).reply(200, ok({ updateAvailable: false }));
+
 mock.onGet(settingsMatcher).reply(200, ok({
 	generalSettings: {
 		activeAccountId: 0,

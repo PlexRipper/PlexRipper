@@ -65,10 +65,16 @@ public class NotifyArrAppsOnStartupCommandHandler : ICommandHandler<NotifyArrApp
         // Only call testall when the arr app is actually configured — skip the HTTP round-trip
         // if the user has not set up the integration.
         if (_radarrSettings.IsConfigured && _radarrSettings.IsValidUrl() && _radarrSettings.IsValidApiKey())
-            await TestAllAsync(_httpClientFactory.CreateRadarrHttpClient(), ct);
+        {
+            var radarrResult = await Result.Try(() => TestAllAsync(_httpClientFactory.CreateRadarrHttpClient(), ct));
+            radarrResult.LogIfFailed();
+        }
 
         if (_sonarrSettings.IsConfigured && _sonarrSettings.IsValidUrl() && _sonarrSettings.IsValidApiKey())
-            await TestAllAsync(_httpClientFactory.CreateSonarrHttpClient(), ct);
+        {
+            var sonarrResult = await Result.Try(() => TestAllAsync(_httpClientFactory.CreateSonarrHttpClient(), ct));
+            sonarrResult.LogIfFailed();
+        }
 
         return Result.Ok();
     }

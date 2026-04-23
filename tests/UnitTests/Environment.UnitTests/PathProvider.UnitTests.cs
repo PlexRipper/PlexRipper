@@ -88,7 +88,7 @@ public class PathProviderUnitTests
             () =>
             {
                 // Act
-                var expected = GetExpectedDesktopConfigPath(home);
+                var expected = GetExpectedDesktopConfigPath(home, appData);
 
                 // Assert
                 PathProvider.ConfigDirectory.ShouldBe(expected);
@@ -133,7 +133,7 @@ public class PathProviderUnitTests
             () =>
             {
                 // Act
-                var expected = GetExpectedDesktopConfigPath(home);
+                var expected = GetExpectedDesktopConfigPath(home, appData);
 
                 // Assert
                 PathProvider.ConfigDirectory.ShouldBe(expected);
@@ -564,13 +564,10 @@ public class PathProviderUnitTests
         );
     }
 
-    private static string GetExpectedDesktopConfigPath(string home) =>
+    private static string GetExpectedDesktopConfigPath(string home, string appData) =>
         OsInfo.CurrentOS switch
         {
-            OperatingSystemPlatform.Windows => Path.Combine(
-                System.Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData),
-                PathProvider.DefaultReaparrFolderName
-            ),
+            OperatingSystemPlatform.Windows => Path.Combine(appData, PathProvider.DefaultReaparrFolderName),
             OperatingSystemPlatform.Osx => Path.Combine(
                 home,
                 "Library",
@@ -623,8 +620,8 @@ public class PathProviderUnitTests
             [EnvKeys.ReaparrPhotosPath] = System.Environment.GetEnvironmentVariable(EnvKeys.ReaparrPhotosPath),
             [EnvKeys.ReaparrOtherPath] = System.Environment.GetEnvironmentVariable(EnvKeys.ReaparrOtherPath),
             [EnvKeys.ReaparrGamesPath] = System.Environment.GetEnvironmentVariable(EnvKeys.ReaparrGamesPath),
-            [EnvKeys.Home] = System.Environment.GetEnvironmentVariable(EnvKeys.Home),
-            [EnvKeys.AppData] = System.Environment.GetEnvironmentVariable(EnvKeys.AppData),
+            ["XDG_CONFIG_HOME"] = System.Environment.GetEnvironmentVariable("XDG_CONFIG_HOME"),
+            ["XDG_DOWNLOAD_DIR"] = System.Environment.GetEnvironmentVariable("XDG_DOWNLOAD_DIR"),
         };
 
         try
@@ -639,8 +636,24 @@ public class PathProviderUnitTests
             System.Environment.SetEnvironmentVariable(EnvKeys.ReaparrPhotosPath, photosPath);
             System.Environment.SetEnvironmentVariable(EnvKeys.ReaparrOtherPath, otherPath);
             System.Environment.SetEnvironmentVariable(EnvKeys.ReaparrGamesPath, gamesPath);
-            System.Environment.SetEnvironmentVariable(EnvKeys.Home, home);
-            System.Environment.SetEnvironmentVariable(EnvKeys.AppData, appData);
+            System.Environment.SetEnvironmentVariable(
+                "XDG_CONFIG_HOME",
+                OsInfo.CurrentOS switch
+                {
+                    OperatingSystemPlatform.Windows => appData,
+                    OperatingSystemPlatform.Osx when home is not null => Path.Combine(
+                        home,
+                        "Library",
+                        "Application Support"
+                    ),
+                    _ when home is not null => Path.Combine(home, ".config"),
+                    _ => null,
+                }
+            );
+            System.Environment.SetEnvironmentVariable(
+                "XDG_DOWNLOAD_DIR",
+                home is not null ? Path.Combine(home, PathProvider.DefaultDownloadsFolderName) : null
+            );
 
             assertion();
         }
@@ -680,8 +693,8 @@ public class PathProviderUnitTests
                 EnvKeys.ReaparrGamesPath,
                 originalValues[EnvKeys.ReaparrGamesPath]
             );
-            System.Environment.SetEnvironmentVariable(EnvKeys.Home, originalValues[EnvKeys.Home]);
-            System.Environment.SetEnvironmentVariable(EnvKeys.AppData, originalValues[EnvKeys.AppData]);
+            System.Environment.SetEnvironmentVariable("XDG_CONFIG_HOME", originalValues["XDG_CONFIG_HOME"]);
+            System.Environment.SetEnvironmentVariable("XDG_DOWNLOAD_DIR", originalValues["XDG_DOWNLOAD_DIR"]);
         }
     }
 }

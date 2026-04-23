@@ -7,7 +7,8 @@
 			v-for="(item, index) in list"
 			:key="index"
 			:href="item.link"
-			target="_blank">
+			target="_blank"
+			@click="onClick(item.link)">
 			<q-item-section>
 				<q-item-label>
 					<QText
@@ -27,6 +28,11 @@
 </template>
 
 <script setup lang="ts">
+import Log from 'consola';
+import { sendDesktopMessage } from '@composables';
+import { DesktopMessageType } from '@dto';
+import { useGlobalStore } from '@store';
+
 withDefaults(defineProps<{
 	list?: { text: string; link?: string }[];
 	cy?: string;
@@ -34,4 +40,16 @@ withDefaults(defineProps<{
 	list: () => [],
 	cy: 'link-list',
 });
+
+const globalStore = useGlobalStore();
+
+function onClick(href?: string): void {
+	if (globalStore.isDesktopMode) {
+		Log.debug('Desktop ExternalLink Click', href);
+		sendDesktopMessage({
+			type: DesktopMessageType.ExternalLink,
+			value: href ?? 'unknown-link',
+		});
+	}
+}
 </script>

@@ -6,22 +6,23 @@
         factoryName=".NET Project"
         activateToolWindowBeforeRun="false"
     >
-        <option name="EXE_PATH" value="/bin/bash" />
-        <option name="PROGRAM_PARAMETERS" value="$PROJECT_DIR$/scripts/run-config/desktop-win-x64.sh" />
+        <option name="EXE_PATH" value="/usr/bin/dotnet" />
+        <option
+            name="PROGRAM_PARAMETERS"
+            value="run --project $PROJECT_DIR$/tools/Build -- desktop run --rid win-x64 --version 0.36.0-dev.1"
+        />
         <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
         <option name="PASS_PARENT_ENVS" value="1" />
         <envs>
-            <env name="DOTNET_ENVIRONMENT" value="Development" />
-            <env name="INFORMATIONAL_VERSION" value="9.9.9-dev" />
+            <env name="DOTNET_ENVIRONMENT" value="Production" />
+            <env name="INFORMATIONAL_VERSION" value="0.36.0-dev.1" />
             <env name="PUID" value="1000" />
-            <env name="REAPARR_DATA_PATH" value="$PROJECT_DIR$/../../DATA/ReaparrCache/" />
-            <env name="REAPARR_CONFIG_PATH" value="$PROJECT_DIR$/../../DATA/ReaparrCache/Config" />
             <env name="SEQ_URL" value="http://localhost:5341" />
             <env name="UNMASKED" value="true" />
             <env name="DOTNET_HTTP_PORTS" value="5000" />
             <env name="LOG_ENV_VARS" value="false" />
             <env name="PGID" value="1000" />
-            <env name="VERSION" value="9.9.9" />
+            <env name="VERSION" value="0.36.0-dev.1" />
             <env name="REAPARR_PLATFORM" value="desktop" />
             <env name="LOG_LEVEL" value="DEBUG" />
         </envs>

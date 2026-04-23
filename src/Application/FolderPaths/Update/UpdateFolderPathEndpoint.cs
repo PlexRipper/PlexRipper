@@ -14,9 +14,6 @@ public class UpdateFolderPathEndpointRequestValidator : Validator<UpdateFolderPa
             .NotNull()
             .DependentRules(() =>
             {
-                RuleFor(x => x.FolderPathDTO.Id)
-                    .GreaterThanOrEqualTo(10)
-                    .WithMessage("Cannot update reserved folder paths with an Id less than 10");
                 RuleFor(x => x.FolderPathDTO.DisplayName).NotEmpty();
                 RuleFor(x => x.FolderPathDTO.Directory).NotEmpty();
                 RuleFor(x => x.FolderPathDTO.FolderType).NotEqual(FolderType.None).NotEqual(FolderType.Unknown);

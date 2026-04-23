@@ -263,6 +263,11 @@
         "resolved": "5.0.0",
         "contentHash": "dMkqfy2el8A8/I76n2Hi1oBFEbG1SfxD2l5nhwXV3XjlnOmwxJlQbYpJH4W51odnU9sARCSAgv7S3CyAFMkpYg=="
       },
+      "Xdg.Directories": {
+        "type": "Transitive",
+        "resolved": "0.1.2",
+        "contentHash": "Zhw6wmXwdLkhCvgBfVd9D8UL62IF2xnmbWDckQVoZMT9lBKCuVLwaVrkXhhJtP6pxcRaf7caauNCWOUngoPNsQ=="
+      },
       "Reaparr.Domain": {
         "type": "Project",
         "dependencies": {
@@ -280,7 +285,8 @@
       "Reaparr.Environment": {
         "type": "Project",
         "dependencies": {
-          "Serilog": "[4.3.1, )"
+          "Serilog": "[4.3.1, )",
+          "Xdg.Directories": "[0.1.2, )"
         }
       },
       "Reaparr.FluentResultExtensions": {

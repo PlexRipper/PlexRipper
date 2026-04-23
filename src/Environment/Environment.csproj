@@ -9,11 +9,10 @@
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
         <PackageReference Include="Serilog" Version="4.3.1" />
-    </ItemGroup>
-    <ItemGroup>
-        <Folder Include="_Shared\" />
+        <PackageReference Include="Xdg.Directories" Version="0.1.2" />
     </ItemGroup>
     <ItemGroup>
         <InternalsVisibleTo Include="Reaparr.BaseTests" />
+        <InternalsVisibleTo Include="Reaparr.Environment.UnitTests" />
     </ItemGroup>
 </Project>

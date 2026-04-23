@@ -83,7 +83,7 @@ jobs:
     # Build and publish desktop apps for all platforms
     build-desktop:
         name: Build Desktop Apps (DEV)
-        needs: [semantic-release]
+        needs: [ semantic-release ]
         if: needs.semantic-release.outputs.new-release-published == 'true'
         uses: ./.github/workflows/desktop-build.yml
         secrets: inherit
@@ -92,11 +92,12 @@ jobs:
             publish_release: false
             version: ${{ needs.semantic-release.outputs.new-release-version }}
             informational_version: ${{ needs.semantic-release.outputs.new-release-version }}
+            velopack_channel: dev
 
     # Build and publish multi-arch Docker images
     build-and-publish:
         name: Build and Publish Docker Images
-        needs: [semantic-release]
+        needs: [ semantic-release ]
         if: needs.semantic-release.outputs.new-release-published == 'true'
         uses: ./.github/workflows/docker-build-multiarch.yml
         secrets: inherit
@@ -109,7 +110,7 @@ jobs:
     # Notifications (depends on build-and-publish and build-desktop)
     notify-discord:
         name: Notify Discord
-        needs: [semantic-release, build-and-publish, build-desktop]
+        needs: [ semantic-release, build-and-publish, build-desktop ]
         if: needs.semantic-release.outputs.new-release-published == 'true'
         runs-on: ubuntu-latest
         steps:

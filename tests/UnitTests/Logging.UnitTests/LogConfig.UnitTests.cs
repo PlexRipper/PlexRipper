@@ -7,6 +7,27 @@ namespace Reaparr.Logging.UnitTests;
 public class LogConfigUnitTests : BaseUnitTest<LogConfig>
 {
     [Test]
+    public void ShouldEnableDebugEvents_WhenMinimumLogLevelIsDebug()
+    {
+        // Act
+        // ReSharper disable once RedundantArgumentDefaultValue
+        using var logger = Sut.GetLogger(LogEventLevel.Debug);
+
+        // Assert
+        logger.IsEnabled(LogEventLevel.Debug).ShouldBeTrue();
+    }
+
+    [Test]
+    public void ShouldNotEnableDebugEvents_WhenMinimumLogLevelIsInformation()
+    {
+        // Act
+        using var logger = Sut.GetLogger(LogEventLevel.Information);
+
+        // Assert
+        logger.IsEnabled(LogEventLevel.Debug).ShouldBeFalse();
+    }
+
+    [Test]
     public void ShouldWritePlainTextToFile_WhenLoggerWritesToFileSink()
     {
         // Arrange

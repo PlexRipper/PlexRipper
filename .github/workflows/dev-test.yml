@@ -4,7 +4,7 @@ on:
     workflow_dispatch:
     pull_request:
         branches: [ dev ]
-        types: [opened, ready_for_review, reopened, synchronize]
+        types: [ opened, ready_for_review, reopened, synchronize ]
         paths-ignore:
             - '.ai/**'
             - '.agents/**'
@@ -29,10 +29,10 @@ jobs:
         runs-on: ubuntu-latest
         if: github.event.pull_request.draft == false
         steps:
-            - run: echo "PR is not in draft, proceeding with tests"
+            -   run: echo "PR is not in draft, proceeding with tests"
 
     Actionlint:
-        needs: [Check-PR-Status, Check-Github-Changes]
+        needs: [ Check-PR-Status, Check-Github-Changes ]
         if: needs.Check-Github-Changes.outputs.should_run == 'true' && (needs.Check-PR-Status.result == 'success' || github.event_name == 'workflow_dispatch')
         runs-on: ubuntu-latest
         steps:
@@ -47,7 +47,7 @@ jobs:
 
     # Check if .github workflows/actions have changed
     Check-Github-Changes:
-        needs: [Check-PR-Status]
+        needs: [ Check-PR-Status ]
         if: always() && (needs.Check-PR-Status.result == 'success' || github.event_name == 'workflow_dispatch')
         runs-on: ubuntu-latest
         outputs:
@@ -64,7 +64,7 @@ jobs:
 
     # Check if front-end has changed
     Check-Frontend-Changes:
-        needs: [Check-PR-Status]
+        needs: [ Check-PR-Status ]
         if: always() && (needs.Check-PR-Status.result == 'success' || github.event_name == 'workflow_dispatch')
         runs-on: ubuntu-latest
         outputs:
@@ -81,7 +81,7 @@ jobs:
 
     # Check if back-end has changed
     Check-Backend-Changes:
-        needs: [Check-PR-Status]
+        needs: [ Check-PR-Status ]
         if: always() && (needs.Check-PR-Status.result == 'success' || github.event_name == 'workflow_dispatch')
         runs-on: ubuntu-latest
         outputs:
@@ -100,7 +100,7 @@ jobs:
 
     # Front-End-Type-Check:
     Front-End-Type-Check:
-        needs: [Check-Frontend-Changes, Check-PR-Status]
+        needs: [ Check-Frontend-Changes, Check-PR-Status ]
         if: needs.Check-Frontend-Changes.outputs.should_run == 'true' && (needs.Check-PR-Status.result == 'success' || github.event_name == 'workflow_dispatch')
         runs-on: ubuntu-latest
         steps:
@@ -113,7 +113,7 @@ jobs:
 
     # Front-End-Unit-Tests:
     Front-End-Unit-Tests:
-        needs: [Check-Frontend-Changes, Check-PR-Status]
+        needs: [ Check-Frontend-Changes, Check-PR-Status ]
         if: needs.Check-Frontend-Changes.outputs.should_run == 'true' && (needs.Check-PR-Status.result == 'success' || github.event_name == 'workflow_dispatch')
         runs-on: ubuntu-latest
         steps:
@@ -132,7 +132,7 @@ jobs:
                     retention-days: 7
 
     Front-End-Eslint-Check:
-        needs: [Check-Frontend-Changes, Check-PR-Status]
+        needs: [ Check-Frontend-Changes, Check-PR-Status ]
         if: needs.Check-Frontend-Changes.outputs.should_run == 'true' && (needs.Check-PR-Status.result == 'success' || github.event_name == 'workflow_dispatch')
         runs-on: ubuntu-latest
         steps:
@@ -144,7 +144,7 @@ jobs:
                 working-directory: src/AppHost/ClientApp/
 
     Front-End-Integration-Tests:
-        needs: [Check-Frontend-Changes, Check-PR-Status]
+        needs: [ Check-Frontend-Changes, Check-PR-Status ]
         if: needs.Check-Frontend-Changes.outputs.should_run == 'true' && (needs.Check-PR-Status.result == 'success' || github.event_name == 'workflow_dispatch')
         runs-on: ubuntu-latest
         strategy:
@@ -183,7 +183,7 @@ jobs:
 
     # Back-End Unit Tests
     Back-End-Build:
-        needs: [Check-Backend-Changes, Check-PR-Status]
+        needs: [ Check-Backend-Changes, Check-PR-Status ]
         if: needs.Check-Backend-Changes.outputs.should_run == 'true' && (needs.Check-PR-Status.result == 'success' || github.event_name == 'workflow_dispatch')
         runs-on: ubuntu-latest
         steps:
@@ -214,7 +214,7 @@ jobs:
                     retention-days: 1
 
     Back-End-Unit-Tests:
-        needs: [Check-Backend-Changes, Check-PR-Status, Back-End-Build]
+        needs: [ Check-Backend-Changes, Check-PR-Status, Back-End-Build ]
         if: needs.Check-Backend-Changes.outputs.should_run == 'true' && (needs.Check-PR-Status.result == 'success' || github.event_name == 'workflow_dispatch')
         runs-on: ubuntu-latest
         name: Back-End-Unit-Tests (${{ matrix.project_name }})
@@ -222,34 +222,34 @@ jobs:
             fail-fast: false
             matrix:
                 include:
-                    - test_project: tests/UnitTests/AppHost.UnitTests/AppHost.UnitTests.csproj
-                      project_name: AppHost.UnitTests
-                    - test_project: tests/UnitTests/Application.UnitTests/Application.UnitTests.csproj
-                      project_name: Application.UnitTests
-                    - test_project: tests/UnitTests/BackgroundJobs.UnitTests/BackgroundJobs.UnitTests.csproj
-                      project_name: BackgroundJobs.UnitTests
-                    - test_project: tests/UnitTests/BaseTests.UnitTests/BaseTests.UnitTests.csproj
-                      project_name: BaseTests.UnitTests
-                    - test_project: tests/UnitTests/Data.UnitTests/Data.UnitTests.csproj
-                      project_name: Data.UnitTests
-                    - test_project: tests/UnitTests/Domain.UnitTests/Domain.UnitTests.csproj
-                      project_name: Domain.UnitTests
-                    - test_project: tests/UnitTests/External.UnitTests/External.UnitTests.csproj
-                      project_name: External.UnitTests
-                    - test_project: tests/UnitTests/FileSystem.UnitTests/FileSystem.UnitTests.csproj
-                      project_name: FileSystem.UnitTests
-                    - test_project: tests/UnitTests/Environment.UnitTests/Environment.UnitTests.csproj
-                      project_name: Environment.UnitTests
-                    - test_project: tests/UnitTests/FluentResultExtension.UnitTests/FluentResultExtension.UnitTests.csproj
-                      project_name: FluentResultExtension.UnitTests
-                    - test_project: tests/UnitTests/Logging.UnitTests/Logging.UnitTests.csproj
-                      project_name: Logging.UnitTests
-                    - test_project: tests/UnitTests/PlexApi.UnitTests/PlexApi.UnitTests.csproj
-                      project_name: PlexApi.UnitTests
-                    - test_project: tests/UnitTests/PublicApi.UnitTests/PublicApi.UnitTests.csproj
-                      project_name: PublicApi.UnitTests
-                    - test_project: tests/UnitTests/Settings.UnitTests/Settings.UnitTests.csproj
-                      project_name: Settings.UnitTests
+                    -   test_project: tests/UnitTests/AppHost.UnitTests/AppHost.UnitTests.csproj
+                        project_name: AppHost.UnitTests
+                    -   test_project: tests/UnitTests/Application.UnitTests/Application.UnitTests.csproj
+                        project_name: Application.UnitTests
+                    -   test_project: tests/UnitTests/BackgroundJobs.UnitTests/BackgroundJobs.UnitTests.csproj
+                        project_name: BackgroundJobs.UnitTests
+                    -   test_project: tests/UnitTests/BaseTests.UnitTests/BaseTests.UnitTests.csproj
+                        project_name: BaseTests.UnitTests
+                    -   test_project: tests/UnitTests/Data.UnitTests/Data.UnitTests.csproj
+                        project_name: Data.UnitTests
+                    -   test_project: tests/UnitTests/Domain.UnitTests/Domain.UnitTests.csproj
+                        project_name: Domain.UnitTests
+                    -   test_project: tests/UnitTests/External.UnitTests/External.UnitTests.csproj
+                        project_name: External.UnitTests
+                    -   test_project: tests/UnitTests/FileSystem.UnitTests/FileSystem.UnitTests.csproj
+                        project_name: FileSystem.UnitTests
+                    -   test_project: tests/UnitTests/Environment.UnitTests/Environment.UnitTests.csproj
+                        project_name: Environment.UnitTests
+                    -   test_project: tests/UnitTests/FluentResultExtension.UnitTests/FluentResultExtension.UnitTests.csproj
+                        project_name: FluentResultExtension.UnitTests
+                    -   test_project: tests/UnitTests/Logging.UnitTests/Logging.UnitTests.csproj
+                        project_name: Logging.UnitTests
+                    -   test_project: tests/UnitTests/PlexApi.UnitTests/PlexApi.UnitTests.csproj
+                        project_name: PlexApi.UnitTests
+                    -   test_project: tests/UnitTests/PublicApi.UnitTests/PublicApi.UnitTests.csproj
+                        project_name: PublicApi.UnitTests
+                    -   test_project: tests/UnitTests/Settings.UnitTests/Settings.UnitTests.csproj
+                        project_name: Settings.UnitTests
 
         steps:
             -   name: Checkout Source Code
@@ -308,7 +308,7 @@ jobs:
 
     # Back-End Integration Tests
     Back-End-Integration-Tests:
-        needs: [Check-Backend-Changes, Check-PR-Status, Back-End-Build]
+        needs: [ Check-Backend-Changes, Check-PR-Status, Back-End-Build ]
         if: needs.Check-Backend-Changes.outputs.should_run == 'true' && (needs.Check-PR-Status.result == 'success' || github.event_name == 'workflow_dispatch')
         runs-on: ubuntu-latest
         strategy:
@@ -367,7 +367,7 @@ jobs:
 
     # Code Coverage Report
     Code-Coverage-Report:
-        needs: [Back-End-Unit-Tests, Back-End-Integration-Tests, Check-PR-Status]
+        needs: [ Back-End-Unit-Tests, Back-End-Integration-Tests, Check-PR-Status ]
         if: always() && (needs.Back-End-Unit-Tests.result != 'skipped' || needs.Back-End-Integration-Tests.result != 'skipped') && (needs.Check-PR-Status.result == 'success' || github.event_name == 'workflow_dispatch')
         runs-on: ubuntu-latest
         steps:
@@ -397,7 +397,7 @@ jobs:
 
     # Ensure Docker images can be built without errors (both amd64 and arm64)
     Test-Docker-Build:
-        needs: [Check-Frontend-Changes, Check-Backend-Changes, Back-End-Unit-Tests, Back-End-Integration-Tests, Front-End-Type-Check, Front-End-Unit-Tests, Front-End-Eslint-Check, Front-End-Integration-Tests, Actionlint, Check-PR-Status]
+        needs: [ Check-Frontend-Changes, Check-Backend-Changes, Back-End-Unit-Tests, Back-End-Integration-Tests, Front-End-Type-Check, Front-End-Unit-Tests, Front-End-Eslint-Check, Front-End-Integration-Tests, Actionlint, Check-PR-Status ]
         if: |
             always() &&
             (needs.Check-PR-Status.result == 'success' || github.event_name == 'workflow_dispatch') &&
@@ -411,7 +411,7 @@ jobs:
 
     # Ensure desktop installers can be built without errors (Windows/Linux/macOS)
     Test-Desktop-Build:
-        needs: [Check-Frontend-Changes, Check-Backend-Changes, Back-End-Unit-Tests, Back-End-Integration-Tests, Front-End-Type-Check, Front-End-Unit-Tests, Front-End-Eslint-Check, Front-End-Integration-Tests, Actionlint, Check-PR-Status]
+        needs: [ Check-Frontend-Changes, Check-Backend-Changes, Back-End-Unit-Tests, Back-End-Integration-Tests, Front-End-Type-Check, Front-End-Unit-Tests, Front-End-Eslint-Check, Front-End-Integration-Tests, Actionlint, Check-PR-Status ]
         if: |
             always() &&
             (needs.Check-PR-Status.result == 'success' || github.event_name == 'workflow_dispatch') &&
@@ -422,3 +422,4 @@ jobs:
             push: false
             version: 9.9.9
             informational_version: 9.9.9-dev
+            velopack_channel: dev

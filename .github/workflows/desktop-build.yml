@@ -24,6 +24,10 @@ on:
                 required: false
                 type: boolean
                 default: false
+            velopack_channel:
+                description: 'Velopack update channel (dev or stable)'
+                required: true
+                type: string
 
 jobs:
     prepare-frontend:
@@ -50,35 +54,23 @@ jobs:
 
     build:
         name: Build ${{ matrix.rid }}
-        needs: [prepare-frontend]
+        needs: [ prepare-frontend ]
         strategy:
             fail-fast: false
             matrix:
                 include:
                     -   rid: win-x64
                         runner: windows-latest
-                        profile: Desktop-win-x64
-                        main-exe: Reaparr.AppHost.exe
                     -   rid: win-arm64
                         runner: windows-11-arm
-                        profile: Desktop-win-arm64
-                        main-exe: Reaparr.AppHost.exe
                     -   rid: linux-x64
                         runner: ubuntu-latest
-                        profile: Desktop-linux-x64
-                        main-exe: Reaparr.AppHost
                     -   rid: linux-arm64
                         runner: ubuntu-24.04-arm
-                        profile: Desktop-linux-arm64
-                        main-exe: Reaparr.AppHost
                     -   rid: osx-x64
                         runner: macos-15-intel
-                        profile: Desktop-osx-x64
-                        main-exe: Reaparr.AppHost
                     -   rid: osx-arm64
                         runner: macos-15
-                        profile: Desktop-osx-arm64
-                        main-exe: Reaparr.AppHost
 
         runs-on: ${{ matrix.runner }}
         permissions:
@@ -105,60 +97,36 @@ jobs:
                     locked-mode: false
                     runtime: ${{ matrix.rid }}
 
-            -   name: Publish (Windows)
-                if: startsWith(matrix.runner, 'windows')
-                shell: bash
-                run: |
-                    dotnet publish src/AppHost/AppHost.csproj \
-                        -p:PublishProfile=${{ matrix.profile }} \
-                        -p:Version=${{ inputs.version }} \
-                        -p:InformationalVersion=${{ inputs.informational_version }} \
-                        -p:CSharpier_Bypass=true \
-                        --no-restore
-
-            -   name: Publish (Non-Windows)
-                if: ${{ !startsWith(matrix.runner, 'windows') }}
-                shell: bash
-                run: |
-                    dotnet publish src/AppHost/AppHost.csproj \
-                        -p:PublishProfile=${{ matrix.profile }} \
-                        -p:Version=${{ inputs.version }} \
-                        -p:InformationalVersion=${{ inputs.informational_version }} \
-                        --no-restore
-
-            -   name: Copy frontend to publish output
-                shell: bash
-                run: |
-                    mkdir -p src/AppHost/bin/Publish/Desktop/${{ matrix.rid }}/wwwroot
-                    cp -r .tmp/frontend-public/. src/AppHost/bin/Publish/Desktop/${{ matrix.rid }}/wwwroot/
-
             -   name: Setup .NET 9 runtime for vpk
                 uses: actions/setup-dotnet@v4
                 with:
                     dotnet-version: 9.0.x
 
             -   name: Install Velopack CLI
+                shell: bash
                 run: dotnet tool install -g vpk
 
             -   name: Download previous release (for delta packages)
                 if: inputs.push
                 shell: bash
                 run: |
+                    mkdir -p Releases
                     vpk download github \
                         --repoUrl https://github.com/${{ github.repository }} \
-                        --channel ${{ matrix.rid }} \
+                        --channel ${{ inputs.velopack_channel }} \
                         --token ${{ secrets.GITHUB_TOKEN }}
 
-            -   name: Pack installer
+            -   name: Package installer via shared CLI
                 shell: bash
                 run: |
-                    vpk pack \
-                        --packId Reaparr \
-                        --packTitle Reaparr \
-                        --packVersion ${{ inputs.version }} \
-                        --packDir src/AppHost/bin/Publish/Desktop/${{ matrix.rid }} \
-                        --mainExe ${{ matrix.main-exe }} \
-                        --channel ${{ matrix.rid }}
+                    dotnet run --project tools/Build -- desktop ci-package \
+                        --rid ${{ matrix.rid }} \
+                        --version ${{ inputs.version }} \
+                        --informational-version ${{ inputs.informational_version }} \
+                        --channel ${{ inputs.velopack_channel }} \
+                        --frontend-public-dir .tmp/frontend-public \
+                        --artifact-dir Releases \
+                        --preserve-existing-artifacts
 
             -   name: Upload packed installer artifact
                 if: inputs.push
@@ -169,13 +137,23 @@ jobs:
                     retention-days: 1
 
     upload-release:
-        name: Upload to GitHub Release
-        needs: [build]
+        name: Upload ${{ matrix.rid }} to GitHub Release
+        needs: [ build ]
         if: inputs.push
         runs-on: ubuntu-latest
         timeout-minutes: 30
         permissions:
             contents: write
+        strategy:
+            fail-fast: false
+            matrix:
+                include:
+                    -   rid: win-x64
+                    -   rid: win-arm64
+                    -   rid: linux-x64
+                    -   rid: linux-arm64
+                    -   rid: osx-x64
+                    -   rid: osx-arm64
 
         steps:
             -   name: Checkout source code
@@ -189,116 +167,21 @@ jobs:
             -   name: Install Velopack CLI
                 run: dotnet tool install -g vpk
 
-            -   name: Download packed installer — win-x64
+            -   name: Download packed installer
                 uses: actions/download-artifact@v4
                 with:
-                    name: desktop-win-x64
-                    path: Releases/win-x64
+                    name: desktop-${{ matrix.rid }}
+                    path: Releases/${{ matrix.rid }}
 
-            -   name: Download packed installer — win-arm64
-                uses: actions/download-artifact@v4
-                with:
-                    name: desktop-win-arm64
-                    path: Releases/win-arm64
-
-            -   name: Download packed installer — linux-x64
-                uses: actions/download-artifact@v4
-                with:
-                    name: desktop-linux-x64
-                    path: Releases/linux-x64
-
-            -   name: Download packed installer — linux-arm64
-                uses: actions/download-artifact@v4
-                with:
-                    name: desktop-linux-arm64
-                    path: Releases/linux-arm64
-
-            -   name: Download packed installer — osx-x64
-                uses: actions/download-artifact@v4
-                with:
-                    name: desktop-osx-x64
-                    path: Releases/osx-x64
-
-            -   name: Download packed installer — osx-arm64
-                uses: actions/download-artifact@v4
-                with:
-                    name: desktop-osx-arm64
-                    path: Releases/osx-arm64
-
-            -   name: Upload win-x64 to GitHub Release
+            -   name: Upload installer to GitHub Release
                 shell: bash
                 run: |
                     vpk upload github \
                         --repoUrl https://github.com/${{ github.repository }} \
                         ${{ inputs.publish_release && '--publish' || '' }} \
                         --merge \
-                        --channel win-x64 \
-                        --outputDir Releases/win-x64 \
-                        --releaseName "Reaparr ${{ inputs.version }}" \
-                        --tag v${{ inputs.version }} \
-                        --token ${{ secrets.GITHUB_TOKEN }}
-
-            -   name: Upload win-arm64 to GitHub Release
-                shell: bash
-                run: |
-                    vpk upload github \
-                        --repoUrl https://github.com/${{ github.repository }} \
-                        ${{ inputs.publish_release && '--publish' || '' }} \
-                        --merge \
-                        --channel win-arm64 \
-                        --outputDir Releases/win-arm64 \
-                        --releaseName "Reaparr ${{ inputs.version }}" \
-                        --tag v${{ inputs.version }} \
-                        --token ${{ secrets.GITHUB_TOKEN }}
-
-            -   name: Upload linux-x64 to GitHub Release
-                shell: bash
-                run: |
-                    vpk upload github \
-                        --repoUrl https://github.com/${{ github.repository }} \
-                        ${{ inputs.publish_release && '--publish' || '' }} \
-                        --merge \
-                        --channel linux-x64 \
-                        --outputDir Releases/linux-x64 \
-                        --releaseName "Reaparr ${{ inputs.version }}" \
-                        --tag v${{ inputs.version }} \
-                        --token ${{ secrets.GITHUB_TOKEN }}
-
-            -   name: Upload linux-arm64 to GitHub Release
-                shell: bash
-                run: |
-                    vpk upload github \
-                        --repoUrl https://github.com/${{ github.repository }} \
-                        ${{ inputs.publish_release && '--publish' || '' }} \
-                        --merge \
-                        --channel linux-arm64 \
-                        --outputDir Releases/linux-arm64 \
-                        --releaseName "Reaparr ${{ inputs.version }}" \
-                        --tag v${{ inputs.version }} \
-                        --token ${{ secrets.GITHUB_TOKEN }}
-
-            -   name: Upload osx-x64 to GitHub Release
-                shell: bash
-                run: |
-                    vpk upload github \
-                        --repoUrl https://github.com/${{ github.repository }} \
-                        ${{ inputs.publish_release && '--publish' || '' }} \
-                        --merge \
-                        --channel osx-x64 \
-                        --outputDir Releases/osx-x64 \
-                        --releaseName "Reaparr ${{ inputs.version }}" \
-                        --tag v${{ inputs.version }} \
-                        --token ${{ secrets.GITHUB_TOKEN }}
-
-            -   name: Upload osx-arm64 to GitHub Release
-                shell: bash
-                run: |
-                    vpk upload github \
-                        --repoUrl https://github.com/${{ github.repository }} \
-                        ${{ inputs.publish_release && '--publish' || '' }} \
-                        --merge \
-                        --channel osx-arm64 \
-                        --outputDir Releases/osx-arm64 \
+                        --channel ${{ inputs.velopack_channel }} \
+                        --outputDir Releases/${{ matrix.rid }} \
                         --releaseName "Reaparr ${{ inputs.version }}" \
                         --tag v${{ inputs.version }} \
                         --token ${{ secrets.GITHUB_TOKEN }}

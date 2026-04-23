@@ -6,15 +6,15 @@
 [JsonConverter(typeof(JsonStringEnumConverter))]
 public enum PlexConnectionTypes
 {
-    [EnumMember(Value = nameof(Local))]
+    [JsonStringEnumMemberName(nameof(Local))]
     Local = 0,
 
-    [EnumMember(Value = nameof(Public))]
+    [JsonStringEnumMemberName(nameof(Public))]
     Public = 1,
 
-    [EnumMember(Value = nameof(PlexRelay))]
+    [JsonStringEnumMemberName(nameof(PlexRelay))]
     PlexRelay = 2,
 
-    [EnumMember(Value = nameof(Unknown))]
+    [JsonStringEnumMemberName(nameof(Unknown))]
     Unknown = 3,
 }

@@ -88,7 +88,7 @@ public class PathProviderUnitTests
             () =>
             {
                 // Act
-                var expected = GetExpectedDesktopConfigPath(home);
+                var expected = GetExpectedDesktopConfigPath(home, appData);
 
                 // Assert
                 PathProvider.ConfigDirectory.ShouldBe(expected);
@@ -133,7 +133,7 @@ public class PathProviderUnitTests
             () =>
             {
                 // Act
-                var expected = GetExpectedDesktopConfigPath(home);
+                var expected = GetExpectedDesktopConfigPath(home, appData);
 
                 // Assert
                 PathProvider.ConfigDirectory.ShouldBe(expected);
@@ -197,7 +197,7 @@ public class PathProviderUnitTests
             {
                 // Assert
                 PathProvider.DataDirectory.ShouldBe(
-                    System.Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile)
+                    Path.Combine(home, PathProvider.DefaultDownloadsFolderName, PathProvider.DefaultReaparrFolderName)
                 );
             }
         );
@@ -276,7 +276,7 @@ public class PathProviderUnitTests
             {
                 // Assert
                 PathProvider.DataDirectory.ShouldBe(
-                    System.Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile)
+                    Path.Combine(home, PathProvider.DefaultDownloadsFolderName, PathProvider.DefaultReaparrFolderName)
                 );
             }
         );
@@ -333,25 +333,12 @@ public class PathProviderUnitTests
             () =>
             {
                 // Act
-                var desktopMediaRoot = Path.Combine(
-                    System.Environment.GetFolderPath(System.Environment.SpecialFolder.MyVideos),
+                var desktopDownloadsRoot = Path.Combine(
+                    home,
+                    PathProvider.DefaultDownloadsFolderName,
                     PathProvider.DefaultReaparrFolderName
                 );
-                var expected = folderName switch
-                {
-                    "Downloads" => Path.Combine(
-                        System.Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile),
-                        PathProvider.DefaultDownloadsFolderName,
-                        PathProvider.DefaultReaparrFolderName
-                    ),
-                    "Movies" => Path.Combine(desktopMediaRoot, PathProvider.DefaultMovieFolderName),
-                    "TvShows" => Path.Combine(desktopMediaRoot, PathProvider.DefaultTvShowsFolderName),
-                    "Music" => Path.Combine(desktopMediaRoot, PathProvider.DefaultMusicFolderName),
-                    "Photos" => Path.Combine(desktopMediaRoot, PathProvider.DefaultPhotosFolderName),
-                    "Other" => Path.Combine(desktopMediaRoot, PathProvider.DefaultOtherFolderName),
-                    "Games" => Path.Combine(desktopMediaRoot, PathProvider.DefaultGamesFolderName),
-                    _ => throw new InvalidOperationException($"Unsupported folder: {folderName}"),
-                };
+                var expected = Path.Combine(desktopDownloadsRoot, folderName);
 
                 // Assert
                 GetDefaultDestinationFolder(folderName).ShouldBe(expected);
@@ -533,24 +520,61 @@ public class PathProviderUnitTests
         );
     }
 
-    private static string GetExpectedDesktopConfigPath(string _) =>
+    [Test]
+    [Arguments(OperatingSystemPlatform.Windows, "C:/Users/reaparr-user")]
+    [Arguments(OperatingSystemPlatform.Osx, "/Users/reaparr-user")]
+    [Arguments(OperatingSystemPlatform.Linux, "/home/reaparr-user")]
+    public void ShouldBuildAllDesktopMediaDestinationFoldersUnderDownloadsReaparr_WhenDesktopModeAndDataPathUnset(
+        OperatingSystemPlatform platform,
+        string userProfile
+    )
+    {
+        // Arrange
+        WithEnvironment(
+            "desktop",
+            null,
+            null,
+            userProfile,
+            "/unused/appdata",
+            () =>
+            {
+                // Act
+                var expectedRoot = Path.Combine(
+                    userProfile,
+                    PathProvider.DefaultDownloadsFolderName,
+                    PathProvider.DefaultReaparrFolderName
+                );
+
+                // Assert
+                GetDefaultDestinationFolder("Downloads")
+                    .ShouldBe(Path.Combine(expectedRoot, PathProvider.DefaultDownloadsFolderName));
+                GetDefaultDestinationFolder("Movies")
+                    .ShouldBe(Path.Combine(expectedRoot, PathProvider.DefaultMovieFolderName));
+                GetDefaultDestinationFolder("TvShows")
+                    .ShouldBe(Path.Combine(expectedRoot, PathProvider.DefaultTvShowsFolderName));
+                GetDefaultDestinationFolder("Music")
+                    .ShouldBe(Path.Combine(expectedRoot, PathProvider.DefaultMusicFolderName));
+                GetDefaultDestinationFolder("Photos")
+                    .ShouldBe(Path.Combine(expectedRoot, PathProvider.DefaultPhotosFolderName));
+                GetDefaultDestinationFolder("Other")
+                    .ShouldBe(Path.Combine(expectedRoot, PathProvider.DefaultOtherFolderName));
+                GetDefaultDestinationFolder("Games")
+                    .ShouldBe(Path.Combine(expectedRoot, PathProvider.DefaultGamesFolderName));
+            }
+        );
+    }
+
+    private static string GetExpectedDesktopConfigPath(string home, string appData) =>
         OsInfo.CurrentOS switch
         {
-            OperatingSystemPlatform.Windows => Path.Combine(
-                System.Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData),
-                PathProvider.DefaultReaparrFolderName
-            ),
+            OperatingSystemPlatform.Windows => Path.Combine(appData, PathProvider.DefaultReaparrFolderName),
             OperatingSystemPlatform.Osx => Path.Combine(
-                System.Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile),
+                home,
                 "Library",
                 "Application Support",
                 PathProvider.DefaultReaparrFolderName
             ),
-            _ => Path.Combine(
-                System.Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile),
-                ".config",
-                PathProvider.DefaultReaparrFolderName
-            ),
+            _ => Path.Combine(home, ".config", PathProvider.DefaultReaparrFolderName),
         };
 
     private static string GetExpectedDockerRootDirectory() => "/";
@@ -596,8 +620,8 @@ public class PathProviderUnitTests
             [EnvKeys.ReaparrPhotosPath] = System.Environment.GetEnvironmentVariable(EnvKeys.ReaparrPhotosPath),
             [EnvKeys.ReaparrOtherPath] = System.Environment.GetEnvironmentVariable(EnvKeys.ReaparrOtherPath),
             [EnvKeys.ReaparrGamesPath] = System.Environment.GetEnvironmentVariable(EnvKeys.ReaparrGamesPath),
-            [EnvKeys.Home] = System.Environment.GetEnvironmentVariable(EnvKeys.Home),
-            [EnvKeys.AppData] = System.Environment.GetEnvironmentVariable(EnvKeys.AppData),
+            [EnvKeys.XdgConfigHome] = System.Environment.GetEnvironmentVariable(EnvKeys.XdgConfigHome),
+            [EnvKeys.XdgDownloadDir] = System.Environment.GetEnvironmentVariable(EnvKeys.XdgDownloadDir),
         };
 
         try
@@ -612,8 +636,24 @@ public class PathProviderUnitTests
             System.Environment.SetEnvironmentVariable(EnvKeys.ReaparrPhotosPath, photosPath);
             System.Environment.SetEnvironmentVariable(EnvKeys.ReaparrOtherPath, otherPath);
             System.Environment.SetEnvironmentVariable(EnvKeys.ReaparrGamesPath, gamesPath);
-            System.Environment.SetEnvironmentVariable(EnvKeys.Home, home);
-            System.Environment.SetEnvironmentVariable(EnvKeys.AppData, appData);
+            System.Environment.SetEnvironmentVariable(
+                EnvKeys.XdgConfigHome,
+                OsInfo.CurrentOS switch
+                {
+                    OperatingSystemPlatform.Windows => appData,
+                    OperatingSystemPlatform.Osx when home is not null => Path.Combine(
+                        home,
+                        "Library",
+                        "Application Support"
+                    ),
+                    _ when home is not null => Path.Combine(home, ".config"),
+                    _ => null,
+                }
+            );
+            System.Environment.SetEnvironmentVariable(
+                EnvKeys.XdgDownloadDir,
+                home is not null ? Path.Combine(home, PathProvider.DefaultDownloadsFolderName) : null
+            );
 
             assertion();
         }
@@ -653,8 +693,8 @@ public class PathProviderUnitTests
                 EnvKeys.ReaparrGamesPath,
                 originalValues[EnvKeys.ReaparrGamesPath]
             );
-            System.Environment.SetEnvironmentVariable(EnvKeys.Home, originalValues[EnvKeys.Home]);
-            System.Environment.SetEnvironmentVariable(EnvKeys.AppData, originalValues[EnvKeys.AppData]);
+            System.Environment.SetEnvironmentVariable(EnvKeys.XdgConfigHome, originalValues[EnvKeys.XdgConfigHome]);
+            System.Environment.SetEnvironmentVariable(EnvKeys.XdgDownloadDir, originalValues[EnvKeys.XdgDownloadDir]);
         }
     }
 }

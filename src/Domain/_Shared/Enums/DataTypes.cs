@@ -6,24 +6,24 @@
 [JsonConverter(typeof(JsonStringEnumConverter))]
 public enum RefreshDataType
 {
-    [EnumMember(Value = nameof(PlexAccount))]
+    [JsonStringEnumMemberName(nameof(PlexAccount))]
     PlexAccount = 0,
 
-    [EnumMember(Value = nameof(PlexServer))]
+    [JsonStringEnumMemberName(nameof(PlexServer))]
     PlexServer = 1,
 
-    [EnumMember(Value = nameof(PlexLibrary))]
+    [JsonStringEnumMemberName(nameof(PlexLibrary))]
     PlexLibrary = 2,
 
-    [EnumMember(Value = nameof(PlexLibrarySyncStatus))]
+    [JsonStringEnumMemberName(nameof(PlexLibrarySyncStatus))]
     PlexLibrarySyncStatus = 3,
 
-    [EnumMember(Value = nameof(PlexServerConnection))]
+    [JsonStringEnumMemberName(nameof(PlexServerConnection))]
     PlexServerConnection = 4,
 
-    [EnumMember(Value = nameof(DownloadTasks))]
+    [JsonStringEnumMemberName(nameof(DownloadTasks))]
     DownloadTasks = 5,
 
-    [EnumMember(Value = nameof(UpdateAvailable))]
+    [JsonStringEnumMemberName(nameof(UpdateAvailable))]
     UpdateAvailable = 6,
 }

@@ -1,3 +1,5 @@
+using System.Diagnostics;
+using System.Text.Json;
 using Photino.NET;
 
 namespace Reaparr.AppHost;
@@ -19,7 +21,7 @@ public class DesktopWindow : IDesktopWindow
     public void ConfigureWindow()
     {
         _window = new PhotinoWindow()
-            .SetTitle("Reaparr - " + EnvironmentExtensions.GetVersion())
+            .SetTitle("Reaparr - " + EnvironmentExtensions.GetInformationalVersion())
             .SetUseOsDefaultSize(true)
             .Center()
             .SetMinSize(1920, 1080)
@@ -37,10 +39,33 @@ public class DesktopWindow : IDesktopWindow
     }
 
     /// <inheritdoc />
+    public void RegisterDesktopMessageHandler(Action<DesktopMessageDTO> handler)
+    {
+        _window?.RegisterWebMessageReceivedHandler(
+            (_, message) =>
+            {
+                var msg =
+                    JsonSerializer.Deserialize<DesktopMessageDTO>(message, DefaultJsonSerializerOptions.ConfigStandard)
+                    ?? new DesktopMessageDTO { Type = DesktopMessageType.None, Value = "" };
+                handler(msg);
+            }
+        );
+    }
+
+    /// <inheritdoc />
+    public void OpenExternalBrowser(Uri uri)
+    {
+        Process.Start(new ProcessStartInfo(uri.AbsoluteUri) { UseShellExecute = true });
+    }
+
+    /// <inheritdoc />
     public void CloseToBackground()
     {
-        if (_window is not null)
-            _window.Minimized = true;
+        if (!IsInitialized)
+            return;
+
+        _window?.Close();
+        _isInitialized = false;
     }
 
     /// <inheritdoc />

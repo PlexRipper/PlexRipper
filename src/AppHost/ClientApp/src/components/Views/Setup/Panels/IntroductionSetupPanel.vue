@@ -20,19 +20,20 @@ const { t } = useI18n();
 defineProps<{
 	name: SetupPanelType;
 }>();
-
-const list: { text: string; link?: string }[] = [
-	{
-		text: t('pages.setup.intro.list.item-1'),
-		link: discordInviteLink(),
-	},
-	{
-		text: t('pages.setup.intro.list.item-2'),
-		link: 'https://www.reaparr.rocks/docs/faq',
-	},
-	{
-		text: t('pages.setup.intro.list.item-3'),
-		link: 'https://github.com/Reaparr/Reaparr/issues',
-	},
-];
+const list = computed((): { text: string; link?: string }[] => {
+	return [
+		{
+			text: t('pages.setup.intro.list.item-1'),
+			link: discordInviteLink(),
+		},
+		{
+			text: t('pages.setup.intro.list.item-2'),
+			link: 'https://www.reaparr.rocks/docs/faq',
+		},
+		{
+			text: t('pages.setup.intro.list.item-3'),
+			link: 'https://github.com/Reaparr/Reaparr/issues',
+		},
+	];
+});
 </script>

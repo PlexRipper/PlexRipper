@@ -1,6 +1,5 @@
 using System.IO.Pipes;
 using System.Text;
-using Reaparr.FluentResultExtensions;
 
 namespace Reaparr.AppHost;
 

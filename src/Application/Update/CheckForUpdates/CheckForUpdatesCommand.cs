@@ -39,6 +39,19 @@ public class CheckForUpdatesCommandHandler : ICommandHandler<CheckForUpdatesComm
         // Desktop mode
         if (EnvironmentExtensions.IsDesktopMode())
         {
+            if (!_velopackManager.IsInstalled)
+            {
+                _log.Here().Information("Skipping update check because the application is not installed");
+                return Result.Ok(AppUpdateCheckResult.NoUpdate());
+            }
+
+            _log.Here()
+                .Information(
+                    "Checking for Velopack updates for {AppId} {CurrentVersion}",
+                    _velopackManager.AppId,
+                    _velopackManager.CurrentVersion
+                );
+
             Result<UpdateInfo?> updateResult = await Result.Try(async Task () =>
                 await _velopackManager.CheckForUpdatesAsync()
             );

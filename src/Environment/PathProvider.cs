@@ -1,3 +1,5 @@
+using Xdg.Directories;
+
 namespace Reaparr.Environment;
 
 public class PathProvider : IPathProvider
@@ -50,201 +52,6 @@ public class PathProvider : IPathProvider
     /// </summary>
     public static string DefaultGamesFolderName => "Games";
 
-    /// <summary>
-    /// Gets the default downloads destination path based on the configured data root or the current platform fallback.
-    /// </summary>
-    public static string DefaultDownloadsDestinationFolder
-    {
-        get
-        {
-            var downloadsPath = EnvironmentExtensions.GetDownloadsPath();
-            if (downloadsPath is not null)
-                return downloadsPath;
-
-            if (EnvironmentExtensions.IsDockerMode())
-                return Path.Combine("/", DefaultDownloadsFolderName);
-
-            if (EnvironmentExtensions.IsDesktopMode())
-                return Path.Combine(
-                    System.Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile),
-                    DefaultDownloadsFolderName,
-                    DefaultReaparrFolderName
-                );
-
-            throw new PlatformNotSupportedException($"Platform: {OsInfo.CurrentOS} is not supported");
-        }
-    }
-
-    /// <summary>
-    /// Gets the default movies destination path based on the configured data root or the current platform fallback.
-    /// </summary>
-    public static string DefaultMovieDestinationFolder
-    {
-        get
-        {
-            var perTypePath = EnvironmentExtensions.GetMoviesPath();
-            if (perTypePath is not null)
-                return perTypePath;
-
-            var dataPath = EnvironmentExtensions.GetDataPath();
-            if (dataPath is not null)
-                return Path.Combine(dataPath, DefaultMovieFolderName);
-
-            if (EnvironmentExtensions.IsDockerMode())
-                return Path.Combine("/", DefaultMovieFolderName);
-
-            if (EnvironmentExtensions.IsDesktopMode())
-            {
-                var home = System.Environment.GetFolderPath(System.Environment.SpecialFolder.MyVideos);
-                return Path.Combine(home, "Reaparr", DefaultMovieFolderName);
-            }
-
-            throw new PlatformNotSupportedException($"Platform: {OsInfo.CurrentOS} is not supported");
-        }
-    }
-
-    /// <summary>
-    /// Gets the default TV shows destination path based on the configured data root or the current platform fallback.
-    /// </summary>
-    public static string DefaultTvShowsDestinationFolder
-    {
-        get
-        {
-            var perTypePath = EnvironmentExtensions.GetTvShowsPath();
-            if (perTypePath is not null)
-                return perTypePath;
-
-            var dataPath = EnvironmentExtensions.GetDataPath();
-            if (dataPath is not null)
-                return Path.Combine(dataPath, DefaultTvShowsFolderName);
-
-            if (EnvironmentExtensions.IsDockerMode())
-                return Path.Combine("/", DefaultTvShowsFolderName);
-
-            if (EnvironmentExtensions.IsDesktopMode())
-            {
-                var home = System.Environment.GetFolderPath(System.Environment.SpecialFolder.MyVideos);
-                return Path.Combine(home, DefaultReaparrFolderName, DefaultTvShowsFolderName);
-            }
-
-            throw new PlatformNotSupportedException($"Platform: {OsInfo.CurrentOS} is not supported");
-        }
-    }
-
-    /// <summary>
-    /// Gets the default music destination path based on the configured data root or the current platform fallback.
-    /// </summary>
-    public static string DefaultMusicDestinationFolder
-    {
-        get
-        {
-            var perTypePath = EnvironmentExtensions.GetMusicPath();
-            if (perTypePath is not null)
-                return perTypePath;
-
-            var dataPath = EnvironmentExtensions.GetDataPath();
-            if (dataPath is not null)
-                return Path.Combine(dataPath, DefaultMusicFolderName);
-
-            if (EnvironmentExtensions.IsDockerMode())
-                return Path.Combine("/", DefaultMusicFolderName);
-
-            if (EnvironmentExtensions.IsDesktopMode())
-            {
-                var home = System.Environment.GetFolderPath(System.Environment.SpecialFolder.MyVideos);
-                return Path.Combine(home, DefaultReaparrFolderName, DefaultMusicFolderName);
-            }
-
-            throw new PlatformNotSupportedException($"Platform: {OsInfo.CurrentOS} is not supported");
-        }
-    }
-
-    /// <summary>
-    /// Gets the default photos destination path based on the configured data root or the current platform fallback.
-    /// </summary>
-    public static string DefaultPhotosDestinationFolder
-    {
-        get
-        {
-            var perTypePath = EnvironmentExtensions.GetPhotosPath();
-            if (perTypePath is not null)
-                return perTypePath;
-
-            var dataPath = EnvironmentExtensions.GetDataPath();
-            if (dataPath is not null)
-                return Path.Combine(dataPath, DefaultPhotosFolderName);
-
-            if (EnvironmentExtensions.IsDockerMode())
-                return Path.Combine("/", DefaultPhotosFolderName);
-
-            if (EnvironmentExtensions.IsDesktopMode())
-            {
-                var home = System.Environment.GetFolderPath(System.Environment.SpecialFolder.MyVideos);
-                return Path.Combine(home, DefaultReaparrFolderName, DefaultPhotosFolderName);
-            }
-
-            throw new PlatformNotSupportedException($"Platform: {OsInfo.CurrentOS} is not supported");
-        }
-    }
-
-    /// <summary>
-    /// Gets the default uncategorized media destination path based on the configured data root or the current platform fallback.
-    /// </summary>
-    public static string DefaultOtherDestinationFolder
-    {
-        get
-        {
-            var perTypePath = EnvironmentExtensions.GetOtherPath();
-            if (perTypePath is not null)
-                return perTypePath;
-
-            var dataPath = EnvironmentExtensions.GetDataPath();
-            if (dataPath is not null)
-                return Path.Combine(dataPath, DefaultOtherFolderName);
-
-            if (EnvironmentExtensions.IsDockerMode())
-                return Path.Combine("/", DefaultOtherFolderName);
-
-            if (EnvironmentExtensions.IsDesktopMode())
-            {
-                var home = System.Environment.GetFolderPath(System.Environment.SpecialFolder.MyVideos);
-                return Path.Combine(home, DefaultReaparrFolderName, DefaultOtherFolderName);
-            }
-
-            throw new PlatformNotSupportedException($"Platform: {OsInfo.CurrentOS} is not supported");
-        }
-    }
-
-    /// <summary>
-    /// Gets the default games destination path based on the configured data root or the current platform fallback.
-    /// </summary>
-    public static string DefaultGamesDestinationFolder
-    {
-        get
-        {
-            var perTypePath = EnvironmentExtensions.GetGamesPath();
-            if (perTypePath is not null)
-                return perTypePath;
-
-            var dataPath = EnvironmentExtensions.GetDataPath();
-            if (dataPath is not null)
-                return Path.Combine(dataPath, DefaultGamesFolderName);
-
-            if (EnvironmentExtensions.IsDockerMode())
-                return Path.Combine("/", DefaultGamesFolderName);
-
-            if (EnvironmentExtensions.IsDesktopMode())
-            {
-                var home = System.Environment.GetFolderPath(System.Environment.SpecialFolder.MyVideos);
-                return Path.Combine(home, DefaultReaparrFolderName, DefaultGamesFolderName);
-            }
-
-            throw new PlatformNotSupportedException($"Platform: {OsInfo.CurrentOS} is not supported");
-        }
-    }
-
-    #endregion
-
     #region FileNames
 
     /// <summary>
@@ -270,6 +77,180 @@ public class PathProvider : IPathProvider
     #endregion
 
     /// <summary>
+    /// Gets the default downloads destination path based on the configured data root or the current platform fallback.
+    /// </summary>
+    public static string DefaultDownloadsDestinationFolder
+    {
+        get
+        {
+            var downloadsPath = EnvironmentExtensions.GetDownloadsPath();
+            if (downloadsPath is not null)
+                return downloadsPath;
+
+            if (EnvironmentExtensions.IsDockerMode())
+                return Path.Combine("/", DefaultDownloadsFolderName);
+
+            if (EnvironmentExtensions.IsDesktopMode())
+                return Path.Combine(DataDirectory, DefaultDownloadsFolderName);
+
+            throw new PlatformNotSupportedException($"Platform: {OsInfo.CurrentOS} is not supported");
+        }
+    }
+
+    /// <summary>
+    /// Gets the default movies destination path based on the configured data root or the current platform fallback.
+    /// </summary>
+    public static string DefaultMovieDestinationFolder
+    {
+        get
+        {
+            var perTypePath = EnvironmentExtensions.GetMoviesPath();
+            if (perTypePath is not null)
+                return perTypePath;
+
+            var dataPath = EnvironmentExtensions.GetDataPath();
+            if (dataPath is not null)
+                return Path.Combine(dataPath, DefaultMovieFolderName);
+
+            if (EnvironmentExtensions.IsDockerMode())
+                return Path.Combine("/", DefaultMovieFolderName);
+
+            if (EnvironmentExtensions.IsDesktopMode())
+                return Path.Combine(DataDirectory, DefaultMovieFolderName);
+
+            throw new PlatformNotSupportedException($"Platform: {OsInfo.CurrentOS} is not supported");
+        }
+    }
+
+    /// <summary>
+    /// Gets the default TV shows destination path based on the configured data root or the current platform fallback.
+    /// </summary>
+    public static string DefaultTvShowsDestinationFolder
+    {
+        get
+        {
+            var perTypePath = EnvironmentExtensions.GetTvShowsPath();
+            if (perTypePath is not null)
+                return perTypePath;
+
+            var dataPath = EnvironmentExtensions.GetDataPath();
+            if (dataPath is not null)
+                return Path.Combine(dataPath, DefaultTvShowsFolderName);
+
+            if (EnvironmentExtensions.IsDockerMode())
+                return Path.Combine("/", DefaultTvShowsFolderName);
+
+            if (EnvironmentExtensions.IsDesktopMode())
+                return Path.Combine(DataDirectory, DefaultTvShowsFolderName);
+
+            throw new PlatformNotSupportedException($"Platform: {OsInfo.CurrentOS} is not supported");
+        }
+    }
+
+    /// <summary>
+    /// Gets the default music destination path based on the configured data root or the current platform fallback.
+    /// </summary>
+    public static string DefaultMusicDestinationFolder
+    {
+        get
+        {
+            var perTypePath = EnvironmentExtensions.GetMusicPath();
+            if (perTypePath is not null)
+                return perTypePath;
+
+            var dataPath = EnvironmentExtensions.GetDataPath();
+            if (dataPath is not null)
+                return Path.Combine(dataPath, DefaultMusicFolderName);
+
+            if (EnvironmentExtensions.IsDockerMode())
+                return Path.Combine("/", DefaultMusicFolderName);
+
+            if (EnvironmentExtensions.IsDesktopMode())
+                return Path.Combine(DataDirectory, DefaultMusicFolderName);
+
+            throw new PlatformNotSupportedException($"Platform: {OsInfo.CurrentOS} is not supported");
+        }
+    }
+
+    /// <summary>
+    /// Gets the default photos destination path based on the configured data root or the current platform fallback.
+    /// </summary>
+    public static string DefaultPhotosDestinationFolder
+    {
+        get
+        {
+            var perTypePath = EnvironmentExtensions.GetPhotosPath();
+            if (perTypePath is not null)
+                return perTypePath;
+
+            var dataPath = EnvironmentExtensions.GetDataPath();
+            if (dataPath is not null)
+                return Path.Combine(dataPath, DefaultPhotosFolderName);
+
+            if (EnvironmentExtensions.IsDockerMode())
+                return Path.Combine("/", DefaultPhotosFolderName);
+
+            if (EnvironmentExtensions.IsDesktopMode())
+                return Path.Combine(DataDirectory, DefaultPhotosFolderName);
+
+            throw new PlatformNotSupportedException($"Platform: {OsInfo.CurrentOS} is not supported");
+        }
+    }
+
+    /// <summary>
+    /// Gets the default uncategorized media destination path based on the configured data root or the current platform fallback.
+    /// </summary>
+    public static string DefaultOtherDestinationFolder
+    {
+        get
+        {
+            var perTypePath = EnvironmentExtensions.GetOtherPath();
+            if (perTypePath is not null)
+                return perTypePath;
+
+            var dataPath = EnvironmentExtensions.GetDataPath();
+            if (dataPath is not null)
+                return Path.Combine(dataPath, DefaultOtherFolderName);
+
+            if (EnvironmentExtensions.IsDockerMode())
+                return Path.Combine("/", DefaultOtherFolderName);
+
+            if (EnvironmentExtensions.IsDesktopMode())
+                return Path.Combine(DataDirectory, DefaultOtherFolderName);
+
+            throw new PlatformNotSupportedException($"Platform: {OsInfo.CurrentOS} is not supported");
+        }
+    }
+
+    /// <summary>
+    /// Gets the default games destination path based on the configured data root or the current platform fallback.
+    /// </summary>
+    public static string DefaultGamesDestinationFolder
+    {
+        get
+        {
+            var perTypePath = EnvironmentExtensions.GetGamesPath();
+            if (perTypePath is not null)
+                return perTypePath;
+
+            var dataPath = EnvironmentExtensions.GetDataPath();
+            if (dataPath is not null)
+                return Path.Combine(dataPath, DefaultGamesFolderName);
+
+            if (EnvironmentExtensions.IsDockerMode())
+                return Path.Combine("/", DefaultGamesFolderName);
+
+            if (EnvironmentExtensions.IsDesktopMode())
+                return Path.Combine(DataDirectory, DefaultGamesFolderName);
+
+            throw new PlatformNotSupportedException($"Platform: {OsInfo.CurrentOS} is not supported");
+        }
+    }
+
+    #endregion
+
+
+    /// <summary>
     /// Gets the directory that stores Reaparr's own application state, such as settings, the SQLite database, backups, and logs.
     /// This is distinct from <see cref="DataDirectory"/>, which is the root location for user media content like Movies, TV shows, and Downloads.
     /// </summary>
@@ -284,33 +265,17 @@ public class PathProvider : IPathProvider
             if (EnvironmentExtensions.IsDockerMode())
                 return Path.Combine("/", DefaultConfigFolderName);
 
-            // Desktop mode
-            return OsInfo.CurrentOS switch
-            {
-                OperatingSystemPlatform.Windows => Path.Combine(
-                    System.Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData),
-                    DefaultReaparrFolderName
-                ),
-                OperatingSystemPlatform.Osx => Path.Combine(
-                    System.Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile),
-                    "Library",
-                    "Application Support",
-                    DefaultReaparrFolderName
-                ),
-                OperatingSystemPlatform.Linux => Path.Combine(
-                    System.Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile),
-                    ".config",
-                    DefaultReaparrFolderName
-                ),
-                _ => throw new PlatformNotSupportedException($"Platform: {OsInfo.CurrentOS} is not supported"),
-            };
+            if (EnvironmentExtensions.IsDesktopMode())
+                return Path.Combine(BaseDirectory.ConfigHome, DefaultReaparrFolderName);
+
+            throw new PlatformNotSupportedException($"Platform: {OsInfo.CurrentOS} is not supported");
         }
     }
 
     /// <summary>
     /// Gets the full path to the main Reaparr settings file.
     /// </summary>
-    public static string ConfigFileLocation => Path.Join(ConfigDirectory, ConfigFileName);
+    public static string ConfigFileLocation => Path.Combine(ConfigDirectory, ConfigFileName);
 
     /// <summary>
     /// Gets the directory used to store database backup files.
@@ -360,7 +325,7 @@ public class PathProvider : IPathProvider
                 return "/";
 
             if (EnvironmentExtensions.IsDesktopMode())
-                return System.Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile);
+                return Path.Combine(UserDirectory.DownloadDir, DefaultReaparrFolderName);
 
             throw new PlatformNotSupportedException($"Platform: {OsInfo.CurrentOS} is not supported");
         }

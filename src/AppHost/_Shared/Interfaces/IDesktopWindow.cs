@@ -16,6 +16,16 @@ public interface IDesktopWindow
     void RegisterWindowClosingHandler(Func<object?, EventArgs, bool> handler);
 
     /// <summary>
+    /// Registers a callback for messages sent by the embedded browser when an external link is requested.
+    /// </summary>
+    void RegisterDesktopMessageHandler(Action<DesktopMessageDTO> handler);
+
+    /// <summary>
+    /// Opens the supplied URI with the operating system default browser.
+    /// </summary>
+    void OpenExternalBrowser(Uri uri);
+
+    /// <summary>
     /// Hides or minimizes the visible window without ending desktop runtime.
     /// </summary>
     void CloseToBackground();

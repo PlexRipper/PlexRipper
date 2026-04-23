@@ -191,16 +191,34 @@ Rules:
 
 Do not run `dotnet build` or project build commands for backend error discovery. Use Rider MCP diagnostics/indexing instead. Build-related execution is only allowed as part of running unit or integration tests.
 
+Before running any dotnet related command, TUnit test command, first check whether THE FINALS is running:
+
+```bash
+ pgrep -afi 'GameThread|Discovery.exe'
+```
+
+If the command returns a matching game process, prefix the backend command with idle-priority I/O scheduling:
+
+```bash
+ionice -c 3 <backend-command>
+```
+
+If the command returns no matching process, run the backend command normally without `ionice`. On this machine, use `GameThread` as the authoritative process check for the running game. Do not use `ps aux | grep ...`; it can match the `grep` command itself and create a false positive.
+
 Run backend AppHost:
 
 ```bash
 dotnet run --project src/AppHost
+# If THE FINALS is running:
+ionice -c 3 dotnet run --project src/AppHost
 ```
 
 Run a backend unit test project:
 
 ```bash
 dotnet run --project tests/UnitTests/<Project>.UnitTests/<Project>.UnitTests.csproj -- --no-ansi --disable-logo
+# If THE FINALS is running:
+ionice -c 3 dotnet run --project tests/UnitTests/<Project>.UnitTests/<Project>.UnitTests.csproj -- --no-ansi --disable-logo
 ```
 
 Common unit test projects:
@@ -208,12 +226,17 @@ Common unit test projects:
 ```bash
 dotnet run --project tests/UnitTests/Application.UnitTests/Application.UnitTests.csproj -- --no-ansi --disable-logo
 dotnet run --project tests/UnitTests/BackgroundJobs.UnitTests/BackgroundJobs.UnitTests.csproj -- --no-ansi --disable-logo
+# If THE FINALS is running:
+ionice -c 3 dotnet run --project tests/UnitTests/Application.UnitTests/Application.UnitTests.csproj -- --no-ansi --disable-logo
+ionice -c 3 dotnet run --project tests/UnitTests/BackgroundJobs.UnitTests/BackgroundJobs.UnitTests.csproj -- --no-ansi --disable-logo
 ```
 
 Run backend integration tests:
 
 ```bash
 dotnet run --project tests/IntegrationTests/IntegrationTests/IntegrationTests.csproj -- --no-ansi --disable-logo
+# If THE FINALS is running:
+ionice -c 3 dotnet run --project tests/IntegrationTests/IntegrationTests/IntegrationTests.csproj -- --no-ansi --disable-logo
 ```
 
 ## Verification Gates

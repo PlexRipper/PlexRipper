@@ -9,12 +9,12 @@ public enum PlexDownloadClientType
     /// <summary>
     /// Direct download client using HTTP range requests with multi-threaded downloading.
     /// </summary>
-    [EnumMember(Value = nameof(Direct))]
+    [JsonStringEnumMemberName(nameof(Direct))]
     Direct = 0,
 
     /// <summary>
     /// DASH (MPEG-DASH) download client using dash-mpd-cli for adaptive streaming content.
     /// </summary>
-    [EnumMember(Value = nameof(Dash))]
+    [JsonStringEnumMemberName(nameof(Dash))]
     Dash = 1,
 }

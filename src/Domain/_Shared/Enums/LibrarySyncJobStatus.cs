@@ -9,36 +9,36 @@ public enum LibrarySyncJobStatus
     /// <summary>
     /// String value was unable to be parsed to this enum.
     /// </summary>
-    [EnumMember(Value = nameof(Unknown))]
+    [JsonStringEnumMemberName(nameof(Unknown))]
     Unknown = 0,
 
     /// <summary>
     /// Library sync is queued and waiting to be processed.
     /// </summary>
-    [EnumMember(Value = nameof(Queued))]
+    [JsonStringEnumMemberName(nameof(Queued))]
     Queued = 1,
 
     /// <summary>
     /// Library sync is currently being processed.
     /// </summary>
-    [EnumMember(Value = nameof(Processing))]
+    [JsonStringEnumMemberName(nameof(Processing))]
     Processing = 2,
 
     /// <summary>
     /// Library sync completed successfully.
     /// </summary>
-    [EnumMember(Value = nameof(Completed))]
+    [JsonStringEnumMemberName(nameof(Completed))]
     Completed = 3,
 
     /// <summary>
     /// Library sync failed with an error.
     /// </summary>
-    [EnumMember(Value = nameof(Failed))]
+    [JsonStringEnumMemberName(nameof(Failed))]
     Failed = 4,
 
     /// <summary>
     /// Library sync was cancelled.
     /// </summary>
-    [EnumMember(Value = nameof(Cancelled))]
+    [JsonStringEnumMemberName(nameof(Cancelled))]
     Cancelled = 5,
 }

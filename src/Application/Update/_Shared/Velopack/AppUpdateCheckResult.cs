@@ -12,9 +12,9 @@ public sealed record AppUpdateCheckResult
         new()
         {
             IsUpdateAvailable = false,
-            NewestVersion = EnvironmentExtensions.GetVersion(),
+            NewestVersion = EnvironmentExtensions.GetInformationalVersion(),
             ReleaseNotes = [],
-            CurrentVersion = EnvironmentExtensions.GetVersion(),
+            CurrentVersion = EnvironmentExtensions.GetInformationalVersion(),
         };
 
     /// <summary>
@@ -31,7 +31,7 @@ public sealed record AppUpdateCheckResult
             IsUpdateAvailable = true,
             NewestVersion = availableVersion,
             ReleaseNotes = releaseNotes,
-            CurrentVersion = EnvironmentExtensions.GetVersion(),
+            CurrentVersion = EnvironmentExtensions.GetInformationalVersion(),
         };
 
     /// <summary>

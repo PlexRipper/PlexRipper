@@ -88,6 +88,8 @@ public class DesktopModeUnitTests : BaseUnitTest<DesktopMode>
         result.IsSuccess.ShouldBeTrue();
         waitForExitTask.IsCompleted.ShouldBeFalse();
         window.IsClosedToBackground.ShouldBeTrue();
+        window.NativeClosePrevented.ShouldBeFalse();
+        window.IsDisposed.ShouldBeFalse();
 
         await sut.ExitAsync(CancellationToken);
         await waitForExitTask;
@@ -125,35 +127,6 @@ public class DesktopModeUnitTests : BaseUnitTest<DesktopMode>
     }
 
     [Test]
-    public async Task ShouldRestoreExistingWindow_WhenShowMainWindowRunsAfterCloseToBackground()
-    {
-        // Arrange
-        using var _ = WithEnvironmentVariablesAsync(
-            new Dictionary<string, string?>
-            {
-                [EnvKeys.ReaparrPlatform] = "desktop",
-                [EnvKeys.DotNetEnvironment] = "Production",
-            }
-        );
-
-        var window = new FakeDesktopWindow();
-        var windowFactory = new FakeDesktopWindowFactory(window);
-        var server = CreateServer("http://localhost:5000");
-        var sut = CreateSut(server, windowFactory.Create);
-
-        await sut.StartAsync(CancellationToken);
-        await sut.CloseMainWindowAsync(CancellationToken);
-
-        // Act
-        var result = await sut.ShowMainWindowAsync(CancellationToken);
-
-        // Assert
-        result.IsSuccess.ShouldBeTrue();
-        window.IsRestored.ShouldBeTrue();
-        windowFactory.CreateCalls.ShouldBe(1);
-    }
-
-    [Test]
     public async Task ShouldAllowNativeClose_WhenExitClosesNativeWindow()
     {
         // Arrange
@@ -181,7 +154,32 @@ public class DesktopModeUnitTests : BaseUnitTest<DesktopMode>
     }
 
     [Test]
-    public async Task ShouldPreventNativeCloseAndCloseToBackground_WhenPhotinoWindowClosingRuns()
+    public async Task ShouldRegisterExternalLinkHandler_WhenMainWindowStarts()
+    {
+        // Arrange
+        using var _ = WithEnvironmentVariablesAsync(
+            new Dictionary<string, string?>
+            {
+                [EnvKeys.ReaparrPlatform] = "desktop",
+                [EnvKeys.DotNetEnvironment] = "Production",
+            }
+        );
+
+        var window = new FakeDesktopWindow();
+        var windowFactory = new FakeDesktopWindowFactory(window);
+        var server = CreateServer("http://localhost:5000");
+        var sut = CreateSut(server, windowFactory.Create);
+
+        // Act
+        var result = await sut.StartAsync(CancellationToken);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        window.ExternalLinkHandler.ShouldNotBeNull();
+    }
+
+    [Test]
+    public async Task ShouldOpenExternalBrowser_WhenExternalLinkMessageIsReceived()
     {
         // Arrange
         using var _ = WithEnvironmentVariablesAsync(
@@ -198,15 +196,18 @@ public class DesktopModeUnitTests : BaseUnitTest<DesktopMode>
         var sut = CreateSut(server, windowFactory.Create);
 
         await sut.StartAsync(CancellationToken);
-        var waitForExitTask = sut.WaitForExitAsync(CancellationToken);
 
         // Act
-        var preventNativeClose = window.WindowClosingHandler!.Invoke(window, EventArgs.Empty);
+        window.ExternalLinkHandler!.Invoke(
+            new DesktopMessageDTO
+            {
+                Type = DesktopMessageType.ExternalLink,
+                Value = "https://github.com/Reaparr/Reaparr",
+            }
+        );
 
         // Assert
-        preventNativeClose.ShouldBeTrue();
-        waitForExitTask.IsCompleted.ShouldBeFalse();
-        await WaitForWindowToCloseToBackground(window);
+        window.OpenedExternalUrls.ShouldBe([new Uri("https://github.com/Reaparr/Reaparr")]);
     }
 
     [Test]
@@ -258,13 +259,6 @@ public class DesktopModeUnitTests : BaseUnitTest<DesktopMode>
         return server.Object;
     }
 
-    private static async Task WaitForWindowToCloseToBackground(FakeDesktopWindow window)
-    {
-        using var cancellationTokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(1));
-        while (!window.IsClosedToBackground)
-            await Task.Delay(TimeSpan.FromMilliseconds(10), cancellationTokenSource.Token);
-    }
-
     private sealed class FakeDesktopWindowFactory
     {
         private readonly FakeDesktopWindow _window;
@@ -279,24 +273,27 @@ public class DesktopModeUnitTests : BaseUnitTest<DesktopMode>
         public IDesktopWindow Create(Uri uri)
         {
             CreateCalls++;
-            _window.LoadedUri = uri;
             return _window;
         }
     }
 
     private sealed class FakeDesktopWindow : IDesktopWindow
     {
-        public Uri? LoadedUri { get; set; }
         public bool IsClosedToBackground { get; private set; }
-        public bool IsRestored { get; private set; }
         public bool NativeClosePrevented { get; private set; }
         public bool IsDisposed { get; private set; }
         public int WaitForCloseCalls { get; private set; }
         public bool IsInitialized { get; private set; }
+        public List<Uri> OpenedExternalUrls { get; } = [];
+
+        public TaskCompletionSource CloseToBackgroundCompletion { get; } =
+            new(TaskCreationOptions.RunContinuationsAsynchronously);
+
         public TaskCompletionSource MessageLoopStarted { get; } =
             new(TaskCreationOptions.RunContinuationsAsynchronously);
 
         public Func<object?, EventArgs, bool>? WindowClosingHandler { get; private set; }
+        public Action<DesktopMessageDTO>? ExternalLinkHandler { get; private set; }
 
         public void ConfigureWindow() { }
 
@@ -305,24 +302,35 @@ public class DesktopModeUnitTests : BaseUnitTest<DesktopMode>
             WindowClosingHandler = handler;
         }
 
+        public void RegisterDesktopMessageHandler(Action<DesktopMessageDTO> handler)
+        {
+            ExternalLinkHandler = handler;
+        }
+
+        public void OpenExternalBrowser(Uri uri)
+        {
+            OpenedExternalUrls.Add(uri);
+        }
+
         public void CloseToBackground()
         {
             IsClosedToBackground = true;
+            CloseToBackgroundCompletion.SetResult();
         }
 
-        public void RestoreFromBackground()
-        {
-            IsRestored = true;
-        }
+        public void RestoreFromBackground() { }
 
         public void CloseNativeWindow()
         {
             NativeClosePrevented = WindowClosingHandler?.Invoke(this, EventArgs.Empty) ?? false;
+            IsDisposed = true;
+            IsInitialized = false;
         }
 
         public void DisposeWindow()
         {
             IsDisposed = true;
+            IsInitialized = false;
         }
 
         public void WaitForClose()

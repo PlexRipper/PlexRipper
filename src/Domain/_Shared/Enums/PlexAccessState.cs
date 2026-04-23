@@ -3,15 +3,15 @@ namespace Reaparr.Domain;
 [JsonConverter(typeof(JsonStringEnumConverter))]
 public enum PlexAccessState
 {
-    [EnumMember(Value = nameof(Unknown))]
+    [JsonStringEnumMemberName(nameof(Unknown))]
     Unknown = 0,
 
-    [EnumMember(Value = nameof(Revoked))]
+    [JsonStringEnumMemberName(nameof(Revoked))]
     Revoked = 1,
 
-    [EnumMember(Value = nameof(Updated))]
+    [JsonStringEnumMemberName(nameof(Updated))]
     Updated = 2,
 
-    [EnumMember(Value = nameof(Granted))]
+    [JsonStringEnumMemberName(nameof(Granted))]
     Granted = 3,
 }

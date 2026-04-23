@@ -12,6 +12,7 @@ public class DesktopMode : IDesktopMode
     private readonly TaskCompletionSource _exitCompletion = new(TaskCreationOptions.RunContinuationsAsynchronously);
 
     private IDesktopWindow? _window;
+    private bool _isClosingToBackground;
     private bool _isExiting;
 
     /// <summary>Initializes a new instance of <see cref="DesktopMode"/>.</summary>
@@ -57,6 +58,7 @@ public class DesktopMode : IDesktopMode
         _window = _windowFactory(uriResult.Value);
         _window.ConfigureWindow();
         _window.RegisterWindowClosingHandler(OnWindowClosing);
+        _window.RegisterDesktopMessageHandler(HandleDesktopMessages);
 
         return Task.FromResult(Result.Ok());
     }
@@ -64,8 +66,21 @@ public class DesktopMode : IDesktopMode
     /// <inheritdoc />
     public Task<Result> CloseMainWindowAsync(CancellationToken cancellationToken)
     {
-        _window?.CloseToBackground();
-        return Task.FromResult(Result.Ok());
+        if (_window is null)
+            return Task.FromResult(Result.Ok());
+
+        _isClosingToBackground = true;
+
+        try
+        {
+            _window.CloseToBackground();
+            _window = null;
+            return Task.FromResult(Result.Ok());
+        }
+        finally
+        {
+            _isClosingToBackground = false;
+        }
     }
 
     /// <inheritdoc />
@@ -94,19 +109,37 @@ public class DesktopMode : IDesktopMode
 
     private bool OnWindowClosing(object? sender, EventArgs args)
     {
-        if (_isExiting)
+        if (_isExiting || _isClosingToBackground)
             return false;
 
-        _ = CloseMainWindowFromWindowClosingAsync();
-        return true;
+        _log.Here().Debug("Closing the Reaparr desktop window to the background");
+
+        _window?.DisposeWindow();
+        _window = null;
+        return false;
     }
 
-    private async Task CloseMainWindowFromWindowClosingAsync()
+    private void HandleDesktopMessages(DesktopMessageDTO message)
     {
-        _log.Here().Debug("Closing the Reaparr desktop window to the background");
-        var result = await CloseMainWindowAsync(CancellationToken.None);
-        if (result.IsFailed)
-            result.LogError();
+        if (_window is null)
+        {
+            _log.Warning(
+                "Received desktop external link message but the desktop window is not initialized: {@Message}",
+                message
+            );
+            return;
+        }
+
+        switch (message.Type)
+        {
+            case DesktopMessageType.None:
+                break;
+            case DesktopMessageType.ExternalLink:
+                _window.OpenExternalBrowser(new Uri(message.Value));
+                break;
+            default:
+                throw new ArgumentOutOfRangeException();
+        }
     }
 
     private Result<Uri> GetReaparrUri()

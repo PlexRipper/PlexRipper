@@ -18,7 +18,7 @@ public class UpdateFolderPathEndpointRequestValidatorUnitTests
     }
 
     [Test]
-    public void ShouldRejectReservedFolderPathIds_WhenUpdatingFolderPath()
+    public void ShouldAllowDefaultFolderPath_WhenUpdatingFolderPath()
     {
         // Arrange
         var validator = new UpdateFolderPathEndpointRequestValidator();
@@ -26,10 +26,10 @@ public class UpdateFolderPathEndpointRequestValidatorUnitTests
         {
             FolderPathDTO = new FolderPathDTO
             {
-                Id = 5,
-                DisplayName = "Reserved",
-                Directory = "/tmp/reserved",
-                FolderType = FolderType.DownloadFolder,
+                Id = PlexMediaType.Movie.ToDefaultDestinationFolderId(),
+                DisplayName = "Default movie destination",
+                Directory = "/tmp/default-movies",
+                FolderType = FolderType.MovieFolder,
                 MediaType = PlexMediaType.Movie,
                 IsDefault = true,
                 IsValid = true,
@@ -40,10 +40,7 @@ public class UpdateFolderPathEndpointRequestValidatorUnitTests
         var result = validator.Validate(request);
 
         // Assert
-        result.IsValid.ShouldBeFalse();
-        result.Errors.ShouldContain(x =>
-            x.ErrorMessage.Contains("reserved folder paths", StringComparison.OrdinalIgnoreCase)
-        );
+        result.IsValid.ShouldBeTrue();
     }
 
     [Test]

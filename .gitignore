@@ -168,3 +168,4 @@ fabric.properties
 config.json
 
 .test-artifacts
+.artifacts

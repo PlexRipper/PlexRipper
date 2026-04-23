@@ -55,7 +55,7 @@ public static class EndpointExtensions
     public static void AddResponseHeaders(this HttpContext httpContext)
     {
         // NOTE: Update "NSwagGlobalHeaders" when adding/updating headers and add to "CORS WithExposedHeaders" in ConfigureServices
-        httpContext.Response.Headers["X-Reaparr-Version"] = EnvironmentExtensions.GetVersion();
+        httpContext.Response.Headers["X-Reaparr-Version"] = EnvironmentExtensions.GetInformationalVersion();
         httpContext.Response.Headers["X-Reaparr-Platform"] = EnvironmentExtensions.GetReaparrMode();
     }
 }

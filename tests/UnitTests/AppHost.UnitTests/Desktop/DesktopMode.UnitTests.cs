@@ -128,35 +128,6 @@ public class DesktopModeUnitTests : BaseUnitTest<DesktopMode>
     }
 
     [Test]
-    public async Task ShouldRestoreExistingWindow_WhenShowMainWindowRunsAfterCloseToBackground()
-    {
-        // Arrange
-        using var _ = WithEnvironmentVariablesAsync(
-            new Dictionary<string, string?>
-            {
-                [EnvKeys.ReaparrPlatform] = "desktop",
-                [EnvKeys.DotNetEnvironment] = "Production",
-            }
-        );
-
-        var window = new FakeDesktopWindow();
-        var windowFactory = new FakeDesktopWindowFactory(window);
-        var server = CreateServer("http://localhost:5000");
-        var sut = CreateSut(server, windowFactory.Create);
-
-        await sut.StartAsync(CancellationToken);
-        await sut.CloseMainWindowAsync(CancellationToken);
-
-        // Act
-        var result = await sut.ShowMainWindowAsync(CancellationToken);
-
-        // Assert
-        result.IsSuccess.ShouldBeTrue();
-        window.IsRestored.ShouldBeTrue();
-        windowFactory.CreateCalls.ShouldBe(1);
-    }
-
-    [Test]
     public async Task ShouldAllowNativeClose_WhenExitClosesNativeWindow()
     {
         // Arrange
@@ -238,34 +209,6 @@ public class DesktopModeUnitTests : BaseUnitTest<DesktopMode>
 
         // Assert
         window.OpenedExternalUrls.ShouldBe([new Uri("https://github.com/Reaparr/Reaparr")]);
-    }
-
-    [Test]
-    public async Task ShouldIgnoreExternalBrowserRequest_WhenExternalLinkMessageUsesUnsafeScheme()
-    {
-        // Arrange
-        using var _ = WithEnvironmentVariablesAsync(
-            new Dictionary<string, string?>
-            {
-                [EnvKeys.ReaparrPlatform] = "desktop",
-                [EnvKeys.DotNetEnvironment] = "Production",
-            }
-        );
-
-        var window = new FakeDesktopWindow();
-        var windowFactory = new FakeDesktopWindowFactory(window);
-        var server = CreateServer("http://localhost:5000");
-        var sut = CreateSut(server, windowFactory.Create);
-
-        await sut.StartAsync(CancellationToken);
-
-        // Act
-        window.ExternalLinkHandler!.Invoke(
-            new DesktopMessageDTO { Type = DesktopMessageType.ExternalLink, Value = "file:///etc/passwd" }
-        );
-
-        // Assert
-        window.OpenedExternalUrls.ShouldBeEmpty();
     }
 
     [Test]

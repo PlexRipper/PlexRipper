@@ -2,7 +2,7 @@ namespace Reaparr.Build;
 
 internal static class DesktopRuntimeCatalog
 {
-    private static readonly IReadOnlyDictionary<string, DesktopRuntime> Runtimes = new Dictionary<
+    private static readonly IReadOnlyDictionary<string, DesktopRuntime> _runtimes = new Dictionary<
         string,
         DesktopRuntime
     >(StringComparer.OrdinalIgnoreCase)
@@ -15,11 +15,11 @@ internal static class DesktopRuntimeCatalog
         ["osx-arm64"] = new("osx-arm64", "Desktop-osx-arm64", "Reaparr"),
     };
 
-    public static string SupportedRuntimeIdentifiers => string.Join(", ", Runtimes.Keys.Order());
+    public static string SupportedRuntimeIdentifiers => string.Join(", ", _runtimes.Keys.Order());
 
     public static DesktopRuntime Get(string runtimeIdentifier)
     {
-        if (Runtimes.TryGetValue(runtimeIdentifier, out var runtime))
+        if (_runtimes.TryGetValue(runtimeIdentifier, out var runtime))
         {
             return runtime;
         }

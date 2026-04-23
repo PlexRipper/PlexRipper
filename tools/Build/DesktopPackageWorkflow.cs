@@ -11,8 +11,8 @@ internal sealed class DesktopPackageWorkflow(
     ILogger<DesktopPackageWorkflow> logger
 )
 {
-    private const string PackageId = "Reaparr";
-    private const string PackageTitle = "Reaparr";
+    private const string PACKAGE_ID = "Reaparr";
+    private const string PACKAGE_TITLE = "Reaparr";
 
     public async Task PackageAsync()
     {
@@ -35,9 +35,9 @@ internal sealed class DesktopPackageWorkflow(
             [
                 "pack",
                 "--packId",
-                PackageId,
+                PACKAGE_ID,
                 "--packTitle",
-                PackageTitle,
+                PACKAGE_TITLE,
                 "--packVersion",
                 settings.Version!,
                 "--packDir",

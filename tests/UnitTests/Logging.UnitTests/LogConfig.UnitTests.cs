@@ -10,6 +10,7 @@ public class LogConfigUnitTests : BaseUnitTest<LogConfig>
     public void ShouldEnableDebugEvents_WhenMinimumLogLevelIsDebug()
     {
         // Act
+        // ReSharper disable once RedundantArgumentDefaultValue
         using var logger = Sut.GetLogger(LogEventLevel.Debug);
 
         // Assert

@@ -1,4 +1,3 @@
-using System.Text.Json;
 using Autofac;
 using Microsoft.AspNetCore.Hosting.Server;
 using Microsoft.AspNetCore.Hosting.Server.Features;
@@ -260,11 +259,6 @@ public class DesktopModeUnitTests : BaseUnitTest<DesktopMode>
         return server.Object;
     }
 
-    private async Task WaitForWindowToCloseToBackground(FakeDesktopWindow window)
-    {
-        await window.CloseToBackgroundCompletion.Task.WaitAsync(CancellationToken);
-    }
-
     private sealed class FakeDesktopWindowFactory
     {
         private readonly FakeDesktopWindow _window;
@@ -279,16 +273,13 @@ public class DesktopModeUnitTests : BaseUnitTest<DesktopMode>
         public IDesktopWindow Create(Uri uri)
         {
             CreateCalls++;
-            _window.LoadedUri = uri;
             return _window;
         }
     }
 
     private sealed class FakeDesktopWindow : IDesktopWindow
     {
-        public Uri? LoadedUri { get; set; }
         public bool IsClosedToBackground { get; private set; }
-        public bool IsRestored { get; private set; }
         public bool NativeClosePrevented { get; private set; }
         public bool IsDisposed { get; private set; }
         public int WaitForCloseCalls { get; private set; }
@@ -327,10 +318,7 @@ public class DesktopModeUnitTests : BaseUnitTest<DesktopMode>
             CloseToBackgroundCompletion.SetResult();
         }
 
-        public void RestoreFromBackground()
-        {
-            IsRestored = true;
-        }
+        public void RestoreFromBackground() { }
 
         public void CloseNativeWindow()
         {

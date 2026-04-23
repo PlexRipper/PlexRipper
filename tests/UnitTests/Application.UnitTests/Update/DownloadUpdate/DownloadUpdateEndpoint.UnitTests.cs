@@ -57,7 +57,7 @@ public class DownloadUpdateEndpointUnitTests : BaseUnitTest<DownloadUpdateEndpoi
         );
 
         var asset = new VelopackAsset { PackageId = "Reaparr", Version = new SemanticVersion(9, 9, 9) };
-        var updateInfo = new UpdateInfo(asset, false, null!, null!);
+        var updateInfo = new UpdateInfo(asset, false);
 
         var mockSource = new Mock<IUpdateSource>();
         var mockLocator = new Mock<IVelopackLocator>();
@@ -105,7 +105,7 @@ public class DownloadUpdateEndpointUnitTests : BaseUnitTest<DownloadUpdateEndpoi
         );
 
         var asset = new VelopackAsset { PackageId = "Reaparr", Version = new SemanticVersion(9, 9, 9) };
-        var updateInfo = new UpdateInfo(asset, false, null!, null!);
+        var updateInfo = new UpdateInfo(asset, false);
 
         var capturedDtos = new List<AppUpdateDownloadProgressDTO>();
         var progressSent = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
@@ -118,7 +118,7 @@ public class DownloadUpdateEndpointUnitTests : BaseUnitTest<DownloadUpdateEndpoi
                 m.DownloadUpdatesAsync(It.IsAny<UpdateInfo>(), It.IsAny<Action<int>?>(), It.IsAny<CancellationToken>())
             )
             .Callback<UpdateInfo, Action<int>?, CancellationToken>(
-                (_, cb, ct) =>
+                (_, cb, _) =>
                 {
                     cb?.Invoke(50);
                     cb?.Invoke(100);

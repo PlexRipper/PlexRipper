@@ -17,7 +17,7 @@ public class LogConfig
 
     public static string SourceContext => nameof(SourceContext);
 
-    private const string TemplateText =
+    private const string TEMPLATE_TEXT =
         "{@t:HH:mm:ss} [{@l}] "
         + "{#if FileName is not null}"
         + "[{FileName}:{LineNumber}.{MethodName}()]"
@@ -27,11 +27,11 @@ public class LogConfig
 
     // Keep interactive console/debug output colorized, but leave redirected CI/test output plain text.
     protected static readonly ExpressionTemplate ConsoleTemplate = new(
-        TemplateText,
+        TEMPLATE_TEXT,
         theme: LogThemes.SystemColored.ToTemplateTheme()
     );
 
-    protected static readonly ExpressionTemplate FileTemplate = new(TemplateText);
+    protected static readonly ExpressionTemplate FileTemplate = new(TEMPLATE_TEXT);
 
     /// <summary>
     /// Provides a base configuration with console and debug sinks, and allows for extension by derived classes (e.g. to add file or Seq sinks).

@@ -67,6 +67,26 @@ public class UpdateFolderPathEndpointUnitTests : BaseUnitTest<UpdateFolderPathEn
 
         var dbContext = IDbContext;
         var defaultFolderPathId = PlexMediaType.Movie.ToDefaultDestinationFolderId();
+        var existingFolderPath = await dbContext.FolderPaths.SingleOrDefaultAsync(
+            x => x.Id == defaultFolderPathId,
+            CancellationToken
+        );
+
+        if (existingFolderPath is null)
+        {
+            existingFolderPath = new FolderPath
+            {
+                Id = defaultFolderPathId,
+                DisplayName = "Default movie destination",
+                DirectoryPath = "/tmp/default-movies-old",
+                FolderType = FolderType.MovieFolder,
+                MediaType = PlexMediaType.Movie,
+            };
+
+            dbContext.FolderPaths.Add(existingFolderPath);
+            await dbContext.SaveChangesAsync(CancellationToken);
+        }
+
         var request = new UpdateFolderPathEndpointRequest
         {
             FolderPathDTO = new FolderPathDTO

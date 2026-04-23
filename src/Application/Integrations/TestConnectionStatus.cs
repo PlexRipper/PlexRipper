@@ -5,18 +5,18 @@ namespace Reaparr.Application;
 [JsonConverter(typeof(JsonStringEnumConverter))]
 public enum TestConnectionStatus
 {
-    [EnumMember(Value = nameof(Unknown))]
+    [JsonStringEnumMemberName(nameof(Unknown))]
     Unknown = 0,
 
-    [EnumMember(Value = nameof(Success))]
+    [JsonStringEnumMemberName(nameof(Success))]
     Success = 1,
 
-    [EnumMember(Value = nameof(UrlIsInvalid))]
+    [JsonStringEnumMemberName(nameof(UrlIsInvalid))]
     UrlIsInvalid = 2,
 
-    [EnumMember(Value = nameof(ConnectionFailed))]
+    [JsonStringEnumMemberName(nameof(ConnectionFailed))]
     ConnectionFailed = 3,
 
-    [EnumMember(Value = nameof(InvalidApiKey))]
+    [JsonStringEnumMemberName(nameof(InvalidApiKey))]
     InvalidApiKey = 4,
 }

@@ -5,30 +5,30 @@ public enum FolderType
 {
     // NOTE: Make sure the indexes are correct, 1,2,3,4,5 etc. and that there is no skip in between
     // Otherwise the TypeScript DTO translator in the front-end starts messing up.
-    [EnumMember(Value = "None")]
+    [JsonStringEnumMemberName(nameof(None))]
     None = 0,
 
-    [EnumMember(Value = "DownloadFolder")]
+    [JsonStringEnumMemberName(nameof(DownloadFolder))]
     DownloadFolder = 1,
 
-    [EnumMember(Value = "MovieFolder")]
+    [JsonStringEnumMemberName(nameof(MovieFolder))]
     MovieFolder = 2,
 
-    [EnumMember(Value = "TvShowFolder")]
+    [JsonStringEnumMemberName(nameof(TvShowFolder))]
     TvShowFolder = 3,
 
-    [EnumMember(Value = "MusicFolder")]
+    [JsonStringEnumMemberName(nameof(MusicFolder))]
     MusicFolder = 4,
 
-    [EnumMember(Value = "PhotosFolder")]
+    [JsonStringEnumMemberName(nameof(PhotosFolder))]
     PhotosFolder = 5,
 
-    [EnumMember(Value = "OtherVideosFolder")]
+    [JsonStringEnumMemberName(nameof(OtherVideosFolder))]
     OtherVideosFolder = 6,
 
-    [EnumMember(Value = "GamesVideosFolder")]
+    [JsonStringEnumMemberName(nameof(GamesVideosFolder))]
     GamesVideosFolder = 7,
 
-    [EnumMember(Value = "Unknown")]
+    [JsonStringEnumMemberName(nameof(Unknown))]
     Unknown = 8,
 }

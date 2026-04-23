@@ -1,4 +1,3 @@
-using System.Runtime.Serialization;
 using System.Text.Json.Serialization;
 
 namespace Reaparr.AppHost;
@@ -12,12 +11,12 @@ public enum DesktopMessageType
     /// <summary>
     /// None
     /// </summary>
-    [EnumMember(Value = nameof(None))]
+    [JsonStringEnumMemberName(nameof(None))]
     None = 0,
 
     /// <summary>
     /// For opening an external link
     /// </summary>
-    [EnumMember(Value = nameof(ExternalLink))]
+    [JsonStringEnumMemberName(nameof(ExternalLink))]
     ExternalLink = 1,
 }

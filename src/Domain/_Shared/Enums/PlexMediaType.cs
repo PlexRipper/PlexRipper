@@ -5,46 +5,46 @@ public enum PlexMediaType
 {
     // NOTE: Make sure the indexes are correct, 1,2,3,4,5 etc. and that there is no skip in between
     // Otherwise the TypeScript DTO translator in the front-end starts messing up
-    [EnumMember(Value = nameof(None))]
+    [JsonStringEnumMemberName(nameof(None))]
     None = 0,
 
-    [EnumMember(Value = nameof(Movie))]
+    [JsonStringEnumMemberName(nameof(Movie))]
     Movie = 1,
 
-    [EnumMember(Value = nameof(TvShow))]
+    [JsonStringEnumMemberName(nameof(TvShow))]
     TvShow = 2,
 
-    [EnumMember(Value = nameof(Season))]
+    [JsonStringEnumMemberName(nameof(Season))]
     Season = 3,
 
-    [EnumMember(Value = nameof(Episode))]
+    [JsonStringEnumMemberName(nameof(Episode))]
     Episode = 4,
 
-    [EnumMember(Value = nameof(Music))]
+    [JsonStringEnumMemberName(nameof(Music))]
     Music = 5,
 
-    [EnumMember(Value = nameof(Artist))]
+    [JsonStringEnumMemberName(nameof(Artist))]
     Artist = 6,
 
-    [EnumMember(Value = nameof(Album))]
+    [JsonStringEnumMemberName(nameof(Album))]
     Album = 7,
 
     // TODO rename to track
-    [EnumMember(Value = nameof(Song))]
+    [JsonStringEnumMemberName(nameof(Song))]
     Song = 8,
 
-    [EnumMember(Value = nameof(PhotoAlbum))]
+    [JsonStringEnumMemberName(nameof(PhotoAlbum))]
     PhotoAlbum = 9,
 
-    [EnumMember(Value = nameof(Photos))]
+    [JsonStringEnumMemberName(nameof(Photos))]
     Photos = 10,
 
-    [EnumMember(Value = nameof(OtherVideos))]
+    [JsonStringEnumMemberName(nameof(OtherVideos))]
     OtherVideos = 11,
 
-    [EnumMember(Value = nameof(Games))]
+    [JsonStringEnumMemberName(nameof(Games))]
     Games = 12,
 
-    [EnumMember(Value = nameof(Unknown))]
+    [JsonStringEnumMemberName(nameof(Unknown))]
     Unknown = 13,
 }

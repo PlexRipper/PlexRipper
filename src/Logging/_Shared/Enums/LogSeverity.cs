@@ -8,27 +8,27 @@ public enum LogSeverity
 {
     // NOTE: Make sure the indexes are correct, 1,2,3,4,5 etc. and that there is no skip in between
     // Otherwise the TypeScript DTO translator in the front-end starts messing up
-    [EnumMember(Value = "None")]
+    [JsonStringEnumMemberName(nameof(None))]
     None = 0,
 
-    [EnumMember(Value = "Verbose")]
+    [JsonStringEnumMemberName(nameof(Verbose))]
     Verbose = 1,
 
-    [EnumMember(Value = "Debug")]
+    [JsonStringEnumMemberName(nameof(Debug))]
     Debug = 2,
 
-    [EnumMember(Value = "Information")]
+    [JsonStringEnumMemberName(nameof(Information))]
     Information = 3,
 
-    [EnumMember(Value = "Success")]
+    [JsonStringEnumMemberName(nameof(Success))]
     Success = 4,
 
-    [EnumMember(Value = "Warning")]
+    [JsonStringEnumMemberName(nameof(Warning))]
     Warning = 5,
 
-    [EnumMember(Value = "Error")]
+    [JsonStringEnumMemberName(nameof(Error))]
     Error = 6,
 
-    [EnumMember(Value = "Fatal")]
+    [JsonStringEnumMemberName(nameof(Fatal))]
     Fatal = 7,
 }

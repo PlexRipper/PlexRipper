@@ -5,18 +5,18 @@ public enum DownloadTaskPhase
 {
     // NOTE: Make sure the indexes are correct, 1,2,3,4,5 etc. and that there is no skip in between
     // Otherwise the TypeScript DTO translator in the front-end starts messing up
-    [EnumMember(Value = "None")]
+    [JsonStringEnumMemberName(nameof(None))]
     None = 0,
 
-    [EnumMember(Value = "Downloading")]
+    [JsonStringEnumMemberName(nameof(Downloading))]
     Downloading = 1,
 
-    [EnumMember(Value = "FileTransfer")]
+    [JsonStringEnumMemberName(nameof(FileTransfer))]
     FileTransfer = 2,
 
-    [EnumMember(Value = "Completed")]
+    [JsonStringEnumMemberName(nameof(Completed))]
     Completed = 3,
 
-    [EnumMember(Value = "Unknown")]
+    [JsonStringEnumMemberName(nameof(Unknown))]
     Unknown = 4,
 }

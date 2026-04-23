@@ -1,4 +1,4 @@
-﻿using System.Runtime.Serialization;
+﻿using System.Text.Json.Serialization;
 
 namespace Reaparr.SignalR;
 
@@ -10,66 +10,66 @@ public enum MessageTypes
     /// <summary>
     ///  Library progress message type.
     /// </summary>
-    [EnumMember(Value = nameof(LibraryProgress))]
+    [JsonStringEnumMemberName(nameof(LibraryProgress))]
     LibraryProgress = 0,
 
     /// <summary>
     ///  Download the task progress message type.
     /// </summary>
-    [EnumMember(Value = nameof(DownloadTaskUpdate))]
+    [JsonStringEnumMemberName(nameof(DownloadTaskUpdate))]
     DownloadTaskUpdate = 2,
 
     /// <summary>
     ///  Server download progress message type.
     /// </summary>
-    [EnumMember(Value = nameof(ServerDownloadProgress))]
+    [JsonStringEnumMemberName(nameof(ServerDownloadProgress))]
     ServerDownloadProgress = 3,
 
     /// <summary>
     ///  Download patch message type.
     /// </summary>
-    [EnumMember(Value = nameof(DownloadPatch))]
+    [JsonStringEnumMemberName(nameof(DownloadPatch))]
     DownloadPatch = 4,
 
     /// <summary>
     ///  Server connection checks status message type.
     /// </summary>
-    [EnumMember(Value = nameof(ServerConnectionCheckStatusProgress))]
+    [JsonStringEnumMemberName(nameof(ServerConnectionCheckStatusProgress))]
     ServerConnectionCheckStatusProgress = 5,
 
     /// <summary>
     ///  File merge progress message type.
     /// </summary>
-    [EnumMember(Value = nameof(MoveDownloadFileProgress))]
+    [JsonStringEnumMemberName(nameof(MoveDownloadFileProgress))]
     MoveDownloadFileProgress = 6,
 
     /// <summary>
     ///  Notification message type.
     /// </summary>
-    [EnumMember(Value = nameof(Notification))]
+    [JsonStringEnumMemberName(nameof(Notification))]
     Notification = 7,
 
     /// <summary>
     ///  Job status update message type.
     /// </summary>
-    [EnumMember(Value = nameof(JobStatusUpdate))]
+    [JsonStringEnumMemberName(nameof(JobStatusUpdate))]
     JobStatusUpdate = 8,
 
     /// <summary>
     ///  Refresh the notification message type.
     /// </summary>
-    [EnumMember(Value = nameof(RefreshNotification))]
+    [JsonStringEnumMemberName(nameof(RefreshNotification))]
     RefreshNotification = 9,
 
     /// <summary>
     ///  App update download progress message type.
     /// </summary>
-    [EnumMember(Value = nameof(AppUpdateDownloadProgress))]
+    [JsonStringEnumMemberName(nameof(AppUpdateDownloadProgress))]
     AppUpdateDownloadProgress = 10,
 
     /// <summary>
     ///  Live log event message type.
     /// </summary>
-    [EnumMember(Value = nameof(LogEvent))]
+    [JsonStringEnumMemberName(nameof(LogEvent))]
     LogEvent = 11,
 }

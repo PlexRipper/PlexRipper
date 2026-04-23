@@ -6,24 +6,24 @@
 [JsonConverter(typeof(JsonStringEnumConverter))]
 public enum DownloadActions
 {
-    [EnumMember(Value = nameof(Details))]
+    [JsonStringEnumMemberName(nameof(Details))]
     Details = 0,
 
-    [EnumMember(Value = nameof(Delete))]
+    [JsonStringEnumMemberName(nameof(Delete))]
     Delete = 1,
 
-    [EnumMember(Value = nameof(Start))]
+    [JsonStringEnumMemberName(nameof(Start))]
     Start = 2,
 
-    [EnumMember(Value = nameof(Pause))]
+    [JsonStringEnumMemberName(nameof(Pause))]
     Pause = 3,
 
-    [EnumMember(Value = nameof(Stop))]
+    [JsonStringEnumMemberName(nameof(Stop))]
     Stop = 4,
 
-    [EnumMember(Value = nameof(Clear))]
+    [JsonStringEnumMemberName(nameof(Clear))]
     Clear = 5,
 
-    [EnumMember(Value = nameof(Restart))]
+    [JsonStringEnumMemberName(nameof(Restart))]
     Restart = 6,
 }

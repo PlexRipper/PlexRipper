@@ -5,28 +5,28 @@ public enum JobTypes
 {
     // NOTE: Make sure the indexes are correct, 1,2,3,4,5 etc. and that there is no skip in between
     // Otherwise the TypeScript DTO translator in the front-end starts messing up
-    [EnumMember(Value = "Unknown")]
+    [JsonStringEnumMemberName(nameof(Unknown))]
     Unknown = 0,
 
-    [EnumMember(Value = nameof(CheckAllConnectionsStatusByPlexServerJob))]
+    [JsonStringEnumMemberName(nameof(CheckAllConnectionsStatusByPlexServerJob))]
     CheckAllConnectionsStatusByPlexServerJob = 1,
 
-    [EnumMember(Value = nameof(DownloadJob))]
+    [JsonStringEnumMemberName(nameof(DownloadJob))]
     DownloadJob = 2,
 
-    [EnumMember(Value = nameof(MoveDownloadFileJob))]
+    [JsonStringEnumMemberName(nameof(MoveDownloadFileJob))]
     MoveDownloadFileJob = 3,
 
-    [EnumMember(Value = nameof(InspectPlexServerJob))]
+    [JsonStringEnumMemberName(nameof(InspectPlexServerJob))]
     InspectPlexServerJob = 4,
 
-    [EnumMember(Value = nameof(LibrarySyncJob))]
+    [JsonStringEnumMemberName(nameof(LibrarySyncJob))]
     LibrarySyncJob = 5,
 
-    [EnumMember(Value = nameof(MetadataSyncJob))]
+    [JsonStringEnumMemberName(nameof(MetadataSyncJob))]
     MetadataSyncJob = 6,
 
-    [EnumMember(Value = nameof(CheckForUpdateJob))]
+    [JsonStringEnumMemberName(nameof(CheckForUpdateJob))]
     CheckForUpdateJob = 7,
 
     // Ensure to add new job types to ToJobStatusUpdate in JobExecutionContextExtensions

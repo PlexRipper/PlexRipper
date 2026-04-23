@@ -90,7 +90,7 @@ public class DesktopModeUnitTests : BaseUnitTest<DesktopMode>
         waitForExitTask.IsCompleted.ShouldBeFalse();
         window.IsClosedToBackground.ShouldBeTrue();
         window.NativeClosePrevented.ShouldBeFalse();
-        window.IsDisposed.ShouldBeTrue();
+        window.IsDisposed.ShouldBeFalse();
 
         await sut.ExitAsync(CancellationToken);
         await waitForExitTask;
@@ -128,7 +128,7 @@ public class DesktopModeUnitTests : BaseUnitTest<DesktopMode>
     }
 
     [Test]
-    public async Task ShouldCreateNewWindow_WhenShowMainWindowRunsAfterCloseToBackground()
+    public async Task ShouldRestoreExistingWindow_WhenShowMainWindowRunsAfterCloseToBackground()
     {
         // Arrange
         using var _ = WithEnvironmentVariablesAsync(
@@ -152,8 +152,8 @@ public class DesktopModeUnitTests : BaseUnitTest<DesktopMode>
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
-        window.IsRestored.ShouldBeFalse();
-        windowFactory.CreateCalls.ShouldBe(2);
+        window.IsRestored.ShouldBeTrue();
+        windowFactory.CreateCalls.ShouldBe(1);
     }
 
     [Test]
@@ -211,7 +211,7 @@ public class DesktopModeUnitTests : BaseUnitTest<DesktopMode>
         waitForExitTask.IsCompleted.ShouldBeFalse();
         await WaitForWindowToCloseToBackground(window);
         window.NativeClosePrevented.ShouldBeFalse();
-        window.IsDisposed.ShouldBeTrue();
+        window.IsDisposed.ShouldBeFalse();
     }
 
     [Test]
@@ -412,8 +412,6 @@ public class DesktopModeUnitTests : BaseUnitTest<DesktopMode>
         public void CloseToBackground()
         {
             IsClosedToBackground = true;
-            IsDisposed = true;
-            IsInitialized = false;
             CloseToBackgroundCompletion.SetResult();
         }
 

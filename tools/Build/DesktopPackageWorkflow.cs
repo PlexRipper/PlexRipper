@@ -30,26 +30,7 @@ internal sealed class DesktopPackageWorkflow(
             }
         }
 
-        await commandRunner.RunCommandAsync(
-            "vpk",
-            [
-                "pack",
-                "--packId",
-                PACKAGE_ID,
-                "--packTitle",
-                PACKAGE_TITLE,
-                "--packVersion",
-                settings.Version!,
-                "--packDir",
-                paths.PublishDirectory(runtime.RuntimeIdentifier),
-                "--mainExe",
-                runtime.MainExecutable,
-                "--channel",
-                GetChannel(),
-                "--outputDir",
-                GetArtifactDirectory(),
-            ]
-        );
+        await commandRunner.RunCommandAsync("vpk", CreatePackArguments(paths, runtime, settings, GetArtifactDirectory()));
 
         logger.LogInformation(
             "Packaged {RuntimeIdentifier} desktop artifacts for Velopack channel {Channel} to {ArtifactDirectory}",
@@ -63,6 +44,36 @@ internal sealed class DesktopPackageWorkflow(
         string.IsNullOrWhiteSpace(settings.ArtifactDirectory)
             ? paths.ArtifactDirectory(runtime.RuntimeIdentifier)
             : Path.GetFullPath(settings.ArtifactDirectory, paths.RootDirectory.FullName);
+
+    private static List<string> CreatePackArguments(
+        BuildPaths paths,
+        DesktopRuntime runtime,
+        DesktopCommandSettings settings,
+        string? artifactDirectory
+    ) =>
+        [
+            "pack",
+            "--packId",
+            PACKAGE_ID,
+            "--packTitle",
+            PACKAGE_TITLE,
+            "--packVersion",
+            settings.Version!,
+            "--packDir",
+            paths.PublishDirectory(runtime.RuntimeIdentifier),
+            "--mainExe",
+            runtime.MainExecutable,
+            "--runtime",
+            runtime.RuntimeIdentifier,
+            "--channel",
+            string.IsNullOrWhiteSpace(settings.Channel)
+                ? (EnvironmentExtensions.IsDevRelease() ? "dev" : "stable")
+                : settings.Channel,
+            "--outputDir",
+            string.IsNullOrWhiteSpace(artifactDirectory)
+                ? paths.ArtifactDirectory(runtime.RuntimeIdentifier)
+                : artifactDirectory,
+        ];
 
     private string GetChannel() =>
         string.IsNullOrWhiteSpace(settings.Channel)

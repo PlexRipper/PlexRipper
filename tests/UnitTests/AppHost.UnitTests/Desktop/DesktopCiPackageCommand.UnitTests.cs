@@ -37,6 +37,39 @@ public class DesktopCiPackageCommandUnitTests
         ciSettings.SkipPackage.ShouldBeFalse();
     }
 
+    [Test]
+    public void ShouldIncludeRuntimeArgument_WhenCreatingVelopackPackArguments()
+    {
+        // Arrange
+        var runtime = DesktopRuntimeCatalog.Get("linux-x64");
+        var settings = new DesktopCommandSettings
+        {
+            RuntimeIdentifier = "linux-x64",
+            Version = "9.9.9",
+            InformationalVersion = "9.9.9-dev",
+            Channel = "dev",
+            ArtifactDirectory = "Releases",
+            PreserveExistingArtifacts = true,
+            DryRun = true,
+        };
+
+        var paths = new BuildPaths(new DirectoryInfo("/tmp/reaparr"));
+
+        // Act
+        var arguments = GetPackArguments(paths, runtime, settings);
+
+        // Assert
+        arguments.ShouldContain("--runtime");
+        var runtimeIndex = arguments.IndexOf("--runtime");
+        runtimeIndex.ShouldBeGreaterThanOrEqualTo(0);
+        arguments[runtimeIndex + 1].ShouldBe("linux-x64");
+
+        arguments.ShouldContain("--mainExe");
+        var mainExeIndex = arguments.IndexOf("--mainExe");
+        mainExeIndex.ShouldBeGreaterThanOrEqualTo(0);
+        arguments[mainExeIndex + 1].ShouldBe("Reaparr.AppHost");
+    }
+
     private static DesktopCommandSettings GetCiSettings(DesktopCommandSettings settings)
     {
         var methodInfo = typeof(DesktopCiPackageCommand).GetMethod(
@@ -50,5 +83,24 @@ public class DesktopCiPackageCommandUnitTests
         result.ShouldBeOfType<DesktopCommandSettings>();
 
         return (DesktopCommandSettings)result;
+    }
+
+    private static List<string> GetPackArguments(
+        BuildPaths paths,
+        DesktopRuntime runtime,
+        DesktopCommandSettings settings
+    )
+    {
+        var methodInfo = typeof(DesktopPackageWorkflow).GetMethod(
+            "CreatePackArguments",
+            BindingFlags.NonPublic | BindingFlags.Static
+        );
+
+        methodInfo.ShouldNotBeNull();
+
+        var result = methodInfo.Invoke(null, [paths, runtime, settings, null]);
+        result.ShouldBeOfType<List<string>>();
+
+        return (List<string>)result;
     }
 }

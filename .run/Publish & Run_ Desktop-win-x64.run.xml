@@ -11,7 +11,7 @@
         <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
         <option name="PASS_PARENT_ENVS" value="1" />
         <envs>
-            <env name="DOTNET_ENVIRONMENT" value="Development" />
+            <env name="DOTNET_ENVIRONMENT" value="Production" />
             <env name="INFORMATIONAL_VERSION" value="9.9.9-dev" />
             <env name="PUID" value="1000" />
             <env name="REAPARR_DATA_PATH" value="$PROJECT_DIR$/../../DATA/ReaparrCache/" />

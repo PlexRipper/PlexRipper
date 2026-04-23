@@ -1,5 +1,12 @@
 Reaparr Changelog
 
+# [0.38.0-dev.9](https://github.com/Reaparr/Reaparr/compare/v0.38.0-dev.8...v0.38.0-dev.9) (2026-04-23)
+
+
+### Bug Fixes
+
+* **WebAPI:** Serialize desktop release uploads ([197d51e](https://github.com/Reaparr/Reaparr/commit/197d51e3f335e2038a4936bbc3fe48d516964903))
+
 # [0.38.0-dev.8](https://github.com/Reaparr/Reaparr/compare/v0.38.0-dev.7...v0.38.0-dev.8) (2026-04-23)
 
 

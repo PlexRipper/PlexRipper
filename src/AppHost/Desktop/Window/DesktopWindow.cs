@@ -61,8 +61,11 @@ public class DesktopWindow : IDesktopWindow
     /// <inheritdoc />
     public void CloseToBackground()
     {
-        if (_window is not null)
-            _window.Minimized = true;
+        if (!IsInitialized)
+            return;
+
+        _window?.Close();
+        _isInitialized = false;
     }
 
     /// <inheritdoc />

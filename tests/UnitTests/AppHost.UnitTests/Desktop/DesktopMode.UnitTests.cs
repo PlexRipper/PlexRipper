@@ -89,6 +89,8 @@ public class DesktopModeUnitTests : BaseUnitTest<DesktopMode>
         result.IsSuccess.ShouldBeTrue();
         waitForExitTask.IsCompleted.ShouldBeFalse();
         window.IsClosedToBackground.ShouldBeTrue();
+        window.NativeClosePrevented.ShouldBeFalse();
+        window.IsDisposed.ShouldBeTrue();
 
         await sut.ExitAsync(CancellationToken);
         await waitForExitTask;
@@ -126,7 +128,7 @@ public class DesktopModeUnitTests : BaseUnitTest<DesktopMode>
     }
 
     [Test]
-    public async Task ShouldRestoreExistingWindow_WhenShowMainWindowRunsAfterCloseToBackground()
+    public async Task ShouldCreateNewWindow_WhenShowMainWindowRunsAfterCloseToBackground()
     {
         // Arrange
         using var _ = WithEnvironmentVariablesAsync(
@@ -150,8 +152,8 @@ public class DesktopModeUnitTests : BaseUnitTest<DesktopMode>
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
-        window.IsRestored.ShouldBeTrue();
-        windowFactory.CreateCalls.ShouldBe(1);
+        window.IsRestored.ShouldBeFalse();
+        windowFactory.CreateCalls.ShouldBe(2);
     }
 
     [Test]
@@ -205,9 +207,11 @@ public class DesktopModeUnitTests : BaseUnitTest<DesktopMode>
         var preventNativeClose = window.WindowClosingHandler!.Invoke(window, EventArgs.Empty);
 
         // Assert
-        preventNativeClose.ShouldBeTrue();
+        preventNativeClose.ShouldBeFalse();
         waitForExitTask.IsCompleted.ShouldBeFalse();
         await WaitForWindowToCloseToBackground(window);
+        window.NativeClosePrevented.ShouldBeFalse();
+        window.IsDisposed.ShouldBeTrue();
     }
 
     [Test]
@@ -408,6 +412,8 @@ public class DesktopModeUnitTests : BaseUnitTest<DesktopMode>
         public void CloseToBackground()
         {
             IsClosedToBackground = true;
+            IsDisposed = true;
+            IsInitialized = false;
             CloseToBackgroundCompletion.SetResult();
         }
 
@@ -419,11 +425,14 @@ public class DesktopModeUnitTests : BaseUnitTest<DesktopMode>
         public void CloseNativeWindow()
         {
             NativeClosePrevented = WindowClosingHandler?.Invoke(this, EventArgs.Empty) ?? false;
+            IsDisposed = true;
+            IsInitialized = false;
         }
 
         public void DisposeWindow()
         {
             IsDisposed = true;
+            IsInitialized = false;
         }
 
         public void WaitForClose()

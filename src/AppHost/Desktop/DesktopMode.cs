@@ -12,6 +12,7 @@ public class DesktopMode : IDesktopMode
     private readonly TaskCompletionSource _exitCompletion = new(TaskCreationOptions.RunContinuationsAsynchronously);
 
     private IDesktopWindow? _window;
+    private bool _isClosingToBackground;
     private bool _isExiting;
 
     /// <summary>Initializes a new instance of <see cref="DesktopMode"/>.</summary>
@@ -65,8 +66,21 @@ public class DesktopMode : IDesktopMode
     /// <inheritdoc />
     public Task<Result> CloseMainWindowAsync(CancellationToken cancellationToken)
     {
-        _window?.CloseToBackground();
-        return Task.FromResult(Result.Ok());
+        if (_window is null)
+            return Task.FromResult(Result.Ok());
+
+        _isClosingToBackground = true;
+
+        try
+        {
+            _window.CloseToBackground();
+            _window = null;
+            return Task.FromResult(Result.Ok());
+        }
+        finally
+        {
+            _isClosingToBackground = false;
+        }
     }
 
     /// <inheritdoc />
@@ -95,19 +109,14 @@ public class DesktopMode : IDesktopMode
 
     private bool OnWindowClosing(object? sender, EventArgs args)
     {
-        if (_isExiting)
+        if (_isExiting || _isClosingToBackground)
             return false;
 
-        _ = CloseMainWindowFromWindowClosingAsync();
-        return true;
-    }
-
-    private async Task CloseMainWindowFromWindowClosingAsync()
-    {
         _log.Here().Debug("Closing the Reaparr desktop window to the background");
-        var result = await CloseMainWindowAsync(CancellationToken.None);
-        if (result.IsFailed)
-            result.LogError();
+
+        _window?.DisposeWindow();
+        _window = null;
+        return false;
     }
 
     private void HandleDesktopMessages(DesktopMessageDTO message)

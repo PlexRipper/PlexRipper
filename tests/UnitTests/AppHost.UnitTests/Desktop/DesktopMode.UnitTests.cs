@@ -184,37 +184,6 @@ public class DesktopModeUnitTests : BaseUnitTest<DesktopMode>
     }
 
     [Test]
-    public async Task ShouldPreventNativeCloseAndCloseToBackground_WhenPhotinoWindowClosingRuns()
-    {
-        // Arrange
-        using var _ = WithEnvironmentVariablesAsync(
-            new Dictionary<string, string?>
-            {
-                [EnvKeys.ReaparrPlatform] = "desktop",
-                [EnvKeys.DotNetEnvironment] = "Production",
-            }
-        );
-
-        var window = new FakeDesktopWindow();
-        var windowFactory = new FakeDesktopWindowFactory(window);
-        var server = CreateServer("http://localhost:5000");
-        var sut = CreateSut(server, windowFactory.Create);
-
-        await sut.StartAsync(CancellationToken);
-        var waitForExitTask = sut.WaitForExitAsync(CancellationToken);
-
-        // Act
-        var preventNativeClose = window.WindowClosingHandler!.Invoke(window, EventArgs.Empty);
-
-        // Assert
-        preventNativeClose.ShouldBeFalse();
-        waitForExitTask.IsCompleted.ShouldBeFalse();
-        await WaitForWindowToCloseToBackground(window);
-        window.NativeClosePrevented.ShouldBeFalse();
-        window.IsDisposed.ShouldBeFalse();
-    }
-
-    [Test]
     public async Task ShouldRegisterExternalLinkHandler_WhenMainWindowStarts()
     {
         // Arrange

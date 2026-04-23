@@ -12,21 +12,24 @@ internal sealed class DesktopCiPackageCommand(BuildPaths paths, ILoggerFactory l
         CancellationToken cancellationToken
     )
     {
-        var ciSettings = new DesktopCommandSettings
+        var ciSettings = CreateCiSettings(settings);
+
+        return DesktopBuildWorkflow.Create(paths, ciSettings, loggerFactory).PackageAsync();
+    }
+
+    private static DesktopCommandSettings CreateCiSettings(DesktopCommandSettings settings) =>
+        new()
         {
             RuntimeIdentifier = settings.RuntimeIdentifier,
             Version = settings.Version,
             InformationalVersion = settings.InformationalVersion,
             Channel = settings.Channel,
             SkipFrontend = true,
-            SkipRestore = true,
+            SkipRestore = false,
             SkipPackage = false,
             DryRun = settings.DryRun,
             FrontendPublicDirectory = settings.FrontendPublicDirectory,
             ArtifactDirectory = settings.ArtifactDirectory,
             PreserveExistingArtifacts = settings.PreserveExistingArtifacts,
         };
-
-        return DesktopBuildWorkflow.Create(paths, ciSettings, loggerFactory).PackageAsync();
-    }
 }

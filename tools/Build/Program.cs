@@ -109,7 +109,7 @@ internal static class Program
                         desktop
                             .AddCommand<DesktopCiPackageCommand>("ci-package")
                             .WithDescription(
-                                "Use pre-generated frontend assets and pre-restored dependencies to package a desktop build in CI."
+                                "Use pre-generated frontend assets and perform the RID-specific restore and packaging steps for a desktop build in CI."
                             )
                             .WithExample(
                                 "desktop",

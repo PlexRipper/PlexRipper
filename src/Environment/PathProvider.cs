@@ -52,6 +52,30 @@ public class PathProvider : IPathProvider
     /// </summary>
     public static string DefaultGamesFolderName => "Games";
 
+    #region FileNames
+
+    /// <summary>
+    /// Gets the file name used for the main Reaparr settings file.
+    /// </summary>
+    public static string ConfigFileName => "ReaparrSettings.json";
+
+    /// <summary>
+    /// Gets the file name used for the SQLite database.
+    /// </summary>
+    public static string DatabaseName => "ReaparrDB.db";
+
+    /// <summary>
+    /// Gets the file name used for the SQLite shared-memory sidecar file.
+    /// </summary>
+    public static string DatabaseShmName => $"{DatabaseName}-shm";
+
+    /// <summary>
+    /// Gets the file name used for the SQLite write-ahead log sidecar file.
+    /// </summary>
+    public static string DatabaseWalName => $"{DatabaseName}-wal";
+
+    #endregion
+
     /// <summary>
     /// Gets the default downloads destination path based on the configured data root or the current platform fallback.
     /// </summary>
@@ -67,7 +91,7 @@ public class PathProvider : IPathProvider
                 return Path.Combine("/", DefaultDownloadsFolderName);
 
             if (EnvironmentExtensions.IsDesktopMode())
-                return Path.Combine(UserDirectory.DownloadDir, DefaultReaparrFolderName, DefaultDownloadsFolderName);
+                return Path.Combine(DataDirectory, DefaultReaparrFolderName, DefaultDownloadsFolderName);
 
             throw new PlatformNotSupportedException($"Platform: {OsInfo.CurrentOS} is not supported");
         }
@@ -92,7 +116,7 @@ public class PathProvider : IPathProvider
                 return Path.Combine("/", DefaultMovieFolderName);
 
             if (EnvironmentExtensions.IsDesktopMode())
-                return Path.Combine(UserDirectory.DownloadDir, DefaultReaparrFolderName, DefaultMovieFolderName);
+                return Path.Combine(DataDirectory, DefaultReaparrFolderName, DefaultMovieFolderName);
 
             throw new PlatformNotSupportedException($"Platform: {OsInfo.CurrentOS} is not supported");
         }
@@ -117,7 +141,7 @@ public class PathProvider : IPathProvider
                 return Path.Combine("/", DefaultTvShowsFolderName);
 
             if (EnvironmentExtensions.IsDesktopMode())
-                return Path.Combine(UserDirectory.DownloadDir, DefaultReaparrFolderName, DefaultTvShowsFolderName);
+                return Path.Combine(DataDirectory, DefaultReaparrFolderName, DefaultTvShowsFolderName);
 
             throw new PlatformNotSupportedException($"Platform: {OsInfo.CurrentOS} is not supported");
         }
@@ -142,7 +166,7 @@ public class PathProvider : IPathProvider
                 return Path.Combine("/", DefaultMusicFolderName);
 
             if (EnvironmentExtensions.IsDesktopMode())
-                return Path.Combine(UserDirectory.DownloadDir, DefaultReaparrFolderName, DefaultMusicFolderName);
+                return Path.Combine(DataDirectory, DefaultReaparrFolderName, DefaultMusicFolderName);
 
             throw new PlatformNotSupportedException($"Platform: {OsInfo.CurrentOS} is not supported");
         }
@@ -167,7 +191,7 @@ public class PathProvider : IPathProvider
                 return Path.Combine("/", DefaultPhotosFolderName);
 
             if (EnvironmentExtensions.IsDesktopMode())
-                return Path.Combine(UserDirectory.DownloadDir, DefaultReaparrFolderName, DefaultPhotosFolderName);
+                return Path.Combine(DataDirectory, DefaultReaparrFolderName, DefaultPhotosFolderName);
 
             throw new PlatformNotSupportedException($"Platform: {OsInfo.CurrentOS} is not supported");
         }
@@ -192,7 +216,7 @@ public class PathProvider : IPathProvider
                 return Path.Combine("/", DefaultOtherFolderName);
 
             if (EnvironmentExtensions.IsDesktopMode())
-                return Path.Combine(UserDirectory.DownloadDir, DefaultReaparrFolderName, DefaultOtherFolderName);
+                return Path.Combine(DataDirectory, DefaultReaparrFolderName, DefaultOtherFolderName);
 
             throw new PlatformNotSupportedException($"Platform: {OsInfo.CurrentOS} is not supported");
         }
@@ -217,7 +241,7 @@ public class PathProvider : IPathProvider
                 return Path.Combine("/", DefaultGamesFolderName);
 
             if (EnvironmentExtensions.IsDesktopMode())
-                return Path.Combine(UserDirectory.DownloadDir, DefaultReaparrFolderName, DefaultGamesFolderName);
+                return Path.Combine(DataDirectory, DefaultReaparrFolderName, DefaultGamesFolderName);
 
             throw new PlatformNotSupportedException($"Platform: {OsInfo.CurrentOS} is not supported");
         }
@@ -225,29 +249,6 @@ public class PathProvider : IPathProvider
 
     #endregion
 
-    #region FileNames
-
-    /// <summary>
-    /// Gets the file name used for the main Reaparr settings file.
-    /// </summary>
-    public static string ConfigFileName => "ReaparrSettings.json";
-
-    /// <summary>
-    /// Gets the file name used for the SQLite database.
-    /// </summary>
-    public static string DatabaseName => "ReaparrDB.db";
-
-    /// <summary>
-    /// Gets the file name used for the SQLite shared-memory sidecar file.
-    /// </summary>
-    public static string DatabaseShmName => $"{DatabaseName}-shm";
-
-    /// <summary>
-    /// Gets the file name used for the SQLite write-ahead log sidecar file.
-    /// </summary>
-    public static string DatabaseWalName => $"{DatabaseName}-wal";
-
-    #endregion
 
     /// <summary>
     /// Gets the directory that stores Reaparr's own application state, such as settings, the SQLite database, backups, and logs.
@@ -274,7 +275,7 @@ public class PathProvider : IPathProvider
     /// <summary>
     /// Gets the full path to the main Reaparr settings file.
     /// </summary>
-    public static string ConfigFileLocation => Path.Join(ConfigDirectory, ConfigFileName);
+    public static string ConfigFileLocation => Path.Combine(ConfigDirectory, ConfigFileName);
 
     /// <summary>
     /// Gets the directory used to store database backup files.
@@ -324,7 +325,7 @@ public class PathProvider : IPathProvider
                 return "/";
 
             if (EnvironmentExtensions.IsDesktopMode())
-                return System.Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile);
+                return UserDirectory.DownloadDir;
 
             throw new PlatformNotSupportedException($"Platform: {OsInfo.CurrentOS} is not supported");
         }

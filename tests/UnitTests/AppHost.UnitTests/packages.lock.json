@@ -1498,6 +1498,11 @@
           "NuGet.Versioning": "6.14.0"
         }
       },
+      "Xdg.Directories": {
+        "type": "Transitive",
+        "resolved": "0.1.2",
+        "contentHash": "Zhw6wmXwdLkhCvgBfVd9D8UL62IF2xnmbWDckQVoZMT9lBKCuVLwaVrkXhhJtP6pxcRaf7caauNCWOUngoPNsQ=="
+      },
       "xunit.v3.common": {
         "type": "Transitive",
         "resolved": "3.2.2",
@@ -1664,7 +1669,8 @@
       "Reaparr.Environment": {
         "type": "Project",
         "dependencies": {
-          "Serilog": "[4.3.1, )"
+          "Serilog": "[4.3.1, )",
+          "Xdg.Directories": "[0.1.2, )"
         }
       },
       "Reaparr.External": {

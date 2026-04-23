@@ -1,3 +1,5 @@
+using Xdg.Directories;
+
 namespace Reaparr.Environment;
 
 public class PathProvider : IPathProvider
@@ -65,11 +67,7 @@ public class PathProvider : IPathProvider
                 return Path.Combine("/", DefaultDownloadsFolderName);
 
             if (EnvironmentExtensions.IsDesktopMode())
-                return Path.Combine(
-                    System.Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile),
-                    DefaultDownloadsFolderName,
-                    DefaultReaparrFolderName
-                );
+                return Path.Combine(UserDirectory.DownloadDir, DefaultReaparrFolderName, DefaultDownloadsFolderName);
 
             throw new PlatformNotSupportedException($"Platform: {OsInfo.CurrentOS} is not supported");
         }
@@ -94,10 +92,7 @@ public class PathProvider : IPathProvider
                 return Path.Combine("/", DefaultMovieFolderName);
 
             if (EnvironmentExtensions.IsDesktopMode())
-            {
-                var home = System.Environment.GetFolderPath(System.Environment.SpecialFolder.MyVideos);
-                return Path.Combine(home, "Reaparr", DefaultMovieFolderName);
-            }
+                return Path.Combine(UserDirectory.DownloadDir, DefaultReaparrFolderName, DefaultMovieFolderName);
 
             throw new PlatformNotSupportedException($"Platform: {OsInfo.CurrentOS} is not supported");
         }
@@ -122,10 +117,7 @@ public class PathProvider : IPathProvider
                 return Path.Combine("/", DefaultTvShowsFolderName);
 
             if (EnvironmentExtensions.IsDesktopMode())
-            {
-                var home = System.Environment.GetFolderPath(System.Environment.SpecialFolder.MyVideos);
-                return Path.Combine(home, DefaultReaparrFolderName, DefaultTvShowsFolderName);
-            }
+                return Path.Combine(UserDirectory.DownloadDir, DefaultReaparrFolderName, DefaultTvShowsFolderName);
 
             throw new PlatformNotSupportedException($"Platform: {OsInfo.CurrentOS} is not supported");
         }
@@ -150,10 +142,7 @@ public class PathProvider : IPathProvider
                 return Path.Combine("/", DefaultMusicFolderName);
 
             if (EnvironmentExtensions.IsDesktopMode())
-            {
-                var home = System.Environment.GetFolderPath(System.Environment.SpecialFolder.MyVideos);
-                return Path.Combine(home, DefaultReaparrFolderName, DefaultMusicFolderName);
-            }
+                return Path.Combine(UserDirectory.DownloadDir, DefaultReaparrFolderName, DefaultMusicFolderName);
 
             throw new PlatformNotSupportedException($"Platform: {OsInfo.CurrentOS} is not supported");
         }
@@ -178,10 +167,7 @@ public class PathProvider : IPathProvider
                 return Path.Combine("/", DefaultPhotosFolderName);
 
             if (EnvironmentExtensions.IsDesktopMode())
-            {
-                var home = System.Environment.GetFolderPath(System.Environment.SpecialFolder.MyVideos);
-                return Path.Combine(home, DefaultReaparrFolderName, DefaultPhotosFolderName);
-            }
+                return Path.Combine(UserDirectory.DownloadDir, DefaultReaparrFolderName, DefaultPhotosFolderName);
 
             throw new PlatformNotSupportedException($"Platform: {OsInfo.CurrentOS} is not supported");
         }
@@ -206,10 +192,7 @@ public class PathProvider : IPathProvider
                 return Path.Combine("/", DefaultOtherFolderName);
 
             if (EnvironmentExtensions.IsDesktopMode())
-            {
-                var home = System.Environment.GetFolderPath(System.Environment.SpecialFolder.MyVideos);
-                return Path.Combine(home, DefaultReaparrFolderName, DefaultOtherFolderName);
-            }
+                return Path.Combine(UserDirectory.DownloadDir, DefaultReaparrFolderName, DefaultOtherFolderName);
 
             throw new PlatformNotSupportedException($"Platform: {OsInfo.CurrentOS} is not supported");
         }
@@ -234,10 +217,7 @@ public class PathProvider : IPathProvider
                 return Path.Combine("/", DefaultGamesFolderName);
 
             if (EnvironmentExtensions.IsDesktopMode())
-            {
-                var home = System.Environment.GetFolderPath(System.Environment.SpecialFolder.MyVideos);
-                return Path.Combine(home, DefaultReaparrFolderName, DefaultGamesFolderName);
-            }
+                return Path.Combine(UserDirectory.DownloadDir, DefaultReaparrFolderName, DefaultGamesFolderName);
 
             throw new PlatformNotSupportedException($"Platform: {OsInfo.CurrentOS} is not supported");
         }
@@ -284,26 +264,10 @@ public class PathProvider : IPathProvider
             if (EnvironmentExtensions.IsDockerMode())
                 return Path.Combine("/", DefaultConfigFolderName);
 
-            // Desktop mode
-            return OsInfo.CurrentOS switch
-            {
-                OperatingSystemPlatform.Windows => Path.Combine(
-                    System.Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData),
-                    DefaultReaparrFolderName
-                ),
-                OperatingSystemPlatform.Osx => Path.Combine(
-                    System.Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile),
-                    "Library",
-                    "Application Support",
-                    DefaultReaparrFolderName
-                ),
-                OperatingSystemPlatform.Linux => Path.Combine(
-                    System.Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile),
-                    ".config",
-                    DefaultReaparrFolderName
-                ),
-                _ => throw new PlatformNotSupportedException($"Platform: {OsInfo.CurrentOS} is not supported"),
-            };
+            if (EnvironmentExtensions.IsDesktopMode())
+                return Path.Combine(BaseDirectory.ConfigHome, DefaultReaparrFolderName);
+
+            throw new PlatformNotSupportedException($"Platform: {OsInfo.CurrentOS} is not supported");
         }
     }
 

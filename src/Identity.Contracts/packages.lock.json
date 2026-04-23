@@ -536,6 +536,11 @@
           "System.Security.Cryptography.Pkcs": "10.0.6"
         }
       },
+      "Xdg.Directories": {
+        "type": "Transitive",
+        "resolved": "0.1.2",
+        "contentHash": "Zhw6wmXwdLkhCvgBfVd9D8UL62IF2xnmbWDckQVoZMT9lBKCuVLwaVrkXhhJtP6pxcRaf7caauNCWOUngoPNsQ=="
+      },
       "Reaparr.Application.Contracts": {
         "type": "Project",
         "dependencies": {
@@ -569,7 +574,8 @@
       "Reaparr.Environment": {
         "type": "Project",
         "dependencies": {
-          "Serilog": "[4.3.1, )"
+          "Serilog": "[4.3.1, )",
+          "Xdg.Directories": "[0.1.2, )"
         }
       },
       "Reaparr.FluentResultExtensions": {

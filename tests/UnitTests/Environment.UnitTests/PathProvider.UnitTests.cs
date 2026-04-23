@@ -333,25 +333,12 @@ public class PathProviderUnitTests
             () =>
             {
                 // Act
-                var desktopMediaRoot = Path.Combine(
-                    System.Environment.GetFolderPath(System.Environment.SpecialFolder.MyVideos),
+                var desktopDownloadsRoot = Path.Combine(
+                    home,
+                    PathProvider.DefaultDownloadsFolderName,
                     PathProvider.DefaultReaparrFolderName
                 );
-                var expected = folderName switch
-                {
-                    "Downloads" => Path.Combine(
-                        System.Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile),
-                        PathProvider.DefaultDownloadsFolderName,
-                        PathProvider.DefaultReaparrFolderName
-                    ),
-                    "Movies" => Path.Combine(desktopMediaRoot, PathProvider.DefaultMovieFolderName),
-                    "TvShows" => Path.Combine(desktopMediaRoot, PathProvider.DefaultTvShowsFolderName),
-                    "Music" => Path.Combine(desktopMediaRoot, PathProvider.DefaultMusicFolderName),
-                    "Photos" => Path.Combine(desktopMediaRoot, PathProvider.DefaultPhotosFolderName),
-                    "Other" => Path.Combine(desktopMediaRoot, PathProvider.DefaultOtherFolderName),
-                    "Games" => Path.Combine(desktopMediaRoot, PathProvider.DefaultGamesFolderName),
-                    _ => throw new InvalidOperationException($"Unsupported folder: {folderName}"),
-                };
+                var expected = Path.Combine(desktopDownloadsRoot, folderName);
 
                 // Assert
                 GetDefaultDestinationFolder(folderName).ShouldBe(expected);
@@ -533,6 +520,51 @@ public class PathProviderUnitTests
         );
     }
 
+    [Test]
+    [Arguments(OperatingSystemPlatform.Windows, "C:/Users/reaparr-user")]
+    [Arguments(OperatingSystemPlatform.Osx, "/Users/reaparr-user")]
+    [Arguments(OperatingSystemPlatform.Linux, "/home/reaparr-user")]
+    public void ShouldBuildAllDesktopMediaDestinationFoldersUnderDownloadsReaparr_WhenDesktopModeAndDataPathUnset(
+        OperatingSystemPlatform platform,
+        string userProfile
+    )
+    {
+        // Arrange
+        WithEnvironment(
+            "desktop",
+            null,
+            null,
+            userProfile,
+            "/unused/appdata",
+            () =>
+            {
+                // Act
+                var expectedRoot = Path.Combine(
+                    userProfile,
+                    PathProvider.DefaultDownloadsFolderName,
+                    PathProvider.DefaultReaparrFolderName
+                );
+
+                // Assert
+                GetDefaultDestinationFolder("Downloads")
+                    .ShouldBe(Path.Combine(expectedRoot, PathProvider.DefaultDownloadsFolderName));
+                GetDefaultDestinationFolder("Movies")
+                    .ShouldBe(Path.Combine(expectedRoot, PathProvider.DefaultMovieFolderName));
+                GetDefaultDestinationFolder("TvShows")
+                    .ShouldBe(Path.Combine(expectedRoot, PathProvider.DefaultTvShowsFolderName));
+                GetDefaultDestinationFolder("Music")
+                    .ShouldBe(Path.Combine(expectedRoot, PathProvider.DefaultMusicFolderName));
+                GetDefaultDestinationFolder("Photos")
+                    .ShouldBe(Path.Combine(expectedRoot, PathProvider.DefaultPhotosFolderName));
+                GetDefaultDestinationFolder("Other")
+                    .ShouldBe(Path.Combine(expectedRoot, PathProvider.DefaultOtherFolderName));
+                GetDefaultDestinationFolder("Games")
+                    .ShouldBe(Path.Combine(expectedRoot, PathProvider.DefaultGamesFolderName));
+            },
+            currentOS: platform
+        );
+    }
+
     private static string GetExpectedDesktopConfigPath(string _) =>
         OsInfo.CurrentOS switch
         {
@@ -581,9 +613,11 @@ public class PathProviderUnitTests
         string? musicPath = null,
         string? photosPath = null,
         string? otherPath = null,
-        string? gamesPath = null
+        string? gamesPath = null,
+        OperatingSystemPlatform? currentOS = null
     )
     {
+        using var osOverride = currentOS is null ? null : OsInfo.WithCurrentOSOverride(currentOS.Value);
         var originalValues = new Dictionary<string, string?>
         {
             [EnvKeys.ReaparrPlatform] = System.Environment.GetEnvironmentVariable(EnvKeys.ReaparrPlatform),
@@ -598,6 +632,10 @@ public class PathProviderUnitTests
             [EnvKeys.ReaparrGamesPath] = System.Environment.GetEnvironmentVariable(EnvKeys.ReaparrGamesPath),
             [EnvKeys.Home] = System.Environment.GetEnvironmentVariable(EnvKeys.Home),
             [EnvKeys.AppData] = System.Environment.GetEnvironmentVariable(EnvKeys.AppData),
+            [EnvKeys.UserProfile] = System.Environment.GetEnvironmentVariable(EnvKeys.UserProfile),
+            [EnvKeys.ReaparrUserProfilePath] = System.Environment.GetEnvironmentVariable(
+                EnvKeys.ReaparrUserProfilePath
+            ),
         };
 
         try
@@ -614,6 +652,8 @@ public class PathProviderUnitTests
             System.Environment.SetEnvironmentVariable(EnvKeys.ReaparrGamesPath, gamesPath);
             System.Environment.SetEnvironmentVariable(EnvKeys.Home, home);
             System.Environment.SetEnvironmentVariable(EnvKeys.AppData, appData);
+            System.Environment.SetEnvironmentVariable(EnvKeys.UserProfile, home);
+            System.Environment.SetEnvironmentVariable(EnvKeys.ReaparrUserProfilePath, home);
 
             assertion();
         }
@@ -655,6 +695,11 @@ public class PathProviderUnitTests
             );
             System.Environment.SetEnvironmentVariable(EnvKeys.Home, originalValues[EnvKeys.Home]);
             System.Environment.SetEnvironmentVariable(EnvKeys.AppData, originalValues[EnvKeys.AppData]);
+            System.Environment.SetEnvironmentVariable(EnvKeys.UserProfile, originalValues[EnvKeys.UserProfile]);
+            System.Environment.SetEnvironmentVariable(
+                EnvKeys.ReaparrUserProfilePath,
+                originalValues[EnvKeys.ReaparrUserProfilePath]
+            );
         }
     }
 }

@@ -1,5 +1,24 @@
 Reaparr Changelog
 
+# [0.38.0-dev.8](https://github.com/Reaparr/Reaparr/compare/v0.38.0-dev.7...v0.38.0-dev.8) (2026-04-23)
+
+
+### Bug Fixes
+
+* **WebAPI:** Correct desktop packaging executable names ([9816443](https://github.com/Reaparr/Reaparr/commit/981644382c269370e8bf5b13db28d1ce602bf340))
+* **WebAPI:** Ensure desktop window is disposed and re-created after closing to background ([ed3e198](https://github.com/Reaparr/Reaparr/commit/ed3e198f085224d58513ff62c0492b2bc4cda684))
+* **WebAPI:** Fixed an issue where the default FolderPaths could not be updated ([23030a9](https://github.com/Reaparr/Reaparr/commit/23030a9fe258c753560dacf8cd0911b776934f40))
+* **WebAPI:** Fixed external links not opening the browser when running Reaparr in Desktop mode ([5fce646](https://github.com/Reaparr/Reaparr/commit/5fce646a1f7b961d2c94e37a3646bd63608f83f2))
+* **Web-UI:** Fixed some setup page translations not updating when the language is changes ([a7a8b37](https://github.com/Reaparr/Reaparr/commit/a7a8b37a6872f7ce69a949826686d3719123b557))
+* **WebAPI:** Log failures when notifying Radarr and Sonarr on startup ([5ad58e7](https://github.com/Reaparr/Reaparr/commit/5ad58e735558400526b283d1de446207de05723f))
+* **Web-UI:** Set app version and platform when not logged in yet ([fb11391](https://github.com/Reaparr/Reaparr/commit/fb1139164029b7b710e193ccf62f447050de23ae))
+* **WebAPI:** Skip update check if Velopack is not installed in desktop mode ([50cdca1](https://github.com/Reaparr/Reaparr/commit/50cdca11fc58189084d7f1f0bbb42d8979e51278))
+
+
+### Features
+
+* **WebAPI:** Added seperate build CLI project for the desktop build workflow ([2df35d6](https://github.com/Reaparr/Reaparr/commit/2df35d637a3d8c8465238e208a95de31f04e34dd))
+
 # [0.38.0-dev.7](https://github.com/Reaparr/Reaparr/compare/v0.38.0-dev.6...v0.38.0-dev.7) (2026-04-22)
 
 

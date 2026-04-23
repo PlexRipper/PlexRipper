@@ -42,7 +42,7 @@ public class GetGitHubReleasesCommandHandler
                 cancellationToken
             );
 
-            var currentVersion = ToSemVersion(EnvironmentExtensions.GetVersion());
+            var currentVersion = ToSemVersion(EnvironmentExtensions.GetInformationalVersion());
             var isDevBuild = EnvironmentExtensions.IsDevRelease();
             var filteredReleases = (releases ?? [])
                 .Where(x =>

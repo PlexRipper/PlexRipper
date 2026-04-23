@@ -73,15 +73,23 @@ public static class EnvironmentExtensions
     }
 
     /// <summary>
-    /// Gets the application version from <c>INFORMATIONAL_VERSION</c> or <c>VERSION</c>. Defaults to <c>0.0.0</c>.
+    /// Gets the application release version from <c>VERSION</c>.
+    /// This should be the stable product version, for example <c>0.36.1</c>.
+    /// Falls back to <c>0.0.0</c> when the environment variable is not set.
     /// </summary>
-    public static string GetVersion() =>
-        GetEnvironmentVariable(EnvKeys.InformationalVersion) ?? GetEnvironmentVariable(EnvKeys.Version) ?? "0.0.0";
+    public static string GetVersion() => GetEnvironmentVariable(EnvKeys.Version) ?? "0.0.0";
+
+    /// <summary>
+    /// Gets the application informational version from <c>INFORMATIONAL_VERSION</c>.
+    /// This is typically a more detailed build string than <c>VERSION</c>, for example <c>0.36.0-dev.1</c>.
+    /// Falls back to <c>0.0.0</c> when the environment variable is not set.
+    /// </summary>
+    public static string GetInformationalVersion() => GetEnvironmentVariable(EnvKeys.InformationalVersion) ?? "0.0.0";
 
     /// <summary>
     /// Returns true if the current version indicates a development build (contains <c>dev</c>).
     /// </summary>
-    public static bool IsDevRelease() => GetVersion().Contains("dev");
+    public static bool IsDevRelease() => GetInformationalVersion().Contains("dev");
 
     /// <summary>
     /// Returns true if the DOTNET_ENVIRONMENT is set to Development.
@@ -210,7 +218,7 @@ public static class EnvironmentExtensions
         public void Dispose() => _testOverrides.Value = previous;
     }
 
-    private static string? GetEnvironmentVariable(string key)
+    public static string? GetEnvironmentVariable(string key)
     {
         if (_testOverrides.Value is { } overrides && overrides.TryGetValue(key, out var val))
             return string.IsNullOrWhiteSpace(val) ? null : val.Trim();

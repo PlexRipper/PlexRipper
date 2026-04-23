@@ -35,7 +35,7 @@ public class Program
                 .Information(
                     "Currently running {Channel} version {Version} on {CurrentOS}",
                     EnvironmentExtensions.IsDevRelease() ? "DEVELOPMENT" : "STABLE",
-                    EnvironmentExtensions.GetVersion(),
+                    EnvironmentExtensions.GetInformationalVersion(),
                     OsInfo.CurrentOS
                 );
 

@@ -3,7 +3,7 @@ using Spectre.Console.Cli;
 
 namespace Reaparr.Build;
 
-internal sealed class DesktopPublishCommand(BuildPaths paths, ILogger<DesktopBuildWorkflow> logger)
+internal sealed class DesktopPublishCommand(BuildPaths paths, ILoggerFactory loggerFactory)
     : AsyncCommand<DesktopCommandSettings>
 {
     protected override Task<int> ExecuteAsync(
@@ -12,6 +12,6 @@ internal sealed class DesktopPublishCommand(BuildPaths paths, ILogger<DesktopBui
         CancellationToken cancellationToken
     )
     {
-        return DesktopBuildWorkflow.Create(paths, settings, logger).PublishAsync();
+        return DesktopBuildWorkflow.Create(paths, settings, loggerFactory).PublishAsync();
     }
 }

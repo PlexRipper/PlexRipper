@@ -27,4 +27,13 @@ internal sealed class DesktopCommandSettings : CommandSettings
 
     [CommandOption("--dry-run")]
     public bool DryRun { get; init; }
+
+    [CommandOption("--frontend-public-dir <PATH>")]
+    public string? FrontendPublicDirectory { get; init; }
+
+    [CommandOption("--artifact-dir <PATH>")]
+    public string? ArtifactDirectory { get; init; }
+
+    [CommandOption("--preserve-existing-artifacts")]
+    public bool PreserveExistingArtifacts { get; init; }
 }

@@ -620,8 +620,8 @@ public class PathProviderUnitTests
             [EnvKeys.ReaparrPhotosPath] = System.Environment.GetEnvironmentVariable(EnvKeys.ReaparrPhotosPath),
             [EnvKeys.ReaparrOtherPath] = System.Environment.GetEnvironmentVariable(EnvKeys.ReaparrOtherPath),
             [EnvKeys.ReaparrGamesPath] = System.Environment.GetEnvironmentVariable(EnvKeys.ReaparrGamesPath),
-            ["XDG_CONFIG_HOME"] = System.Environment.GetEnvironmentVariable("XDG_CONFIG_HOME"),
-            ["XDG_DOWNLOAD_DIR"] = System.Environment.GetEnvironmentVariable("XDG_DOWNLOAD_DIR"),
+            [EnvKeys.XdgConfigHome] = System.Environment.GetEnvironmentVariable(EnvKeys.XdgConfigHome),
+            [EnvKeys.XdgDownloadDir] = System.Environment.GetEnvironmentVariable(EnvKeys.XdgDownloadDir),
         };
 
         try
@@ -637,7 +637,7 @@ public class PathProviderUnitTests
             System.Environment.SetEnvironmentVariable(EnvKeys.ReaparrOtherPath, otherPath);
             System.Environment.SetEnvironmentVariable(EnvKeys.ReaparrGamesPath, gamesPath);
             System.Environment.SetEnvironmentVariable(
-                "XDG_CONFIG_HOME",
+                EnvKeys.XdgConfigHome,
                 OsInfo.CurrentOS switch
                 {
                     OperatingSystemPlatform.Windows => appData,
@@ -651,7 +651,7 @@ public class PathProviderUnitTests
                 }
             );
             System.Environment.SetEnvironmentVariable(
-                "XDG_DOWNLOAD_DIR",
+                EnvKeys.XdgDownloadDir,
                 home is not null ? Path.Combine(home, PathProvider.DefaultDownloadsFolderName) : null
             );
 
@@ -693,8 +693,8 @@ public class PathProviderUnitTests
                 EnvKeys.ReaparrGamesPath,
                 originalValues[EnvKeys.ReaparrGamesPath]
             );
-            System.Environment.SetEnvironmentVariable("XDG_CONFIG_HOME", originalValues["XDG_CONFIG_HOME"]);
-            System.Environment.SetEnvironmentVariable("XDG_DOWNLOAD_DIR", originalValues["XDG_DOWNLOAD_DIR"]);
+            System.Environment.SetEnvironmentVariable(EnvKeys.XdgConfigHome, originalValues[EnvKeys.XdgConfigHome]);
+            System.Environment.SetEnvironmentVariable(EnvKeys.XdgDownloadDir, originalValues[EnvKeys.XdgDownloadDir]);
         }
     }
 }

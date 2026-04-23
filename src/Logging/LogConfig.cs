@@ -36,10 +36,12 @@ public class LogConfig
     /// <summary>
     /// Provides a base configuration with console and debug sinks, and allows for extension by derived classes (e.g. to add file or Seq sinks).
     /// </summary>
+    /// <param name="minimumLogLevel">The global minimum log level used before sink-specific filtering.</param>
     /// <returns></returns>
-    protected static LoggerConfiguration GetBaseConfiguration()
+    protected static LoggerConfiguration GetBaseConfiguration(LogEventLevel minimumLogLevel = LogEventLevel.Debug)
     {
         var config = new LoggerConfiguration()
+            .MinimumLevel.Is(minimumLogLevel)
             .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
             .MinimumLevel.Override("Microsoft.Hosting.Lifetime", LogEventLevel.Information)
             // These filters: No XML encryptor configured. Key {*} may be persisted to storage in unencrypted form.
@@ -92,11 +94,11 @@ public class LogConfig
     /// <summary>
     /// Provides an extended sink configuration with file and Seq sinks.
     /// </summary>
-    /// <param name="minimumLogLevel"> Minimum log level for the file and Seq sinks (console and debug sinks will still use the base configuration's minimum level).</param>
+    /// <param name="minimumLogLevel">The global minimum log level used before sink-specific filtering.</param>
     protected virtual LoggerConfiguration GetExtendedConfiguration(
         LogEventLevel minimumLogLevel = LogEventLevel.Debug
     ) =>
-        GetBaseConfiguration()
+        GetBaseConfiguration(minimumLogLevel)
             .WriteTo.Seq(EnvironmentExtensions.GetSeqUrl(), restrictedToMinimumLevel: minimumLogLevel)
             .WriteTo.File(
                 FileTemplate,

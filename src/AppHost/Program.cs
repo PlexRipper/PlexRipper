@@ -50,7 +50,7 @@ public class Program
             var app = builder.Build();
 
             if (!EnvironmentExtensions.IsIntegrationTestMode())
-                signalRLogConfig.AttachSignalR(app);
+                signalRLogConfig.AttachSignalR(app, LogFactory.MinimumLogLevel);
 
             var configResult = app.SetupConfigFile();
             if (configResult.IsFailed)

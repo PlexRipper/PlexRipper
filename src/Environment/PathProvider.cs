@@ -91,7 +91,7 @@ public class PathProvider : IPathProvider
                 return Path.Combine("/", DefaultDownloadsFolderName);
 
             if (EnvironmentExtensions.IsDesktopMode())
-                return Path.Combine(DataDirectory, DefaultReaparrFolderName, DefaultDownloadsFolderName);
+                return Path.Combine(DataDirectory, DefaultDownloadsFolderName);
 
             throw new PlatformNotSupportedException($"Platform: {OsInfo.CurrentOS} is not supported");
         }
@@ -116,7 +116,7 @@ public class PathProvider : IPathProvider
                 return Path.Combine("/", DefaultMovieFolderName);
 
             if (EnvironmentExtensions.IsDesktopMode())
-                return Path.Combine(DataDirectory, DefaultReaparrFolderName, DefaultMovieFolderName);
+                return Path.Combine(DataDirectory, DefaultMovieFolderName);
 
             throw new PlatformNotSupportedException($"Platform: {OsInfo.CurrentOS} is not supported");
         }
@@ -141,7 +141,7 @@ public class PathProvider : IPathProvider
                 return Path.Combine("/", DefaultTvShowsFolderName);
 
             if (EnvironmentExtensions.IsDesktopMode())
-                return Path.Combine(DataDirectory, DefaultReaparrFolderName, DefaultTvShowsFolderName);
+                return Path.Combine(DataDirectory, DefaultTvShowsFolderName);
 
             throw new PlatformNotSupportedException($"Platform: {OsInfo.CurrentOS} is not supported");
         }
@@ -166,7 +166,7 @@ public class PathProvider : IPathProvider
                 return Path.Combine("/", DefaultMusicFolderName);
 
             if (EnvironmentExtensions.IsDesktopMode())
-                return Path.Combine(DataDirectory, DefaultReaparrFolderName, DefaultMusicFolderName);
+                return Path.Combine(DataDirectory, DefaultMusicFolderName);
 
             throw new PlatformNotSupportedException($"Platform: {OsInfo.CurrentOS} is not supported");
         }
@@ -191,7 +191,7 @@ public class PathProvider : IPathProvider
                 return Path.Combine("/", DefaultPhotosFolderName);
 
             if (EnvironmentExtensions.IsDesktopMode())
-                return Path.Combine(DataDirectory, DefaultReaparrFolderName, DefaultPhotosFolderName);
+                return Path.Combine(DataDirectory, DefaultPhotosFolderName);
 
             throw new PlatformNotSupportedException($"Platform: {OsInfo.CurrentOS} is not supported");
         }
@@ -216,7 +216,7 @@ public class PathProvider : IPathProvider
                 return Path.Combine("/", DefaultOtherFolderName);
 
             if (EnvironmentExtensions.IsDesktopMode())
-                return Path.Combine(DataDirectory, DefaultReaparrFolderName, DefaultOtherFolderName);
+                return Path.Combine(DataDirectory, DefaultOtherFolderName);
 
             throw new PlatformNotSupportedException($"Platform: {OsInfo.CurrentOS} is not supported");
         }
@@ -241,7 +241,7 @@ public class PathProvider : IPathProvider
                 return Path.Combine("/", DefaultGamesFolderName);
 
             if (EnvironmentExtensions.IsDesktopMode())
-                return Path.Combine(DataDirectory, DefaultReaparrFolderName, DefaultGamesFolderName);
+                return Path.Combine(DataDirectory, DefaultGamesFolderName);
 
             throw new PlatformNotSupportedException($"Platform: {OsInfo.CurrentOS} is not supported");
         }
@@ -325,7 +325,7 @@ public class PathProvider : IPathProvider
                 return "/";
 
             if (EnvironmentExtensions.IsDesktopMode())
-                return UserDirectory.DownloadDir;
+                return Path.Combine(UserDirectory.DownloadDir, DefaultReaparrFolderName);
 
             throw new PlatformNotSupportedException($"Platform: {OsInfo.CurrentOS} is not supported");
         }

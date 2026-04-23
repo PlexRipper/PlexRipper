@@ -5,95 +5,89 @@ public static class ReaparrDBContextSeed
 {
     private static readonly ILogger _log = Log.ForContext(typeof(ReaparrDBContextSeed));
 
-    public static List<FolderPath> GetDefaultFolderPaths()
-    {
-        // NOTE: Don't change the DirectoryPath to something dynamic, this will make the EF core migrations fail due to the seed data becoming inconsistent between migrations.
-        var rootPath = PathProvider.DataDirectory;
-
-        return
+    public static List<FolderPath> GetDefaultFolderPaths() =>
         [
-            new FolderPath
+            new()
             {
                 Id = PlexMediaType.None.ToDefaultDestinationFolderId(),
                 DisplayName = "Download Path",
-                DirectoryPath = Path.Combine(rootPath, PathProvider.DefaultDownloadsFolderName),
+                DirectoryPath = PathProvider.DefaultDownloadsDestinationFolder,
                 FolderType = FolderType.DownloadFolder,
                 MediaType = PlexMediaType.None,
             },
-            new FolderPath
+            new()
             {
                 Id = PlexMediaType.Movie.ToDefaultDestinationFolderId(),
                 DisplayName = "Movie Destination Path",
-                DirectoryPath = Path.Combine(rootPath, PathProvider.DefaultMovieFolderName),
+                DirectoryPath = PathProvider.DefaultMovieDestinationFolder,
                 FolderType = FolderType.MovieFolder,
                 MediaType = PlexMediaType.Movie,
             },
-            new FolderPath
+            new()
             {
                 Id = PlexMediaType.TvShow.ToDefaultDestinationFolderId(),
                 DisplayName = "Tv Show Destination Path",
-                DirectoryPath = Path.Combine(rootPath, PathProvider.DefaultTvShowsFolderName),
+                DirectoryPath = PathProvider.DefaultTvShowsDestinationFolder,
                 FolderType = FolderType.TvShowFolder,
                 MediaType = PlexMediaType.TvShow,
             },
-            new FolderPath
+            new()
             {
                 Id = PlexMediaType.Music.ToDefaultDestinationFolderId(),
                 DisplayName = "Music Destination Path",
-                DirectoryPath = Path.Combine(rootPath, PathProvider.DefaultMusicFolderName),
+                DirectoryPath = PathProvider.DefaultMusicDestinationFolder,
                 FolderType = FolderType.MusicFolder,
                 MediaType = PlexMediaType.Music,
             },
-            new FolderPath
+            new()
             {
                 Id = PlexMediaType.Photos.ToDefaultDestinationFolderId(),
                 DisplayName = "Photos Destination Path",
-                DirectoryPath = Path.Combine(rootPath, PathProvider.DefaultPhotosFolderName),
+                DirectoryPath = PathProvider.DefaultPhotosDestinationFolder,
                 FolderType = FolderType.PhotosFolder,
                 MediaType = PlexMediaType.Photos,
             },
-            new FolderPath
+            new()
             {
                 Id = PlexMediaType.OtherVideos.ToDefaultDestinationFolderId(),
                 DisplayName = "Other Videos Destination Path",
-                DirectoryPath = Path.Combine(rootPath, PathProvider.DefaultOtherFolderName),
+                DirectoryPath = PathProvider.DefaultOtherDestinationFolder,
                 FolderType = FolderType.OtherVideosFolder,
                 MediaType = PlexMediaType.OtherVideos,
             },
-            new FolderPath
+            new()
             {
                 Id = PlexMediaType.Games.ToDefaultDestinationFolderId(),
                 DisplayName = "Games Videos Destination Path",
-                DirectoryPath = Path.Combine(rootPath, PathProvider.DefaultGamesFolderName),
+                DirectoryPath = PathProvider.DefaultGamesDestinationFolder,
                 FolderType = FolderType.GamesVideosFolder,
                 MediaType = PlexMediaType.Games,
             },
-            new FolderPath
+            new()
             {
                 Id = 8,
                 DisplayName = "Reserved #1 Destination Path",
-                DirectoryPath = rootPath,
+                DirectoryPath = PathProvider.DataDirectory,
                 FolderType = FolderType.None,
                 MediaType = PlexMediaType.None,
             },
-            new FolderPath
+            new()
             {
                 Id = 9,
                 DisplayName = "Reserved #2 Destination Path",
-                DirectoryPath = rootPath,
+                DirectoryPath = PathProvider.DataDirectory,
                 FolderType = FolderType.None,
                 MediaType = PlexMediaType.None,
             },
-            new FolderPath
+            new()
             {
                 Id = 10,
                 DisplayName = "Reserved #3 Destination Path",
-                DirectoryPath = rootPath,
+                DirectoryPath = PathProvider.DataDirectory,
                 FolderType = FolderType.None,
                 MediaType = PlexMediaType.None,
             },
         ];
-    }
 
     public static Action<DbContext, bool> Seed() =>
         (context, _) =>

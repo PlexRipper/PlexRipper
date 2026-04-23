@@ -6,7 +6,7 @@
         factoryName=".NET Project"
         activateToolWindowBeforeRun="false"
     >
-        <option name="EXE_PATH" value="dotnet" />
+        <option name="EXE_PATH" value="/usr/bin/dotnet" />
         <option
             name="PROGRAM_PARAMETERS"
             value="run --project $PROJECT_DIR$/tools/Build -- desktop run --rid win-x64 --version 0.36.0-dev.1"
@@ -17,8 +17,6 @@
             <env name="DOTNET_ENVIRONMENT" value="Production" />
             <env name="INFORMATIONAL_VERSION" value="0.36.0-dev.1" />
             <env name="PUID" value="1000" />
-            <env name="REAPARR_DATA_PATH" value="$PROJECT_DIR$/../../DATA/ReaparrCache/" />
-            <env name="REAPARR_CONFIG_PATH" value="$PROJECT_DIR$/../../DATA/ReaparrCache/Config" />
             <env name="SEQ_URL" value="http://localhost:5341" />
             <env name="UNMASKED" value="true" />
             <env name="DOTNET_HTTP_PORTS" value="5000" />

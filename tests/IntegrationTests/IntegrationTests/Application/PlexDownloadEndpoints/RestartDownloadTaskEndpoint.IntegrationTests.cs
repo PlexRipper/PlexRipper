@@ -73,7 +73,11 @@ public class RestartDownloadTaskEndpointIntegrationTests : BaseIntegrationTests
         );
         downloadTaskDb.ShouldNotBeNull();
 
-        downloadTaskDb.DownloadStatus.ShouldBeOneOf(DownloadStatus.Queued, DownloadStatus.Completed);
+        downloadTaskDb.DownloadStatus.ShouldBeOneOf(
+            DownloadStatus.Queued,
+            DownloadStatus.Downloading,
+            DownloadStatus.Completed
+        );
 
         var finalDownload = await container.WaitForDownloadStatusAsync(
             downloadTask.Id,

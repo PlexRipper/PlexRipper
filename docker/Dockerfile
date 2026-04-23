@@ -50,14 +50,14 @@ RUN dotnet publish "AppHost.csproj" -c Release -o /app/publish \
     -p:UseAppHost=false
 
 # Stage 3a - .NET runtime (Alpine/musl-based; compatible with the Alpine final image)
-FROM mcr.microsoft.com/dotnet/aspnet:10.0-alpine AS dotnet-runtime
+FROM mcr.microsoft.com/dotnet/aspnet:10.0-alpine3.22 AS dotnet-runtime
 
 # Stage 3b - glibc donor: Ubuntu noble ships glibc 2.39, satisfying dash-mpd-cli's >= 2.38 requirement.
 # This stage is never included in the final image; only individual .so files are bind-mounted from it.
 FROM ubuntu:24.04 AS glibc-source
 
-# Stage 3c - build a static MP4Box binary from GPAC (gpac is not packaged for Alpine 3.20)
-FROM alpine:3.20 AS gpac-builder
+# Stage 3c - build a static MP4Box binary from GPAC (gpac is not packaged for Alpine 3.22)
+FROM alpine:3.22 AS gpac-builder
 
 WORKDIR /src
 RUN apk add --no-cache musl-dev pkgconfig git g++ binutils make zlib-dev zlib-static && \
@@ -67,7 +67,7 @@ RUN apk add --no-cache musl-dev pkgconfig git g++ binutils make zlib-dev zlib-st
     make -j 3
 
 # Stage 4 - Final Image with s6-overlay
-FROM ghcr.io/linuxserver/baseimage-alpine:3.20 AS final
+FROM ghcr.io/linuxserver/baseimage-alpine:3.22 AS final
 
 ARG VERSION
 ARG INFORMATIONAL_VERSION

@@ -3,45 +3,22 @@
 public static class OsInfo
 {
     // ReSharper disable once InconsistentNaming
-    public static OperatingSystemPlatform CurrentOS { get; }
-
-    public static bool IsNotWindows => !IsWindows;
-
-    public static bool IsLinux => CurrentOS == OperatingSystemPlatform.Linux;
-
-    public static bool IsOsx => CurrentOS == OperatingSystemPlatform.Osx;
-
-    public static bool IsWindows => CurrentOS == OperatingSystemPlatform.Windows;
-
-    static OsInfo()
+    public static OperatingSystemPlatform CurrentOS
     {
-        var platform = System.Environment.OSVersion.Platform;
-
-        switch (platform)
+        get
         {
-            case PlatformID.Win32NT:
-            {
-                CurrentOS = OperatingSystemPlatform.Windows;
-                break;
-            }
+            if (OperatingSystem.IsWindows())
+                return OperatingSystemPlatform.Windows;
 
-            case PlatformID.MacOSX:
-            case PlatformID.Unix:
-            {
-                // Sometimes Mac OS reports itself as Unix
-                if (
-                    Directory.Exists("/System/Library/CoreServices/")
-                    && (
-                        File.Exists("/System/Library/CoreServices/SystemVersion.plist")
-                        || File.Exists("/System/Library/CoreServices/ServerVersion.plist")
-                    )
-                )
-                    CurrentOS = OperatingSystemPlatform.Osx;
-                else
-                    CurrentOS = OperatingSystemPlatform.Linux;
+            if (OperatingSystem.IsMacOS())
+                return OperatingSystemPlatform.Osx;
 
-                break;
-            }
+            if (OperatingSystem.IsLinux())
+                return OperatingSystemPlatform.Linux;
+
+            throw new PlatformNotSupportedException();
         }
     }
+
+    public static bool IsWindows => OperatingSystem.IsWindows();
 }

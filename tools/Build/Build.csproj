@@ -13,4 +13,7 @@
         <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.7" />
         <PackageReference Include="Spectre.Console.Cli" Version="0.55.0" />
     </ItemGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\..\src\Environment\Environment.csproj" />
+    </ItemGroup>
 </Project>

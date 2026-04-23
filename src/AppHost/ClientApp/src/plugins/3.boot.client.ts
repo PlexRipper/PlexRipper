@@ -48,6 +48,9 @@ function setupAxios(appConfig: IAppConfig, router: Router) {
 			return config;
 		},
 		(error) => {
+			useGlobalStore().setAppVersion(error.response.headers['x-reaparr-version']);
+			useGlobalStore().setAppPlatform(error.response.headers['x-reaparr-platform']);
+
 			const status = error.response?.status;
 
 			// Redirect to log-in on 401 Unauthorized

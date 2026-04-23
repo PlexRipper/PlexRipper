@@ -1,3 +1,5 @@
+using System.Diagnostics;
+using System.Text.Json;
 using Photino.NET;
 
 namespace Reaparr.AppHost;
@@ -34,6 +36,26 @@ public class DesktopWindow : IDesktopWindow
     public void RegisterWindowClosingHandler(Func<object?, EventArgs, bool> handler)
     {
         _window?.RegisterWindowClosingHandler((sender, args) => handler(sender, args));
+    }
+
+    /// <inheritdoc />
+    public void RegisterDesktopMessageHandler(Action<DesktopMessageDTO> handler)
+    {
+        _window?.RegisterWebMessageReceivedHandler(
+            (_, message) =>
+            {
+                var msg =
+                    JsonSerializer.Deserialize<DesktopMessageDTO>(message, DefaultJsonSerializerOptions.ConfigStandard)
+                    ?? new DesktopMessageDTO { Type = DesktopMessageType.None, Value = "" };
+                handler(msg);
+            }
+        );
+    }
+
+    /// <inheritdoc />
+    public void OpenExternalBrowser(Uri uri)
+    {
+        Process.Start(new ProcessStartInfo(uri.AbsoluteUri) { UseShellExecute = true });
     }
 
     /// <inheritdoc />

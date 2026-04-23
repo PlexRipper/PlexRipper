@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Autofac;
 using Microsoft.AspNetCore.Hosting.Server;
 using Microsoft.AspNetCore.Hosting.Server.Features;
@@ -210,6 +211,91 @@ public class DesktopModeUnitTests : BaseUnitTest<DesktopMode>
     }
 
     [Test]
+    public async Task ShouldRegisterExternalLinkHandler_WhenMainWindowStarts()
+    {
+        // Arrange
+        using var _ = WithEnvironmentVariablesAsync(
+            new Dictionary<string, string?>
+            {
+                [EnvKeys.ReaparrPlatform] = "desktop",
+                [EnvKeys.DotNetEnvironment] = "Production",
+            }
+        );
+
+        var window = new FakeDesktopWindow();
+        var windowFactory = new FakeDesktopWindowFactory(window);
+        var server = CreateServer("http://localhost:5000");
+        var sut = CreateSut(server, windowFactory.Create);
+
+        // Act
+        var result = await sut.StartAsync(CancellationToken);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        window.ExternalLinkHandler.ShouldNotBeNull();
+    }
+
+    [Test]
+    public async Task ShouldOpenExternalBrowser_WhenExternalLinkMessageIsReceived()
+    {
+        // Arrange
+        using var _ = WithEnvironmentVariablesAsync(
+            new Dictionary<string, string?>
+            {
+                [EnvKeys.ReaparrPlatform] = "desktop",
+                [EnvKeys.DotNetEnvironment] = "Production",
+            }
+        );
+
+        var window = new FakeDesktopWindow();
+        var windowFactory = new FakeDesktopWindowFactory(window);
+        var server = CreateServer("http://localhost:5000");
+        var sut = CreateSut(server, windowFactory.Create);
+
+        await sut.StartAsync(CancellationToken);
+
+        // Act
+        window.ExternalLinkHandler!.Invoke(
+            new DesktopMessageDTO
+            {
+                Type = DesktopMessageType.ExternalLink,
+                Value = "https://github.com/Reaparr/Reaparr",
+            }
+        );
+
+        // Assert
+        window.OpenedExternalUrls.ShouldBe([new Uri("https://github.com/Reaparr/Reaparr")]);
+    }
+
+    [Test]
+    public async Task ShouldIgnoreExternalBrowserRequest_WhenExternalLinkMessageUsesUnsafeScheme()
+    {
+        // Arrange
+        using var _ = WithEnvironmentVariablesAsync(
+            new Dictionary<string, string?>
+            {
+                [EnvKeys.ReaparrPlatform] = "desktop",
+                [EnvKeys.DotNetEnvironment] = "Production",
+            }
+        );
+
+        var window = new FakeDesktopWindow();
+        var windowFactory = new FakeDesktopWindowFactory(window);
+        var server = CreateServer("http://localhost:5000");
+        var sut = CreateSut(server, windowFactory.Create);
+
+        await sut.StartAsync(CancellationToken);
+
+        // Act
+        window.ExternalLinkHandler!.Invoke(
+            new DesktopMessageDTO { Type = DesktopMessageType.ExternalLink, Value = "file:///etc/passwd" }
+        );
+
+        // Assert
+        window.OpenedExternalUrls.ShouldBeEmpty();
+    }
+
+    [Test]
     public async Task ShouldCompleteDesktopRuntime_WhenExitCommandRuns()
     {
         // Arrange
@@ -258,11 +344,9 @@ public class DesktopModeUnitTests : BaseUnitTest<DesktopMode>
         return server.Object;
     }
 
-    private static async Task WaitForWindowToCloseToBackground(FakeDesktopWindow window)
+    private async Task WaitForWindowToCloseToBackground(FakeDesktopWindow window)
     {
-        using var cancellationTokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(1));
-        while (!window.IsClosedToBackground)
-            await Task.Delay(TimeSpan.FromMilliseconds(10), cancellationTokenSource.Token);
+        await window.CloseToBackgroundCompletion.Task.WaitAsync(CancellationToken);
     }
 
     private sealed class FakeDesktopWindowFactory
@@ -293,10 +377,16 @@ public class DesktopModeUnitTests : BaseUnitTest<DesktopMode>
         public bool IsDisposed { get; private set; }
         public int WaitForCloseCalls { get; private set; }
         public bool IsInitialized { get; private set; }
+        public List<Uri> OpenedExternalUrls { get; } = [];
+
+        public TaskCompletionSource CloseToBackgroundCompletion { get; } =
+            new(TaskCreationOptions.RunContinuationsAsynchronously);
+
         public TaskCompletionSource MessageLoopStarted { get; } =
             new(TaskCreationOptions.RunContinuationsAsynchronously);
 
         public Func<object?, EventArgs, bool>? WindowClosingHandler { get; private set; }
+        public Action<DesktopMessageDTO>? ExternalLinkHandler { get; private set; }
 
         public void ConfigureWindow() { }
 
@@ -305,9 +395,20 @@ public class DesktopModeUnitTests : BaseUnitTest<DesktopMode>
             WindowClosingHandler = handler;
         }
 
+        public void RegisterDesktopMessageHandler(Action<DesktopMessageDTO> handler)
+        {
+            ExternalLinkHandler = handler;
+        }
+
+        public void OpenExternalBrowser(Uri uri)
+        {
+            OpenedExternalUrls.Add(uri);
+        }
+
         public void CloseToBackground()
         {
             IsClosedToBackground = true;
+            CloseToBackgroundCompletion.SetResult();
         }
 
         public void RestoreFromBackground()

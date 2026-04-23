@@ -57,6 +57,7 @@ public class DesktopMode : IDesktopMode
         _window = _windowFactory(uriResult.Value);
         _window.ConfigureWindow();
         _window.RegisterWindowClosingHandler(OnWindowClosing);
+        _window.RegisterDesktopMessageHandler(HandleDesktopMessages);
 
         return Task.FromResult(Result.Ok());
     }
@@ -107,6 +108,29 @@ public class DesktopMode : IDesktopMode
         var result = await CloseMainWindowAsync(CancellationToken.None);
         if (result.IsFailed)
             result.LogError();
+    }
+
+    private void HandleDesktopMessages(DesktopMessageDTO message)
+    {
+        if (_window is null)
+        {
+            _log.Warning(
+                "Received desktop external link message but the desktop window is not initialized: {@Message}",
+                message
+            );
+            return;
+        }
+
+        switch (message.Type)
+        {
+            case DesktopMessageType.None:
+                break;
+            case DesktopMessageType.ExternalLink:
+                _window.OpenExternalBrowser(new Uri(message.Value));
+                break;
+            default:
+                throw new ArgumentOutOfRangeException();
+        }
     }
 
     private Result<Uri> GetReaparrUri()

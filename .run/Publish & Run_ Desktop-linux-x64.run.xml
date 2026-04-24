@@ -1,7 +1,7 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="Publish &amp; Run: Desktop-linux-x64" type="DotNetProject" factoryName=".NET Project" activateToolWindowBeforeRun="false">
     <option name="EXE_PATH" value="/usr/bin/dotnet" />
-    <option name="PROGRAM_PARAMETERS" value="run --project $PROJECT_DIR$/tools/Build -- desktop run --rid linux-x64 --version 0.36.0-dev.1" />
+    <option name="PROGRAM_PARAMETERS" value="run --project $PROJECT_DIR$/tools/Build -- desktop run --rid linux-x64 --version 0.36.0-dev.1 --informational-version 0.36.0-dev.1 --channel linux-x64-dev" />
     <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
     <option name="PASS_PARENT_ENVS" value="0" />
     <envs>

@@ -16,11 +16,14 @@ internal sealed class DesktopCommandRunner(BuildPaths paths, DesktopCommandSetti
             return;
         }
 
+        var resolvedWorkingDirectory = workingDirectory ?? paths.RootDirectory.FullName;
+        logger.LogInformation("Executing command in {WorkingDirectory}", resolvedWorkingDirectory);
+
         try
         {
             var command = Cli.Wrap(fileName)
                 .WithArguments(arguments)
-                .WithWorkingDirectory(workingDirectory ?? paths.RootDirectory.FullName);
+                .WithWorkingDirectory(resolvedWorkingDirectory);
 
             await foreach (var commandEvent in command.ListenAsync())
             {
@@ -38,7 +41,7 @@ internal sealed class DesktopCommandRunner(BuildPaths paths, DesktopCommandSetti
         catch (CommandExecutionException ex)
         {
             throw new InvalidOperationException(
-                $"Command '{fileName}' failed with exit code {ex.ExitCode}. Full command: {FormatCommand(fileName, arguments)}",
+                $"Command '{fileName}' failed with exit code {ex.ExitCode} in working directory '{resolvedWorkingDirectory}'. Full command: {FormatCommand(fileName, arguments)}",
                 ex
             );
         }
@@ -56,11 +59,20 @@ internal sealed class DesktopCommandRunner(BuildPaths paths, DesktopCommandSetti
             return 0;
         }
 
+        var resolvedWorkingDirectory = workingDirectory ?? paths.RootDirectory.FullName;
+        logger.LogInformation("Executing command in {WorkingDirectory}", resolvedWorkingDirectory);
+
         var result = await Cli.Wrap(fileName)
             .WithArguments(arguments)
-            .WithWorkingDirectory(workingDirectory ?? paths.RootDirectory.FullName)
+            .WithWorkingDirectory(resolvedWorkingDirectory)
             .WithValidation(CommandResultValidation.None)
             .ExecuteAsync();
+
+        logger.LogInformation(
+            "Command exited with code {ExitCode}: {Command}",
+            result.ExitCode,
+            FormatCommand(fileName, arguments)
+        );
 
         return result.ExitCode;
     }

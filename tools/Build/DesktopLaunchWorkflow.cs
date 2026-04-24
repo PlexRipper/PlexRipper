@@ -16,14 +16,25 @@ internal sealed class DesktopLaunchWorkflow(
         if (runtime.RuntimeIdentifier.StartsWith("linux-", StringComparison.OrdinalIgnoreCase) && !settings.SkipPackage)
         {
             var appImagePath = FindLinuxAppImage();
+            logger.LogInformation(
+                "Validated packaged Linux AppImage for {RuntimeIdentifier} at {AppImagePath}; launching published executable for an attached desktop run session",
+                runtime.RuntimeIdentifier,
+                appImagePath
+            );
             await commandRunner.RunCommandAsync("chmod", ["+x", appImagePath]);
-            return await commandRunner.ExecuteCommandAsync(appImagePath, []);
         }
 
         var publishedExecutable = Path.Combine(
             paths.PublishDirectory(runtime.RuntimeIdentifier),
             runtime.MainExecutable
         );
+
+        logger.LogInformation(
+            "Resolved published executable for {RuntimeIdentifier} to {PublishedExecutable}",
+            runtime.RuntimeIdentifier,
+            publishedExecutable
+        );
+
         if (!File.Exists(publishedExecutable))
         {
             throw new FileNotFoundException(
@@ -39,7 +50,20 @@ internal sealed class DesktopLaunchWorkflow(
         {
             if (await commandRunner.CommandExistsAsync("wine"))
             {
-                return await commandRunner.ExecuteCommandAsync("wine", [publishedExecutable]);
+                logger.LogInformation(
+                    "Launching Windows desktop build for {RuntimeIdentifier} with wine using {PublishedExecutable}",
+                    runtime.RuntimeIdentifier,
+                    publishedExecutable
+                );
+
+                var wineExitCode = await commandRunner.ExecuteCommandAsync("wine", [publishedExecutable]);
+                logger.LogInformation(
+                    "Wine launch for {RuntimeIdentifier} exited with code {ExitCode}",
+                    runtime.RuntimeIdentifier,
+                    wineExitCode
+                );
+
+                return wineExitCode;
             }
 
             logger.LogInformation(
@@ -56,12 +80,31 @@ internal sealed class DesktopLaunchWorkflow(
             return 0;
         }
 
-        return await commandRunner.ExecuteCommandAsync(publishedExecutable, []);
+        logger.LogInformation(
+            "Launching published executable for {RuntimeIdentifier} directly from {PublishedExecutable}",
+            runtime.RuntimeIdentifier,
+            publishedExecutable
+        );
+
+        var exitCode = await commandRunner.ExecuteCommandAsync(publishedExecutable, []);
+        logger.LogInformation(
+            "Published executable for {RuntimeIdentifier} exited with code {ExitCode}",
+            runtime.RuntimeIdentifier,
+            exitCode
+        );
+
+        return exitCode;
     }
 
     private string FindLinuxAppImage()
     {
         var artifactDirectory = new DirectoryInfo(packageWorkflow.GetArtifactDirectory());
+        logger.LogInformation(
+            "Searching for packaged Linux AppImage for {RuntimeIdentifier} in {ArtifactDirectory}",
+            runtime.RuntimeIdentifier,
+            artifactDirectory.FullName
+        );
+
         if (!artifactDirectory.Exists)
         {
             throw new DirectoryNotFoundException(
@@ -80,6 +123,12 @@ internal sealed class DesktopLaunchWorkflow(
                 $"No AppImage artifact was produced for runtime '{runtime.RuntimeIdentifier}' in '{artifactDirectory.FullName}'."
             );
         }
+
+        logger.LogInformation(
+            "Selected Linux AppImage for {RuntimeIdentifier}: {AppImagePath}",
+            runtime.RuntimeIdentifier,
+            appImage.FullName
+        );
 
         return appImage.FullName;
     }

@@ -1,5 +1,12 @@
 Reaparr Changelog
 
+# [0.38.0-dev.10](https://github.com/Reaparr/Reaparr/compare/v0.38.0-dev.9...v0.38.0-dev.10) (2026-04-24)
+
+
+### Bug Fixes
+
+* **WebAPI:** Use per-rid release channels for desktop uploads ([3b3122b](https://github.com/Reaparr/Reaparr/commit/3b3122b8386d9f7ef1693947e3ee3341858738ee))
+
 # [0.38.0-dev.9](https://github.com/Reaparr/Reaparr/compare/v0.38.0-dev.8...v0.38.0-dev.9) (2026-04-24)
 
 

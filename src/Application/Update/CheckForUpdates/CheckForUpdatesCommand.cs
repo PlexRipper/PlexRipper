@@ -31,10 +31,7 @@ public class CheckForUpdatesCommandHandler : ICommandHandler<CheckForUpdatesComm
     )
     {
         var releasesResult = await _commandExecutor.Send(new GetGitHubReleasesCommand(), cancellationToken);
-        if (releasesResult.IsFailed)
-            return AppUpdateCheckResult.NoUpdate();
-
-        var releases = releasesResult.Value;
+        var releases = releasesResult.IsSuccess ? releasesResult.Value : [];
 
         // Desktop mode
         if (EnvironmentExtensions.IsDesktopMode())
@@ -52,9 +49,7 @@ public class CheckForUpdatesCommandHandler : ICommandHandler<CheckForUpdatesComm
                     _velopackManager.CurrentVersion
                 );
 
-            Result<UpdateInfo?> updateResult = await Result.Try(async Task () =>
-                await _velopackManager.CheckForUpdatesAsync()
-            );
+            var updateResult = await Result.Try(() => _velopackManager.CheckForUpdatesAsync());
             if (updateResult.IsFailed)
                 return updateResult.LogError();
 
@@ -74,6 +69,9 @@ public class CheckForUpdatesCommandHandler : ICommandHandler<CheckForUpdatesComm
             );
             return Result.Ok(AppUpdateCheckResult.UpdateAvailable(targetVersion, releases));
         }
+
+        if (releasesResult.IsFailed)
+            return AppUpdateCheckResult.NoUpdate();
 
         // Docker Mode
         var isDevRelease = EnvironmentExtensions.IsDevRelease();

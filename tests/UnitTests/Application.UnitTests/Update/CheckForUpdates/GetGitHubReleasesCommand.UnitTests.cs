@@ -178,6 +178,35 @@ public class GetGitHubReleasesCommandUnitTests : BaseUnitTest<GetGitHubReleasesC
     }
 
     [Test]
+    public async Task ShouldSkipMalformedReleaseTags_WhenGitHubContainsNonSemverRelease()
+    {
+        // Arrange
+        var releases = new[]
+        {
+            CreateRelease("dev-latest", isPrerelease: true),
+            CreateRelease("v0.38.0-dev.7", isPrerelease: true),
+        };
+        var sut = Sut;
+
+        Mock.Mock<IHttpClientFactory>()
+            .Setup(x => x.CreateClient(HttpClientModule.GitHubClientName))
+            .Returns(CreateGitHubHttpClient(releases))
+            .Verifiable(Times.Once());
+
+        // Act
+        using var _ = WithEnvironmentVariablesAsync(
+            new Dictionary<string, string?> { [Environment.EnvKeys.InformationalVersion] = "0.38.0-dev.6" }
+        );
+
+        var result = await sut.ExecuteAsync(new GetGitHubReleasesCommand(), CancellationToken);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.Select(x => x.Version).ShouldBe(["v0.38.0-dev.7"]);
+        Mock.Mock<IHttpClientFactory>().Verify();
+    }
+
+    [Test]
     public void ShouldSetGitHubAuthorizationHeader_WhenGitHubTokenIsConfigured()
     {
         // Arrange

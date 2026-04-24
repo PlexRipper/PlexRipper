@@ -42,11 +42,23 @@ public class GetGitHubReleasesCommandHandler
                 cancellationToken
             );
 
-            var currentVersion = ToSemVersion(EnvironmentExtensions.GetInformationalVersion());
+            var currentVersionString = EnvironmentExtensions.GetInformationalVersion();
+            if (!TryParseSemVersion(currentVersionString, out var currentVersion))
+            {
+                _log.Here()
+                    .Warning(
+                        "Failed to parse current informational version {CurrentVersion}; falling back to 0.0.0 for release filtering",
+                        currentVersionString
+                    );
+                currentVersion = new SemVersion(0);
+            }
+
             var isDevBuild = EnvironmentExtensions.IsDevRelease();
             var filteredReleases = (releases ?? [])
+                .Where(x => x.Prerelease == isDevBuild)
                 .Where(x =>
-                    ToSemVersion(x.TagName).ComparePrecedenceTo(currentVersion) > 0 && x.Prerelease == isDevBuild
+                    TryParseReleaseVersion(x.TagName, out var parsedVersion)
+                    && parsedVersion.ComparePrecedenceTo(currentVersion) > 0
                 )
                 .ToList();
 
@@ -59,5 +71,19 @@ public class GetGitHubReleasesCommandHandler
         }
     }
 
-    private SemVersion ToSemVersion(string version) => SemVersion.Parse(version.TrimStart('v'), SemVersionStyles.Any);
+    private bool TryParseReleaseVersion(string version, out SemVersion semVersion)
+    {
+        if (TryParseSemVersion(version, out semVersion))
+            return true;
+
+        _log.Here().Warning("Skipping GitHub release with malformed tag {TagName}", version);
+        return false;
+    }
+
+    private static bool TryParseSemVersion(string version, out SemVersion semVersion)
+    {
+        var success = SemVersion.TryParse(version.TrimStart('v'), SemVersionStyles.Any, out var parsedVersion);
+        semVersion = parsedVersion ?? new SemVersion(0);
+        return success;
+    }
 }

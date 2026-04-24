@@ -604,13 +604,6 @@
           "Serilog.Sinks.TestCorrelator": "[4.0.0, )"
         }
       }
-    },
-    "net10.0/osx-x64": {
-      "System.Security.Cryptography.Pkcs": {
-        "type": "Transitive",
-        "resolved": "10.0.7",
-        "contentHash": "dbdKfF3eA5l+CXiAbDxiCxdezoxeanbue1ck8m49ih1L9uZG6ry8Ul8On6vpragyMDJJP4rQHUY/SWgk66tCYA=="
-      }
     }
   }
 }

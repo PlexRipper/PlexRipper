@@ -1,5 +1,13 @@
 Reaparr Changelog
 
+# [0.38.0-dev.9](https://github.com/Reaparr/Reaparr/compare/v0.38.0-dev.8...v0.38.0-dev.9) (2026-04-24)
+
+
+### Bug Fixes
+
+* **WebAPI:** Patch vulnerable ASP.NET Core packages ([f5aad38](https://github.com/Reaparr/Reaparr/commit/f5aad380886fa0d9808e1ba56d1ed5a20226bdf4))
+* **WebAPI:** Serialize desktop release uploads ([197d51e](https://github.com/Reaparr/Reaparr/commit/197d51e3f335e2038a4936bbc3fe48d516964903))
+
 # [0.38.0-dev.10](https://github.com/Reaparr/Reaparr/compare/v0.38.0-dev.9...v0.38.0-dev.10) (2026-04-24)
 
 

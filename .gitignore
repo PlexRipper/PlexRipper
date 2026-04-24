@@ -166,6 +166,8 @@ fabric.properties
 
 # opencode AI tool config
 config.json
+.opencode/package-lock.json
 
 .test-artifacts
 .artifacts
+.agentbridge/

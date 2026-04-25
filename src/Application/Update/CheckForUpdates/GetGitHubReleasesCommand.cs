@@ -24,7 +24,11 @@ public class GetGitHubReleasesCommandHandler
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly IAppBuildInfo _appBuildInfo;
 
-    public GetGitHubReleasesCommandHandler(ILogger log, IHttpClientFactory httpClientFactory, IAppBuildInfo appBuildInfo)
+    public GetGitHubReleasesCommandHandler(
+        ILogger log,
+        IHttpClientFactory httpClientFactory,
+        IAppBuildInfo appBuildInfo
+    )
     {
         _log = log.ForContext<GetGitHubReleasesCommandHandler>();
         _httpClientFactory = httpClientFactory;

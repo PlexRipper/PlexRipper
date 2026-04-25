@@ -83,7 +83,6 @@ public static class EnvironmentExtensions
         return success ? logLevel : LogEventLevel.Debug;
     }
 
-
     /// <summary>
     /// Returns true if the DOTNET_ENVIRONMENT is set to Development.
     /// </summary>

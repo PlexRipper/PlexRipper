@@ -12,7 +12,11 @@ public static partial class Startup
     /// <param name="app"> The <see cref="IApplicationBuilder"/> instance to configure.</param>
     /// <param name="env"> The <see cref="IWebHostEnvironment"/> instance to configure.</param>
     /// <param name="appBuildInfo"> The <see cref="IAppBuildInfo"/> instance containing application build information to include in response headers.</param>
-    public static void ConfigureApplication(this WebApplication app, IWebHostEnvironment env, IAppBuildInfo appBuildInfo)
+    public static void ConfigureApplication(
+        this WebApplication app,
+        IWebHostEnvironment env,
+        IAppBuildInfo appBuildInfo
+    )
     {
         _log.Here()
             .Information(
@@ -26,7 +30,7 @@ public static partial class Startup
 
         // This has to always be first
         app.UseCors(CorsConfiguration);
-            
+
         app.Use(
             async (ctx, next) =>
             {
@@ -43,7 +47,7 @@ public static partial class Startup
 
                     return Task.CompletedTask;
                 });
-                
+
                 await next();
             }
         );

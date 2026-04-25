@@ -1,10 +1,20 @@
 namespace Reaparr.Environment;
 
+/// <summary>
+/// Provides build-time and assembly-stamped metadata for the running Reaparr application.
+/// </summary>
 public interface IAppBuildInfo
 {
+    /// <summary>
+    /// Gets the application runtime mode stamped into the build metadata, for example <c>desktop</c> or <c>docker</c>.
+    /// </summary>
     string? GetRuntimeMode { get; }
 
-    
+    /// <summary>
+    /// Gets the runtime identifier stamped into the build metadata, for example <c>linux-arm64</c>.
+    /// </summary>
+    string GetRuntimeIdentifier { get; }
+
     /// <summary>
     /// Gets the application release version from <c>VERSION</c>.
     /// This should be the stable product version, for example <c>0.36.1</c>.

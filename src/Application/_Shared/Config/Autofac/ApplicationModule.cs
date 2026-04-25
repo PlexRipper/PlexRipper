@@ -45,11 +45,13 @@ public class ApplicationModule : Module
             .SingleInstance();
 
         builder
-            .Register(context => new UpdateManager(new GithubSource(
-                "https://github.com/Reaparr/Reaparr",
-                EnvironmentExtensions.GetGitHubToken(),
-                context.Resolve<IAppBuildInfo>().IsDevRelease
-            )))
+            .Register(context => new UpdateManager(
+                new GithubSource(
+                    "https://github.com/Reaparr/Reaparr",
+                    EnvironmentExtensions.GetGitHubToken(),
+                    context.Resolve<IAppBuildInfo>().IsDevRelease
+                )
+            ))
             .SingleInstance();
     }
 }

@@ -100,8 +100,8 @@ public partial class BaseUnitTest
             )
             .As<IAuthDbContextFactory>()
             .InstancePerDependency();
-        
-        builder.Register(_ => new Mock<IAppBuildInfo>(MockBehavior.Strict)).As<IAppBuildInfo>().SingleInstance();
+
+        builder.Register(_ => new Mock<IAppBuildInfo>(MockBehavior.Strict).Object).As<IAppBuildInfo>().SingleInstance();
     }
 
     protected void SetupHttpClient(Action<Mock<HttpMessageHandler>>? action = null)

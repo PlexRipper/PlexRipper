@@ -13,7 +13,7 @@ public class DesktopWindow : IDesktopWindow
     private PhotinoWindow? _window;
 
     /// <summary>Initializes a new instance of <see cref="DesktopWindow"/>.</summary>
-    public DesktopWindow(Uri uri, IAppBuildInfo  appBuildInfo)
+    public DesktopWindow(Uri uri, IAppBuildInfo appBuildInfo)
     {
         _uri = uri;
         _appBuildInfo = appBuildInfo;

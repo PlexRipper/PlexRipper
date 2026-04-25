@@ -42,7 +42,7 @@ public class CheckForUpdatesCommandHandler : ICommandHandler<CheckForUpdatesComm
             CurrentVersion = _appBuildInfo.GetInformationalVersion,
             ReleaseNotes = [],
         };
-        
+
         // Desktop mode
         if (_appBuildInfo.IsDesktopMode)
         {
@@ -77,13 +77,15 @@ public class CheckForUpdatesCommandHandler : ICommandHandler<CheckForUpdatesComm
                 RefreshDataType.UpdateAvailable,
                 cancellationToken
             );
-            return Result.Ok(new AppUpdateCheckResult
-            {
-                IsUpdateAvailable = true,
-                NewestVersion = targetVersion,
-                CurrentVersion = _appBuildInfo.GetInformationalVersion,
-                ReleaseNotes = releases,
-            });
+            return Result.Ok(
+                new AppUpdateCheckResult
+                {
+                    IsUpdateAvailable = true,
+                    NewestVersion = targetVersion,
+                    CurrentVersion = _appBuildInfo.GetInformationalVersion,
+                    ReleaseNotes = releases,
+                }
+            );
         }
 
         if (releasesResult.IsFailed)
@@ -103,12 +105,14 @@ public class CheckForUpdatesCommandHandler : ICommandHandler<CheckForUpdatesComm
         _log.Here().Information("Update available: {Version}", latestVersion);
 
         await _notificationHubService.SendRefreshNotificationAsync(RefreshDataType.UpdateAvailable, cancellationToken);
-        return Result.Ok(new AppUpdateCheckResult
-        {
-            IsUpdateAvailable = true,
-            NewestVersion = latestVersion,
-            CurrentVersion = _appBuildInfo.GetInformationalVersion,
-            ReleaseNotes = releases,
-        });
+        return Result.Ok(
+            new AppUpdateCheckResult
+            {
+                IsUpdateAvailable = true,
+                NewestVersion = latestVersion,
+                CurrentVersion = _appBuildInfo.GetInformationalVersion,
+                ReleaseNotes = releases,
+            }
+        );
     }
 }

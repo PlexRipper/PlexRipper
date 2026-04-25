@@ -11,17 +11,57 @@ internal sealed class DesktopLaunchWorkflow(
     ILogger<DesktopLaunchWorkflow> logger
 )
 {
+    private const string LAUNCH_MODE_PACKAGED = "packaged";
+    private const string LAUNCH_MODE_PUBLISHED = "published";
+
     public async Task<int> LaunchAsync()
     {
-        if (runtime.RuntimeIdentifier.StartsWith("linux-", StringComparison.OrdinalIgnoreCase) && !settings.SkipPackage)
+        if (
+            runtime.RuntimeIdentifier.StartsWith("linux-", StringComparison.OrdinalIgnoreCase)
+            && !settings.SkipPackage
+            && string.Equals(settings.LaunchMode, LAUNCH_MODE_PACKAGED, StringComparison.OrdinalIgnoreCase)
+        )
         {
             var appImagePath = FindLinuxAppImage();
             logger.LogInformation(
-                "Validated packaged Linux AppImage for {RuntimeIdentifier} at {AppImagePath}; launching published executable for an attached desktop run session",
+                "Launching packaged Linux AppImage for {RuntimeIdentifier} from {AppImagePath}",
                 runtime.RuntimeIdentifier,
                 appImagePath
             );
+
+            var movedPackages = ClearPendingVelopackPackages(GetVelopackPackageRoot());
+            if (movedPackages.Count > 0)
+            {
+                logger.LogWarning(
+                    "Moved {MovedPackageCount} pending Velopack package(s) to prevent automatic apply on launch: {MovedPackages}",
+                    movedPackages.Count,
+                    string.Join(", ", movedPackages)
+                );
+            }
+
             await commandRunner.RunCommandAsync("chmod", ["+x", appImagePath]);
+
+            var appImageExitCode = await commandRunner.ExecuteCommandAsync(appImagePath, []);
+            logger.LogInformation(
+                "Packaged Linux AppImage for {RuntimeIdentifier} exited with code {ExitCode}",
+                runtime.RuntimeIdentifier,
+                appImageExitCode
+            );
+
+            return appImageExitCode;
+        }
+
+        if (
+            runtime.RuntimeIdentifier.StartsWith("linux-", StringComparison.OrdinalIgnoreCase)
+            && !settings.SkipPackage
+            && !string.Equals(settings.LaunchMode, LAUNCH_MODE_PUBLISHED, StringComparison.OrdinalIgnoreCase)
+            && !string.Equals(settings.LaunchMode, LAUNCH_MODE_PACKAGED, StringComparison.OrdinalIgnoreCase)
+        )
+        {
+            throw new ArgumentException(
+                $"Unsupported launch mode '{settings.LaunchMode}'. Supported values are '{LAUNCH_MODE_PUBLISHED}' and '{LAUNCH_MODE_PACKAGED}'.",
+                nameof(settings.LaunchMode)
+            );
         }
 
         var publishedExecutable = Path.Combine(
@@ -30,9 +70,10 @@ internal sealed class DesktopLaunchWorkflow(
         );
 
         logger.LogInformation(
-            "Resolved published executable for {RuntimeIdentifier} to {PublishedExecutable}",
+            "Resolved published executable for {RuntimeIdentifier} to {PublishedExecutable} (launch mode: {LaunchMode})",
             runtime.RuntimeIdentifier,
-            publishedExecutable
+            publishedExecutable,
+            settings.LaunchMode
         );
 
         if (!File.Exists(publishedExecutable))
@@ -94,6 +135,39 @@ internal sealed class DesktopLaunchWorkflow(
         );
 
         return exitCode;
+    }
+
+    private static string GetVelopackPackageRoot() =>
+        Path.Combine(Path.GetTempPath(), "velopack", "Reaparr");
+
+    private static List<string> ClearPendingVelopackPackages(string velopackPackageRoot)
+    {
+        var packagesDirectory = Path.Combine(velopackPackageRoot, "packages");
+        if (!Directory.Exists(packagesDirectory))
+            return [];
+
+        var pendingPackages = Directory
+            .GetFiles(packagesDirectory, "*.nupkg", SearchOption.TopDirectoryOnly)
+            .OrderBy(path => path, StringComparer.Ordinal)
+            .ToList();
+        if (pendingPackages.Count == 0)
+            return [];
+
+        var holdDirectory = Path.Combine(velopackPackageRoot, "packages-hold");
+        Directory.CreateDirectory(holdDirectory);
+
+        var movedPackages = new List<string>(pendingPackages.Count);
+        foreach (var pendingPackage in pendingPackages)
+        {
+            var destinationPath = Path.Combine(holdDirectory, Path.GetFileName(pendingPackage));
+            if (File.Exists(destinationPath))
+                File.Delete(destinationPath);
+
+            File.Move(pendingPackage, destinationPath);
+            movedPackages.Add(destinationPath);
+        }
+
+        return movedPackages;
     }
 
     private string FindLinuxAppImage()

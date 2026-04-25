@@ -36,4 +36,7 @@ internal sealed class DesktopCommandSettings : CommandSettings
 
     [CommandOption("--preserve-existing-artifacts")]
     public bool PreserveExistingArtifacts { get; init; }
+
+    [CommandOption("--launch-mode <MODE>")]
+    public string LaunchMode { get; init; } = "published";
 }

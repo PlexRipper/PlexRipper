@@ -93,16 +93,9 @@ internal sealed class DesktopPublishWorkflow(
             $"-p:PublishProfile={runtime.PublishProfile}",
             $"-p:Version={settings.Version}",
             $"-p:InformationalVersion={settings.InformationalVersion}",
+            "-p:CSharpier_Bypass=true",
             "--no-restore",
         };
-
-        if (
-            OperatingSystem.IsWindows()
-            || runtime.RuntimeIdentifier.StartsWith("win-", StringComparison.OrdinalIgnoreCase)
-        )
-        {
-            publishArgs.Insert(publishArgs.Count - 1, "-p:CSharpier_Bypass=true");
-        }
 
         await commandRunner.RunCommandAsync("dotnet", publishArgs);
     }

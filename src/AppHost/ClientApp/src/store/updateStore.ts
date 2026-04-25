@@ -1,7 +1,5 @@
 import { acceptHMRUpdate, defineStore } from 'pinia';
-import { computed, reactive, toRefs } from 'vue';
-import { of, type Observable, tap, finalize } from 'rxjs';
-import { switchMap } from 'rxjs/operators';
+import { finalize, of, type Observable, switchMap, tap } from 'rxjs';
 import { updateApi } from '@api';
 import type { ReleaseNoteDTO } from '@api/generated/data-contracts';
 import { RefreshDataType } from '@api/generated/data-contracts';
@@ -15,6 +13,7 @@ interface IUpdateStoreState {
 	releaseNotes: ReleaseNoteDTO[];
 	downloadProgress: number;
 	isDownloading: boolean;
+	isApplyingUpdate: boolean;
 }
 
 export const useUpdateStore = defineStore(StoreNames.UpdateStore, () => {
@@ -24,6 +23,7 @@ export const useUpdateStore = defineStore(StoreNames.UpdateStore, () => {
 		releaseNotes: [],
 		downloadProgress: 0,
 		isDownloading: false,
+		isApplyingUpdate: false,
 	};
 
 	const state = reactive<IUpdateStoreState>(cloneDeep(defaultState));
@@ -37,9 +37,6 @@ export const useUpdateStore = defineStore(StoreNames.UpdateStore, () => {
 
 			signalrStore.getAppUpdateDownloadProgress().subscribe((data) => {
 				state.downloadProgress = data.percentage;
-				if (data.isComplete) {
-					state.isDownloading = false;
-				}
 			});
 
 			return actions.checkForUpdate().pipe(switchMap(() => of({ name: StoreNames.UpdateStore, isSuccess: true })));
@@ -62,7 +59,27 @@ export const useUpdateStore = defineStore(StoreNames.UpdateStore, () => {
 			);
 		},
 		applyUpdate() {
-			return updateApi.applyUpdateEndpoint();
+			state.isApplyingUpdate = true;
+			return updateApi.applyUpdateEndpoint().pipe(
+				finalize(() => {
+					state.isApplyingUpdate = false;
+				}),
+			);
+		},
+		downloadAndApplyUpdate() {
+			state.isDownloading = true;
+			state.isApplyingUpdate = false;
+			state.downloadProgress = 0;
+			return updateApi.downloadUpdateEndpoint().pipe(
+				tap(() => {
+					state.isApplyingUpdate = true;
+				}),
+				switchMap(() => updateApi.applyUpdateEndpoint()),
+				finalize(() => {
+					state.isDownloading = false;
+					state.isApplyingUpdate = false;
+				}),
+			);
 		},
 		$reset() {
 			Object.assign(state, cloneDeep(defaultState));

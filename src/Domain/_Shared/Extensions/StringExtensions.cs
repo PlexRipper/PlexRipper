@@ -31,7 +31,8 @@ public static partial class StringExtensions
 
     public static string GetActualCasing(this string path)
     {
-        if (!OsInfo.IsWindows || path.StartsWith("\\"))
+        IAppBuildInfo buildInfo = new AppBuildInfo();
+        if (!buildInfo.IsWindows || path.StartsWith("\\"))
             return path;
 
         if (Directory.Exists(path) && (File.GetAttributes(path) & FileAttributes.Directory) == FileAttributes.Directory)
@@ -65,14 +66,13 @@ public static partial class StringExtensions
         bool includeUppercase = true,
         bool includeNumeric = true,
         bool includeSpecial = true
-    ) =>
-        new Password(
-            includeLowercase: includeLowercase,
-            includeUppercase: includeUppercase,
-            includeNumeric: includeNumeric,
-            includeSpecial: includeSpecial,
-            passwordLength: passwordLength
-        ).Next();
+    ) => new Password(
+        includeLowercase: includeLowercase,
+        includeUppercase: includeUppercase,
+        includeNumeric: includeNumeric,
+        includeSpecial: includeSpecial,
+        passwordLength: passwordLength
+    ).Next();
 
     public static bool IsIpAddress(this string ipAddress) => IPAddress.TryParse(ipAddress, out var _);
 
@@ -219,22 +219,22 @@ public static partial class StringExtensions
             {
                 var bytes = ipAddress.GetAddressBytes();
                 return bytes[0] == 10
-                    || // 10.x.x.x
-                    (bytes[0] == 172 && bytes[1] >= 16 && bytes[1] <= 31)
-                    || // 172.16.x.x - 172.31.x.x
-                    (bytes[0] == 192 && bytes[1] == 168)
-                    || // 192.168.x.x
-                    ipAddress.Equals(IPAddress.Loopback); // 127.0.0.1
+                       || // 10.x.x.x
+                       (bytes[0] == 172 && bytes[1] >= 16 && bytes[1] <= 31)
+                       || // 172.16.x.x - 172.31.x.x
+                       (bytes[0] == 192 && bytes[1] == 168)
+                       || // 192.168.x.x
+                       ipAddress.Equals(IPAddress.Loopback); // 127.0.0.1
             }
 
             // Check if it's an IPv6 local or loopback address
             if (ipAddress.AddressFamily == AddressFamily.InterNetworkV6)
             {
                 return ipAddress.IsIPv6LinkLocal
-                    || // fe80::/10 range
-                    ipAddress.IsIPv6SiteLocal
-                    || // fec0::/10 range (deprecated but sometimes still used)
-                    ipAddress.Equals(IPAddress.IPv6Loopback); // ::1
+                       || // fe80::/10 range
+                       ipAddress.IsIPv6SiteLocal
+                       || // fec0::/10 range (deprecated but sometimes still used)
+                       ipAddress.Equals(IPAddress.IPv6Loopback); // ::1
             }
         }
 

@@ -43,4 +43,14 @@ public interface IAppBuildInfo
     /// Returns true if the current version indicates a development build (contains <c>dev</c>).
     /// </summary>
     bool IsDevRelease { get; }
+
+    /// <summary>
+    /// Gets the current operating system platform as an <see cref="OperatingSystemPlatform"/> enum value.
+    /// </summary>
+    OperatingSystemPlatform CurrentOS { get; }
+
+    /// <summary>
+    /// Returns true if the current operating system is Windows.
+    /// </summary>
+    bool IsWindows { get; }
 }

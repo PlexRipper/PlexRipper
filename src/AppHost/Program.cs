@@ -28,22 +28,23 @@ public class Program
             if (!EnvironmentExtensions.IsIntegrationTestMode())
                 LogFactory.SetupLogging(signalRLogConfig, EnvironmentExtensions.GetLogLevel());
 
-            // Must be first after logging: handles installer hooks (install, uninstall, update) and exits early when invoked by the Velopack installer.
-            VelopackApp.Build().Run();
-
-            FluentResultConfiguration.Setup();
+            _log.Here().Information("Initiating boot process");
 
             _log.Here()
                 .Information(
-                    "Currently running {Channel} version {Version} on {CurrentOS}",
+                    "Currently running {Channel}, version {Version} on {CurrentOS} with {RuntimeIdentifier}",
                     appBuildInfo.IsDevRelease ? "DEVELOPMENT" : "STABLE",
                     appBuildInfo.GetInformationalVersion,
-                    OsInfo.CurrentOS
+                    appBuildInfo.CurrentOS,
+                    appBuildInfo.GetRuntimeIdentifier
                 );
 
             AppExtensions.LogIdentity();
 
-            _log.Here().Information("Initiating boot process");
+            // Must be first after logging: handles installer hooks (install, uninstall, update) and exits early when invoked by the Velopack installer.
+            VelopackApp.Build().Run();
+
+            FluentResultConfiguration.Setup();
 
             var builder = WebApplication.CreateBuilder(args);
 

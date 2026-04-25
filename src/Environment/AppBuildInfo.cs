@@ -28,6 +28,27 @@ public class AppBuildInfo : IAppBuildInfo
     /// <inheritdoc/>
     public bool IsDevRelease => GetInformationalVersion.Contains("dev", StringComparison.OrdinalIgnoreCase);
 
+    /// <inheritdoc/>
+    public OperatingSystemPlatform CurrentOS
+    {
+        get
+        {
+            if (OperatingSystem.IsWindows())
+                return OperatingSystemPlatform.Windows;
+
+            if (OperatingSystem.IsMacOS())
+                return OperatingSystemPlatform.Osx;
+
+            if (OperatingSystem.IsLinux())
+                return OperatingSystemPlatform.Linux;
+
+            throw new PlatformNotSupportedException();
+        }
+    }
+
+    /// <inheritdoc/>
+    public bool IsWindows => OperatingSystem.IsWindows();
+
     /// <summary>
     /// Initializes a new instance of <see cref="AppBuildInfo"/> by reading build metadata from the entry assembly.
     /// </summary>
@@ -43,9 +64,10 @@ public class AppBuildInfo : IAppBuildInfo
             assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion ?? "0.0.0";
     }
 
-    private string GetAssemblyMetadataValue(string key) =>
-        _attributes
-            .FirstOrDefault(attribute => string.Equals(attribute.Key, key, StringComparison.OrdinalIgnoreCase))
-            ?.Value
-        ?? string.Empty;
+    private string GetAssemblyMetadataValue(string key) => _attributes
+                                                               .FirstOrDefault(attribute =>
+                                                                   string.Equals(attribute.Key, key,
+                                                                       StringComparison.OrdinalIgnoreCase))
+                                                               ?.Value
+                                                           ?? "unknown";
 }

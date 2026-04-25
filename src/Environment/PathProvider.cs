@@ -95,7 +95,7 @@ public class PathProvider : IPathProvider
             if (_appBuildInfo.IsDesktopMode)
                 return Path.Combine(DataDirectory, DefaultDownloadsFolderName);
 
-            throw new PlatformNotSupportedException($"Platform: {OsInfo.CurrentOS} is not supported");
+            throw new PlatformNotSupportedException($"Platform: {_appBuildInfo.CurrentOS} is not supported");
         }
     }
 
@@ -120,7 +120,7 @@ public class PathProvider : IPathProvider
             if (_appBuildInfo.IsDesktopMode)
                 return Path.Combine(DataDirectory, DefaultMovieFolderName);
 
-            throw new PlatformNotSupportedException($"Platform: {OsInfo.CurrentOS} is not supported");
+            throw new PlatformNotSupportedException($"Platform: {_appBuildInfo.CurrentOS} is not supported");
         }
     }
 
@@ -145,7 +145,7 @@ public class PathProvider : IPathProvider
             if (_appBuildInfo.IsDesktopMode)
                 return Path.Combine(DataDirectory, DefaultTvShowsFolderName);
 
-            throw new PlatformNotSupportedException($"Platform: {OsInfo.CurrentOS} is not supported");
+            throw new PlatformNotSupportedException($"Platform: {_appBuildInfo.CurrentOS} is not supported");
         }
     }
 
@@ -170,7 +170,7 @@ public class PathProvider : IPathProvider
             if (_appBuildInfo.IsDesktopMode)
                 return Path.Combine(DataDirectory, DefaultMusicFolderName);
 
-            throw new PlatformNotSupportedException($"Platform: {OsInfo.CurrentOS} is not supported");
+            throw new PlatformNotSupportedException($"Platform: {_appBuildInfo.CurrentOS} is not supported");
         }
     }
 
@@ -195,7 +195,7 @@ public class PathProvider : IPathProvider
             if (_appBuildInfo.IsDesktopMode)
                 return Path.Combine(DataDirectory, DefaultPhotosFolderName);
 
-            throw new PlatformNotSupportedException($"Platform: {OsInfo.CurrentOS} is not supported");
+            throw new PlatformNotSupportedException($"Platform: {_appBuildInfo.CurrentOS} is not supported");
         }
     }
 
@@ -220,7 +220,7 @@ public class PathProvider : IPathProvider
             if (_appBuildInfo.IsDesktopMode)
                 return Path.Combine(DataDirectory, DefaultOtherFolderName);
 
-            throw new PlatformNotSupportedException($"Platform: {OsInfo.CurrentOS} is not supported");
+            throw new PlatformNotSupportedException($"Platform: {_appBuildInfo.CurrentOS} is not supported");
         }
     }
 
@@ -245,12 +245,11 @@ public class PathProvider : IPathProvider
             if (_appBuildInfo.IsDesktopMode)
                 return Path.Combine(DataDirectory, DefaultGamesFolderName);
 
-            throw new PlatformNotSupportedException($"Platform: {OsInfo.CurrentOS} is not supported");
+            throw new PlatformNotSupportedException($"Platform: {_appBuildInfo.CurrentOS} is not supported");
         }
     }
 
     #endregion
-
 
     /// <summary>
     /// Gets the directory that stores Reaparr's own application state, such as settings, the SQLite database, backups, and logs.
@@ -270,7 +269,7 @@ public class PathProvider : IPathProvider
             if (_appBuildInfo.IsDesktopMode)
                 return Path.Combine(BaseDirectory.ConfigHome, DefaultReaparrFolderName);
 
-            throw new PlatformNotSupportedException($"Platform: {OsInfo.CurrentOS} is not supported");
+            throw new PlatformNotSupportedException($"Platform: {_appBuildInfo.CurrentOS} is not supported");
         }
     }
 
@@ -292,12 +291,14 @@ public class PathProvider : IPathProvider
     /// <summary>
     /// Gets the full path to the SQLite shared-memory sidecar file.
     /// </summary>
+
     // ReSharper disable once InconsistentNaming
     public string Database_SHM_Path => Path.Combine(ConfigDirectory, DatabaseShmName);
 
     /// <summary>
     /// Gets the full path to the SQLite write-ahead log sidecar file.
     /// </summary>
+
     // ReSharper disable once InconsistentNaming
     public string Database_WAL_Path => Path.Combine(ConfigDirectory, DatabaseWalName);
 
@@ -329,7 +330,7 @@ public class PathProvider : IPathProvider
             if (_appBuildInfo.IsDesktopMode)
                 return Path.Combine(UserDirectory.DownloadDir, DefaultReaparrFolderName);
 
-            throw new PlatformNotSupportedException($"Platform: {OsInfo.CurrentOS} is not supported");
+            throw new PlatformNotSupportedException($"Platform: {_appBuildInfo.CurrentOS} is not supported");
         }
     }
 

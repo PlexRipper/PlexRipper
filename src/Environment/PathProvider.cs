@@ -291,14 +291,12 @@ public class PathProvider : IPathProvider
     /// <summary>
     /// Gets the full path to the SQLite shared-memory sidecar file.
     /// </summary>
-
     // ReSharper disable once InconsistentNaming
     public string Database_SHM_Path => Path.Combine(ConfigDirectory, DatabaseShmName);
 
     /// <summary>
     /// Gets the full path to the SQLite write-ahead log sidecar file.
     /// </summary>
-
     // ReSharper disable once InconsistentNaming
     public string Database_WAL_Path => Path.Combine(ConfigDirectory, DatabaseWalName);
 

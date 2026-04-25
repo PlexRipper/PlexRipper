@@ -64,10 +64,9 @@ public class AppBuildInfo : IAppBuildInfo
             assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion ?? "0.0.0";
     }
 
-    private string GetAssemblyMetadataValue(string key) => _attributes
-                                                               .FirstOrDefault(attribute =>
-                                                                   string.Equals(attribute.Key, key,
-                                                                       StringComparison.OrdinalIgnoreCase))
-                                                               ?.Value
-                                                           ?? "unknown";
+    private string GetAssemblyMetadataValue(string key) =>
+        _attributes
+            .FirstOrDefault(attribute => string.Equals(attribute.Key, key, StringComparison.OrdinalIgnoreCase))
+            ?.Value
+        ?? "unknown";
 }

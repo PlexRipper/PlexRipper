@@ -16,26 +16,24 @@ public interface IAppBuildInfo
     string GetRuntimeIdentifier { get; }
 
     /// <summary>
-    /// Gets the application release version from <c>VERSION</c>.
+    /// Gets the application release version from the entry assembly version metadata.
     /// This should be the stable product version, for example <c>0.36.1</c>.
-    /// Falls back to <c>0.0.0</c> when the environment variable is not set.
     /// </summary>
     string GetVersion { get; }
 
     /// <summary>
-    /// Gets the application informational version from <c>INFORMATIONAL_VERSION</c>.
-    /// This is typically a more detailed build string than <c>VERSION</c>, for example <c>0.36.0-dev.1</c>.
-    /// Falls back to <c>0.0.0</c> when the environment variable is not set.
+    /// Gets the application informational version from the entry assembly informational version metadata.
+    /// This is typically a more detailed build string than <c>GetVersion</c>, for example <c>0.36.0-dev.1</c>.
     /// </summary>
     string GetInformationalVersion { get; }
 
     /// <summary>
-    /// Gets the application running mode and checks if it is Desktop
+    /// Returns true if the application runtime mode is desktop.
     /// </summary>
     bool IsDesktopMode { get; }
 
     /// <summary>
-    /// Gets the application running mode and checks if it is Docker
+    /// Returns true if the application runtime mode is docker.
     /// </summary>
     bool IsDockerMode { get; }
 

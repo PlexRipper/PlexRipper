@@ -30,13 +30,20 @@ public static class EnvironmentExtensions
     public static string? GetOtherPath() => GetEnvironmentVariable(EnvKeys.ReaparrOtherPath);
 
     public static string? GetGamesPath() => GetEnvironmentVariable(EnvKeys.ReaparrGamesPath);
+    
+    public static string? GetAppImage() => GetEnvironmentVariable(EnvKeys.Appimage);
 
-    public static string GetReaparrMode() =>
-        GetEnvironmentVariable(EnvKeys.ReaparrPlatform)?.ToLowerInvariant() switch
-        {
-            "desktop" => "desktop",
-            _ => "docker",
-        };
+    public static string GetReaparrMode()
+    {
+        var configuredMode = GetEnvironmentVariable(EnvKeys.ReaparrPlatform)?.ToLowerInvariant();
+        if (configuredMode == "desktop")
+            return "desktop";
+
+        if (!string.IsNullOrWhiteSpace(GetAppImage()))
+            return "desktop";
+
+        return "docker";
+    }
 
     public static bool IsDesktopMode() => GetReaparrMode() == "desktop";
 

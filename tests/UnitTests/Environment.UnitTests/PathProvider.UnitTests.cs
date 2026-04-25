@@ -261,6 +261,30 @@ public class PathProviderUnitTests
     }
 
     [Test]
+    public void ShouldTreatMountedAppImageAsDesktop_WhenPlatformEnvVarIsUnset()
+    {
+        // Arrange
+        const string home = "/home/appimage-user";
+
+        WithEnvironment(
+            null,
+            null,
+            null,
+            home,
+            "/unused/appdata",
+            () =>
+            {
+                // Assert
+                PathProvider.DataDirectory.ShouldBe(
+                    Path.Combine(home, PathProvider.DefaultDownloadsFolderName, PathProvider.DefaultReaparrFolderName)
+                );
+                PathProvider.ConfigDirectory.ShouldBe(GetExpectedDesktopConfigPath(home, "/unused/appdata"));
+            },
+            appImagePath: "/tmp/.mount_Reaparr123/Reaparr.AppImage"
+        );
+    }
+
+    [Test]
     public void ShouldTreatWhitespaceAroundDesktopPlatformAsDesktop_WhenValueIsTrimmed()
     {
         // Arrange
@@ -605,7 +629,8 @@ public class PathProviderUnitTests
         string? musicPath = null,
         string? photosPath = null,
         string? otherPath = null,
-        string? gamesPath = null
+        string? gamesPath = null,
+        string? appImagePath = null
     )
     {
         var originalValues = new Dictionary<string, string?>
@@ -622,6 +647,7 @@ public class PathProviderUnitTests
             [EnvKeys.ReaparrGamesPath] = System.Environment.GetEnvironmentVariable(EnvKeys.ReaparrGamesPath),
             [EnvKeys.XdgConfigHome] = System.Environment.GetEnvironmentVariable(EnvKeys.XdgConfigHome),
             [EnvKeys.XdgDownloadDir] = System.Environment.GetEnvironmentVariable(EnvKeys.XdgDownloadDir),
+            [EnvKeys.Appimage] = System.Environment.GetEnvironmentVariable(EnvKeys.Appimage),
         };
 
         try
@@ -654,6 +680,7 @@ public class PathProviderUnitTests
                 EnvKeys.XdgDownloadDir,
                 home is not null ? Path.Combine(home, PathProvider.DefaultDownloadsFolderName) : null
             );
+            System.Environment.SetEnvironmentVariable(EnvKeys.Appimage, appImagePath);
 
             assertion();
         }
@@ -695,6 +722,7 @@ public class PathProviderUnitTests
             );
             System.Environment.SetEnvironmentVariable(EnvKeys.XdgConfigHome, originalValues[EnvKeys.XdgConfigHome]);
             System.Environment.SetEnvironmentVariable(EnvKeys.XdgDownloadDir, originalValues[EnvKeys.XdgDownloadDir]);
+            System.Environment.SetEnvironmentVariable(EnvKeys.Appimage, originalValues[EnvKeys.Appimage]);
         }
     }
 }

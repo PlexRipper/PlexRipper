@@ -13,10 +13,17 @@ public sealed class AuthDbContext : IdentityDbContext<AppUser>, IAuthDbContext, 
     public DbSet<DataProtectionKey> DataProtectionKeys { get; set; }
     public DbSet<DownloadClientSession> DownloadClientSessions { get; set; }
 
+    public AuthDbContext(IPathProvider pathProvider)
+    {
+        _pathProvider = pathProvider;
+        DatabaseName = pathProvider.DatabaseName;
+    }
+
     public AuthDbContext(DbContextOptions<AuthDbContext> options, IPathProvider pathProvider)
         : base(options)
     {
         _pathProvider = pathProvider;
+        DatabaseName = pathProvider.DatabaseName;
     }
 
     public AuthDbContext(DbContextOptions<AuthDbContext> options, IPathProvider pathProvider, string databaseName)

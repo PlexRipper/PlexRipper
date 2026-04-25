@@ -6,10 +6,10 @@ public static class IntegrationTestFileSystemSandbox
     private const string SANDBOX_FOLDER = ".test-artifacts";
     private const string INTEGRATION_SANDBOX_FOLDER = "integration-fs";
 
-    public static string GetSandboxFolder(string memoryDbName) =>
-        Path.Combine(GetProjectRoot(), SANDBOX_FOLDER, INTEGRATION_SANDBOX_FOLDER, memoryDbName);
+    public static string GetSandboxFolder(string memoryDbName) => Path.Combine(GetProjectRoot(), SANDBOX_FOLDER,
+        INTEGRATION_SANDBOX_FOLDER, memoryDbName);
 
-    public static string Create(string memoryDbName, ILogger log)
+    public static string Create(string memoryDbName, ILogger log, IPathProvider pathProvider)
     {
         _log = log.ForContext(typeof(IntegrationTestFileSystemSandbox));
 
@@ -17,7 +17,6 @@ public static class IntegrationTestFileSystemSandbox
         {
             var sandboxPath = Path.GetFullPath(GetSandboxFolder(memoryDbName));
             Directory.CreateDirectory(sandboxPath);
-            IPathProvider pathProvider = new PathProvider();
 
             var pathsToCreate = new[]
             {

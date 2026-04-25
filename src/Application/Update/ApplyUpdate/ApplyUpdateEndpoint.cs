@@ -5,14 +5,16 @@ namespace Reaparr.Application;
 /// </summary>
 public class ApplyUpdateEndpoint : BaseEndpointWithoutRequest
 {
+    private readonly IAppBuildInfo _appBuildInfo;
     private readonly UpdateManager _velopackManager;
     private readonly ILogger _log;
 
     public override string EndpointPath => ApiRoutes.UpdateController + "/execute";
 
-    public ApplyUpdateEndpoint(ILogger log, UpdateManager velopackManager)
+    public ApplyUpdateEndpoint(ILogger log, IAppBuildInfo appBuildInfo, UpdateManager velopackManager)
     {
         _log = log.ForContext<ApplyUpdateEndpoint>();
+        _appBuildInfo = appBuildInfo;
         _velopackManager = velopackManager;
     }
 
@@ -29,7 +31,7 @@ public class ApplyUpdateEndpoint : BaseEndpointWithoutRequest
     {
         _log.Here().DebugApiCall(HttpContext);
 
-        if (!EnvironmentExtensions.IsDesktopMode())
+        if (!_appBuildInfo.IsDesktopMode)
         {
             _log.Here().Debug("Skipping update apply — not running in desktop mode");
             await SendFluentResult(Result.Fail("Desktop updates are not supported in the current runtime mode"), ct);

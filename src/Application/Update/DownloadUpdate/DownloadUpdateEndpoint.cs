@@ -6,14 +6,16 @@ namespace Reaparr.Application;
 public class DownloadUpdateEndpoint : BaseEndpointWithoutRequest
 {
     private readonly UpdateManager _velopackManager;
+    private readonly IAppBuildInfo _appBuildInfo;
     private readonly IProgressHubService _progressHub;
     private readonly ILogger _log;
 
     public override string EndpointPath => ApiRoutes.UpdateController + "/DownloadUpdate";
 
-    public DownloadUpdateEndpoint(ILogger log, UpdateManager velopackManager, IProgressHubService progressHub)
+    public DownloadUpdateEndpoint(ILogger log, IAppBuildInfo appBuildInfo, UpdateManager velopackManager, IProgressHubService progressHub)
     {
         _log = log.ForContext<DownloadUpdateEndpoint>();
+        _appBuildInfo = appBuildInfo;
         _velopackManager = velopackManager;
         _progressHub = progressHub;
     }
@@ -31,7 +33,7 @@ public class DownloadUpdateEndpoint : BaseEndpointWithoutRequest
     {
         _log.Here().DebugApiCall(HttpContext);
 
-        if (!EnvironmentExtensions.IsDesktopMode())
+        if (!_appBuildInfo.IsDesktopMode)
         {
             _log.Here().Debug("Skipping update download — not running in desktop mode");
             await SendFluentResult(Result.Fail("Desktop updates are not supported in the current runtime mode"), ct);

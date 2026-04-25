@@ -9,18 +9,21 @@ public class CheckForUpdatesCommandHandler : ICommandHandler<CheckForUpdatesComm
 {
     private readonly ILogger _log;
     private readonly ICommandExecutor _commandExecutor;
+    private readonly IAppBuildInfo _appBuildInfo;
     private readonly UpdateManager _velopackManager;
     private readonly INotificationHubService _notificationHubService;
 
     public CheckForUpdatesCommandHandler(
         ILogger log,
         ICommandExecutor commandExecutor,
+        IAppBuildInfo appBuildInfo,
         UpdateManager velopackManager,
         INotificationHubService notificationHubService
     )
     {
         _log = log.ForContext<CheckForUpdatesCommandHandler>();
         _commandExecutor = commandExecutor;
+        _appBuildInfo = appBuildInfo;
         _velopackManager = velopackManager;
         _notificationHubService = notificationHubService;
     }
@@ -34,7 +37,7 @@ public class CheckForUpdatesCommandHandler : ICommandHandler<CheckForUpdatesComm
         var releases = releasesResult.IsSuccess ? releasesResult.Value : [];
 
         // Desktop mode
-        if (EnvironmentExtensions.IsDesktopMode())
+        if (_appBuildInfo.IsDesktopMode)
         {
             if (!_velopackManager.IsInstalled)
             {

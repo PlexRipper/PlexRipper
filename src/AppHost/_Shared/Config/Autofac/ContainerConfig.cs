@@ -14,6 +14,9 @@ public static class ContainerConfig
     /// <param name="builder">The builder through which components can be registered.</param>
     public static void ConfigureContainer(ContainerBuilder builder)
     {
+        // Domain
+        builder.RegisterModule<EnvironmentModule>();
+        
         // Application
         builder.RegisterModule<ApplicationModule>();
         builder.RegisterModule<PublicApiModule>();

@@ -1,4 +1,5 @@
 using NuGet.Versioning;
+using Reaparr.Environment;
 using Velopack;
 using Velopack.Locators;
 using Velopack.Sources;
@@ -45,6 +46,7 @@ public class CheckForUpdatesCommandUnitTests : BaseUnitTest<CheckForUpdatesComma
         var sut = new CheckForUpdatesCommandHandler(
             Log,
             Mock.Mock<ICommandExecutor>().Object,
+            new AppBuildInfo(),
             mockManager.Object,
             Mock.Mock<INotificationHubService>().Object
         );

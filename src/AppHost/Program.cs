@@ -8,7 +8,7 @@ namespace Reaparr.AppHost;
 /// </summary>
 public class Program
 {
-    private static readonly Serilog.ILogger _log = LogFactory.Create<Program>();
+    private static readonly Serilog.ILogger _log = Log.Logger.ForContext(typeof(Program));
 
     /// <summary>
     ///  The main method entry point for the application.
@@ -19,6 +19,7 @@ public class Program
     {
         try
         {
+            var appBuildInfo = new AppBuildInfo();
             var pathProvider = new PathProvider();
             var logBuffer = new LogBufferService();
             var signalRLogConfig = new SignalRLogConfig(pathProvider, logBuffer);
@@ -71,7 +72,7 @@ public class Program
 
             app.ConfigureApplication(app.Environment);
 
-            if (EnvironmentExtensions.IsDesktopMode() && !EnvironmentExtensions.IsIntegrationTestMode())
+            if (appBuildInfo.IsDesktopMode && !EnvironmentExtensions.IsIntegrationTestMode())
             {
                 var desktopLifecycleResult = await RunDesktopLifecycleAsync(app);
                 if (desktopLifecycleResult.IsFailed)

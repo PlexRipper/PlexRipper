@@ -5,6 +5,7 @@ namespace Reaparr.Environment;
 public static class EnvironmentExtensions
 {
     private static readonly AsyncLocal<IReadOnlyDictionary<string, string?>?> _testOverrides = new();
+    private static readonly IAppBuildInfo _appBuildInfo = new AppBuildInfo();
 
     #region Getters
 
@@ -30,24 +31,27 @@ public static class EnvironmentExtensions
     public static string? GetOtherPath() => GetEnvironmentVariable(EnvKeys.ReaparrOtherPath);
 
     public static string? GetGamesPath() => GetEnvironmentVariable(EnvKeys.ReaparrGamesPath);
-    
+
     public static string? GetAppImage() => GetEnvironmentVariable(EnvKeys.Appimage);
 
     public static string GetReaparrMode()
     {
+        var stampedMode = _appBuildInfo.GetRuntimeMode?.ToLowerInvariant();
+        if (stampedMode is "desktop" or "docker")
+            return stampedMode;
+
         var configuredMode = GetEnvironmentVariable(EnvKeys.ReaparrPlatform)?.ToLowerInvariant();
         if (configuredMode == "desktop")
             return "desktop";
+
+        if (configuredMode == "docker")
+            return "docker";
 
         if (!string.IsNullOrWhiteSpace(GetAppImage()))
             return "desktop";
 
         return "docker";
     }
-
-    public static bool IsDesktopMode() => GetReaparrMode() == "desktop";
-
-    public static bool IsDockerMode() => GetReaparrMode() == "docker";
 
     /// <summary>
     /// Gets the name of the HTTP header used for bearer/auth token passing. Defaults to <c>X-Auth-User</c>.

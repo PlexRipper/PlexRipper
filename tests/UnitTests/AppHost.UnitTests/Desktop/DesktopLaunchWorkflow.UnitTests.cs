@@ -1,4 +1,3 @@
-using System.Reflection;
 using Reaparr.Build;
 
 namespace Reaparr.AppHost.UnitTests;
@@ -43,16 +42,8 @@ public class DesktopLaunchWorkflowUnitTests
 
     private static IReadOnlyList<string> ClearPendingVelopackPackages(string packageRoot)
     {
-        var methodInfo = typeof(DesktopLaunchWorkflow).GetMethod(
-            "ClearPendingVelopackPackages",
-            BindingFlags.NonPublic | BindingFlags.Static
-        );
-
-        methodInfo.ShouldNotBeNull();
-
-        var result = methodInfo.Invoke(null, [packageRoot]);
-        result.ShouldBeOfType<List<string>>();
-
-        return (List<string>)result;
+        IReadOnlyList<string> movedPackages = DesktopLaunchWorkflow.ClearPendingVelopackPackages(packageRoot);
+        movedPackages.ShouldNotBeNull();
+        return movedPackages;
     }
 }

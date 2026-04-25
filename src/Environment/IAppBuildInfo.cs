@@ -8,24 +8,24 @@ public interface IAppBuildInfo
     /// <summary>
     /// Gets the application runtime mode stamped into the build metadata, for example <c>desktop</c> or <c>docker</c>.
     /// </summary>
-    string? GetRuntimeMode { get; }
+    string? RuntimeMode { get; }
 
     /// <summary>
     /// Gets the runtime identifier stamped into the build metadata, for example <c>linux-arm64</c>.
     /// </summary>
-    string GetRuntimeIdentifier { get; }
+    string RuntimeIdentifier { get; }
 
     /// <summary>
     /// Gets the application release version from the entry assembly version metadata.
     /// This should be the stable product version, for example <c>0.36.1</c>.
     /// </summary>
-    string GetVersion { get; }
+    string Version { get; }
 
     /// <summary>
     /// Gets the application informational version from the entry assembly informational version metadata.
-    /// This is typically a more detailed build string than <c>GetVersion</c>, for example <c>0.36.0-dev.1</c>.
+    /// This is typically a more detailed build string than <c>Version</c>, for example <c>0.36.0-dev.1</c>.
     /// </summary>
-    string GetInformationalVersion { get; }
+    string InformationalVersion { get; }
 
     /// <summary>
     /// Returns true if the application runtime mode is desktop.

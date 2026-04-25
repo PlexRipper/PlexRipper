@@ -12,7 +12,7 @@ internal sealed class NSwagGlobalHeaders : IOperationProcessor
         // NOTE: See "EndpointExtensions.AddResponseHeaders" for globally added response headers
         foreach (var response in context.OperationDescription.Operation.Responses.Values)
         {
-            response.Headers["X-Reaparr-Version"] = new OpenApiHeader
+            response.Headers[ReaparrHeaders.Version] = new OpenApiHeader
             {
                 Kind = OpenApiParameterKind.Header,
                 Example = "0.26.0-dev-2024-12-11",
@@ -26,7 +26,7 @@ internal sealed class NSwagGlobalHeaders : IOperationProcessor
                 },
             };
 
-            response.Headers["X-Reaparr-Platform"] = new OpenApiHeader
+            response.Headers[ReaparrHeaders.Platform] = new OpenApiHeader
             {
                 Kind = OpenApiParameterKind.Header,
                 Example = "docker",

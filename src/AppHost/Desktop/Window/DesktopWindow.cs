@@ -23,7 +23,7 @@ public class DesktopWindow : IDesktopWindow
     public void ConfigureWindow()
     {
         _window = new PhotinoWindow()
-            .SetTitle("Reaparr - " + _appBuildInfo.GetInformationalVersion)
+            .SetTitle("Reaparr - " + _appBuildInfo.InformationalVersion)
             .SetUseOsDefaultSize(true)
             .Center()
             .SetMinSize(1920, 1080)

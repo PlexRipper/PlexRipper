@@ -33,11 +33,11 @@ public class Program
             _log.Here()
                 .Information(
                     "Starting Reaparr {Version} ({Channel}) in {RuntimeMode} mode on {CurrentOS} ({RuntimeIdentifier})",
-                    appBuildInfo.GetInformationalVersion,
+                    appBuildInfo.InformationalVersion,
                     appBuildInfo.IsDevRelease ? "DEVELOPMENT" : "STABLE",
-                    appBuildInfo.GetRuntimeMode,
+                    appBuildInfo.RuntimeMode,
                     appBuildInfo.CurrentOS,
-                    appBuildInfo.GetRuntimeIdentifier
+                    appBuildInfo.RuntimeIdentifier
                 );
 
             AppExtensions.LogIdentity();

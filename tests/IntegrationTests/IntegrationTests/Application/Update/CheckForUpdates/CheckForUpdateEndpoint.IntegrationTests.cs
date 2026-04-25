@@ -22,8 +22,8 @@ public class CheckForUpdateEndpointIntegrationTests : BaseIntegrationTests
                                     _) => Task.FromResult(Result.Ok(new AppUpdateCheckResult
                                 {
                                     IsUpdateAvailable = false,
-                                    NewestVersion = context.Resolve<IAppBuildInfo>().GetInformationalVersion,
-                                    CurrentVersion = context.Resolve<IAppBuildInfo>().GetInformationalVersion,
+                                    NewestVersion = context.Resolve<IAppBuildInfo>().InformationalVersion,
+                                    CurrentVersion = context.Resolve<IAppBuildInfo>().InformationalVersion,
                                     ReleaseNotes = [],
                                 }))
                             )
@@ -247,8 +247,8 @@ public class CheckForUpdateEndpointIntegrationTests : BaseIntegrationTests
                                     _) => Task.FromResult(Result.Ok(new AppUpdateCheckResult
                                 {
                                     IsUpdateAvailable = false,
-                                    NewestVersion = context.Resolve<IAppBuildInfo>().GetInformationalVersion,
-                                    CurrentVersion = context.Resolve<IAppBuildInfo>().GetInformationalVersion,
+                                    NewestVersion = context.Resolve<IAppBuildInfo>().InformationalVersion,
+                                    CurrentVersion = context.Resolve<IAppBuildInfo>().InformationalVersion,
                                     ReleaseNotes = [],
                                 }))
                             )

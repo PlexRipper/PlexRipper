@@ -48,7 +48,7 @@ public class GetGitHubReleasesCommandHandler
                 cancellationToken
             );
 
-            var currentVersionString = _appBuildInfo.GetInformationalVersion;
+            var currentVersionString = _appBuildInfo.InformationalVersion;
             if (!TryParseSemVersion(currentVersionString, out var currentVersion))
             {
                 _log.Here()

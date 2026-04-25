@@ -6,8 +6,8 @@ public static class IntegrationTestFileSystemSandbox
     private const string SANDBOX_FOLDER = ".test-artifacts";
     private const string INTEGRATION_SANDBOX_FOLDER = "integration-fs";
 
-    public static string GetSandboxFolder(string memoryDbName) => Path.Combine(GetProjectRoot(), SANDBOX_FOLDER,
-        INTEGRATION_SANDBOX_FOLDER, memoryDbName);
+    public static string GetSandboxFolder(string memoryDbName) =>
+        Path.Combine(GetProjectRoot(), SANDBOX_FOLDER, INTEGRATION_SANDBOX_FOLDER, memoryDbName);
 
     public static string Create(string memoryDbName, ILogger log, IPathProvider pathProvider)
     {

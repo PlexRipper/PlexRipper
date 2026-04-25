@@ -8,6 +8,14 @@ namespace Reaparr.Application.UnitTests;
 
 public class ApplyUpdateEndpointUnitTests : BaseUnitTest<ApplyUpdateEndpoint>
 {
+    private void SetupBuildInfo(bool isDesktopMode)
+    {
+        Mock.Mock<IAppBuildInfo>()
+            .SetupGet(x => x.IsDesktopMode)
+            .Returns(isDesktopMode)
+            .Verifiable(Times.AtLeastOnce());
+    }
+
     [Test]
     public async Task ShouldReturnFailure_WhenDockerMode()
     {
@@ -19,9 +27,14 @@ public class ApplyUpdateEndpointUnitTests : BaseUnitTest<ApplyUpdateEndpoint>
         var mockSource = new Mock<IUpdateSource>();
         var mockLocator = new Mock<IVelopackLocator>();
         var mockManager = new Mock<UpdateManager>(mockSource.Object, null!, mockLocator.Object);
+        SetupBuildInfo(false);
 
         // Act
-        var endpoint = SetupEndpointUnitTest<ApplyUpdateEndpoint>(s => s.AddSingleton(_ => mockManager.Object));
+        var endpoint = SetupEndpointUnitTest<ApplyUpdateEndpoint>(s =>
+        {
+            s.AddSingleton(_ => mockManager.Object);
+            s.AddSingleton(_ => Mock.Mock<IAppBuildInfo>().Object);
+        });
         await endpoint.HandleAsync(CancellationToken);
         var result = endpoint.Response;
 
@@ -30,6 +43,7 @@ public class ApplyUpdateEndpointUnitTests : BaseUnitTest<ApplyUpdateEndpoint>
         result.IsSuccess.ShouldBeFalse();
         result.Errors.ShouldHaveSingleItem();
         result.Errors[0].Message.ShouldBe("Desktop updates are not supported in the current runtime mode");
+        Mock.Mock<IAppBuildInfo>().Verify();
         mockManager.Verify(m => m.UpdatePendingRestart, Times.Never);
         mockSource.VerifyNoOtherCalls();
     }
@@ -47,10 +61,15 @@ public class ApplyUpdateEndpointUnitTests : BaseUnitTest<ApplyUpdateEndpoint>
         var mockSource = new Mock<IUpdateSource>();
         var mockLocator = new Mock<IVelopackLocator>();
         var mockManager = new Mock<UpdateManager>(mockSource.Object, null!, mockLocator.Object);
+        SetupBuildInfo(true);
         mockManager.Setup(m => m.UpdatePendingRestart).Returns(asset).Verifiable(Times.Once());
 
         // Act
-        var endpoint = SetupEndpointUnitTest<ApplyUpdateEndpoint>(s => s.AddSingleton(_ => mockManager.Object));
+        var endpoint = SetupEndpointUnitTest<ApplyUpdateEndpoint>(s =>
+        {
+            s.AddSingleton(_ => mockManager.Object);
+            s.AddSingleton(_ => Mock.Mock<IAppBuildInfo>().Object);
+        });
         await endpoint.HandleAsync(CancellationToken);
         var result = endpoint.Response;
 
@@ -58,6 +77,7 @@ public class ApplyUpdateEndpointUnitTests : BaseUnitTest<ApplyUpdateEndpoint>
         result.ShouldNotBeNull();
         result.IsSuccess.ShouldBeTrue();
 
+        Mock.Mock<IAppBuildInfo>().Verify();
         mockManager.Verify(m => m.UpdatePendingRestart, Times.Once);
         mockSource.VerifyNoOtherCalls();
     }

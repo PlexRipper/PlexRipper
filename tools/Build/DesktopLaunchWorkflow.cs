@@ -140,7 +140,7 @@ internal sealed class DesktopLaunchWorkflow(
     private static string GetVelopackPackageRoot() =>
         Path.Combine(Path.GetTempPath(), "velopack", "Reaparr");
 
-    private static List<string> ClearPendingVelopackPackages(string velopackPackageRoot)
+    internal static List<string> ClearPendingVelopackPackages(string velopackPackageRoot)
     {
         var packagesDirectory = Path.Combine(velopackPackageRoot, "packages");
         if (!Directory.Exists(packagesDirectory))

@@ -38,8 +38,8 @@ public class CheckForUpdatesCommandHandler : ICommandHandler<CheckForUpdatesComm
         var noUpdate = new AppUpdateCheckResult
         {
             IsUpdateAvailable = false,
-            NewestVersion = _appBuildInfo.GetInformationalVersion,
-            CurrentVersion = _appBuildInfo.GetInformationalVersion,
+            NewestVersion = _appBuildInfo.InformationalVersion,
+            CurrentVersion = _appBuildInfo.InformationalVersion,
             ReleaseNotes = [],
         };
 
@@ -82,7 +82,7 @@ public class CheckForUpdatesCommandHandler : ICommandHandler<CheckForUpdatesComm
                 {
                     IsUpdateAvailable = true,
                     NewestVersion = targetVersion,
-                    CurrentVersion = _appBuildInfo.GetInformationalVersion,
+                    CurrentVersion = _appBuildInfo.InformationalVersion,
                     ReleaseNotes = releases,
                 }
             );
@@ -110,7 +110,7 @@ public class CheckForUpdatesCommandHandler : ICommandHandler<CheckForUpdatesComm
             {
                 IsUpdateAvailable = true,
                 NewestVersion = latestVersion,
-                CurrentVersion = _appBuildInfo.GetInformationalVersion,
+                CurrentVersion = _appBuildInfo.InformationalVersion,
                 ReleaseNotes = releases,
             }
         );

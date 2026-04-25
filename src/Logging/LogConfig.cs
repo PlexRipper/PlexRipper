@@ -36,6 +36,7 @@ public class LogConfig
 
     protected LogConfig(IPathProvider pathProvider)
     {
+        ArgumentNullException.ThrowIfNull(pathProvider);
         _pathProvider = pathProvider;
     }
 

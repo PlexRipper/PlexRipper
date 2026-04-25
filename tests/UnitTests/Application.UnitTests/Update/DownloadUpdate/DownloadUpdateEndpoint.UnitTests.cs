@@ -8,6 +8,14 @@ namespace Reaparr.Application.UnitTests;
 
 public class DownloadUpdateEndpointUnitTests : BaseUnitTest<DownloadUpdateEndpoint>
 {
+    private void SetupBuildInfo(bool isDesktopMode)
+    {
+        Mock.Mock<IAppBuildInfo>()
+            .SetupGet(x => x.IsDesktopMode)
+            .Returns(isDesktopMode)
+            .Verifiable(Times.AtLeastOnce());
+    }
+
     [Test]
     public async Task ShouldReturnFailure_WhenDockerMode()
     {
@@ -19,6 +27,7 @@ public class DownloadUpdateEndpointUnitTests : BaseUnitTest<DownloadUpdateEndpoi
         var mockSource = new Mock<IUpdateSource>();
         var mockLocator = new Mock<IVelopackLocator>();
         var mockManager = new Mock<UpdateManager>(mockSource.Object, null!, mockLocator.Object);
+        SetupBuildInfo(false);
 
         // Act
         var endpoint = SetupEndpointUnitTest<DownloadUpdateEndpoint>(s => s.AddSingleton(_ => mockManager.Object));
@@ -30,6 +39,7 @@ public class DownloadUpdateEndpointUnitTests : BaseUnitTest<DownloadUpdateEndpoi
         result.IsSuccess.ShouldBeFalse();
         result.Errors.ShouldHaveSingleItem();
         result.Errors[0].Message.ShouldBe("Desktop updates are not supported in the current runtime mode");
+        Mock.Mock<IAppBuildInfo>().Verify();
         mockManager.Verify(m => m.CheckForUpdatesAsync(), Times.Never);
         mockManager.Verify(
             m =>
@@ -62,6 +72,7 @@ public class DownloadUpdateEndpointUnitTests : BaseUnitTest<DownloadUpdateEndpoi
         var mockSource = new Mock<IUpdateSource>();
         var mockLocator = new Mock<IVelopackLocator>();
         var mockManager = new Mock<UpdateManager>(mockSource.Object, null!, mockLocator.Object);
+        SetupBuildInfo(true);
         mockManager.Setup(m => m.CheckForUpdatesAsync()).ReturnsAsync(updateInfo).Verifiable(Times.Once());
         mockManager
             .Setup(m =>
@@ -79,6 +90,7 @@ public class DownloadUpdateEndpointUnitTests : BaseUnitTest<DownloadUpdateEndpoi
         result.ShouldNotBeNull();
         result.IsSuccess.ShouldBeTrue();
 
+        Mock.Mock<IAppBuildInfo>().Verify();
         mockManager.Verify(m => m.CheckForUpdatesAsync(), Times.Once);
         mockManager.Verify(
             m => m.DownloadUpdatesAsync(updateInfo, It.IsAny<Action<int>?>(), It.IsAny<CancellationToken>()),
@@ -112,13 +124,13 @@ public class DownloadUpdateEndpointUnitTests : BaseUnitTest<DownloadUpdateEndpoi
         var mockSource = new Mock<IUpdateSource>();
         var mockLocator = new Mock<IVelopackLocator>();
         var mockManager = new Mock<UpdateManager>(mockSource.Object, null!, mockLocator.Object);
+        SetupBuildInfo(true);
         mockManager.Setup(m => m.CheckForUpdatesAsync()).ReturnsAsync(updateInfo).Verifiable(Times.Once());
         mockManager
             .Setup(m =>
                 m.DownloadUpdatesAsync(It.IsAny<UpdateInfo>(), It.IsAny<Action<int>?>(), It.IsAny<CancellationToken>())
             )
-            .Callback<UpdateInfo, Action<int>?, CancellationToken>(
-                (_, cb, _) =>
+            .Callback<UpdateInfo, Action<int>?, CancellationToken>((_, cb, _) =>
                 {
                     cb?.Invoke(50);
                     cb?.Invoke(100);
@@ -133,8 +145,7 @@ public class DownloadUpdateEndpointUnitTests : BaseUnitTest<DownloadUpdateEndpoi
                     It.IsAny<CancellationToken>()
                 )
             )
-            .Callback<AppUpdateDownloadProgressDTO, CancellationToken>(
-                (dto, _) =>
+            .Callback<AppUpdateDownloadProgressDTO, CancellationToken>((dto, _) =>
                 {
                     capturedDtos.Add(dto);
                     if (capturedDtos.Count == 2)
@@ -153,6 +164,7 @@ public class DownloadUpdateEndpointUnitTests : BaseUnitTest<DownloadUpdateEndpoi
         endpoint.Response.ShouldNotBeNull();
         endpoint.Response.IsSuccess.ShouldBeTrue();
 
+        Mock.Mock<IAppBuildInfo>().Verify();
         capturedDtos.Count.ShouldBe(2);
         capturedDtos[0].Percentage.ShouldBe(50);
         capturedDtos[0].IsComplete.ShouldBeFalse();

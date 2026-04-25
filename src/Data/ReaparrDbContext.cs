@@ -163,8 +163,7 @@ public sealed class ReaparrDbContext : DbContext, IReaparrDbContext, IReaparrDbC
     /// <inheritdoc/>
     public void ClearChangeTracker() => ChangeTracker.Clear();
 
-    [ActivatorUtilitiesConstructor]
-    public ReaparrDbContext(IPathProvider pathProvider)
+    internal ReaparrDbContext(IPathProvider pathProvider)
     {
         _pathProvider = pathProvider;
         DatabaseName = pathProvider.DatabaseName;
@@ -174,6 +173,7 @@ public sealed class ReaparrDbContext : DbContext, IReaparrDbContext, IReaparrDbC
     /// Constructor for DbContextFactory - accepts pre-configured options.
     /// This is required for AddDbContextFactory to work properly.
     /// </summary>
+    [ActivatorUtilitiesConstructor]
     public ReaparrDbContext(DbContextOptions<ReaparrDbContext> options, IPathProvider pathProvider)
         : base(options)
     {

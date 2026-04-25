@@ -23,8 +23,12 @@ public class CheckForUpdatesCommandUnitTests : BaseUnitTest<CheckForUpdatesComma
         var asset = new VelopackAsset { PackageId = "Reaparr", Version = new SemanticVersion(0, 38, 0, "dev.10") };
         var updateInfo = new UpdateInfo(asset, false);
         var mockSource = new Mock<IUpdateSource>();
-        var mockLocator = new Mock<IVelopackLocator>();
+        var mockLocator = new Mock<IVelopackLocator>(MockBehavior.Loose);
         var mockManager = new Mock<UpdateManager>(mockSource.Object, null!, mockLocator.Object);
+        var appBuildInfo = new Mock<IAppBuildInfo>(MockBehavior.Strict);
+        appBuildInfo.SetupGet(x => x.IsDesktopMode).Returns(true);
+        appBuildInfo.SetupGet(x => x.InformationalVersion).Returns("0.36.0-dev.1");
+        appBuildInfo.SetupGet(x => x.IsDevRelease).Returns(true);
 
         Mock.Mock<ICommandExecutor>()
             .Setup(x => x.Send(It.IsAny<GetGitHubReleasesCommand>(), It.IsAny<CancellationToken>()))
@@ -46,7 +50,7 @@ public class CheckForUpdatesCommandUnitTests : BaseUnitTest<CheckForUpdatesComma
         var sut = new CheckForUpdatesCommandHandler(
             Log,
             Mock.Mock<ICommandExecutor>().Object,
-            new AppBuildInfo(),
+            appBuildInfo.Object,
             mockManager.Object,
             Mock.Mock<INotificationHubService>().Object
         );

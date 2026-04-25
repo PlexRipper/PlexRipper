@@ -28,5 +28,5 @@ public static class EnvKeys
     public const string Puid = "PUID";
     public const string Pgid = "PGID";
     public const string DisableAuthentication = "I_AM_DUMB_SO_DISABLE_AUTHENTICATION";
-    public const string Appimage = "APPIMAGE";
+    public const string AppImage = "APPIMAGE";
 }

@@ -31,8 +31,7 @@ public static partial class StringExtensions
 
     public static string GetActualCasing(this string path)
     {
-        IAppBuildInfo buildInfo = new AppBuildInfo();
-        if (!buildInfo.IsWindows || path.StartsWith("\\"))
+        if (!OperatingSystem.IsWindows() || path.StartsWith("\\"))
             return path;
 
         if (Directory.Exists(path) && (File.GetAttributes(path) & FileAttributes.Directory) == FileAttributes.Directory)

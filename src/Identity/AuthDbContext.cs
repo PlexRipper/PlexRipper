@@ -1,6 +1,7 @@
 using FluentResults;
 using Microsoft.AspNetCore.DataProtection.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Reaparr.Environment;
 
 namespace Reaparr.Identity;
@@ -13,6 +14,7 @@ public sealed class AuthDbContext : IdentityDbContext<AppUser>, IAuthDbContext, 
     public DbSet<DataProtectionKey> DataProtectionKeys { get; set; }
     public DbSet<DownloadClientSession> DownloadClientSessions { get; set; }
 
+    [ActivatorUtilitiesConstructor]
     public AuthDbContext(IPathProvider pathProvider)
     {
         _pathProvider = pathProvider;

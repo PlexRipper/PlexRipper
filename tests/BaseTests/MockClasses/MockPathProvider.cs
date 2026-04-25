@@ -7,7 +7,7 @@ public class MockPathProvider : IPathProvider
 
     public MockPathProvider(string memoryDbName)
     {
-        _pathProvider = new PathProvider();
+        _pathProvider = new PathProvider(BaseUnitTest.CreateDefaultAppBuildInfo());
         _sandboxFolder = Path.GetFullPath(IntegrationTestFileSystemSandbox.GetSandboxFolder(memoryDbName));
     }
 

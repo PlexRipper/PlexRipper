@@ -14,12 +14,16 @@ public record TestLoginRequest
 [NotInParallel]
 public class LogExtensionsUnitTests : BaseUnitTest
 {
+    private ILogger CreateTestLogger(LogEventLevel logEventLevel) =>
+        new TestLogConfig(PathProvider).GetLogger(logEventLevel).ForContext<LogExtensionsUnitTests>();
+
     [Test]
     public void ShouldLogTheSetLogLevel_WhenLogLevelSetIsVerbose()
     {
         // Arrange
-        var log = new TestLogConfig(Mock.Create<IPathProvider>()).GetLogger(LogEventLevel.Verbose)
-            .ForContext<LogExtensionsUnitTests>();
+        var log = CreateTestLogger(LogEventLevel.Verbose);
+
+        // Act
 
         // Assert
         log.IsLogLevelEnabled(LogEventLevel.Verbose).ShouldBeTrue();
@@ -34,8 +38,9 @@ public class LogExtensionsUnitTests : BaseUnitTest
     public void ShouldNotLogTheSetLogLevel_WhenLogLevelIsAbove()
     {
         // Arrange
-        var log = new TestLogConfig(Mock.Create<IPathProvider>()).GetLogger(LogEventLevel.Error)
-            .ForContext<LogExtensionsUnitTests>();
+        var log = CreateTestLogger(LogEventLevel.Error);
+
+        // Act
 
         // Assert
         log.IsLogLevelEnabled(LogEventLevel.Verbose).ShouldBeFalse();
@@ -49,13 +54,14 @@ public class LogExtensionsUnitTests : BaseUnitTest
     [Test]
     public void ShouldLogWithCorrectLogProperties_WhenEachLogTypeIsCalled()
     {
+        // Arrange
         var position = new { Latitude = 25, Longitude = 134 };
 
-        var log = new TestLogConfig(Mock.Create<IPathProvider>()).GetLogger(LogEventLevel.Verbose)
-            .ForContext<LogExtensionsUnitTests>();
+        var log = CreateTestLogger(LogEventLevel.Verbose);
 
         using var context = TestCorrelator.CreateContext();
 
+        // Act
         log.Here()
             .VerboseMsg(
                 "This is a verbose string with a json object: {Position}, a number {Count}, a bool: {Boolean}",
@@ -99,6 +105,7 @@ public class LogExtensionsUnitTests : BaseUnitTest
                 true
             );
 
+        // Assert
         var logEvents = TestCorrelator.GetLogEventsFromContextId(context.Id).ToList();
         logEvents.ShouldNotBeEmpty();
 
@@ -137,7 +144,7 @@ public class LogExtensionsUnitTests : BaseUnitTest
         try
         {
             LogFactory.CloseAndFlush();
-            LogFactory.SetupLogging(new TestLogConfig(Mock.Create<IPathProvider>()), LogEventLevel.Debug);
+            LogFactory.SetupLogging(new TestLogConfig(PathProvider), LogEventLevel.Debug);
             var log = LogFactory.Create<LogExtensionsUnitTests>();
             var httpContext = new DefaultHttpContext();
             httpContext.Request.Method = HttpMethods.Post;
@@ -183,7 +190,7 @@ public class LogExtensionsUnitTests : BaseUnitTest
         try
         {
             LogFactory.CloseAndFlush();
-            LogFactory.SetupLogging(new TestLogConfig(Mock.Create<IPathProvider>()), LogEventLevel.Debug);
+            LogFactory.SetupLogging(new TestLogConfig(PathProvider), LogEventLevel.Debug);
 
             var log = LogFactory.Create<LogExtensionsUnitTests>();
             var httpContext = new DefaultHttpContext();

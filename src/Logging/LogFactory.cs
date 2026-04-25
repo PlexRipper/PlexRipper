@@ -31,6 +31,7 @@ public static class LogFactory
 
     public static void SetupLogging(LogConfig logConfig, LogEventLevel minimumLogLevel = LogEventLevel.Debug)
     {
+        ArgumentNullException.ThrowIfNull(logConfig);
         MinimumLogLevel = minimumLogLevel;
         Log.Logger = logConfig.GetLogger(minimumLogLevel);
         var log = Create();

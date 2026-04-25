@@ -31,7 +31,10 @@ public class IFileSystemExtensionsUnitTests : BaseUnitTest
         // Arrange
         var path = Mock.Create<IPathProvider>().DefaultMovieDestinationFolder;
 
-        SetupFileSystem(system => { system.AddDirectory(path); });
+        SetupFileSystem(system =>
+        {
+            system.AddDirectory(path);
+        });
 
         // Act
         var sut = Mock.Container.Resolve<IPath>();
@@ -49,7 +52,10 @@ public class IFileSystemExtensionsUnitTests : BaseUnitTest
         // Arrange
         var path = "/SomeCustomFolder";
 
-        SetupFileSystem(system => { system.AddDirectory(path); });
+        SetupFileSystem(system =>
+        {
+            system.AddDirectory(path);
+        });
 
         // Act
         var sut = Mock.Container.Resolve<IPath>();

@@ -42,8 +42,8 @@ public static partial class Startup
                 ctx.Response.OnStarting(() =>
                 {
                     // NOTE: Update "NSwagGlobalHeaders" when adding/updating headers and add to "CORS WithExposedHeaders" in ConfigureServices
-                    ctx.Response.Headers[ReaparrHeaders.Version] = appBuildInfo.GetInformationalVersion;
-                    ctx.Response.Headers[ReaparrHeaders.Platform] = appBuildInfo.GetRuntimeMode;
+                    ctx.Response.Headers[ReaparrHeaders.Version] = appBuildInfo.InformationalVersion;
+                    ctx.Response.Headers[ReaparrHeaders.Platform] = appBuildInfo.RuntimeMode;
 
                     return Task.CompletedTask;
                 });

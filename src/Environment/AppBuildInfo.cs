@@ -8,25 +8,25 @@ public class AppBuildInfo : IAppBuildInfo
     private readonly List<AssemblyMetadataAttribute> _attributes;
 
     /// <inheritdoc/>
-    public string GetVersion { get; }
+    public string Version { get; }
 
     /// <inheritdoc/>
-    public string GetInformationalVersion { get; }
+    public string InformationalVersion { get; }
 
     /// <inheritdoc/>
-    public string GetRuntimeMode => GetAssemblyMetadataValue("ReaparrRuntimeMode");
+    public string RuntimeMode => GetAssemblyMetadataValue("ReaparrRuntimeMode");
 
     /// <inheritdoc/>
-    public string GetRuntimeIdentifier => GetAssemblyMetadataValue("ReaparrRuntimeIdentifier");
+    public string RuntimeIdentifier => GetAssemblyMetadataValue("ReaparrRuntimeIdentifier");
 
     /// <inheritdoc/>
-    public bool IsDesktopMode => GetRuntimeMode.Contains("desktop", StringComparison.OrdinalIgnoreCase);
+    public bool IsDesktopMode => RuntimeMode.Contains("desktop", StringComparison.OrdinalIgnoreCase);
 
     /// <inheritdoc/>
-    public bool IsDockerMode => GetRuntimeMode.Contains("docker", StringComparison.OrdinalIgnoreCase);
+    public bool IsDockerMode => RuntimeMode.Contains("docker", StringComparison.OrdinalIgnoreCase);
 
     /// <inheritdoc/>
-    public bool IsDevRelease => GetInformationalVersion.Contains("dev", StringComparison.OrdinalIgnoreCase);
+    public bool IsDevRelease => InformationalVersion.Contains("dev", StringComparison.OrdinalIgnoreCase);
 
     /// <inheritdoc/>
     public OperatingSystemPlatform CurrentOS
@@ -42,7 +42,7 @@ public class AppBuildInfo : IAppBuildInfo
             if (OperatingSystem.IsLinux())
                 return OperatingSystemPlatform.Linux;
 
-            throw new PlatformNotSupportedException();
+            return OperatingSystemPlatform.Unknown;
         }
     }
 
@@ -56,17 +56,18 @@ public class AppBuildInfo : IAppBuildInfo
     {
         var assembly = Assembly.GetEntryAssembly();
         if (assembly is null)
-            throw new ArgumentNullException(nameof(assembly));
+            throw new InvalidOperationException("Unable to determine entry assembly.");
 
         _attributes = assembly.GetCustomAttributes<AssemblyMetadataAttribute>().ToList();
-        GetVersion = assembly.GetName().Version?.ToString() ?? "0.0.0";
-        GetInformationalVersion =
+        Version = assembly.GetName().Version?.ToString() ?? "0.0.0";
+        InformationalVersion =
             assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion ?? "0.0.0";
     }
 
-    private string GetAssemblyMetadataValue(string key) =>
-        _attributes
-            .FirstOrDefault(attribute => string.Equals(attribute.Key, key, StringComparison.OrdinalIgnoreCase))
-            ?.Value
-        ?? "unknown";
+    private string GetAssemblyMetadataValue(string key) => _attributes
+                                                               .FirstOrDefault(attribute =>
+                                                                   string.Equals(attribute.Key, key,
+                                                                       StringComparison.OrdinalIgnoreCase))
+                                                               ?.Value
+                                                           ?? "unknown";
 }

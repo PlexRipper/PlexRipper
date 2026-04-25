@@ -32,9 +32,10 @@ public class Program
 
             _log.Here()
                 .Information(
-                    "Currently running {Channel}, version {Version} on {CurrentOS} with {RuntimeIdentifier}",
-                    appBuildInfo.IsDevRelease ? "DEVELOPMENT" : "STABLE",
+                    "Starting Reaparr {Version} ({Channel}) in {RuntimeMode} mode on {CurrentOS} ({RuntimeIdentifier})",
                     appBuildInfo.GetInformationalVersion,
+                    appBuildInfo.IsDevRelease ? "DEVELOPMENT" : "STABLE",
+                    appBuildInfo.GetRuntimeMode,
                     appBuildInfo.CurrentOS,
                     appBuildInfo.GetRuntimeIdentifier
                 );

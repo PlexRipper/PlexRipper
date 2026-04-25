@@ -231,7 +231,9 @@ public static partial class MockDatabase
         optionsBuilder.EnableSensitiveDataLogging();
         optionsBuilder.EnableDetailedErrors();
         optionsBuilder.LogTo(text => LogFactory.DbContextLogger(text), LogLevel.Warning);
-        return new ReaparrDbContext(optionsBuilder.Options, dbName);
+
+        IPathProvider pathProvider = new PathProvider();
+        return new ReaparrDbContext(optionsBuilder.Options, pathProvider, dbName);
     }
 
     public static AuthDbContext GetMemoryAuthDbContext(string dbName = "")

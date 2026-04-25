@@ -66,14 +66,5 @@ public class AppExtensions
 
         _log.Here(sourceFilePath, memberName, sourceLineNumber)
             .Information("Current system Username: {SystemPUIDName}", System.Environment.UserName);
-        
-        _log.Here(sourceFilePath, memberName, sourceLineNumber)
-            .Information(
-                "Runtime mode: {RuntimeMode}, APPIMAGE: {AppImage}, ConfigDirectory: {ConfigDirectory}, DataDirectory: {DataDirectory}",
-                EnvironmentExtensions.GetReaparrMode(),
-                System.Environment.GetEnvironmentVariable("APPIMAGE") ?? "<unset>",
-                PathProvider.ConfigDirectory,
-                PathProvider.DataDirectory
-            );
     }
 }

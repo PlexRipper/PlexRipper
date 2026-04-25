@@ -17,6 +17,4 @@ public static class PlexMediaTypeExtensions
             _ => 1, // Used for Downloads folder
         };
     }
-
-
 }

@@ -122,6 +122,8 @@ public partial class BaseUnitTest
 
     private void SetDefaultFileSystemDirectories()
     {
+        IPathProvider pathProvider = new PathProvider();
+
         _fileSystem.AddDrive(
             "/",
             new MockDriveData
@@ -131,14 +133,14 @@ public partial class BaseUnitTest
                 AvailableFreeSpace = DefaultAvailableSpace,
             }
         );
-        _fileSystem.AddDirectory(PathProvider.ConfigDirectory);
-        _fileSystem.AddDirectory(PathProvider.DefaultDownloadsDestinationFolder);
-        _fileSystem.AddDirectory(PathProvider.DefaultMovieDestinationFolder);
-        _fileSystem.AddDirectory(PathProvider.DefaultTvShowsDestinationFolder);
-        _fileSystem.AddDirectory(PathProvider.DefaultMusicDestinationFolder);
-        _fileSystem.AddDirectory(PathProvider.DefaultPhotosDestinationFolder);
-        _fileSystem.AddDirectory(PathProvider.DefaultOtherDestinationFolder);
-        _fileSystem.AddDirectory(PathProvider.DefaultGamesDestinationFolder);
+        _fileSystem.AddDirectory(pathProvider.ConfigDirectory);
+        _fileSystem.AddDirectory(pathProvider.DefaultDownloadsDestinationFolder);
+        _fileSystem.AddDirectory(pathProvider.DefaultMovieDestinationFolder);
+        _fileSystem.AddDirectory(pathProvider.DefaultTvShowsDestinationFolder);
+        _fileSystem.AddDirectory(pathProvider.DefaultMusicDestinationFolder);
+        _fileSystem.AddDirectory(pathProvider.DefaultPhotosDestinationFolder);
+        _fileSystem.AddDirectory(pathProvider.DefaultOtherDestinationFolder);
+        _fileSystem.AddDirectory(pathProvider.DefaultGamesDestinationFolder);
     }
 
     protected void SetupFileSystem(Action<MockFileSystem>? action = default)

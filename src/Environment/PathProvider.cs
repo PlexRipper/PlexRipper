@@ -79,7 +79,7 @@ public class PathProvider : IPathProvider
     /// <summary>
     /// Gets the default downloads destination path based on the configured data root or the current platform fallback.
     /// </summary>
-    public static string DefaultDownloadsDestinationFolder
+    public string DefaultDownloadsDestinationFolder
     {
         get
         {
@@ -100,7 +100,7 @@ public class PathProvider : IPathProvider
     /// <summary>
     /// Gets the default movies destination path based on the configured data root or the current platform fallback.
     /// </summary>
-    public static string DefaultMovieDestinationFolder
+    public string DefaultMovieDestinationFolder
     {
         get
         {
@@ -125,7 +125,7 @@ public class PathProvider : IPathProvider
     /// <summary>
     /// Gets the default TV shows destination path based on the configured data root or the current platform fallback.
     /// </summary>
-    public static string DefaultTvShowsDestinationFolder
+    public string DefaultTvShowsDestinationFolder
     {
         get
         {
@@ -150,7 +150,7 @@ public class PathProvider : IPathProvider
     /// <summary>
     /// Gets the default music destination path based on the configured data root or the current platform fallback.
     /// </summary>
-    public static string DefaultMusicDestinationFolder
+    public string DefaultMusicDestinationFolder
     {
         get
         {
@@ -175,7 +175,7 @@ public class PathProvider : IPathProvider
     /// <summary>
     /// Gets the default photos destination path based on the configured data root or the current platform fallback.
     /// </summary>
-    public static string DefaultPhotosDestinationFolder
+    public string DefaultPhotosDestinationFolder
     {
         get
         {
@@ -200,7 +200,7 @@ public class PathProvider : IPathProvider
     /// <summary>
     /// Gets the default uncategorized media destination path based on the configured data root or the current platform fallback.
     /// </summary>
-    public static string DefaultOtherDestinationFolder
+    public string DefaultOtherDestinationFolder
     {
         get
         {
@@ -225,7 +225,7 @@ public class PathProvider : IPathProvider
     /// <summary>
     /// Gets the default games destination path based on the configured data root or the current platform fallback.
     /// </summary>
-    public static string DefaultGamesDestinationFolder
+    public string DefaultGamesDestinationFolder
     {
         get
         {
@@ -313,7 +313,7 @@ public class PathProvider : IPathProvider
     /// Gets the root directory for user media data, where default destination folders such as Movies, TV shows, Music, and Downloads are created.
     /// This is distinct from <see cref="ConfigDirectory"/>, which stores Reaparr's internal application files rather than media content.
     /// </summary>
-    public static string DataDirectory
+    public string DataDirectory
     {
         get
         {

@@ -12,6 +12,7 @@ namespace Reaparr.Data;
 
 public sealed class ReaparrDbContext : DbContext, IReaparrDbContext, IReaparrDbContextDatabase
 {
+    private readonly IPathProvider _pathProvider;
     public DbSet<PlexAccount> PlexAccounts { get; set; }
 
     public DbSet<FolderPath> FolderPaths { get; set; }
@@ -162,32 +163,33 @@ public sealed class ReaparrDbContext : DbContext, IReaparrDbContext, IReaparrDbC
     /// <inheritdoc/>
     public void ClearChangeTracker() => ChangeTracker.Clear();
 
-    public ReaparrDbContext(string databaseName)
-    {
-        DatabaseName = databaseName;
-    }
-
     [ActivatorUtilitiesConstructor]
     public ReaparrDbContext(IPathProvider pathProvider)
-        : this(pathProvider.DatabaseName) { }
+    {
+        _pathProvider = pathProvider;
+        DatabaseName = pathProvider.DatabaseName;
+    }
 
     /// <summary>
     /// Constructor for DbContextFactory - accepts pre-configured options.
     /// This is required for AddDbContextFactory to work properly.
     /// </summary>
-    public ReaparrDbContext(DbContextOptions<ReaparrDbContext> options)
+    public ReaparrDbContext(DbContextOptions<ReaparrDbContext> options, IPathProvider pathProvider)
         : base(options)
     {
-        DatabaseName = PathProvider.DatabaseName;
+        _pathProvider = pathProvider;
+        DatabaseName = pathProvider.DatabaseName;
     }
 
     /// <summary>
     /// Constructor for DbContextFactory with explicit database name - accepts pre-configured options used in unit and integration testing.
     /// </summary>
-    public ReaparrDbContext(DbContextOptions<ReaparrDbContext> options, string databaseName)
+    public ReaparrDbContext(DbContextOptions<ReaparrDbContext> options, IPathProvider pathProvider, string databaseName)
         : base(options)
     {
+        _pathProvider = pathProvider;
         DatabaseName = databaseName;
+
         Database.OpenConnection();
         Database.EnsureCreated();
     }
@@ -199,9 +201,9 @@ public sealed class ReaparrDbContext : DbContext, IReaparrDbContext, IReaparrDbC
             optionsBuilder.DefaultConfiguration(typeof(ReaparrDbContext));
         }
 
-        optionsBuilder.UseSeeding(ReaparrDBContextSeed.Seed());
+        optionsBuilder.UseSeeding(ReaparrDBContextSeed.Seed(_pathProvider));
 
-        optionsBuilder.UseAsyncSeeding(ReaparrDBContextSeed.SeedAsync());
+        optionsBuilder.UseAsyncSeeding(ReaparrDBContextSeed.SeedAsync(_pathProvider));
     }
 
     protected override void OnModelCreating(ModelBuilder builder)

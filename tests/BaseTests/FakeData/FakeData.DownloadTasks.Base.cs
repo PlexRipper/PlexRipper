@@ -65,7 +65,7 @@ public static partial class FakeData
                     new DownloadTaskDirectory
                     {
                         DestinationRootPath = x.MediaType.ToDefaultDestinationLocation(),
-                        DownloadRootPath = PathProvider.DefaultDownloadsDestinationFolder,
+                        DownloadRootPath = PlexMediaType.None.ToDefaultDestinationLocation(),
                         MovieFolder = x.Title,
                         TvShowFolder = string.Empty,
                         SeasonFolder = string.Empty,
@@ -75,7 +75,7 @@ public static partial class FakeData
             .RuleFor(x => x.DirectDownloadSnapshot, _ => null)
             .RuleFor(x => x.DownloadClientType, _ => PlexDownloadClientType.Direct);
     }
-    
+
     private static string ToDefaultDestinationLocation(this PlexMediaType type)
     {
         return type switch

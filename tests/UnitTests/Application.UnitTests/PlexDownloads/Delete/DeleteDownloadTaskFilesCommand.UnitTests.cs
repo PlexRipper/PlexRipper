@@ -283,7 +283,9 @@ public class DeleteDownloadTaskFilesCommandUnitTests : BaseUnitTest<DeleteDownlo
         // e.g. /Downloads/Movies/SomeMovie  →  category folder = /Downloads/Movies
         var movieTaskFolder = movieFileTask.DownloadDirectory;
         var moviesCategoryFolder = Path.GetDirectoryName(movieTaskFolder.TrimEnd(Path.DirectorySeparatorChar))!;
-        var downloadRoot = PathProvider.DefaultDownloadsDestinationFolder;
+
+        IPathProvider pathProvider = new PathProvider();
+        var downloadRoot = pathProvider.DefaultDownloadsDestinationFolder;
 
         SetupFileSystem(fs => fs.AddFile(plainFilePath, new MockFileData([])));
 
@@ -327,7 +329,8 @@ public class DeleteDownloadTaskFilesCommandUnitTests : BaseUnitTest<DeleteDownlo
         var seasonFolder = episodeFileTask.DownloadDirectory;
         var showFolder = Path.GetDirectoryName(seasonFolder.TrimEnd(Path.DirectorySeparatorChar))!;
         var tvShowsCategoryFolder = Path.GetDirectoryName(showFolder.TrimEnd(Path.DirectorySeparatorChar))!;
-        var downloadRoot = PathProvider.DefaultDownloadsDestinationFolder;
+        IPathProvider pathProvider = new PathProvider();
+        var downloadRoot = pathProvider.DefaultDownloadsDestinationFolder;
 
         SetupFileSystem(fs => fs.AddFile(plainFilePath, new MockFileData([])));
 
@@ -437,7 +440,8 @@ public class DeleteDownloadTaskFilesCommandUnitTests : BaseUnitTest<DeleteDownlo
         var seasonFolder = episodeFileTask.DownloadDirectory;
         var showFolder = Path.GetDirectoryName(seasonFolder.TrimEnd(Path.DirectorySeparatorChar))!;
         var tvShowsCategoryFolder = Path.GetDirectoryName(showFolder.TrimEnd(Path.DirectorySeparatorChar))!;
-        var downloadRoot = PathProvider.DefaultDownloadsDestinationFolder;
+        IPathProvider pathProvider = new PathProvider();
+        var downloadRoot = pathProvider.DefaultDownloadsDestinationFolder;
 
         SetupFileSystem(fs =>
         {

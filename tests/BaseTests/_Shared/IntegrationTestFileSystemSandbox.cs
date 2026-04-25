@@ -17,17 +17,18 @@ public static class IntegrationTestFileSystemSandbox
         {
             var sandboxPath = Path.GetFullPath(GetSandboxFolder(memoryDbName));
             Directory.CreateDirectory(sandboxPath);
+            IPathProvider pathProvider = new PathProvider();
 
             var pathsToCreate = new[]
             {
-                PathProvider.ConfigDirectory,
-                PathProvider.DefaultDownloadsDestinationFolder,
-                PathProvider.DefaultMovieDestinationFolder,
-                PathProvider.DefaultTvShowsDestinationFolder,
-                PathProvider.DefaultMusicDestinationFolder,
-                PathProvider.DefaultPhotosDestinationFolder,
-                PathProvider.DefaultOtherDestinationFolder,
-                PathProvider.DefaultGamesDestinationFolder,
+                pathProvider.ConfigDirectory,
+                pathProvider.DefaultDownloadsDestinationFolder,
+                pathProvider.DefaultMovieDestinationFolder,
+                pathProvider.DefaultTvShowsDestinationFolder,
+                pathProvider.DefaultMusicDestinationFolder,
+                pathProvider.DefaultPhotosDestinationFolder,
+                pathProvider.DefaultOtherDestinationFolder,
+                pathProvider.DefaultGamesDestinationFolder,
             }.Select(Path.GetFullPath);
 
             foreach (var path in pathsToCreate)

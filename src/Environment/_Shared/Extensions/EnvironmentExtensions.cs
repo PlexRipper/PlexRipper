@@ -83,24 +83,6 @@ public static class EnvironmentExtensions
         return success ? logLevel : LogEventLevel.Debug;
     }
 
-    /// <summary>
-    /// Gets the application release version from <c>VERSION</c>.
-    /// This should be the stable product version, for example <c>0.36.1</c>.
-    /// Falls back to <c>0.0.0</c> when the environment variable is not set.
-    /// </summary>
-    public static string GetVersion() => GetEnvironmentVariable(EnvKeys.Version) ?? "0.0.0";
-
-    /// <summary>
-    /// Gets the application informational version from <c>INFORMATIONAL_VERSION</c>.
-    /// This is typically a more detailed build string than <c>VERSION</c>, for example <c>0.36.0-dev.1</c>.
-    /// Falls back to <c>0.0.0</c> when the environment variable is not set.
-    /// </summary>
-    public static string GetInformationalVersion() => GetEnvironmentVariable(EnvKeys.InformationalVersion) ?? "0.0.0";
-
-    /// <summary>
-    /// Returns true if the current version indicates a development build (contains <c>dev</c>).
-    /// </summary>
-    public static bool IsDevRelease() => GetInformationalVersion().Contains("dev");
 
     /// <summary>
     /// Returns true if the DOTNET_ENVIRONMENT is set to Development.

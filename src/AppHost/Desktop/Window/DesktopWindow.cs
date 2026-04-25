@@ -8,20 +8,22 @@ namespace Reaparr.AppHost;
 public class DesktopWindow : IDesktopWindow
 {
     private readonly Uri _uri;
+    private readonly IAppBuildInfo _appBuildInfo;
     private bool _isInitialized;
     private PhotinoWindow? _window;
 
     /// <summary>Initializes a new instance of <see cref="DesktopWindow"/>.</summary>
-    public DesktopWindow(Uri uri)
+    public DesktopWindow(Uri uri, IAppBuildInfo  appBuildInfo)
     {
         _uri = uri;
+        _appBuildInfo = appBuildInfo;
     }
 
     /// <inheritdoc />
     public void ConfigureWindow()
     {
         _window = new PhotinoWindow()
-            .SetTitle("Reaparr - " + EnvironmentExtensions.GetInformationalVersion())
+            .SetTitle("Reaparr - " + _appBuildInfo.GetInformationalVersion)
             .SetUseOsDefaultSize(true)
             .Center()
             .SetMinSize(1920, 1080)

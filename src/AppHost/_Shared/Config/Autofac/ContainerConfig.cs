@@ -16,7 +16,7 @@ public static class ContainerConfig
     {
         // Domain
         builder.RegisterModule<EnvironmentModule>();
-        
+
         // Application
         builder.RegisterModule<ApplicationModule>();
         builder.RegisterModule<PublicApiModule>();

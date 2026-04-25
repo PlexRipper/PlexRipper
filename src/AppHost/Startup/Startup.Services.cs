@@ -40,7 +40,7 @@ public static partial class Startup
                         .AllowAnyHeader()
                         .AllowAnyMethod()
                         .AllowCredentials()
-                        .WithExposedHeaders("X-Reaparr-Version", "X-Reaparr-Platform");
+                        .WithExposedHeaders(ReaparrHeaders.Version, ReaparrHeaders.Platform);
                 }
             );
         });

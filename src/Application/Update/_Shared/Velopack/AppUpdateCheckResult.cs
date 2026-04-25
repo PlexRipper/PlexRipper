@@ -6,35 +6,6 @@ namespace Reaparr.Application;
 public sealed record AppUpdateCheckResult
 {
     /// <summary>
-    /// Creates a result representing that no update is available.
-    /// </summary>
-    public static AppUpdateCheckResult NoUpdate() =>
-        new()
-        {
-            IsUpdateAvailable = false,
-            NewestVersion = EnvironmentExtensions.GetInformationalVersion(),
-            ReleaseNotes = [],
-            CurrentVersion = EnvironmentExtensions.GetInformationalVersion(),
-        };
-
-    /// <summary>
-    /// Creates a result representing that an update is available.
-    /// </summary>
-    /// <param name="availableVersion">The latest available version.</param>
-    /// <param name="releaseNotes">All release notes since the currently installed version, newest first.</param>
-    public static AppUpdateCheckResult UpdateAvailable(
-        string availableVersion,
-        IReadOnlyList<ReleaseNote> releaseNotes
-    ) =>
-        new()
-        {
-            IsUpdateAvailable = true,
-            NewestVersion = availableVersion,
-            ReleaseNotes = releaseNotes,
-            CurrentVersion = EnvironmentExtensions.GetInformationalVersion(),
-        };
-
-    /// <summary>
     /// Whether a newer application version is available.
     /// </summary>
     public required bool IsUpdateAvailable { get; init; }

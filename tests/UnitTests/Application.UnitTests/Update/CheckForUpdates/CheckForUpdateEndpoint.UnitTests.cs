@@ -1,3 +1,5 @@
+using Reaparr.Environment;
+
 namespace Reaparr.Application.UnitTests;
 
 public class CheckForUpdateEndpointUnitTests : BaseUnitTest<CheckForUpdateEndpoint>
@@ -57,10 +59,16 @@ public class CheckForUpdateEndpointUnitTests : BaseUnitTest<CheckForUpdateEndpoi
                 [Environment.EnvKeys.InformationalVersion] = "0.38.0",
             }
         );
-
+        var noUpdate = new AppUpdateCheckResult
+        {
+            IsUpdateAvailable = false,
+            NewestVersion = Mock.Create<IAppBuildInfo>().GetInformationalVersion,
+            CurrentVersion = Mock.Create<IAppBuildInfo>().GetInformationalVersion,
+            ReleaseNotes = [],
+        };
         Mock.Mock<ICommandExecutor>()
             .Setup(x => x.Send(It.IsAny<CheckForUpdatesCommand>(), CancellationToken))
-            .ReturnsAsync(Result.Ok(AppUpdateCheckResult.NoUpdate()))
+            .ReturnsAsync(Result.Ok(noUpdate))
             .Verifiable(Times.Once());
 
         // Act
@@ -101,10 +109,15 @@ public class CheckForUpdateEndpointUnitTests : BaseUnitTest<CheckForUpdateEndpoi
                 IsDevRelease = false,
             },
         };
-
         Mock.Mock<ICommandExecutor>()
             .Setup(x => x.Send(It.IsAny<CheckForUpdatesCommand>(), CancellationToken))
-            .ReturnsAsync(Result.Ok(AppUpdateCheckResult.UpdateAvailable("0.39.0", releaseNotes)))
+            .ReturnsAsync(Result.Ok(new AppUpdateCheckResult
+            {
+                IsUpdateAvailable = true,
+                NewestVersion = "0.39.0",
+                CurrentVersion = "0.37.0",
+                ReleaseNotes = releaseNotes,
+            }))
             .Verifiable(Times.Once());
 
         // Act
@@ -151,7 +164,14 @@ public class CheckForUpdateEndpointUnitTests : BaseUnitTest<CheckForUpdateEndpoi
 
         Mock.Mock<ICommandExecutor>()
             .Setup(x => x.Send(It.IsAny<CheckForUpdatesCommand>(), CancellationToken))
-            .ReturnsAsync(Result.Ok(AppUpdateCheckResult.UpdateAvailable("0.38.0-dev.7", releaseNotes)))
+            .ReturnsAsync(Result.Ok(new AppUpdateCheckResult
+                {
+                    IsUpdateAvailable = true,
+                    NewestVersion = "0.38.0-dev.7",
+                    CurrentVersion = "0.37.0",
+                    ReleaseNotes = releaseNotes,
+                }
+            ))
             .Verifiable(Times.Once());
 
         // Act
@@ -198,7 +218,14 @@ public class CheckForUpdateEndpointUnitTests : BaseUnitTest<CheckForUpdateEndpoi
 
         Mock.Mock<ICommandExecutor>()
             .Setup(x => x.Send(It.IsAny<CheckForUpdatesCommand>(), CancellationToken))
-            .ReturnsAsync(Result.Ok(AppUpdateCheckResult.UpdateAvailable("9.9.9", releaseNotes)))
+            .ReturnsAsync(Result.Ok(new AppUpdateCheckResult
+                {
+                    IsUpdateAvailable = true,
+                    NewestVersion = "9.9.9",
+                    CurrentVersion = "0.37.0",
+                    ReleaseNotes = releaseNotes,
+                }
+            ))
             .Verifiable(Times.Once());
 
         // Act
@@ -231,10 +258,16 @@ public class CheckForUpdateEndpointUnitTests : BaseUnitTest<CheckForUpdateEndpoi
                 [Environment.EnvKeys.InformationalVersion] = "0.38.0",
             }
         );
-
+        var noUpdate = new AppUpdateCheckResult
+        {
+            IsUpdateAvailable = false,
+            NewestVersion = Mock.Create<IAppBuildInfo>().GetInformationalVersion,
+            CurrentVersion = Mock.Create<IAppBuildInfo>().GetInformationalVersion,
+            ReleaseNotes = [],
+        };
         Mock.Mock<ICommandExecutor>()
             .Setup(x => x.Send(It.IsAny<CheckForUpdatesCommand>(), CancellationToken))
-            .ReturnsAsync(Result.Ok(AppUpdateCheckResult.NoUpdate()))
+            .ReturnsAsync(Result.Ok(noUpdate))
             .Verifiable(Times.Once());
 
         // Act

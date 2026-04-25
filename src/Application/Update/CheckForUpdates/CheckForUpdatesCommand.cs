@@ -35,14 +35,21 @@ public class CheckForUpdatesCommandHandler : ICommandHandler<CheckForUpdatesComm
     {
         var releasesResult = await _commandExecutor.Send(new GetGitHubReleasesCommand(), cancellationToken);
         var releases = releasesResult.IsSuccess ? releasesResult.Value : [];
-
+        var noUpdate = new AppUpdateCheckResult
+        {
+            IsUpdateAvailable = false,
+            NewestVersion = _appBuildInfo.GetInformationalVersion,
+            CurrentVersion = _appBuildInfo.GetInformationalVersion,
+            ReleaseNotes = [],
+        };
+        
         // Desktop mode
         if (_appBuildInfo.IsDesktopMode)
         {
             if (!_velopackManager.IsInstalled)
             {
                 _log.Here().Information("Skipping update check because the application is not installed");
-                return Result.Ok(AppUpdateCheckResult.NoUpdate());
+                return Result.Ok(noUpdate);
             }
 
             _log.Here()
@@ -60,7 +67,7 @@ public class CheckForUpdatesCommandHandler : ICommandHandler<CheckForUpdatesComm
             if (updateInfo is null)
             {
                 _log.Here().Information("No update available");
-                return Result.Ok(AppUpdateCheckResult.NoUpdate());
+                return Result.Ok(noUpdate);
             }
 
             var targetVersion = updateInfo.TargetFullRelease.Version.ToString();
@@ -70,19 +77,25 @@ public class CheckForUpdatesCommandHandler : ICommandHandler<CheckForUpdatesComm
                 RefreshDataType.UpdateAvailable,
                 cancellationToken
             );
-            return Result.Ok(AppUpdateCheckResult.UpdateAvailable(targetVersion, releases));
+            return Result.Ok(new AppUpdateCheckResult
+            {
+                IsUpdateAvailable = true,
+                NewestVersion = targetVersion,
+                CurrentVersion = _appBuildInfo.GetInformationalVersion,
+                ReleaseNotes = releases,
+            });
         }
 
         if (releasesResult.IsFailed)
-            return AppUpdateCheckResult.NoUpdate();
+            return noUpdate;
 
         // Docker Mode
-        var isDevRelease = EnvironmentExtensions.IsDevRelease();
+        var isDevRelease = _appBuildInfo.IsDevRelease;
         var latest = releases.FirstOrDefault(r => r.IsDevRelease == isDevRelease);
         if (latest is null)
         {
             _log.Here().Information("No update available");
-            return Result.Ok(AppUpdateCheckResult.NoUpdate());
+            return Result.Ok(noUpdate);
         }
 
         var latestVersion = latest.Version.TrimStart('v');
@@ -90,6 +103,12 @@ public class CheckForUpdatesCommandHandler : ICommandHandler<CheckForUpdatesComm
         _log.Here().Information("Update available: {Version}", latestVersion);
 
         await _notificationHubService.SendRefreshNotificationAsync(RefreshDataType.UpdateAvailable, cancellationToken);
-        return Result.Ok(AppUpdateCheckResult.UpdateAvailable(latestVersion, releases));
+        return Result.Ok(new AppUpdateCheckResult
+        {
+            IsUpdateAvailable = true,
+            NewestVersion = latestVersion,
+            CurrentVersion = _appBuildInfo.GetInformationalVersion,
+            ReleaseNotes = releases,
+        });
     }
 }

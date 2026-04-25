@@ -22,11 +22,13 @@ public class GetGitHubReleasesCommandHandler
 {
     private readonly ILogger _log;
     private readonly IHttpClientFactory _httpClientFactory;
+    private readonly IAppBuildInfo _appBuildInfo;
 
-    public GetGitHubReleasesCommandHandler(ILogger log, IHttpClientFactory httpClientFactory)
+    public GetGitHubReleasesCommandHandler(ILogger log, IHttpClientFactory httpClientFactory, IAppBuildInfo appBuildInfo)
     {
         _log = log.ForContext<GetGitHubReleasesCommandHandler>();
         _httpClientFactory = httpClientFactory;
+        _appBuildInfo = appBuildInfo;
     }
 
     public async Task<Result<IReadOnlyList<ReleaseNote>>> ExecuteAsync(
@@ -42,7 +44,7 @@ public class GetGitHubReleasesCommandHandler
                 cancellationToken
             );
 
-            var currentVersionString = EnvironmentExtensions.GetInformationalVersion();
+            var currentVersionString = _appBuildInfo.GetInformationalVersion;
             if (!TryParseSemVersion(currentVersionString, out var currentVersion))
             {
                 _log.Here()
@@ -53,7 +55,7 @@ public class GetGitHubReleasesCommandHandler
                 currentVersion = new SemVersion(0);
             }
 
-            var isDevBuild = EnvironmentExtensions.IsDevRelease();
+            var isDevBuild = _appBuildInfo.IsDevRelease;
             var filteredReleases = (releases ?? [])
                 .Where(x => x.Prerelease == isDevBuild)
                 .Where(x =>

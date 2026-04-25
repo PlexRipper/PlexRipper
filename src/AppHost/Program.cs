@@ -36,8 +36,8 @@ public class Program
             _log.Here()
                 .Information(
                     "Currently running {Channel} version {Version} on {CurrentOS}",
-                    EnvironmentExtensions.IsDevRelease() ? "DEVELOPMENT" : "STABLE",
-                    EnvironmentExtensions.GetInformationalVersion(),
+                    appBuildInfo.IsDevRelease ? "DEVELOPMENT" : "STABLE",
+                    appBuildInfo.GetInformationalVersion,
                     OsInfo.CurrentOS
                 );
 
@@ -70,7 +70,7 @@ public class Program
 
             app.ApplyForwardedHeaders();
 
-            app.ConfigureApplication(app.Environment);
+            app.ConfigureApplication(app.Environment, appBuildInfo);
 
             if (appBuildInfo.IsDesktopMode && !EnvironmentExtensions.IsIntegrationTestMode())
             {

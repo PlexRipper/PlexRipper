@@ -5,7 +5,7 @@ namespace Reaparr.Environment;
 public class PathProvider : IPathProvider
 {
     private readonly IAppBuildInfo _appBuildInfo = new AppBuildInfo();
-    
+
     #region Properties
 
     #region DirectoryNames

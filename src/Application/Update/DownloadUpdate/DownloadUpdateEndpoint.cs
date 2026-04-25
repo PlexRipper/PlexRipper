@@ -12,7 +12,12 @@ public class DownloadUpdateEndpoint : BaseEndpointWithoutRequest
 
     public override string EndpointPath => ApiRoutes.UpdateController + "/DownloadUpdate";
 
-    public DownloadUpdateEndpoint(ILogger log, IAppBuildInfo appBuildInfo, UpdateManager velopackManager, IProgressHubService progressHub)
+    public DownloadUpdateEndpoint(
+        ILogger log,
+        IAppBuildInfo appBuildInfo,
+        UpdateManager velopackManager,
+        IProgressHubService progressHub
+    )
     {
         _log = log.ForContext<DownloadUpdateEndpoint>();
         _appBuildInfo = appBuildInfo;

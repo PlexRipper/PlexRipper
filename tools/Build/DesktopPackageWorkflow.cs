@@ -87,13 +87,5 @@ internal sealed class DesktopPackageWorkflow(
             : $"{runtime.RuntimeIdentifier}-stable";
     }
 
-    private static bool IsDevRelease(DesktopCommandSettings settings)
-    {
-        if (!string.IsNullOrWhiteSpace(settings.InformationalVersion))
-        {
-            return settings.InformationalVersion.Contains("dev", StringComparison.OrdinalIgnoreCase);
-        }
-
-        return EnvironmentExtensions.IsDevRelease();
-    }
+    private static bool IsDevRelease(DesktopCommandSettings settings) => !string.IsNullOrWhiteSpace(settings.InformationalVersion) && settings.InformationalVersion.Contains("dev", StringComparison.OrdinalIgnoreCase);
 }

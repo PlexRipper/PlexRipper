@@ -16,9 +16,16 @@ public class CheckForUpdateEndpointIntegrationTests : BaseIntegrationTests
             config =>
                 config.OverrideServices = builder =>
                     builder
-                        .Register(_ =>
-                            new FakeCommandExecutor().Intercept<CheckForUpdatesCommand, Result<AppUpdateCheckResult>>(
-                                (_, _) => Task.FromResult(Result.Ok(AppUpdateCheckResult.NoUpdate()))
+                        .Register(context =>
+                            new FakeCommandExecutor().Intercept<CheckForUpdatesCommand, Result<AppUpdateCheckResult>>((
+                                    _,
+                                    _) => Task.FromResult(Result.Ok(new AppUpdateCheckResult
+                                {
+                                    IsUpdateAvailable = false,
+                                    NewestVersion = context.Resolve<IAppBuildInfo>().GetInformationalVersion,
+                                    CurrentVersion = context.Resolve<IAppBuildInfo>().GetInformationalVersion,
+                                    ReleaseNotes = [],
+                                }))
                             )
                         )
                         .As<ICommandExecutor>()
@@ -49,8 +56,12 @@ public class CheckForUpdateEndpointIntegrationTests : BaseIntegrationTests
         // Arrange
         using var environmentOverride = CreateEnvironmentOverride("docker", "0.38.0");
         var seed = new Seed(11002);
-        var updateResult = AppUpdateCheckResult.UpdateAvailable(
-            "0.39.0",
+        var updateResult = new AppUpdateCheckResult
+        {
+            IsUpdateAvailable = true,
+            NewestVersion = "0.39.0",
+            CurrentVersion = "0.38.0",
+            ReleaseNotes =
             [
                 new ReleaseNote
                 {
@@ -59,8 +70,8 @@ public class CheckForUpdateEndpointIntegrationTests : BaseIntegrationTests
                     ReleaseDate = new DateTime(2026, 4, 10, 0, 0, 0, DateTimeKind.Utc),
                     IsDevRelease = false,
                 },
-            ]
-        );
+            ],
+        };
 
         using var container = await CreateContainer(
             seed,
@@ -68,8 +79,9 @@ public class CheckForUpdateEndpointIntegrationTests : BaseIntegrationTests
                 config.OverrideServices = builder =>
                     builder
                         .Register(_ =>
-                            new FakeCommandExecutor().Intercept<CheckForUpdatesCommand, Result<AppUpdateCheckResult>>(
-                                (_, _) => Task.FromResult(Result.Ok(updateResult))
+                            new FakeCommandExecutor().Intercept<CheckForUpdatesCommand, Result<AppUpdateCheckResult>>((
+                                    _,
+                                    _) => Task.FromResult(Result.Ok(updateResult))
                             )
                         )
                         .As<ICommandExecutor>()
@@ -103,8 +115,12 @@ public class CheckForUpdateEndpointIntegrationTests : BaseIntegrationTests
         // Arrange
         using var environmentOverride = CreateEnvironmentOverride("docker", "0.38.0-dev.6");
         var seed = new Seed(11003);
-        var updateResult = AppUpdateCheckResult.UpdateAvailable(
-            "0.38.0-dev.7",
+        var updateResult = new AppUpdateCheckResult
+        {
+            IsUpdateAvailable = true,
+            NewestVersion = "0.38.0-dev.7",
+            CurrentVersion = "0.37.0",
+            ReleaseNotes =
             [
                 new ReleaseNote
                 {
@@ -113,8 +129,8 @@ public class CheckForUpdateEndpointIntegrationTests : BaseIntegrationTests
                     ReleaseDate = new DateTime(2026, 4, 10, 0, 0, 0, DateTimeKind.Utc),
                     IsDevRelease = true,
                 },
-            ]
-        );
+            ],
+        };
 
         using var container = await CreateContainer(
             seed,
@@ -122,8 +138,9 @@ public class CheckForUpdateEndpointIntegrationTests : BaseIntegrationTests
                 config.OverrideServices = builder =>
                     builder
                         .Register(_ =>
-                            new FakeCommandExecutor().Intercept<CheckForUpdatesCommand, Result<AppUpdateCheckResult>>(
-                                (_, _) => Task.FromResult(Result.Ok(updateResult))
+                            new FakeCommandExecutor().Intercept<CheckForUpdatesCommand, Result<AppUpdateCheckResult>>((
+                                    _,
+                                    _) => Task.FromResult(Result.Ok(updateResult))
                             )
                         )
                         .As<ICommandExecutor>()
@@ -157,8 +174,12 @@ public class CheckForUpdateEndpointIntegrationTests : BaseIntegrationTests
         // Arrange
         using var environmentOverride = CreateEnvironmentOverride("desktop", "0.38.0");
         var seed = new Seed(11004);
-        var updateResult = AppUpdateCheckResult.UpdateAvailable(
-            "9.9.9",
+        var updateResult = new AppUpdateCheckResult
+        {
+            IsUpdateAvailable = true,
+            NewestVersion = "9.9.9",
+            CurrentVersion = "0.37.0",
+            ReleaseNotes =
             [
                 new ReleaseNote
                 {
@@ -167,8 +188,8 @@ public class CheckForUpdateEndpointIntegrationTests : BaseIntegrationTests
                     ReleaseDate = new DateTime(2026, 4, 10, 0, 0, 0, DateTimeKind.Utc),
                     IsDevRelease = false,
                 },
-            ]
-        );
+            ],
+        };
 
         using var container = await CreateContainer(
             seed,
@@ -177,8 +198,9 @@ public class CheckForUpdateEndpointIntegrationTests : BaseIntegrationTests
                 {
                     builder
                         .Register(_ =>
-                            new FakeCommandExecutor().Intercept<CheckForUpdatesCommand, Result<AppUpdateCheckResult>>(
-                                (_, _) => Task.FromResult(Result.Ok(updateResult))
+                            new FakeCommandExecutor().Intercept<CheckForUpdatesCommand, Result<AppUpdateCheckResult>>((
+                                    _,
+                                    _) => Task.FromResult(Result.Ok(updateResult))
                             )
                         )
                         .As<ICommandExecutor>()
@@ -218,16 +240,21 @@ public class CheckForUpdateEndpointIntegrationTests : BaseIntegrationTests
             seed,
             config =>
                 config.OverrideServices = builder =>
-                {
                     builder
-                        .Register(_ =>
-                            new FakeCommandExecutor().Intercept<CheckForUpdatesCommand, Result<AppUpdateCheckResult>>(
-                                (_, _) => Task.FromResult(Result.Ok(AppUpdateCheckResult.NoUpdate()))
+                        .Register(context =>
+                            new FakeCommandExecutor().Intercept<CheckForUpdatesCommand, Result<AppUpdateCheckResult>>((
+                                    _,
+                                    _) => Task.FromResult(Result.Ok(new AppUpdateCheckResult
+                                {
+                                    IsUpdateAvailable = false,
+                                    NewestVersion = context.Resolve<IAppBuildInfo>().GetInformationalVersion,
+                                    CurrentVersion = context.Resolve<IAppBuildInfo>().GetInformationalVersion,
+                                    ReleaseNotes = [],
+                                }))
                             )
                         )
                         .As<ICommandExecutor>()
-                        .InstancePerDependency();
-                }
+                        .InstancePerDependency()
         );
 
         var client = container.GetApiClient();

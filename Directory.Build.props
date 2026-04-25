@@ -7,5 +7,13 @@
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
         <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+        <ReaparrRuntimeMode Condition="'$(ReaparrRuntimeMode)' == ''">docker</ReaparrRuntimeMode>
     </PropertyGroup>
+
+    <ItemGroup>
+        <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
+            <_Parameter1>ReaparrRuntimeMode</_Parameter1>
+            <_Parameter2>$(ReaparrRuntimeMode)</_Parameter2>
+        </AssemblyAttribute>
+    </ItemGroup>
 </Project>

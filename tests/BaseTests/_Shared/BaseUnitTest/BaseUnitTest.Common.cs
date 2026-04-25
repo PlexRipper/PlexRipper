@@ -29,8 +29,7 @@ public partial class BaseUnitTest
         EnvironmentExtensions.EnableUnmaskedLog(true);
 
         // Pass the TestLogConfig to LogFactory so all application logs go to test output
-        IPathProvider pathProvider = new PathProvider();
-        var testLogConfig = new TestLogConfig(pathProvider);
+        var testLogConfig = new TestLogConfig(new PathProvider(new MockAppBuildInfo()));
         LogFactory.SetupLogging(testLogConfig, logEventLevel);
 
         BogusExtensions.Setup();
@@ -60,6 +59,7 @@ public partial class BaseUnitTest
                 s.AddSingleton(_ => Mock.Mock<INotificationHubService>().Object);
                 s.AddSingleton(_ => Mock.Mock<IDownloadTaskScheduler>().Object);
                 s.AddSingleton(_ => Mock.Mock<IPathProvider>().Object);
+                s.AddSingleton(_ => Mock.Mock<IAppBuildInfo>().Object);
 
                 extraServices?.Invoke(s);
             });

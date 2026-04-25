@@ -101,7 +101,25 @@ public partial class BaseUnitTest
             .As<IAuthDbContextFactory>()
             .InstancePerDependency();
 
-        builder.Register(_ => new Mock<IAppBuildInfo>(MockBehavior.Strict).Object).As<IAppBuildInfo>().SingleInstance();
+        builder
+            .Register(_ =>
+            {
+                var appBuildInfoMock = new Mock<IAppBuildInfo>(MockBehavior.Loose);
+                appBuildInfoMock.SetupGet(x => x.RuntimeMode).Returns("docker");
+                appBuildInfoMock.SetupGet(x => x.RuntimeIdentifier).Returns("linux-x64");
+                appBuildInfoMock.SetupGet(x => x.Version).Returns("0.0.0");
+                appBuildInfoMock.SetupGet(x => x.InformationalVersion).Returns("0.0.0");
+                appBuildInfoMock.SetupGet(x => x.CurrentOS).Returns(OperatingSystemPlatform.Linux);
+                appBuildInfoMock.SetupGet(x => x.IsWindows).Returns(false);
+                appBuildInfoMock.SetupGet(x => x.IsDesktopMode).Returns(false);
+                appBuildInfoMock.SetupGet(x => x.IsDockerMode).Returns(true);
+                appBuildInfoMock.SetupGet(x => x.IsDevRelease).Returns(false);
+                return appBuildInfoMock.Object;
+            })
+            .As<IAppBuildInfo>()
+            .SingleInstance();
+
+        builder.Register(ctx => new PathProvider(ctx.Resolve<IAppBuildInfo>())).As<IPathProvider>().SingleInstance();
     }
 
     protected void SetupHttpClient(Action<Mock<HttpMessageHandler>>? action = null)
@@ -124,7 +142,7 @@ public partial class BaseUnitTest
 
     private void SetDefaultFileSystemDirectories()
     {
-        IPathProvider pathProvider = new PathProvider();
+        var pathProvider = Mock.Container.Resolve<IPathProvider>();
 
         _fileSystem.AddDrive(
             "/",

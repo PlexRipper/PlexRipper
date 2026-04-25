@@ -248,12 +248,10 @@ public class PathProvider : IPathProvider
     public string DatabasePath => Path.Combine(ConfigDirectory, DatabaseName);
 
     /// <inheritdoc/>
-
     // ReSharper disable once InconsistentNaming
     public string Database_SHM_Path => Path.Combine(ConfigDirectory, DatabaseShmName);
 
     /// <inheritdoc/>
-
     // ReSharper disable once InconsistentNaming
     public string Database_WAL_Path => Path.Combine(ConfigDirectory, DatabaseWalName);
 

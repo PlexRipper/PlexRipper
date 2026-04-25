@@ -516,12 +516,13 @@ public class GetGitHubReleasesCommandUnitTests : BaseUnitTest<GetGitHubReleasesC
     private static HttpClient CreateGitHubHttpClient(IReadOnlyList<GitHubReleaseDTO> releases) =>
         new(new GitHubReleasesResponseHandler(releases)) { BaseAddress = new Uri("https://api.github.com/") };
 
-    private static GitHubReleaseDTO CreateRelease(string tagName, bool isPrerelease) => new()
-    {
-        TagName = tagName,
-        Prerelease = isPrerelease,
-        PublishedAt = new DateTime(2026, 4, 10, 0, 0, 0, DateTimeKind.Utc),
-    };
+    private static GitHubReleaseDTO CreateRelease(string tagName, bool isPrerelease) =>
+        new()
+        {
+            TagName = tagName,
+            Prerelease = isPrerelease,
+            PublishedAt = new DateTime(2026, 4, 10, 0, 0, 0, DateTimeKind.Utc),
+        };
 
     private sealed class GitHubReleasesResponseHandler(IReadOnlyList<GitHubReleaseDTO> releases) : HttpMessageHandler
     {
@@ -553,12 +554,13 @@ public class GetGitHubReleasesCommandUnitTests : BaseUnitTest<GetGitHubReleasesC
         protected override Task<HttpResponseMessage> SendAsync(
             HttpRequestMessage request,
             CancellationToken cancellationToken
-        ) => Task.FromResult(
-            new HttpResponseMessage(HttpStatusCode.OK)
-            {
-                RequestMessage = request,
-                Content = new StringContent("null", Encoding.UTF8, "application/json"),
-            }
-        );
+        ) =>
+            Task.FromResult(
+                new HttpResponseMessage(HttpStatusCode.OK)
+                {
+                    RequestMessage = request,
+                    Content = new StringContent("null", Encoding.UTF8, "application/json"),
+                }
+            );
     }
 }

@@ -15,7 +15,7 @@ public record TestLoginRequest
 public class LogExtensionsUnitTests : BaseUnitTest
 {
     private ILogger CreateTestLogger(LogEventLevel logEventLevel) =>
-        new TestLogConfig(PathProvider).GetLogger(logEventLevel).ForContext<LogExtensionsUnitTests>();
+        new TestLogConfig(Mock.Create<IPathProvider>()).GetLogger(logEventLevel).ForContext<LogExtensionsUnitTests>();
 
     [Test]
     public void ShouldLogTheSetLogLevel_WhenLogLevelSetIsVerbose()
@@ -144,7 +144,7 @@ public class LogExtensionsUnitTests : BaseUnitTest
         try
         {
             LogFactory.CloseAndFlush();
-            LogFactory.SetupLogging(new TestLogConfig(PathProvider), LogEventLevel.Debug);
+            LogFactory.SetupLogging(new TestLogConfig(new PathProvider(new MockAppBuildInfo())), LogEventLevel.Debug);
             var log = LogFactory.Create<LogExtensionsUnitTests>();
             var httpContext = new DefaultHttpContext();
             httpContext.Request.Method = HttpMethods.Post;
@@ -190,7 +190,7 @@ public class LogExtensionsUnitTests : BaseUnitTest
         try
         {
             LogFactory.CloseAndFlush();
-            LogFactory.SetupLogging(new TestLogConfig(PathProvider), LogEventLevel.Debug);
+            LogFactory.SetupLogging(new TestLogConfig(new PathProvider(new MockAppBuildInfo())), LogEventLevel.Debug);
 
             var log = LogFactory.Create<LogExtensionsUnitTests>();
             var httpContext = new DefaultHttpContext();

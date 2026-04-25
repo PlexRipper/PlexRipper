@@ -130,7 +130,8 @@ public class DownloadUpdateEndpointUnitTests : BaseUnitTest<DownloadUpdateEndpoi
             .Setup(m =>
                 m.DownloadUpdatesAsync(It.IsAny<UpdateInfo>(), It.IsAny<Action<int>?>(), It.IsAny<CancellationToken>())
             )
-            .Callback<UpdateInfo, Action<int>?, CancellationToken>((_, cb, _) =>
+            .Callback<UpdateInfo, Action<int>?, CancellationToken>(
+                (_, cb, _) =>
                 {
                     cb?.Invoke(50);
                     cb?.Invoke(100);
@@ -145,7 +146,8 @@ public class DownloadUpdateEndpointUnitTests : BaseUnitTest<DownloadUpdateEndpoi
                     It.IsAny<CancellationToken>()
                 )
             )
-            .Callback<AppUpdateDownloadProgressDTO, CancellationToken>((dto, _) =>
+            .Callback<AppUpdateDownloadProgressDTO, CancellationToken>(
+                (dto, _) =>
                 {
                     capturedDtos.Add(dto);
                     if (capturedDtos.Count == 2)

@@ -47,7 +47,7 @@ public class BaseContainer : IDisposable
         EnvironmentExtensions.SetIntegrationTestMode(true);
 
         var memoryDbName = MockDatabase.GetMemoryDatabaseName();
-        var mockPathProvider = new MockPathProvider(memoryDbName);
+        var mockPathProvider = new MockPathProvider(memoryDbName, new MockAppBuildInfo());
 
         // Create isolated filesystem
         var testFileSystemRootPath = IntegrationTestFileSystemSandbox.Create(memoryDbName, log, mockPathProvider);

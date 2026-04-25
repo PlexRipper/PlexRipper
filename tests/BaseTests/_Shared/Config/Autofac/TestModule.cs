@@ -40,7 +40,10 @@ public class TestModule : Module
         builder.RegisterType<MockNotificationHubService>().As<INotificationHubService>().SingleInstance();
         builder.RegisterType<MockPlexApiServer>().As<IMockPlexApiServer>().SingleInstance();
 
-        builder.Register((_, _) => new MockPathProvider(MemoryDbName)).As<IPathProvider>().InstancePerDependency();
+        builder
+            .Register((ctx, _) => new MockPathProvider(MemoryDbName, ctx.Resolve<IAppBuildInfo>()))
+            .As<IPathProvider>()
+            .InstancePerDependency();
 
         SetMockedDependencies(builder);
 

@@ -1517,7 +1517,7 @@
         "resolved": "16.3.0",
         "contentHash": "SgMOdxbz8X65z8hraIs6hOEdnkH6hESTAIUa7viEngHOYaH+6q5XJmwr1+yb9vJpNQ19hCQY69xbFsLtXpobQA=="
       },
-      "Reaparr": {
+      "Reaparr.AppHost": {
         "type": "Project",
         "dependencies": {
           "Autofac.Extensions.DependencyInjection": "[11.0.0, )",
@@ -1608,7 +1608,7 @@
           "Microsoft.AspNetCore.Mvc.Testing": "[10.0.6, )",
           "Moq": "[4.20.72, )",
           "Moq.Contrib.HttpClient": "[1.4.0, )",
-          "Reaparr": "[1.0.0, )",
+          "Reaparr.AppHost": "[1.0.0, )",
           "Shouldly": "[4.3.0, )",
           "TUnit": "[1.24.0, )",
           "TestableIO.System.IO.Abstractions.TestingHelpers": "[22.1.0, )"
@@ -1654,6 +1654,7 @@
       "Reaparr.Environment": {
         "type": "Project",
         "dependencies": {
+          "Autofac": "[9.1.0, )",
           "Serilog": "[4.3.1, )",
           "Xdg.Directories": "[0.1.2, )"
         }

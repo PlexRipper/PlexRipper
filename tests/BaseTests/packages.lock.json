@@ -1527,7 +1527,7 @@
         "resolved": "16.3.0",
         "contentHash": "SgMOdxbz8X65z8hraIs6hOEdnkH6hESTAIUa7viEngHOYaH+6q5XJmwr1+yb9vJpNQ19hCQY69xbFsLtXpobQA=="
       },
-      "Reaparr": {
+      "Reaparr.AppHost": {
         "type": "Project",
         "dependencies": {
           "Autofac.Extensions.DependencyInjection": "[11.0.0, )",
@@ -1647,6 +1647,7 @@
       "Reaparr.Environment": {
         "type": "Project",
         "dependencies": {
+          "Autofac": "[9.1.0, )",
           "Serilog": "[4.3.1, )",
           "Xdg.Directories": "[0.1.2, )"
         }

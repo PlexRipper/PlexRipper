@@ -8,13 +8,23 @@ namespace Reaparr.AppHost;
 /// <summary>
 /// Serilog configuration that adds a SignalR sink to stream log events to connected clients, in addition to the base configuration (e.g. file sink).
 /// </summary>
-/// <param name="logBuffer"></param>
-public class SignalRLogConfig(ILogBufferService logBuffer) : LogConfig
+public class SignalRLogConfig : LogConfig
 {
+    private readonly ILogBufferService _logBuffer;
+
+    /// <summary>
+    /// Initializes a new instance of <see cref="SignalRLogConfig"/> with the provided path provider and log buffer service.
+    /// </summary>
+    public SignalRLogConfig(IPathProvider pathProvider, ILogBufferService logBuffer)
+        : base(pathProvider)
+    {
+        _logBuffer = logBuffer;
+    }
+
     /// <inheritdoc/>
     protected override LoggerConfiguration GetExtendedConfiguration(
         LogEventLevel minimumLogLevel = LogEventLevel.Debug
-    ) => base.GetExtendedConfiguration(minimumLogLevel).WriteTo.Sink(logBuffer);
+    ) => base.GetExtendedConfiguration(minimumLogLevel).WriteTo.Sink(_logBuffer);
 
     /// <inheritdoc/>
     public override Logger GetLogger(LogEventLevel minimumLogLevel = LogEventLevel.Debug) =>

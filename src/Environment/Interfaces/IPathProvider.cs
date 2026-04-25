@@ -64,4 +64,16 @@ public interface IPathProvider
     /// This is distinct from <see cref="ConfigDirectory"/>, which stores Reaparr's internal application files rather than media content.
     /// </summary>
     string DataDirectory { get; }
+
+    /// <summary>
+    /// Gets the full path to the SQLite shared-memory sidecar file.
+    /// </summary>
+    // ReSharper disable once InconsistentNaming
+    string Database_SHM_Path { get; }
+
+    /// <summary>
+    /// Gets the full path to the SQLite write-ahead log sidecar file.
+    /// </summary>
+    // ReSharper disable once InconsistentNaming
+    string Database_WAL_Path { get; }
 }

@@ -198,7 +198,7 @@ public sealed class ReaparrDbContext : DbContext, IReaparrDbContext, IReaparrDbC
     {
         if (!optionsBuilder.IsConfigured)
         {
-            optionsBuilder.DefaultConfiguration(typeof(ReaparrDbContext));
+            optionsBuilder.DefaultConfiguration(_pathProvider, typeof(ReaparrDbContext));
         }
 
         optionsBuilder.UseSeeding(ReaparrDBContextSeed.Seed(_pathProvider));

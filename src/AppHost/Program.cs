@@ -19,12 +19,13 @@ public class Program
     {
         try
         {
+            var pathProvider = new PathProvider();
             var logBuffer = new LogBufferService();
-            var signalRLogConfig = new SignalRLogConfig(logBuffer);
+            var signalRLogConfig = new SignalRLogConfig(pathProvider, logBuffer);
 
             // Skip logger setup in integration test mode to preserve test logger
             if (!EnvironmentExtensions.IsIntegrationTestMode())
-                LogFactory.SetupLogging(EnvironmentExtensions.GetLogLevel(), signalRLogConfig);
+                LogFactory.SetupLogging(signalRLogConfig, EnvironmentExtensions.GetLogLevel());
 
             // Must be first after logging: handles installer hooks (install, uninstall, update) and exits early when invoked by the Velopack installer.
             VelopackApp.Build().Run();

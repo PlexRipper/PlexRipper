@@ -22,10 +22,11 @@ public abstract class BaseIntegrationTests
         EnvironmentExtensions.SetLogLevel(logLevel);
         EnvironmentExtensions.EnableUnmaskedLog(true);
 
-        var testLogConfig = new TestLogConfig();
+        IPathProvider pathProvider = new PathProvider();
+        var testLogConfig = new TestLogConfig(pathProvider);
 
         // Pass the TestLogConfig to LogFactory so all application logs go to test output
-        LogFactory.SetupLogging(logLevel, testLogConfig);
+        LogFactory.SetupLogging(testLogConfig, logLevel);
         _log = LogFactory.Create<BaseIntegrationTests>();
 
         BogusExtensions.Setup();

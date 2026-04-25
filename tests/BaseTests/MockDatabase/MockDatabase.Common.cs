@@ -251,7 +251,9 @@ public static partial class MockDatabase
         optionsBuilder.EnableSensitiveDataLogging();
         optionsBuilder.EnableDetailedErrors();
         optionsBuilder.LogTo(text => LogFactory.DbContextLogger(text), LogLevel.Warning);
-        return new AuthDbContext(optionsBuilder.Options, dbName);
+
+        IPathProvider pathProvider = new PathProvider();
+        return new AuthDbContext(optionsBuilder.Options, pathProvider, dbName);
     }
 
     public static string DatabaseConnectionString(string dbName = "") =>

@@ -254,7 +254,7 @@ public class PathProvider : IPathProvider
     /// Gets the directory that stores Reaparr's own application state, such as settings, the SQLite database, backups, and logs.
     /// This is distinct from <see cref="DataDirectory"/>, which is the root location for user media content like Movies, TV shows, and Downloads.
     /// </summary>
-    public static string ConfigDirectory
+    public string ConfigDirectory
     {
         get
         {
@@ -275,34 +275,34 @@ public class PathProvider : IPathProvider
     /// <summary>
     /// Gets the full path to the main Reaparr settings file.
     /// </summary>
-    public static string ConfigFileLocation => Path.Combine(ConfigDirectory, ConfigFileName);
+    public string ConfigFileLocation => Path.Combine(ConfigDirectory, ConfigFileName);
 
     /// <summary>
     /// Gets the directory used to store database backup files.
     /// </summary>
-    public static string DatabaseBackupDirectory => Path.Combine(ConfigDirectory, "Database BackUp");
+    public string DatabaseBackupDirectory => Path.Combine(ConfigDirectory, "Database BackUp");
 
     /// <summary>
     /// Gets the full path to the SQLite database file.
     /// </summary>
-    public static string DatabasePath => Path.Combine(ConfigDirectory, DatabaseName);
+    public string DatabasePath => Path.Combine(ConfigDirectory, DatabaseName);
 
     /// <summary>
     /// Gets the full path to the SQLite shared-memory sidecar file.
     /// </summary>
     // ReSharper disable once InconsistentNaming
-    public static string Database_SHM_Path => Path.Combine(ConfigDirectory, DatabaseShmName);
+    public string Database_SHM_Path => Path.Combine(ConfigDirectory, DatabaseShmName);
 
     /// <summary>
     /// Gets the full path to the SQLite write-ahead log sidecar file.
     /// </summary>
     // ReSharper disable once InconsistentNaming
-    public static string Database_WAL_Path => Path.Combine(ConfigDirectory, DatabaseWalName);
+    public string Database_WAL_Path => Path.Combine(ConfigDirectory, DatabaseWalName);
 
     /// <summary>
     /// Gets the directory used to store application log files.
     /// </summary>
-    public static string LogsDirectory => Path.Combine(ConfigDirectory, _logsFolder);
+    public string LogsDirectory => Path.Combine(ConfigDirectory, _logsFolder);
 
     /// <summary>
     /// Gets the full set of SQLite database files tracked by the application, including sidecar files.
@@ -367,11 +367,6 @@ public class PathProvider : IPathProvider
     /// Gets the directory used to store application log files.
     /// </summary>
     string IPathProvider.LogsDirectory => LogsDirectory;
-
-    /// <summary>
-    /// Gets the resolved configuration directory used by the application.
-    /// </summary>
-    string IPathProvider.ConfigDirectory => ConfigDirectory;
 
     #endregion
 

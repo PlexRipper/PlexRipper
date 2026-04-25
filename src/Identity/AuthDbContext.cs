@@ -1,29 +1,28 @@
 using FluentResults;
 using Microsoft.AspNetCore.DataProtection.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Reaparr.Environment;
 
 namespace Reaparr.Identity;
 
 public sealed class AuthDbContext : IdentityDbContext<AppUser>, IAuthDbContext, IAuthDbContextDatabase
 {
+    private readonly IPathProvider _pathProvider;
     public string DatabaseName { get; } = string.Empty;
 
     public DbSet<DataProtectionKey> DataProtectionKeys { get; set; }
     public DbSet<DownloadClientSession> DownloadClientSessions { get; set; }
 
-    public AuthDbContext() { }
-
-    public AuthDbContext(string databaseName)
-    {
-        DatabaseName = databaseName;
-    }
-
-    public AuthDbContext(DbContextOptions<AuthDbContext> options)
-        : base(options) { }
-
-    public AuthDbContext(DbContextOptions<AuthDbContext> options, string databaseName)
+    public AuthDbContext(DbContextOptions<AuthDbContext> options, IPathProvider pathProvider)
         : base(options)
     {
+        _pathProvider = pathProvider;
+    }
+
+    public AuthDbContext(DbContextOptions<AuthDbContext> options, IPathProvider pathProvider, string databaseName)
+        : base(options)
+    {
+        _pathProvider = pathProvider;
         DatabaseName = databaseName;
         Database.OpenConnection();
         Database.EnsureCreated();
@@ -33,7 +32,7 @@ public sealed class AuthDbContext : IdentityDbContext<AppUser>, IAuthDbContext, 
     {
         if (!optionsBuilder.IsConfigured)
         {
-            optionsBuilder.DefaultConfiguration(typeof(AuthDbContext));
+            optionsBuilder.DefaultConfiguration(_pathProvider, typeof(AuthDbContext));
         }
     }
 

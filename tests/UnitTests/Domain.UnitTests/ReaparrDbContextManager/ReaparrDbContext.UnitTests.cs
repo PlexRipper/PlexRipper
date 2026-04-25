@@ -97,11 +97,13 @@ public class ReaparrDbContextManagerUnitTests : BaseUnitTest<ReaparrDbContextMan
     public async Task ShouldBackUpAndResetDatabase_WhenDatabaseCannotConnect()
     {
         // Arrange
+        IPathProvider pathProvider = new PathProvider();
+
         Mock.Mock<IPathProvider>().SetupGet(x => x.DatabasePath).Returns(() => DatabasePath);
         Mock.Mock<IPathProvider>().SetupGet(x => x.DatabaseBackupDirectory).Returns(() => DatabasePath);
         Mock.Mock<IPathProvider>()
             .Setup(x => x.DatabaseFiles)
-            .Returns(() => [PathProvider.DatabasePath, PathProvider.Database_SHM_Path, PathProvider.Database_WAL_Path]);
+            .Returns(() => [pathProvider.DatabasePath, pathProvider.Database_SHM_Path, pathProvider.Database_WAL_Path]);
         Mock.Mock<IFile>().Setup(x => x.Exists(It.IsAny<string>())).Returns(true);
         Mock.Mock<IFile>().Setup(x => x.Copy(It.IsAny<string>(), It.IsAny<string>())).Verifiable(Times.Exactly(3));
         Mock.Mock<IDirectory>()

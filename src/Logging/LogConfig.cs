@@ -7,6 +7,7 @@ namespace Reaparr.Logging;
 
 public class LogConfig
 {
+    private readonly IPathProvider _pathProvider;
     public static string FileName => nameof(FileName);
 
     public static string FilePath => nameof(FilePath);
@@ -32,6 +33,11 @@ public class LogConfig
     );
 
     protected static readonly ExpressionTemplate FileTemplate = new(TEMPLATE_TEXT);
+
+    protected LogConfig(IPathProvider pathProvider)
+    {
+        _pathProvider = pathProvider;
+    }
 
     /// <summary>
     /// Provides a base configuration with console and debug sinks, and allows for extension by derived classes (e.g. to add file or Seq sinks).
@@ -102,7 +108,7 @@ public class LogConfig
             .WriteTo.Seq(EnvironmentExtensions.GetSeqUrl(), restrictedToMinimumLevel: minimumLogLevel)
             .WriteTo.File(
                 FileTemplate,
-                Path.Combine(PathProvider.LogsDirectory, "log.txt"),
+                Path.Combine(_pathProvider.LogsDirectory, "log.txt"),
                 restrictedToMinimumLevel: minimumLogLevel,
                 rollingInterval: RollingInterval.Day,
                 rollOnFileSizeLimit: true,

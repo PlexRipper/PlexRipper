@@ -8,12 +8,18 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
         <ReaparrRuntimeMode Condition="'$(ReaparrRuntimeMode)' == ''">docker</ReaparrRuntimeMode>
+        <ReaparrRuntimeIdentifier Condition="'$(ReaparrRuntimeIdentifier)' == '' and '$(RuntimeIdentifier)' != ''">$(RuntimeIdentifier)</ReaparrRuntimeIdentifier>
+        <ReaparrRuntimeIdentifier Condition="'$(ReaparrRuntimeIdentifier)' == ''">unknown</ReaparrRuntimeIdentifier>
     </PropertyGroup>
 
     <ItemGroup>
         <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
             <_Parameter1>ReaparrRuntimeMode</_Parameter1>
             <_Parameter2>$(ReaparrRuntimeMode)</_Parameter2>
+        </AssemblyAttribute>
+        <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
+            <_Parameter1>ReaparrRuntimeIdentifier</_Parameter1>
+            <_Parameter2>$(ReaparrRuntimeIdentifier)</_Parameter2>
         </AssemblyAttribute>
     </ItemGroup>
 </Project>

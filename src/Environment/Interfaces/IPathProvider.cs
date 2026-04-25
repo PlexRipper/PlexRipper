@@ -2,19 +2,25 @@
 
 public interface IPathProvider
 {
+    /// <summary>
+    /// Gets the full path to the main Reaparr settings file.
+    /// </summary>
     string ConfigFileLocation { get; }
 
-    string ConfigFileName { get; }
-
+    /// <summary>
+    /// Gets the directory used to store database backup files.
+    /// </summary>
     string DatabaseBackupDirectory { get; }
 
-    string DatabaseName { get; }
-
+    /// <summary>
+    /// Gets the full path to the SQLite database file.
+    /// </summary>
     string DatabasePath { get; }
 
+    /// <summary>
+    /// Gets the directory used to store application log files.
+    /// </summary>
     string LogsDirectory { get; }
-
-    string RootDirectory { get; }
 
     List<string> DatabaseFiles { get; }
 
@@ -68,12 +74,79 @@ public interface IPathProvider
     /// <summary>
     /// Gets the full path to the SQLite shared-memory sidecar file.
     /// </summary>
+
     // ReSharper disable once InconsistentNaming
     string Database_SHM_Path { get; }
 
     /// <summary>
     /// Gets the full path to the SQLite write-ahead log sidecar file.
     /// </summary>
+
     // ReSharper disable once InconsistentNaming
     string Database_WAL_Path { get; }
+
+    /// <summary>
+    /// Gets the sub-folder in some cases such as in Desktop mode.
+    /// </summary>
+    string DefaultReaparrFolderName { get; }
+
+    /// <summary>
+    /// Gets the default folder name used for movie libraries under the root media directory.
+    /// </summary>
+    string DefaultMovieFolderName { get; }
+
+    /// <summary>
+    /// Gets the default folder name used for downloaded files under the root media directory.
+    /// </summary>
+    string DefaultDownloadsFolderName { get; }
+
+    /// <summary>
+    /// Gets the default folder name used for TV show libraries under the root media directory.
+    /// </summary>
+    string DefaultTvShowsFolderName { get; }
+
+    /// <summary>
+    /// Gets the default folder name used for music libraries under the root media directory.
+    /// </summary>
+    string DefaultMusicFolderName { get; }
+
+    /// <summary>
+    /// Gets the default folder name used for photo libraries under the root media directory.
+    /// </summary>
+    string DefaultPhotosFolderName { get; }
+
+    /// <summary>
+    /// Gets the default folder name used for uncategorized media under the root media directory.
+    /// </summary>
+    string DefaultOtherFolderName { get; }
+
+    /// <summary>
+    /// Gets the default folder name used for game libraries under the root media directory.
+    /// </summary>
+    string DefaultGamesFolderName { get; }
+
+    /// <summary>
+    /// Gets the default folder name used for the Config folder
+    /// </summary>
+    string DefaultConfigFolderName { get; }
+
+    /// <summary>
+    /// Gets the file name used for the main Reaparr settings file.
+    /// </summary>
+    string ConfigFileName { get; }
+
+    /// <summary>
+    /// Gets the file name used for the SQLite database.
+    /// </summary>
+    string DatabaseName { get; }
+
+    /// <summary>
+    /// Gets the file name used for the SQLite shared-memory sidecar file.
+    /// </summary>
+    string DatabaseShmName { get; }
+
+    /// <summary>
+    /// Gets the file name used for the SQLite write-ahead log sidecar file.
+    /// </summary>
+    string DatabaseWalName { get; }
 }

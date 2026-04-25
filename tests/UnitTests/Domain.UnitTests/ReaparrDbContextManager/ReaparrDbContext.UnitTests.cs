@@ -9,7 +9,7 @@ namespace Reaparr.Domain.UnitTests;
 
 public class ReaparrDbContextManagerUnitTests : BaseUnitTest<ReaparrDbContextManager>
 {
-    private string DatabasePath => "/Config/" + PathProvider.DatabaseName;
+    private string DatabasePath => "/Config/ReaparrDB.db";
 
     [Test]
     public async Task ShouldConnectToDatabaseAndCheckToMigrate_WhenDatabaseAlreadyExists()
@@ -52,7 +52,8 @@ public class ReaparrDbContextManagerUnitTests : BaseUnitTest<ReaparrDbContextMan
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
-        Mock.Mock<IReaparrDbContextDatabase>().Verify(x => x.Migrate(), Times.Once); // Database creation involves migration
+        Mock.Mock<IReaparrDbContextDatabase>()
+            .Verify(x => x.Migrate(), Times.Once); // Database creation involves migration
     }
 
     [Test]
@@ -226,7 +227,8 @@ public class ReaparrDbContextManagerUnitTests : BaseUnitTest<ReaparrDbContextMan
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
-        Mock.Mock<IReaparrDbContextDatabase>().Verify(x => x.Migrate(), Times.Exactly(2)); // Once for a migration attempt and once for a reset
+        Mock.Mock<IReaparrDbContextDatabase>()
+            .Verify(x => x.Migrate(), Times.Exactly(2)); // Once for a migration attempt and once for a reset
         Mock.Mock<IReaparrDbContextDatabase>().Verify(x => x.EnsureDeleted(), Times.Once);
     }
 
@@ -263,7 +265,8 @@ public class ReaparrDbContextManagerUnitTests : BaseUnitTest<ReaparrDbContextMan
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
-        Mock.Mock<IAuthDbContextDatabase>().Verify(x => x.Migrate(), Times.Exactly(2)); // Once for migration attempt, once for reset
+        Mock.Mock<IAuthDbContextDatabase>()
+            .Verify(x => x.Migrate(), Times.Exactly(2)); // Once for migration attempt, once for reset
         Mock.Mock<IReaparrDbContextDatabase>().Verify(x => x.EnsureDeleted(), Times.Once);
     }
 
@@ -379,7 +382,8 @@ public class ReaparrDbContextManagerUnitTests : BaseUnitTest<ReaparrDbContextMan
         // Assert
         result.IsFailed.ShouldBeTrue();
         Mock.Mock<IReaparrDbContextDatabase>().Verify(x => x.EnsureDeleted(), Times.Once);
-        Mock.Mock<IReaparrDbContextDatabase>().Verify(x => x.Migrate(), Times.Never); // Should not attempt to recreate if deletion failed
+        Mock.Mock<IReaparrDbContextDatabase>()
+            .Verify(x => x.Migrate(), Times.Never); // Should not attempt to recreate if deletion failed
     }
 
     [Test]

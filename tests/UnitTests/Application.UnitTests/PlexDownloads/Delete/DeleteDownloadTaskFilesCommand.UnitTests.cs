@@ -207,6 +207,7 @@ public class DeleteDownloadTaskFilesCommandUnitTests : BaseUnitTest<DeleteDownlo
         var movieFileKey = await dbContext.DownloadTaskMovieFile.ProjectToKey().FirstAsync(CancellationToken);
 
         var pathToDelete = movieFileTask.DownloadFilePath.RemoveReapTempSuffix();
+
         // Sibling file that is not owned by this task — directory must survive.
         var siblingPath = Path.Combine(movieFileTask.DownloadDirectory, "sibling.mkv");
 
@@ -284,8 +285,7 @@ public class DeleteDownloadTaskFilesCommandUnitTests : BaseUnitTest<DeleteDownlo
         var movieTaskFolder = movieFileTask.DownloadDirectory;
         var moviesCategoryFolder = Path.GetDirectoryName(movieTaskFolder.TrimEnd(Path.DirectorySeparatorChar))!;
 
-        IPathProvider pathProvider = new PathProvider();
-        var downloadRoot = pathProvider.DefaultDownloadsDestinationFolder;
+        var downloadRoot = Mock.Create<IPathProvider>().DefaultDownloadsDestinationFolder;
 
         SetupFileSystem(fs => fs.AddFile(plainFilePath, new MockFileData([])));
 
@@ -329,8 +329,7 @@ public class DeleteDownloadTaskFilesCommandUnitTests : BaseUnitTest<DeleteDownlo
         var seasonFolder = episodeFileTask.DownloadDirectory;
         var showFolder = Path.GetDirectoryName(seasonFolder.TrimEnd(Path.DirectorySeparatorChar))!;
         var tvShowsCategoryFolder = Path.GetDirectoryName(showFolder.TrimEnd(Path.DirectorySeparatorChar))!;
-        IPathProvider pathProvider = new PathProvider();
-        var downloadRoot = pathProvider.DefaultDownloadsDestinationFolder;
+        var downloadRoot = Mock.Create<IPathProvider>().DefaultDownloadsDestinationFolder;
 
         SetupFileSystem(fs => fs.AddFile(plainFilePath, new MockFileData([])));
 
@@ -440,8 +439,7 @@ public class DeleteDownloadTaskFilesCommandUnitTests : BaseUnitTest<DeleteDownlo
         var seasonFolder = episodeFileTask.DownloadDirectory;
         var showFolder = Path.GetDirectoryName(seasonFolder.TrimEnd(Path.DirectorySeparatorChar))!;
         var tvShowsCategoryFolder = Path.GetDirectoryName(showFolder.TrimEnd(Path.DirectorySeparatorChar))!;
-        IPathProvider pathProvider = new PathProvider();
-        var downloadRoot = pathProvider.DefaultDownloadsDestinationFolder;
+        var downloadRoot = Mock.Create<IPathProvider>().DefaultDownloadsDestinationFolder;
 
         SetupFileSystem(fs =>
         {

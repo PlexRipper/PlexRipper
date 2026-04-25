@@ -12,14 +12,14 @@ public record TestLoginRequest
 }
 
 [NotInParallel]
-public class LogExtensionsUnitTests
+public class LogExtensionsUnitTests : BaseUnitTest
 {
     [Test]
     public void ShouldLogTheSetLogLevel_WhenLogLevelSetIsVerbose()
     {
         // Arrange
-        IPathProvider pathProvider = new PathProvider();
-        var log = new TestLogConfig(pathProvider).GetLogger(LogEventLevel.Verbose).ForContext<LogExtensionsUnitTests>();
+        var log = new TestLogConfig(Mock.Create<IPathProvider>()).GetLogger(LogEventLevel.Verbose)
+            .ForContext<LogExtensionsUnitTests>();
 
         // Assert
         log.IsLogLevelEnabled(LogEventLevel.Verbose).ShouldBeTrue();
@@ -34,8 +34,8 @@ public class LogExtensionsUnitTests
     public void ShouldNotLogTheSetLogLevel_WhenLogLevelIsAbove()
     {
         // Arrange
-        IPathProvider pathProvider = new PathProvider();
-        var log = new TestLogConfig(pathProvider).GetLogger(LogEventLevel.Error).ForContext<LogExtensionsUnitTests>();
+        var log = new TestLogConfig(Mock.Create<IPathProvider>()).GetLogger(LogEventLevel.Error)
+            .ForContext<LogExtensionsUnitTests>();
 
         // Assert
         log.IsLogLevelEnabled(LogEventLevel.Verbose).ShouldBeFalse();
@@ -51,8 +51,8 @@ public class LogExtensionsUnitTests
     {
         var position = new { Latitude = 25, Longitude = 134 };
 
-        IPathProvider pathProvider = new PathProvider();
-        var log = new TestLogConfig(pathProvider).GetLogger(LogEventLevel.Verbose).ForContext<LogExtensionsUnitTests>();
+        var log = new TestLogConfig(Mock.Create<IPathProvider>()).GetLogger(LogEventLevel.Verbose)
+            .ForContext<LogExtensionsUnitTests>();
 
         using var context = TestCorrelator.CreateContext();
 
@@ -136,10 +136,8 @@ public class LogExtensionsUnitTests
 
         try
         {
-            IPathProvider pathProvider = new PathProvider();
-
             LogFactory.CloseAndFlush();
-            LogFactory.SetupLogging(new TestLogConfig(pathProvider), LogEventLevel.Debug);
+            LogFactory.SetupLogging(new TestLogConfig(Mock.Create<IPathProvider>()), LogEventLevel.Debug);
             var log = LogFactory.Create<LogExtensionsUnitTests>();
             var httpContext = new DefaultHttpContext();
             httpContext.Request.Method = HttpMethods.Post;
@@ -184,9 +182,8 @@ public class LogExtensionsUnitTests
 
         try
         {
-            IPathProvider pathProvider = new PathProvider();
             LogFactory.CloseAndFlush();
-            LogFactory.SetupLogging(new TestLogConfig(pathProvider), LogEventLevel.Debug);
+            LogFactory.SetupLogging(new TestLogConfig(Mock.Create<IPathProvider>()), LogEventLevel.Debug);
 
             var log = LogFactory.Create<LogExtensionsUnitTests>();
             var httpContext = new DefaultHttpContext();

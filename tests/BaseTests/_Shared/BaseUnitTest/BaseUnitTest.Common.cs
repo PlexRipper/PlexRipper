@@ -59,6 +59,7 @@ public partial class BaseUnitTest
                 s.AddSingleton(_ => Mock.Mock<IDownloadHubService>().Object);
                 s.AddSingleton(_ => Mock.Mock<INotificationHubService>().Object);
                 s.AddSingleton(_ => Mock.Mock<IDownloadTaskScheduler>().Object);
+                s.AddSingleton(_ => Mock.Mock<IPathProvider>().Object);
 
                 extraServices?.Invoke(s);
             });

@@ -10,77 +10,52 @@ public class PathProvider : IPathProvider
 
     #region DirectoryNames
 
-    public static readonly string DefaultConfigFolderName = "Config";
+    public string DefaultLogsFolderName => "Logs";
 
-    private static readonly string _logsFolder = "Logs";
+    /// <inheritdoc/>
+    public string DefaultConfigFolderName => "Config";
 
-    /// <summary>
-    /// Gets the sub-folder in some cases such as in Desktop mode.
-    /// </summary>
-    public static string DefaultReaparrFolderName => "Reaparr";
+    /// <inheritdoc/>
+    public string DefaultReaparrFolderName => "Reaparr";
 
-    /// <summary>
-    /// Gets the default folder name used for movie libraries under the root media directory.
-    /// </summary>
-    public static string DefaultMovieFolderName => "Movies";
+    /// <inheritdoc/>
+    public string DefaultMovieFolderName => "Movies";
 
-    /// <summary>
-    /// Gets the default folder name used for downloaded files under the root media directory.
-    /// </summary>
-    public static string DefaultDownloadsFolderName => "Downloads";
+    /// <inheritdoc/>
+    public string DefaultDownloadsFolderName => "Downloads";
 
-    /// <summary>
-    /// Gets the default folder name used for TV show libraries under the root media directory.
-    /// </summary>
-    public static string DefaultTvShowsFolderName => "TvShows";
+    /// <inheritdoc/>
+    public string DefaultTvShowsFolderName => "TvShows";
 
-    /// <summary>
-    /// Gets the default folder name used for music libraries under the root media directory.
-    /// </summary>
-    public static string DefaultMusicFolderName => "Music";
+    /// <inheritdoc/>
+    public string DefaultMusicFolderName => "Music";
 
-    /// <summary>
-    /// Gets the default folder name used for photo libraries under the root media directory.
-    /// </summary>
-    public static string DefaultPhotosFolderName => "Photos";
+    /// <inheritdoc/>
+    public string DefaultPhotosFolderName => "Photos";
 
-    /// <summary>
-    /// Gets the default folder name used for uncategorized media under the root media directory.
-    /// </summary>
-    public static string DefaultOtherFolderName => "Other";
+    /// <inheritdoc/>
+    public string DefaultOtherFolderName => "Other";
 
-    /// <summary>
-    /// Gets the default folder name used for game libraries under the root media directory.
-    /// </summary>
-    public static string DefaultGamesFolderName => "Games";
+    /// <inheritdoc/>
+    public string DefaultGamesFolderName => "Games";
 
     #region FileNames
 
-    /// <summary>
-    /// Gets the file name used for the main Reaparr settings file.
-    /// </summary>
-    public static string ConfigFileName => "ReaparrSettings.json";
+    /// <inheritdoc/>
+    public string ConfigFileName => "ReaparrSettings.json";
 
-    /// <summary>
-    /// Gets the file name used for the SQLite database.
-    /// </summary>
-    public static string DatabaseName => "ReaparrDB.db";
+    /// <inheritdoc/>
+    public string DatabaseName => "ReaparrDB.db";
 
-    /// <summary>
-    /// Gets the file name used for the SQLite shared-memory sidecar file.
-    /// </summary>
-    public static string DatabaseShmName => $"{DatabaseName}-shm";
+    /// <inheritdoc/>
+    public string DatabaseShmName => $"{DatabaseName}-shm";
 
-    /// <summary>
-    /// Gets the file name used for the SQLite write-ahead log sidecar file.
-    /// </summary>
-    public static string DatabaseWalName => $"{DatabaseName}-wal";
+    /// <inheritdoc/>
+    public string DatabaseWalName => $"{DatabaseName}-wal";
 
     #endregion
 
-    /// <summary>
-    /// Gets the default downloads destination path based on the configured data root or the current platform fallback.
-    /// </summary>
+    /// <inheritdoc/>
     public string DefaultDownloadsDestinationFolder
     {
         get
@@ -99,9 +74,7 @@ public class PathProvider : IPathProvider
         }
     }
 
-    /// <summary>
-    /// Gets the default movies destination path based on the configured data root or the current platform fallback.
-    /// </summary>
+    /// <inheritdoc/>
     public string DefaultMovieDestinationFolder
     {
         get
@@ -124,9 +97,7 @@ public class PathProvider : IPathProvider
         }
     }
 
-    /// <summary>
-    /// Gets the default TV shows destination path based on the configured data root or the current platform fallback.
-    /// </summary>
+    /// <inheritdoc/>
     public string DefaultTvShowsDestinationFolder
     {
         get
@@ -149,9 +120,7 @@ public class PathProvider : IPathProvider
         }
     }
 
-    /// <summary>
-    /// Gets the default music destination path based on the configured data root or the current platform fallback.
-    /// </summary>
+    /// <inheritdoc/>
     public string DefaultMusicDestinationFolder
     {
         get
@@ -174,9 +143,7 @@ public class PathProvider : IPathProvider
         }
     }
 
-    /// <summary>
-    /// Gets the default photos destination path based on the configured data root or the current platform fallback.
-    /// </summary>
+    /// <inheritdoc/>
     public string DefaultPhotosDestinationFolder
     {
         get
@@ -199,9 +166,7 @@ public class PathProvider : IPathProvider
         }
     }
 
-    /// <summary>
-    /// Gets the default uncategorized media destination path based on the configured data root or the current platform fallback.
-    /// </summary>
+    /// <inheritdoc/>
     public string DefaultOtherDestinationFolder
     {
         get
@@ -224,9 +189,7 @@ public class PathProvider : IPathProvider
         }
     }
 
-    /// <summary>
-    /// Gets the default games destination path based on the configured data root or the current platform fallback.
-    /// </summary>
+    /// <inheritdoc/>
     public string DefaultGamesDestinationFolder
     {
         get
@@ -251,10 +214,7 @@ public class PathProvider : IPathProvider
 
     #endregion
 
-    /// <summary>
-    /// Gets the directory that stores Reaparr's own application state, such as settings, the SQLite database, backups, and logs.
-    /// This is distinct from <see cref="DataDirectory"/>, which is the root location for user media content like Movies, TV shows, and Downloads.
-    /// </summary>
+    /// <inheritdoc/>
     public string ConfigDirectory
     {
         get
@@ -273,47 +233,32 @@ public class PathProvider : IPathProvider
         }
     }
 
-    /// <summary>
-    /// Gets the full path to the main Reaparr settings file.
-    /// </summary>
+    /// <inheritdoc/>
     public string ConfigFileLocation => Path.Combine(ConfigDirectory, ConfigFileName);
 
-    /// <summary>
-    /// Gets the directory used to store database backup files.
-    /// </summary>
+    /// <inheritdoc/>
     public string DatabaseBackupDirectory => Path.Combine(ConfigDirectory, "Database BackUp");
 
-    /// <summary>
-    /// Gets the full path to the SQLite database file.
-    /// </summary>
+    /// <inheritdoc/>
     public string DatabasePath => Path.Combine(ConfigDirectory, DatabaseName);
 
-    /// <summary>
-    /// Gets the full path to the SQLite shared-memory sidecar file.
-    /// </summary>
+    /// <inheritdoc/>
+
     // ReSharper disable once InconsistentNaming
     public string Database_SHM_Path => Path.Combine(ConfigDirectory, DatabaseShmName);
 
-    /// <summary>
-    /// Gets the full path to the SQLite write-ahead log sidecar file.
-    /// </summary>
+    /// <inheritdoc/>
+
     // ReSharper disable once InconsistentNaming
     public string Database_WAL_Path => Path.Combine(ConfigDirectory, DatabaseWalName);
 
-    /// <summary>
-    /// Gets the directory used to store application log files.
-    /// </summary>
-    public string LogsDirectory => Path.Combine(ConfigDirectory, _logsFolder);
+    /// <inheritdoc/>
+    public string LogsDirectory => Path.Combine(ConfigDirectory, DefaultLogsFolderName);
 
-    /// <summary>
-    /// Gets the full set of SQLite database files tracked by the application, including sidecar files.
-    /// </summary>
+    /// <inheritdoc/>
     public List<string> DatabaseFiles => [DatabasePath, Database_SHM_Path, Database_WAL_Path];
 
-    /// <summary>
-    /// Gets the root directory for user media data, where default destination folders such as Movies, TV shows, Music, and Downloads are created.
-    /// This is distinct from <see cref="ConfigDirectory"/>, which stores Reaparr's internal application files rather than media content.
-    /// </summary>
+    /// <inheritdoc/>
     public string DataDirectory
     {
         get
@@ -331,45 +276,6 @@ public class PathProvider : IPathProvider
             throw new PlatformNotSupportedException($"Platform: {_appBuildInfo.CurrentOS} is not supported");
         }
     }
-
-    #region Interface Implementations
-
-    /// <summary>
-    /// Gets the root directory where Reaparr stores downloaded and managed media.
-    /// </summary>
-    string IPathProvider.RootDirectory => DataDirectory;
-
-    /// <summary>
-    /// Gets the full path to the main Reaparr settings file.
-    /// </summary>
-    string IPathProvider.ConfigFileLocation => ConfigFileLocation;
-
-    /// <summary>
-    /// Gets the file name used for the main Reaparr settings file.
-    /// </summary>
-    string IPathProvider.ConfigFileName => ConfigFileName;
-
-    /// <summary>
-    /// Gets the directory used to store database backup files.
-    /// </summary>
-    string IPathProvider.DatabaseBackupDirectory => DatabaseBackupDirectory;
-
-    /// <summary>
-    /// Gets the file name used for the SQLite database.
-    /// </summary>
-    string IPathProvider.DatabaseName => DatabaseName;
-
-    /// <summary>
-    /// Gets the full path to the SQLite database file.
-    /// </summary>
-    string IPathProvider.DatabasePath => DatabasePath;
-
-    /// <summary>
-    /// Gets the directory used to store application log files.
-    /// </summary>
-    string IPathProvider.LogsDirectory => LogsDirectory;
-
-    #endregion
 
     #endregion
 }

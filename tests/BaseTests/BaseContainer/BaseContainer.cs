@@ -49,32 +49,6 @@ public class BaseContainer : IDisposable
         var memoryDbName = MockDatabase.GetMemoryDatabaseName();
 
         // Create isolated filesystem
-        var sandboxFolder = IntegrationTestFileSystemSandbox.GetSandboxFolder(memoryDbName);
-        EnvironmentExtensions.SetDataPath(sandboxFolder);
-        EnvironmentExtensions.SetConfigPath(
-            Path.Combine(sandboxFolder, Environment.PathProvider.DefaultConfigFolderName)
-        );
-        EnvironmentExtensions.SetDownloadsPath(
-            Path.Combine(sandboxFolder, Environment.PathProvider.DefaultDownloadsFolderName)
-        );
-        EnvironmentExtensions.SetMoviesPath(
-            Path.Combine(sandboxFolder, Environment.PathProvider.DefaultMovieFolderName)
-        );
-        EnvironmentExtensions.SetTvShowsPath(
-            Path.Combine(sandboxFolder, Environment.PathProvider.DefaultTvShowsFolderName)
-        );
-        EnvironmentExtensions.SetMusicPath(
-            Path.Combine(sandboxFolder, Environment.PathProvider.DefaultMusicFolderName)
-        );
-        EnvironmentExtensions.SetPhotosPath(
-            Path.Combine(sandboxFolder, Environment.PathProvider.DefaultPhotosFolderName)
-        );
-        EnvironmentExtensions.SetOtherPath(
-            Path.Combine(sandboxFolder, Environment.PathProvider.DefaultOtherFolderName)
-        );
-        EnvironmentExtensions.SetGamesPath(
-            Path.Combine(sandboxFolder, Environment.PathProvider.DefaultGamesFolderName)
-        );
         var testFileSystemRootPath = IntegrationTestFileSystemSandbox.Create(memoryDbName, log);
 
         var config = UnitTestDataConfig.FromOptions(options);
@@ -137,9 +111,6 @@ public class BaseContainer : IDisposable
     public MockDownloadHubService MockDownloadHubService => (MockDownloadHubService)Resolve<IDownloadHubService>();
 
     public MockProgressHubService MockProgressHubService => (MockProgressHubService)Resolve<IProgressHubService>();
-
-    public MockNotificationHubService MockNotificationHubService =>
-        (MockNotificationHubService)Resolve<INotificationHubService>();
 
     public IServerSettingsModule GetServerSettings => Resolve<IServerSettingsModule>();
 

@@ -8,7 +8,7 @@ public interface IAppBuildInfo
     /// <summary>
     /// Gets the application runtime mode stamped into the build metadata, for example <c>desktop</c> or <c>docker</c>.
     /// </summary>
-    string? RuntimeMode { get; }
+    string RuntimeMode { get; }
 
     /// <summary>
     /// Gets the runtime identifier stamped into the build metadata, for example <c>linux-arm64</c>.

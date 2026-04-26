@@ -20,9 +20,7 @@ public class DownloadUpdateEndpointUnitTests : BaseUnitTest<DownloadUpdateEndpoi
     public async Task ShouldReturnFailure_WhenDockerMode()
     {
         // Arrange
-        using var _ = WithEnvironmentVariablesAsync(
-            new Dictionary<string, string?> { [Environment.EnvKeys.ReaparrPlatform] = "docker" }
-        );
+        SetAppBuildInfo(x => x.RuntimeMode = "docker");
 
         var mockSource = new Mock<IUpdateSource>();
         var mockLocator = new Mock<IVelopackLocator>();
@@ -62,9 +60,7 @@ public class DownloadUpdateEndpointUnitTests : BaseUnitTest<DownloadUpdateEndpoi
     public async Task ShouldReturnSuccess_WhenDesktopModeAndUpdateAvailable()
     {
         // Arrange
-        using var _ = WithEnvironmentVariablesAsync(
-            new Dictionary<string, string?> { [Environment.EnvKeys.ReaparrPlatform] = "desktop" }
-        );
+        SetAppBuildInfo(x => x.RuntimeMode = "desktop");
 
         var asset = new VelopackAsset { PackageId = "Reaparr", Version = new SemanticVersion(9, 9, 9) };
         var updateInfo = new UpdateInfo(asset, false);
@@ -112,9 +108,7 @@ public class DownloadUpdateEndpointUnitTests : BaseUnitTest<DownloadUpdateEndpoi
     public async Task ShouldSendProgressUpdates_WhenDownloadingUpdate()
     {
         // Arrange
-        using var _ = WithEnvironmentVariablesAsync(
-            new Dictionary<string, string?> { [Environment.EnvKeys.ReaparrPlatform] = "desktop" }
-        );
+        SetAppBuildInfo(x => x.RuntimeMode = "desktop");
 
         var asset = new VelopackAsset { PackageId = "Reaparr", Version = new SemanticVersion(9, 9, 9) };
         var updateInfo = new UpdateInfo(asset, false);

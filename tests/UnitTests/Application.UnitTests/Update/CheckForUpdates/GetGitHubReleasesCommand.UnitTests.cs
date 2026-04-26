@@ -6,15 +6,6 @@ namespace Reaparr.Application.UnitTests;
 
 public class GetGitHubReleasesCommandUnitTests : BaseUnitTest<GetGitHubReleasesCommandHandler>
 {
-    private void SetupBuildInfo(string informationalVersion)
-    {
-        Mock.Mock<IAppBuildInfo>().SetupGet(x => x.InformationalVersion).Returns(informationalVersion);
-
-        Mock.Mock<IAppBuildInfo>()
-            .SetupGet(x => x.IsDevRelease)
-            .Returns(informationalVersion.Contains("dev", StringComparison.OrdinalIgnoreCase));
-    }
-
     [Test]
     public async Task ShouldReturnOnlyNewerDevReleases_WhenCurrentVersionIsDevRelease()
     {
@@ -33,13 +24,10 @@ public class GetGitHubReleasesCommandUnitTests : BaseUnitTest<GetGitHubReleasesC
             .Setup(x => x.CreateClient(HttpClientModule.GitHubClientName))
             .Returns(CreateGitHubHttpClient(releases))
             .Verifiable(Times.Once());
-        SetupBuildInfo("0.38.0-dev.6");
+
+        SetAppBuildInfo(x => x.Version = "0.38.0-dev.6");
 
         // Act
-        using var _ = WithEnvironmentVariablesAsync(
-            new Dictionary<string, string?> { [Environment.EnvKeys.InformationalVersion] = "0.38.0-dev.6" }
-        );
-
         var result = await sut.ExecuteAsync(new GetGitHubReleasesCommand(), CancellationToken);
 
         // Assert
@@ -66,13 +54,9 @@ public class GetGitHubReleasesCommandUnitTests : BaseUnitTest<GetGitHubReleasesC
             .Setup(x => x.CreateClient(HttpClientModule.GitHubClientName))
             .Returns(CreateGitHubHttpClient(releases))
             .Verifiable(Times.Once());
-        SetupBuildInfo("0.38.0");
+        SetAppBuildInfo(x => x.Version = "0.38.0");
 
         // Act
-        using var _ = WithEnvironmentVariablesAsync(
-            new Dictionary<string, string?> { [Environment.EnvKeys.InformationalVersion] = "0.38.0" }
-        );
-
         var result = await sut.ExecuteAsync(new GetGitHubReleasesCommand(), CancellationToken);
 
         // Assert
@@ -97,13 +81,9 @@ public class GetGitHubReleasesCommandUnitTests : BaseUnitTest<GetGitHubReleasesC
             .Setup(x => x.CreateClient(HttpClientModule.GitHubClientName))
             .Returns(CreateGitHubHttpClient(releases))
             .Verifiable(Times.Once());
-        SetupBuildInfo("0.38.0-dev.6");
+        SetAppBuildInfo(x => x.Version = "0.38.0-dev.6");
 
         // Act
-        using var _ = WithEnvironmentVariablesAsync(
-            new Dictionary<string, string?> { [Environment.EnvKeys.InformationalVersion] = "0.38.0-dev.6" }
-        );
-
         var result = await sut.ExecuteAsync(new GetGitHubReleasesCommand(), CancellationToken);
 
         // Assert
@@ -128,13 +108,9 @@ public class GetGitHubReleasesCommandUnitTests : BaseUnitTest<GetGitHubReleasesC
             .Setup(x => x.CreateClient(HttpClientModule.GitHubClientName))
             .Returns(CreateGitHubHttpClient(releases))
             .Verifiable(Times.Once());
-        SetupBuildInfo("0.38.0-dev.1");
+        SetAppBuildInfo(x => x.Version = "0.38.0-dev.1");
 
         // Act
-        using var _ = WithEnvironmentVariablesAsync(
-            new Dictionary<string, string?> { [Environment.EnvKeys.InformationalVersion] = "0.38.0-dev.1" }
-        );
-
         var result = await sut.ExecuteAsync(new GetGitHubReleasesCommand(), CancellationToken);
 
         // Assert
@@ -154,12 +130,9 @@ public class GetGitHubReleasesCommandUnitTests : BaseUnitTest<GetGitHubReleasesC
             .Setup(x => x.CreateClient(HttpClientModule.GitHubClientName))
             .Returns(CreateGitHubHttpClient([]))
             .Verifiable(Times.Once());
-        SetupBuildInfo("0.38.0-dev.1");
+        SetAppBuildInfo(x => x.Version = "0.38.0-dev.1");
 
         // Act
-        using var _ = WithEnvironmentVariablesAsync(
-            new Dictionary<string, string?> { [Environment.EnvKeys.InformationalVersion] = "0.38.0-dev.1" }
-        );
 
         var result = await sut.ExecuteAsync(new GetGitHubReleasesCommand(), CancellationToken);
 
@@ -182,12 +155,9 @@ public class GetGitHubReleasesCommandUnitTests : BaseUnitTest<GetGitHubReleasesC
                 new HttpClient(new ThrowingHttpMessageHandler()) { BaseAddress = new Uri("https://api.github.com/") }
             )
             .Verifiable(Times.Once());
-        SetupBuildInfo("0.38.0-dev.1");
+        SetAppBuildInfo(x => x.Version = "0.38.0-dev.1");
 
         // Act
-        using var _ = WithEnvironmentVariablesAsync(
-            new Dictionary<string, string?> { [Environment.EnvKeys.InformationalVersion] = "0.38.0-dev.1" }
-        );
 
         var result = await sut.ExecuteAsync(new GetGitHubReleasesCommand(), CancellationToken);
 
@@ -212,12 +182,9 @@ public class GetGitHubReleasesCommandUnitTests : BaseUnitTest<GetGitHubReleasesC
             .Setup(x => x.CreateClient(HttpClientModule.GitHubClientName))
             .Returns(CreateGitHubHttpClient(releases))
             .Verifiable(Times.Once());
-        SetupBuildInfo("0.38.0-dev.6");
+        SetAppBuildInfo(x => x.Version = "0.38.0-dev.6");
 
         // Act
-        using var _ = WithEnvironmentVariablesAsync(
-            new Dictionary<string, string?> { [Environment.EnvKeys.InformationalVersion] = "0.38.0-dev.6" }
-        );
 
         var result = await sut.ExecuteAsync(new GetGitHubReleasesCommand(), CancellationToken);
 
@@ -289,12 +256,9 @@ public class GetGitHubReleasesCommandUnitTests : BaseUnitTest<GetGitHubReleasesC
             .Setup(x => x.CreateClient(HttpClientModule.GitHubClientName))
             .Returns(CreateGitHubHttpClient(releases))
             .Verifiable(Times.Once());
-        SetupBuildInfo("0.38.0-dev.6");
+        SetAppBuildInfo(x => x.Version = "0.38.0-dev.6");
 
         // Act
-        using var _ = WithEnvironmentVariablesAsync(
-            new Dictionary<string, string?> { [Environment.EnvKeys.InformationalVersion] = "0.38.0-dev.6" }
-        );
 
         var result = await sut.ExecuteAsync(new GetGitHubReleasesCommand(), CancellationToken);
 
@@ -331,13 +295,9 @@ public class GetGitHubReleasesCommandUnitTests : BaseUnitTest<GetGitHubReleasesC
             .Setup(x => x.CreateClient(HttpClientModule.GitHubClientName))
             .Returns(CreateGitHubHttpClient(releases))
             .Verifiable(Times.Once());
-        SetupBuildInfo("0.38.0");
+        SetAppBuildInfo(x => x.Version = "0.38.0");
 
         // Act
-        using var _ = WithEnvironmentVariablesAsync(
-            new Dictionary<string, string?> { [Environment.EnvKeys.InformationalVersion] = "0.38.0" }
-        );
-
         var result = await sut.ExecuteAsync(new GetGitHubReleasesCommand(), CancellationToken);
 
         // Assert
@@ -366,13 +326,9 @@ public class GetGitHubReleasesCommandUnitTests : BaseUnitTest<GetGitHubReleasesC
             .Setup(x => x.CreateClient(HttpClientModule.GitHubClientName))
             .Returns(CreateGitHubHttpClient(releases))
             .Verifiable(Times.Once());
-        SetupBuildInfo("0.38.0-dev.6");
+        SetAppBuildInfo(x => x.Version = "0.38.0-dev.6");
 
         // Act
-        using var _ = WithEnvironmentVariablesAsync(
-            new Dictionary<string, string?> { [Environment.EnvKeys.InformationalVersion] = "0.38.0-dev.6" }
-        );
-
         var result = await sut.ExecuteAsync(new GetGitHubReleasesCommand(), CancellationToken);
 
         // Assert
@@ -399,13 +355,9 @@ public class GetGitHubReleasesCommandUnitTests : BaseUnitTest<GetGitHubReleasesC
             .Setup(x => x.CreateClient(HttpClientModule.GitHubClientName))
             .Returns(CreateGitHubHttpClient(releases))
             .Verifiable(Times.Once());
-        SetupBuildInfo("0.38.0");
+        SetAppBuildInfo(x => x.Version = "0.38.0");
 
         // Act
-        using var _ = WithEnvironmentVariablesAsync(
-            new Dictionary<string, string?> { [Environment.EnvKeys.InformationalVersion] = "0.38.0" }
-        );
-
         var result = await sut.ExecuteAsync(new GetGitHubReleasesCommand(), CancellationToken);
 
         // Assert
@@ -433,13 +385,9 @@ public class GetGitHubReleasesCommandUnitTests : BaseUnitTest<GetGitHubReleasesC
             .Setup(x => x.CreateClient(HttpClientModule.GitHubClientName))
             .Returns(CreateGitHubHttpClient(releases))
             .Verifiable(Times.Once());
-        SetupBuildInfo("0.38.0-dev.6");
+        SetAppBuildInfo(x => x.Version = "0.38.0-dev.6");
 
         // Act
-        using var _ = WithEnvironmentVariablesAsync(
-            new Dictionary<string, string?> { [Environment.EnvKeys.InformationalVersion] = "0.38.0-dev.6" }
-        );
-
         var result = await sut.ExecuteAsync(new GetGitHubReleasesCommand(), CancellationToken);
 
         // Assert
@@ -466,13 +414,9 @@ public class GetGitHubReleasesCommandUnitTests : BaseUnitTest<GetGitHubReleasesC
             .Setup(x => x.CreateClient(HttpClientModule.GitHubClientName))
             .Returns(CreateGitHubHttpClient(releases))
             .Verifiable(Times.Once());
-        SetupBuildInfo("0.38.0");
+        SetAppBuildInfo(x => x.Version = "0.38.0");
 
         // Act
-        using var _ = WithEnvironmentVariablesAsync(
-            new Dictionary<string, string?> { [Environment.EnvKeys.InformationalVersion] = "0.38.0" }
-        );
-
         var result = await sut.ExecuteAsync(new GetGitHubReleasesCommand(), CancellationToken);
 
         // Assert
@@ -497,12 +441,9 @@ public class GetGitHubReleasesCommandUnitTests : BaseUnitTest<GetGitHubReleasesC
                 }
             )
             .Verifiable(Times.Once());
-        SetupBuildInfo("0.38.0-dev.1");
+        SetAppBuildInfo(x => x.Version = "0.38.0-dev.1");
 
         // Act
-        using var _ = WithEnvironmentVariablesAsync(
-            new Dictionary<string, string?> { [Environment.EnvKeys.InformationalVersion] = "0.38.0-dev.1" }
-        );
 
         var result = await sut.ExecuteAsync(new GetGitHubReleasesCommand(), CancellationToken);
 

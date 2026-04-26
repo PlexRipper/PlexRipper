@@ -7,6 +7,7 @@ public partial class BaseUnitTest
 {
     private Action<ContainerBuilder>? _fileSystemSetup;
     private Action<ContainerBuilder>? _httpClientSetup;
+    private Action<ContainerBuilder>? _appBuildInfoSetup;
     private readonly MockFileSystem _fileSystem = new();
     protected AutoMock Mock { get; set; }
 
@@ -17,6 +18,9 @@ public partial class BaseUnitTest
         Mock = AutoMock.GetStrict(builder =>
         {
             SetDefaultBuilder(builder);
+
+            if (_appBuildInfoSetup is not null)
+                _appBuildInfoSetup.Invoke(builder);
 
             if (_fileSystemSetup is not null)
             {
@@ -29,9 +33,7 @@ public partial class BaseUnitTest
             }
 
             if (_httpClientSetup is not null)
-            {
                 _httpClientSetup.Invoke(builder);
-            }
         });
 
         // Mock to avoid HttpClient.Dispose() not mocked exception
@@ -101,25 +103,30 @@ public partial class BaseUnitTest
             .As<IAuthDbContextFactory>()
             .InstancePerDependency();
 
-        builder
-            .Register(_ =>
-            {
-                var appBuildInfoMock = new Mock<IAppBuildInfo>(MockBehavior.Loose);
-                appBuildInfoMock.SetupGet(x => x.RuntimeMode).Returns("docker");
-                appBuildInfoMock.SetupGet(x => x.RuntimeIdentifier).Returns("linux-x64");
-                appBuildInfoMock.SetupGet(x => x.Version).Returns("0.0.0");
-                appBuildInfoMock.SetupGet(x => x.InformationalVersion).Returns("0.0.0");
-                appBuildInfoMock.SetupGet(x => x.CurrentOS).Returns(OperatingSystemPlatform.Linux);
-                appBuildInfoMock.SetupGet(x => x.IsWindows).Returns(false);
-                appBuildInfoMock.SetupGet(x => x.IsDesktopMode).Returns(false);
-                appBuildInfoMock.SetupGet(x => x.IsDockerMode).Returns(true);
-                appBuildInfoMock.SetupGet(x => x.IsDevRelease).Returns(false);
-                return appBuildInfoMock.Object;
-            })
-            .As<IAppBuildInfo>()
-            .SingleInstance();
+        builder.RegisterType<MockAppBuildInfo>().As<IAppBuildInfo>().SingleInstance();
 
-        builder.Register(ctx => new PathProvider(ctx.Resolve<IAppBuildInfo>())).As<IPathProvider>().SingleInstance();
+        builder
+            .Register(ctx => new MockPathProvider(_databaseName, ctx.Resolve<IAppBuildInfo>()))
+            .As<IPathProvider>()
+            .SingleInstance();
+    }
+
+    protected void SetAppBuildInfo(Action<MockAppBuildInfo> action)
+    {
+        _appBuildInfoSetup = builder =>
+        {
+            builder
+                .Register<MockAppBuildInfo>(_ =>
+                {
+                    var instance = new MockAppBuildInfo();
+                    action.Invoke(instance);
+                    return instance;
+                })
+                .As<IAppBuildInfo>()
+                .SingleInstance();
+        };
+
+        Build();
     }
 
     protected void SetupHttpClient(Action<Mock<HttpMessageHandler>>? action = null)

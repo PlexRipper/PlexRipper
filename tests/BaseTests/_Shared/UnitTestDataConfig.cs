@@ -25,4 +25,6 @@ public class UnitTestDataConfig : BaseConfig<UnitTestDataConfig>
     /// Optional per-test Autofac overrides. Invoked after TestModule registration so last registration wins.
     /// </summary>
     public Action<ContainerBuilder>? OverrideServices { get; set; }
+
+    public MockAppBuildInfo? OverrideAppBuildInfo { get; set; }
 }

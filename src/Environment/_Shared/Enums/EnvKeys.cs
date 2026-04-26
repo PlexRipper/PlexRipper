@@ -6,9 +6,6 @@ public static class EnvKeys
     public const string Unmasked = "UNMASKED";
     public const string LogEnvironmentVariables = "LOG_ENV_VARS";
     public const string LogLevel = "LOG_LEVEL";
-    public const string Version = "VERSION";
-    public const string InformationalVersion = "INFORMATIONAL_VERSION";
-    public const string ReaparrPlatform = "REAPARR_PLATFORM";
     public const string ReaparrDataPath = "REAPARR_DATA_PATH";
     public const string ReaparrConfigPath = "REAPARR_CONFIG_PATH";
     public const string ReaparrDownloadsPath = "REAPARR_DOWNLOADS_PATH";

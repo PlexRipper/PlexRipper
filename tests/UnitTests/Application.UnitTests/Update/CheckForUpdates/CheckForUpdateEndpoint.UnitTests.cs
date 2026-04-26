@@ -55,13 +55,12 @@ public class CheckForUpdateEndpointUnitTests : BaseUnitTest<CheckForUpdateEndpoi
     public async Task ShouldReturnNoUpdate_WhenDockerModeAndCommandExecutorReturnsNoUpdate()
     {
         // Arrange
-        using var _ = WithEnvironmentVariablesAsync(
-            new Dictionary<string, string?>
-            {
-                [Environment.EnvKeys.ReaparrPlatform] = "docker",
-                [Environment.EnvKeys.InformationalVersion] = StableVersion,
-            }
-        );
+        SetAppBuildInfo(x =>
+        {
+            x.RuntimeMode = "docker";
+            x.InformationalVersion = StableVersion;
+        });
+
         var noUpdate = new AppUpdateCheckResult
         {
             IsUpdateAvailable = false,
@@ -94,13 +93,11 @@ public class CheckForUpdateEndpointUnitTests : BaseUnitTest<CheckForUpdateEndpoi
     public async Task ShouldReturnUpdateAvailable_WhenDockerModeAndCommandExecutorReturnsStableUpdate()
     {
         // Arrange
-        using var _ = WithEnvironmentVariablesAsync(
-            new Dictionary<string, string?>
-            {
-                [Environment.EnvKeys.ReaparrPlatform] = "docker",
-                [Environment.EnvKeys.InformationalVersion] = StableVersion,
-            }
-        );
+        SetAppBuildInfo(x =>
+        {
+            x.RuntimeMode = "docker";
+            x.InformationalVersion = StableVersion;
+        });
 
         var releaseNotes = new List<ReleaseNote>
         {
@@ -150,13 +147,11 @@ public class CheckForUpdateEndpointUnitTests : BaseUnitTest<CheckForUpdateEndpoi
     public async Task ShouldReturnUpdateAvailable_WhenDockerModeAndCommandExecutorReturnsDevUpdate()
     {
         // Arrange
-        using var _ = WithEnvironmentVariablesAsync(
-            new Dictionary<string, string?>
-            {
-                [Environment.EnvKeys.ReaparrPlatform] = "docker",
-                [Environment.EnvKeys.InformationalVersion] = DevVersion,
-            }
-        );
+        SetAppBuildInfo(x =>
+        {
+            x.RuntimeMode = "docker";
+            x.InformationalVersion = DevVersion;
+        });
 
         var releaseNotes = new List<ReleaseNote>
         {
@@ -207,13 +202,11 @@ public class CheckForUpdateEndpointUnitTests : BaseUnitTest<CheckForUpdateEndpoi
     public async Task ShouldReturnUpdateAvailable_WhenDesktopModeAndCommandExecutorReturnsUpdate()
     {
         // Arrange
-        using var _ = WithEnvironmentVariablesAsync(
-            new Dictionary<string, string?>
-            {
-                [Environment.EnvKeys.ReaparrPlatform] = "desktop",
-                [Environment.EnvKeys.InformationalVersion] = StableVersion,
-            }
-        );
+        SetAppBuildInfo(x =>
+        {
+            x.RuntimeMode = "desktop";
+            x.InformationalVersion = StableVersion;
+        });
 
         var releaseNotes = new List<ReleaseNote>
         {
@@ -264,13 +257,12 @@ public class CheckForUpdateEndpointUnitTests : BaseUnitTest<CheckForUpdateEndpoi
     public async Task ShouldReturnNoUpdate_WhenDesktopModeAndCommandExecutorReturnsNoUpdate()
     {
         // Arrange
-        using var _ = WithEnvironmentVariablesAsync(
-            new Dictionary<string, string?>
-            {
-                [Environment.EnvKeys.ReaparrPlatform] = "desktop",
-                [Environment.EnvKeys.InformationalVersion] = StableVersion,
-            }
-        );
+        SetAppBuildInfo(x =>
+        {
+            x.RuntimeMode = "desktop";
+            x.InformationalVersion = StableVersion;
+        });
+
         var noUpdate = new AppUpdateCheckResult
         {
             IsUpdateAvailable = false,

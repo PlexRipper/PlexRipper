@@ -8,29 +8,35 @@ public class CheckForUpdateEndpointIntegrationTests : BaseIntegrationTests
     public async Task ShouldReturnNoUpdate_WhenDockerModeAndCommandExecutorReturnsNoUpdate()
     {
         // Arrange
-        using var environmentOverride = CreateEnvironmentOverride("docker", "0.38.0");
         var seed = new Seed(11001);
+
+        var updateResult = new AppUpdateCheckResult
+        {
+            IsUpdateAvailable = false,
+            NewestVersion = "0.38.0",
+            CurrentVersion = "0.38.0",
+            ReleaseNotes = [],
+        };
 
         using var container = await CreateContainer(
             seed,
             config =>
+            {
+                config.OverrideAppBuildInfo = new MockAppBuildInfo
+                {
+                    RuntimeMode = "docker",
+                    Version = "0.38.0",
+                    RuntimeIdentifier = "linux-x64",
+                    CurrentOS = OperatingSystemPlatform.Linux,
+                };
                 config.OverrideServices = builder =>
+                {
                     builder
-                        .Register(context =>
-                            new FakeCommandExecutor().Intercept<CheckForUpdatesCommand, Result<AppUpdateCheckResult>>((
-                                    _,
-                                    _) => Task.FromResult(Result.Ok(new AppUpdateCheckResult
-                                {
-                                    IsUpdateAvailable = false,
-                                    NewestVersion = context.Resolve<IAppBuildInfo>().InformationalVersion,
-                                    CurrentVersion = context.Resolve<IAppBuildInfo>().InformationalVersion,
-                                    ReleaseNotes = [],
-                                }))
-                            )
-                        )
+                        .Register(_ => CreateCommandExecutor(updateResult))
                         .As<ICommandExecutor>()
-                        .InstancePerDependency()
-        );
+                        .InstancePerDependency();
+                };
+            });
 
         var client = container.GetApiClient();
         await client.SignIn();
@@ -54,7 +60,6 @@ public class CheckForUpdateEndpointIntegrationTests : BaseIntegrationTests
     public async Task ShouldReturnUpdateAvailable_WhenDockerModeAndCommandExecutorReturnsStableUpdate()
     {
         // Arrange
-        using var environmentOverride = CreateEnvironmentOverride("docker", "0.38.0");
         var seed = new Seed(11002);
         var updateResult = new AppUpdateCheckResult
         {
@@ -76,17 +81,20 @@ public class CheckForUpdateEndpointIntegrationTests : BaseIntegrationTests
         using var container = await CreateContainer(
             seed,
             config =>
+            {
+                config.OverrideAppBuildInfo = new MockAppBuildInfo
+                {
+                    RuntimeMode = "docker",
+                    Version = "0.38.0",
+                    RuntimeIdentifier = "linux-x64",
+                    CurrentOS = OperatingSystemPlatform.Linux,
+                };
                 config.OverrideServices = builder =>
                     builder
-                        .Register(_ =>
-                            new FakeCommandExecutor().Intercept<CheckForUpdatesCommand, Result<AppUpdateCheckResult>>((
-                                    _,
-                                    _) => Task.FromResult(Result.Ok(updateResult))
-                            )
-                        )
+                        .Register(_ => CreateCommandExecutor(updateResult))
                         .As<ICommandExecutor>()
-                        .InstancePerDependency()
-        );
+                        .InstancePerDependency();
+            });
 
         var client = container.GetApiClient();
         await client.SignIn();
@@ -113,13 +121,12 @@ public class CheckForUpdateEndpointIntegrationTests : BaseIntegrationTests
     public async Task ShouldReturnUpdateAvailable_WhenDockerModeAndCommandExecutorReturnsDevUpdate()
     {
         // Arrange
-        using var environmentOverride = CreateEnvironmentOverride("docker", "0.38.0-dev.6");
         var seed = new Seed(11003);
         var updateResult = new AppUpdateCheckResult
         {
             IsUpdateAvailable = true,
             NewestVersion = "0.38.0-dev.7",
-            CurrentVersion = "0.37.0",
+            CurrentVersion = "0.38.0",
             ReleaseNotes =
             [
                 new ReleaseNote
@@ -135,17 +142,20 @@ public class CheckForUpdateEndpointIntegrationTests : BaseIntegrationTests
         using var container = await CreateContainer(
             seed,
             config =>
+            {
+                config.OverrideAppBuildInfo = new MockAppBuildInfo
+                {
+                    RuntimeMode = "docker",
+                    Version = "0.38.0-dev.6",
+                    RuntimeIdentifier = "linux-x64",
+                    CurrentOS = OperatingSystemPlatform.Linux,
+                };
                 config.OverrideServices = builder =>
                     builder
-                        .Register(_ =>
-                            new FakeCommandExecutor().Intercept<CheckForUpdatesCommand, Result<AppUpdateCheckResult>>((
-                                    _,
-                                    _) => Task.FromResult(Result.Ok(updateResult))
-                            )
-                        )
+                        .Register(_ => CreateCommandExecutor(updateResult))
                         .As<ICommandExecutor>()
-                        .InstancePerDependency()
-        );
+                        .InstancePerDependency();
+            });
 
         var client = container.GetApiClient();
         await client.SignIn();
@@ -161,7 +171,7 @@ public class CheckForUpdateEndpointIntegrationTests : BaseIntegrationTests
         var dto = response.Result.Value.ShouldNotBeNull();
         dto.IsUpdateAvailable.ShouldBeTrue();
         dto.NewestVersion.ShouldBe("0.38.0-dev.7");
-        dto.CurrentVersion.ShouldBe("0.38.0-dev.6");
+        dto.CurrentVersion.ShouldBe("0.38.0");
         dto.ReleaseNotes.Count.ShouldBe(1);
         dto.ReleaseNotes[0].Version.ShouldBe("v0.38.0-dev.7");
         dto.ReleaseNotes[0].Notes.ShouldBe("Development release notes");
@@ -172,13 +182,12 @@ public class CheckForUpdateEndpointIntegrationTests : BaseIntegrationTests
     public async Task ShouldReturnUpdateAvailable_WhenDesktopModeAndCommandExecutorReturnsUpdate()
     {
         // Arrange
-        using var environmentOverride = CreateEnvironmentOverride("desktop", "0.38.0");
         var seed = new Seed(11004);
         var updateResult = new AppUpdateCheckResult
         {
             IsUpdateAvailable = true,
             NewestVersion = "9.9.9",
-            CurrentVersion = "0.37.0",
+            CurrentVersion = "0.38.0",
             ReleaseNotes =
             [
                 new ReleaseNote
@@ -194,19 +203,20 @@ public class CheckForUpdateEndpointIntegrationTests : BaseIntegrationTests
         using var container = await CreateContainer(
             seed,
             config =>
-                config.OverrideServices = builder =>
+            {
+                config.OverrideAppBuildInfo = new MockAppBuildInfo
                 {
+                    RuntimeMode = "desktop",
+                    Version = "0.38.0",
+                    RuntimeIdentifier = "linux-x64",
+                    CurrentOS = OperatingSystemPlatform.Linux,
+                };
+                config.OverrideServices = builder =>
                     builder
-                        .Register(_ =>
-                            new FakeCommandExecutor().Intercept<CheckForUpdatesCommand, Result<AppUpdateCheckResult>>((
-                                    _,
-                                    _) => Task.FromResult(Result.Ok(updateResult))
-                            )
-                        )
+                        .Register(_ => CreateCommandExecutor(updateResult))
                         .As<ICommandExecutor>()
                         .InstancePerDependency();
-                }
-        );
+            });
 
         var client = container.GetApiClient();
         await client.SignIn();
@@ -233,29 +243,33 @@ public class CheckForUpdateEndpointIntegrationTests : BaseIntegrationTests
     public async Task ShouldReturnNoUpdate_WhenDesktopModeAndCommandExecutorReturnsNoUpdate()
     {
         // Arrange
-        using var environmentOverride = CreateEnvironmentOverride("desktop", "0.38.0");
         var seed = new Seed(11005);
+
+        var updateResult = new AppUpdateCheckResult
+        {
+            IsUpdateAvailable = false,
+            NewestVersion = "0.38.0",
+            CurrentVersion = "0.38.0",
+            ReleaseNotes = [],
+        };
 
         using var container = await CreateContainer(
             seed,
             config =>
+            {
+                config.OverrideAppBuildInfo = new MockAppBuildInfo
+                {
+                    RuntimeMode = "desktop",
+                    Version = "0.38.0",
+                    RuntimeIdentifier = "linux-x64",
+                    CurrentOS = OperatingSystemPlatform.Linux,
+                };
                 config.OverrideServices = builder =>
                     builder
-                        .Register(context =>
-                            new FakeCommandExecutor().Intercept<CheckForUpdatesCommand, Result<AppUpdateCheckResult>>((
-                                    _,
-                                    _) => Task.FromResult(Result.Ok(new AppUpdateCheckResult
-                                {
-                                    IsUpdateAvailable = false,
-                                    NewestVersion = context.Resolve<IAppBuildInfo>().InformationalVersion,
-                                    CurrentVersion = context.Resolve<IAppBuildInfo>().InformationalVersion,
-                                    ReleaseNotes = [],
-                                }))
-                            )
-                        )
+                        .Register(_ => CreateCommandExecutor(updateResult))
                         .As<ICommandExecutor>()
-                        .InstancePerDependency()
-        );
+                        .InstancePerDependency();
+            });
 
         var client = container.GetApiClient();
         await client.SignIn();
@@ -275,12 +289,12 @@ public class CheckForUpdateEndpointIntegrationTests : BaseIntegrationTests
         dto.ReleaseNotes.ShouldBeEmpty();
     }
 
-    private static IDisposable CreateEnvironmentOverride(string platform, string version) =>
-        OverrideEnvironmentVariables(
-            new Dictionary<string, string?>
-            {
-                [EnvKeys.ReaparrPlatform] = platform,
-                [EnvKeys.InformationalVersion] = version,
-            }
-        );
+    private static FakeCommandExecutor CreateCommandExecutor(AppUpdateCheckResult updateResult) =>
+        new FakeCommandExecutor()
+            .Intercept<GetGitHubReleasesCommand, Result<IReadOnlyList<ReleaseNote>>>((_, _) =>
+                Task.FromResult(Result.Ok<IReadOnlyList<ReleaseNote>>(updateResult.ReleaseNotes))
+            )
+            .Intercept<CheckForUpdatesCommand, Result<AppUpdateCheckResult>>((_, _) =>
+                Task.FromResult(Result.Ok(updateResult))
+            );
 }

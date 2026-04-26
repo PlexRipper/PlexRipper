@@ -12,13 +12,11 @@ public class CheckForUpdatesCommandUnitTests : BaseUnitTest<CheckForUpdatesComma
     public async Task ShouldReturnUpdateAvailable_WhenDesktopModeAndReleaseNotesFetchFails()
     {
         // Arrange
-        using var _ = WithEnvironmentVariablesAsync(
-            new Dictionary<string, string?>
-            {
-                [Environment.EnvKeys.ReaparrPlatform] = "desktop",
-                [Environment.EnvKeys.InformationalVersion] = "0.36.0-dev.1",
-            }
-        );
+        SetAppBuildInfo(x =>
+        {
+            x.RuntimeMode = "desktop";
+            x.Version = "0.36.0-dev.1";
+        });
 
         var asset = new VelopackAsset { PackageId = "Reaparr", Version = new SemanticVersion(0, 38, 0, "dev.10") };
         var updateInfo = new UpdateInfo(asset, false);

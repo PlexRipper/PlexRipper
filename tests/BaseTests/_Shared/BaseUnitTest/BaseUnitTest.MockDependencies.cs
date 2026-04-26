@@ -113,6 +113,11 @@ public partial class BaseUnitTest
 
     protected void SetAppBuildInfo(Action<MockAppBuildInfo> action)
     {
+        // Apply to the current singleton for already-resolved SUT instances, then
+        // persist the same override for any future container rebuilds.
+        if (Mock.Container.Resolve<IAppBuildInfo>() is MockAppBuildInfo existingAppBuildInfo)
+            action.Invoke(existingAppBuildInfo);
+
         _appBuildInfoSetup = builder =>
         {
             builder

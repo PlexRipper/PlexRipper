@@ -1,4 +1,5 @@
 using System.IO.Abstractions;
+using Autofac;
 using Reaparr.Data;
 using Reaparr.Data.Contracts;
 using Reaparr.Environment;
@@ -9,7 +10,7 @@ namespace Reaparr.Domain.UnitTests;
 
 public class ReaparrDbContextManagerUnitTests : BaseUnitTest<ReaparrDbContextManager>
 {
-    private string DatabasePath => "/Config/ReaparrDB.db";
+    private string DatabasePath => Mock.Container.Resolve<IPathProvider>().DatabasePath;
 
     [Test]
     public async Task ShouldConnectToDatabaseAndCheckToMigrate_WhenDatabaseAlreadyExists()

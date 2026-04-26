@@ -19,6 +19,9 @@ public class Program
     {
         try
         {
+            // This should be ran at the very start before anything is initiated
+            VelopackApp.Build().Run();
+
             var appBuildInfo = new AppBuildInfo();
             var pathProvider = new PathProvider();
             var logBuffer = new LogBufferService();
@@ -41,9 +44,6 @@ public class Program
                 );
 
             AppExtensions.LogIdentity();
-
-            // Must be first after logging: handles installer hooks (install, uninstall, update) and exits early when invoked by the Velopack installer.
-            VelopackApp.Build().Run();
 
             FluentResultConfiguration.Setup();
 

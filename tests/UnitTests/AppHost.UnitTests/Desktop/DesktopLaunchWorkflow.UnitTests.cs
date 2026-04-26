@@ -22,7 +22,7 @@ public class DesktopLaunchWorkflowUnitTests
         try
         {
             // Act
-            var movedPackages = ClearPendingVelopackPackages(packageRoot);
+            var movedPackages = DesktopLaunchWorkflow.ClearPendingVelopackPackages(packageRoot);
 
             // Assert
             movedPackages.Count.ShouldBe(1);
@@ -38,12 +38,5 @@ public class DesktopLaunchWorkflowUnitTests
             if (Directory.Exists(packageRoot))
                 Directory.Delete(packageRoot, recursive: true);
         }
-    }
-
-    private static IReadOnlyList<string> ClearPendingVelopackPackages(string packageRoot)
-    {
-        IReadOnlyList<string> movedPackages = DesktopLaunchWorkflow.ClearPendingVelopackPackages(packageRoot);
-        movedPackages.ShouldNotBeNull();
-        return movedPackages;
     }
 }

@@ -3,7 +3,7 @@ using System.Reflection;
 namespace Reaparr.Environment;
 
 /// <inheritdoc/>
-public class AppBuildInfo : IAppBuildInfo
+public sealed class AppBuildInfo : IAppBuildInfo
 {
     private readonly List<AssemblyMetadataAttribute> _attributes;
 
@@ -20,10 +20,10 @@ public class AppBuildInfo : IAppBuildInfo
     public string RuntimeIdentifier => GetAssemblyMetadataValue("ReaparrRuntimeIdentifier");
 
     /// <inheritdoc/>
-    public bool IsDesktopMode => RuntimeMode.Contains("desktop", StringComparison.OrdinalIgnoreCase);
+    public bool IsDesktopMode => string.Equals(RuntimeMode, "desktop", StringComparison.OrdinalIgnoreCase);
 
     /// <inheritdoc/>
-    public bool IsDockerMode => RuntimeMode.Contains("docker", StringComparison.OrdinalIgnoreCase);
+    public bool IsDockerMode => string.Equals(RuntimeMode, "docker", StringComparison.OrdinalIgnoreCase);
 
     /// <inheritdoc/>
     public bool IsDevRelease => InformationalVersion.Contains("dev", StringComparison.OrdinalIgnoreCase);
@@ -65,8 +65,6 @@ public class AppBuildInfo : IAppBuildInfo
     }
 
     private string GetAssemblyMetadataValue(string key) =>
-        _attributes
-            .FirstOrDefault(attribute => string.Equals(attribute.Key, key, StringComparison.OrdinalIgnoreCase))
-            ?.Value
+        _attributes.FirstOrDefault(attribute => string.Equals(attribute.Key, key, StringComparison.Ordinal))?.Value
         ?? "unknown";
 }

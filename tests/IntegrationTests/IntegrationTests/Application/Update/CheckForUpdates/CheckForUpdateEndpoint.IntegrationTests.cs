@@ -300,6 +300,10 @@ public class CheckForUpdateEndpointIntegrationTests : BaseIntegrationTests
                 (_, _) => Task.FromResult(Result.Ok<IReadOnlyList<ReleaseNote>>(updateResult.ReleaseNotes))
             )
             .Intercept<CheckForUpdatesCommand, Result<AppUpdateCheckResult>>(
-                (_, _) => Task.FromResult(Result.Ok(updateResult))
+                (_, _) =>
+                {
+                    var expectedResult = Result.Ok(updateResult);
+                    return Task.FromResult(expectedResult);
+                }
             );
 }

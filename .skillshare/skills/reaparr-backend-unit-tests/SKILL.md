@@ -36,6 +36,66 @@ Do not use this skill for frontend tests (Vitest/Cypress).
 - Structure: Arrange -> Act -> Assert. Every test method **must** include the three comment markers `// Arrange`, `// Act`, and `// Assert` — no exceptions. Within Arrange, mock setups (`Mock.Mock<T>()`) must always be the **last step**, immediately before Act.
 - Determinism: no random behavior in tests.
 
+## Base Test Helpers
+
+Prefer the shared `BaseUnitTest` helpers over manual container or SUT construction.
+
+- Use `SetupDatabase(...)` for database state.
+- Use `SetupFileSystem(...)` for filesystem state only.
+- Use `SetupDependencies(...)` when a test needs to replace a DI registration without overloading an unrelated helper.
+- Use `SetAppBuildInfo(...)` for build/version metadata instead of constructing custom handlers or endpoints manually.
+
+### Filesystem and dependency setup
+
+Keep filesystem setup and DI overrides separate:
+
+```csharp
+SetupDependencies(builder => builder.RegisterInstance<IUserSettings>(new UserSettings()));
+SetupFileSystem(system =>
+{
+    system.AddDirectory(configDirectory);
+    system.AddFile(configPath, new MockFileData("{}"));
+});
+
+var result = Sut.Setup();
+```
+
+Do not hide dependency overrides inside `SetupFileSystem(...)`. If a test needs a real service instance, register it explicitly with `SetupDependencies(...)`.
+
+### Sandbox path rule
+
+Do not hard-code config, database, or download paths in backend unit tests when the test uses `BaseUnitTest` helpers.
+
+Prefer `IPathProvider` values resolved from the test container:
+
+```csharp
+var configPath = Mock.Container.Resolve<IPathProvider>().ConfigFileLocation;
+var databasePath = Mock.Container.Resolve<IPathProvider>().DatabasePath;
+```
+
+`BaseUnitTest` uses a sandboxed `MockPathProvider`, so assertions like `"/config/..."` or `"/Config/..."` are brittle and should be avoided.
+
+### Real settings object rule
+
+When testing `ConfigManager.Setup()` or any path that can save settings, prefer a real `UserSettings` instance over a strict `IUserSettings` mock.
+
+Reason:
+- `Setup()` can trigger config save and serialization.
+- A strict mock often forces a large amount of irrelevant property setup.
+- A real `UserSettings` is simpler, more realistic, and more maintainable.
+
+Use mocks for `IUserSettings` only when the test is explicitly asserting `Reset()`, `UpdateSettings(...)`, `SettingsUpdated`, or other interaction behavior.
+
+### App build info rule
+
+If a test changes app version or release channel, call `SetAppBuildInfo(...)` before Act and prefer it over manual container rewiring.
+
+`SetAppBuildInfo(...)` now updates both:
+- the current resolved `MockAppBuildInfo` instance for already-created SUTs
+- the registration used for future container rebuilds
+
+This avoids stale version metadata when a test resolves `Sut` before changing app build info.
+
 ## Test Structure
 
 Follow this exact order within every test method:

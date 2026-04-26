@@ -13,18 +13,6 @@ public class ConfigManagerMigrateLegacyFileNamesUnitTests : BaseUnitTest<ConfigM
     private const string LEGACY_DATABASE_PATH = "/config/PlexRipperDB.db";
     private const string DATABASE_PATH = "/config/ReaparrDB.db";
 
-    private void SetupDependencies()
-    {
-        Mock.Mock<IUserSettings>().SetupGet(x => x.SettingsUpdated).Returns(new Subject<UserSettings>());
-        Mock.Mock<IUserSettings>().Setup(x => x.UpdateSettings(It.IsAny<ISettingsModel>())).Returns(new UserSettings());
-        Mock.Mock<IUserSettings>().Setup(x => x.Reset());
-
-        Mock.Mock<IPathProvider>().SetupGet(x => x.ConfigDirectory).Returns(CONFIG_DIRECTORY);
-        Mock.Mock<IPathProvider>().SetupGet(x => x.ConfigFileName).Returns("TEST_ReaparrSettings.json");
-        Mock.Mock<IPathProvider>().SetupGet(x => x.ConfigFileLocation).Returns(CONFIG_PATH);
-        Mock.Mock<IPathProvider>().SetupGet(x => x.DatabasePath).Returns(DATABASE_PATH);
-    }
-
     [Test]
     public void ShouldRenameLegacyConfigFile_WhenOldExistsAndNewMissing()
     {
@@ -36,7 +24,9 @@ public class ConfigManagerMigrateLegacyFileNamesUnitTests : BaseUnitTest<ConfigM
             system.AddDirectory(CONFIG_DIRECTORY);
             system.AddFile(LEGACY_CONFIG_PATH, new MockFileData("{}"));
         });
-        SetupDependencies();
+        Mock.Mock<IUserSettings>().SetupGet(x => x.SettingsUpdated).Returns(new Subject<UserSettings>());
+        Mock.Mock<IUserSettings>().Setup(x => x.UpdateSettings(It.IsAny<ISettingsModel>())).Returns(new UserSettings());
+        Mock.Mock<IUserSettings>().Setup(x => x.Reset());
 
         // Act
         var result = Sut.Setup();
@@ -58,7 +48,9 @@ public class ConfigManagerMigrateLegacyFileNamesUnitTests : BaseUnitTest<ConfigM
             fileSystem = system;
             system.AddDirectory(CONFIG_DIRECTORY);
         });
-        SetupDependencies();
+        Mock.Mock<IUserSettings>().SetupGet(x => x.SettingsUpdated).Returns(new Subject<UserSettings>());
+        Mock.Mock<IUserSettings>().Setup(x => x.UpdateSettings(It.IsAny<ISettingsModel>())).Returns(new UserSettings());
+        Mock.Mock<IUserSettings>().Setup(x => x.Reset());
 
         // Act
         var result = Sut.Setup();
@@ -88,7 +80,9 @@ public class ConfigManagerMigrateLegacyFileNamesUnitTests : BaseUnitTest<ConfigM
             system.AddFile(legacyWalPath, new MockFileData(string.Empty));
             system.AddFile(legacyShmPath, new MockFileData(string.Empty));
         });
-        SetupDependencies();
+        Mock.Mock<IUserSettings>().SetupGet(x => x.SettingsUpdated).Returns(new Subject<UserSettings>());
+        Mock.Mock<IUserSettings>().Setup(x => x.UpdateSettings(It.IsAny<ISettingsModel>())).Returns(new UserSettings());
+        Mock.Mock<IUserSettings>().Setup(x => x.Reset());
 
         // Act
         var result = Sut.Setup();
@@ -118,7 +112,9 @@ public class ConfigManagerMigrateLegacyFileNamesUnitTests : BaseUnitTest<ConfigM
             system.AddFile(LEGACY_DATABASE_PATH, new MockFileData("legacy-db"));
             system.AddFile(DATABASE_PATH, new MockFileData("new-db"));
         });
-        SetupDependencies();
+        Mock.Mock<IUserSettings>().SetupGet(x => x.SettingsUpdated).Returns(new Subject<UserSettings>());
+        Mock.Mock<IUserSettings>().Setup(x => x.UpdateSettings(It.IsAny<ISettingsModel>())).Returns(new UserSettings());
+        Mock.Mock<IUserSettings>().Setup(x => x.Reset());
 
         // Act
         var result = Sut.Setup();
@@ -149,7 +145,9 @@ public class ConfigManagerMigrateLegacyFileNamesUnitTests : BaseUnitTest<ConfigM
             system.AddFile(DATABASE_PATH, new MockFileData("db"));
             system.AddFile(legacyWalPath, new MockFileData("wal"));
         });
-        SetupDependencies();
+        Mock.Mock<IUserSettings>().SetupGet(x => x.SettingsUpdated).Returns(new Subject<UserSettings>());
+        Mock.Mock<IUserSettings>().Setup(x => x.UpdateSettings(It.IsAny<ISettingsModel>())).Returns(new UserSettings());
+        Mock.Mock<IUserSettings>().Setup(x => x.Reset());
 
         // Act
         var result = Sut.Setup();
@@ -169,9 +167,6 @@ public class ConfigManagerMigrateLegacyFileNamesUnitTests : BaseUnitTest<ConfigM
         MockFileSystem? fileSystem = null;
         SetupFileSystem(system => fileSystem = system);
         Mock.Mock<IUserSettings>().SetupGet(x => x.SettingsUpdated).Returns(new Subject<UserSettings>());
-        Mock.Mock<IPathProvider>().SetupGet(x => x.ConfigFileName).Returns("TEST_ReaparrSettings.json");
-        Mock.Mock<IPathProvider>().SetupGet(x => x.ConfigFileLocation).Returns("/missing/TEST_ReaparrSettings.json");
-        Mock.Mock<IPathProvider>().SetupGet(x => x.ConfigDirectory).Returns("/missing");
 
         // Act
         var result = Sut.Setup();

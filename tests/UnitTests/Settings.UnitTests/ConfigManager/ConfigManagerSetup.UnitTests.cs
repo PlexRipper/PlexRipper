@@ -12,9 +12,6 @@ public class ConfigManagerSetupUnitTests : BaseUnitTest<ConfigManager>
     {
         // Arrange
         Mock.Mock<IUserSettings>().SetupGet(x => x.SettingsUpdated).Returns(new Subject<UserSettings>());
-        Mock.Mock<IPathProvider>().SetupGet(x => x.ConfigFileName).Returns(() => "TEST_ReaparrSettings.json");
-        Mock.Mock<IPathProvider>().SetupGet(x => x.ConfigFileLocation).Returns(() => "/");
-        Mock.Mock<IPathProvider>().SetupGet(x => x.ConfigDirectory).Returns(() => "/TEST_ReaparrSettings.json");
         Mock.Mock<IDirectory>().Setup(x => x.Exists(It.IsAny<string>())).Returns(true);
         Mock.Mock<IDirectory>()
             .Setup(x => x.CreateDirectory(It.IsAny<string>()))
@@ -37,10 +34,6 @@ public class ConfigManagerSetupUnitTests : BaseUnitTest<ConfigManager>
     {
         // Arrange
         Mock.Mock<IUserSettings>().SetupGet(x => x.SettingsUpdated).Returns(new Subject<UserSettings>());
-        Mock.Mock<IPathProvider>().SetupGet(x => x.ConfigFileName).Returns(() => "TEST_ReaparrSettings.json");
-        Mock.Mock<IPathProvider>().SetupGet(x => x.ConfigDirectory).Returns(() => "/");
-        Mock.Mock<IPathProvider>().SetupGet(x => x.ConfigFileLocation).Returns(() => "/TEST_ReaparrSettings.json");
-
         Mock.Mock<IFile>().Setup(x => x.WriteAllText(It.IsAny<string>(), It.IsAny<string>())).Verifiable(Times.Once);
 
         Mock.Mock<IDirectory>().Setup(x => x.Exists(It.IsAny<string>())).Returns(false);

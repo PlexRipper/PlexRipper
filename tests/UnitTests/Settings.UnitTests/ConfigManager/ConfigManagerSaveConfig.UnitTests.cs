@@ -13,8 +13,6 @@ public class ConfigManagerSaveConfigUnitTests : BaseUnitTest<ConfigManager>
     {
         // Arrange
         Mock.Mock<IUserSettings>().SetupGet(x => x.SettingsUpdated).Returns(new Subject<UserSettings>());
-        Mock.Mock<IPathProvider>().SetupGet(x => x.ConfigFileName).Returns(() => "TEST_ReaparrSettings.json");
-        Mock.Mock<IPathProvider>().SetupGet(x => x.ConfigFileLocation).Returns(() => "/");
         Mock.Mock<IFile>().Setup(x => x.WriteAllText(It.IsAny<string>(), It.IsAny<string>())).Verifiable(Times.Once);
 
         // Were mocking other methods from ConfigManager, that's why we need to mock it manually here

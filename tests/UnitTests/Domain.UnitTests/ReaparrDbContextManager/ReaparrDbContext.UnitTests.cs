@@ -16,7 +16,6 @@ public class ReaparrDbContextManagerUnitTests : BaseUnitTest<ReaparrDbContextMan
     {
         // Arrange
 
-        Mock.Mock<IPathProvider>().SetupGet(x => x.DatabasePath).Returns(() => DatabasePath);
         Mock.Mock<IFile>().Setup(x => x.Exists(It.IsAny<string>())).Returns(true);
         Mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.CanConnect()).Returns(true);
         Mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.IsInMemory()).Returns(false);
@@ -42,7 +41,6 @@ public class ReaparrDbContextManagerUnitTests : BaseUnitTest<ReaparrDbContextMan
     public async Task ShouldCreateDatabase_WhenDatabaseDoesNotExist()
     {
         // Arrange
-        Mock.Mock<IPathProvider>().SetupGet(x => x.DatabasePath).Returns(() => DatabasePath);
         Mock.Mock<IFile>().Setup(x => x.Exists(It.IsAny<string>())).Returns(false).Verifiable(Times.Once);
         Mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.Migrate()).Returns(Result.Ok()).Verifiable(Times.Once);
         Mock.Mock<IAuthDbContextDatabase>().Setup(x => x.Migrate()).Returns(Result.Ok()).Verifiable(Times.Once);
@@ -56,29 +54,9 @@ public class ReaparrDbContextManagerUnitTests : BaseUnitTest<ReaparrDbContextMan
     }
 
     [Test]
-    public async Task ShouldLogWarning_WhenDatabaseDoesNotExist()
-    {
-        // Arrange
-        Mock.Mock<IPathProvider>()
-            .SetupGet(x => x.DatabasePath)
-            .Returns(() => DatabasePath)
-            .Verifiable(Times.Exactly(2));
-        Mock.Mock<IFile>().Setup(x => x.Exists(It.IsAny<string>())).Returns(false).Verifiable(Times.Once);
-        Mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.Migrate()).Returns(Result.Ok()).Verifiable(Times.Once);
-        Mock.Mock<IAuthDbContextDatabase>().Setup(x => x.Migrate()).Returns(Result.Ok()).Verifiable(Times.Once);
-
-        // Act
-        var result = await Sut.SetupAsync();
-
-        // Assert
-        result.IsSuccess.ShouldBeTrue();
-    }
-
-    [Test]
     public async Task ShouldFailToCreateDatabase_WhenExceptionIsThrown()
     {
         // Arrange
-        Mock.Mock<IPathProvider>().SetupGet(x => x.DatabasePath).Returns(() => DatabasePath);
         Mock.Mock<IFile>().Setup(x => x.Exists(It.IsAny<string>())).Returns(false);
         Mock.Mock<IReaparrDbContextDatabase>()
             .Setup(x => x.Migrate())
@@ -97,13 +75,6 @@ public class ReaparrDbContextManagerUnitTests : BaseUnitTest<ReaparrDbContextMan
     public async Task ShouldBackUpAndResetDatabase_WhenDatabaseCannotConnect()
     {
         // Arrange
-        IPathProvider pathProvider = new PathProvider();
-
-        Mock.Mock<IPathProvider>().SetupGet(x => x.DatabasePath).Returns(() => DatabasePath);
-        Mock.Mock<IPathProvider>().SetupGet(x => x.DatabaseBackupDirectory).Returns(() => DatabasePath);
-        Mock.Mock<IPathProvider>()
-            .Setup(x => x.DatabaseFiles)
-            .Returns(() => [pathProvider.DatabasePath, pathProvider.Database_SHM_Path, pathProvider.Database_WAL_Path]);
         Mock.Mock<IFile>().Setup(x => x.Exists(It.IsAny<string>())).Returns(true);
         Mock.Mock<IFile>().Setup(x => x.Copy(It.IsAny<string>(), It.IsAny<string>())).Verifiable(Times.Exactly(3));
         Mock.Mock<IDirectory>()
@@ -131,7 +102,6 @@ public class ReaparrDbContextManagerUnitTests : BaseUnitTest<ReaparrDbContextMan
     public async Task ShouldMigrateReaparrDatabase_WhenPendingMigrationsExist()
     {
         // Arrange
-        Mock.Mock<IPathProvider>().SetupGet(x => x.DatabasePath).Returns(() => DatabasePath);
         Mock.Mock<IFile>().Setup(x => x.Exists(It.IsAny<string>())).Returns(true);
         Mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.CanConnect()).Returns(true);
         Mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.IsInMemory()).Returns(false);
@@ -155,7 +125,6 @@ public class ReaparrDbContextManagerUnitTests : BaseUnitTest<ReaparrDbContextMan
     public async Task ShouldMigrateAuthDatabase_WhenPendingMigrationsExist()
     {
         // Arrange
-        Mock.Mock<IPathProvider>().SetupGet(x => x.DatabasePath).Returns(() => DatabasePath);
         Mock.Mock<IFile>().Setup(x => x.Exists(It.IsAny<string>())).Returns(true);
         Mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.CanConnect()).Returns(true);
         Mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.IsInMemory()).Returns(false);
@@ -177,7 +146,6 @@ public class ReaparrDbContextManagerUnitTests : BaseUnitTest<ReaparrDbContextMan
     public async Task ShouldSkipMigration_WhenDatabaseIsInMemory()
     {
         // Arrange
-        Mock.Mock<IPathProvider>().SetupGet(x => x.DatabasePath).Returns(() => DatabasePath);
         Mock.Mock<IFile>().Setup(x => x.Exists(It.IsAny<string>())).Returns(true);
         Mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.CanConnect()).Returns(true);
         Mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.IsInMemory()).Returns(true);
@@ -198,9 +166,6 @@ public class ReaparrDbContextManagerUnitTests : BaseUnitTest<ReaparrDbContextMan
     public async Task ShouldResetDatabase_WhenReaparrMigrationFails()
     {
         // Arrange
-        Mock.Mock<IPathProvider>().SetupGet(x => x.DatabasePath).Returns(() => DatabasePath);
-        Mock.Mock<IPathProvider>().SetupGet(x => x.DatabaseBackupDirectory).Returns(() => "/backup");
-        Mock.Mock<IPathProvider>().Setup(x => x.DatabaseFiles).Returns(() => [DatabasePath]);
         Mock.Mock<IFile>().Setup(x => x.Exists(It.IsAny<string>())).Returns(true);
         Mock.Mock<IFile>().Setup(x => x.Copy(It.IsAny<string>(), It.IsAny<string>()));
         Mock.Mock<IDirectory>()
@@ -234,9 +199,6 @@ public class ReaparrDbContextManagerUnitTests : BaseUnitTest<ReaparrDbContextMan
     public async Task ShouldResetDatabase_WhenAuthDatabaseMigrationFails()
     {
         // Arrange
-        Mock.Mock<IPathProvider>().SetupGet(x => x.DatabasePath).Returns(() => DatabasePath);
-        Mock.Mock<IPathProvider>().SetupGet(x => x.DatabaseBackupDirectory).Returns(() => "/backup");
-        Mock.Mock<IPathProvider>().Setup(x => x.DatabaseFiles).Returns(() => [DatabasePath]);
         Mock.Mock<IFile>().Setup(x => x.Exists(It.IsAny<string>())).Returns(true);
         Mock.Mock<IFile>().Setup(x => x.Copy(It.IsAny<string>(), It.IsAny<string>()));
         Mock.Mock<IDirectory>()
@@ -271,9 +233,6 @@ public class ReaparrDbContextManagerUnitTests : BaseUnitTest<ReaparrDbContextMan
     public async Task ShouldResetDatabase_WhenMigrationThrowsException()
     {
         // Arrange
-        Mock.Mock<IPathProvider>().SetupGet(x => x.DatabasePath).Returns(() => DatabasePath);
-        Mock.Mock<IPathProvider>().SetupGet(x => x.DatabaseBackupDirectory).Returns(() => "/backup");
-        Mock.Mock<IPathProvider>().Setup(x => x.DatabaseFiles).Returns(() => [DatabasePath]);
         Mock.Mock<IFile>().Setup(x => x.Exists(It.IsAny<string>())).Returns(true);
         Mock.Mock<IFile>().Setup(x => x.Copy(It.IsAny<string>(), It.IsAny<string>()));
         Mock.Mock<IDirectory>()
@@ -306,8 +265,6 @@ public class ReaparrDbContextManagerUnitTests : BaseUnitTest<ReaparrDbContextMan
     public async Task ShouldFailBackup_WhenBackupDirectoryCannotBeCreated()
     {
         // Arrange
-        Mock.Mock<IPathProvider>().SetupGet(x => x.DatabasePath).Returns(() => DatabasePath);
-        Mock.Mock<IPathProvider>().SetupGet(x => x.DatabaseBackupDirectory).Returns(() => "/backup");
         Mock.Mock<IFile>().Setup(x => x.Exists(It.IsAny<string>())).Returns(true);
         Mock.Mock<IDirectory>()
             .Setup(x => x.CreateDirectory(It.IsAny<string>()))
@@ -326,9 +283,6 @@ public class ReaparrDbContextManagerUnitTests : BaseUnitTest<ReaparrDbContextMan
     {
         // Arrange
         List<string> dbFiles = [DatabasePath, DatabasePath + "-shm", DatabasePath + "-wal"];
-        Mock.Mock<IPathProvider>().SetupGet(x => x.DatabasePath).Returns(() => DatabasePath);
-        Mock.Mock<IPathProvider>().SetupGet(x => x.DatabaseBackupDirectory).Returns(() => "/backup");
-        Mock.Mock<IPathProvider>().Setup(x => x.DatabaseFiles).Returns(() => dbFiles);
         Mock.Mock<IFile>().Setup(x => x.Exists(DatabasePath)).Returns(true);
         Mock.Mock<IFile>().Setup(x => x.Exists(DatabasePath + "-shm")).Returns(false);
         Mock.Mock<IFile>().Setup(x => x.Exists(DatabasePath + "-wal")).Returns(true);
@@ -358,9 +312,6 @@ public class ReaparrDbContextManagerUnitTests : BaseUnitTest<ReaparrDbContextMan
     public async Task ShouldFailReset_WhenDatabaseDeletionFails()
     {
         // Arrange
-        Mock.Mock<IPathProvider>().SetupGet(x => x.DatabasePath).Returns(() => DatabasePath);
-        Mock.Mock<IPathProvider>().SetupGet(x => x.DatabaseBackupDirectory).Returns(() => "/backup");
-        Mock.Mock<IPathProvider>().Setup(x => x.DatabaseFiles).Returns(() => [DatabasePath]);
         Mock.Mock<IFile>().Setup(x => x.Exists(It.IsAny<string>())).Returns(true);
         Mock.Mock<IFile>().Setup(x => x.Copy(It.IsAny<string>(), It.IsAny<string>()));
         Mock.Mock<IDirectory>()
@@ -386,9 +337,6 @@ public class ReaparrDbContextManagerUnitTests : BaseUnitTest<ReaparrDbContextMan
     public async Task ShouldFailReset_WhenDatabaseCreationFailsAfterReset()
     {
         // Arrange
-        Mock.Mock<IPathProvider>().SetupGet(x => x.DatabasePath).Returns(() => DatabasePath);
-        Mock.Mock<IPathProvider>().SetupGet(x => x.DatabaseBackupDirectory).Returns(() => "/backup");
-        Mock.Mock<IPathProvider>().Setup(x => x.DatabaseFiles).Returns(() => [DatabasePath]);
         Mock.Mock<IFile>().Setup(x => x.Exists(It.IsAny<string>())).Returns(true);
         Mock.Mock<IFile>().Setup(x => x.Copy(It.IsAny<string>(), It.IsAny<string>()));
         Mock.Mock<IDirectory>()
@@ -415,7 +363,6 @@ public class ReaparrDbContextManagerUnitTests : BaseUnitTest<ReaparrDbContextMan
     public async Task ShouldHandleExceptionInResetDatabase_AndReturnFailure()
     {
         // Arrange
-        Mock.Mock<IPathProvider>().SetupGet(x => x.DatabasePath).Returns(() => DatabasePath);
         Mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.CanConnect()).Returns(false);
         Mock.Mock<IReaparrDbContextDatabase>()
             .Setup(x => x.CloseConnection())
@@ -433,9 +380,6 @@ public class ReaparrDbContextManagerUnitTests : BaseUnitTest<ReaparrDbContextMan
     public async Task ShouldSetFirstTimeSetupToTrue_WhenDatabaseIsReset()
     {
         // Arrange
-        Mock.Mock<IPathProvider>().SetupGet(x => x.DatabasePath).Returns(() => DatabasePath);
-        Mock.Mock<IPathProvider>().SetupGet(x => x.DatabaseBackupDirectory).Returns(() => "/backup");
-        Mock.Mock<IPathProvider>().Setup(x => x.DatabaseFiles).Returns(() => [DatabasePath]);
         Mock.Mock<IFile>().Setup(x => x.Exists(It.IsAny<string>())).Returns(true);
         Mock.Mock<IFile>().Setup(x => x.Copy(It.IsAny<string>(), It.IsAny<string>()));
         Mock.Mock<IDirectory>()
@@ -463,7 +407,6 @@ public class ReaparrDbContextManagerUnitTests : BaseUnitTest<ReaparrDbContextMan
     public async Task ShouldSkipBackup_WhenDatabaseDoesNotExistDuringReset()
     {
         // Arrange
-        Mock.Mock<IPathProvider>().SetupGet(x => x.DatabasePath).Returns(() => DatabasePath);
         Mock.Mock<IFile>().Setup(x => x.Exists(DatabasePath)).Returns(false); // Database doesn't exist for backup
         Mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.CanConnect()).Returns(false);
         Mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.CloseConnection());
@@ -484,7 +427,6 @@ public class ReaparrDbContextManagerUnitTests : BaseUnitTest<ReaparrDbContextMan
     public async Task ShouldFailAuthDatabaseCreation_WhenExceptionIsThrown()
     {
         // Arrange
-        Mock.Mock<IPathProvider>().SetupGet(x => x.DatabasePath).Returns(() => DatabasePath);
         Mock.Mock<IFile>().Setup(x => x.Exists(It.IsAny<string>())).Returns(false);
         Mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.Migrate()).Returns(Result.Ok());
         Mock.Mock<IAuthDbContextDatabase>()

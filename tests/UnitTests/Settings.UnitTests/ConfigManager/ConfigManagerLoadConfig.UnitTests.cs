@@ -13,9 +13,6 @@ public class ConfigManagerLoadConfigUnitTests : BaseUnitTest<ConfigManager>
         // Arrange
         var settingsModel = FakeData.GetSettingsModel(new Seed(89944)).Generate();
         var settingsJson = UserSettingsSerializer.Serialize(settingsModel);
-        Mock.Mock<IPathProvider>().SetupGet(x => x.ConfigFileName).Returns(() => "TEST_ReaparrSettings.json");
-        Mock.Mock<IPathProvider>().SetupGet(x => x.ConfigDirectory).Returns(() => "");
-        Mock.Mock<IPathProvider>().SetupGet(x => x.ConfigFileLocation).Returns(() => "");
         Mock.Mock<IFile>().Setup(x => x.ReadAllText(It.IsAny<string>())).Returns(() => settingsJson);
         Mock.Mock<IUserSettings>().Setup(x => x.UpdateSettings(It.IsAny<UserSettings>())).Returns(settingsModel);
 
@@ -31,9 +28,6 @@ public class ConfigManagerLoadConfigUnitTests : BaseUnitTest<ConfigManager>
     public void ShouldResetSettings_WhenFailingToReadSettingsFromFile()
     {
         // Arrange
-        Mock.Mock<IPathProvider>().SetupGet(x => x.ConfigFileName).Returns(() => "TEST_ReaparrSettings.json");
-        Mock.Mock<IPathProvider>().SetupGet(x => x.ConfigFileLocation).Returns(() => "");
-        Mock.Mock<IPathProvider>().SetupGet(x => x.ConfigDirectory).Returns(() => "");
         Mock.Mock<IFile>().Setup(x => x.ReadAllText(It.IsAny<string>())).Returns(() => "");
         Mock.Mock<IUserSettings>().Setup(x => x.Reset());
 
@@ -63,9 +57,6 @@ public class ConfigManagerLoadConfigUnitTests : BaseUnitTest<ConfigManager>
     {
         // Arrange
         Mock.Mock<IFile>().Setup(x => x.ReadAllText(It.IsAny<string>())).Returns(() => "{}");
-        Mock.Mock<IPathProvider>().SetupGet(x => x.ConfigFileName).Returns(() => "TEST_ReaparrSettings.json");
-        Mock.Mock<IPathProvider>().SetupGet(x => x.ConfigFileLocation).Returns(() => "/");
-        Mock.Mock<IUserSettings>().Setup(x => x.Reset());
 
         // Were mocking other methods from ConfigManager, that's why we need to mock it manually here
         var sut = new Mock<ConfigManager>(
@@ -93,8 +84,6 @@ public class ConfigManagerLoadConfigUnitTests : BaseUnitTest<ConfigManager>
     {
         // Arrange
         Mock.Mock<IFile>().Setup(x => x.ReadAllText(It.IsAny<string>())).Returns(() => "@#$%^&");
-        Mock.Mock<IPathProvider>().SetupGet(x => x.ConfigFileName).Returns(() => "TEST_ReaparrSettings.json");
-        Mock.Mock<IPathProvider>().SetupGet(x => x.ConfigFileLocation).Returns(() => "");
         Mock.Mock<IUserSettings>().Setup(x => x.Reset());
 
         // Were mocking other methods from ConfigManager, that's why we need to mock it manually here

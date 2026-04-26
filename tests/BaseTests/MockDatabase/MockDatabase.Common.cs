@@ -232,7 +232,7 @@ public static partial class MockDatabase
         optionsBuilder.EnableDetailedErrors();
         optionsBuilder.LogTo(text => LogFactory.DbContextLogger(text), LogLevel.Warning);
 
-        IPathProvider pathProvider = new PathProvider();
+        IPathProvider pathProvider = CreatePathProvider(dbName);
         return new ReaparrDbContext(optionsBuilder.Options, pathProvider, dbName);
     }
 
@@ -252,7 +252,7 @@ public static partial class MockDatabase
         optionsBuilder.EnableDetailedErrors();
         optionsBuilder.LogTo(text => LogFactory.DbContextLogger(text), LogLevel.Warning);
 
-        IPathProvider pathProvider = new PathProvider();
+        IPathProvider pathProvider = CreatePathProvider(dbName);
         return new AuthDbContext(optionsBuilder.Options, pathProvider, dbName);
     }
 
@@ -265,6 +265,14 @@ public static partial class MockDatabase
             DataSource = dbName,
             Cache = SqliteCacheMode.Shared,
         }.ToString();
+
+    private static IPathProvider CreatePathProvider(string dbName)
+    {
+        if (EnvironmentExtensions.IsIntegrationTestMode())
+            return new MockPathProvider(dbName, new MockAppBuildInfo());
+
+        return new PathProvider();
+    }
 
     public static async Task Setup(
         this (ReaparrDbContext, AuthDbContext) context,

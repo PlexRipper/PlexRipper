@@ -75,7 +75,8 @@ public class StartDownloadTaskEndpointIntegrationTests : BaseIntegrationTests
         await WaitForDatabaseConditionAsync(
             async () =>
             {
-                var dbTask = await container.DbContext.GetDownloadTaskAsync(
+                using var dbContext = await container.Resolve<IReaparrDbContextFactory>().CreateAsync();
+                var dbTask = await dbContext.GetDownloadTaskAsync(
                     downloadTask.Id,
                     cancellationToken: CancellationToken
                 );
@@ -83,7 +84,7 @@ public class StartDownloadTaskEndpointIntegrationTests : BaseIntegrationTests
                 if (dbTask?.DownloadStatus != DownloadStatus.ServerUnreachable)
                     return false;
 
-                return await container.DbContext.DownloadTaskMovieFileLogs.AnyAsync(
+                return await dbContext.DownloadTaskMovieFileLogs.AnyAsync(
                     x =>
                         x.DownloadTaskFileId == downloadTask.Id
                         && x.Status == DownloadStatus.ServerUnreachable

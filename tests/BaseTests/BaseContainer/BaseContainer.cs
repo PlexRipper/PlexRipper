@@ -175,8 +175,10 @@ public class BaseContainer : IDisposable
                 break;
             }
 
-            // Poll database as fallback
-            var dbTask = await DbContext.GetDownloadTaskAsync(
+            // Poll database as fallback using a fresh DbContext so status changes made by
+            // background jobs are observed even when the shared test scope is tracking older entities.
+            using var dbContext = await Resolve<IReaparrDbContextFactory>().CreateAsync();
+            var dbTask = await dbContext.GetDownloadTaskAsync(
                 downloadTaskId,
                 cancellationToken: CancellationToken.None
             );
@@ -207,7 +209,8 @@ public class BaseContainer : IDisposable
         }
 
         // Final database check with current status logging
-        var finalDbTask = await DbContext.GetDownloadTaskAsync(
+        using var finalDbContext = await Resolve<IReaparrDbContextFactory>().CreateAsync();
+        var finalDbTask = await finalDbContext.GetDownloadTaskAsync(
             downloadTaskId,
             cancellationToken: CancellationToken.None
         );

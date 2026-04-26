@@ -36,7 +36,8 @@ public class CheckForUpdateEndpointIntegrationTests : BaseIntegrationTests
                         .As<ICommandExecutor>()
                         .InstancePerDependency();
                 };
-            });
+            }
+        );
 
         var client = container.GetApiClient();
         await client.SignIn();
@@ -94,7 +95,8 @@ public class CheckForUpdateEndpointIntegrationTests : BaseIntegrationTests
                         .Register(_ => CreateCommandExecutor(updateResult))
                         .As<ICommandExecutor>()
                         .InstancePerDependency();
-            });
+            }
+        );
 
         var client = container.GetApiClient();
         await client.SignIn();
@@ -155,7 +157,8 @@ public class CheckForUpdateEndpointIntegrationTests : BaseIntegrationTests
                         .Register(_ => CreateCommandExecutor(updateResult))
                         .As<ICommandExecutor>()
                         .InstancePerDependency();
-            });
+            }
+        );
 
         var client = container.GetApiClient();
         await client.SignIn();
@@ -216,7 +219,8 @@ public class CheckForUpdateEndpointIntegrationTests : BaseIntegrationTests
                         .Register(_ => CreateCommandExecutor(updateResult))
                         .As<ICommandExecutor>()
                         .InstancePerDependency();
-            });
+            }
+        );
 
         var client = container.GetApiClient();
         await client.SignIn();
@@ -269,7 +273,8 @@ public class CheckForUpdateEndpointIntegrationTests : BaseIntegrationTests
                         .Register(_ => CreateCommandExecutor(updateResult))
                         .As<ICommandExecutor>()
                         .InstancePerDependency();
-            });
+            }
+        );
 
         var client = container.GetApiClient();
         await client.SignIn();
@@ -291,10 +296,10 @@ public class CheckForUpdateEndpointIntegrationTests : BaseIntegrationTests
 
     private static FakeCommandExecutor CreateCommandExecutor(AppUpdateCheckResult updateResult) =>
         new FakeCommandExecutor()
-            .Intercept<GetGitHubReleasesCommand, Result<IReadOnlyList<ReleaseNote>>>((_, _) =>
-                Task.FromResult(Result.Ok<IReadOnlyList<ReleaseNote>>(updateResult.ReleaseNotes))
+            .Intercept<GetGitHubReleasesCommand, Result<IReadOnlyList<ReleaseNote>>>(
+                (_, _) => Task.FromResult(Result.Ok<IReadOnlyList<ReleaseNote>>(updateResult.ReleaseNotes))
             )
-            .Intercept<CheckForUpdatesCommand, Result<AppUpdateCheckResult>>((_, _) =>
-                Task.FromResult(Result.Ok(updateResult))
+            .Intercept<CheckForUpdatesCommand, Result<AppUpdateCheckResult>>(
+                (_, _) => Task.FromResult(Result.Ok(updateResult))
             );
 }

@@ -195,6 +195,9 @@ Do **not** install system packages on the host unless explicitly instructed.
 
 ## Skills usage
 
+- **ALWAYS load `karpathy-guidelines`** at the start of every task — no exceptions. It encodes behavioral guidelines to
+  reduce common LLM coding mistakes: avoid overcomplication, make surgical changes, surface assumptions, and define
+  verifiable success criteria.
 - **Reaparr-specific skills take priority.** Before acting on any task in this project, check for a matching `reaparr-*`
   skill and load it first. These skills encode project-specific conventions that override generic guidance.
 - Detect and auto-load any other applicable skills before acting on a task.

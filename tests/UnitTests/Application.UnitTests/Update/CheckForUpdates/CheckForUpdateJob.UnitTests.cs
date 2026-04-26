@@ -17,7 +17,7 @@ public class CheckForUpdateJobUnitTests : BaseUnitTest<CheckForUpdateJob>
     {
         // Arrange
         var context = SetupJobContext();
-        Mock.Mock<IAppBuildInfo>().SetupGet(x => x.InformationalVersion).Returns(CurrentVersion);
+        SetAppBuildInfo(x => x.InformationalVersion = CurrentVersion);
         var noUpdate = new AppUpdateCheckResult
         {
             IsUpdateAvailable = false,

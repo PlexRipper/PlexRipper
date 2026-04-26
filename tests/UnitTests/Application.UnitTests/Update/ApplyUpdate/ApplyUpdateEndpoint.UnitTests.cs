@@ -22,7 +22,7 @@ public class ApplyUpdateEndpointUnitTests : BaseUnitTest<ApplyUpdateEndpoint>
         var endpoint = SetupEndpointUnitTest<ApplyUpdateEndpoint>(s =>
         {
             s.AddSingleton(_ => mockManager.Object);
-            s.AddSingleton(_ => Mock.Mock<IAppBuildInfo>().Object);
+            s.AddSingleton(_ => Mock.Create<IAppBuildInfo>());
         });
         await endpoint.HandleAsync(CancellationToken);
         var result = endpoint.Response;
@@ -32,7 +32,6 @@ public class ApplyUpdateEndpointUnitTests : BaseUnitTest<ApplyUpdateEndpoint>
         result.IsSuccess.ShouldBeFalse();
         result.Errors.ShouldHaveSingleItem();
         result.Errors[0].Message.ShouldBe("Desktop updates are not supported in the current runtime mode");
-        Mock.Mock<IAppBuildInfo>().Verify();
         mockManager.Verify(m => m.UpdatePendingRestart, Times.Never);
         mockSource.VerifyNoOtherCalls();
     }
@@ -54,6 +53,7 @@ public class ApplyUpdateEndpointUnitTests : BaseUnitTest<ApplyUpdateEndpoint>
         var endpoint = SetupEndpointUnitTest<ApplyUpdateEndpoint>(s =>
         {
             s.AddSingleton(_ => mockManager.Object);
+            s.AddSingleton(_ => Mock.Create<IAppBuildInfo>());
         });
         await endpoint.HandleAsync(CancellationToken);
         var result = endpoint.Response;
@@ -62,7 +62,6 @@ public class ApplyUpdateEndpointUnitTests : BaseUnitTest<ApplyUpdateEndpoint>
         result.ShouldNotBeNull();
         result.IsSuccess.ShouldBeTrue();
 
-        Mock.Mock<IAppBuildInfo>().Verify();
         mockManager.Verify(m => m.UpdatePendingRestart, Times.Once);
         mockSource.VerifyNoOtherCalls();
     }

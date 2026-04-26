@@ -1,5 +1,3 @@
-using Reaparr.Environment;
-
 namespace Reaparr.Application.UnitTests;
 
 public class CheckForUpdateJobUnitTests : BaseUnitTest<CheckForUpdateJob>

@@ -8,6 +8,7 @@ public partial class BaseUnitTest
     private Action<ContainerBuilder>? _fileSystemSetup;
     private Action<ContainerBuilder>? _httpClientSetup;
     private Action<ContainerBuilder>? _appBuildInfoSetup;
+    private Action<ContainerBuilder>? _dependenciesSetup;
     private readonly MockFileSystem _fileSystem = new();
     protected AutoMock Mock { get; set; }
 
@@ -31,6 +32,9 @@ public partial class BaseUnitTest
                 builder.Register(ctx => ctx.Resolve<IFileSystem>().File).As<IFile>().SingleInstance();
                 builder.Register(ctx => ctx.Resolve<IFileSystem>().Directory).As<IDirectory>().SingleInstance();
             }
+
+            if (_dependenciesSetup is not null)
+                _dependenciesSetup.Invoke(builder);
 
             if (_httpClientSetup is not null)
                 _httpClientSetup.Invoke(builder);
@@ -187,6 +191,12 @@ public partial class BaseUnitTest
             builder.Register<MockFileSystem>(_ => _fileSystem).As<IFileSystem>().SingleInstance();
         };
 
+        Build();
+    }
+
+    protected void SetupDependencies(Action<ContainerBuilder> action)
+    {
+        _dependenciesSetup = action;
         Build();
     }
 

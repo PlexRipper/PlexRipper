@@ -146,7 +146,7 @@
           "Autofac": "[9.1.0, )",
           "FluentResults": "[4.0.0, )",
           "Microsoft.AspNetCore.Http.Abstractions": "[2.3.9, )",
-          "Reaparr.Environment": "[1.0.0, )",
+          "Reaparr.Environment": "[0.36.0-dev.1, )",
           "Serilog": "[4.3.1, )",
           "Serilog.Enrichers.Sensitive": "[2.1.0, )",
           "Serilog.Expressions": "[5.0.0, )",
@@ -158,6 +158,7 @@
           "Serilog.Sinks.TestCorrelator": "[4.0.0, )"
         }
       }
-    }
+    },
+    "net10.0/linux-x64": {}
   }
 }

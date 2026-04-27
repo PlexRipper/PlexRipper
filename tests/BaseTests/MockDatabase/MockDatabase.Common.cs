@@ -213,13 +213,24 @@ public static partial class MockDatabase
     /// <returns>A <see cref="ReaparrDbContext" /> in memory instance.</returns>
     /// <exception cref="ArgumentOutOfRangeException"></exception>
     ///
-    public static (ReaparrDbContext, AuthDbContext) GetMemoryDbContext(string dbName = "") =>
-        (GetMemoryReaparrDbContext(dbName), GetMemoryAuthDbContext(dbName));
+    public static (ReaparrDbContext, AuthDbContext) GetMemoryDbContext(string dbName = "")
+    {
+        dbName = string.IsNullOrEmpty(dbName) ? GetMemoryDatabaseName() : dbName;
+        var pathProvider = CreatePathProvider(dbName);
+
+        return (GetMemoryReaparrDbContext(dbName, pathProvider), GetMemoryAuthDbContext(dbName, pathProvider));
+    }
 
     public static ReaparrDbContext GetMemoryReaparrDbContext(string dbName = "")
     {
-        var optionsBuilder = new DbContextOptionsBuilder<ReaparrDbContext>();
         dbName = string.IsNullOrEmpty(dbName) ? GetMemoryDatabaseName() : dbName;
+        var pathProvider = CreatePathProvider(dbName);
+        return GetMemoryReaparrDbContext(dbName, pathProvider);
+    }
+
+    private static ReaparrDbContext GetMemoryReaparrDbContext(string dbName, IPathProvider pathProvider)
+    {
+        var optionsBuilder = new DbContextOptionsBuilder<ReaparrDbContext>();
 
         SqliteConnection databaseConnection = new(DatabaseConnectionString(dbName));
 
@@ -232,14 +243,19 @@ public static partial class MockDatabase
         optionsBuilder.EnableDetailedErrors();
         optionsBuilder.LogTo(text => LogFactory.DbContextLogger(text), LogLevel.Warning);
 
-        IPathProvider pathProvider = CreatePathProvider(dbName);
         return new ReaparrDbContext(optionsBuilder.Options, pathProvider, dbName);
     }
 
     public static AuthDbContext GetMemoryAuthDbContext(string dbName = "")
     {
-        var optionsBuilder = new DbContextOptionsBuilder<AuthDbContext>();
         dbName = string.IsNullOrEmpty(dbName) ? GetMemoryDatabaseName() : dbName;
+        var pathProvider = CreatePathProvider(dbName);
+        return GetMemoryAuthDbContext(dbName, pathProvider);
+    }
+
+    private static AuthDbContext GetMemoryAuthDbContext(string dbName, IPathProvider pathProvider)
+    {
+        var optionsBuilder = new DbContextOptionsBuilder<AuthDbContext>();
 
         SqliteConnection databaseConnection = new(DatabaseConnectionString(dbName));
 
@@ -252,11 +268,11 @@ public static partial class MockDatabase
         optionsBuilder.EnableDetailedErrors();
         optionsBuilder.LogTo(text => LogFactory.DbContextLogger(text), LogLevel.Warning);
 
-        IPathProvider pathProvider = CreatePathProvider(dbName);
         return new AuthDbContext(optionsBuilder.Options, pathProvider, dbName);
     }
 
     public static string DatabaseConnectionString(string dbName = "") =>
+
         // https://docs.microsoft.com/en-us/dotnet/standard/data/sqlite/in-memory-databases
         new SqliteConnectionStringBuilder
         {
@@ -265,14 +281,6 @@ public static partial class MockDatabase
             DataSource = dbName,
             Cache = SqliteCacheMode.Shared,
         }.ToString();
-
-    private static IPathProvider CreatePathProvider(string dbName)
-    {
-        if (EnvironmentExtensions.IsIntegrationTestMode())
-            return new MockPathProvider(dbName, new MockAppBuildInfo());
-
-        return new PathProvider();
-    }
 
     public static async Task Setup(
         this (ReaparrDbContext, AuthDbContext) context,
@@ -283,6 +291,7 @@ public static partial class MockDatabase
         var config = FakeDataConfig.FromOptions(options);
 
         var (reaparrContext, authContext) = context;
+        var pathProvider = CreatePathProvider(reaparrContext.DatabaseName);
 
         authContext.Migrate();
 
@@ -310,10 +319,10 @@ public static partial class MockDatabase
             reaparrContext = await reaparrContext.AddPlexTvShows(seed, options);
 
         if (config.MovieDownloadTasksCount > 0)
-            reaparrContext = await reaparrContext.AddDownloadTaskMovies(seed, options);
+            reaparrContext = await reaparrContext.AddDownloadTaskMovies(seed, pathProvider, options);
 
         if (config.TvShowDownloadTasksCount > 0)
-            reaparrContext = await reaparrContext.AddDownloadTaskTvShows(seed, options);
+            reaparrContext = await reaparrContext.AddDownloadTaskTvShows(seed, pathProvider, options);
 
         if (config.AccountHasAccessToAllLibraries)
             reaparrContext = await reaparrContext.AddPlexAccountLibraries();
@@ -382,6 +391,14 @@ public static partial class MockDatabase
             );
 
         return context;
+    }
+
+    private static IPathProvider CreatePathProvider(string dbName)
+    {
+        if (EnvironmentExtensions.IsIntegrationTestMode())
+            return new MockPathProvider(dbName, new MockAppBuildInfo());
+
+        return new PathProvider(new MockAppBuildInfo());
     }
 
     #endregion

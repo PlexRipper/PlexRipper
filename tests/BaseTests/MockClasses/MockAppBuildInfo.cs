@@ -6,7 +6,7 @@ public class MockAppBuildInfo : IAppBuildInfo
     public string RuntimeMode { get; set; } = "docker";
 
     /// <inheritdoc/>
-    public string RuntimeIdentifier { get; init; } = "linux-x64";
+    public string RuntimeIdentifier { get; set; } = "linux-x64";
 
     /// <inheritdoc/>
     public string Version { get; set; } = "0.0.0";
@@ -15,16 +15,16 @@ public class MockAppBuildInfo : IAppBuildInfo
     public string InformationalVersion { get; set; } = "0.0.0";
 
     /// <inheritdoc/>
-    public bool IsDesktopMode => RuntimeMode.Contains("desktop", StringComparison.OrdinalIgnoreCase);
+    public bool IsDesktopMode => string.Equals(RuntimeMode, "desktop", StringComparison.OrdinalIgnoreCase);
 
     /// <inheritdoc/>
-    public bool IsDockerMode => RuntimeMode.Contains("docker", StringComparison.OrdinalIgnoreCase);
+    public bool IsDockerMode => string.Equals(RuntimeMode, "docker", StringComparison.OrdinalIgnoreCase);
 
     /// <inheritdoc/>
     public bool IsDevRelease => InformationalVersion.Contains("dev", StringComparison.OrdinalIgnoreCase);
 
     /// <inheritdoc/>
-    public OperatingSystemPlatform CurrentOS { get; init; } = OperatingSystemPlatform.Linux;
+    public OperatingSystemPlatform CurrentOS { get; set; } = OperatingSystemPlatform.Linux;
 
     /// <inheritdoc/>
     public bool IsWindows => CurrentOS == OperatingSystemPlatform.Windows;

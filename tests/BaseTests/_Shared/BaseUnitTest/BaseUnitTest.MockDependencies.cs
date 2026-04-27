@@ -70,8 +70,7 @@ public partial class BaseUnitTest
             .InstancePerDependency();
 
         builder
-            .Register(
-                (_, _) =>
+            .Register((_, _) =>
                 {
                     var factoryMock = new Mock<IReaparrDbContextFactory>(MockBehavior.Strict);
                     factoryMock
@@ -89,8 +88,7 @@ public partial class BaseUnitTest
             .InstancePerDependency();
 
         builder
-            .Register(
-                (_, _) =>
+            .Register((_, _) =>
                 {
                     var factoryMock = new Mock<IAuthDbContextFactory>(MockBehavior.Strict);
                     factoryMock
@@ -196,7 +194,11 @@ public partial class BaseUnitTest
 
     protected void SetupDependencies(Action<ContainerBuilder> action)
     {
-        _dependenciesSetup = action;
+        if (_dependenciesSetup is not null)
+            throw new InvalidOperationException("SetupDependencies should not be called more than once.");
+
+        _dependenciesSetup += action;
+
         Build();
     }
 

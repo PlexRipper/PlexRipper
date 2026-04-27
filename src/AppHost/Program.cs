@@ -8,7 +8,7 @@ namespace Reaparr.AppHost;
 /// </summary>
 public class Program
 {
-    private static readonly Serilog.ILogger _log = Log.Logger.ForContext(typeof(Program));
+    private static Serilog.ILogger _log => Log.ForContext(typeof(Program));
 
     /// <summary>
     ///  The main method entry point for the application.
@@ -23,7 +23,7 @@ public class Program
             VelopackApp.Build().Run();
 
             var appBuildInfo = new AppBuildInfo();
-            var pathProvider = new PathProvider();
+            var pathProvider = new PathProvider(appBuildInfo);
             var logBuffer = new LogBufferService();
             var signalRLogConfig = new SignalRLogConfig(pathProvider, logBuffer);
 

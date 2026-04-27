@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Logging;
+using System.IO.Abstractions;
 
 namespace Reaparr.Build;
 
@@ -42,6 +43,7 @@ internal sealed class DesktopBuildWorkflow(
             settings,
             commandRunner,
             packageWorkflow,
+            new FileSystem(),
             loggerFactory.CreateLogger<DesktopLaunchWorkflow>()
         );
 

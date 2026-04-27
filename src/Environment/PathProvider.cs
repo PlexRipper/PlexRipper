@@ -6,9 +6,9 @@ public class PathProvider : IPathProvider
 {
     private readonly IAppBuildInfo _appBuildInfo;
 
-    public PathProvider(IAppBuildInfo? appBuildInfo = null)
+    public PathProvider(IAppBuildInfo appBuildInfo)
     {
-        _appBuildInfo = appBuildInfo ?? new AppBuildInfo();
+        _appBuildInfo = appBuildInfo;
     }
 
     #region Properties

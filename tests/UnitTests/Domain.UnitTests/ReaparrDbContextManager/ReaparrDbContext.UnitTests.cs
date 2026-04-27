@@ -284,9 +284,9 @@ public class ReaparrDbContextManagerUnitTests : BaseUnitTest<ReaparrDbContextMan
     {
         // Arrange
         List<string> dbFiles = [DatabasePath, DatabasePath + "-shm", DatabasePath + "-wal"];
-        Mock.Mock<IFile>().Setup(x => x.Exists(DatabasePath)).Returns(true);
-        Mock.Mock<IFile>().Setup(x => x.Exists(DatabasePath + "-shm")).Returns(false);
-        Mock.Mock<IFile>().Setup(x => x.Exists(DatabasePath + "-wal")).Returns(true);
+        Mock.Mock<IFile>().Setup(x => x.Exists(dbFiles[0])).Returns(true);
+        Mock.Mock<IFile>().Setup(x => x.Exists(dbFiles[1])).Returns(false);
+        Mock.Mock<IFile>().Setup(x => x.Exists(dbFiles[2])).Returns(true);
         Mock.Mock<IFile>().Setup(x => x.Copy(It.IsAny<string>(), It.IsAny<string>()));
         Mock.Mock<IDirectory>()
             .Setup(x => x.CreateDirectory(It.IsAny<string>()))
@@ -304,9 +304,9 @@ public class ReaparrDbContextManagerUnitTests : BaseUnitTest<ReaparrDbContextMan
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
-        Mock.Mock<IFile>().Verify(x => x.Copy(DatabasePath, It.IsAny<string>()), Times.Once);
-        Mock.Mock<IFile>().Verify(x => x.Copy(DatabasePath + "-wal", It.IsAny<string>()), Times.Once);
-        Mock.Mock<IFile>().Verify(x => x.Copy(DatabasePath + "-shm", It.IsAny<string>()), Times.Never);
+        Mock.Mock<IFile>().Verify(x => x.Copy(dbFiles[0], It.IsAny<string>()), Times.Once);
+        Mock.Mock<IFile>().Verify(x => x.Copy(dbFiles[2], It.IsAny<string>()), Times.Once);
+        Mock.Mock<IFile>().Verify(x => x.Copy(dbFiles[1], It.IsAny<string>()), Times.Never);
     }
 
     [Test]

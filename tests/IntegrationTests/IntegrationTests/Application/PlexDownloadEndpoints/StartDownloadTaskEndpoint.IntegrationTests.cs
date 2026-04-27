@@ -97,15 +97,16 @@ public class StartDownloadTaskEndpointIntegrationTests : BaseIntegrationTests
             delayMs: 250
         );
 
-        var downloadTaskDb = await container.DbContext.GetDownloadTaskAsync(
+        using var dbContext = await container.Resolve<IReaparrDbContextFactory>().CreateAsync();
+        var downloadTaskDb = await dbContext.GetDownloadTaskAsync(
             downloadTask.Id,
             cancellationToken: CancellationToken
         );
         downloadTaskDb.ShouldNotBeNull();
         downloadTaskDb.DownloadStatus.ShouldBe(DownloadStatus.ServerUnreachable);
 
-        var logs = await container
-            .DbContext.DownloadTaskMovieFileLogs.Where(x => x.DownloadTaskFileId == downloadTask.Id)
+        var logs = await dbContext
+            .DownloadTaskMovieFileLogs.Where(x => x.DownloadTaskFileId == downloadTask.Id)
             .OrderBy(x => x.CreatedAt)
             .ToListAsync(CancellationToken);
 

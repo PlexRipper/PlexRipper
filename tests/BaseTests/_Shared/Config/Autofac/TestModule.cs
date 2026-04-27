@@ -50,7 +50,7 @@ public class TestModule : Module
         builder
             .Register((ctx, _) => new MockPathProvider(MemoryDbName, ctx.Resolve<IAppBuildInfo>()))
             .As<IPathProvider>()
-            .InstancePerDependency();
+            .SingleInstance();
 
         SetMockedDependencies(builder);
 

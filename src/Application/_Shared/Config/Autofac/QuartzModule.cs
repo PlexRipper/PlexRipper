@@ -33,7 +33,7 @@ public class QuartzModule : Module
                             "Quartz.Impl.AdoJobStore.UpdateLockRowSemaphore, Quartz"
                         },
                         { "quartz.jobStore.dataSource", "default" },
-                        { "quartz.jobStore.tablePrefix", QuartzDatabaseConfig.Prefix },
+                        { "quartz.jobStore.tablePrefix", "QRTZ_" },
                         // { "quartz.jobStore.useProperties", "true" },
                         { "quartz.jobStore.driverDelegateType", "Quartz.Impl.AdoJobStore.SQLiteDelegate, Quartz" },
                         { "quartz.dataSource.default.provider", "SQLite-Microsoft" },

@@ -149,6 +149,7 @@ public class CheckForUpdateEndpointIntegrationTests : BaseIntegrationTests
                 {
                     RuntimeMode = "docker",
                     Version = "0.38.0-dev.6",
+                    InformationalVersion = "0.38.0-dev.6",
                     RuntimeIdentifier = "linux-x64",
                     CurrentOS = OperatingSystemPlatform.Linux,
                 };

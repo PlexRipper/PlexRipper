@@ -8,11 +8,18 @@ namespace Reaparr.Settings.UnitTests;
 
 public class ConfigManagerMigrateLegacyFileNamesUnitTests : BaseUnitTest<ConfigManager>
 {
-    private string ConfigDirectory => Mock.Container.Resolve<IPathProvider>().ConfigDirectory;
+    private readonly IPathProvider _pathProvider;
+
+    public ConfigManagerMigrateLegacyFileNamesUnitTests()
+    {
+        _pathProvider = Mock.Container.Resolve<IPathProvider>();
+    }
+
+    private string ConfigDirectory => _pathProvider.ConfigDirectory;
     private string LegacyConfigPath => Path.Combine(ConfigDirectory, "PlexRipperSettings.json");
-    private string ConfigPath => Mock.Container.Resolve<IPathProvider>().ConfigFileLocation;
+    private string ConfigPath => _pathProvider.ConfigFileLocation;
     private string LegacyDatabasePath => Path.Combine(ConfigDirectory, "PlexRipperDB.db");
-    private string DatabasePath => Mock.Container.Resolve<IPathProvider>().DatabasePath;
+    private string DatabasePath => _pathProvider.DatabasePath;
 
     [Test]
     public void ShouldRenameLegacyConfigFile_WhenOldExistsAndNewMissing()

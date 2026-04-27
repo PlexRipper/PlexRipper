@@ -88,15 +88,14 @@ public static class EnvironmentExtensions
     /// Gets the port number from the DOTNET_HTTP_PORTS environment variable.
     /// </summary>
     /// <returns>The port number or 5000 if not configured.</returns>
-    public static int GetPort =>
-        int.TryParse(
-            GetEnvironmentVariable(EnvKeys.DotNetHttpPorts)
-                ?.Split(';', StringSplitOptions.RemoveEmptyEntries)
-                .FirstOrDefault(),
-            out var port
-        )
-            ? port
-            : 5000;
+    public static int GetPort => int.TryParse(
+        GetEnvironmentVariable(EnvKeys.DotNetHttpPorts)
+            ?.Split(';', StringSplitOptions.RemoveEmptyEntries)
+            .FirstOrDefault(),
+        out var port
+    )
+        ? port
+        : 5000;
 
     /// <summary>
     /// Sets the SEQ_URL environment variable to the specified URL.
@@ -118,33 +117,6 @@ public static class EnvironmentExtensions
     {
         System.Environment.SetEnvironmentVariable(EnvKeys.LogLevel, logLevel.ToString().ToUpper());
     }
-
-    public static void SetDataPath(string path) =>
-        System.Environment.SetEnvironmentVariable(EnvKeys.ReaparrDataPath, path);
-
-    public static void SetConfigPath(string path) =>
-        System.Environment.SetEnvironmentVariable(EnvKeys.ReaparrConfigPath, path);
-
-    public static void SetDownloadsPath(string path) =>
-        System.Environment.SetEnvironmentVariable(EnvKeys.ReaparrDownloadsPath, path);
-
-    public static void SetMoviesPath(string path) =>
-        System.Environment.SetEnvironmentVariable(EnvKeys.ReaparrMoviesPath, path);
-
-    public static void SetTvShowsPath(string path) =>
-        System.Environment.SetEnvironmentVariable(EnvKeys.ReaparrTvShowsPath, path);
-
-    public static void SetMusicPath(string path) =>
-        System.Environment.SetEnvironmentVariable(EnvKeys.ReaparrMusicPath, path);
-
-    public static void SetPhotosPath(string path) =>
-        System.Environment.SetEnvironmentVariable(EnvKeys.ReaparrPhotosPath, path);
-
-    public static void SetOtherPath(string path) =>
-        System.Environment.SetEnvironmentVariable(EnvKeys.ReaparrOtherPath, path);
-
-    public static void SetGamesPath(string path) =>
-        System.Environment.SetEnvironmentVariable(EnvKeys.ReaparrGamesPath, path);
 
     /// <summary>
     /// Enables or disables integration test mode by setting <c>IntegrationTestMode</c>.
@@ -203,9 +175,9 @@ public static class EnvironmentExtensions
     /// Determines if the value is true.
     /// </summary>
     /// <param name="value"></param>
-    private static bool IsTrue(string? value) =>
-        value is not null
-        && (string.Equals(value, Convert.ToString(true), StringComparison.OrdinalIgnoreCase) || value == "1");
+    private static bool IsTrue(string? value) => value is not null
+                                                 && (string.Equals(value, Convert.ToString(true),
+                                                     StringComparison.OrdinalIgnoreCase) || value == "1");
 
     #endregion
 }

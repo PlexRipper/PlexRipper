@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Logging;
+using System.IO.Abstractions;
 
 namespace Reaparr.Build;
 
@@ -8,6 +9,7 @@ internal sealed class DesktopLaunchWorkflow(
     DesktopCommandSettings settings,
     DesktopCommandRunner commandRunner,
     DesktopPackageWorkflow packageWorkflow,
+    IFileSystem fileSystem,
     ILogger<DesktopLaunchWorkflow> logger
 )
 {
@@ -29,7 +31,7 @@ internal sealed class DesktopLaunchWorkflow(
                 appImagePath
             );
 
-            var movedPackages = ClearPendingVelopackPackages(GetVelopackPackageRoot());
+            var movedPackages = ClearPendingVelopackPackages(GetVelopackPackageRoot(), fileSystem);
             if (movedPackages.Count > 0)
             {
                 logger.LogWarning(
@@ -140,30 +142,30 @@ internal sealed class DesktopLaunchWorkflow(
     private static string GetVelopackPackageRoot() =>
         Path.Combine(Path.GetTempPath(), "velopack", "Reaparr");
 
-    internal static List<string> ClearPendingVelopackPackages(string velopackPackageRoot)
+    internal static List<string> ClearPendingVelopackPackages(string velopackPackageRoot, IFileSystem fileSystem)
     {
-        var packagesDirectory = Path.Combine(velopackPackageRoot, "packages");
-        if (!Directory.Exists(packagesDirectory))
+        var packagesDirectory = fileSystem.Path.Combine(velopackPackageRoot, "packages");
+        if (!fileSystem.Directory.Exists(packagesDirectory))
             return [];
 
-        var pendingPackages = Directory
+        var pendingPackages = fileSystem.Directory
             .GetFiles(packagesDirectory, "*.nupkg", SearchOption.TopDirectoryOnly)
             .OrderBy(path => path, StringComparer.Ordinal)
             .ToList();
         if (pendingPackages.Count == 0)
             return [];
 
-        var holdDirectory = Path.Combine(velopackPackageRoot, "packages-hold");
-        Directory.CreateDirectory(holdDirectory);
+        var holdDirectory = fileSystem.Path.Combine(velopackPackageRoot, "packages-hold");
+        fileSystem.Directory.CreateDirectory(holdDirectory);
 
         var movedPackages = new List<string>(pendingPackages.Count);
         foreach (var pendingPackage in pendingPackages)
         {
-            var destinationPath = Path.Combine(holdDirectory, Path.GetFileName(pendingPackage));
-            if (File.Exists(destinationPath))
-                File.Delete(destinationPath);
+            var destinationPath = fileSystem.Path.Combine(holdDirectory, fileSystem.Path.GetFileName(pendingPackage));
+            if (fileSystem.File.Exists(destinationPath))
+                fileSystem.File.Delete(destinationPath);
 
-            File.Move(pendingPackage, destinationPath);
+            fileSystem.File.Move(pendingPackage, destinationPath);
             movedPackages.Add(destinationPath);
         }
 

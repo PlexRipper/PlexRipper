@@ -26,7 +26,11 @@ public static partial class Startup
     /// </summary>
     /// <param name="services"> The <see cref="IServiceCollection"/> instance to configure.</param>
     /// <param name="env"> The <see cref="IWebHostEnvironment"/> instance to configure.</param>
-    public static void ConfigureServices(this IServiceCollection services, IWebHostEnvironment env)
+    /// <param name="appRuntimeInfo"> The <see cref="IAppRuntimeInfo"/> instance to configure.</param>
+    public static void ConfigureServices(
+        this IServiceCollection services,
+        IWebHostEnvironment env,
+        IAppRuntimeInfo appRuntimeInfo)
     {
         // This has to always be first
         services.AddCors(options =>
@@ -200,7 +204,7 @@ public static partial class Startup
         services.RegisterSonarrHttpClient();
         services.RegisterRadarrHttpClient();
         services.RegisterPlexThumbnailHttpClient();
-        services.RegisterGitHubHttpClient();
+        services.RegisterGitHubHttpClient(appRuntimeInfo);
 
         // Removing all registered IHttpMessageHandlerBuilderFilter instances to disable built-in HttpClient logging
         services.RemoveAll<IHttpMessageHandlerBuilderFilter>();

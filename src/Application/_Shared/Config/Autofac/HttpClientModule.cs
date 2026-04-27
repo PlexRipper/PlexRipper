@@ -108,13 +108,14 @@ public static class HttpClientModule
                     {
                         EnabledSslProtocols = SslProtocols.Tls12 | SslProtocols.Tls13,
                     },
+
                     // Increase connect timeout to handle slow connections
                     ConnectTimeout = TimeSpan.FromSeconds(15),
                 }
             );
     }
 
-    public static void RegisterGitHubHttpClient(this IServiceCollection services)
+    public static void RegisterGitHubHttpClient(this IServiceCollection services, IAppRuntimeInfo appRuntimeInfo)
     {
         services
             .AddHttpClient(
@@ -128,9 +129,9 @@ public static class HttpClientModule
                     );
                     client.DefaultRequestHeaders.UserAgent.ParseAdd("Reaparr");
 
-                    var token = EnvironmentExtensions.GetGitHubToken();
-                    if (!string.IsNullOrWhiteSpace(token))
-                        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+                    if (!string.IsNullOrWhiteSpace(appRuntimeInfo.GitHubToken))
+                        client.DefaultRequestHeaders.Authorization =
+                            new AuthenticationHeaderValue("Bearer", appRuntimeInfo.GitHubToken);
                 }
             )
             .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler { AllowAutoRedirect = false });

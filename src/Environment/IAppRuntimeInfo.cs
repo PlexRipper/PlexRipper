@@ -8,6 +8,13 @@ namespace Reaparr.Environment;
 public interface IAppRuntimeInfo
 {
     /// <summary>
+    /// Gets the GitHub token from <c>GITHUB_TOKEN</c> for authenticated GitHub API requests.
+    /// </summary>
+    string? GitHubToken { get; }
+
+    #region Paths
+
+    /// <summary>
     /// Gets the base data path from <see cref="EnvKeys.ReaparrDataPath"/>.
     /// </summary>
     string? DataPath { get; }
@@ -51,4 +58,6 @@ public interface IAppRuntimeInfo
     /// Gets the default games library path from <see cref="EnvKeys.ReaparrGamesPath"/>.
     /// </summary>
     string? GamesPath { get; }
+
+    #endregion
 }

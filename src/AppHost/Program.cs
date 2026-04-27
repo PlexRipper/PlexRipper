@@ -51,7 +51,7 @@ public class Program
             var builder = WebApplication.CreateBuilder(args);
 
             builder.Host.ConfigureAutofacBuilder(logBuffer);
-            builder.Services.ConfigureServices(builder.Environment);
+            builder.Services.ConfigureServices(builder.Environment, appRuntimeInfo);
             var app = builder.Build();
 
             if (!EnvironmentExtensions.IsIntegrationTestMode())

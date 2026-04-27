@@ -25,7 +25,8 @@ public class ApplicationModule : Module
 
         builder
             .Register<Func<DownloadConfiguration, IDownloadService>>(_ =>
-                config => new DownloadService(config, loggerFactory: null) // no internal library logging should happen
+                    config => new DownloadService(config,
+                        loggerFactory: null) // no internal library logging should happen
             )
             .InstancePerDependency();
 
@@ -48,7 +49,7 @@ public class ApplicationModule : Module
             .Register(context => new UpdateManager(
                 new GithubSource(
                     "https://github.com/Reaparr/Reaparr",
-                    EnvironmentExtensions.GetGitHubToken(),
+                    context.Resolve<IAppRuntimeInfo>().GitHubToken,
                     context.Resolve<IAppBuildInfo>().IsDevRelease
                 )
             ))

@@ -3,6 +3,11 @@ namespace Reaparr.Environment;
 public class AppRuntimeInfo : IAppRuntimeInfo
 {
     /// <inheritdoc/>
+    public string? GitHubToken => GetEnvironmentVariable(EnvKeys.GitHubToken);
+
+    #region Paths
+
+    /// <inheritdoc/>
     public string? DataPath => GetEnvironmentVariable(EnvKeys.ReaparrDataPath);
 
     /// <inheritdoc/>
@@ -28,6 +33,8 @@ public class AppRuntimeInfo : IAppRuntimeInfo
 
     /// <inheritdoc/>
     public string? GamesPath => GetEnvironmentVariable(EnvKeys.ReaparrGamesPath);
+
+    #endregion
 
     public static string? GetEnvironmentVariable(string key)
     {

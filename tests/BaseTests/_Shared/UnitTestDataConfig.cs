@@ -28,5 +28,5 @@ public class UnitTestDataConfig : BaseConfig<UnitTestDataConfig>
 
     public IAppBuildInfo? OverrideAppBuildInfo { get; set; }
 
-    public IAppRuntimeInfo? OverrideAppRuntimeInfo { get; set; }
+    public Action<MockAppRuntimeInfo>? OverrideAppRuntimeInfo { get; set; }
 }

@@ -46,14 +46,13 @@ public class BaseContainer : IDisposable
     {
         EnvironmentExtensions.SetIntegrationTestMode(true);
 
+        var config = UnitTestDataConfig.FromOptions(options);
         var memoryDbName = MockDatabase.GetMemoryDatabaseName();
-        var mockAppRuntimeInfo = new MockAppRuntimeInfo();
+        var mockAppRuntimeInfo = ResolveRuntimeInfo(config);
         var mockPathProvider = new MockPathProvider(memoryDbName, new MockAppBuildInfo());
 
         // Create isolated filesystem
         var testFileSystemRootPath = IntegrationTestFileSystemSandbox.Create(memoryDbName, log, mockPathProvider);
-
-        var config = UnitTestDataConfig.FromOptions(options);
 
         log.Information("Initialized integration test with database name: {DatabaseName}", memoryDbName);
 
@@ -75,6 +74,13 @@ public class BaseContainer : IDisposable
             await container.SetDownloadSpeedLimit(options);
 
         return container;
+    }
+
+    private static MockAppRuntimeInfo ResolveRuntimeInfo(UnitTestDataConfig config)
+    {
+        var runtimeInfo = new MockAppRuntimeInfo();
+        config.OverrideAppRuntimeInfo?.Invoke(runtimeInfo);
+        return runtimeInfo;
     }
 
     public HttpClient GetApiClient()

@@ -76,7 +76,14 @@ public class TestModule : Module
             .SingleInstance();
 
         builder
-            .Register((_, _) => Config.OverrideAppRuntimeInfo ?? new MockAppRuntimeInfo())
+            .Register(
+                (_, _) =>
+                {
+                    var runtimeInfo = new MockAppRuntimeInfo();
+                    Config.OverrideAppRuntimeInfo?.Invoke(runtimeInfo);
+                    return runtimeInfo;
+                }
+            )
             .As<IAppRuntimeInfo>()
             .SingleInstance();
 

@@ -49,7 +49,7 @@ public class MockAppRuntimeInfo : IAppRuntimeInfo
     public string HeaderAuthTokenName { get; set; } = "X-Auth-User";
     public bool IsUnmasked { get; set; }
 
-    public LogEventLevel LogLevel { get; }
-    public bool IsAuthenticationDisabled { get; }
-    public int AppPort { get; }
+    public LogEventLevel LogLevel { get; set; } = LogEventLevel.Debug;
+    public bool IsAuthenticationDisabled { get; set; }
+    public int AppPort { get; set; } = 5000;
 }

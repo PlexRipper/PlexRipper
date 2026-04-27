@@ -11,21 +11,23 @@ public class SetupRadarrDownloadClientCommandUnitTests : BaseUnitTest<SetupRadar
         RadarrSettings radarrSettings,
         IntegrationsSettings integrationsSettings,
         NetworkSettingsModule networkSettings
-    ) => Mock.Create<SetupRadarrDownloadClientCommandHandler>(
-        new TypedParameter(typeof(IRadarrSettings), radarrSettings),
-        new TypedParameter(typeof(IIntegrationsSettings), integrationsSettings),
-        new TypedParameter(typeof(INetworkSettings), networkSettings)
-    );
+    ) =>
+        Mock.Create<SetupRadarrDownloadClientCommandHandler>(
+            new TypedParameter(typeof(IRadarrSettings), radarrSettings),
+            new TypedParameter(typeof(IIntegrationsSettings), integrationsSettings),
+            new TypedParameter(typeof(INetworkSettings), networkSettings)
+        );
 
     private static RadarrSettings ValidSettings(
         string baseUrl = "http://localhost:7878",
         string apiKey = "some-api-key"
-    ) => new()
-    {
-        IsConfigured = false,
-        RadarrBaseUrl = baseUrl,
-        RadarrApiKey = apiKey,
-    };
+    ) =>
+        new()
+        {
+            IsConfigured = false,
+            RadarrBaseUrl = baseUrl,
+            RadarrApiKey = apiKey,
+        };
 
     private static IntegrationsSettings ValidIntegrationsSettings() => IntegrationsSettings.Create();
 
@@ -202,7 +204,8 @@ public class SetupRadarrDownloadClientCommandUnitTests : BaseUnitTest<SetupRadar
             .Verifiable(Times.Once);
 
         Mock.SetupCommand(It.IsAny<RadarrApiCreateDownloadClientCommand>)
-            .ReturnsAsync((RadarrApiCreateDownloadClientCommand cmd, CancellationToken _) =>
+            .ReturnsAsync(
+                (RadarrApiCreateDownloadClientCommand cmd, CancellationToken _) =>
                 {
                     capturedResource = cmd.Resource;
                     return Result.Ok(new RadarrDownloadClientResourceDTO { Id = 1 });
@@ -249,7 +252,8 @@ public class SetupRadarrDownloadClientCommandUnitTests : BaseUnitTest<SetupRadar
             .Verifiable(Times.Once);
 
         Mock.SetupCommand(It.IsAny<RadarrApiCreateDownloadClientCommand>)
-            .ReturnsAsync((RadarrApiCreateDownloadClientCommand cmd, CancellationToken _) =>
+            .ReturnsAsync(
+                (RadarrApiCreateDownloadClientCommand cmd, CancellationToken _) =>
                 {
                     capturedResource = cmd.Resource;
                     return Result.Ok(new RadarrDownloadClientResourceDTO { Id = 2 });
@@ -300,7 +304,8 @@ public class SetupRadarrDownloadClientCommandUnitTests : BaseUnitTest<SetupRadar
             .Verifiable(Times.Once);
 
         Mock.SetupCommand(It.IsAny<RadarrApiCreateDownloadClientCommand>)
-            .ReturnsAsync((RadarrApiCreateDownloadClientCommand cmd, CancellationToken _) =>
+            .ReturnsAsync(
+                (RadarrApiCreateDownloadClientCommand cmd, CancellationToken _) =>
                 {
                     capturedResource = cmd.Resource;
                     return Result.Ok(new RadarrDownloadClientResourceDTO { Id = 3 });

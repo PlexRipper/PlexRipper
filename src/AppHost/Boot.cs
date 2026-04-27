@@ -12,6 +12,7 @@ public class Boot : IHostedService
 
     private readonly Serilog.ILogger _log;
     private readonly ICommandExecutor _commandExecutor;
+    private readonly IAppRuntimeInfo _appRuntimeInfo;
 
     private readonly IHostApplicationLifetime _appLifetime;
 
@@ -30,6 +31,7 @@ public class Boot : IHostedService
     public Boot(
         Serilog.ILogger log,
         ICommandExecutor commandExecutor,
+        IAppRuntimeInfo appRuntimeInfo,
         IHostApplicationLifetime appLifetime,
         ISchedulerService schedulerService,
         IDownloadQueue downloadQueue,
@@ -38,6 +40,7 @@ public class Boot : IHostedService
     {
         _log = log.ForContext<Boot>();
         _commandExecutor = commandExecutor;
+        _appRuntimeInfo = appRuntimeInfo;
         _appLifetime = appLifetime;
         _schedulerService = schedulerService;
         _downloadQueue = downloadQueue;
@@ -56,7 +59,7 @@ public class Boot : IHostedService
     /// <inheritdoc />
     public async Task StartAsync(CancellationToken cancellationToken)
     {
-        if (EnvironmentExtensions.GetPuid() == 911 && EnvironmentExtensions.GetPgid() == 1001)
+        if (_appRuntimeInfo is { PUID: 911, PGID: 1001 })
         {
             _log.Here()
                 .Error("Reaparr has invalid PUID and PGID values and thus has defaulted to root, this is not allowed");

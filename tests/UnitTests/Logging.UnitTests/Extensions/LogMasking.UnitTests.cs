@@ -21,8 +21,11 @@ public class LogMaskingUnitTests : BaseUnitTest<LogMaskingUnitTests>
             LogFactory.CloseAndFlush();
             EnvironmentExtensions.EnableUnmaskedLog(false);
             EnvironmentExtensions.IsUnmasked().ShouldBeFalse();
+            
+            var runtimeInfo = Mock.Container.Resolve<IAppRuntimeInfo>();
             var pathProvider = Mock.Container.Resolve<IPathProvider>();
-            var testLogConfig = new TestLogConfig(pathProvider);
+            var testLogConfig = new TestLogConfig(runtimeInfo, pathProvider);
+            
             LogFactory.SetupLogging(testLogConfig, LogEventLevel.Debug);
             var log = LogFactory.Create<LogMaskingUnitTests>();
             using (var context = TestCorrelator.CreateContext())

@@ -7,6 +7,7 @@ namespace Reaparr.Logging;
 
 public class LogConfig
 {
+    private readonly IAppRuntimeInfo _appRuntimeInfo;
     private readonly IPathProvider _pathProvider;
     public static string FileName => nameof(FileName);
 
@@ -34,9 +35,10 @@ public class LogConfig
 
     protected static readonly ExpressionTemplate FileTemplate = new(TEMPLATE_TEXT);
 
-    protected LogConfig(IPathProvider pathProvider)
+    protected LogConfig(IAppRuntimeInfo appRuntimeInfo, IPathProvider pathProvider)
     {
         ArgumentNullException.ThrowIfNull(pathProvider);
+        _appRuntimeInfo = appRuntimeInfo;
         _pathProvider = pathProvider;
     }
 
@@ -51,6 +53,7 @@ public class LogConfig
             .MinimumLevel.Is(minimumLogLevel)
             .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
             .MinimumLevel.Override("Microsoft.Hosting.Lifetime", LogEventLevel.Information)
+
             // These filters: No XML encryptor configured. Key {*} may be persisted to storage in unencrypted form.
             // This can be ignored because we use proper auth: https://github.com/dotnet/aspnetcore/issues/3309#issuecomment-404246838
             .Filter.ByExcluding(Matching.FromSource("Microsoft.AspNetCore.DataProtection.KeyManagement.XmlKeyManager"))
@@ -104,17 +107,16 @@ public class LogConfig
     /// <param name="minimumLogLevel">The global minimum log level used before sink-specific filtering.</param>
     protected virtual LoggerConfiguration GetExtendedConfiguration(
         LogEventLevel minimumLogLevel = LogEventLevel.Debug
-    ) =>
-        GetBaseConfiguration(minimumLogLevel)
-            .WriteTo.Seq(EnvironmentExtensions.GetSeqUrl(), restrictedToMinimumLevel: minimumLogLevel)
-            .WriteTo.File(
-                FileTemplate,
-                Path.Combine(_pathProvider.LogsDirectory, "log.txt"),
-                restrictedToMinimumLevel: minimumLogLevel,
-                rollingInterval: RollingInterval.Day,
-                rollOnFileSizeLimit: true,
-                retainedFileCountLimit: 7
-            );
+    ) => GetBaseConfiguration(minimumLogLevel)
+        .WriteTo.Seq(_appRuntimeInfo.SEQ_Url, restrictedToMinimumLevel: minimumLogLevel)
+        .WriteTo.File(
+            FileTemplate,
+            Path.Combine(_pathProvider.LogsDirectory, "log.txt"),
+            restrictedToMinimumLevel: minimumLogLevel,
+            rollingInterval: RollingInterval.Day,
+            rollOnFileSizeLimit: true,
+            retainedFileCountLimit: 7
+        );
 
     public virtual Logger GetLogger(LogEventLevel minimumLogLevel = LogEventLevel.Debug) =>
         GetExtendedConfiguration(minimumLogLevel).CreateLogger();

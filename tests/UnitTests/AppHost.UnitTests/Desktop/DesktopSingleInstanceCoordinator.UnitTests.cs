@@ -1,3 +1,5 @@
+using Reaparr.Environment;
+
 namespace Reaparr.AppHost.UnitTests;
 
 public class DesktopSingleInstanceCoordinatorUnitTests : BaseUnitTest<DesktopSingleInstanceCoordinator>
@@ -140,13 +142,13 @@ public class DesktopSingleInstanceCoordinatorUnitTests : BaseUnitTest<DesktopSin
         string? instanceName = null,
         string? appImagePath = null,
         string? appBaseDirectory = null
-    ) =>
-        new(
-            Log,
-            instanceName ?? CreateInstanceName(),
-            appImagePath is null ? null : () => appImagePath,
-            appBaseDirectory is null ? null : () => appBaseDirectory
-        );
+    ) => new(
+        Log,
+        new AppRuntimeInfo(),
+        instanceName ?? CreateInstanceName(),
+        appImagePath is null ? null : () => appImagePath,
+        appBaseDirectory is null ? null : () => appBaseDirectory
+    );
 
     private static string CreateInstanceName() =>
         $"Reaparr.Desktop.SingleInstance.Tests.{System.Environment.ProcessId}.{Interlocked.Increment(ref _instanceNameCounter)}";

@@ -13,8 +13,6 @@ public static class EnvironmentExtensions
     /// </summary>
     public static bool IsIntegrationTestMode() => IsTrue(GetEnvironmentVariable(EnvKeys.IntegrationTestMode));
 
-    public static string? GetAppImage() => GetEnvironmentVariable(EnvKeys.AppImage);
-
     /// <summary>
     /// Gets the name of the HTTP header used for bearer/auth token passing. Defaults to <c>X-Auth-User</c>.
     /// </summary>
@@ -25,11 +23,6 @@ public static class EnvironmentExtensions
     /// When set to true, the application will not mask/censor sensitive data in the logs.
     /// </summary>
     public static bool IsUnmasked() => IsTrue(GetEnvironmentVariable(EnvKeys.Unmasked));
-
-    /// <summary>
-    /// When set to true, the application will log all environment variables set on startup
-    /// </summary>
-    public static bool ShouldLogEnvVars() => IsTrue(GetEnvironmentVariable(EnvKeys.LogEnvironmentVariables));
 
     /// <summary>
     /// Gets the configured Serilog log level from <c>LOG_LEVEL</c>. Defaults to <see cref="LogEventLevel.Debug"/>.
@@ -52,16 +45,6 @@ public static class EnvironmentExtensions
     public static bool IsAuthenticationDisabled() => IsTrue(GetEnvironmentVariable(EnvKeys.DisableAuthentication));
 
     /// <summary>
-    /// Gets the process user ID (PUID) from the environment. Returns -1 when not set or invalid.
-    /// </summary>
-    public static int GetPuid() => int.TryParse(GetEnvironmentVariable(EnvKeys.Puid), out var puid) ? puid : -1;
-
-    /// <summary>
-    /// Gets the process group ID (PGID) from the environment. Returns -1 when not set or invalid.
-    /// </summary>
-    public static int GetPgid() => int.TryParse(GetEnvironmentVariable(EnvKeys.Pgid), out var pgid) ? pgid : -1;
-
-    /// <summary>
     /// Gets the port number from the DOTNET_HTTP_PORTS environment variable.
     /// </summary>
     /// <returns>The port number or 5000 if not configured.</returns>
@@ -73,12 +56,6 @@ public static class EnvironmentExtensions
     )
         ? port
         : 5000;
-
-    /// <summary>
-    /// Sets the SEQ_URL environment variable to the specified URL.
-    /// Note: This is used for development and testing purposes to redirect logs to a hosted Docker instance of Seq.
-    /// </summary>
-    public static string GetSeqUrl() => GetEnvironmentVariable(EnvKeys.SeqUrl) ?? "http://localhost:5341";
 
     #endregion
 
@@ -111,14 +88,6 @@ public static class EnvironmentExtensions
         System.Environment.SetEnvironmentVariable(EnvKeys.Unmasked, state.ToString());
     }
 
-    /// <summary>
-    /// When set to true, the application will log all environment variables set on startup.
-    /// </summary>
-    public static void EnableLogEnvVars(bool state)
-    {
-        System.Environment.SetEnvironmentVariable(EnvKeys.LogEnvironmentVariables, state.ToString());
-    }
-
     #endregion
 
     #region Helpers
@@ -148,10 +117,6 @@ public static class EnvironmentExtensions
         return string.IsNullOrWhiteSpace(value) ? null : value;
     }
 
-    /// <summary>
-    /// Determines if the value is true.
-    /// </summary>
-    /// <param name="value"></param>
     private static bool IsTrue(string? value) => value is not null
                                                  && (string.Equals(value, Convert.ToString(true),
                                                      StringComparison.OrdinalIgnoreCase) || value == "1");

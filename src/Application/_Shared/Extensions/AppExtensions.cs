@@ -25,31 +25,33 @@ public class AppExtensions
     ///   Log the identity of the current process, including environment variables and user/group IDs.
     /// </summary>
     public static void LogIdentity(
+        IAppBuildInfo appBuildInfo,
+        IAppRuntimeInfo appRuntimeInfo,
         [CallerMemberName] string memberName = "",
         [CallerFilePath] string sourceFilePath = "",
         [CallerLineNumber] int sourceLineNumber = 0
     )
     {
-        if (EnvironmentExtensions.ShouldLogEnvVars())
+        if (appRuntimeInfo.ShouldLogEnvVars)
         {
-            var envDict = System.Environment.GetEnvironmentVariables();
-            var json = JsonSerializer.Serialize(envDict, DefaultJsonSerializerOptions.UserSettingsOptions);
+            var json = JsonSerializer.Serialize(
+                appRuntimeInfo.GetAllEnvironmentVariables, DefaultJsonSerializerOptions.UserSettingsOptions);
             _log.Here(sourceFilePath, memberName, sourceLineNumber).Debug("Vars:\n {EnvironmentVars}", json);
         }
 
         // Retrieve PUID and PGID; guard for non-Unix platforms
-        if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) || RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+        if (appBuildInfo.IsLinux || appBuildInfo.IsMacOS)
         {
             _log.Here(sourceFilePath, memberName, sourceLineNumber)
                 .Information(
                     "PUID from env: {EnvPUID} and from the system: {PUID}",
-                    EnvironmentExtensions.GetPuid(),
+                    appRuntimeInfo.PUID,
                     getuid()
                 );
             _log.Here(sourceFilePath, memberName, sourceLineNumber)
                 .Information(
                     "PGID from env: {EnvPGID} and from the system: {PGID}",
-                    EnvironmentExtensions.GetPgid(),
+                    appRuntimeInfo.PGID,
                     getgid()
                 );
         }
@@ -59,8 +61,8 @@ public class AppExtensions
                 .Information(
                     "Non-Unix OS ({OS}); only env values available. PUID: {EnvPUID}, PGID: {EnvPGID}",
                     RuntimeInformation.OSDescription,
-                    EnvironmentExtensions.GetPuid(),
-                    EnvironmentExtensions.GetPgid()
+                    appRuntimeInfo.PUID,
+                    appRuntimeInfo.PGID
                 );
         }
 

@@ -15,8 +15,8 @@ public class SignalRLogConfig : LogConfig
     /// <summary>
     /// Initializes a new instance of <see cref="SignalRLogConfig"/> with the provided path provider and log buffer service.
     /// </summary>
-    public SignalRLogConfig(IPathProvider pathProvider, ILogBufferService logBuffer)
-        : base(pathProvider)
+    public SignalRLogConfig(IAppRuntimeInfo appRuntimeInfo, IPathProvider pathProvider, ILogBufferService logBuffer)
+        : base(appRuntimeInfo, pathProvider)
     {
         _logBuffer = logBuffer;
     }
@@ -34,8 +34,8 @@ public class SignalRLogConfig : LogConfig
     /// Reconfigures the global logger to also stream events via SignalR.
     /// Call after the DI container is built (i.e. after builder.Build()).
     /// </summary>
-    public void AttachSignalR(WebApplication app, LogEventLevel minimumLogLevel) =>
-        Log.Logger = GetExtendedConfiguration(minimumLogLevel)
+    public void AttachSignalR(WebApplication app, LogEventLevel minimumLogLevel) => Log.Logger =
+        GetExtendedConfiguration(minimumLogLevel)
             .WriteTo.SignalR<LogHub>(
                 app.Services,
                 (context, _, logEvent) =>

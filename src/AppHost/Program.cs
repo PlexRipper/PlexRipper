@@ -26,7 +26,7 @@ public class Program
             var appRuntimeInfo = new AppRuntimeInfo();
             var pathProvider = new PathProvider(appBuildInfo, appRuntimeInfo);
             var logBuffer = new LogBufferService();
-            var signalRLogConfig = new SignalRLogConfig(pathProvider, logBuffer);
+            var signalRLogConfig = new SignalRLogConfig(appRuntimeInfo, pathProvider, logBuffer);
 
             // Skip logger setup in integration test mode to preserve test logger
             if (!EnvironmentExtensions.IsIntegrationTestMode())
@@ -44,7 +44,7 @@ public class Program
                     appBuildInfo.RuntimeIdentifier
                 );
 
-            AppExtensions.LogIdentity();
+            AppExtensions.LogIdentity(appBuildInfo, appRuntimeInfo);
 
             FluentResultConfiguration.Setup();
 

@@ -8,9 +8,24 @@ namespace Reaparr.Environment;
 public interface IAppRuntimeInfo
 {
     /// <summary>
+    /// Gets the process user ID (PUID) from the environment. Returns -1 when not set or invalid.
+    /// </summary>
+    int PUID { get; }
+
+    /// <summary>
+    /// Gets the process group ID (PGID) from the environment. Returns -1 when not set or invalid.
+    /// </summary>
+    int PGID { get; }
+
+    /// <summary>
     /// Gets the GitHub token from <c>GITHUB_TOKEN</c> for authenticated GitHub API requests.
     /// </summary>
     string? GitHubToken { get; }
+
+    /// <summary>
+    /// Gets all defined System and user level Environment keys and their values
+    /// </summary>
+    Dictionary<string, string?> GetAllEnvironmentVariables { get; }
 
     #region Paths
 
@@ -58,6 +73,19 @@ public interface IAppRuntimeInfo
     /// Gets the default games library path from <see cref="EnvKeys.ReaparrGamesPath"/>.
     /// </summary>
     string? GamesPath { get; }
+
+    string? AppImage { get; }
+
+    /// <summary>
+    /// When set to true, the application will log all environment variables set on startup
+    /// </summary>
+    bool ShouldLogEnvVars { get; }
+
+    /// <summary>
+    /// Sets the SEQ_URL environment variable to the specified URL.
+    /// Note: This is used for development and testing purposes to redirect logs to a hosted Docker instance of Seq.
+    /// </summary>
+    string SEQ_Url { get; }
 
     #endregion
 }

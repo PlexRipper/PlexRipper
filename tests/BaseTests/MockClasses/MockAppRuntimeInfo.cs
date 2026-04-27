@@ -4,7 +4,11 @@ public class MockAppRuntimeInfo : IAppRuntimeInfo
 {
     public MockAppRuntimeInfo() { }
 
+    public int PUID { get; }
+    public int PGID { get; }
     public string? GitHubToken { get; set; }
+
+    public Dictionary<string, string?> GetAllEnvironmentVariables { get; } = new Dictionary<string, string?>();
 
     /// <inheritdoc/>
     public string? DataPath { get; }
@@ -32,4 +36,8 @@ public class MockAppRuntimeInfo : IAppRuntimeInfo
 
     /// <inheritdoc/>
     public string? GamesPath { get; }
+
+    public string? AppImage { get; }
+    public bool ShouldLogEnvVars { get; }
+    public string SEQ_Url { get; } = "http://localhost:5341";
 }

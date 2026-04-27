@@ -19,7 +19,7 @@ public class ApplyUpdateEndpointUnitTests : BaseUnitTest<ApplyUpdateEndpoint>
         var mockManager = new Mock<UpdateManager>(mockSource.Object, null!, mockLocator.Object);
 
         // Act
-        var endpoint = SetupEndpointUnitTest<ApplyUpdateEndpoint>(s => { s.AddSingleton(_ => mockManager.Object); });
+        var endpoint = SetupEndpointUnitTest<ApplyUpdateEndpoint>(s => s.AddSingleton(_ => mockManager.Object));
         await endpoint.HandleAsync(CancellationToken);
         var result = endpoint.Response;
 

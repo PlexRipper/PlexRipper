@@ -57,7 +57,7 @@ RUN case "${TARGETPLATFORM}" in \
     /p:ReaparrRuntimeMode=docker \
     /p:ReaparrRuntimeIdentifier=${REAPARR_RUNTIME_IDENTIFIER} \
     -p:UseAppHost=false \
-    -p:CSharpier_Bypass=true \
+    -p:CSharpier_Bypass=true
 
 # Stage 3a - .NET runtime (Alpine/musl-based; compatible with the Alpine final image)
 FROM mcr.microsoft.com/dotnet/aspnet:10.0-alpine3.22 AS dotnet-runtime

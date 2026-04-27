@@ -88,14 +88,15 @@ public static class EnvironmentExtensions
     /// Gets the port number from the DOTNET_HTTP_PORTS environment variable.
     /// </summary>
     /// <returns>The port number or 5000 if not configured.</returns>
-    public static int GetPort => int.TryParse(
-        GetEnvironmentVariable(EnvKeys.DotNetHttpPorts)
-            ?.Split(';', StringSplitOptions.RemoveEmptyEntries)
-            .FirstOrDefault(),
-        out var port
-    )
-        ? port
-        : 5000;
+    public static int GetPort =>
+        int.TryParse(
+            GetEnvironmentVariable(EnvKeys.DotNetHttpPorts)
+                ?.Split(';', StringSplitOptions.RemoveEmptyEntries)
+                .FirstOrDefault(),
+            out var port
+        )
+            ? port
+            : 5000;
 
     /// <summary>
     /// Sets the SEQ_URL environment variable to the specified URL.
@@ -175,9 +176,9 @@ public static class EnvironmentExtensions
     /// Determines if the value is true.
     /// </summary>
     /// <param name="value"></param>
-    private static bool IsTrue(string? value) => value is not null
-                                                 && (string.Equals(value, Convert.ToString(true),
-                                                     StringComparison.OrdinalIgnoreCase) || value == "1");
+    private static bool IsTrue(string? value) =>
+        value is not null
+        && (string.Equals(value, Convert.ToString(true), StringComparison.OrdinalIgnoreCase) || value == "1");
 
     #endregion
 }

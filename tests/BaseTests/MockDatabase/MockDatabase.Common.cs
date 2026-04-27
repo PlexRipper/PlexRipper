@@ -272,7 +272,6 @@ public static partial class MockDatabase
     }
 
     public static string DatabaseConnectionString(string dbName = "") =>
-
         // https://docs.microsoft.com/en-us/dotnet/standard/data/sqlite/in-memory-databases
         new SqliteConnectionStringBuilder
         {

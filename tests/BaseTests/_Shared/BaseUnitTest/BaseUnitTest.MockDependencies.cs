@@ -70,7 +70,8 @@ public partial class BaseUnitTest
             .InstancePerDependency();
 
         builder
-            .Register((_, _) =>
+            .Register(
+                (_, _) =>
                 {
                     var factoryMock = new Mock<IReaparrDbContextFactory>(MockBehavior.Strict);
                     factoryMock
@@ -88,7 +89,8 @@ public partial class BaseUnitTest
             .InstancePerDependency();
 
         builder
-            .Register((_, _) =>
+            .Register(
+                (_, _) =>
                 {
                     var factoryMock = new Mock<IAuthDbContextFactory>(MockBehavior.Strict);
                     factoryMock

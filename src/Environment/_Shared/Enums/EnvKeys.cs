@@ -15,8 +15,6 @@ public static class EnvKeys
     public const string ReaparrPhotosPath = "REAPARR_PHOTOS_PATH";
     public const string ReaparrOtherPath = "REAPARR_OTHER_PATH";
     public const string ReaparrGamesPath = "REAPARR_GAMES_PATH";
-    public const string XdgConfigHome = "XDG_CONFIG_HOME";
-    public const string XdgDownloadDir = "XDG_DOWNLOAD_DIR";
     public const string AuthHeaderTokenName = "AUTH_HEADER_TOKEN";
     public const string GitHubToken = "GITHUB_TOKEN";
     public const string SeqUrl = "SEQ_URL";

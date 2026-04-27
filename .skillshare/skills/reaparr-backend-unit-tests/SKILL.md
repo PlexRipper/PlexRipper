@@ -40,6 +40,8 @@ Do not use this skill for frontend tests (Vitest/Cypress).
 
 Prefer the shared `BaseUnitTest` helpers over manual container or SUT construction.
 
+Before adding any test-local helper or custom setup method, inspect `tests/BaseTests/_Shared/BaseUnitTest/*` and existing `tests/BaseTests/*` utilities first. Reuse an existing helper when one already fits. Do not create ad-hoc test-class helpers for behavior already covered by `BaseUnitTest`, such as app build info setup, dependency overrides, filesystem setup, environment-variable scoping, or SUT creation.
+
 - Use `SetupDatabase(...)` for database state.
 - Use `SetupFileSystem(...)` for filesystem state only.
 - Use `SetupDependencies(...)` when a test needs to replace a DI registration without overloading an unrelated helper.

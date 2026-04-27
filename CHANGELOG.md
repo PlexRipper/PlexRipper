@@ -1,5 +1,20 @@
 Reaparr Changelog
 
+# [0.38.0-dev.11](https://github.com/Reaparr/Reaparr/compare/v0.38.0-dev.10...v0.38.0-dev.11) (2026-04-27)
+
+
+### Bug Fixes
+
+* **WebAPI:** Ensure per-runtime release channels and frontend depende… ([#572](https://github.com/Reaparr/Reaparr/issues/572)) ([7b01438](https://github.com/Reaparr/Reaparr/commit/7b014386a6139166cbb473f768efe861cb59a4b0))
+* **WebAPI:** Ensure per-runtime release channels and frontend dependency install ([7db5301](https://github.com/Reaparr/Reaparr/commit/7db5301553f6ee3c6b525436d53286a47360a23c))
+* **WebAPI:** Fix Dockerfile stage parsing ([6ae517e](https://github.com/Reaparr/Reaparr/commit/6ae517ebbbd206b02f49d84c653fc44c0e0cd893))
+* **WebAPI:** Handle malformed release tags and improve update check fallback ([1da7d05](https://github.com/Reaparr/Reaparr/commit/1da7d05a4e7de003987a4fba27d120ba78ef56dd))
+
+
+### Features
+
+* **Web-UI:** Added progress to the download update pop-up ([931e110](https://github.com/Reaparr/Reaparr/commit/931e110bbc0583f87c2dca297d9d4ab9e36336e6))
+
 # [0.38.0-dev.10](https://github.com/Reaparr/Reaparr/compare/v0.38.0-dev.9...v0.38.0-dev.10) (2026-04-24)
 
 

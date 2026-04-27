@@ -99,6 +99,7 @@ Reference files:
 - Use `WaitForDatabaseConditionAsync(...)` for eventual DB consistency checks.
 - Use `WaitForDownloadStatusAsync(...)` for download status convergence.
 - Use `await container.SchedulerService.AwaitScheduler(...)` after scheduling job-driven operations.
+- When polling for state changes caused by background jobs, prefer a **fresh `IReaparrDbContextFactory.CreateAsync()` context per poll** instead of reusing a long-lived scoped `DbContext`. Shared tracked entities can hide status transitions and make a healthy background flow look stuck.
 
 Do not replace strict final assertions with long sleeps.
 
@@ -146,8 +147,11 @@ Weak assertion examples to avoid:
 Do not hardcode seeded destination folders as root paths like `/Downloads`.
 Use `PathProvider.Default*DestinationFolder` conventions for seeded folder paths.
 
+If integration tests seed download tasks that later participate in real filesystem flows, normalize their `DirectoryMeta.DownloadRootPath` and `DirectoryMeta.DestinationRootPath` against the current integration-test sandbox (for example via `MockPathProvider(databaseName, new MockAppBuildInfo())`). Generic fake-data paths can drift from the active sandbox and cause download/move/cleanup assertions to fail for the wrong reason.
+
 Relevant file:
 - `src/Data/ReaparrDBContextSeed.cs`
+- `tests/BaseTests/MockDatabase/MockDatabase.DownloadTask.cs`
 
 ### Strict Plex SDK payload unions
 
@@ -158,6 +162,16 @@ Relevant files:
 - `tests/BaseTests/FakePlexApiData/FakePlexApiData.PlexMediaContainer.cs`
 - `tests/BaseTests/FakePlexApiData/GetLibrarySectionsAllResponse/FakePlexApiData.GetLibrarySectionsAllMediaContainer.cs`
 - `tests/BaseTests/FakePlexApiData/GetMediaMetaData/FakePlexApiData.MediaMetaDataMediaContainer.cs`
+
+### Background job polling regressions
+
+If a focused integration run appears to hang and the captured output only shows the TUnit startup banner, do not assume the process is deadlocked immediately. First:
+
+1. rerun the failing class with `--treenode-filter`
+2. inspect the generated `TestResults/*.diag` artifacts for `TimeoutException` and the failing `TestNodeUpdateMessage`
+3. verify whether the failure is real job non-completion or stale test-side observation
+
+This matters for download/job tests where the real root cause can be stale tracked entities in test polling rather than the scheduler or worker itself.
 
 ## Integration Test Verification
 

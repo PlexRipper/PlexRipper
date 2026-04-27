@@ -23,6 +23,7 @@ public class TestModule : Module
         builder
             .Register((_, _) => MockDatabase.GetMemoryReaparrDbContext(MemoryDbName))
             .As<IReaparrDbContext>()
+            .As<IReaparrDbContextDatabase>()
             .InstancePerDependency();
 
         builder
@@ -33,12 +34,23 @@ public class TestModule : Module
         builder
             .Register((_, _) => MockDatabase.GetMemoryAuthDbContext(MemoryDbName))
             .As<IAuthDbContext>()
+            .As<IAuthDbContextDatabase>()
             .InstancePerDependency();
 
         builder.RegisterType<MockProgressHubService>().As<IProgressHubService>().SingleInstance();
         builder.RegisterType<MockDownloadHubService>().As<IDownloadHubService>().SingleInstance();
         builder.RegisterType<MockNotificationHubService>().As<INotificationHubService>().SingleInstance();
         builder.RegisterType<MockPlexApiServer>().As<IMockPlexApiServer>().SingleInstance();
+
+        builder
+            .Register((_, _) => Config.OverrideAppBuildInfo ?? new MockAppBuildInfo())
+            .As<IAppBuildInfo>()
+            .SingleInstance();
+
+        builder
+            .Register((ctx, _) => new MockPathProvider(MemoryDbName, ctx.Resolve<IAppBuildInfo>()))
+            .As<IPathProvider>()
+            .SingleInstance();
 
         SetMockedDependencies(builder);
 

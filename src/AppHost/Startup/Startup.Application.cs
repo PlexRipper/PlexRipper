@@ -11,7 +11,12 @@ public static partial class Startup
     /// </summary>
     /// <param name="app"> The <see cref="IApplicationBuilder"/> instance to configure.</param>
     /// <param name="env"> The <see cref="IWebHostEnvironment"/> instance to configure.</param>
-    public static void ConfigureApplication(this WebApplication app, IWebHostEnvironment env)
+    /// <param name="appBuildInfo"> The <see cref="IAppBuildInfo"/> instance containing application build information to include in response headers.</param>
+    public static void ConfigureApplication(
+        this WebApplication app,
+        IWebHostEnvironment env,
+        IAppBuildInfo appBuildInfo
+    )
     {
         _log.Here()
             .Information(
@@ -29,10 +34,19 @@ public static partial class Startup
         app.Use(
             async (ctx, next) =>
             {
+                // Rewrite legacy/public API v2 routes
                 if (ctx.Request.Path.StartsWithSegments("/api/v2", out var remaining))
-                {
                     ctx.Request.Path = PublicApiRoutes.DownloadClient + remaining;
-                }
+
+                // Set global response headers
+                ctx.Response.OnStarting(() =>
+                {
+                    // NOTE: Update "NSwagGlobalHeaders" when adding/updating headers and add to "CORS WithExposedHeaders" in ConfigureServices
+                    ctx.Response.Headers[ReaparrHeaders.Version] = appBuildInfo.InformationalVersion;
+                    ctx.Response.Headers[ReaparrHeaders.Platform] = appBuildInfo.RuntimeMode;
+
+                    return Task.CompletedTask;
+                });
 
                 await next();
             }

@@ -13,14 +13,12 @@ public class DesktopModeUnitTests : BaseUnitTest<DesktopMode>
     {
         // Arrange
         using var _ = WithEnvironmentVariablesAsync(
-            new Dictionary<string, string?>
-            {
-                [EnvKeys.ReaparrPlatform] = "desktop",
-                [EnvKeys.DotNetEnvironment] = "Production",
-            }
+            new Dictionary<string, string?> { [EnvKeys.DotNetEnvironment] = "Production" }
         );
 
-        var windowFactory = new FakeDesktopWindowFactory(new FakeDesktopWindow());
+        SetAppBuildInfo(x => x.RuntimeMode = "desktop");
+
+        var windowFactory = new FakeDesktopWindowFactory(new MockDesktopWindow());
         var server = CreateServer(null);
         var sut = CreateSut(server, windowFactory.Create);
 
@@ -40,14 +38,11 @@ public class DesktopModeUnitTests : BaseUnitTest<DesktopMode>
     {
         // Arrange
         using var _ = WithEnvironmentVariablesAsync(
-            new Dictionary<string, string?>
-            {
-                [EnvKeys.ReaparrPlatform] = "desktop",
-                [EnvKeys.IntegrationTestMode] = "true",
-            }
+            new Dictionary<string, string?> { [EnvKeys.IntegrationTestMode] = "true" }
         );
+        SetAppBuildInfo(x => x.RuntimeMode = "desktop");
 
-        var windowFactory = new FakeDesktopWindowFactory(new FakeDesktopWindow());
+        var windowFactory = new FakeDesktopWindowFactory(new MockDesktopWindow());
         var server = CreateServer("http://localhost:5000");
         var sut = CreateSut(server, windowFactory.Create);
 
@@ -66,14 +61,11 @@ public class DesktopModeUnitTests : BaseUnitTest<DesktopMode>
     {
         // Arrange
         using var _ = WithEnvironmentVariablesAsync(
-            new Dictionary<string, string?>
-            {
-                [EnvKeys.ReaparrPlatform] = "desktop",
-                [EnvKeys.DotNetEnvironment] = "Production",
-            }
+            new Dictionary<string, string?> { [EnvKeys.DotNetEnvironment] = "Production" }
         );
+        SetAppBuildInfo(x => x.RuntimeMode = "desktop");
 
-        var window = new FakeDesktopWindow();
+        var window = new MockDesktopWindow();
         var windowFactory = new FakeDesktopWindowFactory(window);
         var server = CreateServer("http://localhost:5000");
         var sut = CreateSut(server, windowFactory.Create);
@@ -100,14 +92,11 @@ public class DesktopModeUnitTests : BaseUnitTest<DesktopMode>
     {
         // Arrange
         using var _ = WithEnvironmentVariablesAsync(
-            new Dictionary<string, string?>
-            {
-                [EnvKeys.ReaparrPlatform] = "desktop",
-                [EnvKeys.DotNetEnvironment] = "Production",
-            }
+            new Dictionary<string, string?> { [EnvKeys.DotNetEnvironment] = "Production" }
         );
+        SetAppBuildInfo(x => x.RuntimeMode = "desktop");
 
-        var window = new FakeDesktopWindow();
+        var window = new MockDesktopWindow();
         var windowFactory = new FakeDesktopWindowFactory(window);
         var server = CreateServer("http://localhost:5000");
         var sut = CreateSut(server, windowFactory.Create);
@@ -131,14 +120,11 @@ public class DesktopModeUnitTests : BaseUnitTest<DesktopMode>
     {
         // Arrange
         using var _ = WithEnvironmentVariablesAsync(
-            new Dictionary<string, string?>
-            {
-                [EnvKeys.ReaparrPlatform] = "desktop",
-                [EnvKeys.DotNetEnvironment] = "Production",
-            }
+            new Dictionary<string, string?> { [EnvKeys.DotNetEnvironment] = "Production" }
         );
+        SetAppBuildInfo(x => x.RuntimeMode = "desktop");
 
-        var window = new FakeDesktopWindow();
+        var window = new MockDesktopWindow();
         var windowFactory = new FakeDesktopWindowFactory(window);
         var server = CreateServer("http://localhost:5000");
         var sut = CreateSut(server, windowFactory.Create);
@@ -158,14 +144,11 @@ public class DesktopModeUnitTests : BaseUnitTest<DesktopMode>
     {
         // Arrange
         using var _ = WithEnvironmentVariablesAsync(
-            new Dictionary<string, string?>
-            {
-                [EnvKeys.ReaparrPlatform] = "desktop",
-                [EnvKeys.DotNetEnvironment] = "Production",
-            }
+            new Dictionary<string, string?> { [EnvKeys.DotNetEnvironment] = "Production" }
         );
+        SetAppBuildInfo(x => x.RuntimeMode = "desktop");
 
-        var window = new FakeDesktopWindow();
+        var window = new MockDesktopWindow();
         var windowFactory = new FakeDesktopWindowFactory(window);
         var server = CreateServer("http://localhost:5000");
         var sut = CreateSut(server, windowFactory.Create);
@@ -183,14 +166,11 @@ public class DesktopModeUnitTests : BaseUnitTest<DesktopMode>
     {
         // Arrange
         using var _ = WithEnvironmentVariablesAsync(
-            new Dictionary<string, string?>
-            {
-                [EnvKeys.ReaparrPlatform] = "desktop",
-                [EnvKeys.DotNetEnvironment] = "Production",
-            }
+            new Dictionary<string, string?> { [EnvKeys.DotNetEnvironment] = "Production" }
         );
+        SetAppBuildInfo(x => x.RuntimeMode = "desktop");
 
-        var window = new FakeDesktopWindow();
+        var window = new MockDesktopWindow();
         var windowFactory = new FakeDesktopWindowFactory(window);
         var server = CreateServer("http://localhost:5000");
         var sut = CreateSut(server, windowFactory.Create);
@@ -215,14 +195,11 @@ public class DesktopModeUnitTests : BaseUnitTest<DesktopMode>
     {
         // Arrange
         using var _ = WithEnvironmentVariablesAsync(
-            new Dictionary<string, string?>
-            {
-                [EnvKeys.ReaparrPlatform] = "desktop",
-                [EnvKeys.DotNetEnvironment] = "Production",
-            }
+            new Dictionary<string, string?> { [EnvKeys.DotNetEnvironment] = "Production" }
         );
+        SetAppBuildInfo(x => x.RuntimeMode = "desktop");
 
-        var windowFactory = new FakeDesktopWindowFactory(new FakeDesktopWindow());
+        var windowFactory = new FakeDesktopWindowFactory(new MockDesktopWindow());
         var server = CreateServer("http://localhost:5000");
         var sut = CreateSut(server, windowFactory.Create);
 
@@ -238,12 +215,11 @@ public class DesktopModeUnitTests : BaseUnitTest<DesktopMode>
         waitForExitTask.IsCompleted.ShouldBeTrue();
     }
 
-    private DesktopMode CreateSut(IServer server, Func<Uri, IDesktopWindow> windowFactory) =>
-        Mock.Create<DesktopMode>(
-            new TypedParameter(typeof(ILogger), Log),
-            new TypedParameter(typeof(IServer), server),
-            new TypedParameter(typeof(Func<Uri, IDesktopWindow>), windowFactory)
-        );
+    private DesktopMode CreateSut(IServer server, Func<Uri, IDesktopWindow> windowFactory) => Mock.Create<DesktopMode>(
+        new TypedParameter(typeof(ILogger), Log),
+        new TypedParameter(typeof(IServer), server),
+        new TypedParameter(typeof(Func<Uri, IDesktopWindow>), windowFactory)
+    );
 
     private static IServer CreateServer(string? address)
     {
@@ -261,9 +237,9 @@ public class DesktopModeUnitTests : BaseUnitTest<DesktopMode>
 
     private sealed class FakeDesktopWindowFactory
     {
-        private readonly FakeDesktopWindow _window;
+        private readonly MockDesktopWindow _window;
 
-        public FakeDesktopWindowFactory(FakeDesktopWindow window)
+        public FakeDesktopWindowFactory(MockDesktopWindow window)
         {
             _window = window;
         }
@@ -274,70 +250,6 @@ public class DesktopModeUnitTests : BaseUnitTest<DesktopMode>
         {
             CreateCalls++;
             return _window;
-        }
-    }
-
-    private sealed class FakeDesktopWindow : IDesktopWindow
-    {
-        public bool IsClosedToBackground { get; private set; }
-        public bool NativeClosePrevented { get; private set; }
-        public bool IsDisposed { get; private set; }
-        public int WaitForCloseCalls { get; private set; }
-        public bool IsInitialized { get; private set; }
-        public List<Uri> OpenedExternalUrls { get; } = [];
-
-        public TaskCompletionSource CloseToBackgroundCompletion { get; } =
-            new(TaskCreationOptions.RunContinuationsAsynchronously);
-
-        public TaskCompletionSource MessageLoopStarted { get; } =
-            new(TaskCreationOptions.RunContinuationsAsynchronously);
-
-        public Func<object?, EventArgs, bool>? WindowClosingHandler { get; private set; }
-        public Action<DesktopMessageDTO>? ExternalLinkHandler { get; private set; }
-
-        public void ConfigureWindow() { }
-
-        public void RegisterWindowClosingHandler(Func<object?, EventArgs, bool> handler)
-        {
-            WindowClosingHandler = handler;
-        }
-
-        public void RegisterDesktopMessageHandler(Action<DesktopMessageDTO> handler)
-        {
-            ExternalLinkHandler = handler;
-        }
-
-        public void OpenExternalBrowser(Uri uri)
-        {
-            OpenedExternalUrls.Add(uri);
-        }
-
-        public void CloseToBackground()
-        {
-            IsClosedToBackground = true;
-            CloseToBackgroundCompletion.SetResult();
-        }
-
-        public void RestoreFromBackground() { }
-
-        public void CloseNativeWindow()
-        {
-            NativeClosePrevented = WindowClosingHandler?.Invoke(this, EventArgs.Empty) ?? false;
-            IsDisposed = true;
-            IsInitialized = false;
-        }
-
-        public void DisposeWindow()
-        {
-            IsDisposed = true;
-            IsInitialized = false;
-        }
-
-        public void WaitForClose()
-        {
-            WaitForCloseCalls++;
-            IsInitialized = true;
-            MessageLoopStarted.SetResult();
         }
     }
 }

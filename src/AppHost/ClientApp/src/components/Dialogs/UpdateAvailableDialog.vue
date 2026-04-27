@@ -112,8 +112,8 @@
 						v-else
 						unelevated
 						icon="mdi-update"
-						:label="t('components.update-available-dialog.download-update')"
-						:disable="updateStore.isDownloading"
+						:label="desktopUpdateButtonLabel"
+						:disable="updateStore.isDownloading || updateStore.isApplyingUpdate"
 						@click="runDesktopUpdate()" />
 				</QCol>
 			</QRow>
@@ -135,9 +135,20 @@ const updateStore = useUpdateStore();
 
 const releaseIndex = ref(0);
 const latestVersion = computed(() => updateStore.releaseNotes.at(0)?.version ?? '?');
+const desktopUpdateButtonLabel = computed(() => {
+	if (updateStore.isApplyingUpdate) {
+		return t('components.update-available-dialog.restarting');
+	}
+
+	if (updateStore.isDownloading) {
+		return t('components.update-available-dialog.downloading', { percentage: Math.round(updateStore.downloadProgress) });
+	}
+
+	return t('components.update-available-dialog.download-update');
+});
 
 function runDesktopUpdate() {
-	useSubscription(updateStore.downloadUpdate().subscribe());
+	useSubscription(updateStore.downloadAndApplyUpdate().subscribe());
 }
 </script>
 

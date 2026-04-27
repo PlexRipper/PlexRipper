@@ -2,9 +2,8 @@
 
 public enum OperatingSystemPlatform
 {
-    Windows,
-
-    Linux,
-
-    Osx,
+    Unknown = 0,
+    Linux = 1,
+    Windows = 2,
+    Osx = 3,
 }

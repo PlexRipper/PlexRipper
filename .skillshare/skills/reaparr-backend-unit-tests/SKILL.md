@@ -36,6 +36,128 @@ Do not use this skill for frontend tests (Vitest/Cypress).
 - Structure: Arrange -> Act -> Assert. Every test method **must** include the three comment markers `// Arrange`, `// Act`, and `// Assert` — no exceptions. Within Arrange, mock setups (`Mock.Mock<T>()`) must always be the **last step**, immediately before Act.
 - Determinism: no random behavior in tests.
 
+## Base Test Helpers
+
+Prefer the shared `BaseUnitTest` helpers over manual container or SUT construction.
+
+Before adding any test-local helper or custom setup method, inspect `tests/BaseTests/_Shared/BaseUnitTest/*` and existing `tests/BaseTests/*` utilities first. Reuse an existing helper when one already fits. Do not create ad-hoc test-class helpers for behavior already covered by `BaseUnitTest`, such as app build info setup, dependency overrides, filesystem setup, environment-variable scoping, or SUT creation.
+
+- Use `SetupDatabase(...)` for database state.
+- Use `SetupFileSystem(...)` for filesystem state only.
+- Use `SetupDependencies(...)` when a test needs to replace a DI registration without overloading an unrelated helper.
+- Use `SetAppBuildInfo(...)` for build/version metadata instead of constructing custom handlers or endpoints manually.
+
+### Filesystem and dependency setup
+
+Keep filesystem setup and DI overrides separate:
+
+```csharp
+SetupDependencies(builder => builder.RegisterInstance<IUserSettings>(new UserSettings()));
+SetupFileSystem(system =>
+{
+    system.AddDirectory(configDirectory);
+    system.AddFile(configPath, new MockFileData("{}"));
+});
+
+var result = Sut.Setup();
+```
+
+Do not hide dependency overrides inside `SetupFileSystem(...)`. If a test needs a real service instance, register it explicitly with `SetupDependencies(...)`.
+
+### Sandbox path rule
+
+Do not hard-code config, database, or download paths in backend unit tests when the test uses `BaseUnitTest` helpers.
+
+Prefer `IPathProvider` values resolved from the test container:
+
+```csharp
+var configPath = Mock.Container.Resolve<IPathProvider>().ConfigFileLocation;
+var databasePath = Mock.Container.Resolve<IPathProvider>().DatabasePath;
+```
+
+`BaseUnitTest` uses a sandboxed `MockPathProvider`, so assertions like `"/config/..."` or `"/Config/..."` are brittle and should be avoided.
+
+### Real settings object rule
+
+When testing `ConfigManager.Setup()` or any path that can save settings, prefer a real `UserSettings` instance over a strict `IUserSettings` mock.
+
+Reason:
+- `Setup()` can trigger config save and serialization.
+- A strict mock often forces a large amount of irrelevant property setup.
+- A real `UserSettings` is simpler, more realistic, and more maintainable.
+
+Use mocks for `IUserSettings` only when the test is explicitly asserting `Reset()`, `UpdateSettings(...)`, `SettingsUpdated`, or other interaction behavior.
+
+### App build info rule
+
+If a test changes app version or release channel, call `SetAppBuildInfo(...)` before Act and prefer it over manual container rewiring.
+
+`SetAppBuildInfo(...)` now updates both:
+- the current resolved `MockAppBuildInfo` instance for already-created SUTs
+- the registration used for future container rebuilds
+
+This avoids stale version metadata when a test resolves `Sut` before changing app build info.
+
+### Strong typing over stringly test helpers
+
+Prefer domain types, enums, and value objects in test helper parameters and `[Arguments(...)]` data.
+
+Good:
+
+```csharp
+[Arguments(PlexMediaType.Movie)]
+[Arguments(PlexMediaType.TvShow)]
+private static string GetMediaDestinationFolder(PathProvider sut, PlexMediaType mediaType) => ...
+```
+
+Bad:
+
+```csharp
+[Arguments("Movies")]
+[Arguments("TvShows")]
+private static string GetMediaDestinationFolder(PathProvider sut, string mediaType) => ...
+```
+
+Rules:
+- Prefer `PlexMediaType`, `DownloadTaskType`, IDs, and other project types over string literals when the production API already has a typed representation.
+- Avoid stringly-typed switches in tests when an enum or typed model exists.
+- If the test data must model parsing raw strings, keep that explicit in the test name and assertions.
+
+### Prefer `Sut` before custom construction
+
+If `BaseUnitTest<TSUT>` can construct the subject correctly, use `Sut` instead of adding a local `CreateSut(...)` helper.
+
+Only add a local SUT factory when one of these is true:
+- the test must pass constructor parameters that `AutoMock` cannot infer cleanly
+- the test intentionally bypasses container wiring to validate raw constructor behavior
+- there is no existing `BaseUnitTest` helper that covers the setup
+
+If you think you need a local SUT helper, first check whether `SetAppBuildInfo(...)`, `SetupDependencies(...)`, `SetupFileSystem(...)`, or another `BaseUnitTest` helper already solves it.
+
+### Environment override ordering
+
+When a test uses `WithEnvironmentVariablesAsync(...)` and `SetAppBuildInfo(...)`, complete both in Arrange before first reading `Sut` or any derived property.
+
+Good:
+
+```csharp
+using var _ = WithEnvironmentVariablesAsync(new Dictionary<string, string?>
+{
+    [EnvKeys.ReaparrDataPath] = "/custom/data",
+});
+SetAppBuildInfo(x => x.RuntimeMode = "desktop");
+var sut = Sut;
+```
+
+Bad:
+
+```csharp
+var sut = Sut;
+SetAppBuildInfo(x => x.RuntimeMode = "desktop");
+```
+
+This keeps test setup deterministic and avoids reading stale container state.
+
 ## Test Structure
 
 Follow this exact order within every test method:

@@ -1667,7 +1667,8 @@
           "Microsoft.Extensions.Logging.Console": "[10.0.0, )",
           "Reaparr.Environment": "[1.0.0, )",
           "Spectre.Console.Cli": "[0.55.0, )",
-          "Spectre.Console.Cli.Extensions.DependencyInjection": "[0.7.0, )"
+          "Spectre.Console.Cli.Extensions.DependencyInjection": "[0.7.0, )",
+          "System.IO.Abstractions": "[22.0.16, )"
         }
       },
       "Reaparr.Data": {
@@ -1710,6 +1711,7 @@
       "Reaparr.Environment": {
         "type": "Project",
         "dependencies": {
+          "Autofac": "[9.1.0, )",
           "Serilog": "[4.3.1, )",
           "Xdg.Directories": "[0.1.2, )"
         }

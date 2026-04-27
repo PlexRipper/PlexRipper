@@ -8,7 +8,7 @@ namespace Reaparr.AppHost;
 /// </summary>
 public class Program
 {
-    private static readonly Serilog.ILogger _log = LogFactory.Create<Program>();
+    private static Serilog.ILogger _log => Log.ForContext(typeof(Program));
 
     /// <summary>
     ///  The main method entry point for the application.
@@ -19,29 +19,33 @@ public class Program
     {
         try
         {
+            // This should be ran at the very start before anything is initiated
+            VelopackApp.Build().Run();
+
+            var appBuildInfo = new AppBuildInfo();
+            var pathProvider = new PathProvider(appBuildInfo);
             var logBuffer = new LogBufferService();
-            var signalRLogConfig = new SignalRLogConfig(logBuffer);
+            var signalRLogConfig = new SignalRLogConfig(pathProvider, logBuffer);
 
             // Skip logger setup in integration test mode to preserve test logger
             if (!EnvironmentExtensions.IsIntegrationTestMode())
-                LogFactory.SetupLogging(EnvironmentExtensions.GetLogLevel(), signalRLogConfig);
+                LogFactory.SetupLogging(signalRLogConfig, EnvironmentExtensions.GetLogLevel());
 
-            // Must be first after logging: handles installer hooks (install, uninstall, update) and exits early when invoked by the Velopack installer.
-            VelopackApp.Build().Run();
-
-            FluentResultConfiguration.Setup();
+            _log.Here().Information("Initiating boot process");
 
             _log.Here()
                 .Information(
-                    "Currently running {Channel} version {Version} on {CurrentOS}",
-                    EnvironmentExtensions.IsDevRelease() ? "DEVELOPMENT" : "STABLE",
-                    EnvironmentExtensions.GetInformationalVersion(),
-                    OsInfo.CurrentOS
+                    "Starting Reaparr {Version} ({Channel}) in {RuntimeMode} mode on {CurrentOS} ({RuntimeIdentifier})",
+                    appBuildInfo.InformationalVersion,
+                    appBuildInfo.IsDevRelease ? "DEVELOPMENT" : "STABLE",
+                    appBuildInfo.RuntimeMode,
+                    appBuildInfo.CurrentOS,
+                    appBuildInfo.RuntimeIdentifier
                 );
 
             AppExtensions.LogIdentity();
 
-            _log.Here().Information("Initiating boot process");
+            FluentResultConfiguration.Setup();
 
             var builder = WebApplication.CreateBuilder(args);
 
@@ -68,9 +72,9 @@ public class Program
 
             app.ApplyForwardedHeaders();
 
-            app.ConfigureApplication(app.Environment);
+            app.ConfigureApplication(app.Environment, appBuildInfo);
 
-            if (EnvironmentExtensions.IsDesktopMode() && !EnvironmentExtensions.IsIntegrationTestMode())
+            if (appBuildInfo.IsDesktopMode && !EnvironmentExtensions.IsIntegrationTestMode())
             {
                 var desktopLifecycleResult = await RunDesktopLifecycleAsync(app);
                 if (desktopLifecycleResult.IsFailed)

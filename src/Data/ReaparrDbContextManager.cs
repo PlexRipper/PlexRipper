@@ -87,7 +87,9 @@ public class ReaparrDbContextManager : IReaparrDbContextManager
     {
         try
         {
-            using var connection = new Microsoft.Data.Sqlite.SqliteConnection(DbContextConnections.ConnectionString);
+            using var connection = new Microsoft.Data.Sqlite.SqliteConnection(
+                DbContextConnections.GetConnectionString(_pathProvider)
+            );
             connection.Open();
 
             using var walCommand = connection.CreateCommand();

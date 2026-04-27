@@ -25,8 +25,6 @@ public abstract class BaseEndpoint<TRequest, TDTO> : BaseEndpoint<TRequest>
 {
     protected async Task SendFluentResult<T>(Result<T> result, CancellationToken ct = default)
     {
-        this.HttpContext.AddResponseHeaders();
-
         var resultDTO = result.ToResultDTO();
         await this.SendResponseAsync(
             result.ToResult(),
@@ -40,8 +38,6 @@ public abstract class BaseEndpoint<TRequest, TDTO> : BaseEndpoint<TRequest>
 
     protected async Task SendFluentResult<T>(Result<T> result, Func<T, TDTO> mapper, CancellationToken ct = default)
     {
-        this.HttpContext.AddResponseHeaders();
-
         var resultDTO = result.ToResultDTO(mapper);
         await this.SendResponseAsync(
             result.ToResult(),
@@ -60,8 +56,6 @@ public abstract class BaseEndpointWithoutRequest : EndpointWithoutRequest<BaseRe
 
     protected async Task SendFluentResult(Result result, CancellationToken ct = default)
     {
-        this.HttpContext.AddResponseHeaders();
-
         var resultDTO = result.ToResultDTO();
         await this.SendResponseAsync(
             result,
@@ -82,8 +76,6 @@ public abstract class BaseEndpointWithoutRequest<TResponse> : BaseEndpointWithou
         CancellationToken ct = default
     )
     {
-        this.HttpContext.AddResponseHeaders();
-
         var resultDTO = result.ToResultDTO(mapper);
         await this.SendResponseAsync(
             result.ToResult(),

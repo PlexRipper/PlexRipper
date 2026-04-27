@@ -66,17 +66,26 @@ internal sealed class DesktopPackageWorkflow(
             "--runtime",
             runtime.RuntimeIdentifier,
             "--channel",
-            string.IsNullOrWhiteSpace(settings.Channel)
-                ? (EnvironmentExtensions.IsDevRelease() ? "dev" : "stable")
-                : settings.Channel,
+            GetChannel(runtime, settings),
             "--outputDir",
             string.IsNullOrWhiteSpace(artifactDirectory)
                 ? paths.ArtifactDirectory(runtime.RuntimeIdentifier)
                 : artifactDirectory,
         ];
 
-    private string GetChannel() =>
-        string.IsNullOrWhiteSpace(settings.Channel)
-            ? (EnvironmentExtensions.IsDevRelease() ? "dev" : "stable")
-            : settings.Channel;
+    private string GetChannel() => GetChannel(runtime, settings);
+
+    private static string GetChannel(DesktopRuntime runtime, DesktopCommandSettings settings)
+    {
+        if (!string.IsNullOrWhiteSpace(settings.Channel))
+        {
+            return settings.Channel;
+        }
+
+        return IsDevRelease(settings)
+            ? $"{runtime.RuntimeIdentifier}-dev"
+            : $"{runtime.RuntimeIdentifier}-stable";
+    }
+
+    private static bool IsDevRelease(DesktopCommandSettings settings) => !string.IsNullOrWhiteSpace(settings.InformationalVersion) && settings.InformationalVersion.Contains("dev", StringComparison.OrdinalIgnoreCase);
 }

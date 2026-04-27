@@ -1,0 +1,54 @@
+namespace Reaparr.Environment;
+
+/// <summary>
+/// Provides build-time and assembly-stamped metadata for the running Reaparr application.
+/// </summary>
+public interface IAppBuildInfo
+{
+    /// <summary>
+    /// Gets the application runtime mode stamped into the build metadata, for example <c>desktop</c> or <c>docker</c>.
+    /// </summary>
+    string RuntimeMode { get; }
+
+    /// <summary>
+    /// Gets the runtime identifier stamped into the build metadata, for example <c>linux-arm64</c>.
+    /// </summary>
+    string RuntimeIdentifier { get; }
+
+    /// <summary>
+    /// Gets the application release version from the entry assembly version metadata.
+    /// This should be the stable product version, for example <c>0.36.1</c>.
+    /// </summary>
+    string Version { get; }
+
+    /// <summary>
+    /// Gets the application informational version from the entry assembly informational version metadata.
+    /// This is typically a more detailed build string than <c>Version</c>, for example <c>0.36.0-dev.1</c>.
+    /// </summary>
+    string InformationalVersion { get; }
+
+    /// <summary>
+    /// Returns true if the application runtime mode is desktop.
+    /// </summary>
+    bool IsDesktopMode { get; }
+
+    /// <summary>
+    /// Returns true if the application runtime mode is docker.
+    /// </summary>
+    bool IsDockerMode { get; }
+
+    /// <summary>
+    /// Returns true if the current version indicates a development build (contains <c>dev</c>).
+    /// </summary>
+    bool IsDevRelease { get; }
+
+    /// <summary>
+    /// Gets the current operating system platform as an <see cref="OperatingSystemPlatform"/> enum value.
+    /// </summary>
+    OperatingSystemPlatform CurrentOS { get; }
+
+    /// <summary>
+    /// Returns true if the current operating system is Windows.
+    /// </summary>
+    bool IsWindows { get; }
+}

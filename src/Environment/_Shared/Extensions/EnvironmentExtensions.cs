@@ -31,16 +31,7 @@ public static class EnvironmentExtensions
 
     public static string? GetGamesPath() => GetEnvironmentVariable(EnvKeys.ReaparrGamesPath);
 
-    public static string GetReaparrMode() =>
-        GetEnvironmentVariable(EnvKeys.ReaparrPlatform)?.ToLowerInvariant() switch
-        {
-            "desktop" => "desktop",
-            _ => "docker",
-        };
-
-    public static bool IsDesktopMode() => GetReaparrMode() == "desktop";
-
-    public static bool IsDockerMode() => GetReaparrMode() == "docker";
+    public static string? GetAppImage() => GetEnvironmentVariable(EnvKeys.AppImage);
 
     /// <summary>
     /// Gets the name of the HTTP header used for bearer/auth token passing. Defaults to <c>X-Auth-User</c>.
@@ -71,25 +62,6 @@ public static class EnvironmentExtensions
         var success = Enum.TryParse<LogEventLevel>(GetEnvironmentVariable(EnvKeys.LogLevel), true, out var logLevel);
         return success ? logLevel : LogEventLevel.Debug;
     }
-
-    /// <summary>
-    /// Gets the application release version from <c>VERSION</c>.
-    /// This should be the stable product version, for example <c>0.36.1</c>.
-    /// Falls back to <c>0.0.0</c> when the environment variable is not set.
-    /// </summary>
-    public static string GetVersion() => GetEnvironmentVariable(EnvKeys.Version) ?? "0.0.0";
-
-    /// <summary>
-    /// Gets the application informational version from <c>INFORMATIONAL_VERSION</c>.
-    /// This is typically a more detailed build string than <c>VERSION</c>, for example <c>0.36.0-dev.1</c>.
-    /// Falls back to <c>0.0.0</c> when the environment variable is not set.
-    /// </summary>
-    public static string GetInformationalVersion() => GetEnvironmentVariable(EnvKeys.InformationalVersion) ?? "0.0.0";
-
-    /// <summary>
-    /// Returns true if the current version indicates a development build (contains <c>dev</c>).
-    /// </summary>
-    public static bool IsDevRelease() => GetInformationalVersion().Contains("dev");
 
     /// <summary>
     /// Returns true if the DOTNET_ENVIRONMENT is set to Development.
@@ -146,33 +118,6 @@ public static class EnvironmentExtensions
     {
         System.Environment.SetEnvironmentVariable(EnvKeys.LogLevel, logLevel.ToString().ToUpper());
     }
-
-    public static void SetDataPath(string path) =>
-        System.Environment.SetEnvironmentVariable(EnvKeys.ReaparrDataPath, path);
-
-    public static void SetConfigPath(string path) =>
-        System.Environment.SetEnvironmentVariable(EnvKeys.ReaparrConfigPath, path);
-
-    public static void SetDownloadsPath(string path) =>
-        System.Environment.SetEnvironmentVariable(EnvKeys.ReaparrDownloadsPath, path);
-
-    public static void SetMoviesPath(string path) =>
-        System.Environment.SetEnvironmentVariable(EnvKeys.ReaparrMoviesPath, path);
-
-    public static void SetTvShowsPath(string path) =>
-        System.Environment.SetEnvironmentVariable(EnvKeys.ReaparrTvShowsPath, path);
-
-    public static void SetMusicPath(string path) =>
-        System.Environment.SetEnvironmentVariable(EnvKeys.ReaparrMusicPath, path);
-
-    public static void SetPhotosPath(string path) =>
-        System.Environment.SetEnvironmentVariable(EnvKeys.ReaparrPhotosPath, path);
-
-    public static void SetOtherPath(string path) =>
-        System.Environment.SetEnvironmentVariable(EnvKeys.ReaparrOtherPath, path);
-
-    public static void SetGamesPath(string path) =>
-        System.Environment.SetEnvironmentVariable(EnvKeys.ReaparrGamesPath, path);
 
     /// <summary>
     /// Enables or disables integration test mode by setting <c>IntegrationTestMode</c>.

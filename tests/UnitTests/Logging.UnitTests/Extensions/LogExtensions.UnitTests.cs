@@ -12,13 +12,18 @@ public record TestLoginRequest
 }
 
 [NotInParallel]
-public class LogExtensionsUnitTests
+public class LogExtensionsUnitTests : BaseUnitTest
 {
+    private ILogger CreateTestLogger(LogEventLevel logEventLevel) =>
+        new TestLogConfig(Mock.Create<IPathProvider>()).GetLogger(logEventLevel).ForContext<LogExtensionsUnitTests>();
+
     [Test]
     public void ShouldLogTheSetLogLevel_WhenLogLevelSetIsVerbose()
     {
         // Arrange
-        var log = new TestLogConfig().GetLogger(LogEventLevel.Verbose).ForContext<LogExtensionsUnitTests>();
+        var log = CreateTestLogger(LogEventLevel.Verbose);
+
+        // Act
 
         // Assert
         log.IsLogLevelEnabled(LogEventLevel.Verbose).ShouldBeTrue();
@@ -33,7 +38,9 @@ public class LogExtensionsUnitTests
     public void ShouldNotLogTheSetLogLevel_WhenLogLevelIsAbove()
     {
         // Arrange
-        var log = new TestLogConfig().GetLogger(LogEventLevel.Error).ForContext<LogExtensionsUnitTests>();
+        var log = CreateTestLogger(LogEventLevel.Error);
+
+        // Act
 
         // Assert
         log.IsLogLevelEnabled(LogEventLevel.Verbose).ShouldBeFalse();
@@ -47,12 +54,14 @@ public class LogExtensionsUnitTests
     [Test]
     public void ShouldLogWithCorrectLogProperties_WhenEachLogTypeIsCalled()
     {
+        // Arrange
         var position = new { Latitude = 25, Longitude = 134 };
 
-        var log = new TestLogConfig().GetLogger(LogEventLevel.Verbose).ForContext<LogExtensionsUnitTests>();
+        var log = CreateTestLogger(LogEventLevel.Verbose);
 
         using var context = TestCorrelator.CreateContext();
 
+        // Act
         log.Here()
             .VerboseMsg(
                 "This is a verbose string with a json object: {Position}, a number {Count}, a bool: {Boolean}",
@@ -96,6 +105,7 @@ public class LogExtensionsUnitTests
                 true
             );
 
+        // Assert
         var logEvents = TestCorrelator.GetLogEventsFromContextId(context.Id).ToList();
         logEvents.ShouldNotBeEmpty();
 
@@ -134,7 +144,7 @@ public class LogExtensionsUnitTests
         try
         {
             LogFactory.CloseAndFlush();
-            LogFactory.SetupLogging(LogEventLevel.Debug, new TestLogConfig());
+            LogFactory.SetupLogging(new TestLogConfig(new PathProvider(new MockAppBuildInfo())), LogEventLevel.Debug);
             var log = LogFactory.Create<LogExtensionsUnitTests>();
             var httpContext = new DefaultHttpContext();
             httpContext.Request.Method = HttpMethods.Post;
@@ -180,7 +190,8 @@ public class LogExtensionsUnitTests
         try
         {
             LogFactory.CloseAndFlush();
-            LogFactory.SetupLogging(LogEventLevel.Debug, new TestLogConfig());
+            LogFactory.SetupLogging(new TestLogConfig(new PathProvider(new MockAppBuildInfo())), LogEventLevel.Debug);
+
             var log = LogFactory.Create<LogExtensionsUnitTests>();
             var httpContext = new DefaultHttpContext();
             httpContext.Request.Method = HttpMethods.Post;

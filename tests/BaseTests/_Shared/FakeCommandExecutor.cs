@@ -20,11 +20,30 @@ public sealed class FakeCommandExecutor : ICommandExecutor
     public async Task<TResult> Send<TResult>(ICommand<TResult> command, CancellationToken ct = default)
         where TResult : ResultBase, new()
     {
-        if (_interceptors.TryGetValue(command.GetType(), out var interceptor))
+        try
         {
-            return (TResult)await interceptor(command, ct);
-        }
+            if (_interceptors.TryGetValue(command.GetType(), out var interceptor))
+            {
+                return (TResult)await interceptor(command, ct);
+            }
 
-        return await command.ExecuteAsync(ct);
+            return await command.ExecuteAsync(ct);
+        }
+        catch (OperationCanceledException e) when (ct.IsCancellationRequested)
+        {
+            return CreateFailedResult<TResult>(e);
+        }
+        catch (Exception e)
+        {
+            return CreateFailedResult<TResult>(e);
+        }
+    }
+
+    private static TResult CreateFailedResult<TResult>(Exception e)
+        where TResult : ResultBase, new()
+    {
+        var result = new TResult();
+        result.Reasons.Add(new ExceptionalError(e));
+        return result;
     }
 }

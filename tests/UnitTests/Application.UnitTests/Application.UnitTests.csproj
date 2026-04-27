@@ -16,6 +16,7 @@
     </ItemGroup>
     <ItemGroup>
         <ProjectReference Include="..\..\..\src\Application\Application.csproj" />
+        <ProjectReference Include="..\..\..\src\Environment\Environment.csproj" />
         <ProjectReference Include="..\..\..\src\FileSystem.Contracts\FileSystem.Contracts.csproj" />
         <ProjectReference Include="..\..\BaseTests\BaseTests.csproj" />
     </ItemGroup>
@@ -25,6 +26,7 @@
         <Using Include="Quartz" />
         <Using Include="Reaparr.Application.Contracts" />
         <Using Include="Reaparr.Data.Contracts" />
+        <Using Include="Reaparr.Environment" />
         <Using Include="Reaparr.FileSystem.Contracts" />
         <Using Include="Reaparr.PlexApi.Contracts" />
         <Using Include="Reaparr.Settings.Contracts" />

@@ -2,6 +2,8 @@ namespace Reaparr.Application.UnitTests;
 
 public class CheckForUpdateJobUnitTests : BaseUnitTest<CheckForUpdateJob>
 {
+    private const string CurrentVersion = "1.2.3";
+
     private IJobExecutionContext SetupJobContext()
     {
         Mock.Mock<IJobExecutionContext>().SetupGet(x => x.JobDetail.JobDataMap).Returns(new JobDataMap());
@@ -15,10 +17,17 @@ public class CheckForUpdateJobUnitTests : BaseUnitTest<CheckForUpdateJob>
     {
         // Arrange
         var context = SetupJobContext();
-
+        SetAppBuildInfo(x => x.InformationalVersion = CurrentVersion);
+        var noUpdate = new AppUpdateCheckResult
+        {
+            IsUpdateAvailable = false,
+            NewestVersion = CurrentVersion,
+            CurrentVersion = CurrentVersion,
+            ReleaseNotes = [],
+        };
         Mock.Mock<ICommandExecutor>()
             .Setup(x => x.Send(It.IsAny<CheckForUpdatesCommand>(), CancellationToken))
-            .ReturnsAsync(Result.Ok(AppUpdateCheckResult.NoUpdate()))
+            .ReturnsAsync(Result.Ok(noUpdate))
             .Verifiable(Times.Once());
 
         // Act

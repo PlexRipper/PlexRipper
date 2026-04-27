@@ -7,6 +7,8 @@ public partial class BaseUnitTest
 {
     private Action<ContainerBuilder>? _fileSystemSetup;
     private Action<ContainerBuilder>? _httpClientSetup;
+    private Action<ContainerBuilder>? _appBuildInfoSetup;
+    private Action<ContainerBuilder>? _dependenciesSetup;
     private readonly MockFileSystem _fileSystem = new();
     protected AutoMock Mock { get; set; }
 
@@ -18,6 +20,9 @@ public partial class BaseUnitTest
         {
             SetDefaultBuilder(builder);
 
+            if (_appBuildInfoSetup is not null)
+                _appBuildInfoSetup.Invoke(builder);
+
             if (_fileSystemSetup is not null)
             {
                 SetDefaultFileSystemDirectories();
@@ -28,10 +33,11 @@ public partial class BaseUnitTest
                 builder.Register(ctx => ctx.Resolve<IFileSystem>().Directory).As<IDirectory>().SingleInstance();
             }
 
+            if (_dependenciesSetup is not null)
+                _dependenciesSetup.Invoke(builder);
+
             if (_httpClientSetup is not null)
-            {
                 _httpClientSetup.Invoke(builder);
-            }
         });
 
         // Mock to avoid HttpClient.Dispose() not mocked exception
@@ -100,6 +106,36 @@ public partial class BaseUnitTest
             )
             .As<IAuthDbContextFactory>()
             .InstancePerDependency();
+
+        builder.RegisterType<MockAppBuildInfo>().As<IAppBuildInfo>().SingleInstance();
+
+        builder
+            .Register(ctx => new MockPathProvider(_databaseName, ctx.Resolve<IAppBuildInfo>()))
+            .As<IPathProvider>()
+            .SingleInstance();
+    }
+
+    protected void SetAppBuildInfo(Action<MockAppBuildInfo> action)
+    {
+        // Apply to the current singleton for already-resolved SUT instances, then
+        // persist the same override for any future container rebuilds.
+        if (Mock.Container.Resolve<IAppBuildInfo>() is MockAppBuildInfo existingAppBuildInfo)
+            action.Invoke(existingAppBuildInfo);
+
+        _appBuildInfoSetup = builder =>
+        {
+            builder
+                .Register<MockAppBuildInfo>(_ =>
+                {
+                    var instance = new MockAppBuildInfo();
+                    action.Invoke(instance);
+                    return instance;
+                })
+                .As<IAppBuildInfo>()
+                .SingleInstance();
+        };
+
+        Build();
     }
 
     protected void SetupHttpClient(Action<Mock<HttpMessageHandler>>? action = null)
@@ -122,6 +158,8 @@ public partial class BaseUnitTest
 
     private void SetDefaultFileSystemDirectories()
     {
+        var pathProvider = Mock.Container.Resolve<IPathProvider>();
+
         _fileSystem.AddDrive(
             "/",
             new MockDriveData
@@ -131,14 +169,14 @@ public partial class BaseUnitTest
                 AvailableFreeSpace = DefaultAvailableSpace,
             }
         );
-        _fileSystem.AddDirectory(PathProvider.ConfigDirectory);
-        _fileSystem.AddDirectory(PathProvider.DefaultDownloadsDestinationFolder);
-        _fileSystem.AddDirectory(PathProvider.DefaultMovieDestinationFolder);
-        _fileSystem.AddDirectory(PathProvider.DefaultTvShowsDestinationFolder);
-        _fileSystem.AddDirectory(PathProvider.DefaultMusicDestinationFolder);
-        _fileSystem.AddDirectory(PathProvider.DefaultPhotosDestinationFolder);
-        _fileSystem.AddDirectory(PathProvider.DefaultOtherDestinationFolder);
-        _fileSystem.AddDirectory(PathProvider.DefaultGamesDestinationFolder);
+        _fileSystem.AddDirectory(pathProvider.ConfigDirectory);
+        _fileSystem.AddDirectory(pathProvider.DefaultDownloadsDestinationFolder);
+        _fileSystem.AddDirectory(pathProvider.DefaultMovieDestinationFolder);
+        _fileSystem.AddDirectory(pathProvider.DefaultTvShowsDestinationFolder);
+        _fileSystem.AddDirectory(pathProvider.DefaultMusicDestinationFolder);
+        _fileSystem.AddDirectory(pathProvider.DefaultPhotosDestinationFolder);
+        _fileSystem.AddDirectory(pathProvider.DefaultOtherDestinationFolder);
+        _fileSystem.AddDirectory(pathProvider.DefaultGamesDestinationFolder);
     }
 
     protected void SetupFileSystem(Action<MockFileSystem>? action = default)
@@ -152,6 +190,16 @@ public partial class BaseUnitTest
 
             builder.Register<MockFileSystem>(_ => _fileSystem).As<IFileSystem>().SingleInstance();
         };
+
+        Build();
+    }
+
+    protected void SetupDependencies(Action<ContainerBuilder> action)
+    {
+        if (_dependenciesSetup is not null)
+            throw new InvalidOperationException("SetupDependencies should not be called more than once.");
+
+        _dependenciesSetup = action;
 
         Build();
     }

@@ -6,9 +6,6 @@ public static class EnvKeys
     public const string Unmasked = "UNMASKED";
     public const string LogEnvironmentVariables = "LOG_ENV_VARS";
     public const string LogLevel = "LOG_LEVEL";
-    public const string Version = "VERSION";
-    public const string InformationalVersion = "INFORMATIONAL_VERSION";
-    public const string ReaparrPlatform = "REAPARR_PLATFORM";
     public const string ReaparrDataPath = "REAPARR_DATA_PATH";
     public const string ReaparrConfigPath = "REAPARR_CONFIG_PATH";
     public const string ReaparrDownloadsPath = "REAPARR_DOWNLOADS_PATH";
@@ -18,8 +15,6 @@ public static class EnvKeys
     public const string ReaparrPhotosPath = "REAPARR_PHOTOS_PATH";
     public const string ReaparrOtherPath = "REAPARR_OTHER_PATH";
     public const string ReaparrGamesPath = "REAPARR_GAMES_PATH";
-    public const string XdgConfigHome = "XDG_CONFIG_HOME";
-    public const string XdgDownloadDir = "XDG_DOWNLOAD_DIR";
     public const string AuthHeaderTokenName = "AUTH_HEADER_TOKEN";
     public const string GitHubToken = "GITHUB_TOKEN";
     public const string SeqUrl = "SEQ_URL";
@@ -28,4 +23,5 @@ public static class EnvKeys
     public const string Puid = "PUID";
     public const string Pgid = "PGID";
     public const string DisableAuthentication = "I_AM_DUMB_SO_DISABLE_AUTHENTICATION";
+    public const string AppImage = "APPIMAGE";
 }

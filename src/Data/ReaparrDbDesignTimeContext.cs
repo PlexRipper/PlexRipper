@@ -4,5 +4,10 @@ namespace Reaparr.Data;
 
 public class ReaparrDbDesignTimeContext : IDesignTimeDbContextFactory<ReaparrDbContext>
 {
-    public ReaparrDbContext CreateDbContext(string[] args) => new(PathProvider.DatabaseName);
+    public ReaparrDbContext CreateDbContext(string[] args)
+    {
+        var appBuildInfo = new AppBuildInfo();
+        IPathProvider pathProvider = new PathProvider(appBuildInfo);
+        return new(pathProvider);
+    }
 }

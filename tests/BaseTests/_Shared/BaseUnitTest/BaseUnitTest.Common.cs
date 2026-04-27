@@ -29,8 +29,8 @@ public partial class BaseUnitTest
         EnvironmentExtensions.EnableUnmaskedLog(true);
 
         // Pass the TestLogConfig to LogFactory so all application logs go to test output
-        var testLogConfig = new TestLogConfig();
-        LogFactory.SetupLogging(logEventLevel, testLogConfig);
+        var testLogConfig = new TestLogConfig(new MockPathProvider(MockDatabase.GetMemoryDatabaseName()));
+        LogFactory.SetupLogging(testLogConfig, logEventLevel);
 
         BogusExtensions.Setup();
 
@@ -58,6 +58,8 @@ public partial class BaseUnitTest
                 s.AddSingleton(_ => Mock.Mock<IDownloadHubService>().Object);
                 s.AddSingleton(_ => Mock.Mock<INotificationHubService>().Object);
                 s.AddSingleton(_ => Mock.Mock<IDownloadTaskScheduler>().Object);
+                s.AddSingleton(_ => Mock.Container.Resolve<IPathProvider>());
+                s.AddSingleton(_ => Mock.Container.Resolve<IAppBuildInfo>());
 
                 extraServices?.Invoke(s);
             });

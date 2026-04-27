@@ -17,7 +17,6 @@ public class FileSystemModule : Module
     {
         var assembly = Assembly.GetExecutingAssembly();
 
-        builder.RegisterType<PathProvider>().As<IPathProvider>().SingleInstance();
         builder.RegisterType<DiskProvider>().As<IDiskProvider>().SingleInstance();
 
         builder.RegisterModule(new QuartzAutofacJobsModule(assembly));

@@ -12,13 +12,10 @@ public class DownloadUpdateEndpointUnitTests : BaseUnitTest<DownloadUpdateEndpoi
     public async Task ShouldReturnFailure_WhenDockerMode()
     {
         // Arrange
-        using var _ = WithEnvironmentVariablesAsync(
-            new Dictionary<string, string?> { [Environment.EnvKeys.ReaparrPlatform] = "docker" }
-        );
-
         var mockSource = new Mock<IUpdateSource>();
         var mockLocator = new Mock<IVelopackLocator>();
         var mockManager = new Mock<UpdateManager>(mockSource.Object, null!, mockLocator.Object);
+        SetAppBuildInfo(x => x.RuntimeMode = "docker");
 
         // Act
         var endpoint = SetupEndpointUnitTest<DownloadUpdateEndpoint>(s => s.AddSingleton(_ => mockManager.Object));
@@ -52,16 +49,13 @@ public class DownloadUpdateEndpointUnitTests : BaseUnitTest<DownloadUpdateEndpoi
     public async Task ShouldReturnSuccess_WhenDesktopModeAndUpdateAvailable()
     {
         // Arrange
-        using var _ = WithEnvironmentVariablesAsync(
-            new Dictionary<string, string?> { [Environment.EnvKeys.ReaparrPlatform] = "desktop" }
-        );
-
         var asset = new VelopackAsset { PackageId = "Reaparr", Version = new SemanticVersion(9, 9, 9) };
         var updateInfo = new UpdateInfo(asset, false);
 
         var mockSource = new Mock<IUpdateSource>();
         var mockLocator = new Mock<IVelopackLocator>();
         var mockManager = new Mock<UpdateManager>(mockSource.Object, null!, mockLocator.Object);
+        SetAppBuildInfo(x => x.RuntimeMode = "desktop");
         mockManager.Setup(m => m.CheckForUpdatesAsync()).ReturnsAsync(updateInfo).Verifiable(Times.Once());
         mockManager
             .Setup(m =>
@@ -100,10 +94,6 @@ public class DownloadUpdateEndpointUnitTests : BaseUnitTest<DownloadUpdateEndpoi
     public async Task ShouldSendProgressUpdates_WhenDownloadingUpdate()
     {
         // Arrange
-        using var _ = WithEnvironmentVariablesAsync(
-            new Dictionary<string, string?> { [Environment.EnvKeys.ReaparrPlatform] = "desktop" }
-        );
-
         var asset = new VelopackAsset { PackageId = "Reaparr", Version = new SemanticVersion(9, 9, 9) };
         var updateInfo = new UpdateInfo(asset, false);
 
@@ -112,6 +102,7 @@ public class DownloadUpdateEndpointUnitTests : BaseUnitTest<DownloadUpdateEndpoi
         var mockSource = new Mock<IUpdateSource>();
         var mockLocator = new Mock<IVelopackLocator>();
         var mockManager = new Mock<UpdateManager>(mockSource.Object, null!, mockLocator.Object);
+        SetAppBuildInfo(x => x.RuntimeMode = "desktop");
         mockManager.Setup(m => m.CheckForUpdatesAsync()).ReturnsAsync(updateInfo).Verifiable(Times.Once());
         mockManager
             .Setup(m =>

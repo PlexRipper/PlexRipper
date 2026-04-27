@@ -1,37 +1,37 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="Publish &amp; Run: Desktop-linux-x64" type="DotNetProject" factoryName=".NET Project" activateToolWindowBeforeRun="false">
-    <option name="EXE_PATH" value="/usr/bin/dotnet" />
-    <option name="PROGRAM_PARAMETERS" value="run --project $PROJECT_DIR$/tools/Build -- desktop run --rid linux-x64 --version 0.36.0-dev.1" />
-    <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+        <option name="EXE_PATH" value="/usr/bin/dotnet" />
+        <option name="PROGRAM_PARAMETERS" value="run --project $PROJECT_DIR$/tools/Build -- desktop run --rid linux-x64 --version 0.36.0-dev.1 --informational-version 0.36.0-dev.1 --channel linux-x64-dev --launch-mode packaged" />
+        <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
     <option name="PASS_PARENT_ENVS" value="0" />
-    <envs>
-      <env name="DOTNET_ENVIRONMENT" value="Production" />
-      <env name="INFORMATIONAL_VERSION" value="0.36.0-dev.1" />
-      <env name="PUID" value="1000" />
-      <env name="LOG_ENV_VARS" value="false" />
-      <env name="PGID" value="1000" />
-      <env name="VERSION" value="0.36.0-dev.1" />
-      <env name="REAPARR_PLATFORM" value="desktop" />
-      <env name="SEQ_URL" value="http://localhost:5341" />
-      <env name="LOG_LEVEL" value="DEBUG" />
-      <env name="UNMASKED" value="true" />
-      <env name="DOTNET_HTTP_PORTS" value="5000" />
-    </envs>
-    <option name="ENV_FILE_PATHS" value="" />
-    <option name="REDIRECT_INPUT_PATH" value="" />
-    <option name="MIXED_MODE_DEBUG" value="0" />
-    <option name="USE_MONO" value="0" />
-    <option name="RUNTIME_ARGUMENTS" value="" />
-    <option name="AUTO_ATTACH_CHILDREN" value="0" />
-    <option name="RUNTIME_TYPE" value="coreclr" />
-    <option name="PROJECT_PATH" value="$PROJECT_DIR$/src/AppHost/AppHost.csproj" />
-    <option name="PROJECT_EXE_PATH_TRACKING" value="0" />
-    <option name="PROJECT_ARGUMENTS_TRACKING" value="1" />
-    <option name="PROJECT_WORKING_DIRECTORY_TRACKING" value="0" />
-    <option name="PROJECT_KIND" value="DotNetCore" />
-    <option name="PROJECT_TFM" value="net10.0" />
-    <method v="2">
-      <option name="Build" />
-    </method>
-  </configuration>
+        <envs>
+            <env name="DOTNET_ENVIRONMENT" value="Production" />
+            <env name="INFORMATIONAL_VERSION" value="0.36.0-dev.1" />
+            <env name="PUID" value="1000" />
+            <env name="LOG_ENV_VARS" value="false" />
+            <env name="PGID" value="1000" />
+            <env name="VERSION" value="0.36.0-dev.1" />
+            <env name="REAPARR_PLATFORM" value="desktop" />
+            <env name="SEQ_URL" value="http://localhost:5341" />
+            <env name="LOG_LEVEL" value="DEBUG" />
+            <env name="UNMASKED" value="true" />
+            <env name="DOTNET_HTTP_PORTS" value="5000" />
+        </envs>
+        <option name="ENV_FILE_PATHS" value="" />
+        <option name="REDIRECT_INPUT_PATH" value="" />
+        <option name="MIXED_MODE_DEBUG" value="0" />
+        <option name="USE_MONO" value="0" />
+        <option name="RUNTIME_ARGUMENTS" value="" />
+        <option name="AUTO_ATTACH_CHILDREN" value="0" />
+        <option name="RUNTIME_TYPE" value="coreclr" />
+        <option name="PROJECT_PATH" value="$PROJECT_DIR$/src/AppHost/AppHost.csproj" />
+        <option name="PROJECT_EXE_PATH_TRACKING" value="0" />
+        <option name="PROJECT_ARGUMENTS_TRACKING" value="1" />
+        <option name="PROJECT_WORKING_DIRECTORY_TRACKING" value="0" />
+        <option name="PROJECT_KIND" value="DotNetCore" />
+        <option name="PROJECT_TFM" value="net10.0" />
+        <method v="2">
+            <option name="Build" />
+        </method>
+    </configuration>
 </component>

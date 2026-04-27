@@ -26,6 +26,7 @@ FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:10.0 AS back-end
 
 ARG VERSION
 ARG INFORMATIONAL_VERSION
+ARG TARGETPLATFORM
 
 WORKDIR /src
 
@@ -44,10 +45,19 @@ COPY . .
 WORKDIR "/src/src/AppHost"
 
 ## Build and Publish
-RUN dotnet publish "AppHost.csproj" -c Release -o /app/publish \
+RUN case "${TARGETPLATFORM}" in \
+      "linux/amd64") REAPARR_RUNTIME_IDENTIFIER="linux-x64" ;; \
+      "linux/arm64") REAPARR_RUNTIME_IDENTIFIER="linux-arm64" ;; \
+      *) echo "Unsupported TARGETPLATFORM: ${TARGETPLATFORM}"; exit 1 ;; \
+    esac && \
+    dotnet publish "AppHost.csproj" -c Release -o /app/publish \
     --no-restore \
+    /p:Version=${VERSION} \
     /p:InformationalVersion=${INFORMATIONAL_VERSION} \
-    -p:UseAppHost=false
+    /p:ReaparrRuntimeMode=docker \
+    /p:ReaparrRuntimeIdentifier=${REAPARR_RUNTIME_IDENTIFIER} \
+    -p:UseAppHost=false \
+    -p:CSharpier_Bypass=true
 
 # Stage 3a - .NET runtime (Alpine/musl-based; compatible with the Alpine final image)
 FROM mcr.microsoft.com/dotnet/aspnet:10.0-alpine3.22 AS dotnet-runtime

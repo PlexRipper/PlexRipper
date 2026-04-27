@@ -2,9 +2,75 @@ namespace Reaparr.BaseTests;
 
 public static partial class MockDatabase
 {
+    /// <summary>
+    /// Rewrites seeded movie download-task child paths so integration tests use the current
+    /// per-database sandbox instead of any generic/default fake-data paths.
+    /// </summary>
+    private static void ApplyIntegrationTestPaths(
+        IEnumerable<DownloadTaskMovie> downloadTasks,
+        IPathProvider pathProvider
+    )
+    {
+        // Unit tests do not need sandbox rewriting. They usually assert on entities or behavior only,
+        // while integration tests boot the full AppHost and exercise real file-system flows.
+        if (!EnvironmentExtensions.IsIntegrationTestMode())
+            return;
+
+        foreach (var downloadTask in downloadTasks)
+        foreach (var child in downloadTask.Children)
+        {
+            // Each integration test gets its own filesystem sandbox. The seeded download tasks must point
+            // at that sandbox so download, move, and cleanup jobs all operate on the active test paths.
+            child.DirectoryMeta.DownloadRootPath = pathProvider.DefaultDownloadsDestinationFolder;
+            child.DirectoryMeta.DestinationRootPath = child.MediaType switch
+            {
+                // Keep destination roots aligned with the same media-specific defaults used by the test
+                // path provider so seeded tasks match the runtime file-placement rules.
+                PlexMediaType.Movie => pathProvider.DefaultMovieDestinationFolder,
+                PlexMediaType.TvShow or PlexMediaType.Season or PlexMediaType.Episode =>
+                    pathProvider.DefaultTvShowsDestinationFolder,
+                PlexMediaType.Music or PlexMediaType.Album or PlexMediaType.Song =>
+                    pathProvider.DefaultMusicDestinationFolder,
+                PlexMediaType.Photos => pathProvider.DefaultPhotosDestinationFolder,
+                PlexMediaType.OtherVideos => pathProvider.DefaultOtherDestinationFolder,
+                PlexMediaType.Games => pathProvider.DefaultGamesDestinationFolder,
+                _ => throw new ArgumentOutOfRangeException(
+                    nameof(child.MediaType),
+                    child.MediaType,
+                    $"Unsupported PlexMediaType '{child.MediaType}' while mapping seeded movie download task destination root path."
+                ),
+            };
+        }
+    }
+
+    /// <summary>
+    /// Rewrites seeded TV-show episode-file paths so integration tests resolve downloads and moves
+    /// inside the current sandboxed TV destination tree.
+    /// </summary>
+    private static void ApplyIntegrationTestPaths(
+        IEnumerable<DownloadTaskTvShow> downloadTasks,
+        IPathProvider pathProvider
+    )
+    {
+        if (!EnvironmentExtensions.IsIntegrationTestMode())
+            return;
+
+        foreach (var downloadTask in downloadTasks)
+        foreach (var season in downloadTask.Children)
+        foreach (var episode in season.Children)
+        foreach (var child in episode.Children)
+        {
+            // TV download task seeds are nested root -> season -> episode -> file, so only the leaf file
+            // tasks need their directory metadata rewritten for integration-test filesystem operations.
+            child.DirectoryMeta.DownloadRootPath = pathProvider.DefaultDownloadsDestinationFolder;
+            child.DirectoryMeta.DestinationRootPath = pathProvider.DefaultTvShowsDestinationFolder;
+        }
+    }
+
     private static async Task<ReaparrDbContext> AddDownloadTaskMovies(
         this ReaparrDbContext context,
         Seed seed,
+        IPathProvider pathProvider,
         Action<FakeDataConfig>? options = null
     )
     {
@@ -20,6 +86,10 @@ public static partial class MockDatabase
         plexServer.ShouldNotBeNull();
 
         downloadTasks.SetRelationshipIds(plexLibrary.PlexServerId, plexLibrary.Id);
+
+        // Normalize seeded file paths for integration tests after relationship IDs are assigned, so the
+        // generated DirectoryMeta values line up with the current test database sandbox.
+        ApplyIntegrationTestPaths(downloadTasks, pathProvider);
 
         context.DownloadTaskMovie.AddRange(downloadTasks);
         await context.SaveChangesAsync();
@@ -38,6 +108,7 @@ public static partial class MockDatabase
     private static async Task<ReaparrDbContext> AddDownloadTaskTvShows(
         this ReaparrDbContext context,
         Seed seed,
+        IPathProvider pathProvider,
         Action<FakeDataConfig>? options = null
     )
     {
@@ -53,6 +124,10 @@ public static partial class MockDatabase
         plexServer.ShouldNotBeNull();
 
         downloadTasks.SetRelationshipIds(plexLibrary.PlexServerId, plexLibrary.Id);
+
+        // Normalize seeded nested episode-file paths for integration tests after relationship IDs are
+        // assigned, so runtime jobs read/write within the current test sandbox.
+        ApplyIntegrationTestPaths(downloadTasks, pathProvider);
 
         context.DownloadTaskTvShow.AddRange(downloadTasks);
         await context.SaveChangesAsync();

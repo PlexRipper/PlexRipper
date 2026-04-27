@@ -9,7 +9,7 @@
         <option name="EXE_PATH" value="/usr/bin/dotnet" />
         <option
             name="PROGRAM_PARAMETERS"
-            value="run --project $PROJECT_DIR$/tools/Build -- desktop run --rid osx-arm64 --version 0.36.0-dev.1"
+            value="run --project $PROJECT_DIR$/tools/Build -- desktop run --rid osx-arm64 --version 0.36.0-dev.1 --informational-version 0.36.0-dev.1 --channel osx-arm64-dev"
         />
         <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
         <option name="PASS_PARENT_ENVS" value="0" />

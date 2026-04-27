@@ -12,16 +12,14 @@ public class ApplyUpdateEndpointUnitTests : BaseUnitTest<ApplyUpdateEndpoint>
     public async Task ShouldReturnFailure_WhenDockerMode()
     {
         // Arrange
-        using var _ = WithEnvironmentVariablesAsync(
-            new Dictionary<string, string?> { [Environment.EnvKeys.ReaparrPlatform] = "docker" }
-        );
+        SetAppBuildInfo(x => x.RuntimeMode = "docker");
 
         var mockSource = new Mock<IUpdateSource>();
         var mockLocator = new Mock<IVelopackLocator>();
         var mockManager = new Mock<UpdateManager>(mockSource.Object, null!, mockLocator.Object);
 
         // Act
-        var endpoint = SetupEndpointUnitTest<ApplyUpdateEndpoint>(s => s.AddSingleton(_ => mockManager.Object));
+        var endpoint = SetupEndpointUnitTest<ApplyUpdateEndpoint>(s => { s.AddSingleton(_ => mockManager.Object); });
         await endpoint.HandleAsync(CancellationToken);
         var result = endpoint.Response;
 
@@ -38,9 +36,7 @@ public class ApplyUpdateEndpointUnitTests : BaseUnitTest<ApplyUpdateEndpoint>
     public async Task ShouldReturnSuccess_WhenDesktopModeAndUpdatePendingRestart()
     {
         // Arrange
-        using var _ = WithEnvironmentVariablesAsync(
-            new Dictionary<string, string?> { [Environment.EnvKeys.ReaparrPlatform] = "desktop" }
-        );
+        SetAppBuildInfo(x => x.RuntimeMode = "desktop");
 
         var asset = new VelopackAsset { PackageId = "Reaparr", Version = new SemanticVersion(9, 9, 9) };
 
@@ -50,7 +46,7 @@ public class ApplyUpdateEndpointUnitTests : BaseUnitTest<ApplyUpdateEndpoint>
         mockManager.Setup(m => m.UpdatePendingRestart).Returns(asset).Verifiable(Times.Once());
 
         // Act
-        var endpoint = SetupEndpointUnitTest<ApplyUpdateEndpoint>(s => s.AddSingleton(_ => mockManager.Object));
+        var endpoint = SetupEndpointUnitTest<ApplyUpdateEndpoint>(s => { s.AddSingleton(_ => mockManager.Object); });
         await endpoint.HandleAsync(CancellationToken);
         var result = endpoint.Response;
 

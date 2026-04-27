@@ -47,35 +47,10 @@ public class BaseContainer : IDisposable
         EnvironmentExtensions.SetIntegrationTestMode(true);
 
         var memoryDbName = MockDatabase.GetMemoryDatabaseName();
+        var mockPathProvider = new MockPathProvider(memoryDbName, new MockAppBuildInfo());
 
         // Create isolated filesystem
-        var sandboxFolder = IntegrationTestFileSystemSandbox.GetSandboxFolder(memoryDbName);
-        EnvironmentExtensions.SetDataPath(sandboxFolder);
-        EnvironmentExtensions.SetConfigPath(
-            Path.Combine(sandboxFolder, Environment.PathProvider.DefaultConfigFolderName)
-        );
-        EnvironmentExtensions.SetDownloadsPath(
-            Path.Combine(sandboxFolder, Environment.PathProvider.DefaultDownloadsFolderName)
-        );
-        EnvironmentExtensions.SetMoviesPath(
-            Path.Combine(sandboxFolder, Environment.PathProvider.DefaultMovieFolderName)
-        );
-        EnvironmentExtensions.SetTvShowsPath(
-            Path.Combine(sandboxFolder, Environment.PathProvider.DefaultTvShowsFolderName)
-        );
-        EnvironmentExtensions.SetMusicPath(
-            Path.Combine(sandboxFolder, Environment.PathProvider.DefaultMusicFolderName)
-        );
-        EnvironmentExtensions.SetPhotosPath(
-            Path.Combine(sandboxFolder, Environment.PathProvider.DefaultPhotosFolderName)
-        );
-        EnvironmentExtensions.SetOtherPath(
-            Path.Combine(sandboxFolder, Environment.PathProvider.DefaultOtherFolderName)
-        );
-        EnvironmentExtensions.SetGamesPath(
-            Path.Combine(sandboxFolder, Environment.PathProvider.DefaultGamesFolderName)
-        );
-        var testFileSystemRootPath = IntegrationTestFileSystemSandbox.Create(memoryDbName, log);
+        var testFileSystemRootPath = IntegrationTestFileSystemSandbox.Create(memoryDbName, log, mockPathProvider);
 
         var config = UnitTestDataConfig.FromOptions(options);
 
@@ -137,9 +112,6 @@ public class BaseContainer : IDisposable
     public MockDownloadHubService MockDownloadHubService => (MockDownloadHubService)Resolve<IDownloadHubService>();
 
     public MockProgressHubService MockProgressHubService => (MockProgressHubService)Resolve<IProgressHubService>();
-
-    public MockNotificationHubService MockNotificationHubService =>
-        (MockNotificationHubService)Resolve<INotificationHubService>();
 
     public IServerSettingsModule GetServerSettings => Resolve<IServerSettingsModule>();
 
@@ -203,8 +175,10 @@ public class BaseContainer : IDisposable
                 break;
             }
 
-            // Poll database as fallback
-            var dbTask = await DbContext.GetDownloadTaskAsync(
+            // Poll database as fallback using a fresh DbContext so status changes made by
+            // background jobs are observed even when the shared test scope is tracking older entities.
+            using var dbContext = await Resolve<IReaparrDbContextFactory>().CreateAsync();
+            var dbTask = await dbContext.GetDownloadTaskAsync(
                 downloadTaskId,
                 cancellationToken: CancellationToken.None
             );
@@ -235,7 +209,8 @@ public class BaseContainer : IDisposable
         }
 
         // Final database check with current status logging
-        var finalDbTask = await DbContext.GetDownloadTaskAsync(
+        using var finalDbContext = await Resolve<IReaparrDbContextFactory>().CreateAsync();
+        var finalDbTask = await finalDbContext.GetDownloadTaskAsync(
             downloadTaskId,
             cancellationToken: CancellationToken.None
         );

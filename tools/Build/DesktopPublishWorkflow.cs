@@ -62,6 +62,12 @@ internal sealed class DesktopPublishWorkflow(
             await commandRunner.RequireCommandAsync("bun");
         }
 
+        if (ShouldInstallFrontendDependencies(paths.ClientAppDirectory))
+        {
+            logger.LogInformation("Installing frontend dependencies in {ClientAppDirectory}", paths.ClientAppDirectory);
+            await commandRunner.RunCommandAsync("bun", ["install", "--frozen-lockfile"], paths.ClientAppDirectory);
+        }
+
         await commandRunner.RunCommandAsync("bun", ["run", "generate", "--fail-on-error"], paths.ClientAppDirectory);
     }
 
@@ -87,16 +93,9 @@ internal sealed class DesktopPublishWorkflow(
             $"-p:PublishProfile={runtime.PublishProfile}",
             $"-p:Version={settings.Version}",
             $"-p:InformationalVersion={settings.InformationalVersion}",
+            "-p:CSharpier_Bypass=true",
             "--no-restore",
         };
-
-        if (
-            OperatingSystem.IsWindows()
-            || runtime.RuntimeIdentifier.StartsWith("win-", StringComparison.OrdinalIgnoreCase)
-        )
-        {
-            publishArgs.Insert(publishArgs.Count - 1, "-p:CSharpier_Bypass=true");
-        }
 
         await commandRunner.RunCommandAsync("dotnet", publishArgs);
     }
@@ -127,4 +126,12 @@ internal sealed class DesktopPublishWorkflow(
         string.IsNullOrWhiteSpace(settings.FrontendPublicDirectory)
             ? paths.FrontendPublicDirectory
             : Path.GetFullPath(settings.FrontendPublicDirectory, paths.RootDirectory.FullName);
+
+    private static bool ShouldInstallFrontendDependencies(string clientAppDirectory)
+    {
+        var bunLockPath = Path.Combine(clientAppDirectory, "bun.lock");
+        var nodeModulesPath = Path.Combine(clientAppDirectory, "node_modules");
+
+        return File.Exists(bunLockPath) && !Directory.Exists(nodeModulesPath);
+    }
 }

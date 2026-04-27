@@ -1,4 +1,5 @@
 using System.IO.Pipes;
+using System.Security.Cryptography;
 using System.Text;
 
 namespace Reaparr.AppHost;
@@ -16,6 +17,8 @@ public sealed class DesktopSingleInstanceCoordinator : IDesktopSingleInstanceCoo
 
     private readonly Serilog.ILogger _log;
     private readonly string _instanceName;
+    private readonly Func<string?> _appImagePathAccessor;
+    private readonly Func<string> _appBaseDirectoryAccessor;
     private readonly SemaphoreSlim _listenerStartLock = new(1, 1);
 
     private Mutex? _mutex;
@@ -24,10 +27,17 @@ public sealed class DesktopSingleInstanceCoordinator : IDesktopSingleInstanceCoo
     private bool _ownsMutex;
 
     /// <summary>Initializes a new instance of <see cref="DesktopSingleInstanceCoordinator"/>.</summary>
-    public DesktopSingleInstanceCoordinator(Serilog.ILogger log, string instanceName = DEFAULT_SINGLE_INSTANCE_NAME)
+    public DesktopSingleInstanceCoordinator(
+        Serilog.ILogger log,
+        string instanceName = DEFAULT_SINGLE_INSTANCE_NAME,
+        Func<string?>? appImagePathAccessor = null,
+        Func<string>? appBaseDirectoryAccessor = null
+    )
     {
         _log = log.ForContext<DesktopSingleInstanceCoordinator>();
-        _instanceName = instanceName;
+        _appImagePathAccessor = appImagePathAccessor ?? EnvironmentExtensions.GetAppImage;
+        _appBaseDirectoryAccessor = appBaseDirectoryAccessor ?? (() => AppContext.BaseDirectory);
+        _instanceName = BuildScopedInstanceName(instanceName, _appImagePathAccessor(), _appBaseDirectoryAccessor());
     }
 
     /// <inheritdoc />
@@ -109,6 +119,20 @@ public sealed class DesktopSingleInstanceCoordinator : IDesktopSingleInstanceCoo
         }
 
         _mutex?.Dispose();
+    }
+
+    private static string BuildScopedInstanceName(
+        string baseInstanceName,
+        string? appImagePath,
+        string appBaseDirectory
+    )
+    {
+        var executionIdentity = !string.IsNullOrWhiteSpace(appImagePath) ? appImagePath : appBaseDirectory;
+        var normalizedIdentity = Path.GetFullPath(executionIdentity)
+            .TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+        var hashBytes = SHA256.HashData(Encoding.UTF8.GetBytes(normalizedIdentity));
+        var hash = Convert.ToHexString(hashBytes[..8]);
+        return $"{baseInstanceName}.{hash}";
     }
 
     private async Task<Result> ConnectToPrimaryInstanceAsync(

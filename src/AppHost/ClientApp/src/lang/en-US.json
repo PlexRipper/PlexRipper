@@ -37,6 +37,8 @@
             "current-version": "Current: {version}",
             "latest-version": "Latest: {version}",
             "download-update": "Download Update",
+            "downloading": "Downloading Update… {percentage}%",
+            "restarting": "Restarting to Apply Update…",
             "docker-action": "View Docker Releases",
             "no-releases": "No releases are currently available."
         },

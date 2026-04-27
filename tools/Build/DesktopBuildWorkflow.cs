@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Logging;
+using System.IO.Abstractions;
 
 namespace Reaparr.Build;
 
@@ -42,6 +43,7 @@ internal sealed class DesktopBuildWorkflow(
             settings,
             commandRunner,
             packageWorkflow,
+            new FileSystem(),
             loggerFactory.CreateLogger<DesktopLaunchWorkflow>()
         );
 
@@ -71,23 +73,34 @@ internal sealed class DesktopBuildWorkflow(
 
     public async Task<int> RunAsync()
     {
-        logger.LogDebug("Starting run workflow");
+        logger.LogInformation(
+            "Starting run workflow for {RuntimeIdentifier} (SkipPackage={SkipPackage}, DryRun={DryRun})",
+            settings.RuntimeIdentifier,
+            settings.SkipPackage,
+            settings.DryRun
+        );
 
         if (settings.SkipPackage)
         {
+            logger.LogInformation("Skipping packaging step for {RuntimeIdentifier}; launching published output directly", settings.RuntimeIdentifier);
             await publishWorkflow.PublishAsync();
         }
         else
         {
+            logger.LogInformation("Publishing desktop build for {RuntimeIdentifier}", settings.RuntimeIdentifier);
             await publishWorkflow.PublishAsync();
+
+            logger.LogInformation("Packaging desktop build for {RuntimeIdentifier}", settings.RuntimeIdentifier);
             await packageWorkflow.PackageAsync();
         }
 
         if (settings.DryRun)
         {
+            logger.LogInformation("Dry-run enabled; skipping launch step for {RuntimeIdentifier}", settings.RuntimeIdentifier);
             return 0;
         }
 
+        logger.LogInformation("Launching desktop build for {RuntimeIdentifier}", settings.RuntimeIdentifier);
         return await launchWorkflow.LaunchAsync();
     }
 }

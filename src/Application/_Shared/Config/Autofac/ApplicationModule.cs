@@ -1,5 +1,6 @@
 using Downloader;
 using Microsoft.Extensions.Hosting;
+using Velopack.Sources;
 using Module = Autofac.Module;
 
 namespace Reaparr.Application;
@@ -44,15 +45,13 @@ public class ApplicationModule : Module
             .SingleInstance();
 
         builder
-            .Register(_ =>
-            {
-                var source = new Velopack.Sources.GithubSource(
+            .Register(context => new UpdateManager(
+                new GithubSource(
                     "https://github.com/Reaparr/Reaparr",
                     EnvironmentExtensions.GetGitHubToken(),
-                    EnvironmentExtensions.IsDevRelease()
-                );
-                return new UpdateManager(source);
-            })
+                    context.Resolve<IAppBuildInfo>().IsDevRelease
+                )
+            ))
             .SingleInstance();
     }
 }

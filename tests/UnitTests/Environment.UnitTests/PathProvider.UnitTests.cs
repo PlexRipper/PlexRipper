@@ -1,700 +1,301 @@
+using Xdg.Directories;
+
 namespace Reaparr.Environment.UnitTests;
 
-[NotInParallel]
-public class PathProviderUnitTests
+public class PathProviderUnitTests : BaseUnitTest<PathProvider>
 {
     [Test]
-    public void ShouldExposeExpectedDefaultNames_WhenReadingStaticNameProperties()
+    public void ShouldExposeExpectedDefaultFolderAndFileNames()
     {
+        // Arrange
+        var sut = Sut;
+
+        // Act
+        var defaultConfigFolderName = sut.DefaultConfigFolderName;
+        var defaultReaparrFolderName = sut.DefaultReaparrFolderName;
+        var defaultMovieFolderName = sut.DefaultMovieFolderName;
+        var defaultDownloadsFolderName = sut.DefaultDownloadsFolderName;
+        var defaultTvShowsFolderName = sut.DefaultTvShowsFolderName;
+        var defaultMusicFolderName = sut.DefaultMusicFolderName;
+        var defaultPhotosFolderName = sut.DefaultPhotosFolderName;
+        var defaultOtherFolderName = sut.DefaultOtherFolderName;
+        var defaultGamesFolderName = sut.DefaultGamesFolderName;
+        var configFileName = sut.ConfigFileName;
+        var databaseName = sut.DatabaseName;
+        var databaseShmName = sut.DatabaseShmName;
+        var databaseWalName = sut.DatabaseWalName;
+
         // Assert
-        PathProvider.DefaultConfigFolderName.ShouldBe("Config");
-        PathProvider.DefaultMovieFolderName.ShouldBe("Movies");
-        PathProvider.DefaultDownloadsFolderName.ShouldBe("Downloads");
-        PathProvider.DefaultTvShowsFolderName.ShouldBe("TvShows");
-        PathProvider.DefaultMusicFolderName.ShouldBe("Music");
-        PathProvider.DefaultPhotosFolderName.ShouldBe("Photos");
-        PathProvider.DefaultOtherFolderName.ShouldBe("Other");
-        PathProvider.DefaultGamesFolderName.ShouldBe("Games");
-
-        PathProvider.ConfigFileName.ShouldBe("ReaparrSettings.json");
-        PathProvider.DatabaseName.ShouldBe("ReaparrDB.db");
-        PathProvider.DatabaseShmName.ShouldBe("ReaparrDB.db-shm");
-        PathProvider.DatabaseWalName.ShouldBe("ReaparrDB.db-wal");
+        defaultConfigFolderName.ShouldBe("Config");
+        defaultReaparrFolderName.ShouldBe("Reaparr");
+        defaultMovieFolderName.ShouldBe("Movies");
+        defaultDownloadsFolderName.ShouldBe("Downloads");
+        defaultTvShowsFolderName.ShouldBe("TvShows");
+        defaultMusicFolderName.ShouldBe("Music");
+        defaultPhotosFolderName.ShouldBe("Photos");
+        defaultOtherFolderName.ShouldBe("Other");
+        defaultGamesFolderName.ShouldBe("Games");
+        configFileName.ShouldBe("ReaparrSettings.json");
+        databaseName.ShouldBe("ReaparrDB.db");
+        databaseShmName.ShouldBe("ReaparrDB.db-shm");
+        databaseWalName.ShouldBe("ReaparrDB.db-wal");
     }
 
     [Test]
-    public void ShouldUseConfiguredConfigPath_WhenConfigPathIsSet()
+    public void ShouldBuildExpectedConfigDerivedPaths_WhenConfigDirectoryIsOverridden()
     {
         // Arrange
-        var configuredConfigPath = "/test/config";
-
-        WithEnvironment(
-            "desktop",
-            null,
-            configuredConfigPath,
-            "/test/home",
-            "/test/appdata",
-            () =>
-            {
-                // Act & Assert
-                PathProvider.ConfigDirectory.ShouldBe(configuredConfigPath);
-                PathProvider.ConfigFileLocation.ShouldBe(Path.Join(configuredConfigPath, PathProvider.ConfigFileName));
-                PathProvider.DatabaseBackupDirectory.ShouldBe(Path.Combine(configuredConfigPath, "Database BackUp"));
-                PathProvider.DatabasePath.ShouldBe(Path.Combine(configuredConfigPath, PathProvider.DatabaseName));
-                PathProvider.Database_SHM_Path.ShouldBe(
-                    Path.Combine(configuredConfigPath, PathProvider.DatabaseShmName)
-                );
-                PathProvider.Database_WAL_Path.ShouldBe(
-                    Path.Combine(configuredConfigPath, PathProvider.DatabaseWalName)
-                );
-                PathProvider.LogsDirectory.ShouldBe(Path.Combine(configuredConfigPath, "Logs"));
-            }
+        const string configDirectory = "/custom/config";
+        using var _ = WithEnvironmentVariablesAsync(
+            new Dictionary<string, string?> { [EnvKeys.ReaparrConfigPath] = configDirectory }
         );
+        var sut = Sut;
+
+        // Act
+        var configFileLocation = sut.ConfigFileLocation;
+        var databaseBackupDirectory = sut.DatabaseBackupDirectory;
+        var databasePath = sut.DatabasePath;
+        var databaseShmPath = sut.Database_SHM_Path;
+        var databaseWalPath = sut.Database_WAL_Path;
+        var logsDirectory = sut.LogsDirectory;
+        var databaseFiles = sut.DatabaseFiles;
+
+        // Assert
+        configFileLocation.ShouldBe(Path.Combine(configDirectory, sut.ConfigFileName));
+        databaseBackupDirectory.ShouldBe(Path.Combine(configDirectory, "Database BackUp"));
+        databasePath.ShouldBe(Path.Combine(configDirectory, sut.DatabaseName));
+        databaseShmPath.ShouldBe(Path.Combine(configDirectory, sut.DatabaseShmName));
+        databaseWalPath.ShouldBe(Path.Combine(configDirectory, sut.DatabaseWalName));
+        logsDirectory.ShouldBe(Path.Combine(configDirectory, "Logs"));
+        databaseFiles.ShouldBe([databasePath, databaseShmPath, databaseWalPath]);
     }
 
     [Test]
-    public void ShouldTrimConfiguredConfigPath_WhenConfigPathContainsPadding()
+    public void ShouldReturnConfiguredDataDirectory_WhenDataPathOverrideExists()
     {
         // Arrange
-        const string configuredConfigPath = "  /test/config-padded  ";
-
-        WithEnvironment(
-            "desktop",
-            null,
-            configuredConfigPath,
-            "/test/home",
-            "/test/appdata",
-            () =>
-            {
-                // Assert
-                PathProvider.ConfigDirectory.ShouldBe("/test/config-padded");
-            }
+        const string dataDirectory = "/custom/data";
+        using var _ = WithEnvironmentVariablesAsync(
+            new Dictionary<string, string?> { [EnvKeys.ReaparrDataPath] = dataDirectory }
         );
+        SetAppBuildInfo(x => x.RuntimeMode = "desktop");
+        var sut = Sut;
+
+        // Act
+        var result = sut.DataDirectory;
+
+        // Assert
+        result.ShouldBe(dataDirectory);
     }
 
     [Test]
-    public void ShouldFallbackToDesktopConfigPath_WhenConfigPathIsUnsetAndDesktopMode()
+    public void ShouldReturnConfiguredConfigDirectory_WhenConfigPathOverrideExists()
     {
         // Arrange
-        var home = "/home/test-user";
-        var appData = "/appdata/test-user";
-
-        WithEnvironment(
-            "desktop",
-            null,
-            null,
-            home,
-            appData,
-            () =>
-            {
-                // Act
-                var expected = GetExpectedDesktopConfigPath(home, appData);
-
-                // Assert
-                PathProvider.ConfigDirectory.ShouldBe(expected);
-            }
+        const string configDirectory = "/custom/config";
+        using var _ = WithEnvironmentVariablesAsync(
+            new Dictionary<string, string?> { [EnvKeys.ReaparrConfigPath] = configDirectory }
         );
+        SetAppBuildInfo(x => x.RuntimeMode = string.Empty);
+        var sut = Sut;
+
+        // Act
+        var result = sut.ConfigDirectory;
+
+        // Assert
+        result.ShouldBe(configDirectory);
     }
 
     [Test]
-    public void ShouldFallbackToDockerConfigPath_WhenConfigPathIsUnsetAndDockerMode()
+    public void ShouldReturnConfiguredDownloadsPath_WhenDownloadsOverrideExists()
     {
         // Arrange
-        WithEnvironment(
-            "docker",
-            null,
-            null,
-            "/unused/home",
-            "/unused/appdata",
-            () =>
+        const string downloadsDirectory = "/custom/downloads";
+        using var _ = WithEnvironmentVariablesAsync(
+            new Dictionary<string, string?>
             {
-                // Act
-                var expected = Path.Combine(GetExpectedDockerRootDirectory(), PathProvider.DefaultConfigFolderName);
-
-                // Assert
-                PathProvider.ConfigDirectory.ShouldBe(expected);
+                [EnvKeys.ReaparrDataPath] = "/custom/data",
+                [EnvKeys.ReaparrDownloadsPath] = downloadsDirectory,
             }
         );
+        SetAppBuildInfo(x => x.RuntimeMode = "desktop");
+        var sut = Sut;
+
+        // Act
+        var result = sut.DefaultDownloadsDestinationFolder;
+
+        // Assert
+        result.ShouldBe(downloadsDirectory);
     }
 
     [Test]
-    public void ShouldTreatWhitespaceConfigPathAsUnset_WhenDesktopMode()
+    public void ShouldReturnDownloadsFolderInsideDataDirectory_WhenDownloadsOverrideIsMissing()
     {
         // Arrange
-        var home = "/home/whitespace";
-        var appData = "/appdata/whitespace";
-
-        WithEnvironment(
-            "desktop",
-            null,
-            "   ",
-            home,
-            appData,
-            () =>
-            {
-                // Act
-                var expected = GetExpectedDesktopConfigPath(home, appData);
-
-                // Assert
-                PathProvider.ConfigDirectory.ShouldBe(expected);
-            }
+        const string dataDirectory = "/custom/data";
+        using var _ = WithEnvironmentVariablesAsync(
+            new Dictionary<string, string?> { [EnvKeys.ReaparrDataPath] = dataDirectory }
         );
+        SetAppBuildInfo(x => x.RuntimeMode = "desktop");
+        var sut = Sut;
+
+        // Act
+        var result = sut.DefaultDownloadsDestinationFolder;
+
+        // Assert
+        result.ShouldBe(Path.Combine(dataDirectory, sut.DefaultDownloadsFolderName));
     }
 
     [Test]
-    public void ShouldUseConfiguredDataPath_WhenDataPathIsSet()
-    {
-        // Arrange
-        const string configuredDataPath = "/test/data";
-
-        WithEnvironment(
-            "docker",
-            configuredDataPath,
-            null,
-            "/unused/home",
-            "/unused/appdata",
-            () =>
-            {
-                // Assert
-                PathProvider.DataDirectory.ShouldBe(configuredDataPath);
-            }
-        );
-    }
-
-    [Test]
-    public void ShouldTrimConfiguredDataPath_WhenDataPathContainsPadding()
-    {
-        // Arrange
-        const string configuredDataPath = "  /test/data-padded  ";
-
-        WithEnvironment(
-            "docker",
-            configuredDataPath,
-            null,
-            "/unused/home",
-            "/unused/appdata",
-            () =>
-            {
-                // Assert
-                PathProvider.DataDirectory.ShouldBe("/test/data-padded");
-            }
-        );
-    }
-
-    [Test]
-    public void ShouldFallbackToHomeDirectory_WhenDataPathIsUnsetAndDesktopMode()
-    {
-        // Arrange
-        const string home = "/home/data-fallback";
-
-        WithEnvironment(
-            "desktop",
-            null,
-            null,
-            home,
-            "/unused/appdata",
-            () =>
-            {
-                // Assert
-                PathProvider.DataDirectory.ShouldBe(
-                    Path.Combine(home, PathProvider.DefaultDownloadsFolderName, PathProvider.DefaultReaparrFolderName)
-                );
-            }
-        );
-    }
-
-    [Test]
-    public void ShouldFallbackToDockerRoot_WhenDataPathIsUnsetAndDockerMode()
-    {
-        // Arrange
-        WithEnvironment(
-            "docker",
-            null,
-            null,
-            "/unused/home",
-            "/unused/appdata",
-            () =>
-            {
-                // Assert
-                PathProvider.DataDirectory.ShouldBe(GetExpectedDockerRootDirectory());
-            }
-        );
-    }
-
-    [Test]
-    public void ShouldTreatWhitespaceDataPathAsUnset_WhenDockerMode()
-    {
-        // Arrange
-        WithEnvironment(
-            "docker",
-            "  \t  ",
-            null,
-            "/unused/home",
-            "/unused/appdata",
-            () =>
-            {
-                // Assert
-                PathProvider.DataDirectory.ShouldBe(GetExpectedDockerRootDirectory());
-            }
-        );
-    }
-
-    [Test]
-    public void ShouldDefaultToDockerMode_WhenPlatformIsUnknown()
-    {
-        // Arrange
-        WithEnvironment(
-            "unknown",
-            null,
-            null,
-            "/home/unknown-mode",
-            "/unused/appdata",
-            () =>
-            {
-                // Assert
-                PathProvider.DataDirectory.ShouldBe(GetExpectedDockerRootDirectory());
-                PathProvider.ConfigDirectory.ShouldBe(
-                    Path.Combine(GetExpectedDockerRootDirectory(), PathProvider.DefaultConfigFolderName)
-                );
-            }
-        );
-    }
-
-    [Test]
-    public void ShouldTreatWhitespaceAroundDesktopPlatformAsDesktop_WhenValueIsTrimmed()
-    {
-        // Arrange
-        const string home = "/home/whitespace-mode";
-
-        WithEnvironment(
-            " desktop ",
-            null,
-            null,
-            home,
-            "/unused/appdata",
-            () =>
-            {
-                // Assert
-                PathProvider.DataDirectory.ShouldBe(
-                    Path.Combine(home, PathProvider.DefaultDownloadsFolderName, PathProvider.DefaultReaparrFolderName)
-                );
-            }
-        );
-    }
-
-    [Test]
-    [Arguments("Movies")]
-    [Arguments("TvShows")]
-    [Arguments("Music")]
-    [Arguments("Photos")]
-    [Arguments("Other")]
-    [Arguments("Games")]
-    public void ShouldBuildDefaultMediaDestinationFoldersFromDataPath_WhenDataPathIsConfigured(string folderName)
-    {
-        // Arrange
-        const string dataPath = "/test/media-data";
-
-        WithEnvironment(
-            "docker",
-            dataPath,
-            null,
-            "/unused/home",
-            "/unused/appdata",
-            () =>
-            {
-                // Act
-                var expected = Path.Combine(dataPath, folderName);
-
-                // Assert
-                GetDefaultDestinationFolder(folderName).ShouldBe(expected);
-            }
-        );
-    }
-
-    [Test]
-    [Arguments("Movies")]
-    [Arguments("Downloads")]
-    [Arguments("TvShows")]
-    [Arguments("Music")]
-    [Arguments("Photos")]
-    [Arguments("Other")]
-    [Arguments("Games")]
-    public void ShouldBuildDefaultMediaDestinationFoldersFromHome_WhenDesktopModeAndDataPathUnset(string folderName)
-    {
-        // Arrange
-        const string home = "/test/media-home";
-
-        WithEnvironment(
-            "desktop",
-            null,
-            null,
-            home,
-            "/unused/appdata",
-            () =>
-            {
-                // Act
-                var desktopDownloadsRoot = Path.Combine(
-                    home,
-                    PathProvider.DefaultDownloadsFolderName,
-                    PathProvider.DefaultReaparrFolderName
-                );
-                var expected = Path.Combine(desktopDownloadsRoot, folderName);
-
-                // Assert
-                GetDefaultDestinationFolder(folderName).ShouldBe(expected);
-            }
-        );
-    }
-
-    [Test]
-    [Arguments("Movies")]
-    [Arguments("Downloads")]
-    [Arguments("TvShows")]
-    [Arguments("Music")]
-    [Arguments("Photos")]
-    [Arguments("Other")]
-    [Arguments("Games")]
-    public void ShouldBuildDefaultMediaDestinationFoldersFromDockerRoot_WhenDockerModeAndDataPathUnset(
-        string folderName
+    [Arguments(EnvKeys.ReaparrMoviesPath, "/custom/media/movies", PlexMediaType.Movie)]
+    [Arguments(EnvKeys.ReaparrTvShowsPath, "/custom/media/tvshows", PlexMediaType.TvShow)]
+    [Arguments(EnvKeys.ReaparrMusicPath, "/custom/media/music", PlexMediaType.Music)]
+    [Arguments(EnvKeys.ReaparrPhotosPath, "/custom/media/photos", PlexMediaType.Photos)]
+    [Arguments(EnvKeys.ReaparrOtherPath, "/custom/media/other", PlexMediaType.OtherVideos)]
+    [Arguments(EnvKeys.ReaparrGamesPath, "/custom/media/games", PlexMediaType.Games)]
+    public void ShouldReturnDedicatedMediaPath_WhenPerTypeOverrideExists(
+        string environmentKey,
+        string dedicatedPath,
+        PlexMediaType mediaType
     )
     {
         // Arrange
-        WithEnvironment(
-            "docker",
-            null,
-            null,
-            "/unused/home",
-            "/unused/appdata",
-            () =>
+        using var _ = WithEnvironmentVariablesAsync(
+            new Dictionary<string, string?>
             {
-                // Act
-                var expected = Path.Combine(
-                    "/",
-                    folderName == "Downloads" ? PathProvider.DefaultDownloadsFolderName : folderName
-                );
-
-                // Assert
-                GetDefaultDestinationFolder(folderName).ShouldBe(expected);
+                [EnvKeys.ReaparrDataPath] = "/custom/data",
+                [environmentKey] = dedicatedPath,
             }
         );
+        SetAppBuildInfo(x => x.RuntimeMode = "desktop");
+        var sut = Sut;
+
+        // Act
+        var result = GetMediaDestinationFolder(sut, mediaType);
+
+        // Assert
+        result.ShouldBe(dedicatedPath);
     }
 
     [Test]
-    public void ShouldExposeExpectedDatabaseFilesInOrder_WhenReadingDatabaseFilesProperty()
-    {
-        // Arrange
-        const string configPath = "/test/db-config";
-
-        WithEnvironment(
-            "desktop",
-            null,
-            configPath,
-            "/unused/home",
-            "/unused/appdata",
-            () =>
-            {
-                // Act
-                var files = new PathProvider().DatabaseFiles;
-
-                // Assert
-                files.Count.ShouldBe(3);
-                files[0].ShouldBe(PathProvider.DatabasePath);
-                files[1].ShouldBe(PathProvider.Database_SHM_Path);
-                files[2].ShouldBe(PathProvider.Database_WAL_Path);
-            }
-        );
-    }
-
-    [Test]
-    public void ShouldMapIPathProviderMembersToStaticPathProviderValues()
-    {
-        // Arrange
-        const string dataPath = "/test/interface-data";
-        const string configPath = "/test/interface-config";
-
-        WithEnvironment(
-            "desktop",
-            dataPath,
-            configPath,
-            "/unused/home",
-            "/unused/appdata",
-            () =>
-            {
-                // Act
-                IPathProvider sut = new PathProvider();
-
-                // Assert
-                sut.RootDirectory.ShouldBe(PathProvider.DataDirectory);
-                sut.ConfigDirectory.ShouldBe(PathProvider.ConfigDirectory);
-                sut.ConfigFileLocation.ShouldBe(PathProvider.ConfigFileLocation);
-                sut.ConfigFileName.ShouldBe(PathProvider.ConfigFileName);
-                sut.DatabaseBackupDirectory.ShouldBe(PathProvider.DatabaseBackupDirectory);
-                sut.DatabaseName.ShouldBe(PathProvider.DatabaseName);
-                sut.DatabasePath.ShouldBe(PathProvider.DatabasePath);
-                sut.LogsDirectory.ShouldBe(PathProvider.LogsDirectory);
-                sut.DatabaseFiles.ShouldBe([
-                    PathProvider.DatabasePath,
-                    PathProvider.Database_SHM_Path,
-                    PathProvider.Database_WAL_Path,
-                ]);
-            }
-        );
-    }
-
-    [Test]
-    public void ShouldUseConfiguredDownloadsPath_WhenDownloadsPathIsSet()
-    {
-        // Arrange
-        const string configuredDownloadsPath = "/test/custom-downloads";
-
-        WithEnvironment(
-            "desktop",
-            "/test/data-path-ignored",
-            null,
-            "/test/home",
-            "/unused/appdata",
-            () =>
-            {
-                // Assert
-                PathProvider.DefaultDownloadsDestinationFolder.ShouldBe(configuredDownloadsPath);
-            },
-            downloadsPath: configuredDownloadsPath
-        );
-    }
-
-    [Test]
-    [Arguments("Movies")]
-    [Arguments("TvShows")]
-    [Arguments("Music")]
-    [Arguments("Photos")]
-    [Arguments("Other")]
-    [Arguments("Games")]
-    public void ShouldUsePerTypePathOverride_WhenPerTypeEnvVarIsSet(string folderName)
-    {
-        // Arrange
-        const string perTypePath = "/test/per-type-path";
-
-        WithEnvironment(
-            "desktop",
-            "/test/data-fallback",
-            null,
-            "/unused/home",
-            "/unused/appdata",
-            () =>
-            {
-                // Assert
-                GetDefaultDestinationFolder(folderName).ShouldBe(perTypePath);
-            },
-            moviesPath: folderName == "Movies" ? perTypePath : null,
-            tvShowsPath: folderName == "TvShows" ? perTypePath : null,
-            musicPath: folderName == "Music" ? perTypePath : null,
-            photosPath: folderName == "Photos" ? perTypePath : null,
-            otherPath: folderName == "Other" ? perTypePath : null,
-            gamesPath: folderName == "Games" ? perTypePath : null
-        );
-    }
-
-    [Test]
-    [Arguments("Movies")]
-    [Arguments("TvShows")]
-    [Arguments("Music")]
-    [Arguments("Photos")]
-    [Arguments("Other")]
-    [Arguments("Games")]
-    public void ShouldFallbackToDataPathForLibraries_WhenPerTypeEnvVarIsUnset(string folderName)
-    {
-        // Arrange
-        const string dataPath = "/test/data-fallback";
-
-        WithEnvironment(
-            "desktop",
-            dataPath,
-            null,
-            "/unused/home",
-            "/unused/appdata",
-            () =>
-            {
-                // Assert
-                GetDefaultDestinationFolder(folderName).ShouldBe(Path.Combine(dataPath, folderName));
-            }
-        );
-    }
-
-    [Test]
-    [Arguments(OperatingSystemPlatform.Windows, "C:/Users/reaparr-user")]
-    [Arguments(OperatingSystemPlatform.Osx, "/Users/reaparr-user")]
-    [Arguments(OperatingSystemPlatform.Linux, "/home/reaparr-user")]
-    public void ShouldBuildAllDesktopMediaDestinationFoldersUnderDownloadsReaparr_WhenDesktopModeAndDataPathUnset(
-        OperatingSystemPlatform platform,
-        string userProfile
+    [Arguments(PlexMediaType.Movie, "Movies")]
+    [Arguments(PlexMediaType.TvShow, "TvShows")]
+    [Arguments(PlexMediaType.Music, "Music")]
+    [Arguments(PlexMediaType.Photos, "Photos")]
+    [Arguments(PlexMediaType.OtherVideos, "Other")]
+    [Arguments(PlexMediaType.Games, "Games")]
+    public void ShouldReturnMediaFolderInsideDataDirectory_WhenPerTypeOverrideIsMissing(
+        PlexMediaType mediaType,
+        string expectedFolderName
     )
     {
         // Arrange
-        WithEnvironment(
-            "desktop",
-            null,
-            null,
-            userProfile,
-            "/unused/appdata",
-            () =>
-            {
-                // Act
-                var expectedRoot = Path.Combine(
-                    userProfile,
-                    PathProvider.DefaultDownloadsFolderName,
-                    PathProvider.DefaultReaparrFolderName
-                );
+        const string dataDirectory = "/custom/data";
+        using var _ = WithEnvironmentVariablesAsync(
+            new Dictionary<string, string?> { [EnvKeys.ReaparrDataPath] = dataDirectory }
+        );
+        SetAppBuildInfo(x => x.RuntimeMode = "desktop");
+        var sut = Sut;
 
-                // Assert
-                GetDefaultDestinationFolder("Downloads")
-                    .ShouldBe(Path.Combine(expectedRoot, PathProvider.DefaultDownloadsFolderName));
-                GetDefaultDestinationFolder("Movies")
-                    .ShouldBe(Path.Combine(expectedRoot, PathProvider.DefaultMovieFolderName));
-                GetDefaultDestinationFolder("TvShows")
-                    .ShouldBe(Path.Combine(expectedRoot, PathProvider.DefaultTvShowsFolderName));
-                GetDefaultDestinationFolder("Music")
-                    .ShouldBe(Path.Combine(expectedRoot, PathProvider.DefaultMusicFolderName));
-                GetDefaultDestinationFolder("Photos")
-                    .ShouldBe(Path.Combine(expectedRoot, PathProvider.DefaultPhotosFolderName));
-                GetDefaultDestinationFolder("Other")
-                    .ShouldBe(Path.Combine(expectedRoot, PathProvider.DefaultOtherFolderName));
-                GetDefaultDestinationFolder("Games")
-                    .ShouldBe(Path.Combine(expectedRoot, PathProvider.DefaultGamesFolderName));
+        // Act
+        var result = GetMediaDestinationFolder(sut, mediaType);
+
+        // Assert
+        result.ShouldBe(Path.Combine(dataDirectory, expectedFolderName));
+    }
+
+    [Test]
+    public void ShouldReturnDockerFallbackPaths_WhenNoOverridesExist()
+    {
+        // Arrange
+        SetAppBuildInfo(x => x.RuntimeMode = "docker");
+        var sut = Sut;
+
+        // Act
+        var configDirectory = sut.ConfigDirectory;
+        var dataDirectory = sut.DataDirectory;
+        var downloadsDirectory = sut.DefaultDownloadsDestinationFolder;
+        var movieDirectory = sut.DefaultMovieDestinationFolder;
+        var tvShowsDirectory = sut.DefaultTvShowsDestinationFolder;
+        var musicDirectory = sut.DefaultMusicDestinationFolder;
+        var photosDirectory = sut.DefaultPhotosDestinationFolder;
+        var otherDirectory = sut.DefaultOtherDestinationFolder;
+        var gamesDirectory = sut.DefaultGamesDestinationFolder;
+
+        // Assert
+        configDirectory.ShouldBe(Path.Combine("/", sut.DefaultConfigFolderName));
+        dataDirectory.ShouldBe("/");
+        downloadsDirectory.ShouldBe(Path.Combine("/", sut.DefaultDownloadsFolderName));
+        movieDirectory.ShouldBe(Path.Combine("/", sut.DefaultMovieFolderName));
+        tvShowsDirectory.ShouldBe(Path.Combine("/", sut.DefaultTvShowsFolderName));
+        musicDirectory.ShouldBe(Path.Combine("/", sut.DefaultMusicFolderName));
+        photosDirectory.ShouldBe(Path.Combine("/", sut.DefaultPhotosFolderName));
+        otherDirectory.ShouldBe(Path.Combine("/", sut.DefaultOtherFolderName));
+        gamesDirectory.ShouldBe(Path.Combine("/", sut.DefaultGamesFolderName));
+    }
+
+    [Test]
+    public void ShouldReturnDesktopFallbackPaths_WhenNoOverridesExist()
+    {
+        // Arrange
+        SetAppBuildInfo(x => x.RuntimeMode = "desktop");
+        var sut = Sut;
+        var expectedConfigDirectory = Path.Combine(BaseDirectory.ConfigHome, sut.DefaultReaparrFolderName);
+        var expectedDataDirectory = Path.Combine(UserDirectory.DownloadDir, sut.DefaultReaparrFolderName);
+
+        // Act
+        var configDirectory = sut.ConfigDirectory;
+        var dataDirectory = sut.DataDirectory;
+        var downloadsDirectory = sut.DefaultDownloadsDestinationFolder;
+        var movieDirectory = sut.DefaultMovieDestinationFolder;
+
+        // Assert
+        configDirectory.ShouldBe(expectedConfigDirectory);
+        dataDirectory.ShouldBe(expectedDataDirectory);
+        downloadsDirectory.ShouldBe(Path.Combine(expectedDataDirectory, sut.DefaultDownloadsFolderName));
+        movieDirectory.ShouldBe(Path.Combine(expectedDataDirectory, sut.DefaultMovieFolderName));
+    }
+
+    [Test]
+    public void ShouldUseConfigAndDataOverrides_EvenWhenRuntimeModeIsUnsupported()
+    {
+        // Arrange
+        const string configDirectory = "/custom/config";
+        const string dataDirectory = "/custom/data";
+        using var _ = WithEnvironmentVariablesAsync(
+            new Dictionary<string, string?>
+            {
+                [EnvKeys.ReaparrConfigPath] = configDirectory,
+                [EnvKeys.ReaparrDataPath] = dataDirectory,
             }
         );
+        SetAppBuildInfo(x =>
+        {
+            x.RuntimeMode = string.Empty;
+            x.CurrentOS = OperatingSystemPlatform.Unknown;
+        });
+        var sut = Sut;
+
+        // Act
+        var resolvedConfigDirectory = sut.ConfigDirectory;
+        var resolvedDataDirectory = sut.DataDirectory;
+        var resolvedMovieDirectory = sut.DefaultMovieDestinationFolder;
+
+        // Assert
+        resolvedConfigDirectory.ShouldBe(configDirectory);
+        resolvedDataDirectory.ShouldBe(dataDirectory);
+        resolvedMovieDirectory.ShouldBe(Path.Combine(dataDirectory, sut.DefaultMovieFolderName));
     }
 
-    private static string GetExpectedDesktopConfigPath(string home, string appData) =>
-        OsInfo.CurrentOS switch
+    private static string GetMediaDestinationFolder(PathProvider sut, PlexMediaType mediaType) =>
+        mediaType switch
         {
-            OperatingSystemPlatform.Windows => Path.Combine(appData, PathProvider.DefaultReaparrFolderName),
-            OperatingSystemPlatform.Osx => Path.Combine(
-                home,
-                "Library",
-                "Application Support",
-                PathProvider.DefaultReaparrFolderName
-            ),
-            _ => Path.Combine(home, ".config", PathProvider.DefaultReaparrFolderName),
+            PlexMediaType.Movie => sut.DefaultMovieDestinationFolder,
+            PlexMediaType.TvShow => sut.DefaultTvShowsDestinationFolder,
+            PlexMediaType.Music => sut.DefaultMusicDestinationFolder,
+            PlexMediaType.Photos => sut.DefaultPhotosDestinationFolder,
+            PlexMediaType.OtherVideos => sut.DefaultOtherDestinationFolder,
+            PlexMediaType.Games => sut.DefaultGamesDestinationFolder,
+            _ => throw new ArgumentOutOfRangeException(nameof(mediaType), mediaType, null),
         };
-
-    private static string GetExpectedDockerRootDirectory() => "/";
-
-    private static string GetDefaultDestinationFolder(string folderName) =>
-        folderName switch
-        {
-            "Movies" => PathProvider.DefaultMovieDestinationFolder,
-            "Downloads" => PathProvider.DefaultDownloadsDestinationFolder,
-            "TvShows" => PathProvider.DefaultTvShowsDestinationFolder,
-            "Music" => PathProvider.DefaultMusicDestinationFolder,
-            "Photos" => PathProvider.DefaultPhotosDestinationFolder,
-            "Other" => PathProvider.DefaultOtherDestinationFolder,
-            "Games" => PathProvider.DefaultGamesDestinationFolder,
-            _ => throw new InvalidOperationException($"Unsupported folder: {folderName}"),
-        };
-
-    private static void WithEnvironment(
-        string? platform,
-        string? dataPath,
-        string? configPath,
-        string? home,
-        string? appData,
-        Action assertion,
-        string? downloadsPath = null,
-        string? moviesPath = null,
-        string? tvShowsPath = null,
-        string? musicPath = null,
-        string? photosPath = null,
-        string? otherPath = null,
-        string? gamesPath = null
-    )
-    {
-        var originalValues = new Dictionary<string, string?>
-        {
-            [EnvKeys.ReaparrPlatform] = System.Environment.GetEnvironmentVariable(EnvKeys.ReaparrPlatform),
-            [EnvKeys.ReaparrDataPath] = System.Environment.GetEnvironmentVariable(EnvKeys.ReaparrDataPath),
-            [EnvKeys.ReaparrConfigPath] = System.Environment.GetEnvironmentVariable(EnvKeys.ReaparrConfigPath),
-            [EnvKeys.ReaparrDownloadsPath] = System.Environment.GetEnvironmentVariable(EnvKeys.ReaparrDownloadsPath),
-            [EnvKeys.ReaparrMoviesPath] = System.Environment.GetEnvironmentVariable(EnvKeys.ReaparrMoviesPath),
-            [EnvKeys.ReaparrTvShowsPath] = System.Environment.GetEnvironmentVariable(EnvKeys.ReaparrTvShowsPath),
-            [EnvKeys.ReaparrMusicPath] = System.Environment.GetEnvironmentVariable(EnvKeys.ReaparrMusicPath),
-            [EnvKeys.ReaparrPhotosPath] = System.Environment.GetEnvironmentVariable(EnvKeys.ReaparrPhotosPath),
-            [EnvKeys.ReaparrOtherPath] = System.Environment.GetEnvironmentVariable(EnvKeys.ReaparrOtherPath),
-            [EnvKeys.ReaparrGamesPath] = System.Environment.GetEnvironmentVariable(EnvKeys.ReaparrGamesPath),
-            [EnvKeys.XdgConfigHome] = System.Environment.GetEnvironmentVariable(EnvKeys.XdgConfigHome),
-            [EnvKeys.XdgDownloadDir] = System.Environment.GetEnvironmentVariable(EnvKeys.XdgDownloadDir),
-        };
-
-        try
-        {
-            System.Environment.SetEnvironmentVariable(EnvKeys.ReaparrPlatform, platform);
-            System.Environment.SetEnvironmentVariable(EnvKeys.ReaparrDataPath, dataPath);
-            System.Environment.SetEnvironmentVariable(EnvKeys.ReaparrConfigPath, configPath);
-            System.Environment.SetEnvironmentVariable(EnvKeys.ReaparrDownloadsPath, downloadsPath);
-            System.Environment.SetEnvironmentVariable(EnvKeys.ReaparrMoviesPath, moviesPath);
-            System.Environment.SetEnvironmentVariable(EnvKeys.ReaparrTvShowsPath, tvShowsPath);
-            System.Environment.SetEnvironmentVariable(EnvKeys.ReaparrMusicPath, musicPath);
-            System.Environment.SetEnvironmentVariable(EnvKeys.ReaparrPhotosPath, photosPath);
-            System.Environment.SetEnvironmentVariable(EnvKeys.ReaparrOtherPath, otherPath);
-            System.Environment.SetEnvironmentVariable(EnvKeys.ReaparrGamesPath, gamesPath);
-            System.Environment.SetEnvironmentVariable(
-                EnvKeys.XdgConfigHome,
-                OsInfo.CurrentOS switch
-                {
-                    OperatingSystemPlatform.Windows => appData,
-                    OperatingSystemPlatform.Osx when home is not null => Path.Combine(
-                        home,
-                        "Library",
-                        "Application Support"
-                    ),
-                    _ when home is not null => Path.Combine(home, ".config"),
-                    _ => null,
-                }
-            );
-            System.Environment.SetEnvironmentVariable(
-                EnvKeys.XdgDownloadDir,
-                home is not null ? Path.Combine(home, PathProvider.DefaultDownloadsFolderName) : null
-            );
-
-            assertion();
-        }
-        finally
-        {
-            System.Environment.SetEnvironmentVariable(EnvKeys.ReaparrPlatform, originalValues[EnvKeys.ReaparrPlatform]);
-            System.Environment.SetEnvironmentVariable(EnvKeys.ReaparrDataPath, originalValues[EnvKeys.ReaparrDataPath]);
-            System.Environment.SetEnvironmentVariable(
-                EnvKeys.ReaparrConfigPath,
-                originalValues[EnvKeys.ReaparrConfigPath]
-            );
-            System.Environment.SetEnvironmentVariable(
-                EnvKeys.ReaparrDownloadsPath,
-                originalValues[EnvKeys.ReaparrDownloadsPath]
-            );
-            System.Environment.SetEnvironmentVariable(
-                EnvKeys.ReaparrMoviesPath,
-                originalValues[EnvKeys.ReaparrMoviesPath]
-            );
-            System.Environment.SetEnvironmentVariable(
-                EnvKeys.ReaparrTvShowsPath,
-                originalValues[EnvKeys.ReaparrTvShowsPath]
-            );
-            System.Environment.SetEnvironmentVariable(
-                EnvKeys.ReaparrMusicPath,
-                originalValues[EnvKeys.ReaparrMusicPath]
-            );
-            System.Environment.SetEnvironmentVariable(
-                EnvKeys.ReaparrPhotosPath,
-                originalValues[EnvKeys.ReaparrPhotosPath]
-            );
-            System.Environment.SetEnvironmentVariable(
-                EnvKeys.ReaparrOtherPath,
-                originalValues[EnvKeys.ReaparrOtherPath]
-            );
-            System.Environment.SetEnvironmentVariable(
-                EnvKeys.ReaparrGamesPath,
-                originalValues[EnvKeys.ReaparrGamesPath]
-            );
-            System.Environment.SetEnvironmentVariable(EnvKeys.XdgConfigHome, originalValues[EnvKeys.XdgConfigHome]);
-            System.Environment.SetEnvironmentVariable(EnvKeys.XdgDownloadDir, originalValues[EnvKeys.XdgDownloadDir]);
-        }
-    }
 }

@@ -9,7 +9,7 @@ public static class IntegrationTestFileSystemSandbox
     public static string GetSandboxFolder(string memoryDbName) =>
         Path.Combine(GetProjectRoot(), SANDBOX_FOLDER, INTEGRATION_SANDBOX_FOLDER, memoryDbName);
 
-    public static string Create(string memoryDbName, ILogger log)
+    public static string Create(string memoryDbName, ILogger log, IPathProvider pathProvider)
     {
         _log = log.ForContext(typeof(IntegrationTestFileSystemSandbox));
 
@@ -20,14 +20,14 @@ public static class IntegrationTestFileSystemSandbox
 
             var pathsToCreate = new[]
             {
-                PathProvider.ConfigDirectory,
-                PathProvider.DefaultDownloadsDestinationFolder,
-                PathProvider.DefaultMovieDestinationFolder,
-                PathProvider.DefaultTvShowsDestinationFolder,
-                PathProvider.DefaultMusicDestinationFolder,
-                PathProvider.DefaultPhotosDestinationFolder,
-                PathProvider.DefaultOtherDestinationFolder,
-                PathProvider.DefaultGamesDestinationFolder,
+                pathProvider.ConfigDirectory,
+                pathProvider.DefaultDownloadsDestinationFolder,
+                pathProvider.DefaultMovieDestinationFolder,
+                pathProvider.DefaultTvShowsDestinationFolder,
+                pathProvider.DefaultMusicDestinationFolder,
+                pathProvider.DefaultPhotosDestinationFolder,
+                pathProvider.DefaultOtherDestinationFolder,
+                pathProvider.DefaultGamesDestinationFolder,
             }.Select(Path.GetFullPath);
 
             foreach (var path in pathsToCreate)

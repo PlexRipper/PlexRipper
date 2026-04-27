@@ -29,7 +29,7 @@ public class IFileSystemExtensionsUnitTests : BaseUnitTest
     public void ShouldReturnCorrectAvailableSpace_WhenUsingTheMoviesPath()
     {
         // Arrange
-        var path = PathProvider.DefaultMovieDestinationFolder;
+        var path = Mock.Create<IPathProvider>().DefaultMovieDestinationFolder;
 
         SetupFileSystem(system =>
         {

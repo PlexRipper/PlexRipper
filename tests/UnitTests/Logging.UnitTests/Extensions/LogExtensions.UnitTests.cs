@@ -20,7 +20,9 @@ public class LogExtensionsUnitTests : BaseUnitTest
         var runtimeInfo = Mock.Container.Resolve<IAppRuntimeInfo>();
         var pathProvider = Mock.Container.Resolve<IPathProvider>();
 
-        return new TestLogConfig(runtimeInfo, pathProvider).GetLogger(logEventLevel).ForContext<LogExtensionsUnitTests>();
+        return new TestLogConfig(runtimeInfo, pathProvider)
+            .GetLogger(logEventLevel)
+            .ForContext<LogExtensionsUnitTests>();
     }
 
     [Test]

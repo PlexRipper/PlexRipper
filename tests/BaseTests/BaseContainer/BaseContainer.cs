@@ -44,8 +44,6 @@ public class BaseContainer : IDisposable
 
     public static async Task<BaseContainer> Create(ILogger log, Seed seed, Action<UnitTestDataConfig>? options = null)
     {
-        EnvironmentExtensions.SetIntegrationTestMode(true);
-
         var config = UnitTestDataConfig.FromOptions(options);
         var memoryDbName = MockDatabase.GetMemoryDatabaseName();
         var mockAppRuntimeInfo = ResolveRuntimeInfo(config);
@@ -78,7 +76,11 @@ public class BaseContainer : IDisposable
 
     private static MockAppRuntimeInfo ResolveRuntimeInfo(UnitTestDataConfig config)
     {
-        var runtimeInfo = new MockAppRuntimeInfo();
+        var runtimeInfo = new MockAppRuntimeInfo
+        {
+            IsUnmasked = true,
+            IsIntegrationTestMode = true,
+        };
         config.OverrideAppRuntimeInfo?.Invoke(runtimeInfo);
         return runtimeInfo;
     }

@@ -26,10 +26,11 @@ public partial class BaseUnitTest
     /// <param name="logEventLevel"></param>
     protected BaseUnitTest(LogEventLevel logEventLevel = LogEventLevel.Verbose)
     {
-        EnvironmentExtensions.EnableUnmaskedLog(true);
-
         // Pass the TestLogConfig to LogFactory so all application logs go to test output
-        var appRunTimeInfo = new MockAppRuntimeInfo();
+        var appRunTimeInfo = new MockAppRuntimeInfo
+        {
+            IsUnmasked = true,
+        };
         var testLogConfig = new TestLogConfig(
             appRunTimeInfo,
             new MockPathProvider(MockDatabase.GetMemoryDatabaseName())

@@ -6,33 +6,6 @@ public static class EnvironmentExtensions
 {
     private static readonly AsyncLocal<IReadOnlyDictionary<string, string?>?> _testOverrides = new();
 
-    #region Setters
-
-    /// <summary>
-    /// Sets the <c>LOG_LEVEL</c> environment variable to the specified level (upper-cased).
-    /// </summary>
-    public static void SetLogLevel(LogEventLevel logLevel)
-    {
-        System.Environment.SetEnvironmentVariable(EnvKeys.LogLevel, logLevel.ToString().ToUpper());
-    }
-
-    /// <summary>
-    /// Enables or disables integration test mode by setting <c>IntegrationTestMode</c>.
-    /// </summary>
-    public static void SetIntegrationTestMode(bool state)
-    {
-        System.Environment.SetEnvironmentVariable(EnvKeys.IntegrationTestMode, state.ToString());
-    }
-
-    /// <summary>
-    /// When set to true, the application will not mask/censor sensitive data in the logs.
-    /// </summary>
-    public static void EnableUnmaskedLog(bool state)
-    {
-        System.Environment.SetEnvironmentVariable(EnvKeys.Unmasked, state.ToString());
-    }
-
-    #endregion
 
     #region Helpers
 

@@ -39,7 +39,7 @@ public sealed class MockDesktopWindow : IDesktopWindow
     public void CloseToBackground()
     {
         IsClosedToBackground = true;
-        CloseToBackgroundCompletion.SetResult();
+        CloseToBackgroundCompletion.TrySetResult();
     }
 
     public void RestoreFromBackground() { }
@@ -61,6 +61,6 @@ public sealed class MockDesktopWindow : IDesktopWindow
     {
         WaitForCloseCalls++;
         IsInitialized = true;
-        MessageLoopStarted.SetResult();
+        MessageLoopStarted.TrySetResult();
     }
 }

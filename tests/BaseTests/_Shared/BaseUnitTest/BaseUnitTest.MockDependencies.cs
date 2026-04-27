@@ -199,7 +199,7 @@ public partial class BaseUnitTest
         if (_dependenciesSetup is not null)
             throw new InvalidOperationException("SetupDependencies should not be called more than once.");
 
-        _dependenciesSetup += action;
+        _dependenciesSetup = action;
 
         Build();
     }

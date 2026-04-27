@@ -15,10 +15,13 @@ public record TestLoginRequest
 [NotInParallel]
 public class LogExtensionsUnitTests : BaseUnitTest
 {
-    private ILogger CreateTestLogger(LogEventLevel logEventLevel) =>
-        new TestLogConfig(Mock.Create<IAppRuntimeInfo>(), Mock.Create<IPathProvider>())
-            .GetLogger(logEventLevel)
-            .ForContext<LogExtensionsUnitTests>();
+    private ILogger CreateTestLogger(LogEventLevel logEventLevel)
+    {
+        var runtimeInfo = Mock.Container.Resolve<IAppRuntimeInfo>();
+        var pathProvider = Mock.Container.Resolve<IPathProvider>();
+
+        return new TestLogConfig(runtimeInfo, pathProvider).GetLogger(logEventLevel).ForContext<LogExtensionsUnitTests>();
+    }
 
     [Test]
     public void ShouldLogTheSetLogLevel_WhenLogLevelSetIsVerbose()

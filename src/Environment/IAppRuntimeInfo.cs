@@ -3,9 +3,10 @@ using Serilog.Events;
 namespace Reaparr.Environment;
 
 /// <summary>
-/// Provides runtime storage paths resolved from Reaparr environment variables.
-/// Values map to <see cref="EnvKeys"/> keys and are <see langword="null"/> when
-/// the corresponding environment variable is not set or contains only whitespace.
+/// Provides resolved runtime environment values used by Reaparr, including storage paths,
+/// process identity, GitHub authentication, logging configuration, authentication settings,
+/// application port, environment selectors, and an environment-variable dump mapped to
+/// <see cref="EnvKeys"/> where applicable.
 /// </summary>
 public interface IAppRuntimeInfo
 {
@@ -76,7 +77,14 @@ public interface IAppRuntimeInfo
     /// </summary>
     string? GamesPath { get; }
 
+    /// <summary>
+    /// Gets the AppImage path when running from an AppImage package.
+    /// </summary>
     string? AppImage { get; }
+
+    #endregion
+
+    #region Logging
 
     /// <summary>
     /// When set to true, the application will log all environment variables set on startup
@@ -88,6 +96,15 @@ public interface IAppRuntimeInfo
     /// Note: This is used for development and testing purposes to redirect logs to a hosted Docker instance of Seq.
     /// </summary>
     string SEQ_Url { get; }
+
+    /// <summary>
+    /// Gets the configured Serilog log level from <c>LOG_LEVEL</c>. Defaults to <see cref="LogEventLevel.Debug"/>.
+    /// </summary>
+    LogEventLevel LogLevel { get; }
+
+    #endregion
+
+    #region Environment
 
     /// <summary>
     /// Returns true when <c>IntegrationTestMode</c> environment variable is set to a truthy value.
@@ -105,6 +122,16 @@ public interface IAppRuntimeInfo
     bool IsProductionEnvironment { get; }
 
     /// <summary>
+    /// Gets the port number from the DOTNET_HTTP_PORTS environment variable.
+    /// </summary>
+    /// <returns>The port number or 5000 if not configured.</returns>
+    int AppPort { get; }
+
+    #endregion
+
+    #region Auth
+
+    /// <summary>
     /// Gets the name of the HTTP header used for bearer/auth token passing. Defaults to <c>X-Auth-User</c>.
     /// </summary>
     string HeaderAuthTokenName { get; }
@@ -115,20 +142,9 @@ public interface IAppRuntimeInfo
     bool IsUnmasked { get; }
 
     /// <summary>
-    /// Gets the configured Serilog log level from <c>LOG_LEVEL</c>. Defaults to <see cref="LogEventLevel.Debug"/>.
-    /// </summary>
-    LogEventLevel LogLevel { get; }
-
-    /// <summary>
     /// When set to a truthy value, disables all authentication. FOR DEVELOPMENT USE ONLY.
     /// </summary>
     bool IsAuthenticationDisabled { get; }
-
-    /// <summary>
-    /// Gets the port number from the DOTNET_HTTP_PORTS environment variable.
-    /// </summary>
-    /// <returns>The port number or 5000 if not configured.</returns>
-    int AppPort { get; }
 
     #endregion
 }

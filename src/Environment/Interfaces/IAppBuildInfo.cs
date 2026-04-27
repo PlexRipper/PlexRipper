@@ -52,9 +52,13 @@ public interface IAppBuildInfo
     /// </summary>
     bool IsWindows { get; }
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// Returns true if the current operating system is Linux.
+    /// </summary>
     bool IsLinux { get; }
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// Returns true if the current operating system is macOS.
+    /// </summary>
     bool IsMacOS { get; }
 }

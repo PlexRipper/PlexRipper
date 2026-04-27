@@ -328,7 +328,7 @@ public class SetupRadarrDownloadClientCommandUnitTests : BaseUnitTest<SetupRadar
 
         var portField = capturedResource.Fields!.FirstOrDefault(f => f.Name == "port");
         portField.ShouldNotBeNull();
-        portField.Value.ShouldBe(Mock.Container.Resolve<IAppRuntimeInfo>().AppPort);
+        portField.Value.ShouldBe(5000);
 
         var useSslField = capturedResource.Fields!.FirstOrDefault(f => f.Name == "useSsl");
         useSslField.ShouldNotBeNull();

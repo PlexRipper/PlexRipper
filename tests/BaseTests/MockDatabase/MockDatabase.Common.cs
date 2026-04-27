@@ -293,6 +293,7 @@ public static partial class MockDatabase
 
         var (reaparrContext, authContext) = context;
 
+        reaparrContext.Migrate();
         authContext.Migrate();
 
         // PlexServers and Libraries added

@@ -2,8 +2,12 @@ namespace Reaparr.BaseTests;
 
 public class MockAppRuntimeInfo : IAppRuntimeInfo
 {
+    
+    
     public MockAppRuntimeInfo() { }
 
+    private bool _isDevEnvironment = true;
+    
     public int PUID { get; set; }
     public int PGID { get; set; }
     public string? GitHubToken { get; set; }
@@ -42,9 +46,17 @@ public class MockAppRuntimeInfo : IAppRuntimeInfo
     public string SEQ_Url { get; set; } = "http://localhost:5341";
     public bool IsIntegrationTestMode { get; set; }
 
-    public bool IsDevelopmentEnvironment { get; set; }
+    public bool IsDevelopmentEnvironment
+    {
+        get => _isDevEnvironment;
+        set => _isDevEnvironment = value;
+    }
 
-    public bool IsProductionEnvironment { get; set; }
+    public bool IsProductionEnvironment
+    {
+        get => !_isDevEnvironment;
+        set => _isDevEnvironment = !value;
+    }
 
     public string HeaderAuthTokenName { get; set; } = "X-Auth-User";
     public bool IsUnmasked { get; set; }

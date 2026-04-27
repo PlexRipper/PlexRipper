@@ -6,7 +6,6 @@ public static class EnvironmentExtensions
 {
     private static readonly AsyncLocal<IReadOnlyDictionary<string, string?>?> _testOverrides = new();
 
-
     #region Helpers
 
     /// <summary>

@@ -2,7 +2,6 @@ using Autofac;
 using Microsoft.AspNetCore.Hosting.Server;
 using Microsoft.AspNetCore.Hosting.Server.Features;
 using Microsoft.AspNetCore.Http.Features;
-using Reaparr.Environment;
 
 namespace Reaparr.AppHost.UnitTests;
 
@@ -12,9 +11,7 @@ public class DesktopModeUnitTests : BaseUnitTest<DesktopMode>
     public async Task ShouldReturnFailure_WhenServerAddressIsMissingInProduction()
     {
         // Arrange
-        using var _ = WithEnvironmentVariablesAsync(
-            new Dictionary<string, string?> { [EnvKeys.DotNetEnvironment] = "Production" }
-        );
+        SetAppRuntimeInfo(x => x.IsProductionEnvironment = true);
 
         SetAppBuildInfo(x => x.RuntimeMode = "desktop");
 
@@ -37,9 +34,7 @@ public class DesktopModeUnitTests : BaseUnitTest<DesktopMode>
     public async Task ShouldSkipWindowCreation_WhenIntegrationTestModeIsEnabled()
     {
         // Arrange
-        using var _ = WithEnvironmentVariablesAsync(
-            new Dictionary<string, string?> { [EnvKeys.IntegrationTestMode] = "true" }
-        );
+        SetAppRuntimeInfo(x => x.IsIntegrationTestMode = true);
         SetAppBuildInfo(x => x.RuntimeMode = "desktop");
 
         var windowFactory = new FakeDesktopWindowFactory(new MockDesktopWindow());
@@ -60,9 +55,7 @@ public class DesktopModeUnitTests : BaseUnitTest<DesktopMode>
     public async Task ShouldKeepDesktopRuntimeAlive_WhenMainWindowIsClosed()
     {
         // Arrange
-        using var _ = WithEnvironmentVariablesAsync(
-            new Dictionary<string, string?> { [EnvKeys.DotNetEnvironment] = "Production" }
-        );
+        SetAppRuntimeInfo(x => x.IsProductionEnvironment = true);
         SetAppBuildInfo(x => x.RuntimeMode = "desktop");
 
         var window = new MockDesktopWindow();
@@ -91,9 +84,7 @@ public class DesktopModeUnitTests : BaseUnitTest<DesktopMode>
     public async Task ShouldStartWindowMessageLoop_WhenWaitingForExit()
     {
         // Arrange
-        using var _ = WithEnvironmentVariablesAsync(
-            new Dictionary<string, string?> { [EnvKeys.DotNetEnvironment] = "Production" }
-        );
+        SetAppRuntimeInfo(x => x.IsProductionEnvironment = true);
         SetAppBuildInfo(x => x.RuntimeMode = "desktop");
 
         var window = new MockDesktopWindow();
@@ -119,9 +110,7 @@ public class DesktopModeUnitTests : BaseUnitTest<DesktopMode>
     public async Task ShouldAllowNativeClose_WhenExitClosesNativeWindow()
     {
         // Arrange
-        using var _ = WithEnvironmentVariablesAsync(
-            new Dictionary<string, string?> { [EnvKeys.DotNetEnvironment] = "Production" }
-        );
+        SetAppRuntimeInfo(x => x.IsProductionEnvironment = true);
         SetAppBuildInfo(x => x.RuntimeMode = "desktop");
 
         var window = new MockDesktopWindow();
@@ -143,9 +132,7 @@ public class DesktopModeUnitTests : BaseUnitTest<DesktopMode>
     public async Task ShouldRegisterExternalLinkHandler_WhenMainWindowStarts()
     {
         // Arrange
-        using var _ = WithEnvironmentVariablesAsync(
-            new Dictionary<string, string?> { [EnvKeys.DotNetEnvironment] = "Production" }
-        );
+        SetAppRuntimeInfo(x => x.IsProductionEnvironment = true);
         SetAppBuildInfo(x => x.RuntimeMode = "desktop");
 
         var window = new MockDesktopWindow();
@@ -165,9 +152,7 @@ public class DesktopModeUnitTests : BaseUnitTest<DesktopMode>
     public async Task ShouldOpenExternalBrowser_WhenExternalLinkMessageIsReceived()
     {
         // Arrange
-        using var _ = WithEnvironmentVariablesAsync(
-            new Dictionary<string, string?> { [EnvKeys.DotNetEnvironment] = "Production" }
-        );
+        SetAppRuntimeInfo(x => x.IsProductionEnvironment = true);
         SetAppBuildInfo(x => x.RuntimeMode = "desktop");
 
         var window = new MockDesktopWindow();
@@ -194,9 +179,7 @@ public class DesktopModeUnitTests : BaseUnitTest<DesktopMode>
     public async Task ShouldCompleteDesktopRuntime_WhenExitCommandRuns()
     {
         // Arrange
-        using var _ = WithEnvironmentVariablesAsync(
-            new Dictionary<string, string?> { [EnvKeys.DotNetEnvironment] = "Production" }
-        );
+        SetAppRuntimeInfo(x => x.IsProductionEnvironment = true);
         SetAppBuildInfo(x => x.RuntimeMode = "desktop");
 
         var windowFactory = new FakeDesktopWindowFactory(new MockDesktopWindow());

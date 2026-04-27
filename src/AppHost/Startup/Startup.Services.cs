@@ -214,7 +214,8 @@ public static partial class Startup
     private static void ConfigureAuthenticationServices(
         this IServiceCollection services,
         IWebHostEnvironment env,
-        IAppRuntimeInfo appRuntimeInfo)
+        IAppRuntimeInfo appRuntimeInfo
+    )
     {
         services.AddDataProtection().PersistKeysToDbContext<AuthDbContext>();
 

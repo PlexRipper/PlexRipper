@@ -76,11 +76,7 @@ public class BaseContainer : IDisposable
 
     private static MockAppRuntimeInfo ResolveRuntimeInfo(UnitTestDataConfig config)
     {
-        var runtimeInfo = new MockAppRuntimeInfo
-        {
-            IsUnmasked = true,
-            IsIntegrationTestMode = true,
-        };
+        var runtimeInfo = new MockAppRuntimeInfo { IsUnmasked = true, IsIntegrationTestMode = true };
         config.OverrideAppRuntimeInfo?.Invoke(runtimeInfo);
         return runtimeInfo;
     }

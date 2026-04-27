@@ -107,18 +107,40 @@ Replace `<Project>` with the actual project name (e.g., `Application`, `Backgrou
 > **MANDATORY**: At the start of every task, load the `jetbrains-skill` skill. This is non-negotiable — it enforces the
 > correct tool selection order below.
 
+> **Environment note:** In this repo environment, JetBrains IDE MCP access may be exposed through **mcp-proxy upstream
+> servers** rather than as first-class `rider_*` / `webstorm_*` tools in the current tool list. Do **not** conclude that
+> Rider or WebStorm is unavailable just because native tool discovery does not show those tools.
+
 **NEVER use `grep`, `glob`, `read`, or bash file commands as a first tool.** Use the appropriate JetBrains IDE MCP tools
 first, based on the task type:
 
-- **Backend work** (C#, .NET, `src/` excluding `ClientApp/`, `tests/`) → use **Rider MCP tools**
-  (`rider_*`, `rider-official-mcp_*`, `rider-index-mcp_*`, `rider-debugger*`)
-- **Frontend work** (Vue, TypeScript, `src/AppHost/ClientApp/`) → use **WebStorm MCP tools**
-  (`webstorm-official-mcp_*`, `webstorm-index-mcp_*`, `webstorm-index_ide_*`)
+- **Backend work** (C#, .NET, `src/` excluding `ClientApp/`, `tests/`) → use **Rider MCP tools**. In this environment,
+  prefer the connected mcp-proxy upstreams:
+  - `rider-official`
+  - `rider-index`
+  - `rider-debugger`
+- **Frontend work** (Vue, TypeScript, `src/AppHost/ClientApp/`) → use **WebStorm MCP tools**. In this environment,
+  prefer the connected mcp-proxy upstreams:
+  - `webstorm-official`
+  - `webstorm-index`
 
 Never use Rider MCP tools for frontend work, and never use WebStorm MCP tools for backend work.
 
+- **Mandatory availability check:** if JetBrains tools are not obviously present as native tools, check
+  `mcp-proxy_upstream_servers` before falling back. If the relevant upstream server is healthy, treat the IDE as
+  available and continue through mcp-proxy.
+- **Discovery gotcha:** `mcp-proxy_retrieve_tools` may not reliably surface JetBrains file/search/edit tools from broad
+  natural-language queries. Sparse search results are **not** proof that the IDE server is unavailable.
+- **Known-good mcp-proxy workflow:**
+  1. Load `jetbrains-skill`.
+  2. Check `mcp-proxy_upstream_servers` if native Rider/WebStorm tools are not obvious.
+  3. If the relevant upstream server is healthy, use Rider/WebStorm through mcp-proxy first.
+  4. If `mcp-proxy_retrieve_tools` returns sparse or misleading results, retry with a narrower IDE/MCP query instead of
+     assuming the server is unavailable.
+  5. Fall back to `grep`, `glob`, `read`, or bash file commands only after the IDE/MCP path is confirmed unavailable or
+     cannot provide the needed result.
 - Fall back to `grep`, `glob`, or `read` **only** if the appropriate IDE MCP is unavailable, errors, or cannot provide
-  the needed result.
+  the needed result after checking the upstream server and retrying a narrower IDE/MCP path.
 - If fallback is required, **explicitly state it** before using the fallback tool.
 
 ---
@@ -236,9 +258,13 @@ multi-file edits.
 - **Forced verification:** Do not report success after edits until you run the project-appropriate verification for the
   files you changed.
 
-- Backend changes: ALWAYS use Rider IDE diagnostics first through MCP to verify and use run `dotnet build Reaparr.sln` as a last resort, or a narrower relevant build or test command when that is the better
-  verifier.
-- Frontend changes: ALWAYS use WebStorm IDE diagnostics first through MCP to verify. Prefer IDE diagnostics over a
+- Backend changes: ALWAYS use Rider IDE diagnostics first through MCP to verify. In this environment, that includes the
+  Rider mcp-proxy upstreams (`rider-official`, `rider-index`, `rider-debugger`) when native Rider tools are not exposed
+  directly. Use `dotnet build Reaparr.sln` only as a last resort, or a narrower relevant build or test command when that
+  is the better verifier.
+- Frontend changes: ALWAYS use WebStorm IDE diagnostics first through MCP to verify. In this environment, that includes
+  the WebStorm mcp-proxy upstreams (`webstorm-official`, `webstorm-index`) when native WebStorm tools are not exposed
+  directly. Prefer IDE diagnostics over a
   full backend build when the task is frontend-only. From `src/AppHost/ClientApp/`, run `bun run typecheck` and
   `bun run lint` only when a broader frontend verifier is still needed after IDE diagnostics.
 - If a verifier does not exist or cannot run in the current environment, state that explicitly instead of implying

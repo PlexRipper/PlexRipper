@@ -9,11 +9,6 @@ public static class EnvironmentExtensions
     #region Getters
 
     /// <summary>
-    /// Returns true when <c>IntegrationTestMode</c> environment variable is set to a truthy value.
-    /// </summary>
-    public static bool IsIntegrationTestMode() => IsTrue(GetEnvironmentVariable(EnvKeys.IntegrationTestMode));
-
-    /// <summary>
     /// Gets the name of the HTTP header used for bearer/auth token passing. Defaults to <c>X-Auth-User</c>.
     /// </summary>
     public static string GetHeaderAuthTokenName() =>
@@ -32,12 +27,6 @@ public static class EnvironmentExtensions
         var success = Enum.TryParse<LogEventLevel>(GetEnvironmentVariable(EnvKeys.LogLevel), true, out var logLevel);
         return success ? logLevel : LogEventLevel.Debug;
     }
-
-    /// <summary>
-    /// Returns true if the DOTNET_ENVIRONMENT is set to Development.
-    /// </summary>
-    /// <returns></returns>
-    public static bool IsDevelopmentEnvironment() => GetEnvironmentVariable(EnvKeys.DotNetEnvironment) == "Development";
 
     /// <summary>
     /// When set to a truthy value, disables all authentication. FOR DEVELOPMENT USE ONLY.

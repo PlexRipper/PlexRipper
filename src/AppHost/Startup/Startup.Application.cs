@@ -12,10 +12,12 @@ public static partial class Startup
     /// <param name="app"> The <see cref="IApplicationBuilder"/> instance to configure.</param>
     /// <param name="env"> The <see cref="IWebHostEnvironment"/> instance to configure.</param>
     /// <param name="appBuildInfo"> The <see cref="IAppBuildInfo"/> instance containing application build information to include in response headers.</param>
+    /// <param name="appRuntimeInfo"> The <see cref="IAppRuntimeInfo"/> instance containing application runtime information to include in response headers.</param>
     public static void ConfigureApplication(
         this WebApplication app,
         IWebHostEnvironment env,
-        IAppBuildInfo appBuildInfo
+        IAppBuildInfo appBuildInfo,
+        IAppRuntimeInfo appRuntimeInfo
     )
     {
         _log.Here()
@@ -31,8 +33,7 @@ public static partial class Startup
         // This has to always be first
         app.UseCors(CorsConfiguration);
 
-        app.Use(
-            async (ctx, next) =>
+        app.Use(async (ctx, next) =>
             {
                 // Rewrite legacy/public API v2 routes
                 if (ctx.Request.Path.StartsWithSegments("/api/v2", out var remaining))
@@ -54,7 +55,7 @@ public static partial class Startup
 
         app.UseRouting();
 
-        if (!EnvironmentExtensions.IsIntegrationTestMode())
+        if (!appRuntimeInfo.IsIntegrationTestMode)
         {
             // SignalR configuration
             app.MapHub<LogHub>("/logs");
@@ -67,14 +68,11 @@ public static partial class Startup
         }
 
         // Setup FastEndpoints Swagger
-        if (!EnvironmentExtensions.IsIntegrationTestMode() && env.IsProduction())
+        if (!appRuntimeInfo.IsIntegrationTestMode && env.IsProduction())
         {
             // Used to deploy the front-end Nuxt client
             app.UseSpaStaticFiles();
-            app.UseSpa(spa =>
-            {
-                spa.Options.SourcePath = "ClientApp";
-            });
+            app.UseSpa(spa => { spa.Options.SourcePath = "ClientApp"; });
         }
 
         // Use custom header authentication middleware

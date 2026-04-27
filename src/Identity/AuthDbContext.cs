@@ -9,29 +9,44 @@ namespace Reaparr.Identity;
 public sealed class AuthDbContext : IdentityDbContext<AppUser>, IAuthDbContext, IAuthDbContextDatabase
 {
     private readonly IPathProvider _pathProvider;
+    
+    private readonly IAppRuntimeInfo _appRuntimeInfo;
+    
     public string DatabaseName { get; } = string.Empty;
 
     public DbSet<DataProtectionKey> DataProtectionKeys { get; set; }
     public DbSet<DownloadClientSession> DownloadClientSessions { get; set; }
 
     [ActivatorUtilitiesConstructor]
-    public AuthDbContext(IPathProvider pathProvider)
+    public AuthDbContext(IPathProvider pathProvider, IAppRuntimeInfo appRuntimeInfo)
     {
         _pathProvider = pathProvider;
+        _appRuntimeInfo = appRuntimeInfo;
         DatabaseName = pathProvider.DatabaseName;
     }
 
-    public AuthDbContext(DbContextOptions<AuthDbContext> options, IPathProvider pathProvider)
+    public AuthDbContext(
+        DbContextOptions<AuthDbContext> options,
+        IPathProvider pathProvider,
+        IAppRuntimeInfo appRuntimeInfo)
         : base(options)
     {
         _pathProvider = pathProvider;
+        _appRuntimeInfo = appRuntimeInfo;
+
         DatabaseName = pathProvider.DatabaseName;
     }
 
-    public AuthDbContext(DbContextOptions<AuthDbContext> options, IPathProvider pathProvider, string databaseName)
+    public AuthDbContext(
+        DbContextOptions<AuthDbContext> options,
+        IPathProvider pathProvider,
+        IAppRuntimeInfo appRuntimeInfo,
+        string databaseName)
         : base(options)
     {
         _pathProvider = pathProvider;
+        _appRuntimeInfo = appRuntimeInfo;
+
         DatabaseName = databaseName;
         Database.OpenConnection();
         Database.EnsureCreated();
@@ -41,7 +56,7 @@ public sealed class AuthDbContext : IdentityDbContext<AppUser>, IAuthDbContext, 
     {
         if (!optionsBuilder.IsConfigured)
         {
-            optionsBuilder.DefaultConfiguration(_pathProvider, typeof(AuthDbContext));
+            optionsBuilder.DefaultConfiguration(_pathProvider, _appRuntimeInfo, typeof(AuthDbContext));
         }
     }
 

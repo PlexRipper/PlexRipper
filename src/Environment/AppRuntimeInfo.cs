@@ -5,6 +5,15 @@ namespace Reaparr.Environment;
 public class AppRuntimeInfo : IAppRuntimeInfo
 {
     /// <inheritdoc/>
+    public bool IsDevelopmentEnvironment => GetEnvironmentVariable(EnvKeys.DotNetEnvironment) == "Development";
+
+    /// <inheritdoc/>
+    public bool IsProductionEnvironment => GetEnvironmentVariable(EnvKeys.DotNetEnvironment) == "Production";
+
+    /// <inheritdoc/>
+    public bool IsIntegrationTestMode => IsTrue(GetEnvironmentVariable(EnvKeys.IntegrationTestMode));
+
+    /// <inheritdoc/>
     public string SEQ_Url => GetEnvironmentVariable(EnvKeys.SeqUrl) ?? "http://localhost:5341";
 
     /// <inheritdoc/>

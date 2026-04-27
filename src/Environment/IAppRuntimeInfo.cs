@@ -87,5 +87,20 @@ public interface IAppRuntimeInfo
     /// </summary>
     string SEQ_Url { get; }
 
+    /// <summary>
+    /// Returns true when <c>IntegrationTestMode</c> environment variable is set to a truthy value.
+    /// </summary>
+    bool IsIntegrationTestMode { get; }
+
+    /// <summary>
+    /// Returns true if the DOTNET_ENVIRONMENT is set to Development.
+    /// </summary>
+    bool IsDevelopmentEnvironment { get; }
+
+    /// <summary>
+    /// Returns true if the DOTNET_ENVIRONMENT is set to Production.
+    /// </summary>
+    bool IsProductionEnvironment { get; }
+
     #endregion
 }

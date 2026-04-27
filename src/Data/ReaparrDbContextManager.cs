@@ -7,6 +7,7 @@ public class ReaparrDbContextManager : IReaparrDbContextManager
 {
     private readonly ILogger _log;
 
+    private readonly IAppRuntimeInfo _appRuntimeInfo;
     private readonly IReaparrDbContextDatabase _reaparrDbContextDatabase;
     private readonly IAuthDbContextDatabase _authDbContextDatabase;
     private readonly IGeneralSettings _generalSettings;
@@ -19,6 +20,7 @@ public class ReaparrDbContextManager : IReaparrDbContextManager
 
     public ReaparrDbContextManager(
         ILogger log,
+        IAppRuntimeInfo appRuntimeInfo,
         IReaparrDbContextDatabase reaparrDbContextDatabase,
         IAuthDbContextDatabase authDbContextDatabase,
         IGeneralSettings generalSettings,
@@ -28,6 +30,7 @@ public class ReaparrDbContextManager : IReaparrDbContextManager
     )
     {
         _log = log.ForContext<ReaparrDbContextManager>();
+        _appRuntimeInfo = appRuntimeInfo;
         _reaparrDbContextDatabase = reaparrDbContextDatabase;
         _authDbContextDatabase = authDbContextDatabase;
         _generalSettings = generalSettings;
@@ -38,7 +41,7 @@ public class ReaparrDbContextManager : IReaparrDbContextManager
 
     public async Task<Result> SetupAsync()
     {
-        if (EnvironmentExtensions.IsIntegrationTestMode())
+        if (_appRuntimeInfo.IsIntegrationTestMode)
         {
             _log.Here().Information("Integration test mode detected, skipping database setup");
             return Result.Ok();

@@ -29,7 +29,7 @@ public class Program
             var signalRLogConfig = new SignalRLogConfig(appRuntimeInfo, pathProvider, logBuffer);
 
             // Skip logger setup in integration test mode to preserve test logger
-            if (!EnvironmentExtensions.IsIntegrationTestMode())
+            if (!appRuntimeInfo.IsIntegrationTestMode)
                 LogFactory.SetupLogging(signalRLogConfig, EnvironmentExtensions.GetLogLevel());
 
             _log.Here().Information("Initiating boot process");
@@ -54,7 +54,7 @@ public class Program
             builder.Services.ConfigureServices(builder.Environment, appRuntimeInfo);
             var app = builder.Build();
 
-            if (!EnvironmentExtensions.IsIntegrationTestMode())
+            if (!appRuntimeInfo.IsIntegrationTestMode)
                 signalRLogConfig.AttachSignalR(app, LogFactory.MinimumLogLevel);
 
             var configResult = app.SetupConfigFile();
@@ -73,9 +73,9 @@ public class Program
 
             app.ApplyForwardedHeaders();
 
-            app.ConfigureApplication(app.Environment, appBuildInfo);
+            app.ConfigureApplication(app.Environment, appBuildInfo, appRuntimeInfo);
 
-            if (appBuildInfo.IsDesktopMode && !EnvironmentExtensions.IsIntegrationTestMode())
+            if (appBuildInfo.IsDesktopMode && !appRuntimeInfo.IsIntegrationTestMode)
             {
                 var desktopLifecycleResult = await RunDesktopLifecycleAsync(app);
                 if (desktopLifecycleResult.IsFailed)

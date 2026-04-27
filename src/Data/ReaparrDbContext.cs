@@ -13,6 +13,7 @@ namespace Reaparr.Data;
 public sealed class ReaparrDbContext : DbContext, IReaparrDbContext, IReaparrDbContextDatabase
 {
     private readonly IPathProvider _pathProvider;
+    private readonly IAppRuntimeInfo _appRuntimeInfo;
     public DbSet<PlexAccount> PlexAccounts { get; set; }
 
     public DbSet<FolderPath> FolderPaths { get; set; }
@@ -96,45 +97,42 @@ public sealed class ReaparrDbContext : DbContext, IReaparrDbContext, IReaparrDbC
         BulkConfig? bulkConfig = null,
         CancellationToken cancellationToken = default
     )
-        where T : class =>
-        throw new NotSupportedException(
-            "BulkReadAsync is not supported in with SQLite due to issues with UseTempDB and other limitations."
-                + "Use EF native reading instead."
-        );
+        where T : class => throw new NotSupportedException(
+        "BulkReadAsync is not supported in with SQLite due to issues with UseTempDB and other limitations."
+        + "Use EF native reading instead."
+    );
 
     public async Task BulkInsertAsync<T>(
         IList<T> entities,
         BulkConfig? bulkConfig = null,
         CancellationToken cancellationToken = default
     )
-        where T : class =>
-        await ExecuteBulkAsync(
-            () =>
-                DbContextBulkExtensions.BulkInsertAsync(
-                    this,
-                    entities,
-                    bulkConfig,
-                    cancellationToken: cancellationToken
-                ),
-            cancellationToken
-        );
+        where T : class => await ExecuteBulkAsync(
+        () =>
+            DbContextBulkExtensions.BulkInsertAsync(
+                this,
+                entities,
+                bulkConfig,
+                cancellationToken: cancellationToken
+            ),
+        cancellationToken
+    );
 
     public async Task BulkUpdateAsync<T>(
         IList<T> entities,
         BulkConfig? bulkConfig = null,
         CancellationToken cancellationToken = default
     )
-        where T : class =>
-        await ExecuteBulkAsync(
-            () =>
-                DbContextBulkExtensions.BulkUpdateAsync(
-                    this,
-                    entities,
-                    bulkConfig,
-                    cancellationToken: cancellationToken
-                ),
-            cancellationToken
-        );
+        where T : class => await ExecuteBulkAsync(
+        () =>
+            DbContextBulkExtensions.BulkUpdateAsync(
+                this,
+                entities,
+                bulkConfig,
+                cancellationToken: cancellationToken
+            ),
+        cancellationToken
+    );
 
     public async Task BulkInsertOrUpdateAsync<T>(
         IList<T> entities,
@@ -143,19 +141,18 @@ public sealed class ReaparrDbContext : DbContext, IReaparrDbContext, IReaparrDbC
         Type? type = null,
         CancellationToken cancellationToken = default
     )
-        where T : class =>
-        await ExecuteBulkAsync(
-            () =>
-                DbContextBulkExtensions.BulkInsertOrUpdateAsync(
-                    this,
-                    entities,
-                    bulkConfig,
-                    progress,
-                    type,
-                    cancellationToken: cancellationToken
-                ),
-            cancellationToken
-        );
+        where T : class => await ExecuteBulkAsync(
+        () =>
+            DbContextBulkExtensions.BulkInsertOrUpdateAsync(
+                this,
+                entities,
+                bulkConfig,
+                progress,
+                type,
+                cancellationToken: cancellationToken
+            ),
+        cancellationToken
+    );
 
     public Task<IDbContextTransaction> BeginTransactionAsync(CancellationToken cancellationToken = default) =>
         Database.BeginTransactionAsync(cancellationToken);
@@ -184,10 +181,15 @@ public sealed class ReaparrDbContext : DbContext, IReaparrDbContext, IReaparrDbC
     /// <summary>
     /// Constructor for DbContextFactory with explicit database name - accepts pre-configured options used in unit and integration testing.
     /// </summary>
-    public ReaparrDbContext(DbContextOptions<ReaparrDbContext> options, IPathProvider pathProvider, string databaseName)
+    public ReaparrDbContext(
+        DbContextOptions<ReaparrDbContext> options,
+        IPathProvider pathProvider,
+        IAppRuntimeInfo appRuntimeInfo,
+        string databaseName)
         : base(options)
     {
         _pathProvider = pathProvider;
+        _appRuntimeInfo = appRuntimeInfo;
         DatabaseName = databaseName;
 
         Database.OpenConnection();
@@ -198,7 +200,7 @@ public sealed class ReaparrDbContext : DbContext, IReaparrDbContext, IReaparrDbC
     {
         if (!optionsBuilder.IsConfigured)
         {
-            optionsBuilder.DefaultConfiguration(_pathProvider, typeof(ReaparrDbContext));
+            optionsBuilder.DefaultConfiguration(_pathProvider, _appRuntimeInfo, typeof(ReaparrDbContext));
         }
 
         optionsBuilder.UseSeeding(ReaparrDBContextSeed.Seed(_pathProvider));

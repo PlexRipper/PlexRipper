@@ -40,4 +40,9 @@ public class MockAppRuntimeInfo : IAppRuntimeInfo
     public string? AppImage { get; }
     public bool ShouldLogEnvVars { get; }
     public string SEQ_Url { get; } = "http://localhost:5341";
+    public bool IsIntegrationTestMode { get; }
+
+    public bool IsDevelopmentEnvironment { get; }
+
+    public bool IsProductionEnvironment { get; }
 }

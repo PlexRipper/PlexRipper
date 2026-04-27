@@ -80,7 +80,7 @@ public static partial class Startup
 
         services.AddCommandMiddleware(c => c.Register(typeof(ValidationPipeline<,>)));
 
-        if (!EnvironmentExtensions.IsIntegrationTestMode())
+        if (!appRuntimeInfo.IsIntegrationTestMode)
         {
             // Used to deploy the front-end Nuxt client
             if (env.IsProduction())

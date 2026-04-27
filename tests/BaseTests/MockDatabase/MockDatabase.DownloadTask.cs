@@ -8,12 +8,13 @@ public static partial class MockDatabase
     /// </summary>
     private static void ApplyIntegrationTestPaths(
         IEnumerable<DownloadTaskMovie> downloadTasks,
-        IPathProvider pathProvider
+        IPathProvider pathProvider,
+        IAppRuntimeInfo appRuntimeInfo
     )
     {
         // Unit tests do not need sandbox rewriting. They usually assert on entities or behavior only,
         // while integration tests boot the full AppHost and exercise real file-system flows.
-        if (!EnvironmentExtensions.IsIntegrationTestMode())
+        if (!appRuntimeInfo.IsIntegrationTestMode)
             return;
 
         foreach (var downloadTask in downloadTasks)
@@ -49,10 +50,11 @@ public static partial class MockDatabase
     /// </summary>
     private static void ApplyIntegrationTestPaths(
         IEnumerable<DownloadTaskTvShow> downloadTasks,
-        IPathProvider pathProvider
+        IPathProvider pathProvider,
+        IAppRuntimeInfo appRuntimeInfo
     )
     {
-        if (!EnvironmentExtensions.IsIntegrationTestMode())
+        if (!appRuntimeInfo.IsIntegrationTestMode)
             return;
 
         foreach (var downloadTask in downloadTasks)
@@ -71,6 +73,7 @@ public static partial class MockDatabase
         this ReaparrDbContext context,
         Seed seed,
         IPathProvider pathProvider,
+        IAppRuntimeInfo appRuntimeInfo,
         Action<FakeDataConfig>? options = null
     )
     {
@@ -89,7 +92,7 @@ public static partial class MockDatabase
 
         // Normalize seeded file paths for integration tests after relationship IDs are assigned, so the
         // generated DirectoryMeta values line up with the current test database sandbox.
-        ApplyIntegrationTestPaths(downloadTasks, pathProvider);
+        ApplyIntegrationTestPaths(downloadTasks, pathProvider, appRuntimeInfo);
 
         context.DownloadTaskMovie.AddRange(downloadTasks);
         await context.SaveChangesAsync();
@@ -109,6 +112,7 @@ public static partial class MockDatabase
         this ReaparrDbContext context,
         Seed seed,
         IPathProvider pathProvider,
+        IAppRuntimeInfo appRuntimeInfo,
         Action<FakeDataConfig>? options = null
     )
     {
@@ -127,7 +131,7 @@ public static partial class MockDatabase
 
         // Normalize seeded nested episode-file paths for integration tests after relationship IDs are
         // assigned, so runtime jobs read/write within the current test sandbox.
-        ApplyIntegrationTestPaths(downloadTasks, pathProvider);
+        ApplyIntegrationTestPaths(downloadTasks, pathProvider, appRuntimeInfo);
 
         context.DownloadTaskTvShow.AddRange(downloadTasks);
         await context.SaveChangesAsync();

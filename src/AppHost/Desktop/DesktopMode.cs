@@ -7,6 +7,7 @@ namespace Reaparr.AppHost;
 public class DesktopMode : IDesktopMode
 {
     private readonly Serilog.ILogger _log;
+    private readonly IAppRuntimeInfo _appRuntimeInfo;
     private readonly IServer _server;
     private readonly Func<Uri, IDesktopWindow> _windowFactory;
     private readonly TaskCompletionSource _exitCompletion = new(TaskCreationOptions.RunContinuationsAsynchronously);
@@ -16,9 +17,14 @@ public class DesktopMode : IDesktopMode
     private bool _isExiting;
 
     /// <summary>Initializes a new instance of <see cref="DesktopMode"/>.</summary>
-    public DesktopMode(Serilog.ILogger log, IServer server, Func<Uri, IDesktopWindow> windowFactory)
+    public DesktopMode(
+        Serilog.ILogger log,
+        IAppRuntimeInfo appRuntimeInfo,
+        IServer server,
+        Func<Uri, IDesktopWindow> windowFactory)
     {
         _log = log.ForContext<DesktopMode>();
+        _appRuntimeInfo = appRuntimeInfo;
         _server = server;
         _windowFactory = windowFactory;
     }
@@ -26,7 +32,7 @@ public class DesktopMode : IDesktopMode
     /// <inheritdoc />
     public async Task<Result> StartAsync(CancellationToken cancellationToken)
     {
-        if (EnvironmentExtensions.IsIntegrationTestMode())
+        if (_appRuntimeInfo.IsIntegrationTestMode)
         {
             _log.Here()
                 .Warning(
@@ -42,7 +48,7 @@ public class DesktopMode : IDesktopMode
     /// <inheritdoc />
     public Task<Result> ShowMainWindowAsync(CancellationToken cancellationToken)
     {
-        if (EnvironmentExtensions.IsIntegrationTestMode())
+        if (_appRuntimeInfo.IsIntegrationTestMode)
             return Task.FromResult(Result.Ok());
 
         if (_window is not null)
@@ -97,7 +103,7 @@ public class DesktopMode : IDesktopMode
     /// <inheritdoc />
     public async Task WaitForExitAsync(CancellationToken cancellationToken)
     {
-        if (EnvironmentExtensions.IsIntegrationTestMode())
+        if (_appRuntimeInfo.IsIntegrationTestMode)
         {
             await _exitCompletion.Task.WaitAsync(cancellationToken);
             return;
@@ -144,7 +150,7 @@ public class DesktopMode : IDesktopMode
 
     private Result<Uri> GetReaparrUri()
     {
-        if (EnvironmentExtensions.IsDevelopmentEnvironment())
+        if (_appRuntimeInfo.IsDevelopmentEnvironment)
             return Result.Ok(new Uri("http://localhost:3000"));
 
         var serverAddressesFeature = _server.Features.Get<IServerAddressesFeature>();

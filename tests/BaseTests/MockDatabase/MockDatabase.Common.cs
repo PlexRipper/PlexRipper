@@ -210,23 +210,24 @@ public static partial class MockDatabase
     /// Passing in the same dbName will create a new context for the same database
     /// </summary>
     /// <param name="pathProvider">The path provider to use for the DbContext, can be shared between contexts that should have the same sandboxed file paths. Use CreatePathProvider(dbName) to create a new one with unique paths based on the dbName.</param>
+    /// <param name="appRuntimeInfo">The app runtime info to use for the DbContext, can be shared between contexts that should have the same app runtime info. Use CreateAppRuntimeInfo(dbName) to create a new one with unique values based on the dbName.</param>
     /// <param name="dbName">leave empty to generate a random one</param>
     /// <returns>A <see cref="ReaparrDbContext" /> in memory instance.</returns>
-    public static (ReaparrDbContext, AuthDbContext) GetMemoryDbContext(IPathProvider pathProvider, string dbName = "")
+    public static (ReaparrDbContext, AuthDbContext) GetMemoryDbContext(
+        IPathProvider pathProvider,
+        IAppRuntimeInfo appRuntimeInfo,
+        string dbName = "")
     {
         dbName = string.IsNullOrEmpty(dbName) ? GetMemoryDatabaseName() : dbName;
 
-        return (GetMemoryReaparrDbContext(dbName, pathProvider), GetMemoryAuthDbContext(dbName, pathProvider));
+        return (GetMemoryReaparrDbContext(pathProvider, appRuntimeInfo, dbName),
+            GetMemoryAuthDbContext(pathProvider, appRuntimeInfo, dbName));
     }
 
-    // TODO remove this construtor, its the same as the other with reversed parameters
-    public static ReaparrDbContext GetMemoryReaparrDbContext(IPathProvider pathProvider, string dbName = "")
-    {
-        dbName = string.IsNullOrEmpty(dbName) ? GetMemoryDatabaseName() : dbName;
-        return GetMemoryReaparrDbContext(dbName, pathProvider);
-    }
-
-    private static ReaparrDbContext GetMemoryReaparrDbContext(string dbName, IPathProvider pathProvider)
+    public static ReaparrDbContext GetMemoryReaparrDbContext(
+        IPathProvider pathProvider,
+        IAppRuntimeInfo appRuntimeInfo,
+        string dbName = "")
     {
         var optionsBuilder = new DbContextOptionsBuilder<ReaparrDbContext>();
 
@@ -241,16 +242,13 @@ public static partial class MockDatabase
         optionsBuilder.EnableDetailedErrors();
         optionsBuilder.LogTo(text => LogFactory.DbContextLogger(text), LogLevel.Warning);
 
-        return new ReaparrDbContext(optionsBuilder.Options, pathProvider, dbName);
+        return new ReaparrDbContext(optionsBuilder.Options, pathProvider, appRuntimeInfo, dbName);
     }
 
-    public static AuthDbContext GetMemoryAuthDbContext(IPathProvider pathProvider, string dbName = "")
-    {
-        dbName = string.IsNullOrEmpty(dbName) ? GetMemoryDatabaseName() : dbName;
-        return GetMemoryAuthDbContext(dbName, pathProvider);
-    }
-
-    private static AuthDbContext GetMemoryAuthDbContext(string dbName, IPathProvider pathProvider)
+    public static AuthDbContext GetMemoryAuthDbContext(
+        IPathProvider pathProvider,
+        IAppRuntimeInfo appRuntimeInfo,
+        string dbName = "")
     {
         var optionsBuilder = new DbContextOptionsBuilder<AuthDbContext>();
 
@@ -265,10 +263,11 @@ public static partial class MockDatabase
         optionsBuilder.EnableDetailedErrors();
         optionsBuilder.LogTo(text => LogFactory.DbContextLogger(text), LogLevel.Warning);
 
-        return new AuthDbContext(optionsBuilder.Options, pathProvider, dbName);
+        return new AuthDbContext(optionsBuilder.Options, pathProvider, appRuntimeInfo, dbName);
     }
 
     public static string DatabaseConnectionString(string dbName = "") =>
+
         // https://docs.microsoft.com/en-us/dotnet/standard/data/sqlite/in-memory-databases
         new SqliteConnectionStringBuilder
         {
@@ -282,6 +281,7 @@ public static partial class MockDatabase
         this (ReaparrDbContext, AuthDbContext) context,
         Seed seed,
         IPathProvider pathProvider,
+        IAppRuntimeInfo appRuntimeInfo,
         Action<FakeDataConfig>? options = null
     )
     {
@@ -315,10 +315,10 @@ public static partial class MockDatabase
             reaparrContext = await reaparrContext.AddPlexTvShows(seed, options);
 
         if (config.MovieDownloadTasksCount > 0)
-            reaparrContext = await reaparrContext.AddDownloadTaskMovies(seed, pathProvider, options);
+            reaparrContext = await reaparrContext.AddDownloadTaskMovies(seed, pathProvider, appRuntimeInfo, options);
 
         if (config.TvShowDownloadTasksCount > 0)
-            reaparrContext = await reaparrContext.AddDownloadTaskTvShows(seed, pathProvider, options);
+            reaparrContext = await reaparrContext.AddDownloadTaskTvShows(seed, pathProvider, appRuntimeInfo, options);
 
         if (config.AccountHasAccessToAllLibraries)
             reaparrContext = await reaparrContext.AddPlexAccountLibraries();

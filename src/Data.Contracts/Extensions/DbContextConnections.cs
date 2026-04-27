@@ -10,16 +10,17 @@ public static class DbContextConnections
     /// </summary>
     private static readonly NaturalSortCollationInterceptor _collationInterceptor = new();
 
-    public static string GetConnectionString(IPathProvider pathProvider) => new SqliteConnectionStringBuilder
-    {
-        // Mixing shared-cache mode and write-ahead logging is discouraged. For optimal performance, remove Cache=Shared when the database is configured to use write-ahead logging.
-        // https://learn.microsoft.com/en-us/dotnet/standard/data/sqlite/connection-strings#basic
-        Cache = SqliteCacheMode.Default,
-        Mode = SqliteOpenMode.ReadWriteCreate,
-        DataSource = pathProvider.DatabasePath,
-        Pooling = true,
-        DefaultTimeout = 60,
-    }.ToString();
+    public static string GetConnectionString(IPathProvider pathProvider) =>
+        new SqliteConnectionStringBuilder
+        {
+            // Mixing shared-cache mode and write-ahead logging is discouraged. For optimal performance, remove Cache=Shared when the database is configured to use write-ahead logging.
+            // https://learn.microsoft.com/en-us/dotnet/standard/data/sqlite/connection-strings#basic
+            Cache = SqliteCacheMode.Default,
+            Mode = SqliteOpenMode.ReadWriteCreate,
+            DataSource = pathProvider.DatabasePath,
+            Pooling = true,
+            DefaultTimeout = 60,
+        }.ToString();
 
     public static void DefaultConfiguration(
         this DbContextOptionsBuilder optionsBuilder,

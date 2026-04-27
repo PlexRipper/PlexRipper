@@ -29,7 +29,11 @@ public static class LogFactory
         }
     }
 
-    public static void SetupLogging(LogConfig logConfig, LogEventLevel minimumLogLevel = LogEventLevel.Debug)
+    public static void SetupLogging(
+        LogConfig logConfig,
+        IAppRuntimeInfo appRuntimeInfo,
+        LogEventLevel minimumLogLevel = LogEventLevel.Debug
+    )
     {
         ArgumentNullException.ThrowIfNull(logConfig);
         MinimumLogLevel = minimumLogLevel;
@@ -40,7 +44,7 @@ public static class LogFactory
 
         log.Here().Information("Logging level set to {LogLevel}", MinimumLogLevel);
 
-        if (EnvironmentExtensions.IsUnmasked())
+        if (appRuntimeInfo.IsUnmasked)
         {
             log.Here()
                 .Warning(

@@ -11,6 +11,7 @@ namespace Reaparr.AppHost;
 public class HeaderAuthenticationMiddleware
 {
     private readonly RequestDelegate _next;
+    private readonly IAppRuntimeInfo _appRuntimeInfo;
     private readonly IIdentitySignInService _signInService;
     private readonly Serilog.ILogger _log;
     private readonly IHeaderAuthenticationSettings _headerAuthentication;
@@ -22,6 +23,7 @@ public class HeaderAuthenticationMiddleware
     public HeaderAuthenticationMiddleware(
         RequestDelegate next,
         Serilog.ILogger log,
+        IAppRuntimeInfo appRuntimeInfo,
         IIdentitySignInService signInService,
         IAuthenticationSettings authenticationSettings,
         IUserService userService
@@ -29,6 +31,7 @@ public class HeaderAuthenticationMiddleware
     {
         _log = log.ForContext<HeaderAuthenticationMiddleware>();
         _next = next;
+        _appRuntimeInfo = appRuntimeInfo;
         _signInService = signInService;
         _headerAuthentication = authenticationSettings.HeaderAuthentication;
         _userService = userService;
@@ -56,7 +59,7 @@ public class HeaderAuthenticationMiddleware
                 _log.Here()
                     .Warning(
                         "Header authentication is disabled but the header: {HeaderName} was present. Enable header authentication first in the settings file",
-                        EnvironmentExtensions.GetHeaderAuthTokenName()
+                        _appRuntimeInfo.HeaderAuthTokenName
                     );
             await _next(context);
             return;
@@ -123,7 +126,7 @@ public class HeaderAuthenticationMiddleware
                 _log.Here()
                     .Warning(
                         "The wrong user is passed in. Make sure to use the same username you use to log into Reaparr. Header: {HeaderName}, Value: {HeaderValue}, IP: {RemoteIp}",
-                        EnvironmentExtensions.GetHeaderAuthTokenName(),
+                        _appRuntimeInfo.HeaderAuthTokenName,
                         headerValue,
                         context.Connection.RemoteIpAddress
                     );
@@ -143,7 +146,7 @@ public class HeaderAuthenticationMiddleware
                     "User authenticated via header. User: {UserName}, IP: {RemoteIp}, Header: {HeaderName}",
                     user.UserName,
                     context.Connection.RemoteIpAddress,
-                    EnvironmentExtensions.GetHeaderAuthTokenName()
+                    _appRuntimeInfo.HeaderAuthTokenName
                 );
 
         await _next(context);
@@ -265,7 +268,7 @@ public class HeaderAuthenticationMiddleware
 
     private string? ExtractHeaderValue(HttpContext context)
     {
-        if (!context.Request.Headers.TryGetValue(EnvironmentExtensions.GetHeaderAuthTokenName(), out var headerValues))
+        if (!context.Request.Headers.TryGetValue(_appRuntimeInfo.HeaderAuthTokenName, out var headerValues))
             return null;
 
         var headerValue = headerValues.FirstOrDefault();

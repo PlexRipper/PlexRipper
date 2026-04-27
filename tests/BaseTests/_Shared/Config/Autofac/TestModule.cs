@@ -16,29 +16,51 @@ public class TestModule : Module
     {
         // Database context can be setup once and then retrieved by its DB name.
         builder
-            .Register((ctx, _) => MockDatabase.GetMemoryReaparrDbContext(ctx.Resolve<IPathProvider>(),
-                ctx.Resolve<IAppRuntimeInfo>(), MemoryDbName))
+            .Register(
+                (ctx, _) =>
+                    MockDatabase.GetMemoryReaparrDbContext(
+                        ctx.Resolve<IPathProvider>(),
+                        ctx.Resolve<IAppRuntimeInfo>(),
+                        MemoryDbName
+                    )
+            )
             .As<ReaparrDbContext>()
             .InstancePerDependency();
 
         builder
-            .Register((ctx, _) => MockDatabase.GetMemoryReaparrDbContext(ctx.Resolve<IPathProvider>(),
-                ctx.Resolve<IAppRuntimeInfo>(), MemoryDbName))
+            .Register(
+                (ctx, _) =>
+                    MockDatabase.GetMemoryReaparrDbContext(
+                        ctx.Resolve<IPathProvider>(),
+                        ctx.Resolve<IAppRuntimeInfo>(),
+                        MemoryDbName
+                    )
+            )
             .As<IReaparrDbContext>()
             .As<IReaparrDbContextDatabase>()
             .InstancePerDependency();
 
         builder
-            .Register((ctx, _) =>
-                MockDatabase.GetMemoryAuthDbContext(ctx.Resolve<IPathProvider>(), ctx.Resolve<IAppRuntimeInfo>(),
-                    MemoryDbName))
+            .Register(
+                (ctx, _) =>
+                    MockDatabase.GetMemoryAuthDbContext(
+                        ctx.Resolve<IPathProvider>(),
+                        ctx.Resolve<IAppRuntimeInfo>(),
+                        MemoryDbName
+                    )
+            )
             .As<AuthDbContext>()
             .InstancePerDependency();
 
         builder
-            .Register((ctx, _) =>
-                MockDatabase.GetMemoryAuthDbContext(ctx.Resolve<IPathProvider>(), ctx.Resolve<IAppRuntimeInfo>(),
-                    MemoryDbName))
+            .Register(
+                (ctx, _) =>
+                    MockDatabase.GetMemoryAuthDbContext(
+                        ctx.Resolve<IPathProvider>(),
+                        ctx.Resolve<IAppRuntimeInfo>(),
+                        MemoryDbName
+                    )
+            )
             .As<IAuthDbContext>()
             .As<IAuthDbContextDatabase>()
             .InstancePerDependency();

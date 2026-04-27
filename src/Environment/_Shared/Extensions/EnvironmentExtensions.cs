@@ -9,17 +9,6 @@ public static class EnvironmentExtensions
     #region Getters
 
     /// <summary>
-    /// Gets the name of the HTTP header used for bearer/auth token passing. Defaults to <c>X-Auth-User</c>.
-    /// </summary>
-    public static string GetHeaderAuthTokenName() =>
-        GetEnvironmentVariable(EnvKeys.AuthHeaderTokenName) ?? "X-Auth-User";
-
-    /// <summary>
-    /// When set to true, the application will not mask/censor sensitive data in the logs.
-    /// </summary>
-    public static bool IsUnmasked() => IsTrue(GetEnvironmentVariable(EnvKeys.Unmasked));
-
-    /// <summary>
     /// Gets the configured Serilog log level from <c>LOG_LEVEL</c>. Defaults to <see cref="LogEventLevel.Debug"/>.
     /// </summary>
     public static LogEventLevel GetLogLevel()
@@ -37,14 +26,15 @@ public static class EnvironmentExtensions
     /// Gets the port number from the DOTNET_HTTP_PORTS environment variable.
     /// </summary>
     /// <returns>The port number or 5000 if not configured.</returns>
-    public static int GetPort => int.TryParse(
-        GetEnvironmentVariable(EnvKeys.DotNetHttpPorts)
-            ?.Split(';', StringSplitOptions.RemoveEmptyEntries)
-            .FirstOrDefault(),
-        out var port
-    )
-        ? port
-        : 5000;
+    public static int GetPort =>
+        int.TryParse(
+            GetEnvironmentVariable(EnvKeys.DotNetHttpPorts)
+                ?.Split(';', StringSplitOptions.RemoveEmptyEntries)
+                .FirstOrDefault(),
+            out var port
+        )
+            ? port
+            : 5000;
 
     #endregion
 
@@ -106,9 +96,9 @@ public static class EnvironmentExtensions
         return string.IsNullOrWhiteSpace(value) ? null : value;
     }
 
-    private static bool IsTrue(string? value) => value is not null
-                                                 && (string.Equals(value, Convert.ToString(true),
-                                                     StringComparison.OrdinalIgnoreCase) || value == "1");
+    private static bool IsTrue(string? value) =>
+        value is not null
+        && (string.Equals(value, Convert.ToString(true), StringComparison.OrdinalIgnoreCase) || value == "1");
 
     #endregion
 }

@@ -7,26 +7,21 @@ namespace Reaparr.Logging.UnitTests;
 
 public class LogMaskingUnitTests : BaseUnitTest<LogMaskingUnitTests>
 {
-    #region Setup/Teardown
-
-    #endregion
-
     [Test]
     public void ShouldHaveMaskedData_WhenLogPropertyIsConfiguredToBeMasked()
     {
         // Arrange
-        var originalUnmaskedState = EnvironmentExtensions.IsUnmasked();
         try
         {
-            LogFactory.CloseAndFlush();
-            EnvironmentExtensions.EnableUnmaskedLog(false);
-            EnvironmentExtensions.IsUnmasked().ShouldBeFalse();
-            
+            SetAppRuntimeInfo(x => x.IsUnmasked = false);
+
             var runtimeInfo = Mock.Container.Resolve<IAppRuntimeInfo>();
             var pathProvider = Mock.Container.Resolve<IPathProvider>();
             var testLogConfig = new TestLogConfig(runtimeInfo, pathProvider);
-            
-            LogFactory.SetupLogging(testLogConfig, LogEventLevel.Debug);
+
+            runtimeInfo.IsUnmasked.ShouldBeFalse();
+
+            LogFactory.SetupLogging(testLogConfig, runtimeInfo, LogEventLevel.Debug);
             var log = LogFactory.Create<LogMaskingUnitTests>();
             using (var context = TestCorrelator.CreateContext())
             {
@@ -60,10 +55,7 @@ public class LogMaskingUnitTests : BaseUnitTest<LogMaskingUnitTests>
                     }
                 );
 
-                // Assert - check again right before the assertion to ensure it hasn't changed
-                EnvironmentExtensions.EnableUnmaskedLog(false);
-                EnvironmentExtensions.IsUnmasked().ShouldBeFalse();
-
+                // Assert
                 var logEvents = TestCorrelator.GetLogEventsFromContextId(context.Id).ToList();
                 logEvents.ShouldNotBeEmpty();
 
@@ -78,7 +70,6 @@ public class LogMaskingUnitTests : BaseUnitTest<LogMaskingUnitTests>
         {
             // Always restore the previous state and clean up logger
             LogFactory.CloseAndFlush();
-            EnvironmentExtensions.EnableUnmaskedLog(originalUnmaskedState);
         }
     }
 }

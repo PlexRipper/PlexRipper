@@ -16,7 +16,8 @@ public record TestLoginRequest
 public class LogExtensionsUnitTests : BaseUnitTest
 {
     private ILogger CreateTestLogger(LogEventLevel logEventLevel) =>
-        new TestLogConfig(Mock.Create<IAppRuntimeInfo>(), Mock.Create<IPathProvider>()).GetLogger(logEventLevel)
+        new TestLogConfig(Mock.Create<IAppRuntimeInfo>(), Mock.Create<IPathProvider>())
+            .GetLogger(logEventLevel)
             .ForContext<LogExtensionsUnitTests>();
 
     [Test]
@@ -140,16 +141,14 @@ public class LogExtensionsUnitTests : BaseUnitTest
     public void ShouldUsePluginMasking_WhenLoggingDebugApiCallInMaskedMode()
     {
         // Arrange
-        var originalUnmaskedState = EnvironmentExtensions.IsUnmasked();
-        EnvironmentExtensions.EnableUnmaskedLog(false);
-
         try
         {
+            SetAppRuntimeInfo(x => x.IsUnmasked = false);
             var runtimeInfo = Mock.Container.Resolve<IAppRuntimeInfo>();
             var pathProvider = Mock.Container.Resolve<IPathProvider>();
 
             LogFactory.CloseAndFlush();
-            LogFactory.SetupLogging(new TestLogConfig(runtimeInfo, pathProvider), LogEventLevel.Debug);
+            LogFactory.SetupLogging(new TestLogConfig(runtimeInfo, pathProvider), runtimeInfo, LogEventLevel.Debug);
             var log = LogFactory.Create<LogExtensionsUnitTests>();
             var httpContext = new DefaultHttpContext();
             httpContext.Request.Method = HttpMethods.Post;
@@ -181,7 +180,6 @@ public class LogExtensionsUnitTests : BaseUnitTest
         finally
         {
             LogFactory.CloseAndFlush();
-            EnvironmentExtensions.EnableUnmaskedLog(originalUnmaskedState);
         }
     }
 
@@ -189,16 +187,15 @@ public class LogExtensionsUnitTests : BaseUnitTest
     public void ShouldLeavePasswordUnmasked_WhenLoggingDebugApiCallInUnmaskedMode()
     {
         // Arrange
-        var originalUnmaskedState = EnvironmentExtensions.IsUnmasked();
-        EnvironmentExtensions.EnableUnmaskedLog(true);
-
         try
         {
+            SetAppRuntimeInfo(x => x.IsUnmasked = true);
+
             var runtimeInfo = Mock.Container.Resolve<IAppRuntimeInfo>();
             var pathProvider = Mock.Container.Resolve<IPathProvider>();
 
             LogFactory.CloseAndFlush();
-            LogFactory.SetupLogging(new TestLogConfig(runtimeInfo, pathProvider), LogEventLevel.Debug);
+            LogFactory.SetupLogging(new TestLogConfig(runtimeInfo, pathProvider), runtimeInfo, LogEventLevel.Debug);
 
             var log = LogFactory.Create<LogExtensionsUnitTests>();
             var httpContext = new DefaultHttpContext();
@@ -230,7 +227,6 @@ public class LogExtensionsUnitTests : BaseUnitTest
         finally
         {
             LogFactory.CloseAndFlush();
-            EnvironmentExtensions.EnableUnmaskedLog(originalUnmaskedState);
         }
     }
 }

@@ -130,8 +130,10 @@ public static class HttpClientModule
                     client.DefaultRequestHeaders.UserAgent.ParseAdd("Reaparr");
 
                     if (!string.IsNullOrWhiteSpace(appRuntimeInfo.GitHubToken))
-                        client.DefaultRequestHeaders.Authorization =
-                            new AuthenticationHeaderValue("Bearer", appRuntimeInfo.GitHubToken);
+                        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
+                            "Bearer",
+                            appRuntimeInfo.GitHubToken
+                        );
                 }
             )
             .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler { AllowAutoRedirect = false });

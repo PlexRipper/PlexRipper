@@ -30,7 +30,8 @@ public static partial class Startup
     public static void ConfigureServices(
         this IServiceCollection services,
         IWebHostEnvironment env,
-        IAppRuntimeInfo appRuntimeInfo)
+        IAppRuntimeInfo appRuntimeInfo
+    )
     {
         // This has to always be first
         services.AddCors(options =>
@@ -170,7 +171,7 @@ public static partial class Startup
                         {
                             Type = OpenApiSecuritySchemeType.ApiKey,
                             In = OpenApiSecurityApiKeyLocation.Header,
-                            Name = EnvironmentExtensions.GetHeaderAuthTokenName(),
+                            Name = appRuntimeInfo.HeaderAuthTokenName,
                             Description = "Header-based authentication via trusted proxy",
                         }
                     );

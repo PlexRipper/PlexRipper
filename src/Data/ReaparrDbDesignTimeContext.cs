@@ -7,6 +7,7 @@ public class ReaparrDbDesignTimeContext : IDesignTimeDbContextFactory<ReaparrDbC
     public ReaparrDbContext CreateDbContext(string[] args)
     {
         IPathProvider pathProvider = new PathProvider();
-        return new(pathProvider);
+        IAppRuntimeInfo appRuntimeInfo = new AppRuntimeInfo();
+        return new ReaparrDbContext(pathProvider, appRuntimeInfo);
     }
 }

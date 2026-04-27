@@ -102,5 +102,15 @@ public interface IAppRuntimeInfo
     /// </summary>
     bool IsProductionEnvironment { get; }
 
+    /// <summary>
+    /// Gets the name of the HTTP header used for bearer/auth token passing. Defaults to <c>X-Auth-User</c>.
+    /// </summary>
+    string HeaderAuthTokenName { get; }
+
+    /// <summary>
+    /// When set to true, the application will not mask/censor sensitive data in the logs.
+    /// </summary>
+    bool IsUnmasked { get; }
+
     #endregion
 }

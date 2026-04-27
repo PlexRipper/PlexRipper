@@ -34,8 +34,8 @@ public class SignalRLogConfig : LogConfig
     /// Reconfigures the global logger to also stream events via SignalR.
     /// Call after the DI container is built (i.e. after builder.Build()).
     /// </summary>
-    public void AttachSignalR(WebApplication app, LogEventLevel minimumLogLevel) => Log.Logger =
-        GetExtendedConfiguration(minimumLogLevel)
+    public void AttachSignalR(WebApplication app, LogEventLevel minimumLogLevel) =>
+        Log.Logger = GetExtendedConfiguration(minimumLogLevel)
             .WriteTo.SignalR<LogHub>(
                 app.Services,
                 (context, _, logEvent) =>

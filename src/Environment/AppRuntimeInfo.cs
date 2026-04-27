@@ -5,6 +5,9 @@ namespace Reaparr.Environment;
 public class AppRuntimeInfo : IAppRuntimeInfo
 {
     /// <inheritdoc/>
+    public bool IsUnmasked => IsTrue(GetEnvironmentVariable(EnvKeys.Unmasked));
+
+    /// <inheritdoc/>
     public bool IsDevelopmentEnvironment => GetEnvironmentVariable(EnvKeys.DotNetEnvironment) == "Development";
 
     /// <inheritdoc/>
@@ -30,6 +33,13 @@ public class AppRuntimeInfo : IAppRuntimeInfo
 
     /// <inheritdoc/>
     public bool ShouldLogEnvVars => IsTrue(GetEnvironmentVariable(EnvKeys.LogEnvironmentVariables));
+
+    #region Authentication
+
+    /// <inheritdoc/>
+    public string HeaderAuthTokenName => GetEnvironmentVariable(EnvKeys.AuthHeaderTokenName) ?? "X-Auth-User";
+
+    #endregion
 
     #region Paths
 
@@ -68,19 +78,17 @@ public class AppRuntimeInfo : IAppRuntimeInfo
         return string.IsNullOrWhiteSpace(value) ? null : value;
     }
 
-    public Dictionary<string, string?> GetAllEnvironmentVariables => System.Environment
-        .GetEnvironmentVariables()
-        .Cast<DictionaryEntry>()
-        .ToDictionary(
-            entry => entry.Key.ToString()!,
-            entry => entry.Value?.ToString()
-        );
+    public Dictionary<string, string?> GetAllEnvironmentVariables =>
+        System
+            .Environment.GetEnvironmentVariables()
+            .Cast<DictionaryEntry>()
+            .ToDictionary(entry => entry.Key.ToString()!, entry => entry.Value?.ToString());
 
     /// <summary>
     /// Determines if the value is true.
     /// </summary>
     /// <param name="value"></param>
-    private static bool IsTrue(string? value) => value is not null
-                                                 && (string.Equals(value, Convert.ToString(true),
-                                                     StringComparison.OrdinalIgnoreCase) || value == "1");
+    private static bool IsTrue(string? value) =>
+        value is not null
+        && (string.Equals(value, Convert.ToString(true), StringComparison.OrdinalIgnoreCase) || value == "1");
 }

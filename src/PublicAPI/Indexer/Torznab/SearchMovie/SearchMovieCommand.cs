@@ -43,7 +43,8 @@ public class SearchMovieCommandHandler : ICommandHandler<SearchMovieCommand, Res
         ILogger log,
         IReaparrDbContext dbContext,
         IAppRuntimeInfo appRuntimeInfo,
-        INetworkSettings networkSettings)
+        INetworkSettings networkSettings
+    )
     {
         _log = log.ForContext<SearchMovieCommandHandler>();
         _dbContext = dbContext;

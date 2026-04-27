@@ -30,7 +30,7 @@ public class Program
 
             // Skip logger setup in integration test mode to preserve test logger
             if (!appRuntimeInfo.IsIntegrationTestMode)
-                LogFactory.SetupLogging(signalRLogConfig, EnvironmentExtensions.GetLogLevel());
+                LogFactory.SetupLogging(signalRLogConfig, appRuntimeInfo, EnvironmentExtensions.GetLogLevel());
 
             _log.Here().Information("Initiating boot process");
 

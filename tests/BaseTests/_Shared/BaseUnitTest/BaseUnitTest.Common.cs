@@ -29,9 +29,12 @@ public partial class BaseUnitTest
         EnvironmentExtensions.EnableUnmaskedLog(true);
 
         // Pass the TestLogConfig to LogFactory so all application logs go to test output
-        var testLogConfig = new TestLogConfig(new MockAppRuntimeInfo(),
-            new MockPathProvider(MockDatabase.GetMemoryDatabaseName()));
-        LogFactory.SetupLogging(testLogConfig, logEventLevel);
+        var appRunTimeInfo = new MockAppRuntimeInfo();
+        var testLogConfig = new TestLogConfig(
+            appRunTimeInfo,
+            new MockPathProvider(MockDatabase.GetMemoryDatabaseName())
+        );
+        LogFactory.SetupLogging(testLogConfig, appRunTimeInfo, logEventLevel);
 
         BogusExtensions.Setup();
 

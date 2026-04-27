@@ -4,45 +4,48 @@ public class MockAppRuntimeInfo : IAppRuntimeInfo
 {
     public MockAppRuntimeInfo() { }
 
-    public int PUID { get; }
-    public int PGID { get; }
+    public int PUID { get; set; }
+    public int PGID { get; set; }
     public string? GitHubToken { get; set; }
 
-    public Dictionary<string, string?> GetAllEnvironmentVariables { get; } = new Dictionary<string, string?>();
+    public Dictionary<string, string?> GetAllEnvironmentVariables { get; set; } = new Dictionary<string, string?>();
 
     /// <inheritdoc/>
-    public string? DataPath { get; }
+    public string? DataPath { get; set; }
 
     /// <inheritdoc/>
-    public string? ConfigPath { get; }
+    public string? ConfigPath { get; set; }
 
     /// <inheritdoc/>
-    public string? DownloadsPath { get; }
+    public string? DownloadsPath { get; set; }
 
     /// <inheritdoc/>
-    public string? MoviesPath { get; }
+    public string? MoviesPath { get; set; }
 
     /// <inheritdoc/>
-    public string? TvShowsPath { get; }
+    public string? TvShowsPath { get; set; }
 
     /// <inheritdoc/>
-    public string? MusicPath { get; }
+    public string? MusicPath { get; set; }
 
     /// <inheritdoc/>
-    public string? PhotosPath { get; }
+    public string? PhotosPath { get; set; }
 
     /// <inheritdoc/>
-    public string? OtherPath { get; }
+    public string? OtherPath { get; set; }
 
     /// <inheritdoc/>
-    public string? GamesPath { get; }
+    public string? GamesPath { get; set; }
 
-    public string? AppImage { get; }
-    public bool ShouldLogEnvVars { get; }
-    public string SEQ_Url { get; } = "http://localhost:5341";
-    public bool IsIntegrationTestMode { get; }
+    public string? AppImage { get; set; }
+    public bool ShouldLogEnvVars { get; set; }
+    public string SEQ_Url { get; set; } = "http://localhost:5341";
+    public bool IsIntegrationTestMode { get; set; }
 
-    public bool IsDevelopmentEnvironment { get; }
+    public bool IsDevelopmentEnvironment { get; set; }
 
-    public bool IsProductionEnvironment { get; }
+    public bool IsProductionEnvironment { get; set; }
+
+    public string HeaderAuthTokenName { get; set; } = "X-Auth-User";
+    public bool IsUnmasked { get; set; }
 }

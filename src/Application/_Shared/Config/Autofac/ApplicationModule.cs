@@ -25,8 +25,7 @@ public class ApplicationModule : Module
 
         builder
             .Register<Func<DownloadConfiguration, IDownloadService>>(_ =>
-                    config => new DownloadService(config,
-                        loggerFactory: null) // no internal library logging should happen
+                config => new DownloadService(config, loggerFactory: null) // no internal library logging should happen
             )
             .InstancePerDependency();
 

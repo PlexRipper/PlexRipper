@@ -216,18 +216,22 @@ public static partial class MockDatabase
     public static (ReaparrDbContext, AuthDbContext) GetMemoryDbContext(
         IPathProvider pathProvider,
         IAppRuntimeInfo appRuntimeInfo,
-        string dbName = "")
+        string dbName = ""
+    )
     {
         dbName = string.IsNullOrEmpty(dbName) ? GetMemoryDatabaseName() : dbName;
 
-        return (GetMemoryReaparrDbContext(pathProvider, appRuntimeInfo, dbName),
-            GetMemoryAuthDbContext(pathProvider, appRuntimeInfo, dbName));
+        return (
+            GetMemoryReaparrDbContext(pathProvider, appRuntimeInfo, dbName),
+            GetMemoryAuthDbContext(pathProvider, appRuntimeInfo, dbName)
+        );
     }
 
     public static ReaparrDbContext GetMemoryReaparrDbContext(
         IPathProvider pathProvider,
         IAppRuntimeInfo appRuntimeInfo,
-        string dbName = "")
+        string dbName = ""
+    )
     {
         var optionsBuilder = new DbContextOptionsBuilder<ReaparrDbContext>();
 
@@ -248,7 +252,8 @@ public static partial class MockDatabase
     public static AuthDbContext GetMemoryAuthDbContext(
         IPathProvider pathProvider,
         IAppRuntimeInfo appRuntimeInfo,
-        string dbName = "")
+        string dbName = ""
+    )
     {
         var optionsBuilder = new DbContextOptionsBuilder<AuthDbContext>();
 
@@ -267,7 +272,6 @@ public static partial class MockDatabase
     }
 
     public static string DatabaseConnectionString(string dbName = "") =>
-
         // https://docs.microsoft.com/en-us/dotnet/standard/data/sqlite/in-memory-databases
         new SqliteConnectionStringBuilder
         {

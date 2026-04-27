@@ -21,7 +21,8 @@ public class DesktopMode : IDesktopMode
         Serilog.ILogger log,
         IAppRuntimeInfo appRuntimeInfo,
         IServer server,
-        Func<Uri, IDesktopWindow> windowFactory)
+        Func<Uri, IDesktopWindow> windowFactory
+    )
     {
         _log = log.ForContext<DesktopMode>();
         _appRuntimeInfo = appRuntimeInfo;

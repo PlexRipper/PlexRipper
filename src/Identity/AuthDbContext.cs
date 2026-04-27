@@ -9,9 +9,9 @@ namespace Reaparr.Identity;
 public sealed class AuthDbContext : IdentityDbContext<AppUser>, IAuthDbContext, IAuthDbContextDatabase
 {
     private readonly IPathProvider _pathProvider;
-    
+
     private readonly IAppRuntimeInfo _appRuntimeInfo;
-    
+
     public string DatabaseName { get; } = string.Empty;
 
     public DbSet<DataProtectionKey> DataProtectionKeys { get; set; }
@@ -28,7 +28,8 @@ public sealed class AuthDbContext : IdentityDbContext<AppUser>, IAuthDbContext, 
     public AuthDbContext(
         DbContextOptions<AuthDbContext> options,
         IPathProvider pathProvider,
-        IAppRuntimeInfo appRuntimeInfo)
+        IAppRuntimeInfo appRuntimeInfo
+    )
         : base(options)
     {
         _pathProvider = pathProvider;
@@ -41,7 +42,8 @@ public sealed class AuthDbContext : IdentityDbContext<AppUser>, IAuthDbContext, 
         DbContextOptions<AuthDbContext> options,
         IPathProvider pathProvider,
         IAppRuntimeInfo appRuntimeInfo,
-        string databaseName)
+        string databaseName
+    )
         : base(options)
     {
         _pathProvider = pathProvider;

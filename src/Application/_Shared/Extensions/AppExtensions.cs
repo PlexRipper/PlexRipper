@@ -35,7 +35,9 @@ public class AppExtensions
         if (appRuntimeInfo.ShouldLogEnvVars)
         {
             var json = JsonSerializer.Serialize(
-                appRuntimeInfo.GetAllEnvironmentVariables, DefaultJsonSerializerOptions.UserSettingsOptions);
+                appRuntimeInfo.GetAllEnvironmentVariables,
+                DefaultJsonSerializerOptions.UserSettingsOptions
+            );
             _log.Here(sourceFilePath, memberName, sourceLineNumber).Debug("Vars:\n {EnvironmentVars}", json);
         }
 
@@ -43,17 +45,9 @@ public class AppExtensions
         if (appBuildInfo.IsLinux || appBuildInfo.IsMacOS)
         {
             _log.Here(sourceFilePath, memberName, sourceLineNumber)
-                .Information(
-                    "PUID from env: {EnvPUID} and from the system: {PUID}",
-                    appRuntimeInfo.PUID,
-                    getuid()
-                );
+                .Information("PUID from env: {EnvPUID} and from the system: {PUID}", appRuntimeInfo.PUID, getuid());
             _log.Here(sourceFilePath, memberName, sourceLineNumber)
-                .Information(
-                    "PGID from env: {EnvPGID} and from the system: {PGID}",
-                    appRuntimeInfo.PGID,
-                    getgid()
-                );
+                .Information("PGID from env: {EnvPGID} and from the system: {PGID}", appRuntimeInfo.PGID, getgid());
         }
         else
         {

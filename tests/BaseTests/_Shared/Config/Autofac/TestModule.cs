@@ -79,7 +79,7 @@ public class TestModule : Module
             .Register(
                 (_, _) =>
                 {
-                    var runtimeInfo = new MockAppRuntimeInfo();
+                    var runtimeInfo = new MockAppRuntimeInfo { IsIntegrationTestMode = true, IsUnmasked = true };
                     Config.OverrideAppRuntimeInfo?.Invoke(runtimeInfo);
                     return runtimeInfo;
                 }
@@ -88,7 +88,10 @@ public class TestModule : Module
             .SingleInstance();
 
         builder
-            .Register((ctx, _) => new MockPathProvider(MemoryDbName, ctx.Resolve<IAppBuildInfo>()))
+            .Register(
+                (ctx, _) =>
+                    new MockPathProvider(MemoryDbName, ctx.Resolve<IAppBuildInfo>(), ctx.Resolve<IAppRuntimeInfo>())
+            )
             .As<IPathProvider>()
             .SingleInstance();
 

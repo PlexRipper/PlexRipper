@@ -2,12 +2,8 @@ namespace Reaparr.BaseTests;
 
 public class MockAppRuntimeInfo : IAppRuntimeInfo
 {
-    
-    
-    public MockAppRuntimeInfo() { }
-
     private bool _isDevEnvironment = true;
-    
+
     public int PUID { get; set; }
     public int PGID { get; set; }
     public string? GitHubToken { get; set; }

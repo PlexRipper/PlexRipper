@@ -19,12 +19,12 @@ public class GetGitHubReleasesCommandUnitTests : BaseUnitTest<GetGitHubReleasesC
         };
         var expectedVersions = new[] { "v0.38.0-dev.7" };
 
+        SetAppBuildInfo(x => x.InformationalVersion = "0.38.0-dev.6");
+
         Mock.Mock<IHttpClientFactory>()
             .Setup(x => x.CreateClient(HttpClientModule.GitHubClientName))
             .Returns(CreateGitHubHttpClient(releases))
             .Verifiable(Times.Once());
-
-        SetAppBuildInfo(x => x.InformationalVersion = "0.38.0-dev.6");
 
         // Act
         var result = await Sut.ExecuteAsync(new GetGitHubReleasesCommand(), CancellationToken);
@@ -48,11 +48,12 @@ public class GetGitHubReleasesCommandUnitTests : BaseUnitTest<GetGitHubReleasesC
         };
         var expectedVersions = new[] { "v0.38.1" };
 
+        SetAppBuildInfo(x => x.InformationalVersion = "0.38.0");
+
         Mock.Mock<IHttpClientFactory>()
             .Setup(x => x.CreateClient(HttpClientModule.GitHubClientName))
             .Returns(CreateGitHubHttpClient(releases))
             .Verifiable(Times.Once());
-        SetAppBuildInfo(x => x.InformationalVersion = "0.38.0");
 
         // Act
         var result = await Sut.ExecuteAsync(new GetGitHubReleasesCommand(), CancellationToken);
@@ -73,11 +74,12 @@ public class GetGitHubReleasesCommandUnitTests : BaseUnitTest<GetGitHubReleasesC
             CreateRelease("v0.38.0-dev.6", isPrerelease: true),
         };
 
+        SetAppBuildInfo(x => x.InformationalVersion = "0.38.0-dev.6");
+
         Mock.Mock<IHttpClientFactory>()
             .Setup(x => x.CreateClient(HttpClientModule.GitHubClientName))
             .Returns(CreateGitHubHttpClient(releases))
             .Verifiable(Times.Once());
-        SetAppBuildInfo(x => x.InformationalVersion = "0.38.0-dev.6");
 
         // Act
         var result = await Sut.ExecuteAsync(new GetGitHubReleasesCommand(), CancellationToken);
@@ -98,11 +100,12 @@ public class GetGitHubReleasesCommandUnitTests : BaseUnitTest<GetGitHubReleasesC
             CreateRelease("v0.37.0-dev.2", isPrerelease: true),
         };
 
+        SetAppBuildInfo(x => x.InformationalVersion = "0.38.0-dev.1");
+
         Mock.Mock<IHttpClientFactory>()
             .Setup(x => x.CreateClient(HttpClientModule.GitHubClientName))
             .Returns(CreateGitHubHttpClient(releases))
             .Verifiable(Times.Once());
-        SetAppBuildInfo(x => x.InformationalVersion = "0.38.0-dev.1");
 
         // Act
         var result = await Sut.ExecuteAsync(new GetGitHubReleasesCommand(), CancellationToken);
@@ -118,11 +121,12 @@ public class GetGitHubReleasesCommandUnitTests : BaseUnitTest<GetGitHubReleasesC
     {
         // Arrange
 
+        SetAppBuildInfo(x => x.InformationalVersion = "0.38.0-dev.1");
+
         Mock.Mock<IHttpClientFactory>()
             .Setup(x => x.CreateClient(HttpClientModule.GitHubClientName))
             .Returns(CreateGitHubHttpClient([]))
             .Verifiable(Times.Once());
-        SetAppBuildInfo(x => x.InformationalVersion = "0.38.0-dev.1");
 
         // Act
 
@@ -139,13 +143,14 @@ public class GetGitHubReleasesCommandUnitTests : BaseUnitTest<GetGitHubReleasesC
     {
         // Arrange
 
+        SetAppBuildInfo(x => x.InformationalVersion = "0.38.0-dev.1");
+
         Mock.Mock<IHttpClientFactory>()
             .Setup(x => x.CreateClient(HttpClientModule.GitHubClientName))
             .Returns(
                 new HttpClient(new ThrowingHttpMessageHandler()) { BaseAddress = new Uri("https://api.github.com/") }
             )
             .Verifiable(Times.Once());
-        SetAppBuildInfo(x => x.InformationalVersion = "0.38.0-dev.1");
 
         // Act
 
@@ -166,11 +171,12 @@ public class GetGitHubReleasesCommandUnitTests : BaseUnitTest<GetGitHubReleasesC
             CreateRelease("v0.38.0-dev.7", isPrerelease: true),
         };
 
+        SetAppBuildInfo(x => x.InformationalVersion = "0.38.0-dev.6");
+
         Mock.Mock<IHttpClientFactory>()
             .Setup(x => x.CreateClient(HttpClientModule.GitHubClientName))
             .Returns(CreateGitHubHttpClient(releases))
             .Verifiable(Times.Once());
-        SetAppBuildInfo(x => x.InformationalVersion = "0.38.0-dev.6");
 
         // Act
 
@@ -236,11 +242,12 @@ public class GetGitHubReleasesCommandUnitTests : BaseUnitTest<GetGitHubReleasesC
             },
         };
 
+        SetAppBuildInfo(x => x.InformationalVersion = "0.38.0-dev.6");
+
         Mock.Mock<IHttpClientFactory>()
             .Setup(x => x.CreateClient(HttpClientModule.GitHubClientName))
             .Returns(CreateGitHubHttpClient(releases))
             .Verifiable(Times.Once());
-        SetAppBuildInfo(x => x.InformationalVersion = "0.38.0-dev.6");
 
         // Act
         var result = await Sut.ExecuteAsync(new GetGitHubReleasesCommand(), CancellationToken);
@@ -272,11 +279,12 @@ public class GetGitHubReleasesCommandUnitTests : BaseUnitTest<GetGitHubReleasesC
             },
         };
 
+        SetAppBuildInfo(x => x.InformationalVersion = "0.38.0");
+
         Mock.Mock<IHttpClientFactory>()
             .Setup(x => x.CreateClient(HttpClientModule.GitHubClientName))
             .Returns(CreateGitHubHttpClient(releases))
             .Verifiable(Times.Once());
-        SetAppBuildInfo(x => x.InformationalVersion = "0.38.0");
 
         // Act
         var result = await Sut.ExecuteAsync(new GetGitHubReleasesCommand(), CancellationToken);
@@ -301,11 +309,12 @@ public class GetGitHubReleasesCommandUnitTests : BaseUnitTest<GetGitHubReleasesC
             CreateRelease("v0.39.0", isPrerelease: false),
         };
 
+        SetAppBuildInfo(x => x.InformationalVersion = "0.38.0-dev.6");
+
         Mock.Mock<IHttpClientFactory>()
             .Setup(x => x.CreateClient(HttpClientModule.GitHubClientName))
             .Returns(CreateGitHubHttpClient(releases))
             .Verifiable(Times.Once());
-        SetAppBuildInfo(x => x.InformationalVersion = "0.38.0-dev.6");
 
         // Act
         var result = await Sut.ExecuteAsync(new GetGitHubReleasesCommand(), CancellationToken);
@@ -328,11 +337,12 @@ public class GetGitHubReleasesCommandUnitTests : BaseUnitTest<GetGitHubReleasesC
             CreateRelease("v0.39.0-dev.1", isPrerelease: true),
         };
 
+        SetAppBuildInfo(x => x.InformationalVersion = "0.38.0");
+
         Mock.Mock<IHttpClientFactory>()
             .Setup(x => x.CreateClient(HttpClientModule.GitHubClientName))
             .Returns(CreateGitHubHttpClient(releases))
             .Verifiable(Times.Once());
-        SetAppBuildInfo(x => x.InformationalVersion = "0.38.0");
 
         // Act
         var result = await Sut.ExecuteAsync(new GetGitHubReleasesCommand(), CancellationToken);
@@ -356,11 +366,12 @@ public class GetGitHubReleasesCommandUnitTests : BaseUnitTest<GetGitHubReleasesC
         };
         var expectedVersions = new[] { "v0.38.0-dev.7", "v0.38.0-dev.8" };
 
+        SetAppBuildInfo(x => x.InformationalVersion = "0.38.0-dev.6");
+
         Mock.Mock<IHttpClientFactory>()
             .Setup(x => x.CreateClient(HttpClientModule.GitHubClientName))
             .Returns(CreateGitHubHttpClient(releases))
             .Verifiable(Times.Once());
-        SetAppBuildInfo(x => x.InformationalVersion = "0.38.0-dev.6");
 
         // Act
         var result = await Sut.ExecuteAsync(new GetGitHubReleasesCommand(), CancellationToken);
@@ -383,11 +394,12 @@ public class GetGitHubReleasesCommandUnitTests : BaseUnitTest<GetGitHubReleasesC
         };
         var expectedVersions = new[] { "v0.38.1", "v0.39.0" };
 
+        SetAppBuildInfo(x => x.InformationalVersion = "0.38.0");
+
         Mock.Mock<IHttpClientFactory>()
             .Setup(x => x.CreateClient(HttpClientModule.GitHubClientName))
             .Returns(CreateGitHubHttpClient(releases))
             .Verifiable(Times.Once());
-        SetAppBuildInfo(x => x.InformationalVersion = "0.38.0");
 
         // Act
         var result = await Sut.ExecuteAsync(new GetGitHubReleasesCommand(), CancellationToken);
@@ -403,6 +415,8 @@ public class GetGitHubReleasesCommandUnitTests : BaseUnitTest<GetGitHubReleasesC
     {
         // Arrange
 
+        SetAppBuildInfo(x => x.InformationalVersion = "0.38.0-dev.1");
+
         Mock.Mock<IHttpClientFactory>()
             .Setup(x => x.CreateClient(HttpClientModule.GitHubClientName))
             .Returns(
@@ -412,7 +426,6 @@ public class GetGitHubReleasesCommandUnitTests : BaseUnitTest<GetGitHubReleasesC
                 }
             )
             .Verifiable(Times.Once());
-        SetAppBuildInfo(x => x.InformationalVersion = "0.38.0-dev.1");
 
         // Act
 

@@ -6,6 +6,8 @@ public class InMemoryDatabaseUnitTests : BaseUnitTest
     public async Task ShouldAddNotificationToInMemoryDatabase_WhenNotificationIsAdded()
     {
         // Arrange
+        await SetupDatabase(5001);
+
         var notification = new Notification
         {
             Hidden = false,
@@ -28,6 +30,8 @@ public class InMemoryDatabaseUnitTests : BaseUnitTest
     public async Task ShouldAddAndRemoveNotificationToInMemoryDatabase_WhenNotificationIsAddedAndRemoved()
     {
         // Arrange
+        await SetupDatabase(5002);
+
         var notification = new Notification
         {
             Hidden = false,

@@ -16,6 +16,7 @@ public class DownloadJobUnitTests : BaseUnitTest<DownloadJob>
             }
         );
         var testDownloadTask = IDbContext.DownloadTaskMovieFile.First();
+        var expectedDestinationRootPath = testDownloadTask.DirectoryMeta.DestinationRootPath;
         Mock.Mock<IDownloadManagerSettings>().Setup(x => x.DownloadSegments).Returns(4);
         IDictionary<string, object> dict = new Dictionary<string, object>
         {
@@ -27,12 +28,22 @@ public class DownloadJobUnitTests : BaseUnitTest<DownloadJob>
             .Setup(x => x.Send(It.IsAny<DeterminePlexDownloadClientCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Ok(PlexDownloadClientType.Direct))
             .Verifiable(Times.Once());
-        Mock.Mock<IPlexDownloadClient>()
+        var downloadClientMock = Mock.Mock<IPlexDownloadClient>();
+        downloadClientMock
             .Setup(x => x.Start(It.IsAny<DownloadTaskKey>(), CancellationToken))
-            .ReturnsAsync(Result.Ok());
+            .ReturnsAsync(Result.Ok())
+            .Verifiable(Times.Once());
+        downloadClientMock.Setup(x => x.DisposeAsync()).Returns(ValueTask.CompletedTask).Verifiable(Times.Once());
+
+        var downloadClientIndexMock = new Mock<IIndex<PlexDownloadClientType, IPlexDownloadClient>>();
+        downloadClientIndexMock.Setup(x => x[PlexDownloadClientType.Direct]).Returns(downloadClientMock.Object);
+
+        var sut = Mock.Create<DownloadJob>(
+            new NamedParameter("plexDownloadClientFactory", downloadClientIndexMock.Object)
+        );
 
         // Act
-        await Sut.Execute(Mock.Create<IJobExecutionContext>());
+        await sut.Execute(Mock.Create<IJobExecutionContext>());
 
         // Assert
         var downloadTaskResult = await IDbContext.DownloadTaskMovieFile.FirstOrDefaultAsync(
@@ -47,13 +58,20 @@ public class DownloadJobUnitTests : BaseUnitTest<DownloadJob>
             CancellationToken
         );
 
+        downloadTaskResult.DirectoryMeta.DownloadRootPath.ShouldBe(downloadFolder.DirectoryPath);
+        downloadTaskResult.DirectoryMeta.DestinationRootPath.ShouldBe(expectedDestinationRootPath);
         downloadTaskResult.DownloadDirectory.ShouldContain(downloadFolder.DirectoryPath);
-        downloadTaskResult.DestinationDirectory.ShouldContain(destinationFolder.DirectoryPath);
+        downloadTaskResult.DestinationDirectory.ShouldContain(downloadTaskResult.DirectoryMeta.MovieFolder);
         Mock.Mock<ICommandExecutor>()
             .Verify(
                 x => x.Send(It.IsAny<DeterminePlexDownloadClientCommand>(), It.IsAny<CancellationToken>()),
                 Times.Once()
             );
+        downloadClientMock.Verify(
+            x => x.Start(It.Is<DownloadTaskKey>(key => key.Id == testDownloadTask.Id), It.IsAny<CancellationToken>()),
+            Times.Once()
+        );
+        downloadClientMock.Verify(x => x.DisposeAsync(), Times.Once());
     }
 
     [Test]

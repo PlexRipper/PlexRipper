@@ -28,4 +28,8 @@ public class MockAppBuildInfo : IAppBuildInfo
 
     /// <inheritdoc/>
     public bool IsWindows => CurrentOS == OperatingSystemPlatform.Windows;
+
+    public bool IsLinux => CurrentOS == OperatingSystemPlatform.Linux;
+
+    public bool IsMacOS => CurrentOS == OperatingSystemPlatform.Osx;
 }

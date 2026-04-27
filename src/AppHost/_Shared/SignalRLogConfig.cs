@@ -15,8 +15,8 @@ public class SignalRLogConfig : LogConfig
     /// <summary>
     /// Initializes a new instance of <see cref="SignalRLogConfig"/> with the provided path provider and log buffer service.
     /// </summary>
-    public SignalRLogConfig(IPathProvider pathProvider, ILogBufferService logBuffer)
-        : base(pathProvider)
+    public SignalRLogConfig(IAppRuntimeInfo appRuntimeInfo, IPathProvider pathProvider, ILogBufferService logBuffer)
+        : base(appRuntimeInfo, pathProvider)
     {
         _logBuffer = logBuffer;
     }

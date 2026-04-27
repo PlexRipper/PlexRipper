@@ -29,13 +29,14 @@ public sealed class DesktopSingleInstanceCoordinator : IDesktopSingleInstanceCoo
     /// <summary>Initializes a new instance of <see cref="DesktopSingleInstanceCoordinator"/>.</summary>
     public DesktopSingleInstanceCoordinator(
         Serilog.ILogger log,
+        IAppRuntimeInfo appRuntimeInfo,
         string instanceName = DEFAULT_SINGLE_INSTANCE_NAME,
         Func<string?>? appImagePathAccessor = null,
         Func<string>? appBaseDirectoryAccessor = null
     )
     {
         _log = log.ForContext<DesktopSingleInstanceCoordinator>();
-        _appImagePathAccessor = appImagePathAccessor ?? EnvironmentExtensions.GetAppImage;
+        _appImagePathAccessor = appImagePathAccessor ?? (() => appRuntimeInfo.AppImage);
         _appBaseDirectoryAccessor = appBaseDirectoryAccessor ?? (() => AppContext.BaseDirectory);
         _instanceName = BuildScopedInstanceName(instanceName, _appImagePathAccessor(), _appBaseDirectoryAccessor());
     }

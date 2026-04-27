@@ -44,20 +44,20 @@ public class BaseContainer : IDisposable
 
     public static async Task<BaseContainer> Create(ILogger log, Seed seed, Action<UnitTestDataConfig>? options = null)
     {
-        EnvironmentExtensions.SetIntegrationTestMode(true);
-
+        var config = UnitTestDataConfig.FromOptions(options);
         var memoryDbName = MockDatabase.GetMemoryDatabaseName();
-        var mockPathProvider = new MockPathProvider(memoryDbName, new MockAppBuildInfo());
+        var mockAppRuntimeInfo = ResolveRuntimeInfo(config);
+        var mockPathProvider = new MockPathProvider(memoryDbName, new MockAppBuildInfo(), mockAppRuntimeInfo);
 
         // Create isolated filesystem
         var testFileSystemRootPath = IntegrationTestFileSystemSandbox.Create(memoryDbName, log, mockPathProvider);
 
-        var config = UnitTestDataConfig.FromOptions(options);
-
         log.Information("Initialized integration test with database name: {DatabaseName}", memoryDbName);
 
         // Setup database
-        await MockDatabase.GetMemoryDbContext(memoryDbName).Setup(seed, config.DatabaseOptions);
+        await MockDatabase
+            .GetMemoryDbContext(mockPathProvider, mockAppRuntimeInfo, memoryDbName)
+            .Setup(seed, mockPathProvider, mockAppRuntimeInfo, config.DatabaseOptions);
 
         var container = new BaseContainer(log, seed, memoryDbName, testFileSystemRootPath, options);
 
@@ -72,6 +72,13 @@ public class BaseContainer : IDisposable
             await container.SetDownloadSpeedLimit(options);
 
         return container;
+    }
+
+    private static MockAppRuntimeInfo ResolveRuntimeInfo(UnitTestDataConfig config)
+    {
+        var runtimeInfo = new MockAppRuntimeInfo { IsUnmasked = true, IsIntegrationTestMode = true };
+        config.OverrideAppRuntimeInfo?.Invoke(runtimeInfo);
+        return runtimeInfo;
     }
 
     public HttpClient GetApiClient()

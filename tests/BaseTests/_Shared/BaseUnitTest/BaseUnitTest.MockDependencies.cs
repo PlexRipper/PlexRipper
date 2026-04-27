@@ -8,6 +8,7 @@ public partial class BaseUnitTest
     private Action<ContainerBuilder>? _fileSystemSetup;
     private Action<ContainerBuilder>? _httpClientSetup;
     private Action<ContainerBuilder>? _appBuildInfoSetup;
+    private Action<ContainerBuilder>? _appRuntimeInfoSetup;
     private Action<ContainerBuilder>? _dependenciesSetup;
     private readonly MockFileSystem _fileSystem = new();
     protected AutoMock Mock { get; set; }
@@ -22,6 +23,9 @@ public partial class BaseUnitTest
 
             if (_appBuildInfoSetup is not null)
                 _appBuildInfoSetup.Invoke(builder);
+
+            if (_appRuntimeInfoSetup is not null)
+                _appRuntimeInfoSetup.Invoke(builder);
 
             if (_fileSystemSetup is not null)
             {
@@ -50,37 +54,71 @@ public partial class BaseUnitTest
 
         // Database context can be set up once and then retrieved by its DB name.
         builder
-            .Register((_, _) => MockDatabase.GetMemoryReaparrDbContext(_databaseName))
+            .Register(
+                (ctx, _) =>
+                    MockDatabase.GetMemoryReaparrDbContext(
+                        ctx.Resolve<IPathProvider>(),
+                        ctx.Resolve<IAppRuntimeInfo>(),
+                        _databaseName
+                    )
+            )
             .As<ReaparrDbContext>()
             .InstancePerDependency();
 
         builder
-            .Register((_, _) => MockDatabase.GetMemoryReaparrDbContext(_databaseName))
+            .Register(
+                (ctx, _) =>
+                    MockDatabase.GetMemoryReaparrDbContext(
+                        ctx.Resolve<IPathProvider>(),
+                        ctx.Resolve<IAppRuntimeInfo>(),
+                        _databaseName
+                    )
+            )
             .As<IReaparrDbContext>()
             .InstancePerDependency();
 
         builder
-            .Register((_, _) => MockDatabase.GetMemoryAuthDbContext(_databaseName))
+            .Register(
+                (ctx, _) =>
+                    MockDatabase.GetMemoryAuthDbContext(
+                        ctx.Resolve<IPathProvider>(),
+                        ctx.Resolve<IAppRuntimeInfo>(),
+                        _databaseName
+                    )
+            )
             .As<AuthDbContext>()
             .InstancePerDependency();
 
         builder
-            .Register((_, _) => MockDatabase.GetMemoryAuthDbContext(_databaseName))
+            .Register(
+                (ctx, _) =>
+                    MockDatabase.GetMemoryAuthDbContext(
+                        ctx.Resolve<IPathProvider>(),
+                        ctx.Resolve<IAppRuntimeInfo>(),
+                        _databaseName
+                    )
+            )
             .As<IAuthDbContext>()
             .InstancePerDependency();
 
         builder
             .Register(
-                (_, _) =>
+                (ctx, _) =>
                 {
+                    var pathProvider = ctx.Resolve<IPathProvider>();
+                    var appRuntimeInfo = ctx.Resolve<IAppRuntimeInfo>();
                     var factoryMock = new Mock<IReaparrDbContextFactory>(MockBehavior.Strict);
                     factoryMock
                         .Setup(x => x.Create())
-                        .Returns(() => MockDatabase.GetMemoryReaparrDbContext(_databaseName));
+                        .Returns(() =>
+                            MockDatabase.GetMemoryReaparrDbContext(pathProvider, appRuntimeInfo, _databaseName)
+                        );
                     factoryMock
                         .Setup(x => x.CreateAsync())
                         .Returns(() =>
-                            Task.FromResult<IReaparrDbContext>(MockDatabase.GetMemoryReaparrDbContext(_databaseName))
+                            Task.FromResult<IReaparrDbContext>(
+                                MockDatabase.GetMemoryReaparrDbContext(pathProvider, appRuntimeInfo, _databaseName)
+                            )
                         );
                     return factoryMock.Object;
                 }
@@ -90,16 +128,22 @@ public partial class BaseUnitTest
 
         builder
             .Register(
-                (_, _) =>
+                (ctx, _) =>
                 {
+                    var pathProvider = ctx.Resolve<IPathProvider>();
+                    var appRuntimeInfo = ctx.Resolve<IAppRuntimeInfo>();
                     var factoryMock = new Mock<IAuthDbContextFactory>(MockBehavior.Strict);
                     factoryMock
                         .Setup(x => x.Create())
-                        .Returns(() => MockDatabase.GetMemoryAuthDbContext(_databaseName));
+                        .Returns(() =>
+                            MockDatabase.GetMemoryAuthDbContext(pathProvider, appRuntimeInfo, _databaseName)
+                        );
                     factoryMock
                         .Setup(x => x.CreateAsync())
                         .Returns(() =>
-                            Task.FromResult<IAuthDbContext>(MockDatabase.GetMemoryAuthDbContext(_databaseName))
+                            Task.FromResult<IAuthDbContext>(
+                                MockDatabase.GetMemoryAuthDbContext(pathProvider, appRuntimeInfo, _databaseName)
+                            )
                         );
                     return factoryMock.Object;
                 }
@@ -108,9 +152,14 @@ public partial class BaseUnitTest
             .InstancePerDependency();
 
         builder.RegisterType<MockAppBuildInfo>().As<IAppBuildInfo>().SingleInstance();
+        builder.RegisterType<MockAppRuntimeInfo>().As<IAppRuntimeInfo>().SingleInstance();
 
         builder
-            .Register(ctx => new MockPathProvider(_databaseName, ctx.Resolve<IAppBuildInfo>()))
+            .Register(ctx => new MockPathProvider(
+                _databaseName,
+                ctx.Resolve<IAppBuildInfo>(),
+                ctx.Resolve<IAppRuntimeInfo>()
+            ))
             .As<IPathProvider>()
             .SingleInstance();
     }
@@ -132,6 +181,29 @@ public partial class BaseUnitTest
                     return instance;
                 })
                 .As<IAppBuildInfo>()
+                .SingleInstance();
+        };
+
+        Build();
+    }
+
+    protected void SetAppRuntimeInfo(Action<MockAppRuntimeInfo> action)
+    {
+        // Apply to the current singleton for already-resolved SUT instances, then
+        // persist the same override for any future container rebuilds.
+        if (Mock.Container.Resolve<IAppRuntimeInfo>() is MockAppRuntimeInfo existingAppRuntimeInfo)
+            action.Invoke(existingAppRuntimeInfo);
+
+        _appRuntimeInfoSetup = builder =>
+        {
+            builder
+                .Register<MockAppRuntimeInfo>(_ =>
+                {
+                    var instance = new MockAppRuntimeInfo();
+                    action.Invoke(instance);
+                    return instance;
+                })
+                .As<IAppRuntimeInfo>()
                 .SingleInstance();
         };
 

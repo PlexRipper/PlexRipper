@@ -51,4 +51,14 @@ public interface IAppBuildInfo
     /// Returns true if the current operating system is Windows.
     /// </summary>
     bool IsWindows { get; }
+
+    /// <summary>
+    /// Returns true if the current operating system is Linux.
+    /// </summary>
+    bool IsLinux { get; }
+
+    /// <summary>
+    /// Returns true if the current operating system is macOS.
+    /// </summary>
+    bool IsMacOS { get; }
 }

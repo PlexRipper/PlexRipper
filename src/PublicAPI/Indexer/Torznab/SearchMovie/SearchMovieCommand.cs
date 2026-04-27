@@ -36,12 +36,19 @@ public class SearchMovieCommandHandler : ICommandHandler<SearchMovieCommand, Res
 {
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
+    private readonly IAppRuntimeInfo _appRuntimeInfo;
     private readonly INetworkSettings _networkSettings;
 
-    public SearchMovieCommandHandler(ILogger log, IReaparrDbContext dbContext, INetworkSettings networkSettings)
+    public SearchMovieCommandHandler(
+        ILogger log,
+        IReaparrDbContext dbContext,
+        IAppRuntimeInfo appRuntimeInfo,
+        INetworkSettings networkSettings
+    )
     {
         _log = log.ForContext<SearchMovieCommandHandler>();
         _dbContext = dbContext;
+        _appRuntimeInfo = appRuntimeInfo;
         _networkSettings = networkSettings;
     }
 
@@ -181,7 +188,7 @@ public class SearchMovieCommandHandler : ICommandHandler<SearchMovieCommand, Res
             item.Attributes.Add(new TorznabAttr("videoCodec", mediaData.VideoCodec));
             item.Attributes.Add(new TorznabAttr("audioCodec", mediaData.AudioCodec));
 
-            if (EnvironmentExtensions.IsDevelopmentEnvironment())
+            if (_appRuntimeInfo.IsDevelopmentEnvironment)
             {
                 item.Attributes.Add(new TorznabAttr("debug-plexServerId", mediaData.PlexServerId.ToString()));
                 item.Attributes.Add(new TorznabAttr("debug-plexLibraryId", mediaData.PlexLibraryId.ToString()));

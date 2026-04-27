@@ -48,7 +48,7 @@ public class ApplicationModule : Module
             .Register(context => new UpdateManager(
                 new GithubSource(
                     "https://github.com/Reaparr/Reaparr",
-                    EnvironmentExtensions.GetGitHubToken(),
+                    context.Resolve<IAppRuntimeInfo>().GitHubToken,
                     context.Resolve<IAppBuildInfo>().IsDevRelease
                 )
             ))

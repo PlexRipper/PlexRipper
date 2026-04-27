@@ -8,6 +8,7 @@ public class SchedulerService : ISchedulerService
 
     private readonly ILogger _log;
     private readonly IScheduler _scheduler;
+    private readonly IAppRuntimeInfo _appRuntimeInfo;
     private readonly ICommandExecutor _commandExecutor;
     private readonly IAllJobListener _allJobListener;
     private readonly IDownloadJobListener _downloadJobListener;
@@ -19,6 +20,7 @@ public class SchedulerService : ISchedulerService
     public SchedulerService(
         ILogger log,
         IScheduler scheduler,
+        IAppRuntimeInfo appRuntimeInfo,
         ICommandExecutor commandExecutor,
         IAllJobListener allJobListener,
         IDownloadJobListener downloadJobListener
@@ -26,6 +28,7 @@ public class SchedulerService : ISchedulerService
     {
         _log = log.ForContext<SchedulerService>();
         _scheduler = scheduler;
+        _appRuntimeInfo = appRuntimeInfo;
         _commandExecutor = commandExecutor;
         _allJobListener = allJobListener;
         _downloadJobListener = downloadJobListener;
@@ -50,7 +53,7 @@ public class SchedulerService : ISchedulerService
             await _scheduler.Start();
         }
 
-        if (!EnvironmentExtensions.IsIntegrationTestMode())
+        if (!_appRuntimeInfo.IsIntegrationTestMode)
         {
             await SetupPlexServerStatusCheckJob();
             await SetupUpdateCheckJob();

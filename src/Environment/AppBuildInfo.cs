@@ -49,6 +49,12 @@ public sealed class AppBuildInfo : IAppBuildInfo
     /// <inheritdoc/>
     public bool IsWindows => OperatingSystem.IsWindows();
 
+    /// <inheritdoc/>
+    public bool IsLinux => OperatingSystem.IsLinux();
+
+    /// <inheritdoc/>
+    public bool IsMacOS => OperatingSystem.IsMacOS();
+
     /// <summary>
     /// Initializes a new instance of <see cref="AppBuildInfo"/> by reading build metadata from the entry assembly.
     /// </summary>

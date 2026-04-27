@@ -16,23 +16,51 @@ public class TestModule : Module
     {
         // Database context can be setup once and then retrieved by its DB name.
         builder
-            .Register((_, _) => MockDatabase.GetMemoryReaparrDbContext(MemoryDbName))
+            .Register(
+                (ctx, _) =>
+                    MockDatabase.GetMemoryReaparrDbContext(
+                        ctx.Resolve<IPathProvider>(),
+                        ctx.Resolve<IAppRuntimeInfo>(),
+                        MemoryDbName
+                    )
+            )
             .As<ReaparrDbContext>()
             .InstancePerDependency();
 
         builder
-            .Register((_, _) => MockDatabase.GetMemoryReaparrDbContext(MemoryDbName))
+            .Register(
+                (ctx, _) =>
+                    MockDatabase.GetMemoryReaparrDbContext(
+                        ctx.Resolve<IPathProvider>(),
+                        ctx.Resolve<IAppRuntimeInfo>(),
+                        MemoryDbName
+                    )
+            )
             .As<IReaparrDbContext>()
             .As<IReaparrDbContextDatabase>()
             .InstancePerDependency();
 
         builder
-            .Register((_, _) => MockDatabase.GetMemoryAuthDbContext(MemoryDbName))
+            .Register(
+                (ctx, _) =>
+                    MockDatabase.GetMemoryAuthDbContext(
+                        ctx.Resolve<IPathProvider>(),
+                        ctx.Resolve<IAppRuntimeInfo>(),
+                        MemoryDbName
+                    )
+            )
             .As<AuthDbContext>()
             .InstancePerDependency();
 
         builder
-            .Register((_, _) => MockDatabase.GetMemoryAuthDbContext(MemoryDbName))
+            .Register(
+                (ctx, _) =>
+                    MockDatabase.GetMemoryAuthDbContext(
+                        ctx.Resolve<IPathProvider>(),
+                        ctx.Resolve<IAppRuntimeInfo>(),
+                        MemoryDbName
+                    )
+            )
             .As<IAuthDbContext>()
             .As<IAuthDbContextDatabase>()
             .InstancePerDependency();
@@ -48,7 +76,22 @@ public class TestModule : Module
             .SingleInstance();
 
         builder
-            .Register((ctx, _) => new MockPathProvider(MemoryDbName, ctx.Resolve<IAppBuildInfo>()))
+            .Register(
+                (_, _) =>
+                {
+                    var runtimeInfo = new MockAppRuntimeInfo { IsIntegrationTestMode = true, IsUnmasked = true };
+                    Config.OverrideAppRuntimeInfo?.Invoke(runtimeInfo);
+                    return runtimeInfo;
+                }
+            )
+            .As<IAppRuntimeInfo>()
+            .SingleInstance();
+
+        builder
+            .Register(
+                (ctx, _) =>
+                    new MockPathProvider(MemoryDbName, ctx.Resolve<IAppBuildInfo>(), ctx.Resolve<IAppRuntimeInfo>())
+            )
             .As<IPathProvider>()
             .SingleInstance();
 

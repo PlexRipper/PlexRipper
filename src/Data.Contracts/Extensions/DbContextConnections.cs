@@ -25,12 +25,13 @@ public static class DbContextConnections
     public static void DefaultConfiguration(
         this DbContextOptionsBuilder optionsBuilder,
         IPathProvider pathProvider,
+        IAppRuntimeInfo appRuntimeInfo,
         Type contextType
     )
     {
         optionsBuilder.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
 
-        if (EnvironmentExtensions.IsDevelopmentEnvironment() || EnvironmentExtensions.IsIntegrationTestMode())
+        if (appRuntimeInfo.IsDevelopmentEnvironment || appRuntimeInfo.IsIntegrationTestMode)
         {
             optionsBuilder.EnableDetailedErrors();
             optionsBuilder.EnableSensitiveDataLogging();

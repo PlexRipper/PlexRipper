@@ -13,6 +13,7 @@ namespace Reaparr.Data;
 public sealed class ReaparrDbContext : DbContext, IReaparrDbContext, IReaparrDbContextDatabase
 {
     private readonly IPathProvider _pathProvider;
+    private readonly IAppRuntimeInfo _appRuntimeInfo;
     public DbSet<PlexAccount> PlexAccounts { get; set; }
 
     public DbSet<FolderPath> FolderPaths { get; set; }
@@ -163,9 +164,10 @@ public sealed class ReaparrDbContext : DbContext, IReaparrDbContext, IReaparrDbC
     /// <inheritdoc/>
     public void ClearChangeTracker() => ChangeTracker.Clear();
 
-    internal ReaparrDbContext(IPathProvider pathProvider)
+    public ReaparrDbContext(IPathProvider pathProvider, IAppRuntimeInfo appRuntimeInfo)
     {
         _pathProvider = pathProvider;
+        _appRuntimeInfo = appRuntimeInfo;
         DatabaseName = pathProvider.DatabaseName;
     }
 
@@ -174,20 +176,31 @@ public sealed class ReaparrDbContext : DbContext, IReaparrDbContext, IReaparrDbC
     /// This is required for AddDbContextFactory to work properly.
     /// </summary>
     [ActivatorUtilitiesConstructor]
-    public ReaparrDbContext(DbContextOptions<ReaparrDbContext> options, IPathProvider pathProvider)
+    public ReaparrDbContext(
+        DbContextOptions<ReaparrDbContext> options,
+        IPathProvider pathProvider,
+        IAppRuntimeInfo appRuntimeInfo
+    )
         : base(options)
     {
         _pathProvider = pathProvider;
+        _appRuntimeInfo = appRuntimeInfo;
         DatabaseName = pathProvider.DatabaseName;
     }
 
     /// <summary>
     /// Constructor for DbContextFactory with explicit database name - accepts pre-configured options used in unit and integration testing.
     /// </summary>
-    public ReaparrDbContext(DbContextOptions<ReaparrDbContext> options, IPathProvider pathProvider, string databaseName)
+    public ReaparrDbContext(
+        DbContextOptions<ReaparrDbContext> options,
+        IPathProvider pathProvider,
+        IAppRuntimeInfo appRuntimeInfo,
+        string databaseName
+    )
         : base(options)
     {
         _pathProvider = pathProvider;
+        _appRuntimeInfo = appRuntimeInfo;
         DatabaseName = databaseName;
 
         Database.OpenConnection();
@@ -198,7 +211,7 @@ public sealed class ReaparrDbContext : DbContext, IReaparrDbContext, IReaparrDbC
     {
         if (!optionsBuilder.IsConfigured)
         {
-            optionsBuilder.DefaultConfiguration(_pathProvider, typeof(ReaparrDbContext));
+            optionsBuilder.DefaultConfiguration(_pathProvider, _appRuntimeInfo, typeof(ReaparrDbContext));
         }
 
         optionsBuilder.UseSeeding(ReaparrDBContextSeed.Seed(_pathProvider));

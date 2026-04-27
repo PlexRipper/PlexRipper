@@ -6,8 +6,8 @@ public class InMemoryDatabaseUnitTests : BaseUnitTest
     public async Task ShouldAddNotificationToInMemoryDatabase_WhenNotificationIsAdded()
     {
         // Arrange
-        var dbContext = MockDatabase.GetMemoryDbContext();
-        var (context, _) = dbContext;
+        await SetupDatabase(5001);
+
         var notification = new Notification
         {
             Hidden = false,
@@ -17,9 +17,10 @@ public class InMemoryDatabaseUnitTests : BaseUnitTest
         };
 
         // Act
-        context.Notifications.Add(notification);
-        await context.SaveChangesAsync(CancellationToken);
-        var notifications = await context.Notifications.ToListAsync(CancellationToken);
+        var dbContext = IDbContext;
+        dbContext.Notifications.Add(notification);
+        await dbContext.SaveChangesAsync(CancellationToken);
+        var notifications = await dbContext.Notifications.ToListAsync(CancellationToken);
 
         // Assert
         notifications.Count.ShouldBe(1);
@@ -29,8 +30,8 @@ public class InMemoryDatabaseUnitTests : BaseUnitTest
     public async Task ShouldAddAndRemoveNotificationToInMemoryDatabase_WhenNotificationIsAddedAndRemoved()
     {
         // Arrange
-        var dbContext = MockDatabase.GetMemoryDbContext();
-        var (context, _) = dbContext;
+        await SetupDatabase(5002);
+
         var notification = new Notification
         {
             Hidden = false,
@@ -40,11 +41,12 @@ public class InMemoryDatabaseUnitTests : BaseUnitTest
         };
 
         // Act
-        context.Notifications.Add(notification);
-        await context.SaveChangesAsync(CancellationToken);
-        context.Notifications.Remove(notification);
-        await context.SaveChangesAsync(CancellationToken);
-        var notifications = await context.Notifications.ToListAsync(CancellationToken);
+        var dbContext = IDbContext;
+        dbContext.Notifications.Add(notification);
+        await dbContext.SaveChangesAsync(CancellationToken);
+        dbContext.Notifications.Remove(notification);
+        await dbContext.SaveChangesAsync(CancellationToken);
+        var notifications = await dbContext.Notifications.ToListAsync(CancellationToken);
 
         // Assert
         notifications.Count.ShouldBe(0);

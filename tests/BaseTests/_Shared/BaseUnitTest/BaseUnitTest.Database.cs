@@ -21,7 +21,11 @@ public partial class BaseUnitTest : IDisposable
         {
             DataBaseSetupGuard();
 
-            return MockDatabase.GetMemoryReaparrDbContext(_databaseName);
+            return MockDatabase.GetMemoryReaparrDbContext(
+                Mock.Container.Resolve<IPathProvider>(),
+                Mock.Container.Resolve<IAppRuntimeInfo>(),
+                _databaseName
+            );
         }
     }
 
@@ -42,7 +46,11 @@ public partial class BaseUnitTest : IDisposable
         {
             DataBaseSetupGuard();
 
-            return MockDatabase.GetMemoryAuthDbContext(_databaseName);
+            return MockDatabase.GetMemoryAuthDbContext(
+                Mock.Container.Resolve<IPathProvider>(),
+                Mock.Container.Resolve<IAppRuntimeInfo>(),
+                _databaseName
+            );
         }
     }
 
@@ -65,12 +73,19 @@ public partial class BaseUnitTest : IDisposable
     {
         // Database context can be set up once and then retrieved by its DB name.
         _databaseName = MockDatabase.GetMemoryDatabaseName();
-        var (reaparrContext, authContext) = MockDatabase.GetMemoryDbContext(_databaseName);
+        var mockPathProvider = Mock.Container.Resolve<IPathProvider>();
+        var mockAppRuntimeInfo = Mock.Container.Resolve<IAppRuntimeInfo>();
+        var (reaparrContext, authContext) = MockDatabase.GetMemoryDbContext(
+            mockPathProvider,
+            mockAppRuntimeInfo,
+            _databaseName
+        );
+
         // Hold references to keep the SQLite shared-cache in-memory connections open.
         // SQLite destroys the in-memory database when all connections close.
         _setupReaparrDbContext = reaparrContext;
         _setupAuthDbContext = authContext;
-        await (reaparrContext, authContext).Setup(seed, options);
+        await (reaparrContext, authContext).Setup(seed, mockPathProvider, mockAppRuntimeInfo, options);
         IsDatabaseSetup = true;
         return seed;
     }

@@ -7,6 +7,7 @@ public class EnvironmentModule : Module
     protected override void Load(ContainerBuilder builder)
     {
         builder.RegisterType<AppBuildInfo>().As<IAppBuildInfo>().SingleInstance();
+        builder.RegisterType<AppRuntimeInfo>().As<IAppRuntimeInfo>().SingleInstance();
         builder.RegisterType<PathProvider>().As<IPathProvider>().SingleInstance();
     }
 }

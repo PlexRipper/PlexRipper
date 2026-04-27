@@ -320,7 +320,7 @@ public class SetupSonarrDownloadClientCommandUnitTests : BaseUnitTest<SetupSonar
 
         var portField = capturedResource.Fields!.FirstOrDefault(f => f.Name == "port");
         portField.ShouldNotBeNull();
-        portField.Value.ShouldBe(EnvironmentExtensions.GetPort);
+        portField.Value.ShouldBe(Mock.Container.Resolve<IAppRuntimeInfo>().AppPort);
 
         var useSslField = capturedResource.Fields!.FirstOrDefault(f => f.Name == "useSsl");
         useSslField.ShouldNotBeNull();

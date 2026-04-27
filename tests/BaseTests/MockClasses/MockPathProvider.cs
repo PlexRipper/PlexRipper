@@ -5,9 +5,16 @@ public class MockPathProvider : IPathProvider
     private readonly string _sandboxFolder;
     private readonly IPathProvider _pathProvider;
 
-    public MockPathProvider(string memoryDbName, IAppBuildInfo? appBuildInfo = null)
+    public MockPathProvider(
+        string memoryDbName,
+        IAppBuildInfo? appBuildInfo = null,
+        IAppRuntimeInfo? appRuntimeInfo = null
+    )
     {
-        _pathProvider = new PathProvider(appBuildInfo ?? new MockAppBuildInfo());
+        appBuildInfo ??= new MockAppBuildInfo();
+        appRuntimeInfo ??= new MockAppRuntimeInfo();
+
+        _pathProvider = new PathProvider(appBuildInfo, appRuntimeInfo);
         _sandboxFolder = Path.GetFullPath(IntegrationTestFileSystemSandbox.GetSandboxFolder(memoryDbName));
     }
 

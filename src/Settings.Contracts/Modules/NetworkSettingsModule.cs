@@ -84,7 +84,7 @@ public record NetworkSettingsModule
             {
                 Scheme = "http",
                 Host = "localhost",
-                Port = EnvironmentExtensions.GetPort,
+                Port = 5000,
             }
                 .Uri
                 .AbsoluteUri;

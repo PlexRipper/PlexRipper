@@ -26,7 +26,12 @@ public static partial class Startup
     /// </summary>
     /// <param name="services"> The <see cref="IServiceCollection"/> instance to configure.</param>
     /// <param name="env"> The <see cref="IWebHostEnvironment"/> instance to configure.</param>
-    public static void ConfigureServices(this IServiceCollection services, IWebHostEnvironment env)
+    /// <param name="appRuntimeInfo"> The <see cref="IAppRuntimeInfo"/> instance to configure.</param>
+    public static void ConfigureServices(
+        this IServiceCollection services,
+        IWebHostEnvironment env,
+        IAppRuntimeInfo appRuntimeInfo
+    )
     {
         // This has to always be first
         services.AddCors(options =>
@@ -51,7 +56,7 @@ public static partial class Startup
 
         services.AddHttpContextAccessor();
 
-        services.ConfigureAuthenticationServices(env);
+        services.ConfigureAuthenticationServices(env, appRuntimeInfo);
 
         // Set up FastEndpoints
         services.AddFastEndpoints(options =>
@@ -76,7 +81,7 @@ public static partial class Startup
 
         services.AddCommandMiddleware(c => c.Register(typeof(ValidationPipeline<,>)));
 
-        if (!EnvironmentExtensions.IsIntegrationTestMode())
+        if (!appRuntimeInfo.IsIntegrationTestMode)
         {
             // Used to deploy the front-end Nuxt client
             if (env.IsProduction())
@@ -166,7 +171,7 @@ public static partial class Startup
                         {
                             Type = OpenApiSecuritySchemeType.ApiKey,
                             In = OpenApiSecurityApiKeyLocation.Header,
-                            Name = EnvironmentExtensions.GetHeaderAuthTokenName(),
+                            Name = appRuntimeInfo.HeaderAuthTokenName,
                             Description = "Header-based authentication via trusted proxy",
                         }
                     );
@@ -200,13 +205,17 @@ public static partial class Startup
         services.RegisterSonarrHttpClient();
         services.RegisterRadarrHttpClient();
         services.RegisterPlexThumbnailHttpClient();
-        services.RegisterGitHubHttpClient();
+        services.RegisterGitHubHttpClient(appRuntimeInfo);
 
         // Removing all registered IHttpMessageHandlerBuilderFilter instances to disable built-in HttpClient logging
         services.RemoveAll<IHttpMessageHandlerBuilderFilter>();
     }
 
-    private static void ConfigureAuthenticationServices(this IServiceCollection services, IWebHostEnvironment env)
+    private static void ConfigureAuthenticationServices(
+        this IServiceCollection services,
+        IWebHostEnvironment env,
+        IAppRuntimeInfo appRuntimeInfo
+    )
     {
         services.AddDataProtection().PersistKeysToDbContext<AuthDbContext>();
 
@@ -216,7 +225,7 @@ public static partial class Startup
 
             // Set a default policy that requires authentication.
             // Only development may intentionally bypass the fallback policy.
-            if (!(env.IsDevelopment() && EnvironmentExtensions.IsAuthenticationDisabled()))
+            if (!(env.IsDevelopment() && appRuntimeInfo.IsAuthenticationDisabled))
                 options.FallbackPolicy = new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build();
         });
 

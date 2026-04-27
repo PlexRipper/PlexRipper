@@ -7,6 +7,7 @@ namespace Reaparr.Logging;
 
 public class LogConfig
 {
+    private readonly IAppRuntimeInfo _appRuntimeInfo;
     private readonly IPathProvider _pathProvider;
     public static string FileName => nameof(FileName);
 
@@ -34,9 +35,10 @@ public class LogConfig
 
     protected static readonly ExpressionTemplate FileTemplate = new(TEMPLATE_TEXT);
 
-    protected LogConfig(IPathProvider pathProvider)
+    protected LogConfig(IAppRuntimeInfo appRuntimeInfo, IPathProvider pathProvider)
     {
         ArgumentNullException.ThrowIfNull(pathProvider);
+        _appRuntimeInfo = appRuntimeInfo;
         _pathProvider = pathProvider;
     }
 
@@ -45,7 +47,7 @@ public class LogConfig
     /// </summary>
     /// <param name="minimumLogLevel">The global minimum log level used before sink-specific filtering.</param>
     /// <returns></returns>
-    protected static LoggerConfiguration GetBaseConfiguration(LogEventLevel minimumLogLevel = LogEventLevel.Debug)
+    protected LoggerConfiguration GetBaseConfiguration(LogEventLevel minimumLogLevel = LogEventLevel.Debug)
     {
         var config = new LoggerConfiguration()
             .MinimumLevel.Is(minimumLogLevel)
@@ -57,7 +59,7 @@ public class LogConfig
             .MinimumLevel.Override("Quartz", LogEventLevel.Warning);
 
         // Do not mask data when debugging
-        if (!EnvironmentExtensions.IsUnmasked())
+        if (!_appRuntimeInfo.IsUnmasked)
         {
             config.Enrich.WithSensitiveDataMasking(options =>
             {
@@ -106,7 +108,7 @@ public class LogConfig
         LogEventLevel minimumLogLevel = LogEventLevel.Debug
     ) =>
         GetBaseConfiguration(minimumLogLevel)
-            .WriteTo.Seq(EnvironmentExtensions.GetSeqUrl(), restrictedToMinimumLevel: minimumLogLevel)
+            .WriteTo.Seq(_appRuntimeInfo.SEQ_Url, restrictedToMinimumLevel: minimumLogLevel)
             .WriteTo.File(
                 FileTemplate,
                 Path.Combine(_pathProvider.LogsDirectory, "log.txt"),

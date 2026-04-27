@@ -42,6 +42,7 @@ public class GetPlexMediaThumbnailImageEndpointRequestValidator : Validator<GetP
 public sealed class GetPlexMediaThumbnailImageEndpoint : BaseEndpoint<GetPlexMediaThumbnailImageEndpointRequest, byte[]>
 {
     private readonly ILogger _log;
+    private readonly IAppRuntimeInfo _appRuntimeInfo;
     private readonly IReaparrDbContext _dbContext;
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly IMemoryCache _cache;
@@ -53,12 +54,14 @@ public sealed class GetPlexMediaThumbnailImageEndpoint : BaseEndpoint<GetPlexMed
 
     public GetPlexMediaThumbnailImageEndpoint(
         ILogger log,
+        IAppRuntimeInfo appRuntimeInfo,
         IReaparrDbContext dbContext,
         IHttpClientFactory httpClientFactory,
         IMemoryCache cache
     )
     {
         _log = log.ForContext<GetPlexMediaThumbnailImageEndpoint>();
+        _appRuntimeInfo = appRuntimeInfo;
         _dbContext = dbContext;
         _httpClientFactory = httpClientFactory;
         _cache = cache;
@@ -301,9 +304,9 @@ public sealed class GetPlexMediaThumbnailImageEndpoint : BaseEndpoint<GetPlexMed
     /// <summary>
     /// Sanitizes a URL by removing query string parameters to prevent logging sensitive tokens
     /// </summary>
-    private static string SanitizeUrl(string url)
+    private string SanitizeUrl(string url)
     {
-        if (EnvironmentExtensions.IsUnmasked())
+        if (_appRuntimeInfo.IsUnmasked)
             return url;
 
         if (string.IsNullOrEmpty(url))

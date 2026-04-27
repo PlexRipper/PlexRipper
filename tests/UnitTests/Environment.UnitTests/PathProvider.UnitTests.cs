@@ -46,9 +46,7 @@ public class PathProviderUnitTests : BaseUnitTest<PathProvider>
     {
         // Arrange
         const string configDirectory = "/custom/config";
-        using var _ = WithEnvironmentVariablesAsync(
-            new Dictionary<string, string?> { [EnvKeys.ReaparrConfigPath] = configDirectory }
-        );
+        SetAppRuntimeInfo(x => x.ConfigPath = configDirectory);
         var sut = Sut;
 
         // Act
@@ -75,9 +73,7 @@ public class PathProviderUnitTests : BaseUnitTest<PathProvider>
     {
         // Arrange
         const string dataDirectory = "/custom/data";
-        using var _ = WithEnvironmentVariablesAsync(
-            new Dictionary<string, string?> { [EnvKeys.ReaparrDataPath] = dataDirectory }
-        );
+        SetAppRuntimeInfo(x => x.DataPath = dataDirectory);
         SetAppBuildInfo(x => x.RuntimeMode = "desktop");
         var sut = Sut;
 
@@ -93,9 +89,7 @@ public class PathProviderUnitTests : BaseUnitTest<PathProvider>
     {
         // Arrange
         const string configDirectory = "/custom/config";
-        using var _ = WithEnvironmentVariablesAsync(
-            new Dictionary<string, string?> { [EnvKeys.ReaparrConfigPath] = configDirectory }
-        );
+        SetAppRuntimeInfo(x => x.ConfigPath = configDirectory);
         SetAppBuildInfo(x => x.RuntimeMode = string.Empty);
         var sut = Sut;
 
@@ -111,13 +105,11 @@ public class PathProviderUnitTests : BaseUnitTest<PathProvider>
     {
         // Arrange
         const string downloadsDirectory = "/custom/downloads";
-        using var _ = WithEnvironmentVariablesAsync(
-            new Dictionary<string, string?>
-            {
-                [EnvKeys.ReaparrDataPath] = "/custom/data",
-                [EnvKeys.ReaparrDownloadsPath] = downloadsDirectory,
-            }
-        );
+        SetAppRuntimeInfo(x =>
+        {
+            x.DataPath = "/custom/data";
+            x.DownloadsPath = downloadsDirectory;
+        });
         SetAppBuildInfo(x => x.RuntimeMode = "desktop");
         var sut = Sut;
 
@@ -133,9 +125,7 @@ public class PathProviderUnitTests : BaseUnitTest<PathProvider>
     {
         // Arrange
         const string dataDirectory = "/custom/data";
-        using var _ = WithEnvironmentVariablesAsync(
-            new Dictionary<string, string?> { [EnvKeys.ReaparrDataPath] = dataDirectory }
-        );
+        SetAppRuntimeInfo(x => x.DataPath = dataDirectory);
         SetAppBuildInfo(x => x.RuntimeMode = "desktop");
         var sut = Sut;
 
@@ -160,13 +150,33 @@ public class PathProviderUnitTests : BaseUnitTest<PathProvider>
     )
     {
         // Arrange
-        using var _ = WithEnvironmentVariablesAsync(
-            new Dictionary<string, string?>
+        SetAppRuntimeInfo(x =>
+        {
+            x.DataPath = "/custom/data";
+            switch (environmentKey)
             {
-                [EnvKeys.ReaparrDataPath] = "/custom/data",
-                [environmentKey] = dedicatedPath,
+                case EnvKeys.ReaparrMoviesPath:
+                    x.MoviesPath = dedicatedPath;
+                    break;
+                case EnvKeys.ReaparrTvShowsPath:
+                    x.TvShowsPath = dedicatedPath;
+                    break;
+                case EnvKeys.ReaparrMusicPath:
+                    x.MusicPath = dedicatedPath;
+                    break;
+                case EnvKeys.ReaparrPhotosPath:
+                    x.PhotosPath = dedicatedPath;
+                    break;
+                case EnvKeys.ReaparrOtherPath:
+                    x.OtherPath = dedicatedPath;
+                    break;
+                case EnvKeys.ReaparrGamesPath:
+                    x.GamesPath = dedicatedPath;
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(environmentKey), environmentKey, null);
             }
-        );
+        });
         SetAppBuildInfo(x => x.RuntimeMode = "desktop");
         var sut = Sut;
 
@@ -191,9 +201,7 @@ public class PathProviderUnitTests : BaseUnitTest<PathProvider>
     {
         // Arrange
         const string dataDirectory = "/custom/data";
-        using var _ = WithEnvironmentVariablesAsync(
-            new Dictionary<string, string?> { [EnvKeys.ReaparrDataPath] = dataDirectory }
-        );
+        SetAppRuntimeInfo(x => x.DataPath = dataDirectory);
         SetAppBuildInfo(x => x.RuntimeMode = "desktop");
         var sut = Sut;
 
@@ -262,13 +270,11 @@ public class PathProviderUnitTests : BaseUnitTest<PathProvider>
         // Arrange
         const string configDirectory = "/custom/config";
         const string dataDirectory = "/custom/data";
-        using var _ = WithEnvironmentVariablesAsync(
-            new Dictionary<string, string?>
-            {
-                [EnvKeys.ReaparrConfigPath] = configDirectory,
-                [EnvKeys.ReaparrDataPath] = dataDirectory,
-            }
-        );
+        SetAppRuntimeInfo(x =>
+        {
+            x.ConfigPath = configDirectory;
+            x.DataPath = dataDirectory;
+        });
         SetAppBuildInfo(x =>
         {
             x.RuntimeMode = string.Empty;

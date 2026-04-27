@@ -1,3 +1,5 @@
+using Reaparr.Environment;
+
 namespace Reaparr.AppHost.UnitTests;
 
 public class DesktopSingleInstanceCoordinatorUnitTests : BaseUnitTest<DesktopSingleInstanceCoordinator>
@@ -143,6 +145,7 @@ public class DesktopSingleInstanceCoordinatorUnitTests : BaseUnitTest<DesktopSin
     ) =>
         new(
             Log,
+            new AppRuntimeInfo(),
             instanceName ?? CreateInstanceName(),
             appImagePath is null ? null : () => appImagePath,
             appBaseDirectory is null ? null : () => appBaseDirectory

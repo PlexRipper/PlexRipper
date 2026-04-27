@@ -16,23 +16,23 @@ public class TestModule : Module
     {
         // Database context can be setup once and then retrieved by its DB name.
         builder
-            .Register((_, _) => MockDatabase.GetMemoryReaparrDbContext(MemoryDbName))
+            .Register((ctx, _) => MockDatabase.GetMemoryReaparrDbContext(ctx.Resolve<IPathProvider>(), MemoryDbName))
             .As<ReaparrDbContext>()
             .InstancePerDependency();
 
         builder
-            .Register((_, _) => MockDatabase.GetMemoryReaparrDbContext(MemoryDbName))
+            .Register((ctx, _) => MockDatabase.GetMemoryReaparrDbContext(ctx.Resolve<IPathProvider>(), MemoryDbName))
             .As<IReaparrDbContext>()
             .As<IReaparrDbContextDatabase>()
             .InstancePerDependency();
 
         builder
-            .Register((_, _) => MockDatabase.GetMemoryAuthDbContext(MemoryDbName))
+            .Register((ctx, _) => MockDatabase.GetMemoryAuthDbContext(ctx.Resolve<IPathProvider>(), MemoryDbName))
             .As<AuthDbContext>()
             .InstancePerDependency();
 
         builder
-            .Register((_, _) => MockDatabase.GetMemoryAuthDbContext(MemoryDbName))
+            .Register((ctx, _) => MockDatabase.GetMemoryAuthDbContext(ctx.Resolve<IPathProvider>(), MemoryDbName))
             .As<IAuthDbContext>()
             .As<IAuthDbContextDatabase>()
             .InstancePerDependency();
@@ -45,6 +45,11 @@ public class TestModule : Module
         builder
             .Register((_, _) => Config.OverrideAppBuildInfo ?? new MockAppBuildInfo())
             .As<IAppBuildInfo>()
+            .SingleInstance();
+
+        builder
+            .Register((_, _) => Config.OverrideAppRuntimeInfo ?? new MockAppRuntimeInfo())
+            .As<IAppRuntimeInfo>()
             .SingleInstance();
 
         builder

@@ -57,7 +57,9 @@ public class BaseContainer : IDisposable
         log.Information("Initialized integration test with database name: {DatabaseName}", memoryDbName);
 
         // Setup database
-        await MockDatabase.GetMemoryDbContext(memoryDbName).Setup(seed, config.DatabaseOptions);
+        await MockDatabase
+            .GetMemoryDbContext(mockPathProvider, memoryDbName)
+            .Setup(seed, mockPathProvider, config.DatabaseOptions);
 
         var container = new BaseContainer(log, seed, memoryDbName, testFileSystemRootPath, options);
 

@@ -46,7 +46,10 @@ public class ApplyUpdateEndpointUnitTests : BaseUnitTest<ApplyUpdateEndpoint>
         mockManager.Setup(m => m.UpdatePendingRestart).Returns(asset).Verifiable(Times.Once());
 
         // Act
-        var endpoint = SetupEndpointUnitTest<ApplyUpdateEndpoint>(s => { s.AddSingleton(_ => mockManager.Object); });
+        var endpoint = SetupEndpointUnitTest<ApplyUpdateEndpoint>(s =>
+        {
+            s.AddSingleton(_ => mockManager.Object);
+        });
         await endpoint.HandleAsync(CancellationToken);
         var result = endpoint.Response;
 

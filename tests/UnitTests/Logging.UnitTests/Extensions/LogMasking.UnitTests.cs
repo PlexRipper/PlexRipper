@@ -1,4 +1,5 @@
-﻿using Reaparr.Environment;
+﻿using Autofac;
+using Reaparr.Environment;
 using Serilog.Events;
 using Serilog.Sinks.TestCorrelator;
 
@@ -20,7 +21,8 @@ public class LogMaskingUnitTests : BaseUnitTest<LogMaskingUnitTests>
             LogFactory.CloseAndFlush();
             EnvironmentExtensions.EnableUnmaskedLog(false);
             EnvironmentExtensions.IsUnmasked().ShouldBeFalse();
-            var testLogConfig = new TestLogConfig(new PathProvider(new MockAppBuildInfo()));
+            var pathProvider = Mock.Container.Resolve<IPathProvider>();
+            var testLogConfig = new TestLogConfig(pathProvider);
             LogFactory.SetupLogging(testLogConfig, LogEventLevel.Debug);
             var log = LogFactory.Create<LogMaskingUnitTests>();
             using (var context = TestCorrelator.CreateContext())

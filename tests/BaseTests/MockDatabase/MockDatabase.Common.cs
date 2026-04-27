@@ -209,22 +209,20 @@ public static partial class MockDatabase
     /// Creates an in-memory database only to be used for unit and integration testing.
     /// Passing in the same dbName will create a new context for the same database
     /// </summary>
+    /// <param name="pathProvider">The path provider to use for the DbContext, can be shared between contexts that should have the same sandboxed file paths. Use CreatePathProvider(dbName) to create a new one with unique paths based on the dbName.</param>
     /// <param name="dbName">leave empty to generate a random one</param>
     /// <returns>A <see cref="ReaparrDbContext" /> in memory instance.</returns>
-    /// <exception cref="ArgumentOutOfRangeException"></exception>
-    ///
-    public static (ReaparrDbContext, AuthDbContext) GetMemoryDbContext(string dbName = "")
+    public static (ReaparrDbContext, AuthDbContext) GetMemoryDbContext(IPathProvider pathProvider, string dbName = "")
     {
         dbName = string.IsNullOrEmpty(dbName) ? GetMemoryDatabaseName() : dbName;
-        var pathProvider = CreatePathProvider(dbName);
 
         return (GetMemoryReaparrDbContext(dbName, pathProvider), GetMemoryAuthDbContext(dbName, pathProvider));
     }
 
-    public static ReaparrDbContext GetMemoryReaparrDbContext(string dbName = "")
+    // TODO remove this construtor, its the same as the other with reversed parameters
+    public static ReaparrDbContext GetMemoryReaparrDbContext(IPathProvider pathProvider, string dbName = "")
     {
         dbName = string.IsNullOrEmpty(dbName) ? GetMemoryDatabaseName() : dbName;
-        var pathProvider = CreatePathProvider(dbName);
         return GetMemoryReaparrDbContext(dbName, pathProvider);
     }
 
@@ -246,10 +244,9 @@ public static partial class MockDatabase
         return new ReaparrDbContext(optionsBuilder.Options, pathProvider, dbName);
     }
 
-    public static AuthDbContext GetMemoryAuthDbContext(string dbName = "")
+    public static AuthDbContext GetMemoryAuthDbContext(IPathProvider pathProvider, string dbName = "")
     {
         dbName = string.IsNullOrEmpty(dbName) ? GetMemoryDatabaseName() : dbName;
-        var pathProvider = CreatePathProvider(dbName);
         return GetMemoryAuthDbContext(dbName, pathProvider);
     }
 
@@ -284,13 +281,13 @@ public static partial class MockDatabase
     public static async Task Setup(
         this (ReaparrDbContext, AuthDbContext) context,
         Seed seed,
+        IPathProvider pathProvider,
         Action<FakeDataConfig>? options = null
     )
     {
         var config = FakeDataConfig.FromOptions(options);
 
         var (reaparrContext, authContext) = context;
-        var pathProvider = CreatePathProvider(reaparrContext.DatabaseName);
 
         authContext.Migrate();
 
@@ -390,14 +387,6 @@ public static partial class MockDatabase
             );
 
         return context;
-    }
-
-    private static IPathProvider CreatePathProvider(string dbName)
-    {
-        if (EnvironmentExtensions.IsIntegrationTestMode())
-            return new MockPathProvider(dbName, new MockAppBuildInfo());
-
-        return new PathProvider(new MockAppBuildInfo());
     }
 
     #endregion

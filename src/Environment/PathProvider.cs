@@ -5,10 +5,18 @@ namespace Reaparr.Environment;
 public class PathProvider : IPathProvider
 {
     private readonly IAppBuildInfo _appBuildInfo;
+    private readonly IAppRuntimeInfo _appRuntimeInfo;
 
-    public PathProvider(IAppBuildInfo appBuildInfo)
+    public PathProvider()
+    {
+        _appBuildInfo = new AppBuildInfo();
+        _appRuntimeInfo = new AppRuntimeInfo();
+    }
+
+    public PathProvider(IAppBuildInfo appBuildInfo, IAppRuntimeInfo appRuntimeInfo)
     {
         _appBuildInfo = appBuildInfo;
+        _appRuntimeInfo = appRuntimeInfo;
     }
 
     #region Properties
@@ -65,7 +73,7 @@ public class PathProvider : IPathProvider
     {
         get
         {
-            var downloadsPath = EnvironmentExtensions.GetDownloadsPath();
+            var downloadsPath = _appRuntimeInfo.DownloadsPath;
             if (downloadsPath is not null)
                 return downloadsPath;
 
@@ -84,11 +92,11 @@ public class PathProvider : IPathProvider
     {
         get
         {
-            var perTypePath = EnvironmentExtensions.GetMoviesPath();
+            var perTypePath = _appRuntimeInfo.MoviesPath;
             if (perTypePath is not null)
                 return perTypePath;
 
-            var dataPath = EnvironmentExtensions.GetDataPath();
+            var dataPath = _appRuntimeInfo.DataPath;
             if (dataPath is not null)
                 return Path.Combine(dataPath, DefaultMovieFolderName);
 
@@ -107,11 +115,11 @@ public class PathProvider : IPathProvider
     {
         get
         {
-            var perTypePath = EnvironmentExtensions.GetTvShowsPath();
+            var perTypePath = _appRuntimeInfo.TvShowsPath;
             if (perTypePath is not null)
                 return perTypePath;
 
-            var dataPath = EnvironmentExtensions.GetDataPath();
+            var dataPath = _appRuntimeInfo.DataPath;
             if (dataPath is not null)
                 return Path.Combine(dataPath, DefaultTvShowsFolderName);
 
@@ -130,11 +138,11 @@ public class PathProvider : IPathProvider
     {
         get
         {
-            var perTypePath = EnvironmentExtensions.GetMusicPath();
+            var perTypePath = _appRuntimeInfo.MusicPath;
             if (perTypePath is not null)
                 return perTypePath;
 
-            var dataPath = EnvironmentExtensions.GetDataPath();
+            var dataPath = _appRuntimeInfo.DataPath;
             if (dataPath is not null)
                 return Path.Combine(dataPath, DefaultMusicFolderName);
 
@@ -153,11 +161,11 @@ public class PathProvider : IPathProvider
     {
         get
         {
-            var perTypePath = EnvironmentExtensions.GetPhotosPath();
+            var perTypePath = _appRuntimeInfo.PhotosPath;
             if (perTypePath is not null)
                 return perTypePath;
 
-            var dataPath = EnvironmentExtensions.GetDataPath();
+            var dataPath = _appRuntimeInfo.DataPath;
             if (dataPath is not null)
                 return Path.Combine(dataPath, DefaultPhotosFolderName);
 
@@ -176,11 +184,11 @@ public class PathProvider : IPathProvider
     {
         get
         {
-            var perTypePath = EnvironmentExtensions.GetOtherPath();
+            var perTypePath = _appRuntimeInfo.OtherPath;
             if (perTypePath is not null)
                 return perTypePath;
 
-            var dataPath = EnvironmentExtensions.GetDataPath();
+            var dataPath = _appRuntimeInfo.DataPath;
             if (dataPath is not null)
                 return Path.Combine(dataPath, DefaultOtherFolderName);
 
@@ -199,11 +207,11 @@ public class PathProvider : IPathProvider
     {
         get
         {
-            var perTypePath = EnvironmentExtensions.GetGamesPath();
+            var perTypePath = _appRuntimeInfo.GamesPath;
             if (perTypePath is not null)
                 return perTypePath;
 
-            var dataPath = EnvironmentExtensions.GetDataPath();
+            var dataPath = _appRuntimeInfo.DataPath;
             if (dataPath is not null)
                 return Path.Combine(dataPath, DefaultGamesFolderName);
 
@@ -224,7 +232,7 @@ public class PathProvider : IPathProvider
     {
         get
         {
-            var configPath = EnvironmentExtensions.GetConfigPath();
+            var configPath = _appRuntimeInfo.ConfigPath;
             if (configPath != null)
                 return configPath;
 
@@ -266,7 +274,7 @@ public class PathProvider : IPathProvider
     {
         get
         {
-            var dataPath = EnvironmentExtensions.GetDataPath();
+            var dataPath = _appRuntimeInfo.DataPath;
             if (dataPath is not null)
                 return dataPath;
 

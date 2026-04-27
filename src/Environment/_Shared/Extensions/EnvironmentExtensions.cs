@@ -13,24 +13,6 @@ public static class EnvironmentExtensions
     /// </summary>
     public static bool IsIntegrationTestMode() => IsTrue(GetEnvironmentVariable(EnvKeys.IntegrationTestMode));
 
-    public static string? GetDataPath() => GetEnvironmentVariable(EnvKeys.ReaparrDataPath);
-
-    public static string? GetConfigPath() => GetEnvironmentVariable(EnvKeys.ReaparrConfigPath);
-
-    public static string? GetDownloadsPath() => GetEnvironmentVariable(EnvKeys.ReaparrDownloadsPath);
-
-    public static string? GetMoviesPath() => GetEnvironmentVariable(EnvKeys.ReaparrMoviesPath);
-
-    public static string? GetTvShowsPath() => GetEnvironmentVariable(EnvKeys.ReaparrTvShowsPath);
-
-    public static string? GetMusicPath() => GetEnvironmentVariable(EnvKeys.ReaparrMusicPath);
-
-    public static string? GetPhotosPath() => GetEnvironmentVariable(EnvKeys.ReaparrPhotosPath);
-
-    public static string? GetOtherPath() => GetEnvironmentVariable(EnvKeys.ReaparrOtherPath);
-
-    public static string? GetGamesPath() => GetEnvironmentVariable(EnvKeys.ReaparrGamesPath);
-
     public static string? GetAppImage() => GetEnvironmentVariable(EnvKeys.AppImage);
 
     /// <summary>

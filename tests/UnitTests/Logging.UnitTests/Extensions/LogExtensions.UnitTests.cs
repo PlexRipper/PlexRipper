@@ -1,4 +1,5 @@
-﻿using Reaparr.Environment;
+﻿using Autofac;
+using Reaparr.Environment;
 using Serilog.Events;
 using Serilog.Sinks.TestCorrelator;
 
@@ -143,8 +144,9 @@ public class LogExtensionsUnitTests : BaseUnitTest
 
         try
         {
+            var pathProvider = Mock.Container.Resolve<IPathProvider>();
             LogFactory.CloseAndFlush();
-            LogFactory.SetupLogging(new TestLogConfig(new PathProvider(new MockAppBuildInfo())), LogEventLevel.Debug);
+            LogFactory.SetupLogging(new TestLogConfig(pathProvider), LogEventLevel.Debug);
             var log = LogFactory.Create<LogExtensionsUnitTests>();
             var httpContext = new DefaultHttpContext();
             httpContext.Request.Method = HttpMethods.Post;
@@ -189,8 +191,10 @@ public class LogExtensionsUnitTests : BaseUnitTest
 
         try
         {
+            var pathProvider = Mock.Container.Resolve<IPathProvider>();
+
             LogFactory.CloseAndFlush();
-            LogFactory.SetupLogging(new TestLogConfig(new PathProvider(new MockAppBuildInfo())), LogEventLevel.Debug);
+            LogFactory.SetupLogging(new TestLogConfig(pathProvider), LogEventLevel.Debug);
 
             var log = LogFactory.Create<LogExtensionsUnitTests>();
             var httpContext = new DefaultHttpContext();

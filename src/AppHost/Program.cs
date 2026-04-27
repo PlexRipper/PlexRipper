@@ -23,7 +23,8 @@ public class Program
             VelopackApp.Build().Run();
 
             var appBuildInfo = new AppBuildInfo();
-            var pathProvider = new PathProvider(appBuildInfo);
+            var appRuntimeInfo = new AppRuntimeInfo();
+            var pathProvider = new PathProvider(appBuildInfo, appRuntimeInfo);
             var logBuffer = new LogBufferService();
             var signalRLogConfig = new SignalRLogConfig(pathProvider, logBuffer);
 

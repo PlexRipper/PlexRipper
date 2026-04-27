@@ -98,6 +98,66 @@ If a test changes app version or release channel, call `SetAppBuildInfo(...)` be
 
 This avoids stale version metadata when a test resolves `Sut` before changing app build info.
 
+### Strong typing over stringly test helpers
+
+Prefer domain types, enums, and value objects in test helper parameters and `[Arguments(...)]` data.
+
+Good:
+
+```csharp
+[Arguments(PlexMediaType.Movie)]
+[Arguments(PlexMediaType.TvShow)]
+private static string GetMediaDestinationFolder(PathProvider sut, PlexMediaType mediaType) => ...
+```
+
+Bad:
+
+```csharp
+[Arguments("Movies")]
+[Arguments("TvShows")]
+private static string GetMediaDestinationFolder(PathProvider sut, string mediaType) => ...
+```
+
+Rules:
+- Prefer `PlexMediaType`, `DownloadTaskType`, IDs, and other project types over string literals when the production API already has a typed representation.
+- Avoid stringly-typed switches in tests when an enum or typed model exists.
+- If the test data must model parsing raw strings, keep that explicit in the test name and assertions.
+
+### Prefer `Sut` before custom construction
+
+If `BaseUnitTest<TSUT>` can construct the subject correctly, use `Sut` instead of adding a local `CreateSut(...)` helper.
+
+Only add a local SUT factory when one of these is true:
+- the test must pass constructor parameters that `AutoMock` cannot infer cleanly
+- the test intentionally bypasses container wiring to validate raw constructor behavior
+- there is no existing `BaseUnitTest` helper that covers the setup
+
+If you think you need a local SUT helper, first check whether `SetAppBuildInfo(...)`, `SetupDependencies(...)`, `SetupFileSystem(...)`, or another `BaseUnitTest` helper already solves it.
+
+### Environment override ordering
+
+When a test uses `WithEnvironmentVariablesAsync(...)` and `SetAppBuildInfo(...)`, complete both in Arrange before first reading `Sut` or any derived property.
+
+Good:
+
+```csharp
+using var _ = WithEnvironmentVariablesAsync(new Dictionary<string, string?>
+{
+    [EnvKeys.ReaparrDataPath] = "/custom/data",
+});
+SetAppBuildInfo(x => x.RuntimeMode = "desktop");
+var sut = Sut;
+```
+
+Bad:
+
+```csharp
+var sut = Sut;
+SetAppBuildInfo(x => x.RuntimeMode = "desktop");
+```
+
+This keeps test setup deterministic and avoids reading stale container state.
+
 ## Test Structure
 
 Follow this exact order within every test method:

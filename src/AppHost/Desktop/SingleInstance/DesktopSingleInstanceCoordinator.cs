@@ -17,8 +17,6 @@ public sealed class DesktopSingleInstanceCoordinator : IDesktopSingleInstanceCoo
 
     private readonly Serilog.ILogger _log;
     private readonly string _instanceName;
-    private readonly Func<string?> _appImagePathAccessor;
-    private readonly Func<string> _appBaseDirectoryAccessor;
     private readonly SemaphoreSlim _listenerStartLock = new(1, 1);
 
     private Mutex? _mutex;
@@ -36,9 +34,9 @@ public sealed class DesktopSingleInstanceCoordinator : IDesktopSingleInstanceCoo
     )
     {
         _log = log.ForContext<DesktopSingleInstanceCoordinator>();
-        _appImagePathAccessor = appImagePathAccessor ?? (() => appRuntimeInfo.AppImage);
-        _appBaseDirectoryAccessor = appBaseDirectoryAccessor ?? (() => AppContext.BaseDirectory);
-        _instanceName = BuildScopedInstanceName(instanceName, _appImagePathAccessor(), _appBaseDirectoryAccessor());
+        var appImagePathAccessor1 = appImagePathAccessor ?? (() => appRuntimeInfo.AppImage);
+        var appBaseDirectoryAccessor1 = appBaseDirectoryAccessor ?? (() => AppContext.BaseDirectory);
+        _instanceName = BuildScopedInstanceName(instanceName, appImagePathAccessor1(), appBaseDirectoryAccessor1());
     }
 
     /// <inheritdoc />

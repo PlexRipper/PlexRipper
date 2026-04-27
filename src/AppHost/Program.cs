@@ -8,6 +8,7 @@ namespace Reaparr.AppHost;
 /// </summary>
 public class Program
 {
+    // ReSharper disable once InconsistentNaming
     private static Serilog.ILogger _log => Log.ForContext(typeof(Program));
 
     /// <summary>

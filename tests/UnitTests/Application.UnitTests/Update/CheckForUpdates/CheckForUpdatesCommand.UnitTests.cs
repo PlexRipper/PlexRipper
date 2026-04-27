@@ -1,5 +1,4 @@
 using NuGet.Versioning;
-using Reaparr.Environment;
 using Velopack;
 using Velopack.Locators;
 using Velopack.Sources;

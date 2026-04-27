@@ -2,7 +2,6 @@ using System.IO.Abstractions;
 using System.Reflection;
 using Autofac;
 using Autofac.Extras.Quartz;
-using Reaparr.Environment;
 using Module = Autofac.Module;
 
 namespace Reaparr.FileSystem;

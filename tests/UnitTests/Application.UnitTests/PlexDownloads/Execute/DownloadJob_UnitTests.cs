@@ -53,7 +53,7 @@ public class DownloadJobUnitTests : BaseUnitTest<DownloadJob>
         downloadTaskResult.ShouldNotBeNull();
 
         var downloadFolder = await IDbContext.GetDownloadFolder();
-        var destinationFolder = await IDbContext.GetDefaultDestinationFolderPath(
+        await IDbContext.GetDefaultDestinationFolderPath(
             PlexMediaType.Movie,
             CancellationToken
         );

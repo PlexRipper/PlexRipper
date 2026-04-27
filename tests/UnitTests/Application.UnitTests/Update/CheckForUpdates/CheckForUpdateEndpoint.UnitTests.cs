@@ -1,11 +1,9 @@
-using Reaparr.Environment;
-
 namespace Reaparr.Application.UnitTests;
 
 public class CheckForUpdateEndpointUnitTests : BaseUnitTest<CheckForUpdateEndpoint>
 {
-    private const string StableVersion = "0.38.0";
-    private const string DevVersion = "0.38.0-dev.6";
+    private const string STABLE_VERSION = "0.38.0";
+    private const string DEV_VERSION = "0.38.0-dev.6";
 
     [Test]
     public async Task ShouldReturnSuccessResult_WhenTriggerSucceeds()
@@ -58,14 +56,14 @@ public class CheckForUpdateEndpointUnitTests : BaseUnitTest<CheckForUpdateEndpoi
         SetAppBuildInfo(x =>
         {
             x.RuntimeMode = "docker";
-            x.InformationalVersion = StableVersion;
+            x.InformationalVersion = STABLE_VERSION;
         });
 
         var noUpdate = new AppUpdateCheckResult
         {
             IsUpdateAvailable = false,
-            NewestVersion = StableVersion,
-            CurrentVersion = StableVersion,
+            NewestVersion = STABLE_VERSION,
+            CurrentVersion = STABLE_VERSION,
             ReleaseNotes = [],
         };
         Mock.Mock<ICommandExecutor>()
@@ -82,8 +80,8 @@ public class CheckForUpdateEndpointUnitTests : BaseUnitTest<CheckForUpdateEndpoi
         result.ShouldNotBeNull();
         result.IsSuccess.ShouldBeTrue();
         result.Value!.IsUpdateAvailable.ShouldBeFalse();
-        result.Value.NewestVersion.ShouldBe(StableVersion);
-        result.Value.CurrentVersion.ShouldBe(StableVersion);
+        result.Value.NewestVersion.ShouldBe(STABLE_VERSION);
+        result.Value.CurrentVersion.ShouldBe(STABLE_VERSION);
         result.Value.ReleaseNotes.ShouldBeEmpty();
 
         Mock.Mock<ICommandExecutor>().Verify();
@@ -96,7 +94,7 @@ public class CheckForUpdateEndpointUnitTests : BaseUnitTest<CheckForUpdateEndpoi
         SetAppBuildInfo(x =>
         {
             x.RuntimeMode = "docker";
-            x.InformationalVersion = StableVersion;
+            x.InformationalVersion = STABLE_VERSION;
         });
 
         var releaseNotes = new List<ReleaseNote>
@@ -117,7 +115,7 @@ public class CheckForUpdateEndpointUnitTests : BaseUnitTest<CheckForUpdateEndpoi
                     {
                         IsUpdateAvailable = true,
                         NewestVersion = "0.39.0",
-                        CurrentVersion = StableVersion,
+                        CurrentVersion = STABLE_VERSION,
                         ReleaseNotes = releaseNotes,
                     }
                 )
@@ -134,7 +132,7 @@ public class CheckForUpdateEndpointUnitTests : BaseUnitTest<CheckForUpdateEndpoi
         result.IsSuccess.ShouldBeTrue();
         result.Value!.IsUpdateAvailable.ShouldBeTrue();
         result.Value.NewestVersion.ShouldBe("0.39.0");
-        result.Value.CurrentVersion.ShouldBe(StableVersion);
+        result.Value.CurrentVersion.ShouldBe(STABLE_VERSION);
         result.Value.ReleaseNotes.Count.ShouldBe(1);
         result.Value.ReleaseNotes[0].Version.ShouldBe("v0.39.0");
         result.Value.ReleaseNotes[0].Notes.ShouldBe("Stable release notes");
@@ -150,7 +148,7 @@ public class CheckForUpdateEndpointUnitTests : BaseUnitTest<CheckForUpdateEndpoi
         SetAppBuildInfo(x =>
         {
             x.RuntimeMode = "docker";
-            x.InformationalVersion = DevVersion;
+            x.InformationalVersion = DEV_VERSION;
         });
 
         var releaseNotes = new List<ReleaseNote>
@@ -172,7 +170,7 @@ public class CheckForUpdateEndpointUnitTests : BaseUnitTest<CheckForUpdateEndpoi
                     {
                         IsUpdateAvailable = true,
                         NewestVersion = "0.38.0-dev.7",
-                        CurrentVersion = DevVersion,
+                        CurrentVersion = DEV_VERSION,
                         ReleaseNotes = releaseNotes,
                     }
                 )
@@ -189,7 +187,7 @@ public class CheckForUpdateEndpointUnitTests : BaseUnitTest<CheckForUpdateEndpoi
         result.IsSuccess.ShouldBeTrue();
         result.Value!.IsUpdateAvailable.ShouldBeTrue();
         result.Value.NewestVersion.ShouldBe("0.38.0-dev.7");
-        result.Value.CurrentVersion.ShouldBe(DevVersion);
+        result.Value.CurrentVersion.ShouldBe(DEV_VERSION);
         result.Value.ReleaseNotes.Count.ShouldBe(1);
         result.Value.ReleaseNotes[0].Version.ShouldBe("v0.38.0-dev.7");
         result.Value.ReleaseNotes[0].Notes.ShouldBe("Development release notes");
@@ -205,7 +203,7 @@ public class CheckForUpdateEndpointUnitTests : BaseUnitTest<CheckForUpdateEndpoi
         SetAppBuildInfo(x =>
         {
             x.RuntimeMode = "desktop";
-            x.InformationalVersion = StableVersion;
+            x.InformationalVersion = STABLE_VERSION;
         });
 
         var releaseNotes = new List<ReleaseNote>
@@ -227,7 +225,7 @@ public class CheckForUpdateEndpointUnitTests : BaseUnitTest<CheckForUpdateEndpoi
                     {
                         IsUpdateAvailable = true,
                         NewestVersion = "9.9.9",
-                        CurrentVersion = StableVersion,
+                        CurrentVersion = STABLE_VERSION,
                         ReleaseNotes = releaseNotes,
                     }
                 )
@@ -244,7 +242,7 @@ public class CheckForUpdateEndpointUnitTests : BaseUnitTest<CheckForUpdateEndpoi
         result.IsSuccess.ShouldBeTrue();
         result.Value!.IsUpdateAvailable.ShouldBeTrue();
         result.Value.NewestVersion.ShouldBe("9.9.9");
-        result.Value.CurrentVersion.ShouldBe(StableVersion);
+        result.Value.CurrentVersion.ShouldBe(STABLE_VERSION);
         result.Value.ReleaseNotes.Count.ShouldBe(1);
         result.Value.ReleaseNotes[0].Version.ShouldBe("9.9.9");
         result.Value.ReleaseNotes[0].Notes.ShouldBe("Desktop release notes");
@@ -260,14 +258,14 @@ public class CheckForUpdateEndpointUnitTests : BaseUnitTest<CheckForUpdateEndpoi
         SetAppBuildInfo(x =>
         {
             x.RuntimeMode = "desktop";
-            x.InformationalVersion = StableVersion;
+            x.InformationalVersion = STABLE_VERSION;
         });
 
         var noUpdate = new AppUpdateCheckResult
         {
             IsUpdateAvailable = false,
-            NewestVersion = StableVersion,
-            CurrentVersion = StableVersion,
+            NewestVersion = STABLE_VERSION,
+            CurrentVersion = STABLE_VERSION,
             ReleaseNotes = [],
         };
         Mock.Mock<ICommandExecutor>()
@@ -284,8 +282,8 @@ public class CheckForUpdateEndpointUnitTests : BaseUnitTest<CheckForUpdateEndpoi
         result.ShouldNotBeNull();
         result.IsSuccess.ShouldBeTrue();
         result.Value!.IsUpdateAvailable.ShouldBeFalse();
-        result.Value.NewestVersion.ShouldBe(StableVersion);
-        result.Value.CurrentVersion.ShouldBe(StableVersion);
+        result.Value.NewestVersion.ShouldBe(STABLE_VERSION);
+        result.Value.CurrentVersion.ShouldBe(STABLE_VERSION);
         result.Value.ReleaseNotes.ShouldBeEmpty();
 
         Mock.Mock<ICommandExecutor>().Verify();

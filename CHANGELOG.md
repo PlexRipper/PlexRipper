@@ -1,5 +1,7 @@
 Reaparr Changelog
 
+# [0.38.0-dev.12](https://github.com/Reaparr/Reaparr/compare/v0.38.0-dev.11...v0.38.0-dev.12) (2026-04-27)
+
 # [0.38.0-dev.11](https://github.com/Reaparr/Reaparr/compare/v0.38.0-dev.10...v0.38.0-dev.11) (2026-04-27)
 
 

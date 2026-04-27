@@ -163,7 +163,7 @@ public sealed class ReaparrDbContext : DbContext, IReaparrDbContext, IReaparrDbC
     /// <inheritdoc/>
     public void ClearChangeTracker() => ChangeTracker.Clear();
 
-    internal ReaparrDbContext(IPathProvider pathProvider)
+    public ReaparrDbContext(IPathProvider pathProvider)
     {
         _pathProvider = pathProvider;
         DatabaseName = pathProvider.DatabaseName;

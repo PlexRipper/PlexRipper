@@ -7,16 +7,15 @@ public record NetworkSettingsModule
         IBaseSettingsModule<NetworkSettingsModule>,
         INetworkSettings
 {
-    public static NetworkSettingsModule Create() =>
-        new()
-        {
-            ReverseProxyUrl = string.Empty,
-            BasePath = string.Empty,
-            TrustProxyHeaders = false,
-            AllowedProxyIps = [],
-            ForwardedHostHeader = string.Empty,
-            ForwardedPathHeader = string.Empty,
-        };
+    public static NetworkSettingsModule Create() => new()
+    {
+        ReverseProxyUrl = string.Empty,
+        BasePath = string.Empty,
+        TrustProxyHeaders = false,
+        AllowedProxyIps = [],
+        ForwardedHostHeader = string.Empty,
+        ForwardedPathHeader = string.Empty,
+    };
 
     public required string ReverseProxyUrl
     {
@@ -81,11 +80,11 @@ public record NetworkSettingsModule
             }
 
             return new UriBuilder
-            {
-                Scheme = "http",
-                Host = "localhost",
-                Port = EnvironmentExtensions.GetPort,
-            }
+                {
+                    Scheme = "http",
+                    Host = "localhost",
+                    Port = 5000,
+                }
                 .Uri
                 .AbsoluteUri;
         }

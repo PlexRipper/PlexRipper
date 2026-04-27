@@ -1,3 +1,5 @@
+using Serilog.Events;
+
 namespace Reaparr.Environment;
 
 /// <summary>
@@ -111,6 +113,22 @@ public interface IAppRuntimeInfo
     /// When set to true, the application will not mask/censor sensitive data in the logs.
     /// </summary>
     bool IsUnmasked { get; }
+
+    /// <summary>
+    /// Gets the configured Serilog log level from <c>LOG_LEVEL</c>. Defaults to <see cref="LogEventLevel.Debug"/>.
+    /// </summary>
+    LogEventLevel LogLevel { get; }
+
+    /// <summary>
+    /// When set to a truthy value, disables all authentication. FOR DEVELOPMENT USE ONLY.
+    /// </summary>
+    bool IsAuthenticationDisabled { get; }
+
+    /// <summary>
+    /// Gets the port number from the DOTNET_HTTP_PORTS environment variable.
+    /// </summary>
+    /// <returns>The port number or 5000 if not configured.</returns>
+    int AppPort { get; }
 
     #endregion
 }

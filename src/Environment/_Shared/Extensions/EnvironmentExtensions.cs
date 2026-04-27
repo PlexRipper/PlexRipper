@@ -6,42 +6,7 @@ public static class EnvironmentExtensions
 {
     private static readonly AsyncLocal<IReadOnlyDictionary<string, string?>?> _testOverrides = new();
 
-    #region Getters
-
-    /// <summary>
-    /// Gets the configured Serilog log level from <c>LOG_LEVEL</c>. Defaults to <see cref="LogEventLevel.Debug"/>.
-    /// </summary>
-    public static LogEventLevel GetLogLevel()
-    {
-        var success = Enum.TryParse<LogEventLevel>(GetEnvironmentVariable(EnvKeys.LogLevel), true, out var logLevel);
-        return success ? logLevel : LogEventLevel.Debug;
-    }
-
-    /// <summary>
-    /// When set to a truthy value, disables all authentication. FOR DEVELOPMENT USE ONLY.
-    /// </summary>
-    public static bool IsAuthenticationDisabled() => IsTrue(GetEnvironmentVariable(EnvKeys.DisableAuthentication));
-
-    /// <summary>
-    /// Gets the port number from the DOTNET_HTTP_PORTS environment variable.
-    /// </summary>
-    /// <returns>The port number or 5000 if not configured.</returns>
-    public static int GetPort =>
-        int.TryParse(
-            GetEnvironmentVariable(EnvKeys.DotNetHttpPorts)
-                ?.Split(';', StringSplitOptions.RemoveEmptyEntries)
-                .FirstOrDefault(),
-            out var port
-        )
-            ? port
-            : 5000;
-
-    #endregion
-
     #region Setters
-
-    public static void SetPort(int port) =>
-        System.Environment.SetEnvironmentVariable(EnvKeys.DotNetHttpPorts, port.ToString());
 
     /// <summary>
     /// Sets the <c>LOG_LEVEL</c> environment variable to the specified level (upper-cased).
@@ -95,10 +60,6 @@ public static class EnvironmentExtensions
         var value = System.Environment.GetEnvironmentVariable(key)?.Trim();
         return string.IsNullOrWhiteSpace(value) ? null : value;
     }
-
-    private static bool IsTrue(string? value) =>
-        value is not null
-        && (string.Equals(value, Convert.ToString(true), StringComparison.OrdinalIgnoreCase) || value == "1");
 
     #endregion
 }

@@ -33,8 +33,7 @@ public static partial class Startup
         // This has to always be first
         app.UseCors(CorsConfiguration);
 
-        app.Use(
-            async (ctx, next) =>
+        app.Use(async (ctx, next) =>
             {
                 // Rewrite legacy/public API v2 routes
                 if (ctx.Request.Path.StartsWithSegments("/api/v2", out var remaining))
@@ -73,10 +72,7 @@ public static partial class Startup
         {
             // Used to deploy the front-end Nuxt client
             app.UseSpaStaticFiles();
-            app.UseSpa(spa =>
-            {
-                spa.Options.SourcePath = "ClientApp";
-            });
+            app.UseSpa(spa => { spa.Options.SourcePath = "ClientApp"; });
         }
 
         // Use custom header authentication middleware
@@ -87,7 +83,7 @@ public static partial class Startup
 
         // When I_AM_DUMB_SO_DISABLE_AUTHENTICATION is set, bypass all auth with a synthetic Admin principal.
         // This must run after authentication/authorization so the synthetic principal is not overwritten.
-        if (EnvironmentExtensions.IsAuthenticationDisabled())
+        if (appRuntimeInfo.IsAuthenticationDisabled)
             app.UseMiddleware<DisableAuthenticationMiddleware>();
 
         // Enable response caching for downstream caches (must be before FastEndpoints)

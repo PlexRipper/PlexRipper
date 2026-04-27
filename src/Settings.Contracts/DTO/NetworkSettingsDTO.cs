@@ -32,7 +32,7 @@ public class NetworkSettingsDTO : INetworkSettings
                 return reverseProxyUri.AppendPathSegment(BasePath).ToString();
             }
 
-            return new UriBuilder { Host = "localhost", Port = EnvironmentExtensions.GetPort }.ToString();
+            return new UriBuilder { Host = "localhost", Port = 5000 }.ToString();
         }
     }
 }

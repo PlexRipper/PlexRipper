@@ -1,9 +1,31 @@
 using System.Collections;
+using Serilog.Events;
 
 namespace Reaparr.Environment;
 
 public class AppRuntimeInfo : IAppRuntimeInfo
 {
+    /// <inheritdoc/>
+    public bool IsAuthenticationDisabled => IsTrue(GetEnvironmentVariable(EnvKeys.DisableAuthentication));
+
+    /// <inheritdoc/>
+    public int AppPort => int.TryParse(
+        GetEnvironmentVariable(EnvKeys.DotNetHttpPorts)
+            ?.Split(';', StringSplitOptions.RemoveEmptyEntries)
+            .FirstOrDefault(),
+        out var port
+    )
+        ? port
+        : 5000;
+
+    /// <summary>
+    /// Gets the configured Serilog log level from <c>LOG_LEVEL</c>. Defaults to <see cref="LogEventLevel.Debug"/>.
+    /// </summary>
+    public LogEventLevel LogLevel =>
+        Enum.TryParse<LogEventLevel>(GetEnvironmentVariable(EnvKeys.LogLevel), true, out var logLevel)
+            ? logLevel
+            : LogEventLevel.Debug;
+
     /// <inheritdoc/>
     public bool IsUnmasked => IsTrue(GetEnvironmentVariable(EnvKeys.Unmasked));
 
@@ -78,17 +100,16 @@ public class AppRuntimeInfo : IAppRuntimeInfo
         return string.IsNullOrWhiteSpace(value) ? null : value;
     }
 
-    public Dictionary<string, string?> GetAllEnvironmentVariables =>
-        System
-            .Environment.GetEnvironmentVariables()
-            .Cast<DictionaryEntry>()
-            .ToDictionary(entry => entry.Key.ToString()!, entry => entry.Value?.ToString());
+    public Dictionary<string, string?> GetAllEnvironmentVariables => System
+        .Environment.GetEnvironmentVariables()
+        .Cast<DictionaryEntry>()
+        .ToDictionary(entry => entry.Key.ToString()!, entry => entry.Value?.ToString());
 
     /// <summary>
     /// Determines if the value is true.
     /// </summary>
     /// <param name="value"></param>
-    private static bool IsTrue(string? value) =>
-        value is not null
-        && (string.Equals(value, Convert.ToString(true), StringComparison.OrdinalIgnoreCase) || value == "1");
+    private static bool IsTrue(string? value) => value is not null
+                                                 && (string.Equals(value, Convert.ToString(true),
+                                                     StringComparison.OrdinalIgnoreCase) || value == "1");
 }

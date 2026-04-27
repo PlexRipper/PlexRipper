@@ -11,23 +11,21 @@ public class SetupSonarrDownloadClientCommandUnitTests : BaseUnitTest<SetupSonar
         SonarrSettings sonarrSettings,
         IntegrationsSettings integrationsSettings,
         NetworkSettingsModule networkSettings
-    ) =>
-        Mock.Create<SetupSonarrDownloadClientCommandHandler>(
-            new TypedParameter(typeof(ISonarrSettings), sonarrSettings),
-            new TypedParameter(typeof(IIntegrationsSettings), integrationsSettings),
-            new TypedParameter(typeof(INetworkSettings), networkSettings)
-        );
+    ) => Mock.Create<SetupSonarrDownloadClientCommandHandler>(
+        new TypedParameter(typeof(ISonarrSettings), sonarrSettings),
+        new TypedParameter(typeof(IIntegrationsSettings), integrationsSettings),
+        new TypedParameter(typeof(INetworkSettings), networkSettings)
+    );
 
     private static SonarrSettings ValidSettings(
         string baseUrl = "http://localhost:8989",
         string apiKey = "some-api-key"
-    ) =>
-        new()
-        {
-            IsConfigured = false,
-            SonarrBaseUrl = baseUrl,
-            SonarrApiKey = apiKey,
-        };
+    ) => new()
+    {
+        IsConfigured = false,
+        SonarrBaseUrl = baseUrl,
+        SonarrApiKey = apiKey,
+    };
 
     private static IntegrationsSettings ValidIntegrationsSettings() => IntegrationsSettings.Create();
 
@@ -196,8 +194,7 @@ public class SetupSonarrDownloadClientCommandUnitTests : BaseUnitTest<SetupSonar
             .Verifiable(Times.Once);
 
         Mock.SetupCommand(It.IsAny<SonarrApiCreateDownloadClientCommand>)
-            .ReturnsAsync(
-                (SonarrApiCreateDownloadClientCommand cmd, CancellationToken _) =>
+            .ReturnsAsync((SonarrApiCreateDownloadClientCommand cmd, CancellationToken _) =>
                 {
                     capturedResource = cmd.Resource;
                     return Result.Ok(new SonarrDownloadContractDTO { Id = 1 });
@@ -244,8 +241,7 @@ public class SetupSonarrDownloadClientCommandUnitTests : BaseUnitTest<SetupSonar
             .Verifiable(Times.Once);
 
         Mock.SetupCommand(It.IsAny<SonarrApiCreateDownloadClientCommand>)
-            .ReturnsAsync(
-                (SonarrApiCreateDownloadClientCommand cmd, CancellationToken _) =>
+            .ReturnsAsync((SonarrApiCreateDownloadClientCommand cmd, CancellationToken _) =>
                 {
                     capturedResource = cmd.Resource;
                     return Result.Ok(new SonarrDownloadContractDTO { Id = 2 });
@@ -296,8 +292,7 @@ public class SetupSonarrDownloadClientCommandUnitTests : BaseUnitTest<SetupSonar
             .Verifiable(Times.Once);
 
         Mock.SetupCommand(It.IsAny<SonarrApiCreateDownloadClientCommand>)
-            .ReturnsAsync(
-                (SonarrApiCreateDownloadClientCommand cmd, CancellationToken _) =>
+            .ReturnsAsync((SonarrApiCreateDownloadClientCommand cmd, CancellationToken _) =>
                 {
                     capturedResource = cmd.Resource;
                     return Result.Ok(new SonarrDownloadContractDTO { Id = 3 });
@@ -320,7 +315,7 @@ public class SetupSonarrDownloadClientCommandUnitTests : BaseUnitTest<SetupSonar
 
         var portField = capturedResource.Fields!.FirstOrDefault(f => f.Name == "port");
         portField.ShouldNotBeNull();
-        portField.Value.ShouldBe(EnvironmentExtensions.GetPort);
+        portField.Value.ShouldBe(Mock.Container.Resolve<IAppRuntimeInfo>().AppPort);
 
         var useSslField = capturedResource.Fields!.FirstOrDefault(f => f.Name == "useSsl");
         useSslField.ShouldNotBeNull();

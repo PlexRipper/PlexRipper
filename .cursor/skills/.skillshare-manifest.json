@@ -6,7 +6,8 @@
     "reaparr-command-handler-patterns": "symlink",
     "reaparr-frontend-components": "symlink",
     "reaparr-frontend-unit-tests": "symlink",
+    "reaparr-mcp-tools": "symlink",
     "reaparr-pinia-store": "symlink"
   },
-  "updated_at": "2026-04-23T12:59:53.178354408+02:00"
+  "updated_at": "2026-04-28T13:41:34.092772367+02:00"
 }

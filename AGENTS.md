@@ -104,44 +104,8 @@ Replace `<Project>` with the actual project name (e.g., `Application`, `Backgrou
 
 ### IDE-first workflow (Rider for backend, WebStorm for frontend)
 
-> **MANDATORY**: At the start of every task, load the `jetbrains-skill` skill. This is non-negotiable — it enforces the
-> correct tool selection order below.
-
-> **Environment note:** In this repo environment, JetBrains IDE MCP access may be exposed through **mcp-proxy upstream
-> servers** rather than as first-class `rider_*` / `webstorm_*` tools in the current tool list. Do **not** conclude that
-> Rider or WebStorm is unavailable just because native tool discovery does not show those tools.
-
-**NEVER use `grep`, `glob`, `read`, or bash file commands as a first tool.** Use the appropriate JetBrains IDE MCP tools
-first, based on the task type:
-
-- **Backend work** (C#, .NET, `src/` excluding `ClientApp/`, `tests/`) → use **Rider MCP tools**. In this environment,
-  prefer the connected mcp-proxy upstreams:
-  - `rider-official`
-  - `rider-index`
-  - `rider-debugger`
-- **Frontend work** (Vue, TypeScript, `src/AppHost/ClientApp/`) → use **WebStorm MCP tools**. In this environment,
-  prefer the connected mcp-proxy upstreams:
-  - `webstorm-official`
-  - `webstorm-index`
-
-Never use Rider MCP tools for frontend work, and never use WebStorm MCP tools for backend work.
-
-- **Mandatory availability check:** if JetBrains tools are not obviously present as native tools, check
-  `mcp-proxy_upstream_servers` before falling back. If the relevant upstream server is healthy, treat the IDE as
-  available and continue through mcp-proxy.
-- **Discovery gotcha:** `mcp-proxy_retrieve_tools` may not reliably surface JetBrains file/search/edit tools from broad
-  natural-language queries. Sparse search results are **not** proof that the IDE server is unavailable.
-- **Known-good mcp-proxy workflow:**
-  1. Load `jetbrains-skill`.
-  2. Check `mcp-proxy_upstream_servers` if native Rider/WebStorm tools are not obvious.
-  3. If the relevant upstream server is healthy, use Rider/WebStorm through mcp-proxy first.
-  4. If `mcp-proxy_retrieve_tools` returns sparse or misleading results, retry with a narrower IDE/MCP query instead of
-     assuming the server is unavailable.
-  5. Fall back to `grep`, `glob`, `read`, or bash file commands only after the IDE/MCP path is confirmed unavailable or
-     cannot provide the needed result.
-- Fall back to `grep`, `glob`, or `read` **only** if the appropriate IDE MCP is unavailable, errors, or cannot provide
-  the needed result after checking the upstream server and retrying a narrower IDE/MCP path.
-- If fallback is required, **explicitly state it** before using the fallback tool.
+> **MANDATORY**: At the start of every task, load the `reaparr-mcp-tools` skill. This is non-negotiable — it defines
+> how Reaparr uses MCP tooling. All MCP operational rules live in `.skillshare/skills/reaparr-mcp-tools/SKILL.md`.
 
 ---
 
@@ -220,6 +184,7 @@ Do **not** install system packages on the host unless explicitly instructed.
 - **ALWAYS load `karpathy-guidelines`** at the start of every task — no exceptions. It encodes behavioral guidelines to
   reduce common LLM coding mistakes: avoid overcomplication, make surgical changes, surface assumptions, and define
   verifiable success criteria.
+- **ALWAYS load `reaparr-mcp-tools`** at the start of every task — no exceptions.
 - **Reaparr-specific skills take priority.** Before acting on any task in this project, check for a matching `reaparr-*`
   skill and load it first. These skills encode project-specific conventions that override generic guidance.
 - Detect and auto-load any other applicable skills before acting on a task.

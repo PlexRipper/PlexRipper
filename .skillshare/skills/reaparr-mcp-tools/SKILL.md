@@ -121,6 +121,34 @@ Required behavior:
 1. Discover available `dotnet-test-mcp` test tools through `mcp-proxy_retrieve_tools`.
 2. Execute backend tests through the discovered `dotnet-test-mcp` tools only.
 
+## Script and Run Execution Routing
+
+### Frontend scripts
+
+All frontend `bun run` scripts must be executed through the `webstorm-bun-scripts` MCP server.
+
+This includes:
+
+- `bun run dev`
+- `bun run build`
+- `bun run lint`
+- `bun run lint:fix`
+- `bun run typecheck`
+- `bun run generate-ts`
+
+Do not run frontend `bun run` scripts from terminal commands.
+
+### Project run configurations and backend tests
+
+All project run configuration execution and backend test execution must go through the `dotnet-test-mcp` server.
+
+Required behavior:
+
+1. Discover `dotnet-test-mcp` execution tools with `mcp-proxy_retrieve_tools`.
+2. Execute project run configurations through discovered `dotnet-test-mcp` tools.
+3. Execute backend tests through discovered `dotnet-test-mcp` tools.
+4. Do not use terminal commands for these operations.
+
 ## Discovery Retry Rule
 
 When discovery is weak, retry in smaller steps instead of broad natural language.
@@ -192,6 +220,11 @@ Use `mcp-proxy_upstream_servers` for:
 2. Run tests through discovered `dotnet-test-mcp` tools.
 3. Do not execute backend test commands in the terminal.
 
+### Frontend script execution example
+
+1. Use `webstorm-bun-scripts` MCP tools for all `bun run` scripts.
+2. Run `dev`, `build`, `lint`, `lint:fix`, `typecheck`, and `generate-ts` through MCP, not terminal.
+
 ### GitHub read example
 
 1. Discover GitHub tools with `mcp-proxy_retrieve_tools`.
@@ -215,4 +248,6 @@ Use `mcp-proxy_upstream_servers` for:
 - Using Rider for frontend work or WebStorm for backend work
 - Missing `project_path` in Rider/WebStorm calls
 - Running backend tests in terminal instead of `dotnet-test-mcp`
+- Running frontend `bun run` scripts in terminal instead of `webstorm-bun-scripts`
+- Running project run configurations outside `dotnet-test-mcp`
 - Performing remote writes when a safer local workspace edit path is available

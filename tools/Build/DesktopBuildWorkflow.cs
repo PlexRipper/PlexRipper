@@ -43,7 +43,6 @@ internal sealed class DesktopBuildWorkflow(
             settings,
             commandRunner,
             packageWorkflow,
-            new FileSystem(),
             loggerFactory.CreateLogger<DesktopLaunchWorkflow>()
         );
 

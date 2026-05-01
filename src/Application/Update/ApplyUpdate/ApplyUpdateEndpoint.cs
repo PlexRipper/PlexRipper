@@ -41,13 +41,57 @@ public class ApplyUpdateEndpoint : BaseEndpointWithoutRequest
         var asset = _velopackManager.UpdatePendingRestart;
         if (asset is null)
         {
+            _log.Here().Warning("Skipping Velopack update apply because no update is staged");
             await SendFluentResult(Result.Fail("No update staged"), ct);
             return;
         }
 
+        _log.Here()
+            .Warning(
+                "Preparing to apply Velopack update and restart Reaparr; AppId: {AppId}; CurrentVersion: {CurrentVersion}; PackageId: {PackageId}; PackageVersion: {PackageVersion}",
+                _velopackManager.AppId,
+                _velopackManager.CurrentVersion,
+                asset.PackageId,
+                asset.Version
+            );
+
         HttpContext.Response.OnCompleted(() =>
         {
-            _velopackManager.ApplyUpdatesAndRestart(asset, []);
+            try
+            {
+                _log.Here()
+                    .Warning(
+                        "Applying Velopack update and restarting Reaparr; AppId: {AppId}; CurrentVersion: {CurrentVersion}; PackageId: {PackageId}; PackageVersion: {PackageVersion}",
+                        _velopackManager.AppId,
+                        _velopackManager.CurrentVersion,
+                        asset.PackageId,
+                        asset.Version
+                    );
+
+                _velopackManager.ApplyUpdatesAndRestart(asset, []);
+
+                _log.Here()
+                    .Warning(
+                        "Velopack ApplyUpdatesAndRestart returned without terminating the current process; AppId: {AppId}; CurrentVersion: {CurrentVersion}; PackageId: {PackageId}; PackageVersion: {PackageVersion}",
+                        _velopackManager.AppId,
+                        _velopackManager.CurrentVersion,
+                        asset.PackageId,
+                        asset.Version
+                    );
+            }
+            catch (Exception ex)
+            {
+                _log.Here()
+                    .Error(
+                        ex,
+                        "Velopack ApplyUpdatesAndRestart failed; AppId: {AppId}; CurrentVersion: {CurrentVersion}; PackageId: {PackageId}; PackageVersion: {PackageVersion}",
+                        _velopackManager.AppId,
+                        _velopackManager.CurrentVersion,
+                        asset.PackageId,
+                        asset.Version
+                    );
+            }
+
             return Task.CompletedTask;
         });
 

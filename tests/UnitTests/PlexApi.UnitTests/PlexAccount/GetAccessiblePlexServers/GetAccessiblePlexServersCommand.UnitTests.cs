@@ -244,8 +244,7 @@ public class GetAccessiblePlexServersUnitTests : BaseUnitTest<GetAccessiblePlexS
             }
         );
 
-        // TODO I did it dirty here, the first response should be a failure but i switched it around to make the test pass
-        SetCallMock(response2, response1);
+        SetCallMock(response1, response2);
 
         // Act
         var command = new GetAccessiblePlexServersCommand(plexAccount.Id);

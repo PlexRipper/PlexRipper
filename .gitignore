@@ -170,4 +170,7 @@ config.json
 
 .test-artifacts
 .artifacts
-.agentbridge/
+.agentbridge
+.agent-work
+
+.codex

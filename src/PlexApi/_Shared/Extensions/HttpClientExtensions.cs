@@ -21,7 +21,13 @@ public static class HttpClientExtensions
     {
         try
         {
-            return Result.Ok(await operation);
+            var response = await operation;
+            var httpResponseMessage = response.GetHttpResponseMessage();
+
+            if (!httpResponseMessage.IsSuccessStatusCode)
+                return httpResponseMessage.FromSdkExceptionToResult<T>();
+
+            return Result.Ok(response);
         }
         catch (SDKException e)
         {

@@ -13,11 +13,13 @@ public interface IAppRuntimeInfo
     /// <summary>
     /// Gets the process user ID (PUID) from the environment. Returns -1 when not set or invalid.
     /// </summary>
+    // ReSharper disable once InconsistentNaming
     int PUID { get; }
 
     /// <summary>
     /// Gets the process group ID (PGID) from the environment. Returns -1 when not set or invalid.
     /// </summary>
+    // ReSharper disable once InconsistentNaming
     int PGID { get; }
 
     /// <summary>
@@ -95,6 +97,7 @@ public interface IAppRuntimeInfo
     /// Sets the SEQ_URL environment variable to the specified URL.
     /// Note: This is used for development and testing purposes to redirect logs to a hosted Docker instance of Seq.
     /// </summary>
+    // ReSharper disable once InconsistentNaming
     string SEQ_Url { get; }
 
     /// <summary>

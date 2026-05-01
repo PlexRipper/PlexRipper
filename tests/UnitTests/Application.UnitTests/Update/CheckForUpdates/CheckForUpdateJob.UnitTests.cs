@@ -2,7 +2,7 @@ namespace Reaparr.Application.UnitTests;
 
 public class CheckForUpdateJobUnitTests : BaseUnitTest<CheckForUpdateJob>
 {
-    private const string CurrentVersion = "1.2.3";
+    private const string CURRENT_VERSION = "1.2.3";
 
     private IJobExecutionContext SetupJobContext()
     {
@@ -17,12 +17,12 @@ public class CheckForUpdateJobUnitTests : BaseUnitTest<CheckForUpdateJob>
     {
         // Arrange
         var context = SetupJobContext();
-        SetAppBuildInfo(x => x.InformationalVersion = CurrentVersion);
+        SetAppBuildInfo(x => x.InformationalVersion = CURRENT_VERSION);
         var noUpdate = new AppUpdateCheckResult
         {
             IsUpdateAvailable = false,
-            NewestVersion = CurrentVersion,
-            CurrentVersion = CurrentVersion,
+            NewestVersion = CURRENT_VERSION,
+            CurrentVersion = CURRENT_VERSION,
             ReleaseNotes = [],
         };
         Mock.Mock<ICommandExecutor>()

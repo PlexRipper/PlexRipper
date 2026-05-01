@@ -9,7 +9,6 @@ internal sealed class DesktopLaunchWorkflow(
     DesktopCommandSettings settings,
     DesktopCommandRunner commandRunner,
     DesktopPackageWorkflow packageWorkflow,
-    IFileSystem fileSystem,
     ILogger<DesktopLaunchWorkflow> logger
 )
 {
@@ -30,16 +29,6 @@ internal sealed class DesktopLaunchWorkflow(
                 runtime.RuntimeIdentifier,
                 appImagePath
             );
-
-            var movedPackages = ClearPendingVelopackPackages(GetVelopackPackageRoot(), fileSystem);
-            if (movedPackages.Count > 0)
-            {
-                logger.LogWarning(
-                    "Moved {MovedPackageCount} pending Velopack package(s) to prevent automatic apply on launch: {MovedPackages}",
-                    movedPackages.Count,
-                    string.Join(", ", movedPackages)
-                );
-            }
 
             await commandRunner.RunCommandAsync("chmod", ["+x", appImagePath]);
 
@@ -138,39 +127,7 @@ internal sealed class DesktopLaunchWorkflow(
 
         return exitCode;
     }
-
-    private static string GetVelopackPackageRoot() =>
-        Path.Combine(Path.GetTempPath(), "velopack", "Reaparr");
-
-    internal static List<string> ClearPendingVelopackPackages(string velopackPackageRoot, IFileSystem fileSystem)
-    {
-        var packagesDirectory = fileSystem.Path.Combine(velopackPackageRoot, "packages");
-        if (!fileSystem.Directory.Exists(packagesDirectory))
-            return [];
-
-        var pendingPackages = fileSystem.Directory
-            .GetFiles(packagesDirectory, "*.nupkg", SearchOption.TopDirectoryOnly)
-            .OrderBy(path => path, StringComparer.Ordinal)
-            .ToList();
-        if (pendingPackages.Count == 0)
-            return [];
-
-        var holdDirectory = fileSystem.Path.Combine(velopackPackageRoot, "packages-hold");
-        fileSystem.Directory.CreateDirectory(holdDirectory);
-
-        var movedPackages = new List<string>(pendingPackages.Count);
-        foreach (var pendingPackage in pendingPackages)
-        {
-            var destinationPath = fileSystem.Path.Combine(holdDirectory, fileSystem.Path.GetFileName(pendingPackage));
-            if (fileSystem.File.Exists(destinationPath))
-                fileSystem.File.Delete(destinationPath);
-
-            fileSystem.File.Move(pendingPackage, destinationPath);
-            movedPackages.Add(destinationPath);
-        }
-
-        return movedPackages;
-    }
+ 
 
     private string FindLinuxAppImage()
     {

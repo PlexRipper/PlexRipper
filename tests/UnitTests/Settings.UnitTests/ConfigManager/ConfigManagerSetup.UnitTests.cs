@@ -1,6 +1,5 @@
 using System.IO.Abstractions;
 using System.Reactive.Subjects;
-using Reaparr.Environment;
 using Reaparr.Settings.Contracts;
 
 namespace Reaparr.Settings.UnitTests;

@@ -12,7 +12,7 @@ public sealed class AuthDbContext : IdentityDbContext<AppUser>, IAuthDbContext, 
 
     private readonly IAppRuntimeInfo _appRuntimeInfo;
 
-    public string DatabaseName { get; } = string.Empty;
+    public string DatabaseName { get; }
 
     public DbSet<DataProtectionKey> DataProtectionKeys { get; set; }
     public DbSet<DownloadClientSession> DownloadClientSessions { get; set; }

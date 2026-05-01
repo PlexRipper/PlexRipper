@@ -48,32 +48,70 @@ public class CheckForUpdatesCommandHandler : ICommandHandler<CheckForUpdatesComm
         // Desktop mode
         if (_appBuildInfo.IsDesktopMode)
         {
-            if (!_velopackManager.IsInstalled)
+            var isInstalled = _velopackManager.IsInstalled;
+            var appId = _velopackManager.AppId;
+            var currentVersion = _velopackManager.CurrentVersion;
+
+            if (!isInstalled)
             {
-                _log.Here().Information("Skipping update check because the application is not installed");
+                _log.Here()
+                    .Information(
+                        "Skipping update check because the application is not installed; AppId: {AppId}; VelopackCurrentVersion: {VelopackCurrentVersion}; BuildInformationalVersion: {InformationalVersion}; DesktopMode: {IsDesktopMode}",
+                        appId,
+                        currentVersion,
+                        _appBuildInfo.InformationalVersion,
+                        _appBuildInfo.IsDesktopMode
+                    );
                 return Result.Ok(NoUpdate());
             }
 
             _log.Here()
                 .Information(
-                    "Checking for Velopack updates for {AppId} {CurrentVersion}",
-                    _velopackManager.AppId,
-                    _velopackManager.CurrentVersion
+                    "Checking for Velopack updates for {AppId}; Installed: {IsInstalled}; VelopackCurrentVersion: {VelopackCurrentVersion}; BuildInformationalVersion: {InformationalVersion}; DesktopMode: {IsDesktopMode}",
+                    appId,
+                    isInstalled,
+                    currentVersion,
+                    _appBuildInfo.InformationalVersion,
+                    _appBuildInfo.IsDesktopMode
                 );
 
             var updateResult = await Result.Try(() => _velopackManager.CheckForUpdatesAsync());
             if (updateResult.IsFailed)
+            {
+                _log.Here()
+                    .Warning(
+                        "Velopack update check failed; AppId: {AppId}; VelopackCurrentVersion: {VelopackCurrentVersion}; BuildInformationalVersion: {InformationalVersion}; Errors: {Errors}",
+                        appId,
+                        currentVersion,
+                        _appBuildInfo.InformationalVersion,
+                        string.Join("; ", updateResult.Errors.Select(x => x.Message))
+                    );
                 return updateResult.LogError();
+            }
 
             var updateInfo = updateResult.Value;
             if (updateInfo is null)
             {
-                _log.Here().Information("No update available");
+                _log.Here()
+                    .Information(
+                        "No Velopack update available; AppId: {AppId}; VelopackCurrentVersion: {VelopackCurrentVersion}; BuildInformationalVersion: {InformationalVersion}; Installed: {IsInstalled}",
+                        appId,
+                        currentVersion,
+                        _appBuildInfo.InformationalVersion,
+                        isInstalled
+                    );
                 return Result.Ok(NoUpdate());
             }
 
             var targetVersion = updateInfo.TargetFullRelease.Version.ToString();
-            _log.Here().Information("Update available: {Version}", targetVersion);
+            _log.Here()
+                .Information(
+                    "Update available: {Version}; AppId: {AppId}; VelopackCurrentVersion: {VelopackCurrentVersion}; BuildInformationalVersion: {InformationalVersion}",
+                    targetVersion,
+                    appId,
+                    currentVersion,
+                    _appBuildInfo.InformationalVersion
+                );
 
             await _notificationHubService.SendRefreshNotificationAsync(
                 RefreshDataType.UpdateAvailable,

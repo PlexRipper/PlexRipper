@@ -1,5 +1,4 @@
 using Microsoft.Extensions.Logging;
-using Reaparr.Environment;
 
 namespace Reaparr.Build;
 

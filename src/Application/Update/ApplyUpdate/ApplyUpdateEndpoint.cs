@@ -1,3 +1,5 @@
+using Microsoft.Extensions.Hosting;
+
 namespace Reaparr.Application;
 
 /// <summary>
@@ -7,15 +9,22 @@ public class ApplyUpdateEndpoint : BaseEndpointWithoutRequest
 {
     private readonly IAppBuildInfo _appBuildInfo;
     private readonly UpdateManager _velopackManager;
+    private readonly IHostApplicationLifetime _appLifetime;
     private readonly ILogger _log;
 
     public override string EndpointPath => ApiRoutes.UpdateController + "/execute";
 
-    public ApplyUpdateEndpoint(ILogger log, IAppBuildInfo appBuildInfo, UpdateManager velopackManager)
+    public ApplyUpdateEndpoint(
+        ILogger log,
+        IAppBuildInfo appBuildInfo,
+        UpdateManager velopackManager,
+        IHostApplicationLifetime appLifetime
+    )
     {
         _log = log.ForContext<ApplyUpdateEndpoint>();
         _appBuildInfo = appBuildInfo;
         _velopackManager = velopackManager;
+        _appLifetime = appLifetime;
     }
 
     public override void Configure()
@@ -41,16 +50,80 @@ public class ApplyUpdateEndpoint : BaseEndpointWithoutRequest
         var asset = _velopackManager.UpdatePendingRestart;
         if (asset is null)
         {
+            _log.Here().Warning("Skipping Velopack update apply because no update is staged");
             await SendFluentResult(Result.Fail("No update staged"), ct);
             return;
         }
 
+        _log.Here()
+            .Warning(
+                "Preparing to apply Velopack update and restart Reaparr; AppId: {AppId}; CurrentVersion: {CurrentVersion}; PackageId: {PackageId}; PackageVersion: {PackageVersion}",
+                _velopackManager.AppId,
+                _velopackManager.CurrentVersion,
+                asset.PackageId,
+                asset.Version
+            );
+
         HttpContext.Response.OnCompleted(() =>
         {
-            _velopackManager.ApplyUpdatesAndRestart(asset, []);
+            _ = Task.Run(async () => await ApplyUpdateAfterResponseAsync(asset));
+
             return Task.CompletedTask;
         });
 
         await SendFluentResult(Result.Ok(), ct);
+    }
+
+    private async Task ApplyUpdateAfterResponseAsync(VelopackAsset asset)
+    {
+        try
+        {
+            _log.Here()
+                .Warning(
+                    "Launching Velopack updater to wait for Reaparr exit, apply update, and restart; AppId: {AppId}; CurrentVersion: {CurrentVersion}; PackageId: {PackageId}; PackageVersion: {PackageVersion}",
+                    _velopackManager.AppId,
+                    _velopackManager.CurrentVersion,
+                    asset.PackageId,
+                    asset.Version
+                );
+
+            await _velopackManager.WaitExitThenApplyUpdatesAsync(asset, silent: false, restart: true, restartArgs: []);
+
+            _log.Here()
+                .Warning(
+                    "Velopack updater launched; stopping Reaparr host before exiting process; AppId: {AppId}; CurrentVersion: {CurrentVersion}; PackageId: {PackageId}; PackageVersion: {PackageVersion}",
+                    _velopackManager.AppId,
+                    _velopackManager.CurrentVersion,
+                    asset.PackageId,
+                    asset.Version
+                );
+
+            _appLifetime.StopApplication();
+
+            await Task.Delay(TimeSpan.FromMilliseconds(500));
+
+            _log.Here()
+                .Warning(
+                    "Exiting Reaparr process so Velopack can apply update and restart; AppId: {AppId}; CurrentVersion: {CurrentVersion}; PackageId: {PackageId}; PackageVersion: {PackageVersion}",
+                    _velopackManager.AppId,
+                    _velopackManager.CurrentVersion,
+                    asset.PackageId,
+                    asset.Version
+                );
+
+            global::System.Environment.Exit(0);
+        }
+        catch (Exception ex)
+        {
+            _log.Here()
+                .Error(
+                    ex,
+                    "Velopack WaitExitThenApplyUpdatesAsync failed; AppId: {AppId}; CurrentVersion: {CurrentVersion}; PackageId: {PackageId}; PackageVersion: {PackageVersion}",
+                    _velopackManager.AppId,
+                    _velopackManager.CurrentVersion,
+                    asset.PackageId,
+                    asset.Version
+                );
+        }
     }
 }

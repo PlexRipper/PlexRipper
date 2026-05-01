@@ -45,6 +45,7 @@ public interface IAppBuildInfo
     /// <summary>
     /// Gets the current operating system platform as an <see cref="OperatingSystemPlatform"/> enum value.
     /// </summary>
+    // ReSharper disable once InconsistentNaming
     OperatingSystemPlatform CurrentOS { get; }
 
     /// <summary>
@@ -60,5 +61,6 @@ public interface IAppBuildInfo
     /// <summary>
     /// Returns true if the current operating system is macOS.
     /// </summary>
+    // ReSharper disable once InconsistentNaming
     bool IsMacOS { get; }
 }

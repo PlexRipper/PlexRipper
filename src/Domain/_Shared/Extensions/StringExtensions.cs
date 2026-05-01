@@ -5,7 +5,6 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
 using PasswordGenerator;
-using Reaparr.Environment;
 
 namespace Reaparr.Domain;
 

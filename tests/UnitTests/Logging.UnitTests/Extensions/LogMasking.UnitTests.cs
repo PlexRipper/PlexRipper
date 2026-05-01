@@ -1,6 +1,5 @@
 ﻿using Autofac;
 using Reaparr.Environment;
-using Serilog.Events;
 using Serilog.Sinks.TestCorrelator;
 
 namespace Reaparr.Logging.UnitTests;
@@ -21,7 +20,7 @@ public class LogMaskingUnitTests : BaseUnitTest<LogMaskingUnitTests>
 
             runtimeInfo.IsUnmasked.ShouldBeFalse();
 
-            LogFactory.SetupLogging(testLogConfig, runtimeInfo, LogEventLevel.Debug);
+            LogFactory.SetupLogging(testLogConfig, runtimeInfo);
             var log = LogFactory.Create<LogMaskingUnitTests>();
             using (var context = TestCorrelator.CreateContext())
             {

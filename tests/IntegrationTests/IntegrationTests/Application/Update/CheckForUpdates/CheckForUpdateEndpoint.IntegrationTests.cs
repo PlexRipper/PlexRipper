@@ -298,7 +298,7 @@ public class CheckForUpdateEndpointIntegrationTests : BaseIntegrationTests
     private static FakeCommandExecutor CreateCommandExecutor(AppUpdateCheckResult updateResult) =>
         new FakeCommandExecutor()
             .Intercept<GetGitHubReleasesCommand, Result<IReadOnlyList<ReleaseNote>>>(
-                (_, _) => Task.FromResult(Result.Ok<IReadOnlyList<ReleaseNote>>(updateResult.ReleaseNotes))
+                (_, _) => Task.FromResult(Result.Ok(updateResult.ReleaseNotes))
             )
             .Intercept<CheckForUpdatesCommand, Result<AppUpdateCheckResult>>(
                 (_, _) =>

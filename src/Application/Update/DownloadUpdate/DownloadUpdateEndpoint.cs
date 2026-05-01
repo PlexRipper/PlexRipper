@@ -47,10 +47,17 @@ public class DownloadUpdateEndpoint : BaseEndpointWithoutRequest
 
         var result = await Result.Try(async Task () =>
         {
+            _log.Here().Information("Checking for Velopack update before download");
+
             // Single network call: fetch latest update info, then download it.
             var updateInfo = await _velopackManager.CheckForUpdatesAsync();
             if (updateInfo is null)
+            {
+                _log.Here().Information("No Velopack update available to download");
                 return;
+            }
+
+            _log.Here().Information("Downloading Velopack update {Version}", updateInfo.TargetFullRelease.Version);
 
             await _velopackManager.DownloadUpdatesAsync(
                 updateInfo,
@@ -61,6 +68,13 @@ public class DownloadUpdateEndpoint : BaseEndpointWithoutRequest
                 },
                 ct
             );
+
+            _log.Here()
+                .Information(
+                    "Downloaded Velopack update {Version}; PendingRestart: {HasPendingRestart}",
+                    updateInfo.TargetFullRelease.Version,
+                    _velopackManager.UpdatePendingRestart is not null
+                );
         });
 
         await SendFluentResult(result, ct);

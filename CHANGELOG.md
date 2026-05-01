@@ -1,5 +1,12 @@
 Reaparr Changelog
 
+# [0.38.0-dev.13](https://github.com/Reaparr/Reaparr/compare/v0.38.0-dev.12...v0.38.0-dev.13) (2026-05-01)
+
+
+### Bug Fixes
+
+* **WebAPI:** Fix the Reaparr app not exiting on applying update ([e90ba14](https://github.com/Reaparr/Reaparr/commit/e90ba1424071f3220e7b029caaa60160e9927a1c))
+
 # [0.38.0-dev.12](https://github.com/Reaparr/Reaparr/compare/v0.38.0-dev.11...v0.38.0-dev.12) (2026-04-27)
 
 # [0.38.0-dev.11](https://github.com/Reaparr/Reaparr/compare/v0.38.0-dev.10...v0.38.0-dev.11) (2026-04-27)

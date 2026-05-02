@@ -88,16 +88,56 @@ internal sealed class DesktopCommandRunner(BuildPaths paths, DesktopCommandSetti
         }
     }
 
-    public async Task<bool> CommandExistsAsync(string command)
+    public Task<bool> CommandExistsAsync(string command)
     {
-        var executable = OperatingSystem.IsWindows() ? "where" : "which";
-        var result = await Cli.Wrap(executable)
-            .WithArguments([command])
-            .WithWorkingDirectory(paths.RootDirectory.FullName)
-            .WithValidation(CommandResultValidation.None)
-            .ExecuteBufferedAsync();
+        if (string.IsNullOrWhiteSpace(command))
+        {
+            return Task.FromResult(false);
+        }
 
-        return result.ExitCode is 0;
+        if (Path.IsPathRooted(command) || command.Contains(Path.DirectorySeparatorChar) || command.Contains(Path.AltDirectorySeparatorChar))
+        {
+            return Task.FromResult(File.Exists(command));
+        }
+
+        var pathValue = System.Environment.GetEnvironmentVariable("PATH");
+        if (string.IsNullOrWhiteSpace(pathValue))
+        {
+            return Task.FromResult(false);
+        }
+
+        var candidates = new List<string> { command };
+
+        if (OperatingSystem.IsWindows())
+        {
+            var pathExtValue = System.Environment.GetEnvironmentVariable("PATHEXT") ?? ".EXE;.CMD;.BAT;.COM";
+            var pathExts = pathExtValue
+                .Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList();
+
+            if (!Path.HasExtension(command))
+            {
+                foreach (var ext in pathExts)
+                {
+                    candidates.Add(command + ext);
+                }
+            }
+        }
+
+        foreach (var directory in pathValue.Split(Path.PathSeparator, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+        {
+            foreach (var candidate in candidates)
+            {
+                var fullPath = Path.Combine(directory, candidate);
+                if (File.Exists(fullPath))
+                {
+                    return Task.FromResult(true);
+                }
+            }
+        }
+
+        return Task.FromResult(false);
     }
 
     private void LogCommand(string fileName, IReadOnlyList<string> arguments)

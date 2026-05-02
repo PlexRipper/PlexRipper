@@ -4,6 +4,8 @@ using System.IO.Abstractions;
 namespace Reaparr.Build;
 
 internal sealed class DesktopBuildWorkflow(
+    BuildPaths paths,
+    DesktopRuntime runtime,
     DesktopPublishWorkflow publishWorkflow,
     DesktopPackageWorkflow packageWorkflow,
     DesktopLaunchWorkflow launchWorkflow,
@@ -47,6 +49,8 @@ internal sealed class DesktopBuildWorkflow(
         );
 
         return new DesktopBuildWorkflow(
+            paths,
+            runtime,
             publishWorkflow,
             packageWorkflow,
             launchWorkflow,
@@ -83,6 +87,7 @@ internal sealed class DesktopBuildWorkflow(
         {
             logger.LogInformation("Skipping packaging step for {RuntimeIdentifier}; launching published output directly", settings.RuntimeIdentifier);
             await publishWorkflow.PublishAsync();
+            EnsureWindowsArtifactExport();
         }
         else
         {
@@ -101,5 +106,31 @@ internal sealed class DesktopBuildWorkflow(
 
         logger.LogInformation("Launching desktop build for {RuntimeIdentifier}", settings.RuntimeIdentifier);
         return await launchWorkflow.LaunchAsync();
+    }
+
+    private void EnsureWindowsArtifactExport()
+    {
+        if (!runtime.RuntimeIdentifier.StartsWith("win-", StringComparison.OrdinalIgnoreCase))
+        {
+            return;
+        }
+
+        var artifactDirectory = packageWorkflow.GetArtifactDirectory();
+        Directory.CreateDirectory(artifactDirectory);
+
+        var publishedExecutable = Path.Combine(paths.PublishDirectory(runtime.RuntimeIdentifier), runtime.MainExecutable);
+        if (File.Exists(publishedExecutable))
+        {
+            var targetExecutable = Path.Combine(artifactDirectory, runtime.MainExecutable);
+            File.Copy(publishedExecutable, targetExecutable, overwrite: true);
+            logger.LogInformation("Exported Windows executable artifact to {ArtifactPath}", targetExecutable);
+        }
+
+        var publishedRoot = new DirectoryInfo(paths.PublishDirectory(runtime.RuntimeIdentifier));
+        var targetRoot = new DirectoryInfo(Path.Combine(artifactDirectory, "publish"));
+        FileSystemTasks.ClearDirectory(targetRoot);
+        FileSystemTasks.CopyDirectory(publishedRoot, targetRoot);
+
+        logger.LogInformation("Exported Windows publish directory to {ArtifactPublishDirectory}", targetRoot.FullName);
     }
 }

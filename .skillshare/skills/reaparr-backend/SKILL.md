@@ -42,7 +42,7 @@ Fallback to filesystem tools only after repeated Rider MCP attempts cannot provi
 
 ## Secondary Skill Routing
 
-Load this skill first, then load narrower skills when the task matches:
+Load this skill first, then load narrower skills when the task matches. When editing or creating backend unit tests under `tests/UnitTests/`, `reaparr-backend-unit-tests` is mandatory, even if the production code being tested lives in a tooling project such as `tools/Build`. 
 
 | Task | Load next |
 | --- | --- |
@@ -268,6 +268,8 @@ Do not claim success unless Rider MCP diagnostics/indexing was used and required
 ## Common Mistakes
 
 - Skipping this umbrella skill and loading only a narrow backend skill.
+- Editing backend unit tests without also loading `reaparr-backend-unit-tests`.
+- Testing filesystem behavior with real `File`, `Directory`, temp directories, or host filesystem state instead of `BaseUnitTest.SetupFileSystem(...)` and `MockFileSystem`.
 - Treating this skill as optional for small backend changes.
 - Using WebStorm MCP tools for backend files.
 - Falling back to filesystem tools after one Rider MCP hiccup instead of retrying Rider MCP and trying narrower Rider tools.

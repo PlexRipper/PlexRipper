@@ -1,5 +1,4 @@
 using Microsoft.Extensions.Logging;
-using System.IO.Abstractions;
 
 namespace Reaparr.Build;
 
@@ -10,26 +9,33 @@ internal sealed class DesktopBuildWorkflow(
     DesktopPackageWorkflow packageWorkflow,
     DesktopLaunchWorkflow launchWorkflow,
     DesktopCommandSettings settings,
+    FileSystemTasks fileSystemTasks,
+    System.IO.Abstractions.IFileSystem fileSystem,
     ILogger<DesktopBuildWorkflow> logger
 )
 {
     public static DesktopBuildWorkflow Create(
         BuildPaths paths,
         DesktopCommandSettings settings,
-        ILoggerFactory loggerFactory
+        ILoggerFactory loggerFactory,
+        System.IO.Abstractions.IFileSystem fileSystem
     )
     {
         var runtime = DesktopRuntimeCatalog.Get(settings.RuntimeIdentifier);
         var commandRunner = new DesktopCommandRunner(
             paths,
             settings,
+            fileSystem,
             loggerFactory.CreateLogger<DesktopCommandRunner>()
         );
+        var fileSystemTasks = new FileSystemTasks(fileSystem);
         var publishWorkflow = new DesktopPublishWorkflow(
             paths,
             runtime,
             settings,
             commandRunner,
+            fileSystemTasks,
+            fileSystem,
             loggerFactory.CreateLogger<DesktopPublishWorkflow>()
         );
         var packageWorkflow = new DesktopPackageWorkflow(
@@ -37,6 +43,8 @@ internal sealed class DesktopBuildWorkflow(
             runtime,
             settings,
             commandRunner,
+            fileSystemTasks,
+            fileSystem,
             loggerFactory.CreateLogger<DesktopPackageWorkflow>()
         );
         var launchWorkflow = new DesktopLaunchWorkflow(
@@ -45,6 +53,7 @@ internal sealed class DesktopBuildWorkflow(
             settings,
             commandRunner,
             packageWorkflow,
+            fileSystem,
             loggerFactory.CreateLogger<DesktopLaunchWorkflow>()
         );
 
@@ -55,6 +64,8 @@ internal sealed class DesktopBuildWorkflow(
             packageWorkflow,
             launchWorkflow,
             settings,
+            fileSystemTasks,
+            fileSystem,
             loggerFactory.CreateLogger<DesktopBuildWorkflow>()
         );
     }
@@ -76,6 +87,8 @@ internal sealed class DesktopBuildWorkflow(
 
     public async Task<int> RunAsync()
     {
+        ValidateLaunchMode();
+
         logger.LogInformation(
             "Starting run workflow for {RuntimeIdentifier} (SkipPackage={SkipPackage}, DryRun={DryRun})",
             settings.RuntimeIdentifier,
@@ -108,6 +121,27 @@ internal sealed class DesktopBuildWorkflow(
         return await launchWorkflow.LaunchAsync();
     }
 
+    private void ValidateLaunchMode()
+    {
+        if (!runtime.RuntimeIdentifier.StartsWith("linux-", StringComparison.OrdinalIgnoreCase) || settings.SkipPackage)
+        {
+            return;
+        }
+
+        if (
+            string.Equals(settings.LaunchMode, "published", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(settings.LaunchMode, "packaged", StringComparison.OrdinalIgnoreCase)
+        )
+        {
+            return;
+        }
+
+        throw new ArgumentException(
+            $"Unsupported launch mode '{settings.LaunchMode}'. Supported values are 'published' and 'packaged'.",
+            nameof(settings.LaunchMode)
+        );
+    }
+
     private void EnsureWindowsArtifactExport()
     {
         if (!runtime.RuntimeIdentifier.StartsWith("win-", StringComparison.OrdinalIgnoreCase))
@@ -116,21 +150,21 @@ internal sealed class DesktopBuildWorkflow(
         }
 
         var artifactDirectory = packageWorkflow.GetArtifactDirectory();
-        Directory.CreateDirectory(artifactDirectory);
+        fileSystem.Directory.CreateDirectory(artifactDirectory);
 
-        var publishedExecutable = Path.Combine(paths.PublishDirectory(runtime.RuntimeIdentifier), runtime.MainExecutable);
-        if (File.Exists(publishedExecutable))
+        var publishedExecutable = fileSystem.Path.Combine(paths.PublishDirectory(runtime.RuntimeIdentifier), runtime.MainExecutable);
+        if (fileSystem.File.Exists(publishedExecutable))
         {
-            var targetExecutable = Path.Combine(artifactDirectory, runtime.MainExecutable);
-            File.Copy(publishedExecutable, targetExecutable, overwrite: true);
+            var targetExecutable = fileSystem.Path.Combine(artifactDirectory, runtime.MainExecutable);
+            fileSystem.File.Copy(publishedExecutable, targetExecutable, overwrite: true);
             logger.LogInformation("Exported Windows executable artifact to {ArtifactPath}", targetExecutable);
         }
 
-        var publishedRoot = new DirectoryInfo(paths.PublishDirectory(runtime.RuntimeIdentifier));
-        var targetRoot = new DirectoryInfo(Path.Combine(artifactDirectory, "publish"));
-        FileSystemTasks.ClearDirectory(targetRoot);
-        FileSystemTasks.CopyDirectory(publishedRoot, targetRoot);
+        var publishedRoot = paths.PublishDirectory(runtime.RuntimeIdentifier);
+        var targetRoot = fileSystem.Path.Combine(artifactDirectory, "publish");
+        fileSystemTasks.ClearDirectory(targetRoot);
+        fileSystemTasks.CopyDirectory(publishedRoot, targetRoot);
 
-        logger.LogInformation("Exported Windows publish directory to {ArtifactPublishDirectory}", targetRoot.FullName);
+        logger.LogInformation("Exported Windows publish directory to {ArtifactPublishDirectory}", targetRoot);
     }
 }

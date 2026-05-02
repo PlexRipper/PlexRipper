@@ -10,6 +10,7 @@
         <ReaparrRuntimeMode Condition="'$(ReaparrRuntimeMode)' == ''">docker</ReaparrRuntimeMode>
         <ReaparrRuntimeIdentifier Condition="'$(ReaparrRuntimeIdentifier)' == '' and '$(RuntimeIdentifier)' != ''">$(RuntimeIdentifier)</ReaparrRuntimeIdentifier>
         <ReaparrRuntimeIdentifier Condition="'$(ReaparrRuntimeIdentifier)' == ''">unknown</ReaparrRuntimeIdentifier>
+        <CSharpier_Bypass>true</CSharpier_Bypass>
     </PropertyGroup>
 
     <ItemGroup>

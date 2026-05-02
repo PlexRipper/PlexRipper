@@ -1,0 +1,25 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <RootNamespace>Reaparr.Build.UnitTests</RootNamespace>
+        <AssemblyName>Reaparr.Build.UnitTests</AssemblyName>
+    </PropertyGroup>
+    <ItemGroup>
+        <PackageReference Include="CSharpier.MsBuild" Version="1.2.6">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="TUnit" Version="1.24.0" />
+        <PackageReference Include="coverlet.collector" Version="8.0.1">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="Serilog.Sinks.TestCorrelator" Version="4.0.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\..\BaseTests\BaseTests.csproj" />
+        <ProjectReference Include="..\..\..\tools\Build\Build.csproj" />
+        <ProjectReference Include="..\BaseTests.UnitTests\BaseTests.UnitTests.csproj" />
+    </ItemGroup>
+
+</Project>

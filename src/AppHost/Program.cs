@@ -23,6 +23,16 @@ public class Program
     [STAThread]
     public static async Task Main(string[] args)
     {
+        _pathProvider = new PathProvider(_appBuildInfo, _appRuntimeInfo);
+        var logBuffer = new LogBufferService();
+        var signalRLogConfig = new SignalRLogConfig(_appRuntimeInfo, _pathProvider, logBuffer);
+        _failureDialog = new DesktopStartupFailureDialog(_appBuildInfo, _pathProvider, logBuffer);
+                
+        // Skip logger setup in integration test mode to preserve test logger
+        if (!_appRuntimeInfo.IsIntegrationTestMode)
+            LogFactory.SetupLogging(signalRLogConfig, _appRuntimeInfo, _appRuntimeInfo.LogLevel);
+
+        
         // This should be run at the very start before anything is initiated
         var velopackResult = Result.Try(() => VelopackApp.Build().Run());
         if (velopackResult.IsFailed)
@@ -36,14 +46,6 @@ public class Program
 
         try
         {
-            _pathProvider = new PathProvider(_appBuildInfo, _appRuntimeInfo);
-            var logBuffer = new LogBufferService();
-            var signalRLogConfig = new SignalRLogConfig(_appRuntimeInfo, _pathProvider, logBuffer);
-            _failureDialog = new DesktopStartupFailureDialog(_appBuildInfo, _pathProvider, logBuffer);
-                
-            // Skip logger setup in integration test mode to preserve test logger
-            if (!_appRuntimeInfo.IsIntegrationTestMode)
-                LogFactory.SetupLogging(signalRLogConfig, _appRuntimeInfo, _appRuntimeInfo.LogLevel);
 
             _log.Here().Information("Initiating Reaparr boot process");
 

@@ -34,4 +34,15 @@ public class LiveLogEventDTO
     /// Optional source context.
     /// </summary>
     public string? SourceContext { get; init; }
+
+    public override string ToString()
+    {
+        var time = Timestamp.ToString("HH:mm:ss");
+        var level = Level.ToString();
+        var location = string.IsNullOrWhiteSpace(SourceContext) ? "Unknown" : SourceContext;
+        var message = Message ?? string.Empty;
+        var exception = Exception ?? string.Empty;
+
+        return $"{time} [{level}] [{location}] => {message}\n{exception}\n";
+    }
 }

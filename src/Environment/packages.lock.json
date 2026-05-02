@@ -26,6 +26,7 @@
         "resolved": "0.1.2",
         "contentHash": "Zhw6wmXwdLkhCvgBfVd9D8UL62IF2xnmbWDckQVoZMT9lBKCuVLwaVrkXhhJtP6pxcRaf7caauNCWOUngoPNsQ=="
       }
-    }
+    },
+    "net10.0/linux-x64": {}
   }
 }

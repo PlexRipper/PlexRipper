@@ -7,7 +7,7 @@ internal sealed class DesktopPublishWorkflow(
     BuildPaths paths,
     DesktopRuntime runtime,
     DesktopCommandSettings settings,
-    DesktopCommandRunner commandRunner,
+    IDesktopCommandRunner commandRunner,
     FileSystemTasks fileSystemTasks,
     IFileSystem fileSystem,
     ILogger<DesktopPublishWorkflow> logger
@@ -57,6 +57,13 @@ internal sealed class DesktopPublishWorkflow(
     {
         if (settings.SkipFrontend)
         {
+            return;
+        }
+
+        var sourceDirectory = GetFrontendPublicDirectory();
+        if (fileSystem.Directory.Exists(sourceDirectory))
+        {
+            logger.LogInformation("Reusing existing frontend output from {FrontendPublicDirectory}", sourceDirectory);
             return;
         }
 
@@ -122,7 +129,7 @@ internal sealed class DesktopPublishWorkflow(
             paths.PublishDirectory(runtime.RuntimeIdentifier),
             "wwwroot"
         );
-        fileSystem.Directory.CreateDirectory(wwwrootDirectory);
+        fileSystemTasks.ClearArtifactDirectory(paths.RootDirectory, wwwrootDirectory);
         fileSystemTasks.CopyDirectory(sourceDirectory, wwwrootDirectory);
     }
 

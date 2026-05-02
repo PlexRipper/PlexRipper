@@ -1,5 +1,4 @@
 using CliWrap;
-using CliWrap.Buffered;
 using CliWrap.EventStream;
 using CliWrap.Exceptions;
 using Microsoft.Extensions.Logging;
@@ -7,12 +6,23 @@ using System.IO.Abstractions;
 
 namespace Reaparr.Build;
 
+internal interface IDesktopCommandRunner
+{
+    Task RunCommandAsync(string fileName, IReadOnlyList<string> arguments, string? workingDirectory = null);
+
+    Task<int> ExecuteCommandAsync(string fileName, IReadOnlyList<string> arguments, string? workingDirectory = null);
+
+    Task RequireCommandAsync(string command);
+
+    Task<bool> CommandExistsAsync(string command);
+}
+
 internal sealed class DesktopCommandRunner(
     BuildPaths paths,
     DesktopCommandSettings settings,
     IFileSystem fileSystem,
     ILogger logger
-)
+) : IDesktopCommandRunner
 {
     public async Task RunCommandAsync(string fileName, IReadOnlyList<string> arguments, string? workingDirectory = null)
     {

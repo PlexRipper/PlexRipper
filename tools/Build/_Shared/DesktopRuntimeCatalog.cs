@@ -17,6 +17,9 @@ internal static class DesktopRuntimeCatalog
 
     public static string SupportedRuntimeIdentifiers => string.Join(", ", _runtimes.Keys.Order());
 
+    public static bool TryGet(string runtimeIdentifier, out DesktopRuntime runtime) =>
+        _runtimes.TryGetValue(runtimeIdentifier, out runtime!);
+
     public static DesktopRuntime Get(string runtimeIdentifier)
     {
         if (string.IsNullOrWhiteSpace(runtimeIdentifier))
@@ -27,7 +30,7 @@ internal static class DesktopRuntimeCatalog
             );
         }
 
-        if (_runtimes.TryGetValue(runtimeIdentifier, out var runtime))
+        if (TryGet(runtimeIdentifier, out var runtime))
         {
             return runtime;
         }

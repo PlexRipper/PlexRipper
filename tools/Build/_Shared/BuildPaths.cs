@@ -12,8 +12,7 @@ internal sealed class BuildPaths(string rootDirectory, IFileSystem fileSystem)
 
     public string FrontendPublicDirectory => fileSystem.Path.Combine(ClientAppDirectory, ".output", "public");
 
-    public string PublishDirectory(string rid) =>
-        fileSystem.Path.Combine(RootDirectory, "src", "AppHost", "bin", "Publish", "Desktop", rid);
+    public string PublishDirectory(string rid) => fileSystem.Path.Combine(ArtifactDirectory(rid), "publish");
 
     public string ArtifactDirectory(string rid) => fileSystem.Path.Combine(RootDirectory, ".artifacts", rid);
 

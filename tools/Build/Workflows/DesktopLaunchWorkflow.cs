@@ -7,7 +7,7 @@ internal sealed class DesktopLaunchWorkflow(
     BuildPaths paths,
     DesktopRuntime runtime,
     DesktopCommandSettings settings,
-    DesktopCommandRunner commandRunner,
+    IDesktopCommandRunner commandRunner,
     DesktopPackageWorkflow packageWorkflow,
     IFileSystem fileSystem,
     ILogger<DesktopLaunchWorkflow> logger

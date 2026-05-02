@@ -7,7 +7,7 @@ internal sealed class DesktopPackageWorkflow(
     BuildPaths paths,
     DesktopRuntime runtime,
     DesktopCommandSettings settings,
-    DesktopCommandRunner commandRunner,
+    IDesktopCommandRunner commandRunner,
     FileSystemTasks fileSystemTasks,
     IFileSystem fileSystem,
     ILogger<DesktopPackageWorkflow> logger
@@ -20,8 +20,6 @@ internal sealed class DesktopPackageWorkflow(
     {
         if (!settings.DryRun)
         {
-            await commandRunner.RequireCommandAsync("vpk");
-
             if (!settings.PreserveExistingArtifacts)
             {
                 fileSystemTasks.ClearArtifactDirectory(paths.RootDirectory, GetArtifactDirectory());

@@ -23,45 +23,36 @@ public class Program
     [STAThread]
     public static async Task Main(string[] args)
     {
+        FluentResultConfiguration.Setup();
+
         _pathProvider = new PathProvider(_appBuildInfo, _appRuntimeInfo);
         var logBuffer = new LogBufferService();
         var signalRLogConfig = new SignalRLogConfig(_appRuntimeInfo, _pathProvider, logBuffer);
         _failureDialog = new DesktopStartupFailureDialog(_appBuildInfo, _pathProvider, logBuffer);
-                
+
         // Skip logger setup in integration test mode to preserve test logger
         if (!_appRuntimeInfo.IsIntegrationTestMode)
             LogFactory.SetupLogging(signalRLogConfig, _appRuntimeInfo, _appRuntimeInfo.LogLevel);
 
-        
         // This should be run at the very start before anything is initiated
         var velopackResult = Result.Try(() => VelopackApp.Build().Run());
         if (velopackResult.IsFailed)
             FailedToStart(velopackResult);
 
-        var testExceptionResult = Result.Fail(
-            new ExceptionalError(new AbandonedMutexException("Manual startup failure dialog test"))
-        );
-        if (testExceptionResult.IsFailed)
-            FailedToStart(testExceptionResult);
+        _log.Here().Information("Initiating Reaparr boot process");
 
+        _log.Here()
+            .Information(
+                "Starting Reaparr {Version} ({Channel}) in {RuntimeMode} mode on {CurrentOS} ({RuntimeIdentifier})",
+                _appBuildInfo.InformationalVersion,
+                _appBuildInfo.IsDevRelease ? "DEVELOPMENT" : "STABLE",
+                _appBuildInfo.RuntimeMode,
+                _appBuildInfo.CurrentOS,
+                _appBuildInfo.RuntimeIdentifier
+            );
         try
         {
-
-            _log.Here().Information("Initiating Reaparr boot process");
-
-            _log.Here()
-                .Information(
-                    "Starting Reaparr {Version} ({Channel}) in {RuntimeMode} mode on {CurrentOS} ({RuntimeIdentifier})",
-                    _appBuildInfo.InformationalVersion,
-                    _appBuildInfo.IsDevRelease ? "DEVELOPMENT" : "STABLE",
-                    _appBuildInfo.RuntimeMode,
-                    _appBuildInfo.CurrentOS,
-                    _appBuildInfo.RuntimeIdentifier
-                );
-
             AppExtensions.LogIdentity(_appBuildInfo, _appRuntimeInfo);
-
-            FluentResultConfiguration.Setup();
 
             var builder = WebApplication.CreateBuilder(args);
 

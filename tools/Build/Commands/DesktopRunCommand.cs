@@ -1,27 +1,18 @@
-using Microsoft.Extensions.Logging;
-using System.IO.Abstractions;
+using Reaparr.Domain;
 using Spectre.Console.Cli;
 
 namespace Reaparr.Build;
 
-internal sealed class DesktopRunCommand : AsyncCommand<DesktopCommandSettings>
+internal sealed class DesktopRunCommand(ICommandExecutor commandExecutor) : AsyncCommand<DesktopCommandSettings>
 {
-    private readonly BuildPaths _paths;
-    private readonly ILoggerFactory _loggerFactory;
-    private readonly IFileSystem _fileSystem;
-    public DesktopRunCommand(BuildPaths paths, ILoggerFactory loggerFactory, IFileSystem fileSystem)
-    {
-        _paths = paths;
-        _loggerFactory = loggerFactory;
-        _fileSystem = fileSystem;
-    }
-
-    protected override Task<int> ExecuteAsync(
+    protected override async Task<int> ExecuteAsync(
         CommandContext context,
         DesktopCommandSettings settings,
         CancellationToken cancellationToken
     )
     {
-        return DesktopBuildWorkflow.Create(_paths, settings, _loggerFactory, _fileSystem).RunAsync();
+        var result = await commandExecutor.Send(new DesktopRunBuildCommand(settings), cancellationToken);
+
+        return result.IsFailed ? 1 : result.Value;
     }
 }

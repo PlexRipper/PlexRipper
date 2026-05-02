@@ -1,123 +1,47 @@
-using Autofac;
-using Microsoft.Extensions.Logging.Abstractions;
-using System.IO.Abstractions;
+using System.IO.Abstractions.TestingHelpers;
 
 namespace Reaparr.Build.UnitTests;
 
-public class DesktopBuildWorkflowUnitTests : BaseUnitTest
+internal class DesktopRunBuildCommandHandlerUnitTests : BaseUnitTest<DesktopRunBuildCommandHandler>
 {
     [Test]
-    public async Task ShouldRequireVpkBeforePublishing_WhenPackaging()
+    public async Task ShouldNotInvokePackageCommand_WhenSkipPackageIsTrue()
     {
         // Arrange
-        const string root = "/repo";
         SetupFileSystem(system =>
         {
-            system.AddFile("/repo/Reaparr.sln", string.Empty);
+            system.AddFile("/repo/Reaparr.sln", new MockFileData(string.Empty));
             system.AddDirectory("/repo/src/AppHost/ClientApp/.output/public");
+            system.AddDirectory("/repo/.artifacts/linux-x64/publish");
+            system.AddFile("/repo/.artifacts/linux-x64/publish/Reaparr.AppHost", new MockFileData("bin"));
         });
 
-        var fileSystem = Mock.Container.Resolve<IFileSystem>();
-        var paths = new BuildPaths(root, fileSystem);
-        var settings = new DesktopCommandSettings
-        {
-            RuntimeIdentifier = "linux-x64",
-            Version = "1.2.3",
-            InformationalVersion = "1.2.3-dev.1",
-            SkipRestore = true,
-        };
-        var commandRunner = new RecordingDesktopCommandRunner();
-        var workflow = DesktopBuildWorkflow.Create(
-            paths,
-            settings,
-            NullLoggerFactory.Instance,
-            fileSystem,
-            commandRunner
-        );
-
-        // Act
-        await workflow.PackageAsync();
-
-        // Assert
-        commandRunner.Commands.Select(x => x.Operation).ShouldBe(["require", "require", "run", "run"]);
-        commandRunner.Commands[0].FileName.ShouldBe("vpk");
-        commandRunner.Commands[1].FileName.ShouldBe("dotnet");
-        commandRunner.Commands[2].FileName.ShouldBe("dotnet");
-        commandRunner.Commands[2].Arguments.ShouldContain("publish");
-        commandRunner.Commands[3].FileName.ShouldBe("vpk");
-    }
-
-    [Test]
-    public async Task ShouldNotRequireVpk_WhenRunSkipsPackaging()
-    {
-        // Arrange
-        const string root = "/repo";
-        SetupFileSystem(system =>
-        {
-            system.AddFile("/repo/Reaparr.sln", string.Empty);
-            system.AddDirectory("/repo/src/AppHost/ClientApp/.output/public");
-        });
-
-        var fileSystem = Mock.Container.Resolve<IFileSystem>();
-        var paths = new BuildPaths(root, fileSystem);
         var settings = new DesktopCommandSettings
         {
             RuntimeIdentifier = "linux-x64",
             Version = "1.2.3",
             InformationalVersion = "1.2.3-dev.1",
             SkipPackage = true,
-            SkipRestore = true,
             DryRun = true,
+            SkipRestore = true
         };
-        var commandRunner = new RecordingDesktopCommandRunner();
-        var workflow = DesktopBuildWorkflow.Create(
-            paths,
-            settings,
-            NullLoggerFactory.Instance,
-            fileSystem,
-            commandRunner
-        );
+
+        Mock.Mock<ICommandExecutor>()
+            .Setup(x => x.Send(It.IsAny<DesktopPublishBuildCommand>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result.Ok(0))
+            .Verifiable(Times.Once());
+
+        Mock.Mock<ICommandExecutor>()
+            .Setup(x => x.Send(It.IsAny<DesktopPackageBuildCommand>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result.Ok(0))
+            .Verifiable(Times.Never());
 
         // Act
-        var exitCode = await workflow.RunAsync();
+        var result = await Sut.ExecuteAsync(new DesktopRunBuildCommand(settings), CancellationToken);
 
         // Assert
-        exitCode.ShouldBe(0);
-        commandRunner.Commands.ShouldNotContain(x => x.Operation == "require" && x.FileName == "vpk");
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.ShouldBe(0);
+        Mock.Mock<ICommandExecutor>().Verify();
     }
-
-    private sealed class RecordingDesktopCommandRunner : IDesktopCommandRunner
-    {
-        public List<RecordedCommand> Commands { get; } = [];
-
-        public Task RunCommandAsync(string fileName, IReadOnlyList<string> arguments, string? workingDirectory = null)
-        {
-            Commands.Add(new RecordedCommand("run", fileName, arguments));
-            return Task.CompletedTask;
-        }
-
-        public Task<int> ExecuteCommandAsync(
-            string fileName,
-            IReadOnlyList<string> arguments,
-            string? workingDirectory = null
-        )
-        {
-            Commands.Add(new RecordedCommand("execute", fileName, arguments));
-            return Task.FromResult(0);
-        }
-
-        public Task RequireCommandAsync(string command)
-        {
-            Commands.Add(new RecordedCommand("require", command, []));
-            return Task.CompletedTask;
-        }
-
-        public Task<bool> CommandExistsAsync(string command) => Task.FromResult(true);
-    }
-
-    private sealed record RecordedCommand(
-        string Operation,
-        string FileName,
-        IReadOnlyList<string> Arguments
-    );
 }

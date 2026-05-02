@@ -1,6 +1,6 @@
 namespace Reaparr.Build.UnitTests;
 
-public class DesktopCiPackageCommandUnitTests : BaseUnitTest
+internal class DesktopCiPackageCommandUnitTests : BaseUnitTest<DesktopCiPackageCommand>
 {
     [Test]
     public void ShouldPreserveLaunchMode_WhenCreatingCiSettings()

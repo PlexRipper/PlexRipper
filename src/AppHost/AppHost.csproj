@@ -35,6 +35,9 @@
         <PackageReference Include="Serilog.Sinks.AspNetCore.App.SignalR" Version="1.2.2" />
     </ItemGroup>
     <ItemGroup>
+        <EmbeddedResource Include="Desktop\Window\Templates\DesktopStartupFailureDialog.html" />
+    </ItemGroup>
+    <ItemGroup>
         <ProjectReference Include="..\Application\Application.csproj" />
         <ProjectReference Include="..\BackgroundJobs\BackgroundJobs.csproj" />
         <ProjectReference Include="..\Data\Data.csproj" />

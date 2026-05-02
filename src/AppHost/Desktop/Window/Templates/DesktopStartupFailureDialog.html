@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Reaparr failed to start</title>
+  <style>
+    body { font-family: Segoe UI, Arial, sans-serif; margin: 14px; background: #111; color: #eee; }
+    h1 { margin: 0 0 8px; color: #ff6b6b; }
+    .meta { color: #c8c8c8; margin-bottom: 10px; }
+    .actions { display:flex; gap:8px; margin-bottom:12px; }
+    button { padding: 10px 14px; border: 0; border-radius: 6px; cursor: pointer; }
+    .secondary { background: #2a2a2a; color: #fff; }
+    .link { color: #7db4ff; text-decoration: underline; cursor: pointer; }
+    .pane { background: #1a1a1a; padding: 10px; border-radius: 8px; overflow: auto; white-space: pre-wrap; height: 260px; }
+    .pane.logs { height: 420px; }
+    .label { margin: 10px 0 6px; font-weight: 700; }
+  </style>
+</head>
+<body>
+  <h1>Reaparr failed to start</h1>
+  <div class="meta">Version: {{VERSION}} | Logs: {{LOGS_PATH}}</div>
+  <div class="actions">
+    <button class="secondary" onclick="window.external.sendMessage('open-logs')">Open Logs Folder</button>
+    <button class="secondary" onclick="window.external.sendMessage('open-website')">Open reaparr.rocks</button>
+  </div>
+  <div>Support site: <span class="link" onclick="window.external.sendMessage('open-website')">https://www.reaparr.rocks/</span></div>
+
+  <div class="label">Diagnostics</div>
+  <pre class="pane">{{DETAILS}}</pre>
+
+  <div class="label">Recent Logs (tail)</div>
+  <pre class="pane logs">{{LOG_CONTENT}}</pre>
+</body>
+</html>

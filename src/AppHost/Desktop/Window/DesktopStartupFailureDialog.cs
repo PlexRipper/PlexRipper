@@ -1,53 +1,165 @@
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.Encodings.Web;
 using Photino.NET;
 
 namespace Reaparr.AppHost;
 
-internal static class DesktopStartupFailureDialog
+/// <summary>
+/// Displays a diagnostic startup-failure dialog for desktop mode when Reaparr cannot boot.
+/// </summary>
+public class DesktopStartupFailureDialog
 {
-    public static void Show(Result result, string? logsDirectory, string? appVersion)
-    {
-        var safeLogsDirectory = string.IsNullOrWhiteSpace(logsDirectory) ? "(unknown)" : logsDirectory;
+    private readonly IPathProvider _pathProvider;
+    private readonly IAppBuildInfo _appBuildInfo;
+    private readonly ILogBufferService _logBufferService;
+    private const string TEMPLATE_RESOURCE_SUFFIX = "Desktop.Window.Templates.DesktopStartupFailureDialog.html";
 
-        var details = BuildDetails(result, safeLogsDirectory, appVersion);
-        var html = BuildHtml(details);
+    /// <summary>
+    /// Initializes a new instance of the <see cref="DesktopStartupFailureDialog"/> class.
+    /// </summary>
+    /// <param name="appBuildInfo">Build metadata used for diagnostic display content.</param>
+    /// <param name="pathProvider">Path provider used to resolve the logs directory.</param>
+    /// <param name="logBufferService">In-memory log buffer used to render recent log lines in the dialog.</param>
+    public DesktopStartupFailureDialog(
+        IAppBuildInfo appBuildInfo,
+        IPathProvider pathProvider,
+        ILogBufferService logBufferService)
+    {
+        _pathProvider = pathProvider;
+        _appBuildInfo = appBuildInfo;
+        _logBufferService = logBufferService;
+    }
+
+    /// <summary>
+    /// Shows the startup-failure diagnostic dialog populated from the provided failed result.
+    /// </summary>
+    /// <param name="errorResult">The failed result containing startup error information.</param>
+    public void Show(Result errorResult)
+    {
+        var safeLogsDirectory = _pathProvider.LogsDirectory;
+        var details = BuildDetails(errorResult);
+        IReadOnlyCollection<string> logContent = _logBufferService.GetAll().Select(x => x.ToString() ?? string.Empty).ToList();
+        var html = BuildHtmlFromTemplate(details, logContent);
 
         var window = new PhotinoWindow()
             .SetTitle("Reaparr failed to start")
-            .SetUseOsDefaultSize(true)
+            .SetMinSize(1400, 900)
+            .SetMaximized(true)
             .Center()
             .SetResizable(true)
             .SetLogVerbosity(2)
             .LoadRawString(html);
 
-        window.RegisterWebMessageReceivedHandler(
-            (_, message) =>
+        window.RegisterWebMessageReceivedHandler((_, message) =>
             {
-                if (message == "open-logs" && Directory.Exists(safeLogsDirectory))
+                switch (message)
                 {
-                    Process.Start(new ProcessStartInfo { FileName = safeLogsDirectory, UseShellExecute = true });
-                }
-                else if (message == "exit")
-                {
-                    window.Close();
+                    case "open-logs":
+                        TryOpenLogsWithFallbacks(safeLogsDirectory);
+                        break;
+                    case "open-website":
+                        TryOpenPath("https://www.reaparr.rocks/");
+                        break;
                 }
             }
         );
 
+        window.RegisterWindowClosingHandler((_, _) =>
+        {
+            System.Environment.Exit(1);
+            return false;
+        });
+
         window.WaitForClose();
     }
 
-    private static string BuildDetails(Result result, string logsDirectory, string? appVersion)
+    private static void TryOpenLogsWithFallbacks(string logsDirectory)
+    {
+        if (!Directory.Exists(logsDirectory))
+        {
+            return;
+        }
+
+        if (TryOpenPath(logsDirectory))
+        {
+            return;
+        }
+
+        if (OperatingSystem.IsLinux())
+        {
+            if (TryOpenCommand("xdg-open", logsDirectory))
+            {
+                return;
+            }
+
+            if (TryOpenCommand("gio", $"open \"{logsDirectory}\""))
+            {
+                return;
+            }
+        }
+
+        var fallbackUri = new Uri("file://" + logsDirectory.TrimEnd(Path.DirectorySeparatorChar) +
+                                  Path.DirectorySeparatorChar);
+        TryOpenPath(fallbackUri.AbsoluteUri);
+    }
+
+    private static bool TryOpenCommand(string command, string argument)
+    {
+        try
+        {
+            Process.Start(new ProcessStartInfo
+            {
+                FileName = command,
+                Arguments = argument,
+                UseShellExecute = false,
+                CreateNoWindow = true,
+            });
+            return true;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    private static bool TryOpenPath(string candidate)
+    {
+        if (string.IsNullOrWhiteSpace(candidate))
+        {
+            return false;
+        }
+
+        try
+        {
+            Process.Start(new ProcessStartInfo
+            {
+                FileName = candidate,
+                UseShellExecute = true,
+            });
+            return true;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    private string BuildDetails(Result result)
     {
         var firstError = result.Errors.FirstOrDefault();
         var exception = (firstError as ExceptionalError)?.Exception;
 
         var builder = new StringBuilder();
         builder.AppendLine($"Time (UTC): {DateTime.UtcNow:O}");
-        builder.AppendLine($"Version: {appVersion ?? "unknown"}");
-        builder.AppendLine($"Logs: {logsDirectory}");
+        builder.AppendLine($"Version: {_appBuildInfo.InformationalVersion}");
+        builder.AppendLine($"Logs directory: {_pathProvider.LogsDirectory}");
+        builder.AppendLine($"Current directory: {System.Environment.CurrentDirectory}");
+        builder.AppendLine($"Base directory: {AppContext.BaseDirectory}");
+        builder.AppendLine($"Process architecture: {RuntimeInformation.ProcessArchitecture}");
+        builder.AppendLine($"OS: {RuntimeInformation.OSDescription}");
+        builder.AppendLine($"Framework: {RuntimeInformation.FrameworkDescription}");
 
         if (exception is not null)
         {
@@ -66,36 +178,39 @@ internal static class DesktopStartupFailureDialog
         return builder.ToString();
     }
 
-    private static string BuildHtml(string details)
+    private string BuildHtmlFromTemplate(
+        string details,
+        IReadOnlyCollection<string> logContent)
     {
-        var encoded = HtmlEncoder.Default.Encode(details);
+        var template = LoadTemplate();
 
-        return $$"""
-            <!doctype html>
-            <html lang=\"en\">
-            <head>
-              <meta charset=\"utf-8\" />
-              <title>Reaparr failed to start</title>
-              <style>
-                body { font-family: Segoe UI, Arial, sans-serif; margin: 16px; background: #111; color: #eee; }
-                h1 { margin-top: 0; color: #ff6b6b; }
-                button { margin-right: 8px; padding: 8px 12px; border: 0; border-radius: 6px; cursor: pointer; }
-                .secondary { background: #2a2a2a; color: #fff; }
-                .primary { background: #b00020; color: #fff; }
-                pre { background: #1a1a1a; padding: 12px; border-radius: 8px; overflow: auto; white-space: pre-wrap; }
-              </style>
-            </head>
-            <body>
-              <h1>Reaparr failed to start</h1>
-              <p>The desktop app encountered an error during startup. Please copy details and share logs.</p>
-              <div>
-                <button class=\"secondary\" onclick=\"window.external.sendMessage('open-logs')\">Open Logs Folder</button>
-                <button class=\"primary\" onclick=\"window.external.sendMessage('exit')\">Exit</button>
-              </div>
-              <h2>Details</h2>
-              <pre>{{encoded}}</pre>
-            </body>
-            </html>
-            """;
+        return template
+            .Replace("{{VERSION}}", HtmlEncoder.Default.Encode(_appBuildInfo.InformationalVersion))
+            .Replace("{{LOGS_PATH}}", HtmlEncoder.Default.Encode(_pathProvider.LogsDirectory))
+            .Replace("{{DETAILS}}", HtmlEncoder.Default.Encode(details))
+            .Replace("{{LOG_CONTENT}}", HtmlEncoder.Default.Encode(string.Join(System.Environment.NewLine, logContent) ));
+    }
+
+    private static string LoadTemplate()
+    {
+        var assembly = typeof(DesktopStartupFailureDialog).Assembly;
+        var resourceName = assembly.GetManifestResourceNames()
+            .FirstOrDefault(name => name.EndsWith(TEMPLATE_RESOURCE_SUFFIX, StringComparison.Ordinal));
+
+        if (resourceName is null)
+        {
+            return
+                "<!doctype html><html><body><h1>Reaparr failed to start</h1><pre>Startup failure template resource not found.</pre></body></html>";
+        }
+
+        using var stream = assembly.GetManifestResourceStream(resourceName);
+        if (stream is null)
+        {
+            return
+                "<!doctype html><html><body><h1>Reaparr failed to start</h1><pre>Startup failure template stream could not be opened.</pre></body></html>";
+        }
+
+        using var reader = new StreamReader(stream);
+        return reader.ReadToEnd();
     }
 }

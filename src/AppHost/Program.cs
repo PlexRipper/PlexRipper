@@ -11,6 +11,7 @@ public class Program
     private static readonly AppRuntimeInfo _appRuntimeInfo = new();
     private static readonly AppBuildInfo _appBuildInfo = new();
     private static PathProvider? _pathProvider;
+    private static DesktopStartupFailureDialog? _failureDialog;
 
     // ReSharper disable once InconsistentNaming
     private static Serilog.ILogger _log => Log.ForContext(typeof(Program));
@@ -27,12 +28,19 @@ public class Program
         if (velopackResult.IsFailed)
             FailedToStart(velopackResult);
 
+        var testExceptionResult = Result.Fail(
+            new ExceptionalError(new AbandonedMutexException("Manual startup failure dialog test"))
+        );
+        if (testExceptionResult.IsFailed)
+            FailedToStart(testExceptionResult);
+
         try
         {
             _pathProvider = new PathProvider(_appBuildInfo, _appRuntimeInfo);
             var logBuffer = new LogBufferService();
             var signalRLogConfig = new SignalRLogConfig(_appRuntimeInfo, _pathProvider, logBuffer);
-
+            _failureDialog = new DesktopStartupFailureDialog(_appBuildInfo, _pathProvider, logBuffer);
+                
             // Skip logger setup in integration test mode to preserve test logger
             if (!_appRuntimeInfo.IsIntegrationTestMode)
                 LogFactory.SetupLogging(signalRLogConfig, _appRuntimeInfo, _appRuntimeInfo.LogLevel);
@@ -156,11 +164,7 @@ public class Program
         {
             try
             {
-                DesktopStartupFailureDialog.Show(
-                    result,
-                    logsDirectory: _pathProvider?.LogsDirectory,
-                    appVersion: _appBuildInfo.InformationalVersion
-                );
+                _failureDialog?.Show(result);
             }
             catch (Exception dialogException)
             {

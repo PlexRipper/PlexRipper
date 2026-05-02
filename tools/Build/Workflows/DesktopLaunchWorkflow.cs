@@ -3,40 +3,55 @@ using System.IO.Abstractions;
 
 namespace Reaparr.Build;
 
-internal sealed class DesktopLaunchWorkflow(
-    BuildPaths paths,
-    DesktopRuntime runtime,
-    DesktopCommandSettings settings,
-    IDesktopCommandRunner commandRunner,
-    DesktopPackageWorkflow packageWorkflow,
-    IFileSystem fileSystem,
-    ILogger<DesktopLaunchWorkflow> logger
-)
+internal sealed class DesktopLaunchWorkflow
 {
+    private readonly BuildPaths _paths;
+    private readonly DesktopRuntime _runtime;
+    private readonly DesktopCommandSettings _settings;
+    private readonly IDesktopCommandRunner _commandRunner;
+    private readonly DesktopPackageWorkflow _packageWorkflow;
+    private readonly IFileSystem _fileSystem;
+    private readonly ILogger<DesktopLaunchWorkflow> _logger;
+    public DesktopLaunchWorkflow(BuildPaths paths,
+        DesktopRuntime runtime,
+        DesktopCommandSettings settings,
+        IDesktopCommandRunner commandRunner,
+        DesktopPackageWorkflow packageWorkflow,
+        IFileSystem fileSystem,
+        ILogger<DesktopLaunchWorkflow> logger)
+    {
+        _paths = paths;
+        _runtime = runtime;
+        _settings = settings;
+        _commandRunner = commandRunner;
+        _packageWorkflow = packageWorkflow;
+        _fileSystem = fileSystem;
+        _logger = logger;
+    }
     private const string LAUNCH_MODE_PACKAGED = "packaged";
     private const string LAUNCH_MODE_PUBLISHED = "published";
 
     public async Task<int> LaunchAsync()
     {
         if (
-            runtime.RuntimeIdentifier.StartsWith("linux-", StringComparison.OrdinalIgnoreCase)
-            && !settings.SkipPackage
-            && string.Equals(settings.LaunchMode, LAUNCH_MODE_PACKAGED, StringComparison.OrdinalIgnoreCase)
+            _runtime.RuntimeIdentifier.StartsWith("linux-", StringComparison.OrdinalIgnoreCase)
+            && !_settings.SkipPackage
+            && string.Equals(_settings.LaunchMode, LAUNCH_MODE_PACKAGED, StringComparison.OrdinalIgnoreCase)
         )
         {
             var appImagePath = FindLinuxAppImage();
-            logger.LogInformation(
+            _logger.LogInformation(
                 "Launching packaged Linux AppImage for {RuntimeIdentifier} from {AppImagePath}",
-                runtime.RuntimeIdentifier,
+                _runtime.RuntimeIdentifier,
                 appImagePath
             );
 
-            await commandRunner.RunCommandAsync("chmod", ["+x", appImagePath]);
+            await _commandRunner.RunCommandAsync("chmod", ["+x", appImagePath]);
 
-            var appImageExitCode = await commandRunner.ExecuteCommandAsync(appImagePath, []);
-            logger.LogInformation(
+            var appImageExitCode = await _commandRunner.ExecuteCommandAsync(appImagePath, []);
+            _logger.LogInformation(
                 "Packaged Linux AppImage for {RuntimeIdentifier} exited with code {ExitCode}",
-                runtime.RuntimeIdentifier,
+                _runtime.RuntimeIdentifier,
                 appImageExitCode
             );
 
@@ -44,85 +59,85 @@ internal sealed class DesktopLaunchWorkflow(
         }
 
         if (
-            runtime.RuntimeIdentifier.StartsWith("linux-", StringComparison.OrdinalIgnoreCase)
-            && !settings.SkipPackage
-            && !string.Equals(settings.LaunchMode, LAUNCH_MODE_PUBLISHED, StringComparison.OrdinalIgnoreCase)
-            && !string.Equals(settings.LaunchMode, LAUNCH_MODE_PACKAGED, StringComparison.OrdinalIgnoreCase)
+            _runtime.RuntimeIdentifier.StartsWith("linux-", StringComparison.OrdinalIgnoreCase)
+            && !_settings.SkipPackage
+            && !string.Equals(_settings.LaunchMode, LAUNCH_MODE_PUBLISHED, StringComparison.OrdinalIgnoreCase)
+            && !string.Equals(_settings.LaunchMode, LAUNCH_MODE_PACKAGED, StringComparison.OrdinalIgnoreCase)
         )
         {
             throw new ArgumentException(
-                $"Unsupported launch mode '{settings.LaunchMode}'. Supported values are '{LAUNCH_MODE_PUBLISHED}' and '{LAUNCH_MODE_PACKAGED}'.",
-                nameof(settings.LaunchMode)
+                $"Unsupported launch mode '{_settings.LaunchMode}'. Supported values are '{LAUNCH_MODE_PUBLISHED}' and '{LAUNCH_MODE_PACKAGED}'.",
+                nameof(_settings.LaunchMode)
             );
         }
 
-        var publishedExecutable = fileSystem.Path.Combine(
-            paths.PublishDirectory(runtime.RuntimeIdentifier),
-            runtime.MainExecutable
+        var publishedExecutable = _fileSystem.Path.Combine(
+            _paths.PublishDirectory(_runtime.RuntimeIdentifier),
+            _runtime.MainExecutable
         );
 
-        logger.LogInformation(
+        _logger.LogInformation(
             "Resolved published executable for {RuntimeIdentifier} to {PublishedExecutable} (launch mode: {LaunchMode})",
-            runtime.RuntimeIdentifier,
+            _runtime.RuntimeIdentifier,
             publishedExecutable,
-            settings.LaunchMode
+            _settings.LaunchMode
         );
 
-        if (!fileSystem.File.Exists(publishedExecutable))
+        if (!_fileSystem.File.Exists(publishedExecutable))
         {
             throw new FileNotFoundException(
-                $"Published executable for runtime '{runtime.RuntimeIdentifier}' was not found at '{publishedExecutable}'.",
+                $"Published executable for runtime '{_runtime.RuntimeIdentifier}' was not found at '{publishedExecutable}'.",
                 publishedExecutable
             );
         }
 
         if (
-            runtime.RuntimeIdentifier.StartsWith("win-", StringComparison.OrdinalIgnoreCase)
+            _runtime.RuntimeIdentifier.StartsWith("win-", StringComparison.OrdinalIgnoreCase)
             && !OperatingSystem.IsWindows()
         )
         {
-            if (await commandRunner.CommandExistsAsync("wine"))
+            if (await _commandRunner.CommandExistsAsync("wine"))
             {
-                logger.LogInformation(
+                _logger.LogInformation(
                     "Launching Windows desktop build for {RuntimeIdentifier} with wine using {PublishedExecutable}",
-                    runtime.RuntimeIdentifier,
+                    _runtime.RuntimeIdentifier,
                     publishedExecutable
                 );
 
-                var wineExitCode = await commandRunner.ExecuteCommandAsync("wine", [publishedExecutable]);
-                logger.LogInformation(
+                var wineExitCode = await _commandRunner.ExecuteCommandAsync("wine", [publishedExecutable]);
+                _logger.LogInformation(
                     "Wine launch for {RuntimeIdentifier} exited with code {ExitCode}",
-                    runtime.RuntimeIdentifier,
+                    _runtime.RuntimeIdentifier,
                     wineExitCode
                 );
 
                 return wineExitCode;
             }
 
-            logger.LogInformation(
+            _logger.LogInformation(
                 "Published {RuntimeIdentifier} build to {PublishedExecutable}",
-                runtime.RuntimeIdentifier,
+                _runtime.RuntimeIdentifier,
                 publishedExecutable
             );
-            logger.LogInformation(
+            _logger.LogInformation(
                 "Packaged {RuntimeIdentifier} artifacts to {ArtifactDirectory}",
-                runtime.RuntimeIdentifier,
-                packageWorkflow.GetArtifactDirectory()
+                _runtime.RuntimeIdentifier,
+                _packageWorkflow.GetArtifactDirectory()
             );
-            logger.LogWarning("Wine is not available on this host, so the Windows build was not launched.");
+            _logger.LogWarning("Wine is not available on this host, so the Windows build was not launched.");
             return 0;
         }
 
-        logger.LogInformation(
+        _logger.LogInformation(
             "Launching published executable for {RuntimeIdentifier} directly from {PublishedExecutable}",
-            runtime.RuntimeIdentifier,
+            _runtime.RuntimeIdentifier,
             publishedExecutable
         );
 
-        var exitCode = await commandRunner.ExecuteCommandAsync(publishedExecutable, []);
-        logger.LogInformation(
+        var exitCode = await _commandRunner.ExecuteCommandAsync(publishedExecutable, []);
+        _logger.LogInformation(
             "Published executable for {RuntimeIdentifier} exited with code {ExitCode}",
-            runtime.RuntimeIdentifier,
+            _runtime.RuntimeIdentifier,
             exitCode
         );
 
@@ -132,36 +147,36 @@ internal sealed class DesktopLaunchWorkflow(
 
     private string FindLinuxAppImage()
     {
-        var artifactDirectory = packageWorkflow.GetArtifactDirectory();
-        logger.LogInformation(
+        var artifactDirectory = _packageWorkflow.GetArtifactDirectory();
+        _logger.LogInformation(
             "Searching for packaged Linux AppImage for {RuntimeIdentifier} in {ArtifactDirectory}",
-            runtime.RuntimeIdentifier,
+            _runtime.RuntimeIdentifier,
             artifactDirectory
         );
 
-        if (!fileSystem.Directory.Exists(artifactDirectory))
+        if (!_fileSystem.Directory.Exists(artifactDirectory))
         {
             throw new DirectoryNotFoundException(
-                $"Artifact directory for runtime '{runtime.RuntimeIdentifier}' was not found at '{artifactDirectory}'."
+                $"Artifact directory for runtime '{_runtime.RuntimeIdentifier}' was not found at '{artifactDirectory}'."
             );
         }
 
-        var appImage = fileSystem.Directory
+        var appImage = _fileSystem.Directory
             .EnumerateFiles(artifactDirectory, "*.AppImage", SearchOption.TopDirectoryOnly)
-            .Select(file => fileSystem.FileInfo.New(file))
+            .Select(file => _fileSystem.FileInfo.New(file))
             .OrderByDescending(file => file.LastWriteTimeUtc)
             .FirstOrDefault();
 
         if (appImage is null)
         {
             throw new FileNotFoundException(
-                $"No AppImage artifact was produced for runtime '{runtime.RuntimeIdentifier}' in '{artifactDirectory}'."
+                $"No AppImage artifact was produced for runtime '{_runtime.RuntimeIdentifier}' in '{artifactDirectory}'."
             );
         }
 
-        logger.LogInformation(
+        _logger.LogInformation(
             "Selected Linux AppImage for {RuntimeIdentifier}: {AppImagePath}",
-            runtime.RuntimeIdentifier,
+            _runtime.RuntimeIdentifier,
             appImage.FullName
         );
 

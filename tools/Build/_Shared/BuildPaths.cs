@@ -2,19 +2,25 @@ using System.IO.Abstractions;
 
 namespace Reaparr.Build;
 
-internal sealed class BuildPaths(string rootDirectory, IFileSystem fileSystem)
+internal sealed class BuildPaths
 {
-    public string RootDirectory { get; } = rootDirectory;
+    private readonly IFileSystem _fileSystem;
+    public BuildPaths(string rootDirectory, IFileSystem fileSystem)
+    {
+        _fileSystem = fileSystem;
+        RootDirectory = rootDirectory;
+    }
+    public string RootDirectory { get; }
 
-    public string AppHostProject => fileSystem.Path.Combine(RootDirectory, "src", "AppHost", "AppHost.csproj");
+    public string AppHostProject => _fileSystem.Path.Combine(RootDirectory, "src", "AppHost", "AppHost.csproj");
 
-    public string ClientAppDirectory => fileSystem.Path.Combine(RootDirectory, "src", "AppHost", "ClientApp");
+    public string ClientAppDirectory => _fileSystem.Path.Combine(RootDirectory, "src", "AppHost", "ClientApp");
 
-    public string FrontendPublicDirectory => fileSystem.Path.Combine(ClientAppDirectory, ".output", "public");
+    public string FrontendPublicDirectory => _fileSystem.Path.Combine(ClientAppDirectory, ".output", "public");
 
-    public string PublishDirectory(string rid) => fileSystem.Path.Combine(ArtifactDirectory(rid), "publish");
+    public string PublishDirectory(string rid) => _fileSystem.Path.Combine(ArtifactDirectory(rid), "publish");
 
-    public string ArtifactDirectory(string rid) => fileSystem.Path.Combine(RootDirectory, ".artifacts", rid);
+    public string ArtifactDirectory(string rid) => _fileSystem.Path.Combine(RootDirectory, ".artifacts", rid);
 
     public static BuildPaths FromCurrentDirectory(IFileSystem fileSystem)
     {

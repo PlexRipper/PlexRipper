@@ -5,13 +5,15 @@ using Spectre.Console.Cli;
 
 namespace Reaparr.Build;
 
-public sealed class AutofacTypeRegistrar(
-    IServiceCollection services,
-    Action<ContainerBuilder>? registerAutofac = null
-) : ITypeRegistrar, IDisposable
+public sealed class AutofacTypeRegistrar : ITypeRegistrar, IDisposable
 {
-    private readonly ContainerBuilder _builder = CreateContainerBuilder(services, registerAutofac);
+    private readonly ContainerBuilder _builder;
     private IContainer? _container;
+    public AutofacTypeRegistrar(IServiceCollection services,
+        Action<ContainerBuilder>? registerAutofac = null)
+    {
+        _builder = CreateContainerBuilder(services, registerAutofac);
+    }
 
     public ITypeResolver Build()
     {
@@ -41,7 +43,12 @@ public sealed class AutofacTypeRegistrar(
     }
 }
 
-internal sealed class AutofacTypeResolver(IComponentContext context) : ITypeResolver
+internal sealed class AutofacTypeResolver : ITypeResolver
 {
-    public object? Resolve(Type? type) => type is null ? null : context.ResolveOptional(type);
+    private readonly IComponentContext _context;
+    public AutofacTypeResolver(IComponentContext context)
+    {
+        _context = context;
+    }
+    public object? Resolve(Type? type) => type is null ? null : _context.ResolveOptional(type);
 }

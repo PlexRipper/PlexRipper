@@ -4,15 +4,24 @@ using Spectre.Console.Cli;
 
 namespace Reaparr.Build;
 
-internal sealed class DesktopPublishCommand(BuildPaths paths, ILoggerFactory loggerFactory, IFileSystem fileSystem)
-    : AsyncCommand<DesktopCommandSettings>
+internal sealed class DesktopPublishCommand : AsyncCommand<DesktopCommandSettings>
 {
+    private readonly BuildPaths _paths;
+    private readonly ILoggerFactory _loggerFactory;
+    private readonly IFileSystem _fileSystem;
+    public DesktopPublishCommand(BuildPaths paths, ILoggerFactory loggerFactory, IFileSystem fileSystem)
+    {
+        _paths = paths;
+        _loggerFactory = loggerFactory;
+        _fileSystem = fileSystem;
+    }
+
     protected override Task<int> ExecuteAsync(
         CommandContext context,
         DesktopCommandSettings settings,
         CancellationToken cancellationToken
     )
     {
-        return DesktopBuildWorkflow.Create(paths, settings, loggerFactory, fileSystem).PublishAsync();
+        return DesktopBuildWorkflow.Create(_paths, settings, _loggerFactory, _fileSystem).PublishAsync();
     }
 }

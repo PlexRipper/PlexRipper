@@ -3,47 +3,63 @@ using System.IO.Abstractions;
 
 namespace Reaparr.Build;
 
-internal sealed class DesktopPackageWorkflow(
-    BuildPaths paths,
-    DesktopRuntime runtime,
-    DesktopCommandSettings settings,
-    IDesktopCommandRunner commandRunner,
-    FileSystemTasks fileSystemTasks,
-    IFileSystem fileSystem,
-    ILogger<DesktopPackageWorkflow> logger
-)
+internal sealed class DesktopPackageWorkflow
 {
+    private readonly BuildPaths _paths;
+    private readonly DesktopRuntime _runtime;
+    private readonly DesktopCommandSettings _settings;
+    private readonly IDesktopCommandRunner _commandRunner;
+    private readonly FileSystemTasks _fileSystemTasks;
+    private readonly IFileSystem _fileSystem;
+    private readonly ILogger<DesktopPackageWorkflow> _logger;
+    
+    public DesktopPackageWorkflow(BuildPaths paths,
+        DesktopRuntime runtime,
+        DesktopCommandSettings settings,
+        IDesktopCommandRunner commandRunner,
+        FileSystemTasks fileSystemTasks,
+        IFileSystem fileSystem,
+        ILogger<DesktopPackageWorkflow> logger)
+    {
+        _paths = paths;
+        _runtime = runtime;
+        _settings = settings;
+        _commandRunner = commandRunner;
+        _fileSystemTasks = fileSystemTasks;
+        _fileSystem = fileSystem;
+        _logger = logger;
+    }
     private const string PACKAGE_ID = "Reaparr";
     private const string PACKAGE_TITLE = "Reaparr";
 
     public async Task PackageAsync()
     {
-        if (!settings.DryRun)
+        if (!_settings.DryRun)
         {
-            if (!settings.PreserveExistingArtifacts)
+            if (!_settings.PreserveExistingArtifacts)
             {
-                fileSystemTasks.ClearArtifactDirectory(paths.RootDirectory, GetArtifactDirectory());
+                _fileSystemTasks.ClearArtifactDirectory(_paths.RootDirectory, GetArtifactDirectory());
             }
             else
             {
-                fileSystem.Directory.CreateDirectory(GetArtifactDirectory());
+                _fileSystem.Directory.CreateDirectory(GetArtifactDirectory());
             }
         }
 
-        await commandRunner.RunCommandAsync("vpk", CreatePackArguments(paths, runtime, settings, GetArtifactDirectory()));
+        await _commandRunner.RunCommandAsync("vpk", CreatePackArguments(_paths, _runtime, _settings, GetArtifactDirectory()));
 
-        logger.LogInformation(
+        _logger.LogInformation(
             "Packaged {RuntimeIdentifier} desktop artifacts for Velopack channel {Channel} to {ArtifactDirectory}",
-            runtime.RuntimeIdentifier,
+            _runtime.RuntimeIdentifier,
             GetChannel(),
             GetArtifactDirectory()
         );
     }
 
     public string GetArtifactDirectory() =>
-        string.IsNullOrWhiteSpace(settings.ArtifactDirectory)
-            ? paths.ArtifactDirectory(runtime.RuntimeIdentifier)
-            : fileSystem.Path.GetFullPath(settings.ArtifactDirectory, paths.RootDirectory);
+        string.IsNullOrWhiteSpace(_settings.ArtifactDirectory)
+            ? _paths.ArtifactDirectory(_runtime.RuntimeIdentifier)
+            : _fileSystem.Path.GetFullPath(_settings.ArtifactDirectory, _paths.RootDirectory);
 
     private static List<string> CreatePackArguments(
         BuildPaths paths,
@@ -73,7 +89,7 @@ internal sealed class DesktopPackageWorkflow(
                 : artifactDirectory,
         ];
 
-    private string GetChannel() => GetChannel(runtime, settings);
+    private string GetChannel() => GetChannel(_runtime, _settings);
 
     private static string GetChannel(DesktopRuntime runtime, DesktopCommandSettings settings)
     {

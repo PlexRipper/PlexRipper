@@ -2,36 +2,42 @@ using System.IO.Abstractions;
 
 namespace Reaparr.Build;
 
-internal sealed class FileSystemTasks(IFileSystem fileSystem)
+internal sealed class FileSystemTasks
 {
+    private readonly IFileSystem _fileSystem;
+    public FileSystemTasks(IFileSystem fileSystem)
+    {
+        _fileSystem = fileSystem;
+    }
+
     public void CopyDirectory(string source, string target)
     {
         EnsureCopyTargetIsNotNestedInsideSource(source, target);
-        fileSystem.Directory.CreateDirectory(target);
+        _fileSystem.Directory.CreateDirectory(target);
 
-        foreach (var directory in fileSystem.Directory.EnumerateDirectories(source))
+        foreach (var directory in _fileSystem.Directory.EnumerateDirectories(source))
         {
-            CopyDirectory(directory, fileSystem.Path.Combine(target, fileSystem.Path.GetFileName(directory)));
+            CopyDirectory(directory, _fileSystem.Path.Combine(target, _fileSystem.Path.GetFileName(directory)));
         }
 
-        foreach (var file in fileSystem.Directory.EnumerateFiles(source))
+        foreach (var file in _fileSystem.Directory.EnumerateFiles(source))
         {
-            fileSystem.File.Copy(file, fileSystem.Path.Combine(target, fileSystem.Path.GetFileName(file)), overwrite: true);
+            _fileSystem.File.Copy(file, _fileSystem.Path.Combine(target, _fileSystem.Path.GetFileName(file)), overwrite: true);
         }
     }
 
     public void ClearDirectory(string directory)
     {
-        fileSystem.Directory.CreateDirectory(directory);
+        _fileSystem.Directory.CreateDirectory(directory);
 
-        foreach (var file in fileSystem.Directory.EnumerateFiles(directory))
+        foreach (var file in _fileSystem.Directory.EnumerateFiles(directory))
         {
-            fileSystem.File.Delete(file);
+            _fileSystem.File.Delete(file);
         }
 
-        foreach (var childDirectory in fileSystem.Directory.EnumerateDirectories(directory))
+        foreach (var childDirectory in _fileSystem.Directory.EnumerateDirectories(directory))
         {
-            fileSystem.Directory.Delete(childDirectory, recursive: true);
+            _fileSystem.Directory.Delete(childDirectory, recursive: true);
         }
     }
 
@@ -46,7 +52,7 @@ internal sealed class FileSystemTasks(IFileSystem fileSystem)
         var sourcePath = NormalizeDirectoryPath(source);
         var targetPath = NormalizeDirectoryPath(target);
 
-        if (targetPath.StartsWith(sourcePath + fileSystem.Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase))
+        if (targetPath.StartsWith(sourcePath + _fileSystem.Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase))
         {
             throw new InvalidOperationException(
                 $"Refusing to copy '{sourcePath}' into nested target '{targetPath}'."
@@ -64,8 +70,8 @@ internal sealed class FileSystemTasks(IFileSystem fileSystem)
             throw new InvalidOperationException("Refusing to clear the repository root as an artifact directory.");
         }
 
-        var defaultArtifactsRoot = NormalizeDirectoryPath(fileSystem.Path.Combine(rootPath, ".artifacts"));
-        if (!artifactPath.StartsWith(defaultArtifactsRoot + fileSystem.Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase))
+        var defaultArtifactsRoot = NormalizeDirectoryPath(_fileSystem.Path.Combine(rootPath, ".artifacts"));
+        if (!artifactPath.StartsWith(defaultArtifactsRoot + _fileSystem.Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase))
         {
             throw new InvalidOperationException(
                 $"Refusing to clear custom artifact directory '{artifactPath}'. Choose a path under '{defaultArtifactsRoot}' or use --preserve-existing-artifacts."
@@ -74,5 +80,5 @@ internal sealed class FileSystemTasks(IFileSystem fileSystem)
     }
 
     private string NormalizeDirectoryPath(string path) =>
-        fileSystem.Path.GetFullPath(path).TrimEnd(fileSystem.Path.DirectorySeparatorChar, fileSystem.Path.AltDirectorySeparatorChar);
+        _fileSystem.Path.GetFullPath(path).TrimEnd(_fileSystem.Path.DirectorySeparatorChar, _fileSystem.Path.AltDirectorySeparatorChar);
 }

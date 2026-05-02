@@ -17,23 +17,33 @@ internal interface IDesktopCommandRunner
     Task<bool> CommandExistsAsync(string command);
 }
 
-internal sealed class DesktopCommandRunner(
-    BuildPaths paths,
-    DesktopCommandSettings settings,
-    IFileSystem fileSystem,
-    ILogger logger
-) : IDesktopCommandRunner
+internal sealed class DesktopCommandRunner : IDesktopCommandRunner
 {
+    private readonly BuildPaths _paths;
+    private readonly DesktopCommandSettings _settings;
+    private readonly IFileSystem _fileSystem;
+    private readonly ILogger _logger;
+    public DesktopCommandRunner(BuildPaths paths,
+        DesktopCommandSettings settings,
+        IFileSystem fileSystem,
+        ILogger logger)
+    {
+        _paths = paths;
+        _settings = settings;
+        _fileSystem = fileSystem;
+        _logger = logger;
+    }
+
     public async Task RunCommandAsync(string fileName, IReadOnlyList<string> arguments, string? workingDirectory = null)
     {
         LogCommand(fileName, arguments);
-        if (settings.DryRun)
+        if (_settings.DryRun)
         {
             return;
         }
 
-        var resolvedWorkingDirectory = workingDirectory ?? paths.RootDirectory;
-        logger.LogInformation("Executing command in {WorkingDirectory}", resolvedWorkingDirectory);
+        var resolvedWorkingDirectory = workingDirectory ?? _paths.RootDirectory;
+        _logger.LogInformation("Executing command in {WorkingDirectory}", resolvedWorkingDirectory);
 
         try
         {
@@ -46,10 +56,10 @@ internal sealed class DesktopCommandRunner(
                 switch (commandEvent)
                 {
                     case StandardOutputCommandEvent stdOut when !string.IsNullOrWhiteSpace(stdOut.Text):
-                        logger.LogDebug("{Output}", stdOut.Text);
+                        _logger.LogDebug("{Output}", stdOut.Text);
                         break;
                     case StandardErrorCommandEvent stdErr when !string.IsNullOrWhiteSpace(stdErr.Text):
-                        logger.LogWarning("{Output}", stdErr.Text);
+                        _logger.LogWarning("{Output}", stdErr.Text);
                         break;
                 }
             }
@@ -70,13 +80,13 @@ internal sealed class DesktopCommandRunner(
     )
     {
         LogCommand(fileName, arguments);
-        if (settings.DryRun)
+        if (_settings.DryRun)
         {
             return 0;
         }
 
-        var resolvedWorkingDirectory = workingDirectory ?? paths.RootDirectory;
-        logger.LogInformation("Executing command in {WorkingDirectory}", resolvedWorkingDirectory);
+        var resolvedWorkingDirectory = workingDirectory ?? _paths.RootDirectory;
+        _logger.LogInformation("Executing command in {WorkingDirectory}", resolvedWorkingDirectory);
 
         var result = await Cli.Wrap(fileName)
             .WithArguments(arguments)
@@ -84,7 +94,7 @@ internal sealed class DesktopCommandRunner(
             .WithValidation(CommandResultValidation.None)
             .ExecuteAsync();
 
-        logger.LogInformation(
+        _logger.LogInformation(
             "Command exited with code {ExitCode}: {Command}",
             result.ExitCode,
             FormatCommand(fileName, arguments)
@@ -112,12 +122,12 @@ internal sealed class DesktopCommandRunner(
         }
 
         if (
-            fileSystem.Path.IsPathRooted(command)
-            || command.Contains(fileSystem.Path.DirectorySeparatorChar)
-            || command.Contains(fileSystem.Path.AltDirectorySeparatorChar)
+            _fileSystem.Path.IsPathRooted(command)
+            || command.Contains(_fileSystem.Path.DirectorySeparatorChar)
+            || command.Contains(_fileSystem.Path.AltDirectorySeparatorChar)
         )
         {
-            return Task.FromResult(fileSystem.File.Exists(command));
+            return Task.FromResult(_fileSystem.File.Exists(command));
         }
 
         var pathValue = System.Environment.GetEnvironmentVariable("PATH");
@@ -136,7 +146,7 @@ internal sealed class DesktopCommandRunner(
                 .Distinct(StringComparer.OrdinalIgnoreCase)
                 .ToList();
 
-            if (!fileSystem.Path.HasExtension(command))
+            if (!_fileSystem.Path.HasExtension(command))
             {
                 foreach (var ext in pathExts)
                 {
@@ -147,15 +157,15 @@ internal sealed class DesktopCommandRunner(
 
         foreach (
             var directory in pathValue.Split(
-                fileSystem.Path.PathSeparator,
+                _fileSystem.Path.PathSeparator,
                 StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries
             )
         )
         {
             foreach (var candidate in candidates)
             {
-                var fullPath = fileSystem.Path.Combine(directory, candidate);
-                if (fileSystem.File.Exists(fullPath))
+                var fullPath = _fileSystem.Path.Combine(directory, candidate);
+                if (_fileSystem.File.Exists(fullPath))
                 {
                     return Task.FromResult(true);
                 }
@@ -167,7 +177,7 @@ internal sealed class DesktopCommandRunner(
 
     private void LogCommand(string fileName, IReadOnlyList<string> arguments)
     {
-        logger.LogInformation("> {Command}", FormatCommand(fileName, arguments));
+        _logger.LogInformation("> {Command}", FormatCommand(fileName, arguments));
     }
 
     private static string FormatCommand(string fileName, IReadOnlyList<string> arguments) =>

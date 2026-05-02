@@ -1,7 +1,8 @@
 using CliWrap;
 using CliWrap.EventStream;
 using CliWrap.Exceptions;
-using Microsoft.Extensions.Logging;
+using Reaparr.Logging;
+using Serilog;
 using System.IO.Abstractions;
 
 namespace Reaparr.Build;
@@ -20,30 +21,22 @@ internal interface IDesktopCommandRunner
 internal sealed class DesktopCommandRunner : IDesktopCommandRunner
 {
     private readonly BuildPaths _paths;
-    private readonly DesktopCommandSettings _settings;
     private readonly IFileSystem _fileSystem;
-    private readonly ILogger _logger;
-    public DesktopCommandRunner(BuildPaths paths,
-        DesktopCommandSettings settings,
-        IFileSystem fileSystem,
-        ILogger logger)
+    private readonly ILogger _log;
+
+    public DesktopCommandRunner(BuildPaths paths, IFileSystem fileSystem, ILogger logger)
     {
         _paths = paths;
-        _settings = settings;
         _fileSystem = fileSystem;
-        _logger = logger;
+        _log = logger.ForContext<DesktopCommandRunner>();
     }
 
     public async Task RunCommandAsync(string fileName, IReadOnlyList<string> arguments, string? workingDirectory = null)
     {
         LogCommand(fileName, arguments);
-        if (_settings.DryRun)
-        {
-            return;
-        }
 
         var resolvedWorkingDirectory = workingDirectory ?? _paths.RootDirectory;
-        _logger.LogInformation("Executing command in {WorkingDirectory}", resolvedWorkingDirectory);
+        _log.Here().Information("Executing command in {WorkingDirectory}", resolvedWorkingDirectory);
 
         try
         {
@@ -56,10 +49,10 @@ internal sealed class DesktopCommandRunner : IDesktopCommandRunner
                 switch (commandEvent)
                 {
                     case StandardOutputCommandEvent stdOut when !string.IsNullOrWhiteSpace(stdOut.Text):
-                        _logger.LogDebug("{Output}", stdOut.Text);
+                        _log.Here().Debug("{Output}", stdOut.Text);
                         break;
                     case StandardErrorCommandEvent stdErr when !string.IsNullOrWhiteSpace(stdErr.Text):
-                        _logger.LogWarning("{Output}", stdErr.Text);
+                        _log.Here().Warning("{Output}", stdErr.Text);
                         break;
                 }
             }
@@ -73,20 +66,12 @@ internal sealed class DesktopCommandRunner : IDesktopCommandRunner
         }
     }
 
-    public async Task<int> ExecuteCommandAsync(
-        string fileName,
-        IReadOnlyList<string> arguments,
-        string? workingDirectory = null
-    )
+    public async Task<int> ExecuteCommandAsync(string fileName, IReadOnlyList<string> arguments, string? workingDirectory = null)
     {
         LogCommand(fileName, arguments);
-        if (_settings.DryRun)
-        {
-            return 0;
-        }
 
         var resolvedWorkingDirectory = workingDirectory ?? _paths.RootDirectory;
-        _logger.LogInformation("Executing command in {WorkingDirectory}", resolvedWorkingDirectory);
+        _log.Here().Information("Executing command in {WorkingDirectory}", resolvedWorkingDirectory);
 
         var result = await Cli.Wrap(fileName)
             .WithArguments(arguments)
@@ -94,11 +79,7 @@ internal sealed class DesktopCommandRunner : IDesktopCommandRunner
             .WithValidation(CommandResultValidation.None)
             .ExecuteAsync();
 
-        _logger.LogInformation(
-            "Command exited with code {ExitCode}: {Command}",
-            result.ExitCode,
-            FormatCommand(fileName, arguments)
-        );
+        _log.Here().Information("Command exited with code {ExitCode}: {Command}", result.ExitCode, FormatCommand(fileName, arguments));
 
         return result.ExitCode;
     }
@@ -107,10 +88,7 @@ internal sealed class DesktopCommandRunner : IDesktopCommandRunner
     {
         if (!await CommandExistsAsync(command))
         {
-            throw new FileNotFoundException(
-                $"Required command '{command}' was not found on PATH. Install it or adjust your environment before running desktop builds.",
-                command
-            );
+            throw new FileNotFoundException($"Required command '{command}' was not found on PATH. Install it or adjust your environment before running desktop builds.", command);
         }
     }
 
@@ -121,11 +99,7 @@ internal sealed class DesktopCommandRunner : IDesktopCommandRunner
             return Task.FromResult(false);
         }
 
-        if (
-            _fileSystem.Path.IsPathRooted(command)
-            || command.Contains(_fileSystem.Path.DirectorySeparatorChar)
-            || command.Contains(_fileSystem.Path.AltDirectorySeparatorChar)
-        )
+        if (_fileSystem.Path.IsPathRooted(command) || command.Contains(_fileSystem.Path.DirectorySeparatorChar) || command.Contains(_fileSystem.Path.AltDirectorySeparatorChar))
         {
             return Task.FromResult(_fileSystem.File.Exists(command));
         }
@@ -141,10 +115,7 @@ internal sealed class DesktopCommandRunner : IDesktopCommandRunner
         if (OperatingSystem.IsWindows())
         {
             var pathExtValue = System.Environment.GetEnvironmentVariable("PATHEXT") ?? ".EXE;.CMD;.BAT;.COM";
-            var pathExts = pathExtValue
-                .Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
-                .Distinct(StringComparer.OrdinalIgnoreCase)
-                .ToList();
+            var pathExts = pathExtValue.Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).Distinct(StringComparer.OrdinalIgnoreCase).ToList();
 
             if (!_fileSystem.Path.HasExtension(command))
             {
@@ -155,12 +126,7 @@ internal sealed class DesktopCommandRunner : IDesktopCommandRunner
             }
         }
 
-        foreach (
-            var directory in pathValue.Split(
-                _fileSystem.Path.PathSeparator,
-                StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries
-            )
-        )
+        foreach (var directory in pathValue.Split(_fileSystem.Path.PathSeparator, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
         {
             foreach (var candidate in candidates)
             {
@@ -175,10 +141,8 @@ internal sealed class DesktopCommandRunner : IDesktopCommandRunner
         return Task.FromResult(false);
     }
 
-    private void LogCommand(string fileName, IReadOnlyList<string> arguments)
-    {
-        _logger.LogInformation("> {Command}", FormatCommand(fileName, arguments));
-    }
+    private void LogCommand(string fileName, IReadOnlyList<string> arguments) =>
+        _log.Here().Information("> {Command}", FormatCommand(fileName, arguments));
 
     private static string FormatCommand(string fileName, IReadOnlyList<string> arguments) =>
         string.Join(' ', new[] { fileName }.Concat(arguments.Select(QuoteIfNeeded)));

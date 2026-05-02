@@ -1,3 +1,4 @@
+using Reaparr.Logging;
 using Serilog;
 using Spectre.Console.Cli;
 
@@ -7,8 +8,8 @@ public static partial class Startup
 {
     public static CommandApp ConfigureConsole(this CommandApp app, ILogger logger)
     {
-        logger = logger.ForContext(typeof(Startup));
-        
+        var log = logger.ForContext(typeof(Startup));
+
         app.Configure(config =>
         {
             config.SetApplicationName("reaparr-build");
@@ -137,7 +138,7 @@ public static partial class Startup
 
             config.SetExceptionHandler((ex, _) =>
                 {
-                    logger.Error(ex, "{Message}", ex.Message);
+                    log.Here().Error(ex, "{Message}", ex.Message);
                     return -1;
                 }
             );

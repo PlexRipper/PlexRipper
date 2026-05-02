@@ -10,8 +10,8 @@ internal static class Program
     {
         var logConfig = new SlimLogConfig();
         Log.Logger = logConfig.GetLogger();
-        var log = Log.Logger;
-        
+        var log = Log.Logger.ForContext(typeof(Program));
+
         try
         {
             var container = Startup.CreateContainer(log);
@@ -19,7 +19,7 @@ internal static class Program
         }
         catch (Exception ex)
         {
-            log.Fatal(ex, "{Message}", ex.Message);
+            log.Here().Fatal(ex, "{Message}", ex.Message);
             return 1;
         }
     }

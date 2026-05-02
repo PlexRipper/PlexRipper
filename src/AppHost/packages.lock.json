@@ -826,18 +826,18 @@
           "Polly": "[8.6.5, )",
           "Polly.Core": "[8.6.6, )",
           "Quartz.Serialization.SystemTextJson": "[3.17.0, )",
-          "Reaparr.Application.Contracts": "[0.36.0-dev.1, )",
-          "Reaparr.BackgroundJobs.Contracts": "[0.36.0-dev.1, )",
-          "Reaparr.Data.Contracts": "[0.36.0-dev.1, )",
-          "Reaparr.Domain": "[0.36.0-dev.1, )",
-          "Reaparr.External.Contracts": "[0.36.0-dev.1, )",
-          "Reaparr.FileSystem.Contracts": "[0.36.0-dev.1, )",
-          "Reaparr.Identity.Contracts": "[0.36.0-dev.1, )",
-          "Reaparr.PlexApi.Contracts": "[0.36.0-dev.1, )",
-          "Reaparr.PublicAPI.Contracts": "[0.36.0-dev.1, )",
-          "Reaparr.Settings": "[0.36.0-dev.1, )",
-          "Reaparr.Settings.Contracts": "[0.36.0-dev.1, )",
-          "Reaparr.SignalR.Contracts": "[0.36.0-dev.1, )",
+          "Reaparr.Application.Contracts": "[1.0.0, )",
+          "Reaparr.BackgroundJobs.Contracts": "[1.0.0, )",
+          "Reaparr.Data.Contracts": "[1.0.0, )",
+          "Reaparr.Domain": "[1.0.0, )",
+          "Reaparr.External.Contracts": "[1.0.0, )",
+          "Reaparr.FileSystem.Contracts": "[1.0.0, )",
+          "Reaparr.Identity.Contracts": "[1.0.0, )",
+          "Reaparr.PlexApi.Contracts": "[1.0.0, )",
+          "Reaparr.PublicAPI.Contracts": "[1.0.0, )",
+          "Reaparr.Settings": "[1.0.0, )",
+          "Reaparr.Settings.Contracts": "[1.0.0, )",
+          "Reaparr.SignalR.Contracts": "[1.0.0, )",
           "Semver": "[3.0.0, )",
           "Velopack": "[0.0.1298, )"
         }
@@ -846,7 +846,7 @@
         "type": "Project",
         "dependencies": {
           "Quartz": "[3.17.0, )",
-          "Reaparr.Domain": "[0.36.0-dev.1, )"
+          "Reaparr.Domain": "[1.0.0, )"
         }
       },
       "Reaparr.BackgroundJobs": {
@@ -854,19 +854,19 @@
         "dependencies": {
           "Autofac.Extras.Quartz": "[11.0.0, )",
           "Quartz": "[3.17.0, )",
-          "Reaparr.Application.Contracts": "[0.36.0-dev.1, )",
-          "Reaparr.BackgroundJobs.Contracts": "[0.36.0-dev.1, )",
-          "Reaparr.Data.Contracts": "[0.36.0-dev.1, )",
-          "Reaparr.Domain": "[0.36.0-dev.1, )",
-          "Reaparr.PlexApi.Contracts": "[0.36.0-dev.1, )",
-          "Reaparr.SignalR.Contracts": "[0.36.0-dev.1, )"
+          "Reaparr.Application.Contracts": "[1.0.0, )",
+          "Reaparr.BackgroundJobs.Contracts": "[1.0.0, )",
+          "Reaparr.Data.Contracts": "[1.0.0, )",
+          "Reaparr.Domain": "[1.0.0, )",
+          "Reaparr.PlexApi.Contracts": "[1.0.0, )",
+          "Reaparr.SignalR.Contracts": "[1.0.0, )"
         }
       },
       "Reaparr.BackgroundJobs.Contracts": {
         "type": "Project",
         "dependencies": {
           "Quartz": "[3.17.0, )",
-          "Reaparr.Domain": "[0.36.0-dev.1, )"
+          "Reaparr.Domain": "[1.0.0, )"
         }
       },
       "Reaparr.Data": {
@@ -877,10 +877,10 @@
           "Microsoft.AspNetCore.Identity.EntityFrameworkCore": "[10.0.7, )",
           "Microsoft.EntityFrameworkCore.InMemory": "[10.0.6, )",
           "Microsoft.EntityFrameworkCore.Sqlite": "[10.0.6, )",
-          "Reaparr.Data.Contracts": "[0.36.0-dev.1, )",
-          "Reaparr.FileSystem.Contracts": "[0.36.0-dev.1, )",
-          "Reaparr.Identity.Contracts": "[0.36.0-dev.1, )",
-          "Reaparr.Settings.Contracts": "[0.36.0-dev.1, )"
+          "Reaparr.Data.Contracts": "[1.0.0, )",
+          "Reaparr.FileSystem.Contracts": "[1.0.0, )",
+          "Reaparr.Identity.Contracts": "[1.0.0, )",
+          "Reaparr.Settings.Contracts": "[1.0.0, )"
         }
       },
       "Reaparr.Data.Contracts": {
@@ -888,8 +888,8 @@
         "dependencies": {
           "EFCore.BulkExtensions.SQLite": "[10.0.1, )",
           "Microsoft.EntityFrameworkCore": "[10.0.6, )",
-          "Reaparr.Application.Contracts": "[0.36.0-dev.1, )",
-          "Reaparr.Domain": "[0.36.0-dev.1, )"
+          "Reaparr.Application.Contracts": "[1.0.0, )",
+          "Reaparr.Domain": "[1.0.0, )"
         }
       },
       "Reaparr.Domain": {
@@ -901,7 +901,7 @@
           "JetBrains.Annotations": "[2025.2.4, )",
           "NaturalSort.Extension": "[4.4.1, )",
           "PasswordGenerator": "[2.1.0, )",
-          "Reaparr.FluentResultExtensions": "[0.36.0-dev.1, )",
+          "Reaparr.FluentResultExtensions": "[1.0.0, )",
           "System.ComponentModel.Annotations": "[5.0.0, )",
           "System.Reactive": "[6.1.0, )"
         }
@@ -919,15 +919,15 @@
         "dependencies": {
           "Autofac": "[9.1.0, )",
           "CliWrap": "[3.10.1, )",
-          "Reaparr.Application.Contracts": "[0.36.0-dev.1, )",
-          "Reaparr.External.Contracts": "[0.36.0-dev.1, )",
+          "Reaparr.Application.Contracts": "[1.0.0, )",
+          "Reaparr.External.Contracts": "[1.0.0, )",
           "System.IO.Abstractions": "[22.1.0, )"
         }
       },
       "Reaparr.External.Contracts": {
         "type": "Project",
         "dependencies": {
-          "Reaparr.Domain": "[0.36.0-dev.1, )",
+          "Reaparr.Domain": "[1.0.0, )",
           "System.Reactive": "[6.1.0, )"
         }
       },
@@ -936,16 +936,16 @@
         "dependencies": {
           "Autofac": "[9.1.0, )",
           "Autofac.Extras.Quartz": "[11.0.0, )",
-          "Reaparr.Application.Contracts": "[0.36.0-dev.1, )",
-          "Reaparr.Data.Contracts": "[0.36.0-dev.1, )",
-          "Reaparr.FileSystem.Contracts": "[0.36.0-dev.1, )",
+          "Reaparr.Application.Contracts": "[1.0.0, )",
+          "Reaparr.Data.Contracts": "[1.0.0, )",
+          "Reaparr.FileSystem.Contracts": "[1.0.0, )",
           "System.IO.Abstractions": "[22.1.0, )"
         }
       },
       "Reaparr.FileSystem.Contracts": {
         "type": "Project",
         "dependencies": {
-          "Reaparr.Domain": "[0.36.0-dev.1, )",
+          "Reaparr.Domain": "[1.0.0, )",
           "System.IO.Abstractions": "[22.1.0, )"
         }
       },
@@ -954,7 +954,7 @@
         "dependencies": {
           "FluentResults": "[4.0.0, )",
           "FluentValidation": "[12.1.1, )",
-          "Reaparr.Logging": "[0.36.0-dev.1, )"
+          "Reaparr.Logging": "[1.0.0, )"
         }
       },
       "Reaparr.Identity": {
@@ -963,9 +963,9 @@
           "FastEndpoints.Security": "[8.1.0, )",
           "Microsoft.EntityFrameworkCore.InMemory": "[10.0.6, )",
           "Microsoft.EntityFrameworkCore.Sqlite": "[10.0.6, )",
-          "Reaparr.Data.Contracts": "[0.36.0-dev.1, )",
-          "Reaparr.Identity.Contracts": "[0.36.0-dev.1, )",
-          "Reaparr.Logging": "[0.36.0-dev.1, )"
+          "Reaparr.Data.Contracts": "[1.0.0, )",
+          "Reaparr.Identity.Contracts": "[1.0.0, )",
+          "Reaparr.Logging": "[1.0.0, )"
         }
       },
       "Reaparr.Identity.Contracts": {
@@ -973,7 +973,7 @@
         "dependencies": {
           "Microsoft.AspNetCore.DataProtection.EntityFrameworkCore": "[10.0.7, )",
           "Microsoft.AspNetCore.Identity.EntityFrameworkCore": "[10.0.7, )",
-          "Reaparr.Data.Contracts": "[0.36.0-dev.1, )"
+          "Reaparr.Data.Contracts": "[1.0.0, )"
         }
       },
       "Reaparr.Logging": {
@@ -981,7 +981,7 @@
         "dependencies": {
           "Autofac": "[9.1.0, )",
           "FluentResults": "[4.0.0, )",
-          "Reaparr.Environment": "[0.36.0-dev.1, )",
+          "Reaparr.Environment": "[1.0.0, )",
           "Serilog": "[4.3.1, )",
           "Serilog.Enrichers.Sensitive": "[2.1.0, )",
           "Serilog.Expressions": "[5.0.0, )",
@@ -1000,18 +1000,18 @@
           "FastEndpoints": "[8.1.0, )",
           "HttpClientToCurl": "[2.1.1, )",
           "Polly": "[8.6.6, )",
-          "Reaparr.BackgroundJobs.Contracts": "[0.36.0-dev.1, )",
-          "Reaparr.Data.Contracts": "[0.36.0-dev.1, )",
-          "Reaparr.PlexApi.Contracts": "[0.36.0-dev.1, )",
-          "Reaparr.Settings.Contracts": "[0.36.0-dev.1, )"
+          "Reaparr.BackgroundJobs.Contracts": "[1.0.0, )",
+          "Reaparr.Data.Contracts": "[1.0.0, )",
+          "Reaparr.PlexApi.Contracts": "[1.0.0, )",
+          "Reaparr.Settings.Contracts": "[1.0.0, )"
         }
       },
       "Reaparr.PlexApi.Contracts": {
         "type": "Project",
         "dependencies": {
           "LukeHagar.PlexAPI.SDK": "[0.20.7, )",
-          "Reaparr.Application.Contracts": "[0.36.0-dev.1, )",
-          "Reaparr.Domain": "[0.36.0-dev.1, )"
+          "Reaparr.Application.Contracts": "[1.0.0, )",
+          "Reaparr.Domain": "[1.0.0, )"
         }
       },
       "Reaparr.PublicAPI": {
@@ -1020,11 +1020,11 @@
           "Autofac": "[9.1.0, )",
           "BencodeNET": "[5.0.0, )",
           "FastEndpoints": "[8.1.0, )",
-          "Reaparr.Data.Contracts": "[0.36.0-dev.1, )",
-          "Reaparr.Domain": "[0.36.0-dev.1, )",
-          "Reaparr.Identity.Contracts": "[0.36.0-dev.1, )",
-          "Reaparr.PublicAPI.Contracts": "[0.36.0-dev.1, )",
-          "Reaparr.Settings.Contracts": "[0.36.0-dev.1, )"
+          "Reaparr.Data.Contracts": "[1.0.0, )",
+          "Reaparr.Domain": "[1.0.0, )",
+          "Reaparr.Identity.Contracts": "[1.0.0, )",
+          "Reaparr.PublicAPI.Contracts": "[1.0.0, )",
+          "Reaparr.Settings.Contracts": "[1.0.0, )"
         }
       },
       "Reaparr.PublicAPI.Contracts": {
@@ -1034,15 +1034,15 @@
         "type": "Project",
         "dependencies": {
           "Autofac": "[9.1.0, )",
-          "Reaparr.FileSystem.Contracts": "[0.36.0-dev.1, )",
-          "Reaparr.Settings.Contracts": "[0.36.0-dev.1, )"
+          "Reaparr.FileSystem.Contracts": "[1.0.0, )",
+          "Reaparr.Settings.Contracts": "[1.0.0, )"
         }
       },
       "Reaparr.Settings.Contracts": {
         "type": "Project",
         "dependencies": {
-          "Reaparr.Domain": "[0.36.0-dev.1, )",
-          "Reaparr.Environment": "[0.36.0-dev.1, )"
+          "Reaparr.Domain": "[1.0.0, )",
+          "Reaparr.Environment": "[1.0.0, )"
         }
       },
       "Reaparr.SignalR": {
@@ -1050,30 +1050,18 @@
         "dependencies": {
           "Autofac": "[9.1.0, )",
           "MessagePack": "[3.1.4, )",
-          "Reaparr.Application.Contracts": "[0.36.0-dev.1, )",
-          "Reaparr.SignalR.Contracts": "[0.36.0-dev.1, )"
+          "Reaparr.Application.Contracts": "[1.0.0, )",
+          "Reaparr.SignalR.Contracts": "[1.0.0, )"
         }
       },
       "Reaparr.SignalR.Contracts": {
         "type": "Project",
         "dependencies": {
-          "Reaparr.Domain": "[0.36.0-dev.1, )",
-          "Reaparr.Environment": "[0.36.0-dev.1, )",
-          "Reaparr.FluentResultExtensions": "[0.36.0-dev.1, )",
-          "Reaparr.Logging": "[0.36.0-dev.1, )"
+          "Reaparr.Domain": "[1.0.0, )",
+          "Reaparr.Environment": "[1.0.0, )",
+          "Reaparr.FluentResultExtensions": "[1.0.0, )",
+          "Reaparr.Logging": "[1.0.0, )"
         }
-      }
-    },
-    "net10.0/win-x64": {
-      "Photino.Native": {
-        "type": "Transitive",
-        "resolved": "4.0.22",
-        "contentHash": "VIHipEOe4CZ7HElZE8zTwcvANOsCZ2yak/4nQ4LXzjdlwIjdbY8htmHfNR6rRPgWlCfTfT349GCa6V6Id2/Xyg=="
-      },
-      "SQLitePCLRaw.lib.e_sqlite3": {
-        "type": "Transitive",
-        "resolved": "2.1.11",
-        "contentHash": "Ev2ytaXiOlWZ4b3R67GZBsemTINslLD1DCJr2xiacpn4tbapu0Q4dHEzSvZSMnVWeE5nlObU3VZN2p81q3XOYQ=="
       }
     }
   }

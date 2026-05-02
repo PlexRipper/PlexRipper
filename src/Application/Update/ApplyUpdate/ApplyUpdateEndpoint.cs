@@ -87,7 +87,7 @@ public class ApplyUpdateEndpoint : BaseEndpointWithoutRequest
                     asset.Version
                 );
 
-            await _velopackManager.WaitExitThenApplyUpdatesAsync(asset, silent: false, restart: true, restartArgs: []);
+            _velopackManager.WaitExitThenApplyUpdates(asset, silent: false, restart: true, restartArgs: []);
 
             _log.Here()
                 .Warning(
@@ -100,7 +100,7 @@ public class ApplyUpdateEndpoint : BaseEndpointWithoutRequest
 
             _appLifetime.StopApplication();
 
-            await Task.Delay(TimeSpan.FromMilliseconds(500));
+            await Task.Delay(TimeSpan.FromMilliseconds(250));
 
             _log.Here()
                 .Warning(

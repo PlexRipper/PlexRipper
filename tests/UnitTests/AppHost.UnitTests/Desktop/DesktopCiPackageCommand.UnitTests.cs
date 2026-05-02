@@ -1,3 +1,4 @@
+using System.IO.Abstractions.TestingHelpers;
 using System.Reflection;
 using Reaparr.Build;
 
@@ -53,7 +54,7 @@ public class DesktopCiPackageCommandUnitTests
             DryRun = true,
         };
 
-        var paths = new BuildPaths(new DirectoryInfo("/tmp/reaparr"));
+        var paths = new BuildPaths("/tmp/reaparr", new MockFileSystem());
 
         // Act
         var arguments = GetPackArguments(paths, runtime, settings);

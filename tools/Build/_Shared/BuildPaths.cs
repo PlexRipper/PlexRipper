@@ -1,26 +1,30 @@
+using System.IO.Abstractions;
+
 namespace Reaparr.Build;
 
-internal sealed record BuildPaths(DirectoryInfo RootDirectory)
+internal sealed class BuildPaths(string rootDirectory, IFileSystem fileSystem)
 {
-    public string AppHostProject => Path.Combine(RootDirectory.FullName, "src", "AppHost", "AppHost.csproj");
+    public string RootDirectory { get; } = rootDirectory;
 
-    public string ClientAppDirectory => Path.Combine(RootDirectory.FullName, "src", "AppHost", "ClientApp");
+    public string AppHostProject => fileSystem.Path.Combine(RootDirectory, "src", "AppHost", "AppHost.csproj");
 
-    public string FrontendPublicDirectory => Path.Combine(ClientAppDirectory, ".output", "public");
+    public string ClientAppDirectory => fileSystem.Path.Combine(RootDirectory, "src", "AppHost", "ClientApp");
+
+    public string FrontendPublicDirectory => fileSystem.Path.Combine(ClientAppDirectory, ".output", "public");
 
     public string PublishDirectory(string rid) =>
-        Path.Combine(RootDirectory.FullName, "src", "AppHost", "bin", "Publish", "Desktop", rid);
+        fileSystem.Path.Combine(RootDirectory, "src", "AppHost", "bin", "Publish", "Desktop", rid);
 
-    public string ArtifactDirectory(string rid) => Path.Combine(RootDirectory.FullName, ".artifacts", rid);
+    public string ArtifactDirectory(string rid) => fileSystem.Path.Combine(RootDirectory, ".artifacts", rid);
 
-    public static BuildPaths FromCurrentDirectory()
+    public static BuildPaths FromCurrentDirectory(IFileSystem fileSystem)
     {
-        var directory = new DirectoryInfo(System.Environment.CurrentDirectory);
+        var directory = fileSystem.DirectoryInfo.New(System.Environment.CurrentDirectory);
         while (directory is not null)
         {
-            if (File.Exists(Path.Combine(directory.FullName, "Reaparr.sln")))
+            if (fileSystem.File.Exists(fileSystem.Path.Combine(directory.FullName, "Reaparr.sln")))
             {
-                return new BuildPaths(directory);
+                return new BuildPaths(directory.FullName, fileSystem);
             }
 
             directory = directory.Parent;

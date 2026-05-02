@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using System.IO.Abstractions;
 using Spectre.Console.Cli;
 using Spectre.Console.Cli.Extensions.DependencyInjection;
 
@@ -175,6 +176,7 @@ internal static class Program
                     options.TimestampFormat = "HH:mm:ss ";
                 });
             })
-            .AddSingleton(BuildPaths.FromCurrentDirectory());
+            .AddSingleton<IFileSystem, FileSystem>()
+            .AddSingleton(sp => BuildPaths.FromCurrentDirectory(sp.GetRequiredService<IFileSystem>()));
     }
 }

@@ -1,9 +1,10 @@
 using Microsoft.Extensions.Logging;
+using System.IO.Abstractions;
 using Spectre.Console.Cli;
 
 namespace Reaparr.Build;
 
-internal sealed class DesktopRunCommand(BuildPaths paths, ILoggerFactory loggerFactory)
+internal sealed class DesktopRunCommand(BuildPaths paths, ILoggerFactory loggerFactory, IFileSystem fileSystem)
     : AsyncCommand<DesktopCommandSettings>
 {
     protected override Task<int> ExecuteAsync(
@@ -12,6 +13,6 @@ internal sealed class DesktopRunCommand(BuildPaths paths, ILoggerFactory loggerF
         CancellationToken cancellationToken
     )
     {
-        return DesktopBuildWorkflow.Create(paths, settings, loggerFactory).RunAsync();
+        return DesktopBuildWorkflow.Create(paths, settings, loggerFactory, fileSystem).RunAsync();
     }
 }

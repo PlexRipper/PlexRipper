@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Logging;
+using System.IO.Abstractions;
 
 namespace Reaparr.Build;
 
@@ -7,6 +8,8 @@ internal sealed class DesktopPackageWorkflow(
     DesktopRuntime runtime,
     DesktopCommandSettings settings,
     DesktopCommandRunner commandRunner,
+    FileSystemTasks fileSystemTasks,
+    IFileSystem fileSystem,
     ILogger<DesktopPackageWorkflow> logger
 )
 {
@@ -21,11 +24,11 @@ internal sealed class DesktopPackageWorkflow(
 
             if (!settings.PreserveExistingArtifacts)
             {
-                FileSystemTasks.ClearDirectory(new DirectoryInfo(GetArtifactDirectory()));
+                fileSystemTasks.ClearArtifactDirectory(paths.RootDirectory, GetArtifactDirectory());
             }
             else
             {
-                Directory.CreateDirectory(GetArtifactDirectory());
+                fileSystem.Directory.CreateDirectory(GetArtifactDirectory());
             }
         }
 
@@ -42,7 +45,7 @@ internal sealed class DesktopPackageWorkflow(
     public string GetArtifactDirectory() =>
         string.IsNullOrWhiteSpace(settings.ArtifactDirectory)
             ? paths.ArtifactDirectory(runtime.RuntimeIdentifier)
-            : Path.GetFullPath(settings.ArtifactDirectory, paths.RootDirectory.FullName);
+            : fileSystem.Path.GetFullPath(settings.ArtifactDirectory, paths.RootDirectory);
 
     private static List<string> CreatePackArguments(
         BuildPaths paths,

@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Logging;
+using System.IO.Abstractions;
 
 namespace Reaparr.Build;
 
@@ -7,6 +8,8 @@ internal sealed class DesktopPublishWorkflow(
     DesktopRuntime runtime,
     DesktopCommandSettings settings,
     DesktopCommandRunner commandRunner,
+    FileSystemTasks fileSystemTasks,
+    IFileSystem fileSystem,
     ILogger<DesktopPublishWorkflow> logger
 )
 {
@@ -107,31 +110,32 @@ internal sealed class DesktopPublishWorkflow(
             return;
         }
 
-        var sourceDirectory = new DirectoryInfo(GetFrontendPublicDirectory());
-        if (!sourceDirectory.Exists)
+        var sourceDirectory = GetFrontendPublicDirectory();
+        if (!fileSystem.Directory.Exists(sourceDirectory))
         {
             throw new DirectoryNotFoundException(
-                $"Generated frontend output directory was not found at '{sourceDirectory.FullName}'."
+                $"Generated frontend output directory was not found at '{sourceDirectory}'."
             );
         }
 
-        var wwwrootDirectory = new DirectoryInfo(
-            Path.Combine(paths.PublishDirectory(runtime.RuntimeIdentifier), "wwwroot")
+        var wwwrootDirectory = fileSystem.Path.Combine(
+            paths.PublishDirectory(runtime.RuntimeIdentifier),
+            "wwwroot"
         );
-        wwwrootDirectory.Create();
-        FileSystemTasks.CopyDirectory(sourceDirectory, wwwrootDirectory);
+        fileSystem.Directory.CreateDirectory(wwwrootDirectory);
+        fileSystemTasks.CopyDirectory(sourceDirectory, wwwrootDirectory);
     }
 
     private string GetFrontendPublicDirectory() =>
         string.IsNullOrWhiteSpace(settings.FrontendPublicDirectory)
             ? paths.FrontendPublicDirectory
-            : Path.GetFullPath(settings.FrontendPublicDirectory, paths.RootDirectory.FullName);
+            : fileSystem.Path.GetFullPath(settings.FrontendPublicDirectory, paths.RootDirectory);
 
-    private static bool ShouldInstallFrontendDependencies(string clientAppDirectory)
+    private bool ShouldInstallFrontendDependencies(string clientAppDirectory)
     {
-        var bunLockPath = Path.Combine(clientAppDirectory, "bun.lock");
-        var nodeModulesPath = Path.Combine(clientAppDirectory, "node_modules");
+        var bunLockPath = fileSystem.Path.Combine(clientAppDirectory, "bun.lock");
+        var nodeModulesPath = fileSystem.Path.Combine(clientAppDirectory, "node_modules");
 
-        return File.Exists(bunLockPath) && !Directory.Exists(nodeModulesPath);
+        return fileSystem.File.Exists(bunLockPath) && !fileSystem.Directory.Exists(nodeModulesPath);
     }
 }

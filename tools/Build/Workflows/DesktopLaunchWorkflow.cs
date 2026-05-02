@@ -9,6 +9,7 @@ internal sealed class DesktopLaunchWorkflow(
     DesktopCommandSettings settings,
     DesktopCommandRunner commandRunner,
     DesktopPackageWorkflow packageWorkflow,
+    IFileSystem fileSystem,
     ILogger<DesktopLaunchWorkflow> logger
 )
 {
@@ -55,7 +56,7 @@ internal sealed class DesktopLaunchWorkflow(
             );
         }
 
-        var publishedExecutable = Path.Combine(
+        var publishedExecutable = fileSystem.Path.Combine(
             paths.PublishDirectory(runtime.RuntimeIdentifier),
             runtime.MainExecutable
         );
@@ -67,7 +68,7 @@ internal sealed class DesktopLaunchWorkflow(
             settings.LaunchMode
         );
 
-        if (!File.Exists(publishedExecutable))
+        if (!fileSystem.File.Exists(publishedExecutable))
         {
             throw new FileNotFoundException(
                 $"Published executable for runtime '{runtime.RuntimeIdentifier}' was not found at '{publishedExecutable}'.",
@@ -131,29 +132,30 @@ internal sealed class DesktopLaunchWorkflow(
 
     private string FindLinuxAppImage()
     {
-        var artifactDirectory = new DirectoryInfo(packageWorkflow.GetArtifactDirectory());
+        var artifactDirectory = packageWorkflow.GetArtifactDirectory();
         logger.LogInformation(
             "Searching for packaged Linux AppImage for {RuntimeIdentifier} in {ArtifactDirectory}",
             runtime.RuntimeIdentifier,
-            artifactDirectory.FullName
+            artifactDirectory
         );
 
-        if (!artifactDirectory.Exists)
+        if (!fileSystem.Directory.Exists(artifactDirectory))
         {
             throw new DirectoryNotFoundException(
-                $"Artifact directory for runtime '{runtime.RuntimeIdentifier}' was not found at '{artifactDirectory.FullName}'."
+                $"Artifact directory for runtime '{runtime.RuntimeIdentifier}' was not found at '{artifactDirectory}'."
             );
         }
 
-        var appImage = artifactDirectory
-            .GetFiles("*.AppImage", SearchOption.TopDirectoryOnly)
+        var appImage = fileSystem.Directory
+            .EnumerateFiles(artifactDirectory, "*.AppImage", SearchOption.TopDirectoryOnly)
+            .Select(file => fileSystem.FileInfo.New(file))
             .OrderByDescending(file => file.LastWriteTimeUtc)
             .FirstOrDefault();
 
         if (appImage is null)
         {
             throw new FileNotFoundException(
-                $"No AppImage artifact was produced for runtime '{runtime.RuntimeIdentifier}' in '{artifactDirectory.FullName}'."
+                $"No AppImage artifact was produced for runtime '{runtime.RuntimeIdentifier}' in '{artifactDirectory}'."
             );
         }
 

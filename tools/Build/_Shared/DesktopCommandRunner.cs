@@ -3,10 +3,16 @@ using CliWrap.Buffered;
 using CliWrap.EventStream;
 using CliWrap.Exceptions;
 using Microsoft.Extensions.Logging;
+using System.IO.Abstractions;
 
 namespace Reaparr.Build;
 
-internal sealed class DesktopCommandRunner(BuildPaths paths, DesktopCommandSettings settings, ILogger logger)
+internal sealed class DesktopCommandRunner(
+    BuildPaths paths,
+    DesktopCommandSettings settings,
+    IFileSystem fileSystem,
+    ILogger logger
+)
 {
     public async Task RunCommandAsync(string fileName, IReadOnlyList<string> arguments, string? workingDirectory = null)
     {
@@ -16,7 +22,7 @@ internal sealed class DesktopCommandRunner(BuildPaths paths, DesktopCommandSetti
             return;
         }
 
-        var resolvedWorkingDirectory = workingDirectory ?? paths.RootDirectory.FullName;
+        var resolvedWorkingDirectory = workingDirectory ?? paths.RootDirectory;
         logger.LogInformation("Executing command in {WorkingDirectory}", resolvedWorkingDirectory);
 
         try
@@ -59,7 +65,7 @@ internal sealed class DesktopCommandRunner(BuildPaths paths, DesktopCommandSetti
             return 0;
         }
 
-        var resolvedWorkingDirectory = workingDirectory ?? paths.RootDirectory.FullName;
+        var resolvedWorkingDirectory = workingDirectory ?? paths.RootDirectory;
         logger.LogInformation("Executing command in {WorkingDirectory}", resolvedWorkingDirectory);
 
         var result = await Cli.Wrap(fileName)
@@ -95,9 +101,13 @@ internal sealed class DesktopCommandRunner(BuildPaths paths, DesktopCommandSetti
             return Task.FromResult(false);
         }
 
-        if (Path.IsPathRooted(command) || command.Contains(Path.DirectorySeparatorChar) || command.Contains(Path.AltDirectorySeparatorChar))
+        if (
+            fileSystem.Path.IsPathRooted(command)
+            || command.Contains(fileSystem.Path.DirectorySeparatorChar)
+            || command.Contains(fileSystem.Path.AltDirectorySeparatorChar)
+        )
         {
-            return Task.FromResult(File.Exists(command));
+            return Task.FromResult(fileSystem.File.Exists(command));
         }
 
         var pathValue = System.Environment.GetEnvironmentVariable("PATH");
@@ -116,7 +126,7 @@ internal sealed class DesktopCommandRunner(BuildPaths paths, DesktopCommandSetti
                 .Distinct(StringComparer.OrdinalIgnoreCase)
                 .ToList();
 
-            if (!Path.HasExtension(command))
+            if (!fileSystem.Path.HasExtension(command))
             {
                 foreach (var ext in pathExts)
                 {
@@ -125,12 +135,17 @@ internal sealed class DesktopCommandRunner(BuildPaths paths, DesktopCommandSetti
             }
         }
 
-        foreach (var directory in pathValue.Split(Path.PathSeparator, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+        foreach (
+            var directory in pathValue.Split(
+                fileSystem.Path.PathSeparator,
+                StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries
+            )
+        )
         {
             foreach (var candidate in candidates)
             {
-                var fullPath = Path.Combine(directory, candidate);
-                if (File.Exists(fullPath))
+                var fullPath = fileSystem.Path.Combine(directory, candidate);
+                if (fileSystem.File.Exists(fullPath))
                 {
                     return Task.FromResult(true);
                 }

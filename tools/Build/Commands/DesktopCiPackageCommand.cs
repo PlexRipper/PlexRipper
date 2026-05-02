@@ -1,9 +1,10 @@
 using Microsoft.Extensions.Logging;
+using System.IO.Abstractions;
 using Spectre.Console.Cli;
 
 namespace Reaparr.Build;
 
-internal sealed class DesktopCiPackageCommand(BuildPaths paths, ILoggerFactory loggerFactory)
+internal sealed class DesktopCiPackageCommand(BuildPaths paths, ILoggerFactory loggerFactory, IFileSystem fileSystem)
     : AsyncCommand<DesktopCommandSettings>
 {
     protected override Task<int> ExecuteAsync(
@@ -14,10 +15,10 @@ internal sealed class DesktopCiPackageCommand(BuildPaths paths, ILoggerFactory l
     {
         var ciSettings = CreateCiSettings(settings);
 
-        return DesktopBuildWorkflow.Create(paths, ciSettings, loggerFactory).PackageAsync();
+        return DesktopBuildWorkflow.Create(paths, ciSettings, loggerFactory, fileSystem).PackageAsync();
     }
 
-    private static DesktopCommandSettings CreateCiSettings(DesktopCommandSettings settings) =>
+    internal static DesktopCommandSettings CreateCiSettings(DesktopCommandSettings settings) =>
         new()
         {
             RuntimeIdentifier = settings.RuntimeIdentifier,
@@ -31,5 +32,6 @@ internal sealed class DesktopCiPackageCommand(BuildPaths paths, ILoggerFactory l
             FrontendPublicDirectory = settings.FrontendPublicDirectory,
             ArtifactDirectory = settings.ArtifactDirectory,
             PreserveExistingArtifacts = settings.PreserveExistingArtifacts,
+            LaunchMode = settings.LaunchMode,
         };
 }

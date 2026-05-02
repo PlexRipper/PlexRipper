@@ -78,8 +78,11 @@ internal sealed class DesktopPublishBuildCommandHandler : ICommandHandler<Deskto
 
         if (!settings.DryRun)
         {
+            var publishDirectory = _paths.PublishDirectory(runtime.RuntimeIdentifier);
+            _fileSystem.Directory.CreateDirectory(publishDirectory);
+
             await _commandRunner.RunCommandAsync("dotnet",
-            ["publish", _paths.AppHostProject, $"-p:PublishProfile={runtime.PublishProfile}", $"-p:Version={settings.Version}", $"-p:InformationalVersion={settings.InformationalVersion}", "-p:CSharpier_Bypass=true", "--no-restore"]);
+            ["publish", _paths.AppHostProject, $"-p:PublishProfile={runtime.PublishProfile}", $"-p:Version={settings.Version}", $"-p:InformationalVersion={settings.InformationalVersion}", $"-p:PublishDir={publishDirectory}{_fileSystem.Path.DirectorySeparatorChar}", "-p:CSharpier_Bypass=true"]);
         }
 
         if (!settings.DryRun)

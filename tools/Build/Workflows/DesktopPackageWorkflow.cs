@@ -56,10 +56,31 @@ internal sealed class DesktopPackageBuildCommandHandler : ICommandHandler<Deskto
 
         if (!settings.DryRun)
         {
+            var publishDirectory = _paths.PublishDirectory(runtime.RuntimeIdentifier);
+            var normalizedArtifactDirectory = _fileSystem.Path.GetFullPath(artifactDirectory).TrimEnd(_fileSystem.Path.DirectorySeparatorChar, _fileSystem.Path.AltDirectorySeparatorChar);
+            var normalizedPublishDirectory = _fileSystem.Path.GetFullPath(publishDirectory).TrimEnd(_fileSystem.Path.DirectorySeparatorChar, _fileSystem.Path.AltDirectorySeparatorChar);
+
+            var artifactContainsPublish = normalizedPublishDirectory.StartsWith(
+                normalizedArtifactDirectory + _fileSystem.Path.DirectorySeparatorChar,
+                StringComparison.OrdinalIgnoreCase
+            );
+
             if (!settings.PreserveExistingArtifacts)
-                _fileSystemTasks.ClearArtifactDirectory(_paths.RootDirectory, artifactDirectory);
+            {
+                if (artifactContainsPublish)
+                {
+                    _log.Here().Information("Skipping artifact directory cleanup because it contains the publish directory required for packaging: {ArtifactDirectory}", artifactDirectory);
+                    _fileSystem.Directory.CreateDirectory(artifactDirectory);
+                }
+                else
+                {
+                    _fileSystemTasks.ClearArtifactDirectory(_paths.RootDirectory, artifactDirectory);
+                }
+            }
             else
+            {
                 _fileSystem.Directory.CreateDirectory(artifactDirectory);
+            }
 
             await _commandRunner.RunCommandAsync(
                 "vpk",

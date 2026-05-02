@@ -32,7 +32,7 @@ public sealed class BuildModule : Module
             .AsClosedTypesOf(typeof(IValidator<>))
             .InstancePerDependency();
 
-        builder.RegisterType<CommandExecutor>().As<ICommandExecutor>().InstancePerLifetimeScope();
+        builder.RegisterType<BuildCommandExecutor>().As<ICommandExecutor>().InstancePerLifetimeScope();
         builder.RegisterType<EventPublisher>().As<IEventPublisher>().InstancePerLifetimeScope();
 
         builder.RegisterType<DesktopRunCommand>().AsSelf().InstancePerDependency();

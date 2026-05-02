@@ -64,10 +64,22 @@ internal sealed class DesktopRunBuildCommandHandler : ICommandHandler<DesktopRun
                     _log.Here().Information("Exported Windows executable artifact to {ArtifactPath}", targetExecutable);
                 }
 
+                var sourcePublishDirectory = _paths.PublishDirectory(runtime.RuntimeIdentifier);
                 var targetRoot = _fileSystem.Path.Combine(artifactDirectory, "publish");
-                _fileSystemTasks.ClearDirectory(targetRoot);
-                _fileSystemTasks.CopyDirectory(_paths.PublishDirectory(runtime.RuntimeIdentifier), targetRoot);
-                _log.Here().Information("Exported Windows publish directory to {ArtifactPublishDirectory}", targetRoot);
+
+                var normalizedSource = _fileSystem.Path.GetFullPath(sourcePublishDirectory).TrimEnd(_fileSystem.Path.DirectorySeparatorChar, _fileSystem.Path.AltDirectorySeparatorChar);
+                var normalizedTarget = _fileSystem.Path.GetFullPath(targetRoot).TrimEnd(_fileSystem.Path.DirectorySeparatorChar, _fileSystem.Path.AltDirectorySeparatorChar);
+
+                if (string.Equals(normalizedSource, normalizedTarget, StringComparison.OrdinalIgnoreCase))
+                {
+                    _log.Here().Information("Skipping Windows publish directory export because source and target are the same path: {PublishDirectory}", targetRoot);
+                }
+                else
+                {
+                    _fileSystemTasks.ClearDirectory(targetRoot);
+                    _fileSystemTasks.CopyDirectory(sourcePublishDirectory, targetRoot);
+                    _log.Here().Information("Exported Windows publish directory to {ArtifactPublishDirectory}", targetRoot);
+                }
             }
         }
         else

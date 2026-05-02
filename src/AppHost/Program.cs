@@ -8,6 +8,10 @@ namespace Reaparr.AppHost;
 /// </summary>
 public class Program
 {
+    private static readonly AppRuntimeInfo _appRuntimeInfo = new();
+    private static readonly AppBuildInfo _appBuildInfo = new();
+    private static PathProvider? _pathProvider;
+
     // ReSharper disable once InconsistentNaming
     private static Serilog.ILogger _log => Log.ForContext(typeof(Program));
 
@@ -18,44 +22,44 @@ public class Program
     [STAThread]
     public static async Task Main(string[] args)
     {
+        // This should be run at the very start before anything is initiated
+        var velopackResult = Result.Try(() => VelopackApp.Build().Run());
+        if (velopackResult.IsFailed)
+            FailedToStart(velopackResult);
+
         try
         {
-            // This should be ran at the very start before anything is initiated
-            VelopackApp.Build().Run();
-
-            var appBuildInfo = new AppBuildInfo();
-            var appRuntimeInfo = new AppRuntimeInfo();
-            var pathProvider = new PathProvider(appBuildInfo, appRuntimeInfo);
+            _pathProvider = new PathProvider(_appBuildInfo, _appRuntimeInfo);
             var logBuffer = new LogBufferService();
-            var signalRLogConfig = new SignalRLogConfig(appRuntimeInfo, pathProvider, logBuffer);
+            var signalRLogConfig = new SignalRLogConfig(_appRuntimeInfo, _pathProvider, logBuffer);
 
             // Skip logger setup in integration test mode to preserve test logger
-            if (!appRuntimeInfo.IsIntegrationTestMode)
-                LogFactory.SetupLogging(signalRLogConfig, appRuntimeInfo, appRuntimeInfo.LogLevel);
+            if (!_appRuntimeInfo.IsIntegrationTestMode)
+                LogFactory.SetupLogging(signalRLogConfig, _appRuntimeInfo, _appRuntimeInfo.LogLevel);
 
-            _log.Here().Information("Initiating boot process");
+            _log.Here().Information("Initiating Reaparr boot process");
 
             _log.Here()
                 .Information(
                     "Starting Reaparr {Version} ({Channel}) in {RuntimeMode} mode on {CurrentOS} ({RuntimeIdentifier})",
-                    appBuildInfo.InformationalVersion,
-                    appBuildInfo.IsDevRelease ? "DEVELOPMENT" : "STABLE",
-                    appBuildInfo.RuntimeMode,
-                    appBuildInfo.CurrentOS,
-                    appBuildInfo.RuntimeIdentifier
+                    _appBuildInfo.InformationalVersion,
+                    _appBuildInfo.IsDevRelease ? "DEVELOPMENT" : "STABLE",
+                    _appBuildInfo.RuntimeMode,
+                    _appBuildInfo.CurrentOS,
+                    _appBuildInfo.RuntimeIdentifier
                 );
 
-            AppExtensions.LogIdentity(appBuildInfo, appRuntimeInfo);
+            AppExtensions.LogIdentity(_appBuildInfo, _appRuntimeInfo);
 
             FluentResultConfiguration.Setup();
 
             var builder = WebApplication.CreateBuilder(args);
 
             builder.Host.ConfigureAutofacBuilder(logBuffer);
-            builder.Services.ConfigureServices(builder.Environment, appRuntimeInfo);
+            builder.Services.ConfigureServices(builder.Environment, _appRuntimeInfo);
             var app = builder.Build();
 
-            if (!appRuntimeInfo.IsIntegrationTestMode)
+            if (!_appRuntimeInfo.IsIntegrationTestMode)
                 signalRLogConfig.AttachSignalR(app, LogFactory.MinimumLogLevel);
 
             var configResult = app.SetupConfigFile();
@@ -74,9 +78,9 @@ public class Program
 
             app.ApplyForwardedHeaders();
 
-            app.ConfigureApplication(app.Environment, appBuildInfo, appRuntimeInfo);
+            app.ConfigureApplication(app.Environment, _appBuildInfo, _appRuntimeInfo);
 
-            if (appBuildInfo.IsDesktopMode && !appRuntimeInfo.IsIntegrationTestMode)
+            if (_appBuildInfo.IsDesktopMode && !_appRuntimeInfo.IsIntegrationTestMode)
             {
                 var desktopLifecycleResult = await RunDesktopLifecycleAsync(app);
                 if (desktopLifecycleResult.IsFailed)
@@ -90,8 +94,7 @@ public class Program
         catch (Exception e)
         {
             _log.Here().Fatal("Reaparr crashed due to an exception!");
-            Result.Fail(new ExceptionalError(e)).LogFatal();
-            System.Environment.Exit(2);
+            FailedToStart(Result.Fail(new ExceptionalError(e)));
         }
         finally
         {
@@ -148,6 +151,22 @@ public class Program
         _log.Here().Fatal("Reaparr failed to start!");
 
         result.LogFatal();
+
+        if (_appBuildInfo.IsDesktopMode)
+        {
+            try
+            {
+                DesktopStartupFailureDialog.Show(
+                    result,
+                    logsDirectory: _pathProvider?.LogsDirectory,
+                    appVersion: _appBuildInfo.InformationalVersion
+                );
+            }
+            catch (Exception dialogException)
+            {
+                _log.Here().Error(dialogException, "Failed to show startup failure dialog");
+            }
+        }
 
         _log.Here().Fatal("Reaparr has been shutdown! R.I.P.");
 

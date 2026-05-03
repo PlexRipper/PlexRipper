@@ -25,7 +25,8 @@ public class DesktopStartupFailureDialog
     public DesktopStartupFailureDialog(
         IAppBuildInfo appBuildInfo,
         IPathProvider pathProvider,
-        ILogBufferService logBufferService)
+        ILogBufferService logBufferService
+    )
     {
         _pathProvider = pathProvider;
         _appBuildInfo = appBuildInfo;
@@ -40,7 +41,10 @@ public class DesktopStartupFailureDialog
     {
         var safeLogsDirectory = _pathProvider.LogsDirectory;
         var details = BuildDetails(errorResult);
-        IReadOnlyCollection<string> logContent = _logBufferService.GetAll().Select(x => x.ToString() ?? string.Empty).ToList();
+        IReadOnlyCollection<string> logContent = _logBufferService
+            .GetAll()
+            .Select(x => x.ToString() ?? string.Empty)
+            .ToList();
         var html = BuildHtmlFromTemplate(details, logContent);
 
         var window = new PhotinoWindow()
@@ -52,7 +56,8 @@ public class DesktopStartupFailureDialog
             .SetLogVerbosity(2)
             .LoadRawString(html);
 
-        window.RegisterWebMessageReceivedHandler((_, message) =>
+        window.RegisterWebMessageReceivedHandler(
+            (_, message) =>
             {
                 switch (message)
                 {
@@ -66,11 +71,13 @@ public class DesktopStartupFailureDialog
             }
         );
 
-        window.RegisterWindowClosingHandler((_, _) =>
-        {
-            System.Environment.Exit(1);
-            return false;
-        });
+        window.RegisterWindowClosingHandler(
+            (_, _) =>
+            {
+                System.Environment.Exit(1);
+                return false;
+            }
+        );
 
         window.WaitForClose();
     }
@@ -100,8 +107,9 @@ public class DesktopStartupFailureDialog
             }
         }
 
-        var fallbackUri = new Uri("file://" + logsDirectory.TrimEnd(Path.DirectorySeparatorChar) +
-                                  Path.DirectorySeparatorChar);
+        var fallbackUri = new Uri(
+            "file://" + logsDirectory.TrimEnd(Path.DirectorySeparatorChar) + Path.DirectorySeparatorChar
+        );
         TryOpenPath(fallbackUri.AbsoluteUri);
     }
 
@@ -109,13 +117,15 @@ public class DesktopStartupFailureDialog
     {
         try
         {
-            Process.Start(new ProcessStartInfo
-            {
-                FileName = command,
-                Arguments = argument,
-                UseShellExecute = false,
-                CreateNoWindow = true,
-            });
+            Process.Start(
+                new ProcessStartInfo
+                {
+                    FileName = command,
+                    Arguments = argument,
+                    UseShellExecute = false,
+                    CreateNoWindow = true,
+                }
+            );
             return true;
         }
         catch
@@ -133,11 +143,7 @@ public class DesktopStartupFailureDialog
 
         try
         {
-            Process.Start(new ProcessStartInfo
-            {
-                FileName = candidate,
-                UseShellExecute = true,
-            });
+            Process.Start(new ProcessStartInfo { FileName = candidate, UseShellExecute = true });
             return true;
         }
         catch
@@ -178,9 +184,7 @@ public class DesktopStartupFailureDialog
         return builder.ToString();
     }
 
-    private string BuildHtmlFromTemplate(
-        string details,
-        IReadOnlyCollection<string> logContent)
+    private string BuildHtmlFromTemplate(string details, IReadOnlyCollection<string> logContent)
     {
         var template = LoadTemplate();
 
@@ -188,26 +192,28 @@ public class DesktopStartupFailureDialog
             .Replace("{{VERSION}}", HtmlEncoder.Default.Encode(_appBuildInfo.InformationalVersion))
             .Replace("{{LOGS_PATH}}", HtmlEncoder.Default.Encode(_pathProvider.LogsDirectory))
             .Replace("{{DETAILS}}", HtmlEncoder.Default.Encode(details))
-            .Replace("{{LOG_CONTENT}}", HtmlEncoder.Default.Encode(string.Join(System.Environment.NewLine, logContent) ));
+            .Replace(
+                "{{LOG_CONTENT}}",
+                HtmlEncoder.Default.Encode(string.Join(System.Environment.NewLine, logContent))
+            );
     }
 
     private static string LoadTemplate()
     {
         var assembly = typeof(DesktopStartupFailureDialog).Assembly;
-        var resourceName = assembly.GetManifestResourceNames()
+        var resourceName = assembly
+            .GetManifestResourceNames()
             .FirstOrDefault(name => name.EndsWith(TEMPLATE_RESOURCE_SUFFIX, StringComparison.Ordinal));
 
         if (resourceName is null)
         {
-            return
-                "<!doctype html><html><body><h1>Reaparr failed to start</h1><pre>Startup failure template resource not found.</pre></body></html>";
+            return "<!doctype html><html><body><h1>Reaparr failed to start</h1><pre>Startup failure template resource not found.</pre></body></html>";
         }
 
         using var stream = assembly.GetManifestResourceStream(resourceName);
         if (stream is null)
         {
-            return
-                "<!doctype html><html><body><h1>Reaparr failed to start</h1><pre>Startup failure template stream could not be opened.</pre></body></html>";
+            return "<!doctype html><html><body><h1>Reaparr failed to start</h1><pre>Startup failure template stream could not be opened.</pre></body></html>";
         }
 
         using var reader = new StreamReader(stream);

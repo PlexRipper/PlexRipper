@@ -1,9 +1,9 @@
+using System.IO.Abstractions;
 using FastEndpoints;
 using FluentResults;
 using FluentValidation;
 using Reaparr.Logging;
 using Serilog;
-using System.IO.Abstractions;
 
 namespace Reaparr.Build;
 
@@ -25,7 +25,12 @@ internal sealed class DesktopLaunchBuildCommandHandler : ICommandHandler<Desktop
     private readonly IDesktopCommandRunner _commandRunner;
     private readonly IFileSystem _fileSystem;
 
-    public DesktopLaunchBuildCommandHandler(ILogger log, BuildPaths paths, IDesktopCommandRunner commandRunner, IFileSystem fileSystem)
+    public DesktopLaunchBuildCommandHandler(
+        ILogger log,
+        BuildPaths paths,
+        IDesktopCommandRunner commandRunner,
+        IFileSystem fileSystem
+    )
     {
         _log = log.ForContext<DesktopLaunchBuildCommandHandler>();
         _paths = paths;
@@ -38,18 +43,37 @@ internal sealed class DesktopLaunchBuildCommandHandler : ICommandHandler<Desktop
         var settings = command.Settings;
         var runtime = DesktopRuntimeCatalog.Get(settings.RuntimeIdentifier);
 
-        var publishedExecutable = _fileSystem.Path.Combine(_paths.PublishDirectory(runtime.RuntimeIdentifier), runtime.MainExecutable);
-        _log.Here().Information("Resolved published executable for {RuntimeIdentifier} to {PublishedExecutable} (launch mode: {LaunchMode})", runtime.RuntimeIdentifier, publishedExecutable, settings.LaunchMode);
+        var publishedExecutable = _fileSystem.Path.Combine(
+            _paths.PublishDirectory(runtime.RuntimeIdentifier),
+            runtime.MainExecutable
+        );
+        _log.Here()
+            .Information(
+                "Resolved published executable for {RuntimeIdentifier} to {PublishedExecutable} (launch mode: {LaunchMode})",
+                runtime.RuntimeIdentifier,
+                publishedExecutable,
+                settings.LaunchMode
+            );
 
         if (!_fileSystem.File.Exists(publishedExecutable))
-            return Result.Fail<int>($"Published executable for runtime '{runtime.RuntimeIdentifier}' was not found at '{publishedExecutable}'.");
+            return Result.Fail<int>(
+                $"Published executable for runtime '{runtime.RuntimeIdentifier}' was not found at '{publishedExecutable}'."
+            );
 
-        if (runtime.RuntimeIdentifier.StartsWith("win-", StringComparison.OrdinalIgnoreCase) && !OperatingSystem.IsWindows())
+        if (
+            runtime.RuntimeIdentifier.StartsWith("win-", StringComparison.OrdinalIgnoreCase)
+            && !OperatingSystem.IsWindows()
+        )
         {
             if (await _commandRunner.CommandExistsAsync("wine"))
             {
                 var wineExitCode = await _commandRunner.ExecuteCommandAsync("wine", [publishedExecutable]);
-                _log.Here().Information("Wine launch for {RuntimeIdentifier} exited with code {ExitCode}", runtime.RuntimeIdentifier, wineExitCode);
+                _log.Here()
+                    .Information(
+                        "Wine launch for {RuntimeIdentifier} exited with code {ExitCode}",
+                        runtime.RuntimeIdentifier,
+                        wineExitCode
+                    );
                 return Result.Ok(wineExitCode);
             }
 
@@ -58,7 +82,12 @@ internal sealed class DesktopLaunchBuildCommandHandler : ICommandHandler<Desktop
         }
 
         var exitCode = await _commandRunner.ExecuteCommandAsync(publishedExecutable, []);
-        _log.Here().Information("Published executable for {RuntimeIdentifier} exited with code {ExitCode}", runtime.RuntimeIdentifier, exitCode);
+        _log.Here()
+            .Information(
+                "Published executable for {RuntimeIdentifier} exited with code {ExitCode}",
+                runtime.RuntimeIdentifier,
+                exitCode
+            );
         return Result.Ok(exitCode);
     }
 }

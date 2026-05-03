@@ -22,9 +22,8 @@ public class LogConfig : SlimLogConfig
     /// <returns></returns>
     protected override LoggerConfiguration GetBaseConfiguration(LogEventLevel minimumLogLevel = LogEventLevel.Debug)
     {
-        
         var config = base.GetBaseConfiguration(minimumLogLevel);
-        
+
         // Do not mask data when debugging
         if (!_appRuntimeInfo.IsUnmasked)
         {
@@ -73,16 +72,17 @@ public class LogConfig : SlimLogConfig
     /// <param name="minimumLogLevel">The global minimum log level used before sink-specific filtering.</param>
     protected virtual LoggerConfiguration GetExtendedConfiguration(
         LogEventLevel minimumLogLevel = LogEventLevel.Debug
-    ) => GetBaseConfiguration(minimumLogLevel)
-        .WriteTo.Seq(_appRuntimeInfo.SEQ_Url, restrictedToMinimumLevel: minimumLogLevel)
-        .WriteTo.File(
-            FileTemplate,
-            Path.Combine(_pathProvider.LogsDirectory, "log.txt"),
-            restrictedToMinimumLevel: minimumLogLevel,
-            rollingInterval: RollingInterval.Day,
-            rollOnFileSizeLimit: true,
-            retainedFileCountLimit: 7
-        );
+    ) =>
+        GetBaseConfiguration(minimumLogLevel)
+            .WriteTo.Seq(_appRuntimeInfo.SEQ_Url, restrictedToMinimumLevel: minimumLogLevel)
+            .WriteTo.File(
+                FileTemplate,
+                Path.Combine(_pathProvider.LogsDirectory, "log.txt"),
+                restrictedToMinimumLevel: minimumLogLevel,
+                rollingInterval: RollingInterval.Day,
+                rollOnFileSizeLimit: true,
+                retainedFileCountLimit: 7
+            );
 
     public override Logger GetLogger(LogEventLevel minimumLogLevel = LogEventLevel.Debug) =>
         GetExtendedConfiguration(minimumLogLevel).CreateLogger();

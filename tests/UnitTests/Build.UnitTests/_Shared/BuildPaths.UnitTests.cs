@@ -1,5 +1,5 @@
-using Autofac;
 using System.IO.Abstractions;
+using Autofac;
 
 namespace Reaparr.Build.UnitTests;
 
@@ -15,7 +15,6 @@ public class BuildPathsUnitTests : BaseUnitTest
 
         var fileSystem = Mock.Container.Resolve<IFileSystem>();
         var sut = new BuildPaths(root, fileSystem);
-        
 
         // Act
         var result = sut.ArtifactDirectory(runtimeIdentifier);

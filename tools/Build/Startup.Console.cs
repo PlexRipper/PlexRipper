@@ -120,9 +120,7 @@ public static partial class Startup
 
                     desktop
                         .AddCommand<DesktopRunCommand>("run")
-                        .WithDescription(
-                            "Publish or package as needed, then launch the desktop app when supported."
-                        )
+                        .WithDescription("Publish or package as needed, then launch the desktop app when supported.")
                         .WithExample(
                             "desktop",
                             "run",
@@ -136,7 +134,8 @@ public static partial class Startup
                 }
             );
 
-            config.SetExceptionHandler((ex, _) =>
+            config.SetExceptionHandler(
+                (ex, _) =>
                 {
                     log.Here().Error(ex, "{Message}", ex.Message);
                     return -1;

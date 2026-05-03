@@ -6,11 +6,7 @@ public class DesktopCommandSettingsUnitTests : BaseUnitTest
     public void ShouldFailValidation_WhenRuntimeIdentifierIsMissing()
     {
         // Arrange
-        var sut = new DesktopCommandSettings
-        {
-            Version = "1.2.3",
-            InformationalVersion = "1.2.3-dev.1",
-        };
+        var sut = new DesktopCommandSettings { Version = "1.2.3", InformationalVersion = "1.2.3-dev.1" };
 
         // Act
         var result = sut.Validate();
@@ -25,11 +21,7 @@ public class DesktopCommandSettingsUnitTests : BaseUnitTest
     public void ShouldFailValidation_WhenVersionIsMissing()
     {
         // Arrange
-        var sut = new DesktopCommandSettings
-        {
-            RuntimeIdentifier = "linux-x64",
-            InformationalVersion = "1.2.3-dev.1",
-        };
+        var sut = new DesktopCommandSettings { RuntimeIdentifier = "linux-x64", InformationalVersion = "1.2.3-dev.1" };
 
         // Act
         var result = sut.Validate();
@@ -44,11 +36,7 @@ public class DesktopCommandSettingsUnitTests : BaseUnitTest
     public void ShouldFailValidation_WhenInformationalVersionIsMissing()
     {
         // Arrange
-        var sut = new DesktopCommandSettings
-        {
-            RuntimeIdentifier = "linux-x64",
-            Version = "1.2.3",
-        };
+        var sut = new DesktopCommandSettings { RuntimeIdentifier = "linux-x64", Version = "1.2.3" };
 
         // Act
         var result = sut.Validate();

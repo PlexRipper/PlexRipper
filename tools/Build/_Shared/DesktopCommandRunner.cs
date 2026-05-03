@@ -1,9 +1,9 @@
+using System.IO.Abstractions;
 using CliWrap;
 using CliWrap.EventStream;
 using CliWrap.Exceptions;
 using Reaparr.Logging;
 using Serilog;
-using System.IO.Abstractions;
 
 namespace Reaparr.Build;
 
@@ -40,9 +40,7 @@ internal sealed class DesktopCommandRunner : IDesktopCommandRunner
 
         try
         {
-            var command = Cli.Wrap(fileName)
-                .WithArguments(arguments)
-                .WithWorkingDirectory(resolvedWorkingDirectory);
+            var command = Cli.Wrap(fileName).WithArguments(arguments).WithWorkingDirectory(resolvedWorkingDirectory);
 
             await foreach (var commandEvent in command.ListenAsync())
             {
@@ -66,7 +64,11 @@ internal sealed class DesktopCommandRunner : IDesktopCommandRunner
         }
     }
 
-    public async Task<int> ExecuteCommandAsync(string fileName, IReadOnlyList<string> arguments, string? workingDirectory = null)
+    public async Task<int> ExecuteCommandAsync(
+        string fileName,
+        IReadOnlyList<string> arguments,
+        string? workingDirectory = null
+    )
     {
         LogCommand(fileName, arguments);
 
@@ -79,7 +81,12 @@ internal sealed class DesktopCommandRunner : IDesktopCommandRunner
             .WithValidation(CommandResultValidation.None)
             .ExecuteAsync();
 
-        _log.Here().Information("Command exited with code {ExitCode}: {Command}", result.ExitCode, FormatCommand(fileName, arguments));
+        _log.Here()
+            .Information(
+                "Command exited with code {ExitCode}: {Command}",
+                result.ExitCode,
+                FormatCommand(fileName, arguments)
+            );
 
         return result.ExitCode;
     }
@@ -88,7 +95,10 @@ internal sealed class DesktopCommandRunner : IDesktopCommandRunner
     {
         if (!await CommandExistsAsync(command))
         {
-            throw new FileNotFoundException($"Required command '{command}' was not found on PATH. Install it or adjust your environment before running desktop builds.", command);
+            throw new FileNotFoundException(
+                $"Required command '{command}' was not found on PATH. Install it or adjust your environment before running desktop builds.",
+                command
+            );
         }
     }
 
@@ -99,7 +109,11 @@ internal sealed class DesktopCommandRunner : IDesktopCommandRunner
             return Task.FromResult(false);
         }
 
-        if (_fileSystem.Path.IsPathRooted(command) || command.Contains(_fileSystem.Path.DirectorySeparatorChar) || command.Contains(_fileSystem.Path.AltDirectorySeparatorChar))
+        if (
+            _fileSystem.Path.IsPathRooted(command)
+            || command.Contains(_fileSystem.Path.DirectorySeparatorChar)
+            || command.Contains(_fileSystem.Path.AltDirectorySeparatorChar)
+        )
         {
             return Task.FromResult(_fileSystem.File.Exists(command));
         }
@@ -115,7 +129,10 @@ internal sealed class DesktopCommandRunner : IDesktopCommandRunner
         if (OperatingSystem.IsWindows())
         {
             var pathExtValue = System.Environment.GetEnvironmentVariable("PATHEXT") ?? ".EXE;.CMD;.BAT;.COM";
-            var pathExts = pathExtValue.Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).Distinct(StringComparer.OrdinalIgnoreCase).ToList();
+            var pathExts = pathExtValue
+                .Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList();
 
             if (!_fileSystem.Path.HasExtension(command))
             {
@@ -126,7 +143,12 @@ internal sealed class DesktopCommandRunner : IDesktopCommandRunner
             }
         }
 
-        foreach (var directory in pathValue.Split(_fileSystem.Path.PathSeparator, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+        foreach (
+            var directory in pathValue.Split(
+                _fileSystem.Path.PathSeparator,
+                StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries
+            )
+        )
         {
             foreach (var candidate in candidates)
             {

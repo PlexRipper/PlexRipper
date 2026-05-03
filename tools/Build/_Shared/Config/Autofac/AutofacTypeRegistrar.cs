@@ -9,8 +9,8 @@ public sealed class AutofacTypeRegistrar : ITypeRegistrar, IDisposable
 {
     private readonly ContainerBuilder _builder;
     private IContainer? _container;
-    public AutofacTypeRegistrar(IServiceCollection services,
-        Action<ContainerBuilder>? registerAutofac = null)
+
+    public AutofacTypeRegistrar(IServiceCollection services, Action<ContainerBuilder>? registerAutofac = null)
     {
         _builder = CreateContainerBuilder(services, registerAutofac);
     }
@@ -26,8 +26,7 @@ public sealed class AutofacTypeRegistrar : ITypeRegistrar, IDisposable
     public void RegisterInstance(Type service, object implementation) =>
         _builder.RegisterInstance(implementation).As(service);
 
-    public void RegisterLazy(Type service, Func<object> factory) =>
-        _builder.Register(_ => factory()).As(service);
+    public void RegisterLazy(Type service, Func<object> factory) => _builder.Register(_ => factory()).As(service);
 
     public void Dispose() => _container?.Dispose();
 
@@ -46,9 +45,11 @@ public sealed class AutofacTypeRegistrar : ITypeRegistrar, IDisposable
 internal sealed class AutofacTypeResolver : ITypeResolver
 {
     private readonly IComponentContext _context;
+
     public AutofacTypeResolver(IComponentContext context)
     {
         _context = context;
     }
+
     public object? Resolve(Type? type) => type is null ? null : _context.ResolveOptional(type);
 }

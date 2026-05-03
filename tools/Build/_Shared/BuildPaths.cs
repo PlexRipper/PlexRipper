@@ -5,11 +5,13 @@ namespace Reaparr.Build;
 internal sealed class BuildPaths
 {
     private readonly IFileSystem _fileSystem;
+
     public BuildPaths(string rootDirectory, IFileSystem fileSystem)
     {
         _fileSystem = fileSystem;
         RootDirectory = rootDirectory;
     }
+
     public string RootDirectory { get; }
 
     public string AppHostProject => _fileSystem.Path.Combine(RootDirectory, "src", "AppHost", "AppHost.csproj");

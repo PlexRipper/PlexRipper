@@ -1,10 +1,10 @@
+using System.IO.Abstractions;
 using FastEndpoints;
 using FluentResults;
 using FluentValidation;
 using Reaparr.Domain;
 using Reaparr.Logging;
 using Serilog;
-using System.IO.Abstractions;
 
 namespace Reaparr.Build;
 
@@ -27,7 +27,13 @@ internal sealed class DesktopRunBuildCommandHandler : ICommandHandler<DesktopRun
     private readonly FileSystemTasks _fileSystemTasks;
     private readonly ICommandExecutor _commandExecutor;
 
-    public DesktopRunBuildCommandHandler(ILogger log, BuildPaths paths, IFileSystem fileSystem, FileSystemTasks fileSystemTasks, ICommandExecutor commandExecutor)
+    public DesktopRunBuildCommandHandler(
+        ILogger log,
+        BuildPaths paths,
+        IFileSystem fileSystem,
+        FileSystemTasks fileSystemTasks,
+        ICommandExecutor commandExecutor
+    )
     {
         _log = log.ForContext<DesktopRunBuildCommandHandler>();
         _paths = paths;
@@ -41,11 +47,20 @@ internal sealed class DesktopRunBuildCommandHandler : ICommandHandler<DesktopRun
         var settings = command.Settings;
         var runtime = DesktopRuntimeCatalog.Get(settings.RuntimeIdentifier);
 
-        _log.Here().Information("Starting run workflow for {RuntimeIdentifier} (SkipPackage={SkipPackage}, DryRun={DryRun})", settings.RuntimeIdentifier, settings.SkipPackage, settings.DryRun);
+        _log.Here()
+            .Information(
+                "Starting run workflow for {RuntimeIdentifier} (SkipPackage={SkipPackage}, DryRun={DryRun})",
+                settings.RuntimeIdentifier,
+                settings.SkipPackage,
+                settings.DryRun
+            );
 
         if (settings.SkipPackage)
         {
-            var publishResult = await _commandExecutor.Send(new DesktopPublishBuildCommand(settings), cancellationToken);
+            var publishResult = await _commandExecutor.Send(
+                new DesktopPublishBuildCommand(settings),
+                cancellationToken
+            );
             if (publishResult.IsFailed)
                 return Result.Fail<int>(publishResult.Errors);
 
@@ -56,7 +71,10 @@ internal sealed class DesktopRunBuildCommandHandler : ICommandHandler<DesktopRun
                     : _fileSystem.Path.GetFullPath(settings.ArtifactDirectory, _paths.RootDirectory);
 
                 _fileSystem.Directory.CreateDirectory(artifactDirectory);
-                var publishedExecutable = _fileSystem.Path.Combine(_paths.PublishDirectory(runtime.RuntimeIdentifier), runtime.MainExecutable);
+                var publishedExecutable = _fileSystem.Path.Combine(
+                    _paths.PublishDirectory(runtime.RuntimeIdentifier),
+                    runtime.MainExecutable
+                );
                 if (_fileSystem.File.Exists(publishedExecutable))
                 {
                     var targetExecutable = _fileSystem.Path.Combine(artifactDirectory, runtime.MainExecutable);
@@ -67,31 +85,47 @@ internal sealed class DesktopRunBuildCommandHandler : ICommandHandler<DesktopRun
                 var sourcePublishDirectory = _paths.PublishDirectory(runtime.RuntimeIdentifier);
                 var targetRoot = _fileSystem.Path.Combine(artifactDirectory, "publish");
 
-                var normalizedSource = _fileSystem.Path.GetFullPath(sourcePublishDirectory).TrimEnd(_fileSystem.Path.DirectorySeparatorChar, _fileSystem.Path.AltDirectorySeparatorChar);
-                var normalizedTarget = _fileSystem.Path.GetFullPath(targetRoot).TrimEnd(_fileSystem.Path.DirectorySeparatorChar, _fileSystem.Path.AltDirectorySeparatorChar);
+                var normalizedSource = _fileSystem
+                    .Path.GetFullPath(sourcePublishDirectory)
+                    .TrimEnd(_fileSystem.Path.DirectorySeparatorChar, _fileSystem.Path.AltDirectorySeparatorChar);
+                var normalizedTarget = _fileSystem
+                    .Path.GetFullPath(targetRoot)
+                    .TrimEnd(_fileSystem.Path.DirectorySeparatorChar, _fileSystem.Path.AltDirectorySeparatorChar);
 
                 if (string.Equals(normalizedSource, normalizedTarget, StringComparison.OrdinalIgnoreCase))
                 {
-                    _log.Here().Information("Skipping Windows publish directory export because source and target are the same path: {PublishDirectory}", targetRoot);
+                    _log.Here()
+                        .Information(
+                            "Skipping Windows publish directory export because source and target are the same path: {PublishDirectory}",
+                            targetRoot
+                        );
                 }
                 else
                 {
                     _fileSystemTasks.ClearDirectory(targetRoot);
                     _fileSystemTasks.CopyDirectory(sourcePublishDirectory, targetRoot);
-                    _log.Here().Information("Exported Windows publish directory to {ArtifactPublishDirectory}", targetRoot);
+                    _log.Here()
+                        .Information("Exported Windows publish directory to {ArtifactPublishDirectory}", targetRoot);
                 }
             }
         }
         else
         {
-            var packageResult = await _commandExecutor.Send(new DesktopPackageBuildCommand(settings), cancellationToken);
+            var packageResult = await _commandExecutor.Send(
+                new DesktopPackageBuildCommand(settings),
+                cancellationToken
+            );
             if (packageResult.IsFailed)
                 return Result.Fail<int>(packageResult.Errors);
         }
 
         if (settings.DryRun)
         {
-            _log.Here().Information("Dry-run enabled; skipping launch step for {RuntimeIdentifier}", settings.RuntimeIdentifier);
+            _log.Here()
+                .Information(
+                    "Dry-run enabled; skipping launch step for {RuntimeIdentifier}",
+                    settings.RuntimeIdentifier
+                );
             return Result.Ok(0);
         }
 

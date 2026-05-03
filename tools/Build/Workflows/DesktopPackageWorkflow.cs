@@ -1,10 +1,10 @@
+using System.IO.Abstractions;
 using FastEndpoints;
 using FluentResults;
 using FluentValidation;
 using Reaparr.Domain;
 using Reaparr.Logging;
 using Serilog;
-using System.IO.Abstractions;
 
 namespace Reaparr.Build;
 
@@ -28,7 +28,14 @@ internal sealed class DesktopPackageBuildCommandHandler : ICommandHandler<Deskto
     private readonly IFileSystem _fileSystem;
     private readonly ICommandExecutor _commandExecutor;
 
-    public DesktopPackageBuildCommandHandler(ILogger log, BuildPaths paths, IDesktopCommandRunner commandRunner, FileSystemTasks fileSystemTasks, IFileSystem fileSystem, ICommandExecutor commandExecutor)
+    public DesktopPackageBuildCommandHandler(
+        ILogger log,
+        BuildPaths paths,
+        IDesktopCommandRunner commandRunner,
+        FileSystemTasks fileSystemTasks,
+        IFileSystem fileSystem,
+        ICommandExecutor commandExecutor
+    )
     {
         _log = log.ForContext<DesktopPackageBuildCommandHandler>();
         _paths = paths;
@@ -57,8 +64,12 @@ internal sealed class DesktopPackageBuildCommandHandler : ICommandHandler<Deskto
         if (!settings.DryRun)
         {
             var publishDirectory = _paths.PublishDirectory(runtime.RuntimeIdentifier);
-            var normalizedArtifactDirectory = _fileSystem.Path.GetFullPath(artifactDirectory).TrimEnd(_fileSystem.Path.DirectorySeparatorChar, _fileSystem.Path.AltDirectorySeparatorChar);
-            var normalizedPublishDirectory = _fileSystem.Path.GetFullPath(publishDirectory).TrimEnd(_fileSystem.Path.DirectorySeparatorChar, _fileSystem.Path.AltDirectorySeparatorChar);
+            var normalizedArtifactDirectory = _fileSystem
+                .Path.GetFullPath(artifactDirectory)
+                .TrimEnd(_fileSystem.Path.DirectorySeparatorChar, _fileSystem.Path.AltDirectorySeparatorChar);
+            var normalizedPublishDirectory = _fileSystem
+                .Path.GetFullPath(publishDirectory)
+                .TrimEnd(_fileSystem.Path.DirectorySeparatorChar, _fileSystem.Path.AltDirectorySeparatorChar);
 
             var artifactContainsPublish = normalizedPublishDirectory.StartsWith(
                 normalizedArtifactDirectory + _fileSystem.Path.DirectorySeparatorChar,
@@ -69,7 +80,11 @@ internal sealed class DesktopPackageBuildCommandHandler : ICommandHandler<Deskto
             {
                 if (artifactContainsPublish)
                 {
-                    _log.Here().Information("Skipping artifact directory cleanup because it contains the publish directory required for packaging: {ArtifactDirectory}", artifactDirectory);
+                    _log.Here()
+                        .Information(
+                            "Skipping artifact directory cleanup because it contains the publish directory required for packaging: {ArtifactDirectory}",
+                            artifactDirectory
+                        );
                     _fileSystem.Directory.CreateDirectory(artifactDirectory);
                 }
                 else
@@ -101,12 +116,18 @@ internal sealed class DesktopPackageBuildCommandHandler : ICommandHandler<Deskto
                     "--channel",
                     GetChannel(settings, runtime.RuntimeIdentifier),
                     "--outputDir",
-                    artifactDirectory
+                    artifactDirectory,
                 ]
             );
         }
 
-        _log.Here().Information("Packaged {RuntimeIdentifier} desktop artifacts for Velopack channel {Channel} to {ArtifactDirectory}", runtime.RuntimeIdentifier, GetChannel(settings, runtime.RuntimeIdentifier), artifactDirectory);
+        _log.Here()
+            .Information(
+                "Packaged {RuntimeIdentifier} desktop artifacts for Velopack channel {Channel} to {ArtifactDirectory}",
+                runtime.RuntimeIdentifier,
+                GetChannel(settings, runtime.RuntimeIdentifier),
+                artifactDirectory
+            );
 
         return Result.Ok(0);
     }
@@ -121,7 +142,9 @@ internal sealed class DesktopPackageBuildCommandHandler : ICommandHandler<Deskto
         if (!string.IsNullOrWhiteSpace(settings.Channel))
             return settings.Channel;
 
-        return !string.IsNullOrWhiteSpace(settings.InformationalVersion) && settings.InformationalVersion.Contains("dev", StringComparison.OrdinalIgnoreCase)
+        return
+            !string.IsNullOrWhiteSpace(settings.InformationalVersion)
+            && settings.InformationalVersion.Contains("dev", StringComparison.OrdinalIgnoreCase)
             ? $"{rid}-dev"
             : $"{rid}-stable";
     }

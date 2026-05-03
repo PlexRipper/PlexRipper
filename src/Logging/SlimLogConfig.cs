@@ -38,7 +38,6 @@ public class SlimLogConfig
             .MinimumLevel.Is(minimumLogLevel)
             .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
             .MinimumLevel.Override("Microsoft.Hosting.Lifetime", LogEventLevel.Information)
-
             // These filters: No XML encryptor configured. Key {*} may be persisted to storage in unencrypted form.
             // This can be ignored because we use proper auth: https://github.com/dotnet/aspnetcore/issues/3309#issuecomment-404246838
             .Filter.ByExcluding(Matching.FromSource("Microsoft.AspNetCore.DataProtection.KeyManagement.XmlKeyManager"))
@@ -46,7 +45,7 @@ public class SlimLogConfig
 
         return config.Enrich.FromLogContext().WriteTo.Debug(ConsoleTemplate).WriteTo.Console(ConsoleTemplate);
     }
-    
+
     public virtual Logger GetLogger(LogEventLevel minimumLogLevel = LogEventLevel.Debug) =>
         GetBaseConfiguration(minimumLogLevel).CreateLogger();
 }

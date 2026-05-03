@@ -12,7 +12,6 @@ public static partial class Startup
 
         services.AddSerilog(logger);
 
-
         return new AutofacTypeRegistrar(services, builder => builder.RegisterModule<BuildModule>());
     }
 }

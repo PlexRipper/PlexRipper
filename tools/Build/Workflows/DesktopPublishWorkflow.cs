@@ -1,9 +1,9 @@
+using System.IO.Abstractions;
 using FastEndpoints;
 using FluentResults;
 using FluentValidation;
 using Reaparr.Logging;
 using Serilog;
-using System.IO.Abstractions;
 
 namespace Reaparr.Build;
 
@@ -26,7 +26,13 @@ internal sealed class DesktopPublishBuildCommandHandler : ICommandHandler<Deskto
     private readonly FileSystemTasks _fileSystemTasks;
     private readonly IFileSystem _fileSystem;
 
-    public DesktopPublishBuildCommandHandler(ILogger log, BuildPaths paths, IDesktopCommandRunner commandRunner, FileSystemTasks fileSystemTasks, IFileSystem fileSystem)
+    public DesktopPublishBuildCommandHandler(
+        ILogger log,
+        BuildPaths paths,
+        IDesktopCommandRunner commandRunner,
+        FileSystemTasks fileSystemTasks,
+        IFileSystem fileSystem
+    )
     {
         _log = log.ForContext<DesktopPublishBuildCommandHandler>();
         _paths = paths;
@@ -59,30 +65,56 @@ internal sealed class DesktopPublishBuildCommandHandler : ICommandHandler<Deskto
 
                 if (ShouldInstallFrontendDependencies(_paths.ClientAppDirectory))
                 {
-                    _log.Here().Information("Installing frontend dependencies in {ClientAppDirectory}", _paths.ClientAppDirectory);
+                    _log.Here()
+                        .Information(
+                            "Installing frontend dependencies in {ClientAppDirectory}",
+                            _paths.ClientAppDirectory
+                        );
                     if (!settings.DryRun)
-                        await _commandRunner.RunCommandAsync("bun", ["install", "--frozen-lockfile"], _paths.ClientAppDirectory);
+                        await _commandRunner.RunCommandAsync(
+                            "bun",
+                            ["install", "--frozen-lockfile"],
+                            _paths.ClientAppDirectory
+                        );
                 }
 
                 if (!settings.DryRun)
-                    await _commandRunner.RunCommandAsync("bun", ["run", "generate", "--fail-on-error"], _paths.ClientAppDirectory);
+                    await _commandRunner.RunCommandAsync(
+                        "bun",
+                        ["run", "generate", "--fail-on-error"],
+                        _paths.ClientAppDirectory
+                    );
             }
             else
             {
-                _log.Here().Information("Reusing existing frontend output from {FrontendPublicDirectory}", sourceDirectory);
+                _log.Here()
+                    .Information("Reusing existing frontend output from {FrontendPublicDirectory}", sourceDirectory);
             }
         }
 
         if (!settings.SkipRestore && !settings.DryRun)
-            await _commandRunner.RunCommandAsync("dotnet", ["restore", _paths.AppHostProject, "--runtime", runtime.RuntimeIdentifier]);
+            await _commandRunner.RunCommandAsync(
+                "dotnet",
+                ["restore", _paths.AppHostProject, "--runtime", runtime.RuntimeIdentifier]
+            );
 
         if (!settings.DryRun)
         {
             var publishDirectory = _paths.PublishDirectory(runtime.RuntimeIdentifier);
             _fileSystem.Directory.CreateDirectory(publishDirectory);
 
-            await _commandRunner.RunCommandAsync("dotnet",
-            ["publish", _paths.AppHostProject, $"-p:PublishProfile={runtime.PublishProfile}", $"-p:Version={settings.Version}", $"-p:InformationalVersion={settings.InformationalVersion}", $"-p:PublishDir={publishDirectory}{_fileSystem.Path.DirectorySeparatorChar}", "-p:CSharpier_Bypass=true"]);
+            await _commandRunner.RunCommandAsync(
+                "dotnet",
+                [
+                    "publish",
+                    _paths.AppHostProject,
+                    $"-p:PublishProfile={runtime.PublishProfile}",
+                    $"-p:Version={settings.Version}",
+                    $"-p:InformationalVersion={settings.InformationalVersion}",
+                    $"-p:PublishDir={publishDirectory}{_fileSystem.Path.DirectorySeparatorChar}",
+                    "-p:CSharpier_Bypass=true",
+                ]
+            );
         }
 
         if (!settings.DryRun)
@@ -91,12 +123,20 @@ internal sealed class DesktopPublishBuildCommandHandler : ICommandHandler<Deskto
             if (!_fileSystem.Directory.Exists(sourceDirectory))
                 return Result.Fail<int>($"Generated frontend output directory was not found at '{sourceDirectory}'.");
 
-            var wwwrootDirectory = _fileSystem.Path.Combine(_paths.PublishDirectory(runtime.RuntimeIdentifier), "wwwroot");
+            var wwwrootDirectory = _fileSystem.Path.Combine(
+                _paths.PublishDirectory(runtime.RuntimeIdentifier),
+                "wwwroot"
+            );
             _fileSystemTasks.ClearArtifactDirectory(_paths.RootDirectory, wwwrootDirectory);
             _fileSystemTasks.CopyDirectory(sourceDirectory, wwwrootDirectory);
         }
 
-        _log.Here().Information("Published {RuntimeIdentifier} desktop build to {PublishDirectory}", runtime.RuntimeIdentifier, _paths.PublishDirectory(runtime.RuntimeIdentifier));
+        _log.Here()
+            .Information(
+                "Published {RuntimeIdentifier} desktop build to {PublishDirectory}",
+                runtime.RuntimeIdentifier,
+                _paths.PublishDirectory(runtime.RuntimeIdentifier)
+            );
 
         return Result.Ok(0);
     }

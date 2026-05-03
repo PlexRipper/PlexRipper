@@ -1,3 +1,4 @@
+using System.Collections;
 using Autofac;
 using FastEndpoints;
 using FluentResults;
@@ -6,7 +7,6 @@ using FluentValidation.Results;
 using Reaparr.Domain;
 using Reaparr.Logging;
 using Serilog;
-using System.Collections;
 
 namespace Reaparr.Build;
 
@@ -55,12 +55,17 @@ internal sealed class BuildCommandExecutor : ICommandExecutor
         }
         catch (Exception ex)
         {
-            _log.Here().Error(ex, "Failed to execute build command {CommandType}", command?.GetType().Name ?? "Unknown");
+            _log.Here()
+                .Error(ex, "Failed to execute build command {CommandType}", command?.GetType().Name ?? "Unknown");
             return Fail<TResult>(ex.Message);
         }
     }
 
-    private async Task<List<ValidationFailure>> ValidateCommandAsync<TResult>(ICommand<TResult> command, Type commandType, CancellationToken ct)
+    private async Task<List<ValidationFailure>> ValidateCommandAsync<TResult>(
+        ICommand<TResult> command,
+        Type commandType,
+        CancellationToken ct
+    )
         where TResult : ResultBase, new()
     {
         var validatorType = typeof(IValidator<>).MakeGenericType(commandType);
@@ -74,7 +79,10 @@ internal sealed class BuildCommandExecutor : ICommandExecutor
 
         foreach (var validator in validators)
         {
-            var validateMethod = validatorType.GetMethod(nameof(IValidator<object>.ValidateAsync), [typeof(IValidationContext), typeof(CancellationToken)]);
+            var validateMethod = validatorType.GetMethod(
+                nameof(IValidator<object>.ValidateAsync),
+                [typeof(IValidationContext), typeof(CancellationToken)]
+            );
             if (validateMethod is null)
                 continue;
 

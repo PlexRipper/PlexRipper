@@ -21,5 +21,4 @@
         <ProjectReference Include="..\..\..\tools\Build\Build.csproj" />
         <ProjectReference Include="..\BaseTests.UnitTests\BaseTests.UnitTests.csproj" />
     </ItemGroup>
-
 </Project>

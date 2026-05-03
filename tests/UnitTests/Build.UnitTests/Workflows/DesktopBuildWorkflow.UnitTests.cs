@@ -23,7 +23,7 @@ internal class DesktopRunBuildCommandHandlerUnitTests : BaseUnitTest<DesktopRunB
             InformationalVersion = "1.2.3-dev.1",
             SkipPackage = true,
             DryRun = true,
-            SkipRestore = true
+            SkipRestore = true,
         };
 
         Mock.Mock<ICommandExecutor>()

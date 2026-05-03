@@ -24,6 +24,6 @@
         <PackageReference Include="System.IO.Abstractions" Version="22.0.16" />
     </ItemGroup>
     <ItemGroup>
-      <ProjectReference Include="..\..\src\Domain\Domain.csproj" />
+        <ProjectReference Include="..\..\src\Domain\Domain.csproj" />
     </ItemGroup>
 </Project>

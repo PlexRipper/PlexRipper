@@ -64,7 +64,9 @@ internal sealed class DesktopCommandSettings : CommandSettings
 
         if (string.IsNullOrWhiteSpace(InformationalVersion))
         {
-            return ValidationResult.Error("An informational version is required. Pass --informational-version <VERSION>.");
+            return ValidationResult.Error(
+                "An informational version is required. Pass --informational-version <VERSION>."
+            );
         }
 
         if (
@@ -82,4 +84,3 @@ internal sealed class DesktopCommandSettings : CommandSettings
         return ValidationResult.Success();
     }
 }
-

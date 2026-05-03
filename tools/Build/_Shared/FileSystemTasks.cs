@@ -5,6 +5,7 @@ namespace Reaparr.Build;
 internal sealed class FileSystemTasks
 {
     private readonly IFileSystem _fileSystem;
+
     public FileSystemTasks(IFileSystem fileSystem)
     {
         _fileSystem = fileSystem;
@@ -22,7 +23,11 @@ internal sealed class FileSystemTasks
 
         foreach (var file in _fileSystem.Directory.EnumerateFiles(source))
         {
-            _fileSystem.File.Copy(file, _fileSystem.Path.Combine(target, _fileSystem.Path.GetFileName(file)), overwrite: true);
+            _fileSystem.File.Copy(
+                file,
+                _fileSystem.Path.Combine(target, _fileSystem.Path.GetFileName(file)),
+                overwrite: true
+            );
         }
     }
 
@@ -52,11 +57,14 @@ internal sealed class FileSystemTasks
         var sourcePath = NormalizeDirectoryPath(source);
         var targetPath = NormalizeDirectoryPath(target);
 
-        if (targetPath.StartsWith(sourcePath + _fileSystem.Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase))
+        if (
+            targetPath.StartsWith(
+                sourcePath + _fileSystem.Path.DirectorySeparatorChar,
+                StringComparison.OrdinalIgnoreCase
+            )
+        )
         {
-            throw new InvalidOperationException(
-                $"Refusing to copy '{sourcePath}' into nested target '{targetPath}'."
-            );
+            throw new InvalidOperationException($"Refusing to copy '{sourcePath}' into nested target '{targetPath}'.");
         }
     }
 
@@ -71,7 +79,12 @@ internal sealed class FileSystemTasks
         }
 
         var defaultArtifactsRoot = NormalizeDirectoryPath(_fileSystem.Path.Combine(rootPath, ".artifacts"));
-        if (!artifactPath.StartsWith(defaultArtifactsRoot + _fileSystem.Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase))
+        if (
+            !artifactPath.StartsWith(
+                defaultArtifactsRoot + _fileSystem.Path.DirectorySeparatorChar,
+                StringComparison.OrdinalIgnoreCase
+            )
+        )
         {
             throw new InvalidOperationException(
                 $"Refusing to clear custom artifact directory '{artifactPath}'. Choose a path under '{defaultArtifactsRoot}' or use --preserve-existing-artifacts."
@@ -80,5 +93,7 @@ internal sealed class FileSystemTasks
     }
 
     private string NormalizeDirectoryPath(string path) =>
-        _fileSystem.Path.GetFullPath(path).TrimEnd(_fileSystem.Path.DirectorySeparatorChar, _fileSystem.Path.AltDirectorySeparatorChar);
+        _fileSystem
+            .Path.GetFullPath(path)
+            .TrimEnd(_fileSystem.Path.DirectorySeparatorChar, _fileSystem.Path.AltDirectorySeparatorChar);
 }

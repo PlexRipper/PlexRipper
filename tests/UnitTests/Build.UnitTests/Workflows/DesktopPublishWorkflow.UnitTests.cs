@@ -1,4 +1,5 @@
 using System.IO.Abstractions.TestingHelpers;
+using Autofac;
 
 namespace Reaparr.Build.UnitTests;
 
@@ -14,6 +15,15 @@ internal class DesktopPublishWorkflowUnitTests : BaseUnitTest<DesktopPublishBuil
             InformationalVersion = "1.2.3-dev.1",
             DryRun = true,
         };
+
+        // DesktopPublishBuildCommandHandler resolves BuildPaths from DI. BuildPaths requires a
+        // rootDirectory string constructor parameter, so tests must register it explicitly.
+        // /repo matches the mocked filesystem layout used by this test suite.
+        SetupDependencies(builder =>
+            builder.Register(_ => "/repo")
+                .As<string>()
+                .SingleInstance()
+        );
 
         Mock.Mock<IDesktopCommandRunner>()
             .Setup(x => x.RequireCommandAsync(It.IsAny<string>()))
@@ -51,6 +61,12 @@ internal class DesktopPublishWorkflowUnitTests : BaseUnitTest<DesktopPublishBuil
             DryRun = true,
             SkipRestore = true,
         };
+
+        SetupDependencies(builder =>
+            builder.Register(_ => "/repo")
+                .As<string>()
+                .SingleInstance()
+        );
 
         Mock.Mock<IDesktopCommandRunner>()
             .Setup(x => x.RequireCommandAsync("bun"))

@@ -299,7 +299,7 @@
         "type": "Project",
         "dependencies": {
           "Quartz": "[3.17.0, )",
-          "Reaparr.Domain": "[1.0.0, )"
+          "Reaparr.Domain": "[0.36.0-dev.2, )"
         }
       },
       "Reaparr.Domain": {
@@ -311,7 +311,7 @@
           "JetBrains.Annotations": "[2025.2.4, )",
           "NaturalSort.Extension": "[4.4.1, )",
           "PasswordGenerator": "[2.1.0, )",
-          "Reaparr.FluentResultExtensions": "[1.0.0, )",
+          "Reaparr.FluentResultExtensions": "[0.36.0-dev.2, )",
           "System.ComponentModel.Annotations": "[5.0.0, )",
           "System.Reactive": "[6.1.0, )"
         }
@@ -329,7 +329,7 @@
         "dependencies": {
           "FluentResults": "[4.0.0, )",
           "FluentValidation": "[12.1.1, )",
-          "Reaparr.Logging": "[1.0.0, )"
+          "Reaparr.Logging": "[0.36.0-dev.2, )"
         }
       },
       "Reaparr.Logging": {
@@ -338,7 +338,7 @@
           "Autofac": "[9.1.0, )",
           "FluentResults": "[4.0.0, )",
           "Microsoft.AspNetCore.Http.Abstractions": "[2.3.9, )",
-          "Reaparr.Environment": "[1.0.0, )",
+          "Reaparr.Environment": "[0.36.0-dev.2, )",
           "Serilog": "[4.3.1, )",
           "Serilog.Enrichers.Sensitive": "[2.1.0, )",
           "Serilog.Expressions": "[5.0.0, )",

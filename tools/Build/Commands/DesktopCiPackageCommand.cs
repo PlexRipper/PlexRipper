@@ -1,23 +1,23 @@
-using Microsoft.Extensions.Logging;
+using Reaparr.Domain;
 using Spectre.Console.Cli;
 
 namespace Reaparr.Build;
 
-internal sealed class DesktopCiPackageCommand(BuildPaths paths, ILoggerFactory loggerFactory)
-    : AsyncCommand<DesktopCommandSettings>
+internal sealed class DesktopCiPackageCommand(ICommandExecutor commandExecutor) : AsyncCommand<DesktopCommandSettings>
 {
-    protected override Task<int> ExecuteAsync(
+    protected override async Task<int> ExecuteAsync(
         CommandContext context,
         DesktopCommandSettings settings,
         CancellationToken cancellationToken
     )
     {
         var ciSettings = CreateCiSettings(settings);
+        var result = await commandExecutor.Send(new DesktopPackageBuildCommand(ciSettings), cancellationToken);
 
-        return DesktopBuildWorkflow.Create(paths, ciSettings, loggerFactory).PackageAsync();
+        return result.IsFailed ? 1 : result.Value;
     }
 
-    private static DesktopCommandSettings CreateCiSettings(DesktopCommandSettings settings) =>
+    internal static DesktopCommandSettings CreateCiSettings(DesktopCommandSettings settings) =>
         new()
         {
             RuntimeIdentifier = settings.RuntimeIdentifier,
@@ -31,5 +31,6 @@ internal sealed class DesktopCiPackageCommand(BuildPaths paths, ILoggerFactory l
             FrontendPublicDirectory = settings.FrontendPublicDirectory,
             ArtifactDirectory = settings.ArtifactDirectory,
             PreserveExistingArtifacts = settings.PreserveExistingArtifacts,
+            LaunchMode = settings.LaunchMode,
         };
 }

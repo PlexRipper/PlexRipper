@@ -1537,6 +1537,7 @@
           "Microsoft.AspNetCore.SpaServices.Extensions": "[10.0.7, )",
           "Microsoft.Extensions.Http.Polly": "[10.0.6, )",
           "Photino.NET": "[4.0.16, )",
+          "Quartz": "[3.17.0, )",
           "Quartz.Extensions.Hosting": "[3.17.0, )",
           "Reaparr.Application": "[1.0.0, )",
           "Reaparr.BackgroundJobs": "[1.0.0, )",

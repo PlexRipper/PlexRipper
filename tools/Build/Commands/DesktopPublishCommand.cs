@@ -1,17 +1,18 @@
-using Microsoft.Extensions.Logging;
+using Reaparr.Domain;
 using Spectre.Console.Cli;
 
 namespace Reaparr.Build;
 
-internal sealed class DesktopPublishCommand(BuildPaths paths, ILoggerFactory loggerFactory)
-    : AsyncCommand<DesktopCommandSettings>
+internal sealed class DesktopPublishCommand(ICommandExecutor commandExecutor) : AsyncCommand<DesktopCommandSettings>
 {
-    protected override Task<int> ExecuteAsync(
+    protected override async Task<int> ExecuteAsync(
         CommandContext context,
         DesktopCommandSettings settings,
         CancellationToken cancellationToken
     )
     {
-        return DesktopBuildWorkflow.Create(paths, settings, loggerFactory).PublishAsync();
+        var result = await commandExecutor.Send(new DesktopPublishBuildCommand(settings), cancellationToken);
+
+        return result.IsFailed ? 1 : result.Value;
     }
 }

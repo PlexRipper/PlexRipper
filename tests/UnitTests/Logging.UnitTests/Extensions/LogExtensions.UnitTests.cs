@@ -119,19 +119,19 @@ public class LogExtensionsUnitTests : BaseUnitTest
 
         foreach (var logEvent in logEvents)
         {
-            var sourceContext = logEvent.GetStringProperty(LogConfig.SourceContext);
+            var sourceContext = logEvent.GetStringProperty(SlimLogConfig.SourceContext);
             sourceContext.ShouldNotBeNull();
             sourceContext.ShouldContain(nameof(LogExtensionsUnitTests));
 
-            var fileName = logEvent.GetStringProperty(LogConfig.FileName);
+            var fileName = logEvent.GetStringProperty(SlimLogConfig.FileName);
             fileName.ShouldNotBeNull();
             fileName.ShouldContain("LogExtensions.UnitTests");
 
-            var methodName = logEvent.GetStringProperty(LogConfig.MethodName);
+            var methodName = logEvent.GetStringProperty(SlimLogConfig.MethodName);
             methodName.ShouldNotBeNull();
             methodName.ShouldBe(nameof(ShouldLogWithCorrectLogProperties_WhenEachLogTypeIsCalled));
 
-            var lineNumber = logEvent.GetIntProperty(LogConfig.LineNumber);
+            var lineNumber = logEvent.GetIntProperty(SlimLogConfig.LineNumber);
             lineNumber.ShouldNotBeNull();
             lineNumber.ShouldNotBe(0);
 

@@ -230,6 +230,8 @@ jobs:
                         project_name: BackgroundJobs.UnitTests
                     -   test_project: tests/UnitTests/BaseTests.UnitTests/BaseTests.UnitTests.csproj
                         project_name: BaseTests.UnitTests
+                    -   test_project: tests/UnitTests/Build.UnitTests/Build.UnitTests.csproj
+                        project_name: Build.UnitTests
                     -   test_project: tests/UnitTests/Data.UnitTests/Data.UnitTests.csproj
                         project_name: Data.UnitTests
                     -   test_project: tests/UnitTests/Domain.UnitTests/Domain.UnitTests.csproj
@@ -249,7 +251,7 @@ jobs:
                     -   test_project: tests/UnitTests/PublicApi.UnitTests/PublicApi.UnitTests.csproj
                         project_name: PublicApi.UnitTests
                     -   test_project: tests/UnitTests/Settings.UnitTests/Settings.UnitTests.csproj
-                        project_name: Settings.UnitTests
+                        project_name: Settings.UnitTests   
 
         steps:
             -   name: Checkout Source Code

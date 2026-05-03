@@ -71,6 +71,12 @@
           "Photino.Native": "4.0.22"
         }
       },
+      "Quartz": {
+        "type": "Direct",
+        "requested": "[3.17.0, )",
+        "resolved": "3.17.0",
+        "contentHash": "Ko3I49Yz1DqlxWi+fXqdG0FYJlHyGnra86m9RSlhPjIoXy7ip8FxyYJ70HcHc5s3xije0QvX81qG2dlxLEI7hQ=="
+      },
       "Quartz.Extensions.Hosting": {
         "type": "Direct",
         "requested": "[3.17.0, )",
@@ -599,11 +605,6 @@
         "dependencies": {
           "Polly": "7.1.0"
         }
-      },
-      "Quartz": {
-        "type": "Transitive",
-        "resolved": "3.17.0",
-        "contentHash": "Ko3I49Yz1DqlxWi+fXqdG0FYJlHyGnra86m9RSlhPjIoXy7ip8FxyYJ70HcHc5s3xije0QvX81qG2dlxLEI7hQ=="
       },
       "Quartz.Extensions.DependencyInjection": {
         "type": "Transitive",

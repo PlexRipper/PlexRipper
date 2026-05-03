@@ -29,7 +29,7 @@ public class DesktopWindow : IDesktopWindow
             .SetMinSize(1920, 1080)
             .SetMaximized(true)
             .SetResizable(true)
-            .SetLogVerbosity(0)
+            .SetLogVerbosity(2)
             .Load(_uri);
         _isInitialized = true;
     }

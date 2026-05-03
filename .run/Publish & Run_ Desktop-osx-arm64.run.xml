@@ -12,9 +12,9 @@
             value="run --project $PROJECT_DIR$/tools/Build -- desktop run --rid osx-arm64 --version 0.36.0-dev.1 --informational-version 0.36.0-dev.1 --channel osx-arm64-dev"
         />
         <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-        <option name="PASS_PARENT_ENVS" value="0" />
+        <option name="PASS_PARENT_ENVS" value="1" />
         <envs>
-            <env name="DOTNET_ENVIRONMENT" value="Development" />
+            <env name="DOTNET_ENVIRONMENT" value="Production" />
             <env name="INFORMATIONAL_VERSION" value="0.36.0-dev.1" />
             <env name="PUID" value="1000" />
             <env name="SEQ_URL" value="http://localhost:5341" />

@@ -17,9 +17,20 @@ internal static class DesktopRuntimeCatalog
 
     public static string SupportedRuntimeIdentifiers => string.Join(", ", _runtimes.Keys.Order());
 
+    public static bool TryGet(string runtimeIdentifier, out DesktopRuntime runtime) =>
+        _runtimes.TryGetValue(runtimeIdentifier, out runtime!);
+
     public static DesktopRuntime Get(string runtimeIdentifier)
     {
-        if (_runtimes.TryGetValue(runtimeIdentifier, out var runtime))
+        if (string.IsNullOrWhiteSpace(runtimeIdentifier))
+        {
+            throw new ArgumentException(
+                $"A runtime identifier is required. Pass --rid <RID>. Supported values: {SupportedRuntimeIdentifiers}.",
+                nameof(runtimeIdentifier)
+            );
+        }
+
+        if (TryGet(runtimeIdentifier, out var runtime))
         {
             return runtime;
         }

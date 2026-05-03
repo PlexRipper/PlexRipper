@@ -8,9 +8,9 @@ public static class LogEventMapper
 
     public static LiveLogEventDTO ToLiveLogEvent(this LogEvent logEvent)
     {
-        var fileName = logEvent.GetStringProperty(LogConfig.FileName);
-        var lineNumber = logEvent.GetIntProperty(LogConfig.LineNumber);
-        var methodName = logEvent.GetStringProperty(LogConfig.MethodName);
+        var fileName = logEvent.GetStringProperty(SlimLogConfig.FileName);
+        var lineNumber = logEvent.GetIntProperty(SlimLogConfig.LineNumber);
+        var methodName = logEvent.GetStringProperty(SlimLogConfig.MethodName);
         var hasSourceContext =
             !string.IsNullOrWhiteSpace(fileName) || lineNumber != 0 || !string.IsNullOrWhiteSpace(methodName);
 

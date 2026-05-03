@@ -1,4 +1,5 @@
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 
 namespace Reaparr.BaseTests;
 
@@ -54,6 +55,7 @@ public partial class BaseUnitTest
                 s.AddSingleton(_ => Mock.Mock<IDownloadTaskScheduler>().Object);
                 s.AddSingleton(_ => Mock.Container.Resolve<IPathProvider>());
                 s.AddSingleton(_ => Mock.Container.Resolve<IAppBuildInfo>());
+                s.AddSingleton(_ => Mock.Mock<IHostApplicationLifetime>().Object);
 
                 extraServices?.Invoke(s);
             });

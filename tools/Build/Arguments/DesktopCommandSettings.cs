@@ -1,4 +1,5 @@
 using Spectre.Console.Cli;
+using ValidationResult = Spectre.Console.ValidationResult;
 
 namespace Reaparr.Build;
 
@@ -39,4 +40,47 @@ internal sealed class DesktopCommandSettings : CommandSettings
 
     [CommandOption("--launch-mode <MODE>")]
     public string LaunchMode { get; init; } = "published";
+
+    public override ValidationResult Validate()
+    {
+        if (string.IsNullOrWhiteSpace(RuntimeIdentifier))
+        {
+            return ValidationResult.Error(
+                $"A runtime identifier is required. Pass --rid <RID>. Supported values: {DesktopRuntimeCatalog.SupportedRuntimeIdentifiers}."
+            );
+        }
+
+        if (!DesktopRuntimeCatalog.TryGet(RuntimeIdentifier, out _))
+        {
+            return ValidationResult.Error(
+                $"Unsupported desktop RID '{RuntimeIdentifier}'. Supported values: {DesktopRuntimeCatalog.SupportedRuntimeIdentifiers}."
+            );
+        }
+
+        if (string.IsNullOrWhiteSpace(Version))
+        {
+            return ValidationResult.Error("A build version is required. Pass --version <VERSION>.");
+        }
+
+        if (string.IsNullOrWhiteSpace(InformationalVersion))
+        {
+            return ValidationResult.Error(
+                "An informational version is required. Pass --informational-version <VERSION>."
+            );
+        }
+
+        if (
+            RuntimeIdentifier.StartsWith("linux-", StringComparison.OrdinalIgnoreCase)
+            && !SkipPackage
+            && !string.Equals(LaunchMode, "published", StringComparison.OrdinalIgnoreCase)
+            && !string.Equals(LaunchMode, "packaged", StringComparison.OrdinalIgnoreCase)
+        )
+        {
+            return ValidationResult.Error(
+                $"Unsupported launch mode '{LaunchMode}'. Supported values are 'published' and 'packaged'."
+            );
+        }
+
+        return ValidationResult.Success();
+    }
 }

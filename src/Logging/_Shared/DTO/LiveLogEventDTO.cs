@@ -40,9 +40,12 @@ public class LiveLogEventDTO
         var time = Timestamp.ToString("HH:mm:ss");
         var level = Level.ToString();
         var location = string.IsNullOrWhiteSpace(SourceContext) ? "Unknown" : SourceContext;
-        var message = Message;
-        var exception = Exception ?? string.Empty;
 
-        return $"{time} [{level}] [{location}] => {message}\n{exception}\n";
+        var logLine = $"{time} [{level}] [{location}] => {Message}";
+
+        if (Exception != null)
+            logLine += $"{System.Environment.NewLine}{Exception}";
+        
+        return logLine;
     }
 }

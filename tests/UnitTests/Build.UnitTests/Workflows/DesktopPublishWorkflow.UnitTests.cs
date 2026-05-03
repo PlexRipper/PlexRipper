@@ -2,7 +2,7 @@ using System.IO.Abstractions.TestingHelpers;
 
 namespace Reaparr.Build.UnitTests;
 
-internal class DesktopPublishBuildCommandHandlerUnitTests : BaseUnitTest<DesktopPublishBuildCommandHandler>
+internal class DesktopPublishWorkflowUnitTests : BaseUnitTest<DesktopPublishBuildCommandHandler>
 {
     [Test]
     public async Task ShouldFail_WhenVersionIsMissing()
@@ -15,11 +15,22 @@ internal class DesktopPublishBuildCommandHandlerUnitTests : BaseUnitTest<Desktop
             DryRun = true,
         };
 
+        Mock.Mock<IDesktopCommandRunner>()
+            .Setup(x => x.RequireCommandAsync(It.IsAny<string>()))
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.Never());
+
+        Mock.Mock<IDesktopCommandRunner>()
+            .Setup(x => x.RunCommandAsync(It.IsAny<string>(), It.IsAny<IReadOnlyList<string>>(), It.IsAny<string?>()))
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.Never());
+
         // Act
         var result = await Sut.ExecuteAsync(new DesktopPublishBuildCommand(settings), CancellationToken);
 
         // Assert
         result.IsFailed.ShouldBeTrue();
+        Mock.Mock<IDesktopCommandRunner>().Verify();
     }
 
     [Test]
@@ -41,11 +52,22 @@ internal class DesktopPublishBuildCommandHandlerUnitTests : BaseUnitTest<Desktop
             SkipRestore = true,
         };
 
+        Mock.Mock<IDesktopCommandRunner>()
+            .Setup(x => x.RequireCommandAsync("bun"))
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.Never());
+
+        Mock.Mock<IDesktopCommandRunner>()
+            .Setup(x => x.RunCommandAsync("bun", It.IsAny<IReadOnlyList<string>>(), It.IsAny<string?>()))
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.Never());
+
         // Act
         var result = await Sut.ExecuteAsync(new DesktopPublishBuildCommand(settings), CancellationToken);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
         result.Value.ShouldBe(0);
+        Mock.Mock<IDesktopCommandRunner>().Verify();
     }
 }

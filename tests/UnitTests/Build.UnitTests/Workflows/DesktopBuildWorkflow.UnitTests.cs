@@ -2,7 +2,7 @@ using System.IO.Abstractions.TestingHelpers;
 
 namespace Reaparr.Build.UnitTests;
 
-internal class DesktopRunBuildCommandHandlerUnitTests : BaseUnitTest<DesktopRunBuildCommandHandler>
+internal class DesktopBuildWorkflowUnitTests : BaseUnitTest<DesktopRunBuildCommandHandler>
 {
     [Test]
     public async Task ShouldNotInvokePackageCommand_WhenSkipPackageIsTrue()

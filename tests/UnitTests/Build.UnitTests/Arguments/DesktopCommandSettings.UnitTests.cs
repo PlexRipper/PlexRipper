@@ -89,6 +89,26 @@ public class DesktopCommandSettingsUnitTests : BaseUnitTest
     }
 
     [Test]
+    public void ShouldPassValidation_WhenNonLinuxRIDHasUnsupportedLaunchMode()
+    {
+        // Arrange
+        var sut = new DesktopCommandSettings
+        {
+            RuntimeIdentifier = "win-x64",
+            Version = "1.2.3",
+            InformationalVersion = "1.2.3-dev.1",
+            LaunchMode = "invalid",
+        };
+
+        // Act
+        var result = sut.Validate();
+
+        // Assert
+        result.Successful.ShouldBeTrue();
+        result.Message.ShouldBeNullOrWhiteSpace();
+    }
+
+    [Test]
     public void ShouldPassValidation_WhenRequiredSettingsAreValid()
     {
         // Arrange

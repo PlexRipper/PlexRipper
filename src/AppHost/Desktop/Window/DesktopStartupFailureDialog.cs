@@ -71,14 +71,6 @@ public class DesktopStartupFailureDialog
             }
         );
 
-        window.RegisterWindowClosingHandler(
-            (_, _) =>
-            {
-                System.Environment.Exit(1);
-                return false;
-            }
-        );
-
         window.WaitForClose();
     }
 
@@ -97,14 +89,10 @@ public class DesktopStartupFailureDialog
         if (OperatingSystem.IsLinux())
         {
             if (TryOpenCommand("xdg-open", logsDirectory))
-            {
                 return;
-            }
 
             if (TryOpenCommand("gio", $"open \"{logsDirectory}\""))
-            {
                 return;
-            }
         }
 
         var fallbackUri = new Uri(

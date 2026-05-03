@@ -153,11 +153,12 @@ public class Program
 
         result.LogFatal();
 
-        if (_appBuildInfo.IsDesktopMode)
+        if (_appBuildInfo.IsDesktopMode && !_appRuntimeInfo.IsIntegrationTestMode)
         {
             try
             {
                 _failureDialog?.Show(result);
+                _failureDialog = null;
             }
             catch (Exception dialogException)
             {
@@ -167,6 +168,7 @@ public class Program
 
         _log.Here().Fatal("Reaparr has been shutdown! R.I.P.");
 
-        System.Environment.Exit(1);
+        if (!_appRuntimeInfo.IsIntegrationTestMode)
+            System.Environment.Exit(1);
     }
 }

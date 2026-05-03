@@ -100,7 +100,7 @@ public class ApplyUpdateEndpoint : BaseEndpointWithoutRequest
 
             _appLifetime.StopApplication();
 
-            await Task.Delay(TimeSpan.FromMilliseconds(250));
+            await Task.Run(() => _appLifetime.ApplicationStopped.WaitHandle.WaitOne());
 
             _log.Here()
                 .Warning(
@@ -118,7 +118,7 @@ public class ApplyUpdateEndpoint : BaseEndpointWithoutRequest
             _log.Here()
                 .Error(
                     ex,
-                    "Velopack WaitExitThenApplyUpdatesAsync failed; AppId: {AppId}; CurrentVersion: {CurrentVersion}; PackageId: {PackageId}; PackageVersion: {PackageVersion}",
+                    "Velopack WaitExitThenApplyUpdates failed; AppId: {AppId}; CurrentVersion: {CurrentVersion}; PackageId: {PackageId}; PackageVersion: {PackageVersion}",
                     _velopackManager.AppId,
                     _velopackManager.CurrentVersion,
                     asset.PackageId,

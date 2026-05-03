@@ -1,6 +1,6 @@
 namespace Reaparr.Build.UnitTests;
 
-internal class DesktopPublishBuildCommandValidatorUnitTests
+internal class DesktopPublishCommandUnitTests
 {
     [Test]
     public async Task ShouldFailValidation_WhenSettingsIsNull()

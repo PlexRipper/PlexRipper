@@ -9,7 +9,7 @@
         <option name="EXE_PATH" value="/usr/bin/dotnet"/>
         <option
             name="PROGRAM_PARAMETERS"
-            value="run --project $PROJECT_DIR$/tools/Build -- desktop run --rid win-x64 --version 0.36.0-dev.1 --informational-version 0.36.0-dev.1 --channel win-x64-dev --skip-package --launch-mode published"
+            value="run --project $PROJECT_DIR$/tools/Build -- desktop publish --rid win-x64 --version 0.36.0-dev.2 --informational-version 0.36.0-dev.2"
         />
         <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$"/>
         <option name="PASS_PARENT_ENVS" value="1"/>

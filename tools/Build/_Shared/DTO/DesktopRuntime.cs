@@ -12,11 +12,4 @@ internal sealed record DesktopRuntime
     public string RuntimeIdentifier { get; init; }
     public string PublishProfile { get; init; }
     public string MainExecutable { get; init; }
-
-    public void Deconstruct(out string RuntimeIdentifier, out string PublishProfile, out string MainExecutable)
-    {
-        RuntimeIdentifier = this.RuntimeIdentifier;
-        PublishProfile = this.PublishProfile;
-        MainExecutable = this.MainExecutable;
-    }
 }

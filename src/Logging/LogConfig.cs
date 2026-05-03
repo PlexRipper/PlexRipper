@@ -1,5 +1,4 @@
 using Serilog.Enrichers.Sensitive;
-using Serilog.Filters;
 
 namespace Reaparr.Logging;
 

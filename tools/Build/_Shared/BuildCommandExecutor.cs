@@ -26,9 +26,6 @@ internal sealed class BuildCommandExecutor : ICommandExecutor
     {
         try
         {
-            if (command is null)
-                return Fail<TResult>("Command cannot be null.");
-
             var commandType = command.GetType();
             var validationFailures = await ValidateCommandAsync(command, commandType, ct);
             if (validationFailures.Count > 0)
@@ -56,7 +53,7 @@ internal sealed class BuildCommandExecutor : ICommandExecutor
         catch (Exception ex)
         {
             _log.Here()
-                .Error(ex, "Failed to execute build command {CommandType}", command?.GetType().Name ?? "Unknown");
+                .Error(ex, "Failed to execute build command {CommandType}", command.GetType().Name);
             return Fail<TResult>(ex.Message);
         }
     }

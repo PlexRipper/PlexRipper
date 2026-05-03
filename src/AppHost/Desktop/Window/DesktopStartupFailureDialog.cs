@@ -43,7 +43,7 @@ public class DesktopStartupFailureDialog
         var details = BuildDetails(errorResult);
         IReadOnlyCollection<string> logContent = _logBufferService
             .GetAll()
-            .Select(x => x.ToString() ?? string.Empty)
+            .Select(x => x.ToString())
             .ToList();
         var html = BuildHtmlFromTemplate(details, logContent);
 

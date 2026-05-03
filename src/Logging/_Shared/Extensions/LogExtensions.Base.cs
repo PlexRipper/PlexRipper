@@ -17,10 +17,10 @@ public static partial class LogExtensions
         [CallerLineNumber] int sourceLineNumber = 0
     ) =>
         logger // TODO Rename these, they are too generic and are continuously overridden accidentally
-            .ForContext(nameof(LogConfig.FileName), Path.GetFileName(sourceFilePath))
-            .ForContext(nameof(LogConfig.FilePath), sourceFilePath)
-            .ForContext(nameof(LogConfig.MethodName), memberName)
-            .ForContext(nameof(LogConfig.LineNumber), sourceLineNumber);
+            .ForContext(nameof(SlimLogConfig.FileName), Path.GetFileName(sourceFilePath))
+            .ForContext(nameof(SlimLogConfig.FilePath), sourceFilePath)
+            .ForContext(nameof(SlimLogConfig.MethodName), memberName)
+            .ForContext(nameof(SlimLogConfig.LineNumber), sourceLineNumber);
 
     public static string RenderMessage(this ILogger log, string messageTemplate, params object[] args)
     {

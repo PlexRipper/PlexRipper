@@ -1,5 +1,21 @@
 Reaparr Changelog
 
+# [0.38.0-dev.14](https://github.com/Reaparr/Reaparr/compare/v0.38.0-dev.13...v0.38.0-dev.14) (2026-05-03)
+
+
+### Bug Fixes
+
+* **WebAPI:** Ensure Reaparr closes fully when applying the update ([2869197](https://github.com/Reaparr/Reaparr/commit/2869197a9de7f38c9b38df4941f079317990f1f2))
+* **WebAPI:** Fix a startup issue on Windows desktop where background jobs were not found ([69ee826](https://github.com/Reaparr/Reaparr/commit/69ee8262b60c077633e40e4e90d8bc9e42da6ae7))
+* **WebAPI:** Fix Build unit test dependency wiring ([f0a2da0](https://github.com/Reaparr/Reaparr/commit/f0a2da068bde95bceab87eff1ba5e0b46a28a7b1))
+* **build:** harden desktop packaging filesystem paths ([46dc9bc](https://github.com/Reaparr/Reaparr/commit/46dc9bcda8d62ee3de4fadff07a478da0590990f))
+
+
+### Features
+
+* **WebAPI:** Add error dialog on startup if Reaparr in desktop mode fails ([9e82a78](https://github.com/Reaparr/Reaparr/commit/9e82a785ebb596f31339df794d324f1ecf1e1e95))
+* **WebAPI:** Add error pop-up dialog when Reaparr fails to start in desktop mode ([d7baf59](https://github.com/Reaparr/Reaparr/commit/d7baf59b8f40ddab0e3da9603ebc21d3c0bd5121))
+
 # [0.38.0-dev.13](https://github.com/Reaparr/Reaparr/compare/v0.38.0-dev.12...v0.38.0-dev.13) (2026-05-01)
 
 

@@ -22,7 +22,8 @@ public class SlimLogConfig
         + "[{FileName}:{LineNumber}.{MethodName}()]"
         + "{#else}"
         + "[{SourceContext}]"
-        + "{#end} => {@m}\n{@x}\n";
+        + "{#end} => {@m}\n"
+        + "{#if Exception is not null}\n{@x}\n{#end}";
 
     // Keep interactive console/debug output colorized, but leave redirected CI/test output plain text.
     protected static readonly ExpressionTemplate ConsoleTemplate = new(

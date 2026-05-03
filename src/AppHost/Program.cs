@@ -37,7 +37,10 @@ public class Program
         // This should be run at the very start before anything is initiated
         var velopackResult = Result.Try(() => VelopackApp.Build().Run());
         if (velopackResult.IsFailed)
+        {
             FailedToStart(velopackResult);
+            return;
+        }
 
         _log.Here().Information("Initiating Reaparr boot process");
 

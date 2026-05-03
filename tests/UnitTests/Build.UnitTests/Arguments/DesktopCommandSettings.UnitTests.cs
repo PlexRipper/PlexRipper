@@ -124,5 +124,6 @@ public class DesktopCommandSettingsUnitTests : BaseUnitTest
 
         // Assert
         result.Successful.ShouldBeTrue();
+        result.Message.ShouldBeNullOrWhiteSpace();
     }
 }

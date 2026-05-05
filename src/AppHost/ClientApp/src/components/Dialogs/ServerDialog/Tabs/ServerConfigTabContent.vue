@@ -90,7 +90,7 @@ function onAllowStreamDownloaderChanged(value: boolean) {
 	settingsStore.updateAllowStreamDownloader(props.plexServer.machineIdentifier, value);
 }
 
-function onDisableServer(value: boolean) {
+function onDisableServer() {
 	if (!props.plexServer) {
 		Log.error('props.plexServer is null');
 		return;
@@ -98,7 +98,7 @@ function onDisableServer(value: boolean) {
 
 	set(confirmHideDialog, true);
 
-	useSubscription(serverStore.setServerEnabled(props.plexServer.id, value).subscribe(() => {
+	useSubscription(serverStore.setServerEnabled(props.plexServer.id, false).subscribe(() => {
 		set(confirmHideDialog, false);
 		dialogStore.closeDialog(DialogType.ServerHideConfirmationDialog);
 		dialogStore.closeDialog(DialogType.ServerSettingsDialog);

@@ -5,6 +5,7 @@ import { of } from 'rxjs';
 import { switchMap, tap, map, catchError } from 'rxjs/operators';
 import type { PlexServerDTO } from '@dto';
 import { StoreNames, type ISetupResult } from '@interfaces';
+import { get } from '@vueuse/core';
 import { plexServerApi } from '@api';
 import { RefreshDataType } from '@dto';
 import { cloneDeep, orderBy } from 'lodash-es';
@@ -133,11 +134,11 @@ export const useServerStore = defineStore(StoreNames.ServerStore, () => {
 			return serverIds.map((x) => getters.getServer(x)).filter((x) => !!x) ?? [];
 		},
 		getVisibleServers: computed((): PlexServerDTO[] => {
-			const servers = getters.getServers().filter((x) => settingsStore.isServerVisible(x.machineIdentifier) && accountStore.getHasAccountServerAccess(x.id));
+			const servers = getters.getServers().filter((x) => x.isEnabled && accountStore.getHasAccountServerAccess(x.id));
 			return orderBy(servers, [(x) => x.owned, (x) => x.name.toLocaleLowerCase()], ['desc', 'asc']);
 		}),
-		getHiddenServers: computed((): PlexServerDTO[] =>
-			getters.getServers().filter((x) => !settingsStore.isServerVisible(x.machineIdentifier)),
+		getDisabledServers: computed((): PlexServerDTO[] =>
+			getters.getServers().filter((x) => !get(getters.getVisibleServers).includes(x)),
 		),
 		getServerName: (serverId: number): string => {
 			if (settingsStore.shouldMaskServerNames) {

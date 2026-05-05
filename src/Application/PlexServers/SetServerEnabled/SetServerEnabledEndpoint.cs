@@ -20,19 +20,16 @@ public class SetServerEnabledRequestEndpoint : BaseEndpoint<SetServerEnabledRequ
 {
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
-    private readonly IServerSettingsModule _serverSettingsModule;
 
     public override string EndpointPath => ApiRoutes.PlexServerController + "/{PlexServerId}/set-server-enabled";
 
     public SetServerEnabledRequestEndpoint(
         ILogger log,
-        IReaparrDbContext dbContext,
-        IServerSettingsModule serverSettingsModule
+        IReaparrDbContext dbContext
     )
     {
         _log = log.ForContext<SetServerEnabledRequestEndpoint>();
         _dbContext = dbContext;
-        _serverSettingsModule = serverSettingsModule;
     }
 
     public override void Configure()

@@ -28,7 +28,7 @@ public static partial class FakeData
             .RuleFor(x => x.IsEnabled, _ => true)
             .RuleFor(x => x.IsDownloadsPausedByUser, _ => false)
             // Server flags
-            .RuleFor(x => x.Home, f => f.Random.Bool())
+            .RuleFor(x => x.Owned, f => f.Random.Bool())
             .RuleFor(x => x.Synced, f => f.Random.Bool())
             .RuleFor(x => x.Relay, f => f.Random.Bool())
             .RuleFor(x => x.Presence, f => f.Random.Bool())

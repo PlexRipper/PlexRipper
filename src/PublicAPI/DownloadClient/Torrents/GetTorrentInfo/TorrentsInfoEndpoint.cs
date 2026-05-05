@@ -148,12 +148,18 @@ public sealed class TorrentsInfoEndpoint : Endpoint<TorrentsInfoEndpointRequest,
 
         await Task.WhenAll(episodeFilesTask, movieFilesTask);
 
+        var eligibleServerIds = await GetEligibleServerIdsAsync(ct);
+
         var episodeInfos = episodeFilesTask
-            .Result.Where(x => MatchesFilters(x, hashesFilter, categoryFilter))
+            .Result
+            .Where(x => eligibleServerIds.Contains(x.PlexServerId))
+            .Where(x => MatchesFilters(x, hashesFilter, categoryFilter))
             .Select(MapToTorrentInfo)
             .ToList();
         var movieInfos = movieFilesTask
-            .Result.Where(x => MatchesFilters(x, hashesFilter, categoryFilter))
+            .Result
+            .Where(x => eligibleServerIds.Contains(x.PlexServerId))
+            .Where(x => MatchesFilters(x, hashesFilter, categoryFilter))
             .Select(MapToTorrentInfo)
             .ToList();
 
@@ -242,6 +248,18 @@ public sealed class TorrentsInfoEndpoint : Endpoint<TorrentsInfoEndpointRequest,
             return null;
 
         return category;
+    }
+
+    private async Task<HashSet<int>> GetEligibleServerIdsAsync(CancellationToken ct)
+    {
+        using var serverDbContext = await _dbContextFactory.CreateAsync();
+
+        var eligibleServerIds = await serverDbContext
+            .PlexServers.Where(x => x.IsEnabled && !x.Owned)
+            .Select(x => x.Id)
+            .ToListAsync(ct);
+
+        return eligibleServerIds.ToHashSet();
     }
 
     private static bool MatchesFilters(DownloadTaskFileBase file, HashSet<string>? hashesFilter, string? categoryFilter)

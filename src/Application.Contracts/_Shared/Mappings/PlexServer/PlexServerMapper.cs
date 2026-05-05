@@ -23,7 +23,7 @@ public static class PlexServerMapper
             PublicAddress = source.PublicAddress,
             PreferredConnectionId = source.PreferredConnectionId,
             IsEnabled = source.IsEnabled,
-            Home = source.Home,
+            Owned = source.Owned,
             Synced = source.Synced,
             Relay = source.Relay,
             Presence = source.Presence,
@@ -32,7 +32,6 @@ public static class PlexServerMapper
             DnsRebindingProtection = source.DnsRebindingProtection,
             NatLoopbackSupported = source.NatLoopbackSupported,
             IsDownloadsPausedByUser = source.IsDownloadsPausedByUser,
-            Owned = source.PlexAccountServers.Any(x => x.IsServerOwned),
         };
 
     public static List<PlexServerDTO> ToDTO(this List<PlexServer> source) => source.ConvertAll(ToDTO);
@@ -61,7 +60,7 @@ public static class PlexServerMapper
             PreferredConnectionId = source.PreferredConnectionId,
             IsEnabled = source.IsEnabled,
             IsDownloadsPausedByUser = source.IsDownloadsPausedByUser,
-            Home = source.Home,
+            OwnedOverride = source.Owned,
             Synced = source.Synced,
             Relay = source.Relay,
             Presence = source.Presence,

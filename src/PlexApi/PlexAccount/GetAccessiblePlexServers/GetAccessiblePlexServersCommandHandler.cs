@@ -75,7 +75,7 @@ public class GetAccessiblePlexServersCommandHandler
                     PreferredConnectionId = 0,
                     IsEnabled = !_serverSettingsModule.GetIsHidden(x.ClientIdentifier),
                     IsDownloadsPausedByUser = false,
-                    Home = x.Home,
+                    OwnedOverride = null,
                     Synced = x.Synced,
                     Relay = x.Relay,
                     Presence = x.Presence,

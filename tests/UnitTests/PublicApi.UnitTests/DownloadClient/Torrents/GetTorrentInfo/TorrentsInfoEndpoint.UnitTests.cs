@@ -99,6 +99,14 @@ public class TorrentsInfoEndpointUnitTests : BaseUnitTest<TorrentsInfoEndpoint>
 
         var dbContext = IDbContext;
         var movieFile = await dbContext.DownloadTaskMovieFile.FirstAsync(CancellationToken);
+
+        await dbContext
+            .PlexServers.Where(x => x.Id == movieFile.PlexServerId)
+            .ExecuteUpdateAsync(
+                x => x.SetProperty(p => p.IsEnabled, true).SetProperty(p => p.Owned, false),
+                CancellationToken
+            );
+
         await dbContext
             .DownloadTaskMovieFile.Where(x => x.Id == movieFile.Id)
             .ExecuteUpdateAsync(

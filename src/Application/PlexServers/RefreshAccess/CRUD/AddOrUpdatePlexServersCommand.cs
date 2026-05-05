@@ -55,6 +55,7 @@ public class AddOrUpdatePlexServersCommandHandler
         var machineIds = incomingPlexServers.Select(x => x.MachineIdentifier).ToList();
         var plexServerDbList = await _dbContext
             .PlexServers.Include(x => x.PlexServerConnections)
+            .Include(x => x.PlexAccountServers)
             .Where(x => machineIds.Contains(x.MachineIdentifier))
             .AsTracking()
             .ToListAsync(cancellationToken);
@@ -70,7 +71,9 @@ public class AddOrUpdatePlexServersCommandHandler
                 _log.Here().Debug("Updating PlexServer with id: {PlexServerDbId} in the database", existingServer.Id);
                 incomingPlexServer.Id = existingServer.Id;
 
+                var existingOwnedOverride = existingServer.OwnedOverride;
                 _dbContext.Entry(existingServer).CurrentValues.SetValues(incomingPlexServer);
+                existingServer.OwnedOverride = existingOwnedOverride;
 
                 SyncPlexServerConnections(incomingPlexServer, existingServer);
                 rapport.Updated.Add(incomingPlexServer.Id);

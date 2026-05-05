@@ -1,3 +1,5 @@
+using Reaparr.PublicAPI.Contracts;
+
 namespace Reaparr.PublicAPI.UnitTests;
 
 public class TorrentsInfoEndpointUnitTests : BaseUnitTest<TorrentsInfoEndpoint>
@@ -22,8 +24,10 @@ public class TorrentsInfoEndpointUnitTests : BaseUnitTest<TorrentsInfoEndpoint>
     [Test]
     public async Task ShouldReturnRatioLimitZero_WhenStatusIsMoveFinished()
     {
+        // Arrange
         var result = await PrepareAndExecuteTorrentsInfoTest(5102, "hash-move-finished", DownloadStatus.MoveFinished);
 
+        // Assert
         var response = result.Response;
         response.ShouldNotBeNull();
         response.Count.ShouldBe(1);
@@ -36,12 +40,14 @@ public class TorrentsInfoEndpointUnitTests : BaseUnitTest<TorrentsInfoEndpoint>
     [Test]
     public async Task ShouldReturnRatioLimitZero_WhenStatusIsDownloadFinished()
     {
+        // Arrange
         var result = await PrepareAndExecuteTorrentsInfoTest(
             5103,
             "hash-download-finished",
             DownloadStatus.DownloadFinished
         );
 
+        // Assert
         var response = result.Response;
         response.ShouldNotBeNull();
         response.Count.ShouldBe(1);
@@ -54,9 +60,11 @@ public class TorrentsInfoEndpointUnitTests : BaseUnitTest<TorrentsInfoEndpoint>
     [Test]
     public async Task ShouldReturnRatioLimitMinusTwo_WhenStatusIsDownloading()
     {
-        // Arrange — active downloads must not be flagged as ready for removal.
+        // Arrange
+        // active downloads must not be flagged as ready for removal.
         var result = await PrepareAndExecuteTorrentsInfoTest(5104, "hash-downloading", DownloadStatus.Downloading);
 
+        // Assert
         var response = result.Response;
         response.ShouldNotBeNull();
         response.Count.ShouldBe(1);
@@ -69,9 +77,11 @@ public class TorrentsInfoEndpointUnitTests : BaseUnitTest<TorrentsInfoEndpoint>
     [Test]
     public async Task ShouldReturnRatioLimitMinusTwo_WhenStatusIsMovePaused()
     {
-        // Arrange — a paused mid-move must not be flagged as ready for removal.
+        // Arrange
+        // a paused mid-move must not be flagged as ready for removal.
         var result = await PrepareAndExecuteTorrentsInfoTest(5105, "hash-move-paused", DownloadStatus.MovePaused);
 
+        // Assert
         var response = result.Response;
         response.ShouldNotBeNull();
         response.Count.ShouldBe(1);
@@ -103,7 +113,7 @@ public class TorrentsInfoEndpointUnitTests : BaseUnitTest<TorrentsInfoEndpoint>
         await dbContext
             .PlexServers.Where(x => x.Id == movieFile.PlexServerId)
             .ExecuteUpdateAsync(
-                x => x.SetProperty(p => p.IsEnabled, true).SetProperty(p => p.Owned, false),
+                x => x.SetProperty(p => p.IsEnabled, true).SetProperty(p => p.OwnedOverride, false),
                 CancellationToken
             );
 
@@ -114,8 +124,16 @@ public class TorrentsInfoEndpointUnitTests : BaseUnitTest<TorrentsInfoEndpoint>
                 CancellationToken
             );
 
+        // Act
         var endpoint = SetupEndpointUnitTest<TorrentsInfoEndpoint>();
-        await endpoint.HandleAsync(new TorrentsInfoEndpointRequest(), CancellationToken);
+        await endpoint.HandleAsync(
+            new TorrentsInfoEndpointRequest
+            {
+                Hashes = hash,
+                Category = IntegrationDefinitions.RADARR_DEFAULT_CATEGORY,
+            },
+            CancellationToken
+        );
 
         var persistedRow = await dbContext
             .DownloadTaskMovieFile.Where(x => x.Id == movieFile.Id)

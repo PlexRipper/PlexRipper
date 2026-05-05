@@ -35,7 +35,6 @@ public static partial class FakeData
             .RuleFor(x => x.PublicAddressMatches, f => f.Random.Bool())
             .RuleFor(x => x.DnsRebindingProtection, f => f.Random.Bool())
             .RuleFor(x => x.NatLoopbackSupported, f => f.Random.Bool())
-            .Ignore(x => x.Owned)
             .Ignore(x => x.OwnedOverride)
             .Ignore(x => x.PreferredConnectionId)
             .Ignore(x => x.PlexServerConnections)

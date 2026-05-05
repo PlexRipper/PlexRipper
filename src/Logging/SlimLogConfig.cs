@@ -33,6 +33,12 @@ public class SlimLogConfig
 
     protected static readonly ExpressionTemplate FileTemplate = new(TEMPLATE_TEXT);
 
+    /// <summary>
+    /// Interactive sinks (Console/Debug) are useful for local development but noisy in tests/CI.
+    /// Derived log configs can disable them while still reusing shared level/filter configuration.
+    /// </summary>
+    protected virtual bool UseInteractiveSinks => true;
+
     protected virtual LoggerConfiguration GetBaseConfiguration(LogEventLevel minimumLogLevel = LogEventLevel.Debug)
     {
         var config = new LoggerConfiguration()
@@ -42,9 +48,13 @@ public class SlimLogConfig
             // These filters: No XML encryptor configured. Key {*} may be persisted to storage in unencrypted form.
             // This can be ignored because we use proper auth: https://github.com/dotnet/aspnetcore/issues/3309#issuecomment-404246838
             .Filter.ByExcluding(Matching.FromSource("Microsoft.AspNetCore.DataProtection.KeyManagement.XmlKeyManager"))
-            .MinimumLevel.Override("Quartz", LogEventLevel.Warning);
+            .MinimumLevel.Override("Quartz", LogEventLevel.Warning)
+            .Enrich.FromLogContext();
 
-        return config.Enrich.FromLogContext().WriteTo.Debug(ConsoleTemplate).WriteTo.Console(ConsoleTemplate);
+        if (UseInteractiveSinks)
+            config = config.WriteTo.Debug(ConsoleTemplate).WriteTo.Console(ConsoleTemplate);
+
+        return config;
     }
 
     public virtual Logger GetLogger(LogEventLevel minimumLogLevel = LogEventLevel.Debug) =>

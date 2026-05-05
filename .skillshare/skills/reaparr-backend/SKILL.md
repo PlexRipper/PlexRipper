@@ -282,3 +282,4 @@ Do not claim success unless Rider MCP diagnostics/indexing was used and required
 - Weakening tests or assertions to force green.
 - Using `--filter` instead of TUnit `--treenode-filter`.
 - Running frontend package managers for backend-only work.
+- Blocking test execution on unavailable `dotnet-test-mcp`; use Rider run configurations or terminal test commands instead.

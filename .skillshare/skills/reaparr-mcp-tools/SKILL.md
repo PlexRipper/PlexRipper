@@ -112,14 +112,13 @@ This applies to all JetBrains-backed calls (read, write, diagnostics, run/debug,
 
 ## Backend Test Execution Rule
 
-All backend tests must run through the `dotnet-test-mcp` server.
-
-Do not run backend tests with terminal commands.
+Backend tests should be executed either through Rider run configurations or terminal test commands, depending on what is available and most reliable in the current environment.
 
 Required behavior:
 
-1. Discover available `dotnet-test-mcp` test tools through `mcp-proxy_retrieve_tools`.
-2. Execute backend tests through the discovered `dotnet-test-mcp` tools only.
+1. Prefer Rider run configurations when available and healthy.
+2. If Rider run configuration execution is unavailable, run backend tests via terminal commands.
+3. Always capture and report concrete test output for verification before claiming success.
 
 ## Script and Run Execution Routing
 
@@ -140,14 +139,13 @@ Do not run frontend `bun run` scripts from terminal commands.
 
 ### Project run configurations and backend tests
 
-All project run configuration execution and backend test execution must go through the `dotnet-test-mcp` server.
+Project run configurations should be executed through Rider when available. Backend tests may run through Rider run configurations or terminal commands.
 
 Required behavior:
 
-1. Discover `dotnet-test-mcp` execution tools with `mcp-proxy_retrieve_tools`.
-2. Execute project run configurations through discovered `dotnet-test-mcp` tools.
-3. Execute backend tests through discovered `dotnet-test-mcp` tools.
-4. Do not use terminal commands for these operations.
+1. Prefer Rider run configurations for project execution when available.
+2. Execute backend tests through Rider run configurations when practical, or via terminal commands when needed.
+3. Ensure test command/configuration output is captured and checked before completion claims.
 
 ## Discovery Retry Rule
 
@@ -216,9 +214,9 @@ Use `mcp-proxy_upstream_servers` for:
 
 ### Backend test execution example
 
-1. Discover `dotnet-test-mcp` tools using `mcp-proxy_retrieve_tools`.
-2. Run tests through discovered `dotnet-test-mcp` tools.
-3. Do not execute backend test commands in the terminal.
+1. Execute tests through Rider run configurations when available.
+2. If Rider execution is unavailable or unreliable, run backend test commands in the terminal.
+3. Capture output and verify pass/fail results before reporting completion.
 
 ### Frontend script execution example
 
@@ -247,7 +245,7 @@ Use `mcp-proxy_upstream_servers` for:
 - Forgetting `intent_reason` or `intent_data_sensitivity`
 - Using Rider for frontend work or WebStorm for backend work
 - Missing `project_path` in Rider/WebStorm calls
-- Running backend tests in terminal instead of `dotnet-test-mcp`
+- Skipping Rider run configurations when they are available and appropriate
 - Running frontend `bun run` scripts in terminal instead of `webstorm-bun-scripts`
-- Running project run configurations outside `dotnet-test-mcp`
+- Claiming backend test success without captured output from Rider run configuration or terminal test commands
 - Performing remote writes when a safer local workspace edit path is available

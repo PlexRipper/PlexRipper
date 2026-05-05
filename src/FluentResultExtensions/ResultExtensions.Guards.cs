@@ -1,4 +1,5 @@
 ﻿// ReSharper disable once CheckNamespace
+using Microsoft.AspNetCore.Http;
 // Needs to be in the same namespace as the FluentResults package
 
 namespace FluentResults;
@@ -29,7 +30,8 @@ public static partial class ResultExtensions
         Create400BadRequestResult($"The {parameterName} parameter is null.");
 
     public static Result ServerIsDisabled(string plexServerName, int entityId, string operation) =>
-        Create403ForbiddenResult(
+        CreateErrorStatusCodeResult(
+            StatusCodes.Status409Conflict,
             $"The server {plexServerName} with id {entityId} is disabled and can therefore not execute operation: {operation}"
         );
 

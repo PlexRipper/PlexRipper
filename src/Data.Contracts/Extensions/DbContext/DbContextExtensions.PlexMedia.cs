@@ -74,8 +74,7 @@ public static partial class DbContextExtensions
         List<PlexMediaSlimDTO> plexMediaSlimDtos;
         var plexLibraryId = filter.PlexLibraryId;
 
-        var serverList = await dbContext
-            .PlexServers.Where(x => x.IsEnabled)
+        var serverList = await dbContext.PlexServers
             .Select(server => new { server.Id, PlexLibraryIds = server.PlexLibraries.Select(x => x.Id).ToList() })
             .ToListAsync(ct);
 

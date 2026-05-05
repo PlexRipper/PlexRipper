@@ -9,7 +9,8 @@ public static partial class DbContextExtensions
     )
     {
         var plexServerName = await dbContext
-            .PlexServers.Where(x => x.Id == plexServerId)
+            .PlexServers.IgnoreIsEnabledFilter()
+            .Where(x => x.Id == plexServerId)
             .Select(x => x.Name)
             .FirstOrDefaultAsync(cancellationToken);
         return plexServerName ?? "Server Name Not Found";
@@ -21,7 +22,9 @@ public static partial class DbContextExtensions
         CancellationToken cancellationToken = default
     )
     {
-        var plexServer = await dbContext.PlexServers.GetAsync(plexServerId, cancellationToken);
+        var plexServer = await dbContext
+            .PlexServers.IgnoreIsEnabledFilter()
+            .GetAsync(plexServerId, cancellationToken);
         return plexServer?.MachineIdentifier ?? string.Empty;
     }
 
@@ -34,12 +37,27 @@ public static partial class DbContextExtensions
         return await dbContext
             .PlexServerStatuses.Where(x => x.PlexServerId == plexServerId && x.IsSuccessful)
             .AnyAsync(cancellationToken);
+    }  
+    
+    public static async Task<bool> IsServerDisabled(
+        this IReaparrDbContext dbContext,
+        int plexServerId
+    )
+    {
+        return !(await dbContext.PlexServers
+            .Where(x => x.Id == plexServerId)
+            .Select(x => x.IsEnabled)
+            .FirstOrDefaultAsync());
     }
 
+    /// <summary>
+    /// Check if the <see cref="PlexServer"/> has globally paused all downloads by the user
+    /// </summary>
     public static async Task<bool> IsDownloadsPausedByUser(this IReaparrDbContext dbContext, int plexServerId)
     {
         return await dbContext
-            .PlexServers.AsNoTracking()
+            .PlexServers.IgnoreIsEnabledFilter()
+            .AsNoTracking()
             .Where(x => x.Id == plexServerId)
             .Select(x => x.IsDownloadsPausedByUser)
             .FirstOrDefaultAsync(CancellationToken.None);

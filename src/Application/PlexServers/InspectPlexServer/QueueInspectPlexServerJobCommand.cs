@@ -30,32 +30,21 @@ public class QueueInspectPlexServerJobCommandHandler : ICommandHandler<QueueInsp
     {
         var plexServerIds = command.PlexServerIds;
 
-        var plexServer = await _dbContext
-            .PlexServers.Where(x => plexServerIds.Contains(x.Id))
+        var plexServers = await _dbContext.PlexServers
+            .Where(x => plexServerIds.Contains(x.Id))
             .ToListAsync(cancellationToken);
 
-        var enabledServers = plexServer.Where(x => x.IsEnabled).ToList();
-        var notEnabledServers = plexServer.Where(x => !x.IsEnabled).ToList();
-
-        if (notEnabledServers.Any())
+        if (!plexServers.Any())
         {
-            var result = notEnabledServers
-                .Select(x =>
-                    ResultExtensions
-                        .ServerIsNotEnabled(x.Name, x.Id, nameof(QueueInspectPlexServerJobCommand))
-                        .LogError()
-                )
-                .Merge();
-
-            if (!enabledServers.Any())
-                return result;
+            _log.Here().Warning("No Plex servers found for {PlexServerIds} to queue for InspectPlexServerJob", plexServerIds);
+            return Result.Ok();
         }
 
         var list = await _scheduler.GetRunningJobDataMaps(typeof(InspectPlexServerJob));
         var runningPlexServerIds = list.SelectMany(x => x.GetIntListValue(InspectPlexServerJob.PlexServerIdsParameter))
             .ToList();
 
-        var enabledServerIds = enabledServers.Select(x => x.Id).ToList();
+        var enabledServerIds = plexServers.Select(x => x.Id).ToList();
         var alreadyRunning = enabledServerIds.Intersect(runningPlexServerIds).ToList();
         foreach (var i in alreadyRunning)
         {

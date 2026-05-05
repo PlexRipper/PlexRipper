@@ -37,10 +37,19 @@ public class GetPlexServerByIdEndpoint : BaseEndpoint<GetPlexServerByIdEndpointR
     public override async Task HandleAsync(GetPlexServerByIdEndpointRequest req, CancellationToken ct)
     {
         _log.Here().DebugApiCall(HttpContext, req);
-        var plexServer = await _dbContext.PlexServers.Include(x => x.PlexAccountServers).GetAsync(req.PlexServerId, ct);
+        var plexServer = await _dbContext.PlexServers
+            .Include(x => x.PlexAccountServers)
+            .GetAsync(req.PlexServerId, ct);
 
         if (plexServer is null)
         {
+            if (await _dbContext.IsServerDisabled(req.PlexServerId))
+            {
+                var serverName = await _dbContext.GetPlexServerNameById(req.PlexServerId);
+                await SendFluentResult(ResultExtensions.ServerIsDisabled(serverName, req.PlexServerId, nameof(GetPlexServerByIdEndpoint)), ct);
+                return;
+            }
+
             await SendFluentResult(ResultExtensions.EntityNotFound(nameof(PlexServer), req.PlexServerId), ct);
             return;
         }

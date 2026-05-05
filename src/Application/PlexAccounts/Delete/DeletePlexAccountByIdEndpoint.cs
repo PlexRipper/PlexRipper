@@ -62,7 +62,8 @@ public class DeletePlexAccountByIdEndpoint : BaseEndpoint<DeletePlexAccountByIdR
         var accessibleLibraryIds = await _dbContext.PlexAccountLibraries.Select(y => y.PlexLibraryId).ToListAsync(ct);
 
         var deletedServersCount = await _dbContext
-            .PlexServers.Where(x => !accessibleServerIds.Contains(x.Id))
+            .PlexServers.IgnoreIsEnabledFilter()
+            .Where(x => !accessibleServerIds.Contains(x.Id))
             .ExecuteDeleteAsync(ct);
 
         var deletedLibrariesCount = await _dbContext

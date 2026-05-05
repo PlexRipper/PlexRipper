@@ -15,6 +15,12 @@ public static partial class DbContextExtensions
         if (plexServerId <= 0)
             return ResultExtensions.IsInvalidId(nameof(PlexServer), plexServerId);
 
+        if (await dbContext.IsServerDisabled(plexServerId))
+        {
+            var serverName = await dbContext.GetPlexServerNameById(plexServerId, cancellationToken);
+            return _log.Here().ErrorResult("Cannot choose PlexServer connection, server {ServerName} with id {Id} is disabled", serverName, plexServerId);
+        }
+
         var plexServer = await dbContext
             .PlexServers.AsNoTracking()
             .Include(x => x.PlexServerConnections)

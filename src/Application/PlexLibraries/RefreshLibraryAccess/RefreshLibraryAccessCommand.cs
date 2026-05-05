@@ -60,7 +60,9 @@ public class RefreshLibraryAccessHandler
         }
         else
         {
-            var plexServer = await _dbContext.PlexServers.GetAsync(plexServerId, cancellationToken);
+            var plexServer = await _dbContext
+                .PlexServers.IgnoreIsEnabledFilter()
+                .GetAsync(plexServerId, cancellationToken);
             if (plexServer is not null)
             {
                 plexServers.Add(plexServer);

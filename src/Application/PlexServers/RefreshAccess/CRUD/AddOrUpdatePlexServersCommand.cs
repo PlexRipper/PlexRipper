@@ -54,7 +54,8 @@ public class AddOrUpdatePlexServersCommandHandler
 
         var machineIds = incomingPlexServers.Select(x => x.MachineIdentifier).ToList();
         var plexServerDbList = await _dbContext
-            .PlexServers.Include(x => x.PlexServerConnections)
+            .PlexServers.IgnoreIsEnabledFilter()
+            .Include(x => x.PlexServerConnections)
             .Include(x => x.PlexAccountServers)
             .Where(x => machineIds.Contains(x.MachineIdentifier))
             .AsTracking()

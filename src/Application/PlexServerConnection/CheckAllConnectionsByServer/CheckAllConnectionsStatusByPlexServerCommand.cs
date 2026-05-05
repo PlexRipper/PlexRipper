@@ -49,7 +49,8 @@ public class CheckAllConnectionsStatusByPlexServerHandler
         var plexServerId = command.PlexServerId;
 
         var plexServer = await _dbContext
-            .PlexServers.Include(x => x.PlexServerConnections)
+            .PlexServers.IgnoreIsEnabledFilter()
+            .Include(x => x.PlexServerConnections)
             .GetAsync(plexServerId, cancellationToken);
 
         if (plexServer == null)
@@ -58,8 +59,7 @@ public class CheckAllConnectionsStatusByPlexServerHandler
         var plexServerName = await _dbContext.GetPlexServerNameById(plexServerId, cancellationToken);
         if (!plexServer.IsEnabled)
         {
-            return ResultExtensions
-                .ServerIsNotEnabled(plexServerName, plexServerId, nameof(CheckAllConnectionsStatusByPlexServerCommand))
+            return ResultExtensions.ServerIsDisabled(plexServerName, plexServerId, nameof(CheckAllConnectionsStatusByPlexServerCommand))
                 .LogError();
         }
 

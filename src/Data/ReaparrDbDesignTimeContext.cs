@@ -6,8 +6,47 @@ public class ReaparrDbDesignTimeContext : IDesignTimeDbContextFactory<ReaparrDbC
 {
     public ReaparrDbContext CreateDbContext(string[] args)
     {
-        IPathProvider pathProvider = new PathProvider();
         IAppRuntimeInfo appRuntimeInfo = new AppRuntimeInfo();
+
+        // NOTE: EF Core design-time runs under `dotnet-ef` entry assembly,
+        // so AppBuildInfo cannot read Reaparr assembly metadata (RuntimeMode).
+        // Force desktop mode for design-time path resolution to avoid
+        // PlatformNotSupportedException on Linux hosts.
+        IAppBuildInfo designTimeBuildInfo = new DesignTimeAppBuildInfo();
+        IPathProvider pathProvider = new PathProvider(designTimeBuildInfo, appRuntimeInfo);
+
         return new ReaparrDbContext(pathProvider, appRuntimeInfo);
+    }
+
+    private sealed class DesignTimeAppBuildInfo : IAppBuildInfo
+    {
+        public string RuntimeMode => "desktop";
+
+        public string RuntimeIdentifier => "design-time";
+
+        public string Version => "0.0.0";
+
+        public string InformationalVersion => "0.0.0-design-time";
+
+        public bool IsDesktopMode => true;
+
+        public bool IsDockerMode => false;
+
+        public bool IsDevRelease => true;
+
+        public OperatingSystemPlatform CurrentOS =>
+            OperatingSystem.IsWindows()
+                ? OperatingSystemPlatform.Windows
+                : OperatingSystem.IsMacOS()
+                    ? OperatingSystemPlatform.Osx
+                    : OperatingSystem.IsLinux()
+                        ? OperatingSystemPlatform.Linux
+                        : OperatingSystemPlatform.Unknown;
+
+        public bool IsWindows => OperatingSystem.IsWindows();
+
+        public bool IsLinux => OperatingSystem.IsLinux();
+
+        public bool IsMacOS => OperatingSystem.IsMacOS();
     }
 }

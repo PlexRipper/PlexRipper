@@ -40,7 +40,8 @@ public class SetServerEnabledRequestEndpoint : BaseEndpoint<SetServerEnabledRequ
         Put(EndpointPath);
 
         Description(x =>
-            x.Produces(StatusCodes.Status200OK, typeof(BaseResultDTO))
+            x.Accepts<SetServerEnabledRequest>()
+                .Produces(StatusCodes.Status200OK, typeof(BaseResultDTO))
                 .Produces(StatusCodes.Status404NotFound, typeof(BaseResultDTO))
                 .Produces(StatusCodes.Status500InternalServerError, typeof(BaseResultDTO))
         );
@@ -58,9 +59,9 @@ public class SetServerEnabledRequestEndpoint : BaseEndpoint<SetServerEnabledRequ
 
         _serverSettingsModule.SetServerHiddenState(machineIdentifier, !req.IsEnabled);
 
-        var updateCount = await _dbContext
-            .PlexServers
-            .Where(x => x.MachineIdentifier == machineIdentifier)
+        var updateCount = await _dbContext.PlexServers
+            .IgnoreIsEnabledFilter()
+            .Where(x => x.Id == req.PlexServerId)
             .ExecuteUpdateAsync(p => p.SetProperty(x => x.IsEnabled, req.IsEnabled), ct);
 
         if (updateCount == 0)
@@ -68,7 +69,9 @@ public class SetServerEnabledRequestEndpoint : BaseEndpoint<SetServerEnabledRequ
             if (await _dbContext.IsServerDisabled(req.PlexServerId))
             {
                 var serverName = await _dbContext.GetPlexServerNameById(req.PlexServerId);
-                await SendFluentResult(ResultExtensions.ServerIsDisabled(serverName, req.PlexServerId, nameof(GetPlexServerByIdEndpoint)), ct);
+                await SendFluentResult(
+                    ResultExtensions.ServerIsDisabled(serverName, req.PlexServerId, nameof(GetPlexServerByIdEndpoint)),
+                    ct);
                 return;
             }
         }

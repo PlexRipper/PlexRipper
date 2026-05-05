@@ -31,15 +31,21 @@ public static partial class DbContextExtensions
             .AnyAsync(cancellationToken);
     }  
     
+    /// <summary>
+    /// Returns whether a <see cref="PlexServer"/> exists and is disabled.
+    /// </summary>
     public static async Task<bool> IsServerDisabled(
         this IReaparrDbContext dbContext,
         int plexServerId
     )
     {
-        return !(await dbContext.PlexServers
+        var isEnabled = await dbContext.PlexServers
+            .IgnoreIsEnabledFilter() // Include disabled rows so we can distinguish disabled from non-existent servers.
             .Where(x => x.Id == plexServerId)
-            .Select(x => x.IsEnabled)
-            .FirstOrDefaultAsync());
+            .Select(x => (bool?)x.IsEnabled)
+            .FirstOrDefaultAsync();
+
+        return isEnabled.HasValue && !isEnabled.Value;
     }
 
     /// <summary>

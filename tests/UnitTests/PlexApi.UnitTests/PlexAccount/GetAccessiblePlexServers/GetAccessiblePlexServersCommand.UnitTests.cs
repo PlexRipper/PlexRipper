@@ -6,7 +6,6 @@ using LukeHagar.PlexAPI.SDK.Models.Requests;
 using Newtonsoft.Json;
 using Reaparr.PlexApi.Contracts;
 using Reaparr.PlexApi.GetAccessiblePlexServers;
-using Reaparr.Settings.Contracts;
 
 namespace Reaparr.PlexApi.UnitTests;
 
@@ -139,10 +138,6 @@ public class GetAccessiblePlexServersUnitTests : BaseUnitTest<GetAccessiblePlexS
             plexDevice.Connections.Add(testConnection);
         }
 
-        Mock.Mock<IServerSettingsModule>()
-            .Setup(x => x.GetIsHidden(It.IsAny<string>()))
-            .Returns(false)
-            .Verifiable(Times.AtLeastOnce);
 
         SetCallMock(response1, response2);
 
@@ -167,7 +162,6 @@ public class GetAccessiblePlexServersUnitTests : BaseUnitTest<GetAccessiblePlexS
         var plexAccount = await IDbContext.PlexAccounts.FirstOrDefaultAsync(CancellationToken);
         plexAccount.ShouldNotBeNull();
 
-        Mock.Mock<IServerSettingsModule>().Setup(x => x.GetIsHidden(It.IsAny<string>())).Returns(false);
 
         var response1 = new GetServerResourcesResponse
         {
@@ -219,7 +213,6 @@ public class GetAccessiblePlexServersUnitTests : BaseUnitTest<GetAccessiblePlexS
         var plexAccount = await IDbContext.PlexAccounts.FirstOrDefaultAsync(CancellationToken);
         plexAccount.ShouldNotBeNull();
 
-        Mock.Mock<IServerSettingsModule>().Setup(x => x.GetIsHidden(It.IsAny<string>())).Returns(false);
 
         var serverCount = 2;
 
@@ -263,7 +256,6 @@ public class GetAccessiblePlexServersUnitTests : BaseUnitTest<GetAccessiblePlexS
         var plexAccount = await IDbContext.PlexAccounts.FirstOrDefaultAsync(CancellationToken);
         plexAccount.ShouldNotBeNull();
 
-        Mock.Mock<IServerSettingsModule>().Setup(x => x.GetIsHidden(It.IsAny<string>())).Returns(false);
 
         var serverCount = 5;
         var response1 = FakePlexApiData.GetServerResourcesResponse(
@@ -308,7 +300,6 @@ public class GetAccessiblePlexServersUnitTests : BaseUnitTest<GetAccessiblePlexS
         var plexAccount = await IDbContext.PlexAccounts.FirstOrDefaultAsync(CancellationToken);
         plexAccount.ShouldNotBeNull();
 
-        Mock.Mock<IServerSettingsModule>().Setup(x => x.GetIsHidden(It.IsAny<string>())).Returns(false);
 
         var serverResource1 = FakePlexApiData.GetServerResource(new Seed(939)).Generate(2);
         serverResource1[0].Connections.Clear();

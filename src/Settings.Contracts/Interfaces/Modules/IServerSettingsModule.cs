@@ -12,9 +12,6 @@ public interface IServerSettingsModule : IServerSettings
 
     string GetServerNameAlias(string machineIdentifier);
 
-    void SetServerHiddenState(string machineIdentifier, bool isHidden);
-
-    bool GetIsHidden(string machineIdentifier);
 
     bool GetAllowStreamDownloader(string machineIdentifier);
 }

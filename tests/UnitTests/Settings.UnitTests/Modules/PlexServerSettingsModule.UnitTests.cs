@@ -48,21 +48,6 @@ public class PlexServerSettingsModuleUnitTests : BaseUnitTest<PlexServerSettings
         speedLimit.ShouldBe(0);
     }
 
-    [Test]
-    public void SetServerHiddenState_ShouldUpdateValue()
-    {
-        // Arrange
-        var sut = PlexServerSettingsModule.Create();
-
-        sut.SetServerHiddenState("machine1", true);
-
-        // Act
-        var result = sut.Data.FirstOrDefault(x => x.MachineIdentifier == "machine1");
-
-        // Assert
-        result.ShouldNotBeNull();
-        result.Hidden.ShouldBeTrue();
-    }
 
     [Test]
     public void ShouldEmitValuesWhenChanged_WhenSubscribedToTheObservable()

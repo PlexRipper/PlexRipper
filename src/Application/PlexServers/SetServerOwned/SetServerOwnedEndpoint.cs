@@ -16,16 +16,16 @@ public class SetServerOwnedRequestValidator : Validator<SetServerOwnedRequest>
     }
 }
 
-public class SetServerOwnedRequestEndpoint : BaseEndpoint<SetServerOwnedRequest>
+public class SetServerOwnedEndpoint : BaseEndpoint<SetServerOwnedRequest, PlexServerDTO>
 {
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
 
     public override string EndpointPath => ApiRoutes.PlexServerController + "/{PlexServerId}/set-server-owned";
 
-    public SetServerOwnedRequestEndpoint(ILogger log, IReaparrDbContext dbContext)
+    public SetServerOwnedEndpoint(ILogger log, IReaparrDbContext dbContext)
     {
-        _log = log.ForContext<SetServerOwnedRequestEndpoint>();
+        _log = log.ForContext<SetServerOwnedEndpoint>();
         _dbContext = dbContext;
     }
 
@@ -34,7 +34,7 @@ public class SetServerOwnedRequestEndpoint : BaseEndpoint<SetServerOwnedRequest>
         Put(EndpointPath);
 
         Description(x =>
-            x.Produces(StatusCodes.Status200OK, typeof(BaseResultDTO))
+            x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<PlexServerDTO>))
                 .Produces(StatusCodes.Status404NotFound, typeof(BaseResultDTO))
                 .Produces(StatusCodes.Status500InternalServerError, typeof(BaseResultDTO))
         );
@@ -68,6 +68,17 @@ public class SetServerOwnedRequestEndpoint : BaseEndpoint<SetServerOwnedRequest>
             }
         }
 
-        await SendFluentResult(Result.Ok(), ct);
+        var plexServer = await _dbContext.PlexServers
+            .IgnoreIsEnabledFilter()
+            .Include(x => x.PlexAccountServers)
+            .GetAsync(req.PlexServerId, ct);
+
+        if (plexServer is null)
+        {
+            await SendFluentResult(ResultExtensions.EntityNotFound(nameof(PlexServer), req.PlexServerId), ct);
+            return;
+        }
+
+        await SendFluentResult(Result.Ok(plexServer), x => x.ToDTO(), ct);
     }
 }

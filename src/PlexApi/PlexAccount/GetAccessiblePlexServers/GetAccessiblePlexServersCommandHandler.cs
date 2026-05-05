@@ -8,17 +8,14 @@ public class GetAccessiblePlexServersCommandHandler
 {
     private readonly IReaparrDbContext _dbContext;
     private readonly IPlexApiClientFactory _plexApiClientFactory;
-    private readonly IServerSettingsModule _serverSettingsModule;
 
     public GetAccessiblePlexServersCommandHandler(
         IReaparrDbContext dbContext,
-        IPlexApiClientFactory plexApiClientFactory,
-        IServerSettingsModule serverSettingsModule
+        IPlexApiClientFactory plexApiClientFactory
     )
     {
         _dbContext = dbContext;
         _plexApiClientFactory = plexApiClientFactory;
-        _serverSettingsModule = serverSettingsModule;
     }
 
     public async Task<Result<List<PlexServerAccessDTO>>> ExecuteAsync(
@@ -73,7 +70,7 @@ public class GetAccessiblePlexServersCommandHandler
                     MachineIdentifier = x.ClientIdentifier,
                     PublicAddress = x.PublicAddress,
                     PreferredConnectionId = 0,
-                    IsEnabled = !_serverSettingsModule.GetIsHidden(x.ClientIdentifier),
+                    IsEnabled = true,
                     IsDownloadsPausedByUser = false,
                     OwnedOverride = null,
                     Synced = x.Synced,

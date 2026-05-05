@@ -16,7 +16,7 @@ public class SetServerEnabledRequestValidator : Validator<SetServerEnabledReques
     }
 }
 
-public class SetServerEnabledRequestEndpoint : BaseEndpoint<SetServerEnabledRequest>
+public class SetServerEnabledRequestEndpoint : BaseEndpoint<SetServerEnabledRequest, PlexServerDTO>
 {
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
@@ -41,7 +41,7 @@ public class SetServerEnabledRequestEndpoint : BaseEndpoint<SetServerEnabledRequ
 
         Description(x =>
             x.Accepts<SetServerEnabledRequest>()
-                .Produces(StatusCodes.Status200OK, typeof(BaseResultDTO))
+                .Produces(StatusCodes.Status200OK, typeof(ResultDTO<PlexServerDTO>))
                 .Produces(StatusCodes.Status404NotFound, typeof(BaseResultDTO))
                 .Produces(StatusCodes.Status500InternalServerError, typeof(BaseResultDTO))
         );
@@ -56,8 +56,6 @@ public class SetServerEnabledRequestEndpoint : BaseEndpoint<SetServerEnabledRequ
             await SendFluentResult(ResultExtensions.EntityNotFound(nameof(PlexServer), req.PlexServerId), ct);
             return;
         }
-
-        _serverSettingsModule.SetServerHiddenState(machineIdentifier, !req.IsEnabled);
 
         var updateCount = await _dbContext.PlexServers
             .IgnoreIsEnabledFilter()
@@ -76,6 +74,17 @@ public class SetServerEnabledRequestEndpoint : BaseEndpoint<SetServerEnabledRequ
             }
         }
 
-        await SendFluentResult(Result.Ok(), ct);
+        var plexServer = await _dbContext.PlexServers
+            .IgnoreIsEnabledFilter()
+            .Include(x => x.PlexAccountServers)
+            .GetAsync(req.PlexServerId, ct);
+
+        if (plexServer is null)
+        {
+            await SendFluentResult(ResultExtensions.EntityNotFound(nameof(PlexServer), req.PlexServerId), ct);
+            return;
+        }
+
+        await SendFluentResult(Result.Ok(plexServer), x => x.ToDTO(), ct);
     }
 }

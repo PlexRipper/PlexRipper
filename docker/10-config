@@ -1,2 +1,5 @@
-/Config true ${PUID}:${PGID} 0644 0755
-
+# Keep /Config ownership aligned with LinuxServer PUID/PGID model.
+# We use default fallbacks (911:911) to match linuxserver/baseimage init-adduser behavior
+# when env vars are missing, while still honoring explicit PUID/PGID values (e.g., Unraid).
+# Reference: https://github.com/linuxserver/docker-baseimage-alpine
+/Config true ${PUID:-911}:${PGID:-911} 0644 0755

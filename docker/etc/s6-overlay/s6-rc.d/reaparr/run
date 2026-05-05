@@ -1,2 +1,35 @@
-#!/usr/bin/with-contenv sh
+#!/usr/bin/with-contenv bash
+
+# Why this exists:
+# - Some environments can end up with /Config created as root
+#   before Reaparr writes ReaparrSettings.json, causing UnauthorizedAccessException.
+# - We follow LinuxServer image practice by normalizing ownership at runtime using lsiown
+#   before starting the app process as abc.
+#
+# Reference patterns used:
+# - https://github.com/linuxserver/docker-sonarr/blob/master/root/etc/s6-overlay/s6-rc.d/init-sonarr-config/run
+# - https://github.com/linuxserver/docker-radarr/blob/master/root/etc/s6-overlay/s6-rc.d/init-radarr-config/run
+# - https://github.com/linuxserver/docker-plex/blob/master/root/etc/s6-overlay/s6-rc.d/init-plex-chown/run
+# - https://github.com/linuxserver/docker-baseimage-alpine/blob/master/root/etc/s6-overlay/s6-rc.d/init-adduser/run
+#   (documents init-adduser defaults where unset PUID/PGID fall back to 911/911)
+if [[ -z ${LSIO_NON_ROOT_USER} ]]; then
+    PUID=${PUID:-911}
+    PGID=${PGID:-911}
+
+    CURRENT_UID=$(stat -c %u /Config 2>/dev/null || echo "unknown")
+    CURRENT_GID=$(stat -c %g /Config 2>/dev/null || echo "unknown")
+    echo "/Config ownership before fix: uid=${CURRENT_UID} gid=${CURRENT_GID} (target uid=${PUID} gid=${PGID})"
+
+    if [[ ! "${CURRENT_UID}" == "${PUID}" ]] || [[ ! "${CURRENT_GID}" == "${PGID}" ]]; then
+        echo "Change in ownership detected for /Config, applying ownership fix"
+        lsiown -R abc:abc /Config
+    fi
+
+    lsiown abc:abc /Config
+
+    NEW_UID=$(stat -c %u /Config 2>/dev/null || echo "unknown")
+    NEW_GID=$(stat -c %g /Config 2>/dev/null || echo "unknown")
+    echo "/Config ownership after fix: uid=${NEW_UID} gid=${NEW_GID}"
+fi
+
 exec s6-setuidgid abc dotnet /app/Reaparr.AppHost.dll

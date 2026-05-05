@@ -255,7 +255,7 @@ public sealed class TorrentsInfoEndpoint : Endpoint<TorrentsInfoEndpointRequest,
         using var serverDbContext = await _dbContextFactory.CreateAsync();
 
         var eligibleServerIds = await serverDbContext
-            .PlexServers.Where(x => x.IsEnabled && !x.Owned)
+            .PlexServers.WhereIsNotOwned()
             .Select(x => x.Id)
             .ToListAsync(ct);
 

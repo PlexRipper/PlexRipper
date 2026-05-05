@@ -6,6 +6,8 @@ public class PlexServerConfiguration : IEntityTypeConfiguration<PlexServer>
     {
         builder.HasIndex(x => x.MachineIdentifier).IsUnique();
 
+        builder.HasQueryFilter("IsEnabled", x => x.IsEnabled);
+
         builder
             .HasMany(x => x.PlexLibraries)
             .WithOne(x => x.PlexServer)

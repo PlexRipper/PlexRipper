@@ -101,10 +101,7 @@ public class DirectPlexDownloadClientStopAsyncUnitTests : BaseUnitTest<DirectPle
 
         var dbContext = IDbContext;
         var downloadTask = await dbContext.DownloadTaskMovieFile.FirstAsync(CancellationToken);
-        var serverMachineIdentifier = await dbContext.GetPlexServerMachineIdentifierById(
-            downloadTask.PlexServerId,
-            CancellationToken
-        );
+        var serverMachineIdentifier = await dbContext.GetPlexServerMachineIdentifierById(downloadTask.PlexServerId);
 
         SetupSpeedLimitMocks(serverMachineIdentifier);
         SetupCommandExecutor();
@@ -191,10 +188,7 @@ public class DirectPlexDownloadClientStopAsyncUnitTests : BaseUnitTest<DirectPle
 
         var dbContext = IDbContext;
         var downloadTask = await dbContext.DownloadTaskMovieFile.FirstAsync(CancellationToken);
-        var serverMachineIdentifier = await dbContext.GetPlexServerMachineIdentifierById(
-            downloadTask.PlexServerId,
-            CancellationToken
-        );
+        var serverMachineIdentifier = await dbContext.GetPlexServerMachineIdentifierById(downloadTask.PlexServerId);
 
         SetupSpeedLimitMocks(serverMachineIdentifier);
         SetupCommandExecutor();
@@ -279,10 +273,7 @@ public class DirectPlexDownloadClientStopAsyncUnitTests : BaseUnitTest<DirectPle
 
         var dbContext = IDbContext;
         var downloadTask = await dbContext.DownloadTaskMovieFile.FirstAsync(CancellationToken);
-        var serverMachineIdentifier = await dbContext.GetPlexServerMachineIdentifierById(
-            downloadTask.PlexServerId,
-            CancellationToken
-        );
+        var serverMachineIdentifier = await dbContext.GetPlexServerMachineIdentifierById(downloadTask.PlexServerId);
 
         SetupSpeedLimitMocks(serverMachineIdentifier);
         SetupCommandExecutor();
@@ -370,10 +361,7 @@ public class DirectPlexDownloadClientStopAsyncUnitTests : BaseUnitTest<DirectPle
 
         var dbContext = IDbContext;
         var downloadTask = await dbContext.DownloadTaskMovieFile.FirstAsync(CancellationToken);
-        var serverMachineIdentifier = await dbContext.GetPlexServerMachineIdentifierById(
-            downloadTask.PlexServerId,
-            CancellationToken
-        );
+        var serverMachineIdentifier = await dbContext.GetPlexServerMachineIdentifierById(downloadTask.PlexServerId);
 
         SetupSpeedLimitMocks(serverMachineIdentifier);
         SetupCommandExecutor();

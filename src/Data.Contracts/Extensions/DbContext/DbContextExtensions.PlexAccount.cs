@@ -20,7 +20,7 @@ public static partial class DbContextExtensions
 
         if (!query.Any())
         {
-            var plexServerName = await dbContext.GetPlexServerNameById(plexServerId, cancellationToken);
+            var plexServerName = await dbContext.GetPlexServerNameById(plexServerId);
 
             return Result
                 .Fail($"There were no PlexAccounts that have access to PlexServer with id: {plexServerName}")

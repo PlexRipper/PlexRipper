@@ -46,7 +46,7 @@ public class SetServerAlias : BaseEndpoint<SetServerAliasRequest>
     public override async Task HandleAsync(SetServerAliasRequest req, CancellationToken ct)
     {
         _log.Here().DebugApiCall(HttpContext, req);
-        var machineIdentifier = await _dbContext.GetPlexServerMachineIdentifierById(req.PlexServerId, ct);
+        var machineIdentifier = await _dbContext.GetPlexServerMachineIdentifierById(req.PlexServerId);
         if (machineIdentifier == string.Empty)
         {
             await SendFluentResult(ResultExtensions.EntityNotFound(nameof(PlexServer), req.PlexServerId), ct);

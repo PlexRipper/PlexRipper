@@ -72,10 +72,7 @@ public class DashPlexDownloadClientStopAsyncUnitTests : BaseUnitTest<DashPlexDow
         );
 
         var downloadTask = await IDbContext.DownloadTaskMovieFile.FirstAsync(CancellationToken);
-        var serverMachineIdentifier = await IDbContext.GetPlexServerMachineIdentifierById(
-            downloadTask.PlexServerId,
-            CancellationToken
-        );
+        var serverMachineIdentifier = await IDbContext.GetPlexServerMachineIdentifierById(downloadTask.PlexServerId);
 
         SetupSpeedLimit(serverMachineIdentifier);
         SetupCommandExecutor();
@@ -146,10 +143,7 @@ public class DashPlexDownloadClientStopAsyncUnitTests : BaseUnitTest<DashPlexDow
         );
 
         var downloadTask = await IDbContext.DownloadTaskMovieFile.FirstAsync(CancellationToken);
-        var serverMachineIdentifier = await IDbContext.GetPlexServerMachineIdentifierById(
-            downloadTask.PlexServerId,
-            CancellationToken
-        );
+        var serverMachineIdentifier = await IDbContext.GetPlexServerMachineIdentifierById(downloadTask.PlexServerId);
 
         SetupSpeedLimit(serverMachineIdentifier);
         SetupCommandExecutor();

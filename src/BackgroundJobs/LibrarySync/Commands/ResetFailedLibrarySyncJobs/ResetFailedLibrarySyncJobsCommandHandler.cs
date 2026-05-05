@@ -30,7 +30,7 @@ public class ResetFailedLibrarySyncJobsCommandHandler : ICommandHandler<ResetFai
         CancellationToken cancellationToken
     )
     {
-        var plexServerName = await _dbContext.GetPlexServerNameById(command.PlexServerId, cancellationToken);
+        var plexServerName = await _dbContext.GetPlexServerNameById(command.PlexServerId);
 
         // Reset failed library sync jobs for this server to queue
         var resetCount = await _dbContext

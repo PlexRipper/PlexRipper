@@ -38,7 +38,7 @@ public class MetadataSyncJob : IJob
 
         // Use short-lived context for initial checks
         var dbContext = await _dbContextFactory.CreateAsync();
-        var serverName = await dbContext.GetPlexServerNameById(serverId, cancellationToken: ct);
+        var serverName = await dbContext.GetPlexServerNameById(serverId);
         var isServerOnline = await dbContext.IsServerOnline(serverId, ct);
         dbContext.Dispose();
 

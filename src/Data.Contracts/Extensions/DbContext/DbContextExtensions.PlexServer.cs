@@ -2,29 +2,21 @@ namespace Reaparr.Data.Contracts;
 
 public static partial class DbContextExtensions
 {
-    public static async Task<string> GetPlexServerNameById(
-        this IReaparrDbContext dbContext,
-        int plexServerId,
-        CancellationToken cancellationToken = default
-    )
+    public static async Task<string> GetPlexServerNameById(this IReaparrDbContext dbContext, int plexServerId)
     {
         var plexServerName = await dbContext
             .PlexServers.IgnoreIsEnabledFilter()
             .Where(x => x.Id == plexServerId)
             .Select(x => x.Name)
-            .FirstOrDefaultAsync(cancellationToken);
+            .FirstOrDefaultAsync();
         return plexServerName ?? "Server Name Not Found";
     }
 
-    public static async Task<string> GetPlexServerMachineIdentifierById(
-        this IReaparrDbContext dbContext,
-        int plexServerId,
-        CancellationToken cancellationToken = default
-    )
+    public static async Task<string> GetPlexServerMachineIdentifierById(this IReaparrDbContext dbContext, int plexServerId)
     {
         var plexServer = await dbContext
             .PlexServers.IgnoreIsEnabledFilter()
-            .GetAsync(plexServerId, cancellationToken);
+            .GetAsync(plexServerId);
         return plexServer?.MachineIdentifier ?? string.Empty;
     }
 

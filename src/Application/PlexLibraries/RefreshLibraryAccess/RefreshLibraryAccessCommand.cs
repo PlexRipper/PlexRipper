@@ -120,7 +120,7 @@ public class RefreshLibraryAccessHandler
     {
         try
         {
-            var plexServerName = await _dbContext.GetPlexServerNameById(plexServerId, cancellationToken);
+            var plexServerName = await _dbContext.GetPlexServerNameById(plexServerId);
             var plexAccountName = await _dbContext.GetPlexAccountDisplayName(plexAccountId, cancellationToken);
             _log.Here()
                 .Debug(

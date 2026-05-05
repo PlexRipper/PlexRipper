@@ -56,7 +56,7 @@ public class CheckAllConnectionsStatusByPlexServerHandler
         if (plexServer == null)
             return ResultExtensions.EntityNotFound(nameof(plexServerId), plexServerId).LogError();
 
-        var plexServerName = await _dbContext.GetPlexServerNameById(plexServerId, cancellationToken);
+        var plexServerName = await _dbContext.GetPlexServerNameById(plexServerId);
         if (!plexServer.IsEnabled)
         {
             return ResultExtensions.ServerIsDisabled(plexServerName, plexServerId, nameof(CheckAllConnectionsStatusByPlexServerCommand))

@@ -18,7 +18,7 @@ public class DbContextExtensionsPlexServerUnitTests : BaseUnitTest
         server.ShouldNotBeNull();
 
         // Act
-        var name = await IDbContext.GetPlexServerNameById(server.Id, CancellationToken);
+        var name = await IDbContext.GetPlexServerNameById(server.Id);
 
         // Assert
         name.ShouldBe(server.Name);
@@ -31,7 +31,7 @@ public class DbContextExtensionsPlexServerUnitTests : BaseUnitTest
         await SetupDatabase(12002);
 
         // Act
-        var name = await IDbContext.GetPlexServerNameById(9999, CancellationToken);
+        var name = await IDbContext.GetPlexServerNameById(9999);
 
         // Assert
         name.ShouldBe("Server Name Not Found");
@@ -53,7 +53,7 @@ public class DbContextExtensionsPlexServerUnitTests : BaseUnitTest
         server.ShouldNotBeNull();
 
         // Act
-        var machineId = await IDbContext.GetPlexServerMachineIdentifierById(server.Id, CancellationToken);
+        var machineId = await IDbContext.GetPlexServerMachineIdentifierById(server.Id);
 
         // Assert
         machineId.ShouldBe(server.MachineIdentifier);
@@ -66,7 +66,7 @@ public class DbContextExtensionsPlexServerUnitTests : BaseUnitTest
         await SetupDatabase(12004);
 
         // Act
-        var machineId = await IDbContext.GetPlexServerMachineIdentifierById(9999, CancellationToken);
+        var machineId = await IDbContext.GetPlexServerMachineIdentifierById(9999);
 
         // Assert
         machineId.ShouldBe(string.Empty);

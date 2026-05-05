@@ -55,7 +55,7 @@ public class SyncPlexServerMediaEndpoint : BaseEndpoint<SyncPlexServerMediaEndpo
 
         if (!libraryIds.Any())
         {
-            var name = await _dbContext.GetPlexServerNameById(req.PlexServerId, cancellationToken: ct);
+            var name = await _dbContext.GetPlexServerNameById(req.PlexServerId);
             var warnResult = _log.Here().WarningResult("Plex server {Name} has no libraries available to sync", name);
             await SendFluentResult(warnResult.Add400BadRequestError(), ct);
             return;

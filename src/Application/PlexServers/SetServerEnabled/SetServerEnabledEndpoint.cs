@@ -49,7 +49,7 @@ public class SetServerEnabledRequestEndpoint : BaseEndpoint<SetServerEnabledRequ
     public override async Task HandleAsync(SetServerEnabledRequest req, CancellationToken ct)
     {
         _log.Here().DebugApiCall(HttpContext, req);
-        var machineIdentifier = await _dbContext.GetPlexServerMachineIdentifierById(req.PlexServerId, ct);
+        var machineIdentifier = await _dbContext.GetPlexServerMachineIdentifierById(req.PlexServerId);
         if (machineIdentifier == string.Empty)
         {
             await SendFluentResult(ResultExtensions.EntityNotFound(nameof(PlexServer), req.PlexServerId), ct);

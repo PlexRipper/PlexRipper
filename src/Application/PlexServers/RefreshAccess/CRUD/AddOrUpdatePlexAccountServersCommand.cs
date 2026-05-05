@@ -154,7 +154,7 @@ public class AddOrUpdatePlexAccountServersCommandHandler
 
             foreach (var plexServerId in removalIds)
             {
-                var plexServerName = await _dbContext.GetPlexServerNameById(plexServerId, CancellationToken.None);
+                var plexServerName = await _dbContext.GetPlexServerNameById(plexServerId);
                 rapport.AddRevoked(plexServerId, plexServerName);
             }
         }

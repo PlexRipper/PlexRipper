@@ -120,10 +120,7 @@
 			</QRow>
 		</template>
 		<template #actions>
-			<QRow justify="between">
-				<QCol cols="auto">
-					<HideButton @click="dialogStore.openDialog(DialogType.ServerHideConfirmationDialog)" />
-				</QCol>
+			<QRow justify="end">
 				<QCol cols="auto">
 					<BaseButton
 						cy="server-dialog-close-btn"
@@ -133,21 +130,12 @@
 						@click="close" />
 				</QCol>
 			</QRow>
-			<!-- Hide Server Confirm Dialog -->
-			<ConfirmationDialog
-				:confirm-loading="confirmHideDialog"
-				:name="DialogType.ServerHideConfirmationDialog"
-				:title="$t('confirmation.hide-server.title')"
-				:text="$t('confirmation.hide-server.text')"
-				class="q-mr-md"
-				@confirm="onServerHiddenSave" />
 		</template>
 	</QCardDialog>
 </template>
 
 <script setup lang="ts">
 import { get, set } from '@vueuse/core';
-import { tap } from 'rxjs/operators';
 import type { PlexServerDTO } from '@dto';
 import { DialogType } from '@enums';
 import { useServerStore, useLibraryStore, useDialogStore } from '@store';
@@ -155,8 +143,6 @@ import { useServerStore, useLibraryStore, useDialogStore } from '@store';
 const serverStore = useServerStore();
 const libraryStore = useLibraryStore();
 const dialogStore = useDialogStore();
-
-const confirmHideDialog = ref(false);
 
 const loading = ref(false);
 const tabIndex = ref<string>('server-data');
@@ -182,15 +168,6 @@ function close(): void {
 
 function onServerAliasSave(serverAlias: string): void {
 	useSubscription(serverStore.setServerAlias(get(plexServerId), serverAlias).subscribe());
-}
-
-function onServerHiddenSave(): void {
-	useSubscription(
-		serverStore
-			.setServerHidden(get(plexServerId), true)
-			.pipe(tap(() => close()))
-			.subscribe(),
-	);
 }
 </script>
 

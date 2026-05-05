@@ -191,29 +191,28 @@ export class PlexServer {
     data: SetServerEnabledRequest,
     params: RequestParams = {},
   ) =>
-    axiosObservable<BaseResultDTO>({
+    axiosObservable<PlexServerDTO>({
       url: `/api/PlexServer/${plexServerId}/set-server-enabled`,
       method: "PUT",
       data: data,
       secure: true,
-      type: ContentType.Json,
       responseType: "json",
       ...params,
-    }).pipe(apiCheckPipe<BaseResultDTO>);
+    }).pipe(apiCheckPipe<PlexServerDTO>);
 
   /**
    * No description
    * * @tags Plexserver
-   * @name SetServerOwnedRequestEndpoint
+   * @name SetServerOwnedEndpoint
    * @request PUT:/api/PlexServer/{PlexServerId}/set-server-owned
    * @secure
    */
-  setServerOwnedRequestEndpoint = (
+  setServerOwnedEndpoint = (
     plexServerId: number,
     data: SetServerOwnedRequest,
     params: RequestParams = {},
   ) =>
-    axiosObservable<BaseResultDTO>({
+    axiosObservable<PlexServerDTO>({
       url: `/api/PlexServer/${plexServerId}/set-server-owned`,
       method: "PUT",
       data: data,
@@ -221,7 +220,7 @@ export class PlexServer {
       type: ContentType.Json,
       responseType: "json",
       ...params,
-    }).pipe(apiCheckPipe<BaseResultDTO>);
+    }).pipe(apiCheckPipe<PlexServerDTO>);
 
   /**
    * No description
@@ -294,7 +293,7 @@ export class PlexServerPaths {
       url: `/api/PlexServer/${plexServerId}/set-server-enabled`,
     });
 
-  static setServerOwnedRequestEndpoint = (plexServerId: number) =>
+  static setServerOwnedEndpoint = (plexServerId: number) =>
     queryString.stringifyUrl({
       url: `/api/PlexServer/${plexServerId}/set-server-owned`,
     });

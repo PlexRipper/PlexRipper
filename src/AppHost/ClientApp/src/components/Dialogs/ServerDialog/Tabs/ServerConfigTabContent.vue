@@ -9,8 +9,9 @@
 			<QToggle
 				size="lg"
 				:model-value="serverStore.getServer(plexServer.id)!.isEnabled"
-				@update:model-value="onServerEnabledChanged" />
+				@click="dialogStore.openDialog(DialogType.ServerHideConfirmationDialog)" />
 		</HelpRow>
+
 		<!-- Owned -->
 		<HelpRow
 			disable-responsive
@@ -50,11 +51,22 @@
 		type="error">
 		{{ $t('components.server-dialog.tabs.server-config.plex-server-was-null') }}
 	</QAlert>
+	<!-- Hide Server Confirm Dialog -->
+	<ConfirmationDialog
+		:confirm-loading="confirmHideDialog"
+		:name="DialogType.ServerHideConfirmationDialog"
+		:title="$t('confirmation.disable-server.title')"
+		:text="$t('confirmation.disable-server.text')"
+		class="q-mr-md"
+		@confirm="onDisableServer" />
 </template>
 
 <script setup lang="ts">
+import Log from 'consola';
 import type { PlexServerDTO } from '@dto';
-import { useServerStore, useSettingsStore } from '@store';
+import { set } from '@vueuse/core';
+import { useDialogStore, useServerStore, useSettingsStore } from '@store';
+import { DialogType } from '@enums';
 
 const props = defineProps<{
 	plexServer: PlexServerDTO | null;
@@ -62,27 +74,40 @@ const props = defineProps<{
 
 const settingsStore = useSettingsStore();
 const serverStore = useServerStore();
+const confirmHideDialog = ref(false);
+const dialogStore = useDialogStore();
 
 const allowStreamDownloader = computed(
 	() => settingsStore.getServerSettings(props.plexServer?.machineIdentifier)?.allowStreamDownloader ?? false,
 );
 
 function onAllowStreamDownloaderChanged(value: boolean) {
-	if (props.plexServer) {
-		settingsStore.updateAllowStreamDownloader(props.plexServer.machineIdentifier, value);
-	}
-}
-
-function onServerEnabledChanged(value: boolean) {
 	if (!props.plexServer) {
+		Log.error('props.plexServer is null');
 		return;
 	}
 
-	useSubscription(serverStore.setServerEnabled(props.plexServer.id, value).subscribe());
+	settingsStore.updateAllowStreamDownloader(props.plexServer.machineIdentifier, value);
+}
+
+function onDisableServer(value: boolean) {
+	if (!props.plexServer) {
+		Log.error('props.plexServer is null');
+		return;
+	}
+
+	set(confirmHideDialog, true);
+
+	useSubscription(serverStore.setServerEnabled(props.plexServer.id, value).subscribe(() => {
+		set(confirmHideDialog, false);
+		dialogStore.closeDialog(DialogType.ServerHideConfirmationDialog);
+		dialogStore.closeDialog(DialogType.ServerSettingsDialog);
+	}));
 }
 
 function onServerOwnedChanged(value: boolean) {
 	if (!props.plexServer) {
+		Log.error('props.plexServer is null');
 		return;
 	}
 

@@ -70,14 +70,32 @@ export const useServerStore = defineStore(StoreNames.ServerStore, () => {
 				.setServerEnabledRequestEndpoint(serverId, {
 					isEnabled,
 				})
-				.pipe(switchMap(() => actions.refreshPlexServer(serverId)));
+				.pipe(
+					tap((response) => {
+						if (response.isSuccess && response.value) {
+							const i = state.servers.findIndex((x) => x.id === serverId);
+							if (i > -1) {
+								state.servers.splice(i, 1, response.value);
+							}
+						}
+					}),
+				);
 		},
 		setServerOwned(serverId: number, owned: boolean) {
 			return plexServerApi
-				.setServerOwnedRequestEndpoint(serverId, {
+				.setServerOwnedEndpoint(serverId, {
 					isOwned: owned,
 				})
-				.pipe(switchMap(() => actions.refreshPlexServer(serverId)));
+				.pipe(
+					tap((response) => {
+						if (response.isSuccess && response.value) {
+							const i = state.servers.findIndex((x) => x.id === serverId);
+							if (i > -1) {
+								state.servers.splice(i, 1, response.value);
+							}
+						}
+					}),
+				);
 		},
 		setServerPaused(serverId: number, paused: boolean) {
 			const request$ = paused

@@ -17,7 +17,7 @@ namespace Reaparr.Data.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .UseCollation("NATURALSORT")
-                .HasAnnotation("ProductVersion", "10.0.7");
+                .HasAnnotation("ProductVersion", "10.0.6");
 
             modelBuilder.Entity("AppAny.Quartz.EntityFrameworkCore.Migrations.QuartzBlobTrigger", b =>
                 {
@@ -1355,6 +1355,10 @@ namespace Reaparr.Data.Migrations
                         .HasColumnType("INTEGER")
                         .HasColumnOrder(23);
 
+                    b.Property<bool>("Home")
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(17);
+
                     b.Property<bool>("HttpsRequired")
                         .HasColumnType("INTEGER")
                         .HasColumnOrder(21);
@@ -1384,10 +1388,6 @@ namespace Reaparr.Data.Migrations
                     b.Property<bool>("NatLoopbackSupported")
                         .HasColumnType("INTEGER")
                         .HasColumnOrder(24);
-
-                    b.Property<bool>("Owned")
-                        .HasColumnType("INTEGER")
-                        .HasColumnOrder(17);
 
                     b.Property<long>("OwnerId")
                         .HasColumnType("INTEGER")

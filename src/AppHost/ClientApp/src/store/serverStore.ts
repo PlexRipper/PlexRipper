@@ -37,10 +37,7 @@ export const useServerStore = defineStore(StoreNames.ServerStore, () => {
 					name: StoreNames.ServerStore,
 					isSuccess: !!result?.isSuccess,
 				})),
-				catchError((error) => {
-					console.error(error);
-					return of({ name: StoreNames.ServerStore, isSuccess: false });
-				}),
+				catchError(() => of({ name: StoreNames.ServerStore, isSuccess: false })),
 			);
 		},
 		refreshPlexServer(serverId: number) {
@@ -68,12 +65,19 @@ export const useServerStore = defineStore(StoreNames.ServerStore, () => {
 				})
 				.pipe(switchMap((response) => response.isSuccess ? settingsStore.refreshSettings() : of(response)));
 		},
-		setServerHidden(serverId: number, hidden: boolean) {
+		setServerEnabled(serverId: number, isEnabled: boolean) {
 			return plexServerApi
-				.setServerHiddenRequestEndpoint(serverId, {
-					hidden,
+				.setServerEnabledRequestEndpoint(serverId, {
+					isEnabled,
 				})
-				.pipe(switchMap((response) => response.isSuccess ? settingsStore.refreshSettings() : of(response)));
+				.pipe(switchMap(() => actions.refreshPlexServer(serverId)));
+		},
+		setServerOwned(serverId: number, owned: boolean) {
+			return plexServerApi
+				.setServerOwnedRequestEndpoint(serverId, {
+					isOwned: owned,
+				})
+				.pipe(switchMap(() => actions.refreshPlexServer(serverId)));
 		},
 		setServerPaused(serverId: number, paused: boolean) {
 			const request$ = paused

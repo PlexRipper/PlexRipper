@@ -961,7 +961,6 @@ export interface PlexServerDTO {
   createdAt: string;
   device: string;
   dnsRebindingProtection: boolean;
-  home: boolean;
   httpsRequired: boolean;
   /** @format int32 */
   id: number;
@@ -1467,6 +1466,14 @@ export interface SetNotificationVisibilityEndpointRequest {
    * @exclusiveMin true
    */
   id: number;
+}
+
+export interface SetServerEnabledRequest {
+  isEnabled: boolean;
+}
+
+export interface SetServerOwnedRequest {
+  isOwned: boolean;
 }
 
 export interface SettingsModelDTO {

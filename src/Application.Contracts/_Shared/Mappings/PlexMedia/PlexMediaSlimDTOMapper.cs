@@ -126,11 +126,10 @@ public static class PlexMediaSlimDTOMapper
 
     #endregion
 
-    public static PlexMediaStatisticsDTO ToStatisticsDTO(this List<PlexMediaSlimDTO> source, int? totalCount = null)
+    public static PlexMediaStatisticsDTO ToStatisticsDTO(this List<PlexMediaSlimDTO> source)
     {
         var stats = new PlexMediaStatisticsDTO
         {
-            TotalCount = totalCount ?? source.Count,
             MovieCount = 0,
             TvShowCount = 0,
             SeasonCount = 0,

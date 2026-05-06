@@ -1,7 +1,5 @@
 <template>
-	<div
-		v-if="mediaOverviewStore.scrollDict.size > 0"
-		class="alphabet-navigation-container">
+	<div class="alphabet-navigation-container">
 		<div class="alphabet-navigation">
 			<q-btn
 				v-for="[displayValue, scrollIndex] in mediaOverviewStore.scrollDict"

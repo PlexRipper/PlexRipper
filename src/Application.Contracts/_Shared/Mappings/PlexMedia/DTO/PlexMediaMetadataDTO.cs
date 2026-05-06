@@ -46,9 +46,4 @@ public record PlexMediaMetadataDTO
     /// Gets or sets the list of distinct quality levels available in the media items of the <see cref="PlexLibrary"/>.
     /// </summary>
     public required List<PlexQualityDTO> Qualities { get; init; }
-
-    /// <summary>
-    /// Gets sort-aware navigation labels mapped to their first global index in the active filtered/searched/sorted result set.
-    /// </summary>
-    public Dictionary<string, int> NavigationIndexes { get; init; } = [];
 }

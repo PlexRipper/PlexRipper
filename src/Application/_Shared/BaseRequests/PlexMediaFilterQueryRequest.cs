@@ -13,10 +13,7 @@ public abstract record PlexMediaFilterQueryRequest
         int genreId = 0,
         VideoQuality quality = VideoQuality.None,
         bool filterOfflineMedia = false,
-        bool filterOwnedMedia = false,
-        string search = "",
-        string sortField = "sortIndex",
-        string sortDirection = "asc"
+        bool filterOwnedMedia = false
     )
     {
         Page = page;
@@ -27,9 +24,6 @@ public abstract record PlexMediaFilterQueryRequest
         Quality = quality;
         FilterOfflineMedia = filterOfflineMedia;
         FilterOwnedMedia = filterOwnedMedia;
-        Search = search;
-        SortField = sortField;
-        SortDirection = sortDirection;
     }
 
     [QueryParam, BindFrom("page")]
@@ -67,16 +61,4 @@ public abstract record PlexMediaFilterQueryRequest
     [QueryParam, BindFrom("filterOwnedMedia")]
     [DefaultValue(false)]
     public bool FilterOwnedMedia { get; init; }
-
-    [QueryParam, BindFrom("search")]
-    [DefaultValue("")]
-    public string Search { get; init; } = string.Empty;
-
-    [QueryParam, BindFrom("sortField")]
-    [DefaultValue("sortIndex")]
-    public string SortField { get; init; } = "sortIndex";
-
-    [QueryParam, BindFrom("sortDirection")]
-    [DefaultValue("asc")]
-    public string SortDirection { get; init; } = "asc";
 }

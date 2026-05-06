@@ -48,8 +48,6 @@
 import Log from 'consola';
 import { useVirtualizer } from '@tanstack/vue-virtual';
 import { get, set } from '@vueuse/core';
-import { useSubscription } from '@vueuse/rxjs';
-import { tap } from 'rxjs';
 import type { PlexMediaSlimDTO } from '@dto';
 import type { ISelection } from '@interfaces';
 import {
@@ -93,11 +91,11 @@ const BROWSER_MAX_CSS_HEIGHT = 33_000_000;
 
 const rowVirtualizer = useVirtualizer(
 	computed(() => ({
-		count: mediaOverviewStore.totalCount,
+		count: props.rows.length,
 		getScrollElement: () => get(qTableRef),
 		estimateSize: () => ROW_HEIGHT,
 		overscan: 10,
-		getItemKey: (index: number) => mediaOverviewStore.getItemByIndex(index)?.id ?? index,
+		getItemKey: (index: number) => props.rows[index]?.id ?? index,
 		onChange: (_instance: unknown, sync: boolean) => {
 			// sync=false means TanStack has finished its scroll-triggered re-render
 			if (sync)

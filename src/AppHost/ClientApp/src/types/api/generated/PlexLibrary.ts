@@ -116,17 +116,11 @@ export class PlexLibrary {
        * @default 0
        */
       roleId: number;
-      /** @default "" */
-      search: string;
       /**
        * @format int32
        * @default 0
        */
       size: number;
-      /** @default "asc" */
-      sortDirection: string;
-      /** @default "sortIndex" */
-      sortField: string;
     },
     params: RequestParams = {},
   ) =>
@@ -149,35 +143,8 @@ export class PlexLibrary {
   getLibraryMediaMetadata = (
     plexLibraryId: number,
     query: {
-      /**
-       * @format int32
-       * @default 0
-       */
-      countryId: number;
-      /** @default false */
-      filterOfflineMedia: boolean;
-      /** @default false */
-      filterOwnedMedia: boolean;
-      /**
-       * @format int32
-       * @default 0
-       */
-      genreId: number;
       /** @default 0 */
       mediaType: PlexMediaType;
-      /** @default -1 */
-      quality: VideoQuality;
-      /**
-       * @format int32
-       * @default 0
-       */
-      roleId: number;
-      /** @default "" */
-      search: string;
-      /** @default "asc" */
-      sortDirection: string;
-      /** @default "sortIndex" */
-      sortField: string;
     },
     params: RequestParams = {},
   ) =>
@@ -287,17 +254,11 @@ export class PlexLibraryPaths {
        * @default 0
        */
       roleId: number;
-      /** @default "" */
-      search: string;
       /**
        * @format int32
        * @default 0
        */
       size: number;
-      /** @default "asc" */
-      sortDirection: string;
-      /** @default "sortIndex" */
-      sortField: string;
     },
   ) =>
     queryString.stringifyUrl({
@@ -308,35 +269,8 @@ export class PlexLibraryPaths {
   static getLibraryMediaMetadata = (
     plexLibraryId: number,
     query: {
-      /**
-       * @format int32
-       * @default 0
-       */
-      countryId: number;
-      /** @default false */
-      filterOfflineMedia: boolean;
-      /** @default false */
-      filterOwnedMedia: boolean;
-      /**
-       * @format int32
-       * @default 0
-       */
-      genreId: number;
       /** @default 0 */
       mediaType: PlexMediaType;
-      /** @default -1 */
-      quality: VideoQuality;
-      /**
-       * @format int32
-       * @default 0
-       */
-      roleId: number;
-      /** @default "" */
-      search: string;
-      /** @default "asc" */
-      sortDirection: string;
-      /** @default "sortIndex" */
-      sortField: string;
     },
   ) =>
     queryString.stringifyUrl({

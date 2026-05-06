@@ -161,13 +161,14 @@ public class QueueInspectPlexServerJobCommandUnitTests : BaseUnitTest<QueueInspe
         Mock.Mock<IScheduler>()
             .Setup(x => x.ScheduleJob(It.IsAny<IJobDetail>(), It.IsAny<ITrigger>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(DateTimeOffset.UtcNow)
-            .Verifiable(Times.Once());
+            .Verifiable(Times.Never());
 
         // Act
         var result = await Sut.ExecuteAsync(new QueueInspectPlexServerJobCommand(ids), CancellationToken);
 
         // Assert
-        result.IsSuccess.ShouldBeTrue();
+        result.IsFailed.ShouldBeTrue();
+        result.Errors.ShouldContain(x => x.Message.Contains("No enabled Plex servers", StringComparison.OrdinalIgnoreCase));
         Mock.Mock<IScheduler>().Verify();
     }
 

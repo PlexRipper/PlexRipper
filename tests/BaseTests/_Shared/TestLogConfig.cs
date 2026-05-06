@@ -9,7 +9,7 @@ public class TestLogConfig : LogConfig
 
 
     /// <inheritdoc/>
-    protected override bool UseInteractiveSinks => false;
+    protected override bool UseInteractiveSinks => true;
 
     public override Logger GetLogger(LogEventLevel minimumLogLevel = LogEventLevel.Debug) =>
         GetBaseConfiguration(minimumLogLevel).WriteTo.TestCorrelator(minimumLogLevel).CreateLogger();

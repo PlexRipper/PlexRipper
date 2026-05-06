@@ -52,7 +52,7 @@ public class SlimLogConfig
             .Enrich.FromLogContext();
 
         if (UseInteractiveSinks)
-            config = config.WriteTo.Debug(ConsoleTemplate).WriteTo.Console(ConsoleTemplate);
+            config = config.WriteTo.Debug(UseInteractiveSinks ? ConsoleTemplate : FileTemplate).WriteTo.Console(UseInteractiveSinks ? ConsoleTemplate : FileTemplate);
 
         return config;
     }

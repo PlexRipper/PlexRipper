@@ -75,7 +75,7 @@ public class LogConfig : SlimLogConfig
         GetBaseConfiguration(minimumLogLevel)
             .WriteTo.Seq(_appRuntimeInfo.SEQ_Url, restrictedToMinimumLevel: minimumLogLevel)
             .WriteTo.File(
-                FileTemplate,
+                FileTemplate, // This should always be plain file as not to log ASCII characters
                 Path.Combine(_pathProvider.LogsDirectory, "log.txt"),
                 restrictedToMinimumLevel: minimumLogLevel,
                 rollingInterval: RollingInterval.Day,

@@ -1,5 +1,13 @@
 Reaparr Changelog
 
+# [0.38.0-dev.16](https://github.com/Reaparr/Reaparr/compare/v0.38.0-dev.15...v0.38.0-dev.16) (2026-05-06)
+
+
+### Bug Fixes
+
+* **docker:** use PUID/PGID ownership for /Config ([#579](https://github.com/Reaparr/Reaparr/issues/579)) ([f5b80ac](https://github.com/Reaparr/Reaparr/commit/f5b80acc0e53337a84b7257a2d7e535660e3ebd4))
+* **docker:** use PUID/PGID ownership for /Config ([9e1a70a](https://github.com/Reaparr/Reaparr/commit/9e1a70a523dda6a9da1a87cfbcfbe0ce0b1a3ced))
+
 # [0.38.0-dev.15](https://github.com/Reaparr/Reaparr/compare/v0.38.0-dev.14...v0.38.0-dev.15) (2026-05-06)
 
 

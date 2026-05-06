@@ -74,6 +74,16 @@ public class DownloadQueue : IDownloadQueue
             return Result.Ok();
         }
 
+        if (await dbContext.IsServerDisabled(plexServerId))
+        {
+            _log.Here()
+                .Information(
+                    "Skipping download queue check because PlexServer {PlexServerName} is disabled.",
+                    plexServerName
+                );
+            return Result.Ok();
+        }
+
         // Check if the server is online
         if (!await dbContext.IsServerOnline(plexServerId, cancellationToken: _token))
         {

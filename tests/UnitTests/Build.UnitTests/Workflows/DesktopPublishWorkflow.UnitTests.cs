@@ -92,6 +92,9 @@ internal class DesktopPublishWorkflowUnitTests : BaseUnitTest<DesktopPublishBuil
         // Assert
         result.IsSuccess.ShouldBeTrue();
         result.Value.ShouldBe(0);
+        Mock.Mock<IDesktopCommandRunner>().Verify(x => x.RequireCommandAsync("dotnet"), Times.Once());
+        Mock.Mock<IDesktopCommandRunner>()
+            .Verify(x => x.RunCommandAsync("dotnet", It.IsAny<IReadOnlyList<string>>(), It.IsAny<string?>()), Times.Once());
         Mock.Mock<IDesktopCommandRunner>().Verify();
     }
 }

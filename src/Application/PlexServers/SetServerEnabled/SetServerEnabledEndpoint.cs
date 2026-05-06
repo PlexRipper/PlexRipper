@@ -16,19 +16,19 @@ public class SetServerEnabledRequestValidator : Validator<SetServerEnabledReques
     }
 }
 
-public class SetServerEnabledRequestEndpoint : BaseEndpoint<SetServerEnabledRequest, PlexServerDTO>
+public class SetServerEnabledEndpoint : BaseEndpoint<SetServerEnabledRequest, PlexServerDTO>
 {
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
 
     public override string EndpointPath => ApiRoutes.PlexServerController + "/{PlexServerId}/set-server-enabled";
 
-    public SetServerEnabledRequestEndpoint(
+    public SetServerEnabledEndpoint(
         ILogger log,
         IReaparrDbContext dbContext
     )
     {
-        _log = log.ForContext<SetServerEnabledRequestEndpoint>();
+        _log = log.ForContext<SetServerEnabledEndpoint>();
         _dbContext = dbContext;
     }
 

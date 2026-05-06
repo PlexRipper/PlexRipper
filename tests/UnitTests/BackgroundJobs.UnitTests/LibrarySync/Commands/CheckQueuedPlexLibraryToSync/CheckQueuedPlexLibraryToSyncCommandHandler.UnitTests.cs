@@ -227,7 +227,7 @@ public class CheckQueuedPlexLibraryToSyncCommandHandlerUnitTests
     }
 
     [Test]
-    public async Task ShouldLogServerAndLibraryNames_WhenSchedulingJob()
+    public async Task ShouldResolveServerAndLibraryNamesFromDatabase_WhenSchedulingJob()
     {
         // Arrange
         await SetupDatabase(

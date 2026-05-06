@@ -72,7 +72,7 @@ public class GetAccessiblePlexServersCommandHandler
                     PreferredConnectionId = 0,
                     IsEnabled = true,
                     IsDownloadsPausedByUser = false,
-                    OwnedOverride = null,
+                    OwnedOverride = null, // This is set by the user to override
                     Synced = x.Synced,
                     Relay = x.Relay,
                     Presence = x.Presence,

@@ -133,32 +133,29 @@ public sealed class TorrentsInfoEndpoint : Endpoint<TorrentsInfoEndpointRequest,
         var categoryFilter = NormalizeCategory(req.Category);
 
         // Query all download tasks that have a HashId (Sonarr/Radarr tracking id)
-        using var episodeDbContext = await _dbContextFactory.CreateAsync();
-        using var movieDbContext = await _dbContextFactory.CreateAsync();
+        using var dbContext = await _dbContextFactory.CreateAsync();
 
-        var episodeFilesTask = episodeDbContext
-            .DownloadTaskTvShowEpisodeFile.Where(x => x.HashId != null)
+        var nonOwnedServerIds = dbContext.PlexServers.WhereIsNotOwned().Select(x => x.Id);
+
+        var episodeFilesTask = dbContext
+            .DownloadTaskTvShowEpisodeFile.Where(x => x.HashId != null && nonOwnedServerIds.Contains(x.PlexServerId))
             .Include(x => x.Parent)
             .ToListAsync(ct);
 
-        var movieFilesTask = movieDbContext
-            .DownloadTaskMovieFile.Where(x => x.HashId != null)
+        var movieFilesTask = dbContext
+            .DownloadTaskMovieFile.Where(x => x.HashId != null && nonOwnedServerIds.Contains(x.PlexServerId))
             .Include(x => x.Parent)
             .ToListAsync(ct);
 
         await Task.WhenAll(episodeFilesTask, movieFilesTask);
 
-        var eligibleServerIds = await GetEligibleServerIdsAsync(ct);
-
         var episodeInfos = episodeFilesTask
             .Result
-            .Where(x => eligibleServerIds.Contains(x.PlexServerId))
             .Where(x => MatchesFilters(x, hashesFilter, categoryFilter))
             .Select(MapToTorrentInfo)
             .ToList();
         var movieInfos = movieFilesTask
             .Result
-            .Where(x => eligibleServerIds.Contains(x.PlexServerId))
             .Where(x => MatchesFilters(x, hashesFilter, categoryFilter))
             .Select(MapToTorrentInfo)
             .ToList();
@@ -248,18 +245,6 @@ public sealed class TorrentsInfoEndpoint : Endpoint<TorrentsInfoEndpointRequest,
             return null;
 
         return category;
-    }
-
-    private async Task<HashSet<int>> GetEligibleServerIdsAsync(CancellationToken ct)
-    {
-        using var serverDbContext = await _dbContextFactory.CreateAsync();
-
-        var eligibleServerIds = await serverDbContext
-            .PlexServers.WhereIsNotOwned()
-            .Select(x => x.Id)
-            .ToListAsync(ct);
-
-        return eligibleServerIds.ToHashSet();
     }
 
     private static bool MatchesFilters(DownloadTaskFileBase file, HashSet<string>? hashesFilter, string? categoryFilter)

@@ -1,3 +1,4 @@
+using Reaparr.Data.Contracts;
 using Reaparr.PublicAPI.Contracts;
 
 namespace Reaparr.PublicAPI.UnitTests;
@@ -89,6 +90,60 @@ public class TorrentsInfoEndpointUnitTests : BaseUnitTest<TorrentsInfoEndpoint>
         response[0].State.ShouldBe("pausedUP");
         result.PersistedStatus.ShouldBe(DownloadStatus.MovePaused);
         result.PersistedHash.ShouldBe("hash-move-paused");
+    }
+
+    [Test]
+    public async Task ShouldReturnEmptyList_WhenServerIsOwned()
+    {
+        // Arrange
+        await SetupDatabase(5106, config =>
+        {
+            config.PlexServerCount = 1;
+            config.MovieCount = 1;
+            config.MovieDownloadTasksCount = 1;
+        });
+
+        var dbContext = IDbContext;
+        var movieFile = await dbContext.DownloadTaskMovieFile.FirstAsync(CancellationToken);
+
+        await dbContext
+            .PlexServers.Where(x => x.Id == movieFile.PlexServerId)
+            .ExecuteUpdateAsync(
+                x => x.SetProperty(p => p.IsEnabled, true).SetProperty(p => p.OwnedOverride, true),
+                CancellationToken
+            );
+
+        await dbContext
+            .DownloadTaskMovieFile.Where(x => x.Id == movieFile.Id)
+            .ExecuteUpdateAsync(
+                x => x.SetProperty(p => p.HashId, "hash-owned").SetProperty(p => p.DownloadStatus, DownloadStatus.Completed),
+                CancellationToken
+            );
+
+        // Act
+        var endpoint = SetupEndpointUnitTest<TorrentsInfoEndpoint>();
+        await endpoint.HandleAsync(
+            new TorrentsInfoEndpointRequest
+            {
+                Hashes = "hash-owned",
+                Category = IntegrationDefinitions.RADARR_DEFAULT_CATEGORY,
+            },
+            CancellationToken
+        );
+
+        // Assert
+        endpoint.Response.ShouldNotBeNull();
+        endpoint.Response.ShouldBeEmpty();
+
+        var persisted = await dbContext.DownloadTaskMovieFile.Where(x => x.Id == movieFile.Id)
+            .Select(x => new { x.HashId, x.DownloadStatus })
+            .FirstAsync(CancellationToken);
+        persisted.HashId.ShouldBe("hash-owned");
+        persisted.DownloadStatus.ShouldBe(DownloadStatus.Completed);
+
+        var server = await dbContext.PlexServers.IgnoreIsEnabledFilter().FirstAsync(x => x.Id == movieFile.PlexServerId, CancellationToken);
+        server.IsEnabled.ShouldBeTrue();
+        server.OwnedOverride.ShouldBe(true);
     }
 
     private async Task<(

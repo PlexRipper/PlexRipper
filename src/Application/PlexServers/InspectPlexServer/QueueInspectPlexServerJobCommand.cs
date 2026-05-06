@@ -31,13 +31,27 @@ public class QueueInspectPlexServerJobCommandHandler : ICommandHandler<QueueInsp
         var plexServerIds = command.PlexServerIds;
 
         var plexServers = await _dbContext.PlexServers
+            .IgnoreIsEnabledFilter()
             .Where(x => plexServerIds.Contains(x.Id))
             .ToListAsync(cancellationToken);
 
         if (!plexServers.Any())
         {
             _log.Here().Warning("No Plex servers found for {PlexServerIds} to queue for InspectPlexServerJob", plexServerIds);
-            return Result.Ok();
+            return Result.Fail("No Plex servers were found for the requested ids").LogWarning();
+        }
+
+        var disabledServerIds = plexServers.Where(x => !x.IsEnabled).Select(x => x.Id).ToList();
+        if (disabledServerIds.Any())
+        {
+            _log.Here().Warning("Cannot queue InspectPlexServerJob for disabled PlexServerIds {PlexServerIds}", disabledServerIds);
+        }
+
+        var foundServerIds = plexServers.Select(x => x.Id).ToHashSet();
+        var notFoundServerIds = plexServerIds.Where(x => !foundServerIds.Contains(x)).ToList();
+        if (notFoundServerIds.Any())
+        {
+            _log.Here().Warning("No Plex servers found for ids {PlexServerIds}", notFoundServerIds);
         }
 
         var list = await _scheduler.GetRunningJobDataMaps(typeof(InspectPlexServerJob));

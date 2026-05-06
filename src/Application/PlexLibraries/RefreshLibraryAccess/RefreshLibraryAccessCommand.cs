@@ -65,6 +65,9 @@ public class RefreshLibraryAccessHandler
                 .GetAsync(plexServerId, cancellationToken);
             if (plexServer is not null)
             {
+                if (!plexServer.IsEnabled)
+                    return ResultExtensions.ServerIsDisabled(plexServer.Name, plexServer.Id, nameof(RefreshLibraryAccessCommand));
+
                 plexServers.Add(plexServer);
             }
         }

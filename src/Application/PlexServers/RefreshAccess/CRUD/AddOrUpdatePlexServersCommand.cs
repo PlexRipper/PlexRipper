@@ -72,9 +72,38 @@ public class AddOrUpdatePlexServersCommandHandler
                 _log.Here().Debug("Updating PlexServer with id: {PlexServerDbId} in the database", existingServer.Id);
                 incomingPlexServer.Id = existingServer.Id;
 
-                var existingOwnedOverride = existingServer.OwnedOverride;
-                _dbContext.Entry(existingServer).CurrentValues.SetValues(incomingPlexServer);
-                existingServer.OwnedOverride = existingOwnedOverride;
+                _dbContext.Entry(existingServer).CurrentValues.SetValues(new PlexServer
+                {
+                    Id = incomingPlexServer.Id,
+                    Name = incomingPlexServer.Name,
+                    OwnerId = incomingPlexServer.OwnerId,
+                    PlexServerOwnerUsername = incomingPlexServer.PlexServerOwnerUsername,
+                    Device = incomingPlexServer.Device,
+                    Platform = incomingPlexServer.Platform,
+                    PlatformVersion = incomingPlexServer.PlatformVersion,
+                    Product = incomingPlexServer.Product,
+                    ProductVersion = incomingPlexServer.ProductVersion,
+                    Provides = incomingPlexServer.Provides,
+                    CreatedAt = incomingPlexServer.CreatedAt,
+                    LastSeenAt = incomingPlexServer.LastSeenAt,
+                    MachineIdentifier = incomingPlexServer.MachineIdentifier,
+                    PublicAddress = incomingPlexServer.PublicAddress,
+                    PreferredConnectionId = existingServer.PreferredConnectionId,
+                    IsEnabled = existingServer.IsEnabled,
+                    IsDownloadsPausedByUser = existingServer.IsDownloadsPausedByUser,
+                    OwnedOverride = existingServer.OwnedOverride,
+                    Synced = incomingPlexServer.Synced,
+                    Relay = incomingPlexServer.Relay,
+                    Presence = incomingPlexServer.Presence,
+                    HttpsRequired = incomingPlexServer.HttpsRequired,
+                    PublicAddressMatches = incomingPlexServer.PublicAddressMatches,
+                    DnsRebindingProtection = incomingPlexServer.DnsRebindingProtection,
+                    NatLoopbackSupported = incomingPlexServer.NatLoopbackSupported,
+                    PlexAccountServers = existingServer.PlexAccountServers,
+                    PlexLibraries = existingServer.PlexLibraries,
+                    ServerStatus = existingServer.ServerStatus,
+                    PlexServerConnections = existingServer.PlexServerConnections
+                });
 
                 SyncPlexServerConnections(incomingPlexServer, existingServer);
                 rapport.Updated.Add(incomingPlexServer.Id);

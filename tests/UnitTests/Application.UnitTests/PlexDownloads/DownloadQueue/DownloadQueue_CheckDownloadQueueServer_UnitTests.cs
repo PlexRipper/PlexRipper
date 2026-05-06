@@ -133,6 +133,47 @@ public class DownloadQueueCheckDownloadQueueUnitTests : BaseUnitTest<DownloadQue
     }
 
     [Test]
+    public async Task ShouldSkipDownloadQueue_WhenServerIsDisabled()
+    {
+        // Arrange
+        await SetupDatabase(
+            70113,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexMovieLibraryCount = 1;
+                config.MovieCount = 2;
+                config.MovieDownloadTasksCount = 2;
+            }
+        );
+
+        var dbContext = IDbContext;
+        var server = await dbContext.PlexServers.IgnoreIsEnabledFilter().FirstAsync(CancellationToken);
+
+        await dbContext.PlexServers.IgnoreIsEnabledFilter()
+            .Where(x => x.Id == server.Id)
+            .ExecuteUpdateAsync(x => x.SetProperty(y => y.IsEnabled, false), CancellationToken);
+
+        Mock.Mock<IDownloadTaskScheduler>()
+            .Setup(x => x.IsServerDownloading(It.IsAny<int>()))
+            .ReturnsAsync(false)
+            .Verifiable(Times.Never());
+
+        Mock.Mock<IDownloadTaskScheduler>()
+            .Setup(x => x.StartDownloadTaskJob(It.IsAny<DownloadTaskKey>()))
+            .ReturnOk()
+            .Verifiable(Times.Never());
+
+        // Act
+        var result = await Sut.CheckDownloadQueueServer(server.Id);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.ShouldBeNull();
+        Mock.Mock<IDownloadTaskScheduler>().Verify();
+    }
+
+    [Test]
     public async Task ShouldHaveOneDownloadTaskStarted_WhenGivenMovieDownloadTasks()
     {
         // Arrange

@@ -12,6 +12,8 @@ public class GetPlexLibraryMediaEndpointRequestValidator : Validator<GetPlexLibr
         RuleFor(x => x.PlexLibraryId).GreaterThan(0);
         RuleFor(x => x.Page).GreaterThanOrEqualTo(0);
         RuleFor(x => x.Size).GreaterThanOrEqualTo(0);
+        RuleFor(x => x.SortDirection).Must(x => x is "asc" or "desc");
+        RuleFor(x => x.SortField).Must(x => x is "sortIndex" or "year" or "addedAt" or "updatedAt" or "duration" or "mediaSize" or "quality");
     }
 }
 
@@ -83,6 +85,9 @@ public class GetPlexLibraryMediaEndpoint : BaseEndpoint<GetPlexLibraryMediaEndpo
                 ActorId = req.ActorId,
                 GenreId = req.GenreId,
                 Quality = req.Quality,
+                Search = req.Search,
+                SortField = req.SortField,
+                SortDirection = req.SortDirection,
             },
             ct: ct
         );
@@ -93,6 +98,6 @@ public class GetPlexLibraryMediaEndpoint : BaseEndpoint<GetPlexLibraryMediaEndpo
             return;
         }
 
-        await SendFluentResult(Result.Ok(mediaListResult.Value.ToStatisticsDTO()), ct);
+        await SendFluentResult(Result.Ok(mediaListResult.Value.Items.ToStatisticsDTO(mediaListResult.Value.TotalCount)), ct);
     }
 }

@@ -829,6 +829,7 @@ export interface PlexMediaMetadataDTO {
   genres: PlexGenreDTO[];
   /** @format int32 */
   mediaCount: number;
+  navigationIndexes: Record<string, number>;
   qualities: PlexQualityDTO[];
   /** @format int32 */
   qualityCount: number;
@@ -892,6 +893,8 @@ export interface PlexMediaStatisticsDTO {
   movieCount: number;
   /** @format int32 */
   seasonCount: number;
+  /** @format int32 */
+  totalCount: number;
   /** @format int32 */
   tvShowCount: number;
 }
@@ -993,7 +996,6 @@ export interface PlexServerSettingItemModule {
   allowStreamDownloader: boolean;
   /** @format int32 */
   downloadSpeedLimit: number;
-  hidden: boolean;
   machineIdentifier: string;
   plexServerName: string;
 }

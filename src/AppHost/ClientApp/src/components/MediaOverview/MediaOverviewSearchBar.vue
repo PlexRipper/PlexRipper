@@ -1,7 +1,8 @@
 <template>
 	<q-input
-		v-model="mediaOverviewStore.filterQuery"
+		:model-value="mediaOverviewStore.filterQuery"
 		:debounce="300"
+		@update:model-value="onFilterQueryChanged"
 		outlined
 		input-style="font-size: 1.25rem"
 		rounded>
@@ -29,6 +30,7 @@
 </template>
 
 <script setup lang="ts">
+import { useSubscription } from '@vueuse/rxjs';
 import { useMediaOverviewStore } from '@store';
 import IconButton from '@components/Buttons/IconButton.vue';
 import type { IMetaDataMediaFilter } from '@interfaces';
@@ -43,5 +45,10 @@ withDefaults(defineProps<{
 
 function unsetMetaData(key: keyof IMetaDataMediaFilter) {
 	useSubscription(mediaOverviewStore.unsetMetaData(key).subscribe());
+}
+
+function onFilterQueryChanged(value: string | number | null) {
+	mediaOverviewStore.setFilterQuery(String(value ?? ''));
+	useSubscription(mediaOverviewStore.requestMediaFirstPage().subscribe());
 }
 </script>

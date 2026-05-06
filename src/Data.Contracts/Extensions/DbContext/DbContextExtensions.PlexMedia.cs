@@ -65,13 +65,12 @@ public static partial class DbContextExtensions
         );
     }
 
-    public static async Task<Result<List<PlexMediaSlimDTO>>> GetMediaByType(
+    public static async Task<Result<PagedMediaQueryResult>> GetMediaByType(
         this IReaparrDbContext dbContext,
         MediaQueryFilter filter,
         CancellationToken ct = default
     )
     {
-        List<PlexMediaSlimDTO> plexMediaSlimDtos;
         var plexLibraryId = filter.PlexLibraryId;
 
         var serverList = await dbContext.PlexServers
@@ -102,7 +101,11 @@ public static partial class DbContextExtensions
         }
 
         if (plexLibraryId == 0 && !allowedPlexLibraryIds.Any())
-            return Result.Ok(new List<PlexMediaSlimDTO>());
+            return Result.Ok(new PagedMediaQueryResult { Items = [], TotalCount = 0 });
+
+        var sortField = filter.SortField.Trim();
+        var sortDirection = filter.SortDirection.Trim().ToLowerInvariant();
+        var search = filter.Search.Trim().ToLowerInvariant();
 
         switch (filter.MediaType)
         {
@@ -119,25 +122,23 @@ public static partial class DbContextExtensions
                 if (filter.ActorId > 0)
                     query = query.Include(x => x.Actors);
 
-                var movies = await query
+                query = query
                     .Include(x => x.MediaDataList)
                     .ApplyWhere(plexLibraryId > 0, x => x.PlexLibraryId == plexLibraryId)
                     .ApplyWhere(plexLibraryId == 0, x => allowedPlexLibraryIds.Contains(x.PlexLibraryId))
                     .ApplyWhere(filter.CountryId > 0, x => x.Countries.Any(y => y.Id == filter.CountryId))
                     .ApplyWhere(filter.GenreId > 0, x => x.Genres.Any(y => y.Id == filter.GenreId))
                     .ApplyWhere(filter.ActorId > 0, x => x.Actors.Any(y => y.Id == filter.ActorId))
-                    .ApplyWhere(
-                        filter.Quality != VideoQuality.None,
-                        x => x.MediaDataList.Any(y => y.Quality == filter.Quality)
-                    )
-                    .ApplyOrderBy(plexLibraryId > 0, x => x.SortIndex)
-                    .ApplySkip(filter.Skip)
-                    .ApplyTake(filter.Take)
-                    .ToListAsync(ct);
+                    .ApplyWhere(filter.Quality != VideoQuality.None, x => x.MediaDataList.Any(y => y.Quality == filter.Quality))
+                    .ApplyWhere(!string.IsNullOrWhiteSpace(search), x => x.SearchTitle.ToLower().Contains(search));
 
-                plexMediaSlimDtos = movies.Select(x => x.ToSlimDTO()).ToList();
+                query = ApplyMovieSort(query, sortField, sortDirection);
 
-                break;
+                var totalCount = await query.CountAsync(ct);
+                var take = filter.Take <= 0 ? totalCount : filter.Take;
+                var items = await query.ApplySkip(filter.Skip).ApplyTake(take).Select(x => x.ToSlimDTO()).ToListAsync(ct);
+
+                return Result.Ok(new PagedMediaQueryResult { Items = items, TotalCount = totalCount });
             }
             case PlexMediaType.TvShow:
             {
@@ -152,44 +153,61 @@ public static partial class DbContextExtensions
                 if (filter.ActorId > 0)
                     query = query.Include(x => x.Actors);
 
-                var tvShows = await query
+                query = query
                     .Include(x => x.Qualities)
                     .ApplyWhere(plexLibraryId > 0, x => x.PlexLibraryId == plexLibraryId)
                     .ApplyWhere(plexLibraryId == 0, x => allowedPlexLibraryIds.Contains(x.PlexLibraryId))
                     .ApplyWhere(filter.CountryId > 0, x => x.Countries.Any(y => y.Id == filter.CountryId))
                     .ApplyWhere(filter.GenreId > 0, x => x.Genres.Any(y => y.Id == filter.GenreId))
                     .ApplyWhere(filter.ActorId > 0, x => x.Actors.Any(y => y.Id == filter.ActorId))
-                    .ApplyWhere(
-                        filter.Quality != VideoQuality.None,
-                        x => x.Qualities.Any(y => y.Quality == filter.Quality)
-                    )
-                    .ApplyOrderBy(plexLibraryId > 0, x => x.SortIndex)
-                    .ApplySkip(filter.Skip)
-                    .ApplyTake(filter.Take)
-                    .ToListAsync(ct);
+                    .ApplyWhere(filter.Quality != VideoQuality.None, x => x.Qualities.Any(y => y.Quality == filter.Quality))
+                    .ApplyWhere(!string.IsNullOrWhiteSpace(search), x => x.SearchTitle.ToLower().Contains(search));
 
-                plexMediaSlimDtos = tvShows.Select(x => x.ToSlimDTOMapper()).ToList();
-                break;
+                query = ApplyTvShowSort(query, sortField, sortDirection);
+
+                var totalCount = await query.CountAsync(ct);
+                var take = filter.Take <= 0 ? totalCount : filter.Take;
+                var items = await query.ApplySkip(filter.Skip).ApplyTake(take).Select(x => x.ToSlimDTOMapper()).ToListAsync(ct);
+
+                return Result.Ok(new PagedMediaQueryResult { Items = items, TotalCount = totalCount });
             }
             default:
-                return Result.Fail(
-                    $"Type {filter.MediaType} is not supported for retrieving the PlexMedia data by library id"
-                );
+                return Result.Fail($"Type {filter.MediaType} is not supported for retrieving the PlexMedia data by library id");
         }
+    }
 
-        if (plexLibraryId == 0)
-            plexMediaSlimDtos = plexMediaSlimDtos.OrderByNatural(x => x.SearchTitle).ToList();
-
-        // Add token to retrieve thumbnail in front-end
-        for (var i = 0; i < plexMediaSlimDtos.Count; i++)
+    private static IQueryable<PlexMovie> ApplyMovieSort(IQueryable<PlexMovie> query, string sortField, string sortDirection)
+    {
+        var asc = sortDirection != "desc";
+        return sortField switch
         {
-            var slimDTO = plexMediaSlimDtos[i];
+            "year" => asc ? query.OrderBy(x => x.Year).ThenBy(x => x.SearchTitle) : query.OrderByDescending(x => x.Year).ThenByDescending(x => x.SearchTitle),
+            "addedAt" => asc ? query.OrderBy(x => x.AddedAt).ThenBy(x => x.SearchTitle) : query.OrderByDescending(x => x.AddedAt).ThenByDescending(x => x.SearchTitle),
+            "updatedAt" => asc ? query.OrderBy(x => x.UpdatedAt).ThenBy(x => x.SearchTitle) : query.OrderByDescending(x => x.UpdatedAt).ThenByDescending(x => x.SearchTitle),
+            "duration" => asc ? query.OrderBy(x => x.Duration).ThenBy(x => x.SearchTitle) : query.OrderByDescending(x => x.Duration).ThenByDescending(x => x.SearchTitle),
+            "mediaSize" => asc ? query.OrderBy(x => x.MediaSize).ThenBy(x => x.SearchTitle) : query.OrderByDescending(x => x.MediaSize).ThenByDescending(x => x.SearchTitle),
+            "quality" => asc
+                ? query.OrderBy(x => x.MediaDataList.Max(y => (int?)y.Quality) ?? 0).ThenBy(x => x.SearchTitle)
+                : query.OrderByDescending(x => x.MediaDataList.Max(y => (int?)y.Quality) ?? 0).ThenByDescending(x => x.SearchTitle),
+            _ => asc ? query.OrderBy(x => x.SortIndex).ThenBy(x => x.SearchTitle) : query.OrderByDescending(x => x.SortIndex).ThenByDescending(x => x.SearchTitle),
+        };
+    }
 
-            slimDTO.SortIndex = i + 1;
-        }
-
-        // If the plexLibraryId is set, we don't need to sort the list again
-        return Result.Ok(plexMediaSlimDtos);
+    private static IQueryable<PlexTvShow> ApplyTvShowSort(IQueryable<PlexTvShow> query, string sortField, string sortDirection)
+    {
+        var asc = sortDirection != "desc";
+        return sortField switch
+        {
+            "year" => asc ? query.OrderBy(x => x.Year).ThenBy(x => x.SearchTitle) : query.OrderByDescending(x => x.Year).ThenByDescending(x => x.SearchTitle),
+            "addedAt" => asc ? query.OrderBy(x => x.AddedAt).ThenBy(x => x.SearchTitle) : query.OrderByDescending(x => x.AddedAt).ThenByDescending(x => x.SearchTitle),
+            "updatedAt" => asc ? query.OrderBy(x => x.UpdatedAt).ThenBy(x => x.SearchTitle) : query.OrderByDescending(x => x.UpdatedAt).ThenByDescending(x => x.SearchTitle),
+            "duration" => asc ? query.OrderBy(x => x.Duration).ThenBy(x => x.SearchTitle) : query.OrderByDescending(x => x.Duration).ThenByDescending(x => x.SearchTitle),
+            "mediaSize" => asc ? query.OrderBy(x => x.MediaSize).ThenBy(x => x.SearchTitle) : query.OrderByDescending(x => x.MediaSize).ThenByDescending(x => x.SearchTitle),
+            "quality" => asc
+                ? query.OrderBy(x => x.Qualities.Max(y => (int?)y.Quality) ?? 0).ThenBy(x => x.SearchTitle)
+                : query.OrderByDescending(x => x.Qualities.Max(y => (int?)y.Quality) ?? 0).ThenByDescending(x => x.SearchTitle),
+            _ => asc ? query.OrderBy(x => x.SortIndex).ThenBy(x => x.SearchTitle) : query.OrderByDescending(x => x.SortIndex).ThenByDescending(x => x.SearchTitle),
+        };
     }
 
     /// <summary>

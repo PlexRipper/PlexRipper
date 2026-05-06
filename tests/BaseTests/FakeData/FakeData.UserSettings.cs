@@ -161,7 +161,6 @@ public static partial class FakeData
             .RuleFor(x => x.MachineIdentifier, f => f.Finance.BitcoinAddress())
             .Ignore(x => x.PlexServerName)
             .RuleFor(x => x.DownloadSpeedLimit, _ => config.DownloadSpeedLimitInKib)
-            .RuleFor(x => x.Hidden, _ => false)
             .RuleFor(x => x.AllowStreamDownloader, f => f.Random.Bool());
     }
 

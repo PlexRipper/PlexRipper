@@ -48,6 +48,15 @@ public class SyncPlexServerMediaEndpoint : BaseEndpoint<SyncPlexServerMediaEndpo
     {
         _log.Here().DebugApiCall(HttpContext, req);
 
+        if (await _dbContext.IsServerDisabled(req.PlexServerId))
+        {
+            var serverName = await _dbContext.GetPlexServerNameById(req.PlexServerId);
+            var warnResult = _log.Here()
+                .WarningResult("Plex server {Name} is disabled and cannot be synced", serverName);
+            await SendFluentResult(warnResult.Add400BadRequestError(), ct);
+            return;
+        }
+
         var libraryIds = await _dbContext
             .PlexLibraries.Where(x => x.PlexServerId == req.PlexServerId)
             .Select(x => x.Id)
@@ -55,7 +64,7 @@ public class SyncPlexServerMediaEndpoint : BaseEndpoint<SyncPlexServerMediaEndpo
 
         if (!libraryIds.Any())
         {
-            var name = await _dbContext.GetPlexServerNameById(req.PlexServerId, cancellationToken: ct);
+            var name = await _dbContext.GetPlexServerNameById(req.PlexServerId);
             var warnResult = _log.Here().WarningResult("Plex server {Name} has no libraries available to sync", name);
             await SendFluentResult(warnResult.Add400BadRequestError(), ct);
             return;

@@ -16,13 +16,19 @@ public static partial class DbContextExtensions
             return ResultExtensions.IsInvalidId(nameof(PlexServer), plexServerId);
 
         var plexServer = await dbContext
-            .PlexServers.AsNoTracking()
+            .PlexServers.IgnoreIsEnabledFilter()
+            .AsNoTracking()
             .Include(x => x.PlexServerConnections)
                 .ThenInclude(x => x.LatestConnectionStatus)
             .FirstOrDefaultAsync(x => x.Id == plexServerId, cancellationToken);
 
         if (plexServer is null)
             return ResultExtensions.EntityNotFound(nameof(PlexServer), plexServerId);
+
+        if (!plexServer.IsEnabled)
+        {
+            return _log.Here().ErrorResult("Cannot choose PlexServer connection, server {ServerName} with id {Id} is disabled", plexServer.Name, plexServerId);
+        }
 
         var plexServerConnections = plexServer.PlexServerConnections;
         if (!plexServerConnections.Any())

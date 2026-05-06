@@ -4,6 +4,6 @@
 		<LanguageSection />
 		<DateAndTimeSection />
 		<ConfirmationSection />
-		<UnhideServersSection />
+		<EnableServersSection />
 	</QPage>
 </template>

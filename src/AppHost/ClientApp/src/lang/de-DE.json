@@ -549,8 +549,8 @@
             "title": "Sind Sie sicher?",
             "warning": "Dies wird ca.5 Minuten oder mehr benötigen. Wenn der Vorgang abgeschlossen ist schließt sich das Fenster selbstständig."
         },
-        "hide-server": {
-            "text": "Dadurch wird der Server ausgeblendet. Sie können diesen Server wieder einblenden, indem Sie zu Einstellungen -> Benutzeroberfläche -> Plex-Server einblenden gehen.",
+        "disable-server": {
+            "text": "Dadurch wird der Server deaktiviert und ist weder in der Ansicht noch in den Suchergebnissen sichtbar. Er wird auch nicht mehr synchronisiert. Sie können den Server wieder aktivieren, indem Sie zu Einstellungen → Benutzeroberfläche → Plex-Server aktivieren gehen.",
             "title": "Sind Sie sicher?"
         },
         "reset-db": {
@@ -960,9 +960,9 @@
                 "general-settings": {
                     "header": "Allgemeines"
                 },
-                "un-hide-servers-section": {
-                    "header": "Plex-Server einblenden",
-                    "no-servers-hidden": "Aktuell sind keine Plex-Server ausgeblendet. Um einen Server auszublenden, gehen Sie zu den Servereinstellungen und klicken Sie auf „Ausblenden“. Alle ausgeblendeten Server werden dort angezeigt und können wieder eingeblendet werden."
+                "enable-servers-section": {
+                    "header": "Plex-Server aktivieren",
+                    "no-servers-disabled": "Es sind derzeit keine Plex-Server deaktiviert. Um einen Server zu deaktivieren, gehen Sie zu Servereinstellungen => Serverkonfiguration und aktivieren Sie die Option. Alle deaktivierten Server werden hier angezeigt, wo Sie sie wieder aktivieren können."
                 }
             }
         },

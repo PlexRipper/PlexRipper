@@ -62,19 +62,15 @@ public class UserSettingsSerializerUnitTests : BaseUnitTest
         sut.ServerSettings.Data[0].PlexServerName.ShouldBeEmpty();
         sut.ServerSettings.Data[0].MachineIdentifier.ShouldBe("70799fbb07f8a4268bc2b443ac63e6e0ca6b81c8");
         sut.ServerSettings.Data[0].DownloadSpeedLimit.ShouldBe(0);
-        sut.ServerSettings.Data[0].Hidden.ShouldBeFalse();
         sut.ServerSettings.Data[1].PlexServerName.ShouldBeEmpty();
         sut.ServerSettings.Data[1].MachineIdentifier.ShouldBe("e9439c968d0b9f6ad634369d7bb90f3cf87b1b5");
         sut.ServerSettings.Data[1].DownloadSpeedLimit.ShouldBe(0);
-        sut.ServerSettings.Data[1].Hidden.ShouldBeFalse();
         sut.ServerSettings.Data[2].PlexServerName.ShouldBeEmpty();
         sut.ServerSettings.Data[2].MachineIdentifier.ShouldBe("f43caadf1346a7134e138ec89ed4e721c4033033");
         sut.ServerSettings.Data[2].DownloadSpeedLimit.ShouldBe(0);
-        sut.ServerSettings.Data[2].Hidden.ShouldBeTrue();
         sut.ServerSettings.Data[3].PlexServerName.ShouldBeEmpty();
         sut.ServerSettings.Data[3].MachineIdentifier.ShouldBe("94c791bac4a4a0f7dc3e98c91f14f42e03207bb1");
         sut.ServerSettings.Data[3].DownloadSpeedLimit.ShouldBe(0);
-        sut.ServerSettings.Data[3].Hidden.ShouldBeFalse();
     }
 
     [Test]
@@ -113,14 +109,11 @@ public class UserSettingsSerializerUnitTests : BaseUnitTest
         sut.ServerSettings.Data[0].PlexServerName.ShouldBeEmpty();
         sut.ServerSettings.Data[0].MachineIdentifier.ShouldBe("70799fbb07f8a4268bc2b443ac63e6e0ca6b81c8");
         sut.ServerSettings.Data[0].DownloadSpeedLimit.ShouldBe(0);
-        sut.ServerSettings.Data[0].Hidden.ShouldBeFalse();
         sut.ServerSettings.Data[1].PlexServerName.ShouldBeEmpty();
         sut.ServerSettings.Data[1].MachineIdentifier.ShouldBe("e9439c968d0b9f6ad634369d7bb90f3cf87b1b5");
         sut.ServerSettings.Data[1].DownloadSpeedLimit.ShouldBe(0);
-        sut.ServerSettings.Data[1].Hidden.ShouldBeFalse();
         sut.ServerSettings.Data[2].PlexServerName.ShouldBeEmpty();
         sut.ServerSettings.Data[2].MachineIdentifier.ShouldBe("f43caadf1346a7134e138ec89ed4e721c4033033");
         sut.ServerSettings.Data[2].DownloadSpeedLimit.ShouldBe(0);
-        sut.ServerSettings.Data[2].Hidden.ShouldBeTrue();
     }
 }

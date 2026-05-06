@@ -111,7 +111,7 @@ public class AddOrUpdatePlexLibrariesCommandHandler
                 .Select(x => x.PlexServerId)
                 .ToListAsync(cancellationToken);
 
-            var plexServerName = await _dbContext.GetPlexServerNameById(plexServerId, cancellationToken);
+            var plexServerName = await _dbContext.GetPlexServerNameById(plexServerId);
             var rapport = FindOrCreate(plexServerId, plexAccount.DisplayName, plexServerName);
 
             foreach (var incomingPlexLibrary in incomingPlexLibraries)

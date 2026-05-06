@@ -87,7 +87,7 @@ public class PlexServer : BaseEntity
     public required bool IsDownloadsPausedByUser { get; set; }
 
     [Column(Order = 17)]
-    public required bool Home { get; init; }
+    public bool? OwnedOverride { get; set; }
 
     [Column(Order = 18)]
     public required bool Synced { get; init; }
@@ -129,6 +129,13 @@ public class PlexServer : BaseEntity
 
     #region Helpers
 
+    /// <summary>
+    /// Gets whether this server is marked Owned by any Plex account or overridden.
+    /// </summary>
+    [NotMapped]
+    public bool Owned => OwnedOverride ?? PlexAccountServers.Any(x => x.IsServerOwned);
+
+    
     /// <summary>
     /// Gets the last known server status.
     /// </summary>
@@ -180,7 +187,7 @@ public class PlexServer : BaseEntity
         hashCode.Add(MachineIdentifier);
         hashCode.Add(PublicAddress);
         hashCode.Add(PreferredConnectionId);
-        hashCode.Add(Home);
+        hashCode.Add(OwnedOverride);
         hashCode.Add(Synced);
         hashCode.Add(Relay);
         hashCode.Add(Presence);
@@ -223,7 +230,7 @@ public class PlexServer : BaseEntity
         && MachineIdentifier == other.MachineIdentifier
         && PublicAddress == other.PublicAddress
         && PreferredConnectionId == other.PreferredConnectionId
-        && Home == other.Home
+        && OwnedOverride == other.OwnedOverride
         && Synced == other.Synced
         && Relay == other.Relay
         && Presence == other.Presence

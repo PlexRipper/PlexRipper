@@ -30,8 +30,6 @@ public record PlexServerSettingsModule
     public string GetServerNameAlias(string machineIdentifier) =>
         FindOrAddServerSettingsModel(machineIdentifier)?.PlexServerName ?? string.Empty;
 
-    public bool GetIsHidden(string machineIdentifier) =>
-        FindOrAddServerSettingsModel(machineIdentifier)?.Hidden ?? false;
 
     public bool GetAllowStreamDownloader(string machineIdentifier) =>
         FindOrAddServerSettingsModel(machineIdentifier)?.AllowStreamDownloader ?? false;
@@ -62,18 +60,6 @@ public record PlexServerSettingsModule
         }
     }
 
-    public void SetServerHiddenState(string machineIdentifier, bool isHidden)
-    {
-        var model = FindOrAddServerSettingsModel(machineIdentifier);
-        if (model is null)
-            return;
-
-        if (model.Hidden != isHidden)
-        {
-            model.Hidden = isHidden;
-            OnPropertyChanged(nameof(model.Hidden));
-        }
-    }
 
     #endregion
 

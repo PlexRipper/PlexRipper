@@ -62,13 +62,23 @@ public class DownloadQueue : IDownloadQueue
         // Create a new DbContext for this operation to avoid threading issues
         using var dbContext = await _dbContextFactory.CreateAsync();
 
-        var plexServerName = await dbContext.GetPlexServerNameById(plexServerId, _token);
+        var plexServerName = await dbContext.GetPlexServerNameById(plexServerId);
 
         if (await dbContext.IsDownloadsPausedByUser(plexServerId))
         {
             _log.Here()
                 .Information(
                     "Skipping download queue check because PlexServer {PlexServerName} is paused by user.",
+                    plexServerName
+                );
+            return Result.Ok();
+        }
+
+        if (await dbContext.IsServerDisabled(plexServerId))
+        {
+            _log.Here()
+                .Information(
+                    "Skipping download queue check because PlexServer {PlexServerName} is disabled.",
                     plexServerName
                 );
             return Result.Ok();

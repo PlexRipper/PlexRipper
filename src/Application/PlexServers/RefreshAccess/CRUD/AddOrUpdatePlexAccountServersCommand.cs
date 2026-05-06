@@ -56,7 +56,8 @@ public class AddOrUpdatePlexAccountServersCommandHandler
         // Fetch all relevant PlexServers in one query
         var machineIdentifiers = serverAccessTokens.Select(x => x.MachineIdentifier).ToList();
         var plexServers = await _dbContext
-            .PlexServers.Where(x => machineIdentifiers.Contains(x.MachineIdentifier))
+            .PlexServers.IgnoreIsEnabledFilter()
+            .Where(x => machineIdentifiers.Contains(x.MachineIdentifier))
             .ToDictionaryAsync(x => x.MachineIdentifier, cancellationToken);
 
         var newAccountServers = new List<PlexAccountServer>();
@@ -153,7 +154,7 @@ public class AddOrUpdatePlexAccountServersCommandHandler
 
             foreach (var plexServerId in removalIds)
             {
-                var plexServerName = await _dbContext.GetPlexServerNameById(plexServerId, CancellationToken.None);
+                var plexServerName = await _dbContext.GetPlexServerNameById(plexServerId);
                 rapport.AddRevoked(plexServerId, plexServerName);
             }
         }

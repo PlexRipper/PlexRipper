@@ -32,9 +32,8 @@ public class CheckAllConnectionsStatusByPlexServerJob : IJob
         try
         {
             var cancellationToken = context.CancellationToken;
-            var plexServers = _dbContext
-                .PlexServers.Include(x => x.PlexServerConnections)
-                .Where(x => x.IsEnabled)
+            var plexServers = _dbContext.PlexServers
+                .Include(x => x.PlexServerConnections)
                 .ToList();
 
             if (!plexServers.Any())

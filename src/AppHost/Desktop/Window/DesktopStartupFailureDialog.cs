@@ -95,9 +95,15 @@ public class DesktopStartupFailureDialog
                 return;
         }
 
-        var fallbackUri = new Uri(
-            "file://" + logsDirectory.TrimEnd(Path.DirectorySeparatorChar) + Path.DirectorySeparatorChar
-        );
+        var normalizedLogsDirectory =
+            logsDirectory.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar) + Path.DirectorySeparatorChar;
+
+        var fallbackUri = new UriBuilder
+        {
+            Scheme = Uri.UriSchemeFile,
+            Path = normalizedLogsDirectory,
+        }.Uri;
+
         TryOpenPath(fallbackUri.AbsoluteUri);
     }
 

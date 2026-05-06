@@ -549,8 +549,8 @@
             "title": "Jesteś pewny?",
             "warning": "Może to potrwać około 5 minut lub dłużej, po czym okno zamknie się automatycznie!"
         },
-        "hide-server": {
-            "text": "To ukryje serwer z widoku. Możesz odkryć ten serwer, przechodząc do ustawień -> UI -> Odkryj serwery Plex",
+        "disable-server": {
+            "text": "Spowoduje to wyłączenie i ukrycie serwera w wynikach wyszukiwania oraz uniemożliwi jego synchronizację. Możesz ponownie włączyć ten serwer, przechodząc do Ustawień -> Interfejs użytkownika -> Włącz serwery Plex.",
             "title": "Jesteś pewny?"
         },
         "reset-db": {
@@ -960,9 +960,9 @@
                 "general-settings": {
                     "header": "Ogólne"
                 },
-                "un-hide-servers-section": {
-                    "header": "Pokaż serwery Plex",
-                    "no-servers-hidden": "Obecnie żaden serwer Plex nie jest ukryty. Aby ukryć serwer, przejdź do Ustawień serwera i kliknij Ukryj. Wszystkie ukryte serwery pojawią się tutaj, gdzie możesz je wyświetlić."
+                "enable-servers-section": {
+                    "header": "Włącz serwery Plex",
+                    "no-servers-disabled": "Obecnie żaden serwer Plex nie jest wyłączony. Aby wyłączyć serwer, przejdź do Ustawień serwera => Konfiguracja serwera i przełącz opcję na Włączony. Wszystkie wyłączone serwery pojawią się tutaj, gdzie możesz je ponownie włączyć."
                 }
             }
         },

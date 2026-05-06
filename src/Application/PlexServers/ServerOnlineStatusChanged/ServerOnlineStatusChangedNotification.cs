@@ -42,10 +42,7 @@ public class ServerOnlineStatusChangedHandler : IEventHandler<ServerOnlineStatus
         {
             // Create a new DbContext for this operation to avoid threading issues
             using var dbContext = await _dbContextFactory.CreateAsync();
-            var plexServerName = await dbContext.GetPlexServerNameById(
-                notification.PlexServerId,
-                cancellationToken: cancellationToken
-            );
+            var plexServerName = await dbContext.GetPlexServerNameById(notification.PlexServerId);
             _log.Here()
                 .Information(
                     "Server {PlexServerName} came online, checking DownloadQueue and LibrarySyncQueue to resume",

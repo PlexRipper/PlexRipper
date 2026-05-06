@@ -5,6 +5,7 @@ import { of } from 'rxjs';
 import { switchMap, tap, map, catchError } from 'rxjs/operators';
 import type { PlexServerDTO } from '@dto';
 import { StoreNames, type ISetupResult } from '@interfaces';
+import { get } from '@vueuse/core';
 import { plexServerApi } from '@api';
 import { RefreshDataType } from '@dto';
 import { cloneDeep, orderBy } from 'lodash-es';
@@ -37,10 +38,7 @@ export const useServerStore = defineStore(StoreNames.ServerStore, () => {
 					name: StoreNames.ServerStore,
 					isSuccess: !!result?.isSuccess,
 				})),
-				catchError((error) => {
-					console.error(error);
-					return of({ name: StoreNames.ServerStore, isSuccess: false });
-				}),
+				catchError(() => of({ name: StoreNames.ServerStore, isSuccess: false })),
 			);
 		},
 		refreshPlexServer(serverId: number) {
@@ -68,12 +66,37 @@ export const useServerStore = defineStore(StoreNames.ServerStore, () => {
 				})
 				.pipe(switchMap((response) => response.isSuccess ? settingsStore.refreshSettings() : of(response)));
 		},
-		setServerHidden(serverId: number, hidden: boolean) {
+		setServerEnabled(serverId: number, isEnabled: boolean) {
 			return plexServerApi
-				.setServerHiddenRequestEndpoint(serverId, {
-					hidden,
+				.setServerEnabledRequestEndpoint(serverId, {
+					isEnabled,
 				})
-				.pipe(switchMap((response) => response.isSuccess ? settingsStore.refreshSettings() : of(response)));
+				.pipe(
+					tap((response) => {
+						if (response.isSuccess && response.value) {
+							const i = state.servers.findIndex((x) => x.id === serverId);
+							if (i > -1) {
+								state.servers.splice(i, 1, response.value);
+							}
+						}
+					}),
+				);
+		},
+		setServerOwned(serverId: number, owned: boolean) {
+			return plexServerApi
+				.setServerOwnedEndpoint(serverId, {
+					isOwned: owned,
+				})
+				.pipe(
+					tap((response) => {
+						if (response.isSuccess && response.value) {
+							const i = state.servers.findIndex((x) => x.id === serverId);
+							if (i > -1) {
+								state.servers.splice(i, 1, response.value);
+							}
+						}
+					}),
+				);
 		},
 		setServerPaused(serverId: number, paused: boolean) {
 			const request$ = paused
@@ -111,11 +134,11 @@ export const useServerStore = defineStore(StoreNames.ServerStore, () => {
 			return serverIds.map((x) => getters.getServer(x)).filter((x) => !!x) ?? [];
 		},
 		getVisibleServers: computed((): PlexServerDTO[] => {
-			const servers = getters.getServers().filter((x) => settingsStore.isServerVisible(x.machineIdentifier) && accountStore.getHasAccountServerAccess(x.id));
+			const servers = getters.getServers().filter((x) => x.isEnabled && accountStore.getHasAccountServerAccess(x.id));
 			return orderBy(servers, [(x) => x.owned, (x) => x.name.toLocaleLowerCase()], ['desc', 'asc']);
 		}),
-		getHiddenServers: computed((): PlexServerDTO[] =>
-			getters.getServers().filter((x) => !settingsStore.isServerVisible(x.machineIdentifier)),
+		getDisabledServers: computed((): PlexServerDTO[] =>
+			getters.getServers().filter((x) => !get(getters.getVisibleServers).includes(x)),
 		),
 		getServerName: (serverId: number): string => {
 			if (settingsStore.shouldMaskServerNames) {

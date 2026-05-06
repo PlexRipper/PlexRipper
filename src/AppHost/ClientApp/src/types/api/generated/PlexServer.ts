@@ -11,8 +11,14 @@
  */
 
 import type { RequestParams } from "./http-client";
+import { ContentType } from "./http-client";
 
-import type { BaseResultDTO, PlexServerDTO } from "./data-contracts";
+import type {
+  BaseResultDTO,
+  PlexServerDTO,
+  SetServerEnabledRequest,
+  SetServerOwnedRequest,
+} from "./data-contracts";
 
 import { apiCheckPipe, axiosObservable } from "@api/base";
 import queryString from "query-string";
@@ -176,25 +182,45 @@ export class PlexServer {
   /**
    * No description
    * * @tags Plexserver
-   * @name SetServerHiddenRequestEndpoint
-   * @request GET:/api/PlexServer/{PlexServerId}/set-server-hidden
+   * @name SetServerEnabledRequestEndpoint
+   * @request PUT:/api/PlexServer/{PlexServerId}/set-server-enabled
    * @secure
    */
-  setServerHiddenRequestEndpoint = (
+  setServerEnabledRequestEndpoint = (
     plexServerId: number,
-    query: {
-      hidden: boolean;
-    },
+    data: SetServerEnabledRequest,
     params: RequestParams = {},
   ) =>
-    axiosObservable<BaseResultDTO>({
-      url: `/api/PlexServer/${plexServerId}/set-server-hidden`,
-      method: "GET",
-      params: query,
+    axiosObservable<PlexServerDTO>({
+      url: `/api/PlexServer/${plexServerId}/set-server-enabled`,
+      method: "PUT",
+      data: data,
       secure: true,
       responseType: "json",
       ...params,
-    }).pipe(apiCheckPipe<BaseResultDTO>);
+    }).pipe(apiCheckPipe<PlexServerDTO>);
+
+  /**
+   * No description
+   * * @tags Plexserver
+   * @name SetServerOwnedEndpoint
+   * @request PUT:/api/PlexServer/{PlexServerId}/set-server-owned
+   * @secure
+   */
+  setServerOwnedEndpoint = (
+    plexServerId: number,
+    data: SetServerOwnedRequest,
+    params: RequestParams = {},
+  ) =>
+    axiosObservable<PlexServerDTO>({
+      url: `/api/PlexServer/${plexServerId}/set-server-owned`,
+      method: "PUT",
+      data: data,
+      secure: true,
+      type: ContentType.Json,
+      responseType: "json",
+      ...params,
+    }).pipe(apiCheckPipe<PlexServerDTO>);
 
   /**
    * No description
@@ -262,15 +288,14 @@ export class PlexServerPaths {
       query,
     });
 
-  static setServerHiddenRequestEndpoint = (
-    plexServerId: number,
-    query: {
-      hidden: boolean;
-    },
-  ) =>
+  static setServerEnabledRequestEndpoint = (plexServerId: number) =>
     queryString.stringifyUrl({
-      url: `/api/PlexServer/${plexServerId}/set-server-hidden`,
-      query,
+      url: `/api/PlexServer/${plexServerId}/set-server-enabled`,
+    });
+
+  static setServerOwnedEndpoint = (plexServerId: number) =>
+    queryString.stringifyUrl({
+      url: `/api/PlexServer/${plexServerId}/set-server-owned`,
     });
 
   static syncPlexServerMediaEndpoint = (plexServerId: number) =>

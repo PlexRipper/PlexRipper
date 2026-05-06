@@ -4,11 +4,11 @@
     "reaparr-backend-integration-tests": "symlink",
     "reaparr-backend-unit-tests": "symlink",
     "reaparr-command-handler-patterns": "symlink",
+    "reaparr-desktop-build": "symlink",
     "reaparr-frontend-components": "symlink",
     "reaparr-frontend-unit-tests": "symlink",
     "reaparr-git-commit": "symlink",
-    "reaparr-mcp-tools": "symlink",
     "reaparr-pinia-store": "symlink"
   },
-  "updated_at": "2026-04-28T14:06:27.981657212+02:00"
+  "updated_at": "2026-05-05T20:41:47.500102167+02:00"
 }

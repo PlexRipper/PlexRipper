@@ -119,7 +119,7 @@ public class DashPlexDownloadClient : IPlexDownloadClient
         if (downloadingResult.IsFailed)
             return downloadingResult.LogError();
 
-        var options = await CreateDashOptions(downloadTask, downloadUrlResult.Value.DownloadUrl, cancellationToken);
+        var options = await CreateDashOptions(downloadTask, downloadUrlResult.Value.DownloadUrl);
         await using var cancellationRegistration = cancellationToken.Register(() =>
         {
             _ = _dashWrapper.StopAsync();
@@ -151,14 +151,10 @@ public class DashPlexDownloadClient : IPlexDownloadClient
 
     private async Task<DashMpdCliOptions> CreateDashOptions(
         DownloadTaskFileBase downloadTask,
-        string downloadUrl,
-        CancellationToken cancellationToken
+        string downloadUrl
     )
     {
-        var serverMachineIdentifier = await _dbContext.GetPlexServerMachineIdentifierById(
-            downloadTask.PlexServerId,
-            cancellationToken
-        );
+        var serverMachineIdentifier = await _dbContext.GetPlexServerMachineIdentifierById(downloadTask.PlexServerId);
         var speedLimitKb = _serverSettings.GetDownloadSpeedLimit(serverMachineIdentifier);
 
         return new DashMpdCliOptions
@@ -216,7 +212,7 @@ public class DashPlexDownloadClient : IPlexDownloadClient
     {
         _subscriptions.Add(
             _dashWrapper
-                .Progress.Sample(TimeSpan.FromMilliseconds(300))
+                .Progress
                 .TakeUntil(_destroy)
                 .Subscribe(progress =>
                 {

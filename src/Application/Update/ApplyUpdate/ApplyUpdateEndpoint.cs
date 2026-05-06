@@ -100,7 +100,21 @@ public class ApplyUpdateEndpoint : BaseEndpointWithoutRequest
 
             _appLifetime.StopApplication();
 
-            await Task.Run(() => _appLifetime.ApplicationStopped.WaitHandle.WaitOne());
+            var stoppedInTime = await Task.Run(() =>
+                _appLifetime.ApplicationStopped.WaitHandle.WaitOne(TimeSpan.FromSeconds(60))
+            );
+
+            if (!stoppedInTime)
+            {
+                _log.Here()
+                    .Warning(
+                        "Timed out waiting for ApplicationStopped before update exit; forcing process exit to continue Velopack update; AppId: {AppId}; CurrentVersion: {CurrentVersion}; PackageId: {PackageId}; PackageVersion: {PackageVersion}",
+                        _velopackManager.AppId,
+                        _velopackManager.CurrentVersion,
+                        asset.PackageId,
+                        asset.Version
+                    );
+            }
 
             _log.Here()
                 .Warning(

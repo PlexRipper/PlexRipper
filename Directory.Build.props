@@ -14,7 +14,12 @@
         <ReaparrRuntimeIdentifier Condition="'$(ReaparrRuntimeIdentifier)' == ''">unknown</ReaparrRuntimeIdentifier>
         <CSharpier_Bypass>true</CSharpier_Bypass>
     </PropertyGroup>
-
+    <Target Name="PostClean" AfterTargets="Clean">
+        <!-- Remove /bin -->
+        <RemoveDir Directories="$(BaseOutputPath)" />
+        <!-- Remove /obj -->
+        <RemoveDir Directories="$(BaseIntermediateOutputPath)" />
+    </Target>
     <ItemGroup>
         <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
             <_Parameter1>ReaparrRuntimeMode</_Parameter1>

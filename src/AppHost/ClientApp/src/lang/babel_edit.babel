@@ -6180,6 +6180,29 @@
 										</translations>
 									</concept_node>
 									<concept_node>
+										<name>downloading</name>
+										<description/>
+										<comment/>
+										<translations>
+											<translation>
+												<language>de-DE</language>
+												<approved>false</approved>
+											</translation>
+											<translation>
+												<language>en-US</language>
+												<approved>false</approved>
+											</translation>
+											<translation>
+												<language>fr-FR</language>
+												<approved>false</approved>
+											</translation>
+											<translation>
+												<language>pl-PL</language>
+												<approved>false</approved>
+											</translation>
+										</translations>
+									</concept_node>
+									<concept_node>
 										<name>latest-version</name>
 										<description/>
 										<comment/>
@@ -6204,6 +6227,29 @@
 									</concept_node>
 									<concept_node>
 										<name>no-releases</name>
+										<description/>
+										<comment/>
+										<translations>
+											<translation>
+												<language>de-DE</language>
+												<approved>false</approved>
+											</translation>
+											<translation>
+												<language>en-US</language>
+												<approved>false</approved>
+											</translation>
+											<translation>
+												<language>fr-FR</language>
+												<approved>false</approved>
+											</translation>
+											<translation>
+												<language>pl-PL</language>
+												<approved>false</approved>
+											</translation>
+										</translations>
+									</concept_node>
+									<concept_node>
+										<name>restarting</name>
 										<description/>
 										<comment/>
 										<translations>
@@ -6330,7 +6376,7 @@
 								</children>
 							</folder_node>
 							<folder_node>
-								<name>hide-server</name>
+								<name>disable-server</name>
 								<children>
 									<concept_node>
 										<name>text</name>
@@ -14605,6 +14651,57 @@
 												</children>
 											</folder_node>
 											<folder_node>
+												<name>enable-servers-section</name>
+												<children>
+													<concept_node>
+														<name>header</name>
+														<description/>
+														<comment/>
+														<translations>
+															<translation>
+																<language>de-DE</language>
+																<approved>false</approved>
+															</translation>
+															<translation>
+																<language>en-US</language>
+																<approved>false</approved>
+															</translation>
+															<translation>
+																<language>fr-FR</language>
+																<approved>false</approved>
+															</translation>
+															<translation>
+																<language>pl-PL</language>
+																<approved>false</approved>
+															</translation>
+														</translations>
+													</concept_node>
+													<concept_node>
+														<name>no-servers-disabled</name>
+														<description/>
+														<comment/>
+														<translations>
+															<translation>
+																<language>de-DE</language>
+																<approved>false</approved>
+															</translation>
+															<translation>
+																<language>en-US</language>
+																<approved>false</approved>
+															</translation>
+															<translation>
+																<language>fr-FR</language>
+																<approved>false</approved>
+															</translation>
+															<translation>
+																<language>pl-PL</language>
+																<approved>false</approved>
+															</translation>
+														</translations>
+													</concept_node>
+												</children>
+											</folder_node>
+											<folder_node>
 												<name>general-settings</name>
 												<children>
 													<concept_node>
@@ -14637,57 +14734,6 @@
 												<children>
 													<concept_node>
 														<name>header</name>
-														<description/>
-														<comment/>
-														<translations>
-															<translation>
-																<language>de-DE</language>
-																<approved>false</approved>
-															</translation>
-															<translation>
-																<language>en-US</language>
-																<approved>false</approved>
-															</translation>
-															<translation>
-																<language>fr-FR</language>
-																<approved>false</approved>
-															</translation>
-															<translation>
-																<language>pl-PL</language>
-																<approved>false</approved>
-															</translation>
-														</translations>
-													</concept_node>
-												</children>
-											</folder_node>
-											<folder_node>
-												<name>un-hide-servers-section</name>
-												<children>
-													<concept_node>
-														<name>header</name>
-														<description/>
-														<comment/>
-														<translations>
-															<translation>
-																<language>de-DE</language>
-																<approved>false</approved>
-															</translation>
-															<translation>
-																<language>en-US</language>
-																<approved>false</approved>
-															</translation>
-															<translation>
-																<language>fr-FR</language>
-																<approved>false</approved>
-															</translation>
-															<translation>
-																<language>pl-PL</language>
-																<approved>false</approved>
-															</translation>
-														</translations>
-													</concept_node>
-													<concept_node>
-														<name>no-servers-hidden</name>
 														<description/>
 														<comment/>
 														<translations>

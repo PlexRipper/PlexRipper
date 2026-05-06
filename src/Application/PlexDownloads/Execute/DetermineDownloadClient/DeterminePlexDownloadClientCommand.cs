@@ -42,7 +42,7 @@ public class DeterminePlexDownloadClientCommandHandler
         CancellationToken cancellationToken
     )
     {
-        var machineId = await _dbContext.GetPlexServerMachineIdentifierById(command.PlexServerId, cancellationToken);
+        var machineId = await _dbContext.GetPlexServerMachineIdentifierById(command.PlexServerId);
         if (string.IsNullOrWhiteSpace(machineId))
         {
             return Result

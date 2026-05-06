@@ -171,9 +171,6 @@ export const useSettingsStore = defineStore(StoreNames.SettingsStore, () => {
 					Log.error('Could not set view mode for type' + type);
 			}
 		},
-		isServerVisible(machineIdentifier: string): boolean {
-			return !(actions.getServerSettings(machineIdentifier)?.hidden ?? false);
-		},
 		getServerSettings: (machineIdentifier?: string) => machineIdentifier ? state.serverSettings.data.find((user) => user.machineIdentifier === machineIdentifier) : null,
 		isConfirmationEnabled: (type: PlexMediaType) => {
 			switch (type) {

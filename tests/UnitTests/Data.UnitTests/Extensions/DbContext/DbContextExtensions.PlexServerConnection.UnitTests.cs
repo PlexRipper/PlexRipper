@@ -26,6 +26,31 @@ public class DbContextExtensionsPlexServerConnectionUnitTests : BaseUnitTest
     }
 
     [Test]
+    public async Task ShouldReturnFailedResult_WhenServerIsDisabled_EvenWhenUsingIgnoreFilterLoad()
+    {
+        // Arrange
+        await SetupDatabase(47894, cfg =>
+        {
+            cfg.PlexServerCount = 1;
+            cfg.PlexServerConnectionPerServerCount = 1;
+        });
+
+        var dbContext = IDbContext;
+        var plexServer = await dbContext.PlexServers.IgnoreIsEnabledFilter().FirstAsync(CancellationToken);
+
+        await dbContext.PlexServers.IgnoreIsEnabledFilter()
+            .Where(x => x.Id == plexServer.Id)
+            .ExecuteUpdateAsync(x => x.SetProperty(y => y.IsEnabled, false), CancellationToken);
+
+        // Act
+        var result = await dbContext.ChoosePlexServerConnection(plexServer.Id, CancellationToken);
+
+        // Assert
+        result.IsFailed.ShouldBeTrue();
+        result.Errors.ShouldContain(x => x.Message.Contains("disabled", StringComparison.OrdinalIgnoreCase));
+    }
+
+    [Test]
     public async Task ShouldReturnAFailedResult_WhenThereAreNoPlexConnections()
     {
         // Act

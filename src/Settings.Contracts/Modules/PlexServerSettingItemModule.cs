@@ -8,7 +8,6 @@ public record PlexServerSettingItemModule : BaseSettingsModule<PlexServerSetting
             PlexServerName = plexServerName,
             MachineIdentifier = machineIdentifier,
             DownloadSpeedLimit = 0,
-            Hidden = false,
             AllowStreamDownloader = false,
         };
 
@@ -27,11 +26,6 @@ public record PlexServerSettingItemModule : BaseSettingsModule<PlexServerSetting
         set => SetProperty(ref field, value);
     }
 
-    public required bool Hidden
-    {
-        get;
-        set => SetProperty(ref field, value);
-    }
 
     public required bool AllowStreamDownloader
     {

@@ -24,7 +24,6 @@ export function generatePlexServer({
 		ownerId: randNumber({ max: 999999 }),
 		device: 'PC',
 		dnsRebindingProtection: randBoolean(),
-		home: randBoolean(),
 		httpsRequired: randBoolean(),
 		lastSeenAt: randRecentDate({ days: 10 }).toUTCString(),
 		natLoopbackSupported: randBoolean(),

@@ -59,8 +59,8 @@ public class SetPreferredPlexServerConnectionEndpoint
                 plexServerId
             );
 
-        var plexServer = await _dbContext
-            .PlexServers.Include(x => x.PlexServerConnections)
+        var plexServer = await _dbContext.PlexServers
+            .Include(x => x.PlexServerConnections)
             .AsTracking()
             .FirstOrDefaultAsync(x => x.Id == plexServerId, ct);
 

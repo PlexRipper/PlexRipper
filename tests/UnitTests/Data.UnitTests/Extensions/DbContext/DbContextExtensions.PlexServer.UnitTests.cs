@@ -18,7 +18,7 @@ public class DbContextExtensionsPlexServerUnitTests : BaseUnitTest
         server.ShouldNotBeNull();
 
         // Act
-        var name = await IDbContext.GetPlexServerNameById(server.Id, CancellationToken);
+        var name = await IDbContext.GetPlexServerNameById(server.Id);
 
         // Assert
         name.ShouldBe(server.Name);
@@ -31,7 +31,7 @@ public class DbContextExtensionsPlexServerUnitTests : BaseUnitTest
         await SetupDatabase(12002);
 
         // Act
-        var name = await IDbContext.GetPlexServerNameById(9999, CancellationToken);
+        var name = await IDbContext.GetPlexServerNameById(9999);
 
         // Assert
         name.ShouldBe("Server Name Not Found");
@@ -53,7 +53,7 @@ public class DbContextExtensionsPlexServerUnitTests : BaseUnitTest
         server.ShouldNotBeNull();
 
         // Act
-        var machineId = await IDbContext.GetPlexServerMachineIdentifierById(server.Id, CancellationToken);
+        var machineId = await IDbContext.GetPlexServerMachineIdentifierById(server.Id);
 
         // Assert
         machineId.ShouldBe(server.MachineIdentifier);
@@ -66,7 +66,7 @@ public class DbContextExtensionsPlexServerUnitTests : BaseUnitTest
         await SetupDatabase(12004);
 
         // Act
-        var machineId = await IDbContext.GetPlexServerMachineIdentifierById(9999, CancellationToken);
+        var machineId = await IDbContext.GetPlexServerMachineIdentifierById(9999);
 
         // Assert
         machineId.ShouldBe(string.Empty);
@@ -115,4 +115,54 @@ public class DbContextExtensionsPlexServerUnitTests : BaseUnitTest
         // Assert
         isOnline.ShouldBeFalse();
     }
+
+    [Test]
+    public async Task ShouldReturnTrueForIsServerDisabled_WhenServerExistsAndIsDisabled()
+    {
+        // Arrange
+        await SetupDatabase(12007, cfg => cfg.PlexServerCount = 1);
+
+        var dbContext = IDbContext;
+        var server = await dbContext.PlexServers.IgnoreIsEnabledFilter().FirstAsync(CancellationToken);
+
+        await dbContext.PlexServers.IgnoreIsEnabledFilter()
+            .Where(x => x.Id == server.Id)
+            .ExecuteUpdateAsync(x => x.SetProperty(y => y.IsEnabled, false), CancellationToken);
+
+        // Act
+        var result = await dbContext.IsServerDisabled(server.Id);
+
+        // Assert
+        result.ShouldBeTrue();
+    }
+
+    [Test]
+    public async Task ShouldReturnFalseForIsServerDisabled_WhenServerExistsAndIsEnabled()
+    {
+        // Arrange
+        await SetupDatabase(12008, cfg => cfg.PlexServerCount = 1);
+
+        var dbContext = IDbContext;
+        var server = await dbContext.PlexServers.IgnoreIsEnabledFilter().FirstAsync(CancellationToken);
+
+        // Act
+        var result = await dbContext.IsServerDisabled(server.Id);
+
+        // Assert
+        result.ShouldBeFalse();
+    }
+
+    [Test]
+    public async Task ShouldReturnFalseForIsServerDisabled_WhenServerDoesNotExist()
+    {
+        // Arrange
+        await SetupDatabase(12009);
+
+        // Act
+        var result = await IDbContext.IsServerDisabled(99999);
+
+        // Assert
+        result.ShouldBeFalse();
+    }
 }
+

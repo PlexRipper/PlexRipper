@@ -64,7 +64,7 @@ public class LibrarySyncJob : IJob
         var isServerOnline = await _dbContext.IsServerOnline(_serverId, cancellationToken);
         if (!isServerOnline)
         {
-            var serverName = await _dbContext.GetPlexServerNameById(_serverId, cancellationToken);
+            var serverName = await _dbContext.GetPlexServerNameById(_serverId);
             _log.Here()
                 .Warning(
                     "Server {ServerName} with id {ServerId} is offline, marking queue item and skipping sync",

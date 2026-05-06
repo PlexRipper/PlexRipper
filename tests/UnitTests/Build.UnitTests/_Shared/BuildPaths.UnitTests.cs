@@ -6,7 +6,7 @@ namespace Reaparr.Build.UnitTests;
 public class BuildPathsUnitTests : BaseUnitTest
 {
     [Test]
-    public void ShouldReturnArtifactDirectoryUnderArtifactsRoot()
+    public void ShouldReturnArtifactDirectoryUnderArtifactsRoot_WhenCalledWithArtifactsRoot()
     {
         // Arrange
         const string root = "/repo";
@@ -24,7 +24,7 @@ public class BuildPathsUnitTests : BaseUnitTest
     }
 
     [Test]
-    public void ShouldReturnPublishDirectoryUnderArtifactsDirectory()
+    public void ShouldReturnPublishDirectoryUnderArtifactsDirectory_WhenCalledWithArtifactsDirectory()
     {
         // Arrange
         const string root = "/repo";

@@ -1,17 +1,17 @@
 <template>
-	<QSection :header="$t('pages.settings.ui.un-hide-servers-section.header')">
+	<QSection :header="$t('pages.settings.ui.enable-servers-section.header')">
 		<q-list
-			v-if="serverStore.getHiddenServers.length"
+			v-if="serverStore.getDisabledServers.length"
 			bordered>
 			<q-item
-				v-for="server in serverStore.getHiddenServers"
+				v-for="server in serverStore.getDisabledServers"
 				:key="server.id"
 				v-ripple
 				clickable>
 				<q-item-section avatar>
 					<IconSquareButton
 						icon="mdi-eye-check-outline"
-						@click="onServerUnHide(server.id)" />
+						@click="onServerEnable(server.id)" />
 				</q-item-section>
 
 				<q-item-section>
@@ -22,7 +22,7 @@
 		<QAlert
 			v-else
 			type="info">
-			{{ t('pages.settings.ui.un-hide-servers-section.no-servers-hidden') }}
+			{{ t('pages.settings.ui.enable-servers-section.no-servers-disabled') }}
 		</QAlert>
 	</QSection>
 </template>
@@ -33,10 +33,10 @@ import { useSubscription } from '@vueuse/rxjs';
 const serverStore = useServerStore();
 const { t } = useI18n();
 
-function onServerUnHide(plexServerId: number): void {
+function onServerEnable(plexServerId: number): void {
 	useSubscription(
 		serverStore
-			.setServerHidden(plexServerId, false)
+			.setServerEnabled(plexServerId, true)
 			.subscribe(),
 	);
 }

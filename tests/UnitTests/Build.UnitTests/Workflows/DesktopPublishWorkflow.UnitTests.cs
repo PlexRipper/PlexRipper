@@ -58,7 +58,7 @@ internal class DesktopPublishWorkflowUnitTests : BaseUnitTest<DesktopPublishBuil
             RuntimeIdentifier = "linux-x64",
             Version = "1.2.3",
             InformationalVersion = "1.2.3-dev.1",
-            DryRun = true,
+            DryRun = false,
             SkipRestore = true,
         };
 
@@ -67,6 +67,14 @@ internal class DesktopPublishWorkflowUnitTests : BaseUnitTest<DesktopPublishBuil
                 .As<string>()
                 .SingleInstance()
         );
+
+        Mock.Mock<IDesktopCommandRunner>()
+            .Setup(x => x.RequireCommandAsync("dotnet"))
+            .Returns(Task.CompletedTask);
+
+        Mock.Mock<IDesktopCommandRunner>()
+            .Setup(x => x.RunCommandAsync("dotnet", It.IsAny<IReadOnlyList<string>>(), It.IsAny<string?>()))
+            .Returns(Task.CompletedTask);
 
         Mock.Mock<IDesktopCommandRunner>()
             .Setup(x => x.RequireCommandAsync("bun"))
@@ -84,6 +92,9 @@ internal class DesktopPublishWorkflowUnitTests : BaseUnitTest<DesktopPublishBuil
         // Assert
         result.IsSuccess.ShouldBeTrue();
         result.Value.ShouldBe(0);
+        Mock.Mock<IDesktopCommandRunner>().Verify(x => x.RequireCommandAsync("dotnet"), Times.Once());
+        Mock.Mock<IDesktopCommandRunner>()
+            .Verify(x => x.RunCommandAsync("dotnet", It.IsAny<IReadOnlyList<string>>(), It.IsAny<string?>()), Times.Once());
         Mock.Mock<IDesktopCommandRunner>().Verify();
     }
 }

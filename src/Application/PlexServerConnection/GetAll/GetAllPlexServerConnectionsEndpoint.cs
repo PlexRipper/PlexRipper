@@ -23,10 +23,9 @@ public class GetAllPlexServerConnectionsEndpoint : BaseEndpointWithoutRequest<Li
 
     public override async Task HandleAsync(CancellationToken ct)
     {
-        var plexServers = await _dbContext
-            .PlexServers.Include(x => x.PlexServerConnections)
+        var plexServers = await _dbContext.PlexServers
+            .Include(x => x.PlexServerConnections)
                 .ThenInclude(x => x.LatestConnectionStatus)
-            .Where(x => x.IsEnabled)
             .ToListAsync(ct);
 
         // Decide for the frontend which connection to use

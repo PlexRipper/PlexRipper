@@ -227,7 +227,7 @@ public class CheckQueuedPlexLibraryToSyncCommandHandlerUnitTests
     }
 
     [Test]
-    public async Task ShouldLogServerAndLibraryNames_WhenSchedulingJob()
+    public async Task ShouldResolveServerAndLibraryNamesFromDatabase_WhenSchedulingJob()
     {
         // Arrange
         await SetupDatabase(
@@ -279,7 +279,7 @@ public class CheckQueuedPlexLibraryToSyncCommandHandlerUnitTests
         result.IsSuccess.ShouldBeTrue();
         // Verify that GetPlexServerNameById and GetPlexLibraryNameById are called
         // This is implicit in the handler's execution - the handler calls these methods
-        var serverName = await dbContext.GetPlexServerNameById(server.Id, CancellationToken);
+        var serverName = await dbContext.GetPlexServerNameById(server.Id);
         var libraryName = await dbContext.GetPlexLibraryNameById(library.Id, CancellationToken);
         serverName.ShouldNotBeNullOrEmpty();
         libraryName.ShouldNotBeNullOrEmpty();

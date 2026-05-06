@@ -28,7 +28,6 @@ public static partial class FakeData
             .RuleFor(x => x.IsEnabled, _ => true)
             .RuleFor(x => x.IsDownloadsPausedByUser, _ => false)
             // Server flags
-            .RuleFor(x => x.Home, f => f.Random.Bool())
             .RuleFor(x => x.Synced, f => f.Random.Bool())
             .RuleFor(x => x.Relay, f => f.Random.Bool())
             .RuleFor(x => x.Presence, f => f.Random.Bool())
@@ -36,6 +35,7 @@ public static partial class FakeData
             .RuleFor(x => x.PublicAddressMatches, f => f.Random.Bool())
             .RuleFor(x => x.DnsRebindingProtection, f => f.Random.Bool())
             .RuleFor(x => x.NatLoopbackSupported, f => f.Random.Bool())
+            .Ignore(x => x.OwnedOverride)
             .Ignore(x => x.PreferredConnectionId)
             .Ignore(x => x.PlexServerConnections)
             .Ignore(x => x.PlexLibraries)

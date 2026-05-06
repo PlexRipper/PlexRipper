@@ -57,20 +57,21 @@ public class DeletePlexAccountByIdEndpoint : BaseEndpoint<DeletePlexAccountByIdR
             return;
         }
 
+        await _dbContext.PlexAccountServers.Where(x => x.PlexAccountId == req.PlexAccountId).ExecuteDeleteAsync(ct);
+        await _dbContext.PlexAccountLibraries.Where(x => x.PlexAccountId == req.PlexAccountId).ExecuteDeleteAsync(ct);
+
         // Clean up orphaned PlexServers and PlexLibraries
         var accessibleServerIds = await _dbContext.PlexAccountServers.Select(y => y.PlexServerId).ToListAsync(ct);
         var accessibleLibraryIds = await _dbContext.PlexAccountLibraries.Select(y => y.PlexLibraryId).ToListAsync(ct);
 
         var deletedServersCount = await _dbContext
-            .PlexServers.Where(x => !accessibleServerIds.Contains(x.Id))
+            .PlexServers.IgnoreIsEnabledFilter()
+            .Where(x => !accessibleServerIds.Contains(x.Id))
             .ExecuteDeleteAsync(ct);
 
         var deletedLibrariesCount = await _dbContext
             .PlexLibraries.Where(x => !accessibleLibraryIds.Contains(x.Id))
             .ExecuteDeleteAsync(ct);
-
-        await _dbContext.PlexAccountServers.Where(x => x.PlexAccountId == req.PlexAccountId).ExecuteDeleteAsync(ct);
-        await _dbContext.PlexAccountLibraries.Where(x => x.PlexAccountId == req.PlexAccountId).ExecuteDeleteAsync(ct);
 
         _log.Here()
             .Debug(

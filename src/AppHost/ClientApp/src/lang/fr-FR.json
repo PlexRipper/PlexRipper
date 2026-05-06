@@ -549,8 +549,8 @@
             "title": "Êtes vous sûr ?",
             "warning": "Cela peut prendre environ 5 minutes ou plus, puis cette fenêtre se fermera d'elle-même!"
         },
-        "hide-server": {
-            "text": "Cela masquera le serveur de la vue. Vous pouvez afficher ce serveur en accédant aux paramètres -> UI -> Afficher les serveurs Plex",
+        "disable-server": {
+            "text": "Cela désactivera et masquera le serveur, l'empêchant d'apparaître dans les résultats de recherche et la synchronisation. Vous pouvez le réactiver en allant dans Paramètres > Interface utilisateur > Activer les serveurs Plex.",
             "title": "Êtes vous sûr ?"
         },
         "reset-db": {
@@ -960,9 +960,9 @@
                 "general-settings": {
                     "header": "Général"
                 },
-                "un-hide-servers-section": {
-                    "header": "Afficher les serveurs Plex",
-                    "no-servers-hidden": "Aucun serveur Plex n'est actuellement masqué. Pour masquer un serveur, accédez aux Paramètres du serveur et cliquez sur Masquer. Les serveurs masqués apparaîtront alors ici, et vous pourrez les afficher."
+                "enable-servers-section": {
+                    "header": "Activer les serveurs Plex",
+                    "no-servers-disabled": "Aucun serveur Plex n'est actuellement désactivé. Pour désactiver un serveur, accédez à Paramètres du serveur => Configuration du serveur et désactivez l'option Activé. Les serveurs désactivés apparaîtront ici, et vous pourrez les réactiver."
                 }
             }
         },

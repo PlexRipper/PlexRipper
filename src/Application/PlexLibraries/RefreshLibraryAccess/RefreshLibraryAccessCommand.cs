@@ -60,9 +60,14 @@ public class RefreshLibraryAccessHandler
         }
         else
         {
-            var plexServer = await _dbContext.PlexServers.GetAsync(plexServerId, cancellationToken);
+            var plexServer = await _dbContext
+                .PlexServers.IgnoreIsEnabledFilter()
+                .GetAsync(plexServerId, cancellationToken);
             if (plexServer is not null)
             {
+                if (!plexServer.IsEnabled)
+                    return ResultExtensions.ServerIsDisabled(plexServer.Name, plexServer.Id, nameof(RefreshLibraryAccessCommand));
+
                 plexServers.Add(plexServer);
             }
         }
@@ -118,7 +123,7 @@ public class RefreshLibraryAccessHandler
     {
         try
         {
-            var plexServerName = await _dbContext.GetPlexServerNameById(plexServerId, cancellationToken);
+            var plexServerName = await _dbContext.GetPlexServerNameById(plexServerId);
             var plexAccountName = await _dbContext.GetPlexAccountDisplayName(plexAccountId, cancellationToken);
             _log.Here()
                 .Debug(

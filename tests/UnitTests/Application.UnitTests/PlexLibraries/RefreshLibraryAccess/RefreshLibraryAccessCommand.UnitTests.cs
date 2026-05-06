@@ -83,4 +83,38 @@ public class RefreshLibraryAccessCommandUnitTests : BaseUnitTest<RefreshLibraryA
         reports.ShouldNotBeEmpty();
         reports.First().GetGranted.Count.ShouldBe(5);
     }
+
+    [Test]
+    public async Task ShouldReturnFailedResult_WhenSpecificServerIsDisabled_EvenWhenRequestedDirectly()
+    {
+        // Arrange
+        await SetupDatabase(
+            2,
+            config =>
+            {
+                config.PlexAccountCount = 1;
+                config.PlexServerCount = 1;
+            }
+        );
+
+        var dbContext = IDbContext;
+        var plexServer = await dbContext.PlexServers.IgnoreIsEnabledFilter().FirstAsync(CancellationToken);
+
+        await dbContext.PlexServers.IgnoreIsEnabledFilter()
+            .Where(x => x.Id == plexServer.Id)
+            .ExecuteUpdateAsync(x => x.SetProperty(y => y.IsEnabled, false), CancellationToken);
+
+        Mock.Mock<ICommandExecutor>()
+            .Setup(x => x.Send(It.IsAny<GetLibrarySectionsCommand>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result.Ok(new List<PlexLibrary>()))
+            .Verifiable(Times.Never());
+
+        // Act
+        var result = await Sut.ExecuteAsync(new RefreshLibraryAccessCommand(1, plexServer.Id), CancellationToken);
+
+        // Assert
+        result.IsFailed.ShouldBeTrue();
+        Mock.Mock<ICommandExecutor>().Verify();
+    }
 }
+

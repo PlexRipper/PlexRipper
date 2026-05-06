@@ -34,8 +34,6 @@ public class PlexServerDTO
 
     public required bool Owned { get; init; }
 
-    public required bool Home { get; init; }
-
     public required bool IsEnabled { get; init; }
 
     public required bool Synced { get; init; }

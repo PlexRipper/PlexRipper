@@ -33,7 +33,7 @@ public class QueueInspectPlexServerJobCommandUnitTests : BaseUnitTest<QueueInspe
     }
 
     [Test]
-    public async Task ShouldFail_WhenAnyRequestedServerIsDisabled()
+    public async Task ShouldQueueEnabledServers_WhenSomeRequestedServersAreDisabled()
     {
         // Arrange
         await SetupDatabase(91101, config => config.PlexServerCount = 2);
@@ -50,19 +50,18 @@ public class QueueInspectPlexServerJobCommandUnitTests : BaseUnitTest<QueueInspe
         Mock.Mock<IScheduler>()
             .Setup(x => x.GetCurrentlyExecutingJobs(It.IsAny<CancellationToken>()))
             .ReturnsAsync([])
-            .Verifiable(Times.Never());
+            .Verifiable(Times.Once());
 
         Mock.Mock<IScheduler>()
             .Setup(x => x.ScheduleJob(It.IsAny<IJobDetail>(), It.IsAny<ITrigger>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(DateTimeOffset.UtcNow)
-            .Verifiable(Times.Never());
+            .Verifiable(Times.Once());
 
         // Act
         var result = await Sut.ExecuteAsync(new QueueInspectPlexServerJobCommand([enabledServerId, disabledServerId]), CancellationToken);
 
         // Assert
-        result.IsFailed.ShouldBeTrue();
-        result.Errors.ShouldContain(x => x.Message.Contains(disabledServerId.ToString()));
+        result.IsSuccess.ShouldBeTrue();
         Mock.Mock<IScheduler>().Verify();
     }
 
@@ -157,23 +156,23 @@ public class QueueInspectPlexServerJobCommandUnitTests : BaseUnitTest<QueueInspe
         Mock.Mock<IScheduler>()
             .Setup(x => x.GetCurrentlyExecutingJobs(It.IsAny<CancellationToken>()))
             .ReturnsAsync([])
-            .Verifiable(Times.Never());
+            .Verifiable(Times.Once());
 
         Mock.Mock<IScheduler>()
             .Setup(x => x.ScheduleJob(It.IsAny<IJobDetail>(), It.IsAny<ITrigger>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(DateTimeOffset.UtcNow)
-            .Verifiable(Times.Never());
+            .Verifiable(Times.Once());
 
         // Act
         var result = await Sut.ExecuteAsync(new QueueInspectPlexServerJobCommand(ids), CancellationToken);
 
         // Assert
-        result.IsFailed.ShouldBeTrue();
+        result.IsSuccess.ShouldBeTrue();
         Mock.Mock<IScheduler>().Verify();
     }
 
     [Test]
-    public async Task ShouldNotScheduleJob_WhenAtLeastOneRequestedServerIsDisabledEvenIfOthersEnabled()
+    public async Task ShouldScheduleJob_WhenAtLeastOneRequestedServerIsDisabledButOthersEnabled()
     {
         // Arrange
         await SetupDatabase(91123, config => config.PlexServerCount = 3);
@@ -185,18 +184,18 @@ public class QueueInspectPlexServerJobCommandUnitTests : BaseUnitTest<QueueInspe
         Mock.Mock<IScheduler>()
             .Setup(x => x.GetCurrentlyExecutingJobs(It.IsAny<CancellationToken>()))
             .ReturnsAsync([])
-            .Verifiable(Times.Never());
+            .Verifiable(Times.Once());
 
         Mock.Mock<IScheduler>()
             .Setup(x => x.ScheduleJob(It.IsAny<IJobDetail>(), It.IsAny<ITrigger>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(DateTimeOffset.UtcNow)
-            .Verifiable(Times.Never());
+            .Verifiable(Times.Once());
 
         // Act
         var result = await Sut.ExecuteAsync(new QueueInspectPlexServerJobCommand(ids), CancellationToken);
 
         // Assert
-        result.IsFailed.ShouldBeTrue();
+        result.IsSuccess.ShouldBeTrue();
         Mock.Mock<IScheduler>().Verify();
     }
 
@@ -239,7 +238,7 @@ public class QueueInspectPlexServerJobCommandUnitTests : BaseUnitTest<QueueInspe
         Mock.Mock<IScheduler>()
             .Setup(x => x.GetCurrentlyExecutingJobs(It.IsAny<CancellationToken>()))
             .ReturnsAsync([])
-            .Verifiable(Times.Never());
+            .Verifiable(Times.Once());
 
         Mock.Mock<IScheduler>()
             .Setup(x => x.ScheduleJob(It.IsAny<IJobDetail>(), It.IsAny<ITrigger>(), It.IsAny<CancellationToken>()))

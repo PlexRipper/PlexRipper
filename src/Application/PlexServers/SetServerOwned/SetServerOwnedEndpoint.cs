@@ -52,20 +52,15 @@ public class SetServerOwnedEndpoint : BaseEndpoint<SetServerOwnedRequest, PlexSe
             return;
         }
 
-        var updateCount = await _dbContext
-            .PlexAccountServers.Where(x => x.PlexServerId == req.PlexServerId)
-            .ExecuteUpdateAsync(p => p.SetProperty(x => x.IsServerOwned, req.IsOwned), ct);
-        
+        var updateCount = await _dbContext.PlexServers
+            .IgnoreIsEnabledFilter()
+            .Where(x => x.Id == req.PlexServerId)
+            .ExecuteUpdateAsync(x => x.SetProperty(y => y.OwnedOverride, req.IsOwned), ct);
+
         if (updateCount == 0)
         {
-            if (await _dbContext.IsServerDisabled(req.PlexServerId))
-            {
-                var serverName = await _dbContext.GetPlexServerNameById(req.PlexServerId);
-                await SendFluentResult(
-                    ResultExtensions.ServerIsDisabled(serverName, req.PlexServerId, nameof(GetPlexServerByIdEndpoint)),
-                    ct);
-                return;
-            }
+            await SendFluentResult(ResultExtensions.EntityNotFound(nameof(PlexServer), req.PlexServerId), ct);
+            return;
         }
 
         var plexServer = await _dbContext.PlexServers

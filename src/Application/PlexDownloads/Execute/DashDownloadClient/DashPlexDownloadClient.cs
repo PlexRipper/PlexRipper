@@ -212,7 +212,7 @@ public class DashPlexDownloadClient : IPlexDownloadClient
     {
         _subscriptions.Add(
             _dashWrapper
-                .Progress.Sample(TimeSpan.FromMilliseconds(300))
+                .Progress
                 .TakeUntil(_destroy)
                 .Subscribe(progress =>
                 {

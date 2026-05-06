@@ -119,12 +119,9 @@ public class AddOrUpdatePlexServerCommandUnitTests : BaseUnitTest<AddOrUpdatePle
             var originalOwnedOverride = plexServers[i].OwnedOverride;
             originalOwnedOverrides[plexServers[i].MachineIdentifier] = originalOwnedOverride;
 
-            changedPlexServers[i].OwnedOverride = originalOwnedOverride switch
-            {
-                null => true,
-                true => false,
-                false => true,
-            };
+            // Handler preserves persisted OwnedOverride for existing servers;
+            // incoming value is intentionally ignored during update.
+            changedPlexServers[i].OwnedOverride = originalOwnedOverride;
         }
 
         // Act

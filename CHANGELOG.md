@@ -1,5 +1,27 @@
 Reaparr Changelog
 
+# [0.38.0-dev.15](https://github.com/Reaparr/Reaparr/compare/v0.38.0-dev.14...v0.38.0-dev.15) (2026-05-06)
+
+
+### Bug Fixes
+
+* **WebAPI:** Fix Docker /Config ownership bootstrap for [#578](https://github.com/Reaparr/Reaparr/issues/578) ([6e491a2](https://github.com/Reaparr/Reaparr/commit/6e491a227d283c92c697c1f4eae91b5600a67e3e))
+* **WebAPI:** Fix missing log text in tests ([a5e18e1](https://github.com/Reaparr/Reaparr/commit/a5e18e174e69dc201d63a88bb37f15a7365887ef))
+* **WebAPI:** Fixed the missing new line between logging ([1ffd5ef](https://github.com/Reaparr/Reaparr/commit/1ffd5efdee7eb885b68d35fa6f542d5cb1a194a1))
+* **WebAPI:** Handle disabled server updates ([c91c8ee](https://github.com/Reaparr/Reaparr/commit/c91c8ee767b78df0957f4b187487774fdc81bfde))
+* **WebAPI:** Queue inspect jobs with resilient disabled-server filtering ([79b769b](https://github.com/Reaparr/Reaparr/commit/79b769b68b85300f5343a5729af55478d80e7016))
+* **Web-UI:** Redirect to login only on unauthorized ([2d2b52e](https://github.com/Reaparr/Reaparr/commit/2d2b52eccae7399a380a4a87572092d64f74721f))
+* **WebAPI:** Return conflict for disabled server ([184e962](https://github.com/Reaparr/Reaparr/commit/184e96219d07185bb528ae3c5eb525b379f3c567))
+* **WebAPI:** Stabilize PublicApi torrent tests and clean test logging ([95516fc](https://github.com/Reaparr/Reaparr/commit/95516fc2dac0df357cb54fb07e968d60c55d2194))
+* **Web-UI:** Stop background render loop when animation is disabled ([b521a56](https://github.com/Reaparr/Reaparr/commit/b521a566e26b99f0429622b7bd933bcee98d68ff)), closes [#573](https://github.com/Reaparr/Reaparr/issues/573)
+
+
+### Features
+
+* **WebAPI:** Added an override to mark a server as owned such that it will not be used in Sonarr/Radarr results. This prevents downloading your own media already in your possession ([dcbb909](https://github.com/Reaparr/Reaparr/commit/dcbb90960b82f4b9cb3ae5362f2308ad3db114b9))
+* **Web-UI:** Added IsOwned and IsEnabled toggles on the Server Settings dialog ([dc70c58](https://github.com/Reaparr/Reaparr/commit/dc70c586e6c28476a03ce10f296c5f411ffa869a))
+* **Web-UI:** Removed the hide button in the Plex server settings, this is now meant to be hidden/disabled through the Server Configuration tab ([29166a8](https://github.com/Reaparr/Reaparr/commit/29166a8a07c745532465240ab52b2a6af625ed23))
+
 # [0.38.0-dev.14](https://github.com/Reaparr/Reaparr/compare/v0.38.0-dev.13...v0.38.0-dev.14) (2026-05-03)
 
 

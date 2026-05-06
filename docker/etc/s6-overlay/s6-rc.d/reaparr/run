@@ -20,12 +20,14 @@ if [[ -z ${LSIO_NON_ROOT_USER} ]]; then
     CURRENT_GID=$(stat -c %g /Config 2>/dev/null || echo "unknown")
     echo "/Config ownership before fix: uid=${CURRENT_UID} gid=${CURRENT_GID} (target uid=${PUID} gid=${PGID})"
 
+    TARGET_OWNER="${PUID}:${PGID}"
+
     if [[ ! "${CURRENT_UID}" == "${PUID}" ]] || [[ ! "${CURRENT_GID}" == "${PGID}" ]]; then
-        echo "Change in ownership detected for /Config, applying ownership fix"
-        lsiown -R abc:abc /Config
+        echo "Change in ownership detected for /Config, applying ownership fix to ${TARGET_OWNER}"
+        lsiown -R "${TARGET_OWNER}" /Config
     fi
 
-    lsiown abc:abc /Config
+    lsiown "${TARGET_OWNER}" /Config
 
     NEW_UID=$(stat -c %u /Config 2>/dev/null || echo "unknown")
     NEW_GID=$(stat -c %g /Config 2>/dev/null || echo "unknown")

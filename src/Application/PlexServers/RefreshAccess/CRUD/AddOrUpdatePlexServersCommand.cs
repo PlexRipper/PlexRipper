@@ -99,10 +99,10 @@ public class AddOrUpdatePlexServersCommandHandler
                     PublicAddressMatches = incomingPlexServer.PublicAddressMatches,
                     DnsRebindingProtection = incomingPlexServer.DnsRebindingProtection,
                     NatLoopbackSupported = incomingPlexServer.NatLoopbackSupported,
-                    PlexAccountServers = existingServer.PlexAccountServers,
-                    PlexLibraries = existingServer.PlexLibraries,
-                    ServerStatus = existingServer.ServerStatus,
-                    PlexServerConnections = existingServer.PlexServerConnections
+                    PlexAccountServers = [],
+                    PlexLibraries = [],
+                    ServerStatus = [],
+                    PlexServerConnections = [],
                 });
 
                 SyncPlexServerConnections(incomingPlexServer, existingServer);

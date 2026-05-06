@@ -182,11 +182,11 @@ export class PlexServer {
   /**
    * No description
    * * @tags Plexserver
-   * @name SetServerEnabledRequestEndpoint
+   * @name SetServerEnabledEndpoint
    * @request PUT:/api/PlexServer/{PlexServerId}/set-server-enabled
    * @secure
    */
-  setServerEnabledRequestEndpoint = (
+  setServerEnabledEndpoint = (
     plexServerId: number,
     data: SetServerEnabledRequest,
     params: RequestParams = {},
@@ -288,7 +288,7 @@ export class PlexServerPaths {
       query,
     });
 
-  static setServerEnabledRequestEndpoint = (plexServerId: number) =>
+  static setServerEnabledEndpoint = (plexServerId: number) =>
     queryString.stringifyUrl({
       url: `/api/PlexServer/${plexServerId}/set-server-enabled`,
     });

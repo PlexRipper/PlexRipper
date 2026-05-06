@@ -60,11 +60,17 @@ export class PlexMedia {
        * @default 0
        */
       roleId: number;
+      /** @default "" */
+      search: string;
       /**
        * @format int32
        * @default 0
        */
       size: number;
+      /** @default "asc" */
+      sortDirection: string;
+      /** @default "sortIndex" */
+      sortField: string;
     },
     params: RequestParams = {},
   ) =>
@@ -199,11 +205,17 @@ export class PlexMediaPaths {
      * @default 0
      */
     roleId: number;
+    /** @default "" */
+    search: string;
     /**
      * @format int32
      * @default 0
      */
     size: number;
+    /** @default "asc" */
+    sortDirection: string;
+    /** @default "sortIndex" */
+    sortField: string;
   }) => queryString.stringifyUrl({ url: `/api/PlexMedia`, query });
 
   static getMediaDetailByIdEndpoint = (

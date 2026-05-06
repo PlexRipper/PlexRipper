@@ -21,4 +21,10 @@ public record MediaQueryFilter
     public required int GenreId { get; init; }
 
     public required VideoQuality Quality { get; init; }
+
+    public required string Search { get; init; }
+
+    public required string SortField { get; init; }
+
+    public required string SortDirection { get; init; }
 }

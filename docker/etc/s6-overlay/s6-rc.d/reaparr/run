@@ -12,26 +12,16 @@
 # - https://github.com/linuxserver/docker-plex/blob/master/root/etc/s6-overlay/s6-rc.d/init-plex-chown/run
 # - https://github.com/linuxserver/docker-baseimage-alpine/blob/master/root/etc/s6-overlay/s6-rc.d/init-adduser/run
 #   (documents init-adduser defaults where unset PUID/PGID fall back to 911/911)
-if [[ -z ${LSIO_NON_ROOT_USER} ]]; then
-    PUID=${PUID:-911}
-    PGID=${PGID:-911}
+PORT=${PORT:-7000}
 
-    CURRENT_UID=$(stat -c %u /Config 2>/dev/null || echo "unknown")
-    CURRENT_GID=$(stat -c %g /Config 2>/dev/null || echo "unknown")
-    echo "/Config ownership before fix: uid=${CURRENT_UID} gid=${CURRENT_GID} (target uid=${PUID} gid=${PGID})"
+if [[ -z ${DOTNET_HTTP_PORTS} ]]; then
+    DOTNET_HTTP_PORTS=${PORT}
+    export DOTNET_HTTP_PORTS
+fi
 
-    TARGET_OWNER="${PUID}:${PGID}"
-
-    if [[ ! "${CURRENT_UID}" == "${PUID}" ]] || [[ ! "${CURRENT_GID}" == "${PGID}" ]]; then
-        echo "Change in ownership detected for /Config, applying ownership fix to ${TARGET_OWNER}"
-        lsiown -R "${TARGET_OWNER}" /Config
-    fi
-
-    lsiown "${TARGET_OWNER}" /Config
-
-    NEW_UID=$(stat -c %u /Config 2>/dev/null || echo "unknown")
-    NEW_GID=$(stat -c %g /Config 2>/dev/null || echo "unknown")
-    echo "/Config ownership after fix: uid=${NEW_UID} gid=${NEW_GID}"
+if [[ -z ${DOTNET_URLS} ]]; then
+    DOTNET_URLS="http://+:${PORT}"
+    export DOTNET_URLS
 fi
 
 exec s6-setuidgid abc dotnet /app/Reaparr.AppHost.dll

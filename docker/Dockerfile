@@ -10,10 +10,14 @@ ARG BUILDPLATFORM=linux/amd64
 FROM --platform=$BUILDPLATFORM oven/bun:1.3-alpine AS client-build
 
 ARG PORT
+ARG VERSION
 
 ENV NUXT_HOST=0.0.0.0
 ENV NUXT_PORT=${PORT}
 ENV NUXT_PUBLIC_API_PORT=${PORT}
+ENV NUXT_PUBLIC_VERSION=${VERSION}
+# Required during static Nuxt generate so runtimeConfig.public.platform is baked as 'docker' in the client bundle.
+ENV NUXT_PUBLIC_PLATFORM=docker
 
 WORKDIR /tmp/ClientApp
 
@@ -151,6 +155,12 @@ COPY docker/etc/ /etc/
 
 ### This fixes the permissions on the config directory and Reaparr crashes if it can't write to it
 COPY docker/10-config /etc/fix-attrs.d/10-config
+
+## Disable LSIO cron service at image build time
+## For s6-rc, disabling is done by removing service from the 'user' bundle contents.
+RUN if [ -f /etc/s6-overlay/s6-rc.d/user/contents.d/svc-cron ]; then \
+      rm -f /etc/s6-overlay/s6-rc.d/user/contents.d/svc-cron; \
+    fi
 
 EXPOSE ${PORT}
 VOLUME /Config /Downloads /Movies /TvShows

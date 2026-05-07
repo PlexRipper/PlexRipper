@@ -51,6 +51,8 @@ export const useGlobalStore = defineStore(StoreNames.GlobalStore, () => {
 			Log.info('Runtime Config is ready:', config);
 
 			state.config = config;
+			state.platform = config.platform;
+			state.version = config.version;
 
 			return actions.setup();
 		},

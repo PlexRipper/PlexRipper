@@ -12,6 +12,18 @@
 # - https://github.com/linuxserver/docker-plex/blob/master/root/etc/s6-overlay/s6-rc.d/init-plex-chown/run
 # - https://github.com/linuxserver/docker-baseimage-alpine/blob/master/root/etc/s6-overlay/s6-rc.d/init-adduser/run
 #   (documents init-adduser defaults where unset PUID/PGID fall back to 911/911)
+PORT=${PORT:-7000}
+
+if [[ -z ${DOTNET_HTTP_PORTS} ]]; then
+    DOTNET_HTTP_PORTS=${PORT}
+    export DOTNET_HTTP_PORTS
+fi
+
+if [[ -z ${DOTNET_URLS} ]]; then
+    DOTNET_URLS="http://+:${PORT}"
+    export DOTNET_URLS
+fi
+
 if [[ -z ${LSIO_NON_ROOT_USER} ]]; then
     PUID=${PUID:-911}
     PGID=${PGID:-911}
@@ -22,12 +34,27 @@ if [[ -z ${LSIO_NON_ROOT_USER} ]]; then
 
     TARGET_OWNER="${PUID}:${PGID}"
 
-    if [[ ! "${CURRENT_UID}" == "${PUID}" ]] || [[ ! "${CURRENT_GID}" == "${PGID}" ]]; then
-        echo "Change in ownership detected for /Config, applying ownership fix to ${TARGET_OWNER}"
-        lsiown -R "${TARGET_OWNER}" /Config
-    fi
+    echo "Applying ownership fix for Reaparr config artifacts to ${TARGET_OWNER}"
 
     lsiown "${TARGET_OWNER}" /Config
+
+    for path in \
+        "/Config/ReaparrSettings.json" \
+        "/Config/ReaparrDB.db" \
+        "/Config/ReaparrDB.db-wal" \
+        "/Config/ReaparrDB.db-shm"; do
+        if [[ -e "${path}" ]]; then
+            lsiown "${TARGET_OWNER}" "${path}"
+        fi
+    done
+
+    for path in \
+        "/Config/Database BackUp" \
+        "/Config/Logs"; do
+        if [[ -d "${path}" ]]; then
+            lsiown -R "${TARGET_OWNER}" "${path}"
+        fi
+    done
 
     NEW_UID=$(stat -c %u /Config 2>/dev/null || echo "unknown")
     NEW_GID=$(stat -c %g /Config 2>/dev/null || echo "unknown")

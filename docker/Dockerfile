@@ -10,10 +10,14 @@ ARG BUILDPLATFORM=linux/amd64
 FROM --platform=$BUILDPLATFORM oven/bun:1.3-alpine AS client-build
 
 ARG PORT
+ARG VERSION
 
 ENV NUXT_HOST=0.0.0.0
 ENV NUXT_PORT=${PORT}
 ENV NUXT_PUBLIC_API_PORT=${PORT}
+ENV NUXT_PUBLIC_VERSION=${VERSION}
+# Required during static Nuxt generate so runtimeConfig.public.platform is baked as 'docker' in the client bundle.
+ENV NUXT_PUBLIC_PLATFORM=docker
 
 WORKDIR /tmp/ClientApp
 

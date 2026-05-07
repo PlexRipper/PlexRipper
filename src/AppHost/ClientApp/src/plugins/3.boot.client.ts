@@ -14,7 +14,8 @@ export default defineNuxtPlugin((nuxtApp) => {
 		// Log.level = config.public.isProduction ? LogLevel.Debug : LogLevel.Debug;
 
 		let baseUrl = `http://localhost:${publicEnv.apiPort}`;
-		if (publicEnv.isDocker) {
+
+		if (publicEnv.platform === 'docker') {
 			const currentLocation = window.location;
 			baseUrl = `${currentLocation.protocol}//${currentLocation.hostname}:${currentLocation.port}`;
 		}
@@ -22,6 +23,8 @@ export default defineNuxtPlugin((nuxtApp) => {
 		const appConfig: IAppConfig = {
 			nodeEnv: publicEnv.nodeEnv,
 			isProduction: publicEnv.nodeEnv === 'production',
+			platform: publicEnv.platform,
+			version: publicEnv.version,
 			baseUrl,
 		};
 		setupAxios(appConfig, nuxtApp.$router as Router);

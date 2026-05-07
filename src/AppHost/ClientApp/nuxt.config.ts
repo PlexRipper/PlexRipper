@@ -54,6 +54,8 @@ export default defineNuxtConfig({
 		public: {
 			nodeEnv: process.env.NODE_ENV || 'development',
 			apiPort: process.env.API_PORT || '5000',
+			platform: process.env.PLATFORM || 'UNKNOWN',
+			version: process.env.VERSION || '9.9.9',
 		},
 	},
 	dir: {

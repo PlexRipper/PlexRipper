@@ -29,19 +29,19 @@
       },
       "AppAny.Quartz.EntityFrameworkCore.Migrations": {
         "type": "Transitive",
-        "resolved": "0.5.1",
-        "contentHash": "NyqwGMTtHf9eNGogDCG4Zmsr83j7q0EOLcUA6vdCOHtq7E5yyZTS651kMiQuZioVDmvwLcghaSDnxf3F0WLmlw==",
+        "resolved": "0.5.2",
+        "contentHash": "6PBrhEH4S0t5T0DFZgmxPB7jXsEhkxaI6EY6Qt0r9NzOM8S0ukGcnROfPfgMkh7bpqZt/yhD4T7G2ObGBADhMA==",
         "dependencies": {
-          "Microsoft.EntityFrameworkCore": "8.0.2"
+          "Microsoft.EntityFrameworkCore": "8.0.11"
         }
       },
       "AppAny.Quartz.EntityFrameworkCore.Migrations.SQLite": {
         "type": "Transitive",
-        "resolved": "0.5.1",
-        "contentHash": "lUlcQWrDw8iqYiIkpczfbt+uesL844M+4adZ1chW3Pq3Bb9/bY3lGaUv4tq+551wE42k5BDb0kEQxDJKmUiaiw==",
+        "resolved": "0.5.2",
+        "contentHash": "ZzZScJNxyUuijtf0bl0rN6/MSoqeFa4f+4zbntZCDUy0zMBCs6bw4UoJbOtWwarn9xDgZiw6lanGmuKe0/YbkA==",
         "dependencies": {
-          "AppAny.Quartz.EntityFrameworkCore.Migrations": "0.5.1",
-          "Microsoft.EntityFrameworkCore.Sqlite": "8.0.2"
+          "AppAny.Quartz.EntityFrameworkCore.Migrations": "0.5.2",
+          "Microsoft.EntityFrameworkCore.Sqlite": "8.0.11"
         }
       },
       "Autofac": {
@@ -1624,7 +1624,7 @@
       "Reaparr.Data": {
         "type": "Project",
         "dependencies": {
-          "AppAny.Quartz.EntityFrameworkCore.Migrations.SQLite": "[0.5.1, )",
+          "AppAny.Quartz.EntityFrameworkCore.Migrations.SQLite": "[0.5.2, )",
           "Autofac": "[9.1.0, )",
           "Microsoft.AspNetCore.Identity.EntityFrameworkCore": "[10.0.7, )",
           "Microsoft.EntityFrameworkCore.InMemory": "[10.0.6, )",

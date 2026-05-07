@@ -1,5 +1,15 @@
 Reaparr Changelog
 
+# [0.38.0-dev.17](https://github.com/Reaparr/Reaparr/compare/v0.38.0-dev.16...v0.38.0-dev.17) (2026-05-07)
+
+
+### Bug Fixes
+
+* **WebAPI:** Add donation link to the docker logging at the top ([b116b23](https://github.com/Reaparr/Reaparr/commit/b116b23f5c205445cba891443af6f67f8dbe98de))
+* **Web-UI:** Correct docker runtime config platform and version baking ([360db11](https://github.com/Reaparr/Reaparr/commit/360db117fbd9a4210d30fb74cf4834735f7fa73e))
+* **WebAPI:** enforce init-adduser before reaparr service startup ([7de81cb](https://github.com/Reaparr/Reaparr/commit/7de81cb392c14e2ef1a31f0ef7ed187eacced5b0))
+* **WebAPI:** Finally fixed a several year old problem where Reaparr would crash the first time and then work afterwards! It now starts up much faster the first time ([f58e989](https://github.com/Reaparr/Reaparr/commit/f58e9891212337082a0669a504f693c0cf3e7e43))
+
 # [0.38.0-dev.16](https://github.com/Reaparr/Reaparr/compare/v0.38.0-dev.15...v0.38.0-dev.16) (2026-05-06)
 
 

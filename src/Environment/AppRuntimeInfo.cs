@@ -40,7 +40,7 @@ public class AppRuntimeInfo : IAppRuntimeInfo
     public bool IsIntegrationTestMode => IsTrue(GetEnvironmentVariable(EnvKeys.IntegrationTestMode));
 
     /// <inheritdoc/>
-    public string SEQ_Url => GetEnvironmentVariable(EnvKeys.SeqUrl) ?? "http://localhost:5341";
+    public string SEQ_Url => GetEnvironmentVariable(EnvKeys.SeqUrl) ?? string.Empty;
 
     /// <inheritdoc/>
     public int PUID => int.TryParse(GetEnvironmentVariable(EnvKeys.Puid), out var puid) ? puid : -1;

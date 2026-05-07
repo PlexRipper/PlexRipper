@@ -156,6 +156,12 @@ COPY docker/etc/ /etc/
 ### This fixes the permissions on the config directory and Reaparr crashes if it can't write to it
 COPY docker/10-config /etc/fix-attrs.d/10-config
 
+## Disable LSIO cron service at image build time
+## For s6-rc, disabling is done by removing service from the 'user' bundle contents.
+RUN if [ -f /etc/s6-overlay/s6-rc.d/user/contents.d/svc-cron ]; then \
+      rm -f /etc/s6-overlay/s6-rc.d/user/contents.d/svc-cron; \
+    fi
+
 EXPOSE ${PORT}
 VOLUME /Config /Downloads /Movies /TvShows
 

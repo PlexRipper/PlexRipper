@@ -22,7 +22,6 @@ fi
 
 if [[ -z ${LSIO_READ_ONLY_FS} ]] && [[ -z ${LSIO_NON_ROOT_USER} ]]; then
     lsiown abc:abc /app
-    lsiown abc:abc /config
-    lsiown abc:abc /defaults
+    lsiown abc:abc /Config
 fi
 

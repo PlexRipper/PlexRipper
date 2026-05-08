@@ -623,6 +623,31 @@ export enum LogSeverity {
   Fatal = "Fatal",
 }
 
+export interface MediaQueryFilterDTO {
+  distinct?: boolean | null;
+  filter?: string | null;
+  /** @default false */
+  filterOfflineMedia: boolean;
+  /** @default false */
+  filterOwnedMedia: boolean;
+  groupBy?: string | null;
+  having?: string | null;
+  includeCount?: boolean | null;
+  includes?: string | null;
+  /** @default "False" */
+  mediaType: PlexMediaType;
+  mode?: string | null;
+  /** @format int32 */
+  page?: number | null;
+  /** @format int32 */
+  pageSize?: number | null;
+  /** @format int32 */
+  plexLibraryId: number;
+  query?: string | null;
+  select?: string | null;
+  sort?: string | null;
+}
+
 export enum MessageTypes {
   LibraryProgress = "LibraryProgress",
   DownloadTaskUpdate = "DownloadTaskUpdate",
@@ -993,7 +1018,6 @@ export interface PlexServerSettingItemModule {
   allowStreamDownloader: boolean;
   /** @format int32 */
   downloadSpeedLimit: number;
-  hidden: boolean;
   machineIdentifier: string;
   plexServerName: string;
 }

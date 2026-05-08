@@ -17,9 +17,7 @@ import type {
   LibrarySyncJobQueueDTO,
   PlexLibraryDTO,
   PlexMediaMetadataDTO,
-  PlexMediaStatisticsDTO,
   PlexMediaType,
-  VideoQuality,
 } from "./data-contracts";
 
 import { apiCheckPipe, axiosObservable } from "@api/base";
@@ -79,59 +77,6 @@ export class PlexLibrary {
       responseType: "json",
       ...params,
     }).pipe(apiCheckPipe<PlexLibraryDTO[]>);
-
-  /**
-   * No description
-   * * @tags Plexlibrary
-   * @name GetPlexLibraryMediaEndpoint
-   * @request GET:/api/PlexLibrary/{PlexLibraryId}/media
-   * @secure
-   */
-  getPlexLibraryMediaEndpoint = (
-    plexLibraryId: number,
-    query: {
-      /**
-       * @format int32
-       * @default 0
-       */
-      countryId: number;
-      /** @default false */
-      filterOfflineMedia: boolean;
-      /** @default false */
-      filterOwnedMedia: boolean;
-      /**
-       * @format int32
-       * @default 0
-       */
-      genreId: number;
-      /**
-       * @format int32
-       * @default 0
-       */
-      page: number;
-      /** @default -1 */
-      quality: VideoQuality;
-      /**
-       * @format int32
-       * @default 0
-       */
-      roleId: number;
-      /**
-       * @format int32
-       * @default 0
-       */
-      size: number;
-    },
-    params: RequestParams = {},
-  ) =>
-    axiosObservable<PlexMediaStatisticsDTO>({
-      url: `/api/PlexLibrary/${plexLibraryId}/media`,
-      method: "GET",
-      params: query,
-      secure: true,
-      responseType: "json",
-      ...params,
-    }).pipe(apiCheckPipe<PlexMediaStatisticsDTO>);
 
   /**
    * No description
@@ -224,47 +169,6 @@ export class PlexLibraryPaths {
 
   static getAllPlexLibrariesEndpoint = () =>
     queryString.stringifyUrl({ url: `/api/PlexLibrary` });
-
-  static getPlexLibraryMediaEndpoint = (
-    plexLibraryId: number,
-    query: {
-      /**
-       * @format int32
-       * @default 0
-       */
-      countryId: number;
-      /** @default false */
-      filterOfflineMedia: boolean;
-      /** @default false */
-      filterOwnedMedia: boolean;
-      /**
-       * @format int32
-       * @default 0
-       */
-      genreId: number;
-      /**
-       * @format int32
-       * @default 0
-       */
-      page: number;
-      /** @default -1 */
-      quality: VideoQuality;
-      /**
-       * @format int32
-       * @default 0
-       */
-      roleId: number;
-      /**
-       * @format int32
-       * @default 0
-       */
-      size: number;
-    },
-  ) =>
-    queryString.stringifyUrl({
-      url: `/api/PlexLibrary/${plexLibraryId}/media`,
-      query,
-    });
 
   static getLibraryMediaMetadata = (
     plexLibraryId: number,

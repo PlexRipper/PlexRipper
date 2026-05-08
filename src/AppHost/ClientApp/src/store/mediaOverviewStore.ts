@@ -5,6 +5,7 @@ import { acceptHMRUpdate, defineStore } from 'pinia';
 import { computed, reactive, toRefs } from 'vue';
 import { get } from '@vueuse/core';
 import {
+	type MediaQueryFilterDTO,
 	type PlexMediaMetadataDTO,
 	type PlexMediaSlimDTO,
 	type PlexMediaStatisticsDTO,
@@ -16,10 +17,17 @@ import type { IMediaOverviewSort } from '@composables/event-bus';
 import { MediaSortField, SortDirection } from '@enums';
 import { type IMetaDataMediaFilter, type ISelection, type ISortOption, StoreNames } from '@interfaces';
 import { plexLibraryApi, plexMediaApi } from '@api';
-import { map, tap, takeUntil } from 'rxjs/operators';
+import { map, takeUntil, tap } from 'rxjs/operators';
 import { defer, forkJoin, type Observable, of, Subject } from 'rxjs';
 import { useLibraryStore, useSettingsStore } from '@store';
-import { getHighestQuality, getHighestQualityRank, getVideoQualityColor, translateVideoQuality } from '@composables';
+import {
+	buildFlexSortDsl,
+	DSLBuilder,
+	getHighestQuality,
+	getHighestQualityRank,
+	getVideoQualityColor,
+	translateVideoQuality,
+} from '@composables';
 import { useSubscription } from '@vueuse/rxjs';
 import { useI18n } from 'vue-i18n';
 
@@ -123,32 +131,32 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 				}),
 			);
 		},
-		refreshAllLibraryMediaByType(page: number = 0, size: number = 100): Observable<PlexMediaStatisticsDTO | null> {
-			return plexMediaApi.getAllMediaByTypeEndpoint({
-				mediaType: get(getters.getMediaType),
-				page,
-				size,
+		buildFlexQueryParams(page: number, size: number): MediaQueryFilterDTO {
+			return {
 				filterOwnedMedia: settingsStore.generalSettings.hideMediaFromOwnedServers,
 				filterOfflineMedia: settingsStore.generalSettings.hideMediaFromOfflineServers,
-				...state.metadata,
-			}).pipe(
-				takeUntil(cancelSubject$),
-				map(({ isSuccess, value }): PlexMediaStatisticsDTO | null => {
-					if (isSuccess && value) {
-						return value;
-					}
-					return null;
-				}),
-			);
-		},
-		refreshLibraryMedia(page: number = 0, size: number = 100): Observable<PlexMediaStatisticsDTO | null> {
-			return plexLibraryApi.getPlexLibraryMediaEndpoint(state.libraryId, {
+				mediaType: get(getters.getMediaType),
+				plexLibraryId: state.libraryId,
 				page,
-				size,
-				filterOfflineMedia: false,
-				filterOwnedMedia: false,
-				...state.metadata,
-			}).pipe(
+				pageSize: size,
+				query: state.filterQuery || undefined,
+				filter: DSLBuilder()
+					.when((state.metadata.countryId ?? 0) > 0, (x) => x.eq('countryId', state.metadata.countryId ?? 0))
+					.when((state.metadata.roleId ?? 0) > 0, (x) => x.eq('roleId', state.metadata.roleId ?? 0))
+					.when((state.metadata.genreId ?? 0) > 0, (x) => x.eq('genreId', state.metadata.genreId ?? 0))
+					.when(state.metadata.quality !== VideoQuality.None, (x) => x.eq('quality', state.metadata.quality ?? 0))
+					.build(),
+				sort: buildFlexSortDsl([
+					{
+						field: state.sortedState.field,
+						direction: state.sortedState.sort === SortDirection.Desc ? 'desc' : 'asc',
+					},
+				]),
+			};
+		},
+		refreshAllLibraryMediaByType(page: number = 0, size: number = 100): Observable<PlexMediaStatisticsDTO | null> {
+			const queryParams = actions.buildFlexQueryParams(page, size);
+			return plexMediaApi.getAllMediaByTypeEndpoint(queryParams).pipe(
 				takeUntil(cancelSubject$),
 				map(({ isSuccess, value }): PlexMediaStatisticsDTO | null => {
 					if (isSuccess && value) {
@@ -164,8 +172,8 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 				return of(null);
 			}
 
-			const page = 0;
-			const size = 0;
+			const page = 1;
+			const size = 100;
 
 			state.loading = true;
 			Log.debug('Starting media request', { libraryId: state.libraryId, mediaType: get(getters.getMediaType) });
@@ -177,11 +185,7 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 						? libraryStore.refreshLibrary(state.libraryId)
 						: of(null),
 				).pipe(takeUntil(cancelSubject$)),
-				defer(() =>
-					state.libraryId === 0
-						? actions.refreshAllLibraryMediaByType(page, size)
-						: actions.refreshLibraryMedia(page, size),
-				).pipe(
+				defer(() => actions.refreshAllLibraryMediaByType(page, size)).pipe(
 					tap((data) => {
 						actions.setMedia(data);
 						actions.sortMedia(state.sortedState);

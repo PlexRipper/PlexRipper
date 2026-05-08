@@ -17,7 +17,6 @@ import type {
   PlexMediaSlimDTO,
   PlexMediaStatisticsDTO,
   PlexMediaType,
-  VideoQuality,
 } from "./data-contracts";
 
 import { apiCheckPipe, axiosObservable } from "@api/base";
@@ -33,38 +32,28 @@ export class PlexMedia {
    */
   getAllMediaByTypeEndpoint = (
     query: {
-      /**
-       * @format int32
-       * @default 0
-       */
-      countryId: number;
+      distinct?: boolean | null;
+      filter?: string | null;
       /** @default false */
       filterOfflineMedia: boolean;
       /** @default false */
       filterOwnedMedia: boolean;
-      /**
-       * @format int32
-       * @default 0
-       */
-      genreId: number;
+      groupBy?: string | null;
+      having?: string | null;
+      includeCount?: boolean | null;
+      includes?: string | null;
+      /** @default false */
       mediaType: PlexMediaType;
-      /**
-       * @format int32
-       * @default 0
-       */
-      page: number;
-      /** @default -1 */
-      quality: VideoQuality;
-      /**
-       * @format int32
-       * @default 0
-       */
-      roleId: number;
-      /**
-       * @format int32
-       * @default 0
-       */
-      size: number;
+      mode?: string | null;
+      /** @format int32 */
+      page?: number | null;
+      /** @format int32 */
+      pageSize?: number | null;
+      /** @format int32 */
+      plexLibraryId: number;
+      query?: string | null;
+      select?: string | null;
+      sort?: string | null;
     },
     params: RequestParams = {},
   ) =>
@@ -172,38 +161,28 @@ export class PlexMedia {
 
 export class PlexMediaPaths {
   static getAllMediaByTypeEndpoint = (query: {
-    /**
-     * @format int32
-     * @default 0
-     */
-    countryId: number;
+    distinct?: boolean | null;
+    filter?: string | null;
     /** @default false */
     filterOfflineMedia: boolean;
     /** @default false */
     filterOwnedMedia: boolean;
-    /**
-     * @format int32
-     * @default 0
-     */
-    genreId: number;
+    groupBy?: string | null;
+    having?: string | null;
+    includeCount?: boolean | null;
+    includes?: string | null;
+    /** @default false */
     mediaType: PlexMediaType;
-    /**
-     * @format int32
-     * @default 0
-     */
-    page: number;
-    /** @default -1 */
-    quality: VideoQuality;
-    /**
-     * @format int32
-     * @default 0
-     */
-    roleId: number;
-    /**
-     * @format int32
-     * @default 0
-     */
-    size: number;
+    mode?: string | null;
+    /** @format int32 */
+    page?: number | null;
+    /** @format int32 */
+    pageSize?: number | null;
+    /** @format int32 */
+    plexLibraryId: number;
+    query?: string | null;
+    select?: string | null;
+    sort?: string | null;
   }) => queryString.stringifyUrl({ url: `/api/PlexMedia`, query });
 
   static getMediaDetailByIdEndpoint = (

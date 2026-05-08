@@ -1,25 +1,8 @@
+using FlexQuery.NET.Models;
+
 namespace Reaparr.Application;
 
-public record GetAllMediaByTypeRequest : PlexMediaFilterQueryRequest
-{
-    /// <summary>
-    /// NOTE: This constructor is needed to make the query param optional in the front-end typescript-api generation.
-    /// </summary>
-    public GetAllMediaByTypeRequest(
-        PlexMediaType mediaType,
-        int page,
-        int size,
-        bool filterOfflineMedia,
-        bool filterOwnedMedia
-    )
-        : base(page: page, size: size, filterOfflineMedia: filterOfflineMedia, filterOwnedMedia: filterOwnedMedia)
-    {
-        MediaType = mediaType;
-    }
-
-    [QueryParam, BindFrom("mediaType")]
-    public PlexMediaType MediaType { get; init; }
-}
+public record GetAllMediaByTypeRequest : MediaQueryFilterDTO;
 
 public class GetAllMediaByTypeRequestValidator : Validator<GetAllMediaByTypeRequest>
 {
@@ -28,23 +11,22 @@ public class GetAllMediaByTypeRequestValidator : Validator<GetAllMediaByTypeRequ
         RuleFor(x => x.MediaType)
             .Must(type => type is PlexMediaType.TvShow or PlexMediaType.Movie)
             .WithMessage(x => $"Media type {x.MediaType} is not allowed.");
-        RuleFor(x => x.Page).GreaterThanOrEqualTo(0);
-        RuleFor(x => x.Size).GreaterThanOrEqualTo(0);
-        RuleFor(x => x).Must(x => x.Size > 0 || x.Page == 0).WithMessage("Page must be 0 when size is 0.");
+        RuleFor(x => x.Page).GreaterThanOrEqualTo(1).When(x => x.Page.HasValue);
+        RuleFor(x => x.PageSize).GreaterThanOrEqualTo(1).When(x => x.PageSize.HasValue);
     }
 }
 
 public class GetAllMediaByTypeEndpoint : BaseEndpoint<GetAllMediaByTypeRequest, PlexMediaStatisticsDTO>
 {
     private readonly ILogger _log;
-    private readonly IReaparrDbContext _dbContext;
+    private readonly ICommandExecutor _commandExecutor;
 
     public override string EndpointPath => ApiRoutes.PlexMediaController;
 
-    public GetAllMediaByTypeEndpoint(ILogger log, IReaparrDbContext dbContext)
+    public GetAllMediaByTypeEndpoint(ILogger log, IReaparrDbContext dbContext, ICommandExecutor commandExecutor)
     {
         _log = log.ForContext<GetAllMediaByTypeEndpoint>();
-        _dbContext = dbContext;
+        _commandExecutor = commandExecutor;
     }
 
     public override void Configure()
@@ -64,26 +46,32 @@ public class GetAllMediaByTypeEndpoint : BaseEndpoint<GetAllMediaByTypeRequest, 
 
         var stopWatch = Stopwatch.StartNew();
 
-        // When 0, just take everything
-        var take = req.Size <= 0 ? 0 : req.Size;
-        var skip = req.Page * req.Size;
-
-        var mediaListResult = await _dbContext.GetMediaByType(
-            new MediaQueryFilter
+        var mediaListResult = await _commandExecutor.Send(new GetMediaByTypeCommand
+        {
+            Filter = new MediaQueryFilter
             {
                 MediaType = req.MediaType,
-                Skip = skip,
-                Take = take,
-                PlexLibraryId = 0,
+                PlexLibraryId = req.PlexLibraryId,
                 FilterOfflineMedia = req.FilterOfflineMedia,
                 FilterOwnedMedia = req.FilterOwnedMedia,
-                CountryId = req.CountryId,
-                ActorId = req.ActorId,
-                GenreId = req.GenreId,
-                Quality = req.Quality,
+                Parameters = new FlexQueryParameters
+                {
+                    Query = req.Query,
+                    Filter = req.Filter,
+                    Sort = req.Sort,
+                    Select = req.Select,
+                    Includes = req.Includes,
+                    GroupBy = req.GroupBy,
+                    Having = req.Having,
+                    Page = req.Page,
+                    PageSize = req.PageSize,
+                    IncludeCount = req.IncludeCount,
+                    Distinct = req.Distinct,
+                    Mode = req.Mode,
+                },
             },
-            ct: ct
-        );
+        }, ct);
+        
 
         stopWatch.StopAndLog($"GetAllMediaByTypeEndpoint - Retrieved media with filter: {req}");
 
@@ -93,6 +81,6 @@ public class GetAllMediaByTypeEndpoint : BaseEndpoint<GetAllMediaByTypeRequest, 
             return;
         }
 
-        await SendFluentResult(Result.Ok(mediaListResult.Value.ToStatisticsDTO()), ct);
+        await SendFluentResult(Result.Ok(mediaListResult.Value.Items.ToStatisticsDTO()), ct);
     }
 }

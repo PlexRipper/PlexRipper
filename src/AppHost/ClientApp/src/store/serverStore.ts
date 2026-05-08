@@ -68,7 +68,7 @@ export const useServerStore = defineStore(StoreNames.ServerStore, () => {
 		},
 		setServerEnabled(serverId: number, isEnabled: boolean) {
 			return plexServerApi
-				.setServerEnabledRequestEndpoint(serverId, {
+				.setServerEnabledEndpoint(serverId, {
 					isEnabled,
 				})
 				.pipe(

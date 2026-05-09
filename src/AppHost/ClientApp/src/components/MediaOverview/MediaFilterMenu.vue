@@ -190,6 +190,26 @@ function setMetadataFilter({
 	genreId?: number;
 	quality?: VideoQuality;
 }) {
+	if (countryId !== undefined && countryId === mediaOverviewStore.metadata.countryId) {
+		useSubscription(mediaOverviewStore.unsetMetaData('countryId').subscribe());
+		return;
+	}
+
+	if (roleId !== undefined && roleId === mediaOverviewStore.metadata.roleId) {
+		useSubscription(mediaOverviewStore.unsetMetaData('roleId').subscribe());
+		return;
+	}
+
+	if (genreId !== undefined && genreId === mediaOverviewStore.metadata.genreId) {
+		useSubscription(mediaOverviewStore.unsetMetaData('genreId').subscribe());
+		return;
+	}
+
+	if (quality !== undefined && quality === mediaOverviewStore.metadata.quality) {
+		useSubscription(mediaOverviewStore.unsetMetaData('quality').subscribe());
+		return;
+	}
+
 	useSubscription(
 		mediaOverviewStore.setMetaData({
 			countryId,

@@ -15,6 +15,8 @@ public class PlexMediaStatisticsDTO
     public required long MediaSize { get; set; }
 
     public required List<PlexMediaSlimDTO> MediaList { get; init; }
+
+    public required List<MediaNavigationIndexDTO> NavigationIndexes { get; set; } = [];
     
     /// <summary>
     /// Gets or sets the list of distinct roles available in the media items of the <see cref="PlexLibrary"/>.

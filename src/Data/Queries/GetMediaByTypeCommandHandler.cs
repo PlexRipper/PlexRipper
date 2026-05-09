@@ -92,6 +92,7 @@ public class GetMediaByTypeCommandHandler : ICommandHandler<GetMediaByTypeComman
             case PlexMediaType.Movie:
             {
                 var movieQuery = _dbContext.PlexMovies
+                    .IncludeMediaData()
                     .Include(x => x.Actors)
                     .Include(x => x.Countries)
                     .Include(x => x.Genres)
@@ -125,6 +126,7 @@ public class GetMediaByTypeCommandHandler : ICommandHandler<GetMediaByTypeComman
             case PlexMediaType.TvShow:
             {
                 var tvShowQuery = _dbContext.PlexTvShows
+                    .Include(x => x.Qualities)
                     .Include(x => x.Actors)
                     .Include(x => x.Countries)
                     .Include(x => x.Genres)

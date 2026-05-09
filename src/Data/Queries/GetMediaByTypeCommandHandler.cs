@@ -118,7 +118,7 @@ public class GetMediaByTypeCommandHandler : ICommandHandler<GetMediaByTypeComman
                 _response.Countries.AddRange(movies.SelectMany(x => x.Countries).Select(x => x.Id).Distinct().OrderBy(x => x));
                 _response.Genres.AddRange(movies.SelectMany(x => x.Genres).Select(x => x.Id).Distinct().OrderBy(x => x));
                 _response.Qualities.AddRange(
-                    movies.SelectMany(x => x.MediaDataList).Select(x => (int)x.Quality).Distinct().OrderBy(x => x)
+                    movies.SelectMany(x => x.MediaDataList).Select(x => x.Quality.ToId()).Distinct().OrderBy(x => x)
                 );
 
                 break;
@@ -152,7 +152,7 @@ public class GetMediaByTypeCommandHandler : ICommandHandler<GetMediaByTypeComman
                 _response.Countries.AddRange(tvShows.SelectMany(x => x.Countries).Select(x => x.Id).Distinct().OrderBy(x => x));
                 _response.Genres.AddRange(tvShows.SelectMany(x => x.Genres).Select(x => x.Id).Distinct().OrderBy(x => x));
                 _response.Qualities.AddRange(
-                    tvShows.SelectMany(x => x.Qualities).Select(x => (int)x.Quality).Distinct().OrderBy(x => x)
+                    tvShows.SelectMany(x => x.Qualities).Select(x => x.Quality.ToId()).Distinct().OrderBy(x => x)
                 );
 
                 break;

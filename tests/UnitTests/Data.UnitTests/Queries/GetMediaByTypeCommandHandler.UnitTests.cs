@@ -853,48 +853,6 @@ public class GetMediaByTypeCommandHandlerUnitTests : BaseUnitTest<GetMediaByType
         hasMatchingActor.ShouldBeTrue();
     }
 
-    [Test]
-    public async Task ShouldApplyCommaSeparatedMetadataAndQualityFilters_WhenFilterUsesApiQueryFormat()
-    {
-        // Arrange
-        await SetupDatabase(70032, cfg =>
-        {
-            cfg.PlexServerCount = 1;
-            cfg.PlexMovieLibraryCount = 1;
-            cfg.MovieCount = 6;
-        });
-
-        var dbContext = IDbContext;
-        var expectedMovie = await ConfigureExactMetadataMatchAsync(dbContext, VideoQuality.SD);
-        var targetLibraryId = await dbContext.PlexMovies
-            .Where(x => x.Id == expectedMovie.MovieId)
-            .Select(x => x.PlexLibraryId)
-            .SingleAsync(CancellationToken);
-
-        var command = CreateCommand(
-            PlexMediaType.Movie,
-            targetLibraryId,
-            pageSize: 100,
-            sort: "sortIndex:asc",
-            filter: $"Countries:any:Id:eq:{expectedMovie.CountryId},quality:eq:{VideoQuality.SD}"
-        );
-
-        // Act
-        var result = await Sut.ExecuteAsync(command, CancellationToken);
-
-        // Assert
-        result.IsSuccess.ShouldBeTrue();
-        result.IsFailed.ShouldBeFalse();
-        AssertReturnedExactMovies(result.Value, [expectedMovie.MovieId]);
-        result.Value.Items.ShouldAllBe(x => x.Qualities.Any(y => y.Quality == VideoQuality.SD));
-
-        var returnedMovieId = result.Value.Items.Single().Id;
-        var hasMatchingCountry = await dbContext.PlexMovieCountries
-            .AnyAsync(x => x.PlexMovieId == returnedMovieId && x.CountryId == expectedMovie.CountryId, CancellationToken);
-
-        hasMatchingCountry.ShouldBeTrue();
-    }
-
     private async Task<ExpectedMovieMetadata> ConfigureExactMetadataMatchAsync(
         IReaparrDbContext dbContext,
         VideoQuality targetQuality

@@ -32,9 +32,6 @@
         <Compile Remove="CQRS\PlexServers\Commands\AddOrUpdatePlexServersCommandHandler.cs" />
     </ItemGroup>
     <ItemGroup>
-        <Folder Include="_Shared\" />
-    </ItemGroup>
-    <ItemGroup>
         <Using Include="System.ComponentModel.DataAnnotations" />
         <Using Include="System.ComponentModel.DataAnnotations.Schema" />
         <Using Include="FastEndpoints" />

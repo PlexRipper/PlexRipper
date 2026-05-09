@@ -23,12 +23,14 @@ public class GetMediaByTypeCommandValidator : AbstractValidator<GetMediaByTypeCo
 
 public class GetMediaByTypeCommandHandler : ICommandHandler<GetMediaByTypeCommand, Result<PagedMediaQueryResult>>
 {
+    private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
 
     private PagedMediaQueryResult _response = new();
 
-    public GetMediaByTypeCommandHandler(IReaparrDbContext dbContext)
+    public GetMediaByTypeCommandHandler(ILogger log, IReaparrDbContext dbContext)
     {
+        _log = log.ForContext<GetMediaByTypeCommandHandler>();
         _dbContext = dbContext;
     }
 
@@ -39,49 +41,48 @@ public class GetMediaByTypeCommandHandler : ICommandHandler<GetMediaByTypeComman
         var filter = command.Filter;
         var plexLibraryId = filter.PlexLibraryId;
 
-        // Get only enabled servers
-        var serverList = await _dbContext.PlexServers
-            .Select(server => new { server.Id, PlexLibraryIds = server.PlexLibraries.Select(x => x.Id).ToList() })
-            .ToListAsync(ct);
+        var allowedPlexLibraryIds = new List<int>();
 
-        var allowedPlexLibraryIds = serverList.SelectMany(x => x.PlexLibraryIds).ToList();
-        if (filter.FilterOwnedMedia)
+        if (plexLibraryId > 0)
         {
-            var ownedPlexLibraries = await _dbContext
-                .PlexAccountLibraries.Where(x => x.IsLibraryOwned)
-                .Select(x => x.PlexLibraryId)
+            allowedPlexLibraryIds.Add(plexLibraryId);
+        }
+        else
+        {
+            // Get only enabled servers
+            var serverList = await _dbContext.PlexServers
+                .Select(server => new { server.Id, PlexLibraryIds = server.PlexLibraries.Select(x => x.Id).ToList() })
                 .ToListAsync(ct);
 
-            allowedPlexLibraryIds.RemoveAll(x => ownedPlexLibraries.Contains(x));
-        }
-
-        if (filter.FilterOfflineMedia)
-        {
-            foreach (var server in serverList)
+            allowedPlexLibraryIds = serverList.SelectMany(x => x.PlexLibraryIds).ToList();
+            if (filter.FilterOwnedMedia)
             {
-                var isServerOnline = await _dbContext.IsServerOnline(server.Id, ct);
-                if (!isServerOnline)
+                var ownedPlexLibraries = await _dbContext
+                    .PlexAccountLibraries.Where(x => x.IsLibraryOwned)
+                    .Select(x => x.PlexLibraryId)
+                    .ToListAsync(ct);
+
+                allowedPlexLibraryIds.RemoveAll(x => ownedPlexLibraries.Contains(x));
+            }
+
+            if (filter.FilterOfflineMedia)
+            {
+                foreach (var server in serverList)
                 {
-                    allowedPlexLibraryIds.RemoveAll(x => server.PlexLibraryIds.Contains(x));
+                    var isServerOnline = await _dbContext.IsServerOnline(server.Id, ct);
+                    if (!isServerOnline)
+                    {
+                        allowedPlexLibraryIds.RemoveAll(x => server.PlexLibraryIds.Contains(x));
+                    }
                 }
             }
         }
 
-        if (plexLibraryId == 0 && !allowedPlexLibraryIds.Any())
+        if (!allowedPlexLibraryIds.Any())
             return Result.Ok(_response);
 
         var options = QueryOptionsParser.Parse(filter.Parameters);
-
-        if (plexLibraryId == 0)
-        {
-            options = WithServerLibraryScope(options, allowedPlexLibraryIds, plexLibraryId);
-        }
-        else
-        {
-            // Specific library requests should ignore owned/offline visibility filters,
-            // but still be scoped to the requested library id.
-            options = WithServerLibraryScope(options, [plexLibraryId], plexLibraryId);
-        }
+        options = WithServerLibraryScope(options, allowedPlexLibraryIds, plexLibraryId);
 
         ApplyDefaultMediaSort(options, plexLibraryId);
 
@@ -89,27 +90,26 @@ public class GetMediaByTypeCommandHandler : ICommandHandler<GetMediaByTypeComman
         {
             case PlexMediaType.Movie:
             {
-                    var movies = await _dbContext.PlexMovies.IncludeMediaData()
-                        .Include(x => x.MediaDataList)
-                        .ApplyFilter(options)
-                        .ApplySort(options)
-                        .ApplyPaging(options)
-                        .ToListAsync(ct);
-
-                _response.Items = movies.Select(x => x.ToSlimDTO()).ToList();
+                _response.Items = await _dbContext.PlexMovies
+                    .IncludeMediaData()
+                    .ApplyFilter(options)
+                    .ApplySort(options)
+                    .ApplyPaging(options)
+                    .Select(x => x.ToSlimDTO())
+                    .ToListAsync(ct);
 
                 break;
             }
             case PlexMediaType.TvShow:
             {
-                    var tvShows = await _dbContext.PlexTvShows
-                        .Include(x => x.Qualities)
-                        .ApplyFilter(options)
-                        .ApplySort(options)
-                        .ApplyPaging(options)
-                        .ToListAsync(ct);
+                _response.Items = await _dbContext.PlexTvShows
+                    .Include(x => x.Qualities)
+                    .ApplyFilter(options)
+                    .ApplySort(options)
+                    .ApplyPaging(options)
+                    .Select(x => x.ToSlimDTOMapper())
+                    .ToListAsync(ct);
 
-                _response.Items = tvShows.Select(x => x.ToSlimDTOMapper()).ToList();
                 break;
             }
             default:
@@ -118,22 +118,16 @@ public class GetMediaByTypeCommandHandler : ICommandHandler<GetMediaByTypeComman
                 );
         }
 
-       for (var i = 0; i < _response.Items.Count; i++)
+        for (var i = 0; i < _response.Items.Count; i++)
         {
             var slimDTO = _response.Items[i];
 
             slimDTO.SortIndex = i + 1;
         }
 
-        _response.MediaCount = _response.Items.Count;
-        _response.MovieCount = _response.Items.Count(x => x.Type == PlexMediaType.Movie);
-        _response.TvShowCount = _response.Items.Count(x => x.Type == PlexMediaType.TvShow);
-        _response.SeasonCount = _response.Items.Where(x => x.Type == PlexMediaType.TvShow).Sum(x => x.ChildCount);
-        _response.EpisodeCount = _response.Items.Where(x => x.Type == PlexMediaType.TvShow).Sum(x => x.GrandChildCount);
-        _response.MediaSize = _response.Items.Sum(x => x.MediaSize);
+        await SetCounts(options, allowedPlexLibraryIds);
 
         return Result.Ok(_response);
-
     }
 
     /// <summary>
@@ -212,5 +206,35 @@ public class GetMediaByTypeCommandHandler : ICommandHandler<GetMediaByTypeComman
             }
         );
     }
-    
+
+    private async Task SetCounts(QueryOptions options, List<int> allowedPlexLibraryIds)
+    {
+        if (options.HasFiltersApplied())
+        {
+            _response.MediaCount = _response.Items.Count;
+            _response.MovieCount = _response.Items.Count(x => x.Type == PlexMediaType.Movie);
+            _response.TvShowCount = _response.Items.Count(x => x.Type == PlexMediaType.TvShow);
+            _response.SeasonCount = _response.Items.Where(x => x.Type == PlexMediaType.TvShow).Sum(x => x.ChildCount);
+            _response.EpisodeCount =
+                _response.Items.Where(x => x.Type == PlexMediaType.TvShow).Sum(x => x.GrandChildCount);
+            _response.MediaSize = _response.Items.Sum(x => x.MediaSize);
+            _response.TotalCount = _response.MediaCount;
+        }
+        else
+        {
+            var plexLibraries = await _dbContext.PlexLibraries.Where(x => allowedPlexLibraryIds.Contains(x.Id))
+                .ToListAsync();
+
+            foreach (var plexLibrary in plexLibraries)
+            {
+                _response.MovieCount += plexLibrary.MovieCount;
+                _response.TvShowCount += plexLibrary.TvShowCount;
+                _response.SeasonCount += plexLibrary.SeasonCount;
+                _response.EpisodeCount += plexLibrary.EpisodeCount;
+                _response.MediaSize += plexLibrary.MediaSize;
+                _response.MediaCount += plexLibrary.MediaCount;
+                _response.TotalCount += plexLibrary.MediaCount;
+            }
+        }
+    }
 }

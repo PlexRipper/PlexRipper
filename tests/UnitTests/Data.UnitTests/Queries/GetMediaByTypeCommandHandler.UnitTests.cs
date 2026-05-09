@@ -374,8 +374,11 @@ public class GetMediaByTypeCommandHandlerUnitTests : BaseUnitTest<GetMediaByType
         var page2 = CreateCommand(PlexMediaType.Movie, 0, page: 2, pageSize: 3);
 
         // Act
-        var resultPage1 = await Sut.ExecuteAsync(page1, CancellationToken);
-        var resultPage2 = await Sut.ExecuteAsync(page2, CancellationToken);
+        var sutForPage1 = Mock.Create<GetMediaByTypeCommandHandler>();
+        var resultPage1 = await sutForPage1.ExecuteAsync(page1, CancellationToken);
+
+        var sutForPage2 = Mock.Create<GetMediaByTypeCommandHandler>();
+        var resultPage2 = await sutForPage2.ExecuteAsync(page2, CancellationToken);
 
         // Assert
         resultPage1.IsSuccess.ShouldBeTrue();

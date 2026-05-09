@@ -851,6 +851,10 @@ public class GetMediaByTypeCommandHandlerUnitTests : BaseUnitTest<GetMediaByType
         hasMatchingGenre.ShouldBeTrue();
         hasMatchingCountry.ShouldBeTrue();
         hasMatchingActor.ShouldBeTrue();
+        result.Value.Genres.ShouldBe([expectedMovie.GenreId]);
+        result.Value.Countries.ShouldBe([expectedMovie.CountryId]);
+        result.Value.Roles.ShouldBe([expectedMovie.ActorId]);
+        result.Value.Qualities.ShouldBe([(int)VideoQuality.FullHD]);
     }
 
     private async Task<ExpectedMovieMetadata> ConfigureExactMetadataMatchAsync(

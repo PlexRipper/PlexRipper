@@ -26,7 +26,7 @@ public class GetMediaByTypeCommandHandler : ICommandHandler<GetMediaByTypeComman
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
 
-    private PagedMediaQueryResult _response = new();
+    private readonly PagedMediaQueryResult _response = new();
 
     public GetMediaByTypeCommandHandler(ILogger log, IReaparrDbContext dbContext)
     {
@@ -91,25 +91,45 @@ public class GetMediaByTypeCommandHandler : ICommandHandler<GetMediaByTypeComman
         {
             case PlexMediaType.Movie:
             {
-                _response.Items = await _dbContext.PlexMovies
+                var movies = await _dbContext.PlexMovies
                     .IncludeMediaData()
+                    .Include(x => x.Actors)
+                    .Include(x => x.Countries)
+                    .Include(x => x.Genres)
                     .ApplyFilter(options)
                     .ApplySort(options)
                     .ApplyPaging(options)
-                    .Select(x => x.ToSlimDTO())
                     .ToListAsync(ct);
+
+                _response.Items = movies.Select(x => x.ToSlimDTO()).ToList();
+                _response.Roles.AddRange(movies.SelectMany(x => x.Actors).Select(x => x.Id).Distinct().OrderBy(x => x));
+                _response.Countries.AddRange(movies.SelectMany(x => x.Countries).Select(x => x.Id).Distinct().OrderBy(x => x));
+                _response.Genres.AddRange(movies.SelectMany(x => x.Genres).Select(x => x.Id).Distinct().OrderBy(x => x));
+                _response.Qualities.AddRange(
+                    movies.SelectMany(x => x.MediaDataList).Select(x => (int)x.Quality).Distinct().OrderBy(x => x)
+                );
 
                 break;
             }
             case PlexMediaType.TvShow:
             {
-                _response.Items = await _dbContext.PlexTvShows
+                var tvShows = await _dbContext.PlexTvShows
                     .Include(x => x.Qualities)
+                    .Include(x => x.Actors)
+                    .Include(x => x.Countries)
+                    .Include(x => x.Genres)
                     .ApplyFilter(options)
                     .ApplySort(options)
                     .ApplyPaging(options)
-                    .Select(x => x.ToSlimDTOMapper())
                     .ToListAsync(ct);
+
+                _response.Items = tvShows.Select(x => x.ToSlimDTOMapper()).ToList();
+                _response.Roles.AddRange(tvShows.SelectMany(x => x.Actors).Select(x => x.Id).Distinct().OrderBy(x => x));
+                _response.Countries.AddRange(tvShows.SelectMany(x => x.Countries).Select(x => x.Id).Distinct().OrderBy(x => x));
+                _response.Genres.AddRange(tvShows.SelectMany(x => x.Genres).Select(x => x.Id).Distinct().OrderBy(x => x));
+                _response.Qualities.AddRange(
+                    tvShows.SelectMany(x => x.Qualities).Select(x => (int)x.Quality).Distinct().OrderBy(x => x)
+                );
 
                 break;
             }

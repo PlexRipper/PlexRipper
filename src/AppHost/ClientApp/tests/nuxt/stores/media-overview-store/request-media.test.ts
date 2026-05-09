@@ -35,6 +35,10 @@ describe('MediaOverviewStore.requestMedia()', () => {
 				type,
 			},
 		}));
+		movies.navigationIndexes = [
+			{ label: 'A', index: 0 },
+			{ label: 'B', index: 14 },
+		];
 
 		let url = new RegExp(`/api/PlexMedia/*`);
 		mock.onGet(url).reply(200, generateResultDTO(movies));
@@ -55,7 +59,10 @@ describe('MediaOverviewStore.requestMedia()', () => {
 
 		// Assert
 		expect(result.receivedComplete()).toEqual(true);
-		expect(mediaOverviewStore.scrollDict).not.deep.equal({ '#': 0 });
+		expect([...mediaOverviewStore.scrollDict.entries()]).toEqual([
+			['A', 0],
+			['B', 14],
+		]);
 		expect(mediaOverviewStore.allMovieCount).toEqual(movies.movieCount);
 		expect(mediaOverviewStore.allTvShowCount).toEqual(movies.tvShowCount);
 		expect(mediaOverviewStore.allSeasonCount).toEqual(movies.seasonCount);

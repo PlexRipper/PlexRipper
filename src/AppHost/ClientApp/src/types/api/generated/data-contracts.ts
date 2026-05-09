@@ -623,6 +623,12 @@ export enum LogSeverity {
   Fatal = "Fatal",
 }
 
+export interface MediaNavigationIndexDTO {
+  /** @format int32 */
+  index: number;
+  label: string;
+}
+
 export interface MediaQueryFilterDTO {
   distinct?: boolean | null;
   filter?: string | null;
@@ -906,8 +912,10 @@ export interface PlexMediaSlimDTO {
 }
 
 export interface PlexMediaStatisticsDTO {
+  countries: number[];
   /** @format int32 */
   episodeCount: number;
+  genres: number[];
   /** @format int32 */
   mediaCount: number;
   mediaList: PlexMediaSlimDTO[];
@@ -915,6 +923,9 @@ export interface PlexMediaStatisticsDTO {
   mediaSize: number;
   /** @format int32 */
   movieCount: number;
+  navigationIndexes: MediaNavigationIndexDTO[];
+  qualities: number[];
+  roles: number[];
   /** @format int32 */
   seasonCount: number;
   /** @format int32 */

@@ -3,6 +3,7 @@ import { createPinia, setActivePinia } from 'pinia';
 import { baseSetup } from '@services-test-base';
 import { useMediaOverviewStore } from '@store';
 import { VideoQuality } from '@dto';
+import { MediaSortField, SortDirection } from '@enums/mediaSortField';
 
 describe('MediaOverviewStore.buildFlexQueryParams()', () => {
 	beforeAll(() => {
@@ -11,6 +12,18 @@ describe('MediaOverviewStore.buildFlexQueryParams()', () => {
 
 	beforeEach(() => {
 		setActivePinia(createPinia());
+	});
+
+	test('Should use highestQuality when quality sort is selected', () => {
+		// Arrange
+		const mediaOverviewStore = useMediaOverviewStore();
+		mediaOverviewStore.sortMedia({ field: MediaSortField.Quality, sort: SortDirection.Asc });
+
+		// Act
+		const result = mediaOverviewStore.buildFlexQueryParams(1, 100);
+
+		// Assert
+		expect(result.sort).toBe('quality:asc');
 	});
 
 	test('Should combine metadata and quality filters with ampersand separators', () => {

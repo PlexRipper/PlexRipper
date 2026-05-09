@@ -5,7 +5,7 @@
 				v-for="[displayValue, scrollIndex] in mediaOverviewStore.scrollDict"
 				:key="displayValue"
 				class="navigation-btn"
-				:label="displayValue"
+				:label="getDisplayValue(displayValue)"
 				flat
 				square
 				no-wrap
@@ -16,9 +16,20 @@
 </template>
 
 <script setup lang="ts">
+import { MediaSortField } from '@enums';
+import { getVideoQualityFromValue, translateVideoQuality } from '@composables';
 import { sendMediaOverviewScrollToCommand } from '@composables/event-bus';
 
 const mediaOverviewStore = useMediaOverviewStore();
+
+function getDisplayValue(value: string): string {
+	if (mediaOverviewStore.getActiveSort.field !== MediaSortField.Quality) {
+		return value;
+	}
+
+	const quality = getVideoQualityFromValue(value);
+	return quality === undefined ? value : translateVideoQuality(quality);
+}
 </script>
 
 <style lang="scss">

@@ -17,7 +17,7 @@ import type { IMediaOverviewSort } from '@composables/event-bus';
 import { MediaSortField, SortDirection } from '@enums';
 import { type IMetaDataMediaFilter, type ISelection, type ISortOption, StoreNames } from '@interfaces';
 import { plexLibraryApi, plexMediaApi } from '@api';
-import { map, takeUntil, tap } from 'rxjs/operators';
+import { map, switchMap, takeUntil, tap } from 'rxjs/operators';
 import { defer, forkJoin, type Observable, of, Subject } from 'rxjs';
 import { useLibraryStore, useSettingsStore } from '@store';
 import {
@@ -185,15 +185,17 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 						? libraryStore.refreshLibrary(state.libraryId)
 						: of(null),
 				).pipe(takeUntil(cancelSubject$)),
-				defer(() => actions.refreshAllLibraryMediaByType(page, size)).pipe(
-					tap((data) => {
-						actions.setMedia(data);
-						actions.sortMedia(state.sortedState);
-					}),
-				),
 			]).pipe(
 				takeUntil(cancelSubject$),
-				map(([_, __, media]) => media),
+				switchMap(() =>
+					defer(() => actions.refreshAllLibraryMediaByType(page, size)).pipe(
+						takeUntil(cancelSubject$),
+						tap((data) => {
+							actions.setMedia(data);
+							actions.sortMedia(state.sortedState);
+						}),
+					),
+				),
 				tap({
 					next: () => {
 						state.loading = false;

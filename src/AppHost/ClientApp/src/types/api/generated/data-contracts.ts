@@ -941,6 +941,8 @@ export enum PlexMediaType {
 export interface PlexQualityDTO {
   /** @format int32 */
   count: number;
+  /** @format int32 */
+  id: number;
   name: string;
   quality: VideoQuality;
 }

@@ -31,6 +31,13 @@ import {
 import { useSubscription } from '@vueuse/rxjs';
 import { useI18n } from 'vue-i18n';
 
+interface IAvailableMetadataIds {
+	roles?: number[];
+	countries?: number[];
+	genres?: number[];
+	qualities?: number[];
+}
+
 interface IMediaOverviewStoreState {
 	libraryId: number;
 	items: Readonly<PlexMediaSlimDTO[]>;
@@ -51,6 +58,10 @@ interface IMediaOverviewStoreState {
 	allFileSize: number;
 	metadata: IMetaDataMediaFilter;
 	metadataList: PlexMediaMetadataDTO;
+	availableRoleIds: number[];
+	availableCountryIds: number[];
+	availableGenreIds: number[];
+	availableQualityIds: number[];
 }
 
 export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, () => {
@@ -89,6 +100,10 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 			genres: [],
 			qualities: [],
 		},
+		availableRoleIds: [],
+		availableCountryIds: [],
+		availableGenreIds: [],
+		availableQualityIds: [],
 	};
 
 	const state = reactive<IMediaOverviewStoreState>(cloneDeep(defaultState));
@@ -217,6 +232,8 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 		},
 		setMedia(data: PlexMediaStatisticsDTO | null) {
 			if (data) {
+				const availableMetadataIds = data as PlexMediaStatisticsDTO & IAvailableMetadataIds;
+
 				state.items = Object.freeze(data.mediaList);
 				state.itemsLength = data.mediaCount;
 
@@ -225,6 +242,10 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 				state.allSeasonCount = data.seasonCount;
 				state.allEpisodeCount = data.episodeCount;
 				state.allFileSize = data.mediaSize;
+				state.availableRoleIds = availableMetadataIds.roles ?? [];
+				state.availableCountryIds = availableMetadataIds.countries ?? [];
+				state.availableGenreIds = availableMetadataIds.genres ?? [];
+				state.availableQualityIds = availableMetadataIds.qualities ?? [];
 			} else {
 				state.items = Object.freeze([]);
 				state.itemsLength = 0;
@@ -234,6 +255,10 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 				state.allSeasonCount = 0;
 				state.allEpisodeCount = 0;
 				state.allFileSize = 0;
+				state.availableRoleIds = [];
+				state.availableCountryIds = [];
+				state.availableGenreIds = [];
+				state.availableQualityIds = [];
 			}
 			state.filterQuery = '';
 		},
@@ -517,10 +542,21 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 
 			return options;
 		},
-		getGenres: computed(() => sortBy(state.metadataList.genres, (x) => x.name)),
-		getRoles: computed(() => sortBy(state.metadataList.roles, (x) => x.name)),
-		getCountries: computed(() => sortBy(state.metadataList.countries, (x) => x.name)),
-		getQualities: computed(() => state.metadataList.qualities),
+		getGenres: computed(() => sortBy(
+			state.metadataList.genres.filter((x) => state.availableGenreIds.includes(x.id)),
+			(x) => x.name,
+		)),
+		getRoles: computed(() => sortBy(
+			state.metadataList.roles.filter((x) => state.availableRoleIds.includes(x.id)),
+			(x) => x.name,
+		)),
+		getCountries: computed(() => sortBy(
+			state.metadataList.countries.filter((x) => state.availableCountryIds.includes(x.id)),
+			(x) => x.name,
+		)),
+		getQualities: computed(() => state.metadataList.qualities.filter((x) => {
+			return state.availableQualityIds.includes(x.id);
+		})),
 		getFilterChips: computed(() => {
 			const result: { text: string; key: keyof IMetaDataMediaFilter; color?: string; id: string }[] = [];
 

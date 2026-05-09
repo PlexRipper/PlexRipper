@@ -18,6 +18,7 @@ public static partial class FakeData
             .RuleFor(x => x.SearchTitle, (_, x) => x.Title.ToSearchTitle())
             .RuleFor(x => x.Duration, f => f.Random.Int(1000, 3000000))
             .RuleFor(x => x.MediaSize, f => f.Random.Long(1000, 30000000))
+            .RuleFor(x => x.Quality, _ => VideoQuality.Unknown)
             .RuleFor(x => x.PlexApiMetaDataKey, f => f.Random.Int(1, 10000))
             .RuleFor(x => x.HasThumb, f => f.Random.Bool())
             .RuleFor(x => x.HasArt, f => f.Random.Bool())
@@ -58,7 +59,9 @@ public static partial class FakeData
                 {
                     movie.FullTitle = $"{movie.Title} ({movie.Year})";
 
-                    // TODO:Need quality selector in the case of multiple quality media
+                    movie.Quality = movie.MediaDataList.Count == 0
+                        ? VideoQuality.Unknown
+                        : movie.MediaDataList.Max(x => x.Quality);
                     movie.MediaSize = movie.MediaDataList.Sum(x => x.Size);
                 }
             );
@@ -125,6 +128,11 @@ public static partial class FakeData
 
                     tvShow.ChildCount = tvShow.Seasons.Count;
                     tvShow.GrandChildCount = tvShow.Seasons.Sum(season => season.Episodes.Count);
+                    tvShow.Quality = tvShow.Seasons
+                        .SelectMany(season => season.Episodes)
+                        .SelectMany(episode => episode.MediaDataList)
+                        .Select(mediaData => (VideoQuality?)mediaData.Quality)
+                        .Max() ?? VideoQuality.Unknown;
                     tvShow.MediaSize = tvShow.Seasons.Sum(season => season.MediaSize);
                 }
             );

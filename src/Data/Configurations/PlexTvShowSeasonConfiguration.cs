@@ -4,6 +4,8 @@ public class PlexTvShowSeasonConfiguration : IEntityTypeConfiguration<PlexTvShow
 {
     public void Configure(EntityTypeBuilder<PlexTvShowSeason> builder)
     {
+        builder.Ignore(x => x.Quality);
+
         builder.HasIndex(x => new { x.PlexLibraryId, x.SortIndex });
 
         builder.HasIndex(x => new { x.PlexApiRatingKey, x.PlexServerId });

@@ -140,6 +140,23 @@ public static partial class DbContextExtensions
         if (insertTvShowQualitiesResult.IsFailed)
             return await RollbackTvShowInsertAsync(context, plexLibraryId, insertTvShowQualitiesResult, ct);
 
+        foreach (var tvShow in plexTvShows)
+        {
+            var highestQuality = tvShowQualities
+                .Where(x => x.PlexTvShowId == tvShow.Id)
+                .Select(x => (VideoQuality?)x.Quality)
+                .Max();
+
+            tvShow.Quality = highestQuality ?? VideoQuality.Unknown;
+        }
+
+        var updateTvShowQualityResult = await Result.Try(async Task () =>
+            await context.BulkUpdateAsync(plexTvShows, BulkConfigPreset.Default, ct)
+        );
+
+        if (updateTvShowQualityResult.IsFailed)
+            return await RollbackTvShowInsertAsync(context, plexLibraryId, updateTvShowQualityResult, ct);
+
         return Result.Ok(rapport);
     }
 

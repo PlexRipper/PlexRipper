@@ -91,20 +91,17 @@ public class GetMediaByTypeCommandHandler : ICommandHandler<GetMediaByTypeComman
         {
             case PlexMediaType.Movie:
             {
-                var movieQuery = ApplySort(
-                    _dbContext.PlexMovies
-                        .IncludeMediaData()
-                        .Include(x => x.Actors)
-                        .Include(x => x.Countries)
-                        .Include(x => x.Genres)
-                        .ApplyFilter(options),
-                    options
-                );
+                var movieQuery = _dbContext.PlexMovies
+                    .Include(x => x.Actors)
+                    .Include(x => x.Countries)
+                    .Include(x => x.Genres)
+                    .ApplyFilter(options)
+                    .ApplySort(options);
 
                 await SetNavigationIndexes(movieQuery.Select(x => new MediaNavigationIndexRow(
                     x.Title,
                     x.Year,
-                    x.MediaDataList.Max(q => (int?)q.Quality),
+                    (int?)x.Quality,
                     x.Duration,
                     x.AddedAt,
                     x.UpdatedAt,
@@ -120,27 +117,24 @@ public class GetMediaByTypeCommandHandler : ICommandHandler<GetMediaByTypeComman
                 _response.Countries.AddRange(movies.SelectMany(x => x.Countries).Select(x => x.Id).Distinct().OrderBy(x => x));
                 _response.Genres.AddRange(movies.SelectMany(x => x.Genres).Select(x => x.Id).Distinct().OrderBy(x => x));
                 _response.Qualities.AddRange(
-                    movies.SelectMany(x => x.MediaDataList).Select(x => x.Quality.ToId()).Distinct().OrderBy(x => x)
+                    movies.SelectMany(x => x.MediaDataList).Select(x => (int)x.Quality).Distinct().OrderBy(x => x)
                 );
 
                 break;
             }
             case PlexMediaType.TvShow:
             {
-                var tvShowQuery = ApplySort(
-                    _dbContext.PlexTvShows
-                        .Include(x => x.Qualities)
-                        .Include(x => x.Actors)
-                        .Include(x => x.Countries)
-                        .Include(x => x.Genres)
-                        .ApplyFilter(options),
-                    options
-                );
+                var tvShowQuery = _dbContext.PlexTvShows
+                    .Include(x => x.Actors)
+                    .Include(x => x.Countries)
+                    .Include(x => x.Genres)
+                    .ApplyFilter(options)
+                    .ApplySort(options);
 
                 await SetNavigationIndexes(tvShowQuery.Select(x => new MediaNavigationIndexRow(
                     x.Title,
                     x.Year,
-                    x.Qualities.Max(q => (int?)q.Quality),
+                    (int?)x.Quality,
                     x.Duration,
                     x.AddedAt,
                     x.UpdatedAt,
@@ -156,7 +150,7 @@ public class GetMediaByTypeCommandHandler : ICommandHandler<GetMediaByTypeComman
                 _response.Countries.AddRange(tvShows.SelectMany(x => x.Countries).Select(x => x.Id).Distinct().OrderBy(x => x));
                 _response.Genres.AddRange(tvShows.SelectMany(x => x.Genres).Select(x => x.Id).Distinct().OrderBy(x => x));
                 _response.Qualities.AddRange(
-                    tvShows.SelectMany(x => x.Qualities).Select(x => x.Quality.ToId()).Distinct().OrderBy(x => x)
+                    tvShows.SelectMany(x => x.Qualities).Select(x => (int)x.Quality).Distinct().OrderBy(x => x)
                 );
 
                 break;
@@ -250,29 +244,7 @@ public class GetMediaByTypeCommandHandler : ICommandHandler<GetMediaByTypeComman
         );
     }
 
-    private static IQueryable<PlexMovie> ApplySort(IQueryable<PlexMovie> query, QueryOptions options)
-    {
-        var sort = options.Sort.FirstOrDefault();
-        if (sort?.Field != "quality")
-            return query.ApplySort(options);
-
-        return sort.Descending
-            ? query.OrderByDescending(x => x.MediaDataList.Max(q => (int?)q.Quality) ?? int.MinValue)
-            : query.OrderBy(x => x.MediaDataList.Max(q => (int?)q.Quality) ?? int.MinValue);
-    }
-
-    private static IQueryable<PlexTvShow> ApplySort(IQueryable<PlexTvShow> query, QueryOptions options)
-    {
-        var sort = options.Sort.FirstOrDefault();
-        if (sort?.Field != "quality")
-            return query.ApplySort(options);
-
-        return sort.Descending
-            ? query.OrderByDescending(x => x.Qualities.Max(q => (int?)q.Quality) ?? int.MinValue)
-            : query.OrderBy(x => x.Qualities.Max(q => (int?)q.Quality) ?? int.MinValue);
-    }
-
-    private void ApplyDefaultMediaSort(QueryOptions options, int plexLibraryId)
+ private void ApplyDefaultMediaSort(QueryOptions options, int plexLibraryId)
     {
         if (options.Sort.Count > 0 || plexLibraryId == 0)
             return;

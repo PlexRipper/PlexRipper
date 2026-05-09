@@ -5,8 +5,11 @@ public static partial class PlexMediaDataMapper
     public static List<PlexMovie> ToPlexMovies(this List<LibraryMediaItemDTO> source) =>
         source.Select(value => value.ToPlexMovie()).ToList();
 
-    public static PlexMovie ToPlexMovie(this LibraryMediaItemDTO source) =>
-        new()
+    public static PlexMovie ToPlexMovie(this LibraryMediaItemDTO source)
+    {
+        var mediaDataList = source.Media.ToMovieMediaDataList(source);
+
+        return new PlexMovie
         {
             Id = 0,
             Title = source.Title,
@@ -24,6 +27,7 @@ public static partial class PlexMediaDataMapper
 
             Duration = source.Duration,
             MediaSize = source.Media.Sum(y => y.Parts.Sum(z => z.Size)),
+            Quality = mediaDataList.Count == 0 ? VideoQuality.Unknown : mediaDataList.Max(x => x.Quality),
             ChildCount = source.ChildCount,
             AddedAt = source.AddedAt,
             UpdatedAt = source.UpdatedAt,
@@ -43,7 +47,7 @@ public static partial class PlexMediaDataMapper
             Countries = source.Country.ToPlexCountry(),
             Actors = source.Role.ToPlexActor(),
             Genres = source.Genre.ToPlexGenre(),
-            MediaDataList = source.Media.ToMovieMediaDataList(source),
+            MediaDataList = mediaDataList,
 
             FullTitle = $"{source.Title} ({source.Year})",
 
@@ -52,6 +56,7 @@ public static partial class PlexMediaDataMapper
             PlexServerId = 0,
             FullBannerUrl = string.Empty,
         };
+    }
 
     public static ICollection<PlexMovieMediaData> ToMovieMediaDataList(
         this List<LibraryMediaItemMediaDTO> source,

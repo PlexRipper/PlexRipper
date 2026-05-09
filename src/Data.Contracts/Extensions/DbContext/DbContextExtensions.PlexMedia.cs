@@ -89,6 +89,11 @@ public static partial class DbContextExtensions
         {
             plexMovies.SetRelationshipIds(plexServerId, plexLibraryId);
 
+            foreach (var movie in plexMovies)
+                movie.Quality = movie.MediaDataList.Count == 0
+                    ? VideoQuality.Unknown
+                    : movie.MediaDataList.Max(x => x.Quality);
+
             await context.BulkInsertAsync(plexMovies, BulkConfigPreset.Default, ct);
 
             // Add movie media data for each movie

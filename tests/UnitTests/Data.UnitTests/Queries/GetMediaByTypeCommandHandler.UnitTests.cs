@@ -607,6 +607,93 @@ public class GetMediaByTypeCommandHandlerUnitTests : BaseUnitTest<GetMediaByType
     }
 
     [Test]
+    public async Task ShouldSortMoviesByHighestQuality_WhenLegacyQualitySortFieldIsUsed()
+    {
+        // Arrange
+        await SetupDatabase(70030, cfg =>
+        {
+            cfg.PlexServerCount = 1;
+            cfg.PlexMovieLibraryCount = 1;
+            cfg.MovieCount = 3;
+        });
+
+        var dbContext = IDbContext;
+        var movieIds = await dbContext.PlexMovies
+            .OrderBy(x => x.Id)
+            .Select(x => x.Id)
+            .ToListAsync(CancellationToken);
+
+        await SetMovieQualitySortTestDataAsync(dbContext, movieIds);
+
+        var command = CreateCommand(PlexMediaType.Movie, 0, sort: "quality:asc", pageSize: 10);
+
+        // Act
+        var result = await Sut.ExecuteAsync(command, CancellationToken);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.Items.Select(x => x.Title).ShouldBe(["SD Movie", "HD Movie", "4K Movie"]);
+    }
+
+    [Test]
+    public async Task ShouldSortMoviesByHighestQualityDescending_WhenCanonicalHighestQualitySortFieldIsUsed()
+    {
+        // Arrange
+        await SetupDatabase(70031, cfg =>
+        {
+            cfg.PlexServerCount = 1;
+            cfg.PlexMovieLibraryCount = 1;
+            cfg.MovieCount = 3;
+        });
+
+        var dbContext = IDbContext;
+        var movieIds = await dbContext.PlexMovies
+            .OrderBy(x => x.Id)
+            .Select(x => x.Id)
+            .ToListAsync(CancellationToken);
+
+        await SetMovieQualitySortTestDataAsync(dbContext, movieIds);
+
+        var command = CreateCommand(PlexMediaType.Movie, 0, sort: "highestQuality:desc", pageSize: 10);
+
+        // Act
+        var result = await Sut.ExecuteAsync(command, CancellationToken);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.Items.Select(x => x.Title).ShouldBe(["4K Movie", "HD Movie", "SD Movie"]);
+    }
+
+    [Test]
+    public async Task ShouldSortTvShowsByHighestQuality_WhenLegacyQualitySortFieldIsUsed()
+    {
+        // Arrange
+        await SetupDatabase(70032, cfg =>
+        {
+            cfg.PlexServerCount = 1;
+            cfg.PlexTvShowLibraryCount = 1;
+            cfg.TvShowCount = 3;
+        });
+
+        var dbContext = IDbContext;
+        var tvShowIds = await dbContext.PlexTvShows
+            .OrderBy(x => x.Id)
+            .Select(x => x.Id)
+            .ToListAsync(CancellationToken);
+
+        await SetTvShowQualitySortTestDataAsync(dbContext, tvShowIds);
+
+        var command = CreateCommand(PlexMediaType.TvShow, 0, sort: "quality:asc", pageSize: 10);
+
+        // Act
+        var result = await Sut.ExecuteAsync(command, CancellationToken);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.Items.Select(x => x.Title).ShouldBe(["SD Show", "HD Show", "4K Show"]);
+    }
+
+    [Test]
     public async Task ShouldReturnOnlyRequestedLibrary_WhenSpecificLibraryIdAndSortProvided()
     {
         // Arrange
@@ -930,6 +1017,66 @@ public class GetMediaByTypeCommandHandlerUnitTests : BaseUnitTest<GetMediaByType
             country.Id,
             actor.Id
         );
+    }
+
+    private async Task SetMovieQualitySortTestDataAsync(IReaparrDbContext dbContext, IReadOnlyList<int> movieIds)
+    {
+        await dbContext.PlexMovies
+            .Where(x => x.Id == movieIds[0])
+            .ExecuteUpdateAsync(
+                x => x
+                    .SetProperty(y => y.Title, "SD Movie")
+                    .SetProperty(y => y.Quality, VideoQuality.SD),
+                CancellationToken
+            );
+
+        await dbContext.PlexMovies
+            .Where(x => x.Id == movieIds[1])
+            .ExecuteUpdateAsync(
+                x => x
+                    .SetProperty(y => y.Title, "4K Movie")
+                    .SetProperty(y => y.Quality, VideoQuality.UHD_4K),
+                CancellationToken
+            );
+
+        await dbContext.PlexMovies
+            .Where(x => x.Id == movieIds[2])
+            .ExecuteUpdateAsync(
+                x => x
+                    .SetProperty(y => y.Title, "HD Movie")
+                    .SetProperty(y => y.Quality, VideoQuality.FullHD),
+                CancellationToken
+            );
+    }
+
+    private async Task SetTvShowQualitySortTestDataAsync(IReaparrDbContext dbContext, IReadOnlyList<int> tvShowIds)
+    {
+        await dbContext.PlexTvShows
+            .Where(x => x.Id == tvShowIds[0])
+            .ExecuteUpdateAsync(
+                x => x
+                    .SetProperty(y => y.Title, "SD Show")
+                    .SetProperty(y => y.Quality, VideoQuality.SD),
+                CancellationToken
+            );
+
+        await dbContext.PlexTvShows
+            .Where(x => x.Id == tvShowIds[1])
+            .ExecuteUpdateAsync(
+                x => x
+                    .SetProperty(y => y.Title, "4K Show")
+                    .SetProperty(y => y.Quality, VideoQuality.UHD_4K),
+                CancellationToken
+            );
+
+        await dbContext.PlexTvShows
+            .Where(x => x.Id == tvShowIds[2])
+            .ExecuteUpdateAsync(
+                x => x
+                    .SetProperty(y => y.Title, "HD Show")
+                    .SetProperty(y => y.Quality, VideoQuality.FullHD),
+                CancellationToken
+            );
     }
 
     private static void AssertReturnedExactMovies(PagedMediaQueryResult result, IReadOnlyCollection<int> expectedMovieIds)

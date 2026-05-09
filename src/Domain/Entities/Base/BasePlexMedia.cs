@@ -43,6 +43,12 @@ public class BasePlexMedia : BaseEntity
     public required long MediaSize { get; set; }
 
     /// <summary>
+    /// Gets or sets the highest available video quality for this media item or based on its children
+    /// </summary>
+    [Column(Order = 17)]
+    public VideoQuality Quality { get; set; } = VideoQuality.Unknown;
+
+    /// <summary>
     /// Gets or sets the key used to retrieve thumbnails, art or banners.
     /// E.g. /library/metadata/[Key]/art/[MetadataKey] =>  /library/metadata/529367/art/1593898227.
     /// </summary>

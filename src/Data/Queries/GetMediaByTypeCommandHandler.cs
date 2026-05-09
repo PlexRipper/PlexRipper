@@ -25,6 +25,8 @@ public class GetMediaByTypeCommandHandler : ICommandHandler<GetMediaByTypeComman
 {
     private readonly IReaparrDbContext _dbContext;
 
+    private PagedMediaQueryResult _response = new();
+
     public GetMediaByTypeCommandHandler(IReaparrDbContext dbContext)
     {
         _dbContext = dbContext;
@@ -35,7 +37,6 @@ public class GetMediaByTypeCommandHandler : ICommandHandler<GetMediaByTypeComman
         CancellationToken ct)
     {
         var filter = command.Filter;
-        List<PlexMediaSlimDTO> plexMediaSlimDtos;
         var plexLibraryId = filter.PlexLibraryId;
 
         // Get only enabled servers
@@ -67,11 +68,7 @@ public class GetMediaByTypeCommandHandler : ICommandHandler<GetMediaByTypeComman
         }
 
         if (plexLibraryId == 0 && !allowedPlexLibraryIds.Any())
-            return Result.Ok(new PagedMediaQueryResult
-            {
-                TotalCount = 0,
-                Items = [],
-            });
+            return Result.Ok(_response);
 
         var options = QueryOptionsParser.Parse(filter.Parameters);
 
@@ -87,7 +84,7 @@ public class GetMediaByTypeCommandHandler : ICommandHandler<GetMediaByTypeComman
         }
 
         ApplyDefaultMediaSort(options, plexLibraryId);
-
+      
         switch (filter.MediaType)
         {
             case PlexMediaType.Movie:
@@ -99,7 +96,7 @@ public class GetMediaByTypeCommandHandler : ICommandHandler<GetMediaByTypeComman
                     .ApplyPaging(options)
                     .ToListAsync(ct);
 
-                plexMediaSlimDtos = movies.Select(x => x.ToSlimDTO()).ToList();
+                _response.Items = movies.Select(x => x.ToSlimDTO()).ToList();
 
                 break;
             }
@@ -112,7 +109,7 @@ public class GetMediaByTypeCommandHandler : ICommandHandler<GetMediaByTypeComman
                     .ApplyPaging(options)
                     .ToListAsync(ct);
 
-                plexMediaSlimDtos = tvShows.Select(x => x.ToSlimDTOMapper()).ToList();
+                _response.Items = tvShows.Select(x => x.ToSlimDTOMapper()).ToList();
                 break;
             }
             default:
@@ -121,22 +118,15 @@ public class GetMediaByTypeCommandHandler : ICommandHandler<GetMediaByTypeComman
                 );
         }
 
-        // if (plexLibraryId == 0)
-        //     plexMediaSlimDtos = plexMediaSlimDtos.OrderByNatural(x => x.SearchTitle).ToList();
-
-        for (var i = 0; i < plexMediaSlimDtos.Count; i++)
+       for (var i = 0; i < _response.Items.Count; i++)
         {
-            var slimDTO = plexMediaSlimDtos[i];
+            var slimDTO = _response.Items[i];
 
             slimDTO.SortIndex = i + 1;
         }
 
         // If the plexLibraryId is set, we don't need to sort the list again
-        return Result.Ok(new PagedMediaQueryResult
-        {
-            TotalCount = plexMediaSlimDtos.Count,
-            Items = plexMediaSlimDtos,
-        });
+        return Result.Ok(_response);
     }
 
     /// <summary>
@@ -215,111 +205,5 @@ public class GetMediaByTypeCommandHandler : ICommandHandler<GetMediaByTypeComman
             }
         );
     }
-
-    private static QueryExecutionOptions CreateMovieFlexQueryExecutionOptions()
-    {
-        var options = CreateBaseFlexQueryExecutionOptions(
-            filterableFields:
-            [
-                nameof(BasePlexMedia.Title),
-                nameof(BasePlexMedia.SearchTitle),
-                nameof(BasePlexMedia.Year),
-                nameof(BasePlexMedia.Rating),
-                nameof(BasePlexMedia.Studio),
-                nameof(BasePlexMedia.ContentRating),
-                nameof(BasePlexMedia.PlexLibraryId),
-                nameof(BasePlexMedia.PlexServerId),
-                "Countries.Id",
-                "Genres.Id",
-                "Actors.Id",
-                "MediaDataList.Quality",
-            ]
-        );
-
-        options.AllowOperators("MediaDataList.Quality", FilterOperators.Equal, FilterOperators.In);
-        return options;
-    }
-
-    private static QueryExecutionOptions CreateTvShowFlexQueryExecutionOptions()
-    {
-        var options = CreateBaseFlexQueryExecutionOptions(
-            filterableFields:
-            [
-                nameof(BasePlexMedia.Title),
-                nameof(BasePlexMedia.SearchTitle),
-                nameof(BasePlexMedia.Year),
-                nameof(BasePlexMedia.Rating),
-                nameof(BasePlexMedia.Studio),
-                nameof(BasePlexMedia.ContentRating),
-                nameof(BasePlexMedia.PlexLibraryId),
-                nameof(BasePlexMedia.PlexServerId),
-                "Countries.Id",
-                "Genres.Id",
-                "Actors.Id",
-                "Qualities.Quality",
-            ]
-        );
-
-        options.AllowOperators("Qualities.Quality", FilterOperators.Equal, FilterOperators.In);
-        return options;
-    }
-
-    private static QueryExecutionOptions CreateBaseFlexQueryExecutionOptions(HashSet<string> filterableFields)
-    {
-        var sortableFields = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
-        {
-            nameof(BasePlexMedia.Title),
-            nameof(BasePlexMedia.SearchTitle),
-            nameof(BasePlexMedia.Year),
-            nameof(BasePlexMedia.Rating),
-            nameof(BasePlexMedia.SortIndex),
-            nameof(BasePlexMedia.AddedAt),
-            nameof(BasePlexMedia.OriginallyAvailableAt),
-        };
-
-        var selectableFields = new HashSet<string>(sortableFields, StringComparer.OrdinalIgnoreCase)
-        {
-            nameof(BaseEntity.Id),
-            nameof(BasePlexMedia.Duration),
-            nameof(BasePlexMedia.MediaSize),
-            nameof(BasePlexMedia.ChildCount),
-            nameof(BasePlexMedia.FullTitle),
-        };
-
-        var allowedFields = new HashSet<string>(filterableFields, StringComparer.OrdinalIgnoreCase);
-        allowedFields.UnionWith(sortableFields);
-        allowedFields.UnionWith(selectableFields);
-
-        var options = new QueryExecutionOptions
-        {
-            AllowedFields = allowedFields,
-            FilterableFields = filterableFields,
-            SortableFields = sortableFields,
-            SelectableFields = selectableFields,
-            MaxFieldDepth = 2,
-            StrictFieldValidation = true,
-            MaxPageSize = 1000,
-            UseNoTracking = true,
-        };
-
-        foreach (var field in new[] { "Countries.Id", "Genres.Id", "Actors.Id" })
-            options.AllowOperators(field, FilterOperators.Equal, FilterOperators.In);
-
-        foreach (var field in new[] { nameof(BasePlexMedia.PlexLibraryId), nameof(BasePlexMedia.PlexServerId) })
-            options.AllowOperators(field, FilterOperators.Equal, FilterOperators.In);
-
-        foreach (var field in new[]
-                     { nameof(BasePlexMedia.Title), nameof(BasePlexMedia.SearchTitle), nameof(BasePlexMedia.Studio) })
-            options.AllowOperators(field, FilterOperators.Equal, FilterOperators.Contains, FilterOperators.StartsWith);
-
-        return options;
-    }
-
-    private static Error CreateFlexQueryValidationError(FlexQuery.NET.Validation.ValidationResult validation) => new(
-        "FlexQuery validation failed: "
-        + string.Join(
-            "; ",
-            validation.Errors.Select(error => $"{error.Field} [{error.Code}]: {error.Message}")
-        )
-    );
+    
 }

@@ -2,20 +2,20 @@ namespace Reaparr.Data.Contracts;
 
 public record PagedMediaQueryResult
 {
-    public required int TotalCount { get; init; }
+    public int TotalCount { get; set; }
     
-    public required int MediaCount { get; init; }
+    public int MediaCount { get; set; }
 
-    public required int MovieCount { get; init; }
+    public int MovieCount { get; set; }
 
-    public required int TvShowCount { get; init; }
+    public int TvShowCount { get; set; }
 
-    public required int SeasonCount { get; init; }
+    public int SeasonCount { get; set; }
 
-    public required int EpisodeCount { get; init; }
+    public int EpisodeCount { get; set; }
 
-    public required long MediaSize { get; init; }
-    
-    public required List<PlexMediaSlimDTO> Items { get; init; }
+    public long MediaSize { get; set; }
+
+    public List<PlexMediaSlimDTO> Items { get; set; } = [];
 
 }

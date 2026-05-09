@@ -1,0 +1,661 @@
+using FlexQuery.NET.Models;
+
+namespace Reaparr.Data.UnitTests;
+
+public class GetMediaByTypeCommandHandlerUnitTests : BaseUnitTest<GetMediaByTypeCommandHandler>
+{
+    [Test]
+    public async Task ShouldReturnOnlyMoviesFromSpecificLibrary_WhenPlexLibraryIdIsSet()
+    {
+        // Arrange
+        await SetupDatabase(70001, cfg =>
+        {
+            cfg.PlexServerCount = 1;
+            cfg.PlexMovieLibraryCount = 5;
+            cfg.MovieCount = 6;
+        });
+
+        var dbContext = IDbContext;
+        var targetLibraryId = await dbContext.PlexLibraries
+            .Where(x => x.Type == PlexMediaType.Movie)
+            .Select(x => x.Id)
+            .FirstAsync(CancellationToken);
+
+        var command = CreateCommand(PlexMediaType.Movie, targetLibraryId);
+
+        // Act
+        var result = await Sut.ExecuteAsync(command, CancellationToken);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.Items.ShouldNotBeEmpty();
+        result.Value.Items.ShouldAllBe(x => x.PlexLibraryId == targetLibraryId);
+    }
+
+    [Test]
+    public async Task ShouldReturnOnlyTvShowsFromSpecificLibrary_WhenPlexLibraryIdIsSet()
+    {
+        // Arrange
+        await SetupDatabase(70002, cfg =>
+        {
+            cfg.PlexServerCount = 1;
+            cfg.PlexTvShowLibraryCount = 2;
+            cfg.TvShowCount = 6;
+        });
+
+        var dbContext = IDbContext;
+        var targetLibraryId = await dbContext.PlexLibraries
+            .Where(x => x.Type == PlexMediaType.TvShow)
+            .Select(x => x.Id)
+            .FirstAsync(CancellationToken);
+
+        var command = CreateCommand(PlexMediaType.TvShow, targetLibraryId);
+
+        // Act
+        var result = await Sut.ExecuteAsync(command, CancellationToken);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.Items.ShouldNotBeEmpty();
+        result.Value.Items.ShouldAllBe(x => x.PlexLibraryId == targetLibraryId);
+    }
+
+    [Test]
+    public async Task ShouldReturnMoviesFromMultipleLibraries_WhenPlexLibraryIdIsZero()
+    {
+        // Arrange
+        await SetupDatabase(70003, cfg =>
+        {
+            cfg.PlexServerCount = 1;
+            cfg.PlexMovieLibraryCount = 2;
+            cfg.MovieCount = 4;
+        });
+
+        var command = CreateCommand(PlexMediaType.Movie, 0);
+
+        // Act
+        var result = await Sut.ExecuteAsync(command, CancellationToken);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.Items.ShouldNotBeEmpty();
+        result.Value.Items.Select(x => x.PlexLibraryId).Distinct().Count().ShouldBe(2);
+    }
+
+    [Test]
+    public async Task ShouldExcludeOwnedLibraries_WhenFilterOwnedMediaIsTrueForAllLibraries()
+    {
+        // Arrange
+        await SetupDatabase(70004, cfg =>
+        {
+            cfg.PlexServerCount = 1;
+            cfg.PlexMovieLibraryCount = 2;
+            cfg.MovieCount = 4;
+            cfg.PlexAccountCount = 1;
+        });
+
+        var dbContext = IDbContext;
+        var libraryToKeep = await dbContext.PlexLibraries
+            .Where(x => x.Type == PlexMediaType.Movie)
+            .OrderBy(x => x.Id)
+            .Select(x => x.Id)
+            .FirstAsync(CancellationToken);
+
+        await dbContext.PlexAccountLibraries
+            .Where(x => x.PlexLibraryId == libraryToKeep)
+            .ExecuteUpdateAsync(x => x.SetProperty(y => y.IsLibraryOwned, false), CancellationToken);
+
+        var command = CreateCommand(PlexMediaType.Movie, 0, filterOwnedMedia: true);
+
+        // Act
+        var result = await Sut.ExecuteAsync(command, CancellationToken);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.Items.ShouldNotBeEmpty();
+        result.Value.Items.ShouldAllBe(x => x.PlexLibraryId == libraryToKeep);
+    }
+
+    [Test]
+    public async Task ShouldReturnEmpty_WhenAllLibrariesAreOwnedAndFilterOwnedMediaIsTrueForAllLibraries()
+    {
+        // Arrange
+        await SetupDatabase(70005, cfg =>
+        {
+            cfg.PlexServerCount = 1;
+            cfg.PlexMovieLibraryCount = 2;
+            cfg.MovieCount = 4;
+            cfg.PlexAccountCount = 1;
+        });
+
+        var command = CreateCommand(PlexMediaType.Movie, 0, filterOwnedMedia: true);
+
+        // Act
+        var result = await Sut.ExecuteAsync(command, CancellationToken);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.TotalCount.ShouldBe(0);
+        result.Value.Items.ShouldBeEmpty();
+    }
+
+    [Test]
+    public async Task ShouldExcludeOfflineServerLibraries_WhenFilterOfflineMediaIsTrueForAllLibraries()
+    {
+        // Arrange
+        await SetupDatabase(70006, cfg =>
+        {
+            cfg.PlexServerCount = 2;
+            cfg.PlexMovieLibraryCount = 1;
+            cfg.MovieCount = 3;
+        });
+
+        var dbContext = IDbContext;
+        var serverIds = await dbContext.PlexServers
+            .OrderBy(x => x.Id)
+            .Select(x => x.Id)
+            .ToListAsync(CancellationToken);
+        var offlineServerId = serverIds.Last();
+
+        await dbContext.PlexServerStatuses
+            .Where(x => x.PlexServerId == offlineServerId)
+            .ExecuteDeleteAsync(CancellationToken);
+
+        var command = CreateCommand(PlexMediaType.Movie, 0, filterOfflineMedia: true);
+
+        // Act
+        var result = await Sut.ExecuteAsync(command, CancellationToken);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.Items.ShouldNotBeEmpty();
+        result.Value.Items.ShouldAllBe(x => x.PlexServerId != offlineServerId);
+    }
+
+    [Test]
+    public async Task ShouldReturnEmpty_WhenAllServersAreOfflineAndFilterOfflineMediaIsTrueForAllLibraries()
+    {
+        // Arrange
+        await SetupDatabase(70007, cfg =>
+        {
+            cfg.PlexServerCount = 2;
+            cfg.PlexMovieLibraryCount = 1;
+            cfg.MovieCount = 3;
+        });
+
+        var dbContext = IDbContext;
+        await dbContext.PlexServerStatuses.ExecuteDeleteAsync(CancellationToken);
+
+        var command = CreateCommand(PlexMediaType.Movie, 0, filterOfflineMedia: true);
+
+        // Act
+        var result = await Sut.ExecuteAsync(command, CancellationToken);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.TotalCount.ShouldBe(0);
+        result.Value.Items.ShouldBeEmpty();
+    }
+
+    [Test]
+    public async Task ShouldIgnoreOwnedFilter_WhenSpecificPlexLibraryIdIsSet()
+    {
+        // Arrange
+        await SetupDatabase(70008, cfg =>
+        {
+            cfg.PlexServerCount = 1;
+            cfg.PlexMovieLibraryCount = 2;
+            cfg.MovieCount = 4;
+            cfg.PlexAccountCount = 1;
+        });
+
+        var dbContext = IDbContext;
+        var targetLibraryId = await dbContext.PlexLibraries
+            .Where(x => x.Type == PlexMediaType.Movie)
+            .Select(x => x.Id)
+            .FirstAsync(CancellationToken);
+
+        var command = CreateCommand(PlexMediaType.Movie, targetLibraryId, filterOwnedMedia: true);
+
+        // Act
+        var result = await Sut.ExecuteAsync(command, CancellationToken);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.Items.ShouldNotBeEmpty();
+        result.Value.Items.ShouldAllBe(x => x.PlexLibraryId == targetLibraryId);
+    }
+
+    [Test]
+    public async Task ShouldIgnoreOfflineFilter_WhenSpecificPlexLibraryIdIsSet()
+    {
+        // Arrange
+        await SetupDatabase(70009, cfg =>
+        {
+            cfg.PlexServerCount = 1;
+            cfg.PlexMovieLibraryCount = 1;
+            cfg.MovieCount = 4;
+        });
+
+        var dbContext = IDbContext;
+        await dbContext.PlexServerStatuses.ExecuteDeleteAsync(CancellationToken);
+
+        var targetLibraryId = await dbContext.PlexLibraries
+            .Where(x => x.Type == PlexMediaType.Movie)
+            .Select(x => x.Id)
+            .FirstAsync(CancellationToken);
+
+        var command = CreateCommand(PlexMediaType.Movie, targetLibraryId, filterOfflineMedia: true);
+
+        // Act
+        var result = await Sut.ExecuteAsync(command, CancellationToken);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.Items.ShouldNotBeEmpty();
+        result.Value.Items.ShouldAllBe(x => x.PlexLibraryId == targetLibraryId);
+    }
+
+    [Test]
+    public async Task ShouldFail_WhenUnsupportedMediaTypeIsRequested()
+    {
+        // Arrange
+        await SetupDatabase(70010, cfg =>
+        {
+            cfg.PlexServerCount = 1;
+            cfg.PlexMovieLibraryCount = 1;
+            cfg.MovieCount = 2;
+        });
+
+        var command = CreateCommand(PlexMediaType.Season, 0);
+
+        // Act
+        var result = await Sut.ExecuteAsync(command, CancellationToken);
+
+        // Assert
+        result.IsFailed.ShouldBeTrue();
+        result.Errors.ShouldContain(x => x.Message.Contains("not supported"));
+    }
+
+    [Test]
+    public async Task ShouldReturnEmpty_WhenNoAllowedLibrariesExistInAllLibraryMode()
+    {
+        // Arrange
+        await SetupDatabase(70011);
+
+        var command = CreateCommand(PlexMediaType.Movie, 0);
+
+        // Act
+        var result = await Sut.ExecuteAsync(command, CancellationToken);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.TotalCount.ShouldBe(0);
+        result.Value.Items.ShouldBeEmpty();
+    }
+
+    [Test]
+    public async Task ShouldAssignSortIndexesSequentiallyForMovies_WhenResultsReturned()
+    {
+        // Arrange
+        await SetupDatabase(70012, cfg =>
+        {
+            cfg.PlexServerCount = 1;
+            cfg.PlexMovieLibraryCount = 1;
+            cfg.MovieCount = 6;
+        });
+
+        var command = CreateCommand(PlexMediaType.Movie, 0);
+
+        // Act
+        var result = await Sut.ExecuteAsync(command, CancellationToken);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.Items.ShouldNotBeEmpty();
+        result.Value.Items.Select(x => x.SortIndex).ShouldBe(Enumerable.Range(1, result.Value.Items.Count));
+    }
+
+    [Test]
+    public async Task ShouldAssignSortIndexesSequentiallyForTvShows_WhenResultsReturned()
+    {
+        // Arrange
+        await SetupDatabase(70013, cfg =>
+        {
+            cfg.PlexServerCount = 1;
+            cfg.PlexTvShowLibraryCount = 1;
+            cfg.TvShowCount = 6;
+        });
+
+        var command = CreateCommand(PlexMediaType.TvShow, 0);
+
+        // Act
+        var result = await Sut.ExecuteAsync(command, CancellationToken);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.Items.ShouldNotBeEmpty();
+        result.Value.Items.Select(x => x.SortIndex).ShouldBe(Enumerable.Range(1, result.Value.Items.Count));
+    }
+
+    [Test]
+    public async Task ShouldRespectPaging_WhenPageAndPageSizeAreProvided()
+    {
+        // Arrange
+        await SetupDatabase(70014, cfg =>
+        {
+            cfg.PlexServerCount = 1;
+            cfg.PlexMovieLibraryCount = 1;
+            cfg.MovieCount = 8;
+        });
+
+        var command = CreateCommand(PlexMediaType.Movie, 0, page: 1, pageSize: 3);
+
+        // Act
+        var result = await Sut.ExecuteAsync(command, CancellationToken);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.Items.Count.ShouldBe(3);
+    }
+
+    [Test]
+    public async Task ShouldReturnDifferentPageData_WhenPageChanges()
+    {
+        // Arrange
+        await SetupDatabase(70015, cfg =>
+        {
+            cfg.PlexServerCount = 1;
+            cfg.PlexMovieLibraryCount = 1;
+            cfg.MovieCount = 10;
+        });
+
+        var page1 = CreateCommand(PlexMediaType.Movie, 0, page: 1, pageSize: 3);
+        var page2 = CreateCommand(PlexMediaType.Movie, 0, page: 2, pageSize: 3);
+
+        // Act
+        var resultPage1 = await Sut.ExecuteAsync(page1, CancellationToken);
+        var resultPage2 = await Sut.ExecuteAsync(page2, CancellationToken);
+
+        // Assert
+        resultPage1.IsSuccess.ShouldBeTrue();
+        resultPage2.IsSuccess.ShouldBeTrue();
+        resultPage1.Value.Items.Select(x => x.Id)
+            .ShouldNotBe(resultPage2.Value.Items.Select(x => x.Id));
+    }
+
+    [Test]
+    public async Task ShouldReturnEmpty_WhenSpecificLibraryIdDoesNotExist()
+    {
+        // Arrange
+        await SetupDatabase(70016, cfg =>
+        {
+            cfg.PlexServerCount = 1;
+            cfg.PlexMovieLibraryCount = 1;
+            cfg.MovieCount = 4;
+        });
+
+        var command = CreateCommand(PlexMediaType.Movie, 999999);
+
+        // Act
+        var result = await Sut.ExecuteAsync(command, CancellationToken);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.TotalCount.ShouldBe(0);
+        result.Value.Items.ShouldBeEmpty();
+    }
+
+    [Test]
+    public async Task ShouldReturnOnlyMovies_WhenMovieTypeRequestedAndBothMediaTypesExist()
+    {
+        // Arrange
+        await SetupDatabase(70017, cfg =>
+        {
+            cfg.PlexServerCount = 1;
+            cfg.PlexMovieLibraryCount = 1;
+            cfg.PlexTvShowLibraryCount = 1;
+            cfg.MovieCount = 5;
+            cfg.TvShowCount = 5;
+        });
+
+        var command = CreateCommand(PlexMediaType.Movie, 0);
+
+        // Act
+        var result = await Sut.ExecuteAsync(command, CancellationToken);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.Items.ShouldNotBeEmpty();
+        result.Value.Items.ShouldAllBe(x => x.Type == PlexMediaType.Movie);
+    }
+
+    [Test]
+    public async Task ShouldReturnOnlyTvShows_WhenTvShowTypeRequestedAndBothMediaTypesExist()
+    {
+        // Arrange
+        await SetupDatabase(70018, cfg =>
+        {
+            cfg.PlexServerCount = 1;
+            cfg.PlexMovieLibraryCount = 1;
+            cfg.PlexTvShowLibraryCount = 1;
+            cfg.MovieCount = 5;
+            cfg.TvShowCount = 5;
+        });
+
+        var command = CreateCommand(PlexMediaType.TvShow, 0);
+
+        // Act
+        var result = await Sut.ExecuteAsync(command, CancellationToken);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.Items.ShouldNotBeEmpty();
+        result.Value.Items.ShouldAllBe(x => x.Type == PlexMediaType.TvShow);
+    }
+
+    [Test]
+    public async Task ShouldNotExcludeOwnedLibraries_WhenFilterOwnedMediaIsFalse()
+    {
+        // Arrange
+        await SetupDatabase(70019, cfg =>
+        {
+            cfg.PlexServerCount = 1;
+            cfg.PlexMovieLibraryCount = 2;
+            cfg.MovieCount = 4;
+            cfg.PlexAccountCount = 1;
+        });
+
+        var command = CreateCommand(PlexMediaType.Movie, 0, filterOwnedMedia: false);
+
+        // Act
+        var result = await Sut.ExecuteAsync(command, CancellationToken);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.Items.ShouldNotBeEmpty();
+        result.Value.Items.Select(x => x.PlexLibraryId).Distinct().Count().ShouldBe(2);
+    }
+
+    [Test]
+    public async Task ShouldNotExcludeOfflineLibraries_WhenFilterOfflineMediaIsFalse()
+    {
+        // Arrange
+        await SetupDatabase(70020, cfg =>
+        {
+            cfg.PlexServerCount = 1;
+            cfg.PlexMovieLibraryCount = 1;
+            cfg.MovieCount = 4;
+        });
+
+        var dbContext = IDbContext;
+        await dbContext.PlexServerStatuses.ExecuteDeleteAsync(CancellationToken);
+
+        var command = CreateCommand(PlexMediaType.Movie, 0, filterOfflineMedia: false);
+
+        // Act
+        var result = await Sut.ExecuteAsync(command, CancellationToken);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.Items.ShouldNotBeEmpty();
+    }
+
+    [Test]
+    public async Task ShouldReturnEmpty_WhenSpecificLibraryExistsButForDifferentMediaType()
+    {
+        // Arrange
+        await SetupDatabase(70021, cfg =>
+        {
+            cfg.PlexServerCount = 1;
+            cfg.PlexMovieLibraryCount = 1;
+            cfg.PlexTvShowLibraryCount = 1;
+            cfg.MovieCount = 4;
+            cfg.TvShowCount = 4;
+        });
+
+        var dbContext = IDbContext;
+        var movieLibraryId = await dbContext.PlexLibraries
+            .Where(x => x.Type == PlexMediaType.Movie)
+            .Select(x => x.Id)
+            .FirstAsync(CancellationToken);
+
+        var command = CreateCommand(PlexMediaType.TvShow, movieLibraryId);
+
+        // Act
+        var result = await Sut.ExecuteAsync(command, CancellationToken);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.Items.ShouldBeEmpty();
+    }
+
+    [Test]
+    public async Task ShouldReturnEmpty_WhenRequestedPageIsBeyondAvailableRange()
+    {
+        // Arrange
+        await SetupDatabase(70022, cfg =>
+        {
+            cfg.PlexServerCount = 1;
+            cfg.PlexMovieLibraryCount = 1;
+            cfg.MovieCount = 3;
+        });
+
+        var command = CreateCommand(PlexMediaType.Movie, 0, page: 5, pageSize: 10);
+
+        // Act
+        var result = await Sut.ExecuteAsync(command, CancellationToken);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.Items.ShouldBeEmpty();
+        result.Value.TotalCount.ShouldBe(0);
+    }
+
+    [Test]
+    public async Task ShouldTreatServerAsOffline_WhenOnlyUnsuccessfulStatusesExistAndFilterOfflineMediaIsTrue()
+    {
+        // Arrange
+        await SetupDatabase(70023, cfg =>
+        {
+            cfg.PlexServerCount = 1;
+            cfg.PlexMovieLibraryCount = 1;
+            cfg.MovieCount = 5;
+        });
+
+        var dbContext = IDbContext;
+        await dbContext.PlexServerStatuses
+            .ExecuteUpdateAsync(x => x.SetProperty(y => y.IsSuccessful, false), CancellationToken);
+
+        var command = CreateCommand(PlexMediaType.Movie, 0, filterOfflineMedia: true);
+
+        // Act
+        var result = await Sut.ExecuteAsync(command, CancellationToken);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.Items.ShouldBeEmpty();
+    }
+
+    [Test]
+    public async Task ShouldApplyProvidedSort_WhenSortExpressionIsSet()
+    {
+        // Arrange
+        await SetupDatabase(70024, cfg =>
+        {
+            cfg.PlexServerCount = 1;
+            cfg.PlexMovieLibraryCount = 1;
+            cfg.MovieCount = 10;
+        });
+
+        var command = CreateCommand(PlexMediaType.Movie, 0, sort: "Year:desc", pageSize: 10);
+
+        // Act
+        var result = await Sut.ExecuteAsync(command, CancellationToken);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.Items.Count.ShouldBeGreaterThanOrEqualTo(2);
+        result.Value.Items.Zip(result.Value.Items.Skip(1))
+            .ShouldAllBe(x => x.First.Year >= x.Second.Year);
+    }
+
+    [Test]
+    public async Task ShouldReturnOnlyRequestedLibrary_WhenSpecificLibraryIdAndSortProvided()
+    {
+        // Arrange
+        await SetupDatabase(70025, cfg =>
+        {
+            cfg.PlexServerCount = 1;
+            cfg.PlexMovieLibraryCount = 2;
+            cfg.MovieCount = 5;
+        });
+
+        var dbContext = IDbContext;
+        var targetLibraryId = await dbContext.PlexLibraries
+            .Where(x => x.Type == PlexMediaType.Movie)
+            .OrderBy(x => x.Id)
+            .Select(x => x.Id)
+            .FirstAsync(CancellationToken);
+
+        var command = CreateCommand(
+            PlexMediaType.Movie,
+            targetLibraryId,
+            sort: "Year:asc",
+            pageSize: 10
+        );
+
+        // Act
+        var result = await Sut.ExecuteAsync(command, CancellationToken);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.Items.ShouldNotBeEmpty();
+        result.Value.Items.ShouldAllBe(x => x.PlexLibraryId == targetLibraryId);
+    }
+
+    private static GetMediaByTypeCommand CreateCommand(
+        PlexMediaType mediaType,
+        int plexLibraryId,
+        bool filterOfflineMedia = false,
+        bool filterOwnedMedia = false,
+        int? page = null,
+        int? pageSize = null,
+        string? sort = null
+    ) => new()
+    {
+        Filter = new MediaQueryFilter
+        {
+            MediaType = mediaType,
+            PlexLibraryId = plexLibraryId,
+            FilterOfflineMedia = filterOfflineMedia,
+            FilterOwnedMedia = filterOwnedMedia,
+            Parameters = new FlexQueryParameters
+            {
+                Page = page,
+                PageSize = pageSize,
+                Sort = sort,
+            },
+        },
+    };
+}

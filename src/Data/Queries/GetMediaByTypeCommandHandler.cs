@@ -6,14 +6,18 @@ using Reaparr.Application.Contracts;
 
 namespace Reaparr.Data;
 
-
 public class GetMediaByTypeCommandValidator : AbstractValidator<GetMediaByTypeCommand>
 {
     public GetMediaByTypeCommandValidator()
     {
         RuleFor(x => x).NotNull();
 
-        // Add more rules here...
+        RuleFor(x => x.Filter).NotNull();
+
+        RuleFor(x => x.Filter.MediaType)
+            .Must(mediaType => mediaType is not PlexMediaType.None and not PlexMediaType.Unknown)
+            .When(x => x.Filter.PlexLibraryId == 0)
+            .WithMessage("MediaType is required when PlexLibraryId is 0.");
     }
 }
 
@@ -70,7 +74,18 @@ public class GetMediaByTypeCommandHandler : ICommandHandler<GetMediaByTypeComman
             });
 
         var options = QueryOptionsParser.Parse(filter.Parameters);
-        options = WithServerLibraryScope(options, allowedPlexLibraryIds, plexLibraryId);
+
+        if (plexLibraryId == 0)
+        {
+            options = WithServerLibraryScope(options, allowedPlexLibraryIds, plexLibraryId);
+        }
+        else
+        {
+            // Specific library requests should ignore owned/offline visibility filters,
+            // but still be scoped to the requested library id.
+            options = WithServerLibraryScope(options, [plexLibraryId], plexLibraryId);
+        }
+
         ApplyDefaultMediaSort(options, plexLibraryId);
 
         switch (filter.MediaType)
@@ -165,7 +180,9 @@ public class GetMediaByTypeCommandHandler : ICommandHandler<GetMediaByTypeComman
                 {
                     Field = nameof(BasePlexMedia.PlexLibraryId),
                     Operator = scopedLibraryIds.Count == 1 ? FilterOperators.Equal : FilterOperators.In,
-                    Value = scopedLibraryIds.Count == 1 ? scopedLibraryIds.First().ToString() : string.Join(',', scopedLibraryIds),
+                    Value = scopedLibraryIds.Count == 1
+                        ? scopedLibraryIds.First().ToString()
+                        : string.Join(',', scopedLibraryIds),
                 },
             ],
         };

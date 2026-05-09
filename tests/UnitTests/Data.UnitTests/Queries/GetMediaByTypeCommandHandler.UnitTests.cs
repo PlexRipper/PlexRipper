@@ -376,15 +376,16 @@ public class GetMediaByTypeCommandHandlerUnitTests : BaseUnitTest<GetMediaByType
         // Act
         var sutForPage1 = Mock.Create<GetMediaByTypeCommandHandler>();
         var resultPage1 = await sutForPage1.ExecuteAsync(page1, CancellationToken);
+        var page1Ids = resultPage1.Value.Items.Select(x => x.Id).ToList();
 
         var sutForPage2 = Mock.Create<GetMediaByTypeCommandHandler>();
         var resultPage2 = await sutForPage2.ExecuteAsync(page2, CancellationToken);
+        var page2Ids = resultPage2.Value.Items.Select(x => x.Id).ToList();
 
         // Assert
         resultPage1.IsSuccess.ShouldBeTrue();
         resultPage2.IsSuccess.ShouldBeTrue();
-        resultPage1.Value.Items.Select(x => x.Id)
-            .ShouldNotBe(resultPage2.Value.Items.Select(x => x.Id));
+        page1Ids.ShouldNotBe(page2Ids);
     }
 
     [Test]
@@ -740,7 +741,7 @@ public class GetMediaByTypeCommandHandlerUnitTests : BaseUnitTest<GetMediaByType
         // Assert
         result.IsSuccess.ShouldBeTrue();
         result.IsFailed.ShouldBeFalse();
-        AssertReturnedExactMovies(result.Value, [expectedMovie.MovieId]);
+        AssertReturnedExactMovies(result.Value, [expectedMovie.MovieId, expectedMovie.CountryOnlyMovieId]);
     }
 
     [Test]
@@ -769,7 +770,7 @@ public class GetMediaByTypeCommandHandlerUnitTests : BaseUnitTest<GetMediaByType
         // Assert
         result.IsSuccess.ShouldBeTrue();
         result.IsFailed.ShouldBeFalse();
-        AssertReturnedExactMovies(result.Value, [expectedMovie.MovieId]);
+        AssertReturnedExactMovies(result.Value, [expectedMovie.MovieId, expectedMovie.ActorOnlyMovieId]);
     }
 
     [Test]
@@ -798,7 +799,7 @@ public class GetMediaByTypeCommandHandlerUnitTests : BaseUnitTest<GetMediaByType
         // Assert
         result.IsSuccess.ShouldBeTrue();
         result.IsFailed.ShouldBeFalse();
-        AssertReturnedExactMovies(result.Value, [expectedMovie.MovieId]);
+        AssertReturnedExactMovies(result.Value, [expectedMovie.MovieId, expectedMovie.GenreOnlyMovieId]);
     }
 
     [Test]
@@ -838,6 +839,60 @@ public class GetMediaByTypeCommandHandlerUnitTests : BaseUnitTest<GetMediaByType
         result.IsFailed.ShouldBeFalse();
         AssertReturnedExactMovies(result.Value, [expectedMovie.MovieId]);
         result.Value.Items.ShouldAllBe(x => x.Qualities.Any(y => y.Quality == VideoQuality.FullHD));
+
+        var returnedMovieId = result.Value.Items.Single().Id;
+        var hasMatchingGenre = await dbContext.PlexMovieGenres
+            .AnyAsync(x => x.PlexMovieId == returnedMovieId && x.GenresId == expectedMovie.GenreId, CancellationToken);
+        var hasMatchingCountry = await dbContext.PlexMovieCountries
+            .AnyAsync(x => x.PlexMovieId == returnedMovieId && x.CountryId == expectedMovie.CountryId, CancellationToken);
+        var hasMatchingActor = await dbContext.PlexMovieActors
+            .AnyAsync(x => x.PlexMovieId == returnedMovieId && x.PlexActorId == expectedMovie.ActorId, CancellationToken);
+
+        hasMatchingGenre.ShouldBeTrue();
+        hasMatchingCountry.ShouldBeTrue();
+        hasMatchingActor.ShouldBeTrue();
+    }
+
+    [Test]
+    public async Task ShouldApplyCommaSeparatedMetadataAndQualityFilters_WhenFilterUsesApiQueryFormat()
+    {
+        // Arrange
+        await SetupDatabase(70032, cfg =>
+        {
+            cfg.PlexServerCount = 1;
+            cfg.PlexMovieLibraryCount = 1;
+            cfg.MovieCount = 6;
+        });
+
+        var dbContext = IDbContext;
+        var expectedMovie = await ConfigureExactMetadataMatchAsync(dbContext, VideoQuality.SD);
+        var targetLibraryId = await dbContext.PlexMovies
+            .Where(x => x.Id == expectedMovie.MovieId)
+            .Select(x => x.PlexLibraryId)
+            .SingleAsync(CancellationToken);
+
+        var command = CreateCommand(
+            PlexMediaType.Movie,
+            targetLibraryId,
+            pageSize: 100,
+            sort: "sortIndex:asc",
+            filter: $"Countries:any:Id:eq:{expectedMovie.CountryId},quality:eq:{VideoQuality.SD}"
+        );
+
+        // Act
+        var result = await Sut.ExecuteAsync(command, CancellationToken);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        result.IsFailed.ShouldBeFalse();
+        AssertReturnedExactMovies(result.Value, [expectedMovie.MovieId]);
+        result.Value.Items.ShouldAllBe(x => x.Qualities.Any(y => y.Quality == VideoQuality.SD));
+
+        var returnedMovieId = result.Value.Items.Single().Id;
+        var hasMatchingCountry = await dbContext.PlexMovieCountries
+            .AnyAsync(x => x.PlexMovieId == returnedMovieId && x.CountryId == expectedMovie.CountryId, CancellationToken);
+
+        hasMatchingCountry.ShouldBeTrue();
     }
 
     private async Task<ExpectedMovieMetadata> ConfigureExactMetadataMatchAsync(
@@ -884,6 +939,8 @@ public class GetMediaByTypeCommandHandlerUnitTests : BaseUnitTest<GetMediaByType
             new PlexMovieActors(actor.Id, actorOnlyMovie.PlexLibraryId, actorOnlyMovie.Id)
         );
 
+        await dbContext.SaveChangesAsync(CancellationToken);
+
         await dbContext.PlexMovieData
             .Where(x => x.PlexMovieId == expectedMovie.Id)
             .ExecuteUpdateAsync(
@@ -902,7 +959,15 @@ public class GetMediaByTypeCommandHandlerUnitTests : BaseUnitTest<GetMediaByType
                 CancellationToken
             );
 
-        return new ExpectedMovieMetadata(expectedMovie.Id, genre.Id, country.Id, actor.Id);
+        return new ExpectedMovieMetadata(
+            expectedMovie.Id,
+            genreOnlyMovie.Id,
+            countryOnlyMovie.Id,
+            actorOnlyMovie.Id,
+            genre.Id,
+            country.Id,
+            actor.Id
+        );
     }
 
     private static void AssertReturnedExactMovies(PagedMediaQueryResult result, IReadOnlyCollection<int> expectedMovieIds)
@@ -918,7 +983,15 @@ public class GetMediaByTypeCommandHandlerUnitTests : BaseUnitTest<GetMediaByType
         result.EpisodeCount.ShouldBe(0);
     }
 
-    private sealed record ExpectedMovieMetadata(int MovieId, int GenreId, int CountryId, int ActorId);
+    private sealed record ExpectedMovieMetadata(
+        int MovieId,
+        int GenreOnlyMovieId,
+        int CountryOnlyMovieId,
+        int ActorOnlyMovieId,
+        int GenreId,
+        int CountryId,
+        int ActorId
+    );
 
     private static GetMediaByTypeCommand CreateCommand(
         PlexMediaType mediaType,

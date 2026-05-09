@@ -550,6 +550,8 @@ public class GetMediaByTypeCommandHandlerUnitTests : BaseUnitTest<GetMediaByType
         result.IsSuccess.ShouldBeTrue();
         result.Value.Items.ShouldBeEmpty();
         result.Value.TotalCount.ShouldBe(0);
+        result.Value.MediaCount.ShouldBe(0);
+        result.Value.MovieCount.ShouldBe(0);
     }
 
     [Test]
@@ -634,6 +636,162 @@ public class GetMediaByTypeCommandHandlerUnitTests : BaseUnitTest<GetMediaByType
         result.Value.Items.ShouldAllBe(x => x.PlexLibraryId == targetLibraryId);
     }
 
+    [Test]
+    public async Task ShouldUseLibraryCounts_WhenNoFilterOrSearchAndAllLibrariesRequested()
+    {
+        // Arrange
+        await SetupDatabase(70026, cfg =>
+        {
+            cfg.PlexServerCount = 1;
+            cfg.PlexMovieLibraryCount = 2;
+            cfg.MovieCount = 6;
+        });
+
+        var dbContext = IDbContext;
+        var expectedMovieCount = await dbContext.PlexLibraries
+            .Where(x => x.Type == PlexMediaType.Movie)
+            .SumAsync(x => x.MovieCount, CancellationToken);
+        var expectedMediaSize = await dbContext.PlexLibraries
+            .Where(x => x.Type == PlexMediaType.Movie)
+            .SumAsync(x => x.MediaSize, CancellationToken);
+
+        var command = CreateCommand(PlexMediaType.Movie, 0);
+
+        // Act
+        var result = await Sut.ExecuteAsync(command, CancellationToken);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.TotalCount.ShouldBe(expectedMovieCount);
+        result.Value.MediaCount.ShouldBe(expectedMovieCount);
+        result.Value.MovieCount.ShouldBe(expectedMovieCount);
+        result.Value.TvShowCount.ShouldBe(0);
+        result.Value.SeasonCount.ShouldBe(0);
+        result.Value.EpisodeCount.ShouldBe(0);
+        result.Value.MediaSize.ShouldBe(expectedMediaSize);
+    }
+
+    [Test]
+    public async Task ShouldUseRequestedLibraryCounts_WhenNoFilterOrSearchAndSpecificLibraryRequested()
+    {
+        // Arrange
+        await SetupDatabase(70027, cfg =>
+        {
+            cfg.PlexServerCount = 1;
+            cfg.PlexMovieLibraryCount = 2;
+            cfg.MovieCount = 6;
+        });
+
+        var dbContext = IDbContext;
+        var targetLibrary = await dbContext.PlexLibraries
+            .Where(x => x.Type == PlexMediaType.Movie)
+            .OrderBy(x => x.Id)
+            .Select(x => new
+            {
+                x.Id,
+                x.MovieCount,
+                x.MediaSize,
+            })
+            .FirstAsync(CancellationToken);
+
+        var command = CreateCommand(PlexMediaType.Movie, targetLibrary.Id);
+
+        // Act
+        var result = await Sut.ExecuteAsync(command, CancellationToken);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.Items.ShouldAllBe(x => x.PlexLibraryId == targetLibrary.Id);
+        result.Value.TotalCount.ShouldBe(targetLibrary.MovieCount);
+        result.Value.MediaCount.ShouldBe(targetLibrary.MovieCount);
+        result.Value.MovieCount.ShouldBe(targetLibrary.MovieCount);
+        result.Value.TvShowCount.ShouldBe(0);
+        result.Value.SeasonCount.ShouldBe(0);
+        result.Value.EpisodeCount.ShouldBe(0);
+        result.Value.MediaSize.ShouldBe(targetLibrary.MediaSize);
+    }
+
+    [Test]
+    public async Task ShouldFilterMoviesByCountryId_WhenMetadataCountryFilterIsApplied()
+    {
+        // Arrange
+        await SetupDatabase(70028, cfg =>
+        {
+            cfg.PlexServerCount = 1;
+            cfg.PlexMovieLibraryCount = 1;
+            cfg.MovieCount = 6;
+        });
+
+        const int targetCountryId = 1;
+
+        var command = CreateCommand(
+            PlexMediaType.Movie,
+            0,
+            filter: $"Countries:any:Id:eq:{targetCountryId}"
+        );
+
+        // Act
+        var result = await Sut.ExecuteAsync(command, CancellationToken);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        result.IsFailed.ShouldBeFalse();
+    }
+
+    [Test]
+    public async Task ShouldFilterMoviesByRoleId_WhenMetadataRoleFilterIsApplied()
+    {
+        // Arrange
+        await SetupDatabase(70029, cfg =>
+        {
+            cfg.PlexServerCount = 1;
+            cfg.PlexMovieLibraryCount = 1;
+            cfg.MovieCount = 6;
+        });
+
+        const int targetActorId = 1;
+
+        var command = CreateCommand(
+            PlexMediaType.Movie,
+            0,
+            filter: $"Actors:any:Id:eq:{targetActorId}"
+        );
+
+        // Act
+        var result = await Sut.ExecuteAsync(command, CancellationToken);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        result.IsFailed.ShouldBeFalse();
+    }
+
+    [Test]
+    public async Task ShouldFilterMoviesByGenreId_WhenMetadataGenreFilterIsApplied()
+    {
+        // Arrange
+        await SetupDatabase(70030, cfg =>
+        {
+            cfg.PlexServerCount = 1;
+            cfg.PlexMovieLibraryCount = 1;
+            cfg.MovieCount = 6;
+        });
+
+        const int targetGenreId = 1;
+
+        var command = CreateCommand(
+            PlexMediaType.Movie,
+            0,
+            filter: $"Genres:any:Id:eq:{targetGenreId}"
+        );
+
+        // Act
+        var result = await Sut.ExecuteAsync(command, CancellationToken);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        result.IsFailed.ShouldBeFalse();
+    }
+
     private static GetMediaByTypeCommand CreateCommand(
         PlexMediaType mediaType,
         int plexLibraryId,
@@ -641,7 +799,8 @@ public class GetMediaByTypeCommandHandlerUnitTests : BaseUnitTest<GetMediaByType
         bool filterOwnedMedia = false,
         int? page = null,
         int? pageSize = null,
-        string? sort = null
+        string? sort = null,
+        string? filter = null
     ) => new()
     {
         Filter = new MediaQueryFilter
@@ -655,6 +814,7 @@ public class GetMediaByTypeCommandHandlerUnitTests : BaseUnitTest<GetMediaByType
                 Page = page,
                 PageSize = pageSize,
                 Sort = sort,
+                Filter = filter,
             },
         },
     };

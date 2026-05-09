@@ -84,17 +84,17 @@ public class GetMediaByTypeCommandHandler : ICommandHandler<GetMediaByTypeComman
         }
 
         ApplyDefaultMediaSort(options, plexLibraryId);
-      
+
         switch (filter.MediaType)
         {
             case PlexMediaType.Movie:
             {
-                var movies = await _dbContext.PlexMovies.IncludeMediaData()
-                    .Include(x => x.MediaDataList)
-                    .ApplyFilter(options)
-                    .ApplySort(options)
-                    .ApplyPaging(options)
-                    .ToListAsync(ct);
+                    var movies = await _dbContext.PlexMovies.IncludeMediaData()
+                        .Include(x => x.MediaDataList)
+                        .ApplyFilter(options)
+                        .ApplySort(options)
+                        .ApplyPaging(options)
+                        .ToListAsync(ct);
 
                 _response.Items = movies.Select(x => x.ToSlimDTO()).ToList();
 
@@ -102,12 +102,12 @@ public class GetMediaByTypeCommandHandler : ICommandHandler<GetMediaByTypeComman
             }
             case PlexMediaType.TvShow:
             {
-                var tvShows = await _dbContext.PlexTvShows
-                    .Include(x => x.Qualities)
-                    .ApplyFilter(options)
-                    .ApplySort(options)
-                    .ApplyPaging(options)
-                    .ToListAsync(ct);
+                    var tvShows = await _dbContext.PlexTvShows
+                        .Include(x => x.Qualities)
+                        .ApplyFilter(options)
+                        .ApplySort(options)
+                        .ApplyPaging(options)
+                        .ToListAsync(ct);
 
                 _response.Items = tvShows.Select(x => x.ToSlimDTOMapper()).ToList();
                 break;
@@ -125,8 +125,15 @@ public class GetMediaByTypeCommandHandler : ICommandHandler<GetMediaByTypeComman
             slimDTO.SortIndex = i + 1;
         }
 
-        // If the plexLibraryId is set, we don't need to sort the list again
+        _response.MediaCount = _response.Items.Count;
+        _response.MovieCount = _response.Items.Count(x => x.Type == PlexMediaType.Movie);
+        _response.TvShowCount = _response.Items.Count(x => x.Type == PlexMediaType.TvShow);
+        _response.SeasonCount = _response.Items.Where(x => x.Type == PlexMediaType.TvShow).Sum(x => x.ChildCount);
+        _response.EpisodeCount = _response.Items.Where(x => x.Type == PlexMediaType.TvShow).Sum(x => x.GrandChildCount);
+        _response.MediaSize = _response.Items.Sum(x => x.MediaSize);
+
         return Result.Ok(_response);
+
     }
 
     /// <summary>

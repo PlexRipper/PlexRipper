@@ -93,5 +93,9 @@ public class GetAllMediaByTypeEndpoint : BaseEndpoint<GetAllMediaByTypeRequest, 
         MediaSize = source.MediaSize,
         MediaCount = source.TotalCount,
         MediaList = source.Items,
+        Roles = source.Roles,
+        Countries = source.Countries,
+        Genres = source.Genres,
+        Qualities = source.Qualities,
     };
 }

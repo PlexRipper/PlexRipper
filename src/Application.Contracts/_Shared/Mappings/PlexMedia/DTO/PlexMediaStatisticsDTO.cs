@@ -15,4 +15,24 @@ public class PlexMediaStatisticsDTO
     public required long MediaSize { get; set; }
 
     public required List<PlexMediaSlimDTO> MediaList { get; init; }
+    
+    /// <summary>
+    /// Gets or sets the list of distinct roles available in the media items of the <see cref="PlexLibrary"/>.
+    /// </summary>
+    public required List<int> Roles { get; set; } = [];
+
+    /// <summary>
+    /// Gets or sets the list of distinct countries available in the media items of the <see cref="PlexLibrary"/>.
+    /// </summary>
+    public required List<int> Countries { get; set; } = [];
+
+    /// <summary>
+    /// Gets or sets the list of distinct genres available in the media items of the <see cref="PlexLibrary"/>.
+    /// </summary>
+    public required List<int> Genres { get; set; } = [];
+
+    /// <summary>
+    /// Gets or sets the list of distinct quality levels available in the media items of the <see cref="PlexLibrary"/>.
+    /// </summary>
+    public required List<int> Qualities { get; set; } = [];
 }

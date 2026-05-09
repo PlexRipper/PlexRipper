@@ -141,9 +141,9 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 				pageSize: size,
 				query: state.filterQuery || undefined,
 				filter: DSLBuilder()
-					.when((state.metadata.countryId ?? 0) > 0, (x) => x.eq('countryId', state.metadata.countryId ?? 0))
-					.when((state.metadata.roleId ?? 0) > 0, (x) => x.eq('roleId', state.metadata.roleId ?? 0))
-					.when((state.metadata.genreId ?? 0) > 0, (x) => x.eq('genreId', state.metadata.genreId ?? 0))
+					.when((state.metadata.countryId ?? 0) > 0, (x) => x.where('Countries:any:Id', 'eq', state.metadata.countryId ?? 0))
+					.when((state.metadata.roleId ?? 0) > 0, (x) => x.where('Actors:any:Id', 'eq', state.metadata.roleId ?? 0))
+					.when((state.metadata.genreId ?? 0) > 0, (x) => x.where('Genres:any:Id', 'eq', state.metadata.genreId ?? 0))
 					.when(state.metadata.quality !== VideoQuality.None, (x) => x.eq('quality', state.metadata.quality ?? 0))
 					.build(),
 				sort: buildFlexSortDsl([

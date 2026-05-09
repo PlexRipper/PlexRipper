@@ -190,7 +190,7 @@ export class FlexFilterDslBuilder {
 			return undefined;
 		}
 
-		return tokens.join(',');
+		return tokens.join('&');
 	}
 }
 

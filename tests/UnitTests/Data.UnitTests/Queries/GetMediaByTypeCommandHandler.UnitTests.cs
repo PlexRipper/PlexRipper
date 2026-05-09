@@ -725,12 +725,13 @@ public class GetMediaByTypeCommandHandlerUnitTests : BaseUnitTest<GetMediaByType
             cfg.MovieCount = 6;
         });
 
-        const int targetCountryId = 1;
+        var dbContext = IDbContext;
+        var expectedMovie = await ConfigureExactMetadataMatchAsync(dbContext, VideoQuality.FullHD);
 
         var command = CreateCommand(
             PlexMediaType.Movie,
             0,
-            filter: $"Countries:any:Id:eq:{targetCountryId}"
+            filter: $"Countries:any:Id:eq:{expectedMovie.CountryId}"
         );
 
         // Act
@@ -739,6 +740,7 @@ public class GetMediaByTypeCommandHandlerUnitTests : BaseUnitTest<GetMediaByType
         // Assert
         result.IsSuccess.ShouldBeTrue();
         result.IsFailed.ShouldBeFalse();
+        AssertReturnedExactMovies(result.Value, [expectedMovie.MovieId]);
     }
 
     [Test]
@@ -752,12 +754,13 @@ public class GetMediaByTypeCommandHandlerUnitTests : BaseUnitTest<GetMediaByType
             cfg.MovieCount = 6;
         });
 
-        const int targetActorId = 1;
+        var dbContext = IDbContext;
+        var expectedMovie = await ConfigureExactMetadataMatchAsync(dbContext, VideoQuality.FullHD);
 
         var command = CreateCommand(
             PlexMediaType.Movie,
             0,
-            filter: $"Actors:any:Id:eq:{targetActorId}"
+            filter: $"Actors:any:Id:eq:{expectedMovie.ActorId}"
         );
 
         // Act
@@ -766,6 +769,7 @@ public class GetMediaByTypeCommandHandlerUnitTests : BaseUnitTest<GetMediaByType
         // Assert
         result.IsSuccess.ShouldBeTrue();
         result.IsFailed.ShouldBeFalse();
+        AssertReturnedExactMovies(result.Value, [expectedMovie.MovieId]);
     }
 
     [Test]
@@ -779,12 +783,13 @@ public class GetMediaByTypeCommandHandlerUnitTests : BaseUnitTest<GetMediaByType
             cfg.MovieCount = 6;
         });
 
-        const int targetGenreId = 1;
+        var dbContext = IDbContext;
+        var expectedMovie = await ConfigureExactMetadataMatchAsync(dbContext, VideoQuality.FullHD);
 
         var command = CreateCommand(
             PlexMediaType.Movie,
             0,
-            filter: $"Genres:any:Id:eq:{targetGenreId}"
+            filter: $"Genres:any:Id:eq:{expectedMovie.GenreId}"
         );
 
         // Act
@@ -793,7 +798,127 @@ public class GetMediaByTypeCommandHandlerUnitTests : BaseUnitTest<GetMediaByType
         // Assert
         result.IsSuccess.ShouldBeTrue();
         result.IsFailed.ShouldBeFalse();
+        AssertReturnedExactMovies(result.Value, [expectedMovie.MovieId]);
     }
+
+    [Test]
+    public async Task ShouldFilterMoviesByQualityGenreCountryAndRole_WhenAllMetadataFiltersAreApplied()
+    {
+        // Arrange
+        await SetupDatabase(70031, cfg =>
+        {
+            cfg.PlexServerCount = 1;
+            cfg.PlexMovieLibraryCount = 1;
+            cfg.MovieCount = 6;
+        });
+
+        var dbContext = IDbContext;
+        var expectedMovie = await ConfigureExactMetadataMatchAsync(dbContext, VideoQuality.FullHD);
+
+        var filter = string.Join(
+            "&",
+            $"MediaDataList:any:Quality:eq:{VideoQuality.FullHD}",
+            $"Genres:any:Id:eq:{expectedMovie.GenreId}",
+            $"Countries:any:Id:eq:{expectedMovie.CountryId}",
+            $"Actors:any:Id:eq:{expectedMovie.ActorId}"
+        );
+
+        var command = CreateCommand(
+            PlexMediaType.Movie,
+            0,
+            pageSize: 20,
+            filter: filter
+        );
+
+        // Act
+        var result = await Sut.ExecuteAsync(command, CancellationToken);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        result.IsFailed.ShouldBeFalse();
+        AssertReturnedExactMovies(result.Value, [expectedMovie.MovieId]);
+        result.Value.Items.ShouldAllBe(x => x.Qualities.Any(y => y.Quality == VideoQuality.FullHD));
+    }
+
+    private async Task<ExpectedMovieMetadata> ConfigureExactMetadataMatchAsync(
+        IReaparrDbContext dbContext,
+        VideoQuality targetQuality
+    )
+    {
+        var movies = await dbContext.PlexMovies
+            .OrderBy(x => x.Id)
+            .Select(x => new
+            {
+                x.Id,
+                x.PlexLibraryId,
+                x.PlexServerId,
+            })
+            .ToListAsync(CancellationToken);
+
+        movies.Count.ShouldBeGreaterThanOrEqualTo(4);
+
+        var expectedMovie = movies[0];
+        var genreOnlyMovie = movies[1];
+        var countryOnlyMovie = movies[2];
+        var actorOnlyMovie = movies[3];
+
+        var genre = new PlexGenre { Name = "Regression Genre", Key = "regression-genre" };
+        var country = new PlexCountry { Name = "Regression Country", Key = "regression-country" };
+        var actor = new PlexActor { Name = "Regression Actor", Key = "regression-actor" };
+
+        dbContext.PlexGenres.Add(genre);
+        dbContext.PlexCountries.Add(country);
+        dbContext.PlexActors.Add(actor);
+        await dbContext.SaveChangesAsync(CancellationToken);
+
+        dbContext.PlexMovieGenres.AddRange(
+            new PlexMovieGenres(genre.Id, expectedMovie.PlexLibraryId, expectedMovie.Id),
+            new PlexMovieGenres(genre.Id, genreOnlyMovie.PlexLibraryId, genreOnlyMovie.Id)
+        );
+        dbContext.PlexMovieCountries.AddRange(
+            new PlexMovieCountries(country.Id, expectedMovie.PlexLibraryId, expectedMovie.Id),
+            new PlexMovieCountries(country.Id, countryOnlyMovie.PlexLibraryId, countryOnlyMovie.Id)
+        );
+        dbContext.PlexMovieActors.AddRange(
+            new PlexMovieActors(actor.Id, expectedMovie.PlexLibraryId, expectedMovie.Id),
+            new PlexMovieActors(actor.Id, actorOnlyMovie.PlexLibraryId, actorOnlyMovie.Id)
+        );
+
+        await dbContext.PlexMovieData
+            .Where(x => x.PlexMovieId == expectedMovie.Id)
+            .ExecuteUpdateAsync(
+                x => x
+                    .SetProperty(y => y.Quality, targetQuality)
+                    .SetProperty(y => y.VideoResolution, targetQuality),
+                CancellationToken
+            );
+
+        await dbContext.PlexMovieData
+            .Where(x => x.PlexMovieId != expectedMovie.Id)
+            .ExecuteUpdateAsync(
+                x => x
+                    .SetProperty(y => y.Quality, VideoQuality.HD)
+                    .SetProperty(y => y.VideoResolution, VideoQuality.HD),
+                CancellationToken
+            );
+
+        return new ExpectedMovieMetadata(expectedMovie.Id, genre.Id, country.Id, actor.Id);
+    }
+
+    private static void AssertReturnedExactMovies(PagedMediaQueryResult result, IReadOnlyCollection<int> expectedMovieIds)
+    {
+        expectedMovieIds.ShouldNotBeEmpty();
+        result.Items.ShouldNotBeEmpty();
+        result.Items.Select(x => x.Id).OrderBy(x => x).ShouldBe(expectedMovieIds.OrderBy(x => x));
+        result.TotalCount.ShouldBe(expectedMovieIds.Count);
+        result.MediaCount.ShouldBe(expectedMovieIds.Count);
+        result.MovieCount.ShouldBe(expectedMovieIds.Count);
+        result.TvShowCount.ShouldBe(0);
+        result.SeasonCount.ShouldBe(0);
+        result.EpisodeCount.ShouldBe(0);
+    }
+
+    private sealed record ExpectedMovieMetadata(int MovieId, int GenreId, int CountryId, int ActorId);
 
     private static GetMediaByTypeCommand CreateCommand(
         PlexMediaType mediaType,

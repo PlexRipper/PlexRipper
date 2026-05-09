@@ -82,6 +82,7 @@ public class GetMediaByTypeCommandHandler : ICommandHandler<GetMediaByTypeComman
             return Result.Ok(_response);
 
         var options = QueryOptionsParser.Parse(filter.Parameters);
+        var hasUserFilters = options.HasFiltersApplied();
         options = WithServerLibraryScope(options, allowedPlexLibraryIds, plexLibraryId);
 
         ApplyDefaultMediaSort(options, plexLibraryId);
@@ -125,7 +126,7 @@ public class GetMediaByTypeCommandHandler : ICommandHandler<GetMediaByTypeComman
             slimDTO.SortIndex = i + 1;
         }
 
-        await SetCounts(options, allowedPlexLibraryIds);
+        await SetCounts(hasUserFilters, allowedPlexLibraryIds);
 
         return Result.Ok(_response);
     }
@@ -207,9 +208,9 @@ public class GetMediaByTypeCommandHandler : ICommandHandler<GetMediaByTypeComman
         );
     }
 
-    private async Task SetCounts(QueryOptions options, List<int> allowedPlexLibraryIds)
+    private async Task SetCounts(bool hasUserFilters, List<int> allowedPlexLibraryIds)
     {
-        if (options.HasFiltersApplied())
+        if (hasUserFilters)
         {
             _response.MediaCount = _response.Items.Count;
             _response.MovieCount = _response.Items.Count(x => x.Type == PlexMediaType.Movie);

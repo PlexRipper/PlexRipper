@@ -144,7 +144,7 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 					.when((state.metadata.countryId ?? 0) > 0, (x) => x.where('Countries:any:Id', 'eq', state.metadata.countryId ?? 0))
 					.when((state.metadata.roleId ?? 0) > 0, (x) => x.where('Actors:any:Id', 'eq', state.metadata.roleId ?? 0))
 					.when((state.metadata.genreId ?? 0) > 0, (x) => x.where('Genres:any:Id', 'eq', state.metadata.genreId ?? 0))
-					.when(state.metadata.quality !== VideoQuality.None, (x) => x.eq('quality', state.metadata.quality ?? 0))
+					.when(state.metadata.quality !== VideoQuality.None, (x) => x.eq('MediaDataList:any:Quality', state.metadata.quality ?? 0))
 					.build(),
 				sort: buildFlexSortDsl([
 					{

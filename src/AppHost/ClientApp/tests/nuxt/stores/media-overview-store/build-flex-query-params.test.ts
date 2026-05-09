@@ -29,6 +29,6 @@ describe('MediaOverviewStore.buildFlexQueryParams()', () => {
 
 		// Assert
 		expect(result.plexLibraryId).toBe(17);
-		expect(result.filter).toBe('Countries:any:Id:eq:7&Actors:any:Id:eq:11&Genres:any:Id:eq:13&quality:eq:SD');
+		expect(result.filter).toBe('Countries:any:Id:eq:7&Actors:any:Id:eq:11&Genres:any:Id:eq:13&MediaDataList:any:Quality:eq:SD');
 	});
 });

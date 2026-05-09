@@ -126,41 +126,5 @@ public static class PlexMediaSlimDTOMapper
 
     #endregion
 
-    public static PlexMediaStatisticsDTO ToStatisticsDTO(this List<PlexMediaSlimDTO> source)
-    {
-        var stats = new PlexMediaStatisticsDTO
-        {
-            MovieCount = 0,
-            TvShowCount = 0,
-            SeasonCount = 0,
-            EpisodeCount = 0,
-            MediaSize = 0,
-            MediaCount = 0,
-            MediaList = source,
-        };
 
-        if (!source.Any())
-        {
-            return stats;
-        }
-
-        foreach (var entity in source)
-        {
-            stats.MediaCount++;
-            stats.MediaSize += entity.MediaSize;
-            switch (entity.Type)
-            {
-                case PlexMediaType.Movie:
-                    stats.MovieCount++;
-                    break;
-                case PlexMediaType.TvShow:
-                    stats.TvShowCount++;
-                    stats.SeasonCount += entity.ChildCount;
-                    stats.EpisodeCount += entity.GrandChildCount;
-                    break;
-            }
-        }
-
-        return stats;
-    }
 }

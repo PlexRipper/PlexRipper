@@ -81,6 +81,17 @@ public class GetAllMediaByTypeEndpoint : BaseEndpoint<GetAllMediaByTypeRequest, 
             return;
         }
 
-        await SendFluentResult(Result.Ok(mediaListResult.Value.Items.ToStatisticsDTO()), ct);
+        await SendFluentResult(Result.Ok(ToStatisticsDTO(mediaListResult.Value)), ct);
     }
+    
+    public static PlexMediaStatisticsDTO ToStatisticsDTO(PagedMediaQueryResult source) => new()
+    {
+        MovieCount = source.MovieCount,
+        TvShowCount = source.TvShowCount,
+        SeasonCount = source.SeasonCount,
+        EpisodeCount = source.EpisodeCount,
+        MediaSize = source.MediaSize,
+        MediaCount = source.TotalCount,
+        MediaList = source.Items,
+    };
 }

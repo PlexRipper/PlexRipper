@@ -13,11 +13,10 @@ public static partial class PlexMediaDataMapper
             FullTitle = $"{source.GrandparentTitle}/{source.ParentTitle}/{source.Title}",
             Year = source.Year,
 
-            // This is set later on
-            SortIndex = 0,
+            SortIndex = source.SortIndex,
             EpisodeNumber = source.Index,
 
-            SearchTitle = source.Title.ToSearchTitle(),
+            SearchTitle = source.SortTitle,
             Guid = source.Guid,
             ParentGuid = source.ParentGuid,
 

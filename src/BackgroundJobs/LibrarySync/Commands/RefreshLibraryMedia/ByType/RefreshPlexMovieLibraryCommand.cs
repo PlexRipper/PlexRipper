@@ -45,10 +45,6 @@ public class RefreshPlexMovieLibraryCommandHandler
 
         if (plexLibrary.Movies.Any())
         {
-            var i = 1;
-            foreach (var plexMovie in plexLibrary.Movies)
-                plexMovie.SortIndex = i++;
-
             var syncResult = await _commandExecutor.Send(
                 new SyncPlexMoviesCommand(command.LibraryMetadata),
                 cancellationToken

@@ -12,10 +12,8 @@ public static partial class PlexMediaDataMapper
             Title = source.Title,
             Year = source.Year,
 
-            // This is set later on
-            SortIndex = 0,
-
-            SearchTitle = source.Title.ToSearchTitle(),
+            SortIndex = source.SortIndex,
+            SearchTitle = source.SortTitle,
             Guid = source.Guid,
 
             Guid_IMDB = source.Guids.GetImdbId(),

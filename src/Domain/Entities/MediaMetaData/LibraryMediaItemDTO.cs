@@ -24,7 +24,9 @@ public record LibraryMediaItemDTO
 
     public required string ContentRating { get; init; }
 
-    public required string TitleSort { get; init; }
+    public required string SortTitle { get; init; }
+    
+    public required int SortIndex { get; set; }
 
     public required string OriginalTitle { get; init; }
 

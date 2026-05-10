@@ -78,10 +78,15 @@ public class GetMediaByTypeCommandHandler : ICommandHandler<GetMediaByTypeComman
             }
         }
 
+        var options = QueryOptionsParser.Parse(filter.Parameters);
+        var page = Math.Max(filter.Parameters.Page ?? 1, 1);
+        var pageSize = Math.Max(filter.Parameters.PageSize ?? 0, 0);
+        _response.Page = page;
+        _response.PageSize = pageSize;
+
         if (!allowedPlexLibraryIds.Any())
             return Result.Ok(_response);
 
-        var options = QueryOptionsParser.Parse(filter.Parameters);
         var hasUserFilters = options.HasFiltersApplied();
         options = WithServerLibraryScope(options, allowedPlexLibraryIds, plexLibraryId);
 
@@ -108,6 +113,8 @@ public class GetMediaByTypeCommandHandler : ICommandHandler<GetMediaByTypeComman
                     x.UpdatedAt,
                     x.MediaSize
                 )), options, ct);
+
+                _response.TotalCount = await movieQuery.CountAsync(ct);
 
                 var movies = await movieQuery
                     .ApplyPaging(options)
@@ -143,6 +150,8 @@ public class GetMediaByTypeCommandHandler : ICommandHandler<GetMediaByTypeComman
                     x.MediaSize
                 )), options, ct);
 
+                _response.TotalCount = await tvShowQuery.CountAsync(ct);
+
                 var tvShows = await tvShowQuery
                     .ApplyPaging(options)
                     .ToListAsync(ct);
@@ -163,14 +172,17 @@ public class GetMediaByTypeCommandHandler : ICommandHandler<GetMediaByTypeComman
                 );
         }
 
+        var effectivePageSize = _response.PageSize > 0 ? _response.PageSize : _response.Items.Count;
+        var offset = (_response.Page - 1) * effectivePageSize;
+
         for (var i = 0; i < _response.Items.Count; i++)
         {
             var slimDTO = _response.Items[i];
 
-            slimDTO.SortIndex = i + 1;
+            slimDTO.SortIndex = offset + i + 1;
         }
 
-        await SetCounts(hasUserFilters, allowedPlexLibraryIds);
+        await SetCounts(hasUserFilters, allowedPlexLibraryIds, filter.MediaType, ct);
 
         return Result.Ok(_response);
     }
@@ -246,7 +258,7 @@ public class GetMediaByTypeCommandHandler : ICommandHandler<GetMediaByTypeComman
         );
     }
 
- private void ApplyDefaultMediaSort(QueryOptions options, int plexLibraryId)
+    private void ApplyDefaultMediaSort(QueryOptions options, int plexLibraryId)
     {
         if (options.Sort.Count > 0 || plexLibraryId == 0)
             return;
@@ -260,23 +272,28 @@ public class GetMediaByTypeCommandHandler : ICommandHandler<GetMediaByTypeComman
         );
     }
 
-    private async Task SetCounts(bool hasUserFilters, List<int> allowedPlexLibraryIds)
+    private async Task SetCounts(
+        bool hasUserFilters,
+        List<int> allowedPlexLibraryIds,
+        PlexMediaType mediaType,
+        CancellationToken ct)
     {
         if (hasUserFilters)
         {
-            _response.MediaCount = _response.Items.Count;
-            _response.MovieCount = _response.Items.Count(x => x.Type == PlexMediaType.Movie);
-            _response.TvShowCount = _response.Items.Count(x => x.Type == PlexMediaType.TvShow);
+            _response.MediaCount = _response.TotalCount;
+            _response.MovieCount = mediaType == PlexMediaType.Movie ? _response.TotalCount : 0;
+            _response.TvShowCount = mediaType == PlexMediaType.TvShow ? _response.TotalCount : 0;
             _response.SeasonCount = _response.Items.Where(x => x.Type == PlexMediaType.TvShow).Sum(x => x.ChildCount);
             _response.EpisodeCount =
                 _response.Items.Where(x => x.Type == PlexMediaType.TvShow).Sum(x => x.GrandChildCount);
             _response.MediaSize = _response.Items.Sum(x => x.MediaSize);
-            _response.TotalCount = _response.MediaCount;
         }
         else
         {
-            var plexLibraries = await _dbContext.PlexLibraries.Where(x => allowedPlexLibraryIds.Contains(x.Id))
-                .ToListAsync();
+            var plexLibraries = await _dbContext.PlexLibraries
+                .Where(x => allowedPlexLibraryIds.Contains(x.Id))
+                .Where(x => x.Type == mediaType)
+                .ToListAsync(ct);
 
             foreach (var plexLibrary in plexLibraries)
             {
@@ -286,7 +303,6 @@ public class GetMediaByTypeCommandHandler : ICommandHandler<GetMediaByTypeComman
                 _response.EpisodeCount += plexLibrary.EpisodeCount;
                 _response.MediaSize += plexLibrary.MediaSize;
                 _response.MediaCount += plexLibrary.MediaCount;
-                _response.TotalCount += plexLibrary.MediaCount;
             }
         }
     }

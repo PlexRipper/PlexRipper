@@ -2,6 +2,10 @@ namespace Reaparr.Data.Contracts;
 
 public record PagedMediaQueryResult
 {
+    public int Page { get; set; } = 1;
+
+    public int PageSize { get; set; }
+
     public int TotalCount { get; set; }
 
     public int MediaCount { get; set; }

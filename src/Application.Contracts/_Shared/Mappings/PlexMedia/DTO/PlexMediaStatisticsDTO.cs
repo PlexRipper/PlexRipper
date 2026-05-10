@@ -2,6 +2,10 @@ namespace Reaparr.Application.Contracts;
 
 public class PlexMediaStatisticsDTO
 {
+    public required int Page { get; set; }
+
+    public required int PageSize { get; set; }
+
     public required int MediaCount { get; set; }
 
     public required int MovieCount { get; set; }

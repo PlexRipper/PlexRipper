@@ -86,6 +86,8 @@ public class GetAllMediaByTypeEndpoint : BaseEndpoint<GetAllMediaByTypeRequest, 
     
     public static PlexMediaStatisticsDTO ToStatisticsDTO(PagedMediaQueryResult source) => new()
     {
+        Page = source.Page,
+        PageSize = source.PageSize,
         MovieCount = source.MovieCount,
         TvShowCount = source.TvShowCount,
         SeasonCount = source.SeasonCount,

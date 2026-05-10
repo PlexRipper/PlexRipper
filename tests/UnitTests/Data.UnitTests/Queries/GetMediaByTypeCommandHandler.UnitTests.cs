@@ -360,6 +360,125 @@ public class GetMediaByTypeCommandHandlerUnitTests : BaseUnitTest<GetMediaByType
     }
 
     [Test]
+    public async Task ShouldReturnPageAndPageSize_WhenPageAndPageSizeAreProvided()
+    {
+        // Arrange
+        await SetupDatabase(70101, cfg =>
+        {
+            cfg.PlexServerCount = 1;
+            cfg.PlexMovieLibraryCount = 1;
+            cfg.MovieCount = 8;
+        });
+
+        var command = CreateCommand(PlexMediaType.Movie, 0, page: 2, pageSize: 3);
+
+        // Act
+        var result = await Sut.ExecuteAsync(command, CancellationToken);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.Page.ShouldBe(2);
+        result.Value.PageSize.ShouldBe(3);
+    }
+
+    [Test]
+    public async Task ShouldReturnTotalMatchingCount_WhenPagingIsApplied()
+    {
+        // Arrange
+        await SetupDatabase(70102, cfg =>
+        {
+            cfg.PlexServerCount = 1;
+            cfg.PlexMovieLibraryCount = 1;
+            cfg.MovieCount = 8;
+        });
+
+        var expectedMovieCount = await IDbContext.PlexMovies.CountAsync(CancellationToken);
+        var command = CreateCommand(PlexMediaType.Movie, 0, page: 1, pageSize: 3);
+
+        // Act
+        var result = await Sut.ExecuteAsync(command, CancellationToken);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.Items.Count.ShouldBe(3);
+        result.Value.TotalCount.ShouldBe(expectedMovieCount);
+        result.Value.MediaCount.ShouldBe(expectedMovieCount);
+    }
+
+    [Test]
+    public async Task ShouldCountOnlyRequestedMediaType_WhenAllLibraryModeHasMultipleServersAndMixedLibraries()
+    {
+        // Arrange
+        await SetupDatabase(70103, cfg =>
+        {
+            cfg.PlexServerCount = 2;
+            cfg.PlexMovieLibraryCount = 2;
+            cfg.PlexTvShowLibraryCount = 2;
+            cfg.MovieCount = 3;
+            cfg.TvShowCount = 4;
+        });
+
+        var expectedMovieCount = await IDbContext.PlexMovies.CountAsync(CancellationToken);
+        var command = CreateCommand(PlexMediaType.Movie, 0, page: 1, pageSize: 2);
+
+        // Act
+        var result = await Sut.ExecuteAsync(command, CancellationToken);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.Items.Count.ShouldBe(2);
+        result.Value.Items.ShouldAllBe(x => x.Type == PlexMediaType.Movie);
+        result.Value.TotalCount.ShouldBe(expectedMovieCount);
+        result.Value.MediaCount.ShouldBe(expectedMovieCount);
+        result.Value.MovieCount.ShouldBe(expectedMovieCount);
+        result.Value.TvShowCount.ShouldBe(0);
+    }
+
+    [Test]
+    public async Task ShouldAssignGlobalSortIndexes_WhenPageChanges()
+    {
+        // Arrange
+        await SetupDatabase(70104, cfg =>
+        {
+            cfg.PlexServerCount = 1;
+            cfg.PlexMovieLibraryCount = 1;
+            cfg.MovieCount = 10;
+        });
+
+        var command = CreateCommand(PlexMediaType.Movie, 0, page: 2, pageSize: 3);
+
+        // Act
+        var result = await Sut.ExecuteAsync(command, CancellationToken);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.Items.Select(x => x.SortIndex).ShouldBe([4, 5, 6]);
+    }
+
+    [Test]
+    public async Task ShouldBuildNavigationIndexesFromFullSortedResult_WhenPageIsPartial()
+    {
+        // Arrange
+        await SetupDatabase(70105, cfg =>
+        {
+            cfg.PlexServerCount = 1;
+            cfg.PlexMovieLibraryCount = 1;
+            cfg.MovieCount = 10;
+        });
+
+        var command = CreateCommand(PlexMediaType.Movie, 0, sort: "Year:asc", page: 1, pageSize: 2);
+
+        // Act
+        var result = await Sut.ExecuteAsync(command, CancellationToken);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.Items.Count.ShouldBe(2);
+        result.Value.NavigationIndexes.ShouldNotBeEmpty();
+        result.Value.NavigationIndexes.Max(x => x.Index).ShouldBeLessThan(result.Value.TotalCount);
+    }
+
+    [Test]
     public async Task ShouldReturnDifferentPageData_WhenPageChanges()
     {
         // Arrange
@@ -553,9 +672,9 @@ public class GetMediaByTypeCommandHandlerUnitTests : BaseUnitTest<GetMediaByType
         // Assert
         result.IsSuccess.ShouldBeTrue();
         result.Value.Items.ShouldBeEmpty();
-        result.Value.TotalCount.ShouldBe(0);
-        result.Value.MediaCount.ShouldBe(0);
-        result.Value.MovieCount.ShouldBe(0);
+        result.Value.TotalCount.ShouldBe(3);
+        result.Value.MediaCount.ShouldBe(3);
+        result.Value.MovieCount.ShouldBe(3);
     }
 
     [Test]

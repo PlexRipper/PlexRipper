@@ -80,12 +80,14 @@ public static partial class Startup
         app.UseMiddleware<HeaderAuthenticationMiddleware>();
 
         app.UseAuthentication();
-        app.UseAuthorization();
 
-        // When I_AM_DUMB_SO_DISABLE_AUTHENTICATION is set, bypass all auth with a synthetic Admin principal.
-        // This must run after authentication/authorization so the synthetic principal is not overwritten.
+        // When I_AM_DUMB_SO_DISABLE_AUTHENTICATION is set, inject a synthetic Admin principal.
+        // This must run after UseAuthentication() (so auth middleware does not overwrite it)
+        // and before UseAuthorization() (so authorization checks use the synthetic principal).
         if (appRuntimeInfo.IsAuthenticationDisabled)
             app.UseMiddleware<DisableAuthenticationMiddleware>();
+
+        app.UseAuthorization();
 
         // Enable response caching for downstream caches (must be before FastEndpoints)
         // Doc: https://fast-endpoints.com/docs/response-caching

@@ -29,6 +29,7 @@
 					class="media-table--intersection highlight-border-box"
 					:data-scroll-index="virtualRow.index">
 					<MediaTableRow
+						v-if="rows[virtualRow.index]"
 						:index="virtualRow.index"
 						:data-cy="`media-table-row-${virtualRow.index}`"
 						:columns="mediaTableColumns"
@@ -38,6 +39,12 @@
 						:disable-highlight="disableHighlight"
 						:disable-hover-click="disableHoverClick"
 						@selected="updateSelectedRow(rows[virtualRow.index]!.id, $event)" />
+					<div
+						v-else
+						class="media-table--placeholder"
+						data-cy="media-table-row-placeholder">
+						<q-skeleton type="text" />
+					</div>
 				</div>
 			</div>
 		</div>
@@ -48,6 +55,7 @@
 import Log from 'consola';
 import { useVirtualizer } from '@tanstack/vue-virtual';
 import { get, set } from '@vueuse/core';
+import { useSubscription } from '@vueuse/rxjs';
 import type { PlexMediaSlimDTO } from '@dto';
 import type { ISelection } from '@interfaces';
 import {
@@ -91,7 +99,7 @@ const BROWSER_MAX_CSS_HEIGHT = 33_000_000;
 
 const rowVirtualizer = useVirtualizer(
 	computed(() => ({
-		count: props.rows.length,
+		count: mediaOverviewStore.itemsLength,
 		getScrollElement: () => get(qTableRef),
 		estimateSize: () => ROW_HEIGHT,
 		overscan: 10,
@@ -100,6 +108,9 @@ const rowVirtualizer = useVirtualizer(
 			// sync=false means TanStack has finished its scroll-triggered re-render
 			if (sync)
 				return;
+
+			requestVisibleRange();
+
 			const index = get(pendingHighlightIndex);
 			if (index === null)
 				return;
@@ -117,6 +128,15 @@ const rowVirtualizer = useVirtualizer(
 );
 
 const safeTotalSize = computed(() => Math.min(rowVirtualizer.value.getTotalSize(), BROWSER_MAX_CSS_HEIGHT));
+
+function requestVisibleRange() {
+	const virtualItems = get(rowVirtualizer).getVirtualItems();
+	const first = virtualItems.at(0)?.index;
+	const last = virtualItems.at(-1)?.index;
+	if (first !== undefined && last !== undefined) {
+		useSubscription(mediaOverviewStore.requestRange(first, last).subscribe());
+	}
+}
 
 function isSelected(mediaId: number) {
 	return (mediaOverviewStore.selection?.keys ?? []).includes(mediaId);
@@ -151,9 +171,13 @@ onMounted(() => {
 		scrollToIndex(lastMediaItemViewed.sortIndex - 1);
 	}
 
-	// Listen for scroll to letter command
+	// Listen for scroll-to-letter command
 	listenMediaOverviewScrollToCommand((scrollIndex) => {
-		scrollToIndex(scrollIndex);
+		useSubscription(
+			mediaOverviewStore.requestAroundIndex(scrollIndex).subscribe(() => {
+				scrollToIndex(scrollIndex);
+			}),
+		);
 	});
 });
 </script>

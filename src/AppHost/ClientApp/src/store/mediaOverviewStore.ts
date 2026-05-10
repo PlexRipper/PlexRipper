@@ -39,6 +39,9 @@ interface IMediaOverviewStoreState {
 	libraryId: number;
 	items: Readonly<PlexMediaSlimDTO[]>;
 	sortedItems: Readonly<PlexMediaSlimDTO[]>;
+	loadedPages: number[];
+	pageSize: number;
+	totalCount: number;
 	itemsLength: number;
 	sortedState: IMediaOverviewSort;
 	scrollDict: Map<string, number>;
@@ -66,6 +69,9 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 		libraryId: 0,
 		items: [],
 		sortedItems: [],
+		loadedPages: [],
+		pageSize: 100,
+		totalCount: 0,
 		itemsLength: 0,
 		sortedState: { field: MediaSortField.Title, sort: SortDirection.Asc },
 		scrollDict: new Map<string, number>([['#', 0]]),
@@ -166,7 +172,7 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 				]),
 			};
 		},
-		refreshAllLibraryMediaByType(page: number = 0, size: number = 100): Observable<PlexMediaStatisticsDTO | null> {
+		refreshAllLibraryMediaByType(page: number = 1, size: number = 100): Observable<PlexMediaStatisticsDTO | null> {
 			const queryParams = actions.buildFlexQueryParams(page, size);
 			return plexMediaApi.getAllMediaByTypeEndpoint(queryParams).pipe(
 				takeUntil(cancelSubject$),
@@ -226,27 +232,54 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 				}),
 			);
 		},
+		requestMediaPage(page: number, size: number = state.pageSize): Observable<PlexMediaStatisticsDTO | null> {
+			if (state.loadedPages.includes(page)) {
+				return of(null);
+			}
+
+			return actions.refreshAllLibraryMediaByType(page, size).pipe(
+				tap((data) => {
+					if (data) {
+						actions.mergeMediaPage(data);
+					}
+				}),
+			);
+		},
+		mergeMediaPage(data: PlexMediaStatisticsDTO) {
+			const availableMetadataIds = data as PlexMediaStatisticsDTO & IAvailableMetadataIds;
+			const items = [...state.items];
+
+			for (const item of data.mediaList) {
+				const index = Math.max(0, item.sortIndex - 1);
+				items[index] = item;
+			}
+
+			state.items = Object.freeze(items);
+			state.itemsLength = items.length;
+			state.totalCount = data.totalCount;
+			state.pageSize = data.pageSize || state.pageSize;
+			state.loadedPages = [...new Set([...state.loadedPages, data.page])].sort((a, b) => a - b);
+
+			state.allMovieCount = data.movieCount;
+			state.allTvShowCount = data.tvShowCount;
+			state.allSeasonCount = data.seasonCount;
+			state.allEpisodeCount = data.episodeCount;
+			state.allFileSize = data.mediaSize;
+			state.availableRoleIds = availableMetadataIds.roles ?? [];
+			state.availableCountryIds = availableMetadataIds.countries ?? [];
+			state.availableGenreIds = availableMetadataIds.genres ?? [];
+			state.availableQualityIds = availableMetadataIds.qualities ?? [];
+			state.scrollDict = new Map((data.navigationIndexes ?? []).map((x) => [x.label, x.index]));
+		},
 		setMedia(data: PlexMediaStatisticsDTO | null) {
+			state.items = Object.freeze([]);
+			state.loadedPages = [];
+			state.totalCount = 0;
+
 			if (data) {
-				const availableMetadataIds = data as PlexMediaStatisticsDTO & IAvailableMetadataIds;
-
-				state.items = Object.freeze(data.mediaList);
-				state.itemsLength = data.mediaCount;
-
-				state.allMovieCount = data.movieCount;
-				state.allTvShowCount = data.tvShowCount;
-				state.allSeasonCount = data.seasonCount;
-				state.allEpisodeCount = data.episodeCount;
-				state.allFileSize = data.mediaSize;
-				state.availableRoleIds = availableMetadataIds.roles ?? [];
-				state.availableCountryIds = availableMetadataIds.countries ?? [];
-				state.availableGenreIds = availableMetadataIds.genres ?? [];
-				state.availableQualityIds = availableMetadataIds.qualities ?? [];
-				state.scrollDict = new Map((data.navigationIndexes ?? []).map((x) => [x.label, x.index]));
+				actions.mergeMediaPage(data);
 			} else {
-				state.items = Object.freeze([]);
 				state.itemsLength = 0;
-
 				state.allMovieCount = 0;
 				state.allTvShowCount = 0;
 				state.allSeasonCount = 0;
@@ -259,6 +292,25 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 				state.scrollDict = new Map<string, number>([['#', 0]]);
 			}
 			state.filterQuery = '';
+		},
+		getPageForIndex(index: number): number {
+			return Math.floor(index / state.pageSize) + 1;
+		},
+		requestRange(startIndex: number, endIndex: number): Observable<(PlexMediaStatisticsDTO | null)[]> {
+			const firstPage = actions.getPageForIndex(Math.max(0, startIndex));
+			const lastPage = actions.getPageForIndex(Math.max(0, endIndex));
+			const requests: Observable<PlexMediaStatisticsDTO | null>[] = [];
+
+			for (let page = firstPage; page <= lastPage; page++) {
+				if (!state.loadedPages.includes(page)) {
+					requests.push(actions.requestMediaPage(page));
+				}
+			}
+
+			return requests.length ? forkJoin(requests) : of([]);
+		},
+		requestAroundIndex(index: number): Observable<(PlexMediaStatisticsDTO | null)[]> {
+			return actions.requestRange(index - 50, index + 50);
 		},
 		setMetaData({
 			countryId,
@@ -320,7 +372,7 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 			actions.setSelection({
 				indexKey: state.selection.indexKey,
 				keys: get(getters.getMediaItems)
-					.filter((x) => x.sortIndex >= min && x.sortIndex <= max)
+					.filter((x) => x && x.sortIndex >= min && x.sortIndex <= max)
 					.map((x) => x.id),
 				allSelected: false,
 			} as ISelection);
@@ -328,7 +380,7 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 		setRootSelected(value: boolean) {
 			actions.setSelection({
 				indexKey: state.selection?.indexKey ?? 0,
-				keys: value ? state.items.map((x) => x.id) : [],
+				keys: value ? state.items.filter((x) => x).map((x) => x.id) : [],
 				allSelected: value,
 			} as ISelection);
 		},
@@ -372,14 +424,14 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 		allMediaMode: computed(() => state.libraryId === 0),
 		library: computed(() => libraryStore.getLibrary(state.libraryId)),
 		getMediaItems: computed((): Readonly<PlexMediaSlimDTO[]> => {
-			if (!state.items) {
-				return [];
+			const items = (state.items ?? []).filter((x) => x);
+
+			if (!state.filterQuery) {
+				return items;
 			}
-			const query = state.filterQuery.toLowerCase();
-			if (state.filterQuery != '') {
-				return state.items.filter((x) => x.searchTitle.includes(query));
-			}
-			return state.items;
+
+			const filterQuery = state.filterQuery.toLowerCase();
+			return items.filter((x) => x.searchTitle.includes(filterQuery));
 		}),
 		getMediaViewMode: computed((): ViewMode => {
 			switch (get(getters.getMediaType)) {

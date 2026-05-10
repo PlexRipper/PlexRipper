@@ -924,10 +924,16 @@ export interface PlexMediaStatisticsDTO {
   /** @format int32 */
   movieCount: number;
   navigationIndexes: MediaNavigationIndexDTO[];
+  /** @format int32 */
+  page: number;
+  /** @format int32 */
+  pageSize: number;
   qualities: number[];
   roles: number[];
   /** @format int32 */
   seasonCount: number;
+  /** @format int32 */
+  totalCount: number;
   /** @format int32 */
   tvShowCount: number;
 }

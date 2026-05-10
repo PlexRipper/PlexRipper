@@ -5,6 +5,13 @@ import { PlexMediaType, type PlexMediaSlimDTO, type PlexMediaDTO, type PlexMedia
 
 export function generatePlexMediaStatisticsDTO(mediaList: PlexMediaSlimDTO[]): PlexMediaStatisticsDTO {
 	return {
+		countries: [],
+		genres: [],
+		page: 1,
+		pageSize: mediaList.length,
+		qualities: [],
+		roles: [],
+		totalCount: 0,
 		mediaList: mediaList,
 		mediaCount: mediaList.length,
 		movieCount: mediaList.filter((x) => x.type === PlexMediaType.Movie).length,

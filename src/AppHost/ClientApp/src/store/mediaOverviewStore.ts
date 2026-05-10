@@ -70,7 +70,7 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 		items: [],
 		sortedItems: [],
 		loadedPages: [],
-		pageSize: 100,
+		pageSize: 1000,
 		totalCount: 0,
 		itemsLength: 0,
 		sortedState: { field: MediaSortField.Title, sort: SortDirection.Asc },
@@ -172,7 +172,7 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 				]),
 			};
 		},
-		refreshAllLibraryMediaByType(page: number = 1, size: number = 100): Observable<PlexMediaStatisticsDTO | null> {
+		refreshAllLibraryMediaByType(page: number = 1, size: number = state.pageSize): Observable<PlexMediaStatisticsDTO | null> {
 			const queryParams = actions.buildFlexQueryParams(page, size);
 			return plexMediaApi.getAllMediaByTypeEndpoint(queryParams).pipe(
 				takeUntil(cancelSubject$),
@@ -190,9 +190,6 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 				return of(null);
 			}
 
-			const page = 1;
-			const size = 100;
-
 			state.loading = true;
 			Log.debug('Starting media request', { libraryId: state.libraryId, mediaType: get(getters.getMediaType) });
 
@@ -206,7 +203,7 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 			]).pipe(
 				takeUntil(cancelSubject$),
 				switchMap(() =>
-					defer(() => actions.refreshAllLibraryMediaByType(page, size)).pipe(
+					defer(() => actions.refreshAllLibraryMediaByType(1, state.pageSize)).pipe(
 						takeUntil(cancelSubject$),
 						tap((data) => {
 							actions.setMedia(data);
@@ -257,7 +254,6 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 			state.items = Object.freeze(items);
 			state.itemsLength = items.length;
 			state.totalCount = data.totalCount;
-			state.pageSize = data.pageSize || state.pageSize;
 			state.loadedPages = [...new Set([...state.loadedPages, data.page])].sort((a, b) => a - b);
 
 			state.allMovieCount = data.totalMovieCount;
@@ -310,7 +306,7 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 			return requests.length ? forkJoin(requests) : of([]);
 		},
 		requestAroundIndex(index: number): Observable<(PlexMediaStatisticsDTO | null)[]> {
-			return actions.requestRange(index - 20, index + 20);
+			return actions.requestRange(index - 20, index + 50);
 		},
 		setMetaData({
 			countryId,

@@ -20,11 +20,11 @@
 					display: 'flex',
 				}">
 				<MediaPoster
-					v-for="item in getRowItems(virtualRow.index)"
+					v-for="(item, itemIndex) in getRowItems(virtualRow.index)"
 					:key="item.id"
 					:media-item="item"
 					:active="true"
-					:data-scroll-index="getItemFlatIndex(virtualRow.index, item)"
+					:data-scroll-index="virtualRow.index * get(gridItems) + itemIndex"
 					@download="sendMediaOverviewDownloadCommand($event)"
 					@open-media-details="onOpenMediaDetails" />
 			</div>
@@ -94,13 +94,6 @@ const safeTotalSize = computed(() => Math.min(rowVirtualizer.value.getTotalSize(
 function getRowItems(rowIndex: number): PlexMediaSlimDTO[] {
 	const cols = get(gridItems);
 	return props.items.slice(rowIndex * cols, (rowIndex + 1) * cols) as PlexMediaSlimDTO[];
-}
-
-// Converts (rowIndex, item) back to the flat item index for scroll restoration and highlight
-function getItemFlatIndex(rowIndex: number, item: PlexMediaSlimDTO): number {
-	const cols = get(gridItems);
-	const rowItems = getRowItems(rowIndex);
-	return rowIndex * cols + rowItems.indexOf(item);
 }
 
 // useElementBounding must be called at setup level so its ResizeObserver is wired correctly.
@@ -191,10 +184,11 @@ onMounted(() => {
 			return;
 		}
 
+		// Scroll immediately for responsiveness, then prefetch nearby pages in background
+		scrollToIndex(scrollIndex);
+
 		useSubscription(
-			mediaOverviewStore.requestAroundIndex(scrollIndex).subscribe(() => {
-				scrollToIndex(scrollIndex);
-			}),
+			mediaOverviewStore.requestAroundIndex(scrollIndex).subscribe(),
 		);
 	});
 });

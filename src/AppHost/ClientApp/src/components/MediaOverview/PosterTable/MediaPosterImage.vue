@@ -7,43 +7,40 @@
 			square
 			dark />
 		<template v-else>
-			<QHover
+			<div
 				v-if="imageUrl"
 				class="media-poster">
-				<template #default="{ hover }">
-					<q-img
-						:key="mediaItem.id"
-						loading="eager"
-						:src="imageUrl"
-						fit="fill"
-						no-spinner
-						crossorigin="anonymous"
-						class="media-poster--image"
-						:alt="mediaItem.title">
-						<template #default>
-							<!--	Overlay	-->
-							<div :class="['media-poster--overlay', hover && overlay ? 'on-hover' : '', 'white--text']">
-								<MediaPosterImageContent
-									:media-item="mediaItem"
-									:actions="actions"
-									:all-media-mode="allMediaMode"
-									@download="$emit('download', $event)"
-									@open-media-details="$emit('open-media-details')" />
-							</div>
-						</template>
-						<template #error>
-							<!--	Show fallback image	-->
+				<q-img
+					loading="lazy"
+					:src="imageUrl"
+					fit="fill"
+					no-spinner
+					crossorigin="anonymous"
+					class="media-poster--image"
+					:alt="mediaItem.title">
+					<template #default>
+						<!--	Overlay	-->
+						<div :class="['media-poster--overlay', 'white--text']">
 							<MediaPosterImageContent
-								fallback
-								:actions="actions"
 								:media-item="mediaItem"
+								:actions="actions"
 								:all-media-mode="allMediaMode"
 								@download="$emit('download', $event)"
 								@open-media-details="$emit('open-media-details')" />
-						</template>
-					</q-img>
-				</template>
-			</QHover>
+						</div>
+					</template>
+					<template #error>
+						<!--	Show fallback image	-->
+						<MediaPosterImageContent
+							fallback
+							:actions="actions"
+							:media-item="mediaItem"
+							:all-media-mode="allMediaMode"
+							@download="$emit('download', $event)"
+							@open-media-details="$emit('open-media-details')" />
+					</template>
+				</q-img>
+			</div>
 			<!--	Show fallback image	-->
 			<MediaPosterImageContent
 				v-else
@@ -172,8 +169,10 @@ onUnmounted(() => {
     opacity: 0;
     margin: 0;
     transition: opacity 0.2s ease-in-out;
+  }
 
-    &.on-hover {
+  &:hover {
+    .media-poster--overlay {
       opacity: 0.8;
 
       .q-btn {

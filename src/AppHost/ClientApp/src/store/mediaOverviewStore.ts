@@ -310,7 +310,7 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 			return requests.length ? forkJoin(requests) : of([]);
 		},
 		requestAroundIndex(index: number): Observable<(PlexMediaStatisticsDTO | null)[]> {
-			return actions.requestRange(index - 50, index + 50);
+			return actions.requestRange(index - 20, index + 20);
 		},
 		setMetaData({
 			countryId,

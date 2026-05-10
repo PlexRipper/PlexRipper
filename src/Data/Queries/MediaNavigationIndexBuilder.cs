@@ -4,7 +4,7 @@ using Reaparr.Application.Contracts;
 namespace Reaparr.Data;
 
 public sealed record MediaNavigationIndexRow(
-    string? Title,
+    string? SearchTitle,
     int Year,
     int? QualityValue,
     int Duration,
@@ -39,14 +39,14 @@ public static class MediaNavigationIndexBuilder
 
     private static string GetLabel(MediaNavigationIndexRow row, string sortField) => sortField switch
     {
-        nameof(BasePlexMedia.SortIndex) or "sortIndex" or nameof(BasePlexMedia.Title) or "title" => GetTitleLabel(row.Title),
+        nameof(BasePlexMedia.SortIndex) or "sortIndex" or nameof(BasePlexMedia.Title) or "title" => GetTitleLabel(row.SearchTitle),
         nameof(BasePlexMedia.Year) or "year" => row.Year.ToString(CultureInfo.InvariantCulture),
         "quality" => row.QualityValue?.ToString(CultureInfo.InvariantCulture) ?? UnknownLabel,
         nameof(BasePlexMedia.Duration) or "duration" => GetDurationLabel(row.Duration),
         nameof(BasePlexMedia.AddedAt) or "addedAt" => GetMonthLabel(row.AddedAt),
         nameof(BasePlexMedia.UpdatedAt) or "updatedAt" => row.UpdatedAt is null ? UnknownLabel : GetMonthLabel(row.UpdatedAt.Value),
         nameof(BasePlexMedia.MediaSize) or "mediaSize" => GetMediaSizeLabel(row.MediaSize),
-        _ => GetTitleLabel(row.Title),
+        _ => GetTitleLabel(row.SearchTitle),
     };
 
     private static string GetTitleLabel(string? title)

@@ -105,7 +105,7 @@ public class GetMediaByTypeCommandHandler : ICommandHandler<GetMediaByTypeComman
                     .ApplySort(options);
 
                 await SetNavigationIndexes(movieQuery.Select(x => new MediaNavigationIndexRow(
-                    x.Title,
+                    x.SearchTitle,
                     x.Year,
                     (int?)x.Quality,
                     x.Duration,
@@ -141,7 +141,7 @@ public class GetMediaByTypeCommandHandler : ICommandHandler<GetMediaByTypeComman
                     .ApplySort(options);
 
                 await SetNavigationIndexes(tvShowQuery.Select(x => new MediaNavigationIndexRow(
-                    x.Title,
+                    x.SearchTitle,
                     x.Year,
                     (int?)x.Quality,
                     x.Duration,

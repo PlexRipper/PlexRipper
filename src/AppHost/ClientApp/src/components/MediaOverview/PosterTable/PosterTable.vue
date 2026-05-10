@@ -37,6 +37,7 @@ import Log from 'consola';
 import { useVirtualizer } from '@tanstack/vue-virtual';
 
 import { get, set, useElementBounding } from '@vueuse/core';
+import { useSubscription } from '@vueuse/rxjs';
 import type { PlexMediaType, PlexMediaSlimDTO } from '@dto';
 import { listenMediaOverviewScrollToCommand, sendMediaOverviewDownloadCommand } from '@composables/event-bus';
 import { triggerBoxHighlight } from '@composables/animations';
@@ -50,6 +51,7 @@ const posterCardWidth = ref(200 + 32);
 const posterCardHeight = ref(340 + 32);
 const gridItems = ref(10);
 const gridPaddingLeft = ref(0);
+const pageRequestPending = ref(false);
 const router = useRouter();
 
 const props = defineProps<{
@@ -73,6 +75,12 @@ const rowVirtualizer = useVirtualizer(
 		getItemKey: (rowIndex: number): number => {
 			const firstItem = props.items[rowIndex * get(gridItems)];
 			return firstItem?.id ?? rowIndex;
+		},
+		onChange: (_instance: unknown, sync: boolean) => {
+			if (sync)
+				return;
+
+			requestNextPageNearBottom();
 		},
 	})),
 );
@@ -110,11 +118,9 @@ watch(containerWidth, (width) => {
 
 function onPageReady() {
 	const lastMediaItemViewed = get(mediaOverviewStore.lastMediaItemViewed);
-	if (lastMediaItemViewed) {
-		// The index is relative depending on the view mode so we translate the mediaId to the index of the current view
-		const index = mediaOverviewStore.getMediaIndex(lastMediaItemViewed?.id);
+	if (lastMediaItemViewed && lastMediaItemViewed.sortIndex > 0) {
 		// If we have a last viewed media item, scroll to it
-		scrollToIndex(index);
+		scrollToIndex(lastMediaItemViewed.sortIndex - 1);
 	}
 }
 
@@ -126,6 +132,28 @@ function onOpenMediaDetails(mediaItem: PlexMediaSlimDTO) {
 			tvShowId: mediaItem.id.toString(),
 		},
 	});
+}
+
+function requestNextPageNearBottom() {
+	if (get(pageRequestPending) || props.items.length >= mediaOverviewStore.totalCount)
+		return;
+
+	const lastVirtualRow = get(rowVirtualizer).getVirtualItems().at(-1);
+	if (!lastVirtualRow)
+		return;
+
+	const lastVisibleIndex = (lastVirtualRow.index + 1) * get(gridItems) - 1;
+	if (lastVisibleIndex < props.items.length - get(gridItems) * 2)
+		return;
+
+	set(pageRequestPending, true);
+	const nextPage = Math.floor(props.items.length / mediaOverviewStore.pageSize) + 1;
+	useSubscription(
+		mediaOverviewStore.requestMediaPage(nextPage).subscribe({
+			next: () => set(pageRequestPending, false),
+			error: () => set(pageRequestPending, false),
+		}),
+	);
 }
 
 function scrollToIndex(index: number) {
@@ -158,12 +186,16 @@ onMounted(() => {
 			return;
 		}
 
-		if (scrollIndex < 0 || scrollIndex >= props.items.length) {
-			Log.warn(`Scroll index ${scrollIndex} is out of bounds for items length ${props.items.length}`);
+		if (scrollIndex < 0 || scrollIndex >= mediaOverviewStore.totalCount) {
+			Log.warn(`Scroll index ${scrollIndex} is out of bounds for total count ${mediaOverviewStore.totalCount}`);
 			return;
 		}
 
-		scrollToIndex(scrollIndex);
+		useSubscription(
+			mediaOverviewStore.requestAroundIndex(scrollIndex).subscribe(() => {
+				scrollToIndex(scrollIndex);
+			}),
+		);
 	});
 });
 </script>

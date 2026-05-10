@@ -260,11 +260,11 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 			state.pageSize = data.pageSize || state.pageSize;
 			state.loadedPages = [...new Set([...state.loadedPages, data.page])].sort((a, b) => a - b);
 
-			state.allMovieCount = data.movieCount;
-			state.allTvShowCount = data.tvShowCount;
-			state.allSeasonCount = data.seasonCount;
-			state.allEpisodeCount = data.episodeCount;
-			state.allFileSize = data.mediaSize;
+			state.allMovieCount = data.totalMovieCount;
+			state.allTvShowCount = data.totalTvShowCount;
+			state.allSeasonCount = data.totalSeasonCount;
+			state.allEpisodeCount = data.totalEpisodeCount;
+			state.allFileSize = data.totalMediaSize;
 			state.availableRoleIds = availableMetadataIds.roles ?? [];
 			state.availableCountryIds = availableMetadataIds.countries ?? [];
 			state.availableGenreIds = availableMetadataIds.genres ?? [];

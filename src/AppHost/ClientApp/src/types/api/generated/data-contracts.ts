@@ -935,6 +935,16 @@ export interface PlexMediaStatisticsDTO {
   /** @format int32 */
   totalCount: number;
   /** @format int32 */
+  totalEpisodeCount: number;
+  /** @format int64 */
+  totalMediaSize: number;
+  /** @format int32 */
+  totalMovieCount: number;
+  /** @format int32 */
+  totalSeasonCount: number;
+  /** @format int32 */
+  totalTvShowCount: number;
+  /** @format int32 */
   tvShowCount: number;
 }
 

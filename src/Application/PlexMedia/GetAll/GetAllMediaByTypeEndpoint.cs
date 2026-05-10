@@ -100,5 +100,6 @@ public class GetAllMediaByTypeEndpoint : BaseEndpoint<GetAllMediaByTypeRequest, 
         Countries = source.Countries,
         Genres = source.Genres,
         Qualities = source.Qualities,
+        TotalCount = source.TotalCount,
     };
 }

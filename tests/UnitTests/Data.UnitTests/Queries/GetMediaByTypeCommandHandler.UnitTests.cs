@@ -858,12 +858,8 @@ public class GetMediaByTypeCommandHandlerUnitTests : BaseUnitTest<GetMediaByType
         });
 
         var dbContext = IDbContext;
-        var expectedMovieCount = await dbContext.PlexLibraries
-            .Where(x => x.Type == PlexMediaType.Movie)
-            .SumAsync(x => x.MovieCount, CancellationToken);
-        var expectedMediaSize = await dbContext.PlexLibraries
-            .Where(x => x.Type == PlexMediaType.Movie)
-            .SumAsync(x => x.MediaSize, CancellationToken);
+        var expectedMovieCount = await dbContext.PlexMovies.CountAsync(CancellationToken);
+        var expectedMediaSize = await dbContext.PlexMovies.SumAsync(x => x.MediaSize, CancellationToken);
 
         var command = CreateCommand(PlexMediaType.Movie, 0);
 
@@ -899,10 +895,14 @@ public class GetMediaByTypeCommandHandlerUnitTests : BaseUnitTest<GetMediaByType
             .Select(x => new
             {
                 x.Id,
-                x.MovieCount,
-                x.MediaSize,
             })
             .FirstAsync(CancellationToken);
+        var expectedMovieCount = await dbContext.PlexMovies
+            .Where(x => x.PlexLibraryId == targetLibrary.Id)
+            .CountAsync(CancellationToken);
+        var expectedMediaSize = await dbContext.PlexMovies
+            .Where(x => x.PlexLibraryId == targetLibrary.Id)
+            .SumAsync(x => x.MediaSize, CancellationToken);
 
         var command = CreateCommand(PlexMediaType.Movie, targetLibrary.Id);
 
@@ -912,13 +912,13 @@ public class GetMediaByTypeCommandHandlerUnitTests : BaseUnitTest<GetMediaByType
         // Assert
         result.IsSuccess.ShouldBeTrue();
         result.Value.Items.ShouldAllBe(x => x.PlexLibraryId == targetLibrary.Id);
-        result.Value.TotalCount.ShouldBe(targetLibrary.MovieCount);
-        result.Value.MediaCount.ShouldBe(targetLibrary.MovieCount);
-        result.Value.MovieCount.ShouldBe(targetLibrary.MovieCount);
+        result.Value.TotalCount.ShouldBe(expectedMovieCount);
+        result.Value.MediaCount.ShouldBe(expectedMovieCount);
+        result.Value.MovieCount.ShouldBe(expectedMovieCount);
         result.Value.TvShowCount.ShouldBe(0);
         result.Value.SeasonCount.ShouldBe(0);
         result.Value.EpisodeCount.ShouldBe(0);
-        result.Value.MediaSize.ShouldBe(targetLibrary.MediaSize);
+        result.Value.MediaSize.ShouldBe(expectedMediaSize);
     }
 
     [Test]
@@ -983,7 +983,7 @@ public class GetMediaByTypeCommandHandlerUnitTests : BaseUnitTest<GetMediaByType
     public async Task ShouldFilterMoviesByGenreId_WhenMetadataGenreFilterIsApplied()
     {
         // Arrange
-        await SetupDatabase(70030, cfg =>
+        await SetupDatabase(70230, cfg =>
         {
             cfg.PlexServerCount = 1;
             cfg.PlexMovieLibraryCount = 1;
@@ -1012,7 +1012,7 @@ public class GetMediaByTypeCommandHandlerUnitTests : BaseUnitTest<GetMediaByType
     public async Task ShouldFilterMoviesByQualityGenreCountryAndRole_WhenAllMetadataFiltersAreApplied()
     {
         // Arrange
-        await SetupDatabase(70031, cfg =>
+        await SetupDatabase(70231, cfg =>
         {
             cfg.PlexServerCount = 1;
             cfg.PlexMovieLibraryCount = 1;
@@ -1060,7 +1060,7 @@ public class GetMediaByTypeCommandHandlerUnitTests : BaseUnitTest<GetMediaByType
         result.Value.Genres.ShouldBe([expectedMovie.GenreId]);
         result.Value.Countries.ShouldBe([expectedMovie.CountryId]);
         result.Value.Roles.ShouldBe([expectedMovie.ActorId]);
-        result.Value.Qualities.ShouldBe([(int)VideoQuality.FullHD]);
+        result.Value.Qualities.ShouldBe([7]);
     }
 
     private async Task<ExpectedMovieMetadata> ConfigureExactMetadataMatchAsync(

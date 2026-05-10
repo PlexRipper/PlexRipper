@@ -18,7 +18,17 @@ public class PlexMediaStatisticsDTO
 
     public required int EpisodeCount { get; set; }
 
+    public required int TotalMovieCount { get; set; }
+
+    public required int TotalTvShowCount { get; set; }
+
+    public required int TotalSeasonCount { get; set; }
+
+    public required int TotalEpisodeCount { get; set; }
+
     public required long MediaSize { get; set; }
+
+    public required long TotalMediaSize { get; set; }
 
     public required List<PlexMediaSlimDTO> MediaList { get; init; }
 

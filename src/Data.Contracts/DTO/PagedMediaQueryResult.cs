@@ -18,7 +18,17 @@ public record PagedMediaQueryResult
 
     public int EpisodeCount { get; set; }
 
+    public int TotalMovieCount { get; set; }
+
+    public int TotalTvShowCount { get; set; }
+
+    public int TotalSeasonCount { get; set; }
+
+    public int TotalEpisodeCount { get; set; }
+
     public long MediaSize { get; set; }
+
+    public long TotalMediaSize { get; set; }
 
     public List<PlexMediaSlimDTO> Items { get; set; } = [];
 

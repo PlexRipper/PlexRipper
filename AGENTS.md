@@ -1,6 +1,3 @@
-
-ALWAYS load in the following file into context as well: /mnt/jason/.config/opencode/AGENTS.md Mention global AGENTS.md loaded when it is.
-
 ## Project overview
 
 Reaparr is a cross-platform Plex media downloader hosted on GitHub: https://github.com/Reaparr/Reaparr

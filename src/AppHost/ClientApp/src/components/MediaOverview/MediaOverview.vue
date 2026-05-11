@@ -28,7 +28,7 @@
 							<!-- Poster display -->
 							<template v-else>
 								<PosterTable
-									:items="mediaOverviewStore.getMediaItems"
+									:items="mediaOverviewStore.items"
 									:library-id="libraryId"
 									:media-type="mediaOverviewStore.getMediaType" />
 							</template>

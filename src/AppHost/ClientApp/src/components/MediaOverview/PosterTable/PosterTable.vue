@@ -20,11 +20,11 @@
 					display: 'flex',
 				}">
 				<MediaPoster
-					v-for="(item, itemIndex) in getRowItems(virtualRow.index)"
-					:key="item.id"
-					:media-item="item"
+					v-for="rowItem in getRowItems(virtualRow.index)"
+					:key="rowItem.item.id"
+					:media-item="rowItem.item"
 					:active="true"
-					:data-scroll-index="virtualRow.index * get(gridItems) + itemIndex"
+					:data-scroll-index="rowItem.index"
 					@download="sendMediaOverviewDownloadCommand($event)"
 					@open-media-details="onOpenMediaDetails" />
 			</div>
@@ -61,7 +61,7 @@ const props = defineProps<{
 }>();
 
 // Number of rows = ceil(total items / columns)
-const rowCount = computed(() => Math.ceil(props.items.length / get(gridItems)));
+const rowCount = computed(() => Math.ceil(mediaOverviewStore.totalCount / get(gridItems)));
 
 // Row virtualizer — re-configures reactively when rowCount or posterCardHeight changes
 const rowVirtualizer = useVirtualizer(
@@ -90,10 +90,14 @@ const rowVirtualizer = useVirtualizer(
 const BROWSER_MAX_CSS_HEIGHT = 33_000_000;
 const safeTotalSize = computed(() => Math.min(rowVirtualizer.value.getTotalSize(), BROWSER_MAX_CSS_HEIGHT));
 
-// Returns the items belonging to a given row index
-function getRowItems(rowIndex: number): PlexMediaSlimDTO[] {
+// Returns the loaded items belonging to a given row index, preserving each item's global index.
+function getRowItems(rowIndex: number): { item: PlexMediaSlimDTO; index: number }[] {
 	const cols = get(gridItems);
-	return props.items.slice(rowIndex * cols, (rowIndex + 1) * cols) as PlexMediaSlimDTO[];
+	const startIndex = rowIndex * cols;
+	return props.items
+		.slice(startIndex, startIndex + cols)
+		.map((item, itemIndex) => ({ item, index: startIndex + itemIndex }))
+		.filter((rowItem): rowItem is { item: PlexMediaSlimDTO; index: number } => !!rowItem.item);
 }
 
 // useElementBounding must be called at setup level so its ResizeObserver is wired correctly.
@@ -128,7 +132,7 @@ function onOpenMediaDetails(mediaItem: PlexMediaSlimDTO) {
 }
 
 function requestNextPageNearBottom() {
-	if (get(pageRequestPending) || props.items.length >= mediaOverviewStore.totalCount)
+	if (get(pageRequestPending) || props.items.filter((item) => !!item).length >= mediaOverviewStore.totalCount)
 		return;
 
 	const lastVirtualRow = get(rowVirtualizer).getVirtualItems().at(-1);
@@ -136,15 +140,12 @@ function requestNextPageNearBottom() {
 		return;
 
 	const lastVisibleIndex = (lastVirtualRow.index + 1) * get(gridItems) - 1;
-	if (lastVisibleIndex < props.items.length - get(gridItems) * 2)
-		return;
-
 	set(pageRequestPending, true);
-	const nextPage = Math.floor(props.items.length / mediaOverviewStore.pageSize) + 1;
 	useSubscription(
-		mediaOverviewStore.requestMediaPage(nextPage).subscribe({
+		mediaOverviewStore.requestRange(lastVisibleIndex, lastVisibleIndex + mediaOverviewStore.pageSize).subscribe({
 			next: () => set(pageRequestPending, false),
 			error: () => set(pageRequestPending, false),
+			complete: () => set(pageRequestPending, false),
 		}),
 	);
 }
@@ -164,6 +165,11 @@ function scrollToIndex(index: number) {
 
 	// Wait for the element to be rendered before highlighting
 	waitForElement(container, `[data-scroll-index="${index}"]`).then((element) => {
+		if (!element) {
+			Log.debug('Could not find element to highlight for scroll index:', index);
+			return;
+		}
+
 		// Highlight the element after a short delay due to render hang
 		setTimeout(() => {
 			triggerBoxHighlight(element);

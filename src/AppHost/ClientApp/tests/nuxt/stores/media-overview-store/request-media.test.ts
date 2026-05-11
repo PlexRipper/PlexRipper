@@ -7,7 +7,7 @@ import {
 	generateResultDTO,
 } from '@mock';
 import { useMediaOverviewStore } from '@store';
-import { type PlexMediaStatisticsDTO, PlexMediaType } from '@dto';
+import { type PlexMediaSlimDTO, type PlexMediaStatisticsDTO, PlexMediaType } from '@dto';
 
 describe('MediaOverviewStore.requestMedia()', () => {
 	let { mock } = baseVars();
@@ -69,5 +69,73 @@ describe('MediaOverviewStore.requestMedia()', () => {
 		expect(mediaOverviewStore.allEpisodeCount).toEqual(movies.episodeCount);
 		expect(mediaOverviewStore.allFileSize).toEqual(movies.mediaSize);
 		expect(mediaOverviewStore.loading).toEqual(false);
+	});
+
+	test('Should request each unloaded page only once while a range request is in flight', async () => {
+		// Arrange
+		const mediaOverviewStore = useMediaOverviewStore();
+		const pageItems = generatePlexMediaSlims({
+			config: {
+				movieCount: 10,
+			},
+			partialData: {
+				plexServerId: 1,
+				plexLibraryId: 1,
+				type: PlexMediaType.Movie,
+			},
+		}).map((item, index) => ({
+			...item,
+			sortIndex: 1001 + index,
+		})) as PlexMediaSlimDTO[];
+		const pageTwo = generatePlexMediaStatisticsDTO(pageItems);
+		pageTwo.page = 2;
+		pageTwo.pageSize = 1000;
+		pageTwo.totalCount = 2000;
+
+		mock.onGet(new RegExp(`/api/PlexMedia`)).reply(200, generateResultDTO(pageTwo));
+
+		// Act
+		const first = subscribeSpyTo(mediaOverviewStore.requestRange(1000, 1050));
+		const second = subscribeSpyTo(mediaOverviewStore.requestRange(1000, 1050));
+		await first.onComplete();
+		await second.onComplete();
+
+		// Assert
+		expect(mock.history.get.filter((request) => request.url === '/api/PlexMedia')).toHaveLength(1);
+		expect(mediaOverviewStore.loadedPages).toEqual([2]);
+	});
+
+	test('Should allow retrying a page request after the in-flight request completes', async () => {
+		// Arrange
+		const mediaOverviewStore = useMediaOverviewStore();
+		const pageItems = generatePlexMediaSlims({
+			config: {
+				movieCount: 10,
+			},
+			partialData: {
+				plexServerId: 1,
+				plexLibraryId: 1,
+				type: PlexMediaType.Movie,
+			},
+		}).map((item, index) => ({
+			...item,
+			sortIndex: 1001 + index,
+		})) as PlexMediaSlimDTO[];
+		const pageTwo = generatePlexMediaStatisticsDTO(pageItems);
+		pageTwo.page = 2;
+		pageTwo.pageSize = 1000;
+		pageTwo.totalCount = 2000;
+
+		mock.onGet(new RegExp(`/api/PlexMedia`)).reply(200, generateResultDTO(pageTwo));
+
+		// Act
+		const first = subscribeSpyTo(mediaOverviewStore.requestMediaPage(2));
+		await first.onComplete();
+		mediaOverviewStore.loadedPages = [];
+		const second = subscribeSpyTo(mediaOverviewStore.requestMediaPage(2));
+		await second.onComplete();
+
+		// Assert
+		expect(mock.history.get.filter((request) => request.url === '/api/PlexMedia')).toHaveLength(2);
 	});
 });

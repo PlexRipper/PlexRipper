@@ -16,7 +16,7 @@ import type { IMediaOverviewSort } from '@composables/event-bus';
 import { MediaSortField, SortDirection } from '@enums';
 import { type IMetaDataMediaFilter, type ISelection, type ISortOption, StoreNames } from '@interfaces';
 import { plexLibraryApi, plexMediaApi } from '@api';
-import { map, switchMap, takeUntil, tap } from 'rxjs/operators';
+import { finalize, map, switchMap, takeUntil, tap } from 'rxjs/operators';
 import { defer, forkJoin, type Observable, of, Subject } from 'rxjs';
 import { useLibraryStore, useSettingsStore } from '@store';
 import {
@@ -112,6 +112,7 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 	const state = reactive<IMediaOverviewStoreState>(cloneDeep(defaultState));
 	const settingsStore = useSettingsStore();
 	const libraryStore = useLibraryStore();
+	const pendingPages = new Set<number>();
 
 	// Subject to cancel in-flight requests when switching libraries
 	const cancelSubject$ = new Subject<void>();
@@ -128,6 +129,7 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 
 			// Update state
 			state.libraryId = libraryId;
+			state.filterQuery = '';
 			state.isDetailView = false;
 
 			Log.debug('Initializing library', { libraryId, mediaType: get(getters.getMediaType) });
@@ -150,6 +152,8 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 			);
 		},
 		buildFlexQueryParams(page: number, size: number): MediaQueryFilterDTO {
+			const filterQuery = state.filterQuery.trim().toLowerCase();
+
 			return {
 				filterOwnedMedia: settingsStore.generalSettings.hideMediaFromOwnedServers,
 				filterOfflineMedia: settingsStore.generalSettings.hideMediaFromOfflineServers,
@@ -157,8 +161,8 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 				plexLibraryId: state.libraryId,
 				page,
 				pageSize: size,
-				query: state.filterQuery || undefined,
 				filter: DSLBuilder()
+					.when(filterQuery, (x) => x.contains('SearchTitle', filterQuery))
 					.when((state.metadata.countryId ?? 0) > 0, (x) => x.where('Countries:any:Id', 'eq', state.metadata.countryId ?? 0))
 					.when((state.metadata.roleId ?? 0) > 0, (x) => x.where('Actors:any:Id', 'eq', state.metadata.roleId ?? 0))
 					.when((state.metadata.genreId ?? 0) > 0, (x) => x.where('Genres:any:Id', 'eq', state.metadata.genreId ?? 0))
@@ -230,16 +234,18 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 			);
 		},
 		requestMediaPage(page: number, size: number = state.pageSize): Observable<PlexMediaStatisticsDTO | null> {
-			if (state.loadedPages.includes(page)) {
+			if (state.loadedPages.includes(page) || pendingPages.has(page)) {
 				return of(null);
 			}
 
+			pendingPages.add(page);
 			return actions.refreshAllLibraryMediaByType(page, size).pipe(
 				tap((data) => {
 					if (data) {
 						actions.mergeMediaPage(data);
 					}
 				}),
+				finalize(() => pendingPages.delete(page)),
 			);
 		},
 		mergeMediaPage(data: PlexMediaStatisticsDTO) {
@@ -270,6 +276,7 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 		setMedia(data: PlexMediaStatisticsDTO | null) {
 			state.items = Object.freeze([]);
 			state.loadedPages = [];
+			pendingPages.clear();
 			state.totalCount = 0;
 
 			if (data) {
@@ -287,7 +294,6 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 				state.availableQualityIds = [];
 				state.scrollDict = new Map<string, number>([['#', 0]]);
 			}
-			state.filterQuery = '';
 		},
 		getPageForIndex(index: number): number {
 			return Math.floor(index / state.pageSize) + 1;
@@ -384,8 +390,13 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 			state.sortedState = { field: MediaSortField.Title, sort: SortDirection.Asc };
 			state.sortedItems = [];
 		},
-		clearFilter() {
+		setFilterQuery(query: string): Observable<PlexMediaStatisticsDTO | null> {
+			state.filterQuery = query;
+			return actions.requestMedia();
+		},
+		clearFilter(): Observable<PlexMediaStatisticsDTO | null> {
 			state.filterQuery = '';
+			return actions.requestMedia();
 		},
 		toggleSortMedia(field: MediaSortField) {
 			if (state.sortedState.field === field) {
@@ -402,6 +413,7 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 			state.sortedState = event;
 		},
 		$reset() {
+			pendingPages.clear();
 			Object.assign(state, cloneDeep(defaultState));
 		},
 	};
@@ -420,14 +432,7 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 		allMediaMode: computed(() => state.libraryId === 0),
 		library: computed(() => libraryStore.getLibrary(state.libraryId)),
 		getMediaItems: computed((): Readonly<PlexMediaSlimDTO[]> => {
-			const items = (state.items ?? []).filter((x) => x);
-
-			if (!state.filterQuery) {
-				return items;
-			}
-
-			const filterQuery = state.filterQuery.toLowerCase();
-			return items.filter((x) => x.searchTitle.includes(filterQuery));
+			return state.items;
 		}),
 		getMediaViewMode: computed((): ViewMode => {
 			switch (get(getters.getMediaType)) {

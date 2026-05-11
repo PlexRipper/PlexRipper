@@ -26,10 +26,11 @@ describe('MediaOverviewStore.buildFlexQueryParams()', () => {
 		expect(result.sort).toBe('quality:asc');
 	});
 
-	test('Should combine metadata and quality filters with ampersand separators', () => {
+	test('Should combine metadata, quality, and search filters with ampersand separators', () => {
 		// Arrange
 		const mediaOverviewStore = useMediaOverviewStore();
 		mediaOverviewStore.libraryId = 17;
+		mediaOverviewStore.filterQuery = '  The Matrix  ';
 		mediaOverviewStore.metadata = {
 			countryId: 7,
 			roleId: 11,
@@ -42,6 +43,7 @@ describe('MediaOverviewStore.buildFlexQueryParams()', () => {
 
 		// Assert
 		expect(result.plexLibraryId).toBe(17);
-		expect(result.filter).toBe('Countries:any:Id:eq:7&Actors:any:Id:eq:11&Genres:any:Id:eq:13&MediaDataList:any:Quality:eq:SD');
+		expect(result.query).toBeUndefined();
+		expect(result.filter).toBe('SearchTitle:contains:the%20matrix&Countries:any:Id:eq:7&Actors:any:Id:eq:11&Genres:any:Id:eq:13&MediaDataList:any:Quality:eq:SD');
 	});
 });

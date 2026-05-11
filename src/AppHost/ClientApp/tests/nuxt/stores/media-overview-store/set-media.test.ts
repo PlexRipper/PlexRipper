@@ -42,7 +42,7 @@ describe('MediaOverviewStore.setMedia()', () => {
 		}));
 	}
 
-	test('Should reset filterQuery to empty string when new media is set', async () => {
+	test('Should preserve filterQuery when new media is set', async () => {
 		// Arrange
 		const store = useMediaOverviewStore();
 		const type = PlexMediaType.Movie;
@@ -50,26 +50,13 @@ describe('MediaOverviewStore.setMedia()', () => {
 			config: { movieCount: 10 },
 			partialData: { plexServerId: 1, plexLibraryId: 0, type },
 		}));
-		setupMocks(movies);
-
-		const result = subscribeSpyTo(store.requestMedia());
-		await result.onComplete();
-
-		// Set a filter query
 		store.filterQuery = 'some-filter';
+
+		// Act
+		store.setMedia(movies);
+
+		// Assert
 		expect(store.filterQuery).toBe('some-filter');
-
-		// Re-setup mocks for second request and re-request
-		setupMocks(movies);
-
-		// Act — request media again (need to reset loading state manually via $reset trick, or just call setMedia directly)
-		store.$reset();
-		setupMocks(movies);
-		const result2 = subscribeSpyTo(store.requestMedia());
-		await result2.onComplete();
-
-		// Assert — filterQuery should be cleared by setMedia
-		expect(store.filterQuery).toBe('');
 	});
 
 	test('Should set all count fields correctly from PlexMediaStatisticsDTO', async () => {
@@ -161,7 +148,7 @@ describe('MediaOverviewStore.setMedia()', () => {
 		expect(store.itemsLength).toBe(3);
 	});
 
-	test('Should use movieCount for all-movies virtual item count when mediaCount is stale zero', async () => {
+	test('Should keep loaded items separate from backend totalCount when mediaCount is stale zero', async () => {
 		// Arrange
 		const store = useMediaOverviewStore();
 		useSettingsStore().displaySettings.allOverviewViewMode = PlexMediaType.Movie;
@@ -173,6 +160,8 @@ describe('MediaOverviewStore.setMedia()', () => {
 		movies.mediaList = movies.mediaList.slice(0, 10);
 		movies.mediaCount = 0;
 		movies.movieCount = 100;
+		movies.totalMovieCount = 100;
+		movies.totalCount = 100;
 		setupMocks(movies);
 
 		// Act
@@ -180,8 +169,8 @@ describe('MediaOverviewStore.setMedia()', () => {
 		await result.onComplete();
 
 		// Assert
-		expect(store.items.length).toBe(10);
-		expect(store.itemsLength).toBe(100);
+		expect(store.items.filter((x) => x).length).toBe(10);
+		expect(store.itemsLength).toBe(10);
 		expect(store.totalCount).toBe(100);
 	});
 

@@ -20,6 +20,11 @@ export function generatePlexMediaStatisticsDTO(mediaList: PlexMediaSlimDTO[]): P
 		episodeCount: mediaList.filter((x) => x.type === PlexMediaType.Episode).length,
 		mediaSize: mediaList.reduce((acc, x) => acc + x.mediaSize, 0),
 		navigationIndexes: [],
+		totalMovieCount: mediaList.filter((x) => x.type === PlexMediaType.Movie).length,
+		totalTvShowCount: mediaList.filter((x) => x.type === PlexMediaType.TvShow).length,
+		totalSeasonCount: mediaList.filter((x) => x.type === PlexMediaType.Season).length,
+		totalEpisodeCount: mediaList.filter((x) => x.type === PlexMediaType.Episode).length,
+		totalMediaSize: mediaList.reduce((acc, x) => acc + x.mediaSize, 0),
 	};
 }
 

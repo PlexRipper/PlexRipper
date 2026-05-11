@@ -1,7 +1,7 @@
 import Log from 'consola';
 import { cloneDeep, isNumber, sortBy, uniqueId } from 'lodash-es';
 import { acceptHMRUpdate, defineStore } from 'pinia';
-import { computed, reactive, toRefs } from 'vue';
+import { computed, markRaw, reactive, toRefs } from 'vue';
 import { get } from '@vueuse/core';
 import {
 	type MediaQueryFilterDTO,
@@ -37,7 +37,6 @@ interface IAvailableMetadataIds {
 
 interface IMediaOverviewStoreState {
 	libraryId: number;
-	mediaPages: Map<number, readonly PlexMediaSlimDTO[]>;
 	loadedPages: number[];
 	pageSize: number;
 	totalCount: number;
@@ -66,9 +65,8 @@ interface IMediaOverviewStoreState {
 export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, () => {
 	const defaultState: IMediaOverviewStoreState = {
 		libraryId: 0,
-		mediaPages: new Map<number, readonly PlexMediaSlimDTO[]>(),
 		loadedPages: [],
-		pageSize: 1000,
+		pageSize: 100,
 		totalCount: 0,
 		itemsLength: 0,
 		sortedState: { field: MediaSortField.Title, sort: SortDirection.Asc },
@@ -110,6 +108,7 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 	const state = reactive<IMediaOverviewStoreState>(cloneDeep(defaultState));
 	const settingsStore = useSettingsStore();
 	const libraryStore = useLibraryStore();
+	const mediaPages = new Map<number, readonly PlexMediaSlimDTO[]>();
 	const pendingPages = new Set<number>();
 
 	// Subject to cancel in-flight requests when switching libraries
@@ -248,11 +247,11 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 		},
 		mergeMediaPage(data: PlexMediaStatisticsDTO) {
 			const availableMetadataIds = data as PlexMediaStatisticsDTO & IAvailableMetadataIds;
-			const frozenPage = Object.freeze([...data.mediaList]);
+			const frozenPage = markRaw(Object.freeze(data.mediaList));
 
-			state.mediaPages.set(data.page, frozenPage);
+			mediaPages.set(data.page, frozenPage);
 			state.loadedPages = [...new Set([...state.loadedPages, data.page])].sort((a, b) => a - b);
-			state.itemsLength = state.loadedPages.reduce((total, page) => total + (state.mediaPages.get(page)?.length ?? 0), 0);
+			state.itemsLength = state.loadedPages.reduce((total, page) => total + (mediaPages.get(page)?.length ?? 0), 0);
 			state.totalCount = data.totalCount || Math.max(data.mediaCount, state.itemsLength);
 
 			state.allMovieCount = data.totalMovieCount;
@@ -267,7 +266,7 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 			state.scrollDict = new Map((data.navigationIndexes ?? []).map((x) => [x.label, x.index]));
 		},
 		setMedia(data: PlexMediaStatisticsDTO | null) {
-			state.mediaPages = new Map<number, readonly PlexMediaSlimDTO[]>();
+			mediaPages.clear();
 			state.loadedPages = [];
 			pendingPages.clear();
 			state.totalCount = 0;
@@ -401,6 +400,7 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 			state.sortedState = event;
 		},
 		$reset() {
+			mediaPages.clear();
 			pendingPages.clear();
 			Object.assign(state, cloneDeep(defaultState));
 		},
@@ -420,29 +420,10 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 		allMediaMode: computed(() => state.libraryId === 0),
 		library: computed(() => libraryStore.getLibrary(state.libraryId)),
 		getMediaItems: computed((): Readonly<PlexMediaSlimDTO[]> => {
-			return state.loadedPages.flatMap((page) => state.mediaPages.get(page) ?? []);
+			return Array.from(mediaPages.values()).flat();
 		}),
 		getMediaItemsForRange: (start: number, end: number): Readonly<PlexMediaSlimDTO[]> => {
-			const rangeStart = Math.max(0, start);
-			const rangeEnd = Math.max(rangeStart, end);
-
-			return state.loadedPages.flatMap((page) => {
-				const pageItems = state.mediaPages.get(page);
-				if (!pageItems?.length) {
-					return [];
-				}
-
-				const pageStart = (page - 1) * state.pageSize;
-				const pageEnd = pageStart + pageItems.length;
-				if (pageEnd <= rangeStart || pageStart >= rangeEnd) {
-					return [];
-				}
-
-				return pageItems.slice(
-					Math.max(0, rangeStart - pageStart),
-					Math.min(pageItems.length, rangeEnd - pageStart),
-				);
-			});
+			return get(getters.getMediaItems).slice(Math.max(0, start), Math.max(0, end));
 		},
 		getMediaViewMode: computed((): ViewMode => {
 			switch (get(getters.getMediaType)) {

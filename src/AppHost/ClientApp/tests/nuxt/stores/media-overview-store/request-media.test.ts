@@ -7,7 +7,7 @@ import {
 	generateResultDTO,
 } from '@mock';
 import { useMediaOverviewStore } from '@store';
-import { type PlexMediaSlimDTO, type PlexMediaStatisticsDTO, PlexMediaType } from '@dto';
+import { type PlexMediaSlimDTO, PlexMediaType } from '@dto';
 
 describe('MediaOverviewStore.requestMedia()', () => {
 	let { mock } = baseVars();
@@ -43,15 +43,7 @@ describe('MediaOverviewStore.requestMedia()', () => {
 		let url = new RegExp(`/api/PlexMedia/*`);
 		mock.onGet(url).reply(200, generateResultDTO(movies));
 		url = new RegExp(`/api/PlexLibrary/0/metadata`);
-		mock.onGet(url).reply(200, generateResultDTO({
-			episodeCount: 0,
-			mediaCount: 0,
-			mediaSize: 0,
-			movieCount: 0,
-			seasonCount: 0,
-			tvShowCount: 0,
-			mediaList: [],
-		} as PlexMediaStatisticsDTO));
+		mock.onGet(url).reply(200, generateResultDTO(generatePlexMediaStatisticsDTO([])));
 
 		// Act
 		const result = subscribeSpyTo(mediaOverviewStore.requestMedia());
@@ -103,8 +95,8 @@ describe('MediaOverviewStore.requestMedia()', () => {
 		// Assert
 		expect(mock.history.get.filter((request) => request.url === '/api/PlexMedia')).toHaveLength(1);
 		expect(mediaOverviewStore.loadedPages).toEqual([2]);
-		expect(Object.isFrozen(mediaOverviewStore.mediaPages.get(2))).toBe(true);
 		expect(mediaOverviewStore.getMediaItems).toEqual(pageItems);
+		expect(mediaOverviewStore.getMediaItems[0]).toBe(pageItems[0]);
 		expect(mediaOverviewStore.getMediaItemsForRange(1000, 1003)).toEqual(pageItems.slice(0, 3));
 	});
 

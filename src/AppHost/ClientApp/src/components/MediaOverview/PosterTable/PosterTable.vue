@@ -6,7 +6,9 @@
 		:style="{ paddingLeft: `${gridPaddingLeft}px` }"
 		data-cy="poster-table">
 		<!-- Total height spacer — required by TanStack Virtual to define the scrollable area -->
-		<div :style="{ height: `${safeTotalSize}px`, position: 'relative' }">
+		<div
+			:data-pages-version="mediaOverviewStore.mediaPagesVersion"
+			:style="{ height: `${safeTotalSize}px`, position: 'relative' }">
 			<!-- Only virtual rows are rendered, positioned absolutely via translateY -->
 			<div
 				v-for="virtualRow in rowVirtualizer.getVirtualItems()"
@@ -52,6 +54,7 @@ const posterCardHeight = ref(340 + 32);
 const gridItems = ref(10);
 const gridPaddingLeft = ref(0);
 const pageRequestPending = ref(false);
+const hasRunInitialPageReady = ref(false);
 const router = useRouter();
 
 defineProps<{
@@ -68,8 +71,8 @@ const rowVirtualizer = useVirtualizer(
 		count: get(rowCount),
 		getScrollElement: () => get(scrollContainerRef),
 		estimateSize: () => get(posterCardHeight),
-		// Render 5 extra rows above and below viewport for smooth scrolling
-		overscan: 5,
+		// Render extra rows above and below viewport for smoother jumps and less blanking while scrolling
+		overscan: 10,
 		// Stable row keys: use the first item id in each row
 		getItemKey: (rowIndex: number): number => {
 			const firstItem = mediaOverviewStore.getMediaItemsForRange(rowIndex * get(gridItems), rowIndex * get(gridItems) + 1).at(0);
@@ -79,7 +82,7 @@ const rowVirtualizer = useVirtualizer(
 			if (sync)
 				return;
 
-			requestNextPageNearBottom();
+			requestPagesAroundViewport();
 		},
 	})),
 );
@@ -88,6 +91,7 @@ const rowVirtualizer = useVirtualizer(
 // This guard ensures the spacer div never exceeds that limit regardless of item count or column count.
 const BROWSER_MAX_CSS_HEIGHT = 33_000_000;
 const safeTotalSize = computed(() => Math.min(rowVirtualizer.value.getTotalSize(), BROWSER_MAX_CSS_HEIGHT));
+
 
 // Returns the loaded items belonging to a given row index, preserving each item's global index.
 function getRowItems(rowIndex: number): { item: PlexMediaSlimDTO; index: number }[] {
@@ -107,7 +111,11 @@ watch(containerWidth, (width) => {
 	const cols = Math.max(1, Math.floor(width / get(posterCardWidth)));
 	set(gridItems, cols);
 	set(gridPaddingLeft, (width - cols * get(posterCardWidth)) / 2);
-	nextTick(() => onPageReady());
+
+	if (!get(hasRunInitialPageReady)) {
+		set(hasRunInitialPageReady, true);
+		nextTick(() => onPageReady());
+	}
 });
 
 function onPageReady() {
@@ -128,18 +136,26 @@ function onOpenMediaDetails(mediaItem: PlexMediaSlimDTO) {
 	});
 }
 
-function requestNextPageNearBottom() {
+function requestPagesAroundViewport() {
 	if (get(pageRequestPending) || mediaOverviewStore.getMediaItems.length >= mediaOverviewStore.totalCount)
 		return;
 
-	const lastVirtualRow = get(rowVirtualizer).getVirtualItems().at(-1);
-	if (!lastVirtualRow)
+	const virtualItems = get(rowVirtualizer).getVirtualItems();
+	const firstVirtualRow = virtualItems.at(0);
+	const lastVirtualRow = virtualItems.at(-1);
+	if (!firstVirtualRow || !lastVirtualRow)
 		return;
 
-	const lastVisibleIndex = (lastVirtualRow.index + 1) * get(gridItems) - 1;
+	const cols = get(gridItems);
+	const firstVisibleIndex = firstVirtualRow.index * cols;
+	const lastVisibleIndex = ((lastVirtualRow.index + 1) * cols) - 1;
+	const prefetchBuffer = mediaOverviewStore.pageSize;
+	const prefetchStart = Math.max(0, firstVisibleIndex - prefetchBuffer);
+	const prefetchEnd = Math.min(mediaOverviewStore.totalCount, lastVisibleIndex + prefetchBuffer);
+
 	set(pageRequestPending, true);
 	useSubscription(
-		mediaOverviewStore.requestRange(lastVisibleIndex, lastVisibleIndex + mediaOverviewStore.pageSize).subscribe({
+		mediaOverviewStore.requestRange(prefetchStart, prefetchEnd).subscribe({
 			next: () => set(pageRequestPending, false),
 			error: () => set(pageRequestPending, false),
 			complete: () => set(pageRequestPending, false),
@@ -190,8 +206,13 @@ onMounted(() => {
 		// Scroll immediately for responsiveness, then prefetch nearby pages in background
 		scrollToIndex(scrollIndex);
 
+		set(pageRequestPending, true);
 		useSubscription(
-			mediaOverviewStore.requestAroundIndex(scrollIndex).subscribe(),
+			mediaOverviewStore.requestAroundIndex(scrollIndex).subscribe({
+				next: () => set(pageRequestPending, false),
+				error: () => set(pageRequestPending, false),
+				complete: () => set(pageRequestPending, false),
+			}),
 		);
 	});
 });

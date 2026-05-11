@@ -60,6 +60,8 @@ interface IMediaOverviewStoreState {
 	availableCountryIds: number[];
 	availableGenreIds: number[];
 	availableQualityIds: number[];
+	// Meant to update to signify an reactive change in the mediaPages
+	mediaPagesVersion: number;
 }
 
 export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, () => {
@@ -103,6 +105,7 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 		availableCountryIds: [],
 		availableGenreIds: [],
 		availableQualityIds: [],
+		mediaPagesVersion: 0,
 	};
 
 	const state = reactive<IMediaOverviewStoreState>(cloneDeep(defaultState));
@@ -250,6 +253,7 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 			const frozenPage = markRaw(Object.freeze(data.mediaList));
 
 			mediaPages.set(data.page, frozenPage);
+			state.mediaPagesVersion++;
 			state.loadedPages = [...new Set([...state.loadedPages, data.page])].sort((a, b) => a - b);
 			state.itemsLength = state.loadedPages.reduce((total, page) => total + (mediaPages.get(page)?.length ?? 0), 0);
 			state.totalCount = data.totalCount || Math.max(data.mediaCount, state.itemsLength);
@@ -267,6 +271,7 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 		},
 		setMedia(data: PlexMediaStatisticsDTO | null) {
 			mediaPages.clear();
+			state.mediaPagesVersion++;
 			state.loadedPages = [];
 			pendingPages.clear();
 			state.totalCount = 0;
@@ -423,7 +428,26 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 			return Array.from(mediaPages.values()).flat();
 		}),
 		getMediaItemsForRange: (start: number, end: number): Readonly<PlexMediaSlimDTO[]> => {
-			return get(getters.getMediaItems).slice(Math.max(0, start), Math.max(0, end));
+			const normalizedStart = Math.max(0, Math.floor(start));
+			const normalizedEnd = Math.max(normalizedStart, Math.floor(end));
+			const result: PlexMediaSlimDTO[] = [];
+
+			for (let index = normalizedStart; index < normalizedEnd; index++) {
+				const page = actions.getPageForIndex(index);
+				const pageItems = mediaPages.get(page);
+
+				if (!pageItems) {
+					continue;
+				}
+
+				const indexInPage = index - ((page - 1) * state.pageSize);
+				const mediaItem = pageItems[indexInPage];
+				if (mediaItem) {
+					result.push(mediaItem);
+				}
+			}
+
+			return result;
 		},
 		getMediaViewMode: computed((): ViewMode => {
 			switch (get(getters.getMediaType)) {

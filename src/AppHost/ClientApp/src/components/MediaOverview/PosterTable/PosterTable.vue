@@ -21,14 +21,23 @@
 					transform: `translateY(${virtualRow.start}px)`,
 					display: 'flex',
 				}">
-				<MediaPoster
+				<template
 					v-for="rowItem in getRowItems(virtualRow.index)"
-					:key="rowItem.item.id"
-					:media-item="rowItem.item"
-					:active="true"
-					:data-scroll-index="rowItem.index"
-					@download="sendMediaOverviewDownloadCommand($event)"
-					@open-media-details="onOpenMediaDetails" />
+					:key="rowItem.item?.id ?? `skeleton-${rowItem.index}`">
+					<MediaPoster
+						v-if="rowItem.item"
+						:media-item="rowItem.item"
+						:active="true"
+						:data-scroll-index="rowItem.index"
+						@download="sendMediaOverviewDownloadCommand($event)"
+						@open-media-details="onOpenMediaDetails" />
+					<div
+						v-else
+						class="media-poster-placeholder">
+						<div class="media-poster-placeholder__image" />
+						<div class="media-poster-placeholder__quality" />
+					</div>
+				</template>
 			</div>
 		</div>
 	</div>
@@ -92,13 +101,27 @@ const rowVirtualizer = useVirtualizer(
 const BROWSER_MAX_CSS_HEIGHT = 33_000_000;
 const safeTotalSize = computed(() => Math.min(rowVirtualizer.value.getTotalSize(), BROWSER_MAX_CSS_HEIGHT));
 
-
 // Returns the loaded items belonging to a given row index, preserving each item's global index.
-function getRowItems(rowIndex: number): { item: PlexMediaSlimDTO; index: number }[] {
+function getRowItems(rowIndex: number): { item: PlexMediaSlimDTO | null; index: number }[] {
 	const cols = get(gridItems);
 	const startIndex = rowIndex * cols;
-	return mediaOverviewStore.getMediaItemsForRange(startIndex, startIndex + cols)
-		.map((item, itemIndex) => ({ item, index: startIndex + itemIndex }));
+	const endIndex = startIndex + cols;
+	const loadedItems = mediaOverviewStore.getMediaItemsForRange(startIndex, endIndex);
+	const loadedBySortIndex = new Map<number, PlexMediaSlimDTO>();
+	const rowItems: { item: PlexMediaSlimDTO | null; index: number }[] = [];
+
+	for (const item of loadedItems) {
+		loadedBySortIndex.set(item.sortIndex, item);
+	}
+
+	for (let index = startIndex; index < endIndex && index < mediaOverviewStore.totalCount; index++) {
+		rowItems.push({
+			item: loadedBySortIndex.get(index + 1) ?? null,
+			index,
+		});
+	}
+
+	return rowItems;
 }
 
 // useElementBounding must be called at setup level so its ResizeObserver is wired correctly.
@@ -219,6 +242,7 @@ onMounted(() => {
 </script>
 
 <style lang="scss">
+@use '@/assets/scss/_mixins.scss';
 @use '@/assets/scss/variables.scss' as *;
 
 #poster-table {
@@ -235,5 +259,31 @@ onMounted(() => {
   will-change: transform;
   // Prevent layout thrashing during scroll
   contain: layout style paint;
+}
+
+.media-poster-placeholder {
+  display: flex;
+  flex-direction: column;
+  flex: 0 0 232px;
+  width: 232px;
+  min-width: 232px;
+  max-width: 232px;
+  margin: 0;
+  padding: 16px 16px 0;
+  box-sizing: border-box;
+
+  &__image {
+    width: 200px;
+    height: 300px;
+    border-radius: 2px;
+    background: rgba(0, 0, 0, 0.45);
+  }
+
+  &__quality {
+    width: 200px;
+    height: 28px;
+    margin-top: 0;
+    background: rgba(0, 0, 0, 0.6);
+  }
 }
 </style>

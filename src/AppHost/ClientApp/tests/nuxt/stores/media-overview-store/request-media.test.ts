@@ -103,6 +103,9 @@ describe('MediaOverviewStore.requestMedia()', () => {
 		// Assert
 		expect(mock.history.get.filter((request) => request.url === '/api/PlexMedia')).toHaveLength(1);
 		expect(mediaOverviewStore.loadedPages).toEqual([2]);
+		expect(Object.isFrozen(mediaOverviewStore.mediaPages.get(2))).toBe(true);
+		expect(mediaOverviewStore.getMediaItems).toEqual(pageItems);
+		expect(mediaOverviewStore.getMediaItemsForRange(1000, 1003)).toEqual(pageItems.slice(0, 3));
 	});
 
 	test('Should allow retrying a page request after the in-flight request completes', async () => {

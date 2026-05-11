@@ -29,16 +29,16 @@
 					class="media-table--intersection highlight-border-box"
 					:data-scroll-index="virtualRow.index">
 					<MediaTableRow
-						v-if="rows[virtualRow.index]"
+						v-if="getRowItem(virtualRow.index)"
 						:index="virtualRow.index"
 						:data-cy="`media-table-row-${virtualRow.index}`"
 						:columns="mediaTableColumns"
-						:row="rows[virtualRow.index]!"
+						:row="getRowItem(virtualRow.index)!"
 						selectable
-						:selected="isSelected(rows[virtualRow.index]!.id)"
+						:selected="isSelected(getRowItem(virtualRow.index)!.id)"
 						:disable-highlight="disableHighlight"
 						:disable-hover-click="disableHoverClick"
-						@selected="updateSelectedRow(rows[virtualRow.index]!.id, $event)" />
+						@selected="updateSelectedRow(getRowItem(virtualRow.index)!.id, $event)" />
 					<div
 						v-else
 						class="media-table--placeholder"
@@ -74,14 +74,20 @@ const pendingHighlightIndex = ref<number | null>(null);
 
 const props = withDefaults(
 	defineProps<{
-		rows: Readonly<PlexMediaSlimDTO[]>;
+		rows?: Readonly<PlexMediaSlimDTO[]>;
+		selection?: ISelection | null;
+		rowKey?: string;
 		disableHoverClick?: boolean;
 		disableHighlight?: boolean;
+		disableIntersection?: boolean;
 		isScrollable?: boolean;
 	}>(),
 	{
+		selection: null,
+		rowKey: 'id',
 		disableHoverClick: false,
 		disableHighlight: false,
+		disableIntersection: false,
 		isScrollable: true,
 	},
 );
@@ -99,11 +105,11 @@ const BROWSER_MAX_CSS_HEIGHT = 33_000_000;
 
 const rowVirtualizer = useVirtualizer(
 	computed(() => ({
-		count: mediaOverviewStore.itemsLength,
+		count: props.rows?.length ?? mediaOverviewStore.itemsLength,
 		getScrollElement: () => get(qTableRef),
 		estimateSize: () => ROW_HEIGHT,
 		overscan: 10,
-		getItemKey: (index: number) => props.rows[index]?.id ?? index,
+		getItemKey: (index: number) => getRowItem(index)?.id ?? index,
 		onChange: (_instance: unknown, sync: boolean) => {
 			// sync=false means TanStack has finished its scroll-triggered re-render
 			if (sync)
@@ -129,7 +135,15 @@ const rowVirtualizer = useVirtualizer(
 
 const safeTotalSize = computed(() => Math.min(rowVirtualizer.value.getTotalSize(), BROWSER_MAX_CSS_HEIGHT));
 
+function getRowItem(index: number): PlexMediaSlimDTO | undefined {
+	return props.rows?.[index] ?? mediaOverviewStore.getMediaItemsForRange(index, index + 1).at(0);
+}
+
 function requestVisibleRange() {
+	if (props.rows) {
+		return;
+	}
+
 	const virtualItems = get(rowVirtualizer).getVirtualItems();
 	const first = virtualItems.at(0)?.index;
 	const last = virtualItems.at(-1)?.index;

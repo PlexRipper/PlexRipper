@@ -38,7 +38,7 @@ import { useVirtualizer } from '@tanstack/vue-virtual';
 
 import { get, set, useElementBounding } from '@vueuse/core';
 import { useSubscription } from '@vueuse/rxjs';
-import type { PlexMediaType, PlexMediaSlimDTO } from '@dto';
+import type { PlexMediaSlimDTO, PlexMediaType } from '@dto';
 import { listenMediaOverviewScrollToCommand, sendMediaOverviewDownloadCommand } from '@composables/event-bus';
 import { triggerBoxHighlight } from '@composables/animations';
 import { waitForElement } from '@composables';
@@ -54,10 +54,9 @@ const gridPaddingLeft = ref(0);
 const pageRequestPending = ref(false);
 const router = useRouter();
 
-const props = defineProps<{
+defineProps<{
 	mediaType: PlexMediaType;
 	libraryId: number;
-	items: Readonly<PlexMediaSlimDTO[]>;
 }>();
 
 // Number of rows = ceil(total items / columns)
@@ -73,7 +72,7 @@ const rowVirtualizer = useVirtualizer(
 		overscan: 5,
 		// Stable row keys: use the first item id in each row
 		getItemKey: (rowIndex: number): number => {
-			const firstItem = props.items[rowIndex * get(gridItems)];
+			const firstItem = mediaOverviewStore.getMediaItemsForRange(rowIndex * get(gridItems), rowIndex * get(gridItems) + 1).at(0);
 			return firstItem?.id ?? rowIndex;
 		},
 		onChange: (_instance: unknown, sync: boolean) => {
@@ -94,10 +93,8 @@ const safeTotalSize = computed(() => Math.min(rowVirtualizer.value.getTotalSize(
 function getRowItems(rowIndex: number): { item: PlexMediaSlimDTO; index: number }[] {
 	const cols = get(gridItems);
 	const startIndex = rowIndex * cols;
-	return props.items
-		.slice(startIndex, startIndex + cols)
-		.map((item, itemIndex) => ({ item, index: startIndex + itemIndex }))
-		.filter((rowItem): rowItem is { item: PlexMediaSlimDTO; index: number } => !!rowItem.item);
+	return mediaOverviewStore.getMediaItemsForRange(startIndex, startIndex + cols)
+		.map((item, itemIndex) => ({ item, index: startIndex + itemIndex }));
 }
 
 // useElementBounding must be called at setup level so its ResizeObserver is wired correctly.
@@ -132,7 +129,7 @@ function onOpenMediaDetails(mediaItem: PlexMediaSlimDTO) {
 }
 
 function requestNextPageNearBottom() {
-	if (get(pageRequestPending) || props.items.filter((item) => !!item).length >= mediaOverviewStore.totalCount)
+	if (get(pageRequestPending) || mediaOverviewStore.getMediaItems.length >= mediaOverviewStore.totalCount)
 		return;
 
 	const lastVirtualRow = get(rowVirtualizer).getVirtualItems().at(-1);

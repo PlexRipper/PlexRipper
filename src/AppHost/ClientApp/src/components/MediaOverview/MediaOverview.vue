@@ -21,14 +21,12 @@
 							<template v-if="mediaOverviewStore.getMediaViewMode === ViewMode.Table">
 								<MediaTable
 									:disable-hover-click="mediaOverviewStore.getMediaType !== PlexMediaType.TvShow"
-									:rows="mediaOverviewStore.getMediaItems"
 									is-scrollable />
 							</template>
 
 							<!-- Poster display -->
 							<template v-else>
 								<PosterTable
-									:items="mediaOverviewStore.items"
 									:library-id="libraryId"
 									:media-type="mediaOverviewStore.getMediaType" />
 							</template>

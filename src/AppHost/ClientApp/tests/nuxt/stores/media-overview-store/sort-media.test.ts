@@ -106,7 +106,7 @@ describe('MediaOverviewStore.sortMedia()', () => {
 		expect(store.getMediaItems.length).toBeGreaterThan(0);
 	});
 
-	test('Should reset sortedItems and return unsorted items when NoSort is applied', async () => {
+	test('Should reset sort state and return loaded items when NoSort is applied', async () => {
 		// Arrange
 		const store = useMediaOverviewStore();
 		await loadMovies(store);
@@ -127,9 +127,8 @@ describe('MediaOverviewStore.sortMedia()', () => {
 	});
 
 	test('sortMedia with NoSort should not leave getMediaItems empty', async () => {
-		// Arrange — this tests the bug: sortMedia({field: Year, sort: NoSort})
-		// sets sortedItems = [] but getIsSorted returns true (field !== Title),
-		// which causes getMediaItems to return the empty sortedItems.
+		// Arrange — this tests that sortMedia({field: Year, sort: NoSort})
+		// leaves the compact loaded media getter populated from the page cache.
 		const store = useMediaOverviewStore();
 		await loadMovies(store);
 

@@ -123,7 +123,7 @@ describe('MediaOverviewStore.setMedia()', () => {
 		expect(store.allEpisodeCount).toBe(0);
 		expect(store.allFileSize).toBe(0);
 		expect(store.itemsLength).toBe(0);
-		expect(store.items).toEqual([]);
+		expect(store.getMediaItems).toEqual([]);
 	});
 
 	test('Should use mediaList length for itemsLength when API mediaCount is stale zero', async () => {
@@ -143,7 +143,6 @@ describe('MediaOverviewStore.setMedia()', () => {
 		await result.onComplete();
 
 		// Assert
-		expect(store.items.length).toBe(3);
 		expect(store.getMediaItems.length).toBe(3);
 		expect(store.itemsLength).toBe(3);
 	});
@@ -169,7 +168,7 @@ describe('MediaOverviewStore.setMedia()', () => {
 		await result.onComplete();
 
 		// Assert
-		expect(store.items.filter((x) => x).length).toBe(10);
+		expect(store.getMediaItems.length).toBe(10);
 		expect(store.itemsLength).toBe(10);
 		expect(store.totalCount).toBe(100);
 	});

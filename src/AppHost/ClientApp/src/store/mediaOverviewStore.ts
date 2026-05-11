@@ -37,8 +37,7 @@ interface IAvailableMetadataIds {
 
 interface IMediaOverviewStoreState {
 	libraryId: number;
-	items: Readonly<PlexMediaSlimDTO[]>;
-	sortedItems: Readonly<PlexMediaSlimDTO[]>;
+	mediaPages: Map<number, readonly PlexMediaSlimDTO[]>;
 	loadedPages: number[];
 	pageSize: number;
 	totalCount: number;
@@ -67,8 +66,7 @@ interface IMediaOverviewStoreState {
 export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, () => {
 	const defaultState: IMediaOverviewStoreState = {
 		libraryId: 0,
-		items: [],
-		sortedItems: [],
+		mediaPages: new Map<number, readonly PlexMediaSlimDTO[]>(),
 		loadedPages: [],
 		pageSize: 1000,
 		totalCount: 0,
@@ -250,17 +248,12 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 		},
 		mergeMediaPage(data: PlexMediaStatisticsDTO) {
 			const availableMetadataIds = data as PlexMediaStatisticsDTO & IAvailableMetadataIds;
-			const items = [...state.items];
+			const frozenPage = Object.freeze([...data.mediaList]);
 
-			for (const item of data.mediaList) {
-				const index = Math.max(0, item.sortIndex - 1);
-				items[index] = item;
-			}
-
-			state.items = Object.freeze(items);
-			state.itemsLength = items.length;
-			state.totalCount = data.totalCount;
+			state.mediaPages.set(data.page, frozenPage);
 			state.loadedPages = [...new Set([...state.loadedPages, data.page])].sort((a, b) => a - b);
+			state.itemsLength = state.loadedPages.reduce((total, page) => total + (state.mediaPages.get(page)?.length ?? 0), 0);
+			state.totalCount = data.totalCount || Math.max(data.mediaCount, state.itemsLength);
 
 			state.allMovieCount = data.totalMovieCount;
 			state.allTvShowCount = data.totalTvShowCount;
@@ -274,15 +267,15 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 			state.scrollDict = new Map((data.navigationIndexes ?? []).map((x) => [x.label, x.index]));
 		},
 		setMedia(data: PlexMediaStatisticsDTO | null) {
-			state.items = Object.freeze([]);
+			state.mediaPages = new Map<number, readonly PlexMediaSlimDTO[]>();
 			state.loadedPages = [];
 			pendingPages.clear();
 			state.totalCount = 0;
+			state.itemsLength = 0;
 
 			if (data) {
 				actions.mergeMediaPage(data);
 			} else {
-				state.itemsLength = 0;
 				state.allMovieCount = 0;
 				state.allTvShowCount = 0;
 				state.allSeasonCount = 0;
@@ -367,9 +360,6 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 		setSelection(selection: ISelection) {
 			state.selection = selection;
 		},
-		getMediaIndex(mediaId: number): number {
-			return state.items.findIndex((x) => x.id === mediaId);
-		},
 		setSelectionRange(min: number, max: number) {
 			actions.setSelection({
 				indexKey: state.selection.indexKey,
@@ -382,13 +372,12 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 		setRootSelected(value: boolean) {
 			actions.setSelection({
 				indexKey: state.selection?.indexKey ?? 0,
-				keys: value ? state.items.filter((x) => x).map((x) => x.id) : [],
+				keys: value ? get(getters.getMediaItems).map((x) => x.id) : [],
 				allSelected: value,
 			} as ISelection);
 		},
 		clearSort() {
 			state.sortedState = { field: MediaSortField.Title, sort: SortDirection.Asc };
-			state.sortedItems = [];
 		},
 		setFilterQuery(query: string): Observable<PlexMediaStatisticsDTO | null> {
 			state.filterQuery = query;
@@ -409,7 +398,6 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 		},
 		sortMedia(event: IMediaOverviewSort) {
 			Log.debug('Setting media sort state', event);
-			state.sortedItems = [];
 			state.sortedState = event;
 		},
 		$reset() {
@@ -432,8 +420,30 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 		allMediaMode: computed(() => state.libraryId === 0),
 		library: computed(() => libraryStore.getLibrary(state.libraryId)),
 		getMediaItems: computed((): Readonly<PlexMediaSlimDTO[]> => {
-			return state.items;
+			return state.loadedPages.flatMap((page) => state.mediaPages.get(page) ?? []);
 		}),
+		getMediaItemsForRange: (start: number, end: number): Readonly<PlexMediaSlimDTO[]> => {
+			const rangeStart = Math.max(0, start);
+			const rangeEnd = Math.max(rangeStart, end);
+
+			return state.loadedPages.flatMap((page) => {
+				const pageItems = state.mediaPages.get(page);
+				if (!pageItems?.length) {
+					return [];
+				}
+
+				const pageStart = (page - 1) * state.pageSize;
+				const pageEnd = pageStart + pageItems.length;
+				if (pageEnd <= rangeStart || pageStart >= rangeEnd) {
+					return [];
+				}
+
+				return pageItems.slice(
+					Math.max(0, rangeStart - pageStart),
+					Math.min(pageItems.length, rangeEnd - pageStart),
+				);
+			});
+		},
 		getMediaViewMode: computed((): ViewMode => {
 			switch (get(getters.getMediaType)) {
 				case PlexMediaType.Movie:

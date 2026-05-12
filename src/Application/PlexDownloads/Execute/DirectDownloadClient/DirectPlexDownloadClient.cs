@@ -87,6 +87,31 @@ public class DirectPlexDownloadClient : IPlexDownloadClient
         if (downloadUrlResult.IsFailed)
         {
             var failedResult = downloadUrlResult.ToResult();
+
+            // 404 = the stored Plex part id no longer resolves. Most often this means the source
+            // server was re-scanned and the IDs rotated. Try refreshing the task's IDs against
+            // the latest synced library data once before giving up; if a newer match is found
+            // we reset the task to Queued so the picker re-tries with the corrected URL.
+            if (failedResult.Has404NotFoundError() && downloadTask.DownloadTaskType is DownloadTaskType.EpisodeData or DownloadTaskType.MovieData)
+            {
+                var refreshResult = await _commandExecutor.Send(
+                    new RefreshDownloadTaskMetadataCommand(downloadTask.Id, downloadTask.DownloadTaskType),
+                    cancellationToken
+                );
+                if (refreshResult.IsSuccess && refreshResult.Value)
+                {
+                    _log.Here()
+                        .Information(
+                            "Auto-refreshed metadata for {MediaFileName}; resetting status to Queued for retry",
+                            _filename
+                        );
+                    var requeueResult = await SetDownloadStatusAsync(Domain.DownloadStatus.Queued);
+                    if (requeueResult.IsFailed)
+                        return requeueResult;
+                    return Result.Ok();
+                }
+            }
+
             var failureStatus =
                 failedResult.Has404NotFoundError() ? Domain.DownloadStatus.SourceUnavailable
                 : failedResult.IsServerUnreachable() ? Domain.DownloadStatus.ServerUnreachable

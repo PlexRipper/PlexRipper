@@ -199,6 +199,19 @@ public class DownloadQueue : IDownloadQueue
         if (queuedTask is not null)
             return Result.Ok(queuedTask);
 
+        // SourceUnavailable = Plex returned 404 on the stored part id. The auto-refresh path in
+        // DirectPlexDownloadClient already tries to recover before transitioning to this status,
+        // so by the time a task is here the refresh failed (library not re-synced, item gone from
+        // Plex, etc.). Re-attempt only after all real Queued work is exhausted so a long tail of
+        // broken tasks can't starve the queue; the standard retry cooldown stops a tight loop.
+        var sourceUnavailableTask = FindFirstLeafByStatus(
+            downloadTasks,
+            DownloadStatus.SourceUnavailable,
+            IsInRetryCooldown
+        );
+        if (sourceUnavailableTask is not null)
+            return Result.Ok(sourceUnavailableTask);
+
         return Result.Fail("There were no downloadTasks left to download.").LogDebug();
     }
 

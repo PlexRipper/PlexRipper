@@ -68,9 +68,11 @@ public class GetDirectDownloadUrlCommandHandler : ICommandHandler<GetDirectDownl
         if (statusCode != HttpStatusCode.Forbidden)
         {
             fallbackProbeCancellationTokenSource.Cancel();
-            return Result
-                .Fail($"Plex download URL probe failed with status {(int)statusCode} ({statusCode})")
-                .LogError();
+            // Attach the HTTP status code to the Result so downstream consumers can detect 404
+            // via Has404NotFoundError() and recover (e.g. trigger a metadata refresh) rather
+            // than treat every probe failure as a generic Error.
+            var msg = $"Plex download URL probe failed with status {(int)statusCode} ({statusCode})";
+            return Result.Fail(msg).AddStatusCode(statusCode, msg).LogError();
         }
 
         var fallbackProbeResult = await fallbackProbeTask;
@@ -80,13 +82,12 @@ public class GetDirectDownloadUrlCommandHandler : ICommandHandler<GetDirectDownl
         if (fallbackProbeResult.Value.IsSuccessStatusCode)
             return Result.Ok(downloadUrlWithFlag);
 
-        return Result
-            .Fail(
-                $"Plex download URL probe failed for both default URL and URL with download=1 flag. "
-                    + $"Default URL status: {(int)initialProbeResult.Value.StatusCode} ({initialProbeResult.Value.StatusCode}). "
-                    + $"Fallback URL status: {(int)fallbackProbeResult.Value.StatusCode} ({fallbackProbeResult.Value.StatusCode})"
-            )
-            .LogError();
+        var fallbackStatus = fallbackProbeResult.Value.StatusCode;
+        var fallbackMsg =
+            $"Plex download URL probe failed for both default URL and URL with download=1 flag. "
+            + $"Default URL status: {(int)statusCode} ({statusCode}). "
+            + $"Fallback URL status: {(int)fallbackStatus} ({fallbackStatus})";
+        return Result.Fail(fallbackMsg).AddStatusCode(fallbackStatus, fallbackMsg).LogError();
     }
 
     private async Task<Result<ProbeResult>> ProbeDownloadUrl(string downloadUrl, CancellationToken cancellationToken)

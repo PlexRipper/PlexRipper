@@ -266,4 +266,40 @@ public class DownloadQueueGetNextDownloadTaskUnitTests : BaseUnitTest<DownloadQu
         var nextDownloadTaskId = downloadTasks[4].Children[0].Id;
         nextDownloadTask.Value.Id.ShouldBe(nextDownloadTaskId);
     }
+
+    [Test]
+    public async Task ShouldPickSourceUnavailable_OnlyWhenNoOtherWorkIsAvailable()
+    {
+        // Arrange — one SourceUnavailable and one Queued task.
+        await SetupDatabase(81905, config => config.MovieDownloadTasksCount = 2);
+
+        var downloadTasks = await IDbContext.GetAllDownloadTasksByServerAsync(
+            asTracking: true,
+            cancellationToken: CancellationToken
+        );
+
+        var sourceUnavailableTask = downloadTasks[0].Children[0];
+        sourceUnavailableTask.SetDownloadStatus(DownloadStatus.SourceUnavailable);
+        downloadTasks[0].SetDownloadStatus(DownloadStatus.SourceUnavailable);
+
+        var queuedTask = downloadTasks[1].Children[0];
+        queuedTask.SetDownloadStatus(DownloadStatus.Queued);
+        downloadTasks[1].SetDownloadStatus(DownloadStatus.Queued);
+
+        await IDbContext.SaveChangesAsync(CancellationToken);
+
+        // Act — Queued must be picked first; SourceUnavailable falls to last priority.
+        var first = Sut.GetNextDownloadTask(downloadTasks);
+        first.IsSuccess.ShouldBeTrue();
+        first.Value.Id.ShouldBe(queuedTask.Id);
+
+        // Re-mark the queued task as Completed so only SourceUnavailable remains.
+        queuedTask.SetDownloadStatus(DownloadStatus.Completed);
+        downloadTasks[1].SetDownloadStatus(DownloadStatus.Completed);
+        await IDbContext.SaveChangesAsync(CancellationToken);
+
+        var second = Sut.GetNextDownloadTask(downloadTasks);
+        second.IsSuccess.ShouldBeTrue();
+        second.Value.Id.ShouldBe(sourceUnavailableTask.Id);
+    }
 }

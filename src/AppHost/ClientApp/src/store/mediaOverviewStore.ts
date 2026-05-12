@@ -62,6 +62,7 @@ interface IMediaOverviewStoreState {
 	availableQualityIds: number[];
 	// Meant to update to signify an reactive change in the mediaPages
 	mediaPagesVersion: number;
+	currentScrollIndex: number;
 }
 
 export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, () => {
@@ -106,6 +107,7 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 		availableGenreIds: [],
 		availableQualityIds: [],
 		mediaPagesVersion: 0,
+		currentScrollIndex: 0,
 	};
 
 	const state = reactive<IMediaOverviewStoreState>(cloneDeep(defaultState));
@@ -382,6 +384,13 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 		},
 		clearSort() {
 			state.sortedState = { field: MediaSortField.Title, sort: SortDirection.Asc };
+		},
+		setCurrentScrollIndex(scrollIndex: number) {
+			if (scrollIndex < 0) {
+				return;
+			}
+
+			state.currentScrollIndex = scrollIndex;
 		},
 		setFilterQuery(query: string): Observable<PlexMediaStatisticsDTO | null> {
 			state.filterQuery = query;

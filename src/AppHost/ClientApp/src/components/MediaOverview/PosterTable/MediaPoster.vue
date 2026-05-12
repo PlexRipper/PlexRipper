@@ -48,7 +48,8 @@
 											size="subtitle2"
 											:value="serverStore.getServerName(mediaItem.plexServerId)" />
 									</div>
-									<div :class="['media-poster--actions', mediaType === PlexMediaType.TvShow ? 'media-poster--actions-around' : 'media-poster--actions-center']">
+									<div
+										:class="['media-poster--actions', mediaType === PlexMediaType.TvShow ? 'media-poster--actions-around' : 'media-poster--actions-center']">
 										<BaseButton
 											icon="mdi-download"
 											size="xl"
@@ -205,8 +206,10 @@ function loadThumbnail(mediaItem: PlexMediaSlimDTO) {
 }
 
 watch([() => props.mediaItem.id, () => props.active], ([, isActive]) => {
-	if (isActive)
+	if (isActive) {
 		loadThumbnail(props.mediaItem);
+		mediaOverviewStore.setCurrentScrollIndex(props.mediaItem.sortIndex);
+	}
 }, { immediate: true });
 
 onUnmounted(() => {

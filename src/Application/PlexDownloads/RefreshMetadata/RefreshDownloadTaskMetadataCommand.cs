@@ -12,6 +12,38 @@ namespace Reaparr.Application;
 public record RefreshDownloadTaskMetadataCommand(Guid DownloadTaskFileId, DownloadTaskType TaskType)
     : ICommand<Result<bool>>;
 
+/// <summary>
+/// Helpers for the "on 404, try refreshing the task's Plex IDs once before giving up" pattern,
+/// shared between every download client that surfaces a Plex 404 (Direct probe + post-download,
+/// Dash, and the DownloadJob fall-through). Returns <c>true</c> if the refresh succeeded and the
+/// caller should treat the task as recoverable; <c>false</c> means fall through to the existing
+/// failure handling.
+/// </summary>
+public static class DownloadTaskRefreshHelper
+{
+    public static async Task<bool> TryRefreshIfStaleIdAsync(
+        this ICommandExecutor commandExecutor,
+        Guid downloadTaskFileId,
+        DownloadTaskType taskType,
+        Result failureResult,
+        CancellationToken cancellationToken
+    )
+    {
+        if (!failureResult.Has404NotFoundError())
+            return false;
+
+        if (taskType is not DownloadTaskType.EpisodeData and not DownloadTaskType.MovieData)
+            return false;
+
+        var refreshResult = await commandExecutor.Send(
+            new RefreshDownloadTaskMetadataCommand(downloadTaskFileId, taskType),
+            cancellationToken
+        );
+
+        return refreshResult.IsSuccess && refreshResult.Value;
+    }
+}
+
 public class RefreshDownloadTaskMetadataCommandValidator : AbstractValidator<RefreshDownloadTaskMetadataCommand>
 {
     public RefreshDownloadTaskMetadataCommandValidator()
@@ -55,11 +87,17 @@ public class RefreshDownloadTaskMetadataCommandHandler
 
     private readonly ILogger _log;
     private readonly IReaparrDbContextFactory _dbContextFactory;
+    private readonly IDownloadQueue _downloadQueue;
 
-    public RefreshDownloadTaskMetadataCommandHandler(ILogger log, IReaparrDbContextFactory dbContextFactory)
+    public RefreshDownloadTaskMetadataCommandHandler(
+        ILogger log,
+        IReaparrDbContextFactory dbContextFactory,
+        IDownloadQueue downloadQueue
+    )
     {
         _log = log.ForContext<RefreshDownloadTaskMetadataCommandHandler>();
         _dbContextFactory = dbContextFactory;
+        _downloadQueue = downloadQueue;
     }
 
     public async Task<Result<bool>> ExecuteAsync(
@@ -195,6 +233,7 @@ public class RefreshDownloadTaskMetadataCommandHandler
                 task.PlexApiPartId,
                 picked.PlexApiPartId
             );
+        await _downloadQueue.CheckDownloadQueue([task.PlexServerId]);
         return Result.Ok(true);
     }
 
@@ -289,6 +328,7 @@ public class RefreshDownloadTaskMetadataCommandHandler
                 task.PlexApiPartId,
                 picked.PlexApiPartId
             );
+        await _downloadQueue.CheckDownloadQueue([task.PlexServerId]);
         return Result.Ok(true);
     }
 

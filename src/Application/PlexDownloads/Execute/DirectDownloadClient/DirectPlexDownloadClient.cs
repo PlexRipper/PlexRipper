@@ -88,28 +88,27 @@ public class DirectPlexDownloadClient : IPlexDownloadClient
         {
             var failedResult = downloadUrlResult.ToResult();
 
-            // 404 = the stored Plex part id no longer resolves. Most often this means the source
-            // server was re-scanned and the IDs rotated. Try refreshing the task's IDs against
-            // the latest synced library data once before giving up; if a newer match is found
-            // we reset the task to Queued so the picker re-tries with the corrected URL.
-            if (failedResult.Has404NotFoundError() && downloadTask.DownloadTaskType is DownloadTaskType.EpisodeData or DownloadTaskType.MovieData)
-            {
-                var refreshResult = await _commandExecutor.Send(
-                    new RefreshDownloadTaskMetadataCommand(downloadTask.Id, downloadTask.DownloadTaskType),
+            // 404 = the stored Plex part id no longer resolves. Try refreshing this task's IDs
+            // against the latest synced library data; on success, reset to Queued so the picker
+            // re-tries with the corrected URL.
+            if (
+                await _commandExecutor.TryRefreshIfStaleIdAsync(
+                    downloadTask.Id,
+                    downloadTask.DownloadTaskType,
+                    failedResult,
                     cancellationToken
-                );
-                if (refreshResult.IsSuccess && refreshResult.Value)
-                {
-                    _log.Here()
-                        .Information(
-                            "Auto-refreshed metadata for {MediaFileName}; resetting status to Queued for retry",
-                            _filename
-                        );
-                    var requeueResult = await SetDownloadStatusAsync(Domain.DownloadStatus.Queued);
-                    if (requeueResult.IsFailed)
-                        return requeueResult;
-                    return Result.Ok();
-                }
+                )
+            )
+            {
+                _log.Here()
+                    .Information(
+                        "Auto-refreshed metadata for {MediaFileName}; resetting status to Queued for retry",
+                        _filename
+                    );
+                var requeueResult = await SetDownloadStatusAsync(Domain.DownloadStatus.Queued);
+                if (requeueResult.IsFailed)
+                    return requeueResult;
+                return Result.Ok();
             }
 
             var failureStatus =
@@ -274,6 +273,28 @@ public class DirectPlexDownloadClient : IPlexDownloadClient
                         if (args.Error != null)
                         {
                             var downloadErrorResult = Result.Fail(new ExceptionalError(args.Error)).LogError();
+
+                            // Mid-download 404 (server re-scanned while we were downloading): try
+                            // refreshing IDs and re-queue rather than transition to SourceUnavailable.
+                            if (
+                                await _commandExecutor.TryRefreshIfStaleIdAsync(
+                                    downloadTask.Id,
+                                    downloadTask.DownloadTaskType,
+                                    downloadErrorResult,
+                                    CancellationToken.None
+                                )
+                            )
+                            {
+                                _log.Here()
+                                    .Information(
+                                        "Auto-refreshed metadata mid-download for {MediaFileName}; resetting to Queued for retry",
+                                        _filename
+                                    );
+                                var requeueResult = await SetDownloadStatusAsync(Domain.DownloadStatus.Queued);
+                                requeueResult.LogIfFailed();
+                                return;
+                            }
+
                             var failedStatus =
                                 downloadErrorResult.Has404NotFoundError() ? Domain.DownloadStatus.SourceUnavailable
                                 : downloadErrorResult.IsServerUnreachable() ? Domain.DownloadStatus.ServerUnreachable

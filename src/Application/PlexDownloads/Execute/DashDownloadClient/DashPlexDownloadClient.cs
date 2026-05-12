@@ -255,6 +255,23 @@ public class DashPlexDownloadClient : IPlexDownloadClient
 
         if (!completed.IsSuccess)
         {
+            // Dash failure: dash-mpd-cli returns 404 when the manifest's part id is stale.
+            // Try refreshing IDs once before transitioning to SourceUnavailable.
+            if (
+                await _commandExecutor.TryRefreshIfStaleIdAsync(
+                    key.Id,
+                    key.Type,
+                    completed.Result,
+                    CancellationToken.None
+                )
+            )
+            {
+                var requeue = await SetDownloadStatusAsync(DownloadStatus.Queued);
+                if (requeue.IsFailed)
+                    requeue.LogError();
+                return;
+            }
+
             var status =
                 completed.Result.Has404NotFoundError() ? DownloadStatus.SourceUnavailable
                 : completed.Result.IsServerUnreachable() ? DownloadStatus.ServerUnreachable

@@ -136,19 +136,45 @@ public class DownloadJob : IJob
             }
             else if (startResult.IsFailed)
             {
-                var failedStatus =
-                    startResult.Has404NotFoundError() ? DownloadStatus.SourceUnavailable
-                    : startResult.IsServerUnreachable() ? DownloadStatus.ServerUnreachable
-                    : DownloadStatus.DownloadClientError;
+                // 404 here typically means the inner download client didn't catch the stale-id
+                // case (e.g. the Dash client, or a 404 that surfaces only at Quartz-job level).
+                // Try refreshing once before transitioning to SourceUnavailable.
+                if (
+                    await _commandExecutor.TryRefreshIfStaleIdAsync(
+                        downloadTask.Id,
+                        downloadTask.DownloadTaskType,
+                        startResult.ToResult(),
+                        token
+                    )
+                )
+                {
+                    _log.Here()
+                        .Information(
+                            "Auto-refreshed metadata for {FullTitle}; resetting status to Queued for retry",
+                            downloadTask.FullTitle
+                        );
+                    await _downloadTaskUpdateDispatcher.OnStatusChangedAsync(
+                        downloadTask.ToKey(),
+                        DownloadStatus.Queued,
+                        CancellationToken.None
+                    );
+                }
+                else
+                {
+                    var failedStatus =
+                        startResult.Has404NotFoundError() ? DownloadStatus.SourceUnavailable
+                        : startResult.IsServerUnreachable() ? DownloadStatus.ServerUnreachable
+                        : DownloadStatus.DownloadClientError;
 
-                await _downloadTaskUpdateDispatcher.OnStatusChangedAsync(
-                    downloadTask.ToKey(),
-                    failedStatus,
-                    startResult,
-                    CancellationToken.None
-                );
+                    await _downloadTaskUpdateDispatcher.OnStatusChangedAsync(
+                        downloadTask.ToKey(),
+                        failedStatus,
+                        startResult,
+                        CancellationToken.None
+                    );
 
-                await _eventPublisher.PublishAsync(new SendNotificationResult(startResult), token);
+                    await _eventPublisher.PublishAsync(new SendNotificationResult(startResult), token);
+                }
             }
         }
         catch (Exception ex) when (ex is not OperationCanceledException)

@@ -16,8 +16,8 @@ import type { IMediaOverviewSort } from '@composables/event-bus';
 import { MediaSortField, SortDirection } from '@enums';
 import { type IMetaDataMediaFilter, type ISelection, type ISortOption, StoreNames } from '@interfaces';
 import { plexLibraryApi, plexMediaApi } from '@api';
-import { finalize, map, switchMap, takeUntil, tap } from 'rxjs/operators';
-import { BehaviorSubject, defer, forkJoin, type Observable, of, Subject } from 'rxjs';
+import { map, switchMap, takeUntil, tap } from 'rxjs/operators';
+import { BehaviorSubject, defer, finalize, forkJoin, type Observable, of, Subject } from 'rxjs';
 import { useLibraryStore, useSettingsStore } from '@store';
 import {
 	buildFlexSortDsl,
@@ -135,43 +135,24 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 			actions.clearMetaDataFilter();
 			actions.clearSort();
 
+			mediaPages.clear();
+			pendingPages.clear();
+
 			// Load data for the library
-			return actions.requestMedia();
+			return forkJoin([
+				actions.refreshMetaData(),
+				actions.requestMedia(),
+			]).pipe(map(([, x]) => x));
 		},
 		refreshMetaData() {
 			return plexLibraryApi.getLibraryMediaMetadata(state.libraryId, { mediaType: get(getters.getMediaType) }).pipe(
 				takeUntil(cancelSubject$),
 				tap((result) => {
 					if (result.isSuccess && result.value) {
-						return state.metadataList = result.value;
+						state.metadataList = Object.freeze(result.value);
 					}
 				}),
 			);
-		},
-		buildFlexQueryParams(page: number, size: number): MediaQueryFilterDTO {
-			const filterQuery = state.filterQuery.trim().toLowerCase();
-
-			return {
-				filterOwnedMedia: settingsStore.generalSettings.hideMediaFromOwnedServers,
-				filterOfflineMedia: settingsStore.generalSettings.hideMediaFromOfflineServers,
-				mediaType: get(getters.getMediaType),
-				plexLibraryId: state.libraryId,
-				page,
-				pageSize: size,
-				filter: DSLBuilder()
-					.when(filterQuery, (x) => x.contains('SearchTitle', filterQuery))
-					.when((state.metadata.countryId ?? 0) > 0, (x) => x.where('Countries:any:Id', 'eq', state.metadata.countryId ?? 0))
-					.when((state.metadata.roleId ?? 0) > 0, (x) => x.where('Actors:any:Id', 'eq', state.metadata.roleId ?? 0))
-					.when((state.metadata.genreId ?? 0) > 0, (x) => x.where('Genres:any:Id', 'eq', state.metadata.genreId ?? 0))
-					.when(state.metadata.quality !== VideoQuality.None, (x) => x.eq('MediaDataList:any:Quality', state.metadata.quality ?? 0))
-					.build(),
-				sort: buildFlexSortDsl([
-					{
-						field: state.sortedState.field,
-						direction: state.sortedState.sort === SortDirection.Desc ? 'desc' : 'asc',
-					},
-				]),
-			};
 		},
 		requestMedia(): Observable<PlexMediaStatisticsDTO | null> {
 			if (state.loading) {
@@ -179,24 +160,19 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 				return of(null);
 			}
 
+			state.itemsLength = 0;
 			state.loading = true;
 			Log.debug('Starting media request', { libraryId: state.libraryId, mediaType: get(getters.getMediaType) });
 
 			return forkJoin([
-				actions.refreshMetaData(),
 				defer(() =>
 					state.libraryId > 0
 						? libraryStore.refreshLibrary(state.libraryId)
 						: of(null),
-				).pipe(takeUntil(cancelSubject$)),
+				),
 			]).pipe(
 				takeUntil(cancelSubject$),
-				switchMap(() =>
-					defer(() => actions.requestMediaPage(1, state.pageSize)).pipe(
-						takeUntil(cancelSubject$),
-						tap((data) => actions.addMediaPage(data)),
-					),
-				),
+				switchMap(() => actions.requestMediaPage(1, state.pageSize)),
 				tap({
 					next: () => {
 						state.loading = false;
@@ -229,9 +205,13 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 					if (isSuccess && value) {
 						return value;
 					}
+
+					Log.warn('Media page request returned no data', { page, size, queryParams, isSuccess });
 					return null;
 				}),
-				tap((data) => actions.addMediaPage(data)));
+				tap((data) => actions.addMediaPage(data)),
+				finalize(() => pendingPages.delete(page)),
+			);
 		},
 		// Adds the requested media page to the cache
 		addMediaPage(data: PlexMediaStatisticsDTO | null) {
@@ -243,6 +223,7 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 			if (state.queryHash !== data.queryHash) {
 				Log.warn(`mediaPages was cleared, with ${state.queryHash} vs ${data.queryHash}`);
 				mediaPages.clear();
+				state.itemsLength = 0;
 			}
 
 			mediaPages.set(data.page, markRaw(Object.freeze(data.mediaList)));
@@ -334,6 +315,32 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 				quality: VideoQuality.None,
 			};
 		},
+		buildFlexQueryParams(page: number, size: number): MediaQueryFilterDTO {
+			const filterQuery = state.filterQuery.trim().toLowerCase();
+
+			return {
+				filterOwnedMedia: settingsStore.generalSettings.hideMediaFromOwnedServers,
+				filterOfflineMedia: settingsStore.generalSettings.hideMediaFromOfflineServers,
+				mediaType: get(getters.getMediaType),
+				plexLibraryId: state.libraryId,
+				page,
+				pageSize: size,
+				filter: DSLBuilder()
+					.when(filterQuery, (x) => x.contains('SearchTitle', filterQuery))
+					.when((state.metadata.countryId ?? 0) > 0, (x) => x.where('Countries:any:Id', 'eq', state.metadata.countryId ?? 0))
+					.when((state.metadata.roleId ?? 0) > 0, (x) => x.where('Actors:any:Id', 'eq', state.metadata.roleId ?? 0))
+					.when((state.metadata.genreId ?? 0) > 0, (x) => x.where('Genres:any:Id', 'eq', state.metadata.genreId ?? 0))
+					.when(state.metadata.quality !== VideoQuality.None, (x) => x.eq('MediaDataList:any:Quality', state.metadata.quality ?? 0))
+					.build(),
+				sort: buildFlexSortDsl([
+					{
+						field: state.sortedState.field,
+						direction: state.sortedState.sort === SortDirection.Desc ? 'desc' : 'asc',
+					},
+				]),
+			};
+		},
+
 		changeAllMediaOverviewType(mediaType: PlexMediaType) {
 			settingsStore.displaySettings.allOverviewViewMode = mediaType;
 			useSubscription(actions.requestMedia().subscribe());

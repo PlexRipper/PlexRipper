@@ -94,13 +94,12 @@ describe('MediaOverviewStore.requestMedia()', () => {
 
 		// Assert
 		expect(mock.history.get.filter((request) => request.url === '/api/PlexMedia')).toHaveLength(1);
-		expect(mediaOverviewStore.loadedPages).toEqual([2]);
 		expect(mediaOverviewStore.getMediaItems).toEqual(pageItems);
-		expect(mediaOverviewStore.getMediaItems[0]).toBe(pageItems[0]);
-		expect(mediaOverviewStore.getMediaItemsForRange(1000, 1003)).toEqual(pageItems.slice(0, 3));
+		expect(mediaOverviewStore.getMediaItems[0]).toStrictEqual(pageItems[0]);
+		expect(mediaOverviewStore.getMediaItemsForRange(0, 3)).toEqual(pageItems.slice(0, 3));
 	});
 
-	test('Should allow retrying a page request after the in-flight request completes', async () => {
+	test('Should not re-request a page that is already cached after the first request completes', async () => {
 		// Arrange
 		const mediaOverviewStore = useMediaOverviewStore();
 		const pageItems = generatePlexMediaSlims({
@@ -126,11 +125,89 @@ describe('MediaOverviewStore.requestMedia()', () => {
 		// Act
 		const first = subscribeSpyTo(mediaOverviewStore.requestMediaPage(2));
 		await first.onComplete();
-		mediaOverviewStore.loadedPages = [];
+		const second = subscribeSpyTo(mediaOverviewStore.requestMediaPage(2));
+		await second.onComplete();
+
+		// Assert
+		expect(mock.history.get.filter((request) => request.url === '/api/PlexMedia')).toHaveLength(1);
+	});
+
+	test('Should allow retrying a page request after a null response', async () => {
+		// Arrange
+		const mediaOverviewStore = useMediaOverviewStore();
+		const pageItems = generatePlexMediaSlims({
+			config: {
+				movieCount: 10,
+			},
+			partialData: {
+				plexServerId: 1,
+				plexLibraryId: 1,
+				type: PlexMediaType.Movie,
+			},
+		}).map((item, index) => ({
+			...item,
+			sortIndex: 1001 + index,
+		})) as PlexMediaSlimDTO[];
+		const pageTwo = generatePlexMediaStatisticsDTO(pageItems);
+		pageTwo.page = 2;
+		pageTwo.pageSize = 1000;
+		pageTwo.totalCount = 2000;
+
+		const mediaRequestMatcher = new RegExp(`/api/PlexMedia`);
+		mock.onGet(mediaRequestMatcher).replyOnce(200, generateResultDTO(null));
+		mock.onGet(mediaRequestMatcher).reply(200, generateResultDTO(pageTwo));
+
+		// Act
+		const first = subscribeSpyTo(mediaOverviewStore.requestMediaPage(2));
+		await first.onComplete();
 		const second = subscribeSpyTo(mediaOverviewStore.requestMediaPage(2));
 		await second.onComplete();
 
 		// Assert
 		expect(mock.history.get.filter((request) => request.url === '/api/PlexMedia')).toHaveLength(2);
+		expect(mediaOverviewStore.getMediaItems).toEqual(pageItems);
+	});
+
+	test('Should clear old mediaPages and refill with new data when queryHash changes', () => {
+		// Arrange
+		const mediaOverviewStore = useMediaOverviewStore();
+		const firstItems = generatePlexMediaSlims({
+			config: { movieCount: 2 },
+			partialData: {
+				plexServerId: 1,
+				plexLibraryId: 1,
+				type: PlexMediaType.Movie,
+			},
+		}) as PlexMediaSlimDTO[];
+		const secondItems = generatePlexMediaSlims({
+			config: { movieCount: 3 },
+			partialData: {
+				plexServerId: 1,
+				plexLibraryId: 1,
+				type: PlexMediaType.Movie,
+			},
+		}) as PlexMediaSlimDTO[];
+
+		const firstPage = generatePlexMediaStatisticsDTO(firstItems);
+		firstPage.page = 1;
+		firstPage.queryHash = 'hash-1';
+		firstPage.mediaCount = firstItems.length;
+		firstPage.totalCount = firstItems.length;
+
+		const secondPage = generatePlexMediaStatisticsDTO(secondItems);
+		secondPage.page = 1;
+		secondPage.queryHash = 'hash-2';
+		secondPage.mediaCount = secondItems.length;
+		secondPage.totalCount = secondItems.length;
+
+		// Act
+		mediaOverviewStore.addMediaPage(firstPage);
+		mediaOverviewStore.addMediaPage(secondPage);
+
+		// Assert
+		expect(mediaOverviewStore.queryHash).toBe('hash-2');
+		expect(mediaOverviewStore.getMediaItems).toEqual(secondItems);
+		expect(mediaOverviewStore.itemsLength).toBe(secondItems.length);
+		expect(mediaOverviewStore.totalCount).toBe(secondItems.length);
 	});
 });

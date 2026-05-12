@@ -143,7 +143,7 @@ public class DownloadJob : IJob
                     await _commandExecutor.TryRefreshIfStaleIdAsync(
                         downloadTask.Id,
                         downloadTask.DownloadTaskType,
-                        startResult.ToResult(),
+                        startResult,
                         token
                     )
                 )

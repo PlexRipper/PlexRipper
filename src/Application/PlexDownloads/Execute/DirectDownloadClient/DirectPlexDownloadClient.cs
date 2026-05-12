@@ -276,10 +276,12 @@ public class DirectPlexDownloadClient : IPlexDownloadClient
 
                             // Mid-download 404 (server re-scanned while we were downloading): try
                             // refreshing IDs and re-queue rather than transition to SourceUnavailable.
+                            // SetupDownloadListeners doesn't have the downloadTask local in scope,
+                            // so use the DownloadTaskKey it was set up with.
                             if (
                                 await _commandExecutor.TryRefreshIfStaleIdAsync(
-                                    downloadTask.Id,
-                                    downloadTask.DownloadTaskType,
+                                    key.Id,
+                                    key.Type,
                                     downloadErrorResult,
                                     CancellationToken.None
                                 )

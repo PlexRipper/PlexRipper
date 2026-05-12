@@ -47,7 +47,7 @@ describe('MediaOverviewStore - Filter / Search', () => {
 			qualityCount: 0,
 		}));
 
-		await subscribeSpyTo(store.requestMedia()).onComplete();
+		await subscribeSpyTo(store.refreshMediaData()).onComplete();
 		return movies;
 	}
 
@@ -143,7 +143,7 @@ describe('MediaOverviewStore - Filter / Search', () => {
 			genreCount: 0,
 			qualityCount: 0,
 		}));
-		await subscribeSpyTo(store.requestMedia()).onComplete();
+		await subscribeSpyTo(store.refreshMediaData()).onComplete();
 
 		// Act
 		const result = subscribeSpyTo(store.setFilterQuery('matrix'));

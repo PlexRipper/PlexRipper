@@ -144,7 +144,7 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 				switchMap(() =>
 					forkJoin([
 						actions.refreshMetaData(),
-						actions.requestMedia(),
+						actions.refreshMediaData(),
 					]),
 				),
 				map(([, requestMediaResult]) => requestMediaResult),
@@ -160,7 +160,7 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 				}),
 			);
 		},
-		requestMedia(): Observable<PlexMediaStatisticsDTO | null> {
+		refreshMediaData(): Observable<PlexMediaStatisticsDTO | null> {
 			if (state.loading) {
 				Log.debug('Request already in progress, skipping');
 				return of(null);
@@ -293,7 +293,7 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 				state.metadata.quality = quality;
 			}
 
-			return actions.requestMedia();
+			return actions.refreshMediaData();
 		},
 		unsetMetaData(key: keyof IMetaDataMediaFilter): Observable<PlexMediaStatisticsDTO | null> {
 			switch (key) {
@@ -307,7 +307,7 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 					break;
 			}
 
-			return actions.requestMedia();
+			return actions.refreshMediaData();
 		},
 		clearMetaDataFilter() {
 			state.metadata = {
@@ -345,7 +345,7 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 
 		changeAllMediaOverviewType(mediaType: PlexMediaType) {
 			settingsStore.displaySettings.allOverviewViewMode = mediaType;
-			useSubscription(actions.requestMedia().subscribe());
+			useSubscription(actions.refreshMediaData().subscribe());
 		},
 		setSelection(selection: ISelection) {
 			state.selection = selection;
@@ -378,11 +378,11 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 		},
 		setFilterQuery(query: string): Observable<PlexMediaStatisticsDTO | null> {
 			state.filterQuery = query;
-			return actions.requestMedia();
+			return actions.refreshMediaData();
 		},
 		clearFilter(): Observable<PlexMediaStatisticsDTO | null> {
 			state.filterQuery = '';
-			return actions.requestMedia();
+			return actions.refreshMediaData();
 		},
 		toggleSortMedia(field: MediaSortField) {
 			if (state.sortedState.field === field) {
@@ -391,7 +391,7 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 				state.sortedState = { field, sort: SortDirection.Asc };
 			}
 
-			useSubscription(actions.requestMedia().subscribe());
+			useSubscription(actions.refreshMediaData().subscribe());
 		},
 		sortMedia(event: IMediaOverviewSort) {
 			Log.debug('Setting media sort state', event);

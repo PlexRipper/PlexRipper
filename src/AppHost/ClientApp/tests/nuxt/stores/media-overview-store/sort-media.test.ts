@@ -48,7 +48,7 @@ describe('MediaOverviewStore.sortMedia()', () => {
 			qualityCount: 0,
 		}));
 
-		const result = subscribeSpyTo(mediaOverviewStore.requestMedia());
+		const result = subscribeSpyTo(mediaOverviewStore.refreshMediaData());
 		await result.onComplete();
 		return movies;
 	}

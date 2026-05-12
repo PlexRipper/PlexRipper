@@ -2,7 +2,7 @@
 	<q-menu
 		:offset="[0, 12]"
 		@hide="menuIndex = MediaMetaDataTypes.None">
-		<q-list	style="min-width: 260px">
+		<q-list style="min-width: 260px">
 			<!-- Categories -->
 			<template v-if="menuIndex === MediaMetaDataTypes.None">
 				<q-item
@@ -222,6 +222,6 @@ function setMetadataFilter({
 function clearMetadataFilter() {
 	mediaOverviewStore.clearMetaDataFilter();
 
-	useSubscription(mediaOverviewStore.requestMedia().subscribe());
+	useSubscription(mediaOverviewStore.refreshMediaData().subscribe());
 }
 </script>

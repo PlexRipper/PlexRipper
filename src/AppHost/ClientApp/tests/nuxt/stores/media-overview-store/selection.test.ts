@@ -47,7 +47,7 @@ describe('MediaOverviewStore - Selection', () => {
 			qualityCount: 0,
 		}));
 
-		await subscribeSpyTo(store.requestMedia()).onComplete();
+		await subscribeSpyTo(store.refreshMediaData()).onComplete();
 		return movies;
 	}
 

@@ -185,7 +185,7 @@ function onAction(event: IMediaOverviewBarActions) {
 
 function onOptionsClosed(hasChanged: boolean) {
 	if (hasChanged) {
-		useSubscription(mediaOverviewStore.requestMedia().subscribe());
+		useSubscription(mediaOverviewStore.refreshMediaData().subscribe());
 	}
 }
 
@@ -205,7 +205,7 @@ onMounted(() => {
 		}
 
 		if (queue.status === LibrarySyncJobStatus.Completed) {
-			useSubscription(mediaOverviewStore.requestMedia().subscribe());
+			useSubscription(mediaOverviewStore.refreshMediaData().subscribe());
 		}
 	}));
 });

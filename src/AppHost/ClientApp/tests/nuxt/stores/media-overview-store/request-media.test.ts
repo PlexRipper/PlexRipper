@@ -46,7 +46,7 @@ describe('MediaOverviewStore.requestMedia()', () => {
 		mock.onGet(url).reply(200, generateResultDTO(generatePlexMediaStatisticsDTO([])));
 
 		// Act
-		const result = subscribeSpyTo(mediaOverviewStore.requestMedia());
+		const result = subscribeSpyTo(mediaOverviewStore.refreshMediaData());
 		await result.onComplete();
 
 		// Assert

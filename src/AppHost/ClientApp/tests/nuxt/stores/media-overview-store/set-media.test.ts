@@ -53,7 +53,7 @@ describe('MediaOverviewStore.setMedia()', () => {
 		store.filterQuery = 'some-filter';
 
 		// Act
-		store.setMedia(movies);
+		store.addMediaPage(movies);
 
 		// Assert
 		expect(store.filterQuery).toBe('some-filter');
@@ -70,7 +70,7 @@ describe('MediaOverviewStore.setMedia()', () => {
 		setupMocks(movies);
 
 		// Act
-		const result = subscribeSpyTo(store.requestMedia());
+		const result = subscribeSpyTo(store.refreshMediaData());
 		await result.onComplete();
 
 		// Assert
@@ -113,7 +113,7 @@ describe('MediaOverviewStore.setMedia()', () => {
 		}));
 
 		// Act
-		const result = subscribeSpyTo(store.requestMedia());
+		const result = subscribeSpyTo(store.refreshMediaData());
 		await result.onComplete();
 
 		// Assert — null data path in setMedia
@@ -139,7 +139,7 @@ describe('MediaOverviewStore.setMedia()', () => {
 		setupMocks(tvShows);
 
 		// Act
-		const result = subscribeSpyTo(store.requestMedia());
+		const result = subscribeSpyTo(store.refreshMediaData());
 		await result.onComplete();
 
 		// Assert
@@ -164,7 +164,7 @@ describe('MediaOverviewStore.setMedia()', () => {
 		setupMocks(movies);
 
 		// Act
-		const result = subscribeSpyTo(store.requestMedia());
+		const result = subscribeSpyTo(store.refreshMediaData());
 		await result.onComplete();
 
 		// Assert
@@ -201,7 +201,7 @@ describe('MediaOverviewStore.setMedia()', () => {
 		}));
 
 		// Act
-		const result = subscribeSpyTo(store.requestMedia());
+		const result = subscribeSpyTo(store.refreshMediaData());
 		await result.onComplete();
 
 		// Assert

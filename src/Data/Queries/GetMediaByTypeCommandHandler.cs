@@ -39,6 +39,7 @@ public class GetMediaByTypeCommandHandler : ICommandHandler<GetMediaByTypeComman
         CancellationToken ct)
     {
         var filter = command.Filter;
+        _response.QueryHash = filter.QueryHash;
         var plexLibraryId = filter.PlexLibraryId;
 
         var allowedPlexLibraryIds = new List<int>();

@@ -2,6 +2,11 @@ namespace Reaparr.Application.Contracts;
 
 public class PlexMediaStatisticsDTO
 {
+    /// <summary>
+    /// Gets the QueryHash a unique hash that only changes if either query, filter or sorts changes
+    /// </summary>
+    public required string QueryHash { get; set; }
+
     public required int Page { get; set; }
 
     public required int PageSize { get; set; }

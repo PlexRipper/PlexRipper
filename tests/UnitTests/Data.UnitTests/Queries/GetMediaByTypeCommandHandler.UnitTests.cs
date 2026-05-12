@@ -1198,6 +1198,35 @@ public class GetMediaByTypeCommandHandlerUnitTests : BaseUnitTest<GetMediaByType
             );
     }
 
+    [Test]
+    public async Task ShouldSetRequestHashFromFilter_WhenQueryReturnsResults()
+    {
+        // Arrange
+        await SetupDatabase(70231, cfg =>
+        {
+            cfg.PlexServerCount = 1;
+            cfg.PlexMovieLibraryCount = 1;
+            cfg.MovieCount = 4;
+        });
+
+        var command = CreateCommand(
+            PlexMediaType.Movie,
+            0,
+            filterOfflineMedia: true,
+            page: 2,
+            pageSize: 3,
+            sort: "Year:desc",
+            filter: "Year:gte:2000"
+        );
+
+        // Act
+        var result = await Sut.ExecuteAsync(command, CancellationToken);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.QueryHash.ShouldBe(command.Filter.QueryHash);
+    }
+
     private static void AssertReturnedExactMovies(PagedMediaQueryResult result, IReadOnlyCollection<int> expectedMovieIds)
     {
         expectedMovieIds.ShouldNotBeEmpty();

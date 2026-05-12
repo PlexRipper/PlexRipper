@@ -1,3 +1,5 @@
+using System.Security.Cryptography;
+using System.Text;
 using FlexQuery.NET.Models;
 
 namespace Reaparr.Data.Contracts;
@@ -16,4 +18,30 @@ public record MediaQueryFilter
     public required bool FilterOwnedMedia { get; init; }
 
     public required FlexQueryParameters Parameters { get; init; }
+
+    public string QueryHash => Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(BuildHashInput())));
+
+    private string BuildHashInput()
+    {
+        var parameters = Parameters;
+
+        return string.Join(
+            '\n',
+            $"MediaType={MediaType}",
+            $"PlexLibraryId={PlexLibraryId}",
+            $"FilterOfflineMedia={FilterOfflineMedia}",
+            $"FilterOwnedMedia={FilterOwnedMedia}",
+            $"{nameof(FlexQueryParameters.Query)}={parameters.Query ?? string.Empty}",
+            $"{nameof(FlexQueryParameters.Filter)}={parameters.Filter ?? string.Empty}",
+            $"{nameof(FlexQueryParameters.Sort)}={parameters.Sort ?? string.Empty}",
+            $"{nameof(FlexQueryParameters.Select)}={parameters.Select ?? string.Empty}",
+            $"{nameof(FlexQueryParameters.Includes)}={parameters.Includes ?? string.Empty}",
+            $"{nameof(FlexQueryParameters.GroupBy)}={parameters.GroupBy ?? string.Empty}",
+            $"{nameof(FlexQueryParameters.Having)}={parameters.Having ?? string.Empty}",
+            $"{nameof(FlexQueryParameters.PageSize)}={parameters.PageSize?.ToString() ?? string.Empty}",
+            $"{nameof(FlexQueryParameters.IncludeCount)}={parameters.IncludeCount?.ToString() ?? string.Empty}",
+            $"{nameof(FlexQueryParameters.Distinct)}={parameters.Distinct?.ToString() ?? string.Empty}",
+            $"{nameof(FlexQueryParameters.Mode)}={parameters.Mode ?? string.Empty}"
+        );
+    }
 }

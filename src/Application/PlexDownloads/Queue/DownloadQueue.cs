@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.Threading.Channels;
 
 namespace Reaparr.Application;
@@ -7,11 +8,19 @@ namespace Reaparr.Application;
 /// </summary>
 public class DownloadQueue : IDownloadQueue
 {
+    /// <summary>
+    /// Cooldown applied to every download task after it is picked by the queue. Prevents the
+    /// queue picker from re-picking the same task in a tight loop when a download fails fast
+    /// (e.g. stale Plex part IDs returning 404 instantly).
+    /// </summary>
+    private static readonly TimeSpan RetryCooldown = TimeSpan.FromSeconds(60);
+
     private readonly ILogger _log;
     private readonly IReaparrDbContextFactory _dbContextFactory;
     private readonly IDownloadTaskScheduler _downloadTaskScheduler;
 
     private readonly Channel<int> _plexServersToCheckChannel = Channel.CreateUnbounded<int>();
+    private readonly ConcurrentDictionary<Guid, DateTime> _retryCooldownUntil = new();
 
     private readonly CancellationToken _token = new();
 
@@ -131,10 +140,14 @@ public class DownloadQueue : IDownloadQueue
                 nextDownloadTask.FullTitle
             );
 
+        _retryCooldownUntil[nextDownloadTask.Id] = DateTime.UtcNow + RetryCooldown;
         await _downloadTaskScheduler.StartDownloadTaskJob(nextDownloadTask.ToKey());
 
         return Result.Ok(nextDownloadTask);
     }
+
+    private bool IsInRetryCooldown(DownloadTaskGeneric task) =>
+        _retryCooldownUntil.TryGetValue(task.Id, out var until) && DateTime.UtcNow < until;
 
     /// <summary>
     /// Determines the next downloadable <see cref="DownloadTaskGeneric"/> to be executed.

@@ -28,16 +28,8 @@ import {
 import { useSubscription } from '@vueuse/rxjs';
 import { useI18n } from 'vue-i18n';
 
-interface IAvailableMetadataIds {
-	roles?: number[];
-	countries?: number[];
-	genres?: number[];
-	qualities?: number[];
-}
-
 interface IMediaOverviewStoreState {
 	libraryId: number;
-	loadedPages: number[];
 	pageSize: number;
 	totalCount: number;
 	itemsLength: number;
@@ -69,7 +61,6 @@ interface IMediaOverviewStoreState {
 export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, () => {
 	const defaultState: IMediaOverviewStoreState = {
 		libraryId: 0,
-		loadedPages: [],
 		pageSize: 100,
 		totalCount: 0,
 		itemsLength: 0,
@@ -213,9 +204,7 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 				switchMap(() =>
 					defer(() => actions.refreshAllLibraryMediaByType(1, state.pageSize)).pipe(
 						takeUntil(cancelSubject$),
-						tap((data) => {
-							actions.setMedia(data);
-						}),
+						tap((data) => actions.addMediaPage(data)),
 					),
 				),
 				tap({
@@ -238,63 +227,37 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 			);
 		},
 		requestMediaPage(page: number, size: number = state.pageSize): Observable<PlexMediaStatisticsDTO | null> {
-			if (state.loadedPages.includes(page) || pendingPages.has(page)) {
+			if (mediaPages.has(page) || pendingPages.has(page)) {
 				return of(null);
 			}
 
 			pendingPages.add(page);
 			return actions.refreshAllLibraryMediaByType(page, size).pipe(
-				tap((data) => {
-					if (data) {
-						actions.mergeMediaPage(data);
-					}
-				}),
-				finalize(() => pendingPages.delete(page)),
+				tap((data) => actions.addMediaPage(data)),
 			);
 		},
-		mergeMediaPage(data: PlexMediaStatisticsDTO) {
-			const availableMetadataIds = data as PlexMediaStatisticsDTO & IAvailableMetadataIds;
-			const frozenPage = markRaw(Object.freeze(data.mediaList));
+		// Adds the requested media page to the cache
+		addMediaPage(data: PlexMediaStatisticsDTO | null) {
+			if (!data) {
+				Log.error('Received null data for media page');
+				return;
+			}
 
-			mediaPages.set(data.page, frozenPage);
+			mediaPages.set(data.page, markRaw(data.mediaList));
 			state.mediaPagesVersion++;
-			state.loadedPages = [...new Set([...state.loadedPages, data.page])].sort((a, b) => a - b);
-			state.itemsLength = state.loadedPages.reduce((total, page) => total + (mediaPages.get(page)?.length ?? 0), 0);
-			state.totalCount = data.totalCount || Math.max(data.mediaCount, state.itemsLength);
+			state.itemsLength += data.mediaCount;
+			state.totalCount = data.totalCount;
 
 			state.allMovieCount = data.totalMovieCount;
 			state.allTvShowCount = data.totalTvShowCount;
 			state.allSeasonCount = data.totalSeasonCount;
 			state.allEpisodeCount = data.totalEpisodeCount;
 			state.allFileSize = data.totalMediaSize;
-			state.availableRoleIds = availableMetadataIds.roles ?? [];
-			state.availableCountryIds = availableMetadataIds.countries ?? [];
-			state.availableGenreIds = availableMetadataIds.genres ?? [];
-			state.availableQualityIds = availableMetadataIds.qualities ?? [];
+			state.availableRoleIds = data.roles ?? [];
+			state.availableCountryIds = data.countries ?? [];
+			state.availableGenreIds = data.genres ?? [];
+			state.availableQualityIds = data.qualities ?? [];
 			state.scrollDict = new Map((data.navigationIndexes ?? []).map((x) => [x.label, x.index]));
-		},
-		setMedia(data: PlexMediaStatisticsDTO | null) {
-			mediaPages.clear();
-			state.mediaPagesVersion++;
-			state.loadedPages = [];
-			pendingPages.clear();
-			state.totalCount = 0;
-			state.itemsLength = 0;
-
-			if (data) {
-				actions.mergeMediaPage(data);
-			} else {
-				state.allMovieCount = 0;
-				state.allTvShowCount = 0;
-				state.allSeasonCount = 0;
-				state.allEpisodeCount = 0;
-				state.allFileSize = 0;
-				state.availableRoleIds = [];
-				state.availableCountryIds = [];
-				state.availableGenreIds = [];
-				state.availableQualityIds = [];
-				state.scrollDict = new Map<string, number>([['#', 0]]);
-			}
 		},
 		getPageForIndex(index: number): number {
 			return Math.floor(index / state.pageSize) + 1;
@@ -305,7 +268,7 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 			const requests: Observable<PlexMediaStatisticsDTO | null>[] = [];
 
 			for (let page = firstPage; page <= lastPage; page++) {
-				if (!state.loadedPages.includes(page)) {
+				if (!mediaPages.has(page)) {
 					requests.push(actions.requestMediaPage(page));
 				}
 			}

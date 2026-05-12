@@ -17,7 +17,7 @@ import { MediaSortField, SortDirection } from '@enums';
 import { type IMetaDataMediaFilter, type ISelection, type ISortOption, StoreNames } from '@interfaces';
 import { plexLibraryApi, plexMediaApi } from '@api';
 import { finalize, map, switchMap, takeUntil, tap } from 'rxjs/operators';
-import { defer, forkJoin, type Observable, of, Subject } from 'rxjs';
+import { BehaviorSubject, defer, forkJoin, type Observable, of, Subject } from 'rxjs';
 import { useLibraryStore, useSettingsStore } from '@store';
 import {
 	buildFlexSortDsl,
@@ -60,9 +60,10 @@ interface IMediaOverviewStoreState {
 	availableCountryIds: number[];
 	availableGenreIds: number[];
 	availableQualityIds: number[];
-	// Meant to update to signify an reactive change in the mediaPages
+	// Meant to update to signify a reactive change in the mediaPages
 	mediaPagesVersion: number;
 	currentScrollIndex: number;
+	scrollCommand: BehaviorSubject<number>;
 }
 
 export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, () => {
@@ -108,6 +109,7 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 		availableQualityIds: [],
 		mediaPagesVersion: 0,
 		currentScrollIndex: 0,
+		scrollCommand: new BehaviorSubject<number>(0),
 	};
 
 	const state = reactive<IMediaOverviewStoreState>(cloneDeep(defaultState));
@@ -310,8 +312,13 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 
 			return requests.length ? forkJoin(requests) : of([]);
 		},
-		requestAroundIndex(index: number): Observable<(PlexMediaStatisticsDTO | null)[]> {
-			return actions.requestRange(index - 20, index + 50);
+		scrollToIndex(scrollIndex: number) {
+			if (scrollIndex < 0 || scrollIndex >= state.totalCount) {
+				Log.warn(`Scroll index ${scrollIndex} is out of bounds for total count ${state.totalCount}`);
+				return;
+			}
+
+			actions.requestRange(scrollIndex - 50, scrollIndex + 50).subscribe(() => state.scrollCommand.next(scrollIndex));
 		},
 		setMetaData({
 			countryId,
@@ -436,6 +443,9 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 		getMediaItems: computed((): Readonly<PlexMediaSlimDTO[]> => {
 			return Array.from(mediaPages.values()).flat();
 		}),
+		getScrollCommand(): Observable<number> {
+			return state.scrollCommand.asObservable();
+		},
 		getMediaItemsForRange: (start: number, end: number): Readonly<PlexMediaSlimDTO[]> => {
 			const normalizedStart = Math.max(0, Math.floor(start));
 			const normalizedEnd = Math.max(normalizedStart, Math.floor(end));

@@ -50,7 +50,7 @@ import { useVirtualizer } from '@tanstack/vue-virtual';
 import { get, set, useElementBounding } from '@vueuse/core';
 import { useSubscription } from '@vueuse/rxjs';
 import type { PlexMediaSlimDTO, PlexMediaType } from '@dto';
-import { listenMediaOverviewScrollToCommand, sendMediaOverviewDownloadCommand } from '@composables/event-bus';
+import { sendMediaOverviewDownloadCommand } from '@composables/event-bus';
 import { triggerBoxHighlight } from '@composables/animations';
 import { waitForElement } from '@composables';
 import { useRouter, useMediaOverviewStore } from '#imports';
@@ -62,7 +62,6 @@ const posterCardWidth = ref(200 + 32);
 const posterCardHeight = ref(340 + 32);
 const gridItems = ref(10);
 const gridPaddingLeft = ref(0);
-const pageRequestPending = ref(false);
 const hasRunInitialPageReady = ref(false);
 const router = useRouter();
 
@@ -160,7 +159,7 @@ function onOpenMediaDetails(mediaItem: PlexMediaSlimDTO) {
 }
 
 function requestPagesAroundViewport() {
-	if (get(pageRequestPending) || mediaOverviewStore.getMediaItems.length >= mediaOverviewStore.totalCount)
+	if (mediaOverviewStore.getMediaItems.length >= mediaOverviewStore.totalCount)
 		return;
 
 	const virtualItems = get(rowVirtualizer).getVirtualItems();
@@ -176,14 +175,7 @@ function requestPagesAroundViewport() {
 	const prefetchStart = Math.max(0, firstVisibleIndex - prefetchBuffer);
 	const prefetchEnd = Math.min(mediaOverviewStore.totalCount, lastVisibleIndex + prefetchBuffer);
 
-	set(pageRequestPending, true);
-	useSubscription(
-		mediaOverviewStore.requestRange(prefetchStart, prefetchEnd).subscribe({
-			next: () => set(pageRequestPending, false),
-			error: () => set(pageRequestPending, false),
-			complete: () => set(pageRequestPending, false),
-		}),
-	);
+	useSubscription(mediaOverviewStore.requestRange(prefetchStart, prefetchEnd).subscribe());
 }
 
 function scrollToIndex(index: number) {
@@ -214,30 +206,16 @@ function scrollToIndex(index: number) {
 }
 
 onMounted(() => {
-	// Listen for scroll to letter command
-	listenMediaOverviewScrollToCommand((scrollIndex) => {
+	// Listen for scroll to navigation index command
+	useSubscription(mediaOverviewStore.getScrollCommand().subscribe((scrollIndex) => {
 		if (!get(scrollContainerRef)) {
 			Log.error('Could not find container with reference: ', get(scrollContainerRef));
 			return;
 		}
 
-		if (scrollIndex < 0 || scrollIndex >= mediaOverviewStore.totalCount) {
-			Log.warn(`Scroll index ${scrollIndex} is out of bounds for total count ${mediaOverviewStore.totalCount}`);
-			return;
-		}
-
 		// Scroll immediately for responsiveness, then prefetch nearby pages in background
 		scrollToIndex(scrollIndex);
-
-		set(pageRequestPending, true);
-		useSubscription(
-			mediaOverviewStore.requestAroundIndex(scrollIndex).subscribe({
-				next: () => set(pageRequestPending, false),
-				error: () => set(pageRequestPending, false),
-				complete: () => set(pageRequestPending, false),
-			}),
-		);
-	});
+	}));
 });
 </script>
 

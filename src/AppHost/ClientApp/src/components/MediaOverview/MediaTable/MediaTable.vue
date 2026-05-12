@@ -60,7 +60,6 @@ import type { PlexMediaSlimDTO } from '@dto';
 import type { ISelection } from '@interfaces';
 import {
 	triggerBoxHighlight,
-	listenMediaOverviewScrollToCommand,
 	useMediaOverviewStore,
 } from '#imports';
 import { getMediaTableColumns } from '~/composables/mediaTableColumns';
@@ -185,14 +184,10 @@ onMounted(() => {
 		scrollToIndex(lastMediaItemViewed.sortIndex - 1);
 	}
 
-	// Listen for scroll-to-letter command
-	listenMediaOverviewScrollToCommand((scrollIndex) => {
-		useSubscription(
-			mediaOverviewStore.requestAroundIndex(scrollIndex).subscribe(() => {
-				scrollToIndex(scrollIndex);
-			}),
-		);
-	});
+	// Listen for scroll to navigation index command
+	useSubscription(mediaOverviewStore.getScrollCommand().subscribe((scrollIndex) => {
+		scrollToIndex(scrollIndex);
+	}));
 });
 </script>
 

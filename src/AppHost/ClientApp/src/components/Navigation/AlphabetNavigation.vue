@@ -10,7 +10,7 @@
 				square
 				no-wrap
 				:data-cy="`letter-${displayValue}-alphabet-navigation-btn`"
-				@click="sendMediaOverviewScrollToCommand(scrollIndex)" />
+				@click="mediaOverviewStore.scrollToIndex(scrollIndex)" />
 		</div>
 	</div>
 </template>
@@ -18,7 +18,6 @@
 <script setup lang="ts">
 import { MediaSortField } from '@enums';
 import { getVideoQualityFromValue, translateVideoQuality } from '@composables';
-import { sendMediaOverviewScrollToCommand } from '@composables/event-bus';
 
 const mediaOverviewStore = useMediaOverviewStore();
 

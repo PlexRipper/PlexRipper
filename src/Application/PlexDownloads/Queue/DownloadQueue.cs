@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.Threading.Channels;
 
 namespace Reaparr.Application;
@@ -7,12 +8,20 @@ namespace Reaparr.Application;
 /// </summary>
 public class DownloadQueue : IDownloadQueue
 {
+    /// <summary>
+    /// Cooldown applied to every download task after it is picked by the queue. Prevents the
+    /// queue picker from re-picking the same task in a tight loop when a download fails fast
+    /// (e.g. stale Plex part IDs returning 404 instantly).
+    /// </summary>
+    private static readonly TimeSpan RetryCooldown = TimeSpan.FromSeconds(60);
+
     private readonly ILogger _log;
     private readonly IReaparrDbContextFactory _dbContextFactory;
     private readonly IDownloadTaskScheduler _downloadTaskScheduler;
     private readonly IDownloadTaskUpdateDispatcher _downloadTaskUpdateDispatcher;
 
     private readonly Channel<int> _plexServersToCheckChannel = Channel.CreateUnbounded<int>();
+    private readonly ConcurrentDictionary<Guid, DateTime> _retryCooldownUntil = new();
 
     private readonly CancellationToken _token = new();
 
@@ -162,10 +171,14 @@ public class DownloadQueue : IDownloadQueue
                 nextDownloadTask.FullTitle
             );
 
+        _retryCooldownUntil[nextDownloadTask.Id] = DateTime.UtcNow + RetryCooldown;
         await _downloadTaskScheduler.StartDownloadTaskJob(nextDownloadTask.ToKey());
 
         return Result.Ok(nextDownloadTask);
     }
+
+    private bool IsInRetryCooldown(DownloadTaskGeneric task) =>
+        _retryCooldownUntil.TryGetValue(task.Id, out var until) && DateTime.UtcNow < until;
 
     /// <summary>
     /// Determines the next downloadable <see cref="DownloadTaskGeneric"/> to be executed.
@@ -178,11 +191,11 @@ public class DownloadQueue : IDownloadQueue
         if (downloadingTask is not null)
             return Result.Fail("There is already a downloadTask downloading.").LogDebug();
 
-        var serverUnreachableTask = FindFirstLeafByStatus(downloadTasks, DownloadStatus.ServerUnreachable);
+        var serverUnreachableTask = FindFirstLeafByStatus(downloadTasks, DownloadStatus.ServerUnreachable, IsInRetryCooldown);
         if (serverUnreachableTask is not null)
             return Result.Ok(serverUnreachableTask);
 
-        var queuedTask = FindFirstLeafByStatus(downloadTasks, DownloadStatus.Queued);
+        var queuedTask = FindFirstLeafByStatus(downloadTasks, DownloadStatus.Queued, IsInRetryCooldown);
         if (queuedTask is not null)
             return Result.Ok(queuedTask);
 
@@ -191,21 +204,22 @@ public class DownloadQueue : IDownloadQueue
 
     private static DownloadTaskGeneric? FindFirstLeafByStatus(
         IEnumerable<DownloadTaskGeneric> downloadTasks,
-        DownloadStatus status
+        DownloadStatus status,
+        Func<DownloadTaskGeneric, bool>? skip = null
     )
     {
         foreach (var downloadTask in downloadTasks)
         {
             if (downloadTask.Children.Any())
             {
-                var childTask = FindFirstLeafByStatus(downloadTask.Children, status);
+                var childTask = FindFirstLeafByStatus(downloadTask.Children, status, skip);
                 if (childTask is not null)
                     return childTask;
 
                 continue;
             }
 
-            if (downloadTask.DownloadStatus == status)
+            if (downloadTask.DownloadStatus == status && (skip is null || !skip(downloadTask)))
                 return downloadTask;
         }
 
@@ -288,6 +302,13 @@ public class DownloadQueue : IDownloadQueue
                     DownloadStatus.Downloading
                 );
         }
+
+        // Kick the queue for every Plex server. Without this, servers that were already online
+        // before the restart never fire ServerOnlineStatusChangedNotification (it only fires on
+        // transitions), so their queue picker is never invoked and they sit idle until the next
+        // status-check tick or external trigger.
+        if (plexServerIds.Any())
+            await CheckDownloadQueue(plexServerIds);
 
         return Result.Ok();
     }

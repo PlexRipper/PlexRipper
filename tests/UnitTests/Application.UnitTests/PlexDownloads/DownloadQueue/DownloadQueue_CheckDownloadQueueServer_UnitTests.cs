@@ -63,7 +63,7 @@ public class DownloadQueueCheckDownloadQueueUnitTests : BaseUnitTest<DownloadQue
     }
 
     [Test]
-    public async Task ShouldHaveNoStartCommands_WhenATaskIsAlreadyDownloading()
+    public async Task ShouldResetZombieAndStartNextTask_WhenDownloadingStatusButSchedulerHasNoJob()
     {
         // Arrange
         await SetupDatabase(
@@ -83,21 +83,45 @@ public class DownloadQueueCheckDownloadQueueUnitTests : BaseUnitTest<DownloadQue
             .Where(x => x.PlexServerId == 1)
             .IncludeAll()
             .ToListAsync(CancellationToken);
-        Mock.Mock<IDownloadTaskScheduler>().Setup(x => x.StartDownloadTaskJob(It.IsAny<DownloadTaskKey>())).ReturnOk();
-        Mock.Mock<IDownloadTaskScheduler>().Setup(x => x.IsServerDownloading(It.IsAny<int>())).ReturnsAsync(false);
-
         var startedDownloadTask = downloadTasks[0];
         startedDownloadTask.SetDownloadStatus(DownloadStatus.Downloading);
         await dbContext.SaveChangesAsync(CancellationToken);
+        var zombieLeafId = startedDownloadTask.Children.First().Id;
+
+        // The dispatcher writes status to the same in-memory database so the queue picker sees
+        // the reconciled state on its re-read.
+        Mock.Mock<IDownloadTaskScheduler>().Setup(x => x.StartDownloadTaskJob(It.IsAny<DownloadTaskKey>())).ReturnOk();
+        Mock.Mock<IDownloadTaskScheduler>().Setup(x => x.IsServerDownloading(It.IsAny<int>())).ReturnsAsync(false);
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Setup(x =>
+                x.OnStatusChangedAsync(It.IsAny<DownloadTaskKey>(), It.IsAny<DownloadStatus>(), It.IsAny<CancellationToken>())
+            )
+            .Callback<DownloadTaskKey, DownloadStatus, CancellationToken>(
+                (key, status, _) =>
+                {
+                    using var ctx = Mock.Container.Resolve<IReaparrDbContext>();
+                    ctx.SetDownloadStatus(key, status).GetAwaiter().GetResult();
+                }
+            )
+            .Returns(Task.CompletedTask);
 
         // Act
         var result = await Sut.CheckDownloadQueueServer(1);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
-        result.Value.ShouldBeNull();
+        result.Value.ShouldNotBeNull();
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Verify(
+                x => x.OnStatusChangedAsync(
+                    It.Is<DownloadTaskKey>(k => k.Id == zombieLeafId),
+                    DownloadStatus.Queued,
+                    It.IsAny<CancellationToken>()
+                ),
+                Times.Once()
+            );
         Mock.Mock<IDownloadTaskScheduler>()
-            .Verify(x => x.StartDownloadTaskJob(It.IsAny<DownloadTaskKey>()), Times.Never());
+            .Verify(x => x.StartDownloadTaskJob(It.IsAny<DownloadTaskKey>()), Times.Once());
     }
 
     [Test]

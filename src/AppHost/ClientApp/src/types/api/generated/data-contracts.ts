@@ -929,6 +929,7 @@ export interface PlexMediaStatisticsDTO {
   /** @format int32 */
   pageSize: number;
   qualities: number[];
+  queryHash: string;
   roles: number[];
   /** @format int32 */
   seasonCount: number;

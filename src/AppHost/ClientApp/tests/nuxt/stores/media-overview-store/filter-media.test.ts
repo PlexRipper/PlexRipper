@@ -76,7 +76,7 @@ describe('MediaOverviewStore - Filter / Search', () => {
 		// Arrange
 		const store = useMediaOverviewStore();
 		await loadMovies(store, 10);
-		store.setMedia(generatePlexMediaStatisticsDTO([]));
+		store.addMediaPage(generatePlexMediaStatisticsDTO([]));
 
 		// Act
 		store.filterQuery = 'zzz-no-match-xyz-impossible-string';

@@ -35,6 +35,7 @@ interface IMediaOverviewStoreState {
 	itemsLength: number;
 	sortedState: IMediaOverviewSort;
 	scrollDict: Map<string, number>;
+	queryHash: string;
 	selection: ISelection;
 	downloadButtonVisible: boolean;
 	filterQuery: string;
@@ -69,6 +70,7 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 		selection: { keys: [], allSelected: false, indexKey: 0 },
 		downloadButtonVisible: false,
 		filterQuery: '',
+		queryHash: '',
 		lastMediaItemViewed: null,
 		loading: false,
 		isDetailView: false,
@@ -171,18 +173,6 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 				]),
 			};
 		},
-		refreshAllLibraryMediaByType(page: number = 1, size: number = state.pageSize): Observable<PlexMediaStatisticsDTO | null> {
-			const queryParams = actions.buildFlexQueryParams(page, size);
-			return plexMediaApi.getAllMediaByTypeEndpoint(queryParams).pipe(
-				takeUntil(cancelSubject$),
-				map(({ isSuccess, value }): PlexMediaStatisticsDTO | null => {
-					if (isSuccess && value) {
-						return value;
-					}
-					return null;
-				}),
-			);
-		},
 		requestMedia(): Observable<PlexMediaStatisticsDTO | null> {
 			if (state.loading) {
 				Log.debug('Request already in progress, skipping');
@@ -202,7 +192,7 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 			]).pipe(
 				takeUntil(cancelSubject$),
 				switchMap(() =>
-					defer(() => actions.refreshAllLibraryMediaByType(1, state.pageSize)).pipe(
+					defer(() => actions.requestMediaPage(1, state.pageSize)).pipe(
 						takeUntil(cancelSubject$),
 						tap((data) => actions.addMediaPage(data)),
 					),
@@ -232,9 +222,16 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 			}
 
 			pendingPages.add(page);
-			return actions.refreshAllLibraryMediaByType(page, size).pipe(
-				tap((data) => actions.addMediaPage(data)),
-			);
+			const queryParams = actions.buildFlexQueryParams(page, size);
+			return plexMediaApi.getAllMediaByTypeEndpoint(queryParams).pipe(
+				takeUntil(cancelSubject$),
+				map(({ isSuccess, value }): PlexMediaStatisticsDTO | null => {
+					if (isSuccess && value) {
+						return value;
+					}
+					return null;
+				}),
+				tap((data) => actions.addMediaPage(data)));
 		},
 		// Adds the requested media page to the cache
 		addMediaPage(data: PlexMediaStatisticsDTO | null) {
@@ -243,8 +240,14 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 				return;
 			}
 
-			mediaPages.set(data.page, markRaw(data.mediaList));
+			if (state.queryHash !== data.queryHash) {
+				Log.warn(`mediaPages was cleared, with ${state.queryHash} vs ${data.queryHash}`);
+				mediaPages.clear();
+			}
+
+			mediaPages.set(data.page, markRaw(Object.freeze(data.mediaList)));
 			state.mediaPagesVersion++;
+			state.queryHash = data.queryHash;
 			state.itemsLength += data.mediaCount;
 			state.totalCount = data.totalCount;
 
@@ -258,6 +261,8 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 			state.availableGenreIds = data.genres ?? [];
 			state.availableQualityIds = data.qualities ?? [];
 			state.scrollDict = new Map((data.navigationIndexes ?? []).map((x) => [x.label, x.index]));
+
+			Log.debug('mediaPages', mediaPages);
 		},
 		getPageForIndex(index: number): number {
 			return Math.floor(index / state.pageSize) + 1;

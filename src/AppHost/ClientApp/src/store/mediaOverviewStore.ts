@@ -135,14 +135,20 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 			actions.clearMetaDataFilter();
 			actions.clearSort();
 
-			mediaPages.clear();
-			pendingPages.clear();
-
-			// Load data for the library
-			return forkJoin([
-				actions.refreshMetaData(),
-				actions.requestMedia(),
-			]).pipe(map(([, x]) => x));
+			// Load the library first so metadata requests use the resolved media type.
+			return defer(() =>
+				state.libraryId > 0
+					? libraryStore.refreshLibrary(state.libraryId)
+					: of(null),
+			).pipe(
+				switchMap(() =>
+					forkJoin([
+						actions.refreshMetaData(),
+						actions.requestMedia(),
+					]),
+				),
+				map(([, requestMediaResult]) => requestMediaResult),
+			);
 		},
 		refreshMetaData() {
 			return plexLibraryApi.getLibraryMediaMetadata(state.libraryId, { mediaType: get(getters.getMediaType) }).pipe(
@@ -160,19 +166,15 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 				return of(null);
 			}
 
-			state.itemsLength = 0;
 			state.loading = true;
+
+			mediaPages.clear();
+			pendingPages.clear();
+			state.itemsLength = 0;
+
 			Log.debug('Starting media request', { libraryId: state.libraryId, mediaType: get(getters.getMediaType) });
 
-			return forkJoin([
-				defer(() =>
-					state.libraryId > 0
-						? libraryStore.refreshLibrary(state.libraryId)
-						: of(null),
-				),
-			]).pipe(
-				takeUntil(cancelSubject$),
-				switchMap(() => actions.requestMediaPage(1, state.pageSize)),
+			return actions.requestMediaPage(1, state.pageSize).pipe(
 				tap({
 					next: () => {
 						state.loading = false;

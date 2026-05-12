@@ -151,6 +151,14 @@ public class DownloadQueue : IDownloadQueue
         if (serverUnreachableTask is not null)
             return Result.Ok(serverUnreachableTask);
 
+        var downloadClientErrorTask = FindFirstLeafByStatus(downloadTasks, DownloadStatus.DownloadClientError);
+        if (downloadClientErrorTask is not null)
+            return Result.Ok(downloadClientErrorTask);
+
+        var errorTask = FindFirstLeafByStatus(downloadTasks, DownloadStatus.Error);
+        if (errorTask is not null)
+            return Result.Ok(errorTask);
+
         var queuedTask = FindFirstLeafByStatus(downloadTasks, DownloadStatus.Queued);
         if (queuedTask is not null)
             return Result.Ok(queuedTask);

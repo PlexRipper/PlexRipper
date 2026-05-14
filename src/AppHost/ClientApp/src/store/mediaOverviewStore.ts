@@ -112,10 +112,13 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 	const mediaPages = new Map<number, readonly PlexMediaSlimDTO[]>();
 	const pendingPages = new Set<number>();
 
+	const searchQuery = useRouteQuery('q', '', { mode: 'replace' });
 	const countryIdQuery = useRouteQuery('countryId', 0, { mode: 'replace' });
 	const genreIdQuery = useRouteQuery('genreId', 0, { mode: 'replace' });
 	const roleIdQuery = useRouteQuery('roleId', 0, { mode: 'replace' });
 	const qualityIdQuery = useRouteQuery('qualityId', 0, { mode: 'replace' });
+	const scrollIndexQuery = useRouteQuery('scrollIndex', 0, { mode: 'replace' });
+	const sortQuery = useRouteQuery('sort', '', { mode: 'replace' });
 
 	// Subject to cancel in-flight requests when switching libraries
 	const cancelSubject$ = new Subject<void>();
@@ -350,12 +353,7 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 					.when((state.metadata.genreId ?? 0) > 0, (x) => x.where('Genres:any:Id', 'eq', state.metadata.genreId ?? 0))
 					.when((state.metadata.qualityId ?? 0) > 0, (x) => x.eq('MediaDataList:any:Quality', state.metadataList.qualities.find(x => x.id === state.metadata.qualityId)?.quality ?? VideoQuality.None))
 					.build(),
-				sort: buildFlexSortDsl([
-					{
-						field: state.sortedState.field,
-						direction: state.sortedState.sort === SortDirection.Desc ? 'desc' : 'asc',
-					},
-				]),
+				sort: get(getters.getSortDSL),
 			};
 		},
 
@@ -384,16 +382,15 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 		},
 		clearSort() {
 			state.sortedState = { field: MediaSortField.Title, sort: SortDirection.Asc };
+			set(sortQuery, undefined);
 		},
 		setCurrentScrollIndex(scrollIndex: number) {
-			if (scrollIndex < 0) {
-				return;
-			}
-
 			state.currentScrollIndex = scrollIndex;
+			set(scrollIndexQuery, scrollIndex);
 		},
 		setFilterQuery(query: string): Observable<PlexMediaStatisticsDTO | null> {
 			state.filterQuery = query;
+			set(searchQuery, query);
 			return actions.refreshMediaData();
 		},
 		clearFilter(): Observable<PlexMediaStatisticsDTO | null> {
@@ -407,11 +404,10 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 				state.sortedState = { field, sort: SortDirection.Asc };
 			}
 
+			// If default sort then undefined
+			const sort = get(getters.getSortDSL)
+			set(sortQuery, sort !== 'sortIndex:asc' ? sort : undefined)
 			useSubscription(actions.refreshMediaData().subscribe());
-		},
-		sortMedia(event: IMediaOverviewSort) {
-			Log.debug('Setting media sort state', event);
-			state.sortedState = event;
 		},
 		$reset() {
 			mediaPages.clear();
@@ -577,6 +573,14 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 
 			return result;
 		}),
+		getSortDSL: computed((): string => {
+			return buildFlexSortDsl([
+				{
+					field: state.sortedState.field,
+					direction: state.sortedState.sort === SortDirection.Desc ? 'desc' : 'asc',
+				},
+			]) ?? ''
+		})
 	};
 
 	return {

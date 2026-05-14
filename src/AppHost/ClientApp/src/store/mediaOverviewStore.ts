@@ -2,7 +2,8 @@ import Log from 'consola';
 import { cloneDeep, isNumber, sortBy, uniqueId } from 'lodash-es';
 import { acceptHMRUpdate, defineStore } from 'pinia';
 import { computed, markRaw, reactive, toRefs } from 'vue';
-import { get } from '@vueuse/core';
+import { get, set } from '@vueuse/core';
+import { useRouteQuery } from '@vueuse/router';
 import {
 	type MediaQueryFilterDTO,
 	type PlexMediaMetadataDTO,
@@ -83,7 +84,7 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 			countryId: 0,
 			roleId: 0,
 			genreId: 0,
-			quality: VideoQuality.None,
+			qualityId: 0,
 		},
 		metadataList: {
 			mediaCount: 0,
@@ -110,6 +111,11 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 	const libraryStore = useLibraryStore();
 	const mediaPages = new Map<number, readonly PlexMediaSlimDTO[]>();
 	const pendingPages = new Set<number>();
+
+	const countryIdQuery = useRouteQuery('countryId', 0, { mode: 'replace' });
+	const genreIdQuery = useRouteQuery('genreId', 0, { mode: 'replace' });
+	const roleIdQuery = useRouteQuery('roleId', 0, { mode: 'replace' });
+	const qualityIdQuery = useRouteQuery('qualityId', 0, { mode: 'replace' });
 
 	// Subject to cancel in-flight requests when switching libraries
 	const cancelSubject$ = new Subject<void>();
@@ -271,51 +277,61 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 
 			actions.requestRange(scrollIndex - 50, scrollIndex + 50).subscribe(() => state.scrollCommand.next(scrollIndex));
 		},
-		setMetaData({
-			countryId,
-			roleId,
-			genreId,
-			quality,
-		}: Partial<IMetaDataMediaFilter>): Observable<PlexMediaStatisticsDTO | null> {
-			if (isNumber(countryId)) {
-				state.metadata.countryId = countryId;
-			}
-
-			if (isNumber(roleId)) {
-				state.metadata.roleId = roleId;
-			}
-
-			if (isNumber(genreId)) {
-				state.metadata.genreId = genreId;
-			}
-
-			if (quality) {
-				state.metadata.quality = quality;
-			}
-
-			return actions.refreshMediaData();
+		setCountryFilter(countryId?: number | null): Observable<PlexMediaStatisticsDTO | null> {
+			return of(countryId).pipe(
+				map((x) => isNumber(x) && x > 0 ? x : 0),
+				tap((value) => {
+					state.metadata.countryId = value;
+					set(countryIdQuery, value > 0 ? value : undefined);
+				}),
+				switchMap(() => actions.refreshMediaData()),
+			);
 		},
-		unsetMetaData(key: keyof IMetaDataMediaFilter): Observable<PlexMediaStatisticsDTO | null> {
-			switch (key) {
-				case 'countryId':
-				case 'roleId':
-				case 'genreId':
-					state.metadata[key] = 0;
-					break;
-				case 'quality':
-					state.metadata[key] = VideoQuality.None;
-					break;
-			}
 
-			return actions.refreshMediaData();
+		setRoleFilter(roleId?: number | null): Observable<PlexMediaStatisticsDTO | null> {
+			return of(roleId).pipe(
+				map((x) => isNumber(x) && x > 0 ? x : 0),
+				tap((value) => {
+					state.metadata.roleId = value;
+					set(roleIdQuery, value > 0 ? value : undefined);
+				}),
+				switchMap(() => actions.refreshMediaData()),
+			);
+		},
+
+		setGenreFilter(genreId?: number | null): Observable<PlexMediaStatisticsDTO | null> {
+			return of(genreId).pipe(
+				map((x) => isNumber(x) && x > 0 ? x : 0),
+				tap((value) => {
+					state.metadata.genreId = value;
+					set(genreIdQuery, value > 0 ? value : undefined);
+				}),
+				switchMap(() => actions.refreshMediaData()),
+			);
+		},
+
+		setQualityFilter(qualityId?: number | null): Observable<PlexMediaStatisticsDTO | null> {
+			return of(qualityId).pipe(
+				map((x) => isNumber(x) && x > 0 ? x : 0),
+				tap((value) => {
+					state.metadata.qualityId = value;
+					set(qualityIdQuery, value > 0 ? value : undefined);
+				}),
+				switchMap(() => actions.refreshMediaData()),
+			);
 		},
 		clearMetaDataFilter() {
 			state.metadata = {
 				countryId: 0,
 				roleId: 0,
 				genreId: 0,
-				quality: VideoQuality.None,
+				qualityId: 0,
 			};
+			set(countryIdQuery, undefined);
+			set(roleIdQuery, undefined);
+			set(genreIdQuery, undefined);
+			set(qualityIdQuery, undefined);
+
 		},
 		buildFlexQueryParams(page: number, size: number): MediaQueryFilterDTO {
 			const filterQuery = state.filterQuery.trim().toLowerCase();
@@ -332,7 +348,7 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 					.when((state.metadata.countryId ?? 0) > 0, (x) => x.where('Countries:any:Id', 'eq', state.metadata.countryId ?? 0))
 					.when((state.metadata.roleId ?? 0) > 0, (x) => x.where('Actors:any:Id', 'eq', state.metadata.roleId ?? 0))
 					.when((state.metadata.genreId ?? 0) > 0, (x) => x.where('Genres:any:Id', 'eq', state.metadata.genreId ?? 0))
-					.when(state.metadata.quality !== VideoQuality.None, (x) => x.eq('MediaDataList:any:Quality', state.metadata.quality ?? 0))
+					.when((state.metadata.qualityId ?? 0) > 0, (x) => x.eq('MediaDataList:any:Quality', state.metadataList.qualities.find(x => x.id === state.metadata.qualityId)?.quality ?? VideoQuality.None))
 					.build(),
 				sort: buildFlexSortDsl([
 					{
@@ -518,14 +534,16 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 			return state.availableQualityIds.includes(x.id);
 		})),
 		getFilterChips: computed(() => {
-			const result: { text: string; key: keyof IMetaDataMediaFilter; color?: string; id: string }[] = [];
+			const result: { text: string; key: keyof IMetaDataMediaFilter; color?: string; id: string, unset: Observable<PlexMediaStatisticsDTO | null> }[] = [];
 
 			if (state.metadata.countryId > 0) {
 				result.push({
 					text: state.metadataList.countries.find((x) => x.id === state.metadata.countryId)?.name ?? '',
 					key: 'countryId',
 					id: uniqueId(),
+					unset: actions.setCountryFilter()
 				});
+
 			}
 
 			if (state.metadata.roleId > 0) {
@@ -533,6 +551,7 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 					text: state.metadataList.roles.find((x) => x.id === state.metadata.roleId)?.name ?? '',
 					key: 'roleId',
 					id: uniqueId(),
+					unset: actions.setRoleFilter()
 				});
 			}
 
@@ -541,16 +560,18 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 					text: state.metadataList.genres.find((x) => x.id === state.metadata.genreId)?.name ?? '',
 					key: 'genreId',
 					id: uniqueId(),
+					unset: actions.setGenreFilter()
 				});
 			}
 
-			if (state.metadata.quality != VideoQuality.None) {
-				const quality = state.metadataList.qualities.find((x) => x.quality === state.metadata.quality)?.quality;
+			if (state.metadata.qualityId > 0) {
+				const quality = state.metadataList.qualities.find((x) => x.id === state.metadata.qualityId)?.quality;
 				result.push({
 					text: translateVideoQuality(quality),
-					key: 'quality',
+					key: 'qualityId',
 					color: getVideoQualityColor(quality),
 					id: uniqueId(),
+					unset: actions.setQualityFilter()
 				});
 			}
 

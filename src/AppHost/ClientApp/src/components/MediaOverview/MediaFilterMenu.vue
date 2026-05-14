@@ -58,7 +58,7 @@
 							v-for="genre in mediaOverviewStore.getGenres.filter(x => x.name.toLowerCase().includes(menuFilterQuery.toLowerCase()))"
 							:key="genre.id"
 							clickable
-							@click="setMetadataFilter({ genreId: genre.id })">
+							@click="useSubscription(mediaOverviewStore.setGenreFilter(genre.id).subscribe())">
 							<q-item-section avatar>
 								<q-icon
 									v-if="genre.id === mediaOverviewStore.metadata.genreId"
@@ -76,7 +76,7 @@
 							v-for="country in mediaOverviewStore.getCountries.filter(x => x.name.toLowerCase().includes(menuFilterQuery.toLowerCase()))"
 							:key="country.id"
 							clickable
-							@click="setMetadataFilter({ countryId: country.id })">
+							@click="useSubscription(mediaOverviewStore.setCountryFilter(country.id).subscribe())">
 							<q-item-section avatar>
 								<q-icon
 									v-if="country.id === mediaOverviewStore.metadata.countryId"
@@ -92,7 +92,7 @@
 							v-for="role in mediaOverviewStore.getRoles.filter(x => x.name.toLowerCase().includes(menuFilterQuery.toLowerCase()))"
 							:key="role.id"
 							clickable
-							@click="setMetadataFilter({ roleId: role.id })">
+							@click="useSubscription(mediaOverviewStore.setRoleFilter(role.id).subscribe())">
 							<q-item-section avatar>
 								<q-icon
 									v-if="role.id === mediaOverviewStore.metadata.roleId"
@@ -108,10 +108,10 @@
 							v-for="qualityDto in mediaOverviewStore.getQualities.filter(x => x.name.toLowerCase().includes(menuFilterQuery.toLowerCase()))"
 							:key="qualityDto.name"
 							clickable
-							@click="setMetadataFilter({ quality: qualityDto.quality })">
+							@click="useSubscription(mediaOverviewStore.setQualityFilter(qualityDto.id).subscribe())">
 							<q-item-section avatar>
 								<q-icon
-									v-if="qualityDto.quality === mediaOverviewStore.metadata.quality"
+									v-if="qualityDto.id === mediaOverviewStore.metadata.qualityId"
 									name="mdi-check" />
 							</q-item-section>
 							<q-item-section>
@@ -177,46 +177,6 @@ function goBackToMainMenu() {
 	set(menuIndex, MediaMetaDataTypes.None);
 	set(showMenuSearch, false);
 	set(menuFilterQuery, '');
-}
-
-function setMetadataFilter({
-	countryId,
-	roleId,
-	genreId,
-	quality,
-}: {
-	countryId?: number;
-	roleId?: number;
-	genreId?: number;
-	quality?: VideoQuality;
-}) {
-	if (countryId !== undefined && countryId === mediaOverviewStore.metadata.countryId) {
-		useSubscription(mediaOverviewStore.unsetMetaData('countryId').subscribe());
-		return;
-	}
-
-	if (roleId !== undefined && roleId === mediaOverviewStore.metadata.roleId) {
-		useSubscription(mediaOverviewStore.unsetMetaData('roleId').subscribe());
-		return;
-	}
-
-	if (genreId !== undefined && genreId === mediaOverviewStore.metadata.genreId) {
-		useSubscription(mediaOverviewStore.unsetMetaData('genreId').subscribe());
-		return;
-	}
-
-	if (quality !== undefined && quality === mediaOverviewStore.metadata.quality) {
-		useSubscription(mediaOverviewStore.unsetMetaData('quality').subscribe());
-		return;
-	}
-
-	useSubscription(
-		mediaOverviewStore.setMetaData({
-			countryId,
-			roleId,
-			genreId,
-			quality,
-		}).subscribe());
 }
 
 function clearMetadataFilter() {

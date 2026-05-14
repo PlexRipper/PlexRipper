@@ -16,7 +16,7 @@ public static partial class PlexMediaDataMapper
             SortIndex = source.SortIndex,
             SeasonNumber = source.Index,
 
-            SearchTitle = source.SortTitle,
+            SearchTitle = source.SearchTitle,
             Guid = source.Guid,
 
             Guid_IMDB = source.Guids.GetImdbId(),

@@ -21,11 +21,11 @@
       },
       "FlexQuery.NET.EFCore": {
         "type": "Direct",
-        "requested": "[2.3.0, )",
-        "resolved": "2.3.0",
-        "contentHash": "USTIxSapNHA1XsHMr5wEtJ/NRQ15uFST9HCKKdt9FOVZKC8YnGoMapuOyIFEPHtNCjnnwIMhJChpFFZ+5d8XOg==",
+        "requested": "[2.5.0, )",
+        "resolved": "2.5.0",
+        "contentHash": "GVtJI1w0hP2HSdWuky1hjoJls9+1e9J4sGWb/01WcvA0A9m0czzt7i6bO+w/GB9Qx8oJDmYBOr0cWfl0om46GQ==",
         "dependencies": {
-          "FlexQuery.NET": "2.3.0",
+          "FlexQuery.NET": "2.5.0",
           "Microsoft.EntityFrameworkCore": "8.0.0"
         }
       },
@@ -116,8 +116,8 @@
       },
       "FlexQuery.NET": {
         "type": "Transitive",
-        "resolved": "2.3.0",
-        "contentHash": "wy3A2YMsPTMCzAKfVzas2yCdBvPjs1w4xDXN3eDfCc/Nx1HKcFbALt1SGqPDnNTEi1A9OiPrV4gL9FOT7PRvvQ==",
+        "resolved": "2.5.0",
+        "contentHash": "ViwgidP4KyQJj0UkGutsHOqV/XCrRnAo/0AySeRP7/Cv2TeDGneA5HWaWyPKqMjURtdNNGPC/hvgKV3eL6uhmQ==",
         "dependencies": {
           "Microsoft.Extensions.Primitives": "8.0.0"
         }

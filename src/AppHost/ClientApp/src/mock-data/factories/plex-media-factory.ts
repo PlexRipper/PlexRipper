@@ -10,6 +10,7 @@ export function generatePlexMediaStatisticsDTO(mediaList: PlexMediaSlimDTO[]): P
 		page: 1,
 		pageSize: mediaList.length,
 		qualities: [],
+		queryHash: '',
 		roles: [],
 		totalCount: 0,
 		mediaList: mediaList,

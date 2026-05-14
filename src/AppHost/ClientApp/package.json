@@ -40,6 +40,7 @@
     "@pinia/nuxt": "^0.11.3",
     "@primeuix/themes": "^2.0.3",
     "@tanstack/vue-virtual": "^3.13.18",
+    "@vueuse/router": "^14.3.0",
     "@vueuse/rxjs": "^13.0.0",
     "axios": "^1.13.2",
     "caniuse-lite": "^1.0.30001788",

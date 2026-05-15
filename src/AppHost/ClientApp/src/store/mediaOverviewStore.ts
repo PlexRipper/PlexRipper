@@ -390,7 +390,7 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 		},
 		changeAllMediaOverviewType(mediaType: PlexMediaType) {
 			settingsStore.displaySettings.allOverviewViewMode = mediaType;
-			useSubscription(actions.refreshMediaData().subscribe());
+			useSubscription(actions.initializeLibrary(0).subscribe());
 		},
 		setSelection(selection: ISelection) {
 			state.selection = selection;

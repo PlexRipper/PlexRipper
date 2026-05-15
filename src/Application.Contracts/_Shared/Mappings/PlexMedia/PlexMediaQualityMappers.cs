@@ -84,6 +84,9 @@ public static class PlexMediaQualityMappers
         if (_idVideoQualities.TryGetValue(id, out var quality))
             return quality;
 
+        if (Enum.IsDefined((VideoQuality)id))
+            return (VideoQuality)id;
+
         throw new ArgumentOutOfRangeException(nameof(id), id, null);
     }
 

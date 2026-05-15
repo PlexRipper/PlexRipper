@@ -93,6 +93,7 @@
     "typescript": "^5.9.3",
     "vite-tsconfig-paths": "^5.1.4",
     "vitest": "^4.0.8",
+    "vue-router-mock": "^2.0.2",
     "vue-tsc": "^3.2.7"
   }
 }

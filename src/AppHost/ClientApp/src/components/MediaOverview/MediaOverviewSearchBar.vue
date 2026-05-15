@@ -1,7 +1,7 @@
 <template>
 	<q-input
 		:model-value="mediaOverviewStore.filterQuery"
-		:debounce="300"
+		:debounce="100"
 		outlined
 		input-style="font-size: 1.25rem"
 		rounded

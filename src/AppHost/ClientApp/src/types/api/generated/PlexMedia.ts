@@ -32,27 +32,26 @@ export class PlexMedia {
    */
   getAllMediaByTypeEndpoint = (
     query: {
-      distinct?: boolean | null;
-      filter?: string | null;
+      /** @format int32 */
+      countryId?: number | null;
       /** @default false */
       filterOfflineMedia: boolean;
       /** @default false */
       filterOwnedMedia: boolean;
-      groupBy?: string | null;
-      having?: string | null;
-      includeCount?: boolean | null;
-      includes?: string | null;
-      /** @default false */
+      /** @format int32 */
+      genreId?: number | null;
       mediaType: PlexMediaType;
-      mode?: string | null;
       /** @format int32 */
       page?: number | null;
       /** @format int32 */
-      pageSize?: number | null;
+      plexLibraryId?: number | null;
+      q?: string | null;
       /** @format int32 */
-      plexLibraryId: number;
-      query?: string | null;
-      select?: string | null;
+      qualityId?: number | null;
+      /** @format int32 */
+      roleId?: number | null;
+      /** @format int32 */
+      size?: number | null;
       sort?: string | null;
     },
     params: RequestParams = {},
@@ -161,27 +160,26 @@ export class PlexMedia {
 
 export class PlexMediaPaths {
   static getAllMediaByTypeEndpoint = (query: {
-    distinct?: boolean | null;
-    filter?: string | null;
+    /** @format int32 */
+    countryId?: number | null;
     /** @default false */
     filterOfflineMedia: boolean;
     /** @default false */
     filterOwnedMedia: boolean;
-    groupBy?: string | null;
-    having?: string | null;
-    includeCount?: boolean | null;
-    includes?: string | null;
-    /** @default false */
+    /** @format int32 */
+    genreId?: number | null;
     mediaType: PlexMediaType;
-    mode?: string | null;
     /** @format int32 */
     page?: number | null;
     /** @format int32 */
-    pageSize?: number | null;
+    plexLibraryId?: number | null;
+    q?: string | null;
     /** @format int32 */
-    plexLibraryId: number;
-    query?: string | null;
-    select?: string | null;
+    qualityId?: number | null;
+    /** @format int32 */
+    roleId?: number | null;
+    /** @format int32 */
+    size?: number | null;
     sort?: string | null;
   }) => queryString.stringifyUrl({ url: `/api/PlexMedia`, query });
 

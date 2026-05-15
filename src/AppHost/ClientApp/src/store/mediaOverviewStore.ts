@@ -462,12 +462,14 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 		allMediaMode: computed(() => state.libraryId === 0),
 		library: computed(() => libraryStore.getLibrary(state.libraryId)),
 		getMediaItems: computed((): Readonly<PlexMediaSlimDTO[]> => {
+			void state.mediaPagesVersion; // Trigger reactive change
 			return Array.from(mediaPages.values()).flat();
 		}),
 		getScrollCommand(): Observable<number> {
 			return state.scrollCommand.asObservable();
 		},
 		getMediaItemsForRange: (start: number, end: number): Readonly<PlexMediaSlimDTO[]> => {
+			void state.mediaPagesVersion; // Trigger reactive change
 			const normalizedStart = Math.max(0, Math.floor(start));
 			const normalizedEnd = Math.max(normalizedStart, Math.floor(end));
 			const result: PlexMediaSlimDTO[] = [];

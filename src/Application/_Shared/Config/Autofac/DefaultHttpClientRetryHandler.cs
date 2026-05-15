@@ -88,6 +88,7 @@ internal sealed class DefaultHttpClientRetryHandler(ILogger log) : DelegatingHan
                     ShouldHandle = new PredicateBuilder<HttpResponseMessage>()
                         .Handle<HttpRequestException>()
                         .Handle<TimeoutException>()
+                        .Handle<IOException>()
                         .Handle<TaskCanceledException>()
                         .HandleResult(response =>
                             response.StatusCode

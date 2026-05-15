@@ -208,7 +208,6 @@ function loadThumbnail(mediaItem: PlexMediaSlimDTO) {
 watch([() => props.mediaItem.id, () => props.active], ([, isActive]) => {
 	if (isActive) {
 		loadThumbnail(props.mediaItem);
-		mediaOverviewStore.setCurrentScrollIndex(props.mediaItem.sortIndex);
 	}
 }, { immediate: true });
 

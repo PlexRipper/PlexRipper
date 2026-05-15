@@ -91,6 +91,52 @@ const rowVirtualizer = useVirtualizer(
 				return;
 
 			requestPagesAroundViewport();
+
+			const container = get(scrollContainerRef);
+			if (!container) {
+				return;
+			}
+
+			const virtualItems = rowVirtualizer.value.getVirtualItems();
+			const firstVirtualRow = virtualItems.at(0);
+			if (!firstVirtualRow) {
+				return;
+			}
+
+			// Guard initial mount at absolute top so we don't overwrite URL-restored state
+			// (for example, replacing ?scrollIndex=64 with ?scrollIndex=1 before restore runs).
+			if (!(container.scrollTop > 0 || firstVirtualRow.index > 0)) {
+				return;
+			}
+
+			// Persist the exact nearest visible poster index instead of row-start approximation.
+			// In multi-column poster mode, row-start can drift from the poster users perceive as
+			// topmost, causing refresh to restore to a different title.
+			const posterNodes = Array.from(container.querySelectorAll<HTMLElement>('[data-scroll-index]'));
+			if (posterNodes.length === 0) {
+				return;
+			}
+
+			const containerTop = container.getBoundingClientRect().top;
+			let nearestIndex: number | null = null;
+			let nearestDistance = Number.POSITIVE_INFINITY;
+
+			for (const node of posterNodes) {
+				const candidateIndex = Number(node.dataset.scrollIndex);
+				if (!Number.isInteger(candidateIndex) || candidateIndex < 0) {
+					continue;
+				}
+
+				const distance = Math.abs(node.getBoundingClientRect().top - containerTop);
+				if (distance < nearestDistance) {
+					nearestDistance = distance;
+					nearestIndex = candidateIndex;
+				}
+			}
+
+			if (nearestIndex !== null) {
+				mediaOverviewStore.setCurrentScrollIndex(nearestIndex + 1);
+			}
 		},
 	})),
 );

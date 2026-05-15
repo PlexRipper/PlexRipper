@@ -194,7 +194,32 @@ onMounted(() => {
 
 	// Initialize the library in the store
 	useSubscription(
-		mediaOverviewStore.initializeLibrary(props.libraryId).subscribe(),
+		mediaOverviewStore.initializeLibrary(props.libraryId).subscribe({
+			next: async () => {
+				const requestedScrollIndex = mediaOverviewStore.currentScrollIndex;
+				if (requestedScrollIndex <= 0) {
+					return;
+				}
+
+				// URL/store uses one-based index (same convention as media sortIndex).
+				// PosterTable scroll API expects zero-based row/item index.
+				const targetIndex = requestedScrollIndex - 1;
+				// Initial render can race with virtualized content mounting and page prefetch.
+				// Retry a few times so refresh/back-forward restores land at the intended poster.
+				const maxAttempts = 10;
+				for (let attempt = 0; attempt < maxAttempts; attempt++) {
+					await nextTick();
+					mediaOverviewStore.scrollToIndex(targetIndex);
+					await new Promise((resolve) => setTimeout(resolve, 100));
+
+					const container = document.querySelector<HTMLElement>('#poster-table');
+					const targetNode = container?.querySelector(`[data-scroll-index="${targetIndex}"]`);
+					if ((container && container.scrollTop > 0) || targetNode) {
+						break;
+					}
+				}
+			},
+		}),
 	);
 
 	// Library sync job subscription

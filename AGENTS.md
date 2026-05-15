@@ -60,6 +60,8 @@ If working on the backend, then load `reaparr-backend` skill for project-specifi
 
 ### Frontend (`src/AppHost/ClientApp/`)
 
+If working on the frontend, then load `reaparr-frontend` skill first for project-specific frontend conventions. This umbrella skill must be loaded before narrower frontend skills such as `reaparr-frontend-components`, `reaparr-pinia-store`, or `reaparr-frontend-unit-tests`.
+
 > **Package manager:** The frontend uses **Bun exclusively** — never use npm, yarn, or pnpm.
 
 > **`generate-ts` prerequisite:** The backend must be running in dev mode before executing `bun run generate-ts`. Use

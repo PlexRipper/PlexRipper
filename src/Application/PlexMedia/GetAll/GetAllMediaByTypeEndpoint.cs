@@ -2,7 +2,52 @@ using FlexQuery.NET.Models;
 
 namespace Reaparr.Application;
 
-public record GetAllMediaByTypeRequest : MediaQueryFilterDTO;
+public record GetAllMediaByTypeRequest
+{
+    [QueryParam, BindFrom("mediaType")]
+    public required PlexMediaType MediaType { get; init; }
+
+    /// <summary>
+    /// Is > 0 when a specific <see cref="PlexLibrary"/> is requested, and 0 when all are requested.
+    /// </summary>
+    [QueryParam, BindFrom("plexLibraryId")]
+    public int? PlexLibraryId { get; init; }
+
+    /// <summary>The page number (1-indexed).</summary>
+    [QueryParam, BindFrom("page")]
+    public int? Page { get; init; }
+
+    /// <summary>The number of items per page.</summary>
+    [QueryParam, BindFrom("size")]
+    public int? PageSize { get; init; }
+
+    [QueryParam, BindFrom("q")]
+    public string? Search { get; init; }
+
+    [QueryParam, BindFrom("countryId")]
+    public int? CountryId { get; init; }
+
+    [QueryParam, BindFrom("genreId")]
+    public int? GenreId { get; init; }
+
+    [QueryParam, BindFrom("roleId")]
+    public int? RoleId { get; init; }
+
+    [QueryParam, BindFrom("qualityId")]
+    public int? QualityId { get; init; }
+
+    /// <summary>The sorting expression (e.g., "sortIndex:asc").</summary>
+    [QueryParam, BindFrom("sort")]
+    public string? Sort { get; init; }
+
+    [QueryParam, BindFrom("filterOfflineMedia")]
+    [DefaultValue(false)]
+    public bool FilterOfflineMedia { get; init; }
+
+    [QueryParam, BindFrom("filterOwnedMedia")]
+    [DefaultValue(false)]
+    public bool FilterOwnedMedia { get; init; }
+}
 
 public class GetAllMediaByTypeRequestValidator : Validator<GetAllMediaByTypeRequest>
 {
@@ -13,6 +58,10 @@ public class GetAllMediaByTypeRequestValidator : Validator<GetAllMediaByTypeRequ
             .WithMessage(x => $"Media type {x.MediaType} is not allowed.");
         RuleFor(x => x.Page).GreaterThanOrEqualTo(1).When(x => x.Page.HasValue);
         RuleFor(x => x.PageSize).GreaterThanOrEqualTo(1).When(x => x.PageSize.HasValue);
+        RuleFor(x => x.CountryId).GreaterThan(0).When(x => x.CountryId.HasValue);
+        RuleFor(x => x.GenreId).GreaterThan(0).When(x => x.GenreId.HasValue);
+        RuleFor(x => x.RoleId).GreaterThan(0).When(x => x.RoleId.HasValue);
+        RuleFor(x => x.QualityId).GreaterThan(0).When(x => x.QualityId.HasValue);
     }
 }
 
@@ -51,23 +100,15 @@ public class GetAllMediaByTypeEndpoint : BaseEndpoint<GetAllMediaByTypeRequest, 
             Filter = new MediaQueryFilter
             {
                 MediaType = req.MediaType,
-                PlexLibraryId = req.PlexLibraryId,
+                PlexLibraryId = req.PlexLibraryId ?? 0,
                 FilterOfflineMedia = req.FilterOfflineMedia,
                 FilterOwnedMedia = req.FilterOwnedMedia,
                 Parameters = new FlexQueryParameters
                 {
-                    Query = req.Query,
-                    Filter = req.Filter,
+                    Filter = BuildFilter(req),
                     Sort = req.Sort,
-                    Select = req.Select,
-                    Includes = req.Includes,
-                    GroupBy = req.GroupBy,
-                    Having = req.Having,
                     Page = req.Page,
                     PageSize = req.PageSize,
-                    IncludeCount = req.IncludeCount,
-                    Distinct = req.Distinct,
-                    Mode = req.Mode,
                 },
             },
         }, ct);
@@ -84,6 +125,37 @@ public class GetAllMediaByTypeEndpoint : BaseEndpoint<GetAllMediaByTypeRequest, 
         await SendFluentResult(Result.Ok(ToStatisticsDTO(mediaListResult.Value)), ct);
     }
     
+    private static string BuildFilter(GetAllMediaByTypeRequest req)
+    {
+        var filters = new List<string>();
+
+        if (!string.IsNullOrWhiteSpace(req.Search))
+        {
+            var searchTerms = req.Search
+                .ToLowerInvariant()
+                .Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                .Where(x => x.Length >= 2)
+                .Distinct();
+
+            foreach (var term in searchTerms)
+                filters.Add($"SearchTitle:like:{Uri.EscapeDataString(term)}");
+        }
+        
+        if (req.CountryId is > 0)
+            filters.Add($"Countries:any:Id:eq:{req.CountryId}");
+
+        if (req.RoleId is > 0)
+            filters.Add($"Actors:any:Id:eq:{req.RoleId}");
+
+        if (req.GenreId is > 0)
+            filters.Add($"Genres:any:Id:eq:{req.GenreId}");
+
+        if (req.QualityId is > 0)
+            filters.Add($"MediaDataList:any:Quality:eq:{req.QualityId.Value.ToVideoQuality()}");
+
+        return filters.Count == 0 ? string.Empty : string.Join('&', filters);
+    }
+
     public static PlexMediaStatisticsDTO ToStatisticsDTO(PagedMediaQueryResult source) => new()
     {
         QueryHash = source.QueryHash,

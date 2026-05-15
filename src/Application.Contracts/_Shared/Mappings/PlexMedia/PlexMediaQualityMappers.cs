@@ -49,20 +49,43 @@ public static class PlexMediaQualityMappers
 
     #endregion
 
-    public static int ToId(this VideoQuality quality) => quality switch
+    #region ToVideoQuality
+
+    private static readonly IReadOnlyDictionary<VideoQuality, int> _videoQualityIds =
+        new Dictionary<VideoQuality, int>
+        {
+            [VideoQuality.None] = 0,
+            [VideoQuality.Unknown] = -1,
+            [VideoQuality.SubSD_144p] = 1,
+            [VideoQuality.SubSD_CIF] = 2,
+            [VideoQuality.nHD] = 3,
+            [VideoQuality.SD] = 4,
+            [VideoQuality.DVD] = 5,
+            [VideoQuality.HD] = 6,
+            [VideoQuality.FullHD] = 7,
+            [VideoQuality.QHD] = 8,
+            [VideoQuality.UHD_4K] = 9,
+            [VideoQuality.UHD_8K] = 10,
+        };
+
+    private static readonly IReadOnlyDictionary<int, VideoQuality> _idVideoQualities =
+        _videoQualityIds.ToDictionary(x => x.Value, x => x.Key);
+
+    public static int ToId(this VideoQuality quality)
     {
-        VideoQuality.None => 0,
-        VideoQuality.Unknown => -1,
-        VideoQuality.SubSD_144p => 1,
-        VideoQuality.SubSD_CIF => 2,
-        VideoQuality.nHD => 3,
-        VideoQuality.SD => 4,
-        VideoQuality.DVD => 5,
-        VideoQuality.HD => 6,
-        VideoQuality.FullHD => 7,
-        VideoQuality.QHD => 8,
-        VideoQuality.UHD_4K => 9,
-        VideoQuality.UHD_8K => 10,
-        _ => throw new ArgumentOutOfRangeException()
-    };
+        if (_videoQualityIds.TryGetValue(quality, out var id))
+            return id;
+
+        throw new ArgumentOutOfRangeException(nameof(quality), quality, null);
+    }
+
+    public static VideoQuality ToVideoQuality(this int id)
+    {
+        if (_idVideoQualities.TryGetValue(id, out var quality))
+            return quality;
+
+        throw new ArgumentOutOfRangeException(nameof(id), id, null);
+    }
+
+    #endregion
 }

@@ -16,7 +16,7 @@ Reaparr is a cross-platform Plex media downloader hosted on GitHub: https://gith
   - `karpathy-guidelines`
     - It encodes behavioral guidelines to
       reduce common LLM coding mistakes: avoid overcomplication, make surgical changes, surface assumptions, and define verifiable success criteria.
-  - `reaparr-mcp-tools`
+  - `only-use-mcp`
     - It defines how to use MCP tools in this project, including mandatory execution routing through MCP servers and required verification steps.
 - **Reaparr-specific skills take priority.** Before acting on any task in this project, check for a matching `reaparr-*` skill and load it first. These skills encode project-specific conventions that override generic guidance.
 - Detect and auto-load any other applicable skills before acting on a task.

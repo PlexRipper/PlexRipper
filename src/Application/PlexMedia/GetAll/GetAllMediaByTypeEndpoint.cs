@@ -138,7 +138,7 @@ public class GetAllMediaByTypeEndpoint : BaseEndpoint<GetAllMediaByTypeRequest, 
                 .Distinct();
 
             foreach (var term in searchTerms)
-                filters.Add($"SearchTitle:like:{Uri.EscapeDataString(term)}");
+                filters.Add($"SearchTitle:contains:{term}");
         }
         
         if (req.CountryId is > 0)

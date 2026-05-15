@@ -5,12 +5,10 @@ import { computed, markRaw, reactive, toRefs } from 'vue';
 import { get, set } from '@vueuse/core';
 import { useRouteQuery } from '@vueuse/router';
 import {
-	type MediaQueryFilterDTO,
 	type PlexMediaMetadataDTO,
 	type PlexMediaSlimDTO,
 	type PlexMediaStatisticsDTO,
 	PlexMediaType,
-	VideoQuality,
 	ViewMode,
 } from '@dto';
 import type { IMediaOverviewSort } from '@composables/event-bus';
@@ -22,7 +20,6 @@ import { BehaviorSubject, defer, finalize, forkJoin, type Observable, of, Subjec
 import { useLibraryStore, useSettingsStore } from '@store';
 import {
 	buildFlexSortDsl,
-	DSLBuilder,
 	getVideoQualityColor,
 	translateVideoQuality,
 } from '@composables';
@@ -133,16 +130,15 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 			// Cancel any in-flight requests first
 			actions.cancelPendingRequests();
 
-			// Update state
-			state.libraryId = libraryId;
-			state.filterQuery = '';
-			state.isDetailView = false;
-
 			Log.debug('Initializing library', { libraryId, mediaType: get(getters.getMediaType) });
 
-			// Clear filters and sorting
-			actions.clearMetaDataFilter();
-			actions.clearSort();
+			actions.$reset();
+
+			// Update state
+			state.libraryId = libraryId;
+
+			// Apply url query params
+			actions.applyRouteQueryState();
 
 			// Load the library first so metadata requests use the resolved media type.
 			return defer(() =>
@@ -209,15 +205,26 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 			}
 
 			pendingPages.add(page);
-			const queryParams = actions.buildFlexQueryParams(page, size);
-			return plexMediaApi.getAllMediaByTypeEndpoint(queryParams).pipe(
+			return plexMediaApi.getAllMediaByTypeEndpoint({
+				q: state.filterQuery,
+				page,
+				size,
+				sort: get(getters.getSortDSL),
+				countryId: state.metadata.countryId > 0 ? state.metadata.countryId : undefined,
+				genreId: state.metadata.genreId > 0 ? state.metadata.genreId : undefined,
+				qualityId: state.metadata.qualityId > 0 ? state.metadata.qualityId : undefined,
+				roleId: state.metadata.roleId > 0 ? state.metadata.roleId : undefined,
+				mediaType: get(getters.getMediaType),
+				plexLibraryId: state.libraryId > 0 ? state.libraryId : undefined,
+				filterOwnedMedia: settingsStore.generalSettings.hideMediaFromOwnedServers,
+				filterOfflineMedia: settingsStore.generalSettings.hideMediaFromOfflineServers,
+			}).pipe(
 				takeUntil(cancelSubject$),
 				map(({ isSuccess, value }): PlexMediaStatisticsDTO | null => {
 					if (isSuccess && value) {
 						return value;
 					}
 
-					Log.warn('Media page request returned no data', { page, size, queryParams, isSuccess });
 					return null;
 				}),
 				tap((data) => actions.addMediaPage(data)),
@@ -323,40 +330,64 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 				switchMap(() => actions.refreshMediaData()),
 			);
 		},
-		clearMetaDataFilter() {
+		resetMetaDataFilterState() {
 			state.metadata = {
 				countryId: 0,
 				roleId: 0,
 				genreId: 0,
 				qualityId: 0,
 			};
+		},
+		clearMetaDataFilter() {
+			actions.resetMetaDataFilterState();
 			set(countryIdQuery, undefined);
 			set(roleIdQuery, undefined);
 			set(genreIdQuery, undefined);
 			set(qualityIdQuery, undefined);
-
 		},
-		buildFlexQueryParams(page: number, size: number): MediaQueryFilterDTO {
-			const filterQuery = state.filterQuery.trim().toLowerCase();
+		applyRouteQueryState() {
+			const search = String(get(searchQuery)).trim();
+			const countryId = Number(get(countryIdQuery));
+			const genreId = Number(get(genreIdQuery));
+			const roleId = Number(get(roleIdQuery));
+			const qualityId = Number(get(qualityIdQuery));
+			const scrollIndex = Number(get(scrollIndexQuery));
+			const sort = String(get(sortQuery)).trim();
 
-			return {
-				filterOwnedMedia: settingsStore.generalSettings.hideMediaFromOwnedServers,
-				filterOfflineMedia: settingsStore.generalSettings.hideMediaFromOfflineServers,
-				mediaType: get(getters.getMediaType),
-				plexLibraryId: state.libraryId,
-				page,
-				pageSize: size,
-				filter: DSLBuilder()
-					.when(filterQuery, (x) => x.contains('SearchTitle', filterQuery))
-					.when((state.metadata.countryId ?? 0) > 0, (x) => x.where('Countries:any:Id', 'eq', state.metadata.countryId ?? 0))
-					.when((state.metadata.roleId ?? 0) > 0, (x) => x.where('Actors:any:Id', 'eq', state.metadata.roleId ?? 0))
-					.when((state.metadata.genreId ?? 0) > 0, (x) => x.where('Genres:any:Id', 'eq', state.metadata.genreId ?? 0))
-					.when((state.metadata.qualityId ?? 0) > 0, (x) => x.eq('MediaDataList:any:Quality', state.metadataList.qualities.find(x => x.id === state.metadata.qualityId)?.quality ?? VideoQuality.None))
-					.build(),
-				sort: get(getters.getSortDSL),
-			};
+			if (search) {
+				state.filterQuery = search;
+			}
+
+			if (countryId > 0) {
+				state.metadata.countryId = countryId;
+			}
+
+			if (genreId > 0) {
+				state.metadata.genreId = genreId;
+			}
+
+			if (roleId > 0) {
+				state.metadata.roleId = roleId;
+			}
+
+			if (qualityId > 0) {
+				state.metadata.qualityId = qualityId;
+			}
+
+			if (scrollIndex > 0) {
+				state.currentScrollIndex = scrollIndex;
+			}
+
+			const [sortField, sortDirection] = sort.split(':');
+			const validSortFields = Object.values(MediaSortField);
+			const validSortDirections = [SortDirection.Asc, SortDirection.Desc];
+			if (validSortFields.includes(sortField as MediaSortField) && validSortDirections.includes(sortDirection as SortDirection)) {
+				state.sortedState = {
+					field: sortField as MediaSortField,
+					sort: sortDirection as SortDirection,
+				};
+			}
 		},
-
 		changeAllMediaOverviewType(mediaType: PlexMediaType) {
 			settingsStore.displaySettings.allOverviewViewMode = mediaType;
 			useSubscription(actions.refreshMediaData().subscribe());
@@ -383,6 +414,7 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 		clearSort() {
 			state.sortedState = { field: MediaSortField.Title, sort: SortDirection.Asc };
 			set(sortQuery, undefined);
+			return actions.refreshMediaData();
 		},
 		setCurrentScrollIndex(scrollIndex: number) {
 			state.currentScrollIndex = scrollIndex;
@@ -405,8 +437,8 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 			}
 
 			// If default sort then undefined
-			const sort = get(getters.getSortDSL)
-			set(sortQuery, sort !== 'sortIndex:asc' ? sort : undefined)
+			const sort = get(getters.getSortDSL);
+			set(sortQuery, sort !== 'sortIndex:asc' ? sort : undefined);
 			useSubscription(actions.refreshMediaData().subscribe());
 		},
 		$reset() {
@@ -530,16 +562,21 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 			return state.availableQualityIds.includes(x.id);
 		})),
 		getFilterChips: computed(() => {
-			const result: { text: string; key: keyof IMetaDataMediaFilter; color?: string; id: string, unset: Observable<PlexMediaStatisticsDTO | null> }[] = [];
+			const result: {
+				text: string;
+				key: keyof IMetaDataMediaFilter;
+				color?: string;
+				id: string;
+				unset: Observable<PlexMediaStatisticsDTO | null>;
+			}[] = [];
 
 			if (state.metadata.countryId > 0) {
 				result.push({
 					text: state.metadataList.countries.find((x) => x.id === state.metadata.countryId)?.name ?? '',
 					key: 'countryId',
 					id: uniqueId(),
-					unset: actions.setCountryFilter()
+					unset: actions.setCountryFilter(),
 				});
-
 			}
 
 			if (state.metadata.roleId > 0) {
@@ -547,7 +584,7 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 					text: state.metadataList.roles.find((x) => x.id === state.metadata.roleId)?.name ?? '',
 					key: 'roleId',
 					id: uniqueId(),
-					unset: actions.setRoleFilter()
+					unset: actions.setRoleFilter(),
 				});
 			}
 
@@ -556,7 +593,7 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 					text: state.metadataList.genres.find((x) => x.id === state.metadata.genreId)?.name ?? '',
 					key: 'genreId',
 					id: uniqueId(),
-					unset: actions.setGenreFilter()
+					unset: actions.setGenreFilter(),
 				});
 			}
 
@@ -567,7 +604,7 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 					key: 'qualityId',
 					color: getVideoQualityColor(quality),
 					id: uniqueId(),
-					unset: actions.setQualityFilter()
+					unset: actions.setQualityFilter(),
 				});
 			}
 
@@ -579,8 +616,8 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 					field: state.sortedState.field,
 					direction: state.sortedState.sort === SortDirection.Desc ? 'desc' : 'asc',
 				},
-			]) ?? ''
-		})
+			]) ?? '';
+		}),
 	};
 
 	return {

@@ -65,12 +65,15 @@ public static class DownloadPreviewMapper
 
     #region PlexMovie
 
-    private static DownloadPreview ProjectToDownloadPreviewMapper(this PlexMovie source) =>
-        new()
+    private static DownloadPreview ProjectToDownloadPreviewMapper(this PlexMovie source)
+    {
+        var totalMediaSize = source.MediaDataList.Sum(x => x.Size);
+
+        return new()
         {
             Id = source.Id,
             Title = source.Title,
-            Size = source.MediaDataList.Sum(x => x.Size) == 0 ? source.MediaSize : source.MediaDataList.Sum(x => x.Size),
+            Size = totalMediaSize == 0 ? source.MediaSize : totalMediaSize,
             ChildCount = source.ChildCount,
             MediaType = source.Type,
             TvShowId = default,
@@ -87,6 +90,7 @@ public static class DownloadPreviewMapper
                 })
                 .ToList(),
         };
+    }
 
     public static IQueryable<DownloadPreview> ProjectToDownloadPreview(this IQueryable<PlexMovie> source) =>
         source.Select(x => ProjectToDownloadPreviewMapper(x));

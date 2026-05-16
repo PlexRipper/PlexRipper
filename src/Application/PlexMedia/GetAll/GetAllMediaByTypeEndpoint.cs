@@ -72,7 +72,7 @@ public class GetAllMediaByTypeEndpoint : BaseEndpoint<GetAllMediaByTypeRequest, 
 
     public override string EndpointPath => ApiRoutes.PlexMediaController;
 
-    public GetAllMediaByTypeEndpoint(ILogger log, IReaparrDbContext dbContext, ICommandExecutor commandExecutor)
+    public GetAllMediaByTypeEndpoint(ILogger log, ICommandExecutor commandExecutor)
     {
         _log = log.ForContext<GetAllMediaByTypeEndpoint>();
         _commandExecutor = commandExecutor;
@@ -171,7 +171,7 @@ public class GetAllMediaByTypeEndpoint : BaseEndpoint<GetAllMediaByTypeRequest, 
         TotalEpisodeCount = source.TotalEpisodeCount,
         MediaSize = source.MediaSize,
         TotalMediaSize = source.TotalMediaSize,
-        MediaCount = source.TotalCount,
+        MediaCount = source.MediaCount,
         MediaList = source.Items,
         NavigationIndexes = source.NavigationIndexes,
         Roles = source.Roles,

@@ -71,6 +71,6 @@ public record MediaQueryFilterDTO
     public bool FilterOwnedMedia { get; init; }
 
     [QueryParam, BindFrom("mediaType")]
-    [DefaultValue(false)]
+    [DefaultValue(PlexMediaType.None)]
     public required PlexMediaType MediaType { get; init; }
 }

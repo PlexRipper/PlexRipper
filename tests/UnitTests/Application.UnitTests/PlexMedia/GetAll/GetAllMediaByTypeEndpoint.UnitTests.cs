@@ -22,6 +22,14 @@ public class GetAllMediaByTypeEndpointUnitTests : BaseUnitTest<GetAllMediaByType
             FilterOfflineMedia = true,
         };
 
+        var expectedFilter = string.Join('&', [
+            $"SearchTitle:contains:{request.Search}",
+            $"Countries:any:Id:eq:{request.CountryId}",
+            $"Actors:any:Id:eq:{request.RoleId}",
+            $"Genres:any:Id:eq:{request.GenreId}",
+            $"MediaDataList:any:Quality:eq:{request.QualityId!.Value.ToVideoQuality()}",
+        ]);
+
         Mock.Mock<ICommandExecutor>()
             .Setup(x =>
                 x.Send(
@@ -33,8 +41,7 @@ public class GetAllMediaByTypeEndpointUnitTests : BaseUnitTest<GetAllMediaByType
                         && command.Filter.Parameters.Page == 2
                         && command.Filter.Parameters.PageSize == 25
                         && command.Filter.Parameters.Sort == "sortIndex:asc"
-                        && command.Filter.Parameters.Filter
-                            == "SearchTitle:contains:matrix&Countries:any:Id:eq:7&Actors:any:Id:eq:11&Genres:any:Id:eq:13&MediaDataList:any:Quality:eq:SD"),
+                        && command.Filter.Parameters.Filter == expectedFilter),
                     It.IsAny<CancellationToken>()
                 )
             )

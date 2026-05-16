@@ -5,7 +5,7 @@ namespace Reaparr.Data.UnitTests;
 public class MediaQueryFilterUnitTests : BaseUnitTest<MediaQueryFilterUnitTests>
 {
     [Test]
-    public void ShouldChangeRequestHash_WhenQueryParametersChange()
+    public void ShouldNotChangeRequestHash_WhenPageChanges()
     {
         // Arrange
         var original = CreateFilter(page: 1, pageSize: 25, sort: "Year:desc", filter: "Year:gte:2000");

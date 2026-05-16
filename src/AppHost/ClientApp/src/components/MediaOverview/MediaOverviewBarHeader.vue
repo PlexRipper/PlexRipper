@@ -99,17 +99,7 @@ const mediaMetaData = computed(() => {
 	};
 });
 
-const hasMedia = computed(() => {
-	if (mediaOverviewStore.getMediaType === PlexMediaType.Movie) {
-		return mediaMetaData.value.movieCount > 0;
-	}
-
-	if (mediaOverviewStore.getMediaType === PlexMediaType.TvShow) {
-		return mediaMetaData.value.tvShowCount > 0;
-	}
-
-	return false;
-});
+const hasMedia = computed(() => mediaOverviewStore.totalCount > 0);
 
 function formatted({ movieCount, tvShowCount, seasonCount, episodeCount, fileSize }: {
 	movieCount: number;
@@ -137,7 +127,7 @@ function formatted({ movieCount, tvShowCount, seasonCount, episodeCount, fileSiz
 }
 
 function toFileSize(size: number): string {
-	if (!size) {
+	if (size === 0) {
 		return '-';
 	}
 	return prettyBytes(size, { locale: localizationStore.getLanguageLocale?.bcp47Code || 'en-US' });

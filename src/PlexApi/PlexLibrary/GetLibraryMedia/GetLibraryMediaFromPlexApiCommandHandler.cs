@@ -73,7 +73,11 @@ public class GetLibraryMediaFromPlexApiCommandHandler
             return mediaListResult.ToResult();
 
         // Pre-sort the media list
-        var mediaList = mediaListResult.Value.OrderByNatural(x => x.TitleSort).ToList();
+        var mediaList = mediaListResult.Value.OrderByNatural(x => x.SortTitle).ToList();
+
+        // Set Sort index based on OrderByNatural(x => x.TitleSort) 
+        for (var i = 0; i < mediaList.Count; i++)
+            mediaList[i].SortIndex = i + 1;
 
         // Determine how to map based on the Library type.
         switch (updatedPlexLibrary.Type)

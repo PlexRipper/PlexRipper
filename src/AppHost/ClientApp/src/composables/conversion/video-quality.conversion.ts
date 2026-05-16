@@ -39,6 +39,25 @@ export function getHighestQualityRank(item: PlexMediaSlimDTO): number {
 	return videoQualityRank[getHighestQuality(item)];
 }
 
+const videoQualityByValue = new Map<number, VideoQuality>([
+	[-1, VideoQuality.None],
+	[0, VideoQuality.Unknown],
+	[144, VideoQuality.SubSD144P],
+	[240, VideoQuality.SubSDCIF],
+	[360, VideoQuality.NHD],
+	[480, VideoQuality.SD],
+	[576, VideoQuality.DVD],
+	[720, VideoQuality.HD],
+	[1080, VideoQuality.FullHD],
+	[1440, VideoQuality.QHD],
+	[2160, VideoQuality.UHD_4K],
+	[4320, VideoQuality.UHD_8K],
+]);
+
+export function getVideoQualityFromValue(value: string): VideoQuality | undefined {
+	return videoQualityByValue.get(Number(value));
+}
+
 const qualityColorMap: Record<VideoQuality, string> = {
 	[VideoQuality.None]: 'black',
 	[VideoQuality.SubSD144P]: 'brown-6',

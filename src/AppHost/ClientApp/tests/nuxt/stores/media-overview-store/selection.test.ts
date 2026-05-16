@@ -47,7 +47,7 @@ describe('MediaOverviewStore - Selection', () => {
 			qualityCount: 0,
 		}));
 
-		await subscribeSpyTo(store.requestMedia()).onComplete();
+		await subscribeSpyTo(store.refreshMediaData()).onComplete();
 		return movies;
 	}
 
@@ -63,7 +63,7 @@ describe('MediaOverviewStore - Selection', () => {
 		// Arrange
 		const store = useMediaOverviewStore();
 		await loadMovies(store);
-		const firstId = store.items[0]!.id;
+		const firstId = store.getMediaItems[0]!.id;
 
 		// Act
 		store.setSelection({ keys: [firstId], allSelected: false, indexKey: 0 });
@@ -76,7 +76,7 @@ describe('MediaOverviewStore - Selection', () => {
 		// Arrange
 		const store = useMediaOverviewStore();
 		await loadMovies(store, 10);
-		const someIds = store.items.slice(0, 3).map((x) => x.id);
+		const someIds = store.getMediaItems.slice(0, 3).map((x) => x.id);
 
 		// Act
 		store.setSelection({ keys: someIds, allSelected: false, indexKey: 0 });
@@ -96,7 +96,7 @@ describe('MediaOverviewStore - Selection', () => {
 		// Assert
 		expect(store.isRootSelected).toBe(true);
 		expect(store.selection.allSelected).toBe(true);
-		expect(store.selection.keys.length).toBe(store.items.length);
+		expect(store.selection.keys.length).toBe(store.getMediaItems.length);
 	});
 
 	test('isRootSelected should be false when no items are selected', async () => {
@@ -123,7 +123,7 @@ describe('MediaOverviewStore - Selection', () => {
 
 		// Assert
 		const selectedIds = store.selection.keys;
-		const selectedItems = store.items.filter((x) => selectedIds.includes(x.id));
+		const selectedItems = store.getMediaItems.filter((x) => selectedIds.includes(x.id));
 		expect(selectedItems.length).toBe(4); // sortIndex 2, 3, 4, 5
 		for (const item of selectedItems) {
 			expect(item.sortIndex).toBeGreaterThanOrEqual(2);
@@ -159,6 +159,6 @@ describe('MediaOverviewStore - Selection', () => {
 		// Assert
 		expect(store.hasSelectedMedia).toBe(false);
 		expect(store.selection.keys).toEqual([]);
-		expect(store.items).toEqual([]);
+		expect(store.getMediaItems).toEqual([]);
 	});
 });

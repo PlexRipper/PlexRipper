@@ -98,6 +98,7 @@ public static class HttpClientModule
                     client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("image/jpeg"));
                 }
             )
+            .AddHttpMessageHandler<DefaultHttpClientRetryHandler>()
             .ConfigurePrimaryHttpMessageHandler(() =>
                 new SocketsHttpHandler
                 {

@@ -14,7 +14,9 @@ public static class MediaContainerMappers
             Title = data.Title,
             Summary = data.Summary ?? string.Empty,
             Year = data.Year ?? 0,
-            TitleSort = data.Title.ToSortTitle(),
+            SortIndex = 0, // Set later on
+            SortTitle = string.IsNullOrWhiteSpace(data.TitleSort) ? data.Title.ToSortTitle() : data.TitleSort,
+            SearchTitle = data.Title.ToSearchTitle(),
             OriginalTitle = data.OriginalTitle ?? string.Empty,
             ChildCount = data.ChildCount ?? 0,
             Media = data.Media?.Select(x => x.ToItemMediaDTO()).ToList() ?? [],

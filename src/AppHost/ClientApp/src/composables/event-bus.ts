@@ -11,7 +11,7 @@ export interface IMediaOverviewSort {
 
 // region General
 export interface IMediaOverviewCommands {
-	command: 'scrollTo' | 'download' | 'open-details';
+	command: 'download' | 'open-details';
 	scrollIndex?: number;
 	downloadMediaCommands?: DownloadMediaDTO[];
 	mediaId?: number;
@@ -24,25 +24,6 @@ export function resetMediaOverviewCommandsBus(): void {
 export function useMediaOverviewCommandsBus(): UseEventBusReturn<IMediaOverviewCommands, unknown> {
 	// Do not set this to a constant, it will cause issues with the event bus.
 	return useEventBus<IMediaOverviewCommands>('mediaOverViewCommands');
-}
-
-// endregion
-
-// region  ScrollTo command
-
-export function sendMediaOverviewScrollToCommand(scrollIndex: number): void {
-	useMediaOverviewCommandsBus().emit({
-		command: 'scrollTo',
-		scrollIndex: scrollIndex,
-	});
-}
-
-export function listenMediaOverviewScrollToCommand(action: (scrollIndex: number) => void): void {
-	useMediaOverviewCommandsBus().on(({ command, scrollIndex }) => {
-		if (command === 'scrollTo') {
-			action(scrollIndex ?? -1);
-		}
-	});
 }
 
 // endregion

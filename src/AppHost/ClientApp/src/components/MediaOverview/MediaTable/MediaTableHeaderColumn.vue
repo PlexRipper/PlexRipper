@@ -10,9 +10,9 @@
 </template>
 
 <script setup lang="ts">
-import { get, set } from '@vueuse/core';
-import type { IMediaOverviewSort } from '@composables/event-bus';
-import { MediaSortField, SortDirection } from '@enums';
+import { get } from '@vueuse/core';
+import { SortDirection } from '@enums';
+import type { MediaSortField } from '@enums';
 import type { QTreeViewTableHeader } from '@props';
 import { useMediaOverviewStore } from '@store';
 
@@ -22,17 +22,18 @@ const props = defineProps<{
 	column: QTreeViewTableHeader;
 }>();
 
-const sorted = ref<IMediaOverviewSort>({
-	sort: props.column.sortOrder ?? SortDirection.NoSort,
-	field: props.column.sortField ?? MediaSortField.Title,
+const sortField = computed(() => (props.column.sortField ?? props.column.field) as MediaSortField);
+
+const sorted = computed(() => {
+	if (!props.column.sortable) {
+		return false;
+	}
+
+	return get(mediaOverviewStore.getActiveSort).field === get(sortField);
 });
 
-defineEmits<{
-	(e: 'sort'): void;
-}>();
-
 const icon = computed(() => {
-	if (get(mediaOverviewStore.getActiveSort).field !== props.column.field) {
+	if (!get(sorted)) {
 		return '';
 	}
 
@@ -41,42 +42,18 @@ const icon = computed(() => {
 			return 'mdi-arrow-up';
 		case SortDirection.Desc:
 			return 'mdi-arrow-down';
-		case SortDirection.NoSort:
-			return '';
 		default:
-			return 'mdi-arrow-up';
+			return '';
 	}
 });
 
 function onClick() {
-	const newSort: IMediaOverviewSort = {
-		sort: get(sorted)?.sort ?? SortDirection.NoSort,
-		field: (props.column.sortField ?? props.column.field) as MediaSortField,
-	};
-	switch (newSort.sort) {
-		case SortDirection.Asc:
-			newSort.sort = SortDirection.Desc;
-			break;
-		case SortDirection.Desc:
-			newSort.sort = SortDirection.Asc;
-			break;
-		case SortDirection.NoSort:
-			newSort.sort = SortDirection.Asc;
-			break;
-		default:
-			newSort.sort = SortDirection.NoSort;
-			break;
+	if (!props.column.sortable) {
+		return;
 	}
-	set(sorted, newSort);
-	mediaOverviewStore.sortMedia(get(sorted));
-}
 
-onBeforeMount(() => {
-	set(sorted, {
-		field: (props.column.sortField ?? props.column.field) as MediaSortField,
-		sort: SortDirection.Asc,
-	});
-});
+	mediaOverviewStore.toggleSortMedia(get(sortField));
+}
 </script>
 
 <style lang="scss">

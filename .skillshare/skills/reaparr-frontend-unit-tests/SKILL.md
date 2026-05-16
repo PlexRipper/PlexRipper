@@ -40,6 +40,26 @@ tests/nuxt/stores/<store-name>/<method-or-behavior>.test.ts
 - One concern per file. `setup.test.ts` tests only the setup flow. Additional behaviors get their own file (e.g., `get-servers.test.ts`, `filter-media.test.ts`).
 - Mirror the store name from `src/store/` (e.g., `serverStore` → `server-store/`).
 
+## Test Quality Gate
+
+Do not write tests merely to reach a requested count. A number like "add 20 tests" is a budget or lower bound, not the success criterion. First map the code under test, identify high-risk behavior, and choose tests that would catch meaningful regressions. If the requested count would force low-value tests, stop and report the highest-value test plan instead of padding.
+
+Before adding tests, inspect existing tests for the same store/component and explicitly avoid duplicate coverage. Prefer behavior that crosses boundaries or encodes contracts:
+- API request parameter contracts and omitted/default parameters
+- RxJS success, failure, cancellation, and finalization paths
+- cache invalidation, deduplication, pagination, and query-hash behavior
+- interactions with other stores, settings, route query state, and generated API DTOs
+- edge cases that previously failed or could plausibly regress
+
+Reject weak tests such as:
+- default value assertions that do not protect a behavior contract
+- direct setter/getter tests with no observable consequence
+- duplicating existing tests with different wording
+- assertions that only prove mocks were configured
+- broad "kitchen sink" tests added to inflate count
+
+Every new test must earn its place by answering: "What bug would this fail for?" If the answer is unclear, replace it with a stronger test or do not add it.
+
 ## Required Boilerplate
 
 Every test file must follow this exact shape:

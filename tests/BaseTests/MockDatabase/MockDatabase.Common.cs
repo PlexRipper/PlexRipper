@@ -353,6 +353,9 @@ public static partial class MockDatabase
         {
             var movies = FakeData.GetPlexMovies(seed, options).Generate(config.MovieCount);
             await context.BulkInsertPlexMoviesAsync(movies, plexLibrary.PlexServerId, plexLibrary.Id);
+
+            var mediaSize = movies.Sum(x => x.MediaSize);
+            await context.SetMovieMediaMetrics(plexLibrary.Id, movies.Count, mediaSize);
         }
 
         _log.Here()
@@ -381,6 +384,11 @@ public static partial class MockDatabase
         {
             var tvShows = FakeData.GetPlexTvShows(seed, options).Generate(config.TvShowCount);
             await context.BulkInsertPlexTvShowsAsync(tvShows, plexLibrary.PlexServerId, plexLibrary.Id);
+
+            var seasonCount = tvShows.Sum(x => x.Seasons.Count);
+            var episodeCount = tvShows.Sum(x => x.Seasons.Sum(y => y.Episodes.Count));
+            var mediaSize = tvShows.Sum(x => x.Seasons.Sum(y => y.Episodes.Sum(z => z.MediaSize)));
+            await context.SetTvShowMediaMetrics(plexLibrary.Id, tvShows.Count, seasonCount, episodeCount, mediaSize);
         }
 
         _log.Here()

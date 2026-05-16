@@ -656,7 +656,7 @@ public class InsertMediaMetaDataCommandUnitTests : BaseCommandUnitTest<InsertMed
         plexLibrary.ShouldNotBeNull();
 
         // Create actors with very long names
-        var baseActors = FakePlexApiData.GetLibraryMediaItemActorDTO(seed).Generate(3);
+        var baseActors = FakePlexApiData.GetLibraryMediaItemActorDTO(seed).GenerateUnique(3, x => x.Key);
         var longNameActors = baseActors
             .Select(
                 (actor, index) =>

@@ -26,7 +26,7 @@ public static partial class StringExtensions
         "at",
     };
 
-    private static readonly string[] _articles = ["a", "an", "the"];
+    private static readonly string[] _articles = ["a", "an", "the", "and"];
 
     public static string GetActualCasing(this string path)
     {

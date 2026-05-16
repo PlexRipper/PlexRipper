@@ -14,6 +14,7 @@ import { Update } from '@api/generated/Update';
 import { Debug } from '@api/generated/Debug';
 
 export * from './baseApi';
+export * from './api-paths';
 export * from './custom';
 
 const authenticationApi = new Authentication();

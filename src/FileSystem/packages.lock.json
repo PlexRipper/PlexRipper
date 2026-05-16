@@ -113,6 +113,23 @@
         "resolved": "8.1.0",
         "contentHash": "i3VqYn4b9UjpvXFkcCRXZq5lMzQ13dlLab7BWh/19aVY8pvQT9v643ViCdga47zir7y2twnYOIjRIy9Fln2dWw=="
       },
+      "FlexQuery.NET": {
+        "type": "Transitive",
+        "resolved": "2.5.0",
+        "contentHash": "ViwgidP4KyQJj0UkGutsHOqV/XCrRnAo/0AySeRP7/Cv2TeDGneA5HWaWyPKqMjURtdNNGPC/hvgKV3eL6uhmQ==",
+        "dependencies": {
+          "Microsoft.Extensions.Primitives": "8.0.0"
+        }
+      },
+      "FlexQuery.NET.EFCore": {
+        "type": "Transitive",
+        "resolved": "2.5.0",
+        "contentHash": "GVtJI1w0hP2HSdWuky1hjoJls9+1e9J4sGWb/01WcvA0A9m0czzt7i6bO+w/GB9Qx8oJDmYBOr0cWfl0om46GQ==",
+        "dependencies": {
+          "FlexQuery.NET": "2.5.0",
+          "Microsoft.EntityFrameworkCore": "8.0.0"
+        }
+      },
       "FluentResults": {
         "type": "Transitive",
         "resolved": "4.0.0",
@@ -462,16 +479,17 @@
         "type": "Project",
         "dependencies": {
           "Quartz": "[3.17.0, )",
-          "Reaparr.Domain": "[0.36.0-dev.2, )"
+          "Reaparr.Domain": "[1.0.0, )"
         }
       },
       "Reaparr.Data.Contracts": {
         "type": "Project",
         "dependencies": {
           "EFCore.BulkExtensions.SQLite": "[10.0.1, )",
+          "FlexQuery.NET.EFCore": "[2.5.0, )",
           "Microsoft.EntityFrameworkCore": "[10.0.6, )",
-          "Reaparr.Application.Contracts": "[0.36.0-dev.2, )",
-          "Reaparr.Domain": "[0.36.0-dev.2, )"
+          "Reaparr.Application.Contracts": "[1.0.0, )",
+          "Reaparr.Domain": "[1.0.0, )"
         }
       },
       "Reaparr.Domain": {
@@ -483,7 +501,7 @@
           "JetBrains.Annotations": "[2025.2.4, )",
           "NaturalSort.Extension": "[4.4.1, )",
           "PasswordGenerator": "[2.1.0, )",
-          "Reaparr.FluentResultExtensions": "[0.36.0-dev.2, )",
+          "Reaparr.FluentResultExtensions": "[1.0.0, )",
           "System.ComponentModel.Annotations": "[5.0.0, )",
           "System.Reactive": "[6.1.0, )"
         }
@@ -499,7 +517,7 @@
       "Reaparr.FileSystem.Contracts": {
         "type": "Project",
         "dependencies": {
-          "Reaparr.Domain": "[0.36.0-dev.2, )",
+          "Reaparr.Domain": "[1.0.0, )",
           "System.IO.Abstractions": "[22.1.0, )"
         }
       },
@@ -508,7 +526,7 @@
         "dependencies": {
           "FluentResults": "[4.0.0, )",
           "FluentValidation": "[12.1.1, )",
-          "Reaparr.Logging": "[0.36.0-dev.2, )"
+          "Reaparr.Logging": "[1.0.0, )"
         }
       },
       "Reaparr.Logging": {
@@ -517,7 +535,7 @@
           "Autofac": "[9.1.0, )",
           "FluentResults": "[4.0.0, )",
           "Microsoft.AspNetCore.Http.Abstractions": "[2.3.9, )",
-          "Reaparr.Environment": "[0.36.0-dev.2, )",
+          "Reaparr.Environment": "[1.0.0, )",
           "Serilog": "[4.3.1, )",
           "Serilog.Enrichers.Sensitive": "[2.1.0, )",
           "Serilog.Expressions": "[5.0.0, )",

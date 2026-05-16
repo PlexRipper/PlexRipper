@@ -25,7 +25,7 @@ public class BasePlexMedia : BaseEntity
     /// Gets or sets the sort index of the media based on the abc sort order. This makes sorting much quicker as it can sort on this index which is unique within a <see cref="PlexLibrary"/>.
     /// </summary>
     [Column(Order = 4)]
-    public required int SortIndex { get; set; }
+    public required int SortIndex { get; init; }
 
     [Column(Order = 5)]
     public required string SearchTitle { get; init; }
@@ -41,6 +41,12 @@ public class BasePlexMedia : BaseEntity
     /// </summary>
     [Column(Order = 7)]
     public required long MediaSize { get; set; }
+
+    /// <summary>
+    /// Gets or sets the highest available video quality for this media item or based on its children
+    /// </summary>
+    [Column(Order = 17)]
+    public VideoQuality Quality { get; set; } = VideoQuality.Unknown;
 
     /// <summary>
     /// Gets or sets the key used to retrieve thumbnails, art or banners.

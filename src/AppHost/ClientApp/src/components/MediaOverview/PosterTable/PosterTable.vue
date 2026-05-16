@@ -6,7 +6,9 @@
 		:style="{ paddingLeft: `${gridPaddingLeft}px` }"
 		data-cy="poster-table">
 		<!-- Total height spacer — required by TanStack Virtual to define the scrollable area -->
-		<div :style="{ height: `${safeTotalSize}px`, position: 'relative' }">
+		<div
+			:data-pages-version="mediaOverviewStore.mediaPagesVersion"
+			:style="{ height: `${safeTotalSize}px`, position: 'relative' }">
 			<!-- Only virtual rows are rendered, positioned absolutely via translateY -->
 			<div
 				v-for="virtualRow in rowVirtualizer.getVirtualItems()"
@@ -19,14 +21,23 @@
 					transform: `translateY(${virtualRow.start}px)`,
 					display: 'flex',
 				}">
-				<MediaPoster
-					v-for="item in getRowItems(virtualRow.index)"
-					:key="item.id"
-					:media-item="item"
-					:active="true"
-					:data-scroll-index="getItemFlatIndex(virtualRow.index, item)"
-					@download="sendMediaOverviewDownloadCommand($event)"
-					@open-media-details="onOpenMediaDetails" />
+				<template
+					v-for="rowItem in getRowItems(virtualRow.index)"
+					:key="rowItem.item?.id ?? `skeleton-${rowItem.index}`">
+					<MediaPoster
+						v-if="rowItem.item"
+						:media-item="rowItem.item"
+						:active="true"
+						:data-scroll-index="rowItem.index"
+						@download="sendMediaOverviewDownloadCommand($event)"
+						@open-media-details="onOpenMediaDetails" />
+					<div
+						v-else
+						class="media-poster-placeholder">
+						<div class="media-poster-placeholder__image" />
+						<div class="media-poster-placeholder__quality" />
+					</div>
+				</template>
 			</div>
 		</div>
 	</div>
@@ -37,8 +48,9 @@ import Log from 'consola';
 import { useVirtualizer } from '@tanstack/vue-virtual';
 
 import { get, set, useElementBounding } from '@vueuse/core';
-import type { PlexMediaType, PlexMediaSlimDTO } from '@dto';
-import { listenMediaOverviewScrollToCommand, sendMediaOverviewDownloadCommand } from '@composables/event-bus';
+import { useSubscription } from '@vueuse/rxjs';
+import type { PlexMediaSlimDTO, PlexMediaType } from '@dto';
+import { sendMediaOverviewDownloadCommand } from '@composables/event-bus';
 import { triggerBoxHighlight } from '@composables/animations';
 import { waitForElement } from '@composables';
 import { useRouter, useMediaOverviewStore } from '#imports';
@@ -50,16 +62,16 @@ const posterCardWidth = ref(200 + 32);
 const posterCardHeight = ref(340 + 32);
 const gridItems = ref(10);
 const gridPaddingLeft = ref(0);
+const hasRunInitialPageReady = ref(false);
 const router = useRouter();
 
-const props = defineProps<{
+defineProps<{
 	mediaType: PlexMediaType;
 	libraryId: number;
-	items: Readonly<PlexMediaSlimDTO[]>;
 }>();
 
 // Number of rows = ceil(total items / columns)
-const rowCount = computed(() => Math.ceil(props.items.length / get(gridItems)));
+const rowCount = computed(() => Math.ceil(mediaOverviewStore.totalCount / get(gridItems)));
 
 // Row virtualizer — re-configures reactively when rowCount or posterCardHeight changes
 const rowVirtualizer = useVirtualizer(
@@ -67,12 +79,64 @@ const rowVirtualizer = useVirtualizer(
 		count: get(rowCount),
 		getScrollElement: () => get(scrollContainerRef),
 		estimateSize: () => get(posterCardHeight),
-		// Render 5 extra rows above and below viewport for smooth scrolling
-		overscan: 5,
+		// Render extra rows above and below viewport for smoother jumps and less blanking while scrolling
+		overscan: 10,
 		// Stable row keys: use the first item id in each row
 		getItemKey: (rowIndex: number): number => {
-			const firstItem = props.items[rowIndex * get(gridItems)];
+			const firstItem = mediaOverviewStore.getMediaItemsForRange(rowIndex * get(gridItems), rowIndex * get(gridItems) + 1).at(0);
 			return firstItem?.id ?? rowIndex;
+		},
+		onChange: (_instance: unknown, sync: boolean) => {
+			if (sync)
+				return;
+
+			requestPagesAroundViewport();
+
+			const container = get(scrollContainerRef);
+			if (!container) {
+				return;
+			}
+
+			const virtualItems = rowVirtualizer.value.getVirtualItems();
+			const firstVirtualRow = virtualItems.at(0);
+			if (!firstVirtualRow) {
+				return;
+			}
+
+			// Guard initial mount at absolute top so we don't overwrite URL-restored state
+			// (for example, replacing ?scrollIndex=64 with ?scrollIndex=1 before restore runs).
+			if (!(container.scrollTop > 0 || firstVirtualRow.index > 0)) {
+				return;
+			}
+
+			// Persist the exact nearest visible poster index instead of row-start approximation.
+			// In multi-column poster mode, row-start can drift from the poster users perceive as
+			// topmost, causing refresh to restore to a different title.
+			const posterNodes = Array.from(container.querySelectorAll<HTMLElement>('[data-scroll-index]'));
+			if (posterNodes.length === 0) {
+				return;
+			}
+
+			const containerTop = container.getBoundingClientRect().top;
+			let nearestIndex: number | null = null;
+			let nearestDistance = Number.POSITIVE_INFINITY;
+
+			for (const node of posterNodes) {
+				const candidateIndex = Number(node.dataset.scrollIndex);
+				if (!Number.isInteger(candidateIndex) || candidateIndex < 0) {
+					continue;
+				}
+
+				const distance = Math.abs(node.getBoundingClientRect().top - containerTop);
+				if (distance < nearestDistance) {
+					nearestDistance = distance;
+					nearestIndex = candidateIndex;
+				}
+			}
+
+			if (nearestIndex !== null) {
+				mediaOverviewStore.setCurrentScrollIndex(nearestIndex + 1);
+			}
 		},
 	})),
 );
@@ -82,17 +146,27 @@ const rowVirtualizer = useVirtualizer(
 const BROWSER_MAX_CSS_HEIGHT = 33_000_000;
 const safeTotalSize = computed(() => Math.min(rowVirtualizer.value.getTotalSize(), BROWSER_MAX_CSS_HEIGHT));
 
-// Returns the items belonging to a given row index
-function getRowItems(rowIndex: number): PlexMediaSlimDTO[] {
+// Returns the loaded items belonging to a given row index, preserving each item's global index.
+function getRowItems(rowIndex: number): { item: PlexMediaSlimDTO | null; index: number }[] {
 	const cols = get(gridItems);
-	return props.items.slice(rowIndex * cols, (rowIndex + 1) * cols) as PlexMediaSlimDTO[];
-}
+	const startIndex = rowIndex * cols;
+	const endIndex = startIndex + cols;
+	const loadedItems = mediaOverviewStore.getMediaItemsForRange(startIndex, endIndex);
+	const loadedBySortIndex = new Map<number, PlexMediaSlimDTO>();
+	const rowItems: { item: PlexMediaSlimDTO | null; index: number }[] = [];
 
-// Converts (rowIndex, item) back to the flat item index for scroll restoration and highlight
-function getItemFlatIndex(rowIndex: number, item: PlexMediaSlimDTO): number {
-	const cols = get(gridItems);
-	const rowItems = getRowItems(rowIndex);
-	return rowIndex * cols + rowItems.indexOf(item);
+	for (const item of loadedItems) {
+		loadedBySortIndex.set(item.sortIndex, item);
+	}
+
+	for (let index = startIndex; index < endIndex && index < mediaOverviewStore.totalCount; index++) {
+		rowItems.push({
+			item: loadedBySortIndex.get(index + 1) ?? null,
+			index,
+		});
+	}
+
+	return rowItems;
 }
 
 // useElementBounding must be called at setup level so its ResizeObserver is wired correctly.
@@ -105,16 +179,18 @@ watch(containerWidth, (width) => {
 	const cols = Math.max(1, Math.floor(width / get(posterCardWidth)));
 	set(gridItems, cols);
 	set(gridPaddingLeft, (width - cols * get(posterCardWidth)) / 2);
-	nextTick(() => onPageReady());
+
+	if (!get(hasRunInitialPageReady)) {
+		set(hasRunInitialPageReady, true);
+		nextTick(() => onPageReady());
+	}
 });
 
 function onPageReady() {
 	const lastMediaItemViewed = get(mediaOverviewStore.lastMediaItemViewed);
-	if (lastMediaItemViewed) {
-		// The index is relative depending on the view mode so we translate the mediaId to the index of the current view
-		const index = mediaOverviewStore.getMediaIndex(lastMediaItemViewed?.id);
+	if (lastMediaItemViewed && lastMediaItemViewed.sortIndex > 0) {
 		// If we have a last viewed media item, scroll to it
-		scrollToIndex(index);
+		scrollToIndex(lastMediaItemViewed.sortIndex - 1);
 	}
 }
 
@@ -126,6 +202,26 @@ function onOpenMediaDetails(mediaItem: PlexMediaSlimDTO) {
 			tvShowId: mediaItem.id.toString(),
 		},
 	});
+}
+
+function requestPagesAroundViewport() {
+	if (mediaOverviewStore.getMediaItems.length >= mediaOverviewStore.totalCount)
+		return;
+
+	const virtualItems = get(rowVirtualizer).getVirtualItems();
+	const firstVirtualRow = virtualItems.at(0);
+	const lastVirtualRow = virtualItems.at(-1);
+	if (!firstVirtualRow || !lastVirtualRow)
+		return;
+
+	const cols = get(gridItems);
+	const firstVisibleIndex = firstVirtualRow.index * cols;
+	const lastVisibleIndex = ((lastVirtualRow.index + 1) * cols) - 1;
+	const prefetchBuffer = mediaOverviewStore.pageSize;
+	const prefetchStart = Math.max(0, firstVisibleIndex - prefetchBuffer);
+	const prefetchEnd = Math.min(mediaOverviewStore.totalCount, lastVisibleIndex + prefetchBuffer);
+
+	useSubscription(mediaOverviewStore.requestRange(prefetchStart, prefetchEnd).subscribe());
 }
 
 function scrollToIndex(index: number) {
@@ -143,6 +239,11 @@ function scrollToIndex(index: number) {
 
 	// Wait for the element to be rendered before highlighting
 	waitForElement(container, `[data-scroll-index="${index}"]`).then((element) => {
+		if (!element) {
+			Log.debug('Could not find element to highlight for scroll index:', index);
+			return;
+		}
+
 		// Highlight the element after a short delay due to render hang
 		setTimeout(() => {
 			triggerBoxHighlight(element);
@@ -151,24 +252,21 @@ function scrollToIndex(index: number) {
 }
 
 onMounted(() => {
-	// Listen for scroll to letter command
-	listenMediaOverviewScrollToCommand((scrollIndex) => {
+	// Listen for scroll to navigation index command
+	useSubscription(mediaOverviewStore.getScrollCommand().subscribe((scrollIndex) => {
 		if (!get(scrollContainerRef)) {
 			Log.error('Could not find container with reference: ', get(scrollContainerRef));
 			return;
 		}
 
-		if (scrollIndex < 0 || scrollIndex >= props.items.length) {
-			Log.warn(`Scroll index ${scrollIndex} is out of bounds for items length ${props.items.length}`);
-			return;
-		}
-
+		// Scroll immediately for responsiveness, then prefetch nearby pages in background
 		scrollToIndex(scrollIndex);
-	});
+	}));
 });
 </script>
 
 <style lang="scss">
+@use '@/assets/scss/_mixins.scss';
 @use '@/assets/scss/variables.scss' as *;
 
 #poster-table {
@@ -185,5 +283,31 @@ onMounted(() => {
   will-change: transform;
   // Prevent layout thrashing during scroll
   contain: layout style paint;
+}
+
+.media-poster-placeholder {
+  display: flex;
+  flex-direction: column;
+  flex: 0 0 232px;
+  width: 232px;
+  min-width: 232px;
+  max-width: 232px;
+  margin: 0;
+  padding: 16px 16px 0;
+  box-sizing: border-box;
+
+  &__image {
+    width: 200px;
+    height: 300px;
+    border-radius: 2px;
+    background: rgba(0, 0, 0, 0.45);
+  }
+
+  &__quality {
+    width: 200px;
+    height: 28px;
+    margin-top: 0;
+    background: rgba(0, 0, 0, 0.6);
+  }
 }
 </style>

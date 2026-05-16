@@ -47,7 +47,7 @@ describe('MediaOverviewStore - Filter / Search', () => {
 			qualityCount: 0,
 		}));
 
-		await subscribeSpyTo(store.requestMedia()).onComplete();
+		await subscribeSpyTo(store.refreshMediaData()).onComplete();
 		return movies;
 	}
 
@@ -60,33 +60,25 @@ describe('MediaOverviewStore - Filter / Search', () => {
 		expect(store.getMediaItems.length).toBe(movies.mediaCount);
 	});
 
-	test('getMediaItems should filter items by searchTitle (case-insensitive)', async () => {
+	test('getMediaItems should return backend items when filterQuery is set', async () => {
 		// Arrange
 		const store = useMediaOverviewStore();
-		await loadMovies(store, 20);
-
-		// Find an actual item to search for
-		const target = store.items[0]!;
-		// searchTitle is kebab-case lowercase of the title
-		const partialSearch = target.searchTitle.slice(0, 3);
+		const movies = await loadMovies(store, 20);
 
 		// Act
-		store.filterQuery = partialSearch;
+		store.filterQuery = 'backend-search';
 
 		// Assert
-		const filtered = store.getMediaItems;
-		expect(filtered.length).toBeGreaterThan(0);
-		for (const item of filtered) {
-			expect(item.searchTitle).toContain(partialSearch.toLowerCase());
-		}
+		expect(store.getMediaItems.length).toBe(movies.mediaCount);
 	});
 
-	test('hasNoSearchResults should be true when filterQuery yields no results', async () => {
+	test('hasNoSearchResults should be true when backend returns no items for filterQuery', async () => {
 		// Arrange
 		const store = useMediaOverviewStore();
 		await loadMovies(store, 10);
+		store.addMediaPage(generatePlexMediaStatisticsDTO([]));
 
-		// Act — use a query that will match nothing
+		// Act
 		store.filterQuery = 'zzz-no-match-xyz-impossible-string';
 
 		// Assert
@@ -111,32 +103,54 @@ describe('MediaOverviewStore - Filter / Search', () => {
 		expect(store.filterQuery).toBe('some-search');
 
 		// Act
-		store.clearFilter();
+		const result = subscribeSpyTo(store.clearFilter());
+		await result.onComplete();
 
 		// Assert
 		expect(store.filterQuery).toBe('');
 	});
 
-	test('getMediaItems should still filter correctly when sorted', async () => {
+	test('setFilterQuery should request media from the backend', async () => {
 		// Arrange
 		const store = useMediaOverviewStore();
-		await loadMovies(store, 20);
+		const firstResponse = generatePlexMediaStatisticsDTO(generatePlexMediaSlims({
+			config: { movieCount: 20 },
+			partialData: { plexServerId: 1, plexLibraryId: 0, type: PlexMediaType.Movie },
+		}));
+		const secondResponse = generatePlexMediaStatisticsDTO(generatePlexMediaSlims({
+			config: { movieCount: 3 },
+			partialData: { plexServerId: 1, plexLibraryId: 0, type: PlexMediaType.Movie },
+		}));
 
-		// Apply sort
-		store.toggleSortMedia('year');
-
-		// Get a search term from an actual item
-		const target = store.items[0]!;
-		const partialSearch = target.searchTitle.slice(0, 3);
+		mock.onGet(new RegExp(`/api/PlexMedia`))
+			.replyOnce(200, generateResultDTO(firstResponse))
+			.onGet(new RegExp(`/api/PlexMedia`))
+			.reply(200, generateResultDTO(secondResponse));
+		mock.onGet(new RegExp(`/api/PlexLibrary/0/metadata`)).reply(200, generateResultDTO({
+			episodeCount: 0,
+			mediaCount: 0,
+			mediaSize: 0,
+			movieCount: 0,
+			seasonCount: 0,
+			tvShowCount: 0,
+			mediaList: [],
+			roles: [],
+			countries: [],
+			genres: [],
+			qualities: [],
+			roleCount: 0,
+			countryCount: 0,
+			genreCount: 0,
+			qualityCount: 0,
+		}));
+		await subscribeSpyTo(store.refreshMediaData()).onComplete();
 
 		// Act
-		store.filterQuery = partialSearch;
+		const result = subscribeSpyTo(store.setFilterQuery('matrix'));
+		await result.onComplete();
 
-		// Assert — should filter from sortedItems
-		expect(store.getIsSorted).toBe(true);
-		const filtered = store.getMediaItems;
-		for (const item of filtered) {
-			expect(item.searchTitle).toContain(partialSearch.toLowerCase());
-		}
+		// Assert
+		expect(store.filterQuery).toBe('matrix');
+		expect(store.getMediaItems.length).toBe(secondResponse.mediaCount);
 	});
 });

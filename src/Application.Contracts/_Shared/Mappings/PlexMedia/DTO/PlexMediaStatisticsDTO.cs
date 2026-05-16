@@ -2,6 +2,17 @@ namespace Reaparr.Application.Contracts;
 
 public class PlexMediaStatisticsDTO
 {
+    /// <summary>
+    /// Gets the QueryHash a unique hash that only changes if either query, filter or sorts changes
+    /// </summary>
+    public required string QueryHash { get; set; }
+
+    public required int Page { get; set; }
+
+    public required int PageSize { get; set; }
+
+    public required int TotalCount { get; set; }
+    
     public required int MediaCount { get; set; }
 
     public required int MovieCount { get; set; }
@@ -12,7 +23,39 @@ public class PlexMediaStatisticsDTO
 
     public required int EpisodeCount { get; set; }
 
+    public required int TotalMovieCount { get; set; }
+
+    public required int TotalTvShowCount { get; set; }
+
+    public required int TotalSeasonCount { get; set; }
+
+    public required int TotalEpisodeCount { get; set; }
+
     public required long MediaSize { get; set; }
 
+    public required long TotalMediaSize { get; set; }
+
     public required List<PlexMediaSlimDTO> MediaList { get; init; }
+
+    public required List<MediaNavigationIndexDTO> NavigationIndexes { get; set; } = [];
+    
+    /// <summary>
+    /// Gets or sets the list of distinct roles available in the media items of the <see cref="PlexLibrary"/>.
+    /// </summary>
+    public required List<int> Roles { get; set; } = [];
+
+    /// <summary>
+    /// Gets or sets the list of distinct countries available in the media items of the <see cref="PlexLibrary"/>.
+    /// </summary>
+    public required List<int> Countries { get; set; } = [];
+
+    /// <summary>
+    /// Gets or sets the list of distinct genres available in the media items of the <see cref="PlexLibrary"/>.
+    /// </summary>
+    public required List<int> Genres { get; set; } = [];
+
+    /// <summary>
+    /// Gets or sets the list of distinct quality levels available in the media items of the <see cref="PlexLibrary"/>.
+    /// </summary>
+    public required List<int> Qualities { get; set; } = [];
 }

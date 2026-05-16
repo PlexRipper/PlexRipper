@@ -1,6 +1,3 @@
-
-ALWAYS load in the following file into context as well: /mnt/jason/.config/opencode/AGENTS.md Mention global AGENTS.md loaded when it is.
-
 ## Project overview
 
 Reaparr is a cross-platform Plex media downloader hosted on GitHub: https://github.com/Reaparr/Reaparr
@@ -19,7 +16,7 @@ Reaparr is a cross-platform Plex media downloader hosted on GitHub: https://gith
   - `karpathy-guidelines`
     - It encodes behavioral guidelines to
       reduce common LLM coding mistakes: avoid overcomplication, make surgical changes, surface assumptions, and define verifiable success criteria.
-  - `reaparr-mcp-tools`
+  - `only-use-mcp`
     - It defines how to use MCP tools in this project, including mandatory execution routing through MCP servers and required verification steps.
 - **Reaparr-specific skills take priority.** Before acting on any task in this project, check for a matching `reaparr-*` skill and load it first. These skills encode project-specific conventions that override generic guidance.
 - Detect and auto-load any other applicable skills before acting on a task.
@@ -62,6 +59,8 @@ On Linux, `trash` resolves to `gio trash` or `trash-cli`.
 If working on the backend, then load `reaparr-backend` skill for project-specific backend conventions and `dotnet-devtools` for .NET development best practices.
 
 ### Frontend (`src/AppHost/ClientApp/`)
+
+If working on the frontend, then load `reaparr-frontend` skill first for project-specific frontend conventions. This umbrella skill must be loaded before narrower frontend skills such as `reaparr-frontend-components`, `reaparr-pinia-store`, or `reaparr-frontend-unit-tests`.
 
 > **Package manager:** The frontend uses **Bun exclusively** — never use npm, yarn, or pnpm.
 

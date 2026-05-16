@@ -6,6 +6,8 @@ import {
 	setupMockDownloadTasksEndpoints,
 	setupMockFolderPathsEndpoints,
 	setupMockNotificationsEndpoints,
+	setupMockDebugEndpoints,
+	setupMockUpdateEndpoints,
 	setupMockPlexAccountsEndpoints,
 	setupMockPlexLibrariesEndpoints,
 	setupMockPlexMediaEndpoints,
@@ -92,6 +94,14 @@ export class BasePageSetupResult implements IBasePageSetupResult {
 
 	setupNotificationsEndpoints() {
 		return setupMockNotificationsEndpoints.call(this);
+	}
+
+	setupDebugEndpoints() {
+		return setupMockDebugEndpoints.call(this);
+	}
+
+	setupUpdateEndpoints() {
+		return setupMockUpdateEndpoints.call(this);
 	}
 
 	setupSignalREndpoints() {

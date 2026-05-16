@@ -6,7 +6,7 @@ import {
 	generatePlexMediaStatisticsDTO,
 	generateResultDTO,
 } from '@mock';
-import { useMediaOverviewStore } from '@store';
+import { useMediaOverviewStore, useSettingsStore } from '@store';
 import { type PlexMediaStatisticsDTO, PlexMediaType } from '@dto';
 
 describe('MediaOverviewStore.setMedia()', () => {
@@ -42,7 +42,7 @@ describe('MediaOverviewStore.setMedia()', () => {
 		}));
 	}
 
-	test('Should reset filterQuery to empty string when new media is set', async () => {
+	test('Should preserve filterQuery when new media is set', async () => {
 		// Arrange
 		const store = useMediaOverviewStore();
 		const type = PlexMediaType.Movie;
@@ -50,27 +50,13 @@ describe('MediaOverviewStore.setMedia()', () => {
 			config: { movieCount: 10 },
 			partialData: { plexServerId: 1, plexLibraryId: 0, type },
 		}));
-		setupMocks(movies);
-
-		const result = subscribeSpyTo(store.requestMedia());
-		await result.onComplete();
-
-		// Set a filter query
 		store.filterQuery = 'some-filter';
+
+		// Act
+		store.addMediaPage(movies);
+
+		// Assert
 		expect(store.filterQuery).toBe('some-filter');
-
-		// Re-setup mocks for second request and re-request
-		setupMocks(movies);
-
-		// Act — request media again (need to reset loading state manually via $reset trick, or just call setMedia directly)
-		store.$reset();
-		store.mediaType = type;
-		setupMocks(movies);
-		const result2 = subscribeSpyTo(store.requestMedia());
-		await result2.onComplete();
-
-		// Assert — filterQuery should be cleared by setMedia
-		expect(store.filterQuery).toBe('');
 	});
 
 	test('Should set all count fields correctly from PlexMediaStatisticsDTO', async () => {
@@ -84,7 +70,7 @@ describe('MediaOverviewStore.setMedia()', () => {
 		setupMocks(movies);
 
 		// Act
-		const result = subscribeSpyTo(store.requestMedia());
+		const result = subscribeSpyTo(store.refreshMediaData());
 		await result.onComplete();
 
 		// Assert
@@ -99,7 +85,6 @@ describe('MediaOverviewStore.setMedia()', () => {
 	test('Should set all counts to zero when API returns null data (isSuccess: false)', async () => {
 		// Arrange
 		const store = useMediaOverviewStore();
-		store.mediaType = PlexMediaType.Movie;
 
 		// Return failed result for media endpoint
 		mock.onGet(new RegExp(`/api/PlexMedia`)).reply(200, {
@@ -128,7 +113,7 @@ describe('MediaOverviewStore.setMedia()', () => {
 		}));
 
 		// Act
-		const result = subscribeSpyTo(store.requestMedia());
+		const result = subscribeSpyTo(store.refreshMediaData());
 		await result.onComplete();
 
 		// Assert — null data path in setMedia
@@ -138,13 +123,58 @@ describe('MediaOverviewStore.setMedia()', () => {
 		expect(store.allEpisodeCount).toBe(0);
 		expect(store.allFileSize).toBe(0);
 		expect(store.itemsLength).toBe(0);
-		expect(store.items).toEqual([]);
+		expect(store.getMediaItems).toEqual([]);
+	});
+
+	test('Should use API mediaCount for itemsLength when media is set', async () => {
+		// Arrange
+		const store = useMediaOverviewStore();
+		const type = PlexMediaType.TvShow;
+		const tvShows = generatePlexMediaStatisticsDTO(generatePlexMediaSlims({
+			config: { tvShowCount: 3, seasonCount: 1, episodeCount: 1 },
+			partialData: { plexServerId: 1, plexLibraryId: 23, type },
+		}));
+		tvShows.tvShowCount = tvShows.mediaCount;
+		setupMocks(tvShows);
+
+		// Act
+		const result = subscribeSpyTo(store.refreshMediaData());
+		await result.onComplete();
+
+		// Assert
+		expect(store.getMediaItems.length).toBe(3);
+		expect(store.itemsLength).toBe(tvShows.mediaCount);
+	});
+
+	test('Should keep loaded page count separate from backend totalCount', async () => {
+		// Arrange
+		const store = useMediaOverviewStore();
+		useSettingsStore().displaySettings.allOverviewViewMode = PlexMediaType.Movie;
+		const type = PlexMediaType.Movie;
+		const movies = generatePlexMediaStatisticsDTO(generatePlexMediaSlims({
+			config: { movieCount: 100 },
+			partialData: { plexServerId: 1, plexLibraryId: 0, type },
+		}));
+		movies.mediaList = movies.mediaList.slice(0, 10);
+		movies.mediaCount = movies.mediaList.length;
+		movies.movieCount = 100;
+		movies.totalMovieCount = 100;
+		movies.totalCount = 100;
+		setupMocks(movies);
+
+		// Act
+		const result = subscribeSpyTo(store.refreshMediaData());
+		await result.onComplete();
+
+		// Assert
+		expect(store.getMediaItems.length).toBe(10);
+		expect(store.itemsLength).toBe(10);
+		expect(store.totalCount).toBe(100);
 	});
 
 	test('Should correctly set TV show counts from statistics DTO', async () => {
 		// Arrange
 		const store = useMediaOverviewStore();
-		store.mediaType = PlexMediaType.TvShow;
 		const type = PlexMediaType.TvShow;
 		const tvShows = generatePlexMediaStatisticsDTO(generatePlexMediaSlims({
 			config: { tvShowCount: 15, seasonCount: 3, episodeCount: 5 },
@@ -170,7 +200,7 @@ describe('MediaOverviewStore.setMedia()', () => {
 		}));
 
 		// Act
-		const result = subscribeSpyTo(store.requestMedia());
+		const result = subscribeSpyTo(store.refreshMediaData());
 		await result.onComplete();
 
 		// Assert

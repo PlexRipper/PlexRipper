@@ -179,12 +179,10 @@ public class RefreshPlexTvShowLibraryCommandHandler
         var seasonsByTvShowKey = validSeasons.GroupBy(x => x.ParentGuid!).ToDictionary(g => g.Key, g => g.ToList());
         var episodesBySeasonKey = validEpisodes.GroupBy(x => x.ParentGuid!).ToDictionary(g => g.Key, g => g.ToList());
 
-        var i = 0;
         foreach (var plexTvShow in rawTvShowData)
         {
             plexTvShow.PlexLibraryId = plexLibrary.Id;
             plexTvShow.PlexServerId = plexLibrary.PlexServerId;
-            plexTvShow.SortIndex = i + 1;
 
             // Retrieve and assign seasons for this TV show
             if (seasonsByTvShowKey.TryGetValue(plexTvShow.Guid, out var seasons))
@@ -196,10 +194,8 @@ public class RefreshPlexTvShowLibraryCommandHandler
                 seasonsByTvShowKey.Remove(plexTvShow.Guid);
             }
 
-            var seasonIndex = 0;
             foreach (var plexTvShowSeason in plexTvShow.Seasons)
             {
-                plexTvShowSeason.SortIndex = seasonIndex + 1;
                 plexTvShowSeason.PlexLibraryId = plexLibrary.Id;
                 plexTvShowSeason.PlexServerId = plexLibrary.PlexServerId;
                 plexTvShowSeason.TvShow = plexTvShow;
@@ -209,13 +205,11 @@ public class RefreshPlexTvShowLibraryCommandHandler
                     continue;
 
                 // Set library ID in each episode
-                var episodeIndex = 1;
                 episodes.ForEach(
                     (x) =>
                     {
                         x.PlexLibraryId = plexLibrary.Id;
                         x.PlexServerId = plexLibrary.PlexServerId;
-                        x.SortIndex = episodeIndex++;
                     }
                 );
 
@@ -231,14 +225,11 @@ public class RefreshPlexTvShowLibraryCommandHandler
 
                 plexTvShowSeason.MediaSize = episodes.Sum(x => x.MediaSize);
                 plexTvShowSeason.Duration = episodes.Sum(x => x.Duration);
-                seasonIndex++;
             }
 
             plexTvShow.MediaSize = plexTvShow.Seasons.Sum(x => x.MediaSize);
             plexTvShow.Duration = plexTvShow.Seasons.Sum(x => x.Duration);
             plexTvShow.GrandChildCount = plexTvShow.Seasons.Sum(x => x.ChildCount);
-
-            i++;
         }
     }
 

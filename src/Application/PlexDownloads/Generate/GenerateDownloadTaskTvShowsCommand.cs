@@ -60,14 +60,15 @@ public class GenerateDownloadTaskTvShowsCommandHandler : ICommandHandler<Generat
         _log.Here()
             .Debug(
                 "Creating {PlexTvShowIdsCount} TvShow download tasks",
-                plexTvShowList.SelectMany(x => x.MediaIds).ToList().Count
+                plexTvShowList.SelectMany(x => x.MediaIds).Distinct().Count()
             );
 
         foreach (var downloadMediaDto in plexTvShowList)
         {
+            var mediaIds = downloadMediaDto.MediaIds.Distinct().ToList();
             var plexTvShows = await _dbContext
                 .PlexTvShows.Include(x => x.Seasons)
-                .Where(x => downloadMediaDto.MediaIds.Contains(x.Id))
+                .Where(x => mediaIds.Contains(x.Id))
                 .ToListAsync(cancellationToken);
 
             var seasonsIds = new List<DownloadMediaDTO>();

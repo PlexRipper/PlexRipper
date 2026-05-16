@@ -70,7 +70,7 @@
 						v-if="mediaOverviewStore.getIsSorted"
 						clickable
 						cy="sort-clear-btn"
-						@click="mediaOverviewStore.clearSort()">
+						@click="useSubscription(mediaOverviewStore.clearSort().subscribe())">
 						<q-item-section avatar>
 							<q-icon name="mdi-sort-variant-remove" />
 						</q-item-section>
@@ -205,7 +205,6 @@ const viewOptions = computed((): IViewOptions[] => {
 });
 
 function changeView(viewMode: ViewMode) {
-	mediaOverviewStore.clearSort();
 	settingsStore.updateDisplayMode(mediaOverviewStore.getMediaType, viewMode);
 }
 </script>

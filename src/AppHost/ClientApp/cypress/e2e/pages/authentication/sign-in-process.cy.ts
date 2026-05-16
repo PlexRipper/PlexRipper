@@ -25,7 +25,7 @@ describe('sign-in-process', () => {
 					password: 'password',
 					rememberMe: false,
 				}),
-			});
+			}).as('loginSuccess');
 			cy.interceptAuthenticationStatus(true);
 
 			// Type credentials
@@ -33,6 +33,7 @@ describe('sign-in-process', () => {
 			cy.getCy('login-password-input').type('password');
 			cy.getCy('login-remember-me-input').click();
 			cy.getCy('login-submit-button').click();
+			cy.wait('@loginSuccess');
 
 			cy.url().should('eq', route('/'));
 		});
@@ -51,7 +52,7 @@ describe('sign-in-process', () => {
 			cy.intercept('POST', AuthenticationPaths.appUserLoginEndpoint(), {
 				statusCode: 401,
 				body: generateFailedResultDTO(),
-			});
+			}).as('loginUnauthorized');
 			cy.interceptAuthenticationStatus(false);
 
 			// Type credentials
@@ -59,20 +60,24 @@ describe('sign-in-process', () => {
 			cy.getCy('login-password-input').type('password');
 			cy.getCy('login-remember-me-input').click();
 			cy.getCy('login-submit-button').click();
+			cy.wait('@loginUnauthorized');
 
 			cy.url().should('eq', route('/login'));
 			cy.getCy('login-invalid-credentials-alert').should('be.visible');
 
 			// Submit 3 times to lock account
 			cy.getCy('login-submit-button').click();
+			cy.wait('@loginUnauthorized');
 			cy.getCy('login-submit-button').click();
+			cy.wait('@loginUnauthorized');
 
 			cy.intercept('POST', AuthenticationPaths.appUserLoginEndpoint(), {
 				statusCode: 403,
 				body: generateFailedResultDTO(),
-			});
+			}).as('loginLocked');
 
 			cy.getCy('login-submit-button').click();
+			cy.wait('@loginLocked');
 
 			cy.url().should('eq', route('/login'));
 			cy.getCy('login-locked-out-alert').should('be.visible');

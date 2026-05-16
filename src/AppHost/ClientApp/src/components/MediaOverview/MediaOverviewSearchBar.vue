@@ -1,10 +1,11 @@
 <template>
 	<q-input
-		v-model="mediaOverviewStore.filterQuery"
-		:debounce="300"
+		:model-value="mediaOverviewStore.filterQuery"
+		:debounce="100"
 		outlined
 		input-style="font-size: 1.25rem"
-		rounded>
+		rounded
+		@update:model-value="(value) => useSubscription(mediaOverviewStore.setFilterQuery(String(value ?? '')).subscribe())">
 		<template #prepend>
 			<IconButton
 				icon="mdi-magnify">
@@ -18,20 +19,18 @@
 				:value="chip.text"
 				:color="chip.color"
 				removable
-				@remove="unsetMetaData(chip.key)" />
+				@remove="useSubscription(chip.unset.subscribe())" />
 			<q-icon
 				v-if="mediaOverviewStore.filterQuery !== ''"
 				name="mdi-close"
 				class="cursor-pointer q-mr-sm"
-				@click="mediaOverviewStore.clearFilter()" />
+				@click="useSubscription(mediaOverviewStore.clearFilter().subscribe())" />
 		</template>
 	</q-input>
 </template>
 
 <script setup lang="ts">
 import { useMediaOverviewStore } from '@store';
-import IconButton from '@components/Buttons/IconButton.vue';
-import type { IMetaDataMediaFilter } from '@interfaces';
 
 const mediaOverviewStore = useMediaOverviewStore();
 
@@ -40,8 +39,4 @@ withDefaults(defineProps<{
 }>(), {
 	libraryId: 0,
 });
-
-function unsetMetaData(key: keyof IMetaDataMediaFilter) {
-	useSubscription(mediaOverviewStore.unsetMetaData(key).subscribe());
-}
 </script>

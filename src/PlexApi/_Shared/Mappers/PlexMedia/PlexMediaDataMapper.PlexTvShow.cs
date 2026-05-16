@@ -12,10 +12,8 @@ public static partial class PlexMediaDataMapper
             Title = source.Title,
             Year = source.Year,
 
-            // This is set later on
-            SortIndex = 0,
-
-            SearchTitle = source.Title.ToSearchTitle(),
+            SortIndex = source.SortIndex,
+            SearchTitle = source.SearchTitle,
             Guid = source.Guid,
 
             Guid_IMDB = source.Guids.GetImdbId(),
@@ -24,6 +22,7 @@ public static partial class PlexMediaDataMapper
 
             Duration = source.Duration,
             MediaSize = source.Media.Sum(y => y.Parts.Sum(z => z.Size)),
+            Quality = VideoQuality.Unknown,
             ChildCount = source.ChildCount,
             GrandChildCount = 0, // This is set later on in BuildTvShowTree
             AddedAt = source.AddedAt,

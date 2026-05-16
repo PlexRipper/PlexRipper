@@ -5,6 +5,14 @@ import { PlexMediaType, type PlexMediaSlimDTO, type PlexMediaDTO, type PlexMedia
 
 export function generatePlexMediaStatisticsDTO(mediaList: PlexMediaSlimDTO[]): PlexMediaStatisticsDTO {
 	return {
+		countries: [],
+		genres: [],
+		page: 1,
+		pageSize: mediaList.length,
+		qualities: [],
+		queryHash: '',
+		roles: [],
+		totalCount: 0,
 		mediaList: mediaList,
 		mediaCount: mediaList.length,
 		movieCount: mediaList.filter((x) => x.type === PlexMediaType.Movie).length,
@@ -12,6 +20,12 @@ export function generatePlexMediaStatisticsDTO(mediaList: PlexMediaSlimDTO[]): P
 		seasonCount: mediaList.filter((x) => x.type === PlexMediaType.Season).length,
 		episodeCount: mediaList.filter((x) => x.type === PlexMediaType.Episode).length,
 		mediaSize: mediaList.reduce((acc, x) => acc + x.mediaSize, 0),
+		navigationIndexes: [],
+		totalMovieCount: mediaList.filter((x) => x.type === PlexMediaType.Movie).length,
+		totalTvShowCount: mediaList.filter((x) => x.type === PlexMediaType.TvShow).length,
+		totalSeasonCount: mediaList.filter((x) => x.type === PlexMediaType.Season).length,
+		totalEpisodeCount: mediaList.filter((x) => x.type === PlexMediaType.Episode).length,
+		totalMediaSize: mediaList.reduce((acc, x) => acc + x.mediaSize, 0),
 	};
 }
 

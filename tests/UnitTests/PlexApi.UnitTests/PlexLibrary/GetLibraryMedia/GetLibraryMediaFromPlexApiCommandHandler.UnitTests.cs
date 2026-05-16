@@ -349,7 +349,7 @@ public class GetLibraryMediaFromPlexApiCommandHandlerUnitTests : BaseUnitTest<Ge
         var movies = result.Value.Library.Movies.ToList();
         movies.Count.ShouldBe(mediaItems.Count);
 
-        var expectedTitles = mediaItems.OrderByNatural(x => x.TitleSort).Select(x => x.Title).ToList();
+        var expectedTitles = mediaItems.OrderByNatural(x => x.SortTitle).Select(x => x.Title).ToList();
         movies.Select(x => x.Title).ShouldBe(expectedTitles);
 
         Mock.Mock<ILibrarySyncProgressStore>()

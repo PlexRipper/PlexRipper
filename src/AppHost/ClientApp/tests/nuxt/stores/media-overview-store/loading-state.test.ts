@@ -60,7 +60,7 @@ describe('MediaOverviewStore - Loading State', () => {
 		setupSuccessMocks(movies);
 
 		// Act
-		const result = subscribeSpyTo(store.requestMedia());
+		const result = subscribeSpyTo(store.refreshMediaData());
 		await result.onComplete();
 
 		// Assert
@@ -78,10 +78,10 @@ describe('MediaOverviewStore - Loading State', () => {
 		setupSuccessMocks(movies);
 
 		// Start first request but don't await it
-		const first = subscribeSpyTo(store.requestMedia());
+		const first = subscribeSpyTo(store.refreshMediaData());
 
 		// Act — second call while loading is true
-		const second = subscribeSpyTo(store.requestMedia());
+		const second = subscribeSpyTo(store.refreshMediaData());
 		await second.onComplete();
 
 		// Assert — second call completes immediately with null (skipped)
@@ -123,7 +123,7 @@ describe('MediaOverviewStore - Loading State', () => {
 		}));
 
 		// Act
-		const result = subscribeSpyTo(store.requestMedia());
+		const result = subscribeSpyTo(store.refreshMediaData());
 		await result.onComplete();
 
 		// Assert — loading must be reset to false even on failed response

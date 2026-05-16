@@ -187,7 +187,6 @@
             "selected-count": "{selectedCount} sélectionné",
             "episode-count": "{episodeCount}  épisodes",
             "columns": {
-                "index": "#",
                 "title": "Titre",
                 "year": "Année",
                 "duration": "Durée",

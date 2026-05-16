@@ -623,6 +623,37 @@ export enum LogSeverity {
   Fatal = "Fatal",
 }
 
+export interface MediaNavigationIndexDTO {
+  /** @format int32 */
+  index: number;
+  label: string;
+}
+
+export interface MediaQueryFilterDTO {
+  distinct?: boolean | null;
+  filter?: string | null;
+  /** @default false */
+  filterOfflineMedia: boolean;
+  /** @default false */
+  filterOwnedMedia: boolean;
+  groupBy?: string | null;
+  having?: string | null;
+  includeCount?: boolean | null;
+  includes?: string | null;
+  /** @default "False" */
+  mediaType: PlexMediaType;
+  mode?: string | null;
+  /** @format int32 */
+  page?: number | null;
+  /** @format int32 */
+  pageSize?: number | null;
+  /** @format int32 */
+  plexLibraryId: number;
+  query?: string | null;
+  select?: string | null;
+  sort?: string | null;
+}
+
 export enum MessageTypes {
   LibraryProgress = "LibraryProgress",
   DownloadTaskUpdate = "DownloadTaskUpdate",
@@ -881,8 +912,10 @@ export interface PlexMediaSlimDTO {
 }
 
 export interface PlexMediaStatisticsDTO {
+  countries: number[];
   /** @format int32 */
   episodeCount: number;
+  genres: number[];
   /** @format int32 */
   mediaCount: number;
   mediaList: PlexMediaSlimDTO[];
@@ -890,8 +923,28 @@ export interface PlexMediaStatisticsDTO {
   mediaSize: number;
   /** @format int32 */
   movieCount: number;
+  navigationIndexes: MediaNavigationIndexDTO[];
+  /** @format int32 */
+  page: number;
+  /** @format int32 */
+  pageSize: number;
+  qualities: number[];
+  queryHash: string;
+  roles: number[];
   /** @format int32 */
   seasonCount: number;
+  /** @format int32 */
+  totalCount: number;
+  /** @format int32 */
+  totalEpisodeCount: number;
+  /** @format int64 */
+  totalMediaSize: number;
+  /** @format int32 */
+  totalMovieCount: number;
+  /** @format int32 */
+  totalSeasonCount: number;
+  /** @format int32 */
+  totalTvShowCount: number;
   /** @format int32 */
   tvShowCount: number;
 }
@@ -916,6 +969,8 @@ export enum PlexMediaType {
 export interface PlexQualityDTO {
   /** @format int32 */
   count: number;
+  /** @format int32 */
+  id: number;
   name: string;
   quality: VideoQuality;
 }
@@ -993,7 +1048,6 @@ export interface PlexServerSettingItemModule {
   allowStreamDownloader: boolean;
   /** @format int32 */
   downloadSpeedLimit: number;
-  hidden: boolean;
   machineIdentifier: string;
   plexServerName: string;
 }

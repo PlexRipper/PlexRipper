@@ -48,7 +48,7 @@ describe('MediaOverviewStore.sortMedia()', () => {
 			qualityCount: 0,
 		}));
 
-		const result = subscribeSpyTo(mediaOverviewStore.requestMedia());
+		const result = subscribeSpyTo(mediaOverviewStore.refreshMediaData());
 		await result.onComplete();
 		return movies;
 	}
@@ -78,11 +78,6 @@ describe('MediaOverviewStore.sortMedia()', () => {
 		expect(store.getIsSorted).toBe(true);
 		expect(store.sortedState.field).toBe(MediaSortField.Year);
 		expect(store.sortedState.sort).toBe(SortDirection.Desc);
-		const items = store.getMediaItems;
-		expect(items.length).toBeGreaterThan(0);
-		for (let i = 0; i < items.length - 1; i++) {
-			expect(items[i]!.year).toBeGreaterThanOrEqual(items[i + 1]!.year);
-		}
 	});
 
 	test('Should sort items ascending by year on first toggle', async () => {
@@ -94,11 +89,8 @@ describe('MediaOverviewStore.sortMedia()', () => {
 		store.toggleSortMedia(MediaSortField.Year);
 
 		// Assert
+		expect(store.sortedState.field).toBe(MediaSortField.Year);
 		expect(store.sortedState.sort).toBe(SortDirection.Asc);
-		const items = store.getMediaItems;
-		for (let i = 0; i < items.length - 1; i++) {
-			expect(items[i]!.year).toBeLessThanOrEqual(items[i + 1]!.year);
-		}
 	});
 
 	test('getIsSorted should be true when sorted by Title descending', async () => {
@@ -107,14 +99,15 @@ describe('MediaOverviewStore.sortMedia()', () => {
 		await loadMovies(store);
 
 		// Act — Title/Desc should be "sorted" (non-default)
-		store.sortMedia({ field: MediaSortField.Title, sort: SortDirection.Desc });
+		store.toggleSortMedia(MediaSortField.Title);
 
 		// Assert
 		expect(store.getIsSorted).toBe(true);
-		expect(store.getMediaItems.length).toBeGreaterThan(0);
+		expect(store.sortedState.field).toBe(MediaSortField.Title);
+		expect(store.sortedState.sort).toBe(SortDirection.Desc);
 	});
 
-	test('Should reset sortedItems and return unsorted items when NoSort is applied', async () => {
+	test('Should reset sort state when clearSort is applied', async () => {
 		// Arrange
 		const store = useMediaOverviewStore();
 		await loadMovies(store);
@@ -130,21 +123,5 @@ describe('MediaOverviewStore.sortMedia()', () => {
 		expect(store.sortedState.field).toBe(MediaSortField.Title);
 		expect(store.sortedState.sort).toBe(SortDirection.Asc);
 		expect(store.getIsSorted).toBe(false);
-		// Items should still be accessible from the unsorted items array
-		expect(store.getMediaItems.length).toBeGreaterThan(0);
-	});
-
-	test('sortMedia with NoSort should not leave getMediaItems empty', async () => {
-		// Arrange — this tests the bug: sortMedia({field: Year, sort: NoSort})
-		// sets sortedItems = [] but getIsSorted returns true (field !== Title),
-		// which causes getMediaItems to return the empty sortedItems.
-		const store = useMediaOverviewStore();
-		await loadMovies(store);
-
-		// Act
-		store.sortMedia({ field: MediaSortField.Year, sort: SortDirection.NoSort });
-
-		// Assert — after NoSort, items should still be accessible
-		expect(store.getMediaItems.length).toBeGreaterThan(0);
 	});
 });

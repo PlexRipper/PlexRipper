@@ -247,6 +247,23 @@
           "xunit.v3.extensibility.core": "3.2.2"
         }
       },
+      "FlexQuery.NET": {
+        "type": "Transitive",
+        "resolved": "2.5.0",
+        "contentHash": "ViwgidP4KyQJj0UkGutsHOqV/XCrRnAo/0AySeRP7/Cv2TeDGneA5HWaWyPKqMjURtdNNGPC/hvgKV3eL6uhmQ==",
+        "dependencies": {
+          "Microsoft.Extensions.Primitives": "8.0.0"
+        }
+      },
+      "FlexQuery.NET.EFCore": {
+        "type": "Transitive",
+        "resolved": "2.5.0",
+        "contentHash": "GVtJI1w0hP2HSdWuky1hjoJls9+1e9J4sGWb/01WcvA0A9m0czzt7i6bO+w/GB9Qx8oJDmYBOr0cWfl0om46GQ==",
+        "dependencies": {
+          "FlexQuery.NET": "2.5.0",
+          "Microsoft.EntityFrameworkCore": "8.0.0"
+        }
+      },
       "FluentResults": {
         "type": "Transitive",
         "resolved": "4.0.0",
@@ -1640,6 +1657,7 @@
         "type": "Project",
         "dependencies": {
           "EFCore.BulkExtensions.SQLite": "[10.0.1, )",
+          "FlexQuery.NET.EFCore": "[2.5.0, )",
           "Microsoft.EntityFrameworkCore": "[10.0.6, )",
           "Reaparr.Application.Contracts": "[1.0.0, )",
           "Reaparr.Domain": "[1.0.0, )"

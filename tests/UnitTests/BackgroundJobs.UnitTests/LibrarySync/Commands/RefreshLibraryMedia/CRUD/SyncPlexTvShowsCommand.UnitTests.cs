@@ -46,7 +46,11 @@ public class SyncPlexTvShowsCommandUnitTests : BaseUnitTest<SyncPlexTvShowsComma
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
-        var dbPlexTvShows = IDbContext.PlexTvShows.Include(x => x.Seasons).ThenInclude(x => x.Episodes).ToList();
+        var dbPlexTvShows = IDbContext
+            .PlexTvShows.Include(x => x.Seasons)
+            .ThenInclude(x => x.Episodes)
+            .Where(x => x.PlexLibraryId == library.Id)
+            .ToList();
 
         var dbSeasons = dbPlexTvShows.SelectMany(x => x.Seasons).ToList();
         var dbEpisodes = dbSeasons.SelectMany(x => x.Episodes).ToList();

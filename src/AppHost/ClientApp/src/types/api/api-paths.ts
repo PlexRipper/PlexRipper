@@ -8,6 +8,8 @@ import { PlexMediaPaths } from '@api/generated/PlexMedia';
 import { PlexServerConnectionPaths } from '@api/generated/PlexServerConnection';
 import { PlexServerPaths } from '@api/generated/PlexServer';
 import { SettingsPaths } from '@api/generated/Settings';
+import { DebugPaths } from '@api/generated/Debug';
+import { UpdatePaths } from '@api/generated/Update';
 
 export {
 	AuthenticationPaths,
@@ -20,4 +22,6 @@ export {
 	PlexServerConnectionPaths,
 	PlexServerPaths,
 	SettingsPaths,
+	DebugPaths,
+	UpdatePaths,
 };

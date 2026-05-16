@@ -2,7 +2,7 @@
 	<q-menu
 		:offset="[0, 12]"
 		@hide="menuIndex = MediaMetaDataTypes.None">
-		<q-list	style="min-width: 260px">
+		<q-list style="min-width: 260px">
 			<!-- Categories -->
 			<template v-if="menuIndex === MediaMetaDataTypes.None">
 				<q-item
@@ -58,7 +58,7 @@
 							v-for="genre in mediaOverviewStore.getGenres.filter(x => x.name.toLowerCase().includes(menuFilterQuery.toLowerCase()))"
 							:key="genre.id"
 							clickable
-							@click="setMetadataFilter({ genreId: genre.id })">
+							@click="useSubscription(mediaOverviewStore.setGenreFilter(genre.id).subscribe())">
 							<q-item-section avatar>
 								<q-icon
 									v-if="genre.id === mediaOverviewStore.metadata.genreId"
@@ -76,7 +76,7 @@
 							v-for="country in mediaOverviewStore.getCountries.filter(x => x.name.toLowerCase().includes(menuFilterQuery.toLowerCase()))"
 							:key="country.id"
 							clickable
-							@click="setMetadataFilter({ countryId: country.id })">
+							@click="useSubscription(mediaOverviewStore.setCountryFilter(country.id).subscribe())">
 							<q-item-section avatar>
 								<q-icon
 									v-if="country.id === mediaOverviewStore.metadata.countryId"
@@ -92,7 +92,7 @@
 							v-for="role in mediaOverviewStore.getRoles.filter(x => x.name.toLowerCase().includes(menuFilterQuery.toLowerCase()))"
 							:key="role.id"
 							clickable
-							@click="setMetadataFilter({ roleId: role.id })">
+							@click="useSubscription(mediaOverviewStore.setRoleFilter(role.id).subscribe())">
 							<q-item-section avatar>
 								<q-icon
 									v-if="role.id === mediaOverviewStore.metadata.roleId"
@@ -108,10 +108,10 @@
 							v-for="qualityDto in mediaOverviewStore.getQualities.filter(x => x.name.toLowerCase().includes(menuFilterQuery.toLowerCase()))"
 							:key="qualityDto.name"
 							clickable
-							@click="setMetadataFilter({ quality: qualityDto.quality })">
+							@click="useSubscription(mediaOverviewStore.setQualityFilter(qualityDto.id).subscribe())">
 							<q-item-section avatar>
 								<q-icon
-									v-if="qualityDto.quality === mediaOverviewStore.metadata.quality"
+									v-if="qualityDto.id === mediaOverviewStore.metadata.qualityId"
 									name="mdi-check" />
 							</q-item-section>
 							<q-item-section>
@@ -130,7 +130,6 @@ import { get, set } from '@vueuse/core';
 import { useMediaOverviewStore } from '@store';
 import { MediaMetaDataTypes } from '@enums';
 import IconButton from '@components/Buttons/IconButton.vue';
-import type { VideoQuality } from '@dto';
 
 const menuIndex = ref<MediaMetaDataTypes>(MediaMetaDataTypes.None);
 const mediaOverviewStore = useMediaOverviewStore();
@@ -179,29 +178,9 @@ function goBackToMainMenu() {
 	set(menuFilterQuery, '');
 }
 
-function setMetadataFilter({
-	countryId,
-	roleId,
-	genreId,
-	quality,
-}: {
-	countryId?: number;
-	roleId?: number;
-	genreId?: number;
-	quality?: VideoQuality;
-}) {
-	useSubscription(
-		mediaOverviewStore.setMetaData({
-			countryId,
-			roleId,
-			genreId,
-			quality,
-		}).subscribe());
-}
-
 function clearMetadataFilter() {
 	mediaOverviewStore.clearMetaDataFilter();
 
-	useSubscription(mediaOverviewStore.requestMedia().subscribe());
+	useSubscription(mediaOverviewStore.refreshMediaData().subscribe());
 }
 </script>

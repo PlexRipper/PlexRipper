@@ -8,7 +8,6 @@ public class MediaNavigationIndexBuilderUnitTests
     public void ShouldBuildTitleNavigationIndexes_WhenRowsAreSortedByTitle()
     {
         // Arrange
-        // 60s = 1min, 599s = just under 10min, 600s = exactly 10min bucket boundary
         var rows = new[]
         {
             CreateRow(title: "2001: A Space Odyssey"),
@@ -32,7 +31,6 @@ public class MediaNavigationIndexBuilderUnitTests
     public void ShouldBuildYearNavigationIndexes_WhenRowsAreSortedByYear()
     {
         // Arrange
-        // 60s = 1min, 599s = just under 10min, 600s = exactly 10min bucket boundary
         var rows = new[]
         {
             CreateRow(year: 1999),
@@ -97,7 +95,6 @@ public class MediaNavigationIndexBuilderUnitTests
     public void ShouldBuildDateNavigationIndexes_WhenRowsAreSortedByAddedAt()
     {
         // Arrange
-        // 60s = 1min, 599s = just under 10min, 600s = exactly 10min bucket boundary
         var rows = new[]
         {
             CreateRow(addedAt: new DateTime(2025, 12, 14)),
@@ -119,7 +116,6 @@ public class MediaNavigationIndexBuilderUnitTests
     public void ShouldBuildMediaSizeNavigationIndexes_WhenRowsAreSortedByMediaSize()
     {
         // Arrange
-        // 60s = 1min, 599s = just under 10min, 600s = exactly 10min bucket boundary
         var rows = new[]
         {
             CreateRow(mediaSize: 1),

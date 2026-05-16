@@ -56,6 +56,7 @@ public class GetAllMediaByTypeRequestValidator : Validator<GetAllMediaByTypeRequ
         RuleFor(x => x.MediaType)
             .Must(type => type is PlexMediaType.TvShow or PlexMediaType.Movie)
             .WithMessage(x => $"Media type {x.MediaType} is not allowed.");
+        RuleFor(x => x.PlexLibraryId).GreaterThanOrEqualTo(0).When(x => x.PlexLibraryId.HasValue);
         RuleFor(x => x.Page).GreaterThanOrEqualTo(1).When(x => x.Page.HasValue);
         RuleFor(x => x.PageSize).GreaterThanOrEqualTo(1).When(x => x.PageSize.HasValue);
         RuleFor(x => x.CountryId).GreaterThan(0).When(x => x.CountryId.HasValue);

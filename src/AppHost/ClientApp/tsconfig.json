@@ -2,21 +2,11 @@
 	// https://nuxt.com/docs/guide/concepts/typescript
 	"extends": "./.nuxt/tsconfig.json",
 	"compilerOptions": {
-		// Fix: https://github.com/aleclarson/vite-tsconfig-paths/issues/123#issuecomment-2029702341
-		"baseUrl": "./.nuxt/",
-		"sourceMap": true,
+			"sourceMap": true,
 		// TODO This might be better to enable
 		"noImplicitAny": false,
 		// Fix: https://github.com/mammadataei/cypress-vite/issues/13#issuecomment-1288454576
 		"esModuleInterop": true,
 		"composite": true,
-		"types": [
-			"@nuxtjs/i18n",
-			"@pinia/nuxt",
-			"vitest/importMeta",
-			"vitest/globals",
-			"@testing-library/cypress",
-			"cypress"
-		]
 	}
 }

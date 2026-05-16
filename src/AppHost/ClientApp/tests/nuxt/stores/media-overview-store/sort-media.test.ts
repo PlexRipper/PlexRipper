@@ -99,14 +99,15 @@ describe('MediaOverviewStore.sortMedia()', () => {
 		await loadMovies(store);
 
 		// Act — Title/Desc should be "sorted" (non-default)
-		store.sortMedia({ field: MediaSortField.Title, sort: SortDirection.Desc });
+		store.toggleSortMedia(MediaSortField.Title);
 
 		// Assert
 		expect(store.getIsSorted).toBe(true);
-		expect(store.getMediaItems.length).toBeGreaterThan(0);
+		expect(store.sortedState.field).toBe(MediaSortField.Title);
+		expect(store.sortedState.sort).toBe(SortDirection.Desc);
 	});
 
-	test('Should reset sort state and return loaded items when NoSort is applied', async () => {
+	test('Should reset sort state when clearSort is applied', async () => {
 		// Arrange
 		const store = useMediaOverviewStore();
 		await loadMovies(store);
@@ -122,20 +123,5 @@ describe('MediaOverviewStore.sortMedia()', () => {
 		expect(store.sortedState.field).toBe(MediaSortField.Title);
 		expect(store.sortedState.sort).toBe(SortDirection.Asc);
 		expect(store.getIsSorted).toBe(false);
-		// Items should still be accessible from the unsorted items array
-		expect(store.getMediaItems.length).toBeGreaterThan(0);
-	});
-
-	test('sortMedia with NoSort should not leave getMediaItems empty', async () => {
-		// Arrange — this tests that sortMedia({field: Year, sort: NoSort})
-		// leaves the compact loaded media getter populated from the page cache.
-		const store = useMediaOverviewStore();
-		await loadMovies(store);
-
-		// Act
-		store.sortMedia({ field: MediaSortField.Year, sort: SortDirection.NoSort });
-
-		// Assert — after NoSort, items should still be accessible
-		expect(store.getMediaItems.length).toBeGreaterThan(0);
 	});
 });

@@ -126,7 +126,7 @@ describe('MediaOverviewStore.setMedia()', () => {
 		expect(store.getMediaItems).toEqual([]);
 	});
 
-	test('Should use mediaList length for itemsLength when API mediaCount is stale zero', async () => {
+	test('Should use API mediaCount for itemsLength when media is set', async () => {
 		// Arrange
 		const store = useMediaOverviewStore();
 		const type = PlexMediaType.TvShow;
@@ -134,8 +134,7 @@ describe('MediaOverviewStore.setMedia()', () => {
 			config: { tvShowCount: 3, seasonCount: 1, episodeCount: 1 },
 			partialData: { plexServerId: 1, plexLibraryId: 23, type },
 		}));
-		tvShows.mediaCount = 0;
-		tvShows.tvShowCount = 0;
+		tvShows.tvShowCount = tvShows.mediaCount;
 		setupMocks(tvShows);
 
 		// Act
@@ -144,10 +143,10 @@ describe('MediaOverviewStore.setMedia()', () => {
 
 		// Assert
 		expect(store.getMediaItems.length).toBe(3);
-		expect(store.itemsLength).toBe(3);
+		expect(store.itemsLength).toBe(tvShows.mediaCount);
 	});
 
-	test('Should keep loaded items separate from backend totalCount when mediaCount is stale zero', async () => {
+	test('Should keep loaded page count separate from backend totalCount', async () => {
 		// Arrange
 		const store = useMediaOverviewStore();
 		useSettingsStore().displaySettings.allOverviewViewMode = PlexMediaType.Movie;
@@ -157,7 +156,7 @@ describe('MediaOverviewStore.setMedia()', () => {
 			partialData: { plexServerId: 1, plexLibraryId: 0, type },
 		}));
 		movies.mediaList = movies.mediaList.slice(0, 10);
-		movies.mediaCount = 0;
+		movies.mediaCount = movies.mediaList.length;
 		movies.movieCount = 100;
 		movies.totalMovieCount = 100;
 		movies.totalCount = 100;

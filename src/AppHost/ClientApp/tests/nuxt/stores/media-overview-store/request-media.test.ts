@@ -80,8 +80,8 @@ describe('MediaOverviewStore.requestMedia()', () => {
 			sortIndex: 1001 + index,
 		})) as PlexMediaSlimDTO[];
 		const pageTwo = generatePlexMediaStatisticsDTO(pageItems);
-		pageTwo.page = 2;
-		pageTwo.pageSize = 1000;
+		pageTwo.page = 11;
+		pageTwo.pageSize = 100;
 		pageTwo.totalCount = 2000;
 
 		mock.onGet(new RegExp(`/api/PlexMedia`)).reply(200, generateResultDTO(pageTwo));
@@ -96,7 +96,7 @@ describe('MediaOverviewStore.requestMedia()', () => {
 		expect(mock.history.get.filter((request) => request.url === '/api/PlexMedia')).toHaveLength(1);
 		expect(mediaOverviewStore.getMediaItems).toEqual(pageItems);
 		expect(mediaOverviewStore.getMediaItems[0]).toStrictEqual(pageItems[0]);
-		expect(mediaOverviewStore.getMediaItemsForRange(0, 3)).toEqual(pageItems.slice(0, 3));
+		expect(mediaOverviewStore.getMediaItemsForRange(1000, 1003)).toEqual(pageItems.slice(0, 3));
 	});
 
 	test('Should not re-request a page that is already cached after the first request completes', async () => {
@@ -117,7 +117,7 @@ describe('MediaOverviewStore.requestMedia()', () => {
 		})) as PlexMediaSlimDTO[];
 		const pageTwo = generatePlexMediaStatisticsDTO(pageItems);
 		pageTwo.page = 2;
-		pageTwo.pageSize = 1000;
+		pageTwo.pageSize = 100;
 		pageTwo.totalCount = 2000;
 
 		mock.onGet(new RegExp(`/api/PlexMedia`)).reply(200, generateResultDTO(pageTwo));
@@ -150,7 +150,7 @@ describe('MediaOverviewStore.requestMedia()', () => {
 		})) as PlexMediaSlimDTO[];
 		const pageTwo = generatePlexMediaStatisticsDTO(pageItems);
 		pageTwo.page = 2;
-		pageTwo.pageSize = 1000;
+		pageTwo.pageSize = 100;
 		pageTwo.totalCount = 2000;
 
 		const mediaRequestMatcher = new RegExp(`/api/PlexMedia`);

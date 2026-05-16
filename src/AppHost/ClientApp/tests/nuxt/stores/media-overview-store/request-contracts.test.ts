@@ -143,7 +143,7 @@ describe('MediaOverviewStore - Request Contracts', () => {
 	test('Should send the current sort DSL in media request params', async () => {
 		// Arrange
 		const store = useMediaOverviewStore();
-		store.sortMedia({ field: MediaSortField.Year, sort: SortDirection.Desc });
+		store.sortedState = { field: MediaSortField.Year, sort: SortDirection.Desc };
 		mockMediaResponse();
 
 		// Act

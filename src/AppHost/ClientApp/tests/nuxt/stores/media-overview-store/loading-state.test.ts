@@ -92,10 +92,9 @@ describe('MediaOverviewStore - Loading State', () => {
 		await first.onComplete();
 	});
 
-	test('loading should be false after requestMedia with a failed API response', async () => {
+	test('loading should be false after initializeLibrary with a failed API response', async () => {
 		// Arrange
 		const store = useMediaOverviewStore();
-		store.mediaType = PlexMediaType.Movie;
 
 		mock.onGet(new RegExp(`/api/PlexMedia`)).reply(200, {
 			isSuccess: false,
@@ -123,10 +122,11 @@ describe('MediaOverviewStore - Loading State', () => {
 		}));
 
 		// Act
-		const result = subscribeSpyTo(store.refreshMediaData());
+		const result = subscribeSpyTo(store.initializeLibrary(0));
 		await result.onComplete();
 
 		// Assert — loading must be reset to false even on failed response
+		expect(result.getLastValue()).toBeNull();
 		expect(store.loading).toBe(false);
 	});
 });

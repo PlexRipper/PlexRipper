@@ -53,7 +53,7 @@ describe('ServerStore.getServers()', () => {
 		const firstValue = serversResult;
 		expect(firstValue.length).toEqual(3);
 		for (let i = 0; i < 3; i++) {
-			expect(firstValue[i].id).toEqual(serverIds[i]);
+			expect(firstValue[i]?.id).toEqual(serverIds[i]);
 		}
 	});
 });

@@ -1,0 +1,14 @@
+{
+  "files": [],
+  "references": [
+    {
+      "path": "./tsconfig.json"
+    },
+    {
+      "path": "./tests/tsconfig.json"
+    },
+    {
+      "path": "./cypress/tsconfig.json"
+    }
+  ]
+}

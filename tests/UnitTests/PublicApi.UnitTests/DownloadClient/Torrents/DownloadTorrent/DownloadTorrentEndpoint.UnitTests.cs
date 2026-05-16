@@ -22,9 +22,16 @@ public class DownloadTorrentEndpointUnitTests : BaseUnitTest
             }
         );
 
-        var server = await IDbContext.PlexServers.FirstAsync(CancellationToken);
-        var library = await IDbContext.PlexLibraries.FirstAsync(CancellationToken);
-        var episodeData = await IDbContext.PlexTvShowEpisodeData.FirstAsync(CancellationToken);
+        var server = await IDbContext.PlexServers.FirstOrDefaultAsync(CancellationToken);
+        server.ShouldNotBeNull();
+
+        var library = await IDbContext
+            .PlexLibraries.Where(x => x.Type == PlexMediaType.TvShow)
+            .FirstOrDefaultAsync(CancellationToken);
+        library.ShouldNotBeNull();
+
+        var episodeData = await IDbContext.PlexTvShowEpisodeData.FirstOrDefaultAsync(CancellationToken);
+        episodeData.ShouldNotBeNull();
 
         var req = new DownloadTorrentEndpointRequest
         {
@@ -82,13 +89,21 @@ public class DownloadTorrentEndpointUnitTests : BaseUnitTest
             config =>
             {
                 config.PlexServerCount = 1;
+                config.PlexMovieLibraryCount = 1;
                 config.MovieCount = 1;
             }
         );
 
-        var server = await IDbContext.PlexServers.FirstAsync(CancellationToken);
-        var library = await IDbContext.PlexLibraries.FirstAsync(CancellationToken);
-        var movieData = await IDbContext.PlexMovieData.FirstAsync(CancellationToken);
+        var server = await IDbContext.PlexServers.FirstOrDefaultAsync(CancellationToken);
+        server.ShouldNotBeNull();
+
+        var library = await IDbContext
+            .PlexLibraries.Where(x => x.Type == PlexMediaType.Movie)
+            .FirstOrDefaultAsync(CancellationToken);
+        library.ShouldNotBeNull();
+
+        var movieData = await IDbContext.PlexMovieData.FirstOrDefaultAsync(CancellationToken);
+        movieData.ShouldNotBeNull();
 
         var req = new DownloadTorrentEndpointRequest
         {
@@ -153,8 +168,13 @@ public class DownloadTorrentEndpointUnitTests : BaseUnitTest
             }
         );
 
-        var server = await IDbContext.PlexServers.FirstAsync(CancellationToken);
-        var library = await IDbContext.PlexLibraries.FirstAsync(CancellationToken);
+        var server = await IDbContext.PlexServers.FirstOrDefaultAsync(CancellationToken);
+        server.ShouldNotBeNull();
+
+        var library = await IDbContext
+            .PlexLibraries.Where(x => x.Type == PlexMediaType.TvShow)
+            .FirstOrDefaultAsync(CancellationToken);
+        library.ShouldNotBeNull();
 
         // pick an episode type with random non-existing ids (deterministic constants)
         var req = new DownloadTorrentEndpointRequest

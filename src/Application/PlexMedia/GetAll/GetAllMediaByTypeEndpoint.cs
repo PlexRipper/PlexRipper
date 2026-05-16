@@ -139,7 +139,7 @@ public class GetAllMediaByTypeEndpoint : BaseEndpoint<GetAllMediaByTypeRequest, 
                 .Distinct();
 
             foreach (var term in searchTerms)
-                filters.Add($"SearchTitle:contains:{term}");
+                filters.Add($"SearchTitle:contains:{EscapeFlexValue(term)}");
         }
         
         if (req.CountryId is > 0)
@@ -156,6 +156,13 @@ public class GetAllMediaByTypeEndpoint : BaseEndpoint<GetAllMediaByTypeRequest, 
 
         return filters.Count == 0 ? string.Empty : string.Join('&', filters);
     }
+
+    private static string EscapeFlexValue(string value) =>
+        value
+            .Replace("\\", "\\\\")
+            .Replace("\"", "\\\"")
+            .Replace(":", "\\:")
+            .Replace("&", "\\&");
 
     public static PlexMediaStatisticsDTO ToStatisticsDTO(PagedMediaQueryResult source) => new()
     {

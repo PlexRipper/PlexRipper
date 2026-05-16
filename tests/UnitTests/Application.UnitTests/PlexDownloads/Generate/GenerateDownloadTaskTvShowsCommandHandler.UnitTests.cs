@@ -26,12 +26,19 @@ public class GenerateDownloadTaskTvShowsCommandHandlerUnitTests
             5954,
             config =>
             {
+                config.PlexServerCount = 1;
+                config.PlexTvShowLibraryCount = 1;
                 config.TvShowCount = 5;
                 config.TvShowSeasonCount = 3;
                 config.TvShowEpisodeCount = 3;
             }
         );
         var plexTvShows = await IDbContext.PlexTvShows.IncludeAll().ToListAsync(CancellationToken);
+        plexTvShows.ShouldNotBeEmpty();
+
+        var firstTvShow = plexTvShows.First();
+        var plexServerId = firstTvShow.PlexServerId;
+        var plexLibraryId = firstTvShow.PlexLibraryId;
 
         var tvShows = new List<DownloadMediaDTO>
         {
@@ -39,8 +46,8 @@ public class GenerateDownloadTaskTvShowsCommandHandlerUnitTests
             {
                 Type = PlexMediaType.TvShow,
                 MediaIds = plexTvShows.Select(x => x.Id).ToList(),
-                PlexServerId = 1,
-                PlexLibraryId = 1,
+                PlexServerId = plexServerId,
+                PlexLibraryId = plexLibraryId,
                 Qualities = [],
             },
         };
@@ -67,8 +74,8 @@ public class GenerateDownloadTaskTvShowsCommandHandlerUnitTests
             downloadTaskTvShow.FullTitle.ShouldNotBeEmpty();
             downloadTaskTvShow.DownloadStatus.ShouldBe(DownloadStatus.Queued);
 
-            downloadTaskTvShow.PlexServerId.ShouldBe(1);
-            downloadTaskTvShow.PlexLibraryId.ShouldBe(1);
+            downloadTaskTvShow.PlexServerId.ShouldBe(plexServerId);
+            downloadTaskTvShow.PlexLibraryId.ShouldBe(plexLibraryId);
 
             downloadTaskTvShow.DownloadTaskType.ShouldBe(DownloadTaskType.TvShow);
             downloadTaskTvShow.MediaType.ShouldBe(PlexMediaType.TvShow);
@@ -90,12 +97,17 @@ public class GenerateDownloadTaskTvShowsCommandHandlerUnitTests
             5955,
             config =>
             {
+                config.PlexServerCount = 1;
+                config.PlexTvShowLibraryCount = 1;
                 config.TvShowCount = 1;
                 config.TvShowSeasonCount = 1;
                 config.TvShowEpisodeCount = 1;
             }
         );
         var plexTvShows = await IDbContext.PlexTvShows.IncludeAll().ToListAsync(CancellationToken);
+        plexTvShows.ShouldNotBeEmpty();
+
+        var firstTvShow = plexTvShows.First();
 
         var tvShows = new List<DownloadMediaDTO>
         {
@@ -103,8 +115,8 @@ public class GenerateDownloadTaskTvShowsCommandHandlerUnitTests
             {
                 Type = PlexMediaType.TvShow,
                 MediaIds = plexTvShows.Select(x => x.Id).ToList(),
-                PlexServerId = 1,
-                PlexLibraryId = 1,
+                PlexServerId = firstTvShow.PlexServerId,
+                PlexLibraryId = firstTvShow.PlexLibraryId,
                 Qualities = [],
             },
         };
@@ -141,12 +153,17 @@ public class GenerateDownloadTaskTvShowsCommandHandlerUnitTests
             5956,
             config =>
             {
+                config.PlexServerCount = 1;
+                config.PlexTvShowLibraryCount = 1;
                 config.TvShowCount = 1;
                 config.TvShowSeasonCount = 1;
                 config.TvShowEpisodeCount = 1;
             }
         );
         var plexTvShows = await IDbContext.PlexTvShows.IncludeAll().ToListAsync(CancellationToken);
+        plexTvShows.ShouldNotBeEmpty();
+
+        var firstTvShow = plexTvShows.First();
 
         var tvShows = new List<DownloadMediaDTO>
         {
@@ -154,8 +171,8 @@ public class GenerateDownloadTaskTvShowsCommandHandlerUnitTests
             {
                 Type = PlexMediaType.TvShow,
                 MediaIds = plexTvShows.Select(x => x.Id).ToList(),
-                PlexServerId = 1,
-                PlexLibraryId = 1,
+                PlexServerId = firstTvShow.PlexServerId,
+                PlexLibraryId = firstTvShow.PlexLibraryId,
                 Qualities = [],
             },
         };

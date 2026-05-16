@@ -31,7 +31,7 @@ describe('DownloadStore.getDownloadTaskById()', () => {
 			config,
 			seed: new Seed(config.seed!),
 		})];
-		const queuedDownloadTask = serverDownloads[0].downloads[0]!;
+		const queuedDownloadTask = serverDownloads[0]!.downloads[0]!;
 		mock.onGet(DownloadPaths.getAllDownloadTasksEndpoint()).reply(200, generateResultDTO(serverDownloads));
 
 		// Act

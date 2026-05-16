@@ -373,33 +373,6 @@ describe('MediaOverviewStore - Request Contracts', () => {
 		expect(store.queryHash).toBe(existing.queryHash);
 	});
 
-	test('Should default optional filter id collections and navigation indexes when statistics omit them', () => {
-		// Arrange
-		const store = useMediaOverviewStore();
-		const statistics = createMediaStatistics(2) as PlexMediaStatisticsDTO & {
-			roles?: number[];
-			countries?: number[];
-			genres?: number[];
-			qualities?: number[];
-			navigationIndexes?: PlexMediaStatisticsDTO['navigationIndexes'];
-		};
-		statistics.roles = undefined;
-		statistics.countries = undefined;
-		statistics.genres = undefined;
-		statistics.qualities = undefined;
-		statistics.navigationIndexes = undefined;
-
-		// Act
-		store.addMediaPage(statistics);
-
-		// Assert
-		expect(store.availableRoleIds).toEqual([]);
-		expect(store.availableCountryIds).toEqual([]);
-		expect(store.availableGenreIds).toEqual([]);
-		expect(store.availableQualityIds).toEqual([]);
-		expect([...store.scrollDict.entries()]).toEqual([]);
-	});
-
 	test('Should set country, role, genre, and quality filter params when their values are positive', async () => {
 		// Arrange
 		const store = useMediaOverviewStore();

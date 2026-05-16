@@ -244,11 +244,12 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 				state.itemsLength = 0;
 			}
 
-			mediaPages.set(data.page, markRaw(Object.freeze(data.mediaList)));
+			const mediaList = Array.isArray(data.mediaList) ? data.mediaList : [];
+			mediaPages.set(data.page, markRaw(mediaList));
 			state.mediaPagesVersion++;
-			state.queryHash = data.queryHash;
-			state.itemsLength += data.mediaCount;
-			state.totalCount = data.totalCount;
+			state.queryHash = data.queryHash ?? '';
+			state.itemsLength += data.mediaCount ?? mediaList.length;
+			state.totalCount = data.totalCount ?? state.totalCount;
 
 			state.allMovieCount = data.totalMovieCount;
 			state.allTvShowCount = data.totalTvShowCount;

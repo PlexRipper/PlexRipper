@@ -53,6 +53,12 @@ export function basePageSetup(config: Partial<MockConfig> = {}): Cypress.Chainab
 	// Background Jobs call
 	result.setupBackgroundJobsEndpoints(validConfig);
 
+	// Debug logs call
+	result.setupDebugEndpoints();
+
+	// Update check call
+	result.setupUpdateEndpoints();
+
 	// SignalR call
 	result.setupSignalREndpoints();
 

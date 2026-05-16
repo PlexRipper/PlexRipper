@@ -78,7 +78,6 @@ describe('sign-in-process', () => {
 
 			cy.getCy('login-submit-button').click();
 			cy.wait('@loginLocked');
-			cy.wait('@loginUnauthorized');
 
 			cy.url().should('eq', route('/login'));
 			cy.getCy('login-locked-out-alert').should('be.visible');

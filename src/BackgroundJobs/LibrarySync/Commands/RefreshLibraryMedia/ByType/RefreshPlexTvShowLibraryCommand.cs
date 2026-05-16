@@ -179,7 +179,6 @@ public class RefreshPlexTvShowLibraryCommandHandler
         var seasonsByTvShowKey = validSeasons.GroupBy(x => x.ParentGuid!).ToDictionary(g => g.Key, g => g.ToList());
         var episodesBySeasonKey = validEpisodes.GroupBy(x => x.ParentGuid!).ToDictionary(g => g.Key, g => g.ToList());
 
-        var i = 0;
         foreach (var plexTvShow in rawTvShowData)
         {
             plexTvShow.PlexLibraryId = plexLibrary.Id;
@@ -231,8 +230,6 @@ public class RefreshPlexTvShowLibraryCommandHandler
             plexTvShow.MediaSize = plexTvShow.Seasons.Sum(x => x.MediaSize);
             plexTvShow.Duration = plexTvShow.Seasons.Sum(x => x.Duration);
             plexTvShow.GrandChildCount = plexTvShow.Seasons.Sum(x => x.ChildCount);
-
-            i++;
         }
     }
 

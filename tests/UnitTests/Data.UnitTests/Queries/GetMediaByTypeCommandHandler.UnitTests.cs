@@ -773,7 +773,7 @@ public class GetMediaByTypeCommandHandlerUnitTests : BaseUnitTest<GetMediaByType
 
         await SetMovieQualitySortTestDataAsync(dbContext, movieIds);
 
-        var command = CreateCommand(PlexMediaType.Movie, 0, sort: "highestQuality:desc", pageSize: 10);
+        var command = CreateCommand(PlexMediaType.Movie, 0, sort: "quality:desc", pageSize: 10);
 
         // Act
         var result = await Sut.ExecuteAsync(command, CancellationToken);

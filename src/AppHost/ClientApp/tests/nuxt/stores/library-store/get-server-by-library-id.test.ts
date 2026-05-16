@@ -34,7 +34,7 @@ describe('LibraryStore.getServerByLibraryId()', () => {
 		mock.onGet(PlexServerPaths.getAllPlexServersEndpoint()).reply(200, generateResultDTO(servers));
 		mock.onGet(PlexLibraryPaths.getAllPlexLibrariesEndpoint()).reply(200, generateResultDTO(libraries));
 
-		const testLibrary = libraries[2];
+		const testLibrary = libraries[2]!;
 		const testServer = servers.find((x) => x.id === testLibrary.plexServerId);
 
 		// Act

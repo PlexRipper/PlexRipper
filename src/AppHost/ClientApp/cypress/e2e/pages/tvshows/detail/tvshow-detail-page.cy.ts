@@ -15,7 +15,7 @@ describe('TV-Show Detail Page', () => {
 			if (!testData) {
 				return;
 			}
-			cy.visit(route(`/tvshows/${testData.libraryId}/details/${testData.media[0].id}`));
+			cy.visit(route(`/tvshows/${testData.libraryId}/details/${testData.media[0]!.id}`));
 		});
 	});
 

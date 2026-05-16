@@ -29,7 +29,8 @@ export function baseSetup(): { ctx: Context; appConfig: IAppConfig } {
 		baseUrl: 'http://localhost:3030/',
 		nodeEnv: 'TESTING',
 		isProduction: false,
-		isDocker: false,
+		platform: 'docker',
+		version: '1.0.0-test',
 	};
 	process.env.NODE_ENV = 'dev';
 	import.meta.client = true;

@@ -95,7 +95,7 @@ describe('MediaOverviewStore - Loading State', () => {
 	test('loading should be false after requestMedia with a failed API response', async () => {
 		// Arrange
 		const store = useMediaOverviewStore();
-		store.mediaType = PlexMediaType.Movie;
+		store.changeAllMediaOverviewType(PlexMediaType.Movie);
 
 		mock.onGet(new RegExp(`/api/PlexMedia`)).reply(200, {
 			isSuccess: false,

@@ -30,11 +30,11 @@ describe('ServerStore.getServers()', () => {
 
 		// Act
 		await subscribeSpyTo(serverStore.setup()).onComplete();
-		const serverResult = serverStore.getServer(servers[2].id);
+		const serverResult = serverStore.getServer(servers[2]!.id);
 
 		// Assert
 		expect(serverResult).not.toBeNaN();
-		expect(serverResult?.id).toEqual(servers[2].id);
+		expect(serverResult?.id).toEqual(servers[2]!.id);
 		expect(serverResult).toEqual(servers[2]);
 	});
 });

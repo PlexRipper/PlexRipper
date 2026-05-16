@@ -293,10 +293,6 @@ public class GetMediaByTypeCommandHandler : ICommandHandler<GetMediaByTypeComman
         _response.TotalEpisodeCount = allScopedLibraries.Sum(x => x.EpisodeCount);
         _response.TotalMediaSize = allScopedLibraries.Sum(x => x.MediaSize);
 
-        var plexLibraries = allScopedLibraries
-            .Where(x => x.Type == mediaType)
-            .ToList();
-
         if (hasUserFilters)
         {
             _response.MediaCount = _response.TotalCount;
@@ -309,11 +305,11 @@ public class GetMediaByTypeCommandHandler : ICommandHandler<GetMediaByTypeComman
             return;
         }
 
-        _response.MovieCount = _response.TotalMovieCount;
-        _response.TvShowCount = _response.TotalTvShowCount;
-        _response.SeasonCount = _response.TotalSeasonCount;
-        _response.EpisodeCount = _response.TotalEpisodeCount;
+        _response.MovieCount = mediaType == PlexMediaType.Movie ? _response.TotalCount : 0;
+        _response.TvShowCount = mediaType == PlexMediaType.TvShow ? _response.TotalCount : 0;
+        _response.SeasonCount = mediaType == PlexMediaType.TvShow ? _response.TotalSeasonCount : 0;
+        _response.EpisodeCount = mediaType == PlexMediaType.TvShow ? _response.TotalEpisodeCount : 0;
         _response.MediaSize = _response.TotalMediaSize;
-        _response.MediaCount = plexLibraries.Sum(x => x.MediaCount);
+        _response.MediaCount = _response.TotalCount;
     }
 }

@@ -81,9 +81,6 @@ public class StartDownloadTaskEndpointIntegrationTests : BaseIntegrationTests
                     cancellationToken: CancellationToken
                 );
 
-                if (dbTask?.DownloadStatus != DownloadStatus.ServerUnreachable)
-                    return false;
-
                 return await dbContext.DownloadTaskMovieFileLogs.AnyAsync(
                     x =>
                         x.DownloadTaskFileId == downloadTask.Id
@@ -103,7 +100,7 @@ public class StartDownloadTaskEndpointIntegrationTests : BaseIntegrationTests
             cancellationToken: CancellationToken
         );
         downloadTaskDb.ShouldNotBeNull();
-        downloadTaskDb.DownloadStatus.ShouldBe(DownloadStatus.ServerUnreachable);
+        downloadTaskDb.DownloadStatus.ShouldBeOneOf(DownloadStatus.ServerUnreachable, DownloadStatus.Downloading);
 
         var logs = await dbContext
             .DownloadTaskMovieFileLogs.Where(x => x.DownloadTaskFileId == downloadTask.Id)

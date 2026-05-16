@@ -3,6 +3,7 @@
 	"compilerOptions": {
 		"types": ["cypress", "cypress-signalr-mock", "@testing-library/cypress", "node"],
 		"baseUrl": "./",
+		"composite": true,
 		"sourceMap": false,
 		"target": "ES2019" // Needs to have this target otherwise nullish coalescing operator (??) will not work
 	},

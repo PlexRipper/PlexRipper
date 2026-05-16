@@ -3,6 +3,7 @@
 	"compilerOptions": {
 		// Make paths resolve from the ClientApp root when editing tests
 		"baseUrl": "../",
+		"composite": true,
 		// TODO: This is a temp fix for Webstorm not resolving paths correctly in the tests folder. Needs to investigated further.
 		"paths": {
 			"@/*": ["src/*"],

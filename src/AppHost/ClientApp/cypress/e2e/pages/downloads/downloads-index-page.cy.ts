@@ -2,7 +2,6 @@ import { cloneDeep } from 'lodash-es';
 import prettyBytes from 'pretty-bytes';
 import { route } from '@fixtures';
 import { DownloadStatus, MessageTypes } from '@dto';
-import { DownloadPaths } from '@api-urls';
 import { generateResultDTO } from '@mock';
 
 describe('Downloads page', () => {

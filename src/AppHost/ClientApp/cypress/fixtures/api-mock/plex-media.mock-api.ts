@@ -1,4 +1,4 @@
-import { type BasePageSetupResult, headers, urlBuilder } from '@fixtures';
+import { type BasePageSetupResult, headers } from '@fixtures';
 import type { MockConfig } from '@mock';
 import { generatePlexMedia, generatePlexMediaSlims, generateResultDTO } from '@mock';
 import { PlexMediaPaths } from '@api/api-paths';

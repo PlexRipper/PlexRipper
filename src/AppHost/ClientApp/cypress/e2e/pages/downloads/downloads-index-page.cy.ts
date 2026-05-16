@@ -18,13 +18,15 @@ describe('Downloads page', () => {
 		cy.url().should('eq', route('/downloads'));
 
 		cy.getPageData().then((data) => {
-			const serverProgress = data.serverDownloadProgress[0]!;
-			const downloadTasks = serverProgress.downloads;
+			const downloadTasks = data.serverDownloadProgress[0]!.downloads;
 			Cypress._.times(downloadTasks.length, (downloadTaskIndex) => {
 				const iterations = 10;
 				Cypress._.times(iterations + 1, (i) => {
-					const updatedProgress = cloneDeep(serverProgress);
-					const downloadTask = updatedProgress.downloads[downloadTaskIndex]!;
+					const updatedProgress = cloneDeep(data.serverDownloadProgress[0]!);
+					const downloadTask = updatedProgress.downloads[downloadTaskIndex];
+					if (!downloadTask) {
+						return;
+					}
 					const dataReceived = i * (downloadTask.dataTotal / iterations);
 					const downloadSpeed = downloadTask.dataTotal / iterations;
 					const timeRemaining = iterations - i;
@@ -37,7 +39,6 @@ describe('Downloads page', () => {
 					updatedProgress.downloads = [
 						{
 							...downloadTask,
-							children: downloadTask.children ?? [],
 							percentage,
 							status,
 							timeRemaining,
@@ -97,11 +98,7 @@ describe('Downloads page', () => {
 			const downloadTask = data.detailDownloadTasks[0]!;
 			cy.intercept({
 				method: 'GET',
-				pathname: DownloadPaths.getDownloadTaskLogsByDownloadTaskIdEndpoint(downloadTask.id, {
-					plexLibraryId: downloadTask.plexLibraryId,
-					plexServerId: downloadTask.plexServerId,
-					type: downloadTask.downloadTaskType,
-				}),
+				pathname: `/api/Download/logs/${downloadTask.id}`,
 			}, generateResultDTO([])).as('downloadTaskLogs');
 			cy.getCy(`column-actions-details-${downloadTask.id}`).click();
 			cy.wait('@downloadTaskLogs');

@@ -25,7 +25,7 @@ public class BasePlexMedia : BaseEntity
     /// Gets or sets the sort index of the media based on the abc sort order. This makes sorting much quicker as it can sort on this index which is unique within a <see cref="PlexLibrary"/>.
     /// </summary>
     [Column(Order = 4)]
-    public required int SortIndex { get; set; }
+    public required int SortIndex { get; init; }
 
     [Column(Order = 5)]
     public required string SearchTitle { get; init; }

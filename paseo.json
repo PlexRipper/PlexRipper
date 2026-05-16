@@ -1,0 +1,5 @@
+{
+  "worktree": {
+    "setup": "bun --cwd ./src/AppHost/ClientApp install"
+  }
+}

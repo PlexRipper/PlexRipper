@@ -9,7 +9,8 @@ vi.mock('@vueuse/router', () => ({
 		},
 		set value(value: T | undefined) {
 			if (value === undefined) {
-				delete query[name];
+				const { [name]: _removed, ...rest } = query;
+				query = rest;
 				return;
 			}
 

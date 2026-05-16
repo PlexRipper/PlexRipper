@@ -1,8 +1,8 @@
 import { type BasePageSetupResult, headers, urlBuilder } from '@fixtures';
 import type { MockConfig } from '@mock';
 import { generatePlexMedia, generatePlexMediaSlims, generateResultDTO } from '@mock';
-import { PlexLibraryPaths, PlexMediaPaths } from '@api/api-paths';
-import { type PlexMediaStatisticsDTO, PlexMediaType, VideoQuality } from '@dto';
+import { PlexMediaPaths } from '@api/api-paths';
+import { type PlexMediaStatisticsDTO, PlexMediaType } from '@dto';
 
 export function setupMockPlexMediaEndpoints(
 	this: BasePageSetupResult,

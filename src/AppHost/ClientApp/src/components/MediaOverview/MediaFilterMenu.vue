@@ -130,7 +130,6 @@ import { get, set } from '@vueuse/core';
 import { useMediaOverviewStore } from '@store';
 import { MediaMetaDataTypes } from '@enums';
 import IconButton from '@components/Buttons/IconButton.vue';
-import type { VideoQuality } from '@dto';
 
 const menuIndex = ref<MediaMetaDataTypes>(MediaMetaDataTypes.None);
 const mediaOverviewStore = useMediaOverviewStore();

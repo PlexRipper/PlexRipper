@@ -187,7 +187,6 @@
             "selected-count": "{selectedCount} wybranych",
             "episode-count": "{episodeCount} Odcinków",
             "columns": {
-                "index": "#",
                 "title": "Tytuł",
                 "year": "Rok",
                 "duration": "Czas trwania",

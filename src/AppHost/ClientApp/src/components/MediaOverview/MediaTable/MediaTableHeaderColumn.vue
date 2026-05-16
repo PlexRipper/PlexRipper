@@ -11,7 +11,8 @@
 
 <script setup lang="ts">
 import { get } from '@vueuse/core';
-import { MediaSortField, SortDirection } from '@enums';
+import { SortDirection } from '@enums';
+import type { MediaSortField } from '@enums';
 import type { QTreeViewTableHeader } from '@props';
 import { useMediaOverviewStore } from '@store';
 

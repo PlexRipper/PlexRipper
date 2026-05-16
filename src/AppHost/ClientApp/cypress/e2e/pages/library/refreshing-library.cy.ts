@@ -182,7 +182,7 @@ describe('Test the refreshing of a PlexLibrary', () => {
 
 			// Stage 1: TvShows progress from 0% to 100%, Seasons and Episodes not yet started
 			for (let i = 1; i <= steps; i++) {
-				const tvShowReceived = i * (tvShowCount / steps);
+				const tvShowReceived = Math.round(i * (tvShowCount / steps));
 
 				const items = [
 					generateLibrarySyncProgressItem(PlexMediaType.TvShow, {
@@ -229,7 +229,7 @@ describe('Test the refreshing of a PlexLibrary', () => {
 
 			// Stage 2: TvShows complete, Seasons progress from 0% to 100%, Episodes not yet started
 			for (let i = 1; i <= steps; i++) {
-				const seasonReceived = i * (seasonCount / steps);
+				const seasonReceived = Math.round(i * (seasonCount / steps));
 
 				const items = [
 					generateLibrarySyncProgressItem(PlexMediaType.TvShow, {
@@ -276,7 +276,7 @@ describe('Test the refreshing of a PlexLibrary', () => {
 
 			// Stage 3: TvShows and Seasons complete, Episodes progress from 0% to 100%
 			for (let i = 1; i <= steps; i++) {
-				const episodeReceived = i * (episodeCount / steps);
+				const episodeReceived = Math.round(i * (episodeCount / steps));
 
 				const items = [
 					generateLibrarySyncProgressItem(PlexMediaType.TvShow, {

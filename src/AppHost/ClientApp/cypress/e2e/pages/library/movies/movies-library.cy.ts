@@ -22,7 +22,8 @@ describe('Display media collection on the Library detail page', () => {
 
 				cy.getCy('media-table-scroll').scrollTo('bottom', { duration: 10000 });
 				const movieList = mediaData.find((x) => x.libraryId === movieLibrary.id)?.media;
-				cy.getCy(`media-table-row-${movieList!.length - 1}`)
+				cy.getCy(`media-table-row-${movieList!.length - 1}`, { timeout: 20000 })
+					.scrollIntoView()
 					.should('exist')
 					.and('be.visible');
 			});

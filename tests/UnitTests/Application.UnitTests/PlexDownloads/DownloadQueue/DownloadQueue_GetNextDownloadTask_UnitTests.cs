@@ -266,4 +266,128 @@ public class DownloadQueueGetNextDownloadTaskUnitTests : BaseUnitTest<DownloadQu
         var nextDownloadTaskId = downloadTasks[4].Children[0].Id;
         nextDownloadTask.Value.Id.ShouldBe(nextDownloadTaskId);
     }
+
+    [Test]
+    public async Task ShouldPrioritizeDownloadClientError_OverQueued()
+    {
+        // Arrange
+        await SetupDatabase(81901, config => config.MovieDownloadTasksCount = 3);
+
+        var downloadTasks = await IDbContext.GetAllDownloadTasksByServerAsync(
+            asTracking: true,
+            cancellationToken: CancellationToken
+        );
+
+        var queuedTask = downloadTasks[0].Children[0];
+        queuedTask.SetDownloadStatus(DownloadStatus.Queued);
+        downloadTasks[0].SetDownloadStatus(DownloadStatus.Queued);
+
+        var downloadClientErrorTask = downloadTasks[1].Children[0];
+        downloadClientErrorTask.SetDownloadStatus(DownloadStatus.DownloadClientError);
+        downloadTasks[1].SetDownloadStatus(DownloadStatus.DownloadClientError);
+
+        await IDbContext.SaveChangesAsync(CancellationToken);
+
+        // Act
+        var nextDownloadTask = Sut.GetNextDownloadTask(downloadTasks);
+
+        // Assert
+        nextDownloadTask.IsSuccess.ShouldBeTrue();
+        nextDownloadTask.Value.Id.ShouldBe(downloadClientErrorTask.Id);
+    }
+
+    [Test]
+    public async Task ShouldPrioritizeError_OverQueued()
+    {
+        // Arrange
+        await SetupDatabase(81902, config => config.MovieDownloadTasksCount = 3);
+
+        var downloadTasks = await IDbContext.GetAllDownloadTasksByServerAsync(
+            asTracking: true,
+            cancellationToken: CancellationToken
+        );
+
+        var queuedTask = downloadTasks[0].Children[0];
+        queuedTask.SetDownloadStatus(DownloadStatus.Queued);
+        downloadTasks[0].SetDownloadStatus(DownloadStatus.Queued);
+
+        var errorTask = downloadTasks[1].Children[0];
+        errorTask.SetDownloadStatus(DownloadStatus.Error);
+        downloadTasks[1].SetDownloadStatus(DownloadStatus.Error);
+
+        await IDbContext.SaveChangesAsync(CancellationToken);
+
+        // Act
+        var nextDownloadTask = Sut.GetNextDownloadTask(downloadTasks);
+
+        // Assert
+        nextDownloadTask.IsSuccess.ShouldBeTrue();
+        nextDownloadTask.Value.Id.ShouldBe(errorTask.Id);
+    }
+
+    [Test]
+    public async Task ShouldPrioritizeDownloadClientError_OverError()
+    {
+        // Arrange
+        await SetupDatabase(81903, config => config.MovieDownloadTasksCount = 3);
+
+        var downloadTasks = await IDbContext.GetAllDownloadTasksByServerAsync(
+            asTracking: true,
+            cancellationToken: CancellationToken
+        );
+
+        var errorTask = downloadTasks[0].Children[0];
+        errorTask.SetDownloadStatus(DownloadStatus.Error);
+        downloadTasks[0].SetDownloadStatus(DownloadStatus.Error);
+
+        var downloadClientErrorTask = downloadTasks[1].Children[0];
+        downloadClientErrorTask.SetDownloadStatus(DownloadStatus.DownloadClientError);
+        downloadTasks[1].SetDownloadStatus(DownloadStatus.DownloadClientError);
+
+        await IDbContext.SaveChangesAsync(CancellationToken);
+
+        // Act
+        var nextDownloadTask = Sut.GetNextDownloadTask(downloadTasks);
+
+        // Assert
+        nextDownloadTask.IsSuccess.ShouldBeTrue();
+        nextDownloadTask.Value.Id.ShouldBe(downloadClientErrorTask.Id);
+    }
+
+    [Test]
+    public async Task ShouldHonorFullPriorityChain_ServerUnreachableOverDownloadClientErrorOverErrorOverQueued()
+    {
+        // Arrange
+        await SetupDatabase(81904, config => config.MovieDownloadTasksCount = 4);
+
+        var downloadTasks = await IDbContext.GetAllDownloadTasksByServerAsync(
+            asTracking: true,
+            cancellationToken: CancellationToken
+        );
+
+        var queuedTask = downloadTasks[0].Children[0];
+        queuedTask.SetDownloadStatus(DownloadStatus.Queued);
+        downloadTasks[0].SetDownloadStatus(DownloadStatus.Queued);
+
+        var errorTask = downloadTasks[1].Children[0];
+        errorTask.SetDownloadStatus(DownloadStatus.Error);
+        downloadTasks[1].SetDownloadStatus(DownloadStatus.Error);
+
+        var downloadClientErrorTask = downloadTasks[2].Children[0];
+        downloadClientErrorTask.SetDownloadStatus(DownloadStatus.DownloadClientError);
+        downloadTasks[2].SetDownloadStatus(DownloadStatus.DownloadClientError);
+
+        var serverUnreachableTask = downloadTasks[3].Children[0];
+        serverUnreachableTask.SetDownloadStatus(DownloadStatus.ServerUnreachable);
+        downloadTasks[3].SetDownloadStatus(DownloadStatus.ServerUnreachable);
+
+        await IDbContext.SaveChangesAsync(CancellationToken);
+
+        // Act
+        var nextDownloadTask = Sut.GetNextDownloadTask(downloadTasks);
+
+        // Assert
+        nextDownloadTask.IsSuccess.ShouldBeTrue();
+        nextDownloadTask.Value.Id.ShouldBe(serverUnreachableTask.Id);
+    }
 }

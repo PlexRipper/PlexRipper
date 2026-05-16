@@ -7,121 +7,131 @@ public enum DownloadStatus
     // Otherwise the TypeScript DTO translator in the front-end starts messing up
 
     /// <summary>
-    /// String value was unable to be parsed to this enum.
+    /// Fallback value used when a status string cannot be parsed into a known <see cref="DownloadStatus"/> value.
+    /// Indicates invalid or unknown persisted/incoming status data.
     /// </summary>
     [JsonStringEnumMemberName(nameof(Unknown))]
     Unknown = 0,
 
     /// <summary>
-    /// There was an error during download.
+    /// Generic download failure bucket when no more specific status applies.
+    /// Used as a fallback error state.
     /// </summary>
     [JsonStringEnumMemberName(nameof(Error))]
     Error = 1,
 
     /// <summary>
-    /// Download is added to the queue.
+    /// Waiting in the download queue and not currently being processed.
     /// </summary>
     [JsonStringEnumMemberName(nameof(Queued))]
     Queued = 2,
 
     /// <summary>
-    /// Download Task has finished downloading data from the server.
+    /// Actively downloading media data from the source server.
     /// </summary>
     [JsonStringEnumMemberName(nameof(Downloading))]
     Downloading = 3,
 
     /// <summary>
-    /// Download Task is downloading data from the server.
+    /// Download phase has finished and payload data is fully received.
+    /// Next step is typically file move/post-processing.
     /// </summary>
     [JsonStringEnumMemberName(nameof(DownloadFinished))]
     DownloadFinished = 4,
 
     /// <summary>
-    /// Download file is being moved.
+    /// Downloaded files are currently being moved to their final destination.
     /// </summary>
     [JsonStringEnumMemberName(nameof(Moving))]
     Moving = 5,
 
     /// <summary>
-    /// Download file is paused during move.
+    /// Move download file to destination phase is paused before completion.
     /// </summary>
     [JsonStringEnumMemberName(nameof(MovePaused))]
     MovePaused = 6,
 
     /// <summary>
-    /// Download file has been moved.
+    /// Move download file to destination phase has completed successfully.
     /// </summary>
     [JsonStringEnumMemberName(nameof(MoveFinished))]
     MoveFinished = 7,
 
     /// <summary>
-    /// Download is completed.
+    /// Full download task workflow completed successfully.
+    /// Terminal success state.
     /// </summary>
     [JsonStringEnumMemberName(nameof(Completed))]
     Completed = 8,
 
     /// <summary>
-    /// Download is paused.
+    /// Task is paused and can typically be resumed without resetting progress.
     /// </summary>
     [JsonStringEnumMemberName(nameof(Paused))]
     Paused = 9,
 
     /// <summary>
-    /// Download is paused.
+    /// Task was explicitly stopped/cancelled and is no longer progressing.
+    /// Restart is required to continue.
     /// </summary>
     [JsonStringEnumMemberName(nameof(Stopped))]
     Stopped = 10,
 
     /// <summary>
-    /// Download is deleted.
+    /// Task has been deleted and must not be processed further.
+    /// Terminal removed state.
     /// </summary>
     [JsonStringEnumMemberName(nameof(Deleted))]
     Deleted = 11,
 
     /// <summary>
-    /// The server is offline.
+    /// Source server was unreachable (offline or transient network failure).
+    /// Recoverable when connectivity is restored.
     /// </summary>
     [JsonStringEnumMemberName(nameof(ServerUnreachable))]
     ServerUnreachable = 12,
 
     /// <summary>
-    /// Authentication failed and user action is required.
+    /// Authentication/authorization failed against the source.
+    /// User intervention is typically required before retry succeeds.
     /// </summary>
     [JsonStringEnumMemberName(nameof(AuthError))]
     AuthError = 13,
 
     /// <summary>
-    /// Storage could not be accessed or is full.
+    /// Local storage could not be accessed or lacked required capacity/permissions.
     /// </summary>
     [JsonStringEnumMemberName(nameof(StorageError))]
     StorageError = 14,
 
     /// <summary>
-    /// The media source is unavailable.
+    /// Requested source media is unavailable at origin (missing, inaccessible, or removed).
     /// </summary>
     [JsonStringEnumMemberName(nameof(SourceUnavailable))]
     SourceUnavailable = 15,
 
     /// <summary>
-    /// The download client failed.
+    /// Download execution failed inside the client pipeline (for example segment/mux/tool/process failure).
+    /// Use when failure is client-side and should be distinguished from <see cref="ServerUnreachable"/> and <see cref="SourceUnavailable"/>.
     /// </summary>
     [JsonStringEnumMemberName(nameof(DownloadClientError))]
     DownloadClientError = 16,
 
     /// <summary>
-    /// Download integrity verification failed.
+    /// Downloaded content failed integrity verification after transfer completed.
+    /// Use when bytes were received but validation of expected file correctness failed and a clean re-download is required.
     /// </summary>
     [JsonStringEnumMemberName(nameof(IntegrityError))]
     IntegrityError = 17,
 
     /// <summary>
-    /// The move operation failed.
+    /// Move/post-download relocation failed while transferring files to destination.
     /// </summary>
     [JsonStringEnumMemberName(nameof(MoveError))]
     MoveError = 18,
 
     /// <summary>
-    /// The DownloadTask is in the process of restarting
+    /// Task is in a transient restart transition before re-entering normal processing.
     /// </summary>
     [JsonStringEnumMemberName(nameof(Restarting))]
     Restarting = 19,

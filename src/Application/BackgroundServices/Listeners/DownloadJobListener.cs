@@ -45,16 +45,6 @@ public class DownloadJobListener : IDownloadJobListener
             using var dbContext = await _dbContextFactory.CreateAsync();
             var status = await dbContext.GetDownloadTaskStatusAsync(downloadTaskKey, cancellationToken);
 
-            if (status == DownloadStatus.ServerUnreachable)
-            {
-                _log.Here()
-                    .Debug(
-                        "DownloadTask with id: {DownloadTaskId} ended with status ServerUnreachable, skipping DownloadQueueCheck",
-                        downloadTaskKey.Id
-                    );
-                return;
-            }
-
             if (status == DownloadStatus.DownloadFinished)
             {
                 _log.Here()

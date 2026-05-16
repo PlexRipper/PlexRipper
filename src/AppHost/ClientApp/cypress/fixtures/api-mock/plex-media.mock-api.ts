@@ -36,7 +36,7 @@ export function setupMockPlexMediaEndpoints(
 		};
 
 		// Library media endpoints
-		const url = urlBuilder(PlexLibraryPaths.getPlexLibraryMediaEndpoint(library.id, {
+		const url = urlBuilder(PlexMediaPaths.getAllMediaByTypeEndpoint({
 			countryId: 0,
 			filterOfflineMedia: false,
 			filterOwnedMedia: false,
@@ -44,7 +44,9 @@ export function setupMockPlexMediaEndpoints(
 			roleId: 0,
 			page: 0,
 			size: 0,
-			quality: VideoQuality.None,
+			qualityId: 0,
+			mediaType: library.type,
+			plexLibraryId: library.id,
 		}));
 
 		cy.intercept(

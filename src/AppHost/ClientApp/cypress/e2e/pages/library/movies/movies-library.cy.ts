@@ -8,6 +8,7 @@ describe('Display media collection on the Library detail page', () => {
 			plexServerCount: 1,
 			plexMovieLibraryCount: 1,
 			movieCount: 1000,
+			isLoggedIn: true,
 		})
 			.then(({ mediaData, plexLibraries }) => {
 				const movieLibrary = plexLibraries.find((x) => x.type === PlexMediaType.Movie);
@@ -16,13 +17,13 @@ describe('Display media collection on the Library detail page', () => {
 				}
 				// Visit the page
 				cy.visit(route(`/movies/${movieLibrary.id}`));
+				cy.url({ timeout: 20000 }).should('include', `/movies/${movieLibrary.id}`);
 
-				cy.getCy('change-view-mode-btn').click();
-				cy.getCy('view-mode-table-btn').click();
-
-				cy.getCy('media-table-scroll').scrollTo('bottom', { duration: 10000 });
-				const movieList = mediaData.find((x) => x.libraryId === movieLibrary.id)?.media;
-				cy.getCy(`media-table-row-${movieList!.length - 1}`, { timeout: 20000 })
+				cy.get('[data-cy="poster-table"]', { timeout: 20000 })
+					.should('exist')
+					.scrollTo('bottom', { duration: 10000 });
+				const movieList = mediaData.find((x) => x.libraryId === movieLibrary.id)?.media ?? [];
+				cy.get(`[data-scroll-index="${movieList.length - 1}"]`, { timeout: 20000 })
 					.scrollIntoView()
 					.should('exist')
 					.and('be.visible');
@@ -35,6 +36,7 @@ describe('Display media collection on the Library detail page', () => {
 			plexServerCount: 1,
 			plexMovieLibraryCount: 1,
 			movieCount: 1000,
+			isLoggedIn: true,
 		})
 			.then((data) => {
 				const movieLibrary = data.plexLibraries.find((x) => x.type === PlexMediaType.Movie);
@@ -43,6 +45,9 @@ describe('Display media collection on the Library detail page', () => {
 				}
 				// Visit the page
 				cy.visit(route(`/movies/${movieLibrary.id}`));
+				cy.url({ timeout: 20000 }).should('include', `/movies/${movieLibrary.id}`);
+
+				cy.get('[data-cy="poster-table"]', { timeout: 20000 }).should('exist');
 
 				const movies = data.mediaData.find((x) => x.libraryId === movieLibrary.id)?.media ?? [];
 				const sortTitles = movies.map((x) => x.title[0]?.toLowerCase() ?? '#');

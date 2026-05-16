@@ -8,6 +8,18 @@ export function setupMockSignalREndpoints(this: BasePageSetupResult): BasePageSe
 		...headers,
 	});
 
+	cy.intercept('GET', '/download', {
+		statusCode: 200,
+		body: {},
+		...headers,
+	});
+
+	cy.intercept('GET', '/logs', {
+		statusCode: 200,
+		body: {},
+		...headers,
+	});
+
 	cy.intercept('GET', '/notifications', {
 		statusCode: 200,
 		body: {},

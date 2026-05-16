@@ -72,7 +72,8 @@ export function setupMockPlexMediaEndpoints(
 
 		const navigationIndexes = allLibraryMedia.reduce<{ label: string; index: number }[]>((acc, item, idx) => {
 			const label = (item.title?.[0]?.toUpperCase() ?? '#');
-			if (acc.length === 0 || acc[acc.length - 1].label !== label) {
+			const lastLabel = acc.at(-1)?.label;
+			if (lastLabel !== label) {
 				acc.push({ label, index: idx });
 			}
 			return acc;

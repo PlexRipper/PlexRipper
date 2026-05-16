@@ -1,6 +1,6 @@
 import type { BasePageSetupResult } from '@fixtures';
 import { generateResultDTO } from '@mock';
-import { DebugPaths } from '@api/api-paths';
+import { DebugPaths } from '@api';
 
 export function setupMockDebugEndpoints(
 	this: BasePageSetupResult,

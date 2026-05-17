@@ -1,5 +1,45 @@
 Reaparr Changelog
 
+# [0.38.0-dev.18](https://github.com/Reaparr/Reaparr/compare/v0.38.0-dev.17...v0.38.0-dev.18) (2026-05-17)
+
+
+### Bug Fixes
+
+* **WebAPI:** Auto-retry downloads after ServerUnreachable, Error, DownloadClientError ([#584](https://github.com/Reaparr/Reaparr/issues/584)) ([957ef85](https://github.com/Reaparr/Reaparr/commit/957ef8519fd1a26aebf5cfae3410017da63f9413))
+* **WebAPI:** Auto-retry downloads after ServerUnreachable, Error, DownloadClientError ([de67420](https://github.com/Reaparr/Reaparr/commit/de67420dd22ae78d709903e37f5b0dfde8f86e06))
+* **WebAPI:** Escape search query values that might mess up the search ([2757865](https://github.com/Reaparr/Reaparr/commit/27578653e9230aa1b6d3ea6ba0e0ed2a78bfbfbe))
+* **WebAPI:** Fixed some sorting in the media overview to be doubly sorted leading to inconsisten sorting ([ce8475b](https://github.com/Reaparr/Reaparr/commit/ce8475bb6f330b459dbd40fed07dbbe5299285ee))
+* **Web-UI:** Fixed the sorting on MediaTable view ([70fb472](https://github.com/Reaparr/Reaparr/commit/70fb472697d1e7bbfa5ba2b762992bf7bd6139fa))
+* **WebAPI:** Handle HTTP retry exceptions ([e797641](https://github.com/Reaparr/Reaparr/commit/e797641b09aa7c4e9ff8c3d24807caa5da55da91))
+* **WebAPI:** Handle zero media size fallback ([3f1dee5](https://github.com/Reaparr/Reaparr/commit/3f1dee59cc6b1a036626be5e004d44a3d94f4533))
+* **data:** rehydrate persisted tv show IDs before season/episode inserts ([da4e1ac](https://github.com/Reaparr/Reaparr/commit/da4e1acae9190d73898ee2063dc2f910414415a1))
+* **Web-UI:** Remove index column from mediaoverview table, its obsolete ([c2d0a52](https://github.com/Reaparr/Reaparr/commit/c2d0a523d6facec7bba9137240b06e5a1b88d4de))
+* **Web-UI:** Shortend the debounce time from searching from 3 to 1 seconds to make it more reactive ([df3010e](https://github.com/Reaparr/Reaparr/commit/df3010e64b69cb38140bae9e71464964655c13e5))
+* **WebAPI:** When restarting a DownloadTask, it will refetch the latest media source data ([2befea1](https://github.com/Reaparr/Reaparr/commit/2befea10b949cbeaddc25dc96248f1266e896612))
+
+
+### Features
+
+* **WebAPI:** Add retry mechanism to poster image loading ensuring far less image time-outs ([3a80841](https://github.com/Reaparr/Reaparr/commit/3a80841351d47b5c00d3862238a7093b39ee1b0f))
+* **Web-UI:** Auto scroll to the last scroll position when navigating from and to the media overview ([45afb8f](https://github.com/Reaparr/Reaparr/commit/45afb8f9e96c0800f8cb34241f7524be5dabfc3d))
+* **Web-UI:** Filtering media in the MediaOverview will now only display options that will give results ([1fd0165](https://github.com/Reaparr/Reaparr/commit/1fd01654c8e51eac92533aa4f9dbf122e25f335f))
+* **WebAPI:** Implemented FlexQuery.NET as the new media filter and sorter ([e9c6da3](https://github.com/Reaparr/Reaparr/commit/e9c6da36a6601986c3aa71efe15cbed0bb128327))
+* **Web-UI:** Reaparr now reloads a media overview with the last set filter and sort parameters ([ff55764](https://github.com/Reaparr/Reaparr/commit/ff55764bd5dda0dd86d37368c605f938e2afb64a))
+* **Web-UI:** When clicking on a media flter menu item again, after it is checked, will now uncheck it ([c30b696](https://github.com/Reaparr/Reaparr/commit/c30b6969216272c2ca60f6d834fdd634c8a99380))
+
+
+### Performance Improvements
+
+* **Web-UI:** Implement paginated loading for media poster pages, this should make first-load much faster ([cacdfc5](https://github.com/Reaparr/Reaparr/commit/cacdfc53abc8e548ae79865bfda1c4010f83f8af))
+* **Web-UI:** Made some medium performance improvement on the poster media table to speed up rendering ([abc9ecf](https://github.com/Reaparr/Reaparr/commit/abc9ecf74a7d584c277ece071057cc0fa63a5a19))
+* **Web-UI:** Made some performance improvement Mediaposter to use less nested components to speed up rendering ([f6c3896](https://github.com/Reaparr/Reaparr/commit/f6c38969f65e71b2663730ad20deb0048f68e342))
+* **WebAPI:** Move media sorting calculations to back-end to increase performance in the the front-end ([b1905f8](https://github.com/Reaparr/Reaparr/commit/b1905f835bb1de436da3cdcd54840c18df240ed0))
+
+
+### Reverts
+
+* **WebAPI:** Revert ([f38289b](https://github.com/Reaparr/Reaparr/commit/f38289bcba167b20170fa7fe3f853364a634d5d9))
+
 # [0.38.0-dev.17](https://github.com/Reaparr/Reaparr/compare/v0.38.0-dev.16...v0.38.0-dev.17) (2026-05-07)
 
 

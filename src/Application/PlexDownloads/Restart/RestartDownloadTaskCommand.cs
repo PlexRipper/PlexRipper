@@ -184,11 +184,11 @@ public class RestartDownloadTaskCommandHandler : ICommandHandler<RestartDownload
                 downloadTask.ToKey(),
                 NotificationLevel.Information,
                 DownloadStatus.SourceUnavailable,
-                $"Could not find the original source media for download task \"${downloadTaskKey}\" with title \"{downloadTask.FullTitle}\""
+                $"Could not find the original source media for download task \"{downloadTaskKey}\" with title \"{downloadTask.FullTitle}\""
             );
 
             return Result.Fail(
-                $"Could not find the original source media for download task \"${downloadTaskKey}\" with title \"{downloadTask.FullTitle}\"");
+                $"Could not find the original source media for download task \"{downloadTaskKey}\" with title \"{downloadTask.FullTitle}\"");
         }
 
         return await Result.Try(async Task () =>
@@ -261,10 +261,10 @@ public class RestartDownloadTaskCommandHandler : ICommandHandler<RestartDownload
                 downloadTask.ToKey(),
                 NotificationLevel.Information,
                 DownloadStatus.SourceUnavailable,
-                $"Could not find the original source media for download task \"${downloadTaskKey}\" with title \"{downloadTask.FullTitle}\"");
+                $"Could not find the original source media for download task \"{downloadTaskKey}\" with title \"{downloadTask.FullTitle}\"");
 
             return Result.Fail(
-                $"Could not find the original source media for download task \"${downloadTaskKey}\" with title \"{downloadTask.FullTitle}\"");
+                $"Could not find the original source media for download task \"{downloadTaskKey}\" with title \"{downloadTask.FullTitle}\"");
         }
 
         return await Result.Try(async Task () =>

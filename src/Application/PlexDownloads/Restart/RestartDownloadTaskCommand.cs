@@ -83,11 +83,23 @@ public class RestartDownloadTaskCommandHandler : ICommandHandler<RestartDownload
                 $"Restart workflow: stop completed for child task {childKey.Id} ({downloadTask.FileName}), preparing to queue."
             );
 
-            await _downloadTaskUpdateDispatcher.OnStatusChangedAsync(
-                childKey,
-                DownloadStatus.Queued,
-                cancellationToken
-            );
+            switch (downloadTask.DownloadTaskType)
+            {
+                case DownloadTaskType.MovieData:
+                    var refreshResult = await RefreshMovieDownloadTask(childKey);
+                    if (refreshResult.IsFailed)
+                        continue;
+
+                    break;
+
+                case DownloadTaskType.EpisodeData:
+                    var refreshEpisodeResult = await RefreshEpisodeMovieDownloadTask(childKey);
+                    if (refreshEpisodeResult.IsFailed)
+                        continue;
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException($"The {downloadTask.DownloadTaskType} is unsupported");
+            }
 
             await _dbContext.CreateDownloadClientLog(
                 childKey,
@@ -110,5 +122,155 @@ public class RestartDownloadTaskCommandHandler : ICommandHandler<RestartDownload
         );
 
         return Result.Ok();
+    }
+
+    private async Task<Result> RefreshMovieDownloadTask(DownloadTaskKey downloadTaskKey)
+    {
+        var downloadTask = await _dbContext.DownloadTaskMovieFile.FirstOrDefaultAsync(x => x.Id == downloadTaskKey.Id);
+        if (downloadTask is null)
+            return ResultExtensions.EntityNotFound(nameof(DownloadTaskGeneric), downloadTaskKey.Id).LogError();
+
+        var newDownloadTask = await _dbContext.PlexMovieData
+            .Include(x => x.PlexMovie)
+            .Where(x =>
+                x.PlexApiMediaId == downloadTask.PlexApiMediaId && x.PlexApiPartId == downloadTask.PlexApiPartId)
+            .Select(x => new DownloadTaskMovieFile
+            {
+                Id = downloadTask.Id,
+                Parent = downloadTask.Parent,
+                ParentId = downloadTask.ParentId,
+                Title = x.GetFileName,
+                DownloadStatus = DownloadStatus.Queued,
+                CreatedAt = DateTime.UtcNow,
+                FullTitle = $"{x.PlexMovie!.FullTitle}/{x.GetFileName}",
+                PlexServerId = downloadTask.PlexServerId,
+                PlexLibraryId = downloadTask.PlexLibraryId,
+                PlexApiRatingKey = downloadTask.PlexApiRatingKey,
+                PlexApiMediaId = downloadTask.PlexApiMediaId,
+                PlexApiPartId = downloadTask.PlexApiPartId,
+                FileName = x.GetFileName,
+                FileLocationUrl = x.Key,
+                HashId = downloadTask.HashId,
+                Quality = x.VideoResolution,
+                DirectoryMeta = new DownloadTaskDirectory
+                {
+                    DownloadRootPath = string.Empty,
+                    DestinationRootPath = downloadTask.DirectoryMeta.DestinationRootPath,
+                    MovieFolder = x.PlexMovie.Title.SanitizeFolderName(),
+                    TvShowFolder = string.Empty,
+                    SeasonFolder = string.Empty,
+                    KeepCompletedInDownloadFolder = downloadTask.DirectoryMeta.KeepCompletedInDownloadFolder,
+                },
+                DataReceived = 0,
+                DataTotal = 0,
+                DownloadSpeed = 0,
+                DirectDownloadSnapshot = null,
+                DownloadClientType = downloadTask.DownloadClientType,
+                FileTransferSpeed = 0,
+                FileDataTransferred = 0,
+                TimeRemaining = 0,
+                DestinationFolderPathId = downloadTask.DestinationFolderPathId,
+            })
+            .FirstOrDefaultAsync();
+
+        if (newDownloadTask is null)
+        {
+            await _downloadTaskUpdateDispatcher.OnStatusChangedAsync(
+                downloadTask.ToKey(),
+                DownloadStatus.SourceUnavailable
+            );
+
+            await _dbContext.CreateDownloadClientLog(
+                downloadTask.ToKey(),
+                NotificationLevel.Information,
+                DownloadStatus.SourceUnavailable,
+                $"Could not find the original source media for download task \"{downloadTaskKey}\" with title \"{downloadTask.FullTitle}\""
+            );
+
+            return Result.Fail(
+                $"Could not find the original source media for download task \"{downloadTaskKey}\" with title \"{downloadTask.FullTitle}\"");
+        }
+
+        return await Result.Try(async Task () =>
+        {
+            _dbContext.DownloadTaskMovieFile.Update(newDownloadTask);
+            await _dbContext.SaveChangesAsync();
+        });
+    }
+
+    private async Task<Result> RefreshEpisodeMovieDownloadTask(DownloadTaskKey downloadTaskKey)
+    {
+        var downloadTask =
+            await _dbContext.DownloadTaskTvShowEpisodeFile.FirstOrDefaultAsync(x => x.Id == downloadTaskKey.Id);
+        if (downloadTask is null)
+            return ResultExtensions.EntityNotFound(nameof(DownloadTaskGeneric), downloadTaskKey.Id).LogError();
+
+        var newDownloadTask = await _dbContext.PlexTvShowEpisodeData
+            .Include(x => x.PlexTvShowEpisode)
+            .ThenInclude(x => x!.TvShowSeason)
+            .ThenInclude(x => x!.TvShow)
+            .Where(x =>
+                x.PlexApiMediaId == downloadTask.PlexApiMediaId && x.PlexApiPartId == downloadTask.PlexApiPartId)
+            .Select(x => new DownloadTaskTvShowEpisodeFile
+            {
+                Id = downloadTask.Id,
+                Parent = downloadTask.Parent,
+                ParentId = downloadTask.ParentId,
+                Title = x.GetFileName,
+                DownloadStatus = DownloadStatus.Queued,
+                CreatedAt = DateTime.UtcNow,
+                FullTitle = $"{x.PlexTvShowEpisode!.FullTitle}/{x.GetFileName}",
+                PlexServerId = downloadTask.PlexServerId,
+                PlexLibraryId = downloadTask.PlexLibraryId,
+                PlexApiRatingKey = downloadTask.PlexApiRatingKey,
+                PlexApiMediaId = downloadTask.PlexApiMediaId,
+                PlexApiPartId = downloadTask.PlexApiPartId,
+                FileName = x.GetFileName,
+                FileLocationUrl = x.Key,
+                HashId = downloadTask.HashId,
+                Quality = x.VideoResolution,
+                DirectoryMeta = new DownloadTaskDirectory
+                {
+                    DownloadRootPath = string.Empty,
+                    DestinationRootPath = downloadTask.DirectoryMeta.DestinationRootPath,
+                    MovieFolder = string.Empty,
+                    TvShowFolder = x.PlexTvShowEpisode!.TvShow!.Title.SanitizeFolderName(),
+                    SeasonFolder = x.PlexTvShowEpisode!.TvShowSeason!.Title.SanitizeFolderName(),
+                    KeepCompletedInDownloadFolder = downloadTask.DirectoryMeta.KeepCompletedInDownloadFolder,
+                },
+                DataReceived = 0,
+                DataTotal = 0,
+                DownloadSpeed = 0,
+                DirectDownloadSnapshot = null,
+                DownloadClientType = downloadTask.DownloadClientType,
+                FileTransferSpeed = 0,
+                FileDataTransferred = 0,
+                TimeRemaining = 0,
+                DestinationFolderPathId = downloadTask.DestinationFolderPathId,
+            })
+            .FirstOrDefaultAsync();
+
+        if (newDownloadTask is null)
+        {
+            await _downloadTaskUpdateDispatcher.OnStatusChangedAsync(
+                downloadTask.ToKey(),
+                DownloadStatus.SourceUnavailable
+            );
+
+            await _dbContext.CreateDownloadClientLog(
+                downloadTask.ToKey(),
+                NotificationLevel.Information,
+                DownloadStatus.SourceUnavailable,
+                $"Could not find the original source media for download task \"{downloadTaskKey}\" with title \"{downloadTask.FullTitle}\"");
+
+            return Result.Fail(
+                $"Could not find the original source media for download task \"{downloadTaskKey}\" with title \"{downloadTask.FullTitle}\"");
+        }
+
+        return await Result.Try(async Task () =>
+        {
+            _dbContext.DownloadTaskTvShowEpisodeFile.Update(newDownloadTask);
+            await _dbContext.SaveChangesAsync();
+        });
     }
 }

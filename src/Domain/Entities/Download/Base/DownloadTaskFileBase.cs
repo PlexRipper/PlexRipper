@@ -62,6 +62,9 @@ public abstract class DownloadTaskFileBase : DownloadTaskBase, IDownloadTaskProg
     [Column(Order = 17)]
     public required long DownloadSpeed { get; set; }
 
+    /// <summary>
+    /// Gets or sets the snapshot of the DirectDownloader to resume from if set
+    /// </summary>
     [Column(Order = 18)]
     public required DirectDownloadSnapshot? DirectDownloadSnapshot { get; set; }
 

@@ -60,6 +60,9 @@ public class MockPlexApiServer : IMockPlexApiServer
 
         SetupServers(handler);
 
+        if (_config.SetServerResourcesResponse == HttpStatusCode.Unauthorized)
+            return;
+
         SetupIdentityRequest(handler);
 
         SetupLibraries(handler);
@@ -172,12 +175,18 @@ public class MockPlexApiServer : IMockPlexApiServer
             var plexServers = _dbContext.PlexServers.IncludeLibraries().ToList();
 
             foreach (var plexServer in plexServers)
-                _libraries.TryAdd(plexServer.MachineIdentifier, plexServer.PlexLibraries.ToList().ToPlexApiDTO());
+                _libraries[plexServer.MachineIdentifier] = plexServer.PlexLibraries.ToList().ToPlexApiDTO();
         }
 
-        var libraries = new List<LibrarySection>();
         foreach (var server in _servers)
         {
+            // Keep DB-backed libraries intact when GenerateFromDatabase is enabled.
+            // This preserves existing library keys/ids expected by refresh-media tests.
+            if (_libraries.ContainsKey(server.ClientIdentifier))
+                continue;
+
+            var libraries = new List<LibrarySection>();
+
             if (_config.MovieLibraryCount > 0)
             {
                 libraries.AddRange(
@@ -196,7 +205,7 @@ public class MockPlexApiServer : IMockPlexApiServer
                 );
             }
 
-            _libraries.TryAdd(server.ClientIdentifier, libraries);
+            _libraries[server.ClientIdentifier] = libraries;
         }
 
         // Setup libraries responses

@@ -42,10 +42,38 @@ public class RestartDownloadTaskEndpointIntegrationTests : BaseIntegrationTests
             x => x.SetProperty(y => y.Url, _ => "https://download.blender.org"),
             CancellationToken
         );
-        await container.DbContext.DownloadTaskMovieFile.ExecuteUpdateAsync(
-            x => x.SetProperty(y => y.FileLocationUrl, _ => "/peach/bigbuckbunny_movies/BigBuckBunny_320x180.mp4"),
-            CancellationToken
-        );
+
+        var seededMovieData = await container.DbContext.PlexMovieData
+            .AsNoTracking()
+            .OrderBy(x => x.Id)
+            .FirstOrDefaultAsync(CancellationToken);
+        seededMovieData.ShouldNotBeNull();
+
+        const string validDownloadPath = "/peach/bigbuckbunny_movies/BigBuckBunny_320x180.mp4";
+
+        await container.DbContext.PlexMovieData
+            .Where(x => x.Id == seededMovieData.Id)
+            .ExecuteUpdateAsync(
+                x => x.SetProperty(y => y.Key, _ => validDownloadPath),
+                CancellationToken
+            );
+
+        var seededDownloadTask = await container.DbContext.DownloadTaskMovieFile
+            .AsTracking()
+            .OrderBy(x => x.Id)
+            .FirstOrDefaultAsync(CancellationToken);
+        seededDownloadTask.ShouldNotBeNull();
+
+        await container.DbContext.DownloadTaskMovieFile
+            .Where(x => x.Id == seededDownloadTask.Id)
+            .ExecuteUpdateAsync(
+                x => x
+                    .SetProperty(y => y.PlexApiRatingKey, _ => seededMovieData.PlexApiRatingKey)
+                    .SetProperty(y => y.PlexApiMediaId, _ => seededMovieData.PlexApiMediaId)
+                    .SetProperty(y => y.PlexApiPartId, _ => seededMovieData.PlexApiPartId)
+                    .SetProperty(y => y.FileLocationUrl, _ => validDownloadPath),
+                CancellationToken
+            );
 
         var downloadTasks = await container.DbContext.GetAllDownloadTasksByServerAsync(
             cancellationToken: CancellationToken

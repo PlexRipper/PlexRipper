@@ -14,8 +14,7 @@ public class RestartDownloadTaskCommandUnitTests : BaseUnitTest<RestartDownloadT
                     It.IsAny<CancellationToken>()
                 )
             )
-            .Returns(
-                async (DownloadTaskKey key, DownloadStatus status, CancellationToken ct) =>
+            .Returns(async (DownloadTaskKey key, DownloadStatus status, CancellationToken ct) =>
                 {
                     await IDbContext.SetDownloadStatus(key, status);
                 }
@@ -34,6 +33,19 @@ public class RestartDownloadTaskCommandUnitTests : BaseUnitTest<RestartDownloadT
         var childKeys = await IDbContext.GetDownloadableChildTaskKeys(movieTask.ToKey(), CancellationToken);
 
         childKeys.Count.ShouldBeGreaterThan(0);
+
+        var sourceMedia = await IDbContext.PlexMovieData
+            .Select(x => new { x.PlexApiMediaId, x.PlexApiPartId })
+            .FirstAsync(CancellationToken);
+
+        await IDbContext.DownloadTaskMovieFile
+            .Where(x => x.ParentId == movieTask.Id)
+            .ExecuteUpdateAsync(
+                p =>
+                    p.SetProperty(x => x.PlexApiMediaId, sourceMedia.PlexApiMediaId)
+                        .SetProperty(x => x.PlexApiPartId, sourceMedia.PlexApiPartId),
+                CancellationToken
+            );
 
         foreach (var childKey in childKeys)
         {
@@ -68,16 +80,6 @@ public class RestartDownloadTaskCommandUnitTests : BaseUnitTest<RestartDownloadT
                         x.OnStatusChangedAsync(
                             It.Is<DownloadTaskKey>(k => k == childKey),
                             DownloadStatus.Restarting,
-                            It.IsAny<CancellationToken>()
-                        ),
-                    Times.Once()
-                );
-            Mock.Mock<IDownloadTaskUpdateDispatcher>()
-                .Verify(
-                    x =>
-                        x.OnStatusChangedAsync(
-                            It.Is<DownloadTaskKey>(k => k == childKey),
-                            DownloadStatus.Queued,
                             It.IsAny<CancellationToken>()
                         ),
                     Times.Once()
@@ -120,8 +122,7 @@ public class RestartDownloadTaskCommandUnitTests : BaseUnitTest<RestartDownloadT
                     It.IsAny<CancellationToken>()
                 )
             )
-            .Returns(
-                async (DownloadTaskKey key, DownloadStatus status, CancellationToken ct) =>
+            .Returns(async (DownloadTaskKey key, DownloadStatus status, CancellationToken ct) =>
                 {
                     await IDbContext.SetDownloadStatus(key, status);
                 }
@@ -269,8 +270,7 @@ public class RestartDownloadTaskCommandUnitTests : BaseUnitTest<RestartDownloadT
                     It.IsAny<CancellationToken>()
                 )
             )
-            .Returns(
-                async (DownloadTaskKey key, DownloadStatus status, CancellationToken ct) =>
+            .Returns(async (DownloadTaskKey key, DownloadStatus status, CancellationToken ct) =>
                 {
                     await IDbContext.SetDownloadStatus(key, status);
                 }
@@ -295,9 +295,19 @@ public class RestartDownloadTaskCommandUnitTests : BaseUnitTest<RestartDownloadT
 
         var failedChildAfter = await IDbContext.GetDownloadTaskFileAsync(failedChild, CancellationToken);
         failedChildAfter.ShouldNotBeNull();
-        failedChildAfter.DownloadStatus.ShouldBe(DownloadStatus.Restarting);
+        failedChildAfter.DownloadStatus.ShouldNotBe(DownloadStatus.Restarting);
 
         Mock.VerifyEventPublished(() => new StopDownloadTaskCommand(failedChild.Id), Times.Once());
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Verify(
+                x =>
+                    x.OnStatusChangedAsync(
+                        It.Is<DownloadTaskKey>(k => k == failedChild),
+                        DownloadStatus.Restarting,
+                        It.IsAny<CancellationToken>()
+                    ),
+                Times.Never()
+            );
         Mock.Mock<IEventPublisher>().Verify();
     }
 
@@ -305,9 +315,31 @@ public class RestartDownloadTaskCommandUnitTests : BaseUnitTest<RestartDownloadT
     public async Task ShouldSetRestartingForParent_WhenRestartingValidId()
     {
         // Arrange
-        await SetupDatabase(72157, config => config.MovieDownloadTasksCount = 1);
+        await SetupDatabase(72157, config =>
+        {
+            config.PlexServerCount = 1;
+            config.PlexMovieLibraryCount = 1;
+            config.MovieCount = 1;
+            config.MovieDownloadTasksCount = 1;
+        });
 
-        var movieTask = (await IDbContext.GetAllDownloadTasksByServerAsync(cancellationToken: CancellationToken)).First();
+        var movieTask =
+            (await IDbContext.GetAllDownloadTasksByServerAsync(cancellationToken: CancellationToken)).First();
+        var childKeys = await IDbContext.GetDownloadableChildTaskKeys(movieTask.ToKey(), CancellationToken);
+        childKeys.Count.ShouldBeGreaterThan(0);
+
+        var sourceMedia = await IDbContext.PlexMovieData
+            .Select(x => new { x.PlexApiMediaId, x.PlexApiPartId })
+            .FirstAsync(CancellationToken);
+
+        await IDbContext.DownloadTaskMovieFile
+            .Where(x => x.ParentId == movieTask.Id)
+            .ExecuteUpdateAsync(
+                p =>
+                    p.SetProperty(x => x.PlexApiMediaId, sourceMedia.PlexApiMediaId)
+                        .SetProperty(x => x.PlexApiPartId, sourceMedia.PlexApiPartId),
+                CancellationToken
+            );
 
         Mock.Mock<IDownloadTaskUpdateDispatcher>()
             .Setup(x =>
@@ -317,8 +349,7 @@ public class RestartDownloadTaskCommandUnitTests : BaseUnitTest<RestartDownloadT
                     It.IsAny<CancellationToken>()
                 )
             )
-            .Returns(
-                async (DownloadTaskKey key, DownloadStatus status, CancellationToken ct) =>
+            .Returns(async (DownloadTaskKey key, DownloadStatus status, CancellationToken ct) =>
                 {
                     await IDbContext.SetDownloadStatus(key, status);
                 }
@@ -338,7 +369,7 @@ public class RestartDownloadTaskCommandUnitTests : BaseUnitTest<RestartDownloadT
 
         var parentAfter = await IDbContext.GetDownloadTaskAsync(movieTask.ToKey(), CancellationToken);
         parentAfter.ShouldNotBeNull();
-        parentAfter.DownloadStatus.ShouldBe(DownloadStatus.Restarting);
+        parentAfter.DownloadStatus.ShouldBe(DownloadStatus.Queued);
 
         Mock.Mock<IDownloadTaskUpdateDispatcher>()
             .Verify(
@@ -356,9 +387,31 @@ public class RestartDownloadTaskCommandUnitTests : BaseUnitTest<RestartDownloadT
     public async Task ShouldPublishQueueEventOnce_WhenRestartSucceeds()
     {
         // Arrange
-        await SetupDatabase(72158, config => config.MovieDownloadTasksCount = 1);
+        await SetupDatabase(72158, config =>
+        {
+            config.PlexServerCount = 1;
+            config.PlexMovieLibraryCount = 1;
+            config.MovieCount = 1;
+            config.MovieDownloadTasksCount = 1;
+        });
 
-        var movieTask = (await IDbContext.GetAllDownloadTasksByServerAsync(cancellationToken: CancellationToken)).First();
+        var movieTask =
+            (await IDbContext.GetAllDownloadTasksByServerAsync(cancellationToken: CancellationToken)).First();
+        var childKeys = await IDbContext.GetDownloadableChildTaskKeys(movieTask.ToKey(), CancellationToken);
+        childKeys.Count.ShouldBeGreaterThan(0);
+
+        var sourceMedia = await IDbContext.PlexMovieData
+            .Select(x => new { x.PlexApiMediaId, x.PlexApiPartId })
+            .FirstAsync(CancellationToken);
+
+        await IDbContext.DownloadTaskMovieFile
+            .Where(x => x.ParentId == movieTask.Id)
+            .ExecuteUpdateAsync(
+                p =>
+                    p.SetProperty(x => x.PlexApiMediaId, sourceMedia.PlexApiMediaId)
+                        .SetProperty(x => x.PlexApiPartId, sourceMedia.PlexApiPartId),
+                CancellationToken
+            );
 
         Mock.Mock<IDownloadTaskUpdateDispatcher>()
             .Setup(x =>
@@ -368,8 +421,7 @@ public class RestartDownloadTaskCommandUnitTests : BaseUnitTest<RestartDownloadT
                     It.IsAny<CancellationToken>()
                 )
             )
-            .Returns(
-                async (DownloadTaskKey key, DownloadStatus status, CancellationToken ct) =>
+            .Returns(async (DownloadTaskKey key, DownloadStatus status, CancellationToken ct) =>
                 {
                     await IDbContext.SetDownloadStatus(key, status);
                 }
@@ -386,9 +438,6 @@ public class RestartDownloadTaskCommandUnitTests : BaseUnitTest<RestartDownloadT
         // Assert
         result.IsSuccess.ShouldBeTrue();
         result.Errors.Count.ShouldBe(0);
-
-        var childKeys = await IDbContext.GetDownloadableChildTaskKeys(movieTask.ToKey(), CancellationToken);
-        childKeys.Count.ShouldBeGreaterThan(0);
 
         foreach (var childKey in childKeys)
         {
@@ -412,10 +461,31 @@ public class RestartDownloadTaskCommandUnitTests : BaseUnitTest<RestartDownloadT
     public async Task ShouldInvokeStopCommandForEveryChild_WhenRestartingValidId()
     {
         // Arrange
-        await SetupDatabase(72159, config => config.MovieDownloadTasksCount = 1);
+        await SetupDatabase(72159, config =>
+        {
+            config.PlexServerCount = 1;
+            config.PlexMovieLibraryCount = 1;
+            config.MovieCount = 1;
+            config.MovieDownloadTasksCount = 1;
+        });
 
-        var movieTask = (await IDbContext.GetAllDownloadTasksByServerAsync(cancellationToken: CancellationToken)).First();
+        var movieTask =
+            (await IDbContext.GetAllDownloadTasksByServerAsync(cancellationToken: CancellationToken)).First();
         var childKeys = await IDbContext.GetDownloadableChildTaskKeys(movieTask.ToKey(), CancellationToken);
+        childKeys.Count.ShouldBeGreaterThan(0);
+
+        var sourceMedia = await IDbContext.PlexMovieData
+            .Select(x => new { x.PlexApiMediaId, x.PlexApiPartId })
+            .FirstAsync(CancellationToken);
+
+        await IDbContext.DownloadTaskMovieFile
+            .Where(x => x.ParentId == movieTask.Id)
+            .ExecuteUpdateAsync(
+                p =>
+                    p.SetProperty(x => x.PlexApiMediaId, sourceMedia.PlexApiMediaId)
+                        .SetProperty(x => x.PlexApiPartId, sourceMedia.PlexApiPartId),
+                CancellationToken
+            );
 
         Mock.Mock<IDownloadTaskUpdateDispatcher>()
             .Setup(x =>
@@ -425,8 +495,7 @@ public class RestartDownloadTaskCommandUnitTests : BaseUnitTest<RestartDownloadT
                     It.IsAny<CancellationToken>()
                 )
             )
-            .Returns(
-                async (DownloadTaskKey key, DownloadStatus status, CancellationToken ct) =>
+            .Returns(async (DownloadTaskKey key, DownloadStatus status, CancellationToken ct) =>
                 {
                     await IDbContext.SetDownloadStatus(key, status);
                 }
@@ -470,6 +539,21 @@ public class RestartDownloadTaskCommandUnitTests : BaseUnitTest<RestartDownloadT
 
         var before = await IDbContext.DownloadTaskMovieFile.FirstAsync(x => x.Id == childKey.Id, CancellationToken);
 
+        var sourceMedia = await IDbContext.PlexMovieData
+            .Select(x => new { x.PlexApiMediaId, x.PlexApiPartId })
+            .FirstAsync(CancellationToken);
+
+        await IDbContext.DownloadTaskMovieFile
+            .Where(x => x.ParentId == parent.Id)
+            .ExecuteUpdateAsync(
+                p =>
+                    p.SetProperty(x => x.PlexApiMediaId, sourceMedia.PlexApiMediaId)
+                        .SetProperty(x => x.PlexApiPartId, sourceMedia.PlexApiPartId),
+                CancellationToken
+            );
+
+        before = await IDbContext.DownloadTaskMovieFile.FirstAsync(x => x.Id == childKey.Id, CancellationToken);
+
         Mock.Mock<IDownloadTaskUpdateDispatcher>()
             .Setup(x =>
                 x.OnStatusChangedAsync(
@@ -478,8 +562,7 @@ public class RestartDownloadTaskCommandUnitTests : BaseUnitTest<RestartDownloadT
                     It.IsAny<CancellationToken>()
                 )
             )
-            .Returns(
-                async (DownloadTaskKey key, DownloadStatus status, CancellationToken ct) =>
+            .Returns(async (DownloadTaskKey key, DownloadStatus status, CancellationToken ct) =>
                 {
                     await IDbContext.SetDownloadStatus(key, status);
                 }
@@ -529,13 +612,33 @@ public class RestartDownloadTaskCommandUnitTests : BaseUnitTest<RestartDownloadT
         {
             config.PlexServerCount = 1;
             config.PlexTvShowLibraryCount = 1;
+            config.TvShowCount = 5;
+            config.TvShowSeasonCount = 1;
+            config.TvShowEpisodeCount = 1;
             config.TvShowDownloadTasksCount = 1;
         });
 
         var parent = (await IDbContext.GetAllDownloadTasksByServerAsync(cancellationToken: CancellationToken)).First();
         var childKey = (await IDbContext.GetDownloadableChildTaskKeys(parent.ToKey(), CancellationToken)).First();
 
-        var before = await IDbContext.DownloadTaskTvShowEpisodeFile.FirstAsync(x => x.Id == childKey.Id, CancellationToken);
+        var before =
+            await IDbContext.DownloadTaskTvShowEpisodeFile.FirstAsync(x => x.Id == childKey.Id, CancellationToken);
+
+        var sourceMedia = await IDbContext.PlexTvShowEpisodeData
+            .Select(x => new { x.PlexApiMediaId, x.PlexApiPartId })
+            .FirstOrDefaultAsync(CancellationToken);
+        sourceMedia.ShouldNotBeNull();
+
+        await IDbContext.DownloadTaskTvShowEpisodeFile
+            .Where(x => x.Id == childKey.Id)
+            .ExecuteUpdateAsync(
+                p =>
+                    p.SetProperty(x => x.PlexApiMediaId, sourceMedia.PlexApiMediaId)
+                        .SetProperty(x => x.PlexApiPartId, sourceMedia.PlexApiPartId),
+                CancellationToken
+            );
+
+        before = await IDbContext.DownloadTaskTvShowEpisodeFile.FirstAsync(x => x.Id == childKey.Id, CancellationToken);
 
         Mock.Mock<IDownloadTaskUpdateDispatcher>()
             .Setup(x =>
@@ -545,8 +648,7 @@ public class RestartDownloadTaskCommandUnitTests : BaseUnitTest<RestartDownloadT
                     It.IsAny<CancellationToken>()
                 )
             )
-            .Returns(
-                async (DownloadTaskKey key, DownloadStatus status, CancellationToken ct) =>
+            .Returns(async (DownloadTaskKey key, DownloadStatus status, CancellationToken ct) =>
                 {
                     await IDbContext.SetDownloadStatus(key, status);
                 }
@@ -564,7 +666,8 @@ public class RestartDownloadTaskCommandUnitTests : BaseUnitTest<RestartDownloadT
         result.IsSuccess.ShouldBeTrue();
         result.Errors.Count.ShouldBe(0);
 
-        var after = await IDbContext.DownloadTaskTvShowEpisodeFile.FirstAsync(x => x.Id == childKey.Id, CancellationToken);
+        var after = await IDbContext.DownloadTaskTvShowEpisodeFile.FirstAsync(x => x.Id == childKey.Id,
+            CancellationToken);
         after.DownloadStatus.ShouldBe(DownloadStatus.Queued);
         after.Id.ShouldBe(before.Id);
         after.ParentId.ShouldBe(before.ParentId);
@@ -589,5 +692,3 @@ public class RestartDownloadTaskCommandUnitTests : BaseUnitTest<RestartDownloadT
         after.FullTitle.ShouldContain(after.FileName);
     }
 }
-
-

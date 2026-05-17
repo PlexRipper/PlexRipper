@@ -14,11 +14,7 @@ public class RestartDownloadTaskCommandUnitTests : BaseUnitTest<RestartDownloadT
                     It.IsAny<CancellationToken>()
                 )
             )
-            .Returns(async (DownloadTaskKey key, DownloadStatus status, CancellationToken ct) =>
-                {
-                    await IDbContext.SetDownloadStatus(key, status);
-                }
-            );
+            .Returns(async (DownloadTaskKey key, DownloadStatus status, CancellationToken _) => await IDbContext.SetDownloadStatus(key, status));
 
         await SetupDatabase(72153, config =>
         {
@@ -122,7 +118,7 @@ public class RestartDownloadTaskCommandUnitTests : BaseUnitTest<RestartDownloadT
                     It.IsAny<CancellationToken>()
                 )
             )
-            .Returns(async (DownloadTaskKey key, DownloadStatus status, CancellationToken ct) =>
+            .Returns(async (DownloadTaskKey key, DownloadStatus status, CancellationToken _) =>
                 {
                     await IDbContext.SetDownloadStatus(key, status);
                 }
@@ -270,7 +266,7 @@ public class RestartDownloadTaskCommandUnitTests : BaseUnitTest<RestartDownloadT
                     It.IsAny<CancellationToken>()
                 )
             )
-            .Returns(async (DownloadTaskKey key, DownloadStatus status, CancellationToken ct) =>
+            .Returns(async (DownloadTaskKey key, DownloadStatus status, CancellationToken _) =>
                 {
                     await IDbContext.SetDownloadStatus(key, status);
                 }
@@ -349,7 +345,7 @@ public class RestartDownloadTaskCommandUnitTests : BaseUnitTest<RestartDownloadT
                     It.IsAny<CancellationToken>()
                 )
             )
-            .Returns(async (DownloadTaskKey key, DownloadStatus status, CancellationToken ct) =>
+            .Returns(async (DownloadTaskKey key, DownloadStatus status, CancellationToken _) =>
                 {
                     await IDbContext.SetDownloadStatus(key, status);
                 }
@@ -421,7 +417,7 @@ public class RestartDownloadTaskCommandUnitTests : BaseUnitTest<RestartDownloadT
                     It.IsAny<CancellationToken>()
                 )
             )
-            .Returns(async (DownloadTaskKey key, DownloadStatus status, CancellationToken ct) =>
+            .Returns(async (DownloadTaskKey key, DownloadStatus status, CancellationToken _) =>
                 {
                     await IDbContext.SetDownloadStatus(key, status);
                 }
@@ -495,7 +491,7 @@ public class RestartDownloadTaskCommandUnitTests : BaseUnitTest<RestartDownloadT
                     It.IsAny<CancellationToken>()
                 )
             )
-            .Returns(async (DownloadTaskKey key, DownloadStatus status, CancellationToken ct) =>
+            .Returns(async (DownloadTaskKey key, DownloadStatus status, CancellationToken _) =>
                 {
                     await IDbContext.SetDownloadStatus(key, status);
                 }
@@ -562,7 +558,7 @@ public class RestartDownloadTaskCommandUnitTests : BaseUnitTest<RestartDownloadT
                     It.IsAny<CancellationToken>()
                 )
             )
-            .Returns(async (DownloadTaskKey key, DownloadStatus status, CancellationToken ct) =>
+            .Returns(async (DownloadTaskKey key, DownloadStatus status, CancellationToken _) =>
                 {
                     await IDbContext.SetDownloadStatus(key, status);
                 }
@@ -648,7 +644,7 @@ public class RestartDownloadTaskCommandUnitTests : BaseUnitTest<RestartDownloadT
                     It.IsAny<CancellationToken>()
                 )
             )
-            .Returns(async (DownloadTaskKey key, DownloadStatus status, CancellationToken ct) =>
+            .Returns(async (DownloadTaskKey key, DownloadStatus status, CancellationToken _) =>
                 {
                     await IDbContext.SetDownloadStatus(key, status);
                 }

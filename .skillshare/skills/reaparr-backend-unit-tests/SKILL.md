@@ -362,6 +362,24 @@ For unit test work:
 - Prefer a narrow `--treenode-filter` for fast iteration.
 - Broaden to the full affected unit test project before claiming completion when behavior or shared test infrastructure changed.
 
+## Test Quality Gate
+
+Do not write tests merely to reach a requested count. A number like "add 20 tests" is a budget or lower bound, not the success criterion. First map the code under test, identify high-risk behavior, and choose tests that would catch meaningful regressions. If the requested count would force low-value tests, stop and report the highest-value test plan instead of padding.
+
+Before adding tests, inspect existing tests for the same class and explicitly avoid duplicate coverage. Prefer behavior that crosses boundaries or encodes contracts:
+- API request parameter contracts and omitted/default parameters
+- edge cases that previously failed or could plausibly regress
+
+Reject weak tests such as:
+- default value assertions that do not protect a behavior contract
+- direct setter/getter tests with no observable consequence
+- duplicating existing tests with different wording
+- assertions that only prove mocks were configured
+- broad "kitchen sink" tests added to inflate count
+
+Every new test must earn its place by answering: "What bug would this fail for?" If the answer is unclear, replace it with a stronger test or do not add it.
+
+
 ### TUnit filtering for unit tests
 
 Use `--treenode-filter`, not `--filter`.

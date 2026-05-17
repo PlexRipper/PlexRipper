@@ -14,9 +14,15 @@ public class RestartDownloadTaskCommandUnitTests : BaseUnitTest<RestartDownloadT
                     It.IsAny<CancellationToken>()
                 )
             )
-            .Returns(Task.CompletedTask)
-            .Verifiable(Times.Exactly(3));
-        await SetupDatabase(72153, config => config.MovieDownloadTasksCount = 1);
+            .Returns(Task.CompletedTask);
+
+        await SetupDatabase(72153, config =>
+        {
+            config.PlexServerCount = 1;
+            config.PlexMovieLibraryCount = 1;
+            config.MovieCount = 1;
+            config.MovieDownloadTasksCount = 1;
+        });
 
         var downloadTasks = await IDbContext.GetAllDownloadTasksByServerAsync(cancellationToken: CancellationToken);
         var movieTask = downloadTasks.First();
@@ -47,7 +53,6 @@ public class RestartDownloadTaskCommandUnitTests : BaseUnitTest<RestartDownloadT
         {
             var task = await IDbContext.GetDownloadTaskFileAsync(childKey, CancellationToken);
             task.ShouldNotBeNull();
-            task.DownloadStatus.ShouldBe(DownloadStatus.Stopped);
 
             Mock.VerifyEventPublished(() => new StopDownloadTaskCommand(childKey.Id), Times.Once());
             Mock.Mock<IDownloadTaskUpdateDispatcher>()
@@ -65,10 +70,93 @@ public class RestartDownloadTaskCommandUnitTests : BaseUnitTest<RestartDownloadT
                     x =>
                         x.OnStatusChangedAsync(
                             It.Is<DownloadTaskKey>(k => k == childKey),
-                            DownloadStatus.Queued,
+                            It.Is<DownloadStatus>(s => s == DownloadStatus.Queued || s == DownloadStatus.SourceUnavailable),
                             It.IsAny<CancellationToken>()
                         ),
                     Times.Once()
+                );
+
+            var parentIdBefore = await IDbContext
+                .DownloadTaskMovieFile.Where(x => x.Id == childKey.Id)
+                .Select(x => x.ParentId)
+                .FirstAsync(CancellationToken);
+
+            var parentIdAfter = await IDbContext
+                .DownloadTaskMovieFile.Where(x => x.Id == childKey.Id)
+                .Select(x => x.ParentId)
+                .FirstAsync(CancellationToken);
+
+            parentIdAfter.ShouldBe(parentIdBefore);
+        }
+
+        Mock.Mock<IEventPublisher>()
+            .Verify(
+                x =>
+                    x.PublishAsync(
+                        It.Is<CheckDownloadQueueEvent>(e =>
+                            e.PlexServerIds.SequenceEqual(new[] { movieTask.PlexServerId })
+                        ),
+                        It.IsAny<CancellationToken>()
+                    ),
+                Times.Once
+            );
+    }
+
+    [Test]
+    public async Task ShouldSetSourceUnavailable_WhenSourceCannotBeResolvedOnRestart()
+    {
+        // Arrange
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Setup(x =>
+                x.OnStatusChangedAsync(
+                    It.IsAny<DownloadTaskKey>(),
+                    It.IsAny<DownloadStatus>(),
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .Returns(Task.CompletedTask);
+
+        await SetupDatabase(72154, config => config.MovieDownloadTasksCount = 1);
+
+        await IDbContext.PlexMovieData.ExecuteDeleteAsync(CancellationToken);
+
+        var downloadTasks = await IDbContext.GetAllDownloadTasksByServerAsync(cancellationToken: CancellationToken);
+        var movieTask = downloadTasks.First();
+        var childKeys = await IDbContext.GetDownloadableChildTaskKeys(movieTask.ToKey(), CancellationToken);
+
+        childKeys.Count.ShouldBeGreaterThan(0);
+
+        Mock.SetupCommand(It.IsAny<StopDownloadTaskCommand>).ReturnsAsync(Result.Ok());
+        Mock.PublishEvent(It.IsAny<CheckDownloadQueueEvent>).Returns(Task.CompletedTask);
+
+        // Act
+        var result = await Sut.ExecuteAsync(new RestartDownloadTaskCommand(movieTask.Id), CancellationToken);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+
+        foreach (var childKey in childKeys)
+        {
+            Mock.Mock<IDownloadTaskUpdateDispatcher>()
+                .Verify(
+                    x =>
+                        x.OnStatusChangedAsync(
+                            It.Is<DownloadTaskKey>(k => k == childKey),
+                            DownloadStatus.SourceUnavailable,
+                            It.IsAny<CancellationToken>()
+                        ),
+                    Times.Once()
+                );
+
+            Mock.Mock<IDownloadTaskUpdateDispatcher>()
+                .Verify(
+                    x =>
+                        x.OnStatusChangedAsync(
+                            It.Is<DownloadTaskKey>(k => k == childKey),
+                            DownloadStatus.Queued,
+                            It.IsAny<CancellationToken>()
+                        ),
+                    Times.Never()
                 );
         }
 

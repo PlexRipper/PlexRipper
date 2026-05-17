@@ -36,30 +36,6 @@ public static partial class DbContextExtensions
         if (insertTvShowsResult.IsFailed)
             return await RollbackTvShowInsertAsync(context, plexLibraryId, insertTvShowsResult, ct);
 
-        var persistedTvShowIds = await context.PlexTvShows
-            .Where(x => x.PlexServerId == plexServerId && x.PlexLibraryId == plexLibraryId)
-            .Select(x => new
-            {
-                x.PlexApiRatingKey,
-                x.Id,
-            })
-            .ToDictionaryAsync(x => x.PlexApiRatingKey, x => x.Id, ct);
-
-        foreach (var tvShow in plexTvShows)
-        {
-            if (!persistedTvShowIds.TryGetValue(tvShow.PlexApiRatingKey, out var persistedId))
-                return await RollbackTvShowInsertAsync(
-                    context,
-                    plexLibraryId,
-                    Result.Fail(
-                        $"Could not rehydrate persisted PlexTvShow id for rating key {tvShow.PlexApiRatingKey} in library {plexLibraryId}"
-                    ),
-                    ct
-                );
-
-            tvShow.Id = persistedId;
-        }
-
         // Phase 2: Insert seasons
         var seasons = plexTvShows
             .SelectMany(tvShow => tvShow.Seasons.Select(season => new { tvShow, season }))
@@ -76,8 +52,7 @@ public static partial class DbContextExtensions
 
         var insertSeasonsResult = await Result.Try(async Task () =>
         {
-            context.PlexTvShowSeason.AddRange(seasonsToInsert);
-            await context.SaveChangesAsync(ct);
+            await context.BulkInsertAsync(seasonsToInsert, BulkConfigPreset.Default, ct);
             rapport.CreatedSeasons = seasonsToInsert.Count;
         });
 
@@ -102,8 +77,7 @@ public static partial class DbContextExtensions
 
         var insertEpisodesResult = await Result.Try(async Task () =>
         {
-            context.PlexTvShowEpisodes.AddRange(episodesToInsert);
-            await context.SaveChangesAsync(ct);
+            await context.BulkInsertAsync(episodesToInsert, BulkConfigPreset.Default, ct);
             rapport.CreatedEpisodes = episodesToInsert.Count;
         });
 

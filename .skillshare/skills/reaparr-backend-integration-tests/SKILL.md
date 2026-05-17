@@ -142,36 +142,35 @@ Weak assertion examples to avoid:
 
 ## Known Regression Guardrails
 
-### Destination path regressions
+### Filesystem path consistency
 
-Do not hardcode seeded destination folders as root paths like `/Downloads`.
-Use `PathProvider.Default*DestinationFolder` conventions for seeded folder paths.
+Never hardcode seeded filesystem roots for integration tests.
+Always derive paths from the active test `PathProvider` defaults.
 
-If integration tests seed download tasks that later participate in real filesystem flows, normalize their `DirectoryMeta.DownloadRootPath` and `DirectoryMeta.DestinationRootPath` against the current integration-test sandbox (for example via `MockPathProvider(databaseName, new MockAppBuildInfo())`). Generic fake-data paths can drift from the active sandbox and cause download/move/cleanup assertions to fail for the wrong reason.
+When seeded entities participate in real filesystem flows (download, move, cleanup, import/export), normalize persisted path metadata to the current integration-test sandbox before assertions. This prevents false failures caused by path drift between fake-data defaults and runtime sandbox roots.
 
-Relevant file:
+Reference points:
 - `src/Data/ReaparrDBContextSeed.cs`
-- `tests/BaseTests/MockDatabase/MockDatabase.DownloadTask.cs`
+- `tests/BaseTests/MockDatabase/`
 
-### Strict Plex SDK payload unions
+### Generated payload shape compatibility
 
-When fake Plex payloads are generated for integration tests, strict SDK union fields must not serialize to unexpected null shapes.
-For fields like `HasVoiceActivity`, `SkipChildren`, and `SkipParent`, generate explicit union values compatible with current SDK expectations.
+When integration tests rely on generated API payloads, ensure generated JSON shape is compatible with the strict contract expected by the consuming SDK/client models.
 
-Relevant files:
-- `tests/BaseTests/FakePlexApiData/FakePlexApiData.PlexMediaContainer.cs`
-- `tests/BaseTests/FakePlexApiData/GetLibrarySectionsAllResponse/FakePlexApiData.GetLibrarySectionsAllMediaContainer.cs`
-- `tests/BaseTests/FakePlexApiData/GetMediaMetaData/FakePlexApiData.MediaMetaDataMediaContainer.cs`
+Do not rely on implicit/null union coercion. Prefer explicit, valid values for contract-sensitive fields, especially discriminated/union-like members.
 
-### Background job polling regressions
+Reference area:
+- `tests/BaseTests/FakePlexApiData/`
 
-If a focused integration run appears to hang and the captured output only shows the TUnit startup banner, do not assume the process is deadlocked immediately. First:
+### Async/polling diagnosis
 
-1. rerun the failing class with `--treenode-filter`
-2. inspect the generated `TestResults/*.diag` artifacts for `TimeoutException` and the failing `TestNodeUpdateMessage`
-3. verify whether the failure is real job non-completion or stale test-side observation
+If a focused integration run appears to hang or time out, do not assume deadlock immediately. First:
 
-This matters for download/job tests where the real root cause can be stale tracked entities in test polling rather than the scheduler or worker itself.
+1. rerun only the failing class/test with `--treenode-filter`
+2. inspect generated `TestResults/*.diag` artifacts for timeout/failure telemetry
+3. distinguish real backend non-completion from stale test-side observation
+
+When polling for state changes, prefer fresh `DbContext` instances per poll to avoid stale tracked state masking real transitions.
 
 ## Integration Test Verification
 

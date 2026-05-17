@@ -295,6 +295,41 @@ Also verify expected mock interactions explicitly; do not leave mocks unverified
 
 When a dependency is mocked, prefer verifying exact interaction parameters and call counts over asserting downstream state that only the real dependency would have produced.
 
+### Critical-path strictness rules (mandatory)
+
+For critical workflows (download lifecycle, restart/stop/pause/start, queue progression), every test must include multiple assertions per case and must not rely on a single boolean assertion.
+
+Minimum strictness for command/handler tests on critical paths:
+- Assert outcome shape (`IsSuccess`/`IsFailed`) **and** error count semantics (`Errors.Count == 0` for success, `> 0` for failure).
+- Assert final persisted `DownloadStatus` for affected entities whenever the test wiring makes persistence observable.
+- Assert interaction contracts (`Times.Once`/`Times.Never`) for key collaborators (`ICommandExecutor`, dispatcher, event publisher).
+- Assert parent/child invariants where relevant (e.g., parent status transition + each child terminal status).
+
+If status transitions are delegated to `IDownloadTaskUpdateDispatcher`, and you need strict DB status assertions, use a deterministic callback in test Arrange:
+
+```csharp
+Mock.Mock<IDownloadTaskUpdateDispatcher>()
+    .Setup(x => x.OnStatusChangedAsync(It.IsAny<DownloadTaskKey>(), It.IsAny<DownloadStatus>(), It.IsAny<CancellationToken>()))
+    .Returns(async (DownloadTaskKey key, DownloadStatus status, CancellationToken _) =>
+    {
+        await IDbContext.SetDownloadStatus(key, status);
+    });
+```
+
+This is allowed only when the explicit goal of the test is validating persisted status outcomes from dispatched transitions.
+
+### Mapping assertions for remap/refresh logic
+
+When a handler reconstructs/remaps entities (e.g., restart refresh for Movie/Episode tasks), tests must assert mapping correctness, not only success status.
+
+At minimum assert:
+- identity/link invariants preserved (Id, ParentId, media/part IDs, destination path IDs, hash IDs),
+- reset invariants applied (transfer counters/speeds/time remaining reset to zero, expected status),
+- directory metadata rules (expected roots/folders preserved or recomputed),
+- content/title invariants (e.g., file name non-empty, full title contains file name).
+
+Include at least one MovieData mapping test and one EpisodeData mapping test for restart-critical flows.
+
 ## Special Constraints and Gotchas
 
 ### BackgroundJobs.UnitTests references
@@ -361,6 +396,17 @@ For unit test work:
 - Start with the relevant `tests/UnitTests/<Project>.UnitTests/<Project>.UnitTests.csproj` project.
 - Prefer a narrow `--treenode-filter` for fast iteration.
 - Broaden to the full affected unit test project before claiming completion when behavior or shared test infrastructure changed.
+
+### Verification fallback when execution environment is constrained
+
+If test execution is blocked by environment constraints (for example, read-only obj writes), do not claim runtime pass. Instead:
+- run Rider file problem checks and ensure zero errors in changed test files,
+- state the exact execution blocker and raw error message,
+- keep assertions strict and deterministic so rerun is straightforward once the environment is fixed.
+
+Evidence-before-assertion rule:
+- fixed compile or symbol issues may be claimed only with zero Rider file problems,
+- tests pass may be claimed only with completed test execution output.
 
 ## Test Quality Gate
 

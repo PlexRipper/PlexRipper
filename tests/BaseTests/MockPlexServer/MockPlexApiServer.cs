@@ -180,6 +180,11 @@ public class MockPlexApiServer : IMockPlexApiServer
 
         foreach (var server in _servers)
         {
+            // Keep DB-backed libraries intact when GenerateFromDatabase is enabled.
+            // This preserves existing library keys/ids expected by refresh-media tests.
+            if (_libraries.ContainsKey(server.ClientIdentifier))
+                continue;
+
             var libraries = new List<LibrarySection>();
 
             if (_config.MovieLibraryCount > 0)

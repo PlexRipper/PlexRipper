@@ -317,8 +317,7 @@ public class BaseContainer : IDisposable
 
         try
         {
-            // Use a more robust delay mechanism
-            var delay = Task.Delay(TimeSpan.FromSeconds(3));
+            var delay = Task.Delay(TimeSpan.FromMilliseconds(100));
             delay.Wait();
             _log.Here().Information("Async operations wait completed for container {DatabaseName}", dbName);
         }

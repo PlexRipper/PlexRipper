@@ -24,7 +24,7 @@ public class RefreshPlexAccountAccessEndpointIntegrationTestsIntegrationTests : 
                 {
                     x.PlexServerAccessCount = plexServerCount;
                     x.MovieLibraryCount = plexLibraryCount;
-                    x.MoviesPerLibraryCount = 500;
+                    x.MoviesPerLibraryCount = 25;
                     x.SetServerResourcesResponse = HttpStatusCode.Unauthorized;
                 };
             }

@@ -25,6 +25,7 @@ public class RestartDownloadTaskEndpointIntegrationTests : BaseIntegrationTests
                     x.MovieDownloadTasksCount = 1;
                 };
 
+                
                 config.FileSystemOptions = (system, dbContext) =>
                 {
                     var downloadTask = dbContext.DownloadTaskMovieFile.First();
@@ -114,7 +115,7 @@ public class RestartDownloadTaskEndpointIntegrationTests : BaseIntegrationTests
             CancellationToken
         );
 
-        // Assert
+        // Assert 
         var result = testResult.Result;
         result.IsSuccess.ShouldBeTrue();
         finalDownload.ShouldNotBeNull();

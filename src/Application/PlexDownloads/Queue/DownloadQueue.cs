@@ -9,9 +9,8 @@ namespace Reaparr.Application;
 public class DownloadQueue : IDownloadQueue
 {
     /// <summary>
-    /// Cooldown applied to every download task after it is picked by the queue. Prevents the
-    /// queue picker from re-picking the same task in a tight loop when a download fails fast
-    /// (e.g. stale Plex part IDs returning 404 instantly).
+    /// Cooldown applied after a task is picked by the queue. This prevents a fast-failing
+    /// task from being selected repeatedly in a tight listener-triggered loop.
     /// </summary>
     private static readonly TimeSpan RetryCooldown = TimeSpan.FromSeconds(60);
 
@@ -63,6 +62,22 @@ public class DownloadQueue : IDownloadQueue
         return Result.Ok();
     }
 
+    /// <inheritdoc />
+    public async Task<Result> CheckDownloadQueueForAllServers(CancellationToken cancellationToken = default)
+    {
+        using var dbContext = await _dbContextFactory.CreateAsync();
+
+        var plexServerIds = await dbContext.PlexServers
+            .AsNoTracking()
+            .Select(x => x.Id)
+            .ToListAsync(cancellationToken);
+
+        if (!plexServerIds.Any())
+            return Result.Ok();
+
+        return await CheckDownloadQueue(plexServerIds);
+    }
+
     internal async Task<Result<DownloadTaskGeneric>> CheckDownloadQueueServer(int plexServerId)
     {
         if (plexServerId <= 0)
@@ -110,10 +125,10 @@ public class DownloadQueue : IDownloadQueue
         // This avoids race condition where job is finishing but still registered in Quartz
         if (hasDownloadingTask && await _downloadTaskScheduler.IsServerDownloading(plexServerId))
         {
-                return Result
-                    .Fail("Cannot select the next download task because server is already downloading one.")
-                    .LogWarning();
-            }
+            return Result
+                .Fail("Cannot select the next download task because server is already downloading one.")
+                .LogWarning();
+        }
 
         _log.Here()
             .Debug(
@@ -146,8 +161,17 @@ public class DownloadQueue : IDownloadQueue
         return Result.Ok(nextDownloadTask);
     }
 
-    private bool IsInRetryCooldown(DownloadTaskGeneric task) =>
-        _retryCooldownUntil.TryGetValue(task.Id, out var until) && DateTime.UtcNow < until;
+    private bool IsInRetryCooldown(DownloadTaskGeneric task)
+    {
+        if (!_retryCooldownUntil.TryGetValue(task.Id, out var until))
+            return false;
+
+        if (DateTime.UtcNow < until)
+            return true;
+
+        _retryCooldownUntil.TryRemove(task.Id, out _);
+        return false;
+    }
 
     /// <summary>
     /// Determines the next downloadable <see cref="DownloadTaskGeneric"/> to be executed.
@@ -160,23 +184,23 @@ public class DownloadQueue : IDownloadQueue
         if (downloadingTask is not null)
             return Result.Fail("There is already a downloadTask downloading.").LogDebug();
 
-        var autoPausedTask = FindFirstLeafByStatus(downloadTasks, DownloadStatus.AutoPaused);
+        var autoPausedTask = FindFirstLeafByStatus(downloadTasks, DownloadStatus.AutoPaused, IsInRetryCooldown);
         if (autoPausedTask is not null)
             return Result.Ok(autoPausedTask);
-        
-        var serverUnreachableTask = FindFirstLeafByStatus(downloadTasks, DownloadStatus.ServerUnreachable);
+
+        var serverUnreachableTask = FindFirstLeafByStatus(downloadTasks, DownloadStatus.ServerUnreachable, IsInRetryCooldown);
         if (serverUnreachableTask is not null)
             return Result.Ok(serverUnreachableTask);
 
-        var downloadClientErrorTask = FindFirstLeafByStatus(downloadTasks, DownloadStatus.DownloadClientError);
+        var downloadClientErrorTask = FindFirstLeafByStatus(downloadTasks, DownloadStatus.DownloadClientError, IsInRetryCooldown);
         if (downloadClientErrorTask is not null)
             return Result.Ok(downloadClientErrorTask);
 
-        var errorTask = FindFirstLeafByStatus(downloadTasks, DownloadStatus.Error);
+        var errorTask = FindFirstLeafByStatus(downloadTasks, DownloadStatus.Error, IsInRetryCooldown);
         if (errorTask is not null)
             return Result.Ok(errorTask);
 
-        var queuedTask = FindFirstLeafByStatus(downloadTasks, DownloadStatus.Queued);
+        var queuedTask = FindFirstLeafByStatus(downloadTasks, DownloadStatus.Queued, IsInRetryCooldown);
         if (queuedTask is not null)
             return Result.Ok(queuedTask);
 
@@ -185,21 +209,22 @@ public class DownloadQueue : IDownloadQueue
 
     private static DownloadTaskGeneric? FindFirstLeafByStatus(
         IEnumerable<DownloadTaskGeneric> downloadTasks,
-        DownloadStatus status
+        DownloadStatus status,
+        Func<DownloadTaskGeneric, bool>? skip = null
     )
     {
         foreach (var downloadTask in downloadTasks)
         {
             if (downloadTask.Children.Any())
             {
-                var childTask = FindFirstLeafByStatus(downloadTask.Children, status);
+                var childTask = FindFirstLeafByStatus(downloadTask.Children, status, skip);
                 if (childTask is not null)
                     return childTask;
 
                 continue;
             }
 
-            if (downloadTask.DownloadStatus == status)
+            if (downloadTask.DownloadStatus == status && (skip is null || !skip(downloadTask)))
                 return downloadTask;
         }
 

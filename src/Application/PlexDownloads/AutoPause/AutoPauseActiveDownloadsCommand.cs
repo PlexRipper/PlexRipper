@@ -8,18 +8,21 @@ public class AutoPauseActiveDownloadsCommandHandler : ICommandHandler<AutoPauseA
     private readonly IReaparrDbContext _dbContext;
     private readonly ICommandExecutor _commandExecutor;
     private readonly IDownloadTaskScheduler _downloadTaskScheduler;
+    private readonly IMoveDownloadFileScheduler _moveDownloadFileScheduler;
 
     public AutoPauseActiveDownloadsCommandHandler(
         ILogger log,
         IReaparrDbContext dbContext,
         ICommandExecutor commandExecutor,
-        IDownloadTaskScheduler downloadTaskScheduler
+        IDownloadTaskScheduler downloadTaskScheduler,
+        IMoveDownloadFileScheduler moveDownloadFileScheduler
     )
     {
         _log = log.ForContext<AutoPauseActiveDownloadsCommandHandler>();
         _dbContext = dbContext;
         _commandExecutor = commandExecutor;
         _downloadTaskScheduler = downloadTaskScheduler;
+        _moveDownloadFileScheduler = moveDownloadFileScheduler;
     }
 
     public async Task<Result> ExecuteAsync(AutoPauseActiveDownloadsCommand command, CancellationToken cancellationToken)
@@ -33,30 +36,45 @@ public class AutoPauseActiveDownloadsCommandHandler : ICommandHandler<AutoPauseA
 
         foreach (var plexServerId in plexServerIds)
         {
-            var activeKeys = await _downloadTaskScheduler.GetCurrentlyDownloadingKeysByServer(plexServerId);
-
-            foreach (var activeKey in activeKeys.Distinct())
+            for (var pass = 1; pass <= 2; pass++)
             {
-                _log.Here()
-                    .Information(
-                        "Auto-pausing active download task {DownloadTaskKey} during shutdown",
-                        activeKey
+                var activeDownloads = await _downloadTaskScheduler.GetCurrentlyDownloadingKeysByServer(plexServerId);
+                var activeMoves = await _moveDownloadFileScheduler.GetCurrentlyMovingKeysByServer(plexServerId);
+
+                foreach (var activeKey in activeDownloads.Concat(activeMoves))
+                {
+                    _log.Here()
+                        .Information(
+                            "Auto-pausing active task {DownloadTaskKey} during shutdown on pass {Pass} for PlexServer {PlexServerId}",
+                            activeKey,
+                            pass,
+                            plexServerId
+                        );
+
+                    var pauseResult = await _commandExecutor.Send(
+                        new PauseDownloadTaskCommand(activeKey.Id, AutoPause: true),
+                        cancellationToken
                     );
 
-                var pauseResult = await _commandExecutor.Send(
-                    new PauseDownloadTaskCommand(activeKey.Id, AutoPause: true),
-                    cancellationToken
-                );
+                    if (pauseResult.IsFailed)
+                    {
+                        _log.Here()
+                            .Error(
+                                "Failed to auto-pause active task {DownloadTaskKey} during shutdown from {SchedulerSource} on pass {Pass} for PlexServer {PlexServerId}",
+                                activeKey,
+                                pass,
+                                plexServerId
+                            );
+                        return pauseResult.LogError();
+                    }
 
-                if (pauseResult.IsFailed)
-                    return pauseResult.LogError();
-
-                totalPaused++;
+                    totalPaused++;
+                }
             }
         }
 
         if (totalPaused > 0)
-            _log.Here().Information("Auto-paused {Count} active download task(s) during shutdown", totalPaused);
+            _log.Here().Information("Auto-paused {Count} active download or move task(s) during shutdown", totalPaused);
 
         return Result.Ok();
     }

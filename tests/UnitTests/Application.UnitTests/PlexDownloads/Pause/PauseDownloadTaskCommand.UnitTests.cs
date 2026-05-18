@@ -533,6 +533,10 @@ public class PauseDownloadTaskCommandUnitTests : BaseUnitTest<PauseDownloadTaskC
         childTask.DownloadTaskPhase.ShouldBe(DownloadStatus.DownloadFinished.ToDownloadTaskPhase());
         await IDbContext.SaveChangesAsync(CancellationToken);
 
+        Mock.Mock<IDownloadTaskScheduler>()
+            .Setup(x => x.IsDownloading(It.IsAny<DownloadTaskKey>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(false);
+
         Mock.Mock<IDownloadTaskUpdateDispatcher>()
             .Setup(x =>
                 x.OnStatusChangedAsync(It.IsAny<DownloadTaskKey>(), It.IsAny<DownloadStatus>(), It.IsAny<CancellationToken>())
@@ -561,14 +565,29 @@ public class PauseDownloadTaskCommandUnitTests : BaseUnitTest<PauseDownloadTaskC
         var parentTask = await IDbContext.DownloadTaskMovie.AsTracking().FirstAsync(CancellationToken);
         var childTask = await IDbContext.DownloadTaskMovieFile.AsTracking().FirstAsync(CancellationToken);
 
-        childTask.DownloadStatus = DownloadStatus.Moving;
-        childTask.DownloadTaskPhase.ShouldBe(DownloadStatus.Moving.ToDownloadTaskPhase());
-        childTask.FileTransferSpeed = 2048;
-        await IDbContext.SaveChangesAsync(CancellationToken);
+        await IDbContext
+            .DownloadTaskMovieFile.Where(x => x.Id == childTask.Id)
+            .ExecuteUpdateAsync(
+                p =>
+                    p.SetProperty(x => x.DownloadStatus, DownloadStatus.Moving)
+                        .SetProperty(x => x.FileTransferSpeed, 2048),
+                CancellationToken
+            );
+
 
         Mock.Mock<IMoveDownloadFileScheduler>()
             .Setup(x => x.IsDownloadFileMoving(It.IsAny<DownloadTaskKey>()))
             .ReturnsAsync(false);
+
+        Mock.Mock<IDownloadTaskScheduler>()
+            .Setup(x => x.IsDownloading(It.IsAny<DownloadTaskKey>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(false);
+
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Setup(x =>
+                x.OnStatusChangedAsync(It.IsAny<DownloadTaskKey>(), It.IsAny<DownloadStatus>(), It.IsAny<CancellationToken>())
+            )
+            .Returns(Task.CompletedTask);
 
         var result = await Sut.ExecuteAsync(new PauseDownloadTaskCommand(parentTask.Id, AutoPause: true), CancellationToken);
 

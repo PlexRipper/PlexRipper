@@ -1,7 +1,7 @@
 namespace Reaparr.Application;
 
 /// <summary>
-/// Reset download tasks left in Downloading from a previous run before the scheduler starts.
+/// Reset download tasks left in active download or move states from a previous run before the scheduler starts.
 /// </summary>
 public record RecoverInterruptedDownloadsCommand : ICommand<Result>;
 
@@ -22,20 +22,22 @@ public class RecoverInterruptedDownloadsCommandHandler : ICommandHandler<Recover
         _downloadTaskUpdateDispatcher = downloadTaskUpdateDispatcher;
     }
 
-    public async Task<Result> ExecuteAsync(RecoverInterruptedDownloadsCommand command, CancellationToken cancellationToken)
+    public async Task<Result> ExecuteAsync(
+        RecoverInterruptedDownloadsCommand command,
+        CancellationToken cancellationToken)
     {
         using var dbContext = await _dbContextFactory.CreateAsync();
 
         var movieFileZombies = await dbContext.DownloadTaskMovieFile
             .AsNoTracking()
-            .Where(x => x.DownloadStatus == DownloadStatus.Downloading)
-            .Select(x => new { x.Id, x.FullTitle, x.PlexServerId, x.PlexLibraryId })
+            .Where(x => x.DownloadStatus == DownloadStatus.Downloading || x.DownloadStatus == DownloadStatus.Moving)
+            .Select(x => new { x.Id, x.FullTitle, x.PlexServerId, x.PlexLibraryId, x.DownloadStatus })
             .ToListAsync(cancellationToken);
 
         var episodeFileZombies = await dbContext.DownloadTaskTvShowEpisodeFile
             .AsNoTracking()
-            .Where(x => x.DownloadStatus == DownloadStatus.Downloading)
-            .Select(x => new { x.Id, x.FullTitle, x.PlexServerId, x.PlexLibraryId })
+            .Where(x => x.DownloadStatus == DownloadStatus.Downloading || x.DownloadStatus == DownloadStatus.Moving)
+            .Select(x => new { x.Id, x.FullTitle, x.PlexServerId, x.PlexLibraryId, x.DownloadStatus })
             .ToListAsync(cancellationToken);
 
         var totalReset = 0;
@@ -48,8 +50,10 @@ public class RecoverInterruptedDownloadsCommandHandler : ICommandHandler<Recover
                     zombie.Id,
                     zombie.FullTitle,
                     zombie.PlexServerId,
-                    DownloadStatus.Downloading,
-                    DownloadStatus.AutoPaused
+                    zombie.DownloadStatus,
+                    zombie.DownloadStatus == DownloadStatus.Moving
+                        ? DownloadStatus.AutoMovePaused
+                        : DownloadStatus.AutoPaused
                 );
 
             await _downloadTaskUpdateDispatcher.OnStatusChangedAsync(
@@ -60,7 +64,9 @@ public class RecoverInterruptedDownloadsCommandHandler : ICommandHandler<Recover
                     PlexServerId = zombie.PlexServerId,
                     PlexLibraryId = zombie.PlexLibraryId,
                 },
-                DownloadStatus.AutoPaused,
+                zombie.DownloadStatus == DownloadStatus.Moving
+                    ? DownloadStatus.AutoMovePaused
+                    : DownloadStatus.AutoPaused,
                 cancellationToken
             );
 
@@ -75,8 +81,10 @@ public class RecoverInterruptedDownloadsCommandHandler : ICommandHandler<Recover
                     zombie.Id,
                     zombie.FullTitle,
                     zombie.PlexServerId,
-                    DownloadStatus.Downloading,
-                    DownloadStatus.AutoPaused
+                    zombie.DownloadStatus,
+                    zombie.DownloadStatus == DownloadStatus.Moving
+                        ? DownloadStatus.AutoMovePaused
+                        : DownloadStatus.AutoPaused
                 );
 
             await _downloadTaskUpdateDispatcher.OnStatusChangedAsync(
@@ -87,7 +95,9 @@ public class RecoverInterruptedDownloadsCommandHandler : ICommandHandler<Recover
                     PlexServerId = zombie.PlexServerId,
                     PlexLibraryId = zombie.PlexLibraryId,
                 },
-                DownloadStatus.AutoPaused,
+                zombie.DownloadStatus == DownloadStatus.Moving
+                    ? DownloadStatus.AutoMovePaused
+                    : DownloadStatus.AutoPaused,
                 cancellationToken
             );
 
@@ -98,9 +108,8 @@ public class RecoverInterruptedDownloadsCommandHandler : ICommandHandler<Recover
         {
             _log.Here()
                 .Information(
-                    "Recovered {Count} interrupted download task(s) left in {DownloadStatus} from a previous run",
-                    totalReset,
-                    DownloadStatus.Downloading
+                    "Recovered {Count} interrupted active download or move task(s) from a previous run",
+                    totalReset
                 );
         }
 

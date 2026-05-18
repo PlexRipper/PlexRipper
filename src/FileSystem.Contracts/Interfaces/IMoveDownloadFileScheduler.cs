@@ -11,4 +11,7 @@ public interface IMoveDownloadFileScheduler
     Task<bool> IsDownloadFileMoving(DownloadTaskKey downloadTaskKey);
 
     Task<bool> IsAnyMoveDownloadFileJobRunning();
+
+    Task<List<DownloadTaskKey>> GetCurrentlyMovingKeysByServer(int plexServerId);
 }
+

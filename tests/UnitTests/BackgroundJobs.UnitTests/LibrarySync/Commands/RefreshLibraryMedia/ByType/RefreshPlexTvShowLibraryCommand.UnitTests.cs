@@ -272,6 +272,8 @@ public class RefreshPlexTvShowLibraryCommandUnitTests : BaseUnitTest<RefreshPlex
                 config.PlexServerCount = 1;
                 config.PlexTvShowLibraryCount = 1;
                 config.TvShowCount = 1;
+                config.TvShowSeasonCount = 1;
+                config.TvShowEpisodeCount = 1;
             }
         );
         var testLibrary = IDbContext.PlexLibraries.Include(x => x.TvShows).First();
@@ -315,6 +317,8 @@ public class RefreshPlexTvShowLibraryCommandUnitTests : BaseUnitTest<RefreshPlex
                 config.PlexServerCount = 1;
                 config.PlexTvShowLibraryCount = 1;
                 config.TvShowCount = 1;
+                config.TvShowSeasonCount = 1;
+                config.TvShowEpisodeCount = 1;
             }
         );
         var testLibrary = IDbContext.PlexLibraries.Include(x => x.TvShows).First();
@@ -363,6 +367,8 @@ public class RefreshPlexTvShowLibraryCommandUnitTests : BaseUnitTest<RefreshPlex
                 config.PlexServerCount = 1;
                 config.PlexTvShowLibraryCount = 1;
                 config.TvShowCount = 1;
+                config.TvShowSeasonCount = 1;
+                config.TvShowEpisodeCount = 1;
             }
         );
         var testLibrary = IDbContext.PlexLibraries.Include(x => x.TvShows).First();
@@ -404,6 +410,8 @@ public class RefreshPlexTvShowLibraryCommandUnitTests : BaseUnitTest<RefreshPlex
                 config.PlexServerCount = 1;
                 config.PlexTvShowLibraryCount = 1;
                 config.TvShowCount = 1;
+                config.TvShowSeasonCount = 1;
+                config.TvShowEpisodeCount = 1;
             }
         );
         var testLibrary = IDbContext.PlexLibraries.Include(x => x.TvShows).First();

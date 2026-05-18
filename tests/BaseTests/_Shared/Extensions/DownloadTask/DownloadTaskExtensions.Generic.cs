@@ -50,6 +50,7 @@ public static partial class DownloadTaskExtensions
                 break;
             case DownloadStatus.Downloading:
             case DownloadStatus.Paused:
+            case DownloadStatus.AutoPaused:
             case DownloadStatus.Error:
             case DownloadStatus.ServerUnreachable:
                 downloadTask.DataReceived = 1;
@@ -58,6 +59,7 @@ public static partial class DownloadTaskExtensions
             case DownloadStatus.DownloadFinished:
             case DownloadStatus.Moving:
             case DownloadStatus.MovePaused:
+            case DownloadStatus.AutoMovePaused:
             case DownloadStatus.MoveError:
                 downloadTask.DataReceived = downloadTask.DataTotal;
                 downloadTask.FileDataTransferred = 0;

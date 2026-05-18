@@ -183,7 +183,7 @@ public sealed class TorrentsInfoEndpoint : Endpoint<TorrentsInfoEndpointRequest,
         // Setting ratio_limit=0 with ratio=0 satisfies the (ratio_limit - ratio <= 0.001) check.
         var isReadyForRemoval =
             file.DownloadStatus
-            is DownloadStatus.Completed
+                is DownloadStatus.Completed
                 or DownloadStatus.MoveFinished
                 or DownloadStatus.DownloadFinished;
 
@@ -267,11 +267,15 @@ public sealed class TorrentsInfoEndpoint : Endpoint<TorrentsInfoEndpointRequest,
                 return "downloading";
             case DownloadStatus.Queued:
                 return "queuedDL";
-            case DownloadStatus.Stopped or DownloadStatus.Paused:
+            case DownloadStatus.Stopped:
+            case DownloadStatus.Paused:
+            case DownloadStatus.AutoPaused:
                 return "pausedDL";
             case DownloadStatus.Completed:
             case DownloadStatus.MoveFinished:
             case DownloadStatus.DownloadFinished:
+            case DownloadStatus.MovePaused:
+            case DownloadStatus.AutoMovePaused:
                 return "pausedUP";
             case DownloadStatus.Deleted:
             case DownloadStatus.Error:
@@ -280,8 +284,6 @@ public sealed class TorrentsInfoEndpoint : Endpoint<TorrentsInfoEndpointRequest,
                 return "error";
             case DownloadStatus.Moving:
                 return "moving";
-            case DownloadStatus.MovePaused:
-                return "pausedUP";
             case DownloadStatus.Unknown:
             default:
                 _log.Here()

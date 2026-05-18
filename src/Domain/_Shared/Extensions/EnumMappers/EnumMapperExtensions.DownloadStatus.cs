@@ -10,10 +10,12 @@ public static partial class EnumMapperExtensions
         ["Downloading"] = DownloadStatus.Downloading,
         ["DownloadFinished"] = DownloadStatus.DownloadFinished,
         ["Paused"] = DownloadStatus.Paused,
+        ["AutoPaused"] = DownloadStatus.AutoPaused,
         ["Stopped"] = DownloadStatus.Stopped,
         ["Deleted"] = DownloadStatus.Deleted,
         ["Moving"] = DownloadStatus.Moving,
         ["MovePaused"] = DownloadStatus.MovePaused,
+        ["AutoMovePaused"] = DownloadStatus.AutoMovePaused,
         ["MoveFinished"] = DownloadStatus.MoveFinished,
         ["Completed"] = DownloadStatus.Completed,
         ["ServerUnreachable"] = DownloadStatus.ServerUnreachable,
@@ -25,7 +27,12 @@ public static partial class EnumMapperExtensions
         ["SourceUnavailable"] = DownloadStatus.SourceUnavailable,
         ["Restarting"] = DownloadStatus.Restarting,
     };
-
+    
+    private static readonly Dictionary<DownloadStatus, string> _statusToString = _stringToStatus.ToDictionary(
+        x => x.Value,
+        x => x.Key
+    );
+    
     /// <summary>
     /// Converts string to <see cref="DownloadStatus"/> by a fast method.
     /// </summary>
@@ -38,6 +45,7 @@ public static partial class EnumMapperExtensions
             return status;
 
         _log.Here().Error("Failed to convert string {Value} to {DownloadStatus}", value, nameof(DownloadStatus));
+        
         throw new ArgumentOutOfRangeException(nameof(value), value, null);
     }
 
@@ -49,40 +57,16 @@ public static partial class EnumMapperExtensions
     /// <exception cref="ArgumentOutOfRangeException">Throws exception if value is not found.</exception>
     public static string ToDownloadStatusString(this DownloadStatus value)
     {
-        return value switch
-        {
-            DownloadStatus.Unknown => "Unknown",
-            DownloadStatus.Error => "Error",
-            DownloadStatus.Queued => "Queued",
-            DownloadStatus.Downloading => "Downloading",
-            DownloadStatus.DownloadFinished => "DownloadFinished",
-            DownloadStatus.Paused => "Paused",
-            DownloadStatus.Stopped => "Stopped",
-            DownloadStatus.Deleted => "Deleted",
-            DownloadStatus.Moving => "Moving",
-            DownloadStatus.MovePaused => "MovePaused",
-            DownloadStatus.MoveFinished => "MoveFinished",
-            DownloadStatus.Completed => "Completed",
-            DownloadStatus.ServerUnreachable => "ServerUnreachable",
-            DownloadStatus.MoveError => "MoveError",
-            DownloadStatus.AuthError => "AuthError",
-            DownloadStatus.StorageError => "StorageError",
-            DownloadStatus.DownloadClientError => "DownloadClientError",
-            DownloadStatus.IntegrityError => "IntegrityError",
-            DownloadStatus.SourceUnavailable => "SourceUnavailable",
-            DownloadStatus.Restarting => "Restarting",
-            _ => DefaultException(),
-        };
+        if (_statusToString.TryGetValue(value, out var statusString))
+            return statusString;
+        
+        _log.Here()
+            .Error(
+                "Failed to convert {Value} to string of type {NameOfDownloadStatus}",
+                value,
+                nameof(DownloadStatus)
+            );
 
-        string DefaultException()
-        {
-            _log.Here()
-                .Error(
-                    "Failed to convert {Value} to string of type {NameOfDownloadStatus}",
-                    value,
-                    nameof(DownloadStatus)
-                );
-            throw new ArgumentOutOfRangeException(nameof(value), value, null);
-        }
+        throw new ArgumentOutOfRangeException(nameof(value), value, null);
     }
 }

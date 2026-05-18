@@ -14,6 +14,7 @@ public static class DownloadTaskPhaseExtensions
             case DownloadStatus.Downloading:
             case DownloadStatus.Error:
             case DownloadStatus.Paused:
+            case DownloadStatus.AutoPaused:
             case DownloadStatus.Stopped:
             case DownloadStatus.Deleted:
             case DownloadStatus.ServerUnreachable:
@@ -28,6 +29,7 @@ public static class DownloadTaskPhaseExtensions
             case DownloadStatus.DownloadFinished:
             case DownloadStatus.Moving:
             case DownloadStatus.MovePaused:
+            case DownloadStatus.AutoMovePaused:
             case DownloadStatus.MoveFinished:
             case DownloadStatus.MoveError:
                 return DownloadTaskPhase.FileTransfer;

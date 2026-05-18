@@ -16,7 +16,9 @@ public static class DownloadTaskActions
         DownloadStatus.MoveError,
         DownloadStatus.Downloading,
         DownloadStatus.Paused,
+        DownloadStatus.AutoPaused,
         DownloadStatus.MovePaused,
+        DownloadStatus.AutoMovePaused,
         DownloadStatus.Stopped,
         DownloadStatus.Restarting,
         DownloadStatus.Moving,
@@ -53,7 +55,9 @@ public static class DownloadTaskActions
                 actions.Add(DownloadActions.Delete);
                 break;
             case DownloadStatus.Paused:
+            case DownloadStatus.AutoPaused:
             case DownloadStatus.MovePaused:
+            case DownloadStatus.AutoMovePaused:
                 actions.Add(DownloadActions.Start);
                 actions.Add(DownloadActions.Stop);
                 actions.Add(DownloadActions.Delete);

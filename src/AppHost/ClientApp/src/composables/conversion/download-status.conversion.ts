@@ -33,12 +33,16 @@ export function translateDownloadStatus(status: DownloadStatus) {
 			return t('general.download-status.server-unreachable');
 		case DownloadStatus.Paused:
 			return t('general.download-status.paused');
+		case DownloadStatus.AutoPaused:
+			return t('general.download-status.auto-paused');
 		case DownloadStatus.Queued:
 			return t('general.download-status.queued');
 		case DownloadStatus.Stopped:
 			return t('general.download-status.stopped');
 		case DownloadStatus.MovePaused:
 			return t('general.download-status.move-paused');
+		case DownloadStatus.AutoMovePaused:
+			return t('general.download-status.auto-move-paused');
 		case DownloadStatus.MoveFinished:
 			return t('general.download-status.move-finished');
 		case DownloadStatus.MoveError:

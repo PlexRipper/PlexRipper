@@ -44,8 +44,14 @@ public class RestartDownloadTaskEndpointIntegrationTests : BaseIntegrationTests
             CancellationToken
         );
 
+        var downloadTaskToRestart = await container.DbContext.DownloadTaskMovieFile
+            .AsNoTracking()
+            .OrderBy(x => x.Id)
+            .FirstAsync(CancellationToken);
+
         var seededMovieData = await container.DbContext.PlexMovieData
             .AsNoTracking()
+            .Where(x => x.PlexLibraryId == downloadTaskToRestart.PlexLibraryId)
             .OrderBy(x => x.Id)
             .FirstOrDefaultAsync(CancellationToken);
         seededMovieData.ShouldNotBeNull();

@@ -88,6 +88,13 @@ public class Boot : IHostedService
 
         await _schedulerService.SetupAsync();
 
+        if (!_appRuntimeInfo.IsIntegrationTestMode)
+        {
+            var bootQueueKickResult = await _downloadQueue.CheckDownloadQueueForAllServers(cancellationToken);
+            if (bootQueueKickResult.IsFailed)
+                bootQueueKickResult.LogError();
+        }
+
         var librarySyncListenerSetup = _librarySyncJobListener.Setup();
         if (librarySyncListenerSetup.IsFailed)
         {

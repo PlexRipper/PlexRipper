@@ -21,8 +21,8 @@ public class RecoverInterruptedDownloadsCommandUnitTests : BaseUnitTest<RecoverI
             }
         );
 
-        var movieFile = await IDbContext.DownloadTaskMovieFile.FirstAsync(CancellationToken);
-        var episodeFile = await IDbContext.DownloadTaskTvShowEpisodeFile.FirstAsync(CancellationToken);
+        var movieFile = await IDbContext.DownloadTaskMovieFile.OrderBy(x => x.Id).FirstAsync(CancellationToken);
+        var episodeFile = await IDbContext.DownloadTaskTvShowEpisodeFile.OrderBy(x => x.Id).FirstAsync(CancellationToken);
 
         await IDbContext
             .DownloadTaskMovieFile.Where(x => x.Id == movieFile.Id)
@@ -62,6 +62,16 @@ public class RecoverInterruptedDownloadsCommandUnitTests : BaseUnitTest<RecoverI
                     It.IsAny<CancellationToken>()
                 ),
                 Times.Once
+            );
+
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Verify(
+                x => x.OnStatusChangedAsync(
+                    It.IsAny<DownloadTaskKey>(),
+                    It.IsAny<DownloadStatus>(),
+                    It.IsAny<CancellationToken>()
+                ),
+                Times.Exactly(2)
             );
     }
 
@@ -84,8 +94,8 @@ public class RecoverInterruptedDownloadsCommandUnitTests : BaseUnitTest<RecoverI
             }
         );
 
-        var movieFile = await IDbContext.DownloadTaskMovieFile.FirstAsync(CancellationToken);
-        var episodeFile = await IDbContext.DownloadTaskTvShowEpisodeFile.FirstAsync(CancellationToken);
+        var movieFile = await IDbContext.DownloadTaskMovieFile.OrderBy(x => x.Id).FirstAsync(CancellationToken);
+        var episodeFile = await IDbContext.DownloadTaskTvShowEpisodeFile.OrderBy(x => x.Id).FirstAsync(CancellationToken);
 
         await IDbContext
             .DownloadTaskMovieFile.Where(x => x.Id == movieFile.Id)
@@ -126,6 +136,16 @@ public class RecoverInterruptedDownloadsCommandUnitTests : BaseUnitTest<RecoverI
                 ),
                 Times.Once
             );
+
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Verify(
+                x => x.OnStatusChangedAsync(
+                    It.IsAny<DownloadTaskKey>(),
+                    It.IsAny<DownloadStatus>(),
+                    It.IsAny<CancellationToken>()
+                ),
+                Times.Exactly(2)
+            );
     }
 
     [Test]
@@ -143,7 +163,7 @@ public class RecoverInterruptedDownloadsCommandUnitTests : BaseUnitTest<RecoverI
             }
         );
 
-        var movieFiles = await IDbContext.DownloadTaskMovieFile.Take(4).ToListAsync(CancellationToken);
+        var movieFiles = await IDbContext.DownloadTaskMovieFile.OrderBy(x => x.Id).Take(4).ToListAsync(CancellationToken);
         await IDbContext
             .DownloadTaskMovieFile.Where(x => x.Id == movieFiles[0].Id)
             .ExecuteUpdateAsync(p => p.SetProperty(x => x.DownloadStatus, DownloadStatus.Downloading), CancellationToken);
@@ -196,6 +216,15 @@ public class RecoverInterruptedDownloadsCommandUnitTests : BaseUnitTest<RecoverI
                 ),
                 Times.Never
             );
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Verify(
+                x => x.OnStatusChangedAsync(
+                    It.IsAny<DownloadTaskKey>(),
+                    It.IsAny<DownloadStatus>(),
+                    It.IsAny<CancellationToken>()
+                ),
+                Times.Exactly(2)
+            );
     }
 
     [Test]
@@ -213,7 +242,7 @@ public class RecoverInterruptedDownloadsCommandUnitTests : BaseUnitTest<RecoverI
             }
         );
 
-        var movieFiles = await IDbContext.DownloadTaskMovieFile.ToListAsync(CancellationToken);
+        var movieFiles = await IDbContext.DownloadTaskMovieFile.OrderBy(x => x.Id).ToListAsync(CancellationToken);
         await IDbContext
             .DownloadTaskMovieFile.Where(x => x.Id == movieFiles[0].Id)
             .ExecuteUpdateAsync(p => p.SetProperty(x => x.DownloadStatus, DownloadStatus.Paused), CancellationToken);

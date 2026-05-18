@@ -60,7 +60,7 @@ public class AutoPauseActiveDownloadsCommandHandler : ICommandHandler<AutoPauseA
                     {
                         _log.Here()
                             .Error(
-                                "Failed to auto-pause active task {DownloadTaskKey} during shutdown from {SchedulerSource} on pass {Pass} for PlexServer {PlexServerId}",
+                                "Failed to auto-pause active task {DownloadTaskKey} during shutdown on pass {Pass} for PlexServer {PlexServerId}",
                                 activeKey,
                                 pass,
                                 plexServerId

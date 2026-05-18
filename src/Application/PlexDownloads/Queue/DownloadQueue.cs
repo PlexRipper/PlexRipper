@@ -10,7 +10,6 @@ public class DownloadQueue : IDownloadQueue
     private readonly ILogger _log;
     private readonly IReaparrDbContextFactory _dbContextFactory;
     private readonly IDownloadTaskScheduler _downloadTaskScheduler;
-    private readonly IDownloadTaskUpdateDispatcher _downloadTaskUpdateDispatcher;
 
     private readonly Channel<int> _plexServersToCheckChannel = Channel.CreateUnbounded<int>();
 
@@ -19,14 +18,12 @@ public class DownloadQueue : IDownloadQueue
     public DownloadQueue(
         ILogger log,
         IReaparrDbContextFactory dbContextFactory,
-        IDownloadTaskScheduler downloadTaskScheduler,
-        IDownloadTaskUpdateDispatcher downloadTaskUpdateDispatcher
+        IDownloadTaskScheduler downloadTaskScheduler
     )
     {
         _log = log.ForContext<DownloadQueue>();
         _dbContextFactory = dbContextFactory;
         _downloadTaskScheduler = downloadTaskScheduler;
-        _downloadTaskUpdateDispatcher = downloadTaskUpdateDispatcher;
     }
 
     public bool IsBusy => _plexServersToCheckChannel.Reader.Count > 0;
@@ -101,41 +98,13 @@ public class DownloadQueue : IDownloadQueue
 
         var hasDownloadingTask = downloadTasks.Any(x => x.DownloadStatus == DownloadStatus.Downloading);
 
-        if (hasDownloadingTask)
+        // This avoids race condition where job is finishing but still registered in Quartz
+        if (hasDownloadingTask && await _downloadTaskScheduler.IsServerDownloading(plexServerId))
         {
-            var isServerDownloading = await _downloadTaskScheduler.IsServerDownloading(plexServerId);
-            if (isServerDownloading)
-            {
-                // Real, active download in flight. Avoids race condition where job is finishing
-                // but still registered in Quartz.
                 return Result
                     .Fail("Cannot select the next download task because server is already downloading one.")
                     .LogWarning();
             }
-
-            // Zombie: DB says Downloading but no Quartz job is running for it. This happens when
-            // the process is killed mid-download (OOM, container restart) so the DownloadFileCompleted
-            // handler never fires. Reset zombies to Queued so the picker can re-launch from the saved
-            // snapshot, then re-read the task list.
-            var zombies = FindAllLeavesByStatus(downloadTasks, DownloadStatus.Downloading);
-            foreach (var zombie in zombies)
-            {
-                _log.Here()
-                    .Warning(
-                        "Resetting zombie {DownloadStatus} task {DownloadTaskId} ({FullTitle}) on PlexServer {PlexServerName} — no scheduler job is running for it",
-                        DownloadStatus.Downloading,
-                        zombie.Id,
-                        zombie.FullTitle,
-                        plexServerName
-                    );
-                await _downloadTaskUpdateDispatcher.OnStatusChangedAsync(
-                    zombie.ToKey(),
-                    DownloadStatus.Queued,
-                    _token
-                );
-            }
-            downloadTasks = await dbContext.GetAllDownloadTasksByServerAsync(plexServerId, cancellationToken: _token);
-        }
 
         _log.Here()
             .Debug(
@@ -178,6 +147,10 @@ public class DownloadQueue : IDownloadQueue
         if (downloadingTask is not null)
             return Result.Fail("There is already a downloadTask downloading.").LogDebug();
 
+        var autoPausedTask = FindFirstLeafByStatus(downloadTasks, DownloadStatus.AutoPaused);
+        if (autoPausedTask is not null)
+            return Result.Ok(autoPausedTask);
+        
         var serverUnreachableTask = FindFirstLeafByStatus(downloadTasks, DownloadStatus.ServerUnreachable);
         if (serverUnreachableTask is not null)
             return Result.Ok(serverUnreachableTask);
@@ -218,86 +191,6 @@ public class DownloadQueue : IDownloadQueue
         }
 
         return null;
-    }
-
-    private static List<DownloadTaskGeneric> FindAllLeavesByStatus(
-        IEnumerable<DownloadTaskGeneric> downloadTasks,
-        DownloadStatus status
-    )
-    {
-        var matches = new List<DownloadTaskGeneric>();
-        CollectLeavesByStatus(downloadTasks, status, matches);
-        return matches;
-    }
-
-    private static void CollectLeavesByStatus(
-        IEnumerable<DownloadTaskGeneric> downloadTasks,
-        DownloadStatus status,
-        List<DownloadTaskGeneric> matches
-    )
-    {
-        foreach (var downloadTask in downloadTasks)
-        {
-            if (downloadTask.Children.Any())
-            {
-                CollectLeavesByStatus(downloadTask.Children, status, matches);
-                continue;
-            }
-
-            if (downloadTask.DownloadStatus == status)
-                matches.Add(downloadTask);
-        }
-    }
-
-    /// <inheritdoc />
-    public async Task<Result> RecoverInterruptedDownloadsAsync(CancellationToken cancellationToken = default)
-    {
-        using var dbContext = await _dbContextFactory.CreateAsync();
-
-        var plexServerIds = await dbContext.PlexServers
-            .AsNoTracking()
-            .Select(x => x.Id)
-            .ToListAsync(cancellationToken);
-
-        var totalReset = 0;
-        foreach (var plexServerId in plexServerIds)
-        {
-            var downloadTasks = await dbContext.GetAllDownloadTasksByServerAsync(
-                plexServerId,
-                cancellationToken: cancellationToken
-            );
-            var zombies = FindAllLeavesByStatus(downloadTasks, DownloadStatus.Downloading);
-            foreach (var zombie in zombies)
-            {
-                _log.Here()
-                    .Warning(
-                        "Recovering interrupted download task {DownloadTaskId} ({FullTitle}) on PlexServer {PlexServerId} — was left in {DownloadStatus} across a restart, resetting to {ResetStatus}",
-                        zombie.Id,
-                        zombie.FullTitle,
-                        plexServerId,
-                        DownloadStatus.Downloading,
-                        DownloadStatus.Queued
-                    );
-                await _downloadTaskUpdateDispatcher.OnStatusChangedAsync(
-                    zombie.ToKey(),
-                    DownloadStatus.Queued,
-                    cancellationToken
-                );
-                totalReset++;
-            }
-        }
-
-        if (totalReset > 0)
-        {
-            _log.Here()
-                .Information(
-                    "Recovered {Count} interrupted download task(s) left in {DownloadStatus} from a previous run",
-                    totalReset,
-                    DownloadStatus.Downloading
-                );
-        }
-
-        return Result.Ok();
     }
 
     private async Task ExecuteDownloadQueueCheck()

@@ -81,10 +81,8 @@ public class Boot : IHostedService
             return;
         }
 
-        // Reset any download tasks left in Downloading from a previous run before the scheduler
-        // starts. Without this, the queue picker treats a zombie task as an active download and
-        // never picks a new one for that server.
-        var recoverResult = await _downloadQueue.RecoverInterruptedDownloadsAsync(cancellationToken);
+
+        var recoverResult = await _commandExecutor.Send(new RecoverInterruptedDownloadsCommand(), cancellationToken);
         if (recoverResult.IsFailed)
             recoverResult.LogError();
 
@@ -110,6 +108,11 @@ public class Boot : IHostedService
     public async Task StopAsync(CancellationToken cancellationToken)
     {
         _log.Here().Information("Shutting down the container");
+
+        var autoPauseResult = await _commandExecutor.Send(new AutoPauseActiveDownloadsCommand(), cancellationToken);
+        if (autoPauseResult.IsFailed)
+            autoPauseResult.LogError();
+
         await _schedulerService.StopAsync();
     }
 

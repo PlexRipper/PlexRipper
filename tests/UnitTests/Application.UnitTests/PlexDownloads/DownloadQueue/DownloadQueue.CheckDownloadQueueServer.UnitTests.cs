@@ -115,7 +115,7 @@ public class DownloadQueueCheckDownloadQueueUnitTests : BaseUnitTest<DownloadQue
             .Verify(
                 x => x.OnStatusChangedAsync(
                     It.Is<DownloadTaskKey>(k => k.Id == zombieLeafId),
-                    DownloadStatus.Queued,
+                    DownloadStatus.AutoPaused,
                     It.IsAny<CancellationToken>()
                 ),
                 Times.Once()

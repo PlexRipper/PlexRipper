@@ -58,6 +58,7 @@ public class SchedulerService : ISchedulerService
             await SetupPlexServerStatusCheckJob();
             await SetupUpdateCheckJob();
             await SetupLibrarySyncJob();
+            await _commandExecutor.Send(new QueueCheckPlexLibraryUpdatesJobCommand(), CancellationToken.None);
         }
 
         return _scheduler.IsStarted

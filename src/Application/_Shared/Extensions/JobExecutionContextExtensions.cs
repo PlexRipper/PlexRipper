@@ -61,6 +61,10 @@ public static class JobExecutionContextExtensions
             case JobTypes.CheckForUpdateJob:
                 break;
 
+            // NOTE: CheckPlexLibrariesForUpdatesJob only dispatches queueing work and does not need a payload.
+            case JobTypes.CheckPlexLibrariesForUpdatesJob:
+                break;
+
             default:
                 jsonString = "{}";
                 break;

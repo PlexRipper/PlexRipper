@@ -56,7 +56,5 @@ public class DownloadQueueCheckDownloadQueueForAllServersUnitTests : BaseUnitTes
 
         if (lastException is not null)
             throw lastException;
-
-        assertion();
     }
 }

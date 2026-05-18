@@ -72,6 +72,8 @@ public class DownloadQueue : IDownloadQueue
             .Select(x => x.Id)
             .ToListAsync(cancellationToken);
 
+        cancellationToken.ThrowIfCancellationRequested();
+
         if (!plexServerIds.Any())
             return Result.Ok();
 

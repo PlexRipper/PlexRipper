@@ -33,6 +33,7 @@ public class AutoPauseActiveDownloadsCommandHandler : ICommandHandler<AutoPauseA
             .ToListAsync(cancellationToken);
 
         var totalPaused = 0;
+        var pauseFailure = Result.Ok();
 
         foreach (var plexServerId in plexServerIds)
         {
@@ -65,7 +66,8 @@ public class AutoPauseActiveDownloadsCommandHandler : ICommandHandler<AutoPauseA
                                 pass,
                                 plexServerId
                             );
-                        return pauseResult.LogError();
+                        pauseFailure.WithErrors(pauseResult.Errors);
+                        continue;
                     }
 
                     totalPaused++;
@@ -75,6 +77,9 @@ public class AutoPauseActiveDownloadsCommandHandler : ICommandHandler<AutoPauseA
 
         if (totalPaused > 0)
             _log.Here().Information("Auto-paused {Count} active download or move task(s) during shutdown", totalPaused);
+
+        if (pauseFailure.IsFailed)
+            return pauseFailure.LogError();
 
         return Result.Ok();
     }

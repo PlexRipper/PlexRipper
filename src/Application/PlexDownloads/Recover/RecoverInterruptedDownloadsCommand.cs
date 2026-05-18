@@ -29,13 +29,13 @@ public class RecoverInterruptedDownloadsCommandHandler : ICommandHandler<Recover
         var movieFileZombies = await dbContext.DownloadTaskMovieFile
             .AsNoTracking()
             .Where(x => x.DownloadStatus == DownloadStatus.Downloading)
-            .Select(x => new { x.Id, x.FullTitle, x.PlexServerId, Key = x.ToKey() })
+            .Select(x => new { x.Id, x.FullTitle, x.PlexServerId, x.PlexLibraryId })
             .ToListAsync(cancellationToken);
 
         var episodeFileZombies = await dbContext.DownloadTaskTvShowEpisodeFile
             .AsNoTracking()
             .Where(x => x.DownloadStatus == DownloadStatus.Downloading)
-            .Select(x => new { x.Id, x.FullTitle, x.PlexServerId, Key = x.ToKey() })
+            .Select(x => new { x.Id, x.FullTitle, x.PlexServerId, x.PlexLibraryId })
             .ToListAsync(cancellationToken);
 
         var totalReset = 0;
@@ -53,7 +53,13 @@ public class RecoverInterruptedDownloadsCommandHandler : ICommandHandler<Recover
                 );
 
             await _downloadTaskUpdateDispatcher.OnStatusChangedAsync(
-                zombie.Key,
+                new DownloadTaskKey
+                {
+                    Id = zombie.Id,
+                    Type = DownloadTaskType.MovieData,
+                    PlexServerId = zombie.PlexServerId,
+                    PlexLibraryId = zombie.PlexLibraryId,
+                },
                 DownloadStatus.AutoPaused,
                 cancellationToken
             );
@@ -74,7 +80,13 @@ public class RecoverInterruptedDownloadsCommandHandler : ICommandHandler<Recover
                 );
 
             await _downloadTaskUpdateDispatcher.OnStatusChangedAsync(
-                zombie.Key,
+                new DownloadTaskKey
+                {
+                    Id = zombie.Id,
+                    Type = DownloadTaskType.EpisodeData,
+                    PlexServerId = zombie.PlexServerId,
+                    PlexLibraryId = zombie.PlexLibraryId,
+                },
                 DownloadStatus.AutoPaused,
                 cancellationToken
             );

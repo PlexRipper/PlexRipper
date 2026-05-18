@@ -196,12 +196,12 @@ public class AutoPauseActiveDownloadsCommandUnitTests : BaseUnitTest<AutoPauseAc
         Mock.Mock<IDownloadTaskScheduler>()
             .Setup(x => x.GetCurrentlyDownloadingKeysByServer(serverId))
             .ReturnsAsync([fileTask.ToKey()])
-            .Verifiable(Times.Once);
+            .Verifiable(Times.Exactly(2));
 
         Mock.Mock<IMoveDownloadFileScheduler>()
             .Setup(x => x.GetCurrentlyMovingKeysByServer(serverId))
             .ReturnsAsync([])
-            .Verifiable(Times.Once);
+            .Verifiable(Times.Exactly(2));
 
         Mock.SetupCommand<Result>(c => c is PauseDownloadTaskCommand)
             .Returns(Task.FromResult(Result.Fail("pause failed")));

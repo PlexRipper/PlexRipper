@@ -1,7 +1,7 @@
 namespace Reaparr.Application;
 
 /// <summary>
-///  Reset any download tasks left in Downloading from a previous run before the scheduler starts. Without this, the queue picker treats a zombie task as an active download and never picks a new one for that server.
+/// Reset download tasks left in Downloading from a previous run before the scheduler starts.
 /// </summary>
 public record RecoverInterruptedDownloadsCommand : ICommand<Result>;
 
@@ -22,43 +22,64 @@ public class RecoverInterruptedDownloadsCommandHandler : ICommandHandler<Recover
         _downloadTaskUpdateDispatcher = downloadTaskUpdateDispatcher;
     }
 
-    public async Task<Result> ExecuteAsync(
-        RecoverInterruptedDownloadsCommand command,
-        CancellationToken cancellationToken)
+    public async Task<Result> ExecuteAsync(RecoverInterruptedDownloadsCommand command, CancellationToken cancellationToken)
     {
         using var dbContext = await _dbContextFactory.CreateAsync();
 
-        var plexServerIds = await dbContext.PlexServers
+        var movieFileZombies = await dbContext.DownloadTaskMovieFile
             .AsNoTracking()
-            .Select(x => x.Id)
+            .Where(x => x.DownloadStatus == DownloadStatus.Downloading)
+            .Select(x => new { x.Id, x.FullTitle, x.PlexServerId, Key = x.ToKey() })
+            .ToListAsync(cancellationToken);
+
+        var episodeFileZombies = await dbContext.DownloadTaskTvShowEpisodeFile
+            .AsNoTracking()
+            .Where(x => x.DownloadStatus == DownloadStatus.Downloading)
+            .Select(x => new { x.Id, x.FullTitle, x.PlexServerId, Key = x.ToKey() })
             .ToListAsync(cancellationToken);
 
         var totalReset = 0;
-        foreach (var plexServerId in plexServerIds)
+
+        foreach (var zombie in movieFileZombies)
         {
-            var downloadTasks = await dbContext.GetAllDownloadTasksByServerAsync(
-                plexServerId,
-                cancellationToken: cancellationToken
-            );
-            var zombies = FindAllLeavesByStatus(downloadTasks, DownloadStatus.Downloading);
-            foreach (var zombie in zombies)
-            {
-                _log.Here()
-                    .Warning(
-                        "Recovering interrupted download task {DownloadTaskId} ({FullTitle}) on PlexServer {PlexServerId} — was left in {DownloadStatus} across a restart, resetting to {ResetStatus}",
-                        zombie.Id,
-                        zombie.FullTitle,
-                        plexServerId,
-                        DownloadStatus.Downloading,
-                        DownloadStatus.AutoPaused
-                    );
-                await _downloadTaskUpdateDispatcher.OnStatusChangedAsync(
-                    zombie.ToKey(),
-                    DownloadStatus.AutoPaused,
-                    cancellationToken
+            _log.Here()
+                .Warning(
+                    "Recovering interrupted download task {DownloadTaskId} ({FullTitle}) on PlexServer {PlexServerId} — was left in {DownloadStatus} across a restart, resetting to {ResetStatus}",
+                    zombie.Id,
+                    zombie.FullTitle,
+                    zombie.PlexServerId,
+                    DownloadStatus.Downloading,
+                    DownloadStatus.AutoPaused
                 );
-                totalReset++;
-            }
+
+            await _downloadTaskUpdateDispatcher.OnStatusChangedAsync(
+                zombie.Key,
+                DownloadStatus.AutoPaused,
+                cancellationToken
+            );
+
+            totalReset++;
+        }
+
+        foreach (var zombie in episodeFileZombies)
+        {
+            _log.Here()
+                .Warning(
+                    "Recovering interrupted download task {DownloadTaskId} ({FullTitle}) on PlexServer {PlexServerId} — was left in {DownloadStatus} across a restart, resetting to {ResetStatus}",
+                    zombie.Id,
+                    zombie.FullTitle,
+                    zombie.PlexServerId,
+                    DownloadStatus.Downloading,
+                    DownloadStatus.AutoPaused
+                );
+
+            await _downloadTaskUpdateDispatcher.OnStatusChangedAsync(
+                zombie.Key,
+                DownloadStatus.AutoPaused,
+                cancellationToken
+            );
+
+            totalReset++;
         }
 
         if (totalReset > 0)
@@ -72,34 +93,5 @@ public class RecoverInterruptedDownloadsCommandHandler : ICommandHandler<Recover
         }
 
         return Result.Ok();
-    }
-
-    private static List<DownloadTaskGeneric> FindAllLeavesByStatus(
-        IEnumerable<DownloadTaskGeneric> downloadTasks,
-        DownloadStatus status
-    )
-    {
-        var matches = new List<DownloadTaskGeneric>();
-        CollectLeavesByStatus(downloadTasks, status, matches);
-        return matches;
-    }
-
-    private static void CollectLeavesByStatus(
-        IEnumerable<DownloadTaskGeneric> downloadTasks,
-        DownloadStatus status,
-        List<DownloadTaskGeneric> matches
-    )
-    {
-        foreach (var downloadTask in downloadTasks)
-        {
-            if (downloadTask.Children.Any())
-            {
-                CollectLeavesByStatus(downloadTask.Children, status, matches);
-                continue;
-            }
-
-            if (downloadTask.DownloadStatus == status)
-                matches.Add(downloadTask);
-        }
     }
 }

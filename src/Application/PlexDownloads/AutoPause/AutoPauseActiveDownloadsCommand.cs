@@ -29,20 +29,34 @@ public class AutoPauseActiveDownloadsCommandHandler : ICommandHandler<AutoPauseA
             .Select(x => x.Id)
             .ToListAsync(cancellationToken);
 
+        var totalPaused = 0;
+
         foreach (var plexServerId in plexServerIds)
         {
             var activeKeys = await _downloadTaskScheduler.GetCurrentlyDownloadingKeysByServer(plexServerId);
-            foreach (var activeKey in activeKeys)
+
+            foreach (var activeKey in activeKeys.Distinct())
             {
                 _log.Here()
                     .Information(
                         "Auto-pausing active download task {DownloadTaskKey} during shutdown",
                         activeKey
                     );
-                
-                await _commandExecutor.Send(new PauseDownloadTaskCommand(activeKey.Id, true), cancellationToken);
+
+                var pauseResult = await _commandExecutor.Send(
+                    new PauseDownloadTaskCommand(activeKey.Id, AutoPause: true),
+                    cancellationToken
+                );
+
+                if (pauseResult.IsFailed)
+                    return pauseResult.LogError();
+
+                totalPaused++;
             }
         }
+
+        if (totalPaused > 0)
+            _log.Here().Information("Auto-paused {Count} active download task(s) during shutdown", totalPaused);
 
         return Result.Ok();
     }

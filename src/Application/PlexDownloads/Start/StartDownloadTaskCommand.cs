@@ -12,6 +12,14 @@ public class StartDownloadTaskCommandValidator : AbstractValidator<StartDownload
 
 public class StartDownloadTaskCommandHandler : ICommandHandler<StartDownloadTaskCommand, Result>
 {
+    private static readonly DownloadStatus[] ResumablePausedStatuses =
+    [
+        DownloadStatus.Paused,
+        DownloadStatus.AutoPaused,
+        DownloadStatus.MovePaused,
+        DownloadStatus.AutoMovePaused,
+    ];
+
     private readonly IReaparrDbContext _dbContext;
     private readonly ICommandExecutor _commandExecutor;
     private readonly IDownloadTaskUpdateDispatcher _downloadTaskUpdateDispatcher;
@@ -46,9 +54,7 @@ public class StartDownloadTaskCommandHandler : ICommandHandler<StartDownloadTask
         if (!downloadableChildTasks.Any())
             return ResultExtensions.IsEmpty(nameof(downloadableChildTasks)).LogWarning();
 
-        var nextDownloadTask = downloadableChildTasks.FirstOrDefault(x =>
-            x.DownloadStatus == DownloadStatus.Paused || x.DownloadStatus == DownloadStatus.MovePaused
-        );
+        var nextDownloadTask = downloadableChildTasks.FirstOrDefault(x => ResumablePausedStatuses.Contains(x.DownloadStatus));
         nextDownloadTask ??= downloadableChildTasks.FirstOrDefault(x =>
             x.DownloadTaskPhase != DownloadTaskPhase.Completed
         );
@@ -71,9 +77,11 @@ public class StartDownloadTaskCommandHandler : ICommandHandler<StartDownloadTask
         {
             var statusesToQueue = nextDownloadTask.DownloadStatus switch
             {
-                DownloadStatus.Paused => new[] { DownloadStatus.Paused, DownloadStatus.MovePaused },
-                DownloadStatus.MovePaused => new[] { DownloadStatus.Paused, DownloadStatus.MovePaused },
-                DownloadStatus.Stopped => new[] { DownloadStatus.Stopped },
+                DownloadStatus.Paused
+                    or DownloadStatus.AutoPaused
+                    or DownloadStatus.MovePaused
+                    or DownloadStatus.AutoMovePaused => ResumablePausedStatuses,
+                DownloadStatus.Stopped => [DownloadStatus.Stopped],
                 _ => [],
             };
 

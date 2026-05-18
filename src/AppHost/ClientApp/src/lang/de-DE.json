@@ -524,8 +524,10 @@
             "completed": "Vollendet",
             "move-error": "Verschiebe Fehler",
             "move-finished": "Verschieben abgeschlossen",
+            "auto-move-paused": "Automatische Bewegung pausiert",
             "move-paused": "Verschieben pausiert",
-            "restarting": "Neustart"
+            "restarting": "Neustart",
+            "auto-paused": "Automatisch pausiert"
         },
         "video-quality": {
             "quality-1-unknown": "Unknown",

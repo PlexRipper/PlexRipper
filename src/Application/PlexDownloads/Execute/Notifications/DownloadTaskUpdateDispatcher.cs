@@ -90,14 +90,14 @@ public class DownloadTaskUpdateDispatcher : BackgroundService, IDownloadTaskUpda
 
             if (hasStatusChanged)
             {
-                if (newStatus is DownloadStatus.Paused)
+                if (newStatus is DownloadStatus.Paused or DownloadStatus.AutoPaused)
                     await PersistBufferedProgressBeforePauseAsync(dbContext, key, cancellationToken);
 
                 await SetDownloadStatusAsync(dbContext, key, newStatus, cancellationToken);
                 await LogStatusChangeAsync(dbContext, key, newStatus, cancellationToken);
                 ResetProgressJourneyTrackingIfNeeded(key.Id, newStatus);
 
-                if (newStatus is DownloadStatus.Paused)
+                if (newStatus is DownloadStatus.Paused or DownloadStatus.AutoPaused)
                     await dbContext.ClearDownloadSpeed(key, cancellationToken);
             }
             else
@@ -154,7 +154,7 @@ public class DownloadTaskUpdateDispatcher : BackgroundService, IDownloadTaskUpda
         DirectDownloadSnapshot? snapshot = null
     )
     {
-        if (_statusByNodeId.GetValueOrDefault(key.Id) is DownloadStatus.Paused or DownloadStatus.Deleted)
+        if (_statusByNodeId.GetValueOrDefault(key.Id) is DownloadStatus.Paused or DownloadStatus.AutoPaused or DownloadStatus.Deleted)
             return;
 
         var update = new BufferedProgressUpdate

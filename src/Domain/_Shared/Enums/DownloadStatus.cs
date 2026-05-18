@@ -50,89 +50,101 @@ public enum DownloadStatus
     /// </summary>
     [JsonStringEnumMemberName(nameof(MovePaused))]
     MovePaused = 6,
+    
+    /// <summary>
+    /// Move process is auto-paused by the system (shutdown/crash recovery) and can be auto-resumed.
+    /// </summary>
+    [JsonStringEnumMemberName(nameof(AutoMovePaused))]
+    AutoMovePaused = 7,
 
     /// <summary>
     /// Move download file to destination phase has completed successfully.
     /// </summary>
     [JsonStringEnumMemberName(nameof(MoveFinished))]
-    MoveFinished = 7,
+    MoveFinished = 8,
 
     /// <summary>
     /// Full download task workflow completed successfully.
     /// Terminal success state.
     /// </summary>
     [JsonStringEnumMemberName(nameof(Completed))]
-    Completed = 8,
+    Completed = 9,
 
     /// <summary>
     /// Task is paused and can typically be resumed without resetting progress.
     /// </summary>
     [JsonStringEnumMemberName(nameof(Paused))]
-    Paused = 9,
+    Paused = 10,
+
+    /// <summary>
+    /// Download is auto-paused by the system (shutdown/crash recovery) and can be auto-resumed.
+    /// </summary>
+    [JsonStringEnumMemberName(nameof(AutoPaused))]
+    AutoPaused = 11,
 
     /// <summary>
     /// Task was explicitly stopped/cancelled and is no longer progressing.
     /// Restart is required to continue.
     /// </summary>
     [JsonStringEnumMemberName(nameof(Stopped))]
-    Stopped = 10,
+    Stopped = 12,
 
     /// <summary>
     /// Task has been deleted and must not be processed further.
     /// Terminal removed state.
     /// </summary>
     [JsonStringEnumMemberName(nameof(Deleted))]
-    Deleted = 11,
+    Deleted = 13,
 
     /// <summary>
     /// Source server was unreachable (offline or transient network failure).
     /// Recoverable when connectivity is restored.
     /// </summary>
     [JsonStringEnumMemberName(nameof(ServerUnreachable))]
-    ServerUnreachable = 12,
+    ServerUnreachable = 14,
 
     /// <summary>
     /// Authentication/authorization failed against the source.
     /// User intervention is typically required before retry succeeds.
     /// </summary>
     [JsonStringEnumMemberName(nameof(AuthError))]
-    AuthError = 13,
+    AuthError = 15,
 
     /// <summary>
     /// Local storage could not be accessed or lacked required capacity/permissions.
     /// </summary>
     [JsonStringEnumMemberName(nameof(StorageError))]
-    StorageError = 14,
+    StorageError = 16,
 
     /// <summary>
     /// Requested source media is unavailable at origin (missing, inaccessible, or removed).
     /// </summary>
     [JsonStringEnumMemberName(nameof(SourceUnavailable))]
-    SourceUnavailable = 15,
+    SourceUnavailable = 17,
 
     /// <summary>
     /// Download execution failed inside the client pipeline (for example segment/mux/tool/process failure).
     /// Use when failure is client-side and should be distinguished from <see cref="ServerUnreachable"/> and <see cref="SourceUnavailable"/>.
     /// </summary>
     [JsonStringEnumMemberName(nameof(DownloadClientError))]
-    DownloadClientError = 16,
+    DownloadClientError = 18,
 
     /// <summary>
     /// Downloaded content failed integrity verification after transfer completed.
     /// Use when bytes were received but validation of expected file correctness failed and a clean re-download is required.
     /// </summary>
     [JsonStringEnumMemberName(nameof(IntegrityError))]
-    IntegrityError = 17,
+    IntegrityError = 19,
 
     /// <summary>
     /// Move/post-download relocation failed while transferring files to destination.
     /// </summary>
     [JsonStringEnumMemberName(nameof(MoveError))]
-    MoveError = 18,
+    MoveError = 20,
 
     /// <summary>
     /// Task is in a transient restart transition before re-entering normal processing.
     /// </summary>
     [JsonStringEnumMemberName(nameof(Restarting))]
-    Restarting = 19,
+    Restarting = 21,
 }

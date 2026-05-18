@@ -101,10 +101,10 @@ public class DownloadQueue : IDownloadQueue
         // This avoids race condition where job is finishing but still registered in Quartz
         if (hasDownloadingTask && await _downloadTaskScheduler.IsServerDownloading(plexServerId))
         {
-            return Result
-                .Fail("Cannot select the next download task because server is already downloading one.")
-                .LogWarning();
-        }
+                return Result
+                    .Fail("Cannot select the next download task because server is already downloading one.")
+                    .LogWarning();
+            }
 
         _log.Here()
             .Debug(
@@ -147,6 +147,10 @@ public class DownloadQueue : IDownloadQueue
         if (downloadingTask is not null)
             return Result.Fail("There is already a downloadTask downloading.").LogDebug();
 
+        var autoPausedTask = FindFirstLeafByStatus(downloadTasks, DownloadStatus.AutoPaused);
+        if (autoPausedTask is not null)
+            return Result.Ok(autoPausedTask);
+        
         var serverUnreachableTask = FindFirstLeafByStatus(downloadTasks, DownloadStatus.ServerUnreachable);
         if (serverUnreachableTask is not null)
             return Result.Ok(serverUnreachableTask);

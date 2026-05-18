@@ -81,6 +81,11 @@ public class Boot : IHostedService
             return;
         }
 
+
+        var recoverResult = await _commandExecutor.Send(new RecoverInterruptedDownloadsCommand(), cancellationToken);
+        if (recoverResult.IsFailed)
+            recoverResult.LogError();
+
         await _schedulerService.SetupAsync();
 
         var librarySyncListenerSetup = _librarySyncJobListener.Setup();
@@ -103,6 +108,11 @@ public class Boot : IHostedService
     public async Task StopAsync(CancellationToken cancellationToken)
     {
         _log.Here().Information("Shutting down the container");
+
+        var autoPauseResult = await _commandExecutor.Send(new AutoPauseActiveDownloadsCommand(), cancellationToken);
+        if (autoPauseResult.IsFailed)
+            autoPauseResult.LogError();
+
         await _schedulerService.StopAsync();
     }
 

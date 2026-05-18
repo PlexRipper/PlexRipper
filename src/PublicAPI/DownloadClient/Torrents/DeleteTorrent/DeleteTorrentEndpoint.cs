@@ -244,7 +244,9 @@ public sealed class DeleteTorrentEndpoint : Endpoint<DeleteTorrentRequest>
                 is DownloadStatus.Downloading
                     or DownloadStatus.Queued
                     or DownloadStatus.Moving
+                    or DownloadStatus.AutoMovePaused
                     or DownloadStatus.MovePaused
+                    or DownloadStatus.AutoPaused
                     or DownloadStatus.Restarting;
 
         var movieTask = _dbContext

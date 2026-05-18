@@ -524,8 +524,10 @@
             "completed": "Zakończony",
             "move-error": "Błąd przenoszenia",
             "move-finished": "Przenoszenie zakończone",
+            "auto-move-paused": "Automatyczne poruszanie się wstrzymane",
             "move-paused": "Przenoszenie wstrzymane",
-            "restarting": "Ponowne uruchamianie"
+            "restarting": "Ponowne uruchamianie",
+            "auto-paused": "Automatyczne wstrzymanie"
         },
         "video-quality": {
             "quality-1-unknown": "Unknown",

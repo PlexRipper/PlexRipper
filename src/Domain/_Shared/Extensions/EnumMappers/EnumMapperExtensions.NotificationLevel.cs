@@ -79,9 +79,11 @@ public static partial class EnumMapperExtensions
             case DownloadStatus.DownloadFinished:
             case DownloadStatus.Moving:
             case DownloadStatus.MovePaused:
+            case DownloadStatus.AutoMovePaused:
             case DownloadStatus.MoveFinished:
             case DownloadStatus.Completed:
             case DownloadStatus.Paused:
+            case DownloadStatus.AutoPaused:
             case DownloadStatus.Stopped:
             case DownloadStatus.Queued:
             case DownloadStatus.Deleted:

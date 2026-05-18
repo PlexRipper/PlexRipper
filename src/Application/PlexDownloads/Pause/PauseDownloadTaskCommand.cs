@@ -5,7 +5,7 @@ namespace Reaparr.Application;
 /// </summary>
 /// <param name="DownloadTaskGuid">The id of the <see cref="DownloadTaskGeneric"/> to Pause.</param>
 /// <returns>If successful a list of the DownloadTasks that were Paused.</returns>
-public record PauseDownloadTaskCommand(Guid DownloadTaskGuid) : ICommand<Result>;
+public record PauseDownloadTaskCommand(Guid DownloadTaskGuid, bool AutoPause = false) : ICommand<Result>;
 
 public class PauseDownloadTaskCommandValidator : AbstractValidator<PauseDownloadTaskCommand>
 {
@@ -68,7 +68,7 @@ public class PauseDownloadTaskCommandHandler : ICommandHandler<PauseDownloadTask
             {
                 await _downloadTaskUpdateDispatcher.OnStatusChangedAsync(
                     downloadTaskKey,
-                    DownloadStatus.Paused,
+                    command.AutoPause ? DownloadStatus.AutoPaused : DownloadStatus.Paused,
                     cancellationToken
                 );
                 continue;
@@ -89,11 +89,12 @@ public class PauseDownloadTaskCommandHandler : ICommandHandler<PauseDownloadTask
 
                 var resetMoveProgressResult = await _dbContext.ResetDownloadTaskProgress(
                     downloadTaskKey,
-                    DownloadStatus.MovePaused,
+                    command.AutoPause ? DownloadStatus.AutoMovePaused : DownloadStatus.MovePaused,
                     cancellationToken
                 );
                 if (resetMoveProgressResult.IsFailed)
                     return resetMoveProgressResult.LogError();
+
                 continue;
             }
 
@@ -102,7 +103,7 @@ public class PauseDownloadTaskCommandHandler : ICommandHandler<PauseDownloadTask
             {
                 await _downloadTaskUpdateDispatcher.OnStatusChangedAsync(
                     downloadTaskKey,
-                    DownloadStatus.Paused,
+                    command.AutoPause ? DownloadStatus.AutoPaused : DownloadStatus.Paused,
                     cancellationToken
                 );
                 continue;
@@ -114,7 +115,7 @@ public class PauseDownloadTaskCommandHandler : ICommandHandler<PauseDownloadTask
 
             await _downloadTaskUpdateDispatcher.OnStatusChangedAsync(
                 downloadTaskKey,
-                DownloadStatus.Paused,
+                command.AutoPause ? DownloadStatus.AutoPaused : DownloadStatus.Paused,
                 cancellationToken
             );
         }

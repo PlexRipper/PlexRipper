@@ -8,6 +8,14 @@ public static partial class MockDatabase
 {
     private static readonly Serilog.ILogger _log = LogFactory.Create(typeof(MockDatabase));
 
+    // Unit tests run in parallel, but SQLite shared-cache in-memory migrations plus
+    // EFCore.BulkExtensions seed operations are not reliable when many test databases
+    // are being created at the same time. Without this gate, suite runs can leave
+    // partially seeded media graphs (for example movies without media data or TV shows
+    // rolled back after FK failures), while the same tests pass when run alone.
+    // Keep database names unique per test; only serialize the setup/migration phase.
+    private static readonly SemaphoreSlim SetupLock = new(1, 1);
+
     /// <summary>
     /// NaturalSortComparer uses InvariantCultureIgnoreCase for deterministic test results.
     /// Note: If UI-facing code uses CurrentCultureIgnoreCase, this difference is intentional
@@ -293,40 +301,50 @@ public static partial class MockDatabase
 
         var (reaparrContext, authContext) = context;
 
-        reaparrContext.Migrate();
-        authContext.Migrate();
+        // Serialize the setup block only. The resulting in-memory database remains
+        // isolated by its unique name and can be used normally by the test after seeding.
+        await SetupLock.WaitAsync();
+        try
+        {
+            reaparrContext.Migrate();
+            authContext.Migrate();
 
-        // PlexServers and Libraries added
-        _log.Here()
-            .Debug(
-                "Setting up {NameOfReaparrDbContext} for {DatabaseName}",
-                nameof(ReaparrDbContext),
-                reaparrContext.DatabaseName
-            );
+            // PlexServers and Libraries added
+            _log.Here()
+                .Debug(
+                    "Setting up {NameOfReaparrDbContext} for {DatabaseName}",
+                    nameof(ReaparrDbContext),
+                    reaparrContext.DatabaseName
+                );
 
-        if (config.ShouldHavePlexServer)
-            reaparrContext = await reaparrContext.AddPlexServers(seed, options);
+            if (config.ShouldHavePlexServer)
+                reaparrContext = await reaparrContext.AddPlexServers(seed, options);
 
-        if (config.ShouldHavePlexLibrary)
-            reaparrContext = await reaparrContext.AddPlexLibraries(seed, options);
+            if (config.ShouldHavePlexLibrary)
+                reaparrContext = await reaparrContext.AddPlexLibraries(seed, options);
 
-        if (config.PlexAccountCount > 0)
-            reaparrContext = await reaparrContext.AddPlexAccount(seed, options);
+            if (config.PlexAccountCount > 0)
+                reaparrContext = await reaparrContext.AddPlexAccount(seed, options);
 
-        if (config.MovieCount > 0)
-            reaparrContext = await reaparrContext.AddPlexMovies(seed, options);
+            if (config.MovieCount > 0)
+                reaparrContext = await reaparrContext.AddPlexMovies(seed, options);
 
-        if (config.TvShowCount > 0)
-            reaparrContext = await reaparrContext.AddPlexTvShows(seed, options);
+            if (config.TvShowCount > 0)
+                reaparrContext = await reaparrContext.AddPlexTvShows(seed, options);
 
-        if (config.MovieDownloadTasksCount > 0)
-            reaparrContext = await reaparrContext.AddDownloadTaskMovies(seed, pathProvider, appRuntimeInfo, options);
+            if (config.MovieDownloadTasksCount > 0)
+                reaparrContext = await reaparrContext.AddDownloadTaskMovies(seed, pathProvider, appRuntimeInfo, options);
 
-        if (config.TvShowDownloadTasksCount > 0)
-            reaparrContext = await reaparrContext.AddDownloadTaskTvShows(seed, pathProvider, appRuntimeInfo, options);
+            if (config.TvShowDownloadTasksCount > 0)
+                reaparrContext = await reaparrContext.AddDownloadTaskTvShows(seed, pathProvider, appRuntimeInfo, options);
 
-        if (config.AccountHasAccessToAllLibraries)
-            reaparrContext = await reaparrContext.AddPlexAccountLibraries();
+            if (config.AccountHasAccessToAllLibraries)
+                reaparrContext = await reaparrContext.AddPlexAccountLibraries();
+        }
+        finally
+        {
+            SetupLock.Release();
+        }
 
         reaparrContext.ShouldNotBeNull();
     }

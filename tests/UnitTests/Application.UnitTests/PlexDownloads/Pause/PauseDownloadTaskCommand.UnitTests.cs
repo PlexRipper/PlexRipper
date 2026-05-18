@@ -521,4 +521,99 @@ public class PauseDownloadTaskCommandUnitTests : BaseUnitTest<PauseDownloadTaskC
         after.DirectDownloadSnapshot!.SaveProgress.ShouldBe(snapshot.SaveProgress);
         after.DirectDownloadSnapshot.Chunks.Count.ShouldBe(1);
     }
+
+    [Test]
+    public async Task ShouldSetAutoPaused_WhenAutoPauseIsTrueAndStatusIsDownloadFinished()
+    {
+        await SetupDatabase(67001, config => config.MovieDownloadTasksCount = 1);
+
+        var parentTask = await IDbContext.DownloadTaskMovie.AsTracking().FirstAsync(CancellationToken);
+        var childTask = await IDbContext.DownloadTaskMovieFile.AsTracking().FirstAsync(CancellationToken);
+        childTask.DownloadStatus = DownloadStatus.DownloadFinished;
+        childTask.DownloadTaskPhase.ShouldBe(DownloadStatus.DownloadFinished.ToDownloadTaskPhase());
+        await IDbContext.SaveChangesAsync(CancellationToken);
+
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Setup(x =>
+                x.OnStatusChangedAsync(It.IsAny<DownloadTaskKey>(), It.IsAny<DownloadStatus>(), It.IsAny<CancellationToken>())
+            )
+            .Returns(Task.CompletedTask);
+
+        var result = await Sut.ExecuteAsync(new PauseDownloadTaskCommand(parentTask.Id, AutoPause: true), CancellationToken);
+
+        result.IsSuccess.ShouldBeTrue();
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Verify(
+                x => x.OnStatusChangedAsync(
+                    It.Is<DownloadTaskKey>(k => k.Id == childTask.Id),
+                    DownloadStatus.AutoPaused,
+                    It.IsAny<CancellationToken>()
+                ),
+                Times.Once
+            );
+    }
+
+    [Test]
+    public async Task ShouldSetAutoMovePaused_WhenAutoPauseIsTrueAndStatusIsMoving()
+    {
+        await SetupDatabase(67002, config => config.MovieDownloadTasksCount = 1);
+
+        var parentTask = await IDbContext.DownloadTaskMovie.AsTracking().FirstAsync(CancellationToken);
+        var childTask = await IDbContext.DownloadTaskMovieFile.AsTracking().FirstAsync(CancellationToken);
+
+        childTask.DownloadStatus = DownloadStatus.Moving;
+        childTask.DownloadTaskPhase.ShouldBe(DownloadStatus.Moving.ToDownloadTaskPhase());
+        childTask.FileTransferSpeed = 2048;
+        await IDbContext.SaveChangesAsync(CancellationToken);
+
+        Mock.Mock<IMoveDownloadFileScheduler>()
+            .Setup(x => x.IsDownloadFileMoving(It.IsAny<DownloadTaskKey>()))
+            .ReturnsAsync(false);
+
+        var result = await Sut.ExecuteAsync(new PauseDownloadTaskCommand(parentTask.Id, AutoPause: true), CancellationToken);
+
+        result.IsSuccess.ShouldBeTrue();
+
+        var updated = await IDbContext.GetDownloadTaskFileAsync(childTask.ToKey(), CancellationToken);
+        updated.ShouldNotBeNull();
+        updated.DownloadStatus.ShouldBe(DownloadStatus.AutoMovePaused);
+        updated.FileTransferSpeed.ShouldBe(0);
+    }
+
+    [Test]
+    public async Task ShouldSetAutoPaused_WhenAutoPauseIsTrueAndTaskIsNotActivelyDownloading()
+    {
+        await SetupDatabase(67003, config => config.MovieDownloadTasksCount = 1);
+
+        var parentTask = await IDbContext.DownloadTaskMovie.AsTracking().FirstAsync(CancellationToken);
+        var childTask = await IDbContext.DownloadTaskMovieFile.AsTracking().FirstAsync(CancellationToken);
+
+        childTask.DownloadStatus = DownloadStatus.Queued;
+        childTask.DownloadTaskPhase.ShouldBe(DownloadStatus.Queued.ToDownloadTaskPhase());
+        await IDbContext.SaveChangesAsync(CancellationToken);
+
+        Mock.Mock<IDownloadTaskScheduler>()
+            .Setup(x => x.IsDownloading(It.IsAny<DownloadTaskKey>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(false);
+
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Setup(x =>
+                x.OnStatusChangedAsync(It.IsAny<DownloadTaskKey>(), It.IsAny<DownloadStatus>(), It.IsAny<CancellationToken>())
+            )
+            .Returns(Task.CompletedTask);
+
+        var result = await Sut.ExecuteAsync(new PauseDownloadTaskCommand(parentTask.Id, AutoPause: true), CancellationToken);
+
+        result.IsSuccess.ShouldBeTrue();
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Verify(
+                x => x.OnStatusChangedAsync(
+                    It.Is<DownloadTaskKey>(k => k.Id == childTask.Id),
+                    DownloadStatus.AutoPaused,
+                    It.IsAny<CancellationToken>()
+                ),
+                Times.Once
+            );
+    }
 }
+

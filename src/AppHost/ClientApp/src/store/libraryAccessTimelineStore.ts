@@ -59,7 +59,7 @@ export const useLibraryAccessTimelineStore = defineStore(StoreNames.LibraryAcces
 		},
 		isLoading: false,
 		selectedRowId: '',
-		zoomPreset: '30d',
+		zoomPreset: '7d',
 	};
 
 	const state = reactive<ILibraryAccessTimelineStoreState>(cloneDeep(defaultState));
@@ -129,9 +129,66 @@ export const useLibraryAccessTimelineStore = defineStore(StoreNames.LibraryAcces
 		return `${hours}h`;
 	}
 
+	function getFilteredEvents(options?: { ignoreLibraryFilter?: boolean; ignoreDateFilter?: boolean }): PlexLibraryAccessTimelineEventDTO[] {
+		const ignoreDateFilter = options?.ignoreDateFilter ?? false;
+		const fromMs = !ignoreDateFilter && state.filters.fromUtc ? new Date(state.filters.fromUtc).getTime() : null;
+		const toMs = !ignoreDateFilter && state.filters.toUtc ? new Date(state.filters.toUtc).getTime() : null;
+		const ignoreLibraryFilter = options?.ignoreLibraryFilter ?? false;
+
+		return state.timeline.events.filter((event) => {
+			if (state.filters.plexServerId && event.plexServerId !== state.filters.plexServerId) {
+				return false;
+			}
+
+			if (!ignoreLibraryFilter && state.filters.plexLibraryId && event.plexLibraryId !== state.filters.plexLibraryId) {
+				return false;
+			}
+
+			const eventMs = new Date(event.createdAt).getTime();
+			if (!Number.isFinite(eventMs)) {
+				return false;
+			}
+
+			if ((fromMs !== null) && eventMs < fromMs) {
+				return false;
+			}
+
+			if ((toMs !== null) && eventMs > toMs) {
+				return false;
+			}
+
+			return true;
+		});
+	}
+
+	function intervalOverlapsDateWindow(interval: LibraryAccessTimelineInterval, fromMs: number | null, toMs: number | null): boolean {
+		if (fromMs === null && toMs === null) {
+			return true;
+		}
+
+		const intervalStartMs = interval.start.getTime();
+		const intervalEndMs = interval.end.getTime();
+		if (!Number.isFinite(intervalStartMs) || !Number.isFinite(intervalEndMs)) {
+			return false;
+		}
+
+		if (fromMs !== null && intervalEndMs < fromMs) {
+			return false;
+		}
+
+		if (toMs !== null && intervalStartMs > toMs) {
+			return false;
+		}
+
+		return true;
+	}
+
 	function buildIntervals(): LibraryAccessTimelineInterval[] {
 		const now = new Date();
-		const groupedEvents = groupBy(orderBy(state.timeline.events, (event) => event.createdAt, 'asc'), (event) => buildRowId(event.plexServerId, event.plexLibraryId));
+		const fromMs = state.filters.fromUtc ? new Date(state.filters.fromUtc).getTime() : null;
+		const toMs = state.filters.toUtc ? new Date(state.filters.toUtc).getTime() : null;
+		const filteredEvents = getFilteredEvents({ ignoreDateFilter: true });
+		const groupedEvents = groupBy(orderBy(filteredEvents, (event) => event.createdAt, 'asc'), (event) => buildRowId(event.plexServerId, event.plexLibraryId));
 
 		return Object.entries(groupedEvents).flatMap(([rowId, events]) => {
 			const intervals: LibraryAccessTimelineInterval[] = [];
@@ -185,13 +242,24 @@ export const useLibraryAccessTimelineStore = defineStore(StoreNames.LibraryAcces
 				});
 			}
 
-			return intervals;
+			return intervals.filter((interval) => intervalOverlapsDateWindow(interval, fromMs, toMs));
 		});
 	}
 
 	const getters = {
 		timelineIntervals: computed((): LibraryAccessTimelineInterval[] => buildIntervals()),
 		currentStateRows: computed((): PlexLibraryAccessCurrentStateLibraryDTO[] => compact(state.timeline.currentState.flatMap((server) => server.libraries))),
+		filteredLibraryIdsForSelectedServer: computed((): number[] => {
+			if (!state.filters.plexServerId) {
+				return [];
+			}
+
+			const eventLibraryIds = getFilteredEvents({ ignoreLibraryFilter: true })
+				.map((event) => event.plexLibraryId)
+				.filter((id): id is number => typeof id === 'number');
+
+			return Array.from(new Set(eventLibraryIds)).sort((left, right) => left - right);
+		}),
 	};
 
 	return {

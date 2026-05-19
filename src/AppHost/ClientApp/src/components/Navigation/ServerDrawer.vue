@@ -22,7 +22,15 @@
 							name="mdi-home"
 							size="24px"
 							left />
-						{{ serverStore.getServerName(server.id) }}
+						<span class="server-name-text">
+							{{ serverStore.getServerName(server.id) }}
+						</span>
+						<q-icon
+							v-if="isServerSyncing(server.id)"
+							name="mdi-sync"
+							size="14px"
+							class="server-sync-icon"
+							aria-label="server syncing" />
 					</div>
 				</q-item-section>
 				<q-item-section side>
@@ -127,6 +135,11 @@ function filterLibraries(plexServerId: number): PlexLibraryDTO[] {
 	return libraryStore.getLibrariesByServerId(plexServerId);
 }
 
+function isServerSyncing(serverId: number): boolean {
+	const libraries = filterLibraries(serverId);
+	return libraries.some((library) => libraryStore.getIsLibrarySyncing(library.id));
+}
+
 function openMediaPage(library: PlexLibraryDTO): void {
 	switch (library.type) {
 		case PlexMediaType.Movie:
@@ -170,9 +183,25 @@ function runReSyncAccount(): void {
 .server-name {
   width: 190px;
   display: flex;
+  align-items: center;
+  gap: 6px;
   line-height: 24px;
   align-content: center;
   text-overflow: ellipsis;
+}
+
+.server-name-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.server-sync-icon {
+  opacity: 0.72;
+  color: #ff8a80;
+  filter: drop-shadow(0 0 4px rgba(255, 138, 128, 0.35));
+  transform-origin: 50% 50%;
+  animation: server-sync-spin 1.9s linear infinite, server-sync-breathe 2.8s ease-in-out infinite;
 }
 
 .server-panels {
@@ -212,9 +241,9 @@ function runReSyncAccount(): void {
     right: 0;
     bottom: 0;
     background: linear-gradient(90deg,
-      transparent,
-      rgba(211, 47, 47, 0.2),
-      transparent
+    transparent,
+    rgba(211, 47, 47, 0.2),
+    transparent
     );
     animation: shimmer 3s ease-in-out infinite;
     pointer-events: none;
@@ -224,11 +253,11 @@ function runReSyncAccount(): void {
 @keyframes glow-pulse {
   0%, 100% {
     box-shadow: inset 4px 0 20px rgba(211, 47, 47, 0.4),
-                0 0 15px rgba(211, 47, 47, 0.2);
+    0 0 15px rgba(211, 47, 47, 0.2);
   }
   50% {
     box-shadow: inset 4px 0 30px rgba(229, 115, 115, 0.5),
-                0 0 20px rgba(229, 115, 115, 0.3);
+    0 0 20px rgba(229, 115, 115, 0.3);
   }
 }
 
@@ -244,12 +273,41 @@ function runReSyncAccount(): void {
 @keyframes text-glow {
   0%, 100% {
     text-shadow: 0 0 8px rgba(239, 154, 154, 0.6),
-                 0 0 12px rgba(211, 47, 47, 0.4);
+    0 0 12px rgba(211, 47, 47, 0.4);
   }
   50% {
     text-shadow: 0 0 12px rgba(239, 154, 154, 0.8),
-                 0 0 18px rgba(239, 154, 154, 0.6),
-                 0 0 24px rgba(211, 47, 47, 0.4);
+    0 0 18px rgba(239, 154, 154, 0.6),
+    0 0 24px rgba(211, 47, 47, 0.4);
+  }
+}
+
+@keyframes server-sync-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(-360deg);
+  }
+}
+
+@keyframes server-sync-breathe {
+  0%,
+  100% {
+    opacity: 0.62;
+    color: #ff8a80;
+    filter: drop-shadow(0 0 2px rgba(255, 138, 128, 0.25));
+  }
+  50% {
+    opacity: 0.95;
+    color: #ffffff;
+    filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.4));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .server-sync-icon {
+    animation: none !important;
   }
 }
 </style>

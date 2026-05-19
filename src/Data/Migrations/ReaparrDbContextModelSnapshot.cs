@@ -988,53 +988,6 @@ namespace Reaparr.Data.Migrations
                     b.ToTable("PlexLibraries");
                 });
 
-            modelBuilder.Entity("Reaparr.Domain.PlexLibraryAccessHistoryEvent", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER")
-                        .HasColumnOrder(0);
-
-                    b.Property<DateTimeOffset>("OccurredAtUtc")
-                        .HasColumnType("TEXT");
-
-                    b.Property<int>("PlexAccountId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("PlexAccountNameSnapshot")
-                        .HasColumnType("TEXT");
-
-                    b.Property<int?>("PlexLibraryId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("PlexLibraryNameSnapshot")
-                        .HasColumnType("TEXT");
-
-                    b.Property<int?>("PlexServerId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("PlexServerNameSnapshot")
-                        .HasColumnType("TEXT");
-
-                    b.Property<Guid>("RefreshRunId")
-                        .HasColumnType("TEXT");
-
-                    b.Property<int>("State")
-                        .HasColumnType("INTEGER");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("RefreshRunId");
-
-                    b.HasIndex("PlexAccountId", "OccurredAtUtc");
-
-                    b.HasIndex("PlexAccountId", "PlexLibraryId", "OccurredAtUtc");
-
-                    b.HasIndex("PlexAccountId", "PlexServerId", "OccurredAtUtc");
-
-                    b.ToTable("PlexLibraryAccessHistoryEvents");
-                });
-
             modelBuilder.Entity("Reaparr.Domain.PlexLibraryActors", b =>
                 {
                     b.Property<int>("PlexActorId")
@@ -1144,6 +1097,10 @@ namespace Reaparr.Data.Migrations
                         .HasColumnType("INTEGER")
                         .HasColumnOrder(18);
 
+                    b.Property<int>("Quality")
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(17);
+
                     b.Property<long>("MediaSize")
                         .HasColumnType("INTEGER")
                         .HasColumnOrder(7);
@@ -1165,10 +1122,6 @@ namespace Reaparr.Data.Migrations
 
                     b.Property<int>("PlexServerId")
                         .HasColumnType("INTEGER");
-
-                    b.Property<int>("Quality")
-                        .HasColumnType("INTEGER")
-                        .HasColumnOrder(17);
 
                     b.Property<double>("Rating")
                         .HasColumnType("REAL")
@@ -1208,9 +1161,9 @@ namespace Reaparr.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("PlexServerId");
-
                     b.HasIndex("Quality");
+
+                    b.HasIndex("PlexServerId");
 
                     b.HasIndex("SearchTitle");
 
@@ -1674,6 +1627,10 @@ namespace Reaparr.Data.Migrations
                         .HasColumnType("INTEGER")
                         .HasColumnOrder(18);
 
+                    b.Property<int>("Quality")
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(17);
+
                     b.Property<long>("MediaSize")
                         .HasColumnType("INTEGER")
                         .HasColumnOrder(7);
@@ -1695,10 +1652,6 @@ namespace Reaparr.Data.Migrations
 
                     b.Property<int>("PlexServerId")
                         .HasColumnType("INTEGER");
-
-                    b.Property<int>("Quality")
-                        .HasColumnType("INTEGER")
-                        .HasColumnOrder(17);
 
                     b.Property<double>("Rating")
                         .HasColumnType("REAL")
@@ -1738,9 +1691,9 @@ namespace Reaparr.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("PlexServerId");
-
                     b.HasIndex("Quality");
+
+                    b.HasIndex("PlexServerId");
 
                     b.HasIndex("SearchTitle");
 

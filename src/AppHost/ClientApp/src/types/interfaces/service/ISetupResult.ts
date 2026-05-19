@@ -22,6 +22,7 @@ export enum StoreNames {
 	PageSetup = 'PageSetup',
 	AccountDialogStore = 'AccountDialogStore',
 	MediaOverviewStore = 'MediaOverviewStore',
+	LibraryAccessTimelineStore = 'LibraryAccessTimelineStore',
 }
 
 export interface ISetupResult {

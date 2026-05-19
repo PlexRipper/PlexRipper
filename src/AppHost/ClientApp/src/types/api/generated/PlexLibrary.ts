@@ -15,6 +15,7 @@ import type { RequestParams } from "./http-client";
 import type {
   BaseResultDTO,
   LibrarySyncJobQueueDTO,
+  PlexLibraryAccessTimelineDTO,
   PlexLibraryDTO,
   PlexMediaMetadataDTO,
   PlexMediaType,
@@ -61,6 +62,22 @@ export class PlexLibrary {
       responseType: "json",
       ...params,
     }).pipe(apiCheckPipe<PlexLibraryDTO>);
+
+  /**
+   * No description
+   * * @tags Plexlibrary
+   * @name GetPlexLibraryAccessTimelineEndpoint
+   * @request GET:/api/PlexLibrary/access-timeline
+   * @secure
+   */
+  getPlexLibraryAccessTimelineEndpoint = (params: RequestParams = {}) =>
+    axiosObservable<PlexLibraryAccessTimelineDTO>({
+      url: `/api/PlexLibrary/access-timeline`,
+      method: "GET",
+      secure: true,
+      responseType: "json",
+      ...params,
+    }).pipe(apiCheckPipe<PlexLibraryAccessTimelineDTO>);
 
   /**
    * No description
@@ -166,6 +183,9 @@ export class PlexLibraryPaths {
 
   static getPlexLibraryByIdEndpoint = (plexLibraryId: number) =>
     queryString.stringifyUrl({ url: `/api/PlexLibrary/${plexLibraryId}` });
+
+  static getPlexLibraryAccessTimelineEndpoint = () =>
+    queryString.stringifyUrl({ url: `/api/PlexLibrary/access-timeline` });
 
   static getAllPlexLibrariesEndpoint = () =>
     queryString.stringifyUrl({ url: `/api/PlexLibrary` });

@@ -28,7 +28,7 @@ public class GetPlexLibraryAccessTimelineEndpoint : BaseEndpointWithoutRequest<P
     {
         _log.Here().DebugApiCall(HttpContext);
 
-        var events = await _dbContext.PlexLibraryAccessHistoryEvents
+        var events = (await _dbContext.PlexLibraryAccessHistoryEvents
             .GroupJoin(
                 _dbContext.PlexAccounts,
                 historyEvent => historyEvent.PlexAccountId,
@@ -68,13 +68,14 @@ public class GetPlexLibraryAccessTimelineEndpoint : BaseEndpointWithoutRequest<P
                     PlexLibraryId = x.HistoryEvent.PlexLibraryId,
                     PlexLibraryName = library != null ? library.Title : x.HistoryEvent.PlexLibraryNameSnapshot,
                     State = x.HistoryEvent.State,
-                    OccurredAtUtc = x.HistoryEvent.OccurredAtUtc,
+                    CreatedAt = x.HistoryEvent.CreatedAt,
                 }
             )
-            .OrderBy(x => x.OccurredAtUtc)
+            .ToListAsync(ct))
+            .OrderBy(x => x.CreatedAt)
             .ThenBy(x => x.PlexServerName)
             .ThenBy(x => x.PlexLibraryName)
-            .ToListAsync(ct);
+            .ToList();
 
         var response = new PlexLibraryAccessTimelineDTO
         {
@@ -91,7 +92,7 @@ public class GetPlexLibraryAccessTimelineEndpoint : BaseEndpointWithoutRequest<P
         foreach (var eventGroup in events.GroupBy(x => new { x.PlexAccountId, x.PlexServerId, x.PlexLibraryId }))
         {
             var accessibleLibrary = ToAccessibleLibraryOrDefault(
-                eventGroup.OrderBy(x => x.OccurredAtUtc).ThenBy(x => x.Id).ToList()
+                eventGroup.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id).ToList()
             );
             if (accessibleLibrary is not null)
                 accessibleLibraries.Add(accessibleLibrary);
@@ -125,8 +126,8 @@ public class GetPlexLibraryAccessTimelineEndpoint : BaseEndpointWithoutRequest<P
             PlexLibraryName = latestEvent.PlexLibraryName,
             PlexAccountId = latestEvent.PlexAccountId,
             PlexAccountName = latestEvent.PlexAccountName,
-            GrantedAt = latestEvent.OccurredAtUtc,
-            LastChangedAt = latestEvent.OccurredAtUtc,
+            GrantedAt = latestEvent.CreatedAt,
+            LastChangedAt = latestEvent.CreatedAt,
         };
     }
 }

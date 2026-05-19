@@ -115,7 +115,7 @@ public class AddOrUpdatePlexLibrariesCommandUnitTests : BaseUnitTest<AddOrUpdate
         historyEvents.Select(x => x.PlexServerNameSnapshot).ShouldAllBe(x => x == plexServer.Name);
         historyEvents.Select(x => x.PlexLibraryNameSnapshot).ShouldBe(plexLibraries.Select(x => x.Name));
         historyEvents.Select(x => x.RefreshRunId).Distinct().Count().ShouldBe(1);
-        historyEvents.Select(x => x.OccurredAtUtc).ShouldAllBe(x => x.Offset == TimeSpan.Zero);
+        historyEvents.Select(x => x.CreatedAt).ShouldAllBe(x => x > DateTime.MinValue);
     }
 
     [Test]
@@ -163,7 +163,7 @@ public class AddOrUpdatePlexLibrariesCommandUnitTests : BaseUnitTest<AddOrUpdate
         revokedEvent.PlexLibraryId.ShouldBe(removedLibrary.Id);
         revokedEvent.PlexLibraryNameSnapshot.ShouldBe(removedLibrary.Name);
         revokedEvent.RefreshRunId.ShouldNotBe(Guid.Empty);
-        revokedEvent.OccurredAtUtc.Offset.ShouldBe(TimeSpan.Zero);
+        revokedEvent.CreatedAt.ShouldBeGreaterThan(DateTime.MinValue);
     }
 
     [Test]

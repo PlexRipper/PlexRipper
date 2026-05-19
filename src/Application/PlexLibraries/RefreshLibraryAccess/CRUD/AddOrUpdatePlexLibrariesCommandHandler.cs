@@ -200,7 +200,7 @@ public class AddOrUpdatePlexLibrariesCommandHandler
     private async Task AddHistoryEventsAsync(PlexAccount plexAccount, CancellationToken cancellationToken)
     {
         var refreshRunId = Guid.NewGuid();
-        var occurredAtUtc = DateTimeOffset.UtcNow;
+        var createdAt = DateTime.UtcNow;
 
         foreach (var rapport in _list)
         {
@@ -217,7 +217,7 @@ public class AddOrUpdatePlexLibrariesCommandHandler
                         PlexLibraryId = row.PlexLibraryId,
                         PlexLibraryNameSnapshot = row.PlexLibraryName,
                         State = row.State,
-                        OccurredAtUtc = occurredAtUtc,
+                        CreatedAt = createdAt,
                     },
                     cancellationToken
                 );

@@ -18,6 +18,6 @@ public class PlexLibraryAccessHistoryEvent : BaseEntity
 
     public required PlexAccessState State { get; init; }
 
-    public required DateTimeOffset OccurredAtUtc { get; init; }
+    public required DateTime CreatedAt { get; init; }
 
 }

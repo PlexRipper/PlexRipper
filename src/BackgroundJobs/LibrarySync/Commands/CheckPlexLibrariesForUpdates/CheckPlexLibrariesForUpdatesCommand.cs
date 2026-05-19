@@ -35,34 +35,47 @@ public class CheckPlexLibrariesForUpdatesCommandHandler
         CheckPlexLibrariesForUpdatesCommand command,
         CancellationToken cancellationToken)
     {
-        var servers = await _dbContext
-            .PlexServers.Select(x => new
-            {
-                x.Id,
-            })
+        var enabledServerIds = await _dbContext
+            .PlexServers
+            .AsNoTracking()
+            .Select(x => x.Id)
             .ToListAsync(cancellationToken);
 
-        if (!servers.Any())
+        if (!enabledServerIds.Any())
         {
             _log.Here().Debug("No enabled Plex servers found for automatic library sync");
             return Result.Ok();
         }
 
-        var accountId = await _dbContext.PlexAccounts.Select(x => x.Id).FirstOrDefaultAsync(cancellationToken);
+        var accountMappings = await _dbContext
+            .PlexAccountServers
+            .AsNoTracking()
+            .Where(x => enabledServerIds.Contains(x.PlexServerId))
+            .GroupBy(x => x.PlexServerId)
+            .Select(x => new
+            {
+                PlexServerId = x.Key,
+                PlexAccountId = x.Min(y => y.PlexAccountId),
+            })
+            .ToDictionaryAsync(x => x.PlexServerId, x => x.PlexAccountId, cancellationToken);
 
-        if (accountId <= 0)
+        var serversWithTokenMappings = new List<int>();
+        foreach (var serverId in enabledServerIds)
         {
-            _log.Here().Warning("No Plex account found for automatic library sync");
-            return Result.Ok();
-        }
+            if (!accountMappings.TryGetValue(serverId, out var accountId) || accountId <= 0)
+            {
+                _log.Here()
+                    .Warning(
+                        "No Plex account-server token mapping found for PlexServer with id {PlexServerId}; skipping refresh",
+                        serverId
+                    );
+                continue;
+            }
 
-        var enabledServerIds = new List<int>();
-        foreach (var server in servers)
-        {
-            enabledServerIds.Add(server.Id);
+            serversWithTokenMappings.Add(serverId);
 
             var refreshResult = await _commandExecutor.Send(
-                new RefreshLibraryAccessCommand(accountId, server.Id),
+                new RefreshLibraryAccessCommand(accountId, serverId),
                 cancellationToken
             );
 
@@ -70,15 +83,15 @@ public class CheckPlexLibrariesForUpdatesCommandHandler
                 refreshResult.ToResult().LogError();
         }
 
-        if (!enabledServerIds.Any())
+        if (!serversWithTokenMappings.Any())
         {
-            _log.Here().Debug("No Plex servers are enabled for automatic library sync");
+            _log.Here().Debug("No Plex servers with token mappings found for automatic library sync");
             return Result.Ok();
         }
 
         var outdatedLibraryIds = await _dbContext
             .PlexLibraries.AsNoTracking()
-            .Where(x => enabledServerIds.Contains(x.PlexServerId))
+            .Where(x => serversWithTokenMappings.Contains(x.PlexServerId))
             .Where(x => x.Type == PlexMediaType.Movie || x.Type == PlexMediaType.TvShow)
             .Where(x => x.UpdatedAt != null && (x.SyncedAt == null || x.SyncedAt < x.UpdatedAt))
             .Select(x => x.Id)

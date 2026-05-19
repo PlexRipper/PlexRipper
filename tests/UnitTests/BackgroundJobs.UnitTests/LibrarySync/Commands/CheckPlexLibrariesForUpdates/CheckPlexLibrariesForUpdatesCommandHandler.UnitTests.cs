@@ -15,9 +15,25 @@ public class CheckPlexLibrariesForUpdatesCommandHandlerUnitTests
             config.PlexAccountCount = 1;
         });
 
-        var serverIds = await IDbContext.PlexServers.AsNoTracking().Select(x => x.Id).ToListAsync(CancellationToken);
+        await IDbContext.PlexServers
+            .IgnoreQueryFilters()
+            .ExecuteUpdateAsync(x => x.SetProperty(y => y.IsEnabled, true), CancellationToken);
+
+        var serverIds = await IDbContext.PlexServers.Select(x => x.Id).ToListAsync(CancellationToken);
         var accountId = await IDbContext.PlexAccounts.Select(x => x.Id).FirstAsync(CancellationToken);
 
+        await IDbContext.PlexAccountServers.ExecuteDeleteAsync(CancellationToken);
+        IDbContext.PlexAccountServers.AddRange(
+            serverIds.Select(serverId => new PlexAccountServer
+            {
+                PlexAccountId = accountId,
+                PlexServerId = serverId,
+                AuthToken = $"token-{serverId}",
+                AuthTokenCreationDate = DateTime.UtcNow,
+                IsServerOwned = true,
+            })
+        );
+        await IDbContext.SaveChangesAsync(CancellationToken);
 
         Mock.Mock<ICommandExecutor>()
             .Setup(x =>
@@ -46,6 +62,66 @@ public class CheckPlexLibrariesForUpdatesCommandHandlerUnitTests
     }
 
     [Test]
+    public async Task ShouldSkipServerWithoutTokenMapping_WhenRefreshingLibraryAccess()
+    {
+        // Arrange
+        await SetupDatabase(4503, config =>
+        {
+            config.PlexServerCount = 2;
+            config.PlexAccountCount = 1;
+        });
+
+        await IDbContext.PlexServers
+            .IgnoreQueryFilters()
+            .ExecuteUpdateAsync(x => x.SetProperty(y => y.IsEnabled, true), CancellationToken);
+
+        var serverIds = await IDbContext.PlexServers
+            .OrderBy(x => x.Id)
+            .Select(x => x.Id)
+            .ToListAsync(CancellationToken);
+
+        var accountId = await IDbContext.PlexAccounts.Select(x => x.Id).FirstAsync(CancellationToken);
+
+        await IDbContext.PlexAccountServers.ExecuteDeleteAsync(CancellationToken);
+        IDbContext.PlexAccountServers.Add(
+            new PlexAccountServer
+            {
+                PlexAccountId = accountId,
+                PlexServerId = serverIds[0],
+                AuthToken = "token-only-first-server",
+                AuthTokenCreationDate = DateTime.UtcNow,
+                IsServerOwned = true,
+            }
+        );
+        await IDbContext.SaveChangesAsync(CancellationToken);
+
+        Mock.Mock<ICommandExecutor>()
+            .Setup(x =>
+                x.Send(
+                    It.Is<RefreshLibraryAccessCommand>(cmd =>
+                        cmd.PlexAccountId == accountId && cmd.PlexServerId == serverIds[0]
+                    ),
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .ReturnsAsync(Result.Ok(new PlexLibraryAccessRefreshResponse { Reports = [], OfflineServers = [] }))
+            .Verifiable(Times.Once());
+
+        Mock.Mock<ICommandExecutor>()
+            .Setup(x => x.Send(It.IsAny<QueueLibrarySyncJobCommand>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result.Ok())
+            .Verifiable(Times.Never());
+
+        // Act
+        var result = await Sut.ExecuteAsync(new CheckPlexLibrariesForUpdatesCommand(), CancellationToken);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        result.Errors.Count.ShouldBe(0);
+        Mock.Mock<ICommandExecutor>().Verify();
+    }
+
+    [Test]
     public async Task ShouldQueueOnlyOutdatedLibraries_WhenUpdatedAtIsNewerThanSyncedAt()
     {
         // Arrange
@@ -57,6 +133,10 @@ public class CheckPlexLibrariesForUpdatesCommandHandlerUnitTests
             config.PlexMovieLibraryCount = 3;
             config.PlexTvShowLibraryCount = 0;
         });
+
+        await IDbContext.PlexServers
+            .IgnoreQueryFilters()
+            .ExecuteUpdateAsync(x => x.SetProperty(y => y.IsEnabled, true), CancellationToken);
 
         var serverId = await IDbContext.PlexServers.Select(x => x.Id).FirstAsync(CancellationToken);
         var libraries = await IDbContext.PlexLibraries.AsTracking().OrderBy(x => x.Id).ToListAsync(CancellationToken);
@@ -74,6 +154,18 @@ public class CheckPlexLibrariesForUpdatesCommandHandlerUnitTests
         var expectedLibraryIds = new[] { libraries[0].Id, libraries[2].Id };
         var accountId = await IDbContext.PlexAccounts.Select(x => x.Id).FirstAsync(CancellationToken);
 
+        await IDbContext.PlexAccountServers.ExecuteDeleteAsync(CancellationToken);
+        IDbContext.PlexAccountServers.Add(
+            new PlexAccountServer
+            {
+                PlexAccountId = accountId,
+                PlexServerId = serverId,
+                AuthToken = "token-outdated",
+                AuthTokenCreationDate = DateTime.UtcNow,
+                IsServerOwned = true,
+            }
+        );
+        await IDbContext.SaveChangesAsync(CancellationToken);
 
         Mock.Mock<ICommandExecutor>()
             .Setup(x =>

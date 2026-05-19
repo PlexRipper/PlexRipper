@@ -22,6 +22,8 @@ public sealed class ReaparrDbContext : DbContext, IReaparrDbContext, IReaparrDbC
 
     public DbSet<PlexLibrary> PlexLibraries { get; set; }
 
+    public DbSet<PlexLibraryAccessHistoryEvent> PlexLibraryAccessHistoryEvents { get; set; }
+
     public DbSet<PlexActor> PlexActors { get; set; }
 
     public DbSet<PlexGenre> PlexGenres { get; set; }

@@ -187,12 +187,42 @@ public class AddOrUpdatePlexLibrariesCommandHandler
             }
         }
 
+        await AddHistoryEventsAsync(plexAccount, cancellationToken);
+
         await _dbContext.SaveChangesAsync(cancellationToken);
 
         foreach (var rapport in _list)
             _log.Here().Information(rapport.ToString());
 
         return Result.Ok(_list);
+    }
+
+    private async Task AddHistoryEventsAsync(PlexAccount plexAccount, CancellationToken cancellationToken)
+    {
+        var refreshRunId = Guid.NewGuid();
+        var occurredAtUtc = DateTimeOffset.UtcNow;
+
+        foreach (var rapport in _list)
+        {
+            foreach (var row in rapport.Data.Where(x => x.State is PlexAccessState.Granted or PlexAccessState.Revoked))
+            {
+                await _dbContext.PlexLibraryAccessHistoryEvents.AddAsync(
+                    new PlexLibraryAccessHistoryEvent
+                    {
+                        RefreshRunId = refreshRunId,
+                        PlexAccountId = plexAccount.Id,
+                        PlexAccountNameSnapshot = plexAccount.DisplayName,
+                        PlexServerId = rapport.PlexServerId,
+                        PlexServerNameSnapshot = rapport.PlexServerName,
+                        PlexLibraryId = row.PlexLibraryId,
+                        PlexLibraryNameSnapshot = row.PlexLibraryName,
+                        State = row.State,
+                        OccurredAtUtc = occurredAtUtc,
+                    },
+                    cancellationToken
+                );
+            }
+        }
     }
 
     private PlexLibraryAccessRapport FindOrCreate(int plexServerId, string plexAccountName, string plexServerName)

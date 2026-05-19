@@ -10,61 +10,63 @@ public interface IReaparrDbContext : IDisposable
 
     #region Tables
 
-    public DbSet<PlexAccount> PlexAccounts { get; }
+    DbSet<PlexAccount> PlexAccounts { get; }
 
-    public DbSet<DownloadTaskMovieFileLog> DownloadTaskMovieFileLogs { get; }
+    DbSet<DownloadTaskMovieFileLog> DownloadTaskMovieFileLogs { get; }
 
-    public DbSet<DownloadTaskTvShowEpisodeFileLog> DownloadTaskTvShowEpisodeFileLogs { get; }
+    DbSet<DownloadTaskTvShowEpisodeFileLog> DownloadTaskTvShowEpisodeFileLogs { get; }
 
-    public DbSet<FolderPath> FolderPaths { get; }
+    DbSet<FolderPath> FolderPaths { get; }
 
-    public DbSet<Notification> Notifications { get; }
+    DbSet<Notification> Notifications { get; }
 
-    public DbSet<PlexLibrary> PlexLibraries { get; }
+    DbSet<PlexLibrary> PlexLibraries { get; }
+
+    DbSet<PlexLibraryAccessHistoryEvent> PlexLibraryAccessHistoryEvents { get; }
 
     #region PlexMedia
 
-    public DbSet<PlexActor> PlexActors { get; }
+    DbSet<PlexActor> PlexActors { get; }
 
-    public DbSet<PlexGenre> PlexGenres { get; }
+    DbSet<PlexGenre> PlexGenres { get; }
 
-    public DbSet<PlexCountry> PlexCountries { get; }
+    DbSet<PlexCountry> PlexCountries { get; }
 
     #endregion
 
     #region PlexMovie
 
-    public DbSet<PlexMovie> PlexMovies { get; }
+    DbSet<PlexMovie> PlexMovies { get; }
 
-    public DbSet<PlexMovieMediaData> PlexMovieData { get; }
+    DbSet<PlexMovieMediaData> PlexMovieData { get; }
 
     #endregion
 
     #region PlexTvShow
 
-    public DbSet<PlexTvShow> PlexTvShows { get; }
+    DbSet<PlexTvShow> PlexTvShows { get; }
 
-    public DbSet<PlexTvShowMediaQuality> PlexTvShowMediaQualities { get; }
+    DbSet<PlexTvShowMediaQuality> PlexTvShowMediaQualities { get; }
 
-    public DbSet<PlexTvShowSeason> PlexTvShowSeason { get; }
+    DbSet<PlexTvShowSeason> PlexTvShowSeason { get; }
 
-    public DbSet<PlexTvShowSeasonMediaQuality> PlexTvShowSeasonMediaQualities { get; }
+    DbSet<PlexTvShowSeasonMediaQuality> PlexTvShowSeasonMediaQualities { get; }
 
-    public DbSet<PlexTvShowEpisode> PlexTvShowEpisodes { get; }
+    DbSet<PlexTvShowEpisode> PlexTvShowEpisodes { get; }
 
-    public DbSet<PlexTvShowEpisodeMediaData> PlexTvShowEpisodeData { get; }
+    DbSet<PlexTvShowEpisodeMediaData> PlexTvShowEpisodeData { get; }
 
     #endregion
 
     #region PlexServers
 
-    public DbSet<PlexServer> PlexServers { get; }
+    DbSet<PlexServer> PlexServers { get; }
 
-    public DbSet<PlexServerConnection> PlexServerConnections { get; }
+    DbSet<PlexServerConnection> PlexServerConnections { get; }
 
-    public DbSet<PlexServerStatus> PlexServerStatuses { get; }
+    DbSet<PlexServerStatus> PlexServerStatuses { get; }
 
-    public DbSet<LibrarySyncJobQueue> LibrarySyncJobQueues { get; }
+    DbSet<LibrarySyncJobQueue> LibrarySyncJobQueues { get; }
 
     #endregion
 
@@ -72,72 +74,72 @@ public interface IReaparrDbContext : IDisposable
 
     #region DownloadTasks
 
-    public DbSet<DownloadTaskMovie> DownloadTaskMovie { get; }
+    DbSet<DownloadTaskMovie> DownloadTaskMovie { get; }
 
-    public DbSet<DownloadTaskMovieFile> DownloadTaskMovieFile { get; }
+    DbSet<DownloadTaskMovieFile> DownloadTaskMovieFile { get; }
 
-    public DbSet<DownloadTaskTvShow> DownloadTaskTvShow { get; }
+    DbSet<DownloadTaskTvShow> DownloadTaskTvShow { get; }
 
-    public DbSet<DownloadTaskTvShowSeason> DownloadTaskTvShowSeason { get; }
+    DbSet<DownloadTaskTvShowSeason> DownloadTaskTvShowSeason { get; }
 
-    public DbSet<DownloadTaskTvShowEpisode> DownloadTaskTvShowEpisode { get; }
+    DbSet<DownloadTaskTvShowEpisode> DownloadTaskTvShowEpisode { get; }
 
-    public DbSet<DownloadTaskTvShowEpisodeFile> DownloadTaskTvShowEpisodeFile { get; }
+    DbSet<DownloadTaskTvShowEpisodeFile> DownloadTaskTvShowEpisodeFile { get; }
 
     #endregion
 
     #region JoinTables
 
-    public DbSet<PlexAccountServer> PlexAccountServers { get; }
+    DbSet<PlexAccountServer> PlexAccountServers { get; }
 
-    public DbSet<PlexAccountLibrary> PlexAccountLibraries { get; }
+    DbSet<PlexAccountLibrary> PlexAccountLibraries { get; }
 
-    public DbSet<PlexLibraryActors> PlexLibraryActors { get; }
+    DbSet<PlexLibraryActors> PlexLibraryActors { get; }
 
-    public DbSet<PlexLibraryCountries> PlexLibraryCountries { get; }
+    DbSet<PlexLibraryCountries> PlexLibraryCountries { get; }
 
-    public DbSet<PlexLibraryGenres> PlexLibraryGenres { get; }
+    DbSet<PlexLibraryGenres> PlexLibraryGenres { get; }
 
-    public DbSet<PlexMovieActors> PlexMovieActors { get; }
+    DbSet<PlexMovieActors> PlexMovieActors { get; }
 
-    public DbSet<PlexMovieCountries> PlexMovieCountries { get; }
+    DbSet<PlexMovieCountries> PlexMovieCountries { get; }
 
-    public DbSet<PlexMovieGenres> PlexMovieGenres { get; }
+    DbSet<PlexMovieGenres> PlexMovieGenres { get; }
 
-    public DbSet<PlexTvShowActors> PlexTvShowActors { get; }
+    DbSet<PlexTvShowActors> PlexTvShowActors { get; }
 
-    public DbSet<PlexTvShowGenres> PlexTvShowGenres { get; }
+    DbSet<PlexTvShowGenres> PlexTvShowGenres { get; }
 
-    public DbSet<PlexTvShowCountries> PlexTvShowCountries { get; }
+    DbSet<PlexTvShowCountries> PlexTvShowCountries { get; }
 
     #endregion
 
-    public string DatabaseName { get; }
+    string DatabaseName { get; }
 
     #endregion Properties
 
-    public Task BulkReadAsync<T>(
+    Task BulkReadAsync<T>(
         IList<T> entities,
         BulkConfig? bulkConfig = null,
         CancellationToken cancellationToken = default
     )
         where T : class;
 
-    public Task BulkInsertAsync<T>(
+    Task BulkInsertAsync<T>(
         IList<T> entities,
         BulkConfig? bulkConfig = null,
         CancellationToken cancellationToken = default
     )
         where T : class;
 
-    public Task BulkUpdateAsync<T>(
+    Task BulkUpdateAsync<T>(
         IList<T> entities,
         BulkConfig? bulkConfig = null,
         CancellationToken cancellationToken = default
     )
         where T : class;
 
-    public Task BulkInsertOrUpdateAsync<T>(
+    Task BulkInsertOrUpdateAsync<T>(
         IList<T> entities,
         BulkConfig? bulkConfig = null,
         Action<decimal>? progress = null,
@@ -147,14 +149,14 @@ public interface IReaparrDbContext : IDisposable
         where T : class;
 
     Task<IDbContextTransaction> BeginTransactionAsync(CancellationToken cancellationToken = default);
-    public EntityEntry Entry(object entity);
+    EntityEntry Entry(object entity);
 
-    public int SaveChanges();
+    int SaveChanges();
 
-    public int SaveChanges(bool acceptAllChangesOnSuccess);
-    public Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
+    int SaveChanges(bool acceptAllChangesOnSuccess);
+    Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 
-    public Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken);
+    Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken);
 
     void ClearChangeTracker();
 }

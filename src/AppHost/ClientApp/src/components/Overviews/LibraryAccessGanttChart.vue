@@ -39,6 +39,11 @@ const LEFT_PANE_WIDTH_PX = 240;
 const COLUMN_BORDER_COMPENSATION_PX = 2;
 
 const sortedIntervals = computed(() => [...props.intervals].sort((left, right) => {
+	const serverCompare = left.serverName.localeCompare(right.serverName);
+	if (serverCompare !== 0) {
+		return serverCompare;
+	}
+
 	const libraryCompare = left.libraryName.localeCompare(right.libraryName);
 	if (libraryCompare !== 0) {
 		return libraryCompare;
@@ -305,7 +310,7 @@ function groupIntervalsByServer(intervals: LibraryAccessTimelineInterval[]) {
 
 	for (const interval of intervals) {
 		const serverName = interval.serverName || 'Unknown Server';
-		const groupId = `server-${slugify(serverName)}`;
+		const groupId = interval.serverGroupId;
 		const existing = groups.get(groupId);
 		if (existing) {
 			existing.intervals.push(interval);
@@ -323,7 +328,7 @@ function groupIntervalsByServer(intervals: LibraryAccessTimelineInterval[]) {
 		});
 	}
 
-	return Array.from(groups.values()).sort((left, right) => left.name.localeCompare(right.name));
+	return Array.from(groups.values()).sort((left, right) => left.name.localeCompare(right.name) || left.id.localeCompare(right.id));
 }
 
 function buildServerGroupTask(serverGroup: { id: string; name: string; min: Date; max: Date }) {

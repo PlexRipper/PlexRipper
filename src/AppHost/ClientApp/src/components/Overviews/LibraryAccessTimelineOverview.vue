@@ -34,6 +34,7 @@
 								clearable
 								dense
 								filled
+								:disable="!hasSelectedServer"
 								:label="t('components.library-access-timeline.filters.library')"
 								:options="libraryOptions" />
 						</QCol>
@@ -85,6 +86,7 @@ import { get } from '@vueuse/core';
 import { useSubscription } from '@vueuse/rxjs';
 import { debounceTime, switchMap } from 'rxjs/operators';
 import { Subject } from 'rxjs';
+import { orderBy } from 'lodash-es';
 import { useAccountStore, useLibraryAccessTimelineStore, useLibraryStore, useServerStore } from '@store';
 import type { LibraryAccessTimelineZoomPreset } from '@store';
 
@@ -121,28 +123,36 @@ const selectedZoomPreset = computed({
 	},
 });
 
-const serverOptions = computed(() => get(serverStore.getVisibleServers).map((server) => ({
-	label: serverStore.getServerName(server.id),
-	value: server.id,
-})));
+const hasSelectedServer = computed(() => timelineStore.filters.plexServerId !== null);
+
+const serverOptions = computed(() => orderBy(
+	get(serverStore.getVisibleServers).map((server) => ({
+		label: serverStore.getServerName(server.id),
+		value: server.id,
+	})),
+	[(option) => option.label.toLocaleLowerCase(), (option) => option.value],
+	['asc', 'asc'],
+));
 
 const libraryOptions = computed(() => {
-	const allLibrariesForServer = libraryStore.getLibrariesByServerId(timelineStore.filters.plexServerId ?? 0);
-	const filteredLibraryIds = new Set(timelineStore.filteredLibraryIdsForSelectedServer);
-
-	if (filteredLibraryIds.size === 0) {
-		return allLibrariesForServer.map((library) => ({
-			label: libraryStore.getLibraryName(library.id),
-			value: library.id,
-		}));
+	if (!timelineStore.filters.plexServerId) {
+		return [];
 	}
 
-	return allLibrariesForServer
-		.filter((library) => filteredLibraryIds.has(library.id))
-		.map((library) => ({
+	const allLibrariesForServer = libraryStore.getLibrariesByServerId(timelineStore.filters.plexServerId);
+	const filteredLibraryIds = new Set(timelineStore.filteredLibraryIdsForSelectedServer);
+	const libraries = filteredLibraryIds.size === 0
+		? allLibrariesForServer
+		: allLibrariesForServer.filter((library) => filteredLibraryIds.has(library.id));
+
+	return orderBy(
+		libraries.map((library) => ({
 			label: libraryStore.getLibraryName(library.id),
 			value: library.id,
-		}));
+		})),
+		[(option) => option.label.toLocaleLowerCase(), (option) => option.value],
+		['asc', 'asc'],
+	);
 });
 
 const zoomOptions: { label: string; value: LibraryAccessTimelineZoomPreset }[] = [

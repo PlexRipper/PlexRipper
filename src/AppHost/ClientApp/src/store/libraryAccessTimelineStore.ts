@@ -12,6 +12,7 @@ import {
 	type PlexLibraryAccessTimelineEventDTO,
 } from '@dto';
 import { StoreNames, type ISetupResult } from '@interfaces';
+import { useSettingsStore } from '@store';
 
 export type LibraryAccessTimelineZoomPreset = '1d' | '7d' | '30d' | '90d' | 'All';
 
@@ -19,6 +20,7 @@ export interface LibraryAccessTimelineInterval {
 	id: string;
 	rowId: string;
 	accountName: string;
+	serverGroupId: string;
 	serverName: string;
 	libraryName: string;
 	grantedAt: string;
@@ -63,6 +65,8 @@ export const useLibraryAccessTimelineStore = defineStore(StoreNames.LibraryAcces
 	};
 
 	const state = reactive<ILibraryAccessTimelineStoreState>(cloneDeep(defaultState));
+
+	const settingsStore = useSettingsStore();
 
 	const actions = {
 		setup(): Observable<ISetupResult> {
@@ -116,6 +120,22 @@ export const useLibraryAccessTimelineStore = defineStore(StoreNames.LibraryAcces
 
 	function buildRowId(plexServerId?: number | null, plexLibraryId?: number | null): string {
 		return `server-${plexServerId ?? 'unknown'}-library-${plexLibraryId ?? 'unknown'}`;
+	}
+
+	function getAccountName(event: PlexLibraryAccessTimelineEventDTO): string {
+		return settingsStore.shouldMaskAccountNames ? '**MASKED**' : event.plexAccountName;
+	}
+
+	function getServerGroupId(event: PlexLibraryAccessTimelineEventDTO): string {
+		return `server-${event.plexServerId ?? 'unknown'}`;
+	}
+
+	function getServerName(event: PlexLibraryAccessTimelineEventDTO): string {
+		return settingsStore.shouldMaskServerNames ? '**MASKED**' : event.plexServerName ?? '';
+	}
+
+	function getLibraryName(event: PlexLibraryAccessTimelineEventDTO): string {
+		return settingsStore.shouldMaskLibraryNames ? '**MASKED**' : event.plexLibraryName ?? '';
 	}
 
 	function formatDuration(start: Date, end: Date): string {
@@ -214,9 +234,10 @@ export const useLibraryAccessTimelineStore = defineStore(StoreNames.LibraryAcces
 						intervals.push({
 							id: `${rowId}-${openGrant.refreshRunId}-${event.refreshRunId}`,
 							rowId,
-							accountName: openGrant.plexAccountName,
-							serverName: openGrant.plexServerName ?? '',
-							libraryName: openGrant.plexLibraryName ?? '',
+							serverGroupId: getServerGroupId(openGrant),
+							accountName: getAccountName(openGrant),
+							serverName: getServerName(openGrant),
+							libraryName: getLibraryName(openGrant),
 							grantedAt: openGrant.createdAt,
 							revokedAt: event.createdAt,
 							start,
@@ -235,9 +256,10 @@ export const useLibraryAccessTimelineStore = defineStore(StoreNames.LibraryAcces
 					intervals.push({
 						id: `${rowId}-${openGrant.refreshRunId}-active`,
 						rowId,
-						accountName: openGrant.plexAccountName,
-						serverName: openGrant.plexServerName ?? '',
-						libraryName: openGrant.plexLibraryName ?? '',
+						serverGroupId: getServerGroupId(openGrant),
+						accountName: getAccountName(openGrant),
+						serverName: getServerName(openGrant),
+						libraryName: getLibraryName(openGrant),
 						grantedAt: openGrant.createdAt,
 						revokedAt: null,
 						start,

@@ -361,23 +361,12 @@
         },
         "library-access-timeline": {
             "filters": {
-                "account": "Account",
                 "server": "Server",
                 "library": "Library"
             },
             "chart": {
                 "title": "Library Access Timeline",
-                "empty": "No library access history found for the selected filters.",
-                "now": "Now"
-            },
-            "table": {
-                "account": "Account",
-                "server": "Server",
-                "library": "Library",
-                "current-state": "Current State",
-                "granted-at": "Granted At",
-                "revoked-at": "Revoked At",
-                "last-changed-at": "Last Changed At"
+                "empty": "No library access history found for the selected filters."
             }
         },
         "media-poster-image-content": {
@@ -524,8 +513,7 @@
             "invalid-server": "Server object was invalid"
         },
         "delimiter": {
-            "dash": " - ",
-            "arrow": "→"
+            "dash": " - "
         },
         "download-status": {
             "error": "Error",

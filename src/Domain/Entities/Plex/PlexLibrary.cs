@@ -44,58 +44,65 @@ public class PlexLibrary : BaseEntity
     public required DateTime? ScannedAt { get; init; }
 
     /// <summary>
-    /// Gets or sets the DateTime this <see cref="PlexLibrary"/> had its media last synced with the PlexApi.
+    /// Gets or sets the last time Plex reported that the library content changed.
+    /// NOTE: Value is set by the PlexApi.
     /// </summary>
     [Column(Order = 8)]
+    public DateTime ContentChangedAt { get; set; } = DateTime.MinValue;
+
+    /// <summary>
+    /// Gets or sets the DateTime this <see cref="PlexLibrary"/> had its media last synced with the PlexApi.
+    /// </summary>
+    [Column(Order = 9)]
     public DateTime? SyncedAt { get; set; }
 
     /// <summary>
     /// Gets or sets the unique id of the <see cref="PlexLibrary"/>.
     /// Can be a valid GUID or a Plex generated UUID.
     /// </summary>
-    [Column(Order = 9)]
+    [Column(Order = 10)]
     public required string Uuid { get; init; }
 
-    [Column(Order = 10)]
+    [Column(Order = 11)]
     public required string Language { get; init; }
 
     /// <summary>
     /// Gets the total file size of the nested media.
     /// </summary>
-    [Column(Order = 11)]
+    [Column(Order = 12)]
     public long MediaSize { get; init; }
 
     /// <summary>
     /// Gets the total <see cref="PlexMovie"/> count.
     /// </summary>
-    [Column(Order = 12)]
+    [Column(Order = 13)]
     public int MovieCount { get; init; }
 
     /// <summary>
     /// Gets the total <see cref="PlexTvShow"/> count.
     /// </summary>
-    [Column(Order = 13)]
+    [Column(Order = 14)]
     public int TvShowCount { get; init; }
 
     /// <summary>
     /// Gets the total <see cref="PlexTvShowSeason"/> count of all <see cref="PlexTvShow">PlexTvShows</see> in this library.
     /// </summary>
-    [Column(Order = 14)]
+    [Column(Order = 15)]
     public int SeasonCount { get; init; }
 
     /// <summary>
     /// Gets the total <see cref="PlexTvShowEpisode"/> count of all <see cref="PlexTvShow">PlexTvShows</see> in this library.
     /// </summary>
-    [Column(Order = 15)]
+    [Column(Order = 16)]
     public int EpisodeCount { get; init; }
 
-    [Column(Order = 16)]
+    [Column(Order = 17)]
     public int ActorsCount { get; init; }
 
-    [Column(Order = 17)]
+    [Column(Order = 18)]
     public int GenresCount { get; init; }
 
-    [Column(Order = 18)]
+    [Column(Order = 19)]
     public int CountriesCount { get; init; }
 
     /// <summary>
@@ -153,7 +160,7 @@ public class PlexLibrary : BaseEntity
     /// Gets a value indicating whether this <see cref="PlexLibrary"/> has been updated since it was last synced with Reaparr.
     /// </summary>
     [NotMapped]
-    public bool Outdated => SyncedAt < UpdatedAt;
+    public bool Outdated => SyncedAt < ContentChangedAt;
 
     #endregion
 }

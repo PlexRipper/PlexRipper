@@ -13,6 +13,7 @@ public static class TestPlexLibraryExtensions
                 Type = plexLibrary.Type,
                 Language = plexLibrary.Language,
                 UpdatedAt = updatedTime,
+                ContentChangedAt = updatedTime,
                 SyncedAt = null,
                 DefaultDestinationId = null,
                 CreatedAt = plexLibrary.CreatedAt,

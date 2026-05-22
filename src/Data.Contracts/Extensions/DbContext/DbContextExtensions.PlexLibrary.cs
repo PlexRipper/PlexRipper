@@ -49,11 +49,7 @@ public static partial class DbContextExtensions
     {
         await dbContext
             .PlexLibraries.Where(x => x.Id == plexLibraryId)
-            .ExecuteUpdateAsync(p =>
-                p.SetProperty(x => x.SyncedAt, DateTime.UtcNow)
-                    .SetProperty(x => x.MovieCount, movieCount)
-                    .SetProperty(x => x.MediaSize, mediaSize)
-            );
+            .ExecuteUpdateAsync(p => p.SetProperty(x => x.MovieCount, movieCount).SetProperty(x => x.MediaSize, mediaSize));
     }
 
     public static async Task SetTvShowMediaMetrics(
@@ -68,8 +64,7 @@ public static partial class DbContextExtensions
         await dbContext
             .PlexLibraries.Where(x => x.Id == plexLibraryId)
             .ExecuteUpdateAsync(p =>
-                p.SetProperty(x => x.SyncedAt, DateTime.UtcNow)
-                    .SetProperty(x => x.TvShowCount, tvShowCount)
+                p.SetProperty(x => x.TvShowCount, tvShowCount)
                     .SetProperty(x => x.SeasonCount, seasonCount)
                     .SetProperty(x => x.EpisodeCount, episodeCount)
                     .SetProperty(x => x.MediaSize, mediaSize)

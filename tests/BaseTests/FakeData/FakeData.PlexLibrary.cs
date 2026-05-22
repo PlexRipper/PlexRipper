@@ -16,6 +16,7 @@ public static partial class FakeData
             .RuleFor(x => x.CreatedAt, f => f.Date.Past(4))
             .RuleFor(x => x.UpdatedAt, f => f.Date.Recent())
             .RuleFor(x => x.ScannedAt, f => f.Date.Recent())
+            .RuleFor(x => x.ContentChangedAt, f => f.Date.Recent())
             .RuleFor(x => x.SyncedAt, f => f.Date.Recent())
             .RuleFor(x => x.Language, f => f.Address.Country())
             .RuleFor(x => x.Uuid, _ => Guid.NewGuid().ToString())

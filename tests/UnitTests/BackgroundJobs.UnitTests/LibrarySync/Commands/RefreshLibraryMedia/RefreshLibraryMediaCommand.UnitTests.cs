@@ -25,6 +25,7 @@ public class RefreshLibraryMediaCommandUnitTests : BaseCommandUnitTest<RefreshLi
             CreatedAt = fakeLibrary.CreatedAt,
             UpdatedAt = fakeLibrary.UpdatedAt,
             ScannedAt = fakeLibrary.ScannedAt,
+            ContentChangedAt = fakeLibrary.ContentChangedAt,
             DefaultDestination = fakeLibrary.DefaultDestination,
             DefaultDestinationId = fakeLibrary.DefaultDestinationId,
         };
@@ -135,6 +136,8 @@ public class RefreshLibraryMediaCommandUnitTests : BaseCommandUnitTest<RefreshLi
             .FirstOrDefaultAsync(CancellationToken);
         dbLibrary.ShouldNotBeNull();
         dbLibrary.SyncedAt.ShouldNotBeNull();
+        dbLibrary.SyncedAt.Value.ShouldNotBe(updatedLibrary.ContentChangedAt);
+        dbLibrary.SyncedAt.Value.ShouldBeGreaterThan(updatedLibrary.ContentChangedAt);
     }
 
     [Test]

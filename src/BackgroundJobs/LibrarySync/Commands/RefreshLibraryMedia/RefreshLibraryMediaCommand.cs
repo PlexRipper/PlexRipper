@@ -65,26 +65,43 @@ public class RefreshLibraryMediaCommandHandler : ICommandHandler<RefreshLibraryM
 
         // Phase 4: Continue with retrieving the rest of the media such as seasons/episodes based on the media type
         var newPlexLibrary = syncLibraryMediaResult.Value.Library;
-        switch (newPlexLibrary.Type)
+        var refreshLibraryResult = newPlexLibrary.Type switch
         {
-            case PlexMediaType.Movie:
-                return await _commandExecutor.Send(
-                    new RefreshPlexMovieLibraryCommand(insertPlexLibraryMediaMetaDataResult.Value),
-                    ct
+            PlexMediaType.Movie => await _commandExecutor.Send(
+                new RefreshPlexMovieLibraryCommand(insertPlexLibraryMediaMetaDataResult.Value),
+                ct
+            ),
+            PlexMediaType.TvShow => await _commandExecutor.Send(
+                new RefreshPlexTvShowLibraryCommand(insertPlexLibraryMediaMetaDataResult.Value),
+                ct
+            ),
+            _ => Result.Ok(newPlexLibrary),
+        };
+
+        if (newPlexLibrary.Type is not (PlexMediaType.Movie or PlexMediaType.TvShow))
+        {
+            _log.Here()
+                .Warning(
+                    "Library type {LibraryType} is currently not supported by Reaparr. Coming from library with id: {LibraryId}",
+                    newPlexLibrary.Type,
+                    plexLibrary.Id
                 );
-            case PlexMediaType.TvShow:
-                return await _commandExecutor.Send(
-                    new RefreshPlexTvShowLibraryCommand(insertPlexLibraryMediaMetaDataResult.Value),
-                    ct
-                );
-            default:
-                _log.Here()
-                    .Warning(
-                        "Library type {LibraryType} is currently not supported by Reaparr. Coming from library with id: {LibraryId}",
-                        newPlexLibrary.Type,
-                        plexLibrary.Id
-                    );
-                return Result.Ok();
+
+            return Result.Ok();
         }
+
+        if (refreshLibraryResult.IsFailed)
+            return refreshLibraryResult;
+
+        var syncedAt = DateTime.UtcNow;
+        await _dbContext
+            .PlexLibraries.Where(x => x.Id == command.PlexLibraryId)
+            .ExecuteUpdateAsync(s => s.SetProperty(x => x.SyncedAt, syncedAt), ct);
+
+        var syncedLibrary = await _dbContext.PlexLibraries.GetAsync(command.PlexLibraryId, ct);
+        if (syncedLibrary is null)
+            return ResultExtensions.EntityNotFound(nameof(PlexLibrary), command.PlexLibraryId);
+
+        return Result.Ok(syncedLibrary);
     }
 }

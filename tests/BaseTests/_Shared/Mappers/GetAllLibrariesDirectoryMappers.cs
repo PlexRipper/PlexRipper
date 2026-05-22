@@ -25,7 +25,7 @@ public static class LibrarySectionMappers
             ScannedAt = source.ScannedAt.ToUnixLong(),
             Content = false,
             Directory = false,
-            ContentChangedAt = 0,
+            ContentChangedAt = (int)source.ContentChangedAt.ToUnixLong(),
             Hidden = null,
             Location = [],
         };

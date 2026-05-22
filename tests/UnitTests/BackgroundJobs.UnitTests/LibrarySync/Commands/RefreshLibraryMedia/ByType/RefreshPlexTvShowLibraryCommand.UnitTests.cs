@@ -75,7 +75,7 @@ public class RefreshPlexTvShowLibraryCommandUnitTests : BaseUnitTest<RefreshPlex
     }
 
     [Test]
-    public async Task ShouldSuccessfullyRefreshLibraryAndUpdateSyncedAt_WhenTvShowsExist()
+    public async Task ShouldSuccessfullyRefreshLibraryAndKeepSyncedAtUnchanged_WhenTvShowsExist()
     {
         // Arrange
         var seed = await SetupDatabase(
@@ -89,6 +89,7 @@ public class RefreshPlexTvShowLibraryCommandUnitTests : BaseUnitTest<RefreshPlex
         );
         var dbContext = IDbContext;
         var testLibrary = dbContext.PlexLibraries.Include(x => x.TvShows).First();
+        var originalSyncedAt = testLibrary.SyncedAt;
 
         SetupProgressStoreMocks();
 
@@ -106,7 +107,7 @@ public class RefreshPlexTvShowLibraryCommandUnitTests : BaseUnitTest<RefreshPlex
         result.IsSuccess.ShouldBeTrue();
         var updatedLibrary = await dbContext.PlexLibraries.GetAsync(testLibrary.Id, CancellationToken);
         updatedLibrary.ShouldNotBeNull();
-        updatedLibrary.SyncedAt.ShouldNotBeNull();
+        updatedLibrary.SyncedAt.ShouldBe(originalSyncedAt);
         Mock.Mock<ILibrarySyncProgressStore>()
             .Verify(
                 x => x.UpdateItemAsync(It.IsAny<int>(), It.IsAny<LibraryProgressItem>(), It.IsAny<CancellationToken>()),

@@ -1,7 +1,7 @@
 namespace Reaparr.BackgroundJobs;
 
 /// <summary>
-/// Checks Plex library section metadata and queues full syncs for libraries whose Plex UpdatedAt value is newer than Reaparr's SyncedAt value.
+/// Checks Plex library section metadata and queues full syncs for libraries whose Plex ContentChangedAt value is newer than Reaparr's SyncedAt value.
 /// </summary>
 public record CheckPlexLibrariesForUpdatesCommand : ICommand<Result>;
 
@@ -93,7 +93,7 @@ public class CheckPlexLibrariesForUpdatesCommandHandler
             .PlexLibraries.AsNoTracking()
             .Where(x => serversWithTokenMappings.Contains(x.PlexServerId))
             .Where(x => x.Type == PlexMediaType.Movie || x.Type == PlexMediaType.TvShow)
-            .Where(x => x.UpdatedAt != null && (x.SyncedAt == null || x.SyncedAt < x.UpdatedAt))
+            .Where(x => x.SyncedAt == null || x.SyncedAt < x.ContentChangedAt)
             .Select(x => x.Id)
             .ToListAsync(cancellationToken);
 

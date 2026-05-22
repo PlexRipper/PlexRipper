@@ -1,5 +1,6 @@
 <template>
-	<div
+	<QSection
+		:header="t('components.library-access-timeline.chart.title')"
 		class="library-access-timeline-page-scroll"
 		data-cy="library-access-timeline-overview">
 		<div class="library-access-timeline-layout">
@@ -54,21 +55,10 @@
 			</div>
 
 			<div class="library-access-timeline-scroll-region">
-				<q-card class="q-pa-md library-access-timeline-scroll-card">
-					<QText
-						class="q-mb-md"
-						size="h5"
-						:value="t('components.library-access-timeline.chart.title')" />
+				<div class="q-pa-md library-access-timeline-scroll-card">
 					<div
 						class="library-access-timeline"
 						data-cy="library-access-timeline-chart">
-						<div
-							v-if="timelineStore.isLoading"
-							class="text-center q-pa-xl">
-							<QSpinner
-								color="primary"
-								size="3rem" />
-						</div>
 						<LibraryAccessGanttChart
 							v-if="timelineStore.timelineIntervals.length > 0"
 							cy="library-access-timeline-gantt"
@@ -82,12 +72,12 @@
 							class="q-pa-xl"
 							:value="t('components.library-access-timeline.chart.empty')" />
 					</div>
-				</q-card>
+				</div>
 			</div>
 
 			<!-- Current-state table removed per UX request (duplicate information). -->
 		</div>
-	</div>
+	</QSection>
 </template>
 
 <script setup lang="ts">
@@ -203,46 +193,51 @@ function applyZoomPreset(zoomPreset: LibraryAccessTimelineZoomPreset) {
 @use '@/assets/scss/variables.scss' as *;
 
 .library-access-timeline-page-scroll {
-	height: calc(100vh - 6.5rem);
-	max-height: calc(100vh - 6.5rem);
-	overflow: hidden;
+  height: calc(100vh - 6.5rem);
+  overflow: hidden;
+  align-items: stretch !important;
+
+  > [class*='col-'] {
+    height: 100%;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  > [class*='col-'] > .q-mx-md {
+    flex: 0 0 auto;
+  }
+
+  > [class*='col-'] > .q-pa-md {
+    min-height: 0;
+    flex: 1 1 auto;
+    display: flex;
+  }
 }
 
 .library-access-timeline-layout {
-	height: 100%;
-	max-height: 100%;
-	display: grid;
-	grid-template-rows: auto minmax(0, 1fr);
-	gap: 1rem;
+  min-height: 0;
+  flex: 1 1 auto;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: 1rem;
 }
 
 .library-access-timeline-filters {
-	position: sticky;
-	top: 0;
-	z-index: 10;
-	background: $dark-lg-background-color;
-	backdrop-filter: blur(6px);
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: $dark-lg-background-color;
+  backdrop-filter: blur(6px);
 }
 
 .library-access-timeline-scroll-region {
-	min-height: 0;
-	overflow-y: auto;
-	overflow-x: hidden;
-	padding-right: 0.25rem;
+  min-height: 0;
+  overflow: hidden auto;
+  padding-right: 0.25rem;
 }
 
 .library-access-timeline-scroll-card {
-	min-height: 0;
-}
-
-.library-access-timeline {
-	min-height: 18rem;
-}
-
-body {
-	&.body--dark,
-	&.body--light {
-		overflow-y: auto !important;
-	}
+  min-height: 18rem;
 }
 </style>

@@ -129,7 +129,10 @@ export const useLibraryAccessTimelineStore = defineStore(StoreNames.LibraryAcces
 		return `${hours}h`;
 	}
 
-	function getFilteredEvents(options?: { ignoreLibraryFilter?: boolean; ignoreDateFilter?: boolean }): PlexLibraryAccessTimelineEventDTO[] {
+	function getFilteredEvents(options?: {
+		ignoreLibraryFilter?: boolean;
+		ignoreDateFilter?: boolean;
+	}): PlexLibraryAccessTimelineEventDTO[] {
 		const ignoreDateFilter = options?.ignoreDateFilter ?? false;
 		const fromMs = !ignoreDateFilter && state.filters.fromUtc ? new Date(state.filters.fromUtc).getTime() : null;
 		const toMs = !ignoreDateFilter && state.filters.toUtc ? new Date(state.filters.toUtc).getTime() : null;
@@ -183,71 +186,69 @@ export const useLibraryAccessTimelineStore = defineStore(StoreNames.LibraryAcces
 		return true;
 	}
 
-	function buildIntervals(): LibraryAccessTimelineInterval[] {
-		const now = new Date();
-		const fromMs = state.filters.fromUtc ? new Date(state.filters.fromUtc).getTime() : null;
-		const toMs = state.filters.toUtc ? new Date(state.filters.toUtc).getTime() : null;
-		const filteredEvents = getFilteredEvents({ ignoreDateFilter: true });
-		const groupedEvents = groupBy(orderBy(filteredEvents, (event) => event.createdAt, 'asc'), (event) => buildRowId(event.plexServerId, event.plexLibraryId));
+	const getters = {
+		timelineIntervals: computed((): LibraryAccessTimelineInterval[] => {
+			const now = new Date();
+			const fromMs = state.filters.fromUtc ? new Date(state.filters.fromUtc).getTime() : null;
+			const toMs = state.filters.toUtc ? new Date(state.filters.toUtc).getTime() : null;
+			const filteredEvents = getFilteredEvents({ ignoreDateFilter: true });
+			const groupedEvents = groupBy(orderBy(filteredEvents, (event) => event.createdAt, 'asc'), (event) => buildRowId(event.plexServerId, event.plexLibraryId));
 
-		return Object.entries(groupedEvents).flatMap(([rowId, events]) => {
-			const intervals: LibraryAccessTimelineInterval[] = [];
-			let openGrant: PlexLibraryAccessTimelineEventDTO | null = null;
+			return Object.entries(groupedEvents).flatMap(([rowId, events]) => {
+				const intervals: LibraryAccessTimelineInterval[] = [];
+				let openGrant: PlexLibraryAccessTimelineEventDTO | null = null;
 
-			for (const event of events) {
-				if (event.state === PlexAccessState.Granted) {
-					openGrant = event;
-					continue;
-				}
-
-				if ((event.state === PlexAccessState.Revoked) && openGrant) {
-					const start = new Date(openGrant.createdAt);
-					const end = new Date(event.createdAt);
-					if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) {
-						openGrant = null;
+				for (const event of events) {
+					if (event.state === PlexAccessState.Granted) {
+						openGrant = event;
 						continue;
 					}
+
+					if ((event.state === PlexAccessState.Revoked) && openGrant) {
+						const start = new Date(openGrant.createdAt);
+						const end = new Date(event.createdAt);
+						if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) {
+							openGrant = null;
+							continue;
+						}
+						intervals.push({
+							id: `${rowId}-${openGrant.refreshRunId}-${event.refreshRunId}`,
+							rowId,
+							accountName: openGrant.plexAccountName,
+							serverName: openGrant.plexServerName ?? '',
+							libraryName: openGrant.plexLibraryName ?? '',
+							grantedAt: openGrant.createdAt,
+							revokedAt: event.createdAt,
+							start,
+							end,
+							durationLabel: formatDuration(start, end),
+						});
+						openGrant = null;
+					}
+				}
+
+				if (openGrant) {
+					const start = new Date(openGrant.createdAt);
+					if (Number.isNaN(start.getTime())) {
+						return intervals;
+					}
 					intervals.push({
-						id: `${rowId}-${openGrant.refreshRunId}-${event.refreshRunId}`,
+						id: `${rowId}-${openGrant.refreshRunId}-active`,
 						rowId,
 						accountName: openGrant.plexAccountName,
 						serverName: openGrant.plexServerName ?? '',
 						libraryName: openGrant.plexLibraryName ?? '',
 						grantedAt: openGrant.createdAt,
-						revokedAt: event.createdAt,
+						revokedAt: null,
 						start,
-						end,
-						durationLabel: formatDuration(start, end),
+						end: now,
+						durationLabel: formatDuration(start, now),
 					});
-					openGrant = null;
 				}
-			}
 
-			if (openGrant) {
-				const start = new Date(openGrant.createdAt);
-				if (Number.isNaN(start.getTime())) {
-					return intervals;
-				}
-				intervals.push({
-					id: `${rowId}-${openGrant.refreshRunId}-active`,
-					rowId,
-					accountName: openGrant.plexAccountName,
-					serverName: openGrant.plexServerName ?? '',
-					libraryName: openGrant.plexLibraryName ?? '',
-					grantedAt: openGrant.createdAt,
-					revokedAt: null,
-					start,
-					end: now,
-					durationLabel: formatDuration(start, now),
-				});
-			}
-
-			return intervals.filter((interval) => intervalOverlapsDateWindow(interval, fromMs, toMs));
-		});
-	}
-
-	const getters = {
-		timelineIntervals: computed((): LibraryAccessTimelineInterval[] => buildIntervals()),
+				return intervals.filter((interval) => intervalOverlapsDateWindow(interval, fromMs, toMs));
+			});
+		}),
 		currentStateRows: computed((): PlexLibraryAccessCurrentStateLibraryDTO[] => compact(state.timeline.currentState.flatMap((server) => server.libraries))),
 		filteredLibraryIdsForSelectedServer: computed((): number[] => {
 			if (!state.filters.plexServerId) {

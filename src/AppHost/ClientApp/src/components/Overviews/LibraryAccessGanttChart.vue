@@ -113,7 +113,7 @@ function renderGanttChart() {
 
 	const dayPresetOptions = {
 		vDayMajorDateDisplayFormat: 'mon yyyy - Week ww',
-		vDayMinorDateDisplayFormat: 'dd',
+		vDayMinorDateDisplayFormat: isSevenDayPreset ? 'dd mon' : 'dd',
 	};
 
 	if (isSevenDayPreset) {
@@ -146,10 +146,11 @@ function renderGanttChart() {
 		vFormatArr: ['day', 'week', 'month', 'quarter'] satisfies GanttChartFormat[],
 	});
 
-	const sevenDayRange = props.zoomPreset === '7d' ? buildLocalSevenDayRange() : null;
+	const currentTime = new Date();
+	const sevenDayRange = props.zoomPreset === '7d' ? buildLocalSevenDayRange(currentTime) : null;
 	const visibleIntervals = sevenDayRange
-		? clampIntervalsToRange(get(sortedIntervals), sevenDayRange.start, sevenDayRange.end)
-		: get(sortedIntervals);
+		? clampIntervalsToRange(get(sortedIntervals), sevenDayRange.start, currentTime)
+		: clampActiveIntervalsToNow(get(sortedIntervals), currentTime);
 
 	const tasks = buildChartTasks(visibleIntervals);
 	for (const task of tasks) {
@@ -175,8 +176,7 @@ function chartSetDateBounds(chart: ReturnType<typeof createGanttChart>, min: Dat
 	chart.setMaxDate(max);
 }
 
-function buildLocalSevenDayRange() {
-	const now = new Date();
+function buildLocalSevenDayRange(now = new Date()) {
 	const end = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
 	const start = new Date(end);
 	start.setDate(end.getDate() - 6);
@@ -196,7 +196,8 @@ function clampIntervalsToRange(
 	return intervals
 		.map((interval) => {
 			const intervalStartMs = interval.start.getTime();
-			const intervalEndMs = interval.end.getTime();
+			const effectiveEnd = getEffectiveIntervalEnd(interval, end);
+			const intervalEndMs = effectiveEnd.getTime();
 			if (intervalEndMs < startMs || intervalStartMs > endMs) {
 				return null;
 			}
@@ -214,6 +215,24 @@ function clampIntervalsToRange(
 			};
 		})
 		.filter((interval): interval is LibraryAccessTimelineInterval => interval !== null);
+}
+
+function clampActiveIntervalsToNow(
+	intervals: LibraryAccessTimelineInterval[],
+	now: Date,
+): LibraryAccessTimelineInterval[] {
+	return intervals.map((interval) => ({
+		...interval,
+		end: getEffectiveIntervalEnd(interval, now),
+	}));
+}
+
+function getEffectiveIntervalEnd(interval: LibraryAccessTimelineInterval, now: Date): Date {
+	if (interval.revokedAt !== null || interval.end.getTime() <= now.getTime()) {
+		return interval.end;
+	}
+
+	return now;
 }
 
 function applyVisibleRangePadding(
@@ -311,8 +330,8 @@ function buildServerGroupTask(serverGroup: { id: string; name: string; min: Date
 	return {
 		pID: serverGroup.id,
 		pName: serverGroup.name,
-		pStart: formatGanttDate(serverGroup.min),
-		pEnd: formatGanttDate(serverGroup.max),
+		pStart: serverGroup.min,
+		pEnd: serverGroup.max,
 		pClass: 'ggroupblack',
 		pLink: '',
 		pMile: 0,
@@ -334,8 +353,8 @@ function mapIntervalToLibraryTask(interval: LibraryAccessTimelineInterval, paren
 	return {
 		pID: interval.id,
 		pName: interval.libraryName,
-		pStart: formatGanttDate(interval.start),
-		pEnd: formatGanttDate(interval.end),
+		pStart: interval.start,
+		pEnd: interval.end,
 		pClass: isSelected ? 'gtaskblue' : isActive ? 'gtaskgreen' : 'gtaskred',
 		pLink: '',
 		pMile: 0,
@@ -380,6 +399,8 @@ function applyPostDrawViewportAdjustments(ganttContainer: HTMLElement) {
 	if (zoomPreset === '7d') {
 		constrainSevenDayViewport(ganttContainer);
 		alignCurrentDayCell(ganttContainer);
+	} else {
+		alignCurrentTimeMarkerToActiveBars(ganttContainer);
 	}
 
 	if (zoomPreset === '30d') {
@@ -458,8 +479,12 @@ function buildLocalSevenDayLabels(): string[] {
 	return Array.from({ length: 7 }, (_, index) => {
 		const day = new Date(today);
 		day.setDate(today.getDate() - (6 - index));
-		return dayjs(day).format('DD');
+		return formatSevenDayHeaderLabel(day);
 	});
+}
+
+function formatSevenDayHeaderLabel(value: Date): string {
+	return dayjs(value).format('DD MMM');
 }
 
 function findConsecutiveDayLabelIndex(headerCells: HTMLElement[], expectedDays: string[]): number {
@@ -480,7 +505,7 @@ function alignCurrentDayCell(ganttContainer: HTMLElement) {
 		return;
 	}
 
-	const todayDay = dayjs().format('DD');
+	const todayDay = formatSevenDayHeaderLabel(new Date());
 	const todayCellIndex = headerCells.findIndex((cell) => (cell.textContent || '').trim() === todayDay);
 	if (todayCellIndex < 0) {
 		return;
@@ -505,8 +530,29 @@ function alignCurrentDayCell(ganttContainer: HTMLElement) {
 
 	const gridRect = grid.getBoundingClientRect();
 	const todayRect = todayCell.getBoundingClientRect();
-	const markerLeft = todayRect.left - gridRect.left + (todayRect.width / 2);
+	const now = new Date();
+	const dayProgress = now.getHours() / 24;
+	const markerLeft = todayRect.left - gridRect.left + (todayRect.width * dayProgress);
 	grid.style.setProperty('--library-access-current-day-left', `${markerLeft}px`);
+}
+
+function alignCurrentTimeMarkerToActiveBars(ganttContainer: HTMLElement) {
+	const grid = ganttContainer.querySelector<HTMLElement>('.gchartgrid');
+	const activeBar = ganttContainer.querySelector<HTMLElement>('.gtaskbarcontainer:has(.gtaskgreen)');
+	if (!grid || !activeBar) {
+		return;
+	}
+
+	const gridRect = grid.getBoundingClientRect();
+	const activeBarRect = activeBar.getBoundingClientRect();
+	const markerLeft = activeBarRect.right - gridRect.left;
+	if (markerLeft < 0 || markerLeft > gridRect.width) {
+		grid.classList.remove('has-library-access-current-time-marker');
+		return;
+	}
+
+	grid.style.setProperty('--library-access-current-day-left', `${markerLeft}px`);
+	grid.classList.add('has-library-access-current-time-marker');
 }
 
 function bindTaskSelection(ganttContainer: HTMLElement) {
@@ -550,10 +596,6 @@ function resolveDisplayFormat(zoomPreset: LibraryAccessTimelineZoomPreset): Gant
 	return 'week';
 }
 
-function formatGanttDate(value: Date): string {
-	return dayjs(value).format('YYYY-MM-DD');
-}
-
 function slugify(value: string): string {
 	return value
 		.toLowerCase()
@@ -568,10 +610,15 @@ function slugify(value: string): string {
 .library-access-gantt-chart {
   min-height: 18rem;
   width: 100%;
-  max-width: 100%;
-  overflow-x: auto;
-  overflow-y: visible;
+  overflow: hidden;
   color: #fff;
+
+  .gantt,
+  .gchartcontainer,
+  .gmain {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
 
   .gantt,
   .gchartcontainer,
@@ -589,68 +636,48 @@ function slugify(value: string): string {
     background: transparent !important;
   }
 
-  .gchartlbl,
-  .gchartgrid {
-    width: 100% !important;
-    min-width: 0 !important;
-    max-width: 100% !important;
-    overflow-x: hidden !important;
-  }
-
-  .gcharttable,
-  .gcharttableh {
-    width: max-content !important;
-    min-width: 100% !important;
-    table-layout: auto !important;
-  }
-
-  .gantt,
-  .gchartcontainer,
-  .gmain {
-    width: 100% !important;
-    max-width: 100% !important;
-  }
-
   .gmain {
     resize: none !important;
     overflow: hidden !important;
   }
 
   .gmainleft {
-    min-width: 240px;
     flex: 0 0 240px;
+    min-width: 240px;
   }
 
   .gmainright {
-    flex: 1 1 auto;
     min-width: 0;
     overflow: hidden !important;
   }
 
+  .gchartlbl,
   .gchartgrid {
-    overflow-x: hidden !important;
-    overflow-y: hidden !important;
     width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    overflow: hidden !important;
   }
 
-  .gchartlbl {
-    width: 100% !important;
+  .gcharttable,
+  .gcharttableh {
+    min-width: 100% !important;
+    width: max-content !important;
+    table-layout: auto !important;
   }
 
-  .gtasktablewrapper {
-    overflow-y: hidden !important;
-    overflow-x: hidden !important;
-  }
-
+  .gtasktablewrapper,
   .gtasktableouterwrapper {
     overflow: hidden !important;
   }
 
-  &[data-zoom-preset='7d'] .gchartgrid {
+  &[data-zoom-preset='7d'] .gchartgrid,
+  .gchartgrid.has-library-access-current-time-marker {
     position: relative !important;
   }
 
-  &[data-zoom-preset='7d'] .gchartgrid::after {
+  &[data-zoom-preset='7d'] .gchartgrid::after,
+  .gchartgrid.has-library-access-current-time-marker::after {
     content: '';
     position: absolute;
     top: 0;
@@ -658,8 +685,8 @@ function slugify(value: string): string {
     left: var(--library-access-current-day-left, -9999px);
     width: 2px;
     transform: translateX(-1px);
-    background: $blue;
-    box-shadow: 0 0 8px rgba($blue, 0.7);
+    background: $primary;
+    box-shadow: 0 0 8px rgba($primary, 0.7);
     pointer-events: none;
     z-index: 4;
   }
@@ -670,18 +697,10 @@ function slugify(value: string): string {
   .gtaskheading,
   .gname,
   .gtaskname,
-  .gres,
-  .gdur,
-  .gcomp,
-  .gstartdate,
-  .genddate,
-  .gplanstartdate,
-  .gplanenddate,
-  .gcost,
-  .gtasklist,
   .gtaskcell,
   .gtaskcellwkend,
   .gtaskcellcurrent,
+  .gtasklist,
   .gadditional {
     background: rgba(0, 0, 0, 0.35) !important;
     border-color: rgba(255, 255, 255, 0.15) !important;
@@ -703,31 +722,11 @@ function slugify(value: string): string {
   .gTtTitle,
   .gfoldercollapse {
     color: #fff !important;
-  }
-
-  .JSGanttToolTipcont,
-  .gTaskInfo {
-    background: rgba(25, 25, 25, 0.35) !important;
-    backdrop-filter: blur(14px) saturate(140%);
-    -webkit-backdrop-filter: blur(14px) saturate(140%);
-    border: 1px solid rgba(255, 0, 0, 0.65) !important;
-    box-shadow: 0 0 14px rgba(255, 0, 0, 0.4);
-    color: #fff !important;
-  }
-
-  .JSGanttToolTipcont *,
-  .gTaskInfo * {
-    color: #fff !important;
+    white-space: nowrap;
   }
 
   .gtasktable {
     font-size: 0.875rem;
-  }
-
-  .gtaskname,
-  .gresource,
-  .gcaption {
-    white-space: nowrap;
   }
 }
 </style>

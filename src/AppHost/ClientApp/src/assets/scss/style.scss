@@ -7,7 +7,9 @@
 @use 'animations.scss';
 @use 'primevue/overwrite.scss';
 
-:root { color-scheme: dark !important; }
+:root {
+  color-scheme: dark !important;
+}
 
 /*
 default
@@ -41,6 +43,53 @@ a.link:focus:hover,
 a.link:hover,
 a.link:visited:hover {
   color: red
+}
+
+/*
+JSGantt tooltip
+*/
+#JSGanttToolTip {
+  z-index: 10000;
+  color: #fff;
+  font-size: variables.$tooltip-fontsize;
+}
+
+#JSGanttToolTipcont,
+#JSGanttToolTip .gTaskInfo {
+  border: 1px solid rgba(255, 64, 64, 0.9) !important;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.55) !important;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: 0 0 0 1px rgba(255, 40, 40, 0.35),
+  0 0 14px rgba(255, 40, 40, 0.55),
+  0 0 26px rgba(255, 32, 32, 0.35);
+  color: #fff !important;
+}
+
+#JSGanttToolTip .gTaskInfo {
+  padding: 0.75rem 1rem;
+}
+
+#JSGanttToolTip .gTtTitle {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: #fff !important;
+  font-weight: 700;
+}
+
+#JSGanttToolTip .gTaskLabel {
+  color: rgba(255, 255, 255, 0.72) !important;
+  font-weight: 600;
+}
+
+#JSGanttToolTip .gTaskText,
+#JSGanttToolTip .gTaskNotes {
+  color: #fff !important;
+}
+
+#JSGanttToolTip .gTILine {
+  margin-top: 0.25rem;
 }
 
 

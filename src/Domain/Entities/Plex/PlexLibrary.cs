@@ -45,7 +45,8 @@ public class PlexLibrary : BaseEntity
 
     /// <summary>
     /// Gets or sets the last time Plex reported that the library content changed.
-    /// NOTE: Value is set by the PlexApi.
+    /// Computed from Plex's <c>contentChangedAt</c> counter (seconds since library creation)
+    /// anchored to <see cref="CreatedAt"/>.
     /// </summary>
     [Column(Order = 8)]
     public DateTime ContentChangedAt { get; set; } = DateTime.MinValue;

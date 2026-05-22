@@ -67,7 +67,7 @@ public class GetLibrarySectionsCommandHandler : ICommandHandler<GetLibrarySectio
                 CreatedAt = DateTimeExtensions.FromUnixTime(x.CreatedAt),
                 UpdatedAt = DateTimeExtensions.FromUnixTime(x.UpdatedAt),
                 ScannedAt = DateTimeExtensions.FromUnixTime(x.ScannedAt),
-                ContentChangedAt = DateTimeExtensions.FromUnixTime(x.ContentChangedAt) ?? DateTime.MinValue,
+                ContentChangedAt = DateTimeExtensions.FromUnixTime(x.CreatedAt)?.AddSeconds(x.ContentChangedAt ?? 0) ?? DateTime.MinValue,
                 SyncedAt = null,
                 Uuid = x.Uuid,
                 PlexServer = null,

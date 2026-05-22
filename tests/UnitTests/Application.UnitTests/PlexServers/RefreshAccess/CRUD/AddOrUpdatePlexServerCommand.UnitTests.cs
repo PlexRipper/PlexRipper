@@ -22,7 +22,7 @@ public class AddOrUpdatePlexServerCommandUnitTests : BaseUnitTest<AddOrUpdatePle
         {
             var plexServerDb = plexServersDbs.Find(x => x.MachineIdentifier == expectedPlexServer.MachineIdentifier);
             plexServerDb.ShouldNotBeNull();
-            plexServerDb.ShouldBe(expectedPlexServer);
+            ShouldMatchPlexServer(plexServerDb, expectedPlexServer);
             plexServerDb.PlexServerConnections.Count.ShouldBe(expectedPlexServer.PlexServerConnections.Count);
             plexServerDb.PlexServerConnections.ShouldBe(expectedPlexServer.PlexServerConnections, true);
         }
@@ -143,7 +143,7 @@ public class AddOrUpdatePlexServerCommandUnitTests : BaseUnitTest<AddOrUpdatePle
         {
             var plexServerDb = plexServersDbs.Find(x => x.MachineIdentifier == expectedPlexServer.MachineIdentifier);
             plexServerDb.ShouldNotBeNull();
-            plexServerDb.ShouldBe(expectedPlexServer);
+            ShouldMatchPlexServer(plexServerDb, expectedPlexServer);
             plexServerDb.PlexServerConnections.Count.ShouldBe(expectedPlexServer.PlexServerConnections.Count);
             plexServerDb.PlexServerConnections.ShouldBe(expectedPlexServer.PlexServerConnections, true);
         }
@@ -249,5 +249,31 @@ public class AddOrUpdatePlexServerCommandUnitTests : BaseUnitTest<AddOrUpdatePle
             plexServerConnection.Id.ShouldBe(expectedConnection.Id);
             plexServerConnection.ShouldBe(expectedConnection);
         }
+    }
+
+    private static void ShouldMatchPlexServer(PlexServer actual, PlexServer expected)
+    {
+        actual.Name.ShouldBe(expected.Name);
+        actual.OwnerId.ShouldBe(expected.OwnerId);
+        actual.PlexServerOwnerUsername.ShouldBe(expected.PlexServerOwnerUsername);
+        actual.Device.ShouldBe(expected.Device);
+        actual.Platform.ShouldBe(expected.Platform);
+        actual.PlatformVersion.ShouldBe(expected.PlatformVersion);
+        actual.Product.ShouldBe(expected.Product);
+        actual.ProductVersion.ShouldBe(expected.ProductVersion);
+        actual.Provides.ShouldBe(expected.Provides);
+        actual.CreatedAt.ShouldBe(expected.CreatedAt.ToUniversalTime());
+        actual.LastSeenAt.ShouldBe(expected.LastSeenAt.ToUniversalTime());
+        actual.MachineIdentifier.ShouldBe(expected.MachineIdentifier);
+        actual.PublicAddress.ShouldBe(expected.PublicAddress);
+        actual.PreferredConnectionId.ShouldBe(expected.PreferredConnectionId);
+        actual.OwnedOverride.ShouldBe(expected.OwnedOverride);
+        actual.Synced.ShouldBe(expected.Synced);
+        actual.Relay.ShouldBe(expected.Relay);
+        actual.Presence.ShouldBe(expected.Presence);
+        actual.HttpsRequired.ShouldBe(expected.HttpsRequired);
+        actual.PublicAddressMatches.ShouldBe(expected.PublicAddressMatches);
+        actual.DnsRebindingProtection.ShouldBe(expected.DnsRebindingProtection);
+        actual.NatLoopbackSupported.ShouldBe(expected.NatLoopbackSupported);
     }
 }

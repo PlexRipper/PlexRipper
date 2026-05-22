@@ -204,7 +204,7 @@ public class AddOrUpdatePlexLibrariesCommandUnitTests : BaseUnitTest<AddOrUpdate
         plexServers.ShouldNotBeNull();
 
         // Set values that should not be overwritten by refreshing the libraries
-        var syncedAtDateTime = DateTime.Now - TimeSpan.FromHours(6);
+        var syncedAtDateTime = DateTime.UtcNow - TimeSpan.FromHours(6);
         var plexLibraries = dbContext.PlexLibraries.AsTracking().ToList();
         foreach (var plexLibrary in plexLibraries)
         {
@@ -216,7 +216,7 @@ public class AddOrUpdatePlexLibrariesCommandUnitTests : BaseUnitTest<AddOrUpdate
         await dbContext.SaveChangesAsync(CancellationToken);
 
         // Create API Data
-        var updatedTime = DateTime.Now - TimeSpan.FromHours(4);
+        var updatedTime = DateTime.UtcNow - TimeSpan.FromHours(4);
 
         // Act
         var request = new AddOrUpdatePlexLibrariesCommand
@@ -284,7 +284,7 @@ public class AddOrUpdatePlexLibrariesCommandUnitTests : BaseUnitTest<AddOrUpdate
             if (i % 2 == 0)
                 plexLibraries.RemoveAt(i);
 
-        var updatedTime = DateTime.Now - TimeSpan.FromHours(2);
+        var updatedTime = DateTime.UtcNow - TimeSpan.FromHours(2);
         var request = new AddOrUpdatePlexLibrariesCommand
         {
             PlexAccountId = plexAccount.Id,

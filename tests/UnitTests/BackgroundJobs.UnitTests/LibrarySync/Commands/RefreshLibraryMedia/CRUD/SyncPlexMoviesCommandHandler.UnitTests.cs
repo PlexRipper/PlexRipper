@@ -110,7 +110,7 @@ public class SyncPlexMoviesCommandHandlerUnitTests : BaseUnitTest<SyncPlexMovies
             if (i is >= 10 and < 30)
             {
                 newMovies[i].PlexApiRatingKey = moviesDb[i].PlexApiRatingKey;
-                newMovies[i].UpdatedAt = DateTime.Now;
+                newMovies[i].UpdatedAt = DateTime.UtcNow;
             }
 
             newMovies[i].Id = 0;

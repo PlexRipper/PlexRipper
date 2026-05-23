@@ -44,12 +44,10 @@ public class PlexLibrary : BaseEntity
     public required DateTime? ScannedAt { get; init; }
 
     /// <summary>
-    /// Gets or sets the last time Plex reported that the library content changed.
-    /// Computed from Plex's <c>contentChangedAt</c> counter (seconds since library creation)
-    /// anchored to <see cref="CreatedAt"/>.
+    /// Gets or sets Plex's raw <c>contentChangedAt</c> counter for this library.
     /// </summary>
     [Column(Order = 8)]
-    public DateTime ContentChangedAt { get; set; } = DateTime.MinValue;
+    public long ContentChangedAt { get; set; }
 
     /// <summary>
     /// Gets or sets the DateTime this <see cref="PlexLibrary"/> had its media last synced with the PlexApi.
@@ -105,7 +103,13 @@ public class PlexLibrary : BaseEntity
 
     [Column(Order = 19)]
     public int CountriesCount { get; init; }
-
+    
+    /// <summary>
+    /// Gets a value indicating whether this <see cref="PlexLibrary"/> needs to be synced with Reaparr.
+    /// </summary>
+    [Column(Order = 20)]
+    public bool Outdated { get; set; }
+    
     /// <summary>
     /// DB-computed column that holds the total count of media items associated with this <see cref="PlexLibrary"/>.
     /// </summary>
@@ -157,11 +161,7 @@ public class PlexLibrary : BaseEntity
     [NotMapped]
     public string Name => Title;
 
-    /// <summary>
-    /// Gets a value indicating whether this <see cref="PlexLibrary"/> has been updated since it was last synced with Reaparr.
-    /// </summary>
-    [NotMapped]
-    public bool Outdated => SyncedAt < ContentChangedAt;
+
 
     #endregion
 }

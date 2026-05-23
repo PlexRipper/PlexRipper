@@ -73,18 +73,18 @@ public class AddOrUpdatePlexLibrariesCommandHandler
                 }
                 else
                 {
-                    incomingPlexLibrary.Id = plexLibraryDb.Id;
-                    incomingPlexLibrary.SyncedAt = plexLibraryDb.SyncedAt;
-                    incomingPlexLibrary.DefaultDestinationId = plexLibraryDb.DefaultDestinationId;
-
                     _log.Here()
                         .Debug(
                             "Updating PlexLibrary {PlexLibraryName} with id: {PlexLibraryId} in the database",
                             incomingPlexLibrary.Title,
                             incomingPlexLibrary.Id
                         );
-
+                    
+                    incomingPlexLibrary.Id = plexLibraryDb.Id;
+                    incomingPlexLibrary.SyncedAt = plexLibraryDb.SyncedAt;
+                    incomingPlexLibrary.Outdated = plexLibraryDb.Outdated || incomingPlexLibrary.ContentChangedAt != plexLibraryDb.ContentChangedAt;
                     incomingPlexLibrary.DefaultDestinationId = plexLibraryDb.DefaultDestinationId;
+
                     _dbContext.Entry(plexLibraryDb).CurrentValues.SetValues(incomingPlexLibrary);
                 }
             }

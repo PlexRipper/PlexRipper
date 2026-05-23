@@ -217,12 +217,13 @@ public class AddOrUpdatePlexLibrariesCommandUnitTests : BaseUnitTest<AddOrUpdate
 
         // Create API Data
         var updatedTime = DateTime.UtcNow - TimeSpan.FromHours(4);
+        var changedContentChangedAt = plexLibraries.Max(x => x.ContentChangedAt) + 1;
 
         // Act
         var request = new AddOrUpdatePlexLibrariesCommand
         {
             PlexAccountId = plexAccount.Id,
-            PlexLibraries = plexLibraries.ToApiLibraries(updatedTime),
+            PlexLibraries = plexLibraries.ToApiLibraries(updatedTime, contentChangedAt: changedContentChangedAt),
         };
         var result = await Sut.ExecuteAsync(request, CancellationToken);
 
@@ -247,6 +248,7 @@ public class AddOrUpdatePlexLibrariesCommandUnitTests : BaseUnitTest<AddOrUpdate
             plexLibraryDb.ShouldNotBeNull();
             plexLibraryDb.UpdatedAt.ShouldBe(updatedTime);
             plexLibraryDb.SyncedAt.ShouldBe(syncedAtDateTime);
+            plexLibraryDb.Outdated.ShouldBeTrue();
             plexLibraryDb.DefaultDestinationId.ShouldBe(5);
         }
 

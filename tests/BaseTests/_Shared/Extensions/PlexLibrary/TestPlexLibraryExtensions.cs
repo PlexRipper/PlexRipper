@@ -2,7 +2,11 @@ namespace Reaparr.BaseTests;
 
 public static class TestPlexLibraryExtensions
 {
-    public static List<PlexLibrary> ToApiLibraries(this List<PlexLibrary> plexLibraries, DateTime updatedTime)
+    public static List<PlexLibrary> ToApiLibraries(
+        this List<PlexLibrary> plexLibraries,
+        DateTime updatedTime,
+        long? contentChangedAt = null
+    )
     {
         return plexLibraries
             .Select(plexLibrary => new PlexLibrary()
@@ -13,8 +17,9 @@ public static class TestPlexLibraryExtensions
                 Type = plexLibrary.Type,
                 Language = plexLibrary.Language,
                 UpdatedAt = updatedTime,
-                ContentChangedAt = updatedTime,
-                SyncedAt = null,
+                ContentChangedAt = contentChangedAt ?? plexLibrary.ContentChangedAt,
+                SyncedAt = plexLibrary.SyncedAt,
+                Outdated = plexLibrary.Outdated,
                 DefaultDestinationId = null,
                 CreatedAt = plexLibrary.CreatedAt,
                 PlexServerId = plexLibrary.PlexServerId,

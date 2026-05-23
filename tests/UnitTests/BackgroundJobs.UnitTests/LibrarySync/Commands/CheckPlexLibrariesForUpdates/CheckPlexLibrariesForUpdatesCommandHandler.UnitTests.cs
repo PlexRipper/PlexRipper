@@ -124,7 +124,7 @@ public class CheckPlexLibrariesForUpdatesCommandHandlerUnitTests
     }
 
     [Test]
-    public async Task ShouldQueueOnlyLibrariesWithChangedContent_WhenContentChangedAtIsNewerThanSyncedAt()
+    public async Task ShouldQueueOnlyOutdatedLibraries_WhenMarkedByRefresh()
     {
         // Arrange
         var now = DateTime.UtcNow;
@@ -145,23 +145,27 @@ public class CheckPlexLibrariesForUpdatesCommandHandlerUnitTests
         var libraries = await dbContext.PlexLibraries.AsTracking().OrderBy(x => x.Id).ToListAsync(CancellationToken);
         libraries[0].PlexServerId = serverId;
         libraries[0].UpdatedAt = now;
-        libraries[0].ContentChangedAt = now.AddHours(-1);
+        libraries[0].ContentChangedAt = 10;
         libraries[0].SyncedAt = now.AddHours(-2);
+        libraries[0].Outdated = false;
         libraries[1].PlexServerId = serverId;
         libraries[1].UpdatedAt = now;
-        libraries[1].ContentChangedAt = now.AddHours(-2);
+        libraries[1].ContentChangedAt = 20;
         libraries[1].SyncedAt = now.AddHours(-1);
+        libraries[1].Outdated = false;
         libraries[2].PlexServerId = serverId;
         libraries[2].UpdatedAt = now;
-        libraries[2].ContentChangedAt = now.AddHours(-1);
-        libraries[2].SyncedAt = null;
+        libraries[2].ContentChangedAt = 30;
+        libraries[2].SyncedAt = now.AddHours(-4);
+        libraries[2].Outdated = true;
         libraries[3].PlexServerId = serverId;
         libraries[3].UpdatedAt = now;
-        libraries[3].ContentChangedAt = DateTime.MinValue;
-        libraries[3].SyncedAt = now.AddHours(-2);
+        libraries[3].ContentChangedAt = 40;
+        libraries[3].SyncedAt = now.AddHours(-3);
+        libraries[3].Outdated = true;
         await dbContext.SaveChangesAsync(CancellationToken);
 
-        var expectedLibraryIds = new[] { libraries[0].Id, libraries[2].Id };
+        var expectedLibraryIds = new[] { libraries[2].Id, libraries[3].Id };
         var accountId = await dbContext.PlexAccounts.IgnoreQueryFilters().Select(x => x.Id).FirstAsync(CancellationToken);
 
         await dbContext.PlexAccountServers.IgnoreQueryFilters().ExecuteDeleteAsync(CancellationToken);

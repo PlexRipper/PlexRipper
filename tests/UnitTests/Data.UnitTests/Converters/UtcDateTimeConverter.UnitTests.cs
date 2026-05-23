@@ -3,75 +3,37 @@ namespace Reaparr.Data.UnitTests;
 public class UtcDateTimeConverterUnitTests : BaseUnitTest
 {
     [Test]
-    public async Task ShouldLoadDateTimeAsUtc_WhenSavedAsUtc()
+    public async Task ShouldPersistPlexLibraryContentChangedAtRawValue_WhenSavedAndLoaded()
     {
         // Arrange
         await SetupDatabase(27300);
-        var savedDateTime = new DateTime(2026, 5, 22, 10, 30, 0, DateTimeKind.Utc);
+        const long contentChangedAt = 123456789;
 
-        await SaveLibrary(savedDateTime);
+        await SaveLibrary(contentChangedAt);
 
         // Act
-        var loadedDateTime = await LoadContentChangedAt();
+        var loadedContentChangedAt = await LoadContentChangedAt();
 
         // Assert
-        loadedDateTime.Kind.ShouldBe(DateTimeKind.Utc);
-        loadedDateTime.ShouldBe(savedDateTime);
+        loadedContentChangedAt.ShouldBe(contentChangedAt);
     }
 
     [Test]
-    public async Task ShouldConvertDateTimeToUtc_WhenSavedAsLocal()
+    public async Task ShouldPersistZeroPlexLibraryContentChangedAt_WhenUsingDefaultValue()
     {
         // Arrange
         await SetupDatabase(27301);
-        var savedDateTime = new DateTime(2026, 5, 22, 10, 30, 0, DateTimeKind.Local);
-        var expectedDateTime = savedDateTime.ToUniversalTime();
-
-        await SaveLibrary(savedDateTime);
-
-        // Act
-        var loadedDateTime = await LoadContentChangedAt();
-
-        // Assert
-        loadedDateTime.Kind.ShouldBe(DateTimeKind.Utc);
-        loadedDateTime.ShouldBe(expectedDateTime);
-    }
-
-    [Test]
-    public async Task ShouldTreatDateTimeAsUtc_WhenSavedAsUnspecified()
-    {
-        // Arrange
-        await SetupDatabase(27302);
-        var savedDateTime = new DateTime(2026, 5, 22, 10, 30, 0, DateTimeKind.Unspecified);
-        var expectedDateTime = DateTime.SpecifyKind(savedDateTime, DateTimeKind.Utc);
-
-        await SaveLibrary(savedDateTime);
-
-        // Act
-        var loadedDateTime = await LoadContentChangedAt();
-
-        // Assert
-        loadedDateTime.Kind.ShouldBe(DateTimeKind.Utc);
-        loadedDateTime.ShouldBe(expectedDateTime);
-    }
-
-    [Test]
-    public async Task ShouldLoadDateTimeMinValueAsUtc_WhenUsingDefaultValue()
-    {
-        // Arrange
-        await SetupDatabase(27303);
 
         await SaveLibrary();
 
         // Act
-        var loadedDateTime = await LoadContentChangedAt();
+        var loadedContentChangedAt = await LoadContentChangedAt();
 
         // Assert
-        loadedDateTime.Kind.ShouldBe(DateTimeKind.Utc);
-        loadedDateTime.ShouldBe(DateTime.SpecifyKind(DateTime.MinValue, DateTimeKind.Utc));
+        loadedContentChangedAt.ShouldBe(0);
     }
 
-    private async Task SaveLibrary(DateTime? contentChangedAt = null)
+    private async Task SaveLibrary(long? contentChangedAt = null)
     {
         await using var dbContext = (ReaparrDbContext)IDbContext;
         var server = FakeData.GetPlexServer(new Seed(27304)).Generate();
@@ -98,7 +60,7 @@ public class UtcDateTimeConverterUnitTests : BaseUnitTest
         await dbContext.SaveChangesAsync(CancellationToken);
     }
 
-    private async Task<DateTime> LoadContentChangedAt()
+    private async Task<long> LoadContentChangedAt()
     {
         await using var dbContext = (ReaparrDbContext)IDbContext;
 

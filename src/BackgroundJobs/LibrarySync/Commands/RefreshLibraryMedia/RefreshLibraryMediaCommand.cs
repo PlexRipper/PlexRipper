@@ -96,7 +96,10 @@ public class RefreshLibraryMediaCommandHandler : ICommandHandler<RefreshLibraryM
         var syncedAt = DateTime.UtcNow;
         await _dbContext
             .PlexLibraries.Where(x => x.Id == command.PlexLibraryId)
-            .ExecuteUpdateAsync(s => s.SetProperty(x => x.SyncedAt, syncedAt), ct);
+            .ExecuteUpdateAsync(
+                s => s.SetProperty(x => x.SyncedAt, syncedAt).SetProperty(x => x.Outdated, false),
+                ct
+            );
 
         var syncedLibrary = await _dbContext.PlexLibraries.GetAsync(command.PlexLibraryId, ct);
         if (syncedLibrary is null)

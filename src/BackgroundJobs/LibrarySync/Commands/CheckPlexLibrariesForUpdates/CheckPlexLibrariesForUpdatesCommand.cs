@@ -72,15 +72,18 @@ public class CheckPlexLibrariesForUpdatesCommandHandler
                 continue;
             }
 
-            serversWithTokenMappings.Add(serverId);
-
             var refreshResult = await _commandExecutor.Send(
                 new RefreshLibraryAccessCommand(accountId, serverId),
                 cancellationToken
             );
 
             if (refreshResult.IsFailed)
+            {
                 refreshResult.ToResult().LogError();
+                continue;
+            }
+
+            serversWithTokenMappings.Add(serverId);
         }
 
         if (!serversWithTokenMappings.Any())

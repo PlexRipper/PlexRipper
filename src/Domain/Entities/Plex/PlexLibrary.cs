@@ -106,6 +106,7 @@ public class PlexLibrary : BaseEntity
     
     /// <summary>
     /// Gets a value indicating whether this <see cref="PlexLibrary"/> needs to be synced with Reaparr.
+    /// This is dependent on <see cref="ContentChangedAt"/>, when a higher value is set from the Plex API, then its marked as outdated.
     /// </summary>
     [Column(Order = 20)]
     public bool Outdated { get; set; }

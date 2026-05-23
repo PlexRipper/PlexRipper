@@ -29,53 +29,22 @@ public class GetPlexLibraryAccessTimelineEndpoint : BaseEndpointWithoutRequest<P
         _log.Here().DebugApiCall(HttpContext);
 
         var events = (await _dbContext.PlexLibraryAccessHistoryEvents
-            .GroupJoin(
-                _dbContext.PlexAccounts,
-                historyEvent => historyEvent.PlexAccountId,
-                account => account.Id,
-                (historyEvent, accounts) => new { HistoryEvent = historyEvent, Accounts = accounts }
-            )
-            .SelectMany(
-                x => x.Accounts.DefaultIfEmpty(),
-                (x, account) => new { x.HistoryEvent, Account = account }
-            )
-            .GroupJoin(
-                _dbContext.PlexServers,
-                x => x.HistoryEvent.PlexServerId,
-                server => server.Id,
-                (x, servers) => new { x.HistoryEvent, x.Account, Servers = servers }
-            )
-            .SelectMany(
-                x => x.Servers.DefaultIfEmpty(),
-                (x, server) => new { x.HistoryEvent, x.Account, Server = server }
-            )
-            .GroupJoin(
-                _dbContext.PlexLibraries,
-                x => x.HistoryEvent.PlexLibraryId,
-                library => library.Id,
-                (x, libraries) => new { x.HistoryEvent, x.Account, x.Server, Libraries = libraries }
-            )
-            .SelectMany(
-                x => x.Libraries.DefaultIfEmpty(),
-                (x, library) => new PlexLibraryAccessTimelineEventDTO
-                {
-                    Id = x.HistoryEvent.Id,
-                    RefreshRunId = x.HistoryEvent.RefreshRunId,
-                    PlexAccountId = x.HistoryEvent.PlexAccountId,
-                    PlexAccountName = x.Account != null ? x.Account.DisplayName : x.HistoryEvent.PlexAccountNameSnapshot ?? string.Empty,
-                    PlexServerId = x.HistoryEvent.PlexServerId,
-                    PlexServerName = x.Server != null ? x.Server.Name : x.HistoryEvent.PlexServerNameSnapshot,
-                    PlexLibraryId = x.HistoryEvent.PlexLibraryId,
-                    PlexLibraryName = library != null ? library.Title : x.HistoryEvent.PlexLibraryNameSnapshot,
-                    State = x.HistoryEvent.State,
-                    CreatedAt = x.HistoryEvent.CreatedAt,
-                }
-            )
-            .ToListAsync(ct))
-            .OrderBy(x => x.CreatedAt)
-            .ThenBy(x => x.PlexServerName)
+            .Select(x => new PlexLibraryAccessTimelineEventDTO
+            {
+                Id = x.Id,
+                RefreshRunId = x.RefreshRunId,
+                PlexAccountId = x.PlexAccountId,
+                PlexAccountName = x.PlexAccountNameSnapshot ?? string.Empty,
+                PlexServerId = x.PlexServerId,
+                PlexServerName = x.PlexServerNameSnapshot,
+                PlexLibraryId = x.PlexLibraryId,
+                PlexLibraryName = x.PlexLibraryNameSnapshot,
+                State = x.State,
+                CreatedAt = x.CreatedAt,
+            })
+            .OrderBy(x => x.PlexServerName)
             .ThenBy(x => x.PlexLibraryName)
-            .ToList();
+            .ToListAsync(ct));
 
         var response = new PlexLibraryAccessTimelineDTO
         {

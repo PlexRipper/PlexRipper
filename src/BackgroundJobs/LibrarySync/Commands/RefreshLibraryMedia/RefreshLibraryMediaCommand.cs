@@ -87,7 +87,7 @@ public class RefreshLibraryMediaCommandHandler : ICommandHandler<RefreshLibraryM
                     plexLibrary.Id
                 );
 
-            return Result.Ok();
+            return Result.Ok(newPlexLibrary);
         }
 
         if (refreshLibraryResult.IsFailed)

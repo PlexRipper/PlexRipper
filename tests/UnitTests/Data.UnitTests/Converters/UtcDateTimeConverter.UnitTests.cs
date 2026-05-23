@@ -35,7 +35,7 @@ public class UtcDateTimeConverterUnitTests : BaseUnitTest
 
     private async Task SaveLibrary(long? contentChangedAt = null)
     {
-        await using var dbContext = (ReaparrDbContext)IDbContext;
+        var dbContext = IDbContext;
         var server = FakeData.GetPlexServer(new Seed(27304)).Generate();
         dbContext.PlexServers.Add(server);
         await dbContext.SaveChangesAsync(CancellationToken);
@@ -62,7 +62,7 @@ public class UtcDateTimeConverterUnitTests : BaseUnitTest
 
     private async Task<long> LoadContentChangedAt()
     {
-        await using var dbContext = (ReaparrDbContext)IDbContext;
+        var dbContext = IDbContext;
 
         return await dbContext.PlexLibraries.Select(x => x.ContentChangedAt).SingleAsync(CancellationToken);
     }

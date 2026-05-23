@@ -28,7 +28,6 @@ public class AddOrUpdatePlexLibrariesCommandHandler
 {
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
-    private readonly List<PlexLibraryAccessRapport> _list = [];
 
     public AddOrUpdatePlexLibrariesCommandHandler(ILogger log, IReaparrDbContext dbContext)
     {
@@ -41,7 +40,7 @@ public class AddOrUpdatePlexLibrariesCommandHandler
         CancellationToken cancellationToken
     )
     {
-        _list.Clear();
+        List<PlexLibraryAccessRapport> rapportList = [];
 
         var plexAccountId = command.PlexAccountId;
 
@@ -114,7 +113,7 @@ public class AddOrUpdatePlexLibrariesCommandHandler
                 .ToListAsync(cancellationToken);
 
             var plexServerName = await _dbContext.GetPlexServerNameById(plexServerId);
-            var rapport = FindOrCreate(plexServerId, plexAccount.DisplayName, plexServerName);
+            var rapport = FindOrCreate(rapportList, plexServerId, plexAccount.DisplayName, plexServerName);
 
             foreach (var incomingPlexLibrary in incomingPlexLibraries)
             {
@@ -189,22 +188,26 @@ public class AddOrUpdatePlexLibrariesCommandHandler
             }
         }
 
-        await AddHistoryEventsAsync(plexAccount, cancellationToken);
+        await AddHistoryEventsAsync(rapportList, plexAccount, cancellationToken);
 
         await _dbContext.SaveChangesAsync(cancellationToken);
 
-        foreach (var rapport in _list)
+        foreach (var rapport in rapportList)
             _log.Here().Information(rapport.ToString());
 
-        return Result.Ok(_list);
+        return Result.Ok(rapportList);
     }
 
-    private async Task AddHistoryEventsAsync(PlexAccount plexAccount, CancellationToken cancellationToken)
+    private async Task AddHistoryEventsAsync(
+        List<PlexLibraryAccessRapport> rapportList,
+        PlexAccount plexAccount,
+        CancellationToken cancellationToken
+    )
     {
         var refreshRunId = Guid.NewGuid();
         var createdAt = DateTime.UtcNow;
 
-        var updatedRows = _list
+        var updatedRows = rapportList
             .SelectMany(rapport =>
                 rapport.Data
                     .Where(x => x.State == PlexAccessState.Updated)
@@ -242,7 +245,7 @@ public class AddOrUpdatePlexLibrariesCommandHandler
                 .ToHashSet();
         }
 
-        foreach (var rapport in _list)
+        foreach (var rapport in rapportList)
         {
             foreach (var row in rapport.Data.Where(x => x.State is PlexAccessState.Granted or PlexAccessState.Revoked))
             {
@@ -288,15 +291,20 @@ public class AddOrUpdatePlexLibrariesCommandHandler
         }
     }
 
-    private PlexLibraryAccessRapport FindOrCreate(int plexServerId, string plexAccountName, string plexServerName)
+    private static PlexLibraryAccessRapport FindOrCreate(
+        List<PlexLibraryAccessRapport> rapportList,
+        int plexServerId,
+        string plexAccountName,
+        string plexServerName
+    )
     {
-        var x = _list.Find(x => x.PlexServerId == plexServerId);
+        var x = rapportList.Find(x => x.PlexServerId == plexServerId);
         if (x is not null)
         {
             return x;
         }
 
-        _list.Add(new PlexLibraryAccessRapport(plexAccountName, plexServerId, plexServerName));
-        return _list.Last();
+        rapportList.Add(new PlexLibraryAccessRapport(plexAccountName, plexServerId, plexServerName));
+        return rapportList.Last();
     }
 }

@@ -1,5 +1,40 @@
 Reaparr Changelog
 
+# [0.38.0-dev.19](https://github.com/Reaparr/Reaparr/compare/v0.38.0-dev.18...v0.38.0-dev.19) (2026-05-23)
+
+
+### Bug Fixes
+
+* **WebAPI:** Add DownloadQueue retry cooldown ([fae413d](https://github.com/Reaparr/Reaparr/commit/fae413d8e1e45f3c904c653bd5a1f0c0a3349d24))
+* **WebAPI:** Add retry cooldown and boot-time queue kick to DownloadQueue ([#586](https://github.com/Reaparr/Reaparr/issues/586)) ([5c412ee](https://github.com/Reaparr/Reaparr/commit/5c412eed2088129201a9c5078dfdf44e1d1dca2f))
+* **WebAPI:** Add retry cooldown and boot-time queue kick to DownloadQueue ([8fd13ac](https://github.com/Reaparr/Reaparr/commit/8fd13acb6974e11a12eccba910e3f88fafacde9a))
+* **WebAPI:** Add retry cooldown and boot-time queue kick to DownloadQueue ([3050f52](https://github.com/Reaparr/Reaparr/commit/3050f52093d26c6b42b5b7d686c1fdeabbc23c57))
+* **WebAPI:** Backfill granted history events ([e767540](https://github.com/Reaparr/Reaparr/commit/e76754098a5be52ae8adece1458ba3055b372314))
+* **WebAPI:** Fixed the contentChangedAt being seconds since library createdAt and not a unix since epoch ([19f46c2](https://github.com/Reaparr/Reaparr/commit/19f46c24940aa9819a11f8183eb5f981b61921c5))
+* **WebAPI:** Normalize SQLite DateTime values to UTC ([ac87642](https://github.com/Reaparr/Reaparr/commit/ac87642271170d22c18eff9fd51b0b37b4f7373e))
+* **WebAPI:** Recover zombie Downloading tasks left over from a crash ([#585](https://github.com/Reaparr/Reaparr/issues/585)) ([650d2aa](https://github.com/Reaparr/Reaparr/commit/650d2aa40c4b0f4c07812fceccd41dc730cb6c62))
+* **WebAPI:** Recover zombie Downloading tasks left over from a crash ([35187f1](https://github.com/Reaparr/Reaparr/commit/35187f125523845c850368c5a648cbc991623869))
+* **WebAPI:** Skip boot queue kick in integration tests ([57ffea1](https://github.com/Reaparr/Reaparr/commit/57ffea16e8ed22335e18feb9715c593f23b31a3c))
+* **WebAPI:** Stabilize DownloadQueue restart integration test ([9c0d78d](https://github.com/Reaparr/Reaparr/commit/9c0d78dfcd4eb1b3eab9ce75b88f6d931099f361))
+
+
+### Features
+
+* **Web-UI:** Added a spinning animation next to Plex Servers that are currently syncing their Plex libaries ([36b8b1f](https://github.com/Reaparr/Reaparr/commit/36b8b1f20dd30cbc57d223ad513a028537337121))
+* **WebAPI:** Added auto-recovery of DownloadTasks when Reaparr crashes and auto pause when downloading and Reaparr shutsdown ([b755760](https://github.com/Reaparr/Reaparr/commit/b7557606822d8c1b0d5827a1570d3f632def4385))
+* **WebAPI:** Added periodic auto PlexLibrary media sync, every hour Reaparr will check if there is an update to a PlexLibrary ans resync the media ([890ce26](https://github.com/Reaparr/Reaparr/commit/890ce26709fca806cae1c21643467ae0e2e14524))
+* **WebAPI:** Added PlexLibrary access history tracking to determine and look back if access to a library has been lost or gained ([edfd374](https://github.com/Reaparr/Reaparr/commit/edfd374472449805e9e9ecb14e9da8fc58699380))
+* **Web-UI:** Added translations for the new AutoPaused and AutoMovePaused ([25fc94c](https://github.com/Reaparr/Reaparr/commit/25fc94c7af54f11fcf3518c541454500af9d0cd8))
+* **WebAPI:** Auto-recovery for Downloadtasks that are downloading or moving media files to destination when Reaparr shuts down or crashes ([f436d1c](https://github.com/Reaparr/Reaparr/commit/f436d1cec86b32859bc3382dcb3ae1ed59a61adb))
+* **Web-UI:** First draft version of Plex library access history overview ([c7123ab](https://github.com/Reaparr/Reaparr/commit/c7123abed23253c6b95961ade7a1b654c8580a21))
+* **Web-UI:** There is now a Library Access timeline visible under settings => Accounts => Scroll to bottom to view ([7728655](https://github.com/Reaparr/Reaparr/commit/7728655ba885ce6b82c2454dd9b077524df018f8))
+
+
+### Reverts
+
+* **WebAPI:** Revert migration ([b1cb378](https://github.com/Reaparr/Reaparr/commit/b1cb378cbe5d93c77be1a438878c4225ace7f1d2))
+* **WebAPI:** Revert migraton ([59d5d1f](https://github.com/Reaparr/Reaparr/commit/59d5d1faf6fae1a3d3e6713d83303bfc60c55daf))
+
 # [0.38.0-dev.18](https://github.com/Reaparr/Reaparr/compare/v0.38.0-dev.17...v0.38.0-dev.18) (2026-05-17)
 
 

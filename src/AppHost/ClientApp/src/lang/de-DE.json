@@ -359,6 +359,16 @@
             },
             "offline-server-message": "Die Bibliothekszugriffsliste konnte nicht von diesem Server abgerufen werden, da sie offline ist. Versuchen Sie es erneut, wenn der Server wieder online ist."
         },
+        "library-access-timeline": {
+            "filters": {
+                "server": "Server",
+                "library": "Bibliothek"
+            },
+            "chart": {
+                "title": "Zeitleiste des Bibliothekszugriffs",
+                "empty": "Für die ausgewählten Filter wurde kein Bibliothekszugriffsverlauf gefunden."
+            }
+        },
         "media-poster-image-content": {
             "episode-count": "Keine Episoden | 1 Episode | {count} Episoden",
             "seasons-count": "Keine Staffeln | 1 Staffel | {count} Staffeln"
@@ -903,7 +913,9 @@
         "settings": {
             "accounts": {
                 "plex-accounts-header": "Plex Konten",
-                "app-accounts-header": "Authentifizierung"
+                "app-accounts-header": "Authentifizierung",
+                "library-access-history": "Zugriffsverlauf der Plex-Bibliothek",
+                "library-access-history-link-text": "Gehen Sie zur Seite „Plex-Bibliothekszugriffsverlauf“."
             },
             "advanced": {
                 "database": {

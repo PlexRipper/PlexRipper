@@ -22,6 +22,8 @@ public sealed class ReaparrDbContext : DbContext, IReaparrDbContext, IReaparrDbC
 
     public DbSet<PlexLibrary> PlexLibraries { get; set; }
 
+    public DbSet<PlexLibraryAccessHistoryEvent> PlexLibraryAccessHistoryEvents { get; set; }
+
     public DbSet<PlexActor> PlexActors { get; set; }
 
     public DbSet<PlexGenre> PlexGenres { get; set; }
@@ -217,6 +219,13 @@ public sealed class ReaparrDbContext : DbContext, IReaparrDbContext, IReaparrDbC
         optionsBuilder.UseSeeding(ReaparrDBContextSeed.Seed(_pathProvider));
 
         optionsBuilder.UseAsyncSeeding(ReaparrDBContextSeed.SeedAsync(_pathProvider));
+    }
+
+    protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
+    {
+        base.ConfigureConventions(configurationBuilder);
+
+        configurationBuilder.Properties<DateTime>().HaveConversion<UtcDateTimeConverter>();
     }
 
     protected override void OnModelCreating(ModelBuilder builder)

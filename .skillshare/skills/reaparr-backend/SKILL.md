@@ -27,7 +27,24 @@ Rider MCP is mandatory for backend work. All backend file operations, searches, 
 - `rider-index-mcp_*`
 - `rider-debugger*` when debugging runtime behavior
 
-Never use WebStorm MCP tools for backend work under `src/` excluding `ClientApp/`, `tests/UnitTests/`, or `tests/IntegrationTests/`.
+Never use WebStorm MCP tools for backend work under `src/` excluding `ClientApp/`, `tests/UnitTests/`, or `tests/IntegrationTests/`. WebStorm MCP is reserved for frontend work under `src/AppHost/ClientApp/`.
+
+### Backend MCP fast path
+
+After one successful MCP discovery or server health check in a session, reuse these known-good exact tool names instead of repeatedly rediscovering them:
+
+| Action | Tool | Wrapper |
+| --- | --- | --- |
+| Read file/range | `rider-official:read_file` | `mcpproxy_call_tool_read` |
+| Read full file | `rider-official:get_file_text_by_path` | `mcpproxy_call_tool_read` |
+| Create file | `rider-official:create_new_file` | `mcpproxy_call_tool_write` |
+| Replace text | `rider-official:replace_text_in_file` | `mcpproxy_call_tool_write` |
+| Search text | `rider-official:search_in_files_by_text` | `mcpproxy_call_tool_read` |
+| Search regex | `rider-official:search_in_files_by_regex` | `mcpproxy_call_tool_read` |
+| File diagnostics | `rider-official:get_file_problems` | `mcpproxy_call_tool_read` |
+| Run configurations | `rider-official:get_run_configurations` | `mcpproxy_call_tool_read` |
+
+Only rerun broad `mcpproxy_retrieve_tools` discovery when a needed capability is not in this table, a cached tool fails, or the target MCP server changes.
 
 ### Rider MCP retry rule
 
@@ -97,8 +114,15 @@ Prefer Reaparr-specific skills over generic skills when both apply.
 
 - EF Core access goes through project contexts/factories and existing repository/service patterns.
 - Avoid application-side joins and unbounded queries.
-- Prefer no-tracking reads when entities are not being updated.
+- Do not add `.AsNoTracking()` to read queries; no-tracking is already the explicit default in Reaparr query configuration.
 - Keep query behavior deterministic and testable.
+
+### EF Core migrations
+
+- Never hand-author, manually create, or manually edit EF Core migration files or `*ModelSnapshot.cs` files.
+- Always generate migrations through MCP tooling with `dotnet-mcp:dotnet_ef` and `action: MigrationsAdd`.
+- If a migration needs to be removed or regenerated, use `dotnet-mcp:dotnet_ef` with the appropriate migration action instead of deleting or rewriting files by hand.
+- After MCP migration generation, inspect generated files and run Rider MCP diagnostics on the changed model/configuration files before claiming completion.
 
 ### Background Jobs
 
@@ -191,6 +215,23 @@ Rules:
 
 Do not run `dotnet build` or project build commands for backend error discovery. Use Rider MCP diagnostics/indexing instead. Build-related execution is only allowed as part of running unit or integration tests.
 
+### Preferred test execution: dotnet-test-mcp
+
+When `dotnet-test-mcp` is available, always use it for backend test execution instead of terminal-style `dotnet run` commands or Rider run configurations. Exact known tools are:
+
+| Action | Tool | Wrapper |
+| --- | --- | --- |
+| List test projects | `dotnet-test-mcp:list_test_projects` | `mcpproxy_call_tool_read` |
+| List tests summary | `dotnet-test-mcp:list_tests_summary` | `mcpproxy_call_tool_read` |
+| Run single test | `dotnet-test-mcp:run_single_test` | `mcpproxy_call_tool_read` |
+| Run test class | `dotnet-test-mcp:run_all_tests_in_class` | `mcpproxy_call_tool_read` |
+| Run test project | `dotnet-test-mcp:run_all_tests_for_project` | `mcpproxy_call_tool_read` |
+| Run all tests | `dotnet-test-mcp:run_all_tests` | `mcpproxy_call_tool_read` |
+
+Use direct calls to these exact tools after one successful MCP discovery/health check; retrieval can miss them. Fall back to Rider run configurations only when `dotnet-test-mcp` is disabled, quarantined, unhealthy, or fails with a tool/server error.
+
+The shell command examples below document equivalent commands for humans and for environments without `dotnet-test-mcp`; agents should prefer the MCP tools above.
+
 Before running any dotnet related command, TUnit test command, first check whether THE FINALS is running:
 
 ```bash
@@ -282,4 +323,4 @@ Do not claim success unless Rider MCP diagnostics/indexing was used and required
 - Weakening tests or assertions to force green.
 - Using `--filter` instead of TUnit `--treenode-filter`.
 - Running frontend package managers for backend-only work.
-- Blocking test execution on unavailable `dotnet-test-mcp`; use Rider run configurations or terminal test commands instead.
+- Blocking test execution on unavailable `dotnet-test-mcp`; first check server health/quarantine and direct-call known `dotnet-test-mcp:*` tools, then use Rider run configurations only if the MCP server is genuinely unavailable.

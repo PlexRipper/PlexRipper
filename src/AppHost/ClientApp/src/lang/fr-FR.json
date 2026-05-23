@@ -359,6 +359,16 @@
             },
             "offline-server-message": "Impossible de récupérer la liste d'accès à la bibliothèque à partir de ce serveur car il est hors ligne, réessayez lorsque le serveur sera de nouveau en ligne."
         },
+        "library-access-timeline": {
+            "filters": {
+                "server": "Serveur",
+                "library": "BIBLIOTHÈQUE"
+            },
+            "chart": {
+                "title": "Chronologie de l'accès à la bibliothèque",
+                "empty": "Aucun historique d'accès à la bibliothèque n'a été trouvé pour les filtres sélectionnés."
+            }
+        },
         "media-poster-image-content": {
             "episode-count": "Aucun épisode | 1 épisode | {count} épisodes",
             "seasons-count": "Aucune saison | 1 saison | {count} saisons"
@@ -903,7 +913,9 @@
         "settings": {
             "accounts": {
                 "plex-accounts-header": "Compte Plex",
-                "app-accounts-header": "Authentification"
+                "app-accounts-header": "Authentification",
+                "library-access-history": "Historique d'accès à la bibliothèque Plex",
+                "library-access-history-link-text": "Accédez à la page d'historique d'accès à la bibliothèque Plex."
             },
             "advanced": {
                 "database": {

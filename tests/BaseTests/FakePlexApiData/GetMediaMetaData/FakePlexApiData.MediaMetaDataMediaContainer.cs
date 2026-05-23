@@ -33,7 +33,7 @@ public partial class FakePlexApiData
         .RuleFor(l => l.AudienceRating, f => f.Random.Float() * 10)
         .RuleFor(l => l.ViewOffset, f => f.Random.Int(1))
         .RuleFor(l => l.LastViewedAt, _ => 0)
-        .RuleFor(l => l.Year, f => f.Random.Int(0, DateTime.Now.Year))
+        .RuleFor(l => l.Year, f => f.Random.Int(0, DateTime.UtcNow.Year))
         .RuleFor(l => l.AddedAt, f => f.Date.Past().ToUnixLong())
         .RuleFor(l => l.UpdatedAt, f => f.Date.Recent().ToUnixLong())
         .RuleFor(l => l.Thumb, (_, x) => $"/library/metadata/{x.RatingKey}/thumb/{x.UpdatedAt}")

@@ -25,6 +25,7 @@ public class RefreshLibraryMediaCommandUnitTests : BaseCommandUnitTest<RefreshLi
             CreatedAt = fakeLibrary.CreatedAt,
             UpdatedAt = fakeLibrary.UpdatedAt,
             ScannedAt = fakeLibrary.ScannedAt,
+            ContentChangedAt = fakeLibrary.ContentChangedAt,
             DefaultDestination = fakeLibrary.DefaultDestination,
             DefaultDestinationId = fakeLibrary.DefaultDestinationId,
         };
@@ -95,6 +96,9 @@ public class RefreshLibraryMediaCommandUnitTests : BaseCommandUnitTest<RefreshLi
         );
 
         var updatedLibrary = await GetUpdatedLibrary(seed, libraryType);
+        await IDbContext
+            .PlexLibraries.Where(x => x.Id == updatedLibrary.Id)
+            .ExecuteUpdateAsync(s => s.SetProperty(x => x.Outdated, true), CancellationToken);
 
         Mock.SetupCommand(It.IsAny<GetLibraryMediaFromPlexApiCommand>)
             .ReturnsAsync(
@@ -135,6 +139,8 @@ public class RefreshLibraryMediaCommandUnitTests : BaseCommandUnitTest<RefreshLi
             .FirstOrDefaultAsync(CancellationToken);
         dbLibrary.ShouldNotBeNull();
         dbLibrary.SyncedAt.ShouldNotBeNull();
+        dbLibrary.SyncedAt.Value.ShouldBeGreaterThan(updatedLibrary.UpdatedAt!.Value);
+        dbLibrary.Outdated.ShouldBeFalse();
     }
 
     [Test]

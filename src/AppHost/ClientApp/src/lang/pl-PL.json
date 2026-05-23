@@ -359,6 +359,16 @@
             },
             "offline-server-message": "Nie można pobrać listy dostępu do biblioteki z tego serwera, ponieważ jest on offline. Spróbuj ponownie, gdy serwer będzie online."
         },
+        "library-access-timeline": {
+            "filters": {
+                "server": "Serwer",
+                "library": "Biblioteka"
+            },
+            "chart": {
+                "title": "Oś czasu dostępu do biblioteki",
+                "empty": "Nie znaleziono historii dostępu do biblioteki dla wybranych filtrów."
+            }
+        },
         "media-poster-image-content": {
             "episode-count": "Brak odcinków | 1 odcinek | {count} odcinków",
             "seasons-count": "Brak sezonów | 1 sezon | {count} sezonów"
@@ -903,7 +913,9 @@
         "settings": {
             "accounts": {
                 "plex-accounts-header": "Konta Plex",
-                "app-accounts-header": "Uwierzytelnianie"
+                "app-accounts-header": "Uwierzytelnianie",
+                "library-access-history": "Historia dostępu do biblioteki Plex",
+                "library-access-history-link-text": "Przejdź do strony historii dostępu do biblioteki Plex"
             },
             "advanced": {
                 "database": {

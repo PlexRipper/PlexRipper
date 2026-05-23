@@ -70,6 +70,118 @@ public class AddOrUpdatePlexLibrariesCommandUnitTests : BaseUnitTest<AddOrUpdate
     }
 
     [Test]
+    public async Task ShouldPersistGrantedHistoryEvents_WhenNewLibraryAccessIsGranted()
+    {
+        // Arrange
+        var serverCount = 1;
+        var libraryCount = 2;
+        var seed = await SetupDatabase(
+            32,
+            config =>
+            {
+                config.PlexServerCount = serverCount;
+                config.PlexAccountCount = 1;
+            }
+        );
+
+        var dbContext = IDbContext;
+        var plexAccount = dbContext.PlexAccounts.FirstOrDefault();
+        plexAccount.ShouldNotBeNull();
+        var plexServer = await dbContext.PlexServers.FirstAsync(CancellationToken);
+        var plexLibraries = FakeData.GetPlexLibrary(seed).Generate(libraryCount);
+        foreach (var plexLibrary in plexLibraries)
+            plexLibrary.PlexServerId = plexServer.Id;
+
+        var request = new AddOrUpdatePlexLibrariesCommand
+        {
+            PlexAccountId = plexAccount.Id,
+            PlexLibraries = plexLibraries,
+        };
+
+        // Act
+        var result = await Sut.ExecuteAsync(request, CancellationToken);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        var historyEvents = await dbContext
+            .PlexLibraryAccessHistoryEvents.OrderBy(x => x.PlexLibraryId)
+            .ToListAsync(CancellationToken);
+
+        historyEvents.Count.ShouldBe(libraryCount);
+        historyEvents.Select(x => x.State).ShouldAllBe(x => x == PlexAccessState.Granted);
+        historyEvents.Select(x => x.PlexAccountId).ShouldAllBe(x => x == plexAccount.Id);
+        historyEvents.Select(x => x.PlexAccountNameSnapshot).ShouldAllBe(x => x == plexAccount.DisplayName);
+        historyEvents.Select(x => x.PlexServerId).ShouldAllBe(x => x == plexServer.Id);
+        historyEvents.Select(x => x.PlexServerNameSnapshot).ShouldAllBe(x => x == plexServer.Name);
+        historyEvents.Select(x => x.PlexLibraryNameSnapshot).ShouldBe(plexLibraries.Select(x => x.Name));
+        historyEvents.Select(x => x.RefreshRunId).Distinct().Count().ShouldBe(1);
+        historyEvents.Select(x => x.CreatedAt).ShouldAllBe(x => x > DateTime.MinValue);
+    }
+
+    [Test]
+    public async Task ShouldPersistRevokedAndBackfillGrantedHistoryEvents_WhenLibraryAccessChangesWithoutPriorHistory()
+    {
+        // Arrange
+        var serverCount = 1;
+        var libraryCount = 3;
+        await SetupDatabase(
+            32,
+            config =>
+            {
+                config.PlexServerCount = serverCount;
+                config.PlexMovieLibraryCount = libraryCount;
+                config.PlexAccountCount = 1;
+            }
+        );
+
+        var dbContext = IDbContext;
+        var plexAccount = dbContext.PlexAccounts.FirstOrDefault();
+        plexAccount.ShouldNotBeNull();
+        var plexLibraries = dbContext.PlexLibraries.AsTracking().OrderBy(x => x.Id).ToList();
+        var removedLibrary = plexLibraries.Last();
+        var incomingLibraries = plexLibraries.Take(libraryCount - 1).ToList();
+        var updatedTime = DateTime.UtcNow - TimeSpan.FromHours(2);
+        var request = new AddOrUpdatePlexLibrariesCommand
+        {
+            PlexAccountId = plexAccount.Id,
+            PlexLibraries = incomingLibraries.ToApiLibraries(updatedTime),
+        };
+
+        // Act
+        var result = await Sut.ExecuteAsync(request, CancellationToken);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        var historyEvents = await dbContext.PlexLibraryAccessHistoryEvents.ToListAsync(CancellationToken);
+
+        historyEvents.Count.ShouldBe(3);
+        historyEvents.Count(x => x.State == PlexAccessState.Granted).ShouldBe(2);
+        historyEvents.Count(x => x.State == PlexAccessState.Revoked).ShouldBe(1);
+
+        var revokedEvent = historyEvents.Single(x => x.State == PlexAccessState.Revoked);
+        revokedEvent.PlexAccountId.ShouldBe(plexAccount.Id);
+        revokedEvent.PlexAccountNameSnapshot.ShouldBe(plexAccount.DisplayName);
+        revokedEvent.PlexServerId.ShouldBe(removedLibrary.PlexServerId);
+        revokedEvent.PlexLibraryId.ShouldBe(removedLibrary.Id);
+        revokedEvent.PlexLibraryNameSnapshot.ShouldBe(removedLibrary.Name);
+
+        var grantedLibraryIdsNullable = historyEvents
+            .Where(x => x.State == PlexAccessState.Granted)
+            .Select(x => x.PlexLibraryId)
+            .ToList();
+        grantedLibraryIdsNullable.ShouldAllBe(x => x.HasValue);
+
+        var grantedLibraryIds = grantedLibraryIdsNullable
+            .Select(x => x!.Value)
+            .OrderBy(x => x)
+            .ToList();
+        grantedLibraryIds.ShouldBe(incomingLibraries.Select(x => x.Id).OrderBy(x => x).ToList());
+
+        historyEvents.Select(x => x.RefreshRunId).Distinct().Count().ShouldBe(1);
+        historyEvents.Select(x => x.CreatedAt).ShouldAllBe(x => x > DateTime.MinValue);
+    }
+
+    [Test]
     public async Task ShouldUpdatePlexLibraries_WhenTheyExistInTheDatabase()
     {
         // Arrange
@@ -92,7 +204,7 @@ public class AddOrUpdatePlexLibrariesCommandUnitTests : BaseUnitTest<AddOrUpdate
         plexServers.ShouldNotBeNull();
 
         // Set values that should not be overwritten by refreshing the libraries
-        var syncedAtDateTime = DateTime.Now - TimeSpan.FromHours(6);
+        var syncedAtDateTime = DateTime.UtcNow - TimeSpan.FromHours(6);
         var plexLibraries = dbContext.PlexLibraries.AsTracking().ToList();
         foreach (var plexLibrary in plexLibraries)
         {
@@ -104,13 +216,14 @@ public class AddOrUpdatePlexLibrariesCommandUnitTests : BaseUnitTest<AddOrUpdate
         await dbContext.SaveChangesAsync(CancellationToken);
 
         // Create API Data
-        var updatedTime = DateTime.Now - TimeSpan.FromHours(4);
+        var updatedTime = DateTime.UtcNow - TimeSpan.FromHours(4);
+        var changedContentChangedAt = plexLibraries.Max(x => x.ContentChangedAt) + 1;
 
         // Act
         var request = new AddOrUpdatePlexLibrariesCommand
         {
             PlexAccountId = plexAccount.Id,
-            PlexLibraries = plexLibraries.ToApiLibraries(updatedTime),
+            PlexLibraries = plexLibraries.ToApiLibraries(updatedTime, contentChangedAt: changedContentChangedAt),
         };
         var result = await Sut.ExecuteAsync(request, CancellationToken);
 
@@ -135,6 +248,7 @@ public class AddOrUpdatePlexLibrariesCommandUnitTests : BaseUnitTest<AddOrUpdate
             plexLibraryDb.ShouldNotBeNull();
             plexLibraryDb.UpdatedAt.ShouldBe(updatedTime);
             plexLibraryDb.SyncedAt.ShouldBe(syncedAtDateTime);
+            plexLibraryDb.Outdated.ShouldBeTrue();
             plexLibraryDb.DefaultDestinationId.ShouldBe(5);
         }
 
@@ -172,7 +286,7 @@ public class AddOrUpdatePlexLibrariesCommandUnitTests : BaseUnitTest<AddOrUpdate
             if (i % 2 == 0)
                 plexLibraries.RemoveAt(i);
 
-        var updatedTime = DateTime.Now - TimeSpan.FromHours(2);
+        var updatedTime = DateTime.UtcNow - TimeSpan.FromHours(2);
         var request = new AddOrUpdatePlexLibrariesCommand
         {
             PlexAccountId = plexAccount.Id,
@@ -200,5 +314,107 @@ public class AddOrUpdatePlexLibrariesCommandUnitTests : BaseUnitTest<AddOrUpdate
         plexAccountLibrariesDb.Select(x => x.PlexAccountId).ShouldAllBe(x => x == plexAccount.Id);
         plexAccountLibrariesDb.Select(x => x.PlexServerId).ShouldAllBe(x => x > 0 && x <= serverCount);
         plexAccountLibrariesDb.Select(x => x.PlexLibraryId).ShouldAllBe(x => x % 2 == 0);
+    }
+
+    [Test]
+    public async Task ShouldBackfillGrantedHistoryEventOnlyOnce_WhenLibraryIsUpdatedAcrossMultipleRefreshes()
+    {
+        // Arrange
+        await SetupDatabase(
+            32,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexMovieLibraryCount = 1;
+                config.PlexAccountCount = 1;
+            }
+        );
+
+        var dbContext = IDbContext;
+        var plexAccount = dbContext.PlexAccounts.FirstOrDefault();
+        plexAccount.ShouldNotBeNull();
+        var plexLibrary = dbContext.PlexLibraries.AsTracking().Single();
+        var updatedTime = DateTime.UtcNow - TimeSpan.FromMinutes(30);
+        var request = new AddOrUpdatePlexLibrariesCommand
+        {
+            PlexAccountId = plexAccount.Id,
+            PlexLibraries = new List<PlexLibrary> { plexLibrary }.ToApiLibraries(updatedTime),
+        };
+
+        // Act
+        var firstResult = await Sut.ExecuteAsync(request, CancellationToken);
+        var secondResult = await Sut.ExecuteAsync(request, CancellationToken);
+
+        // Assert
+        firstResult.IsSuccess.ShouldBeTrue();
+        secondResult.IsSuccess.ShouldBeTrue();
+        firstResult.Value.Single().GetUpdated.Count.ShouldBe(1);
+        firstResult.Value.Single().GetGranted.Count.ShouldBe(0);
+        secondResult.Value.Single().GetUpdated.Count.ShouldBe(1);
+        secondResult.Value.Single().GetGranted.Count.ShouldBe(0);
+
+        var historyEvents = await dbContext.PlexLibraryAccessHistoryEvents.ToListAsync(CancellationToken);
+        historyEvents.Count.ShouldBe(1);
+
+        var grantedEvent = historyEvents.Single();
+        grantedEvent.State.ShouldBe(PlexAccessState.Granted);
+        grantedEvent.PlexAccountId.ShouldBe(plexAccount.Id);
+        grantedEvent.PlexServerId.ShouldBe(plexLibrary.PlexServerId);
+        grantedEvent.PlexLibraryId.ShouldBe(plexLibrary.Id);
+        grantedEvent.CreatedAt.ShouldBeGreaterThan(DateTime.MinValue);
+    }
+
+    [Test]
+    public async Task ShouldNotBackfillGrantedHistoryEvent_WhenLibraryAlreadyHasAnyHistory()
+    {
+        // Arrange
+        await SetupDatabase(
+            32,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexMovieLibraryCount = 1;
+                config.PlexAccountCount = 1;
+            }
+        );
+
+        var dbContext = IDbContext;
+        var plexAccount = dbContext.PlexAccounts.FirstOrDefault();
+        plexAccount.ShouldNotBeNull();
+        var plexServer = dbContext.PlexServers.Single();
+        var plexLibrary = dbContext.PlexLibraries.AsTracking().Single();
+
+        await dbContext.PlexLibraryAccessHistoryEvents.AddAsync(
+            new PlexLibraryAccessHistoryEvent
+            {
+                RefreshRunId = Guid.NewGuid(),
+                PlexAccountId = plexAccount.Id,
+                PlexAccountNameSnapshot = plexAccount.DisplayName,
+                PlexServerId = plexServer.Id,
+                PlexServerNameSnapshot = plexServer.Name,
+                PlexLibraryId = plexLibrary.Id,
+                PlexLibraryNameSnapshot = plexLibrary.Name,
+                State = PlexAccessState.Revoked,
+                CreatedAt = DateTime.UtcNow - TimeSpan.FromHours(1),
+            },
+            CancellationToken
+        );
+        await dbContext.SaveChangesAsync(CancellationToken);
+
+        var updatedTime = DateTime.UtcNow - TimeSpan.FromMinutes(30);
+        var request = new AddOrUpdatePlexLibrariesCommand
+        {
+            PlexAccountId = plexAccount.Id,
+            PlexLibraries = new List<PlexLibrary> { plexLibrary }.ToApiLibraries(updatedTime),
+        };
+
+        // Act
+        var result = await Sut.ExecuteAsync(request, CancellationToken);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        var historyEvents = await dbContext.PlexLibraryAccessHistoryEvents.ToListAsync(CancellationToken);
+        historyEvents.Count.ShouldBe(1);
+        historyEvents.Single().State.ShouldBe(PlexAccessState.Revoked);
     }
 }

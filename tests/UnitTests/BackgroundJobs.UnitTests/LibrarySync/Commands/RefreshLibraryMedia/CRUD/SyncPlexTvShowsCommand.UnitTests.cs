@@ -249,7 +249,7 @@ public class SyncPlexTvShowsCommandUnitTests : BaseUnitTest<SyncPlexTvShowsComma
             if (i is >= 10 and < 30)
             {
                 newTvShows[i].PlexApiRatingKey = tvShowsDb[i].PlexApiRatingKey;
-                newTvShows[i].UpdatedAt = DateTime.Now;
+                newTvShows[i].UpdatedAt = DateTime.UtcNow;
             }
 
             newTvShows[i].Id = 0;

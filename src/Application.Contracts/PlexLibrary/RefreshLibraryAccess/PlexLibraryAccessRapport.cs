@@ -10,6 +10,8 @@ public record PlexLibraryAccessRapport(string _plexAccountName, int PlexServerId
 
     public int PlexServerId { get; } = PlexServerId;
 
+    public string PlexServerName => _plexServerName;
+
     public List<PlexLibraryAccessRow> Data { get; set; } = new();
 
     public List<PlexLibraryAccessRow> GetGranted => Data.FindAll(x => x.State == PlexAccessState.Granted);

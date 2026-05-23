@@ -359,6 +359,16 @@
             },
             "offline-server-message": "Could not retrieve the library access list from this server because it is offline, try again when the server is back online."
         },
+        "library-access-timeline": {
+            "filters": {
+                "server": "Server",
+                "library": "Library"
+            },
+            "chart": {
+                "title": "Library Access Timeline",
+                "empty": "No library access history found for the selected filters."
+            }
+        },
         "media-poster-image-content": {
             "episode-count": "No Episodes | 1 Episode | {count} Episodes",
             "seasons-count": "No Seasons | 1 Season | {count} Seasons"
@@ -903,7 +913,9 @@
         "settings": {
             "accounts": {
                 "plex-accounts-header": "Plex Accounts",
-                "app-accounts-header": "Authentication"
+                "app-accounts-header": "Authentication",
+                "library-access-history": "Plex Library Access History",
+                "library-access-history-link-text": "Go to Plex library access history page"
             },
             "advanced": {
                 "database": {

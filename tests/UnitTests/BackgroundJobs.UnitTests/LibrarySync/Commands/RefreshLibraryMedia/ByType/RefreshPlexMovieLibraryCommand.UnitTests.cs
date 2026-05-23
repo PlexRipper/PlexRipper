@@ -5,7 +5,7 @@ namespace Reaparr.BackgroundJobs.UnitTests;
 public class RefreshPlexMovieLibraryCommandUnitTests : BaseUnitTest<RefreshPlexMovieLibraryCommandHandler>
 {
     [Test]
-    public async Task ShouldSuccessfullyRefreshLibraryAndUpdateSyncedAt_WhenMoviesExist()
+    public async Task ShouldSuccessfullyRefreshLibraryAndKeepSyncedAtUnchanged_WhenMoviesExist()
     {
         // Arrange
         await SetupDatabase(
@@ -18,6 +18,8 @@ public class RefreshPlexMovieLibraryCommandUnitTests : BaseUnitTest<RefreshPlexM
             }
         );
         var testLibrary = IDbContext.PlexLibraries.Include(x => x.Movies).First();
+        var originalSyncedAt = testLibrary.SyncedAt;
+
         Mock.Mock<ILibrarySyncProgressStore>()
             .Setup(x =>
                 x.UpdateItemAsync(It.IsAny<int>(), It.IsAny<LibraryProgressItem>(), It.IsAny<CancellationToken>())
@@ -38,7 +40,7 @@ public class RefreshPlexMovieLibraryCommandUnitTests : BaseUnitTest<RefreshPlexM
         result.IsSuccess.ShouldBeTrue();
         var updatedLibrary = await IDbContext.PlexLibraries.GetAsync(testLibrary.Id, CancellationToken);
         updatedLibrary.ShouldNotBeNull();
-        updatedLibrary.SyncedAt.ShouldNotBeNull();
+        updatedLibrary.SyncedAt.ShouldBe(originalSyncedAt);
         Mock.Mock<ILibrarySyncProgressStore>()
             .Verify(
                 x => x.UpdateItemAsync(It.IsAny<int>(), It.IsAny<LibraryProgressItem>(), It.IsAny<CancellationToken>()),
@@ -98,6 +100,7 @@ public class RefreshPlexMovieLibraryCommandUnitTests : BaseUnitTest<RefreshPlexM
             }
         );
         var testLibrary = IDbContext.PlexLibraries.First();
+        var originalSyncedAt = testLibrary.SyncedAt;
 
         Mock.Mock<ILibrarySyncProgressStore>()
             .Setup(x =>
@@ -115,7 +118,7 @@ public class RefreshPlexMovieLibraryCommandUnitTests : BaseUnitTest<RefreshPlexM
         result.IsSuccess.ShouldBeTrue();
         var updatedLibrary = await IDbContext.PlexLibraries.GetAsync(testLibrary.Id, CancellationToken);
         updatedLibrary.ShouldNotBeNull();
-        updatedLibrary.SyncedAt.ShouldNotBeNull();
+        updatedLibrary.SyncedAt.ShouldBe(originalSyncedAt);
 
         Mock.Mock<ILibrarySyncProgressStore>()
             .Verify(
@@ -138,6 +141,7 @@ public class RefreshPlexMovieLibraryCommandUnitTests : BaseUnitTest<RefreshPlexM
             }
         );
         var testLibrary = IDbContext.PlexLibraries.Include(x => x.Movies).First();
+        var originalSyncedAt = testLibrary.SyncedAt;
         foreach (var movie in testLibrary.Movies)
         {
             movie.MediaSize = 0;
@@ -163,7 +167,7 @@ public class RefreshPlexMovieLibraryCommandUnitTests : BaseUnitTest<RefreshPlexM
         result.IsSuccess.ShouldBeTrue();
         var updatedLibrary = await IDbContext.PlexLibraries.GetAsync(testLibrary.Id, CancellationToken);
         updatedLibrary.ShouldNotBeNull();
-        updatedLibrary.SyncedAt.ShouldNotBeNull();
+        updatedLibrary.SyncedAt.ShouldBe(originalSyncedAt);
 
         Mock.Mock<ILibrarySyncProgressStore>()
             .Verify(

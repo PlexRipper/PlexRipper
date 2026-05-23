@@ -539,6 +539,7 @@ export enum JobTypes {
   LibrarySyncJob = "LibrarySyncJob",
   MetadataSyncJob = "MetadataSyncJob",
   CheckForUpdateJob = "CheckForUpdateJob",
+  CheckPlexLibrariesForUpdatesJob = "CheckPlexLibrariesForUpdatesJob",
 }
 
 export interface LanguageSettingsDTO {
@@ -642,7 +643,7 @@ export interface MediaQueryFilterDTO {
   having?: string | null;
   includeCount?: boolean | null;
   includes?: string | null;
-  /** @default "False" */
+  /** @default "None" */
   mediaType: PlexMediaType;
   mode?: string | null;
   /** @format int32 */
@@ -756,12 +757,59 @@ export interface PlexGenreDTO {
   name: string;
 }
 
+export interface PlexLibraryAccessCurrentStateDTO {
+  libraries: PlexLibraryAccessCurrentStateLibraryDTO[];
+  /** @format int32 */
+  plexServerId?: number | null;
+  plexServerName?: string | null;
+}
+
+export interface PlexLibraryAccessCurrentStateLibraryDTO {
+  /** @format date-time */
+  grantedAt: string;
+  /** @format date-time */
+  lastChangedAt: string;
+  /** @format int32 */
+  plexAccountId: number;
+  plexAccountName: string;
+  /** @format int32 */
+  plexLibraryId?: number | null;
+  plexLibraryName?: string | null;
+  /** @format int32 */
+  plexServerId?: number | null;
+  plexServerName?: string | null;
+}
+
 export interface PlexLibraryAccessRapportDTO {
   /** @format int32 */
   plexLibraryId: number;
   plexLibraryName: string;
   /** @format int32 */
   plexServerId: number;
+  state: PlexAccessState;
+}
+
+export interface PlexLibraryAccessTimelineDTO {
+  currentState: PlexLibraryAccessCurrentStateDTO[];
+  events: PlexLibraryAccessTimelineEventDTO[];
+}
+
+export interface PlexLibraryAccessTimelineEventDTO {
+  /** @format date-time */
+  createdAt: string;
+  /** @format int32 */
+  id: number;
+  /** @format int32 */
+  plexAccountId: number;
+  plexAccountName: string;
+  /** @format int32 */
+  plexLibraryId?: number | null;
+  plexLibraryName?: string | null;
+  /** @format int32 */
+  plexServerId?: number | null;
+  plexServerName?: string | null;
+  /** @format guid */
+  refreshRunId: string;
   state: PlexAccessState;
 }
 
@@ -1333,6 +1381,15 @@ export interface ResultDTOOfPlexAccountDTO {
   statusCode: number;
   successes: SuccessDTO[];
   value?: PlexAccountDTO | null;
+}
+
+export interface ResultDTOOfPlexLibraryAccessTimelineDTO {
+  errors: ErrorDTO[];
+  isSuccess: boolean;
+  /** @format int32 */
+  statusCode: number;
+  successes: SuccessDTO[];
+  value?: PlexLibraryAccessTimelineDTO | null;
 }
 
 export interface ResultDTOOfPlexLibraryDTO {

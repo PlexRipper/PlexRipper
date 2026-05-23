@@ -28,7 +28,6 @@ public class AddOrUpdatePlexLibrariesCommandHandler
 {
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
-    private readonly List<PlexLibraryAccessRapport> _list = [];
 
     public AddOrUpdatePlexLibrariesCommandHandler(ILogger log, IReaparrDbContext dbContext)
     {
@@ -41,6 +40,8 @@ public class AddOrUpdatePlexLibrariesCommandHandler
         CancellationToken cancellationToken
     )
     {
+        List<PlexLibraryAccessRapport> rapportList = [];
+
         var plexAccountId = command.PlexAccountId;
 
         var plexAccount = await _dbContext.PlexAccounts.GetAsync(plexAccountId, cancellationToken);
@@ -71,18 +72,18 @@ public class AddOrUpdatePlexLibrariesCommandHandler
                 }
                 else
                 {
-                    incomingPlexLibrary.Id = plexLibraryDb.Id;
-                    incomingPlexLibrary.SyncedAt = plexLibraryDb.SyncedAt;
-                    incomingPlexLibrary.DefaultDestinationId = plexLibraryDb.DefaultDestinationId;
-
                     _log.Here()
                         .Debug(
                             "Updating PlexLibrary {PlexLibraryName} with id: {PlexLibraryId} in the database",
                             incomingPlexLibrary.Title,
                             incomingPlexLibrary.Id
                         );
-
+                    
+                    incomingPlexLibrary.Id = plexLibraryDb.Id;
+                    incomingPlexLibrary.SyncedAt = plexLibraryDb.SyncedAt;
+                    incomingPlexLibrary.Outdated = plexLibraryDb.Outdated || incomingPlexLibrary.ContentChangedAt != plexLibraryDb.ContentChangedAt;
                     incomingPlexLibrary.DefaultDestinationId = plexLibraryDb.DefaultDestinationId;
+
                     _dbContext.Entry(plexLibraryDb).CurrentValues.SetValues(incomingPlexLibrary);
                 }
             }
@@ -112,7 +113,7 @@ public class AddOrUpdatePlexLibrariesCommandHandler
                 .ToListAsync(cancellationToken);
 
             var plexServerName = await _dbContext.GetPlexServerNameById(plexServerId);
-            var rapport = FindOrCreate(plexServerId, plexAccount.DisplayName, plexServerName);
+            var rapport = FindOrCreate(rapportList, plexServerId, plexAccount.DisplayName, plexServerName);
 
             foreach (var incomingPlexLibrary in incomingPlexLibraries)
             {
@@ -187,23 +188,123 @@ public class AddOrUpdatePlexLibrariesCommandHandler
             }
         }
 
+        await AddHistoryEventsAsync(rapportList, plexAccount, cancellationToken);
+
         await _dbContext.SaveChangesAsync(cancellationToken);
 
-        foreach (var rapport in _list)
+        foreach (var rapport in rapportList)
             _log.Here().Information(rapport.ToString());
 
-        return Result.Ok(_list);
+        return Result.Ok(rapportList);
     }
 
-    private PlexLibraryAccessRapport FindOrCreate(int plexServerId, string plexAccountName, string plexServerName)
+    private async Task AddHistoryEventsAsync(
+        List<PlexLibraryAccessRapport> rapportList,
+        PlexAccount plexAccount,
+        CancellationToken cancellationToken
+    )
     {
-        var x = _list.Find(x => x.PlexServerId == plexServerId);
+        var refreshRunId = Guid.NewGuid();
+        var createdAt = DateTime.UtcNow;
+
+        var updatedRows = rapportList
+            .SelectMany(rapport =>
+                rapport.Data
+                    .Where(x => x.State == PlexAccessState.Updated)
+                    .Select(row => new
+                    {
+                        rapport.PlexServerId,
+                        row.PlexLibraryId,
+                        row.PlexLibraryName,
+                        rapport.PlexServerName,
+                    })
+            )
+            .DistinctBy(x => new { x.PlexServerId, x.PlexLibraryId })
+            .ToList();
+
+        var existingHistoryKeys = new HashSet<(int PlexServerId, int PlexLibraryId)>();
+
+        if (updatedRows.Count > 0)
+        {
+            var updatedServerIds = updatedRows.Select(x => x.PlexServerId).Distinct().ToList();
+            var updatedLibraryIds = updatedRows.Select(x => x.PlexLibraryId).Distinct().ToList();
+
+            var existingHistory = await _dbContext
+                .PlexLibraryAccessHistoryEvents.Where(x =>
+                    x.PlexAccountId == plexAccount.Id
+                    && x.PlexServerId.HasValue
+                    && x.PlexLibraryId.HasValue
+                    && updatedServerIds.Contains(x.PlexServerId.Value)
+                    && updatedLibraryIds.Contains(x.PlexLibraryId.Value)
+                )
+                .Select(x => new { x.PlexServerId, x.PlexLibraryId })
+                .ToListAsync(cancellationToken);
+
+            existingHistoryKeys = existingHistory
+                .Select(x => (x.PlexServerId!.Value, x.PlexLibraryId!.Value))
+                .ToHashSet();
+        }
+
+        foreach (var rapport in rapportList)
+        {
+            foreach (var row in rapport.Data.Where(x => x.State is PlexAccessState.Granted or PlexAccessState.Revoked))
+            {
+                await _dbContext.PlexLibraryAccessHistoryEvents.AddAsync(
+                    new PlexLibraryAccessHistoryEvent
+                    {
+                        RefreshRunId = refreshRunId,
+                        PlexAccountId = plexAccount.Id,
+                        PlexAccountNameSnapshot = plexAccount.DisplayName,
+                        PlexServerId = rapport.PlexServerId,
+                        PlexServerNameSnapshot = rapport.PlexServerName,
+                        PlexLibraryId = row.PlexLibraryId,
+                        PlexLibraryNameSnapshot = row.PlexLibraryName,
+                        State = row.State,
+                        CreatedAt = createdAt,
+                    },
+                    cancellationToken
+                );
+            }
+        }
+
+        foreach (var updatedRow in updatedRows)
+        {
+            var historyKey = (updatedRow.PlexServerId, updatedRow.PlexLibraryId);
+            if (existingHistoryKeys.Contains(historyKey))
+                continue;
+
+            await _dbContext.PlexLibraryAccessHistoryEvents.AddAsync(
+                new PlexLibraryAccessHistoryEvent
+                {
+                    RefreshRunId = refreshRunId,
+                    PlexAccountId = plexAccount.Id,
+                    PlexAccountNameSnapshot = plexAccount.DisplayName,
+                    PlexServerId = updatedRow.PlexServerId,
+                    PlexServerNameSnapshot = updatedRow.PlexServerName,
+                    PlexLibraryId = updatedRow.PlexLibraryId,
+                    PlexLibraryNameSnapshot = updatedRow.PlexLibraryName,
+                    State = PlexAccessState.Granted,
+                    CreatedAt = DateTime.UtcNow,
+                },
+                cancellationToken
+            );
+        }
+    }
+
+    private static PlexLibraryAccessRapport FindOrCreate(
+        List<PlexLibraryAccessRapport> rapportList,
+        int plexServerId,
+        string plexAccountName,
+        string plexServerName
+    )
+    {
+        var x = rapportList.Find(x => x.PlexServerId == plexServerId);
         if (x is not null)
         {
             return x;
         }
 
-        _list.Add(new PlexLibraryAccessRapport(plexAccountName, plexServerId, plexServerName));
-        return _list.Last();
+        rapportList.Add(new PlexLibraryAccessRapport(plexAccountName, plexServerId, plexServerName));
+        return rapportList.Last();
     }
 }

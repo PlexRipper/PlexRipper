@@ -98,7 +98,20 @@ public class CheckConnectionStatusByIdCommandHandler
         // Add plexServer status to DB, the PlexServerStatus table functions as a server log.
         var plexServerStatus = serverStatusResult.Value;
 
-        var upsertResult = await Result.Try(async Task () =>
+        var relationExists = await dbContext.PlexServerConnections
+            .AnyAsync(
+                x => x.Id == plexServerStatus.PlexServerConnectionId && x.PlexServerId == plexServerStatus.PlexServerId,
+                cancellationToken
+            );
+
+        if (!relationExists)
+        {
+            return ResultExtensions
+                .EntityNotFound(nameof(PlexServerConnection), plexServerStatus.PlexServerConnectionId)
+                .LogWarning();
+        }
+
+        try
         {
             var existingCount = await dbContext
                 .PlexServerStatuses.Where(x => x.PlexServerConnectionId == plexServerStatus.PlexServerConnectionId)
@@ -118,11 +131,11 @@ public class CheckConnectionStatusByIdCommandHandler
                 dbContext.PlexServerStatuses.Add(plexServerStatus);
                 await dbContext.SaveChangesAsync(cancellationToken);
             }
-        });
-
-        if (upsertResult.IsFailed)
+        }
+        catch (DbUpdateException ex)
         {
-            return upsertResult.LogError();
+            return Result.Fail(new ExceptionalError($"Failed to upsert {nameof(PlexServerStatus)} due to relational integrity changes.", ex))
+                .LogError();
         }
 
         return serverStatusResult.Value;

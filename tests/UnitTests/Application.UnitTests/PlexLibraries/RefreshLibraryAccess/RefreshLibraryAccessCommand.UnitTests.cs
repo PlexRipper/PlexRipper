@@ -53,7 +53,7 @@ public class RefreshLibraryAccessCommandUnitTests : BaseUnitTest<RefreshLibraryA
         );
         var plexServer = IDbContext.PlexServers.FirstOrDefault();
         plexServer.ShouldNotBeNull();
-        var updatedTime = DateTime.Now - TimeSpan.FromHours(9);
+        var updatedTime = DateTime.UtcNow - TimeSpan.FromHours(9);
         var plexLibraries = FakeData.GetPlexLibrary(seed).Generate(5).ToApiLibraries(updatedTime);
 
         Mock.Mock<ICommandExecutor>()

@@ -79,6 +79,7 @@ public static partial class DbContextExtensions
             .PlexAccounts.AsNoTracking()
             .Include(x => x.PlexAccountServers)
                 .ThenInclude(x => x.PlexServer)
+            .Where(x => x.IsEnabled)
             .FirstOrDefaultAsync(x => x.Id == plexAccountId, cancellationToken);
 
         if (plexAccount == null)

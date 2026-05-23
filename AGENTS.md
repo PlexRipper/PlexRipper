@@ -34,6 +34,7 @@ Reaparr is a cross-platform Plex media downloader hosted on GitHub: https://gith
 - Respect formatting, analyzers, EditorConfig, and linters.
 - Match existing naming conventions and folder layout.
 - Avoid breaking public APIs unless explicitly coordinated.
+- **Do not commit automatically.** The user reviews committed work carefully; only create commits when explicitly asked to commit. Plans should include verification checkpoints, not per-task commit steps.
 
 ---
 
@@ -56,11 +57,20 @@ On Linux, `trash` resolves to `gio trash` or `trash-cli`.
 ---
 ### Backend (`src/`)
 
-If working on the backend, then load `reaparr-backend` skill for project-specific backend conventions and `dotnet-devtools` for .NET development best practices.
+If working on the backend, then load `reaparr-backend` skill for project-specific backend conventions and `dotnet-devtools` for .NET development best practices. Backend file reads, edits, searches, refactors, and diagnostics must default to Rider MCP (`rider-official:*`). Do not use WebStorm MCP for backend files.
+
+Backend tests must use `dotnet-test-mcp` whenever available. Prefer these exact tools over Rider run configurations or terminal-style commands:
+
+- `dotnet-test-mcp:list_test_projects`
+- `dotnet-test-mcp:list_tests_summary`
+- `dotnet-test-mcp:run_single_test`
+- `dotnet-test-mcp:run_all_tests_in_class`
+- `dotnet-test-mcp:run_all_tests_for_project`
+- `dotnet-test-mcp:run_all_tests`
 
 ### Frontend (`src/AppHost/ClientApp/`)
 
-If working on the frontend, then load `reaparr-frontend` skill first for project-specific frontend conventions. This umbrella skill must be loaded before narrower frontend skills such as `reaparr-frontend-components`, `reaparr-pinia-store`, or `reaparr-frontend-unit-tests`.
+If working on the frontend, then load `reaparr-frontend` skill first for project-specific frontend conventions. This umbrella skill must be loaded before narrower frontend skills such as `reaparr-frontend-components`, `reaparr-pinia-store`, or `reaparr-frontend-unit-tests`. Frontend file reads, edits, searches, refactors, and diagnostics must default to WebStorm MCP (`webstorm-official:*`). Do not use Rider MCP for frontend files unless WebStorm is unavailable and the user approves the fallback.
 
 > **Package manager:** The frontend uses **Bun exclusively** — never use npm, yarn, or pnpm.
 
@@ -75,6 +85,7 @@ If working on the frontend, then load `reaparr-frontend` skill first for project
 - **All agents operating in this project** must ask questions using clickable multiple-choice options via the question
   tool — never plain-text lists. Bundle related questions together whenever possible. Include a recommended option when appropriate. 
 - Default to **read-only exploration and analysis**. Only write when edits are explicitly needed.
+- For MCP-backed work, cache exact tool names after the first successful discovery/health check in a session. Reuse known-good tools instead of repeatedly rediscovering them; only rediscover when a tool fails or a new capability is needed.
 - Store all generated plans under this repository’s `plans/` directory. Do not place plans in any external `.claude`
   directory or other out-of-repo location, regardless of which AI agent creates them.
 

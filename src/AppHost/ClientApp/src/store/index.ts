@@ -10,6 +10,7 @@ export * from './globalStore';
 export * from './helpStore';
 export * from './integrationStore';
 export * from './libraryStore';
+export * from './libraryAccessTimelineStore';
 export * from './localizationStore';
 export * from './logsStore';
 export * from './mediaOverviewStore';

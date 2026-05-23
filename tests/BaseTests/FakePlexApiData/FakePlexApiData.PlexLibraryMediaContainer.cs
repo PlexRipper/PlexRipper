@@ -27,7 +27,7 @@ public partial class FakePlexApiData
             .RuleFor(x => x.ScannedAt, f => f.Date.Recent().ToUnixLong())
             .RuleFor(x => x.Content, f => f.Random.Bool())
             .RuleFor(x => x.Directory, f => f.Random.Bool())
-            .RuleFor(x => x.ContentChangedAt, f => (int)f.Date.Recent().ToUnixLong())
+            .RuleFor(x => x.ContentChangedAt, f => f.Random.Long(1, 10_000_000))
             .RuleFor(x => x.Hidden, f => f.Random.Bool())
             .RuleFor(
                 x => x.Location,

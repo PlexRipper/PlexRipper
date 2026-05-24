@@ -172,6 +172,7 @@ export interface DesktopMessageDTO {
 export enum DesktopMessageType {
   None = "None",
   ExternalLink = "ExternalLink",
+  DesktopReady = "DesktopReady",
 }
 
 export interface DisplaySettingsDTO {

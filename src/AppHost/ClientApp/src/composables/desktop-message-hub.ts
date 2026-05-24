@@ -12,3 +12,7 @@ declare const window: Window & {
 export function sendDesktopMessage(message: DesktopMessageDTO): void {
 	window.external.sendMessage(JSON.stringify(message));
 }
+
+export function canSendDesktopMessage(): boolean {
+	return typeof window !== 'undefined' && typeof window.external?.sendMessage === 'function';
+}

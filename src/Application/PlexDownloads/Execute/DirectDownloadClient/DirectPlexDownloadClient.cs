@@ -299,7 +299,7 @@ public class DirectPlexDownloadClient : IPlexDownloadClient
                         var verifiedFileSize = completionResult.Value;
                         var progress = new DownloadTaskProgress
                         {
-                            DataTotal = expectedFileSize,
+                            DataTotal = verifiedFileSize,
                             Percentage = 100,
                             DataReceived = verifiedFileSize,
                             DownloadSpeed = 0,
@@ -353,7 +353,7 @@ public class DirectPlexDownloadClient : IPlexDownloadClient
 
         var progress = new DownloadTaskProgress
         {
-            DataTotal = expectedFileSize,
+            DataTotal = verifiedFileSize,
             Percentage = 100,
             DataReceived = verifiedFileSize,
             DownloadSpeed = 0,

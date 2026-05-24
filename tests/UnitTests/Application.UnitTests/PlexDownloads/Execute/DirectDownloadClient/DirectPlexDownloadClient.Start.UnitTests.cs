@@ -1313,6 +1313,98 @@ public class DirectPlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDow
     }
 
     [Test]
+    public async Task ShouldReportVerifiedFileSizeAsDataTotal_WhenCompletedFileIsLargerThanSeededMetadata()
+    {
+        // Arrange
+        await SetupDatabase(
+            88890,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexAccountCount = 1;
+                config.MovieDownloadTasksCount = 1;
+            }
+        );
+
+        var dbContext = IDbContext;
+        var downloadTask = await dbContext.DownloadTaskMovieFile.FirstAsync(CancellationToken);
+        var seededMetadataSize = downloadTask.DataTotal;
+        var verifiedFileSize = seededMetadataSize + 1024;
+        var serverMachineIdentifier = await dbContext.GetPlexServerMachineIdentifierById(downloadTask.PlexServerId);
+        var completionPackage = MakeDownloadPackage(verifiedFileSize);
+        var fileMock = new Mock<IFile>();
+        var fileInfoFactoryMock = new Mock<IFileInfoFactory>();
+        var downloadServiceMock = new Mock<IDownloadService>();
+
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Setup(x =>
+                x.OnStatusChangedAsync(
+                    It.IsAny<DownloadTaskKey>(),
+                    It.IsAny<Domain.DownloadStatus>(),
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.Exactly(2));
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Setup(x =>
+                x.OnProgressUpdated(
+                    It.IsAny<DownloadTaskKey>(),
+                    It.IsAny<DownloadTaskProgress>(),
+                    It.IsAny<DirectDownloadSnapshot?>()
+                )
+            );
+
+        SetupSpeedLimitMocks(serverMachineIdentifier);
+        SetupCommandExecutor();
+
+        downloadServiceMock.Setup(x => x.Clear()).Returns(Task.CompletedTask);
+        downloadServiceMock.Setup(x => x.CancelTaskAsync()).Returns(Task.CompletedTask);
+        downloadServiceMock.Setup(x => x.Package).Returns(completionPackage);
+        downloadServiceMock
+            .Setup(x => x.DownloadFileTaskAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .Returns<string, string, CancellationToken>(
+                (_, targetPath, _) =>
+                {
+                    SetupVerifiedFile(fileMock, fileInfoFactoryMock, targetPath, verifiedFileSize);
+
+                    downloadServiceMock.Raise(
+                        x => x.DownloadFileCompleted += null,
+                        downloadServiceMock.Object,
+                        new AsyncCompletedEventArgs(null, false, completionPackage)
+                    );
+                    return Task.CompletedTask;
+                }
+            );
+
+        // Act
+        var sut = CreateSut(downloadServiceMock, fileMock, fileInfoFactoryMock);
+        var result = await sut.Start(downloadTask.ToKey(), CancellationToken);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Verify(
+                x =>
+                    x.OnProgressUpdated(
+                        It.Is<DownloadTaskKey>(key => key == downloadTask.ToKey()),
+                        It.Is<DownloadTaskProgress>(p =>
+                            p.DataTotal == verifiedFileSize
+                            && p.DataReceived == verifiedFileSize
+                            && p.Percentage == 100
+                            && p.TimeRemaining == 0
+                        ),
+                        It.IsAny<DirectDownloadSnapshot?>()
+                    ),
+                Times.Once()
+            );
+        Mock.Mock<IDownloadTaskUpdateDispatcher>().Verify();
+        Mock.Mock<ICommandExecutor>()
+            .Verify(x => x.Send(It.IsAny<GetDirectDownloadUrlCommand>(), It.IsAny<CancellationToken>()), Times.Once());
+    }
+
+    [Test]
     public async Task ShouldReturnFailedResultAndPersistClientErrorLog_WhenGetDirectDownloadUrlFails()
     {
         // Arrange

@@ -18,8 +18,8 @@
         <PackageReference Include="Moq" Version="4.20.72" />
         <PackageReference Include="Moq.Contrib.HttpClient" Version="1.4.0" />
         <PackageReference Include="Shouldly" Version="4.3.0" />
-        <PackageReference Include="TUnit" Version="1.24.0" />
-        <PackageReference Include="TestableIO.System.IO.Abstractions.TestingHelpers" Version="22.1.0" />
+        <PackageReference Include="TUnit" Version="1.45.29" />
+        <PackageReference Include="TestableIO.System.IO.Abstractions.TestingHelpers" Version="22.1.1" />
     </ItemGroup>
     <ItemGroup>
         <ProjectReference Include="..\..\src\AppHost\AppHost.csproj" />

@@ -138,6 +138,13 @@ public class MoveFileWithResumeCommandHandler : ICommandHandler<MoveFileWithResu
         if (cancellationToken.IsCancellationRequested)
             return ResultExtensions.TaskIsCancelled(nameof(MoveFileWithResumeCommandHandler));
 
+        if (currentOffset < dataTotal)
+        {
+            return Result.Fail(
+                $"Move ended before the expected byte count was transferred. Expected {dataTotal} bytes but transferred {currentOffset} bytes from '{sourcePath}' to '{targetPath}'."
+            ).LogError();
+        }
+
         if (!cancellationToken.IsCancellationRequested && _file.Exists(sourcePath))
         {
             var deleteSourceResult = Result.Try(() => _file.Delete(sourcePath));

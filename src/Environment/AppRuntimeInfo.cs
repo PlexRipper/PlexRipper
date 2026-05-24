@@ -40,6 +40,9 @@ public class AppRuntimeInfo : IAppRuntimeInfo
     public bool IsIntegrationTestMode => IsTrue(GetEnvironmentVariable(EnvKeys.IntegrationTestMode));
 
     /// <inheritdoc/>
+    public bool IsDesktopEmbeddedDisabled => IsTrue(GetEnvironmentVariable(EnvKeys.DesktopEmbeddedDisabled));
+
+    /// <inheritdoc/>
     public string SEQ_Url => GetEnvironmentVariable(EnvKeys.SeqUrl) ?? string.Empty;
 
     /// <inheritdoc/>

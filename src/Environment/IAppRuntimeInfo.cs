@@ -115,6 +115,11 @@ public interface IAppRuntimeInfo
     bool IsIntegrationTestMode { get; }
 
     /// <summary>
+    /// Returns true when desktop embedded window mode is disabled and browser-only mode should be used.
+    /// </summary>
+    bool IsDesktopEmbeddedDisabled { get; }
+
+    /// <summary>
     /// Returns true if the DOTNET_ENVIRONMENT is set to Development.
     /// </summary>
     bool IsDevelopmentEnvironment { get; }

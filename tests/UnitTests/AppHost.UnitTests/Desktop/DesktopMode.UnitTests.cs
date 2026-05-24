@@ -176,6 +176,50 @@ public class DesktopModeUnitTests : BaseUnitTest<DesktopMode>
     }
 
     [Test]
+    public async Task ShouldAcceptDesktopReadyMessage_WhenMainWindowStarts()
+    {
+        // Arrange
+        SetAppRuntimeInfo(x => x.IsProductionEnvironment = true);
+        SetAppBuildInfo(x => x.RuntimeMode = "desktop");
+
+        var window = new MockDesktopWindow();
+        var windowFactory = new FakeDesktopWindowFactory(window);
+        var server = CreateServer("http://localhost:5000");
+        var sut = CreateSut(server, windowFactory.Create);
+
+        await sut.StartAsync(CancellationToken);
+
+        // Act
+        window.ExternalLinkHandler!.Invoke(new DesktopMessageDTO { Type = DesktopMessageType.DesktopReady, Value = "ready" });
+
+        // Assert
+        window.OpenedExternalUrls.ShouldBeEmpty();
+    }
+
+    [Test]
+    public async Task ShouldOpenExternalBrowserFallback_WhenDesktopReadyIsNotReportedWithinTimeout()
+    {
+        // Arrange
+        SetAppRuntimeInfo(x => x.IsProductionEnvironment = true);
+        SetAppBuildInfo(x => x.RuntimeMode = "desktop");
+
+        var window = new MockDesktopWindow();
+        var windowFactory = new FakeDesktopWindowFactory(window);
+        var server = CreateServer("http://localhost:5000");
+        var sut = CreateSut(server, windowFactory.Create);
+
+        // Act
+        var startResult = await sut.StartAsync(CancellationToken);
+        await Task.Delay(TimeSpan.FromSeconds(6), CancellationToken);
+
+        // Assert
+        startResult.IsSuccess.ShouldBeTrue();
+        window.OpenedExternalUrls.ShouldContain(new Uri("http://localhost:5000/"));
+
+        await sut.ExitAsync(CancellationToken);
+    }
+
+    [Test]
     public async Task ShouldCompleteDesktopRuntime_WhenExitCommandRuns()
     {
         // Arrange

@@ -59,5 +59,6 @@ public class MockAppRuntimeInfo : IAppRuntimeInfo
 
     public LogEventLevel LogLevel { get; set; } = LogEventLevel.Debug;
     public bool IsAuthenticationDisabled { get; set; }
+    public bool IsDesktopEmbeddedDisabled { get; set; }
     public int AppPort { get; set; } = 5000;
 }

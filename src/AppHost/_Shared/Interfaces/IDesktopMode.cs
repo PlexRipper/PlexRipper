@@ -29,4 +29,9 @@ public interface IDesktopMode
     /// Waits until explicit desktop shutdown is requested.
     /// </summary>
     Task WaitForExitAsync(CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Opens a URL in the default external browser.
+    /// </summary>
+    void OpenExternalBrowser(Uri uri);
 }

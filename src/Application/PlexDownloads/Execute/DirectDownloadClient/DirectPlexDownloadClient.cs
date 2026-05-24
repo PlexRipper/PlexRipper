@@ -61,6 +61,7 @@ public class DirectPlexDownloadClient : IPlexDownloadClient
         _configuration.HttpClientTimeout = (int)TimeSpan.FromSeconds(100).TotalMilliseconds;
         _configuration.EnableAutoResumeDownload = false;
         _configuration.DownloadFileExtension = FilePathExtensions.TempDownloadFileSuffix;
+        _configuration.CheckDiskSizeBeforeDownload = false;
 
         _downloader = downloadServiceFactory(_configuration);
     }

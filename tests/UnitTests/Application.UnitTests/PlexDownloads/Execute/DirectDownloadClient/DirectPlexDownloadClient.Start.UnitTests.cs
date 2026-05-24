@@ -405,6 +405,34 @@ public class DirectPlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDow
     }
 
     [Test]
+    public void ShouldDisableDownloaderDiskSizePrecheck_WhenCreatingDownloadService()
+    {
+        // Arrange
+        DownloadConfiguration? capturedConfig = null;
+        var downloadServiceMock = new Mock<IDownloadService>();
+
+        Mock.Mock<IDownloadManagerSettings>().Setup(x => x.DownloadSegments).Returns(1);
+
+        // Act
+        _ = Mock.Create<DirectPlexDownloadClient>(
+            new NamedParameter(
+                "downloadServiceFactory",
+                (Func<DownloadConfiguration, IDownloadService>)(
+                    config =>
+                    {
+                        capturedConfig = config;
+                        return downloadServiceMock.Object;
+                    }
+                )
+            )
+        );
+
+        // Assert
+        capturedConfig.ShouldNotBeNull();
+        capturedConfig!.CheckDiskSizeBeforeDownload.ShouldBeFalse();
+    }
+
+    [Test]
     public async Task ShouldReturnEntityNotFoundError_WhenDownloadTaskKeyDoesNotExist()
     {
         // Arrange

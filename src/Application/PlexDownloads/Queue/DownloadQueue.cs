@@ -12,7 +12,7 @@ public class DownloadQueue : IDownloadQueue
     /// Cooldown applied after a task is picked by the queue. This prevents a fast-failing
     /// task from being selected repeatedly in a tight listener-triggered loop.
     /// </summary>
-    private static readonly TimeSpan RetryCooldown = TimeSpan.FromSeconds(60);
+    private static readonly TimeSpan _retryCooldown = TimeSpan.FromSeconds(60);
 
     private readonly ILogger _log;
     private readonly IReaparrDbContextFactory _dbContextFactory;
@@ -157,7 +157,7 @@ public class DownloadQueue : IDownloadQueue
                 nextDownloadTask.FullTitle
             );
 
-        _retryCooldownUntil[nextDownloadTask.Id] = DateTime.UtcNow + RetryCooldown;
+        _retryCooldownUntil[nextDownloadTask.Id] = DateTime.UtcNow + _retryCooldown;
         await _downloadTaskScheduler.StartDownloadTaskJob(nextDownloadTask.ToKey());
 
         return Result.Ok(nextDownloadTask);

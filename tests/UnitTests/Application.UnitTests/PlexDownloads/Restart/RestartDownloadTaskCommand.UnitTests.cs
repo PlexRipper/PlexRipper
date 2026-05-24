@@ -533,8 +533,6 @@ public class RestartDownloadTaskCommandUnitTests : BaseUnitTest<RestartDownloadT
         var parent = (await IDbContext.GetAllDownloadTasksByServerAsync(cancellationToken: CancellationToken)).First();
         var childKey = (await IDbContext.GetDownloadableChildTaskKeys(parent.ToKey(), CancellationToken)).First();
 
-        var before = await IDbContext.DownloadTaskMovieFile.FirstAsync(x => x.Id == childKey.Id, CancellationToken);
-
         var sourceMedia = await IDbContext.PlexMovieData
             .Select(x => new { x.PlexApiMediaId, x.PlexApiPartId })
             .FirstAsync(CancellationToken);
@@ -548,7 +546,7 @@ public class RestartDownloadTaskCommandUnitTests : BaseUnitTest<RestartDownloadT
                 CancellationToken
             );
 
-        before = await IDbContext.DownloadTaskMovieFile.FirstAsync(x => x.Id == childKey.Id, CancellationToken);
+        var before = await IDbContext.DownloadTaskMovieFile.FirstAsync(x => x.Id == childKey.Id, CancellationToken);
 
         Mock.Mock<IDownloadTaskUpdateDispatcher>()
             .Setup(x =>
@@ -617,9 +615,6 @@ public class RestartDownloadTaskCommandUnitTests : BaseUnitTest<RestartDownloadT
         var parent = (await IDbContext.GetAllDownloadTasksByServerAsync(cancellationToken: CancellationToken)).First();
         var childKey = (await IDbContext.GetDownloadableChildTaskKeys(parent.ToKey(), CancellationToken)).First();
 
-        var before =
-            await IDbContext.DownloadTaskTvShowEpisodeFile.FirstAsync(x => x.Id == childKey.Id, CancellationToken);
-
         var sourceMedia = await IDbContext.PlexTvShowEpisodeData
             .Select(x => new { x.PlexApiMediaId, x.PlexApiPartId })
             .FirstOrDefaultAsync(CancellationToken);
@@ -634,7 +629,7 @@ public class RestartDownloadTaskCommandUnitTests : BaseUnitTest<RestartDownloadT
                 CancellationToken
             );
 
-        before = await IDbContext.DownloadTaskTvShowEpisodeFile.FirstAsync(x => x.Id == childKey.Id, CancellationToken);
+        var before = await IDbContext.DownloadTaskTvShowEpisodeFile.FirstAsync(x => x.Id == childKey.Id, CancellationToken);
 
         Mock.Mock<IDownloadTaskUpdateDispatcher>()
             .Setup(x =>

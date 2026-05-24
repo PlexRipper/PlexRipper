@@ -24,6 +24,7 @@ public class FileSystemModule : Module
         builder.RegisterType<System.IO.Abstractions.FileSystem>().As<IFileSystem>().SingleInstance();
         builder.Register(ctx => ctx.Resolve<IFileSystem>().Path).As<IPath>().SingleInstance();
         builder.Register(ctx => ctx.Resolve<IFileSystem>().File).As<IFile>().SingleInstance();
+        builder.Register(ctx => ctx.Resolve<IFileSystem>().FileInfo).As<IFileInfoFactory>().SingleInstance();
         builder.Register(ctx => ctx.Resolve<IFileSystem>().Directory).As<IDirectory>().SingleInstance();
     }
 }

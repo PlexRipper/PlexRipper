@@ -9,7 +9,7 @@
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="Downloader" Version="5.1.0" />
+        <PackageReference Include="Downloader" Version="5.5.0" />
         <PackageReference Include="FastEndpoints" Version="8.1.0" />
         <PackageReference Include="FastEndpoints.Security" Version="8.1.0" />
         <PackageReference Include="FastEndpoints.Swagger" Version="8.1.0" />

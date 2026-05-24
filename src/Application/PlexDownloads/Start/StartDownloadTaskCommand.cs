@@ -12,7 +12,7 @@ public class StartDownloadTaskCommandValidator : AbstractValidator<StartDownload
 
 public class StartDownloadTaskCommandHandler : ICommandHandler<StartDownloadTaskCommand, Result>
 {
-    private static readonly DownloadStatus[] ResumablePausedStatuses =
+    private static readonly DownloadStatus[] _resumablePausedStatuses =
     [
         DownloadStatus.Paused,
         DownloadStatus.AutoPaused,
@@ -54,7 +54,7 @@ public class StartDownloadTaskCommandHandler : ICommandHandler<StartDownloadTask
         if (!downloadableChildTasks.Any())
             return ResultExtensions.IsEmpty(nameof(downloadableChildTasks)).LogWarning();
 
-        var nextDownloadTask = downloadableChildTasks.FirstOrDefault(x => ResumablePausedStatuses.Contains(x.DownloadStatus));
+        var nextDownloadTask = downloadableChildTasks.FirstOrDefault(x => _resumablePausedStatuses.Contains(x.DownloadStatus));
         nextDownloadTask ??= downloadableChildTasks.FirstOrDefault(x =>
             x.DownloadTaskPhase != DownloadTaskPhase.Completed
         );
@@ -80,7 +80,7 @@ public class StartDownloadTaskCommandHandler : ICommandHandler<StartDownloadTask
                 DownloadStatus.Paused
                     or DownloadStatus.AutoPaused
                     or DownloadStatus.MovePaused
-                    or DownloadStatus.AutoMovePaused => ResumablePausedStatuses,
+                    or DownloadStatus.AutoMovePaused => _resumablePausedStatuses,
                 DownloadStatus.Stopped => [DownloadStatus.Stopped],
                 _ => [],
             };

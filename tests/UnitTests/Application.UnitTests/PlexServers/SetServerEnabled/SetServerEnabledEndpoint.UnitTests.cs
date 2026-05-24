@@ -108,7 +108,7 @@ public class SetServerEnabledEndpointUnitTests : BaseUnitTest<SetServerEnabledEn
 
         await db.PlexServers.IgnoreIsEnabledFilter()
             .Where(x => x.Id == server.Id)
-            .ExecuteUpdateAsync(x => x.SetProperty(y => y.OwnedOverride, (bool?)true), CancellationToken);
+            .ExecuteUpdateAsync(x => x.SetProperty(y => y.OwnedOverride, true), CancellationToken);
 
         // Act
         var endpoint = SetupEndpointUnitTest<SetServerEnabledEndpoint>();

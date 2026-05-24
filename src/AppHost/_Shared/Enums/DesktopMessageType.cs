@@ -19,4 +19,10 @@ public enum DesktopMessageType
     /// </summary>
     [JsonStringEnumMemberName(nameof(ExternalLink))]
     ExternalLink = 1,
+
+    /// <summary>
+    /// Sent by the embedded front-end after the desktop UI has mounted.
+    /// </summary>
+    [JsonStringEnumMemberName(nameof(DesktopReady))]
+    DesktopReady = 2,
 }

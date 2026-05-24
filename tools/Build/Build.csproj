@@ -21,7 +21,7 @@
         <PackageReference Include="Serilog.AspNetCore" Version="10.0.0" />
         <PackageReference Include="Spectre.Console.Cli" Version="0.55.0" />
         <PackageReference Include="Spectre.Console.Cli.Extensions.DependencyInjection" Version="0.7.0" />
-        <PackageReference Include="System.IO.Abstractions" Version="22.0.16" />
+        <PackageReference Include="System.IO.Abstractions" Version="22.1.1" />
     </ItemGroup>
     <ItemGroup>
         <ProjectReference Include="..\..\src\Domain\Domain.csproj" />

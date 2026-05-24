@@ -14,7 +14,7 @@ public static partial class MockDatabase
     // partially seeded media graphs (for example movies without media data or TV shows
     // rolled back after FK failures), while the same tests pass when run alone.
     // Keep database names unique per test; only serialize the setup/migration phase.
-    private static readonly SemaphoreSlim SetupLock = new(1, 1);
+    private static readonly SemaphoreSlim _setupLock = new(1, 1);
 
     /// <summary>
     /// NaturalSortComparer uses InvariantCultureIgnoreCase for deterministic test results.
@@ -303,7 +303,7 @@ public static partial class MockDatabase
 
         // Serialize the setup block only. The resulting in-memory database remains
         // isolated by its unique name and can be used normally by the test after seeding.
-        await SetupLock.WaitAsync();
+        await _setupLock.WaitAsync();
         try
         {
             reaparrContext.Migrate();
@@ -343,7 +343,7 @@ public static partial class MockDatabase
         }
         finally
         {
-            SetupLock.Release();
+            _setupLock.Release();
         }
 
         reaparrContext.ShouldNotBeNull();

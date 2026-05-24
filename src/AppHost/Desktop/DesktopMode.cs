@@ -6,15 +6,20 @@ namespace Reaparr.AppHost;
 /// <summary>Manages the Photino desktop window lifecycle.</summary>
 public class DesktopMode : IDesktopMode
 {
+    private const int DesktopReadyTimeoutSeconds = 5;
+
     private readonly Serilog.ILogger _log;
     private readonly IAppRuntimeInfo _appRuntimeInfo;
     private readonly IServer _server;
     private readonly Func<Uri, IDesktopWindow> _windowFactory;
     private readonly TaskCompletionSource _exitCompletion = new(TaskCreationOptions.RunContinuationsAsynchronously);
 
+    private TaskCompletionSource? _desktopReadyCompletion;
+
     private IDesktopWindow? _window;
     private bool _isClosingToBackground;
     private bool _isExiting;
+    private bool _browserFallbackLaunched;
 
     /// <summary>Initializes a new instance of <see cref="DesktopMode"/>.</summary>
     public DesktopMode(
@@ -62,10 +67,20 @@ public class DesktopMode : IDesktopMode
         if (uriResult.IsFailed)
             return Task.FromResult(uriResult.ToResult());
 
-        _window = _windowFactory(uriResult.Value);
+        _log.Here().Information("Opening Reaparr desktop window at {Uri}", uriResult.Value);
+
+        var window = _windowFactory(uriResult.Value);
+        var desktopReadyCompletion = ResetDesktopReadyCompletion();
+
+        _window = window;
         _window.ConfigureWindow();
+
+        _log.Here().Information("Desktop window initialized and navigation requested");
         _window.RegisterWindowClosingHandler(OnWindowClosing);
-        _window.RegisterDesktopMessageHandler(HandleDesktopMessages);
+        _window.RegisterDesktopMessageHandler(message => HandleDesktopMessages(window, desktopReadyCompletion, message));
+
+        _browserFallbackLaunched = false;
+        _ = MonitorDesktopReadyTimeoutAsync(uriResult.Value, window, desktopReadyCompletion);
 
         return Task.FromResult(Result.Ok());
     }
@@ -97,8 +112,15 @@ public class DesktopMode : IDesktopMode
         _window?.CloseNativeWindow();
         _window?.DisposeWindow();
         _window = null;
+        ClearDesktopReadyCompletion();
         _exitCompletion.TrySetResult();
         return Task.FromResult(Result.Ok());
+    }
+
+    /// <inheritdoc />
+    public void OpenExternalBrowser(Uri uri)
+    {
+        _window?.OpenExternalBrowser(uri);
     }
 
     /// <inheritdoc />
@@ -126,14 +148,19 @@ public class DesktopMode : IDesktopMode
         return false;
     }
 
-    private void HandleDesktopMessages(DesktopMessageDTO message)
+    private void HandleDesktopMessages(
+        IDesktopWindow window,
+        TaskCompletionSource desktopReadyCompletion,
+        DesktopMessageDTO message
+    )
     {
-        if (_window is null)
+        if (!ReferenceEquals(_window, window))
         {
-            _log.Warning(
-                "Received desktop external link message but the desktop window is not initialized: {@Message}",
-                message
-            );
+            _log.Here()
+                .Warning(
+                    "Received desktop message for a stale desktop window session: {@Message}",
+                    message
+                );
             return;
         }
 
@@ -142,7 +169,11 @@ public class DesktopMode : IDesktopMode
             case DesktopMessageType.None:
                 break;
             case DesktopMessageType.ExternalLink:
-                _window.OpenExternalBrowser(new Uri(message.Value));
+                window.OpenExternalBrowser(new Uri(message.Value));
+                break;
+            case DesktopMessageType.DesktopReady:
+                _log.Here().Information("Reaparr desktop UI reported ready");
+                desktopReadyCompletion.TrySetResult();
                 break;
             default:
                 throw new ArgumentOutOfRangeException();
@@ -161,6 +192,74 @@ public class DesktopMode : IDesktopMode
 
         var uri = new Uri(serverAddress);
         return Result.Ok(NormalizeWildcardHost(uri));
+    }
+
+    private async Task MonitorDesktopReadyTimeoutAsync(
+        Uri uri,
+        IDesktopWindow window,
+        TaskCompletionSource desktopReadyCompletion
+    )
+    {
+        if (_appRuntimeInfo.IsIntegrationTestMode)
+            return;
+
+        using var timeoutCts = new CancellationTokenSource(TimeSpan.FromSeconds(DesktopReadyTimeoutSeconds));
+        try
+        {
+            await desktopReadyCompletion.Task.WaitAsync(timeoutCts.Token);
+        }
+        catch (OperationCanceledException)
+        {
+            _log.Here()
+                .Warning(
+                    "Desktop UI did not report ready within {TimeoutSeconds}s after loading {Uri}. Embedded WebView may have failed to render. Launching external browser fallback now.",
+                    DesktopReadyTimeoutSeconds,
+                    uri
+                );
+
+            LaunchBrowserFallback(uri, window);
+        }
+        finally
+        {
+            Interlocked.CompareExchange(ref _desktopReadyCompletion, null, desktopReadyCompletion);
+        }
+    }
+
+    private TaskCompletionSource ResetDesktopReadyCompletion()
+    {
+        var desktopReadyCompletion = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        Interlocked.Exchange(ref _desktopReadyCompletion, desktopReadyCompletion);
+        return desktopReadyCompletion;
+    }
+
+    private void ClearDesktopReadyCompletion()
+    {
+        Interlocked.Exchange(ref _desktopReadyCompletion, null);
+    }
+
+    private void LaunchBrowserFallback(Uri uri, IDesktopWindow window)
+    {
+        if (_browserFallbackLaunched)
+            return;
+
+        if (!ReferenceEquals(_window, window))
+            return;
+
+        _browserFallbackLaunched = true;
+
+        try
+        {
+            window.OpenExternalBrowser(uri);
+            _log.Here()
+                .Information(
+                    "Launched external browser fallback to {Uri} after embedded desktop render timeout",
+                    uri
+                );
+        }
+        catch (Exception ex)
+        {
+            _log.Here().Error(ex, "Failed to launch external browser fallback to {Uri}", uri);
+        }
     }
 
     private static Uri NormalizeWildcardHost(Uri uri)

@@ -23,14 +23,12 @@ public class GetMediaByTypeCommandValidator : AbstractValidator<GetMediaByTypeCo
 
 public class GetMediaByTypeCommandHandler : ICommandHandler<GetMediaByTypeCommand, Result<PagedMediaQueryResult>>
 {
-    private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
 
     private readonly PagedMediaQueryResult _response = new();
 
-    public GetMediaByTypeCommandHandler(ILogger log, IReaparrDbContext dbContext)
+    public GetMediaByTypeCommandHandler(IReaparrDbContext dbContext)
     {
-        _log = log.ForContext<GetMediaByTypeCommandHandler>();
         _dbContext = dbContext;
     }
 

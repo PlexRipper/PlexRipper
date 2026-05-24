@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Reaparr.Environment;
 
 namespace Reaparr.AppHost.UnitTests;
 
@@ -179,6 +180,7 @@ public class DesktopProgramLifecycleUnitTests : BaseUnitTest
         builder.Services.AddSingleton<IHostedService>(hostProbe);
         builder.Services.AddSingleton(desktopMode);
         builder.Services.AddSingleton(coordinator);
+        builder.Services.AddSingleton<IAppRuntimeInfo>(new MockAppRuntimeInfo());
         return builder.Build();
     }
 

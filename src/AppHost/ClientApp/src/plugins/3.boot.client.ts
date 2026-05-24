@@ -1,6 +1,8 @@
 import Log from 'consola';
 import Axios from 'axios';
 import { useGlobalStore, useLocalizationStore } from '@store';
+import { canSendDesktopMessage, sendDesktopMessage } from '@composables/desktop-message-hub';
+import { DesktopMessageType } from '@dto';
 import type IAppConfig from '@class/IAppConfig';
 import type { Router } from 'vue-router';
 import type { I18nObjectType } from '@interfaces';
@@ -31,7 +33,14 @@ export default defineNuxtPlugin((nuxtApp) => {
 		useLocalizationStore().setI18nObject(nuxtApp.$i18n as I18nObjectType);
 		useGlobalStore()
 			.setupServices({ config: appConfig })
-			.subscribe();
+			.subscribe(() => {
+				if (appConfig.platform === 'desktop' && canSendDesktopMessage()) {
+					sendDesktopMessage({
+						type: DesktopMessageType.DesktopReady,
+						value: 'ready',
+					});
+				}
+			});
 	});
 });
 

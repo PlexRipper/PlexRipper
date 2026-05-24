@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using Reaparr.FluentResultExtensions;
 using Velopack;
 
@@ -124,6 +125,23 @@ public class Program
         await app.StartAsync(cancellationToken);
         try
         {
+            var appRuntimeInfo = services.GetRequiredService<IAppRuntimeInfo>();
+            if (appRuntimeInfo.IsDesktopEmbeddedDisabled)
+            {
+                var browserUri = ResolveBrowserUri(app);
+                _log.Here()
+                    .Warning(
+                        "Embedded desktop window mode disabled via {EnvVar}. Launching browser-only mode at {Uri}.",
+                        EnvKeys.DesktopEmbeddedDisabled,
+                        browserUri
+                    );
+
+                Process.Start(new ProcessStartInfo(browserUri.AbsoluteUri) { UseShellExecute = true });
+
+                await app.WaitForShutdownAsync(cancellationToken);
+                return Result.Ok();
+            }
+
             _log.Here().Debug("Starting the Reaparr desktop single-instance listener");
             var desktopMode = services.GetRequiredService<IDesktopMode>();
             var listenerResult = singleInstanceCoordinator.StartListener(
@@ -148,6 +166,19 @@ public class Program
         {
             await app.StopAsync(cancellationToken);
         }
+    }
+
+    private static Uri ResolveBrowserUri(WebApplication app)
+    {
+        var serverAddress = app.Urls.FirstOrDefault();
+        if (string.IsNullOrWhiteSpace(serverAddress))
+            return new Uri($"http://localhost:{_appRuntimeInfo.AppPort}/");
+
+        var uri = new Uri(serverAddress);
+        if (uri.Host is "0.0.0.0" or "::" or "[::]")
+            return new UriBuilder(uri) { Host = "localhost" }.Uri;
+
+        return uri;
     }
 
     private static void FailedToStart(Result result)

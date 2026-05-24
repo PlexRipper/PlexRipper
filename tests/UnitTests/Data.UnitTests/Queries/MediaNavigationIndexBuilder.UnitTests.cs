@@ -1,5 +1,3 @@
-using Reaparr.Application.Contracts;
-
 namespace Reaparr.Data.UnitTests;
 
 public class MediaNavigationIndexBuilderUnitTests

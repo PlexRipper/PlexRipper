@@ -15,8 +15,8 @@ public sealed record MediaNavigationIndexRow(
 
 public static class MediaNavigationIndexBuilder
 {
-    private const string UnknownLabel = "#";
-    private const long BytesPerGigabyte = 1_000_000_000;
+    private const string UNKNOWN_LABEL = "#";
+    private const long BYTES_PER_GIGABYTE = 1_000_000_000;
 
     public static List<MediaNavigationIndexDTO> Build(IEnumerable<MediaNavigationIndexRow> rows, string? sortField)
     {
@@ -41,10 +41,10 @@ public static class MediaNavigationIndexBuilder
     {
         nameof(BasePlexMedia.SortIndex) or "sortIndex" or nameof(BasePlexMedia.Title) or "title" => GetTitleLabel(row.SearchTitle),
         nameof(BasePlexMedia.Year) or "year" => row.Year.ToString(CultureInfo.InvariantCulture),
-        "quality" => row.QualityValue?.ToString(CultureInfo.InvariantCulture) ?? UnknownLabel,
+        "quality" => row.QualityValue?.ToString(CultureInfo.InvariantCulture) ?? UNKNOWN_LABEL,
         nameof(BasePlexMedia.Duration) or "duration" => GetDurationLabel(row.Duration),
         nameof(BasePlexMedia.AddedAt) or "addedAt" => GetMonthLabel(row.AddedAt),
-        nameof(BasePlexMedia.UpdatedAt) or "updatedAt" => row.UpdatedAt is null ? UnknownLabel : GetMonthLabel(row.UpdatedAt.Value),
+        nameof(BasePlexMedia.UpdatedAt) or "updatedAt" => row.UpdatedAt is null ? UNKNOWN_LABEL : GetMonthLabel(row.UpdatedAt.Value),
         nameof(BasePlexMedia.MediaSize) or "mediaSize" => GetMediaSizeLabel(row.MediaSize),
         _ => GetTitleLabel(row.SearchTitle),
     };
@@ -53,7 +53,7 @@ public static class MediaNavigationIndexBuilder
     {
         var first = title?.Trim().FirstOrDefault();
         if (first is null or '\0' || !char.IsAsciiLetter(first.Value))
-            return UnknownLabel;
+            return UNKNOWN_LABEL;
 
         return char.ToUpperInvariant(first.Value).ToString();
     }
@@ -68,7 +68,7 @@ public static class MediaNavigationIndexBuilder
 
     private static string GetMediaSizeLabel(long mediaSize)
     {
-        var start = Math.Max(0, mediaSize) / BytesPerGigabyte;
+        var start = Math.Max(0, mediaSize) / BYTES_PER_GIGABYTE;
         return $"{start}–{start + 1} GB";
     }
 }

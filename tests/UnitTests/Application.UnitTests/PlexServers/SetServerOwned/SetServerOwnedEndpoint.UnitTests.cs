@@ -38,7 +38,7 @@ public class SetServerOwnedEndpointUnitTests : BaseUnitTest<SetServerOwnedEndpoi
 
         await dbContext.PlexServers.IgnoreIsEnabledFilter()
             .Where(x => x.Id == plexServer.Id)
-            .ExecuteUpdateAsync(x => x.SetProperty(y => y.OwnedOverride, (bool?)true), CancellationToken);
+            .ExecuteUpdateAsync(x => x.SetProperty(y => y.OwnedOverride, true), CancellationToken);
 
         // Act
         var endpoint = SetupEndpointUnitTest<SetServerOwnedEndpoint>();

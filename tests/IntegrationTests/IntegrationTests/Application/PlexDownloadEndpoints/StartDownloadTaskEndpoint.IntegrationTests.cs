@@ -76,11 +76,6 @@ public class StartDownloadTaskEndpointIntegrationTests : BaseIntegrationTests
             async () =>
             {
                 using var dbContext = await container.Resolve<IReaparrDbContextFactory>().CreateAsync();
-                var dbTask = await dbContext.GetDownloadTaskAsync(
-                    downloadTask.Id,
-                    cancellationToken: CancellationToken
-                );
-
                 return await dbContext.DownloadTaskMovieFileLogs.AnyAsync(
                     x =>
                         x.DownloadTaskFileId == downloadTask.Id

@@ -110,18 +110,14 @@ public class AddOrUpdatePlexServerCommandUnitTests : BaseUnitTest<AddOrUpdatePle
             plexServers[4],
         };
 
-        // Create updated servers with the same machineId while preserving persisted ownership semantics
-        var originalOwnedOverrides = new Dictionary<string, bool?>();
+        // Create updated servers with the same machineId while preserving persisted ownership semantics.
         for (var i = 0; i < changedPlexServers.Count; i++)
         {
             changedPlexServers[i].MachineIdentifier = plexServers[i].MachineIdentifier;
 
-            var originalOwnedOverride = plexServers[i].OwnedOverride;
-            originalOwnedOverrides[plexServers[i].MachineIdentifier] = originalOwnedOverride;
-
             // Handler preserves persisted OwnedOverride for existing servers;
             // incoming value is intentionally ignored during update.
-            changedPlexServers[i].OwnedOverride = originalOwnedOverride;
+            changedPlexServers[i].OwnedOverride = plexServers[i].OwnedOverride;
         }
 
         // Act

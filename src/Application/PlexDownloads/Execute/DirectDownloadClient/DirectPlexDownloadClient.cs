@@ -165,8 +165,7 @@ public class DirectPlexDownloadClient : IPlexDownloadClient
             var reconciliationResult = await ReconcileMissingCompletionCallbackAsync(
                 downloadTaskKey,
                 downloadTask.DownloadFilePath,
-                downloadTask.DataTotal,
-                cancellationToken
+                downloadTask.DataTotal
             );
             if (reconciliationResult.IsFailed)
                 return reconciliationResult;
@@ -317,8 +316,7 @@ public class DirectPlexDownloadClient : IPlexDownloadClient
     private async Task<Result> ReconcileMissingCompletionCallbackAsync(
         DownloadTaskKey key,
         string downloadFilePath,
-        long expectedFileSize,
-        CancellationToken cancellationToken
+        long expectedFileSize
     )
     {
         var package = _downloader.Package;

@@ -124,10 +124,10 @@
       },
       "Downloader": {
         "type": "Transitive",
-        "resolved": "5.1.0",
-        "contentHash": "lUsiygfKkPgLx4oFy/dWlKrWOjpg3A/VaiSAoX8f+WiwldoQGi+JBeOgc60ep6qWeSD5FYyrUl7CYvdR1vUt3w==",
+        "resolved": "5.5.0",
+        "contentHash": "md69tMUzX6UNXgGizdyXDTgizCoCnw8qCuk2dNn4trIqFJJEjcDRuKtNfkbMPyZkLc5CFVQ9wOQ5xp8n0y0sGg==",
         "dependencies": {
-          "Microsoft.Extensions.Logging.Abstractions": "10.0.3"
+          "Microsoft.Extensions.Logging.Abstractions": "10.0.7"
         }
       },
       "EFCore.BulkExtensions.Core": {
@@ -1571,7 +1571,7 @@
         "type": "Project",
         "dependencies": {
           "Autofac.Extras.Quartz": "[11.0.0, )",
-          "Downloader": "[5.1.0, )",
+          "Downloader": "[5.5.0, )",
           "FastEndpoints": "[8.1.0, )",
           "FastEndpoints.Security": "[8.1.0, )",
           "FastEndpoints.Swagger": "[8.1.0, )",

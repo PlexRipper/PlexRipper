@@ -1,5 +1,23 @@
 Reaparr Changelog
 
+# [0.38.0-dev.20](https://github.com/Reaparr/Reaparr/compare/v0.38.0-dev.19...v0.38.0-dev.20) (2026-05-24)
+
+
+### Bug Fixes
+
+* **WebAPI:** Disable downloader disk precheck ([d8b0290](https://github.com/Reaparr/Reaparr/commit/d8b0290e9c5b99e8f7cfce4e63138ab58df06164))
+* **WebAPI:** Fix integration test download flow ([1994ace](https://github.com/Reaparr/Reaparr/commit/1994acef27940ee6eedfe22ef451e12818612163))
+* **WebAPI:** Persist verified download size ([166125a](https://github.com/Reaparr/Reaparr/commit/166125a8b8165c0226ba65f75b45d0c7013e4ad7))
+* **WebAPI:** Reconcile missing direct download completion callback ([e344560](https://github.com/Reaparr/Reaparr/commit/e344560e4df7e4408ac96f43d1dc4e708078daf1))
+* **WebAPI:** Refresh desktop ready state per window ([f9d526c](https://github.com/Reaparr/Reaparr/commit/f9d526c8f419f763927464ae2b8023ac453bf13c))
+* **WebAPI:** Verify completed downloads before finishing ([#596](https://github.com/Reaparr/Reaparr/issues/596)) ([be20b8f](https://github.com/Reaparr/Reaparr/commit/be20b8f899f52fb1a166ce768bb1e1fb5e767c01))
+* **WebAPI:** Verify completed downloads before finishing ([b1a72e2](https://github.com/Reaparr/Reaparr/commit/b1a72e24ca058b02e40bca3ab4b19e7bfb52c372))
+
+
+### Features
+
+* **WebAPI:** Added fallback for Windows to lauch browser if the desktop window fails to render thanks to missing webview ([334a7d9](https://github.com/Reaparr/Reaparr/commit/334a7d9dfebaa556a7912177def691d1e01cff31))
+
 # [0.38.0-dev.19](https://github.com/Reaparr/Reaparr/compare/v0.38.0-dev.18...v0.38.0-dev.19) (2026-05-23)
 
 

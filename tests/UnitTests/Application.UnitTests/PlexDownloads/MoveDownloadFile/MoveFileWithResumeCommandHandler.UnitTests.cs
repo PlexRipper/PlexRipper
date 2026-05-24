@@ -93,6 +93,7 @@ public class MoveFileWithResumeCommandHandlerUnitTests : BaseUnitTest<MoveFileWi
         {
             fs.AddDirectory("/test");
             fs.AddFile(sourcePath, new MockFileData(content));
+
             // Pre-populate target with first offset bytes
             fs.AddFile(targetPath, new MockFileData(content.Take(offset).ToArray()));
         });
@@ -152,6 +153,7 @@ public class MoveFileWithResumeCommandHandlerUnitTests : BaseUnitTest<MoveFileWi
 
         var file = Mock.Container.Resolve<IFile>();
         using var targetStream = file.Open(targetPath, FileMode.Open, FileAccess.Read, FileShare.Read);
+
         // Only first chunk (1MB) should have been written before cancellation check breaks
         targetStream.Length.ShouldBeGreaterThan(0);
         targetStream.Length.ShouldBeLessThan(content.LongLength);
@@ -284,8 +286,9 @@ public class MoveFileWithResumeCommandHandlerUnitTests : BaseUnitTest<MoveFileWi
     }
 
     [Test]
-    public async Task ExecuteAsync_CurrentOffsetGreaterThanTotal_NoWritesAndOk()
+    public async Task ExecuteAsync_CurrentOffsetGreaterThanTotal_ReturnsFailedAndKeepsSourceFile()
     {
+        // Arrange
         var sourcePath = "/test/source-offset-gt.bin";
         var targetPath = "/test/target-offset-gt.bin";
         var content = CreateBytes(64 * 1024);
@@ -298,18 +301,33 @@ public class MoveFileWithResumeCommandHandlerUnitTests : BaseUnitTest<MoveFileWi
         });
 
         var progressCalled = false;
+        var expectedBytes = content.LongLength;
+        var transferredBytes = content.LongLength + 10;
         var command = new MoveFileWithResumeCommand
         {
             SourcePath = sourcePath,
             TargetPath = targetPath,
-            CurrentOffset = content.LongLength + 10,
-            DataTotal = content.LongLength,
+            CurrentOffset = transferredBytes,
+            DataTotal = expectedBytes,
             Progress = _ => progressCalled = true,
         };
 
+        // Act
         var result = await Sut.ExecuteAsync(command, CancellationToken.None);
-        result.IsSuccess.ShouldBeTrue();
+
+        // Assert
+        result.IsFailed.ShouldBeTrue();
+        result.Errors.ShouldNotBeEmpty();
+        var resultMessage = result.ToString();
+        resultMessage.ShouldContain("Move ended with a byte count mismatch");
+        resultMessage.ShouldContain(expectedBytes.ToString());
+        resultMessage.ShouldContain(transferredBytes.ToString());
+        resultMessage.ShouldContain(sourcePath);
+        resultMessage.ShouldContain(targetPath);
         progressCalled.ShouldBeFalse();
+
+        var file = Mock.Container.Resolve<IFile>();
+        file.Exists(sourcePath).ShouldBeTrue();
     }
 
     [Test]
@@ -483,12 +501,14 @@ public class MoveFileWithResumeCommandHandlerUnitTests : BaseUnitTest<MoveFileWi
             fs.AddFile(targetPath, new MockFileData([]));
         });
 
+        var expectedBytes = content.LongLength + 1;
+        var transferredBytes = content.LongLength;
         var command = new MoveFileWithResumeCommand
         {
             SourcePath = sourcePath,
             TargetPath = targetPath,
             CurrentOffset = 0,
-            DataTotal = content.LongLength + 1,
+            DataTotal = expectedBytes,
             Progress = _ => { },
         };
 
@@ -498,7 +518,55 @@ public class MoveFileWithResumeCommandHandlerUnitTests : BaseUnitTest<MoveFileWi
         // Assert
         result.IsFailed.ShouldBeTrue();
         result.Errors.ShouldNotBeEmpty();
-        result.ToString().ShouldContain("Move ended before the expected byte count");
+        var resultMessage = result.ToString();
+        resultMessage.ShouldContain("Move ended with a byte count mismatch");
+        resultMessage.ShouldContain(expectedBytes.ToString());
+        resultMessage.ShouldContain(transferredBytes.ToString());
+        resultMessage.ShouldContain(sourcePath);
+        resultMessage.ShouldContain(targetPath);
+
+        var file = Mock.Container.Resolve<IFile>();
+        file.Exists(sourcePath).ShouldBeTrue();
+    }
+
+    [Test]
+    public async Task ExecuteAsync_SourceLongerThanExpected_ReturnsFailedAndKeepsSourceFile()
+    {
+        // Arrange
+        var sourcePath = "/test/source-over-transfer.bin";
+        var targetPath = "/test/target-over-transfer.bin";
+        var content = CreateBytes(256 * 1024);
+
+        SetupFileSystem(fs =>
+        {
+            fs.AddDirectory("/test");
+            fs.AddFile(sourcePath, new MockFileData(content));
+            fs.AddFile(targetPath, new MockFileData([]));
+        });
+
+        var expectedBytes = content.LongLength - 1;
+        var transferredBytes = content.LongLength;
+        var command = new MoveFileWithResumeCommand
+        {
+            SourcePath = sourcePath,
+            TargetPath = targetPath,
+            CurrentOffset = 0,
+            DataTotal = expectedBytes,
+            Progress = _ => { },
+        };
+
+        // Act
+        var result = await Sut.ExecuteAsync(command, CancellationToken.None);
+
+        // Assert
+        result.IsFailed.ShouldBeTrue();
+        result.Errors.ShouldNotBeEmpty();
+        var resultMessage = result.ToString();
+        resultMessage.ShouldContain("Move ended with a byte count mismatch");
+        resultMessage.ShouldContain(expectedBytes.ToString());
+        resultMessage.ShouldContain(transferredBytes.ToString());
+        resultMessage.ShouldContain(sourcePath);
+        resultMessage.ShouldContain(targetPath);
 
         var file = Mock.Container.Resolve<IFile>();
         file.Exists(sourcePath).ShouldBeTrue();

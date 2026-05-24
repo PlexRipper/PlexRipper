@@ -28,7 +28,7 @@ public class DirectPlexDownloadClient : IPlexDownloadClient
     private readonly Subject<Unit> _destroy = new();
     private int _isDisposed;
     private int _completionCallbackReceived;
-    private decimal _lastObservedProgressPercentage;
+    private int _lastObservedProgressPercentagePercent;
 
     public DirectPlexDownloadClient(
         ILogger log,
@@ -160,7 +160,10 @@ public class DirectPlexDownloadClient : IPlexDownloadClient
         // Guard against client library edge cases where progress reaches 100% but
         // DownloadFileCompleted is never raised. We only reconcile after observing
         // terminal progress so we do not misclassify ordinary interrupted downloads.
-        if (Volatile.Read(ref _completionCallbackReceived) == 0 && _lastObservedProgressPercentage >= 100m)
+        if (
+            Volatile.Read(ref _completionCallbackReceived) == 0
+            && Volatile.Read(ref _lastObservedProgressPercentagePercent) >= 100
+        )
         {
             var reconciliationResult = await ReconcileMissingCompletionCallbackAsync(
                 downloadTaskKey,
@@ -245,7 +248,8 @@ public class DirectPlexDownloadClient : IPlexDownloadClient
                         ),
                     };
 
-                    _lastObservedProgressPercentage = progress.Percentage;
+                    var progressPercentagePercent = Math.Clamp((int)Math.Round(progress.Percentage), 0, 100);
+                    Volatile.Write(ref _lastObservedProgressPercentagePercent, progressPercentagePercent);
                     _downloadTaskUpdateDispatcher.OnProgressUpdated(key, progress, _downloader.Package.ToSnapshot());
                 })
         );

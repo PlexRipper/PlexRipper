@@ -62,9 +62,12 @@ public class MoveFileWithResumeCommandHandler : ICommandHandler<MoveFileWithResu
     {
         var sourcePath = command.SourcePath;
         var targetPath = command.TargetPath;
-        var currentOffset = Math.Min(command.CurrentOffset, command.DataTotal);
+        var currentOffset = command.CurrentOffset;
         var dataTotal = command.DataTotal;
         var moveDownloadFileProgres = command.Progress;
+
+        if (currentOffset > dataTotal)
+            return CreateByteCountMismatchFailure(dataTotal, currentOffset, sourcePath, targetPath);
 
         var inputStreamResult = Result.Try(
             (() => _file.Open(sourcePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
@@ -138,12 +141,8 @@ public class MoveFileWithResumeCommandHandler : ICommandHandler<MoveFileWithResu
         if (cancellationToken.IsCancellationRequested)
             return ResultExtensions.TaskIsCancelled(nameof(MoveFileWithResumeCommandHandler));
 
-        if (currentOffset < dataTotal)
-        {
-            return Result.Fail(
-                $"Move ended before the expected byte count was transferred. Expected {dataTotal} bytes but transferred {currentOffset} bytes from '{sourcePath}' to '{targetPath}'."
-            ).LogError();
-        }
+        if (currentOffset != dataTotal)
+            return CreateByteCountMismatchFailure(dataTotal, currentOffset, sourcePath, targetPath);
 
         if (!cancellationToken.IsCancellationRequested && _file.Exists(sourcePath))
         {
@@ -158,4 +157,14 @@ public class MoveFileWithResumeCommandHandler : ICommandHandler<MoveFileWithResu
 
         return Result.Ok();
     }
+
+    private static Result CreateByteCountMismatchFailure(
+        long expectedBytes,
+        long transferredBytes,
+        string sourcePath,
+        string targetPath
+    ) => Result.Fail(
+            $"Move ended with a byte count mismatch. Expected {expectedBytes} bytes but transferred {transferredBytes} bytes from '{sourcePath}' to '{targetPath}'."
+        )
+        .LogError();
 }

@@ -13,7 +13,8 @@ public class DesktopMode : IDesktopMode
     private readonly IServer _server;
     private readonly Func<Uri, IDesktopWindow> _windowFactory;
     private readonly TaskCompletionSource _exitCompletion = new(TaskCreationOptions.RunContinuationsAsynchronously);
-    private readonly TaskCompletionSource _desktopReadyCompletion = new(TaskCreationOptions.RunContinuationsAsynchronously);
+
+    private TaskCompletionSource? _desktopReadyCompletion;
 
     private IDesktopWindow? _window;
     private bool _isClosingToBackground;
@@ -68,15 +69,18 @@ public class DesktopMode : IDesktopMode
 
         _log.Here().Information("Opening Reaparr desktop window at {Uri}", uriResult.Value);
 
-        _window = _windowFactory(uriResult.Value);
+        var window = _windowFactory(uriResult.Value);
+        var desktopReadyCompletion = ResetDesktopReadyCompletion();
+
+        _window = window;
         _window.ConfigureWindow();
 
         _log.Here().Information("Desktop window initialized and navigation requested");
         _window.RegisterWindowClosingHandler(OnWindowClosing);
-        _window.RegisterDesktopMessageHandler(HandleDesktopMessages);
+        _window.RegisterDesktopMessageHandler(message => HandleDesktopMessages(window, desktopReadyCompletion, message));
 
         _browserFallbackLaunched = false;
-        _ = MonitorDesktopReadyTimeoutAsync(uriResult.Value);
+        _ = MonitorDesktopReadyTimeoutAsync(uriResult.Value, window, desktopReadyCompletion);
 
         return Task.FromResult(Result.Ok());
     }
@@ -108,6 +112,7 @@ public class DesktopMode : IDesktopMode
         _window?.CloseNativeWindow();
         _window?.DisposeWindow();
         _window = null;
+        ClearDesktopReadyCompletion();
         _exitCompletion.TrySetResult();
         return Task.FromResult(Result.Ok());
     }
@@ -143,14 +148,19 @@ public class DesktopMode : IDesktopMode
         return false;
     }
 
-    private void HandleDesktopMessages(DesktopMessageDTO message)
+    private void HandleDesktopMessages(
+        IDesktopWindow window,
+        TaskCompletionSource desktopReadyCompletion,
+        DesktopMessageDTO message
+    )
     {
-        if (_window is null)
+        if (!ReferenceEquals(_window, window))
         {
-            _log.Warning(
-                "Received desktop external link message but the desktop window is not initialized: {@Message}",
-                message
-            );
+            _log.Here()
+                .Warning(
+                    "Received desktop message for a stale desktop window session: {@Message}",
+                    message
+                );
             return;
         }
 
@@ -159,11 +169,11 @@ public class DesktopMode : IDesktopMode
             case DesktopMessageType.None:
                 break;
             case DesktopMessageType.ExternalLink:
-                _window.OpenExternalBrowser(new Uri(message.Value));
+                window.OpenExternalBrowser(new Uri(message.Value));
                 break;
             case DesktopMessageType.DesktopReady:
                 _log.Here().Information("Reaparr desktop UI reported ready");
-                _desktopReadyCompletion.TrySetResult();
+                desktopReadyCompletion.TrySetResult();
                 break;
             default:
                 throw new ArgumentOutOfRangeException();
@@ -184,7 +194,11 @@ public class DesktopMode : IDesktopMode
         return Result.Ok(NormalizeWildcardHost(uri));
     }
 
-    private async Task MonitorDesktopReadyTimeoutAsync(Uri uri)
+    private async Task MonitorDesktopReadyTimeoutAsync(
+        Uri uri,
+        IDesktopWindow window,
+        TaskCompletionSource desktopReadyCompletion
+    )
     {
         if (_appRuntimeInfo.IsIntegrationTestMode)
             return;
@@ -192,7 +206,7 @@ public class DesktopMode : IDesktopMode
         using var timeoutCts = new CancellationTokenSource(TimeSpan.FromSeconds(DesktopReadyTimeoutSeconds));
         try
         {
-            await _desktopReadyCompletion.Task.WaitAsync(timeoutCts.Token);
+            await desktopReadyCompletion.Task.WaitAsync(timeoutCts.Token);
         }
         catch (OperationCanceledException)
         {
@@ -203,23 +217,39 @@ public class DesktopMode : IDesktopMode
                     uri
                 );
 
-            LaunchBrowserFallback(uri);
+            LaunchBrowserFallback(uri, window);
+        }
+        finally
+        {
+            Interlocked.CompareExchange(ref _desktopReadyCompletion, null, desktopReadyCompletion);
         }
     }
 
-    private void LaunchBrowserFallback(Uri uri)
+    private TaskCompletionSource ResetDesktopReadyCompletion()
+    {
+        var desktopReadyCompletion = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        Interlocked.Exchange(ref _desktopReadyCompletion, desktopReadyCompletion);
+        return desktopReadyCompletion;
+    }
+
+    private void ClearDesktopReadyCompletion()
+    {
+        Interlocked.Exchange(ref _desktopReadyCompletion, null);
+    }
+
+    private void LaunchBrowserFallback(Uri uri, IDesktopWindow window)
     {
         if (_browserFallbackLaunched)
             return;
 
-        if (_window is null)
+        if (!ReferenceEquals(_window, window))
             return;
 
         _browserFallbackLaunched = true;
 
         try
         {
-            _window.OpenExternalBrowser(uri);
+            window.OpenExternalBrowser(uri);
             _log.Here()
                 .Information(
                     "Launched external browser fallback to {Uri} after embedded desktop render timeout",

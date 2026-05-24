@@ -220,6 +220,38 @@ public class DesktopModeUnitTests : BaseUnitTest<DesktopMode>
     }
 
     [Test]
+    public async Task ShouldUseFreshDesktopReadyCompletion_WhenMainWindowReopens()
+    {
+        // Arrange
+        SetAppRuntimeInfo(x => x.IsProductionEnvironment = true);
+        SetAppBuildInfo(x => x.RuntimeMode = "desktop");
+
+        var firstWindow = new MockDesktopWindow();
+        var secondWindow = new MockDesktopWindow();
+        var windowFactory = new FakeDesktopWindowFactory(firstWindow, secondWindow);
+        var server = CreateServer("http://localhost:5000");
+        var sut = CreateSut(server, windowFactory.Create);
+
+        await sut.StartAsync(CancellationToken);
+        await sut.CloseMainWindowAsync(CancellationToken);
+
+        // Act
+        var showResult = await sut.ShowMainWindowAsync(CancellationToken);
+        firstWindow.ExternalLinkHandler!.Invoke(
+            new DesktopMessageDTO { Type = DesktopMessageType.DesktopReady, Value = "ready" }
+        );
+        await Task.Delay(TimeSpan.FromSeconds(6), CancellationToken);
+
+        // Assert
+        showResult.IsSuccess.ShouldBeTrue();
+        windowFactory.CreateCalls.ShouldBe(2);
+        firstWindow.OpenedExternalUrls.ShouldBeEmpty();
+        secondWindow.OpenedExternalUrls.ShouldContain(new Uri("http://localhost:5000/"));
+
+        await sut.ExitAsync(CancellationToken);
+    }
+
+    [Test]
     public async Task ShouldCompleteDesktopRuntime_WhenExitCommandRuns()
     {
         // Arrange
@@ -265,11 +297,11 @@ public class DesktopModeUnitTests : BaseUnitTest<DesktopMode>
 
     private sealed class FakeDesktopWindowFactory
     {
-        private readonly MockDesktopWindow _window;
+        private readonly Queue<MockDesktopWindow> _windows;
 
-        public FakeDesktopWindowFactory(MockDesktopWindow window)
+        public FakeDesktopWindowFactory(params MockDesktopWindow[] windows)
         {
-            _window = window;
+            _windows = new Queue<MockDesktopWindow>(windows);
         }
 
         public int CreateCalls { get; private set; }
@@ -277,7 +309,7 @@ public class DesktopModeUnitTests : BaseUnitTest<DesktopMode>
         public IDesktopWindow Create(Uri uri)
         {
             CreateCalls++;
-            return _window;
+            return _windows.Dequeue();
         }
     }
 }

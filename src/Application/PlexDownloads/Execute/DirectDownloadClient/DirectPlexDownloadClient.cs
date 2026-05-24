@@ -27,6 +27,8 @@ public class DirectPlexDownloadClient : IPlexDownloadClient
     private readonly CompositeDisposable _subscriptions = new();
     private readonly Subject<Unit> _destroy = new();
     private int _isDisposed;
+    private int _completionCallbackReceived;
+    private decimal _lastObservedProgressPercentage;
 
     public DirectPlexDownloadClient(
         ILogger log,
@@ -154,6 +156,21 @@ public class DirectPlexDownloadClient : IPlexDownloadClient
             await _downloader.DownloadFileTaskAsync(downloadUrl, downloaderTargetPath, cancellationToken);
         }
 
+        // Guard against client library edge cases where progress reaches 100% but
+        // DownloadFileCompleted is never raised. We only reconcile after observing
+        // terminal progress so we do not misclassify ordinary interrupted downloads.
+        if (Volatile.Read(ref _completionCallbackReceived) == 0 && _lastObservedProgressPercentage >= 100m)
+        {
+            var reconciliationResult = await ReconcileMissingCompletionCallbackAsync(
+                downloadTaskKey,
+                downloadTask.DownloadFilePath,
+                downloadTask.DataTotal,
+                cancellationToken
+            );
+            if (reconciliationResult.IsFailed)
+                return reconciliationResult;
+        }
+
         _log.Here()
             .Debug(
                 "Direct downloader start workflow for {MediaFileName} completed in {DownloaderElapsedMilliseconds} ms ({TotalElapsedMilliseconds} ms total startup)",
@@ -228,6 +245,7 @@ public class DirectPlexDownloadClient : IPlexDownloadClient
                         ),
                     };
 
+                    _lastObservedProgressPercentage = progress.Percentage;
                     _downloadTaskUpdateDispatcher.OnProgressUpdated(key, progress, _downloader.Package.ToSnapshot());
                 })
         );
@@ -239,6 +257,7 @@ public class DirectPlexDownloadClient : IPlexDownloadClient
                     h => _downloader.DownloadFileCompleted -= h
                 )
                 .Select(x => x.EventArgs)
+                .Do(_ => Interlocked.Exchange(ref _completionCallbackReceived, 1))
                 .TakeUntil(_destroy)
                 .Select(args =>
                     Observable.FromAsync(async _ =>
@@ -292,6 +311,60 @@ public class DirectPlexDownloadClient : IPlexDownloadClient
                 .Concat()
                 .Subscribe()
         );
+    }
+
+    private async Task<Result> ReconcileMissingCompletionCallbackAsync(
+        DownloadTaskKey key,
+        string downloadFilePath,
+        long expectedFileSize,
+        CancellationToken cancellationToken
+    )
+    {
+        var package = _downloader.Package;
+
+        var completionResult = VerifyCompletedDownload(package, downloadFilePath, expectedFileSize);
+        if (completionResult.IsFailed)
+        {
+            var failure = completionResult.ToResult();
+
+            _log.Here()
+                .Error(
+                    "Download finished execution without completion callback and verification failed for {MediaFileName}.",
+                    _filename
+                );
+
+            var statusResult = await SetDownloadStatusAsync(Domain.DownloadStatus.Error, failure);
+            if (statusResult.IsFailed)
+                return statusResult;
+
+            return failure;
+        }
+
+        var verifiedFileSize = completionResult.Value;
+
+        _log.Here()
+            .Warning(
+                "Download completion callback was not received for {MediaFileName}; applying verified completion reconciliation.",
+                _filename
+            );
+
+        var progress = new DownloadTaskProgress
+        {
+            DataTotal = expectedFileSize,
+            Percentage = 100,
+            DataReceived = verifiedFileSize,
+            DownloadSpeed = 0,
+            TimeRemaining = 0,
+        };
+
+        _downloadTaskUpdateDispatcher.OnProgressUpdated(key, progress, package?.ToSnapshot());
+
+        var finishResult = await SetDownloadStatusAsync(Domain.DownloadStatus.DownloadFinished);
+        if (finishResult.IsFailed)
+            return finishResult;
+
+        Interlocked.Exchange(ref _completionCallbackReceived, 1);
+        return Result.Ok();
     }
 
     private Result<long> VerifyCompletedDownload(DownloadPackage? package, string downloadFilePath, long expectedFileSize)

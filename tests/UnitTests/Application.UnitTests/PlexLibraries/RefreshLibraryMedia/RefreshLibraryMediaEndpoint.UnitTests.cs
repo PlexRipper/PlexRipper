@@ -25,7 +25,7 @@ public class RefreshLibraryMediaEndpointUnitTests
         var endpointResult = await TestEndpointHandleAsync(
             new RefreshLibraryMediaEndpointRequest(plexLibrary.Id)
         );
-        var resultDTO = endpointResult.Result;
+        var resultDTO = endpointResult.Response;
 
         // Assert
         resultDTO.ShouldNotBeNull();
@@ -54,7 +54,7 @@ public class RefreshLibraryMediaEndpointUnitTests
         var endpointResult = await TestEndpointHandleAsync(
             new RefreshLibraryMediaEndpointRequest(plexLibrary.Id)
         );
-        var resultDTO = endpointResult.Result;
+        var resultDTO = endpointResult.Response;
 
         // Assert
         resultDTO.ShouldNotBeNull();
@@ -115,7 +115,7 @@ public class RefreshLibraryMediaEndpointUnitTests
         var endpointResult = await TestEndpointHandleAsync(
             new RefreshLibraryMediaEndpointRequest(plexLibrary.Id)
         );
-        var resultDTO = endpointResult.Result;
+        var resultDTO = endpointResult.Response;
 
         // Assert
         resultDTO.ShouldNotBeNull();

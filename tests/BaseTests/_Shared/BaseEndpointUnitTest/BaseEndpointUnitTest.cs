@@ -2,7 +2,8 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Reaparr.BaseTests;
 
-public abstract class BaseEndpointUnitTest<TEndpoint, TRequest, TResponse> : BaseUnitTest<TEndpoint>
+public abstract class BaseEndpointUnitTest<TEndpoint, TRequest, TResponse>
+    : BaseEndpointUnitTestBase<TEndpoint, TResponse>
     where TEndpoint : Application.BaseEndpoint<TRequest>
     where TRequest : class
     where TResponse : BaseResultDTO
@@ -32,59 +33,14 @@ public abstract class BaseEndpointUnitTest<TEndpoint, TRequest, TResponse> : Bas
         return new EndpointUnitTestResult<TEndpoint, TResponse>
         {
             Endpoint = endpoint,
-            Result = GetEndpointResponse(endpoint),
+            Response = CastEndpointResponse(endpoint, endpoint.Response),
             ValidationResult = validationResult,
         };
     }
-
-    protected static async Task<FluentValidation.Results.ValidationResult?> ValidateEndpointRequestAsync(
-        TRequest request,
-        CancellationToken cancellationToken
-    )
-    {
-        IValidator? validator;
-        var requestType = typeof(TRequest);
-        var validatorInterface = typeof(IValidator<>).MakeGenericType(requestType);
-
-        var validatorTypes = requestType
-            .Assembly.GetTypes()
-            .Where(t => t is { IsAbstract: false, IsInterface: false } && validatorInterface.IsAssignableFrom(t))
-            .ToList();
-
-        if (validatorTypes.Count == 0)
-            validator = null;
-        else
-        {
-            if (validatorTypes.Count > 1)
-            {
-                throw new InvalidOperationException(
-                    $"Multiple validators found for endpoint request type '{requestType.FullName}'. Endpoint unit tests expect at most one validator."
-                );
-            }
-
-            validator = (IValidator)Activator.CreateInstance(validatorTypes.First())!;
-        }
-
-        if (validator is null)
-            return null;
-
-        var context = new FluentValidation.ValidationContext<object>(request);
-        return await validator.ValidateAsync(context, cancellationToken);
-    }
-
-    protected static TResponse GetEndpointResponse(IEndpoint endpoint)
-    {
-        var endpointResponseProperty = endpoint.GetType().GetProperty(nameof(Endpoint<>.Response));
-        var response = endpointResponseProperty?.GetValue(endpoint);
-
-        return response as TResponse
-               ?? throw new InvalidOperationException(
-                   $"Endpoint '{endpoint.GetType().FullName}' returned response type '{response?.GetType().FullName ?? "null"}', expected '{typeof(TResponse).FullName}'."
-               );
-    }
 }
 
-public abstract class BaseEndpointWithoutRequestUnitTest<TEndpoint, TResponse> : BaseUnitTest<TEndpoint>
+public abstract class BaseEndpointWithoutRequestUnitTest<TEndpoint, TResponse>
+    : BaseEndpointUnitTestBase<TEndpoint, TResponse>
     where TEndpoint : Application.BaseEndpointWithoutRequest
     where TResponse : BaseResultDTO
 {
@@ -102,20 +58,17 @@ public abstract class BaseEndpointWithoutRequestUnitTest<TEndpoint, TResponse> :
         return new EndpointUnitTestResult<TEndpoint, TResponse>
         {
             Endpoint = endpoint,
-            Result = GetEndpointResponse(endpoint),
+            Response = CastEndpointResponse(endpoint, endpoint.Response),
         };
     }
+}
 
-    protected static TResponse GetEndpointResponse(IEndpoint endpoint)
-    {
-        var endpointResponseProperty = endpoint.GetType().GetProperty(nameof(Endpoint<>.Response));
-        var response = endpointResponseProperty?.GetValue(endpoint);
-
-        return response as TResponse
-               ?? throw new InvalidOperationException(
-                   $"Endpoint '{endpoint.GetType().FullName}' returned response type '{response?.GetType().FullName ?? "null"}', expected '{typeof(TResponse).FullName}'."
-               );
-    }
+public abstract class BaseEndpointUnitTestBase<TEndpoint, TResponse> : BaseUnitTest<TEndpoint>
+    where TEndpoint : class, IEndpoint
+    where TResponse : BaseResultDTO
+{
+    protected BaseEndpointUnitTestBase(LogEventLevel logEventLevel = LogEventLevel.Verbose)
+        : base(logEventLevel) { }
 
     protected static async Task<FluentValidation.Results.ValidationResult?> ValidateEndpointRequestAsync<TRequest>(
         TRequest request,
@@ -123,7 +76,23 @@ public abstract class BaseEndpointWithoutRequestUnitTest<TEndpoint, TResponse> :
     )
         where TRequest : class
     {
-        IValidator? validator;
+        var validator = GetEndpointValidator<TRequest>();
+        if (validator is null)
+            return null;
+
+        var context = new FluentValidation.ValidationContext<object>(request);
+        return await validator.ValidateAsync(context, cancellationToken);
+    }
+
+    protected static TResponse CastEndpointResponse(IEndpoint endpoint, BaseResultDTO? response) =>
+        response as TResponse
+        ?? throw new InvalidOperationException(
+            $"Endpoint '{endpoint.GetType().FullName}' returned response type '{response?.GetType().FullName ?? "null"}', expected '{typeof(TResponse).FullName}'."
+        );
+
+    private static IValidator? GetEndpointValidator<TRequest>()
+        where TRequest : class
+    {
         var requestType = typeof(TRequest);
         var validatorInterface = typeof(IValidator<>).MakeGenericType(requestType);
 
@@ -132,25 +101,14 @@ public abstract class BaseEndpointWithoutRequestUnitTest<TEndpoint, TResponse> :
             .Where(t => t is { IsAbstract: false, IsInterface: false } && validatorInterface.IsAssignableFrom(t))
             .ToList();
 
-        if (validatorTypes.Count == 0)
-            validator = null;
-        else
+        return validatorTypes.Count switch
         {
-            if (validatorTypes.Count > 1)
-            {
-                throw new InvalidOperationException(
-                    $"Multiple validators found for endpoint request type '{requestType.FullName}'. Endpoint unit tests expect at most one validator."
-                );
-            }
-
-            validator = (IValidator)Activator.CreateInstance(validatorTypes.First())!;
-        }
-
-        if (validator is null)
-            return null;
-
-        var context = new FluentValidation.ValidationContext<object>(request);
-        return await validator.ValidateAsync(context, cancellationToken);
+            0 => null,
+            1 => (IValidator)Activator.CreateInstance(validatorTypes[0])!,
+            _ => throw new InvalidOperationException(
+                $"Multiple validators found for endpoint request type '{requestType.FullName}'. Endpoint unit tests expect at most one validator."
+            ),
+        };
     }
 }
 
@@ -160,7 +118,7 @@ public sealed class EndpointUnitTestResult<TEndpoint, TResponse>
 {
     public required TEndpoint Endpoint { get; init; }
 
-    public TResponse? Result { get; init; }
+    public TResponse? Response { get; init; }
 
     public FluentValidation.Results.ValidationResult? ValidationResult { get; init; }
 

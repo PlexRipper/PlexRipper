@@ -22,7 +22,7 @@ public class ApplyUpdateEndpointUnitTests : BaseEndpointWithoutRequestUnitTest<A
         var endpointResult = await TestEndpointHandleAsync(
             extraServices: s => s.AddSingleton(_ => mockManager.Object)
         );
-        var result = endpointResult.Result;
+        var result = endpointResult.Response;
 
         // Assert
         result.ShouldNotBeNull();
@@ -51,7 +51,7 @@ public class ApplyUpdateEndpointUnitTests : BaseEndpointWithoutRequestUnitTest<A
         {
             s.AddSingleton(_ => mockManager.Object);
         });
-        var result = endpointResult.Result;
+        var result = endpointResult.Response;
 
         // Assert
         result.ShouldNotBeNull();

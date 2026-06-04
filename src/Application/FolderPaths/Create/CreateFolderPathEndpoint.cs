@@ -17,7 +17,12 @@ public class CreateFolderPathEndpointRequestValidator : Validator<CreateFolderPa
                 RuleFor(x => x.FolderPathDto!.DisplayName).NotEmpty();
                 RuleFor(x => x.FolderPathDto!.Directory).NotEmpty();
                 RuleFor(x => x.FolderPathDto!.FolderType).NotEqual(FolderType.None).NotEqual(FolderType.Unknown);
-                RuleFor(x => x.FolderPathDto!.MediaType).NotEqual(PlexMediaType.None).NotEqual(PlexMediaType.Unknown);
+                RuleFor(x => x.FolderPathDto!.MediaType)
+                    .NotEqual(PlexMediaType.Unknown)
+                    .Must((request, mediaType) =>
+                        request.FolderPathDto!.FolderType == FolderType.DownloadFolder || mediaType != PlexMediaType.None
+                    )
+                    .WithMessage("Media type can only be None for download folders.");
             });
     }
 }

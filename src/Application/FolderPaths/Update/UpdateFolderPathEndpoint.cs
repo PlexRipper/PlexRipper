@@ -17,7 +17,12 @@ public class UpdateFolderPathEndpointRequestValidator : Validator<UpdateFolderPa
                 RuleFor(x => x.FolderPathDTO.DisplayName).NotEmpty();
                 RuleFor(x => x.FolderPathDTO.Directory).NotEmpty();
                 RuleFor(x => x.FolderPathDTO.FolderType).NotEqual(FolderType.None).NotEqual(FolderType.Unknown);
-                RuleFor(x => x.FolderPathDTO.MediaType).NotEqual(PlexMediaType.None).NotEqual(PlexMediaType.Unknown);
+                RuleFor(x => x.FolderPathDTO.MediaType)
+                    .NotEqual(PlexMediaType.Unknown)
+                    .Must((request, mediaType) =>
+                        request.FolderPathDTO.FolderType == FolderType.DownloadFolder || mediaType != PlexMediaType.None
+                    )
+                    .WithMessage("Media type can only be None for download folders.");
             });
     }
 }

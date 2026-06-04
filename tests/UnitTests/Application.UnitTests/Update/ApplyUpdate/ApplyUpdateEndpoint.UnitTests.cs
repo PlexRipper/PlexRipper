@@ -6,7 +6,7 @@ using Velopack.Sources;
 
 namespace Reaparr.Application.UnitTests;
 
-public class ApplyUpdateEndpointUnitTests : BaseUnitTest<ApplyUpdateEndpoint>
+public class ApplyUpdateEndpointUnitTests : BaseEndpointWithoutRequestUnitTest<ApplyUpdateEndpoint, BaseResultDTO>
 {
     [Test]
     public async Task ShouldReturnFailure_WhenDockerMode()
@@ -19,9 +19,10 @@ public class ApplyUpdateEndpointUnitTests : BaseUnitTest<ApplyUpdateEndpoint>
         var mockManager = new Mock<UpdateManager>(mockSource.Object, null!, mockLocator.Object);
 
         // Act
-        var endpoint = SetupEndpointUnitTest<ApplyUpdateEndpoint>(s => s.AddSingleton(_ => mockManager.Object));
-        await endpoint.HandleAsync(CancellationToken);
-        var result = endpoint.Response;
+        var endpointResult = await TestEndpointHandleAsync(
+            extraServices: s => s.AddSingleton(_ => mockManager.Object)
+        );
+        var result = endpointResult.Result;
 
         // Assert
         result.ShouldNotBeNull();
@@ -46,12 +47,11 @@ public class ApplyUpdateEndpointUnitTests : BaseUnitTest<ApplyUpdateEndpoint>
         mockManager.Setup(m => m.UpdatePendingRestart).Returns(asset).Verifiable(Times.Once());
 
         // Act
-        var endpoint = SetupEndpointUnitTest<ApplyUpdateEndpoint>(s =>
+        var endpointResult = await TestEndpointHandleAsync(extraServices: s =>
         {
             s.AddSingleton(_ => mockManager.Object);
         });
-        await endpoint.HandleAsync(CancellationToken);
-        var result = endpoint.Response;
+        var result = endpointResult.Result;
 
         // Assert
         result.ShouldNotBeNull();

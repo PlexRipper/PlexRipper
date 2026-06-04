@@ -1,4 +1,4 @@
-namespace Reaparr.Application;
+namespace Reaparr.Application.Contracts;
 
 public abstract class BaseEndpoint<TRequest> : Endpoint<TRequest, BaseResultDTO>
     where TRequest : class

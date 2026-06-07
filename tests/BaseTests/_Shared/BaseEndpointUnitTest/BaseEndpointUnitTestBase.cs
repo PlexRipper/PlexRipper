@@ -1,7 +1,5 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Newtonsoft.Json;
-using System.Text;
 
 namespace Reaparr.BaseTests;
 
@@ -26,42 +24,6 @@ public abstract class BaseEndpointUnitTestBase<TEndpoint, TResponse> : BaseUnitT
         return await validator.ValidateAsync(context, cancellationToken);
     }
 
-    protected static TResponse GetEndpointResponse(IEndpoint endpoint)
-    {
-        if (endpoint.HttpContext.Items.TryGetValue("FastEndpointsResponse", out var response) &&
-            response is TResponse typedResponse)
-            return typedResponse;
-
-        var bodyResponse = GetEndpointBodyResponse(endpoint);
-        if (bodyResponse is not null)
-            return bodyResponse;
-
-        throw new InvalidOperationException(
-            $"Endpoint '{endpoint.GetType().FullName}' did not store a response of type '{typeof(TResponse).FullName}'."
-        );
-    }
-
-    private static TResponse? GetEndpointBodyResponse(IEndpoint endpoint)
-    {
-        var responseBody = endpoint.HttpContext.Response.Body;
-        if (!responseBody.CanSeek)
-            return null;
-
-        var position = responseBody.Position;
-        responseBody.Position = 0;
-        using var reader = new StreamReader(responseBody, Encoding.UTF8, leaveOpen: true);
-        var body = reader.ReadToEnd();
-        responseBody.Position = position;
-
-        if (string.IsNullOrWhiteSpace(body))
-            return null;
-
-        if (typeof(TResponse) == typeof(string))
-            return (TResponse)(object)body;
-
-        return JsonConvert.DeserializeObject<TResponse>(body);
-    }
-
     private static IValidator? GetEndpointValidator<TRequest>()
         where TRequest : class
     {
@@ -71,9 +33,10 @@ public abstract class BaseEndpointUnitTestBase<TEndpoint, TResponse> : BaseUnitT
             .Assembly.GetTypes()
             .Where(t =>
                 t is { IsAbstract: false, IsInterface: false }
-                && t.GetInterfaces().Any(i => i.IsGenericType
-                    && i.GetGenericTypeDefinition() == typeof(IValidator<>)
-                    && i.GenericTypeArguments[0] == requestType)
+                && t.GetInterfaces()
+                    .Any(i => i.IsGenericType
+                              && i.GetGenericTypeDefinition() == typeof(IValidator<>)
+                              && i.GenericTypeArguments[0] == requestType)
             )
             .ToList();
 

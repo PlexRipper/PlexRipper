@@ -10,7 +10,7 @@ public class BaseResultDTO
 {
     public required bool IsSuccess { get; init; } = true;
 
-    public required int StatusCode { get; set; }
+    public required int StatusCode { get; init; }
 
     public required IReadOnlyList<ErrorDTO> Errors { get; set; } = [];
 

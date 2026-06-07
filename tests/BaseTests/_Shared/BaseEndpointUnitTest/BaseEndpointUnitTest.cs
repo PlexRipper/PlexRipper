@@ -27,7 +27,6 @@ public abstract class BaseEndpointUnitTest<TEndpoint, TRequest>
             {
                 Endpoint = endpoint,
                 ValidationResult = validationResult,
-                Response = null!,
             };
         }
 
@@ -37,7 +36,6 @@ public abstract class BaseEndpointUnitTest<TEndpoint, TRequest>
         {
             Endpoint = endpoint,
             ValidationResult = validationResult,
-            Response = null!,
         };
     }
 }
@@ -66,7 +64,6 @@ public abstract class BaseEndpointUnitTest<TEndpoint, TRequest, TResponse>
             {
                 Endpoint = endpoint,
                 ValidationResult = validationResult,
-                Response = null!,
             };
         }
 
@@ -75,7 +72,6 @@ public abstract class BaseEndpointUnitTest<TEndpoint, TRequest, TResponse>
         return new EndpointUnitTestResult<TEndpoint, TResponse>
         {
             Endpoint = endpoint,
-            Response = GetEndpointResponse(endpoint),
             ValidationResult = validationResult,
         };
     }
@@ -102,7 +98,6 @@ public abstract class BaseEndpointWithoutRequestUnitTest<TEndpoint, TResponse>
         return new EndpointUnitTestResult<TEndpoint, TResponse>
         {
             Endpoint = endpoint,
-            Response = GetEndpointResponse(endpoint),
         };
     }
 }

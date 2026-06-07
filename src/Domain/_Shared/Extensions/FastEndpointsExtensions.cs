@@ -96,7 +96,7 @@ public static class FastEndpointsExtensions
     /// <param name="result">The result to convert and send.</param>
     /// <param name="ct">Token to observe while sending the response.</param>
     public static async Task FluentResult(this IResponseSender sender, Result result, CancellationToken ct = default) =>
-        await sender.SendFluentResultDTOAsync(result, result.ToResultDTO(), ct);
+        await sender.SendFluentResultDTOAsync(result.ToResultDTO(), ct: ct);
 
     /// <summary>
     /// Sends a FluentResults <see cref="Result{T}"/> response using the project-standard <see cref="ResultDTO{T}"/> envelope.
@@ -105,8 +105,11 @@ public static class FastEndpointsExtensions
     /// <param name="sender">The response sender associated with the current endpoint.</param>
     /// <param name="result">The result to convert and send.</param>
     /// <param name="ct">Token to observe while sending the response.</param>
-    public static async Task FluentResult<T>(this IResponseSender sender, Result<T> result, CancellationToken ct = default) =>
-        await sender.SendFluentResultDTOAsync(result.ToResult(), result.ToResultDTO(), ct);
+    public static async Task FluentResult<T>(
+        this IResponseSender sender,
+        Result<T> result,
+        CancellationToken ct = default) =>
+        await sender.SendFluentResultDTOAsync(result.ToResultDTO(), ct: ct);
 
     /// <summary>
     /// Sends a FluentResults <see cref="Result{T}"/> response after mapping the value into the response DTO type.
@@ -125,61 +128,13 @@ public static class FastEndpointsExtensions
     )
     {
         var resultDTO = result.ToResultDTO(mapper);
-        await sender.SendFluentResultDTOAsync(result.ToResult(), resultDTO, ct);
+        await sender.SendFluentResultDTOAsync(resultDTO, ct: ct);
     }
 
-    private static async Task SendFluentResultDTOAsync<TResponse>(
-        this IResponseSender sender,
-        Result result,
+    private static Task SendFluentResultDTOAsync<TResponse>(
+        this IResponseSender ep,
         TResponse resultDTO,
-        CancellationToken ct
+        CancellationToken ct = default
     )
-        where TResponse : BaseResultDTO
-    {
-        await result.SendResponseAsync(async statusCode =>
-        {
-            resultDTO.StatusCode = statusCode;
-            await sender.HttpContext.Response.SendAsync(resultDTO, statusCode, cancellation: ct);
-        });
-    }
-
-    private static async Task SendResponseAsync(this Result result, Func<int, Task> sendAsync)
-    {
-        if (result.IsSuccess)
-        {
-            // Status code 201 Created
-            if (result.Has201CreatedRequestSuccess())
-                await sendAsync(StatusCodes.Status201Created);
-            // Status code 204 No Content
-            else if (result.Has204NoContentRequestSuccess())
-                await sendAsync(StatusCodes.Status204NoContent);
-            // Status code 200 Ok
-            else
-                await sendAsync(StatusCodes.Status200OK);
-        }
-        else
-        {
-            // Status Code 400 Bad Request
-            if (result.Has400BadRequestError())
-                await sendAsync(StatusCodes.Status400BadRequest);
-            // Status Code 401 Unauthorized
-            else if (result.Has401UnauthorizedError())
-                await sendAsync(StatusCodes.Status401Unauthorized);
-            // Status Code 403 Forbidden
-            else if (result.Has403ForbiddenError())
-                await sendAsync(StatusCodes.Status403Forbidden);
-            // Status Code 404 Not Found
-            else if (result.Has404NotFoundError())
-                await sendAsync(StatusCodes.Status404NotFound);
-            // Status Code 502 Bad Gateway
-            else if (result.Has502BadGatewayError())
-                await sendAsync(StatusCodes.Status502BadGateway);
-            // Status Code 504 Gateway Timeout
-            else if (result.Has504GatewayTimeoutError())
-                await sendAsync(StatusCodes.Status504GatewayTimeout);
-            // Status Code 500 Internal Server Error
-            else
-                await sendAsync(StatusCodes.Status500InternalServerError);
-        }
-    }
+        where TResponse : BaseResultDTO => ep.HttpContext.Response.SendAsync(resultDTO, resultDTO.StatusCode, cancellation: ct);
 }

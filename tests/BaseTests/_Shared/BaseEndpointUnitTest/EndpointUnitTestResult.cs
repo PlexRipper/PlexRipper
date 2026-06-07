@@ -8,7 +8,7 @@ public sealed record EndpointUnitTestResult<TEndpoint, TResponse>
 {
     public required TEndpoint Endpoint { get; init; }
 
-    public required TResponse Response { get; init; }
+    public TResponse? Response => Endpoint.GetType().GetProperty(nameof(Response))?.GetValue(Endpoint) as TResponse;
 
     public FluentValidation.Results.ValidationResult? ValidationResult { get; init; }
 

@@ -122,6 +122,8 @@ public class SyncPlexServerMediaEndpointUnitTests : BaseEndpointUnitTest<SyncPle
         var endpointResult = await TestEndpointHandleAsync(new SyncPlexServerMediaEndpointRequest { PlexServerId = targetServerId });
 
         // Assert
+        endpointResult.ShouldNotBeNull();
+        endpointResult.Response.ShouldNotBeNull();
         endpointResult.Response.IsSuccess.ShouldBeTrue();
         Mock.Mock<ICommandExecutor>()
             .Verify(x => x.Send(It.Is<QueueLibrarySyncJobCommand>(cmd => cmd.PlexLibraryIds.Count == targetLibraryCount), It.IsAny<CancellationToken>()), Times.Once());
@@ -142,6 +144,8 @@ public class SyncPlexServerMediaEndpointUnitTests : BaseEndpointUnitTest<SyncPle
         var endpointResult = await TestEndpointHandleAsync(new SyncPlexServerMediaEndpointRequest { PlexServerId = 9999 });
 
         // Assert
+        endpointResult.ShouldNotBeNull();
+        endpointResult.Response.ShouldNotBeNull();
         endpointResult.Response.IsSuccess.ShouldBeFalse();
         Mock.Mock<ICommandExecutor>()
             .Verify(x => x.Send(It.IsAny<QueueLibrarySyncJobCommand>(), It.IsAny<CancellationToken>()), Times.Never());
@@ -171,6 +175,8 @@ public class SyncPlexServerMediaEndpointUnitTests : BaseEndpointUnitTest<SyncPle
         var endpointResult = await TestEndpointHandleAsync(new SyncPlexServerMediaEndpointRequest { PlexServerId = serverId });
 
         // Assert
+        endpointResult.ShouldNotBeNull();
+        endpointResult.Response.ShouldNotBeNull();
         endpointResult.Response.IsSuccess.ShouldBeFalse();
         endpointResult.Response.Errors.ShouldContain(x => x.Message.Contains("disabled", StringComparison.OrdinalIgnoreCase));
         Mock.Mock<ICommandExecutor>()
@@ -204,6 +210,8 @@ public class SyncPlexServerMediaEndpointUnitTests : BaseEndpointUnitTest<SyncPle
         var endpointResult = await TestEndpointHandleAsync(new SyncPlexServerMediaEndpointRequest { PlexServerId = enabledServerId });
 
         // Assert
+        endpointResult.ShouldNotBeNull();
+        endpointResult.Response.ShouldNotBeNull();
         endpointResult.Response.IsSuccess.ShouldBeTrue();
         Mock.Mock<ICommandExecutor>()
             .Verify(x => x.Send(It.IsAny<QueueLibrarySyncJobCommand>(), It.IsAny<CancellationToken>()), Times.Once());
@@ -244,6 +252,8 @@ public class SyncPlexServerMediaEndpointUnitTests : BaseEndpointUnitTest<SyncPle
         var endpointResult = await TestEndpointHandleAsync(new SyncPlexServerMediaEndpointRequest { PlexServerId = serverId });
 
         // Assert
+        endpointResult.ShouldNotBeNull();
+        endpointResult.Response.ShouldNotBeNull();
         endpointResult.Response.IsSuccess.ShouldBeTrue();
         Mock.Mock<ICommandExecutor>()
             .Verify(x => x.Send(It.Is<QueueLibrarySyncJobCommand>(cmd => cmd.PlexLibraryIds.Count == 1), It.IsAny<CancellationToken>()), Times.Once());

@@ -144,6 +144,8 @@ public class SetServerEnabledEndpointUnitTests : BaseEndpointUnitTest<SetServerE
         var endpointResult = await TestEndpointHandleAsync(new SetServerEnabledRequest { PlexServerId = server.Id, IsEnabled = true });
 
         // Assert
+        endpointResult.ShouldNotBeNull();
+        endpointResult.Response.ShouldNotBeNull();
         endpointResult.Response.IsSuccess.ShouldBe(true);
         var updated = await db.PlexServers.IgnoreIsEnabledFilter().FirstAsync(x => x.Id == server.Id, CancellationToken);
         updated.IsEnabled.ShouldBe(true);
@@ -163,6 +165,8 @@ public class SetServerEnabledEndpointUnitTests : BaseEndpointUnitTest<SetServerE
         var endpointResult = await TestEndpointHandleAsync(new SetServerEnabledRequest { PlexServerId = server.Id, IsEnabled = false });
 
         // Assert
+        endpointResult.ShouldNotBeNull();
+        endpointResult.Response.ShouldNotBeNull();
         endpointResult.Response.IsSuccess.ShouldBe(true);
         var updated = await db.PlexServers.IgnoreIsEnabledFilter().FirstAsync(x => x.Id == server.Id, CancellationToken);
         updated.IsEnabled.ShouldBeFalse();

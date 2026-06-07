@@ -153,6 +153,7 @@ public class UpdateFolderPathEndpointUnitTests : BaseEndpointUnitTest<UpdateFold
         var folderPathCountAfter = await dbContext.FolderPaths.CountAsync(CancellationToken);
 
         // Assert
+        result.ShouldNotBeNull();
         result.IsSuccess.ShouldBeFalse();
         result.Errors.ShouldContain(x =>
             x.Message.Contains(nameof(FolderPath)) && x.Message.Contains(missingFolderPathId.ToString())

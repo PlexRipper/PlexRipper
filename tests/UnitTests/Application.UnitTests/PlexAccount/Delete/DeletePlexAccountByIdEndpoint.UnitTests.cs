@@ -32,6 +32,8 @@ public class DeletePlexAccountByIdEndpointUnitTests : BaseEndpointUnitTest<Delet
         var result = await TestEndpointHandleAsync(new DeletePlexAccountByIdRequest(testAccount.Id));
 
         // Assert
+        result.ShouldNotBeNull();
+        result.Response.ShouldNotBeNull();
         result.Response.IsSuccess.ShouldBeTrue();
         IDbContext.PlexAccounts.ToList().ShouldBeEmpty();
         IDbContext.PlexServers.ToList().ShouldBeEmpty();
@@ -135,6 +137,8 @@ public class DeletePlexAccountByIdEndpointUnitTests : BaseEndpointUnitTest<Delet
         var endpoint = await TestEndpointHandleAsync(new DeletePlexAccountByIdRequest(deleteAccountId));
 
         // Assert
+        endpoint.ShouldNotBeNull();
+        endpoint.Response.ShouldNotBeNull();
         endpoint.Response.IsSuccess.ShouldBeTrue();
 
         var remainingServers = await dbContext.PlexServers.IgnoreIsEnabledFilter()

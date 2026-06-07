@@ -56,6 +56,7 @@ public class DeleteDownloadTaskEndpointUnitTests : BaseEndpointUnitTest<DeleteDo
         var result = endpointResult.Response;
 
         // Assert
+        result.ShouldNotBeNull();
         result.IsSuccess.ShouldBeTrue();
         Mock.Mock<ICommandExecutor>()
             .Verify(
@@ -130,6 +131,7 @@ public class DeleteDownloadTaskEndpointUnitTests : BaseEndpointUnitTest<DeleteDo
         var result = endpointResult.Response;
 
         // Assert
+        result.ShouldNotBeNull();
         result.IsSuccess.ShouldBeTrue();
         Mock.Mock<ICommandExecutor>()
             .Verify(
@@ -174,6 +176,7 @@ public class DeleteDownloadTaskEndpointUnitTests : BaseEndpointUnitTest<DeleteDo
         var result = endpointResult.Response;
 
         // Assert
+        result.ShouldNotBeNull();
         result.IsSuccess.ShouldBeTrue();
         Mock.Mock<ICommandExecutor>()
             .Verify(x => x.Send(It.IsAny<StopDownloadTaskCommand>(), It.IsAny<CancellationToken>()), Times.Never);

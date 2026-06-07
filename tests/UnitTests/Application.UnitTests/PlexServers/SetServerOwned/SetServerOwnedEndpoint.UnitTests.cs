@@ -60,6 +60,8 @@ public class SetServerOwnedEndpointUnitTests : BaseEndpointUnitTest<SetServerOwn
         var endpointResult = await TestEndpointHandleAsync(new SetServerOwnedRequest { PlexServerId = 9999, IsOwned = true });
 
         // Assert
+        endpointResult.ShouldNotBeNull();
+        endpointResult.Response.ShouldNotBeNull();
         endpointResult.Response.IsSuccess.ShouldBe(false);
     }
 

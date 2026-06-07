@@ -190,6 +190,9 @@ public class TorrentsInfoEndpointUnitTests : BaseEndpointUnitTest<TorrentsInfoEn
             .Select(x => new { x.DownloadStatus, x.HashId })
             .FirstAsync(CancellationToken);
 
+        endpointResult.ShouldNotBeNull();
+        endpointResult.Response.ShouldNotBeNull();
+        
         return (endpointResult.Response, persistedRow.DownloadStatus, persistedRow.HashId);
     }
 }

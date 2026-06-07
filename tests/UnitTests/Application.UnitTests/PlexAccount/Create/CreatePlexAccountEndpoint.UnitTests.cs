@@ -35,6 +35,8 @@ public class CreatePlexAccountEndpointUnitTests : BaseEndpointUnitTest<CreatePle
         var endpointResult = await TestEndpointHandleAsync(createPlexAccountDTO);
 
         // Assert
+        endpointResult.ShouldNotBeNull();
+        endpointResult.Response.ShouldNotBeNull();
         endpointResult.Response.IsSuccess.ShouldBeTrue();
         var createdAccount = await IDbContext.PlexAccounts.SingleOrDefaultAsync(x => x.Username == newAccount.Username, CancellationToken);
         createdAccount.ShouldNotBeNull();
@@ -80,6 +82,8 @@ public class CreatePlexAccountEndpointUnitTests : BaseEndpointUnitTest<CreatePle
         var endpointResult = await TestEndpointHandleAsync(createPlexAccountDTO);
 
         // Assert
+        endpointResult.ShouldNotBeNull();
+        endpointResult.Response.ShouldNotBeNull();
         endpointResult.Response.IsSuccess.ShouldBeFalse();
         var duplicateAccounts = await IDbContext.PlexAccounts.CountAsync(x => x.Username == duplicateUsername, CancellationToken);
         duplicateAccounts.ShouldBe(1);

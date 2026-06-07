@@ -5,6 +5,17 @@ using Microsoft.Extensions.Hosting;
 
 namespace Reaparr.BaseTests;
 
+/// <summary>
+/// Shared FastEndpoints unit-test infrastructure for constructing endpoints, executing request
+/// validation, and capturing endpoint responses in a deterministic in-memory HTTP context.
+/// </summary>
+/// <remarks>
+/// Endpoint tests use this layer instead of calling <c>Factory.Create</c> directly so that every
+/// test receives the same Reaparr services, mock hub dependencies, optional database-backed
+/// contexts, and response-body capture behavior.
+/// </remarks>
+/// <typeparam name="TEndpoint">The endpoint type under test.</typeparam>
+/// <typeparam name="TResponse">The response DTO type expected by the concrete endpoint helper.</typeparam>
 public abstract class BaseEndpointUnitTestBase<TEndpoint, TResponse> : BaseUnitTest<TEndpoint>
     where TEndpoint : class, IEndpoint
     where TResponse : class
@@ -12,21 +23,17 @@ public abstract class BaseEndpointUnitTestBase<TEndpoint, TResponse> : BaseUnitT
     protected BaseEndpointUnitTestBase(LogEventLevel logEventLevel = LogEventLevel.Verbose)
         : base(logEventLevel) { }
 
+    /// <summary>
+    /// Runs the endpoint request validator, when one exists, before invoking the endpoint handler.
+    /// </summary>
+    /// <typeparam name="TRequest">The request DTO type being validated.</typeparam>
+    /// <param name="request">The request DTO passed to the endpoint test.</param>
+    /// <param name="cancellationToken">Cancellation token for validator execution.</param>
+    /// <returns>The validation result, or <see langword="null"/> when the request type has no validator.</returns>
     protected static async Task<FluentValidation.Results.ValidationResult?> ValidateEndpointRequestAsync<TRequest>(
         TRequest request,
         CancellationToken cancellationToken
     )
-        where TRequest : class
-    {
-        var validator = GetEndpointValidator<TRequest>();
-        if (validator is null)
-            return null;
-
-        var context = new FluentValidation.ValidationContext<object>(request);
-        return await validator.ValidateAsync(context, cancellationToken);
-    }
-
-    private static IValidator? GetEndpointValidator<TRequest>()
         where TRequest : class
     {
         var requestType = typeof(TRequest);
@@ -41,8 +48,8 @@ public abstract class BaseEndpointUnitTestBase<TEndpoint, TResponse> : BaseUnitT
                               && i.GenericTypeArguments[0] == requestType)
             )
             .ToList();
-
-        return validatorTypes.Count switch
+        
+        var validator = validatorTypes.Count switch
         {
             0 => null,
             1 => (IValidator)Activator.CreateInstance(validatorTypes[0])!,
@@ -50,8 +57,26 @@ public abstract class BaseEndpointUnitTestBase<TEndpoint, TResponse> : BaseUnitT
                 $"Multiple validators found for endpoint request type '{requestType.FullName}'. Endpoint unit tests expect at most one validator."
             ),
         };
+        if (validator is null)
+            return null;
+
+        var context = new FluentValidation.ValidationContext<object>(request);
+        return await validator.ValidateAsync(context, cancellationToken);
     }
 
+    /// <summary>
+    /// Captures a response from a FastEndpoints endpoint without requiring every endpoint to assign
+    /// the <c>Response</c> property directly.
+    /// </summary>
+    /// <param name="endpoint">The endpoint instance after handler execution.</param>
+    /// <param name="cancellationToken">Cancellation token for response-body deserialization.</param>
+    /// <returns>The typed response when it can be read, otherwise <see langword="null"/>.</returns>
+    /// <remarks>
+    /// FastEndpoints can produce responses in multiple ways: assigning <c>Response</c>, writing JSON
+    /// through <c>SendAsync</c>, sending project FluentResult DTOs, or writing plain text. This helper
+    /// checks those paths in that order and resets the body stream after reading so tests may still
+    /// assert against the raw response body when needed.
+    /// </remarks>
     protected static async Task<TResponse?> GetEndpointResponseAsync(TEndpoint endpoint, CancellationToken cancellationToken)
     {
         try

@@ -2,6 +2,11 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Reaparr.BaseTests;
 
+/// <summary>
+/// Base class for endpoint unit tests whose endpoint accepts a request but does not declare a typed response DTO.
+/// </summary>
+/// <typeparam name="TEndpoint">The endpoint type under test.</typeparam>
+/// <typeparam name="TRequest">The request DTO type accepted by the endpoint.</typeparam>
 public abstract class BaseEndpointUnitTest<TEndpoint, TRequest>
     : BaseEndpointUnitTestBase<TEndpoint, object>
     where TEndpoint : Endpoint<TRequest>
@@ -10,6 +15,12 @@ public abstract class BaseEndpointUnitTest<TEndpoint, TRequest>
     protected BaseEndpointUnitTest(LogEventLevel logEventLevel = LogEventLevel.Verbose)
         : base(logEventLevel) { }
 
+    /// <summary>
+    /// Validates the request and invokes the endpoint's <c>HandleAsync</c> method only when validation succeeds.
+    /// </summary>
+    /// <param name="request">The request DTO passed to the endpoint.</param>
+    /// <param name="extraServices">Optional test-specific service registrations.</param>
+    /// <returns>The endpoint, validation outcome, HTTP status metadata, and captured response body.</returns>
     protected async Task<EndpointUnitTestResult<TEndpoint, object>> TestEndpointHandleAsync(
         TRequest request,
         Action<IServiceCollection>? extraServices = null
@@ -41,6 +52,12 @@ public abstract class BaseEndpointUnitTest<TEndpoint, TRequest>
     }
 }
 
+/// <summary>
+/// Base class for endpoint unit tests whose endpoint accepts a request and declares a typed response DTO.
+/// </summary>
+/// <typeparam name="TEndpoint">The endpoint type under test.</typeparam>
+/// <typeparam name="TRequest">The request DTO type accepted by the endpoint.</typeparam>
+/// <typeparam name="TResponse">The response DTO type expected from the endpoint.</typeparam>
 public abstract class BaseEndpointUnitTest<TEndpoint, TRequest, TResponse>
     : BaseEndpointUnitTestBase<TEndpoint, TResponse>
     where TEndpoint : Endpoint<TRequest, TResponse>
@@ -50,6 +67,12 @@ public abstract class BaseEndpointUnitTest<TEndpoint, TRequest, TResponse>
     protected BaseEndpointUnitTest(LogEventLevel logEventLevel = LogEventLevel.Verbose)
         : base(logEventLevel) { }
 
+    /// <summary>
+    /// Validates the request and invokes the endpoint's <c>HandleAsync</c> method only when validation succeeds.
+    /// </summary>
+    /// <param name="request">The request DTO passed to the endpoint.</param>
+    /// <param name="extraServices">Optional test-specific service registrations.</param>
+    /// <returns>The endpoint, validation outcome, HTTP status metadata, and captured response DTO.</returns>
     protected async Task<EndpointUnitTestResult<TEndpoint, TResponse>> TestEndpointHandleAsync(
         TRequest request,
         Action<IServiceCollection>? extraServices = null
@@ -79,6 +102,11 @@ public abstract class BaseEndpointUnitTest<TEndpoint, TRequest, TResponse>
     }
 }
 
+/// <summary>
+/// Base class for endpoint unit tests whose endpoint has no request DTO and declares a typed response DTO.
+/// </summary>
+/// <typeparam name="TEndpoint">The endpoint type under test.</typeparam>
+/// <typeparam name="TResponse">The response DTO type expected from the endpoint.</typeparam>
 public abstract class BaseEndpointWithoutRequestUnitTest<TEndpoint, TResponse>
     : BaseEndpointUnitTestBase<TEndpoint, TResponse>
     where TEndpoint : EndpointWithoutRequest<TResponse>
@@ -87,6 +115,11 @@ public abstract class BaseEndpointWithoutRequestUnitTest<TEndpoint, TResponse>
     protected BaseEndpointWithoutRequestUnitTest(LogEventLevel logEventLevel = LogEventLevel.Verbose)
         : base(logEventLevel) { }
 
+    /// <summary>
+    /// Invokes the endpoint's <c>HandleAsync</c> method using the endpoint test service container.
+    /// </summary>
+    /// <param name="extraServices">Optional test-specific service registrations.</param>
+    /// <returns>The endpoint, HTTP status metadata, and captured response DTO.</returns>
     protected async Task<EndpointUnitTestResult<TEndpoint, TResponse>> TestEndpointHandleAsync(
         Action<IServiceCollection>? extraServices = null
     )

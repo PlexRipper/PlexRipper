@@ -3,7 +3,7 @@ using BencodeNET.Torrents;
 
 namespace Reaparr.PublicAPI.UnitTests;
 
-public class DownloadTorrentEndpointUnitTests : BaseUnitTest
+public class DownloadTorrentEndpointUnitTests : BaseEndpointUnitTest<DownloadTorrentEndpoint, DownloadTorrentEndpointRequest>
 {
     [Test]
     public async Task ShouldReturnValidTorrent_WhenEpisodeExists()
@@ -46,14 +46,13 @@ public class DownloadTorrentEndpointUnitTests : BaseUnitTest
         };
 
         // Act
-        var ep = SetupEndpointUnitTest<DownloadTorrentEndpoint>();
+        var endpointResult = await TestEndpointHandleAsync(req);
         var buffer = new MemoryStream();
-        ep.HttpContext.Response.Body = buffer;
-        await ep.HandleAsync(req, CancellationToken);
+        endpointResult.Endpoint.HttpContext.Response.Body = buffer;
 
         // Assert – response is a torrent file with the correct content type
-        ep.HttpContext.Response.StatusCode.ShouldBe(StatusCodes.Status200OK);
-        ep.HttpContext.Response.ContentType.ShouldBe("application/x-bittorrent");
+        endpointResult.StatusCode.ShouldBe(StatusCodes.Status200OK);
+        endpointResult.ContentType.ShouldBe("application/x-bittorrent");
 
         // Assert – bytes were written and are a valid torrent
         var bytes = buffer.ToArray();
@@ -118,14 +117,13 @@ public class DownloadTorrentEndpointUnitTests : BaseUnitTest
         };
 
         // Act
-        var ep = SetupEndpointUnitTest<DownloadTorrentEndpoint>();
+        var endpointResult = await TestEndpointHandleAsync(req);
         var buffer = new MemoryStream();
-        ep.HttpContext.Response.Body = buffer;
-        await ep.HandleAsync(req, CancellationToken);
+        endpointResult.Endpoint.HttpContext.Response.Body = buffer;
 
         // Assert – response is a torrent file with the correct content type
-        ep.HttpContext.Response.StatusCode.ShouldBe(StatusCodes.Status200OK);
-        ep.HttpContext.Response.ContentType.ShouldBe("application/x-bittorrent");
+        endpointResult.StatusCode.ShouldBe(StatusCodes.Status200OK);
+        endpointResult.ContentType.ShouldBe("application/x-bittorrent");
 
         // Assert – bytes were written and are a valid torrent
         var bytes = buffer.ToArray();
@@ -190,11 +188,10 @@ public class DownloadTorrentEndpointUnitTests : BaseUnitTest
         };
 
         // Act
-        var ep = SetupEndpointUnitTest<DownloadTorrentEndpoint>();
-        await ep.HandleAsync(req, CancellationToken);
+        var endpointResult = await TestEndpointHandleAsync(req);
 
         // Assert
-        ep.HttpContext.Response.StatusCode.ShouldBe(StatusCodes.Status404NotFound);
+        endpointResult.StatusCode.ShouldBe(StatusCodes.Status404NotFound);
     }
 
     [Test]

@@ -1,6 +1,6 @@
 ﻿namespace Reaparr.Application.UnitTests;
 
-public class GenerateTokenEndpointUnitTests : BaseUnitTest
+public class GenerateTokenEndpointUnitTests : BaseEndpointUnitTest<GeneratePlexTokenEndpoint, GeneratePlexTokenEndpointRequest, ResultDTO<GeneratePlexTokenResponse>>
 {
     [Test]
     public async Task ShouldGenerateToken_WhenSignInIsSuccessful()
@@ -33,12 +33,10 @@ public class GenerateTokenEndpointUnitTests : BaseUnitTest
             });
 
         // Act
-        var ep = SetupEndpointUnitTest<GeneratePlexTokenEndpoint>();
-        await ep.HandleAsync(
-            new GeneratePlexTokenEndpointRequest { PlexAccountId = plexAccount.Id, VerificationCode = "" },
-            CancellationToken
+        var endpointResult = await TestEndpointHandleAsync(
+            new GeneratePlexTokenEndpointRequest { PlexAccountId = plexAccount.Id, VerificationCode = "" }
         );
-        var result = ep.Response as ResultDTO<GeneratePlexTokenResponse>;
+        var result = endpointResult.Response;
 
         // Assert
         result.ShouldNotBeNull();
@@ -65,12 +63,10 @@ public class GenerateTokenEndpointUnitTests : BaseUnitTest
             );
 
         // Act
-        var ep = SetupEndpointUnitTest<GeneratePlexTokenEndpoint>();
-        await ep.HandleAsync(
-            new GeneratePlexTokenEndpointRequest { PlexAccountId = plexAccount.Id },
-            CancellationToken
+        var endpointResult = await TestEndpointHandleAsync(
+            new GeneratePlexTokenEndpointRequest { PlexAccountId = plexAccount.Id }
         );
-        var result = ep.Response as ResultDTO<GeneratePlexTokenResponse>;
+        var result = endpointResult.Response;
 
         // Assert
         result.ShouldNotBeNull();
@@ -94,12 +90,10 @@ public class GenerateTokenEndpointUnitTests : BaseUnitTest
             .ReturnsAsync(Result.Fail(new PlexError("Unauthorized")).Add401UnauthorizedError());
 
         // Act
-        var ep = SetupEndpointUnitTest<GeneratePlexTokenEndpoint>();
-        await ep.HandleAsync(
-            new GeneratePlexTokenEndpointRequest { PlexAccountId = plexAccount.Id },
-            CancellationToken
+        var endpointResult = await TestEndpointHandleAsync(
+            new GeneratePlexTokenEndpointRequest { PlexAccountId = plexAccount.Id }
         );
-        var result = ep.Response as ResultDTO<GeneratePlexTokenResponse>;
+        var result = endpointResult.Response;
 
         // Assert
         result.ShouldNotBeNull();
@@ -127,12 +121,10 @@ public class GenerateTokenEndpointUnitTests : BaseUnitTest
             );
 
         // Act
-        var ep = SetupEndpointUnitTest<GeneratePlexTokenEndpoint>();
-        await ep.HandleAsync(
-            new GeneratePlexTokenEndpointRequest { PlexAccountId = plexAccount.Id },
-            CancellationToken
+        var endpointResult = await TestEndpointHandleAsync(
+            new GeneratePlexTokenEndpointRequest { PlexAccountId = plexAccount.Id }
         );
-        var result = ep.Response;
+        var result = endpointResult.Response;
 
         // Assert
         result.ShouldNotBeNull();

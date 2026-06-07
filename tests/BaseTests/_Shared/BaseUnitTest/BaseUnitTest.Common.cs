@@ -34,33 +34,7 @@ public partial class BaseUnitTest
         Mock = AutoMock.GetStrict(SetDefaultBuilder);
     }
 
-    protected T SetupEndpointUnitTest<T>(Action<IServiceCollection>? extraServices = null)
-        where T : class, IEndpoint
-    {
-        return Factory.Create<T>(ctx =>
-        {
-            ctx.AddTestServices(s =>
-            {
-                // All different dependencies that are needed for the endpoint need to be added here. And then they can be mocked in the test.
-                s.AddTransient(_ => Mock.Create<ILogger>());
-                s.AddTransient(_ => Mock.Create<IReaparrDbContext>());
-                s.AddTransient(_ => Mock.Mock<IReaparrDbContextFactory>().Object);
-                s.AddTransient(_ => Mock.Create<IAuthDbContext>());
-                s.AddTransient(_ => Mock.Create<IAuthDbContextFactory>());
-                s.AddTransient(_ => Mock.Mock<ICommandExecutor>().Object);
-                s.AddSingleton(_ => Mock.Create<ISchedulerService>());
-                s.AddSingleton(_ => Mock.Mock<IProgressHubService>().Object);
-                s.AddSingleton(_ => Mock.Mock<IDownloadHubService>().Object);
-                s.AddSingleton(_ => Mock.Mock<INotificationHubService>().Object);
-                s.AddSingleton(_ => Mock.Mock<IDownloadTaskScheduler>().Object);
-                s.AddSingleton(_ => Mock.Container.Resolve<IPathProvider>());
-                s.AddSingleton(_ => Mock.Container.Resolve<IAppBuildInfo>());
-                s.AddSingleton(_ => Mock.Mock<IHostApplicationLifetime>().Object);
 
-                extraServices?.Invoke(s);
-            });
-        });
-    }
 
     public virtual void Dispose()
     {

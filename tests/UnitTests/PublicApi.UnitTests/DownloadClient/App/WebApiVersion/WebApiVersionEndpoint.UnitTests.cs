@@ -2,23 +2,19 @@ using System.Text;
 
 namespace Reaparr.PublicAPI.UnitTests;
 
-public class WebApiVersionEndpointUnitTests : BaseUnitTest<WebApiVersionEndpoint>
+public class WebApiVersionEndpointUnitTests : BaseEndpointWithoutRequestUnitTest<WebApiVersionEndpoint, string>
 {
     [Test]
     public async Task ShouldReturnWebApiVersionString_WhenBodyParsed()
     {
         // Arrange
-        var ep = SetupEndpointUnitTest<WebApiVersionEndpoint>();
-        var buffer = new MemoryStream();
-        ep.HttpContext.Response.Body = buffer;
-
         // Act
-        await ep.HandleAsync(CancellationToken);
+        var endpointResult = await TestEndpointHandleAsync();
 
         // Assert
-        ep.HttpContext.Response.StatusCode.ShouldBe(StatusCodes.Status200OK);
+        endpointResult.StatusCode.ShouldBe(StatusCodes.Status200OK);
 
-        var body = Encoding.UTF8.GetString(buffer.ToArray());
+        var body = endpointResult.Response;
         body.ShouldNotBeNullOrWhiteSpace();
 
         // Sonarr/Radarr call Version.Parse() directly on the webapiVersion response body.

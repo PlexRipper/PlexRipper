@@ -2,7 +2,7 @@ using Reaparr.Application.Contracts.Validators;
 
 namespace Reaparr.Application.UnitTests;
 
-public class GetMediaDetailByIdEndpointUnitTests : BaseUnitTest<GetMediaDetailByIdEndpoint>
+public class GetMediaDetailByIdEndpointUnitTests : BaseEndpointUnitTest<GetMediaDetailByIdEndpoint, GetMediaDetailByIdEndpointRequest, ResultDTO<PlexMediaDTO>>
 {
     private PlexMediaDTOValidator PlexMediaDtoValidator => new();
 
@@ -28,9 +28,8 @@ public class GetMediaDetailByIdEndpointUnitTests : BaseUnitTest<GetMediaDetailBy
         var request = new GetMediaDetailByIdEndpointRequest(testMovie.Id, PlexMediaType.Movie);
 
         // Act
-        var ep = SetupEndpointUnitTest<GetMediaDetailByIdEndpoint>();
-        await ep.HandleAsync(request, CancellationToken);
-        var result = ep.Response as ResultDTO<PlexMediaDTO>;
+        var endpointResult = await TestEndpointHandleAsync(request);
+        var result = endpointResult.Response;
 
         // Assert
         result.ShouldNotBeNull();
@@ -64,9 +63,8 @@ public class GetMediaDetailByIdEndpointUnitTests : BaseUnitTest<GetMediaDetailBy
         var request = new GetMediaDetailByIdEndpointRequest(testTvShow.Id, PlexMediaType.TvShow);
 
         // Act
-        var ep = SetupEndpointUnitTest<GetMediaDetailByIdEndpoint>();
-        await ep.HandleAsync(request, CancellationToken);
-        var result = ep.Response as ResultDTO<PlexMediaDTO>;
+        var endpointResult = await TestEndpointHandleAsync(request);
+        var result = endpointResult.Response;
 
         // Assert
         result.ShouldNotBeNull();

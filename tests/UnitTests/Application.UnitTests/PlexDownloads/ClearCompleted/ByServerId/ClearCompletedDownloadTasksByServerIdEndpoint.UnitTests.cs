@@ -1,7 +1,7 @@
 namespace Reaparr.Application.UnitTests;
 
 public class ClearCompletedDownloadTasksByServerIdEndpointUnitTests
-    : BaseUnitTest<ClearCompletedDownloadTasksByServerIdEndpoint>
+    : BaseEndpointUnitTest<ClearCompletedDownloadTasksByServerIdEndpoint, ClearCompletedDownloadTasksByServerIdEndpointRequest, ResultDTO<CountResponseDTO>>
 {
     [Test]
     public async Task ShouldRemoveAllCompletedDownloadTasksForServer_WhenClearCompletedByServerIdEndpointIsCalled()
@@ -34,13 +34,13 @@ public class ClearCompletedDownloadTasksByServerIdEndpointUnitTests
             );
 
         // Act
-        var ep = SetupEndpointUnitTest<ClearCompletedDownloadTasksByServerIdEndpoint>();
-        var request = new ClearCompletedDownloadTasksByServerIdEndpointRequest
-        {
-            PlexServerId = downloadTasks[0].PlexServerId,
-        };
-        await ep.HandleAsync(request, CancellationToken);
-        var result = ep.Response;
+        var endpointResult = await TestEndpointHandleAsync(
+            new ClearCompletedDownloadTasksByServerIdEndpointRequest
+            {
+                PlexServerId = downloadTasks[0].PlexServerId,
+            }
+        );
+        var result = endpointResult.Response;
 
         // Assert
         result.ShouldNotBeNull();
@@ -88,10 +88,10 @@ public class ClearCompletedDownloadTasksByServerIdEndpointUnitTests
             );
 
         // Act
-        var ep = SetupEndpointUnitTest<ClearCompletedDownloadTasksByServerIdEndpoint>();
-        var request = new ClearCompletedDownloadTasksByServerIdEndpointRequest { PlexServerId = targetServerId };
-        await ep.HandleAsync(request, CancellationToken);
-        var result = ep.Response as ResultDTO<CountResponseDTO>;
+        var endpointResult = await TestEndpointHandleAsync(
+            new ClearCompletedDownloadTasksByServerIdEndpointRequest { PlexServerId = targetServerId }
+        );
+        var result = endpointResult.Response;
 
         // Assert
         result.ShouldNotBeNull();

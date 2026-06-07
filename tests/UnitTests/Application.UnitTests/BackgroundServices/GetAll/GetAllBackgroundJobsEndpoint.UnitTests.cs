@@ -1,6 +1,6 @@
 namespace Reaparr.Application.UnitTests;
 
-public class GetAllBackgroundJobsEndpointUnitTests : BaseUnitTest<GetAllBackgroundJobsEndpoint>
+public class GetAllBackgroundJobsEndpointUnitTests : BaseEndpointUnitTest<GetAllBackgroundJobsEndpoint, GetAllBackgroundJobsEndpointRequest, ResultDTO<List<JobStatusUpdateDTO>>>
 {
     private string ToJsonString<T>(T value) =>
         value is null ? string.Empty : JsonSerializer.Serialize(value, DefaultJsonSerializerOptions.ConfigStandard);
@@ -12,9 +12,8 @@ public class GetAllBackgroundJobsEndpointUnitTests : BaseUnitTest<GetAllBackgrou
         Mock.Mock<ISchedulerService>().Setup(x => x.GetRunningJobUpdates()).ReturnsAsync([]);
 
         // Act
-        var rawResponse = SetupEndpointUnitTest<GetAllBackgroundJobsEndpoint>();
-        await rawResponse.HandleAsync(new GetAllBackgroundJobsEndpointRequest(), CancellationToken);
-        var resultDTO = rawResponse.Response as ResultDTO<List<JobStatusUpdateDTO>>;
+        var endpointResult = await TestEndpointHandleAsync(new GetAllBackgroundJobsEndpointRequest());
+        var resultDTO = endpointResult.Response;
 
         // Assert
         resultDTO.ShouldNotBeNull();
@@ -33,9 +32,8 @@ public class GetAllBackgroundJobsEndpointUnitTests : BaseUnitTest<GetAllBackgrou
         Mock.Mock<ISchedulerService>().Setup(x => x.GetRunningJobUpdates()).ReturnsAsync(list);
 
         // Act
-        var rawResponse = SetupEndpointUnitTest<GetAllBackgroundJobsEndpoint>();
-        await rawResponse.HandleAsync(new GetAllBackgroundJobsEndpointRequest(), CancellationToken);
-        var resultDTO = rawResponse.Response as ResultDTO<List<JobStatusUpdateDTO>>;
+        var endpointResult = await TestEndpointHandleAsync(new GetAllBackgroundJobsEndpointRequest());
+        var resultDTO = endpointResult.Response;
 
         // Assert
         resultDTO.ShouldNotBeNull();
@@ -122,9 +120,8 @@ public class GetAllBackgroundJobsEndpointUnitTests : BaseUnitTest<GetAllBackgrou
         Mock.Mock<ISchedulerService>().Setup(x => x.GetRunningJobUpdates()).ReturnsAsync(list);
 
         // Act
-        var rawResponse = SetupEndpointUnitTest<GetAllBackgroundJobsEndpoint>();
-        await rawResponse.HandleAsync(new GetAllBackgroundJobsEndpointRequest(), CancellationToken);
-        var resultDTO = rawResponse.Response as ResultDTO<List<JobStatusUpdateDTO>>;
+        var endpointResult = await TestEndpointHandleAsync(new GetAllBackgroundJobsEndpointRequest());
+        var resultDTO = endpointResult.Response;
 
         // Assert
         resultDTO.ShouldNotBeNull();

@@ -6,7 +6,7 @@ using Velopack.Sources;
 
 namespace Reaparr.Application.UnitTests;
 
-public class DownloadUpdateEndpointUnitTests : BaseUnitTest<DownloadUpdateEndpoint>
+public class DownloadUpdateEndpointUnitTests : BaseEndpointWithoutRequestUnitTest<DownloadUpdateEndpoint, BaseResultDTO>
 {
     [Test]
     public async Task ShouldReturnFailure_WhenDockerMode()
@@ -18,9 +18,8 @@ public class DownloadUpdateEndpointUnitTests : BaseUnitTest<DownloadUpdateEndpoi
         SetAppBuildInfo(x => x.RuntimeMode = "docker");
 
         // Act
-        var endpoint = SetupEndpointUnitTest<DownloadUpdateEndpoint>(s => s.AddSingleton(_ => mockManager.Object));
-        await endpoint.HandleAsync(CancellationToken);
-        var result = endpoint.Response;
+        var endpointResult = await TestEndpointHandleAsync(extraServices: s => s.AddSingleton(_ => mockManager.Object));
+        var result = endpointResult.Response;
 
         // Assert
         result.ShouldNotBeNull();
@@ -65,9 +64,8 @@ public class DownloadUpdateEndpointUnitTests : BaseUnitTest<DownloadUpdateEndpoi
             .Verifiable(Times.Once());
 
         // Act
-        var endpoint = SetupEndpointUnitTest<DownloadUpdateEndpoint>(s => s.AddSingleton(_ => mockManager.Object));
-        await endpoint.HandleAsync(CancellationToken);
-        var result = endpoint.Response;
+        var endpointResult = await TestEndpointHandleAsync(extraServices: s => s.AddSingleton(_ => mockManager.Object));
+        var result = endpointResult.Response;
 
         // Assert
         result.ShouldNotBeNull();
@@ -136,13 +134,12 @@ public class DownloadUpdateEndpointUnitTests : BaseUnitTest<DownloadUpdateEndpoi
             .Verifiable(Times.Exactly(2));
 
         // Act
-        var endpoint = SetupEndpointUnitTest<DownloadUpdateEndpoint>(s => s.AddSingleton(_ => mockManager.Object));
-        await endpoint.HandleAsync(CancellationToken);
+        var endpointResult = await TestEndpointHandleAsync(extraServices: s => s.AddSingleton(_ => mockManager.Object));
         await progressSent.Task.WaitAsync(TimeSpan.FromSeconds(5), CancellationToken);
 
         // Assert
-        endpoint.Response.ShouldNotBeNull();
-        endpoint.Response.IsSuccess.ShouldBeTrue();
+        endpointResult.Response.ShouldNotBeNull();
+        endpointResult.Response.IsSuccess.ShouldBeTrue();
 
         capturedDtos.Count.ShouldBe(2);
         capturedDtos[0].Percentage.ShouldBe(50);

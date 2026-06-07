@@ -1,6 +1,44 @@
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 
 namespace Reaparr.BaseTests;
+
+public abstract class BaseEndpointUnitTest<TEndpoint, TRequest>
+    : BaseEndpointUnitTestBase<TEndpoint, object>
+    where TEndpoint : Endpoint<TRequest>
+    where TRequest : class
+{
+    protected BaseEndpointUnitTest(LogEventLevel logEventLevel = LogEventLevel.Verbose)
+        : base(logEventLevel) { }
+
+    protected async Task<EndpointUnitTestResult<TEndpoint, object>> TestEndpointHandleAsync(
+        TRequest request,
+        Action<IServiceCollection>? extraServices = null
+    )
+    {
+        var endpoint = SetupEndpointUnitTest<TEndpoint>(extraServices);
+        var validationResult = await ValidateEndpointRequestAsync(request, CancellationToken);
+
+        if (validationResult is { IsValid: false })
+        {
+            return new EndpointUnitTestResult<TEndpoint, object>
+            {
+                Endpoint = endpoint,
+                ValidationResult = validationResult,
+                Response = null!,
+            };
+        }
+
+        await endpoint.HandleAsync(request, CancellationToken);
+
+        return new EndpointUnitTestResult<TEndpoint, object>
+        {
+            Endpoint = endpoint,
+            ValidationResult = validationResult,
+            Response = null!,
+        };
+    }
+}
 
 public abstract class BaseEndpointUnitTest<TEndpoint, TRequest, TResponse>
     : BaseEndpointUnitTestBase<TEndpoint, TResponse>
@@ -87,7 +125,8 @@ public abstract class BaseEndpointUnitTestBase<TEndpoint, TResponse> : BaseUnitT
 
     protected static TResponse GetEndpointResponse(IEndpoint endpoint)
     {
-        if (endpoint.HttpContext.Items.TryGetValue("FastEndpointsResponse", out var response) && response is TResponse typedResponse)
+        if (endpoint.HttpContext.Items.TryGetValue("FastEndpointsResponse", out var response) &&
+            response is TResponse typedResponse)
             return typedResponse;
 
         throw new InvalidOperationException(
@@ -115,19 +154,32 @@ public abstract class BaseEndpointUnitTestBase<TEndpoint, TResponse> : BaseUnitT
             ),
         };
     }
-}
 
-public sealed class EndpointUnitTestResult<TEndpoint, TResponse>
-    where TEndpoint : class, IEndpoint
-    where TResponse : class
-{
-    public required TEndpoint Endpoint { get; init; }
+    protected T SetupEndpointUnitTest<T>(Action<IServiceCollection>? extraServices = null)
+        where T : class, IEndpoint
+    {
+        return Factory.Create<T>(ctx =>
+        {
+            ctx.AddTestServices(s =>
+            {
+                // All different dependencies that are needed for the endpoint need to be added here. And then they can be mocked in the test.
+                s.AddTransient(_ => Mock.Create<ILogger>());
+                s.AddTransient(_ => Mock.Create<IReaparrDbContext>());
+                s.AddTransient(_ => Mock.Mock<IReaparrDbContextFactory>().Object);
+                s.AddTransient(_ => Mock.Create<IAuthDbContext>());
+                s.AddTransient(_ => Mock.Create<IAuthDbContextFactory>());
+                s.AddTransient(_ => Mock.Mock<ICommandExecutor>().Object);
+                s.AddSingleton(_ => Mock.Create<ISchedulerService>());
+                s.AddSingleton(_ => Mock.Mock<IProgressHubService>().Object);
+                s.AddSingleton(_ => Mock.Mock<IDownloadHubService>().Object);
+                s.AddSingleton(_ => Mock.Mock<INotificationHubService>().Object);
+                s.AddSingleton(_ => Mock.Mock<IDownloadTaskScheduler>().Object);
+                s.AddSingleton(_ => Mock.Container.Resolve<IPathProvider>());
+                s.AddSingleton(_ => Mock.Container.Resolve<IAppBuildInfo>());
+                s.AddSingleton(_ => Mock.Mock<IHostApplicationLifetime>().Object);
 
-    public required TResponse Response { get; init; }
-
-    public FluentValidation.Results.ValidationResult? ValidationResult { get; init; }
-
-    public bool HasValidator => ValidationResult is not null;
-
-    public bool IsValid => ValidationResult?.IsValid ?? true;
+                extraServices?.Invoke(s);
+            });
+        });
+    }
 }

@@ -1,6 +1,6 @@
 namespace Reaparr.Application.UnitTests;
 
-public class CheckForUpdateEndpointUnitTests : BaseUnitTest<CheckForUpdateEndpoint>
+public class CheckForUpdateEndpointUnitTests : BaseEndpointWithoutRequestUnitTest<CheckForUpdateEndpoint, ResultDTO<AppUpdateCheckDTO>>
 {
     private const string STABLE_VERSION = "0.38.0";
     private const string DEV_VERSION = "0.38.0-dev.6";
@@ -15,9 +15,8 @@ public class CheckForUpdateEndpointUnitTests : BaseUnitTest<CheckForUpdateEndpoi
             .Verifiable(Times.Once());
 
         // Act
-        var endpoint = SetupEndpointUnitTest<CheckForUpdateEndpoint>();
-        await endpoint.HandleAsync(CancellationToken);
-        var result = endpoint.Response;
+        var endpointResult = await TestEndpointHandleAsync();
+        var result = endpointResult.Response;
 
         // Assert
         result.ShouldNotBeNull();
@@ -37,9 +36,8 @@ public class CheckForUpdateEndpointUnitTests : BaseUnitTest<CheckForUpdateEndpoi
             .Verifiable(Times.Once());
 
         // Act
-        var endpoint = SetupEndpointUnitTest<CheckForUpdateEndpoint>();
-        await endpoint.HandleAsync(CancellationToken);
-        var result = endpoint.Response;
+        var endpointResult = await TestEndpointHandleAsync();
+        var result = endpointResult.Response;
 
         // Assert
         result.ShouldNotBeNull();
@@ -72,9 +70,8 @@ public class CheckForUpdateEndpointUnitTests : BaseUnitTest<CheckForUpdateEndpoi
             .Verifiable(Times.Once());
 
         // Act
-        var endpoint = SetupEndpointUnitTest<CheckForUpdateEndpoint>();
-        await endpoint.HandleAsync(CancellationToken);
-        var result = endpoint.Response as ResultDTO<AppUpdateCheckDTO>;
+        var endpointResult = await TestEndpointHandleAsync();
+        var result = endpointResult.Response;
 
         // Assert
         result.ShouldNotBeNull();
@@ -123,9 +120,8 @@ public class CheckForUpdateEndpointUnitTests : BaseUnitTest<CheckForUpdateEndpoi
             .Verifiable(Times.Once());
 
         // Act
-        var endpoint = SetupEndpointUnitTest<CheckForUpdateEndpoint>();
-        await endpoint.HandleAsync(CancellationToken);
-        var result = endpoint.Response as ResultDTO<AppUpdateCheckDTO>;
+        var endpointResult = await TestEndpointHandleAsync();
+        var result = endpointResult.Response;
 
         // Assert
         result.ShouldNotBeNull();
@@ -178,9 +174,8 @@ public class CheckForUpdateEndpointUnitTests : BaseUnitTest<CheckForUpdateEndpoi
             .Verifiable(Times.Once());
 
         // Act
-        var endpoint = SetupEndpointUnitTest<CheckForUpdateEndpoint>();
-        await endpoint.HandleAsync(CancellationToken);
-        var result = endpoint.Response as ResultDTO<AppUpdateCheckDTO>;
+        var endpointResult = await TestEndpointHandleAsync();
+        var result = endpointResult.Response;
 
         // Assert
         result.ShouldNotBeNull();
@@ -233,9 +228,8 @@ public class CheckForUpdateEndpointUnitTests : BaseUnitTest<CheckForUpdateEndpoi
             .Verifiable(Times.Once());
 
         // Act
-        var endpoint = SetupEndpointUnitTest<CheckForUpdateEndpoint>();
-        await endpoint.HandleAsync(CancellationToken);
-        var result = endpoint.Response as ResultDTO<AppUpdateCheckDTO>;
+        var endpointResult = await TestEndpointHandleAsync();
+        var result = endpointResult.Response;
 
         // Assert
         result.ShouldNotBeNull();
@@ -274,9 +268,8 @@ public class CheckForUpdateEndpointUnitTests : BaseUnitTest<CheckForUpdateEndpoi
             .Verifiable(Times.Once());
 
         // Act
-        var endpoint = SetupEndpointUnitTest<CheckForUpdateEndpoint>();
-        await endpoint.HandleAsync(CancellationToken);
-        var result = endpoint.Response as ResultDTO<AppUpdateCheckDTO>;
+        var endpointResult = await TestEndpointHandleAsync();
+        var result = endpointResult.Response;
 
         // Assert
         result.ShouldNotBeNull();

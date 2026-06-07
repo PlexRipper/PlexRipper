@@ -1,6 +1,6 @@
 namespace Reaparr.Application.UnitTests;
 
-public class UpdateFolderPathEndpointUnitTests : BaseUnitTest<UpdateFolderPathEndpoint>
+public class UpdateFolderPathEndpointUnitTests : BaseEndpointUnitTest<UpdateFolderPathEndpoint, UpdateFolderPathEndpointRequest, ResultDTO<FolderPathDTO>>
 {
     [Test]
     public async Task ShouldUpdateFolderPath_WhenFolderPathExists()
@@ -35,9 +35,8 @@ public class UpdateFolderPathEndpointUnitTests : BaseUnitTest<UpdateFolderPathEn
         };
 
         // Act
-        var ep = SetupEndpointUnitTest<UpdateFolderPathEndpoint>();
-        await ep.HandleAsync(request, CancellationToken);
-        var result = ep.Response as ResultDTO<FolderPathDTO>;
+        var endpointResult = await TestEndpointHandleAsync(request);
+        var result = endpointResult.Response;
         var updatedFolderPath = await dbContext.FolderPaths.SingleAsync(
             x => x.Id == existingFolderPath.Id,
             CancellationToken
@@ -102,9 +101,8 @@ public class UpdateFolderPathEndpointUnitTests : BaseUnitTest<UpdateFolderPathEn
         };
 
         // Act
-        var ep = SetupEndpointUnitTest<UpdateFolderPathEndpoint>();
-        await ep.HandleAsync(request, CancellationToken);
-        var result = ep.Response as ResultDTO<FolderPathDTO>;
+        var endpointResult = await TestEndpointHandleAsync(request);
+        var result = endpointResult.Response;
         var updatedFolderPath = await dbContext.FolderPaths.SingleAsync(
             x => x.Id == defaultFolderPathId,
             CancellationToken
@@ -150,9 +148,8 @@ public class UpdateFolderPathEndpointUnitTests : BaseUnitTest<UpdateFolderPathEn
         var folderPathCountBefore = await dbContext.FolderPaths.CountAsync(CancellationToken);
 
         // Act
-        var ep = SetupEndpointUnitTest<UpdateFolderPathEndpoint>();
-        await ep.HandleAsync(request, CancellationToken);
-        var result = ep.Response;
+        var endpointResult = await TestEndpointHandleAsync(request);
+        var result = endpointResult.Response;
         var folderPathCountAfter = await dbContext.FolderPaths.CountAsync(CancellationToken);
 
         // Assert

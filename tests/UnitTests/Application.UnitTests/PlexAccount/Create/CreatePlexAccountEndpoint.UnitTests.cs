@@ -1,6 +1,6 @@
 ﻿namespace Reaparr.Application.UnitTests;
 
-public class CreatePlexAccountEndpointUnitTests : BaseUnitTest<CreatePlexAccountEndpoint>
+public class CreatePlexAccountEndpointUnitTests : BaseEndpointUnitTest<CreatePlexAccountEndpoint, CreatePlexAccountEndpointRequest, ResultDTO<PlexAccountDTO>>
 {
     [Test]
     public async Task CreatePlexAccountAsync_ShouldSuccessResult_WhenAccountIsValid()
@@ -31,9 +31,8 @@ public class CreatePlexAccountEndpointUnitTests : BaseUnitTest<CreatePlexAccount
         };
 
         // Act
-        var endPoint = SetupEndpointUnitTest<CreatePlexAccountEndpoint>();
-        await endPoint.HandleAsync(createPlexAccountDTO, CancellationToken);
-        var result = endPoint.Response;
+        var endpointResult = await TestEndpointHandleAsync(createPlexAccountDTO);
+        var result = endpointResult.Response;
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -71,9 +70,8 @@ public class CreatePlexAccountEndpointUnitTests : BaseUnitTest<CreatePlexAccount
         };
 
         // Act
-        var endPoint = SetupEndpointUnitTest<CreatePlexAccountEndpoint>();
-        await endPoint.HandleAsync(createPlexAccountDTO, CancellationToken);
-        var result = endPoint.Response;
+        var endpointResult = await TestEndpointHandleAsync(createPlexAccountDTO);
+        var result = endpointResult.Response;
 
         // Assert
         result.IsSuccess.ShouldBeFalse();

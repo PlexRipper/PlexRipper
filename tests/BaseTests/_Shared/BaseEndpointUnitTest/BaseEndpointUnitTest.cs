@@ -25,6 +25,7 @@ public abstract class BaseEndpointUnitTest<TEndpoint, TRequest, TResponse>
             {
                 Endpoint = endpoint,
                 ValidationResult = validationResult,
+                Response = null!,
             };
         }
 
@@ -33,7 +34,7 @@ public abstract class BaseEndpointUnitTest<TEndpoint, TRequest, TResponse>
         return new EndpointUnitTestResult<TEndpoint, TResponse>
         {
             Endpoint = endpoint,
-            Response = endpoint.Response,
+            Response = GetEndpointResponse(endpoint),
             ValidationResult = validationResult,
         };
     }
@@ -58,7 +59,7 @@ public abstract class BaseEndpointWithoutRequestUnitTest<TEndpoint, TResponse>
         return new EndpointUnitTestResult<TEndpoint, TResponse>
         {
             Endpoint = endpoint,
-            Response = endpoint.Response,
+            Response = GetEndpointResponse(endpoint),
         };
     }
 }
@@ -82,6 +83,16 @@ public abstract class BaseEndpointUnitTestBase<TEndpoint, TResponse> : BaseUnitT
 
         var context = new FluentValidation.ValidationContext<object>(request);
         return await validator.ValidateAsync(context, cancellationToken);
+    }
+
+    protected static TResponse GetEndpointResponse(IEndpoint endpoint)
+    {
+        if (endpoint.HttpContext.Items.TryGetValue("FastEndpointsResponse", out var response) && response is TResponse typedResponse)
+            return typedResponse;
+
+        throw new InvalidOperationException(
+            $"Endpoint '{endpoint.GetType().FullName}' did not store a response of type '{typeof(TResponse).FullName}'."
+        );
     }
 
     private static IValidator? GetEndpointValidator<TRequest>()
@@ -112,7 +123,7 @@ public sealed class EndpointUnitTestResult<TEndpoint, TResponse>
 {
     public required TEndpoint Endpoint { get; init; }
 
-    public TResponse? Response { get; init; }
+    public required TResponse Response { get; init; }
 
     public FluentValidation.Results.ValidationResult? ValidationResult { get; init; }
 

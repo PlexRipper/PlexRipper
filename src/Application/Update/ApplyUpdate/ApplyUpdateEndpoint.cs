@@ -5,7 +5,7 @@ namespace Reaparr.Application;
 /// <summary>
 /// Applies a downloaded desktop update and restarts the application.
 /// </summary>
-public class ApplyUpdateEndpoint : EndpointWithoutRequest
+public class ApplyUpdateEndpoint : EndpointWithoutRequest<BaseResultDTO>
 {
     private readonly IAppBuildInfo _appBuildInfo;
     private readonly UpdateManager _velopackManager;

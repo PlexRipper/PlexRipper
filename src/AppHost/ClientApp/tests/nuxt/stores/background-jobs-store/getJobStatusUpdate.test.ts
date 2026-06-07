@@ -78,4 +78,31 @@ describe('BackgroundJobsStore.getJobStatusUpdate()', () => {
 		// Assert
 		expect(result.getFirstValue()).toEqual(testMsg);
 	});
+
+	test('Should emit the statusJobUpdate with null data when jsonString is empty', () => {
+		// Arrange
+		const backgroundJobsStore = useBackgroundJobsStore();
+
+		const testMsg = generateJobStatusUpdate({
+			jobType: JobTypes.InspectPlexServerJob,
+			jobStatus: JobStatus.Started,
+			data: { plexServerIds: [4] } as InspectPlexServerJobUpdateDTO,
+			partial: { jsonString: '' },
+		});
+
+		mock.onGet(BackgroundJobsPaths.getAllBackgroundJobsEndpoint()).reply(200, generateResultDTO([]));
+
+		// Act
+		backgroundJobsStore.setup();
+		const result = subscribeSpyTo(backgroundJobsStore.getJobStatusUpdate(JobTypes.InspectPlexServerJob));
+
+		backgroundJobsStore.setStatusJobUpdate(testMsg);
+
+		// Assert
+		expect(result.getFirstValue()).toEqual({
+			...testMsg,
+			data: null,
+		});
+	});
+
 });

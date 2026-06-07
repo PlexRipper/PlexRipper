@@ -11,12 +11,12 @@ public sealed record EndpointUnitTestResult<TEndpoint, TResponse>
     public required TResponse Response { get; init; }
 
     public FluentValidation.Results.ValidationResult? ValidationResult { get; init; }
-    
-    public List<ValidationFailure> ValidationErrors => ValidationResult?.Errors ?? [];
+
+    public IReadOnlyList<ValidationFailure> ValidationErrors => [.. (ValidationResult?.Errors ?? []), ..Endpoint.ValidationFailures];
 
     public bool HasValidator => ValidationResult is not null;
 
-    public bool IsValid => ValidationResult?.IsValid ?? true;
+    public bool IsValid => (ValidationResult?.IsValid ?? true) && ValidationErrors.Count == 0;
 
     public int StatusCode => Endpoint.HttpContext.Response.StatusCode;  
     

@@ -47,15 +47,14 @@ public class DownloadTorrentEndpointUnitTests : BaseEndpointUnitTest<DownloadTor
 
         // Act
         var endpointResult = await TestEndpointHandleAsync(req);
-        var buffer = new MemoryStream();
-        endpointResult.Endpoint.HttpContext.Response.Body = buffer;
+        var buffer = endpointResult.Endpoint.HttpContext.Response.Body;
 
         // Assert – response is a torrent file with the correct content type
         endpointResult.StatusCode.ShouldBe(StatusCodes.Status200OK);
         endpointResult.ContentType.ShouldBe("application/x-bittorrent");
 
         // Assert – bytes were written and are a valid torrent
-        var bytes = buffer.ToArray();
+        var bytes = ((MemoryStream)buffer).ToArray();
         bytes.Length.ShouldBeGreaterThan(0);
         var parser = new BencodeParser();
         var torrent = parser.Parse<Torrent>(new MemoryStream(bytes));
@@ -118,15 +117,14 @@ public class DownloadTorrentEndpointUnitTests : BaseEndpointUnitTest<DownloadTor
 
         // Act
         var endpointResult = await TestEndpointHandleAsync(req);
-        var buffer = new MemoryStream();
-        endpointResult.Endpoint.HttpContext.Response.Body = buffer;
+        var buffer = endpointResult.Endpoint.HttpContext.Response.Body;
 
         // Assert – response is a torrent file with the correct content type
         endpointResult.StatusCode.ShouldBe(StatusCodes.Status200OK);
         endpointResult.ContentType.ShouldBe("application/x-bittorrent");
 
         // Assert – bytes were written and are a valid torrent
-        var bytes = buffer.ToArray();
+        var bytes = ((MemoryStream)buffer).ToArray();
         bytes.Length.ShouldBeGreaterThan(0);
         var parser = new BencodeParser();
         var torrent = parser.Parse<Torrent>(new MemoryStream(bytes));

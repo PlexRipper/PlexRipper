@@ -6,8 +6,9 @@ public class CreatePlexAccountEndpointUnitTests : BaseEndpointUnitTest<CreatePle
     public async Task CreatePlexAccountAsync_ShouldSuccessResult_WhenAccountIsValid()
     {
         // Arrange
-        await SetupDatabase(352);
-        var newAccount = PlexAccount.Create("TestUsername", "Password123");
+        var seed = new Seed(352);
+        await SetupDatabase(seed);
+        var newAccount = FakeData.GetPlexAccount(seed).Generate();
 
         Mock.SetupCommand(It.IsAny<InspectAllPlexServersByAccountIdCommand>).ReturnsAsync(Result.Ok());
 
@@ -32,10 +33,15 @@ public class CreatePlexAccountEndpointUnitTests : BaseEndpointUnitTest<CreatePle
 
         // Act
         var endpointResult = await TestEndpointHandleAsync(createPlexAccountDTO);
-        var result = endpointResult.Response;
 
         // Assert
-        result.IsSuccess.ShouldBeTrue();
+        endpointResult.Response.IsSuccess.ShouldBeTrue();
+        var createdAccount = await IDbContext.PlexAccounts.SingleOrDefaultAsync(x => x.Username == newAccount.Username, CancellationToken);
+        createdAccount.ShouldNotBeNull();
+        createdAccount.Username.ShouldBe(newAccount.Username);
+
+        Mock.Mock<ICommandExecutor>()
+            .Verify(x => x.Send(It.IsAny<InspectAllPlexServersByAccountIdCommand>(), It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Test]
@@ -71,9 +77,13 @@ public class CreatePlexAccountEndpointUnitTests : BaseEndpointUnitTest<CreatePle
 
         // Act
         var endpointResult = await TestEndpointHandleAsync(createPlexAccountDTO);
-        var result = endpointResult.Response;
 
         // Assert
-        result.IsSuccess.ShouldBeFalse();
+        endpointResult.Response.IsSuccess.ShouldBeFalse();
+        var duplicateAccounts = await IDbContext.PlexAccounts.CountAsync(x => x.Username == newAccount.Username, CancellationToken);
+        duplicateAccounts.ShouldBe(1);
+
+        Mock.Mock<ICommandExecutor>()
+            .Verify(x => x.Send(It.IsAny<InspectAllPlexServersByAccountIdCommand>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 }

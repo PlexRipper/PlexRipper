@@ -90,6 +90,7 @@ public class GetMediaByTypeCommandHandler : ICommandHandler<GetMediaByTypeComman
         options = WithServerLibraryScope(options, allowedPlexLibraryIds, plexLibraryId);
 
         ApplyDefaultMediaSort(options, plexLibraryId);
+        NormalizeAllLibrarySort(options, plexLibraryId);
 
         switch (filter.MediaType)
         {
@@ -260,6 +261,17 @@ public class GetMediaByTypeCommandHandler : ICommandHandler<GetMediaByTypeComman
             options.Sort.FirstOrDefault()?.Field
         );
     }
+
+    private void NormalizeAllLibrarySort(QueryOptions options, int plexLibraryId)
+    {
+        if (plexLibraryId > 0 || !options.Sort.Any())
+            return;
+
+        foreach (var sort in options.Sort.Where(x => IsSortIndexField(x.Field)))
+            sort.Field = nameof(BasePlexMedia.SearchTitle);
+    }
+
+    private static bool IsSortIndexField(string? field) => field is nameof(BasePlexMedia.SortIndex) or "sortIndex";
 
     private void ApplyDefaultMediaSort(QueryOptions options, int plexLibraryId)
     {

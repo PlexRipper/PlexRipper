@@ -726,6 +726,45 @@ public class GetMediaByTypeCommandHandlerUnitTests : BaseUnitTest<GetMediaByType
     }
 
     [Test]
+    public async Task ShouldSortAllLibraryMoviesBySearchTitle_WhenSortIndexSortIsRequested()
+    {
+        // Arrange
+        await SetupDatabase(70233, cfg =>
+        {
+            cfg.PlexServerCount = 1;
+            cfg.PlexMovieLibraryCount = 2;
+            cfg.MovieCount = 4;
+        });
+
+        var dbContext = IDbContext;
+        var movieIds = await dbContext.PlexMovies
+            .OrderBy(x => x.Id)
+            .Select(x => x.Id)
+            .ToListAsync(CancellationToken);
+
+        await SetAllLibrarySortIndexRegressionDataAsync(dbContext, movieIds);
+
+        var command = CreateCommand(PlexMediaType.Movie, 0, sort: "sortIndex:asc", pageSize: 10);
+
+        // Act
+        var result = await Sut.ExecuteAsync(command, CancellationToken);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.Items.Select(x => x.Title).ShouldBe([
+            "Alpha",
+            "Bravo",
+            "Charlie",
+            "Delta",
+            "Whiskey",
+            "Xray",
+            "Yankee",
+            "Zulu",
+        ]);
+        result.Value.NavigationIndexes.Select(x => x.Label).ShouldBe(["A", "B", "C", "D", "W", "X", "Y", "Z"]);
+    }
+
+    [Test]
     public async Task ShouldSortMoviesByHighestQuality_WhenLegacyQualitySortFieldIsUsed()
     {
         // Arrange
@@ -1172,6 +1211,36 @@ public class GetMediaByTypeCommandHandlerUnitTests : BaseUnitTest<GetMediaByType
             country.Id,
             actor.Id
         );
+    }
+
+    private async Task SetAllLibrarySortIndexRegressionDataAsync(IReaparrDbContext dbContext, IReadOnlyList<int> movieIds)
+    {
+        movieIds.Count.ShouldBeGreaterThanOrEqualTo(8);
+
+        var titlesById = new[]
+        {
+            (movieIds[0], "Zulu", 1),
+            (movieIds[1], "Alpha", 1),
+            (movieIds[2], "Charlie", 2),
+            (movieIds[3], "Bravo", 2),
+            (movieIds[4], "Yankee", 3),
+            (movieIds[5], "Delta", 3),
+            (movieIds[6], "Xray", 4),
+            (movieIds[7], "Whiskey", 4),
+        };
+
+        foreach (var (movieId, title, sortIndex) in titlesById)
+        {
+            await dbContext.PlexMovies
+                .Where(x => x.Id == movieId)
+                .ExecuteUpdateAsync(
+                    x => x
+                        .SetProperty(y => y.Title, title)
+                        .SetProperty(y => y.SearchTitle, title.ToLowerInvariant())
+                        .SetProperty(y => y.SortIndex, sortIndex),
+                    CancellationToken
+                );
+        }
     }
 
     private async Task SetMovieQualitySortTestDataAsync(IReaparrDbContext dbContext, IReadOnlyList<int> movieIds)

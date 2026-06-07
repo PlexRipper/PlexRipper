@@ -48,9 +48,19 @@ public class GetMediaByTypeCommandHandler : ICommandHandler<GetMediaByTypeComman
         }
         else
         {
-            // Get only enabled servers
+            var hasPlexAccounts = await _dbContext.PlexAccounts.AnyAsync(ct);
+
+            // Get only enabled servers and libraries that still have access through at least one Plex account.
             var serverList = await _dbContext.PlexServers
-                .Select(server => new { server.Id, PlexLibraryIds = server.PlexLibraries.Select(x => x.Id).ToList() })
+                .Where(server => !hasPlexAccounts || server.PlexAccountServers.Any())
+                .Select(server => new
+                {
+                    server.Id,
+                    PlexLibraryIds = server.PlexLibraries
+                        .Where(library => !hasPlexAccounts || library.PlexAccountLibraries.Any())
+                        .Select(library => library.Id)
+                        .ToList(),
+                })
                 .ToListAsync(ct);
 
             allowedPlexLibraryIds = serverList.SelectMany(x => x.PlexLibraryIds).ToList();

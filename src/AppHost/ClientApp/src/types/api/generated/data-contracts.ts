@@ -1582,6 +1582,10 @@ export interface SetNotificationVisibilityEndpointRequest {
   id: number;
 }
 
+export interface SetServerAliasRequest {
+  serverAlias: string;
+}
+
 export interface SetServerEnabledRequest {
   isEnabled: boolean;
 }

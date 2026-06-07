@@ -16,6 +16,7 @@ import { ContentType } from "./http-client";
 import type {
   BaseResultDTO,
   PlexServerDTO,
+  SetServerAliasRequest,
   SetServerEnabledRequest,
   SetServerOwnedRequest,
 } from "./data-contracts";
@@ -160,21 +161,20 @@ export class PlexServer {
    * No description
    * * @tags Plexserver
    * @name SetServerAlias
-   * @request GET:/api/PlexServer/{PlexServerId}/set-server-alias
+   * @request PUT:/api/PlexServer/{PlexServerId}/set-server-alias
    * @secure
    */
   setServerAlias = (
     plexServerId: number,
-    query: {
-      serverAlias: string;
-    },
+    data: SetServerAliasRequest,
     params: RequestParams = {},
   ) =>
     axiosObservable<BaseResultDTO>({
       url: `/api/PlexServer/${plexServerId}/set-server-alias`,
-      method: "GET",
-      params: query,
+      method: "PUT",
+      data: data,
       secure: true,
+      type: ContentType.Json,
       responseType: "json",
       ...params,
     }).pipe(apiCheckPipe<BaseResultDTO>);
@@ -277,15 +277,9 @@ export class PlexServerPaths {
       url: `/api/PlexServer/server/resume/${plexServerId}`,
     });
 
-  static setServerAlias = (
-    plexServerId: number,
-    query: {
-      serverAlias: string;
-    },
-  ) =>
+  static setServerAlias = (plexServerId: number) =>
     queryString.stringifyUrl({
       url: `/api/PlexServer/${plexServerId}/set-server-alias`,
-      query,
     });
 
   static setServerEnabledEndpoint = (plexServerId: number) =>

@@ -10,9 +10,13 @@
 			</q-item-section>
 			<q-item-section>
 				<q-item-label v-if="server && library">
-					{{ server ? serverStore.getServerName(server.id) : $t('general.commands.unknown') }}
+					<span :class="{ 'inaccessible-item-text': !accountStore.getHasAccountServerAccess(server.id) }">
+						{{ serverStore.getServerName(server.id) }}
+					</span>
 					{{ $t('general.delimiter.dash') }}
-					{{ library ? libraryStore.getLibraryName(library.id) : $t('general.commands.unknown') }}
+					<span :class="{ 'inaccessible-item-text': !accountStore.getHasAccountLibraryAccess(library.id) }">
+						{{ libraryStore.getLibraryName(library.id) }}
+					</span>
 				</q-item-label>
 				<q-item-label v-else>
 					{{ mediaTypeToAllText(mediaOverviewStore.getMediaType) }}
@@ -57,8 +61,16 @@
 import { get } from '@vueuse/core';
 import { type PlexMediaDTO, PlexMediaType } from '@dto';
 import prettyBytes from 'pretty-bytes';
-import { useLibraryStore, useServerStore, useLocalizationStore, useMediaOverviewStore, useI18n } from '#imports';
+import {
+	useAccountStore,
+	useLibraryStore,
+	useServerStore,
+	useLocalizationStore,
+	useMediaOverviewStore,
+	useI18n,
+} from '#imports';
 
+const accountStore = useAccountStore();
 const libraryStore = useLibraryStore();
 const serverStore = useServerStore();
 const localizationStore = useLocalizationStore();
@@ -144,3 +156,10 @@ function mediaTypeToAllText(mediaType: PlexMediaType): string {
 	}
 }
 </script>
+
+<style lang="scss">
+.inaccessible-item-text {
+  text-decoration: line-through;
+  opacity: 0.62;
+}
+</style>

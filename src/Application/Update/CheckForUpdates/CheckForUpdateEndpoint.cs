@@ -3,7 +3,7 @@ namespace Reaparr.Application;
 /// <summary>
 /// Sends a <see cref="CheckForUpdatesCommand"/> immediately to check for a Velopack application update.
 /// </summary>
-public class CheckForUpdateEndpoint : EndpointWithoutRequest<AppUpdateCheckDTO>
+public class CheckForUpdateEndpoint : EndpointWithoutRequest<ResultDTO<AppUpdateCheckDTO>>
 {
     private readonly ILogger _log;
     private readonly ICommandExecutor _commandExecutor;

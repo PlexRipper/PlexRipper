@@ -53,7 +53,7 @@ public class ValidatePlexCredentialsEndpointRequestValidator : Validator<Validat
 }
 
 public class ValidatePlexCredentialsEndpoint
-    : Endpoint<ValidatePlexCredentialsEndpointRequest, ValidatePlexCredentialsDTO>
+    : Endpoint<ValidatePlexCredentialsEndpointRequest, ResultDTO<ValidatePlexCredentialsDTO>>
 {
     private readonly ILogger _log;
     private readonly ICommandExecutor _commandExecutor;

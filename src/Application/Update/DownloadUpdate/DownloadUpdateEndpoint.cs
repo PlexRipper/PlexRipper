@@ -3,7 +3,7 @@ namespace Reaparr.Application;
 /// <summary>
 /// Downloads the latest desktop update package when an update is available.
 /// </summary>
-public class DownloadUpdateEndpoint : EndpointWithoutRequest
+public class DownloadUpdateEndpoint : EndpointWithoutRequest<BaseResultDTO>
 {
     private readonly UpdateManager _velopackManager;
     private readonly IAppBuildInfo _appBuildInfo;

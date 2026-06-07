@@ -16,7 +16,7 @@ public class SetServerOwnedRequestValidator : Validator<SetServerOwnedRequest>
     }
 }
 
-public class SetServerOwnedEndpoint : Endpoint<SetServerOwnedRequest, PlexServerDTO>
+public class SetServerOwnedEndpoint : Endpoint<SetServerOwnedRequest, ResultDTO<PlexServerDTO>>
 {
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;

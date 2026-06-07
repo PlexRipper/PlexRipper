@@ -10,7 +10,7 @@ public class StartDownloadTaskEndpointRequestValidator : Validator<StartDownload
     }
 }
 
-public class StartDownloadTaskEndpoint : Endpoint<StartDownloadTaskEndpointRequest>
+public class StartDownloadTaskEndpoint : Endpoint<StartDownloadTaskEndpointRequest, BaseResultDTO>
 {
     private readonly ICommandExecutor _commandExecutor;
 

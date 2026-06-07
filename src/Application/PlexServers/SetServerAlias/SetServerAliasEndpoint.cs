@@ -17,7 +17,7 @@ public class SetServerAliasRequestValidator : Validator<SetServerAliasRequest>
     }
 }
 
-public class SetServerAlias : Endpoint<SetServerAliasRequest>
+public class SetServerAlias : Endpoint<SetServerAliasRequest, BaseResultDTO>
 {
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;

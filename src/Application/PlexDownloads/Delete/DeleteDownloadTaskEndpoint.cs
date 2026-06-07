@@ -14,7 +14,7 @@ public class DeleteDownloadTaskEndpointRequestValidator : Validator<DeleteDownlo
     }
 }
 
-public class DeleteDownloadTaskEndpoint : Endpoint<DeleteDownloadTaskEndpointRequest>
+public class DeleteDownloadTaskEndpoint : Endpoint<DeleteDownloadTaskEndpointRequest, BaseResultDTO>
 {
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;

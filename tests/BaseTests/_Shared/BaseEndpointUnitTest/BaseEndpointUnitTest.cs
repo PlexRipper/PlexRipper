@@ -4,9 +4,9 @@ namespace Reaparr.BaseTests;
 
 public abstract class BaseEndpointUnitTest<TEndpoint, TRequest, TResponse>
     : BaseEndpointUnitTestBase<TEndpoint, TResponse>
-    where TEndpoint : Application.BaseEndpoint<TRequest>
+    where TEndpoint : Endpoint<TRequest, TResponse>
     where TRequest : class
-    where TResponse : BaseResultDTO
+    where TResponse : class
 {
     protected BaseEndpointUnitTest(LogEventLevel logEventLevel = LogEventLevel.Verbose)
         : base(logEventLevel) { }
@@ -33,7 +33,7 @@ public abstract class BaseEndpointUnitTest<TEndpoint, TRequest, TResponse>
         return new EndpointUnitTestResult<TEndpoint, TResponse>
         {
             Endpoint = endpoint,
-            Response = CastEndpointResponse(endpoint, endpoint.Response),
+            Response = endpoint.Response,
             ValidationResult = validationResult,
         };
     }
@@ -41,8 +41,8 @@ public abstract class BaseEndpointUnitTest<TEndpoint, TRequest, TResponse>
 
 public abstract class BaseEndpointWithoutRequestUnitTest<TEndpoint, TResponse>
     : BaseEndpointUnitTestBase<TEndpoint, TResponse>
-    where TEndpoint : Application.BaseEndpointWithoutRequest
-    where TResponse : BaseResultDTO
+    where TEndpoint : EndpointWithoutRequest<TResponse>
+    where TResponse : class
 {
     protected BaseEndpointWithoutRequestUnitTest(LogEventLevel logEventLevel = LogEventLevel.Verbose)
         : base(logEventLevel) { }
@@ -58,14 +58,14 @@ public abstract class BaseEndpointWithoutRequestUnitTest<TEndpoint, TResponse>
         return new EndpointUnitTestResult<TEndpoint, TResponse>
         {
             Endpoint = endpoint,
-            Response = CastEndpointResponse(endpoint, endpoint.Response),
+            Response = endpoint.Response,
         };
     }
 }
 
 public abstract class BaseEndpointUnitTestBase<TEndpoint, TResponse> : BaseUnitTest<TEndpoint>
     where TEndpoint : class, IEndpoint
-    where TResponse : BaseResultDTO
+    where TResponse : class
 {
     protected BaseEndpointUnitTestBase(LogEventLevel logEventLevel = LogEventLevel.Verbose)
         : base(logEventLevel) { }
@@ -83,12 +83,6 @@ public abstract class BaseEndpointUnitTestBase<TEndpoint, TResponse> : BaseUnitT
         var context = new FluentValidation.ValidationContext<object>(request);
         return await validator.ValidateAsync(context, cancellationToken);
     }
-
-    protected static TResponse CastEndpointResponse(IEndpoint endpoint, BaseResultDTO? response) =>
-        response as TResponse
-        ?? throw new InvalidOperationException(
-            $"Endpoint '{endpoint.GetType().FullName}' returned response type '{response?.GetType().FullName ?? "null"}', expected '{typeof(TResponse).FullName}'."
-        );
 
     private static IValidator? GetEndpointValidator<TRequest>()
         where TRequest : class
@@ -114,7 +108,7 @@ public abstract class BaseEndpointUnitTestBase<TEndpoint, TResponse> : BaseUnitT
 
 public sealed class EndpointUnitTestResult<TEndpoint, TResponse>
     where TEndpoint : class, IEndpoint
-    where TResponse : BaseResultDTO
+    where TResponse : class
 {
     public required TEndpoint Endpoint { get; init; }
 

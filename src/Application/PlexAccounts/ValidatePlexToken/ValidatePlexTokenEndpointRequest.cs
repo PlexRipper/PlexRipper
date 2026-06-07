@@ -40,7 +40,7 @@ public class ValidatePlexTokenPlexAccountRequestValidator : Validator<ValidatePl
 }
 
 public class ValidatePlexTokenEndpoint
-    : Endpoint<ValidatePlexTokenEndpointRequest, ValidatePlexTokenEndpointResponse>
+    : Endpoint<ValidatePlexTokenEndpointRequest, ResultDTO<ValidatePlexTokenEndpointResponse>>
 {
     private readonly ILogger _log;
     private readonly ICommandExecutor _commandExecutor;

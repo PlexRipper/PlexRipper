@@ -10,7 +10,7 @@ public class RefreshLibraryMediaEndpointRequestValidator : Validator<RefreshLibr
     }
 }
 
-public class RefreshLibraryMediaEndpoint : Endpoint<RefreshLibraryMediaEndpointRequest, PlexLibraryDTO>
+public class RefreshLibraryMediaEndpoint : Endpoint<RefreshLibraryMediaEndpointRequest, BaseResultDTO>
 {
     private readonly ILogger _log;
     private readonly ICommandExecutor _commandExecutor;

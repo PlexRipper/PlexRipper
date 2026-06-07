@@ -79,6 +79,9 @@ public class SetServerOwnedEndpointUnitTests : BaseEndpointUnitTest<SetServerOwn
         var endpointResult = await TestEndpointHandleAsync(new SetServerOwnedRequest { PlexServerId = server.Id, IsOwned = true });
 
         // Assert
+        endpointResult.ShouldNotBeNull();
+        endpointResult.Response.ShouldNotBeNull();
+        endpointResult.Response.IsSuccess.ShouldBe(true);
         var updated = await db.PlexServers.IgnoreIsEnabledFilter().FirstAsync(x => x.Id == server.Id, CancellationToken);
         updated.IsEnabled.ShouldBe(false);
         updated.OwnedOverride.ShouldBe(true);
@@ -114,6 +117,9 @@ public class SetServerOwnedEndpointUnitTests : BaseEndpointUnitTest<SetServerOwn
         var endpointResult = await TestEndpointHandleAsync(new SetServerOwnedRequest { PlexServerId = server.Id, IsOwned = true });
 
         // Assert
+        endpointResult.ShouldNotBeNull();
+        endpointResult.Response.ShouldNotBeNull();
+        endpointResult.Response.IsSuccess.ShouldBe(true);
         var updated = await db.PlexServers.IgnoreIsEnabledFilter().FirstAsync(x => x.Id == server.Id, CancellationToken);
         updated.OwnedOverride.ShouldBe(true);
     }
@@ -132,6 +138,9 @@ public class SetServerOwnedEndpointUnitTests : BaseEndpointUnitTest<SetServerOwn
         var endpointResult = await TestEndpointHandleAsync(new SetServerOwnedRequest { PlexServerId = server.Id, IsOwned = false });
 
         // Assert
+        endpointResult.ShouldNotBeNull();
+        endpointResult.Response.ShouldNotBeNull();
+        endpointResult.Response.IsSuccess.ShouldBe(true);
         var updated = await db.PlexServers.IgnoreIsEnabledFilter().FirstAsync(x => x.Id == server.Id, CancellationToken);
         updated.OwnedOverride.ShouldBe(false);
     }
@@ -150,6 +159,9 @@ public class SetServerOwnedEndpointUnitTests : BaseEndpointUnitTest<SetServerOwn
         var endpointResult = await TestEndpointHandleAsync(new SetServerOwnedRequest { PlexServerId = targetId, IsOwned = true });
 
         // Assert
+        endpointResult.ShouldNotBeNull();
+        endpointResult.Response.ShouldNotBeNull();
+        endpointResult.Response.IsSuccess.ShouldBe(true);
         var target = await db.PlexServers.IgnoreIsEnabledFilter().FirstAsync(x => x.Id == targetId, CancellationToken);
         var other = await db.PlexServers.IgnoreIsEnabledFilter().FirstAsync(x => x.Id == otherId, CancellationToken);
         target.OwnedOverride.ShouldBe(true);

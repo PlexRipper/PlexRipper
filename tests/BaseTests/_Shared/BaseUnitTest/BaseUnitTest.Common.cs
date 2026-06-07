@@ -1,6 +1,3 @@
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-
 namespace Reaparr.BaseTests;
 
 public partial class BaseUnitTest

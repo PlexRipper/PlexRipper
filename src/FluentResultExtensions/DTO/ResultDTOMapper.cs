@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http;
 
 namespace Reaparr.FluentResultExtensions;
 
+// ReSharper disable InconsistentNaming
 public static class ResultDTOMapper
 {
     public static BaseResultDTO ToResultDTO(this Result result) => new()

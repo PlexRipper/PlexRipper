@@ -6,7 +6,7 @@ namespace Reaparr.AppHost;
 /// <summary>Manages the Photino desktop window lifecycle.</summary>
 public class DesktopMode : IDesktopMode
 {
-    private const int DesktopReadyTimeoutSeconds = 5;
+    private const int DESKTOP_READY_TIMEOUT_SECONDS = 5;
 
     private readonly Serilog.ILogger _log;
     private readonly IAppRuntimeInfo _appRuntimeInfo;
@@ -203,7 +203,7 @@ public class DesktopMode : IDesktopMode
         if (_appRuntimeInfo.IsIntegrationTestMode)
             return;
 
-        using var timeoutCts = new CancellationTokenSource(TimeSpan.FromSeconds(DesktopReadyTimeoutSeconds));
+        using var timeoutCts = new CancellationTokenSource(TimeSpan.FromSeconds(DESKTOP_READY_TIMEOUT_SECONDS));
         try
         {
             await desktopReadyCompletion.Task.WaitAsync(timeoutCts.Token);
@@ -213,7 +213,7 @@ public class DesktopMode : IDesktopMode
             _log.Here()
                 .Warning(
                     "Desktop UI did not report ready within {TimeoutSeconds}s after loading {Uri}. Embedded WebView may have failed to render. Launching external browser fallback now.",
-                    DesktopReadyTimeoutSeconds,
+                    DESKTOP_READY_TIMEOUT_SECONDS,
                     uri
                 );
 

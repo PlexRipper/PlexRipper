@@ -1,5 +1,3 @@
-using System.Text;
-
 namespace Reaparr.PublicAPI.UnitTests;
 
 public class WebApiVersionEndpointUnitTests : BaseEndpointWithoutRequestUnitTest<WebApiVersionEndpoint, string>

@@ -104,5 +104,4 @@ describe('BackgroundJobsStore.getJobStatusUpdate()', () => {
 			data: null,
 		});
 	});
-
 });

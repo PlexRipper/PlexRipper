@@ -1812,7 +1812,7 @@ public class GetMediaByTypeCommandHandlerUnitTests : BaseUnitTest<GetMediaByType
         var dbContext = IDbContext;
         var expectedMovie = await ConfigureExactMetadataMatchAsync(dbContext, VideoQuality.FullHD);
 
-        string? filter = $"Countries:any:Id:eq:{expectedMovie.CountryId}";
+        var filter = $"Countries:any:Id:eq:{expectedMovie.CountryId}";
         var command = new GetMediaByTypeCommand()
         {
             Filter = new MediaQueryFilter
@@ -1854,7 +1854,7 @@ public class GetMediaByTypeCommandHandlerUnitTests : BaseUnitTest<GetMediaByType
         var dbContext = IDbContext;
         var expectedMovie = await ConfigureExactMetadataMatchAsync(dbContext, VideoQuality.FullHD);
 
-        string? filter = $"Actors:any:Id:eq:{expectedMovie.ActorId}";
+        var filter = $"Actors:any:Id:eq:{expectedMovie.ActorId}";
         var command = new GetMediaByTypeCommand()
         {
             Filter = new MediaQueryFilter
@@ -1896,7 +1896,7 @@ public class GetMediaByTypeCommandHandlerUnitTests : BaseUnitTest<GetMediaByType
         var dbContext = IDbContext;
         var expectedMovie = await ConfigureExactMetadataMatchAsync(dbContext, VideoQuality.FullHD);
 
-        string? filter = $"Genres:any:Id:eq:{expectedMovie.GenreId}";
+        var filter = $"Genres:any:Id:eq:{expectedMovie.GenreId}";
         var command = new GetMediaByTypeCommand()
         {
             Filter = new MediaQueryFilter

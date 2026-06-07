@@ -120,6 +120,7 @@ import {
 	useServerConnectionStore,
 	useAccountStore,
 } from '@store';
+import { orderBy } from 'lodash-es';
 import { useI18n } from '#imports';
 
 const { t } = useI18n();
@@ -138,7 +139,22 @@ function isActiveLibrary(libraryId: number): boolean {
 }
 
 function filterLibraries(plexServerId: number): PlexLibraryDTO[] {
-	return libraryStore.getLibrariesByServerId(plexServerId);
+	return orderBy(
+		libraryStore.getLibrariesByServerId(plexServerId),
+		[(library) => getLibraryTypeSortOrder(library.type), (library) => libraryStore.getLibraryName(library.id).toLocaleLowerCase()],
+		['asc', 'asc'],
+	);
+}
+
+function getLibraryTypeSortOrder(type: PlexMediaType): number {
+	switch (type) {
+		case PlexMediaType.Movie:
+			return 0;
+		case PlexMediaType.TvShow:
+			return 1;
+		default:
+			return 2;
+	}
 }
 
 function isServerSyncing(serverId: number): boolean {

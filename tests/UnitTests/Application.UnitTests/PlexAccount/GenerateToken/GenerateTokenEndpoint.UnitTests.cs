@@ -1,6 +1,4 @@
-﻿using Reaparr.FluentResultExtensions;
-
-namespace Reaparr.Application.UnitTests;
+﻿namespace Reaparr.Application.UnitTests;
 
 public class GenerateTokenEndpointUnitTests : BaseUnitTest
 {

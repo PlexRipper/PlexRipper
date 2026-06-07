@@ -30,6 +30,7 @@
         <Using Include="Reaparr.Application.Contracts" />
         <Using Include="Reaparr.Data.Contracts" />
         <Using Include="Reaparr.Environment" />
+        <Using Include="Reaparr.FluentResultExtensions" />
         <Using Include="System.Net" />
     </ItemGroup>
 </Project>

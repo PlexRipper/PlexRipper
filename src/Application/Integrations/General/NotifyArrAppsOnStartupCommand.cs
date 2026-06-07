@@ -1,5 +1,3 @@
-using Reaparr.FluentResultExtensions;
-
 namespace Reaparr.Application;
 
 /// <summary>

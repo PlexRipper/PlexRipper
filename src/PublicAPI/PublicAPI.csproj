@@ -29,6 +29,7 @@
         <Using Include="Microsoft.EntityFrameworkCore" />
         <Using Include="Reaparr.Data.Contracts" />
         <Using Include="Reaparr.Domain" />
+        <Using Include="Reaparr.FluentResultExtensions" />
         <Using Include="Reaparr.Identity.Contracts" />
         <Using Include="Reaparr.Logging" />
         <Using Include="Reaparr.PublicAPI.Contracts" />

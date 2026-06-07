@@ -142,6 +142,19 @@ export const useAccountStore = defineStore(StoreNames.AccountStore, () => {
 
 			return false;
 		},
+		/**
+     * Checks if there is any enabled account that has access to the library.
+     * @param plexLibraryId
+     */
+		getHasAccountLibraryAccess(plexLibraryId: number): boolean {
+			for (const account of state.accounts.filter((x) => x.isEnabled)) {
+				if (account.plexLibraryAccess.includes(plexLibraryId)) {
+					return true;
+				}
+			}
+
+			return false;
+		},
 		$reset() {
 			Object.assign(state, cloneDeep(defaultState));
 		},

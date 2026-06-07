@@ -22,7 +22,9 @@
 							name="mdi-home"
 							size="24px"
 							left />
-						<span class="server-name-text">
+						<span
+							class="server-name-text"
+							:class="{ 'inaccessible-item-text': !accountStore.getHasAccountServerAccess(server.id) }">
 							{{ serverStore.getServerName(server.id) }}
 						</span>
 						<q-icon
@@ -58,7 +60,11 @@
 							:media-type="library.type" />
 					</q-item-section>
 					<q-item-section>
-						<span :class="{ 'active-library-text': isActiveLibrary(library.id) }">
+						<span
+							:class="{
+								'active-library-text': isActiveLibrary(library.id),
+								'inaccessible-item-text': !accountStore.getHasAccountLibraryAccess(library.id),
+							}">
 							{{ libraryStore.getLibraryName(library.id) }}
 						</span>
 					</q-item-section>
@@ -194,6 +200,11 @@ function runReSyncAccount(): void {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.inaccessible-item-text {
+  text-decoration: line-through;
+  opacity: 0.62;
 }
 
 .server-sync-icon {

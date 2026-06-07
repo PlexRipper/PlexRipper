@@ -35,6 +35,7 @@ public abstract class BaseEndpointUnitTest<TEndpoint, TRequest>
         return new EndpointUnitTestResult<TEndpoint, object>
         {
             Endpoint = endpoint,
+            Response = await GetEndpointResponseAsync(endpoint, CancellationToken),
             ValidationResult = validationResult,
         };
     }
@@ -72,6 +73,7 @@ public abstract class BaseEndpointUnitTest<TEndpoint, TRequest, TResponse>
         return new EndpointUnitTestResult<TEndpoint, TResponse>
         {
             Endpoint = endpoint,
+            Response = await GetEndpointResponseAsync(endpoint, CancellationToken),
             ValidationResult = validationResult,
         };
     }
@@ -98,6 +100,7 @@ public abstract class BaseEndpointWithoutRequestUnitTest<TEndpoint, TResponse>
         return new EndpointUnitTestResult<TEndpoint, TResponse>
         {
             Endpoint = endpoint,
+            Response = await GetEndpointResponseAsync(endpoint, CancellationToken),
         };
     }
 }

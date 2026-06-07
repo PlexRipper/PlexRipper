@@ -12,7 +12,10 @@ public class AddTorrentEndpointUnitTests : BaseEndpointUnitTest<AddTorrentEndpoi
     public async Task ShouldReturnOk_WhenValidTorrentFileIsUploaded()
     {
         // Arrange
-        var validMetadata = CreateValidTorrentMetadata();
+        await SetupDatabase(1234, config => config.MovieDownloadTasksCount = 1);
+        var movieFile = await IDbContext.DownloadTaskMovieFile.FirstAsync(CancellationToken);
+
+        var validMetadata = CreateValidTorrentMetadata() with { PlexApiPartId = movieFile.PlexApiPartId };
         var (torrentFile, torrentFileMock) = CreateMockTorrentFile(validMetadata, "test.torrent");
         var request = new AddTorrentEndpointRequest { TorrentFile = torrentFile };
 

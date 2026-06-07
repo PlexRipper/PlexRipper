@@ -1,3 +1,5 @@
+using System.Reflection;
+using System.Text;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
@@ -48,6 +50,50 @@ public abstract class BaseEndpointUnitTestBase<TEndpoint, TResponse> : BaseUnitT
                 $"Multiple validators found for endpoint request type '{requestType.FullName}'. Endpoint unit tests expect at most one validator."
             ),
         };
+    }
+
+    protected static async Task<TResponse?> GetEndpointResponseAsync(TEndpoint endpoint, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var responseProperty = endpoint.GetType().GetProperty(nameof(Endpoint<,>.Response));
+            if (responseProperty?.GetValue(endpoint) is TResponse response)
+                return response;
+        }
+        catch (Exception ex) when (ex is NotSupportedException or TargetInvocationException { InnerException: NotSupportedException })
+        {
+            // Some FastEndpoints response DTOs cannot be auto-created because they have required members.
+            // Those endpoints still write their response to the HTTP body via SendAsync/Send.FluentResult.
+        }
+
+        if (endpoint.HttpContext.Response.Body is not MemoryStream body || body.Length == 0)
+            return null;
+
+        if (typeof(TResponse) == typeof(string))
+        {
+            body.Position = 0;
+            using var reader = new StreamReader(body, Encoding.UTF8, leaveOpen: true);
+            var text = await reader.ReadToEndAsync(cancellationToken);
+            body.Position = 0;
+            return text as TResponse;
+        }
+
+        try
+        {
+            body.Position = 0;
+            var response = await JsonSerializer.DeserializeAsync<TResponse>(
+                body,
+                DefaultJsonSerializerOptions.ConfigStandard,
+                cancellationToken
+            );
+            body.Position = 0;
+            return response;
+        }
+        catch (JsonException)
+        {
+            body.Position = 0;
+            return null;
+        }
     }
 
     protected T SetupEndpointUnitTest<T>(Action<IServiceCollection>? extraServices = null)

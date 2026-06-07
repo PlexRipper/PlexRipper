@@ -33,10 +33,10 @@ public class ClearCompletedDownloadTasksByDownloadTaskIdEndpoint : BaseEndpoint<
         var result = await _commandExecutor.Send(new ClearCompletedDownloadTasksByDownloadTaskKeyCommand(keys), ct);
         if (result.IsFailed)
         {
-            await SendFluentResult(result.ToResult(), ct);
+            await Send.FluentResult(result.ToResult(), ct);
             return;
         }
 
-        await SendFluentResult(Result.Ok(new CountResponseDTO(result.Value)), ct);
+        await Send.FluentResult(Result.Ok(new CountResponseDTO(result.Value)), ct);
     }
 }

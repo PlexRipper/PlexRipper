@@ -53,7 +53,7 @@ public class SyncPlexServerMediaEndpoint : BaseEndpoint<SyncPlexServerMediaEndpo
             var serverName = await _dbContext.GetPlexServerNameById(req.PlexServerId);
             var warnResult = _log.Here()
                 .WarningResult("Plex server {Name} is disabled and cannot be synced", serverName);
-            await SendFluentResult(warnResult.Add400BadRequestError(), ct);
+            await Send.FluentResult(warnResult.Add400BadRequestError(), ct);
             return;
         }
 
@@ -66,11 +66,11 @@ public class SyncPlexServerMediaEndpoint : BaseEndpoint<SyncPlexServerMediaEndpo
         {
             var name = await _dbContext.GetPlexServerNameById(req.PlexServerId);
             var warnResult = _log.Here().WarningResult("Plex server {Name} has no libraries available to sync", name);
-            await SendFluentResult(warnResult.Add400BadRequestError(), ct);
+            await Send.FluentResult(warnResult.Add400BadRequestError(), ct);
             return;
         }
 
         var result = await _commandExecutor.Send(new QueueLibrarySyncJobCommand(libraryIds), ct);
-        await SendFluentResult(result, ct);
+        await Send.FluentResult(result, ct);
     }
 }

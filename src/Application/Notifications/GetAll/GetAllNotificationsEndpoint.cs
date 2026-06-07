@@ -24,6 +24,6 @@ public class GetAllNotificationsEndpoint : BaseEndpointWithoutRequest<List<Notif
     public override async Task HandleAsync(CancellationToken ct)
     {
         var list = await _dbContext.Notifications.ToListAsync(ct);
-        await SendFluentResult(Result.Ok(list), x => x.ToDTO(), ct);
+        await Send.FluentResult(Result.Ok(list), x => x.ToDTO(), ct);
     }
 }

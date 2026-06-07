@@ -44,10 +44,10 @@ public class GetPlexServerByIdEndpoint : BaseEndpoint<GetPlexServerByIdEndpointR
 
         if (plexServer is null)
         {
-            await SendFluentResult(ResultExtensions.EntityNotFound(nameof(PlexServer), req.PlexServerId), ct);
+            await Send.FluentResult(ResultExtensions.EntityNotFound(nameof(PlexServer), req.PlexServerId), ct);
             return;
         }
 
-        await SendFluentResult(Result.Ok(plexServer), x => x.ToDTO(), ct);
+        await Send.FluentResult(Result.Ok(plexServer), x => x.ToDTO(), ct);
     }
 }

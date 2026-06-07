@@ -37,6 +37,6 @@ public class StopDownloadTaskEndpoint : BaseEndpoint<StopDownloadTaskEndpointReq
     {
         var stopResult = await _commandExecutor.Send(new StopDownloadTaskCommand(req.DownloadTaskGuid), ct);
 
-        await SendFluentResult(stopResult, ct);
+        await Send.FluentResult(stopResult, ct);
     }
 }

@@ -76,6 +76,6 @@ public class UpdatePlexServerConnectionEndpoint
         var connectionDb = await _dbContext.PlexServerConnections.GetAsync(req.Id, ct);
 
         var result = ResultExtensions.Create200OkResult(connectionDb!.ToDTO());
-        await SendFluentResult(result, ct);
+        await Send.FluentResult(result, ct);
     }
 }

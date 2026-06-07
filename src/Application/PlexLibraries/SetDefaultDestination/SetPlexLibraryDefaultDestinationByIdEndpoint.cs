@@ -51,7 +51,7 @@ public class SetPlexLibraryDefaultDestinationByIdEndpoint
 
         if (plexLibraryDb == 0)
         {
-            await SendFluentResult(
+            await Send.FluentResult(
                 Result.Fail(
                     $"No library found with id {req.PlexLibraryId} that could have its default folder destination updated"
                 ),
@@ -59,6 +59,6 @@ public class SetPlexLibraryDefaultDestinationByIdEndpoint
             );
         }
         else
-            await SendFluentResult(Result.Ok(), ct);
+            await Send.FluentResult(Result.Ok(), ct);
     }
 }

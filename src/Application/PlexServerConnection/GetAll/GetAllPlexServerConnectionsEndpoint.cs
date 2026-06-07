@@ -48,6 +48,6 @@ public class GetAllPlexServerConnectionsEndpoint : BaseEndpointWithoutRequest<Li
         foreach (var connection in plexServerConnections)
             connection.ChosenConnection = chosenHash.Contains(connection.Id);
 
-        await SendFluentResult(Result.Ok(plexServerConnections), x => x, ct);
+        await Send.FluentResult(Result.Ok(plexServerConnections), x => x, ct);
     }
 }

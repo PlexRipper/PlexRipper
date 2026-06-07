@@ -37,6 +37,6 @@ public class PausePlexServerDownloadsEndpoint : BaseEndpoint<PausePlexServerDown
     {
         var result = await _commandExecutor.Send(new PausePlexServerDownloadsCommand(req.PlexServerId), ct);
 
-        await SendFluentResult(result, ct);
+        await Send.FluentResult(result, ct);
     }
 }

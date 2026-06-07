@@ -42,8 +42,8 @@ public class CheckAllConnectionsStatusByPlexServerEndpoint
             ct
         );
         if (result.IsFailed)
-            await SendFluentResult(result.ToResult(), ct);
+            await Send.FluentResult(result.ToResult(), ct);
         else
-            await SendFluentResult(result, x => x.ToDTO(), ct);
+            await Send.FluentResult(result, x => x.ToDTO(), ct);
     }
 }

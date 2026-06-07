@@ -61,13 +61,13 @@ public class UpdateFolderPathEndpoint : BaseEndpoint<UpdateFolderPathEndpointReq
 
         if (folderPathDb is null)
         {
-            await SendFluentResult(ResultExtensions.EntityNotFound(nameof(FolderPath), folderPath.Id), ct);
+            await Send.FluentResult(ResultExtensions.EntityNotFound(nameof(FolderPath), folderPath.Id), ct);
             return;
         }
 
         _dbContext.Entry(folderPathDb).CurrentValues.SetValues(folderPath);
         await _dbContext.SaveChangesAsync(ct);
 
-        await SendFluentResult(Result.Ok(folderPathDb), path => path.ToDTO(), ct);
+        await Send.FluentResult(Result.Ok(folderPathDb), path => path.ToDTO(), ct);
     }
 }

@@ -28,6 +28,6 @@ public class ClearSonarrConfigurationEndpoint : BaseEndpointWithoutRequest
 
         _sonarrSettings.Reset();
 
-        await SendFluentResult(Result.Ok(), ct);
+        await Send.FluentResult(Result.Ok(), ct);
     }
 }

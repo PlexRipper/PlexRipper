@@ -42,12 +42,12 @@ public class GetPlexServerConnectionByIdEndpoint
 
         if (plexServerConnection is null)
         {
-            await SendFluentResult(
+            await Send.FluentResult(
                 ResultExtensions.EntityNotFound(nameof(PlexServerConnection), req.PlexServerConnectionId),
                 ct
             );
         }
         else
-            await SendFluentResult(Result.Ok(plexServerConnection), x => x.ToDTO(), ct);
+            await Send.FluentResult(Result.Ok(plexServerConnection), x => x.ToDTO(), ct);
     }
 }

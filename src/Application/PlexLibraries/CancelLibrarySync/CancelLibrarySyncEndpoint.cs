@@ -40,6 +40,6 @@ public class CancelLibrarySyncEndpoint : BaseEndpoint<CancelLibrarySyncEndpointR
 
         var result = await _commandExecutor.Send(new CancelLibrarySyncJobCommand(req.PlexLibraryId), ct);
 
-        await SendFluentResult(result, ct);
+        await Send.FluentResult(result, ct);
     }
 }

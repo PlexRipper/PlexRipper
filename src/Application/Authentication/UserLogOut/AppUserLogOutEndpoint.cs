@@ -30,6 +30,6 @@ public class AppUserLogOutEndpoint : BaseEndpointWithoutRequest<string>
         await CookieAuth.SignOutAsync();
 
         var result = Result.Ok("Logout successful");
-        await SendFluentResult(result, x => x, ct);
+        await Send.FluentResult(result, x => x, ct);
     }
 }

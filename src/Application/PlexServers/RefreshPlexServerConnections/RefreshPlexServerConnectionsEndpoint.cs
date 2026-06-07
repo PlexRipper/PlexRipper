@@ -47,7 +47,7 @@ public class RefreshPlexServerConnectionsEndpoint : BaseEndpoint<RefreshPlexServ
         var plexAccountResult = await _dbContext.ChoosePlexAccountToConnect(req.PlexServerId, ct);
         if (plexAccountResult.IsFailed)
         {
-            await SendFluentResult(plexAccountResult.ToResult(), ct);
+            await Send.FluentResult(plexAccountResult.ToResult(), ct);
             return;
         }
 
@@ -56,6 +56,6 @@ public class RefreshPlexServerConnectionsEndpoint : BaseEndpoint<RefreshPlexServ
             ct
         );
 
-        await SendFluentResult(refreshResult.ToResult(), ct);
+        await Send.FluentResult(refreshResult.ToResult(), ct);
     }
 }

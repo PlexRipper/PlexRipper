@@ -61,7 +61,7 @@ public class UpdatePlexAccountByIdEndpoint : BaseEndpoint<UpdatePlexAccountByIdE
 
         if (accountInDb == null)
         {
-            await SendFluentResult(ResultExtensions.EntityNotFound(nameof(PlexAccount), plexAccountDTO.Id), ct);
+            await Send.FluentResult(ResultExtensions.EntityNotFound(nameof(PlexAccount), plexAccountDTO.Id), ct);
             return;
         }
 
@@ -70,6 +70,6 @@ public class UpdatePlexAccountByIdEndpoint : BaseEndpoint<UpdatePlexAccountByIdE
         _dbContext.Entry(accountInDb).CurrentValues.SetValues(updatedPlexAccount);
         await _dbContext.SaveChangesAsync(ct);
 
-        await SendFluentResult(Result.Ok(accountInDb), x => x.ToDTO(), ct);
+        await Send.FluentResult(Result.Ok(accountInDb), x => x.ToDTO(), ct);
     }
 }

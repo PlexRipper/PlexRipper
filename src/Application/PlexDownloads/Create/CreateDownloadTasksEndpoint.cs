@@ -46,6 +46,6 @@ public class CreateDownloadTasksEndpoint : BaseEndpoint<CreateDownloadTasksEndpo
 
         var result = await _commandExecutor.Send(new CreateDownloadTasksCommand(req.Request), ct);
 
-        await SendFluentResult(result, ct);
+        await Send.FluentResult(result, ct);
     }
 }

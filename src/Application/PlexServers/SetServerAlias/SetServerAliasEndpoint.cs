@@ -49,12 +49,12 @@ public class SetServerAlias : BaseEndpoint<SetServerAliasRequest>
         var machineIdentifier = await _dbContext.GetPlexServerMachineIdentifierById(req.PlexServerId);
         if (machineIdentifier == string.Empty)
         {
-            await SendFluentResult(ResultExtensions.EntityNotFound(nameof(PlexServer), req.PlexServerId), ct);
+            await Send.FluentResult(ResultExtensions.EntityNotFound(nameof(PlexServer), req.PlexServerId), ct);
             return;
         }
 
         _serverSettingsModule.SetServerName(machineIdentifier, req.ServerAlias);
 
-        await SendFluentResult(Result.Ok(), ct);
+        await Send.FluentResult(Result.Ok(), ct);
     }
 }

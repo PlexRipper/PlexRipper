@@ -36,6 +36,6 @@ public class StartDownloadTaskEndpoint : BaseEndpoint<StartDownloadTaskEndpointR
     {
         var startResult = await _commandExecutor.Send(new StartDownloadTaskCommand(req.DownloadTaskGuid), ct);
 
-        await SendFluentResult(startResult, ct);
+        await Send.FluentResult(startResult, ct);
     }
 }

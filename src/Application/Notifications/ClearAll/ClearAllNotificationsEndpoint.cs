@@ -32,6 +32,6 @@ public class ClearAllNotificationsEndpoint : BaseEndpointWithoutRequest<CountRes
         _log.Here().DebugApiCall(HttpContext);
         // Empty the table
         var deletedNotificationsCount = await _dbContext.Notifications.ExecuteDeleteAsync(ct);
-        await SendFluentResult(Result.Ok(new CountResponseDTO(deletedNotificationsCount)), x => x, ct);
+        await Send.FluentResult(Result.Ok(new CountResponseDTO(deletedNotificationsCount)), x => x, ct);
     }
 }

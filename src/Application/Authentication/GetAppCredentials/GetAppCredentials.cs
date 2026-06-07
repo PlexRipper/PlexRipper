@@ -53,7 +53,7 @@ public class GetAppCredentials : BaseEndpointWithoutRequest<AppCredentialsDTO>
         if (user is null)
         {
             var result = Result.Fail("No app user found in the database").LogError();
-            await SendFluentResult(result, ct);
+            await Send.FluentResult(result, ct);
             return;
         }
 
@@ -62,7 +62,7 @@ public class GetAppCredentials : BaseEndpointWithoutRequest<AppCredentialsDTO>
             && await _userService.CheckPasswordAsync(user, DefaultUserAppCredentials.DefaultPassword);
 
         // Don't send back the real password as this is hidden anyway when updating the password
-        await SendFluentResult(
+        await Send.FluentResult(
             Result.Ok(new AppCredentialsDTO(user.UserName!, StringExtensions.GeneratePassword(), isDefaultCredentials)),
             x => x,
             ct

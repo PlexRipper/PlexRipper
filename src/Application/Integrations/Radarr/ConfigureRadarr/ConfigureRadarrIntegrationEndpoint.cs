@@ -56,7 +56,7 @@ public class ConfigureRadarrIntegrationEndpoint : BaseEndpoint<ConfigureRadarrIn
         if (!setupDownloadClient.IsSuccess)
         {
             _radarrSettings.IsConfigured = false;
-            await SendFluentResult(setupDownloadClient.ToResult(), ct);
+            await Send.FluentResult(setupDownloadClient.ToResult(), ct);
             return;
         }
 
@@ -68,11 +68,11 @@ public class ConfigureRadarrIntegrationEndpoint : BaseEndpoint<ConfigureRadarrIn
         if (!setupIndexerClient.IsSuccess)
         {
             _radarrSettings.IsConfigured = false;
-            await SendFluentResult(setupIndexerClient.ToResult(), ct);
+            await Send.FluentResult(setupIndexerClient.ToResult(), ct);
             return;
         }
 
         _radarrSettings.IsConfigured = true;
-        await SendFluentResult(Result.Ok(), ct);
+        await Send.FluentResult(Result.Ok(), ct);
     }
 }

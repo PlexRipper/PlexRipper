@@ -44,7 +44,7 @@ public class GetPlexAccountByIdEndpoint : BaseEndpoint<GetPlexAccountByIdEndpoin
             .GetAsync(req.PlexAccountId, ct);
         if (plexAccount is null)
         {
-            await SendFluentResult(
+            await Send.FluentResult(
                 ResultExtensions.EntityNotFound(nameof(PlexAccount), req.PlexAccountId).LogWarning(),
                 ct
             );
@@ -53,6 +53,6 @@ public class GetPlexAccountByIdEndpoint : BaseEndpoint<GetPlexAccountByIdEndpoin
 
         _log.Here()
             .Debug("Found an {NameOfPlexAccount} with the id: {AccountId}", nameof(PlexAccount), req.PlexAccountId);
-        await SendFluentResult(Result.Ok(plexAccount), x => x.ToDTO(), ct);
+        await Send.FluentResult(Result.Ok(plexAccount), x => x.ToDTO(), ct);
     }
 }

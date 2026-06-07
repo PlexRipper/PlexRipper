@@ -27,6 +27,6 @@ public class GetAllDownloadTasksEndpoint : BaseEndpointWithoutRequest<List<Serve
     {
         _log.Here().DebugApiCall(HttpContext);
         var downloadList = await _dbContext.GetAllDownloadTasksByServerAsync(cancellationToken: ct);
-        await SendFluentResult(Result.Ok(downloadList), x => x.ToServerDownloadProgressDTOList(), ct);
+        await Send.FluentResult(Result.Ok(downloadList), x => x.ToServerDownloadProgressDTOList(), ct);
     }
 }

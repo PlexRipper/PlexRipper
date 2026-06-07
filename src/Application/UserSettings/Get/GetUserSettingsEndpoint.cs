@@ -23,6 +23,6 @@ public class GetUserSettingsEndpoint : BaseEndpointWithoutRequest<SettingsModelD
 
     public override async Task HandleAsync(CancellationToken ct)
     {
-        await SendFluentResult(Result.Ok(_userSettings), x => x.ToDTO(), ct);
+        await Send.FluentResult(Result.Ok(_userSettings), x => x.ToDTO(), ct);
     }
 }

@@ -34,6 +34,6 @@ public class GetDownloadPreviewEndpoint : BaseEndpoint<List<DownloadMediaDTO>, D
     {
         var result = await _commandExecutor.Send(new GetDownloadPreviewQuery(downloadMedias), ct);
 
-        await SendFluentResult(result, x => x.ToDTO(), ct);
+        await Send.FluentResult(result, x => x.ToDTO(), ct);
     }
 }

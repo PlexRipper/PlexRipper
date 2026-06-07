@@ -118,6 +118,6 @@ public class TestConnectionToRadarrEndpoint
 
     private async Task SendTestResult(TestConnectionStatus status, CancellationToken ct)
     {
-        await SendFluentResult(Result.Ok(new TestConnectionToRadarrEndpointResponse(status)), ct);
+        await Send.FluentResult(Result.Ok(new TestConnectionToRadarrEndpointResponse(status)), ct);
     }
 }

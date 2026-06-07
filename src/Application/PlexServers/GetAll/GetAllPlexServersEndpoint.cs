@@ -40,6 +40,6 @@ public class GetAllPlexServersEndpoint : BaseEndpointWithoutRequest<List<PlexSer
             .Include(x => x.PlexAccountServers)
             .ToListAsync(ct);
 
-        await SendFluentResult(Result.Ok(plexServers), x => x.ToDTO(), ct);
+        await Send.FluentResult(Result.Ok(plexServers), x => x.ToDTO(), ct);
     }
 }

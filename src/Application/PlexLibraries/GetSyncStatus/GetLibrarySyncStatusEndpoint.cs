@@ -31,6 +31,6 @@ public class GetLibrarySyncStatusEndpoint : BaseEndpointWithoutRequest<List<Libr
         _log.Here().DebugApiCall(HttpContext);
         var syncJobs = await _dbContext.LibrarySyncJobQueues.ToListAsync(ct);
 
-        await SendFluentResult(Result.Ok(syncJobs), x => x.Select(y => y.ToDTO()).ToList(), ct);
+        await Send.FluentResult(Result.Ok(syncJobs), x => x.Select(y => y.ToDTO()).ToList(), ct);
     }
 }

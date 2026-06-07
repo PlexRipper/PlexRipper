@@ -48,6 +48,6 @@ public class ValidatePlexServerConnectionEndpoint
     public override async Task HandleAsync(ValidatePlexServerConnectionEndpointRequest req, CancellationToken ct)
     {
         var result = await _commandExecutor.Send(new ValidatePlexConnectionUrlCommand(req.Url), ct);
-        await SendFluentResult(result, ct);
+        await Send.FluentResult(result, ct);
     }
 }

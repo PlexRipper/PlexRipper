@@ -40,8 +40,8 @@ public class CheckConnectionStatusByIdEndpoint : BaseEndpoint<CheckConnectionSta
         _log.Here().DebugApiCall(HttpContext, req);
         var result = await _commandExecutor.Send(new CheckConnectionStatusByIdCommand(req.PlexServerConnectionId), ct);
         if (result.IsFailed)
-            await SendFluentResult(result.ToResult(), ct);
+            await Send.FluentResult(result.ToResult(), ct);
         else
-            await SendFluentResult(result, x => x.ToDTO(), ct);
+            await Send.FluentResult(result, x => x.ToDTO(), ct);
     }
 }

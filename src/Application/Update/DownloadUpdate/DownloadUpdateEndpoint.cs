@@ -41,7 +41,7 @@ public class DownloadUpdateEndpoint : BaseEndpointWithoutRequest
         if (!_appBuildInfo.IsDesktopMode)
         {
             _log.Here().Debug("Skipping update download — not running in desktop mode");
-            await SendFluentResult(Result.Fail("Desktop updates are not supported in the current runtime mode"), ct);
+            await Send.FluentResult(Result.Fail("Desktop updates are not supported in the current runtime mode"), ct);
             return;
         }
 
@@ -77,6 +77,6 @@ public class DownloadUpdateEndpoint : BaseEndpointWithoutRequest
                 );
         });
 
-        await SendFluentResult(result, ct);
+        await Send.FluentResult(result, ct);
     }
 }

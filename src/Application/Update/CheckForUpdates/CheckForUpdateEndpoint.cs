@@ -30,6 +30,6 @@ public class CheckForUpdateEndpoint : BaseEndpointWithoutRequest<AppUpdateCheckD
         _log.Here().DebugApiCall(HttpContext);
 
         var result = await _commandExecutor.Send(new CheckForUpdatesCommand(), ct);
-        await SendFluentResult(result, x => x.ToDTO(), ct);
+        await Send.FluentResult(result, x => x.ToDTO(), ct);
     }
 }

@@ -31,6 +31,6 @@ public class GetAllPlexLibrariesEndpoint : BaseEndpointWithoutRequest<List<PlexL
         _log.Here().DebugApiCall(HttpContext);
         var plexLibraries = await _dbContext.PlexLibraries.ToListAsync(ct);
 
-        await SendFluentResult(Result.Ok(plexLibraries), x => x.ToDTO(), ct);
+        await Send.FluentResult(Result.Ok(plexLibraries), x => x.ToDTO(), ct);
     }
 }

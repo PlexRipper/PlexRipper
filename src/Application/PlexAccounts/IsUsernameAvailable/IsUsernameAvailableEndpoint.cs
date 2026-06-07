@@ -43,6 +43,6 @@ public class IsUsernameAvailableEndpoint : BaseEndpoint<IsUsernameAvailableEndpo
     public override async Task HandleAsync(IsUsernameAvailableEndpointRequest req, CancellationToken ct)
     {
         var isUsernameAvailable = await _dbContext.IsUsernameAvailable(req.Username, ct);
-        await SendFluentResult(Result.Ok(isUsernameAvailable), x => x, ct);
+        await Send.FluentResult(Result.Ok(isUsernameAvailable), x => x, ct);
     }
 }

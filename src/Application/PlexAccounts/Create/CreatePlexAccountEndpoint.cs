@@ -114,7 +114,7 @@ public class CreatePlexAccountEndpoint : BaseEndpoint<CreatePlexAccountEndpointR
             {
                 var msg =
                     $"Account with username {req.Username} cannot be created due to an account with the same username already existing";
-                await SendFluentResult(ResultExtensions.Create400BadRequestResult(msg).LogError(), ct);
+                await Send.FluentResult(ResultExtensions.Create400BadRequestResult(msg).LogError(), ct);
                 return;
             }
 
@@ -125,7 +125,7 @@ public class CreatePlexAccountEndpoint : BaseEndpoint<CreatePlexAccountEndpointR
                 var badResult = ResultExtensions
                     .Create400BadRequestResult("Account with the same UUID {plexAccount.Uuid} already exists")
                     .LogWarning();
-                await SendFluentResult(badResult, ct);
+                await Send.FluentResult(badResult, ct);
                 return;
             }
         }
@@ -170,13 +170,13 @@ public class CreatePlexAccountEndpoint : BaseEndpoint<CreatePlexAccountEndpointR
 
         if (plexAccountDb is null)
         {
-            await SendFluentResult(ResultExtensions.EntityNotFound(nameof(PlexAccount), 0), ct);
+            await Send.FluentResult(ResultExtensions.EntityNotFound(nameof(PlexAccount), 0), ct);
             return;
         }
 
         var result = Result.Ok(plexAccountDb).Add201CreatedRequestSuccess("PlexAccount created successfully.");
 
-        await SendFluentResult(result, model => model.ToDTO(), ct);
+        await Send.FluentResult(result, model => model.ToDTO(), ct);
 
         // Return the Ok result and then kick off the inspecting job
         var inspectResult = await _commandExecutor.Send(

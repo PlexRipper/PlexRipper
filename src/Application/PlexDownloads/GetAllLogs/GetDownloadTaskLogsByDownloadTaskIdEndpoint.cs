@@ -74,6 +74,6 @@ public class GetDownloadTaskLogsByDownloadTaskIdEndpoint
 
         logsResult.LogIfFailed();
 
-        await SendFluentResult(logsResult, x => x.Select(log => log.ToDTO()).ToList(), ct);
+        await Send.FluentResult(logsResult, x => x.Select(log => log.ToDTO()).ToList(), ct);
     }
 }

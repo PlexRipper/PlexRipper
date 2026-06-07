@@ -29,11 +29,11 @@ public class AuthenticationStatusEndpoint : BaseEndpointWithoutRequest<UserClaim
                     Claims = User.Claims.Select(c => c.Type).ToList(),
                 }
             );
-            await SendFluentResult(result, x => x, ct);
+            await Send.FluentResult(result, x => x, ct);
         }
         else
         {
-            await SendFluentResult(ResultExtensions.Create401UnauthorizedResult(), ct);
+            await Send.FluentResult(ResultExtensions.Create401UnauthorizedResult(), ct);
         }
     }
 }

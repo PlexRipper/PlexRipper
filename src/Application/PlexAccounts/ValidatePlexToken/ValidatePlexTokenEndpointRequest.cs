@@ -97,7 +97,7 @@ public class ValidatePlexTokenEndpoint
                 ValidatedAt = null,
                 Is2Fa = false,
             };
-            await SendFluentResult(Result.Ok(response), ct);
+            await Send.FluentResult(Result.Ok(response), ct);
             return;
         }
 
@@ -123,11 +123,11 @@ public class ValidatePlexTokenEndpoint
                 ValidatedAt = validateResult.Value.ValidatedAt,
                 Is2Fa = validateResult.Value.Is2Fa,
             };
-            await SendFluentResult(Result.Ok(response), ct);
+            await Send.FluentResult(Result.Ok(response), ct);
             return;
         }
 
         // Default: return all errors if none of the above conditions matched
-        await SendFluentResult(validateResult, ct);
+        await Send.FluentResult(validateResult, ct);
     }
 }

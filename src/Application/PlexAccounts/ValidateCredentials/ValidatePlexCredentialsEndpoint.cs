@@ -115,7 +115,7 @@ public class ValidatePlexCredentialsEndpoint
                 ValidatedAt = null,
                 Is2Fa = true,
             };
-            await SendFluentResult(Result.Ok(response), ct);
+            await Send.FluentResult(Result.Ok(response), ct);
 
             return;
         }
@@ -139,7 +139,7 @@ public class ValidatePlexCredentialsEndpoint
                 ValidatedAt = null,
                 Is2Fa = false,
             };
-            await SendFluentResult(Result.Ok(response), ct);
+            await Send.FluentResult(Result.Ok(response), ct);
             return;
         }
 
@@ -162,11 +162,11 @@ public class ValidatePlexCredentialsEndpoint
                 ValidatedAt = signInResult.Value.ValidatedAt,
                 Is2Fa = signInResult.Value.Is2Fa,
             };
-            await SendFluentResult(Result.Ok(response), ct);
+            await Send.FluentResult(Result.Ok(response), ct);
             return;
         }
 
         // Default: return all errors if none of the above conditions matched
-        await SendFluentResult(signInResult.ToResult(), ct);
+        await Send.FluentResult(signInResult.ToResult(), ct);
     }
 }

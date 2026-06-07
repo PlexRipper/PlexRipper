@@ -37,6 +37,6 @@ public class ResumePlexServerDownloadsEndpoint : BaseEndpoint<ResumePlexServerDo
     {
         var result = await _commandExecutor.Send(new ResumePlexServerDownloadsCommand(req.PlexServerId), ct);
 
-        await SendFluentResult(result, ct);
+        await Send.FluentResult(result, ct);
     }
 }

@@ -48,10 +48,10 @@ public class SetNotificationVisibilityEndpoint : BaseEndpoint<SetNotificationVis
 
         if (changed == 0)
         {
-            await SendFluentResult(ResultExtensions.EntityNotFound(nameof(Notification), req.Id), ct);
+            await Send.FluentResult(ResultExtensions.EntityNotFound(nameof(Notification), req.Id), ct);
             return;
         }
 
-        await SendFluentResult(Result.Ok(), ct);
+        await Send.FluentResult(Result.Ok(), ct);
     }
 }

@@ -40,10 +40,10 @@ public class ClearCompletedDownloadTasksByServerIdEndpoint
         );
         if (result.IsFailed)
         {
-            await SendFluentResult(result.ToResult(), ct);
+            await Send.FluentResult(result.ToResult(), ct);
             return;
         }
 
-        await SendFluentResult(Result.Ok(new CountResponseDTO(result.Value)), ct);
+        await Send.FluentResult(Result.Ok(new CountResponseDTO(result.Value)), ct);
     }
 }

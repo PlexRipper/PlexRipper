@@ -57,7 +57,7 @@ public class ConfigureSonarrIntegrationEndpoint : BaseEndpoint<ConfigureSonarrIn
         if (!setupDownloadClient.IsSuccess)
         {
             _sonarrSettings.IsConfigured = false;
-            await SendFluentResult(setupDownloadClient.ToResult(), ct);
+            await Send.FluentResult(setupDownloadClient.ToResult(), ct);
             return;
         }
 
@@ -69,11 +69,11 @@ public class ConfigureSonarrIntegrationEndpoint : BaseEndpoint<ConfigureSonarrIn
         if (!setupIndexerClient.IsSuccess)
         {
             _sonarrSettings.IsConfigured = false;
-            await SendFluentResult(setupIndexerClient.ToResult(), ct);
+            await Send.FluentResult(setupIndexerClient.ToResult(), ct);
             return;
         }
 
         _sonarrSettings.IsConfigured = true;
-        await SendFluentResult(Result.Ok(), ct);
+        await Send.FluentResult(Result.Ok(), ct);
     }
 }

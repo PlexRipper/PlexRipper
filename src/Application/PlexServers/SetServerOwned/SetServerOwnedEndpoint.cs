@@ -48,7 +48,7 @@ public class SetServerOwnedEndpoint : BaseEndpoint<SetServerOwnedRequest, PlexSe
             .AnyAsync(x => x.Id == req.PlexServerId, ct);
         if (!plexServerExists)
         {
-            await SendFluentResult(ResultExtensions.EntityNotFound(nameof(PlexServer), req.PlexServerId), ct);
+            await Send.FluentResult(ResultExtensions.EntityNotFound(nameof(PlexServer), req.PlexServerId), ct);
             return;
         }
 
@@ -59,7 +59,7 @@ public class SetServerOwnedEndpoint : BaseEndpoint<SetServerOwnedRequest, PlexSe
 
         if (updateCount == 0)
         {
-            await SendFluentResult(ResultExtensions.EntityNotFound(nameof(PlexServer), req.PlexServerId), ct);
+            await Send.FluentResult(ResultExtensions.EntityNotFound(nameof(PlexServer), req.PlexServerId), ct);
             return;
         }
 
@@ -70,10 +70,10 @@ public class SetServerOwnedEndpoint : BaseEndpoint<SetServerOwnedRequest, PlexSe
 
         if (plexServer is null)
         {
-            await SendFluentResult(ResultExtensions.EntityNotFound(nameof(PlexServer), req.PlexServerId), ct);
+            await Send.FluentResult(ResultExtensions.EntityNotFound(nameof(PlexServer), req.PlexServerId), ct);
             return;
         }
 
-        await SendFluentResult(Result.Ok(plexServer), x => x.ToDTO(), ct);
+        await Send.FluentResult(Result.Ok(plexServer), x => x.ToDTO(), ct);
     }
 }

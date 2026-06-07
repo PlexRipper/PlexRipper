@@ -48,10 +48,10 @@ public class GetPlexLibraryByIdEndpoint : BaseEndpoint<GetPlexLibraryByIdEndpoin
         var plexLibrary = await _dbContext.PlexLibraries.GetAsync(req.PlexLibraryId, ct);
         if (plexLibrary is null)
         {
-            await SendFluentResult(ResultExtensions.EntityNotFound(nameof(plexLibrary), req.PlexLibraryId), ct);
+            await Send.FluentResult(ResultExtensions.EntityNotFound(nameof(plexLibrary), req.PlexLibraryId), ct);
             return;
         }
 
-        await SendFluentResult(Result.Ok(plexLibrary), x => x.ToDTO(), ct);
+        await Send.FluentResult(Result.Ok(plexLibrary), x => x.ToDTO(), ct);
     }
 }

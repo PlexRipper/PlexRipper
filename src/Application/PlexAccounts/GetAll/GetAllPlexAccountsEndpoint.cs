@@ -56,6 +56,6 @@ public class GetAllPlexAccountsEndpoint : BaseEndpoint<GetAllPlexAccountsEndpoin
 
         var plexAccounts = await query.ToListAsync(ct);
 
-        await SendFluentResult(Result.Ok(plexAccounts), x => x.ToDTO(), ct);
+        await Send.FluentResult(Result.Ok(plexAccounts), x => x.ToDTO(), ct);
     }
 }

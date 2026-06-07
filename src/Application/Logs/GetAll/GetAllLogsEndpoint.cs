@@ -26,6 +26,6 @@ public class GetAllLogsEndpoint : BaseEndpointWithoutRequest<List<LiveLogEventDT
     public override async Task HandleAsync(CancellationToken ct)
     {
         _log.Here().VerboseApiCall(HttpContext);
-        await SendFluentResult(Result.Ok(_logBufferService.GetAll().ToList()), x => x, ct);
+        await Send.FluentResult(Result.Ok(_logBufferService.GetAll().ToList()), x => x, ct);
     }
 }

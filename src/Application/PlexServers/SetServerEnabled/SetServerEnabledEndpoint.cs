@@ -50,7 +50,7 @@ public class SetServerEnabledEndpoint : BaseEndpoint<SetServerEnabledRequest, Pl
         var machineIdentifier = await _dbContext.GetPlexServerMachineIdentifierById(req.PlexServerId);
         if (machineIdentifier == string.Empty)
         {
-            await SendFluentResult(ResultExtensions.EntityNotFound(nameof(PlexServer), req.PlexServerId), ct);
+            await Send.FluentResult(ResultExtensions.EntityNotFound(nameof(PlexServer), req.PlexServerId), ct);
             return;
         }
 
@@ -64,7 +64,7 @@ public class SetServerEnabledEndpoint : BaseEndpoint<SetServerEnabledRequest, Pl
             if (await _dbContext.IsServerDisabled(req.PlexServerId))
             {
                 var serverName = await _dbContext.GetPlexServerNameById(req.PlexServerId);
-                await SendFluentResult(
+                await Send.FluentResult(
                     ResultExtensions.ServerIsDisabled(serverName, req.PlexServerId, nameof(GetPlexServerByIdEndpoint)),
                     ct);
                 return;
@@ -78,10 +78,10 @@ public class SetServerEnabledEndpoint : BaseEndpoint<SetServerEnabledRequest, Pl
 
         if (plexServer is null)
         {
-            await SendFluentResult(ResultExtensions.EntityNotFound(nameof(PlexServer), req.PlexServerId), ct);
+            await Send.FluentResult(ResultExtensions.EntityNotFound(nameof(PlexServer), req.PlexServerId), ct);
             return;
         }
 
-        await SendFluentResult(Result.Ok(plexServer), x => x.ToDTO(), ct);
+        await Send.FluentResult(Result.Ok(plexServer), x => x.ToDTO(), ct);
     }
 }

@@ -44,13 +44,13 @@ public class DeletePlexServerConnectionById : BaseEndpoint<DeletePlexServerConne
 
         if (deleteCount == 0)
         {
-            await SendFluentResult(
+            await Send.FluentResult(
                 ResultExtensions.EntityNotFound(nameof(PlexServerConnection), req.PlexServerConnectionId),
                 ct
             );
             return;
         }
 
-        await SendFluentResult(Result.Ok(), ct);
+        await Send.FluentResult(Result.Ok(), ct);
     }
 }

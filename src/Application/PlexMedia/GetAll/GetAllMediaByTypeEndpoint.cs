@@ -119,11 +119,11 @@ public class GetAllMediaByTypeEndpoint : BaseEndpoint<GetAllMediaByTypeRequest, 
 
         if (mediaListResult.IsFailed)
         {
-            await SendFluentResult(mediaListResult, ct);
+            await Send.FluentResult(mediaListResult, ct);
             return;
         }
 
-        await SendFluentResult(Result.Ok(ToStatisticsDTO(mediaListResult.Value)), ct);
+        await Send.FluentResult(Result.Ok(ToStatisticsDTO(mediaListResult.Value)), ct);
     }
     
     private static string BuildFilter(GetAllMediaByTypeRequest req)

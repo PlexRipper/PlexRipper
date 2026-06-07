@@ -61,7 +61,7 @@ public class GetFolderPathDirectoryEndpoint : BaseEndpoint<GetFolderPathDirector
 
         var result = LookupContents(path, false, true);
 
-        await SendFluentResult(result, x => x.ToDTO(), ct);
+        await Send.FluentResult(result, x => x.ToDTO(), ct);
     }
 
     private Result<FileSystemResult> LookupContents(

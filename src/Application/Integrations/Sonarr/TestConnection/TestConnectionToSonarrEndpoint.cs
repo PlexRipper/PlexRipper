@@ -118,6 +118,6 @@ public class TestConnectionToSonarrEndpoint
 
     private async Task SendTestResult(TestConnectionStatus status, CancellationToken ct)
     {
-        await SendFluentResult(Result.Ok(new TestConnectionToSonarrEndpointResponse(status)), ct);
+        await Send.FluentResult(Result.Ok(new TestConnectionToSonarrEndpointResponse(status)), ct);
     }
 }

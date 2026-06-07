@@ -136,7 +136,7 @@ public sealed class GetPlexMediaThumbnailImageEndpoint : BaseEndpoint<GetPlexMed
                     plexServerId,
                     tokenResult.Errors.FirstOrDefault()?.Message
                 );
-            await SendFluentResult(tokenResult.ToResult(), ct);
+            await Send.FluentResult(tokenResult.ToResult(), ct);
             return;
         }
 
@@ -149,7 +149,7 @@ public sealed class GetPlexMediaThumbnailImageEndpoint : BaseEndpoint<GetPlexMed
                     plexServerId,
                     connectionResult.Errors.FirstOrDefault()?.Message
                 );
-            await SendFluentResult(connectionResult.ToResult(), ct);
+            await Send.FluentResult(connectionResult.ToResult(), ct);
             return;
         }
 
@@ -184,7 +184,7 @@ public sealed class GetPlexMediaThumbnailImageEndpoint : BaseEndpoint<GetPlexMed
                         SanitizeUrl(url),
                         response.StatusCode
                     );
-                await SendFluentResult(Result.Fail("Failed to fetch image").Add502BadGatewayError(), ct);
+                await Send.FluentResult(Result.Fail("Failed to fetch image").Add502BadGatewayError(), ct);
                 return;
             }
 
@@ -230,7 +230,7 @@ public sealed class GetPlexMediaThumbnailImageEndpoint : BaseEndpoint<GetPlexMed
                     );
             }
 
-            await SendFluentResult(Result.Fail("Failed to connect to Plex server").Add502BadGatewayError(), ct);
+            await Send.FluentResult(Result.Fail("Failed to connect to Plex server").Add502BadGatewayError(), ct);
         }
         catch (TaskCanceledException ex) when (!ct.IsCancellationRequested)
         {
@@ -243,7 +243,7 @@ public sealed class GetPlexMediaThumbnailImageEndpoint : BaseEndpoint<GetPlexMed
                     req.PlexKey,
                     SanitizeUrl(url)
                 );
-            await SendFluentResult(Result.Fail("Request timeout").Add502BadGatewayError(), ct);
+            await Send.FluentResult(Result.Fail("Request timeout").Add502BadGatewayError(), ct);
         }
         catch (IOException ex)
         {
@@ -255,7 +255,7 @@ public sealed class GetPlexMediaThumbnailImageEndpoint : BaseEndpoint<GetPlexMed
                     req.PlexKey,
                     ex.Message
                 );
-            await SendFluentResult(Result.Fail("Network error while fetching image").Add502BadGatewayError(), ct);
+            await Send.FluentResult(Result.Fail("Network error while fetching image").Add502BadGatewayError(), ct);
         }
     }
 

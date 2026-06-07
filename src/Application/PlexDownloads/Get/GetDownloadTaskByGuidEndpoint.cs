@@ -57,7 +57,7 @@ public class GetDownloadTaskByGuidEndpoint : BaseEndpoint<GetDownloadTaskByGuidR
 
         if (downloadTask is null)
         {
-            await SendFluentResult(
+            await Send.FluentResult(
                 ResultExtensions.EntityNotFound(nameof(DownloadTaskGeneric), req.DownloadTaskGuid).LogError(),
                 ct
             );
@@ -75,10 +75,10 @@ public class GetDownloadTaskByGuidEndpoint : BaseEndpoint<GetDownloadTaskByGuidR
             if (downloadUrl.IsFailed)
                 downloadUrl.LogError();
 
-            await SendFluentResult(Result.Ok(downloadTask), x => x.ToDTO(downloadUrl.ValueOrDefault), ct);
+            await Send.FluentResult(Result.Ok(downloadTask), x => x.ToDTO(downloadUrl.ValueOrDefault), ct);
             return;
         }
 
-        await SendFluentResult(Result.Ok(downloadTask), x => x.ToDTO(), ct);
+        await Send.FluentResult(Result.Ok(downloadTask), x => x.ToDTO(), ct);
     }
 }

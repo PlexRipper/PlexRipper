@@ -66,14 +66,14 @@ public class SetPreferredPlexServerConnectionEndpoint
 
         if (plexServer is null)
         {
-            await SendFluentResult(ResultExtensions.EntityNotFound(nameof(PlexServer), plexServerId).LogError(), ct);
+            await Send.FluentResult(ResultExtensions.EntityNotFound(nameof(PlexServer), plexServerId).LogError(), ct);
             return;
         }
 
         var connectionIds = plexServer.PlexServerConnections.Select(x => x.Id).ToList();
         if (!connectionIds.Contains(plexServerConnectionId))
         {
-            await SendFluentResult(
+            await Send.FluentResult(
                 Result
                     .Fail(
                         $"PlexServer with id {plexServerId} has no connections with id {plexServerConnectionId} and can not set that as preferred"
@@ -88,6 +88,6 @@ public class SetPreferredPlexServerConnectionEndpoint
 
         await _dbContext.SaveChangesAsync(ct);
 
-        await SendFluentResult(Result.Ok(), ct);
+        await Send.FluentResult(Result.Ok(), ct);
     }
 }

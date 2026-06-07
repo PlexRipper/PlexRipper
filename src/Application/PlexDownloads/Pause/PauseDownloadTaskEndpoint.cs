@@ -42,6 +42,6 @@ public class PauseDownloadTaskEndpoint : BaseEndpoint<PauseDownloadTaskEndpointR
     {
         var pauseResult = await _commandExecutor.Send(new PauseDownloadTaskCommand(req.DownloadTaskGuid), ct);
 
-        await SendFluentResult(pauseResult, ct);
+        await Send.FluentResult(pauseResult, ct);
     }
 }

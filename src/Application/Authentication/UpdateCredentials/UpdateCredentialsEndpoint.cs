@@ -71,7 +71,7 @@ public class UpdateCredentialsEndpoint : BaseEndpoint<UpdateCredentialsEndpointR
         if (user is null)
         {
             var result = Result.Fail("No app user found in the database").LogError();
-            await SendFluentResult(result, ct);
+            await Send.FluentResult(result, ct);
             return;
         }
 
@@ -89,7 +89,7 @@ public class UpdateCredentialsEndpoint : BaseEndpoint<UpdateCredentialsEndpointR
             {
                 var result = Result.Fail(usernameResult.Errors.Select(e => e.Description)).LogError();
                 result.Add400BadRequestError("Failed to update username");
-                await SendFluentResult(result, ct);
+                await Send.FluentResult(result, ct);
                 return;
             }
         }
@@ -103,7 +103,7 @@ public class UpdateCredentialsEndpoint : BaseEndpoint<UpdateCredentialsEndpointR
             {
                 var result = Result.Fail(passwordResult.Errors.Select(e => e.Description)).LogError();
                 result.Add400BadRequestError("Failed to update password");
-                await SendFluentResult(result, ct);
+                await Send.FluentResult(result, ct);
                 return;
             }
         }
@@ -111,6 +111,6 @@ public class UpdateCredentialsEndpoint : BaseEndpoint<UpdateCredentialsEndpointR
         _log.Here().Warning("The Reaparr app credentials have been updated! Make sure this is intended");
 
         // Respond with success
-        await SendFluentResult(Result.Ok(), ct);
+        await Send.FluentResult(Result.Ok(), ct);
     }
 }

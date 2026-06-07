@@ -39,13 +39,13 @@ public class GetAllBackgroundJobsEndpoint : BaseEndpoint<GetAllBackgroundJobsEnd
     {
         if (req.UseMockData)
         {
-            await SendFluentResult(Result.Ok(MockData()), ct);
+            await Send.FluentResult(Result.Ok(MockData()), ct);
         }
         else
         {
             var result = await _schedulerService.GetRunningJobUpdates();
 
-            await SendFluentResult(Result.Ok(result), x => x.ToDTO(), ct);
+            await Send.FluentResult(Result.Ok(result), x => x.ToDTO(), ct);
         }
     }
 

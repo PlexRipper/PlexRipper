@@ -41,6 +41,6 @@ public class RefreshLibraryMediaEndpoint : BaseEndpoint<RefreshLibraryMediaEndpo
 
         var result = await _commandExecutor.Send(new QueueLibrarySyncJobCommand([req.PlexLibraryId]), ct);
 
-        await SendFluentResult(result, ct);
+        await Send.FluentResult(result, ct);
     }
 }

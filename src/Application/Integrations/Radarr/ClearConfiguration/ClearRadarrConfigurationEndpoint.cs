@@ -28,6 +28,6 @@ public class ClearRadarrConfigurationEndpoint : BaseEndpointWithoutRequest
 
         _radarrSettings.Reset();
 
-        await SendFluentResult(Result.Ok(), ct);
+        await Send.FluentResult(Result.Ok(), ct);
     }
 }

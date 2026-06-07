@@ -48,7 +48,7 @@ public class DeleteDownloadTaskEndpoint : BaseEndpoint<DeleteDownloadTaskEndpoin
         var keys = await _dbContext.GetDownloadTaskKeysAsync(req.DownloadTaskIds, ct);
         if (keys.Count == 0)
         {
-            await SendFluentResult(Result.Ok(), ct);
+            await Send.FluentResult(Result.Ok(), ct);
             return;
         }
 
@@ -57,13 +57,13 @@ public class DeleteDownloadTaskEndpoint : BaseEndpoint<DeleteDownloadTaskEndpoin
             var stopResult = await _commandExecutor.Send(new StopDownloadTaskCommand(key.Id), ct);
             if (stopResult.IsFailed)
             {
-                await SendFluentResult(stopResult, ct);
+                await Send.FluentResult(stopResult, ct);
                 return;
             }
         }
 
         var deleteResult = await _commandExecutor.Send(new DeleteDownloadTasksByKeyCommand(keys), ct);
 
-        await SendFluentResult(deleteResult, ct);
+        await Send.FluentResult(deleteResult, ct);
     }
 }

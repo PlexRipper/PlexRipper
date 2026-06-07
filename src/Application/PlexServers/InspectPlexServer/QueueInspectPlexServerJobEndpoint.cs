@@ -36,6 +36,6 @@ public class QueueInspectPlexServerJobEndpoint
     public override async Task HandleAsync(QueueInspectPlexServerJobEndpointRequest req, CancellationToken ct)
     {
         var result = await _commandExecutor.Send(new QueueInspectPlexServerJobCommand([req.PlexServerId]), ct);
-        await SendFluentResult(result, ct);
+        await Send.FluentResult(result, ct);
     }
 }

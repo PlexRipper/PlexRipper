@@ -43,6 +43,6 @@ public class DeleteFolderPathEndpoint : BaseEndpoint<DeleteFolderPathEndpointReq
         _log.Here()
             .Debug("Deleted {FolderPathName} with Id: {CommandId} from the database", nameof(FolderPath), req.Id);
 
-        await SendFluentResult(Result.Ok(), ct);
+        await Send.FluentResult(Result.Ok(), ct);
     }
 }

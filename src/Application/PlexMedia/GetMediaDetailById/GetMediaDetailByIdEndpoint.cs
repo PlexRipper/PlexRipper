@@ -65,27 +65,27 @@ public class GetMediaDetailByIdEndpoint : BaseEndpoint<GetMediaDetailByIdEndpoin
             var plexMovie = await _dbContext.PlexMovies.GetAsync(req.PlexMediaId, ct);
             if (plexMovie is null)
             {
-                await SendFluentResult(ResultExtensions.EntityNotFound(nameof(req.Type.GetType), req.PlexMediaId), ct);
+                await Send.FluentResult(ResultExtensions.EntityNotFound(nameof(req.Type.GetType), req.PlexMediaId), ct);
                 return;
             }
 
             await SetNestedMovieProperties(plexMovie, ct);
 
-            await SendFluentResult(Result.Ok(plexMovie), x => x.ToDTO(), ct);
+            await Send.FluentResult(Result.Ok(plexMovie), x => x.ToDTO(), ct);
         }
         else if (req.Type == PlexMediaType.TvShow)
         {
             var plexTvShowResult = await GetPlexTvShow(req.PlexMediaId, ct);
             if (plexTvShowResult.IsFailed)
             {
-                await SendFluentResult(plexTvShowResult, ct);
+                await Send.FluentResult(plexTvShowResult, ct);
                 return;
             }
 
-            await SendFluentResult(plexTvShowResult, x => x.ToDTO(), ct);
+            await Send.FluentResult(plexTvShowResult, x => x.ToDTO(), ct);
         }
         else
-            await SendFluentResult(ResultExtensions.Create400BadRequestResult($"Type {req.Type} is not allowed"), ct);
+            await Send.FluentResult(ResultExtensions.Create400BadRequestResult($"Type {req.Type} is not allowed"), ct);
     }
 
     private async Task<Result<PlexTvShow>> GetPlexTvShow(int plexTvShowId, CancellationToken ct)

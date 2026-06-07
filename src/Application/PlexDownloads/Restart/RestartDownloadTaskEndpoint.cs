@@ -31,6 +31,6 @@ public class RestartDownloadTaskEndpoint(ICommandExecutor commandExecutor)
     {
         var restartResult = await commandExecutor.Send(new RestartDownloadTaskCommand(req.DownloadTaskGuid), ct);
 
-        await SendFluentResult(restartResult, ct);
+        await Send.FluentResult(restartResult, ct);
     }
 }

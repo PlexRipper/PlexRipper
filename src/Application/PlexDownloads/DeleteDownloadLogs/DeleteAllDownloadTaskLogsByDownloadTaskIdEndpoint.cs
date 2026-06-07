@@ -69,6 +69,6 @@ public class DeleteAllDownloadTaskLogsByDownloadTaskIdEndpoint
         if (logsResult.IsSuccess)
             _log.Here().Debug("Deleted {Count} logs of type {DownloadTaskType}", logsResult.Value, key.Type);
 
-        await SendFluentResult(logsResult, x => x, ct);
+        await Send.FluentResult(logsResult, x => x, ct);
     }
 }

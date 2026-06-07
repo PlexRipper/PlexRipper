@@ -42,7 +42,7 @@ public class SearchPlexMediaEndpoint : BaseEndpoint<SearchPlexMediaRequest, Resu
         // Early return if query is null, empty, or whitespace
         if (string.IsNullOrWhiteSpace(q))
         {
-            await SendFluentResult(Result.Ok(new List<PlexMediaSlimDTO>()), ct);
+            await Send.FluentResult(Result.Ok(new List<PlexMediaSlimDTO>()), ct);
             return;
         }
 
@@ -67,6 +67,6 @@ public class SearchPlexMediaEndpoint : BaseEndpoint<SearchPlexMediaRequest, Resu
         // Flatten the results
         var entities = results.SelectMany(x => x).ToList();
 
-        await SendFluentResult(Result.Ok(entities), ct);
+        await Send.FluentResult(Result.Ok(entities), ct);
     }
 }

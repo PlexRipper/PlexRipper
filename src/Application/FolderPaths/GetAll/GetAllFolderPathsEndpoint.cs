@@ -24,6 +24,6 @@ public class GetAllFolderPathsEndpoint : BaseEndpointWithoutRequest<List<FolderP
         _log.Here().DebugApiCall(HttpContext);
         var folderPaths = await _dbContext.FolderPaths.ToListAsync(ct);
 
-        await SendFluentResult(Result.Ok(folderPaths), list => list.ToDTO(), ct);
+        await Send.FluentResult(Result.Ok(folderPaths), list => list.ToDTO(), ct);
     }
 }

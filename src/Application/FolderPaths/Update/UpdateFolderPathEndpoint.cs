@@ -27,7 +27,7 @@ public class UpdateFolderPathEndpointRequestValidator : Validator<UpdateFolderPa
     }
 }
 
-public class UpdateFolderPathEndpoint : BaseEndpoint<UpdateFolderPathEndpointRequest, FolderPathDTO>
+public class UpdateFolderPathEndpoint : Endpoint<UpdateFolderPathEndpointRequest, FolderPathDTO>
 {
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;

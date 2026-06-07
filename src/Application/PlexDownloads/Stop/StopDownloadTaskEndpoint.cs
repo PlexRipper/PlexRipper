@@ -10,7 +10,7 @@ public class StopDownloadTaskEndpointRequestValidator : Validator<StopDownloadTa
     }
 }
 
-public class StopDownloadTaskEndpoint : BaseEndpoint<StopDownloadTaskEndpointRequest>
+public class StopDownloadTaskEndpoint : Endpoint<StopDownloadTaskEndpointRequest>
 {
     private readonly ICommandExecutor _commandExecutor;
 

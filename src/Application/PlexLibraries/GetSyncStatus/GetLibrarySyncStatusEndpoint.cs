@@ -3,7 +3,7 @@ namespace Reaparr.Application;
 /// <summary>
 /// Retrieves all the <see cref="LibrarySyncJobQueue">LibrarySyncJobQueues</see> from the database.
 /// </summary>
-public class GetLibrarySyncStatusEndpoint : BaseEndpointWithoutRequest<List<LibrarySyncJobQueueDTO>>
+public class GetLibrarySyncStatusEndpoint : EndpointWithoutRequest<List<LibrarySyncJobQueueDTO>>
 {
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;

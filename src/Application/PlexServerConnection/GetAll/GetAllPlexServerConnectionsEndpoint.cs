@@ -1,6 +1,6 @@
 namespace Reaparr.Application;
 
-public class GetAllPlexServerConnectionsEndpoint : BaseEndpointWithoutRequest<List<PlexServerConnectionDTO>>
+public class GetAllPlexServerConnectionsEndpoint : EndpointWithoutRequest<List<PlexServerConnectionDTO>>
 {
     private readonly IReaparrDbContext _dbContext;
 

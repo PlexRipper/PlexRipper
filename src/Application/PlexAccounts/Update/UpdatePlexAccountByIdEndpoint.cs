@@ -29,7 +29,7 @@ public class UpdatePlexAccountByIdEndpointRequestValidator : Validator<UpdatePle
     }
 }
 
-public class UpdatePlexAccountByIdEndpoint : BaseEndpoint<UpdatePlexAccountByIdEndpointRequest, PlexAccountDTO>
+public class UpdatePlexAccountByIdEndpoint : Endpoint<UpdatePlexAccountByIdEndpointRequest, PlexAccountDTO>
 {
     private readonly IReaparrDbContext _dbContext;
 

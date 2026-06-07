@@ -23,7 +23,7 @@ public class ValidatePlexServerConnectionEndpointRequestValidator
 }
 
 public class ValidatePlexServerConnectionEndpoint
-    : BaseEndpoint<ValidatePlexServerConnectionEndpointRequest, ResultDTO<ServerIdentityDTO>>
+    : Endpoint<ValidatePlexServerConnectionEndpointRequest, ResultDTO<ServerIdentityDTO>>
 {
     private readonly ICommandExecutor _commandExecutor;
 

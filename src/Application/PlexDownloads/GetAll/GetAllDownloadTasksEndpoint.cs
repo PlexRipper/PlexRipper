@@ -1,6 +1,6 @@
 namespace Reaparr.Application;
 
-public class GetAllDownloadTasksEndpoint : BaseEndpointWithoutRequest<List<ServerDownloadProgressDTO>>
+public class GetAllDownloadTasksEndpoint : EndpointWithoutRequest<List<ServerDownloadProgressDTO>>
 {
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;

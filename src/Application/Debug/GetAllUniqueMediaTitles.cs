@@ -11,7 +11,7 @@ public record GetAllUniqueMediaTitlesEndpointRequest
     public int Count { get; init; } = 0;
 }
 
-public class GetAllUniqueMediaTitlesEndpoint : BaseEndpoint<GetAllUniqueMediaTitlesEndpointRequest, List<string>>
+public class GetAllUniqueMediaTitlesEndpoint : Endpoint<GetAllUniqueMediaTitlesEndpointRequest, List<string>>
 {
     private readonly IReaparrDbContext _dbContext;
 

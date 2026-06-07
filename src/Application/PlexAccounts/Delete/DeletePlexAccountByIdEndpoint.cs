@@ -10,7 +10,7 @@ public class DeletePlexAccountByIdRequestValidator : Validator<DeletePlexAccount
     }
 }
 
-public class DeletePlexAccountByIdEndpoint : BaseEndpoint<DeletePlexAccountByIdRequest>
+public class DeletePlexAccountByIdEndpoint : Endpoint<DeletePlexAccountByIdRequest>
 {
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;

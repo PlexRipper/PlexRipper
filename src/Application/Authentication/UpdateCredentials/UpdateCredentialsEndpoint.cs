@@ -27,7 +27,7 @@ public class UpdateCredentialsEndpointRequestValidator : Validator<UpdateCredent
     }
 }
 
-public class UpdateCredentialsEndpoint : BaseEndpoint<UpdateCredentialsEndpointRequest>
+public class UpdateCredentialsEndpoint : Endpoint<UpdateCredentialsEndpointRequest>
 {
     private readonly ILogger _log;
     private readonly IUserService _userService;

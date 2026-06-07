@@ -1,6 +1,6 @@
 namespace Reaparr.Application;
 
-public class AuthenticationStatusEndpoint : BaseEndpointWithoutRequest<UserClaimsDTO>
+public class AuthenticationStatusEndpoint : EndpointWithoutRequest<UserClaimsDTO>
 {
     public override void Configure()
     {

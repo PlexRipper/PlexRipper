@@ -35,7 +35,7 @@ public class GetDownloadTaskLogsByDownloadTaskIdRequestValidator : Validator<Get
 }
 
 public class GetDownloadTaskLogsByDownloadTaskIdEndpoint
-    : BaseEndpoint<GetDownloadTaskLogsByDownloadTaskIdRequest, List<DownloadTaskLogDTO>>
+    : Endpoint<GetDownloadTaskLogsByDownloadTaskIdRequest, List<DownloadTaskLogDTO>>
 {
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;

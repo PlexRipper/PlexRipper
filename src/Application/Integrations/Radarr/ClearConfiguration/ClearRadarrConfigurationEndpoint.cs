@@ -1,6 +1,6 @@
 namespace Reaparr.Application;
 
-public class ClearRadarrConfigurationEndpoint : BaseEndpointWithoutRequest
+public class ClearRadarrConfigurationEndpoint : EndpointWithoutRequest
 {
     private readonly ILogger _log;
     private readonly IRadarrSettings _radarrSettings;

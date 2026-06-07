@@ -25,7 +25,7 @@ public class GetDownloadTaskByGuidRequestValidator : Validator<GetDownloadTaskBy
     }
 }
 
-public class GetDownloadTaskByGuidEndpoint : BaseEndpoint<GetDownloadTaskByGuidRequest, DownloadTaskDTO>
+public class GetDownloadTaskByGuidEndpoint : Endpoint<GetDownloadTaskByGuidRequest, DownloadTaskDTO>
 {
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;

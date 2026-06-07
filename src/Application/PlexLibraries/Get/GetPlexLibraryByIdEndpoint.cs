@@ -16,7 +16,7 @@ public class GetPlexLibraryByIdEndpointRequestValidator : Validator<GetPlexLibra
     }
 }
 
-public class GetPlexLibraryByIdEndpoint : BaseEndpoint<GetPlexLibraryByIdEndpointRequest, PlexLibraryDTO>
+public class GetPlexLibraryByIdEndpoint : Endpoint<GetPlexLibraryByIdEndpointRequest, PlexLibraryDTO>
 {
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;

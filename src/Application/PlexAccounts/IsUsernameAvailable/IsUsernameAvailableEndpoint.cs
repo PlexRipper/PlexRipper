@@ -19,7 +19,7 @@ public class IsUsernameAvailableEndpointRequestValidator : Validator<IsUsernameA
     }
 }
 
-public class IsUsernameAvailableEndpoint : BaseEndpoint<IsUsernameAvailableEndpointRequest, bool>
+public class IsUsernameAvailableEndpoint : Endpoint<IsUsernameAvailableEndpointRequest, bool>
 {
     private readonly IReaparrDbContext _dbContext;
 

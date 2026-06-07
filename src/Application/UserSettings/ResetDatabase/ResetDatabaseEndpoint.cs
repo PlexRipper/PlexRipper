@@ -1,6 +1,6 @@
 namespace Reaparr.Application;
 
-public class ResetDatabaseEndpoint : BaseEndpointWithoutRequest<BaseResultDTO>
+public class ResetDatabaseEndpoint : EndpointWithoutRequest<BaseResultDTO>
 {
     public override void Configure()
     {

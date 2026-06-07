@@ -3,7 +3,7 @@ namespace Reaparr.Application;
 /// <summary>
 /// Retrieves all the <see cref="PlexLibrary">PlexLibraries</see> from the database.
 /// </summary>
-public class GetAllPlexLibrariesEndpoint : BaseEndpointWithoutRequest<List<PlexLibraryDTO>>
+public class GetAllPlexLibrariesEndpoint : EndpointWithoutRequest<List<PlexLibraryDTO>>
 {
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;

@@ -19,7 +19,7 @@ public class SetPreferredPlexServerConnectionEndpointRequestValidator
 }
 
 public class SetPreferredPlexServerConnectionEndpoint
-    : BaseEndpoint<SetPreferredPlexServerConnectionEndpointRequest, BaseResultDTO>
+    : Endpoint<SetPreferredPlexServerConnectionEndpointRequest, BaseResultDTO>
 {
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;

@@ -10,7 +10,7 @@ public class GetPlexAccountByIdEndpointRequestValidator : Validator<GetPlexAccou
     }
 }
 
-public class GetPlexAccountByIdEndpoint : BaseEndpoint<GetPlexAccountByIdEndpointRequest, PlexAccountDTO>
+public class GetPlexAccountByIdEndpoint : Endpoint<GetPlexAccountByIdEndpointRequest, PlexAccountDTO>
 {
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;

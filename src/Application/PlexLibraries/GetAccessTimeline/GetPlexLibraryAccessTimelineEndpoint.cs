@@ -1,6 +1,6 @@
 namespace Reaparr.Application;
 
-public class GetPlexLibraryAccessTimelineEndpoint : BaseEndpointWithoutRequest<PlexLibraryAccessTimelineDTO>
+public class GetPlexLibraryAccessTimelineEndpoint : EndpointWithoutRequest<PlexLibraryAccessTimelineDTO>
 {
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;

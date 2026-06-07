@@ -12,7 +12,7 @@ public class CheckAllConnectionsStatusByPlexServerRequestValidator
 }
 
 public class CheckAllConnectionsStatusByPlexServerEndpoint
-    : BaseEndpoint<CheckAllConnectionsStatusByPlexServerRequest, List<PlexServerStatusDTO>>
+    : Endpoint<CheckAllConnectionsStatusByPlexServerRequest, List<PlexServerStatusDTO>>
 {
     private readonly ICommandExecutor _commandExecutor;
 

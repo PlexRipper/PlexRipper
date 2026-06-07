@@ -33,7 +33,7 @@ public class AppUserLoginEndpointRequestValidator : Validator<AppUserLoginEndpoi
     }
 }
 
-public class AppUserLoginEndpoint : BaseEndpoint<AppUserLoginEndpointRequest>
+public class AppUserLoginEndpoint : Endpoint<AppUserLoginEndpointRequest>
 {
     private readonly ILogger _log;
     private readonly IIdentitySignInService _identitySignInService;

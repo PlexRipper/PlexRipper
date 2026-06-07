@@ -16,7 +16,7 @@ public class SetServerEnabledRequestValidator : Validator<SetServerEnabledReques
     }
 }
 
-public class SetServerEnabledEndpoint : BaseEndpoint<SetServerEnabledRequest, PlexServerDTO>
+public class SetServerEnabledEndpoint : Endpoint<SetServerEnabledRequest, PlexServerDTO>
 {
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;

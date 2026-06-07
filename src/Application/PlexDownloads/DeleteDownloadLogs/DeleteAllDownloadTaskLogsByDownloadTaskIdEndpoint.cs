@@ -28,7 +28,7 @@ public class DeleteAllDownloadTaskLogsByDownloadTaskIdRequestValidator
 }
 
 public class DeleteAllDownloadTaskLogsByDownloadTaskIdEndpoint
-    : BaseEndpoint<DeleteAllDownloadTaskLogsByDownloadTaskIdRequest, int>
+    : Endpoint<DeleteAllDownloadTaskLogsByDownloadTaskIdRequest, int>
 {
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;

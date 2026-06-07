@@ -8,7 +8,7 @@ public class GetDownloadPreviewEndpointRequestValidator : Validator<List<Downloa
     }
 }
 
-public class GetDownloadPreviewEndpoint : BaseEndpoint<List<DownloadMediaDTO>, DownloadPreviewContainerDTO>
+public class GetDownloadPreviewEndpoint : Endpoint<List<DownloadMediaDTO>, DownloadPreviewContainerDTO>
 {
     private readonly ICommandExecutor _commandExecutor;
 

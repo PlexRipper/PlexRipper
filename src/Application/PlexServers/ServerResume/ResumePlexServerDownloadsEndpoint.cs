@@ -10,7 +10,7 @@ public class ResumePlexServerDownloadsEndpointRequestValidator : Validator<Resum
     }
 }
 
-public class ResumePlexServerDownloadsEndpoint : BaseEndpoint<ResumePlexServerDownloadsEndpointRequest>
+public class ResumePlexServerDownloadsEndpoint : Endpoint<ResumePlexServerDownloadsEndpointRequest>
 {
     private readonly ICommandExecutor _commandExecutor;
 

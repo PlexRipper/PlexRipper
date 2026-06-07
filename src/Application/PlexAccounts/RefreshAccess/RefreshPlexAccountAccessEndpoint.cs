@@ -11,7 +11,7 @@ public class RefreshPlexAccountAccessEndpointRequestValidator : Validator<Refres
 }
 
 public class RefreshPlexAccountAccessEndpoint
-    : BaseEndpoint<RefreshPlexAccountAccessEndpointRequest, ResultDTO<List<RefreshPlexAccountAccessRapportDTO>>>
+    : Endpoint<RefreshPlexAccountAccessEndpointRequest, ResultDTO<List<RefreshPlexAccountAccessRapportDTO>>>
 {
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;

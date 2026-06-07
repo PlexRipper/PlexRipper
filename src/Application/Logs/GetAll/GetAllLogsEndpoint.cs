@@ -1,6 +1,6 @@
 namespace Reaparr.Application;
 
-public class GetAllLogsEndpoint : BaseEndpointWithoutRequest<List<LiveLogEventDTO>>
+public class GetAllLogsEndpoint : EndpointWithoutRequest<List<LiveLogEventDTO>>
 {
     private readonly ILogger _log;
     private readonly ILogBufferService _logBufferService;

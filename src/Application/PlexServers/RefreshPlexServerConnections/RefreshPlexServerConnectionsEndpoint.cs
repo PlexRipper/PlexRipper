@@ -11,7 +11,7 @@ public class RefreshPlexServerConnectionsEndpointRequestValidator
     }
 }
 
-public class RefreshPlexServerConnectionsEndpoint : BaseEndpoint<RefreshPlexServerConnectionsEndpointRequest>
+public class RefreshPlexServerConnectionsEndpoint : Endpoint<RefreshPlexServerConnectionsEndpointRequest>
 {
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;

@@ -2,7 +2,7 @@ using FastEndpoints.Security;
 
 namespace Reaparr.Application;
 
-public class AppUserLogOutEndpoint : BaseEndpointWithoutRequest<string>
+public class AppUserLogOutEndpoint : EndpointWithoutRequest<string>
 {
     private readonly IIdentitySignInService _identitySignInService;
 

@@ -10,7 +10,7 @@ public class CancelLibrarySyncEndpointRequestValidator : Validator<CancelLibrary
     }
 }
 
-public class CancelLibrarySyncEndpoint : BaseEndpoint<CancelLibrarySyncEndpointRequest>
+public class CancelLibrarySyncEndpoint : Endpoint<CancelLibrarySyncEndpointRequest>
 {
     private readonly ILogger _log;
     private readonly ICommandExecutor _commandExecutor;

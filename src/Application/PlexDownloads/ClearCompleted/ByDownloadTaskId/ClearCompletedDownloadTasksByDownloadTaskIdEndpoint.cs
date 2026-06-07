@@ -4,7 +4,7 @@ namespace Reaparr.Application;
 /// Clears specific completed <see cref="DownloadTaskGeneric"/> from the database by their IDs.
 /// </summary>
 /// <returns>Is successful.</returns>
-public class ClearCompletedDownloadTasksByDownloadTaskIdEndpoint : BaseEndpoint<List<Guid>, ResultDTO<CountResponseDTO>>
+public class ClearCompletedDownloadTasksByDownloadTaskIdEndpoint : Endpoint<List<Guid>, ResultDTO<CountResponseDTO>>
 {
     private readonly IReaparrDbContext _dbContext;
     private readonly ICommandExecutor _commandExecutor;

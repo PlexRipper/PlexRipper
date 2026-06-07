@@ -32,7 +32,7 @@ public class GetMediaDetailByIdEndpointRequestValidator : Validator<GetMediaDeta
     }
 }
 
-public class GetMediaDetailByIdEndpoint : BaseEndpoint<GetMediaDetailByIdEndpointRequest, PlexMediaDTO>
+public class GetMediaDetailByIdEndpoint : Endpoint<GetMediaDetailByIdEndpointRequest, PlexMediaDTO>
 {
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;

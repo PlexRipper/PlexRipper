@@ -74,7 +74,7 @@ public class CreatePlexAccountEndpointRequestValidator : Validator<CreatePlexAcc
     }
 }
 
-public class CreatePlexAccountEndpoint : BaseEndpoint<CreatePlexAccountEndpointRequest, PlexAccountDTO>
+public class CreatePlexAccountEndpoint : Endpoint<CreatePlexAccountEndpointRequest, PlexAccountDTO>
 {
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;

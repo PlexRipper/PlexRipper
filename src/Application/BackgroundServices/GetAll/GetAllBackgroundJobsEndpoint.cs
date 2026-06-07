@@ -15,7 +15,7 @@ public record GetAllBackgroundJobsEndpointRequest
     public required bool UseMockData { get; init; }
 }
 
-public class GetAllBackgroundJobsEndpoint : BaseEndpoint<GetAllBackgroundJobsEndpointRequest, List<JobStatusUpdateDTO>>
+public class GetAllBackgroundJobsEndpoint : Endpoint<GetAllBackgroundJobsEndpointRequest, List<JobStatusUpdateDTO>>
 {
     private readonly ISchedulerService _schedulerService;
 

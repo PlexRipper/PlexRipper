@@ -14,7 +14,7 @@ public class CreateDownloadTasksEndpointRequestValidator : Validator<CreateDownl
     }
 }
 
-public class CreateDownloadTasksEndpoint : BaseEndpoint<CreateDownloadTasksEndpointRequest>
+public class CreateDownloadTasksEndpoint : Endpoint<CreateDownloadTasksEndpointRequest>
 {
     private readonly ILogger _log;
     private readonly ICommandExecutor _commandExecutor;

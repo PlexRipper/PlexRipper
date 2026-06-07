@@ -11,7 +11,7 @@ public class RestartDownloadTaskEndpointRequestValidator : Validator<RestartDown
 }
 
 public class RestartDownloadTaskEndpoint(ICommandExecutor commandExecutor)
-    : BaseEndpoint<RestartDownloadTaskEndpointRequest>
+    : Endpoint<RestartDownloadTaskEndpointRequest>
 {
     public override void Configure()
     {

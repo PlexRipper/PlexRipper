@@ -29,7 +29,7 @@ public class UpdatePlexServerConnectionEndpointRequestValidator : Validator<Upda
 }
 
 public class UpdatePlexServerConnectionEndpoint
-    : BaseEndpoint<UpdatePlexServerConnectionEndpointRequest, ResultDTO<PlexServerConnectionDTO>>
+    : Endpoint<UpdatePlexServerConnectionEndpointRequest, ResultDTO<PlexServerConnectionDTO>>
 {
     private readonly IReaparrDbContext _dbContext;
 

@@ -1,6 +1,6 @@
 namespace Reaparr.Application;
 
-public class GetUserSettingsEndpoint : BaseEndpointWithoutRequest<SettingsModelDTO>
+public class GetUserSettingsEndpoint : EndpointWithoutRequest<SettingsModelDTO>
 {
     private readonly IUserSettings _userSettings;
 

@@ -15,7 +15,7 @@ public class PauseDownloadTaskEndpointRequestValidator : Validator<PauseDownload
     }
 }
 
-public class PauseDownloadTaskEndpoint : BaseEndpoint<PauseDownloadTaskEndpointRequest>
+public class PauseDownloadTaskEndpoint : Endpoint<PauseDownloadTaskEndpointRequest>
 {
     private readonly ICommandExecutor _commandExecutor;
 

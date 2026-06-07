@@ -10,7 +10,7 @@ public class PausePlexServerDownloadsEndpointRequestValidator : Validator<PauseP
     }
 }
 
-public class PausePlexServerDownloadsEndpoint : BaseEndpoint<PausePlexServerDownloadsEndpointRequest>
+public class PausePlexServerDownloadsEndpoint : Endpoint<PausePlexServerDownloadsEndpointRequest>
 {
     private readonly ICommandExecutor _commandExecutor;
 

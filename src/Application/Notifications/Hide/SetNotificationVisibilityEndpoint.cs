@@ -16,7 +16,7 @@ public class SetNotificationVisibilityEndpointRequestValidator : Validator<SetNo
     }
 }
 
-public class SetNotificationVisibilityEndpoint : BaseEndpoint<SetNotificationVisibilityEndpointRequest, BaseResultDTO>
+public class SetNotificationVisibilityEndpoint : Endpoint<SetNotificationVisibilityEndpointRequest, BaseResultDTO>
 {
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;

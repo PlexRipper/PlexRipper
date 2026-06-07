@@ -1,6 +1,6 @@
 namespace Reaparr.Application;
 
-public class GetAllNotificationsEndpoint : BaseEndpointWithoutRequest<List<NotificationDTO>>
+public class GetAllNotificationsEndpoint : EndpointWithoutRequest<List<NotificationDTO>>
 {
     private readonly IReaparrDbContext _dbContext;
 

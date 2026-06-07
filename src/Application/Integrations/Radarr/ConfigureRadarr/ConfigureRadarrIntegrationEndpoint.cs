@@ -15,7 +15,7 @@ public class ConfigureRadarrIntegrationRequestValidator : Validator<ConfigureRad
     }
 }
 
-public class ConfigureRadarrIntegrationEndpoint : BaseEndpoint<ConfigureRadarrIntegrationRequest>
+public class ConfigureRadarrIntegrationEndpoint : Endpoint<ConfigureRadarrIntegrationRequest>
 {
     private readonly ILogger _log;
     private readonly ICommandExecutor _commandExecutor;

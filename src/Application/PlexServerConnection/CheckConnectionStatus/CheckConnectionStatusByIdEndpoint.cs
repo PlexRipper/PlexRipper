@@ -10,7 +10,7 @@ public class CheckConnectionStatusByIdRequestValidator : Validator<CheckConnecti
     }
 }
 
-public class CheckConnectionStatusByIdEndpoint : BaseEndpoint<CheckConnectionStatusByIdRequest, PlexServerStatusDTO>
+public class CheckConnectionStatusByIdEndpoint : Endpoint<CheckConnectionStatusByIdRequest, PlexServerStatusDTO>
 {
     private readonly ILogger _log;
     private readonly ICommandExecutor _commandExecutor;

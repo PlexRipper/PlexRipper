@@ -27,7 +27,7 @@ public class CreateFolderPathEndpointRequestValidator : Validator<CreateFolderPa
     }
 }
 
-public class CreateFolderPathEndpoint : BaseEndpoint<CreateFolderPathEndpointRequest, FolderPathDTO>
+public class CreateFolderPathEndpoint : Endpoint<CreateFolderPathEndpointRequest, FolderPathDTO>
 {
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;

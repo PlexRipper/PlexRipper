@@ -21,7 +21,7 @@ public record GetAllPlexAccountsEndpointRequest
     public bool EnabledOnly { get; init; }
 }
 
-public class GetAllPlexAccountsEndpoint : BaseEndpoint<GetAllPlexAccountsEndpointRequest, List<PlexAccountDTO>>
+public class GetAllPlexAccountsEndpoint : Endpoint<GetAllPlexAccountsEndpointRequest, List<PlexAccountDTO>>
 {
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;

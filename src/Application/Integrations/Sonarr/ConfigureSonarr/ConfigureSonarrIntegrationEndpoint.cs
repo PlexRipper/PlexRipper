@@ -16,7 +16,7 @@ public class ConfigureSonarrIntegrationRequestValidator : Validator<ConfigureSon
     }
 }
 
-public class ConfigureSonarrIntegrationEndpoint : BaseEndpoint<ConfigureSonarrIntegrationRequest>
+public class ConfigureSonarrIntegrationEndpoint : Endpoint<ConfigureSonarrIntegrationRequest>
 {
     private readonly ILogger _log;
     private readonly ICommandExecutor _commandExecutor;

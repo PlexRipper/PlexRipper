@@ -11,7 +11,7 @@ public class QueueInspectPlexServerJobEndpointRequestValidator : Validator<Queue
 }
 
 public class QueueInspectPlexServerJobEndpoint
-    : BaseEndpoint<QueueInspectPlexServerJobEndpointRequest, ResultDTO<PlexServerDTO>>
+    : Endpoint<QueueInspectPlexServerJobEndpointRequest, ResultDTO<PlexServerDTO>>
 {
     private readonly ICommandExecutor _commandExecutor;
 

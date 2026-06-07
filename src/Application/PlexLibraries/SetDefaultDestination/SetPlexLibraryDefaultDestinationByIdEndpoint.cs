@@ -18,7 +18,7 @@ public class SetPlexLibraryDefaultDestinationByIdEndpointRequestValidator
 }
 
 public class SetPlexLibraryDefaultDestinationByIdEndpoint
-    : BaseEndpoint<SetPlexLibraryDefaultDestinationByIdEndpointRequest, BaseResultDTO>
+    : Endpoint<SetPlexLibraryDefaultDestinationByIdEndpointRequest, BaseResultDTO>
 {
     private readonly IReaparrDbContext _dbContext;
 

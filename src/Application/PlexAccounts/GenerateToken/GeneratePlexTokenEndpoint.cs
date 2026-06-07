@@ -33,7 +33,7 @@ public class GeneratePlexTokenResponse
     public required string PlexAuthToken { get; init; }
 }
 
-public class GeneratePlexTokenEndpoint : BaseEndpoint<GeneratePlexTokenEndpointRequest, GeneratePlexTokenResponse>
+public class GeneratePlexTokenEndpoint : Endpoint<GeneratePlexTokenEndpointRequest, GeneratePlexTokenResponse>
 {
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;

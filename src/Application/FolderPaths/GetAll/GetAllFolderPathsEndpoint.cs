@@ -1,6 +1,6 @@
 namespace Reaparr.Application;
 
-public class GetAllFolderPathsEndpoint : BaseEndpointWithoutRequest<List<FolderPathDTO>>
+public class GetAllFolderPathsEndpoint : EndpointWithoutRequest<List<FolderPathDTO>>
 {
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;

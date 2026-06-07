@@ -46,7 +46,7 @@ public class TestConnectionToSonarrEndpointRequestValidator : Validator<TestConn
 }
 
 public class TestConnectionToSonarrEndpoint
-    : BaseEndpoint<TestConnectionToSonarrEndpointRequest, TestConnectionToSonarrEndpointResponse>
+    : Endpoint<TestConnectionToSonarrEndpointRequest, TestConnectionToSonarrEndpointResponse>
 {
     private readonly ILogger _log;
     private readonly HttpClient _client;

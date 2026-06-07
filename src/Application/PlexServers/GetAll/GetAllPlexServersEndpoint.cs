@@ -3,7 +3,7 @@ namespace Reaparr.Application;
 /// <summary>
 /// Retrieves all the <see cref="PlexServer">PlexServers</see>, without PlexLibraries but with all its connections.
 /// </summary>
-public class GetAllPlexServersEndpoint : BaseEndpointWithoutRequest<List<PlexServerDTO>>
+public class GetAllPlexServersEndpoint : EndpointWithoutRequest<List<PlexServerDTO>>
 {
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;

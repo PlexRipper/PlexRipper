@@ -14,7 +14,7 @@ public class SearchPlexMediaRequestValidator : Validator<SearchPlexMediaRequest>
     }
 }
 
-public class SearchPlexMediaEndpoint : BaseEndpoint<SearchPlexMediaRequest, ResultDTO<List<PlexMediaSlimDTO>>>
+public class SearchPlexMediaEndpoint : Endpoint<SearchPlexMediaRequest, ResultDTO<List<PlexMediaSlimDTO>>>
 {
     private readonly IReaparrDbContext _dbContext;
 

@@ -39,7 +39,7 @@ public class GetPlexMediaThumbnailImageEndpointRequestValidator : Validator<GetP
 /// High-performance thumbnail proxy endpoint with streaming response and in-memory caching
 /// for database lookups. Response caching is enabled for downstream caches (3 days).
 /// </summary>
-public sealed class GetPlexMediaThumbnailImageEndpoint : BaseEndpoint<GetPlexMediaThumbnailImageEndpointRequest, byte[]>
+public sealed class GetPlexMediaThumbnailImageEndpoint : Endpoint<GetPlexMediaThumbnailImageEndpointRequest, byte[]>
 {
     private readonly ILogger _log;
     private readonly IAppRuntimeInfo _appRuntimeInfo;

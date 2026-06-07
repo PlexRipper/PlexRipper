@@ -11,7 +11,7 @@ public sealed class ClearCompletedDownloadTasksByServerIdEndpointRequest
 }
 
 public class ClearCompletedDownloadTasksByServerIdEndpoint
-    : BaseEndpoint<ClearCompletedDownloadTasksByServerIdEndpointRequest, ResultDTO<CountResponseDTO>>
+    : Endpoint<ClearCompletedDownloadTasksByServerIdEndpointRequest, ResultDTO<CountResponseDTO>>
 {
     private readonly ICommandExecutor _commandExecutor;
 

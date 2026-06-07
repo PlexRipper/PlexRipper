@@ -1,6 +1,6 @@
 namespace Reaparr.Application;
 
-public class ClearSonarrConfigurationEndpoint : BaseEndpointWithoutRequest
+public class ClearSonarrConfigurationEndpoint : EndpointWithoutRequest
 {
     private readonly ILogger _log;
     private readonly ISonarrSettings _sonarrSettings;

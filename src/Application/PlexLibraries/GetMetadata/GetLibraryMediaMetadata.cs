@@ -20,7 +20,7 @@ public class GetLibraryMediaMetadataRequestValidator : Validator<GetLibraryMedia
     }
 }
 
-public class GetLibraryMediaMetadata : BaseEndpoint<GetLibraryMediaMetadataRequest, PlexMediaMetadataDTO>
+public class GetLibraryMediaMetadata : Endpoint<GetLibraryMediaMetadataRequest, PlexMediaMetadataDTO>
 {
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;

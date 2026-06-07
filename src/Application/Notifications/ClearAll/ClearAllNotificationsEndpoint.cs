@@ -4,7 +4,7 @@ namespace Reaparr.Application;
 /// Deletes/Clears all <see cref="Notification">Notifications</see>.
 /// </summary>
 /// <returns>Returns the number of <see cref="Notification">Notifications</see> that have been deleted.</returns>
-public class ClearAllNotificationsEndpoint : BaseEndpointWithoutRequest<CountResponseDTO>
+public class ClearAllNotificationsEndpoint : EndpointWithoutRequest<CountResponseDTO>
 {
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;

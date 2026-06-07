@@ -66,7 +66,7 @@ public class GetAllMediaByTypeRequestValidator : Validator<GetAllMediaByTypeRequ
     }
 }
 
-public class GetAllMediaByTypeEndpoint : BaseEndpoint<GetAllMediaByTypeRequest, PlexMediaStatisticsDTO>
+public class GetAllMediaByTypeEndpoint : Endpoint<GetAllMediaByTypeRequest, PlexMediaStatisticsDTO>
 {
     private readonly ILogger _log;
     private readonly ICommandExecutor _commandExecutor;

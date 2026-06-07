@@ -10,7 +10,7 @@ public class DeletePlexServerConnectionByIdRequestValidator : Validator<DeletePl
     }
 }
 
-public class DeletePlexServerConnectionById : BaseEndpoint<DeletePlexServerConnectionByIdRequest>
+public class DeletePlexServerConnectionById : Endpoint<DeletePlexServerConnectionByIdRequest>
 {
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;

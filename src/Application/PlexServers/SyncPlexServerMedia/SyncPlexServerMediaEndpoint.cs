@@ -17,7 +17,7 @@ public class SyncPlexServerMediaEndpointRequestValidator : Validator<SyncPlexSer
     }
 }
 
-public class SyncPlexServerMediaEndpoint : BaseEndpoint<SyncPlexServerMediaEndpointRequest, BaseResultDTO>
+public class SyncPlexServerMediaEndpoint : Endpoint<SyncPlexServerMediaEndpointRequest, BaseResultDTO>
 {
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;

@@ -46,7 +46,7 @@ public class TestConnectionToRadarrEndpointRequestValidator : Validator<TestConn
 }
 
 public class TestConnectionToRadarrEndpoint
-    : BaseEndpoint<TestConnectionToRadarrEndpointRequest, TestConnectionToRadarrEndpointResponse>
+    : Endpoint<TestConnectionToRadarrEndpointRequest, TestConnectionToRadarrEndpointResponse>
 {
     private readonly ILogger _log;
     private readonly HttpClient _client;

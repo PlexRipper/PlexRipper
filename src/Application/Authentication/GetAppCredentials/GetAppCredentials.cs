@@ -17,7 +17,7 @@ public class AppCredentialsDTO
     public required bool IsDefaultCredentials { get; set; }
 }
 
-public class GetAppCredentials : BaseEndpointWithoutRequest<AppCredentialsDTO>
+public class GetAppCredentials : EndpointWithoutRequest<AppCredentialsDTO>
 {
     private readonly ILogger _log;
     private readonly IUserService _userService;

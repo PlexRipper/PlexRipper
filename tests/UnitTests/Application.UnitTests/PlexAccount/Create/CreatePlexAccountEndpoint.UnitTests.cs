@@ -52,14 +52,15 @@ public class CreatePlexAccountEndpointUnitTests : BaseEndpointUnitTest<CreatePle
         var plexAccount = await IDbContext.PlexAccounts.GetAsync(1, CancellationToken);
         plexAccount.ShouldNotBeNull();
 
-        var newAccount = PlexAccount.Create(plexAccount.Username, "Password123");
+        var newAccount = FakeData.GetPlexAccount(234).Generate();
+        var duplicateUsername = plexAccount.Username;
 
         Mock.SetupCommand(It.IsAny<InspectAllPlexServersByAccountIdCommand>).ReturnsAsync(Result.Ok());
 
         var createPlexAccountDTO = new CreatePlexAccountEndpointRequest
         {
             DisplayName = newAccount.DisplayName,
-            Username = newAccount.Username,
+            Username = duplicateUsername,
             Password = newAccount.Password,
             IsEnabled = newAccount.IsEnabled,
             IsMain = newAccount.IsMain,
@@ -80,7 +81,7 @@ public class CreatePlexAccountEndpointUnitTests : BaseEndpointUnitTest<CreatePle
 
         // Assert
         endpointResult.Response.IsSuccess.ShouldBeFalse();
-        var duplicateAccounts = await IDbContext.PlexAccounts.CountAsync(x => x.Username == newAccount.Username, CancellationToken);
+        var duplicateAccounts = await IDbContext.PlexAccounts.CountAsync(x => x.Username == duplicateUsername, CancellationToken);
         duplicateAccounts.ShouldBe(1);
 
         Mock.Mock<ICommandExecutor>()

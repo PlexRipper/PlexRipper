@@ -922,6 +922,42 @@ public class GetMediaByTypeCommandHandlerUnitTests : BaseUnitTest<GetMediaByType
     }
 
     [Test]
+    public async Task ShouldCalculateMediaSizeFromMovieRows_WhenLibraryMediaSizeSnapshotIsStale()
+    {
+        // Arrange
+        await SetupDatabase(70232, cfg =>
+        {
+            cfg.PlexServerCount = 1;
+            cfg.PlexMovieLibraryCount = 1;
+            cfg.MovieCount = 6;
+        });
+
+        var dbContext = IDbContext;
+        var targetLibrary = await dbContext.PlexLibraries
+            .Where(x => x.Type == PlexMediaType.Movie)
+            .OrderBy(x => x.Id)
+            .FirstAsync(CancellationToken);
+        var expectedMediaSize = await dbContext.PlexMovies
+            .Where(x => x.PlexLibraryId == targetLibrary.Id)
+            .SumAsync(x => x.MediaSize, CancellationToken);
+        await dbContext.PlexLibraries
+            .Where(x => x.Id == targetLibrary.Id)
+            .ExecuteUpdateAsync(x => x.SetProperty(y => y.MediaSize, 0), CancellationToken);
+
+        var command = CreateCommand(PlexMediaType.Movie, targetLibrary.Id);
+
+        // Act
+        var result = await Sut.ExecuteAsync(command, CancellationToken);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.Items.ShouldAllBe(x => x.PlexLibraryId == targetLibrary.Id);
+        result.Value.MediaSize.ShouldBe(expectedMediaSize);
+        result.Value.TotalMediaSize.ShouldBe(expectedMediaSize);
+        result.Value.MediaSize.ShouldBeGreaterThan(0);
+    }
+
+    [Test]
     public async Task ShouldFilterMoviesByCountryId_WhenMetadataCountryFilterIsApplied()
     {
         // Arrange

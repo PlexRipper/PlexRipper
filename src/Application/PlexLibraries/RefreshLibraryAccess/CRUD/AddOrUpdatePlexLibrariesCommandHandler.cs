@@ -80,11 +80,16 @@ public class AddOrUpdatePlexLibrariesCommandHandler
                         );
                     
                     incomingPlexLibrary.Id = plexLibraryDb.Id;
-                    incomingPlexLibrary.SyncedAt = plexLibraryDb.SyncedAt;
-                    incomingPlexLibrary.Outdated = plexLibraryDb.Outdated || incomingPlexLibrary.ContentChangedAt != plexLibraryDb.ContentChangedAt;
-                    incomingPlexLibrary.DefaultDestinationId = plexLibraryDb.DefaultDestinationId;
 
-                    _dbContext.Entry(plexLibraryDb).CurrentValues.SetValues(incomingPlexLibrary);
+                    plexLibraryDb.Title = incomingPlexLibrary.Title;
+                    plexLibraryDb.Key = incomingPlexLibrary.Key;
+                    plexLibraryDb.CreatedAt = incomingPlexLibrary.CreatedAt;
+                    plexLibraryDb.UpdatedAt = incomingPlexLibrary.UpdatedAt;
+                    plexLibraryDb.ScannedAt = incomingPlexLibrary.ScannedAt;
+                    plexLibraryDb.ContentChangedAt = incomingPlexLibrary.ContentChangedAt;
+                    plexLibraryDb.Uuid = incomingPlexLibrary.Uuid;
+                    plexLibraryDb.Language = incomingPlexLibrary.Language;
+                    plexLibraryDb.Outdated = plexLibraryDb.Outdated || incomingPlexLibrary.ContentChangedAt != plexLibraryDb.ContentChangedAt;
                 }
             }
 

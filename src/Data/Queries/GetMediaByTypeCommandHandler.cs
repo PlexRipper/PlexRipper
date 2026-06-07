@@ -114,6 +114,8 @@ public class GetMediaByTypeCommandHandler : ICommandHandler<GetMediaByTypeComman
                 )), options, ct);
 
                 _response.TotalCount = await movieQuery.CountAsync(ct);
+                _response.MediaSize = await movieQuery.SumAsync(x => x.MediaSize, ct);
+                _response.TotalMediaSize = _response.MediaSize;
 
                 var movies = await movieQuery
                     .ApplyPaging(options)
@@ -150,6 +152,8 @@ public class GetMediaByTypeCommandHandler : ICommandHandler<GetMediaByTypeComman
                 )), options, ct);
 
                 _response.TotalCount = await tvShowQuery.CountAsync(ct);
+                _response.MediaSize = await tvShowQuery.SumAsync(x => x.MediaSize, ct);
+                _response.TotalMediaSize = _response.MediaSize;
 
                 var tvShows = await tvShowQuery
                     .ApplyPaging(options)
@@ -289,7 +293,6 @@ public class GetMediaByTypeCommandHandler : ICommandHandler<GetMediaByTypeComman
             : allScopedLibraries.Sum(x => x.TvShowCount);
         _response.TotalSeasonCount = allScopedLibraries.Sum(x => x.SeasonCount);
         _response.TotalEpisodeCount = allScopedLibraries.Sum(x => x.EpisodeCount);
-        _response.TotalMediaSize = allScopedLibraries.Sum(x => x.MediaSize);
 
         if (hasUserFilters)
         {
@@ -299,7 +302,6 @@ public class GetMediaByTypeCommandHandler : ICommandHandler<GetMediaByTypeComman
             _response.SeasonCount = _response.Items.Where(x => x.Type == PlexMediaType.TvShow).Sum(x => x.ChildCount);
             _response.EpisodeCount =
                 _response.Items.Where(x => x.Type == PlexMediaType.TvShow).Sum(x => x.GrandChildCount);
-            _response.MediaSize = _response.Items.Sum(x => x.MediaSize);
             return;
         }
 
@@ -307,7 +309,6 @@ public class GetMediaByTypeCommandHandler : ICommandHandler<GetMediaByTypeComman
         _response.TvShowCount = mediaType == PlexMediaType.TvShow ? _response.TotalCount : 0;
         _response.SeasonCount = mediaType == PlexMediaType.TvShow ? _response.TotalSeasonCount : 0;
         _response.EpisodeCount = mediaType == PlexMediaType.TvShow ? _response.TotalEpisodeCount : 0;
-        _response.MediaSize = _response.TotalMediaSize;
         _response.MediaCount = _response.TotalCount;
     }
 }

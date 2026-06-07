@@ -1,5 +1,30 @@
 Reaparr Changelog
 
+# [0.38.0-dev.21](https://github.com/Reaparr/Reaparr/compare/v0.38.0-dev.20...v0.38.0-dev.21) (2026-06-07)
+
+
+### Bug Fixes
+
+* **WebAPI:** Allow download folder media type none ([5bb25b9](https://github.com/Reaparr/Reaparr/commit/5bb25b9d1a8d993170804bb3847a158a64b092b6))
+* **WebAPI:** Correct all-library alphabet navigation order ([396eea4](https://github.com/Reaparr/Reaparr/commit/396eea4d92627786f3be398ea4f38b79ab9ecf16))
+* **Web-UI:** Distinguish between disabled and inaccessible servers ([2039230](https://github.com/Reaparr/Reaparr/commit/20392309764672dcf3f944384366f05979465967))
+* **WebAPI:** Fix incorrect job status updates due to missing listeners ([344d642](https://github.com/Reaparr/Reaparr/commit/344d6425be7aee83baaf8c65ada6e28f18dda5e8))
+* **WebAPI:** Fixed an issue where inaccessible servers would still show up on the home page, this media is now always filtered out ([b4d08a6](https://github.com/Reaparr/Reaparr/commit/b4d08a6f96ee747e269dd466a0ca3f2aac52e91b))
+* **WebAPI:** Fixed PlexLibrary not being sent after a RefreshLibraryMedia ([cb323bc](https://github.com/Reaparr/Reaparr/commit/cb323bcea6091d1d76d3154d0397d4ee80176663))
+* **Web-UI:** Fixed the alphabetical order of the Plex libraries in the server drawer, now its movies, then tv-shows then the rest ([e344b0e](https://github.com/Reaparr/Reaparr/commit/e344b0e2f1b95a756925b39351a3ffcd15c8ee36))
+* **Web-UI:** Handle empty job update payloads ([5d89ba8](https://github.com/Reaparr/Reaparr/commit/5d89ba8201631dcbcb38b49a18a3b8bb5b896388))
+* **frontend:** mark inaccessible media header names ([4feeb97](https://github.com/Reaparr/Reaparr/commit/4feeb97b06d84710e9817a05d4eb681955d69b33))
+* **WebAPI:** Preserve Plex library metrics during refresh ([6771d1c](https://github.com/Reaparr/Reaparr/commit/6771d1c57e500b200958bab92f6254efc2385a5a))
+* **WebAPI:** Remove Database.EnsureCreated() from DbContext constructor, this was causing errors during unit tests ([26e7d12](https://github.com/Reaparr/Reaparr/commit/26e7d12ae2cf0023e40fe375081ab394ec0597f7))
+* **Web-UI:** Show server name on fallback posters ([5490890](https://github.com/Reaparr/Reaparr/commit/549089046ab94c08875a3b9c8d61e6a1dee0ed14))
+* **WebAPI:** Validate setup folder paths by existence ([5314d95](https://github.com/Reaparr/Reaparr/commit/5314d952eced13b8f685ae49283fcaef283f7449)), closes [#599](https://github.com/Reaparr/Reaparr/issues/599)
+
+
+### Features
+
+* **Web-UI:** Add strikethrough through the Plex server name on the Downloads Table when there is no Plex account that has access ([570b861](https://github.com/Reaparr/Reaparr/commit/570b861881a9034b8decb3e4d6ac51fb11c9ae4e))
+* **Web-UI:** Added Plex server command button in the Server settings to delete a Plex Server ([baf277c](https://github.com/Reaparr/Reaparr/commit/baf277c3a6f8a3f29fbb0e12ec63d2c252af09ed))
+
 # [0.38.0-dev.20](https://github.com/Reaparr/Reaparr/compare/v0.38.0-dev.19...v0.38.0-dev.20) (2026-05-24)
 
 

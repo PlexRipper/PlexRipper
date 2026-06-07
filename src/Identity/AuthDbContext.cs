@@ -51,7 +51,6 @@ public sealed class AuthDbContext : IdentityDbContext<AppUser>, IAuthDbContext, 
 
         DatabaseName = databaseName;
         Database.OpenConnection();
-        Database.EnsureCreated();
     }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)

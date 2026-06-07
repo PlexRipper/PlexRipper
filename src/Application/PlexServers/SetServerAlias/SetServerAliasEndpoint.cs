@@ -2,6 +2,7 @@ namespace Reaparr.Application;
 
 public record SetServerAliasRequest
 {
+    [RouteParam, BindFrom("PlexServerId")]
     public required int PlexServerId { get; init; }
 
     public required string ServerAlias { get; init; }

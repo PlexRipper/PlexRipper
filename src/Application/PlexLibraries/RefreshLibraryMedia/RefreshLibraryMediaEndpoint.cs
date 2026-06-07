@@ -13,11 +13,13 @@ public class RefreshLibraryMediaEndpointRequestValidator : Validator<RefreshLibr
 public class RefreshLibraryMediaEndpoint : Endpoint<RefreshLibraryMediaEndpointRequest, BaseResultDTO>
 {
     private readonly ILogger _log;
+    private readonly IReaparrDbContext _dbContext;
     private readonly ICommandExecutor _commandExecutor;
 
     public RefreshLibraryMediaEndpoint(ILogger log, IReaparrDbContext dbContext, ICommandExecutor commandExecutor)
     {
         _log = log.ForContext<RefreshLibraryMediaEndpoint>();
+        _dbContext = dbContext;
         _commandExecutor = commandExecutor;
     }
 
@@ -26,7 +28,7 @@ public class RefreshLibraryMediaEndpoint : Endpoint<RefreshLibraryMediaEndpointR
         Get(ApiRoutes.PlexLibraryController + "/refresh/{PlexLibraryId}");
 
         Description(x =>
-            x.Produces(StatusCodes.Status200OK, typeof(BaseResultDTO))
+            x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<PlexLibraryDTO>))
                 .Produces(StatusCodes.Status400BadRequest, typeof(BaseResultDTO))
                 .Produces(StatusCodes.Status404NotFound, typeof(BaseResultDTO))
                 .Produces(StatusCodes.Status500InternalServerError, typeof(BaseResultDTO))
@@ -38,7 +40,19 @@ public class RefreshLibraryMediaEndpoint : Endpoint<RefreshLibraryMediaEndpointR
         _log.Here().DebugApiCall(HttpContext, req);
 
         var result = await _commandExecutor.Send(new QueueLibrarySyncJobCommand([req.PlexLibraryId]), ct);
+        if (result.IsFailed)
+        {
+            await Send.FluentResult(result, ct);
+            return;
+        }
 
-        await Send.FluentResult(result, ct);
+        var plexLibrary = await _dbContext.PlexLibraries.GetAsync(req.PlexLibraryId, cancellationToken: ct);
+        if (plexLibrary is null)
+        {
+            await Send.FluentResult(ResultExtensions.EntityNotFound(nameof(PlexLibrary), req.PlexLibraryId), ct: ct);
+            return;
+        }
+
+        await Send.FluentResult(Result.Ok(plexLibrary), x => x.ToDTO(), ct);
     }
 }

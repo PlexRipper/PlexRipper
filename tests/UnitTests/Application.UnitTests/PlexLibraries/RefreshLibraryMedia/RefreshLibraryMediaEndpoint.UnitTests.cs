@@ -3,7 +3,7 @@ using Reaparr.BackgroundJobs.Contracts;
 namespace Reaparr.Application.UnitTests;
 
 public class RefreshLibraryMediaEndpointUnitTests
-    : BaseEndpointUnitTest<RefreshLibraryMediaEndpoint, RefreshLibraryMediaEndpointRequest, BaseResultDTO>
+    : BaseEndpointUnitTest<RefreshLibraryMediaEndpoint, RefreshLibraryMediaEndpointRequest, ResultDTO<PlexLibraryDTO>>
 {
     [Test]
     public async Task ShouldReturnSuccess_WhenLibrarySyncJobQueued()

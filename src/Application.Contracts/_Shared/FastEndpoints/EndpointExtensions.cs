@@ -1,4 +1,6 @@
-namespace Reaparr.Application;
+using Microsoft.AspNetCore.Http;
+
+namespace Reaparr.Application.Contracts;
 
 public static class EndpointExtensions
 {

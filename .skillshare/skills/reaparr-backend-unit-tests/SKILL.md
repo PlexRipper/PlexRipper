@@ -345,23 +345,85 @@ Include at least one MovieData mapping test and one EpisodeData mapping test for
 
 ### Endpoint unit tests
 
-- **Always inherit `BaseUnitTest<TEndpoint>`** — the generic form, with the endpoint as the type parameter. Do not use non-generic `BaseUnitTest` for endpoint tests even if `Sut` is not directly used; the generic form is the project standard.
+Endpoint tests use endpoint-specific base classes from `tests/BaseTests/_Shared/BaseEndpointUnitTest/BaseEndpointUnitTest.cs`. Put the endpoint/request/response types on the test class once, then call `TestEndpointHandleAsync(...)` without method-level endpoint generics.
+
+- **Request endpoints:** inherit `BaseEndpointUnitTest<TEndpoint, TRequest, TResponse>`.
+- **No-request endpoints:** inherit `BaseEndpointWithoutRequestUnitTest<TEndpoint, TResponse>`.
+- **Do not** inherit plain `BaseUnitTest<TEndpoint>` for endpoint tests unless intentionally bypassing endpoint helper behavior.
+- **Do not** call endpoint `HandleAsync(...)` directly in normal endpoint unit tests; direct calls bypass validator execution.
+- `TestEndpointHandleAsync(TRequest request, Action<IServiceCollection>? extraServices = null)` validates request endpoints before execution and skips `HandleAsync(...)` when validation fails.
+- `TestEndpointHandleAsync(Action<IServiceCollection>? extraServices = null)` executes no-request endpoints.
+- The helper returns `EndpointUnitTestResult<TEndpoint, TResponse>` with `Endpoint`, nullable typed `Result`, `RequiredResult`, `ValidationResult`, `HasValidator`, and `IsValid`.
+- `Result` is nullable because invalid validation intentionally does not execute the endpoint. Use `RequiredResult` only after asserting/knowing the endpoint executed.
+- `TResponse` must match the actual runtime `endpoint.Response` type. Use `BaseResultDTO` for endpoints that send non-generic command results, even if OpenAPI documents `ResultDTO<T>` for success. Use `ResultDTO<T>` only when the endpoint actually sets that runtime response type.
+- `SetupEndpointUnitTest<T>()` remains the lower-level factory. Use it only when a test explicitly needs to bypass the validation-aware helper.
 - `SetupEndpointUnitTest<T>()` provides a real in-memory `IReaparrDbContext` and registers: `ILogger`, `IReaparrDbContext`, `IReaparrDbContextFactory`, `IAuthDbContext`, `IAuthDbContextFactory`, `ICommandExecutor`, `ISchedulerService`, `IProgressHubService`, `IDownloadHubService`, `INotificationHubService`, `IDownloadTaskScheduler`.
 - Avoid mocking `IReaparrDbContext` in endpoint tests unless intentionally re-registering a mock.
-- **Endpoints with non-standard dependencies** (e.g. `UpdateManager`, custom services not in the list above): pass an `extraServices` action to `SetupEndpointUnitTest<T>()` — never call `Factory.Create<T>` directly. `ILogger` is always registered by `SetupEndpointUnitTest`, so only add what is missing:
+- **Endpoints with non-standard dependencies** (e.g. `UpdateManager`, custom services not in the list above): pass `extraServices` to `TestEndpointHandleAsync(...)` — never call `Factory.Create<T>` directly. `ILogger` is always registered by `SetupEndpointUnitTest`, so only add what is missing.
+
+Request endpoint example:
 
 ```csharp
-var endpoint = SetupEndpointUnitTest<MyEndpoint>(s =>
-    s.AddSingleton(_ => mockCustomDep.Object)
-);
+public class RefreshLibraryMediaEndpointUnitTests
+    : BaseEndpointUnitTest<RefreshLibraryMediaEndpoint, RefreshLibraryMediaEndpointRequest, BaseResultDTO>
+{
+    [Test]
+    public async Task ShouldReturnSuccess_WhenLibrarySyncJobQueued()
+    {
+        // Arrange
+        var request = new RefreshLibraryMediaEndpointRequest(plexLibrary.Id);
+
+        Mock.SetupCommand(It.IsAny<QueueLibrarySyncJobCommand>())
+            .ReturnsAsync(Result.Ok())
+            .Verifiable(Times.Once());
+
+        // Act
+        var endpointResult = await TestEndpointHandleAsync(request);
+        var result = endpointResult.RequiredResult;
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+    }
+}
 ```
 
-- **Accessing typed response DTOs**: `endpoint.Response` is declared as `BaseResultDTO`. For endpoints returning `ResultDTO<T>`, use a null-safe `as` cast — never a direct cast:
+No-request endpoint with extra services:
 
 ```csharp
-var result = endpoint.Response as ResultDTO<MyDTO>;
-result.ShouldNotBeNull();
-result.Value!.SomeField.ShouldBe(expected);
+public class ApplyUpdateEndpointUnitTests
+    : BaseEndpointWithoutRequestUnitTest<ApplyUpdateEndpoint, BaseResultDTO>
+{
+    [Test]
+    public async Task ShouldReturnFailure_WhenDockerMode()
+    {
+        // Arrange
+        SetAppBuildInfo(x => x.RuntimeMode = "docker");
+        var mockManager = new Mock<UpdateManager>(mockSource.Object, null!, mockLocator.Object);
+
+        // Act
+        var endpointResult = await TestEndpointHandleAsync(
+            extraServices: s => s.AddSingleton(_ => mockManager.Object)
+        );
+        var result = endpointResult.RequiredResult;
+
+        // Assert
+        result.IsSuccess.ShouldBeFalse();
+    }
+}
+```
+
+Validation failure example:
+
+```csharp
+var endpointResult = await TestEndpointHandleAsync(new RefreshLibraryMediaEndpointRequest(0));
+
+endpointResult.IsValid.ShouldBeFalse();
+endpointResult.ValidationResult.ShouldNotBeNull();
+endpointResult.Result.ShouldBeNull();
+Mock.Mock<ICommandExecutor>().Verify(
+    x => x.Send(It.IsAny<QueueLibrarySyncJobCommand>(), It.IsAny<CancellationToken>()),
+    Times.Never
+);
 ```
 
 ### Static abstract settings interfaces

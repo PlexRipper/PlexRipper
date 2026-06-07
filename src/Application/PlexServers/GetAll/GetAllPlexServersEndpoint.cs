@@ -3,12 +3,10 @@ namespace Reaparr.Application;
 /// <summary>
 /// Retrieves all the <see cref="PlexServer">PlexServers</see>, without PlexLibraries but with all its connections.
 /// </summary>
-public class GetAllPlexServersEndpoint : BaseEndpointWithoutRequest<List<PlexServerDTO>>
+public class GetAllPlexServersEndpoint : EndpointWithoutRequest<List<PlexServerDTO>>
 {
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
-
-    public override string EndpointPath => ApiRoutes.PlexServerController + "/";
 
     public GetAllPlexServersEndpoint(ILogger log, IReaparrDbContext dbContext)
     {
@@ -18,7 +16,7 @@ public class GetAllPlexServersEndpoint : BaseEndpointWithoutRequest<List<PlexSer
 
     public override void Configure()
     {
-        Get(EndpointPath);
+        Get(ApiRoutes.PlexServerController + "/");
 
         Summary(summary =>
         {
@@ -40,6 +38,6 @@ public class GetAllPlexServersEndpoint : BaseEndpointWithoutRequest<List<PlexSer
             .Include(x => x.PlexAccountServers)
             .ToListAsync(ct);
 
-        await SendFluentResult(Result.Ok(plexServers), x => x.ToDTO(), ct);
+        await Send.FluentResult(Result.Ok(plexServers), x => x.ToDTO(), ct);
     }
 }

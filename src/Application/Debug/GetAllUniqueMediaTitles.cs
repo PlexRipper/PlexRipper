@@ -11,13 +11,11 @@ public record GetAllUniqueMediaTitlesEndpointRequest
     public int Count { get; init; } = 0;
 }
 
-public class GetAllUniqueMediaTitlesEndpoint : BaseEndpoint<GetAllUniqueMediaTitlesEndpointRequest, List<string>>
+public class GetAllUniqueMediaTitlesEndpoint : Endpoint<GetAllUniqueMediaTitlesEndpointRequest, List<string>>
 {
     private readonly IReaparrDbContext _dbContext;
 
     private readonly Random _random = new();
-
-    public override string EndpointPath => ApiRoutes.DebugController + "/unique-media-titles";
 
     public GetAllUniqueMediaTitlesEndpoint(IReaparrDbContext dbContext)
     {
@@ -26,7 +24,7 @@ public class GetAllUniqueMediaTitlesEndpoint : BaseEndpoint<GetAllUniqueMediaTit
 
     public override void Configure()
     {
-        Get(EndpointPath);
+        Get(ApiRoutes.DebugController + "/unique-media-titles");
 
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<List<string>>))

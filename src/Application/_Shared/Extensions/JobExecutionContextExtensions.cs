@@ -55,15 +55,12 @@ public static class JobExecutionContextExtensions
 
             // NOTE: LibrarySyncJob handles its own status updates via SignalR in LibrarySyncJobListener
             case JobTypes.LibrarySyncJob:
-                break;
-
+  
             // NOTE: CheckForUpdateJob emits update availability through RefreshDataType.UpdateAvailable notifications.
             case JobTypes.CheckForUpdateJob:
-                break;
 
             // NOTE: CheckPlexLibrariesForUpdatesJob only dispatches queueing work and does not need a payload.
             case JobTypes.CheckPlexLibrariesForUpdatesJob:
-                break;
 
             default:
                 jsonString = "{}";

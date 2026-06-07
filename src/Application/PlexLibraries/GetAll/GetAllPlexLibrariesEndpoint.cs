@@ -3,12 +3,10 @@ namespace Reaparr.Application;
 /// <summary>
 /// Retrieves all the <see cref="PlexLibrary">PlexLibraries</see> from the database.
 /// </summary>
-public class GetAllPlexLibrariesEndpoint : BaseEndpointWithoutRequest<List<PlexLibraryDTO>>
+public class GetAllPlexLibrariesEndpoint : EndpointWithoutRequest<List<PlexLibraryDTO>>
 {
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
-
-    public override string EndpointPath => ApiRoutes.PlexLibraryController + "/";
 
     public GetAllPlexLibrariesEndpoint(ILogger log, IReaparrDbContext dbContext)
     {
@@ -18,7 +16,7 @@ public class GetAllPlexLibrariesEndpoint : BaseEndpointWithoutRequest<List<PlexL
 
     public override void Configure()
     {
-        Get(EndpointPath);
+        Get(ApiRoutes.PlexLibraryController + "/");
 
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<List<PlexLibraryDTO>>))
@@ -31,6 +29,6 @@ public class GetAllPlexLibrariesEndpoint : BaseEndpointWithoutRequest<List<PlexL
         _log.Here().DebugApiCall(HttpContext);
         var plexLibraries = await _dbContext.PlexLibraries.ToListAsync(ct);
 
-        await SendFluentResult(Result.Ok(plexLibraries), x => x.ToDTO(), ct);
+        await Send.FluentResult(Result.Ok(plexLibraries), x => x.ToDTO(), ct);
     }
 }

@@ -3,14 +3,12 @@ namespace Reaparr.Application;
 /// <summary>
 /// Downloads the latest desktop update package when an update is available.
 /// </summary>
-public class DownloadUpdateEndpoint : BaseEndpointWithoutRequest
+public class DownloadUpdateEndpoint : EndpointWithoutRequest<BaseResultDTO>
 {
     private readonly UpdateManager _velopackManager;
     private readonly IAppBuildInfo _appBuildInfo;
     private readonly IProgressHubService _progressHub;
     private readonly ILogger _log;
-
-    public override string EndpointPath => ApiRoutes.UpdateController + "/DownloadUpdate";
 
     public DownloadUpdateEndpoint(
         ILogger log,
@@ -27,7 +25,7 @@ public class DownloadUpdateEndpoint : BaseEndpointWithoutRequest
 
     public override void Configure()
     {
-        Post(EndpointPath);
+        Post(ApiRoutes.UpdateController + "/DownloadUpdate");
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(BaseResultDTO))
                 .Produces(StatusCodes.Status500InternalServerError, typeof(BaseResultDTO))
@@ -41,7 +39,7 @@ public class DownloadUpdateEndpoint : BaseEndpointWithoutRequest
         if (!_appBuildInfo.IsDesktopMode)
         {
             _log.Here().Debug("Skipping update download — not running in desktop mode");
-            await SendFluentResult(Result.Fail("Desktop updates are not supported in the current runtime mode"), ct);
+            await Send.FluentResult(Result.Fail("Desktop updates are not supported in the current runtime mode"), ct);
             return;
         }
 
@@ -77,6 +75,6 @@ public class DownloadUpdateEndpoint : BaseEndpointWithoutRequest
                 );
         });
 
-        await SendFluentResult(result, ct);
+        await Send.FluentResult(result, ct);
     }
 }

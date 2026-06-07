@@ -2,20 +2,20 @@ namespace Reaparr.Application;
 
 public record ValidateFolderPathsCommand(PlexMediaType MediaType = PlexMediaType.None) : ICommand<Result>;
 
-public class ValidateFolderPathsValidator : AbstractValidator<ValidateFolderPathsCommand>
+public class ValidateFolderPathsCommandValidator : AbstractValidator<ValidateFolderPathsCommand>
 {
-    public ValidateFolderPathsValidator()
+    public ValidateFolderPathsCommandValidator()
     {
         RuleFor(x => x).NotNull();
     }
 }
 
-public class ValidateFolderPathsHandler : ICommandHandler<ValidateFolderPathsCommand, Result>
+public class ValidateFolderPathsCommandHandler : ICommandHandler<ValidateFolderPathsCommand, Result>
 {
     private readonly IReaparrDbContext _dbContext;
     private readonly IDirectory _directory;
 
-    public ValidateFolderPathsHandler(IReaparrDbContext dbContext, IDirectory directory)
+    public ValidateFolderPathsCommandHandler(IReaparrDbContext dbContext, IDirectory directory)
     {
         _dbContext = dbContext;
         _directory = directory;
@@ -37,14 +37,10 @@ public class ValidateFolderPathsHandler : ICommandHandler<ValidateFolderPathsCom
         var errors = new List<IError>();
         foreach (var folderPath in folderPaths)
         {
-            var directoryExists = _directory.Exists(folderPath.DirectoryPath);
-            if (!directoryExists)
-            {
+            if (_directory.Exists(folderPath.DirectoryPath))
                 continue;
-            }
 
-            if (folderPath.MediaType == command.MediaType && !directoryExists)
-                errors.Add(new Error($"The {folderPath.DisplayName} is not a valid or existing directory"));
+            errors.Add(new Error($"The {folderPath.DisplayName} is not a valid or existing directory"));
         }
 
         return errors.Count > 0 ? new Result().WithErrors(errors).LogError() : Result.Ok();

@@ -12,39 +12,42 @@ public class PlexLibrary : BaseEntity
 
     /// <summary>
     /// Gets or sets the display title of this <see cref="PlexLibrary"/>.
+    /// <remarks>Value is set by the PlexApi</remarks>
     /// </summary>
     [Column(Order = 2)]
-    public required string Title { get; init; }
+    public required string Title { get; set; }
 
     /// <summary>
     /// Gets or sets the Library Section Identifier used by Plex.
+    /// <remarks>Value is set by the PlexApi</remarks>
     /// </summary>
     [Column(Order = 3)]
-    public required string Key { get; init; }
+    public required string Key { get; set; }
 
     /// <summary>
     /// Gets or sets the creation date of this <see cref="PlexLibrary"/> on the <see cref="PlexServer"/> by the owner.
-    /// NOTE: Value is set by the PlexApi.
+    /// <remarks>Value is set by the PlexApi</remarks>
     /// </summary>
     [Column(Order = 5)]
-    public required DateTime? CreatedAt { get; init; }
+    public required DateTime? CreatedAt { get; set; }
 
     /// <summary>
     /// Gets or sets the last time this <see cref="PlexLibrary"/> was updated by the <see cref="PlexServer"/> owner.
-    /// NOTE: Value is set by the PlexApi.
+    /// <remarks>Value is set by the PlexApi</remarks>
     /// </summary>
     [Column(Order = 6)]
     public required DateTime? UpdatedAt { get; set; }
 
     /// <summary>
     /// Gets or sets the last time this <see cref="PlexLibrary"/> was scanned for new media by the <see cref="PlexServer"/> owner.
-    /// NOTE: Value is set by the PlexApi.
+    /// <remarks>Value is set by the PlexApi</remarks>
     /// </summary>
     [Column(Order = 7)]
-    public required DateTime? ScannedAt { get; init; }
+    public required DateTime? ScannedAt { get; set; }
 
     /// <summary>
     /// Gets or sets Plex's raw <c>contentChangedAt</c> counter for this library.
+    /// <remarks>Value is set by the PlexApi</remarks>
     /// </summary>
     [Column(Order = 8)]
     public long ContentChangedAt { get; set; }
@@ -58,12 +61,17 @@ public class PlexLibrary : BaseEntity
     /// <summary>
     /// Gets or sets the unique id of the <see cref="PlexLibrary"/>.
     /// Can be a valid GUID or a Plex generated UUID.
+    /// <remarks>Value is set by the PlexApi</remarks>
     /// </summary>
     [Column(Order = 10)]
-    public required string Uuid { get; init; }
+    public required string Uuid { get; set; }
 
+    /// <summary>
+    ///
+    /// <remarks>Value is set by the PlexApi</remarks>
+    /// </summary>
     [Column(Order = 11)]
-    public required string Language { get; init; }
+    public required string Language { get; set; }
 
     /// <summary>
     /// Gets the total file size of the nested media.

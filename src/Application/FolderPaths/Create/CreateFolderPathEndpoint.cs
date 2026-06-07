@@ -17,17 +17,20 @@ public class CreateFolderPathEndpointRequestValidator : Validator<CreateFolderPa
                 RuleFor(x => x.FolderPathDto!.DisplayName).NotEmpty();
                 RuleFor(x => x.FolderPathDto!.Directory).NotEmpty();
                 RuleFor(x => x.FolderPathDto!.FolderType).NotEqual(FolderType.None).NotEqual(FolderType.Unknown);
-                RuleFor(x => x.FolderPathDto!.MediaType).NotEqual(PlexMediaType.None).NotEqual(PlexMediaType.Unknown);
+                RuleFor(x => x.FolderPathDto!.MediaType)
+                    .NotEqual(PlexMediaType.Unknown)
+                    .Must((request, mediaType) =>
+                        request.FolderPathDto!.FolderType == FolderType.DownloadFolder || mediaType != PlexMediaType.None
+                    )
+                    .WithMessage("Media type can only be None for download folders.");
             });
     }
 }
 
-public class CreateFolderPathEndpoint : BaseEndpoint<CreateFolderPathEndpointRequest, FolderPathDTO>
+public class CreateFolderPathEndpoint : Endpoint<CreateFolderPathEndpointRequest, ResultDTO<FolderPathDTO>>
 {
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
-
-    public override string EndpointPath => ApiRoutes.FolderPathController + "/";
 
     public CreateFolderPathEndpoint(ILogger log, IReaparrDbContext dbContext)
     {
@@ -37,7 +40,7 @@ public class CreateFolderPathEndpoint : BaseEndpoint<CreateFolderPathEndpointReq
 
     public override void Configure()
     {
-        Post(EndpointPath);
+        Post(ApiRoutes.FolderPathController + "/");
 
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<FolderPathDTO>))
@@ -55,8 +58,8 @@ public class CreateFolderPathEndpoint : BaseEndpoint<CreateFolderPathEndpointReq
 
         var folderPathDb = await _dbContext.FolderPaths.GetAsync(folderPath.Id, ct);
         if (folderPathDb is null)
-            await SendFluentResult(ResultExtensions.EntityNotFound(nameof(FolderPath), folderPath.Id), ct);
+            await Send.FluentResult(ResultExtensions.EntityNotFound(nameof(FolderPath), folderPath.Id), ct);
         else
-            await SendFluentResult(Result.Ok(folderPathDb), x => x.ToDTO(), ct);
+            await Send.FluentResult(Result.Ok(folderPathDb), x => x.ToDTO(), ct);
     }
 }

@@ -16,12 +16,10 @@ public class GetPlexLibraryByIdEndpointRequestValidator : Validator<GetPlexLibra
     }
 }
 
-public class GetPlexLibraryByIdEndpoint : BaseEndpoint<GetPlexLibraryByIdEndpointRequest, PlexLibraryDTO>
+public class GetPlexLibraryByIdEndpoint : Endpoint<GetPlexLibraryByIdEndpointRequest, PlexLibraryDTO>
 {
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
-
-    public override string EndpointPath => ApiRoutes.PlexLibraryController + "/{PlexLibraryId}";
 
     public GetPlexLibraryByIdEndpoint(ILogger log, IReaparrDbContext dbContext)
     {
@@ -31,7 +29,7 @@ public class GetPlexLibraryByIdEndpoint : BaseEndpoint<GetPlexLibraryByIdEndpoin
 
     public override void Configure()
     {
-        Get(EndpointPath);
+        Get(ApiRoutes.PlexLibraryController + "/{PlexLibraryId}");
 
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<PlexLibraryDTO>))
@@ -48,10 +46,10 @@ public class GetPlexLibraryByIdEndpoint : BaseEndpoint<GetPlexLibraryByIdEndpoin
         var plexLibrary = await _dbContext.PlexLibraries.GetAsync(req.PlexLibraryId, ct);
         if (plexLibrary is null)
         {
-            await SendFluentResult(ResultExtensions.EntityNotFound(nameof(plexLibrary), req.PlexLibraryId), ct);
+            await Send.FluentResult(ResultExtensions.EntityNotFound(nameof(plexLibrary), req.PlexLibraryId), ct);
             return;
         }
 
-        await SendFluentResult(Result.Ok(plexLibrary), x => x.ToDTO(), ct);
+        await Send.FluentResult(Result.Ok(plexLibrary), x => x.ToDTO(), ct);
     }
 }

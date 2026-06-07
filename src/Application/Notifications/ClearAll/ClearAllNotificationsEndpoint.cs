@@ -4,12 +4,10 @@ namespace Reaparr.Application;
 /// Deletes/Clears all <see cref="Notification">Notifications</see>.
 /// </summary>
 /// <returns>Returns the number of <see cref="Notification">Notifications</see> that have been deleted.</returns>
-public class ClearAllNotificationsEndpoint : BaseEndpointWithoutRequest<CountResponseDTO>
+public class ClearAllNotificationsEndpoint : EndpointWithoutRequest<CountResponseDTO>
 {
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
-
-    public override string EndpointPath => ApiRoutes.NotificationController + "/clear";
 
     public ClearAllNotificationsEndpoint(ILogger log, IReaparrDbContext dbContext)
     {
@@ -19,7 +17,7 @@ public class ClearAllNotificationsEndpoint : BaseEndpointWithoutRequest<CountRes
 
     public override void Configure()
     {
-        Delete(EndpointPath);
+        Delete(ApiRoutes.NotificationController + "/clear");
 
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<CountResponseDTO>))
@@ -32,6 +30,6 @@ public class ClearAllNotificationsEndpoint : BaseEndpointWithoutRequest<CountRes
         _log.Here().DebugApiCall(HttpContext);
         // Empty the table
         var deletedNotificationsCount = await _dbContext.Notifications.ExecuteDeleteAsync(ct);
-        await SendFluentResult(Result.Ok(new CountResponseDTO(deletedNotificationsCount)), x => x, ct);
+        await Send.FluentResult(Result.Ok(new CountResponseDTO(deletedNotificationsCount)), x => x, ct);
     }
 }

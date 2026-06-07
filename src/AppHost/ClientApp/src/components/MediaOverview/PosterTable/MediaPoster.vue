@@ -83,6 +83,11 @@
 								align="center"
 								size="h6"
 								class="media-poster--title" />
+							<QText
+								v-if="mediaOverviewStore.allMediaMode"
+								align="center"
+								size="subtitle2"
+								:value="serverStore.getServerName(mediaItem.plexServerId)" />
 						</div>
 					</div>
 				</QGlowContainer>

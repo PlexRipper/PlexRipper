@@ -17,17 +17,20 @@ public class UpdateFolderPathEndpointRequestValidator : Validator<UpdateFolderPa
                 RuleFor(x => x.FolderPathDTO.DisplayName).NotEmpty();
                 RuleFor(x => x.FolderPathDTO.Directory).NotEmpty();
                 RuleFor(x => x.FolderPathDTO.FolderType).NotEqual(FolderType.None).NotEqual(FolderType.Unknown);
-                RuleFor(x => x.FolderPathDTO.MediaType).NotEqual(PlexMediaType.None).NotEqual(PlexMediaType.Unknown);
+                RuleFor(x => x.FolderPathDTO.MediaType)
+                    .NotEqual(PlexMediaType.Unknown)
+                    .Must((request, mediaType) =>
+                        request.FolderPathDTO.FolderType == FolderType.DownloadFolder || mediaType != PlexMediaType.None
+                    )
+                    .WithMessage("Media type can only be None for download folders.");
             });
     }
 }
 
-public class UpdateFolderPathEndpoint : BaseEndpoint<UpdateFolderPathEndpointRequest, FolderPathDTO>
+public class UpdateFolderPathEndpoint : Endpoint<UpdateFolderPathEndpointRequest, ResultDTO<FolderPathDTO>>
 {
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
-
-    public override string EndpointPath => ApiRoutes.FolderPathController + "/";
 
     public UpdateFolderPathEndpoint(ILogger log, IReaparrDbContext dbContext)
     {
@@ -37,7 +40,7 @@ public class UpdateFolderPathEndpoint : BaseEndpoint<UpdateFolderPathEndpointReq
 
     public override void Configure()
     {
-        Put(EndpointPath);
+        Put(ApiRoutes.FolderPathController + "/");
 
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<FolderPathDTO>))
@@ -56,13 +59,13 @@ public class UpdateFolderPathEndpoint : BaseEndpoint<UpdateFolderPathEndpointReq
 
         if (folderPathDb is null)
         {
-            await SendFluentResult(ResultExtensions.EntityNotFound(nameof(FolderPath), folderPath.Id), ct);
+            await Send.FluentResult(ResultExtensions.EntityNotFound(nameof(FolderPath), folderPath.Id), ct);
             return;
         }
 
         _dbContext.Entry(folderPathDb).CurrentValues.SetValues(folderPath);
         await _dbContext.SaveChangesAsync(ct);
 
-        await SendFluentResult(Result.Ok(folderPathDb), path => path.ToDTO(), ct);
+        await Send.FluentResult(Result.Ok(folderPathDb), path => path.ToDTO(), ct);
     }
 }

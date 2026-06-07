@@ -3,7 +3,7 @@ using Reaparr.PublicAPI.Contracts;
 
 namespace Reaparr.PublicAPI.UnitTests;
 
-public class TorrentsInfoEndpointUnitTests : BaseUnitTest<TorrentsInfoEndpoint>
+public class TorrentsInfoEndpointUnitTests : BaseEndpointUnitTest<TorrentsInfoEndpoint, TorrentsInfoEndpointRequest, List<QBittorrentTorrentInfo>>
 {
     [Test]
     public async Task ShouldReturnRatioLimitZero_WhenStatusIsCompleted()
@@ -121,19 +121,17 @@ public class TorrentsInfoEndpointUnitTests : BaseUnitTest<TorrentsInfoEndpoint>
             );
 
         // Act
-        var endpoint = SetupEndpointUnitTest<TorrentsInfoEndpoint>();
-        await endpoint.HandleAsync(
+        var testResult = await TestEndpointHandleAsync(
             new TorrentsInfoEndpointRequest
             {
                 Hashes = "hash-owned",
                 Category = IntegrationDefinitions.RADARR_DEFAULT_CATEGORY,
-            },
-            CancellationToken
+            }
         );
 
         // Assert
-        endpoint.Response.ShouldNotBeNull();
-        endpoint.Response.ShouldBeEmpty();
+        testResult.Response.ShouldNotBeNull();
+        testResult.Response.ShouldBeEmpty();
 
         var persisted = await dbContext.DownloadTaskMovieFile.Where(x => x.Id == movieFile.Id)
             .Select(x => new { x.HashId, x.DownloadStatus })
@@ -180,14 +178,12 @@ public class TorrentsInfoEndpointUnitTests : BaseUnitTest<TorrentsInfoEndpoint>
             );
 
         // Act
-        var endpoint = SetupEndpointUnitTest<TorrentsInfoEndpoint>();
-        await endpoint.HandleAsync(
+        var endpointResult = await TestEndpointHandleAsync(
             new TorrentsInfoEndpointRequest
             {
                 Hashes = hash,
                 Category = IntegrationDefinitions.RADARR_DEFAULT_CATEGORY,
-            },
-            CancellationToken
+            }
         );
 
         var persistedRow = await dbContext
@@ -195,6 +191,9 @@ public class TorrentsInfoEndpointUnitTests : BaseUnitTest<TorrentsInfoEndpoint>
             .Select(x => new { x.DownloadStatus, x.HashId })
             .FirstAsync(CancellationToken);
 
-        return (endpoint.Response, persistedRow.DownloadStatus, persistedRow.HashId);
+        endpointResult.ShouldNotBeNull();
+        endpointResult.Response.ShouldNotBeNull();
+        
+        return (endpointResult.Response, persistedRow.DownloadStatus, persistedRow.HashId);
     }
 }

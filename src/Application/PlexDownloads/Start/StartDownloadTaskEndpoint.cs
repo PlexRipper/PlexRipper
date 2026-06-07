@@ -10,11 +10,9 @@ public class StartDownloadTaskEndpointRequestValidator : Validator<StartDownload
     }
 }
 
-public class StartDownloadTaskEndpoint : BaseEndpoint<StartDownloadTaskEndpointRequest>
+public class StartDownloadTaskEndpoint : Endpoint<StartDownloadTaskEndpointRequest, BaseResultDTO>
 {
     private readonly ICommandExecutor _commandExecutor;
-
-    public override string EndpointPath => ApiRoutes.DownloadController + "/start/{DownloadTaskGuid}";
 
     public StartDownloadTaskEndpoint(ICommandExecutor commandExecutor)
     {
@@ -23,7 +21,7 @@ public class StartDownloadTaskEndpoint : BaseEndpoint<StartDownloadTaskEndpointR
 
     public override void Configure()
     {
-        Put(EndpointPath);
+        Put(ApiRoutes.DownloadController + "/start/{DownloadTaskGuid}");
 
         Description(x =>
             x.Accepts<StartDownloadTaskEndpointRequest>()
@@ -36,6 +34,6 @@ public class StartDownloadTaskEndpoint : BaseEndpoint<StartDownloadTaskEndpointR
     {
         var startResult = await _commandExecutor.Send(new StartDownloadTaskCommand(req.DownloadTaskGuid), ct);
 
-        await SendFluentResult(startResult, ct);
+        await Send.FluentResult(startResult, ct);
     }
 }

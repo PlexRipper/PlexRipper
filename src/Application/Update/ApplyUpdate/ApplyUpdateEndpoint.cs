@@ -5,14 +5,12 @@ namespace Reaparr.Application;
 /// <summary>
 /// Applies a downloaded desktop update and restarts the application.
 /// </summary>
-public class ApplyUpdateEndpoint : BaseEndpointWithoutRequest
+public class ApplyUpdateEndpoint : EndpointWithoutRequest<BaseResultDTO>
 {
     private readonly IAppBuildInfo _appBuildInfo;
     private readonly UpdateManager _velopackManager;
     private readonly IHostApplicationLifetime _appLifetime;
     private readonly ILogger _log;
-
-    public override string EndpointPath => ApiRoutes.UpdateController + "/execute";
 
     public ApplyUpdateEndpoint(
         ILogger log,
@@ -29,7 +27,7 @@ public class ApplyUpdateEndpoint : BaseEndpointWithoutRequest
 
     public override void Configure()
     {
-        Post(EndpointPath);
+        Post(ApiRoutes.UpdateController + "/execute");
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(BaseResultDTO))
                 .Produces(StatusCodes.Status500InternalServerError, typeof(BaseResultDTO))
@@ -43,7 +41,7 @@ public class ApplyUpdateEndpoint : BaseEndpointWithoutRequest
         if (!_appBuildInfo.IsDesktopMode)
         {
             _log.Here().Debug("Skipping update apply — not running in desktop mode");
-            await SendFluentResult(Result.Fail("Desktop updates are not supported in the current runtime mode"), ct);
+            await Send.FluentResult(Result.Fail("Desktop updates are not supported in the current runtime mode"), ct);
             return;
         }
 
@@ -51,7 +49,7 @@ public class ApplyUpdateEndpoint : BaseEndpointWithoutRequest
         if (asset is null)
         {
             _log.Here().Warning("Skipping Velopack update apply because no update is staged");
-            await SendFluentResult(Result.Fail("No update staged"), ct);
+            await Send.FluentResult(Result.Fail("No update staged"), ct);
             return;
         }
 
@@ -71,7 +69,7 @@ public class ApplyUpdateEndpoint : BaseEndpointWithoutRequest
             return Task.CompletedTask;
         });
 
-        await SendFluentResult(Result.Ok(), ct);
+        await Send.FluentResult(Result.Ok(), ct);
     }
 
     private async Task ApplyUpdateAfterResponseAsync(VelopackAsset asset)

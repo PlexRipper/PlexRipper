@@ -19,11 +19,9 @@ public class IsUsernameAvailableEndpointRequestValidator : Validator<IsUsernameA
     }
 }
 
-public class IsUsernameAvailableEndpoint : BaseEndpoint<IsUsernameAvailableEndpointRequest, bool>
+public class IsUsernameAvailableEndpoint : Endpoint<IsUsernameAvailableEndpointRequest, bool>
 {
     private readonly IReaparrDbContext _dbContext;
-
-    public override string EndpointPath => ApiRoutes.PlexAccountController + "/check";
 
     public IsUsernameAvailableEndpoint(IReaparrDbContext dbContext)
     {
@@ -32,7 +30,7 @@ public class IsUsernameAvailableEndpoint : BaseEndpoint<IsUsernameAvailableEndpo
 
     public override void Configure()
     {
-        Get(EndpointPath);
+        Get(ApiRoutes.PlexAccountController + "/check");
 
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<bool>))
@@ -43,6 +41,6 @@ public class IsUsernameAvailableEndpoint : BaseEndpoint<IsUsernameAvailableEndpo
     public override async Task HandleAsync(IsUsernameAvailableEndpointRequest req, CancellationToken ct)
     {
         var isUsernameAvailable = await _dbContext.IsUsernameAvailable(req.Username, ct);
-        await SendFluentResult(Result.Ok(isUsernameAvailable), x => x, ct);
+        await Send.FluentResult(Result.Ok(isUsernameAvailable), x => x, ct);
     }
 }

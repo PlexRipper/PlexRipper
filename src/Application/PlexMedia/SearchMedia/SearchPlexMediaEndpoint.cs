@@ -14,11 +14,9 @@ public class SearchPlexMediaRequestValidator : Validator<SearchPlexMediaRequest>
     }
 }
 
-public class SearchPlexMediaEndpoint : BaseEndpoint<SearchPlexMediaRequest, ResultDTO<List<PlexMediaSlimDTO>>>
+public class SearchPlexMediaEndpoint : Endpoint<SearchPlexMediaRequest, ResultDTO<List<PlexMediaSlimDTO>>>
 {
     private readonly IReaparrDbContext _dbContext;
-
-    public override string EndpointPath => ApiRoutes.PlexMediaController + "/search";
 
     public SearchPlexMediaEndpoint(IReaparrDbContext dbContext)
     {
@@ -27,7 +25,7 @@ public class SearchPlexMediaEndpoint : BaseEndpoint<SearchPlexMediaRequest, Resu
 
     public override void Configure()
     {
-        Get(EndpointPath);
+        Get(ApiRoutes.PlexMediaController + "/search");
 
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<List<PlexMediaSlimDTO>>))
@@ -42,7 +40,7 @@ public class SearchPlexMediaEndpoint : BaseEndpoint<SearchPlexMediaRequest, Resu
         // Early return if query is null, empty, or whitespace
         if (string.IsNullOrWhiteSpace(q))
         {
-            await SendFluentResult(Result.Ok(new List<PlexMediaSlimDTO>()), ct);
+            await Send.FluentResult(Result.Ok(new List<PlexMediaSlimDTO>()), ct);
             return;
         }
 
@@ -67,6 +65,6 @@ public class SearchPlexMediaEndpoint : BaseEndpoint<SearchPlexMediaRequest, Resu
         // Flatten the results
         var entities = results.SelectMany(x => x).ToList();
 
-        await SendFluentResult(Result.Ok(entities), ct);
+        await Send.FluentResult(Result.Ok(entities), ct);
     }
 }

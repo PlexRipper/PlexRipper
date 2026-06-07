@@ -11,11 +11,9 @@ public class GetPlexServerConnectionByIdEndpointRequestValidator : Validator<Get
 }
 
 public class GetPlexServerConnectionByIdEndpoint
-    : BaseEndpoint<GetPlexServerConnectionByIdEndpointRequest, PlexServerConnectionDTO>
+    : Endpoint<GetPlexServerConnectionByIdEndpointRequest, PlexServerConnectionDTO>
 {
     private readonly IReaparrDbContext _dbContext;
-
-    public override string EndpointPath => ApiRoutes.PlexServerConnectionController + "/{PlexServerConnectionId}";
 
     public GetPlexServerConnectionByIdEndpoint(IReaparrDbContext dbContext)
     {
@@ -24,7 +22,7 @@ public class GetPlexServerConnectionByIdEndpoint
 
     public override void Configure()
     {
-        Get(EndpointPath);
+        Get(ApiRoutes.PlexServerConnectionController + "/{PlexServerConnectionId}");
 
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<PlexServerConnectionDTO>))
@@ -42,12 +40,12 @@ public class GetPlexServerConnectionByIdEndpoint
 
         if (plexServerConnection is null)
         {
-            await SendFluentResult(
+            await Send.FluentResult(
                 ResultExtensions.EntityNotFound(nameof(PlexServerConnection), req.PlexServerConnectionId),
                 ct
             );
         }
         else
-            await SendFluentResult(Result.Ok(plexServerConnection), x => x.ToDTO(), ct);
+            await Send.FluentResult(Result.Ok(plexServerConnection), x => x.ToDTO(), ct);
     }
 }

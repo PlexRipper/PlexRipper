@@ -11,13 +11,11 @@ public class RestartDownloadTaskEndpointRequestValidator : Validator<RestartDown
 }
 
 public class RestartDownloadTaskEndpoint(ICommandExecutor commandExecutor)
-    : BaseEndpoint<RestartDownloadTaskEndpointRequest>
+    : Endpoint<RestartDownloadTaskEndpointRequest>
 {
-    public override string EndpointPath => ApiRoutes.DownloadController + "/restart/{DownloadTaskGuid}";
-
     public override void Configure()
     {
-        Put(EndpointPath);
+        Put(ApiRoutes.DownloadController + "/restart/{DownloadTaskGuid}");
 
         Description(x =>
             x.Accepts<RestartDownloadTaskEndpointRequest>()
@@ -31,6 +29,6 @@ public class RestartDownloadTaskEndpoint(ICommandExecutor commandExecutor)
     {
         var restartResult = await commandExecutor.Send(new RestartDownloadTaskCommand(req.DownloadTaskGuid), ct);
 
-        await SendFluentResult(restartResult, ct);
+        await Send.FluentResult(restartResult, ct);
     }
 }

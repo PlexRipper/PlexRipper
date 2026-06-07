@@ -10,11 +10,9 @@ public class StopDownloadTaskEndpointRequestValidator : Validator<StopDownloadTa
     }
 }
 
-public class StopDownloadTaskEndpoint : BaseEndpoint<StopDownloadTaskEndpointRequest>
+public class StopDownloadTaskEndpoint : Endpoint<StopDownloadTaskEndpointRequest, BaseResultDTO>
 {
     private readonly ICommandExecutor _commandExecutor;
-
-    public override string EndpointPath => ApiRoutes.DownloadController + "/stop/{DownloadTaskGuid}";
 
     public StopDownloadTaskEndpoint(ICommandExecutor commandExecutor)
     {
@@ -23,8 +21,7 @@ public class StopDownloadTaskEndpoint : BaseEndpoint<StopDownloadTaskEndpointReq
 
     public override void Configure()
     {
-        // TODO state is changed - use POST / PUT
-        Get(EndpointPath);
+        Put(ApiRoutes.DownloadController + "/stop/{DownloadTaskGuid}");
 
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(BaseResultDTO))
@@ -37,6 +34,6 @@ public class StopDownloadTaskEndpoint : BaseEndpoint<StopDownloadTaskEndpointReq
     {
         var stopResult = await _commandExecutor.Send(new StopDownloadTaskCommand(req.DownloadTaskGuid), ct);
 
-        await SendFluentResult(stopResult, ct);
+        await Send.FluentResult(stopResult, ct);
     }
 }

@@ -2,7 +2,7 @@ using Reaparr.Application.Contracts;
 
 namespace Reaparr.PublicAPI.UnitTests;
 
-public class DeleteTorrentEndpointUnitTests : BaseUnitTest<DeleteTorrentEndpoint>
+public class DeleteTorrentEndpointUnitTests : BaseEndpointUnitTest<DeleteTorrentEndpoint, DeleteTorrentRequest>
 {
     public DeleteTorrentEndpointUnitTests()
     {
@@ -47,11 +47,10 @@ public class DeleteTorrentEndpointUnitTests : BaseUnitTest<DeleteTorrentEndpoint
         var request = new DeleteTorrentRequest { Hashes = [hashId] };
 
         // Act
-        var endpoint = SetupEndpointUnitTest<DeleteTorrentEndpoint>();
-        await endpoint.HandleAsync(request, CancellationToken);
+        var endpointResult = await TestEndpointHandleAsync(request);
 
         // Assert
-        endpoint.HttpContext.Response.StatusCode.ShouldBe(200);
+        endpointResult.StatusCode.ShouldBe(200);
         Mock.Mock<ICommandExecutor>()
             .Verify(x => x.Send(It.IsAny<StopDownloadTaskCommand>(), It.IsAny<CancellationToken>()), Times.Never);
         Mock.Mock<ICommandExecutor>()
@@ -111,11 +110,10 @@ public class DeleteTorrentEndpointUnitTests : BaseUnitTest<DeleteTorrentEndpoint
         var request = new DeleteTorrentRequest { Hashes = [hashId] };
 
         // Act
-        var endpoint = SetupEndpointUnitTest<DeleteTorrentEndpoint>();
-        await endpoint.HandleAsync(request, CancellationToken);
+        var endpointResult = await TestEndpointHandleAsync(request);
 
         // Assert
-        endpoint.HttpContext.Response.StatusCode.ShouldBe(200);
+        endpointResult.StatusCode.ShouldBe(200);
         Mock.Mock<ICommandExecutor>()
             .Verify(
                 x =>
@@ -183,11 +181,10 @@ public class DeleteTorrentEndpointUnitTests : BaseUnitTest<DeleteTorrentEndpoint
         var request = new DeleteTorrentRequest { Hashes = null, HashesRaw = hashId };
 
         // Act
-        var endpoint = SetupEndpointUnitTest<DeleteTorrentEndpoint>();
-        await endpoint.HandleAsync(request, CancellationToken);
+        var endpointResult = await TestEndpointHandleAsync(request);
 
         // Assert
-        endpoint.HttpContext.Response.StatusCode.ShouldBe(200);
+        endpointResult.StatusCode.ShouldBe(200);
         Mock.Mock<ICommandExecutor>()
             .Verify(
                 x =>
@@ -257,11 +254,10 @@ public class DeleteTorrentEndpointUnitTests : BaseUnitTest<DeleteTorrentEndpoint
         var request = new DeleteTorrentRequest { HashesRaw = requestHashId };
 
         // Act
-        var endpoint = SetupEndpointUnitTest<DeleteTorrentEndpoint>();
-        await endpoint.HandleAsync(request, CancellationToken);
+        var endpointResult = await TestEndpointHandleAsync(request);
 
         // Assert
-        endpoint.HttpContext.Response.StatusCode.ShouldBe(200);
+        endpointResult.StatusCode.ShouldBe(200);
         Mock.Mock<ICommandExecutor>()
             .Verify(
                 x =>
@@ -340,11 +336,10 @@ public class DeleteTorrentEndpointUnitTests : BaseUnitTest<DeleteTorrentEndpoint
         var request = new DeleteTorrentRequest { HashesRaw = " all\n" };
 
         // Act
-        var endpoint = SetupEndpointUnitTest<DeleteTorrentEndpoint>();
-        await endpoint.HandleAsync(request, CancellationToken);
+        var endpointResult = await TestEndpointHandleAsync(request);
 
         // Assert
-        endpoint.HttpContext.Response.StatusCode.ShouldBe(200);
+        endpointResult.StatusCode.ShouldBe(200);
         Mock.Mock<ICommandExecutor>()
             .Verify(
                 x =>
@@ -411,11 +406,10 @@ public class DeleteTorrentEndpointUnitTests : BaseUnitTest<DeleteTorrentEndpoint
         var request = new DeleteTorrentRequest { HashesRaw = "all" };
 
         // Act
-        var endpoint = SetupEndpointUnitTest<DeleteTorrentEndpoint>();
-        await endpoint.HandleAsync(request, CancellationToken);
+        var endpointResult = await TestEndpointHandleAsync(request);
 
         // Assert
-        endpoint.HttpContext.Response.StatusCode.ShouldBe(200);
+        endpointResult.StatusCode.ShouldBe(200);
         Mock.Mock<ICommandExecutor>()
             .Verify(x => x.Send(It.IsAny<StopDownloadTaskCommand>(), It.IsAny<CancellationToken>()), Times.Never);
 
@@ -461,11 +455,10 @@ public class DeleteTorrentEndpointUnitTests : BaseUnitTest<DeleteTorrentEndpoint
         var request = new DeleteTorrentRequest { HashesRaw = "all" };
 
         // Act
-        var endpoint = SetupEndpointUnitTest<DeleteTorrentEndpoint>();
-        await endpoint.HandleAsync(request, CancellationToken);
+        var endpointResult = await TestEndpointHandleAsync(request);
 
         // Assert
-        endpoint.HttpContext.Response.StatusCode.ShouldBe(200);
+        endpointResult.StatusCode.ShouldBe(200);
         Mock.Mock<ICommandExecutor>()
             .Verify(
                 x =>
@@ -513,11 +506,10 @@ public class DeleteTorrentEndpointUnitTests : BaseUnitTest<DeleteTorrentEndpoint
         var request = new DeleteTorrentRequest { HashesRaw = "all", DeleteFiles = false };
 
         // Act
-        var endpoint = SetupEndpointUnitTest<DeleteTorrentEndpoint>();
-        await endpoint.HandleAsync(request, CancellationToken);
+        var endpointResult = await TestEndpointHandleAsync(request);
 
         // Assert
-        endpoint.HttpContext.Response.StatusCode.ShouldBe(200);
+        endpointResult.StatusCode.ShouldBe(200);
         Mock.Mock<ICommandExecutor>()
             .Verify(
                 x =>
@@ -577,11 +569,10 @@ public class DeleteTorrentEndpointUnitTests : BaseUnitTest<DeleteTorrentEndpoint
         var request = new DeleteTorrentRequest { Hashes = [hashId], DeleteFiles = true };
 
         // Act
-        var endpoint = SetupEndpointUnitTest<DeleteTorrentEndpoint>();
-        await endpoint.HandleAsync(request, CancellationToken);
+        var endpointResult = await TestEndpointHandleAsync(request);
 
         // Assert
-        endpoint.HttpContext.Response.StatusCode.ShouldBe(200);
+        endpointResult.StatusCode.ShouldBe(200);
         Mock.Mock<ICommandExecutor>()
             .Verify(
                 x =>
@@ -627,11 +618,10 @@ public class DeleteTorrentEndpointUnitTests : BaseUnitTest<DeleteTorrentEndpoint
         var request = new DeleteTorrentRequest { Hashes = [hashId], DeleteFiles = false };
 
         // Act
-        var endpoint = SetupEndpointUnitTest<DeleteTorrentEndpoint>();
-        await endpoint.HandleAsync(request, CancellationToken);
+        var endpointResult = await TestEndpointHandleAsync(request);
 
         // Assert
-        endpoint.HttpContext.Response.StatusCode.ShouldBe(200);
+        endpointResult.StatusCode.ShouldBe(200);
         Mock.Mock<ICommandExecutor>()
             .Verify(
                 x => x.Send(It.IsAny<DeleteDownloadTaskFilesCommand>(), It.IsAny<CancellationToken>()),
@@ -675,11 +665,10 @@ public class DeleteTorrentEndpointUnitTests : BaseUnitTest<DeleteTorrentEndpoint
         var request = new DeleteTorrentRequest { Hashes = [hashId], DeleteFiles = true };
 
         // Act
-        var endpoint = SetupEndpointUnitTest<DeleteTorrentEndpoint>();
-        await endpoint.HandleAsync(request, CancellationToken);
+        var endpointResult = await TestEndpointHandleAsync(request);
 
         // Assert
-        endpoint.HttpContext.Response.StatusCode.ShouldBe(200);
+        endpointResult.StatusCode.ShouldBe(200);
         Mock.Mock<ICommandExecutor>()
             .Verify(
                 x => x.Send(It.IsAny<DeleteDownloadTaskFilesCommand>(), It.IsAny<CancellationToken>()),
@@ -745,11 +734,10 @@ public class DeleteTorrentEndpointUnitTests : BaseUnitTest<DeleteTorrentEndpoint
         var request = new DeleteTorrentRequest { HashesRaw = "all" };
 
         // Act
-        var endpoint = SetupEndpointUnitTest<DeleteTorrentEndpoint>();
-        await endpoint.HandleAsync(request, CancellationToken);
+        var endpointResult = await TestEndpointHandleAsync(request);
 
         // Assert
-        endpoint.HttpContext.Response.StatusCode.ShouldBe(200);
+        endpointResult.StatusCode.ShouldBe(200);
         Mock.Mock<ICommandExecutor>()
             .Verify(
                 x =>
@@ -801,11 +789,10 @@ public class DeleteTorrentEndpointUnitTests : BaseUnitTest<DeleteTorrentEndpoint
         var request = new DeleteTorrentRequest { Hashes = ["hash-stopped"] };
 
         // Act
-        var endpoint = SetupEndpointUnitTest<DeleteTorrentEndpoint>();
-        await endpoint.HandleAsync(request, CancellationToken);
+        var endpointResult = await TestEndpointHandleAsync(request);
 
         // Assert
-        endpoint.HttpContext.Response.StatusCode.ShouldBe(200);
+        endpointResult.StatusCode.ShouldBe(200);
         Mock.Mock<ICommandExecutor>()
             .Verify(x => x.Send(It.IsAny<StopDownloadTaskCommand>(), It.IsAny<CancellationToken>()), Times.Never);
         Mock.Mock<ICommandExecutor>()
@@ -870,11 +857,10 @@ public class DeleteTorrentEndpointUnitTests : BaseUnitTest<DeleteTorrentEndpoint
         var request = new DeleteTorrentRequest { Hashes = ["hash-move-finished"] };
 
         // Act
-        var endpoint = SetupEndpointUnitTest<DeleteTorrentEndpoint>();
-        await endpoint.HandleAsync(request, CancellationToken);
+        var endpointResult = await TestEndpointHandleAsync(request);
 
         // Assert
-        endpoint.HttpContext.Response.StatusCode.ShouldBe(200);
+        endpointResult.StatusCode.ShouldBe(200);
         Mock.Mock<ICommandExecutor>()
             .Verify(x => x.Send(It.IsAny<StopDownloadTaskCommand>(), It.IsAny<CancellationToken>()), Times.Never);
         Mock.Mock<ICommandExecutor>()
@@ -939,11 +925,10 @@ public class DeleteTorrentEndpointUnitTests : BaseUnitTest<DeleteTorrentEndpoint
         var request = new DeleteTorrentRequest { Hashes = ["hash-moving"] };
 
         // Act
-        var endpoint = SetupEndpointUnitTest<DeleteTorrentEndpoint>();
-        await endpoint.HandleAsync(request, CancellationToken);
+        var endpointResult = await TestEndpointHandleAsync(request);
 
         // Assert
-        endpoint.HttpContext.Response.StatusCode.ShouldBe(200);
+        endpointResult.StatusCode.ShouldBe(200);
         Mock.Mock<ICommandExecutor>()
             .Verify(
                 x =>

@@ -10,13 +10,11 @@ public class DeletePlexAccountByIdRequestValidator : Validator<DeletePlexAccount
     }
 }
 
-public class DeletePlexAccountByIdEndpoint : BaseEndpoint<DeletePlexAccountByIdRequest>
+public class DeletePlexAccountByIdEndpoint : Endpoint<DeletePlexAccountByIdRequest, BaseResultDTO>
 {
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
     private readonly INotificationHubService _notificationHubService;
-
-    public override string EndpointPath => ApiRoutes.PlexAccountController + "/{PlexAccountId}";
 
     public DeletePlexAccountByIdEndpoint(
         ILogger log,
@@ -31,7 +29,7 @@ public class DeletePlexAccountByIdEndpoint : BaseEndpoint<DeletePlexAccountByIdR
 
     public override void Configure()
     {
-        Delete(EndpointPath);
+        Delete(ApiRoutes.PlexAccountController + "/{PlexAccountId}");
 
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(BaseResultDTO))
@@ -50,7 +48,7 @@ public class DeletePlexAccountByIdEndpoint : BaseEndpoint<DeletePlexAccountByIdR
 
         if (deletedPlexAccountsCount == 0)
         {
-            await SendFluentResult(
+            await Send.FluentResult(
                 Result.Fail($"Could not find {nameof(PlexAccount)} with id {req.PlexAccountId} to delete.").LogError(),
                 ct
             );
@@ -92,6 +90,6 @@ public class DeletePlexAccountByIdEndpoint : BaseEndpoint<DeletePlexAccountByIdR
             ct
         );
 
-        await SendFluentResult(Result.Ok(), ct);
+        await Send.FluentResult(Result.Ok(), ct);
     }
 }

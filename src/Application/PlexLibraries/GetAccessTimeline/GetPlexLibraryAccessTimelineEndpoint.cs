@@ -1,11 +1,9 @@
 namespace Reaparr.Application;
 
-public class GetPlexLibraryAccessTimelineEndpoint : BaseEndpointWithoutRequest<PlexLibraryAccessTimelineDTO>
+public class GetPlexLibraryAccessTimelineEndpoint : EndpointWithoutRequest<PlexLibraryAccessTimelineDTO>
 {
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
-
-    public override string EndpointPath => ApiRoutes.PlexLibraryController + "/access-timeline";
 
     public GetPlexLibraryAccessTimelineEndpoint(ILogger log, IReaparrDbContext dbContext)
     {
@@ -15,7 +13,7 @@ public class GetPlexLibraryAccessTimelineEndpoint : BaseEndpointWithoutRequest<P
 
     public override void Configure()
     {
-        Get(EndpointPath);
+        Get(ApiRoutes.PlexLibraryController + "/access-timeline");
 
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<PlexLibraryAccessTimelineDTO>))
@@ -52,7 +50,7 @@ public class GetPlexLibraryAccessTimelineEndpoint : BaseEndpointWithoutRequest<P
             CurrentState = ToCurrentState(events),
         };
 
-        await SendFluentResult(Result.Ok(response), x => x, ct);
+        await Send.FluentResult(Result.Ok(response), x => x, ct);
     }
 
     private static List<PlexLibraryAccessCurrentStateDTO> ToCurrentState(List<PlexLibraryAccessTimelineEventDTO> events)

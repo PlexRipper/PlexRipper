@@ -10,11 +10,9 @@ public class PausePlexServerDownloadsEndpointRequestValidator : Validator<PauseP
     }
 }
 
-public class PausePlexServerDownloadsEndpoint : BaseEndpoint<PausePlexServerDownloadsEndpointRequest>
+public class PausePlexServerDownloadsEndpoint : Endpoint<PausePlexServerDownloadsEndpointRequest>
 {
     private readonly ICommandExecutor _commandExecutor;
-
-    public override string EndpointPath => ApiRoutes.PlexServerController + "/server/pause/{PlexServerId}";
 
     public PausePlexServerDownloadsEndpoint(ICommandExecutor commandExecutor)
     {
@@ -23,7 +21,7 @@ public class PausePlexServerDownloadsEndpoint : BaseEndpoint<PausePlexServerDown
 
     public override void Configure()
     {
-        Put(EndpointPath);
+        Put(ApiRoutes.PlexServerController + "/server/pause/{PlexServerId}");
 
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(BaseResultDTO))
@@ -37,6 +35,6 @@ public class PausePlexServerDownloadsEndpoint : BaseEndpoint<PausePlexServerDown
     {
         var result = await _commandExecutor.Send(new PausePlexServerDownloadsCommand(req.PlexServerId), ct);
 
-        await SendFluentResult(result, ct);
+        await Send.FluentResult(result, ct);
     }
 }

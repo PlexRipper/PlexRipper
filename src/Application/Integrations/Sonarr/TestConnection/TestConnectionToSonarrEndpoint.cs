@@ -46,12 +46,10 @@ public class TestConnectionToSonarrEndpointRequestValidator : Validator<TestConn
 }
 
 public class TestConnectionToSonarrEndpoint
-    : BaseEndpoint<TestConnectionToSonarrEndpointRequest, TestConnectionToSonarrEndpointResponse>
+    : Endpoint<TestConnectionToSonarrEndpointRequest, TestConnectionToSonarrEndpointResponse>
 {
     private readonly ILogger _log;
     private readonly HttpClient _client;
-
-    public override string EndpointPath => ApiRoutes.IntegrationController + "/Sonarr/TestConnection";
 
     public TestConnectionToSonarrEndpoint(ILogger log, IHttpClientFactory httpClientFactory)
     {
@@ -61,7 +59,7 @@ public class TestConnectionToSonarrEndpoint
 
     public override void Configure()
     {
-        Get(EndpointPath);
+        Get(ApiRoutes.IntegrationController + "/Sonarr/TestConnection");
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<TestConnectionToSonarrEndpointResponse>))
                 .Produces(StatusCodes.Status400BadRequest, typeof(BaseResultDTO))
@@ -118,6 +116,6 @@ public class TestConnectionToSonarrEndpoint
 
     private async Task SendTestResult(TestConnectionStatus status, CancellationToken ct)
     {
-        await SendFluentResult(Result.Ok(new TestConnectionToSonarrEndpointResponse(status)), ct);
+        await Send.FluentResult(Result.Ok(new TestConnectionToSonarrEndpointResponse(status)), ct);
     }
 }

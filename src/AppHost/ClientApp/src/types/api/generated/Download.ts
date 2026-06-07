@@ -288,7 +288,7 @@ export class Download {
    * No description
    * * @tags Download
    * @name StopDownloadTaskEndpoint
-   * @request GET:/api/Download/stop/{DownloadTaskGuid}
+   * @request PUT:/api/Download/stop/{DownloadTaskGuid}
    * @secure
    */
   stopDownloadTaskEndpoint = (
@@ -297,7 +297,7 @@ export class Download {
   ) =>
     axiosObservable<BaseResultDTO>({
       url: `/api/Download/stop/${downloadTaskGuid}`,
-      method: "GET",
+      method: "PUT",
       secure: true,
       responseType: "json",
       ...params,

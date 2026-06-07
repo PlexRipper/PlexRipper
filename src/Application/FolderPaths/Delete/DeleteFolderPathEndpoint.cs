@@ -12,12 +12,10 @@ public class DeleteFolderPathEndpointRequestValidator : Validator<DeleteFolderPa
     }
 }
 
-public class DeleteFolderPathEndpoint : BaseEndpoint<DeleteFolderPathEndpointRequest, BaseResultDTO>
+public class DeleteFolderPathEndpoint : Endpoint<DeleteFolderPathEndpointRequest, BaseResultDTO>
 {
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
-
-    public override string EndpointPath => ApiRoutes.FolderPathController + "/{Id}";
 
     public DeleteFolderPathEndpoint(ILogger log, IReaparrDbContext dbContext)
     {
@@ -27,7 +25,7 @@ public class DeleteFolderPathEndpoint : BaseEndpoint<DeleteFolderPathEndpointReq
 
     public override void Configure()
     {
-        Delete(EndpointPath);
+        Delete(ApiRoutes.FolderPathController + "/{Id}");
 
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(BaseResultDTO))
@@ -43,6 +41,6 @@ public class DeleteFolderPathEndpoint : BaseEndpoint<DeleteFolderPathEndpointReq
         _log.Here()
             .Debug("Deleted {FolderPathName} with Id: {CommandId} from the database", nameof(FolderPath), req.Id);
 
-        await SendFluentResult(Result.Ok(), ct);
+        await Send.FluentResult(Result.Ok(), ct);
     }
 }

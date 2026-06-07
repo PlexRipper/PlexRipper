@@ -12,11 +12,9 @@ public class CheckAllConnectionsStatusByPlexServerRequestValidator
 }
 
 public class CheckAllConnectionsStatusByPlexServerEndpoint
-    : BaseEndpoint<CheckAllConnectionsStatusByPlexServerRequest, List<PlexServerStatusDTO>>
+    : Endpoint<CheckAllConnectionsStatusByPlexServerRequest, List<PlexServerStatusDTO>>
 {
     private readonly ICommandExecutor _commandExecutor;
-
-    public override string EndpointPath => ApiRoutes.PlexServerConnectionController + "/check/by-server/{PlexServerId}";
 
     public CheckAllConnectionsStatusByPlexServerEndpoint(ICommandExecutor commandExecutor)
     {
@@ -25,7 +23,7 @@ public class CheckAllConnectionsStatusByPlexServerEndpoint
 
     public override void Configure()
     {
-        Get(EndpointPath);
+        Get(ApiRoutes.PlexServerConnectionController + "/check/by-server/{PlexServerId}");
 
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<List<PlexServerStatusDTO>>))
@@ -42,8 +40,8 @@ public class CheckAllConnectionsStatusByPlexServerEndpoint
             ct
         );
         if (result.IsFailed)
-            await SendFluentResult(result.ToResult(), ct);
+            await Send.FluentResult(result.ToResult(), ct);
         else
-            await SendFluentResult(result, x => x.ToDTO(), ct);
+            await Send.FluentResult(result, x => x.ToDTO(), ct);
     }
 }

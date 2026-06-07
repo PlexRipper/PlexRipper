@@ -1,10 +1,9 @@
 namespace Reaparr.Application;
 
-public class GetAllFolderPathsEndpoint : BaseEndpointWithoutRequest<List<FolderPathDTO>>
+public class GetAllFolderPathsEndpoint : EndpointWithoutRequest<List<FolderPathDTO>>
 {
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
-    public override string EndpointPath => ApiRoutes.FolderPathController + "/";
 
     public GetAllFolderPathsEndpoint(ILogger log, IReaparrDbContext dbContext)
     {
@@ -14,7 +13,7 @@ public class GetAllFolderPathsEndpoint : BaseEndpointWithoutRequest<List<FolderP
 
     public override void Configure()
     {
-        Get(EndpointPath);
+        Get(ApiRoutes.FolderPathController + "/");
 
         Description(x => x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<List<FolderPathDTO>>)));
     }
@@ -24,6 +23,6 @@ public class GetAllFolderPathsEndpoint : BaseEndpointWithoutRequest<List<FolderP
         _log.Here().DebugApiCall(HttpContext);
         var folderPaths = await _dbContext.FolderPaths.ToListAsync(ct);
 
-        await SendFluentResult(Result.Ok(folderPaths), list => list.ToDTO(), ct);
+        await Send.FluentResult(Result.Ok(folderPaths), list => list.ToDTO(), ct);
     }
 }

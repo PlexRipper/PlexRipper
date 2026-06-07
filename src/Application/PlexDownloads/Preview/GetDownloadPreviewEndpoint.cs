@@ -8,11 +8,9 @@ public class GetDownloadPreviewEndpointRequestValidator : Validator<List<Downloa
     }
 }
 
-public class GetDownloadPreviewEndpoint : BaseEndpoint<List<DownloadMediaDTO>, DownloadPreviewContainerDTO>
+public class GetDownloadPreviewEndpoint : Endpoint<List<DownloadMediaDTO>, DownloadPreviewContainerDTO>
 {
     private readonly ICommandExecutor _commandExecutor;
-
-    public override string EndpointPath => ApiRoutes.DownloadController + "/preview";
 
     public GetDownloadPreviewEndpoint(ICommandExecutor commandExecutor)
     {
@@ -21,7 +19,7 @@ public class GetDownloadPreviewEndpoint : BaseEndpoint<List<DownloadMediaDTO>, D
 
     public override void Configure()
     {
-        Post(EndpointPath);
+        Post(ApiRoutes.DownloadController + "/preview");
 
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<DownloadPreviewContainerDTO>))
@@ -34,6 +32,6 @@ public class GetDownloadPreviewEndpoint : BaseEndpoint<List<DownloadMediaDTO>, D
     {
         var result = await _commandExecutor.Send(new GetDownloadPreviewQuery(downloadMedias), ct);
 
-        await SendFluentResult(result, x => x.ToDTO(), ct);
+        await Send.FluentResult(result, x => x.ToDTO(), ct);
     }
 }

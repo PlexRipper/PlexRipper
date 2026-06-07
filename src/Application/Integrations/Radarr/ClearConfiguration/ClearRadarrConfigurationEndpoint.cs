@@ -1,11 +1,9 @@
 namespace Reaparr.Application;
 
-public class ClearRadarrConfigurationEndpoint : BaseEndpointWithoutRequest
+public class ClearRadarrConfigurationEndpoint : EndpointWithoutRequest
 {
     private readonly ILogger _log;
     private readonly IRadarrSettings _radarrSettings;
-
-    public override string EndpointPath => ApiRoutes.IntegrationController + "/Radarr/Configuration";
 
     public ClearRadarrConfigurationEndpoint(ILogger log, IRadarrSettings radarrSettings)
     {
@@ -15,7 +13,7 @@ public class ClearRadarrConfigurationEndpoint : BaseEndpointWithoutRequest
 
     public override void Configure()
     {
-        Delete(EndpointPath);
+        Delete(ApiRoutes.IntegrationController + "/Radarr/Configuration");
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(BaseResultDTO))
                 .Produces(StatusCodes.Status500InternalServerError, typeof(BaseResultDTO))
@@ -28,6 +26,6 @@ public class ClearRadarrConfigurationEndpoint : BaseEndpointWithoutRequest
 
         _radarrSettings.Reset();
 
-        await SendFluentResult(Result.Ok(), ct);
+        await Send.FluentResult(Result.Ok(), ct);
     }
 }

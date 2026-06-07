@@ -10,22 +10,22 @@ public class RefreshLibraryMediaEndpointRequestValidator : Validator<RefreshLibr
     }
 }
 
-public class RefreshLibraryMediaEndpoint : BaseEndpoint<RefreshLibraryMediaEndpointRequest, PlexLibraryDTO>
+public class RefreshLibraryMediaEndpoint : Endpoint<RefreshLibraryMediaEndpointRequest, ResultDTO<PlexLibraryDTO>>
 {
     private readonly ILogger _log;
+    private readonly IReaparrDbContext _dbContext;
     private readonly ICommandExecutor _commandExecutor;
-
-    public override string EndpointPath => ApiRoutes.PlexLibraryController + "/refresh/{PlexLibraryId}";
 
     public RefreshLibraryMediaEndpoint(ILogger log, IReaparrDbContext dbContext, ICommandExecutor commandExecutor)
     {
         _log = log.ForContext<RefreshLibraryMediaEndpoint>();
+        _dbContext = dbContext;
         _commandExecutor = commandExecutor;
     }
 
     public override void Configure()
     {
-        Get(EndpointPath);
+        Get(ApiRoutes.PlexLibraryController + "/refresh/{PlexLibraryId}");
 
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<PlexLibraryDTO>))
@@ -40,7 +40,19 @@ public class RefreshLibraryMediaEndpoint : BaseEndpoint<RefreshLibraryMediaEndpo
         _log.Here().DebugApiCall(HttpContext, req);
 
         var result = await _commandExecutor.Send(new QueueLibrarySyncJobCommand([req.PlexLibraryId]), ct);
+        if (result.IsFailed)
+        {
+            await Send.FluentResult(result, ct);
+            return;
+        }
 
-        await SendFluentResult(result, ct);
+        var plexLibrary = await _dbContext.PlexLibraries.GetAsync(req.PlexLibraryId, cancellationToken: ct);
+        if (plexLibrary is null)
+        {
+            await Send.FluentResult(ResultExtensions.EntityNotFound(nameof(PlexLibrary), req.PlexLibraryId), ct: ct);
+            return;
+        }
+
+        await Send.FluentResult(Result.Ok(plexLibrary), x => x.ToDTO(), ct);
     }
 }

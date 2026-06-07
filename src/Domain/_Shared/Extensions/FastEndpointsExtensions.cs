@@ -88,4 +88,53 @@ public static class FastEndpointsExtensions
         stream.Position = 0;
         await stream.CopyToAsync(ep.HttpContext.Response.Body, cancellationToken);
     }
+
+    /// <summary>
+    /// Sends a FluentResults <see cref="Result"/> response using the project-standard <see cref="BaseResultDTO"/> envelope.
+    /// </summary>
+    /// <param name="sender">The response sender associated with the current endpoint.</param>
+    /// <param name="result">The result to convert and send.</param>
+    /// <param name="ct">Token to observe while sending the response.</param>
+    public static Task FluentResult(this IResponseSender sender, Result result, CancellationToken ct = default) =>
+        sender.SendFluentResultDTOAsync(result.ToResultDTO(), ct: ct);
+
+    /// <summary>
+    /// Sends a FluentResults <see cref="Result{T}"/> response using the project-standard <see cref="ResultDTO{T}"/> envelope.
+    /// </summary>
+    /// <typeparam name="T">The result value type.</typeparam>
+    /// <param name="sender">The response sender associated with the current endpoint.</param>
+    /// <param name="result">The result to convert and send.</param>
+    /// <param name="ct">Token to observe while sending the response.</param>
+    public static Task FluentResult<T>(
+        this IResponseSender sender,
+        Result<T> result,
+        CancellationToken ct = default) =>
+        sender.SendFluentResultDTOAsync(result.ToResultDTO(), ct: ct);
+
+    /// <summary>
+    /// Sends a FluentResults <see cref="Result{T}"/> response after mapping the value into the response DTO type.
+    /// </summary>
+    /// <typeparam name="T">The result value type.</typeparam>
+    /// <typeparam name="TResponse">The mapped response DTO type.</typeparam>
+    /// <param name="sender">The response sender associated with the current endpoint.</param>
+    /// <param name="result">The result to convert and send.</param>
+    /// <param name="mapper">Maps a successful result value to the response DTO value.</param>
+    /// <param name="ct">Token to observe while sending the response.</param>
+    public static async Task FluentResult<T, TResponse>(
+        this IResponseSender sender,
+        Result<T> result,
+        Func<T, TResponse> mapper,
+        CancellationToken ct = default
+    )
+    {
+        var resultDTO = result.ToResultDTO(mapper);
+        await sender.SendFluentResultDTOAsync(resultDTO, ct: ct);
+    }
+
+    private static Task SendFluentResultDTOAsync<TResponse>(
+        this IResponseSender ep,
+        TResponse resultDTO,
+        CancellationToken ct = default
+    )
+        where TResponse : BaseResultDTO => ep.HttpContext.Response.SendAsync(resultDTO, resultDTO.StatusCode, cancellation: ct);
 }

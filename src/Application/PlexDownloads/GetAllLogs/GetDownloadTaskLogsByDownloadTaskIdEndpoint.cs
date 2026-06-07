@@ -35,12 +35,10 @@ public class GetDownloadTaskLogsByDownloadTaskIdRequestValidator : Validator<Get
 }
 
 public class GetDownloadTaskLogsByDownloadTaskIdEndpoint
-    : BaseEndpoint<GetDownloadTaskLogsByDownloadTaskIdRequest, List<DownloadTaskLogDTO>>
+    : Endpoint<GetDownloadTaskLogsByDownloadTaskIdRequest, List<DownloadTaskLogDTO>>
 {
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
-
-    public override string EndpointPath => ApiRoutes.DownloadController + "/logs/{DownloadTaskGuid}/";
 
     public GetDownloadTaskLogsByDownloadTaskIdEndpoint(ILogger log, IReaparrDbContext dbContext)
     {
@@ -50,7 +48,7 @@ public class GetDownloadTaskLogsByDownloadTaskIdEndpoint
 
     public override void Configure()
     {
-        Get(EndpointPath);
+        Get(ApiRoutes.DownloadController + "/logs/{DownloadTaskGuid}/");
 
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<List<DownloadTaskLogDTO>>))
@@ -74,6 +72,6 @@ public class GetDownloadTaskLogsByDownloadTaskIdEndpoint
 
         logsResult.LogIfFailed();
 
-        await SendFluentResult(logsResult, x => x.Select(log => log.ToDTO()).ToList(), ct);
+        await Send.FluentResult(logsResult, x => x.Select(log => log.ToDTO()).ToList(), ct);
     }
 }

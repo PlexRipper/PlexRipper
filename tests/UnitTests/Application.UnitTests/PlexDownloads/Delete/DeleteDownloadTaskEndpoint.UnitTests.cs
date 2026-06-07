@@ -1,6 +1,6 @@
 namespace Reaparr.Application.UnitTests;
 
-public class DeleteDownloadTaskEndpointUnitTests : BaseUnitTest<DeleteDownloadTaskEndpoint>
+public class DeleteDownloadTaskEndpointUnitTests : BaseEndpointUnitTest<DeleteDownloadTaskEndpoint, DeleteDownloadTaskEndpointRequest, BaseResultDTO>
 {
     [Test]
     public async Task ShouldDispatchDeleteCommand_WhenDownloadTaskIdIsGiven()
@@ -50,14 +50,13 @@ public class DeleteDownloadTaskEndpointUnitTests : BaseUnitTest<DeleteDownloadTa
             .Verifiable(Times.Once());
 
         // Act
-        var ep = SetupEndpointUnitTest<DeleteDownloadTaskEndpoint>();
-        await ep.HandleAsync(
-            new DeleteDownloadTaskEndpointRequest { DownloadTaskIds = [episodeFileId] },
-            CancellationToken
+        var endpointResult = await TestEndpointHandleAsync(
+            new DeleteDownloadTaskEndpointRequest { DownloadTaskIds = [episodeFileId] }
         );
-        var result = ep.Response;
+        var result = endpointResult.Response;
 
         // Assert
+        result.ShouldNotBeNull();
         result.IsSuccess.ShouldBeTrue();
         Mock.Mock<ICommandExecutor>()
             .Verify(
@@ -128,11 +127,11 @@ public class DeleteDownloadTaskEndpointUnitTests : BaseUnitTest<DeleteDownloadTa
             );
 
         // Act
-        var ep = SetupEndpointUnitTest<DeleteDownloadTaskEndpoint>();
-        await ep.HandleAsync(new DeleteDownloadTaskEndpointRequest { DownloadTaskIds = [movieId] }, CancellationToken);
-        var result = ep.Response;
+        var endpointResult = await TestEndpointHandleAsync(new DeleteDownloadTaskEndpointRequest { DownloadTaskIds = [movieId] });
+        var result = endpointResult.Response;
 
         // Assert
+        result.ShouldNotBeNull();
         result.IsSuccess.ShouldBeTrue();
         Mock.Mock<ICommandExecutor>()
             .Verify(
@@ -171,14 +170,13 @@ public class DeleteDownloadTaskEndpointUnitTests : BaseUnitTest<DeleteDownloadTa
         var missingId = Guid.NewGuid();
 
         // Act
-        var ep = SetupEndpointUnitTest<DeleteDownloadTaskEndpoint>();
-        await ep.HandleAsync(
-            new DeleteDownloadTaskEndpointRequest { DownloadTaskIds = [missingId] },
-            CancellationToken
+        var endpointResult = await TestEndpointHandleAsync(
+            new DeleteDownloadTaskEndpointRequest { DownloadTaskIds = [missingId] }
         );
-        var result = ep.Response;
+        var result = endpointResult.Response;
 
         // Assert
+        result.ShouldNotBeNull();
         result.IsSuccess.ShouldBeTrue();
         Mock.Mock<ICommandExecutor>()
             .Verify(x => x.Send(It.IsAny<StopDownloadTaskCommand>(), It.IsAny<CancellationToken>()), Times.Never);

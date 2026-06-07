@@ -22,6 +22,7 @@
         <Using Include="FluentValidation" />
         <Using Include="Quartz" />
         <Using Include="Reaparr.Domain" />
+        <Using Include="Reaparr.FluentResultExtensions" />
         <Using Include="System.Text.Json.Serialization" />
     </ItemGroup>
 </Project>

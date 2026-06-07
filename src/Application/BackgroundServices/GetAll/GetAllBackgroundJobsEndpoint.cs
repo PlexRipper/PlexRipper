@@ -15,11 +15,9 @@ public record GetAllBackgroundJobsEndpointRequest
     public required bool UseMockData { get; init; }
 }
 
-public class GetAllBackgroundJobsEndpoint : BaseEndpoint<GetAllBackgroundJobsEndpointRequest, List<JobStatusUpdateDTO>>
+public class GetAllBackgroundJobsEndpoint : Endpoint<GetAllBackgroundJobsEndpointRequest, ResultDTO<List<JobStatusUpdateDTO>>>
 {
     private readonly ISchedulerService _schedulerService;
-
-    public override string EndpointPath => ApiRoutes.BackgroundJobsController;
 
     public GetAllBackgroundJobsEndpoint(ISchedulerService schedulerService)
     {
@@ -28,7 +26,7 @@ public class GetAllBackgroundJobsEndpoint : BaseEndpoint<GetAllBackgroundJobsEnd
 
     public override void Configure()
     {
-        Get(EndpointPath);
+        Get(ApiRoutes.BackgroundJobsController);
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<List<JobStatusUpdateDTO>>))
                 .Produces(StatusCodes.Status500InternalServerError, typeof(BaseResultDTO))
@@ -39,13 +37,13 @@ public class GetAllBackgroundJobsEndpoint : BaseEndpoint<GetAllBackgroundJobsEnd
     {
         if (req.UseMockData)
         {
-            await SendFluentResult(Result.Ok(MockData()), ct);
+            await Send.FluentResult(Result.Ok(MockData()), ct);
         }
         else
         {
             var result = await _schedulerService.GetRunningJobUpdates();
 
-            await SendFluentResult(Result.Ok(result), x => x.ToDTO(), ct);
+            await Send.FluentResult(Result.Ok(result), x => x.ToDTO(), ct);
         }
     }
 

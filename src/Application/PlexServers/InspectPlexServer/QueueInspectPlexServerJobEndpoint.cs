@@ -11,11 +11,9 @@ public class QueueInspectPlexServerJobEndpointRequestValidator : Validator<Queue
 }
 
 public class QueueInspectPlexServerJobEndpoint
-    : BaseEndpoint<QueueInspectPlexServerJobEndpointRequest, ResultDTO<PlexServerDTO>>
+    : Endpoint<QueueInspectPlexServerJobEndpointRequest, ResultDTO<PlexServerDTO>>
 {
     private readonly ICommandExecutor _commandExecutor;
-
-    public override string EndpointPath => ApiRoutes.PlexServerController + "/{PlexServerId}/inspect";
 
     public QueueInspectPlexServerJobEndpoint(ICommandExecutor commandExecutor)
     {
@@ -24,7 +22,7 @@ public class QueueInspectPlexServerJobEndpoint
 
     public override void Configure()
     {
-        Get(EndpointPath);
+        Get(ApiRoutes.PlexServerController + "/{PlexServerId}/inspect");
 
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(BaseResultDTO))
@@ -36,6 +34,6 @@ public class QueueInspectPlexServerJobEndpoint
     public override async Task HandleAsync(QueueInspectPlexServerJobEndpointRequest req, CancellationToken ct)
     {
         var result = await _commandExecutor.Send(new QueueInspectPlexServerJobCommand([req.PlexServerId]), ct);
-        await SendFluentResult(result, ct);
+        await Send.FluentResult(result, ct);
     }
 }

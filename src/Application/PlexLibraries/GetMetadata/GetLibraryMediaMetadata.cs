@@ -20,12 +20,10 @@ public class GetLibraryMediaMetadataRequestValidator : Validator<GetLibraryMedia
     }
 }
 
-public class GetLibraryMediaMetadata : BaseEndpoint<GetLibraryMediaMetadataRequest, PlexMediaMetadataDTO>
+public class GetLibraryMediaMetadata : Endpoint<GetLibraryMediaMetadataRequest, PlexMediaMetadataDTO>
 {
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
-
-    public override string EndpointPath => ApiRoutes.PlexLibraryController + "/{PlexLibraryId}/metadata";
 
     public GetLibraryMediaMetadata(ILogger log, IReaparrDbContext dbContext)
     {
@@ -35,7 +33,7 @@ public class GetLibraryMediaMetadata : BaseEndpoint<GetLibraryMediaMetadataReque
 
     public override void Configure()
     {
-        Get(EndpointPath);
+        Get(ApiRoutes.PlexLibraryController + "/{PlexLibraryId}/metadata");
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<PlexMediaMetadataDTO>))
                 .Produces(StatusCodes.Status500InternalServerError, typeof(BaseResultDTO))
@@ -51,7 +49,7 @@ public class GetLibraryMediaMetadata : BaseEndpoint<GetLibraryMediaMetadataReque
             var plexLibrary = await _dbContext.PlexLibraries.GetAsync(req.PlexLibraryId, ct);
             if (plexLibrary is null)
             {
-                await SendFluentResult(ResultExtensions.EntityNotFound(nameof(PlexLibrary), req.PlexLibraryId), ct);
+                await Send.FluentResult(ResultExtensions.EntityNotFound(nameof(PlexLibrary), req.PlexLibraryId), ct);
                 return;
             }
 
@@ -92,7 +90,7 @@ public class GetLibraryMediaMetadata : BaseEndpoint<GetLibraryMediaMetadataReque
                 QualityCount = uniqueQualities.Count,
             };
 
-            await SendFluentResult(Result.Ok(mediaMetadataDTO), ct);
+            await Send.FluentResult(Result.Ok(mediaMetadataDTO), ct);
         }
         else
         {
@@ -146,7 +144,7 @@ public class GetLibraryMediaMetadata : BaseEndpoint<GetLibraryMediaMetadataReque
 
             var uniqueQualities = await GetQualitiesForMediaType(req.MediaType, ct: ct);
 
-            await SendFluentResult(
+            await Send.FluentResult(
                 Result.Ok(
                     new PlexMediaMetadataDTO
                     {

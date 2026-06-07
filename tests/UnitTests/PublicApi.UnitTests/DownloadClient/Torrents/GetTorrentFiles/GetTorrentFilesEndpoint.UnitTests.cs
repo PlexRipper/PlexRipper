@@ -1,6 +1,6 @@
 namespace Reaparr.PublicAPI.UnitTests;
 
-public class GetTorrentFilesEndpointUnitTests : BaseUnitTest<GetTorrentFilesEndpoint>
+public class GetTorrentFilesEndpointUnitTests : BaseEndpointUnitTest<GetTorrentFilesEndpoint, GetTorrentFilesRequest, List<QBittorrentTorrentFile>>
 {
     [Test]
     public async Task ShouldReturnEmptyList_WhenHashMatchesNoFiles()
@@ -23,12 +23,11 @@ public class GetTorrentFilesEndpointUnitTests : BaseUnitTest<GetTorrentFilesEndp
         var request = new GetTorrentFilesRequest { Hash = "missing-hash" };
 
         // Act
-        var endpoint = SetupEndpointUnitTest<GetTorrentFilesEndpoint>();
-        await endpoint.HandleAsync(request, CancellationToken);
-        var response = endpoint.Response;
+        var endpointResult = await TestEndpointHandleAsync(request);
+        var response = endpointResult.Response;
 
         // Assert
-        endpoint.HttpContext.Response.StatusCode.ShouldBe(StatusCodes.Status200OK);
+        endpointResult.StatusCode.ShouldBe(StatusCodes.Status200OK);
         response.ShouldNotBeNull();
         response.ShouldBeEmpty();
 
@@ -76,12 +75,11 @@ public class GetTorrentFilesEndpointUnitTests : BaseUnitTest<GetTorrentFilesEndp
         var request = new GetTorrentFilesRequest { Hash = hash };
 
         // Act
-        var endpoint = SetupEndpointUnitTest<GetTorrentFilesEndpoint>();
-        await endpoint.HandleAsync(request, CancellationToken);
-        var response = endpoint.Response;
+        var endpointResult = await TestEndpointHandleAsync(request);
+        var response = endpointResult.Response;
 
         // Assert
-        endpoint.HttpContext.Response.StatusCode.ShouldBe(StatusCodes.Status200OK);
+        endpointResult.StatusCode.ShouldBe(StatusCodes.Status200OK);
         response.ShouldNotBeNull();
         response.Count.ShouldBe(1);
         response.Single().Name.ShouldBe("only-file-name.mkv");
@@ -134,12 +132,11 @@ public class GetTorrentFilesEndpointUnitTests : BaseUnitTest<GetTorrentFilesEndp
         var request = new GetTorrentFilesRequest { Hash = hash };
 
         // Act
-        var endpoint = SetupEndpointUnitTest<GetTorrentFilesEndpoint>();
-        await endpoint.HandleAsync(request, CancellationToken);
-        var response = endpoint.Response;
+        var endpointResult = await TestEndpointHandleAsync(request);
+        var response = endpointResult.Response;
 
         // Assert
-        endpoint.HttpContext.Response.StatusCode.ShouldBe(StatusCodes.Status200OK);
+        endpointResult.StatusCode.ShouldBe(StatusCodes.Status200OK);
         response.ShouldNotBeNull();
         response.Count.ShouldBe(1);
         response.Single().Name.ShouldBe("outside-root-file.mkv");

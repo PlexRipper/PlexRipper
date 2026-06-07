@@ -78,22 +78,32 @@ export const useBackgroundJobsStore = defineStore(StoreNames.BackgroundJobsStore
 		},
 
 		setStatusJobUpdate(update: ApiJobStatusUpdateDTO) {
-			try {
-				const updateWithData = {
-					...update,
-					data: JSON.parse(update.jsonString),
-				};
-				Log.debug(updateWithData);
-				state.jobStatusObservable.next(updateWithData);
-			} catch (e) {
-				Log.error('setStatusJobUpdate => Failed to parse job update\'s jsonString', e);
-			}
+			const updateWithData = {
+				...update,
+				data: parseJobUpdateData(update),
+			};
+			Log.debug(updateWithData);
+			state.jobStatusObservable.next(updateWithData);
 		},
 
 		$reset() {
 			Object.assign(state, cloneDeep(defaultState));
 		},
 	};
+
+	function parseJobUpdateData(update: ApiJobStatusUpdateDTO): unknown {
+		const jsonString = update.jsonString?.trim();
+		if (!jsonString) {
+			return null;
+		}
+
+		try {
+			return JSON.parse(jsonString);
+		} catch (e) {
+			Log.error('setStatusJobUpdate => Failed to parse job update\'s jsonString', e, update);
+			return null;
+		}
+	}
 
 	// Getters
 	const getters = {

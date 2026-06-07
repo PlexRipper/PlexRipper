@@ -28,12 +28,10 @@ public class DeleteAllDownloadTaskLogsByDownloadTaskIdRequestValidator
 }
 
 public class DeleteAllDownloadTaskLogsByDownloadTaskIdEndpoint
-    : BaseEndpoint<DeleteAllDownloadTaskLogsByDownloadTaskIdRequest, int>
+    : Endpoint<DeleteAllDownloadTaskLogsByDownloadTaskIdRequest, int>
 {
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
-
-    public override string EndpointPath => ApiRoutes.DownloadController + "/logs/{DownloadTaskGuid}/";
 
     public DeleteAllDownloadTaskLogsByDownloadTaskIdEndpoint(ILogger log, IReaparrDbContext dbContext)
     {
@@ -43,7 +41,7 @@ public class DeleteAllDownloadTaskLogsByDownloadTaskIdEndpoint
 
     public override void Configure()
     {
-        Delete(EndpointPath);
+        Delete(ApiRoutes.DownloadController + "/logs/{DownloadTaskGuid}/");
 
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<int>))
@@ -69,6 +67,6 @@ public class DeleteAllDownloadTaskLogsByDownloadTaskIdEndpoint
         if (logsResult.IsSuccess)
             _log.Here().Debug("Deleted {Count} logs of type {DownloadTaskType}", logsResult.Value, key.Type);
 
-        await SendFluentResult(logsResult, x => x, ct);
+        await Send.FluentResult(logsResult, x => x, ct);
     }
 }

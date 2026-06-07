@@ -3,12 +3,10 @@ namespace Reaparr.Application;
 /// <summary>
 /// Retrieves all the <see cref="LibrarySyncJobQueue">LibrarySyncJobQueues</see> from the database.
 /// </summary>
-public class GetLibrarySyncStatusEndpoint : BaseEndpointWithoutRequest<List<LibrarySyncJobQueueDTO>>
+public class GetLibrarySyncStatusEndpoint : EndpointWithoutRequest<List<LibrarySyncJobQueueDTO>>
 {
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
-
-    public override string EndpointPath => ApiRoutes.PlexLibraryController + "/sync-status";
 
     public GetLibrarySyncStatusEndpoint(ILogger log, IReaparrDbContext dbContext)
     {
@@ -18,7 +16,7 @@ public class GetLibrarySyncStatusEndpoint : BaseEndpointWithoutRequest<List<Libr
 
     public override void Configure()
     {
-        Get(EndpointPath);
+        Get(ApiRoutes.PlexLibraryController + "/sync-status");
 
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<List<LibrarySyncJobQueueDTO>>))
@@ -31,6 +29,6 @@ public class GetLibrarySyncStatusEndpoint : BaseEndpointWithoutRequest<List<Libr
         _log.Here().DebugApiCall(HttpContext);
         var syncJobs = await _dbContext.LibrarySyncJobQueues.ToListAsync(ct);
 
-        await SendFluentResult(Result.Ok(syncJobs), x => x.Select(y => y.ToDTO()).ToList(), ct);
+        await Send.FluentResult(Result.Ok(syncJobs), x => x.Select(y => y.ToDTO()).ToList(), ct);
     }
 }

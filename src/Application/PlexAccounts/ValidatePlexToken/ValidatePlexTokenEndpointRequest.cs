@@ -40,12 +40,10 @@ public class ValidatePlexTokenPlexAccountRequestValidator : Validator<ValidatePl
 }
 
 public class ValidatePlexTokenEndpoint
-    : BaseEndpoint<ValidatePlexTokenEndpointRequest, ValidatePlexTokenEndpointResponse>
+    : Endpoint<ValidatePlexTokenEndpointRequest, ResultDTO<ValidatePlexTokenEndpointResponse>>
 {
     private readonly ILogger _log;
     private readonly ICommandExecutor _commandExecutor;
-
-    public override string EndpointPath => ApiRoutes.PlexAccountController + "/validate/token";
 
     public ValidatePlexTokenEndpoint(ILogger log, ICommandExecutor commandExecutor)
     {
@@ -55,7 +53,7 @@ public class ValidatePlexTokenEndpoint
 
     public override void Configure()
     {
-        Post(EndpointPath);
+        Post(ApiRoutes.PlexAccountController + "/validate/token");
 
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<ValidatePlexTokenEndpointResponse>))
@@ -97,7 +95,7 @@ public class ValidatePlexTokenEndpoint
                 ValidatedAt = null,
                 Is2Fa = false,
             };
-            await SendFluentResult(Result.Ok(response), ct);
+            await Send.FluentResult(Result.Ok(response), ct);
             return;
         }
 
@@ -123,11 +121,11 @@ public class ValidatePlexTokenEndpoint
                 ValidatedAt = validateResult.Value.ValidatedAt,
                 Is2Fa = validateResult.Value.Is2Fa,
             };
-            await SendFluentResult(Result.Ok(response), ct);
+            await Send.FluentResult(Result.Ok(response), ct);
             return;
         }
 
         // Default: return all errors if none of the above conditions matched
-        await SendFluentResult(validateResult, ct);
+        await Send.FluentResult(validateResult, ct);
     }
 }

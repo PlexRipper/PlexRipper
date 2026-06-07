@@ -1,7 +1,7 @@
 ﻿using FluentValidation.Results;
 using ValidationResult = FluentValidation.Results.ValidationResult;
 
-namespace Reaparr.Application;
+namespace Reaparr.Application.Contracts;
 
 public class ValidationPipeline<TRequest, TResponse> : ICommandMiddleware<TRequest, TResponse>
     where TRequest : ICommand<TResponse>

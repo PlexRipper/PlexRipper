@@ -18,12 +18,9 @@ public class SetPlexLibraryDefaultDestinationByIdEndpointRequestValidator
 }
 
 public class SetPlexLibraryDefaultDestinationByIdEndpoint
-    : BaseEndpoint<SetPlexLibraryDefaultDestinationByIdEndpointRequest, BaseResultDTO>
+    : Endpoint<SetPlexLibraryDefaultDestinationByIdEndpointRequest, BaseResultDTO>
 {
     private readonly IReaparrDbContext _dbContext;
-
-    public override string EndpointPath =>
-        ApiRoutes.PlexLibraryController + "/{PlexLibraryId}/default/destination/{FolderPathId}";
 
     public SetPlexLibraryDefaultDestinationByIdEndpoint(IReaparrDbContext dbContext)
     {
@@ -32,7 +29,7 @@ public class SetPlexLibraryDefaultDestinationByIdEndpoint
 
     public override void Configure()
     {
-        Get(EndpointPath);
+        Get(ApiRoutes.PlexLibraryController + "/{PlexLibraryId}/default/destination/{FolderPathId}");
 
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(BaseResultDTO))
@@ -51,7 +48,7 @@ public class SetPlexLibraryDefaultDestinationByIdEndpoint
 
         if (plexLibraryDb == 0)
         {
-            await SendFluentResult(
+            await Send.FluentResult(
                 Result.Fail(
                     $"No library found with id {req.PlexLibraryId} that could have its default folder destination updated"
                 ),
@@ -59,6 +56,6 @@ public class SetPlexLibraryDefaultDestinationByIdEndpoint
             );
         }
         else
-            await SendFluentResult(Result.Ok(), ct);
+            await Send.FluentResult(Result.Ok(), ct);
     }
 }

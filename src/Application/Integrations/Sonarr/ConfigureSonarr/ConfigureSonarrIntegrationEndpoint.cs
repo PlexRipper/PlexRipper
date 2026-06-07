@@ -16,13 +16,11 @@ public class ConfigureSonarrIntegrationRequestValidator : Validator<ConfigureSon
     }
 }
 
-public class ConfigureSonarrIntegrationEndpoint : BaseEndpoint<ConfigureSonarrIntegrationRequest>
+public class ConfigureSonarrIntegrationEndpoint : Endpoint<ConfigureSonarrIntegrationRequest>
 {
     private readonly ILogger _log;
     private readonly ICommandExecutor _commandExecutor;
     private readonly ISonarrSettings _sonarrSettings;
-
-    public override string EndpointPath => ApiRoutes.IntegrationController + "/Sonarr/Configure";
 
     public ConfigureSonarrIntegrationEndpoint(
         ILogger log,
@@ -37,7 +35,7 @@ public class ConfigureSonarrIntegrationEndpoint : BaseEndpoint<ConfigureSonarrIn
 
     public override void Configure()
     {
-        Post(EndpointPath);
+        Post(ApiRoutes.IntegrationController + "/Sonarr/Configure");
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(BaseResultDTO))
                 .Produces(StatusCodes.Status400BadRequest, typeof(BaseResultDTO))
@@ -57,7 +55,7 @@ public class ConfigureSonarrIntegrationEndpoint : BaseEndpoint<ConfigureSonarrIn
         if (!setupDownloadClient.IsSuccess)
         {
             _sonarrSettings.IsConfigured = false;
-            await SendFluentResult(setupDownloadClient.ToResult(), ct);
+            await Send.FluentResult(setupDownloadClient.ToResult(), ct);
             return;
         }
 
@@ -69,11 +67,11 @@ public class ConfigureSonarrIntegrationEndpoint : BaseEndpoint<ConfigureSonarrIn
         if (!setupIndexerClient.IsSuccess)
         {
             _sonarrSettings.IsConfigured = false;
-            await SendFluentResult(setupIndexerClient.ToResult(), ct);
+            await Send.FluentResult(setupIndexerClient.ToResult(), ct);
             return;
         }
 
         _sonarrSettings.IsConfigured = true;
-        await SendFluentResult(Result.Ok(), ct);
+        await Send.FluentResult(Result.Ok(), ct);
     }
 }

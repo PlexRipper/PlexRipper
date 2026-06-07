@@ -1,7 +1,7 @@
 namespace Reaparr.Application.UnitTests;
 
 public class ClearCompletedDownloadTasksByDownloadTaskIdEndpointUnitTests
-    : BaseUnitTest<ClearCompletedDownloadTasksByDownloadTaskIdEndpoint>
+    : BaseEndpointUnitTest<ClearCompletedDownloadTasksByDownloadTaskIdEndpoint, List<Guid>, ResultDTO<CountResponseDTO>>
 {
     [Test]
     public async Task ShouldRemoveOnlySpecifiedCompletedDownloadTasks_WhenCalledWithGuidList()
@@ -61,9 +61,8 @@ public class ClearCompletedDownloadTasksByDownloadTaskIdEndpointUnitTests
             .Verifiable(Times.Once());
 
         // Act
-        var ep = SetupEndpointUnitTest<ClearCompletedDownloadTasksByDownloadTaskIdEndpoint>();
-        await ep.HandleAsync(downloadTasks.Select(x => x.Id).Take(5).ToList(), CancellationToken);
-        var result = ep.Response;
+        var endpointResult = await TestEndpointHandleAsync(downloadTasks.Select(x => x.Id).Take(5).ToList());
+        var result = endpointResult.Response;
 
         // Assert
         result.ShouldNotBeNull();
@@ -126,9 +125,8 @@ public class ClearCompletedDownloadTasksByDownloadTaskIdEndpointUnitTests
             );
 
         // Act
-        var ep = SetupEndpointUnitTest<ClearCompletedDownloadTasksByDownloadTaskIdEndpoint>();
-        await ep.HandleAsync(downloadTasks.Select(x => x.Id).ToList(), CancellationToken);
-        var result = ep.Response;
+        var endpointResult = await TestEndpointHandleAsync(downloadTasks.Select(x => x.Id).ToList());
+        var result = endpointResult.Response;
 
         // Assert
         result.ShouldNotBeNull();
@@ -217,9 +215,8 @@ public class ClearCompletedDownloadTasksByDownloadTaskIdEndpointUnitTests
             );
 
         // Act
-        var ep = SetupEndpointUnitTest<ClearCompletedDownloadTasksByDownloadTaskIdEndpoint>();
-        await ep.HandleAsync([episodeFileId], CancellationToken);
-        var result = ep.Response;
+        var endpointResult = await TestEndpointHandleAsync([episodeFileId]);
+        var result = endpointResult.Response;
 
         // Assert
         result.ShouldNotBeNull();

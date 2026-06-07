@@ -39,7 +39,7 @@ public class GetPlexMediaThumbnailImageEndpointRequestValidator : Validator<GetP
 /// High-performance thumbnail proxy endpoint with streaming response and in-memory caching
 /// for database lookups. Response caching is enabled for downstream caches (3 days).
 /// </summary>
-public sealed class GetPlexMediaThumbnailImageEndpoint : BaseEndpoint<GetPlexMediaThumbnailImageEndpointRequest, byte[]>
+public sealed class GetPlexMediaThumbnailImageEndpoint : Endpoint<GetPlexMediaThumbnailImageEndpointRequest, byte[]>
 {
     private readonly ILogger _log;
     private readonly IAppRuntimeInfo _appRuntimeInfo;
@@ -49,8 +49,6 @@ public sealed class GetPlexMediaThumbnailImageEndpoint : BaseEndpoint<GetPlexMed
 
     private static readonly TimeSpan _tokenCacheDuration = TimeSpan.FromMinutes(10);
     private static readonly TimeSpan _connectionCacheDuration = TimeSpan.FromMinutes(5);
-
-    public override string EndpointPath => ApiRoutes.PlexMediaController + "/thumbnail";
 
     public GetPlexMediaThumbnailImageEndpoint(
         ILogger log,
@@ -69,7 +67,7 @@ public sealed class GetPlexMediaThumbnailImageEndpoint : BaseEndpoint<GetPlexMed
 
     public override void Configure()
     {
-        Get(EndpointPath);
+        Get(ApiRoutes.PlexMediaController + "/thumbnail");
 
         // Enable response caching headers for downstream caches (proxies, CDNs, browsers)
         // 3 days = 259200 seconds, varied by query parameters
@@ -136,7 +134,7 @@ public sealed class GetPlexMediaThumbnailImageEndpoint : BaseEndpoint<GetPlexMed
                     plexServerId,
                     tokenResult.Errors.FirstOrDefault()?.Message
                 );
-            await SendFluentResult(tokenResult.ToResult(), ct);
+            await Send.FluentResult(tokenResult.ToResult(), ct);
             return;
         }
 
@@ -149,7 +147,7 @@ public sealed class GetPlexMediaThumbnailImageEndpoint : BaseEndpoint<GetPlexMed
                     plexServerId,
                     connectionResult.Errors.FirstOrDefault()?.Message
                 );
-            await SendFluentResult(connectionResult.ToResult(), ct);
+            await Send.FluentResult(connectionResult.ToResult(), ct);
             return;
         }
 
@@ -184,7 +182,7 @@ public sealed class GetPlexMediaThumbnailImageEndpoint : BaseEndpoint<GetPlexMed
                         SanitizeUrl(url),
                         response.StatusCode
                     );
-                await SendFluentResult(Result.Fail("Failed to fetch image").Add502BadGatewayError(), ct);
+                await Send.FluentResult(Result.Fail("Failed to fetch image").Add502BadGatewayError(), ct);
                 return;
             }
 
@@ -230,7 +228,7 @@ public sealed class GetPlexMediaThumbnailImageEndpoint : BaseEndpoint<GetPlexMed
                     );
             }
 
-            await SendFluentResult(Result.Fail("Failed to connect to Plex server").Add502BadGatewayError(), ct);
+            await Send.FluentResult(Result.Fail("Failed to connect to Plex server").Add502BadGatewayError(), ct);
         }
         catch (TaskCanceledException ex) when (!ct.IsCancellationRequested)
         {
@@ -243,7 +241,7 @@ public sealed class GetPlexMediaThumbnailImageEndpoint : BaseEndpoint<GetPlexMed
                     req.PlexKey,
                     SanitizeUrl(url)
                 );
-            await SendFluentResult(Result.Fail("Request timeout").Add502BadGatewayError(), ct);
+            await Send.FluentResult(Result.Fail("Request timeout").Add502BadGatewayError(), ct);
         }
         catch (IOException ex)
         {
@@ -255,7 +253,7 @@ public sealed class GetPlexMediaThumbnailImageEndpoint : BaseEndpoint<GetPlexMed
                     req.PlexKey,
                     ex.Message
                 );
-            await SendFluentResult(Result.Fail("Network error while fetching image").Add502BadGatewayError(), ct);
+            await Send.FluentResult(Result.Fail("Network error while fetching image").Add502BadGatewayError(), ct);
         }
     }
 

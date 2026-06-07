@@ -1,6 +1,6 @@
 namespace Reaparr.Application.UnitTests;
 
-public class GetAllMediaByTypeEndpointUnitTests : BaseUnitTest<GetAllMediaByTypeEndpoint>
+public class GetAllMediaByTypeEndpointUnitTests : BaseEndpointUnitTest<GetAllMediaByTypeEndpoint, GetAllMediaByTypeRequest, PlexMediaStatisticsDTO>
 {
     [Test]
     public async Task ShouldMapFriendlyRequestFiltersToMediaQueryFilter_WhenHandlingRequest()
@@ -49,8 +49,7 @@ public class GetAllMediaByTypeEndpointUnitTests : BaseUnitTest<GetAllMediaByType
             .Verifiable(Times.Once());
 
         // Act
-        var endpoint = SetupEndpointUnitTest<GetAllMediaByTypeEndpoint>();
-        await endpoint.HandleAsync(request, CancellationToken);
+        await TestEndpointHandleAsync(request);
 
         // Assert
         Mock.Mock<ICommandExecutor>().Verify();

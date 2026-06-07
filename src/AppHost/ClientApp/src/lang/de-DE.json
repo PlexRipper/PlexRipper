@@ -482,6 +482,7 @@
             "save": "speichern",
             "skip-setup": "Einrichtung überspringen",
             "sync-server-libraries": "Server Mediatheken Synchronisieren",
+            "delete-server": "Server löschen",
             "unknown": "unbekannt",
             "update": "aktualisieren",
             "validate": "überprüfen",
@@ -564,6 +565,11 @@
             "text": "Dadurch wird der Server deaktiviert und ist weder in der Ansicht noch in den Suchergebnissen sichtbar. Er wird auch nicht mehr synchronisiert. Sie können den Server wieder aktivieren, indem Sie zu Einstellungen → Benutzeroberfläche → Plex-Server aktivieren gehen.",
             "title": "Sind Sie sicher?"
         },
+        "delete-server": {
+            "text": "Sie sind dabei, diesen Server zu löschen. Löschen Sie diesen Server nur, wenn Sie keinen Zugriff mehr darauf haben. Wenn Sie noch Zugriff auf diesen Plex-Server haben, wird er beim nächsten Aktualisieren Ihres Plex-Kontos wieder erscheinen. Deaktivieren Sie den Server stattdessen, damit er ausgeblendet bleibt.",
+            "title": "Server löschen?",
+            "warning": "Sind Sie sicher, dass Sie diesen Server löschen möchten?"
+        },
         "reset-db": {
             "text": "Das erstellt ein Backup der Datenbank nach \"config/Database Backup/\" und erstellt eine neue. Danach werden Sie auf die Setup-Seite weitergeleitet. Einstellungen werden nicht zurückgesetzt. Diese befinden sich hier:  \"config/ReaparrSettings.json\"",
             "title": "Sind Sie sicher?"
@@ -634,6 +640,11 @@
                     "text": "Dadurch werden alle Mediendaten für jede Bibliothek auf diesem Plex-Server erneut synchronisiert.",
                     "title": "Bibliotheksmedien erneut synchronisieren",
                     "label": "Re-sync Mediathekdaten"
+                },
+                "delete-server": {
+                    "text": "Löschen Sie diesen Server nur, wenn Sie keinen Zugriff mehr darauf haben. Wenn Sie noch Zugriff haben, deaktivieren Sie ihn stattdessen, damit er ausgeblendet bleibt.",
+                    "title": "Diesen Plex-Server löschen",
+                    "label": "Server löschen"
                 }
             }
         },

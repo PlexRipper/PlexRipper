@@ -25,12 +25,10 @@ public class GetDownloadTaskByGuidRequestValidator : Validator<GetDownloadTaskBy
     }
 }
 
-public class GetDownloadTaskByGuidEndpoint : BaseEndpoint<GetDownloadTaskByGuidRequest, DownloadTaskDTO>
+public class GetDownloadTaskByGuidEndpoint : Endpoint<GetDownloadTaskByGuidRequest, DownloadTaskDTO>
 {
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
-
-    public override string EndpointPath => ApiRoutes.DownloadController + "/detail/{DownloadTaskGuid}";
 
     public GetDownloadTaskByGuidEndpoint(ILogger log, IReaparrDbContext dbContext)
     {
@@ -40,7 +38,7 @@ public class GetDownloadTaskByGuidEndpoint : BaseEndpoint<GetDownloadTaskByGuidR
 
     public override void Configure()
     {
-        Get(EndpointPath);
+        Get(ApiRoutes.DownloadController + "/detail/{DownloadTaskGuid}");
 
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<DownloadTaskDTO>))
@@ -57,7 +55,7 @@ public class GetDownloadTaskByGuidEndpoint : BaseEndpoint<GetDownloadTaskByGuidR
 
         if (downloadTask is null)
         {
-            await SendFluentResult(
+            await Send.FluentResult(
                 ResultExtensions.EntityNotFound(nameof(DownloadTaskGeneric), req.DownloadTaskGuid).LogError(),
                 ct
             );
@@ -75,10 +73,10 @@ public class GetDownloadTaskByGuidEndpoint : BaseEndpoint<GetDownloadTaskByGuidR
             if (downloadUrl.IsFailed)
                 downloadUrl.LogError();
 
-            await SendFluentResult(Result.Ok(downloadTask), x => x.ToDTO(downloadUrl.ValueOrDefault), ct);
+            await Send.FluentResult(Result.Ok(downloadTask), x => x.ToDTO(downloadUrl.ValueOrDefault), ct);
             return;
         }
 
-        await SendFluentResult(Result.Ok(downloadTask), x => x.ToDTO(), ct);
+        await Send.FluentResult(Result.Ok(downloadTask), x => x.ToDTO(), ct);
     }
 }

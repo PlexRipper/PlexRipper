@@ -2,10 +2,8 @@ using FastEndpoints.Security;
 
 namespace Reaparr.Application;
 
-public class AppUserLogOutEndpoint : BaseEndpointWithoutRequest<string>
+public class AppUserLogOutEndpoint : EndpointWithoutRequest<string>
 {
-    public override string EndpointPath => ApiRoutes.LogOutEndpoint;
-
     private readonly IIdentitySignInService _identitySignInService;
 
     public AppUserLogOutEndpoint(IIdentitySignInService identitySignInService)
@@ -15,7 +13,7 @@ public class AppUserLogOutEndpoint : BaseEndpointWithoutRequest<string>
 
     public override void Configure()
     {
-        Post(EndpointPath);
+        Post(ApiRoutes.LogOutEndpoint);
         Description(x =>
         {
             x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<string>));
@@ -30,6 +28,6 @@ public class AppUserLogOutEndpoint : BaseEndpointWithoutRequest<string>
         await CookieAuth.SignOutAsync();
 
         var result = Result.Ok("Logout successful");
-        await SendFluentResult(result, x => x, ct);
+        await Send.FluentResult(result, x => x, ct);
     }
 }

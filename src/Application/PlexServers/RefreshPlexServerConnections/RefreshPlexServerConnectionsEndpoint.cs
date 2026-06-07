@@ -11,12 +11,11 @@ public class RefreshPlexServerConnectionsEndpointRequestValidator
     }
 }
 
-public class RefreshPlexServerConnectionsEndpoint : BaseEndpoint<RefreshPlexServerConnectionsEndpointRequest>
+public class RefreshPlexServerConnectionsEndpoint : Endpoint<RefreshPlexServerConnectionsEndpointRequest>
 {
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
     private readonly ICommandExecutor _commandExecutor;
-    public override string EndpointPath => ApiRoutes.PlexServerController + "/{PlexServerId}/refresh";
 
     public RefreshPlexServerConnectionsEndpoint(
         ILogger log,
@@ -31,7 +30,7 @@ public class RefreshPlexServerConnectionsEndpoint : BaseEndpoint<RefreshPlexServ
 
     public override void Configure()
     {
-        Get(EndpointPath);
+        Get(ApiRoutes.PlexServerController + "/{PlexServerId}/refresh");
 
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<PlexServerDTO>))
@@ -47,7 +46,7 @@ public class RefreshPlexServerConnectionsEndpoint : BaseEndpoint<RefreshPlexServ
         var plexAccountResult = await _dbContext.ChoosePlexAccountToConnect(req.PlexServerId, ct);
         if (plexAccountResult.IsFailed)
         {
-            await SendFluentResult(plexAccountResult.ToResult(), ct);
+            await Send.FluentResult(plexAccountResult.ToResult(), ct);
             return;
         }
 
@@ -56,6 +55,6 @@ public class RefreshPlexServerConnectionsEndpoint : BaseEndpoint<RefreshPlexServ
             ct
         );
 
-        await SendFluentResult(refreshResult.ToResult(), ct);
+        await Send.FluentResult(refreshResult.ToResult(), ct);
     }
 }

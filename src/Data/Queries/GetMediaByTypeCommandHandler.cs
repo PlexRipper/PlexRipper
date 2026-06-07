@@ -48,9 +48,19 @@ public class GetMediaByTypeCommandHandler : ICommandHandler<GetMediaByTypeComman
         }
         else
         {
-            // Get only enabled servers
+            var hasPlexAccounts = await _dbContext.PlexAccounts.AnyAsync(ct);
+
+            // Get only enabled servers and libraries that still have access through at least one Plex account.
             var serverList = await _dbContext.PlexServers
-                .Select(server => new { server.Id, PlexLibraryIds = server.PlexLibraries.Select(x => x.Id).ToList() })
+                .Where(server => !hasPlexAccounts || server.PlexAccountServers.Any())
+                .Select(server => new
+                {
+                    server.Id,
+                    PlexLibraryIds = server.PlexLibraries
+                        .Where(library => !hasPlexAccounts || library.PlexAccountLibraries.Any())
+                        .Select(library => library.Id)
+                        .ToList(),
+                })
                 .ToListAsync(ct);
 
             allowedPlexLibraryIds = serverList.SelectMany(x => x.PlexLibraryIds).ToList();
@@ -90,6 +100,7 @@ public class GetMediaByTypeCommandHandler : ICommandHandler<GetMediaByTypeComman
         options = WithServerLibraryScope(options, allowedPlexLibraryIds, plexLibraryId);
 
         ApplyDefaultMediaSort(options, plexLibraryId);
+        NormalizeAllLibrarySort(options, plexLibraryId);
 
         switch (filter.MediaType)
         {
@@ -114,6 +125,8 @@ public class GetMediaByTypeCommandHandler : ICommandHandler<GetMediaByTypeComman
                 )), options, ct);
 
                 _response.TotalCount = await movieQuery.CountAsync(ct);
+                _response.MediaSize = await movieQuery.SumAsync(x => x.MediaSize, ct);
+                _response.TotalMediaSize = _response.MediaSize;
 
                 var movies = await movieQuery
                     .ApplyPaging(options)
@@ -150,6 +163,8 @@ public class GetMediaByTypeCommandHandler : ICommandHandler<GetMediaByTypeComman
                 )), options, ct);
 
                 _response.TotalCount = await tvShowQuery.CountAsync(ct);
+                _response.MediaSize = await tvShowQuery.SumAsync(x => x.MediaSize, ct);
+                _response.TotalMediaSize = _response.MediaSize;
 
                 var tvShows = await tvShowQuery
                     .ApplyPaging(options)
@@ -257,6 +272,17 @@ public class GetMediaByTypeCommandHandler : ICommandHandler<GetMediaByTypeComman
         );
     }
 
+    private void NormalizeAllLibrarySort(QueryOptions options, int plexLibraryId)
+    {
+        if (plexLibraryId > 0 || !options.Sort.Any())
+            return;
+
+        foreach (var sort in options.Sort.Where(x => IsSortIndexField(x.Field)))
+            sort.Field = nameof(BasePlexMedia.SearchTitle);
+    }
+
+    private static bool IsSortIndexField(string? field) => field is nameof(BasePlexMedia.SortIndex) or "sortIndex";
+
     private void ApplyDefaultMediaSort(QueryOptions options, int plexLibraryId)
     {
         if (options.Sort.Count > 0 || plexLibraryId == 0)
@@ -289,7 +315,6 @@ public class GetMediaByTypeCommandHandler : ICommandHandler<GetMediaByTypeComman
             : allScopedLibraries.Sum(x => x.TvShowCount);
         _response.TotalSeasonCount = allScopedLibraries.Sum(x => x.SeasonCount);
         _response.TotalEpisodeCount = allScopedLibraries.Sum(x => x.EpisodeCount);
-        _response.TotalMediaSize = allScopedLibraries.Sum(x => x.MediaSize);
 
         if (hasUserFilters)
         {
@@ -299,7 +324,6 @@ public class GetMediaByTypeCommandHandler : ICommandHandler<GetMediaByTypeComman
             _response.SeasonCount = _response.Items.Where(x => x.Type == PlexMediaType.TvShow).Sum(x => x.ChildCount);
             _response.EpisodeCount =
                 _response.Items.Where(x => x.Type == PlexMediaType.TvShow).Sum(x => x.GrandChildCount);
-            _response.MediaSize = _response.Items.Sum(x => x.MediaSize);
             return;
         }
 
@@ -307,7 +331,6 @@ public class GetMediaByTypeCommandHandler : ICommandHandler<GetMediaByTypeComman
         _response.TvShowCount = mediaType == PlexMediaType.TvShow ? _response.TotalCount : 0;
         _response.SeasonCount = mediaType == PlexMediaType.TvShow ? _response.TotalSeasonCount : 0;
         _response.EpisodeCount = mediaType == PlexMediaType.TvShow ? _response.TotalEpisodeCount : 0;
-        _response.MediaSize = _response.TotalMediaSize;
         _response.MediaCount = _response.TotalCount;
     }
 }

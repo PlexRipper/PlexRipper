@@ -32,12 +32,10 @@ public class GetMediaDetailByIdEndpointRequestValidator : Validator<GetMediaDeta
     }
 }
 
-public class GetMediaDetailByIdEndpoint : BaseEndpoint<GetMediaDetailByIdEndpointRequest, PlexMediaDTO>
+public class GetMediaDetailByIdEndpoint : Endpoint<GetMediaDetailByIdEndpointRequest, ResultDTO<PlexMediaDTO>>
 {
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
-
-    public override string EndpointPath => ApiRoutes.PlexMediaController + "/detail/{PlexMediaId}";
 
     public GetMediaDetailByIdEndpoint(ILogger log, IReaparrDbContext dbContext)
     {
@@ -47,7 +45,7 @@ public class GetMediaDetailByIdEndpoint : BaseEndpoint<GetMediaDetailByIdEndpoin
 
     public override void Configure()
     {
-        Get(EndpointPath);
+        Get(ApiRoutes.PlexMediaController + "/detail/{PlexMediaId}");
 
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<PlexMediaDTO>))
@@ -65,27 +63,27 @@ public class GetMediaDetailByIdEndpoint : BaseEndpoint<GetMediaDetailByIdEndpoin
             var plexMovie = await _dbContext.PlexMovies.GetAsync(req.PlexMediaId, ct);
             if (plexMovie is null)
             {
-                await SendFluentResult(ResultExtensions.EntityNotFound(nameof(req.Type.GetType), req.PlexMediaId), ct);
+                await Send.FluentResult(ResultExtensions.EntityNotFound(nameof(req.Type.GetType), req.PlexMediaId), ct);
                 return;
             }
 
             await SetNestedMovieProperties(plexMovie, ct);
 
-            await SendFluentResult(Result.Ok(plexMovie), x => x.ToDTO(), ct);
+            await Send.FluentResult(Result.Ok(plexMovie), x => x.ToDTO(), ct);
         }
         else if (req.Type == PlexMediaType.TvShow)
         {
             var plexTvShowResult = await GetPlexTvShow(req.PlexMediaId, ct);
             if (plexTvShowResult.IsFailed)
             {
-                await SendFluentResult(plexTvShowResult, ct);
+                await Send.FluentResult(plexTvShowResult, ct);
                 return;
             }
 
-            await SendFluentResult(plexTvShowResult, x => x.ToDTO(), ct);
+            await Send.FluentResult(plexTvShowResult, x => x.ToDTO(), ct);
         }
         else
-            await SendFluentResult(ResultExtensions.Create400BadRequestResult($"Type {req.Type} is not allowed"), ct);
+            await Send.FluentResult(ResultExtensions.Create400BadRequestResult($"Type {req.Type} is not allowed"), ct);
     }
 
     private async Task<Result<PlexTvShow>> GetPlexTvShow(int plexTvShowId, CancellationToken ct)

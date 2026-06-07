@@ -61,6 +61,7 @@
         <Using Include="Reaparr.Environment" />
         <Using Include="Reaparr.External.Contracts" />
         <Using Include="Reaparr.FileSystem.Contracts" />
+        <Using Include="Reaparr.FluentResultExtensions" />
         <Using Include="Reaparr.Identity.Contracts" />
         <Using Include="Reaparr.Logging" />
         <Using Include="Reaparr.PlexApi.Contracts" />

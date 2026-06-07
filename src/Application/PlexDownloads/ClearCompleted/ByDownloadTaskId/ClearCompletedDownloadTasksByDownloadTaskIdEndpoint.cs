@@ -4,12 +4,10 @@ namespace Reaparr.Application;
 /// Clears specific completed <see cref="DownloadTaskGeneric"/> from the database by their IDs.
 /// </summary>
 /// <returns>Is successful.</returns>
-public class ClearCompletedDownloadTasksByDownloadTaskIdEndpoint : BaseEndpoint<List<Guid>, ResultDTO<CountResponseDTO>>
+public class ClearCompletedDownloadTasksByDownloadTaskIdEndpoint : Endpoint<List<Guid>, ResultDTO<CountResponseDTO>>
 {
     private readonly IReaparrDbContext _dbContext;
     private readonly ICommandExecutor _commandExecutor;
-
-    public override string EndpointPath => ApiRoutes.DownloadController + "/clear/tasks";
 
     public ClearCompletedDownloadTasksByDownloadTaskIdEndpoint(
         IReaparrDbContext dbContext,
@@ -22,7 +20,7 @@ public class ClearCompletedDownloadTasksByDownloadTaskIdEndpoint : BaseEndpoint<
 
     public override void Configure()
     {
-        Delete(EndpointPath);
+        Delete(ApiRoutes.DownloadController + "/clear/tasks");
 
         Description(x => x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<CountResponseDTO>)));
     }
@@ -33,10 +31,10 @@ public class ClearCompletedDownloadTasksByDownloadTaskIdEndpoint : BaseEndpoint<
         var result = await _commandExecutor.Send(new ClearCompletedDownloadTasksByDownloadTaskKeyCommand(keys), ct);
         if (result.IsFailed)
         {
-            await SendFluentResult(result.ToResult(), ct);
+            await Send.FluentResult(result.ToResult(), ct);
             return;
         }
 
-        await SendFluentResult(Result.Ok(new CountResponseDTO(result.Value)), ct);
+        await Send.FluentResult(Result.Ok(new CountResponseDTO(result.Value)), ct);
     }
 }

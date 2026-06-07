@@ -214,6 +214,18 @@ public class AddOrUpdatePlexLibrariesCommandUnitTests : BaseUnitTest<AddOrUpdate
         }
 
         await dbContext.SaveChangesAsync(CancellationToken);
+        await dbContext.PlexLibraries.ExecuteUpdateAsync(
+            x => x
+                .SetProperty(y => y.MediaSize, 123_456_789)
+                .SetProperty(y => y.MovieCount, 11)
+                .SetProperty(y => y.TvShowCount, 12)
+                .SetProperty(y => y.SeasonCount, 13)
+                .SetProperty(y => y.EpisodeCount, 14)
+                .SetProperty(y => y.ActorsCount, 15)
+                .SetProperty(y => y.GenresCount, 16)
+                .SetProperty(y => y.CountriesCount, 17),
+            CancellationToken
+        );
 
         // Create API Data
         var updatedTime = DateTime.UtcNow - TimeSpan.FromHours(4);
@@ -250,6 +262,14 @@ public class AddOrUpdatePlexLibrariesCommandUnitTests : BaseUnitTest<AddOrUpdate
             plexLibraryDb.SyncedAt.ShouldBe(syncedAtDateTime);
             plexLibraryDb.Outdated.ShouldBeTrue();
             plexLibraryDb.DefaultDestinationId.ShouldBe(5);
+            plexLibraryDb.MediaSize.ShouldBe(123_456_789);
+            plexLibraryDb.MovieCount.ShouldBe(11);
+            plexLibraryDb.TvShowCount.ShouldBe(12);
+            plexLibraryDb.SeasonCount.ShouldBe(13);
+            plexLibraryDb.EpisodeCount.ShouldBe(14);
+            plexLibraryDb.ActorsCount.ShouldBe(15);
+            plexLibraryDb.GenresCount.ShouldBe(16);
+            plexLibraryDb.CountriesCount.ShouldBe(17);
         }
 
         foreach (var plexAccountLibrary in plexAccountLibrariesDb)
@@ -257,6 +277,125 @@ public class AddOrUpdatePlexLibrariesCommandUnitTests : BaseUnitTest<AddOrUpdate
             plexAccountLibrary.PlexAccountId.ShouldBe(plexAccount.Id);
             plexAccountLibrary.PlexServerId.ShouldBeInRange(1, serverCount);
             plexAccountLibrary.PlexLibraryId.ShouldBeInRange(1, serverCount * libraryCount);
+        }
+    }
+
+    [Test]
+    public async Task ShouldPreserveComputedLibraryMetrics_WhenIncomingPlexLibraryRefreshContainsDefaultMetrics()
+    {
+        // Arrange
+        await SetupDatabase(
+            32,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexMovieLibraryCount = 3;
+                config.PlexAccountCount = 1;
+            }
+        );
+
+        var dbContext = IDbContext;
+        var plexAccount = await dbContext.PlexAccounts.FirstAsync(CancellationToken);
+        var existingLibraries = await dbContext.PlexLibraries
+            .OrderBy(x => x.Id)
+            .ToListAsync(CancellationToken);
+        existingLibraries.Count.ShouldBe(3);
+
+        var expectedMetrics = new Dictionary<int, ExpectedLibraryMetrics>();
+        for (var i = 0; i < existingLibraries.Count; i++)
+        {
+            var library = existingLibraries[i];
+            var metrics = new ExpectedLibraryMetrics(
+                MediaSize: 100_000_000 + i,
+                MovieCount: 10 + i,
+                TvShowCount: 20 + i,
+                SeasonCount: 30 + i,
+                EpisodeCount: 40 + i,
+                ActorsCount: 50 + i,
+                GenresCount: 60 + i,
+                CountriesCount: 70 + i
+            );
+            expectedMetrics.Add(library.Id, metrics);
+
+            await dbContext.PlexLibraries
+                .Where(x => x.Id == library.Id)
+                .ExecuteUpdateAsync(
+                    x => x
+                        .SetProperty(y => y.MediaSize, metrics.MediaSize)
+                        .SetProperty(y => y.MovieCount, metrics.MovieCount)
+                        .SetProperty(y => y.TvShowCount, metrics.TvShowCount)
+                        .SetProperty(y => y.SeasonCount, metrics.SeasonCount)
+                        .SetProperty(y => y.EpisodeCount, metrics.EpisodeCount)
+                        .SetProperty(y => y.ActorsCount, metrics.ActorsCount)
+                        .SetProperty(y => y.GenresCount, metrics.GenresCount)
+                        .SetProperty(y => y.CountriesCount, metrics.CountriesCount),
+                    CancellationToken
+                );
+        }
+
+        var updatedTime = DateTime.UtcNow - TimeSpan.FromHours(3);
+        var changedContentChangedAt = existingLibraries.Max(x => x.ContentChangedAt) + 1;
+        var incomingLibraries = existingLibraries.ToApiLibraries(updatedTime, contentChangedAt: changedContentChangedAt);
+        for (var i = 0; i < incomingLibraries.Count; i++)
+        {
+            var incomingLibrary = incomingLibraries[i];
+            incomingLibrary.Title = $"Updated Plex Library {i}";
+            incomingLibrary.Key = $"updated-key-{i}";
+            incomingLibrary.CreatedAt = DateTime.UtcNow - TimeSpan.FromDays(10 + i);
+            incomingLibrary.ScannedAt = DateTime.UtcNow - TimeSpan.FromDays(5 + i);
+            incomingLibrary.Language = $"updated-language-{i}";
+        }
+
+        incomingLibraries.ShouldAllBe(x => x.MediaSize == 0);
+        incomingLibraries.ShouldAllBe(x => x.MovieCount == 0);
+        incomingLibraries.ShouldAllBe(x => x.TvShowCount == 0);
+        incomingLibraries.ShouldAllBe(x => x.SeasonCount == 0);
+        incomingLibraries.ShouldAllBe(x => x.EpisodeCount == 0);
+        incomingLibraries.ShouldAllBe(x => x.ActorsCount == 0);
+        incomingLibraries.ShouldAllBe(x => x.GenresCount == 0);
+        incomingLibraries.ShouldAllBe(x => x.CountriesCount == 0);
+
+        var request = new AddOrUpdatePlexLibrariesCommand
+        {
+            PlexAccountId = plexAccount.Id,
+            PlexLibraries = incomingLibraries,
+        };
+
+        // Act
+        var result = await Sut.ExecuteAsync(request, CancellationToken);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        result.Errors.Count.ShouldBe(0);
+        result.Value.Single().GetUpdated.Count.ShouldBe(existingLibraries.Count);
+        result.Value.Single().GetGranted.Count.ShouldBe(0);
+        result.Value.Single().GetRevoked.Count.ShouldBe(0);
+
+        var updatedLibraries = await dbContext.PlexLibraries
+            .OrderBy(x => x.Id)
+            .ToListAsync(CancellationToken);
+        updatedLibraries.Count.ShouldBe(existingLibraries.Count);
+        foreach (var updatedLibrary in updatedLibraries)
+        {
+            var metrics = expectedMetrics[updatedLibrary.Id];
+            var incomingLibrary = incomingLibraries.Single(x => x.Id == updatedLibrary.Id);
+            updatedLibrary.Title.ShouldBe(incomingLibrary.Title);
+            updatedLibrary.Key.ShouldBe(incomingLibrary.Key);
+            updatedLibrary.CreatedAt.ShouldBe(incomingLibrary.CreatedAt);
+            updatedLibrary.UpdatedAt.ShouldBe(updatedTime);
+            updatedLibrary.ScannedAt.ShouldBe(incomingLibrary.ScannedAt);
+            updatedLibrary.ContentChangedAt.ShouldBe(changedContentChangedAt);
+            updatedLibrary.Uuid.ShouldBe(incomingLibrary.Uuid);
+            updatedLibrary.Language.ShouldBe(incomingLibrary.Language);
+            updatedLibrary.Outdated.ShouldBeTrue();
+            updatedLibrary.MediaSize.ShouldBe(metrics.MediaSize);
+            updatedLibrary.MovieCount.ShouldBe(metrics.MovieCount);
+            updatedLibrary.TvShowCount.ShouldBe(metrics.TvShowCount);
+            updatedLibrary.SeasonCount.ShouldBe(metrics.SeasonCount);
+            updatedLibrary.EpisodeCount.ShouldBe(metrics.EpisodeCount);
+            updatedLibrary.ActorsCount.ShouldBe(metrics.ActorsCount);
+            updatedLibrary.GenresCount.ShouldBe(metrics.GenresCount);
+            updatedLibrary.CountriesCount.ShouldBe(metrics.CountriesCount);
         }
     }
 
@@ -417,4 +556,15 @@ public class AddOrUpdatePlexLibrariesCommandUnitTests : BaseUnitTest<AddOrUpdate
         historyEvents.Count.ShouldBe(1);
         historyEvents.Single().State.ShouldBe(PlexAccessState.Revoked);
     }
+
+    private sealed record ExpectedLibraryMetrics(
+        long MediaSize,
+        int MovieCount,
+        int TvShowCount,
+        int SeasonCount,
+        int EpisodeCount,
+        int ActorsCount,
+        int GenresCount,
+        int CountriesCount
+    );
 }

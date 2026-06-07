@@ -17,12 +17,10 @@ public class AppCredentialsDTO
     public required bool IsDefaultCredentials { get; set; }
 }
 
-public class GetAppCredentials : BaseEndpointWithoutRequest<AppCredentialsDTO>
+public class GetAppCredentials : EndpointWithoutRequest<AppCredentialsDTO>
 {
     private readonly ILogger _log;
     private readonly IUserService _userService;
-
-    public override string EndpointPath => ApiRoutes.AuthenticatedController;
 
     public GetAppCredentials(ILogger log, IUserService userService)
     {
@@ -32,7 +30,7 @@ public class GetAppCredentials : BaseEndpointWithoutRequest<AppCredentialsDTO>
 
     public override void Configure()
     {
-        Get(EndpointPath);
+        Get(ApiRoutes.AuthenticatedController);
 
         Summary(s =>
         {
@@ -53,7 +51,7 @@ public class GetAppCredentials : BaseEndpointWithoutRequest<AppCredentialsDTO>
         if (user is null)
         {
             var result = Result.Fail("No app user found in the database").LogError();
-            await SendFluentResult(result, ct);
+            await Send.FluentResult(result, ct);
             return;
         }
 
@@ -62,7 +60,7 @@ public class GetAppCredentials : BaseEndpointWithoutRequest<AppCredentialsDTO>
             && await _userService.CheckPasswordAsync(user, DefaultUserAppCredentials.DefaultPassword);
 
         // Don't send back the real password as this is hidden anyway when updating the password
-        await SendFluentResult(
+        await Send.FluentResult(
             Result.Ok(new AppCredentialsDTO(user.UserName!, StringExtensions.GeneratePassword(), isDefaultCredentials)),
             x => x,
             ct

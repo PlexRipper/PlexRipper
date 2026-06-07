@@ -10,12 +10,10 @@ public class GetPlexAccountByIdEndpointRequestValidator : Validator<GetPlexAccou
     }
 }
 
-public class GetPlexAccountByIdEndpoint : BaseEndpoint<GetPlexAccountByIdEndpointRequest, PlexAccountDTO>
+public class GetPlexAccountByIdEndpoint : Endpoint<GetPlexAccountByIdEndpointRequest, PlexAccountDTO>
 {
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
-
-    public override string EndpointPath => ApiRoutes.PlexAccountController + "/{PlexAccountId}";
 
     public GetPlexAccountByIdEndpoint(ILogger log, IReaparrDbContext dbContext)
     {
@@ -25,7 +23,7 @@ public class GetPlexAccountByIdEndpoint : BaseEndpoint<GetPlexAccountByIdEndpoin
 
     public override void Configure()
     {
-        Get(EndpointPath);
+        Get(ApiRoutes.PlexAccountController + "/{PlexAccountId}");
 
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<PlexAccountDTO>))
@@ -44,7 +42,7 @@ public class GetPlexAccountByIdEndpoint : BaseEndpoint<GetPlexAccountByIdEndpoin
             .GetAsync(req.PlexAccountId, ct);
         if (plexAccount is null)
         {
-            await SendFluentResult(
+            await Send.FluentResult(
                 ResultExtensions.EntityNotFound(nameof(PlexAccount), req.PlexAccountId).LogWarning(),
                 ct
             );
@@ -53,6 +51,6 @@ public class GetPlexAccountByIdEndpoint : BaseEndpoint<GetPlexAccountByIdEndpoin
 
         _log.Here()
             .Debug("Found an {NameOfPlexAccount} with the id: {AccountId}", nameof(PlexAccount), req.PlexAccountId);
-        await SendFluentResult(Result.Ok(plexAccount), x => x.ToDTO(), ct);
+        await Send.FluentResult(Result.Ok(plexAccount), x => x.ToDTO(), ct);
     }
 }

@@ -16,12 +16,10 @@ public class SetServerOwnedRequestValidator : Validator<SetServerOwnedRequest>
     }
 }
 
-public class SetServerOwnedEndpoint : BaseEndpoint<SetServerOwnedRequest, PlexServerDTO>
+public class SetServerOwnedEndpoint : Endpoint<SetServerOwnedRequest, ResultDTO<PlexServerDTO>>
 {
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
-
-    public override string EndpointPath => ApiRoutes.PlexServerController + "/{PlexServerId}/set-server-owned";
 
     public SetServerOwnedEndpoint(ILogger log, IReaparrDbContext dbContext)
     {
@@ -31,7 +29,7 @@ public class SetServerOwnedEndpoint : BaseEndpoint<SetServerOwnedRequest, PlexSe
 
     public override void Configure()
     {
-        Put(EndpointPath);
+        Put(ApiRoutes.PlexServerController + "/{PlexServerId}/set-server-owned");
 
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<PlexServerDTO>))
@@ -48,7 +46,7 @@ public class SetServerOwnedEndpoint : BaseEndpoint<SetServerOwnedRequest, PlexSe
             .AnyAsync(x => x.Id == req.PlexServerId, ct);
         if (!plexServerExists)
         {
-            await SendFluentResult(ResultExtensions.EntityNotFound(nameof(PlexServer), req.PlexServerId), ct);
+            await Send.FluentResult(ResultExtensions.EntityNotFound(nameof(PlexServer), req.PlexServerId), ct);
             return;
         }
 
@@ -59,7 +57,7 @@ public class SetServerOwnedEndpoint : BaseEndpoint<SetServerOwnedRequest, PlexSe
 
         if (updateCount == 0)
         {
-            await SendFluentResult(ResultExtensions.EntityNotFound(nameof(PlexServer), req.PlexServerId), ct);
+            await Send.FluentResult(ResultExtensions.EntityNotFound(nameof(PlexServer), req.PlexServerId), ct);
             return;
         }
 
@@ -70,10 +68,10 @@ public class SetServerOwnedEndpoint : BaseEndpoint<SetServerOwnedRequest, PlexSe
 
         if (plexServer is null)
         {
-            await SendFluentResult(ResultExtensions.EntityNotFound(nameof(PlexServer), req.PlexServerId), ct);
+            await Send.FluentResult(ResultExtensions.EntityNotFound(nameof(PlexServer), req.PlexServerId), ct);
             return;
         }
 
-        await SendFluentResult(Result.Ok(plexServer), x => x.ToDTO(), ct);
+        await Send.FluentResult(Result.Ok(plexServer), x => x.ToDTO(), ct);
     }
 }

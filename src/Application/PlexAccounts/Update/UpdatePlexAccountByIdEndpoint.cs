@@ -29,11 +29,9 @@ public class UpdatePlexAccountByIdEndpointRequestValidator : Validator<UpdatePle
     }
 }
 
-public class UpdatePlexAccountByIdEndpoint : BaseEndpoint<UpdatePlexAccountByIdEndpointRequest, PlexAccountDTO>
+public class UpdatePlexAccountByIdEndpoint : Endpoint<UpdatePlexAccountByIdEndpointRequest, PlexAccountDTO>
 {
     private readonly IReaparrDbContext _dbContext;
-
-    public override string EndpointPath => ApiRoutes.PlexAccountController;
 
     public UpdatePlexAccountByIdEndpoint(IReaparrDbContext dbContext)
     {
@@ -42,7 +40,7 @@ public class UpdatePlexAccountByIdEndpoint : BaseEndpoint<UpdatePlexAccountByIdE
 
     public override void Configure()
     {
-        Put(EndpointPath);
+        Put(ApiRoutes.PlexAccountController);
 
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<PlexAccountDTO>))
@@ -61,7 +59,7 @@ public class UpdatePlexAccountByIdEndpoint : BaseEndpoint<UpdatePlexAccountByIdE
 
         if (accountInDb == null)
         {
-            await SendFluentResult(ResultExtensions.EntityNotFound(nameof(PlexAccount), plexAccountDTO.Id), ct);
+            await Send.FluentResult(ResultExtensions.EntityNotFound(nameof(PlexAccount), plexAccountDTO.Id), ct);
             return;
         }
 
@@ -70,6 +68,6 @@ public class UpdatePlexAccountByIdEndpoint : BaseEndpoint<UpdatePlexAccountByIdE
         _dbContext.Entry(accountInDb).CurrentValues.SetValues(updatedPlexAccount);
         await _dbContext.SaveChangesAsync(ct);
 
-        await SendFluentResult(Result.Ok(accountInDb), x => x.ToDTO(), ct);
+        await Send.FluentResult(Result.Ok(accountInDb), x => x.ToDTO(), ct);
     }
 }

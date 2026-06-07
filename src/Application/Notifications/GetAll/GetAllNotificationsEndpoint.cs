@@ -1,10 +1,8 @@
 namespace Reaparr.Application;
 
-public class GetAllNotificationsEndpoint : BaseEndpointWithoutRequest<List<NotificationDTO>>
+public class GetAllNotificationsEndpoint : EndpointWithoutRequest<List<NotificationDTO>>
 {
     private readonly IReaparrDbContext _dbContext;
-
-    public override string EndpointPath => ApiRoutes.NotificationController + "/";
 
     public GetAllNotificationsEndpoint(IReaparrDbContext dbContext)
     {
@@ -13,7 +11,7 @@ public class GetAllNotificationsEndpoint : BaseEndpointWithoutRequest<List<Notif
 
     public override void Configure()
     {
-        Get(EndpointPath);
+        Get(ApiRoutes.NotificationController + "/");
 
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<List<NotificationDTO>>))
@@ -24,6 +22,6 @@ public class GetAllNotificationsEndpoint : BaseEndpointWithoutRequest<List<Notif
     public override async Task HandleAsync(CancellationToken ct)
     {
         var list = await _dbContext.Notifications.ToListAsync(ct);
-        await SendFluentResult(Result.Ok(list), x => x.ToDTO(), ct);
+        await Send.FluentResult(Result.Ok(list), x => x.ToDTO(), ct);
     }
 }

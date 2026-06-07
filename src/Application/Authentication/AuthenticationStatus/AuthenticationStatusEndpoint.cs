@@ -1,12 +1,10 @@
 namespace Reaparr.Application;
 
-public class AuthenticationStatusEndpoint : BaseEndpointWithoutRequest<UserClaimsDTO>
+public class AuthenticationStatusEndpoint : EndpointWithoutRequest<UserClaimsDTO>
 {
-    public override string EndpointPath => ApiRoutes.AuthenticatedController + "/status";
-
     public override void Configure()
     {
-        Get(EndpointPath);
+        Get(ApiRoutes.AuthenticatedController + "/status");
         AllowAnonymous();
         Description(x =>
         {
@@ -29,11 +27,11 @@ public class AuthenticationStatusEndpoint : BaseEndpointWithoutRequest<UserClaim
                     Claims = User.Claims.Select(c => c.Type).ToList(),
                 }
             );
-            await SendFluentResult(result, x => x, ct);
+            await Send.FluentResult(result, x => x, ct);
         }
         else
         {
-            await SendFluentResult(ResultExtensions.Create401UnauthorizedResult(), ct);
+            await Send.FluentResult(ResultExtensions.Create401UnauthorizedResult(), ct);
         }
     }
 }

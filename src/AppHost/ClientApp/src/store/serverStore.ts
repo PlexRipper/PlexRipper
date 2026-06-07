@@ -5,11 +5,10 @@ import { of } from 'rxjs';
 import { switchMap, tap, map, catchError } from 'rxjs/operators';
 import type { PlexServerDTO } from '@dto';
 import { StoreNames, type ISetupResult } from '@interfaces';
-import { get } from '@vueuse/core';
 import { plexServerApi } from '@api';
 import { RefreshDataType } from '@dto';
 import { cloneDeep, orderBy } from 'lodash-es';
-import { useAccountStore, useServerConnectionStore, useSettingsStore, useSignalrStore } from '@store';
+import { useServerConnectionStore, useSettingsStore, useSignalrStore } from '@store';
 
 interface IServerStoreState {
 	servers: PlexServerDTO[];
@@ -22,7 +21,6 @@ export const useServerStore = defineStore(StoreNames.ServerStore, () => {
 
 	const state = reactive<IServerStoreState>(cloneDeep(defaultState));
 
-	const accountStore = useAccountStore();
 	const serverConnectionStore = useServerConnectionStore();
 	const settingsStore = useSettingsStore();
 	const signalRStore = useSignalrStore();
@@ -98,6 +96,15 @@ export const useServerStore = defineStore(StoreNames.ServerStore, () => {
 					}),
 				);
 		},
+		deleteServer(serverId: number) {
+			return plexServerApi.deletePlexServerEndpoint(serverId).pipe(
+				tap((response) => {
+					if (response.isSuccess) {
+						state.servers = state.servers.filter((x) => x.id !== serverId);
+					}
+				}),
+			);
+		},
 		setServerPaused(serverId: number, paused: boolean) {
 			const request$ = paused
 				? plexServerApi.pausePlexServerDownloadsEndpoint(serverId)
@@ -134,12 +141,10 @@ export const useServerStore = defineStore(StoreNames.ServerStore, () => {
 			return serverIds.map((x) => getters.getServer(x)).filter((x) => !!x) ?? [];
 		},
 		getVisibleServers: computed((): PlexServerDTO[] => {
-			const servers = getters.getServers().filter((x) => x.isEnabled && accountStore.getHasAccountServerAccess(x.id));
+			const servers = getters.getServers().filter((x) => x.isEnabled);
 			return orderBy(servers, [(x) => x.owned, (x) => x.name.toLocaleLowerCase()], ['desc', 'asc']);
 		}),
-		getDisabledServers: computed((): PlexServerDTO[] =>
-			getters.getServers().filter((x) => !get(getters.getVisibleServers).includes(x)),
-		),
+		getDisabledServers: computed((): PlexServerDTO[] => getters.getServers().filter((x) => !x.isEnabled)),
 		getServerName: (serverId: number): string => {
 			if (settingsStore.shouldMaskServerNames) {
 				return '**MASKED**';

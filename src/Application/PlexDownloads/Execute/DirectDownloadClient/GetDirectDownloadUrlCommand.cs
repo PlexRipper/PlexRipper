@@ -1,5 +1,4 @@
 using System.Net;
-using Reaparr.FluentResultExtensions;
 
 namespace Reaparr.Application;
 

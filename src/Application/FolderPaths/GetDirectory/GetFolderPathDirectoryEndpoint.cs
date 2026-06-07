@@ -22,14 +22,12 @@ public class GetFolderPathDirectoryRequestValidator : Validator<GetFolderPathDir
     }
 }
 
-public class GetFolderPathDirectoryEndpoint : BaseEndpoint<GetFolderPathDirectoryRequest, FileSystemDTO>
+public class GetFolderPathDirectoryEndpoint : Endpoint<GetFolderPathDirectoryRequest, FileSystemDTO>
 {
     private readonly ILogger _log;
     private readonly IDirectory _directory;
     private readonly IPath _path;
     private readonly IDiskProvider _diskProvider;
-
-    public override string EndpointPath => ApiRoutes.FolderPathController + "/directory";
 
     public GetFolderPathDirectoryEndpoint(ILogger log, IDirectory directory, IPath path, IDiskProvider diskProvider)
     {
@@ -41,7 +39,7 @@ public class GetFolderPathDirectoryEndpoint : BaseEndpoint<GetFolderPathDirector
 
     public override void Configure()
     {
-        Get(EndpointPath);
+        Get(ApiRoutes.FolderPathController + "/directory");
 
         Summary(x =>
         {
@@ -61,7 +59,7 @@ public class GetFolderPathDirectoryEndpoint : BaseEndpoint<GetFolderPathDirector
 
         var result = LookupContents(path, false, true);
 
-        await SendFluentResult(result, x => x.ToDTO(), ct);
+        await Send.FluentResult(result, x => x.ToDTO(), ct);
     }
 
     private Result<FileSystemResult> LookupContents(

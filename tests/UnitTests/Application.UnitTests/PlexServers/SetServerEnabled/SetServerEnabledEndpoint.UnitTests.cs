@@ -1,6 +1,6 @@
 namespace Reaparr.Application.UnitTests;
 
-public class SetServerEnabledEndpointUnitTests : BaseUnitTest<SetServerEnabledEndpoint>
+public class SetServerEnabledEndpointUnitTests : BaseEndpointUnitTest<SetServerEnabledEndpoint, SetServerEnabledRequest, ResultDTO<PlexServerDTO>>
 {
     [Test]
     public async Task ShouldEnableServer_WhenServerIsDisabled()
@@ -16,15 +16,13 @@ public class SetServerEnabledEndpointUnitTests : BaseUnitTest<SetServerEnabledEn
             .ExecuteUpdateAsync(x => x.SetProperty(y => y.IsEnabled, false), CancellationToken);
 
         // Act
-        var endpoint = SetupEndpointUnitTest<SetServerEnabledEndpoint>();
-        await endpoint.HandleAsync(
-            new SetServerEnabledRequest { PlexServerId = server.Id, IsEnabled = true },
-            CancellationToken
+        var endpointResult = await TestEndpointHandleAsync(
+            new SetServerEnabledRequest { PlexServerId = server.Id, IsEnabled = true }
         );
 
         // Assert
-        endpoint.Response.ShouldNotBeNull();
-        endpoint.Response.IsSuccess.ShouldBe(true);
+        endpointResult.Response.ShouldNotBeNull();
+        endpointResult.Response.IsSuccess.ShouldBe(true);
 
         var updated = await dbContext.PlexServers.IgnoreIsEnabledFilter().FirstAsync(x => x.Id == server.Id, CancellationToken);
         updated.IsEnabled.ShouldBe(true);
@@ -40,15 +38,13 @@ public class SetServerEnabledEndpointUnitTests : BaseUnitTest<SetServerEnabledEn
         var server = await dbContext.PlexServers.IgnoreIsEnabledFilter().FirstAsync(CancellationToken);
 
         // Act
-        var endpoint = SetupEndpointUnitTest<SetServerEnabledEndpoint>();
-        await endpoint.HandleAsync(
-            new SetServerEnabledRequest { PlexServerId = server.Id, IsEnabled = false },
-            CancellationToken
+        var endpointResult = await TestEndpointHandleAsync(
+            new SetServerEnabledRequest { PlexServerId = server.Id, IsEnabled = false }
         );
 
         // Assert
-        endpoint.Response.ShouldNotBeNull();
-        endpoint.Response.IsSuccess.ShouldBe(true);
+        endpointResult.Response.ShouldNotBeNull();
+        endpointResult.Response.IsSuccess.ShouldBe(true);
 
         var updated = await dbContext.PlexServers.IgnoreIsEnabledFilter().FirstAsync(x => x.Id == server.Id, CancellationToken);
         updated.IsEnabled.ShouldBeFalse();
@@ -66,12 +62,11 @@ public class SetServerEnabledEndpointUnitTests : BaseUnitTest<SetServerEnabledEn
         var otherId = servers[1].Id;
 
         // Act
-        var endpoint = SetupEndpointUnitTest<SetServerEnabledEndpoint>();
-        await endpoint.HandleAsync(new SetServerEnabledRequest { PlexServerId = targetId, IsEnabled = false }, CancellationToken);
+        var endpointResult = await TestEndpointHandleAsync(new SetServerEnabledRequest { PlexServerId = targetId, IsEnabled = false });
 
         // Assert
-        endpoint.Response.ShouldNotBeNull();
-        endpoint.Response.IsSuccess.ShouldBe(true);
+        endpointResult.Response.ShouldNotBeNull();
+        endpointResult.Response.IsSuccess.ShouldBe(true);
 
         var target = await dbContext.PlexServers.IgnoreIsEnabledFilter().FirstAsync(x => x.Id == targetId, CancellationToken);
         var other = await dbContext.PlexServers.IgnoreIsEnabledFilter().FirstAsync(x => x.Id == otherId, CancellationToken);
@@ -87,15 +82,13 @@ public class SetServerEnabledEndpointUnitTests : BaseUnitTest<SetServerEnabledEn
         await SetupDatabase(91202, config => config.PlexServerCount = 0);
 
         // Act
-        var endpoint = SetupEndpointUnitTest<SetServerEnabledEndpoint>();
-        await endpoint.HandleAsync(
-            new SetServerEnabledRequest { PlexServerId = 9999, IsEnabled = true },
-            CancellationToken
+        var endpointResult = await TestEndpointHandleAsync(
+            new SetServerEnabledRequest { PlexServerId = 9999, IsEnabled = true }
         );
 
         // Assert
-        endpoint.Response.ShouldNotBeNull();
-        endpoint.Response.IsSuccess.ShouldBeFalse();
+        endpointResult.Response.ShouldNotBeNull();
+        endpointResult.Response.IsSuccess.ShouldBeFalse();
     }
 
     [Test]
@@ -111,10 +104,12 @@ public class SetServerEnabledEndpointUnitTests : BaseUnitTest<SetServerEnabledEn
             .ExecuteUpdateAsync(x => x.SetProperty(y => y.OwnedOverride, true), CancellationToken);
 
         // Act
-        var endpoint = SetupEndpointUnitTest<SetServerEnabledEndpoint>();
-        await endpoint.HandleAsync(new SetServerEnabledRequest { PlexServerId = server.Id, IsEnabled = false }, CancellationToken);
+        var endpointResult = await TestEndpointHandleAsync(new SetServerEnabledRequest { PlexServerId = server.Id, IsEnabled = false });
 
         // Assert
+        endpointResult.ShouldNotBeNull();
+        endpointResult.Response.ShouldNotBeNull();
+        endpointResult.Response.IsSuccess.ShouldBe(true);
         var updated = await db.PlexServers.IgnoreIsEnabledFilter().FirstAsync(x => x.Id == server.Id, CancellationToken);
         updated.OwnedOverride.ShouldBe(true);
         updated.IsEnabled.ShouldBeFalse();
@@ -133,10 +128,12 @@ public class SetServerEnabledEndpointUnitTests : BaseUnitTest<SetServerEnabledEn
             .ExecuteUpdateAsync(x => x.SetProperty(y => y.IsDownloadsPausedByUser, true), CancellationToken);
 
         // Act
-        var endpoint = SetupEndpointUnitTest<SetServerEnabledEndpoint>();
-        await endpoint.HandleAsync(new SetServerEnabledRequest { PlexServerId = server.Id, IsEnabled = false }, CancellationToken);
+        var endpointResult = await TestEndpointHandleAsync(new SetServerEnabledRequest { PlexServerId = server.Id, IsEnabled = false });
 
         // Assert
+        endpointResult.ShouldNotBeNull();
+        endpointResult.Response.ShouldNotBeNull();
+        endpointResult.Response.IsSuccess.ShouldBe(true);
         var updated = await db.PlexServers.IgnoreIsEnabledFilter().FirstAsync(x => x.Id == server.Id, CancellationToken);
         updated.IsDownloadsPausedByUser.ShouldBe(true);
     }
@@ -150,11 +147,12 @@ public class SetServerEnabledEndpointUnitTests : BaseUnitTest<SetServerEnabledEn
         var server = await db.PlexServers.IgnoreIsEnabledFilter().FirstAsync(CancellationToken);
 
         // Act
-        var endpoint = SetupEndpointUnitTest<SetServerEnabledEndpoint>();
-        await endpoint.HandleAsync(new SetServerEnabledRequest { PlexServerId = server.Id, IsEnabled = true }, CancellationToken);
+        var endpointResult = await TestEndpointHandleAsync(new SetServerEnabledRequest { PlexServerId = server.Id, IsEnabled = true });
 
         // Assert
-        endpoint.Response.IsSuccess.ShouldBe(true);
+        endpointResult.ShouldNotBeNull();
+        endpointResult.Response.ShouldNotBeNull();
+        endpointResult.Response.IsSuccess.ShouldBe(true);
         var updated = await db.PlexServers.IgnoreIsEnabledFilter().FirstAsync(x => x.Id == server.Id, CancellationToken);
         updated.IsEnabled.ShouldBe(true);
     }
@@ -170,11 +168,12 @@ public class SetServerEnabledEndpointUnitTests : BaseUnitTest<SetServerEnabledEn
             .ExecuteUpdateAsync(x => x.SetProperty(y => y.IsEnabled, false), CancellationToken);
 
         // Act
-        var endpoint = SetupEndpointUnitTest<SetServerEnabledEndpoint>();
-        await endpoint.HandleAsync(new SetServerEnabledRequest { PlexServerId = server.Id, IsEnabled = false }, CancellationToken);
+        var endpointResult = await TestEndpointHandleAsync(new SetServerEnabledRequest { PlexServerId = server.Id, IsEnabled = false });
 
         // Assert
-        endpoint.Response.IsSuccess.ShouldBe(true);
+        endpointResult.ShouldNotBeNull();
+        endpointResult.Response.ShouldNotBeNull();
+        endpointResult.Response.IsSuccess.ShouldBe(true);
         var updated = await db.PlexServers.IgnoreIsEnabledFilter().FirstAsync(x => x.Id == server.Id, CancellationToken);
         updated.IsEnabled.ShouldBeFalse();
     }
@@ -186,11 +185,9 @@ public class SetServerEnabledEndpointUnitTests : BaseUnitTest<SetServerEnabledEn
         await SetupDatabase(91209, config => config.PlexServerCount = 1);
         var db = IDbContext;
         var server = await db.PlexServers.IgnoreIsEnabledFilter().FirstAsync(CancellationToken);
-        var endpoint = SetupEndpointUnitTest<SetServerEnabledEndpoint>();
-
         // Act
-        await endpoint.HandleAsync(new SetServerEnabledRequest { PlexServerId = server.Id, IsEnabled = false }, CancellationToken);
-        await endpoint.HandleAsync(new SetServerEnabledRequest { PlexServerId = server.Id, IsEnabled = true }, CancellationToken);
+        await TestEndpointHandleAsync(new SetServerEnabledRequest { PlexServerId = server.Id, IsEnabled = false });
+        await TestEndpointHandleAsync(new SetServerEnabledRequest { PlexServerId = server.Id, IsEnabled = true });
 
         // Assert
         var updated = await db.PlexServers.IgnoreIsEnabledFilter().FirstAsync(x => x.Id == server.Id, CancellationToken);
@@ -206,12 +203,11 @@ public class SetServerEnabledEndpointUnitTests : BaseUnitTest<SetServerEnabledEn
         var server = await db.PlexServers.IgnoreIsEnabledFilter().FirstAsync(CancellationToken);
 
         // Act
-        var endpoint = SetupEndpointUnitTest<SetServerEnabledEndpoint>();
-        await endpoint.HandleAsync(new SetServerEnabledRequest { PlexServerId = server.Id, IsEnabled = false }, CancellationToken);
+        var endpointResult = await TestEndpointHandleAsync(new SetServerEnabledRequest { PlexServerId = server.Id, IsEnabled = false });
 
         // Assert
-        endpoint.Response.ShouldNotBeNull();
-        endpoint.Response.IsSuccess.ShouldBe(true);
+        endpointResult.Response.ShouldNotBeNull();
+        endpointResult.Response.IsSuccess.ShouldBe(true);
     }
 
     [Test]

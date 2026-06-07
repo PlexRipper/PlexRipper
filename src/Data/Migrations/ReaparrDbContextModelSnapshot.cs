@@ -1367,8 +1367,7 @@ namespace Reaparr.Data.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("Quality")
-                        .HasColumnType("INTEGER")
-                        .HasColumnOrder(3);
+                        .HasColumnType("INTEGER");
 
                     b.Property<long>("Size")
                         .HasColumnType("INTEGER")
@@ -2022,8 +2021,7 @@ namespace Reaparr.Data.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("Quality")
-                        .HasColumnType("INTEGER")
-                        .HasColumnOrder(3);
+                        .HasColumnType("INTEGER");
 
                     b.Property<long>("Size")
                         .HasColumnType("INTEGER")
@@ -2096,8 +2094,7 @@ namespace Reaparr.Data.Migrations
                         .HasColumnOrder(2);
 
                     b.Property<int>("Quality")
-                        .HasColumnType("INTEGER")
-                        .HasColumnOrder(3);
+                        .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
 
@@ -2265,8 +2262,7 @@ namespace Reaparr.Data.Migrations
                         .HasColumnOrder(2);
 
                     b.Property<int>("Quality")
-                        .HasColumnType("INTEGER")
-                        .HasColumnOrder(3);
+                        .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
 

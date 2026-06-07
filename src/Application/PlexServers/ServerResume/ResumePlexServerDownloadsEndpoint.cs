@@ -10,11 +10,9 @@ public class ResumePlexServerDownloadsEndpointRequestValidator : Validator<Resum
     }
 }
 
-public class ResumePlexServerDownloadsEndpoint : BaseEndpoint<ResumePlexServerDownloadsEndpointRequest>
+public class ResumePlexServerDownloadsEndpoint : Endpoint<ResumePlexServerDownloadsEndpointRequest>
 {
     private readonly ICommandExecutor _commandExecutor;
-
-    public override string EndpointPath => ApiRoutes.PlexServerController + "/server/resume/{PlexServerId}";
 
     public ResumePlexServerDownloadsEndpoint(ICommandExecutor commandExecutor)
     {
@@ -23,7 +21,7 @@ public class ResumePlexServerDownloadsEndpoint : BaseEndpoint<ResumePlexServerDo
 
     public override void Configure()
     {
-        Put(EndpointPath);
+        Put(ApiRoutes.PlexServerController + "/server/resume/{PlexServerId}");
 
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(BaseResultDTO))
@@ -37,6 +35,6 @@ public class ResumePlexServerDownloadsEndpoint : BaseEndpoint<ResumePlexServerDo
     {
         var result = await _commandExecutor.Send(new ResumePlexServerDownloadsCommand(req.PlexServerId), ct);
 
-        await SendFluentResult(result, ct);
+        await Send.FluentResult(result, ct);
     }
 }

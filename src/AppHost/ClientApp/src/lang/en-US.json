@@ -482,6 +482,7 @@
             "save": "Save",
             "skip-setup": "Skip setup",
             "sync-server-libraries": "Sync server libraries",
+            "delete-server": "Delete server",
             "unknown": "Unknown",
             "update": "Update",
             "validate": "Validate",
@@ -564,6 +565,11 @@
             "text": "This will disable and hide the server from view, search results and will not be synced anymore. You can enable this server again by going to settings -> UI -> Enable Plex Servers",
             "title": "Are you sure?"
         },
+        "delete-server": {
+            "text": "You are about to delete this server. Only delete this server if you no longer have access to it. If you still have access to this Plex server, it will appear again the next time your Plex account refreshes. In that case, disable the server instead so it stays hidden.",
+            "title": "Delete server?",
+            "warning": "Are you sure you want to delete this server?"
+        },
         "reset-db": {
             "text": "This will back-up the current database to \"config/Database Backup/\" and create a new one, after which you will be redirected to the setup page. This will not reset settings since those are stored in \"config/ReaparrSettings.json\"",
             "title": "Are you sure?"
@@ -634,6 +640,11 @@
                     "text": "This will re-sync all media data for each library in this Plex server.",
                     "title": "Re-sync Library media",
                     "label": "Re-sync Library media"
+                },
+                "delete-server": {
+                    "text": "Delete this server only if you no longer have access to it. If you still have access, disable it instead so it stays hidden.",
+                    "title": "Delete this Plex server",
+                    "label": "Delete Server"
                 }
             }
         },

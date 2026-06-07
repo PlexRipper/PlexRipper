@@ -482,6 +482,7 @@
             "save": "Sauvegarder",
             "skip-setup": "Ignorer le configuration",
             "sync-server-libraries": "Synchroniser les bibliothèques du serveur",
+            "delete-server": "Supprimer le serveur",
             "unknown": "Inconnu",
             "update": "Mettre à jour",
             "validate": "Valider",
@@ -564,6 +565,11 @@
             "text": "Cela désactivera et masquera le serveur, l'empêchant d'apparaître dans les résultats de recherche et la synchronisation. Vous pouvez le réactiver en allant dans Paramètres > Interface utilisateur > Activer les serveurs Plex.",
             "title": "Êtes vous sûr ?"
         },
+        "delete-server": {
+            "text": "Vous êtes sur le point de supprimer ce serveur. Supprimez ce serveur uniquement si vous n'y avez plus accès. Si vous avez toujours accès à ce serveur Plex, il réapparaîtra lors de la prochaine actualisation de votre compte Plex. Dans ce cas, désactivez plutôt le serveur afin qu'il reste masqué.",
+            "title": "Supprimer le serveur ?",
+            "warning": "Êtes-vous sûr de vouloir supprimer ce serveur ?"
+        },
         "reset-db": {
             "text": "Ca va backuper votre base de donnée vers \"config/Database Backup/\" et en créer une nouvelle, après vous serrez redirigé vers la page de configuration. Ca ne réinitialisera pas les paramètres qui sont stocké dans \"config/ReaparrSettings.json\"",
             "title": "Êtes vous sûr ?"
@@ -634,6 +640,11 @@
                     "text": "Cela resynchronisera toutes les données multimédias pour chaque bibliothèque de ce serveur Plex.",
                     "title": "Resynchroniser les médias de la bibliothèque",
                     "label": "Resyncroniser les bibliothèques"
+                },
+                "delete-server": {
+                    "text": "Supprimez ce serveur uniquement si vous n'y avez plus accès. Si vous y avez toujours accès, désactivez-le plutôt afin qu'il reste masqué.",
+                    "title": "Supprimer ce serveur Plex",
+                    "label": "Supprimer le serveur"
                 }
             }
         },

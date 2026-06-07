@@ -1,10 +1,8 @@
 namespace Reaparr.Application;
 
-public class GetAllPlexServerConnectionsEndpoint : BaseEndpointWithoutRequest<List<PlexServerConnectionDTO>>
+public class GetAllPlexServerConnectionsEndpoint : EndpointWithoutRequest<List<PlexServerConnectionDTO>>
 {
     private readonly IReaparrDbContext _dbContext;
-
-    public override string EndpointPath => ApiRoutes.PlexServerConnectionController + "/";
 
     public GetAllPlexServerConnectionsEndpoint(IReaparrDbContext dbContext)
     {
@@ -13,7 +11,7 @@ public class GetAllPlexServerConnectionsEndpoint : BaseEndpointWithoutRequest<Li
 
     public override void Configure()
     {
-        Get(EndpointPath);
+        Get(ApiRoutes.PlexServerConnectionController + "/");
 
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<List<PlexServerConnectionDTO>>))
@@ -48,6 +46,6 @@ public class GetAllPlexServerConnectionsEndpoint : BaseEndpointWithoutRequest<Li
         foreach (var connection in plexServerConnections)
             connection.ChosenConnection = chosenHash.Contains(connection.Id);
 
-        await SendFluentResult(Result.Ok(plexServerConnections), x => x, ct);
+        await Send.FluentResult(Result.Ok(plexServerConnections), x => x, ct);
     }
 }

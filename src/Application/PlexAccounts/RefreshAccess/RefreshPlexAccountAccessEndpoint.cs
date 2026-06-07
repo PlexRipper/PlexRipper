@@ -11,15 +11,13 @@ public class RefreshPlexAccountAccessEndpointRequestValidator : Validator<Refres
 }
 
 public class RefreshPlexAccountAccessEndpoint
-    : BaseEndpoint<RefreshPlexAccountAccessEndpointRequest, ResultDTO<List<RefreshPlexAccountAccessRapportDTO>>>
+    : Endpoint<RefreshPlexAccountAccessEndpointRequest, ResultDTO<List<RefreshPlexAccountAccessRapportDTO>>>
 {
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
     private readonly ICommandExecutor _commandExecutor;
     private readonly INotificationHubService _notificationHubService;
     private List<RefreshPlexAccountAccessRapportDTO> _list = new();
-
-    public override string EndpointPath => ApiRoutes.PlexAccountController + "/refresh/{PlexAccountId}";
 
     public RefreshPlexAccountAccessEndpoint(
         ILogger log,
@@ -36,7 +34,7 @@ public class RefreshPlexAccountAccessEndpoint
 
     public override void Configure()
     {
-        Get(EndpointPath);
+        Get(ApiRoutes.PlexAccountController + "/refresh/{PlexAccountId}");
 
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<List<RefreshPlexAccountAccessRapportDTO>>))
@@ -58,7 +56,7 @@ public class RefreshPlexAccountAccessEndpoint
             if (!enabledAccounts.Any())
             {
                 _log.Here().Warning("No enabled Plex accounts found to start the refresh PlexServer access job");
-                await SendFluentResult(Result.Ok(), ct);
+                await Send.FluentResult(Result.Ok(new List<RefreshPlexAccountAccessRapportDTO>()), ct);
                 return;
             }
 
@@ -142,7 +140,7 @@ public class RefreshPlexAccountAccessEndpoint
             CancellationToken.None
         );
 
-        await SendFluentResult(Result.Ok(_list), ct);
+        await Send.FluentResult(Result.Ok(_list), ct);
     }
 
     private RefreshPlexAccountAccessRapportDTO ToDTO(

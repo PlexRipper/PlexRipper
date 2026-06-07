@@ -29,11 +29,9 @@ public class UpdatePlexServerConnectionEndpointRequestValidator : Validator<Upda
 }
 
 public class UpdatePlexServerConnectionEndpoint
-    : BaseEndpoint<UpdatePlexServerConnectionEndpointRequest, ResultDTO<PlexServerConnectionDTO>>
+    : Endpoint<UpdatePlexServerConnectionEndpointRequest, ResultDTO<PlexServerConnectionDTO>>
 {
     private readonly IReaparrDbContext _dbContext;
-
-    public override string EndpointPath => ApiRoutes.PlexServerConnectionController;
 
     public UpdatePlexServerConnectionEndpoint(IReaparrDbContext dbContext)
     {
@@ -42,7 +40,7 @@ public class UpdatePlexServerConnectionEndpoint
 
     public override void Configure()
     {
-        Patch(EndpointPath);
+        Patch(ApiRoutes.PlexServerConnectionController);
 
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<PlexServerConnectionDTO>))
@@ -76,6 +74,6 @@ public class UpdatePlexServerConnectionEndpoint
         var connectionDb = await _dbContext.PlexServerConnections.GetAsync(req.Id, ct);
 
         var result = ResultExtensions.Create200OkResult(connectionDb!.ToDTO());
-        await SendFluentResult(result, ct);
+        await Send.FluentResult(result, ct);
     }
 }

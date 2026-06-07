@@ -10,12 +10,10 @@ public class GetPlexServerByIdEndpointRequestValidator : Validator<GetPlexServer
     }
 }
 
-public class GetPlexServerByIdEndpoint : BaseEndpoint<GetPlexServerByIdEndpointRequest, PlexServerDTO>
+public class GetPlexServerByIdEndpoint : Endpoint<GetPlexServerByIdEndpointRequest, PlexServerDTO>
 {
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
-
-    public override string EndpointPath => ApiRoutes.PlexServerController + "/{PlexServerId}";
 
     public GetPlexServerByIdEndpoint(ILogger log, IReaparrDbContext dbContext)
     {
@@ -25,7 +23,7 @@ public class GetPlexServerByIdEndpoint : BaseEndpoint<GetPlexServerByIdEndpointR
 
     public override void Configure()
     {
-        Get(EndpointPath);
+        Get(ApiRoutes.PlexServerController + "/{PlexServerId}");
 
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<PlexServerDTO>))
@@ -44,10 +42,10 @@ public class GetPlexServerByIdEndpoint : BaseEndpoint<GetPlexServerByIdEndpointR
 
         if (plexServer is null)
         {
-            await SendFluentResult(ResultExtensions.EntityNotFound(nameof(PlexServer), req.PlexServerId), ct);
+            await Send.FluentResult(ResultExtensions.EntityNotFound(nameof(PlexServer), req.PlexServerId), ct);
             return;
         }
 
-        await SendFluentResult(Result.Ok(plexServer), x => x.ToDTO(), ct);
+        await Send.FluentResult(Result.Ok(plexServer), x => x.ToDTO(), ct);
     }
 }

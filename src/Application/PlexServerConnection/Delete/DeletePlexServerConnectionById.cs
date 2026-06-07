@@ -10,12 +10,10 @@ public class DeletePlexServerConnectionByIdRequestValidator : Validator<DeletePl
     }
 }
 
-public class DeletePlexServerConnectionById : BaseEndpoint<DeletePlexServerConnectionByIdRequest>
+public class DeletePlexServerConnectionById : Endpoint<DeletePlexServerConnectionByIdRequest>
 {
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
-
-    public override string EndpointPath => ApiRoutes.PlexServerConnectionController + "/{PlexServerConnectionId}";
 
     public DeletePlexServerConnectionById(ILogger log, IReaparrDbContext dbContext)
     {
@@ -25,7 +23,7 @@ public class DeletePlexServerConnectionById : BaseEndpoint<DeletePlexServerConne
 
     public override void Configure()
     {
-        Delete(EndpointPath);
+        Delete(ApiRoutes.PlexServerConnectionController + "/{PlexServerConnectionId}");
 
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(BaseResultDTO))
@@ -44,13 +42,13 @@ public class DeletePlexServerConnectionById : BaseEndpoint<DeletePlexServerConne
 
         if (deleteCount == 0)
         {
-            await SendFluentResult(
+            await Send.FluentResult(
                 ResultExtensions.EntityNotFound(nameof(PlexServerConnection), req.PlexServerConnectionId),
                 ct
             );
             return;
         }
 
-        await SendFluentResult(Result.Ok(), ct);
+        await Send.FluentResult(Result.Ok(), ct);
     }
 }

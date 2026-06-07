@@ -2,9 +2,9 @@ namespace Reaparr.Application;
 
 public record SetServerAliasRequest
 {
+    [RouteParam, BindFrom("PlexServerId")]
     public required int PlexServerId { get; init; }
 
-    [QueryParam, BindFrom("serverAlias")]
     public required string ServerAlias { get; init; }
 }
 
@@ -17,13 +17,11 @@ public class SetServerAliasRequestValidator : Validator<SetServerAliasRequest>
     }
 }
 
-public class SetServerAlias : BaseEndpoint<SetServerAliasRequest>
+public class SetServerAlias : Endpoint<SetServerAliasRequest, BaseResultDTO>
 {
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
     private readonly IServerSettingsModule _serverSettingsModule;
-
-    public override string EndpointPath => ApiRoutes.PlexServerController + "/{PlexServerId}/set-server-alias";
 
     public SetServerAlias(ILogger log, IReaparrDbContext dbContext, IServerSettingsModule serverSettingsModule)
     {
@@ -34,7 +32,7 @@ public class SetServerAlias : BaseEndpoint<SetServerAliasRequest>
 
     public override void Configure()
     {
-        Get(EndpointPath);
+        Put(ApiRoutes.PlexServerController + "/{PlexServerId}/set-server-alias");
 
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(BaseResultDTO))
@@ -49,12 +47,12 @@ public class SetServerAlias : BaseEndpoint<SetServerAliasRequest>
         var machineIdentifier = await _dbContext.GetPlexServerMachineIdentifierById(req.PlexServerId);
         if (machineIdentifier == string.Empty)
         {
-            await SendFluentResult(ResultExtensions.EntityNotFound(nameof(PlexServer), req.PlexServerId), ct);
+            await Send.FluentResult(ResultExtensions.EntityNotFound(nameof(PlexServer), req.PlexServerId), ct);
             return;
         }
 
         _serverSettingsModule.SetServerName(machineIdentifier, req.ServerAlias);
 
-        await SendFluentResult(Result.Ok(), ct);
+        await Send.FluentResult(Result.Ok(), ct);
     }
 }

@@ -16,12 +16,10 @@ public class SetServerEnabledRequestValidator : Validator<SetServerEnabledReques
     }
 }
 
-public class SetServerEnabledEndpoint : BaseEndpoint<SetServerEnabledRequest, PlexServerDTO>
+public class SetServerEnabledEndpoint : Endpoint<SetServerEnabledRequest, ResultDTO<PlexServerDTO>>
 {
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
-
-    public override string EndpointPath => ApiRoutes.PlexServerController + "/{PlexServerId}/set-server-enabled";
 
     public SetServerEnabledEndpoint(
         ILogger log,
@@ -34,7 +32,7 @@ public class SetServerEnabledEndpoint : BaseEndpoint<SetServerEnabledRequest, Pl
 
     public override void Configure()
     {
-        Put(EndpointPath);
+        Put(ApiRoutes.PlexServerController + "/{PlexServerId}/set-server-enabled");
 
         Description(x =>
             x.Accepts<SetServerEnabledRequest>()
@@ -50,7 +48,7 @@ public class SetServerEnabledEndpoint : BaseEndpoint<SetServerEnabledRequest, Pl
         var machineIdentifier = await _dbContext.GetPlexServerMachineIdentifierById(req.PlexServerId);
         if (machineIdentifier == string.Empty)
         {
-            await SendFluentResult(ResultExtensions.EntityNotFound(nameof(PlexServer), req.PlexServerId), ct);
+            await Send.FluentResult(ResultExtensions.EntityNotFound(nameof(PlexServer), req.PlexServerId), ct);
             return;
         }
 
@@ -64,7 +62,7 @@ public class SetServerEnabledEndpoint : BaseEndpoint<SetServerEnabledRequest, Pl
             if (await _dbContext.IsServerDisabled(req.PlexServerId))
             {
                 var serverName = await _dbContext.GetPlexServerNameById(req.PlexServerId);
-                await SendFluentResult(
+                await Send.FluentResult(
                     ResultExtensions.ServerIsDisabled(serverName, req.PlexServerId, nameof(GetPlexServerByIdEndpoint)),
                     ct);
                 return;
@@ -78,10 +76,10 @@ public class SetServerEnabledEndpoint : BaseEndpoint<SetServerEnabledRequest, Pl
 
         if (plexServer is null)
         {
-            await SendFluentResult(ResultExtensions.EntityNotFound(nameof(PlexServer), req.PlexServerId), ct);
+            await Send.FluentResult(ResultExtensions.EntityNotFound(nameof(PlexServer), req.PlexServerId), ct);
             return;
         }
 
-        await SendFluentResult(Result.Ok(plexServer), x => x.ToDTO(), ct);
+        await Send.FluentResult(Result.Ok(plexServer), x => x.ToDTO(), ct);
     }
 }

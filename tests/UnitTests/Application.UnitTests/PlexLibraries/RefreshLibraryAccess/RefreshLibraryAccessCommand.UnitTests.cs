@@ -6,6 +6,14 @@ public class RefreshLibraryAccessCommandUnitTests : BaseUnitTest<RefreshLibraryA
     public async Task ShouldReturnFailedResult_WhenPlexAccountIdIsInvalid()
     {
         // Arrange
+        await SetupDatabase(
+            1,
+            config =>
+            {
+                config.PlexAccountCount = 1;
+                config.PlexServerCount = 0;
+            }
+        );
         var request = new RefreshLibraryAccessCommand(0);
 
         // Act

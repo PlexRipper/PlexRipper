@@ -21,7 +21,23 @@ public class GetMediaByTypeCommandHandlerUnitTests : BaseUnitTest<GetMediaByType
             .Select(x => x.Id)
             .FirstAsync(CancellationToken);
 
-        var command = CreateCommand(PlexMediaType.Movie, targetLibraryId);
+        var command = new GetMediaByTypeCommand()
+        {
+            Filter = new MediaQueryFilter
+            {
+                MediaType = PlexMediaType.Movie,
+                PlexLibraryId = targetLibraryId,
+                FilterOfflineMedia = false,
+                FilterOwnedMedia = false,
+                Parameters = new FlexQueryParameters
+                {
+                    Page = null,
+                    PageSize = null,
+                    Sort = null,
+                    Filter = null,
+                },
+            },
+        };
 
         // Act
         var result = await Sut.ExecuteAsync(command, CancellationToken);
@@ -49,7 +65,23 @@ public class GetMediaByTypeCommandHandlerUnitTests : BaseUnitTest<GetMediaByType
             .Select(x => x.Id)
             .FirstAsync(CancellationToken);
 
-        var command = CreateCommand(PlexMediaType.TvShow, targetLibraryId);
+        var command = new GetMediaByTypeCommand()
+        {
+            Filter = new MediaQueryFilter
+            {
+                MediaType = PlexMediaType.TvShow,
+                PlexLibraryId = targetLibraryId,
+                FilterOfflineMedia = false,
+                FilterOwnedMedia = false,
+                Parameters = new FlexQueryParameters
+                {
+                    Page = null,
+                    PageSize = null,
+                    Sort = null,
+                    Filter = null,
+                },
+            },
+        };
 
         // Act
         var result = await Sut.ExecuteAsync(command, CancellationToken);
@@ -71,7 +103,23 @@ public class GetMediaByTypeCommandHandlerUnitTests : BaseUnitTest<GetMediaByType
             cfg.MovieCount = 4;
         });
 
-        var command = CreateCommand(PlexMediaType.Movie, 0);
+        var command = new GetMediaByTypeCommand()
+        {
+            Filter = new MediaQueryFilter
+            {
+                MediaType = PlexMediaType.Movie,
+                PlexLibraryId = 0,
+                FilterOfflineMedia = false,
+                FilterOwnedMedia = false,
+                Parameters = new FlexQueryParameters
+                {
+                    Page = null,
+                    PageSize = null,
+                    Sort = null,
+                    Filter = null,
+                },
+            },
+        };
 
         // Act
         var result = await Sut.ExecuteAsync(command, CancellationToken);
@@ -105,7 +153,23 @@ public class GetMediaByTypeCommandHandlerUnitTests : BaseUnitTest<GetMediaByType
             .Where(x => x.PlexLibraryId == libraryToKeep)
             .ExecuteUpdateAsync(x => x.SetProperty(y => y.IsLibraryOwned, false), CancellationToken);
 
-        var command = CreateCommand(PlexMediaType.Movie, 0, filterOwnedMedia: true);
+        var command = new GetMediaByTypeCommand()
+        {
+            Filter = new MediaQueryFilter
+            {
+                MediaType = PlexMediaType.Movie,
+                PlexLibraryId = 0,
+                FilterOfflineMedia = false,
+                FilterOwnedMedia = true,
+                Parameters = new FlexQueryParameters
+                {
+                    Page = null,
+                    PageSize = null,
+                    Sort = null,
+                    Filter = null,
+                },
+            },
+        };
 
         // Act
         var result = await Sut.ExecuteAsync(command, CancellationToken);
@@ -128,7 +192,23 @@ public class GetMediaByTypeCommandHandlerUnitTests : BaseUnitTest<GetMediaByType
             cfg.PlexAccountCount = 1;
         });
 
-        var command = CreateCommand(PlexMediaType.Movie, 0, filterOwnedMedia: true);
+        var command = new GetMediaByTypeCommand()
+        {
+            Filter = new MediaQueryFilter
+            {
+                MediaType = PlexMediaType.Movie,
+                PlexLibraryId = 0,
+                FilterOfflineMedia = false,
+                FilterOwnedMedia = true,
+                Parameters = new FlexQueryParameters
+                {
+                    Page = null,
+                    PageSize = null,
+                    Sort = null,
+                    Filter = null,
+                },
+            },
+        };
 
         // Act
         var result = await Sut.ExecuteAsync(command, CancellationToken);
@@ -161,7 +241,23 @@ public class GetMediaByTypeCommandHandlerUnitTests : BaseUnitTest<GetMediaByType
             .Where(x => x.PlexServerId == offlineServerId)
             .ExecuteDeleteAsync(CancellationToken);
 
-        var command = CreateCommand(PlexMediaType.Movie, 0, filterOfflineMedia: true);
+        var command = new GetMediaByTypeCommand()
+        {
+            Filter = new MediaQueryFilter
+            {
+                MediaType = PlexMediaType.Movie,
+                PlexLibraryId = 0,
+                FilterOfflineMedia = true,
+                FilterOwnedMedia = false,
+                Parameters = new FlexQueryParameters
+                {
+                    Page = null,
+                    PageSize = null,
+                    Sort = null,
+                    Filter = null,
+                },
+            },
+        };
 
         // Act
         var result = await Sut.ExecuteAsync(command, CancellationToken);
@@ -170,6 +266,205 @@ public class GetMediaByTypeCommandHandlerUnitTests : BaseUnitTest<GetMediaByType
         result.IsSuccess.ShouldBeTrue();
         result.Value.Items.ShouldNotBeEmpty();
         result.Value.Items.ShouldAllBe(x => x.PlexServerId != offlineServerId);
+    }
+
+    [Test]
+    public async Task ShouldExcludeServerLibraries_WhenServerHasNoPlexAccountAccessForAllLibraries()
+    {
+        // Arrange
+        await SetupDatabase(70033, cfg =>
+        {
+            cfg.PlexServerCount = 2;
+            cfg.PlexMovieLibraryCount = 1;
+            cfg.MovieCount = 3;
+            cfg.PlexAccountCount = 1;
+        });
+
+        var dbContext = IDbContext;
+        var inaccessibleServerId = await dbContext.PlexServers
+            .OrderBy(x => x.Id)
+            .Select(x => x.Id)
+            .LastAsync(CancellationToken);
+
+        await dbContext.PlexAccountServers
+            .Where(x => x.PlexServerId == inaccessibleServerId)
+            .ExecuteDeleteAsync(CancellationToken);
+
+        var command = new GetMediaByTypeCommand()
+        {
+            Filter = new MediaQueryFilter
+            {
+                MediaType = PlexMediaType.Movie,
+                PlexLibraryId = 0,
+                FilterOfflineMedia = false,
+                FilterOwnedMedia = false,
+                Parameters = new FlexQueryParameters
+                {
+                    Page = null,
+                    PageSize = null,
+                    Sort = null,
+                    Filter = null,
+                },
+            },
+        };
+
+        // Act
+        var result = await Sut.ExecuteAsync(command, CancellationToken);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.Items.ShouldNotBeEmpty();
+        result.Value.Items.ShouldAllBe(x => x.PlexServerId != inaccessibleServerId);
+    }
+
+    [Test]
+    public async Task ShouldIgnoreServerAccessFilter_WhenSpecificLibraryIdIsSet()
+    {
+        // Arrange
+        await SetupDatabase(70034, cfg =>
+        {
+            cfg.PlexServerCount = 1;
+            cfg.PlexMovieLibraryCount = 1;
+            cfg.MovieCount = 3;
+            cfg.PlexAccountCount = 1;
+        });
+
+        var dbContext = IDbContext;
+        var targetLibrary = await dbContext.PlexLibraries
+            .Where(x => x.Type == PlexMediaType.Movie)
+            .Select(x => new { x.Id, x.PlexServerId })
+            .FirstAsync(CancellationToken);
+
+        await dbContext.PlexAccountServers
+            .Where(x => x.PlexServerId == targetLibrary.PlexServerId)
+            .ExecuteDeleteAsync(CancellationToken);
+
+        var command = new GetMediaByTypeCommand()
+        {
+            Filter = new MediaQueryFilter
+            {
+                MediaType = PlexMediaType.Movie,
+                PlexLibraryId = targetLibrary.Id,
+                FilterOfflineMedia = false,
+                FilterOwnedMedia = false,
+                Parameters = new FlexQueryParameters
+                {
+                    Page = null,
+                    PageSize = null,
+                    Sort = null,
+                    Filter = null,
+                },
+            },
+        };
+
+        // Act
+        var result = await Sut.ExecuteAsync(command, CancellationToken);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.Items.ShouldNotBeEmpty();
+        result.Value.Items.ShouldAllBe(x => x.PlexLibraryId == targetLibrary.Id);
+    }
+
+    [Test]
+    public async Task ShouldExcludeLibrariesWithoutPlexAccountAccess_WhenServerHasPartialLibraryAccessForAllLibraries()
+    {
+        // Arrange
+        await SetupDatabase(70035, cfg =>
+        {
+            cfg.PlexServerCount = 1;
+            cfg.PlexMovieLibraryCount = 2;
+            cfg.MovieCount = 4;
+            cfg.PlexAccountCount = 1;
+        });
+
+        var dbContext = IDbContext;
+        var libraryIds = await dbContext.PlexLibraries
+            .Where(x => x.Type == PlexMediaType.Movie)
+            .OrderBy(x => x.Id)
+            .Select(x => x.Id)
+            .ToListAsync(CancellationToken);
+        var inaccessibleLibraryId = libraryIds.Last();
+
+        await dbContext.PlexAccountLibraries
+            .Where(x => x.PlexLibraryId == inaccessibleLibraryId)
+            .ExecuteDeleteAsync(CancellationToken);
+
+        var command = new GetMediaByTypeCommand()
+        {
+            Filter = new MediaQueryFilter
+            {
+                MediaType = PlexMediaType.Movie,
+                PlexLibraryId = 0,
+                FilterOfflineMedia = false,
+                FilterOwnedMedia = false,
+                Parameters = new FlexQueryParameters
+                {
+                    Page = null,
+                    PageSize = null,
+                    Sort = null,
+                    Filter = null,
+                },
+            },
+        };
+
+        // Act
+        var result = await Sut.ExecuteAsync(command, CancellationToken);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.Items.ShouldNotBeEmpty();
+        result.Value.Items.ShouldAllBe(x => x.PlexLibraryId != inaccessibleLibraryId);
+    }
+
+    [Test]
+    public async Task ShouldIgnoreLibraryAccessFilter_WhenSpecificLibraryIdIsSet()
+    {
+        // Arrange
+        await SetupDatabase(70036, cfg =>
+        {
+            cfg.PlexServerCount = 1;
+            cfg.PlexMovieLibraryCount = 2;
+            cfg.MovieCount = 4;
+            cfg.PlexAccountCount = 1;
+        });
+
+        var dbContext = IDbContext;
+        var inaccessibleLibraryId = await dbContext.PlexLibraries
+            .Where(x => x.Type == PlexMediaType.Movie)
+            .OrderBy(x => x.Id)
+            .Select(x => x.Id)
+            .LastAsync(CancellationToken);
+
+        await dbContext.PlexAccountLibraries
+            .Where(x => x.PlexLibraryId == inaccessibleLibraryId)
+            .ExecuteDeleteAsync(CancellationToken);
+
+        var command = new GetMediaByTypeCommand()
+        {
+            Filter = new MediaQueryFilter
+            {
+                MediaType = PlexMediaType.Movie,
+                PlexLibraryId = inaccessibleLibraryId,
+                FilterOfflineMedia = false,
+                FilterOwnedMedia = false,
+                Parameters = new FlexQueryParameters
+                {
+                    Page = null,
+                    PageSize = null,
+                    Sort = null,
+                    Filter = null,
+                },
+            },
+        };
+
+        // Act
+        var result = await Sut.ExecuteAsync(command, CancellationToken);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.Items.ShouldNotBeEmpty();
+        result.Value.Items.ShouldAllBe(x => x.PlexLibraryId == inaccessibleLibraryId);
     }
 
     [Test]
@@ -186,7 +481,23 @@ public class GetMediaByTypeCommandHandlerUnitTests : BaseUnitTest<GetMediaByType
         var dbContext = IDbContext;
         await dbContext.PlexServerStatuses.ExecuteDeleteAsync(CancellationToken);
 
-        var command = CreateCommand(PlexMediaType.Movie, 0, filterOfflineMedia: true);
+        var command = new GetMediaByTypeCommand()
+        {
+            Filter = new MediaQueryFilter
+            {
+                MediaType = PlexMediaType.Movie,
+                PlexLibraryId = 0,
+                FilterOfflineMedia = true,
+                FilterOwnedMedia = false,
+                Parameters = new FlexQueryParameters
+                {
+                    Page = null,
+                    PageSize = null,
+                    Sort = null,
+                    Filter = null,
+                },
+            },
+        };
 
         // Act
         var result = await Sut.ExecuteAsync(command, CancellationToken);
@@ -215,7 +526,23 @@ public class GetMediaByTypeCommandHandlerUnitTests : BaseUnitTest<GetMediaByType
             .Select(x => x.Id)
             .FirstAsync(CancellationToken);
 
-        var command = CreateCommand(PlexMediaType.Movie, targetLibraryId, filterOwnedMedia: true);
+        var command = new GetMediaByTypeCommand()
+        {
+            Filter = new MediaQueryFilter
+            {
+                MediaType = PlexMediaType.Movie,
+                PlexLibraryId = targetLibraryId,
+                FilterOfflineMedia = false,
+                FilterOwnedMedia = true,
+                Parameters = new FlexQueryParameters
+                {
+                    Page = null,
+                    PageSize = null,
+                    Sort = null,
+                    Filter = null,
+                },
+            },
+        };
 
         // Act
         var result = await Sut.ExecuteAsync(command, CancellationToken);
@@ -245,7 +572,23 @@ public class GetMediaByTypeCommandHandlerUnitTests : BaseUnitTest<GetMediaByType
             .Select(x => x.Id)
             .FirstAsync(CancellationToken);
 
-        var command = CreateCommand(PlexMediaType.Movie, targetLibraryId, filterOfflineMedia: true);
+        var command = new GetMediaByTypeCommand()
+        {
+            Filter = new MediaQueryFilter
+            {
+                MediaType = PlexMediaType.Movie,
+                PlexLibraryId = targetLibraryId,
+                FilterOfflineMedia = true,
+                FilterOwnedMedia = false,
+                Parameters = new FlexQueryParameters
+                {
+                    Page = null,
+                    PageSize = null,
+                    Sort = null,
+                    Filter = null,
+                },
+            },
+        };
 
         // Act
         var result = await Sut.ExecuteAsync(command, CancellationToken);
@@ -267,7 +610,23 @@ public class GetMediaByTypeCommandHandlerUnitTests : BaseUnitTest<GetMediaByType
             cfg.MovieCount = 2;
         });
 
-        var command = CreateCommand(PlexMediaType.Season, 0);
+        var command = new GetMediaByTypeCommand()
+        {
+            Filter = new MediaQueryFilter
+            {
+                MediaType = PlexMediaType.Season,
+                PlexLibraryId = 0,
+                FilterOfflineMedia = false,
+                FilterOwnedMedia = false,
+                Parameters = new FlexQueryParameters
+                {
+                    Page = null,
+                    PageSize = null,
+                    Sort = null,
+                    Filter = null,
+                },
+            },
+        };
 
         // Act
         var result = await Sut.ExecuteAsync(command, CancellationToken);
@@ -283,7 +642,23 @@ public class GetMediaByTypeCommandHandlerUnitTests : BaseUnitTest<GetMediaByType
         // Arrange
         await SetupDatabase(70011);
 
-        var command = CreateCommand(PlexMediaType.Movie, 0);
+        var command = new GetMediaByTypeCommand()
+        {
+            Filter = new MediaQueryFilter
+            {
+                MediaType = PlexMediaType.Movie,
+                PlexLibraryId = 0,
+                FilterOfflineMedia = false,
+                FilterOwnedMedia = false,
+                Parameters = new FlexQueryParameters
+                {
+                    Page = null,
+                    PageSize = null,
+                    Sort = null,
+                    Filter = null,
+                },
+            },
+        };
 
         // Act
         var result = await Sut.ExecuteAsync(command, CancellationToken);
@@ -305,7 +680,23 @@ public class GetMediaByTypeCommandHandlerUnitTests : BaseUnitTest<GetMediaByType
             cfg.MovieCount = 6;
         });
 
-        var command = CreateCommand(PlexMediaType.Movie, 0);
+        var command = new GetMediaByTypeCommand()
+        {
+            Filter = new MediaQueryFilter
+            {
+                MediaType = PlexMediaType.Movie,
+                PlexLibraryId = 0,
+                FilterOfflineMedia = false,
+                FilterOwnedMedia = false,
+                Parameters = new FlexQueryParameters
+                {
+                    Page = null,
+                    PageSize = null,
+                    Sort = null,
+                    Filter = null,
+                },
+            },
+        };
 
         // Act
         var result = await Sut.ExecuteAsync(command, CancellationToken);
@@ -327,7 +718,23 @@ public class GetMediaByTypeCommandHandlerUnitTests : BaseUnitTest<GetMediaByType
             cfg.TvShowCount = 6;
         });
 
-        var command = CreateCommand(PlexMediaType.TvShow, 0);
+        var command = new GetMediaByTypeCommand()
+        {
+            Filter = new MediaQueryFilter
+            {
+                MediaType = PlexMediaType.TvShow,
+                PlexLibraryId = 0,
+                FilterOfflineMedia = false,
+                FilterOwnedMedia = false,
+                Parameters = new FlexQueryParameters
+                {
+                    Page = null,
+                    PageSize = null,
+                    Sort = null,
+                    Filter = null,
+                },
+            },
+        };
 
         // Act
         var result = await Sut.ExecuteAsync(command, CancellationToken);
@@ -349,7 +756,23 @@ public class GetMediaByTypeCommandHandlerUnitTests : BaseUnitTest<GetMediaByType
             cfg.MovieCount = 8;
         });
 
-        var command = CreateCommand(PlexMediaType.Movie, 0, page: 1, pageSize: 3);
+        var command = new GetMediaByTypeCommand()
+        {
+            Filter = new MediaQueryFilter
+            {
+                MediaType = PlexMediaType.Movie,
+                PlexLibraryId = 0,
+                FilterOfflineMedia = false,
+                FilterOwnedMedia = false,
+                Parameters = new FlexQueryParameters
+                {
+                    Page = 1,
+                    PageSize = 3,
+                    Sort = null,
+                    Filter = null,
+                },
+            },
+        };
 
         // Act
         var result = await Sut.ExecuteAsync(command, CancellationToken);
@@ -370,7 +793,23 @@ public class GetMediaByTypeCommandHandlerUnitTests : BaseUnitTest<GetMediaByType
             cfg.MovieCount = 8;
         });
 
-        var command = CreateCommand(PlexMediaType.Movie, 0, page: 2, pageSize: 3);
+        var command = new GetMediaByTypeCommand()
+        {
+            Filter = new MediaQueryFilter
+            {
+                MediaType = PlexMediaType.Movie,
+                PlexLibraryId = 0,
+                FilterOfflineMedia = false,
+                FilterOwnedMedia = false,
+                Parameters = new FlexQueryParameters
+                {
+                    Page = 2,
+                    PageSize = 3,
+                    Sort = null,
+                    Filter = null,
+                },
+            },
+        };
 
         // Act
         var result = await Sut.ExecuteAsync(command, CancellationToken);
@@ -393,7 +832,23 @@ public class GetMediaByTypeCommandHandlerUnitTests : BaseUnitTest<GetMediaByType
         });
 
         var expectedMovieCount = await IDbContext.PlexMovies.CountAsync(CancellationToken);
-        var command = CreateCommand(PlexMediaType.Movie, 0, page: 1, pageSize: 3);
+        var command = new GetMediaByTypeCommand()
+        {
+            Filter = new MediaQueryFilter
+            {
+                MediaType = PlexMediaType.Movie,
+                PlexLibraryId = 0,
+                FilterOfflineMedia = false,
+                FilterOwnedMedia = false,
+                Parameters = new FlexQueryParameters
+                {
+                    Page = 1,
+                    PageSize = 3,
+                    Sort = null,
+                    Filter = null,
+                },
+            },
+        };
 
         // Act
         var result = await Sut.ExecuteAsync(command, CancellationToken);
@@ -419,7 +874,23 @@ public class GetMediaByTypeCommandHandlerUnitTests : BaseUnitTest<GetMediaByType
         });
 
         var expectedMovieCount = await IDbContext.PlexMovies.CountAsync(CancellationToken);
-        var command = CreateCommand(PlexMediaType.Movie, 0, page: 1, pageSize: 2);
+        var command = new GetMediaByTypeCommand()
+        {
+            Filter = new MediaQueryFilter
+            {
+                MediaType = PlexMediaType.Movie,
+                PlexLibraryId = 0,
+                FilterOfflineMedia = false,
+                FilterOwnedMedia = false,
+                Parameters = new FlexQueryParameters
+                {
+                    Page = 1,
+                    PageSize = 2,
+                    Sort = null,
+                    Filter = null,
+                },
+            },
+        };
 
         // Act
         var result = await Sut.ExecuteAsync(command, CancellationToken);
@@ -445,7 +916,23 @@ public class GetMediaByTypeCommandHandlerUnitTests : BaseUnitTest<GetMediaByType
             cfg.MovieCount = 10;
         });
 
-        var command = CreateCommand(PlexMediaType.Movie, 0, page: 2, pageSize: 3);
+        var command = new GetMediaByTypeCommand()
+        {
+            Filter = new MediaQueryFilter
+            {
+                MediaType = PlexMediaType.Movie,
+                PlexLibraryId = 0,
+                FilterOfflineMedia = false,
+                FilterOwnedMedia = false,
+                Parameters = new FlexQueryParameters
+                {
+                    Page = 2,
+                    PageSize = 3,
+                    Sort = null,
+                    Filter = null,
+                },
+            },
+        };
 
         // Act
         var result = await Sut.ExecuteAsync(command, CancellationToken);
@@ -466,7 +953,23 @@ public class GetMediaByTypeCommandHandlerUnitTests : BaseUnitTest<GetMediaByType
             cfg.MovieCount = 10;
         });
 
-        var command = CreateCommand(PlexMediaType.Movie, 0, sort: "Year:asc", page: 1, pageSize: 2);
+        var command = new GetMediaByTypeCommand()
+        {
+            Filter = new MediaQueryFilter
+            {
+                MediaType = PlexMediaType.Movie,
+                PlexLibraryId = 0,
+                FilterOfflineMedia = false,
+                FilterOwnedMedia = false,
+                Parameters = new FlexQueryParameters
+                {
+                    Page = 1,
+                    PageSize = 2,
+                    Sort = "Year:asc",
+                    Filter = null,
+                },
+            },
+        };
 
         // Act
         var result = await Sut.ExecuteAsync(command, CancellationToken);
@@ -489,8 +992,40 @@ public class GetMediaByTypeCommandHandlerUnitTests : BaseUnitTest<GetMediaByType
             cfg.MovieCount = 10;
         });
 
-        var page1 = CreateCommand(PlexMediaType.Movie, 0, page: 1, pageSize: 3);
-        var page2 = CreateCommand(PlexMediaType.Movie, 0, page: 2, pageSize: 3);
+        var page1 = new GetMediaByTypeCommand()
+        {
+            Filter = new MediaQueryFilter
+            {
+                MediaType = PlexMediaType.Movie,
+                PlexLibraryId = 0,
+                FilterOfflineMedia = false,
+                FilterOwnedMedia = false,
+                Parameters = new FlexQueryParameters
+                {
+                    Page = 1,
+                    PageSize = 3,
+                    Sort = null,
+                    Filter = null,
+                },
+            },
+        };
+        var page2 = new GetMediaByTypeCommand()
+        {
+            Filter = new MediaQueryFilter
+            {
+                MediaType = PlexMediaType.Movie,
+                PlexLibraryId = 0,
+                FilterOfflineMedia = false,
+                FilterOwnedMedia = false,
+                Parameters = new FlexQueryParameters
+                {
+                    Page = 2,
+                    PageSize = 3,
+                    Sort = null,
+                    Filter = null,
+                },
+            },
+        };
 
         // Act
         var sutForPage1 = Mock.Create<GetMediaByTypeCommandHandler>();
@@ -518,7 +1053,23 @@ public class GetMediaByTypeCommandHandlerUnitTests : BaseUnitTest<GetMediaByType
             cfg.MovieCount = 4;
         });
 
-        var command = CreateCommand(PlexMediaType.Movie, 999999);
+        var command = new GetMediaByTypeCommand()
+        {
+            Filter = new MediaQueryFilter
+            {
+                MediaType = PlexMediaType.Movie,
+                PlexLibraryId = 999999,
+                FilterOfflineMedia = false,
+                FilterOwnedMedia = false,
+                Parameters = new FlexQueryParameters
+                {
+                    Page = null,
+                    PageSize = null,
+                    Sort = null,
+                    Filter = null,
+                },
+            },
+        };
 
         // Act
         var result = await Sut.ExecuteAsync(command, CancellationToken);
@@ -542,7 +1093,23 @@ public class GetMediaByTypeCommandHandlerUnitTests : BaseUnitTest<GetMediaByType
             cfg.TvShowCount = 5;
         });
 
-        var command = CreateCommand(PlexMediaType.Movie, 0);
+        var command = new GetMediaByTypeCommand()
+        {
+            Filter = new MediaQueryFilter
+            {
+                MediaType = PlexMediaType.Movie,
+                PlexLibraryId = 0,
+                FilterOfflineMedia = false,
+                FilterOwnedMedia = false,
+                Parameters = new FlexQueryParameters
+                {
+                    Page = null,
+                    PageSize = null,
+                    Sort = null,
+                    Filter = null,
+                },
+            },
+        };
 
         // Act
         var result = await Sut.ExecuteAsync(command, CancellationToken);
@@ -566,7 +1133,23 @@ public class GetMediaByTypeCommandHandlerUnitTests : BaseUnitTest<GetMediaByType
             cfg.TvShowCount = 5;
         });
 
-        var command = CreateCommand(PlexMediaType.TvShow, 0);
+        var command = new GetMediaByTypeCommand()
+        {
+            Filter = new MediaQueryFilter
+            {
+                MediaType = PlexMediaType.TvShow,
+                PlexLibraryId = 0,
+                FilterOfflineMedia = false,
+                FilterOwnedMedia = false,
+                Parameters = new FlexQueryParameters
+                {
+                    Page = null,
+                    PageSize = null,
+                    Sort = null,
+                    Filter = null,
+                },
+            },
+        };
 
         // Act
         var result = await Sut.ExecuteAsync(command, CancellationToken);
@@ -589,7 +1172,23 @@ public class GetMediaByTypeCommandHandlerUnitTests : BaseUnitTest<GetMediaByType
             cfg.PlexAccountCount = 1;
         });
 
-        var command = CreateCommand(PlexMediaType.Movie, 0, filterOwnedMedia: false);
+        var command = new GetMediaByTypeCommand()
+        {
+            Filter = new MediaQueryFilter
+            {
+                MediaType = PlexMediaType.Movie,
+                PlexLibraryId = 0,
+                FilterOfflineMedia = false,
+                FilterOwnedMedia = false,
+                Parameters = new FlexQueryParameters
+                {
+                    Page = null,
+                    PageSize = null,
+                    Sort = null,
+                    Filter = null,
+                },
+            },
+        };
 
         // Act
         var result = await Sut.ExecuteAsync(command, CancellationToken);
@@ -614,7 +1213,23 @@ public class GetMediaByTypeCommandHandlerUnitTests : BaseUnitTest<GetMediaByType
         var dbContext = IDbContext;
         await dbContext.PlexServerStatuses.ExecuteDeleteAsync(CancellationToken);
 
-        var command = CreateCommand(PlexMediaType.Movie, 0, filterOfflineMedia: false);
+        var command = new GetMediaByTypeCommand()
+        {
+            Filter = new MediaQueryFilter
+            {
+                MediaType = PlexMediaType.Movie,
+                PlexLibraryId = 0,
+                FilterOfflineMedia = false,
+                FilterOwnedMedia = false,
+                Parameters = new FlexQueryParameters
+                {
+                    Page = null,
+                    PageSize = null,
+                    Sort = null,
+                    Filter = null,
+                },
+            },
+        };
 
         // Act
         var result = await Sut.ExecuteAsync(command, CancellationToken);
@@ -643,7 +1258,23 @@ public class GetMediaByTypeCommandHandlerUnitTests : BaseUnitTest<GetMediaByType
             .Select(x => x.Id)
             .FirstAsync(CancellationToken);
 
-        var command = CreateCommand(PlexMediaType.TvShow, movieLibraryId);
+        var command = new GetMediaByTypeCommand()
+        {
+            Filter = new MediaQueryFilter
+            {
+                MediaType = PlexMediaType.TvShow,
+                PlexLibraryId = movieLibraryId,
+                FilterOfflineMedia = false,
+                FilterOwnedMedia = false,
+                Parameters = new FlexQueryParameters
+                {
+                    Page = null,
+                    PageSize = null,
+                    Sort = null,
+                    Filter = null,
+                },
+            },
+        };
 
         // Act
         var result = await Sut.ExecuteAsync(command, CancellationToken);
@@ -664,7 +1295,23 @@ public class GetMediaByTypeCommandHandlerUnitTests : BaseUnitTest<GetMediaByType
             cfg.MovieCount = 3;
         });
 
-        var command = CreateCommand(PlexMediaType.Movie, 0, page: 5, pageSize: 10);
+        var command = new GetMediaByTypeCommand()
+        {
+            Filter = new MediaQueryFilter
+            {
+                MediaType = PlexMediaType.Movie,
+                PlexLibraryId = 0,
+                FilterOfflineMedia = false,
+                FilterOwnedMedia = false,
+                Parameters = new FlexQueryParameters
+                {
+                    Page = 5,
+                    PageSize = 10,
+                    Sort = null,
+                    Filter = null,
+                },
+            },
+        };
 
         // Act
         var result = await Sut.ExecuteAsync(command, CancellationToken);
@@ -692,7 +1339,23 @@ public class GetMediaByTypeCommandHandlerUnitTests : BaseUnitTest<GetMediaByType
         await dbContext.PlexServerStatuses
             .ExecuteUpdateAsync(x => x.SetProperty(y => y.IsSuccessful, false), CancellationToken);
 
-        var command = CreateCommand(PlexMediaType.Movie, 0, filterOfflineMedia: true);
+        var command = new GetMediaByTypeCommand()
+        {
+            Filter = new MediaQueryFilter
+            {
+                MediaType = PlexMediaType.Movie,
+                PlexLibraryId = 0,
+                FilterOfflineMedia = true,
+                FilterOwnedMedia = false,
+                Parameters = new FlexQueryParameters
+                {
+                    Page = null,
+                    PageSize = null,
+                    Sort = null,
+                    Filter = null,
+                },
+            },
+        };
 
         // Act
         var result = await Sut.ExecuteAsync(command, CancellationToken);
@@ -713,7 +1376,23 @@ public class GetMediaByTypeCommandHandlerUnitTests : BaseUnitTest<GetMediaByType
             cfg.MovieCount = 10;
         });
 
-        var command = CreateCommand(PlexMediaType.Movie, 0, sort: "Year:desc", pageSize: 10);
+        var command = new GetMediaByTypeCommand()
+        {
+            Filter = new MediaQueryFilter
+            {
+                MediaType = PlexMediaType.Movie,
+                PlexLibraryId = 0,
+                FilterOfflineMedia = false,
+                FilterOwnedMedia = false,
+                Parameters = new FlexQueryParameters
+                {
+                    Page = null,
+                    PageSize = 10,
+                    Sort = "Year:desc",
+                    Filter = null,
+                },
+            },
+        };
 
         // Act
         var result = await Sut.ExecuteAsync(command, CancellationToken);
@@ -723,6 +1402,61 @@ public class GetMediaByTypeCommandHandlerUnitTests : BaseUnitTest<GetMediaByType
         result.Value.Items.Count.ShouldBeGreaterThanOrEqualTo(2);
         result.Value.Items.Zip(result.Value.Items.Skip(1))
             .ShouldAllBe(x => x.First.Year >= x.Second.Year);
+    }
+
+    [Test]
+    public async Task ShouldSortAllLibraryMoviesBySearchTitle_WhenSortIndexSortIsRequested()
+    {
+        // Arrange
+        await SetupDatabase(70233, cfg =>
+        {
+            cfg.PlexServerCount = 1;
+            cfg.PlexMovieLibraryCount = 2;
+            cfg.MovieCount = 4;
+        });
+
+        var dbContext = IDbContext;
+        var movieIds = await dbContext.PlexMovies
+            .OrderBy(x => x.Id)
+            .Select(x => x.Id)
+            .ToListAsync(CancellationToken);
+
+        await SetAllLibrarySortIndexRegressionDataAsync(dbContext, movieIds);
+
+        var command = new GetMediaByTypeCommand()
+        {
+            Filter = new MediaQueryFilter
+            {
+                MediaType = PlexMediaType.Movie,
+                PlexLibraryId = 0,
+                FilterOfflineMedia = false,
+                FilterOwnedMedia = false,
+                Parameters = new FlexQueryParameters
+                {
+                    Page = null,
+                    PageSize = 10,
+                    Sort = "sortIndex:asc",
+                    Filter = null,
+                },
+            },
+        };
+
+        // Act
+        var result = await Sut.ExecuteAsync(command, CancellationToken);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.Items.Select(x => x.Title).ShouldBe([
+            "Alpha",
+            "Bravo",
+            "Charlie",
+            "Delta",
+            "Whiskey",
+            "Xray",
+            "Yankee",
+            "Zulu",
+        ]);
+        result.Value.NavigationIndexes.Select(x => x.Label).ShouldBe(["A", "B", "C", "D", "W", "X", "Y", "Z"]);
     }
 
     [Test]
@@ -744,7 +1478,23 @@ public class GetMediaByTypeCommandHandlerUnitTests : BaseUnitTest<GetMediaByType
 
         await SetMovieQualitySortTestDataAsync(dbContext, movieIds);
 
-        var command = CreateCommand(PlexMediaType.Movie, 0, sort: "quality:asc", pageSize: 10);
+        var command = new GetMediaByTypeCommand()
+        {
+            Filter = new MediaQueryFilter
+            {
+                MediaType = PlexMediaType.Movie,
+                PlexLibraryId = 0,
+                FilterOfflineMedia = false,
+                FilterOwnedMedia = false,
+                Parameters = new FlexQueryParameters
+                {
+                    Page = null,
+                    PageSize = 10,
+                    Sort = "quality:asc",
+                    Filter = null,
+                },
+            },
+        };
 
         // Act
         var result = await Sut.ExecuteAsync(command, CancellationToken);
@@ -773,7 +1523,23 @@ public class GetMediaByTypeCommandHandlerUnitTests : BaseUnitTest<GetMediaByType
 
         await SetMovieQualitySortTestDataAsync(dbContext, movieIds);
 
-        var command = CreateCommand(PlexMediaType.Movie, 0, sort: "quality:desc", pageSize: 10);
+        var command = new GetMediaByTypeCommand()
+        {
+            Filter = new MediaQueryFilter
+            {
+                MediaType = PlexMediaType.Movie,
+                PlexLibraryId = 0,
+                FilterOfflineMedia = false,
+                FilterOwnedMedia = false,
+                Parameters = new FlexQueryParameters
+                {
+                    Page = null,
+                    PageSize = 10,
+                    Sort = "quality:desc",
+                    Filter = null,
+                },
+            },
+        };
 
         // Act
         var result = await Sut.ExecuteAsync(command, CancellationToken);
@@ -802,7 +1568,23 @@ public class GetMediaByTypeCommandHandlerUnitTests : BaseUnitTest<GetMediaByType
 
         await SetTvShowQualitySortTestDataAsync(dbContext, tvShowIds);
 
-        var command = CreateCommand(PlexMediaType.TvShow, 0, sort: "quality:asc", pageSize: 10);
+        var command = new GetMediaByTypeCommand()
+        {
+            Filter = new MediaQueryFilter
+            {
+                MediaType = PlexMediaType.TvShow,
+                PlexLibraryId = 0,
+                FilterOfflineMedia = false,
+                FilterOwnedMedia = false,
+                Parameters = new FlexQueryParameters
+                {
+                    Page = null,
+                    PageSize = 10,
+                    Sort = "quality:asc",
+                    Filter = null,
+                },
+            },
+        };
 
         // Act
         var result = await Sut.ExecuteAsync(command, CancellationToken);
@@ -830,12 +1612,23 @@ public class GetMediaByTypeCommandHandlerUnitTests : BaseUnitTest<GetMediaByType
             .Select(x => x.Id)
             .FirstAsync(CancellationToken);
 
-        var command = CreateCommand(
-            PlexMediaType.Movie,
-            targetLibraryId,
-            sort: "Year:asc",
-            pageSize: 10
-        );
+        var command = new GetMediaByTypeCommand()
+        {
+            Filter = new MediaQueryFilter
+            {
+                MediaType = PlexMediaType.Movie,
+                PlexLibraryId = targetLibraryId,
+                FilterOfflineMedia = false,
+                FilterOwnedMedia = false,
+                Parameters = new FlexQueryParameters
+                {
+                    Page = null,
+                    PageSize = 10,
+                    Sort = "Year:asc",
+                    Filter = null,
+                },
+            },
+        };
 
         // Act
         var result = await Sut.ExecuteAsync(command, CancellationToken);
@@ -861,7 +1654,23 @@ public class GetMediaByTypeCommandHandlerUnitTests : BaseUnitTest<GetMediaByType
         var expectedMovieCount = await dbContext.PlexMovies.CountAsync(CancellationToken);
         var expectedMediaSize = await dbContext.PlexMovies.SumAsync(x => x.MediaSize, CancellationToken);
 
-        var command = CreateCommand(PlexMediaType.Movie, 0);
+        var command = new GetMediaByTypeCommand()
+        {
+            Filter = new MediaQueryFilter
+            {
+                MediaType = PlexMediaType.Movie,
+                PlexLibraryId = 0,
+                FilterOfflineMedia = false,
+                FilterOwnedMedia = false,
+                Parameters = new FlexQueryParameters
+                {
+                    Page = null,
+                    PageSize = null,
+                    Sort = null,
+                    Filter = null,
+                },
+            },
+        };
 
         // Act
         var result = await Sut.ExecuteAsync(command, CancellationToken);
@@ -904,7 +1713,23 @@ public class GetMediaByTypeCommandHandlerUnitTests : BaseUnitTest<GetMediaByType
             .Where(x => x.PlexLibraryId == targetLibrary.Id)
             .SumAsync(x => x.MediaSize, CancellationToken);
 
-        var command = CreateCommand(PlexMediaType.Movie, targetLibrary.Id);
+        var command = new GetMediaByTypeCommand()
+        {
+            Filter = new MediaQueryFilter
+            {
+                MediaType = PlexMediaType.Movie,
+                PlexLibraryId = targetLibrary.Id,
+                FilterOfflineMedia = false,
+                FilterOwnedMedia = false,
+                Parameters = new FlexQueryParameters
+                {
+                    Page = null,
+                    PageSize = null,
+                    Sort = null,
+                    Filter = null,
+                },
+            },
+        };
 
         // Act
         var result = await Sut.ExecuteAsync(command, CancellationToken);
@@ -922,6 +1747,58 @@ public class GetMediaByTypeCommandHandlerUnitTests : BaseUnitTest<GetMediaByType
     }
 
     [Test]
+    public async Task ShouldCalculateMediaSizeFromMovieRows_WhenLibraryMediaSizeSnapshotIsStale()
+    {
+        // Arrange
+        await SetupDatabase(70232, cfg =>
+        {
+            cfg.PlexServerCount = 1;
+            cfg.PlexMovieLibraryCount = 1;
+            cfg.MovieCount = 6;
+        });
+
+        var dbContext = IDbContext;
+        var targetLibrary = await dbContext.PlexLibraries
+            .Where(x => x.Type == PlexMediaType.Movie)
+            .OrderBy(x => x.Id)
+            .FirstAsync(CancellationToken);
+        var expectedMediaSize = await dbContext.PlexMovies
+            .Where(x => x.PlexLibraryId == targetLibrary.Id)
+            .SumAsync(x => x.MediaSize, CancellationToken);
+        await dbContext.PlexLibraries
+            .Where(x => x.Id == targetLibrary.Id)
+            .ExecuteUpdateAsync(x => x.SetProperty(y => y.MediaSize, 0), CancellationToken);
+
+        var command = new GetMediaByTypeCommand()
+        {
+            Filter = new MediaQueryFilter
+            {
+                MediaType = PlexMediaType.Movie,
+                PlexLibraryId = targetLibrary.Id,
+                FilterOfflineMedia = false,
+                FilterOwnedMedia = false,
+                Parameters = new FlexQueryParameters
+                {
+                    Page = null,
+                    PageSize = null,
+                    Sort = null,
+                    Filter = null,
+                },
+            },
+        };
+
+        // Act
+        var result = await Sut.ExecuteAsync(command, CancellationToken);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.Items.ShouldAllBe(x => x.PlexLibraryId == targetLibrary.Id);
+        result.Value.MediaSize.ShouldBe(expectedMediaSize);
+        result.Value.TotalMediaSize.ShouldBe(expectedMediaSize);
+        result.Value.MediaSize.ShouldBeGreaterThan(0);
+    }
+
+    [Test]
     public async Task ShouldFilterMoviesByCountryId_WhenMetadataCountryFilterIsApplied()
     {
         // Arrange
@@ -935,11 +1812,24 @@ public class GetMediaByTypeCommandHandlerUnitTests : BaseUnitTest<GetMediaByType
         var dbContext = IDbContext;
         var expectedMovie = await ConfigureExactMetadataMatchAsync(dbContext, VideoQuality.FullHD);
 
-        var command = CreateCommand(
-            PlexMediaType.Movie,
-            0,
-            filter: $"Countries:any:Id:eq:{expectedMovie.CountryId}"
-        );
+        var filter = $"Countries:any:Id:eq:{expectedMovie.CountryId}";
+        var command = new GetMediaByTypeCommand()
+        {
+            Filter = new MediaQueryFilter
+            {
+                MediaType = PlexMediaType.Movie,
+                PlexLibraryId = 0,
+                FilterOfflineMedia = false,
+                FilterOwnedMedia = false,
+                Parameters = new FlexQueryParameters
+                {
+                    Page = null,
+                    PageSize = null,
+                    Sort = null,
+                    Filter = filter,
+                },
+            },
+        };
 
         // Act
         var result = await Sut.ExecuteAsync(command, CancellationToken);
@@ -964,11 +1854,24 @@ public class GetMediaByTypeCommandHandlerUnitTests : BaseUnitTest<GetMediaByType
         var dbContext = IDbContext;
         var expectedMovie = await ConfigureExactMetadataMatchAsync(dbContext, VideoQuality.FullHD);
 
-        var command = CreateCommand(
-            PlexMediaType.Movie,
-            0,
-            filter: $"Actors:any:Id:eq:{expectedMovie.ActorId}"
-        );
+        var filter = $"Actors:any:Id:eq:{expectedMovie.ActorId}";
+        var command = new GetMediaByTypeCommand()
+        {
+            Filter = new MediaQueryFilter
+            {
+                MediaType = PlexMediaType.Movie,
+                PlexLibraryId = 0,
+                FilterOfflineMedia = false,
+                FilterOwnedMedia = false,
+                Parameters = new FlexQueryParameters
+                {
+                    Page = null,
+                    PageSize = null,
+                    Sort = null,
+                    Filter = filter,
+                },
+            },
+        };
 
         // Act
         var result = await Sut.ExecuteAsync(command, CancellationToken);
@@ -993,11 +1896,24 @@ public class GetMediaByTypeCommandHandlerUnitTests : BaseUnitTest<GetMediaByType
         var dbContext = IDbContext;
         var expectedMovie = await ConfigureExactMetadataMatchAsync(dbContext, VideoQuality.FullHD);
 
-        var command = CreateCommand(
-            PlexMediaType.Movie,
-            0,
-            filter: $"Genres:any:Id:eq:{expectedMovie.GenreId}"
-        );
+        var filter = $"Genres:any:Id:eq:{expectedMovie.GenreId}";
+        var command = new GetMediaByTypeCommand()
+        {
+            Filter = new MediaQueryFilter
+            {
+                MediaType = PlexMediaType.Movie,
+                PlexLibraryId = 0,
+                FilterOfflineMedia = false,
+                FilterOwnedMedia = false,
+                Parameters = new FlexQueryParameters
+                {
+                    Page = null,
+                    PageSize = null,
+                    Sort = null,
+                    Filter = filter,
+                },
+            },
+        };
 
         // Act
         var result = await Sut.ExecuteAsync(command, CancellationToken);
@@ -1030,12 +1946,23 @@ public class GetMediaByTypeCommandHandlerUnitTests : BaseUnitTest<GetMediaByType
             $"Actors:any:Id:eq:{expectedMovie.ActorId}"
         );
 
-        var command = CreateCommand(
-            PlexMediaType.Movie,
-            0,
-            pageSize: 20,
-            filter: filter
-        );
+        var command = new GetMediaByTypeCommand()
+        {
+            Filter = new MediaQueryFilter
+            {
+                MediaType = PlexMediaType.Movie,
+                PlexLibraryId = 0,
+                FilterOfflineMedia = false,
+                FilterOwnedMedia = false,
+                Parameters = new FlexQueryParameters
+                {
+                    Page = null,
+                    PageSize = 20,
+                    Sort = null,
+                    Filter = filter,
+                },
+            },
+        };
 
         // Act
         var result = await Sut.ExecuteAsync(command, CancellationToken);
@@ -1138,6 +2065,36 @@ public class GetMediaByTypeCommandHandlerUnitTests : BaseUnitTest<GetMediaByType
         );
     }
 
+    private async Task SetAllLibrarySortIndexRegressionDataAsync(IReaparrDbContext dbContext, IReadOnlyList<int> movieIds)
+    {
+        movieIds.Count.ShouldBeGreaterThanOrEqualTo(8);
+
+        var titlesById = new[]
+        {
+            (movieIds[0], "Zulu", 1),
+            (movieIds[1], "Alpha", 1),
+            (movieIds[2], "Charlie", 2),
+            (movieIds[3], "Bravo", 2),
+            (movieIds[4], "Yankee", 3),
+            (movieIds[5], "Delta", 3),
+            (movieIds[6], "Xray", 4),
+            (movieIds[7], "Whiskey", 4),
+        };
+
+        foreach (var (movieId, title, sortIndex) in titlesById)
+        {
+            await dbContext.PlexMovies
+                .Where(x => x.Id == movieId)
+                .ExecuteUpdateAsync(
+                    x => x
+                        .SetProperty(y => y.Title, title)
+                        .SetProperty(y => y.SearchTitle, title.ToLowerInvariant())
+                        .SetProperty(y => y.SortIndex, sortIndex),
+                    CancellationToken
+                );
+        }
+    }
+
     private async Task SetMovieQualitySortTestDataAsync(IReaparrDbContext dbContext, IReadOnlyList<int> movieIds)
     {
         await dbContext.PlexMovies
@@ -1209,15 +2166,23 @@ public class GetMediaByTypeCommandHandlerUnitTests : BaseUnitTest<GetMediaByType
             cfg.MovieCount = 4;
         });
 
-        var command = CreateCommand(
-            PlexMediaType.Movie,
-            0,
-            filterOfflineMedia: true,
-            page: 2,
-            pageSize: 3,
-            sort: "Year:desc",
-            filter: "Year:gte:2000"
-        );
+        var command = new GetMediaByTypeCommand()
+        {
+            Filter = new MediaQueryFilter
+            {
+                MediaType = PlexMediaType.Movie,
+                PlexLibraryId = 0,
+                FilterOfflineMedia = true,
+                FilterOwnedMedia = false,
+                Parameters = new FlexQueryParameters
+                {
+                    Page = 2,
+                    PageSize = 3,
+                    Sort = "Year:desc",
+                    Filter = "Year:gte:2000",
+                },
+            },
+        };
 
         // Act
         var result = await Sut.ExecuteAsync(command, CancellationToken);
@@ -1249,31 +2214,4 @@ public class GetMediaByTypeCommandHandlerUnitTests : BaseUnitTest<GetMediaByType
         int CountryId,
         int ActorId
     );
-
-    private static GetMediaByTypeCommand CreateCommand(
-        PlexMediaType mediaType,
-        int plexLibraryId,
-        bool filterOfflineMedia = false,
-        bool filterOwnedMedia = false,
-        int? page = null,
-        int? pageSize = null,
-        string? sort = null,
-        string? filter = null
-    ) => new()
-    {
-        Filter = new MediaQueryFilter
-        {
-            MediaType = mediaType,
-            PlexLibraryId = plexLibraryId,
-            FilterOfflineMedia = filterOfflineMedia,
-            FilterOwnedMedia = filterOwnedMedia,
-            Parameters = new FlexQueryParameters
-            {
-                Page = page,
-                PageSize = pageSize,
-                Sort = sort,
-                Filter = filter,
-            },
-        },
-    };
 }

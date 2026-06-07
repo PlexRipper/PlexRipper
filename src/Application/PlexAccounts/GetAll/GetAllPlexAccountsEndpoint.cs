@@ -21,12 +21,10 @@ public record GetAllPlexAccountsEndpointRequest
     public bool EnabledOnly { get; init; }
 }
 
-public class GetAllPlexAccountsEndpoint : BaseEndpoint<GetAllPlexAccountsEndpointRequest, List<PlexAccountDTO>>
+public class GetAllPlexAccountsEndpoint : Endpoint<GetAllPlexAccountsEndpointRequest, List<PlexAccountDTO>>
 {
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
-
-    public override string EndpointPath => ApiRoutes.PlexAccountController;
 
     public GetAllPlexAccountsEndpoint(ILogger log, IReaparrDbContext dbContext)
     {
@@ -36,7 +34,7 @@ public class GetAllPlexAccountsEndpoint : BaseEndpoint<GetAllPlexAccountsEndpoin
 
     public override void Configure()
     {
-        Get(EndpointPath);
+        Get(ApiRoutes.PlexAccountController);
 
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<List<PlexAccountDTO>>))
@@ -56,6 +54,6 @@ public class GetAllPlexAccountsEndpoint : BaseEndpoint<GetAllPlexAccountsEndpoin
 
         var plexAccounts = await query.ToListAsync(ct);
 
-        await SendFluentResult(Result.Ok(plexAccounts), x => x.ToDTO(), ct);
+        await Send.FluentResult(Result.Ok(plexAccounts), x => x.ToDTO(), ct);
     }
 }

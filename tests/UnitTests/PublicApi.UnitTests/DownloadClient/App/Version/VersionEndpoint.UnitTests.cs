@@ -1,24 +1,18 @@
-using System.Text;
-
 namespace Reaparr.PublicAPI.UnitTests;
 
-public class VersionEndpointUnitTests : BaseUnitTest<VersionEndpoint>
+public class VersionEndpointUnitTests : BaseEndpointWithoutRequestUnitTest<VersionEndpoint, string>
 {
     [Test]
     public async Task ShouldReturnVersionString_WhenPrefixTrimmed()
     {
         // Arrange
-        var ep = SetupEndpointUnitTest<VersionEndpoint>();
-        var buffer = new MemoryStream();
-        ep.HttpContext.Response.Body = buffer;
-
         // Act
-        await ep.HandleAsync(CancellationToken);
+        var endpointResult = await TestEndpointHandleAsync();
 
         // Assert
-        ep.HttpContext.Response.StatusCode.ShouldBe(StatusCodes.Status200OK);
+        endpointResult.StatusCode.ShouldBe(StatusCodes.Status200OK);
 
-        var body = Encoding.UTF8.GetString(buffer.ToArray());
+        var body = endpointResult.Response;
         body.ShouldNotBeNullOrWhiteSpace();
 
         // Sonarr/Radarr parse the version by trimming the leading 'v' then reading as a string.

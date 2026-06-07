@@ -28,11 +28,9 @@ public class UpdateUserSettingsEndpointRequestValidator : Validator<UpdateUserSe
     }
 }
 
-public class UpdateUserSettingsEndpoint : BaseEndpoint<UpdateUserSettingsEndpointRequest, SettingsModelDTO>
+public class UpdateUserSettingsEndpoint : Endpoint<UpdateUserSettingsEndpointRequest, SettingsModelDTO>
 {
     private readonly IUserSettings _userSettings;
-
-    public override string EndpointPath => ApiRoutes.SettingsController + "/";
 
     public UpdateUserSettingsEndpoint(IUserSettings userSettings)
     {
@@ -41,7 +39,7 @@ public class UpdateUserSettingsEndpoint : BaseEndpoint<UpdateUserSettingsEndpoin
 
     public override void Configure()
     {
-        Put(EndpointPath);
+        Put(ApiRoutes.SettingsController + "/");
 
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<SettingsModelDTO>))
@@ -54,6 +52,6 @@ public class UpdateUserSettingsEndpoint : BaseEndpoint<UpdateUserSettingsEndpoin
     {
         _userSettings.UpdateSettings(req.SettingsModelDto!.ToModel());
 
-        await SendFluentResult(Result.Ok(_userSettings), x => x.ToDTO(), ct);
+        await Send.FluentResult(Result.Ok(_userSettings), x => x.ToDTO(), ct);
     }
 }

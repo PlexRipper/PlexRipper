@@ -10,12 +10,10 @@ public class CancelLibrarySyncEndpointRequestValidator : Validator<CancelLibrary
     }
 }
 
-public class CancelLibrarySyncEndpoint : BaseEndpoint<CancelLibrarySyncEndpointRequest>
+public class CancelLibrarySyncEndpoint : Endpoint<CancelLibrarySyncEndpointRequest>
 {
     private readonly ILogger _log;
     private readonly ICommandExecutor _commandExecutor;
-
-    public override string EndpointPath => ApiRoutes.PlexLibraryController + "/cancel/{PlexLibraryId}";
 
     public CancelLibrarySyncEndpoint(ILogger log, ICommandExecutor commandExecutor)
     {
@@ -25,7 +23,7 @@ public class CancelLibrarySyncEndpoint : BaseEndpoint<CancelLibrarySyncEndpointR
 
     public override void Configure()
     {
-        Delete(EndpointPath);
+        Delete(ApiRoutes.PlexLibraryController + "/cancel/{PlexLibraryId}");
 
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(BaseResultDTO))
@@ -40,6 +38,6 @@ public class CancelLibrarySyncEndpoint : BaseEndpoint<CancelLibrarySyncEndpointR
 
         var result = await _commandExecutor.Send(new CancelLibrarySyncJobCommand(req.PlexLibraryId), ct);
 
-        await SendFluentResult(result, ct);
+        await Send.FluentResult(result, ct);
     }
 }

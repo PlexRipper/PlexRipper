@@ -11,11 +11,9 @@ public sealed class ClearCompletedDownloadTasksByServerIdEndpointRequest
 }
 
 public class ClearCompletedDownloadTasksByServerIdEndpoint
-    : BaseEndpoint<ClearCompletedDownloadTasksByServerIdEndpointRequest, ResultDTO<CountResponseDTO>>
+    : Endpoint<ClearCompletedDownloadTasksByServerIdEndpointRequest, ResultDTO<CountResponseDTO>>
 {
     private readonly ICommandExecutor _commandExecutor;
-
-    public override string EndpointPath => ApiRoutes.DownloadController + "/clear/{PlexServerId}";
 
     public ClearCompletedDownloadTasksByServerIdEndpoint(ICommandExecutor commandExecutor)
     {
@@ -24,7 +22,7 @@ public class ClearCompletedDownloadTasksByServerIdEndpoint
 
     public override void Configure()
     {
-        Delete(EndpointPath);
+        Delete(ApiRoutes.DownloadController + "/clear/{PlexServerId}");
 
         Description(x => x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<CountResponseDTO>)));
     }
@@ -40,10 +38,10 @@ public class ClearCompletedDownloadTasksByServerIdEndpoint
         );
         if (result.IsFailed)
         {
-            await SendFluentResult(result.ToResult(), ct);
+            await Send.FluentResult(result.ToResult(), ct);
             return;
         }
 
-        await SendFluentResult(Result.Ok(new CountResponseDTO(result.Value)), ct);
+        await Send.FluentResult(Result.Ok(new CountResponseDTO(result.Value)), ct);
     }
 }

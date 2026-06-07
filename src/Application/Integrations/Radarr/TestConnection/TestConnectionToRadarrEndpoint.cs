@@ -46,12 +46,10 @@ public class TestConnectionToRadarrEndpointRequestValidator : Validator<TestConn
 }
 
 public class TestConnectionToRadarrEndpoint
-    : BaseEndpoint<TestConnectionToRadarrEndpointRequest, TestConnectionToRadarrEndpointResponse>
+    : Endpoint<TestConnectionToRadarrEndpointRequest, TestConnectionToRadarrEndpointResponse>
 {
     private readonly ILogger _log;
     private readonly HttpClient _client;
-
-    public override string EndpointPath => ApiRoutes.IntegrationController + "/Radarr/TestConnection";
 
     public TestConnectionToRadarrEndpoint(ILogger log, IHttpClientFactory httpClientFactory)
     {
@@ -61,7 +59,7 @@ public class TestConnectionToRadarrEndpoint
 
     public override void Configure()
     {
-        Get(EndpointPath);
+        Get(ApiRoutes.IntegrationController + "/Radarr/TestConnection");
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<TestConnectionToRadarrEndpointResponse>))
                 .Produces(StatusCodes.Status400BadRequest, typeof(BaseResultDTO))
@@ -118,6 +116,6 @@ public class TestConnectionToRadarrEndpoint
 
     private async Task SendTestResult(TestConnectionStatus status, CancellationToken ct)
     {
-        await SendFluentResult(Result.Ok(new TestConnectionToRadarrEndpointResponse(status)), ct);
+        await Send.FluentResult(Result.Ok(new TestConnectionToRadarrEndpointResponse(status)), ct);
     }
 }

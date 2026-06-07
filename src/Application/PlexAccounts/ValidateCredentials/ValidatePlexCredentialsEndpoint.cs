@@ -53,12 +53,10 @@ public class ValidatePlexCredentialsEndpointRequestValidator : Validator<Validat
 }
 
 public class ValidatePlexCredentialsEndpoint
-    : BaseEndpoint<ValidatePlexCredentialsEndpointRequest, ValidatePlexCredentialsDTO>
+    : Endpoint<ValidatePlexCredentialsEndpointRequest, ResultDTO<ValidatePlexCredentialsDTO>>
 {
     private readonly ILogger _log;
     private readonly ICommandExecutor _commandExecutor;
-
-    public override string EndpointPath => ApiRoutes.PlexAccountController + "/validate/credentials";
 
     public ValidatePlexCredentialsEndpoint(ILogger log, ICommandExecutor commandExecutor)
     {
@@ -68,7 +66,7 @@ public class ValidatePlexCredentialsEndpoint
 
     public override void Configure()
     {
-        Post(EndpointPath);
+        Post(ApiRoutes.PlexAccountController + "/validate/credentials");
 
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<ValidatePlexCredentialsDTO>))
@@ -115,7 +113,7 @@ public class ValidatePlexCredentialsEndpoint
                 ValidatedAt = null,
                 Is2Fa = true,
             };
-            await SendFluentResult(Result.Ok(response), ct);
+            await Send.FluentResult(Result.Ok(response), ct);
 
             return;
         }
@@ -139,7 +137,7 @@ public class ValidatePlexCredentialsEndpoint
                 ValidatedAt = null,
                 Is2Fa = false,
             };
-            await SendFluentResult(Result.Ok(response), ct);
+            await Send.FluentResult(Result.Ok(response), ct);
             return;
         }
 
@@ -162,11 +160,11 @@ public class ValidatePlexCredentialsEndpoint
                 ValidatedAt = signInResult.Value.ValidatedAt,
                 Is2Fa = signInResult.Value.Is2Fa,
             };
-            await SendFluentResult(Result.Ok(response), ct);
+            await Send.FluentResult(Result.Ok(response), ct);
             return;
         }
 
         // Default: return all errors if none of the above conditions matched
-        await SendFluentResult(signInResult.ToResult(), ct);
+        await Send.FluentResult(signInResult.ToResult(), ct);
     }
 }

@@ -16,6 +16,7 @@ import { ContentType } from "./http-client";
 import type {
   BaseResultDTO,
   PlexServerDTO,
+  SetServerAliasRequest,
   SetServerEnabledRequest,
   SetServerOwnedRequest,
 } from "./data-contracts";
@@ -39,6 +40,25 @@ export class PlexServer {
     axiosObservable<BaseResultDTO>({
       url: `/api/PlexServer/${plexServerId}/preferred-connection/${plexServerConnectionId}`,
       method: "GET",
+      secure: true,
+      responseType: "json",
+      ...params,
+    }).pipe(apiCheckPipe<BaseResultDTO>);
+
+  /**
+   * No description
+   * * @tags Plexserver
+   * @name DeletePlexServerEndpoint
+   * @request DELETE:/api/PlexServer/{PlexServerId}
+   * @secure
+   */
+  deletePlexServerEndpoint = (
+    plexServerId: number,
+    params: RequestParams = {},
+  ) =>
+    axiosObservable<BaseResultDTO>({
+      url: `/api/PlexServer/${plexServerId}`,
+      method: "DELETE",
       secure: true,
       responseType: "json",
       ...params,
@@ -160,21 +180,20 @@ export class PlexServer {
    * No description
    * * @tags Plexserver
    * @name SetServerAlias
-   * @request GET:/api/PlexServer/{PlexServerId}/set-server-alias
+   * @request PUT:/api/PlexServer/{PlexServerId}/set-server-alias
    * @secure
    */
   setServerAlias = (
     plexServerId: number,
-    query: {
-      serverAlias: string;
-    },
+    data: SetServerAliasRequest,
     params: RequestParams = {},
   ) =>
     axiosObservable<BaseResultDTO>({
       url: `/api/PlexServer/${plexServerId}/set-server-alias`,
-      method: "GET",
-      params: query,
+      method: "PUT",
+      data: data,
       secure: true,
+      type: ContentType.Json,
       responseType: "json",
       ...params,
     }).pipe(apiCheckPipe<BaseResultDTO>);
@@ -251,6 +270,9 @@ export class PlexServerPaths {
       url: `/api/PlexServer/${plexServerId}/preferred-connection/${plexServerConnectionId}`,
     });
 
+  static deletePlexServerEndpoint = (plexServerId: number) =>
+    queryString.stringifyUrl({ url: `/api/PlexServer/${plexServerId}` });
+
   static getPlexServerByIdEndpoint = (plexServerId: number) =>
     queryString.stringifyUrl({ url: `/api/PlexServer/${plexServerId}` });
 
@@ -277,15 +299,9 @@ export class PlexServerPaths {
       url: `/api/PlexServer/server/resume/${plexServerId}`,
     });
 
-  static setServerAlias = (
-    plexServerId: number,
-    query: {
-      serverAlias: string;
-    },
-  ) =>
+  static setServerAlias = (plexServerId: number) =>
     queryString.stringifyUrl({
       url: `/api/PlexServer/${plexServerId}/set-server-alias`,
-      query,
     });
 
   static setServerEnabledEndpoint = (plexServerId: number) =>

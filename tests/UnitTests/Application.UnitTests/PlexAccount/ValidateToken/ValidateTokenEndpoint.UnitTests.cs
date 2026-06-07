@@ -1,6 +1,7 @@
 ﻿namespace Reaparr.Application.UnitTests;
 
-public class ValidatePlexTokenEndpointUnitTests : BaseUnitTest
+public class ValidatePlexTokenEndpointUnitTests : BaseEndpointUnitTest<ValidatePlexTokenEndpoint,
+    ValidatePlexTokenEndpointRequest, ResultDTO<ValidatePlexTokenEndpointResponse>>
 {
     [Test]
     public async Task ShouldValidateThePlexToken_WhenTokenIsValid()
@@ -34,16 +35,14 @@ public class ValidatePlexTokenEndpointUnitTests : BaseUnitTest
             .ReturnsAsync(Result.Ok(commandResult));
 
         // Act
-        var ep = SetupEndpointUnitTest<ValidatePlexTokenEndpoint>();
-        await ep.HandleAsync(
+        var endpointResult = await TestEndpointHandleAsync(
             new ValidatePlexTokenEndpointRequest()
             {
                 DisplayName = testAccountDTO.DisplayName,
                 ManualAuthenticationToken = testAccountDTO.AuthenticationToken,
-            },
-            CancellationToken
+            }
         );
-        var result = ep.Response as ResultDTO<ValidatePlexTokenEndpointResponse>;
+        var result = endpointResult.Response;
 
         // Assert
         result.ShouldNotBeNull();
@@ -96,16 +95,14 @@ public class ValidatePlexTokenEndpointUnitTests : BaseUnitTest
             .ReturnsAsync(Result.Ok(commandResult).AddPlex401UnauthorizedError());
 
         // Act
-        var ep = SetupEndpointUnitTest<ValidatePlexTokenEndpoint>();
-        await ep.HandleAsync(
+        var endpointResult = await TestEndpointHandleAsync(
             new ValidatePlexTokenEndpointRequest()
             {
                 DisplayName = testAccountDTO.DisplayName,
                 ManualAuthenticationToken = testAccountDTO.AuthenticationToken,
-            },
-            CancellationToken
+            }
         );
-        var result = ep.Response as ResultDTO<ValidatePlexTokenEndpointResponse>;
+        var result = endpointResult.Response;
 
         // Assert
         result.ShouldNotBeNull();
@@ -157,16 +154,14 @@ public class ValidatePlexTokenEndpointUnitTests : BaseUnitTest
             .ReturnsAsync(Result.Ok(commandResult));
 
         // Act
-        var ep = SetupEndpointUnitTest<ValidatePlexTokenEndpoint>();
-        await ep.HandleAsync(
+        var endpointResult = await TestEndpointHandleAsync(
             new ValidatePlexTokenEndpointRequest()
             {
                 DisplayName = testAccountDTO.DisplayName,
                 ManualAuthenticationToken = testAccountDTO.AuthenticationToken,
-            },
-            CancellationToken
+            }
         );
-        var result = ep.Response as ResultDTO<ValidatePlexTokenEndpointResponse>;
+        var result = endpointResult.Response;
 
         // Assert
         result.ShouldNotBeNull();
@@ -219,16 +214,14 @@ public class ValidatePlexTokenEndpointUnitTests : BaseUnitTest
             );
 
         // Act
-        var ep = SetupEndpointUnitTest<ValidatePlexTokenEndpoint>();
-        await ep.HandleAsync(
+        var endpointResult = await TestEndpointHandleAsync(
             new ValidatePlexTokenEndpointRequest()
             {
                 DisplayName = testAccountDTO.DisplayName,
                 ManualAuthenticationToken = testAccountDTO.AuthenticationToken,
-            },
-            CancellationToken
+            }
         );
-        var result = ep.Response;
+        var result = endpointResult.Response;
 
         // Assert
         result.ShouldNotBeNull();
@@ -255,16 +248,14 @@ public class ValidatePlexTokenEndpointUnitTests : BaseUnitTest
             .ReturnsAsync(Result.Fail("Command execution failed"));
 
         // Act
-        var ep = SetupEndpointUnitTest<ValidatePlexTokenEndpoint>();
-        await ep.HandleAsync(
+        var endpointResult = await TestEndpointHandleAsync(
             new ValidatePlexTokenEndpointRequest()
             {
                 DisplayName = testAccountDTO.DisplayName,
                 ManualAuthenticationToken = testAccountDTO.AuthenticationToken,
-            },
-            CancellationToken
+            }
         );
-        var result = ep.Response;
+        var result = endpointResult.Response;
 
         // Assert
         result.ShouldNotBeNull();
@@ -304,16 +295,14 @@ public class ValidatePlexTokenEndpointUnitTests : BaseUnitTest
             .ReturnsAsync(Result.Ok(commandResult));
 
         // Act
-        var ep = SetupEndpointUnitTest<ValidatePlexTokenEndpoint>();
-        await ep.HandleAsync(
+        var endpointResult = await TestEndpointHandleAsync(
             new ValidatePlexTokenEndpointRequest()
             {
                 DisplayName = "UnknownDisplayName", // Default value
                 ManualAuthenticationToken = testAccountDTO.AuthenticationToken,
-            },
-            CancellationToken
+            }
         );
-        var result = ep.Response as ResultDTO<ValidatePlexTokenEndpointResponse>;
+        var result = endpointResult.Response;
 
         // Assert
         result.ShouldNotBeNull();

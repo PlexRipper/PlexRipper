@@ -33,13 +33,11 @@ public class GeneratePlexTokenResponse
     public required string PlexAuthToken { get; init; }
 }
 
-public class GeneratePlexTokenEndpoint : BaseEndpoint<GeneratePlexTokenEndpointRequest, GeneratePlexTokenResponse>
+public class GeneratePlexTokenEndpoint : Endpoint<GeneratePlexTokenEndpointRequest, ResultDTO<GeneratePlexTokenResponse>>
 {
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
     private readonly ICommandExecutor _commandExecutor;
-
-    public override string EndpointPath => ApiRoutes.PlexAccountController + "/generate-token/{PlexAccountId}";
 
     public GeneratePlexTokenEndpoint(ILogger log, IReaparrDbContext dbContext, ICommandExecutor commandExecutor)
     {
@@ -50,7 +48,7 @@ public class GeneratePlexTokenEndpoint : BaseEndpoint<GeneratePlexTokenEndpointR
 
     public override void Configure()
     {
-        Get(EndpointPath);
+        Get(ApiRoutes.PlexAccountController + "/generate-token/{PlexAccountId}");
 
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<GeneratePlexTokenResponse>))
@@ -66,7 +64,7 @@ public class GeneratePlexTokenEndpoint : BaseEndpoint<GeneratePlexTokenEndpointR
         var plexAccount = await _dbContext.PlexAccounts.GetAsync(req.PlexAccountId, ct);
         if (plexAccount is null)
         {
-            await SendFluentResult(ResultExtensions.EntityNotFound(nameof(PlexAccount), req.PlexAccountId), ct);
+            await Send.FluentResult(ResultExtensions.EntityNotFound(nameof(PlexAccount), req.PlexAccountId), ct);
             return;
         }
 
@@ -95,7 +93,7 @@ public class GeneratePlexTokenEndpoint : BaseEndpoint<GeneratePlexTokenEndpointR
                 NeedsVerificationCode = false,
                 PlexAuthToken = validateResult.Value.AuthenticationToken,
             };
-            await SendFluentResult(Result.Ok(response), ct);
+            await Send.FluentResult(Result.Ok(response), ct);
             return;
         }
 
@@ -107,7 +105,7 @@ public class GeneratePlexTokenEndpoint : BaseEndpoint<GeneratePlexTokenEndpointR
                 NeedsVerificationCode = true,
                 PlexAuthToken = "",
             };
-            await SendFluentResult(Result.Ok(response), ct);
+            await Send.FluentResult(Result.Ok(response), ct);
             return;
         }
 
@@ -119,12 +117,12 @@ public class GeneratePlexTokenEndpoint : BaseEndpoint<GeneratePlexTokenEndpointR
                 NeedsVerificationCode = false,
                 PlexAuthToken = "",
             };
-            await SendFluentResult(Result.Ok(response), ct);
+            await Send.FluentResult(Result.Ok(response), ct);
             return;
         }
 
         var result = Result.Ok();
         result.WithErrors(validateResult.Errors.Where(x => x.GetType() == typeof(PlexError)));
-        await SendFluentResult(result, ct);
+        await Send.FluentResult(result, ct);
     }
 }

@@ -14,13 +14,11 @@ public class DeleteDownloadTaskEndpointRequestValidator : Validator<DeleteDownlo
     }
 }
 
-public class DeleteDownloadTaskEndpoint : BaseEndpoint<DeleteDownloadTaskEndpointRequest>
+public class DeleteDownloadTaskEndpoint : Endpoint<DeleteDownloadTaskEndpointRequest, BaseResultDTO>
 {
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
     private readonly ICommandExecutor _commandExecutor;
-
-    public override string EndpointPath => ApiRoutes.DownloadController + "/delete";
 
     public DeleteDownloadTaskEndpoint(ILogger log, IReaparrDbContext dbContext, ICommandExecutor commandExecutor)
     {
@@ -31,7 +29,7 @@ public class DeleteDownloadTaskEndpoint : BaseEndpoint<DeleteDownloadTaskEndpoin
 
     public override void Configure()
     {
-        Delete(EndpointPath);
+        Delete(ApiRoutes.DownloadController + "/delete");
 
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(BaseResultDTO))
@@ -48,7 +46,7 @@ public class DeleteDownloadTaskEndpoint : BaseEndpoint<DeleteDownloadTaskEndpoin
         var keys = await _dbContext.GetDownloadTaskKeysAsync(req.DownloadTaskIds, ct);
         if (keys.Count == 0)
         {
-            await SendFluentResult(Result.Ok(), ct);
+            await Send.FluentResult(Result.Ok(), ct);
             return;
         }
 
@@ -57,13 +55,13 @@ public class DeleteDownloadTaskEndpoint : BaseEndpoint<DeleteDownloadTaskEndpoin
             var stopResult = await _commandExecutor.Send(new StopDownloadTaskCommand(key.Id), ct);
             if (stopResult.IsFailed)
             {
-                await SendFluentResult(stopResult, ct);
+                await Send.FluentResult(stopResult, ct);
                 return;
             }
         }
 
         var deleteResult = await _commandExecutor.Send(new DeleteDownloadTasksByKeyCommand(keys), ct);
 
-        await SendFluentResult(deleteResult, ct);
+        await Send.FluentResult(deleteResult, ct);
     }
 }

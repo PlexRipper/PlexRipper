@@ -1,10 +1,8 @@
 namespace Reaparr.Application;
 
-public class GetUserSettingsEndpoint : BaseEndpointWithoutRequest<SettingsModelDTO>
+public class GetUserSettingsEndpoint : EndpointWithoutRequest<SettingsModelDTO>
 {
     private readonly IUserSettings _userSettings;
-
-    public override string EndpointPath => ApiRoutes.SettingsController + "/";
 
     public GetUserSettingsEndpoint(IUserSettings userSettings)
     {
@@ -13,7 +11,7 @@ public class GetUserSettingsEndpoint : BaseEndpointWithoutRequest<SettingsModelD
 
     public override void Configure()
     {
-        Get(EndpointPath);
+        Get(ApiRoutes.SettingsController + "/");
 
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<SettingsModelDTO>))
@@ -23,6 +21,6 @@ public class GetUserSettingsEndpoint : BaseEndpointWithoutRequest<SettingsModelD
 
     public override async Task HandleAsync(CancellationToken ct)
     {
-        await SendFluentResult(Result.Ok(_userSettings), x => x.ToDTO(), ct);
+        await Send.FluentResult(Result.Ok(_userSettings), x => x.ToDTO(), ct);
     }
 }

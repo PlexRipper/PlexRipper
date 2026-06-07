@@ -66,12 +66,10 @@ public class GetAllMediaByTypeRequestValidator : Validator<GetAllMediaByTypeRequ
     }
 }
 
-public class GetAllMediaByTypeEndpoint : BaseEndpoint<GetAllMediaByTypeRequest, PlexMediaStatisticsDTO>
+public class GetAllMediaByTypeEndpoint : Endpoint<GetAllMediaByTypeRequest, PlexMediaStatisticsDTO>
 {
     private readonly ILogger _log;
     private readonly ICommandExecutor _commandExecutor;
-
-    public override string EndpointPath => ApiRoutes.PlexMediaController;
 
     public GetAllMediaByTypeEndpoint(ILogger log, ICommandExecutor commandExecutor)
     {
@@ -81,7 +79,7 @@ public class GetAllMediaByTypeEndpoint : BaseEndpoint<GetAllMediaByTypeRequest, 
 
     public override void Configure()
     {
-        Get(EndpointPath);
+        Get(ApiRoutes.PlexMediaController);
 
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<PlexMediaStatisticsDTO>))
@@ -119,11 +117,11 @@ public class GetAllMediaByTypeEndpoint : BaseEndpoint<GetAllMediaByTypeRequest, 
 
         if (mediaListResult.IsFailed)
         {
-            await SendFluentResult(mediaListResult, ct);
+            await Send.FluentResult(mediaListResult, ct);
             return;
         }
 
-        await SendFluentResult(Result.Ok(ToStatisticsDTO(mediaListResult.Value)), ct);
+        await Send.FluentResult(Result.Ok(ToStatisticsDTO(mediaListResult.Value)), ct);
     }
     
     private static string BuildFilter(GetAllMediaByTypeRequest req)

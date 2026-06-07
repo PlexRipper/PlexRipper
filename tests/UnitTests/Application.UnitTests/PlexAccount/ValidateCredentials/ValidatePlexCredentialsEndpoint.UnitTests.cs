@@ -1,8 +1,7 @@
-﻿using Reaparr.FluentResultExtensions;
+﻿namespace Reaparr.Application.UnitTests;
 
-namespace Reaparr.Application.UnitTests;
-
-public class ValidatePlexCredentialsEndpointUnitTests : BaseUnitTest
+public class ValidatePlexCredentialsEndpointUnitTests : BaseEndpointUnitTest<ValidatePlexCredentialsEndpoint,
+    ValidatePlexCredentialsEndpointRequest, ResultDTO<ValidatePlexCredentialsDTO>>
 {
     [Test]
     public async Task ShouldReturnValidatedAccount_WhenSignInSucceeds()
@@ -33,11 +32,11 @@ public class ValidatePlexCredentialsEndpointUnitTests : BaseUnitTest
                         Is2Fa = testAccountResponse.Is2Fa,
                     }
                 )
-            );
+            )
+            .Verifiable(Times.Once());
 
         // Act
-        var ep = SetupEndpointUnitTest<ValidatePlexCredentialsEndpoint>();
-        await ep.HandleAsync(
+        var endpointResult = await TestEndpointHandleAsync(
             new ValidatePlexCredentialsEndpointRequest
             {
                 ClientId = testAccountDTO.ClientId,
@@ -45,12 +44,12 @@ public class ValidatePlexCredentialsEndpointUnitTests : BaseUnitTest
                 Username = testAccountDTO.Username,
                 Password = testAccountDTO.Password,
                 VerificationCode = testAccountDTO.VerificationCode,
-            },
-            CancellationToken
+            }
         );
-        var result = ep.Response as ResultDTO<ValidatePlexCredentialsDTO>;
+        var result = endpointResult.Response;
 
         // Assert
+        endpointResult.IsValid.ShouldBeTrue();
         result.ShouldNotBeNull();
         result.IsSuccess.ShouldBeTrue();
         var value = result.Value;
@@ -69,6 +68,7 @@ public class ValidatePlexCredentialsEndpointUnitTests : BaseUnitTest
         value.PlexId.ShouldBe(testAccountDTO.PlexId);
         value.Uuid.ShouldBe(testAccountDTO.Uuid);
 
+        Mock.Mock<ICommandExecutor>().Verify();
         Mock.Mock<ICommandExecutor>()
             .Verify(
                 x =>
@@ -91,30 +91,28 @@ public class ValidatePlexCredentialsEndpointUnitTests : BaseUnitTest
         var seed = new Seed(4088);
         var testAccountDTO = FakeData.GetPlexAccount(seed).Generate().ToDTO();
 
+        var signInValue = new PlexSignInCommandResult
+        {
+            ClientId = testAccountDTO.ClientId,
+            Username = testAccountDTO.Username,
+            Password = testAccountDTO.Password,
+            Email = testAccountDTO.Email,
+            Title = testAccountDTO.Title,
+            PlexId = testAccountDTO.PlexId,
+            Uuid = testAccountDTO.Uuid,
+            AuthenticationToken = testAccountDTO.AuthenticationToken,
+            IsValidated = true,
+            ValidatedAt = DateTime.UtcNow,
+            Is2Fa = false,
+        };
+
         Mock.Mock<ICommandExecutor>()
             .Setup(x => x.Send(It.IsAny<PlexSignInCommand>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(
-                Result.Ok(
-                    new PlexSignInCommandResult
-                    {
-                        ClientId = testAccountDTO.ClientId,
-                        Username = testAccountDTO.Username,
-                        Password = testAccountDTO.Password,
-                        Email = testAccountDTO.Email,
-                        Title = testAccountDTO.Title,
-                        PlexId = testAccountDTO.PlexId,
-                        Uuid = testAccountDTO.Uuid,
-                        AuthenticationToken = testAccountDTO.AuthenticationToken,
-                        IsValidated = true,
-                        ValidatedAt = DateTime.UtcNow,
-                        Is2Fa = false,
-                    }
-                )
-            );
+            .ReturnsAsync(Result.Ok(signInValue))
+            .Verifiable(Times.Once());
 
         // Act
-        var ep = SetupEndpointUnitTest<ValidatePlexCredentialsEndpoint>();
-        await ep.HandleAsync(
+        var endpointResult = await TestEndpointHandleAsync(
             new ValidatePlexCredentialsEndpointRequest
             {
                 ClientId = testAccountDTO.ClientId,
@@ -122,16 +120,43 @@ public class ValidatePlexCredentialsEndpointUnitTests : BaseUnitTest
                 Username = testAccountDTO.Username,
                 Password = testAccountDTO.Password,
                 VerificationCode = testAccountDTO.VerificationCode,
-            },
-            CancellationToken
+            }
         );
 
         // Assert
+        endpointResult.IsValid.ShouldBeTrue();
+        var result = endpointResult.Response;
+        result.ShouldNotBeNull();
+        result.IsSuccess.ShouldBeTrue();
+        result.Errors.ShouldBeEmpty();
+
+        var value = result.Value;
+        value.ShouldNotBeNull();
+        value.IsUnAuthorized.ShouldBeFalse();
+        value.IsValidated.ShouldBeTrue();
+        value.ValidatedAt.ShouldNotBeNull();
+        value.ValidatedAt?.ShouldBe(DateTime.UtcNow, TimeSpan.FromSeconds(5));
+        value.Is2Fa.ShouldBeFalse();
+        value.ClientId.ShouldBe(testAccountDTO.ClientId);
+        value.Username.ShouldBe(testAccountDTO.Username);
+        value.Password.ShouldBe(testAccountDTO.Password);
+        value.Email.ShouldBe(testAccountDTO.Email);
+        value.Title.ShouldBe(testAccountDTO.Title);
+        value.PlexId.ShouldBe(testAccountDTO.PlexId);
+        value.Uuid.ShouldBe(testAccountDTO.Uuid);
+        value.AuthenticationToken.ShouldBe(testAccountDTO.AuthenticationToken);
+
+        Mock.Mock<ICommandExecutor>().Verify();
         Mock.Mock<ICommandExecutor>()
             .Verify(
                 x =>
                     x.Send(
-                        It.Is<PlexSignInCommand>(c => c.ClientId == testAccountDTO.ClientId),
+                        It.Is<PlexSignInCommand>(c =>
+                            c.ClientId == testAccountDTO.ClientId
+                            && c.Username == testAccountDTO.Username
+                            && c.Password == testAccountDTO.Password
+                            && c.VerificationCode == testAccountDTO.VerificationCode
+                        ),
                         It.IsAny<CancellationToken>()
                     ),
                 Times.Once()
@@ -145,30 +170,28 @@ public class ValidatePlexCredentialsEndpointUnitTests : BaseUnitTest
         var seed = new Seed(5091);
         var testAccountDTO = FakeData.GetPlexAccount(seed).Generate().ToDTO();
 
+        var signInValue = new PlexSignInCommandResult
+        {
+            ClientId = Guid.NewGuid().ToString(),
+            Username = testAccountDTO.Username,
+            Password = testAccountDTO.Password,
+            Email = testAccountDTO.Email,
+            Title = testAccountDTO.Title,
+            PlexId = testAccountDTO.PlexId,
+            Uuid = testAccountDTO.Uuid,
+            AuthenticationToken = testAccountDTO.AuthenticationToken,
+            IsValidated = true,
+            ValidatedAt = DateTime.UtcNow,
+            Is2Fa = false,
+        };
+
         Mock.Mock<ICommandExecutor>()
             .Setup(x => x.Send(It.IsAny<PlexSignInCommand>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(
-                Result.Ok(
-                    new PlexSignInCommandResult
-                    {
-                        ClientId = Guid.NewGuid().ToString(),
-                        Username = testAccountDTO.Username,
-                        Password = testAccountDTO.Password,
-                        Email = testAccountDTO.Email,
-                        Title = testAccountDTO.Title,
-                        PlexId = testAccountDTO.PlexId,
-                        Uuid = testAccountDTO.Uuid,
-                        AuthenticationToken = testAccountDTO.AuthenticationToken,
-                        IsValidated = true,
-                        ValidatedAt = DateTime.UtcNow,
-                        Is2Fa = false,
-                    }
-                )
-            );
+            .ReturnsAsync(Result.Ok(signInValue))
+            .Verifiable(Times.Once());
 
         // Act
-        var ep = SetupEndpointUnitTest<ValidatePlexCredentialsEndpoint>();
-        await ep.HandleAsync(
+        var endpointResult = await TestEndpointHandleAsync(
             new ValidatePlexCredentialsEndpointRequest
             {
                 ClientId = "",
@@ -176,11 +199,37 @@ public class ValidatePlexCredentialsEndpointUnitTests : BaseUnitTest
                 Username = testAccountDTO.Username,
                 Password = testAccountDTO.Password,
                 VerificationCode = testAccountDTO.VerificationCode,
-            },
-            CancellationToken
+            }
         );
+        var result = endpointResult.Response;
 
         // Assert
+        endpointResult.IsValid.ShouldBeTrue();
+        result.ShouldNotBeNull();
+        result.IsSuccess.ShouldBeTrue();
+        result.Errors.ShouldBeEmpty();
+
+        var value = result.Value;
+        value.ShouldNotBeNull();
+        value.IsUnAuthorized.ShouldBeFalse();
+        value.IsValidated.ShouldBeTrue();
+        value.ValidatedAt.ShouldNotBeNull();
+        value.Is2Fa.ShouldBeFalse();
+        value.Username.ShouldBe(testAccountDTO.Username);
+        value.Password.ShouldBe(testAccountDTO.Password);
+        value.Email.ShouldBe(testAccountDTO.Email);
+        value.Title.ShouldBe(testAccountDTO.Title);
+        value.PlexId.ShouldBe(testAccountDTO.PlexId);
+        value.Uuid.ShouldBe(testAccountDTO.Uuid);
+        value.AuthenticationToken.ShouldBe(testAccountDTO.AuthenticationToken);
+
+        // The endpoint must have generated a GUID clientId and it must appear in the response.
+        value.ClientId.ShouldNotBeNullOrEmpty();
+        Guid.Parse(value.ClientId).ShouldNotBe(Guid.Empty);
+
+        Mock.Mock<ICommandExecutor>().Verify();
+
+        // The command must have been sent with a generated clientId, not an empty one.
         Mock.Mock<ICommandExecutor>()
             .Verify(
                 x =>
@@ -223,11 +272,11 @@ public class ValidatePlexCredentialsEndpointUnitTests : BaseUnitTest
                 Result
                     .Ok(signInValue)
                     .WithError(new PlexError("Enter verification code") { Code = PlexErrorCodes.EnterVerificationCode })
-            );
+            )
+            .Verifiable(Times.Once());
 
         // Act
-        var ep = SetupEndpointUnitTest<ValidatePlexCredentialsEndpoint>();
-        await ep.HandleAsync(
+        var endpointResult = await TestEndpointHandleAsync(
             new ValidatePlexCredentialsEndpointRequest
             {
                 ClientId = testAccountDTO.ClientId,
@@ -235,10 +284,10 @@ public class ValidatePlexCredentialsEndpointUnitTests : BaseUnitTest
                 Username = testAccountDTO.Username,
                 Password = testAccountDTO.Password,
                 VerificationCode = testAccountDTO.VerificationCode,
-            },
-            CancellationToken
+            }
         );
-        var result = ep.Response as ResultDTO<ValidatePlexCredentialsDTO>;
+        endpointResult.IsValid.ShouldBeTrue();
+        var result = endpointResult.Response;
 
         // Assert
         result.ShouldNotBeNull();
@@ -258,6 +307,7 @@ public class ValidatePlexCredentialsEndpointUnitTests : BaseUnitTest
         value.Uuid.ShouldBeEmpty();
         value.AuthenticationToken.ShouldBeEmpty();
 
+        Mock.Mock<ICommandExecutor>().Verify();
         Mock.Mock<ICommandExecutor>()
             .Verify(x => x.Send(It.IsAny<PlexSignInCommand>(), It.IsAny<CancellationToken>()), Times.Once());
     }
@@ -293,11 +343,11 @@ public class ValidatePlexCredentialsEndpointUnitTests : BaseUnitTest
                 Result
                     .Ok(signInValue)
                     .WithErrors([new PlexError("Error #1") { Code = 1234 }, new PlexError("Error #2") { Code = 5678 }])
-            );
+            )
+            .Verifiable(Times.Once());
 
         // Act
-        var ep = SetupEndpointUnitTest<ValidatePlexCredentialsEndpoint>();
-        await ep.HandleAsync(
+        var endpointResult = await TestEndpointHandleAsync(
             new ValidatePlexCredentialsEndpointRequest
             {
                 ClientId = testAccountDTO.ClientId,
@@ -305,18 +355,21 @@ public class ValidatePlexCredentialsEndpointUnitTests : BaseUnitTest
                 Username = testAccountDTO.Username,
                 Password = testAccountDTO.Password,
                 VerificationCode = testAccountDTO.VerificationCode,
-            },
-            CancellationToken
+            }
         );
-        var result = ep.Response;
 
         // Assert
+        endpointResult.IsValid.ShouldBeTrue();
+        var result = endpointResult.Response;
         result.ShouldNotBeNull();
         result.IsSuccess.ShouldBeFalse();
         result.Errors.ShouldNotBeEmpty();
+        result.Errors.Count.ShouldBe(2);
+        result.Errors.ShouldContain(e => e.Message == "Error #1");
+        result.Errors.ShouldContain(e => e.Message == "Error #2");
+        result.Value.ShouldBeNull();
 
-        Mock.Mock<ICommandExecutor>()
-            .Verify(x => x.Send(It.IsAny<PlexSignInCommand>(), It.IsAny<CancellationToken>()), Times.Once());
+        Mock.Mock<ICommandExecutor>().Verify();
     }
 
     [Test]
@@ -328,11 +381,11 @@ public class ValidatePlexCredentialsEndpointUnitTests : BaseUnitTest
 
         Mock.Mock<ICommandExecutor>()
             .Setup(x => x.Send(It.IsAny<PlexSignInCommand>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result.Fail("Command execution failed"));
+            .ReturnsAsync(Result.Fail("Command execution failed"))
+            .Verifiable(Times.Once());
 
         // Act
-        var ep = SetupEndpointUnitTest<ValidatePlexCredentialsEndpoint>();
-        await ep.HandleAsync(
+        var endpointResult = await TestEndpointHandleAsync(
             new ValidatePlexCredentialsEndpointRequest
             {
                 ClientId = testAccountDTO.ClientId,
@@ -340,17 +393,19 @@ public class ValidatePlexCredentialsEndpointUnitTests : BaseUnitTest
                 Username = testAccountDTO.Username,
                 Password = testAccountDTO.Password,
                 VerificationCode = testAccountDTO.VerificationCode,
-            },
-            CancellationToken
+            }
         );
-        var result = ep.Response;
 
         // Assert
+        endpointResult.IsValid.ShouldBeTrue();
+        var result = endpointResult.Response;
         result.ShouldNotBeNull();
         result.IsSuccess.ShouldBeFalse();
         result.Errors.ShouldNotBeEmpty();
+        result.Errors.ShouldHaveSingleItem();
+        result.Errors[0].Message.ShouldBe("Command execution failed");
+        result.Value.ShouldBeNull();
 
-        Mock.Mock<ICommandExecutor>()
-            .Verify(x => x.Send(It.IsAny<PlexSignInCommand>(), It.IsAny<CancellationToken>()), Times.Once());
+        Mock.Mock<ICommandExecutor>().Verify();
     }
 }

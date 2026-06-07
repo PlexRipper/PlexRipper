@@ -26,12 +26,10 @@ public class CreatePlexServerConnectionEndpointRequestValidator : Validator<Crea
 }
 
 public class CreatePlexServerConnectionEndpoint
-    : BaseEndpoint<CreatePlexServerConnectionEndpointRequest, ResultDTO<PlexServerConnectionDTO>>
+    : Endpoint<CreatePlexServerConnectionEndpointRequest, ResultDTO<PlexServerConnectionDTO>>
 {
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
-
-    public override string EndpointPath => ApiRoutes.PlexServerConnectionController;
 
     public CreatePlexServerConnectionEndpoint(ILogger log, IReaparrDbContext dbContext)
     {
@@ -41,7 +39,7 @@ public class CreatePlexServerConnectionEndpoint
 
     public override void Configure()
     {
-        Post(EndpointPath);
+        Post(ApiRoutes.PlexServerConnectionController);
 
         Description(x =>
             x.ClearDefaultProduces()
@@ -73,6 +71,6 @@ public class CreatePlexServerConnectionEndpoint
         await _dbContext.SaveChangesAsync(ct);
 
         var result = ResultExtensions.Create201CreatedResult(connection.ToDTO());
-        await SendFluentResult(result, ct);
+        await Send.FluentResult(result, ct);
     }
 }

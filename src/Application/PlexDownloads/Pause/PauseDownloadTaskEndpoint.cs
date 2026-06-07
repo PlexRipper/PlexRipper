@@ -15,11 +15,9 @@ public class PauseDownloadTaskEndpointRequestValidator : Validator<PauseDownload
     }
 }
 
-public class PauseDownloadTaskEndpoint : BaseEndpoint<PauseDownloadTaskEndpointRequest>
+public class PauseDownloadTaskEndpoint : Endpoint<PauseDownloadTaskEndpointRequest>
 {
     private readonly ICommandExecutor _commandExecutor;
-
-    public override string EndpointPath => ApiRoutes.DownloadController + "/pause/{DownloadTaskGuid}";
 
     public PauseDownloadTaskEndpoint(ICommandExecutor commandExecutor)
     {
@@ -28,7 +26,7 @@ public class PauseDownloadTaskEndpoint : BaseEndpoint<PauseDownloadTaskEndpointR
 
     public override void Configure()
     {
-        Put(EndpointPath);
+        Put(ApiRoutes.DownloadController + "/pause/{DownloadTaskGuid}");
 
         Description(x =>
             x.Accepts<PauseDownloadTaskEndpointRequest>()
@@ -42,6 +40,6 @@ public class PauseDownloadTaskEndpoint : BaseEndpoint<PauseDownloadTaskEndpointR
     {
         var pauseResult = await _commandExecutor.Send(new PauseDownloadTaskCommand(req.DownloadTaskGuid), ct);
 
-        await SendFluentResult(pauseResult, ct);
+        await Send.FluentResult(pauseResult, ct);
     }
 }

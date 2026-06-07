@@ -1,11 +1,9 @@
 namespace Reaparr.Application;
 
-public class GetAllDownloadTasksEndpoint : BaseEndpointWithoutRequest<List<ServerDownloadProgressDTO>>
+public class GetAllDownloadTasksEndpoint : EndpointWithoutRequest<List<ServerDownloadProgressDTO>>
 {
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
-
-    public override string EndpointPath => ApiRoutes.DownloadController;
 
     public GetAllDownloadTasksEndpoint(ILogger log, IReaparrDbContext dbContext)
     {
@@ -15,7 +13,7 @@ public class GetAllDownloadTasksEndpoint : BaseEndpointWithoutRequest<List<Serve
 
     public override void Configure()
     {
-        Get(EndpointPath);
+        Get(ApiRoutes.DownloadController);
 
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<List<ServerDownloadProgressDTO>>))
@@ -27,6 +25,6 @@ public class GetAllDownloadTasksEndpoint : BaseEndpointWithoutRequest<List<Serve
     {
         _log.Here().DebugApiCall(HttpContext);
         var downloadList = await _dbContext.GetAllDownloadTasksByServerAsync(cancellationToken: ct);
-        await SendFluentResult(Result.Ok(downloadList), x => x.ToServerDownloadProgressDTOList(), ct);
+        await Send.FluentResult(Result.Ok(downloadList), x => x.ToServerDownloadProgressDTOList(), ct);
     }
 }

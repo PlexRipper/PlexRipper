@@ -17,12 +17,11 @@ public class SyncPlexServerMediaEndpointRequestValidator : Validator<SyncPlexSer
     }
 }
 
-public class SyncPlexServerMediaEndpoint : BaseEndpoint<SyncPlexServerMediaEndpointRequest, BaseResultDTO>
+public class SyncPlexServerMediaEndpoint : Endpoint<SyncPlexServerMediaEndpointRequest, BaseResultDTO>
 {
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
     private readonly ICommandExecutor _commandExecutor;
-    public override string EndpointPath => ApiRoutes.PlexServerController + "/{PlexServerId}/sync";
 
     public SyncPlexServerMediaEndpoint(ILogger log, IReaparrDbContext dbContext, ICommandExecutor commandExecutor)
     {
@@ -33,7 +32,7 @@ public class SyncPlexServerMediaEndpoint : BaseEndpoint<SyncPlexServerMediaEndpo
 
     public override void Configure()
     {
-        Post(EndpointPath);
+        Post(ApiRoutes.PlexServerController + "/{PlexServerId}/sync");
 
         Description(x =>
             x.Accepts<SyncPlexServerMediaEndpointRequest>()
@@ -53,7 +52,7 @@ public class SyncPlexServerMediaEndpoint : BaseEndpoint<SyncPlexServerMediaEndpo
             var serverName = await _dbContext.GetPlexServerNameById(req.PlexServerId);
             var warnResult = _log.Here()
                 .WarningResult("Plex server {Name} is disabled and cannot be synced", serverName);
-            await SendFluentResult(warnResult.Add400BadRequestError(), ct);
+            await Send.FluentResult(warnResult.Add400BadRequestError(), ct);
             return;
         }
 
@@ -66,11 +65,11 @@ public class SyncPlexServerMediaEndpoint : BaseEndpoint<SyncPlexServerMediaEndpo
         {
             var name = await _dbContext.GetPlexServerNameById(req.PlexServerId);
             var warnResult = _log.Here().WarningResult("Plex server {Name} has no libraries available to sync", name);
-            await SendFluentResult(warnResult.Add400BadRequestError(), ct);
+            await Send.FluentResult(warnResult.Add400BadRequestError(), ct);
             return;
         }
 
         var result = await _commandExecutor.Send(new QueueLibrarySyncJobCommand(libraryIds), ct);
-        await SendFluentResult(result, ct);
+        await Send.FluentResult(result, ct);
     }
 }

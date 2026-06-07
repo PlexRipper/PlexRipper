@@ -19,13 +19,10 @@ public class SetPreferredPlexServerConnectionEndpointRequestValidator
 }
 
 public class SetPreferredPlexServerConnectionEndpoint
-    : BaseEndpoint<SetPreferredPlexServerConnectionEndpointRequest, BaseResultDTO>
+    : Endpoint<SetPreferredPlexServerConnectionEndpointRequest, BaseResultDTO>
 {
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
-
-    public override string EndpointPath =>
-        ApiRoutes.PlexServerController + "/{PlexServerId}/preferred-connection/{PlexServerConnectionId}";
 
     public SetPreferredPlexServerConnectionEndpoint(ILogger log, IReaparrDbContext dbContext)
     {
@@ -35,7 +32,7 @@ public class SetPreferredPlexServerConnectionEndpoint
 
     public override void Configure()
     {
-        Get(EndpointPath);
+        Get(ApiRoutes.PlexServerController + "/{PlexServerId}/preferred-connection/{PlexServerConnectionId}");
 
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(BaseResultDTO))
@@ -66,14 +63,14 @@ public class SetPreferredPlexServerConnectionEndpoint
 
         if (plexServer is null)
         {
-            await SendFluentResult(ResultExtensions.EntityNotFound(nameof(PlexServer), plexServerId).LogError(), ct);
+            await Send.FluentResult(ResultExtensions.EntityNotFound(nameof(PlexServer), plexServerId).LogError(), ct);
             return;
         }
 
         var connectionIds = plexServer.PlexServerConnections.Select(x => x.Id).ToList();
         if (!connectionIds.Contains(plexServerConnectionId))
         {
-            await SendFluentResult(
+            await Send.FluentResult(
                 Result
                     .Fail(
                         $"PlexServer with id {plexServerId} has no connections with id {plexServerConnectionId} and can not set that as preferred"
@@ -88,6 +85,6 @@ public class SetPreferredPlexServerConnectionEndpoint
 
         await _dbContext.SaveChangesAsync(ct);
 
-        await SendFluentResult(Result.Ok(), ct);
+        await Send.FluentResult(Result.Ok(), ct);
     }
 }

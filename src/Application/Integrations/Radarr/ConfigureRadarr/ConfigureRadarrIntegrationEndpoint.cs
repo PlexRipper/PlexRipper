@@ -15,13 +15,11 @@ public class ConfigureRadarrIntegrationRequestValidator : Validator<ConfigureRad
     }
 }
 
-public class ConfigureRadarrIntegrationEndpoint : BaseEndpoint<ConfigureRadarrIntegrationRequest>
+public class ConfigureRadarrIntegrationEndpoint : Endpoint<ConfigureRadarrIntegrationRequest>
 {
     private readonly ILogger _log;
     private readonly ICommandExecutor _commandExecutor;
     private readonly IRadarrSettings _radarrSettings;
-
-    public override string EndpointPath => ApiRoutes.IntegrationController + "/Radarr/Configure";
 
     public ConfigureRadarrIntegrationEndpoint(
         ILogger log,
@@ -36,7 +34,7 @@ public class ConfigureRadarrIntegrationEndpoint : BaseEndpoint<ConfigureRadarrIn
 
     public override void Configure()
     {
-        Post(EndpointPath);
+        Post(ApiRoutes.IntegrationController + "/Radarr/Configure");
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(BaseResultDTO))
                 .Produces(StatusCodes.Status400BadRequest, typeof(BaseResultDTO))
@@ -56,7 +54,7 @@ public class ConfigureRadarrIntegrationEndpoint : BaseEndpoint<ConfigureRadarrIn
         if (!setupDownloadClient.IsSuccess)
         {
             _radarrSettings.IsConfigured = false;
-            await SendFluentResult(setupDownloadClient.ToResult(), ct);
+            await Send.FluentResult(setupDownloadClient.ToResult(), ct);
             return;
         }
 
@@ -68,11 +66,11 @@ public class ConfigureRadarrIntegrationEndpoint : BaseEndpoint<ConfigureRadarrIn
         if (!setupIndexerClient.IsSuccess)
         {
             _radarrSettings.IsConfigured = false;
-            await SendFluentResult(setupIndexerClient.ToResult(), ct);
+            await Send.FluentResult(setupIndexerClient.ToResult(), ct);
             return;
         }
 
         _radarrSettings.IsConfigured = true;
-        await SendFluentResult(Result.Ok(), ct);
+        await Send.FluentResult(Result.Ok(), ct);
     }
 }

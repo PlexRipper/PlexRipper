@@ -11,7 +11,11 @@
 				<!-- Download Server Title -->
 				<QCol class="q-px-md absolute-center row items-center no-wrap">
 					<QStatus :value="serverConnectionStore.isServerConnected(plexServer.id)" />
-					<span class="title q-ml-md">{{ serverStore.getServerName(plexServer.id) }}</span>
+					<span
+						class="title q-ml-md"
+						:class="{ 'inaccessible-item-text': !accountStore.getHasAccountServerAccess(plexServer.id) }">
+						{{ serverStore.getServerName(plexServer.id) }}
+					</span>
 					<QBadge
 						v-if="plexServer.isDownloadsPausedByUser"
 						class="q-ml-sm"
@@ -78,7 +82,7 @@ import { DialogType } from '@enums';
 import type { IDownloadTableNode, ISelection } from '@interfaces';
 import type { QTreeViewTableHeader } from '@props';
 import { flatMapDeep } from 'lodash-es';
-import { useDownloadStore, useServerConnectionStore, useDialogStore, useServerStore } from '@store';
+import { useDownloadStore, useServerConnectionStore, useDialogStore, useServerStore, useAccountStore } from '@store';
 import { toDownloadActions } from '@composables';
 import { useI18n } from '#imports';
 
@@ -86,6 +90,7 @@ const serverStore = useServerStore();
 const downloadStore = useDownloadStore();
 const dialogStore = useDialogStore();
 const serverConnectionStore = useServerConnectionStore();
+const accountStore = useAccountStore();
 
 const { t } = useI18n();
 
@@ -266,3 +271,10 @@ function getAllIds(nodes: IDownloadTableNode[]): string[] {
 	]);
 }
 </script>
+
+<style lang="scss">
+.inaccessible-item-text {
+	text-decoration: line-through;
+	opacity: 0.62;
+}
+</style>

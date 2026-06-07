@@ -16,12 +16,10 @@ public class SetNotificationVisibilityEndpointRequestValidator : Validator<SetNo
     }
 }
 
-public class SetNotificationVisibilityEndpoint : BaseEndpoint<SetNotificationVisibilityEndpointRequest, BaseResultDTO>
+public class SetNotificationVisibilityEndpoint : Endpoint<SetNotificationVisibilityEndpointRequest, BaseResultDTO>
 {
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
-
-    public override string EndpointPath => ApiRoutes.NotificationController;
 
     public SetNotificationVisibilityEndpoint(ILogger log, IReaparrDbContext dbContext)
     {
@@ -31,7 +29,7 @@ public class SetNotificationVisibilityEndpoint : BaseEndpoint<SetNotificationVis
 
     public override void Configure()
     {
-        Patch(EndpointPath);
+        Patch(ApiRoutes.NotificationController);
 
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(BaseResultDTO))
@@ -48,10 +46,10 @@ public class SetNotificationVisibilityEndpoint : BaseEndpoint<SetNotificationVis
 
         if (changed == 0)
         {
-            await SendFluentResult(ResultExtensions.EntityNotFound(nameof(Notification), req.Id), ct);
+            await Send.FluentResult(ResultExtensions.EntityNotFound(nameof(Notification), req.Id), ct);
             return;
         }
 
-        await SendFluentResult(Result.Ok(), ct);
+        await Send.FluentResult(Result.Ok(), ct);
     }
 }

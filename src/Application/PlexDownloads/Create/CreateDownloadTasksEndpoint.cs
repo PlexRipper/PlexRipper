@@ -14,12 +14,10 @@ public class CreateDownloadTasksEndpointRequestValidator : Validator<CreateDownl
     }
 }
 
-public class CreateDownloadTasksEndpoint : BaseEndpoint<CreateDownloadTasksEndpointRequest>
+public class CreateDownloadTasksEndpoint : Endpoint<CreateDownloadTasksEndpointRequest>
 {
     private readonly ILogger _log;
     private readonly ICommandExecutor _commandExecutor;
-
-    public override string EndpointPath => ApiRoutes.DownloadController + "/create";
 
     public CreateDownloadTasksEndpoint(ILogger log, ICommandExecutor commandExecutor)
     {
@@ -29,7 +27,7 @@ public class CreateDownloadTasksEndpoint : BaseEndpoint<CreateDownloadTasksEndpo
 
     public override void Configure()
     {
-        Post(EndpointPath);
+        Post(ApiRoutes.DownloadController + "/create");
 
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(BaseResultDTO))
@@ -46,6 +44,6 @@ public class CreateDownloadTasksEndpoint : BaseEndpoint<CreateDownloadTasksEndpo
 
         var result = await _commandExecutor.Send(new CreateDownloadTasksCommand(req.Request), ct);
 
-        await SendFluentResult(result, ct);
+        await Send.FluentResult(result, ct);
     }
 }

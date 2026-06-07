@@ -24,6 +24,7 @@
 				@click="cancel" />
 			<ConfirmButton
 				cy="confirmation-dialog-confirmation-button"
+				:label="confirmLabel"
 				:loading="confirmLoading"
 				@click="confirm" />
 		</template>
@@ -44,9 +45,11 @@ const props = withDefaults(defineProps<{
 	title: string;
 	text: string;
 	warning?: string;
+	confirmLabel?: string;
 	confirmLoading?: boolean;
 }>(), {
 	warning: '',
+	confirmLabel: '',
 	confirmLoading: false,
 });
 

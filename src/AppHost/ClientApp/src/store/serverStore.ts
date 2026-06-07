@@ -96,6 +96,15 @@ export const useServerStore = defineStore(StoreNames.ServerStore, () => {
 					}),
 				);
 		},
+		deleteServer(serverId: number) {
+			return plexServerApi.deletePlexServerEndpoint(serverId).pipe(
+				tap((response) => {
+					if (response.isSuccess) {
+						state.servers = state.servers.filter((x) => x.id !== serverId);
+					}
+				}),
+			);
+		},
 		setServerPaused(serverId: number, paused: boolean) {
 			const request$ = paused
 				? plexServerApi.pausePlexServerDownloadsEndpoint(serverId)

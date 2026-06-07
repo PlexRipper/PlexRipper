@@ -48,6 +48,25 @@ export class PlexServer {
   /**
    * No description
    * * @tags Plexserver
+   * @name DeletePlexServerEndpoint
+   * @request DELETE:/api/PlexServer/{PlexServerId}
+   * @secure
+   */
+  deletePlexServerEndpoint = (
+    plexServerId: number,
+    params: RequestParams = {},
+  ) =>
+    axiosObservable<BaseResultDTO>({
+      url: `/api/PlexServer/${plexServerId}`,
+      method: "DELETE",
+      secure: true,
+      responseType: "json",
+      ...params,
+    }).pipe(apiCheckPipe<BaseResultDTO>);
+
+  /**
+   * No description
+   * * @tags Plexserver
    * @name GetPlexServerByIdEndpoint
    * @request GET:/api/PlexServer/{PlexServerId}
    * @secure
@@ -250,6 +269,9 @@ export class PlexServerPaths {
     queryString.stringifyUrl({
       url: `/api/PlexServer/${plexServerId}/preferred-connection/${plexServerConnectionId}`,
     });
+
+  static deletePlexServerEndpoint = (plexServerId: number) =>
+    queryString.stringifyUrl({ url: `/api/PlexServer/${plexServerId}` });
 
   static getPlexServerByIdEndpoint = (plexServerId: number) =>
     queryString.stringifyUrl({ url: `/api/PlexServer/${plexServerId}` });

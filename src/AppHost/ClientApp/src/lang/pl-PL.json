@@ -482,6 +482,7 @@
             "save": "Zapisz",
             "skip-setup": "Pomiń konfigurację",
             "sync-server-libraries": "Synchronizuj biblioteki serwera",
+            "delete-server": "Usuń serwer",
             "unknown": "Nieznane",
             "update": "Aktualizuj",
             "validate": "Sprawdź poprawność",
@@ -564,6 +565,11 @@
             "text": "Spowoduje to wyłączenie i ukrycie serwera w wynikach wyszukiwania oraz uniemożliwi jego synchronizację. Możesz ponownie włączyć ten serwer, przechodząc do Ustawień -> Interfejs użytkownika -> Włącz serwery Plex.",
             "title": "Jesteś pewny?"
         },
+        "delete-server": {
+            "text": "Zamierzasz usunąć ten serwer. Usuń ten serwer tylko wtedy, gdy nie masz już do niego dostępu. Jeśli nadal masz dostęp do tego serwera Plex, pojawi się ponownie przy następnym odświeżeniu konta Plex. W takim przypadku wyłącz serwer, aby pozostał ukryty.",
+            "title": "Usunąć serwer?",
+            "warning": "Czy na pewno chcesz usunąć ten serwer?"
+        },
         "reset-db": {
             "text": "Spowoduje to utworzenie kopii zapasowej bieżącej bazy danych w \"config/Database Backup/\" i utworzenie nowej, po czym nastąpi przekierowanie do strony konfiguracji. Nie spowoduje to zresetowania ustawień, ponieważ są one przechowywane w pliku \"config/ReaparrSettings.json\".",
             "title": "Jesteś pewny?"
@@ -634,6 +640,11 @@
                     "text": "Spowoduje to ponowną synchronizację wszystkich danych multimedialnych dla każdej biblioteki na tym serwerze Plex.",
                     "title": "Ponowna synchronizacja multimediów bibliotecznych",
                     "label": "Ponownie zsynchronizuj media biblioteki"
+                },
+                "delete-server": {
+                    "text": "Usuń ten serwer tylko wtedy, gdy nie masz już do niego dostępu. Jeśli nadal masz dostęp, wyłącz go, aby pozostał ukryty.",
+                    "title": "Usuń ten serwer Plex",
+                    "label": "Usuń serwer"
                 }
             }
         },

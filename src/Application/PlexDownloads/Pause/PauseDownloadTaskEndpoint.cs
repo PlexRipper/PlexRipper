@@ -19,8 +19,6 @@ public class PauseDownloadTaskEndpoint : BaseEndpoint<PauseDownloadTaskEndpointR
 {
     private readonly ICommandExecutor _commandExecutor;
 
-    public override string EndpointPath => ApiRoutes.DownloadController + "/pause/{DownloadTaskGuid}";
-
     public PauseDownloadTaskEndpoint(ICommandExecutor commandExecutor)
     {
         _commandExecutor = commandExecutor;
@@ -28,7 +26,7 @@ public class PauseDownloadTaskEndpoint : BaseEndpoint<PauseDownloadTaskEndpointR
 
     public override void Configure()
     {
-        Put(EndpointPath);
+        Put(ApiRoutes.DownloadController + "/pause/{DownloadTaskGuid}");
 
         Description(x =>
             x.Accepts<PauseDownloadTaskEndpointRequest>()

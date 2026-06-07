@@ -20,8 +20,6 @@ public class DeleteDownloadTaskEndpoint : BaseEndpoint<DeleteDownloadTaskEndpoin
     private readonly IReaparrDbContext _dbContext;
     private readonly ICommandExecutor _commandExecutor;
 
-    public override string EndpointPath => ApiRoutes.DownloadController + "/delete";
-
     public DeleteDownloadTaskEndpoint(ILogger log, IReaparrDbContext dbContext, ICommandExecutor commandExecutor)
     {
         _log = log.ForContext<DeleteDownloadTaskEndpoint>();
@@ -31,7 +29,7 @@ public class DeleteDownloadTaskEndpoint : BaseEndpoint<DeleteDownloadTaskEndpoin
 
     public override void Configure()
     {
-        Delete(EndpointPath);
+        Delete(ApiRoutes.DownloadController + "/delete");
 
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(BaseResultDTO))

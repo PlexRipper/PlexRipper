@@ -33,8 +33,6 @@ public class UpdatePlexServerConnectionEndpoint
 {
     private readonly IReaparrDbContext _dbContext;
 
-    public override string EndpointPath => ApiRoutes.PlexServerConnectionController;
-
     public UpdatePlexServerConnectionEndpoint(IReaparrDbContext dbContext)
     {
         _dbContext = dbContext;
@@ -42,7 +40,7 @@ public class UpdatePlexServerConnectionEndpoint
 
     public override void Configure()
     {
-        Patch(EndpointPath);
+        Patch(ApiRoutes.PlexServerConnectionController);
 
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<PlexServerConnectionDTO>))

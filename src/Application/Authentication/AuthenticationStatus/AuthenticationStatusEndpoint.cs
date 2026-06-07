@@ -2,11 +2,9 @@ namespace Reaparr.Application;
 
 public class AuthenticationStatusEndpoint : BaseEndpointWithoutRequest<UserClaimsDTO>
 {
-    public override string EndpointPath => ApiRoutes.AuthenticatedController + "/status";
-
     public override void Configure()
     {
-        Get(EndpointPath);
+        Get(ApiRoutes.AuthenticatedController + "/status");
         AllowAnonymous();
         Description(x =>
         {

@@ -14,8 +14,6 @@ public class ResumePlexServerDownloadsEndpoint : BaseEndpoint<ResumePlexServerDo
 {
     private readonly ICommandExecutor _commandExecutor;
 
-    public override string EndpointPath => ApiRoutes.PlexServerController + "/server/resume/{PlexServerId}";
-
     public ResumePlexServerDownloadsEndpoint(ICommandExecutor commandExecutor)
     {
         _commandExecutor = commandExecutor;
@@ -23,7 +21,7 @@ public class ResumePlexServerDownloadsEndpoint : BaseEndpoint<ResumePlexServerDo
 
     public override void Configure()
     {
-        Put(EndpointPath);
+        Put(ApiRoutes.PlexServerController + "/server/resume/{PlexServerId}");
 
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(BaseResultDTO))

@@ -4,7 +4,6 @@ public class GetAllFolderPathsEndpoint : BaseEndpointWithoutRequest<List<FolderP
 {
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
-    public override string EndpointPath => ApiRoutes.FolderPathController + "/";
 
     public GetAllFolderPathsEndpoint(ILogger log, IReaparrDbContext dbContext)
     {
@@ -14,7 +13,7 @@ public class GetAllFolderPathsEndpoint : BaseEndpointWithoutRequest<List<FolderP
 
     public override void Configure()
     {
-        Get(EndpointPath);
+        Get(ApiRoutes.FolderPathController + "/");
 
         Description(x => x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<List<FolderPathDTO>>)));
     }

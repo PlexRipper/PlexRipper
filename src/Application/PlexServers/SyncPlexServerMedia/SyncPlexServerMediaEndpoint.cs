@@ -22,7 +22,6 @@ public class SyncPlexServerMediaEndpoint : BaseEndpoint<SyncPlexServerMediaEndpo
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
     private readonly ICommandExecutor _commandExecutor;
-    public override string EndpointPath => ApiRoutes.PlexServerController + "/{PlexServerId}/sync";
 
     public SyncPlexServerMediaEndpoint(ILogger log, IReaparrDbContext dbContext, ICommandExecutor commandExecutor)
     {
@@ -33,7 +32,7 @@ public class SyncPlexServerMediaEndpoint : BaseEndpoint<SyncPlexServerMediaEndpo
 
     public override void Configure()
     {
-        Post(EndpointPath);
+        Post(ApiRoutes.PlexServerController + "/{PlexServerId}/sync");
 
         Description(x =>
             x.Accepts<SyncPlexServerMediaEndpointRequest>()

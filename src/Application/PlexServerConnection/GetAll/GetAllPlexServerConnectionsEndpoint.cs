@@ -4,8 +4,6 @@ public class GetAllPlexServerConnectionsEndpoint : BaseEndpointWithoutRequest<Li
 {
     private readonly IReaparrDbContext _dbContext;
 
-    public override string EndpointPath => ApiRoutes.PlexServerConnectionController + "/";
-
     public GetAllPlexServerConnectionsEndpoint(IReaparrDbContext dbContext)
     {
         _dbContext = dbContext;
@@ -13,7 +11,7 @@ public class GetAllPlexServerConnectionsEndpoint : BaseEndpointWithoutRequest<Li
 
     public override void Configure()
     {
-        Get(EndpointPath);
+        Get(ApiRoutes.PlexServerConnectionController + "/");
 
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<List<PlexServerConnectionDTO>>))

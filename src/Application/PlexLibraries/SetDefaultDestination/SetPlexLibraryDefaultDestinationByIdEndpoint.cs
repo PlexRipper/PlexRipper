@@ -22,9 +22,6 @@ public class SetPlexLibraryDefaultDestinationByIdEndpoint
 {
     private readonly IReaparrDbContext _dbContext;
 
-    public override string EndpointPath =>
-        ApiRoutes.PlexLibraryController + "/{PlexLibraryId}/default/destination/{FolderPathId}";
-
     public SetPlexLibraryDefaultDestinationByIdEndpoint(IReaparrDbContext dbContext)
     {
         _dbContext = dbContext;
@@ -32,7 +29,7 @@ public class SetPlexLibraryDefaultDestinationByIdEndpoint
 
     public override void Configure()
     {
-        Get(EndpointPath);
+        Get(ApiRoutes.PlexLibraryController + "/{PlexLibraryId}/default/destination/{FolderPathId}");
 
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(BaseResultDTO))

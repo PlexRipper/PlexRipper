@@ -29,8 +29,6 @@ public class GetFolderPathDirectoryEndpoint : BaseEndpoint<GetFolderPathDirector
     private readonly IPath _path;
     private readonly IDiskProvider _diskProvider;
 
-    public override string EndpointPath => ApiRoutes.FolderPathController + "/directory";
-
     public GetFolderPathDirectoryEndpoint(ILogger log, IDirectory directory, IPath path, IDiskProvider diskProvider)
     {
         _log = log.ForContext<GetFolderPathDirectoryEndpoint>();
@@ -41,7 +39,7 @@ public class GetFolderPathDirectoryEndpoint : BaseEndpoint<GetFolderPathDirector
 
     public override void Configure()
     {
-        Get(EndpointPath);
+        Get(ApiRoutes.FolderPathController + "/directory");
 
         Summary(x =>
         {

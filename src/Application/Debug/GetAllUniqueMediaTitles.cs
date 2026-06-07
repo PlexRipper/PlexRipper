@@ -17,8 +17,6 @@ public class GetAllUniqueMediaTitlesEndpoint : BaseEndpoint<GetAllUniqueMediaTit
 
     private readonly Random _random = new();
 
-    public override string EndpointPath => ApiRoutes.DebugController + "/unique-media-titles";
-
     public GetAllUniqueMediaTitlesEndpoint(IReaparrDbContext dbContext)
     {
         _dbContext = dbContext;
@@ -26,7 +24,7 @@ public class GetAllUniqueMediaTitlesEndpoint : BaseEndpoint<GetAllUniqueMediaTit
 
     public override void Configure()
     {
-        Get(EndpointPath);
+        Get(ApiRoutes.DebugController + "/unique-media-titles");
 
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<List<string>>))

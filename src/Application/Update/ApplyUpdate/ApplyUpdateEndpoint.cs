@@ -12,8 +12,6 @@ public class ApplyUpdateEndpoint : BaseEndpointWithoutRequest
     private readonly IHostApplicationLifetime _appLifetime;
     private readonly ILogger _log;
 
-    public override string EndpointPath => ApiRoutes.UpdateController + "/execute";
-
     public ApplyUpdateEndpoint(
         ILogger log,
         IAppBuildInfo appBuildInfo,
@@ -29,7 +27,7 @@ public class ApplyUpdateEndpoint : BaseEndpointWithoutRequest
 
     public override void Configure()
     {
-        Post(EndpointPath);
+        Post(ApiRoutes.UpdateController + "/execute");
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(BaseResultDTO))
                 .Produces(StatusCodes.Status500InternalServerError, typeof(BaseResultDTO))

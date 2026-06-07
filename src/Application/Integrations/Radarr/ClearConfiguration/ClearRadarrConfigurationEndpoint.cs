@@ -5,8 +5,6 @@ public class ClearRadarrConfigurationEndpoint : BaseEndpointWithoutRequest
     private readonly ILogger _log;
     private readonly IRadarrSettings _radarrSettings;
 
-    public override string EndpointPath => ApiRoutes.IntegrationController + "/Radarr/Configuration";
-
     public ClearRadarrConfigurationEndpoint(ILogger log, IRadarrSettings radarrSettings)
     {
         _log = log.ForContext<ClearRadarrConfigurationEndpoint>();
@@ -15,7 +13,7 @@ public class ClearRadarrConfigurationEndpoint : BaseEndpointWithoutRequest
 
     public override void Configure()
     {
-        Delete(EndpointPath);
+        Delete(ApiRoutes.IntegrationController + "/Radarr/Configuration");
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(BaseResultDTO))
                 .Produces(StatusCodes.Status500InternalServerError, typeof(BaseResultDTO))

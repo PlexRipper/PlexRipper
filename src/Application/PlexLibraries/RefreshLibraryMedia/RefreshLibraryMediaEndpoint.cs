@@ -15,8 +15,6 @@ public class RefreshLibraryMediaEndpoint : BaseEndpoint<RefreshLibraryMediaEndpo
     private readonly ILogger _log;
     private readonly ICommandExecutor _commandExecutor;
 
-    public override string EndpointPath => ApiRoutes.PlexLibraryController + "/refresh/{PlexLibraryId}";
-
     public RefreshLibraryMediaEndpoint(ILogger log, IReaparrDbContext dbContext, ICommandExecutor commandExecutor)
     {
         _log = log.ForContext<RefreshLibraryMediaEndpoint>();
@@ -25,7 +23,7 @@ public class RefreshLibraryMediaEndpoint : BaseEndpoint<RefreshLibraryMediaEndpo
 
     public override void Configure()
     {
-        Get(EndpointPath);
+        Get(ApiRoutes.PlexLibraryController + "/refresh/{PlexLibraryId}");
 
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<PlexLibraryDTO>))

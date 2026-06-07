@@ -31,8 +31,6 @@ public class CreatePlexServerConnectionEndpoint
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
 
-    public override string EndpointPath => ApiRoutes.PlexServerConnectionController;
-
     public CreatePlexServerConnectionEndpoint(ILogger log, IReaparrDbContext dbContext)
     {
         _log = log.ForContext<CreatePlexServerConnectionEndpoint>();
@@ -41,7 +39,7 @@ public class CreatePlexServerConnectionEndpoint
 
     public override void Configure()
     {
-        Post(EndpointPath);
+        Post(ApiRoutes.PlexServerConnectionController);
 
         Description(x =>
             x.ClearDefaultProduces()

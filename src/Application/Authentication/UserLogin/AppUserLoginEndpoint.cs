@@ -35,8 +35,6 @@ public class AppUserLoginEndpointRequestValidator : Validator<AppUserLoginEndpoi
 
 public class AppUserLoginEndpoint : BaseEndpoint<AppUserLoginEndpointRequest>
 {
-    public override string EndpointPath => ApiRoutes.LoginEndpoint;
-
     private readonly ILogger _log;
     private readonly IIdentitySignInService _identitySignInService;
 
@@ -48,7 +46,7 @@ public class AppUserLoginEndpoint : BaseEndpoint<AppUserLoginEndpointRequest>
 
     public override void Configure()
     {
-        Post(EndpointPath);
+        Post(ApiRoutes.LoginEndpoint);
         AllowAnonymous();
         AllowFormData();
 

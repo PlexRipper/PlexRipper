@@ -16,8 +16,6 @@ public class CheckAllConnectionsStatusByPlexServerEndpoint
 {
     private readonly ICommandExecutor _commandExecutor;
 
-    public override string EndpointPath => ApiRoutes.PlexServerConnectionController + "/check/by-server/{PlexServerId}";
-
     public CheckAllConnectionsStatusByPlexServerEndpoint(ICommandExecutor commandExecutor)
     {
         _commandExecutor = commandExecutor;
@@ -25,7 +23,7 @@ public class CheckAllConnectionsStatusByPlexServerEndpoint
 
     public override void Configure()
     {
-        Get(EndpointPath);
+        Get(ApiRoutes.PlexServerConnectionController + "/check/by-server/{PlexServerId}");
 
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<List<PlexServerStatusDTO>>))

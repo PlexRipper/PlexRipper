@@ -21,8 +21,6 @@ public class ConfigureRadarrIntegrationEndpoint : BaseEndpoint<ConfigureRadarrIn
     private readonly ICommandExecutor _commandExecutor;
     private readonly IRadarrSettings _radarrSettings;
 
-    public override string EndpointPath => ApiRoutes.IntegrationController + "/Radarr/Configure";
-
     public ConfigureRadarrIntegrationEndpoint(
         ILogger log,
         ICommandExecutor commandExecutor,
@@ -36,7 +34,7 @@ public class ConfigureRadarrIntegrationEndpoint : BaseEndpoint<ConfigureRadarrIn
 
     public override void Configure()
     {
-        Post(EndpointPath);
+        Post(ApiRoutes.IntegrationController + "/Radarr/Configure");
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(BaseResultDTO))
                 .Produces(StatusCodes.Status400BadRequest, typeof(BaseResultDTO))

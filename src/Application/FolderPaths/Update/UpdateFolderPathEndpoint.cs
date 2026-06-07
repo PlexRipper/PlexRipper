@@ -32,8 +32,6 @@ public class UpdateFolderPathEndpoint : BaseEndpoint<UpdateFolderPathEndpointReq
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
 
-    public override string EndpointPath => ApiRoutes.FolderPathController + "/";
-
     public UpdateFolderPathEndpoint(ILogger log, IReaparrDbContext dbContext)
     {
         _log = log.ForContext<UpdateFolderPathEndpoint>();
@@ -42,7 +40,7 @@ public class UpdateFolderPathEndpoint : BaseEndpoint<UpdateFolderPathEndpointReq
 
     public override void Configure()
     {
-        Put(EndpointPath);
+        Put(ApiRoutes.FolderPathController + "/");
 
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<FolderPathDTO>))

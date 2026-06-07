@@ -58,8 +58,6 @@ public class ValidatePlexCredentialsEndpoint
     private readonly ILogger _log;
     private readonly ICommandExecutor _commandExecutor;
 
-    public override string EndpointPath => ApiRoutes.PlexAccountController + "/validate/credentials";
-
     public ValidatePlexCredentialsEndpoint(ILogger log, ICommandExecutor commandExecutor)
     {
         _log = log.ForContext<ValidatePlexCredentialsEndpoint>();
@@ -68,7 +66,7 @@ public class ValidatePlexCredentialsEndpoint
 
     public override void Configure()
     {
-        Post(EndpointPath);
+        Post(ApiRoutes.PlexAccountController + "/validate/credentials");
 
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<ValidatePlexCredentialsDTO>))

@@ -26,8 +26,6 @@ public class GetAllPlexAccountsEndpoint : BaseEndpoint<GetAllPlexAccountsEndpoin
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
 
-    public override string EndpointPath => ApiRoutes.PlexAccountController;
-
     public GetAllPlexAccountsEndpoint(ILogger log, IReaparrDbContext dbContext)
     {
         _log = log.ForContext<GetAllPlexAccountsEndpoint>();
@@ -36,7 +34,7 @@ public class GetAllPlexAccountsEndpoint : BaseEndpoint<GetAllPlexAccountsEndpoin
 
     public override void Configure()
     {
-        Get(EndpointPath);
+        Get(ApiRoutes.PlexAccountController);
 
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<List<PlexAccountDTO>>))

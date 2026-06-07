@@ -39,8 +39,6 @@ public class GeneratePlexTokenEndpoint : BaseEndpoint<GeneratePlexTokenEndpointR
     private readonly IReaparrDbContext _dbContext;
     private readonly ICommandExecutor _commandExecutor;
 
-    public override string EndpointPath => ApiRoutes.PlexAccountController + "/generate-token/{PlexAccountId}";
-
     public GeneratePlexTokenEndpoint(ILogger log, IReaparrDbContext dbContext, ICommandExecutor commandExecutor)
     {
         _log = log.ForContext<GeneratePlexTokenEndpoint>();
@@ -50,7 +48,7 @@ public class GeneratePlexTokenEndpoint : BaseEndpoint<GeneratePlexTokenEndpointR
 
     public override void Configure()
     {
-        Get(EndpointPath);
+        Get(ApiRoutes.PlexAccountController + "/generate-token/{PlexAccountId}");
 
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<GeneratePlexTokenResponse>))

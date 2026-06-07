@@ -24,9 +24,6 @@ public class SetPreferredPlexServerConnectionEndpoint
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
 
-    public override string EndpointPath =>
-        ApiRoutes.PlexServerController + "/{PlexServerId}/preferred-connection/{PlexServerConnectionId}";
-
     public SetPreferredPlexServerConnectionEndpoint(ILogger log, IReaparrDbContext dbContext)
     {
         _log = log.ForContext<SetPreferredPlexServerConnectionEndpoint>();
@@ -35,7 +32,7 @@ public class SetPreferredPlexServerConnectionEndpoint
 
     public override void Configure()
     {
-        Get(EndpointPath);
+        Get(ApiRoutes.PlexServerController + "/{PlexServerId}/preferred-connection/{PlexServerConnectionId}");
 
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(BaseResultDTO))

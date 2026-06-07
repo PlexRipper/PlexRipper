@@ -23,8 +23,6 @@ public class SetServerAlias : BaseEndpoint<SetServerAliasRequest>
     private readonly IReaparrDbContext _dbContext;
     private readonly IServerSettingsModule _serverSettingsModule;
 
-    public override string EndpointPath => ApiRoutes.PlexServerController + "/{PlexServerId}/set-server-alias";
-
     public SetServerAlias(ILogger log, IReaparrDbContext dbContext, IServerSettingsModule serverSettingsModule)
     {
         _log = log.ForContext<SetServerAlias>();
@@ -34,7 +32,7 @@ public class SetServerAlias : BaseEndpoint<SetServerAliasRequest>
 
     public override void Configure()
     {
-        Get(EndpointPath);
+        Get(ApiRoutes.PlexServerController + "/{PlexServerId}/set-server-alias");
 
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(BaseResultDTO))

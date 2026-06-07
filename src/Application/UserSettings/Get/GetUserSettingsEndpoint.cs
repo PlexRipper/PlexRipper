@@ -4,8 +4,6 @@ public class GetUserSettingsEndpoint : BaseEndpointWithoutRequest<SettingsModelD
 {
     private readonly IUserSettings _userSettings;
 
-    public override string EndpointPath => ApiRoutes.SettingsController + "/";
-
     public GetUserSettingsEndpoint(IUserSettings userSettings)
     {
         _userSettings = userSettings;
@@ -13,7 +11,7 @@ public class GetUserSettingsEndpoint : BaseEndpointWithoutRequest<SettingsModelD
 
     public override void Configure()
     {
-        Get(EndpointPath);
+        Get(ApiRoutes.SettingsController + "/");
 
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<SettingsModelDTO>))

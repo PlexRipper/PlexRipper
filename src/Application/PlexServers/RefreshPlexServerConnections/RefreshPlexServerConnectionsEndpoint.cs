@@ -16,7 +16,6 @@ public class RefreshPlexServerConnectionsEndpoint : BaseEndpoint<RefreshPlexServ
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
     private readonly ICommandExecutor _commandExecutor;
-    public override string EndpointPath => ApiRoutes.PlexServerController + "/{PlexServerId}/refresh";
 
     public RefreshPlexServerConnectionsEndpoint(
         ILogger log,
@@ -31,7 +30,7 @@ public class RefreshPlexServerConnectionsEndpoint : BaseEndpoint<RefreshPlexServ
 
     public override void Configure()
     {
-        Get(EndpointPath);
+        Get(ApiRoutes.PlexServerController + "/{PlexServerId}/refresh");
 
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<PlexServerDTO>))

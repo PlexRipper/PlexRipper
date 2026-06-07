@@ -8,8 +8,6 @@ public class CheckForUpdateEndpoint : BaseEndpointWithoutRequest<AppUpdateCheckD
     private readonly ILogger _log;
     private readonly ICommandExecutor _commandExecutor;
 
-    public override string EndpointPath => ApiRoutes.UpdateController + "/Check";
-
     public CheckForUpdateEndpoint(ILogger log, ICommandExecutor commandExecutor)
     {
         _log = log.ForContext<CheckForUpdateEndpoint>();
@@ -18,7 +16,7 @@ public class CheckForUpdateEndpoint : BaseEndpointWithoutRequest<AppUpdateCheckD
 
     public override void Configure()
     {
-        Get(EndpointPath);
+        Get(ApiRoutes.UpdateController + "/Check");
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<AppUpdateCheckDTO>))
                 .Produces(StatusCodes.Status500InternalServerError, typeof(BaseResultDTO))

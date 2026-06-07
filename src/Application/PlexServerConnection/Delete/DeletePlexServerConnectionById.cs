@@ -15,8 +15,6 @@ public class DeletePlexServerConnectionById : BaseEndpoint<DeletePlexServerConne
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
 
-    public override string EndpointPath => ApiRoutes.PlexServerConnectionController + "/{PlexServerConnectionId}";
-
     public DeletePlexServerConnectionById(ILogger log, IReaparrDbContext dbContext)
     {
         _log = log.ForContext<DeletePlexServerConnectionById>();
@@ -25,7 +23,7 @@ public class DeletePlexServerConnectionById : BaseEndpoint<DeletePlexServerConne
 
     public override void Configure()
     {
-        Delete(EndpointPath);
+        Delete(ApiRoutes.PlexServerConnectionController + "/{PlexServerConnectionId}");
 
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(BaseResultDTO))

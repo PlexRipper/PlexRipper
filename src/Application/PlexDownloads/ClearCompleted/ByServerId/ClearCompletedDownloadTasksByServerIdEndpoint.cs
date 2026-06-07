@@ -15,8 +15,6 @@ public class ClearCompletedDownloadTasksByServerIdEndpoint
 {
     private readonly ICommandExecutor _commandExecutor;
 
-    public override string EndpointPath => ApiRoutes.DownloadController + "/clear/{PlexServerId}";
-
     public ClearCompletedDownloadTasksByServerIdEndpoint(ICommandExecutor commandExecutor)
     {
         _commandExecutor = commandExecutor;
@@ -24,7 +22,7 @@ public class ClearCompletedDownloadTasksByServerIdEndpoint
 
     public override void Configure()
     {
-        Delete(EndpointPath);
+        Delete(ApiRoutes.DownloadController + "/clear/{PlexServerId}");
 
         Description(x => x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<CountResponseDTO>)));
     }

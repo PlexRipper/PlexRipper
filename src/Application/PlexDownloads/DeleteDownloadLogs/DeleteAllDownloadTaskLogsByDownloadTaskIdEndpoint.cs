@@ -33,8 +33,6 @@ public class DeleteAllDownloadTaskLogsByDownloadTaskIdEndpoint
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
 
-    public override string EndpointPath => ApiRoutes.DownloadController + "/logs/{DownloadTaskGuid}/";
-
     public DeleteAllDownloadTaskLogsByDownloadTaskIdEndpoint(ILogger log, IReaparrDbContext dbContext)
     {
         _log = log.ForContext<DeleteAllDownloadTaskLogsByDownloadTaskIdEndpoint>();
@@ -43,7 +41,7 @@ public class DeleteAllDownloadTaskLogsByDownloadTaskIdEndpoint
 
     public override void Configure()
     {
-        Delete(EndpointPath);
+        Delete(ApiRoutes.DownloadController + "/logs/{DownloadTaskGuid}/");
 
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<int>))

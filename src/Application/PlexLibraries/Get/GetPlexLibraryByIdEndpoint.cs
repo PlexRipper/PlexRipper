@@ -21,8 +21,6 @@ public class GetPlexLibraryByIdEndpoint : BaseEndpoint<GetPlexLibraryByIdEndpoin
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
 
-    public override string EndpointPath => ApiRoutes.PlexLibraryController + "/{PlexLibraryId}";
-
     public GetPlexLibraryByIdEndpoint(ILogger log, IReaparrDbContext dbContext)
     {
         _log = log.ForContext<GetPlexLibraryByIdEndpoint>();
@@ -31,7 +29,7 @@ public class GetPlexLibraryByIdEndpoint : BaseEndpoint<GetPlexLibraryByIdEndpoin
 
     public override void Configure()
     {
-        Get(EndpointPath);
+        Get(ApiRoutes.PlexLibraryController + "/{PlexLibraryId}");
 
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<PlexLibraryDTO>))

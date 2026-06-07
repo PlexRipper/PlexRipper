@@ -8,8 +8,6 @@ public class GetLibrarySyncStatusEndpoint : BaseEndpointWithoutRequest<List<Libr
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
 
-    public override string EndpointPath => ApiRoutes.PlexLibraryController + "/sync-status";
-
     public GetLibrarySyncStatusEndpoint(ILogger log, IReaparrDbContext dbContext)
     {
         _log = log.ForContext<GetLibrarySyncStatusEndpoint>();
@@ -18,7 +16,7 @@ public class GetLibrarySyncStatusEndpoint : BaseEndpointWithoutRequest<List<Libr
 
     public override void Configure()
     {
-        Get(EndpointPath);
+        Get(ApiRoutes.PlexLibraryController + "/sync-status");
 
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<List<LibrarySyncJobQueueDTO>>))

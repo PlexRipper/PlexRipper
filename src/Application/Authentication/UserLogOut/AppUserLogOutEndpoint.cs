@@ -4,8 +4,6 @@ namespace Reaparr.Application;
 
 public class AppUserLogOutEndpoint : BaseEndpointWithoutRequest<string>
 {
-    public override string EndpointPath => ApiRoutes.LogOutEndpoint;
-
     private readonly IIdentitySignInService _identitySignInService;
 
     public AppUserLogOutEndpoint(IIdentitySignInService identitySignInService)
@@ -15,7 +13,7 @@ public class AppUserLogOutEndpoint : BaseEndpointWithoutRequest<string>
 
     public override void Configure()
     {
-        Post(EndpointPath);
+        Post(ApiRoutes.LogOutEndpoint);
         Description(x =>
         {
             x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<string>));

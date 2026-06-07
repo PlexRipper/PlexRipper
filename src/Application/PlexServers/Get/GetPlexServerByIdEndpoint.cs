@@ -15,8 +15,6 @@ public class GetPlexServerByIdEndpoint : BaseEndpoint<GetPlexServerByIdEndpointR
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
 
-    public override string EndpointPath => ApiRoutes.PlexServerController + "/{PlexServerId}";
-
     public GetPlexServerByIdEndpoint(ILogger log, IReaparrDbContext dbContext)
     {
         _log = log.ForContext<GetPlexServerByIdEndpoint>();
@@ -25,7 +23,7 @@ public class GetPlexServerByIdEndpoint : BaseEndpoint<GetPlexServerByIdEndpointR
 
     public override void Configure()
     {
-        Get(EndpointPath);
+        Get(ApiRoutes.PlexServerController + "/{PlexServerId}");
 
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<PlexServerDTO>))

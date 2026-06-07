@@ -33,8 +33,6 @@ public class UpdatePlexAccountByIdEndpoint : BaseEndpoint<UpdatePlexAccountByIdE
 {
     private readonly IReaparrDbContext _dbContext;
 
-    public override string EndpointPath => ApiRoutes.PlexAccountController;
-
     public UpdatePlexAccountByIdEndpoint(IReaparrDbContext dbContext)
     {
         _dbContext = dbContext;
@@ -42,7 +40,7 @@ public class UpdatePlexAccountByIdEndpoint : BaseEndpoint<UpdatePlexAccountByIdE
 
     public override void Configure()
     {
-        Put(EndpointPath);
+        Put(ApiRoutes.PlexAccountController);
 
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<PlexAccountDTO>))

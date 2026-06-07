@@ -5,8 +5,6 @@ public class GetPlexLibraryAccessTimelineEndpoint : BaseEndpointWithoutRequest<P
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
 
-    public override string EndpointPath => ApiRoutes.PlexLibraryController + "/access-timeline";
-
     public GetPlexLibraryAccessTimelineEndpoint(ILogger log, IReaparrDbContext dbContext)
     {
         _log = log.ForContext<GetPlexLibraryAccessTimelineEndpoint>();
@@ -15,7 +13,7 @@ public class GetPlexLibraryAccessTimelineEndpoint : BaseEndpointWithoutRequest<P
 
     public override void Configure()
     {
-        Get(EndpointPath);
+        Get(ApiRoutes.PlexLibraryController + "/access-timeline");
 
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<PlexLibraryAccessTimelineDTO>))

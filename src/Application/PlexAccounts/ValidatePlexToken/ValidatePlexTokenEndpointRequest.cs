@@ -45,8 +45,6 @@ public class ValidatePlexTokenEndpoint
     private readonly ILogger _log;
     private readonly ICommandExecutor _commandExecutor;
 
-    public override string EndpointPath => ApiRoutes.PlexAccountController + "/validate/token";
-
     public ValidatePlexTokenEndpoint(ILogger log, ICommandExecutor commandExecutor)
     {
         _log = log.ForContext<ValidatePlexTokenEndpoint>();
@@ -55,7 +53,7 @@ public class ValidatePlexTokenEndpoint
 
     public override void Configure()
     {
-        Post(EndpointPath);
+        Post(ApiRoutes.PlexAccountController + "/validate/token");
 
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<ValidatePlexTokenEndpointResponse>))

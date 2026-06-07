@@ -17,8 +17,6 @@ public class DeleteFolderPathEndpoint : BaseEndpoint<DeleteFolderPathEndpointReq
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
 
-    public override string EndpointPath => ApiRoutes.FolderPathController + "/{Id}";
-
     public DeleteFolderPathEndpoint(ILogger log, IReaparrDbContext dbContext)
     {
         _log = log.ForContext<DeleteFolderPathEndpoint>();
@@ -27,7 +25,7 @@ public class DeleteFolderPathEndpoint : BaseEndpoint<DeleteFolderPathEndpointReq
 
     public override void Configure()
     {
-        Delete(EndpointPath);
+        Delete(ApiRoutes.FolderPathController + "/{Id}");
 
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(BaseResultDTO))

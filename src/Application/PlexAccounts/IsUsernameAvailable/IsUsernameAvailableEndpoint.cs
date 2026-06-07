@@ -23,8 +23,6 @@ public class IsUsernameAvailableEndpoint : BaseEndpoint<IsUsernameAvailableEndpo
 {
     private readonly IReaparrDbContext _dbContext;
 
-    public override string EndpointPath => ApiRoutes.PlexAccountController + "/check";
-
     public IsUsernameAvailableEndpoint(IReaparrDbContext dbContext)
     {
         _dbContext = dbContext;
@@ -32,7 +30,7 @@ public class IsUsernameAvailableEndpoint : BaseEndpoint<IsUsernameAvailableEndpo
 
     public override void Configure()
     {
-        Get(EndpointPath);
+        Get(ApiRoutes.PlexAccountController + "/check");
 
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<bool>))

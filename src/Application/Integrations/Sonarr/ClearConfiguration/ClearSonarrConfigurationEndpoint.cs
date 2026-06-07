@@ -5,8 +5,6 @@ public class ClearSonarrConfigurationEndpoint : BaseEndpointWithoutRequest
     private readonly ILogger _log;
     private readonly ISonarrSettings _sonarrSettings;
 
-    public override string EndpointPath => ApiRoutes.IntegrationController + "/Sonarr/Configuration";
-
     public ClearSonarrConfigurationEndpoint(ILogger log, ISonarrSettings sonarrSettings)
     {
         _log = log.ForContext<ClearSonarrConfigurationEndpoint>();
@@ -15,7 +13,7 @@ public class ClearSonarrConfigurationEndpoint : BaseEndpointWithoutRequest
 
     public override void Configure()
     {
-        Delete(EndpointPath);
+        Delete(ApiRoutes.IntegrationController + "/Sonarr/Configuration");
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(BaseResultDTO))
                 .Produces(StatusCodes.Status500InternalServerError, typeof(BaseResultDTO))

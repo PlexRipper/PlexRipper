@@ -16,8 +16,6 @@ public class DeletePlexAccountByIdEndpoint : BaseEndpoint<DeletePlexAccountByIdR
     private readonly IReaparrDbContext _dbContext;
     private readonly INotificationHubService _notificationHubService;
 
-    public override string EndpointPath => ApiRoutes.PlexAccountController + "/{PlexAccountId}";
-
     public DeletePlexAccountByIdEndpoint(
         ILogger log,
         IReaparrDbContext dbContext,
@@ -31,7 +29,7 @@ public class DeletePlexAccountByIdEndpoint : BaseEndpoint<DeletePlexAccountByIdR
 
     public override void Configure()
     {
-        Delete(EndpointPath);
+        Delete(ApiRoutes.PlexAccountController + "/{PlexAccountId}");
 
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(BaseResultDTO))

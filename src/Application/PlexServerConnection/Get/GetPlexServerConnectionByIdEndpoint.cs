@@ -15,8 +15,6 @@ public class GetPlexServerConnectionByIdEndpoint
 {
     private readonly IReaparrDbContext _dbContext;
 
-    public override string EndpointPath => ApiRoutes.PlexServerConnectionController + "/{PlexServerConnectionId}";
-
     public GetPlexServerConnectionByIdEndpoint(IReaparrDbContext dbContext)
     {
         _dbContext = dbContext;
@@ -24,7 +22,7 @@ public class GetPlexServerConnectionByIdEndpoint
 
     public override void Configure()
     {
-        Get(EndpointPath);
+        Get(ApiRoutes.PlexServerConnectionController + "/{PlexServerConnectionId}");
 
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<PlexServerConnectionDTO>))

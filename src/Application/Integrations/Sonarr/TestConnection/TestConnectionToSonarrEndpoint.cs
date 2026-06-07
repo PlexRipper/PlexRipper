@@ -51,8 +51,6 @@ public class TestConnectionToSonarrEndpoint
     private readonly ILogger _log;
     private readonly HttpClient _client;
 
-    public override string EndpointPath => ApiRoutes.IntegrationController + "/Sonarr/TestConnection";
-
     public TestConnectionToSonarrEndpoint(ILogger log, IHttpClientFactory httpClientFactory)
     {
         _log = log.ForContext<TestConnectionToSonarrEndpoint>();
@@ -61,7 +59,7 @@ public class TestConnectionToSonarrEndpoint
 
     public override void Configure()
     {
-        Get(EndpointPath);
+        Get(ApiRoutes.IntegrationController + "/Sonarr/TestConnection");
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<TestConnectionToSonarrEndpointResponse>))
                 .Produces(StatusCodes.Status400BadRequest, typeof(BaseResultDTO))

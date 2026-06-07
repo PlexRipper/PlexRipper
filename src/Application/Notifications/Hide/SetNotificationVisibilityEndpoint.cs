@@ -21,8 +21,6 @@ public class SetNotificationVisibilityEndpoint : BaseEndpoint<SetNotificationVis
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
 
-    public override string EndpointPath => ApiRoutes.NotificationController;
-
     public SetNotificationVisibilityEndpoint(ILogger log, IReaparrDbContext dbContext)
     {
         _log = log.ForContext<SetNotificationVisibilityEndpoint>();
@@ -31,7 +29,7 @@ public class SetNotificationVisibilityEndpoint : BaseEndpoint<SetNotificationVis
 
     public override void Configure()
     {
-        Patch(EndpointPath);
+        Patch(ApiRoutes.NotificationController);
 
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(BaseResultDTO))

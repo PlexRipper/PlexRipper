@@ -8,8 +8,6 @@ public class GetAllPlexServersEndpoint : BaseEndpointWithoutRequest<List<PlexSer
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
 
-    public override string EndpointPath => ApiRoutes.PlexServerController + "/";
-
     public GetAllPlexServersEndpoint(ILogger log, IReaparrDbContext dbContext)
     {
         _log = log.ForContext<GetAllPlexServersEndpoint>();
@@ -18,7 +16,7 @@ public class GetAllPlexServersEndpoint : BaseEndpointWithoutRequest<List<PlexSer
 
     public override void Configure()
     {
-        Get(EndpointPath);
+        Get(ApiRoutes.PlexServerController + "/");
 
         Summary(summary =>
         {

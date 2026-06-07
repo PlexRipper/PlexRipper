@@ -9,8 +9,6 @@ public class ClearAllNotificationsEndpoint : BaseEndpointWithoutRequest<CountRes
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
 
-    public override string EndpointPath => ApiRoutes.NotificationController + "/clear";
-
     public ClearAllNotificationsEndpoint(ILogger log, IReaparrDbContext dbContext)
     {
         _log = log.ForContext<ClearAllNotificationsEndpoint>();
@@ -19,7 +17,7 @@ public class ClearAllNotificationsEndpoint : BaseEndpointWithoutRequest<CountRes
 
     public override void Configure()
     {
-        Delete(EndpointPath);
+        Delete(ApiRoutes.NotificationController + "/clear");
 
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<CountResponseDTO>))

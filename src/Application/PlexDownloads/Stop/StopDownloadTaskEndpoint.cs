@@ -14,8 +14,6 @@ public class StopDownloadTaskEndpoint : BaseEndpoint<StopDownloadTaskEndpointReq
 {
     private readonly ICommandExecutor _commandExecutor;
 
-    public override string EndpointPath => ApiRoutes.DownloadController + "/stop/{DownloadTaskGuid}";
-
     public StopDownloadTaskEndpoint(ICommandExecutor commandExecutor)
     {
         _commandExecutor = commandExecutor;
@@ -24,7 +22,7 @@ public class StopDownloadTaskEndpoint : BaseEndpoint<StopDownloadTaskEndpointReq
     public override void Configure()
     {
         // TODO state is changed - use POST / PUT
-        Get(EndpointPath);
+        Get(ApiRoutes.DownloadController + "/stop/{DownloadTaskGuid}");
 
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(BaseResultDTO))

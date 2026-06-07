@@ -22,8 +22,6 @@ public class GetAppCredentials : BaseEndpointWithoutRequest<AppCredentialsDTO>
     private readonly ILogger _log;
     private readonly IUserService _userService;
 
-    public override string EndpointPath => ApiRoutes.AuthenticatedController;
-
     public GetAppCredentials(ILogger log, IUserService userService)
     {
         _log = log.ForContext<GetAppCredentials>();
@@ -32,7 +30,7 @@ public class GetAppCredentials : BaseEndpointWithoutRequest<AppCredentialsDTO>
 
     public override void Configure()
     {
-        Get(EndpointPath);
+        Get(ApiRoutes.AuthenticatedController);
 
         Summary(s =>
         {

@@ -2,11 +2,9 @@ namespace Reaparr.Application;
 
 public class ResetDatabaseEndpoint : BaseEndpointWithoutRequest<BaseResultDTO>
 {
-    public override string EndpointPath => ApiRoutes.SettingsController + "/resetdb";
-
     public override void Configure()
     {
-        Get(EndpointPath);
+        Get(ApiRoutes.SettingsController + "/resetdb");
 
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(BaseResultDTO))

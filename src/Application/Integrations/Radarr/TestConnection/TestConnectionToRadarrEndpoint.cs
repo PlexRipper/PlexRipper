@@ -51,8 +51,6 @@ public class TestConnectionToRadarrEndpoint
     private readonly ILogger _log;
     private readonly HttpClient _client;
 
-    public override string EndpointPath => ApiRoutes.IntegrationController + "/Radarr/TestConnection";
-
     public TestConnectionToRadarrEndpoint(ILogger log, IHttpClientFactory httpClientFactory)
     {
         _log = log.ForContext<TestConnectionToRadarrEndpoint>();
@@ -61,7 +59,7 @@ public class TestConnectionToRadarrEndpoint
 
     public override void Configure()
     {
-        Get(EndpointPath);
+        Get(ApiRoutes.IntegrationController + "/Radarr/TestConnection");
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<TestConnectionToRadarrEndpointResponse>))
                 .Produces(StatusCodes.Status400BadRequest, typeof(BaseResultDTO))

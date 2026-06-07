@@ -19,8 +19,6 @@ public class CreateDownloadTasksEndpoint : BaseEndpoint<CreateDownloadTasksEndpo
     private readonly ILogger _log;
     private readonly ICommandExecutor _commandExecutor;
 
-    public override string EndpointPath => ApiRoutes.DownloadController + "/create";
-
     public CreateDownloadTasksEndpoint(ILogger log, ICommandExecutor commandExecutor)
     {
         _log = log.ForContext<CreateDownloadTasksEndpoint>();
@@ -29,7 +27,7 @@ public class CreateDownloadTasksEndpoint : BaseEndpoint<CreateDownloadTasksEndpo
 
     public override void Configure()
     {
-        Post(EndpointPath);
+        Post(ApiRoutes.DownloadController + "/create");
 
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(BaseResultDTO))

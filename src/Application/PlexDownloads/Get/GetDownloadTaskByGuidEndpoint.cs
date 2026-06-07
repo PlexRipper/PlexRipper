@@ -30,8 +30,6 @@ public class GetDownloadTaskByGuidEndpoint : BaseEndpoint<GetDownloadTaskByGuidR
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
 
-    public override string EndpointPath => ApiRoutes.DownloadController + "/detail/{DownloadTaskGuid}";
-
     public GetDownloadTaskByGuidEndpoint(ILogger log, IReaparrDbContext dbContext)
     {
         _log = log.ForContext<GetDownloadTaskByGuidEndpoint>();
@@ -40,7 +38,7 @@ public class GetDownloadTaskByGuidEndpoint : BaseEndpoint<GetDownloadTaskByGuidR
 
     public override void Configure()
     {
-        Get(EndpointPath);
+        Get(ApiRoutes.DownloadController + "/detail/{DownloadTaskGuid}");
 
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<DownloadTaskDTO>))

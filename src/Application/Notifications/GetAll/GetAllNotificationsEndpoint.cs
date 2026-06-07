@@ -4,8 +4,6 @@ public class GetAllNotificationsEndpoint : BaseEndpointWithoutRequest<List<Notif
 {
     private readonly IReaparrDbContext _dbContext;
 
-    public override string EndpointPath => ApiRoutes.NotificationController + "/";
-
     public GetAllNotificationsEndpoint(IReaparrDbContext dbContext)
     {
         _dbContext = dbContext;
@@ -13,7 +11,7 @@ public class GetAllNotificationsEndpoint : BaseEndpointWithoutRequest<List<Notif
 
     public override void Configure()
     {
-        Get(EndpointPath);
+        Get(ApiRoutes.NotificationController + "/");
 
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<List<NotificationDTO>>))

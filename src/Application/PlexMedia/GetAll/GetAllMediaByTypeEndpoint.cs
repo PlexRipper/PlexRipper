@@ -71,8 +71,6 @@ public class GetAllMediaByTypeEndpoint : BaseEndpoint<GetAllMediaByTypeRequest, 
     private readonly ILogger _log;
     private readonly ICommandExecutor _commandExecutor;
 
-    public override string EndpointPath => ApiRoutes.PlexMediaController;
-
     public GetAllMediaByTypeEndpoint(ILogger log, ICommandExecutor commandExecutor)
     {
         _log = log.ForContext<GetAllMediaByTypeEndpoint>();
@@ -81,7 +79,7 @@ public class GetAllMediaByTypeEndpoint : BaseEndpoint<GetAllMediaByTypeRequest, 
 
     public override void Configure()
     {
-        Get(EndpointPath);
+        Get(ApiRoutes.PlexMediaController);
 
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<PlexMediaStatisticsDTO>))

@@ -12,8 +12,6 @@ public class GetDownloadPreviewEndpoint : BaseEndpoint<List<DownloadMediaDTO>, D
 {
     private readonly ICommandExecutor _commandExecutor;
 
-    public override string EndpointPath => ApiRoutes.DownloadController + "/preview";
-
     public GetDownloadPreviewEndpoint(ICommandExecutor commandExecutor)
     {
         _commandExecutor = commandExecutor;
@@ -21,7 +19,7 @@ public class GetDownloadPreviewEndpoint : BaseEndpoint<List<DownloadMediaDTO>, D
 
     public override void Configure()
     {
-        Post(EndpointPath);
+        Post(ApiRoutes.DownloadController + "/preview");
 
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<DownloadPreviewContainerDTO>))

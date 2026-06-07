@@ -50,8 +50,6 @@ public sealed class GetPlexMediaThumbnailImageEndpoint : BaseEndpoint<GetPlexMed
     private static readonly TimeSpan _tokenCacheDuration = TimeSpan.FromMinutes(10);
     private static readonly TimeSpan _connectionCacheDuration = TimeSpan.FromMinutes(5);
 
-    public override string EndpointPath => ApiRoutes.PlexMediaController + "/thumbnail";
-
     public GetPlexMediaThumbnailImageEndpoint(
         ILogger log,
         IAppRuntimeInfo appRuntimeInfo,
@@ -69,7 +67,7 @@ public sealed class GetPlexMediaThumbnailImageEndpoint : BaseEndpoint<GetPlexMed
 
     public override void Configure()
     {
-        Get(EndpointPath);
+        Get(ApiRoutes.PlexMediaController + "/thumbnail");
 
         // Enable response caching headers for downstream caches (proxies, CDNs, browsers)
         // 3 days = 259200 seconds, varied by query parameters

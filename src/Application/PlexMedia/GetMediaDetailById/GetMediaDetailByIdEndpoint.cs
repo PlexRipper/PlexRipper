@@ -37,8 +37,6 @@ public class GetMediaDetailByIdEndpoint : BaseEndpoint<GetMediaDetailByIdEndpoin
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
 
-    public override string EndpointPath => ApiRoutes.PlexMediaController + "/detail/{PlexMediaId}";
-
     public GetMediaDetailByIdEndpoint(ILogger log, IReaparrDbContext dbContext)
     {
         _log = log.ForContext<GetMediaDetailByIdEndpoint>();
@@ -47,7 +45,7 @@ public class GetMediaDetailByIdEndpoint : BaseEndpoint<GetMediaDetailByIdEndpoin
 
     public override void Configure()
     {
-        Get(EndpointPath);
+        Get(ApiRoutes.PlexMediaController + "/detail/{PlexMediaId}");
 
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<PlexMediaDTO>))

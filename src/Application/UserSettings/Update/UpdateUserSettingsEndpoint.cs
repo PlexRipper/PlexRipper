@@ -32,8 +32,6 @@ public class UpdateUserSettingsEndpoint : BaseEndpoint<UpdateUserSettingsEndpoin
 {
     private readonly IUserSettings _userSettings;
 
-    public override string EndpointPath => ApiRoutes.SettingsController + "/";
-
     public UpdateUserSettingsEndpoint(IUserSettings userSettings)
     {
         _userSettings = userSettings;
@@ -41,7 +39,7 @@ public class UpdateUserSettingsEndpoint : BaseEndpoint<UpdateUserSettingsEndpoin
 
     public override void Configure()
     {
-        Put(EndpointPath);
+        Put(ApiRoutes.SettingsController + "/");
 
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<SettingsModelDTO>))

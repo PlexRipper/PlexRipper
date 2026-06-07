@@ -80,8 +80,6 @@ public class CreatePlexAccountEndpoint : BaseEndpoint<CreatePlexAccountEndpointR
     private readonly IReaparrDbContext _dbContext;
     private readonly ICommandExecutor _commandExecutor;
 
-    public override string EndpointPath => ApiRoutes.PlexAccountController + "/";
-
     public CreatePlexAccountEndpoint(ILogger log, IReaparrDbContext dbContext, ICommandExecutor commandExecutor)
     {
         _log = log.ForContext<CreatePlexAccountEndpoint>();
@@ -91,7 +89,7 @@ public class CreatePlexAccountEndpoint : BaseEndpoint<CreatePlexAccountEndpointR
 
     public override void Configure()
     {
-        Post(EndpointPath);
+        Post(ApiRoutes.PlexAccountController + "/");
 
         Description(x =>
             x.Produces(StatusCodes.Status201Created, typeof(ResultDTO<PlexAccountDTO>))

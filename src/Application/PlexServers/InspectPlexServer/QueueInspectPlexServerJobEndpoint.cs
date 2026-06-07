@@ -15,8 +15,6 @@ public class QueueInspectPlexServerJobEndpoint
 {
     private readonly ICommandExecutor _commandExecutor;
 
-    public override string EndpointPath => ApiRoutes.PlexServerController + "/{PlexServerId}/inspect";
-
     public QueueInspectPlexServerJobEndpoint(ICommandExecutor commandExecutor)
     {
         _commandExecutor = commandExecutor;
@@ -24,7 +22,7 @@ public class QueueInspectPlexServerJobEndpoint
 
     public override void Configure()
     {
-        Get(EndpointPath);
+        Get(ApiRoutes.PlexServerController + "/{PlexServerId}/inspect");
 
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(BaseResultDTO))

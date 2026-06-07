@@ -25,8 +25,6 @@ public class GetLibraryMediaMetadata : BaseEndpoint<GetLibraryMediaMetadataReque
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
 
-    public override string EndpointPath => ApiRoutes.PlexLibraryController + "/{PlexLibraryId}/metadata";
-
     public GetLibraryMediaMetadata(ILogger log, IReaparrDbContext dbContext)
     {
         _log = log.ForContext<GetLibraryMediaMetadata>();
@@ -35,7 +33,7 @@ public class GetLibraryMediaMetadata : BaseEndpoint<GetLibraryMediaMetadataReque
 
     public override void Configure()
     {
-        Get(EndpointPath);
+        Get(ApiRoutes.PlexLibraryController + "/{PlexLibraryId}/metadata");
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<PlexMediaMetadataDTO>))
                 .Produces(StatusCodes.Status500InternalServerError, typeof(BaseResultDTO))

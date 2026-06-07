@@ -5,8 +5,6 @@ public class GetAllDownloadTasksEndpoint : BaseEndpointWithoutRequest<List<Serve
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
 
-    public override string EndpointPath => ApiRoutes.DownloadController;
-
     public GetAllDownloadTasksEndpoint(ILogger log, IReaparrDbContext dbContext)
     {
         _log = log.ForContext<GetAllDownloadTasksEndpoint>();
@@ -15,7 +13,7 @@ public class GetAllDownloadTasksEndpoint : BaseEndpointWithoutRequest<List<Serve
 
     public override void Configure()
     {
-        Get(EndpointPath);
+        Get(ApiRoutes.DownloadController);
 
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<List<ServerDownloadProgressDTO>>))

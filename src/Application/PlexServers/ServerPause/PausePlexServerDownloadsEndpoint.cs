@@ -14,8 +14,6 @@ public class PausePlexServerDownloadsEndpoint : BaseEndpoint<PausePlexServerDown
 {
     private readonly ICommandExecutor _commandExecutor;
 
-    public override string EndpointPath => ApiRoutes.PlexServerController + "/server/pause/{PlexServerId}";
-
     public PausePlexServerDownloadsEndpoint(ICommandExecutor commandExecutor)
     {
         _commandExecutor = commandExecutor;
@@ -23,7 +21,7 @@ public class PausePlexServerDownloadsEndpoint : BaseEndpoint<PausePlexServerDown
 
     public override void Configure()
     {
-        Put(EndpointPath);
+        Put(ApiRoutes.PlexServerController + "/server/pause/{PlexServerId}");
 
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(BaseResultDTO))

@@ -29,8 +29,6 @@ public class UpdateCredentialsEndpointRequestValidator : Validator<UpdateCredent
 
 public class UpdateCredentialsEndpoint : BaseEndpoint<UpdateCredentialsEndpointRequest>
 {
-    public override string EndpointPath => ApiRoutes.AuthenticatedController;
-
     private readonly ILogger _log;
     private readonly IUserService _userService;
 
@@ -42,7 +40,7 @@ public class UpdateCredentialsEndpoint : BaseEndpoint<UpdateCredentialsEndpointR
 
     public override void Configure()
     {
-        Put(EndpointPath);
+        Put(ApiRoutes.AuthenticatedController);
 
         Summary(s =>
         {

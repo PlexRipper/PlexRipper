@@ -21,8 +21,6 @@ public class SetServerOwnedEndpoint : BaseEndpoint<SetServerOwnedRequest, PlexSe
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
 
-    public override string EndpointPath => ApiRoutes.PlexServerController + "/{PlexServerId}/set-server-owned";
-
     public SetServerOwnedEndpoint(ILogger log, IReaparrDbContext dbContext)
     {
         _log = log.ForContext<SetServerOwnedEndpoint>();
@@ -31,7 +29,7 @@ public class SetServerOwnedEndpoint : BaseEndpoint<SetServerOwnedRequest, PlexSe
 
     public override void Configure()
     {
-        Put(EndpointPath);
+        Put(ApiRoutes.PlexServerController + "/{PlexServerId}/set-server-owned");
 
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<PlexServerDTO>))

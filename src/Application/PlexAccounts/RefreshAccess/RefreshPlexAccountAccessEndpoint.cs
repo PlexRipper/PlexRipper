@@ -19,8 +19,6 @@ public class RefreshPlexAccountAccessEndpoint
     private readonly INotificationHubService _notificationHubService;
     private List<RefreshPlexAccountAccessRapportDTO> _list = new();
 
-    public override string EndpointPath => ApiRoutes.PlexAccountController + "/refresh/{PlexAccountId}";
-
     public RefreshPlexAccountAccessEndpoint(
         ILogger log,
         IReaparrDbContext dbContext,
@@ -36,7 +34,7 @@ public class RefreshPlexAccountAccessEndpoint
 
     public override void Configure()
     {
-        Get(EndpointPath);
+        Get(ApiRoutes.PlexAccountController + "/refresh/{PlexAccountId}");
 
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<List<RefreshPlexAccountAccessRapportDTO>>))

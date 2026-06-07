@@ -27,8 +27,6 @@ public class ValidatePlexServerConnectionEndpoint
 {
     private readonly ICommandExecutor _commandExecutor;
 
-    public override string EndpointPath => ApiRoutes.PlexServerConnectionController + "/validate";
-
     public ValidatePlexServerConnectionEndpoint(ICommandExecutor commandExecutor)
     {
         _commandExecutor = commandExecutor;
@@ -36,7 +34,7 @@ public class ValidatePlexServerConnectionEndpoint
 
     public override void Configure()
     {
-        Post(EndpointPath);
+        Post(ApiRoutes.PlexServerConnectionController + "/validate");
 
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<ServerIdentityDTO>))

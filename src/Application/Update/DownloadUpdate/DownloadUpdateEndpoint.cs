@@ -10,8 +10,6 @@ public class DownloadUpdateEndpoint : BaseEndpointWithoutRequest
     private readonly IProgressHubService _progressHub;
     private readonly ILogger _log;
 
-    public override string EndpointPath => ApiRoutes.UpdateController + "/DownloadUpdate";
-
     public DownloadUpdateEndpoint(
         ILogger log,
         IAppBuildInfo appBuildInfo,
@@ -27,7 +25,7 @@ public class DownloadUpdateEndpoint : BaseEndpointWithoutRequest
 
     public override void Configure()
     {
-        Post(EndpointPath);
+        Post(ApiRoutes.UpdateController + "/DownloadUpdate");
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(BaseResultDTO))
                 .Produces(StatusCodes.Status500InternalServerError, typeof(BaseResultDTO))

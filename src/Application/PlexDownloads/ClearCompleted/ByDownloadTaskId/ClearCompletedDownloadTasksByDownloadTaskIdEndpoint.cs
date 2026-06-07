@@ -9,8 +9,6 @@ public class ClearCompletedDownloadTasksByDownloadTaskIdEndpoint : BaseEndpoint<
     private readonly IReaparrDbContext _dbContext;
     private readonly ICommandExecutor _commandExecutor;
 
-    public override string EndpointPath => ApiRoutes.DownloadController + "/clear/tasks";
-
     public ClearCompletedDownloadTasksByDownloadTaskIdEndpoint(
         IReaparrDbContext dbContext,
         ICommandExecutor commandExecutor
@@ -22,7 +20,7 @@ public class ClearCompletedDownloadTasksByDownloadTaskIdEndpoint : BaseEndpoint<
 
     public override void Configure()
     {
-        Delete(EndpointPath);
+        Delete(ApiRoutes.DownloadController + "/clear/tasks");
 
         Description(x => x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<CountResponseDTO>)));
     }

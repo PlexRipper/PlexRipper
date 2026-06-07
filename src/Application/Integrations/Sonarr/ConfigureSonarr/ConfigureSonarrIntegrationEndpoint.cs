@@ -22,8 +22,6 @@ public class ConfigureSonarrIntegrationEndpoint : BaseEndpoint<ConfigureSonarrIn
     private readonly ICommandExecutor _commandExecutor;
     private readonly ISonarrSettings _sonarrSettings;
 
-    public override string EndpointPath => ApiRoutes.IntegrationController + "/Sonarr/Configure";
-
     public ConfigureSonarrIntegrationEndpoint(
         ILogger log,
         ICommandExecutor commandExecutor,
@@ -37,7 +35,7 @@ public class ConfigureSonarrIntegrationEndpoint : BaseEndpoint<ConfigureSonarrIn
 
     public override void Configure()
     {
-        Post(EndpointPath);
+        Post(ApiRoutes.IntegrationController + "/Sonarr/Configure");
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(BaseResultDTO))
                 .Produces(StatusCodes.Status400BadRequest, typeof(BaseResultDTO))

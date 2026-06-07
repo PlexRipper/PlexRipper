@@ -5,8 +5,6 @@ public class GetAllLogsEndpoint : BaseEndpointWithoutRequest<List<LiveLogEventDT
     private readonly ILogger _log;
     private readonly ILogBufferService _logBufferService;
 
-    public override string EndpointPath => ApiRoutes.DebugController + "/logs/";
-
     public GetAllLogsEndpoint(ILogger log, ILogBufferService logBufferService)
     {
         _log = log.ForContext<GetAllLogsEndpoint>();
@@ -15,7 +13,7 @@ public class GetAllLogsEndpoint : BaseEndpointWithoutRequest<List<LiveLogEventDT
 
     public override void Configure()
     {
-        Get(EndpointPath);
+        Get(ApiRoutes.DebugController + "/logs/");
 
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<List<LiveLogEventDTO>>))

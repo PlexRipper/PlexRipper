@@ -18,8 +18,6 @@ public class SearchPlexMediaEndpoint : BaseEndpoint<SearchPlexMediaRequest, Resu
 {
     private readonly IReaparrDbContext _dbContext;
 
-    public override string EndpointPath => ApiRoutes.PlexMediaController + "/search";
-
     public SearchPlexMediaEndpoint(IReaparrDbContext dbContext)
     {
         _dbContext = dbContext;
@@ -27,7 +25,7 @@ public class SearchPlexMediaEndpoint : BaseEndpoint<SearchPlexMediaRequest, Resu
 
     public override void Configure()
     {
-        Get(EndpointPath);
+        Get(ApiRoutes.PlexMediaController + "/search");
 
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<List<PlexMediaSlimDTO>>))

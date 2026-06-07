@@ -19,8 +19,6 @@ public class GetAllBackgroundJobsEndpoint : BaseEndpoint<GetAllBackgroundJobsEnd
 {
     private readonly ISchedulerService _schedulerService;
 
-    public override string EndpointPath => ApiRoutes.BackgroundJobsController;
-
     public GetAllBackgroundJobsEndpoint(ISchedulerService schedulerService)
     {
         _schedulerService = schedulerService;
@@ -28,7 +26,7 @@ public class GetAllBackgroundJobsEndpoint : BaseEndpoint<GetAllBackgroundJobsEnd
 
     public override void Configure()
     {
-        Get(EndpointPath);
+        Get(ApiRoutes.BackgroundJobsController);
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<List<JobStatusUpdateDTO>>))
                 .Produces(StatusCodes.Status500InternalServerError, typeof(BaseResultDTO))

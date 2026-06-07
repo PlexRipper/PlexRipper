@@ -4,7 +4,6 @@ public record SetServerAliasRequest
 {
     public required int PlexServerId { get; init; }
 
-    [QueryParam, BindFrom("serverAlias")]
     public required string ServerAlias { get; init; }
 }
 
@@ -32,7 +31,7 @@ public class SetServerAlias : Endpoint<SetServerAliasRequest, BaseResultDTO>
 
     public override void Configure()
     {
-        Get(ApiRoutes.PlexServerController + "/{PlexServerId}/set-server-alias");
+        Put(ApiRoutes.PlexServerController + "/{PlexServerId}/set-server-alias");
 
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(BaseResultDTO))

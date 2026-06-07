@@ -26,7 +26,7 @@ public class RefreshLibraryMediaEndpoint : Endpoint<RefreshLibraryMediaEndpointR
         Get(ApiRoutes.PlexLibraryController + "/refresh/{PlexLibraryId}");
 
         Description(x =>
-            x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<PlexLibraryDTO>))
+            x.Produces(StatusCodes.Status200OK, typeof(BaseResultDTO))
                 .Produces(StatusCodes.Status400BadRequest, typeof(BaseResultDTO))
                 .Produces(StatusCodes.Status404NotFound, typeof(BaseResultDTO))
                 .Produces(StatusCodes.Status500InternalServerError, typeof(BaseResultDTO))

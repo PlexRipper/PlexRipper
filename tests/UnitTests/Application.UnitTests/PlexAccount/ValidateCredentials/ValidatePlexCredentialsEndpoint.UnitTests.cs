@@ -32,7 +32,8 @@ public class ValidatePlexCredentialsEndpointUnitTests : BaseEndpointUnitTest<Val
                         Is2Fa = testAccountResponse.Is2Fa,
                     }
                 )
-            );
+            )
+            .Verifiable(Times.Once());
 
         // Act
         var endpointResult = await TestEndpointHandleAsync(
@@ -48,6 +49,7 @@ public class ValidatePlexCredentialsEndpointUnitTests : BaseEndpointUnitTest<Val
         var result = endpointResult.Response;
 
         // Assert
+        endpointResult.IsValid.ShouldBeTrue();
         result.ShouldNotBeNull();
         result.IsSuccess.ShouldBeTrue();
         var value = result.Value;
@@ -66,6 +68,7 @@ public class ValidatePlexCredentialsEndpointUnitTests : BaseEndpointUnitTest<Val
         value.PlexId.ShouldBe(testAccountDTO.PlexId);
         value.Uuid.ShouldBe(testAccountDTO.Uuid);
 
+        Mock.Mock<ICommandExecutor>().Verify();
         Mock.Mock<ICommandExecutor>()
             .Verify(
                 x =>
@@ -119,10 +122,10 @@ public class ValidatePlexCredentialsEndpointUnitTests : BaseEndpointUnitTest<Val
                 VerificationCode = testAccountDTO.VerificationCode,
             }
         );
-        var result = endpointResult.Response;
 
         // Assert
         endpointResult.IsValid.ShouldBeTrue();
+        var result = endpointResult.Response;
         result.ShouldNotBeNull();
         result.IsSuccess.ShouldBeTrue();
         result.Errors.ShouldBeEmpty();
@@ -269,7 +272,8 @@ public class ValidatePlexCredentialsEndpointUnitTests : BaseEndpointUnitTest<Val
                 Result
                     .Ok(signInValue)
                     .WithError(new PlexError("Enter verification code") { Code = PlexErrorCodes.EnterVerificationCode })
-            );
+            )
+            .Verifiable(Times.Once());
 
         // Act
         var endpointResult = await TestEndpointHandleAsync(
@@ -282,6 +286,7 @@ public class ValidatePlexCredentialsEndpointUnitTests : BaseEndpointUnitTest<Val
                 VerificationCode = testAccountDTO.VerificationCode,
             }
         );
+        endpointResult.IsValid.ShouldBeTrue();
         var result = endpointResult.Response;
 
         // Assert
@@ -302,6 +307,7 @@ public class ValidatePlexCredentialsEndpointUnitTests : BaseEndpointUnitTest<Val
         value.Uuid.ShouldBeEmpty();
         value.AuthenticationToken.ShouldBeEmpty();
 
+        Mock.Mock<ICommandExecutor>().Verify();
         Mock.Mock<ICommandExecutor>()
             .Verify(x => x.Send(It.IsAny<PlexSignInCommand>(), It.IsAny<CancellationToken>()), Times.Once());
     }
@@ -351,10 +357,10 @@ public class ValidatePlexCredentialsEndpointUnitTests : BaseEndpointUnitTest<Val
                 VerificationCode = testAccountDTO.VerificationCode,
             }
         );
-        var result = endpointResult.Response;
 
         // Assert
         endpointResult.IsValid.ShouldBeTrue();
+        var result = endpointResult.Response;
         result.ShouldNotBeNull();
         result.IsSuccess.ShouldBeFalse();
         result.Errors.ShouldNotBeEmpty();
@@ -389,10 +395,10 @@ public class ValidatePlexCredentialsEndpointUnitTests : BaseEndpointUnitTest<Val
                 VerificationCode = testAccountDTO.VerificationCode,
             }
         );
-        var result = endpointResult.Response;
 
         // Assert
         endpointResult.IsValid.ShouldBeTrue();
+        var result = endpointResult.Response;
         result.ShouldNotBeNull();
         result.IsSuccess.ShouldBeFalse();
         result.Errors.ShouldNotBeEmpty();

@@ -56,7 +56,7 @@ public class RefreshPlexAccountAccessEndpoint
             if (!enabledAccounts.Any())
             {
                 _log.Here().Warning("No enabled Plex accounts found to start the refresh PlexServer access job");
-                await Send.FluentResult(Result.Ok(), ct);
+                await Send.FluentResult(Result.Ok(new List<RefreshPlexAccountAccessRapportDTO>()), ct);
                 return;
             }
 

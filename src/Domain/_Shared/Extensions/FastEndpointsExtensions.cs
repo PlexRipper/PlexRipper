@@ -95,8 +95,8 @@ public static class FastEndpointsExtensions
     /// <param name="sender">The response sender associated with the current endpoint.</param>
     /// <param name="result">The result to convert and send.</param>
     /// <param name="ct">Token to observe while sending the response.</param>
-    public static async Task FluentResult(this IResponseSender sender, Result result, CancellationToken ct = default) =>
-        await sender.SendFluentResultDTOAsync(result.ToResultDTO(), ct: ct);
+    public static Task FluentResult(this IResponseSender sender, Result result, CancellationToken ct = default) =>
+        sender.SendFluentResultDTOAsync(result.ToResultDTO(), ct: ct);
 
     /// <summary>
     /// Sends a FluentResults <see cref="Result{T}"/> response using the project-standard <see cref="ResultDTO{T}"/> envelope.
@@ -105,11 +105,11 @@ public static class FastEndpointsExtensions
     /// <param name="sender">The response sender associated with the current endpoint.</param>
     /// <param name="result">The result to convert and send.</param>
     /// <param name="ct">Token to observe while sending the response.</param>
-    public static async Task FluentResult<T>(
+    public static Task FluentResult<T>(
         this IResponseSender sender,
         Result<T> result,
         CancellationToken ct = default) =>
-        await sender.SendFluentResultDTOAsync(result.ToResultDTO(), ct: ct);
+        sender.SendFluentResultDTOAsync(result.ToResultDTO(), ct: ct);
 
     /// <summary>
     /// Sends a FluentResults <see cref="Result{T}"/> response after mapping the value into the response DTO type.

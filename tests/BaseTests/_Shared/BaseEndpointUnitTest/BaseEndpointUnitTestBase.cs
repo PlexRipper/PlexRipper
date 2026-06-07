@@ -60,7 +60,7 @@ public abstract class BaseEndpointUnitTestBase<TEndpoint, TResponse> : BaseUnitT
         if (validator is null)
             return null;
 
-        var context = new FluentValidation.ValidationContext<object>(request);
+        var context = new FluentValidation.ValidationContext<TRequest>(request);
         return await validator.ValidateAsync(context, cancellationToken);
     }
 

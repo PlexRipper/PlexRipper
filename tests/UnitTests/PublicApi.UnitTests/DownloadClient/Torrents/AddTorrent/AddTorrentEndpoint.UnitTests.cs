@@ -24,10 +24,10 @@ public class AddTorrentEndpointUnitTests : BaseEndpointUnitTest<AddTorrentEndpoi
             .ReturnsAsync(Result.Ok());
 
         // Act
-        var testResult = await TestEndpointHandleAsync(request);
+        var endpointResult = await TestEndpointHandleAsync(request);
 
         // Assert
-        testResult.StatusCode.ShouldBe(200);
+        endpointResult.StatusCode.ShouldBe(200);
 
         // Verify command was called with correct data
         Mock.Mock<ICommandExecutor>()
@@ -80,12 +80,12 @@ public class AddTorrentEndpointUnitTests : BaseEndpointUnitTest<AddTorrentEndpoi
             .ReturnsAsync(Result.Ok());
 
         // Act
-        var endpoint = await TestEndpointHandleAsync(request);
+        var endpointResult = await TestEndpointHandleAsync(request);
 
         // Assert
-        endpoint.IsValid.ShouldBeFalse();
-        endpoint.ValidationErrors.ShouldNotBeEmpty();
-        endpoint.ValidationErrors.Count.ShouldBeGreaterThan(0);
+        endpointResult.IsValid.ShouldBeFalse();
+        endpointResult.ValidationErrors.ShouldNotBeEmpty();
+        endpointResult.ValidationErrors.Count.ShouldBeGreaterThan(0);
 
         // Verify command was not called
         Mock.Mock<ICommandExecutor>()
@@ -110,10 +110,10 @@ public class AddTorrentEndpointUnitTests : BaseEndpointUnitTest<AddTorrentEndpoi
             .ReturnsAsync(failureResult);
 
         // Act
-        var testResult = await TestEndpointHandleAsync(request);
+        var endpointResult = await TestEndpointHandleAsync(request);
 
         // Assert
-        testResult.StatusCode.ShouldBe(200);
+        endpointResult.StatusCode.ShouldBe(200);
 
         // Verify command was called once
         Mock.Mock<ICommandExecutor>()

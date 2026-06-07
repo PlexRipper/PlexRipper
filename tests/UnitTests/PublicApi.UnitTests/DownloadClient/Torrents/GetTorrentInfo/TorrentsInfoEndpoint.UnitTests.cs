@@ -131,6 +131,7 @@ public class TorrentsInfoEndpointUnitTests : BaseEndpointUnitTest<TorrentsInfoEn
 
         // Assert
         testResult.Response.ShouldNotBeNull();
+        testResult.Response.ShouldBeEmpty();
 
         var persisted = await dbContext.DownloadTaskMovieFile.Where(x => x.Id == movieFile.Id)
             .Select(x => new { x.HashId, x.DownloadStatus })

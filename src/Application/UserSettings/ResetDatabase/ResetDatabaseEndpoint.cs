@@ -17,7 +17,5 @@ public class ResetDatabaseEndpoint : EndpointWithoutRequest<BaseResultDTO>
         var result = Result.Ok();
 
         await Send.FluentResult(result, ct);
-
-        throw new NotImplementedException();
     }
 }

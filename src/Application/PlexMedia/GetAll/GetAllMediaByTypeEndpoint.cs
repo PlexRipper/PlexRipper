@@ -69,12 +69,12 @@ public class GetAllMediaByTypeRequestValidator : Validator<GetAllMediaByTypeRequ
 public class GetAllMediaByTypeEndpoint : Endpoint<GetAllMediaByTypeRequest, PlexMediaStatisticsDTO>
 {
     private readonly ILogger _log;
-    private readonly ICommandExecutor _commandExecutor;
+    private readonly IMediaQueryCache _mediaQueryCache;
 
-    public GetAllMediaByTypeEndpoint(ILogger log, ICommandExecutor commandExecutor)
+    public GetAllMediaByTypeEndpoint(ILogger log, IMediaQueryCache mediaQueryCache)
     {
         _log = log.ForContext<GetAllMediaByTypeEndpoint>();
-        _commandExecutor = commandExecutor;
+        _mediaQueryCache = mediaQueryCache;
     }
 
     public override void Configure()
@@ -94,9 +94,8 @@ public class GetAllMediaByTypeEndpoint : Endpoint<GetAllMediaByTypeRequest, Plex
 
         var stopWatch = Stopwatch.StartNew();
 
-        var mediaListResult = await _commandExecutor.Send(new GetMediaByTypeCommand
-        {
-            Filter = new MediaQueryFilter
+        var mediaListResult = await _mediaQueryCache.GetMediaAsync(
+            new MediaQueryFilter
             {
                 MediaType = req.MediaType,
                 PlexLibraryId = req.PlexLibraryId ?? 0,
@@ -110,8 +109,8 @@ public class GetAllMediaByTypeEndpoint : Endpoint<GetAllMediaByTypeRequest, Plex
                     PageSize = req.PageSize,
                 },
             },
-        }, ct);
-        
+            ct
+        );
 
         stopWatch.StopAndLog($"GetAllMediaByTypeEndpoint - Retrieved media with filter: {req}");
 
@@ -123,7 +122,7 @@ public class GetAllMediaByTypeEndpoint : Endpoint<GetAllMediaByTypeRequest, Plex
 
         await Send.FluentResult(Result.Ok(ToStatisticsDTO(mediaListResult.Value)), ct);
     }
-    
+
     private static string BuildFilter(GetAllMediaByTypeRequest req)
     {
         var filters = new List<string>();
@@ -139,7 +138,7 @@ public class GetAllMediaByTypeEndpoint : Endpoint<GetAllMediaByTypeRequest, Plex
             foreach (var term in searchTerms)
                 filters.Add($"SearchTitle:contains:{EscapeFlexValue(term)}");
         }
-        
+
         if (req.CountryId is > 0)
             filters.Add($"Countries:any:Id:eq:{req.CountryId}");
 
@@ -155,12 +154,11 @@ public class GetAllMediaByTypeEndpoint : Endpoint<GetAllMediaByTypeRequest, Plex
         return filters.Count == 0 ? string.Empty : string.Join('&', filters);
     }
 
-    private static string EscapeFlexValue(string value) =>
-        value
-            .Replace("\\", "\\\\")
-            .Replace("\"", "\\\"")
-            .Replace(":", "\\:")
-            .Replace("&", "\\&");
+    private static string EscapeFlexValue(string value) => value
+        .Replace("\\", "\\\\")
+        .Replace("\"", "\\\"")
+        .Replace(":", "\\:")
+        .Replace("&", "\\&");
 
     public static PlexMediaStatisticsDTO ToStatisticsDTO(PagedMediaQueryResult source) => new()
     {

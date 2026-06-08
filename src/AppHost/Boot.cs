@@ -81,7 +81,6 @@ public class Boot : IHostedService
             return;
         }
 
-
         var recoverResult = await _commandExecutor.Send(new RecoverInterruptedDownloadsCommand(), cancellationToken);
         if (recoverResult.IsFailed)
             recoverResult.LogError();
@@ -131,8 +130,12 @@ public class Boot : IHostedService
     {
         _log.Here().Debug("Boot.OnStarted has been called");
 
-        await _commandExecutor.Send(new NotifyArrAppsOnStartupCommand(), CancellationToken.None);
+        await _commandExecutor.Send(new NotifyArrAppsOnStartupCommand(), _appLifetime.ApplicationStopping);
+        
+        await _commandExecutor.Send(new WarmupMediaQueryCacheCommand(), _appLifetime.ApplicationStopping);
+        
     }
+    
 
     private void OnStopping()
     {

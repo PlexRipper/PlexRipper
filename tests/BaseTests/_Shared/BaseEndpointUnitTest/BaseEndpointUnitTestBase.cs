@@ -142,6 +142,7 @@ public abstract class BaseEndpointUnitTestBase<TEndpoint, TResponse> : BaseUnitT
                 s.AddSingleton(_ => Mock.Mock<IDownloadTaskScheduler>().Object);
                 s.AddSingleton(_ => Mock.Container.Resolve<IPathProvider>());
                 s.AddSingleton(_ => Mock.Container.Resolve<IAppBuildInfo>());
+                s.AddSingleton(_ => Mock.Container.Resolve<IMediaQueryCache>());
                 s.AddSingleton(_ => Mock.Mock<IHostApplicationLifetime>().Object);
 
                 extraServices?.Invoke(s);

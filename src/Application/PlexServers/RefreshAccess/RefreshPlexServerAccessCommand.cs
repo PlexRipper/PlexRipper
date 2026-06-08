@@ -21,18 +21,21 @@ public class RefreshPlexServerAccessCommandHandler
     private readonly IReaparrDbContext _dbContext;
     private readonly ICommandExecutor _commandExecutor;
     private readonly INotificationHubService _notificationHubService;
+    private readonly IMediaQueryCache _mediaQueryCache;
 
     public RefreshPlexServerAccessCommandHandler(
         ILogger log,
         IReaparrDbContext dbContext,
         ICommandExecutor commandExecutor,
-        INotificationHubService notificationHubService
+        INotificationHubService notificationHubService,
+        IMediaQueryCache mediaQueryCache
     )
     {
         _log = log.ForContext<RefreshPlexServerAccessCommandHandler>();
         _dbContext = dbContext;
         _commandExecutor = commandExecutor;
         _notificationHubService = notificationHubService;
+        _mediaQueryCache = mediaQueryCache;
     }
 
     public async Task<Result<RefreshPlexServerAccessRapport>> ExecuteAsync(
@@ -122,6 +125,13 @@ public class RefreshPlexServerAccessCommandHandler
             .Select(x => new { x.PlexServerId, x.PlexServer!.Name })
             .ToListAsync();
 
+        var affectedServerIds = plexServers.Select(x => x.PlexServerId).ToList();
+        var affectedLibraryIds = await _dbContext.PlexLibraries
+            .IgnoreQueryFilters()
+            .Where(x => affectedServerIds.Contains(x.PlexServerId))
+            .Select(x => x.Id)
+            .ToListAsync();
+
         var plexAccountName = await _dbContext.GetPlexAccountDisplayName(plexAccountId, CancellationToken.None);
         var rapport = new RefreshPlexServerAccessRapport(plexAccountId, plexAccountName);
 
@@ -138,6 +148,8 @@ public class RefreshPlexServerAccessCommandHandler
         await _dbContext
             .PlexAccountServers.Where(x => x.PlexAccountId == plexAccountId)
             .ExecuteDeleteAsync(CancellationToken.None);
+
+        _mediaQueryCache.InvalidateLibraries(affectedLibraryIds, "Plex server access revoked");
 
         return Result.Ok(rapport);
     }

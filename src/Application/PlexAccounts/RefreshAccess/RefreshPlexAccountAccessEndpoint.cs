@@ -17,19 +17,22 @@ public class RefreshPlexAccountAccessEndpoint
     private readonly IReaparrDbContext _dbContext;
     private readonly ICommandExecutor _commandExecutor;
     private readonly INotificationHubService _notificationHubService;
+    private readonly IMediaQueryCache _mediaQueryCache;
     private List<RefreshPlexAccountAccessRapportDTO> _list = new();
 
     public RefreshPlexAccountAccessEndpoint(
         ILogger log,
         IReaparrDbContext dbContext,
         ICommandExecutor commandExecutor,
-        INotificationHubService notificationHubService
+        INotificationHubService notificationHubService,
+        IMediaQueryCache mediaQueryCache
     )
     {
         _log = log.ForContext<RefreshPlexAccountAccessEndpoint>();
         _dbContext = dbContext;
         _commandExecutor = commandExecutor;
         _notificationHubService = notificationHubService;
+        _mediaQueryCache = mediaQueryCache;
     }
 
     public override void Configure()
@@ -108,11 +111,13 @@ public class RefreshPlexAccountAccessEndpoint
                 _list.Add(ToDTO(serverAccessRapport, libraryAccessRapport));
 
                 // Remove LibraryAccess for the given PlexAccount
+                var affectedLibraryIds = lostLibraryAccess.Select(x => x.PlexLibraryId).Distinct().ToList();
                 await _dbContext
                     .PlexAccountLibraries.Where(x =>
                         x.PlexAccountId == plexAccountId && lostServerAccess.Contains(x.PlexServerId)
                     )
                     .ExecuteDeleteAsync(cancellationToken: ct);
+                _mediaQueryCache.InvalidateLibraries(affectedLibraryIds, "Plex account library access revoked");
             }
             else
             {

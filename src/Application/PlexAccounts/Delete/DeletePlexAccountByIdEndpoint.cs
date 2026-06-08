@@ -15,16 +15,19 @@ public class DeletePlexAccountByIdEndpoint : Endpoint<DeletePlexAccountByIdReque
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
     private readonly INotificationHubService _notificationHubService;
+    private readonly IMediaQueryCache _mediaQueryCache;
 
     public DeletePlexAccountByIdEndpoint(
         ILogger log,
         IReaparrDbContext dbContext,
-        INotificationHubService notificationHubService
+        INotificationHubService notificationHubService,
+        IMediaQueryCache mediaQueryCache
     )
     {
         _log = log.ForContext<DeletePlexAccountByIdEndpoint>();
         _dbContext = dbContext;
         _notificationHubService = notificationHubService;
+        _mediaQueryCache = mediaQueryCache;
     }
 
     public override void Configure()
@@ -55,6 +58,15 @@ public class DeletePlexAccountByIdEndpoint : Endpoint<DeletePlexAccountByIdReque
             return;
         }
 
+        var affectedLibraryIds = await _dbContext.PlexAccountLibraries
+            .Where(x => x.PlexAccountId == req.PlexAccountId)
+            .Select(x => x.PlexLibraryId)
+            .ToListAsync(ct);
+        var affectedServerIds = await _dbContext.PlexAccountServers
+            .Where(x => x.PlexAccountId == req.PlexAccountId)
+            .Select(x => x.PlexServerId)
+            .ToListAsync(ct);
+
         await _dbContext.PlexAccountServers.Where(x => x.PlexAccountId == req.PlexAccountId).ExecuteDeleteAsync(ct);
         await _dbContext.PlexAccountLibraries.Where(x => x.PlexAccountId == req.PlexAccountId).ExecuteDeleteAsync(ct);
 
@@ -70,6 +82,18 @@ public class DeletePlexAccountByIdEndpoint : Endpoint<DeletePlexAccountByIdReque
         var deletedLibrariesCount = await _dbContext
             .PlexLibraries.Where(x => !accessibleLibraryIds.Contains(x.Id))
             .ExecuteDeleteAsync(ct);
+
+        if (affectedServerIds.Count > 0)
+        {
+            var serverLibraryIds = await _dbContext.PlexLibraries
+                .IgnoreQueryFilters()
+                .Where(x => affectedServerIds.Contains(x.PlexServerId))
+                .Select(x => x.Id)
+                .ToListAsync(ct);
+            affectedLibraryIds.AddRange(serverLibraryIds);
+        }
+
+        _mediaQueryCache.InvalidateLibraries(affectedLibraryIds.Distinct().ToList(), "Plex account access deleted");
 
         _log.Here()
             .Debug(

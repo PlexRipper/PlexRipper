@@ -1,6 +1,6 @@
 namespace Reaparr.Application.UnitTests;
 
-public class AddOrUpdatePlexAccountServersCommandHandlerUnitTests : BaseUnitTest
+public class AddOrUpdatePlexAccountServersCommandHandlerUnitTests : BaseUnitTest<AddOrUpdatePlexAccountServersCommandHandler>
 {
     [Test]
     public async Task ShouldAddPlexAccountServerAssociations_WhenNoneExistsYet()
@@ -23,13 +23,21 @@ public class AddOrUpdatePlexAccountServersCommandHandlerUnitTests : BaseUnitTest
         // Remove all associations
         await IDbContext.PlexAccountServers.ExecuteDeleteAsync(CancellationToken);
 
+
+        Mock.Mock<IMediaQueryCache>()
+            .Setup(x => x.InvalidateLibraries(
+                It.Is<IReadOnlyCollection<int>>(libraryIds => !libraryIds.Any()),
+                "Plex account server access changed"
+            ))
+            .Verifiable(Times.Once);
+
         // Act
         var request = new AddOrUpdatePlexAccountServersCommand(plexAccount.Id, serverAccessTokens);
-        var handler = new AddOrUpdatePlexAccountServersCommandHandler(Log, IDbContext);
-        var result = await handler.ExecuteAsync(request, CancellationToken);
+        var result = await Sut.ExecuteAsync(request, CancellationToken);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
+        Mock.Mock<IMediaQueryCache>().Verify();
         var plexAccountServers = IDbContext.PlexAccountServers.Include(x => x.PlexServer).ToList();
         plexAccountServers.Count.ShouldBe(serverAccessTokens.Count);
 
@@ -69,13 +77,21 @@ public class AddOrUpdatePlexAccountServersCommandHandlerUnitTests : BaseUnitTest
         // Remove all associations
         await IDbContext.PlexAccountServers.ExecuteDeleteAsync(CancellationToken);
 
+
+        Mock.Mock<IMediaQueryCache>()
+            .Setup(x => x.InvalidateLibraries(
+                It.Is<IReadOnlyCollection<int>>(libraryIds => !libraryIds.Any()),
+                "Plex account server access changed"
+            ))
+            .Verifiable(Times.Once);
+
         // Act
         var request = new AddOrUpdatePlexAccountServersCommand(plexAccount.Id, serverAccessTokens);
-        var handler = new AddOrUpdatePlexAccountServersCommandHandler(Log, IDbContext);
-        var result = await handler.ExecuteAsync(request, CancellationToken);
+        var result = await Sut.ExecuteAsync(request, CancellationToken);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
+        Mock.Mock<IMediaQueryCache>().Verify();
         var plexAccountServers = IDbContext
             .PlexAccountServers.Include(x => x.PlexServer)
             .Include(x => x.PlexAccount)
@@ -90,6 +106,47 @@ public class AddOrUpdatePlexAccountServersCommandHandlerUnitTests : BaseUnitTest
                     && x.PlexAccountId == plexAccount.Id
                 )
                 .ShouldBeTrue();
+    }
+
+    [Test]
+    public async Task ShouldInvalidateServerLibraries_WhenServerAccessChanges()
+    {
+        // Arrange
+        var seed = await SetupDatabase(
+            33383,
+            config =>
+            {
+                config.PlexServerCount = 2;
+                config.PlexMovieLibraryCount = 1;
+                config.PlexAccountCount = 1;
+            }
+        );
+
+        var plexAccount = IDbContext.PlexAccounts.FirstOrDefault();
+        plexAccount.ShouldNotBeNull();
+        var plexServers = IDbContext.PlexServers.IgnoreIsEnabledFilter().OrderBy(x => x.Id).ToList();
+        var serverAccessTokens = FakeData.GetServerAccessTokenDTO(seed, plexAccount, plexServers);
+        var expectedLibraryIds = IDbContext.PlexLibraries
+            .IgnoreQueryFilters()
+            .Where(x => plexServers.Select(y => y.Id).Contains(x.PlexServerId))
+            .Select(x => x.Id)
+            .OrderBy(x => x)
+            .ToList();
+
+        Mock.Mock<IMediaQueryCache>()
+            .Setup(x => x.InvalidateLibraries(
+                It.Is<IReadOnlyCollection<int>>(libraryIds => libraryIds.OrderBy(id => id).SequenceEqual(expectedLibraryIds)),
+                "Plex account server access changed"
+            ))
+            .Verifiable(Times.Once);
+
+        // Act
+        var request = new AddOrUpdatePlexAccountServersCommand(plexAccount.Id, serverAccessTokens);
+        var result = await Sut.ExecuteAsync(request, CancellationToken);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        Mock.Mock<IMediaQueryCache>().Verify();
     }
 
     [Test]
@@ -116,13 +173,21 @@ public class AddOrUpdatePlexAccountServersCommandHandlerUnitTests : BaseUnitTest
         // Remove all associations
         await IDbContext.PlexAccountServers.ExecuteDeleteAsync(CancellationToken);
 
+
+        Mock.Mock<IMediaQueryCache>()
+            .Setup(x => x.InvalidateLibraries(
+                It.Is<IReadOnlyCollection<int>>(libraryIds => !libraryIds.Any()),
+                "Plex account server access changed"
+            ))
+            .Verifiable(Times.Once);
+
         // Act
         var request = new AddOrUpdatePlexAccountServersCommand(plexAccount.Id, serverAccessTokens);
-        var handler = new AddOrUpdatePlexAccountServersCommandHandler(Log, IDbContext);
-        var result = await handler.ExecuteAsync(request, CancellationToken);
+        var result = await Sut.ExecuteAsync(request, CancellationToken);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
+        Mock.Mock<IMediaQueryCache>().Verify();
         var plexAccountServers = IDbContext.PlexAccountServers.Include(x => x.PlexServer).ToList();
         plexAccountServers.Count.ShouldBe(3);
 

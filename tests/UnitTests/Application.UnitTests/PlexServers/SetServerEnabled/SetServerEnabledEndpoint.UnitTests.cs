@@ -1,3 +1,5 @@
+using Microsoft.Extensions.DependencyInjection;
+
 namespace Reaparr.Application.UnitTests;
 
 public class SetServerEnabledEndpointUnitTests : BaseEndpointUnitTest<SetServerEnabledEndpoint, SetServerEnabledRequest, ResultDTO<PlexServerDTO>>
@@ -208,6 +210,46 @@ public class SetServerEnabledEndpointUnitTests : BaseEndpointUnitTest<SetServerE
         // Assert
         endpointResult.Response.ShouldNotBeNull();
         endpointResult.Response.IsSuccess.ShouldBe(true);
+    }
+
+    [Test]
+    public async Task ShouldInvalidateServerLibraries_WhenTogglingIsEnabled()
+    {
+        // Arrange
+        await SetupDatabase(91211, config =>
+        {
+            config.PlexServerCount = 2;
+            config.PlexMovieLibraryCount = 2;
+            config.PlexTvShowLibraryCount = 2;
+        });
+
+        var dbContext = IDbContext;
+        var server = await dbContext.PlexServers.IgnoreIsEnabledFilter().OrderBy(x => x.Id).FirstAsync(CancellationToken);
+        var expectedLibraryIds = await dbContext.PlexLibraries
+            .IgnoreQueryFilters()
+            .Where(x => x.PlexServerId == server.Id)
+            .Select(x => x.Id)
+            .OrderBy(x => x)
+            .ToListAsync(CancellationToken);
+        var mediaQueryCache = new Mock<IMediaQueryCache>(MockBehavior.Strict);
+
+        mediaQueryCache
+            .Setup(x => x.InvalidateLibraries(
+                It.Is<IReadOnlyCollection<int>>(libraryIds => libraryIds.OrderBy(id => id).SequenceEqual(expectedLibraryIds)),
+                "Plex server enabled scope changed"
+            ))
+            .Verifiable(Times.Once);
+
+        // Act
+        var endpointResult = await TestEndpointHandleAsync(
+            new SetServerEnabledRequest { PlexServerId = server.Id, IsEnabled = false },
+            services => services.AddSingleton(_ => mediaQueryCache.Object)
+        );
+
+        // Assert
+        endpointResult.Response.ShouldNotBeNull();
+        endpointResult.Response.IsSuccess.ShouldBe(true);
+        mediaQueryCache.Verify();
     }
 
     [Test]

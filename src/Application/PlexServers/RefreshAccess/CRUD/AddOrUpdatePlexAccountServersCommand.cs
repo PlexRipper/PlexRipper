@@ -16,11 +16,17 @@ public class AddOrUpdatePlexAccountServersCommandHandler
 {
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
+    private readonly IMediaQueryCache _mediaQueryCache;
 
-    public AddOrUpdatePlexAccountServersCommandHandler(ILogger log, IReaparrDbContext dbContext)
+    public AddOrUpdatePlexAccountServersCommandHandler(
+        ILogger log,
+        IReaparrDbContext dbContext,
+        IMediaQueryCache mediaQueryCache
+    )
     {
         _log = log.ForContext<AddOrUpdatePlexAccountServersCommandHandler>();
         _dbContext = dbContext;
+        _mediaQueryCache = mediaQueryCache;
     }
 
     public async Task<Result<RefreshPlexServerAccessRapport>> ExecuteAsync(
@@ -138,6 +144,8 @@ public class AddOrUpdatePlexAccountServersCommandHandler
             .AsTracking()
             .ToListAsync(cancellationToken);
 
+        var changedPlexServerIds = accessiblePlexServers.Distinct().ToList();
+
         if (removalList.Any())
         {
             foreach (var plexAccountServer in removalList)
@@ -148,6 +156,7 @@ public class AddOrUpdatePlexAccountServersCommandHandler
                         plexAccountServer.PlexServer!.Name
                     );
             var removalIds = removalList.Select(x => x.PlexServerId).ToList();
+            changedPlexServerIds.AddRange(removalIds);
             await _dbContext
                 .PlexAccountServers.Where(x => removalIds.Contains(x.PlexServerId) && x.PlexAccountId == plexAccountId)
                 .ExecuteDeleteAsync(cancellationToken);
@@ -166,6 +175,13 @@ public class AddOrUpdatePlexAccountServersCommandHandler
                     plexAccount.DisplayName
                 );
         }
+
+        var affectedLibraryIds = await _dbContext.PlexLibraries
+            .IgnoreQueryFilters()
+            .Where(x => changedPlexServerIds.Contains(x.PlexServerId))
+            .Select(x => x.Id)
+            .ToListAsync(cancellationToken);
+        _mediaQueryCache.InvalidateLibraries(affectedLibraryIds, "Plex account server access changed");
 
         return Result.Ok(rapport);
     }

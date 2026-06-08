@@ -1,3 +1,5 @@
+using Microsoft.Extensions.DependencyInjection;
+
 namespace Reaparr.Application.UnitTests;
 
 public class SetServerOwnedEndpointUnitTests : BaseEndpointUnitTest<SetServerOwnedEndpoint, SetServerOwnedRequest, ResultDTO<PlexServerDTO>>
@@ -166,6 +168,46 @@ public class SetServerOwnedEndpointUnitTests : BaseEndpointUnitTest<SetServerOwn
         var other = await db.PlexServers.IgnoreIsEnabledFilter().FirstAsync(x => x.Id == otherId, CancellationToken);
         target.OwnedOverride.ShouldBe(true);
         other.OwnedOverride.ShouldBe(servers[1].OwnedOverride);
+    }
+
+    [Test]
+    public async Task ShouldInvalidateServerLibraries_WhenChangingOwnedOverride()
+    {
+        // Arrange
+        await SetupDatabase(91116, config =>
+        {
+            config.PlexServerCount = 2;
+            config.PlexMovieLibraryCount = 2;
+            config.PlexTvShowLibraryCount = 2;
+        });
+
+        var dbContext = IDbContext;
+        var server = await dbContext.PlexServers.IgnoreIsEnabledFilter().OrderBy(x => x.Id).FirstAsync(CancellationToken);
+        var expectedLibraryIds = await dbContext.PlexLibraries
+            .IgnoreQueryFilters()
+            .Where(x => x.PlexServerId == server.Id)
+            .Select(x => x.Id)
+            .OrderBy(x => x)
+            .ToListAsync(CancellationToken);
+        var mediaQueryCache = new Mock<IMediaQueryCache>(MockBehavior.Strict);
+
+        mediaQueryCache
+            .Setup(x => x.InvalidateLibraries(
+                It.Is<IReadOnlyCollection<int>>(libraryIds => libraryIds.OrderBy(id => id).SequenceEqual(expectedLibraryIds)),
+                "Plex server ownership scope changed"
+            ))
+            .Verifiable(Times.Once);
+
+        // Act
+        var endpointResult = await TestEndpointHandleAsync(
+            new SetServerOwnedRequest { PlexServerId = server.Id, IsOwned = true },
+            services => services.AddSingleton(_ => mediaQueryCache.Object)
+        );
+
+        // Assert
+        endpointResult.Response.ShouldNotBeNull();
+        endpointResult.Response.IsSuccess.ShouldBe(true);
+        mediaQueryCache.Verify();
     }
 
     [Test]

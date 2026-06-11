@@ -15,9 +15,9 @@
       },
       "CSharpier.MsBuild": {
         "type": "Direct",
-        "requested": "[1.2.6, )",
-        "resolved": "1.2.6",
-        "contentHash": "KMSJG+jfk7vjP52QkWB99qWespXCPAzG/IaMCMRHYWumJEAGKQYm2HtyWG6eqnOwDitH96i1cqq5EVesyOtPmg=="
+        "requested": "[1.3.0, )",
+        "resolved": "1.3.0",
+        "contentHash": "jzzLpmz7F6LyBh5FTZy8/4dEYVcAG9VjBPKryZ82LIoUuupcBkCSXzaeS/4oYcp/rBC8yVLcDstJ8CIv9n2IFw=="
       },
       "Downloader": {
         "type": "Direct",

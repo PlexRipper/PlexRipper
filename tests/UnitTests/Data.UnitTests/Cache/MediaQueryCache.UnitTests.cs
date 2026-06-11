@@ -1,5 +1,6 @@
 using FlexQuery.NET.Models;
 using Reaparr.Application.Contracts;
+using Reaparr.Settings.Contracts;
 
 namespace Reaparr.Data.UnitTests;
 
@@ -489,7 +490,8 @@ public class MediaQueryCacheUnitTests : BaseUnitTest<MediaQueryCache>
         });
 
         var unfiltered = CreateFilter(sort: "sortIndex:asc", page: 1, pageSize: 5);
-        var filtered = CreateFilter(filterOfflineMedia: true, filterOwnedMedia: true, sort: "sortIndex:asc", page: 1, pageSize: 5);
+        var filtered = CreateFilter(filterOfflineMedia: true, filterOwnedMedia: true, sort: "sortIndex:asc", page: 1,
+            pageSize: 5);
         var buildResults = new Queue<Result<PagedMediaQueryResult>>([
             Result.Ok(CreateResult([1, 2, 3, 4, 5])),
             Result.Ok(CreateResult([6, 7, 8, 9, 10])),
@@ -530,7 +532,8 @@ public class MediaQueryCacheUnitTests : BaseUnitTest<MediaQueryCache>
             .ToListAsync(CancellationToken);
         var firstFilter = CreateFilter(sort: "sortIndex:asc", page: 1, pageSize: 5);
         var secondFilter = CreateFilter(sort: "sortIndex:asc", page: 2, pageSize: 5);
-        var buildCompletion = new TaskCompletionSource<Result<PagedMediaQueryResult>>(TaskCreationOptions.RunContinuationsAsynchronously);
+        var buildCompletion =
+            new TaskCompletionSource<Result<PagedMediaQueryResult>>(TaskCreationOptions.RunContinuationsAsynchronously);
 
         var commandExecutor = Mock.Mock<ICommandExecutor>();
         commandExecutor
@@ -575,6 +578,9 @@ public class MediaQueryCacheUnitTests : BaseUnitTest<MediaQueryCache>
             })
             .Verifiable(Times.Exactly(14));
 
+        Mock.Mock<IGeneralSettings>().Setup(x => x.HideMediaFromOfflineServers).Returns(true);
+        Mock.Mock<IGeneralSettings>().Setup(x => x.HideMediaFromOwnedServers).Returns(true);
+
         // Act
         await Sut.BuildCache();
 
@@ -588,6 +594,7 @@ public class MediaQueryCacheUnitTests : BaseUnitTest<MediaQueryCache>
             command.Filter.Parameters.Page.ShouldBeNull();
             command.Filter.Parameters.PageSize.ShouldBeNull();
         }
+
         commandExecutor.Verify();
     }
 

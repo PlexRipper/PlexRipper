@@ -7,6 +7,40 @@ namespace Reaparr.Data.UnitTests;
 public class MediaQueryCacheUnitTests : BaseUnitTest<MediaQueryCache>
 {
     [Test]
+    public async Task ShouldReturnSecondPageItems_WhenUsingRealQueryHandlerSnapshot()
+    {
+        // Arrange
+        await SetupDatabase(70320, cfg =>
+        {
+            cfg.PlexServerCount = 1;
+            cfg.PlexMovieLibraryCount = 1;
+            cfg.MovieCount = 250;
+        });
+
+        var dbContext = IDbContext;
+        var allMovieIds = await dbContext.PlexMovies
+            .OrderBy(x => x.SearchTitle)
+            .Select(x => x.Id)
+            .ToListAsync(CancellationToken);
+        var filter = CreateFilter(sort: "sortIndex:asc", page: 2, pageSize: 100);
+        var realHandler = new GetMediaByTypeCommandHandler(dbContext);
+
+        Mock.Mock<ICommandExecutor>()
+            .Setup(x => x.Send(It.IsAny<GetMediaByTypeCommand>(), It.IsAny<CancellationToken>()))
+            .Returns<GetMediaByTypeCommand, CancellationToken>((command, token) => realHandler.ExecuteAsync(command, token))
+            .Verifiable(Times.Once());
+
+        // Act
+        var result = await Sut.GetMediaAsync(filter, CancellationToken);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.TotalCount.ShouldBe(allMovieIds.Count);
+        result.Value.Items.Select(x => x.Id).ShouldBe(allMovieIds.Skip(100).Take(100));
+        Mock.Mock<ICommandExecutor>().Verify();
+    }
+
+    [Test]
     public async Task ShouldReturnDeepPageItems_WhenSnapshotContainsFullResult()
     {
         // Arrange

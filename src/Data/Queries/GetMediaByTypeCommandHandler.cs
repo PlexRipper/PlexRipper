@@ -90,6 +90,8 @@ public class GetMediaByTypeCommandHandler : ICommandHandler<GetMediaByTypeComman
         var options = QueryOptionsParser.Parse(filter.Parameters);
         var page = Math.Max(filter.Parameters.Page ?? 1, 1);
         var pageSize = Math.Max(filter.Parameters.PageSize ?? 0, 0);
+        options.Paging.Disabled = pageSize == 0;
+        
         _response.Page = page;
         _response.PageSize = pageSize;
 
@@ -127,7 +129,7 @@ public class GetMediaByTypeCommandHandler : ICommandHandler<GetMediaByTypeComman
                 _response.TotalCount = await movieQuery.CountAsync(ct);
                 _response.MediaSize = await movieQuery.SumAsync(x => x.MediaSize, ct);
                 _response.TotalMediaSize = _response.MediaSize;
-
+                
                 var movies = await movieQuery
                     .ApplyPaging(options)
                     .ToListAsync(ct);

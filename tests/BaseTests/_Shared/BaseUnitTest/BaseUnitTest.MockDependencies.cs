@@ -1,6 +1,4 @@
 using System.IO.Abstractions.TestingHelpers;
-using Moq;
-using Reaparr.Data.Contracts;
 using Reaparr.PlexApi.Contracts;
 
 namespace Reaparr.BaseTests;

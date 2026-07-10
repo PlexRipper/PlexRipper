@@ -1,0 +1,1136 @@
+{
+    "components": {
+        "account-card": {
+            "invalid-account": "계정 객체가 유효하지 않습니다"
+        },
+        "account-dialog": {
+            "add-account-title": "Plex 계정 추가: {name}",
+            "edit-account-title": "Plex 계정 편집: {name}",
+            "generate-token-button": "토큰 생성"
+        },
+        "connection-progress-text": {
+            "retry-connection": "연결을 다시 시도하는 중, { attemptCount }회 중 { attemptIndex }번째 시도입니다.",
+            "connection-connectable": "연결 상태가 양호합니다!",
+            "connection-un-connectable": "연결에 실패했습니다!"
+        },
+        "check-server-connections-dialog": {
+            "server-connectable": "서버에 연결할 수 있습니다!",
+            "server-un-connectable": "서버에 연결할 수 없습니다. 오프라인 상태일 가능성이 높습니다.",
+            "checking-progress": "Plex 서버 연결 확인 중 ({total}개 중 {count}번째)",
+            "completed": "Plex 서버 {length}개의 점검을 완료했습니다!",
+            "fetching-servers": "Plex 계정 {displayName}의 접근 가능한 서버를 가져오는 중",
+            "no-connections": "이 Plex 서버에 대한 연결을 찾을 수 없습니다!",
+            "no-progress-yet": "아직 진행 상황 없음"
+        },
+        "account-verification-code-dialog": {
+            "error": "인증 코드가 유효하지 않습니다. 다시 시도해 주세요.",
+            "sub-title": "이 계정은 2단계 인증이 활성화되어 있습니다.",
+            "title": "인증 코드 입력"
+        },
+        "app-bar": {
+            "no-accounts": "사용 가능한 계정 없음",
+            "copy-version": "Reaparr 버전 복사 - { version }",
+            "update-available": "업데이트 가능"
+        },
+        "update-available-dialog": {
+            "title": "새 버전 사용 가능",
+            "current-version": "현재 버전: {version}",
+            "latest-version": "최신 버전: {version}",
+            "download-update": "업데이트 다운로드",
+            "downloading": "업데이트 다운로드 중… {percentage}%",
+            "restarting": "업데이트 적용을 위해 재시작 중…",
+            "docker-action": "Docker 릴리스 보기",
+            "no-releases": "현재 사용 가능한 릴리스가 없습니다."
+        },
+        "details-overview": {
+            "total-duration": "총 재생 시간:",
+            "media-count": "시즌 {seasonCount}개 - 에피소드 {episodeCount}개",
+            "media-count-label": "미디어 개수:",
+            "summary": "요약:",
+            "one-movie-count": "영화 1편"
+        },
+        "directory-browser": {
+            "path": "경로:",
+            "select-path": "{pathName} 선택",
+            "type": "유형:",
+            "no-path": "아래에 입력을 시작하거나 경로를 선택하세요.",
+            "has-no-read-permission": "이 폴더에 대한 읽기 권한이 없습니다!",
+            "has-no-write-permission": "이 폴더에 대한 쓰기 권한이 없습니다!",
+            "current-folder-has-no-write-permission": "현재 폴더에 쓰기 권한이 없습니다! 권한이 있는 폴더를 선택하세요."
+        },
+        "download-confirmation": {
+            "description": "Reaparr가 다음 항목의 다운로드를 시작합니다",
+            "total-size": "전체 크기:",
+            "columns": {
+                "file-size": "파일 크기",
+                "title": "제목"
+            },
+            "destination": {
+                "custom-destination-option": "사용자 지정",
+                "header": "다운로드 위치:"
+            }
+        },
+        "download-details-dialog": {
+            "overview": {
+                "destination-path": "대상 경로:",
+                "download-path": "다운로드 경로:",
+                "download-url": "다운로드 URL:",
+                "file-name": "파일 이름:",
+                "status": "상태:"
+            },
+            "invalid-download-task": {
+                "body": "이 다운로드 작업의 세부 정보를 가져오는 중 오류가 발생했습니다:",
+                "title": "다운로드 작업을 가져올 수 없습니다"
+            },
+            "logs": {
+                "copy-all": "모든 로그 복사",
+                "delete-all": "모든 로그 삭제",
+                "sort-oldest-first": "오래된 순",
+                "sort-newest-first": "최신 순",
+                "filter-by-level": "로그 수준별 필터",
+                "copied-to-clipboard": "로그가 클립보드에 복사되었습니다",
+                "entry-copied-to-clipboard": "로그 항목이 클립보드에 복사되었습니다",
+                "deleted": "로그가 삭제되었습니다",
+                "no-logs": "이 다운로드 작업에 대한 로그가 없습니다.",
+                "delete-confirmation": {
+                    "title": "모든 로그 삭제",
+                    "text": "이 다운로드 작업의 모든 로그를 삭제하시겠습니까?"
+                }
+            }
+        },
+        "media-overview": {
+            "is-refreshing": "{server}에서 \"{library}\" 라이브러리 데이터를 새로고침하는 중",
+            "could-not-display": "이 라이브러리를 표시할 수 없습니다.",
+            "no-data": "라이브러리가 동기화되었지만 미디어가 없습니다.",
+            "library-not-yet-synced": "라이브러리 미디어 데이터가 아직 동기화되지 않았습니다. 잠시 기다리거나 지금 새로고침하세요.",
+            "no-search-results": "\"{query}\"이(가) 포함된 미디어를 찾을 수 없습니다",
+            "no-media-items-available": "미디어 항목을 찾을 수 없습니다!",
+            "no-filter-results": "현재 필터 설정과 일치하는 미디어 결과가 없습니다. 필터를 조정하거나 초기화하여 결과를 표시하세요"
+        },
+        "navigation-drawer": {
+            "accounts": "계정",
+            "advanced": "고급",
+            "debug": "디버그",
+            "dialogs": "대화상자",
+            "downloads": "다운로드",
+            "logs": "로그",
+            "paths": "경로",
+            "settings": "설정",
+            "ui": "UI",
+            "buttons": "버튼",
+            "scratchpad": "스크래치패드",
+            "integrations": "연동"
+        },
+        "notifications-drawer": {
+            "clear-notifications": "모든 알림 지우기",
+            "no-notifications": "사용 가능한 알림 없음"
+        },
+        "folder-paths-overview": {
+            "main": {
+                "header": "기본 경로"
+            },
+            "movie": {
+                "header": "영화 경로",
+                "default-name": "영화 폴더 경로"
+            },
+            "tv-show": {
+                "header": "TV 프로그램 경로",
+                "default-name": "TV 프로그램 폴더 경로"
+            }
+        },
+        "server-dialog": {
+            "header": "{serverName} 구성",
+            "tabs": {
+                "download-destinations": {
+                    "header": "다운로드 위치"
+                },
+                "server-commands": {
+                    "header": "서버 명령"
+                },
+                "server-config": {
+                    "header": "서버 구성",
+                    "plex-server-was-null": "Plex 서버가 null입니다"
+                },
+                "server-connections": {
+                    "header": "서버 연결",
+                    "section-header": "선호하는 서버 연결을 선택하세요:",
+                    "add-connection-button": "연결 추가",
+                    "check-all-connections": "모든 연결 확인"
+                },
+                "server-data": {
+                    "headers": {
+                        "created-on": "생성일:",
+                        "current-status": "현재 상태:",
+                        "last-seen-at": "마지막 접속:",
+                        "machine-id": "머신 식별자:",
+                        "plex-version": "Plex 버전:",
+                        "device": "기기:",
+                        "platform": "플랫폼:"
+                    },
+                    "header": "서버 데이터",
+                    "values": {
+                        "platform-version": "{platform} ({platformVersion})",
+                        "product-version": "{product} ({productVersion})"
+                    }
+                }
+            }
+        },
+        "server-drawer": {
+            "no-libraries": "라이브러리를 찾을 수 없습니다. 클릭하여 접근 권한을 새로고침하세요.",
+            "no-servers": {
+                "description": "설정에 Plex 계정이 등록되어 있는지, 그리고 우측 상단의 계정 선택기에서 접근 가능한 Plex 서버가 있는 계정을 선택했는지 확인하세요.",
+                "header": "사용 가능한 서버가 없습니다!"
+            }
+        },
+        "media-list": {
+            "no-media-found": "미디어를 찾을 수 없습니다.",
+            "selected-count": "{selectedCount}개 선택됨",
+            "episode-count": "에피소드 {episodeCount}개",
+            "columns": {
+                "title": "제목",
+                "year": "연도",
+                "duration": "재생 시간",
+                "media-size": "크기",
+                "added-at": "추가된 날짜",
+                "updated-at": "업데이트된 날짜",
+                "actions": "작업",
+                "quality": "화질"
+            }
+        },
+        "server-download-status": {
+            "pause": "일시정지",
+            "start": "시작"
+        },
+        "q-tree-view-table-row": {
+            "invalid-node": "노드가 undefined이거나 null입니다"
+        },
+        "server-library-destinations-tab-content": {
+            "no-libraries": "이 Plex 서버에는 기본 대상을 설정할 라이브러리가 없습니다"
+        },
+        "account-selector": {
+            "all-accounts": "모든 Plex 계정",
+            "title": "계정 새로고침",
+            "log-out-button": "로그아웃"
+        },
+        "media-selection-dialog": {
+            "title": "미디어를 선택할 인덱스 범위를 설정하세요 (#{min} - #{max})"
+        },
+        "q-status": {
+            "server-connectable": "서버가 온라인 상태이며 연결 가능합니다!",
+            "server-unconnectable": "서버에 연결할 수 없으며 오프라인 상태일 수 있습니다.."
+        },
+        "alert-dialog": {
+            "request-data-sent": "전송된 요청 데이터:"
+        },
+        "account-token-validate-dialog": {
+            "column": {
+                "email": "이메일",
+                "title": "제목",
+                "username": "사용자 이름"
+            },
+            "invalid-token": "자격 증명 또는 토큰이 유효하지 않거나 만료되었습니다.",
+            "sub-header": "토큰 {authToken}은(는) 다음 Plex 계정에 속합니다:",
+            "title": "Plex.tv 인증 토큰 검증"
+        },
+        "downloads-table": {
+            "clear-completed": {
+                "button": "완료된 항목 지우기",
+                "confirmation": {
+                    "title": "완료된 다운로드를 지우시겠습니까?",
+                    "text": "이 서버의 완료된 다운로드 작업만 재귀적으로 제거합니다. 다운로드된 파일은 파일 시스템에서 삭제되지 않습니다."
+                }
+            },
+            "columns": {
+                "actions": "작업",
+                "data-received": "수신됨",
+                "data-total": "크기",
+                "percentage": "진행률",
+                "speed": "속도",
+                "status": "상태",
+                "time-remaining": "남은 시간",
+                "title": "제목"
+            }
+        },
+        "q-countdown": {
+            "hours-minute-seconds": "{hours}시간 {minutes}분 {seconds}초 남음",
+            "minutes-seconds": "{minutes}분 {seconds}초 남음",
+            "seconds": "{seconds}초 남음"
+        },
+        "add-connection-dialog": {
+            "header": "{serverName}에 연결 추가",
+            "add-connection-button": "연결 생성",
+            "input": {
+                "connection-url": "연결 URL",
+                "host-name": "호스트 이름",
+                "port": "포트",
+                "protocol": "프로토콜"
+            },
+            "test-connection-button": "연결 테스트",
+            "url-has-invalid-format": "URL 형식이 잘못되었습니다!",
+            "url-has-valid-format": "URL 형식이 올바릅니다!",
+            "update-connection": "연결 업데이트",
+            "url-already-exists": "이 URL은 이미 서버 {serverName}에서 사용 중입니다"
+        },
+        "account-form": {
+            "credentials-tab": "사용자 이름 및 비밀번호",
+            "token-tab": "인증 토큰",
+            "validation": {
+                "display-name-length": "표시 이름은 최소 {count}자 이상이어야 합니다",
+                "display-name-required": "표시 이름은 필수입니다",
+                "username-is-required": "사용자 이름은 필수입니다",
+                "auth-token-format": "인증 토큰은 영문자, 숫자, 밑줄(_), 하이픈(-)만 포함할 수 있습니다.",
+                "auth-token-length": "인증 토큰은 {count}자여야 합니다.",
+                "auth-token-required": "인증 토큰은 필수입니다."
+            }
+        },
+        "media-overview-bar": {
+            "all-media-mode": {
+                "movies": "모든 영화",
+                "tv-shows": "모든 TV 프로그램"
+            }
+        },
+        "media-options-dialog": {
+            "title": "미디어 개요 옵션"
+        },
+        "background-activity-toggle-button": {
+            "checking-plex-server-connections": "Plex 서버 연결 확인 중",
+            "no-active-background-activity": "진행 중인 백그라운드 작업이 없습니다.",
+            "syncing-media": "Plex 서버에서 미디어 데이터 동기화 중"
+        },
+        "media-overview-bar-header": {
+            "movies-metadata": "영화 {movieCount}편 - {fileSize} ",
+            "tv-shows-metadata": "TV 프로그램 {tvShowCount}개 - 시즌 {seasonCount}개 - 에피소드 {episodeCount}개 - {fileSize} "
+        },
+        "discord-invite-dialog": {
+            "discord-invite-button-text": "Reaparr Discord 참여하기!",
+            "header": "새로운 Reaparr Discord에 참여하세요!",
+            "reasons": {
+                "reason-1": "Plex 서버 접근 권한을 공유하고 교환하세요!",
+                "reason-2": "Reaparr 설정 및 문제 해결에 대한 실시간 지원을 받으세요!",
+                "reason-3": "비슷한 관심사를 가진 Reaparr 및 Plex 애호가 커뮤니티와 소통하세요!",
+                "reason-4": "새로운 기능과 릴리스에 대한 토론에 참여하세요!",
+                "reason-5": "Reaparr에 대한 독점 업데이트와 공지사항을 확인하세요!"
+            }
+        },
+        "sync-server-media-dialog": {
+            "completed": "모든 미디어가 동기화되었습니다!",
+            "checking-progress": "Plex 라이브러리 동기화 중 ({total}개 중 {count}번째)",
+            "fetching-servers": "미디어 동기화를 위해 접근 가능한 서버를 가져오는 중"
+        },
+        "authentication-overview": {
+            "validation": {
+                "username-is-required": "사용자 이름은 필수입니다",
+                "username-length": "사용자 이름은 최소 {count}자 이상이어야 합니다",
+                "passwords-are-not-equal": "비밀번호가 일치하지 않습니다. 두 비밀번호가 같은지 확인하세요."
+            }
+        },
+        "password-input-field": {
+            "validation": {
+                "password-is-required": "비밀번호는 필수입니다",
+                "password-length": "비밀번호는 최소 {count}자 이상이어야 합니다",
+                "password-is-missing-capital-letter": "대문자가 없습니다!",
+                "password-is-missing-lowercase-letter": "소문자가 없습니다!",
+                "password-is-missing-number": "숫자가 없습니다!",
+                "password-is-missing-special-symbol": "특수 문자가 없습니다!"
+            }
+        },
+        "password-strength": {
+            "validation": {
+                "uppercase": "대문자 포함",
+                "lowercase": "소문자 포함",
+                "number": "숫자 포함",
+                "symbol": "특수 문자 포함",
+                "length": "{count}자 이상"
+            }
+        },
+        "q-connection-icon": {
+            "tooltip": {
+                "local-connection": "로컬 연결",
+                "public-connection": "공개 연결",
+                "plex-connection": "Plex 릴레이 연결"
+            }
+        },
+        "refresh-account-access-dialog": {
+            "access": {
+                "granted": "접근 권한이 새로 부여되었습니다!",
+                "revoked": "접근 권한을 잃었습니다!",
+                "updated": "접근 권한이 업데이트되었습니다!",
+                "unknown": "Plex 서버에 연결할 수 없어 접근 상태를 알 수 없습니다"
+            },
+            "offline-server-message": "서버가 오프라인 상태여서 라이브러리 접근 목록을 가져올 수 없습니다. 서버가 다시 온라인 상태가 되면 다시 시도하세요."
+        },
+        "library-access-timeline": {
+            "filters": {
+                "server": "서버",
+                "library": "라이브러리"
+            },
+            "chart": {
+                "title": "라이브러리 접근 타임라인",
+                "empty": "선택한 필터에 해당하는 라이브러리 접근 기록이 없습니다."
+            }
+        },
+        "media-poster-image-content": {
+            "episode-count": "에피소드 없음 | 에피소드 1개 | 에피소드 {count}개",
+            "seasons-count": "시즌 없음 | 시즌 1개 | 시즌 {count}개"
+        },
+        "media-filter-menu": {
+            "all": "전체",
+            "meta-data": {
+                "country": "국가",
+                "genre": "장르",
+                "roles": "출연진",
+                "quality": "화질"
+            }
+        },
+        "alert-display-debug": {
+            "error-example": "미디어 화질 옵션을 불러오는 중 예기치 않은 오류가 발생했습니다. 나중에 다시 시도해 주세요.",
+            "info-example": "미디어 화질 설정에 대한 임의의 안내 메시지입니다. Lorem ipsum dolor sit amet.",
+            "success-example": "미디어 화질 설정에 대한 임의의 성공 메시지입니다. Lorem ipsum dolor sit amet.",
+            "warning-example": "알림! 일부 설정이 올바르지 않을 수 있습니다. 임의 확인 코드: 42XY-LMN."
+        },
+        "api-key-input-field": {
+            "validation": {
+                "api-key-format": "API 키는 16진수 문자(0-9, A-F)만 포함할 수 있습니다.",
+                "api-key-invalid-placeholder": "유효하지 않거나 플레이스홀더 값인 API 키입니다.",
+                "api-key-is-required": "API 키는 필수입니다",
+                "api-key-length": "API 키는 정확히 32자여야 합니다."
+            }
+        },
+        "sonarr-integration": {
+            "callback-url-warning": "Reaparr는 콜백 URL로 localhost를 사용하여 Sonarr에 등록됩니다. Docker에서 실행 중이라면 네트워크 설정에서 공개 Reaparr URL을 구성하세요.",
+            "callback-url-configured": "Reaparr는 콜백 URL로 {url}을(를) 사용하여 Sonarr에 등록됩니다.",
+            "connection-status": {
+                "connection-failed": "Sonarr에 연결할 수 없습니다. Sonarr가 온라인 상태이며 연결 가능한지 확인하세요!",
+                "invalid-api-key": "Sonarr에 연결은 되었지만 API 키가 유효하지 않습니다",
+                "success": "Reaparr가 Sonarr에 성공적으로 연결할 수 있습니다!",
+                "unknown-connection-status": "Sonarr와의 연결 테스트 중 문제의 원인을 확인할 수 없습니다",
+                "url-is-invalid": "Sonarr 기본 URL이 유효하지 않습니다. 다시 확인하세요."
+            },
+            "configuration-status": {
+                "success": "Sonarr가 Reaparr와 함께 작동하도록 성공적으로 구성되었습니다"
+            },
+            "nav-bar": {
+                "configure": {
+                    "button": "Sonarr 연동 설정",
+                    "title": "Sonarr 연동 구성"
+                },
+                "connection": {
+                    "title": "Sonarr 연결 설정"
+                }
+            },
+            "title": "Sonarr 연동"
+        },
+        "radarr-integration": {
+            "callback-url-warning": "Reaparr는 콜백 URL로 localhost를 사용하여 Radarr에 등록됩니다. Docker에서 실행 중이라면 네트워크 설정에서 공개 Reaparr URL을 구성하세요.",
+            "callback-url-configured": "Reaparr는 콜백 URL로 {url}을(를) 사용하여 Radarr에 등록됩니다.",
+            "connection-status": {
+                "connection-failed": "Radarr에 연결할 수 없습니다. Radarr가 온라인 상태이며 연결 가능한지 확인하세요!",
+                "invalid-api-key": "Radarr에 연결은 되었지만 API 키가 유효하지 않습니다",
+                "success": "Reaparr가 Radarr에 성공적으로 연결할 수 있습니다!",
+                "unknown-connection-status": "Radarr와의 연결 테스트 중 문제의 원인을 확인할 수 없습니다",
+                "url-is-invalid": "Radarr 기본 URL이 유효하지 않습니다. 다시 확인하세요."
+            },
+            "configuration-status": {
+                "success": "Radarr가 Reaparr와 함께 작동하도록 성공적으로 구성되었습니다"
+            },
+            "nav-bar": {
+                "configure": {
+                    "button": "Radarr 연동 설정",
+                    "title": "Radarr 연동 구성"
+                },
+                "connection": {
+                    "title": "Radarr 연결 설정"
+                }
+            },
+            "title": "Radarr 연동"
+        }
+    },
+    "general": {
+        "logs": {
+            "level": {
+                "debug": "디버그",
+                "information": "정보",
+                "success": "성공",
+                "warning": "경고",
+                "error": "오류",
+                "fatal": "치명적 오류",
+                "verbose": "상세"
+            }
+        },
+        "alerts": {
+            "disabled-paths": "다운로드가 진행 중일 때는 경로 편집이 비활성화됩니다. 모든 다운로드를 중지하거나 삭제했는지 확인하세요!",
+            "invalid-directory": "디렉터리가 유효한 경로가 아닙니다!",
+            "valid-directory": "디렉터리가 유효한 경로입니다!"
+        },
+        "commands": {
+            "add-alert": "알림 추가",
+            "back": "뒤로",
+            "cancel": "취소",
+            "close": "닫기",
+            "confirm": "확인",
+            "delete": "삭제",
+            "disabled": "비활성화됨",
+            "enabled": "활성화됨",
+            "finish-setup": "설정 완료",
+            "go-to-setup-page": "설정 페이지로 이동",
+            "hide": "숨기기",
+            "check-connection": "연결 확인",
+            "next": "다음",
+            "not-validated": "검증되지 않음",
+            "reset": "초기화",
+            "reset-db": "데이터베이스 초기화",
+            "save": "저장",
+            "skip-setup": "설정 건너뛰기",
+            "sync-server-libraries": "서버 라이브러리 동기화",
+            "delete-server": "서버 삭제",
+            "unknown": "알 수 없음",
+            "update": "업데이트",
+            "validate": "검증",
+            "validated": "검증됨",
+            "inspect-server": "서버 점검",
+            "selection": "선택",
+            "set-selection": "선택 설정",
+            "download": "다운로드",
+            "refresh": "새로고침",
+            "view": "보기",
+            "media-options": "옵션",
+            "sort": "정렬"
+        },
+        "sort": {
+            "clear": "정렬 초기화",
+            "title": "제목",
+            "year": "연도",
+            "added-at": "추가됨",
+            "updated-at": "업데이트됨",
+            "duration": "재생 시간",
+            "size": "크기",
+            "quality": "화질"
+        },
+        "units": {
+            "per-second": "/초"
+        },
+        "error": {
+            "unknown": "\"알 수 없음\"",
+            "invalid-server": "서버 객체가 유효하지 않습니다"
+        },
+        "delimiter": {
+            "dash": " - "
+        },
+        "download-status": {
+            "error": "오류",
+            "auth-error": "인증 오류",
+            "storage-error": "저장소 오류",
+            "source-unavailable": "소스 사용 불가",
+            "download-client-error": "다운로드 클라이언트 오류",
+            "integrity-error": "무결성 오류",
+            "server-unreachable": "서버에 연결할 수 없음",
+            "unknown": "알 수 없음",
+            "queued": "대기 중",
+            "downloading": "다운로드 중",
+            "download-finished": "다운로드 완료",
+            "paused": "일시정지됨",
+            "stopped": "중지됨",
+            "deleted": "삭제됨",
+            "moving": "이동 중",
+            "completed": "완료됨",
+            "move-error": "이동 오류",
+            "move-finished": "이동 완료",
+            "auto-move-paused": "자동 이동 일시정지됨",
+            "move-paused": "이동 일시정지됨",
+            "restarting": "재시작 중",
+            "auto-paused": "자동 일시정지됨"
+        },
+        "video-quality": {
+            "quality-1-unknown": "알 수 없음",
+            "quality-0-none": "없음",
+            "quality-144-subsd-144p": "144p",
+            "quality-240-subsd-cif": "240p",
+            "quality-360-nhd": "360p",
+            "quality-480-sd": "SD (480p)",
+            "quality-576-dvd": "DVD (576p)",
+            "quality-720-hd": "HD (720p)",
+            "quality-1080-fullhd": "Full HD (1080p)",
+            "quality-1440-qhd": "QHD (1440p)",
+            "quality-2160-uhd-4k": "4K (2160p)",
+            "quality-4320-uhd-8k": "8K (4320p)"
+        }
+    },
+    "confirmation": {
+        "delete-account": {
+            "text": "이 작업은 Reaparr에서 이 Plex 계정을 삭제합니다! \n\n또한 접근할 수 없는 모든 Plex 공유 서버, Plex 라이브러리 및 그 안에 포함된 모든 미디어가 함께 삭제됩니다. 이 계정으로 시작되었거나 대기 중인 모든 활성 다운로드는 취소되어 삭제됩니다. 완료된 다운로드는 그대로 유지됩니다.",
+            "title": "정말 삭제하시겠습니까?",
+            "warning": "이 작업은 약 5분 이상 소요될 수 있으며, 완료되면 이 창이 자동으로 닫힙니다!"
+        },
+        "disable-server": {
+            "text": "이 작업은 서버를 비활성화하고 화면과 검색 결과에서 숨기며, 더 이상 동기화되지 않습니다. 설정 -> UI -> Plex 서버 활성화에서 이 서버를 다시 활성화할 수 있습니다",
+            "title": "정말 비활성화하시겠습니까?"
+        },
+        "delete-server": {
+            "text": "이 서버를 삭제하려고 합니다. 더 이상 이 서버에 접근할 수 없는 경우에만 삭제하세요. 여전히 이 Plex 서버에 접근할 수 있다면, 다음번 Plex 계정 새로고침 시 서버가 다시 나타납니다. 이 경우에는 삭제 대신 서버를 비활성화하여 숨겨진 상태로 유지하세요.",
+            "title": "서버를 삭제하시겠습니까?",
+            "warning": "정말로 이 서버를 삭제하시겠습니까?"
+        },
+        "reset-db": {
+            "text": "이 작업은 현재 데이터베이스를 \"config/Database Backup/\"에 백업하고 새 데이터베이스를 생성하며, 이후 설정 페이지로 이동합니다. 설정은 \"config/ReaparrSettings.json\"에 저장되어 있으므로 초기화되지 않습니다",
+            "title": "정말 초기화하시겠습니까?"
+        },
+        "not-found": {
+            "text": "올바른 확인 문구를 찾을 수 없습니다..",
+            "title": "올바른 확인 문구를 찾을 수 없습니다.."
+        }
+    },
+    "help": {
+        "account-form": {
+            "auth-token": {
+                "label": "인증 토큰",
+                "text": "사용자 이름과 비밀번호 대신 Plex.tv 인증 토큰을 입력하는 방법입니다",
+                "title": "Plex.tv 인증 토큰"
+            },
+            "display-name": {
+                "label": "표시 이름",
+                "text": "UI에서 이 계정을 표시하는 데 사용되는 이름입니다.",
+                "title": "표시 이름"
+            },
+            "is-enabled": {
+                "label": "활성화 여부",
+                "text": "이 계정을 Plex 서버에서 데이터를 다운로드하고 가져오는 데 사용할지 여부입니다.",
+                "title": "활성화 여부"
+            },
+            "is-main": {
+                "label": "메인 계정 여부",
+                "text": "메인 계정은 사용자의 Plex 라이브러리를 소유한 계정입니다. 메인 계정이 아닌 계정이 공유 Plex 서버의 동일한 Plex 라이브러리에 메인 계정과 함께 접근 권한을 가지고 있다면, 메인 계정을 보호하기 위해 해당 계정이 먼저 사용됩니다.",
+                "title": "메인 계정 여부"
+            },
+            "password": {
+                "label": "비밀번호",
+                "text": "사용자 Plex 계정의 비밀번호입니다.",
+                "title": "비밀번호"
+            },
+            "username": {
+                "label": "사용자 이름",
+                "text": "사용자 Plex 계정의 사용자 이름입니다.\n\n**참고:** Plex는 **이메일 주소**를 사용자 이름으로 사용합니다. 사용자 이름이 작동하지 않는 경우 [FAQ](https://www.reaparr.rocks/docs/faq#username-setup)를 참고하세요.",
+                "title": "사용자 이름"
+            }
+        },
+        "default": {
+            "label": "누락된 레이블",
+            "text": "이 텍스트가 저장된 언어 경로가 올바르지 않습니다",
+            "title": "알 수 없는 도움말"
+        },
+        "server-dialog": {
+            "server-config": {
+                "download-speed-limit": {
+                    "label": "다운로드 속도 제한",
+                    "text": "이 Plex 서버의 다운로드 속도를 초당 킬로바이트 단위로 제한합니다. 이 값을 0으로 설정하면 제한이 비활성화됩니다. ",
+                    "title": "다운로드 속도 제한"
+                },
+                "allow-stream-downloader": {
+                    "label": "스트림 다운로더 허용",
+                    "text": "활성화하면 Reaparr가 이 Plex 서버에 스트림 다운로더를 사용합니다.\n\n **경고:** 이 기능을 활성화하기 전에 [스트림 다운로더 문서](https://www.reaparr.rocks/docs/configuration/stream-downloader)를 읽어보세요.",
+                    "title": "스트림 다운로더 허용"
+                }
+            },
+            "server-commands": {
+                "inspect-server": {
+                    "text": "서버를 점검하면 모든 연결을 확인하고 모든 라이브러리가 여전히 접근 가능한지 확인합니다.",
+                    "title": "Plex 서버 점검",
+                    "label": "서버 점검"
+                },
+                "sync-server-libraries": {
+                    "text": "이 Plex 서버의 각 라이브러리에 대한 모든 미디어 데이터를 다시 동기화합니다.",
+                    "title": "라이브러리 미디어 재동기화",
+                    "label": "라이브러리 미디어 재동기화"
+                },
+                "delete-server": {
+                    "text": "더 이상 접근할 수 없는 경우에만 이 서버를 삭제하세요. 여전히 접근 가능하다면 삭제 대신 비활성화하여 숨겨진 상태로 유지하세요.",
+                    "title": "이 Plex 서버 삭제",
+                    "label": "서버 삭제"
+                }
+            }
+        },
+        "settings": {
+            "advanced": {
+                "download-manager-section": {
+                    "download-segments": {
+                        "label": "다운로드 세그먼트",
+                        "text": "Reaparr는 멀티스레드 다운로드를 지원하며, 다운로드할 미디어를 여러 부분으로 나누어 각 부분을 개별적으로 다운로드할 수 있습니다. 이는 전반적인 다운로드 속도를 높이는 경향이 있지만, 단점은 이후 여러 부분을 하나의 완전한 미디어 파일로 병합하는 데 추가 시간이 필요하다는 것입니다.\n\n이 값을 1로 설정하면 멀티스레드 다운로드가 비활성화되고 미디어 파일이 하나의 완전한 파일로 다운로드됩니다. 다운로드 세그먼트 수는 미디어 파일이 병합되는 속도에 영향을 주지 않습니다.",
+                        "title": "다운로드 세그먼트"
+                    },
+                    "keep-in-downloads": {
+                        "label": "완료된 다운로드를 대상 폴더로 이동하지 않음",
+                        "title": "완료된 다운로드를 대상 폴더로 이동하지 않음",
+                        "text": "활성화하면 완료된 다운로드가 다운로드 폴더에 그대로 남아 있으며 대상 폴더로 이동되지 않습니다."
+                    }
+                },
+                "debug-section": {
+                    "debug-mode": {
+                        "text": "디버그 모드를 활성화하면 사용자 인터페이스의 여러 영역에서 평소보다 더 많은 정보가 표시됩니다.",
+                        "title": "디버그 모드",
+                        "label": "디버그 모드"
+                    }
+                },
+                "reset-db": {
+                    "label": "데이터베이스 초기화",
+                    "text": "데이터베이스를 초기화하고 기존 데이터베이스를 백업합니다.",
+                    "title": "데이터베이스 초기화"
+                },
+                "setup-section": {
+                    "go-to-setup-page": {
+                        "label": "설정 페이지로 이동",
+                        "text": "Reaparr 설정 페이지로 이동합니다.",
+                        "title": "설정 페이지로 이동"
+                    }
+                },
+                "network-section": {
+                    "reverse-proxy-url": {
+                        "label": "리버스 프록시 URL",
+                        "text": "선택 사항입니다. Reaparr가 리버스 프록시를 통해 접근될 때 사용되는 공개 기본 URL입니다 (예: https://reaparr.example.com). localhost를 유지하려면 비워 두세요.",
+                        "title": "리버스 프록시용 공개 URL"
+                    },
+                    "base-path": {
+                        "label": "기본 경로",
+                        "text": "선택 사항입니다. 프록시에 설정된 경로 접두사입니다 (예: /reaparr). 프록시가 루트에서 라우팅하는 경우 비워 두세요.",
+                        "title": "프록시 경로 접두사"
+                    },
+                    "trust-proxy-headers": {
+                        "label": "프록시 헤더 신뢰",
+                        "text": "TLS가 프록시에서 종료되는 경우 필요합니다. Reaparr가 올바른 URL을 생성할 수 있도록 X-Forwarded-* 헤더 신뢰를 활성화합니다. 재시작이 필요합니다.",
+                        "title": "전달된 헤더 사용"
+                    },
+                    "allowed-proxy-ips": {
+                        "label": "허용된 프록시 IP",
+                        "text": "선택 사항이지만 프록시 헤더 신뢰가 활성화된 경우 권장됩니다. 쉼표 또는 줄바꿈으로 구분된 IP/CIDR 범위입니다. 재시작이 필요합니다.",
+                        "title": "프록시 IP 허용 목록"
+                    },
+                    "forwarded-host-header": {
+                        "label": "전달된 호스트 헤더",
+                        "text": "선택 사항입니다. 원본 호스트를 포함하는 사용자 지정 헤더 이름입니다 (기본값: X-Forwarded-Host). 재시작이 필요합니다.",
+                        "title": "전달된 호스트 헤더 이름"
+                    },
+                    "forwarded-path-header": {
+                        "label": "전달된 경로 헤더",
+                        "text": "선택 사항입니다. 원본 경로 접두사를 포함하는 사용자 지정 헤더 이름입니다 (기본값: X-Forwarded-Prefix). 재시작이 필요합니다.",
+                        "title": "전달된 경로 헤더 이름"
+                    }
+                }
+            },
+            "ui": {
+                "general-settings": {
+                    "mask-plex-libraries": {
+                        "label": "Plex 라이브러리 이름 마스킹",
+                        "text": "UI에서 Plex 라이브러리 이름을 마스킹합니다. 익명 스크린샷을 찍을 때 유용합니다 ",
+                        "title": "Plex 라이브러리 이름 마스킹"
+                    },
+                    "mask-plex-accounts": {
+                        "label": "Plex 계정 이름 마스킹",
+                        "text": "UI에서 Plex 계정 이름을 마스킹합니다. 익명 스크린샷을 찍을 때 유용합니다.",
+                        "title": "Plex 계정 이름 마스킹"
+                    },
+                    "mask-plex-servers": {
+                        "label": "Plex 서버 이름 마스킹",
+                        "text": "UI에서 Plex 서버 이름을 마스킹합니다. 익명 스크린샷을 찍을 때 유용합니다.",
+                        "title": "Plex 서버 이름 마스킹"
+                    },
+                    "toggle-animated-background": {
+                        "label": "배경 애니메이션 비활성화",
+                        "text": "애니메이션 배경은 브라우저에서 성능 문제를 일으킬 수 있습니다. 이 토글을 사용하면 애니메이션을 비활성화하고 정적인 배경만 표시할 수 있습니다.",
+                        "title": "배경 애니메이션 비활성화"
+                    }
+                },
+                "confirmation-settings": {
+                    "download-episode-confirmation": {
+                        "label": "에피소드 다운로드 확인 여부 묻기",
+                        "text": "에피소드를 다운로드하려고 할 때 확인 팝업을 표시할까요?",
+                        "title": "에피소드 다운로드 확인 여부 묻기"
+                    },
+                    "download-movie-confirmation": {
+                        "label": "영화 다운로드 확인 여부 묻기",
+                        "text": "영화를 다운로드하려고 할 때 확인 팝업을 표시할까요?",
+                        "title": "영화 다운로드 확인 여부 묻기"
+                    },
+                    "download-season-confirmation": {
+                        "label": "시즌 다운로드 확인 여부 묻기",
+                        "text": "시즌을 다운로드하려고 할 때 확인 팝업을 표시할까요?",
+                        "title": "시즌 다운로드 확인 여부 묻기"
+                    },
+                    "download-tvshow-confirmation": {
+                        "label": "TV 프로그램 다운로드 확인 여부 묻기",
+                        "text": "TV 프로그램을 다운로드하려고 할 때 확인 팝업을 표시할까요?",
+                        "title": "TV 프로그램 다운로드 확인 여부 묻기"
+                    }
+                },
+                "date-and-time": {
+                    "long-date-format": {
+                        "label": "긴 날짜 형식",
+                        "text": "",
+                        "title": ""
+                    },
+                    "short-date-format": {
+                        "label": "짧은 날짜 형식",
+                        "text": "",
+                        "title": ""
+                    },
+                    "show-relative-dates": {
+                        "label": "상대적 날짜 표시",
+                        "text": "",
+                        "title": ""
+                    },
+                    "time-format": {
+                        "label": "시간 형식",
+                        "text": "",
+                        "title": ""
+                    }
+                },
+                "language": {
+                    "language-selection": {
+                        "label": "언어",
+                        "text": "이 설정은 거의 모든 부분의 언어를 변경합니다. 오류 메시지와 같은 텍스트는 번역되지 않을 수 있습니다. 번역 수정이나 새로운 언어 추가는 언제나 환영합니다. 새로운 언어를 추가하는 방법은 www.reaparr.rocks를 확인하세요.",
+                        "title": "선호하는 언어를 선택하세요"
+                    }
+                }
+            },
+            "accounts": {
+                "app-username": {
+                    "text": "Reaparr에 로그인할 때 사용할 사용자 이름을 입력하세요.",
+                    "title": "Reaparr 사용자 이름",
+                    "label": "사용자 이름"
+                },
+                "app-confirm-password": {
+                    "label": "비밀번호 확인"
+                },
+                "app-password": {
+                    "label": "비밀번호",
+                    "text": "Reaparr에 안전하게 로그인할 때 사용할 비밀번호를 입력하세요.",
+                    "title": "Reaparr 비밀번호"
+                }
+            },
+            "paths": {
+                "download-folder": {
+                    "label": "다운로드 경로",
+                    "text": "모든 파일이 여러 부분으로 나뉘어 다운로드된 후 대상 폴더에서 하나로 병합되기 전에 저장되는 경로입니다.",
+                    "title": "다운로드 경로"
+                },
+                "movie-folder": {
+                    "label": "영화 경로",
+                    "text": "사용자 지정 대상이 선택되지 않았을 때 영화의 기본 경로입니다.",
+                    "title": "영화 경로"
+                },
+                "tv-show-folder": {
+                    "label": "TV 프로그램 경로",
+                    "text": "사용자 지정 대상이 선택되지 않았을 때 TV 프로그램의 기본 경로입니다.",
+                    "title": "TV 프로그램 경로"
+                }
+            },
+            "integrations": {
+                "sonarr": {
+                    "api-key-input": {
+                        "label": "Sonarr API 키",
+                        "text": "Sonarr로 이동: 설정 → 일반 → 보안 → API 키에서 API 키를 복사하여 이 필드에 붙여넣으세요",
+                        "title": "Sonarr의 API 키"
+                    },
+                    "base-url-input": {
+                        "label": "Sonarr 기본 URL",
+                        "text": "Sonarr 인스턴스에 접근할 수 있는 기본 주소입니다. 예: http://localhost:8989 또는 http://sonarr:8989",
+                        "title": "Sonarr의 기본 URL"
+                    },
+                    "clear-configuration": {
+                        "text": "Reaparr에서 Sonarr 구성을 지우고 기본 URL 및 API 키 입력을 초기화합니다.",
+                        "title": "Sonarr 구성 지우기"
+                    },
+                    "setup-configuration": {
+                        "text": "Reaparr는 Sonarr에 인덱서와 다운로드 클라이언트를 설정하며, 이를 통해 Sonarr가 다운로드를 트리거할 수 있습니다.\n\n자세한 내용은 [Sonarr/Radarr 연동 가이드](https://www.reaparr.rocks/docs/integration/sonarr-radarr)를 참고하세요.",
+                        "title": "Sonarr 구성 설정"
+                    },
+                    "test-connection": {
+                        "text": "Reaparr가 제공된 기본 URL과 API 키로 Sonarr 인스턴스에 연결을 시도합니다.",
+                        "title": "Sonarr 연결 테스트"
+                    }
+                },
+                "radarr": {
+                    "api-key-input": {
+                        "label": "Radarr API 키",
+                        "text": "Radarr로 이동: 설정 → 일반 → 보안 → API 키에서 API 키를 복사하여 이 필드에 붙여넣으세요",
+                        "title": "Radarr의 API 키"
+                    },
+                    "base-url-input": {
+                        "label": "Radarr 기본 URL",
+                        "text": "Radarr 인스턴스에 접근할 수 있는 기본 주소입니다. 예: http://localhost:7878 또는 http://radarr:7878",
+                        "title": "Radarr의 기본 URL"
+                    },
+                    "clear-configuration": {
+                        "text": "Reaparr에서 Radarr 구성을 지우고 기본 URL 및 API 키 입력을 초기화합니다.",
+                        "title": "Radarr 구성 지우기"
+                    },
+                    "setup-configuration": {
+                        "text": "Reaparr는 Radarr에 인덱서와 다운로드 클라이언트를 설정하며, 이를 통해 Radarr가 다운로드를 트리거할 수 있습니다.\n\n자세한 내용은 [Sonarr/Radarr 연동 가이드](https://www.reaparr.rocks/docs/integration/sonarr-radarr)를 참고하세요.",
+                        "title": "Radarr 구성 설정"
+                    },
+                    "test-connection": {
+                        "text": "Reaparr가 제공된 기본 URL과 API 키로 Radarr 인스턴스에 연결을 시도합니다.",
+                        "title": "Radarr 연결 테스트"
+                    }
+                }
+            },
+            "logs": {
+                "title": {
+                    "title": "실시간 로그",
+                    "text": "여기에는 현재 애플리케이션 실행 중의 로그만 표시됩니다. 이전 로그는 /config 디렉터리에서 찾을 수 있습니다.",
+                    "label": "Reaparr 앱 로그"
+                }
+            }
+        },
+        "media-options": {
+            "hide-offline-servers": {
+                "label": "오프라인 Plex 서버의 미디어 표시 안 함:",
+                "text": "활성화하면 현재 오프라인 상태인 Plex 서버의 미디어가 이 미디어 개요에서 제외됩니다.",
+                "title": "오프라인 Plex 서버의 미디어 표시 안 함"
+            },
+            "hide-owned-media": {
+                "label": "소유한 Plex 서버의 미디어 표시 안 함:",
+                "text": "Plex 계정이 소유한 Plex 서버에서 가져온 모든 미디어를 이 개요에서 숨깁니다.",
+                "title": "소유한 Plex 서버의 미디어 표시 안 함"
+            },
+            "use-low-quality-poster-images": {
+                "label": "저화질 포스터 이미지 사용:",
+                "text": "활성화하면 포스터 썸네일에 더 낮은 해상도의 이미지가 사용되어 Plex 라이브러리를 탐색할 때 로딩 속도가 크게 향상됩니다.",
+                "title": "저화질 포스터 이미지 사용"
+            }
+        }
+    },
+    "pages": {
+        "downloads": {
+            "no-downloads": "현재 진행 중인 다운로드가 없습니다"
+        },
+        "error": {
+            "header": "오류!",
+            "return-link": "홈페이지로 돌아가기"
+        },
+        "music": {
+            "music-id": {
+                "header": "안타깝게도 음악 라이브러리는 아직 지원되지 않습니다 :("
+            },
+            "index": {
+                "header": "안타깝게도 음악 라이브러리는 아직 지원되지 않습니다 :("
+            }
+        },
+        "photos": {
+            "photo-id": {
+                "header": "안타깝게도 사진 라이브러리는 아직 지원되지 않습니다 :("
+            },
+            "index": {
+                "header": "안타깝게도 사진 라이브러리는 아직 지원되지 않습니다 :("
+            }
+        },
+        "settings": {
+            "accounts": {
+                "plex-accounts-header": "Plex 계정",
+                "app-accounts-header": "인증",
+                "library-access-history": "Plex 라이브러리 접근 기록",
+                "library-access-history-link-text": "Plex 라이브러리 접근 기록 페이지로 이동"
+            },
+            "advanced": {
+                "database": {
+                    "header": "데이터베이스"
+                },
+                "download-manager": {
+                    "header": "다운로드 관리자"
+                },
+                "debug": {
+                    "header": "디버그 설정"
+                },
+                "network": {
+                    "header": "네트워크 및 리버스 프록시",
+                    "hints": {
+                        "reverse-proxy-url": "예: https://reaparr.example.com (선택 사항)",
+                        "base-path": "예: /reaparr (선택 사항)",
+                        "trust-proxy-headers": "재시작 필요",
+                        "allowed-proxy-ips": "예: 192.168.1.10, 10.0.0.0/24 (재시작 필요)",
+                        "forwarded-host-header": "기본값: X-Forwarded-Host (재시작 필요)",
+                        "forwarded-path-header": "기본값: X-Forwarded-Prefix (재시작 필요)"
+                    }
+                },
+                "setup": {
+                    "header": "Reaparr 설정"
+                }
+            },
+            "logs": {
+                "title": "Reaparr 앱 로그",
+                "clear": "지우기",
+                "search": "로그 검색",
+                "level-filter": "수준",
+                "visible-count": "캐시된 로그 {total}개 중 {count}개 표시 중",
+                "empty": "현재 필터와 일치하는 실시간 로그가 없습니다.",
+                "sort": {
+                    "oldest-first": "오래된 순",
+                    "newest-first": "최신 순"
+                },
+                "refresh": "로그 새로고침",
+                "copy": "로그 항목 복사",
+                "copy-selected": "선택 항목 복사 ({count})",
+                "copy-all": "모든 로그 복사",
+                "pause-scroll": "일시정지",
+                "copied-to-clipboard": "로그 항목이 클립보드에 복사되었습니다"
+            },
+            "ui": {
+                "confirmation-settings": {
+                    "header": "확인 설정"
+                },
+                "date-and-time": {
+                    "header": "날짜 및 시간"
+                },
+                "language": {
+                    "header": "언어"
+                },
+                "general-settings": {
+                    "header": "일반"
+                },
+                "enable-servers-section": {
+                    "header": "Plex 서버 활성화",
+                    "no-servers-disabled": "현재 비활성화된 Plex 서버가 없습니다. 서버를 비활성화하려면 서버 설정 => 서버 구성으로 이동하여 활성화를 토글하세요. 비활성화된 서버는 여기에 표시되며, 다시 활성화할 수 있습니다."
+                }
+            }
+        },
+        "setup": {
+            "accounts": {
+                "header": "Plex 계정",
+                "title": "Plex 계정을 추가하세요!"
+            },
+            "authorization": {
+                "header": "인증",
+                "title": "기본 로그인 자격 증명을 변경하세요!"
+            },
+            "disclaimer": {
+                "header": "면책 조항",
+                "i-agree-disclaimer-button": "전적으로 이해하며 동의합니다",
+                "text": {
+                    "heading": "계속하기 전에 아래 약관을 읽고 동의해 주세요:",
+                    "section1": {
+                        "title": "법적 및 윤리적 사용",
+                        "content": "저작권법을 포함한 모든 관련 법률과 상호작용하는 모든 플랫폼의 서비스 약관을 Reaparr 사용이 준수하도록 하는 것은 사용자의 책임입니다. Reaparr는 오직 개인 미디어 관리 및 백업을 위해 설계되었습니다. 무단 다운로드, 저작권 침해 또는 기타 불법 행위에 사용해서는 안 됩니다."
+                    },
+                    "section2": {
+                        "title": "소유권 및 권한",
+                        "content": "Reaparr를 사용하여 상호작용하는 미디어 콘텐츠 및 서버에 대해 명시적인 소유권 또는 접근 권한을 가지고 있어야 합니다. 제3자 서버나 미디어에 대한 무단 접근 또는 사용은 엄격히 금지됩니다."
+                    },
+                    "section3": {
+                        "title": "제휴 관계 없음",
+                        "content": "Reaparr는 독립적인 도구이며 Plex Inc. 또는 다른 어떤 플랫폼과도 제휴, 승인 또는 연관되어 있지 않습니다."
+                    },
+                    "section4": {
+                        "title": "책임의 제한",
+                        "content": "Reaparr 개발자는 이 도구의 오용이나 무단 또는 불법적인 사용으로 인해 발생하는 결과에 대해 책임지지 않습니다."
+                    },
+                    "confirmation": "계속 진행함으로써 귀하는 이러한 약관을 이해하고 수락하며, Reaparr를 책임감 있고 윤리적으로 사용할 것임을 확인합니다."
+                }
+            },
+            "finished": {
+                "header": "완료되었습니다!",
+                "list": {
+                    "item-1": "Github 페이지에서 스타를 눌러주세요!",
+                    "item-5": "DockerHub 페이지에서 스타를 눌러주세요!",
+                    "item-2": "기능을 요청하고 버그를 제보해 주세요!",
+                    "item-3": "Reaparr를 여러분의 언어로 번역해 주세요!",
+                    "item-4": "코드를 살펴보고 피드백을 주거나 개선 사항을 제안해 주세요!"
+                },
+                "text": {
+                    "p-1": "이 프로젝트가 마음에 드시고 감사를 표현하고 싶으시다면 다음을 고려해 보세요:"
+                },
+                "title": "이제 Reaparr 사용을 시작할 준비가 되었습니다!"
+            },
+            "intro": {
+                "header": "시작하기",
+                "list": {
+                    "item-1": "Reaparr는 Discord가 있습니다! 지원과 새로운 기능 및 릴리스에 대한 논의를 위해 참여하세요!",
+                    "item-2": "Reaparr는 자주 묻는 질문을 담은 웹사이트가 있습니다! 도움을 요청하기 전에 꼭 읽어보세요!",
+                    "item-3": "Reaparr는 현재 활발히 개발 중이므로 곳곳에 버그가 있을 수 있습니다. 발견하신 버그는 Github 이슈 페이지에 꼭 제보해 주세요."
+                },
+                "text": {
+                    "p-1": "다음은 유용한 정보입니다:"
+                },
+                "title": "Reaparr 설정에 오신 것을 환영합니다!"
+            },
+            "paths": {
+                "header": "경로 확인 중",
+                "title": "모든 경로가 유효한지 확인하세요!"
+            }
+        },
+        "tvshows": {
+            "index": {
+                "header": "TV 프로그램 개요",
+                "sub-header": "왼쪽에서 라이브러리를 선택하세요"
+            }
+        },
+        "debug": {
+            "dialogs": {
+                "buttons": {
+                    "download-confirmation": "다운로드 확인",
+                    "help-dialog": "도움말 대화상자",
+                    "server-dialog": "서버 대화상자",
+                    "check-server-connections-dialog": "서버 연결 확인 대화상자",
+                    "directory-browser": "디렉터리 탐색기 대화상자",
+                    "verification-dialog": "2FA 인증 대화상자",
+                    "discord-invite": "Discord 초대",
+                    "sync-server-media-dialog": "서버 미디어 동기화 대화상자",
+                    "refresh-plex-account-access-dialog": "Plex 계정 접근 새로고침 대화상자"
+                },
+                "header": "디버그 대화상자 모달",
+                "account-dialog-header": "계정 대화상자",
+                "connection-dialog-header": "연결 대화상자"
+            },
+            "buttons": {
+                "main-header": "버튼 디버그",
+                "media-quality-header": "미디어 화질 표시",
+                "alert-display-header": "알림 표시 헤더"
+            }
+        },
+        "empty": {
+            "title": "빈 페이지"
+        },
+        "unknown": {
+            "index": {
+                "header": "라이브러리 {libraryName}은(는) 알 수 없는 유형입니다"
+            }
+        },
+        "login": {
+            "header": "계속하려면 로그인하세요",
+            "invalid-credentials": " 사용자 이름 또는 비밀번호가 올바르지 않습니다 ",
+            "locked-out": "Reaparr 해킹에 실패했습니다. 5분 동안 잠깁니다!",
+            "remember-me": "로그인 상태 유지",
+            "forgot-your-password": "비밀번호를 잊으셨나요?"
+        }
+    },
+    "debug": {
+        "button-labels": {
+            "amber": "호박색",
+            "black": "검정",
+            "brown5": "브라운 5",
+            "deep-orange": "진한 주황",
+            "primary": "기본",
+            "purple": "보라",
+            "secondary": "보조",
+            "standard": "표준"
+        },
+        "buttons": {
+            "account-validation-button": "계정 검증 버튼",
+            "add-icon-button": "추가 아이콘 버튼",
+            "base-button": "기본 버튼",
+            "cancel-button": "취소 버튼",
+            "check-connection-button": "연결 확인 버튼",
+            "confirm-button": "확인 버튼",
+            "debug-button": "디버그 버튼",
+            "delete-button": "삭제 버튼",
+            "delete-icon-button": "삭제 아이콘 버튼",
+            "external-link-button": "외부 링크 버튼",
+            "go-to-button": "이동 버튼",
+            "help-button": "도움말 버튼",
+            "hide-button": "숨기기 버튼",
+            "navigation-finish-setup-button": "설정 완료 내비게이션 버튼",
+            "navigation-next-button": "다음 내비게이션 버튼",
+            "navigation-previous-button": "이전 내비게이션 버튼",
+            "navigation-skip-setup-button": "설정 건너뛰기 내비게이션 버튼",
+            "reset-button": "초기화 버튼",
+            "save-button": "저장 버튼",
+            "warning-button": "경고 버튼"
+        }
+    }
+}

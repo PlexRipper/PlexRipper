@@ -154,6 +154,11 @@ export default defineNuxtConfig({
 				code: 'pl-PL',
 				file: 'pl-PL.json',
 			},
+			{
+				name: '한국어',
+				code: 'ko-KR',
+				file: 'ko-KR.json',
+			},
 		],
 		bundle: {
 			compositionOnly: true,

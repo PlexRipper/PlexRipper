@@ -39,6 +39,8 @@ interface IMediaOverviewStoreState {
   filterQuery: string;
   lastMediaItemViewed: PlexMediaSlimDTO | null;
   loading: boolean;
+  navLoading: boolean;
+  filterMetadataLoading: boolean;
   isDetailView: boolean;
   allMovieCount: number;
   allTvShowCount: number;
@@ -71,6 +73,8 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
     queryHash: '',
     lastMediaItemViewed: null,
     loading: false,
+    navLoading: false,
+    filterMetadataLoading: false,
     isDetailView: false,
     allMovieCount: 0,
     allTvShowCount: 0,
@@ -167,6 +171,7 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
       );
     },
     refreshFilterMetadata() {
+      state.filterMetadataLoading = true;
       return plexLibraryApi.getMetadataFilter(state.libraryId, { mediaType: get(getters.getMediaType) }).pipe(
         takeUntil(cancelSubject$),
         tap((result) => {
@@ -176,6 +181,9 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
             state.availableGenreIds = result.value.genres ?? [];
             state.availableQualityIds = result.value.qualities ?? [];
           }
+        }),
+        finalize(() => {
+          state.filterMetadataLoading = false;
         })
       );
     },
@@ -288,7 +296,16 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
         }
       }
 
-      return requests.length ? forkJoin(requests) : of([]);
+      if (requests.length) {
+        state.navLoading = true;
+        return forkJoin(requests).pipe(
+          finalize(() => {
+            state.navLoading = false;
+          })
+        );
+      }
+
+      return of([]);
     },
     scrollToIndex(scrollIndex: number) {
       if (scrollIndex < 0 || scrollIndex >= state.totalCount) {

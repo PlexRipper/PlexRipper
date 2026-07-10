@@ -49,7 +49,15 @@
 						dense />
 				</q-item>
 				<q-separator />
+				<div
+					v-if="mediaOverviewStore.filterMetadataLoading"
+					class="q-pa-md text-center">
+					<QSpinnerDots
+						size="2em"
+						color="primary" />
+				</div>
 				<QScroll
+					v-else
 					:fit="false"
 					:height="'260px'">
 					<!-- Show Genres Sub-Menu -->

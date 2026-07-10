@@ -27,7 +27,7 @@
 					<MediaPoster
 						v-if="rowItem.item"
 						:media-item="rowItem.item"
-						:active="true"
+						:active="isRowVisible(virtualRow.index)"
 						:data-scroll-index="rowItem.index"
 						@download="sendMediaOverviewDownloadCommand($event)"
 						@open-media-details="onOpenMediaDetails" />
@@ -168,6 +168,21 @@ function persistScrollIndex() {
 		if (nearestIndex !== null)
 			mediaOverviewStore.setCurrentScrollIndex(nearestIndex + 1);
 	}, 500);
+}
+
+// Returns whether a given row index is within the currently visible viewport
+// (excluding overscan). Used to defer thumbnail loading for off-screen posters.
+function isRowVisible(rowIndex: number): boolean {
+	const container = get(scrollContainerRef);
+	if (!container)
+		return true; // fallback: load if we can't check
+
+	const rowTop = rowIndex * get(posterCardHeight);
+	const rowBottom = rowTop + get(posterCardHeight);
+	const viewportTop = container.scrollTop;
+	const viewportBottom = container.scrollTop + container.clientHeight;
+
+	return rowBottom > viewportTop && rowTop < viewportBottom;
 }
 
 // useElementBounding must be called at setup level so its ResizeObserver is wired correctly.

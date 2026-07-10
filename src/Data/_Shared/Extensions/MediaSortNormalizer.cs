@@ -6,8 +6,8 @@ namespace Reaparr.Data;
 /// </summary>
 internal static class MediaSortNormalizer
 {
-    private const string DefaultTitleSortMultiLibrary = nameof(BasePlexMedia.SearchTitle);
-    private const string DefaultTitleSortSingleLibrary = "sortIndex";
+    private const string DEFAULT_TITLE_SORT_MULTI_LIBRARY = nameof(BasePlexMedia.SearchTitle);
+    private const string DEFAULT_TITLE_SORT_SINGLE_LIBRARY = "sortIndex";
 
     /// <summary>
     /// All allowed sort fields (case-insensitive). The normalization function resolves aliases to
@@ -56,8 +56,8 @@ internal static class MediaSortNormalizer
         if (string.IsNullOrWhiteSpace(sort))
         {
             var titleField = libraryCount == 1
-                ? DefaultTitleSortSingleLibrary
-                : DefaultTitleSortMultiLibrary;
+                ? DEFAULT_TITLE_SORT_SINGLE_LIBRARY
+                : DEFAULT_TITLE_SORT_MULTI_LIBRARY;
 
             return new Result(titleField, false);
         }
@@ -93,8 +93,8 @@ internal static class MediaSortNormalizer
     {
         if (_titleFields.Contains(requested))
             return libraryCount == 1
-                ? DefaultTitleSortSingleLibrary
-                : DefaultTitleSortMultiLibrary;
+                ? DEFAULT_TITLE_SORT_SINGLE_LIBRARY
+                : DEFAULT_TITLE_SORT_MULTI_LIBRARY;
 
         return _fieldMap.TryGetValue(requested, out var canonical)
             ? canonical

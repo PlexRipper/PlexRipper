@@ -79,8 +79,8 @@ const rowVirtualizer = useVirtualizer(
 		count: get(rowCount),
 		getScrollElement: () => get(scrollContainerRef),
 		estimateSize: () => get(posterCardHeight),
-		// Render extra rows above and below viewport for smoother jumps and less blanking while scrolling
-		overscan: 10,
+		// Render extra rows above and below viewport for smoother jumps
+		overscan: 5,
 		// Stable row keys: use the first item id in each row
 		getItemKey: (rowIndex: number): number => rowIndex,
 		onChange: (_instance: unknown, sync: boolean) => {
@@ -205,24 +205,32 @@ function onOpenMediaDetails(mediaItem: PlexMediaSlimDTO) {
 	});
 }
 
+// Throttled page-prefetch during scrolling — avoids firing HTTP requests on every scroll tick.
+let prefetchTimer: ReturnType<typeof setTimeout> | null = null;
 function requestPagesAroundViewport() {
-	if (mediaOverviewStore.getMediaItems.length >= mediaOverviewStore.totalCount)
+	if (prefetchTimer)
 		return;
 
-	const virtualItems = get(rowVirtualizer).getVirtualItems();
-	const firstVirtualRow = virtualItems.at(0);
-	const lastVirtualRow = virtualItems.at(-1);
-	if (!firstVirtualRow || !lastVirtualRow)
-		return;
+	prefetchTimer = setTimeout(() => {
+		prefetchTimer = null;
+		if (mediaOverviewStore.getMediaItems.length >= mediaOverviewStore.totalCount)
+			return;
 
-	const cols = get(gridItems);
-	const firstVisibleIndex = firstVirtualRow.index * cols;
-	const lastVisibleIndex = ((lastVirtualRow.index + 1) * cols) - 1;
-	const prefetchBuffer = mediaOverviewStore.pageSize;
-	const prefetchStart = Math.max(0, firstVisibleIndex - prefetchBuffer);
-	const prefetchEnd = Math.min(mediaOverviewStore.totalCount, lastVisibleIndex + prefetchBuffer);
+		const virtualItems = get(rowVirtualizer).getVirtualItems();
+		const firstVirtualRow = virtualItems.at(0);
+		const lastVirtualRow = virtualItems.at(-1);
+		if (!firstVirtualRow || !lastVirtualRow)
+			return;
 
-	useSubscription(mediaOverviewStore.requestRange(prefetchStart, prefetchEnd).subscribe());
+		const cols = get(gridItems);
+		const firstVisibleIndex = firstVirtualRow.index * cols;
+		const lastVisibleIndex = ((lastVirtualRow.index + 1) * cols) - 1;
+		const prefetchBuffer = mediaOverviewStore.pageSize;
+		const prefetchStart = Math.max(0, firstVisibleIndex - prefetchBuffer);
+		const prefetchEnd = Math.min(mediaOverviewStore.totalCount, lastVisibleIndex + prefetchBuffer);
+
+		useSubscription(mediaOverviewStore.requestRange(prefetchStart, prefetchEnd).subscribe());
+	}, 200);
 }
 
 function scrollToIndex(index: number) {
@@ -234,10 +242,15 @@ function scrollToIndex(index: number) {
 
 	Log.debug('Scrolling to index:', index);
 
+	// Prefetch the target page range before scrolling so data loads during the scroll animation
+	const prefetchStart = Math.max(0, index - mediaOverviewStore.pageSize);
+	const prefetchEnd = Math.min(mediaOverviewStore.totalCount, index + mediaOverviewStore.pageSize);
+	useSubscription(mediaOverviewStore.requestRange(prefetchStart, prefetchEnd).subscribe());
+
 	const rowIndex = Math.floor(index / get(gridItems));
 	get(rowVirtualizer).scrollToIndex(rowIndex, { align: 'start' });
 
-	// Highlight after render — reduced delay for faster feedback
+	// Highlight after render
 	waitForElement(container, `[data-scroll-index="${index}"]`).then((element) => {
 		if (element) {
 			triggerBoxHighlight(element);

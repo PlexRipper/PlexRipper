@@ -278,7 +278,11 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
       state.allSeasonCount = data.totalSeasonCount;
       state.allEpisodeCount = data.totalEpisodeCount;
       state.allFileSize = data.totalMediaSize;
-      state.scrollDict = new Map((data.navigationIndexes ?? []).map((x) => [x.label, x.index]));
+
+      // navigationIndexes are identical across all pages — only set once
+      if (state.scrollDict.size <= 1 && data.navigationIndexes?.length) {
+        state.scrollDict = new Map(data.navigationIndexes.map((x) => [x.label, x.index]));
+      }
 
       Log.debug('mediaPages', mediaPages);
     },

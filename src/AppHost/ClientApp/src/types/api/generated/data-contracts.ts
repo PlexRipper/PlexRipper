@@ -902,6 +902,13 @@ export interface PlexMediaDataDTO {
   videoResolution: VideoQuality;
 }
 
+export interface PlexMediaFilterMetadataDTO {
+  countries: number[];
+  genres: number[];
+  qualities: number[];
+  roles: number[];
+}
+
 export interface PlexMediaMetadataDTO {
   countries: PlexCountryDTO[];
   /** @format int32 */
@@ -1409,6 +1416,15 @@ export interface ResultDTOOfPlexMediaDTO {
   statusCode: number;
   successes: SuccessDTO[];
   value?: PlexMediaDTO | null;
+}
+
+export interface ResultDTOOfPlexMediaFilterMetadataDTO {
+  errors: ErrorDTO[];
+  isSuccess: boolean;
+  /** @format int32 */
+  statusCode: number;
+  successes: SuccessDTO[];
+  value?: PlexMediaFilterMetadataDTO | null;
 }
 
 export interface ResultDTOOfPlexMediaMetadataDTO {

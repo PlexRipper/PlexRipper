@@ -17,6 +17,7 @@ import type {
   LibrarySyncJobQueueDTO,
   PlexLibraryAccessTimelineDTO,
   PlexLibraryDTO,
+  PlexMediaFilterMetadataDTO,
   PlexMediaMetadataDTO,
   PlexMediaType,
 } from "./data-contracts";
@@ -122,6 +123,30 @@ export class PlexLibrary {
   /**
    * No description
    * * @tags Plexlibrary
+   * @name GetMetadataFilter
+   * @request GET:/api/PlexLibrary/{PlexLibraryId}/metadata-filter
+   * @secure
+   */
+  getMetadataFilter = (
+    plexLibraryId: number,
+    query: {
+      /** @default 0 */
+      mediaType: PlexMediaType;
+    },
+    params: RequestParams = {},
+  ) =>
+    axiosObservable<PlexMediaFilterMetadataDTO>({
+      url: `/api/PlexLibrary/${plexLibraryId}/metadata-filter`,
+      method: "GET",
+      params: query,
+      secure: true,
+      responseType: "json",
+      ...params,
+    }).pipe(apiCheckPipe<PlexMediaFilterMetadataDTO>);
+
+  /**
+   * No description
+   * * @tags Plexlibrary
    * @name GetLibrarySyncStatusEndpoint
    * @request GET:/api/PlexLibrary/sync-status
    * @secure
@@ -199,6 +224,18 @@ export class PlexLibraryPaths {
   ) =>
     queryString.stringifyUrl({
       url: `/api/PlexLibrary/${plexLibraryId}/metadata`,
+      query,
+    });
+
+  static getMetadataFilter = (
+    plexLibraryId: number,
+    query: {
+      /** @default 0 */
+      mediaType: PlexMediaType;
+    },
+  ) =>
+    queryString.stringifyUrl({
+      url: `/api/PlexLibrary/${plexLibraryId}/metadata-filter`,
       query,
     });
 

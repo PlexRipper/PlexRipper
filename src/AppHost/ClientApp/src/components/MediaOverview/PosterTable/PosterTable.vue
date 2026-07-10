@@ -79,64 +79,18 @@ const rowVirtualizer = useVirtualizer(
 		count: get(rowCount),
 		getScrollElement: () => get(scrollContainerRef),
 		estimateSize: () => get(posterCardHeight),
-		// Render extra rows above and below viewport for smoother jumps and less blanking while scrolling
+		// Render extra rows above and below viewport for smoother jumps
 		overscan: 10,
 		// Stable row keys: use the first item id in each row
-		getItemKey: (rowIndex: number): number => {
-			const firstItem = mediaOverviewStore.getMediaItemsForRange(rowIndex * get(gridItems), rowIndex * get(gridItems) + 1).at(0);
-			return firstItem?.id ?? rowIndex;
-		},
+		getItemKey: (rowIndex: number): number => rowIndex,
 		onChange: (_instance: unknown, sync: boolean) => {
 			if (sync)
 				return;
 
 			requestPagesAroundViewport();
 
-			const container = get(scrollContainerRef);
-			if (!container) {
-				return;
-			}
-
-			const virtualItems = rowVirtualizer.value.getVirtualItems();
-			const firstVirtualRow = virtualItems.at(0);
-			if (!firstVirtualRow) {
-				return;
-			}
-
-			// Guard initial mount at absolute top so we don't overwrite URL-restored state
-			// (for example, replacing ?scrollIndex=64 with ?scrollIndex=1 before restore runs).
-			if (!(container.scrollTop > 0 || firstVirtualRow.index > 0)) {
-				return;
-			}
-
-			// Persist the exact nearest visible poster index instead of row-start approximation.
-			// In multi-column poster mode, row-start can drift from the poster users perceive as
-			// topmost, causing refresh to restore to a different title.
-			const posterNodes = Array.from(container.querySelectorAll<HTMLElement>('[data-scroll-index]'));
-			if (posterNodes.length === 0) {
-				return;
-			}
-
-			const containerTop = container.getBoundingClientRect().top;
-			let nearestIndex: number | null = null;
-			let nearestDistance = Number.POSITIVE_INFINITY;
-
-			for (const node of posterNodes) {
-				const candidateIndex = Number(node.dataset.scrollIndex);
-				if (!Number.isInteger(candidateIndex) || candidateIndex < 0) {
-					continue;
-				}
-
-				const distance = Math.abs(node.getBoundingClientRect().top - containerTop);
-				if (distance < nearestDistance) {
-					nearestDistance = distance;
-					nearestIndex = candidateIndex;
-				}
-			}
-
-			if (nearestIndex !== null) {
-				mediaOverviewStore.setCurrentScrollIndex(nearestIndex + 1);
-			}
+			// Throttle scroll-index persistence: only run every 500ms to avoid layout thrashing
+			persistScrollIndex();
 		},
 	})),
 );
@@ -152,21 +106,68 @@ function getRowItems(rowIndex: number): { item: PlexMediaSlimDTO | null; index: 
 	const startIndex = rowIndex * cols;
 	const endIndex = startIndex + cols;
 	const loadedItems = mediaOverviewStore.getMediaItemsForRange(startIndex, endIndex);
-	const loadedBySortIndex = new Map<number, PlexMediaSlimDTO>();
 	const rowItems: { item: PlexMediaSlimDTO | null; index: number }[] = [];
 
-	for (const item of loadedItems) {
-		loadedBySortIndex.set(item.sortIndex, item);
-	}
-
+	// loadedItems are already in index order with sortIndex = globalIndex + 1.
+	// Single pass: walk both the range and the loaded items in lockstep.
+	let loadedIdx = 0;
 	for (let index = startIndex; index < endIndex && index < mediaOverviewStore.totalCount; index++) {
-		rowItems.push({
-			item: loadedBySortIndex.get(index + 1) ?? null,
-			index,
-		});
+		const next = loadedItems[loadedIdx];
+		if (next && next.sortIndex === index + 1) {
+			rowItems.push({ item: next, index });
+			loadedIdx++;
+		} else {
+			rowItems.push({ item: null, index });
+		}
 	}
 
 	return rowItems;
+}
+
+// Throttled scroll-index persistence — avoids DOM queries + BCR calls on every scroll tick.
+let persistTimer: ReturnType<typeof setTimeout> | null = null;
+function persistScrollIndex() {
+	if (persistTimer)
+		return;
+
+	persistTimer = setTimeout(() => {
+		persistTimer = null;
+		const container = get(scrollContainerRef);
+		if (!container)
+			return;
+
+		const virtualItems = rowVirtualizer.value.getVirtualItems();
+		const firstVirtualRow = virtualItems.at(0);
+		if (!firstVirtualRow)
+			return;
+
+		// Guard initial mount at absolute top
+		if (!(container.scrollTop > 0 || firstVirtualRow.index > 0))
+			return;
+
+		const posterNodes = Array.from(container.querySelectorAll<HTMLElement>('[data-scroll-index]'));
+		if (posterNodes.length === 0)
+			return;
+
+		const containerTop = container.getBoundingClientRect().top;
+		let nearestIndex: number | null = null;
+		let nearestDistance = Number.POSITIVE_INFINITY;
+
+		for (const node of posterNodes) {
+			const candidateIndex = Number(node.dataset.scrollIndex);
+			if (!Number.isInteger(candidateIndex) || candidateIndex < 0)
+				continue;
+
+			const distance = Math.abs(node.getBoundingClientRect().top - containerTop);
+			if (distance < nearestDistance) {
+				nearestDistance = distance;
+				nearestIndex = candidateIndex;
+			}
+		}
+
+		if (nearestIndex !== null)
+			mediaOverviewStore.setCurrentScrollIndex(nearestIndex + 1);
+	}, 500);
 }
 
 // useElementBounding must be called at setup level so its ResizeObserver is wired correctly.
@@ -204,24 +205,32 @@ function onOpenMediaDetails(mediaItem: PlexMediaSlimDTO) {
 	});
 }
 
+// Throttled page-prefetch during scrolling — avoids firing HTTP requests on every scroll tick.
+let prefetchTimer: ReturnType<typeof setTimeout> | null = null;
 function requestPagesAroundViewport() {
-	if (mediaOverviewStore.getMediaItems.length >= mediaOverviewStore.totalCount)
+	if (prefetchTimer)
 		return;
 
-	const virtualItems = get(rowVirtualizer).getVirtualItems();
-	const firstVirtualRow = virtualItems.at(0);
-	const lastVirtualRow = virtualItems.at(-1);
-	if (!firstVirtualRow || !lastVirtualRow)
-		return;
+	prefetchTimer = setTimeout(() => {
+		prefetchTimer = null;
+		if (mediaOverviewStore.getMediaItems.length >= mediaOverviewStore.totalCount)
+			return;
 
-	const cols = get(gridItems);
-	const firstVisibleIndex = firstVirtualRow.index * cols;
-	const lastVisibleIndex = ((lastVirtualRow.index + 1) * cols) - 1;
-	const prefetchBuffer = mediaOverviewStore.pageSize;
-	const prefetchStart = Math.max(0, firstVisibleIndex - prefetchBuffer);
-	const prefetchEnd = Math.min(mediaOverviewStore.totalCount, lastVisibleIndex + prefetchBuffer);
+		const virtualItems = get(rowVirtualizer).getVirtualItems();
+		const firstVirtualRow = virtualItems.at(0);
+		const lastVirtualRow = virtualItems.at(-1);
+		if (!firstVirtualRow || !lastVirtualRow)
+			return;
 
-	useSubscription(mediaOverviewStore.requestRange(prefetchStart, prefetchEnd).subscribe());
+		const cols = get(gridItems);
+		const firstVisibleIndex = firstVirtualRow.index * cols;
+		const lastVisibleIndex = ((lastVirtualRow.index + 1) * cols) - 1;
+		const prefetchBuffer = mediaOverviewStore.pageSize;
+		const prefetchStart = Math.max(0, firstVisibleIndex - prefetchBuffer);
+		const prefetchEnd = Math.min(mediaOverviewStore.totalCount, lastVisibleIndex + prefetchBuffer);
+
+		useSubscription(mediaOverviewStore.requestRange(prefetchStart, prefetchEnd).subscribe());
+	}, 200);
 }
 
 function scrollToIndex(index: number) {
@@ -233,21 +242,19 @@ function scrollToIndex(index: number) {
 
 	Log.debug('Scrolling to index:', index);
 
-	// Convert flat item index to row index, then scroll to that row
+	// Prefetch the target page range before scrolling so data loads during the scroll animation
+	const prefetchStart = Math.max(0, index - mediaOverviewStore.pageSize);
+	const prefetchEnd = Math.min(mediaOverviewStore.totalCount, index + mediaOverviewStore.pageSize);
+	useSubscription(mediaOverviewStore.requestRange(prefetchStart, prefetchEnd).subscribe());
+
 	const rowIndex = Math.floor(index / get(gridItems));
 	get(rowVirtualizer).scrollToIndex(rowIndex, { align: 'start' });
 
-	// Wait for the element to be rendered before highlighting
+	// Highlight after render
 	waitForElement(container, `[data-scroll-index="${index}"]`).then((element) => {
-		if (!element) {
-			Log.debug('Could not find element to highlight for scroll index:', index);
-			return;
-		}
-
-		// Highlight the element after a short delay due to render hang
-		setTimeout(() => {
+		if (element) {
 			triggerBoxHighlight(element);
-		}, 400);
+		}
 	});
 }
 

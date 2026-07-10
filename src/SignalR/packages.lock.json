@@ -10,18 +10,18 @@
       },
       "CSharpier.MsBuild": {
         "type": "Direct",
-        "requested": "[1.2.6, )",
-        "resolved": "1.2.6",
-        "contentHash": "KMSJG+jfk7vjP52QkWB99qWespXCPAzG/IaMCMRHYWumJEAGKQYm2HtyWG6eqnOwDitH96i1cqq5EVesyOtPmg=="
+        "requested": "[1.3.0, )",
+        "resolved": "1.3.0",
+        "contentHash": "jzzLpmz7F6LyBh5FTZy8/4dEYVcAG9VjBPKryZ82LIoUuupcBkCSXzaeS/4oYcp/rBC8yVLcDstJ8CIv9n2IFw=="
       },
       "MessagePack": {
         "type": "Direct",
-        "requested": "[3.1.4, )",
-        "resolved": "3.1.4",
-        "contentHash": "BH0wlHWmVoZpbAPyyt2Awbq30C+ZsS3eHSkYdnyUAbqVJ22fAJDzn2xTieBeoT5QlcBzp61vHcv878YJGfi3mg==",
+        "requested": "[3.1.8, )",
+        "resolved": "3.1.8",
+        "contentHash": "Qk2q+9FVxnMSp+NQ9y3SLz3HqWe7Rg3KRMHhBX28FkKUoOeP9YIU86mA4pFOxDDjUIRA9e7Ssbxs/LwWUcAzPw==",
         "dependencies": {
-          "MessagePack.Annotations": "3.1.4",
-          "MessagePackAnalyzer": "3.1.4",
+          "MessagePack.Annotations": "3.1.8",
+          "MessagePackAnalyzer": "3.1.8",
           "Microsoft.NET.StringTools": "17.11.4"
         }
       },
@@ -108,13 +108,13 @@
       },
       "MessagePack.Annotations": {
         "type": "Transitive",
-        "resolved": "3.1.4",
-        "contentHash": "aVWrDAkCdqxwQsz/q0ldPh2EFn48M99YUzE9OvZjMq2RNLKz4o2z88iGFvSvbMqOWRweRvKPHBJZe22PRqzslQ=="
+        "resolved": "3.1.8",
+        "contentHash": "SitOtZ4tOlAZZPF7p52M7143F+Cuz7o/aU0MrtAXX0+ZkPXzDNroOFhzzE2ogMFThsoEW/E6akXVVcBFM9ZKaw=="
       },
       "MessagePackAnalyzer": {
         "type": "Transitive",
-        "resolved": "3.1.4",
-        "contentHash": "CTaSsN/liJ7MhLCAB7Z4ZLBNuVGCq9lt2BT/cbrc9vzGv89yK3CqIA+z9T19a11eQYl9etZHL6MQJgCqECRVpg=="
+        "resolved": "3.1.8",
+        "contentHash": "Vm4g0cR4YRKRchEOmMJ0uVFU6yxdg7cJa2KHv3SUAHEsdYKvMpHMF5A1hZfsix89ymD5cmuzRnw9a6dKMcvq+Q=="
       },
       "Microsoft.AspNetCore.Http.Abstractions": {
         "type": "Transitive",
@@ -306,7 +306,7 @@
         "type": "Project",
         "dependencies": {
           "Quartz": "[3.17.0, )",
-          "Reaparr.Domain": "[0.36.0-dev.2, )"
+          "Reaparr.Domain": "[1.0.0, )"
         }
       },
       "Reaparr.Domain": {
@@ -318,7 +318,7 @@
           "JetBrains.Annotations": "[2025.2.4, )",
           "NaturalSort.Extension": "[4.4.1, )",
           "PasswordGenerator": "[2.1.0, )",
-          "Reaparr.FluentResultExtensions": "[0.36.0-dev.2, )",
+          "Reaparr.FluentResultExtensions": "[1.0.0, )",
           "System.ComponentModel.Annotations": "[5.0.0, )",
           "System.Reactive": "[6.1.0, )"
         }
@@ -336,7 +336,7 @@
         "dependencies": {
           "FluentResults": "[4.0.0, )",
           "FluentValidation": "[12.1.1, )",
-          "Reaparr.Logging": "[0.36.0-dev.2, )"
+          "Reaparr.Logging": "[1.0.0, )"
         }
       },
       "Reaparr.Logging": {
@@ -345,7 +345,7 @@
           "Autofac": "[9.1.0, )",
           "FluentResults": "[4.0.0, )",
           "Microsoft.AspNetCore.Http.Abstractions": "[2.3.9, )",
-          "Reaparr.Environment": "[0.36.0-dev.2, )",
+          "Reaparr.Environment": "[1.0.0, )",
           "Serilog": "[4.3.1, )",
           "Serilog.Enrichers.Sensitive": "[2.1.0, )",
           "Serilog.Expressions": "[5.0.0, )",
@@ -360,10 +360,10 @@
       "Reaparr.SignalR.Contracts": {
         "type": "Project",
         "dependencies": {
-          "Reaparr.Domain": "[0.36.0-dev.2, )",
-          "Reaparr.Environment": "[0.36.0-dev.2, )",
-          "Reaparr.FluentResultExtensions": "[0.36.0-dev.2, )",
-          "Reaparr.Logging": "[0.36.0-dev.2, )"
+          "Reaparr.Domain": "[1.0.0, )",
+          "Reaparr.Environment": "[1.0.0, )",
+          "Reaparr.FluentResultExtensions": "[1.0.0, )",
+          "Reaparr.Logging": "[1.0.0, )"
         }
       }
     }

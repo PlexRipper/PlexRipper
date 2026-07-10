@@ -20,11 +20,13 @@ public class SetServerOwnedEndpoint : Endpoint<SetServerOwnedRequest, ResultDTO<
 {
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
+    private readonly IMediaQueryCache _mediaQueryCache;
 
-    public SetServerOwnedEndpoint(ILogger log, IReaparrDbContext dbContext)
+    public SetServerOwnedEndpoint(ILogger log, IReaparrDbContext dbContext, IMediaQueryCache mediaQueryCache)
     {
         _log = log.ForContext<SetServerOwnedEndpoint>();
         _dbContext = dbContext;
+        _mediaQueryCache = mediaQueryCache;
     }
 
     public override void Configure()
@@ -71,6 +73,13 @@ public class SetServerOwnedEndpoint : Endpoint<SetServerOwnedRequest, ResultDTO<
             await Send.FluentResult(ResultExtensions.EntityNotFound(nameof(PlexServer), req.PlexServerId), ct);
             return;
         }
+
+        var libraryIds = await _dbContext.PlexLibraries
+            .IgnoreQueryFilters()
+            .Where(x => x.PlexServerId == req.PlexServerId)
+            .Select(x => x.Id)
+            .ToListAsync(ct);
+        _mediaQueryCache.InvalidateLibraries(libraryIds, "Plex server ownership scope changed");
 
         await Send.FluentResult(Result.Ok(plexServer), x => x.ToDTO(), ct);
     }

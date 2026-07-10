@@ -28,6 +28,14 @@ export function setupMockPlexLibraryMetaDataEndpoints(
 				cy.log('BasePageSetup -> plexLibraries', this.plexLibraries);
 			}
 		});
+
+		cy.intercept('GET', PlexLibraryPaths.getMetadataFilter(library.id, {
+			mediaType: library.type,
+		}), {
+			statusCode: 200,
+			body: generateResultDTO({ roles: [], countries: [], genres: [], qualities: [] }),
+			...headers,
+		});
 	}
 
 	return this;

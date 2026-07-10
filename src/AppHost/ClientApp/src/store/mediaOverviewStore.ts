@@ -39,6 +39,8 @@ interface IMediaOverviewStoreState {
 	filterQuery: string;
 	lastMediaItemViewed: PlexMediaSlimDTO | null;
 	loading: boolean;
+	navLoading: boolean;
+	filterMetadataLoading: boolean;
 	isDetailView: boolean;
 	allMovieCount: number;
 	allTvShowCount: number;
@@ -71,6 +73,8 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 		queryHash: '',
 		lastMediaItemViewed: null,
 		loading: false,
+		navLoading: false,
+		filterMetadataLoading: false,
 		isDetailView: false,
 		allMovieCount: 0,
 		allTvShowCount: 0,
@@ -148,11 +152,12 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 			).pipe(
 				switchMap(() =>
 					forkJoin([
+						actions.refreshFilterMetadata(),
 						actions.refreshMetaData(),
 						actions.refreshMediaData(),
 					]),
 				),
-				map(([, requestMediaResult]) => requestMediaResult),
+				map(([, , requestMediaResult]) => requestMediaResult),
 			);
 		},
 		refreshMetaData() {
@@ -162,6 +167,23 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 					if (result.isSuccess && result.value) {
 						state.metadataList = Object.freeze(result.value);
 					}
+				}),
+			);
+		},
+		refreshFilterMetadata() {
+			state.filterMetadataLoading = true;
+			return plexLibraryApi.getMetadataFilter(state.libraryId, { mediaType: get(getters.getMediaType) }).pipe(
+				takeUntil(cancelSubject$),
+				tap((result) => {
+					if (result.isSuccess && result.value) {
+						state.availableRoleIds = result.value.roles ?? [];
+						state.availableCountryIds = result.value.countries ?? [];
+						state.availableGenreIds = result.value.genres ?? [];
+						state.availableQualityIds = result.value.qualities ?? [];
+					}
+				}),
+				finalize(() => {
+					state.filterMetadataLoading = false;
 				}),
 			);
 		},
@@ -256,11 +278,11 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 			state.allSeasonCount = data.totalSeasonCount;
 			state.allEpisodeCount = data.totalEpisodeCount;
 			state.allFileSize = data.totalMediaSize;
-			state.availableRoleIds = data.roles ?? [];
-			state.availableCountryIds = data.countries ?? [];
-			state.availableGenreIds = data.genres ?? [];
-			state.availableQualityIds = data.qualities ?? [];
-			state.scrollDict = new Map((data.navigationIndexes ?? []).map((x) => [x.label, x.index]));
+
+			// navigationIndexes are identical across all pages — only set once
+			if (state.scrollDict.size <= 1 && data.navigationIndexes?.length) {
+				state.scrollDict = new Map(data.navigationIndexes.map((x) => [x.label, x.index]));
+			}
 
 			Log.debug('mediaPages', mediaPages);
 		},
@@ -278,7 +300,16 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 				}
 			}
 
-			return requests.length ? forkJoin(requests) : of([]);
+			if (requests.length) {
+				state.navLoading = true;
+				return forkJoin(requests).pipe(
+					finalize(() => {
+						state.navLoading = false;
+					}),
+				);
+			}
+
+			return of([]);
 		},
 		scrollToIndex(scrollIndex: number) {
 			if (scrollIndex < 0 || scrollIndex >= state.totalCount) {

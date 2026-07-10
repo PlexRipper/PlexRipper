@@ -1,3 +1,5 @@
+using Microsoft.Extensions.DependencyInjection;
+
 namespace Reaparr.Application.UnitTests;
 
 public class DeletePlexServerEndpointUnitTests
@@ -176,6 +178,48 @@ public class DeletePlexServerEndpointUnitTests
         (await dbContext.PlexServers.IgnoreIsEnabledFilter().AnyAsync(x => x.Id == otherServerId, CancellationToken)).ShouldBeTrue();
         (await dbContext.DownloadTaskMovie.AnyAsync(x => x.Id == otherMovieDownloadId, CancellationToken)).ShouldBeTrue();
         (await dbContext.DownloadTaskMovieFile.AnyAsync(x => x.Id == otherMovieFileDownloadId, CancellationToken)).ShouldBeTrue();
+    }
+
+    [Test]
+    public async Task ShouldInvalidateServerLibraries_WhenServerIsDeleted()
+    {
+        // Arrange
+        await SetupDatabase(91304, config =>
+        {
+            config.PlexServerCount = 2;
+            config.PlexMovieLibraryCount = 2;
+            config.PlexTvShowLibraryCount = 2;
+        });
+
+        var dbContext = IDbContext;
+        var server = await dbContext.PlexServers.IgnoreIsEnabledFilter().OrderBy(x => x.Id).FirstAsync(CancellationToken);
+        var expectedLibraryIds = await dbContext.PlexLibraries
+            .IgnoreQueryFilters()
+            .Where(x => x.PlexServerId == server.Id)
+            .Select(x => x.Id)
+            .OrderBy(x => x)
+            .ToListAsync(CancellationToken);
+        var mediaQueryCache = new Mock<IMediaQueryCache>(MockBehavior.Strict);
+
+        mediaQueryCache
+            .Setup(x => x.InvalidateLibraries(
+                It.Is<IReadOnlyCollection<int>>(libraryIds => libraryIds.OrderBy(id => id).SequenceEqual(expectedLibraryIds)),
+                "Plex server deleted"
+            ))
+            .Verifiable(Times.Once);
+
+        // Act
+        var endpointResult = await TestEndpointHandleAsync(
+            new DeletePlexServerEndpointRequest { PlexServerId = server.Id },
+            services => services.AddSingleton(_ => mediaQueryCache.Object)
+        );
+        var result = endpointResult.Response;
+
+        // Assert
+        result.ShouldNotBeNull();
+        result.IsSuccess.ShouldBeTrue();
+        (await dbContext.PlexServers.IgnoreIsEnabledFilter().AnyAsync(x => x.Id == server.Id, CancellationToken)).ShouldBeFalse();
+        mediaQueryCache.Verify();
     }
 
     private static DownloadTaskDirectory CreateDownloadTaskDirectory() =>

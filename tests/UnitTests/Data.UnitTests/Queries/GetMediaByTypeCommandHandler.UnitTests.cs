@@ -746,6 +746,47 @@ public class GetMediaByTypeCommandHandlerUnitTests : BaseUnitTest<GetMediaByType
     }
 
     [Test]
+    public async Task ShouldReturnFullResult_WhenPageSizeIsNotProvided()
+    {
+        // Arrange
+        await SetupDatabase(70106, cfg =>
+        {
+            cfg.PlexServerCount = 1;
+            cfg.PlexMovieLibraryCount = 1;
+            cfg.MovieCount = 150;
+        });
+
+        var expectedMovieCount = await IDbContext.PlexMovies.CountAsync(CancellationToken);
+        var command = new GetMediaByTypeCommand()
+        {
+            Filter = new MediaQueryFilter
+            {
+                MediaType = PlexMediaType.Movie,
+                PlexLibraryId = 0,
+                FilterOfflineMedia = false,
+                FilterOwnedMedia = false,
+                Parameters = new FlexQueryParameters
+                {
+                    Page = 2,
+                    PageSize = null,
+                    Sort = null,
+                    Filter = null,
+                },
+            },
+        };
+
+        // Act
+        var result = await Sut.ExecuteAsync(command, CancellationToken);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.Items.Count.ShouldBe(expectedMovieCount);
+        result.Value.TotalCount.ShouldBe(expectedMovieCount);
+        result.Value.Page.ShouldBe(2);
+        result.Value.PageSize.ShouldBe(0);
+    }
+
+    [Test]
     public async Task ShouldRespectPaging_WhenPageAndPageSizeAreProvided()
     {
         // Arrange

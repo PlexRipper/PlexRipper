@@ -1,6 +1,6 @@
 ---
 name: reaparr-frontend-components
-description: ALWAYS load for ANY frontend work in Reaparr — editing .vue files, composables, pages, stores, or any file under src/AppHost/ClientApp/. Defines mandatory standards: SFC block order, Nuxt auto-imports (what to omit), get/set for refs, useSubscription for RxJS, consola logging, Pinia-first logic, props/emits typing, styling, and cypress data-cy attributes.
+description: "ALWAYS load for ANY frontend work in Reaparr — editing .vue files, composables, pages, stores, or any file under src/AppHost/ClientApp/. Defines mandatory standards: SFC block order, Nuxt auto-imports (what to omit), get/set for refs, useSubscription for RxJS, consola logging, Pinia-first logic, props/emits typing, styling, and cypress data-cy attributes."
 ---
 
 # Reaparr Frontend Component Standards

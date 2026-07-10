@@ -11,11 +11,11 @@
 
     <ItemGroup>
         <PackageReference Include="Autofac" Version="9.1.0" />
-        <PackageReference Include="CSharpier.MsBuild" Version="1.2.6">
+        <PackageReference Include="CSharpier.MsBuild" Version="1.3.0">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="MessagePack" Version="3.1.4" />
+        <PackageReference Include="MessagePack" Version="3.1.8" />
     </ItemGroup>
     <ItemGroup>
         <Using Include="System.ComponentModel.DataAnnotations" />

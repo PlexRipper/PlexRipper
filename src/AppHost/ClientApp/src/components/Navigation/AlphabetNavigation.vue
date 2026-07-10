@@ -6,11 +6,18 @@
 				:key="displayValue"
 				class="navigation-btn"
 				:label="getDisplayValue(displayValue)"
+				:loading="clickedLabel === displayValue && mediaOverviewStore.navLoading"
 				flat
 				square
 				no-wrap
 				:data-cy="`letter-${displayValue}-alphabet-navigation-btn`"
-				@click="mediaOverviewStore.scrollToIndex(scrollIndex)" />
+				@click="onLetterClick(displayValue, scrollIndex)">
+				<template #loading>
+					<QSpinnerPuff
+						size="1em"
+						color="primary" />
+				</template>
+			</q-btn>
 		</div>
 	</div>
 </template>
@@ -20,6 +27,18 @@ import { MediaSortField } from '@enums';
 import { getVideoQualityFromValue, translateVideoQuality } from '@composables';
 
 const mediaOverviewStore = useMediaOverviewStore();
+const clickedLabel = ref<string | null>(null);
+
+watch(() => mediaOverviewStore.navLoading, (isLoading) => {
+	if (!isLoading) {
+		clickedLabel.value = null;
+	}
+});
+
+function onLetterClick(label: string, scrollIndex: number) {
+	clickedLabel.value = label;
+	mediaOverviewStore.scrollToIndex(scrollIndex);
+}
 
 function getDisplayValue(value: string): string {
 	if (mediaOverviewStore.getActiveSort.field !== MediaSortField.Quality) {

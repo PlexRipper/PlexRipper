@@ -1,6 +1,9 @@
+using Microsoft.Extensions.DependencyInjection;
+
 namespace Reaparr.Application.UnitTests;
 
-public class GetAllMediaByTypeEndpointUnitTests : BaseEndpointUnitTest<GetAllMediaByTypeEndpoint, GetAllMediaByTypeRequest, PlexMediaStatisticsDTO>
+public class GetAllMediaByTypeEndpointUnitTests : BaseEndpointUnitTest<GetAllMediaByTypeEndpoint,
+    GetAllMediaByTypeRequest, PlexMediaStatisticsDTO>
 {
     [Test]
     public async Task ShouldMapFriendlyRequestFiltersToMediaQueryFilter_WhenHandlingRequest()
@@ -30,18 +33,19 @@ public class GetAllMediaByTypeEndpointUnitTests : BaseEndpointUnitTest<GetAllMed
             $"MediaDataList:any:Quality:eq:{request.QualityId!.Value.ToVideoQuality()}",
         ]);
 
-        Mock.Mock<ICommandExecutor>()
+        var mediaQueryCache = new Mock<IMediaQueryCache>(MockBehavior.Strict);
+        mediaQueryCache
             .Setup(x =>
-                x.Send(
-                    It.Is<GetMediaByTypeCommand>(command =>
-                        command.Filter.MediaType == PlexMediaType.Movie
-                        && command.Filter.PlexLibraryId == 42
-                        && command.Filter.FilterOwnedMedia
-                        && command.Filter.FilterOfflineMedia
-                        && command.Filter.Parameters.Page == 2
-                        && command.Filter.Parameters.PageSize == 25
-                        && command.Filter.Parameters.Sort == "sortIndex:asc"
-                        && command.Filter.Parameters.Filter == expectedFilter),
+                x.GetMediaAsync(
+                    It.Is<MediaQueryFilter>(filter =>
+                        filter.MediaType == PlexMediaType.Movie
+                        && filter.PlexLibraryId == 42
+                        && filter.FilterOwnedMedia
+                        && filter.FilterOfflineMedia
+                        && filter.Parameters.Page == 2
+                        && filter.Parameters.PageSize == 25
+                        && filter.Parameters.Sort == "sortIndex:asc"
+                        && filter.Parameters.Filter == expectedFilter),
                     It.IsAny<CancellationToken>()
                 )
             )
@@ -49,10 +53,13 @@ public class GetAllMediaByTypeEndpointUnitTests : BaseEndpointUnitTest<GetAllMed
             .Verifiable(Times.Once());
 
         // Act
-        await TestEndpointHandleAsync(request);
+        await TestEndpointHandleAsync(
+            request,
+            services => services.AddSingleton(_ => mediaQueryCache.Object)
+        );
 
         // Assert
-        Mock.Mock<ICommandExecutor>().Verify();
+        mediaQueryCache.Verify();
     }
 
     [Test]

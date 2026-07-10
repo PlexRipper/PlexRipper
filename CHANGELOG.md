@@ -1,5 +1,28 @@
 Reaparr Changelog
 
+# [0.38.0-dev.22](https://github.com/Reaparr/Reaparr/compare/v0.38.0-dev.21...v0.38.0-dev.22) (2026-07-10)
+
+
+### Bug Fixes
+
+* **WebAPI:** Disable paging for zero page size ([691524e](https://github.com/Reaparr/Reaparr/commit/691524ef58ad92e0622f617f78e9fb05d14ef7ff))
+
+
+### Features
+
+* **Web-UI:** Add loading indicators for filter menu and alphabet navigation ([84fb489](https://github.com/Reaparr/Reaparr/commit/84fb489ea2217844d57235665329f3ed460b2973))
+
+
+### Performance Improvements
+
+* **WebAPI:** Added media overview cache for the home page to greatly improve loading times ([acfbbee](https://github.com/Reaparr/Reaparr/commit/acfbbee3a2078b5458e10a10071505da398ab821))
+* **Web-UI:** Batch page fetches, reduce overscan, and prefetch before scroll ([c09faec](https://github.com/Reaparr/Reaparr/commit/c09faeca126234b3a8580e08de4417dc505e588f))
+* **Web-UI:** Defer thumbnail loading to viewport-visible rows only ([c4d77b1](https://github.com/Reaparr/Reaparr/commit/c4d77b139ddcc941c05b75055543cf190ebc28b4))
+* **Web-UI:** Fetch filter metadata via dedicated endpoint instead of page response ([e91086c](https://github.com/Reaparr/Reaparr/commit/e91086ca1baa926141da1d723c079c828d2c5417))
+* **Web-UI:** Optimize poster table render and scroll performance ([e0ff569](https://github.com/Reaparr/Reaparr/commit/e0ff569d11e68f68c21fcd1fb79aeda346c27365))
+* **Web-UI:** Preload thumbnails for overscan rows with wider buffer ([691eafb](https://github.com/Reaparr/Reaparr/commit/691eafbf2f9408c66dc5244a62a1370d6265e0ab))
+* **WebAPI:** Strip filter metadata from media page responses and serve lazily ([9ff0807](https://github.com/Reaparr/Reaparr/commit/9ff0807d48352c822de26e579057e9a4e87b41f5))
+
 # [0.38.0-dev.21](https://github.com/Reaparr/Reaparr/compare/v0.38.0-dev.20...v0.38.0-dev.21) (2026-06-07)
 
 

@@ -26,34 +26,9 @@ public sealed class MediaQueryCache : IMediaQueryCache
         PlexMediaType.TvShow,
     ];
 
-    private static readonly HashSet<string> _titleSortFields = new(StringComparer.OrdinalIgnoreCase)
-    {
-        "sortTitle",
-        "title",
-        "sortIndex",
-        nameof(BasePlexMedia.SortIndex),
-        nameof(BasePlexMedia.SearchTitle),
-    };
-
-    private static readonly Dictionary<string, string> _sortAliases = new(StringComparer.OrdinalIgnoreCase)
-    {
-        ["year"] = nameof(BasePlexMedia.Year),
-        [nameof(BasePlexMedia.Year)] = nameof(BasePlexMedia.Year),
-        ["addedAt"] = nameof(BasePlexMedia.AddedAt),
-        [nameof(BasePlexMedia.AddedAt)] = nameof(BasePlexMedia.AddedAt),
-        ["updatedAt"] = nameof(BasePlexMedia.UpdatedAt),
-        [nameof(BasePlexMedia.UpdatedAt)] = nameof(BasePlexMedia.UpdatedAt),
-        ["duration"] = nameof(BasePlexMedia.Duration),
-        [nameof(BasePlexMedia.Duration)] = nameof(BasePlexMedia.Duration),
-        ["mediaSize"] = nameof(BasePlexMedia.MediaSize),
-        [nameof(BasePlexMedia.MediaSize)] = nameof(BasePlexMedia.MediaSize),
-        ["quality"] = "quality",
-    };
-
     private readonly ConcurrentDictionary<MediaQueryMetadataKey, MediaQueryMetadataSnapshot> _metadataSnapshots = new();
     private readonly ConcurrentDictionary<MediaQuerySortedListKey, MediaQuerySortedListSnapshot> _sortedListSnapshots = new();
-
-    private readonly ConcurrentDictionary<MediaQuerySortedListKey, Lazy<Task<Result<MediaQuerySortedListSnapshot>>>> _builds = new();
+    private readonly ConcurrentDictionary<MediaQuerySortedListKey, Lazy<Task<Result<MediaQueryBuildResult>>>> _builds = new();
     private readonly ConcurrentDictionary<MediaQuerySortedListKey, long> _buildVersions = new();
 
     private readonly ICommandExecutor _commandExecutor;
@@ -61,9 +36,6 @@ public sealed class MediaQueryCache : IMediaQueryCache
     private readonly IGeneralSettings _generalSettings;
     private readonly ILogger _log;
 
-    /// <summary>
-    /// Creates the cache with command execution for snapshot builds and database access for resolving library scopes.
-    /// </summary>
     public MediaQueryCache(ILogger log, ICommandExecutor commandExecutor, IReaparrDbContextFactory dbContextFactory, IGeneralSettings generalSettings)
     {
         _log = log.ForContext<MediaQueryCache>();
@@ -84,8 +56,8 @@ public sealed class MediaQueryCache : IMediaQueryCache
             return await BypassCacheAsync(filter, cancellationToken, "filter parameter is set");
 
         var libraryIds = await ResolveLibraryIdsAsync(filter, cancellationToken);
-        var normalizedSortResult = NormalizeSort(filter.Parameters.Sort, libraryIds.Count);
-        if (normalizedSortResult is null)
+        var sort = filter.Parameters.Sort.Normalize(libraryIds.Count);
+        if (sort is null)
         {
             _log.Here().Debug("Bypassing media query cache: unsupported sort {Sort}", filter.Parameters.Sort);
             return await BypassCacheAsync(filter, cancellationToken, null);
@@ -97,31 +69,28 @@ public sealed class MediaQueryCache : IMediaQueryCache
             filter.FilterOfflineMedia,
             filter.FilterOwnedMedia);
 
-        var sortedListKey = new MediaQuerySortedListKey(metadataKey, normalizedSortResult.StoredField);
+        var sortedListKey = new MediaQuerySortedListKey(metadataKey, sort.Field);
 
         if (_metadataSnapshots.TryGetValue(metadataKey, out var metadataSnapshot)
             && _sortedListSnapshots.TryGetValue(sortedListKey, out var sortedListSnapshot))
         {
             _log.Here().Debug("Media query cache hit for {MediaType} sorted by {SortField}", filter.MediaType, sortedListKey.NormalizedAscendingSortField);
-            return Result.Ok(CreatePage(filter, metadataSnapshot, sortedListSnapshot, normalizedSortResult.Descending));
+            return Result.Ok(CreatePage(filter, metadataSnapshot, sortedListSnapshot, sort.Descending));
         }
 
         _log.Here().Debug("Media query cache miss for {MediaType} sorted by {SortField}", filter.MediaType, sortedListKey.NormalizedAscendingSortField);
-        var buildResult = await GetOrBuildSortedListSnapshotAsync(filter, sortedListKey, normalizedSortResult, cancellationToken);
-        if (buildResult.IsFailed)
-            return Result.Fail(buildResult.Errors);
-
-        if (!_metadataSnapshots.TryGetValue(metadataKey, out metadataSnapshot))
-            return Result.Fail("Media query cache build completed without metadata snapshot.");
-
-        return Result.Ok(CreatePage(filter, metadataSnapshot, buildResult.Value, normalizedSortResult.Descending));
+        var buildResult = await GetOrBuildSnapshotAsync(filter, sortedListKey, sort, cancellationToken);
+        return buildResult.IsSuccess
+            ? Result.Ok(CreatePage(filter, buildResult.Value.Metadata, buildResult.Value.SortedList, sort.Descending))
+            : Result.Fail(buildResult.Errors);
     }
 
     /// <inheritdoc />
     public async Task BuildCache()
     {
         var warmupTasks = _warmupMediaTypes
-            .SelectMany(mediaType => _warmupSortFields.Select(sortField => GetMediaAsync(CreateWarmupFilter(mediaType, sortField), CancellationToken.None)))
+            .SelectMany(mediaType => _warmupSortFields
+                .Select(sortField => GetMediaAsync(CreateWarmupFilter(mediaType, sortField), CancellationToken.None)))
             .ToList();
 
         var results = await Task.WhenAll(warmupTasks);
@@ -145,50 +114,54 @@ public sealed class MediaQueryCache : IMediaQueryCache
         if (affectedLibraryIds.Count == 0)
             return;
 
-        var removedMetadataCount = RemoveKeysContainingLibrary(_metadataSnapshots, affectedLibraryIds);
-        var removedSortedListCount = RemoveKeysContainingLibrary(_sortedListSnapshots, affectedLibraryIds);
-        var removedBuildCount = RemoveKeysContainingLibrary(_builds, affectedLibraryIds);
-        
-        var keysToIncrement = _buildVersions.Keys.Where(key => key.ContainsAnyLibrary(affectedLibraryIds)).ToList();
-        foreach (var key in keysToIncrement)
+        var removedMetadataCount = RemoveKeysContainingLibrary(_metadataSnapshots, affectedLibraryIds, k => k.ContainsAnyLibrary(affectedLibraryIds));
+        var removedSortedListCount = RemoveKeysContainingLibrary(_sortedListSnapshots, affectedLibraryIds, k => k.ContainsAnyLibrary(affectedLibraryIds));
+        var removedBuildCount = RemoveKeysContainingLibrary(_builds, affectedLibraryIds, k => k.ContainsAnyLibrary(affectedLibraryIds));
+
+        // Bump versions so in-flight builds that complete after this point discard their results.
+        var keysToBump = _buildVersions.Keys.Where(key => key.ContainsAnyLibrary(affectedLibraryIds)).ToList();
+        foreach (var key in keysToBump)
             _buildVersions.AddOrUpdate(key, 1, (_, version) => version + 1);
 
-        _log.Here()
-            .Information(
-                "Invalidated media query cache for libraries {PlexLibraryIds}: {Reason}. Removed {MetadataCount} metadata snapshots, {SortedListCount} sorted lists, and {BuildCount} in-flight builds",
-                affectedLibraryIds,
-                reason,
-                removedMetadataCount,
-                removedSortedListCount,
-                removedBuildCount);
+        _log.Here().Information(
+            "Invalidated media query cache for libraries {PlexLibraryIds}: {Reason}. " +
+            "Removed {MetadataCount} metadata, {SortedListCount} sorted-lists, {BuildCount} in-flight builds",
+            affectedLibraryIds, reason, removedMetadataCount, removedSortedListCount, removedBuildCount);
     }
 
+    // ── Build helpers ──────────────────────────────────────────────
+
     /// <summary>
-    /// Ensures only one build runs per sorted-list key and stores the completed snapshot if it was not invalidated mid-build.
+    /// Ensures only one build runs per sorted-list key. Stores metadata and sorted-list
+    /// snapshots atomically after the version check passes.
     /// </summary>
-    private async Task<Result<MediaQuerySortedListSnapshot>> GetOrBuildSortedListSnapshotAsync(
+    private async Task<Result<MediaQueryBuildResult>> GetOrBuildSnapshotAsync(
         MediaQueryFilter filter,
         MediaQuerySortedListKey sortedListKey,
-        NormalizedMediaSort normalizedSort,
+        MediaSortNormalizer.Result sort,
         CancellationToken cancellationToken)
     {
         var buildVersion = _buildVersions.GetOrAdd(sortedListKey, 0);
         var lazyBuild = _builds.GetOrAdd(
             sortedListKey,
-            _ => new Lazy<Task<Result<MediaQuerySortedListSnapshot>>>(
-                () => BuildSortedListSnapshotAsync(filter, sortedListKey, normalizedSort, cancellationToken),
+            _ => new Lazy<Task<Result<MediaQueryBuildResult>>>(
+                () => BuildSnapshotAsync(filter, sortedListKey, sort, cancellationToken),
                 LazyThreadSafetyMode.ExecutionAndPublication));
 
         try
         {
-            var result = await lazyBuild.Value;
+            var buildResult = await lazyBuild.Value;
+
             if (_buildVersions.TryGetValue(sortedListKey, out var currentVersion) && currentVersion != buildVersion)
                 return Result.Fail("Media query cache build was invalidated before completion.");
 
-            if (result.IsSuccess)
-                _sortedListSnapshots[sortedListKey] = result.Value;
+            if (buildResult.IsSuccess)
+            {
+                _metadataSnapshots[sortedListKey.MetadataKey] = buildResult.Value.Metadata;
+                _sortedListSnapshots[sortedListKey] = buildResult.Value.SortedList;
+            }
 
-            return result;
+            return buildResult;
         }
         finally
         {
@@ -198,12 +171,13 @@ public sealed class MediaQueryCache : IMediaQueryCache
     }
 
     /// <summary>
-    /// Builds the full ascending snapshot by executing the existing media query command with paging and user filters removed.
+    /// Executes the media query with paging and user filters removed, producing both metadata
+    /// and sorted-list snapshots.
     /// </summary>
-    private async Task<Result<MediaQuerySortedListSnapshot>> BuildSortedListSnapshotAsync(
+    private async Task<Result<MediaQueryBuildResult>> BuildSnapshotAsync(
         MediaQueryFilter originalFilter,
         MediaQuerySortedListKey sortedListKey,
-        NormalizedMediaSort normalizedSort,
+        MediaSortNormalizer.Result sort,
         CancellationToken cancellationToken)
     {
         var commandResult = await _commandExecutor.Send(
@@ -215,7 +189,7 @@ public sealed class MediaQueryCache : IMediaQueryCache
                     {
                         Query = null,
                         Filter = null,
-                        Sort = $"{normalizedSort.HandlerField}:asc",
+                        Sort = $"{sort.Field}:asc",
                         Page = null,
                         PageSize = null,
                         Select = originalFilter.Parameters.Select,
@@ -234,19 +208,22 @@ public sealed class MediaQueryCache : IMediaQueryCache
             return Result.Fail(commandResult.Errors);
 
         var result = commandResult.Value;
-        _metadataSnapshots[sortedListKey.MetadataKey] = CreateMetadataSnapshot(sortedListKey.MetadataKey, result);
 
-        return Result.Ok(new MediaQuerySortedListSnapshot
-        {
-            Key = sortedListKey,
-            Items = result.Items.Select(x => x with { Qualities = x.Qualities.ToList() }).ToList(),
-            NavigationIndexes = result.NavigationIndexes.Select(CopyNavigationIndex).ToList(),
-            CreatedAt = DateTimeOffset.UtcNow,
-        });
+        return Result.Ok(new MediaQueryBuildResult(
+            CreateMetadataSnapshot(sortedListKey.MetadataKey, result),
+            new MediaQuerySortedListSnapshot
+            {
+                Key = sortedListKey,
+                Items = result.Items.Select(x => x with { Qualities = x.Qualities.ToList() }).ToList(),
+                NavigationIndexes = result.NavigationIndexes.Select(CopyNavigationIndex).ToList(),
+                CreatedAt = DateTimeOffset.UtcNow,
+            }));
     }
 
+    // ── Library resolution ─────────────────────────────────────────
+
     /// <summary>
-    /// Resolves the effective library id set for the request, applying account access, owned-library, and offline-server filters for all-library requests.
+    /// Resolves the effective library id set for the request.
     /// </summary>
     private async Task<IReadOnlyList<int>> ResolveLibraryIdsAsync(MediaQueryFilter filter, CancellationToken cancellationToken)
     {
@@ -271,12 +248,12 @@ public sealed class MediaQueryCache : IMediaQueryCache
 
         if (filter.FilterOwnedMedia)
         {
-            var ownedPlexLibraries = await dbContext.PlexAccountLibraries
+            var ownedLibraries = await dbContext.PlexAccountLibraries
                 .Where(x => x.IsLibraryOwned)
                 .Select(x => x.PlexLibraryId)
                 .ToListAsync(cancellationToken);
 
-            allowedPlexLibraryIds.RemoveAll(ownedPlexLibraries.Contains);
+            allowedPlexLibraryIds.RemoveAll(ownedLibraries.Contains);
         }
 
         if (filter.FilterOfflineMedia)
@@ -292,53 +269,8 @@ public sealed class MediaQueryCache : IMediaQueryCache
         return allowedPlexLibraryIds.Distinct().OrderBy(x => x).ToList();
     }
 
-    /// <summary>
-    /// Normalizes supported sort expressions into a cache key and indicates whether the request should be reversed at page creation.
-    /// </summary>
-    private static NormalizedMediaSort? NormalizeSort(string? sort, int libraryCount)
-    {
-        if (string.IsNullOrWhiteSpace(sort))
-        {
-            var titleField = libraryCount == 1 ? "sortIndex" : nameof(BasePlexMedia.SearchTitle);
-            return new NormalizedMediaSort(titleField, titleField, false);
-        }
+    // ── Page creation ──────────────────────────────────────────────
 
-        var segments = sort.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
-        if (segments.Length != 1)
-            return null;
-
-        var parts = segments[0].Split(':', StringSplitOptions.TrimEntries);
-        if (parts.Length is < 1 or > 2)
-            return null;
-
-        var normalizedField = NormalizeSortField(parts[0], libraryCount);
-        if (normalizedField is null)
-            return null;
-
-        var direction = parts.Length == 2 && !string.IsNullOrWhiteSpace(parts[1]) ? parts[1] : "asc";
-        var descending = direction.Equals("desc", StringComparison.OrdinalIgnoreCase);
-        if (!descending && !direction.Equals("asc", StringComparison.OrdinalIgnoreCase))
-            return null;
-
-        return new NormalizedMediaSort(normalizedField, normalizedField, descending);
-    }
-
-    /// <summary>
-    /// Maps supported sort aliases to the canonical field name used by the snapshot build.
-    /// </summary>
-    private static string? NormalizeSortField(string requestedField, int libraryCount)
-    {
-        if (_titleSortFields.Contains(requestedField))
-            return libraryCount == 1 ? "sortIndex" : nameof(BasePlexMedia.SearchTitle);
-
-        return _sortAliases.TryGetValue(requestedField, out var normalizedField)
-            ? normalizedField
-            : null;
-    }
-
-    /// <summary>
-    /// Creates a page response by slicing the cached list, rebuilding descending views when necessary, and copying shared metadata.
-    /// </summary>
     private static PagedMediaQueryResult CreatePage(
         MediaQueryFilter filter,
         MediaQueryMetadataSnapshot metadataSnapshot,
@@ -361,10 +293,10 @@ public sealed class MediaQueryCache : IMediaQueryCache
             PageSize = effectivePageSize,
             Items = pageItems,
             NavigationIndexes = navigationIndexes,
-            Roles = metadataSnapshot.Roles.ToList(),
-            Countries = metadataSnapshot.Countries.ToList(),
-            Genres = metadataSnapshot.Genres.ToList(),
-            Qualities = metadataSnapshot.Qualities.ToList(),
+            Roles = [],
+            Countries = [],
+            Genres = [],
+            Qualities = [],
             TotalCount = metadataSnapshot.TotalCount,
             MediaCount = metadataSnapshot.MediaCount,
             MovieCount = metadataSnapshot.MovieCount,
@@ -396,10 +328,9 @@ public sealed class MediaQueryCache : IMediaQueryCache
         {
             var sourceIndex = descending ? items.Count - i - 1 : i;
             var item = items[sourceIndex];
-            var sortIndex = i + 1;
             pageItems.Add(item with
             {
-                SortIndex = sortIndex,
+                SortIndex = i + 1,
                 Qualities = item.Qualities.ToList(),
             });
         }
@@ -407,9 +338,6 @@ public sealed class MediaQueryCache : IMediaQueryCache
         return pageItems;
     }
 
-    /// <summary>
-    /// Rebuilds navigation indexes from a reversed source list so descending requests still expose correct anchors.
-    /// </summary>
     private static List<MediaNavigationIndexDTO> RebuildNavigationIndexes(
         IReadOnlyList<PlexMediaSlimDTO> sourceItems,
         string sortField)
@@ -431,28 +359,32 @@ public sealed class MediaQueryCache : IMediaQueryCache
         return MediaNavigationIndexBuilder.Build(rows, sortField);
     }
 
-    /// <summary>
-    /// Creates a warmup request for one media type and sort field.
-    /// </summary>
+    // ── Invalidation helpers ───────────────────────────────────────
+
+    private static int RemoveKeysContainingLibrary<TKey, TValue>(
+        ConcurrentDictionary<TKey, TValue> dictionary,
+        IReadOnlySet<int> libraryIds,
+        Func<TKey, bool> matches)
+        where TKey : notnull
+    {
+        var keysToRemove = dictionary.Keys.Where(matches).ToList();
+        foreach (var key in keysToRemove)
+            dictionary.TryRemove(key, out _);
+
+        return keysToRemove.Count;
+    }
+
+    // ── Factory helpers ────────────────────────────────────────────
+
     private MediaQueryFilter CreateWarmupFilter(PlexMediaType mediaType, string sortField) => new()
     {
         MediaType = mediaType,
         PlexLibraryId = 0,
         FilterOfflineMedia = _generalSettings.HideMediaFromOfflineServers,
         FilterOwnedMedia = _generalSettings.HideMediaFromOwnedServers,
-        Parameters = new FlexQueryParameters
-        {
-            Query = null,
-            Filter = null,
-            Sort = $"{sortField}:asc",
-            Page = null,
-            PageSize = null,
-        },
+        Parameters = new FlexQueryParameters { Query = null, Filter = null, Sort = $"{sortField}:asc", Page = null, PageSize = null },
     };
 
-    /// <summary>
-    /// Bypasses the cache and forwards the request to the media query handler.
-    /// </summary>
     private Task<Result<PagedMediaQueryResult>> BypassCacheAsync(MediaQueryFilter filter, CancellationToken cancellationToken, string? reason)
     {
         if (!string.IsNullOrWhiteSpace(reason))
@@ -461,9 +393,6 @@ public sealed class MediaQueryCache : IMediaQueryCache
         return _commandExecutor.Send(new GetMediaByTypeCommand { Filter = filter }, cancellationToken);
     }
 
-    /// <summary>
-    /// Creates the shared metadata snapshot for a cached sorted list.
-    /// </summary>
     private static MediaQueryMetadataSnapshot CreateMetadataSnapshot(MediaQueryMetadataKey key, PagedMediaQueryResult result) => new()
     {
         Key = key,
@@ -486,45 +415,18 @@ public sealed class MediaQueryCache : IMediaQueryCache
         CreatedAt = DateTimeOffset.UtcNow,
     };
 
-    /// <summary>
-    /// Removes dictionary entries whose metadata keys depend on one of the invalidated libraries.
-    /// </summary>
-    private static int RemoveKeysContainingLibrary<TValue>(
-        ConcurrentDictionary<MediaQueryMetadataKey, TValue> dictionary,
-        IReadOnlySet<int> libraryIds)
-    {
-        var keysToRemove = dictionary.Keys.Where(key => key.ContainsAnyLibrary(libraryIds)).ToList();
-        foreach (var key in keysToRemove)
-            dictionary.TryRemove(key, out _);
-
-        return keysToRemove.Count;
-    }
-
-    /// <summary>
-    /// Removes dictionary entries whose sorted-list keys depend on one of the invalidated libraries.
-    /// </summary>
-    private static int RemoveKeysContainingLibrary<TValue>(
-        ConcurrentDictionary<MediaQuerySortedListKey, TValue> dictionary,
-        IReadOnlySet<int> libraryIds)
-    {
-        var keysToRemove = dictionary.Keys.Where(key => key.ContainsAnyLibrary(libraryIds)).ToList();
-        foreach (var key in keysToRemove)
-            dictionary.TryRemove(key, out _);
-
-        return keysToRemove.Count;
-    }
-
-    /// <summary>
-    /// Copies a navigation index so cached snapshots do not expose mutable shared instances.
-    /// </summary>
     private static MediaNavigationIndexDTO CopyNavigationIndex(MediaNavigationIndexDTO index) => new()
     {
         Label = index.Label,
         Index = index.Index,
     };
 
+    // ── Nested types ───────────────────────────────────────────────
+
     /// <summary>
-    /// Stores the canonical sort field to cache, the field sent to the query handler, and whether the requested page should be reversed.
+    /// Bundles metadata and sorted-list snapshots produced by a single build so they can be stored atomically.
     /// </summary>
-    private sealed record NormalizedMediaSort(string StoredField, string HandlerField, bool Descending);
+    private sealed record MediaQueryBuildResult(
+        MediaQueryMetadataSnapshot Metadata,
+        MediaQuerySortedListSnapshot SortedList);
 }

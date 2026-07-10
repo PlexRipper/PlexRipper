@@ -4,7 +4,7 @@ namespace Reaparr.Data;
 /// Normalizes supported Plex media sort expressions into a canonical cache key and resolves title-sort
 /// field selection based on the number of libraries in scope.
 /// </summary>
-internal static class MediaSortNormalizer
+public static class MediaSortNormalizer
 {
     private const string DEFAULT_TITLE_SORT_MULTI_LIBRARY = nameof(BasePlexMedia.SearchTitle);
     private const string DEFAULT_TITLE_SORT_SINGLE_LIBRARY = "sortIndex";

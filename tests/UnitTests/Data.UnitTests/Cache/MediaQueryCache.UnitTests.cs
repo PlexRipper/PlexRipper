@@ -826,4 +826,78 @@ public class MediaQueryCacheUnitTests : BaseUnitTest<MediaQueryCache>
         HasThumb = false,
         Qualities = new List<PlexMediaQualityDTO>(),
     };
+
+    [Test]
+    public async Task ShouldReturnEmptyFilterArrays_InPageResponse()
+    {
+        // Arrange
+        await SetupDatabase(70320, cfg =>
+        {
+            cfg.PlexServerCount = 1;
+            cfg.PlexMovieLibraryCount = 1;
+            cfg.MovieCount = 10;
+        });
+
+        var filter = CreateFilter(sort: "sortIndex:asc", page: 1, pageSize: 5);
+
+        Mock.Mock<ICommandExecutor>()
+            .Setup(x => x.Send(It.IsAny<GetMediaByTypeCommand>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result.Ok(CreateResult([1, 2, 3, 4, 5])))
+            .Verifiable(Times.Once());
+
+        // Act
+        var result = await Sut.GetMediaAsync(filter, CancellationToken);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.Roles.ShouldBeEmpty();
+        result.Value.Countries.ShouldBeEmpty();
+        result.Value.Genres.ShouldBeEmpty();
+        result.Value.Qualities.ShouldBeEmpty();
+        Mock.Mock<ICommandExecutor>().Verify();
+    }
+
+    [Test]
+    public async Task ShouldSkipMetadataStorage_WhenBuildInvalidatedMidFlight()
+    {
+        // Arrange
+        await SetupDatabase(70321, cfg =>
+        {
+            cfg.PlexServerCount = 1;
+            cfg.PlexMovieLibraryCount = 1;
+            cfg.MovieCount = 5;
+        });
+
+        var libraryId = await IDbContext.PlexLibraries
+            .Where(x => x.Type == PlexMediaType.Movie)
+            .Select(x => x.Id)
+            .FirstAsync(CancellationToken);
+
+        var staleBuildTcs = new TaskCompletionSource<Result<PagedMediaQueryResult>>(TaskCreationOptions.RunContinuationsAsynchronously);
+        var freshBuildTcs = new TaskCompletionSource<Result<PagedMediaQueryResult>>(TaskCreationOptions.RunContinuationsAsynchronously);
+        var buildQueue = new Queue<TaskCompletionSource<Result<PagedMediaQueryResult>>>([staleBuildTcs, freshBuildTcs]);
+
+        var filter = CreateFilter(plexLibraryId: libraryId, sort: "year:asc", page: 1, pageSize: 5);
+
+        Mock.Mock<ICommandExecutor>()
+            .Setup(x => x.Send(It.IsAny<GetMediaByTypeCommand>(), It.IsAny<CancellationToken>()))
+            .Returns(() => buildQueue.Dequeue().Task)
+            .Verifiable(Times.Exactly(2));
+
+        // Act — start build, invalidate mid-flight, complete stale build, then verify fresh build succeeds
+        var firstRequest = Sut.GetMediaAsync(filter, CancellationToken);
+        Sut.InvalidateLibraries([libraryId], "mid-build invalidation");
+        staleBuildTcs.SetResult(Result.Ok(CreateResult([100, 200, 300, 400, 500])));
+        var staleResult = await firstRequest;
+
+        freshBuildTcs.SetResult(Result.Ok(CreateResult([10, 20, 30, 40, 50])));
+        var freshResult = await Sut.GetMediaAsync(filter, CancellationToken);
+
+        // Assert
+        staleResult.IsFailed.ShouldBeTrue();
+        staleResult.Errors.ShouldContain(x => x.Message.Contains("invalidated"));
+        freshResult.IsSuccess.ShouldBeTrue();
+        freshResult.Value.Items.Select(x => x.Id).ShouldBe([10, 20, 30, 40, 50]);
+        Mock.Mock<ICommandExecutor>().Verify();
+    }
 }

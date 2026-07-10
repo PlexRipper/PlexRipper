@@ -214,10 +214,10 @@ describe('MediaOverviewStore - Request Contracts', () => {
 		expect(store.allSeasonCount).toBe(12);
 		expect(store.allEpisodeCount).toBe(13);
 		expect(store.allFileSize).toBe(123456);
-		expect(store.availableRoleIds).toEqual([11, 12]);
-		expect(store.availableCountryIds).toEqual([21, 22]);
-		expect(store.availableGenreIds).toEqual([31, 32]);
-		expect(store.availableQualityIds).toEqual([41, 42]);
+		expect(store.availableRoleIds).toEqual([]);
+		expect(store.availableCountryIds).toEqual([]);
+		expect(store.availableGenreIds).toEqual([]);
+		expect(store.availableQualityIds).toEqual([]);
 		expect([...store.scrollDict.entries()]).toEqual([['A', 0], ['Z', 2]]);
 	});
 

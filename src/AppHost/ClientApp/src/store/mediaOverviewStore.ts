@@ -143,6 +143,9 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 
 			actions.$reset();
 
+			// Prevent the empty-state flash while data loads.
+			state.loading = true;
+
 			// Update state
 			state.libraryId = libraryId;
 

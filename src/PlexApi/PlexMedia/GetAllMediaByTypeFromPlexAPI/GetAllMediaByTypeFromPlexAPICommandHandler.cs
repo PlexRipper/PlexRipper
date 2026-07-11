@@ -93,7 +93,7 @@ public class GetAllMediaByTypeFromPlexApiCommandHandler
             if (mediaListResult.IsFailed)
             {
                 mediaListResult.ToResult().LogError();
-                break;
+                return mediaListResult.ToResult();
             }
 
             var rawMediaList = mediaListResult.Value;

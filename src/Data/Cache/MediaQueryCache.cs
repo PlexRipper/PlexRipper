@@ -9,6 +9,7 @@ namespace Reaparr.Data;
 /// </summary>
 public sealed class MediaQueryCache : IMediaQueryCache
 {
+    private const string CacheWarmingUpMessage = "Media query cache is warming up. The media overview will appear once the cache is built on the next request.";
     private static readonly string[] _warmupSortFields =
     [
         nameof(BasePlexMedia.SearchTitle),
@@ -30,6 +31,7 @@ public sealed class MediaQueryCache : IMediaQueryCache
     private readonly ConcurrentDictionary<MediaQuerySortedListKey, MediaQuerySortedListSnapshot> _sortedListSnapshots = new();
     private readonly ConcurrentDictionary<MediaQuerySortedListKey, Lazy<Task<Result<MediaQueryBuildResult>>>> _builds = new();
     private readonly ConcurrentDictionary<MediaQuerySortedListKey, long> _buildVersions = new();
+    private readonly ConcurrentDictionary<MediaQuerySortedListKey, bool> _dirtyKeys = new();
 
     private readonly ICommandExecutor _commandExecutor;
     private readonly IReaparrDbContextFactory _dbContextFactory;
@@ -43,6 +45,9 @@ public sealed class MediaQueryCache : IMediaQueryCache
         _dbContextFactory = dbContextFactory;
         _generalSettings = generalSettings;
     }
+
+    /// <inheritdoc />
+    public bool SuppressInvalidation { get; set; }
 
     /// <inheritdoc />
     public async Task<Result<PagedMediaQueryResult>> GetMediaAsync(
@@ -74,26 +79,41 @@ public sealed class MediaQueryCache : IMediaQueryCache
         if (_metadataSnapshots.TryGetValue(metadataKey, out var metadataSnapshot)
             && _sortedListSnapshots.TryGetValue(sortedListKey, out var sortedListSnapshot))
         {
+            if (_dirtyKeys.ContainsKey(sortedListKey))
+                QueueSnapshotRefresh(sortedListKey);
+
             _log.Here().Debug("Media query cache hit for {MediaType} sorted by {SortField}", filter.MediaType, sortedListKey.NormalizedAscendingSortField);
             return Result.Ok(CreatePage(filter, metadataSnapshot, sortedListSnapshot, sort.Descending));
         }
 
         _log.Here().Debug("Media query cache miss for {MediaType} sorted by {SortField}", filter.MediaType, sortedListKey.NormalizedAscendingSortField);
-        var buildResult = await GetOrBuildSnapshotAsync(filter, sortedListKey, sort, cancellationToken);
-        return buildResult.IsSuccess
-            ? Result.Ok(CreatePage(filter, buildResult.Value.Metadata, buildResult.Value.SortedList, sort.Descending))
-            : Result.Fail(buildResult.Errors);
+        QueueSnapshotRefresh(sortedListKey);
+        return Result.Fail(CacheWarmingUpMessage).Add503ServiceUnavailableError();
     }
 
     /// <inheritdoc />
     public async Task BuildCache()
     {
-        var warmupTasks = _warmupMediaTypes
+        // Resolve library IDs once for Movie and TvShow warmup keys
+        var movieLibraryIds = await ResolveLibraryIdsAsync(CreateWarmupFilter(PlexMediaType.Movie, _warmupSortFields[0]), CancellationToken.None);
+        var tvShowLibraryIds = await ResolveLibraryIdsAsync(CreateWarmupFilter(PlexMediaType.TvShow, _warmupSortFields[0]), CancellationToken.None);
+
+        var warmupFilters = _warmupMediaTypes
             .SelectMany(mediaType => _warmupSortFields
-                .Select(sortField => GetMediaAsync(CreateWarmupFilter(mediaType, sortField), CancellationToken.None)))
+                .Select(sortField =>
+                {
+                    var filter = CreateWarmupFilter(mediaType, sortField);
+                    var libraryIds = mediaType == PlexMediaType.Movie ? movieLibraryIds : tvShowLibraryIds;
+                    var normalizedSort = MediaSortNormalizer.Normalize(filter.Parameters.Sort, libraryIds.Count)!;
+                    var key = new MediaQuerySortedListKey(
+                        new MediaQueryMetadataKey(mediaType, libraryIds, filter.FilterOfflineMedia, filter.FilterOwnedMedia),
+                        normalizedSort.Field);
+                    return (Filter: filter, Key: key);
+                }))
             .ToList();
 
-        var results = await Task.WhenAll(warmupTasks);
+        var tasks = warmupFilters.Select(x => BuildAndStoreSnapshotAsync(x.Filter, x.Key, CancellationToken.None)).ToList();
+        var results = await Task.WhenAll(tasks);
         var failures = results.Where(x => x.IsFailed).SelectMany(x => x.Errors).ToList();
         if (failures.Count > 0)
         {
@@ -110,58 +130,52 @@ public sealed class MediaQueryCache : IMediaQueryCache
     /// <inheritdoc />
     public void InvalidateLibraries(IReadOnlyCollection<int> plexLibraryIds, string reason)
     {
+        if (SuppressInvalidation)
+        {
+            _log.Here().Debug("Skipping media query cache invalidation for libraries {PlexLibraryIds}: suppression active. Reason: {Reason}", plexLibraryIds, reason);
+            return;
+        }
         var affectedLibraryIds = plexLibraryIds.Where(x => x > 0).ToHashSet();
         if (affectedLibraryIds.Count == 0)
             return;
 
-        var removedMetadataCount = RemoveKeysContainingLibrary(_metadataSnapshots, affectedLibraryIds, k => k.ContainsAnyLibrary(affectedLibraryIds));
-        var removedSortedListCount = RemoveKeysContainingLibrary(_sortedListSnapshots, affectedLibraryIds, k => k.ContainsAnyLibrary(affectedLibraryIds));
-        var removedBuildCount = RemoveKeysContainingLibrary(_builds, affectedLibraryIds, k => k.ContainsAnyLibrary(affectedLibraryIds));
-
-        // Bump versions so in-flight builds that complete after this point discard their results.
-        var keysToBump = _buildVersions.Keys.Where(key => key.ContainsAnyLibrary(affectedLibraryIds)).ToList();
-        foreach (var key in keysToBump)
-            _buildVersions.AddOrUpdate(key, 1, (_, version) => version + 1);
+        var dirtyMetadataCount = MarkKeysContainingLibraryAsDirty(_metadataSnapshots, affectedLibraryIds, k => k.ContainsAnyLibrary(affectedLibraryIds));
+        var dirtySortedListCount = MarkKeysContainingLibraryAsDirty(_sortedListSnapshots, affectedLibraryIds, k => k.ContainsAnyLibrary(affectedLibraryIds));
+        var inFlightCount = CountKeysContainingLibrary(_builds, affectedLibraryIds, k => k.ContainsAnyLibrary(affectedLibraryIds));
 
         _log.Here().Information(
             "Invalidated media query cache for libraries {PlexLibraryIds}: {Reason}. " +
-            "Removed {MetadataCount} metadata, {SortedListCount} sorted-lists, {BuildCount} in-flight builds",
-            affectedLibraryIds, reason, removedMetadataCount, removedSortedListCount, removedBuildCount);
+            "Marked {MetadataCount} metadata, {SortedListCount} sorted-lists as dirty, {InFlightCount} in-flight builds.",
+            affectedLibraryIds, reason, dirtyMetadataCount, dirtySortedListCount, inFlightCount);
     }
 
-    // ── Build helpers ──────────────────────────────────────────────
+    // ── Background refresh helpers ────────────────────────────────
 
-    /// <summary>
-    /// Ensures only one build runs per sorted-list key. Stores metadata and sorted-list
-    /// snapshots atomically after the version check passes.
-    /// </summary>
-    private async Task<Result<MediaQueryBuildResult>> GetOrBuildSnapshotAsync(
-        MediaQueryFilter filter,
-        MediaQuerySortedListKey sortedListKey,
-        MediaSortNormalizer.Result sort,
-        CancellationToken cancellationToken)
+    private void QueueSnapshotRefresh(MediaQuerySortedListKey sortedListKey)
     {
-        var buildVersion = _buildVersions.GetOrAdd(sortedListKey, 0);
+        if (_builds.ContainsKey(sortedListKey))
+            return;
+
         var lazyBuild = _builds.GetOrAdd(
             sortedListKey,
             _ => new Lazy<Task<Result<MediaQueryBuildResult>>>(
-                () => BuildSnapshotAsync(filter, sortedListKey, sort, cancellationToken),
+                () => BuildAndStoreSnapshotAsync(sortedListKey, CancellationToken.None),
                 LazyThreadSafetyMode.ExecutionAndPublication));
 
+        _ = ObserveBuildAsync(lazyBuild, sortedListKey);
+    }
+
+    private async Task ObserveBuildAsync(
+        Lazy<Task<Result<MediaQueryBuildResult>>> lazyBuild,
+        MediaQuerySortedListKey sortedListKey)
+    {
         try
         {
-            var buildResult = await lazyBuild.Value;
-
-            if (_buildVersions.TryGetValue(sortedListKey, out var currentVersion) && currentVersion != buildVersion)
-                return Result.Fail("Media query cache build was invalidated before completion.");
-
-            if (buildResult.IsSuccess)
-            {
-                _metadataSnapshots[sortedListKey.MetadataKey] = buildResult.Value.Metadata;
-                _sortedListSnapshots[sortedListKey] = buildResult.Value.SortedList;
-            }
-
-            return buildResult;
+            _ = await lazyBuild.Value;
+        }
+        catch (Exception ex)
+        {
+            _log.Here().Error(ex, "Unhandled error in snapshot refresh background observer for {SortedListKey}", sortedListKey);
         }
         finally
         {
@@ -169,6 +183,51 @@ public sealed class MediaQueryCache : IMediaQueryCache
                 _builds.TryRemove(sortedListKey, out _);
         }
     }
+
+    private async Task<Result<MediaQueryBuildResult>> BuildAndStoreSnapshotAsync(
+        MediaQuerySortedListKey sortedListKey,
+        CancellationToken cancellationToken)
+    {
+        var libraryIds = sortedListKey.LibraryIds;
+        var plexLibraryId = libraryIds.Count == 1 ? libraryIds[0] : 0;
+        var filter = new MediaQueryFilter
+        {
+            MediaType = sortedListKey.MetadataKey.MediaType,
+            PlexLibraryId = plexLibraryId,
+            FilterOfflineMedia = sortedListKey.MetadataKey.FilterOfflineMedia,
+            FilterOwnedMedia = sortedListKey.MetadataKey.FilterOwnedMedia,
+            Parameters = new FlexQueryParameters { Sort = $"{sortedListKey.NormalizedAscendingSortField}:asc", Page = null, PageSize = null },
+        };
+
+        var sort = filter.Parameters.Sort.Normalize(libraryIds.Count);
+        if (sort is null)
+            return Result.Fail("Invalid sort parameter");
+
+        return await BuildAndStoreSnapshotAsync(filter, sortedListKey, cancellationToken);
+    }
+
+    private async Task<Result<MediaQueryBuildResult>> BuildAndStoreSnapshotAsync(
+        MediaQueryFilter filter,
+        MediaQuerySortedListKey sortedListKey,
+        CancellationToken cancellationToken)
+    {
+        var sort = MediaSortNormalizer.Normalize(filter.Parameters.Sort, 0);
+        if (sort is null)
+            return Result.Fail("Invalid sort parameter");
+
+        var buildResult = await BuildSnapshotAsync(filter, sortedListKey, sort, cancellationToken);
+
+        if (buildResult.IsSuccess)
+        {
+            _metadataSnapshots[sortedListKey.MetadataKey] = buildResult.Value.Metadata;
+            _sortedListSnapshots[sortedListKey] = buildResult.Value.SortedList;
+            _dirtyKeys.TryRemove(sortedListKey, out _);
+        }
+
+        return buildResult;
+    }
+
+
 
     /// <summary>
     /// Executes the media query with paging and user filters removed, producing both metadata
@@ -361,18 +420,30 @@ public sealed class MediaQueryCache : IMediaQueryCache
 
     // ── Invalidation helpers ───────────────────────────────────────
 
-    private static int RemoveKeysContainingLibrary<TKey, TValue>(
+    private int MarkKeysContainingLibraryAsDirty<TKey, TValue>(
         ConcurrentDictionary<TKey, TValue> dictionary,
         IReadOnlySet<int> libraryIds,
         Func<TKey, bool> matches)
         where TKey : notnull
     {
-        var keysToRemove = dictionary.Keys.Where(matches).ToList();
-        foreach (var key in keysToRemove)
-            dictionary.TryRemove(key, out _);
+        var matchingKeys = dictionary.Keys.Where(matches).ToList();
+        foreach (var key in matchingKeys)
+        {
+            if (key is MediaQuerySortedListKey sortedListKey)
+            {
+                _dirtyKeys.TryAdd(sortedListKey, true);
+                QueueSnapshotRefresh(sortedListKey);
+            }
+        }
 
-        return keysToRemove.Count;
+        return matchingKeys.Count;
     }
+
+    private static int CountKeysContainingLibrary<TKey, TValue>(
+        ConcurrentDictionary<TKey, TValue> dictionary,
+        IReadOnlySet<int> libraryIds,
+        Func<TKey, bool> matches)
+        where TKey : notnull => dictionary.Keys.Count(matches);
 
     // ── Factory helpers ────────────────────────────────────────────
 

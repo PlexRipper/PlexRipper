@@ -489,7 +489,7 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 
 	function startCacheRetry(): void {
 		if (cacheRetryTimer !== null || state.loading) return;
-			state.cacheRetrySeconds = 5;
+		state.cacheRetrySeconds = 5;
 		cacheRetryTimer = setInterval(() => {
 			state.cacheRetrySeconds--;
 			if (state.cacheRetrySeconds <= 0) {
@@ -504,7 +504,7 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 			clearInterval(cacheRetryTimer);
 			cacheRetryTimer = null;
 		}
-			state.cacheRetrySeconds = 0;
+		state.cacheRetrySeconds = 0;
 	}
 
 	const getters = {

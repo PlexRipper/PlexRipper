@@ -68,7 +68,7 @@ describe('MediaOverviewStore - Loading State', () => {
 		expect(result.receivedComplete()).toBe(true);
 	});
 
-	test('requestMedia should return of(null) immediately when loading is already true', async () => {
+	test('refreshMediaData should execute again even when loading is already true', async () => {
 		// Arrange
 		const store = useMediaOverviewStore();
 		const movies = generatePlexMediaStatisticsDTO(generatePlexMediaSlims({
@@ -80,12 +80,12 @@ describe('MediaOverviewStore - Loading State', () => {
 		// Start first request but don't await it
 		const first = subscribeSpyTo(store.refreshMediaData());
 
-		// Act — second call while loading is true
+		// Act — second call while loading is true (no longer skipped)
 		const second = subscribeSpyTo(store.refreshMediaData());
 		await second.onComplete();
 
-		// Assert — second call completes immediately with null (skipped)
-		expect(second.getLastValue()).toBeNull();
+		// Assert — second call returns data, not null (loading guard removed)
+		expect(second.getLastValue()).not.toBeNull();
 		expect(second.receivedComplete()).toBe(true);
 
 		// Clean up first

@@ -132,6 +132,7 @@ function resetProgress() {
 
 function refreshLibrary() {
 	resetProgress();
+	mediaOverviewStore.loading = true;
 	useSubscription(
 		libraryStore.reSyncLibrary(mediaOverviewStore.libraryId).subscribe(),
 	);
@@ -194,6 +195,16 @@ function onOptionsClosed(hasChanged: boolean) {
 		useSubscription(mediaOverviewStore.refreshMediaData().subscribe());
 	}
 }
+
+// Refresh media data when a library sync completes.
+watch(
+	() => libraryStore.getIsLibrarySyncing(props.libraryId),
+	(isSyncing, wasSyncing) => {
+		if (wasSyncing && !isSyncing) {
+			useSubscription(mediaOverviewStore.refreshMediaData().subscribe());
+		}
+	},
+);
 
 onMounted(() => {
 	resetProgress();

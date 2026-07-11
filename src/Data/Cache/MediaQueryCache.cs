@@ -54,6 +54,10 @@ public sealed class MediaQueryCache : IMediaQueryCache
         MediaQueryFilter filter,
         CancellationToken cancellationToken)
     {
+        // Single-library queries are small — bypass the cache and hit the DB directly.
+        if (filter.PlexLibraryId > 0)
+            return await BypassCacheAsync(filter, cancellationToken, "specific library scope");
+
         if (!string.IsNullOrWhiteSpace(filter.Parameters.Query))
             return await BypassCacheAsync(filter, cancellationToken, "query parameter is set");
 

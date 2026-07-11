@@ -282,6 +282,7 @@ public class DirectPlexDownloadClient : IPlexDownloadClient
                             var failedStatus =
                                 downloadErrorResult.Has404NotFoundError() ? Domain.DownloadStatus.SourceUnavailable
                                 : downloadErrorResult.IsServerUnreachable() ? Domain.DownloadStatus.ServerUnreachable
+                                : downloadErrorResult.HasStorageError() ? Domain.DownloadStatus.StorageError
                                 : Domain.DownloadStatus.Error;
 
                             var statusResult = await SetDownloadStatusAsync(failedStatus, downloadErrorResult);

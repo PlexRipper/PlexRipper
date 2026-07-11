@@ -258,6 +258,7 @@ public class DashPlexDownloadClient : IPlexDownloadClient
             var status =
                 completed.Result.Has404NotFoundError() ? DownloadStatus.SourceUnavailable
                 : completed.Result.IsServerUnreachable() ? DownloadStatus.ServerUnreachable
+                : completed.Result.HasStorageError() ? DownloadStatus.StorageError
                 : DownloadStatus.DownloadClientError;
             var statusResult = await SetDownloadStatusAsync(status, completed.Result);
             if (statusResult.IsFailed)

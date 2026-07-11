@@ -143,9 +143,9 @@ public sealed class MediaQueryCache : IMediaQueryCache
         if (affectedLibraryIds.Count == 0)
             return;
 
-        var dirtyMetadataCount = MarkKeysContainingLibraryAsDirty(_metadataSnapshots, affectedLibraryIds, k => k.ContainsAnyLibrary(affectedLibraryIds));
-        var dirtySortedListCount = MarkKeysContainingLibraryAsDirty(_sortedListSnapshots, affectedLibraryIds, k => k.ContainsAnyLibrary(affectedLibraryIds));
-        var inFlightCount = CountKeysContainingLibrary(_builds, affectedLibraryIds, k => k.ContainsAnyLibrary(affectedLibraryIds));
+        var dirtyMetadataCount = MarkKeysContainingLibraryAsDirty(_metadataSnapshots, k => k.ContainsAnyLibrary(affectedLibraryIds));
+        var dirtySortedListCount = MarkKeysContainingLibraryAsDirty(_sortedListSnapshots, k => k.ContainsAnyLibrary(affectedLibraryIds));
+        var inFlightCount = CountKeysContainingLibrary(_builds, k => k.ContainsAnyLibrary(affectedLibraryIds));
 
         _log.Here().Information(
             "Invalidated media query cache for libraries {PlexLibraryIds}: {Reason}. " +
@@ -215,7 +215,7 @@ public sealed class MediaQueryCache : IMediaQueryCache
         MediaQuerySortedListKey sortedListKey,
         CancellationToken cancellationToken)
     {
-        var sort = MediaSortNormalizer.Normalize(filter.Parameters.Sort, 0);
+        var sort = filter.Parameters.Sort.Normalize(sortedListKey.LibraryIds.Count);
         if (sort is null)
             return Result.Fail("Invalid sort parameter");
 
@@ -426,7 +426,6 @@ public sealed class MediaQueryCache : IMediaQueryCache
 
     private int MarkKeysContainingLibraryAsDirty<TKey, TValue>(
         ConcurrentDictionary<TKey, TValue> dictionary,
-        IReadOnlySet<int> libraryIds,
         Func<TKey, bool> matches)
         where TKey : notnull
     {
@@ -445,7 +444,6 @@ public sealed class MediaQueryCache : IMediaQueryCache
 
     private static int CountKeysContainingLibrary<TKey, TValue>(
         ConcurrentDictionary<TKey, TValue> dictionary,
-        IReadOnlySet<int> libraryIds,
         Func<TKey, bool> matches)
         where TKey : notnull => dictionary.Keys.Count(matches);
 

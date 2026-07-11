@@ -583,9 +583,9 @@ public static partial class ResultExtensions
         result.Errors.Any(error =>
             error.Message.Contains(NOT_ENOUGH_SPACE_TOKEN, StringComparison.OrdinalIgnoreCase)
             || error.Message.Contains(DISK_FULL_TOKEN, StringComparison.OrdinalIgnoreCase)
-            || error is ExceptionalError { Exception: IOException }
-            || error is ExceptionalError { Exception: UnauthorizedAccessException }
-        );
+        )
+        || result.HasException<IOException>()
+        || result.HasException<UnauthorizedAccessException>();
 
     public static bool HasStorageError<T>(this Result<T> result) =>
         result.ToResult().HasStorageError();

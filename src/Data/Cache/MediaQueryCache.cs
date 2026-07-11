@@ -160,10 +160,28 @@ public sealed class MediaQueryCache : IMediaQueryCache
         if (_builds.ContainsKey(sortedListKey))
             return;
 
+        var startVersion = _buildVersions.TryGetValue(sortedListKey, out var v) ? v : 0;
+
         var lazyBuild = _builds.GetOrAdd(
             sortedListKey,
             _ => new Lazy<Task<Result<MediaQueryBuildResult>>>(
-                () => BuildAndStoreSnapshotAsync(sortedListKey, CancellationToken.None),
+                async () =>
+                {
+                    var result = await BuildAndStoreSnapshotAsync(sortedListKey, CancellationToken.None);
+                    // If version was bumped during the build, the result may be stale.
+                    // Re-mark dirty so the next read queues a fresh build.
+                    if (result.IsSuccess
+                        && _buildVersions.TryGetValue(sortedListKey, out var currentVersion)
+                        && currentVersion > startVersion)
+                    {
+                        _dirtyKeys.TryAdd(sortedListKey, true);
+                        _log.Here().Debug(
+                            "Snapshot build for {SortedListKey} was stale (version {StartVersion} → {CurrentVersion}), re-marking dirty",
+                            sortedListKey, startVersion, currentVersion);
+                    }
+
+                    return result;
+                },
                 LazyThreadSafetyMode.ExecutionAndPublication));
 
         _ = ObserveBuildAsync(lazyBuild, sortedListKey);
@@ -185,6 +203,10 @@ public sealed class MediaQueryCache : IMediaQueryCache
         {
             if (_builds.TryGetValue(sortedListKey, out var currentBuild) && ReferenceEquals(currentBuild, lazyBuild))
                 _builds.TryRemove(sortedListKey, out _);
+
+            // If dirty marker survived the build (stale detection re-added it), queue another refresh.
+            if (_dirtyKeys.ContainsKey(sortedListKey))
+                QueueSnapshotRefresh(sortedListKey);
         }
     }
 
@@ -434,6 +456,7 @@ public sealed class MediaQueryCache : IMediaQueryCache
         {
             if (key is MediaQuerySortedListKey sortedListKey)
             {
+                _buildVersions.AddOrUpdate(sortedListKey, 1, (_, v) => v + 1);
                 _dirtyKeys.TryAdd(sortedListKey, true);
                 QueueSnapshotRefresh(sortedListKey);
             }

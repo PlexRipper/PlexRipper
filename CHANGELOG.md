@@ -1,5 +1,23 @@
 Reaparr Changelog
 
+## [0.38.1](https://github.com/Reaparr/Reaparr/compare/v0.38.0...v0.38.1) (2026-07-11)
+
+
+### Bug Fixes
+
+* **WebAPI:** Bypass media cache for single-library queries, use only for All view ([18558b0](https://github.com/Reaparr/Reaparr/commit/18558b0b9c0a728d03844db3c9c45598b6b6cdf1))
+* **WebAPI:** Cap download memory buffer at 50MB to prevent OOM on large files. Should prevent memory issues ([e9264fe](https://github.com/Reaparr/Reaparr/commit/e9264fe24f2dee878ca0fb3027403a1d13906eb6))
+* **downloads:** detect storage errors instead of generic DownloadClientError ([b9a280b](https://github.com/Reaparr/Reaparr/commit/b9a280b86dfa4a333ab6cd4235f0cc31ea6f835e)), closes [#609](https://github.com/Reaparr/Reaparr/issues/609)
+* **Web-UI:** Fix cache retry countdown loop and error visibility ([253ab18](https://github.com/Reaparr/Reaparr/commit/253ab18c7eae9c533a6c1b77110d02ec99532a3f))
+* **Web-UI:** Keep loading spinner during library refresh until data arrives ([545bfd4](https://github.com/Reaparr/Reaparr/commit/545bfd441b66e65d2549b2d9198dbc8a5d755138))
+* **cache:** prevent stale snapshot builds from clearing dirty flag ([0cab8e6](https://github.com/Reaparr/Reaparr/commit/0cab8e6d0d000a40d15d0742a97feda42dbfb0c7))
+* **WebAPI:** Replace cache-doom-loop with stale-while-revalidate and suppress invalidation during sync storms ([e7ccae1](https://github.com/Reaparr/Reaparr/commit/e7ccae19bc54bd0d19cc88eca32d63070935048c))
+* **file-system:** resolve UNC path rejection when checking available disk space ([ef80c6d](https://github.com/Reaparr/Reaparr/commit/ef80c6dac98cc38b83c964692eff423e77187b78)), closes [#609](https://github.com/Reaparr/Reaparr/issues/609)
+* **Web-UI:** Set loading in $reset to prevent empty-state flash on library switch ([2e96b1b](https://github.com/Reaparr/Reaparr/commit/2e96b1b682b6a4715398176323cf34835111ce42))
+* **Web-UI:** Set loading state immediately on library init to prevent empty-state flash ([d319ee0](https://github.com/Reaparr/Reaparr/commit/d319ee0aa4f7fc33bea4e2ad674c0970131e9554))
+* **Web-UI:** Show server error state and auto-retry on 503 cache warmup with countdown ([a8bf195](https://github.com/Reaparr/Reaparr/commit/a8bf195448ae39f605a79fd1c264550bca5b766b))
+* **logging:** strip ANSI escape codes from console output when redirected ([1b34d1d](https://github.com/Reaparr/Reaparr/commit/1b34d1d24868cead0e090b41b6e4028c04df30f7)), closes [#609](https://github.com/Reaparr/Reaparr/issues/609)
+
 ## [0.38.1-dev.1](https://github.com/Reaparr/Reaparr/compare/v0.38.0...v0.38.1-dev.1) (2026-07-11)
 
 

@@ -1,5 +1,0 @@
-{
-  "worktree": {
-    "setup": "bun install --cwd ./src/AppHost/ClientApp && dotnet restore"
-  }
-}

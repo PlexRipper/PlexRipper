@@ -57,6 +57,8 @@ interface IMediaOverviewStoreState {
 	mediaPagesVersion: number;
 	currentScrollIndex: number;
 	scrollCommand: BehaviorSubject<number>;
+	serverError: boolean;
+	cacheRetrySeconds: number;
 }
 
 export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, () => {
@@ -105,6 +107,8 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 		mediaPagesVersion: 0,
 		currentScrollIndex: 0,
 		scrollCommand: new BehaviorSubject<number>(0),
+		serverError: false,
+		cacheRetrySeconds: 0,
 	};
 
 	const state = reactive<IMediaOverviewStoreState>(cloneDeep(defaultState));
@@ -112,6 +116,7 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 	const libraryStore = useLibraryStore();
 	const mediaPages = new Map<number, readonly PlexMediaSlimDTO[]>();
 	const pendingPages = new Set<number>();
+	let cacheRetryTimer: ReturnType<typeof setInterval> | null = null;
 
 	const searchQuery = useRouteQuery('q', '', { mode: 'replace' });
 	const countryIdQuery = useRouteQuery('countryId', 0, { mode: 'replace' });
@@ -188,12 +193,8 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 			);
 		},
 		refreshMediaData(): Observable<PlexMediaStatisticsDTO | null> {
-			if (state.loading) {
-				Log.debug('Request already in progress, skipping');
-				return of(null);
-			}
-
-			state.loading = true;
+			state.cacheRetrySeconds = 0;
+			clearCacheRetryTimer();
 
 			mediaPages.clear();
 			pendingPages.clear();
@@ -256,9 +257,13 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 		// Adds the requested media page to the cache
 		addMediaPage(data: PlexMediaStatisticsDTO | null) {
 			if (!data) {
+				state.serverError = true;
+				startCacheRetry();
 				Log.error('Received null data for media page');
 				return;
 			}
+
+			state.serverError = false;
 
 			if (state.queryHash !== data.queryHash) {
 				Log.warn(`mediaPages was cleared, with ${state.queryHash} vs ${data.queryHash}`);
@@ -477,8 +482,31 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 			mediaPages.clear();
 			pendingPages.clear();
 			Object.assign(state, cloneDeep(defaultState));
+			state.loading = true;
 		},
 	};
+
+	// ── Cache retry helpers ────────────────────────────────
+
+	function startCacheRetry(): void {
+		if (cacheRetryTimer !== null) return;
+		state.cacheRetrySeconds = 5;
+		cacheRetryTimer = setInterval(() => {
+			state.cacheRetrySeconds--;
+			if (state.cacheRetrySeconds <= 0) {
+				clearCacheRetryTimer();
+				actions.refreshMediaData().subscribe();
+			}
+		}, 1000);
+	}
+
+	function clearCacheRetryTimer(): void {
+		if (cacheRetryTimer !== null) {
+			clearInterval(cacheRetryTimer);
+			cacheRetryTimer = null;
+		}
+		state.cacheRetrySeconds = 0;
+	}
 
 	const getters = {
 		hasSelectedMedia: computed((): boolean => {

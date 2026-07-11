@@ -174,3 +174,4 @@ config.json
 .agent-work
 
 .codex
+.playwright-mcp

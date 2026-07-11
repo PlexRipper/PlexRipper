@@ -44,7 +44,13 @@
 						<QCol cols="auto">
 							<QAlert
 								type="warning">
-								<template v-if="mediaOverviewStore.allMediaMode">
+								<template v-if="mediaOverviewStore.serverError">
+									{{ t('components.media-overview.failed-to-load-media') }}
+									<template v-if="mediaOverviewStore.cacheRetrySeconds > 0">
+										{{ t('components.media-overview.retrying-in-seconds', { seconds: mediaOverviewStore.cacheRetrySeconds }) }}
+									</template>
+								</template>
+								<template v-else-if="mediaOverviewStore.allMediaMode">
 									{{ t('components.media-overview.no-media-items-available') }}
 								</template>
 								<template v-else-if="mediaOverviewStore.hasNoSearchResults">
@@ -126,6 +132,7 @@ function resetProgress() {
 
 function refreshLibrary() {
 	resetProgress();
+	mediaOverviewStore.loading = true;
 	useSubscription(
 		libraryStore.reSyncLibrary(mediaOverviewStore.libraryId).subscribe(),
 	);
@@ -188,6 +195,16 @@ function onOptionsClosed(hasChanged: boolean) {
 		useSubscription(mediaOverviewStore.refreshMediaData().subscribe());
 	}
 }
+
+// Refresh media data when a library sync completes.
+watch(
+	() => libraryStore.getIsLibrarySyncing(props.libraryId),
+	(isSyncing, wasSyncing) => {
+		if (wasSyncing && !isSyncing) {
+			useSubscription(mediaOverviewStore.refreshMediaData().subscribe());
+		}
+	},
+);
 
 onMounted(() => {
 	resetProgress();

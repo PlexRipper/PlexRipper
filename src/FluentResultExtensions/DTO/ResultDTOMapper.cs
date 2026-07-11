@@ -84,6 +84,10 @@ public static class ResultDTOMapper
         if (result.Has504GatewayTimeoutError())
             return StatusCodes.Status504GatewayTimeout;
 
+        // Status Code 503 Service Unavailable
+        if (result.Has503ServiceUnavailableError())
+            return StatusCodes.Status503ServiceUnavailable;
+
         // Status Code 500 Internal Server Error
         return StatusCodes.Status500InternalServerError;
     }

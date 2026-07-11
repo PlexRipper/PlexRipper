@@ -573,4 +573,22 @@ public static partial class ResultExtensions
     #endregion
 
     #endregion
+
+    #region Storage
+
+    private const string NOT_ENOUGH_SPACE_TOKEN = "not enough space";
+    private const string DISK_FULL_TOKEN = "disk full";
+
+    public static bool HasStorageError(this Result result) =>
+        result.Errors.Any(error =>
+            error.Message.Contains(NOT_ENOUGH_SPACE_TOKEN, StringComparison.OrdinalIgnoreCase)
+            || error.Message.Contains(DISK_FULL_TOKEN, StringComparison.OrdinalIgnoreCase)
+        )
+        || result.HasException<IOException>()
+        || result.HasException<UnauthorizedAccessException>();
+
+    public static bool HasStorageError<T>(this Result<T> result) =>
+        result.ToResult().HasStorageError();
+
+    #endregion
 }

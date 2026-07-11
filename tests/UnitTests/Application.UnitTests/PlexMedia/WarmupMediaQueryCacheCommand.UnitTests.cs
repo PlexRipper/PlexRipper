@@ -1,3 +1,5 @@
+using System.Reflection;
+
 namespace Reaparr.Application.UnitTests;
 
 public class WarmupMediaQueryCacheCommandHandlerUnitTests : BaseUnitTest<WarmupMediaQueryCacheCommandHandler>
@@ -9,9 +11,12 @@ public class WarmupMediaQueryCacheCommandHandlerUnitTests : BaseUnitTest<WarmupM
         await SetupDatabase(8237);
 
         Mock.Mock<IMediaQueryCache>()
+            .SetupProperty(x => x.SuppressInvalidation);
+        Mock.Mock<IMediaQueryCache>()
             .Setup(x => x.BuildCache())
-            .Returns(Task.CompletedTask)
-            .Verifiable(Times.Once());
+            .Returns(Task.CompletedTask);
+
+        OverrideSyncQuietPeriod(TimeSpan.Zero);
 
         // Act
         var result = await Sut.ExecuteAsync(new WarmupMediaQueryCacheCommand(), CancellationToken);
@@ -20,22 +25,29 @@ public class WarmupMediaQueryCacheCommandHandlerUnitTests : BaseUnitTest<WarmupM
         result.IsSuccess.ShouldBeTrue();
         result.Errors.Count.ShouldBe(0);
         Mock.Mock<IMediaQueryCache>().Verify(
+            x => x.BuildCache(),
+            Times.Exactly(2)
+        );
+        Mock.Mock<IMediaQueryCache>().Verify(
             x => x.GetMediaAsync(It.IsAny<MediaQueryFilter>(), It.IsAny<CancellationToken>()),
             Times.Never
         );
     }
 
     [Test]
-    public async Task ShouldReturnFailure_WhenMediaQueryCacheBuildFails()
+    public async Task ShouldReturnFailure_WhenFirstBuildFails()
     {
         // Arrange
         var expectedException = new InvalidOperationException("Build cache failed");
         await SetupDatabase(8237);
 
         Mock.Mock<IMediaQueryCache>()
+            .SetupProperty(x => x.SuppressInvalidation);
+        Mock.Mock<IMediaQueryCache>()
             .Setup(x => x.BuildCache())
-            .ThrowsAsync(expectedException)
-            .Verifiable(Times.Once());
+            .ThrowsAsync(expectedException);
+
+        OverrideSyncQuietPeriod(TimeSpan.Zero);
 
         // Act
         var result = await Sut.ExecuteAsync(new WarmupMediaQueryCacheCommand(), CancellationToken);
@@ -44,8 +56,43 @@ public class WarmupMediaQueryCacheCommandHandlerUnitTests : BaseUnitTest<WarmupM
         result.IsFailed.ShouldBeTrue();
         result.Errors.Count.ShouldBeGreaterThan(0);
         Mock.Mock<IMediaQueryCache>().Verify(
-            x => x.GetMediaAsync(It.IsAny<MediaQueryFilter>(), It.IsAny<CancellationToken>()),
-            Times.Never
+            x => x.BuildCache(),
+            Times.Once
         );
+    }
+
+    [Test]
+    public async Task ShouldSuppressInvalidationDuringSyncStorm_ThenUnsuppressAndRebuild()
+    {
+        // Arrange
+        await SetupDatabase(8237);
+
+        Mock.Mock<IMediaQueryCache>()
+            .SetupProperty(x => x.SuppressInvalidation);
+        Mock.Mock<IMediaQueryCache>()
+            .Setup(x => x.BuildCache())
+            .Returns(Task.CompletedTask);
+
+        OverrideSyncQuietPeriod(TimeSpan.Zero);
+
+        // Act
+        var result = await Sut.ExecuteAsync(new WarmupMediaQueryCacheCommand(), CancellationToken);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        var mock = Mock.Mock<IMediaQueryCache>();
+        mock.VerifySet(x => x.SuppressInvalidation = true, Times.Once);
+        mock.VerifySet(x => x.SuppressInvalidation = false, Times.Once);
+    }
+
+    /// <summary>
+    /// Overrides the quiet period to avoid real delays in unit tests.
+    /// </summary>
+    private void OverrideSyncQuietPeriod(TimeSpan period)
+    {
+        typeof(WarmupMediaQueryCacheCommandHandler)
+            .GetProperty("SyncQuietPeriod",
+                BindingFlags.NonPublic | BindingFlags.Instance)!
+            .SetValue(Sut, period);
     }
 }

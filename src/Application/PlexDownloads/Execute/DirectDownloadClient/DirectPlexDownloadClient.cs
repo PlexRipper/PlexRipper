@@ -62,6 +62,7 @@ public class DirectPlexDownloadClient : IPlexDownloadClient
         _configuration.EnableAutoResumeDownload = false;
         _configuration.DownloadFileExtension = FilePathExtensions.TempDownloadFileSuffix;
         _configuration.CheckDiskSizeBeforeDownload = false;
+        _configuration.MaximumMemoryBufferBytes = 50 * 1024 * 1024; // 50MB memory buffer cap
 
         _downloader = downloadServiceFactory(_configuration);
     }
@@ -281,6 +282,7 @@ public class DirectPlexDownloadClient : IPlexDownloadClient
                             var failedStatus =
                                 downloadErrorResult.Has404NotFoundError() ? Domain.DownloadStatus.SourceUnavailable
                                 : downloadErrorResult.IsServerUnreachable() ? Domain.DownloadStatus.ServerUnreachable
+                                : downloadErrorResult.HasStorageError() ? Domain.DownloadStatus.StorageError
                                 : Domain.DownloadStatus.Error;
 
                             var statusResult = await SetDownloadStatusAsync(failedStatus, downloadErrorResult);

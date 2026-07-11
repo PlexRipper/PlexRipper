@@ -139,6 +139,7 @@ public class DownloadJob : IJob
                 var failedStatus =
                     startResult.Has404NotFoundError() ? DownloadStatus.SourceUnavailable
                     : startResult.IsServerUnreachable() ? DownloadStatus.ServerUnreachable
+                    : startResult.HasStorageError() ? DownloadStatus.StorageError
                     : DownloadStatus.DownloadClientError;
 
                 await _downloadTaskUpdateDispatcher.OnStatusChangedAsync(

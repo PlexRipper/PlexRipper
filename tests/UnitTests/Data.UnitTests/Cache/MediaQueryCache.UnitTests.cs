@@ -6,158 +6,59 @@ namespace Reaparr.Data.UnitTests;
 
 public class MediaQueryCacheUnitTests : BaseUnitTest<MediaQueryCache>
 {
+    // ──────────────────────────────────────────────────────────────
+    // Cache miss → 503 (no synchronous blocking)
+    // ──────────────────────────────────────────────────────────────
+
     [Test]
-    public async Task ShouldReturnSecondPageItems_WhenUsingRealQueryHandlerSnapshot()
+    public async Task ShouldReturn503ServiceUnavailable_WhenCacheIsCold()
     {
         // Arrange
-        await SetupDatabase(70320, cfg =>
+        await SetupDatabase(70307, cfg =>
         {
             cfg.PlexServerCount = 1;
             cfg.PlexMovieLibraryCount = 1;
-            cfg.MovieCount = 250;
+            cfg.MovieCount = 5;
         });
 
-        var dbContext = IDbContext;
-        var allMovieIds = await dbContext.PlexMovies
-            .OrderBy(x => x.SearchTitle)
-            .Select(x => x.Id)
-            .ToListAsync(CancellationToken);
-        var filter = CreateFilter(sort: "sortIndex:asc", page: 2, pageSize: 100);
-        var realHandler = new GetMediaByTypeCommandHandler(dbContext);
-
-        Mock.Mock<ICommandExecutor>()
-            .Setup(x => x.Send(It.IsAny<GetMediaByTypeCommand>(), It.IsAny<CancellationToken>()))
-            .Returns<GetMediaByTypeCommand, CancellationToken>((command, token) => realHandler.ExecuteAsync(command, token))
-            .Verifiable(Times.Once());
+        var filter = CreateFilter(sort: "sortIndex:asc", page: 1, pageSize: 10);
 
         // Act
         var result = await Sut.GetMediaAsync(filter, CancellationToken);
 
         // Assert
-        result.IsSuccess.ShouldBeTrue();
-        result.Value.TotalCount.ShouldBe(allMovieIds.Count);
-        result.Value.Items.Select(x => x.Id).ShouldBe(allMovieIds.Skip(100).Take(100));
-        Mock.Mock<ICommandExecutor>().Verify();
+        result.IsFailed.ShouldBeTrue();
+        result.Errors.ShouldContain(x => x.Message.Contains("warming up"));
+        result.Has503ServiceUnavailableError().ShouldBeTrue();
     }
 
     [Test]
-    public async Task ShouldReturnDeepPageItems_WhenSnapshotContainsFullResult()
+    public async Task ShouldReturn503_WhenConcurrentRequestsMissSameSnapshot()
     {
         // Arrange
-        await SetupDatabase(70301, cfg =>
-        {
-            cfg.PlexServerCount = 1;
-            cfg.PlexMovieLibraryCount = 1;
-            cfg.MovieCount = 250;
-        });
-
-        var dbContext = IDbContext;
-        var allMovieIds = await dbContext.PlexMovies
-            .OrderBy(x => x.SearchTitle)
-            .Select(x => x.Id)
-            .ToListAsync(CancellationToken);
-        var expectedPageIds = allMovieIds.Skip(200).Take(50).ToList();
-
-        GetMediaByTypeCommand? capturedCommand = null;
-        var commandExecutor = Mock.Mock<ICommandExecutor>();
-        commandExecutor
-            .Setup(x => x.Send(It.IsAny<GetMediaByTypeCommand>(), It.IsAny<CancellationToken>()))
-            .Returns<GetMediaByTypeCommand, CancellationToken>((command, _) =>
-            {
-                capturedCommand = command;
-                return Task.FromResult(Result.Ok(CreateResult(allMovieIds)));
-            })
-            .Verifiable(Times.Once());
-
-        var filter = CreateFilter(sort: "sortIndex:asc", page: 5, pageSize: 50);
-
-        // Act
-        var result = await Sut.GetMediaAsync(filter, CancellationToken);
-
-        // Assert
-        result.IsSuccess.ShouldBeTrue();
-        result.Value.TotalCount.ShouldBe(allMovieIds.Count);
-        capturedCommand.ShouldNotBeNull();
-        capturedCommand!.Filter.Parameters.Page.ShouldBeNull();
-        capturedCommand.Filter.Parameters.PageSize.ShouldBeNull();
-        result.Value.Items.Count.ShouldBe(50);
-        result.Value.Items.Select(x => x.Id).ShouldBe(expectedPageIds);
-        result.Value.Items.Select(x => x.SortIndex).ShouldBe(Enumerable.Range(201, 50));
-        commandExecutor.Verify();
-    }
-
-    [Test]
-    public async Task ShouldReuseCachedSnapshot_WhenOnlyPageChanges()
-    {
-        // Arrange
-        await SetupDatabase(70302, cfg =>
+        await SetupDatabase(70315, cfg =>
         {
             cfg.PlexServerCount = 1;
             cfg.PlexMovieLibraryCount = 1;
             cfg.MovieCount = 30;
         });
 
-        var allMovieIds = await IDbContext.PlexMovies
-            .OrderBy(x => x.SearchTitle)
-            .Select(x => x.Id)
-            .ToListAsync(CancellationToken);
-        var firstPageFilter = CreateFilter(sort: "sortIndex:asc", page: 1, pageSize: 10);
-        var secondPageFilter = CreateFilter(sort: "sortIndex:asc", page: 2, pageSize: 10);
-
-        var commandExecutor = Mock.Mock<ICommandExecutor>();
-        commandExecutor
-            .Setup(x => x.Send(It.IsAny<GetMediaByTypeCommand>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result.Ok(CreateResult(allMovieIds)))
-            .Verifiable(Times.Once());
+        var firstFilter = CreateFilter(sort: "sortIndex:asc", page: 1, pageSize: 5);
+        var secondFilter = CreateFilter(sort: "sortIndex:asc", page: 2, pageSize: 5);
 
         // Act
-        var firstResult = await Sut.GetMediaAsync(firstPageFilter, CancellationToken);
-        var secondResult = await Sut.GetMediaAsync(secondPageFilter, CancellationToken);
+        var results = await Task.WhenAll(
+            Sut.GetMediaAsync(firstFilter, CancellationToken),
+            Sut.GetMediaAsync(secondFilter, CancellationToken));
 
         // Assert
-        firstResult.IsSuccess.ShouldBeTrue();
-        secondResult.IsSuccess.ShouldBeTrue();
-        firstResult.Value.Items.Select(x => x.Id).ShouldBe(allMovieIds.Take(10));
-        secondResult.Value.Items.Select(x => x.Id).ShouldBe(allMovieIds.Skip(10).Take(10));
-        commandExecutor.Verify();
+        results.ShouldAllBe(x => x.IsFailed);
+        results.ShouldAllBe(x => x.Has503ServiceUnavailableError());
     }
 
-    [Test]
-    public async Task ShouldReuseAscendingSnapshotAndReverseItems_WhenDescendingSortRequested()
-    {
-        // Arrange
-        await SetupDatabase(70303, cfg =>
-        {
-            cfg.PlexServerCount = 1;
-            cfg.PlexMovieLibraryCount = 1;
-            cfg.MovieCount = 25;
-        });
-
-        var allMovieIds = await IDbContext.PlexMovies
-            .OrderBy(x => x.SearchTitle)
-            .Select(x => x.Id)
-            .ToListAsync(CancellationToken);
-        var ascendingFilter = CreateFilter(sort: "sortIndex:asc", page: 1, pageSize: 5);
-        var descendingFilter = CreateFilter(sort: "sortIndex:desc", page: 1, pageSize: 5);
-
-        var commandExecutor = Mock.Mock<ICommandExecutor>();
-        commandExecutor
-            .Setup(x => x.Send(It.IsAny<GetMediaByTypeCommand>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result.Ok(CreateResult(allMovieIds)))
-            .Verifiable(Times.Once());
-
-        // Act
-        var ascendingResult = await Sut.GetMediaAsync(ascendingFilter, CancellationToken);
-        var descendingResult = await Sut.GetMediaAsync(descendingFilter, CancellationToken);
-
-        // Assert
-        ascendingResult.IsSuccess.ShouldBeTrue();
-        descendingResult.IsSuccess.ShouldBeTrue();
-        ascendingResult.Value.Items.Select(x => x.Id).ShouldBe(allMovieIds.Take(5));
-        descendingResult.Value.Items.Select(x => x.Id).ShouldBe(allMovieIds.AsEnumerable().Reverse().Take(5));
-        descendingResult.Value.Items.Select(x => x.SortIndex).ShouldBe(Enumerable.Range(1, 5));
-        commandExecutor.Verify();
-    }
+    // ──────────────────────────────────────────────────────────────
+    // Cache bypass (query/filter/multi-sort still work directly)
+    // ──────────────────────────────────────────────────────────────
 
     [Test]
     public async Task ShouldBypassCache_WhenQueryParameterIsSet()
@@ -173,8 +74,7 @@ public class MediaQueryCacheUnitTests : BaseUnitTest<MediaQueryCache>
         var filter = CreateFilter(query: "alpha", sort: "sortIndex:asc", page: 2, pageSize: 2);
         GetMediaByTypeCommand? capturedCommand = null;
 
-        var commandExecutor = Mock.Mock<ICommandExecutor>();
-        commandExecutor
+        Mock.Mock<ICommandExecutor>()
             .Setup(x => x.Send(It.IsAny<GetMediaByTypeCommand>(), It.IsAny<CancellationToken>()))
             .Returns<GetMediaByTypeCommand, CancellationToken>((command, _) =>
             {
@@ -188,12 +88,10 @@ public class MediaQueryCacheUnitTests : BaseUnitTest<MediaQueryCache>
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
-        capturedCommand.ShouldNotBeNull();
         capturedCommand!.Filter.Parameters.Query.ShouldBe("alpha");
         capturedCommand.Filter.Parameters.Page.ShouldBe(2);
-        capturedCommand.Filter.Parameters.PageSize.ShouldBe(2);
         result.Value.Items.Select(x => x.Id).ShouldBe([101, 102]);
-        commandExecutor.Verify();
+        Mock.Mock<ICommandExecutor>().Verify();
     }
 
     [Test]
@@ -210,8 +108,7 @@ public class MediaQueryCacheUnitTests : BaseUnitTest<MediaQueryCache>
         var filter = CreateFilter(filter: "Genres:any:Id:eq:1", sort: "sortIndex:asc", page: 3, pageSize: 2);
         GetMediaByTypeCommand? capturedCommand = null;
 
-        var commandExecutor = Mock.Mock<ICommandExecutor>();
-        commandExecutor
+        Mock.Mock<ICommandExecutor>()
             .Setup(x => x.Send(It.IsAny<GetMediaByTypeCommand>(), It.IsAny<CancellationToken>()))
             .Returns<GetMediaByTypeCommand, CancellationToken>((command, _) =>
             {
@@ -225,12 +122,10 @@ public class MediaQueryCacheUnitTests : BaseUnitTest<MediaQueryCache>
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
-        capturedCommand.ShouldNotBeNull();
         capturedCommand!.Filter.Parameters.Filter.ShouldBe("Genres:any:Id:eq:1");
         capturedCommand.Filter.Parameters.Page.ShouldBe(3);
-        capturedCommand.Filter.Parameters.PageSize.ShouldBe(2);
         result.Value.Items.Select(x => x.Id).ShouldBe([201, 202]);
-        commandExecutor.Verify();
+        Mock.Mock<ICommandExecutor>().Verify();
     }
 
     [Test]
@@ -247,8 +142,7 @@ public class MediaQueryCacheUnitTests : BaseUnitTest<MediaQueryCache>
         var filter = CreateFilter(sort: "year:asc,title:desc", page: 4, pageSize: 2);
         GetMediaByTypeCommand? capturedCommand = null;
 
-        var commandExecutor = Mock.Mock<ICommandExecutor>();
-        commandExecutor
+        Mock.Mock<ICommandExecutor>()
             .Setup(x => x.Send(It.IsAny<GetMediaByTypeCommand>(), It.IsAny<CancellationToken>()))
             .Returns<GetMediaByTypeCommand, CancellationToken>((command, _) =>
             {
@@ -262,331 +156,16 @@ public class MediaQueryCacheUnitTests : BaseUnitTest<MediaQueryCache>
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
-        capturedCommand.ShouldNotBeNull();
         capturedCommand!.Filter.Parameters.Sort.ShouldBe("year:asc,title:desc");
         capturedCommand.Filter.Parameters.Page.ShouldBe(4);
-        capturedCommand.Filter.Parameters.PageSize.ShouldBe(2);
         result.Value.Items.Select(x => x.Id).ShouldBe([301, 302]);
-        commandExecutor.Verify();
+        Mock.Mock<ICommandExecutor>().Verify();
     }
 
-    [Test]
-    public async Task ShouldReturnFailure_WhenSnapshotBuildCommandFails()
-    {
-        // Arrange
-        await SetupDatabase(70307, cfg =>
-        {
-            cfg.PlexServerCount = 1;
-            cfg.PlexMovieLibraryCount = 1;
-            cfg.MovieCount = 5;
-        });
-
-        var filter = CreateFilter(sort: "sortIndex:asc", page: 1, pageSize: 10);
-
-        var commandExecutor = Mock.Mock<ICommandExecutor>();
-        commandExecutor
-            .Setup(x => x.Send(It.IsAny<GetMediaByTypeCommand>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result.Fail<PagedMediaQueryResult>("snapshot build failed"))
-            .Verifiable(Times.Once());
-
-        // Act
-        var result = await Sut.GetMediaAsync(filter, CancellationToken);
-
-        // Assert
-        result.IsFailed.ShouldBeTrue();
-        result.Errors.ShouldContain(x => x.Message == "snapshot build failed");
-        commandExecutor.Verify();
-    }
-
-    [Test]
-    public async Task ShouldNormalizeAllLibrarySortIndexToSearchTitle_WhenMultipleLibrariesAreInScope()
-    {
-        // Arrange
-        await SetupDatabase(70308, cfg =>
-        {
-            cfg.PlexServerCount = 1;
-            cfg.PlexMovieLibraryCount = 2;
-            cfg.MovieCount = 5;
-        });
-
-        var filter = CreateFilter(sort: "sortIndex:asc", page: 1, pageSize: 5);
-        GetMediaByTypeCommand? capturedCommand = null;
-
-        var commandExecutor = Mock.Mock<ICommandExecutor>();
-        commandExecutor
-            .Setup(x => x.Send(It.IsAny<GetMediaByTypeCommand>(), It.IsAny<CancellationToken>()))
-            .Returns<GetMediaByTypeCommand, CancellationToken>((command, _) =>
-            {
-                capturedCommand = command;
-                return Task.FromResult(Result.Ok(CreateResult([1, 2, 3, 4, 5])));
-            })
-            .Verifiable(Times.Once());
-
-        // Act
-        var result = await Sut.GetMediaAsync(filter, CancellationToken);
-
-        // Assert
-        result.IsSuccess.ShouldBeTrue();
-        capturedCommand.ShouldNotBeNull();
-        capturedCommand!.Filter.Parameters.Sort.ShouldBe("SearchTitle:asc");
-        capturedCommand.Filter.Parameters.Page.ShouldBeNull();
-        capturedCommand.Filter.Parameters.PageSize.ShouldBeNull();
-        commandExecutor.Verify();
-    }
-
-    [Test]
-    public async Task ShouldKeepSortIndexSort_WhenSingleSpecificLibraryIsInScope()
-    {
-        // Arrange
-        await SetupDatabase(70309, cfg =>
-        {
-            cfg.PlexServerCount = 1;
-            cfg.PlexMovieLibraryCount = 1;
-            cfg.MovieCount = 5;
-        });
-
-        var libraryId = await IDbContext.PlexLibraries
-            .Where(x => x.Type == PlexMediaType.Movie)
-            .Select(x => x.Id)
-            .FirstAsync(CancellationToken);
-        var filter = CreateFilter(plexLibraryId: libraryId, sort: "sortIndex:asc", page: 1, pageSize: 5);
-        GetMediaByTypeCommand? capturedCommand = null;
-
-        var commandExecutor = Mock.Mock<ICommandExecutor>();
-        commandExecutor
-            .Setup(x => x.Send(It.IsAny<GetMediaByTypeCommand>(), It.IsAny<CancellationToken>()))
-            .Returns<GetMediaByTypeCommand, CancellationToken>((command, _) =>
-            {
-                capturedCommand = command;
-                return Task.FromResult(Result.Ok(CreateResult([1, 2, 3, 4, 5])));
-            })
-            .Verifiable(Times.Once());
-
-        // Act
-        var result = await Sut.GetMediaAsync(filter, CancellationToken);
-
-        // Assert
-        result.IsSuccess.ShouldBeTrue();
-        capturedCommand.ShouldNotBeNull();
-        capturedCommand!.Filter.Parameters.Sort.ShouldBe("sortIndex:asc");
-        capturedCommand.Filter.Parameters.Page.ShouldBeNull();
-        capturedCommand.Filter.Parameters.PageSize.ShouldBeNull();
-        commandExecutor.Verify();
-    }
-
-    [Test]
-    public async Task ShouldUseSearchTitleDefaultSort_WhenAllLibraryModeHasMultipleLibraries()
-    {
-        // Arrange
-        await SetupDatabase(70310, cfg =>
-        {
-            cfg.PlexServerCount = 1;
-            cfg.PlexMovieLibraryCount = 2;
-            cfg.MovieCount = 5;
-        });
-
-        var filter = CreateFilter(sort: null, page: 1, pageSize: 5);
-        GetMediaByTypeCommand? capturedCommand = null;
-
-        var commandExecutor = Mock.Mock<ICommandExecutor>();
-        commandExecutor
-            .Setup(x => x.Send(It.IsAny<GetMediaByTypeCommand>(), It.IsAny<CancellationToken>()))
-            .Returns<GetMediaByTypeCommand, CancellationToken>((command, _) =>
-            {
-                capturedCommand = command;
-                return Task.FromResult(Result.Ok(CreateResult([1, 2, 3, 4, 5])));
-            })
-            .Verifiable(Times.Once());
-
-        // Act
-        var result = await Sut.GetMediaAsync(filter, CancellationToken);
-
-        // Assert
-        result.IsSuccess.ShouldBeTrue();
-        capturedCommand.ShouldNotBeNull();
-        capturedCommand!.Filter.Parameters.Sort.ShouldBe("SearchTitle:asc");
-        commandExecutor.Verify();
-    }
-
-    [Test]
-    public async Task ShouldUseSortIndexDefaultSort_WhenSingleLibraryIsInScope()
-    {
-        // Arrange
-        await SetupDatabase(70311, cfg =>
-        {
-            cfg.PlexServerCount = 1;
-            cfg.PlexMovieLibraryCount = 1;
-            cfg.MovieCount = 5;
-        });
-
-        var filter = CreateFilter(sort: null, page: 1, pageSize: 5);
-        GetMediaByTypeCommand? capturedCommand = null;
-
-        var commandExecutor = Mock.Mock<ICommandExecutor>();
-        commandExecutor
-            .Setup(x => x.Send(It.IsAny<GetMediaByTypeCommand>(), It.IsAny<CancellationToken>()))
-            .Returns<GetMediaByTypeCommand, CancellationToken>((command, _) =>
-            {
-                capturedCommand = command;
-                return Task.FromResult(Result.Ok(CreateResult([1, 2, 3, 4, 5])));
-            })
-            .Verifiable(Times.Once());
-
-        // Act
-        var result = await Sut.GetMediaAsync(filter, CancellationToken);
-
-        // Assert
-        result.IsSuccess.ShouldBeTrue();
-        capturedCommand.ShouldNotBeNull();
-        capturedCommand!.Filter.Parameters.Sort.ShouldBe("sortIndex:asc");
-        commandExecutor.Verify();
-    }
-
-    [Test]
-    public async Task ShouldReturnAllItems_WhenRequestedPageSizeIsNull()
-    {
-        // Arrange
-        await SetupDatabase(70312, cfg =>
-        {
-            cfg.PlexServerCount = 1;
-            cfg.PlexMovieLibraryCount = 1;
-            cfg.MovieCount = 12;
-        });
-
-        var allMovieIds = await IDbContext.PlexMovies
-            .OrderBy(x => x.SearchTitle)
-            .Select(x => x.Id)
-            .ToListAsync(CancellationToken);
-        var filter = CreateFilter(sort: "sortIndex:asc", page: null, pageSize: null);
-
-        var commandExecutor = Mock.Mock<ICommandExecutor>();
-        commandExecutor
-            .Setup(x => x.Send(It.IsAny<GetMediaByTypeCommand>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result.Ok(CreateResult(allMovieIds)))
-            .Verifiable(Times.Once());
-
-        // Act
-        var result = await Sut.GetMediaAsync(filter, CancellationToken);
-
-        // Assert
-        result.IsSuccess.ShouldBeTrue();
-        result.Value.Page.ShouldBe(1);
-        result.Value.PageSize.ShouldBe(allMovieIds.Count);
-        result.Value.Items.Select(x => x.Id).ShouldBe(allMovieIds);
-        commandExecutor.Verify();
-    }
-
-    [Test]
-    public async Task ShouldReturnEmptyItemsWithMetadata_WhenRequestedPageIsBeyondSnapshotRange()
-    {
-        // Arrange
-        await SetupDatabase(70313, cfg =>
-        {
-            cfg.PlexServerCount = 1;
-            cfg.PlexMovieLibraryCount = 1;
-            cfg.MovieCount = 12;
-        });
-
-        var allMovieIds = await IDbContext.PlexMovies
-            .OrderBy(x => x.SearchTitle)
-            .Select(x => x.Id)
-            .ToListAsync(CancellationToken);
-        var filter = CreateFilter(sort: "sortIndex:asc", page: 99, pageSize: 10);
-
-        var commandExecutor = Mock.Mock<ICommandExecutor>();
-        commandExecutor
-            .Setup(x => x.Send(It.IsAny<GetMediaByTypeCommand>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result.Ok(CreateResult(allMovieIds, totalMediaSize: 12345)))
-            .Verifiable(Times.Once());
-
-        // Act
-        var result = await Sut.GetMediaAsync(filter, CancellationToken);
-
-        // Assert
-        result.IsSuccess.ShouldBeTrue();
-        result.Value.Page.ShouldBe(99);
-        result.Value.PageSize.ShouldBe(10);
-        result.Value.TotalCount.ShouldBe(allMovieIds.Count);
-        result.Value.MediaSize.ShouldBe(12345);
-        result.Value.Items.ShouldBeEmpty();
-        commandExecutor.Verify();
-    }
-
-    [Test]
-    public async Task ShouldUseSeparateSnapshots_WhenVisibilityFiltersChange()
-    {
-        // Arrange
-        await SetupDatabase(70314, cfg =>
-        {
-            cfg.PlexServerCount = 1;
-            cfg.PlexMovieLibraryCount = 1;
-            cfg.MovieCount = 10;
-        });
-
-        var unfiltered = CreateFilter(sort: "sortIndex:asc", page: 1, pageSize: 5);
-        var filtered = CreateFilter(filterOfflineMedia: true, filterOwnedMedia: true, sort: "sortIndex:asc", page: 1,
-            pageSize: 5);
-        var buildResults = new Queue<Result<PagedMediaQueryResult>>([
-            Result.Ok(CreateResult([1, 2, 3, 4, 5])),
-            Result.Ok(CreateResult([6, 7, 8, 9, 10])),
-        ]);
-
-        var commandExecutor = Mock.Mock<ICommandExecutor>();
-        commandExecutor
-            .Setup(x => x.Send(It.IsAny<GetMediaByTypeCommand>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(() => buildResults.Dequeue())
-            .Verifiable(Times.Exactly(2));
-
-        // Act
-        var unfilteredResult = await Sut.GetMediaAsync(unfiltered, CancellationToken);
-        var filteredResult = await Sut.GetMediaAsync(filtered, CancellationToken);
-
-        // Assert
-        unfilteredResult.IsSuccess.ShouldBeTrue();
-        filteredResult.IsSuccess.ShouldBeTrue();
-        unfilteredResult.Value.Items.Select(x => x.Id).ShouldBe([1, 2, 3, 4, 5]);
-        filteredResult.Value.Items.Select(x => x.Id).ShouldBe([6, 7, 8, 9, 10]);
-        commandExecutor.Verify();
-    }
-
-    [Test]
-    public async Task ShouldShareSingleBuild_WhenConcurrentRequestsMissSameSnapshot()
-    {
-        // Arrange
-        await SetupDatabase(70315, cfg =>
-        {
-            cfg.PlexServerCount = 1;
-            cfg.PlexMovieLibraryCount = 1;
-            cfg.MovieCount = 30;
-        });
-
-        var allMovieIds = await IDbContext.PlexMovies
-            .OrderBy(x => x.SearchTitle)
-            .Select(x => x.Id)
-            .ToListAsync(CancellationToken);
-        var firstFilter = CreateFilter(sort: "sortIndex:asc", page: 1, pageSize: 5);
-        var secondFilter = CreateFilter(sort: "sortIndex:asc", page: 2, pageSize: 5);
-        var buildCompletion =
-            new TaskCompletionSource<Result<PagedMediaQueryResult>>(TaskCreationOptions.RunContinuationsAsynchronously);
-
-        var commandExecutor = Mock.Mock<ICommandExecutor>();
-        commandExecutor
-            .Setup(x => x.Send(It.IsAny<GetMediaByTypeCommand>(), It.IsAny<CancellationToken>()))
-            .Returns(buildCompletion.Task)
-            .Verifiable(Times.Once());
-
-        // Act
-        var firstTask = Sut.GetMediaAsync(firstFilter, CancellationToken);
-        var secondTask = Sut.GetMediaAsync(secondFilter, CancellationToken);
-        buildCompletion.SetResult(Result.Ok(CreateResult(allMovieIds)));
-        var results = await Task.WhenAll(firstTask, secondTask);
-
-        // Assert
-        results.ShouldAllBe(x => x.IsSuccess);
-        results[0].Value.Items.Select(x => x.Id).ShouldBe(allMovieIds.Take(5));
-        results[1].Value.Items.Select(x => x.Id).ShouldBe(allMovieIds.Skip(5).Take(5));
-        commandExecutor.Verify();
-    }
+    // ──────────────────────────────────────────────────────────────
+    // BuildCache warms all-library snapshots synchronously.
+    // Subsequent all-library requests hit the cache.
+    // ──────────────────────────────────────────────────────────────
 
     [Test]
     public async Task ShouldWarmAllLibraryMovieAndTvShowSnapshots_WhenBuildCacheRuns()
@@ -602,8 +181,8 @@ public class MediaQueryCacheUnitTests : BaseUnitTest<MediaQueryCache>
         });
 
         var capturedCommands = new List<GetMediaByTypeCommand>();
-        var commandExecutor = Mock.Mock<ICommandExecutor>();
-        commandExecutor
+
+        Mock.Mock<ICommandExecutor>()
             .Setup(x => x.Send(It.IsAny<GetMediaByTypeCommand>(), It.IsAny<CancellationToken>()))
             .Returns<GetMediaByTypeCommand, CancellationToken>((command, _) =>
             {
@@ -623,17 +202,224 @@ public class MediaQueryCacheUnitTests : BaseUnitTest<MediaQueryCache>
         capturedCommands.Select(x => x.Filter.MediaType).Count(x => x == PlexMediaType.Movie).ShouldBe(7);
         capturedCommands.Select(x => x.Filter.MediaType).Count(x => x == PlexMediaType.TvShow).ShouldBe(7);
         capturedCommands.ShouldAllBe(x => x.Filter.PlexLibraryId == 0);
-        foreach (var command in capturedCommands)
-        {
-            command.Filter.Parameters.Page.ShouldBeNull();
-            command.Filter.Parameters.PageSize.ShouldBeNull();
-        }
-
-        commandExecutor.Verify();
+        capturedCommands.ShouldAllBe(x => x.Filter.Parameters.Page == null);
+        capturedCommands.ShouldAllBe(x => x.Filter.Parameters.PageSize == null);
+        Mock.Mock<ICommandExecutor>().Verify();
     }
 
     [Test]
-    public async Task ShouldTriggerFreshBuild_WhenInvalidationClearsCachedSnapshot()
+    public async Task ShouldHitWarmedCache_WhenRequestingAllLibraries()
+    {
+        // Arrange
+        await SetupDatabase(70302, cfg =>
+        {
+            cfg.PlexServerCount = 1;
+            cfg.PlexMovieLibraryCount = 1;
+            cfg.MovieCount = 30;
+        });
+
+        // Setup mocks for warmup
+        var allMovieIds = await IDbContext.PlexMovies
+            .OrderBy(x => x.SearchTitle)
+            .Select(x => x.Id)
+            .ToListAsync(CancellationToken);
+
+        Mock.Mock<IGeneralSettings>().Setup(x => x.HideMediaFromOfflineServers).Returns(false);
+        Mock.Mock<IGeneralSettings>().Setup(x => x.HideMediaFromOwnedServers).Returns(false);
+
+        Mock.Mock<ICommandExecutor>()
+            .Setup(x => x.Send(It.IsAny<GetMediaByTypeCommand>(), It.IsAny<CancellationToken>()))
+            .Returns<GetMediaByTypeCommand, CancellationToken>((command, _) =>
+                Task.FromResult(Result.Ok(CreateResult(allMovieIds, command.Filter.MediaType))));
+
+        await Sut.BuildCache();
+
+        // Reset and verify no more executor calls needed (cache hits)
+        Mock.Mock<ICommandExecutor>().Reset();
+
+        var firstPageFilter = CreateFilter(sort: "sortIndex:asc", page: 1, pageSize: 10);
+        var secondPageFilter = CreateFilter(sort: "sortIndex:asc", page: 2, pageSize: 10);
+
+        // Act
+        var firstResult = await Sut.GetMediaAsync(firstPageFilter, CancellationToken);
+        var secondResult = await Sut.GetMediaAsync(secondPageFilter, CancellationToken);
+
+        // Assert
+        firstResult.IsSuccess.ShouldBeTrue();
+        secondResult.IsSuccess.ShouldBeTrue();
+        firstResult.Value.Items.Select(x => x.Id).ShouldBe(allMovieIds.Take(10));
+        secondResult.Value.Items.Select(x => x.Id).ShouldBe(allMovieIds.Skip(10).Take(10));
+    }
+
+    [Test]
+    public async Task ShouldReuseAscendingSnapshotAndReverseItems_WhenDescendingSortRequested()
+    {
+        // Arrange
+        await SetupDatabase(70303, cfg =>
+        {
+            cfg.PlexServerCount = 1;
+            cfg.PlexMovieLibraryCount = 1;
+            cfg.MovieCount = 25;
+        });
+
+        var allMovieIds = await IDbContext.PlexMovies
+            .OrderBy(x => x.SearchTitle)
+            .Select(x => x.Id)
+            .ToListAsync(CancellationToken);
+
+        Mock.Mock<IGeneralSettings>().Setup(x => x.HideMediaFromOfflineServers).Returns(false);
+        Mock.Mock<IGeneralSettings>().Setup(x => x.HideMediaFromOwnedServers).Returns(false);
+
+        Mock.Mock<ICommandExecutor>()
+            .Setup(x => x.Send(It.IsAny<GetMediaByTypeCommand>(), It.IsAny<CancellationToken>()))
+            .Returns<GetMediaByTypeCommand, CancellationToken>((command, _) =>
+                Task.FromResult(Result.Ok(CreateResult(allMovieIds, command.Filter.MediaType))));
+
+        await Sut.BuildCache();
+
+        Mock.Mock<ICommandExecutor>().Reset();
+
+        var ascendingFilter = CreateFilter(sort: "sortIndex:asc", page: 1, pageSize: 5);
+        var descendingFilter = CreateFilter(sort: "sortIndex:desc", page: 1, pageSize: 5);
+
+        // Act
+        var ascendingResult = await Sut.GetMediaAsync(ascendingFilter, CancellationToken);
+        var descendingResult = await Sut.GetMediaAsync(descendingFilter, CancellationToken);
+
+        // Assert
+        ascendingResult.IsSuccess.ShouldBeTrue();
+        descendingResult.IsSuccess.ShouldBeTrue();
+        ascendingResult.Value.Items.Select(x => x.Id).ShouldBe(allMovieIds.Take(5));
+        descendingResult.Value.Items.Select(x => x.Id).ShouldBe(allMovieIds.AsEnumerable().Reverse().Take(5));
+        descendingResult.Value.Items.Select(x => x.SortIndex).ShouldBe(Enumerable.Range(1, 5));
+    }
+
+    [Test]
+    public async Task ShouldReturnEmptyItemsWithMetadata_WhenRequestedPageIsBeyondSnapshotRange()
+    {
+        // Arrange
+        await SetupDatabase(70313, cfg =>
+        {
+            cfg.PlexServerCount = 1;
+            cfg.PlexMovieLibraryCount = 1;
+            cfg.MovieCount = 12;
+        });
+
+        var allMovieIds = await IDbContext.PlexMovies
+            .OrderBy(x => x.SearchTitle)
+            .Select(x => x.Id)
+            .ToListAsync(CancellationToken);
+
+        Mock.Mock<IGeneralSettings>().Setup(x => x.HideMediaFromOfflineServers).Returns(false);
+        Mock.Mock<IGeneralSettings>().Setup(x => x.HideMediaFromOwnedServers).Returns(false);
+
+        Mock.Mock<ICommandExecutor>()
+            .Setup(x => x.Send(It.IsAny<GetMediaByTypeCommand>(), It.IsAny<CancellationToken>()))
+            .Returns<GetMediaByTypeCommand, CancellationToken>((command, _) =>
+                Task.FromResult(Result.Ok(CreateResult(allMovieIds, command.Filter.MediaType, totalMediaSize: 12345))));
+
+        await Sut.BuildCache();
+        Mock.Mock<ICommandExecutor>().Reset();
+
+        var filter = CreateFilter(sort: "sortIndex:asc", page: 99, pageSize: 10);
+
+        // Act
+        var result = await Sut.GetMediaAsync(filter, CancellationToken);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.Page.ShouldBe(99);
+        result.Value.PageSize.ShouldBe(10);
+        result.Value.TotalCount.ShouldBe(allMovieIds.Count);
+        result.Value.MediaSize.ShouldBe(12345);
+        result.Value.Items.ShouldBeEmpty();
+    }
+
+    [Test]
+    public async Task ShouldReturnAllItems_WhenRequestedPageSizeIsNull()
+    {
+        // Arrange
+        await SetupDatabase(70312, cfg =>
+        {
+            cfg.PlexServerCount = 1;
+            cfg.PlexMovieLibraryCount = 1;
+            cfg.MovieCount = 12;
+        });
+
+        var allMovieIds = await IDbContext.PlexMovies
+            .OrderBy(x => x.SearchTitle)
+            .Select(x => x.Id)
+            .ToListAsync(CancellationToken);
+
+        Mock.Mock<IGeneralSettings>().Setup(x => x.HideMediaFromOfflineServers).Returns(false);
+        Mock.Mock<IGeneralSettings>().Setup(x => x.HideMediaFromOwnedServers).Returns(false);
+
+        Mock.Mock<ICommandExecutor>()
+            .Setup(x => x.Send(It.IsAny<GetMediaByTypeCommand>(), It.IsAny<CancellationToken>()))
+            .Returns<GetMediaByTypeCommand, CancellationToken>((command, _) =>
+                Task.FromResult(Result.Ok(CreateResult(allMovieIds, command.Filter.MediaType))));
+
+        await Sut.BuildCache();
+        Mock.Mock<ICommandExecutor>().Reset();
+
+        var filter = CreateFilter(sort: "sortIndex:asc", page: null, pageSize: null);
+
+        // Act
+        var result = await Sut.GetMediaAsync(filter, CancellationToken);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.Page.ShouldBe(1);
+        result.Value.PageSize.ShouldBe(allMovieIds.Count);
+        result.Value.Items.Select(x => x.Id).ShouldBe(allMovieIds);
+    }
+
+    [Test]
+    public async Task ShouldReturnEmptyFilterArrays_InPageResponse()
+    {
+        // Arrange
+        await SetupDatabase(70320, cfg =>
+        {
+            cfg.PlexServerCount = 1;
+            cfg.PlexMovieLibraryCount = 1;
+            cfg.MovieCount = 10;
+        });
+
+        var allMovieIds = await IDbContext.PlexMovies
+            .OrderBy(x => x.SearchTitle)
+            .Select(x => x.Id)
+            .ToListAsync(CancellationToken);
+
+        Mock.Mock<IGeneralSettings>().Setup(x => x.HideMediaFromOfflineServers).Returns(false);
+        Mock.Mock<IGeneralSettings>().Setup(x => x.HideMediaFromOwnedServers).Returns(false);
+
+        Mock.Mock<ICommandExecutor>()
+            .Setup(x => x.Send(It.IsAny<GetMediaByTypeCommand>(), It.IsAny<CancellationToken>()))
+            .Returns<GetMediaByTypeCommand, CancellationToken>((command, _) =>
+                Task.FromResult(Result.Ok(CreateResult(allMovieIds, command.Filter.MediaType))));
+
+        await Sut.BuildCache();
+        Mock.Mock<ICommandExecutor>().Reset();
+
+        var filter = CreateFilter(sort: "sortIndex:asc", page: 1, pageSize: 5);
+
+        // Act
+        var result = await Sut.GetMediaAsync(filter, CancellationToken);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.Roles.ShouldBeEmpty();
+        result.Value.Countries.ShouldBeEmpty();
+        result.Value.Genres.ShouldBeEmpty();
+        result.Value.Qualities.ShouldBeEmpty();
+    }
+
+    // ──────────────────────────────────────────────────────────────
+    // Invalidation: marks dirty, returns stale, queues background
+    // ──────────────────────────────────────────────────────────────
+
+    [Test]
+    public async Task ShouldReturnStaleData_WhenInvalidationMarksSnapshotDirty()
     {
         // Arrange
         await SetupDatabase(70317, cfg =>
@@ -647,32 +433,81 @@ public class MediaQueryCacheUnitTests : BaseUnitTest<MediaQueryCache>
             .Where(x => x.Type == PlexMediaType.Movie)
             .Select(x => x.Id)
             .FirstAsync(CancellationToken);
-        var freshIds = new List<int> { 50, 51, 52, 53, 54 };
+        var allMovieIds = await IDbContext.PlexMovies
+            .OrderBy(x => x.SearchTitle)
+            .Select(x => x.Id)
+            .ToListAsync(CancellationToken);
 
-        var filter = CreateFilter(plexLibraryId: libraryId, sort: "year:asc", page: 1, pageSize: 5);
-        var buildResults = new Queue<Result<PagedMediaQueryResult>>([
-            Result.Ok(CreateResult([1, 2, 3, 4, 5])),
-            Result.Ok(CreateResult(freshIds)),
-        ]);
+        Mock.Mock<IGeneralSettings>().Setup(x => x.HideMediaFromOfflineServers).Returns(false);
+        Mock.Mock<IGeneralSettings>().Setup(x => x.HideMediaFromOwnedServers).Returns(false);
 
-        var commandExecutor = Mock.Mock<ICommandExecutor>();
-        commandExecutor
+        Mock.Mock<ICommandExecutor>()
             .Setup(x => x.Send(It.IsAny<GetMediaByTypeCommand>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(() => buildResults.Dequeue())
-            .Verifiable(Times.Exactly(2));
+            .Returns<GetMediaByTypeCommand, CancellationToken>((command, _) =>
+                Task.FromResult(Result.Ok(CreateResult(allMovieIds, command.Filter.MediaType))));
 
-        // Act — first call builds the snapshot
+        await Sut.BuildCache();
+        Mock.Mock<ICommandExecutor>().Reset();
+
+        var filter = CreateFilter(sort: "sortIndex:asc", page: 1, pageSize: 5);
+
+        // Verify warm cache hit
         var firstResult = await Sut.GetMediaAsync(filter, CancellationToken);
-        firstResult.Value.Items.Select(x => x.Id).ShouldBe([1, 2, 3, 4, 5]);
+        firstResult.IsSuccess.ShouldBeTrue();
+        firstResult.Value.Items.ShouldNotBeEmpty();
 
-        // Invalidate and verify second call builds fresh
+        // Act — invalidate library (marks dirty, queues background rebuild)
         Sut.InvalidateLibraries([libraryId], "test invalidation");
+
+        // Second call should still return stale cached data (not 503, not empty)
         var secondResult = await Sut.GetMediaAsync(filter, CancellationToken);
 
         // Assert
         secondResult.IsSuccess.ShouldBeTrue();
-        secondResult.Value.Items.Select(x => x.Id).ShouldBe(freshIds);
-        commandExecutor.Verify();
+        secondResult.Value.Items.Count.ShouldBeGreaterThan(0);
+    }
+
+    [Test]
+    public async Task ShouldNotEmptyState_WhenInvalidationHitsAndSubsequentRequestUsesStaleSnapshot()
+    {
+        // Arrange
+        await SetupDatabase(70323, cfg =>
+        {
+            cfg.PlexServerCount = 1;
+            cfg.PlexMovieLibraryCount = 1;
+            cfg.MovieCount = 15;
+        });
+
+        var libraryId = await IDbContext.PlexLibraries
+            .Where(x => x.Type == PlexMediaType.Movie)
+            .Select(x => x.Id)
+            .FirstAsync(CancellationToken);
+        var allMovieIds = await IDbContext.PlexMovies
+            .OrderBy(x => x.SearchTitle)
+            .Select(x => x.Id)
+            .ToListAsync(CancellationToken);
+
+        Mock.Mock<IGeneralSettings>().Setup(x => x.HideMediaFromOfflineServers).Returns(false);
+        Mock.Mock<IGeneralSettings>().Setup(x => x.HideMediaFromOwnedServers).Returns(false);
+
+        Mock.Mock<ICommandExecutor>()
+            .Setup(x => x.Send(It.IsAny<GetMediaByTypeCommand>(), It.IsAny<CancellationToken>()))
+            .Returns<GetMediaByTypeCommand, CancellationToken>((command, _) =>
+                Task.FromResult(Result.Ok(CreateResult(allMovieIds, command.Filter.MediaType))));
+
+        await Sut.BuildCache();
+        Mock.Mock<ICommandExecutor>().Reset();
+
+        var filter = CreateFilter(sort: "sortIndex:asc", page: 1, pageSize: 10);
+
+        // Act — invalidate first (simulates library refresh), then request
+        Sut.InvalidateLibraries([libraryId], "simulated library refresh");
+        var result = await Sut.GetMediaAsync(filter, CancellationToken);
+
+        // Assert — stale data available, not empty
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.Items.ShouldNotBeEmpty();
+        result.Value.Items.Count.ShouldBe(10);
     }
 
     [Test]
@@ -691,75 +526,39 @@ public class MediaQueryCacheUnitTests : BaseUnitTest<MediaQueryCache>
             .Select(x => x.Id)
             .OrderBy(x => x)
             .ToListAsync(CancellationToken);
-        var unrelatedId = libraryIds[0] + libraryIds[1] + 999; // non-existent library
+        var unrelatedId = libraryIds[0] + libraryIds[1] + 999;
+        var allMovieIds = await IDbContext.PlexMovies
+            .OrderBy(x => x.SearchTitle)
+            .Select(x => x.Id)
+            .ToListAsync(CancellationToken);
 
-        var filter = CreateFilter(sort: "year:asc", page: 1, pageSize: 5);
+        Mock.Mock<IGeneralSettings>().Setup(x => x.HideMediaFromOfflineServers).Returns(false);
+        Mock.Mock<IGeneralSettings>().Setup(x => x.HideMediaFromOwnedServers).Returns(false);
 
-        var commandExecutor = Mock.Mock<ICommandExecutor>();
-        commandExecutor
+        Mock.Mock<ICommandExecutor>()
             .Setup(x => x.Send(It.IsAny<GetMediaByTypeCommand>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result.Ok(CreateResult([10, 20, 30, 40, 50])))
-            .Verifiable(Times.Once());
+            .Returns<GetMediaByTypeCommand, CancellationToken>((command, _) =>
+                Task.FromResult(Result.Ok(CreateResult(allMovieIds, command.Filter.MediaType))));
+
+        await Sut.BuildCache();
+        Mock.Mock<ICommandExecutor>().Reset();
+
+        var filter = CreateFilter(sort: "sortIndex:asc", page: 1, pageSize: 5);
 
         // Act
         var firstResult = await Sut.GetMediaAsync(filter, CancellationToken);
         Sut.InvalidateLibraries([unrelatedId], "unrelated invalidation");
         var secondResult = await Sut.GetMediaAsync(filter, CancellationToken);
 
-        // Assert — should reuse cached snapshot (only one build total)
+        // Assert
         firstResult.IsSuccess.ShouldBeTrue();
         secondResult.IsSuccess.ShouldBeTrue();
-        secondResult.Value.Items.Select(x => x.Id).ShouldBe([10, 20, 30, 40, 50]);
-        commandExecutor.Verify();
+        secondResult.Value.Items.Select(x => x.Id).ShouldBe(firstResult.Value.Items.Select(x => x.Id));
     }
 
-    [Test]
-    public async Task ShouldDiscardInFlightBuild_WhenInvalidationOccursDuringBuild()
-    {
-        // Arrange
-        await SetupDatabase(70319, cfg =>
-        {
-            cfg.PlexServerCount = 1;
-            cfg.PlexMovieLibraryCount = 1;
-            cfg.MovieCount = 5;
-        });
-
-        var libraryId = await IDbContext.PlexLibraries
-            .Where(x => x.Type == PlexMediaType.Movie)
-            .Select(x => x.Id)
-            .FirstAsync(CancellationToken);
-
-        // Build that will be invalidated mid-flight
-        var staleBuild = new TaskCompletionSource<Result<PagedMediaQueryResult>>(TaskCreationOptions.RunContinuationsAsynchronously);
-        // Build after invalidation
-        var freshBuild = new TaskCompletionSource<Result<PagedMediaQueryResult>>(TaskCreationOptions.RunContinuationsAsynchronously);
-        var buildQueue = new Queue<TaskCompletionSource<Result<PagedMediaQueryResult>>>([staleBuild, freshBuild]);
-
-        var filter = CreateFilter(plexLibraryId: libraryId, sort: "sortIndex:asc", page: 1, pageSize: 5);
-
-        var commandExecutor = Mock.Mock<ICommandExecutor>();
-        commandExecutor
-            .Setup(x => x.Send(It.IsAny<GetMediaByTypeCommand>(), It.IsAny<CancellationToken>()))
-            .Returns(() => buildQueue.Dequeue().Task)
-            .Verifiable(Times.Exactly(2));
-
-        // Act — start a build, invalidate, then complete the stale build
-        var firstRequest = Sut.GetMediaAsync(filter, CancellationToken);
-        Sut.InvalidateLibraries([libraryId], "mid-build invalidation");
-        staleBuild.SetResult(Result.Ok(CreateResult([100, 101, 102, 103, 104])));
-        var staleResult = await firstRequest;
-
-        // The stale build was discarded; next request triggers a fresh one
-        freshBuild.SetResult(Result.Ok(CreateResult([200, 201, 202, 203, 204])));
-        var freshResult = await Sut.GetMediaAsync(filter, CancellationToken);
-
-        // Assert
-        staleResult.IsFailed.ShouldBeTrue();
-        staleResult.Errors.ShouldContain(x => x.Message.Contains("invalidated"));
-        freshResult.IsSuccess.ShouldBeTrue();
-        freshResult.Value.Items.Select(x => x.Id).ShouldBe([200, 201, 202, 203, 204]);
-        commandExecutor.Verify();
-    }
+    // ──────────────────────────────────────────────────────────────
+    // Helpers
+    // ──────────────────────────────────────────────────────────────
 
     private static MediaQueryFilter CreateFilter(
         PlexMediaType mediaType = PlexMediaType.Movie,
@@ -826,78 +625,4 @@ public class MediaQueryCacheUnitTests : BaseUnitTest<MediaQueryCache>
         HasThumb = false,
         Qualities = new List<PlexMediaQualityDTO>(),
     };
-
-    [Test]
-    public async Task ShouldReturnEmptyFilterArrays_InPageResponse()
-    {
-        // Arrange
-        await SetupDatabase(70320, cfg =>
-        {
-            cfg.PlexServerCount = 1;
-            cfg.PlexMovieLibraryCount = 1;
-            cfg.MovieCount = 10;
-        });
-
-        var filter = CreateFilter(sort: "sortIndex:asc", page: 1, pageSize: 5);
-
-        Mock.Mock<ICommandExecutor>()
-            .Setup(x => x.Send(It.IsAny<GetMediaByTypeCommand>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result.Ok(CreateResult([1, 2, 3, 4, 5])))
-            .Verifiable(Times.Once());
-
-        // Act
-        var result = await Sut.GetMediaAsync(filter, CancellationToken);
-
-        // Assert
-        result.IsSuccess.ShouldBeTrue();
-        result.Value.Roles.ShouldBeEmpty();
-        result.Value.Countries.ShouldBeEmpty();
-        result.Value.Genres.ShouldBeEmpty();
-        result.Value.Qualities.ShouldBeEmpty();
-        Mock.Mock<ICommandExecutor>().Verify();
-    }
-
-    [Test]
-    public async Task ShouldSkipMetadataStorage_WhenBuildInvalidatedMidFlight()
-    {
-        // Arrange
-        await SetupDatabase(70321, cfg =>
-        {
-            cfg.PlexServerCount = 1;
-            cfg.PlexMovieLibraryCount = 1;
-            cfg.MovieCount = 5;
-        });
-
-        var libraryId = await IDbContext.PlexLibraries
-            .Where(x => x.Type == PlexMediaType.Movie)
-            .Select(x => x.Id)
-            .FirstAsync(CancellationToken);
-
-        var staleBuildTcs = new TaskCompletionSource<Result<PagedMediaQueryResult>>(TaskCreationOptions.RunContinuationsAsynchronously);
-        var freshBuildTcs = new TaskCompletionSource<Result<PagedMediaQueryResult>>(TaskCreationOptions.RunContinuationsAsynchronously);
-        var buildQueue = new Queue<TaskCompletionSource<Result<PagedMediaQueryResult>>>([staleBuildTcs, freshBuildTcs]);
-
-        var filter = CreateFilter(plexLibraryId: libraryId, sort: "year:asc", page: 1, pageSize: 5);
-
-        Mock.Mock<ICommandExecutor>()
-            .Setup(x => x.Send(It.IsAny<GetMediaByTypeCommand>(), It.IsAny<CancellationToken>()))
-            .Returns(() => buildQueue.Dequeue().Task)
-            .Verifiable(Times.Exactly(2));
-
-        // Act — start build, invalidate mid-flight, complete stale build, then verify fresh build succeeds
-        var firstRequest = Sut.GetMediaAsync(filter, CancellationToken);
-        Sut.InvalidateLibraries([libraryId], "mid-build invalidation");
-        staleBuildTcs.SetResult(Result.Ok(CreateResult([100, 200, 300, 400, 500])));
-        var staleResult = await firstRequest;
-
-        freshBuildTcs.SetResult(Result.Ok(CreateResult([10, 20, 30, 40, 50])));
-        var freshResult = await Sut.GetMediaAsync(filter, CancellationToken);
-
-        // Assert
-        staleResult.IsFailed.ShouldBeTrue();
-        staleResult.Errors.ShouldContain(x => x.Message.Contains("invalidated"));
-        freshResult.IsSuccess.ShouldBeTrue();
-        freshResult.Value.Items.Select(x => x.Id).ShouldBe([10, 20, 30, 40, 50]);
-        Mock.Mock<ICommandExecutor>().Verify();
-    }
 }

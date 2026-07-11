@@ -193,7 +193,6 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 			);
 		},
 		refreshMediaData(): Observable<PlexMediaStatisticsDTO | null> {
-			state.serverError = false;
 			state.cacheRetrySeconds = 0;
 			clearCacheRetryTimer();
 
@@ -263,6 +262,8 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 				Log.error('Received null data for media page');
 				return;
 			}
+
+			state.serverError = false;
 
 			if (state.queryHash !== data.queryHash) {
 				Log.warn(`mediaPages was cleared, with ${state.queryHash} vs ${data.queryHash}`);
@@ -488,7 +489,7 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 	// ── Cache retry helpers ────────────────────────────────
 
 	function startCacheRetry(): void {
-		if (cacheRetryTimer !== null || state.loading) return;
+		if (cacheRetryTimer !== null) return;
 		state.cacheRetrySeconds = 5;
 		cacheRetryTimer = setInterval(() => {
 			state.cacheRetrySeconds--;

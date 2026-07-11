@@ -143,9 +143,6 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 
 			actions.$reset();
 
-			// Prevent the empty-state flash while data loads.
-			state.loading = true;
-
 			// Update state
 			state.libraryId = libraryId;
 
@@ -196,15 +193,9 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 			);
 		},
 		refreshMediaData(): Observable<PlexMediaStatisticsDTO | null> {
-			if (state.loading) {
-				Log.debug('Request already in progress, skipping');
-				return of(null);
-			}
-
-			state.loading = true;
 			state.serverError = false;
-	state.cacheRetrySeconds = 0;
-	clearCacheRetryTimer();
+		state.cacheRetrySeconds = 0;
+		clearCacheRetryTimer();
 
 			mediaPages.clear();
 			pendingPages.clear();
@@ -490,13 +481,14 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 			mediaPages.clear();
 			pendingPages.clear();
 			Object.assign(state, cloneDeep(defaultState));
+			state.loading = true;
 		},
 	};
 
 	// ── Cache retry helpers ────────────────────────────────
 
 	function startCacheRetry(): void {
-		if (cacheRetryTimer !== null) return;
+		if (cacheRetryTimer !== null || state.loading) return;
 		state.cacheRetrySeconds = 5;
 		cacheRetryTimer = setInterval(() => {
 			state.cacheRetrySeconds--;

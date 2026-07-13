@@ -93,6 +93,20 @@ public sealed class ReaparrDbContext : DbContext, IReaparrDbContext, IReaparrDbC
 
     public DbSet<PlexTvShowCountries> PlexTvShowCountries { get; set; }
 
+    #region Comparison
+
+    public DbSet<PlexComparisonState> PlexComparisonScopes { get; set; }
+
+    public DbSet<PlexMovieComparison> PlexMovieComparisons { get; set; }
+
+    public DbSet<PlexTvShowComparison> PlexTvShowComparisons { get; set; }
+
+    public DbSet<PlexSeasonComparison> PlexSeasonComparisons { get; set; }
+
+    public DbSet<PlexEpisodeComparison> PlexEpisodeComparisons { get; set; }
+
+    #endregion
+
     public string DatabaseName { get; }
 
     public Task BulkReadAsync<T>(

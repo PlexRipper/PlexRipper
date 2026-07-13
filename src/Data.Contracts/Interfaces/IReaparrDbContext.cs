@@ -114,6 +114,20 @@ public interface IReaparrDbContext : IDisposable
 
     #endregion
 
+    #region Comparison
+
+    DbSet<PlexComparisonState> PlexComparisonScopes { get; }
+
+    DbSet<PlexMovieComparison> PlexMovieComparisons { get; }
+
+    DbSet<PlexTvShowComparison> PlexTvShowComparisons { get; }
+
+    DbSet<PlexSeasonComparison> PlexSeasonComparisons { get; }
+
+    DbSet<PlexEpisodeComparison> PlexEpisodeComparisons { get; }
+
+    #endregion
+
     string DatabaseName { get; }
 
     #endregion Properties

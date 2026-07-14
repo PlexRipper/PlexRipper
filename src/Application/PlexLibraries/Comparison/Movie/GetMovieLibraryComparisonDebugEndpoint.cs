@@ -26,7 +26,7 @@ public record MovieLibraryComparisonDebugResponseDTO(
     int OwnedLibraryId,
     List<MovieLibraryComparisonDebugHitDTO> Matched,
     List<MovieLibraryComparisonDebugHitDTO> HigherQuality,
-    List<MovieLibraryComparisonDebugMissingDTO> Missing
+    int MissingCount
 );
 
 public record MovieLibraryComparisonDebugHitDTO(
@@ -42,12 +42,6 @@ public record MovieLibraryComparisonDebugHitDTO(
     DateTime ComparedAt
 );
 
-public record MovieLibraryComparisonDebugMissingDTO(
-    int RemoteMediaId,
-    string RemoteTitle,
-    int RemoteYear,
-    VideoQuality RemoteQuality
-);
 
 public class GetMovieLibraryComparisonDebugEndpoint
     : Endpoint<GetMovieLibraryComparisonDebugEndpointRequest, ResultDTO<MovieLibraryComparisonDebugResponseDTO>>
@@ -131,26 +125,23 @@ public class GetMovieLibraryComparisonDebugEndpoint
             })
             .ToListAsync(ct);
 
-        var missing = await _dbContext.PlexMovies
+        var missingCount = await _dbContext.PlexMovies
             .Where(x => x.PlexLibraryId == req.RemoteLibraryId)
-            .Where(remote =>
+            .CountAsync(remote =>
                 !_dbContext.PlexMovieComparisons.Any(comparison =>
                     comparison.RemotePlexLibraryId == req.RemoteLibraryId
                     && comparison.OwnedPlexLibraryId == req.OwnedLibraryId
                     && comparison.RemotePlexMediaId == remote.Id
-                )
-            )
-            .OrderBy(x => x.Title)
-            .ThenBy(x => x.Year)
-            .Select(x => new MovieLibraryComparisonDebugMissingDTO(x.Id, x.Title, x.Year, x.Quality))
-            .ToListAsync(ct);
+                ),
+                ct
+            );
 
         var response = new MovieLibraryComparisonDebugResponseDTO(
             req.RemoteLibraryId,
             req.OwnedLibraryId,
             hits.Where(x => x.HitState == PlexMediaComparisonHitState.Matched).Select(x => x.Hit).ToList(),
             hits.Where(x => x.HitState == PlexMediaComparisonHitState.HigherQuality).Select(x => x.Hit).ToList(),
-            missing
+            missingCount
         );
 
         await Send.FluentResult(Result.Ok(response), ct);

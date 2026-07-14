@@ -64,16 +64,13 @@ public class PlexLibraryComparisonJob : IJob
                 _mediaType
             );
 
-        if (_mediaType != PlexMediaType.Movie)
-        {
-            _log.Here().Warning("Library comparison for media type {MediaType} is not yet implemented", _mediaType);
-            return;
-        }
-
         // Jobs should swallow exceptions; Quartz will otherwise keep re-executing
-        var result = await Result.Try(() =>
-            _commandExecutor.Send(new CompareMoviePlexLibraryCommand(_remoteLibraryId, _ownedLibraryId), cancellationToken)
-        );
+        var result = _mediaType switch
+        {
+            PlexMediaType.Movie => await _commandExecutor.Send(new CompareMoviePlexLibraryCommand(_remoteLibraryId, _ownedLibraryId), cancellationToken),
+            PlexMediaType.TvShow => await _commandExecutor.Send(new CompareTvShowPlexLibraryCommand(_remoteLibraryId, _ownedLibraryId), cancellationToken),
+            _ => Result.Fail($"Library comparison for media type {_mediaType} is not yet implemented"),
+        };
 
         if (result.IsFailed)
         {

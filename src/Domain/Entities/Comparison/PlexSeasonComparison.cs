@@ -15,5 +15,4 @@ public class PlexSeasonComparison : BaseEntity
     public required VideoQuality OwnedQuality { get; init; }
     public required PlexMediaComparisonMatchType MatchType { get; init; }
     public required DateTime ComparedAt { get; init; }
-    public required int AlgorithmVersion { get; init; }
 }

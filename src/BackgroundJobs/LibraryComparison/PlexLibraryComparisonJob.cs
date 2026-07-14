@@ -5,6 +5,7 @@ namespace Reaparr.BackgroundJobs;
 /// for a specific media type and stores comparison hit rows.
 /// Triggered after library sync completes or ownership/access changes.
 /// </summary>
+[DisallowConcurrentExecution]
 public class PlexLibraryComparisonJob : IJob
 {
     public const string RemoteLibraryIdParameter = nameof(RemoteLibraryIdParameter);
@@ -63,12 +64,15 @@ public class PlexLibraryComparisonJob : IJob
                 _mediaType
             );
 
+        if (_mediaType != PlexMediaType.Movie)
+        {
+            _log.Here().Warning("Library comparison for media type {MediaType} is not yet implemented", _mediaType);
+            return;
+        }
+
         // Jobs should swallow exceptions; Quartz will otherwise keep re-executing
         var result = await Result.Try(() =>
-            _commandExecutor.Send(
-                new CompareMoviePlexLibraryCommand(_remoteLibraryId, _ownedLibraryId, _mediaType),
-                cancellationToken
-            )
+            _commandExecutor.Send(new CompareMoviePlexLibraryCommand(_remoteLibraryId, _ownedLibraryId), cancellationToken)
         );
 
         if (result.IsFailed)

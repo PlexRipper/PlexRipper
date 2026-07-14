@@ -50,9 +50,4 @@ public class PlexMovieComparison : BaseEntity
     /// When this comparison row was calculated.
     /// </summary>
     public required DateTime ComparedAt { get; init; }
-
-    /// <summary>
-    /// The algorithm version at compare time; allows recalculation after matching logic changes.
-    /// </summary>
-    public required int AlgorithmVersion { get; init; }
 }

@@ -266,7 +266,13 @@ public sealed class ReaparrDbContext : DbContext, IReaparrDbContext, IReaparrDbC
             await Database.OpenConnectionAsync(cancellationToken);
 
         try
-        {
+        {             
+            if (Database.CurrentTransaction is not null)
+            {
+                await operation();
+                return;
+            }
+            
             await using var tx = await BeginTransactionAsync(cancellationToken);
             await operation();
             await tx.CommitAsync(cancellationToken);

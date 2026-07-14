@@ -1,12 +1,11 @@
 namespace Reaparr.Application.Contracts;
 
 /// <summary>
-/// Compares a remote library against an owned library for a specific media type.
+/// Compares a remote movie library against an owned movie library.
 /// Produces comparison hit rows and a scope row so browse queries can project
-/// comparison state efficiently.
+/// movie comparison state efficiently.
 /// </summary>
 public record CompareMoviePlexLibraryCommand(
     int RemotePlexLibraryId,
-    int OwnedPlexLibraryId,
-    PlexMediaType MediaType
+    int OwnedPlexLibraryId
 ) : ICommand<Result>;

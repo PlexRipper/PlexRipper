@@ -10,6 +10,8 @@
 
 # Build results
 [Dd]ebug*/
+!src/Application/Debug/
+!src/Application/Debug/**
 [Rr]elease*/
 x64/
 x86/

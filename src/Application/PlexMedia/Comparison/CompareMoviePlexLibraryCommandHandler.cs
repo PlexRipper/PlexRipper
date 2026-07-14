@@ -9,9 +9,9 @@ public class CompareMoviePlexLibraryCommandValidator : AbstractValidator<Compare
 {
     public CompareMoviePlexLibraryCommandValidator()
     {
-        RuleFor(x => x.RemotePlexLibraryId).GreaterThan(0);
+        RuleFor(x => x).NotNull();
+        RuleFor(x => x.RemotePlexLibraryId).GreaterThan(0).NotEqual(x => x.OwnedPlexLibraryId);
         RuleFor(x => x.OwnedPlexLibraryId).GreaterThan(0);
-        RuleFor(x => x.MediaType).IsInEnum();
     }
 }
 
@@ -20,21 +20,16 @@ public class CompareMoviePlexLibraryCommandHandler : ICommandHandler<CompareMovi
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
     private readonly IReaparrDbContextFactory _dbContextFactory;
-    private readonly INotificationHubService _notificationHubService;
-
-    private const int AlgorithmVersion = 1;
 
     public CompareMoviePlexLibraryCommandHandler(
         ILogger log,
         IReaparrDbContext dbContext,
-        IReaparrDbContextFactory dbContextFactory,
-        INotificationHubService notificationHubService
+        IReaparrDbContextFactory dbContextFactory
     )
     {
         _log = log.ForContext<CompareMoviePlexLibraryCommandHandler>();
         _dbContext = dbContext;
         _dbContextFactory = dbContextFactory;
-        _notificationHubService = notificationHubService;
     }
 
     public async Task<Result> ExecuteAsync(
@@ -44,22 +39,56 @@ public class CompareMoviePlexLibraryCommandHandler : ICommandHandler<CompareMovi
     {
         return await Result.Try(new Func<Task<Result>>(async () =>
         {
-            var (remoteLibraryId, ownedLibraryId, mediaType) = command;
+            var (remoteLibraryId, ownedLibraryId) = command;
 
             _log.Here()
                 .Information(
-                    "Starting comparison for media type {MediaType}: remote library {RemoteLibId} vs owned library {OwnedLibId}",
-                    mediaType,
+                    "Starting movie comparison: remote library {RemoteLibId} vs owned library {OwnedLibId}",
                     remoteLibraryId,
                     ownedLibraryId
                 );
 
-            return mediaType switch
-            {
-                PlexMediaType.Movie => await CompareMoviesAsync(remoteLibraryId, ownedLibraryId, cancellationToken),
-                _ => Result.Fail($"Media type {mediaType} comparison is not yet implemented"),
-            };
+            var validationResult = await ValidateLibrariesAsync(remoteLibraryId, ownedLibraryId, cancellationToken);
+
+            if (validationResult.IsFailed)
+                return validationResult;
+
+            return await CompareMoviesAsync(remoteLibraryId, ownedLibraryId, cancellationToken);
         }));
+    }
+
+    private async Task<Result> ValidateLibrariesAsync(
+        int remoteLibraryId,
+        int ownedLibraryId,
+        CancellationToken cancellationToken
+    )
+    {
+        var libraries = await _dbContext.PlexLibraries
+            .Where(x => x.Id == remoteLibraryId || x.Id == ownedLibraryId)
+            .Select(x => new
+            {
+                x.Id,
+                x.Type,
+                IsOwned = x.PlexAccountLibraries.Any(y => y.IsLibraryOwned),
+            })
+            .ToDictionaryAsync(x => x.Id, cancellationToken);
+
+        if (!libraries.TryGetValue(remoteLibraryId, out var remoteLibrary))
+            return Result.Fail($"Remote library {remoteLibraryId} was not found");
+
+        if (!libraries.TryGetValue(ownedLibraryId, out var ownedLibrary))
+            return Result.Fail($"Owned library {ownedLibraryId} was not found");
+
+        if (remoteLibrary.IsOwned)
+            return Result.Fail($"Library {remoteLibraryId} is owned and cannot be compared as a remote library");
+
+        if (!ownedLibrary.IsOwned)
+            return Result.Fail($"Library {ownedLibraryId} is not owned and cannot be compared as an owned library");
+
+        if (remoteLibrary.Type != PlexMediaType.Movie || ownedLibrary.Type != PlexMediaType.Movie)
+            return Result.Fail("Both libraries must be movie libraries");
+
+        return Result.Ok();
     }
 
     private async Task<Result> CompareMoviesAsync(
@@ -72,7 +101,6 @@ public class CompareMoviePlexLibraryCommandHandler : ICommandHandler<CompareMovi
 
         // Load remote movies with their quality
         var remoteMovies = await _dbContext.PlexMovies
-            .AsNoTracking()
             .Where(m => m.PlexLibraryId == remoteLibraryId)
             .Select(m => new MovieProjection
             {
@@ -90,7 +118,6 @@ public class CompareMoviePlexLibraryCommandHandler : ICommandHandler<CompareMovi
 
         // Load owned movies with their quality
         var ownedMovies = await _dbContext.PlexMovies
-            .AsNoTracking()
             .Where(m => m.PlexLibraryId == ownedLibraryId)
             .Select(m => new MovieProjection
             {
@@ -129,19 +156,20 @@ public class CompareMoviePlexLibraryCommandHandler : ICommandHandler<CompareMovi
             .GroupBy(x => x.Guid_TVDB!.Value)
             .ToDictionary(g => g.Key, g => g.ToList());
 
-        var nowTimestamp = now;
+        var ownedByTitleYear = ownedMovies
+            .GroupBy(GetTitleYearKey, StringComparer.OrdinalIgnoreCase)
+            .ToDictionary(g => g.Key, g => g.ToList(), StringComparer.OrdinalIgnoreCase);
 
         var hitRows = new List<PlexMovieComparison>();
 
         foreach (var remote in remoteMovies)
         {
-            var matches = MatchMovie(remote, ownedByTmdb, ownedByImdb, ownedByTvdb, ownedMovies);
+            var matches = MatchMovie(remote, ownedByTmdb, ownedByImdb, ownedByTvdb, ownedByTitleYear);
 
             foreach (var (owned, matchType) in matches)
             {
                 var remoteQuality = remote.Quality;
                 var ownedQuality = owned.Quality;
-                var isHigherQuality = remoteQuality > ownedQuality;
 
                 hitRows.Add(new PlexMovieComparison
                 {
@@ -150,12 +178,13 @@ public class CompareMoviePlexLibraryCommandHandler : ICommandHandler<CompareMovi
                     OwnedPlexLibraryId = ownedLibraryId,
                     RemotePlexMediaId = remote.Id,
                     OwnedPlexMediaId = owned.Id,
-                    HitState = isHigherQuality ? PlexMediaComparisonHitState.HigherQuality : PlexMediaComparisonHitState.Matched,
+                    HitState = IsHigherQuality(remoteQuality, ownedQuality)
+                        ? PlexMediaComparisonHitState.HigherQuality
+                        : PlexMediaComparisonHitState.Matched,
                     RemoteQuality = remoteQuality,
                     OwnedQuality = ownedQuality,
                     MatchType = matchType,
-                    ComparedAt = nowTimestamp,
-                    AlgorithmVersion = AlgorithmVersion,
+                    ComparedAt = now,
                 });
             }
         }
@@ -167,38 +196,55 @@ public class CompareMoviePlexLibraryCommandHandler : ICommandHandler<CompareMovi
                 remoteMovies.Count
             );
 
-        // Atomic scope update: mark old scopes as not current, insert new scope + hits
         using var dbContext = await _dbContextFactory.CreateAsync();
         await using var transaction = await dbContext.BeginTransactionAsync(cancellationToken);
 
-        // Insert new scope
-        var scope = new PlexComparisonState
-        {
-            Id = 0,
-            RemotePlexLibraryId = remoteLibraryId,
-            OwnedPlexLibraryId = ownedLibraryId,
-            MediaType = PlexMediaType.Movie,
-            CompletedAt = nowTimestamp,
-            AlgorithmVersion = AlgorithmVersion,
-        };
+        await dbContext.PlexMovieComparisons
+            .Where(c => c.RemotePlexLibraryId == remoteLibraryId && c.OwnedPlexLibraryId == ownedLibraryId)
+            .ExecuteDeleteAsync(cancellationToken);
 
-        await dbContext.PlexComparisonScopes.AddAsync(scope, cancellationToken);
+        var librarySnapshots = await dbContext.PlexLibraries
+            .Where(x => x.Id == remoteLibraryId || x.Id == ownedLibraryId)
+            .Select(x => new { x.Id, x.UpdatedAt })
+            .ToDictionaryAsync(x => x.Id, x => x.UpdatedAt, cancellationToken);
+
+        var state = await dbContext.PlexComparisonScopes
+            .SingleOrDefaultAsync(
+                x =>
+                    x.RemotePlexLibraryId == remoteLibraryId
+                    && x.OwnedPlexLibraryId == ownedLibraryId
+                    && x.MediaType == PlexMediaType.Movie,
+                cancellationToken
+            );
+
+        if (state is null)
+        {
+            state = new PlexComparisonState
+            {
+                Id = 0,
+                RemotePlexLibraryId = remoteLibraryId,
+                OwnedPlexLibraryId = ownedLibraryId,
+                MediaType = PlexMediaType.Movie,
+                CompletedAt = now,
+                RemoteLibraryUpdatedAt = librarySnapshots.GetValueOrDefault(remoteLibraryId),
+                OwnedLibraryUpdatedAt = librarySnapshots.GetValueOrDefault(ownedLibraryId),
+            };
+
+            await dbContext.PlexComparisonScopes.AddAsync(state, cancellationToken);
+        }
+        else
+        {
+            state.CompletedAt = now;
+            state.RemoteLibraryUpdatedAt = librarySnapshots.GetValueOrDefault(remoteLibraryId);
+            state.OwnedLibraryUpdatedAt = librarySnapshots.GetValueOrDefault(ownedLibraryId);
+        }
+
         await dbContext.SaveChangesAsync(cancellationToken);
 
-        // Insert hit rows
         if (hitRows.Count > 0)
         {
             await dbContext.BulkInsertAsync(hitRows, cancellationToken: cancellationToken);
         }
-
-        // Clean up orphan hit rows from old versions
-        await dbContext.PlexMovieComparisons
-            .Where(c =>
-                c.RemotePlexLibraryId == remoteLibraryId
-                && c.OwnedPlexLibraryId == ownedLibraryId
-                && c.AlgorithmVersion < AlgorithmVersion
-            )
-            .ExecuteDeleteAsync(cancellationToken);
 
         await transaction.CommitAsync(cancellationToken);
 
@@ -218,10 +264,9 @@ public class CompareMoviePlexLibraryCommandHandler : ICommandHandler<CompareMovi
         Dictionary<int, List<MovieProjection>> ownedByTmdb,
         Dictionary<string, List<MovieProjection>> ownedByImdb,
         Dictionary<int, List<MovieProjection>> ownedByTvdb,
-        List<MovieProjection> allOwnedMovies
+        Dictionary<string, List<MovieProjection>> ownedByTitleYear
     )
     {
-        // GUID waterfall: TMDB > IMDB > TVDB
         if (remote.Guid_TMDB.HasValue && ownedByTmdb.TryGetValue(remote.Guid_TMDB.Value, out var tmdbMatches))
             return tmdbMatches.Select(m => (m, PlexMediaComparisonMatchType.TmdbGuid)).ToList();
 
@@ -231,40 +276,26 @@ public class CompareMoviePlexLibraryCommandHandler : ICommandHandler<CompareMovi
         if (remote.Guid_TVDB.HasValue && ownedByTvdb.TryGetValue(remote.Guid_TVDB.Value, out var tvdbMatches))
             return tvdbMatches.Select(m => (m, PlexMediaComparisonMatchType.TvdbGuid)).ToList();
 
-        // Title/year fallback
-        var titleYearMatches = allOwnedMovies
-            .Where(o =>
-                string.Equals(o.SearchTitle, remote.SearchTitle, StringComparison.OrdinalIgnoreCase)
-                && o.Year == remote.Year
-            )
-            .ToList();
+        if (!ownedByTitleYear.TryGetValue(GetTitleYearKey(remote), out var titleYearMatches))
+            return [];
 
-        if (titleYearMatches.Count > 0)
+        if (remote.Duration > 0)
         {
-            // If duration is available, try duration match first
-            if (remote.Duration > 0)
-            {
-                var durationMatches = titleYearMatches
-                    .Where(o => o.Duration > 0 && o.Duration == remote.Duration)
-                    .ToList();
+            var durationMatches = titleYearMatches
+                .Where(o => o.Duration > 0 && o.Duration == remote.Duration)
+                .ToList();
 
-                if (durationMatches.Count > 0)
-                    return durationMatches.Select(m => (m, PlexMediaComparisonMatchType.NormalizedTitleYearAndDuration)).ToList();
-            }
-
-            return titleYearMatches.Select(m => (m, PlexMediaComparisonMatchType.NormalizedTitleAndYear)).ToList();
+            if (durationMatches.Count > 0)
+                return durationMatches.Select(m => (m, PlexMediaComparisonMatchType.NormalizedTitleYearAndDuration)).ToList();
         }
 
-        return [];
+        return titleYearMatches.Select(m => (m, PlexMediaComparisonMatchType.NormalizedTitleAndYear)).ToList();
     }
 
-    private async Task<DateTime?> GetLibraryUpdatedAt(int libraryId, CancellationToken cancellationToken)
-    {
-        return await _dbContext.PlexLibraries
-            .Where(l => l.Id == libraryId)
-            .Select(l => l.UpdatedAt)
-            .FirstOrDefaultAsync(cancellationToken);
-    }
+    private static bool IsHigherQuality(VideoQuality remoteQuality, VideoQuality ownedQuality) =>
+        remoteQuality.ToId() > ownedQuality.ToId();
+
+    private static string GetTitleYearKey(MovieProjection movie) => $"{movie.SearchTitle}\u001F{movie.Year}";
 
     /// <summary>
     /// Projection used for matching — only the fields needed for comparison.

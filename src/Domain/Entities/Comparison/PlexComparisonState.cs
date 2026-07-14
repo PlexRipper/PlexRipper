@@ -29,10 +29,14 @@ public class PlexComparisonState : BaseEntity
     public required DateTime CompletedAt { get; set; }
 
     /// <summary>
-    /// The comparison algorithm version used to produce this scope.
-    /// Invalidation bumps this to mark old scopes stale.
+    /// Remote library update timestamp captured when this comparison completed.
     /// </summary>
-    public required int AlgorithmVersion { get; set; }
+    public DateTime? RemoteLibraryUpdatedAt { get; set; }
+
+    /// <summary>
+    /// Owned library update timestamp captured when this comparison completed.
+    /// </summary>
+    public DateTime? OwnedLibraryUpdatedAt { get; set; }
 
     public PlexLibrary? RemotePlexLibrary { get; init; }
 

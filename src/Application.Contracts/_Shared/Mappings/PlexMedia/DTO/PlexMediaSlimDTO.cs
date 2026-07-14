@@ -48,4 +48,6 @@ public record PlexMediaSlimDTO
     public required bool HasThumb { get; set; }
 
     public required List<PlexMediaQualityDTO> Qualities { get; init; } = [];
+
+    public PlexMediaComparisonState ComparisonState { get; init; } = PlexMediaComparisonState.NotCompared;
 }

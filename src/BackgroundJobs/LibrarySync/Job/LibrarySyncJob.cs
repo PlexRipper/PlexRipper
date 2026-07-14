@@ -127,6 +127,11 @@ public class LibrarySyncJob : IJob
                         _serverId
                     );
 
+                var comparisonQueueResult = await _commandExecutor.Send(new QueueLibraryComparisonJobsForLibraryCommand(_libraryId), CancellationToken.None);
+
+                if (comparisonQueueResult.IsFailed)
+                    _log.Here().Warning("Failed to queue comparison jobs for library {LibraryId}", _libraryId);
+
                 // Mark queue item as completed
                 await UpdateQueueItemAsync(LibrarySyncJobStatus.Completed);
             }

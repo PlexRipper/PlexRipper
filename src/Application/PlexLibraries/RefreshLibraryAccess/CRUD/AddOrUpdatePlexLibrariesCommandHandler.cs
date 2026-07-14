@@ -29,12 +29,19 @@ public class AddOrUpdatePlexLibrariesCommandHandler
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
     private readonly IMediaQueryCache _mediaQueryCache;
+    private readonly ICommandExecutor _commandExecutor;
 
-    public AddOrUpdatePlexLibrariesCommandHandler(ILogger log, IReaparrDbContext dbContext, IMediaQueryCache mediaQueryCache)
+    public AddOrUpdatePlexLibrariesCommandHandler(
+        ILogger log,
+        IReaparrDbContext dbContext,
+        IMediaQueryCache mediaQueryCache,
+        ICommandExecutor commandExecutor
+    )
     {
         _log = log.ForContext<AddOrUpdatePlexLibrariesCommandHandler>();
         _dbContext = dbContext;
         _mediaQueryCache = mediaQueryCache;
+        _commandExecutor = commandExecutor;
     }
 
     public async Task<Result<List<PlexLibraryAccessRapport>>> ExecuteAsync(
@@ -209,6 +216,8 @@ public class AddOrUpdatePlexLibrariesCommandHandler
 
         var affectedLibraryIds = rapportList.SelectMany(x => x.Data).Select(x => x.PlexLibraryId).Distinct().ToList();
         _mediaQueryCache.InvalidateLibraries(affectedLibraryIds, "Plex library access or ownership changed");
+        foreach (var libraryId in affectedLibraryIds)
+            await _commandExecutor.Send(new QueueLibraryComparisonJobsForLibraryCommand(libraryId), cancellationToken);
 
         return Result.Ok(rapportList);
     }

@@ -1,5 +1,3 @@
-using Quartz;
-
 namespace Reaparr.BackgroundJobs;
 
 public class QueueLibraryMediaCompareJobCommandValidator : AbstractValidator<QueueLibraryMediaCompareJobCommand>
@@ -13,15 +11,24 @@ public class QueueLibraryMediaCompareJobCommandValidator : AbstractValidator<Que
     }
 }
 
+/// <summary>
+/// Persists one de-duplicated library comparison queue row and wakes the queue worker.
+/// </summary>
 public class QueueLibraryMediaCompareJobCommandHandler : ICommandHandler<QueueLibraryMediaCompareJobCommand, Result>
 {
     private readonly ILogger _log;
-    private readonly IScheduler _scheduler;
+    private readonly IReaparrDbContext _dbContext;
+    private readonly ICommandExecutor _commandExecutor;
 
-    public QueueLibraryMediaCompareJobCommandHandler(ILogger log, IScheduler scheduler)
+    public QueueLibraryMediaCompareJobCommandHandler(
+        ILogger log,
+        IReaparrDbContext dbContext,
+        ICommandExecutor commandExecutor
+    )
     {
         _log = log.ForContext<QueueLibraryMediaCompareJobCommandHandler>();
-        _scheduler = scheduler;
+        _dbContext = dbContext;
+        _commandExecutor = commandExecutor;
     }
 
     public async Task<Result> ExecuteAsync(
@@ -31,32 +38,51 @@ public class QueueLibraryMediaCompareJobCommandHandler : ICommandHandler<QueueLi
     {
         var (remoteLibraryId, ownedLibraryId, mediaType) = command;
 
-        var jobKey = PlexLibraryComparisonJob.GetJobKey(remoteLibraryId, ownedLibraryId, mediaType);
+        var existingQueueItem = await _dbContext.LibraryComparisonJobQueues
+            .FirstOrDefaultAsync(
+                x =>
+                    x.RemotePlexLibraryId == remoteLibraryId
+                    && x.OwnedPlexLibraryId == ownedLibraryId
+                    && x.MediaType == mediaType,
+                cancellationToken
+            );
 
-        // Replace existing job if one already exists for this pair
-        if (await _scheduler.CheckExists(jobKey, cancellationToken))
+        if (existingQueueItem is null)
         {
-            await _scheduler.DeleteJob(jobKey, cancellationToken);
+            await _dbContext.LibraryComparisonJobQueues.AddAsync(
+                new LibraryComparisonJobQueue
+                {
+                    RemotePlexLibraryId = remoteLibraryId,
+                    OwnedPlexLibraryId = ownedLibraryId,
+                    MediaType = mediaType,
+                    Priority = mediaType == PlexMediaType.Movie ? 1 : 2,
+                    Status = LibrarySyncJobStatus.Queued,
+                    CreatedAt = DateTime.UtcNow,
+                },
+                cancellationToken
+            );
+            await _dbContext.SaveChangesAsync(cancellationToken);
+        }
+        // Leave queued or processing rows alone; they already represent the latest requested work.
+        else if (existingQueueItem.Status is LibrarySyncJobStatus.Completed or LibrarySyncJobStatus.Failed or LibrarySyncJobStatus.Cancelled)
+        {
+            await _dbContext.LibraryComparisonJobQueues
+                .Where(x =>
+                    x.RemotePlexLibraryId == remoteLibraryId
+                    && x.OwnedPlexLibraryId == ownedLibraryId
+                    && x.MediaType == mediaType
+                )
+                .ExecuteUpdateAsync(
+                    x => x.SetProperty(y => y.Status, LibrarySyncJobStatus.Queued)
+                        .SetProperty(y => y.CreatedAt, DateTime.UtcNow)
+                        .SetProperty(y => y.StartedAt, (DateTime?)null)
+                        .SetProperty(y => y.CompletedAt, (DateTime?)null)
+                        .SetProperty(y => y.ErrorMessage, (string?)null),
+                    cancellationToken
+                );
         }
 
-        var jobDataMap = new JobDataMap
-        {
-            [PlexLibraryComparisonJob.RemoteLibraryIdParameter] = remoteLibraryId,
-            [PlexLibraryComparisonJob.OwnedLibraryIdParameter] = ownedLibraryId,
-            [PlexLibraryComparisonJob.MediaTypeParameter] = (int)mediaType,
-        };
-
-        var job = JobBuilder.Create<PlexLibraryComparisonJob>()
-            .WithIdentity(jobKey)
-            .SetJobData(jobDataMap)
-            .Build();
-
-        var trigger = TriggerBuilder.Create()
-            .WithIdentity($"{jobKey.Name}_trigger", jobKey.Group)
-            .StartNow()
-            .Build();
-
-        await _scheduler.ScheduleJob(job, trigger, cancellationToken);
+        await _commandExecutor.Send(new CheckQueuedLibraryComparisonJobCommand(), cancellationToken);
 
         _log.Here()
             .Debug(

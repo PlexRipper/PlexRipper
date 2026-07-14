@@ -58,6 +58,7 @@ public class SchedulerService : ISchedulerService
             await SetupPlexServerStatusCheckJob();
             await SetupUpdateCheckJob();
             await SetupLibrarySyncJob();
+            await SetupLibraryComparisonJob();
             var queueLibraryUpdatesResult = await _commandExecutor.Send(
                 new QueueCheckPlexLibraryUpdatesJobCommand(),
                 CancellationToken.None
@@ -168,6 +169,19 @@ public class SchedulerService : ISchedulerService
         catch (Exception ex)
         {
             _log.Here().Error(ex, "Failed to setup library sync job during scheduler initialization");
+        }
+    }
+
+    private async Task SetupLibraryComparisonJob()
+    {
+        try
+        {
+            await _commandExecutor.Send(new CleanupLibraryComparisonJobQueueCommand(), CancellationToken.None);
+            await _commandExecutor.Send(new CheckQueuedLibraryComparisonJobCommand(), CancellationToken.None);
+        }
+        catch (Exception ex)
+        {
+            _log.Here().Error(ex, "Failed to setup library comparison job during scheduler initialization");
         }
     }
 

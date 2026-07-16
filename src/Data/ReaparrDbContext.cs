@@ -3,6 +3,7 @@ using System.Reflection;
 using AppAny.Quartz.EntityFrameworkCore.Migrations;
 using AppAny.Quartz.EntityFrameworkCore.Migrations.SQLite;
 using EFCore.BulkExtensions;
+using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -238,28 +239,95 @@ public sealed class ReaparrDbContext : DbContext, IReaparrDbContext, IReaparrDbC
     }
 
     /// <summary>
-    /// Executes a bulk operation within a transaction context.
+    /// Maximum number of retry attempts (not including the initial attempt) for SQLite busy errors.
+    /// </summary>
+    private const int MaxRetries = 5;
+
+    /// <summary>
+    /// Base delay in milliseconds before the first retry.
+    /// </summary>
+    private const int BaseDelayMs = 100;
+
+    /// <inheritdoc/>
+    public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+    {
+        for (var attempt = 0; attempt <= MaxRetries; attempt++)
+        {
+            try
+            {
+                return await base.SaveChangesAsync(cancellationToken);
+            }
+            catch (SqliteException ex) when (ex.SqliteErrorCode == 5)
+            {
+                if (attempt == MaxRetries)
+                    throw;
+
+                await Task.Delay(TimeSpan.FromMilliseconds(BaseDelayMs * Math.Pow(2, attempt)), cancellationToken);
+            }
+        }
+
+        throw new InvalidOperationException("Unreachable");
+    }
+
+    /// <inheritdoc/>
+    public override int SaveChanges()
+    {
+        for (var attempt = 0; attempt <= MaxRetries; attempt++)
+        {
+            try
+            {
+                return base.SaveChanges();
+            }
+            catch (SqliteException ex) when (ex.SqliteErrorCode == 5)
+            {
+                if (attempt == MaxRetries)
+                    throw;
+
+                Thread.Sleep(TimeSpan.FromMilliseconds(BaseDelayMs * Math.Pow(2, attempt)));
+            }
+        }
+
+        throw new InvalidOperationException("Unreachable");
+    }
+
+    /// <summary>
+    /// Executes a bulk operation within a transaction context with SQLite busy retry.
     /// This method ensures that the database connection is opened and closed properly,
     /// and that the operation is committed if successful.
     /// This is to avoid "Prepare can only be called when the connection is open."
     /// </summary>
     private async Task ExecuteBulkAsync(Func<Task> operation, CancellationToken cancellationToken = default)
     {
-        var conn = Database.GetDbConnection();
-        var openedHere = conn.State != ConnectionState.Open;
-        if (openedHere)
-            await Database.OpenConnectionAsync(cancellationToken);
+        for (var attempt = 0; attempt <= MaxRetries; attempt++)
+        {
+            try
+            {
+                var conn = Database.GetDbConnection();
+                var openedHere = conn.State != ConnectionState.Open;
+                if (openedHere)
+                    await Database.OpenConnectionAsync(cancellationToken);
 
-        try
-        {
-            await using var tx = await BeginTransactionAsync(cancellationToken);
-            await operation();
-            await tx.CommitAsync(cancellationToken);
-        }
-        finally
-        {
-            if (openedHere)
-                await Database.CloseConnectionAsync();
+                try
+                {
+                    await using var tx = await BeginTransactionAsync(cancellationToken);
+                    await operation();
+                    await tx.CommitAsync(cancellationToken);
+                }
+                finally
+                {
+                    if (openedHere)
+                        await Database.CloseConnectionAsync();
+                }
+
+                return;
+            }
+            catch (SqliteException ex) when (ex.SqliteErrorCode == 5)
+            {
+                if (attempt == MaxRetries)
+                    throw;
+
+                await Task.Delay(TimeSpan.FromMilliseconds(BaseDelayMs * Math.Pow(2, attempt)), cancellationToken);
+            }
         }
     }
 

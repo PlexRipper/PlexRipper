@@ -241,7 +241,7 @@ public sealed class ReaparrDbContext : DbContext, IReaparrDbContext, IReaparrDbC
     /// <summary>
     /// Maximum number of retry attempts (not including the initial attempt) for SQLite busy errors.
     /// </summary>
-    private const int MaxRetries = 5;
+    private const int MaxRetries = 8;
 
     /// <summary>
     /// Base delay in milliseconds before the first retry.

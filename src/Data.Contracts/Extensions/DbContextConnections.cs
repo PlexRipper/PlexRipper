@@ -19,7 +19,7 @@ public static class DbContextConnections
             Mode = SqliteOpenMode.ReadWriteCreate,
             DataSource = pathProvider.DatabasePath,
             Pooling = true,
-            DefaultTimeout = 60,
+            DefaultTimeout = 120,
         }.ToString();
 
     public static void DefaultConfiguration(

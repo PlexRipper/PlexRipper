@@ -167,6 +167,7 @@ public sealed class MediaQueryCache : IMediaQueryCache
             _ => new Lazy<Task<Result<MediaQueryBuildResult>>>(
                 async () =>
                 {
+                    _dirtyKeys.TryRemove(sortedListKey, out bool _);
                     var result = await BuildAndStoreSnapshotAsync(sortedListKey, CancellationToken.None);
                     // If version was bumped during the build, the result may be stale.
                     // Re-mark dirty so the next read queues a fresh build.

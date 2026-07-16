@@ -97,13 +97,25 @@ withDefaults(defineProps<{ onlyDefaults?: boolean }>(), {
 });
 
 const confirmDirectoryBrowser = (path: FolderPathDTO): void => {
-	useSubscription(
-		folderPathStore.setFolderPathDirectory(path.id, path.directory).subscribe({
-			error(err) {
-				showErrorNotification(err);
-			},
-		}),
-	);
+	if (path.id === 0) {
+		// New folder path — create with the confirmed directory
+		useSubscription(
+			folderPathStore.createFolderPath(path).subscribe({
+				error(err) {
+					showErrorNotification(err);
+				},
+			}),
+		);
+	} else {
+		// Existing folder path — update the directory
+		useSubscription(
+			folderPathStore.setFolderPathDirectory(path.id, path.directory).subscribe({
+				error(err) {
+					showErrorNotification(err);
+				},
+			}),
+		);
+	}
 };
 
 function addFolderPath(folderGroup: IFolderPathGroup): void {
@@ -119,19 +131,15 @@ function addFolderPath(folderGroup: IFolderPathGroup): void {
 			throw new Error(`Unknown folder type: ${folderGroup.folderType}`);
 	}
 
-	useSubscription(
-		folderPathStore
-			.createFolderPath({
-				id: 0,
-				displayName,
-				directory: '',
-				folderType: folderGroup.folderType,
-				mediaType: folderGroup.mediaType,
-				isValid: false,
-				isDefault: false,
-			})
-			.subscribe(),
-	);
+	dialogStore.openDirectoryBrowserDialog({
+		id: 0,
+		displayName,
+		directory: '',
+		folderType: folderGroup.folderType,
+		mediaType: folderGroup.mediaType,
+		isValid: false,
+		isDefault: false,
+	});
 }
 
 function deleteFolderPath(id: number): void {

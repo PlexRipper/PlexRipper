@@ -198,7 +198,7 @@
 </template>
 
 <script setup lang="ts">
-import { get, set, useDebounceFn } from '@vueuse/core';
+import { get, set, useClipboard, useDebounceFn } from '@vueuse/core';
 import { format } from 'date-fns';
 import { useLogsStore } from '@store';
 import type { LiveLogEventDTO } from '@dto';
@@ -207,6 +207,7 @@ import { SortDirection } from '@enums';
 
 const logsStore = useLogsStore();
 const helpStore = useHelpStore();
+const { copy } = useClipboard({ legacy: true });
 
 const { t } = useI18n();
 
@@ -326,8 +327,8 @@ function formatLogEntry(item: LiveLogEventDTO): string {
 	return parts.join(' ');
 }
 
-async function copyLogEntry(item: LiveLogEventDTO): Promise<void> {
-	await navigator.clipboard.writeText(formatLogEntry(item));
+function copyLogEntry(item: LiveLogEventDTO): void {
+	copy(formatLogEntry(item));
 	showSuccessNotification(t('pages.settings.logs.copied-to-clipboard'), 2000);
 }
 
@@ -342,17 +343,17 @@ function onEntrySelectionChanged(sequence: number, selected: boolean): void {
 	set(selectedEntries, updated);
 }
 
-async function copySelectedEntries(): Promise<void> {
+function copySelectedEntries(): void {
 	const sequences = get(selectedEntries);
 	const entries = logsStore.getLogs.filter((x) => sequences.has(x.sequence));
 	const text = entries.map(formatLogEntry).join('\n');
-	await navigator.clipboard.writeText(text);
+	copy(text);
 	showSuccessNotification(t('pages.settings.logs.copied-to-clipboard'), 2000);
 }
 
-async function copyAllEntries(): Promise<void> {
+function copyAllEntries(): void {
 	const text = logsStore.getLogs.map(formatLogEntry).join('\n');
-	await navigator.clipboard.writeText(text);
+	copy(text);
 	showSuccessNotification(t('pages.settings.logs.copied-to-clipboard'), 2000);
 }
 

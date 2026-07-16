@@ -464,6 +464,16 @@
         "resolved": "6.0.0",
         "contentHash": "UcSjPsst+DfAdJGVDsu346FX0ci0ah+lw3WRtn18NUwEqRt70HaOQ7lI72vy3+1LxtqI3T5GWwV39rQSrCzAeg=="
       },
+      "Microsoft.Data.Sqlite": {
+        "type": "Transitive",
+        "resolved": "10.0.9",
+        "contentHash": "/eBwiZPcNisn0qZX+Zk4YCftlK/vnoWqv7hHnmSk8MjPxFdYYkmPObpogT0MfCCWN6oAIZnMCo0SoOtZlbbmgQ==",
+        "dependencies": {
+          "Microsoft.Data.Sqlite.Core": "10.0.9",
+          "SQLitePCLRaw.bundle_e_sqlite3": "2.1.11",
+          "SQLitePCLRaw.core": "2.1.11"
+        }
+      },
       "Microsoft.Data.Sqlite.Core": {
         "type": "Transitive",
         "resolved": "10.0.9",
@@ -1645,6 +1655,7 @@
           "AppAny.Quartz.EntityFrameworkCore.Migrations.SQLite": "[0.5.2, )",
           "Autofac": "[9.1.0, )",
           "Microsoft.AspNetCore.Identity.EntityFrameworkCore": "[10.0.9, )",
+          "Microsoft.Data.Sqlite": "[10.0.9, )",
           "Microsoft.EntityFrameworkCore.InMemory": "[10.0.9, )",
           "Microsoft.EntityFrameworkCore.Sqlite": "[10.0.9, )",
           "Reaparr.Data.Contracts": "[1.0.0, )",

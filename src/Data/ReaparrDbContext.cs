@@ -264,6 +264,13 @@ public sealed class ReaparrDbContext : DbContext, IReaparrDbContext, IReaparrDbC
 
                 await Task.Delay(TimeSpan.FromMilliseconds(BaseDelayMs * Math.Pow(2, attempt)), cancellationToken);
             }
+            catch (DbUpdateException ex) when (ex.InnerException is SqliteException { SqliteErrorCode: 5 })
+            {
+                if (attempt == MaxRetries)
+                    throw;
+
+                await Task.Delay(TimeSpan.FromMilliseconds(BaseDelayMs * Math.Pow(2, attempt)), cancellationToken);
+            }
         }
 
         throw new InvalidOperationException("Unreachable");
@@ -279,6 +286,13 @@ public sealed class ReaparrDbContext : DbContext, IReaparrDbContext, IReaparrDbC
                 return base.SaveChanges();
             }
             catch (SqliteException ex) when (ex.SqliteErrorCode == 5)
+            {
+                if (attempt == MaxRetries)
+                    throw;
+
+                Thread.Sleep(TimeSpan.FromMilliseconds(BaseDelayMs * Math.Pow(2, attempt)));
+            }
+            catch (DbUpdateException ex) when (ex.InnerException is SqliteException { SqliteErrorCode: 5 })
             {
                 if (attempt == MaxRetries)
                     throw;
@@ -322,6 +336,13 @@ public sealed class ReaparrDbContext : DbContext, IReaparrDbContext, IReaparrDbC
                 return;
             }
             catch (SqliteException ex) when (ex.SqliteErrorCode == 5)
+            {
+                if (attempt == MaxRetries)
+                    throw;
+
+                await Task.Delay(TimeSpan.FromMilliseconds(BaseDelayMs * Math.Pow(2, attempt)), cancellationToken);
+            }
+            catch (DbUpdateException ex) when (ex.InnerException is SqliteException { SqliteErrorCode: 5 })
             {
                 if (attempt == MaxRetries)
                     throw;

@@ -1,5 +1,20 @@
 Reaparr Changelog
 
+## [0.38.2-dev.1](https://github.com/Reaparr/Reaparr/compare/v0.38.1...v0.38.2-dev.1) (2026-07-16)
+
+
+### Bug Fixes
+
+* **WebAPI:** Added resillience to the save changes to auto retry when getting busy signals ([bf9e467](https://github.com/Reaparr/Reaparr/commit/bf9e467dcaf5f11116442dd7264179eefe1dd55e))
+* **WebAPI:** Handle DbUpdateException wrapping a SQLite busy error in retry loops ([4c346da](https://github.com/Reaparr/Reaparr/commit/4c346da13303205354d795e76a9e6f3f2e019eca))
+* **Web-UI:** Open directory browser when adding folder paths ([ea7e5a1](https://github.com/Reaparr/Reaparr/commit/ea7e5a10d424502815599e932983468808b36403))
+* **WebAPI:** Prevent infinite recursion when MediaQueryCache snapshot build fails ([9e9af05](https://github.com/Reaparr/Reaparr/commit/9e9af05c3ae6b55c5947605591402071a270c42f))
+
+
+### Performance Improvements
+
+* **WebAPI:** Increase SQLite busy_timeout to 120s and max retries to 8 ([d6404ff](https://github.com/Reaparr/Reaparr/commit/d6404ffe344e182725f6770b2377871fe46c1422))
+
 ## [0.38.1](https://github.com/Reaparr/Reaparr/compare/v0.38.0...v0.38.1) (2026-07-11)
 
 

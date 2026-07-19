@@ -93,7 +93,10 @@ public class AddOrUpdatePlexLibrariesCommandHandler
                     plexLibraryDb.ContentChangedAt = incomingPlexLibrary.ContentChangedAt;
                     plexLibraryDb.Uuid = incomingPlexLibrary.Uuid;
                     plexLibraryDb.Language = incomingPlexLibrary.Language;
-                    plexLibraryDb.Outdated = plexLibraryDb.Outdated || incomingPlexLibrary.ContentChangedAt != previousContentChangedAt;
+                    plexLibraryDb.Outdated = plexLibraryDb.Outdated
+                        || (incomingPlexLibrary.ContentChangedAt != previousContentChangedAt
+                            && (plexLibraryDb.SyncedAt is null
+                                || incomingPlexLibrary.UpdatedAt > plexLibraryDb.SyncedAt));
                 }
             }
 

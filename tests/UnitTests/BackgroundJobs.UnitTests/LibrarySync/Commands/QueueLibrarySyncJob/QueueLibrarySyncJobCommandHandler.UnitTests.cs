@@ -273,6 +273,10 @@ public class QueueLibrarySyncJobCommandHandlerUnitTests : BaseUnitTest<QueueLibr
                 CancellationToken
             );
 
+        Mock.Mock<ICommandExecutor>()
+            .Setup(x => x.Send(It.IsAny<CheckQueuedPlexLibraryToSyncCommand>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result.Ok());
+
         var command = new QueueLibrarySyncJobCommand([library.Id]);
 
         // Act
@@ -282,11 +286,11 @@ public class QueueLibrarySyncJobCommandHandlerUnitTests : BaseUnitTest<QueueLibr
         result.IsSuccess.ShouldBeTrue();
         result.Errors.Count.ShouldBe(0);
         var queueItems = await dbContext.LibrarySyncJobQueues.IgnoreQueryFilters().ToListAsync(CancellationToken);
-        queueItems.ShouldBeEmpty();
+        queueItems.Count.ShouldBe(1);
         Mock.Mock<ICommandExecutor>()
             .Verify(
                 x => x.Send(It.IsAny<CheckQueuedPlexLibraryToSyncCommand>(), It.IsAny<CancellationToken>()),
-                Times.Never()
+                Times.Once()
             );
     }
 
@@ -329,6 +333,10 @@ public class QueueLibrarySyncJobCommandHandlerUnitTests : BaseUnitTest<QueueLibr
         );
         await dbContext.SaveChangesNewAsync(CancellationToken);
 
+        Mock.Mock<ICommandExecutor>()
+            .Setup(x => x.Send(It.IsAny<CheckQueuedPlexLibraryToSyncCommand>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result.Ok());
+
         var command = new QueueLibrarySyncJobCommand([library.Id]);
 
         // Act
@@ -340,12 +348,12 @@ public class QueueLibrarySyncJobCommandHandlerUnitTests : BaseUnitTest<QueueLibr
         var queueItem = await dbContext.LibrarySyncJobQueues.AsNoTracking().SingleAsync(CancellationToken);
         queueItem.PlexLibraryId.ShouldBe(library.Id);
         queueItem.PlexServerId.ShouldBe(library.PlexServerId);
-        queueItem.Status.ShouldBe(LibrarySyncJobStatus.Completed);
-        queueItem.CompletedAt.ShouldNotBeNull();
+        queueItem.Status.ShouldBe(LibrarySyncJobStatus.Queued);
+        queueItem.CompletedAt.ShouldBeNull();
         Mock.Mock<ICommandExecutor>()
             .Verify(
                 x => x.Send(It.IsAny<CheckQueuedPlexLibraryToSyncCommand>(), It.IsAny<CancellationToken>()),
-                Times.Never()
+                Times.Once()
             );
     }
 

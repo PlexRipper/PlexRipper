@@ -18,9 +18,9 @@ public sealed record DownloadTaskCreationReport
     ) =>
         new()
         {
-            Movies = left.Movies + right.Movies,
-            TvShows = left.TvShows + right.TvShows,
-            Seasons = left.Seasons + right.Seasons,
-            Episodes = left.Episodes + right.Episodes,
+            Movies = (left?.Movies ?? 0) + (right?.Movies ?? 0),
+            TvShows = (left?.TvShows ?? 0) + (right?.TvShows ?? 0),
+            Seasons = (left?.Seasons ?? 0) + (right?.Seasons ?? 0),
+            Episodes = (left?.Episodes ?? 0) + (right?.Episodes ?? 0),
         };
 }

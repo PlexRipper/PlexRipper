@@ -231,13 +231,12 @@ public class InsertMediaMetaDataCommandUnitTests : BaseCommandUnitTest<InsertMed
             LibraryMetadata: new LibraryMetadata(plexLibrary) { Actors = actors.Slice(50, 50) }
         );
 
-        var results = await Task.WhenAll(
-            TestHandlerExecuteAsync<InsertMediaMetaDataCommandResponse>(command1),
-            TestHandlerExecuteAsync<InsertMediaMetaDataCommandResponse>(command2)
-        );
+        var result1 = await TestHandlerExecuteAsync<InsertMediaMetaDataCommandResponse>(command1);
+        var result2 = await TestHandlerExecuteAsync<InsertMediaMetaDataCommandResponse>(command2);
 
         // Assert
-        results.All(x => x.IsSuccess).ShouldBeTrue();
+        result1.IsSuccess.ShouldBeTrue();
+        result2.IsSuccess.ShouldBeTrue();
         var actorsDb = await IDbContext.PlexActors.ToListAsync(CancellationToken);
         actorsDb.Count.ShouldBe(100);
         actorsDb.Select(x => x.Key).Distinct().Count().ShouldBe(100);

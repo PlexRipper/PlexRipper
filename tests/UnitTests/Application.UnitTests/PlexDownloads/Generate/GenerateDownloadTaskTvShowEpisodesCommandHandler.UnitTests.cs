@@ -31,7 +31,7 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandlerUnitTests
 
         // Act
         var command = new GenerateDownloadTaskTvShowEpisodesCommand(downloadMediaDtos);
-        var result = await TestHandlerExecuteAsync(command);
+        var result = await TestHandlerExecuteAsync<DownloadTaskCreationReport>(command);
 
         // Assert
         result.IsFailed.ShouldBeTrue();
@@ -75,7 +75,7 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandlerUnitTests
         // Act
         var request = new CreateDownloadTasksRequest(downloadMediaDtos, 99);
         var command = new GenerateDownloadTaskTvShowEpisodesCommand(request);
-        var result = await TestHandlerExecuteAsync(command);
+        var result = await TestHandlerExecuteAsync<DownloadTaskCreationReport>(command);
 
         // Assert
         result.IsSuccess.ShouldBeTrue(result.ToString());
@@ -149,7 +149,7 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandlerUnitTests
 
         // Act
         var command = new GenerateDownloadTaskTvShowEpisodesCommand(downloadMediaDtos);
-        var result = await TestHandlerExecuteAsync(command);
+        var result = await TestHandlerExecuteAsync<DownloadTaskCreationReport>(command);
 
         // Assert
         result.IsSuccess.ShouldBeTrue(result.ToString());
@@ -202,7 +202,7 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandlerUnitTests
 
         // Act
         var command = new GenerateDownloadTaskTvShowEpisodesCommand(downloadMediaDtos);
-        var result = await TestHandlerExecuteAsync(command);
+        var result = await TestHandlerExecuteAsync<DownloadTaskCreationReport>(command);
 
         // Assert
         result.IsSuccess.ShouldBeTrue(result.ToString());
@@ -250,7 +250,7 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandlerUnitTests
 
         // Act
         var command = new GenerateDownloadTaskTvShowEpisodesCommand(downloadMediaDtos);
-        var result = await TestHandlerExecuteAsync(command);
+        var result = await TestHandlerExecuteAsync<DownloadTaskCreationReport>(command);
 
         // Assert
         result.IsSuccess.ShouldBeTrue(result.ToString());
@@ -324,7 +324,7 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandlerUnitTests
             },
         };
         var command = new GenerateDownloadTaskTvShowEpisodesCommand(downloadMediaDtos);
-        var result = await TestHandlerExecuteAsync(command);
+        var result = await TestHandlerExecuteAsync<DownloadTaskCreationReport>(command);
 
         // Assert
         result.IsSuccess.ShouldBeTrue(result.ToString());
@@ -380,7 +380,7 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandlerUnitTests
 
         // Act
         var command = new GenerateDownloadTaskTvShowEpisodesCommand(downloadMediaDtos);
-        var result = await TestHandlerExecuteAsync(command);
+        var result = await TestHandlerExecuteAsync<DownloadTaskCreationReport>(command);
 
         // Assert
         result.IsSuccess.ShouldBeTrue(result.ToString());
@@ -456,7 +456,7 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandlerUnitTests
 
         // Act
         var command = new GenerateDownloadTaskTvShowEpisodesCommand(downloadMediaDtos);
-        var result = await TestHandlerExecuteAsync(command);
+        var result = await TestHandlerExecuteAsync<DownloadTaskCreationReport>(command);
 
         // Assert
         result.IsSuccess.ShouldBeTrue(result.ToString());
@@ -510,7 +510,7 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandlerUnitTests
         // Act
         var request = new CreateDownloadTasksRequest(downloadMediaDtos, customDestinationFolderId);
         var command = new GenerateDownloadTaskTvShowEpisodesCommand(request);
-        var result = await TestHandlerExecuteAsync(command);
+        var result = await TestHandlerExecuteAsync<DownloadTaskCreationReport>(command);
 
         // Assert
         result.IsSuccess.ShouldBeTrue(result.ToString());
@@ -564,7 +564,7 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandlerUnitTests
         // Act
         var request = new CreateDownloadTasksRequest(downloadMediaDtos, null, customPath);
         var command = new GenerateDownloadTaskTvShowEpisodesCommand(request);
-        var result = await TestHandlerExecuteAsync(command);
+        var result = await TestHandlerExecuteAsync<DownloadTaskCreationReport>(command);
 
         // Assert
         result.IsSuccess.ShouldBeTrue(result.ToString());
@@ -597,7 +597,7 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandlerUnitTests
 
         // Act
         var command = new GenerateDownloadTaskTvShowEpisodesCommand(downloadMediaDtos);
-        var result = await TestHandlerExecuteAsync(command);
+        var result = await TestHandlerExecuteAsync<DownloadTaskCreationReport>(command);
 
         // Assert
         result.IsFailed.ShouldBeTrue();
@@ -637,7 +637,7 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandlerUnitTests
 
         // Act
         var command = new GenerateDownloadTaskTvShowEpisodesCommand(downloadMediaDtos);
-        var result = await TestHandlerExecuteAsync(command);
+        var result = await TestHandlerExecuteAsync<DownloadTaskCreationReport>(command);
 
         // Assert
         result.IsSuccess.ShouldBeTrue(result.ToString());

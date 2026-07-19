@@ -85,7 +85,7 @@ public class InsertMediaMetaDataCommandUnitTests : BaseCommandUnitTest<InsertMed
         await dbContext.PlexActors.AddRangeAsync(initialActors.ToPlexActor(), CancellationToken);
         await dbContext.PlexGenres.AddRangeAsync(initialGenres.ToPlexGenre(), CancellationToken);
         await dbContext.PlexCountries.AddRangeAsync(initialCountries.ToPlexCountry(), CancellationToken);
-        await dbContext.SaveChangesAsync(CancellationToken);
+        await dbContext.SaveChangesNewAsync(CancellationToken);
 
         // Create new data with some overlaps
         var newActors = FakePlexApiData.GetLibraryMediaItemActorDTO(seed).GenerateUnique(100, x => x.Key);
@@ -308,7 +308,7 @@ public class InsertMediaMetaDataCommandUnitTests : BaseCommandUnitTest<InsertMed
         // Create initial data
         var initialActors = FakePlexApiData.GetLibraryMediaItemActorDTO(seed).GenerateUnique(50, x => x.Key);
         await IDbContext.PlexActors.AddRangeAsync(initialActors.ToPlexActor(), CancellationToken);
-        await IDbContext.SaveChangesAsync(CancellationToken);
+        await IDbContext.SaveChangesNewAsync(CancellationToken);
 
         // Create new data with some overlapping PlexKeys but different names
         var newActors = initialActors.Take(25).Select(r => r with { Name = r.Name + "_updated" }).ToList();

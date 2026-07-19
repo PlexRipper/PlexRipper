@@ -19,7 +19,7 @@ public class InMemoryDatabaseUnitTests : BaseUnitTest
         // Act
         var dbContext = IDbContext;
         dbContext.Notifications.Add(notification);
-        await dbContext.SaveChangesAsync(CancellationToken);
+        await dbContext.SaveChangesNewAsync(CancellationToken);
         var notifications = await dbContext.Notifications.ToListAsync(CancellationToken);
 
         // Assert
@@ -43,9 +43,9 @@ public class InMemoryDatabaseUnitTests : BaseUnitTest
         // Act
         var dbContext = IDbContext;
         dbContext.Notifications.Add(notification);
-        await dbContext.SaveChangesAsync(CancellationToken);
+        await dbContext.SaveChangesNewAsync(CancellationToken);
         dbContext.Notifications.Remove(notification);
-        await dbContext.SaveChangesAsync(CancellationToken);
+        await dbContext.SaveChangesNewAsync(CancellationToken);
         var notifications = await dbContext.Notifications.ToListAsync(CancellationToken);
 
         // Assert

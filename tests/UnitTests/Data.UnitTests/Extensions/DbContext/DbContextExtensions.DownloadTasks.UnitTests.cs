@@ -186,7 +186,7 @@ public class DbContextExtensionsDownloadTasksUnitTests : BaseUnitTest
         testDownloadTask.FileTransferSpeed = 50;
         testDownloadTask.FileDataTransferred = 50;
         testDownloadTask.CurrentFileTransferBytesOffset = 50;
-        await dbContext.SaveChangesAsync(CancellationToken);
+        await dbContext.SaveChangesNewAsync(CancellationToken);
 
         // Act
         var resetResult = await IDbContext.ResetDownloadTaskProgress(
@@ -243,7 +243,7 @@ public class DbContextExtensionsDownloadTasksUnitTests : BaseUnitTest
         testDownloadTask.FileTransferSpeed = 50;
         testDownloadTask.FileDataTransferred = 50;
         testDownloadTask.CurrentFileTransferBytesOffset = 50;
-        await dbContext.SaveChangesAsync(CancellationToken);
+        await dbContext.SaveChangesNewAsync(CancellationToken);
 
         // Act
         var resetResult = await IDbContext.ResetDownloadTaskProgress(
@@ -312,7 +312,7 @@ public class DbContextExtensionsDownloadTasksUnitTests : BaseUnitTest
         conn.LatestConnectionStatus.PlexServerId = server.Id;
         conn.LatestConnectionStatus.PlexServerConnectionId = conn.Id;
         db.PlexServerConnections.Add(conn);
-        await db.SaveChangesAsync(CancellationToken);
+        await db.SaveChangesNewAsync(CancellationToken);
 
         var access = await db.PlexAccountServers.FirstAsync(CancellationToken);
         var fileLocationUrl = "/library/parts/123/file.mkv";
@@ -382,7 +382,7 @@ public class DbContextExtensionsDownloadTasksUnitTests : BaseUnitTest
         conn.LatestConnectionStatus.PlexServerId = server.Id;
         conn.LatestConnectionStatus.PlexServerConnectionId = conn.Id;
         db.PlexServerConnections.Add(conn);
-        await db.SaveChangesAsync(CancellationToken);
+        await db.SaveChangesNewAsync(CancellationToken);
 
         // Act
         var result = await db.GetDownloadUrl(server.Id, "/file", CancellationToken);

@@ -54,7 +54,7 @@ public class CreateFolderPathEndpoint : Endpoint<CreateFolderPathEndpointRequest
         _log.Here().DebugApiCall(HttpContext, req);
         var folderPath = req.FolderPathDto!.ToModel();
         await _dbContext.FolderPaths.AddAsync(folderPath, ct);
-        await _dbContext.SaveChangesAsync(ct);
+        await _dbContext.SaveChangesNewAsync(ct);
 
         var folderPathDb = await _dbContext.FolderPaths.GetAsync(folderPath.Id, ct);
         if (folderPathDb is null)

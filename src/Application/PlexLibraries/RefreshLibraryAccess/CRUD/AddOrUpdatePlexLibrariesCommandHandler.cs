@@ -100,7 +100,7 @@ public class AddOrUpdatePlexLibrariesCommandHandler
             // NOTE: We don't delete libraries here, access can be temporarily suspended due to missing PlexServer access or offline.
         }
 
-        await _dbContext.SaveChangesAsync(cancellationToken);
+        await _dbContext.SaveChangesNewAsync(cancellationToken);
 
         // Add or update the PlexAccount, PlexServer and PlexLibrary relationships
         _log.Here()
@@ -199,7 +199,7 @@ public class AddOrUpdatePlexLibrariesCommandHandler
 
         await AddHistoryEventsAsync(rapportList, plexAccount, cancellationToken);
 
-        await _dbContext.SaveChangesAsync(cancellationToken);
+        await _dbContext.SaveChangesNewAsync(cancellationToken);
 
         foreach (var rapport in rapportList)
             _log.Here().Information(rapport.ToString());

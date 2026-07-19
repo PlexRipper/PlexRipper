@@ -158,7 +158,7 @@ public class CreatePlexAccountEndpoint : Endpoint<CreatePlexAccountEndpointReque
 
         await _dbContext.PlexAccounts.AddAsync(plexAccountDb, ct);
 
-        await _dbContext.SaveChangesAsync(ct);
+        await _dbContext.SaveChangesNewAsync(ct);
         await _dbContext.Entry(plexAccountDb).GetDatabaseValuesAsync(ct);
 
         plexAccountDb = await _dbContext

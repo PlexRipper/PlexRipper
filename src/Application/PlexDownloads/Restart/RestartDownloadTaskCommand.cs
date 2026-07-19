@@ -194,7 +194,7 @@ public class RestartDownloadTaskCommandHandler : ICommandHandler<RestartDownload
         return await Result.Try(async Task () =>
         {
             _dbContext.DownloadTaskMovieFile.Update(newDownloadTask);
-            await _dbContext.SaveChangesAsync();
+            await _dbContext.SaveChangesNewAsync();
         });
     }
 
@@ -270,7 +270,7 @@ public class RestartDownloadTaskCommandHandler : ICommandHandler<RestartDownload
         return await Result.Try(async Task () =>
         {
             _dbContext.DownloadTaskTvShowEpisodeFile.Update(newDownloadTask);
-            await _dbContext.SaveChangesAsync();
+            await _dbContext.SaveChangesNewAsync();
         });
     }
 }

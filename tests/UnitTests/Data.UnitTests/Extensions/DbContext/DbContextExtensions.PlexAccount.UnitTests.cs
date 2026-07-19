@@ -55,7 +55,7 @@ public class DbContextExtensionsPlexAccountUnitTests : BaseUnitTest
         var nonMain = FakeData.GetPlexAccount(seed).Generate();
         nonMain.UpdateInitProperty(nameof(PlexAccount.IsMain), false);
         db.PlexAccounts.Add(nonMain);
-        await db.SaveChangesAsync(CancellationToken);
+        await db.SaveChangesNewAsync(CancellationToken);
 
         db.PlexAccountServers.Add(
             new PlexAccountServer
@@ -67,7 +67,7 @@ public class DbContextExtensionsPlexAccountUnitTests : BaseUnitTest
                 IsServerOwned = false,
             }
         );
-        await db.SaveChangesAsync(CancellationToken);
+        await db.SaveChangesNewAsync(CancellationToken);
 
         // Act
         var result = await db.ChoosePlexAccountToConnect(server.Id, CancellationToken);

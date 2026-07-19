@@ -63,7 +63,7 @@ public class CheckQueuedPlexLibraryToSyncCommandHandlerUnitTests
         };
 
         await dbContext.LibrarySyncJobQueues.AddAsync(queueItem, CancellationToken);
-        var saveResult = await dbContext.SaveChangesAsync(CancellationToken);
+        var saveResult = await dbContext.SaveChangesNewAsync(CancellationToken);
         saveResult.ShouldBeGreaterThan(0);
 
         // Verify the item was saved and is visible
@@ -126,7 +126,7 @@ public class CheckQueuedPlexLibraryToSyncCommandHandlerUnitTests
         };
 
         await dbContext.LibrarySyncJobQueues.AddAsync(queueItem, CancellationToken);
-        var saveResult = await dbContext.SaveChangesAsync(CancellationToken);
+        var saveResult = await dbContext.SaveChangesNewAsync(CancellationToken);
         saveResult.ShouldBeGreaterThan(0);
 
         // Verify the item was saved
@@ -190,7 +190,7 @@ public class CheckQueuedPlexLibraryToSyncCommandHandlerUnitTests
         };
 
         await dbContext.LibrarySyncJobQueues.AddRangeAsync([queueItem1, queueItem2], CancellationToken);
-        var saveResult = await dbContext.SaveChangesAsync(CancellationToken);
+        var saveResult = await dbContext.SaveChangesNewAsync(CancellationToken);
         saveResult.ShouldBeGreaterThan(0);
 
         // Verify the items were saved
@@ -254,7 +254,7 @@ public class CheckQueuedPlexLibraryToSyncCommandHandlerUnitTests
         };
 
         await dbContext.LibrarySyncJobQueues.AddAsync(queueItem, CancellationToken);
-        var saveResult = await dbContext.SaveChangesAsync(CancellationToken);
+        var saveResult = await dbContext.SaveChangesNewAsync(CancellationToken);
         saveResult.ShouldBeGreaterThan(0);
 
         // Verify the item was saved and is visible
@@ -331,7 +331,7 @@ public class CheckQueuedPlexLibraryToSyncCommandHandlerUnitTests
         };
 
         await dbContext.LibrarySyncJobQueues.AddRangeAsync([queueItem1, queueItem2], CancellationToken);
-        await dbContext.SaveChangesAsync(CancellationToken);
+        await dbContext.SaveChangesNewAsync(CancellationToken);
 
         var command = new CheckQueuedPlexLibraryToSyncCommand();
 
@@ -412,7 +412,7 @@ public class CheckQueuedPlexLibraryToSyncCommandHandlerUnitTests
         };
 
         await dbContext.LibrarySyncJobQueues.AddRangeAsync(queueItems, CancellationToken);
-        await dbContext.SaveChangesAsync(CancellationToken);
+        await dbContext.SaveChangesNewAsync(CancellationToken);
 
         // Setup scheduler mocks for both servers (highest priority library for each)
         var jobKey1 = LibrarySyncJob.GetJobKey(servers[0].Id, server1Libraries[0].Id);
@@ -508,7 +508,7 @@ public class CheckQueuedPlexLibraryToSyncCommandHandlerUnitTests
         };
 
         await dbContext.LibrarySyncJobQueues.AddRangeAsync([queueItem1, queueItem2], CancellationToken);
-        await dbContext.SaveChangesAsync(CancellationToken);
+        await dbContext.SaveChangesNewAsync(CancellationToken);
 
         var onlineServerJobKey = LibrarySyncJob.GetJobKey(servers[1].Id, server2Library.Id);
         Mock.Mock<IScheduler>()
@@ -613,7 +613,7 @@ public class CheckQueuedPlexLibraryToSyncCommandHandlerUnitTests
             [queuedItem, processingItem, failedItem, completedItem],
             CancellationToken
         );
-        await dbContext.SaveChangesAsync(CancellationToken);
+        await dbContext.SaveChangesNewAsync(CancellationToken);
 
         var expectedJobKey = LibrarySyncJob.GetJobKey(server.Id, libraries[0].Id);
         Mock.Mock<IScheduler>()

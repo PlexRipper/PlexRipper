@@ -122,7 +122,7 @@ public class AddOrUpdatePlexServersCommandHandler
             }
         }
 
-        await _dbContext.SaveChangesAsync(cancellationToken);
+        await _dbContext.SaveChangesNewAsync(cancellationToken);
 
         _log.Here().Information(rapport.ToString());
 

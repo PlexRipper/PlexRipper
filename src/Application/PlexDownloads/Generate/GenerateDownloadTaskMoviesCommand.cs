@@ -147,7 +147,7 @@ public class GenerateDownloadTaskMoviesCommandHandler : ICommandHandler<Generate
         }
 
         _dbContext.DownloadTaskMovie.AddRange(allDownloadTasks);
-        await _dbContext.SaveChangesAsync(cancellationToken);
+        await _dbContext.SaveChangesNewAsync(cancellationToken);
 
         var logs = new List<DownloadTaskMovieFileLog>();
         foreach (var downloadTaskMovie in allDownloadTasks)
@@ -166,7 +166,7 @@ public class GenerateDownloadTaskMoviesCommandHandler : ICommandHandler<Generate
         }
 
         _dbContext.DownloadTaskMovieFileLogs.AddRange(logs);
-        await _dbContext.SaveChangesAsync(cancellationToken);
+        await _dbContext.SaveChangesNewAsync(cancellationToken);
         await transaction.CommitAsync(cancellationToken);
 
         return Result.Ok();

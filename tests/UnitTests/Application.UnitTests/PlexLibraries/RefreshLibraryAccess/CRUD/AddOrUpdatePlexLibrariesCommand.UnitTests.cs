@@ -213,7 +213,7 @@ public class AddOrUpdatePlexLibrariesCommandUnitTests : BaseUnitTest<AddOrUpdate
             plexLibrary.DefaultDestinationId = 5;
         }
 
-        await dbContext.SaveChangesAsync(CancellationToken);
+        await dbContext.SaveChangesNewAsync(CancellationToken);
         await dbContext.PlexLibraries.ExecuteUpdateAsync(
             x => x
                 .SetProperty(y => y.MediaSize, 123_456_789)
@@ -538,7 +538,7 @@ public class AddOrUpdatePlexLibrariesCommandUnitTests : BaseUnitTest<AddOrUpdate
             },
             CancellationToken
         );
-        await dbContext.SaveChangesAsync(CancellationToken);
+        await dbContext.SaveChangesNewAsync(CancellationToken);
 
         var updatedTime = DateTime.UtcNow - TimeSpan.FromMinutes(30);
         var request = new AddOrUpdatePlexLibrariesCommand

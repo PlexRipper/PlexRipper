@@ -87,7 +87,7 @@ public class GenerateDownloadTaskTvShowSeasonsCommandHandler
                     // Insert the tvShowDownloadTask into the database
                     downloadTaskTvShow = season.TvShow.MapToDownloadTask();
                     _dbContext.DownloadTaskTvShow.Add(downloadTaskTvShow);
-                    await _dbContext.SaveChangesAsync(cancellationToken);
+                    await _dbContext.SaveChangesNewAsync(cancellationToken);
                 }
 
                 // Check if the SeasonDownloadTask has already been created
@@ -116,7 +116,7 @@ public class GenerateDownloadTaskTvShowSeasonsCommandHandler
         }
 
         _dbContext.DownloadTaskTvShowSeason.AddRange(seasonsToInsert);
-        await _dbContext.SaveChangesAsync(cancellationToken);
+        await _dbContext.SaveChangesNewAsync(cancellationToken);
 
         // Create episodes downloadTasks
         var episodesResult = await _command.Send(

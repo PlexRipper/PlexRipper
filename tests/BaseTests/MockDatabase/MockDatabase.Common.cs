@@ -43,7 +43,7 @@ public static partial class MockDatabase
             context.PlexServers.Add(plexServer);
         }
 
-        await context.SaveChangesAsync();
+        await context.SaveChangesNewAsync();
         var plexServers = await context.PlexServers.ToListAsync();
 
         // Add Connection to each server
@@ -55,7 +55,7 @@ public static partial class MockDatabase
             context.PlexServerConnections.AddRange(connections);
         }
 
-        await context.SaveChangesAsync();
+        await context.SaveChangesNewAsync();
         var plexConnections = await context.PlexServerConnections.ToListAsync();
 
         // Add status to each connection
@@ -67,7 +67,7 @@ public static partial class MockDatabase
             context.PlexServerStatuses.Add(status);
         }
 
-        await context.SaveChangesAsync();
+        await context.SaveChangesNewAsync();
 
         _log.Here()
             .Debug(
@@ -120,7 +120,7 @@ public static partial class MockDatabase
         }
 
         context.PlexLibraries.AddRange(plexLibrariesToDb);
-        await context.SaveChangesAsync();
+        await context.SaveChangesNewAsync();
         return context;
     }
 
@@ -139,7 +139,7 @@ public static partial class MockDatabase
             var plexAccount = FakeData.GetPlexAccount(seed).Generate();
 
             await context.PlexAccounts.AddAsync(plexAccount);
-            await context.SaveChangesAsync();
+            await context.SaveChangesNewAsync();
 
             _log.Here()
                 .Debug(
@@ -160,7 +160,7 @@ public static partial class MockDatabase
 
             // Add account -> server relation
             context.PlexAccountServers.AddRange(plexAccountServer);
-            await context.SaveChangesAsync();
+            await context.SaveChangesNewAsync();
 
             // Add account -> library relation
             var plexAccountLibraries = plexServers
@@ -175,7 +175,7 @@ public static partial class MockDatabase
             context.PlexAccountLibraries.AddRange(plexAccountLibraries);
         }
 
-        await context.SaveChangesAsync();
+        await context.SaveChangesNewAsync();
 
         return context;
     }
@@ -201,7 +201,7 @@ public static partial class MockDatabase
             );
 
         context.PlexAccountLibraries.AddRange(plexAccountLibraries);
-        await context.SaveChangesAsync();
+        await context.SaveChangesNewAsync();
         return context;
     }
 

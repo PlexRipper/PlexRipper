@@ -91,7 +91,7 @@ public class DbContextExtensionsPlexServerConnectionUnitTests : BaseUnitTest
         plexServer.PreferredConnectionId = preferredConnection.Id;
 
         // Add status to all connections
-        await dbContext.SaveChangesAsync(CancellationToken);
+        await dbContext.SaveChangesNewAsync(CancellationToken);
 
         // Act
         var result = await IDbContext.ChoosePlexServerConnection(plexServer.Id, CancellationToken);
@@ -196,7 +196,7 @@ public class DbContextExtensionsPlexServerConnectionUnitTests : BaseUnitTest
         }
 
         dbContext.PlexServerConnections.AddRange(plexServerConnections);
-        await dbContext.SaveChangesAsync(CancellationToken);
+        await dbContext.SaveChangesNewAsync(CancellationToken);
 
         // Act
         var result = await IDbContext.ChoosePlexServerConnection(plexServer.Id, CancellationToken);
@@ -261,12 +261,12 @@ public class DbContextExtensionsPlexServerConnectionUnitTests : BaseUnitTest
         httpConn.LatestConnectionStatus = statusHttp;
 
         db.PlexServerConnections.AddRange(httpsConn, httpConn);
-        await db.SaveChangesAsync(CancellationToken);
+        await db.SaveChangesNewAsync(CancellationToken);
 
         // Now that connection ids exist, set FK backrefs for statuses
         statusHttps.PlexServerConnectionId = httpsConn.Id;
         statusHttp.PlexServerConnectionId = httpConn.Id;
-        await db.SaveChangesAsync(CancellationToken);
+        await db.SaveChangesNewAsync(CancellationToken);
 
         // Act
         var result = await db.ChoosePlexServerConnection(server.Id, CancellationToken);
@@ -330,12 +330,12 @@ public class DbContextExtensionsPlexServerConnectionUnitTests : BaseUnitTest
         localConn.LatestConnectionStatus = statusLocal;
 
         db.PlexServerConnections.AddRange(publicConn, localConn);
-        await db.SaveChangesAsync(CancellationToken);
+        await db.SaveChangesNewAsync(CancellationToken);
 
         // Link statuses with saved connection ids
         statusPublic.PlexServerConnectionId = publicConn.Id;
         statusLocal.PlexServerConnectionId = localConn.Id;
-        await db.SaveChangesAsync(CancellationToken);
+        await db.SaveChangesNewAsync(CancellationToken);
 
         // Act
         var result = await db.ChoosePlexServerConnection(server.Id, CancellationToken);
@@ -369,7 +369,7 @@ public class DbContextExtensionsPlexServerConnectionUnitTests : BaseUnitTest
             c.LatestConnectionStatus = status;
         }
         db.PlexServerConnections.AddRange(conn);
-        await db.SaveChangesAsync(CancellationToken);
+        await db.SaveChangesNewAsync(CancellationToken);
 
         // Act
         var result = await db.ChoosePlexServerConnection(server.Id, CancellationToken);
@@ -430,7 +430,7 @@ public class DbContextExtensionsPlexServerConnectionUnitTests : BaseUnitTest
         direct.LatestConnectionStatus = directStatus;
 
         db.PlexServerConnections.AddRange(relay, direct);
-        await db.SaveChangesAsync(CancellationToken);
+        await db.SaveChangesNewAsync(CancellationToken);
 
         // Act
         var result = await db.ChoosePlexServerConnection(server.Id, CancellationToken);
@@ -458,7 +458,7 @@ public class DbContextExtensionsPlexServerConnectionUnitTests : BaseUnitTest
         var nonMain = FakeData.GetPlexAccount(seed).Generate();
         nonMain.UpdateInitProperty(nameof(PlexAccount.IsMain), false);
         db.PlexAccounts.Add(nonMain);
-        await db.SaveChangesAsync(CancellationToken);
+        await db.SaveChangesNewAsync(CancellationToken);
 
         var server = db.PlexServers.First();
         var nonMainAccess = new PlexAccountServer
@@ -470,7 +470,7 @@ public class DbContextExtensionsPlexServerConnectionUnitTests : BaseUnitTest
             IsServerOwned = false,
         };
         db.PlexAccountServers.Add(nonMainAccess);
-        await db.SaveChangesAsync(CancellationToken);
+        await db.SaveChangesNewAsync(CancellationToken);
 
         // Act
         var result = await db.GetPlexServerTokenAsync(server.Id, CancellationToken);

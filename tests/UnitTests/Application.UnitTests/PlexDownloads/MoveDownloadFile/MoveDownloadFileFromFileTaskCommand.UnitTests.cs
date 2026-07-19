@@ -125,7 +125,7 @@ public class MoveDownloadFileFromFileTaskCommandUnitTests : BaseUnitTest<MoveDow
         });
 
         downloadFileTask.DataTotal = content.LongLength;
-        await IDbContext.SaveChangesAsync(CancellationToken);
+        await IDbContext.SaveChangesNewAsync(CancellationToken);
 
         Mock.Mock<IDownloadManagerSettings>()
             .Setup(x => x.KeepCompletedInDownloadFolder)
@@ -227,7 +227,7 @@ public class MoveDownloadFileFromFileTaskCommandUnitTests : BaseUnitTest<MoveDow
         });
 
         downloadFileTask.DataTotal = content.LongLength;
-        await dbContext.SaveChangesAsync(CancellationToken);
+        await dbContext.SaveChangesNewAsync(CancellationToken);
 
         Mock.Mock<IDownloadManagerSettings>()
             .Setup(x => x.KeepCompletedInDownloadFolder)
@@ -336,7 +336,7 @@ public class MoveDownloadFileFromFileTaskCommandUnitTests : BaseUnitTest<MoveDow
         });
 
         downloadFileTask.DataTotal = content.LongLength;
-        await dbContext.SaveChangesAsync(CancellationToken);
+        await dbContext.SaveChangesNewAsync(CancellationToken);
 
         Mock.Mock<IDownloadManagerSettings>().Setup(x => x.KeepCompletedInDownloadFolder).Returns(false);
 
@@ -444,7 +444,7 @@ public class MoveDownloadFileFromFileTaskCommandUnitTests : BaseUnitTest<MoveDow
         downloadFileTask.ShouldNotBeNull();
 
         downloadFileTask.CurrentFileTransferBytesOffset = 2348;
-        await dbContext.SaveChangesAsync(CancellationToken);
+        await dbContext.SaveChangesNewAsync(CancellationToken);
 
         var fileSizeInMb = 10;
         var progress = new Subject<IDownloadFileTransferProgress>();
@@ -465,7 +465,7 @@ public class MoveDownloadFileFromFileTaskCommandUnitTests : BaseUnitTest<MoveDow
         });
 
         downloadFileTask.DataTotal = content.LongLength;
-        await dbContext.SaveChangesAsync(CancellationToken);
+        await dbContext.SaveChangesNewAsync(CancellationToken);
 
         Mock.Mock<IEventPublisher>()
             .Setup(m => m.PublishAsync(It.IsAny<SendNotificationResult>(), It.IsAny<CancellationToken>()))
@@ -564,7 +564,7 @@ public class MoveDownloadFileFromFileTaskCommandUnitTests : BaseUnitTest<MoveDow
 
         firstTask.DataTotal = firstContent.LongLength;
         secondTask.DataTotal = secondContent.LongLength;
-        await dbContext.SaveChangesAsync(CancellationToken);
+        await dbContext.SaveChangesNewAsync(CancellationToken);
 
         var firstProgress = new Subject<IDownloadFileTransferProgress>();
         var secondProgress = new Subject<IDownloadFileTransferProgress>();
@@ -684,7 +684,7 @@ public class MoveDownloadFileFromFileTaskCommandUnitTests : BaseUnitTest<MoveDow
         });
 
         downloadFileTask.DataTotal = content.LongLength;
-        await IDbContext.SaveChangesAsync(CancellationToken);
+        await IDbContext.SaveChangesNewAsync(CancellationToken);
 
         // Keep in downloads triggers rename flow, not MoveFileWithResume
         Mock.Mock<IDownloadManagerSettings>().Setup(x => x.KeepCompletedInDownloadFolder).Returns(true);
@@ -785,7 +785,7 @@ public class MoveDownloadFileFromFileTaskCommandUnitTests : BaseUnitTest<MoveDow
         });
 
         downloadFileTask.DataTotal = content.LongLength;
-        await dbContext.SaveChangesAsync(CancellationToken);
+        await dbContext.SaveChangesNewAsync(CancellationToken);
 
         var persistedTask = await dbContext.DownloadTaskTvShowEpisodeFile.AsNoTracking().FirstAsync(CancellationToken);
         persistedTask.DownloadFilePath.RemoveReapTempSuffix().ShouldBe(persistedTask.DestinationFilePath);
@@ -884,7 +884,7 @@ public class MoveDownloadFileFromFileTaskCommandUnitTests : BaseUnitTest<MoveDow
         });
 
         downloadFileTask.DataTotal = content.LongLength;
-        await dbContext.SaveChangesAsync(CancellationToken);
+        await dbContext.SaveChangesNewAsync(CancellationToken);
 
         var persistedTask = await dbContext.DownloadTaskTvShowEpisodeFile.AsNoTracking().FirstAsync(CancellationToken);
         persistedTask.DownloadFilePath.RemoveReapTempSuffix().ShouldBe(persistedTask.DestinationFilePath);
@@ -1125,7 +1125,7 @@ public class MoveDownloadFileFromFileTaskCommandUnitTests : BaseUnitTest<MoveDow
         });
 
         downloadFileTask.DataTotal = content.LongLength;
-        await IDbContext.SaveChangesAsync(CancellationToken);
+        await IDbContext.SaveChangesNewAsync(CancellationToken);
 
         Mock.Mock<IDownloadManagerSettings>().Setup(x => x.KeepCompletedInDownloadFolder).Returns(false);
 
@@ -1215,7 +1215,7 @@ public class MoveDownloadFileFromFileTaskCommandUnitTests : BaseUnitTest<MoveDow
         });
 
         downloadFileTask.DataTotal = content.LongLength;
-        await IDbContext.SaveChangesAsync(CancellationToken);
+        await IDbContext.SaveChangesNewAsync(CancellationToken);
 
         Mock.Mock<IDownloadManagerSettings>().Setup(x => x.KeepCompletedInDownloadFolder).Returns(true);
 
@@ -1303,7 +1303,7 @@ public class MoveDownloadFileFromFileTaskCommandUnitTests : BaseUnitTest<MoveDow
         });
 
         downloadFileTask.DataTotal = content.LongLength;
-        await dbContext.SaveChangesAsync(CancellationToken);
+        await dbContext.SaveChangesNewAsync(CancellationToken);
 
         Mock.Mock<IDownloadManagerSettings>().Setup(x => x.KeepCompletedInDownloadFolder).Returns(false);
 
@@ -1388,7 +1388,7 @@ public class MoveDownloadFileFromFileTaskCommandUnitTests : BaseUnitTest<MoveDow
         // Simulate a stale Percentage left over from the download phase
         downloadFileTask.Percentage = 75m;
         downloadFileTask.DataTotal = 5 * 1024 * 1024;
-        await dbContext.SaveChangesAsync(CancellationToken);
+        await dbContext.SaveChangesNewAsync(CancellationToken);
 
         var content = new byte[1024];
         new Random(55).NextBytes(content);
@@ -1488,7 +1488,7 @@ public class MoveDownloadFileFromFileTaskCommandUnitTests : BaseUnitTest<MoveDow
         });
 
         downloadFileTask.DataTotal = content.LongLength;
-        await IDbContext.SaveChangesAsync(CancellationToken);
+        await IDbContext.SaveChangesNewAsync(CancellationToken);
 
         Mock.Mock<IDownloadManagerSettings>()
             .Setup(x => x.KeepCompletedInDownloadFolder)
@@ -1578,7 +1578,7 @@ public class MoveDownloadFileFromFileTaskCommandUnitTests : BaseUnitTest<MoveDow
         });
 
         downloadFileTask.DataTotal = content.LongLength;
-        await IDbContext.SaveChangesAsync(CancellationToken);
+        await IDbContext.SaveChangesNewAsync(CancellationToken);
 
         Mock.Mock<IDownloadManagerSettings>().Setup(x => x.KeepCompletedInDownloadFolder).Returns(false);
 
@@ -1664,7 +1664,7 @@ public class MoveDownloadFileFromFileTaskCommandUnitTests : BaseUnitTest<MoveDow
         });
 
         downloadFileTask.DataTotal = content.LongLength;
-        await IDbContext.SaveChangesAsync(CancellationToken);
+        await IDbContext.SaveChangesNewAsync(CancellationToken);
 
         Mock.Mock<IDownloadManagerSettings>().Setup(x => x.KeepCompletedInDownloadFolder).Returns(false);
 

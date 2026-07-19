@@ -24,7 +24,7 @@ public class ClearCompletedDownloadTasksByDownloadTaskIdEndpointUnitTests
             .ToListAsync(CancellationToken);
 
         downloadTasks.SetDownloadStatus(DownloadStatus.Completed);
-        await dbContext.SaveChangesAsync(CancellationToken);
+        await dbContext.SaveChangesNewAsync(CancellationToken);
 
         Mock.Mock<IDownloadTaskUpdateDispatcher>()
             .Setup(x =>
@@ -106,7 +106,7 @@ public class ClearCompletedDownloadTasksByDownloadTaskIdEndpointUnitTests
             .ToListAsync(CancellationToken);
 
         downloadTasks.SetDownloadStatus(DownloadStatus.Downloading);
-        await dbContext.SaveChangesAsync(CancellationToken);
+        await dbContext.SaveChangesNewAsync(CancellationToken);
 
         Mock.Mock<ICommandExecutor>()
             .Setup(x => x.Send(It.IsAny<DeleteDownloadTasksByKeyCommand>(), It.IsAny<CancellationToken>()))
@@ -173,7 +173,7 @@ public class ClearCompletedDownloadTasksByDownloadTaskIdEndpointUnitTests
             .ToListAsync(CancellationToken);
 
         tvShowDownloadTasks.SetDownloadStatus(DownloadStatus.Completed);
-        await dbContext.SaveChangesAsync(CancellationToken);
+        await dbContext.SaveChangesNewAsync(CancellationToken);
 
         var episodeFileId = tvShowDownloadTasks
             .SelectMany(x => x.Children)

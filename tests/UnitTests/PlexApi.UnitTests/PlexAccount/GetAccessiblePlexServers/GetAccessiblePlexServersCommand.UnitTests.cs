@@ -45,7 +45,7 @@ public class GetAccessiblePlexServersUnitTests : BaseUnitTest<GetAccessiblePlexS
         var plexAccount = await dbContext.PlexAccounts.AsTracking().FirstOrDefaultAsync(CancellationToken);
         plexAccount.ShouldNotBeNull();
         plexAccount.AuthenticationToken = string.Empty;
-        await dbContext.SaveChangesAsync(CancellationToken);
+        await dbContext.SaveChangesNewAsync(CancellationToken);
 
         // Act
         var command = new GetAccessiblePlexServersCommand(plexAccount.Id);

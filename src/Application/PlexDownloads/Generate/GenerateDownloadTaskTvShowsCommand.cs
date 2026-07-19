@@ -104,7 +104,7 @@ public class GenerateDownloadTaskTvShowsCommandHandler : ICommandHandler<Generat
 
             // Insert the tvShowDownloadTask into the database
             _dbContext.DownloadTaskTvShow.AddRange(tvShowsToInsert);
-            await _dbContext.SaveChangesAsync(cancellationToken);
+            await _dbContext.SaveChangesNewAsync(cancellationToken);
 
             if (seasonsIds.Count == 0)
                 continue;

@@ -129,7 +129,7 @@ public class DeletePlexAccountByIdEndpointUnitTests : BaseEndpointUnitTest<Delet
             CancellationToken
         );
 
-        await dbContext.SaveChangesAsync(CancellationToken);
+        await dbContext.SaveChangesNewAsync(CancellationToken);
 
         Mock.SendRefreshNotification();
 

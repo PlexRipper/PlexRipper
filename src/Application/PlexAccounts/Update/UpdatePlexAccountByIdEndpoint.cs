@@ -66,7 +66,7 @@ public class UpdatePlexAccountByIdEndpoint : Endpoint<UpdatePlexAccountByIdEndpo
         var updatedPlexAccount = plexAccountDTO.ToModel();
 
         _dbContext.Entry(accountInDb).CurrentValues.SetValues(updatedPlexAccount);
-        await _dbContext.SaveChangesAsync(ct);
+        await _dbContext.SaveChangesNewAsync(ct);
 
         await Send.FluentResult(Result.Ok(accountInDb), x => x.ToDTO(), ct);
     }

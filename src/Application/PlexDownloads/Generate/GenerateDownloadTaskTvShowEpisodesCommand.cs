@@ -162,7 +162,7 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandler
             downloadTasks.Add(processResult.Value);
         }
 
-        var saveResult = await Result.Try(() => _dbContext.SaveChangesAsync(ct));
+        var saveResult = await Result.Try(() => _dbContext.SaveChangesNewAsync(ct));
         if (saveResult.IsFailed)
         {
             return saveResult.LogError();

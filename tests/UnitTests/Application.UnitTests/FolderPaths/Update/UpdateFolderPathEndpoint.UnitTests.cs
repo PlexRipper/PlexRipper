@@ -18,7 +18,7 @@ public class UpdateFolderPathEndpointUnitTests : BaseEndpointUnitTest<UpdateFold
             MediaType = PlexMediaType.Movie,
         };
         dbContext.FolderPaths.Add(existingFolderPath);
-        await dbContext.SaveChangesAsync(CancellationToken);
+        await dbContext.SaveChangesNewAsync(CancellationToken);
 
         var request = new UpdateFolderPathEndpointRequest
         {
@@ -83,7 +83,7 @@ public class UpdateFolderPathEndpointUnitTests : BaseEndpointUnitTest<UpdateFold
             };
 
             dbContext.FolderPaths.Add(existingFolderPath);
-            await dbContext.SaveChangesAsync(CancellationToken);
+            await dbContext.SaveChangesNewAsync(CancellationToken);
         }
 
         var request = new UpdateFolderPathEndpointRequest

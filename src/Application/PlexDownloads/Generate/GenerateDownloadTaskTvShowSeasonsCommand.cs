@@ -1,6 +1,6 @@
 namespace Reaparr.Application;
 
-public record GenerateDownloadTaskTvShowSeasonsCommand(CreateDownloadTasksRequest Request) : ICommand<Result>;
+public record GenerateDownloadTaskTvShowSeasonsCommand(CreateDownloadTasksRequest Request) : ICommand<Result<DownloadTaskCreationReport>>;
 
 public class GenerateDownloadTaskTvShowSeasonsCommandValidator
     : AbstractValidator<GenerateDownloadTaskTvShowSeasonsCommand>
@@ -19,7 +19,7 @@ public class GenerateDownloadTaskTvShowSeasonsCommandValidator
 }
 
 public class GenerateDownloadTaskTvShowSeasonsCommandHandler
-    : ICommandHandler<GenerateDownloadTaskTvShowSeasonsCommand, Result>
+    : ICommandHandler<GenerateDownloadTaskTvShowSeasonsCommand, Result<DownloadTaskCreationReport>>
 {
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
@@ -36,7 +36,7 @@ public class GenerateDownloadTaskTvShowSeasonsCommandHandler
         _command = command;
     }
 
-    public async Task<Result> ExecuteAsync(
+    public async Task<Result<DownloadTaskCreationReport>> ExecuteAsync(
         GenerateDownloadTaskTvShowSeasonsCommand command,
         CancellationToken cancellationToken
     )
@@ -132,6 +132,6 @@ public class GenerateDownloadTaskTvShowSeasonsCommandHandler
         if (episodesResult.IsFailed)
             return episodesResult.LogError();
 
-        return Result.Ok();
+        return Result.Ok(new DownloadTaskCreationReport { Seasons = seasonsToInsert.Count } + episodesResult.Value);
     }
 }

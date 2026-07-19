@@ -4,7 +4,7 @@ namespace Reaparr.Application;
 /// Creates <see cref="DownloadTaskMovie">DownloadTaskMovies</see> from <see cref="PlexMovie">PlexMovies</see> and inserts it into Database.
 /// </summary>
 /// <returns>The created <see cref="DownloadTaskGeneric"/>.</returns>
-public record GenerateDownloadTaskMoviesCommand : ICommand<Result>
+public record GenerateDownloadTaskMoviesCommand : ICommand<Result<DownloadTaskCreationReport>>
 {
     public GenerateDownloadTaskMoviesCommand(CreateDownloadTasksRequest request)
     {
@@ -34,7 +34,7 @@ public class GenerateDownloadTaskMoviesCommandValidator : AbstractValidator<Gene
     }
 }
 
-public class GenerateDownloadTaskMoviesCommandHandler : ICommandHandler<GenerateDownloadTaskMoviesCommand, Result>
+public class GenerateDownloadTaskMoviesCommandHandler : ICommandHandler<GenerateDownloadTaskMoviesCommand, Result<DownloadTaskCreationReport>>
 {
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
@@ -45,7 +45,7 @@ public class GenerateDownloadTaskMoviesCommandHandler : ICommandHandler<Generate
         _dbContext = dbContext;
     }
 
-    public async Task<Result> ExecuteAsync(
+    public async Task<Result<DownloadTaskCreationReport>> ExecuteAsync(
         GenerateDownloadTaskMoviesCommand command,
         CancellationToken cancellationToken
     )
@@ -143,7 +143,7 @@ public class GenerateDownloadTaskMoviesCommandHandler : ICommandHandler<Generate
         if (allDownloadTasks.Count == 0)
         {
             await transaction.CommitAsync(cancellationToken);
-            return Result.Ok();
+            return Result.Ok(new DownloadTaskCreationReport { Movies = 0 });
         }
 
         _dbContext.DownloadTaskMovie.AddRange(allDownloadTasks);
@@ -169,7 +169,7 @@ public class GenerateDownloadTaskMoviesCommandHandler : ICommandHandler<Generate
         await _dbContext.SaveChangesNewAsync(cancellationToken);
         await transaction.CommitAsync(cancellationToken);
 
-        return Result.Ok();
+        return Result.Ok(new DownloadTaskCreationReport { Movies = allDownloadTasks.Count });
     }
 
     /// <summary>

@@ -1,6 +1,6 @@
 namespace Reaparr.Application;
 
-public record GenerateDownloadTaskTvShowEpisodesCommand : ICommand<Result>
+public record GenerateDownloadTaskTvShowEpisodesCommand : ICommand<Result<DownloadTaskCreationReport>>
 {
     public GenerateDownloadTaskTvShowEpisodesCommand(CreateDownloadTasksRequest request)
     {
@@ -32,7 +32,7 @@ public class GenerateDownloadTaskTvShowEpisodesCommandValidator
 }
 
 public class GenerateDownloadTaskTvShowEpisodesCommandHandler
-    : ICommandHandler<GenerateDownloadTaskTvShowEpisodesCommand, Result>
+    : ICommandHandler<GenerateDownloadTaskTvShowEpisodesCommand, Result<DownloadTaskCreationReport>>
 {
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
@@ -45,7 +45,7 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandler
         _dbContext = dbContext;
     }
 
-    public async Task<Result> ExecuteAsync(GenerateDownloadTaskTvShowEpisodesCommand command, CancellationToken ct)
+    public async Task<Result<DownloadTaskCreationReport>> ExecuteAsync(GenerateDownloadTaskTvShowEpisodesCommand command, CancellationToken ct)
     {
         var request = command.Request;
         var groupedList = command.Request.DownloadMedias.MergeAndGroupList();
@@ -188,7 +188,7 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandler
 
         await _dbContext.CreateDownloadClientLogs(logs);
 
-        return Result.Ok();
+        return Result.Ok(new DownloadTaskCreationReport { Episodes = downloadTasks.Count });
     }
 
     private async Task<DownloadTaskTvShow?> GetOrCreateTvShowDownloadTaskAsync(

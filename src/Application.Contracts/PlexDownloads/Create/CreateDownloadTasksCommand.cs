@@ -4,7 +4,7 @@ namespace Reaparr.Application.Contracts;
 /// Generates a nested list of <see cref="DownloadTaskGeneric"/> and adds to the download queue.
 /// </summary>
 /// <returns>Returns true if all downloadTasks were added successfully.</returns>
-public record CreateDownloadTasksCommand : ICommand<Result>
+public record CreateDownloadTasksCommand : ICommand<Result<DownloadTaskCreationReport>>
 {
     public CreateDownloadTasksCommand(CreateDownloadTasksRequest request)
     {

@@ -1,6 +1,6 @@
 namespace Reaparr.Application;
 
-public record GenerateDownloadTaskTvShowsCommand : ICommand<Result>
+public record GenerateDownloadTaskTvShowsCommand : ICommand<Result<DownloadTaskCreationReport>>
 {
     public GenerateDownloadTaskTvShowsCommand(CreateDownloadTasksRequest request)
     {
@@ -30,7 +30,8 @@ public class GenerateDownloadTaskTvShowsCommandValidator : AbstractValidator<Gen
     }
 }
 
-public class GenerateDownloadTaskTvShowsCommandHandler : ICommandHandler<GenerateDownloadTaskTvShowsCommand, Result>
+public class GenerateDownloadTaskTvShowsCommandHandler
+    : ICommandHandler<GenerateDownloadTaskTvShowsCommand, Result<DownloadTaskCreationReport>>
 {
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
@@ -47,7 +48,7 @@ public class GenerateDownloadTaskTvShowsCommandHandler : ICommandHandler<Generat
         _commandExecutor = commandExecutor;
     }
 
-    public async Task<Result> ExecuteAsync(
+    public async Task<Result<DownloadTaskCreationReport>> ExecuteAsync(
         GenerateDownloadTaskTvShowsCommand command,
         CancellationToken cancellationToken
     )
@@ -62,6 +63,8 @@ public class GenerateDownloadTaskTvShowsCommandHandler : ICommandHandler<Generat
                 "Creating {PlexTvShowIdsCount} TvShow download tasks",
                 plexTvShowList.SelectMany(x => x.MediaIds).Distinct().Count()
             );
+
+        var report = new DownloadTaskCreationReport();
 
         foreach (var downloadMediaDto in plexTvShowList)
         {
@@ -103,6 +106,7 @@ public class GenerateDownloadTaskTvShowsCommandHandler : ICommandHandler<Generat
             }
 
             // Insert the tvShowDownloadTask into the database
+            report = report with { TvShows = report.TvShows + tvShowsToInsert.Count };
             _dbContext.DownloadTaskTvShow.AddRange(tvShowsToInsert);
             await _dbContext.SaveChangesNewAsync(cancellationToken);
 
@@ -123,8 +127,9 @@ public class GenerateDownloadTaskTvShowsCommandHandler : ICommandHandler<Generat
             if (seasonsResult.IsFailed)
                 return seasonsResult.LogError();
 
+            report += seasonsResult.Value;
         }
 
-        return Result.Ok();
+        return Result.Ok(report);
     }
 }

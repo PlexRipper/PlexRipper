@@ -9,7 +9,8 @@ public class CreateDownloadTasksCommandValidator : AbstractValidator<CreateDownl
     }
 }
 
-public class CreateDownloadTasksCommandHandler : ICommandHandler<CreateDownloadTasksCommand, Result>
+public class CreateDownloadTasksCommandHandler
+    : ICommandHandler<CreateDownloadTasksCommand, Result<DownloadTaskCreationReport>>
 {
     private readonly ICommandExecutor _commandExecutor;
     private readonly IEventPublisher _eventPublisher;
@@ -27,16 +28,21 @@ public class CreateDownloadTasksCommandHandler : ICommandHandler<CreateDownloadT
         _notificationHubService = notificationHubService;
     }
 
-    public async Task<Result> ExecuteAsync(CreateDownloadTasksCommand command, CancellationToken cancellationToken)
+    public async Task<Result<DownloadTaskCreationReport>> ExecuteAsync(
+        CreateDownloadTasksCommand command,
+        CancellationToken cancellationToken
+    )
     {
         var request = command.Request;
         var downloadMedias = command.Request.DownloadMedias;
+        var report = new DownloadTaskCreationReport();
 
         if (downloadMedias.Any(x => x.Type == PlexMediaType.Movie))
         {
             var result = await _commandExecutor.Send(new GenerateDownloadTaskMoviesCommand(request), cancellationToken);
             if (result.IsFailed)
                 return result.LogError();
+            report += result.Value;
             _generatedTasks = true;
         }
 
@@ -48,6 +54,7 @@ public class CreateDownloadTasksCommandHandler : ICommandHandler<CreateDownloadT
             );
             if (result.IsFailed)
                 return result.LogError();
+            report += result.Value;
             _generatedTasks = true;
         }
 
@@ -59,6 +66,7 @@ public class CreateDownloadTasksCommandHandler : ICommandHandler<CreateDownloadT
             );
             if (result.IsFailed)
                 return result.LogError();
+            report += result.Value;
             _generatedTasks = true;
         }
 
@@ -70,6 +78,7 @@ public class CreateDownloadTasksCommandHandler : ICommandHandler<CreateDownloadT
             );
             if (result.IsFailed)
                 return result.LogError();
+            report += result.Value;
             _generatedTasks = true;
         }
 
@@ -90,6 +99,6 @@ public class CreateDownloadTasksCommandHandler : ICommandHandler<CreateDownloadT
             );
         }
 
-        return Result.Ok();
+        return Result.Ok(report);
     }
 }

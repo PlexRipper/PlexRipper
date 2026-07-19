@@ -262,7 +262,6 @@ public static partial class MockDatabase
             Mode = SqliteOpenMode.Memory,
             ForeignKeys = true,
             DataSource = dbName,
-            Cache = SqliteCacheMode.Shared,
         }.ToString();
 
     public static async Task Setup(

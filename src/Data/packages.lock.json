@@ -870,7 +870,8 @@
           "Microsoft.EntityFrameworkCore": "[10.0.9, )",
           "Microsoft.EntityFrameworkCore.Sqlite": "[10.0.9, )",
           "Reaparr.Application.Contracts": "[1.0.0, )",
-          "Reaparr.Domain": "[1.0.0, )"
+          "Reaparr.Domain": "[1.0.0, )",
+          "SQLitePCLRaw.lib.e_sqlite3": "[2.1.12, )"
         }
       },
       "Reaparr.Domain": {

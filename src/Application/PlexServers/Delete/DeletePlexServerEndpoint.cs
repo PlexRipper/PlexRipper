@@ -60,7 +60,7 @@ public class DeletePlexServerEndpoint : Endpoint<DeletePlexServerEndpointRequest
             .ToListAsync(ct);
 
         _dbContext.PlexServers.Remove(plexServer);
-        await _dbContext.SaveChangesAsync(ct);
+        await _dbContext.SaveChangesNewAsync(ct);
 
         _mediaQueryCache.InvalidateLibraries(libraryIds, "Plex server deleted");
 

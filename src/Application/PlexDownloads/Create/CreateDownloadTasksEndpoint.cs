@@ -3,7 +3,7 @@ namespace Reaparr.Application;
 public record CreateDownloadTasksEndpointRequest
 {
     [FromBody]
-    public required CreateDownloadTasksRequest Request { get; set; }
+    public required CreateDownloadTasksRequest Request { get; init; }
 }
 
 public class CreateDownloadTasksEndpointRequestValidator : Validator<CreateDownloadTasksEndpointRequest>
@@ -30,7 +30,7 @@ public class CreateDownloadTasksEndpoint : Endpoint<CreateDownloadTasksEndpointR
         Post(ApiRoutes.DownloadController + "/create");
 
         Description(x =>
-            x.Produces(StatusCodes.Status200OK, typeof(BaseResultDTO))
+            x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<DownloadTaskCreationReportDTO>))
                 .Produces(StatusCodes.Status400BadRequest, typeof(BaseResultDTO))
                 .Produces(StatusCodes.Status500InternalServerError, typeof(BaseResultDTO))
         );
@@ -44,6 +44,12 @@ public class CreateDownloadTasksEndpoint : Endpoint<CreateDownloadTasksEndpointR
 
         var result = await _commandExecutor.Send(new CreateDownloadTasksCommand(req.Request), ct);
 
-        await Send.FluentResult(result, ct);
+        await Send.FluentResult(result, report => new DownloadTaskCreationReportDTO
+        {
+            Movies = report.Movies,
+            TvShows = report.TvShows,
+            Seasons = report.Seasons,
+            Episodes = report.Episodes,
+        }, ct);
     }
 }

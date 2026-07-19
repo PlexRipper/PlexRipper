@@ -130,7 +130,7 @@ public class AddOrUpdatePlexAccountServersCommandHandler
         if (newAccountServers.Any())
             await _dbContext.PlexAccountServers.AddRangeAsync(newAccountServers, cancellationToken);
 
-        await _dbContext.SaveChangesAsync(cancellationToken);
+        await _dbContext.SaveChangesNewAsync(cancellationToken);
 
         _log.Here().Information("Checking if there are any PlexServers this PlexAccount has no access to anymore");
 

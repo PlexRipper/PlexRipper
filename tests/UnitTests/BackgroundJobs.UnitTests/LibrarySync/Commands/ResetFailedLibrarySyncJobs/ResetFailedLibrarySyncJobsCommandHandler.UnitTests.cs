@@ -46,7 +46,7 @@ public class ResetFailedLibrarySyncJobsCommandHandlerUnitTests : BaseUnitTest<Re
         };
 
         await dbContext.LibrarySyncJobQueues.AddRangeAsync([failedItem1, failedItem2], CancellationToken);
-        await dbContext.SaveChangesAsync(CancellationToken);
+        await dbContext.SaveChangesNewAsync(CancellationToken);
 
         Mock.Mock<ICommandExecutor>()
             .Setup(x => x.Send(It.IsAny<CheckQueuedPlexLibraryToSyncCommand>(), It.IsAny<CancellationToken>()))
@@ -116,7 +116,7 @@ public class ResetFailedLibrarySyncJobsCommandHandlerUnitTests : BaseUnitTest<Re
         };
 
         await dbContext.LibrarySyncJobQueues.AddRangeAsync([failedItemServer1, failedItemServer2], CancellationToken);
-        await dbContext.SaveChangesAsync(CancellationToken);
+        await dbContext.SaveChangesNewAsync(CancellationToken);
 
         Mock.Mock<ICommandExecutor>()
             .Setup(x => x.Send(It.IsAny<CheckQueuedPlexLibraryToSyncCommand>(), It.IsAny<CancellationToken>()))
@@ -189,7 +189,7 @@ public class ResetFailedLibrarySyncJobsCommandHandlerUnitTests : BaseUnitTest<Re
         };
 
         await dbContext.LibrarySyncJobQueues.AddRangeAsync([failedItem, queuedItem, processingItem], CancellationToken);
-        await dbContext.SaveChangesAsync(CancellationToken);
+        await dbContext.SaveChangesNewAsync(CancellationToken);
 
         Mock.Mock<ICommandExecutor>()
             .Setup(x => x.Send(It.IsAny<CheckQueuedPlexLibraryToSyncCommand>(), It.IsAny<CancellationToken>()))
@@ -243,7 +243,7 @@ public class ResetFailedLibrarySyncJobsCommandHandlerUnitTests : BaseUnitTest<Re
         };
 
         await dbContext.LibrarySyncJobQueues.AddAsync(failedItem, CancellationToken);
-        await dbContext.SaveChangesAsync(CancellationToken);
+        await dbContext.SaveChangesNewAsync(CancellationToken);
 
         Mock.Mock<ICommandExecutor>()
             .Setup(x => x.Send(It.IsAny<CheckQueuedPlexLibraryToSyncCommand>(), It.IsAny<CancellationToken>()))
@@ -328,7 +328,7 @@ public class ResetFailedLibrarySyncJobsCommandHandlerUnitTests : BaseUnitTest<Re
         };
 
         await dbContext.LibrarySyncJobQueues.AddAsync(failedItem, CancellationToken);
-        await dbContext.SaveChangesAsync(CancellationToken);
+        await dbContext.SaveChangesNewAsync(CancellationToken);
 
         Mock.Mock<ICommandExecutor>()
             .Setup(x => x.Send(It.IsAny<CheckQueuedPlexLibraryToSyncCommand>(), It.IsAny<CancellationToken>()))

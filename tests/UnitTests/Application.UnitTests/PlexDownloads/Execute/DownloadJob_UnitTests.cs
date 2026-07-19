@@ -140,7 +140,7 @@ public class DownloadJobUnitTests : BaseUnitTest<DownloadJob>
 
         var testDownloadTask = IDbContext.DownloadTaskMovieFile.First();
         testDownloadTask.DownloadStatus = DownloadStatus.SourceUnavailable;
-        await IDbContext.SaveChangesAsync(CancellationToken);
+        await IDbContext.SaveChangesNewAsync(CancellationToken);
 
         IDictionary<string, object> dict = new Dictionary<string, object>
         {

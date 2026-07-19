@@ -141,7 +141,7 @@ public class ProcessEpisodeMetadataCommandHandler : ICommandHandler<ProcessEpiso
                     processedCount++;
                 }
 
-                await dbContext.SaveChangesAsync(ct);
+                await dbContext.SaveChangesNewAsync(ct);
             }
 
             _log.Here()

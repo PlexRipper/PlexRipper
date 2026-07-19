@@ -19,6 +19,7 @@ import type {
   CreateDownloadTasksRequest,
   DownloadMediaDTO,
   DownloadPreviewContainerDTO,
+  DownloadTaskCreationReportDTO,
   DownloadTaskDTO,
   DownloadTaskLogDTO,
   DownloadTaskType,
@@ -80,7 +81,7 @@ export class Download {
     data: CreateDownloadTasksRequest,
     params: RequestParams = {},
   ) =>
-    axiosObservable<BaseResultDTO>({
+    axiosObservable<DownloadTaskCreationReportDTO>({
       url: `/api/Download/create`,
       method: "POST",
       data: data,
@@ -88,7 +89,7 @@ export class Download {
       type: ContentType.Json,
       responseType: "json",
       ...params,
-    }).pipe(apiCheckPipe<BaseResultDTO>);
+    }).pipe(apiCheckPipe<DownloadTaskCreationReportDTO>);
 
   /**
    * No description

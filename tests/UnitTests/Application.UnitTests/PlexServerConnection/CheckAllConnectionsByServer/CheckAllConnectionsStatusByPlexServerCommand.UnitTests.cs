@@ -98,7 +98,7 @@ public class CheckAllConnectionsStatusByPlexServerCommandUnitTests
             );
         }
 
-        await dbContext.SaveChangesAsync(CancellationToken);
+        await dbContext.SaveChangesNewAsync(CancellationToken);
 
         Mock.Mock<INotificationHubService>()
             .Setup(m =>
@@ -175,7 +175,7 @@ public class CheckAllConnectionsStatusByPlexServerCommandUnitTests
             );
         }
 
-        await dbContext.SaveChangesAsync(CancellationToken);
+        await dbContext.SaveChangesNewAsync(CancellationToken);
 
         Mock.Mock<INotificationHubService>()
             .Setup(m =>
@@ -312,7 +312,7 @@ public class CheckAllConnectionsStatusByPlexServerCommandUnitTests
             );
         }
 
-        await dbContext.SaveChangesAsync(CancellationToken);
+        await dbContext.SaveChangesNewAsync(CancellationToken);
 
         Mock.Mock<INotificationHubService>()
             .Setup(m =>

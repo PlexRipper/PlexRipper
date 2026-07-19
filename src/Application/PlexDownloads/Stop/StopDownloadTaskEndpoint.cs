@@ -1,6 +1,13 @@
 namespace Reaparr.Application;
 
-public record StopDownloadTaskEndpointRequest(Guid DownloadTaskGuid);
+/// <summary>
+/// Stop a currently downloading <see cref="DownloadTaskGeneric"/>.
+/// </summary>
+public record StopDownloadTaskEndpointRequest
+{
+    [RouteParam, BindFrom("DownloadTaskGuid")]
+    public required Guid DownloadTaskGuid { get; init; }
+}
 
 public class StopDownloadTaskEndpointRequestValidator : Validator<StopDownloadTaskEndpointRequest>
 {

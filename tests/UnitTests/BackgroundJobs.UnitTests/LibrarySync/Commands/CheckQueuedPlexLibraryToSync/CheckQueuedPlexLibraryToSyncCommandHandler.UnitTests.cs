@@ -63,7 +63,7 @@ public class CheckQueuedPlexLibraryToSyncCommandHandlerUnitTests
         };
 
         await dbContext.LibrarySyncJobQueues.AddAsync(queueItem, CancellationToken);
-        var saveResult = await dbContext.SaveChangesAsync(CancellationToken);
+        var saveResult = await dbContext.SaveChangesNewAsync(CancellationToken);
         saveResult.ShouldBeGreaterThan(0);
 
         // Verify the item was saved and is visible
@@ -126,7 +126,7 @@ public class CheckQueuedPlexLibraryToSyncCommandHandlerUnitTests
         };
 
         await dbContext.LibrarySyncJobQueues.AddAsync(queueItem, CancellationToken);
-        var saveResult = await dbContext.SaveChangesAsync(CancellationToken);
+        var saveResult = await dbContext.SaveChangesNewAsync(CancellationToken);
         saveResult.ShouldBeGreaterThan(0);
 
         // Verify the item was saved
@@ -190,7 +190,7 @@ public class CheckQueuedPlexLibraryToSyncCommandHandlerUnitTests
         };
 
         await dbContext.LibrarySyncJobQueues.AddRangeAsync([queueItem1, queueItem2], CancellationToken);
-        var saveResult = await dbContext.SaveChangesAsync(CancellationToken);
+        var saveResult = await dbContext.SaveChangesNewAsync(CancellationToken);
         saveResult.ShouldBeGreaterThan(0);
 
         // Verify the items were saved
@@ -254,7 +254,7 @@ public class CheckQueuedPlexLibraryToSyncCommandHandlerUnitTests
         };
 
         await dbContext.LibrarySyncJobQueues.AddAsync(queueItem, CancellationToken);
-        var saveResult = await dbContext.SaveChangesAsync(CancellationToken);
+        var saveResult = await dbContext.SaveChangesNewAsync(CancellationToken);
         saveResult.ShouldBeGreaterThan(0);
 
         // Verify the item was saved and is visible
@@ -331,7 +331,7 @@ public class CheckQueuedPlexLibraryToSyncCommandHandlerUnitTests
         };
 
         await dbContext.LibrarySyncJobQueues.AddRangeAsync([queueItem1, queueItem2], CancellationToken);
-        await dbContext.SaveChangesAsync(CancellationToken);
+        await dbContext.SaveChangesNewAsync(CancellationToken);
 
         var command = new CheckQueuedPlexLibraryToSyncCommand();
 
@@ -412,7 +412,7 @@ public class CheckQueuedPlexLibraryToSyncCommandHandlerUnitTests
         };
 
         await dbContext.LibrarySyncJobQueues.AddRangeAsync(queueItems, CancellationToken);
-        await dbContext.SaveChangesAsync(CancellationToken);
+        await dbContext.SaveChangesNewAsync(CancellationToken);
 
         // Setup scheduler mocks for both servers (highest priority library for each)
         var jobKey1 = LibrarySyncJob.GetJobKey(servers[0].Id, server1Libraries[0].Id);
@@ -508,7 +508,7 @@ public class CheckQueuedPlexLibraryToSyncCommandHandlerUnitTests
         };
 
         await dbContext.LibrarySyncJobQueues.AddRangeAsync([queueItem1, queueItem2], CancellationToken);
-        await dbContext.SaveChangesAsync(CancellationToken);
+        await dbContext.SaveChangesNewAsync(CancellationToken);
 
         var onlineServerJobKey = LibrarySyncJob.GetJobKey(servers[1].Id, server2Library.Id);
         Mock.Mock<IScheduler>()
@@ -554,6 +554,438 @@ public class CheckQueuedPlexLibraryToSyncCommandHandlerUnitTests
     }
 
     [Test]
+    public async Task ShouldNotScheduleQueuedLibrary_WhenSameServerHasProcessingLibrary()
+    {
+        // Arrange
+        await SetupDatabase(
+            1010,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexMovieLibraryCount = 2;
+            }
+        );
+
+        var dbContext = IDbContext;
+        var server = dbContext.PlexServers.First();
+        var libraries = dbContext.PlexLibraries.ToList();
+
+        await dbContext.LibrarySyncJobQueues.AddRangeAsync(
+            [
+                new LibrarySyncJobQueue
+                {
+                    PlexServerId = server.Id,
+                    PlexLibraryId = libraries[0].Id,
+                    Priority = 1,
+                    Status = LibrarySyncJobStatus.Processing,
+                    CreatedAt = DateTime.UtcNow,
+                    StartedAt = DateTime.UtcNow,
+                },
+                new LibrarySyncJobQueue
+                {
+                    PlexServerId = server.Id,
+                    PlexLibraryId = libraries[1].Id,
+                    Priority = 2,
+                    Status = LibrarySyncJobStatus.Queued,
+                    CreatedAt = DateTime.UtcNow,
+                },
+            ],
+            CancellationToken
+        );
+        await dbContext.SaveChangesNewAsync(CancellationToken);
+
+        var command = new CheckQueuedPlexLibraryToSyncCommand();
+
+        // Act
+        var result = await Sut.ExecuteAsync(command, CancellationToken);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        Mock.Mock<IScheduler>()
+            .Verify(
+                x => x.ScheduleJob(It.IsAny<IJobDetail>(), It.IsAny<ITrigger>(), It.IsAny<CancellationToken>()),
+                Times.Never()
+            );
+    }
+
+    [Test]
+    public async Task ShouldClearServerOfflineFlag_WhenServerComesBackOnline()
+    {
+        // Arrange
+        await SetupDatabase(
+            1011,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexMovieLibraryCount = 1;
+            }
+        );
+
+        var dbContext = IDbContext;
+        var server = dbContext.PlexServers.First();
+        var library = dbContext.PlexLibraries.First();
+
+        var queueItem = new LibrarySyncJobQueue
+        {
+            PlexServerId = server.Id,
+            PlexLibraryId = library.Id,
+            Priority = 1,
+            Status = LibrarySyncJobStatus.Queued,
+            CreatedAt = DateTime.UtcNow,
+            IsServerOffline = true,
+        };
+
+        await dbContext.LibrarySyncJobQueues.AddAsync(queueItem, CancellationToken);
+        await dbContext.SaveChangesNewAsync(CancellationToken);
+
+        var jobKey = LibrarySyncJob.GetJobKey(server.Id, library.Id);
+        Mock.Mock<IScheduler>().Setup(x => x.CheckExists(jobKey, It.IsAny<CancellationToken>())).ReturnsAsync(false);
+        Mock.Mock<IScheduler>()
+            .Setup(x => x.ScheduleJob(It.IsAny<IJobDetail>(), It.IsAny<ITrigger>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(DateTimeOffset.UtcNow);
+
+        var command = new CheckQueuedPlexLibraryToSyncCommand();
+
+        // Act
+        var result = await Sut.ExecuteAsync(command, CancellationToken);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        var updatedItem = await dbContext.LibrarySyncJobQueues.FirstAsync(CancellationToken);
+        updatedItem.IsServerOffline.ShouldBeFalse();
+        Mock.Mock<IScheduler>()
+            .Verify(
+                x =>
+                    x.ScheduleJob(
+                        It.Is<IJobDetail>(j => j.Key.Equals(jobKey)),
+                        It.IsAny<ITrigger>(),
+                        It.IsAny<CancellationToken>()
+                    ),
+                Times.Once()
+            );
+    }
+
+    [Test]
+    public async Task ShouldScheduleOnlineServer_WhenDifferentServerHasProcessingLibrary()
+    {
+        // Arrange
+        await SetupDatabase(
+            1012,
+            config =>
+            {
+                config.PlexServerCount = 2;
+                config.PlexMovieLibraryCount = 2;
+            }
+        );
+
+        var dbContext = IDbContext;
+        var servers = dbContext.PlexServers.ToList();
+        var libraries = dbContext.PlexLibraries.ToList();
+        var processingServerLibrary = libraries.First(x => x.PlexServerId == servers[0].Id);
+        var queuedServerLibrary = libraries.First(x => x.PlexServerId == servers[1].Id);
+
+        await dbContext.LibrarySyncJobQueues.AddRangeAsync(
+            [
+                new LibrarySyncJobQueue
+                {
+                    PlexServerId = servers[0].Id,
+                    PlexLibraryId = processingServerLibrary.Id,
+                    Priority = 1,
+                    Status = LibrarySyncJobStatus.Processing,
+                    CreatedAt = DateTime.UtcNow,
+                    StartedAt = DateTime.UtcNow,
+                },
+                new LibrarySyncJobQueue
+                {
+                    PlexServerId = servers[1].Id,
+                    PlexLibraryId = queuedServerLibrary.Id,
+                    Priority = 1,
+                    Status = LibrarySyncJobStatus.Queued,
+                    CreatedAt = DateTime.UtcNow,
+                },
+            ],
+            CancellationToken
+        );
+        await dbContext.SaveChangesNewAsync(CancellationToken);
+
+        var expectedJobKey = LibrarySyncJob.GetJobKey(servers[1].Id, queuedServerLibrary.Id);
+        Mock.Mock<IScheduler>().Setup(x => x.CheckExists(expectedJobKey, It.IsAny<CancellationToken>())).ReturnsAsync(false);
+        Mock.Mock<IScheduler>()
+            .Setup(x => x.ScheduleJob(It.IsAny<IJobDetail>(), It.IsAny<ITrigger>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(DateTimeOffset.UtcNow);
+
+        var command = new CheckQueuedPlexLibraryToSyncCommand();
+
+        // Act
+        var result = await Sut.ExecuteAsync(command, CancellationToken);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        Mock.Mock<IScheduler>()
+            .Verify(
+                x =>
+                    x.ScheduleJob(
+                        It.Is<IJobDetail>(j => j.Key.Equals(expectedJobKey)),
+                        It.IsAny<ITrigger>(),
+                        It.IsAny<CancellationToken>()
+                    ),
+                Times.Once()
+            );
+    }
+
+    [Test]
+    public async Task ShouldNotClearServerOfflineFlag_WhenSameServerHasProcessingLibrary()
+    {
+        // Arrange
+        await SetupDatabase(
+            1013,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexMovieLibraryCount = 2;
+            }
+        );
+
+        var dbContext = IDbContext;
+        var server = dbContext.PlexServers.First();
+        var libraries = dbContext.PlexLibraries.ToList();
+
+        await dbContext.LibrarySyncJobQueues.AddRangeAsync(
+            [
+                new LibrarySyncJobQueue
+                {
+                    PlexServerId = server.Id,
+                    PlexLibraryId = libraries[0].Id,
+                    Priority = 1,
+                    Status = LibrarySyncJobStatus.Processing,
+                    CreatedAt = DateTime.UtcNow,
+                    StartedAt = DateTime.UtcNow,
+                },
+                new LibrarySyncJobQueue
+                {
+                    PlexServerId = server.Id,
+                    PlexLibraryId = libraries[1].Id,
+                    Priority = 2,
+                    Status = LibrarySyncJobStatus.Queued,
+                    CreatedAt = DateTime.UtcNow,
+                    IsServerOffline = true,
+                },
+            ],
+            CancellationToken
+        );
+        await dbContext.SaveChangesNewAsync(CancellationToken);
+
+        var command = new CheckQueuedPlexLibraryToSyncCommand();
+
+        // Act
+        var result = await Sut.ExecuteAsync(command, CancellationToken);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        var queuedItem = await dbContext
+            .LibrarySyncJobQueues.FirstAsync(x => x.Status == LibrarySyncJobStatus.Queued, CancellationToken);
+        queuedItem.IsServerOffline.ShouldBeTrue();
+        Mock.Mock<IScheduler>()
+            .Verify(
+                x => x.ScheduleJob(It.IsAny<IJobDetail>(), It.IsAny<ITrigger>(), It.IsAny<CancellationToken>()),
+                Times.Never()
+            );
+    }
+
+    [Test]
+    public async Task ShouldScheduleOtherServer_WhenOneServerJobAlreadyExists()
+    {
+        // Arrange
+        await SetupDatabase(
+            1014,
+            config =>
+            {
+                config.PlexServerCount = 2;
+                config.PlexMovieLibraryCount = 1;
+            }
+        );
+
+        var dbContext = IDbContext;
+        var servers = dbContext.PlexServers.ToList();
+        var libraries = dbContext.PlexLibraries.ToList();
+        var firstServerLibrary = libraries.First(x => x.PlexServerId == servers[0].Id);
+        var secondServerLibrary = libraries.First(x => x.PlexServerId == servers[1].Id);
+
+        await dbContext.LibrarySyncJobQueues.AddRangeAsync(
+            [
+                new LibrarySyncJobQueue
+                {
+                    PlexServerId = servers[0].Id,
+                    PlexLibraryId = firstServerLibrary.Id,
+                    Priority = 1,
+                    Status = LibrarySyncJobStatus.Queued,
+                    CreatedAt = DateTime.UtcNow,
+                },
+                new LibrarySyncJobQueue
+                {
+                    PlexServerId = servers[1].Id,
+                    PlexLibraryId = secondServerLibrary.Id,
+                    Priority = 1,
+                    Status = LibrarySyncJobStatus.Queued,
+                    CreatedAt = DateTime.UtcNow,
+                },
+            ],
+            CancellationToken
+        );
+        await dbContext.SaveChangesNewAsync(CancellationToken);
+
+        var existingJobKey = LibrarySyncJob.GetJobKey(servers[0].Id, firstServerLibrary.Id);
+        var expectedJobKey = LibrarySyncJob.GetJobKey(servers[1].Id, secondServerLibrary.Id);
+        Mock.Mock<IScheduler>().Setup(x => x.CheckExists(existingJobKey, It.IsAny<CancellationToken>())).ReturnsAsync(true);
+        Mock.Mock<IScheduler>().Setup(x => x.CheckExists(expectedJobKey, It.IsAny<CancellationToken>())).ReturnsAsync(false);
+        Mock.Mock<IScheduler>()
+            .Setup(x => x.ScheduleJob(It.IsAny<IJobDetail>(), It.IsAny<ITrigger>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(DateTimeOffset.UtcNow);
+
+        var command = new CheckQueuedPlexLibraryToSyncCommand();
+
+        // Act
+        var result = await Sut.ExecuteAsync(command, CancellationToken);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        result.Errors.Count.ShouldBe(0);
+        Mock.Mock<IScheduler>().Verify(x => x.CheckExists(existingJobKey, It.IsAny<CancellationToken>()), Times.Once());
+        Mock.Mock<IScheduler>().Verify(x => x.CheckExists(expectedJobKey, It.IsAny<CancellationToken>()), Times.Once());
+        Mock.Mock<IScheduler>()
+            .Verify(
+                x =>
+                    x.ScheduleJob(
+                        It.Is<IJobDetail>(j =>
+                            j.Key.Equals(expectedJobKey)
+                            && (int)j.JobDataMap[LibrarySyncJob.ServerIdParameter] == servers[1].Id
+                            && (int)j.JobDataMap[LibrarySyncJob.LibraryIdParameter] == secondServerLibrary.Id
+                        ),
+                        It.Is<ITrigger>(t =>
+                            t.JobKey.Equals(expectedJobKey)
+                            && t.Key.Name == $"{expectedJobKey.Name}_trigger"
+                            && t.Key.Group == expectedJobKey.Group
+                        ),
+                        It.IsAny<CancellationToken>()
+                    ),
+                Times.Once()
+            );
+        Mock.Mock<IScheduler>()
+            .Verify(
+                x =>
+                    x.ScheduleJob(
+                        It.Is<IJobDetail>(j => j.Key.Equals(existingJobKey)),
+                        It.IsAny<ITrigger>(),
+                        It.IsAny<CancellationToken>()
+                    ),
+                Times.Never()
+            );
+        Mock.Mock<IScheduler>()
+            .Verify(
+                x => x.ScheduleJob(It.IsAny<IJobDetail>(), It.IsAny<ITrigger>(), It.IsAny<CancellationToken>()),
+                Times.Once()
+            );
+    }
+
+    [Test]
+    public async Task ShouldKeepOfflineFlagForOfflineServerAndClearOnlineServer()
+    {
+        // Arrange
+        await SetupDatabase(
+            1015,
+            config =>
+            {
+                config.PlexServerCount = 2;
+                config.PlexMovieLibraryCount = 1;
+            }
+        );
+
+        var dbContext = IDbContext;
+        var servers = dbContext.PlexServers.ToList();
+        var libraries = dbContext.PlexLibraries.ToList();
+        var offlineServerLibrary = libraries.First(x => x.PlexServerId == servers[0].Id);
+        var onlineServerLibrary = libraries.First(x => x.PlexServerId == servers[1].Id);
+
+        await dbContext
+            .PlexServerStatuses.Where(x => x.PlexServerId == servers[0].Id)
+            .ExecuteDeleteAsync(CancellationToken);
+
+        await dbContext.LibrarySyncJobQueues.AddRangeAsync(
+            [
+                new LibrarySyncJobQueue
+                {
+                    PlexServerId = servers[0].Id,
+                    PlexLibraryId = offlineServerLibrary.Id,
+                    Priority = 1,
+                    Status = LibrarySyncJobStatus.Queued,
+                    CreatedAt = DateTime.UtcNow,
+                    IsServerOffline = true,
+                },
+                new LibrarySyncJobQueue
+                {
+                    PlexServerId = servers[1].Id,
+                    PlexLibraryId = onlineServerLibrary.Id,
+                    Priority = 1,
+                    Status = LibrarySyncJobStatus.Queued,
+                    CreatedAt = DateTime.UtcNow,
+                    IsServerOffline = true,
+                },
+            ],
+            CancellationToken
+        );
+        await dbContext.SaveChangesNewAsync(CancellationToken);
+
+        var onlineJobKey = LibrarySyncJob.GetJobKey(servers[1].Id, onlineServerLibrary.Id);
+        Mock.Mock<IScheduler>().Setup(x => x.CheckExists(onlineJobKey, It.IsAny<CancellationToken>())).ReturnsAsync(false);
+        Mock.Mock<IScheduler>()
+            .Setup(x => x.ScheduleJob(It.IsAny<IJobDetail>(), It.IsAny<ITrigger>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(DateTimeOffset.UtcNow);
+
+        var command = new CheckQueuedPlexLibraryToSyncCommand();
+
+        // Act
+        var result = await Sut.ExecuteAsync(command, CancellationToken);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        result.Errors.Count.ShouldBe(0);
+        var queueItems = await dbContext.LibrarySyncJobQueues.AsNoTracking().ToListAsync(CancellationToken);
+        queueItems.Count.ShouldBe(2);
+        var offlineItem = queueItems.First(x => x.PlexServerId == servers[0].Id);
+        offlineItem.PlexLibraryId.ShouldBe(offlineServerLibrary.Id);
+        offlineItem.Status.ShouldBe(LibrarySyncJobStatus.Queued);
+        offlineItem.IsServerOffline.ShouldBeTrue();
+        var onlineItem = queueItems.First(x => x.PlexServerId == servers[1].Id);
+        onlineItem.PlexLibraryId.ShouldBe(onlineServerLibrary.Id);
+        onlineItem.Status.ShouldBe(LibrarySyncJobStatus.Processing);
+        onlineItem.IsServerOffline.ShouldBeFalse();
+        Mock.Mock<IScheduler>().Verify(x => x.CheckExists(onlineJobKey, It.IsAny<CancellationToken>()), Times.Once());
+        Mock.Mock<IScheduler>()
+            .Verify(
+                x =>
+                    x.ScheduleJob(
+                        It.Is<IJobDetail>(j =>
+                            j.Key.Equals(onlineJobKey)
+                            && (int)j.JobDataMap[LibrarySyncJob.ServerIdParameter] == servers[1].Id
+                            && (int)j.JobDataMap[LibrarySyncJob.LibraryIdParameter] == onlineServerLibrary.Id
+                        ),
+                        It.Is<ITrigger>(t =>
+                            t.JobKey.Equals(onlineJobKey)
+                            && t.Key.Name == $"{onlineJobKey.Name}_trigger"
+                            && t.Key.Group == onlineJobKey.Group
+                        ),
+                        It.IsAny<CancellationToken>()
+                    ),
+                Times.Once()
+            );
+        Mock.Mock<IScheduler>()
+            .Verify(
+                x => x.ScheduleJob(It.IsAny<IJobDetail>(), It.IsAny<ITrigger>(), It.IsAny<CancellationToken>()),
+                Times.Once()
+            );
+    }
+
+    [Test]
     public async Task ShouldNotScheduleNonQueuedItems_WhenMixedStatusesExist()
     {
         // Arrange
@@ -579,14 +1011,14 @@ public class CheckQueuedPlexLibraryToSyncCommandHandlerUnitTests
             CreatedAt = DateTime.UtcNow,
         };
 
-        var processingItem = new LibrarySyncJobQueue
+        var cancelledItem = new LibrarySyncJobQueue
         {
             PlexServerId = server.Id,
             PlexLibraryId = libraries[1].Id,
             Priority = 1,
-            Status = LibrarySyncJobStatus.Processing,
+            Status = LibrarySyncJobStatus.Cancelled,
             CreatedAt = DateTime.UtcNow,
-            StartedAt = DateTime.UtcNow,
+            CompletedAt = DateTime.UtcNow,
         };
 
         var failedItem = new LibrarySyncJobQueue
@@ -610,10 +1042,10 @@ public class CheckQueuedPlexLibraryToSyncCommandHandlerUnitTests
         };
 
         await dbContext.LibrarySyncJobQueues.AddRangeAsync(
-            [queuedItem, processingItem, failedItem, completedItem],
+            [queuedItem, cancelledItem, failedItem, completedItem],
             CancellationToken
         );
-        await dbContext.SaveChangesAsync(CancellationToken);
+        await dbContext.SaveChangesNewAsync(CancellationToken);
 
         var expectedJobKey = LibrarySyncJob.GetJobKey(server.Id, libraries[0].Id);
         Mock.Mock<IScheduler>()

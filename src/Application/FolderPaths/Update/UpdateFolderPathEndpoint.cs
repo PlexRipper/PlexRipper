@@ -64,7 +64,7 @@ public class UpdateFolderPathEndpoint : Endpoint<UpdateFolderPathEndpointRequest
         }
 
         _dbContext.Entry(folderPathDb).CurrentValues.SetValues(folderPath);
-        await _dbContext.SaveChangesAsync(ct);
+        await _dbContext.SaveChangesNewAsync(ct);
 
         await Send.FluentResult(Result.Ok(folderPathDb), path => path.ToDTO(), ct);
     }

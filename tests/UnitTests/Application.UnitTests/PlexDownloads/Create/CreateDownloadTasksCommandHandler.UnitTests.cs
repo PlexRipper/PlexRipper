@@ -1,7 +1,12 @@
-﻿namespace Reaparr.Application.UnitTests;
+namespace Reaparr.Application.UnitTests;
 
 public class CreateDownloadTasksCommandHandlerUnitTests : BaseUnitTest<CreateDownloadTasksCommandHandler>
 {
+    private static readonly DownloadTaskCreationReport MoviesReport = new() { Movies = 3 };
+    private static readonly DownloadTaskCreationReport TvShowsReport = new() { TvShows = 2 };
+    private static readonly DownloadTaskCreationReport SeasonsReport = new() { Seasons = 4 };
+    private static readonly DownloadTaskCreationReport EpisodesReport = new() { Episodes = 10 };
+
     [Test]
     public void CreateDownloadTasksCommandValidator_ShouldRejectNullRequest()
     {
@@ -21,11 +26,11 @@ public class CreateDownloadTasksCommandHandlerUnitTests : BaseUnitTest<CreateDow
     public async Task ShouldGenerateAllDownloadTaskTypes_WhenAllMediaTypesAreGiven()
     {
         // Arrange
-        Mock.SetupCommand(It.IsAny<GenerateDownloadTaskMoviesCommand>).ReturnsAsync(Result.Ok());
-        Mock.SetupCommand(It.IsAny<GenerateDownloadTaskTvShowsCommand>).ReturnsAsync(Result.Ok());
-        Mock.SetupCommand(It.IsAny<GenerateDownloadTaskTvShowSeasonsCommand>).ReturnsAsync(Result.Ok());
+        Mock.SetupCommand(It.IsAny<GenerateDownloadTaskMoviesCommand>).ReturnsAsync(Result.Ok(MoviesReport));
+        Mock.SetupCommand(It.IsAny<GenerateDownloadTaskTvShowsCommand>).ReturnsAsync(Result.Ok(TvShowsReport));
+        Mock.SetupCommand(It.IsAny<GenerateDownloadTaskTvShowSeasonsCommand>).ReturnsAsync(Result.Ok(SeasonsReport));
         Mock.SetupCommand(It.IsAny<GenerateDownloadTaskTvShowEpisodesCommand>)
-            .ReturnsAsync(Result.Ok())
+            .ReturnsAsync(Result.Ok(EpisodesReport))
             .Verifiable(Times.Once());
         Mock.PublishEvent(It.IsAny<CheckDownloadQueueEvent>).Returns(Task.CompletedTask);
         Mock.Mock<INotificationHubService>()
@@ -78,6 +83,11 @@ public class CreateDownloadTasksCommandHandlerUnitTests : BaseUnitTest<CreateDow
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
+        result.Value.Movies.ShouldBe(3);
+        result.Value.TvShows.ShouldBe(2);
+        result.Value.Seasons.ShouldBe(4);
+        result.Value.Episodes.ShouldBe(10);
+        result.Value.Total.ShouldBe(19);
         Mock.Mock<ICommandExecutor>()
             .Verify(
                 x => x.Send(It.IsAny<GenerateDownloadTaskMoviesCommand>(), It.IsAny<CancellationToken>()),
@@ -105,11 +115,11 @@ public class CreateDownloadTasksCommandHandlerUnitTests : BaseUnitTest<CreateDow
     public async Task ShouldOnlyGenerateTvShowAndMoviesAndCallCheckDownloadQueue_WhenOnlyTvShowAndMovieMediaIdsAreGiven()
     {
         // Arrange
-        Mock.SetupCommand(It.IsAny<GenerateDownloadTaskMoviesCommand>).ReturnsAsync(Result.Ok());
-        Mock.SetupCommand(It.IsAny<GenerateDownloadTaskTvShowsCommand>).ReturnsAsync(Result.Ok());
-        Mock.SetupCommand(It.IsAny<GenerateDownloadTaskTvShowSeasonsCommand>).ReturnsAsync(Result.Ok());
+        Mock.SetupCommand(It.IsAny<GenerateDownloadTaskMoviesCommand>).ReturnsAsync(Result.Ok(MoviesReport));
+        Mock.SetupCommand(It.IsAny<GenerateDownloadTaskTvShowsCommand>).ReturnsAsync(Result.Ok(TvShowsReport));
+        Mock.SetupCommand(It.IsAny<GenerateDownloadTaskTvShowSeasonsCommand>).ReturnsAsync(Result.Ok(SeasonsReport));
         Mock.SetupCommand(It.IsAny<GenerateDownloadTaskTvShowEpisodesCommand>)
-            .ReturnsAsync(Result.Ok())
+            .ReturnsAsync(Result.Ok(EpisodesReport))
             .Verifiable(Times.Never());
         Mock.PublishEvent(It.IsAny<CheckDownloadQueueEvent>).Returns(Task.CompletedTask);
         Mock.Mock<INotificationHubService>()
@@ -146,6 +156,9 @@ public class CreateDownloadTasksCommandHandlerUnitTests : BaseUnitTest<CreateDow
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
+        result.Value.Movies.ShouldBe(3);
+        result.Value.TvShows.ShouldBe(2);
+        result.Value.Total.ShouldBe(5);
         Mock.Mock<ICommandExecutor>()
             .Verify(
                 x => x.Send(It.IsAny<GenerateDownloadTaskMoviesCommand>(), It.IsAny<CancellationToken>()),
@@ -168,11 +181,11 @@ public class CreateDownloadTasksCommandHandlerUnitTests : BaseUnitTest<CreateDow
     public async Task ShouldNotCallCheckDownloadQueue_WhenNoMediaIdsAreGiven()
     {
         // Arrange
-        Mock.SetupCommand(It.IsAny<GenerateDownloadTaskMoviesCommand>).ReturnsAsync(Result.Ok());
-        Mock.SetupCommand(It.IsAny<GenerateDownloadTaskTvShowsCommand>).ReturnsAsync(Result.Ok());
-        Mock.SetupCommand(It.IsAny<GenerateDownloadTaskTvShowSeasonsCommand>).ReturnsAsync(Result.Ok());
+        Mock.SetupCommand(It.IsAny<GenerateDownloadTaskMoviesCommand>).ReturnsAsync(Result.Ok(MoviesReport));
+        Mock.SetupCommand(It.IsAny<GenerateDownloadTaskTvShowsCommand>).ReturnsAsync(Result.Ok(TvShowsReport));
+        Mock.SetupCommand(It.IsAny<GenerateDownloadTaskTvShowSeasonsCommand>).ReturnsAsync(Result.Ok(SeasonsReport));
         Mock.SetupCommand(It.IsAny<GenerateDownloadTaskTvShowEpisodesCommand>)
-            .ReturnsAsync(Result.Ok())
+            .ReturnsAsync(Result.Ok(EpisodesReport))
             .Verifiable(Times.Never());
         Mock.PublishEvent(It.IsAny<CheckDownloadQueueEvent>).Returns(Task.CompletedTask);
         Mock.Mock<INotificationHubService>()
@@ -189,6 +202,7 @@ public class CreateDownloadTasksCommandHandlerUnitTests : BaseUnitTest<CreateDow
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
+        result.Value.Total.ShouldBe(0);
         Mock.Mock<ICommandExecutor>()
             .Verify(
                 x => x.Send(It.IsAny<GenerateDownloadTaskMoviesCommand>(), It.IsAny<CancellationToken>()),
@@ -219,9 +233,9 @@ public class CreateDownloadTasksCommandHandlerUnitTests : BaseUnitTest<CreateDow
         Mock.SetupCommand(It.IsAny<GenerateDownloadTaskMoviesCommand>)
             .ReturnsAsync(Result.Fail("Movie generation failed"))
             .Verifiable(Times.Once());
-        Mock.SetupCommand(It.IsAny<GenerateDownloadTaskTvShowsCommand>).ReturnsAsync(Result.Ok());
-        Mock.SetupCommand(It.IsAny<GenerateDownloadTaskTvShowSeasonsCommand>).ReturnsAsync(Result.Ok());
-        Mock.SetupCommand(It.IsAny<GenerateDownloadTaskTvShowEpisodesCommand>).ReturnsAsync(Result.Ok());
+        Mock.SetupCommand(It.IsAny<GenerateDownloadTaskTvShowsCommand>).ReturnsAsync(Result.Ok(TvShowsReport));
+        Mock.SetupCommand(It.IsAny<GenerateDownloadTaskTvShowSeasonsCommand>).ReturnsAsync(Result.Ok(SeasonsReport));
+        Mock.SetupCommand(It.IsAny<GenerateDownloadTaskTvShowEpisodesCommand>).ReturnsAsync(Result.Ok(EpisodesReport));
         Mock.PublishEvent(It.IsAny<CheckDownloadQueueEvent>).Returns(Task.CompletedTask);
         Mock.Mock<INotificationHubService>()
             .Setup(x =>

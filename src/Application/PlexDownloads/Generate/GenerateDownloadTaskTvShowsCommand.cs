@@ -1,6 +1,6 @@
 namespace Reaparr.Application;
 
-public record GenerateDownloadTaskTvShowsCommand : ICommand<Result>
+public record GenerateDownloadTaskTvShowsCommand : ICommand<Result<DownloadTaskCreationReport>>
 {
     public GenerateDownloadTaskTvShowsCommand(CreateDownloadTasksRequest request)
     {
@@ -30,7 +30,8 @@ public class GenerateDownloadTaskTvShowsCommandValidator : AbstractValidator<Gen
     }
 }
 
-public class GenerateDownloadTaskTvShowsCommandHandler : ICommandHandler<GenerateDownloadTaskTvShowsCommand, Result>
+public class GenerateDownloadTaskTvShowsCommandHandler
+    : ICommandHandler<GenerateDownloadTaskTvShowsCommand, Result<DownloadTaskCreationReport>>
 {
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
@@ -47,7 +48,7 @@ public class GenerateDownloadTaskTvShowsCommandHandler : ICommandHandler<Generat
         _commandExecutor = commandExecutor;
     }
 
-    public async Task<Result> ExecuteAsync(
+    public async Task<Result<DownloadTaskCreationReport>> ExecuteAsync(
         GenerateDownloadTaskTvShowsCommand command,
         CancellationToken cancellationToken
     )
@@ -63,6 +64,8 @@ public class GenerateDownloadTaskTvShowsCommandHandler : ICommandHandler<Generat
                 plexTvShowList.SelectMany(x => x.MediaIds).Distinct().Count()
             );
 
+        var report = new DownloadTaskCreationReport();
+
         foreach (var downloadMediaDto in plexTvShowList)
         {
             var mediaIds = downloadMediaDto.MediaIds.Distinct().ToList();
@@ -73,8 +76,6 @@ public class GenerateDownloadTaskTvShowsCommandHandler : ICommandHandler<Generat
 
             var seasonsIds = new List<DownloadMediaDTO>();
             var tvShowsToInsert = new List<DownloadTaskTvShow>();
-
-            await using var transaction = await _dbContext.BeginTransactionAsync(cancellationToken);
 
             foreach (var tvShow in plexTvShows)
             {
@@ -105,14 +106,12 @@ public class GenerateDownloadTaskTvShowsCommandHandler : ICommandHandler<Generat
             }
 
             // Insert the tvShowDownloadTask into the database
+            report = report with { TvShows = report.TvShows + tvShowsToInsert.Count };
             _dbContext.DownloadTaskTvShow.AddRange(tvShowsToInsert);
-            await _dbContext.SaveChangesAsync(cancellationToken);
+            await _dbContext.SaveChangesNewAsync(cancellationToken);
 
             if (seasonsIds.Count == 0)
-            {
-                await transaction.CommitAsync(cancellationToken);
                 continue;
-            }
 
             // Create seasons downloadTasks
             var seasonsResult = await _commandExecutor.Send(
@@ -128,9 +127,9 @@ public class GenerateDownloadTaskTvShowsCommandHandler : ICommandHandler<Generat
             if (seasonsResult.IsFailed)
                 return seasonsResult.LogError();
 
-            await transaction.CommitAsync(cancellationToken);
+            report += seasonsResult.Value;
         }
 
-        return Result.Ok();
+        return Result.Ok(report);
     }
 }

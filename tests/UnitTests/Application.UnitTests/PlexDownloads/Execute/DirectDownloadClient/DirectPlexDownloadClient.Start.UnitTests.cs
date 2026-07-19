@@ -526,7 +526,7 @@ public class DirectPlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDow
         // Remove all server connections so GetDownloadUrl cannot choose a connection
         var connections = await dbContext.PlexServerConnections.ToListAsync(CancellationToken);
         dbContext.PlexServerConnections.RemoveRange(connections);
-        await dbContext.SaveChangesAsync(CancellationToken);
+        await dbContext.SaveChangesNewAsync(CancellationToken);
 
         var serverMachineIdentifier = await dbContext.GetPlexServerMachineIdentifierById(downloadTask.PlexServerId);
 

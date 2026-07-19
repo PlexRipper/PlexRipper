@@ -83,7 +83,7 @@ public class SetPreferredPlexServerConnectionEndpoint
 
         plexServer.PreferredConnectionId = plexServerConnectionId;
 
-        await _dbContext.SaveChangesAsync(ct);
+        await _dbContext.SaveChangesNewAsync(ct);
 
         await Send.FluentResult(Result.Ok(), ct);
     }

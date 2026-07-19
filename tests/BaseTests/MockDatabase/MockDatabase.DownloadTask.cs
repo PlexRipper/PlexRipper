@@ -95,7 +95,7 @@ public static partial class MockDatabase
         ApplyIntegrationTestPaths(downloadTasks, pathProvider, appRuntimeInfo);
 
         context.DownloadTaskMovie.AddRange(downloadTasks);
-        await context.SaveChangesAsync();
+        await context.SaveChangesNewAsync();
 
         _log.Here()
             .Debug(
@@ -134,7 +134,7 @@ public static partial class MockDatabase
         ApplyIntegrationTestPaths(downloadTasks, pathProvider, appRuntimeInfo);
 
         context.DownloadTaskTvShow.AddRange(downloadTasks);
-        await context.SaveChangesAsync();
+        await context.SaveChangesNewAsync();
 
         _log.Here()
             .Debug(

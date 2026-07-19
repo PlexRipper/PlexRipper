@@ -109,6 +109,17 @@
           "NetTopologySuite.IO.SpatiaLite": "2.0.0"
         }
       },
+      "EntityFrameworkCore.Sqlite.Concurrency": {
+        "type": "Transitive",
+        "resolved": "10.1.0",
+        "contentHash": "qx1w1c2WMJVIJzcle6zuma6IRY6N8iLt5zyqrjDGR6jhB5Xp0229XMVCF1QGHTkzzbdNNddd4F+wsaq/SyBoVw==",
+        "dependencies": {
+          "Microsoft.Data.Sqlite": "10.0.9",
+          "Microsoft.EntityFrameworkCore.Sqlite": "10.0.9",
+          "Microsoft.Extensions.DependencyInjection": "10.0.9",
+          "Microsoft.Extensions.Logging.Abstractions": "10.0.9"
+        }
+      },
       "FastEndpoints": {
         "type": "Transitive",
         "resolved": "8.1.0",
@@ -354,6 +365,16 @@
           "Microsoft.VisualStudio.SolutionPersistence": "1.0.52",
           "Newtonsoft.Json": "13.0.3",
           "System.Composition": "9.0.0"
+        }
+      },
+      "Microsoft.Data.Sqlite": {
+        "type": "Transitive",
+        "resolved": "10.0.9",
+        "contentHash": "/eBwiZPcNisn0qZX+Zk4YCftlK/vnoWqv7hHnmSk8MjPxFdYYkmPObpogT0MfCCWN6oAIZnMCo0SoOtZlbbmgQ==",
+        "dependencies": {
+          "Microsoft.Data.Sqlite.Core": "10.0.9",
+          "SQLitePCLRaw.bundle_e_sqlite3": "2.1.11",
+          "SQLitePCLRaw.core": "2.1.11"
         }
       },
       "Microsoft.Data.Sqlite.Core": {
@@ -864,10 +885,13 @@
         "type": "Project",
         "dependencies": {
           "EFCore.BulkExtensions.SQLite": "[10.0.1, )",
+          "EntityFrameworkCore.Sqlite.Concurrency": "[10.1.0, )",
           "FlexQuery.NET.EFCore": "[2.5.0, )",
           "Microsoft.EntityFrameworkCore": "[10.0.9, )",
+          "Microsoft.EntityFrameworkCore.Sqlite": "[10.0.9, )",
           "Reaparr.Application.Contracts": "[1.0.0, )",
-          "Reaparr.Domain": "[1.0.0, )"
+          "Reaparr.Domain": "[1.0.0, )",
+          "SQLitePCLRaw.lib.e_sqlite3": "[2.1.12, )"
         }
       },
       "Reaparr.Domain": {

@@ -70,6 +70,21 @@ public class CheckQueuedPlexLibraryToSyncCommandHandler : ICommandHandler<CheckQ
                 continue;
             }
 
+            var hasProcessingLibrary = await _dbContext.LibrarySyncJobQueues.AnyAsync(
+                x => x.PlexServerId == serverId && x.Status == LibrarySyncJobStatus.Processing,
+                cancellationToken
+            );
+
+            if (hasProcessingLibrary)
+            {
+                _log.Here()
+                    .Debug(
+                        "Skipping queued library syncs for server {ServerId} because another library is already processing",
+                        serverId
+                    );
+                continue;
+            }
+
             await _dbContext
                 .LibrarySyncJobQueues.Where(x =>
                     x.PlexServerId == serverId && x.Status == LibrarySyncJobStatus.Queued && x.IsServerOffline
@@ -78,13 +93,13 @@ public class CheckQueuedPlexLibraryToSyncCommandHandler : ICommandHandler<CheckQ
 
             var nextLibrary = serverGroup.OrderBy(x => x.Priority).First();
 
-            await ScheduleLibrarySyncJob(serverId, nextLibrary.PlexLibraryId);
+            await ScheduleLibrarySyncJob(serverId, nextLibrary.PlexLibraryId, cancellationToken);
         }
 
         return Result.Ok();
     }
 
-    private async Task ScheduleLibrarySyncJob(int serverId, int libraryId)
+    private async Task ScheduleLibrarySyncJob(int serverId, int libraryId, CancellationToken cancellationToken)
     {
         var jobKey = LibrarySyncJob.GetJobKey(serverId, libraryId);
 
@@ -108,9 +123,23 @@ public class CheckQueuedPlexLibraryToSyncCommandHandler : ICommandHandler<CheckQ
 
         var job = JobBuilder.Create<LibrarySyncJob>().WithIdentity(jobKey).SetJobData(jobDataMap).Build();
 
-        var trigger = TriggerBuilder.Create().WithIdentity($"{jobKey.Name}_trigger", jobKey.Group).StartNow().Build();
+        var trigger = TriggerBuilder.Create().WithIdentity($"{jobKey.Name}_trigger", jobKey.Group).ForJob(jobKey).StartNow().Build();
 
         await _scheduler.ScheduleJob(job, trigger);
+
+        // Mark the queue item as processing immediately to prevent
+        // CheckQueuedPlexLibraryToSync from scheduling another library
+        // for the same server before the job starts executing.
+        await _dbContext
+            .LibrarySyncJobQueues.Where(x =>
+                x.PlexServerId == serverId
+                && x.PlexLibraryId == libraryId
+                && x.Status == LibrarySyncJobStatus.Queued
+            )
+            .ExecuteUpdateAsync(
+                x => x.SetProperty(y => y.Status, LibrarySyncJobStatus.Processing),
+                cancellationToken
+            );
 
         _log.Here()
             .Debug("Scheduled library sync job for server {ServerId} and library {LibraryId}", serverId, libraryId);

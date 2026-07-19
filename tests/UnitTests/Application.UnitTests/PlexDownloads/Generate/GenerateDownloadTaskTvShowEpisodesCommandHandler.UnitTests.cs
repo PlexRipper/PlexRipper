@@ -31,7 +31,7 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandlerUnitTests
 
         // Act
         var command = new GenerateDownloadTaskTvShowEpisodesCommand(downloadMediaDtos);
-        var result = await TestHandlerExecuteAsync(command);
+        var result = await TestHandlerExecuteAsync<DownloadTaskCreationReport>(command);
 
         // Assert
         result.IsFailed.ShouldBeTrue();
@@ -75,7 +75,7 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandlerUnitTests
         // Act
         var request = new CreateDownloadTasksRequest(downloadMediaDtos, 99);
         var command = new GenerateDownloadTaskTvShowEpisodesCommand(request);
-        var result = await TestHandlerExecuteAsync(command);
+        var result = await TestHandlerExecuteAsync<DownloadTaskCreationReport>(command);
 
         // Assert
         result.IsSuccess.ShouldBeTrue(result.ToString());
@@ -133,7 +133,7 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandlerUnitTests
         // Create a download task for the TV-show
         var createdTvShowDownloadTask = plexTvShows.First().MapToDownloadTask();
         dbContext.DownloadTaskTvShow.Add(createdTvShowDownloadTask);
-        await dbContext.SaveChangesAsync(CancellationToken);
+        await dbContext.SaveChangesNewAsync(CancellationToken);
 
         var downloadMediaDtos = new List<DownloadMediaDTO>
         {
@@ -149,7 +149,7 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandlerUnitTests
 
         // Act
         var command = new GenerateDownloadTaskTvShowEpisodesCommand(downloadMediaDtos);
-        var result = await TestHandlerExecuteAsync(command);
+        var result = await TestHandlerExecuteAsync<DownloadTaskCreationReport>(command);
 
         // Assert
         result.IsSuccess.ShouldBeTrue(result.ToString());
@@ -202,7 +202,7 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandlerUnitTests
 
         // Act
         var command = new GenerateDownloadTaskTvShowEpisodesCommand(downloadMediaDtos);
-        var result = await TestHandlerExecuteAsync(command);
+        var result = await TestHandlerExecuteAsync<DownloadTaskCreationReport>(command);
 
         // Assert
         result.IsSuccess.ShouldBeTrue(result.ToString());
@@ -250,7 +250,7 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandlerUnitTests
 
         // Act
         var command = new GenerateDownloadTaskTvShowEpisodesCommand(downloadMediaDtos);
-        var result = await TestHandlerExecuteAsync(command);
+        var result = await TestHandlerExecuteAsync<DownloadTaskCreationReport>(command);
 
         // Assert
         result.IsSuccess.ShouldBeTrue(result.ToString());
@@ -309,7 +309,7 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandlerUnitTests
         episodeDownloadTask.ShouldNotBeNull();
         episodeDownloadTask.UpdateInitProperty(nameof(episodeDownloadTask.PlexApiRatingKey), episode.PlexApiRatingKey);
 
-        await dbContext.SaveChangesAsync(CancellationToken);
+        await dbContext.SaveChangesNewAsync(CancellationToken);
 
         // Act
         var downloadMediaDtos = new List<DownloadMediaDTO>
@@ -324,7 +324,7 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandlerUnitTests
             },
         };
         var command = new GenerateDownloadTaskTvShowEpisodesCommand(downloadMediaDtos);
-        var result = await TestHandlerExecuteAsync(command);
+        var result = await TestHandlerExecuteAsync<DownloadTaskCreationReport>(command);
 
         // Assert
         result.IsSuccess.ShouldBeTrue(result.ToString());
@@ -380,7 +380,7 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandlerUnitTests
 
         // Act
         var command = new GenerateDownloadTaskTvShowEpisodesCommand(downloadMediaDtos);
-        var result = await TestHandlerExecuteAsync(command);
+        var result = await TestHandlerExecuteAsync<DownloadTaskCreationReport>(command);
 
         // Assert
         result.IsSuccess.ShouldBeTrue(result.ToString());
@@ -456,7 +456,7 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandlerUnitTests
 
         // Act
         var command = new GenerateDownloadTaskTvShowEpisodesCommand(downloadMediaDtos);
-        var result = await TestHandlerExecuteAsync(command);
+        var result = await TestHandlerExecuteAsync<DownloadTaskCreationReport>(command);
 
         // Assert
         result.IsSuccess.ShouldBeTrue(result.ToString());
@@ -510,7 +510,7 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandlerUnitTests
         // Act
         var request = new CreateDownloadTasksRequest(downloadMediaDtos, customDestinationFolderId);
         var command = new GenerateDownloadTaskTvShowEpisodesCommand(request);
-        var result = await TestHandlerExecuteAsync(command);
+        var result = await TestHandlerExecuteAsync<DownloadTaskCreationReport>(command);
 
         // Assert
         result.IsSuccess.ShouldBeTrue(result.ToString());
@@ -564,7 +564,7 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandlerUnitTests
         // Act
         var request = new CreateDownloadTasksRequest(downloadMediaDtos, null, customPath);
         var command = new GenerateDownloadTaskTvShowEpisodesCommand(request);
-        var result = await TestHandlerExecuteAsync(command);
+        var result = await TestHandlerExecuteAsync<DownloadTaskCreationReport>(command);
 
         // Assert
         result.IsSuccess.ShouldBeTrue(result.ToString());
@@ -597,7 +597,7 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandlerUnitTests
 
         // Act
         var command = new GenerateDownloadTaskTvShowEpisodesCommand(downloadMediaDtos);
-        var result = await TestHandlerExecuteAsync(command);
+        var result = await TestHandlerExecuteAsync<DownloadTaskCreationReport>(command);
 
         // Assert
         result.IsFailed.ShouldBeTrue();
@@ -637,7 +637,7 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandlerUnitTests
 
         // Act
         var command = new GenerateDownloadTaskTvShowEpisodesCommand(downloadMediaDtos);
-        var result = await TestHandlerExecuteAsync(command);
+        var result = await TestHandlerExecuteAsync<DownloadTaskCreationReport>(command);
 
         // Assert
         result.IsSuccess.ShouldBeTrue(result.ToString());

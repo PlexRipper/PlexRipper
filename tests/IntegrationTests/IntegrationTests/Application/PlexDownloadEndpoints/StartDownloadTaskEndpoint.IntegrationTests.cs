@@ -64,7 +64,7 @@ public class StartDownloadTaskEndpointIntegrationTests : BaseIntegrationTests
             StartDownloadTaskEndpoint,
             StartDownloadTaskEndpointRequest,
             BaseResultDTO
-        >(new StartDownloadTaskEndpointRequest(downloadTask.Id));
+        >(new StartDownloadTaskEndpointRequest { DownloadTaskGuid = downloadTask.Id });
 
         // Assert
         testResult.Response.IsSuccessStatusCode.ShouldBeTrue(
@@ -171,7 +171,7 @@ public class StartDownloadTaskEndpointIntegrationTests : BaseIntegrationTests
             StartDownloadTaskEndpoint,
             StartDownloadTaskEndpointRequest,
             BaseResultDTO
-        >(new StartDownloadTaskEndpointRequest(downloadTask.Id));
+        >(new StartDownloadTaskEndpointRequest { DownloadTaskGuid = downloadTask.Id });
         testResult.Response.IsSuccessStatusCode.ShouldBeTrue(
             await testResult.Response.Content.ReadAsStringAsync(CancellationToken)
         );

@@ -70,7 +70,7 @@ public class CreateDownloadTasksEndpointIntegrationTests : BaseIntegrationTests
         var testResult = await client.POSTAsync<
             CreateDownloadTasksEndpoint,
             CreateDownloadTasksEndpointRequest,
-            BaseResultDTO
+            ResultDTO<DownloadTaskCreationReportDTO>
         >(new CreateDownloadTasksEndpointRequest { Request = new CreateDownloadTasksRequest(dtoList) });
         testResult.Response.IsSuccessStatusCode.ShouldBeTrue(
             $"Response status code was {testResult.Response.StatusCode}"
@@ -94,6 +94,8 @@ public class CreateDownloadTasksEndpointIntegrationTests : BaseIntegrationTests
         // Assert - verify API response
         var result = testResult.Result;
         result.IsSuccess.ShouldBeTrue();
+        result.Value.ShouldNotBeNull();
+        result.Value.Total.ShouldBeGreaterThan(0);
 
         var downloadTasksDb = await container.DbContext.GetAllDownloadTasksByServerAsync(
             cancellationToken: CancellationToken

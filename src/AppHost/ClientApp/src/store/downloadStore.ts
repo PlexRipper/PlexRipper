@@ -9,12 +9,14 @@ import {
 	type BaseResultDTO,
 	type CreateDownloadTasksRequest,
 	DownloadActions,
-	type DownloadMediaDTO, type DownloadPreviewContainerDTO,
+	type DownloadMediaDTO,
+	type DownloadPreviewContainerDTO,
 	type DownloadPatchMessagePackDTO,
 	type DownloadProgressDTO,
 	DownloadStatus,
 	type PlexServerDTO,
-	type ServerDownloadProgressDTO, RefreshDataType,
+	type ServerDownloadProgressDTO,
+	RefreshDataType,
 } from '@dto';
 import { StoreNames, type IDownloadsSelection, type IPTreeTableSelectionKeys, type ISetupResult } from '@interfaces';
 import { downloadApi } from '@api';
@@ -28,15 +30,15 @@ interface IDownloadsStoreState {
 
 export const useDownloadStore = defineStore(StoreNames.DownloadStore, () => {
 	const defaultState: IDownloadsStoreState = {
-		serverDownloads: [],
-		selected: [],
-		latestPatchSequenceByServer: {},
+		serverDownloads: [], selected: [], latestPatchSequenceByServer: {},
 	};
 
 	const state = reactive<IDownloadsStoreState>(cloneDeep(defaultState));
 
 	const signalRStore = useSignalrStore();
 	const serverStore = useServerStore();
+	const { $i18n } = useNuxtApp();
+	const { t } = $i18n;
 
 	// Actions
 	const actions = {
@@ -47,28 +49,26 @@ export const useDownloadStore = defineStore(StoreNames.DownloadStore, () => {
 				.pipe(switchMap(() => actions.fetchDownloadList()))
 				.subscribe();
 
-			return actions.fetchDownloadList().pipe(switchMap(() => of({ name: StoreNames.DownloadStore, isSuccess: true })));
+			return actions.fetchDownloadList().pipe(switchMap(() => of({
+				name: StoreNames.DownloadStore,
+				isSuccess: true,
+			})));
 		},
 		/**
-     * Fetch the download list from the API.
-     */
+         * Fetch the download list from the API.
+         */
 		fetchDownloadList() {
-			return downloadApi.getAllDownloadTasksEndpoint().pipe(
-				tap((downloads) => {
-					if (downloads.isSuccess) {
-						state.serverDownloads = downloads.value ?? [];
-					}
-				}),
-			);
+			return downloadApi.getAllDownloadTasksEndpoint().pipe(tap((downloads) => {
+				if (downloads.isSuccess) {
+					state.serverDownloads = downloads.value ?? [];
+				}
+			}));
 		},
 		executeDownloadCommand(action: DownloadActions, downloadTaskIds: string[], plexServerId?: number): Observable<BaseResultDTO> {
 			if (downloadTaskIds.length === 0 && action !== DownloadActions.Clear) {
 				Log.error(`No downloadTaskIds provided for action: ${action}`);
 				return of({
-					errors: [],
-					isSuccess: false,
-					statusCode: 400,
-					successes: [],
+					errors: [], isSuccess: false, statusCode: 400, successes: [],
 				} as BaseResultDTO);
 			}
 
@@ -77,10 +77,7 @@ export const useDownloadStore = defineStore(StoreNames.DownloadStore, () => {
 			if (!downloadTaskId && action !== DownloadActions.Clear && action !== DownloadActions.Delete) {
 				Log.error(`No downloadTaskId provided for action: ${action}`);
 				return of({
-					errors: [],
-					isSuccess: false,
-					statusCode: 400,
-					successes: [],
+					errors: [], isSuccess: false, statusCode: 400, successes: [],
 				} as BaseResultDTO);
 			}
 			const id = downloadTaskId as string;
@@ -127,9 +124,7 @@ export const useDownloadStore = defineStore(StoreNames.DownloadStore, () => {
 			}
 
 			const existing = state.serverDownloads[i]!;
-			const merged: DownloadProgressDTO[] = values(
-				merge(keyBy(existing.downloads ?? [], 'id'), keyBy(serverDownloadProgress.downloads ?? [], 'id')),
-			);
+			const merged: DownloadProgressDTO[] = values(merge(keyBy(existing.downloads ?? [], 'id'), keyBy(serverDownloadProgress.downloads ?? [], 'id')));
 
 			state.serverDownloads.splice(i, 1, {
 				...existing,
@@ -139,12 +134,10 @@ export const useDownloadStore = defineStore(StoreNames.DownloadStore, () => {
 			});
 		},
 		updateDownloadPatch(patch: DownloadPatchMessagePackDTO): void {
-			if (!patch)
-				return;
+			if (!patch) return;
 
 			const latest = state.latestPatchSequenceByServer[patch.serverId] ?? 0;
-			if (patch.sequence <= latest)
-				return;
+			if (patch.sequence <= latest) return;
 
 			state.latestPatchSequenceByServer[patch.serverId] = patch.sequence;
 
@@ -157,8 +150,7 @@ export const useDownloadStore = defineStore(StoreNames.DownloadStore, () => {
 			const serverDownload = state.serverDownloads[serverIndex]!;
 			let downloads = cloneDeep(serverDownload.downloads ?? []);
 
-			if (patch.deletedIds.length > 0)
-				downloads = removeDeleted(downloads, patch.deletedIds);
+			if (patch.deletedIds.length > 0) downloads = removeDeleted(downloads, patch.deletedIds);
 
 			for (const upsert of patch.upserts) {
 				const existingNode = findNodeById(downloads, upsert.id);
@@ -176,24 +168,122 @@ export const useDownloadStore = defineStore(StoreNames.DownloadStore, () => {
 			}
 
 			state.serverDownloads.splice(serverIndex, 1, {
-				...serverDownload,
-				downloads,
+				...serverDownload, downloads,
 			});
 		},
 		previewDownload(downloadMediaCommand: DownloadMediaDTO[]): Observable<DownloadPreviewContainerDTO | null> {
-			return downloadApi.getDownloadPreviewEndpoint(downloadMediaCommand).pipe(
-				map((response) => {
-					if (response && response.isSuccess) {
-						return response.value ?? null;
-					}
-					return null;
-				}),
-			);
+			return downloadApi.getDownloadPreviewEndpoint(downloadMediaCommand).pipe(map((response) => {
+				if (response && response.isSuccess) {
+					return response.value ?? null;
+				}
+				return null;
+			}));
 		},
 		downloadMedia(request: CreateDownloadTasksRequest): void {
 			downloadApi
 				.createDownloadTasksEndpoint(request)
-				.pipe(switchMap(() => actions.fetchDownloadList()))
+				.pipe(tap((result) => {
+					if (result.isSuccess && result.value) {
+						const { movies, tvShows, seasons, episodes } = result.value;
+						let message = t('general.download-notification.unknown');
+						if (movies > 0 && tvShows > 0) {
+							const variant = (movies > 1 ? 8 : 0) | (tvShows > 1 ? 4 : 0) | (seasons > 1 ? 2 : 0) | (episodes > 1 ? 1 : 0);
+							switch (variant) {
+								case 0:
+									message = t('general.download-notification.movie-and-tv-show-v0', { movies, shows: tvShows, seasons, episodes });
+									break;
+								case 1:
+									message = t('general.download-notification.movie-and-tv-show-v1', { movies, shows: tvShows, seasons, episodes });
+									break;
+								case 2:
+									message = t('general.download-notification.movie-and-tv-show-v2', { movies, shows: tvShows, seasons, episodes });
+									break;
+								case 3:
+									message = t('general.download-notification.movie-and-tv-show-v3', { movies, shows: tvShows, seasons, episodes });
+									break;
+								case 4:
+									message = t('general.download-notification.movie-and-tv-show-v4', { movies, shows: tvShows, seasons, episodes });
+									break;
+								case 5:
+									message = t('general.download-notification.movie-and-tv-show-v5', { movies, shows: tvShows, seasons, episodes });
+									break;
+								case 6:
+									message = t('general.download-notification.movie-and-tv-show-v6', { movies, shows: tvShows, seasons, episodes });
+									break;
+								case 7:
+									message = t('general.download-notification.movie-and-tv-show-v7', { movies, shows: tvShows, seasons, episodes });
+									break;
+								case 8:
+									message = t('general.download-notification.movie-and-tv-show-v8', { movies, shows: tvShows, seasons, episodes });
+									break;
+								case 9:
+									message = t('general.download-notification.movie-and-tv-show-v9', { movies, shows: tvShows, seasons, episodes });
+									break;
+								case 10:
+									message = t('general.download-notification.movie-and-tv-show-v10', { movies, shows: tvShows, seasons, episodes });
+									break;
+								case 11:
+									message = t('general.download-notification.movie-and-tv-show-v11', { movies, shows: tvShows, seasons, episodes });
+									break;
+								case 12:
+									message = t('general.download-notification.movie-and-tv-show-v12', { movies, shows: tvShows, seasons, episodes });
+									break;
+								case 13:
+									message = t('general.download-notification.movie-and-tv-show-v13', { movies, shows: tvShows, seasons, episodes });
+									break;
+								case 14:
+									message = t('general.download-notification.movie-and-tv-show-v14', { movies, shows: tvShows, seasons, episodes });
+									break;
+								case 15:
+									message = t('general.download-notification.movie-and-tv-show-v15', { movies, shows: tvShows, seasons, episodes });
+									break;
+							}
+						} else if (movies > 0) {
+							message = t('general.download-notification.movie', { count: movies }, { plural: movies });
+						} else if (tvShows > 0) {
+							const variant = (tvShows > 1 ? 4 : 0) | (seasons > 1 ? 2 : 0) | (episodes > 1 ? 1 : 0);
+							switch (variant) {
+								case 0:
+									message = t('general.download-notification.tv-show-detail-v0', { shows: tvShows, seasons, episodes });
+									break;
+								case 1:
+									message = t('general.download-notification.tv-show-detail-v1', { shows: tvShows, seasons, episodes });
+									break;
+								case 2:
+									message = t('general.download-notification.tv-show-detail-v2', { shows: tvShows, seasons, episodes });
+									break;
+								case 3:
+									message = t('general.download-notification.tv-show-detail-v3', { shows: tvShows, seasons, episodes });
+									break;
+								case 4:
+									message = t('general.download-notification.tv-show-detail-v4', { shows: tvShows, seasons, episodes });
+									break;
+								case 5:
+									message = t('general.download-notification.tv-show-detail-v5', { shows: tvShows, seasons, episodes });
+									break;
+								case 6:
+									message = t('general.download-notification.tv-show-detail-v6', { shows: tvShows, seasons, episodes });
+									break;
+								case 7:
+									message = t('general.download-notification.tv-show-detail-v7', { shows: tvShows, seasons, episodes });
+									break;
+							}
+						}
+
+						Notify.create({
+							type: 'positive',
+							message: message,
+							progress: true,
+							timeout: 3500,
+							icon: 'mdi-download',
+							position: 'top',
+							actions: [{
+								icon: 'mdi-close', color: 'white', round: true, handler: () => {
+								},
+							}],
+						});
+					}
+				}), switchMap(() => actions.fetchDownloadList()))
 				.subscribe();
 		},
 		setupSelection(serverId: number): void {
@@ -205,16 +295,11 @@ export const useDownloadStore = defineStore(StoreNames.DownloadStore, () => {
 				return [x, flatMapDeep(x.children, getLeafs)];
 			};
 
-			const allSelection: IPTreeTableSelectionKeys = flatMapDeep(downloads, getLeafs).reduce(
-				(a, v) => ({
-					...a,
-					[v.id]: {
-						checked: true,
-						partialChecked: false,
-					},
-				}),
-				{},
-			);
+			const allSelection: IPTreeTableSelectionKeys = flatMapDeep(downloads, getLeafs).reduce((a, v) => ({
+				...a, [v.id]: {
+					checked: true, partialChecked: false,
+				},
+			}), {});
 			state.selected.push({
 				plexServerId: serverId,
 				allSelection,
@@ -230,8 +315,7 @@ export const useDownloadStore = defineStore(StoreNames.DownloadStore, () => {
 			}
 			const current = state.selected[i]!;
 			state.selected.splice(i, 1, {
-				...current,
-				selection: value ? clone(current.allSelection) : {},
+				...current, selection: value ? clone(current.allSelection) : {},
 			});
 		},
 		updateSelectedDownloadTasks(serverId: number, selection: IPTreeTableSelectionKeys): void {
@@ -255,20 +339,17 @@ export const useDownloadStore = defineStore(StoreNames.DownloadStore, () => {
 
 	function findNodeById(nodes: DownloadProgressDTO[], id: string): DownloadProgressDTO | null {
 		for (const node of nodes) {
-			if (node.id === id)
-				return node;
+			if (node.id === id) return node;
 
 			const childNode = findNodeById(node.children ?? [], id);
-			if (childNode)
-				return childNode;
+			if (childNode) return childNode;
 		}
 
 		return null;
 	}
 
 	function removeDeleted(nodes: DownloadProgressDTO[], deletedIds: string[]): DownloadProgressDTO[] {
-		if (deletedIds.length === 0)
-			return nodes;
+		if (deletedIds.length === 0) return nodes;
 
 		const deletedSet = new Set(deletedIds);
 
@@ -281,8 +362,7 @@ export const useDownloadStore = defineStore(StoreNames.DownloadStore, () => {
 
 		const scanDeletedRoots = (items: DownloadProgressDTO[]) => {
 			for (const item of items) {
-				if (deletedSet.has(item.id))
-					collectChildrenIds(item);
+				if (deletedSet.has(item.id)) collectChildrenIds(item);
 
 				scanDeletedRoots(item.children ?? []);
 			}
@@ -294,8 +374,7 @@ export const useDownloadStore = defineStore(StoreNames.DownloadStore, () => {
 			return items
 				.filter((item) => !deletedSet.has(item.id))
 				.map((item) => ({
-					...item,
-					children: removeRecursive(item.children ?? []),
+					...item, children: removeRecursive(item.children ?? []),
 				}));
 		};
 
@@ -319,8 +398,7 @@ export const useDownloadStore = defineStore(StoreNames.DownloadStore, () => {
 
 			return plexServersWithDownloads.map((x) => {
 				return {
-					plexServer: x,
-					downloads: getters.getDownloadsByServerId(x.id),
+					plexServer: x, downloads: getters.getDownloadsByServerId(x.id),
 				};
 			}).filter((x) => x.downloads.length > 0);
 		}),
@@ -328,8 +406,8 @@ export const useDownloadStore = defineStore(StoreNames.DownloadStore, () => {
 			return getters.getDownloadsByServerId(serverId).flatMap((x) => x.children).flatMap((x) => x.children).flatMap((x) => x.children).filter((x) => x.status != DownloadStatus.Completed && x.status != DownloadStatus.Error);
 		},
 		/**
-     * Get the total number of download tasks that are downloadable in the download list.
-     */
+         * Get the total number of download tasks that are downloadable in the download list.
+         */
 		getTotalDownloadsCount: computed((): number => {
 			return sum(state.serverDownloads.flatMap((x) => x.downloadableTasksCount));
 		}),
@@ -352,9 +430,7 @@ export const useDownloadStore = defineStore(StoreNames.DownloadStore, () => {
 	};
 
 	return {
-		...toRefs(state),
-		...actions,
-		...getters,
+		...toRefs(state), ...actions, ...getters,
 	};
 });
 

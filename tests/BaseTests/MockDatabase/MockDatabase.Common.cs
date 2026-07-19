@@ -1,3 +1,4 @@
+using EntityFrameworkCore.Sqlite.Concurrency;
 using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.Logging;
 using NaturalSort.Extension;
@@ -8,12 +9,9 @@ public static partial class MockDatabase
 {
     private static readonly Serilog.ILogger _log = LogFactory.Create(typeof(MockDatabase));
 
-    // Unit tests run in parallel, but SQLite shared-cache in-memory migrations plus
-    // EFCore.BulkExtensions seed operations are not reliable when many test databases
-    // are being created at the same time. Without this gate, suite runs can leave
-    // partially seeded media graphs (for example movies without media data or TV shows
-    // rolled back after FK failures), while the same tests pass when run alone.
-    // Keep database names unique per test; only serialize the setup/migration phase.
+    // Unit tests run in parallel, but SQLite migrations plus EFCore.BulkExtensions
+    // seed operations are not reliable when many test databases are being created
+    // at the same time. Keep database paths unique per test; only serialize setup.
     private static readonly SemaphoreSlim _setupLock = new(1, 1);
 
     /// <summary>
@@ -45,7 +43,7 @@ public static partial class MockDatabase
             context.PlexServers.Add(plexServer);
         }
 
-        await context.SaveChangesAsync();
+        await context.SaveChangesNewAsync();
         var plexServers = await context.PlexServers.ToListAsync();
 
         // Add Connection to each server
@@ -57,7 +55,7 @@ public static partial class MockDatabase
             context.PlexServerConnections.AddRange(connections);
         }
 
-        await context.SaveChangesAsync();
+        await context.SaveChangesNewAsync();
         var plexConnections = await context.PlexServerConnections.ToListAsync();
 
         // Add status to each connection
@@ -69,7 +67,7 @@ public static partial class MockDatabase
             context.PlexServerStatuses.Add(status);
         }
 
-        await context.SaveChangesAsync();
+        await context.SaveChangesNewAsync();
 
         _log.Here()
             .Debug(
@@ -122,7 +120,7 @@ public static partial class MockDatabase
         }
 
         context.PlexLibraries.AddRange(plexLibrariesToDb);
-        await context.SaveChangesAsync();
+        await context.SaveChangesNewAsync();
         return context;
     }
 
@@ -141,7 +139,7 @@ public static partial class MockDatabase
             var plexAccount = FakeData.GetPlexAccount(seed).Generate();
 
             await context.PlexAccounts.AddAsync(plexAccount);
-            await context.SaveChangesAsync();
+            await context.SaveChangesNewAsync();
 
             _log.Here()
                 .Debug(
@@ -162,7 +160,7 @@ public static partial class MockDatabase
 
             // Add account -> server relation
             context.PlexAccountServers.AddRange(plexAccountServer);
-            await context.SaveChangesAsync();
+            await context.SaveChangesNewAsync();
 
             // Add account -> library relation
             var plexAccountLibraries = plexServers
@@ -177,7 +175,7 @@ public static partial class MockDatabase
             context.PlexAccountLibraries.AddRange(plexAccountLibraries);
         }
 
-        await context.SaveChangesAsync();
+        await context.SaveChangesNewAsync();
 
         return context;
     }
@@ -203,7 +201,7 @@ public static partial class MockDatabase
             );
 
         context.PlexAccountLibraries.AddRange(plexAccountLibraries);
-        await context.SaveChangesAsync();
+        await context.SaveChangesNewAsync();
         return context;
     }
 
@@ -241,18 +239,7 @@ public static partial class MockDatabase
         string dbName = ""
     )
     {
-        var optionsBuilder = new DbContextOptionsBuilder<ReaparrDbContext>();
-
-        SqliteConnection databaseConnection = new(DatabaseConnectionString(dbName));
-
-        databaseConnection.CreateCollation(OrderByNaturalExtensions.CollationName, _naturalComparer.Compare);
-
-        optionsBuilder.UseSqlite(databaseConnection);
-
-        optionsBuilder.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
-        optionsBuilder.EnableSensitiveDataLogging();
-        optionsBuilder.EnableDetailedErrors();
-        optionsBuilder.LogTo(text => LogFactory.DbContextLogger(text), LogLevel.Warning);
+        var optionsBuilder = GetDbContextOptionsBuilder<ReaparrDbContext>(dbName);
 
         return new ReaparrDbContext(optionsBuilder.Options, pathProvider, appRuntimeInfo, dbName);
     }
@@ -263,18 +250,7 @@ public static partial class MockDatabase
         string dbName = ""
     )
     {
-        var optionsBuilder = new DbContextOptionsBuilder<AuthDbContext>();
-
-        SqliteConnection databaseConnection = new(DatabaseConnectionString(dbName));
-
-        databaseConnection.CreateCollation(OrderByNaturalExtensions.CollationName, _naturalComparer.Compare);
-
-        optionsBuilder.UseSqlite(databaseConnection);
-
-        optionsBuilder.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
-        optionsBuilder.EnableSensitiveDataLogging();
-        optionsBuilder.EnableDetailedErrors();
-        optionsBuilder.LogTo(text => LogFactory.DbContextLogger(text), LogLevel.Warning);
+        var optionsBuilder = GetDbContextOptionsBuilder<AuthDbContext>(dbName);
 
         return new AuthDbContext(optionsBuilder.Options, pathProvider, appRuntimeInfo, dbName);
     }
@@ -286,7 +262,6 @@ public static partial class MockDatabase
             Mode = SqliteOpenMode.Memory,
             ForeignKeys = true,
             DataSource = dbName,
-            Cache = SqliteCacheMode.Shared,
         }.ToString();
 
     public static async Task Setup(
@@ -333,10 +308,12 @@ public static partial class MockDatabase
                 reaparrContext = await reaparrContext.AddPlexTvShows(seed, options);
 
             if (config.MovieDownloadTasksCount > 0)
-                reaparrContext = await reaparrContext.AddDownloadTaskMovies(seed, pathProvider, appRuntimeInfo, options);
+                reaparrContext =
+                    await reaparrContext.AddDownloadTaskMovies(seed, pathProvider, appRuntimeInfo, options);
 
             if (config.TvShowDownloadTasksCount > 0)
-                reaparrContext = await reaparrContext.AddDownloadTaskTvShows(seed, pathProvider, appRuntimeInfo, options);
+                reaparrContext =
+                    await reaparrContext.AddDownloadTaskTvShows(seed, pathProvider, appRuntimeInfo, options);
 
             if (config.AccountHasAccessToAllLibraries)
                 reaparrContext = await reaparrContext.AddPlexAccountLibraries();
@@ -352,6 +329,28 @@ public static partial class MockDatabase
     #endregion
 
     #endregion
+
+    private static DbContextOptionsBuilder<TContext> GetDbContextOptionsBuilder<TContext>(string dbName)
+        where TContext : DbContext
+    {
+        var optionsBuilder = new DbContextOptionsBuilder<TContext>();
+        var databaseConnectionString = DatabaseConnectionString(dbName);
+        optionsBuilder.AddInterceptors(new NaturalSortCollationInterceptor());
+        optionsBuilder.UseSqliteWithConcurrency(
+            databaseConnectionString,
+            options =>
+            {
+                options.BusyTimeout = TimeSpan.FromSeconds(5);
+                options.MaxRetryAttempts = 8;
+            }
+        );
+
+        optionsBuilder.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
+        optionsBuilder.EnableSensitiveDataLogging();
+        optionsBuilder.EnableDetailedErrors();
+        optionsBuilder.LogTo(text => LogFactory.DbContextLogger(text), LogLevel.Warning);
+        return optionsBuilder;
+    }
 
     #region Add Media
 

@@ -52,7 +52,7 @@ public class GenerateDownloadTaskTvShowSeasonsCommandUnitTests
 
         // Act
         var command = new GenerateDownloadTaskTvShowSeasonsCommand(new CreateDownloadTasksRequest(seasons));
-        var result = await TestHandlerExecuteAsync(command);
+        var result = await TestHandlerExecuteAsync<DownloadTaskCreationReport>(command);
 
         // Assert
         result.IsFailed.ShouldBeTrue();

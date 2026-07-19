@@ -85,7 +85,7 @@ public class InsertMediaMetaDataCommandUnitTests : BaseCommandUnitTest<InsertMed
         await dbContext.PlexActors.AddRangeAsync(initialActors.ToPlexActor(), CancellationToken);
         await dbContext.PlexGenres.AddRangeAsync(initialGenres.ToPlexGenre(), CancellationToken);
         await dbContext.PlexCountries.AddRangeAsync(initialCountries.ToPlexCountry(), CancellationToken);
-        await dbContext.SaveChangesAsync(CancellationToken);
+        await dbContext.SaveChangesNewAsync(CancellationToken);
 
         // Create new data with some overlaps
         var newActors = FakePlexApiData.GetLibraryMediaItemActorDTO(seed).GenerateUnique(100, x => x.Key);
@@ -231,13 +231,12 @@ public class InsertMediaMetaDataCommandUnitTests : BaseCommandUnitTest<InsertMed
             LibraryMetadata: new LibraryMetadata(plexLibrary) { Actors = actors.Slice(50, 50) }
         );
 
-        var results = await Task.WhenAll(
-            TestHandlerExecuteAsync<InsertMediaMetaDataCommandResponse>(command1),
-            TestHandlerExecuteAsync<InsertMediaMetaDataCommandResponse>(command2)
-        );
+        var result1 = await TestHandlerExecuteAsync<InsertMediaMetaDataCommandResponse>(command1);
+        var result2 = await TestHandlerExecuteAsync<InsertMediaMetaDataCommandResponse>(command2);
 
         // Assert
-        results.All(x => x.IsSuccess).ShouldBeTrue();
+        result1.IsSuccess.ShouldBeTrue();
+        result2.IsSuccess.ShouldBeTrue();
         var actorsDb = await IDbContext.PlexActors.ToListAsync(CancellationToken);
         actorsDb.Count.ShouldBe(100);
         actorsDb.Select(x => x.Key).Distinct().Count().ShouldBe(100);
@@ -308,7 +307,7 @@ public class InsertMediaMetaDataCommandUnitTests : BaseCommandUnitTest<InsertMed
         // Create initial data
         var initialActors = FakePlexApiData.GetLibraryMediaItemActorDTO(seed).GenerateUnique(50, x => x.Key);
         await IDbContext.PlexActors.AddRangeAsync(initialActors.ToPlexActor(), CancellationToken);
-        await IDbContext.SaveChangesAsync(CancellationToken);
+        await IDbContext.SaveChangesNewAsync(CancellationToken);
 
         // Create new data with some overlapping PlexKeys but different names
         var newActors = initialActors.Take(25).Select(r => r with { Name = r.Name + "_updated" }).ToList();

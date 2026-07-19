@@ -43,7 +43,7 @@ public static class DbContextConnections
             GetConnectionString(pathProvider),
             options =>
             {
-                options.BusyTimeout = TimeSpan.FromSeconds(120);
+                options.BusyTimeout = TimeSpan.FromSeconds(5);
                 options.MaxRetryAttempts = 8;
             }
         );

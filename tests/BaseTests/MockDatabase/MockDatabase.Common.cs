@@ -335,11 +335,15 @@ public static partial class MockDatabase
     {
         var optionsBuilder = new DbContextOptionsBuilder<TContext>();
         var databaseConnectionString = DatabaseConnectionString(dbName);
-        SqliteConnection databaseConnection = new(databaseConnectionString);
-
-        databaseConnection.CreateCollation(OrderByNaturalExtensions.CollationName, _naturalComparer.Compare);
         optionsBuilder.AddInterceptors(new NaturalSortCollationInterceptor());
-        optionsBuilder.UseSqliteWithConcurrency(databaseConnectionString);
+        optionsBuilder.UseSqliteWithConcurrency(
+            databaseConnectionString,
+            options =>
+            {
+                options.BusyTimeout = TimeSpan.FromSeconds(5);
+                options.MaxRetryAttempts = 8;
+            }
+        );
 
         optionsBuilder.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
         optionsBuilder.EnableSensitiveDataLogging();

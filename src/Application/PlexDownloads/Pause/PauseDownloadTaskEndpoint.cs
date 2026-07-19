@@ -3,9 +3,14 @@ namespace Reaparr.Application;
 /// <summary>
 /// Pause a currently downloading <see cref="DownloadTaskGeneric"/>.
 /// </summary>
-/// <param name="DownloadTaskGuid">The id of the <see cref="DownloadTaskGeneric"/> to pause.</param>
-/// <returns>Is successful.</returns>
-public record PauseDownloadTaskEndpointRequest(Guid DownloadTaskGuid);
+public record PauseDownloadTaskEndpointRequest
+{
+    /// <summary>
+    /// The id of the <see cref="DownloadTaskGeneric"/> to pause.
+    /// </summary>
+    [RouteParam, BindFrom("DownloadTaskGuid")]
+    public required Guid DownloadTaskGuid { get; init; }
+}
 
 public class PauseDownloadTaskEndpointRequestValidator : Validator<PauseDownloadTaskEndpointRequest>
 {

@@ -1,6 +1,13 @@
 namespace Reaparr.Application;
 
-public record RestartDownloadTaskEndpointRequest(Guid DownloadTaskGuid);
+/// <summary>
+/// Restart a currently downloading <see cref="DownloadTaskGeneric"/>.
+/// </summary>
+public record RestartDownloadTaskEndpointRequest
+{
+    [RouteParam, BindFrom("DownloadTaskGuid")]
+    public required Guid DownloadTaskGuid { get; init; }
+}
 
 public class RestartDownloadTaskEndpointRequestValidator : Validator<RestartDownloadTaskEndpointRequest>
 {

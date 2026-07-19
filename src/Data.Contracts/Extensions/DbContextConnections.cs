@@ -21,6 +21,7 @@ public static class DbContextConnections
             Pooling = true,
         }.ToString();
 
+
     public static void DefaultConfiguration(
         this DbContextOptionsBuilder optionsBuilder,
         IPathProvider pathProvider,

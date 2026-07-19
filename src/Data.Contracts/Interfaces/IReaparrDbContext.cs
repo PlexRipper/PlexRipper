@@ -151,12 +151,7 @@ public interface IReaparrDbContext : IDisposable
     Task<IDbContextTransaction> BeginTransactionAsync(CancellationToken cancellationToken = default);
     EntityEntry Entry(object entity);
 
-    int SaveChanges();
-
-    int SaveChanges(bool acceptAllChangesOnSuccess);
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
-
-    Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken);
 
     void ClearChangeTracker();
 }

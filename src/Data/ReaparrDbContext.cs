@@ -3,6 +3,7 @@ using System.Reflection;
 using AppAny.Quartz.EntityFrameworkCore.Migrations;
 using AppAny.Quartz.EntityFrameworkCore.Migrations.SQLite;
 using EFCore.BulkExtensions;
+using EntityFrameworkCore.Sqlite.Concurrency;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -290,4 +291,6 @@ public sealed class ReaparrDbContext : DbContext, IReaparrDbContext, IReaparrDbC
 
     /// <inheritdoc/>
     public IEnumerable<string> GetPendingMigrations() => Database.GetPendingMigrations();
+
+    public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = new()) => this.SaveChangesSerializedAsync(8, cancellationToken);
 }

@@ -281,6 +281,96 @@ public class AddOrUpdatePlexLibrariesCommandUnitTests : BaseUnitTest<AddOrUpdate
     }
 
     [Test]
+    public async Task ShouldNotMarkLibraryOutdated_WhenContentChangedButUpdatedBeforeLastSync()
+    {
+        // Arrange
+        await SetupDatabase(
+            33,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexMovieLibraryCount = 1;
+                config.PlexAccountCount = 1;
+            }
+        );
+
+        var dbContext = IDbContext;
+        var plexAccount = await dbContext.PlexAccounts.FirstAsync(CancellationToken);
+        var plexLibrary = await dbContext.PlexLibraries.AsTracking().SingleAsync(CancellationToken);
+        var syncedAt = DateTime.UtcNow - TimeSpan.FromHours(1);
+        var incomingUpdatedAt = syncedAt - TimeSpan.FromMinutes(5);
+        plexLibrary.SyncedAt = syncedAt;
+        plexLibrary.Outdated = false;
+        await dbContext.SaveChangesNewAsync(CancellationToken);
+
+        var incomingLibrary = new List<PlexLibrary> { plexLibrary }
+            .ToApiLibraries(incomingUpdatedAt, contentChangedAt: plexLibrary.ContentChangedAt + 1)
+            .Single();
+        var request = new AddOrUpdatePlexLibrariesCommand
+        {
+            PlexAccountId = plexAccount.Id,
+            PlexLibraries = [incomingLibrary],
+        };
+
+        // Act
+        var result = await Sut.ExecuteAsync(request, CancellationToken);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        result.Errors.Count.ShouldBe(0);
+        var updatedLibrary = await dbContext.PlexLibraries.AsNoTracking().SingleAsync(CancellationToken);
+        updatedLibrary.UpdatedAt.ShouldBe(incomingUpdatedAt);
+        updatedLibrary.SyncedAt.ShouldBe(syncedAt);
+        updatedLibrary.ContentChangedAt.ShouldBe(incomingLibrary.ContentChangedAt);
+        updatedLibrary.Outdated.ShouldBeFalse();
+    }
+
+    [Test]
+    public async Task ShouldMarkLibraryOutdated_WhenContentChangedAfterLastSync()
+    {
+        // Arrange
+        await SetupDatabase(
+            34,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexMovieLibraryCount = 1;
+                config.PlexAccountCount = 1;
+            }
+        );
+
+        var dbContext = IDbContext;
+        var plexAccount = await dbContext.PlexAccounts.FirstAsync(CancellationToken);
+        var plexLibrary = await dbContext.PlexLibraries.AsTracking().SingleAsync(CancellationToken);
+        var syncedAt = DateTime.UtcNow - TimeSpan.FromHours(2);
+        var incomingUpdatedAt = syncedAt + TimeSpan.FromMinutes(5);
+        plexLibrary.SyncedAt = syncedAt;
+        plexLibrary.Outdated = false;
+        await dbContext.SaveChangesNewAsync(CancellationToken);
+
+        var incomingLibrary = new List<PlexLibrary> { plexLibrary }
+            .ToApiLibraries(incomingUpdatedAt, contentChangedAt: plexLibrary.ContentChangedAt + 1)
+            .Single();
+        var request = new AddOrUpdatePlexLibrariesCommand
+        {
+            PlexAccountId = plexAccount.Id,
+            PlexLibraries = [incomingLibrary],
+        };
+
+        // Act
+        var result = await Sut.ExecuteAsync(request, CancellationToken);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        result.Errors.Count.ShouldBe(0);
+        var updatedLibrary = await dbContext.PlexLibraries.AsNoTracking().SingleAsync(CancellationToken);
+        updatedLibrary.UpdatedAt.ShouldBe(incomingUpdatedAt);
+        updatedLibrary.SyncedAt.ShouldBe(syncedAt);
+        updatedLibrary.ContentChangedAt.ShouldBe(incomingLibrary.ContentChangedAt);
+        updatedLibrary.Outdated.ShouldBeTrue();
+    }
+
+    [Test]
     public async Task ShouldPreserveComputedLibraryMetrics_WhenIncomingPlexLibraryRefreshContainsDefaultMetrics()
     {
         // Arrange

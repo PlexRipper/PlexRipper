@@ -33,6 +33,7 @@ public class QueueLibrarySyncJobCommandHandler : ICommandHandler<QueueLibrarySyn
                 x.Id,
                 x.PlexServerId,
                 x.Type,
+                x.SyncedAt,
             })
             .ToListAsync(cancellationToken);
 
@@ -46,13 +47,13 @@ public class QueueLibrarySyncJobCommandHandler : ICommandHandler<QueueLibrarySyn
             .LibrarySyncJobQueues.Where(x => command.PlexLibraryIds.Contains(x.PlexLibraryId))
             .ToListAsync(cancellationToken: cancellationToken);
 
+        var syncBufferCutoff = DateTime.UtcNow.AddHours(-3);
+
         // Get IDs of items to reset (completed/failed)
         var itemsToReset = existingQueues
             .Where(x =>
-                x.Status
-                    is LibrarySyncJobStatus.Failed
-                        or LibrarySyncJobStatus.Cancelled
-                        or LibrarySyncJobStatus.Completed
+                x.Status is LibrarySyncJobStatus.Failed or LibrarySyncJobStatus.Cancelled
+                || (x.Status == LibrarySyncJobStatus.Completed && x.CompletedAt <= syncBufferCutoff)
             )
             .Select(x => x.PlexLibraryId)
             .ToList();
@@ -84,6 +85,7 @@ public class QueueLibrarySyncJobCommandHandler : ICommandHandler<QueueLibrarySyn
         // Add new items (excluding ALL existing ones, including those we just reset)
         var itemsToAdd = libraries
             .Where(x => !existingLibraryIds.Contains(x.Id))
+            .Where(x => x.SyncedAt is null || x.SyncedAt <= syncBufferCutoff)
             .Select(x => new LibrarySyncJobQueue
             {
                 PlexLibraryId = x.Id,
@@ -111,7 +113,8 @@ public class QueueLibrarySyncJobCommandHandler : ICommandHandler<QueueLibrarySyn
                 );
         }
 
-        await _commandExecutor.Send(new CheckQueuedPlexLibraryToSyncCommand(), cancellationToken);
+        if (itemsToAdd.Any() || itemsToReset.Any() || queuedOrProcessingIds.Any())
+            await _commandExecutor.Send(new CheckQueuedPlexLibraryToSyncCommand(), cancellationToken);
 
         return Result.Ok();
     }

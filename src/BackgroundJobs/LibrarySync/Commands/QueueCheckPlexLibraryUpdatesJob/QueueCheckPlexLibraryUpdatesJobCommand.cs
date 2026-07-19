@@ -27,7 +27,7 @@ public class QueueCheckPlexLibraryUpdatesJobCommandHandler
     {
         var key = CheckPlexLibrariesForUpdatesJob.GetJobKey();
 
-        const int intervalHours = 1;
+        const int intervalHours = 3;
 
         if (await _scheduler.CheckExists(key, cancellationToken))
         {

@@ -70,6 +70,21 @@ public class CheckQueuedPlexLibraryToSyncCommandHandler : ICommandHandler<CheckQ
                 continue;
             }
 
+            var hasProcessingLibrary = await _dbContext.LibrarySyncJobQueues.AnyAsync(
+                x => x.PlexServerId == serverId && x.Status == LibrarySyncJobStatus.Processing,
+                cancellationToken
+            );
+
+            if (hasProcessingLibrary)
+            {
+                _log.Here()
+                    .Debug(
+                        "Skipping queued library syncs for server {ServerId} because another library is already processing",
+                        serverId
+                    );
+                continue;
+            }
+
             await _dbContext
                 .LibrarySyncJobQueues.Where(x =>
                     x.PlexServerId == serverId && x.Status == LibrarySyncJobStatus.Queued && x.IsServerOffline

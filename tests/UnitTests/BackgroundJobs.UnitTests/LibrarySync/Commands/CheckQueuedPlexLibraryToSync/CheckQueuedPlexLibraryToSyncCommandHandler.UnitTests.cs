@@ -957,7 +957,7 @@ public class CheckQueuedPlexLibraryToSyncCommandHandlerUnitTests
         offlineItem.IsServerOffline.ShouldBeTrue();
         var onlineItem = queueItems.First(x => x.PlexServerId == servers[1].Id);
         onlineItem.PlexLibraryId.ShouldBe(onlineServerLibrary.Id);
-        onlineItem.Status.ShouldBe(LibrarySyncJobStatus.Queued);
+        onlineItem.Status.ShouldBe(LibrarySyncJobStatus.Processing);
         onlineItem.IsServerOffline.ShouldBeFalse();
         Mock.Mock<IScheduler>().Verify(x => x.CheckExists(onlineJobKey, It.IsAny<CancellationToken>()), Times.Once());
         Mock.Mock<IScheduler>()

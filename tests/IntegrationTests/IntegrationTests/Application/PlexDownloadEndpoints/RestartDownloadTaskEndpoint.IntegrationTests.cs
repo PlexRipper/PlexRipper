@@ -97,7 +97,7 @@ public class RestartDownloadTaskEndpointIntegrationTests : BaseIntegrationTests
             RestartDownloadTaskEndpoint,
             RestartDownloadTaskEndpointRequest,
             BaseResultDTO
-        >(new RestartDownloadTaskEndpointRequest(downloadTask.Id));
+        >(new RestartDownloadTaskEndpointRequest { DownloadTaskGuid = downloadTask.Id });
         testResult.Response.IsSuccessStatusCode.ShouldBeTrue(
             await testResult.Response.Content.ReadAsStringAsync(CancellationToken)
         );

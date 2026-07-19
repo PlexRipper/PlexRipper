@@ -63,7 +63,7 @@ public class PauseDownloadTaskEndpointIntegrationTests : BaseIntegrationTests
             StartDownloadTaskEndpoint,
             StartDownloadTaskEndpointRequest,
             BaseResultDTO
-        >(new StartDownloadTaskEndpointRequest(childDownloadTask.Id));
+        >(new StartDownloadTaskEndpointRequest { DownloadTaskGuid = childDownloadTask.Id });
         startTestResult.Response.IsSuccessStatusCode.ShouldBeTrue(
             await startTestResult.Response.Content.ReadAsStringAsync(CancellationToken)
         );
@@ -87,7 +87,7 @@ public class PauseDownloadTaskEndpointIntegrationTests : BaseIntegrationTests
             PauseDownloadTaskEndpoint,
             PauseDownloadTaskEndpointRequest,
             BaseResultDTO
-        >(new PauseDownloadTaskEndpointRequest(childDownloadTask.Id));
+        >(new PauseDownloadTaskEndpointRequest { DownloadTaskGuid = childDownloadTask.Id });
         pauseTestResult.Response.IsSuccessStatusCode.ShouldBeTrue(
             await pauseTestResult.Response.Content.ReadAsStringAsync(CancellationToken)
         );

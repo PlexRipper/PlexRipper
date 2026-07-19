@@ -1,5 +1,17 @@
 Reaparr Changelog
 
+## [0.38.2-dev.2](https://github.com/Reaparr/Reaparr/compare/v0.38.2-dev.1...v0.38.2-dev.2) (2026-07-19)
+
+
+### Bug Fixes
+
+* **WebAPI:** Fixed TvShow, Season and Episode not responding to Download task commands ([2c06a39](https://github.com/Reaparr/Reaparr/commit/2c06a39390c6f38c72792e471ad36b4d6480ed68))
+* **WebAPI:** Implemented EntityFrameworkCore.Sqlite.Concurrency to resolve sqlite busy errors ([dfb5d5c](https://github.com/Reaparr/Reaparr/commit/dfb5d5ce1439009d7f458a1307d097619c485c4d))
+* **Web-UI:** Replace direct clipboard API with VueUse clipboard for l… ([#615](https://github.com/Reaparr/Reaparr/issues/615)) ([c2442e7](https://github.com/Reaparr/Reaparr/commit/c2442e7100d161d7d63d83441aaef642c3caa91a))
+* **Web-UI:** Replace direct clipboard API with VueUse clipboard for log viewer ([ef2bc52](https://github.com/Reaparr/Reaparr/commit/ef2bc5283b26af8e7ce851ace05a3e13591dde8c))
+* **WebAPI:** Resolve sqlite vulnerability warning ([fe45386](https://github.com/Reaparr/Reaparr/commit/fe4538619b1b82f7066dc8e56b3bf9256558cb36))
+* **WebAPI:** Throttle Plex library sync scheduling and prevent multiple libraries from syncing in the same Plex server at the same time ([647c6e4](https://github.com/Reaparr/Reaparr/commit/647c6e487fc0e450efd4f045a5a436c1a49653ca))
+
 ## [0.38.2-dev.1](https://github.com/Reaparr/Reaparr/compare/v0.38.1...v0.38.2-dev.1) (2026-07-16)
 
 

@@ -1,4 +1,7 @@
+using EntityFrameworkCore.Sqlite.Concurrency;
+using EntityFrameworkCore.Sqlite.Concurrency.Models;
 using Microsoft.Data.Sqlite;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using Reaparr.Environment;
 
 namespace Reaparr.Data.Contracts;
@@ -13,13 +16,9 @@ public static class DbContextConnections
     public static string GetConnectionString(IPathProvider pathProvider) =>
         new SqliteConnectionStringBuilder
         {
-            // Mixing shared-cache mode and write-ahead logging is discouraged. For optimal performance, remove Cache=Shared when the database is configured to use write-ahead logging.
-            // https://learn.microsoft.com/en-us/dotnet/standard/data/sqlite/connection-strings#basic
-            Cache = SqliteCacheMode.Default,
             Mode = SqliteOpenMode.ReadWriteCreate,
             DataSource = pathProvider.DatabasePath,
             Pooling = true,
-            DefaultTimeout = 120,
         }.ToString();
 
     public static void DefaultConfiguration(
@@ -39,18 +38,22 @@ public static class DbContextConnections
 
         optionsBuilder.AddInterceptors(_collationInterceptor);
 
-        optionsBuilder.UseSqlite(
+        optionsBuilder.UseSqliteWithConcurrency(
             GetConnectionString(pathProvider),
-            b =>
+            options =>
             {
-                b.MigrationsAssembly(contextType.Assembly.FullName);
-
-                // Use split queries for multiple collection includes to avoid cartesian explosion.
-                // This resolves: "Compiling a query which loads related collections for more than one
-                // collection navigation... no 'QuerySplittingBehavior' has been configured"
-                // See: https://go.microsoft.com/fwlink/?linkid=2134277
-                b.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
+                options.BusyTimeout = TimeSpan.FromSeconds(120);
+                options.MaxRetryAttempts = 8;
             }
         );
+
+        var sqliteOptionsBuilder = new SqliteDbContextOptionsBuilder(optionsBuilder);
+        sqliteOptionsBuilder.MigrationsAssembly(contextType.Assembly.FullName);
+
+        // Use split queries for multiple collection includes to avoid cartesian explosion.
+        // This resolves: "Compiling a query which loads related collections for more than one
+        // collection navigation... no 'QuerySplittingBehavior' has been configured"
+        // See: https://go.microsoft.com/fwlink/?linkid=2134277
+        sqliteOptionsBuilder.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
     }
 }

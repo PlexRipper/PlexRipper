@@ -4,8 +4,7 @@ public partial class BaseUnitTest : IDisposable
 {
     private string _databaseName = string.Empty;
 
-    // Held alive to keep the SQLite shared-cache in-memory database alive for the test duration.
-    // SQLite destroys an in-memory database when all connections to it are closed.
+    // Held alive for the test duration so setup contexts can be disposed explicitly.
     private ReaparrDbContext? _setupReaparrDbContext;
     private AuthDbContext? _setupAuthDbContext;
 
@@ -81,8 +80,7 @@ public partial class BaseUnitTest : IDisposable
             _databaseName
         );
 
-        // Hold references to keep the SQLite shared-cache in-memory connections open.
-        // SQLite destroys the in-memory database when all connections close.
+        // Hold references so setup contexts can be cleaned up in Dispose().
         _setupReaparrDbContext = reaparrContext;
         _setupAuthDbContext = authContext;
         await (reaparrContext, authContext).Setup(seed, mockPathProvider, mockAppRuntimeInfo, options);

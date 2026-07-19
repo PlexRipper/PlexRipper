@@ -30,13 +30,6 @@ public class SyncPlexLibraryMediaMetaDataCommandHandler : ICommandHandler<SyncPl
     private readonly IReaparrDbContext _dbContext;
     private readonly ILogger _log;
 
-    private readonly BulkConfig? _bulkInsertConfig = new()
-    {
-        SetOutputIdentity = false,
-        PreserveInsertOrder = true,
-        UseTempDB = true,
-    };
-
     public SyncPlexLibraryMediaMetaDataCommandHandler(IReaparrDbContext dbContext, ILogger log)
     {
         _dbContext = dbContext;
@@ -144,7 +137,7 @@ public class SyncPlexLibraryMediaMetaDataCommandHandler : ICommandHandler<SyncPl
 
         _log.Here().Debug("[SyncMetaData] BulkInsertAsync actors starting ({Count} rows)", newActors.Count);
         var insertResult = await Result.Try(
-            () => _dbContext.BulkInsertAsync(newActors, _bulkInsertConfig),
+            () => _dbContext.BulkInsertAsync(newActors),
             e => new ExceptionalError(e)
         );
         _log.Here().Debug("[SyncMetaData] BulkInsertAsync actors done. IsFailed={IsFailed}", insertResult.IsFailed);
@@ -216,7 +209,7 @@ public class SyncPlexLibraryMediaMetaDataCommandHandler : ICommandHandler<SyncPl
         var newGenres = sourceDict.Select(x => new PlexLibraryGenres(libraryId, x.Value.Id)).ToList();
         _log.Here().Debug("[SyncMetaData] BulkInsertAsync genres starting ({Count} rows)", newGenres.Count);
         var insertResult = await Result.Try(
-            () => _dbContext.BulkInsertAsync(newGenres, _bulkInsertConfig),
+            () => _dbContext.BulkInsertAsync(newGenres),
             e => new ExceptionalError(e)
         );
         _log.Here().Debug("[SyncMetaData] BulkInsertAsync genres done. IsFailed={IsFailed}", insertResult.IsFailed);
@@ -287,7 +280,7 @@ public class SyncPlexLibraryMediaMetaDataCommandHandler : ICommandHandler<SyncPl
         var newCountries = sourceDict.Select(x => new PlexLibraryCountries(libraryId, x.Value.Id)).ToList();
         _log.Here().Debug("[SyncMetaData] BulkInsertAsync countries starting ({Count} rows)", newCountries.Count);
         var insertResult = await Result.Try(
-            () => _dbContext.BulkInsertAsync(newCountries, _bulkInsertConfig),
+            () => _dbContext.BulkInsertAsync(newCountries),
             e => new ExceptionalError(e)
         );
         _log.Here().Debug("[SyncMetaData] BulkInsertAsync countries done. IsFailed={IsFailed}", insertResult.IsFailed);

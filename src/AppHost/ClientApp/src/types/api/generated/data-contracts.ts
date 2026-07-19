@@ -337,6 +337,19 @@ export enum DownloadStatus {
   Restarting = "Restarting",
 }
 
+export interface DownloadTaskCreationReportDTO {
+  /** @format int32 */
+  episodes: number;
+  /** @format int32 */
+  movies: number;
+  /** @format int32 */
+  seasons: number;
+  /** @format int32 */
+  total: number;
+  /** @format int32 */
+  tvShows: number;
+}
+
 export interface DownloadTaskDTO {
   children: DownloadTaskDTO[];
   /** @format date-time */
@@ -1199,6 +1212,15 @@ export interface ResultDTOOfDownloadPreviewContainerDTO {
   statusCode: number;
   successes: SuccessDTO[];
   value?: DownloadPreviewContainerDTO | null;
+}
+
+export interface ResultDTOOfDownloadTaskCreationReportDTO {
+  errors: ErrorDTO[];
+  isSuccess: boolean;
+  /** @format int32 */
+  statusCode: number;
+  successes: SuccessDTO[];
+  value?: DownloadTaskCreationReportDTO | null;
 }
 
 export interface ResultDTOOfDownloadTaskDTO {

@@ -38,6 +38,8 @@ public class SyncPlexMoviesCommandHandler : ICommandHandler<SyncPlexMoviesComman
 
     private readonly CrudMoviesReport _report = new();
 
+    private readonly BulkConfig? _config = new() { BatchSize = 500, SetOutputIdentity = true };
+
     public SyncPlexMoviesCommandHandler(ILogger log, IReaparrDbContext dbContext)
     {
         _log = log.ForContext<SyncPlexMoviesCommandHandler>();
@@ -175,7 +177,7 @@ public class SyncPlexMoviesCommandHandler : ICommandHandler<SyncPlexMoviesComman
         // Remove duplicates before inserting
         list = list.DistinctBy(x => new { x.PlexActorId, x.PlexMovieId }).ToList();
 
-        var insertResult = await Result.Try(() => _dbContext.BulkInsertAsync(list, ct));
+        var insertResult = await Result.Try(() => _dbContext.BulkInsertAsync(list, _config, ct));
         if (insertResult.IsFailed)
         {
             _log.Here().Error("Failed to sync movie actors: {Error}", insertResult.Errors);
@@ -226,7 +228,7 @@ public class SyncPlexMoviesCommandHandler : ICommandHandler<SyncPlexMoviesComman
         // Remove duplicates before inserting
         list = list.DistinctBy(x => new { x.GenresId, x.PlexMovieId }).ToList();
 
-        var insertResult = await Result.Try(() => _dbContext.BulkInsertAsync(list, ct));
+        var insertResult = await Result.Try(() => _dbContext.BulkInsertAsync(list, _config, ct));
         if (insertResult.IsFailed)
         {
             _log.Here().Error("Failed to sync movie genres: {Error}", insertResult.Errors);
@@ -277,7 +279,7 @@ public class SyncPlexMoviesCommandHandler : ICommandHandler<SyncPlexMoviesComman
         // Remove duplicates before inserting
         list = list.DistinctBy(x => new { x.CountryId, x.PlexMovieId }).ToList();
 
-        var insertResult = await Result.Try(() => _dbContext.BulkInsertAsync(list, ct));
+        var insertResult = await Result.Try(() => _dbContext.BulkInsertAsync(list, _config, ct));
         if (insertResult.IsFailed)
         {
             _log.Here().Error("Failed to sync movie countries: {Error}", insertResult.Errors);

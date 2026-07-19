@@ -29,7 +29,7 @@ public static partial class DbContextExtensions
         // Phase 1: Insert TV shows
         var insertTvShowsResult = await Result.Try(async Task () =>
         {
-            await context.BulkInsertAsync(plexTvShows, ct);
+            await context.BulkInsertAsync(plexTvShows, BulkConfigPreset.Default, ct);
             rapport.CreatedTvShows = plexTvShows.Count;
         });
 
@@ -52,7 +52,7 @@ public static partial class DbContextExtensions
 
         var insertSeasonsResult = await Result.Try(async Task () =>
         {
-            await context.BulkInsertAsync(seasonsToInsert, ct);
+            await context.BulkInsertAsync(seasonsToInsert, BulkConfigPreset.Default, ct);
             rapport.CreatedSeasons = seasonsToInsert.Count;
         });
 
@@ -77,7 +77,7 @@ public static partial class DbContextExtensions
 
         var insertEpisodesResult = await Result.Try(async Task () =>
         {
-            await context.BulkInsertAsync(episodesToInsert, ct);
+            await context.BulkInsertAsync(episodesToInsert, BulkConfigPreset.Default, ct);
             rapport.CreatedEpisodes = episodesToInsert.Count;
         });
 
@@ -98,7 +98,7 @@ public static partial class DbContextExtensions
             .ToList();
 
         var insertMediaDataResult = await Result.Try(async Task () =>
-            await context.BulkInsertAsync(mediaData, ct)
+            await context.BulkInsertAsync(mediaData, BulkConfigPreset.Default, ct)
         );
 
         if (insertMediaDataResult.IsFailed)
@@ -118,7 +118,7 @@ public static partial class DbContextExtensions
             .ToList();
 
         var insertSeasonQualitiesResult = await Result.Try(async Task () =>
-            await context.BulkInsertAsync(seasonQualities, ct)
+            await context.BulkInsertAsync(seasonQualities, BulkConfigPreset.Default, ct)
         );
 
         if (insertSeasonQualitiesResult.IsFailed)
@@ -137,7 +137,7 @@ public static partial class DbContextExtensions
             .ToList();
 
         var insertTvShowQualitiesResult = await Result.Try(async Task () =>
-            await context.BulkInsertAsync(tvShowQualities, ct)
+            await context.BulkInsertAsync(tvShowQualities, BulkConfigPreset.Default, ct)
         );
 
         if (insertTvShowQualitiesResult.IsFailed)

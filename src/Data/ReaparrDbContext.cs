@@ -95,14 +95,33 @@ public sealed class ReaparrDbContext : DbContext, IReaparrDbContext, IReaparrDbC
 
     public string DatabaseName { get; }
 
-    public async Task BulkInsertAsync<T>(
+    public Task BulkReadAsync<T>(
         IList<T> entities,
+        BulkConfig? bulkConfig = null,
         CancellationToken cancellationToken = default
     )
-        where T : class
-    {
-        await this.BulkInsertOptimizedAsync(entities, cancellationToken);
-    }
+        where T : class =>
+        throw new NotSupportedException(
+            "BulkReadAsync is not supported in with SQLite due to issues with UseTempDB and other limitations."
+                + "Use EF native reading instead."
+        );
+
+    public async Task BulkInsertAsync<T>(
+        IList<T> entities,
+        BulkConfig? bulkConfig = null,
+        CancellationToken cancellationToken = default
+    )
+        where T : class =>
+        await ExecuteBulkAsync(
+            () =>
+                DbContextBulkExtensions.BulkInsertAsync(
+                    this,
+                    entities,
+                    bulkConfig,
+                    cancellationToken: cancellationToken
+                ),
+            cancellationToken
+        );
 
     public async Task BulkUpdateAsync<T>(
         IList<T> entities,
@@ -116,6 +135,27 @@ public sealed class ReaparrDbContext : DbContext, IReaparrDbContext, IReaparrDbC
                     this,
                     entities,
                     bulkConfig,
+                    cancellationToken: cancellationToken
+                ),
+            cancellationToken
+        );
+
+    public async Task BulkInsertOrUpdateAsync<T>(
+        IList<T> entities,
+        BulkConfig? bulkConfig = null,
+        Action<decimal>? progress = null,
+        Type? type = null,
+        CancellationToken cancellationToken = default
+    )
+        where T : class =>
+        await ExecuteBulkAsync(
+            () =>
+                DbContextBulkExtensions.BulkInsertOrUpdateAsync(
+                    this,
+                    entities,
+                    bulkConfig,
+                    progress,
+                    type,
                     cancellationToken: cancellationToken
                 ),
             cancellationToken

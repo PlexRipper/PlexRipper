@@ -94,7 +94,7 @@ public static partial class DbContextExtensions
                     ? VideoQuality.Unknown
                     : movie.MediaDataList.Max(x => x.Quality);
 
-            await context.BulkInsertAsync(plexMovies, ct);
+            await context.BulkInsertAsync(plexMovies, BulkConfigPreset.Default, ct);
 
             // Add movie media data for each movie
             var mediaData = plexMovies
@@ -105,7 +105,7 @@ public static partial class DbContextExtensions
                 })
                 .ToList();
 
-            await context.BulkInsertAsync(mediaData, ct);
+            await context.BulkInsertAsync(mediaData, BulkConfigPreset.Default, ct);
         });
     }
 }

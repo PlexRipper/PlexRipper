@@ -118,14 +118,32 @@ public interface IReaparrDbContext : IDisposable
 
     #endregion Properties
 
+    Task BulkReadAsync<T>(
+        IList<T> entities,
+        BulkConfig? bulkConfig = null,
+        CancellationToken cancellationToken = default
+    )
+        where T : class;
+
     Task BulkInsertAsync<T>(
         IList<T> entities,
-        CancellationToken cancellationToken = default)
+        BulkConfig? bulkConfig = null,
+        CancellationToken cancellationToken = default
+    )
         where T : class;
 
     Task BulkUpdateAsync<T>(
         IList<T> entities,
         BulkConfig? bulkConfig = null,
+        CancellationToken cancellationToken = default
+    )
+        where T : class;
+
+    Task BulkInsertOrUpdateAsync<T>(
+        IList<T> entities,
+        BulkConfig? bulkConfig = null,
+        Action<decimal>? progress = null,
+        Type? type = null,
         CancellationToken cancellationToken = default
     )
         where T : class;

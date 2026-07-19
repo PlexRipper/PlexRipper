@@ -8,18 +8,18 @@
       <env name="DOTNET_ENVIRONMENT" value="Development" />
       <env name="DOTNET_HTTP_PORTS" value="5000" />
       <env name="GITHUB_TOKEN" value="" />
+      <env name="I_AM_DUMB_SO_DISABLE_AUTHENTICATION" value="true" />
       <env name="INFORMATIONAL_VERSION" value="0.36.0-dev.2" />
       <env name="LOG_ENV_VARS" value="false" />
       <env name="LOG_LEVEL" value="DEBUG" />
       <env name="PGID" value="1000" />
       <env name="PUID" value="1000" />
-      <env name="REAPARR_CONFIG_PATH" value="$PROJECT_DIR$/../../DATA/ReaparrCache/Config" />
-      <env name="REAPARR_DATA_PATH" value="$PROJECT_DIR$/../../DATA/ReaparrCache/" />
+      <env name="REAPARR_CONFIG_PATH" value="/mnt/DATA/ReaparrCache/Config/" />
+      <env name="REAPARR_DATA_PATH" value="/mnt/DATA/ReaparrCache/" />
       <env name="REAPARR_PLATFORM" value="docker" />
       <env name="SEQ_URL" value="http://localhost:5341" />
       <env name="UNMASKED" value="true" />
       <env name="VERSION" value="0.36.0" />
-      <env name="I_AM_DUMB_SO_DISABLE_AUTHENTICATION" value="true" />
     </envs>
     <option name="ENV_FILE_PATHS" value="" />
     <option name="REDIRECT_INPUT_PATH" value="" />

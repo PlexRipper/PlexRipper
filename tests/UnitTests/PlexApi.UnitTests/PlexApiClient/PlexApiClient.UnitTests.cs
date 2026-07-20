@@ -3,6 +3,7 @@ using System.Text;
 using System.Text.Json;
 using Moq.Contrib.HttpClient;
 using Moq.Protected;
+using Reaparr.Application.Contracts;
 using Reaparr.PlexApi.Contracts;
 
 namespace Reaparr.PlexApi.UnitTests;
@@ -66,7 +67,8 @@ public class PlexApiClientUnitTests : BaseUnitTest<Func<PlexApiClientOptions?, P
         });
 
         // Arrange
-        var client = Sut(new PlexApiClientOptions { ConnectionUrl = "http://localhost", RetryProgressAction = null });
+        var progressUpdates = new List<HttpRequestRetryProgress>();
+        var client = Sut(new PlexApiClientOptions { ConnectionUrl = "http://localhost", RetryProgressAction = progressUpdates.Add });
 
         // Act
         var responseMessage = await client.SendAsync(new HttpRequestMessage());
@@ -74,6 +76,10 @@ public class PlexApiClientUnitTests : BaseUnitTest<Func<PlexApiClientOptions?, P
         // Assert
         responseMessage.StatusCode.ShouldBe(HttpStatusCode.RequestTimeout);
         responseMessage.ReasonPhrase.ShouldBe("Request Timeout");
+        var progress = progressUpdates.ShouldHaveSingleItem();
+        progress.Completed.ShouldBeTrue();
+        progress.ConnectionSuccessful.ShouldBeFalse();
+        progress.StatusCode.ShouldBe((int)HttpStatusCode.RequestTimeout);
         HttpHandlerMock
             .Protected()
             .Verify("SendAsync", Times.Once(), ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>());
@@ -182,7 +188,8 @@ public class PlexApiClientUnitTests : BaseUnitTest<Func<PlexApiClientOptions?, P
         });
 
         // Arrange
-        var client = Sut(new PlexApiClientOptions { ConnectionUrl = "http://localhost", RetryProgressAction = null });
+        var progressUpdates = new List<HttpRequestRetryProgress>();
+        var client = Sut(new PlexApiClientOptions { ConnectionUrl = "http://localhost", RetryProgressAction = progressUpdates.Add });
 
         // Act
         var responseMessage = await client.SendAsync(new HttpRequestMessage());
@@ -190,6 +197,10 @@ public class PlexApiClientUnitTests : BaseUnitTest<Func<PlexApiClientOptions?, P
         // Assert
         responseMessage.StatusCode.ShouldBe(HttpStatusCode.BadGateway);
         responseMessage.ReasonPhrase.ShouldBe("Bad Gateway");
+        var progress = progressUpdates.ShouldHaveSingleItem();
+        progress.Completed.ShouldBeTrue();
+        progress.ConnectionSuccessful.ShouldBeFalse();
+        progress.StatusCode.ShouldBe((int)HttpStatusCode.BadGateway);
         HttpHandlerMock
             .Protected()
             .Verify("SendAsync", Times.Once(), ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>());

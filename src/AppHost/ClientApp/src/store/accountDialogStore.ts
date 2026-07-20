@@ -167,6 +167,16 @@ export const useAccountDialogStore = defineStore(StoreNames.AccountDialogStore, 
 					if (!isSuccess || !value || value.isUnAuthorized) {
 						state.isValidated = false;
 						state.hasValidationErrors = true;
+
+						// If 2FA is required, open the verification code dialog instead
+						if (value?.is2Fa) {
+							state.clientId = value.clientId;
+							state.hasValidationErrors = false;
+							Log.info('Account has 2FA enabled');
+							dialogStore.openDialog(DialogType.AccountVerificationCodeDialog);
+							return;
+						}
+
 						dialogStore.openDialog(DialogType.AccountTokenValidateDialog);
 						return;
 					}
@@ -206,6 +216,7 @@ export const useAccountDialogStore = defineStore(StoreNames.AccountDialogStore, 
 					state.isValidated = false;
 					state.hasValidationErrors = true;
 					Log.error('Credentials validation failed', error);
+					dialogStore.openDialog(DialogType.AccountTokenValidateDialog);
 					return of({ value: null, isSuccess: false });
 				}),
 			);
@@ -214,12 +225,20 @@ export const useAccountDialogStore = defineStore(StoreNames.AccountDialogStore, 
 			return plexAccountApi.validatePlexCredentialsEndpoint(get(getters.getAccountData)).pipe(
 				tap(({ value, isSuccess }) => {
 					if (isSuccess && value) {
+						if (value.isUnAuthorized) {
+							Log.error('Invalid verification code, 2FA still required');
+							state.hasValidationErrors = true;
+							state.verificationCode = '';
+							return;
+						}
 						dialogStore.closeDialog(DialogType.AccountVerificationCodeDialog);
 						// Update state with validated credentials data
 						updateStateWithAccountData(value);
+						state.hasValidationErrors = false;
 					} else {
 						Log.error('Validate Error', value);
 					}
+					state.verificationCode = '';
 				}),
 			);
 		},

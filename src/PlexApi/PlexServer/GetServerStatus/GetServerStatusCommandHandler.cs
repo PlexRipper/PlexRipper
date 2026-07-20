@@ -27,7 +27,7 @@ public class GetServerStatusCommandHandler : ICommandHandler<GetServerStatusComm
             {
                 ConnectionUrl = connection.Url,
                 RetryProgressAction = command.ProgressAction,
-                Timeout = 10,
+                Timeout = command.Timeout,
                 RetryCount = 0,
             }
         );

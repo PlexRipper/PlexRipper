@@ -51,7 +51,11 @@
 					v-else
 					cy="auth-token-validation-dialog-invalid-token-alert"
 					type="error">
-					{{ $t('components.account-token-validate-dialog.invalid-token') }}
+					{{
+						accountDialogStore.isAuthTokenMode
+							? $t('components.account-token-validate-dialog.invalid-token')
+							: $t('components.account-token-validate-dialog.invalid-credentials')
+					}}
 				</QAlert>
 			</div>
 		</template>

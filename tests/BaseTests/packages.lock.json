@@ -115,19 +115,19 @@
       },
       "AppAny.Quartz.EntityFrameworkCore.Migrations": {
         "type": "Transitive",
-        "resolved": "0.5.2",
-        "contentHash": "6PBrhEH4S0t5T0DFZgmxPB7jXsEhkxaI6EY6Qt0r9NzOM8S0ukGcnROfPfgMkh7bpqZt/yhD4T7G2ObGBADhMA==",
+        "resolved": "0.6.0",
+        "contentHash": "hhhg6TeGEl5qczPD67xhJ9IYCpZ7PAd6CNiaA9vqK9a8y9tdXUp/Nkca19oTs55BxF8mmNSNUTjnO4T7lhKnvQ==",
         "dependencies": {
-          "Microsoft.EntityFrameworkCore": "8.0.11"
+          "Microsoft.EntityFrameworkCore": "10.0.8"
         }
       },
       "AppAny.Quartz.EntityFrameworkCore.Migrations.SQLite": {
         "type": "Transitive",
-        "resolved": "0.5.2",
-        "contentHash": "ZzZScJNxyUuijtf0bl0rN6/MSoqeFa4f+4zbntZCDUy0zMBCs6bw4UoJbOtWwarn9xDgZiw6lanGmuKe0/YbkA==",
+        "resolved": "0.6.0",
+        "contentHash": "gyRyO8EFn3u0AmnJCBBVDzjSKwfJUkrMIFWHL7ox/tp5buezNjWb7K6pyM33wkRRbSvhNqKSQhjoYYkSwPsBMw==",
         "dependencies": {
-          "AppAny.Quartz.EntityFrameworkCore.Migrations": "0.5.2",
-          "Microsoft.EntityFrameworkCore.Sqlite": "8.0.11"
+          "AppAny.Quartz.EntityFrameworkCore.Migrations": "0.6.0",
+          "Microsoft.EntityFrameworkCore.Sqlite": "10.0.8"
         }
       },
       "Autofac.Extensions.DependencyInjection": {
@@ -1232,37 +1232,37 @@
       },
       "Quartz": {
         "type": "Transitive",
-        "resolved": "3.17.0",
-        "contentHash": "Ko3I49Yz1DqlxWi+fXqdG0FYJlHyGnra86m9RSlhPjIoXy7ip8FxyYJ70HcHc5s3xije0QvX81qG2dlxLEI7hQ==",
+        "resolved": "3.18.2",
+        "contentHash": "/KaRLj7jv84RSIR/UtAWnzYRmS7o/mA6CdEuoLwxhLa9Nfl7Q1keMA7Fe/r2BzRfDf+7YpN1QNEYSSU89DA3OA==",
         "dependencies": {
           "Microsoft.Extensions.Logging.Abstractions": "2.1.1"
         }
       },
       "Quartz.Extensions.DependencyInjection": {
         "type": "Transitive",
-        "resolved": "3.17.0",
-        "contentHash": "SYPUS3eOwbYFv9mXwAqz6R0G5SHztRg0qG7GzQBsncSEW7y2vRvcMxnaYM5bGP1fF4SFBMdYAj25gGgQvD+tOA==",
+        "resolved": "3.18.2",
+        "contentHash": "+P0z/WUQZF/QrY5wB1wgvl9/VkiWqGR/K5bdtjW1qiFBraEoe/dqfNTxXQPnSZHnha1qmSBRoa5oA7kwHPsTqA==",
         "dependencies": {
           "Microsoft.Extensions.Configuration.Abstractions": "10.0.0",
           "Microsoft.Extensions.Options": "10.0.0",
-          "Quartz": "3.17.0"
+          "Quartz": "3.18.2"
         }
       },
       "Quartz.Extensions.Hosting": {
         "type": "Transitive",
-        "resolved": "3.17.0",
-        "contentHash": "6XgnbMBMsn5a7u2amkZVWKljVCQnO45SxDznpaRonXWolLNeX6Fx5t/73zigVshGLs3Q1A+NSv5z6oPTgv37sA==",
+        "resolved": "3.18.2",
+        "contentHash": "6uSMAm4FArjtVoxBjlkA+gHL1Eln2ngIOnRTrVrYxtSlM5PpLQd2aV+fc/OOwfwt+AyDm69HOAybEFqVvyyG2A==",
         "dependencies": {
           "Microsoft.Extensions.Hosting.Abstractions": "10.0.0",
-          "Quartz.Extensions.DependencyInjection": "3.17.0"
+          "Quartz.Extensions.DependencyInjection": "3.18.2"
         }
       },
       "Quartz.Serialization.SystemTextJson": {
         "type": "Transitive",
-        "resolved": "3.17.0",
-        "contentHash": "QfqaugT/yokgUGhSrWHIpEGBUOhs0KJKZEd0WLIEoOj7m/eourC495pz1S/vq3I8LN81k6n8Pn6oky8qr3P2iw==",
+        "resolved": "3.18.2",
+        "contentHash": "FZAV4mUwnl4yNSa73ZuQNvBOZeyuPTUW4M8Mxa0XAFHUwgHGEYmqOVSgaztAET+a/fUGNBzj0eEPW2pZMQPYuA==",
         "dependencies": {
-          "Quartz": "3.17.0"
+          "Quartz": "3.18.2"
         }
       },
       "Semver": {
@@ -1575,8 +1575,8 @@
           "Microsoft.AspNetCore.SpaServices.Extensions": "[10.0.9, )",
           "Microsoft.Extensions.Http.Polly": "[10.0.9, )",
           "Photino.NET": "[4.0.16, )",
-          "Quartz": "[3.17.0, )",
-          "Quartz.Extensions.Hosting": "[3.17.0, )",
+          "Quartz": "[3.18.2, )",
+          "Quartz.Extensions.Hosting": "[3.18.2, )",
           "Reaparr.Application": "[1.0.0, )",
           "Reaparr.BackgroundJobs": "[1.0.0, )",
           "Reaparr.Data": "[1.0.0, )",
@@ -1602,7 +1602,7 @@
           "FastEndpoints.Swagger": "[8.1.0, )",
           "Polly": "[8.6.5, )",
           "Polly.Core": "[8.6.6, )",
-          "Quartz.Serialization.SystemTextJson": "[3.17.0, )",
+          "Quartz.Serialization.SystemTextJson": "[3.18.2, )",
           "Reaparr.Application.Contracts": "[1.0.0, )",
           "Reaparr.BackgroundJobs.Contracts": "[1.0.0, )",
           "Reaparr.Data.Contracts": "[1.0.0, )",
@@ -1622,7 +1622,7 @@
       "Reaparr.Application.Contracts": {
         "type": "Project",
         "dependencies": {
-          "Quartz": "[3.17.0, )",
+          "Quartz": "[3.18.2, )",
           "Reaparr.Domain": "[1.0.0, )"
         }
       },
@@ -1630,7 +1630,7 @@
         "type": "Project",
         "dependencies": {
           "Autofac.Extras.Quartz": "[11.0.0, )",
-          "Quartz": "[3.17.0, )",
+          "Quartz": "[3.18.2, )",
           "Reaparr.Application.Contracts": "[1.0.0, )",
           "Reaparr.BackgroundJobs.Contracts": "[1.0.0, )",
           "Reaparr.Data.Contracts": "[1.0.0, )",
@@ -1642,14 +1642,14 @@
       "Reaparr.BackgroundJobs.Contracts": {
         "type": "Project",
         "dependencies": {
-          "Quartz": "[3.17.0, )",
+          "Quartz": "[3.18.2, )",
           "Reaparr.Domain": "[1.0.0, )"
         }
       },
       "Reaparr.Data": {
         "type": "Project",
         "dependencies": {
-          "AppAny.Quartz.EntityFrameworkCore.Migrations.SQLite": "[0.5.2, )",
+          "AppAny.Quartz.EntityFrameworkCore.Migrations.SQLite": "[0.6.0, )",
           "Autofac": "[9.1.0, )",
           "Microsoft.AspNetCore.Identity.EntityFrameworkCore": "[10.0.9, )",
           "Microsoft.Data.Sqlite": "[10.0.9, )",

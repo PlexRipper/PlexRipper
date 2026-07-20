@@ -109,6 +109,10 @@ describe('Check server connections dialog', () => {
 			cy.getCy(`check-server-connections-dialog-result-text-success-${successServer.id}`).should('exist');
 			cy.getCy(`check-server-connections-dialog-result-text-completed-${failedServer.id}`).should('exist');
 			cy.getCy(`check-server-connections-dialog-result-text-completed-${loadingServer.id}`).should('not.exist');
+			cy.getCy('check-server-connection-dialog-progress')
+				.should('have.attr', 'data-completed')
+				.and('equal', 'false');
+			cy.contains('Checking 2 of 3 Plex servers connections').should('be.visible');
 			cy.getCy(`check-server-connections-dialog-connection-title-${loadingInProgressConnection.id}`)
 				.closest('.q-tree__node')
 				.find(`[data-cy="check-server-connections-dialog-${loadingInProgressConnection.id}"]`)

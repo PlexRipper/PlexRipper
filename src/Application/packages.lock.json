@@ -74,11 +74,11 @@
       },
       "Quartz.Serialization.SystemTextJson": {
         "type": "Direct",
-        "requested": "[3.17.0, )",
-        "resolved": "3.17.0",
-        "contentHash": "QfqaugT/yokgUGhSrWHIpEGBUOhs0KJKZEd0WLIEoOj7m/eourC495pz1S/vq3I8LN81k6n8Pn6oky8qr3P2iw==",
+        "requested": "[3.18.2, )",
+        "resolved": "3.18.2",
+        "contentHash": "FZAV4mUwnl4yNSa73ZuQNvBOZeyuPTUW4M8Mxa0XAFHUwgHGEYmqOVSgaztAET+a/fUGNBzj0eEPW2pZMQPYuA==",
         "dependencies": {
-          "Quartz": "3.17.0"
+          "Quartz": "3.18.2"
         }
       },
       "Semver": {
@@ -501,8 +501,8 @@
       },
       "Quartz": {
         "type": "Transitive",
-        "resolved": "3.17.0",
-        "contentHash": "Ko3I49Yz1DqlxWi+fXqdG0FYJlHyGnra86m9RSlhPjIoXy7ip8FxyYJ70HcHc5s3xije0QvX81qG2dlxLEI7hQ=="
+        "resolved": "3.18.2",
+        "contentHash": "/KaRLj7jv84RSIR/UtAWnzYRmS7o/mA6CdEuoLwxhLa9Nfl7Q1keMA7Fe/r2BzRfDf+7YpN1QNEYSSU89DA3OA=="
       },
       "Serilog": {
         "type": "Transitive",
@@ -661,14 +661,14 @@
       "Reaparr.Application.Contracts": {
         "type": "Project",
         "dependencies": {
-          "Quartz": "[3.17.0, )",
+          "Quartz": "[3.18.2, )",
           "Reaparr.Domain": "[1.0.0, )"
         }
       },
       "Reaparr.BackgroundJobs.Contracts": {
         "type": "Project",
         "dependencies": {
-          "Quartz": "[3.17.0, )",
+          "Quartz": "[3.18.2, )",
           "Reaparr.Domain": "[1.0.0, )"
         }
       },

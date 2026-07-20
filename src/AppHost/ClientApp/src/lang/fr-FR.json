@@ -231,6 +231,7 @@
                 "username": "Nom d'utilisateur"
             },
             "invalid-token": "Les identifiants ou le jeton n'étaient pas valides et/ou ont expiré.",
+            "invalid-credentials": "Le nom d'utilisateur ou le mot de passe est incorrect. Veuillez vérifier vos identifiants et réessayer.",
             "sub-header": "Le jeton : {authToken} appartient au compte Plex :",
             "title": "Validation du jeton d'authentification Plex.tv"
         },

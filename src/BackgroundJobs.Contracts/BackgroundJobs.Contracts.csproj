@@ -11,7 +11,7 @@
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="Quartz" Version="3.17.0" />
+        <PackageReference Include="Quartz" Version="3.18.2" />
     </ItemGroup>
     <ItemGroup>
         <Using Include="FastEndpoints" />

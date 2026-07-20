@@ -1,12 +1,14 @@
 namespace Reaparr.Application;
 
-public record CheckConnectionStatusByIdCommand(int PlexServerConnectionId) : ICommand<Result<PlexServerStatus>>;
+public record CheckConnectionStatusByIdCommand(int PlexServerConnectionId, int Timeout = 10)
+    : ICommand<Result<PlexServerStatus>>;
 
 public class CheckConnectionStatusByIdCommandValidator : AbstractValidator<CheckConnectionStatusByIdCommand>
 {
     public CheckConnectionStatusByIdCommandValidator()
     {
         RuleFor(x => x.PlexServerConnectionId).GreaterThan(0);
+        RuleFor(x => x.Timeout).GreaterThan(0);
     }
 }
 
@@ -59,6 +61,7 @@ public class CheckConnectionStatusByIdCommandHandler
             new GetServerStatusCommand
             {
                 PlexServerConnectionId = command.PlexServerConnectionId,
+                Timeout = command.Timeout,
                 ProgressAction = progress =>
                 {
                     if (_plexServerConnection is not null)

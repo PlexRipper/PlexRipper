@@ -231,6 +231,7 @@
                 "username": "Username"
             },
             "invalid-token": "The credentials or token were invalid and/or have expired.",
+            "invalid-credentials": "The username or password was invalid. Please double-check your credentials and try again.",
             "sub-header": "The token: {authToken} belongs to the Plex account:",
             "title": "Plex.tv Authentication Token Validation"
         },

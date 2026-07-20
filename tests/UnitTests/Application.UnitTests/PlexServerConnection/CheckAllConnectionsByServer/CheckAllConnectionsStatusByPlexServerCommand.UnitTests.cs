@@ -137,6 +137,11 @@ public class CheckAllConnectionsStatusByPlexServerCommandUnitTests
         // Assert
         result.ShouldNotBeNull();
         result.IsSuccess.ShouldBeTrue();
+        Mock.Mock<ICommandExecutor>()
+            .Verify(
+                x => x.Send(It.Is<CheckConnectionStatusByIdCommand>(command => command.Timeout == 10), It.IsAny<CancellationToken>()),
+                Times.AtLeastOnce()
+            );
         Mock.Mock<IEventPublisher>()
             .Verify(
                 x => x.PublishAsync(It.IsAny<ServerOnlineStatusChangedNotification>(), It.IsAny<CancellationToken>()),

@@ -16,6 +16,7 @@
 				<QRow justify="center">
 					<QCol cols="auto">
 						<VOtpInput
+							ref="otpInput"
 							id="verification-code"
 							v-model:value="accountDialogStore.verificationCode"
 							input-classes="otp-input"
@@ -33,6 +34,7 @@
 				</QRow>
 				<QRow
 					v-if="errors.length > 0"
+					data-cy="2fa-code-verification-error"
 					justify="center">
 					<QCol cols="auto">
 						<span style="color: red; font-weight: bold">
@@ -53,6 +55,7 @@
 				<!--	Confirm	-->
 				<QCol cols="auto">
 					<ConfirmButton
+						cy="2fa-code-verification-confirm-button"
 						:loading="loading"
 						:disabled="accountDialogStore.verificationCode.length < 6"
 						@click="onComplete" />
@@ -64,7 +67,7 @@
 
 <script setup lang="ts">
 import VOtpInput from 'vue3-otp-input';
-import { set } from '@vueuse/core';
+import { get, set } from '@vueuse/core';
 import { useSubscription } from '@vueuse/rxjs';
 import { DialogType } from '@enums';
 import { useAccountDialogStore, useI18n } from '#imports';
@@ -74,10 +77,13 @@ const { t } = useI18n();
 
 const accountDialogStore = useAccountDialogStore();
 
+const otpInput = ref<InstanceType<typeof VOtpInput>>();
+
 const loading = ref(false);
 const errors = ref<ErrorDTO[]>([]);
 
 function onComplete() {
+	set(errors, []);
 	set(loading, true);
 	useSubscription(
 		accountDialogStore.validateVerificationCode().subscribe({
@@ -86,6 +92,14 @@ function onComplete() {
 			},
 			complete: () => {
 				set(loading, false);
+				if (accountDialogStore.hasValidationErrors) {
+					set(errors, [
+						{
+							message: t('components.account-verification-code-dialog.error'),
+						} as ErrorDTO,
+					]);
+					get(otpInput)?.clearInput();
+				}
 			},
 		}),
 	);

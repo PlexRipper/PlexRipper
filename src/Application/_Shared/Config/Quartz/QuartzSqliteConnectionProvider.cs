@@ -6,14 +6,15 @@ using Quartz.Impl.AdoJobStore.Common;
 namespace Reaparr.Application;
 
 /// <summary>
-/// Custom Quartz <see cref="IDbProvider"/> that applies <c>PRAGMA busy_timeout</c>
-/// to every connection opened by Quartz's <c>AdoJobStore</c>.
+/// Custom Quartz <see cref="IDbProvider"/> that applies SQLite PRAGMAs
+/// to every connection opened by Quartz's <c>AdoJobStore</c>, matching the
+/// EF Core concurrency interceptor's connection-level defaults.
 ///
 /// Quartz's <c>AdoJobStore</c> opens raw ADO.NET connections that bypass the EF Core
-/// interceptor pipeline. Without this provider, Quartz connections get <c>busy_timeout=0</c>
-/// (the SQLite default), which causes instant <c>SQLITE_BUSY</c> ("database is locked")
-/// whenever an EF Core write transaction holds the lock — most commonly observed during
-/// misfire recovery.
+/// interceptor pipeline. Without this provider, Quartz connections get factory-default
+/// settings — including <c>busy_timeout=0</c> (the SQLite default), which causes instant
+/// <c>SQLITE_BUSY</c> ("database is locked") whenever an EF Core write transaction holds
+/// the lock — most commonly observed during misfire recovery.
 /// </summary>
 public sealed class QuartzSqliteConnectionProvider : IDbProvider
 {
@@ -77,7 +78,16 @@ public sealed class QuartzSqliteConnectionProvider : IDbProvider
             if (args.CurrentState == ConnectionState.Open)
             {
                 using var pragmaCmd = conn.CreateCommand();
-                pragmaCmd.CommandText = "PRAGMA busy_timeout = 30000;";
+                pragmaCmd.CommandText = """
+                    PRAGMA journal_mode = WAL;
+                    PRAGMA synchronous = NORMAL;
+                    PRAGMA busy_timeout = 30000;
+                    PRAGMA cache_size = -20000;
+                    PRAGMA mmap_size = 268435456;
+                    PRAGMA temp_store = MEMORY;
+                    PRAGMA locking_mode = NORMAL;
+                    PRAGMA secure_delete = OFF;
+                    """;
                 pragmaCmd.ExecuteNonQuery();
             }
         };

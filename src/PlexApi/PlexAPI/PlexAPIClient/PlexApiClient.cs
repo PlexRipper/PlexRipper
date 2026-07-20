@@ -125,7 +125,7 @@ public class PlexApiClient : IPlexApiClient
         request.GetRetryProgressCallback()?.Invoke(
             new HttpRequestRetryProgress
             {
-                RetryAttemptIndex = 0,
+                RetryAttemptIndex = _options.RetryCount,
                 RetryAttemptCount = _options.RetryCount,
                 TimeToNextRetry = 0,
                 StatusCode = (int)statusCode,

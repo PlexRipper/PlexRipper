@@ -1,5 +1,20 @@
 Reaparr Changelog
 
+## [0.38.3-dev.1](https://github.com/Reaparr/Reaparr/compare/v0.38.2...v0.38.3-dev.1) (2026-07-20)
+
+
+### Bug Fixes
+
+* **WebAPI:** Add correct DbMetadata to QuartzSqliteConnectionProvider ([b553ed9](https://github.com/Reaparr/Reaparr/commit/b553ed91e83a9df50f21b814f4b2b23f90461d7b))
+* **WebAPI:** Apply SQLite WAL and busy_timeout PRAGMAs to Quartz ADO.… ([#620](https://github.com/Reaparr/Reaparr/issues/620)) ([fcebb9a](https://github.com/Reaparr/Reaparr/commit/fcebb9acbbe7f98063b4a3c690bae7a65e039f51))
+* **WebAPI:** Apply SQLite WAL and busy_timeout PRAGMAs to Quartz ADO.NET connections ([35e087e](https://github.com/Reaparr/Reaparr/commit/35e087e4d6fc4337ee570df6e38a97b5afbe01d0))
+* **Web-UI:** Fix 2FA verification code pop-up not showing and instead telling the user their credentials are invalid ([a811e1d](https://github.com/Reaparr/Reaparr/commit/a811e1d40a3e4ed63086f2953cf05b058953ad6f))
+* **WebAPI:** Fix connections not completing when they time-out ([68f91c7](https://github.com/Reaparr/Reaparr/commit/68f91c74b7b65001797f5e8d8d21331985d48844))
+* **Web-UI:** Fix the Plex server connectable count, it will now show a Plex server finished when connectable or all fail ([1b27097](https://github.com/Reaparr/Reaparr/commit/1b27097a2945b10cc0c1d1cdb950ca185594e5d1))
+* **Web-UI:** Fixed the invalid verification code input for 2FA not showing the validity ([7d80657](https://github.com/Reaparr/Reaparr/commit/7d80657da217b3326a1252443d66026323b3752f))
+* **WebAPI:** Prevent metadata insert races ([f1d0b4e](https://github.com/Reaparr/Reaparr/commit/f1d0b4e945ba186d23f498504185edfbba573cd0))
+* **WebAPI:** Use DbContext factory for Plex inspection ([0bb1c87](https://github.com/Reaparr/Reaparr/commit/0bb1c871d96ed743a853123397d321961ef898a2))
+
 ## [0.38.2](https://github.com/Reaparr/Reaparr/compare/v0.38.1...v0.38.2) (2026-07-19)
 
 

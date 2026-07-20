@@ -11,6 +11,16 @@ public record ApplyRemoteTvShowComparisonStateCommand(
     int RemoteLibraryId
 ) : ICommand<Result>;
 
+public class ApplyRemoteTvShowComparisonStateCommandValidator
+    : AbstractValidator<ApplyRemoteTvShowComparisonStateCommand>
+{
+    public ApplyRemoteTvShowComparisonStateCommandValidator()
+    {
+        RuleFor(x => x.Items).NotNull().WithMessage("Items must not be null.");
+        RuleFor(x => x.RemoteLibraryId).GreaterThan(0).WithMessage("RemoteLibraryId must be greater than 0.");
+    }
+}
+
 public class ApplyRemoteTvShowComparisonStateCommandHandler
     : ICommandHandler<ApplyRemoteTvShowComparisonStateCommand, Result>
 {

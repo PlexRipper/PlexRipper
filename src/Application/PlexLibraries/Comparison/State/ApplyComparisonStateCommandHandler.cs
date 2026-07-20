@@ -1,5 +1,17 @@
 namespace Reaparr.Application;
 
+public class ApplyComparisonStateCommandValidator : AbstractValidator<ApplyComparisonStateCommand>
+{
+    public ApplyComparisonStateCommandValidator()
+    {
+        RuleFor(x => x.Items).NotNull().WithMessage("Items must not be null.");
+        RuleFor(x => x.PlexLibraryId).GreaterThanOrEqualTo(0).WithMessage("PlexLibraryId must be >= 0.");
+        RuleFor(x => x.MediaType)
+            .Must(x => x is PlexMediaType.Movie or PlexMediaType.TvShow)
+            .WithMessage("MediaType must be Movie or TvShow.");
+    }
+}
+
 /// <summary>
 /// Dispatches comparison state projection to type- and ownership-specific sub-handlers
 /// via <see cref="ICommandExecutor"/>. Determines whether the target library is owned or remote,

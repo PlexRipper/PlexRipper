@@ -48,15 +48,15 @@
 				</q-markup-table>
 
 				<QAlert
-				v-else
-				cy="auth-token-validation-dialog-invalid-token-alert"
-				type="error">
-				{{
-					accountDialogStore.isAuthTokenMode
-						? $t('components.account-token-validate-dialog.invalid-token')
-						: $t('components.account-token-validate-dialog.invalid-credentials')
-				}}
-			</QAlert>
+					v-else
+					cy="auth-token-validation-dialog-invalid-token-alert"
+					type="error">
+					{{
+						accountDialogStore.isAuthTokenMode
+							? $t('components.account-token-validate-dialog.invalid-token')
+							: $t('components.account-token-validate-dialog.invalid-credentials')
+					}}
+				</QAlert>
 			</div>
 		</template>
 		<template #actions="{ close }">

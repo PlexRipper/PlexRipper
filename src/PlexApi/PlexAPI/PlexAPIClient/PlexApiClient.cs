@@ -46,11 +46,17 @@ public class PlexApiClient : IPlexApiClient
         }
         catch (TaskCanceledException)
         {
-            return CreateErrorResponse(request, HttpStatusCode.RequestTimeout, "Request Timeout");
+            var statusCode = HttpStatusCode.RequestTimeout;
+            var reasonPhrase = "Request Timeout";
+            SendCompletedProgress(request, statusCode, reasonPhrase);
+            return CreateErrorResponse(request, statusCode, reasonPhrase);
         }
         catch (HttpRequestException)
         {
-            return CreateErrorResponse(request, HttpStatusCode.BadGateway, "Bad Gateway");
+            var statusCode = HttpStatusCode.BadGateway;
+            var reasonPhrase = "Bad Gateway";
+            SendCompletedProgress(request, statusCode, reasonPhrase);
+            return CreateErrorResponse(request, statusCode, reasonPhrase);
         }
 
         if (!response.IsSuccessStatusCode)
@@ -112,6 +118,24 @@ public class PlexApiClient : IPlexApiClient
                 DefaultJsonSerializerOptions.ConfigStandard
             )
             .ToStringContent();
+    }
+
+    private void SendCompletedProgress(HttpRequestMessage request, HttpStatusCode statusCode, string reasonPhrase)
+    {
+        request.GetRetryProgressCallback()?.Invoke(
+            new HttpRequestRetryProgress
+            {
+                RetryAttemptIndex = 0,
+                RetryAttemptCount = _options.RetryCount,
+                TimeToNextRetry = 0,
+                StatusCode = (int)statusCode,
+                ConnectionSuccessful = false,
+                Completed = true,
+                Message = reasonPhrase,
+                ErrorMessage = reasonPhrase,
+                RequestUri = request.RequestUri?.ToString() ?? "unknown",
+            }
+        );
     }
 
     private HttpResponseMessage CreateErrorResponse(

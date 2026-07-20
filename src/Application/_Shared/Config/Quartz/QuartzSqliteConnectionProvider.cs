@@ -1,15 +1,13 @@
 using System.Data;
 using System.Data.Common;
-using EntityFrameworkCore.Sqlite.Concurrency;
 using Microsoft.Data.Sqlite;
 using Quartz.Impl.AdoJobStore.Common;
 
 namespace Reaparr.Application;
 
 /// <summary>
-/// Custom Quartz <see cref="IDbProvider"/> that applies the same SQLite PRAGMAs
-/// (<c>busy_timeout</c>, <c>journal_mode=WAL</c>, <c>synchronous=NORMAL</c>, etc.)
-/// as the EF Core pipeline via <see cref="SqliteConnectionEnhancer.ApplyRuntimePragmas"/>.
+/// Custom Quartz <see cref="IDbProvider"/> that applies <c>PRAGMA busy_timeout</c>
+/// to every connection opened by Quartz's <c>AdoJobStore</c>.
 ///
 /// Quartz's <c>AdoJobStore</c> opens raw ADO.NET connections that bypass the EF Core
 /// interceptor pipeline. Without this provider, Quartz connections get <c>busy_timeout=0</c>
@@ -19,9 +17,6 @@ namespace Reaparr.Application;
 /// </summary>
 public sealed class QuartzSqliteConnectionProvider : IDbProvider
 {
-    private const string MetadataProductName = "Quartz-SQLite-Custom";
-    private const string MetadataAssemblyName = "Microsoft.Data.Sqlite";
-
     private readonly DbProviderFactory _factory;
     private string _connectionString = "";
 
@@ -50,8 +45,11 @@ public sealed class QuartzSqliteConnectionProvider : IDbProvider
     /// <inheritdoc />
     public DbMetadata Metadata => new()
     {
-        ProductName = MetadataProductName,
-        AssemblyName = MetadataAssemblyName,
+        ProductName = "Microsoft.Data.Sqlite",
+        AssemblyName = "Microsoft.Data.Sqlite",
+        ParameterNamePrefix = "@",
+        BindByName = true,
+        UseParameterNamePrefixInParameterCollection = true,
     };
 
     /// <inheritdoc />
@@ -77,7 +75,11 @@ public sealed class QuartzSqliteConnectionProvider : IDbProvider
         conn.StateChange += (_, args) =>
         {
             if (args.CurrentState == ConnectionState.Open)
-                SqliteConnectionEnhancer.ApplyRuntimePragmas(conn);
+            {
+                using var pragmaCmd = conn.CreateCommand();
+                pragmaCmd.CommandText = "PRAGMA busy_timeout = 30000;";
+                pragmaCmd.ExecuteNonQuery();
+            }
         };
 
         return conn;

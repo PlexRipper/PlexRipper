@@ -218,15 +218,16 @@ const plexServerNodes = computed((): IPlexServerNode[] => {
 		const hasSuccessfulConnection = hasConnections
 			? mappedConnections.some((connection) => connection.connectionSuccessful)
 			: false;
+		const serverCompleted = serverHasProgress
+			? (hasConnections ? hasSuccessfulConnection || !hasInProgressConnections : true)
+			: false;
 
 		return {
 			id: server.id,
 			index: uniqueIndex++,
 			type: 'server',
 			title: serverStore.getServerName(server.id),
-			completed: serverHasProgress
-				? (hasConnections ? !hasInProgressConnections : true)
-				: false,
+			completed: serverCompleted,
 			connectionSuccessful: hasSuccessfulConnection,
 			hasInProgressConnections,
 			noConnections: !hasConnections,

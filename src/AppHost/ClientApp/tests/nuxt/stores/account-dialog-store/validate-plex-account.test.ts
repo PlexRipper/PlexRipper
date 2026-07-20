@@ -146,4 +146,61 @@ describe('AccountDialogStore.validatePlexAccount()', () => {
 		expect(accountDialogStore.validateLoading).toEqual(false);
 		expect(openDialogSpy).not.toHaveBeenCalledWith('account-token-validate-dialog');
 	});
+
+	test('Should open verification code dialog and set clientId when Plex API returns 2FA unauthorized', async () => {
+		// Arrange
+		const dialogStore = useDialogStore();
+		const openDialogSpy = vi.spyOn(dialogStore, 'openDialog');
+		const accountDialogStore = useAccountDialogStore();
+		accountDialogStore.username = '2fa-user';
+		accountDialogStore.password = '2fa-pass';
+
+		mock.onPost(PlexAccountPaths.validatePlexCredentialsEndpoint()).reply(200, generateResultDTO({
+			is2Fa: true,
+			authenticationToken: '',
+			clientId: 'server-assigned-client-id',
+			email: '',
+			isUnAuthorized: true,
+			isValidated: false,
+			password: '2fa-pass',
+			plexId: 0,
+			title: '',
+			username: '2fa-user',
+			uuid: '',
+			validatedAt: null,
+		}));
+
+		// Act
+		const result = subscribeSpyTo(accountDialogStore.validatePlexAccount());
+		await result.onComplete();
+
+		// Assert
+		expect(accountDialogStore.isValidated).toEqual(false);
+		expect(accountDialogStore.hasValidationErrors).toEqual(true);
+		expect(accountDialogStore.validateLoading).toEqual(false);
+		expect(accountDialogStore.clientId).toEqual('server-assigned-client-id');
+		expect(openDialogSpy).toHaveBeenCalledWith('account-verification-code-dialog');
+		expect(openDialogSpy).not.toHaveBeenCalledWith('account-token-validate-dialog');
+	});
+
+	test('Should open token validate dialog and show validation errors on network error', async () => {
+		// Arrange
+		const dialogStore = useDialogStore();
+		const openDialogSpy = vi.spyOn(dialogStore, 'openDialog');
+		const accountDialogStore = useAccountDialogStore();
+		accountDialogStore.username = 'user';
+		accountDialogStore.password = 'pass';
+
+		mock.onPost(PlexAccountPaths.validatePlexCredentialsEndpoint()).reply(500);
+
+		// Act
+		const result = subscribeSpyTo(accountDialogStore.validatePlexAccount());
+		await result.onComplete();
+
+		// Assert
+		expect(accountDialogStore.isValidated).toEqual(false);
+		expect(accountDialogStore.hasValidationErrors).toEqual(true);
+		expect(accountDialogStore.validateLoading).toEqual(false);
+		expect(openDialogSpy).toHaveBeenCalledWith('account-token-validate-dialog');
+	});
 });

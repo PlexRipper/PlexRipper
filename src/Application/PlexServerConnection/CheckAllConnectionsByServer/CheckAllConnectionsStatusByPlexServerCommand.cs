@@ -6,7 +6,8 @@ namespace Reaparr.Application;
 /// </summary>
 /// <param name="PlexServerId">The id of the <see cref="PlexServer" /> to check the connections for.</param>
 /// <returns>Returns successful result if any connection connected.</returns>
-public record CheckAllConnectionsStatusByPlexServerCommand(int PlexServerId) : ICommand<Result<List<PlexServerStatus>>>;
+public record CheckAllConnectionsStatusByPlexServerCommand(int PlexServerId, int Timeout = 10)
+    : ICommand<Result<List<PlexServerStatus>>>;
 
 public class CheckAllConnectionsStatusByPlexServerValidator
     : AbstractValidator<CheckAllConnectionsStatusByPlexServerCommand>
@@ -14,6 +15,7 @@ public class CheckAllConnectionsStatusByPlexServerValidator
     public CheckAllConnectionsStatusByPlexServerValidator()
     {
         RuleFor(x => x.PlexServerId).GreaterThan(0);
+        RuleFor(x => x.Timeout).GreaterThan(0);
     }
 }
 
@@ -74,7 +76,7 @@ public class CheckAllConnectionsStatusByPlexServerHandler
         // Create connection check tasks for all connections
         var connectionTasks = connections.Select(async plexServerConnection =>
             await _commandExecutor.Send(
-                new CheckConnectionStatusByIdCommand(plexServerConnection.Id),
+                new CheckConnectionStatusByIdCommand(plexServerConnection.Id, command.Timeout),
                 cancellationToken
             )
         );

@@ -60,7 +60,7 @@ public class InspectPlexServerJob : IJob
     {
         // Check all Plex Server Connections
         var checkResult = await _commandExecutor.Send(
-            new CheckAllConnectionsStatusByPlexServerCommand(plexServerId),
+            new CheckAllConnectionsStatusByPlexServerCommand(plexServerId, Timeout: 5),
             cancellationToken
         );
 

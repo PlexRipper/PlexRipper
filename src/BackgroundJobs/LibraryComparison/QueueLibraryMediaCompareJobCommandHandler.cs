@@ -61,7 +61,7 @@ public class QueueLibraryMediaCompareJobCommandHandler : ICommandHandler<QueueLi
                 },
                 cancellationToken
             );
-            await _dbContext.SaveChangesAsync(cancellationToken);
+            await _dbContext.SaveChangesNewAsync(cancellationToken);
         }
         // Leave queued or processing rows alone; they already represent the latest requested work.
         else if (existingQueueItem.Status is LibrarySyncJobStatus.Completed or LibrarySyncJobStatus.Failed or LibrarySyncJobStatus.Cancelled)

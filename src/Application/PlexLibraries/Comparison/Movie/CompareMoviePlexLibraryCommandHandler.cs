@@ -239,7 +239,7 @@ public class CompareMoviePlexLibraryCommandHandler : ICommandHandler<CompareMovi
             state.OwnedLibraryUpdatedAt = librarySnapshots.GetValueOrDefault(ownedLibraryId);
         }
 
-        await dbContext.SaveChangesAsync(cancellationToken);
+        await dbContext.SaveChangesNewAsync(cancellationToken);
 
         if (hitRows.Count > 0)
         {

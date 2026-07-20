@@ -24,12 +24,14 @@ public class GetMediaByTypeCommandValidator : AbstractValidator<GetMediaByTypeCo
 public class GetMediaByTypeCommandHandler : ICommandHandler<GetMediaByTypeCommand, Result<PagedMediaQueryResult>>
 {
     private readonly IReaparrDbContext _dbContext;
+    private readonly ICommandExecutor _commandExecutor;
 
     private readonly PagedMediaQueryResult _response = new();
 
-    public GetMediaByTypeCommandHandler(IReaparrDbContext dbContext)
+    public GetMediaByTypeCommandHandler(IReaparrDbContext dbContext, ICommandExecutor commandExecutor)
     {
         _dbContext = dbContext;
+        _commandExecutor = commandExecutor;
     }
 
     public async Task<Result<PagedMediaQueryResult>> ExecuteAsync(
@@ -134,7 +136,10 @@ public class GetMediaByTypeCommandHandler : ICommandHandler<GetMediaByTypeComman
                     .ApplyPaging(options)
                     .ToListAsync(ct);
 
-                _response.Items = movies.Select(x => x.ToSlimDTO()).ToList();
+                var movieDtos = movies.Select(x => x.ToSlimDTO()).ToList();
+                await _commandExecutor.Send(new ApplyComparisonStateCommand(movieDtos, plexLibraryId, PlexMediaType.Movie), ct);
+
+                _response.Items = movieDtos;
                 _response.Roles.AddRange(movies.SelectMany(x => x.Actors).Select(x => x.Id).Distinct().OrderBy(x => x));
                 _response.Countries.AddRange(movies.SelectMany(x => x.Countries).Select(x => x.Id).Distinct().OrderBy(x => x));
                 _response.Genres.AddRange(movies.SelectMany(x => x.Genres).Select(x => x.Id).Distinct().OrderBy(x => x));
@@ -172,7 +177,10 @@ public class GetMediaByTypeCommandHandler : ICommandHandler<GetMediaByTypeComman
                     .ApplyPaging(options)
                     .ToListAsync(ct);
 
-                _response.Items = tvShows.Select(x => x.ToSlimDTOMapper()).ToList();
+                var tvShowDtos = tvShows.Select(x => x.ToSlimDTOMapper()).ToList();
+                await _commandExecutor.Send(new ApplyComparisonStateCommand(tvShowDtos, plexLibraryId, PlexMediaType.TvShow), ct);
+
+                _response.Items = tvShowDtos;
                 _response.Roles.AddRange(tvShows.SelectMany(x => x.Actors).Select(x => x.Id).Distinct().OrderBy(x => x));
                 _response.Countries.AddRange(tvShows.SelectMany(x => x.Countries).Select(x => x.Id).Distinct().OrderBy(x => x));
                 _response.Genres.AddRange(tvShows.SelectMany(x => x.Genres).Select(x => x.Id).Distinct().OrderBy(x => x));

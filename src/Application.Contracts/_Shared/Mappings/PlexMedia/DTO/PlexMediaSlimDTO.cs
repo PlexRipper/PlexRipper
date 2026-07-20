@@ -49,5 +49,10 @@ public record PlexMediaSlimDTO
 
     public required List<PlexMediaQualityDTO> Qualities { get; init; } = [];
 
+    /// <summary>
+    /// Comparison state derived from current stored scope rows.
+    /// <see cref="PlexMediaComparisonState.NotCompared"/> when no current scopes exist.
+    /// A separate detail endpoint returns exact upgrade/missing information on user action.
+    /// </summary>
     public PlexMediaComparisonState ComparisonState { get; init; } = PlexMediaComparisonState.NotCompared;
 }

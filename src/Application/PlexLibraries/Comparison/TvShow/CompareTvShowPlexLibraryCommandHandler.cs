@@ -276,7 +276,7 @@ public class CompareTvShowPlexLibraryCommandHandler : ICommandHandler<CompareTvS
             state.OwnedLibraryUpdatedAt = librarySnapshots.GetValueOrDefault(ownedLibraryId);
         }
 
-        await dbContext.SaveChangesAsync(cancellationToken);
+        await dbContext.SaveChangesNewAsync(cancellationToken);
 
         if (showRows.Count > 0)
             await dbContext.BulkInsertAsync(showRows, cancellationToken: cancellationToken);

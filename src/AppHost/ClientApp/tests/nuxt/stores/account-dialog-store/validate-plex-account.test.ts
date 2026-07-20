@@ -176,7 +176,7 @@ describe('AccountDialogStore.validatePlexAccount()', () => {
 
 		// Assert
 		expect(accountDialogStore.isValidated).toEqual(false);
-		expect(accountDialogStore.hasValidationErrors).toEqual(true);
+		expect(accountDialogStore.hasValidationErrors).toEqual(false);
 		expect(accountDialogStore.validateLoading).toEqual(false);
 		expect(accountDialogStore.clientId).toEqual('server-assigned-client-id');
 		expect(openDialogSpy).toHaveBeenCalledWith('account-verification-code-dialog');

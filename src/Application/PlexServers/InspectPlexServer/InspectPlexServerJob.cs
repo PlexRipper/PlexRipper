@@ -7,7 +7,7 @@ public class InspectPlexServerJob : IJob
 {
     public static string PlexServerIdsParameter => "plexServerIds";
 
-    private readonly IReaparrDbContext _dbContext;
+    private readonly IReaparrDbContextFactory _dbContextFactory;
     private readonly INotificationHubService _notificationHubService;
     private readonly ILogger _log;
     private readonly ICommandExecutor _commandExecutor;
@@ -17,13 +17,13 @@ public class InspectPlexServerJob : IJob
     public InspectPlexServerJob(
         ILogger log,
         ICommandExecutor commandExecutor,
-        IReaparrDbContext dbContext,
+        IReaparrDbContextFactory dbContextFactory,
         INotificationHubService notificationHubService
     )
     {
         _log = log.ForContext<InspectPlexServerJob>();
         _commandExecutor = commandExecutor;
-        _dbContext = dbContext;
+        _dbContextFactory = dbContextFactory;
         _notificationHubService = notificationHubService;
     }
 
@@ -43,20 +43,7 @@ public class InspectPlexServerJob : IJob
 
         try
         {
-            var serverTasks = plexServerIds.Select(async plexServerId =>
-            {
-                // Check all Plex Server Connections
-                var checkResult = await _commandExecutor.Send(
-                    new CheckAllConnectionsStatusByPlexServerCommand(plexServerId),
-                    cancellationToken
-                );
-
-                if (checkResult.IsFailed)
-                    return checkResult.LogError();
-
-                return await RefreshAndSyncLibraries(plexServerId, cancellationToken);
-            });
-
+            var serverTasks = plexServerIds.Select(plexServerId => InspectPlexServer(plexServerId, cancellationToken));
             await Task.WhenAll(serverTasks);
 
             _log.Here().Information("Successfully finished the inspection of {Count}", plexServerIds.Count);
@@ -69,10 +56,32 @@ public class InspectPlexServerJob : IJob
         }
     }
 
-    private async Task<Result> RefreshAndSyncLibraries(int plexServerId, CancellationToken cancellationToken)
+    private async Task InspectPlexServer(int plexServerId, CancellationToken cancellationToken)
+    {
+        // Check all Plex Server Connections
+        var checkResult = await _commandExecutor.Send(
+            new CheckAllConnectionsStatusByPlexServerCommand(plexServerId),
+            cancellationToken
+        );
+
+        if (checkResult.IsFailed)
+        {
+            checkResult.LogError();
+            return;
+        }
+
+        using var dbContext = await _dbContextFactory.CreateAsync();
+        await RefreshAndSyncLibraries(dbContext, plexServerId, cancellationToken);
+    }
+
+    private async Task<Result> RefreshAndSyncLibraries(
+        IReaparrDbContext dbContext,
+        int plexServerId,
+        CancellationToken cancellationToken
+    )
     {
         // Refresh accessible libraries
-        var accountsResult = await _dbContext.GetPlexAccountsWithAccessAsync(plexServerId, cancellationToken);
+        var accountsResult = await dbContext.GetPlexAccountsWithAccessAsync(plexServerId, cancellationToken);
         if (accountsResult.IsFailed)
             return accountsResult.ToResult().LogError();
 
@@ -85,7 +94,7 @@ public class InspectPlexServerJob : IJob
             CancellationToken.None
         );
 
-        var libraryIds = await _dbContext
+        var libraryIds = await dbContext
             .PlexLibraries.Where(x => x.PlexServerId == plexServerId)
             .Select(x => x.Id)
             .ToListAsync(cancellationToken);

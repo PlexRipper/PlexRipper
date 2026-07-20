@@ -21,8 +21,10 @@ public class DownloadJobListenerUnitTests : BaseUnitTest<DownloadJobListener>
 
         var jobDetail = Mock.Mock<IJobDetail>().Object;
         var jobContext = Mock.Mock<IJobExecutionContext>().Object;
-        var jobDataMap = new JobDataMap();
-        jobDataMap.Put(DownloadJob.DownloadTaskIdParameter, JsonSerializer.Serialize(downloadTask.ToKey()));
+        var jobDataMap = new JobDataMap
+        {
+            [DownloadJob.DownloadTaskIdParameter] = JsonSerializer.Serialize(downloadTask.ToKey()),
+        };
 
         Mock.Mock<IMoveDownloadFileQueue>()
             .Setup(x => x.CheckMoveDownloadFileJobQueue())
@@ -74,8 +76,10 @@ public class DownloadJobListenerUnitTests : BaseUnitTest<DownloadJobListener>
 
         var jobDetail = Mock.Mock<IJobDetail>().Object;
         var jobContext = Mock.Mock<IJobExecutionContext>().Object;
-        var jobDataMap = new JobDataMap();
-        jobDataMap.Put(DownloadJob.DownloadTaskIdParameter, JsonSerializer.Serialize(downloadTask.ToKey()));
+        var jobDataMap = new JobDataMap
+        {
+            [DownloadJob.DownloadTaskIdParameter] = JsonSerializer.Serialize(downloadTask.ToKey()),
+        };
 
         Mock.Mock<IMoveDownloadFileQueue>()
             .Setup(x => x.CheckMoveDownloadFileJobQueue())

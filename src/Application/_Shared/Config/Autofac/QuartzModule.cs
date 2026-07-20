@@ -8,6 +8,9 @@ namespace Reaparr.Application;
 
 public class QuartzModule : Module
 {
+    private static readonly string _connectionProviderTypeName =
+        $"{typeof(QuartzSqliteConnectionProvider).FullName}, {typeof(QuartzSqliteConnectionProvider).Assembly.GetName().Name}";
+
     protected override void Load(ContainerBuilder builder)
     {
         var assembly = Assembly.GetExecutingAssembly();
@@ -36,7 +39,14 @@ public class QuartzModule : Module
                         { "quartz.jobStore.tablePrefix", "QRTZ_" },
                         // { "quartz.jobStore.useProperties", "true" },
                         { "quartz.jobStore.driverDelegateType", "Quartz.Impl.AdoJobStore.SQLiteDelegate, Quartz" },
-                        { "quartz.dataSource.default.provider", "SQLite-Microsoft" },
+                        {
+                            "quartz.dataSource.default.connectionProvider.type",
+                            _connectionProviderTypeName
+                        },
+                        {
+                            "quartz.dataSource.default.connectionProvider.connectionString",
+                            DbContextConnections.GetConnectionString(pathProvider)
+                        },
                         // False because we are first setting up autofac, and then the database. When the database is set up, the schema is already validated.
                         { "quartz.jobStore.performSchemaValidation", "false" },
                         {

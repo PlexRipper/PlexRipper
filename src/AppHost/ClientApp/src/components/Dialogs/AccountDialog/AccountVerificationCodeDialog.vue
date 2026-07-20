@@ -16,6 +16,7 @@
 				<QRow justify="center">
 					<QCol cols="auto">
 						<VOtpInput
+							ref="otpInput"
 							id="verification-code"
 							v-model:value="accountDialogStore.verificationCode"
 							input-classes="otp-input"
@@ -66,7 +67,7 @@
 
 <script setup lang="ts">
 import VOtpInput from 'vue3-otp-input';
-import { set } from '@vueuse/core';
+import { get, set } from '@vueuse/core';
 import { useSubscription } from '@vueuse/rxjs';
 import { DialogType } from '@enums';
 import { useAccountDialogStore, useI18n } from '#imports';
@@ -75,6 +76,8 @@ import type { ErrorDTO } from '@dto';
 const { t } = useI18n();
 
 const accountDialogStore = useAccountDialogStore();
+
+const otpInput = ref<InstanceType<typeof VOtpInput>>();
 
 const loading = ref(false);
 const errors = ref<ErrorDTO[]>([]);
@@ -95,6 +98,7 @@ function onComplete() {
 							message: t('components.account-verification-code-dialog.error'),
 						} as ErrorDTO,
 					]);
+					get(otpInput)?.clearInput();
 				}
 			},
 		}),

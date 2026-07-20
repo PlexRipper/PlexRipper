@@ -21,6 +21,13 @@
 						class="media-poster--image"
 						:alt="mediaItem.title">
 						<template #default>
+							<!-- Comparison State Button -->
+							<IconButton
+								class="comparison-state-button"
+								:color="comparisonBadge.color"
+								size="1rem"
+								:cy="`comparison-chip-${mediaItem.comparisonState}`"
+								:icon="comparisonBadge.icon" />
 							<div class="media-poster--overlay white--text">
 								<div class="media-poster--content">
 									<div class="media-poster--section">
@@ -48,6 +55,7 @@
 											size="subtitle2"
 											:value="serverStore.getServerName(mediaItem.plexServerId)" />
 									</div>
+
 									<div
 										:class="['media-poster--actions', mediaType === PlexMediaType.TvShow ? 'media-poster--actions-around' : 'media-poster--actions-center']">
 										<BaseButton
@@ -134,7 +142,13 @@
 <script setup lang="ts">
 import { get, set } from '@vueuse/core';
 import type { Subscription } from 'rxjs';
-import { type DownloadMediaDTO, type PlexMediaQualityDTO, type PlexMediaSlimDTO, PlexMediaType } from '@dto';
+import {
+	type DownloadMediaDTO,
+	PlexMediaComparisonState,
+	type PlexMediaQualityDTO,
+	type PlexMediaSlimDTO,
+	PlexMediaType,
+} from '@dto';
 import { MediaSortField } from '@enums';
 import { useMediaOverviewStore, useMediaStore, useServerStore, useSettingsStore } from '@store';
 
@@ -142,6 +156,7 @@ const mediaOverviewStore = useMediaOverviewStore();
 const mediaStore = useMediaStore();
 const serverStore = useServerStore();
 const settingsStore = useSettingsStore();
+const { t } = useI18n();
 
 const props = withDefaults(defineProps<{
 	mediaItem: PlexMediaSlimDTO;
@@ -163,6 +178,51 @@ const thumbHeight = 300;
 let currentSubscription: Subscription | null = null;
 
 const mediaType = computed(() => props.mediaItem?.type ?? PlexMediaType.Unknown);
+
+const comparisonBadge = computed((): {
+	icon: string;
+	label: string;
+	color: 'default' | 'positive' | 'warning' | 'negative';
+} => {
+	switch (props.mediaItem.comparisonState) {
+		case PlexMediaComparisonState.Missing:
+			return {
+				color: 'negative',
+				label: t('components.media-overview.comparison-missing'),
+				icon: 'mdi-call-missed',
+			};
+		case PlexMediaComparisonState.HigherQuality:
+			return {
+				color: 'positive',
+				label: t('components.media-overview.comparison-higher-quality'),
+				icon: 'mdi-arrow-up-circle',
+			};
+		case PlexMediaComparisonState.MissingAndHigherQuality:
+			return {
+				color: 'positive',
+				label: t('components.media-overview.comparison-higher-quality'),
+				icon: 'mdi-arrow-up-circle',
+			};
+		case PlexMediaComparisonState.Owned:
+			return {
+				color: 'default',
+				label: t('components.media-overview.comparison-owned'),
+				icon: 'mdi-check',
+			};
+		case PlexMediaComparisonState.NotCompared:
+			return {
+				color: 'default',
+				label: t('components.media-overview.comparison-owned'),
+				icon: 'mdi-sync',
+			};
+		default:
+			return {
+				color: 'negative',
+				label: t('components.media-overview.comparison-not-compared'),
+				icon: 'mdi-alert-circle-outline',
+			};
+	}
+});
 
 function onDownload(mediaQualities: PlexMediaQualityDTO[]) {
 	const downloadCommand: DownloadMediaDTO = {
@@ -227,6 +287,11 @@ onUnmounted(() => {
 
 .q-img__content > div {
   padding: 0;
+}
+
+.comparison-state-button {
+  position: absolute;
+  z-index: 9999;
 }
 
 .media-poster-card {

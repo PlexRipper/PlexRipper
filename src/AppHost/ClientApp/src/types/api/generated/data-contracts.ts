@@ -554,6 +554,7 @@ export enum JobTypes {
   MetadataSyncJob = "MetadataSyncJob",
   CheckForUpdateJob = "CheckForUpdateJob",
   CheckPlexLibrariesForUpdatesJob = "CheckPlexLibrariesForUpdatesJob",
+  LibraryComparisonJob = "LibraryComparisonJob",
 }
 
 export interface LanguageSettingsDTO {
@@ -687,6 +688,35 @@ export enum MessageTypes {
 
 export interface MoveDownloadFileJobUpdateDTO {
   id: DownloadTaskKey;
+}
+
+export interface MovieLibraryComparisonDebugHitDTO {
+  /** @format date-time */
+  comparedAt: string;
+  matchType: PlexMediaComparisonMatchType;
+  /** @format int32 */
+  ownedMediaId: number;
+  ownedQuality: VideoQuality;
+  ownedTitle: string;
+  /** @format int32 */
+  ownedYear: number;
+  /** @format int32 */
+  remoteMediaId: number;
+  remoteQuality: VideoQuality;
+  remoteTitle: string;
+  /** @format int32 */
+  remoteYear: number;
+}
+
+export interface MovieLibraryComparisonDebugResponseDTO {
+  higherQuality: MovieLibraryComparisonDebugHitDTO[];
+  matched: MovieLibraryComparisonDebugHitDTO[];
+  /** @format int32 */
+  missingCount: number;
+  /** @format int32 */
+  ownedLibraryId: number;
+  /** @format int32 */
+  remoteLibraryId: number;
 }
 
 export interface NetworkSettingsDTO {
@@ -858,12 +888,31 @@ export interface PlexLibraryDTO {
   uuid: string;
 }
 
+export enum PlexMediaComparisonMatchType {
+  None = "None",
+  TmdbGuid = "TmdbGuid",
+  ImdbGuid = "ImdbGuid",
+  TvdbGuid = "TvdbGuid",
+  NormalizedTitleAndYear = "NormalizedTitleAndYear",
+  NormalizedTitleYearAndDuration = "NormalizedTitleYearAndDuration",
+  ParentAndChildNumbers = "ParentAndChildNumbers",
+}
+
+export enum PlexMediaComparisonState {
+  NotCompared = "NotCompared",
+  Owned = "Owned",
+  Missing = "Missing",
+  HigherQuality = "HigherQuality",
+  MissingAndHigherQuality = "MissingAndHigherQuality",
+}
+
 export interface PlexMediaDTO {
   /** @format date-time */
   addedAt: string;
   /** @format int32 */
   childCount: number;
   children: PlexMediaDTO[];
+  comparisonState: PlexMediaComparisonState;
   contentRating?: string | null;
   /** @format int32 */
   duration: number;
@@ -953,6 +1002,7 @@ export interface PlexMediaSlimDTO {
   addedAt: string;
   /** @format int32 */
   childCount: number;
+  comparisonState: PlexMediaComparisonState;
   /** @format int32 */
   duration: number;
   /** @format int32 */
@@ -1404,6 +1454,15 @@ export interface ResultDTOOfListOfString {
   value?: string[] | null;
 }
 
+export interface ResultDTOOfMovieLibraryComparisonDebugResponseDTO {
+  errors: ErrorDTO[];
+  isSuccess: boolean;
+  /** @format int32 */
+  statusCode: number;
+  successes: SuccessDTO[];
+  value?: MovieLibraryComparisonDebugResponseDTO | null;
+}
+
 export interface ResultDTOOfPlexAccountDTO {
   errors: ErrorDTO[];
   isSuccess: boolean;
@@ -1539,6 +1598,15 @@ export interface ResultDTOOfTestConnectionToSonarrEndpointResponse {
   value?: TestConnectionToSonarrEndpointResponse | null;
 }
 
+export interface ResultDTOOfTvShowLibraryComparisonDebugResponseDTO {
+  errors: ErrorDTO[];
+  isSuccess: boolean;
+  /** @format int32 */
+  statusCode: number;
+  successes: SuccessDTO[];
+  value?: TvShowLibraryComparisonDebugResponseDTO | null;
+}
+
 export interface ResultDTOOfUserClaimsDTO {
   errors: ErrorDTO[];
   isSuccess: boolean;
@@ -1670,6 +1738,103 @@ export interface TestConnectionToRadarrEndpointResponse {
 
 export interface TestConnectionToSonarrEndpointResponse {
   result: TestConnectionStatus;
+}
+
+export interface TvShowLibraryComparisonDebugEpisodeHitDTO {
+  /** @format date-time */
+  comparedAt: string;
+  matchType: PlexMediaComparisonMatchType;
+  /** @format int32 */
+  ownedEpisodeNumber: number;
+  /** @format int32 */
+  ownedMediaId: number;
+  ownedQuality: VideoQuality;
+  /** @format int32 */
+  ownedSeasonId: number;
+  ownedTitle: string;
+  /** @format int32 */
+  ownedTvShowId: number;
+  /** @format int32 */
+  remoteEpisodeNumber: number;
+  /** @format int32 */
+  remoteMediaId: number;
+  remoteQuality: VideoQuality;
+  /** @format int32 */
+  remoteSeasonId: number;
+  remoteTitle: string;
+  /** @format int32 */
+  remoteTvShowId: number;
+}
+
+export interface TvShowLibraryComparisonDebugResponseDTO {
+  episodes: TvShowLibraryComparisonDebugSectionDTOOfTvShowLibraryComparisonDebugEpisodeHitDTO;
+  /** @format int32 */
+  ownedLibraryId: number;
+  /** @format int32 */
+  remoteLibraryId: number;
+  seasons: TvShowLibraryComparisonDebugSectionDTOOfTvShowLibraryComparisonDebugSeasonHitDTO;
+  shows: TvShowLibraryComparisonDebugSectionDTOOfTvShowLibraryComparisonDebugShowHitDTO;
+}
+
+export interface TvShowLibraryComparisonDebugSeasonHitDTO {
+  /** @format date-time */
+  comparedAt: string;
+  matchType: PlexMediaComparisonMatchType;
+  /** @format int32 */
+  ownedMediaId: number;
+  ownedQuality: VideoQuality;
+  /** @format int32 */
+  ownedSeasonNumber: number;
+  ownedTitle: string;
+  /** @format int32 */
+  ownedTvShowId: number;
+  /** @format int32 */
+  remoteMediaId: number;
+  remoteQuality: VideoQuality;
+  /** @format int32 */
+  remoteSeasonNumber: number;
+  remoteTitle: string;
+  /** @format int32 */
+  remoteTvShowId: number;
+}
+
+export interface TvShowLibraryComparisonDebugSectionDTOOfTvShowLibraryComparisonDebugEpisodeHitDTO {
+  higherQuality: TvShowLibraryComparisonDebugEpisodeHitDTO[];
+  matched: TvShowLibraryComparisonDebugEpisodeHitDTO[];
+  /** @format int32 */
+  missingCount: number;
+}
+
+export interface TvShowLibraryComparisonDebugSectionDTOOfTvShowLibraryComparisonDebugSeasonHitDTO {
+  higherQuality: TvShowLibraryComparisonDebugSeasonHitDTO[];
+  matched: TvShowLibraryComparisonDebugSeasonHitDTO[];
+  /** @format int32 */
+  missingCount: number;
+}
+
+export interface TvShowLibraryComparisonDebugSectionDTOOfTvShowLibraryComparisonDebugShowHitDTO {
+  higherQuality: TvShowLibraryComparisonDebugShowHitDTO[];
+  matched: TvShowLibraryComparisonDebugShowHitDTO[];
+  /** @format int32 */
+  missingCount: number;
+}
+
+export interface TvShowLibraryComparisonDebugShowHitDTO {
+  /** @format date-time */
+  comparedAt: string;
+  matchType: PlexMediaComparisonMatchType;
+  /** @format int32 */
+  ownedMediaId: number;
+  ownedQuality: VideoQuality;
+  ownedTitle: string;
+  /** @format int32 */
+  ownedYear: number;
+  /** @format int32 */
+  remoteMediaId: number;
+  remoteQuality: VideoQuality;
+  remoteTitle: string;
+  /** @format int32 */
+  remoteYear: number;
 }
 
 /** @example {"username":"ReaparrRocks","password":"R€Aℙℙ@rr69"} */

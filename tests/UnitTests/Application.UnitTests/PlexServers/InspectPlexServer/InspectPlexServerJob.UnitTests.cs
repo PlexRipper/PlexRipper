@@ -44,7 +44,7 @@ public class InspectPlexServerJobUnitTests : BaseUnitTest<InspectPlexServerJob>
         Mock.Mock<ICommandExecutor>()
             .Setup(x =>
                 x.Send(
-                    It.Is<CheckAllConnectionsStatusByPlexServerCommand>(command => command.Timeout == 3),
+                    It.Is<CheckAllConnectionsStatusByPlexServerCommand>(command => command.Timeout == 5),
                     It.IsAny<CancellationToken>()
                 )
             )
@@ -93,7 +93,7 @@ public class InspectPlexServerJobUnitTests : BaseUnitTest<InspectPlexServerJob>
         expectedLibraryIds.ShouldNotBeEmpty();
         Mock.Mock<ICommandExecutor>()
             .Verify(
-                x => x.Send(It.Is<CheckAllConnectionsStatusByPlexServerCommand>(command => command.Timeout == 3), It.IsAny<CancellationToken>()),
+                x => x.Send(It.Is<CheckAllConnectionsStatusByPlexServerCommand>(command => command.Timeout == 5), It.IsAny<CancellationToken>()),
                 Times.Exactly(plexServerIds.Count)
             );
         Mock.Mock<ICommandExecutor>()
@@ -149,7 +149,7 @@ public class InspectPlexServerJobUnitTests : BaseUnitTest<InspectPlexServerJob>
         Mock.Mock<ICommandExecutor>()
             .Setup(x =>
                 x.Send(
-                    It.Is<CheckAllConnectionsStatusByPlexServerCommand>(command => command.Timeout == 3),
+                    It.Is<CheckAllConnectionsStatusByPlexServerCommand>(command => command.Timeout == 5),
                     It.IsAny<CancellationToken>()
                 )
             )
@@ -193,7 +193,7 @@ public class InspectPlexServerJobUnitTests : BaseUnitTest<InspectPlexServerJob>
         // Assert
         Mock.Mock<ICommandExecutor>()
             .Verify(
-                x => x.Send(It.Is<CheckAllConnectionsStatusByPlexServerCommand>(command => command.Timeout == 3), It.IsAny<CancellationToken>()),
+                x => x.Send(It.Is<CheckAllConnectionsStatusByPlexServerCommand>(command => command.Timeout == 5), It.IsAny<CancellationToken>()),
                 Times.Exactly(plexServerIds.Count)
             );
         Mock.Mock<ICommandExecutor>()

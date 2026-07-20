@@ -33,6 +33,7 @@
 				</QRow>
 				<QRow
 					v-if="errors.length > 0"
+					data-cy="2fa-code-verification-error"
 					justify="center">
 					<QCol cols="auto">
 						<span style="color: red; font-weight: bold">
@@ -53,6 +54,7 @@
 				<!--	Confirm	-->
 				<QCol cols="auto">
 					<ConfirmButton
+						cy="2fa-code-verification-confirm-button"
 						:loading="loading"
 						:disabled="accountDialogStore.verificationCode.length < 6"
 						@click="onComplete" />
@@ -78,6 +80,7 @@ const loading = ref(false);
 const errors = ref<ErrorDTO[]>([]);
 
 function onComplete() {
+	set(errors, []);
 	set(loading, true);
 	useSubscription(
 		accountDialogStore.validateVerificationCode().subscribe({
@@ -86,6 +89,13 @@ function onComplete() {
 			},
 			complete: () => {
 				set(loading, false);
+				if (accountDialogStore.hasValidationErrors) {
+					set(errors, [
+						{
+							message: t('components.account-verification-code-dialog.error'),
+						} as ErrorDTO,
+					]);
+				}
 			},
 		}),
 	);

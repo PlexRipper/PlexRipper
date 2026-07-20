@@ -171,6 +171,7 @@ export const useAccountDialogStore = defineStore(StoreNames.AccountDialogStore, 
 						// If 2FA is required, open the verification code dialog instead
 						if (value?.is2Fa) {
 							state.clientId = value.clientId;
+							state.hasValidationErrors = false;
 							Log.info('Account has 2FA enabled');
 							dialogStore.openDialog(DialogType.AccountVerificationCodeDialog);
 							return;
@@ -226,6 +227,7 @@ export const useAccountDialogStore = defineStore(StoreNames.AccountDialogStore, 
 					if (isSuccess && value) {
 						if (value.isUnAuthorized) {
 							Log.error('Invalid verification code, 2FA still required');
+							state.hasValidationErrors = true;
 							state.verificationCode = '';
 							return;
 						}

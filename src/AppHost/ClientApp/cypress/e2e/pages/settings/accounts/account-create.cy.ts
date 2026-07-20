@@ -22,7 +22,7 @@ describe('Add Plex account to Reaparr', () => {
 		});
 	});
 
-	it('Should request a verification code when 2Fa is enabled for an Plex account', function () {
+	it('Should request a verification code, show invalid code error, and allow retry when 2FA is enabled', function () {
 		const plexAccount: PlexAccountDTO = generatePlexAccount({
 			id: 99,
 			partialData: {
@@ -42,29 +42,67 @@ describe('Add Plex account to Reaparr', () => {
 		// Validate button should be enabled
 		cy.getCy('account-dialog-validate-button').should('not.be.disabled');
 
-		// Validate Action, should return is2Fa true and isValidated false
+		// Initial Plex response: credentials are valid but require a 2FA code
 		cy.validatePlexCredentialsEndpoint({
+			isUnAuthorized: true,
 			partialData: {
+				clientId: plexAccount.clientId,
 				is2Fa: true,
 				isValidated: false,
 			},
-		});
+		}).as('validateNeeds2Fa');
 
 		cy.getCy('account-dialog-validate-button').click();
+		cy.wait('@validateNeeds2Fa');
 
 		// Verify 2FA dialog appears
 		cy.getCy('2fa-code-verification-dialog').should('be.visible');
+		cy.getCy('2fa-code-verification-error').should('not.exist');
 
-		// Insert verification code, should return is2Fa true and isValidated true
+		// Invalid verification code: backend returns unauthorized and keeps account unvalidated
+		cy.validatePlexCredentialsEndpoint({
+			isUnAuthorized: true,
+			partialData: {
+				clientId: plexAccount.clientId,
+				is2Fa: false,
+				isValidated: false,
+			},
+		}).as('validateInvalidCode');
+
+		cy.get(':nth-child(1) > [data-test="single-input"]').type('111111');
+		cy.wait('@validateInvalidCode').then((interception) => {
+			expect(interception.request.body.verificationCode).to.equal('111111');
+		});
+		cy.getCy('2fa-code-verification-dialog').should('be.visible');
+		cy.getCy('2fa-code-verification-error').should('be.visible');
+		cy.getCy('2fa-code-verification-dialog')
+			.find('[data-test="single-input"]')
+			.should(($inputs) => {
+				expect(Array.from($inputs, (input) => (input as HTMLInputElement).value)).to.deep.equal([
+					'',
+					'',
+					'',
+					'',
+					'',
+					'',
+				]);
+			});
+		cy.getCy('2fa-code-verification-confirm-button').should('be.disabled');
+		cy.getCy('account-dialog-save-button').should('be.disabled');
+
+		// Retry with a valid verification code
 		cy.validatePlexCredentialsEndpoint({
 			partialData: {
+				clientId: plexAccount.clientId,
 				is2Fa: true,
 				isValidated: true,
 			},
-		});
+		}).as('validateValidCode');
 
-		// Enter 2FA code
 		cy.get(':nth-child(1) > [data-test="single-input"]').type('123456');
+		cy.wait('@validateValidCode').then((interception) => {
+			expect(interception.request.body.verificationCode).to.equal('123456');
+		});
 
 		// Verify 2FA dialog closes after successful validation
 		cy.getCy('2fa-code-verification-dialog').should('not.exist');
@@ -325,6 +363,7 @@ describe('Add Plex account to Reaparr', () => {
 
 			// First validation attempt - should fail
 			cy.validatePlexCredentialsEndpoint({
+				isUnAuthorized: true,
 				partialData: {
 					isValidated: false,
 					is2Fa: false,

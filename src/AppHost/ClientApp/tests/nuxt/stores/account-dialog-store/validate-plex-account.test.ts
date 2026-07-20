@@ -2,7 +2,7 @@ import { describe, beforeAll, beforeEach, test, expect, vi } from 'vitest';
 import { createPinia, setActivePinia } from 'pinia';
 import { baseSetup, baseVars, getAxiosMock, subscribeSpyTo } from '@services-test-base';
 import { PlexAccountPaths } from '@api-urls';
-import { generateResultDTO } from '@mock';
+import { generateFailedResultDTO, generateResultDTO } from '@mock';
 import { useAccountDialogStore, useDialogStore } from '@store';
 
 describe('AccountDialogStore.validatePlexAccount()', () => {
@@ -202,5 +202,94 @@ describe('AccountDialogStore.validatePlexAccount()', () => {
 		expect(accountDialogStore.hasValidationErrors).toEqual(true);
 		expect(accountDialogStore.validateLoading).toEqual(false);
 		expect(openDialogSpy).toHaveBeenCalledWith('account-token-validate-dialog');
+	});
+
+	test('Should open token validate dialog when API returns unsuccessful result (isSuccess=false)', async () => {
+		// Arrange
+		const dialogStore = useDialogStore();
+		const openDialogSpy = vi.spyOn(dialogStore, 'openDialog');
+		const accountDialogStore = useAccountDialogStore();
+		accountDialogStore.username = 'user';
+		accountDialogStore.password = 'pass';
+
+		mock.onPost(PlexAccountPaths.validatePlexCredentialsEndpoint()).reply(200, generateFailedResultDTO());
+
+		// Act
+		const result = subscribeSpyTo(accountDialogStore.validatePlexAccount());
+		await result.onComplete();
+
+		// Assert
+		expect(accountDialogStore.isValidated).toEqual(false);
+		expect(accountDialogStore.hasValidationErrors).toEqual(true);
+		expect(accountDialogStore.validateLoading).toEqual(false);
+		expect(openDialogSpy).toHaveBeenCalledWith('account-token-validate-dialog');
+	});
+
+	test('Should open token validate dialog when account has no 2FA and is not validated', async () => {
+		// Arrange
+		const dialogStore = useDialogStore();
+		const openDialogSpy = vi.spyOn(dialogStore, 'openDialog');
+		const accountDialogStore = useAccountDialogStore();
+		accountDialogStore.username = 'user';
+		accountDialogStore.password = 'pass';
+
+		mock.onPost(PlexAccountPaths.validatePlexCredentialsEndpoint()).reply(200, generateResultDTO({
+			is2Fa: false,
+			authenticationToken: '',
+			clientId: 'client-id',
+			email: '',
+			isUnAuthorized: false,
+			isValidated: false,
+			password: 'pass',
+			plexId: 0,
+			title: '',
+			username: 'user',
+			uuid: '',
+			validatedAt: null,
+		}));
+
+		// Act
+		const result = subscribeSpyTo(accountDialogStore.validatePlexAccount());
+		await result.onComplete();
+
+		// Assert
+		expect(accountDialogStore.isValidated).toEqual(false);
+		expect(accountDialogStore.hasValidationErrors).toEqual(true);
+		expect(accountDialogStore.validateLoading).toEqual(false);
+		expect(openDialogSpy).toHaveBeenCalledWith('account-token-validate-dialog');
+	});
+
+	test('Should log warning and not open any dialog when account is validated with 2FA (inconsistent state)', async () => {
+		// Arrange
+		const dialogStore = useDialogStore();
+		const openDialogSpy = vi.spyOn(dialogStore, 'openDialog');
+		const accountDialogStore = useAccountDialogStore();
+		accountDialogStore.username = 'user';
+		accountDialogStore.password = 'pass';
+
+		mock.onPost(PlexAccountPaths.validatePlexCredentialsEndpoint()).reply(200, generateResultDTO({
+			is2Fa: true,
+			authenticationToken: 'token',
+			clientId: 'client-id',
+			email: 'user@test.dev',
+			isUnAuthorized: false,
+			isValidated: true,
+			password: 'pass',
+			plexId: 42,
+			title: 'Title',
+			username: 'user',
+			uuid: 'uuid',
+			validatedAt: '2026-04-03T00:00:00Z',
+		}));
+
+		// Act
+		const result = subscribeSpyTo(accountDialogStore.validatePlexAccount());
+		await result.onComplete();
+
+		// Assert
+		expect(accountDialogStore.isValidated).toEqual(true);
+		expect(accountDialogStore.hasValidationErrors).toEqual(false);
+		expect(accountDialogStore.validateLoading).toEqual(false);
+		expect(openDialogSpy).not.toHaveBeenCalled();
 	});
 });

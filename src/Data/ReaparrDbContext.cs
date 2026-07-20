@@ -116,45 +116,42 @@ public sealed class ReaparrDbContext : DbContext, IReaparrDbContext, IReaparrDbC
         BulkConfig? bulkConfig = null,
         CancellationToken cancellationToken = default
     )
-        where T : class =>
-        throw new NotSupportedException(
-            "BulkReadAsync is not supported in with SQLite due to issues with UseTempDB and other limitations."
-                + "Use EF native reading instead."
-        );
+        where T : class => throw new NotSupportedException(
+        "BulkReadAsync is not supported in with SQLite due to issues with UseTempDB and other limitations."
+        + "Use EF native reading instead."
+    );
 
     public async Task BulkInsertAsync<T>(
         IList<T> entities,
         BulkConfig? bulkConfig = null,
         CancellationToken cancellationToken = default
     )
-        where T : class =>
-        await ExecuteBulkAsync(
-            () =>
-                DbContextBulkExtensions.BulkInsertAsync(
-                    this,
-                    entities,
-                    bulkConfig,
-                    cancellationToken: cancellationToken
-                ),
-            cancellationToken
-        );
+        where T : class => await ExecuteBulkAsync(
+        () =>
+            DbContextBulkExtensions.BulkInsertAsync(
+                this,
+                entities,
+                bulkConfig,
+                cancellationToken: cancellationToken
+            ),
+        cancellationToken
+    );
 
     public async Task BulkUpdateAsync<T>(
         IList<T> entities,
         BulkConfig? bulkConfig = null,
         CancellationToken cancellationToken = default
     )
-        where T : class =>
-        await ExecuteBulkAsync(
-            () =>
-                DbContextBulkExtensions.BulkUpdateAsync(
-                    this,
-                    entities,
-                    bulkConfig,
-                    cancellationToken: cancellationToken
-                ),
-            cancellationToken
-        );
+        where T : class => await ExecuteBulkAsync(
+        () =>
+            DbContextBulkExtensions.BulkUpdateAsync(
+                this,
+                entities,
+                bulkConfig,
+                cancellationToken: cancellationToken
+            ),
+        cancellationToken
+    );
 
     public async Task BulkInsertOrUpdateAsync<T>(
         IList<T> entities,
@@ -163,19 +160,32 @@ public sealed class ReaparrDbContext : DbContext, IReaparrDbContext, IReaparrDbC
         Type? type = null,
         CancellationToken cancellationToken = default
     )
-        where T : class =>
-        await ExecuteBulkAsync(
-            () =>
-                DbContextBulkExtensions.BulkInsertOrUpdateAsync(
-                    this,
-                    entities,
-                    bulkConfig,
-                    progress,
-                    type,
-                    cancellationToken: cancellationToken
-                ),
-            cancellationToken
-        );
+        where T : class => await ExecuteBulkAsync(
+        () =>
+            DbContextBulkExtensions.BulkInsertOrUpdateAsync(
+                this,
+                entities,
+                bulkConfig,
+                progress,
+                type,
+                cancellationToken: cancellationToken
+            ),
+        cancellationToken
+    );
+
+    /// <inheritdoc/>
+    public Task<T> ExecuteWithRetryAsync<T>(
+        Func<IReaparrDbContext, Task<T>> operation,
+        int maxRetries = 3,
+        CancellationToken cancellationToken = default) =>
+        ((DbContext)this).ExecuteWithRetryAsync(ctx => operation((IReaparrDbContext)ctx), maxRetries,
+            cancellationToken);
+
+    /// <inheritdoc/>
+    public Task<int> ExecuteSqlInterpolatedAsync(
+        FormattableString sql,
+        CancellationToken cancellationToken = default) =>
+        this.Database.ExecuteSqlInterpolatedAsync(sql, cancellationToken);
 
     public Task<IDbContextTransaction> BeginTransactionAsync(CancellationToken cancellationToken = default) =>
         Database.BeginTransactionAsync(cancellationToken);
@@ -268,13 +278,13 @@ public sealed class ReaparrDbContext : DbContext, IReaparrDbContext, IReaparrDbC
             await Database.OpenConnectionAsync(cancellationToken);
 
         try
-        {             
+        {
             if (Database.CurrentTransaction is not null)
             {
                 await operation();
                 return;
             }
-            
+
             await using var tx = await BeginTransactionAsync(cancellationToken);
             await operation();
             await tx.CommitAsync(cancellationToken);
@@ -314,5 +324,6 @@ public sealed class ReaparrDbContext : DbContext, IReaparrDbContext, IReaparrDbC
     /// <inheritdoc/>
     public IEnumerable<string> GetPendingMigrations() => Database.GetPendingMigrations();
 
-    public Task<int> SaveChangesNewAsync(CancellationToken cancellationToken = new()) => this.SaveChangesSerializedAsync(8, cancellationToken);
+    public Task<int> SaveChangesNewAsync(CancellationToken cancellationToken = new()) =>
+        this.SaveChangesSerializedAsync(8, cancellationToken);
 }

@@ -164,10 +164,84 @@ public interface IReaparrDbContext : IDisposable
     )
         where T : class;
 
+    /// <summary>
+    /// Executes an operation with automatic retry on <c>SQLITE_BUSY</c> and
+    /// <c>SQLITE_BUSY_SNAPSHOT</c> errors.
+    /// </summary>
+    /// <typeparam name="T">The result type.</typeparam>
+    /// <param name="context">The database context.</param>
+    /// <param name="operation">The operation to execute.</param>
+    /// <param name="maxRetries">
+    /// The maximum number of retry attempts. Each retry waits using exponential backoff
+    /// with jitter starting at 100 ms.
+    /// </param>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <returns>The result of the operation.</returns>
+    /// <remarks>
+    /// <para>
+    /// Two classes of busy error are handled:
+    /// </para>
+    /// <list type="bullet">
+    ///   <item>
+    ///     <b>SQLITE_BUSY / SQLITE_BUSY_RECOVERY / SQLITE_BUSY_TIMEOUT</b> — another
+    ///     connection holds a lock. The operation is retried after a backoff delay.
+    ///   </item>
+    ///   <item>
+    ///     <b>SQLITE_BUSY_SNAPSHOT</b> — the connection's read snapshot became stale
+    ///     after another writer committed. The entire operation is restarted so that it
+    ///     can acquire a fresh snapshot. Any data read in the failed attempt must be
+    ///     re-queried inside the operation lambda.
+    ///   </item>
+    /// </list>
+    /// <para>
+    ///   <b>SQLITE_LOCKED</b> (same-connection conflict) is not retried and propagates
+    ///   immediately, as it indicates an application-level bug.
+    /// </para>
+    /// </remarks>
+    Task<T> ExecuteWithRetryAsync<T>(
+        Func<IReaparrDbContext, Task<T>> operation,
+        int maxRetries = 3,
+        CancellationToken cancellationToken = default);
+    
+    
     Task<IDbContextTransaction> BeginTransactionAsync(CancellationToken cancellationToken = default);
     EntityEntry Entry(object entity);
 
     Task<int> SaveChangesNewAsync(CancellationToken cancellationToken = default);
 
     void ClearChangeTracker();
+
+        /// <summary>
+    ///     Executes the given SQL against the database and returns the number of rows affected.
+    /// </summary>
+    /// <remarks>
+    ///     <para>
+    ///         Note that this method does not start a transaction. To use this method with
+    ///         a transaction, first call <see cref="BeginTransaction" /> or <see cref="O:UseTransaction" />.
+    ///     </para>
+    ///     <para>
+    ///         Note that the current <see cref="ExecutionStrategy" /> is not used by this method
+    ///         since the SQL may not be idempotent and does not run in a transaction. An <see cref="ExecutionStrategy" />
+    ///         can be used explicitly, making sure to also use a transaction if the SQL is not
+    ///         idempotent.
+    ///     </para>
+    ///     <para>
+    ///         As with any API that accepts SQL it is important to parameterize any user input to protect against a SQL injection
+    ///         attack. You can include parameter place holders in the SQL query string and then supply parameter values as additional
+    ///         arguments. Any parameter values you supply will automatically be converted to a DbParameter.
+    ///     </para>
+    ///     <para>
+    ///         See <see href="https://aka.ms/efcore-docs-raw-sql">Executing raw SQL commands with EF Core</see>
+    ///         for more information and examples.
+    ///     </para>
+    /// </remarks>
+    /// <param name="sql">The interpolated string representing a SQL query with parameters.</param>
+    /// <param name="cancellationToken">A <see cref="CancellationToken" /> to observe while waiting for the task to complete.</param>
+    /// <returns>
+    ///     A task that represents the asynchronous operation. The task result is the number of rows affected.
+    /// </returns>
+    /// <exception cref="OperationCanceledException">If the <see cref="CancellationToken" /> is canceled.</exception>
+    Task<int> ExecuteSqlInterpolatedAsync(
+        FormattableString sql,
+        CancellationToken cancellationToken = default);
 }

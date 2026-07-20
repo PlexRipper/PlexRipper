@@ -1,8 +1,3 @@
-using FastEndpoints;
-using FluentResults;
-using FluentValidation;
-using Microsoft.EntityFrameworkCore;
-
 namespace Reaparr.Application;
 
 public class CompareMoviePlexLibraryCommandValidator : AbstractValidator<CompareMoviePlexLibraryCommand>
@@ -19,17 +14,14 @@ public class CompareMoviePlexLibraryCommandHandler : ICommandHandler<CompareMovi
 {
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
-    private readonly IReaparrDbContextFactory _dbContextFactory;
 
     public CompareMoviePlexLibraryCommandHandler(
         ILogger log,
-        IReaparrDbContext dbContext,
-        IReaparrDbContextFactory dbContextFactory
+        IReaparrDbContext dbContext
     )
     {
         _log = log.ForContext<CompareMoviePlexLibraryCommandHandler>();
         _dbContext = dbContext;
-        _dbContextFactory = dbContextFactory;
     }
 
     public async Task<Result> ExecuteAsync(
@@ -196,57 +188,66 @@ public class CompareMoviePlexLibraryCommandHandler : ICommandHandler<CompareMovi
                 remoteMovies.Count
             );
 
-        using var dbContext = await _dbContextFactory.CreateAsync();
-        await using var transaction = await dbContext.BeginTransactionAsync(cancellationToken);
-
-        await dbContext.PlexMovieComparisons
-            .Where(c => c.RemotePlexLibraryId == remoteLibraryId && c.OwnedPlexLibraryId == ownedLibraryId)
-            .ExecuteDeleteAsync(cancellationToken);
-
-        var librarySnapshots = await dbContext.PlexLibraries
-            .Where(x => x.Id == remoteLibraryId || x.Id == ownedLibraryId)
-            .Select(x => new { x.Id, x.UpdatedAt })
-            .ToDictionaryAsync(x => x.Id, x => x.UpdatedAt, cancellationToken);
-
-        var state = await dbContext.PlexComparisonScopes
-            .SingleOrDefaultAsync(
-                x =>
-                    x.RemotePlexLibraryId == remoteLibraryId
-                    && x.OwnedPlexLibraryId == ownedLibraryId
-                    && x.MediaType == PlexMediaType.Movie,
-                cancellationToken
-            );
-
-        if (state is null)
-        {
-            state = new PlexComparisonState
+        await _dbContext.ExecuteWithRetryAsync(
+            async ctx =>
             {
-                Id = 0,
-                RemotePlexLibraryId = remoteLibraryId,
-                OwnedPlexLibraryId = ownedLibraryId,
-                MediaType = PlexMediaType.Movie,
-                CompletedAt = now,
-                RemoteLibraryUpdatedAt = librarySnapshots.GetValueOrDefault(remoteLibraryId),
-                OwnedLibraryUpdatedAt = librarySnapshots.GetValueOrDefault(ownedLibraryId),
-            };
+                var dbContext = (IReaparrDbContext)ctx;
 
-            await dbContext.PlexComparisonScopes.AddAsync(state, cancellationToken);
-        }
-        else
-        {
-            state.CompletedAt = now;
-            state.RemoteLibraryUpdatedAt = librarySnapshots.GetValueOrDefault(remoteLibraryId);
-            state.OwnedLibraryUpdatedAt = librarySnapshots.GetValueOrDefault(ownedLibraryId);
-        }
+                // 1. Delete old hit rows for this pair.
+                await dbContext.PlexMovieComparisons
+                    .Where(x => x.RemotePlexLibraryId == remoteLibraryId && x.OwnedPlexLibraryId == ownedLibraryId)
+                    .ExecuteDeleteAsync(cancellationToken);
 
-        await dbContext.SaveChangesNewAsync(cancellationToken);
+                // 2. Insert new hit rows via standard EF — goes through the write queue.
+                if (hitRows.Count > 0)
+                {
+                    dbContext.PlexMovieComparisons.AddRange(hitRows);
+                    await dbContext.SaveChangesNewAsync(cancellationToken);
+                }
 
-        if (hitRows.Count > 0)
-        {
-            await dbContext.BulkInsertAsync(hitRows, cancellationToken: cancellationToken);
-        }
+                // 3. Update scope last — makes new hits visible atomically to readers.
+                var librarySnapshots = await dbContext.PlexLibraries
+                    .Where(x => x.Id == remoteLibraryId || x.Id == ownedLibraryId)
+                    .Select(x => new { x.Id, x.UpdatedAt })
+                    .ToDictionaryAsync(x => x.Id, x => x.UpdatedAt, cancellationToken);
 
-        await transaction.CommitAsync(cancellationToken);
+                var state = await dbContext.PlexComparisonScopes
+                    .SingleOrDefaultAsync(
+                        x =>
+                            x.RemotePlexLibraryId == remoteLibraryId
+                            && x.OwnedPlexLibraryId == ownedLibraryId
+                            && x.MediaType == PlexMediaType.Movie,
+                        cancellationToken
+                    );
+
+                if (state is null)
+                {
+                    state = new PlexComparisonState
+                    {
+                        Id = 0,
+                        RemotePlexLibraryId = remoteLibraryId,
+                        OwnedPlexLibraryId = ownedLibraryId,
+                        MediaType = PlexMediaType.Movie,
+                        CompletedAt = now,
+                        RemoteLibraryUpdatedAt = librarySnapshots.GetValueOrDefault(remoteLibraryId),
+                        OwnedLibraryUpdatedAt = librarySnapshots.GetValueOrDefault(ownedLibraryId),
+                    };
+
+                    await dbContext.PlexComparisonScopes.AddAsync(state, cancellationToken);
+                }
+                else
+                {
+                    state.CompletedAt = now;
+                    state.RemoteLibraryUpdatedAt = librarySnapshots.GetValueOrDefault(remoteLibraryId);
+                    state.OwnedLibraryUpdatedAt = librarySnapshots.GetValueOrDefault(ownedLibraryId);
+                }
+
+                await dbContext.SaveChangesNewAsync(cancellationToken);
+
+                return 0;
+            },
+            cancellationToken: cancellationToken
+        );
 
         _log.Here()
             .Information(

@@ -28,8 +28,7 @@ public enum PlexMediaComparisonState
     HigherQuality = 3,
 
     /// <summary>
-    /// Current scope exists; the media is both missing at one level and higher-quality at another
-    /// (e.g. a TV show with some missing seasons and some higher-quality episodes).
+    /// When comparison work is queued or processing and no current scope is available yet.
     /// </summary>
-    MissingAndHigherQuality = 4,
+    Pending = 4,
 }

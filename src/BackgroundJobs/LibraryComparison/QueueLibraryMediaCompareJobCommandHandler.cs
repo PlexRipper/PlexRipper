@@ -85,7 +85,7 @@ public class QueueLibraryMediaCompareJobCommandHandler : ICommandHandler<QueueLi
         await _commandExecutor.Send(new CheckQueuedLibraryComparisonJobCommand(), cancellationToken);
 
         _log.Here()
-            .Debug(
+            .Verbose(
                 "Scheduled library comparison job: remote {RemoteLibId} vs owned {OwnedLibId}, {MediaType}",
                 remoteLibraryId,
                 ownedLibraryId,

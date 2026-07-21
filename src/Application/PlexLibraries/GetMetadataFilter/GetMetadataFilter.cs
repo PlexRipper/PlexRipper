@@ -123,20 +123,24 @@ public class GetMetadataFilter : Endpoint<GetMetadataFilterRequest, PlexMediaFil
     {
         if (mediaType == PlexMediaType.Movie)
         {
-            return await _dbContext.PlexMovieData
+            var qualities = await _dbContext.PlexMovieData
                 .ApplyWhere(plexLibraryId > 0, x => x.PlexLibraryId == plexLibraryId)
                 .GroupBy(x => x.Quality)
-                .Select(g => (int)g.Key)
+                .Select(g => g.Key)
                 .ToListAsync(ct);
+
+            return qualities.Select(x => x.ToId()).ToList();
         }
 
         if (mediaType == PlexMediaType.TvShow)
         {
-            return await _dbContext.PlexTvShowMediaQualities
+            var qualities = await _dbContext.PlexTvShowMediaQualities
                 .ApplyWhere(plexLibraryId > 0, x => x.PlexLibraryId == plexLibraryId)
                 .GroupBy(x => x.Quality)
-                .Select(g => (int)g.Key)
+                .Select(g => g.Key)
                 .ToListAsync(ct);
+
+            return qualities.Select(x => x.ToId()).ToList();
         }
 
         return [];

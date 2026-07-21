@@ -26,6 +26,10 @@ public class GetMetadataFilterUnitTests : BaseEndpointUnitTest<GetMetadataFilter
         // Assert
         endpointResult.IsValid.ShouldBeTrue();
         endpointResult.StatusCode.ShouldBe(200);
+        var response = endpointResult.Response;
+        response.ShouldNotBeNull();
+        response.Qualities.ShouldNotBeEmpty();
+        response.Qualities.ShouldAllBe(x => x >= -1 && x <= 10);
     }
 
     [Test]
@@ -56,5 +60,10 @@ public class GetMetadataFilterUnitTests : BaseEndpointUnitTest<GetMetadataFilter
         // Assert
         endpointResult.IsValid.ShouldBeTrue();
         endpointResult.StatusCode.ShouldBe(200);
+
+        var response = endpointResult.Response;
+        response.ShouldNotBeNull();
+        response.Qualities.ShouldNotBeEmpty();
+        response.Qualities.ShouldAllBe(x => x >= -1 && x <= 10);
     }
 }

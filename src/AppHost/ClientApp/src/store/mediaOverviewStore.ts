@@ -271,7 +271,10 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 			if (state.queryHash !== data.queryHash) {
 				Log.warn(`mediaPages was cleared, with ${state.queryHash} vs ${data.queryHash}`);
 				mediaPages.clear();
+				pendingPages.clear();
 				state.itemsLength = 0;
+				state.currentScrollIndex = 0;
+				state.scrollDict = cloneDeep(defaultState.scrollDict);
 			}
 
 			const mediaList = Array.isArray(data.mediaList) ? data.mediaList : [];

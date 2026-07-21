@@ -193,12 +193,20 @@ describe('MediaOverviewStore.requestMedia()', () => {
 		firstPage.queryHash = 'hash-1';
 		firstPage.mediaCount = firstItems.length;
 		firstPage.totalCount = firstItems.length;
+		firstPage.navigationIndexes = [
+			{ label: 'A', index: 0 },
+			{ label: 'B', index: 1 },
+		];
 
 		const secondPage = generatePlexMediaStatisticsDTO(secondItems);
 		secondPage.page = 1;
 		secondPage.queryHash = 'hash-2';
 		secondPage.mediaCount = secondItems.length;
 		secondPage.totalCount = secondItems.length;
+		secondPage.navigationIndexes = [
+			{ label: 'C', index: 0 },
+			{ label: 'D', index: 2 },
+		];
 
 		// Act
 		mediaOverviewStore.addMediaPage(firstPage);
@@ -209,5 +217,9 @@ describe('MediaOverviewStore.requestMedia()', () => {
 		expect(mediaOverviewStore.getMediaItems).toEqual(secondItems);
 		expect(mediaOverviewStore.itemsLength).toBe(secondItems.length);
 		expect(mediaOverviewStore.totalCount).toBe(secondItems.length);
+		expect([...mediaOverviewStore.scrollDict.entries()]).toEqual([
+			['C', 0],
+			['D', 2],
+		]);
 	});
 });

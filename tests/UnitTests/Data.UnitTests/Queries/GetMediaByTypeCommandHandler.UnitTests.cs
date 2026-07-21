@@ -4,6 +4,13 @@ namespace Reaparr.Data.UnitTests;
 
 public class GetMediaByTypeCommandHandlerUnitTests : BaseUnitTest<GetMediaByTypeCommandHandler>
 {
+    public GetMediaByTypeCommandHandlerUnitTests()
+    {
+        Mock.Mock<ICommandExecutor>()
+            .Setup(x => x.Send(It.IsAny<ICommand<Result>>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result.Ok());
+    }
+
     [Test]
     public async Task ShouldReturnOnlyMoviesFromSpecificLibrary_WhenPlexLibraryIdIsSet()
     {
@@ -136,8 +143,8 @@ public class GetMediaByTypeCommandHandlerUnitTests : BaseUnitTest<GetMediaByType
         // Arrange
         await SetupDatabase(70004, cfg =>
         {
-            cfg.PlexServerCount = 1;
-            cfg.PlexMovieLibraryCount = 2;
+            cfg.PlexServerCount = 2;
+            cfg.PlexMovieLibraryCount = 1;
             cfg.MovieCount = 4;
             cfg.PlexAccountCount = 1;
         });
@@ -146,12 +153,12 @@ public class GetMediaByTypeCommandHandlerUnitTests : BaseUnitTest<GetMediaByType
         var libraryToKeep = await dbContext.PlexLibraries
             .Where(x => x.Type == PlexMediaType.Movie)
             .OrderBy(x => x.Id)
-            .Select(x => x.Id)
+            .Select(x => new { x.Id, x.PlexServerId })
             .FirstAsync(CancellationToken);
 
-        await dbContext.PlexAccountLibraries
-            .Where(x => x.PlexLibraryId == libraryToKeep)
-            .ExecuteUpdateAsync(x => x.SetProperty(y => y.IsLibraryOwned, false), CancellationToken);
+        await dbContext.PlexServers
+            .Where(x => x.Id == libraryToKeep.PlexServerId)
+            .ExecuteUpdateAsync(x => x.SetProperty(y => y.OwnedOverride, false), CancellationToken);
 
         var command = new GetMediaByTypeCommand()
         {
@@ -177,7 +184,7 @@ public class GetMediaByTypeCommandHandlerUnitTests : BaseUnitTest<GetMediaByType
         // Assert
         result.IsSuccess.ShouldBeTrue();
         result.Value.Items.ShouldNotBeEmpty();
-        result.Value.Items.ShouldAllBe(x => x.PlexLibraryId == libraryToKeep);
+        result.Value.Items.ShouldAllBe(x => x.PlexLibraryId == libraryToKeep.Id);
     }
 
     [Test]

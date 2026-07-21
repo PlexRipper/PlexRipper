@@ -68,12 +68,12 @@ public class GetMediaByTypeCommandHandler : ICommandHandler<GetMediaByTypeComman
             allowedPlexLibraryIds = serverList.SelectMany(x => x.PlexLibraryIds).ToList();
             if (filter.FilterOwnedMedia)
             {
-                var ownedPlexLibraries = await _dbContext
-                    .PlexAccountLibraries.Where(x => x.IsLibraryOwned)
-                    .Select(x => x.PlexLibraryId)
+                var ownedPlexLibraryIds = await _dbContext.PlexLibraries
+                    .WhereIsOwned()
+                    .Select(x => x.Id)
                     .ToListAsync(ct);
 
-                allowedPlexLibraryIds.RemoveAll(x => ownedPlexLibraries.Contains(x));
+                allowedPlexLibraryIds.RemoveAll(ownedPlexLibraryIds.Contains);
             }
 
             if (filter.FilterOfflineMedia)

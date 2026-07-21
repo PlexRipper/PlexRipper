@@ -43,19 +43,7 @@ public class QueueLibraryComparisonJobsForLibraryCommandHandler
     {
         var sourceLibrary = await _dbContext.PlexLibraries
             .Where(x => x.Id == command.PlexLibraryId)
-            .Select(x => new
-            {
-                x.Id,
-                x.Type,
-                IsOwned = x.PlexServer!.OwnedOverride == true
-                          || (
-                              x.PlexServer.OwnedOverride == null
-                              && (
-                                  x.PlexAccountLibraries.Any(y => y.IsLibraryOwned)
-                                  || x.PlexServer.PlexAccountServers.Any(y => y.IsServerOwned)
-                              )
-                          ),
-            })
+            .SelectOwnership()
             .SingleOrDefaultAsync(cancellationToken);
 
         if (sourceLibrary is null)
@@ -66,18 +54,7 @@ public class QueueLibraryComparisonJobsForLibraryCommandHandler
 
         var targetLibraries = await _dbContext.PlexLibraries
             .Where(x => x.Id != sourceLibrary.Id && x.Type == sourceLibrary.Type)
-            .Select(x => new
-            {
-                x.Id,
-                IsOwned = x.PlexServer!.OwnedOverride == true
-                          || (
-                              x.PlexServer.OwnedOverride == null
-                              && (
-                                  x.PlexAccountLibraries.Any(y => y.IsLibraryOwned)
-                                  || x.PlexServer.PlexAccountServers.Any(y => y.IsServerOwned)
-                              )
-                          ),
-            })
+            .SelectOwnership()
             .ToListAsync(cancellationToken);
 
         // Comparison always flows remote-to-owned, regardless of which side changed.

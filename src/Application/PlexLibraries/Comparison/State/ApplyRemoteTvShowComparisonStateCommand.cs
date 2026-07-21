@@ -126,7 +126,6 @@ public class ApplyRemoteTvShowComparisonStateCommandHandler
             {
                 ComparisonState = (showMissingCount, totalHigherQuality) switch
                 {
-                    (> 0, > 0) => PlexMediaComparisonState.MissingAndHigherQuality,
                     (> 0, _) => PlexMediaComparisonState.Missing,
                     (_, > 0) => PlexMediaComparisonState.HigherQuality,
                     _ => hasShowHit ? PlexMediaComparisonState.Owned : PlexMediaComparisonState.NotCompared,

@@ -1,9 +1,11 @@
 namespace Reaparr.Data.Contracts;
 
+public sealed record PlexLibraryOwnership(int Id, PlexMediaType Type, bool IsOwned);
+
 public static partial class DbSetExtensions
 {
     /// <summary>
-    /// Filters <see cref="PlexLibrary"/> to only those owned by any linked Plex account.
+    /// Projects <see cref="PlexLibrary"/> rows with the shared ownership decision.
     /// </summary>
     /// <remarks>
     /// A library is owned when:
@@ -14,6 +16,16 @@ public static partial class DbSetExtensions
     ///     OR <c>PlexServer.PlexAccountServers.Any(y => y.IsServerOwned)</c>)</item>
     /// </list>
     /// </remarks>
+    public static IQueryable<PlexLibraryOwnership> SelectOwnership(this IQueryable<PlexLibrary> query) =>
+        query.Select(x => new PlexLibraryOwnership(
+            x.Id,
+            x.Type,
+            x.PlexServer!.OwnedOverride == true
+            || (x.PlexServer!.OwnedOverride == null
+                && (x.PlexAccountLibraries.Any(y => y.IsLibraryOwned)
+                    || x.PlexServer.PlexAccountServers.Any(y => y.IsServerOwned)))
+        ));
+
     public static IQueryable<PlexLibrary> WhereIsOwned(this IQueryable<PlexLibrary> query) =>
         query.Where(x =>
             x.PlexServer!.OwnedOverride == true

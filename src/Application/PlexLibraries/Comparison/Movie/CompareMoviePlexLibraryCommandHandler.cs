@@ -57,12 +57,7 @@ public class CompareMoviePlexLibraryCommandHandler : ICommandHandler<CompareMovi
     {
         var libraries = await _dbContext.PlexLibraries
             .Where(x => x.Id == remoteLibraryId || x.Id == ownedLibraryId)
-            .Select(x => new
-            {
-                x.Id,
-                x.Type,
-                IsOwned = x.PlexAccountLibraries.Any(y => y.IsLibraryOwned),
-            })
+            .SelectOwnership()
             .ToDictionaryAsync(x => x.Id, cancellationToken);
 
         if (!libraries.TryGetValue(remoteLibraryId, out var remoteLibrary))

@@ -334,12 +334,12 @@ public sealed class MediaQueryCache : IMediaQueryCache
 
         if (filter.FilterOwnedMedia)
         {
-            var ownedLibraries = await dbContext.PlexAccountLibraries
-                .Where(x => x.IsLibraryOwned)
-                .Select(x => x.PlexLibraryId)
+            var ownedLibraryIds = await dbContext.PlexLibraries
+                .WhereIsOwned()
+                .Select(x => x.Id)
                 .ToListAsync(cancellationToken);
 
-            allowedPlexLibraryIds.RemoveAll(ownedLibraries.Contains);
+            allowedPlexLibraryIds.RemoveAll(ownedLibraryIds.Contains);
         }
 
         if (filter.FilterOfflineMedia)

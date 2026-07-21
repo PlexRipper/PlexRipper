@@ -17,6 +17,8 @@ public record MediaQueryFilter
 
     public required bool FilterOwnedMedia { get; init; }
 
+    public PlexMediaComparisonState? ComparisonState { get; init; }
+
     public required FlexQueryParameters Parameters { get; init; }
 
     public string QueryHash => Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(BuildHashInput())));
@@ -31,6 +33,7 @@ public record MediaQueryFilter
             $"PlexLibraryId={PlexLibraryId}",
             $"FilterOfflineMedia={FilterOfflineMedia}",
             $"FilterOwnedMedia={FilterOwnedMedia}",
+            $"ComparisonState={ComparisonState?.ToString() ?? string.Empty}",
             $"{nameof(FlexQueryParameters.Query)}={parameters.Query ?? string.Empty}",
             $"{nameof(FlexQueryParameters.Filter)}={parameters.Filter ?? string.Empty}",
             $"{nameof(FlexQueryParameters.Sort)}={parameters.Sort ?? string.Empty}",

@@ -64,6 +64,9 @@ public sealed class MediaQueryCache : IMediaQueryCache
         if (!string.IsNullOrWhiteSpace(filter.Parameters.Filter))
             return await BypassCacheAsync(filter, cancellationToken, "filter parameter is set");
 
+        if (filter.ComparisonState.HasValue)
+            return await BypassCacheAsync(filter, cancellationToken, "comparison state filter is set");
+
         var libraryIds = await ResolveLibraryIdsAsync(filter, cancellationToken);
         var sort = filter.Parameters.Sort.Normalize(libraryIds.Count);
         if (sort is null)

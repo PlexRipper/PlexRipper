@@ -23,11 +23,13 @@
 						<template #default>
 							<!-- Comparison State Button -->
 							<IconButton
+								v-if="comparisonBadge"
 								class="comparison-state-button"
 								:color="comparisonBadge.color"
 								size="1rem"
 								:cy="`comparison-chip-${mediaItem.comparisonState}`"
-								:icon="comparisonBadge.icon" />
+								:icon="comparisonBadge.icon"
+								:tooltip-text="comparisonBadge.label" />
 							<div class="media-poster--overlay white--text">
 								<div class="media-poster--content">
 									<div class="media-poster--section">
@@ -184,42 +186,50 @@ const comparisonBadge = computed((): {
 	label: string;
 	color: 'default' | 'positive' | 'warning' | 'negative';
 } => {
-	switch (props.mediaItem.comparisonState) {
+	const comparisonState = props.mediaItem.comparisonState as PlexMediaComparisonState | number;
+
+	switch (comparisonState) {
+		case PlexMediaComparisonState.NotCompared:
+		case 0:
+			return {
+				color: 'default',
+				label: t('components.media-overview.comparison.comparison-not-compared'),
+				icon: 'mdi-alert-circle-outline',
+			};
+		case PlexMediaComparisonState.Owned:
+		case 1:
+			return {
+				color: 'default',
+				label: t('components.media-overview.comparison.comparison-owned'),
+				icon: 'mdi-check',
+			};
 		case PlexMediaComparisonState.Missing:
+		case 2:
 			return {
 				color: 'negative',
-				label: t('components.media-overview.comparison-missing'),
+				label: t('components.media-overview.comparison.comparison-missing'),
 				icon: 'mdi-call-missed',
 			};
 		case PlexMediaComparisonState.HigherQuality:
+		case 3:
 			return {
 				color: 'positive',
-				label: t('components.media-overview.comparison-higher-quality'),
+				label: t('components.media-overview.comparison.comparison-higher-quality'),
 				icon: 'mdi-arrow-up-circle',
 			};
-		case PlexMediaComparisonState.MissingAndHigherQuality:
+		case PlexMediaComparisonState.Pending:
+		case 4:
 			return {
 				color: 'positive',
-				label: t('components.media-overview.comparison-higher-quality'),
-				icon: 'mdi-arrow-up-circle',
+				label: t('components.media-overview.comparison.comparison-pending'),
+				icon: 'mdi-clock-fast',
 			};
-		case PlexMediaComparisonState.Owned:
-			return {
-				color: 'default',
-				label: t('components.media-overview.comparison-owned'),
-				icon: 'mdi-check',
-			};
-		case PlexMediaComparisonState.NotCompared:
-			return {
-				color: 'default',
-				label: t('components.media-overview.comparison-owned'),
-				icon: 'mdi-sync',
-			};
+
 		default:
 			return {
 				color: 'negative',
-				label: t('components.media-overview.comparison-not-compared'),
-				icon: 'mdi-alert-circle-outline',
+				label: t('components.media-overview.comparison.unknown'),
+				icon: 'mdi-crosshairs-question',
 			};
 	}
 });
@@ -292,6 +302,7 @@ onUnmounted(() => {
 .comparison-state-button {
   position: absolute;
   z-index: 9999;
+  pointer-events: auto;
 }
 
 .media-poster-card {

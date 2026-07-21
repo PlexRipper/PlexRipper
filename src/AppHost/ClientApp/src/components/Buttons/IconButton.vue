@@ -11,7 +11,7 @@ export default defineComponent({
 		return h(
 			BaseButton,
 			{
-				...mergeProps(this.$props, {
+				...mergeProps(this.$attrs, this.$props, {
 					round: true,
 					flat: true,
 					outline: false,

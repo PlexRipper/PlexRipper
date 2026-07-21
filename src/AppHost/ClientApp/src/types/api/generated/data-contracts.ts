@@ -903,7 +903,7 @@ export enum PlexMediaComparisonState {
   Owned = "Owned",
   Missing = "Missing",
   HigherQuality = "HigherQuality",
-  MissingAndHigherQuality = "MissingAndHigherQuality",
+  Pending = "Pending",
 }
 
 export interface PlexMediaDTO {

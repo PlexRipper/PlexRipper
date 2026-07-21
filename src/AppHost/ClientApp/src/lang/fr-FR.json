@@ -107,7 +107,15 @@
             "no-media-items-available": "Aucun élément multimédia trouvé!",
             "failed-to-load-media": "Échec du chargement des médias. Le serveur est peut-être occupé. Veuillez réessayer ou attendre que le cache se réchauffe.",
             "retrying-in-seconds": "Nouvelle tentative dans {seconds}s...",
-            "no-filter-results": "Aucun résultat multimédia ne correspond aux paramètres de filtre actuels. Veuillez ajuster ou réinitialiser vos filtres pour afficher les résultats disponibles."
+            "no-filter-results": "Aucun résultat multimédia ne correspond aux paramètres de filtre actuels. Veuillez ajuster ou réinitialiser vos filtres pour afficher les résultats disponibles.",
+            "comparison": {
+                "comparison-missing": "Absent de la bibliothèque possédée",
+                "comparison-higher-quality": "Qualité supérieure disponible",
+                "comparison-owned": "Déjà possédé",
+                "comparison-not-compared": "Pas encore comparé",
+                "comparison-pending": "Comparaison en cours",
+                "unknown": "État de comparaison inconnu"
+            }
         },
         "navigation-drawer": {
             "accounts": "Comptes",

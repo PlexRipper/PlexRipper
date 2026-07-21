@@ -5,6 +5,7 @@ import { computed, markRaw, reactive, toRefs } from 'vue';
 import { get, set } from '@vueuse/core';
 import { useRouteQuery } from '@vueuse/router';
 import {
+	PlexMediaComparisonState,
 	type PlexMediaMetadataDTO,
 	type PlexMediaSlimDTO,
 	type PlexMediaStatisticsDTO,
@@ -24,7 +25,6 @@ import {
 	translateVideoQuality,
 } from '@composables';
 import { useSubscription } from '@vueuse/rxjs';
-import { useI18n } from 'vue-i18n';
 
 interface IMediaOverviewStoreState {
 	libraryId: number;
@@ -88,6 +88,7 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 			roleId: 0,
 			genreId: 0,
 			qualityId: 0,
+			comparisonState: null,
 		},
 		metadataList: {
 			mediaCount: 0,
@@ -123,6 +124,7 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 	const genreIdQuery = useRouteQuery('genreId', 0, { mode: 'replace' });
 	const roleIdQuery = useRouteQuery('roleId', 0, { mode: 'replace' });
 	const qualityIdQuery = useRouteQuery('qualityId', 0, { mode: 'replace' });
+	const comparisonStateQuery = useRouteQuery<string>('comparisonState', '', { mode: 'replace' });
 	const scrollIndexQuery = useRouteQuery('scrollIndex', 0, { mode: 'replace' });
 	const sortQuery = useRouteQuery('sort', '', { mode: 'replace' });
 
@@ -236,6 +238,7 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 				countryId: state.metadata.countryId > 0 ? state.metadata.countryId : undefined,
 				genreId: state.metadata.genreId > 0 ? state.metadata.genreId : undefined,
 				qualityId: state.metadata.qualityId > 0 ? state.metadata.qualityId : undefined,
+				comparisonState: state.metadata.comparisonState ?? undefined,
 				roleId: state.metadata.roleId > 0 ? state.metadata.roleId : undefined,
 				mediaType: get(getters.getMediaType),
 				plexLibraryId: state.libraryId > 0 ? state.libraryId : undefined,
@@ -367,12 +370,23 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 				switchMap(() => actions.refreshMediaData()),
 			);
 		},
+		setComparisonStateFilter(comparisonState?: PlexMediaComparisonState | null): Observable<PlexMediaStatisticsDTO | null> {
+			return of(comparisonState).pipe(
+				map((value) => value && Object.values(PlexMediaComparisonState).includes(value) ? value : null),
+				tap((value) => {
+					state.metadata.comparisonState = value;
+					set(comparisonStateQuery, value ?? undefined);
+				}),
+				switchMap(() => actions.refreshMediaData()),
+			);
+		},
 		resetMetaDataFilterState() {
 			state.metadata = {
 				countryId: 0,
 				roleId: 0,
 				genreId: 0,
 				qualityId: 0,
+				comparisonState: null,
 			};
 		},
 		clearMetaDataFilter() {
@@ -381,6 +395,7 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 			set(roleIdQuery, undefined);
 			set(genreIdQuery, undefined);
 			set(qualityIdQuery, undefined);
+			set(comparisonStateQuery, undefined);
 		},
 		applyRouteQueryState() {
 			const search = String(get(searchQuery)).trim();
@@ -388,6 +403,7 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 			const genreId = Number(get(genreIdQuery));
 			const roleId = Number(get(roleIdQuery));
 			const qualityId = Number(get(qualityIdQuery));
+			const comparisonState = String(get(comparisonStateQuery)).trim();
 			const scrollIndex = Number(get(scrollIndexQuery));
 			const sort = String(get(sortQuery)).trim();
 
@@ -409,6 +425,10 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 
 			if (qualityId > 0) {
 				state.metadata.qualityId = qualityId;
+			}
+
+			if (Object.values(PlexMediaComparisonState).includes(comparisonState as PlexMediaComparisonState)) {
+				state.metadata.comparisonState = comparisonState as PlexMediaComparisonState;
 			}
 
 			if (scrollIndex > 0) {
@@ -589,7 +609,8 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 			return !(state.sortedState.field === MediaSortField.Title && state.sortedState.sort === SortDirection.Asc);
 		}),
 		getSortOptions: (): ISortOption[] => {
-			const { t } = useI18n({ useScope: 'global' });
+			const { $i18n } = useNuxtApp();
+			const { t } = $i18n;
 			const options: ISortOption[] = [
 				{ field: MediaSortField.Title, label: t('general.sort.title'), direction: SortDirection.NoSort },
 				{ field: MediaSortField.Year, label: t('general.sort.year'), direction: SortDirection.NoSort },
@@ -623,6 +644,17 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 		getQualities: computed(() => state.metadataList.qualities.filter((x) => {
 			return state.availableQualityIds.includes(x.id);
 		})),
+		getComparisonStateOptions: computed(() => {
+			const { $i18n } = useNuxtApp();
+			const { t } = $i18n;
+			return [
+				{ value: PlexMediaComparisonState.NotCompared, label: t('components.media-overview.comparison.comparison-not-compared') },
+				{ value: PlexMediaComparisonState.Owned, label: t('components.media-overview.comparison.comparison-owned') },
+				{ value: PlexMediaComparisonState.Missing, label: t('components.media-overview.comparison.comparison-missing') },
+				{ value: PlexMediaComparisonState.HigherQuality, label: t('components.media-overview.comparison.comparison-higher-quality') },
+				{ value: PlexMediaComparisonState.Pending, label: t('components.media-overview.comparison.comparison-pending') },
+			];
+		}),
 		getFilterChips: computed(() => {
 			const result: {
 				text: string;
@@ -667,6 +699,15 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 					color: getVideoQualityColor(quality),
 					id: uniqueId(),
 					unset: actions.setQualityFilter(),
+				});
+			}
+
+			if (state.metadata.comparisonState) {
+				result.push({
+					text: get(getters.getComparisonStateOptions).find((x) => x.value === state.metadata.comparisonState)?.label ?? '',
+					key: 'comparisonState',
+					id: uniqueId(),
+					unset: actions.setComparisonStateFilter(),
 				});
 			}
 

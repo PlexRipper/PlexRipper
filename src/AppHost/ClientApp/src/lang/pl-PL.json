@@ -390,7 +390,8 @@
                 "country": "Kraj",
                 "genre": "Genre",
                 "roles": "Role",
-                "quality": "Jakość"
+                "quality": "Jakość",
+                "comparison-state": "Stan porównania"
             }
         },
         "alert-display-debug": {

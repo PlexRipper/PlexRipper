@@ -13,6 +13,7 @@
 import type { RequestParams } from "./http-client";
 
 import type {
+  PlexMediaComparisonState,
   PlexMediaDTO,
   PlexMediaSlimDTO,
   PlexMediaStatisticsDTO,
@@ -32,6 +33,7 @@ export class PlexMedia {
    */
   getAllMediaByTypeEndpoint = (
     query: {
+      comparisonState?: PlexMediaComparisonState | null;
       /** @format int32 */
       countryId?: number | null;
       /** @default false */
@@ -160,6 +162,7 @@ export class PlexMedia {
 
 export class PlexMediaPaths {
   static getAllMediaByTypeEndpoint = (query: {
+    comparisonState?: PlexMediaComparisonState | null;
     /** @format int32 */
     countryId?: number | null;
     /** @default false */

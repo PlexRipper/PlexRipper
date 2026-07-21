@@ -127,6 +127,22 @@
 							</q-item-section>
 						</q-item>
 					</template>
+
+					<!-- Show Comparison State Sub-Menu -->
+					<template v-if="menuIndex === MediaMetaDataTypes.ComparisonState">
+						<q-item
+							v-for="comparisonState in mediaOverviewStore.getComparisonStateOptions.filter(x => x.label.toLowerCase().includes(menuFilterQuery.toLowerCase()))"
+							:key="comparisonState.value"
+							clickable
+							@click="useSubscription(mediaOverviewStore.setComparisonStateFilter(comparisonState.value).subscribe())">
+							<q-item-section avatar>
+								<q-icon
+									v-if="comparisonState.value === mediaOverviewStore.metadata.comparisonState"
+									name="mdi-check" />
+							</q-item-section>
+							<q-item-section>{{ comparisonState.label }}</q-item-section>
+						</q-item>
+					</template>
 				</QScroll>
 			</template>
 		</q-list>
@@ -152,7 +168,7 @@ withDefaults(defineProps<{
 	libraryId: 0,
 });
 
-const menuItems: { text: string; type: MediaMetaDataTypes }[] = [
+const menuItems = computed((): { text: string; type: MediaMetaDataTypes }[] => [
 	{
 		text: t('components.media-filter-menu.meta-data.country'),
 		type: MediaMetaDataTypes.Country,
@@ -169,7 +185,11 @@ const menuItems: { text: string; type: MediaMetaDataTypes }[] = [
 		text: t('components.media-filter-menu.meta-data.quality'),
 		type: MediaMetaDataTypes.Quality,
 	},
-];
+	{
+		text: t('components.media-filter-menu.meta-data.comparison-state'),
+		type: MediaMetaDataTypes.ComparisonState,
+	},
+]);
 
 function onMenuOpen(category: MediaMetaDataTypes) {
 	set(menuIndex, category);

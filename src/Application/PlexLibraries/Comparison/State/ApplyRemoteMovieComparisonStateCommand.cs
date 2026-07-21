@@ -93,8 +93,6 @@ public class ApplyRemoteMovieComparisonStateCommandHandler
             .GroupBy(x => x.RemotePlexMediaId)
             .ToDictionary(g => g.Key, g => g.ToList());
 
-        var totalOwnedTargets = currentOwnedLibraryIds.Count;
-
         for (var i = 0; i < items.Count; i++)
         {
             if (!hitLookup.TryGetValue(items[i].Id, out var itemHits))
@@ -103,18 +101,13 @@ public class ApplyRemoteMovieComparisonStateCommandHandler
                 continue;
             }
 
-            var ownedWithHit = itemHits.Select(x => x.OwnedPlexLibraryId).ToHashSet();
-            var missingCount = totalOwnedTargets - ownedWithHit.Count;
             var higherQualityCount = itemHits.Count(x => x.HitState == PlexMediaComparisonHitState.HigherQuality);
 
             items[i] = items[i] with
             {
-                ComparisonState = (missingCount, higherQualityCount) switch
-                {
-                    (> 0, _) => PlexMediaComparisonState.Missing,
-                    (_, > 0) => PlexMediaComparisonState.HigherQuality,
-                    _ => PlexMediaComparisonState.Owned,
-                },
+                ComparisonState = higherQualityCount > 0
+                    ? PlexMediaComparisonState.HigherQuality
+                    : PlexMediaComparisonState.Owned,
             };
         }
 

@@ -13,12 +13,12 @@ public enum PlexMediaComparisonState
     NotCompared = 0,
 
     /// <summary>
-    /// Current scope exists; this media matched an owned target at same-or-better quality.
+    /// Current scope exists; this media matched at least one owned target at same-or-better quality.
     /// </summary>
     Owned = 1,
 
     /// <summary>
-    /// Current scope exists; this media is missing from owned libraries (anti-join result).
+    /// Current scope exists; this media has no hit in any current owned library (anti-join result).
     /// </summary>
     Missing = 2,
 

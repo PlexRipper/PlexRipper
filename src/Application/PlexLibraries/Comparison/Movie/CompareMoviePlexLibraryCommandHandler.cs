@@ -207,6 +207,7 @@ public class CompareMoviePlexLibraryCommandHandler : ICommandHandler<CompareMovi
                     .ToDictionaryAsync(x => x.Id, x => x.UpdatedAt, cancellationToken);
 
                 var state = await dbContext.PlexComparisonScopes
+                    .AsTracking()
                     .SingleOrDefaultAsync(
                         x =>
                             x.RemotePlexLibraryId == remoteLibraryId

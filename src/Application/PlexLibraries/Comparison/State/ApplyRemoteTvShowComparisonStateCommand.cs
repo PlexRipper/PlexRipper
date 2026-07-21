@@ -81,7 +81,6 @@ public class ApplyRemoteTvShowComparisonStateCommandHandler
             return Result.Ok();
 
         var itemIds = items.Select(x => x.Id).ToHashSet();
-        var totalOwnedTargets = currentOwnedLibraryIds.Count;
 
         var showHits = await _dbContext.PlexTvShowComparisons
             .Where(x =>
@@ -111,25 +110,22 @@ public class ApplyRemoteTvShowComparisonStateCommandHandler
             var showId = items[i].Id;
             var hasShowHit = showHitLookup.TryGetValue(showId, out var showHitsForItem);
 
-            var showMissingCount = hasShowHit
-                ? totalOwnedTargets - showHitsForItem!.Select(x => x.OwnedPlexLibraryId).ToHashSet().Count
-                : totalOwnedTargets;
+            if (!hasShowHit)
+            {
+                items[i] = items[i] with { ComparisonState = PlexMediaComparisonState.Missing };
+                continue;
+            }
 
-            var showHigherQualityCount = hasShowHit
-                ? showHitsForItem!.Count(x => x.HitState == PlexMediaComparisonHitState.HigherQuality)
-                : 0;
+            var showHigherQualityCount = showHitsForItem!.Count(x => x.HitState == PlexMediaComparisonHitState.HigherQuality);
 
             seasonHqLookup.TryGetValue(showId, out var seasonHq);
             var totalHigherQuality = showHigherQualityCount + seasonHq;
 
             items[i] = items[i] with
             {
-                ComparisonState = (showMissingCount, totalHigherQuality) switch
-                {
-                    (> 0, _) => PlexMediaComparisonState.Missing,
-                    (_, > 0) => PlexMediaComparisonState.HigherQuality,
-                    _ => hasShowHit ? PlexMediaComparisonState.Owned : PlexMediaComparisonState.NotCompared,
-                },
+                ComparisonState = totalHigherQuality > 0
+                    ? PlexMediaComparisonState.HigherQuality
+                    : PlexMediaComparisonState.Owned,
             };
         }
 

@@ -11,95 +11,97 @@
 						animation="fade"
 						square
 						dark />
-					<q-img
-						v-else-if="imageUrl"
-						loading="lazy"
-						:src="imageUrl"
-						fit="fill"
-						no-spinner
-						crossorigin="anonymous"
-						class="media-poster--image"
-						:alt="mediaItem.title">
-						<template #default>
-							<!-- Comparison State Button -->
-							<IconButton
-								v-if="comparisonBadge"
-								class="comparison-state-button"
-								:color="comparisonBadge.color"
-								size="1rem"
-								:cy="`comparison-chip-${mediaItem.comparisonState}`"
-								:icon="comparisonBadge.icon"
-								:tooltip-text="comparisonBadge.label" />
-							<div class="media-poster--overlay white--text">
-								<div class="media-poster--content">
-									<div class="media-poster--section">
-										<QText
-											:value="mediaItem.title"
-											bold="bold"
-											align="center"
-											size="h6"
-											class="media-poster--title" />
-										<QText
-											v-if="mediaType === PlexMediaType.TvShow"
-											:value="$t('components.media-poster-image-content.seasons-count', { count: mediaItem.childCount })"
-											bold="bold"
-											align="center"
-											size="subtitle1" />
-										<QText
-											v-if="mediaType === PlexMediaType.TvShow"
-											:value="$t('components.media-poster-image-content.episode-count', { count: mediaItem.grandChildCount })"
-											bold="bold"
-											align="center"
-											size="subtitle1" />
-										<QText
-											v-if="mediaOverviewStore.allMediaMode"
-											align="center"
-											size="subtitle2"
-											:value="serverStore.getServerName(mediaItem.plexServerId)" />
-									</div>
+					<template v-else>
+						<q-img
+							v-if="imageUrl"
+							loading="lazy"
+							:src="imageUrl"
+							fit="fill"
+							no-spinner
+							crossorigin="anonymous"
+							class="media-poster--image"
+							:alt="mediaItem.title" />
+						<div
+							v-else
+							class="media-poster--content media-poster--fallback">
+							<div class="media-poster--fallback-icon">
+								<QMediaTypeIcon
+									:size="60"
+									:media-type="mediaType" />
+							</div>
+							<div class="media-poster--section media-poster--section-compact">
+								<QText
+									:value="mediaItem.title"
+									bold="bold"
+									align="center"
+									size="h6"
+									class="media-poster--title" />
+								<QText
+									v-if="mediaOverviewStore.allMediaMode"
+									align="center"
+									size="subtitle2"
+									:value="serverStore.getServerName(mediaItem.plexServerId)" />
+							</div>
+						</div>
 
-									<div
-										:class="['media-poster--actions', mediaType === PlexMediaType.TvShow ? 'media-poster--actions-around' : 'media-poster--actions-center']">
-										<BaseButton
-											icon="mdi-download"
-											size="xl"
-											flat
-											:outline="false"
-											@click="onDownload([])" />
-										<BaseButton
-											v-if="mediaType === PlexMediaType.TvShow"
-											icon="mdi-magnify"
-											:outline="false"
-											size="xl"
-											flat
-											@click="emit('open-media-details', mediaItem)" />
-									</div>
+						<!-- Comparison State Button (always visible, rendered outside image element) -->
+						<IconButton
+							v-if="comparisonBadge"
+							class="comparison-state-button"
+							:color="comparisonBadge.color"
+							size="1rem"
+							:cy="`comparison-chip-${mediaItem.comparisonState}`"
+							:icon="comparisonBadge.icon"
+							:tooltip-text="comparisonBadge.label" />
+
+						<!-- Hover overlay (always rendered, positioned absolutely over image/fallback) -->
+						<div class="media-poster--overlay white--text">
+							<div class="media-poster--content">
+								<div class="media-poster--section">
+									<QText
+										:value="mediaItem.title"
+										bold="bold"
+										align="center"
+										size="h6"
+										class="media-poster--title" />
+									<QText
+										v-if="mediaType === PlexMediaType.TvShow"
+										:value="$t('components.media-poster-image-content.seasons-count', { count: mediaItem.childCount })"
+										bold="bold"
+										align="center"
+										size="subtitle1" />
+									<QText
+										v-if="mediaType === PlexMediaType.TvShow"
+										:value="$t('components.media-poster-image-content.episode-count', { count: mediaItem.grandChildCount })"
+										bold="bold"
+										align="center"
+										size="subtitle1" />
+									<QText
+										v-if="mediaOverviewStore.allMediaMode"
+										align="center"
+										size="subtitle2"
+										:value="serverStore.getServerName(mediaItem.plexServerId)" />
+								</div>
+
+								<div
+									:class="['media-poster--actions', mediaType === PlexMediaType.TvShow ? 'media-poster--actions-around' : 'media-poster--actions-center']">
+									<BaseButton
+										icon="mdi-download"
+										size="xl"
+										flat
+										:outline="false"
+										@click="onDownload([])" />
+									<BaseButton
+										v-if="mediaType === PlexMediaType.TvShow"
+										icon="mdi-magnify"
+										:outline="false"
+										size="xl"
+										flat
+										@click="emit('open-media-details', mediaItem)" />
 								</div>
 							</div>
-						</template>
-					</q-img>
-					<div
-						v-else
-						class="media-poster--content media-poster--fallback">
-						<div class="media-poster--fallback-icon">
-							<QMediaTypeIcon
-								:size="60"
-								:media-type="mediaType" />
 						</div>
-						<div class="media-poster--section media-poster--section-compact">
-							<QText
-								:value="mediaItem.title"
-								bold="bold"
-								align="center"
-								size="h6"
-								class="media-poster--title" />
-							<QText
-								v-if="mediaOverviewStore.allMediaMode"
-								align="center"
-								size="subtitle2"
-								:value="serverStore.getServerName(mediaItem.plexServerId)" />
-						</div>
-					</div>
+					</template>
 				</QGlowContainer>
 
 				<div
@@ -144,13 +146,8 @@
 <script setup lang="ts">
 import { get, set } from '@vueuse/core';
 import type { Subscription } from 'rxjs';
-import {
-	type DownloadMediaDTO,
-	PlexMediaComparisonState,
-	type PlexMediaQualityDTO,
-	type PlexMediaSlimDTO,
-	PlexMediaType,
-} from '@dto';
+import { PlexMediaType } from '@dto';
+import type { DownloadMediaDTO, PlexMediaComparisonState, PlexMediaQualityDTO, PlexMediaSlimDTO } from '@dto';
 import { MediaSortField } from '@enums';
 import { useMediaOverviewStore, useMediaStore, useServerStore, useSettingsStore } from '@store';
 
@@ -181,58 +178,11 @@ let currentSubscription: Subscription | null = null;
 
 const mediaType = computed(() => props.mediaItem?.type ?? PlexMediaType.Unknown);
 
-const comparisonBadge = computed((): {
-	icon: string;
-	label: string;
-	color: 'default' | 'positive' | 'warning' | 'negative';
-} => {
-	const comparisonState = props.mediaItem.comparisonState as PlexMediaComparisonState | number;
+const { getComparisonStateBadge } = useComparisonStateBadge();
 
-	switch (comparisonState) {
-		case PlexMediaComparisonState.NotCompared:
-		case 0:
-			return {
-				color: 'default',
-				label: t('components.media-overview.comparison.comparison-not-compared'),
-				icon: 'mdi-alert-circle-outline',
-			};
-		case PlexMediaComparisonState.Owned:
-		case 1:
-			return {
-				color: 'default',
-				label: t('components.media-overview.comparison.comparison-owned'),
-				icon: 'mdi-check',
-			};
-		case PlexMediaComparisonState.Missing:
-		case 2:
-			return {
-				color: 'negative',
-				label: t('components.media-overview.comparison.comparison-missing'),
-				icon: 'mdi-call-missed',
-			};
-		case PlexMediaComparisonState.HigherQuality:
-		case 3:
-			return {
-				color: 'positive',
-				label: t('components.media-overview.comparison.comparison-higher-quality'),
-				icon: 'mdi-arrow-up-circle',
-			};
-		case PlexMediaComparisonState.Pending:
-		case 4:
-			return {
-				color: 'positive',
-				label: t('components.media-overview.comparison.comparison-pending'),
-				icon: 'mdi-clock-fast',
-			};
-
-		default:
-			return {
-				color: 'negative',
-				label: t('components.media-overview.comparison.unknown'),
-				icon: 'mdi-crosshairs-question',
-			};
-	}
-});
+const comparisonBadge = computed(() =>
+	getComparisonStateBadge(props.mediaItem.comparisonState as PlexMediaComparisonState | number),
+);
 
 function onDownload(mediaQualities: PlexMediaQualityDTO[]) {
 	const downloadCommand: DownloadMediaDTO = {
@@ -301,6 +251,8 @@ onUnmounted(() => {
 
 .comparison-state-button {
   position: absolute;
+  top: 0;
+  left: 0;
   z-index: 9999;
   pointer-events: auto;
 }
@@ -331,10 +283,14 @@ onUnmounted(() => {
 
   &--overlay {
     @extend .background-xl;
+    position: absolute;
+    top: 0;
+    left: 0;
     width: 100%;
     height: 100%;
     opacity: 0;
     margin: 0;
+    pointer-events: none;
     transition: opacity 0.2s ease-in-out;
   }
 
@@ -356,6 +312,7 @@ onUnmounted(() => {
   &--fallback {
     @extend .background-sm;
     padding: 0 !important;
+    transition: opacity 0.2s ease-in-out;
   }
 
   &--fallback-icon {
@@ -398,8 +355,13 @@ onUnmounted(() => {
 }
 
 .media-poster-card:hover {
+  .media-poster--fallback {
+    opacity: 0;
+  }
+
   .media-poster--overlay {
     opacity: 0.8;
+    pointer-events: auto;
 
     .q-btn {
       opacity: 1;

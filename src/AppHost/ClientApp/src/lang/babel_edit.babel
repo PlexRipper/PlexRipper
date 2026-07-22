@@ -1644,7 +1644,7 @@
 										</translations>
 									</concept_node>
 									<concept_node>
-										<name>one-movie-count</name>
+										<name>movie-file-count</name>
 										<description/>
 										<comment/>
 										<translations>
@@ -1667,7 +1667,7 @@
 										</translations>
 									</concept_node>
 									<concept_node>
-										<name>movie-file-count</name>
+										<name>one-movie-count</name>
 										<description/>
 										<comment/>
 										<translations>
@@ -3211,6 +3211,29 @@
 										<name>meta-data</name>
 										<children>
 											<concept_node>
+												<name>comparison-state</name>
+												<description/>
+												<comment/>
+												<translations>
+													<translation>
+														<language>de-DE</language>
+														<approved>false</approved>
+													</translation>
+													<translation>
+														<language>en-US</language>
+														<approved>false</approved>
+													</translation>
+													<translation>
+														<language>fr-FR</language>
+														<approved>false</approved>
+													</translation>
+													<translation>
+														<language>pl-PL</language>
+														<approved>false</approved>
+													</translation>
+												</translations>
+											</concept_node>
+											<concept_node>
 												<name>country</name>
 												<description/>
 												<comment/>
@@ -3337,6 +3360,29 @@
 											</concept_node>
 											<concept_node>
 												<name>added-at</name>
+												<description/>
+												<comment/>
+												<translations>
+													<translation>
+														<language>de-DE</language>
+														<approved>false</approved>
+													</translation>
+													<translation>
+														<language>en-US</language>
+														<approved>false</approved>
+													</translation>
+													<translation>
+														<language>fr-FR</language>
+														<approved>false</approved>
+													</translation>
+													<translation>
+														<language>pl-PL</language>
+														<approved>false</approved>
+													</translation>
+												</translations>
+											</concept_node>
+											<concept_node>
+												<name>comparison-state</name>
 												<description/>
 												<comment/>
 												<translations>
@@ -3767,6 +3813,29 @@
 										</translations>
 									</concept_node>
 									<concept_node>
+										<name>enable-library-button</name>
+										<description/>
+										<comment/>
+										<translations>
+											<translation>
+												<language>de-DE</language>
+												<approved>false</approved>
+											</translation>
+											<translation>
+												<language>en-US</language>
+												<approved>false</approved>
+											</translation>
+											<translation>
+												<language>fr-FR</language>
+												<approved>false</approved>
+											</translation>
+											<translation>
+												<language>pl-PL</language>
+												<approved>false</approved>
+											</translation>
+										</translations>
+									</concept_node>
+									<concept_node>
 										<name>failed-to-load-media</name>
 										<description/>
 										<comment/>
@@ -3791,6 +3860,29 @@
 									</concept_node>
 									<concept_node>
 										<name>is-refreshing</name>
+										<description/>
+										<comment/>
+										<translations>
+											<translation>
+												<language>de-DE</language>
+												<approved>false</approved>
+											</translation>
+											<translation>
+												<language>en-US</language>
+												<approved>false</approved>
+											</translation>
+											<translation>
+												<language>fr-FR</language>
+												<approved>false</approved>
+											</translation>
+											<translation>
+												<language>pl-PL</language>
+												<approved>false</approved>
+											</translation>
+										</translations>
+									</concept_node>
+									<concept_node>
+										<name>library-disabled</name>
 										<description/>
 										<comment/>
 										<translations>
@@ -5882,6 +5974,57 @@
 															</concept_node>
 														</children>
 													</folder_node>
+												</children>
+											</folder_node>
+											<folder_node>
+												<name>server-libraries</name>
+												<children>
+													<concept_node>
+														<name>header</name>
+														<description/>
+														<comment/>
+														<translations>
+															<translation>
+																<language>de-DE</language>
+																<approved>false</approved>
+															</translation>
+															<translation>
+																<language>en-US</language>
+																<approved>false</approved>
+															</translation>
+															<translation>
+																<language>fr-FR</language>
+																<approved>false</approved>
+															</translation>
+															<translation>
+																<language>pl-PL</language>
+																<approved>false</approved>
+															</translation>
+														</translations>
+													</concept_node>
+													<concept_node>
+														<name>sync-alert</name>
+														<description/>
+														<comment/>
+														<translations>
+															<translation>
+																<language>de-DE</language>
+																<approved>false</approved>
+															</translation>
+															<translation>
+																<language>en-US</language>
+																<approved>false</approved>
+															</translation>
+															<translation>
+																<language>fr-FR</language>
+																<approved>false</approved>
+															</translation>
+															<translation>
+																<language>pl-PL</language>
+																<approved>false</approved>
+															</translation>
+														</translations>
+													</concept_node>
 												</children>
 											</folder_node>
 										</children>

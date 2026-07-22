@@ -109,6 +109,8 @@
             "failed-to-load-media": "Fehler beim Laden der Medien. Der Server ist möglicherweise ausgelastet. Bitte versuchen Sie es erneut oder warten Sie, bis der Cache aufgewärmt ist.",
             "retrying-in-seconds": "Erneuter Versuch in {seconds}s...",
             "no-filter-results": "Keine Medienergebnisse entsprechen den aktuellen Filtereinstellungen. Bitte passen Sie Ihre Filter an oder setzen Sie sie zurück, um die verfügbaren Ergebnisse anzuzeigen",
+            "library-disabled": "Die Mediathek \"{library}\" ist deaktiviert. Aktivieren Sie sie und synchronisieren Sie sie erneut, bevor Sie ihre Medien anzeigen.",
+            "enable-library-button": "Mediathek aktivieren",
             "comparison": {
                 "comparison-missing": "Fehlt in eigener Mediathek",
                 "comparison-higher-quality": "Höhere Qualität verfügbar",
@@ -167,6 +169,10 @@
                     "section-header": "Wählen Sie die bevorzugte Serververbindung aus:",
                     "add-connection-button": "Verbindung hinzufügen",
                     "check-all-connections": "Alle Verbindungen prüfen"
+                },
+                "server-libraries": {
+                    "header": "Server-Mediatheken",
+                    "sync-alert": "Wenn Sie eine Plex-Bibliothek deaktivieren, wird sie vollständig aus den Suchergebnissen ausgeblendet und ihre Mediendaten werden gelöscht. Durch Aktivieren wird sie automatisch wieder synchronisiert."
                 },
                 "server-data": {
                     "headers": {

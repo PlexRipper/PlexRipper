@@ -869,6 +869,7 @@ export interface PlexLibraryDTO {
   episodeCount: number;
   /** @format int32 */
   id: number;
+  isEnabled: boolean;
   key: string;
   /** @format int64 */
   mediaSize: number;
@@ -1685,6 +1686,10 @@ export interface ServerIdentityDTO {
 
 export interface ServerSettingsDTO {
   data: PlexServerSettingItemModule[];
+}
+
+export interface SetLibraryEnabledRequest {
+  isEnabled: boolean;
 }
 
 export interface SetNotificationVisibilityEndpointRequest {

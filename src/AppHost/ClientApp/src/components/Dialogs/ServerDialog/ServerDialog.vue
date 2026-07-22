@@ -48,12 +48,12 @@
 							icon="mdi-cog-box"
 							data-cy="server-dialog-tab-3"
 							:label="$t('components.server-dialog.tabs.server-config.header')" />
-						<!--	Library Destinations Tab Header	-->
+						<!--	Server Libraries Tab Header	-->
 						<q-tab
-							name="download-destinations"
-							icon="mdi-folder-edit-outline"
+							name="server-libraries"
+							icon="mdi-bookshelf"
 							data-cy="server-dialog-tab-4"
-							:label="$t('components.server-dialog.tabs.download-destinations.header')" />
+							:label="$t('components.server-dialog.tabs.server-libraries.header')" />
 						<!--	Server Commands Tab Header	-->
 						<q-tab
 							name="server-commands"
@@ -97,14 +97,13 @@
 							<ServerConfigTabContent :plex-server="plexServer" />
 						</q-tab-panel>
 
-						<!--	Library Download Destinations	Tab Content -->
+						<!--	Server Libraries Tab Content -->
 						<q-tab-panel
-							name="download-destinations"
-							class="inherit-all-height"
+							name="server-libraries"
 							data-cy="server-dialog-tab-content-4">
-							<ServerLibraryDestinationsTabContent
+							<ServerLibrariesTabContent
 								:plex-server="plexServer"
-								:plex-libraries="libraryStore.getLibrariesByServerId(plexServerId)" />
+								:plex-libraries="libraryStore.getAllLibrariesByServerId(plexServerId)" />
 						</q-tab-panel>
 
 						<!--	Server Commands -->

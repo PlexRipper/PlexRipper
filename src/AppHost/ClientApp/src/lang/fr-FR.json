@@ -109,6 +109,8 @@
             "failed-to-load-media": "Échec du chargement des médias. Le serveur est peut-être occupé. Veuillez réessayer ou attendre que le cache se réchauffe.",
             "retrying-in-seconds": "Nouvelle tentative dans {seconds}s...",
             "no-filter-results": "Aucun résultat multimédia ne correspond aux paramètres de filtre actuels. Veuillez ajuster ou réinitialiser vos filtres pour afficher les résultats disponibles.",
+            "library-disabled": "La bibliothèque \"{library}\" est désactivée. Activez-la puis resynchronisez-la avant d'afficher ses médias.",
+            "enable-library-button": "Activer la bibliothèque",
             "comparison": {
                 "comparison-missing": "Absent de la bibliothèque possédée",
                 "comparison-higher-quality": "Qualité supérieure disponible",
@@ -167,6 +169,10 @@
                     "section-header": "Sélectionnez la connexion serveur préférée :",
                     "add-connection-button": "Ajouter une connexion",
                     "check-all-connections": "Vérifier toutes les connexions"
+                },
+                "server-libraries": {
+                    "header": "Bibliothèques du serveur",
+                    "sync-alert": "Désactiver une bibliothèque Plex la rendra invisible dans les résultats de recherche et supprimera ses données multimédias. La réactiver la synchronisera automatiquement."
                 },
                 "server-data": {
                     "headers": {

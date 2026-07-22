@@ -5,7 +5,11 @@ import { of } from 'rxjs';
 import { map, switchMap, tap } from 'rxjs/operators';
 import { get } from '@vueuse/core';
 import {
-	type LibrarySyncProgressDTO, type LibrarySyncJobQueueDTO, LibrarySyncJobStatus, type PlexLibraryDTO, type PlexServerDTO,
+	type LibrarySyncProgressDTO,
+	type LibrarySyncJobQueueDTO,
+	LibrarySyncJobStatus,
+	type PlexLibraryDTO,
+	type PlexServerDTO,
 } from '@dto';
 import { StoreNames, type ISetupResult } from '@interfaces';
 import { plexLibraryApi } from '@api';
@@ -110,7 +114,19 @@ export const useLibraryStore = defineStore(StoreNames.LibraryStore, () => {
 					}
 				}
 			});
-		}, updateLibrary(library?: PlexLibraryDTO | null): void {
+		},
+		setLibraryEnabled(libraryId: number, isEnabled: boolean): Observable<PlexLibraryDTO | null> {
+			return plexLibraryApi.setLibraryEnabledEndpoint(libraryId, { isEnabled }).pipe(
+				switchMap((response) => {
+					if (response.isSuccess && response.value) {
+						actions.updateLibrary(response.value);
+						return actions.refreshLibrary(response.value.id);
+					}
+					return of(null);
+				}),
+			);
+		},
+		updateLibrary(library?: PlexLibraryDTO | null): void {
 			if (!library) {
 				Log.error('Library was invalid, cannot update store.', library);
 				return;
@@ -156,7 +172,18 @@ export const useLibraryStore = defineStore(StoreNames.LibraryStore, () => {
 		},
 	};
 	const getters = {
-		getLibrariesByServerId: (plexServerId: number) => state.libraries.filter((y) => y.plexServerId === plexServerId),
+		/**
+     * Get the enabled Plex libraries
+     * @param plexServerId
+     */
+		getLibrariesByServerId: (plexServerId: number) =>
+			state.libraries.filter((y) => y.plexServerId === plexServerId && y.isEnabled),
+		/**
+     * Gets all the Plex libraries regardless of enabled/disabled state
+     * @param plexServerId
+     */
+		getAllLibrariesByServerId: (plexServerId: number) =>
+			state.libraries.filter((y) => y.plexServerId === plexServerId),
 		getLibrary: (libraryId: number): PlexLibraryDTO | null => state.libraries.find((x) => x.id === libraryId) ?? null,
 		getLibraries: (libraryIds: number[] = []): PlexLibraryDTO[] => {
 			if (libraryIds.length === 0) {

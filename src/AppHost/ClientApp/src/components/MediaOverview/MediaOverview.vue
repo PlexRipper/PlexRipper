@@ -13,8 +13,31 @@
 		</div>
 		<div class="media-overview-content">
 			<template v-if="!mediaOverviewStore.loading">
+				<QRow
+					v-if="library && !library.isEnabled"
+					class="q-mt-md"
+					justify="center"
+					gutter="md">
+					<QCol cols="auto">
+						<QAlert type="warning">
+							<QRow
+								align="center"
+								gutter="md">
+								<QCol>
+									{{ t('components.media-overview.library-disabled', { library: library.title }) }}
+								</QCol>
+								<QCol cols="auto">
+									<BaseButton
+										color="positive"
+										:label="t('components.media-overview.enable-library-button')"
+										@click="openLibraryServerSettings" />
+								</QCol>
+							</QRow>
+						</QAlert>
+					</QCol>
+				</QRow>
 				<!-- Media Overview -->
-				<template v-if="mediaOverviewStore.itemsLength && !mediaOverviewStore.hasNoSearchResults">
+				<template v-else-if="mediaOverviewStore.itemsLength && !mediaOverviewStore.hasNoSearchResults">
 					<!--	Data table display	-->
 					<QRow align="start">
 						<QCol>
@@ -47,7 +70,9 @@
 								<template v-if="mediaOverviewStore.serverError">
 									{{ t('components.media-overview.failed-to-load-media') }}
 									<template v-if="mediaOverviewStore.cacheRetrySeconds > 0">
-										{{ t('components.media-overview.retrying-in-seconds', { seconds: mediaOverviewStore.cacheRetrySeconds }) }}
+										{{
+											t('components.media-overview.retrying-in-seconds', { seconds: mediaOverviewStore.cacheRetrySeconds })
+										}}
 									</template>
 								</template>
 								<template v-else-if="mediaOverviewStore.allMediaMode">
@@ -59,7 +84,7 @@
 								<template v-else-if="mediaOverviewStore.hasNoFilterResults">
 									{{ t('components.media-overview.no-filter-results') }}
 								</template>
-								<template v-else-if="libraryStore.getLibrary(libraryId)?.syncedAt === null">
+								<template v-else-if="library?.syncedAt === null">
 									{{ t('components.media-overview.library-not-yet-synced') }}
 								</template>
 								<template v-else-if="!mediaOverviewStore.itemsLength">
@@ -116,6 +141,8 @@ const props = defineProps<{
 	libraryId: number;
 }>();
 
+const library = computed(() => libraryStore.getLibrary(props.libraryId));
+
 function resetProgress() {
 	libraryStore.updateLibraryProgress({
 		plexLibraryId: mediaOverviewStore.libraryId,
@@ -135,6 +162,12 @@ function refreshLibrary() {
 	mediaOverviewStore.loading = true;
 	useSubscription(
 		libraryStore.reSyncLibrary(mediaOverviewStore.libraryId).subscribe(),
+	);
+}
+
+function openLibraryServerSettings(): void {
+	useSubscription(
+		libraryStore.setLibraryEnabled(props.libraryId, true).subscribe(),
 	);
 }
 

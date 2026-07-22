@@ -96,8 +96,12 @@ public class ApplyOwnedMovieComparisonStateCommandHandler
 
         for (var i = 0; i < items.Count; i++)
         {
-            if (upgradeIdSet.Contains(items[i].Id))
-                items[i] = items[i] with { ComparisonState = PlexMediaComparisonState.HigherQuality };
+            items[i] = items[i] with
+            {
+                ComparisonState = upgradeIdSet.Contains(items[i].Id)
+                    ? PlexMediaComparisonState.HigherQuality
+                    : PlexMediaComparisonState.Owned,
+            };
         }
 
         return Result.Ok();

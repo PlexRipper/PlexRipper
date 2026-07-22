@@ -202,8 +202,7 @@ public class GetMediaByTypeCommandHandler : ICommandHandler<GetMediaByTypeComman
                         .ToListAsync(ct);
 
                     var movieDtos = movies.Select(x => x.ToSlimDTO()).ToList();
-                    await _commandExecutor.Send(
-                        new ApplyComparisonStateCommand(movieDtos, plexLibraryId, PlexMediaType.Movie), ct);
+                    await ApplyComparisonStateAsync(movieDtos, plexLibraryId, PlexMediaType.Movie, ct);
 
                     _response.Items = movieDtos;
                     _response.Roles.AddRange(movies.SelectMany(x => x.Actors)
@@ -306,8 +305,7 @@ public class GetMediaByTypeCommandHandler : ICommandHandler<GetMediaByTypeComman
                         .ToListAsync(ct);
 
                     var tvShowDtos = tvShows.Select(x => x.ToSlimDTOMapper()).ToList();
-                    await _commandExecutor.Send(
-                        new ApplyComparisonStateCommand(tvShowDtos, plexLibraryId, PlexMediaType.TvShow), ct);
+                    await ApplyComparisonStateAsync(tvShowDtos, plexLibraryId, PlexMediaType.TvShow, ct);
 
                     _response.Items = tvShowDtos;
                     _response.Roles.AddRange(tvShows.SelectMany(x => x.Actors)

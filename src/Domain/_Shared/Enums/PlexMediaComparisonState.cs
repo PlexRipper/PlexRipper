@@ -31,4 +31,14 @@ public enum PlexMediaComparisonState
     /// When comparison work is queued or processing and no current scope is available yet.
     /// </summary>
     Pending = 4,
+
+    /// <summary>
+    /// Current scope exists; the top-level media item is owned, but child media such as seasons or episodes are missing.
+    /// </summary>
+    Partial = 5,
+
+    /// <summary>
+    /// Current scope exists; the top-level media item is owned, but child media are both missing and available at higher quality.
+    /// </summary>
+    PartialAndHigherQuality = 6,
 }

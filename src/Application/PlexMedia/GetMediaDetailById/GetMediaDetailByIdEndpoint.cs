@@ -60,7 +60,7 @@ public class GetMediaDetailByIdEndpoint : Endpoint<GetMediaDetailByIdEndpointReq
         _log.Here().DebugApiCall(HttpContext, req);
         if (req.Type == PlexMediaType.Movie)
         {
-            var plexMovie = await _dbContext.PlexMovies.GetAsync(req.PlexMediaId, ct);
+            var plexMovie = await _dbContext.PlexMovies.IncludeAll().FirstOrDefaultAsync(x => x.Id == req.PlexMediaId, ct);
             if (plexMovie is null)
             {
                 await Send.FluentResult(ResultExtensions.EntityNotFound(nameof(req.Type.GetType), req.PlexMediaId), ct);

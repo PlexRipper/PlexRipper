@@ -43,7 +43,12 @@ public static partial class PlexMediaDTOMapper
     public static PlexMediaDataDTO ToDTO(this PlexTvShowEpisodeMediaData source) =>
         new()
         {
+            Id = source.Id,
+            PlexApiMediaId = source.PlexApiMediaId,
+            PlexApiPartId = source.PlexApiPartId,
+            FileName = source.GetFileName,
             Duration = source.Duration,
+            Size = source.Size,
             VideoResolution = source.VideoResolution,
             VideoCodec = source.VideoCodec,
             AudioCodec = source.AudioCodec,

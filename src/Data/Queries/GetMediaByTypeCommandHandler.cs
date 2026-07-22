@@ -42,6 +42,18 @@ public class GetMediaByTypeCommandHandler : ICommandHandler<GetMediaByTypeComman
         _response.QueryHash = filter.QueryHash;
         var plexLibraryId = filter.PlexLibraryId;
 
+        // For a specific library request, verify the library is enabled.
+        if (plexLibraryId > 0)
+        {
+            var requestedLibrary = await _dbContext.PlexLibraries
+                .IgnoreIsEnabledFilter()
+                .Select(x => new { x.Id, x.IsEnabled })
+                .FirstOrDefaultAsync(x => x.Id == plexLibraryId, ct);
+
+            if (requestedLibrary is null || !requestedLibrary.IsEnabled)
+                return Result.Ok(_response);
+        }
+
         var allowedPlexLibraryIds = new List<int>();
 
         if (plexLibraryId > 0)
@@ -93,7 +105,7 @@ public class GetMediaByTypeCommandHandler : ICommandHandler<GetMediaByTypeComman
         var page = Math.Max(filter.Parameters.Page ?? 1, 1);
         var pageSize = Math.Max(filter.Parameters.PageSize ?? 0, 0);
         options.Paging.Disabled = pageSize == 0;
-        
+
         _response.Page = page;
         _response.PageSize = pageSize;
 
@@ -150,11 +162,23 @@ public class GetMediaByTypeCommandHandler : ICommandHandler<GetMediaByTypeComman
                     var pagedMovies = filteredMovies.Where(x => pagedIds.Contains(x.Id)).ToList();
 
                     _response.Items = pagedDtos;
-                    _response.Roles.AddRange(pagedMovies.SelectMany(x => x.Actors).Select(x => x.Id).Distinct().OrderBy(x => x));
-                    _response.Countries.AddRange(pagedMovies.SelectMany(x => x.Countries).Select(x => x.Id).Distinct().OrderBy(x => x));
-                    _response.Genres.AddRange(pagedMovies.SelectMany(x => x.Genres).Select(x => x.Id).Distinct().OrderBy(x => x));
+                    _response.Roles.AddRange(pagedMovies.SelectMany(x => x.Actors)
+                        .Select(x => x.Id)
+                        .Distinct()
+                        .OrderBy(x => x));
+                    _response.Countries.AddRange(pagedMovies.SelectMany(x => x.Countries)
+                        .Select(x => x.Id)
+                        .Distinct()
+                        .OrderBy(x => x));
+                    _response.Genres.AddRange(pagedMovies.SelectMany(x => x.Genres)
+                        .Select(x => x.Id)
+                        .Distinct()
+                        .OrderBy(x => x));
                     _response.Qualities.AddRange(
-                        pagedMovies.SelectMany(x => x.MediaDataList).Select(x => x.Quality.ToId()).Distinct().OrderBy(x => x)
+                        pagedMovies.SelectMany(x => x.MediaDataList)
+                            .Select(x => x.Quality.ToId())
+                            .Distinct()
+                            .OrderBy(x => x)
                     );
                 }
                 else
@@ -178,12 +202,22 @@ public class GetMediaByTypeCommandHandler : ICommandHandler<GetMediaByTypeComman
                         .ToListAsync(ct);
 
                     var movieDtos = movies.Select(x => x.ToSlimDTO()).ToList();
-                    await _commandExecutor.Send(new ApplyComparisonStateCommand(movieDtos, plexLibraryId, PlexMediaType.Movie), ct);
+                    await _commandExecutor.Send(
+                        new ApplyComparisonStateCommand(movieDtos, plexLibraryId, PlexMediaType.Movie), ct);
 
                     _response.Items = movieDtos;
-                    _response.Roles.AddRange(movies.SelectMany(x => x.Actors).Select(x => x.Id).Distinct().OrderBy(x => x));
-                    _response.Countries.AddRange(movies.SelectMany(x => x.Countries).Select(x => x.Id).Distinct().OrderBy(x => x));
-                    _response.Genres.AddRange(movies.SelectMany(x => x.Genres).Select(x => x.Id).Distinct().OrderBy(x => x));
+                    _response.Roles.AddRange(movies.SelectMany(x => x.Actors)
+                        .Select(x => x.Id)
+                        .Distinct()
+                        .OrderBy(x => x));
+                    _response.Countries.AddRange(movies.SelectMany(x => x.Countries)
+                        .Select(x => x.Id)
+                        .Distinct()
+                        .OrderBy(x => x));
+                    _response.Genres.AddRange(movies.SelectMany(x => x.Genres)
+                        .Select(x => x.Id)
+                        .Distinct()
+                        .OrderBy(x => x));
                     _response.Qualities.AddRange(
                         movies.SelectMany(x => x.MediaDataList).Select(x => x.Quality.ToId()).Distinct().OrderBy(x => x)
                     );
@@ -232,11 +266,23 @@ public class GetMediaByTypeCommandHandler : ICommandHandler<GetMediaByTypeComman
                     var pagedTvShows = filteredTvShows.Where(x => pagedIds.Contains(x.Id)).ToList();
 
                     _response.Items = pagedDtos;
-                    _response.Roles.AddRange(pagedTvShows.SelectMany(x => x.Actors).Select(x => x.Id).Distinct().OrderBy(x => x));
-                    _response.Countries.AddRange(pagedTvShows.SelectMany(x => x.Countries).Select(x => x.Id).Distinct().OrderBy(x => x));
-                    _response.Genres.AddRange(pagedTvShows.SelectMany(x => x.Genres).Select(x => x.Id).Distinct().OrderBy(x => x));
+                    _response.Roles.AddRange(pagedTvShows.SelectMany(x => x.Actors)
+                        .Select(x => x.Id)
+                        .Distinct()
+                        .OrderBy(x => x));
+                    _response.Countries.AddRange(pagedTvShows.SelectMany(x => x.Countries)
+                        .Select(x => x.Id)
+                        .Distinct()
+                        .OrderBy(x => x));
+                    _response.Genres.AddRange(pagedTvShows.SelectMany(x => x.Genres)
+                        .Select(x => x.Id)
+                        .Distinct()
+                        .OrderBy(x => x));
                     _response.Qualities.AddRange(
-                        pagedTvShows.SelectMany(x => x.Qualities).Select(x => x.Quality.ToId()).Distinct().OrderBy(x => x)
+                        pagedTvShows.SelectMany(x => x.Qualities)
+                            .Select(x => x.Quality.ToId())
+                            .Distinct()
+                            .OrderBy(x => x)
                     );
                 }
                 else
@@ -260,12 +306,22 @@ public class GetMediaByTypeCommandHandler : ICommandHandler<GetMediaByTypeComman
                         .ToListAsync(ct);
 
                     var tvShowDtos = tvShows.Select(x => x.ToSlimDTOMapper()).ToList();
-                    await _commandExecutor.Send(new ApplyComparisonStateCommand(tvShowDtos, plexLibraryId, PlexMediaType.TvShow), ct);
+                    await _commandExecutor.Send(
+                        new ApplyComparisonStateCommand(tvShowDtos, plexLibraryId, PlexMediaType.TvShow), ct);
 
                     _response.Items = tvShowDtos;
-                    _response.Roles.AddRange(tvShows.SelectMany(x => x.Actors).Select(x => x.Id).Distinct().OrderBy(x => x));
-                    _response.Countries.AddRange(tvShows.SelectMany(x => x.Countries).Select(x => x.Id).Distinct().OrderBy(x => x));
-                    _response.Genres.AddRange(tvShows.SelectMany(x => x.Genres).Select(x => x.Id).Distinct().OrderBy(x => x));
+                    _response.Roles.AddRange(tvShows.SelectMany(x => x.Actors)
+                        .Select(x => x.Id)
+                        .Distinct()
+                        .OrderBy(x => x));
+                    _response.Countries.AddRange(tvShows.SelectMany(x => x.Countries)
+                        .Select(x => x.Id)
+                        .Distinct()
+                        .OrderBy(x => x));
+                    _response.Genres.AddRange(tvShows.SelectMany(x => x.Genres)
+                        .Select(x => x.Id)
+                        .Distinct()
+                        .OrderBy(x => x));
                     _response.Qualities.AddRange(
                         tvShows.SelectMany(x => x.Qualities).Select(x => x.Quality.ToId()).Distinct().OrderBy(x => x)
                     );
@@ -357,7 +413,10 @@ public class GetMediaByTypeCommandHandler : ICommandHandler<GetMediaByTypeComman
         return options;
     }
 
-    private async Task SetNavigationIndexes(IQueryable<MediaNavigationIndexRow> rows, QueryOptions options, CancellationToken ct)
+    private async Task SetNavigationIndexes(
+        IQueryable<MediaNavigationIndexRow> rows,
+        QueryOptions options,
+        CancellationToken ct)
     {
         SetNavigationIndexes(await rows.ToListAsync(ct), options);
     }

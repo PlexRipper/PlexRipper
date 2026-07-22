@@ -118,6 +118,13 @@ public class PlexLibrary : BaseEntity
     /// </summary>
     [Column(Order = 20)]
     public bool Outdated { get; set; }
+
+    /// <summary>
+    /// Gets or sets a value indicating whether this <see cref="PlexLibrary"/> is enabled.
+    /// When disabled, the library is excluded from normal workflows and its synced media data is purged.
+    /// </summary>
+    [Column(Order = 21)]
+    public bool IsEnabled { get; set; } = true;
     
     /// <summary>
     /// DB-computed column that holds the total count of media items associated with this <see cref="PlexLibrary"/>.

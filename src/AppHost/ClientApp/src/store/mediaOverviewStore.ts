@@ -691,6 +691,8 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 				{ value: PlexMediaComparisonState.Missing, label: t('components.media-overview.comparison.comparison-missing') },
 				{ value: PlexMediaComparisonState.HigherQuality, label: t('components.media-overview.comparison.comparison-higher-quality') },
 				{ value: PlexMediaComparisonState.Pending, label: t('components.media-overview.comparison.comparison-pending') },
+				{ value: PlexMediaComparisonState.Partial, label: t('components.media-overview.comparison.comparison-partial') },
+				{ value: PlexMediaComparisonState.PartialAndHigherQuality, label: t('components.media-overview.comparison.comparison-partial-and-higher-quality') },
 			];
 		}),
 		getFilterChips: computed(() => {

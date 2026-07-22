@@ -7,6 +7,7 @@ import type {
 	CheckAllConnectionStatusUpdateDTO,
 	DownloadMediaDTO,
 	FolderPathDTO,
+	PlexMediaSlimDTO,
 	RefreshPlexAccountAccessRapportDTO,
 } from '@dto';
 import { cloneDeep } from 'lodash-es';
@@ -49,6 +50,9 @@ export const useDialogStore = defineStore(StoreNames.DialogStore, () => {
 		},
 		openMediaConfirmationDownloadDialog(data: DownloadMediaDTO[]): void {
 			state.dialogUpdate.next({ name: DialogType.MediaDownloadConfirmationDialog, state: true, data });
+		},
+		openMediaComparisonDetailsDialog(data: PlexMediaSlimDTO): void {
+			state.dialogUpdate.next({ name: DialogType.MediaComparisonDetailsDialog, state: true, data });
 		},
 		openAddConnectionDialog(data: IConnectionDialog): void {
 			state.dialogUpdate.next({ name: DialogType.AddConnectionDialog, state: true, data });

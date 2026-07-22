@@ -131,7 +131,7 @@
 					<!-- Show Comparison State Sub-Menu -->
 					<template v-if="menuIndex === MediaMetaDataTypes.ComparisonState">
 						<q-item
-							v-for="comparisonState in mediaOverviewStore.getComparisonStateOptions.filter(x => x.label.toLowerCase().includes(menuFilterQuery.toLowerCase()))"
+							v-for="comparisonState in comparisonStateOptions"
 							:key="comparisonState.value"
 							clickable
 							@click="useSubscription(mediaOverviewStore.setComparisonStateFilter(comparisonState.value).subscribe())">
@@ -140,7 +140,13 @@
 									v-if="comparisonState.value === mediaOverviewStore.metadata.comparisonState"
 									name="mdi-check" />
 							</q-item-section>
-							<q-item-section>{{ comparisonState.label }}</q-item-section>
+							<q-item-section>
+								<MediaComparisonStateButton
+									:comparison-state="comparisonState.value"
+									show-label
+									dense
+									:cy="`comparison-filter-option-${comparisonState.value}`" />
+							</q-item-section>
 						</q-item>
 					</template>
 				</QScroll>
@@ -151,12 +157,15 @@
 
 <script setup lang="ts">
 import { get, set } from '@vueuse/core';
-import { useMediaOverviewStore } from '@store';
+import { PlexMediaComparisonState, PlexMediaType } from '@dto';
+import { useLibraryStore, useMediaOverviewStore, useServerStore } from '@store';
 import { MediaMetaDataTypes } from '@enums';
 import IconButton from '@components/Buttons/IconButton.vue';
 
 const menuIndex = ref<MediaMetaDataTypes>(MediaMetaDataTypes.None);
 const mediaOverviewStore = useMediaOverviewStore();
+const libraryStore = useLibraryStore();
+const serverStore = useServerStore();
 const { t } = useI18n();
 
 const showMenuSearch = ref(false);
@@ -190,6 +199,42 @@ const menuItems = computed((): { text: string; type: MediaMetaDataTypes }[] => [
 		type: MediaMetaDataTypes.ComparisonState,
 	},
 ]);
+
+const isOwnedLibrary = computed(() => {
+	if (mediaOverviewStore.allMediaMode)
+		return false;
+
+	const serverId = libraryStore.getLibrary(mediaOverviewStore.libraryId)?.plexServerId ?? 0;
+	return serverStore.getServer(serverId)?.owned ?? false;
+});
+
+const possibleComparisonStates = computed((): PlexMediaComparisonState[] => {
+	const baseStates = [
+		PlexMediaComparisonState.NotCompared,
+		PlexMediaComparisonState.Owned,
+		PlexMediaComparisonState.HigherQuality,
+		PlexMediaComparisonState.Pending,
+	];
+
+	if (mediaOverviewStore.getMediaType !== PlexMediaType.TvShow)
+		return get(isOwnedLibrary) ? baseStates : [...baseStates, PlexMediaComparisonState.Missing];
+
+	return [
+		...baseStates,
+		...(get(isOwnedLibrary) ? [] : [PlexMediaComparisonState.Missing]),
+		PlexMediaComparisonState.Partial,
+		PlexMediaComparisonState.PartialAndHigherQuality,
+	];
+});
+
+const comparisonStateOptions = computed(() => {
+	return mediaOverviewStore.getComparisonStateOptions.filter((x) => {
+		if (!get(possibleComparisonStates).includes(x.value))
+			return false;
+
+		return x.label.toLowerCase().includes(get(menuFilterQuery).toLowerCase());
+	});
+});
 
 function onMenuOpen(category: MediaMetaDataTypes) {
 	set(menuIndex, category);

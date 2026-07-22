@@ -905,6 +905,8 @@ export enum PlexMediaComparisonState {
   Missing = "Missing",
   HigherQuality = "HigherQuality",
   Pending = "Pending",
+  Partial = "Partial",
+  PartialAndHigherQuality = "PartialAndHigherQuality",
 }
 
 export interface PlexMediaDTO {

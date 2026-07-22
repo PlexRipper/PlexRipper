@@ -101,6 +101,8 @@
 
 			<!-- Media Selection Dialog -->
 			<MediaSelectionDialog />
+			<!-- Media Comparison Details Dialog -->
+			<MediaComparisonDetailsDialog />
 			<!-- Media Options Dialog -->
 			<MediaOptionsDialog @closed="onOptionsClosed" />
 			<!-- Loading overlay -->

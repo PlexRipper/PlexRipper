@@ -49,7 +49,10 @@
 							class="comparison-state-button"
 							:comparison-state="mediaItem.comparisonState"
 							show-tooltip
-							:cy="`comparison-chip-${mediaItem.comparisonState}`" />
+							dense
+							:clickable="comparisonBadgeClickable"
+							:cy="`comparison-chip-${mediaItem.comparisonState}`"
+							@click="openComparisonDetails" />
 
 						<!-- Hover overlay (always rendered, positioned absolutely over image/fallback) -->
 						<div class="media-poster--overlay white--text">
@@ -149,16 +152,17 @@
 <script setup lang="ts">
 import { get, set } from '@vueuse/core';
 import type { Subscription } from 'rxjs';
-import { PlexMediaType } from '@dto';
+import { PlexMediaComparisonState, PlexMediaType } from '@dto';
 import type { DownloadMediaDTO, PlexMediaQualityDTO, PlexMediaSlimDTO } from '@dto';
 import { MediaSortField } from '@enums';
-import { useMediaOverviewStore, useMediaStore, useServerStore, useSettingsStore, useLibraryStore } from '@store';
+import { useDialogStore, useMediaOverviewStore, useMediaStore, useServerStore, useSettingsStore, useLibraryStore } from '@store';
 
 const mediaOverviewStore = useMediaOverviewStore();
 const mediaStore = useMediaStore();
 const serverStore = useServerStore();
 const settingsStore = useSettingsStore();
 const libraryStore = useLibraryStore();
+const dialogStore = useDialogStore();
 const props = withDefaults(defineProps<{
 	mediaItem: PlexMediaSlimDTO;
 	active?: boolean;
@@ -182,6 +186,15 @@ const mediaType = computed(() => props.mediaItem?.type ?? PlexMediaType.Unknown)
 
 const hasDetailsAction = computed(() => get(mediaType) === PlexMediaType.TvShow || get(mediaType) === PlexMediaType.Movie);
 
+const comparisonBadgeClickable = computed(() => {
+	return [
+		PlexMediaComparisonState.Missing,
+		PlexMediaComparisonState.HigherQuality,
+		PlexMediaComparisonState.Partial,
+		PlexMediaComparisonState.PartialAndHigherQuality,
+	].includes(props.mediaItem.comparisonState);
+});
+
 const titleSize = computed(() => {
 	const len = props.mediaItem?.title?.length ?? 0;
 	if (len <= 25) return 'h4';
@@ -201,6 +214,11 @@ function onDownload(mediaQualities: PlexMediaQualityDTO[]) {
 	};
 
 	emit('download', [downloadCommand]);
+}
+
+function openComparisonDetails() {
+	if (get(comparisonBadgeClickable))
+		dialogStore.openMediaComparisonDetailsDialog(props.mediaItem);
 }
 
 function loadThumbnail(mediaItem: PlexMediaSlimDTO) {
@@ -257,10 +275,11 @@ onUnmounted(() => {
 
 .comparison-state-button {
   position: absolute;
-  top: 0;
-  left: 0;
+  top: 8px;
+  left: 8px;
   z-index: 9999;
   pointer-events: auto;
+  max-width: calc(100% - 16px);
 }
 
 .media-poster-card {

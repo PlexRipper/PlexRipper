@@ -49,11 +49,14 @@ public class QueueLibrarySyncJobCommandHandler : ICommandHandler<QueueLibrarySyn
 
         var syncBufferCutoff = DateTime.UtcNow.AddHours(-3);
 
-        // Get IDs of items to reset (completed/failed)
+        var unsyncedLibraryIds = libraries.Where(x => x.SyncedAt is null).Select(x => x.Id).ToHashSet();
+
+        // Get IDs of items to reset (completed/failed/cancelled)
         var itemsToReset = existingQueues
             .Where(x =>
                 x.Status is LibrarySyncJobStatus.Failed or LibrarySyncJobStatus.Cancelled
-                || (x.Status == LibrarySyncJobStatus.Completed && x.CompletedAt <= syncBufferCutoff)
+                || (x.Status == LibrarySyncJobStatus.Completed
+                    && (x.CompletedAt <= syncBufferCutoff || unsyncedLibraryIds.Contains(x.PlexLibraryId)))
             )
             .Select(x => x.PlexLibraryId)
             .ToList();

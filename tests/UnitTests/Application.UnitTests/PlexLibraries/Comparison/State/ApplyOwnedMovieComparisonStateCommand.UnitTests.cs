@@ -48,6 +48,49 @@ public class ApplyOwnedMovieComparisonStateCommandUnitTests
         items[0].ComparisonState.ShouldBe(PlexMediaComparisonState.Owned);
     }
 
+    [Test]
+    public async Task ShouldMarkPending_WhenNoCurrentRemoteScopeAndComparisonIsQueued()
+    {
+        // Arrange
+        await SetupDatabase(65, config =>
+        {
+            config.PlexServerCount = 2;
+            config.PlexMovieLibraryCount = 1;
+            config.PlexAccountCount = 1;
+            config.MovieCount = 1;
+        });
+
+        var dbContext = IDbContext;
+        var libraries = await dbContext.PlexLibraries.OrderBy(x => x.Id).ToListAsync(CancellationToken);
+        var remoteLibrary = libraries[0];
+        var ownedLibrary = libraries[1];
+        await SetOwnedOverrideAsync(remoteLibrary.PlexServerId, false);
+        await SetOwnedOverrideAsync(ownedLibrary.PlexServerId, true);
+        await SetLibraryUpdatedAtAsync(remoteLibrary.Id, new DateTime(2026, 7, 22, 10, 0, 0, DateTimeKind.Utc));
+        await SetLibraryUpdatedAtAsync(ownedLibrary.Id, new DateTime(2026, 7, 22, 10, 5, 0, DateTimeKind.Utc));
+
+        var ownedMovie = await GetLibraryMovieAsync(ownedLibrary.Id);
+        dbContext.LibraryComparisonJobQueues.Add(new LibraryComparisonJobQueue
+        {
+            RemotePlexLibraryId = remoteLibrary.Id,
+            OwnedPlexLibraryId = ownedLibrary.Id,
+            MediaType = PlexMediaType.Movie,
+            Priority = 1,
+            Status = LibrarySyncJobStatus.Queued,
+            CreatedAt = DateTime.UtcNow,
+        });
+        await dbContext.SaveChangesNewAsync(CancellationToken);
+
+        var items = new List<PlexMediaSlimDTO> { CreateMovieItem(ownedMovie) };
+
+        // Act
+        var result = await Sut.ExecuteAsync(new ApplyOwnedMovieComparisonStateCommand(items, ownedLibrary.Id), CancellationToken);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        items[0].ComparisonState.ShouldBe(PlexMediaComparisonState.Pending);
+    }
+
     private async Task SetOwnedOverrideAsync(int plexServerId, bool ownedOverride)
     {
         await IDbContext.PlexServers

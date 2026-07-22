@@ -78,7 +78,15 @@ public class ApplyOwnedMovieComparisonStateCommandHandler
             .ToHashSet();
 
         if (currentRemoteLibraryIds.Count == 0)
+        {
+            if (await HasPendingComparisonAsync(command.OwnedLibraryId, remoteLibraries.Keys.ToHashSet(), ct))
+            {
+                for (var i = 0; i < items.Count; i++)
+                    items[i] = items[i] with { ComparisonState = PlexMediaComparisonState.Pending };
+            }
+
             return Result.Ok();
+        }
 
         var itemIds = items.Select(x => x.Id).ToHashSet();
 
@@ -106,4 +114,15 @@ public class ApplyOwnedMovieComparisonStateCommandHandler
 
         return Result.Ok();
     }
+
+    private async Task<bool> HasPendingComparisonAsync(
+        int ownedLibraryId,
+        HashSet<int> remoteLibraryIds,
+        CancellationToken ct) =>
+        await _dbContext.LibraryComparisonJobQueues
+            .AnyAsync(x =>
+                x.OwnedPlexLibraryId == ownedLibraryId
+                && x.MediaType == PlexMediaType.Movie
+                && remoteLibraryIds.Contains(x.RemotePlexLibraryId)
+                && (x.Status == LibrarySyncJobStatus.Queued || x.Status == LibrarySyncJobStatus.Processing), ct);
 }

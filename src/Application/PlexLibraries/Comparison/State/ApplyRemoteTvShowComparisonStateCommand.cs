@@ -78,7 +78,15 @@ public class ApplyRemoteTvShowComparisonStateCommandHandler
             .ToHashSet();
 
         if (currentOwnedLibraryIds.Count == 0)
+        {
+            if (await HasPendingComparisonAsync(command.RemoteLibraryId, ownedLibraries.Keys.ToHashSet(), ct))
+            {
+                for (var i = 0; i < items.Count; i++)
+                    items[i] = items[i] with { ComparisonState = PlexMediaComparisonState.Pending };
+            }
+
             return Result.Ok();
+        }
 
         var itemIds = items.Select(x => x.Id).ToHashSet();
 
@@ -155,4 +163,15 @@ public class ApplyRemoteTvShowComparisonStateCommandHandler
 
         return Result.Ok();
     }
+
+    private async Task<bool> HasPendingComparisonAsync(
+        int remoteLibraryId,
+        HashSet<int> ownedLibraryIds,
+        CancellationToken ct) =>
+        await _dbContext.LibraryComparisonJobQueues
+            .AnyAsync(x =>
+                x.RemotePlexLibraryId == remoteLibraryId
+                && x.MediaType == PlexMediaType.TvShow
+                && ownedLibraryIds.Contains(x.OwnedPlexLibraryId)
+                && (x.Status == LibrarySyncJobStatus.Queued || x.Status == LibrarySyncJobStatus.Processing), ct);
 }

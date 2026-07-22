@@ -3,7 +3,7 @@ import { reactive, toRefs } from 'vue';
 import { from, type Observable } from 'rxjs';
 import { of } from 'rxjs';
 import { map, take, catchError } from 'rxjs/operators';
-import type { PlexMediaType, PlexMediaDTO, BaseResultDTO } from '@dto';
+import type { PlexMediaComparisonDetailsDTO, PlexMediaType, PlexMediaDTO, BaseResultDTO } from '@dto';
 import { StoreNames, type ISetupResult } from '@interfaces';
 import { plexMediaApi } from '@api';
 import { cloneDeep } from 'lodash-es';
@@ -35,6 +35,13 @@ export const useMediaStore = defineStore(StoreNames.MediaStore, () => {
 		getMediaDataDetailById(mediaId: number, mediaType: PlexMediaType): Observable<PlexMediaDTO> {
 			return plexMediaApi
 				.getMediaDetailByIdEndpoint(mediaId, {
+					type: mediaType,
+				})
+				.pipe(map((response) => response.value!));
+		},
+		getMediaComparisonDetails(mediaId: number, mediaType: PlexMediaType): Observable<PlexMediaComparisonDetailsDTO> {
+			return plexMediaApi
+				.getMediaComparisonDetailsEndpoint(mediaId, {
 					type: mediaType,
 				})
 				.pipe(map((response) => response.value!));

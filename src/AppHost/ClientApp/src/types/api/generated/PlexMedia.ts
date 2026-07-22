@@ -13,6 +13,7 @@
 import type { RequestParams } from "./http-client";
 
 import type {
+  PlexMediaComparisonDetailsDTO,
   PlexMediaComparisonState,
   PlexMediaDTO,
   PlexMediaSlimDTO,
@@ -66,6 +67,29 @@ export class PlexMedia {
       responseType: "json",
       ...params,
     }).pipe(apiCheckPipe<PlexMediaStatisticsDTO>);
+
+  /**
+   * No description
+   * * @tags Plexmedia
+   * @name GetMediaComparisonDetailsEndpoint
+   * @request GET:/api/PlexMedia/comparison-details/{PlexMediaId}
+   * @secure
+   */
+  getMediaComparisonDetailsEndpoint = (
+    plexMediaId: number,
+    query: {
+      type: PlexMediaType;
+    },
+    params: RequestParams = {},
+  ) =>
+    axiosObservable<PlexMediaComparisonDetailsDTO>({
+      url: `/api/PlexMedia/comparison-details/${plexMediaId}`,
+      method: "GET",
+      params: query,
+      secure: true,
+      responseType: "json",
+      ...params,
+    }).pipe(apiCheckPipe<PlexMediaComparisonDetailsDTO>);
 
   /**
    * No description
@@ -185,6 +209,17 @@ export class PlexMediaPaths {
     size?: number | null;
     sort?: string | null;
   }) => queryString.stringifyUrl({ url: `/api/PlexMedia`, query });
+
+  static getMediaComparisonDetailsEndpoint = (
+    plexMediaId: number,
+    query: {
+      type: PlexMediaType;
+    },
+  ) =>
+    queryString.stringifyUrl({
+      url: `/api/PlexMedia/comparison-details/${plexMediaId}`,
+      query,
+    });
 
   static getMediaDetailByIdEndpoint = (
     plexMediaId: number,

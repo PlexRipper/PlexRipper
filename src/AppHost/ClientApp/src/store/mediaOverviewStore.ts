@@ -264,6 +264,13 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 				return of(null);
 			}
 
+			const mediaType = get(getters.getMediaType);
+			if (state.libraryId > 0 && mediaType === PlexMediaType.None) {
+				return libraryStore.refreshLibrary(state.libraryId).pipe(
+					switchMap((library) => library ? actions.requestMediaPage(page, size) : of(null)),
+				);
+			}
+
 			pendingPages.add(page);
 			return plexMediaApi.getAllMediaByTypeEndpoint({
 				q: state.filterQuery,
@@ -275,7 +282,7 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 				qualityId: state.metadata.qualityId > 0 ? state.metadata.qualityId : undefined,
 				comparisonState: state.metadata.comparisonState ?? undefined,
 				roleId: state.metadata.roleId > 0 ? state.metadata.roleId : undefined,
-				mediaType: get(getters.getMediaType),
+				mediaType,
 				plexLibraryId: state.libraryId > 0 ? state.libraryId : undefined,
 				filterOwnedMedia: settingsStore.generalSettings.hideMediaFromOwnedServers,
 				filterOfflineMedia: settingsStore.generalSettings.hideMediaFromOfflineServers,

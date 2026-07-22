@@ -15,6 +15,7 @@
 				<q-item
 					v-for="(item, index) in menuItems"
 					:key="index"
+					:data-cy="`media-filter-menu-category-${item.type}`"
 					clickable
 					@click="onMenuOpen(item.type)">
 					<q-item-section>{{ item.text }}</q-item-section>

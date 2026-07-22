@@ -25,6 +25,23 @@ export function setupMockPlexMediaEndpoints(
 		});
 
 		for (const mediaItem of mediaList) {
+			cy.intercept(
+				'GET',
+				PlexMediaPaths.getMediaComparisonDetailsEndpoint(mediaItem.id, {
+					type: library.type,
+				}),
+				{
+					statusCode: 200,
+					body: generateResultDTO({
+						plexMediaId: mediaItem.id,
+						type: mediaItem.type,
+						state: mediaItem.comparisonState,
+						rows: [],
+					}),
+					...headers,
+				},
+			);
+
 			if (mediaItem.type === PlexMediaType.TvShow) {
 				cy.intercept(
 					'GET',
@@ -62,7 +79,10 @@ export function setupMockPlexMediaEndpoints(
 
 		const library = this.plexLibraries.find((x) => x.id === requestedLibraryId);
 		const mediaData = this.mediaData.find((x) => x.libraryId === requestedLibraryId);
-		const allLibraryMedia = [...(mediaData?.media ?? [])]
+		const sourceMedia = requestedLibraryId === 0
+			? this.mediaData.flatMap((x) => x.media)
+			: (mediaData?.media ?? []);
+		const allLibraryMedia = [...sourceMedia]
 			.filter((item) => requestedMediaType === PlexMediaType.None || item.type === requestedMediaType)
 			.sort((a, b) => a.sortIndex - b.sortIndex);
 
@@ -109,7 +129,7 @@ export function setupMockPlexMediaEndpoints(
 			tvShowCount: requestedMediaType === PlexMediaType.TvShow ? pagedMediaList.length : 0,
 		};
 
-		if (!library || !mediaData) {
+		if (requestedLibraryId !== 0 && (!library || !mediaData)) {
 			req.reply({
 				statusCode: 200,
 				body: generateResultDTO({ ...response, mediaList: [], mediaCount: 0, totalCount: 0 }),

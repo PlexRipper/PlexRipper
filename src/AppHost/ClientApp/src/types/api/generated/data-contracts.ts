@@ -889,6 +889,35 @@ export interface PlexLibraryDTO {
   uuid: string;
 }
 
+export interface PlexMediaComparisonDetailsDTO {
+  /** @format int32 */
+  plexMediaId: number;
+  rows: PlexMediaComparisonDetailsRowDTO[];
+  state: PlexMediaComparisonState;
+  type: PlexMediaType;
+}
+
+export interface PlexMediaComparisonDetailsRowDTO {
+  /** @format int32 */
+  id: number;
+  isActionable: boolean;
+  /** @format int32 */
+  level: number;
+  ownedLibraryTitle: string;
+  ownedLocation: string;
+  ownedQuality?: VideoQuality | null;
+  /** @format int32 */
+  parentId?: number | null;
+  /** @format int32 */
+  plexMediaId: number;
+  remoteLibraryTitle: string;
+  remoteLocation: string;
+  remoteQuality?: VideoQuality | null;
+  state: PlexMediaComparisonState;
+  title: string;
+  type: PlexMediaType;
+}
+
 export enum PlexMediaComparisonMatchType {
   None = "None",
   TmdbGuid = "TmdbGuid",
@@ -1500,6 +1529,15 @@ export interface ResultDTOOfPlexLibraryDTO {
   statusCode: number;
   successes: SuccessDTO[];
   value?: PlexLibraryDTO | null;
+}
+
+export interface ResultDTOOfPlexMediaComparisonDetailsDTO {
+  errors: ErrorDTO[];
+  isSuccess: boolean;
+  /** @format int32 */
+  statusCode: number;
+  successes: SuccessDTO[];
+  value?: PlexMediaComparisonDetailsDTO | null;
 }
 
 export interface ResultDTOOfPlexMediaDTO {

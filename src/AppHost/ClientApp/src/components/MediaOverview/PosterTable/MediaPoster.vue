@@ -44,16 +44,6 @@
 							</div>
 						</div>
 
-						<!-- Comparison State Button (always visible, rendered outside image element) -->
-						<MediaComparisonStateButton
-							class="comparison-state-button"
-							:comparison-state="mediaItem.comparisonState"
-							show-tooltip
-							dense
-							:clickable="comparisonBadgeClickable"
-							:cy="`comparison-chip-${mediaItem.comparisonState}`"
-							@click="openComparisonDetails" />
-
 						<!-- Hover overlay (always rendered, positioned absolutely over image/fallback) -->
 						<div class="media-poster--overlay white--text">
 							<div class="media-poster--content">
@@ -108,6 +98,16 @@
 							</div>
 						</div>
 					</template>
+
+					<!-- Comparison State Button (always visible, rendered outside image element) -->
+					<MediaComparisonStateButton
+						class="comparison-state-button"
+						:comparison-state="mediaItem.comparisonState"
+						show-tooltip
+						dense
+						:clickable="comparisonBadgeClickable"
+						:cy="`comparison-chip-${mediaItem.comparisonState}`"
+						@click="openComparisonDetails" />
 				</QGlowContainer>
 
 				<div

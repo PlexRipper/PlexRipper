@@ -46,10 +46,27 @@ public class GetMetadataFilter : Endpoint<GetMetadataFilterRequest, PlexMediaFil
 
         if (req.PlexLibraryId > 0)
         {
-            var plexLibrary = await _dbContext.PlexLibraries.GetAsync(req.PlexLibraryId, ct);
+            var plexLibrary = await _dbContext.PlexLibraries
+                .IgnoreQueryFilters()
+                .GetAsync(req.PlexLibraryId, ct);
             if (plexLibrary is null)
             {
                 await Send.FluentResult(ResultExtensions.EntityNotFound(nameof(PlexLibrary), req.PlexLibraryId), ct);
+                return;
+            }
+
+            // A disabled library has no browsable media. Return an empty filter
+            // response so the frontend can show the disabled-library alert instead
+            // of treating this as a server error.
+            if (!plexLibrary.IsEnabled)
+            {
+                await Send.FluentResult(Result.Ok(new PlexMediaFilterMetadataDTO
+                {
+                    Roles = [],
+                    Countries = [],
+                    Genres = [],
+                    Qualities = [],
+                }), ct);
                 return;
             }
 

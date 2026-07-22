@@ -43,7 +43,9 @@ public class GetPlexLibraryByIdEndpoint : Endpoint<GetPlexLibraryByIdEndpointReq
     {
         _log.Here().DebugApiCall(HttpContext, req);
 
-        var plexLibrary = await _dbContext.PlexLibraries.GetAsync(req.PlexLibraryId, ct);
+        var plexLibrary = await _dbContext.PlexLibraries
+            .IgnoreQueryFilters()
+            .GetAsync(req.PlexLibraryId, ct);
         if (plexLibrary is null)
         {
             await Send.FluentResult(ResultExtensions.EntityNotFound(nameof(plexLibrary), req.PlexLibraryId), ct);

@@ -81,7 +81,7 @@
 								</div>
 
 								<div
-									:class="['media-poster--actions', mediaType === PlexMediaType.TvShow ? 'media-poster--actions-around' : 'media-poster--actions-center']">
+									:class="['media-poster--actions', hasDetailsAction ? 'media-poster--actions-around' : 'media-poster--actions-center']">
 									<BaseButton
 										icon="mdi-download"
 										size="xl"
@@ -89,7 +89,7 @@
 										:outline="false"
 										@click="onDownload([])" />
 									<BaseButton
-										v-if="mediaType === PlexMediaType.TvShow"
+										v-if="hasDetailsAction"
 										icon="mdi-magnify"
 										:outline="false"
 										size="xl"
@@ -152,8 +152,6 @@ const mediaOverviewStore = useMediaOverviewStore();
 const mediaStore = useMediaStore();
 const serverStore = useServerStore();
 const settingsStore = useSettingsStore();
-const { t } = useI18n();
-
 const props = withDefaults(defineProps<{
 	mediaItem: PlexMediaSlimDTO;
 	active?: boolean;
@@ -174,6 +172,8 @@ const thumbHeight = 300;
 let currentSubscription: Subscription | null = null;
 
 const mediaType = computed(() => props.mediaItem?.type ?? PlexMediaType.Unknown);
+
+const hasDetailsAction = computed(() => get(mediaType) === PlexMediaType.TvShow || get(mediaType) === PlexMediaType.Movie);
 
 function onDownload(mediaQualities: PlexMediaQualityDTO[]) {
 	const downloadCommand: DownloadMediaDTO = {

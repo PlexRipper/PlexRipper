@@ -47,7 +47,8 @@
             "media-count": "{seasonCount} Sezon - {episodeCount} Odcinków",
             "media-count-label": "Liczba mediów:",
             "summary": "Podsumowanie:",
-            "one-movie-count": "1 Film"
+            "one-movie-count": "1 Film",
+            "movie-file-count": "{movieFileCount} pliki filmowe"
         },
         "directory-browser": {
             "path": "Ścieżka:",

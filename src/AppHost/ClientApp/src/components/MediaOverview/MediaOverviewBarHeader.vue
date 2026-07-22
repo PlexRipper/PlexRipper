@@ -93,9 +93,10 @@ const { t } = useI18n();
 
 const mediaMetaData = computed(() => {
 	if (props.mediaDetailItem) {
+		const movieFileCount = props.mediaDetailItem.mediaData.length || props.mediaDetailItem.qualities.length || 1;
 		return {
-			movieCount: 0,
-			tvShowCount: 1,
+			movieCount: props.mediaDetailItem.type === PlexMediaType.Movie ? movieFileCount : 0,
+			tvShowCount: props.mediaDetailItem.type === PlexMediaType.TvShow ? 1 : 0,
 			seasonCount: props.mediaDetailItem.childCount,
 			episodeCount: props.mediaDetailItem.grandChildCount,
 			fileSize: props.mediaDetailItem.mediaSize,
@@ -111,7 +112,7 @@ const mediaMetaData = computed(() => {
 	};
 });
 
-const hasMedia = computed(() => mediaOverviewStore.totalCount > 0);
+const hasMedia = computed(() => !!props.mediaDetailItem || mediaOverviewStore.totalCount > 0);
 
 function formatted({ movieCount, tvShowCount, seasonCount, episodeCount, fileSize }: {
 	movieCount: number;

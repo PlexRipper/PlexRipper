@@ -95,7 +95,7 @@
 import type { QTableProps } from 'quasar';
 import Convert from '@class/Convert';
 import { ButtonType } from '@enums';
-import type { PlexMediaSlimDTO } from '@dto';
+import type { DownloadMediaDTO, PlexMediaSlimDTO } from '@dto';
 import type { ISelection } from '@interfaces';
 import { getMediaTableColumns } from '@composables/mediaTableColumns';
 import {
@@ -111,6 +111,7 @@ const router = useRouter();
 const props = defineProps<{
 	rows: PlexMediaSlimDTO[];
 	selection: ISelection | null;
+	downloadMediaFactory?: (row: PlexMediaSlimDTO) => DownloadMediaDTO[];
 }>();
 
 const emit = defineEmits<{
@@ -144,7 +145,7 @@ const qTableProps = computed((): QTableProps => {
 function onRowAction(row: PlexMediaSlimDTO, action: IMediaOverviewCommands) {
 	switch (action.command) {
 		case 'download':
-			sendMediaOverviewDownloadCommand(toDownloadMedia(row));
+			sendMediaOverviewDownloadCommand(props.downloadMediaFactory?.(row) ?? toDownloadMedia(row));
 			break;
 		case 'open-details':
 			router.push({

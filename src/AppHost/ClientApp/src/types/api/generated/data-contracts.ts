@@ -960,6 +960,15 @@ export interface PlexMediaDataDTO {
   audioCodec: string;
   /** @format int64 */
   duration: number;
+  fileName: string;
+  /** @format int32 */
+  id: number;
+  /** @format int32 */
+  plexApiMediaId: number;
+  /** @format int32 */
+  plexApiPartId: number;
+  /** @format int64 */
+  size: number;
   videoCodec: string;
   videoResolution: VideoQuality;
 }

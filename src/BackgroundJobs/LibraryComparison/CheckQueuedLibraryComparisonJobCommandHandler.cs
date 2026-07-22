@@ -48,6 +48,12 @@ public class CheckQueuedLibraryComparisonJobCommandHandler
         var jobKey = PlexLibraryComparisonJob.GetJobKey();
         if (await _scheduler.CheckExists(jobKey, cancellationToken))
         {
+            var isAlreadyRunning = (await _scheduler.GetCurrentlyExecutingJobs(cancellationToken))
+                .Any(x => x.JobDetail.Key.Equals(jobKey));
+
+            if (isAlreadyRunning)
+                return Result.Ok();
+
             await _scheduler.TriggerJob(jobKey, cancellationToken);
             return Result.Ok();
         }

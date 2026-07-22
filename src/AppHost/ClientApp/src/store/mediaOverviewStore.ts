@@ -137,6 +137,36 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 			cancelSubject$.next();
 			state.loading = false;
 		},
+		clearLibraryMediaData(libraryId: number): void {
+			Log.debug('Clearing media overview data for disabled library', { libraryId });
+			actions.cancelPendingRequests();
+			clearCacheRetryTimer();
+			mediaPages.clear();
+			pendingPages.clear();
+			state.libraryId = libraryId;
+			state.totalCount = 0;
+			state.itemsLength = 0;
+			state.queryHash = '';
+			state.selection = cloneDeep(defaultState.selection);
+			state.downloadButtonVisible = false;
+			state.lastMediaItemViewed = null;
+			state.navLoading = false;
+			state.filterMetadataLoading = false;
+			state.isDetailView = false;
+			state.allMovieCount = 0;
+			state.allTvShowCount = 0;
+			state.allSeasonCount = 0;
+			state.allEpisodeCount = 0;
+			state.allFileSize = 0;
+			state.metadataList = cloneDeep(defaultState.metadataList);
+			state.availableRoleIds = [];
+			state.availableCountryIds = [];
+			state.availableGenreIds = [];
+			state.availableQualityIds = [];
+			state.mediaPagesVersion++;
+			state.serverError = false;
+			state.cacheRetrySeconds = 0;
+		},
 		initializeLibrary(libraryId: number): Observable<PlexMediaStatisticsDTO | null> {
 			// Cancel any in-flight requests first
 			actions.cancelPendingRequests();
@@ -159,7 +189,7 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 			).pipe(
 				switchMap(() => {
 					const library = libraryStore.getLibrary(state.libraryId);
-					if (library && !library.isEnabled) {
+					if (library && (!library.isEnabled || library.syncedAt === null)) {
 						state.loading = false;
 						return of(null);
 					}

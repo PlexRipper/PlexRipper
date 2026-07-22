@@ -14,7 +14,7 @@ import {
 import { StoreNames, type ISetupResult } from '@interfaces';
 import { plexLibraryApi } from '@api';
 import { RefreshDataType } from '@dto';
-import { useBackgroundJobsStore, useServerStore, useSettingsStore, useSignalrStore } from '@store';
+import { useBackgroundJobsStore, useMediaOverviewStore, useServerStore, useSettingsStore, useSignalrStore } from '@store';
 import { cloneDeep } from 'lodash-es';
 import Log from 'consola';
 
@@ -119,8 +119,26 @@ export const useLibraryStore = defineStore(StoreNames.LibraryStore, () => {
 			return plexLibraryApi.setLibraryEnabledEndpoint(libraryId, { isEnabled }).pipe(
 				switchMap((response) => {
 					if (response.isSuccess && response.value) {
+						const mediaOverviewStore = useMediaOverviewStore();
 						actions.updateLibrary(response.value);
-						return actions.refreshLibrary(response.value.id);
+
+						// When disabling a library, clear the media overview so the
+						// disabled-library alert shows immediately without requiring
+						// a page refresh.
+						if (!isEnabled) {
+							mediaOverviewStore.clearLibraryMediaData(response.value.id);
+						}
+
+						return actions.refreshLibrary(response.value.id).pipe(
+							switchMap((library) => actions.refreshLibrarySyncStatus().pipe(map(() => library))),
+							switchMap((library) => {
+								if (isEnabled && library && mediaOverviewStore.libraryId === library.id && !getters.getIsLibrarySyncing(library.id)) {
+									return mediaOverviewStore.initializeLibrary(library.id).pipe(map(() => library));
+								}
+
+								return of(library);
+							}),
+						);
 					}
 					return of(null);
 				}),
@@ -208,7 +226,8 @@ export const useLibraryStore = defineStore(StoreNames.LibraryStore, () => {
 			return state.progress.find((x) => x.plexLibraryId === libraryId) ?? null;
 		},
 		getIsLibrarySyncing: (libraryId: number): boolean => {
-			return state.syncQueues.some((x) => x.plexLibraryId === libraryId && x.status == LibrarySyncJobStatus.Processing);
+			return state.syncQueues.some((x) =>
+				x.plexLibraryId === libraryId && [LibrarySyncJobStatus.Queued, LibrarySyncJobStatus.Processing].includes(x.status));
 		},
 		getLibrarySyncQueueGrouped: (): ILibrarySyncProgress[] => {
 			return state.syncQueues.reduce<ILibrarySyncProgress[]>((acc, queue) => {

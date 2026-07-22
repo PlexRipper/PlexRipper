@@ -45,14 +45,11 @@
 						</div>
 
 						<!-- Comparison State Button (always visible, rendered outside image element) -->
-						<IconButton
-							v-if="comparisonBadge"
+						<MediaComparisonStateButton
 							class="comparison-state-button"
-							:color="comparisonBadge.color"
-							size="1rem"
-							:cy="`comparison-chip-${mediaItem.comparisonState}`"
-							:icon="comparisonBadge.icon"
-							:tooltip-text="comparisonBadge.label" />
+							:comparison-state="mediaItem.comparisonState"
+							show-tooltip
+							:cy="`comparison-chip-${mediaItem.comparisonState}`" />
 
 						<!-- Hover overlay (always rendered, positioned absolutely over image/fallback) -->
 						<div class="media-poster--overlay white--text">
@@ -147,7 +144,7 @@
 import { get, set } from '@vueuse/core';
 import type { Subscription } from 'rxjs';
 import { PlexMediaType } from '@dto';
-import type { DownloadMediaDTO, PlexMediaComparisonState, PlexMediaQualityDTO, PlexMediaSlimDTO } from '@dto';
+import type { DownloadMediaDTO, PlexMediaQualityDTO, PlexMediaSlimDTO } from '@dto';
 import { MediaSortField } from '@enums';
 import { useMediaOverviewStore, useMediaStore, useServerStore, useSettingsStore } from '@store';
 
@@ -177,12 +174,6 @@ const thumbHeight = 300;
 let currentSubscription: Subscription | null = null;
 
 const mediaType = computed(() => props.mediaItem?.type ?? PlexMediaType.Unknown);
-
-const { getComparisonStateBadge } = useComparisonStateBadge();
-
-const comparisonBadge = computed(() =>
-	getComparisonStateBadge(props.mediaItem.comparisonState as PlexMediaComparisonState | number),
-);
 
 function onDownload(mediaQualities: PlexMediaQualityDTO[]) {
 	const downloadCommand: DownloadMediaDTO = {

@@ -93,7 +93,17 @@ Prefer Reaparr-specific frontend skills over generic Vue/Nuxt/Pinia skills when 
 ### State and Stores
 
 - Pinia is the default place for frontend state and business-facing UI orchestration.
-- Import stores explicitly from `@store`; do not rely on store auto-imports.
+- Import Reaparr stores explicitly from `@store`; do not rely on store auto-imports.
+- Never import Reaparr stores from `#imports`. Nuxt auto-imports are acceptable for framework composables/components, but store imports must stay explicit so they do not trigger Nuxt imports-plugin warnings.
+
+```ts
+// ✅ Correct
+import { useMediaStore, useSettingsStore } from '@store'
+
+// ❌ Wrong
+import { useMediaStore, useSettingsStore } from '#imports'
+```
+
 - Destructure store refs/actions according to existing store conventions.
 - Do not wrap store state in redundant local `computed` values.
 - Keep async flows deterministic and testable.
@@ -193,6 +203,7 @@ Do not claim success unless WebStorm MCP diagnostics/indexing was used when appl
 - Falling back to filesystem tools after one WebStorm MCP hiccup instead of retrying WebStorm MCP and trying narrower WebStorm tools.
 - Running package builds as the first way to discover errors instead of using WebStorm MCP intelligence/indexing.
 - Importing Vue, Nuxt, Quasar, PrimeVue, VueUse, components, or composables that Nuxt already auto-imports.
+- Importing Reaparr stores from `#imports` instead of `@store`.
 - Accessing refs with `.value` in script blocks instead of `get()`/`set()`.
 - Adding `console.*` logging instead of `consola`.
 - Placing orchestration-heavy logic in components instead of Pinia stores.

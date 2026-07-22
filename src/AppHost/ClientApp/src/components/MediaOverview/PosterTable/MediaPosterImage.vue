@@ -59,7 +59,7 @@ import { set } from '@vueuse/core';
 import type { Subscription } from 'rxjs';
 import type { PlexMediaSlimDTO } from '@dto';
 import type { IMediaActionEmits } from '@interfaces';
-import { useSettingsStore, useMediaStore } from '#imports';
+import { useSettingsStore, useMediaStore } from '@store';
 
 const settingsStore = useSettingsStore();
 const mediaStore = useMediaStore();

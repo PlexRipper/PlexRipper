@@ -27,7 +27,6 @@ WebStorm MCP is mandatory for frontend work. All frontend file operations, searc
 - `webstorm-official-mcp_*`
 - `webstorm-index-mcp_*`
 - `webstorm-index_ide_*`
-- `webstorm-bun-scripts:*` for running frontend `package.json` scripts; do not run those scripts through terminal commands yourself
 
 Never use Rider MCP tools for frontend work under `src/AppHost/ClientApp/` unless WebStorm MCP is unavailable after retry, health, and quarantine checks.
 
@@ -152,8 +151,7 @@ Do not introduce hand-rolled handlers for common patterns unless the existing li
 7. Keep behavior deterministic, especially in tests and RxJS flows.
 8. Re-read changed files after edits to confirm the intended changes landed.
 9. Use WebStorm MCP intelligence/indexing to find errors that need fixing before claiming completion. Do not run a package build as the first error-discovery mechanism.
-10. Run the smallest relevant package-script verification through the `webstorm-bun-scripts` MCP server when behavior changed.
-11. For user-visible frontend implementation changes, verify the behavior in a browser with Chrome DevTools MCP or Playwright MCP before claiming completion.
+10. For user-visible frontend implementation changes, verify the behavior in a browser with Chrome DevTools MCP or Playwright MCP before claiming completion.
 
 ## Browser Verification
 
@@ -170,31 +168,13 @@ Browser verification should be targeted and proportional:
 
 Pure skill/documentation-only changes do not require browser verification.
 
-## Package Commands
-
-Run frontend `package.json` scripts through the `webstorm-bun-scripts` MCP server. Do not run package scripts yourself with terminal commands such as `bun run ...`, `npm run ...`, `yarn ...`, or `pnpm ...`.
-
-Use the exact MCP tool exposed for the script name, for example:
-
-| Package script | MCP tool |
-| --- | --- |
-| `lint` | `webstorm-bun-scripts:lint` |
-| `typecheck` | `webstorm-bun-scripts:typecheck` |
-| `unit-test` | `webstorm-bun-scripts:unit-test` |
-| `generate-ts` | `webstorm-bun-scripts:generate-ts` |
-| `cypress:ci` | `webstorm-bun-scripts:cypress_ci` |
-| `cypress:e2e` | `webstorm-bun-scripts:cypress_e2e` |
-
-Before adding or relying on a script, inspect `src/AppHost/ClientApp/package.json`; script names may change. If the required script is not exposed by `webstorm-bun-scripts`, check MCP server health/quarantine and report the missing tool instead of falling back to a terminal command unless the user explicitly approves that fallback.
-
 ## Verification Gates
 
 Required error-checking flow:
 1. Run WebStorm MCP diagnostics/file problems/inspections for each changed frontend file when available.
 2. If diagnostics are incomplete or fail, retry WebStorm MCP and use narrower or adjacent indexed tools.
 3. Fix all relevant WebStorm-reported errors.
-4. Only after WebStorm MCP reports the changed files are clean, run targeted package-script verification through `webstorm-bun-scripts` MCP when the change requires behavioral verification.
-5. For user-visible frontend implementation changes, perform targeted browser verification with Chrome DevTools MCP or Playwright MCP and report the evidence.
+4. For user-visible frontend implementation changes, perform targeted browser verification with Chrome DevTools MCP or Playwright MCP and report the evidence.
 
 Test routing:
 - Component/page/composable changes: WebStorm MCP diagnostics first, then targeted Vitest tests when available; otherwise lint/typecheck or explain the missing targeted verifier.
@@ -223,5 +203,4 @@ Do not claim success unless WebStorm MCP diagnostics/indexing was used when appl
 - Omitting stable `data-cy` hooks for Cypress-relevant UI.
 - Weakening tests or assertions to force green.
 - Running backend package managers or dotnet commands for frontend-only work.
-- Running frontend package scripts through terminal commands instead of the `webstorm-bun-scripts` MCP server.
 - Claiming a user-visible frontend implementation is complete without targeted Chrome DevTools MCP or Playwright MCP verification, unless browser verification was not applicable or could not be run and that limitation is reported.

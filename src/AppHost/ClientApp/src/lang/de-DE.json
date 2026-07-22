@@ -204,7 +204,8 @@
                 "added-at": "Hinzugefügt am",
                 "updated-at": "Aktualisiert am",
                 "actions": "Aktionen",
-                "quality": "Qualität"
+                "quality": "Qualität",
+                "comparison-state": "Vergleichsstatus"
             }
         },
         "server-download-status": {

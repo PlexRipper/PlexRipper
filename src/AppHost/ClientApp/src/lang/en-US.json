@@ -204,7 +204,8 @@
         "added-at": "Added At",
         "updated-at": "Updated At",
         "actions": "Actions",
-        "quality": "Quality"
+        "quality": "Quality",
+        "comparison-state": "Comparison state"
       }
     },
     "server-download-status": {

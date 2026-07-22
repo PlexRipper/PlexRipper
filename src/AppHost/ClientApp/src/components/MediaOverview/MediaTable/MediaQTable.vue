@@ -21,6 +21,20 @@
 				<MediaQuality :qualities="row.qualities" />
 			</q-td>
 		</template>
+		<!-- Comparison State -->
+		<template #body-cell-comparisonState="{ row }: { row: PlexMediaSlimDTO }">
+			<q-td class="text-center">
+				<q-chip
+					dense
+					:outline="true"
+					:color="getComparisonStateBadge(row.comparisonState).color"
+					:text-color="getComparisonStateBadge(row.comparisonState).color === 'default' ? undefined : 'white'"
+					:icon="getComparisonStateBadge(row.comparisonState).icon"
+					:data-cy="`episode-comparison-chip-${row.comparisonState}`">
+					{{ getComparisonStateBadge(row.comparisonState).label }}
+				</q-chip>
+			</q-td>
+		</template>
 		<!-- Media Year -->
 		<template #body-cell-year="{ row }">
 			<q-td class="text-center">
@@ -91,6 +105,7 @@ import { toDownloadMedia } from '@composables/conversion';
 import QDateTime from '@components/Common/QDateTime.vue';
 
 const mediaTableColumns = getMediaTableColumns();
+const { getComparisonStateBadge } = useComparisonStateBadge();
 const router = useRouter();
 
 const props = defineProps<{

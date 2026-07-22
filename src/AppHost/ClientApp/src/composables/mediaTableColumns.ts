@@ -23,6 +23,12 @@ export const getMediaTableColumns = (): QTreeViewTableHeader[] => {
 			sortable: false,
 		},
 		{
+			label: t('components.media-list.columns.comparison-state'),
+			field: 'comparisonState',
+			align: 'center',
+			sortable: true,
+		},
+		{
 			label: t('components.media-list.columns.year'),
 			field: 'year',
 			align: 'center',

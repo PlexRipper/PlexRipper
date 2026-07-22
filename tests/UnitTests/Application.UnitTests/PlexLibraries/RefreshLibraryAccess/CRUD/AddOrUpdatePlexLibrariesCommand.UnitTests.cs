@@ -647,6 +647,56 @@ public class AddOrUpdatePlexLibrariesCommandUnitTests : BaseUnitTest<AddOrUpdate
         historyEvents.Single().State.ShouldBe(PlexAccessState.Revoked);
     }
 
+    [Test]
+    public async Task ShouldDeduplicateIncomingLibrariesByServerAndUuid_WhenPlexReturnsDuplicateRows()
+    {
+        // Arrange
+        var seed = await SetupDatabase(
+            32,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexAccountCount = 1;
+            }
+        );
+
+        var dbContext = IDbContext;
+        var plexAccount = dbContext.PlexAccounts.FirstOrDefault();
+        plexAccount.ShouldNotBeNull();
+        var plexServer = dbContext.PlexServers.Single();
+        var plexLibrary = FakeData.GetPlexLibrary(seed).Generate();
+        plexLibrary.PlexServerId = plexServer.Id;
+        plexLibrary.Uuid = "duplicate-library-uuid";
+        var duplicateLibrary = FakeData.GetPlexLibrary(seed).Generate();
+        duplicateLibrary.PlexServerId = plexServer.Id;
+        duplicateLibrary.Uuid = plexLibrary.Uuid;
+        duplicateLibrary.Title = "Duplicate payload winner";
+        duplicateLibrary.Key = "duplicate-payload-winner";
+
+        var request = new AddOrUpdatePlexLibrariesCommand
+        {
+            PlexAccountId = plexAccount.Id,
+            PlexLibraries = [plexLibrary, duplicateLibrary],
+        };
+
+        Mock.Mock<ICommandExecutor>()
+            .Setup(x => x.Send(It.IsAny<ICommand<Result>>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result.Ok());
+
+        // Act
+        var result = await Sut.ExecuteAsync(request, CancellationToken);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        var plexLibrariesDb = await dbContext.PlexLibraries.ToListAsync(CancellationToken);
+        plexLibrariesDb.Count.ShouldBe(1);
+        plexLibrariesDb.Single().Uuid.ShouldBe(plexLibrary.Uuid);
+        plexLibrariesDb.Single().Title.ShouldBe(duplicateLibrary.Title);
+        var plexAccountLibrariesDb = await dbContext.PlexAccountLibraries.ToListAsync(CancellationToken);
+        plexAccountLibrariesDb.Count.ShouldBe(1);
+        result.Value.Single().GetGranted.Count.ShouldBe(1);
+    }
+
     private sealed record ExpectedLibraryMetrics(
         long MediaSize,
         int MovieCount,

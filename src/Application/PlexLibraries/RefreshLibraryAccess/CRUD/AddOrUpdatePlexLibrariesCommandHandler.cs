@@ -60,7 +60,13 @@ public class AddOrUpdatePlexLibrariesCommandHandler
 
         var plexServerLibrariesDict = command
             .PlexLibraries.GroupBy(x => x.PlexServerId)
-            .ToDictionary(group => group.Key, group => group.ToList());
+            .ToDictionary(
+                group => group.Key,
+                group => group
+                    .GroupBy(x => x.Uuid)
+                    .Select(x => x.Last())
+                    .ToList()
+            );
 
         foreach (var (_, incomingPlexLibraries) in plexServerLibrariesDict)
         {

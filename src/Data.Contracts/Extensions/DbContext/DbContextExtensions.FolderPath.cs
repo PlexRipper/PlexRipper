@@ -41,32 +41,8 @@ public static partial class DbContextExtensions
         CancellationToken token = default
     )
     {
-        switch (mediaType)
-        {
-            case PlexMediaType.Movie:
-                return (await dbContext.FolderPaths.GetAsync(2, token))!;
-            case PlexMediaType.TvShow:
-            case PlexMediaType.Season:
-            case PlexMediaType.Episode:
-                return (await dbContext.FolderPaths.GetAsync(3, token))!;
-            case PlexMediaType.Music:
-            case PlexMediaType.Album:
-            case PlexMediaType.Song:
-                return (await dbContext.FolderPaths.GetAsync(4, token))!;
-            case PlexMediaType.Photos:
-                return (await dbContext.FolderPaths.GetAsync(5, token))!;
-            case PlexMediaType.OtherVideos:
-                return (await dbContext.FolderPaths.GetAsync(6, token))!;
-            case PlexMediaType.Games:
-                return (await dbContext.FolderPaths.GetAsync(7, token))!;
-            case PlexMediaType.None:
-            case PlexMediaType.Unknown:
-            default:
-                Log.Error(
-                    "Unknown PlexMediaType {PlexMediaType} that could not be used to determine a default path, defaulting to the DownloadPath",
-                    mediaType
-                );
-                return (await dbContext.FolderPaths.GetAsync(1, token))!;
-        }
+        var id = mediaType.ToDefaultDestinationFolderId();
+        // Default folder paths always exist
+        return (await dbContext.FolderPaths.GetAsync(id, token))!;
     }
 }

@@ -80,6 +80,8 @@ public class GetMediaDetailByIdEndpoint : Endpoint<GetMediaDetailByIdEndpointReq
                 return;
             }
 
+            await ApplyTvShowDetailComparisonStateAsync(plexTvShowResult.Value, ct);
+
             await Send.FluentResult(plexTvShowResult, x => x.ToDTO(), ct);
         }
         else
@@ -110,6 +112,186 @@ public class GetMediaDetailByIdEndpoint : Endpoint<GetMediaDetailByIdEndpointReq
         await SetNestedTvShowProperties(plexTvShow, ct);
 
         return Result.Ok(plexTvShow);
+    }
+
+    private async Task ApplyTvShowDetailComparisonStateAsync(PlexTvShow plexTvShow, CancellationToken ct)
+    {
+        var isOwned = await _dbContext.PlexLibraries
+            .WhereIsOwned()
+            .AnyAsync(x => x.Id == plexTvShow.PlexLibraryId, ct);
+
+        if (isOwned)
+            await ApplyOwnedTvShowDetailComparisonStateAsync(plexTvShow, ct);
+        else
+            await ApplyRemoteTvShowDetailComparisonStateAsync(plexTvShow, ct);
+    }
+
+    private async Task ApplyRemoteTvShowDetailComparisonStateAsync(PlexTvShow plexTvShow, CancellationToken ct)
+    {
+        var remoteUpdatedAt = await _dbContext.PlexLibraries
+            .Where(x => x.Id == plexTvShow.PlexLibraryId)
+            .Select(x => x.UpdatedAt)
+            .SingleOrDefaultAsync(ct);
+
+        if (remoteUpdatedAt is null)
+            return;
+
+        var ownedLibraries = await _dbContext.PlexLibraries
+            .WhereIsOwned()
+            .Where(x => x.Type == PlexMediaType.TvShow)
+            .Select(x => new { x.Id, x.UpdatedAt })
+            .ToDictionaryAsync(x => x.Id, x => x.UpdatedAt, ct);
+
+        if (ownedLibraries.Count == 0)
+            return;
+
+        var scopeRows = await _dbContext.PlexComparisonScopes
+            .Where(x =>
+                x.RemotePlexLibraryId == plexTvShow.PlexLibraryId
+                && x.MediaType == PlexMediaType.TvShow
+                && ownedLibraries.Keys.Contains(x.OwnedPlexLibraryId))
+            .ToListAsync(ct);
+
+        var currentOwnedLibraryIds = scopeRows
+            .Where(x =>
+                x.RemoteLibraryUpdatedAt == remoteUpdatedAt
+                && ownedLibraries.TryGetValue(x.OwnedPlexLibraryId, out var ownedUpdatedAt)
+                && x.OwnedLibraryUpdatedAt == ownedUpdatedAt)
+            .Select(x => x.OwnedPlexLibraryId)
+            .ToHashSet();
+
+        if (currentOwnedLibraryIds.Count == 0)
+        {
+            if (await HasPendingRemoteTvShowComparisonAsync(plexTvShow.PlexLibraryId, ownedLibraries.Keys.ToHashSet(), ct))
+                SetEpisodeComparisonState(plexTvShow, PlexMediaComparisonState.Pending);
+
+            return;
+        }
+
+        var episodeIds = plexTvShow.Seasons
+            .SelectMany(x => x.Episodes)
+            .Select(x => x.Id)
+            .ToHashSet();
+
+        var episodeHits = await _dbContext.PlexEpisodeComparisons
+            .Where(x =>
+                x.RemotePlexLibraryId == plexTvShow.PlexLibraryId
+                && currentOwnedLibraryIds.Contains(x.OwnedPlexLibraryId)
+                && episodeIds.Contains(x.RemotePlexMediaId))
+            .Select(x => new { x.RemotePlexMediaId, x.HitState })
+            .ToListAsync(ct);
+
+        var episodeHitLookup = episodeHits
+            .GroupBy(x => x.RemotePlexMediaId)
+            .ToDictionary(x => x.Key, x => x.Select(y => y.HitState).ToList());
+
+        foreach (var episode in plexTvShow.Seasons.SelectMany(x => x.Episodes))
+        {
+            if (!episodeHitLookup.TryGetValue(episode.Id, out var hits))
+            {
+                episode.ComparisonState = PlexMediaComparisonState.Missing;
+                continue;
+            }
+
+            episode.ComparisonState = hits.Contains(PlexMediaComparisonHitState.HigherQuality)
+                ? PlexMediaComparisonState.HigherQuality
+                : PlexMediaComparisonState.Owned;
+        }
+    }
+
+    private async Task ApplyOwnedTvShowDetailComparisonStateAsync(PlexTvShow plexTvShow, CancellationToken ct)
+    {
+        var ownedUpdatedAt = await _dbContext.PlexLibraries
+            .Where(x => x.Id == plexTvShow.PlexLibraryId)
+            .Select(x => x.UpdatedAt)
+            .SingleOrDefaultAsync(ct);
+
+        if (ownedUpdatedAt is null)
+            return;
+
+        var remoteLibraries = await _dbContext.PlexLibraries
+            .WhereIsNotOwned()
+            .Where(x => x.Type == PlexMediaType.TvShow)
+            .Select(x => new { x.Id, x.UpdatedAt })
+            .ToDictionaryAsync(x => x.Id, x => x.UpdatedAt, ct);
+
+        if (remoteLibraries.Count == 0)
+            return;
+
+        var scopeRows = await _dbContext.PlexComparisonScopes
+            .Where(x =>
+                x.OwnedPlexLibraryId == plexTvShow.PlexLibraryId
+                && x.MediaType == PlexMediaType.TvShow
+                && remoteLibraries.Keys.Contains(x.RemotePlexLibraryId))
+            .ToListAsync(ct);
+
+        var currentRemoteLibraryIds = scopeRows
+            .Where(x =>
+                x.OwnedLibraryUpdatedAt == ownedUpdatedAt
+                && remoteLibraries.TryGetValue(x.RemotePlexLibraryId, out var remoteUpdatedAt)
+                && x.RemoteLibraryUpdatedAt == remoteUpdatedAt)
+            .Select(x => x.RemotePlexLibraryId)
+            .ToHashSet();
+
+        if (currentRemoteLibraryIds.Count == 0)
+        {
+            if (await HasPendingOwnedTvShowComparisonAsync(plexTvShow.PlexLibraryId, remoteLibraries.Keys.ToHashSet(), ct))
+                SetEpisodeComparisonState(plexTvShow, PlexMediaComparisonState.Pending);
+
+            return;
+        }
+
+        var episodeIds = plexTvShow.Seasons
+            .SelectMany(x => x.Episodes)
+            .Select(x => x.Id)
+            .ToHashSet();
+
+        var upgradeIds = await _dbContext.PlexEpisodeComparisons
+            .Where(x =>
+                currentRemoteLibraryIds.Contains(x.RemotePlexLibraryId)
+                && x.OwnedPlexLibraryId == plexTvShow.PlexLibraryId
+                && episodeIds.Contains(x.OwnedPlexMediaId)
+                && x.HitState == PlexMediaComparisonHitState.HigherQuality)
+            .Select(x => x.OwnedPlexMediaId)
+            .Distinct()
+            .ToListAsync(ct);
+
+        var upgradeIdSet = upgradeIds.ToHashSet();
+
+        foreach (var episode in plexTvShow.Seasons.SelectMany(x => x.Episodes))
+        {
+            episode.ComparisonState = upgradeIdSet.Contains(episode.Id)
+                ? PlexMediaComparisonState.HigherQuality
+                : PlexMediaComparisonState.Owned;
+        }
+    }
+
+    private async Task<bool> HasPendingRemoteTvShowComparisonAsync(
+        int remoteLibraryId,
+        HashSet<int> ownedLibraryIds,
+        CancellationToken ct) =>
+        await _dbContext.LibraryComparisonJobQueues
+            .AnyAsync(x =>
+                x.RemotePlexLibraryId == remoteLibraryId
+                && x.MediaType == PlexMediaType.TvShow
+                && ownedLibraryIds.Contains(x.OwnedPlexLibraryId)
+                && (x.Status == LibrarySyncJobStatus.Queued || x.Status == LibrarySyncJobStatus.Processing), ct);
+
+    private async Task<bool> HasPendingOwnedTvShowComparisonAsync(
+        int ownedLibraryId,
+        HashSet<int> remoteLibraryIds,
+        CancellationToken ct) =>
+        await _dbContext.LibraryComparisonJobQueues
+            .AnyAsync(x =>
+                x.OwnedPlexLibraryId == ownedLibraryId
+                && x.MediaType == PlexMediaType.TvShow
+                && remoteLibraryIds.Contains(x.RemotePlexLibraryId)
+                && (x.Status == LibrarySyncJobStatus.Queued || x.Status == LibrarySyncJobStatus.Processing), ct);
+
+    private static void SetEpisodeComparisonState(PlexTvShow plexTvShow, PlexMediaComparisonState state)
+    {
+        foreach (var episode in plexTvShow.Seasons.SelectMany(x => x.Episodes))
+            episode.ComparisonState = state;
     }
 
     private async Task SetNestedMovieProperties(PlexMovie plexMovie, CancellationToken ct = default)

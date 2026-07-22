@@ -19,6 +19,7 @@ public static partial class FakeData
             .RuleFor(x => x.Duration, f => f.Random.Int(1000, 3000000))
             .RuleFor(x => x.MediaSize, f => f.Random.Long(1000, 30000000))
             .RuleFor(x => x.Quality, _ => VideoQuality.Unknown)
+            .RuleFor(x => x.ComparisonState, _ => PlexMediaComparisonState.NotCompared)
             .RuleFor(x => x.PlexApiMetaDataKey, f => f.Random.Int(1, 10000))
             .RuleFor(x => x.HasThumb, f => f.Random.Bool())
             .RuleFor(x => x.HasArt, f => f.Random.Bool())

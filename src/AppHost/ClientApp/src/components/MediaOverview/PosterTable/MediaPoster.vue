@@ -34,7 +34,7 @@
 									:value="mediaItem.title"
 									bold="bold"
 									align="center"
-									size="h6"
+									:size="titleSize"
 									class="media-poster--title" />
 								<QText
 									v-if="mediaOverviewStore.allMediaMode"
@@ -59,7 +59,7 @@
 										:value="mediaItem.title"
 										bold="bold"
 										align="center"
-										size="h6"
+										:size="titleSize"
 										class="media-poster--title" />
 									<QText
 										v-if="mediaType === PlexMediaType.TvShow"
@@ -76,8 +76,14 @@
 									<QText
 										v-if="mediaOverviewStore.allMediaMode"
 										align="center"
-										size="subtitle2"
+										size="subtitle1"
 										:value="serverStore.getServerName(mediaItem.plexServerId)" />
+									<QText
+										v-if="mediaOverviewStore.allMediaMode"
+										align="center"
+										size="subtitle2"
+										class="media-poster-library-name"
+										:value="libraryStore.getLibraryName(mediaItem.plexLibraryId)" />
 								</div>
 
 								<div
@@ -146,12 +152,13 @@ import type { Subscription } from 'rxjs';
 import { PlexMediaType } from '@dto';
 import type { DownloadMediaDTO, PlexMediaQualityDTO, PlexMediaSlimDTO } from '@dto';
 import { MediaSortField } from '@enums';
-import { useMediaOverviewStore, useMediaStore, useServerStore, useSettingsStore } from '@store';
+import { useMediaOverviewStore, useMediaStore, useServerStore, useSettingsStore, useLibraryStore } from '@store';
 
 const mediaOverviewStore = useMediaOverviewStore();
 const mediaStore = useMediaStore();
 const serverStore = useServerStore();
 const settingsStore = useSettingsStore();
+const libraryStore = useLibraryStore();
 const props = withDefaults(defineProps<{
 	mediaItem: PlexMediaSlimDTO;
 	active?: boolean;
@@ -174,6 +181,14 @@ let currentSubscription: Subscription | null = null;
 const mediaType = computed(() => props.mediaItem?.type ?? PlexMediaType.Unknown);
 
 const hasDetailsAction = computed(() => get(mediaType) === PlexMediaType.TvShow || get(mediaType) === PlexMediaType.Movie);
+
+const titleSize = computed(() => {
+	const len = props.mediaItem?.title?.length ?? 0;
+	if (len <= 25) return 'h4';
+	if (len <= 50) return 'h5';
+	if (len <= 75) return 'h6';
+	return 'subtitle1';
+});
 
 function onDownload(mediaQualities: PlexMediaQualityDTO[]) {
 	const downloadCommand: DownloadMediaDTO = {
@@ -292,7 +307,7 @@ onUnmounted(() => {
   }
 
   &--section {
-    padding: 16px;
+    padding: 36px 16px 16px 16px;
   }
 
   &--section-compact {
@@ -384,5 +399,10 @@ onUnmounted(() => {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.media-poster-library-name {
+  padding-top: 2px;
+  opacity: 0.7;
 }
 </style>

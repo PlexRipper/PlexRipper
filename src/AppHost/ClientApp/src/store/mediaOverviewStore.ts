@@ -157,14 +157,19 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 					? libraryStore.refreshLibrary(state.libraryId)
 					: of(null),
 			).pipe(
-				switchMap(() =>
-					forkJoin([
+				switchMap(() => {
+					const library = libraryStore.getLibrary(state.libraryId);
+					if (library && !library.isEnabled) {
+						state.loading = false;
+						return of(null);
+					}
+
+					return forkJoin([
 						actions.refreshFilterMetadata(),
 						actions.refreshMetaData(),
 						actions.refreshMediaData(),
-					]),
-				),
-				map(([, , requestMediaResult]) => requestMediaResult),
+					]).pipe(map(([, , requestMediaResult]) => requestMediaResult));
+				}),
 			);
 		},
 		refreshMetaData() {

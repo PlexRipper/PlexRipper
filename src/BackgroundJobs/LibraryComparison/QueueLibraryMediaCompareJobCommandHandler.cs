@@ -19,16 +19,19 @@ public class QueueLibraryMediaCompareJobCommandHandler : ICommandHandler<QueueLi
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
     private readonly ICommandExecutor _commandExecutor;
+    private readonly IMediaQueryCache _mediaQueryCache;
 
     public QueueLibraryMediaCompareJobCommandHandler(
         ILogger log,
         IReaparrDbContext dbContext,
-        ICommandExecutor commandExecutor
+        ICommandExecutor commandExecutor,
+        IMediaQueryCache mediaQueryCache
     )
     {
         _log = log.ForContext<QueueLibraryMediaCompareJobCommandHandler>();
         _dbContext = dbContext;
         _commandExecutor = commandExecutor;
+        _mediaQueryCache = mediaQueryCache;
     }
 
     public async Task<Result> ExecuteAsync(
@@ -46,6 +49,8 @@ public class QueueLibraryMediaCompareJobCommandHandler : ICommandHandler<QueueLi
                     && x.MediaType == mediaType,
                 cancellationToken
             );
+        var shouldInvalidateComparisonState = existingQueueItem is null
+            || existingQueueItem.Status is LibrarySyncJobStatus.Completed or LibrarySyncJobStatus.Failed or LibrarySyncJobStatus.Cancelled;
 
         if (existingQueueItem is null)
         {
@@ -82,6 +87,9 @@ public class QueueLibraryMediaCompareJobCommandHandler : ICommandHandler<QueueLi
                 );
         }
 
+        if (shouldInvalidateComparisonState)
+            await InvalidateComparisonStateAsync(remoteLibraryId, ownedLibraryId, mediaType, cancellationToken);
+
         await _commandExecutor.Send(new CheckQueuedLibraryComparisonJobCommand(), cancellationToken);
 
         _log.Here()
@@ -93,5 +101,30 @@ public class QueueLibraryMediaCompareJobCommandHandler : ICommandHandler<QueueLi
             );
 
         return Result.Ok();
+    }
+
+    private async Task InvalidateComparisonStateAsync(
+        int remoteLibraryId,
+        int ownedLibraryId,
+        PlexMediaType mediaType,
+        CancellationToken cancellationToken
+    )
+    {
+        await _dbContext.PlexComparisonScopes
+            .Where(x =>
+                x.RemotePlexLibraryId == remoteLibraryId
+                && x.OwnedPlexLibraryId == ownedLibraryId
+                && x.MediaType == mediaType
+            )
+            .ExecuteUpdateAsync(
+                x => x.SetProperty(y => y.RemoteLibraryUpdatedAt, (DateTime?)null)
+                    .SetProperty(y => y.OwnedLibraryUpdatedAt, (DateTime?)null),
+                cancellationToken
+            );
+
+        _mediaQueryCache.InvalidateLibraries(
+            [remoteLibraryId, ownedLibraryId],
+            $"Library comparison queued for {mediaType}"
+        );
     }
 }

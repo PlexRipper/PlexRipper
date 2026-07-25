@@ -1,5 +1,3 @@
-using Quartz;
-
 namespace Reaparr.BackgroundJobs;
 
 /// <summary>
@@ -36,36 +34,78 @@ public class CheckQueuedLibraryComparisonJobCommandHandler
         CancellationToken cancellationToken
     )
     {
+        var jobKey = PlexLibraryComparisonJob.GetJobKey();
+        var triggerKey = new TriggerKey($"{jobKey.Name}_trigger", jobKey.Group);
+        
         var hasQueuedItems = await _dbContext.LibraryComparisonJobQueues
             .AnyAsync(x => x.Status == LibrarySyncJobStatus.Queued, cancellationToken);
+        
+        var hasProcessingItems = await _dbContext.LibraryComparisonJobQueues
+            .AnyAsync(x => x.Status == LibrarySyncJobStatus.Processing, cancellationToken);
 
-        if (!hasQueuedItems)
+        if (!hasQueuedItems && !hasProcessingItems)
         {
             _log.Here().Debug("No queued library comparison jobs found");
             return Result.Ok();
         }
 
-        var jobKey = PlexLibraryComparisonJob.GetJobKey();
         if (await _scheduler.CheckExists(jobKey, cancellationToken))
         {
-            var isAlreadyRunning = (await _scheduler.GetCurrentlyExecutingJobs(cancellationToken))
-                .Any(x => x.JobDetail.Key.Equals(jobKey));
-
-            if (isAlreadyRunning)
-                return Result.Ok();
-
-            await _scheduler.TriggerJob(jobKey, cancellationToken);
+            _log.Here().Debug("Library comparison queue worker is already running");
             return Result.Ok();
         }
 
-        var job = JobBuilder.Create<PlexLibraryComparisonJob>().WithIdentity(jobKey).Build();
+        if (hasProcessingItems)
+        {
+            var requeuedCount = await RequeueStaleProcessingItemsAsync(cancellationToken);
+            hasQueuedItems = hasQueuedItems || requeuedCount > 0;
+        }
 
-        var trigger = TriggerBuilder.Create().WithIdentity($"{jobKey.Name}_trigger", jobKey.Group).StartNow().Build();
+        if (!hasQueuedItems)
+        {
+            _log.Here().Debug("No queued library comparison jobs found after processing stale rows");
+            return Result.Ok();
+        }
 
-        await _scheduler.ScheduleJob(job, trigger, cancellationToken);
+        if (await _scheduler.CheckExists(triggerKey, cancellationToken))
+        {
+            _log.Here().Debug("Library comparison queue worker trigger is already scheduled");
+            return Result.Ok();
+        }
 
-        _log.Here().Debug("Scheduled library comparison queue worker");
+        var result = await Result.Try(async Task () =>
+        {
+            var trigger = TriggerBuilder.Create().WithIdentity(triggerKey).ForJob(jobKey).StartNow().Build();
 
-        return Result.Ok();
+            if (await _scheduler.CheckExists(jobKey, CancellationToken.None))
+                await _scheduler.ScheduleJob(trigger, CancellationToken.None);
+            else
+            {
+                var job = JobBuilder.Create<PlexLibraryComparisonJob>().WithIdentity(jobKey).StoreDurably().Build();
+                await _scheduler.ScheduleJob(job, trigger, CancellationToken.None);
+            }
+
+            _log.Here().Debug("Scheduled library comparison queue worker");
+        });
+
+        result.LogIfFailed();
+
+        return result;
+    }
+
+    private async Task<int> RequeueStaleProcessingItemsAsync(CancellationToken cancellationToken)
+    {
+        var requeuedCount = await _dbContext.LibraryComparisonJobQueues
+            .Where(x => x.Status == LibrarySyncJobStatus.Processing)
+            .ExecuteUpdateAsync(
+                x => x.SetProperty(y => y.Status, LibrarySyncJobStatus.Queued)
+                    .SetProperty(y => y.StartedAt, (DateTime?)null)
+                    .SetProperty(y => y.ErrorMessage, (string?)null),
+                cancellationToken
+            );
+
+        _log.Here().Warning("Requeued {Count} stale processing library comparison jobs", requeuedCount);
+
+        return requeuedCount;
     }
 }

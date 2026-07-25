@@ -90,7 +90,10 @@ public class QueueLibraryMediaCompareJobCommandHandler : ICommandHandler<QueueLi
         if (shouldInvalidateComparisonState)
             await InvalidateComparisonStateAsync(remoteLibraryId, ownedLibraryId, mediaType, cancellationToken);
 
-        await _commandExecutor.Send(new CheckQueuedLibraryComparisonJobCommand(), cancellationToken);
+        var checkQueuedResult = await _commandExecutor.Send(new CheckQueuedLibraryComparisonJobCommand(), cancellationToken);
+
+        if (checkQueuedResult.IsFailed)
+            _log.Here().Warning("Failed to wake library comparison queue worker: {Errors}", string.Join(", ", checkQueuedResult.Errors));
 
         _log.Here()
             .Verbose(

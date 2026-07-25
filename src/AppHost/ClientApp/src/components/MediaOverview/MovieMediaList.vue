@@ -46,7 +46,7 @@
 <script setup lang="ts">
 import { get, set } from '@vueuse/core';
 import type { DownloadMediaDTO, PlexMediaDTO, PlexMediaQualityDTO, PlexMediaSlimDTO } from '@dto';
-import { PlexMediaComparisonState, PlexMediaType } from '@dto';
+import { PlexMediaType } from '@dto';
 import type { ISelection } from '@interfaces';
 import { useMediaOverviewStore, useSettingsStore } from '@store';
 import { sendMediaOverviewDownloadCommand, useMediaOverviewBarDownloadCommandBus } from '@composables/event-bus';
@@ -84,14 +84,13 @@ const mediaRows = computed((): PlexMediaSlimDTO[] => {
 		hasThumb: false,
 		plexApiRatingKey: props.mediaItem.plexApiRatingKey,
 		plexApiMetaDataKey: props.mediaItem.plexApiMetaDataKey,
-		comparisonState: props.mediaItem.comparisonState ?? PlexMediaComparisonState.NotCompared,
-		qualities: [
-			{
-				dataId: mediaData.id,
-				mediaDataType: PlexMediaType.Movie,
-				mediaId: props.mediaItem.id,
-				quality: mediaData.videoResolution,
-			} satisfies PlexMediaQualityDTO,
+		comparisonId: props.mediaItem.comparisonId,
+		qualities: [{
+			dataId: mediaData.id,
+			mediaDataType: PlexMediaType.Movie,
+			mediaId: props.mediaItem.id,
+			quality: mediaData.videoResolution,
+		} satisfies PlexMediaQualityDTO,
 		],
 	}));
 });

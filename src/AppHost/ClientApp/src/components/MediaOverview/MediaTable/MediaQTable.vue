@@ -25,7 +25,7 @@
 		<template #body-cell-comparisonState="{ row }: { row: PlexMediaSlimDTO }">
 			<q-td class="text-center">
 				<MediaComparisonStateButton
-					:comparison-state="row.comparisonState"
+					:comparison-state="getPlexMediaComparisonState(row)"
 					show-label
 					show-tooltip
 					dense
@@ -33,7 +33,7 @@
 					outline
 					:round="false"
 					:flat="false"
-					:cy="`episode-comparison-chip-${row.comparisonState}`" />
+					:cy="`episode-comparison-chip-${getPlexMediaComparisonState(row)}`" />
 			</q-td>
 		</template>
 		<!-- Media Year -->
@@ -102,7 +102,7 @@ import {
 	type IMediaOverviewCommands,
 	sendMediaOverviewDownloadCommand,
 } from '@composables/event-bus';
-import { toDownloadMedia } from '@composables/conversion';
+import { getPlexMediaComparisonState, toDownloadMedia } from '@composables/conversion';
 import QDateTime from '@components/Common/QDateTime.vue';
 
 const mediaTableColumns = getMediaTableColumns();

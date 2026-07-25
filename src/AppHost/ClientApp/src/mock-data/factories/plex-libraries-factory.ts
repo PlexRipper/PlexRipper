@@ -37,6 +37,7 @@ export function generatePlexLibrary({
 		outdated: false,
 		plexServerId,
 		seasonCount: 0,
+		isEnabled: true,
 		...partialData,
 	};
 }

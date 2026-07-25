@@ -2,6 +2,7 @@ import { route, headers } from '@fixtures';
 import { generateResultDTO } from '@mock';
 import { PlexMediaPaths } from '@api/api-paths';
 import { PlexMediaComparisonState, PlexMediaType, VideoQuality } from '@dto';
+import { getPlexMediaComparisonStateId } from '@composables';
 
 function openComparisonFilterMenu() {
 	cy.getCy('media-overview-filter-btn').click();
@@ -18,8 +19,8 @@ describe('Comparison poster status UX', () => {
 			isLoggedIn: true,
 		})
 			.then(({ mediaData }) => {
-				mediaData[0]!.media[0]!.comparisonState = PlexMediaComparisonState.HigherQuality;
-				mediaData[1]!.media[0]!.comparisonState = PlexMediaComparisonState.Missing;
+				mediaData[0]!.media[0]!.comparisonId = getPlexMediaComparisonStateId(PlexMediaComparisonState.HigherQuality);
+				mediaData[1]!.media[0]!.comparisonId = getPlexMediaComparisonStateId(PlexMediaComparisonState.Missing);
 
 				cy.visit(route('/'));
 				openComparisonFilterMenu();
@@ -30,7 +31,6 @@ describe('Comparison poster status UX', () => {
 				cy.getCy(`comparison-filter-option-${PlexMediaComparisonState.Missing}`).should('be.visible');
 			});
 	});
-
 
 	it('Should open comparison details dialog for a higher-quality badge', () => {
 		cy.basePageSetup({
@@ -46,7 +46,7 @@ describe('Comparison poster status UX', () => {
 					throw new Error('Movie library not found');
 
 				const movie = mediaData.find((x) => x.libraryId === movieLibrary.id)!.media[0]!;
-				movie.comparisonState = PlexMediaComparisonState.HigherQuality;
+				movie.comparisonId = getPlexMediaComparisonStateId(PlexMediaComparisonState.HigherQuality);
 
 				cy.intercept({ method: 'GET', pathname: '/api/PlexMedia' }, {
 					statusCode: 200,

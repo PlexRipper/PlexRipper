@@ -102,11 +102,11 @@
 					<!-- Comparison State Button (always visible, rendered outside image element) -->
 					<MediaComparisonStateButton
 						class="comparison-state-button"
-						:comparison-state="mediaItem.comparisonState"
+						:comparison-state="getPlexMediaComparisonState(mediaItem)"
 						show-tooltip
 						dense
 						:clickable="comparisonBadgeClickable"
-						:cy="`comparison-chip-${mediaItem.comparisonState}`"
+						:cy="`comparison-chip-${getPlexMediaComparisonState(mediaItem)}`"
 						@click="openComparisonDetails" />
 				</QGlowContainer>
 
@@ -155,7 +155,15 @@ import type { Subscription } from 'rxjs';
 import { PlexMediaComparisonState, PlexMediaType } from '@dto';
 import type { DownloadMediaDTO, PlexMediaQualityDTO, PlexMediaSlimDTO } from '@dto';
 import { MediaSortField } from '@enums';
-import { useDialogStore, useMediaOverviewStore, useMediaStore, useServerStore, useSettingsStore, useLibraryStore } from '@store';
+import {
+	useDialogStore,
+	useMediaOverviewStore,
+	useMediaStore,
+	useServerStore,
+	useSettingsStore,
+	useLibraryStore,
+} from '@store';
+import { getPlexMediaComparisonState } from '@composables';
 
 const mediaOverviewStore = useMediaOverviewStore();
 const mediaStore = useMediaStore();
@@ -192,7 +200,7 @@ const comparisonBadgeClickable = computed(() => {
 		PlexMediaComparisonState.HigherQuality,
 		PlexMediaComparisonState.Partial,
 		PlexMediaComparisonState.PartialAndHigherQuality,
-	].includes(props.mediaItem.comparisonState);
+	].includes(getPlexMediaComparisonState(props.mediaItem));
 });
 
 const titleSize = computed(() => {

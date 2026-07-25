@@ -748,35 +748,20 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 			return state.availableQualityIds.includes(x.id);
 		})),
 		getComparisonStateOptions: computed(() => {
-			const { $i18n } = useNuxtApp();
-			const { t } = $i18n;
-			return [
-				{
-					value: PlexMediaComparisonState.NotCompared,
-					label: t('components.media-overview.comparison.comparison-not-compared'),
-				},
-				{ value: PlexMediaComparisonState.Owned, label: t('components.media-overview.comparison.comparison-owned') },
-				{
-					value: PlexMediaComparisonState.Missing,
-					label: t('components.media-overview.comparison.comparison-missing'),
-				},
-				{
-					value: PlexMediaComparisonState.HigherQuality,
-					label: t('components.media-overview.comparison.comparison-higher-quality'),
-				},
-				{
-					value: PlexMediaComparisonState.Pending,
-					label: t('components.media-overview.comparison.comparison-pending'),
-				},
-				{
-					value: PlexMediaComparisonState.Partial,
-					label: t('components.media-overview.comparison.comparison-partial'),
-				},
-				{
-					value: PlexMediaComparisonState.PartialAndHigherQuality,
-					label: t('components.media-overview.comparison.comparison-partial-and-higher-quality'),
-				},
+			const states = [
+				PlexMediaComparisonState.NotCompared,
+				PlexMediaComparisonState.Owned,
+				PlexMediaComparisonState.Missing,
+				PlexMediaComparisonState.HigherQuality,
+				PlexMediaComparisonState.Pending,
+				PlexMediaComparisonState.Partial,
+				PlexMediaComparisonState.PartialAndHigherQuality,
 			];
+
+			return states.map((state) => ({
+				value: state,
+				label: translateMediaComparisonState(state),
+			}));
 		}),
 		getFilterChips: computed(() => {
 			const result: {

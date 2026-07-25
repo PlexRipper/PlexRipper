@@ -3,6 +3,7 @@ import type { MockConfig } from '@mock';
 import { generatePlexMedia, generatePlexMediaSlims, generateResultDTO } from '@mock';
 import { PlexMediaPaths } from '@api/api-paths';
 import { type PlexMediaStatisticsDTO, PlexMediaType } from '@dto';
+import { getPlexMediaComparisonStateFromId } from '@composables';
 
 export function setupMockPlexMediaEndpoints(
 	this: BasePageSetupResult,
@@ -35,7 +36,7 @@ export function setupMockPlexMediaEndpoints(
 					body: generateResultDTO({
 						plexMediaId: mediaItem.id,
 						type: mediaItem.type,
-						state: mediaItem.comparisonState,
+						state: getPlexMediaComparisonStateFromId(mediaItem.comparisonId),
 						rows: [],
 					}),
 					...headers,

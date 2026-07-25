@@ -15,15 +15,15 @@
 			:round="round"
 			:rounded="rounded"
 			:outline="outline"
-			:tooltip-text="showTooltip ? comparisonBadge.label : ''"
+			:tooltip-text="showTooltip ? translateMediaComparisonState(comparisonState) : ''"
 			:cy="cy"
 			@click="onClick" />
 	</span>
 </template>
 
 <script setup lang="ts">
-import { get } from '@vueuse/core';
 import { PlexMediaComparisonState } from '@dto';
+import { translateMediaComparisonState } from '@composables';
 
 type ComparisonBadgeTone
 	= 'not-compared'
@@ -37,12 +37,11 @@ type ComparisonBadgeTone
 
 interface IComparisonStateBadge {
 	icon: string;
-	label: string;
 	tone: ComparisonBadgeTone;
 }
 
 const props = withDefaults(defineProps<{
-	comparisonState: PlexMediaComparisonState | number;
+	comparisonState: PlexMediaComparisonState;
 	showTooltip?: boolean;
 	showLabel?: boolean;
 	size?: string;
@@ -70,69 +69,53 @@ const emit = defineEmits<{
 	(e: 'click'): void;
 }>();
 
-const { t } = useI18n();
-
 const comparisonBadge = computed((): IComparisonStateBadge => {
 	switch (props.comparisonState) {
 		case PlexMediaComparisonState.NotCompared:
-		case 0:
 			return {
-				label: t('components.media-overview.comparison.comparison-not-compared'),
 				icon: 'mdi-alert-circle-outline',
 				tone: 'not-compared',
 			};
 		case PlexMediaComparisonState.Owned:
-		case 1:
 			return {
-				label: t('components.media-overview.comparison.comparison-owned'),
 				icon: 'mdi-check-circle-outline',
 				tone: 'owned',
 			};
 		case PlexMediaComparisonState.Missing:
-		case 2:
 			return {
-				label: t('components.media-overview.comparison.comparison-missing'),
 				icon: 'mdi-cloud-download-outline',
 				tone: 'missing',
 			};
 		case PlexMediaComparisonState.HigherQuality:
-		case 3:
 			return {
-				label: t('components.media-overview.comparison.comparison-higher-quality'),
 				icon: 'mdi-arrow-up-circle',
 				tone: 'higher-quality',
 			};
 		case PlexMediaComparisonState.Pending:
-		case 4:
 			return {
-				label: t('components.media-overview.comparison.comparison-pending'),
 				icon: 'mdi-loading',
 				tone: 'pending',
 			};
 		case PlexMediaComparisonState.Partial:
-		case 5:
 			return {
-				label: t('components.media-overview.comparison.comparison-partial'),
 				icon: 'mdi-circle-slice-4',
 				tone: 'partial',
 			};
 		case PlexMediaComparisonState.PartialAndHigherQuality:
-		case 6:
 			return {
-				label: t('components.media-overview.comparison.comparison-partial-and-higher-quality'),
 				icon: 'mdi-layers-triple-outline',
 				tone: 'partial-and-higher-quality',
 			};
+		case PlexMediaComparisonState.Unknown:
 		default:
 			return {
-				label: t('components.media-overview.comparison.unknown'),
 				icon: 'mdi-crosshairs-question',
 				tone: 'unknown',
 			};
 	}
 });
 
-const resolvedLabel = computed(() => props.showLabel ? get(comparisonBadge).label : undefined);
+const resolvedLabel = computed(() => props.showLabel ? translateMediaComparisonState(props.comparisonState) : undefined);
 
 function onClick() {
 	if (props.clickable)
@@ -147,7 +130,7 @@ function onClick() {
   white-space: nowrap;
   color: #cfd8dc;
 
-	.q-btn {
+  .q-btn {
     color: currentColor !important;
     background: rgba(10, 14, 22, 0.88);
     border: none !important;
@@ -160,7 +143,7 @@ function onClick() {
     .block {
       color: currentColor !important;
     }
-	}
+  }
 }
 
 .media-comparison-state-button--clickable {

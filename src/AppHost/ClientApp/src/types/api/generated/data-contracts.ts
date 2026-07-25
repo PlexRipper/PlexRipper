@@ -939,11 +939,12 @@ export enum PlexMediaComparisonMatchType {
 export enum PlexMediaComparisonState {
   NotCompared = "NotCompared",
   Owned = "Owned",
+  Pending = "Pending",
   Missing = "Missing",
   HigherQuality = "HigherQuality",
-  Pending = "Pending",
   Partial = "Partial",
   PartialAndHigherQuality = "PartialAndHigherQuality",
+  Unknown = "Unknown",
 }
 
 export interface PlexMediaDTO {
@@ -952,7 +953,8 @@ export interface PlexMediaDTO {
   /** @format int32 */
   childCount: number;
   children: PlexMediaDTO[];
-  comparisonState: PlexMediaComparisonState;
+  /** @format int32 */
+  comparisonId: number;
   contentRating?: string | null;
   /** @format int32 */
   duration: number;
@@ -1051,7 +1053,8 @@ export interface PlexMediaSlimDTO {
   addedAt: string;
   /** @format int32 */
   childCount: number;
-  comparisonState: PlexMediaComparisonState;
+  /** @format int32 */
+  comparisonId: number;
   /** @format int32 */
   duration: number;
   /** @format int32 */
@@ -1438,15 +1441,6 @@ export interface ResultDTOOfListOfPlexLibraryDTO {
   statusCode: number;
   successes: SuccessDTO[];
   value?: PlexLibraryDTO[] | null;
-}
-
-export interface ResultDTOOfListOfPlexMediaSlimDTO {
-  errors: ErrorDTO[];
-  isSuccess: boolean;
-  /** @format int32 */
-  statusCode: number;
-  successes: SuccessDTO[];
-  value?: PlexMediaSlimDTO[] | null;
 }
 
 export interface ResultDTOOfListOfPlexServerConnectionDTO {

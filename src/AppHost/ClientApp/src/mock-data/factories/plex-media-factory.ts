@@ -1,7 +1,14 @@
 import { randCompanyName, randMovie, randNumber, randRecentDate, randSentence } from '@ngneat/falso';
 import { kebabCase, sortBy, times, uniqueId } from 'lodash-es';
 import { checkConfig, incrementSeed, type MockConfig } from '@mock';
-import { PlexMediaComparisonState, PlexMediaType, type PlexMediaSlimDTO, type PlexMediaDTO, type PlexMediaStatisticsDTO } from '@dto';
+import {
+	PlexMediaComparisonState,
+	PlexMediaType,
+	type PlexMediaSlimDTO,
+	type PlexMediaDTO,
+	type PlexMediaStatisticsDTO,
+} from '@dto';
+import { getPlexMediaComparisonStateId } from '@composables';
 
 export function generatePlexMediaStatisticsDTO(mediaList: PlexMediaSlimDTO[]): PlexMediaStatisticsDTO {
 	return {
@@ -58,7 +65,7 @@ function generatePlexMediaSlim({
 		mediaSize: randNumber({ min: 10000, max: 1000000 }),
 		addedAt: randRecentDate({ days: 120 }).toUTCString(),
 		updatedAt: randRecentDate({ days: 60 }).toUTCString(),
-		comparisonState: PlexMediaComparisonState.NotCompared,
+		comparisonId: getPlexMediaComparisonStateId(PlexMediaComparisonState.NotCompared),
 		qualities: [],
 	};
 

@@ -73,7 +73,9 @@ public class AddOrUpdatePlexLibrariesCommandHandler
             foreach (var incomingPlexLibrary in incomingPlexLibraries)
             {
                 var plexLibraryDb = await _dbContext
-                    .PlexLibraries.AsTracking()
+                    .PlexLibraries
+                    .IgnoreIsEnabledFilter()
+                    .AsTracking()
                     .FirstOrDefaultAsync(
                         x => x.PlexServerId == incomingPlexLibrary.PlexServerId && x.Uuid == incomingPlexLibrary.Uuid,
                         cancellationToken

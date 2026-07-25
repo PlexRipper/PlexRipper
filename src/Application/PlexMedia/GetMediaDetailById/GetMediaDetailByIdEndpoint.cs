@@ -171,6 +171,20 @@ public class GetMediaDetailByIdEndpoint : Endpoint<GetMediaDetailByIdEndpointReq
             return;
         }
 
+        var showHits = await _dbContext.PlexTvShowComparisons
+            .Where(x =>
+                x.RemotePlexLibraryId == plexTvShow.PlexLibraryId
+                && currentOwnedLibraryIds.Contains(x.OwnedPlexLibraryId)
+                && x.RemotePlexMediaId == plexTvShow.Id)
+            .Select(x => x.HitState)
+            .ToListAsync(ct);
+
+        plexTvShow.ComparisonState = showHits.Count == 0
+            ? PlexMediaComparisonState.Missing
+            : showHits.Contains(PlexMediaComparisonHitState.HigherQuality)
+                ? PlexMediaComparisonState.HigherQuality
+                : PlexMediaComparisonState.Owned;
+
         var episodeIds = plexTvShow.Seasons
             .SelectMany(x => x.Episodes)
             .Select(x => x.Id)

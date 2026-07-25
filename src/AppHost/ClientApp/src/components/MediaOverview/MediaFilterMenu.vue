@@ -2,7 +2,7 @@
 	<q-menu
 		:offset="[0, 12]"
 		@hide="menuIndex = MediaMetaDataTypes.None">
-		<q-list style="min-width: 260px">
+		<q-list style="min-width: 400px">
 			<!-- Categories -->
 			<template v-if="menuIndex === MediaMetaDataTypes.None">
 				<q-item
@@ -21,6 +21,7 @@
 					<q-item-section>{{ item.text }}</q-item-section>
 				</q-item>
 			</template>
+			<!-- Menu Level 2 -->
 			<template v-else>
 				<q-item
 					clickable
@@ -60,6 +61,7 @@
 				<QScroll
 					v-else
 					:fit="false"
+					width="400px"
 					:height="'260px'">
 					<!-- Show Genres Sub-Menu -->
 					<template v-if="menuIndex === MediaMetaDataTypes.Genres">

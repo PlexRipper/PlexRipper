@@ -19,7 +19,15 @@ public class RefreshLibraryMediaEndpointUnitTests
 
         var plexLibrary = IDbContext.PlexLibraries.First();
 
-        Mock.SetupCommand(It.IsAny<QueueLibrarySyncJobCommand>).ReturnsAsync(Result.Ok()).Verifiable(Times.Once());
+        Mock.Mock<ICommandExecutor>()
+            .Setup(x => x.Send(
+                It.Is<QueueLibrarySyncJobCommand>(command =>
+                    command.Force && command.PlexLibraryIds.SequenceEqual(new[] { plexLibrary.Id })
+                ),
+                It.IsAny<CancellationToken>()
+            ))
+            .ReturnsAsync(Result.Ok())
+            .Verifiable(Times.Once());
 
         // Act
         var endpointResult = await TestEndpointHandleAsync(
@@ -46,7 +54,13 @@ public class RefreshLibraryMediaEndpointUnitTests
 
         var plexLibrary = IDbContext.PlexLibraries.First();
 
-        Mock.SetupCommand(It.IsAny<QueueLibrarySyncJobCommand>)
+        Mock.Mock<ICommandExecutor>()
+            .Setup(x => x.Send(
+                It.Is<QueueLibrarySyncJobCommand>(command =>
+                    command.Force && command.PlexLibraryIds.SequenceEqual(new[] { plexLibrary.Id })
+                ),
+                It.IsAny<CancellationToken>()
+            ))
             .ReturnsAsync(Result.Fail("Failed to refresh library"))
             .Verifiable(Times.Once());
 
@@ -109,7 +123,15 @@ public class RefreshLibraryMediaEndpointUnitTests
         var plexLibrary = IDbContext.PlexLibraries.First();
         plexLibrary.Type.ShouldBe(libraryType);
 
-        Mock.SetupCommand(It.IsAny<QueueLibrarySyncJobCommand>).ReturnsAsync(Result.Ok()).Verifiable(Times.Once());
+        Mock.Mock<ICommandExecutor>()
+            .Setup(x => x.Send(
+                It.Is<QueueLibrarySyncJobCommand>(command =>
+                    command.Force && command.PlexLibraryIds.SequenceEqual(new[] { plexLibrary.Id })
+                ),
+                It.IsAny<CancellationToken>()
+            ))
+            .ReturnsAsync(Result.Ok())
+            .Verifiable(Times.Once());
 
         // Act
         var endpointResult = await TestEndpointHandleAsync(

@@ -39,7 +39,7 @@ public class RefreshLibraryMediaEndpoint : Endpoint<RefreshLibraryMediaEndpointR
     {
         _log.Here().DebugApiCall(HttpContext, req);
 
-        var result = await _commandExecutor.Send(new QueueLibrarySyncJobCommand([req.PlexLibraryId]), ct);
+        var result = await _commandExecutor.Send(new QueueLibrarySyncJobCommand([req.PlexLibraryId], Force: true), ct);
         if (result.IsFailed)
         {
             await Send.FluentResult(result, ct);

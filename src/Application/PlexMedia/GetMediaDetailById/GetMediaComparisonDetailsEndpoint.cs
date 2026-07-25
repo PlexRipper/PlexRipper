@@ -49,7 +49,7 @@ public record PlexMediaComparisonDetailsRowDTO
 
     public required string Title { get; init; }
 
-    public required PlexMediaComparisonState State { get; init; }
+    public required int ComparisonId { get; init; }
 
     public required bool IsActionable { get; init; }
 
@@ -400,8 +400,8 @@ public class GetMediaComparisonDetailsEndpoint
         foreach (var group in childRows.GroupBy(x => episodeLookup.TryGetValue(x.PlexMediaId, out var episode) ? episode.TvShowSeason?.SeasonNumber ?? 0 : 0).OrderBy(x => x.Key))
         {
             var parentId = ++_rowId;
-            var hasMissing = group.Any(x => x.State == PlexMediaComparisonState.Missing);
-            var hasHigherQuality = group.Any(x => x.State == PlexMediaComparisonState.HigherQuality);
+            var hasMissing = group.Any(x => x.ComparisonId == PlexMediaComparisonState.Missing.ToComparisonId());
+            var hasHigherQuality = group.Any(x => x.ComparisonId == PlexMediaComparisonState.HigherQuality.ToComparisonId());
             result.Add(new PlexMediaComparisonDetailsRowDTO
             {
                 Id = parentId,
@@ -410,9 +410,9 @@ public class GetMediaComparisonDetailsEndpoint
                 PlexMediaId = 0,
                 Type = PlexMediaType.Season,
                 Title = $"Season {group.Key}",
-                State = hasMissing && hasHigherQuality
-                    ? PlexMediaComparisonState.PartialAndHigherQuality
-                    : hasMissing ? PlexMediaComparisonState.Partial : PlexMediaComparisonState.HigherQuality,
+                ComparisonId = hasMissing && hasHigherQuality
+                    ? PlexMediaComparisonState.PartialAndHigherQuality.ToComparisonId()
+                    : hasMissing ? PlexMediaComparisonState.Partial.ToComparisonId() : PlexMediaComparisonState.HigherQuality.ToComparisonId(),
                 IsActionable = true,
             });
 
@@ -499,7 +499,7 @@ public class GetMediaComparisonDetailsEndpoint
             PlexMediaId = plexMediaId,
             Type = type,
             Title = title,
-            State = state,
+            ComparisonId = state.ToComparisonId(),
             IsActionable = true,
             RemoteQuality = remoteQuality,
             OwnedQuality = ownedQuality,
@@ -511,8 +511,8 @@ public class GetMediaComparisonDetailsEndpoint
 
     private static PlexMediaComparisonState ToParentState(List<PlexMediaComparisonDetailsRowDTO> rows)
     {
-        var hasMissing = rows.Any(x => x.State == PlexMediaComparisonState.Missing || x.State == PlexMediaComparisonState.Partial);
-        var hasHigherQuality = rows.Any(x => x.State == PlexMediaComparisonState.HigherQuality);
+        var hasMissing = rows.Any(x => x.ComparisonId == PlexMediaComparisonState.Missing.ToComparisonId() || x.ComparisonId == PlexMediaComparisonState.Partial.ToComparisonId());
+        var hasHigherQuality = rows.Any(x => x.ComparisonId == PlexMediaComparisonState.HigherQuality.ToComparisonId());
         return (hasMissing, hasHigherQuality) switch
         {
             (true, true) => PlexMediaComparisonState.PartialAndHigherQuality,

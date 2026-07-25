@@ -2,6 +2,7 @@ namespace Reaparr.Domain;
 
 /// <summary>
 /// Represents the status of a library sync queue item.
+/// TODO Rename to JobStatus
 /// </summary>
 [JsonConverter(typeof(JsonStringEnumConverter))]
 public enum LibrarySyncJobStatus

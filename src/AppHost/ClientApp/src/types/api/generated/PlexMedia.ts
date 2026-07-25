@@ -16,7 +16,6 @@ import type {
   PlexMediaComparisonDetailsDTO,
   PlexMediaComparisonState,
   PlexMediaDTO,
-  PlexMediaSlimDTO,
   PlexMediaStatisticsDTO,
   PlexMediaType,
 } from "./data-contracts";
@@ -160,28 +159,6 @@ export class PlexMedia {
       responseType: "blob",
       ...params,
     }).pipe(apiCheckPipe<Blob>);
-
-  /**
-   * No description
-   * * @tags Plexmedia
-   * @name SearchPlexMediaEndpoint
-   * @request GET:/api/PlexMedia/search
-   * @secure
-   */
-  searchPlexMediaEndpoint = (
-    query: {
-      query: string;
-    },
-    params: RequestParams = {},
-  ) =>
-    axiosObservable<PlexMediaSlimDTO[]>({
-      url: `/api/PlexMedia/search`,
-      method: "GET",
-      params: query,
-      secure: true,
-      responseType: "json",
-      ...params,
-    }).pipe(apiCheckPipe<PlexMediaSlimDTO[]>);
 }
 
 export class PlexMediaPaths {
@@ -259,7 +236,4 @@ export class PlexMediaPaths {
      */
     width: number;
   }) => queryString.stringifyUrl({ url: `/api/PlexMedia/thumbnail`, query });
-
-  static searchPlexMediaEndpoint = (query: { query: string }) =>
-    queryString.stringifyUrl({ url: `/api/PlexMedia/search`, query });
 }

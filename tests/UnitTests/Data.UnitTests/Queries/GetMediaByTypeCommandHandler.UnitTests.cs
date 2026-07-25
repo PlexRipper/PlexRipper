@@ -113,12 +113,9 @@ public class GetMediaByTypeCommandHandlerUnitTests : BaseUnitTest<GetMediaByType
                 var applyCommand = (ApplyComparisonStateCommand)projectionCommand;
                 for (var i = 0; i < applyCommand.Items.Count; i++)
                 {
-                    applyCommand.Items[i] = applyCommand.Items[i] with
-                    {
-                        ComparisonState = i is 0 or 2
-                            ? PlexMediaComparisonState.Missing
-                            : PlexMediaComparisonState.Owned,
-                    };
+                    applyCommand.Items[i].SetComparisonState(i is 0 or 2
+                        ? PlexMediaComparisonState.Missing
+                        : PlexMediaComparisonState.Owned);
                 }
             })
             .ReturnsAsync(Result.Ok())
@@ -131,7 +128,7 @@ public class GetMediaByTypeCommandHandlerUnitTests : BaseUnitTest<GetMediaByType
         result.IsSuccess.ShouldBeTrue();
         result.Value.TotalCount.ShouldBe(2);
         result.Value.Items.Count.ShouldBe(1);
-        result.Value.Items.ShouldAllBe(x => x.ComparisonState == PlexMediaComparisonState.Missing);
+        result.Value.Items.ShouldAllBe(x => x.ComparisonId == PlexMediaComparisonState.Missing.ToComparisonId());
         result.Value.NavigationIndexes
             .Select(x => new { x.Label, x.Index })
             .ShouldBe([
@@ -180,12 +177,9 @@ public class GetMediaByTypeCommandHandlerUnitTests : BaseUnitTest<GetMediaByType
 
                 for (var i = 0; i < applyCommand.Items.Count; i++)
                 {
-                    applyCommand.Items[i] = applyCommand.Items[i] with
-                    {
-                        ComparisonState = i == 0
-                            ? PlexMediaComparisonState.Missing
-                            : PlexMediaComparisonState.Owned,
-                    };
+                    applyCommand.Items[i].SetComparisonState(i == 0
+                        ? PlexMediaComparisonState.Missing
+                        : PlexMediaComparisonState.Owned); 
                 }
             })
             .ReturnsAsync(Result.Ok())
@@ -198,7 +192,7 @@ public class GetMediaByTypeCommandHandlerUnitTests : BaseUnitTest<GetMediaByType
         result.IsSuccess.ShouldBeTrue();
         result.Value.TotalCount.ShouldBe(2);
         result.Value.Items.Count.ShouldBe(1);
-        result.Value.Items.ShouldAllBe(x => x.ComparisonState == PlexMediaComparisonState.Missing);
+        result.Value.Items.ShouldAllBe(x => x.ComparisonId == PlexMediaComparisonState.Missing.ToComparisonId());
         result.Value.NavigationIndexes.Max(x => x.Index).ShouldBe(1);
         Mock.Mock<ICommandExecutor>().Verify();
     }

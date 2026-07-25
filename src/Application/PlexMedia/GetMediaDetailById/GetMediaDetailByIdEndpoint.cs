@@ -302,7 +302,7 @@ public class GetMediaDetailByIdEndpoint : Endpoint<GetMediaDetailByIdEndpointReq
         var items = new List<PlexMediaSlimDTO> { plexMovie.ToSlimDTO() };
         await _commandExecutor.Send(new ApplyComparisonStateCommand(items, plexMovie.PlexLibraryId, PlexMediaType.Movie), ct);
 
-        plexMovie.ComparisonState = items[0].ComparisonState;
+        plexMovie.ComparisonState = items[0].ComparisonId.ToComparisonState();
     }
 
     private async Task SetNestedMovieProperties(PlexMovie plexMovie, CancellationToken ct = default)

@@ -35,7 +35,7 @@ public static partial class PlexMediaDTOMapper
             Type = source.Type,
             HasThumb = source.HasThumb,
             Qualities = source.Qualities.ToDTO(),
-            ComparisonState = source.ComparisonState,
+            ComparisonId = source.ComparisonState.ToComparisonId(),
             PlexApiRatingKey = source.PlexApiRatingKey,
             HasArt = source.HasArt,
             HasTheme = source.HasTheme,

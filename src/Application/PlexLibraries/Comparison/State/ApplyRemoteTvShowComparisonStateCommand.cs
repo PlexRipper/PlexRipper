@@ -2,7 +2,7 @@ namespace Reaparr.Application;
 
 /// <summary>
 /// Projects stored comparison scopes and TV show/season/episode hit rows onto remote-library
-/// <see cref="PlexMediaSlimDTO"/> items, setting <see cref="PlexMediaSlimDTO.ComparisonState"/> per item in-place.
+/// <see cref="PlexMediaSlimDTO"/> items, setting <see cref="PlexMediaSlimDTO.ComparisonId"/> per item in-place.
 /// </summary>
 /// <param name="Items">The overview page items from a remote library. Modified in-place.</param>
 /// <param name="RemoteLibraryId">The remote TV show Plex library being browsed.</param>
@@ -81,8 +81,8 @@ public class ApplyRemoteTvShowComparisonStateCommandHandler
         {
             if (await HasPendingComparisonAsync(command.RemoteLibraryId, ownedLibraries.Keys.ToHashSet(), ct))
             {
-                for (var i = 0; i < items.Count; i++)
-                    items[i] = items[i] with { ComparisonState = PlexMediaComparisonState.Pending };
+                foreach (var item in items)
+                    item.SetComparisonState(PlexMediaComparisonState.Pending);
             }
 
             return Result.Ok();
@@ -137,7 +137,7 @@ public class ApplyRemoteTvShowComparisonStateCommandHandler
 
             if (!hasShowHit)
             {
-                items[i] = items[i] with { ComparisonState = PlexMediaComparisonState.Missing };
+                items[i].SetComparisonState(PlexMediaComparisonState.Missing);
                 continue;
             }
 
@@ -149,16 +149,14 @@ public class ApplyRemoteTvShowComparisonStateCommandHandler
             var hasPartialMissingChildren = remoteEpisodeCount > 0 && matchedEpisodeCount < remoteEpisodeCount;
             var totalHigherQuality = showHigherQualityCount + (episodeHitSummary?.HigherQualityCount ?? 0);
 
-            items[i] = items[i] with
-            {
-                ComparisonState = (hasPartialMissingChildren, totalHigherQuality > 0) switch
+            items[i]
+                .SetComparisonState((hasPartialMissingChildren, totalHigherQuality > 0) switch
                 {
                     (true, true) => PlexMediaComparisonState.PartialAndHigherQuality,
                     (true, false) => PlexMediaComparisonState.Partial,
                     (false, true) => PlexMediaComparisonState.HigherQuality,
                     _ => PlexMediaComparisonState.Owned,
-                },
-            };
+                });
         }
 
         return Result.Ok();

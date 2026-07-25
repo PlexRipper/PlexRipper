@@ -10,6 +10,12 @@ public enum PlexMediaComparisonState
     /// No current comparison scope for this media's library pair.
     /// Show the muted "not compared yet" chip; never show missing/HQ badges.
     /// </summary>
+    Unknown = -1,   
+    
+    /// <summary>
+    /// No current comparison scope for this media's library pair.
+    /// Show the muted "not compared yet" chip; never show missing/HQ badges.
+    /// </summary>
     NotCompared = 0,
 
     /// <summary>
@@ -18,19 +24,19 @@ public enum PlexMediaComparisonState
     Owned = 1,
 
     /// <summary>
+    /// When comparison work is queued or processing and no current scope is available yet.
+    /// </summary>
+    Pending = 2,
+    
+    /// <summary>
     /// Current scope exists; this media has no hit in any current owned library (anti-join result).
     /// </summary>
-    Missing = 2,
+    Missing = 3,
 
     /// <summary>
     /// Current scope exists; a remote match is higher quality than the owned match(es).
     /// </summary>
-    HigherQuality = 3,
-
-    /// <summary>
-    /// When comparison work is queued or processing and no current scope is available yet.
-    /// </summary>
-    Pending = 4,
+    HigherQuality = 4,
 
     /// <summary>
     /// Current scope exists; the top-level media item is owned, but child media such as seasons or episodes are missing.

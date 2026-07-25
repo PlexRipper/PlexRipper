@@ -63,7 +63,7 @@ public class ApplyOwnedTvShowComparisonStateCommandUnitTests
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
-        items[0].ComparisonState.ShouldBe(PlexMediaComparisonState.Partial);
+        items[0].ComparisonId.ShouldBe(PlexMediaComparisonState.Partial.ToComparisonId());
     }
 
     private async Task SetOwnedOverrideAsync(int plexServerId, bool ownedOverride)

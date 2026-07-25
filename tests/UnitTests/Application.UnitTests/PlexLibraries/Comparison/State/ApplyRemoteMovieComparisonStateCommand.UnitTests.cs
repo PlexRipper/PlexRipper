@@ -50,7 +50,7 @@ public class ApplyRemoteMovieComparisonStateCommandUnitTests
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
-        items[0].ComparisonState.ShouldBe(PlexMediaComparisonState.Owned);
+        items[0].ComparisonId.ShouldBe(PlexMediaComparisonState.Owned.ToComparisonId());
     }
 
     [Test]
@@ -108,7 +108,7 @@ public class ApplyRemoteMovieComparisonStateCommandUnitTests
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
-        items[0].ComparisonState.ShouldBe(PlexMediaComparisonState.HigherQuality);
+        items[0].ComparisonId.ShouldBe(PlexMediaComparisonState.HigherQuality.ToComparisonId());
     }
 
     [Test]
@@ -145,7 +145,7 @@ public class ApplyRemoteMovieComparisonStateCommandUnitTests
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
-        items[0].ComparisonState.ShouldBe(PlexMediaComparisonState.Missing);
+        items[0].ComparisonId.ShouldBe(PlexMediaComparisonState.Missing.ToComparisonId());
     }
 
     private async Task SetOwnedOverrideAsync(int plexServerId, bool ownedOverride)

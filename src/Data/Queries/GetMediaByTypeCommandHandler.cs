@@ -138,7 +138,7 @@ public class GetMediaByTypeCommandHandler : ICommandHandler<GetMediaByTypeComman
                     await ApplyComparisonStateAsync(movieDtos, plexLibraryId, PlexMediaType.Movie, ct);
 
                     var filteredDtos = movieDtos
-                        .Where(x => x.ComparisonState == filter.ComparisonState.Value)
+                        .Where(x => x.ComparisonId == filter.ComparisonState.Value.ToComparisonId())
                         .ToList();
                     var filteredIds = filteredDtos.Select(x => x.Id).ToHashSet();
                     var filteredMovies = movies.Where(x => filteredIds.Contains(x.Id)).ToList();
@@ -241,7 +241,7 @@ public class GetMediaByTypeCommandHandler : ICommandHandler<GetMediaByTypeComman
                     await ApplyComparisonStateAsync(tvShowDtos, plexLibraryId, PlexMediaType.TvShow, ct);
 
                     var filteredDtos = tvShowDtos
-                        .Where(x => x.ComparisonState == filter.ComparisonState.Value)
+                        .Where(x => x.ComparisonId == filter.ComparisonState.Value.ToComparisonId())
                         .ToList();
                     var filteredIds = filteredDtos.Select(x => x.Id).ToHashSet();
                     var filteredTvShows = tvShows.Where(x => filteredIds.Contains(x.Id)).ToList();

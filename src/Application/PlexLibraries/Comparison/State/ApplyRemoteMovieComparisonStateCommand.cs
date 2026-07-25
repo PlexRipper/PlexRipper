@@ -2,7 +2,7 @@ namespace Reaparr.Application;
 
 /// <summary>
 /// Projects stored comparison scopes and movie hit rows onto remote-library <see cref="PlexMediaSlimDTO"/> items,
-/// setting <see cref="PlexMediaSlimDTO.ComparisonState"/> per item in-place.
+/// setting <see cref="PlexMediaSlimDTO.ComparisonId"/> per item in-place.
 /// </summary>
 /// <param name="Items">The overview page items from a remote library. Modified in-place.</param>
 /// <param name="RemoteLibraryId">The remote movie Plex library being browsed.</param>
@@ -48,7 +48,8 @@ public class ApplyRemoteMovieComparisonStateCommandHandler
 
         if (remoteUpdatedAt is null)
         {
-            _log.Here().Warning("Remote library {LibraryId} not found for comparison projection", command.RemoteLibraryId);
+            _log.Here()
+                .Warning("Remote library {LibraryId} not found for comparison projection", command.RemoteLibraryId);
             return Result.Ok();
         }
 
@@ -79,7 +80,10 @@ public class ApplyRemoteMovieComparisonStateCommandHandler
         if (currentOwnedLibraryIds.Count == 0)
         {
             if (await HasPendingComparisonAsync(command.RemoteLibraryId, ownedLibraries.Keys.ToHashSet(), ct))
-                SetComparisonState(items, PlexMediaComparisonState.Pending);
+            {
+                foreach (var item in items)
+                    item.SetComparisonState(PlexMediaComparisonState.Pending);
+            }
 
             return Result.Ok();
         }
@@ -102,18 +106,16 @@ public class ApplyRemoteMovieComparisonStateCommandHandler
         {
             if (!hitLookup.TryGetValue(items[i].Id, out var itemHits))
             {
-                items[i] = items[i] with { ComparisonState = PlexMediaComparisonState.Missing };
+                items[i].SetComparisonState(PlexMediaComparisonState.Missing);
                 continue;
             }
 
             var higherQualityCount = itemHits.Count(x => x.HitState == PlexMediaComparisonHitState.HigherQuality);
 
-            items[i] = items[i] with
-            {
-                ComparisonState = higherQualityCount > 0
+            items[i]
+                .SetComparisonState(higherQualityCount > 0
                     ? PlexMediaComparisonState.HigherQuality
-                    : PlexMediaComparisonState.Owned,
-            };
+                    : PlexMediaComparisonState.Owned);
         }
 
         return Result.Ok();
@@ -122,17 +124,10 @@ public class ApplyRemoteMovieComparisonStateCommandHandler
     private async Task<bool> HasPendingComparisonAsync(
         int remoteLibraryId,
         HashSet<int> ownedLibraryIds,
-        CancellationToken ct) =>
-        await _dbContext.LibraryComparisonJobQueues
-            .AnyAsync(x =>
-                x.RemotePlexLibraryId == remoteLibraryId
-                && x.MediaType == PlexMediaType.Movie
-                && ownedLibraryIds.Contains(x.OwnedPlexLibraryId)
-                && (x.Status == LibrarySyncJobStatus.Queued || x.Status == LibrarySyncJobStatus.Processing), ct);
-
-    private static void SetComparisonState(List<PlexMediaSlimDTO> items, PlexMediaComparisonState state)
-    {
-        for (var i = 0; i < items.Count; i++)
-            items[i] = items[i] with { ComparisonState = state };
-    }
+        CancellationToken ct) => await _dbContext.LibraryComparisonJobQueues
+        .AnyAsync(x =>
+            x.RemotePlexLibraryId == remoteLibraryId
+            && x.MediaType == PlexMediaType.Movie
+            && ownedLibraryIds.Contains(x.OwnedPlexLibraryId)
+            && (x.Status == LibrarySyncJobStatus.Queued || x.Status == LibrarySyncJobStatus.Processing), ct);
 }

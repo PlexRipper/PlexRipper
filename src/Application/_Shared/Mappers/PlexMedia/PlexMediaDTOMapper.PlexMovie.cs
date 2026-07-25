@@ -33,7 +33,7 @@ public static partial class PlexMediaDTOMapper
                     MediaId = source.Id,
                 })
                 .ToList(),
-            ComparisonState = source.ComparisonState,
+            ComparisonId = source.ComparisonState.ToComparisonId(),
             PlexApiRatingKey = source.PlexApiRatingKey,
             HasArt = source.HasArt,
             HasTheme = source.HasTheme,

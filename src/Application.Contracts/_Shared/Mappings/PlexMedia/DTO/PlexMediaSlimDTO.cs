@@ -54,5 +54,5 @@ public record PlexMediaSlimDTO
     /// <see cref="PlexMediaComparisonState.NotCompared"/> when no current scopes exist.
     /// A separate detail endpoint returns exact upgrade/missing information on user action.
     /// </summary>
-    public PlexMediaComparisonState ComparisonState { get; init; } = PlexMediaComparisonState.NotCompared;
+    public int ComparisonId { get; set; }
 }

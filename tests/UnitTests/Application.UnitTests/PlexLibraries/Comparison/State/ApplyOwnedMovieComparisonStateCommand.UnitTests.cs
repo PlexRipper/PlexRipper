@@ -45,7 +45,7 @@ public class ApplyOwnedMovieComparisonStateCommandUnitTests
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
-        items[0].ComparisonState.ShouldBe(PlexMediaComparisonState.Owned);
+        items[0].ComparisonId.ShouldBe(PlexMediaComparisonState.Owned.ToComparisonId());
     }
 
     [Test]
@@ -88,7 +88,7 @@ public class ApplyOwnedMovieComparisonStateCommandUnitTests
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
-        items[0].ComparisonState.ShouldBe(PlexMediaComparisonState.Pending);
+        items[0].ComparisonId.ShouldBe(PlexMediaComparisonState.Pending.ToComparisonId());
     }
 
     private async Task SetOwnedOverrideAsync(int plexServerId, bool ownedOverride)

@@ -81,8 +81,8 @@ public class ApplyOwnedMovieComparisonStateCommandHandler
         {
             if (await HasPendingComparisonAsync(command.OwnedLibraryId, remoteLibraries.Keys.ToHashSet(), ct))
             {
-                for (var i = 0; i < items.Count; i++)
-                    items[i] = items[i] with { ComparisonState = PlexMediaComparisonState.Pending };
+                foreach (var item in items)
+                    item.SetComparisonState(PlexMediaComparisonState.Pending);
             }
 
             return Result.Ok();
@@ -102,14 +102,11 @@ public class ApplyOwnedMovieComparisonStateCommandHandler
 
         var upgradeIdSet = upgradeIds.ToHashSet();
 
-        for (var i = 0; i < items.Count; i++)
+        foreach (var item in items)
         {
-            items[i] = items[i] with
-            {
-                ComparisonState = upgradeIdSet.Contains(items[i].Id)
-                    ? PlexMediaComparisonState.HigherQuality
-                    : PlexMediaComparisonState.Owned,
-            };
+            item.SetComparisonState(upgradeIdSet.Contains(item.Id)
+                ? PlexMediaComparisonState.HigherQuality
+                : PlexMediaComparisonState.Owned);
         }
 
         return Result.Ok();
@@ -118,11 +115,10 @@ public class ApplyOwnedMovieComparisonStateCommandHandler
     private async Task<bool> HasPendingComparisonAsync(
         int ownedLibraryId,
         HashSet<int> remoteLibraryIds,
-        CancellationToken ct) =>
-        await _dbContext.LibraryComparisonJobQueues
-            .AnyAsync(x =>
-                x.OwnedPlexLibraryId == ownedLibraryId
-                && x.MediaType == PlexMediaType.Movie
-                && remoteLibraryIds.Contains(x.RemotePlexLibraryId)
-                && (x.Status == LibrarySyncJobStatus.Queued || x.Status == LibrarySyncJobStatus.Processing), ct);
+        CancellationToken ct) => await _dbContext.LibraryComparisonJobQueues
+        .AnyAsync(x =>
+            x.OwnedPlexLibraryId == ownedLibraryId
+            && x.MediaType == PlexMediaType.Movie
+            && remoteLibraryIds.Contains(x.RemotePlexLibraryId)
+            && (x.Status == LibrarySyncJobStatus.Queued || x.Status == LibrarySyncJobStatus.Processing), ct);
 }

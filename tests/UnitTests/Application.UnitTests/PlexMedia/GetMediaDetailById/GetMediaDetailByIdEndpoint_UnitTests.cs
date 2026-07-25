@@ -157,9 +157,9 @@ public class GetMediaDetailByIdEndpointUnitTests : BaseEndpointUnitTest<GetMedia
         result.Value.ShouldNotBeNull();
         var episodes = result.Value.Children.SelectMany(x => x.Children).OrderBy(x => x.Id).ToList();
         episodes.Count.ShouldBe(3);
-        episodes[0].ComparisonState.ShouldBe(PlexMediaComparisonState.Owned);
-        episodes[1].ComparisonState.ShouldBe(PlexMediaComparisonState.HigherQuality);
-        episodes[2].ComparisonState.ShouldBe(PlexMediaComparisonState.Missing);
+        episodes[0].ComparisonId.ShouldBe(PlexMediaComparisonState.Owned.ToComparisonId());
+        episodes[1].ComparisonId.ShouldBe(PlexMediaComparisonState.HigherQuality.ToComparisonId());
+        episodes[2].ComparisonId.ShouldBe(PlexMediaComparisonState.Missing.ToComparisonId());
     }
 
     private async Task SetOwnedOverrideAsync(int plexServerId, bool ownedOverride)

@@ -13,12 +13,19 @@ public class PlexLibraryComparisonJob : IJob
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
     private readonly ICommandExecutor _commandExecutor;
+    private readonly IProgressHubService _progressHubService;
 
-    public PlexLibraryComparisonJob(ILogger log, IReaparrDbContext dbContext, ICommandExecutor commandExecutor)
+    public PlexLibraryComparisonJob(
+        ILogger log,
+        IReaparrDbContext dbContext,
+        ICommandExecutor commandExecutor,
+        IProgressHubService progressHubService
+    )
     {
         _log = log.ForContext<PlexLibraryComparisonJob>();
         _dbContext = dbContext;
         _commandExecutor = commandExecutor;
+        _progressHubService = progressHubService;
     }
 
     public static JobKey GetJobKey() => new(nameof(JobTypes.LibraryComparisonJob), nameof(JobTypes.LibraryComparisonJob));
@@ -99,6 +106,8 @@ public class PlexLibraryComparisonJob : IJob
                 );
         }
 
+        await SendCompletionNotificationIfSettledAsync(queueItem, cancellationToken);
+
         var hasMoreQueuedItems = await _dbContext.LibraryComparisonJobQueues
             .AnyAsync(x => x.Status == LibrarySyncJobStatus.Queued, cancellationToken);
 
@@ -126,4 +135,53 @@ public class PlexLibraryComparisonJob : IJob
                 cancellationToken
             );
     }
+
+    private async Task SendCompletionNotificationIfSettledAsync(
+        LibraryComparisonJobQueue queueItem,
+        CancellationToken cancellationToken
+    )
+    {
+        var affectedLibraryIds = new List<int>();
+
+        if (await IsRemoteLibrarySettledAsync(queueItem, cancellationToken))
+            affectedLibraryIds.Add(queueItem.RemotePlexLibraryId);
+
+        if (await IsOwnedLibrarySettledAsync(queueItem, cancellationToken))
+            affectedLibraryIds.Add(queueItem.OwnedPlexLibraryId);
+
+        if (affectedLibraryIds.Count == 0)
+            return;
+
+        await _progressHubService.SendLibraryComparisonCompletedAsync(
+            new LibraryComparisonCompletedDTO
+            {
+                AffectedLibraryIds = affectedLibraryIds.Distinct().ToList(),
+                MediaType = queueItem.MediaType,
+                CompletedAt = DateTime.UtcNow,
+            },
+            cancellationToken
+        );
+    }
+
+    private async Task<bool> IsRemoteLibrarySettledAsync(
+        LibraryComparisonJobQueue queueItem,
+        CancellationToken cancellationToken
+    ) =>
+        !await _dbContext.LibraryComparisonJobQueues.AnyAsync(
+            x => x.RemotePlexLibraryId == queueItem.RemotePlexLibraryId
+                 && x.MediaType == queueItem.MediaType
+                 && (x.Status == LibrarySyncJobStatus.Queued || x.Status == LibrarySyncJobStatus.Processing),
+            cancellationToken
+        );
+
+    private async Task<bool> IsOwnedLibrarySettledAsync(
+        LibraryComparisonJobQueue queueItem,
+        CancellationToken cancellationToken
+    ) =>
+        !await _dbContext.LibraryComparisonJobQueues.AnyAsync(
+            x => x.OwnedPlexLibraryId == queueItem.OwnedPlexLibraryId
+                 && x.MediaType == queueItem.MediaType
+                 && (x.Status == LibrarySyncJobStatus.Queued || x.Status == LibrarySyncJobStatus.Processing),
+            cancellationToken
+        );
 }

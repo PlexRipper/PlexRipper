@@ -48,6 +48,12 @@ Use `trash` instead:
 
 On Linux, `trash` resolves to `gio trash` or `trash-cli`.
 
+> **Code file deletions:** When deleting a code file, always use the appropriate IDE MCP instead of `trash`:
+> - Backend files (`src/` excluding `ClientApp/`, `tests/`): use **Rider MCP** (`rider-official:delete_file` or equivalent).
+> - Frontend files (`src/AppHost/ClientApp/`): use **WebStorm MCP** (`webstorm-official:delete_file` or equivalent).
+> - Only fall back to `trash` when the IDE MCP tool is unavailable after retries, and state the fallback reason.
+> This ensures project references, `.csproj` entries, imports, and IDE indexes stay consistent.
+
 ---
 ### Backend (`src/`)
 

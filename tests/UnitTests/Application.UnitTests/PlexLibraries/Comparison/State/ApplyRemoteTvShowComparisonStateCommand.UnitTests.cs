@@ -129,6 +129,44 @@ public class ApplyRemoteTvShowComparisonStateCommandUnitTests
         items[0].ComparisonId.ShouldBe(PlexMediaComparisonState.PartialAndHigherQuality.ToComparisonId());
     }
 
+    [Test]
+    public async Task ShouldMarkMissing_WhenRemoteTvShowHasManyEpisodesAndNoTopLevelHit()
+    {
+        // Arrange
+        await SetupDatabase(63, config =>
+        {
+            config.PlexServerCount = 2;
+            config.PlexTvShowLibraryCount = 1;
+            config.PlexAccountCount = 1;
+            config.TvShowCount = 1;
+            config.TvShowSeasonCount = 1;
+            config.TvShowEpisodeCount = 1200;
+        });
+
+        var dbContext = IDbContext;
+        var libraries = await dbContext.PlexLibraries.OrderBy(x => x.Id).ToListAsync(CancellationToken);
+        var remoteLibrary = libraries[0];
+        var ownedLibrary = libraries[1];
+        await SetOwnedOverrideAsync(remoteLibrary.PlexServerId, false);
+        await SetOwnedOverrideAsync(ownedLibrary.PlexServerId, true);
+        await SetLibraryUpdatedAtAsync(remoteLibrary.Id, new DateTime(2026, 7, 22, 8, 0, 0, DateTimeKind.Utc));
+        await SetLibraryUpdatedAtAsync(ownedLibrary.Id, new DateTime(2026, 7, 22, 8, 5, 0, DateTimeKind.Utc));
+        remoteLibrary = await GetLibraryAsync(remoteLibrary.Id);
+        ownedLibrary = await GetLibraryAsync(ownedLibrary.Id);
+
+        var remoteTvShow = await GetLibraryTvShowAsync(remoteLibrary.Id);
+        await AddCurrentScopeAsync(remoteLibrary, ownedLibrary);
+
+        var items = new List<PlexMediaSlimDTO> { CreateTvShowItem(remoteTvShow) };
+
+        // Act
+        var result = await Sut.ExecuteAsync(new ApplyRemoteTvShowComparisonStateCommand(items, remoteLibrary.Id), CancellationToken);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        items[0].ComparisonId.ShouldBe(PlexMediaComparisonState.Missing.ToComparisonId());
+    }
+
     private async Task SetOwnedOverrideAsync(int plexServerId, bool ownedOverride)
     {
         await IDbContext.PlexServers

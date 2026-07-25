@@ -135,7 +135,9 @@ public class GetMediaByTypeCommandHandler : ICommandHandler<GetMediaByTypeComman
                 {
                     var movies = await movieQuery.ToListAsync(ct);
                     var movieDtos = movies.Select(x => x.ToSlimDTO()).ToList();
-                    await ApplyComparisonStateAsync(movieDtos, plexLibraryId, PlexMediaType.Movie, ct);
+                    var movieComparisonResult = await ApplyComparisonStateAsync(movieDtos, plexLibraryId, PlexMediaType.Movie, ct);
+                    if (movieComparisonResult.IsFailed)
+                        return Result.Fail<PagedMediaQueryResult>(movieComparisonResult.Errors);
 
                     var filteredDtos = movieDtos
                         .Where(x => x.ComparisonId == filter.ComparisonState.Value.ToComparisonId())
@@ -202,7 +204,9 @@ public class GetMediaByTypeCommandHandler : ICommandHandler<GetMediaByTypeComman
                         .ToListAsync(ct);
 
                     var movieDtos = movies.Select(x => x.ToSlimDTO()).ToList();
-                    await ApplyComparisonStateAsync(movieDtos, plexLibraryId, PlexMediaType.Movie, ct);
+                    var movieComparisonResult = await ApplyComparisonStateAsync(movieDtos, plexLibraryId, PlexMediaType.Movie, ct);
+                    if (movieComparisonResult.IsFailed)
+                        return Result.Fail<PagedMediaQueryResult>(movieComparisonResult.Errors);
 
                     _response.Items = movieDtos;
                     _response.Roles.AddRange(movies.SelectMany(x => x.Actors)
@@ -238,7 +242,9 @@ public class GetMediaByTypeCommandHandler : ICommandHandler<GetMediaByTypeComman
                 {
                     var tvShows = await tvShowQuery.ToListAsync(ct);
                     var tvShowDtos = tvShows.Select(x => x.ToSlimDTOMapper()).ToList();
-                    await ApplyComparisonStateAsync(tvShowDtos, plexLibraryId, PlexMediaType.TvShow, ct);
+                    var tvShowComparisonResult = await ApplyComparisonStateAsync(tvShowDtos, plexLibraryId, PlexMediaType.TvShow, ct);
+                    if (tvShowComparisonResult.IsFailed)
+                        return Result.Fail<PagedMediaQueryResult>(tvShowComparisonResult.Errors);
 
                     var filteredDtos = tvShowDtos
                         .Where(x => x.ComparisonId == filter.ComparisonState.Value.ToComparisonId())
@@ -305,7 +311,9 @@ public class GetMediaByTypeCommandHandler : ICommandHandler<GetMediaByTypeComman
                         .ToListAsync(ct);
 
                     var tvShowDtos = tvShows.Select(x => x.ToSlimDTOMapper()).ToList();
-                    await ApplyComparisonStateAsync(tvShowDtos, plexLibraryId, PlexMediaType.TvShow, ct);
+                    var tvShowComparisonResult = await ApplyComparisonStateAsync(tvShowDtos, plexLibraryId, PlexMediaType.TvShow, ct);
+                    if (tvShowComparisonResult.IsFailed)
+                        return Result.Fail<PagedMediaQueryResult>(tvShowComparisonResult.Errors);
 
                     _response.Items = tvShowDtos;
                     _response.Roles.AddRange(tvShows.SelectMany(x => x.Actors)
@@ -419,19 +427,22 @@ public class GetMediaByTypeCommandHandler : ICommandHandler<GetMediaByTypeComman
         SetNavigationIndexes(await rows.ToListAsync(ct), options);
     }
 
-    private async Task ApplyComparisonStateAsync(
+    private async Task<Result> ApplyComparisonStateAsync(
         List<PlexMediaSlimDTO> items,
         int plexLibraryId,
         PlexMediaType mediaType,
         CancellationToken ct)
     {
         if (items.Count == 0)
-            return;
+            return Result.Ok();
 
         if (plexLibraryId > 0)
         {
-            await _commandExecutor.Send(new ApplyComparisonStateCommand(items, plexLibraryId, mediaType), ct);
-            return;
+            var result = await _commandExecutor.Send(new ApplyComparisonStateCommand(items, plexLibraryId, mediaType), ct);
+            if (result.IsFailed)
+                return Result.Fail(result.Errors);
+
+            return Result.Ok();
         }
 
         var groupedItemIndexes = items
@@ -443,11 +454,15 @@ public class GetMediaByTypeCommandHandler : ICommandHandler<GetMediaByTypeComman
         {
             var indexes = group.Select(x => x.Index).ToList();
             var libraryItems = indexes.Select(index => items[index]).ToList();
-            await _commandExecutor.Send(new ApplyComparisonStateCommand(libraryItems, group.Key, mediaType), ct);
+            var result = await _commandExecutor.Send(new ApplyComparisonStateCommand(libraryItems, group.Key, mediaType), ct);
+            if (result.IsFailed)
+                return Result.Fail(result.Errors);
 
             for (var i = 0; i < indexes.Count; i++)
                 items[indexes[i]] = libraryItems[i];
         }
+
+        return Result.Ok();
     }
 
     private void SetNavigationIndexes(IEnumerable<MediaNavigationIndexRow> rows, QueryOptions options)

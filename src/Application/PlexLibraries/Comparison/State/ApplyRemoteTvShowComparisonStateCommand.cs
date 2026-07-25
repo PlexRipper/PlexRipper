@@ -109,19 +109,17 @@ public class ApplyRemoteTvShowComparisonStateCommandHandler
         var remoteEpisodeCountLookup = remoteEpisodes
             .GroupBy(x => x.TvShowId)
             .ToDictionary(x => x.Key, x => x.Count());
-        var remoteEpisodeShowLookup = remoteEpisodes.ToDictionary(x => x.Id, x => x.TvShowId);
-        var remoteEpisodeIds = remoteEpisodeShowLookup.Keys.ToHashSet();
-
-        var episodeHits = await _dbContext.PlexEpisodeComparisons
-            .Where(x =>
-                x.RemotePlexLibraryId == command.RemoteLibraryId
-                && currentOwnedLibraryIds.Contains(x.OwnedPlexLibraryId)
-                && remoteEpisodeIds.Contains(x.RemotePlexMediaId))
-            .Select(x => new { x.RemotePlexMediaId, x.HitState })
+        var episodeHits = await (
+            from comparison in _dbContext.PlexEpisodeComparisons
+            join episode in _dbContext.PlexTvShowEpisodes on comparison.RemotePlexMediaId equals episode.Id
+            where comparison.RemotePlexLibraryId == command.RemoteLibraryId
+                  && currentOwnedLibraryIds.Contains(comparison.OwnedPlexLibraryId)
+                  && itemIds.Contains(episode.TvShowId)
+            select new { episode.TvShowId, comparison.RemotePlexMediaId, comparison.HitState })
             .ToListAsync(ct);
 
         var episodeHitLookup = episodeHits
-            .GroupBy(x => remoteEpisodeShowLookup[x.RemotePlexMediaId])
+            .GroupBy(x => x.TvShowId)
             .ToDictionary(
                 g => g.Key,
                 g => new

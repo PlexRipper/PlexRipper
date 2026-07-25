@@ -112,13 +112,6 @@
             "library-disabled": "La bibliothèque \"{library}\" est désactivée. Activez-la puis resynchronisez-la avant d'afficher ses médias.",
             "enable-library-button": "Activer la bibliothèque",
             "comparison": {
-                "comparison-missing": "Absent de la bibliothèque possédée",
-                "comparison-higher-quality": "Qualité supérieure disponible",
-                "comparison-owned": "Déjà possédé",
-                "comparison-not-compared": "Pas encore comparé",
-                "comparison-pending": "Comparaison en cours",
-                "comparison-partial": "Partiel",
-                "comparison-partial-and-higher-quality": "Partiel + qualité",
                 "details-column-title": "Title",
                 "details-column-quality": "Quality",
                 "details-column-size": "Size",
@@ -418,7 +411,7 @@
                 "genre": "Genre",
                 "roles": "Les rôles",
                 "quality": "Qualité",
-                "comparison-state": "État de comparaison"
+                "comparison-state": "Comparaison des médias"
             }
         },
         "alert-display-debug": {
@@ -485,6 +478,16 @@
         }
     },
     "general": {
+        "comparison": {
+            "comparison-missing": "Manquant",
+            "comparison-higher-quality": "Qualité supérieure disponible",
+            "comparison-owned": "Déjà possédé",
+            "comparison-not-compared": "Non comparé",
+            "comparison-pending": "Comparaison en cours",
+            "comparison-partial": "Partiel",
+            "comparison-partial-and-higher-quality": "Partiel + qualité",
+            "unknown": "État de comparaison inconnu"
+        },
         "logs": {
             "level": {
                 "debug": "Débogage",

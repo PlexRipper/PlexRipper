@@ -112,13 +112,6 @@
             "library-disabled": "Die Mediathek \"{library}\" ist deaktiviert. Aktivieren Sie sie und synchronisieren Sie sie erneut, bevor Sie ihre Medien anzeigen.",
             "enable-library-button": "Mediathek aktivieren",
             "comparison": {
-                "comparison-missing": "Fehlt in eigener Mediathek",
-                "comparison-higher-quality": "Höhere Qualität verfügbar",
-                "comparison-owned": "Bereits vorhanden",
-                "comparison-not-compared": "Noch nicht verglichen",
-                "comparison-pending": "Vergleich läuft",
-                "comparison-partial": "Teilweise vorhanden",
-                "comparison-partial-and-higher-quality": "Teilweise + Qualität",
                 "details-column-title": "Title",
                 "details-column-quality": "Quality",
                 "details-column-size": "Size",
@@ -418,7 +411,7 @@
                 "genre": "Genre",
                 "roles": "Rollen",
                 "quality": "Qualität",
-                "comparison-state": "Vergleichsstatus"
+                "comparison-state": "Medienvergleich"
             }
         },
         "alert-display-debug": {
@@ -485,6 +478,16 @@
         }
     },
     "general": {
+        "comparison": {
+            "comparison-missing": "Fehlen",
+            "comparison-higher-quality": "Höhere Qualität verfügbar",
+            "comparison-owned": "Bereits vorhanden",
+            "comparison-not-compared": "Nicht verglichen",
+            "comparison-pending": "Vergleich läuft",
+            "comparison-partial": "Teilweise vorhanden",
+            "comparison-partial-and-higher-quality": "Teilweise + Qualität",
+            "unknown": "Unbekannter Vergleichszustand"
+        },
         "logs": {
             "level": {
                 "debug": "Debug",

@@ -112,13 +112,6 @@
             "library-disabled": "Biblioteka \"{library}\" jest wyłączona. Włącz ją i zsynchronizuj ponownie, zanim wyświetlisz jej multimedia.",
             "enable-library-button": "Włącz bibliotekę",
             "comparison": {
-                "comparison-missing": "Brak w posiadanej bibliotece",
-                "comparison-higher-quality": "Dostępna wyższa jakość",
-                "comparison-owned": "Już posiadane",
-                "comparison-not-compared": "Jeszcze nie porównano",
-                "comparison-pending": "Porównywanie w toku",
-                "comparison-partial": "Częściowo",
-                "comparison-partial-and-higher-quality": "Częściowo + jakość",
                 "details-column-title": "Title",
                 "details-column-quality": "Quality",
                 "details-column-size": "Size",
@@ -418,7 +411,7 @@
                 "genre": "Genre",
                 "roles": "Role",
                 "quality": "Jakość",
-                "comparison-state": "Stan porównania"
+                "comparison-state": "Porównanie mediów"
             }
         },
         "alert-display-debug": {
@@ -485,6 +478,16 @@
         }
     },
     "general": {
+        "comparison": {
+            "comparison-missing": "Zaginiony",
+            "comparison-higher-quality": "Dostępna wyższa jakość",
+            "comparison-owned": "Już posiadane",
+            "comparison-not-compared": "Nie porównano",
+            "comparison-pending": "Porównywanie w toku",
+            "comparison-partial": "Częściowo",
+            "comparison-partial-and-higher-quality": "Częściowo + jakość",
+            "unknown": "Nieznany stan porównania"
+        },
         "logs": {
             "level": {
                 "debug": "Debugowanie",

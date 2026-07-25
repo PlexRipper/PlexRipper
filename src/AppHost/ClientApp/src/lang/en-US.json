@@ -112,13 +112,6 @@
             "library-disabled": "The library \"{library}\" is disabled. Enable it and resync the library before viewing its media.",
             "enable-library-button": "Enable library",
             "comparison": {
-                "comparison-missing": "Missing from owned library",
-                "comparison-higher-quality": "Higher quality available",
-                "comparison-owned": "Already owned",
-                "comparison-not-compared": "Not compared yet",
-                "comparison-pending": "Comparison in progress",
-                "comparison-partial": "Partial",
-                "comparison-partial-and-higher-quality": "Partial + quality",
                 "details-column-title": "Title",
                 "details-column-quality": "Quality",
                 "details-column-size": "Size",
@@ -418,7 +411,7 @@
                 "genre": "Genre",
                 "roles": "Roles",
                 "quality": "Quality",
-                "comparison-state": "Meda Comparison"
+                "comparison-state": "Media Comparison"
             }
         },
         "alert-display-debug": {
@@ -485,6 +478,16 @@
         }
     },
     "general": {
+        "comparison": {
+            "comparison-missing": "Missing",
+            "comparison-higher-quality": "Higher quality available",
+            "comparison-owned": "Already owned",
+            "comparison-not-compared": "Not compared",
+            "comparison-pending": "Comparison in progress",
+            "comparison-partial": "Partial",
+            "comparison-partial-and-higher-quality": "Partial + quality",
+            "unknown": "Unknown comparison state"
+        },
         "logs": {
             "level": {
                 "debug": "Debug",

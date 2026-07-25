@@ -28,31 +28,30 @@ export function getPlexMediaComparisonState(mediaItem: PlexMediaSlimDTO): PlexMe
 export function translateMediaComparisonState(state: PlexMediaComparisonState): string {
 	const { $i18n } = useNuxtApp();
 	const { t } = $i18n;
-
 	switch (state) {
 		case PlexMediaComparisonState.NotCompared:
-			return t('components.media-overview.comparison.comparison-not-compared');
+			return t('general.comparison.comparison-not-compared');
 
 		case PlexMediaComparisonState.Owned:
-			return t('components.media-overview.comparison.comparison-owned');
+			return t('general.comparison.comparison-owned');
 
 		case PlexMediaComparisonState.Missing:
-			return t('components.media-overview.comparison.comparison-missing');
+			return t('general.comparison.comparison-missing');
 
 		case PlexMediaComparisonState.HigherQuality:
-			return t('components.media-overview.comparison.comparison-higher-quality');
+			return t('general.comparison.comparison-higher-quality');
 
 		case PlexMediaComparisonState.Pending:
-			return t('components.media-overview.comparison.comparison-pending');
+			return t('general.comparison.comparison-pending');
 
 		case PlexMediaComparisonState.Partial:
-			return t('components.media-overview.comparison.comparison-partial');
+			return t('general.comparison.comparison-partial');
 
 		case PlexMediaComparisonState.PartialAndHigherQuality:
-			return t('components.media-overview.comparison.comparison-partial-and-higher-quality');
+			return t('general.comparison.comparison-partial-and-higher-quality');
 
 		case PlexMediaComparisonState.Unknown:
 		default:
-			return t('components.media-overview.comparison.unknown');
+			return t('general.comparison.unknown');
 	}
 }

@@ -56,7 +56,7 @@ const getQualityDisplay = (quality: VideoQuality): {
 	switch (quality) {
 		case VideoQuality.None:
 			return {
-				color: 'black',
+				color: 'grey-7',
 				label: translateVideoQuality(VideoQuality.None),
 			};
 		case VideoQuality.SubSD144P:

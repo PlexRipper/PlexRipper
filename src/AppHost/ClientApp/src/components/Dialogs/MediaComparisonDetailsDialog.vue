@@ -49,10 +49,22 @@
 							</span>
 						</q-td>
 					</template>
-					<template #body-cell-reason="scope">
-						<q-td :props="scope">
+					<!-- Owned Quality	-->
+					<template #body-cell-ownedQuality="{ row }: { row: IComparisonDetailRow }">
+						<q-td class="text-eclipse">
+							<MediaVideoQuality :quality="row.ownedQuality" />
+						</q-td>
+					</template>
+					<!-- Remote Quality	-->
+					<template #body-cell-remoteQuality="{ row }: { row: IComparisonDetailRow }">
+						<q-td class="text-eclipse">
+							<MediaVideoQuality :quality="row.remoteQuality" />
+						</q-td>
+					</template>
+					<template #body-cell-reason="{ row } : {row: IComparisonDetailRow }">
+						<q-td>
 							<MediaComparisonStateButton
-								:comparison-state="scope.row.comparisonState"
+								:comparison-state="row.comparisonState"
 								show-tooltip
 								dense />
 						</q-td>
@@ -93,13 +105,13 @@ import { PlexMediaComparisonState, VideoQuality } from '@dto';
 import type { PlexMediaComparisonDetailsRowDTO, PlexMediaSlimDTO } from '@dto';
 import { DialogType } from '@enums';
 import { useMediaStore } from '@store';
-import { getPlexMediaComparisonState } from '@composables';
+import { getPlexMediaComparisonState, getPlexMediaComparisonStateFromId } from '@composables';
 
 interface IComparisonDetailRow {
 	key: string;
 	title: string;
-	remoteQuality: string;
-	ownedQuality: string;
+	remoteQuality: VideoQuality;
+	ownedQuality: VideoQuality;
 	remoteLocation: string;
 	ownedLocation: string;
 	comparisonState: PlexMediaComparisonState;
@@ -121,15 +133,15 @@ const columns: QTableColumn[] = [
 		align: 'left',
 	},
 	{
-		name: 'remoteQuality',
-		label: t('components.media-overview.comparison.details-column-remote-quality'),
-		field: 'remoteQuality',
-		align: 'left',
-	},
-	{
 		name: 'ownedQuality',
 		label: t('components.media-overview.comparison.details-column-owned-quality'),
 		field: 'ownedQuality',
+		align: 'left',
+	},
+	{
+		name: 'remoteQuality',
+		label: t('components.media-overview.comparison.details-column-remote-quality'),
+		field: 'remoteQuality',
 		align: 'left',
 	},
 	{
@@ -158,11 +170,11 @@ const detailRows = computed(() => {
 		.map((row): IComparisonDetailRow => ({
 			key: `${row.type}-${row.id}`,
 			title: row.title,
-			remoteQuality: qualityLabel(row.remoteQuality),
-			ownedQuality: qualityLabel(row.ownedQuality),
+			ownedQuality: row.ownedQuality ?? VideoQuality.None,
+			remoteQuality: row.remoteQuality ?? VideoQuality.None,
 			remoteLocation: locationLabel(row.remoteLocation, row.remoteLibraryTitle),
 			ownedLocation: locationLabel(row.ownedLocation, row.ownedLibraryTitle),
-			comparisonState: row.state,
+			comparisonState: getPlexMediaComparisonStateFromId(row.comparisonId),
 			level: row.level,
 		}));
 });
@@ -179,10 +191,6 @@ function onOpen(value: unknown) {
 			error: () => set(loading, false),
 		}),
 	);
-}
-
-function qualityLabel(quality?: VideoQuality | null): string {
-	return quality && quality !== VideoQuality.Unknown ? quality : t('general.error.unknown');
 }
 
 function locationLabel(location: string, libraryTitle: string): string {

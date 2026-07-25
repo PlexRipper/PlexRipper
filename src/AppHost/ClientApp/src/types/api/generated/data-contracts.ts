@@ -907,6 +907,8 @@ export interface PlexMediaComparisonDetailsDTO {
 
 export interface PlexMediaComparisonDetailsRowDTO {
   /** @format int32 */
+  comparisonId: number;
+  /** @format int32 */
   id: number;
   isActionable: boolean;
   /** @format int32 */
@@ -921,7 +923,6 @@ export interface PlexMediaComparisonDetailsRowDTO {
   remoteLibraryTitle: string;
   remoteLocation: string;
   remoteQuality?: VideoQuality | null;
-  state: PlexMediaComparisonState;
   title: string;
   type: PlexMediaType;
 }

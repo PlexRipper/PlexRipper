@@ -15,7 +15,7 @@
 				<QText :value="row.title" />
 			</q-td>
 		</template>
-		<!-- Media Quality bar	-->
+		<!-- Media Quality	-->
 		<template #body-cell-quality="{ row }: { row: PlexMediaSlimDTO }">
 			<q-td class="text-eclipse">
 				<MediaQuality :qualities="row.qualities" />

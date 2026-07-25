@@ -33,18 +33,19 @@ Never use WebStorm MCP tools for backend work under `src/` excluding `ClientApp/
 
 After one successful MCP discovery or server health check in a session, reuse these known-good exact tool names instead of repeatedly rediscovering them:
 
-| Action | Tool | Wrapper |
-| --- | --- | --- |
-| Read file/range | `rider-official:read_file` | `mcpproxy_call_tool_read` |
-| Read full file | `rider-official:get_file_text_by_path` | `mcpproxy_call_tool_read` |
-| Create file | `rider-official:create_new_file` | `mcpproxy_call_tool_write` |
-| Replace text | `rider-official:replace_text_in_file` | `mcpproxy_call_tool_write` |
-| Search text | `rider-official:search_in_files_by_text` | `mcpproxy_call_tool_read` |
-| Search regex | `rider-official:search_in_files_by_regex` | `mcpproxy_call_tool_read` |
-| File diagnostics | `rider-official:get_file_problems` | `mcpproxy_call_tool_read` |
-| Run configurations | `rider-official:get_run_configurations` | `mcpproxy_call_tool_read` |
+| Action | Tool |
+| --- | --- |
+| Read file/range | `rider-official:read_file` |
+| Read full file | `rider-official:get_file_text_by_path` |
+| Create file | `rider-official:create_new_file` |
+| Replace text | `rider-official:replace_text_in_file` |
+| Delete file | `rider-official:delete_file` |
+| Search text | `rider-official:search_in_files_by_text` |
+| Search regex | `rider-official:search_in_files_by_regex` |
+| File diagnostics | `rider-official:get_file_problems` |
+| Run configurations | `rider-official:get_run_configurations` |
 
-Only rerun broad `mcpproxy_retrieve_tools` discovery when a needed capability is not in this table, a cached tool fails, or the target MCP server changes.
+Only rediscover tools when a needed capability is not in this table, a cached tool fails, or the target MCP server changes.
 
 ### Rider MCP retry rule
 
@@ -219,14 +220,14 @@ Do not run `dotnet build` or project build commands for backend error discovery.
 
 When `dotnet-test-mcp` is available, always use it for backend test execution instead of terminal-style `dotnet run` commands or Rider run configurations. Exact known tools are:
 
-| Action | Tool | Wrapper |
-| --- | --- | --- |
-| List test projects | `dotnet-test-mcp:list_test_projects` | `mcpproxy_call_tool_read` |
-| List tests summary | `dotnet-test-mcp:list_tests_summary` | `mcpproxy_call_tool_read` |
-| Run single test | `dotnet-test-mcp:run_single_test` | `mcpproxy_call_tool_read` |
-| Run test class | `dotnet-test-mcp:run_all_tests_in_class` | `mcpproxy_call_tool_read` |
-| Run test project | `dotnet-test-mcp:run_all_tests_for_project` | `mcpproxy_call_tool_read` |
-| Run all tests | `dotnet-test-mcp:run_all_tests` | `mcpproxy_call_tool_read` |
+| Action | Tool |
+| --- | --- |
+| List test projects | `dotnet-test-mcp:list_test_projects` |
+| List tests summary | `dotnet-test-mcp:list_tests_summary` |
+| Run single test | `dotnet-test-mcp:run_single_test` |
+| Run test class | `dotnet-test-mcp:run_all_tests_in_class` |
+| Run test project | `dotnet-test-mcp:run_all_tests_for_project` |
+| Run all tests | `dotnet-test-mcp:run_all_tests` |
 
 Use direct calls to these exact tools after one successful MCP discovery/health check; retrieval can miss them. Fall back to Rider run configurations only when `dotnet-test-mcp` is disabled, quarantined, unhealthy, or fails with a tool/server error.
 

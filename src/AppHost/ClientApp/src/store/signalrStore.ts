@@ -26,15 +26,21 @@ import type {
 	ServerDownloadProgressDTO,
 	ServerDownloadProgressMessagePackDTO,
 	LiveLogEventDTO,
+	LibraryComparisonCompletedDTO,
 } from '@dto';
 import { RefreshDataType, MessageTypes } from '@dto';
 import type { IRetryPolicy } from '@microsoft/signalr/src/IRetryPolicy';
-import { useDownloadStore, useBackgroundJobsStore, useNotificationsStore, useLibraryStore } from '@store';
+import {
+	useDownloadStore,
+	useBackgroundJobsStore,
+	useNotificationsStore,
+	useLibraryStore,
+	useMediaOverviewStore,
+} from '@store';
 import Axios from 'axios';
 import { MessagePackHubProtocol } from '@microsoft/signalr-protocol-msgpack';
 
-export enum HubName
-{
+export enum HubName {
 	Progress = 'progress',
 	Download = 'download',
 	Notifications = 'notifications',
@@ -170,6 +176,8 @@ export const useSignalrStore = defineStore(StoreNames.SignalrStore, () => {
 		progressHubConnection?.on(MessageTypes.JobStatusUpdate, (data) => backgroundStore.setStatusJobUpdate(data));
 
 		progressHubConnection?.on(MessageTypes.AppUpdateDownloadProgress, (data: AppUpdateDownloadProgressDTO) => state.appUpdateDownloadProgressSubject.next(data));
+
+		progressHubConnection?.on(MessageTypes.LibraryComparisonCompleted, (data: LibraryComparisonCompletedDTO) => useMediaOverviewStore().refreshCurrentMediaDataWhenComparisonCompleted(data).subscribe());
 
 		notificationHubConnection?.on(MessageTypes.Notification, (data: NotificationDTO) => notificationsStore.setNotification(data));
 

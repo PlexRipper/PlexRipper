@@ -11,6 +11,7 @@ import {
 	type PlexMediaStatisticsDTO,
 	PlexMediaType,
 	ViewMode,
+	type LibraryComparisonCompletedDTO,
 } from '@dto';
 import type { IMediaOverviewSort } from '@composables/event-bus';
 import { MediaSortField, SortDirection } from '@enums';
@@ -117,6 +118,7 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 	const libraryStore = useLibraryStore();
 	const mediaPages = new Map<number, readonly PlexMediaSlimDTO[]>();
 	const pendingPages = new Set<number>();
+	const comparisonRefreshKeysInFlight = new Set<string>();
 	let cacheRetryTimer: ReturnType<typeof setInterval> | null = null;
 
 	const searchQuery = useRouteQuery('q', '', { mode: 'replace' });
@@ -166,6 +168,43 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 			state.mediaPagesVersion++;
 			state.serverError = false;
 			state.cacheRetrySeconds = 0;
+		},
+		refreshCurrentMediaDataWhenComparisonCompleted(notification: LibraryComparisonCompletedDTO): Observable<PlexMediaStatisticsDTO | null> {
+			const mediaType = get(getters.getMediaType);
+			const libraryId = state.libraryId;
+
+			if (libraryId <= 0 || mediaType !== notification.mediaType || !notification.affectedLibraryIds.includes(libraryId)) {
+				return of(null);
+			}
+
+			const refreshKey = getters.getCurrentRequestKey();
+			if (comparisonRefreshKeysInFlight.has(refreshKey)) {
+				return of(null);
+			}
+
+			const pagesToRefresh = Array.from(mediaPages.keys());
+			if (pagesToRefresh.length === 0) {
+				return of(null);
+			}
+
+			comparisonRefreshKeysInFlight.add(refreshKey);
+			Log.debug('Refreshing previously requested media pages after comparison completed', {
+				libraryId,
+				mediaType,
+				pages: pagesToRefresh,
+			});
+
+			mediaPages.clear();
+			pendingPages.clear();
+			state.itemsLength = 0;
+			state.queryHash = '';
+			state.mediaPagesVersion++;
+
+			const requests = pagesToRefresh.map((page) => actions.requestMediaPage(page, state.pageSize));
+			return forkJoin(requests).pipe(
+				finalize(() => comparisonRefreshKeysInFlight.delete(refreshKey)),
+				map(() => null),
+			);
 		},
 		initializeLibrary(libraryId: number): Observable<PlexMediaStatisticsDTO | null> {
 			// Cancel any in-flight requests first
@@ -586,6 +625,20 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 		}),
 		allMediaMode: computed(() => state.libraryId === 0),
 		library: computed(() => libraryStore.getLibrary(state.libraryId)),
+		getCurrentRequestKey: (): string => JSON.stringify({
+			libraryId: state.libraryId,
+			mediaType: get(getters.getMediaType),
+			pageSize: state.pageSize,
+			sort: get(getters.getSortDSL),
+			query: state.filterQuery,
+			countryId: state.metadata.countryId,
+			genreId: state.metadata.genreId,
+			qualityId: state.metadata.qualityId,
+			comparisonState: state.metadata.comparisonState,
+			roleId: state.metadata.roleId,
+			filterOwnedMedia: settingsStore.generalSettings.hideMediaFromOwnedServers,
+			filterOfflineMedia: settingsStore.generalSettings.hideMediaFromOfflineServers,
+		}),
 		getMediaItems: computed((): Readonly<PlexMediaSlimDTO[]> => {
 			void state.mediaPagesVersion; // Trigger reactive change
 			return Array.from(mediaPages.values()).flat();
@@ -693,13 +746,31 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 			const { $i18n } = useNuxtApp();
 			const { t } = $i18n;
 			return [
-				{ value: PlexMediaComparisonState.NotCompared, label: t('components.media-overview.comparison.comparison-not-compared') },
+				{
+					value: PlexMediaComparisonState.NotCompared,
+					label: t('components.media-overview.comparison.comparison-not-compared'),
+				},
 				{ value: PlexMediaComparisonState.Owned, label: t('components.media-overview.comparison.comparison-owned') },
-				{ value: PlexMediaComparisonState.Missing, label: t('components.media-overview.comparison.comparison-missing') },
-				{ value: PlexMediaComparisonState.HigherQuality, label: t('components.media-overview.comparison.comparison-higher-quality') },
-				{ value: PlexMediaComparisonState.Pending, label: t('components.media-overview.comparison.comparison-pending') },
-				{ value: PlexMediaComparisonState.Partial, label: t('components.media-overview.comparison.comparison-partial') },
-				{ value: PlexMediaComparisonState.PartialAndHigherQuality, label: t('components.media-overview.comparison.comparison-partial-and-higher-quality') },
+				{
+					value: PlexMediaComparisonState.Missing,
+					label: t('components.media-overview.comparison.comparison-missing'),
+				},
+				{
+					value: PlexMediaComparisonState.HigherQuality,
+					label: t('components.media-overview.comparison.comparison-higher-quality'),
+				},
+				{
+					value: PlexMediaComparisonState.Pending,
+					label: t('components.media-overview.comparison.comparison-pending'),
+				},
+				{
+					value: PlexMediaComparisonState.Partial,
+					label: t('components.media-overview.comparison.comparison-partial'),
+				},
+				{
+					value: PlexMediaComparisonState.PartialAndHigherQuality,
+					label: t('components.media-overview.comparison.comparison-partial-and-higher-quality'),
+				},
 			];
 		}),
 		getFilterChips: computed(() => {

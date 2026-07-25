@@ -561,6 +561,13 @@ export interface LanguageSettingsDTO {
   language: string;
 }
 
+export interface LibraryComparisonCompletedDTO {
+  affectedLibraryIds: number[];
+  /** @format date-time */
+  completedAt: string;
+  mediaType: PlexMediaType;
+}
+
 export interface LibrarySyncJobQueueDTO {
   /** @format date-time */
   completedAt?: string | null;
@@ -684,6 +691,7 @@ export enum MessageTypes {
   RefreshNotification = "RefreshNotification",
   AppUpdateDownloadProgress = "AppUpdateDownloadProgress",
   LogEvent = "LogEvent",
+  LibraryComparisonCompleted = "LibraryComparisonCompleted",
 }
 
 export interface MoveDownloadFileJobUpdateDTO {

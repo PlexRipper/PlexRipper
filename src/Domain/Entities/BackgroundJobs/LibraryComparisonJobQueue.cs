@@ -6,6 +6,7 @@ namespace Reaparr.Domain;
 /// <remarks>
 /// The composite key intentionally de-duplicates by remote library, owned library, and media type so repeated sync or
 /// ownership invalidations refresh the same pending work instead of creating duplicate Quartz jobs.
+/// Lower numeric <see cref="Priority"/> values run first; movies currently use 1 so they run before slower TV comparisons.
 /// </remarks>
 [Table("BackgroundJobLibraryComparisonJobQueues")]
 public class LibraryComparisonJobQueue

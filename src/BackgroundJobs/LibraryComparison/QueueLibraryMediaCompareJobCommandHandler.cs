@@ -60,6 +60,7 @@ public class QueueLibraryMediaCompareJobCommandHandler : ICommandHandler<QueueLi
                     RemotePlexLibraryId = remoteLibraryId,
                     OwnedPlexLibraryId = ownedLibraryId,
                     MediaType = mediaType,
+                    // Lower numeric values run first; movie comparisons are quicker and should drain before TV comparisons.
                     Priority = mediaType == PlexMediaType.Movie ? 1 : 2,
                     Status = LibrarySyncJobStatus.Queued,
                     CreatedAt = DateTime.UtcNow,

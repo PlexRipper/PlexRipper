@@ -116,7 +116,7 @@
 <script setup lang="ts">
 import Log from 'consola';
 import { useSubscription } from '@vueuse/rxjs';
-import { type DownloadMediaDTO, LibrarySyncJobStatus, PlexMediaType, ViewMode } from '@dto';
+import { type DownloadMediaDTO, PlexMediaType, ViewMode } from '@dto';
 import { DialogType } from '@enums';
 import type { IMediaOverviewBarActions } from '@interfaces';
 import {
@@ -137,7 +137,6 @@ const mediaOverviewStore = useMediaOverviewStore();
 const downloadStore = useDownloadStore();
 const libraryStore = useLibraryStore();
 const dialogStore = useDialogStore();
-const backgroundJobsStore = useBackgroundJobsStore();
 
 const props = defineProps<{
 	libraryId: number;
@@ -273,18 +272,6 @@ onMounted(() => {
 			},
 		}),
 	);
-
-	// Library sync job subscription
-	useSubscription(backgroundJobsStore.getLibrarySyncJobUpdate().subscribe((value) => {
-		const queue = value.data;
-		if (queue.plexLibraryId !== mediaOverviewStore.libraryId) {
-			return;
-		}
-
-		if (queue.status === LibrarySyncJobStatus.Completed) {
-			useSubscription(mediaOverviewStore.refreshMediaData().subscribe());
-		}
-	}));
 });
 </script>
 

@@ -148,6 +148,7 @@
 									:comparison-state="comparisonState.value"
 									show-label
 									dense
+									flat
 									:cy="`comparison-filter-option-${comparisonState.value}`" />
 							</q-item-section>
 						</q-item>

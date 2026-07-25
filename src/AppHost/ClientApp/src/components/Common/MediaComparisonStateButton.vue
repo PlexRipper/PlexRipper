@@ -5,6 +5,7 @@
 			'media-comparison-state-button--with-label': showLabel,
 			'media-comparison-state-button--dense': dense,
 			'media-comparison-state-button--clickable': clickable,
+			'media-comparison-state-button--flat': flat,
 			[`media-comparison-state-button--${comparisonBadge.tone}`]: true,
 		}">
 		<BaseButton
@@ -25,21 +26,6 @@
 import { PlexMediaComparisonState } from '@dto';
 import { translateMediaComparisonState } from '@composables';
 
-type ComparisonBadgeTone
-	= 'not-compared'
-		| 'owned'
-		| 'missing'
-		| 'higher-quality'
-		| 'pending'
-		| 'partial'
-		| 'partial-and-higher-quality'
-		| 'unknown';
-
-interface IComparisonStateBadge {
-	icon: string;
-	tone: ComparisonBadgeTone;
-}
-
 const props = withDefaults(defineProps<{
 	comparisonState: PlexMediaComparisonState;
 	showTooltip?: boolean;
@@ -57,7 +43,7 @@ const props = withDefaults(defineProps<{
 	showLabel: false,
 	size: '1rem',
 	dense: false,
-	flat: true,
+	flat: false,
 	round: false,
 	rounded: true,
 	outline: false,
@@ -69,7 +55,17 @@ const emit = defineEmits<{
 	(e: 'click'): void;
 }>();
 
-const comparisonBadge = computed((): IComparisonStateBadge => {
+const comparisonBadge = computed((): {
+	icon: string;
+	tone: 'not-compared'
+		| 'owned'
+		| 'missing'
+		| 'higher-quality'
+		| 'pending'
+		| 'partial'
+		| 'partial-and-higher-quality'
+		| 'unknown';
+} => {
 	switch (props.comparisonState) {
 		case PlexMediaComparisonState.NotCompared:
 			return {
@@ -137,12 +133,19 @@ function onClick() {
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.55);
     backdrop-filter: blur(4px);
     text-transform: none;
-    cursor: default;
 
     .q-icon,
     .block {
       color: currentColor !important;
     }
+  }
+}
+
+.media-comparison-state-button--flat {
+  .q-btn {
+    background: transparent;
+    box-shadow: none;
+    backdrop-filter: none;
   }
 }
 

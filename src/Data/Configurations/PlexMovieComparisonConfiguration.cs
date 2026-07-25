@@ -4,16 +4,13 @@ public class PlexMovieComparisonConfiguration : IEntityTypeConfiguration<PlexMov
 {
     public void Configure(EntityTypeBuilder<PlexMovieComparison> builder)
     {
-        builder.HasIndex(x => new { x.OwnedPlexLibraryId, x.OwnedPlexMediaId })
-            .HasDatabaseName("IX_PlexMovieComparison_OwnedOwned");
+        builder.HasIndex(x => new { x.OwnedPlexLibraryId, x.OwnedPlexMediaId });
 
-        builder.HasIndex(x => new { x.RemotePlexLibraryId, x.OwnedPlexLibraryId, x.HitState })
-            .HasDatabaseName("IX_PlexMovieComparison_RemoteOwnedState");
+        builder.HasIndex(x => new { x.RemotePlexLibraryId, x.OwnedPlexLibraryId, x.HitState });
 
         builder.HasIndex(x =>
                 new { x.RemotePlexLibraryId, x.OwnedPlexLibraryId, x.RemotePlexMediaId, x.OwnedPlexMediaId }
             )
-            .HasDatabaseName("UX_PlexMovieComparison_RemoteOwnedMedia")
             .IsUnique();
 
         builder.HasOne<PlexLibrary>()

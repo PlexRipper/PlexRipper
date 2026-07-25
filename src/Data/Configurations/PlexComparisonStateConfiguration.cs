@@ -11,7 +11,6 @@ public class PlexComparisonStateConfiguration : IEntityTypeConfiguration<PlexCom
             .IsUnicode(false);
 
         builder.HasIndex(x => new { x.RemotePlexLibraryId, x.OwnedPlexLibraryId, x.MediaType })
-            .HasDatabaseName("UX_PlexComparisonScopes_RemoteOwnedType")
             .IsUnique();
     }
 }

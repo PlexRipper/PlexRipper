@@ -4,16 +4,13 @@ public class PlexEpisodeComparisonConfiguration : IEntityTypeConfiguration<PlexE
 {
     public void Configure(EntityTypeBuilder<PlexEpisodeComparison> builder)
     {
-        builder.HasIndex(x => new { x.OwnedPlexLibraryId, x.OwnedPlexMediaId })
-            .HasDatabaseName("IX_PlexEpisodeComparison_OwnedOwned");
+        builder.HasIndex(x => new { x.OwnedPlexLibraryId, x.OwnedPlexMediaId });
 
-        builder.HasIndex(x => new { x.RemotePlexLibraryId, x.OwnedPlexLibraryId, x.HitState })
-            .HasDatabaseName("IX_PlexEpisodeComparison_RemoteOwnedState");
+        builder.HasIndex(x => new { x.RemotePlexLibraryId, x.OwnedPlexLibraryId, x.HitState });
 
         builder.HasIndex(x =>
                 new { x.RemotePlexLibraryId, x.OwnedPlexLibraryId, x.RemotePlexMediaId, x.OwnedPlexMediaId }
             )
-            .HasDatabaseName("UX_PlexEpisodeComparison_RemoteOwnedMedia")
             .IsUnique();
 
         builder.HasOne<PlexLibrary>().WithMany().HasForeignKey(x => x.RemotePlexLibraryId).OnDelete(DeleteBehavior.Cascade);

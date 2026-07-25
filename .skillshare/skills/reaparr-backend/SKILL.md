@@ -44,6 +44,11 @@ After one successful MCP discovery or server health check in a session, reuse th
 | Search regex | `rider-official:search_in_files_by_regex` |
 | File diagnostics | `rider-official:get_file_problems` |
 | Run configurations | `rider-official:get_run_configurations` |
+| List run configs + status | `rider-official:list_run_configurations` |
+| Launch run config | `rider-official:start_run_configuration` |
+| Build solution | `rider-official:build_solution` |
+| Trigger IDE action | `rider-official:execute_ide_action` |
+| Console output | `rider-official:get_console_output` |
 
 Only rediscover tools when a needed capability is not in this table, a cached tool fails, or the target MCP server changes.
 
@@ -211,6 +216,17 @@ Rules:
 8. Before finishing any backend code file creation, check whether a new folder was introduced. If yes, use the root project namespace in the code file and update the owning `.csproj.DotSettings` `NamespaceFoldersToSkip` entry.
 9. Re-read changed files after edits to confirm the intended changes landed.
 10. Use Rider MCP intelligence/indexing to find errors that need fixing before claiming completion. Do not run a build as an error-discovery mechanism.
+
+## Apply Backend Changes (Restart in Debug Mode)
+
+Use Rider MCP to stop and relaunch the backend in debug mode. Rider auto-builds on launch, and Hot Reload is not supported on Linux.
+
+1. `list_run_configurations`
+2. If `Reaparr Docker Development` is `running: true`, `execute_ide_action` with `actionId: "Stop"`, then `list_run_configurations` again to confirm it stopped.
+3. `start_run_configuration` with `configurationName: "Reaparr Docker Development"`, `mode: "debug"`
+4. `list_run_configurations` — confirm `running: true`
+
+All calls use `projectPath: {WorkingDirectory}`.
 
 ## Run and Test Commands
 

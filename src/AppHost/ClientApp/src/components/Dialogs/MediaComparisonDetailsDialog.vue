@@ -1,8 +1,7 @@
 <template>
 	<QCardDialog
 		:name="DialogType.MediaComparisonDetailsDialog"
-		width="900px"
-		content-height="60"
+		content-height="80"
 		:loading="loading"
 		close-button
 		cy="media-comparison-details-dialog"
@@ -14,13 +13,15 @@
 				<QCol cols="auto">
 					<MediaComparisonStateButton
 						v-if="selectedMediaItem"
-						:comparison-state="selectedMediaItem.comparisonState"
-						show-label
+						show-tooltip
+						:comparison-state="getPlexMediaComparisonState(selectedMediaItem)"
 						dense
 						cy="media-comparison-details-dialog-state" />
 				</QCol>
 				<QCol>
-					{{ selectedMediaItem?.title ?? t('general.error.unknown') }}
+					<QText size="h4">
+						{{ selectedMediaItem?.title ?? t('general.error.unknown') }}
+					</QText>
 				</QCol>
 			</QRow>
 		</template>
@@ -48,16 +49,11 @@
 							</span>
 						</q-td>
 					</template>
-					<template #body-cell-size="scope">
-						<q-td :props="scope">
-							<QFileSize :size="scope.row.size" />
-						</q-td>
-					</template>
 					<template #body-cell-reason="scope">
 						<q-td :props="scope">
 							<MediaComparisonStateButton
 								:comparison-state="scope.row.comparisonState"
-								show-label
+								show-tooltip
 								dense />
 						</q-td>
 					</template>
@@ -94,16 +90,18 @@ import type { QTableColumn } from 'quasar';
 import { useSubscription } from '@vueuse/rxjs';
 import { get, set } from '@vueuse/core';
 import { PlexMediaComparisonState, VideoQuality } from '@dto';
-import type { PlexMediaDTO, PlexMediaSlimDTO } from '@dto';
+import type { PlexMediaComparisonDetailsRowDTO, PlexMediaSlimDTO } from '@dto';
 import { DialogType } from '@enums';
 import { useMediaStore } from '@store';
+import { getPlexMediaComparisonState } from '@composables';
 
 interface IComparisonDetailRow {
 	key: string;
 	title: string;
-	quality: string;
-	size: number;
-	location: string;
+	remoteQuality: string;
+	ownedQuality: string;
+	remoteLocation: string;
+	ownedLocation: string;
 	comparisonState: PlexMediaComparisonState;
 	level: number;
 }
@@ -112,79 +110,96 @@ const { t } = useI18n();
 const mediaStore = useMediaStore();
 
 const loading = ref(false);
-const mediaDetail = ref<PlexMediaDTO | null>(null);
+const comparisonRows = ref<PlexMediaComparisonDetailsRowDTO[]>([]);
 const selectedMediaItem = ref<PlexMediaSlimDTO | null>(null);
 
-const actionableStates = [
-	PlexMediaComparisonState.Missing,
-	PlexMediaComparisonState.HigherQuality,
-	PlexMediaComparisonState.Partial,
-	PlexMediaComparisonState.PartialAndHigherQuality,
-];
-
 const columns: QTableColumn[] = [
-	{ name: 'title', label: t('components.media-overview.comparison.details-column-title'), field: 'title', align: 'left' },
-	{ name: 'quality', label: t('components.media-overview.comparison.details-column-quality'), field: 'quality', align: 'left' },
-	{ name: 'size', label: t('components.media-overview.comparison.details-column-size'), field: 'size', align: 'left' },
-	{ name: 'location', label: t('components.media-overview.comparison.details-column-location'), field: 'location', align: 'left' },
-	{ name: 'reason', label: t('components.media-overview.comparison.details-column-reason'), field: 'comparisonState', align: 'left' },
+	{
+		name: 'title',
+		label: t('components.media-overview.comparison.details-column-title'),
+		field: 'title',
+		align: 'left',
+	},
+	{
+		name: 'remoteQuality',
+		label: t('components.media-overview.comparison.details-column-remote-quality'),
+		field: 'remoteQuality',
+		align: 'left',
+	},
+	{
+		name: 'ownedQuality',
+		label: t('components.media-overview.comparison.details-column-owned-quality'),
+		field: 'ownedQuality',
+		align: 'left',
+	},
+	{
+		name: 'remoteLocation',
+		label: t('components.media-overview.comparison.details-column-remote-location'),
+		field: 'remoteLocation',
+		align: 'left',
+	},
+	{
+		name: 'ownedLocation',
+		label: t('components.media-overview.comparison.details-column-owned-location'),
+		field: 'ownedLocation',
+		align: 'left',
+	},
+	{
+		name: 'reason',
+		label: t('components.media-overview.comparison.details-column-reason'),
+		field: 'comparisonState',
+		align: 'left',
+	},
 ];
 
 const detailRows = computed(() => {
-	const detail = get(mediaDetail);
-	if (!detail)
-		return [];
-
-	const rows: IComparisonDetailRow[] = [];
-	addActionableRow(rows, detail, 0);
-	for (const child of detail.children) {
-		addActionableRow(rows, child, 1);
-		for (const grandChild of child.children)
-			addActionableRow(rows, grandChild, 2);
-	}
-
-	return rows;
+	return get(comparisonRows)
+		.filter((row) => row.isActionable)
+		.map((row): IComparisonDetailRow => ({
+			key: `${row.type}-${row.id}`,
+			title: row.title,
+			remoteQuality: qualityLabel(row.remoteQuality),
+			ownedQuality: qualityLabel(row.ownedQuality),
+			remoteLocation: locationLabel(row.remoteLocation, row.remoteLibraryTitle),
+			ownedLocation: locationLabel(row.ownedLocation, row.ownedLibraryTitle),
+			comparisonState: row.state,
+			level: row.level,
+		}));
 });
 
 function onOpen(value: unknown) {
 	const mediaItem = value as PlexMediaSlimDTO;
 	set(selectedMediaItem, mediaItem);
 	set(loading, true);
-	set(mediaDetail, null);
+	set(comparisonRows, []);
 	useSubscription(
-		mediaStore.getMediaDataDetailById(mediaItem.id, mediaItem.type).subscribe({
-			next: (detail) => set(mediaDetail, detail),
+		mediaStore.getMediaComparisonDetails(mediaItem.id, mediaItem.type).subscribe({
+			next: (details) => set(comparisonRows, details.rows),
 			complete: () => set(loading, false),
 			error: () => set(loading, false),
 		}),
 	);
 }
 
-function addActionableRow(rows: IComparisonDetailRow[], mediaItem: PlexMediaDTO, level: number) {
-	if (!actionableStates.includes(mediaItem.comparisonState))
-		return;
-
-	rows.push({
-		key: `${mediaItem.type}-${mediaItem.id}`,
-		title: mediaItem.title,
-		quality: qualityLabel(mediaItem),
-		size: mediaItem.mediaSize,
-		location: t('components.media-overview.comparison.details-library-location', { libraryId: mediaItem.plexLibraryId }),
-		comparisonState: mediaItem.comparisonState,
-		level,
-	});
+function qualityLabel(quality?: VideoQuality | null): string {
+	return quality && quality !== VideoQuality.Unknown ? quality : t('general.error.unknown');
 }
 
-function qualityLabel(mediaItem: PlexMediaDTO): string {
-	const qualities = mediaItem.qualities.map((x) => x.quality).filter((x) => x !== VideoQuality.Unknown);
-	if (qualities.length === 0)
-		return VideoQuality.Unknown;
+function locationLabel(location: string, libraryTitle: string): string {
+	if (!location && !libraryTitle)
+		return t('general.error.unknown');
 
-	return [...new Set(qualities)].join(', ');
+	if (!location)
+		return libraryTitle;
+
+	if (!libraryTitle)
+		return location;
+
+	return `${libraryTitle}: ${location}`;
 }
 
 function descriptionFor(mediaItem: PlexMediaSlimDTO): string {
-	switch (mediaItem.comparisonState) {
+	switch (getPlexMediaComparisonState(mediaItem)) {
 		case PlexMediaComparisonState.Missing:
 			return t('components.media-overview.comparison.details-missing', { title: mediaItem.title });
 		case PlexMediaComparisonState.HigherQuality:

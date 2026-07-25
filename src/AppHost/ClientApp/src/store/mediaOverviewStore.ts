@@ -194,13 +194,7 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 				pages: pagesToRefresh,
 			});
 
-			mediaPages.clear();
-			pendingPages.clear();
-			state.itemsLength = 0;
-			state.queryHash = '';
-			state.mediaPagesVersion++;
-
-			const requests = pagesToRefresh.map((page) => actions.requestMediaPage(page, state.pageSize));
+			const requests = pagesToRefresh.map((page) => actions.requestMediaPage(page, state.pageSize, true));
 			return forkJoin(requests).pipe(
 				finalize(() => comparisonRefreshKeysInFlight.delete(refreshKey)),
 				map(() => null),
@@ -269,6 +263,8 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 			);
 		},
 		refreshMediaData(): Observable<PlexMediaStatisticsDTO | null> {
+			state.loading = true;
+			state.serverError = false;
 			state.cacheRetrySeconds = 0;
 			clearCacheRetryTimer();
 
@@ -298,15 +294,15 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 				}),
 			);
 		},
-		requestMediaPage(page: number, size: number = state.pageSize): Observable<PlexMediaStatisticsDTO | null> {
-			if (mediaPages.has(page) || pendingPages.has(page)) {
+		requestMediaPage(page: number, size: number = state.pageSize, forceRefresh: boolean = false): Observable<PlexMediaStatisticsDTO | null> {
+			if (pendingPages.has(page) || (!forceRefresh && mediaPages.has(page))) {
 				return of(null);
 			}
 
 			const mediaType = get(getters.getMediaType);
 			if (state.libraryId > 0 && mediaType === PlexMediaType.None) {
 				return libraryStore.refreshLibrary(state.libraryId).pipe(
-					switchMap((library) => library ? actions.requestMediaPage(page, size) : of(null)),
+					switchMap((library) => library ? actions.requestMediaPage(page, size, forceRefresh) : of(null)),
 				);
 			}
 
@@ -359,10 +355,12 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 			}
 
 			const mediaList = Array.isArray(data.mediaList) ? data.mediaList : [];
+			const previousMediaCount = mediaPages.get(data.page)?.length ?? 0;
+			const mediaCount = data.mediaCount ?? mediaList.length;
 			mediaPages.set(data.page, markRaw(mediaList));
 			state.mediaPagesVersion++;
 			state.queryHash = data.queryHash ?? '';
-			state.itemsLength += data.mediaCount ?? mediaList.length;
+			state.itemsLength += mediaCount - previousMediaCount;
 			state.totalCount = data.totalCount ?? state.totalCount;
 
 			state.allMovieCount = data.totalMovieCount;
@@ -620,8 +618,15 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 		hasNoSearchResults: computed((): boolean => {
 			return state.filterQuery != '' && get(getters.getMediaItems).length === 0;
 		}),
+		hasActiveFilter: computed((): boolean => {
+			return state.metadata.countryId > 0
+				|| state.metadata.roleId > 0
+				|| state.metadata.genreId > 0
+				|| state.metadata.qualityId > 0
+				|| state.metadata.comparisonState !== null;
+		}),
 		hasNoFilterResults: computed((): boolean => {
-			return state.metadataList.mediaCount > 0 && get(getters.getMediaItems).length === 0;
+			return get(getters.hasActiveFilter) && state.metadataList.mediaCount > 0 && get(getters.getMediaItems).length === 0;
 		}),
 		allMediaMode: computed(() => state.libraryId === 0),
 		library: computed(() => libraryStore.getLibrary(state.libraryId)),

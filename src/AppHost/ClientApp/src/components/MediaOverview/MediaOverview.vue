@@ -87,7 +87,7 @@
 								<template v-else-if="library?.syncedAt === null">
 									{{ t('components.media-overview.library-not-yet-synced') }}
 								</template>
-								<template v-else-if="!mediaOverviewStore.itemsLength">
+								<template v-else-if="!mediaOverviewStore.itemsLength && !mediaOverviewStore.filterQuery && !mediaOverviewStore.hasActiveFilter">
 									{{ t('components.media-overview.no-data') }}
 								</template>
 								<template v-else>

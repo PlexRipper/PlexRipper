@@ -4,8 +4,7 @@ namespace Reaparr.BackgroundJobs;
 /// Singleton Quartz worker that drains persisted library comparison queue rows.
 /// </summary>
 /// <remarks>
-/// Each execution claims one queued remote-to-owned library pair, runs the media-specific comparison command, updates the
-/// queue row, and re-schedules itself when more persisted work remains.
+/// Each execution drains queued remote-to-owned library pairs one at a time until no persisted work remains.
 /// </remarks>
 [DisallowConcurrentExecution]
 public class PlexLibraryComparisonJob : IJob
@@ -33,7 +32,23 @@ public class PlexLibraryComparisonJob : IJob
     public async Task Execute(IJobExecutionContext context)
     {
         var cancellationToken = context.CancellationToken;
-        // Claim one persisted row per run to bound database and Plex comparison load.
+        var processedCount = 0;
+
+        while (!cancellationToken.IsCancellationRequested)
+        {
+            var processedQueueItem = await ProcessNextQueueItemAsync(cancellationToken);
+
+            if (!processedQueueItem)
+                break;
+
+            processedCount++;
+        }
+
+        _log.Here().Debug("Library comparison queue worker finished after processing {Count} items", processedCount);
+    }
+
+    private async Task<bool> ProcessNextQueueItemAsync(CancellationToken cancellationToken)
+    {
         var queueItem = await _dbContext.LibraryComparisonJobQueues
             .Where(x => x.Status == LibrarySyncJobStatus.Queued)
             .OrderBy(x => x.Priority)
@@ -43,7 +58,7 @@ public class PlexLibraryComparisonJob : IJob
         if (queueItem is null)
         {
             _log.Here().Debug("No queued library comparison jobs found");
-            return;
+            return false;
         }
 
         await _dbContext.LibraryComparisonJobQueues
@@ -107,12 +122,7 @@ public class PlexLibraryComparisonJob : IJob
         }
 
         await SendCompletionNotificationIfSettledAsync(queueItem, cancellationToken);
-
-        var hasMoreQueuedItems = await _dbContext.LibraryComparisonJobQueues
-            .AnyAsync(x => x.Status == LibrarySyncJobStatus.Queued, cancellationToken);
-
-        if (hasMoreQueuedItems)
-            await _commandExecutor.Send(new CheckQueuedLibraryComparisonJobCommand(), cancellationToken);
+        return true;
     }
 
     private async Task UpdateQueueItemAsync(

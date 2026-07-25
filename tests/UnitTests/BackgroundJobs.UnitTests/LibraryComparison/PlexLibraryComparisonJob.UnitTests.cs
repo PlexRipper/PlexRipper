@@ -7,7 +7,7 @@ namespace Reaparr.BackgroundJobs.UnitTests;
 public class PlexLibraryComparisonJobUnitTests : BaseUnitTest<PlexLibraryComparisonJob>
 {
     [Test]
-    public async Task ShouldNotSendCompletionNotification_WhenRelatedRemoteAndOwnedComparisonsRemainPending()
+    public async Task ShouldDrainQueuedComparisonItems_WhenMultipleItemsAreQueued()
     {
         // Arrange
         await SetupDatabase(75, config =>
@@ -53,36 +53,33 @@ public class PlexLibraryComparisonJobUnitTests : BaseUnitTest<PlexLibraryCompari
         var jobContext = Moq.Mock.Of<IJobExecutionContext>(x => x.CancellationToken == CancellationToken);
 
         Mock.Mock<ICommandExecutor>()
-            .Setup(x => x.Send(
-                It.Is<CompareMoviePlexLibraryCommand>(command =>
-                    command.RemotePlexLibraryId == remoteLibrary.Id && command.OwnedPlexLibraryId == ownedLibrary.Id),
+            .Setup(x => x.Send(It.IsAny<CompareMoviePlexLibraryCommand>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result.Ok())
+            .Verifiable(Times.Exactly(3));
+        Mock.Mock<IProgressHubService>()
+            .Setup(x => x.SendLibraryComparisonCompletedAsync(
+                It.Is<LibraryComparisonCompletedDTO>(notification =>
+                    notification.MediaType == PlexMediaType.Movie
+                    && notification.AffectedLibraryIds.Count == 2),
                 It.IsAny<CancellationToken>()
             ))
-            .ReturnsAsync(Result.Ok())
-            .Verifiable(Times.Once());
-        Mock.Mock<ICommandExecutor>()
-            .Setup(x => x.Send(It.IsAny<CheckQueuedLibraryComparisonJobCommand>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result.Ok())
-            .Verifiable(Times.Once());
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.Exactly(2));
 
         // Act
         await Sut.Execute(jobContext);
 
         // Assert
-        var completedQueueItem = await IDbContext.LibraryComparisonJobQueues.SingleAsync(
-            x => x.RemotePlexLibraryId == remoteLibrary.Id && x.OwnedPlexLibraryId == ownedLibrary.Id && x.MediaType == PlexMediaType.Movie,
-            CancellationToken
-        );
-        completedQueueItem.Status.ShouldBe(LibrarySyncJobStatus.Completed);
-        Mock.Mock<IProgressHubService>()
-            .Verify(
-                x => x.SendLibraryComparisonCompletedAsync(
-                    It.IsAny<LibraryComparisonCompletedDTO>(),
-                    It.IsAny<CancellationToken>()
-                ),
-                Times.Never
-            );
+        var queueItems = await IDbContext.LibraryComparisonJobQueues.ToListAsync(CancellationToken);
+        queueItems.Count.ShouldBe(3);
+        queueItems.ShouldAllBe(x => x.Status == LibrarySyncJobStatus.Completed);
+        queueItems.ShouldAllBe(x => x.Attempts == 1);
+        queueItems.ShouldAllBe(x => x.StartedAt.HasValue);
+        queueItems.ShouldAllBe(x => x.CompletedAt.HasValue);
         Mock.Mock<ICommandExecutor>().Verify();
+        Mock.Mock<ICommandExecutor>()
+            .Verify(x => x.Send(It.IsAny<CheckQueuedLibraryComparisonJobCommand>(), It.IsAny<CancellationToken>()), Times.Never);
+        Mock.Mock<IProgressHubService>().Verify();
     }
 
     [Test]

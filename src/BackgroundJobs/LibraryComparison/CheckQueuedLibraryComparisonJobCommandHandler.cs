@@ -49,7 +49,10 @@ public class CheckQueuedLibraryComparisonJobCommandHandler
             return Result.Ok();
         }
 
-        if (await _scheduler.CheckExists(jobKey, cancellationToken))
+        var isAlreadyRunning = (await _scheduler.GetCurrentlyExecutingJobs(cancellationToken))
+            .Any(x => x.JobDetail.Key.Equals(jobKey));
+
+        if (isAlreadyRunning)
         {
             _log.Here().Debug("Library comparison queue worker is already running");
             return Result.Ok();

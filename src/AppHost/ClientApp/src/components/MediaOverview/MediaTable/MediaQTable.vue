@@ -26,13 +26,11 @@
 			<q-td class="text-center">
 				<MediaComparisonStateButton
 					:comparison-state="getPlexMediaComparisonState(row)"
-					show-label
 					show-tooltip
 					dense
 					rounded
 					outline
-					:round="false"
-					:flat="false"
+					flat
 					:cy="`episode-comparison-chip-${getPlexMediaComparisonState(row)}`" />
 			</q-td>
 		</template>

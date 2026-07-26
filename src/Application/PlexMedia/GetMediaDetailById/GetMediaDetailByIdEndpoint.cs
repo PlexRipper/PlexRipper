@@ -120,6 +120,10 @@ public class GetMediaDetailByIdEndpoint : Endpoint<GetMediaDetailByIdEndpointReq
     private async Task ApplyTvShowDetailComparisonStateAsync(PlexTvShow plexTvShow, CancellationToken ct)
     {
         var items = new List<PlexMediaSlimDTO> { plexTvShow.ToSlimDTOMapper() };
+        var episodes = plexTvShow.Seasons.SelectMany(s => s.Episodes).ToList();
+        foreach (var episode in episodes)
+            items.Add(episode.ToSlimDTO());
+
         var result = await _commandExecutor.Send(new ApplyComparisonStateCommand(items, plexTvShow.PlexLibraryId, PlexMediaType.TvShow), ct);
 
         if (result.IsFailed)
@@ -129,6 +133,9 @@ public class GetMediaDetailByIdEndpoint : Endpoint<GetMediaDetailByIdEndpointReq
         }
 
         plexTvShow.ComparisonState = items[0].ComparisonId.ToComparisonState();
+
+        for (var i = 0; i < episodes.Count; i++)
+            episodes[i].ComparisonState = items[i + 1].ComparisonId.ToComparisonState();
     }
 
     private async Task ApplyMovieDetailComparisonStateAsync(PlexMovie plexMovie, CancellationToken ct)

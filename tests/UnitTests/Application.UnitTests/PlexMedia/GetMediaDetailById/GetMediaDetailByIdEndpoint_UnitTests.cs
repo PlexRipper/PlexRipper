@@ -64,6 +64,8 @@ public class GetMediaDetailByIdEndpointUnitTests : BaseEndpointUnitTest<GetMedia
 
         var request = new GetMediaDetailByIdEndpointRequest(testTvShow.Id, PlexMediaType.TvShow);
 
+        Mock.SetupCommand<Result>(x => x is ApplyComparisonStateCommand).ReturnsAsync(Result.Ok());
+
         // Act
         var endpointResult = await TestEndpointHandleAsync(request);
         var result = endpointResult.Response;
@@ -158,6 +160,17 @@ public class GetMediaDetailByIdEndpointUnitTests : BaseEndpointUnitTest<GetMedia
 
         var request = new GetMediaDetailByIdEndpointRequest(remoteTvShow.Id, PlexMediaType.TvShow);
 
+        Mock.SetupCommand<Result>(x => x is ApplyComparisonStateCommand)
+            .Callback((ICommand<Result> cmd, CancellationToken _) =>
+            {
+                var typed = (ApplyComparisonStateCommand)cmd;
+                typed.Items[0].ComparisonId = PlexMediaComparisonState.HigherQuality.ToComparisonId();
+                typed.Items[1].ComparisonId = PlexMediaComparisonState.Owned.ToComparisonId();
+                typed.Items[2].ComparisonId = PlexMediaComparisonState.HigherQuality.ToComparisonId();
+                typed.Items[3].ComparisonId = PlexMediaComparisonState.Missing.ToComparisonId();
+            })
+            .ReturnsAsync(Result.Ok());
+
         // Act
         var endpointResult = await TestEndpointHandleAsync(request);
         var result = endpointResult.Response;
@@ -239,6 +252,17 @@ public class GetMediaDetailByIdEndpointUnitTests : BaseEndpointUnitTest<GetMedia
         await dbContext.SaveChangesNewAsync(CancellationToken);
 
         var request = new GetMediaDetailByIdEndpointRequest(remoteTvShow.Id, PlexMediaType.TvShow);
+
+        Mock.SetupCommand<Result>(x => x is ApplyComparisonStateCommand)
+            .Callback((ICommand<Result> cmd, CancellationToken _) =>
+            {
+                var typed = (ApplyComparisonStateCommand)cmd;
+                typed.Items[0].ComparisonId = PlexMediaComparisonState.HigherQuality.ToComparisonId();
+                typed.Items[1].ComparisonId = PlexMediaComparisonState.Owned.ToComparisonId();
+                typed.Items[2].ComparisonId = PlexMediaComparisonState.Owned.ToComparisonId();
+                typed.Items[3].ComparisonId = PlexMediaComparisonState.Owned.ToComparisonId();
+            })
+            .ReturnsAsync(Result.Ok());
 
         // Act
         var endpointResult = await TestEndpointHandleAsync(request);

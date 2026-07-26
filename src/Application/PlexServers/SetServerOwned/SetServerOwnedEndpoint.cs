@@ -90,7 +90,7 @@ public class SetServerOwnedEndpoint : Endpoint<SetServerOwnedRequest, ResultDTO<
         var failedResults = new List<ResultBase>();
         foreach (var libraryId in libraryIds)
         {
-            var queueResult = await _commandExecutor.Send(new QueueLibraryComparisonJobsForLibraryCommand(libraryId), ct);
+            var queueResult = await _commandExecutor.Send(new QueueLibraryComparisonJobsForLibraryCommand(libraryId), CancellationToken.None);
             if (queueResult.IsFailed)
                 failedResults.Add(queueResult);
             

@@ -93,6 +93,13 @@ public class PlexLibraryComparisonJobUnitTests : BaseUnitTest<PlexLibraryCompari
         Mock.Mock<ICommandExecutor>()
             .Verify(x => x.Send(It.IsAny<CheckQueuedLibraryComparisonJobCommand>(), It.IsAny<CancellationToken>()), Times.Never);
         Mock.Mock<IProgressHubService>().Verify();
+        Mock.Mock<IProgressHubService>()
+            .Verify(
+                x => x.SendLibraryComparisonCompletedAsync(
+                    It.IsAny<LibraryComparisonCompletedDTO>(),
+                    It.IsAny<CancellationToken>()),
+                Times.Exactly(2)
+            );
     }
 
     [Test]

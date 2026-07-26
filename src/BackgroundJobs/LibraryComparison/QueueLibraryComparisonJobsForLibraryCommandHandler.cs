@@ -77,7 +77,7 @@ public class QueueLibraryComparisonJobsForLibraryCommandHandler
 
             if (result.IsFailed)
             {
-                failedResults.AddRange(result);
+                failedResults.Add(result);
                 continue;
             }
 

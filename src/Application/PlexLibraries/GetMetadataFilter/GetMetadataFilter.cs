@@ -36,6 +36,7 @@ public class GetMetadataFilter : Endpoint<GetMetadataFilterRequest, ResultDTO<Pl
         Get(ApiRoutes.PlexLibraryController + "/{PlexLibraryId}/metadata-filter");
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<PlexMediaFilterMetadataDTO>))
+                .Produces(StatusCodes.Status404NotFound, typeof(BaseResultDTO))
                 .Produces(StatusCodes.Status500InternalServerError, typeof(BaseResultDTO))
         );
     }

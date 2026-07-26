@@ -22,6 +22,7 @@ public class GetTvShowMediaComparisonDetailsCommandHandlerUnitTests
 
         var dbContext = IDbContext;
         var libraries = await dbContext.PlexLibraries.OrderBy(x => x.Id).ToListAsync(CancellationToken);
+        libraries.Count.ShouldBe(2);
         var remoteLibrary = libraries[0];
         var ownedLibrary = libraries[1];
         await SetOwnedOverrideAsync(remoteLibrary.PlexServerId, false);

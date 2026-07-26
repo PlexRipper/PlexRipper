@@ -230,7 +230,7 @@ public class AddOrUpdatePlexLibrariesCommandHandler
         {
             var queueResult = await _commandExecutor.Send(new QueueLibraryComparisonJobsForLibraryCommand(libraryId), cancellationToken);
             if (queueResult.IsFailed)
-                failedResults.AddRange(queueResult);
+                failedResults.Add(queueResult);
         }
 
         return failedResults.Count > 0 ? Result.Merge(failedResults.ToArray()).LogError() : Result.Ok(rapportList);

@@ -36,6 +36,7 @@ public class GetLibraryMediaMetadata : Endpoint<GetLibraryMediaMetadataRequest, 
         Get(ApiRoutes.PlexLibraryController + "/{PlexLibraryId}/metadata");
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<PlexMediaMetadataDTO>))
+                .Produces(StatusCodes.Status404NotFound, typeof(BaseResultDTO))
                 .Produces(StatusCodes.Status500InternalServerError, typeof(BaseResultDTO))
         );
     }

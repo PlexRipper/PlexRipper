@@ -9,7 +9,8 @@ public static partial class DbContextExtensions
     )
     {
         var plexLibraryName = await dbContext
-            .PlexLibraries.Where(x => x.Id == plexLibraryId)
+            .PlexLibraries.IgnoreIsEnabledFilter()
+            .Where(x => x.Id == plexLibraryId)
             .Select(x => x.Title)
             .FirstOrDefaultAsync(cancellationToken);
         return plexLibraryName ?? "Library Name Not Found";
@@ -52,10 +53,10 @@ public static partial class DbContextExtensions
         PlexMediaType mediaType,
         CancellationToken cancellationToken)
     {
-        var libraryUpdatedAt = dbContext.PlexLibraries
+        var libraryUpdatedAt = await dbContext.PlexLibraries
             .Where(x => x.Id == libraryId)
             .Select(x => x.UpdatedAt)
-            .SingleOrDefault();
+            .SingleOrDefaultAsync(cancellationToken);
 
         if (libraryUpdatedAt is null)
             return [];

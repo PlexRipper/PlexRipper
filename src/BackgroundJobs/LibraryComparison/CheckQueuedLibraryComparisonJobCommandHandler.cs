@@ -92,7 +92,7 @@ public class CheckQueuedLibraryComparisonJobCommandHandler
             _log.Here().Debug("Scheduled library comparison queue worker");
         });
 
-        if (result.IsFailed && result.Errors.Any(x => x.Message.Contains("already exists", StringComparison.OrdinalIgnoreCase)))
+        if (result.IsFailed && result.Errors.OfType<ExceptionalError>().Any(x => x.Exception is ObjectAlreadyExistsException))
         {
             _log.Here().Warning("Library comparison queue worker trigger was already scheduled by another caller");
             return Result.Ok();

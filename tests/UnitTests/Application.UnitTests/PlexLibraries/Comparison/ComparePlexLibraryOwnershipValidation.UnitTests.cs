@@ -31,6 +31,14 @@ public class CompareMoviePlexLibraryCommandOwnershipUnitTests : BaseUnitTest<Com
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
+        var scope = await IDbContext.PlexComparisonScopes.SingleAsync(
+            x => x.RemotePlexLibraryId == remoteLibrary.Id
+                 && x.OwnedPlexLibraryId == ownedLibrary.Id
+                 && x.MediaType == PlexMediaType.Movie,
+            CancellationToken
+        );
+        scope.RemotePlexLibraryId.ShouldBe(remoteLibrary.Id);
+        scope.OwnedPlexLibraryId.ShouldBe(ownedLibrary.Id);
     }
 
     [Test]
@@ -130,6 +138,14 @@ public class CompareTvShowPlexLibraryCommandOwnershipUnitTests : BaseUnitTest<Co
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
+        var scope = await IDbContext.PlexComparisonScopes.SingleAsync(
+            x => x.RemotePlexLibraryId == remoteLibrary.Id
+                 && x.OwnedPlexLibraryId == ownedLibrary.Id
+                 && x.MediaType == PlexMediaType.TvShow,
+            CancellationToken
+        );
+        scope.RemotePlexLibraryId.ShouldBe(remoteLibrary.Id);
+        scope.OwnedPlexLibraryId.ShouldBe(ownedLibrary.Id);
     }
 
     [Test]

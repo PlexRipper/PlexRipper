@@ -212,6 +212,53 @@ public class CheckQueuedLibraryComparisonJobCommandHandlerUnitTests
     }
 
     [Test]
+    public async Task ShouldFailProcessingItemsAtMaxAttemptsAndNotTriggerJob_WhenNoQueuedItemsRemain()
+    {
+        // Arrange
+        var jobKey = PlexLibraryComparisonJob.GetJobKey();
+        var command = new CheckQueuedLibraryComparisonJobCommand();
+        await SetupDatabase(83, config =>
+        {
+            config.PlexServerCount = 2;
+            config.PlexMovieLibraryCount = 1;
+            config.PlexAccountCount = 1;
+        });
+        var dbContext = IDbContext;
+        var libraries = await dbContext.PlexLibraries.OrderBy(x => x.Id).ToListAsync(CancellationToken);
+        dbContext.LibraryComparisonJobQueues.Add(new LibraryComparisonJobQueue
+        {
+            RemotePlexLibraryId = libraries[0].Id,
+            OwnedPlexLibraryId = libraries[1].Id,
+            MediaType = PlexMediaType.Movie,
+            Priority = 1,
+            Status = LibrarySyncJobStatus.Processing,
+            Attempts = 3,
+            CreatedAt = DateTime.UtcNow,
+            StartedAt = DateTime.UtcNow,
+        });
+        await dbContext.SaveChangesNewAsync(CancellationToken);
+
+        Mock.Mock<IScheduler>()
+            .Setup(x => x.GetCurrentlyExecutingJobs(It.IsAny<CancellationToken>()))
+            .ReturnsAsync([])
+            .Verifiable(Times.Once());
+
+        // Act
+        var result = await Sut.ExecuteAsync(command, CancellationToken);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        result.Errors.Count.ShouldBe(0);
+        var queueItem = await IDbContext.LibraryComparisonJobQueues.SingleAsync(CancellationToken);
+        queueItem.Status.ShouldBe(LibrarySyncJobStatus.Failed);
+        queueItem.CompletedAt.ShouldNotBeNull();
+        queueItem.ErrorMessage.ShouldBe("Library comparison exceeded retry attempts while processing");
+        Mock.Mock<IScheduler>().Verify();
+        Mock.Mock<IScheduler>().Verify(x => x.CheckExists(jobKey, It.IsAny<CancellationToken>()), Times.Never());
+        Mock.Mock<IScheduler>().Verify(x => x.ScheduleJob(It.IsAny<ITrigger>(), It.IsAny<CancellationToken>()), Times.Never());
+    }
+
+    [Test]
     public async Task ShouldScheduleSingleJobAndTrigger_WhenComparisonWorkerDoesNotExist()
     {
         // Arrange

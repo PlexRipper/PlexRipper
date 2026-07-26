@@ -38,6 +38,32 @@ public class GetMediaComparisonDetailsEndpointUnitTests
     }
 
     [Test]
+    public async Task ShouldReturnFailure_WhenUnsupportedMediaTypeReachesHandler()
+    {
+        // Arrange
+        var request = new GetMediaComparisonDetailsEndpointRequest(1889, PlexMediaType.Episode);
+        var endpoint = SetupEndpointUnitTest<GetMediaComparisonDetailsEndpoint>();
+        endpoint.HttpContext.Response.Body = new MemoryStream();
+
+        Mock.SetupCommand<Result<PlexMediaComparisonDetailsDTO>>(x => (x as GetMovieMediaComparisonDetailsCommand) != null)
+            .ReturnsAsync(Result.Fail<PlexMediaComparisonDetailsDTO>("Unexpected dispatch"))
+            .Verifiable(Times.Never);
+        Mock.SetupCommand<Result<PlexMediaComparisonDetailsDTO>>(x => (x as GetTvShowMediaComparisonDetailsCommand) != null)
+            .ReturnsAsync(Result.Fail<PlexMediaComparisonDetailsDTO>("Unexpected dispatch"))
+            .Verifiable(Times.Never);
+
+        // Act
+        await endpoint.HandleAsync(request, CancellationToken);
+        var result = await GetEndpointResponseAsync(endpoint, CancellationToken);
+
+        // Assert
+        result.ShouldNotBeNull();
+        result.IsSuccess.ShouldBeFalse();
+        result.Errors.Select(x => x.Message).ShouldContain("Unsupported media type");
+        Mock.Mock<ICommandExecutor>().Verify();
+    }
+
+    [Test]
     public async Task ShouldDispatchTvShowCommand_WhenTvShowComparisonDetailsRequested()
     {
         // Arrange

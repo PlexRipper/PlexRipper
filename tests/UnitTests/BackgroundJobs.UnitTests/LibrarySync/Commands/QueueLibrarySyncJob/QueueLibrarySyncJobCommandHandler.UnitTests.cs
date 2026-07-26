@@ -256,6 +256,7 @@ public class QueueLibrarySyncJobCommandHandlerUnitTests : BaseUnitTest<QueueLibr
             Priority = 1,
             Status = LibrarySyncJobStatus.Completed,
             CreatedAt = DateTime.UtcNow,
+            StartedAt = DateTime.UtcNow.AddHours(-3),
             CompletedAt = DateTime.UtcNow.AddHours(-2),
         };
 

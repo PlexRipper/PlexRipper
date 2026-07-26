@@ -66,17 +66,19 @@ public class SetLibraryEnabledEndpoint : Endpoint<SetLibraryEnabledRequest, Resu
             return;
         }
 
-        if (req.IsEnabled)
+        var operationResult = req.IsEnabled
+            ? await EnableLibraryAsync(plexLibrary, ct)
+            : await DisableLibraryAsync(plexLibrary, ct);
+        if (operationResult.IsFailed)
         {
-            await EnableLibraryAsync(plexLibrary, ct);
-        }
-        else
-        {
-            await DisableLibraryAsync(plexLibrary, ct);
+            operationResult.LogError();
+            await Send.FluentResult(operationResult, ct);
+            return;
         }
 
         // Re-fetch with ignore filter to return updated entity including IsEnabled
         var updatedLibrary = await _dbContext.PlexLibraries
+            .AsNoTracking()
             .IgnoreIsEnabledFilter()
             .FirstOrDefaultAsync(x => x.Id == req.PlexLibraryId, ct);
 
@@ -89,15 +91,21 @@ public class SetLibraryEnabledEndpoint : Endpoint<SetLibraryEnabledRequest, Resu
         await Send.FluentResult(Result.Ok(updatedLibrary), x => x.ToDTO(), ct);
     }
 
-    private async Task EnableLibraryAsync(PlexLibrary plexLibrary, CancellationToken ct)
+    private async Task<Result> EnableLibraryAsync(PlexLibrary plexLibrary, CancellationToken ct)
     {
         _log.Here().Information("Enabling PlexLibrary {PlexLibraryId}", plexLibrary.Id);
+
+        await using var transaction = await _dbContext.BeginTransactionAsync(ct);
 
         plexLibrary.IsEnabled = true;
         await _dbContext.SaveChangesNewAsync(ct);
 
         // Queue a fresh sync
-        await _commandExecutor.Send(new QueueLibrarySyncJobCommand([plexLibrary.Id]), ct);
+        var queueResult = await _commandExecutor.Send(new QueueLibrarySyncJobCommand([plexLibrary.Id]), ct);
+        if (queueResult.IsFailed)
+            return queueResult.LogError();
+
+        await transaction.CommitAsync(ct);
 
         // Invalidate/re-build media query cache scopes for this library
         _mediaQueryCache.InvalidateLibrary(plexLibrary.Id, "PlexLibrary re-enabled");
@@ -109,25 +117,37 @@ public class SetLibraryEnabledEndpoint : Endpoint<SetLibraryEnabledRequest, Resu
         );
 
         _log.Here().Information("PlexLibrary {PlexLibraryId} enabled and sync queued", plexLibrary.Id);
+        return Result.Ok();
     }
 
-    private async Task DisableLibraryAsync(PlexLibrary plexLibrary, CancellationToken ct)
+    private async Task<Result> DisableLibraryAsync(PlexLibrary plexLibrary, CancellationToken ct)
     {
         _log.Here().Information("Disabling PlexLibrary {PlexLibraryId}", plexLibrary.Id);
 
-        plexLibrary.IsEnabled = false;
-        await _dbContext.SaveChangesNewAsync(ct);
-
         // Cancel queued/processing sync job for this library
-        await _commandExecutor.Send(new CancelLibrarySyncJobCommand(plexLibrary.Id), ct);
+        var cancelResult = await _commandExecutor.Send(new CancelLibrarySyncJobCommand(plexLibrary.Id), ct);
+        if (cancelResult.IsFailed)
+            return cancelResult.LogError();
+
+        await using var transaction = await _dbContext.BeginTransactionAsync(ct);
+
+        plexLibrary.IsEnabled = false;
 
         // Purge synced media and derived state based on library type
         await PurgeLibraryMediaAsync(plexLibrary, ct);
 
         // Reset library sync metadata and counts
-        plexLibrary.SyncedAt = null;
-        plexLibrary.Outdated = false;
-        await _dbContext.SaveChangesNewAsync(ct);
+        await _dbContext.PlexLibraries
+            .IgnoreIsEnabledFilter()
+            .Where(x => x.Id == plexLibrary.Id)
+            .ExecuteUpdateAsync(x => x.SetProperty(y => y.IsEnabled, false)
+                .SetProperty(y => y.SyncedAt, (DateTime?)null)
+                .SetProperty(y => y.Outdated, false)
+                .SetProperty(y => y.MovieCount, 0)
+                .SetProperty(y => y.TvShowCount, 0)
+                .SetProperty(y => y.SeasonCount, 0)
+                .SetProperty(y => y.EpisodeCount, 0), ct);
+        await transaction.CommitAsync(ct);
 
         // Remove all media query cache references to this library and rebuild affected snapshots
         _mediaQueryCache.InvalidateLibrary(plexLibrary.Id, "PlexLibrary disabled");
@@ -139,6 +159,7 @@ public class SetLibraryEnabledEndpoint : Endpoint<SetLibraryEnabledRequest, Resu
         );
 
         _log.Here().Information("PlexLibrary {PlexLibraryId} disabled and media purged", plexLibrary.Id);
+        return Result.Ok();
     }
 
     private async Task PurgeLibraryMediaAsync(PlexLibrary plexLibrary, CancellationToken ct)

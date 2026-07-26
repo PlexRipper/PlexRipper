@@ -101,11 +101,6 @@ public class ApplyOwnedTvShowComparisonStateCommandHandler
 
         var showUpgradeIdSet = showUpgradeIds.ToHashSet();
 
-        var ownedEpisodeCountLookup = await _dbContext.PlexTvShowEpisodes
-            .Where(x => itemIds.Contains(x.TvShowId))
-            .GroupBy(x => x.TvShowId)
-            .Select(g => new { TvShowId = g.Key, Count = g.Count() })
-            .ToDictionaryAsync(x => x.TvShowId, x => x.Count, ct);
         var remoteEpisodeCounts = await _dbContext.PlexTvShowEpisodes
             .Where(x => currentRemoteLibraryIds.Contains(x.PlexLibraryId))
             .GroupBy(x => x.TvShowId)
@@ -157,7 +152,6 @@ public class ApplyOwnedTvShowComparisonStateCommandHandler
         foreach (var item in items)
         {
             var showId = item.Id;
-            ownedEpisodeCountLookup.TryGetValue(showId, out var ownedEpisodeCount);
             remoteEpisodeCountByOwnedShow.TryGetValue(showId, out var remoteEpisodeCount);
             episodeHitLookup.TryGetValue(showId, out var episodeHitSummary);
             var matchedEpisodeCount = episodeHitSummary?.MatchedCount ?? 0;

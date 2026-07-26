@@ -70,7 +70,7 @@ public class GetMovieMediaComparisonDetailsCommandHandler
                     state: PlexMediaComparisonState.Missing,
                     remoteQuality: movie.Quality,
                     ownedQuality: VideoQuality.None,
-                    remoteLocation: movie.MediaDataList.Select(x => x.GetFileName).FirstOrDefault(x => !string.IsNullOrWhiteSpace(x)) ?? string.Empty,
+                    remoteLocation: FirstFileNameOrEmpty(movie),
                     ownedLocation: string.Empty,
                     remotePlexLibraryId: movie.PlexLibraryId,
                     remotePlexServerId: await _dbContext.GetPlexServerIdFromPlexLibraryId(movie.PlexLibraryId))
@@ -110,8 +110,8 @@ public class GetMovieMediaComparisonDetailsCommandHandler
                     state: PlexMediaComparisonState.HigherQuality,
                     remoteQuality: hit.RemoteQuality,
                     ownedQuality: hit.OwnedQuality,
-                    remoteLocation: movie.MediaDataList.Select(x => x.GetFileName).FirstOrDefault(x => !string.IsNullOrWhiteSpace(x)) ?? string.Empty,
-                    ownedLocation: ownedMovie?.MediaDataList.Select(x => x.GetFileName).FirstOrDefault(x => !string.IsNullOrWhiteSpace(x)) ?? string.Empty,
+                    remoteLocation: FirstFileNameOrEmpty(movie),
+                    ownedLocation: FirstFileNameOrEmpty(ownedMovie),
                     remotePlexLibraryId: hit.RemotePlexLibraryId,
                     remotePlexServerId: remoteServerIds.GetValueOrDefault(hit.RemotePlexLibraryId));
             })
@@ -156,13 +156,16 @@ public class GetMovieMediaComparisonDetailsCommandHandler
                     state: PlexMediaComparisonState.HigherQuality,
                     remoteQuality: hit.RemoteQuality,
                     ownedQuality: hit.OwnedQuality,
-                    remoteLocation: remoteMovie?.MediaDataList.Select(x => x.GetFileName).FirstOrDefault(x => !string.IsNullOrWhiteSpace(x)) ?? string.Empty,
-                    ownedLocation: movie.MediaDataList.Select(x => x.GetFileName).FirstOrDefault(x => !string.IsNullOrWhiteSpace(x)) ?? string.Empty,
+                    remoteLocation: FirstFileNameOrEmpty(remoteMovie),
+                    ownedLocation: FirstFileNameOrEmpty(movie),
                     remotePlexLibraryId: hit.RemotePlexLibraryId,
                     remotePlexServerId: remoteServerIds.GetValueOrDefault(hit.RemotePlexLibraryId));
             })
             .ToList();
     }
+
+    private static string FirstFileNameOrEmpty(PlexMovie? movie) =>
+        movie?.MediaDataList.Select(x => x.GetFileName).FirstOrDefault(x => !string.IsNullOrWhiteSpace(x)) ?? string.Empty;
 
     private async Task<Dictionary<int, int>> GetPlexServerIdsByLibraryIdAsync(IEnumerable<int> plexLibraryIds, CancellationToken ct)
     {

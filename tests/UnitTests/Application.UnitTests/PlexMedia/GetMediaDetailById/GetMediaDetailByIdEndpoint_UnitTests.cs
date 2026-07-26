@@ -110,6 +110,7 @@ public class GetMediaDetailByIdEndpointUnitTests : BaseEndpointUnitTest<GetMedia
 
         var dbContext = IDbContext;
         var libraries = await dbContext.PlexLibraries.OrderBy(x => x.Id).ToListAsync(CancellationToken);
+        libraries.Count.ShouldBe(2);
         var remoteLibrary = libraries[0];
         var ownedLibrary = libraries[1];
         await SetOwnedOverrideAsync(remoteLibrary.PlexServerId, false);
@@ -160,15 +161,10 @@ public class GetMediaDetailByIdEndpointUnitTests : BaseEndpointUnitTest<GetMedia
 
         var request = new GetMediaDetailByIdEndpointRequest(remoteTvShow.Id, PlexMediaType.TvShow);
 
-        Mock.SetupCommand<Result>(x => x is ApplyComparisonStateCommand)
-            .Callback((ICommand<Result> cmd, CancellationToken _) =>
-            {
-                var typed = (ApplyComparisonStateCommand)cmd;
-                typed.Items[0].ComparisonId = PlexMediaComparisonState.HigherQuality.ToComparisonId();
-                typed.Items[1].ComparisonId = PlexMediaComparisonState.Owned.ToComparisonId();
-                typed.Items[2].ComparisonId = PlexMediaComparisonState.HigherQuality.ToComparisonId();
-                typed.Items[3].ComparisonId = PlexMediaComparisonState.Missing.ToComparisonId();
-            })
+        Mock.Mock<ICommandExecutor>()
+            .Setup(x => x.Send(It.IsAny<ApplyComparisonStateCommand>(), It.IsAny<CancellationToken>()))
+            .Callback<ICommand<Result>, CancellationToken>((cmd, _) =>
+                ((ApplyComparisonStateCommand)cmd).Items[0].ComparisonId = PlexMediaComparisonState.HigherQuality.ToComparisonId())
             .ReturnsAsync(Result.Ok());
 
         // Act
@@ -205,6 +201,7 @@ public class GetMediaDetailByIdEndpointUnitTests : BaseEndpointUnitTest<GetMedia
 
         var dbContext = IDbContext;
         var libraries = await dbContext.PlexLibraries.OrderBy(x => x.Id).ToListAsync(CancellationToken);
+        libraries.Count.ShouldBe(2);
         var remoteLibrary = libraries[0];
         var ownedLibrary = libraries[1];
         await SetOwnedOverrideAsync(remoteLibrary.PlexServerId, false);
@@ -253,15 +250,10 @@ public class GetMediaDetailByIdEndpointUnitTests : BaseEndpointUnitTest<GetMedia
 
         var request = new GetMediaDetailByIdEndpointRequest(remoteTvShow.Id, PlexMediaType.TvShow);
 
-        Mock.SetupCommand<Result>(x => x is ApplyComparisonStateCommand)
-            .Callback((ICommand<Result> cmd, CancellationToken _) =>
-            {
-                var typed = (ApplyComparisonStateCommand)cmd;
-                typed.Items[0].ComparisonId = PlexMediaComparisonState.HigherQuality.ToComparisonId();
-                typed.Items[1].ComparisonId = PlexMediaComparisonState.Owned.ToComparisonId();
-                typed.Items[2].ComparisonId = PlexMediaComparisonState.Owned.ToComparisonId();
-                typed.Items[3].ComparisonId = PlexMediaComparisonState.Owned.ToComparisonId();
-            })
+        Mock.Mock<ICommandExecutor>()
+            .Setup(x => x.Send(It.IsAny<ApplyComparisonStateCommand>(), It.IsAny<CancellationToken>()))
+            .Callback<ICommand<Result>, CancellationToken>((cmd, _) =>
+                ((ApplyComparisonStateCommand)cmd).Items[0].ComparisonId = PlexMediaComparisonState.HigherQuality.ToComparisonId())
             .ReturnsAsync(Result.Ok());
 
         // Act

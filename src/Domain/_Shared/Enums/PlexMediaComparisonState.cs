@@ -7,8 +7,7 @@ namespace Reaparr.Domain;
 public enum PlexMediaComparisonState
 {
     /// <summary>
-    /// No current comparison scope for this media's library pair.
-    /// Show the muted "not compared yet" chip; never show missing/HQ badges.
+    /// Invalid or unmapped persisted comparison state fallback.
     /// </summary>
     Unknown = -1,   
     

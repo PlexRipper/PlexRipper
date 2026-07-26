@@ -74,13 +74,11 @@ public class GetAllMediaByTypeEndpoint : Endpoint<GetAllMediaByTypeRequest, Plex
 {
     private readonly ILogger _log;
     private readonly IMediaQueryCache _mediaQueryCache;
-    private readonly IReaparrDbContext _dbContext;
 
-    public GetAllMediaByTypeEndpoint(ILogger log, IMediaQueryCache mediaQueryCache, IReaparrDbContext dbContext)
+    public GetAllMediaByTypeEndpoint(ILogger log, IMediaQueryCache mediaQueryCache)
     {
         _log = log.ForContext<GetAllMediaByTypeEndpoint>();
         _mediaQueryCache = mediaQueryCache;
-        _dbContext = dbContext;
     }
 
     public override void Configure()
@@ -97,46 +95,6 @@ public class GetAllMediaByTypeEndpoint : Endpoint<GetAllMediaByTypeRequest, Plex
     public override async Task HandleAsync(GetAllMediaByTypeRequest req, CancellationToken ct)
     {
         _log.Here().DebugApiCall(HttpContext, req);
-
-        // When a specific library is requested but it is disabled, there is no
-        // browsable media. Return an empty result immediately so the frontend
-        // can show the disabled-library alert instead of hitting the cache or
-        // throwing a 400 validation error.
-        if (req.PlexLibraryId is > 0)
-        {
-            var plexLibrary = await _dbContext.PlexLibraries
-                .IgnoreQueryFilters()
-                .FirstOrDefaultAsync(x => x.Id == req.PlexLibraryId.Value, ct);
-
-            if (plexLibrary is not null && !plexLibrary.IsEnabled)
-            {
-                await Send.FluentResult(Result.Ok(new PlexMediaStatisticsDTO
-                {
-                    QueryHash = $"disabled-{req.PlexLibraryId}",
-                    Page = req.Page ?? 1,
-                    PageSize = req.PageSize ?? 100,
-                    TotalCount = 0,
-                    MediaCount = 0,
-                    MovieCount = 0,
-                    TvShowCount = 0,
-                    SeasonCount = 0,
-                    EpisodeCount = 0,
-                    TotalMovieCount = 0,
-                    TotalTvShowCount = 0,
-                    TotalSeasonCount = 0,
-                    TotalEpisodeCount = 0,
-                    MediaSize = 0,
-                    TotalMediaSize = 0,
-                    MediaList = [],
-                    NavigationIndexes = [],
-                    Roles = [],
-                    Countries = [],
-                    Genres = [],
-                    Qualities = [],
-                }), ct);
-                return;
-            }
-        }
 
         var stopWatch = Stopwatch.StartNew();
 

@@ -26,8 +26,6 @@ public class GetMediaByTypeCommandHandler : ICommandHandler<GetMediaByTypeComman
     private readonly IReaparrDbContext _dbContext;
     private readonly ICommandExecutor _commandExecutor;
 
-    private readonly PagedMediaQueryResult _response = new();
-
     public GetMediaByTypeCommandHandler(IReaparrDbContext dbContext, ICommandExecutor commandExecutor)
     {
         _dbContext = dbContext;
@@ -39,7 +37,14 @@ public class GetMediaByTypeCommandHandler : ICommandHandler<GetMediaByTypeComman
         CancellationToken ct)
     {
         var filter = command.Filter;
-        _response.QueryHash = filter.QueryHash;
+        var page = Math.Max(filter.Parameters.Page ?? 1, 1);
+        var pageSize = Math.Max(filter.Parameters.PageSize ?? 0, 0);
+        var response = new PagedMediaQueryResult
+        {
+            QueryHash = filter.QueryHash,
+            Page = page,
+            PageSize = pageSize,
+        };
         var plexLibraryId = filter.PlexLibraryId;
 
         // For a specific library request, verify the library is enabled.
@@ -51,7 +56,7 @@ public class GetMediaByTypeCommandHandler : ICommandHandler<GetMediaByTypeComman
                 .FirstOrDefaultAsync(x => x.Id == plexLibraryId, ct);
 
             if (requestedLibrary is null || !requestedLibrary.IsEnabled)
-                return Result.Ok(_response);
+                return Result.Ok(response);
         }
 
         var allowedPlexLibraryIds = new List<int>();
@@ -102,15 +107,10 @@ public class GetMediaByTypeCommandHandler : ICommandHandler<GetMediaByTypeComman
         }
 
         var options = QueryOptionsParser.Parse(filter.Parameters);
-        var page = Math.Max(filter.Parameters.Page ?? 1, 1);
-        var pageSize = Math.Max(filter.Parameters.PageSize ?? 0, 0);
         options.Paging.Disabled = pageSize == 0;
 
-        _response.Page = page;
-        _response.PageSize = pageSize;
-
         if (!allowedPlexLibraryIds.Any())
-            return Result.Ok(_response);
+            return Result.Ok(response);
 
         var hasUserFilters = options.HasFiltersApplied() || filter.ComparisonState.HasValue;
         options = WithServerLibraryScope(options, allowedPlexLibraryIds, plexLibraryId);
@@ -145,7 +145,7 @@ public class GetMediaByTypeCommandHandler : ICommandHandler<GetMediaByTypeComman
                     var filteredIds = filteredDtos.Select(x => x.Id).ToHashSet();
                     var filteredMovies = movies.Where(x => filteredIds.Contains(x.Id)).ToList();
 
-                    SetNavigationIndexes(filteredMovies.Select(x => new MediaNavigationIndexRow(
+                    SetNavigationIndexes(response, filteredMovies.Select(x => new MediaNavigationIndexRow(
                         x.SearchTitle,
                         x.Year,
                         (int?)x.Quality,
@@ -155,28 +155,28 @@ public class GetMediaByTypeCommandHandler : ICommandHandler<GetMediaByTypeComman
                         x.MediaSize
                     )), options);
 
-                    _response.TotalCount = filteredDtos.Count;
-                    _response.MediaSize = filteredDtos.Sum(x => x.MediaSize);
-                    _response.TotalMediaSize = _response.MediaSize;
+                    response.TotalCount = filteredDtos.Count;
+                    response.MediaSize = filteredDtos.Sum(x => x.MediaSize);
+                    response.TotalMediaSize = response.MediaSize;
 
                     var pagedDtos = ApplyDtoPaging(filteredDtos, page, pageSize);
                     var pagedIds = pagedDtos.Select(x => x.Id).ToHashSet();
                     var pagedMovies = filteredMovies.Where(x => pagedIds.Contains(x.Id)).ToList();
 
-                    _response.Items = pagedDtos;
-                    _response.Roles.AddRange(pagedMovies.SelectMany(x => x.Actors)
+                    response.Items = pagedDtos;
+                    response.Roles.AddRange(pagedMovies.SelectMany(x => x.Actors)
                         .Select(x => x.Id)
                         .Distinct()
                         .OrderBy(x => x));
-                    _response.Countries.AddRange(pagedMovies.SelectMany(x => x.Countries)
+                    response.Countries.AddRange(pagedMovies.SelectMany(x => x.Countries)
                         .Select(x => x.Id)
                         .Distinct()
                         .OrderBy(x => x));
-                    _response.Genres.AddRange(pagedMovies.SelectMany(x => x.Genres)
+                    response.Genres.AddRange(pagedMovies.SelectMany(x => x.Genres)
                         .Select(x => x.Id)
                         .Distinct()
                         .OrderBy(x => x));
-                    _response.Qualities.AddRange(
+                    response.Qualities.AddRange(
                         pagedMovies.SelectMany(x => x.MediaDataList)
                             .Select(x => x.Quality.ToId())
                             .Distinct()
@@ -185,7 +185,7 @@ public class GetMediaByTypeCommandHandler : ICommandHandler<GetMediaByTypeComman
                 }
                 else
                 {
-                    await SetNavigationIndexes(movieQuery.Select(x => new MediaNavigationIndexRow(
+                    await SetNavigationIndexes(response, movieQuery.Select(x => new MediaNavigationIndexRow(
                         x.SearchTitle,
                         x.Year,
                         (int?)x.Quality,
@@ -195,9 +195,9 @@ public class GetMediaByTypeCommandHandler : ICommandHandler<GetMediaByTypeComman
                         x.MediaSize
                     )), options, ct);
 
-                    _response.TotalCount = await movieQuery.CountAsync(ct);
-                    _response.MediaSize = await movieQuery.SumAsync(x => x.MediaSize, ct);
-                    _response.TotalMediaSize = _response.MediaSize;
+                    response.TotalCount = await movieQuery.CountAsync(ct);
+                    response.MediaSize = await movieQuery.SumAsync(x => x.MediaSize, ct);
+                    response.TotalMediaSize = response.MediaSize;
 
                     var movies = await movieQuery
                         .ApplyPaging(options)
@@ -208,20 +208,20 @@ public class GetMediaByTypeCommandHandler : ICommandHandler<GetMediaByTypeComman
                     if (movieComparisonResult.IsFailed)
                         return Result.Fail<PagedMediaQueryResult>(movieComparisonResult.Errors);
 
-                    _response.Items = movieDtos;
-                    _response.Roles.AddRange(movies.SelectMany(x => x.Actors)
+                    response.Items = movieDtos;
+                    response.Roles.AddRange(movies.SelectMany(x => x.Actors)
                         .Select(x => x.Id)
                         .Distinct()
                         .OrderBy(x => x));
-                    _response.Countries.AddRange(movies.SelectMany(x => x.Countries)
+                    response.Countries.AddRange(movies.SelectMany(x => x.Countries)
                         .Select(x => x.Id)
                         .Distinct()
                         .OrderBy(x => x));
-                    _response.Genres.AddRange(movies.SelectMany(x => x.Genres)
+                    response.Genres.AddRange(movies.SelectMany(x => x.Genres)
                         .Select(x => x.Id)
                         .Distinct()
                         .OrderBy(x => x));
-                    _response.Qualities.AddRange(
+                    response.Qualities.AddRange(
                         movies.SelectMany(x => x.MediaDataList).Select(x => x.Quality.ToId()).Distinct().OrderBy(x => x)
                     );
                 }
@@ -252,7 +252,7 @@ public class GetMediaByTypeCommandHandler : ICommandHandler<GetMediaByTypeComman
                     var filteredIds = filteredDtos.Select(x => x.Id).ToHashSet();
                     var filteredTvShows = tvShows.Where(x => filteredIds.Contains(x.Id)).ToList();
 
-                    SetNavigationIndexes(filteredTvShows.Select(x => new MediaNavigationIndexRow(
+                    SetNavigationIndexes(response, filteredTvShows.Select(x => new MediaNavigationIndexRow(
                         x.SearchTitle,
                         x.Year,
                         (int?)x.Quality,
@@ -262,28 +262,28 @@ public class GetMediaByTypeCommandHandler : ICommandHandler<GetMediaByTypeComman
                         x.MediaSize
                     )), options);
 
-                    _response.TotalCount = filteredDtos.Count;
-                    _response.MediaSize = filteredDtos.Sum(x => x.MediaSize);
-                    _response.TotalMediaSize = _response.MediaSize;
+                    response.TotalCount = filteredDtos.Count;
+                    response.MediaSize = filteredDtos.Sum(x => x.MediaSize);
+                    response.TotalMediaSize = response.MediaSize;
 
                     var pagedDtos = ApplyDtoPaging(filteredDtos, page, pageSize);
                     var pagedIds = pagedDtos.Select(x => x.Id).ToHashSet();
                     var pagedTvShows = filteredTvShows.Where(x => pagedIds.Contains(x.Id)).ToList();
 
-                    _response.Items = pagedDtos;
-                    _response.Roles.AddRange(pagedTvShows.SelectMany(x => x.Actors)
+                    response.Items = pagedDtos;
+                    response.Roles.AddRange(pagedTvShows.SelectMany(x => x.Actors)
                         .Select(x => x.Id)
                         .Distinct()
                         .OrderBy(x => x));
-                    _response.Countries.AddRange(pagedTvShows.SelectMany(x => x.Countries)
+                    response.Countries.AddRange(pagedTvShows.SelectMany(x => x.Countries)
                         .Select(x => x.Id)
                         .Distinct()
                         .OrderBy(x => x));
-                    _response.Genres.AddRange(pagedTvShows.SelectMany(x => x.Genres)
+                    response.Genres.AddRange(pagedTvShows.SelectMany(x => x.Genres)
                         .Select(x => x.Id)
                         .Distinct()
                         .OrderBy(x => x));
-                    _response.Qualities.AddRange(
+                    response.Qualities.AddRange(
                         pagedTvShows.SelectMany(x => x.Qualities)
                             .Select(x => x.Quality.ToId())
                             .Distinct()
@@ -292,7 +292,7 @@ public class GetMediaByTypeCommandHandler : ICommandHandler<GetMediaByTypeComman
                 }
                 else
                 {
-                    await SetNavigationIndexes(tvShowQuery.Select(x => new MediaNavigationIndexRow(
+                    await SetNavigationIndexes(response, tvShowQuery.Select(x => new MediaNavigationIndexRow(
                         x.SearchTitle,
                         x.Year,
                         (int?)x.Quality,
@@ -302,9 +302,9 @@ public class GetMediaByTypeCommandHandler : ICommandHandler<GetMediaByTypeComman
                         x.MediaSize
                     )), options, ct);
 
-                    _response.TotalCount = await tvShowQuery.CountAsync(ct);
-                    _response.MediaSize = await tvShowQuery.SumAsync(x => x.MediaSize, ct);
-                    _response.TotalMediaSize = _response.MediaSize;
+                    response.TotalCount = await tvShowQuery.CountAsync(ct);
+                    response.MediaSize = await tvShowQuery.SumAsync(x => x.MediaSize, ct);
+                    response.TotalMediaSize = response.MediaSize;
 
                     var tvShows = await tvShowQuery
                         .ApplyPaging(options)
@@ -315,20 +315,20 @@ public class GetMediaByTypeCommandHandler : ICommandHandler<GetMediaByTypeComman
                     if (tvShowComparisonResult.IsFailed)
                         return Result.Fail<PagedMediaQueryResult>(tvShowComparisonResult.Errors);
 
-                    _response.Items = tvShowDtos;
-                    _response.Roles.AddRange(tvShows.SelectMany(x => x.Actors)
+                    response.Items = tvShowDtos;
+                    response.Roles.AddRange(tvShows.SelectMany(x => x.Actors)
                         .Select(x => x.Id)
                         .Distinct()
                         .OrderBy(x => x));
-                    _response.Countries.AddRange(tvShows.SelectMany(x => x.Countries)
+                    response.Countries.AddRange(tvShows.SelectMany(x => x.Countries)
                         .Select(x => x.Id)
                         .Distinct()
                         .OrderBy(x => x));
-                    _response.Genres.AddRange(tvShows.SelectMany(x => x.Genres)
+                    response.Genres.AddRange(tvShows.SelectMany(x => x.Genres)
                         .Select(x => x.Id)
                         .Distinct()
                         .OrderBy(x => x));
-                    _response.Qualities.AddRange(
+                    response.Qualities.AddRange(
                         tvShows.SelectMany(x => x.Qualities).Select(x => x.Quality.ToId()).Distinct().OrderBy(x => x)
                     );
                 }
@@ -341,19 +341,19 @@ public class GetMediaByTypeCommandHandler : ICommandHandler<GetMediaByTypeComman
                 );
         }
 
-        var effectivePageSize = _response.PageSize > 0 ? _response.PageSize : _response.Items.Count;
-        var offset = (_response.Page - 1) * effectivePageSize;
+        var effectivePageSize = response.PageSize > 0 ? response.PageSize : response.Items.Count;
+        var offset = (response.Page - 1) * effectivePageSize;
 
-        for (var i = 0; i < _response.Items.Count; i++)
+        for (var i = 0; i < response.Items.Count; i++)
         {
-            var slimDTO = _response.Items[i];
+            var slimDTO = response.Items[i];
 
             slimDTO.SortIndex = offset + i + 1;
         }
 
-        await SetCounts(hasUserFilters, allowedPlexLibraryIds, filter.MediaType, ct);
+        await SetCounts(response, hasUserFilters, allowedPlexLibraryIds, filter.MediaType, ct);
 
-        return Result.Ok(_response);
+        return Result.Ok(response);
     }
 
     /// <summary>
@@ -420,11 +420,12 @@ public class GetMediaByTypeCommandHandler : ICommandHandler<GetMediaByTypeComman
     }
 
     private async Task SetNavigationIndexes(
+        PagedMediaQueryResult response,
         IQueryable<MediaNavigationIndexRow> rows,
         QueryOptions options,
         CancellationToken ct)
     {
-        SetNavigationIndexes(await rows.ToListAsync(ct), options);
+        SetNavigationIndexes(response, await rows.ToListAsync(ct), options);
     }
 
     private async Task<Result> ApplyComparisonStateAsync(
@@ -445,29 +446,20 @@ public class GetMediaByTypeCommandHandler : ICommandHandler<GetMediaByTypeComman
             return Result.Ok();
         }
 
-        var groupedItemIndexes = items
-            .Select((item, index) => new { item.PlexLibraryId, Index = index })
-            .Where(x => x.PlexLibraryId > 0)
-            .GroupBy(x => x.PlexLibraryId);
-
-        foreach (var group in groupedItemIndexes)
+        foreach (var group in items.Where(x => x.PlexLibraryId > 0).GroupBy(x => x.PlexLibraryId))
         {
-            var indexes = group.Select(x => x.Index).ToList();
-            var libraryItems = indexes.Select(index => items[index]).ToList();
+            var libraryItems = group.ToList();
             var result = await _commandExecutor.Send(new ApplyComparisonStateCommand(libraryItems, group.Key, mediaType), ct);
             if (result.IsFailed)
                 return Result.Fail(result.Errors);
-
-            for (var i = 0; i < indexes.Count; i++)
-                items[indexes[i]] = libraryItems[i];
         }
 
         return Result.Ok();
     }
 
-    private void SetNavigationIndexes(IEnumerable<MediaNavigationIndexRow> rows, QueryOptions options)
+    private static void SetNavigationIndexes(PagedMediaQueryResult response, IEnumerable<MediaNavigationIndexRow> rows, QueryOptions options)
     {
-        _response.NavigationIndexes = MediaNavigationIndexBuilder.Build(
+        response.NavigationIndexes = MediaNavigationIndexBuilder.Build(
             rows,
             options.Sort.FirstOrDefault()?.Field
         );
@@ -510,6 +502,7 @@ public class GetMediaByTypeCommandHandler : ICommandHandler<GetMediaByTypeComman
     }
 
     private async Task SetCounts(
+        PagedMediaQueryResult response,
         bool hasUserFilters,
         List<int> allowedPlexLibraryIds,
         PlexMediaType mediaType,
@@ -519,30 +512,30 @@ public class GetMediaByTypeCommandHandler : ICommandHandler<GetMediaByTypeComman
             .Where(x => allowedPlexLibraryIds.Contains(x.Id))
             .ToListAsync(ct);
 
-        _response.TotalMovieCount = mediaType == PlexMediaType.Movie
-            ? _response.TotalCount
+        response.TotalMovieCount = mediaType == PlexMediaType.Movie
+            ? response.TotalCount
             : allScopedLibraries.Sum(x => x.MovieCount);
-        _response.TotalTvShowCount = mediaType == PlexMediaType.TvShow
-            ? _response.TotalCount
+        response.TotalTvShowCount = mediaType == PlexMediaType.TvShow
+            ? response.TotalCount
             : allScopedLibraries.Sum(x => x.TvShowCount);
-        _response.TotalSeasonCount = allScopedLibraries.Sum(x => x.SeasonCount);
-        _response.TotalEpisodeCount = allScopedLibraries.Sum(x => x.EpisodeCount);
+        response.TotalSeasonCount = allScopedLibraries.Sum(x => x.SeasonCount);
+        response.TotalEpisodeCount = allScopedLibraries.Sum(x => x.EpisodeCount);
 
         if (hasUserFilters)
         {
-            _response.MediaCount = _response.TotalCount;
-            _response.MovieCount = mediaType == PlexMediaType.Movie ? _response.TotalCount : 0;
-            _response.TvShowCount = mediaType == PlexMediaType.TvShow ? _response.TotalCount : 0;
-            _response.SeasonCount = _response.Items.Where(x => x.Type == PlexMediaType.TvShow).Sum(x => x.ChildCount);
-            _response.EpisodeCount =
-                _response.Items.Where(x => x.Type == PlexMediaType.TvShow).Sum(x => x.GrandChildCount);
+            response.MediaCount = response.TotalCount;
+            response.MovieCount = mediaType == PlexMediaType.Movie ? response.TotalCount : 0;
+            response.TvShowCount = mediaType == PlexMediaType.TvShow ? response.TotalCount : 0;
+            response.SeasonCount = response.Items.Where(x => x.Type == PlexMediaType.TvShow).Sum(x => x.ChildCount);
+            response.EpisodeCount =
+                response.Items.Where(x => x.Type == PlexMediaType.TvShow).Sum(x => x.GrandChildCount);
             return;
         }
 
-        _response.MovieCount = mediaType == PlexMediaType.Movie ? _response.TotalCount : 0;
-        _response.TvShowCount = mediaType == PlexMediaType.TvShow ? _response.TotalCount : 0;
-        _response.SeasonCount = mediaType == PlexMediaType.TvShow ? _response.TotalSeasonCount : 0;
-        _response.EpisodeCount = mediaType == PlexMediaType.TvShow ? _response.TotalEpisodeCount : 0;
-        _response.MediaCount = _response.TotalCount;
+        response.MovieCount = mediaType == PlexMediaType.Movie ? response.TotalCount : 0;
+        response.TvShowCount = mediaType == PlexMediaType.TvShow ? response.TotalCount : 0;
+        response.SeasonCount = mediaType == PlexMediaType.TvShow ? response.TotalSeasonCount : 0;
+        response.EpisodeCount = mediaType == PlexMediaType.TvShow ? response.TotalEpisodeCount : 0;
+        response.MediaCount = response.TotalCount;
     }
 }

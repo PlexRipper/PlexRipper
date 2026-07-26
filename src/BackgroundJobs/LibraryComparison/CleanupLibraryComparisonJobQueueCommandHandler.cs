@@ -18,6 +18,7 @@ public class CleanupLibraryComparisonJobQueueCommandValidator
 public class CleanupLibraryComparisonJobQueueCommandHandler
     : ICommandHandler<CleanupLibraryComparisonJobQueueCommand, Result>
 {
+    private const int MAX_ATTEMPTS = 3;
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
 
@@ -37,7 +38,16 @@ public class CleanupLibraryComparisonJobQueueCommandHandler
             .ExecuteDeleteAsync(cancellationToken);
 
         await _dbContext.LibraryComparisonJobQueues
-            .Where(x => x.Status == LibrarySyncJobStatus.Processing || x.Status == LibrarySyncJobStatus.Failed)
+            .Where(x => x.Status == LibrarySyncJobStatus.Processing && x.Attempts >= MAX_ATTEMPTS)
+            .ExecuteUpdateAsync(
+                x => x.SetProperty(y => y.Status, LibrarySyncJobStatus.Failed)
+                    .SetProperty(y => y.CompletedAt, DateTime.UtcNow)
+                    .SetProperty(y => y.ErrorMessage, "Library comparison exceeded retry attempts while processing"),
+                cancellationToken
+            );
+
+        await _dbContext.LibraryComparisonJobQueues
+            .Where(x => (x.Status == LibrarySyncJobStatus.Processing || x.Status == LibrarySyncJobStatus.Failed) && x.Attempts < MAX_ATTEMPTS)
             .ExecuteUpdateAsync(
                 x => x.SetProperty(y => y.Status, LibrarySyncJobStatus.Queued)
                     .SetProperty(y => y.StartedAt, (DateTime?)null)

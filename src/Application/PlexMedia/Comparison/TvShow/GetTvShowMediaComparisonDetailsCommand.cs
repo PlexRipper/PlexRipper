@@ -184,11 +184,12 @@ public class GetTvShowMediaComparisonDetailsCommandHandler
         var result = new List<ComparisonDetailsRow>();
         foreach (var group in childRows.GroupBy(x =>
                          episodeLookup.TryGetValue(x.PlexMediaId, out var episode)
-                             ? episode.TvShowSeason?.SeasonNumber ?? 0
+                             ? episode.TvShowSeasonId
                              : 0)
                      .OrderBy(x => x.Key))
         {
             var sourceRow = group.FirstOrDefault(x => x.RemotePlexLibraryId > 0) ?? group.First();
+            var seasonNumber = group.Select(x => episodeLookup.GetValueOrDefault(x.PlexMediaId)?.TvShowSeason?.SeasonNumber ?? 0).FirstOrDefault();
             var seasonRowId = ++_rowId;
             result.Add(new ComparisonDetailsRow
             {
@@ -197,13 +198,8 @@ public class GetTvShowMediaComparisonDetailsCommandHandler
                 Level = 0,
                 PlexMediaId = group.Select(x => episodeLookup.GetValueOrDefault(x.PlexMediaId)?.TvShowSeasonId ?? 0).FirstOrDefault(x => x > 0),
                 Type = PlexMediaType.Season,
-                Title = $"Season {group.Key}",
-                ComparisonId = group.Any(x => x.ComparisonId == PlexMediaComparisonState.Missing.ToComparisonId()) &&
-                               group.Any(x => x.ComparisonId == PlexMediaComparisonState.HigherQuality.ToComparisonId())
-                    ? PlexMediaComparisonState.PartialAndHigherQuality.ToComparisonId()
-                    : group.Any(x => x.ComparisonId == PlexMediaComparisonState.Missing.ToComparisonId())
-                        ? PlexMediaComparisonState.Partial.ToComparisonId()
-                        : PlexMediaComparisonState.HigherQuality.ToComparisonId(),
+                Title = $"Season {seasonNumber}",
+                ComparisonId = PlexMediaComparisonDetailsMapper.ToParentState(group.ToList()).ToComparisonId(),
                 IsActionable = true,
                 RemoteQuality = PlexMediaComparisonDetailsMapper.GetHighestQuality(group.Select(x => x.RemoteQuality)),
                 OwnedQuality = PlexMediaComparisonDetailsMapper.GetHighestQuality(group.Select(x => x.OwnedQuality)),

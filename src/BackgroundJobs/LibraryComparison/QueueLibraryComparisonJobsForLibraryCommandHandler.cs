@@ -47,7 +47,7 @@ public class QueueLibraryComparisonJobsForLibraryCommandHandler
             .SingleOrDefaultAsync(cancellationToken);
 
         if (sourceLibrary is null)
-            return Result.Fail($"Library {command.PlexLibraryId} was not found");
+            return Result.Fail($"Library {command.PlexLibraryId} was not found or was disabled");
 
         if (sourceLibrary.Type is not PlexMediaType.Movie and not PlexMediaType.TvShow)
             return Result.Ok();
@@ -67,6 +67,7 @@ public class QueueLibraryComparisonJobsForLibraryCommandHandler
                 .Select(x => (RemoteLibraryId: sourceLibrary.Id, OwnedLibraryId: x.Id));
 
         var queuedCount = 0;
+        var failedResults = new List<ResultBase>();
         foreach (var pair in pairs)
         {
             var result = await _commandExecutor.Send(
@@ -75,7 +76,10 @@ public class QueueLibraryComparisonJobsForLibraryCommandHandler
             );
 
             if (result.IsFailed)
-                return Result.Fail(result.Errors);
+            {
+                failedResults.AddRange(result);
+                continue;
+            }
 
             queuedCount++;
         }
@@ -87,6 +91,6 @@ public class QueueLibraryComparisonJobsForLibraryCommandHandler
                 sourceLibrary.Id
             );
 
-        return Result.Ok();
+        return failedResults.Count > 0 ? Result.Merge(failedResults.ToArray()).LogError() : Result.Ok();
     }
 }

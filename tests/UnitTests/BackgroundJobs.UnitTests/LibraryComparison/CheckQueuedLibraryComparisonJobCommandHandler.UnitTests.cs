@@ -92,7 +92,7 @@ public class CheckQueuedLibraryComparisonJobCommandHandlerUnitTests
             .ReturnsAsync(true)
             .Verifiable(Times.Once());
         Mock.Mock<IScheduler>()
-            .Setup(x => x.ScheduleJob(It.IsAny<ITrigger>(), CancellationToken.None))
+            .Setup(x => x.ScheduleJob(It.IsAny<ITrigger>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(DateTimeOffset.UtcNow)
             .Verifiable(Times.Once());
 
@@ -116,7 +116,7 @@ public class CheckQueuedLibraryComparisonJobCommandHandlerUnitTests
         var jobKey = PlexLibraryComparisonJob.GetJobKey();
         var triggerKey = new TriggerKey($"{jobKey.Name}_trigger", jobKey.Group);
         var command = new CheckQueuedLibraryComparisonJobCommand();
-        await SetupDatabase(73, config =>
+        await SetupDatabase(80, config =>
         {
             config.PlexServerCount = 2;
             config.PlexMovieLibraryCount = 1;
@@ -166,7 +166,7 @@ public class CheckQueuedLibraryComparisonJobCommandHandlerUnitTests
         // Arrange
         var jobKey = PlexLibraryComparisonJob.GetJobKey();
         var command = new CheckQueuedLibraryComparisonJobCommand();
-        await SetupDatabase(74, config =>
+        await SetupDatabase(81, config =>
         {
             config.PlexServerCount = 2;
             config.PlexMovieLibraryCount = 1;
@@ -198,7 +198,7 @@ public class CheckQueuedLibraryComparisonJobCommandHandlerUnitTests
             .ReturnsAsync(true)
             .Verifiable(Times.Once());
         Mock.Mock<IScheduler>()
-            .Setup(x => x.ScheduleJob(It.IsAny<ITrigger>(), CancellationToken.None))
+            .Setup(x => x.ScheduleJob(It.IsAny<ITrigger>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(DateTimeOffset.UtcNow)
             .Verifiable(Times.Once());
 
@@ -217,7 +217,7 @@ public class CheckQueuedLibraryComparisonJobCommandHandlerUnitTests
         // Arrange
         var jobKey = PlexLibraryComparisonJob.GetJobKey();
         var command = new CheckQueuedLibraryComparisonJobCommand();
-        await SetupDatabase(75, config =>
+        await SetupDatabase(82, config =>
         {
             config.PlexServerCount = 2;
             config.PlexMovieLibraryCount = 1;
@@ -249,7 +249,7 @@ public class CheckQueuedLibraryComparisonJobCommandHandlerUnitTests
             .ReturnsAsync(false)
             .Verifiable(Times.Once());
         Mock.Mock<IScheduler>()
-            .Setup(x => x.ScheduleJob(It.IsAny<IJobDetail>(), It.IsAny<ITrigger>(), CancellationToken.None))
+            .Setup(x => x.ScheduleJob(It.IsAny<IJobDetail>(), It.IsAny<ITrigger>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(DateTimeOffset.UtcNow)
             .Verifiable(Times.Once());
 

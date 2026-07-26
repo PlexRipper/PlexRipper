@@ -224,10 +224,16 @@ public class AddOrUpdatePlexLibrariesCommandHandler
 
         var affectedLibraryIds = rapportList.SelectMany(x => x.Data).Select(x => x.PlexLibraryId).Distinct().ToList();
         _mediaQueryCache.InvalidateLibraries(affectedLibraryIds, "Plex library access or ownership changed");
-        foreach (var libraryId in affectedLibraryIds)
-            await _commandExecutor.Send(new QueueLibraryComparisonJobsForLibraryCommand(libraryId), cancellationToken);
+        var failedResults = new List<ResultBase>();
 
-        return Result.Ok(rapportList);
+        foreach (var libraryId in affectedLibraryIds)
+        {
+            var queueResult = await _commandExecutor.Send(new QueueLibraryComparisonJobsForLibraryCommand(libraryId), cancellationToken);
+            if (queueResult.IsFailed)
+                failedResults.AddRange(queueResult);
+        }
+
+        return failedResults.Count > 0 ? Result.Merge(failedResults.ToArray()).LogError() : Result.Ok(rapportList);
     }
 
     private async Task AddHistoryEventsAsync(

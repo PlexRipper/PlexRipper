@@ -63,7 +63,7 @@ public class MockProgressHubService : IProgressHubService
     )
     {
         LibraryComparisonCompletedList.Add(notification, cancellationToken);
-        _log.Here().Verbose("{ClassName} => {@Notification}", nameof(MockNotificationHubService), notification);
+        _log.Here().Verbose("{ClassName} => {@Notification}", nameof(MockProgressHubService), notification);
 
         return Task.CompletedTask;
     }

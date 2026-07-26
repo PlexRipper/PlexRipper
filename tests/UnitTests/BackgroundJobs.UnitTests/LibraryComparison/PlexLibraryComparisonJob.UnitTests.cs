@@ -60,11 +60,24 @@ public class PlexLibraryComparisonJobUnitTests : BaseUnitTest<PlexLibraryCompari
             .Setup(x => x.SendLibraryComparisonCompletedAsync(
                 It.Is<LibraryComparisonCompletedDTO>(notification =>
                     notification.MediaType == PlexMediaType.Movie
-                    && notification.AffectedLibraryIds.Count == 2),
+                    && notification.AffectedLibraryIds.Count == 2
+                    && notification.AffectedLibraryIds.Contains(remoteLibrary.Id)
+                    && notification.AffectedLibraryIds.Contains(otherRemoteLibrary.Id)),
                 It.IsAny<CancellationToken>()
             ))
             .Returns(Task.CompletedTask)
-            .Verifiable(Times.Exactly(2));
+            .Verifiable(Times.Once());
+        Mock.Mock<IProgressHubService>()
+            .Setup(x => x.SendLibraryComparisonCompletedAsync(
+                It.Is<LibraryComparisonCompletedDTO>(notification =>
+                    notification.MediaType == PlexMediaType.Movie
+                    && notification.AffectedLibraryIds.Count == 2
+                    && notification.AffectedLibraryIds.Contains(otherRemoteLibrary.Id)
+                    && notification.AffectedLibraryIds.Contains(ownedLibrary.Id)),
+                It.IsAny<CancellationToken>()
+            ))
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.Once());
 
         // Act
         await Sut.Execute(jobContext);

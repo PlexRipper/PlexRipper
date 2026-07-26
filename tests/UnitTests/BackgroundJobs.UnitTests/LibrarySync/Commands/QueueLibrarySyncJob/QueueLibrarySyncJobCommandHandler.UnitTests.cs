@@ -383,7 +383,9 @@ public class QueueLibrarySyncJobCommandHandlerUnitTests : BaseUnitTest<QueueLibr
         // Assert
         result.IsSuccess.ShouldBeTrue();
 
-        var queueItem = dbContext.LibrarySyncJobQueues.Single(x => x.PlexLibraryId == library.Id);
+        var queueItem = await dbContext.LibrarySyncJobQueues
+            .IgnoreQueryFilters()
+            .SingleAsync(x => x.PlexLibraryId == library.Id, CancellationToken);
         queueItem.Status.ShouldBe(LibrarySyncJobStatus.Queued);
         queueItem.StartedAt.ShouldBeNull();
         queueItem.CompletedAt.ShouldBeNull();

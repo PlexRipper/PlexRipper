@@ -101,13 +101,11 @@ public class ApplyOwnedTvShowComparisonStateCommandHandler
 
         var showUpgradeIdSet = showUpgradeIds.ToHashSet();
 
-        var ownedEpisodes = await _dbContext.PlexTvShowEpisodes
+        var ownedEpisodeCountLookup = await _dbContext.PlexTvShowEpisodes
             .Where(x => itemIds.Contains(x.TvShowId))
-            .ToListAsync(ct);
-
-        var ownedEpisodeCountLookup = ownedEpisodes
             .GroupBy(x => x.TvShowId)
-            .ToDictionary(x => x.Key, x => x.Count());
+            .Select(g => new { TvShowId = g.Key, Count = g.Count() })
+            .ToDictionaryAsync(x => x.TvShowId, x => x.Count, ct);
         var remoteEpisodeCounts = await _dbContext.PlexTvShowEpisodes
             .Where(x => currentRemoteLibraryIds.Contains(x.PlexLibraryId))
             .GroupBy(x => x.TvShowId)
@@ -163,7 +161,7 @@ public class ApplyOwnedTvShowComparisonStateCommandHandler
             remoteEpisodeCountByOwnedShow.TryGetValue(showId, out var remoteEpisodeCount);
             episodeHitLookup.TryGetValue(showId, out var episodeHitSummary);
             var matchedEpisodeCount = episodeHitSummary?.MatchedCount ?? 0;
-            var hasPartialMissingChildren = remoteEpisodeCount > ownedEpisodeCount || matchedEpisodeCount < remoteEpisodeCount;
+            var hasPartialMissingChildren = remoteEpisodeCount > 0 && matchedEpisodeCount < remoteEpisodeCount;
             var hasHigherQuality = showUpgradeIdSet.Contains(showId) || episodeHitSummary?.HigherQualityCount > 0;
 
             item.SetComparisonState((hasPartialMissingChildren, hasHigherQuality) switch

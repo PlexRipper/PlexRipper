@@ -133,7 +133,7 @@ public class ApplyRemoteTvShowComparisonStateCommandUnitTests
     public async Task ShouldMarkMissing_WhenRemoteTvShowHasManyEpisodesAndNoTopLevelHit()
     {
         // Arrange
-        await SetupDatabase(63, config =>
+        await SetupDatabase(64, config =>
         {
             config.PlexServerCount = 2;
             config.PlexTvShowLibraryCount = 1;

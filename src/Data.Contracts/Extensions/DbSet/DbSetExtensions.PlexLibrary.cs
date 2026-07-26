@@ -4,6 +4,9 @@ public sealed record PlexLibraryOwnership(int Id, PlexMediaType Type, bool IsOwn
 
 public static partial class DbSetExtensions
 {
+    public static IQueryable<PlexLibrary> IgnoreIsEnabledFilter(this IQueryable<PlexLibrary> query) =>
+        query.IgnoreQueryFilters(["IsEnabled"]);
+
     /// <summary>
     /// Projects <see cref="PlexLibrary"/> rows with the shared ownership decision.
     /// </summary>

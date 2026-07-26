@@ -23,70 +23,76 @@ public static partial class DbContextExtensions
             .FirstOrDefaultAsync(CancellationToken.None);
     }
 
-    public static async Task<HashSet<int>> GetCurrentOwnedLibraryIds(
+    public static Task<HashSet<int>> GetCurrentOwnedLibraryIds(
         this IReaparrDbContext dbContext,
         int remoteLibraryId,
         PlexMediaType mediaType,
-        CancellationToken cancellationToken = default)
-    {
-        var remoteUpdatedAt = await dbContext.PlexLibraries
-            .Where(x => x.Id == remoteLibraryId)
-            .Select(x => x.UpdatedAt)
-            .SingleOrDefaultAsync(cancellationToken);
-        if (remoteUpdatedAt is null)
-            return [];
+        CancellationToken cancellationToken = default) => GetCurrentLibraryIds(
+        dbContext,
+        CurrentLibraryRole.Owned,
+        remoteLibraryId,
+        mediaType,
+        cancellationToken);
 
-        var ownedLibraries = await dbContext.PlexLibraries
-            .WhereIsOwned()
-            .Where(x => x.Type == mediaType)
-            .Select(x => new { x.Id, x.UpdatedAt })
-            .ToDictionaryAsync(x => x.Id, x => x.UpdatedAt, cancellationToken);
-
-        var scopeRows = await dbContext.PlexComparisonScopes
-            .Where(x => x.RemotePlexLibraryId == remoteLibraryId && x.MediaType == mediaType &&
-                        ownedLibraries.Keys.Contains(x.OwnedPlexLibraryId))
-            .ToListAsync(cancellationToken);
-
-        return scopeRows
-            .Where(x =>
-                x.RemoteLibraryUpdatedAt == remoteUpdatedAt
-                && ownedLibraries.TryGetValue(x.OwnedPlexLibraryId, out var ownedUpdatedAt)
-                && x.OwnedLibraryUpdatedAt == ownedUpdatedAt)
-            .Select(x => x.OwnedPlexLibraryId)
-            .ToHashSet();
-    }
-
-    public static async Task<HashSet<int>> GetCurrentRemoteLibraryIds(
+    public static Task<HashSet<int>> GetCurrentRemoteLibraryIds(
         this IReaparrDbContext dbContext,
         int ownedLibraryId,
         PlexMediaType mediaType,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default) => GetCurrentLibraryIds(
+        dbContext,
+        CurrentLibraryRole.Remote,
+        ownedLibraryId,
+        mediaType,
+        cancellationToken);
+
+    private static async Task<HashSet<int>> GetCurrentLibraryIds(
+        IReaparrDbContext dbContext,
+        CurrentLibraryRole role,
+        int libraryId,
+        PlexMediaType mediaType,
+        CancellationToken cancellationToken)
     {
-        var ownedUpdatedAt = await dbContext.PlexLibraries
-            .Where(x => x.Id == ownedLibraryId)
+        var libraryUpdatedAt = dbContext.PlexLibraries
+            .Where(x => x.Id == libraryId)
             .Select(x => x.UpdatedAt)
-            .SingleOrDefaultAsync(cancellationToken);
-        if (ownedUpdatedAt is null)
+            .SingleOrDefault();
+
+        if (libraryUpdatedAt is null)
             return [];
 
-        var remoteLibraries = await dbContext.PlexLibraries
-            .WhereIsNotOwned()
-            .Where(x => x.Type == mediaType)
-            .Select(x => new { x.Id, x.UpdatedAt })
-            .ToDictionaryAsync(x => x.Id, x => x.UpdatedAt, cancellationToken);
+        var ids = role == CurrentLibraryRole.Owned
+            ? await dbContext.PlexComparisonScopes
+                .Where(x => x.RemotePlexLibraryId == libraryId
+                            && x.MediaType == mediaType
+                            && x.RemoteLibraryUpdatedAt == libraryUpdatedAt)
+                .Join(
+                    dbContext.PlexLibraries.WhereIsOwned().Where(x => x.Type == mediaType),
+                    scope => scope.OwnedPlexLibraryId,
+                    library => library.Id,
+                    (scope, library) => new { scope, library })
+                .Where(x => x.scope.OwnedLibraryUpdatedAt == x.library.UpdatedAt)
+                .Select(x => x.library.Id)
+                .ToListAsync(cancellationToken)
+            : await dbContext.PlexComparisonScopes
+                .Where(x => x.OwnedPlexLibraryId == libraryId
+                            && x.MediaType == mediaType
+                            && x.OwnedLibraryUpdatedAt == libraryUpdatedAt)
+                .Join(
+                    dbContext.PlexLibraries.WhereIsNotOwned().Where(x => x.Type == mediaType),
+                    scope => scope.RemotePlexLibraryId,
+                    library => library.Id,
+                    (scope, library) => new { scope, library })
+                .Where(x => x.scope.RemoteLibraryUpdatedAt == x.library.UpdatedAt)
+                .Select(x => x.library.Id)
+                .ToListAsync(cancellationToken);
 
-        var scopeRows = await dbContext.PlexComparisonScopes
-            .Where(x => x.OwnedPlexLibraryId == ownedLibraryId && x.MediaType == mediaType &&
-                        remoteLibraries.Keys.Contains(x.RemotePlexLibraryId))
-            .ToListAsync(cancellationToken);
+        return ids.ToHashSet();
+    }
 
-        return scopeRows
-            .Where(x =>
-                x.OwnedLibraryUpdatedAt == ownedUpdatedAt
-                && remoteLibraries.TryGetValue(x.RemotePlexLibraryId, out var remoteUpdatedAt)
-                && x.RemoteLibraryUpdatedAt == remoteUpdatedAt)
-            .Select(x => x.RemotePlexLibraryId)
-            .ToHashSet();
+    private enum CurrentLibraryRole
+    {
+        Owned,
+        Remote,
     }
 
     public static async Task SetLibraryMetaData(

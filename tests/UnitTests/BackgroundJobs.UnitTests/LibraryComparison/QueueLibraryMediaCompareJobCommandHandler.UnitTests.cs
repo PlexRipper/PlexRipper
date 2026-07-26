@@ -9,7 +9,7 @@ public class QueueLibraryMediaCompareJobCommandHandlerUnitTests
     public async Task ShouldInvalidateComparisonScopeAndMediaCache_WhenCompletedQueueItemIsRequeued()
     {
         // Arrange
-        await SetupDatabase(73, config =>
+        await SetupDatabase(78, config =>
         {
             config.PlexServerCount = 2;
             config.PlexMovieLibraryCount = 1;
@@ -94,7 +94,7 @@ public class QueueLibraryMediaCompareJobCommandHandlerUnitTests
     public async Task ShouldKeepCurrentComparisonScope_WhenQueueItemIsAlreadyQueued()
     {
         // Arrange
-        await SetupDatabase(74, config =>
+        await SetupDatabase(79, config =>
         {
             config.PlexServerCount = 2;
             config.PlexMovieLibraryCount = 1;

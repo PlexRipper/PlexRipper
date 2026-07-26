@@ -87,8 +87,20 @@ public class SetServerOwnedEndpoint : Endpoint<SetServerOwnedRequest, ResultDTO<
             .Select(x => x.Id)
             .ToListAsync(ct);
         _mediaQueryCache.InvalidateLibraries(libraryIds, "Plex server ownership scope changed");
+        var failedResults = new List<ResultBase>();
         foreach (var libraryId in libraryIds)
-            await _commandExecutor.Send(new QueueLibraryComparisonJobsForLibraryCommand(libraryId), ct);
+        {
+            var queueResult = await _commandExecutor.Send(new QueueLibraryComparisonJobsForLibraryCommand(libraryId), ct);
+            if (queueResult.IsFailed)
+                failedResults.Add(queueResult);
+            
+        }
+
+        if (failedResults.Count > 0)
+        {
+            await Send.FluentResult(Result.Merge(failedResults.ToArray()).LogError(), ct);
+            return;
+        }
 
         await Send.FluentResult(Result.Ok(plexServer), x => x.ToDTO(), ct);
     }

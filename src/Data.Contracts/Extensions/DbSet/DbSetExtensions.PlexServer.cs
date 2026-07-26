@@ -21,9 +21,6 @@ public static partial class DbSetExtensions
     public static IQueryable<PlexServer> IgnoreIsEnabledFilter(this IQueryable<PlexServer> query) =>
         query.IgnoreQueryFilters(["IsEnabled"]);
 
-    public static IQueryable<PlexLibrary> IgnoreIsEnabledFilter(this IQueryable<PlexLibrary> query) =>
-        query.IgnoreQueryFilters(["IsEnabled"]);
-
     public static IQueryable<PlexServer> WhereIsOwned(this IQueryable<PlexServer> query) => query.IsOwnedHelper(true);
 
     public static IQueryable<PlexServer> WhereIsNotOwned(this IQueryable<PlexServer> query) => query.IsOwnedHelper(false);

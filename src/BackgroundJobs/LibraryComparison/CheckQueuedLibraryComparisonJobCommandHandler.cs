@@ -18,6 +18,7 @@ public class CheckQueuedLibraryComparisonJobCommandValidator
 public class CheckQueuedLibraryComparisonJobCommandHandler
     : ICommandHandler<CheckQueuedLibraryComparisonJobCommand, Result>
 {
+    private const int MAX_ATTEMPTS = 3;
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
     private readonly IScheduler _scheduler;
@@ -80,16 +81,22 @@ public class CheckQueuedLibraryComparisonJobCommandHandler
         {
             var trigger = TriggerBuilder.Create().WithIdentity(triggerKey).ForJob(jobKey).StartNow().Build();
 
-            if (await _scheduler.CheckExists(jobKey, CancellationToken.None))
-                await _scheduler.ScheduleJob(trigger, CancellationToken.None);
+            if (await _scheduler.CheckExists(jobKey, cancellationToken))
+                await _scheduler.ScheduleJob(trigger, cancellationToken);
             else
             {
                 var job = JobBuilder.Create<PlexLibraryComparisonJob>().WithIdentity(jobKey).StoreDurably().Build();
-                await _scheduler.ScheduleJob(job, trigger, CancellationToken.None);
+                await _scheduler.ScheduleJob(job, trigger, cancellationToken);
             }
 
             _log.Here().Debug("Scheduled library comparison queue worker");
         });
+
+        if (result.IsFailed && result.Errors.Any(x => x.Message.Contains("already exists", StringComparison.OrdinalIgnoreCase)))
+        {
+            _log.Here().Warning("Library comparison queue worker trigger was already scheduled by another caller");
+            return Result.Ok();
+        }
 
         result.LogIfFailed();
 
@@ -98,8 +105,16 @@ public class CheckQueuedLibraryComparisonJobCommandHandler
 
     private async Task<int> RequeueStaleProcessingItemsAsync(CancellationToken cancellationToken)
     {
+        var failedCount = await _dbContext.LibraryComparisonJobQueues
+            .Where(x => x.Status == LibrarySyncJobStatus.Processing && x.Attempts >= MAX_ATTEMPTS)
+            .ExecuteUpdateAsync(
+                x => x.SetProperty(y => y.Status, LibrarySyncJobStatus.Failed)
+                    .SetProperty(y => y.CompletedAt, DateTime.UtcNow)
+                    .SetProperty(y => y.ErrorMessage, "Library comparison exceeded retry attempts while processing"),
+                cancellationToken
+            );
         var requeuedCount = await _dbContext.LibraryComparisonJobQueues
-            .Where(x => x.Status == LibrarySyncJobStatus.Processing)
+            .Where(x => x.Status == LibrarySyncJobStatus.Processing && x.Attempts < MAX_ATTEMPTS)
             .ExecuteUpdateAsync(
                 x => x.SetProperty(y => y.Status, LibrarySyncJobStatus.Queued)
                     .SetProperty(y => y.StartedAt, (DateTime?)null)
@@ -107,7 +122,11 @@ public class CheckQueuedLibraryComparisonJobCommandHandler
                 cancellationToken
             );
 
-        _log.Here().Warning("Requeued {Count} stale processing library comparison jobs", requeuedCount);
+        _log.Here().Warning(
+            "Requeued {Count} stale processing library comparison jobs and failed {FailedCount} max-attempt jobs",
+            requeuedCount,
+            failedCount
+        );
 
         return requeuedCount;
     }

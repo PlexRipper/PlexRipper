@@ -168,12 +168,13 @@ public class GetMediaByTypeCommandHandlerUnitTests : BaseUnitTest<GetMediaByType
             },
         };
 
+        var observedPlexLibraryIds = new List<int>();
         Mock.Mock<ICommandExecutor>()
             .Setup(x => x.Send(It.IsAny<ApplyComparisonStateCommand>(), It.IsAny<CancellationToken>()))
             .Callback<ICommand<Result>, CancellationToken>((projectionCommand, _) =>
             {
                 var applyCommand = (ApplyComparisonStateCommand)projectionCommand;
-                applyCommand.PlexLibraryId.ShouldBeGreaterThan(0);
+                observedPlexLibraryIds.Add(applyCommand.PlexLibraryId);
 
                 for (var i = 0; i < applyCommand.Items.Count; i++)
                 {
@@ -190,6 +191,7 @@ public class GetMediaByTypeCommandHandlerUnitTests : BaseUnitTest<GetMediaByType
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
+        observedPlexLibraryIds.ShouldAllBe(x => x > 0);
         result.Value.TotalCount.ShouldBe(2);
         result.Value.Items.Count.ShouldBe(1);
         result.Value.Items.ShouldAllBe(x => x.ComparisonId == PlexMediaComparisonState.Missing.ToComparisonId());

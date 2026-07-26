@@ -38,6 +38,7 @@ public class RefreshLibraryMediaEndpointUnitTests
         // Assert
         resultDTO.ShouldNotBeNull();
         resultDTO.IsSuccess.ShouldBeTrue();
+        Mock.Mock<ICommandExecutor>().Verify();
     }
 
     [Test]
@@ -74,6 +75,7 @@ public class RefreshLibraryMediaEndpointUnitTests
         resultDTO.ShouldNotBeNull();
         resultDTO.IsSuccess.ShouldBeFalse();
         resultDTO.Errors.ShouldContain(x => x.Message.Contains("Failed to refresh library"));
+        Mock.Mock<ICommandExecutor>().Verify();
     }
 
     [Test]
@@ -142,5 +144,6 @@ public class RefreshLibraryMediaEndpointUnitTests
         // Assert
         resultDTO.ShouldNotBeNull();
         resultDTO.IsSuccess.ShouldBeTrue();
+        Mock.Mock<ICommandExecutor>().Verify();
     }
 }

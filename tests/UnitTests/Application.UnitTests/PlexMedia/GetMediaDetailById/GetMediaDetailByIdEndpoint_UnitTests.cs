@@ -120,7 +120,7 @@ public class GetMediaDetailByIdEndpointUnitTests : BaseEndpointUnitTest<GetMedia
         var remoteTvShow = await GetLibraryTvShowAsync(remoteLibrary.Id);
         var ownedTvShow = await GetLibraryTvShowAsync(ownedLibrary.Id);
         var ownedEpisodes = await dbContext.PlexTvShowEpisodes
-            .Where(x => x.PlexLibraryId == ownedLibrary.Id)
+            .Where(x => x.TvShowId == ownedTvShow.Id)
             .OrderBy(x => x.Id)
             .Take(2)
             .ToListAsync(CancellationToken);

@@ -106,7 +106,7 @@ public class CompareTvShowPlexLibraryCommandOwnershipUnitTests : BaseUnitTest<Co
     {
         // Arrange
         await SetupDatabase(
-            32,
+            35,
             config =>
             {
                 config.PlexServerCount = 2;

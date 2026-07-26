@@ -13,8 +13,6 @@ public record PlexMediaComparisonDetailsDTO
 
 public record PlexMediaComparisonDetailsRowDTO
 {
-    public required int Id { get; init; }
-
     public required string Title { get; init; }
 
     public required int PlexMediaId { get; init; }

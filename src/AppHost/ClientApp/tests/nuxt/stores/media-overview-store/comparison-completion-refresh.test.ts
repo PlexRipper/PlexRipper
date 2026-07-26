@@ -11,7 +11,6 @@ import {
 import { useLibraryStore, useMediaOverviewStore } from '@store';
 import { type LibraryComparisonCompletedDTO, type PlexMediaSlimDTO, PlexMediaType } from '@dto';
 
-
 describe('MediaOverviewStore.refreshCurrentMediaDataWhenComparisonCompleted()', () => {
 	let { mock } = baseVars();
 

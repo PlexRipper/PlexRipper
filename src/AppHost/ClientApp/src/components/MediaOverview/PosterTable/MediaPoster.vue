@@ -205,9 +205,8 @@ const comparisonBadgeClickable = computed(() => {
 
 const titleSize = computed(() => {
 	const len = props.mediaItem?.title?.length ?? 0;
-	if (len <= 25) return 'h4';
-	if (len <= 50) return 'h5';
-	if (len <= 75) return 'h6';
+	if (len <= 25) return 'h5';
+	if (len <= 50) return 'h6';
 	return 'subtitle1';
 });
 

@@ -115,11 +115,12 @@ public class Boot : IHostedService
     {
         _log.Here().Information("Shutting down the container");
 
+        // Stop scheduler first so background jobs can't race with the auto-pause DB queries
+        await _schedulerService.StopAsync();
+
         var autoPauseResult = await _commandExecutor.Send(new AutoPauseActiveDownloadsCommand(), cancellationToken);
         if (autoPauseResult.IsFailed)
             autoPauseResult.LogError();
-
-        await _schedulerService.StopAsync();
     }
 
     #endregion

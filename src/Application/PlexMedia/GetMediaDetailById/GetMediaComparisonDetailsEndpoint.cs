@@ -357,7 +357,7 @@ public class GetMediaComparisonDetailsEndpoint
                     type: PlexMediaType.Episode,
                     title: episode.Title,
                     state: PlexMediaComparisonState.Missing,
-                    remoteQuality: episode.Quality,
+                    remoteQuality: GetQuality(episode),
                     ownedQuality: null,
                     remoteLocation: GetLocation(episode.MediaDataList),
                     ownedLocation: string.Empty,
@@ -376,8 +376,8 @@ public class GetMediaComparisonDetailsEndpoint
                     type: PlexMediaType.Episode,
                     title: episode.Title,
                     state: PlexMediaComparisonState.HigherQuality,
-                    remoteQuality: hit.RemoteQuality,
-                    ownedQuality: hit.OwnedQuality,
+                    remoteQuality: GetQuality(hit.RemoteQuality, episode),
+                    ownedQuality: ownedEpisode is null ? hit.OwnedQuality : GetQuality(hit.OwnedQuality, ownedEpisode),
                     remoteLocation: GetLocation(episode.MediaDataList),
                     ownedLocation: ownedEpisode is null ? string.Empty : GetLocation(ownedEpisode.MediaDataList),
                     remoteLibraryTitle: GetDictionaryValue(libraryTitles, hit.RemotePlexLibraryId),
@@ -539,4 +539,18 @@ public class GetMediaComparisonDetailsEndpoint
 
     private static string GetLocation(IEnumerable<PlexTvShowEpisodeMediaData> mediaData) =>
         mediaData.Select(x => x.GetFileName).FirstOrDefault(x => !string.IsNullOrWhiteSpace(x)) ?? string.Empty;
+
+    private static VideoQuality GetQuality(PlexTvShowEpisode episode) =>
+        GetQuality(episode.Quality, episode);
+
+    private static VideoQuality GetQuality(VideoQuality quality, PlexTvShowEpisode episode)
+    {
+        if (quality != VideoQuality.Unknown)
+            return quality;
+
+        return episode.MediaDataList
+            .Select(x => x.VideoResolution)
+            .OrderByDescending(x => x.ToId())
+            .FirstOrDefault();
+    }
 }

@@ -81,19 +81,19 @@ public class SetServerOwnedEndpoint : Endpoint<SetServerOwnedRequest, ResultDTO<
             return;
         }
 
-        var libraryIds = await _dbContext.PlexLibraries
+        var libraries = await _dbContext.PlexLibraries
             .IgnoreQueryFilters()
             .Where(x => x.PlexServerId == req.PlexServerId)
-            .Select(x => x.Id)
+            .Select(x => new { x.Id, x.IsEnabled })
             .ToListAsync(ct);
+        var libraryIds = libraries.Select(x => x.Id).ToList();
         _mediaQueryCache.InvalidateLibraries(libraryIds, "Plex server ownership scope changed");
         var failedResults = new List<ResultBase>();
-        foreach (var libraryId in libraryIds)
+        foreach (var lib in libraries.Where(x => x.IsEnabled))
         {
-            var queueResult = await _commandExecutor.Send(new QueueLibraryComparisonJobsForLibraryCommand(libraryId), CancellationToken.None);
+            var queueResult = await _commandExecutor.Send(new QueueLibraryComparisonJobsForLibraryCommand(lib.Id), CancellationToken.None);
             if (queueResult.IsFailed)
                 failedResults.Add(queueResult);
-            
         }
 
         if (failedResults.Count > 0)

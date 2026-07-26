@@ -13,6 +13,7 @@
 		selection-mode="checkbox"
 		size="small"
 		@update:selection-keys="onSelectionChange">
+		<!-- Title -->
 		<Column
 			expander
 			field="title"

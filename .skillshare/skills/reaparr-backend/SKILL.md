@@ -245,56 +245,14 @@ When `dotnet-test-mcp` is available, always use it for backend test execution in
 | Run test project | `dotnet-test-mcp:run_all_tests_for_project` |
 | Run all tests | `dotnet-test-mcp:run_all_tests` |
 
-Use direct calls to these exact tools after one successful MCP discovery/health check; retrieval can miss them. Fall back to Rider run configurations only when `dotnet-test-mcp` is disabled, quarantined, unhealthy, or fails with a tool/server error.
+Use direct calls to these exact tools after one successful MCP discovery/health check; retrieval can miss them. Do not fall back to Rider run configurations or terminal commands for test execution.
 
-The shell command examples below document equivalent commands for humans and for environments without `dotnet-test-mcp`; agents should prefer the MCP tools above.
+All backend test execution goes exclusively through `dotnet-test-mcp` tools. Never use terminal-style `dotnet run --project` or `dotnet test` for test execution.
 
-Before running any dotnet related command, TUnit test command, first check whether THE FINALS is running:
-
-```bash
- pgrep -afi 'GameThread|Discovery.exe'
-```
-
-If the command returns a matching game process, prefix the backend command with idle-priority I/O scheduling:
-
-```bash
-ionice -c 3 <backend-command>
-```
-
-If the command returns no matching process, run the backend command normally without `ionice`. On this machine, use `GameThread` as the authoritative process check for the running game. Do not use `ps aux | grep ...`; it can match the `grep` command itself and create a false positive.
-
-Run backend AppHost:
+### Running the backend AppHost (not test-related)
 
 ```bash
 dotnet run --project src/AppHost
-# If THE FINALS is running:
-ionice -c 3 dotnet run --project src/AppHost
-```
-
-Run a backend unit test project:
-
-```bash
-dotnet run --project tests/UnitTests/<Project>.UnitTests/<Project>.UnitTests.csproj -- --no-ansi --disable-logo
-# If THE FINALS is running:
-ionice -c 3 dotnet run --project tests/UnitTests/<Project>.UnitTests/<Project>.UnitTests.csproj -- --no-ansi --disable-logo
-```
-
-Common unit test projects:
-
-```bash
-dotnet run --project tests/UnitTests/Application.UnitTests/Application.UnitTests.csproj -- --no-ansi --disable-logo
-dotnet run --project tests/UnitTests/BackgroundJobs.UnitTests/BackgroundJobs.UnitTests.csproj -- --no-ansi --disable-logo
-# If THE FINALS is running:
-ionice -c 3 dotnet run --project tests/UnitTests/Application.UnitTests/Application.UnitTests.csproj -- --no-ansi --disable-logo
-ionice -c 3 dotnet run --project tests/UnitTests/BackgroundJobs.UnitTests/BackgroundJobs.UnitTests.csproj -- --no-ansi --disable-logo
-```
-
-Run backend integration tests:
-
-```bash
-dotnet run --project tests/IntegrationTests/IntegrationTests/IntegrationTests.csproj -- --no-ansi --disable-logo
-# If THE FINALS is running:
-ionice -c 3 dotnet run --project tests/IntegrationTests/IntegrationTests/IntegrationTests.csproj -- --no-ansi --disable-logo
 ```
 
 ## Verification Gates
@@ -338,6 +296,6 @@ Do not claim success unless Rider MCP diagnostics/indexing was used and required
 - Returning raw values or `null` from Result-based command handlers.
 - Letting Quartz job exceptions escape.
 - Weakening tests or assertions to force green.
-- Using `--filter` instead of TUnit `--treenode-filter`.
+- Using `--filter` or `--treenode-filter` shell arguments for test discovery — use `dotnet-test-mcp` tools instead.
 - Running frontend package managers for backend-only work.
-- Blocking test execution on unavailable `dotnet-test-mcp`; first check server health/quarantine and direct-call known `dotnet-test-mcp:*` tools, then use Rider run configurations only if the MCP server is genuinely unavailable.
+- Blocking test execution on unavailable `dotnet-test-mcp`; first check server health/quarantine and direct-call known `dotnet-test-mcp:*` tools. Do not fall back to terminal commands or Rider run configurations for tests.

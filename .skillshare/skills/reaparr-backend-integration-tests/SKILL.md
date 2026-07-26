@@ -35,11 +35,7 @@ Do not use this skill for:
 - Do not mark flaky tests as skipped instead of fixing the root cause.
 - Do not stop at targeted-test green.
 - Test framework is `TUnit` on Microsoft.Testing.Platform.
-- Do not claim completion until this full command passes:
-
-```bash
-dotnet run --project tests/IntegrationTests/IntegrationTests/IntegrationTests.csproj -- --no-ansi --disable-logo
-```
+- Do not claim completion until `dotnet-test-mcp:run_all_tests_for_project` passes with `projectPath: "tests/IntegrationTests/IntegrationTests/IntegrationTests.csproj"`.
 
 ## Root-Cause Workflow (No Shortcuts)
 
@@ -166,7 +162,7 @@ Reference area:
 
 If a focused integration run appears to hang or time out, do not assume deadlock immediately. First:
 
-1. rerun only the failing class/test with `--treenode-filter`
+1. rerun only the failing class/test with `dotnet-test-mcp:run_all_tests_in_class` or `dotnet-test-mcp:run_single_test`
 2. inspect generated `TestResults/*.diag` artifacts for timeout/failure telemetry
 3. distinguish real backend non-completion from stale test-side observation
 
@@ -174,72 +170,57 @@ When polling for state changes, prefer fresh `DbContext` instances per poll to a
 
 ## Integration Test Verification
 
-Use the shared build/test commands from `reaparr-backend`.
+All integration test execution goes through `dotnet-test-mcp` tools. Do not use terminal-style `dotnet run --project` or `dotnet test`.
 
 For integration test work:
-- Start with a targeted `--treenode-filter` when reproducing or iterating on a specific failing class or test.
-- Use `--list-tests` if exact names are unknown.
+- Start with `dotnet-test-mcp:run_all_tests_in_class` when reproducing or iterating on a specific failing class.
+- Use `dotnet-test-mcp:run_single_test` for a single failing test method.
+- Use `dotnet-test-mcp:list_tests_summary` with `includeTests: true` if exact test/class names are unknown.
 - Do not stop at targeted-test green.
 - Mandatory completion gate for any integration test change or integration failure fix:
 
-```bash
-dotnet run --project tests/IntegrationTests/IntegrationTests/IntegrationTests.csproj -- --no-ansi --disable-logo
+```
+dotnet-test-mcp:run_all_tests_for_project
+  projectPath: "tests/IntegrationTests/IntegrationTests/IntegrationTests.csproj"
 ```
 
 CI alignment:
-- Workflow uses this same project in `.github/workflows/dev-test.yml`.
+- CI workflow uses this same project in `.github/workflows/dev-test.yml` (via `dotnet-test-mcp`).
 
-### TUnit filtering for integration tests
+### Test discovery and execution via dotnet-test-mcp
 
-Use `--treenode-filter`, not `--filter`. Syntax: `/<Assembly>/<Namespace>/<Class>/<Test>` — exactly 4 path segments separated by `/`.
+All test filtering maps to `dotnet-test-mcp` tools. Do not use `--treenode-filter` or `--list-tests` shell arguments.
 
-**CRITICAL: `[...]` bracket syntax is for property filters only (5th segment).** Never use brackets in class or test-name segments; doing so matches zero tests silently.
+| Goal | `dotnet-test-mcp` tool | Key parameter |
+|------|------------------------|---------------|
+| Discover test/class names | `list_tests_summary` | `prefix`, `projectPath`, `includeTests: true` |
+| Run single test method | `run_single_test` | `testName: "Fully.Qualified.ClassName.MethodName"` |
+| Run all tests in a class | `run_all_tests_in_class` | `className: "Fully.Qualified.ClassName"` |
+| Run entire integration project | `run_all_tests_for_project` | `projectPath: "tests/IntegrationTests/IntegrationTests/IntegrationTests.csproj"` |
 
-| Segment | Position | Example value |
-|---------|----------|---------------|
-| Assembly | 1st (`/*`) | wildcard always |
-| Namespace | 2nd (`/*`) | `Reaparr.IntegrationTests.Api*` |
-| Class name | 3rd | `RefreshLibraryMediaEndpointIntegrationTests` or `*Endpoint*` |
-| Test name | 4th | `*` or exact method name |
-| Property filter | 5th (optional) | `[Category=Smoke]` |
+Examples:
 
-Filter by class name:
-
-```bash
-dotnet run --project tests/IntegrationTests/IntegrationTests/IntegrationTests.csproj -- --no-ansi --disable-logo --treenode-filter "/*/*/RefreshLibraryMediaEndpointIntegrationTests/*"
+Run a test class:
+```
+dotnet-test-mcp:run_all_tests_in_class
+  className: "Reaparr.IntegrationTests.Api.RefreshLibraryMediaEndpointIntegrationTests"
+  projectPath: "tests/IntegrationTests/IntegrationTests/IntegrationTests.csproj"
 ```
 
-Filter by class wildcard:
-
-```bash
-dotnet run --project tests/IntegrationTests/IntegrationTests/IntegrationTests.csproj -- --no-ansi --disable-logo --treenode-filter "/*/*/CheckForUpdate*/*"
+Run a single test method:
+```
+dotnet-test-mcp:run_single_test
+  testName: "Reaparr.IntegrationTests.Api.RefreshLibraryMediaEndpointIntegrationTests.ShouldReturn200_WhenLibraryRefreshSucceeds"
+  projectPath: "tests/IntegrationTests/IntegrationTests/IntegrationTests.csproj"
 ```
 
-Filter multiple classes with OR:
-
-```bash
-dotnet run --project tests/IntegrationTests/IntegrationTests/IntegrationTests.csproj -- --no-ansi --disable-logo --treenode-filter "/*/*/(RefreshLibraryMediaEndpointIntegrationTests)|(CheckForUpdateEndpointIntegrationTests)/*"
+Discover test names by namespace prefix:
 ```
-
-Filter by namespace prefix:
-
-```bash
-dotnet run --project tests/IntegrationTests/IntegrationTests/IntegrationTests.csproj -- --no-ansi --disable-logo --treenode-filter "/*/Reaparr.IntegrationTests.Api*/*/*"
+dotnet-test-mcp:list_tests_summary
+  prefix: "Reaparr.IntegrationTests.Api"
+  projectPath: "tests/IntegrationTests/IntegrationTests/IntegrationTests.csproj"
+  includeTests: true
 ```
-
-Filter by specific test method:
-
-```bash
-dotnet run --project tests/IntegrationTests/IntegrationTests/IntegrationTests.csproj -- --no-ansi --disable-logo --treenode-filter "/*/*/*/ShouldReturn200_WhenLibraryRefreshSucceeds"
-```
-
-If exact names are unknown, list tests first:
-
-```bash
-dotnet run --project tests/IntegrationTests/IntegrationTests/IntegrationTests.csproj -- --no-ansi --disable-logo --list-tests
-```
-
-**Anti-pattern (zero tests ran):** `"/*/*/*[CheckForUpdateEndpoint*]"` puts bracket property syntax in the class segment. Use `"/*/*/CheckForUpdateEndpoint*/*"` instead.
 
 ## Test Quality Gate
 

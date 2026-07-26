@@ -59,7 +59,7 @@ On Linux, `trash` resolves to `gio trash` or `trash-cli`.
 
 If working on the backend, then load `reaparr-backend` skill for project-specific backend conventions and `dotnet-devtools` for .NET development best practices. Backend file reads, edits, searches, refactors, and diagnostics must default to Rider MCP (`rider-official:*`). Do not use WebStorm MCP for backend files.
 
-Backend tests must use `dotnet-test-mcp` whenever available. Prefer these exact tools over Rider run configurations or terminal-style commands:
+Backend tests must always use `dotnet-test-mcp`. Never use terminal-style `dotnet test`, `dotnet run --project`, or Rider run configurations for test execution:
 
 - `dotnet-test-mcp:list_test_projects`
 - `dotnet-test-mcp:list_tests_summary`

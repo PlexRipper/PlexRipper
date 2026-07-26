@@ -448,16 +448,17 @@ var sut = Mock.Create<MyHandler>(
 4. Inherit `BaseUnitTest<TSUT>` and prepare deterministic arrange step.
 5. Execute SUT method once in Act section.
 6. Assert result + database state + mock interactions.
-7. Run the specific test project first, usually with a narrow TUnit `--treenode-filter`, then broaden the scope if needed.
+7. Run the specific test class first with `dotnet-test-mcp:run_all_tests_in_class`, then broaden to `dotnet-test-mcp:run_all_tests_for_project` if needed.
 
 ## Unit Test Verification
 
-Use the shared build/test commands from `reaparr-backend`.
+All unit test execution goes through `dotnet-test-mcp` tools. Do not use terminal-style `dotnet run --project` or `dotnet test`.
 
 For unit test work:
-- Start with the relevant `tests/UnitTests/<Project>.UnitTests/<Project>.UnitTests.csproj` project.
-- Prefer a narrow `--treenode-filter` for fast iteration.
-- Broaden to the full affected unit test project before claiming completion when behavior or shared test infrastructure changed.
+- Start with `dotnet-test-mcp:run_all_tests_in_class` for fast targeted iteration on a specific test class.
+- Use `dotnet-test-mcp:run_single_test` to run a single test method.
+- Use `dotnet-test-mcp:list_tests_summary` with `includeTests: true` to discover test names when unsure.
+- Broaden to `dotnet-test-mcp:run_all_tests_for_project` before claiming completion when behavior or shared test infrastructure changed.
 
 ### Verification fallback when execution environment is constrained
 
@@ -488,51 +489,46 @@ Reject weak tests such as:
 Every new test must earn its place by answering: "What bug would this fail for?" If the answer is unclear, replace it with a stronger test or do not add it.
 
 
-### TUnit filtering for unit tests
+### Test discovery and execution via dotnet-test-mcp
 
-Use `--treenode-filter`, not `--filter`.
+All test filtering maps to `dotnet-test-mcp` tools. Do not use `--treenode-filter` or `--list-tests` shell arguments.
 
-Filter syntax is:
+| Goal | `dotnet-test-mcp` tool | Key parameter |
+|------|------------------------|---------------|
+| List test projects | `list_test_projects` | `workingDirectory` |
+| Discover test/class names | `list_tests_summary` | `prefix`, `projectPath`, `includeTests: true` |
+| Run single test method | `run_single_test` | `testName: "Fully.Qualified.ClassName.MethodName"` |
+| Run all tests in a class | `run_all_tests_in_class` | `className: "Fully.Qualified.ClassName"` |
+| Run entire test project | `run_all_tests_for_project` | `projectPath: "tests/UnitTests/Application.UnitTests/Application.UnitTests.csproj"` |
+| Run all tests in solution | `run_all_tests` | `workingDirectory` |
 
-```text
-/<Assembly>/<Namespace>/<Class>/<Test>
+Examples:
+
+Run a single test class:
+```
+dotnet-test-mcp:run_all_tests_in_class
+  className: "Reaparr.Application.UnitTests.PlexDownloads.DownloadJobUnitTests"
+  projectPath: "tests/UnitTests/Application.UnitTests/Application.UnitTests.csproj"
 ```
 
-Use `*` as a wildcard for segments you do not want to pin exactly. Use parentheses with `|` for OR conditions inside a single segment.
-
-Filter by class:
-
-```bash
-dotnet run --project tests/UnitTests/Application.UnitTests/Application.UnitTests.csproj -- --no-ansi --disable-logo --treenode-filter "/*/*/DownloadJobUnitTests/*"
+Run a single test method:
+```
+dotnet-test-mcp:run_single_test
+  testName: "Reaparr.Application.UnitTests.PlexDownloads.DownloadJobUnitTests.ShouldSetDownloadClientErrorStatus_WhenClientStartFailsWithoutSpecificError"
+  projectPath: "tests/UnitTests/Application.UnitTests/Application.UnitTests.csproj"
 ```
 
-Filter by test name:
-
-```bash
-dotnet run --project tests/UnitTests/Application.UnitTests/Application.UnitTests.csproj -- --no-ansi --disable-logo --treenode-filter "/*/*/*/ShouldSetDownloadClientErrorStatus_WhenClientStartFailsWithoutSpecificError"
+Discover test names by namespace prefix:
 ```
-
-Filter multiple classes with OR:
-
-```bash
-dotnet run --project tests/UnitTests/Application.UnitTests/Application.UnitTests.csproj -- --no-ansi --disable-logo --treenode-filter "/*/*/(DownloadJobUnitTests)|(DeterminePlexDownloadClientCommandHandlerUnitTests)/*"
-```
-
-Filter by namespace prefix:
-
-```bash
-dotnet run --project tests/UnitTests/Application.UnitTests/Application.UnitTests.csproj -- --no-ansi --disable-logo --treenode-filter "/*/Reaparr.Application.UnitTests.PlexDownloads*/*/*"
-```
-
-If you need exact test or class names, list tests first:
-
-```bash
-dotnet run --project tests/UnitTests/Application.UnitTests/Application.UnitTests.csproj -- --no-ansi --disable-logo --list-tests
+dotnet-test-mcp:list_tests_summary
+  prefix: "Reaparr.Application.UnitTests.PlexDownloads"
+  projectPath: "tests/UnitTests/Application.UnitTests/Application.UnitTests.csproj"
+  includeTests: true
 ```
 
 ## Common Mistakes
 
-- Using `[ClassName*]` bracket syntax in the class segment of `--treenode-filter` — this causes "Zero tests ran". Brackets are for property filters only (5th segment). Use plain wildcards: `"/*/*/MyClassUnitTests/*"` not `"/*/*/*[MyClass*]"`.
+- Using `[ClassName*]` bracket syntax — this is a TUnit `--treenode-filter` shell-command antipattern that causes "Zero tests ran". Use `dotnet-test-mcp:run_all_tests_in_class` with the fully qualified class name instead.
 - Putting tests in the wrong `*.UnitTests` project because of command location instead of handler location.
 - Using folder-based namespaces instead of `<SUTProjectNamespace>.UnitTests`.
 - Asserting only return values and not checking database state or mock interactions.

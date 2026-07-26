@@ -35,7 +35,39 @@ public record PlexMediaComparisonDetailsDTO
     public required List<PlexMediaComparisonDetailsRowDTO> Rows { get; init; }
 }
 
+public record PlexMediaComparisonDetailsLocationDTO
+{
+    public required int PlexLibraryId { get; init; }
+
+    public required int PlexServerId { get; init; }
+
+    public required string ServerName { get; init; }
+
+    public required string LibraryTitle { get; init; }
+}
+
 public record PlexMediaComparisonDetailsRowDTO
+{
+    public required int Id { get; init; }
+
+    public required int PlexMediaId { get; init; }
+
+    public required PlexMediaType Type { get; init; }
+
+    public required string Title { get; init; }
+
+    public required PlexMediaComparisonState State { get; init; }
+
+    public VideoQuality? RemoteQuality { get; init; }
+
+    public VideoQuality? OwnedQuality { get; init; }
+
+    public required PlexMediaComparisonDetailsLocationDTO Location { get; init; }
+
+    public required List<PlexMediaComparisonDetailsRowDTO> Children { get; init; }
+}
+
+internal record ComparisonDetailsRow
 {
     public required int Id { get; init; }
 
@@ -64,6 +96,14 @@ public record PlexMediaComparisonDetailsRowDTO
     public string RemoteLibraryTitle { get; init; } = string.Empty;
 
     public string OwnedLibraryTitle { get; init; } = string.Empty;
+
+    public string RemoteServerName { get; init; } = string.Empty;
+
+    public int RemotePlexLibraryId { get; init; }
+
+    public int RemotePlexServerId { get; init; }
+
+    public string OwnedServerName { get; init; } = string.Empty;
 }
 
 public class GetMediaComparisonDetailsEndpoint
@@ -121,11 +161,11 @@ public class GetMediaComparisonDetailsEndpoint
             PlexMediaId = movie.Id,
             Type = PlexMediaType.Movie,
             State = ToParentState(rows),
-            Rows = rows,
+            Rows = ToDtoRows(rows),
         });
     }
 
-    private async Task<List<PlexMediaComparisonDetailsRowDTO>> GetRemoteMovieRowsAsync(PlexMovie movie, CancellationToken ct)
+    private async Task<List<ComparisonDetailsRow>> GetRemoteMovieRowsAsync(PlexMovie movie, CancellationToken ct)
     {
         var currentOwnedLibraryIds = await GetCurrentOwnedLibraryIdsAsync(movie.PlexLibraryId, PlexMediaType.Movie, ct);
         if (currentOwnedLibraryIds.Count == 0)
@@ -152,14 +192,14 @@ public class GetMediaComparisonDetailsEndpoint
                     ownedQuality: null,
                     remoteLocation: GetLocation(movie.MediaDataList),
                     ownedLocation: string.Empty,
-                    remoteLibraryTitle: await GetLibraryTitleAsync(movie.PlexLibraryId, ct),
-                    ownedLibraryTitle: string.Empty)
+                    remoteSource: await GetLibrarySourceAsync(movie.PlexLibraryId, ct),
+                    ownedSource: LibrarySource.Empty)
             ];
 
         return await CreateRemoteMovieUpgradeRowsAsync(movie, hits, ct);
     }
 
-    private async Task<List<PlexMediaComparisonDetailsRowDTO>> CreateRemoteMovieUpgradeRowsAsync(
+    private async Task<List<ComparisonDetailsRow>> CreateRemoteMovieUpgradeRowsAsync(
         PlexMovie movie,
         List<PlexMovieComparison> hits,
         CancellationToken ct)
@@ -174,7 +214,7 @@ public class GetMediaComparisonDetailsEndpoint
             .Where(x => ownedMovieIds.Contains(x.Id))
             .ToDictionaryAsync(x => x.Id, ct);
 
-        var libraryTitles = await GetLibraryTitlesAsync(upgradeHits.SelectMany(x => new[] { x.RemotePlexLibraryId, x.OwnedPlexLibraryId }), ct);
+        var librarySources = await GetLibrarySourcesAsync(upgradeHits.SelectMany(x => new[] { x.RemotePlexLibraryId, x.OwnedPlexLibraryId }), ct);
 
         return upgradeHits
             .Select(hit =>
@@ -191,13 +231,13 @@ public class GetMediaComparisonDetailsEndpoint
                     ownedQuality: hit.OwnedQuality,
                     remoteLocation: GetLocation(movie.MediaDataList),
                     ownedLocation: ownedMovie is null ? string.Empty : GetLocation(ownedMovie.MediaDataList),
-                    remoteLibraryTitle: GetDictionaryValue(libraryTitles, hit.RemotePlexLibraryId),
-                    ownedLibraryTitle: GetDictionaryValue(libraryTitles, hit.OwnedPlexLibraryId));
+                    remoteSource: GetDictionaryValue(librarySources, hit.RemotePlexLibraryId),
+                    ownedSource: GetDictionaryValue(librarySources, hit.OwnedPlexLibraryId));
             })
             .ToList();
     }
 
-    private async Task<List<PlexMediaComparisonDetailsRowDTO>> GetOwnedMovieRowsAsync(PlexMovie movie, CancellationToken ct)
+    private async Task<List<ComparisonDetailsRow>> GetOwnedMovieRowsAsync(PlexMovie movie, CancellationToken ct)
     {
         var currentRemoteLibraryIds = await GetCurrentRemoteLibraryIdsAsync(movie.PlexLibraryId, PlexMediaType.Movie, ct);
         if (currentRemoteLibraryIds.Count == 0)
@@ -219,7 +259,7 @@ public class GetMediaComparisonDetailsEndpoint
             .Include(x => x.MediaDataList)
             .Where(x => remoteMovieIds.Contains(x.Id))
             .ToDictionaryAsync(x => x.Id, ct);
-        var libraryTitles = await GetLibraryTitlesAsync(upgradeHits.SelectMany(x => new[] { x.RemotePlexLibraryId, x.OwnedPlexLibraryId }), ct);
+        var librarySources = await GetLibrarySourcesAsync(upgradeHits.SelectMany(x => new[] { x.RemotePlexLibraryId, x.OwnedPlexLibraryId }), ct);
 
         return upgradeHits
             .Select(hit =>
@@ -236,8 +276,8 @@ public class GetMediaComparisonDetailsEndpoint
                     ownedQuality: hit.OwnedQuality,
                     remoteLocation: remoteMovie is null ? string.Empty : GetLocation(remoteMovie.MediaDataList),
                     ownedLocation: GetLocation(movie.MediaDataList),
-                    remoteLibraryTitle: GetDictionaryValue(libraryTitles, hit.RemotePlexLibraryId),
-                    ownedLibraryTitle: GetDictionaryValue(libraryTitles, hit.OwnedPlexLibraryId));
+                    remoteSource: GetDictionaryValue(librarySources, hit.RemotePlexLibraryId),
+                    ownedSource: GetDictionaryValue(librarySources, hit.OwnedPlexLibraryId));
             })
             .ToList();
     }
@@ -258,11 +298,11 @@ public class GetMediaComparisonDetailsEndpoint
             PlexMediaId = tvShow.Id,
             Type = PlexMediaType.TvShow,
             State = ToParentState(rows),
-            Rows = rows,
+            Rows = ToDtoRows(rows),
         });
     }
 
-    private async Task<List<PlexMediaComparisonDetailsRowDTO>> GetRemoteTvShowRowsAsync(PlexTvShow tvShow, CancellationToken ct)
+    private async Task<List<ComparisonDetailsRow>> GetRemoteTvShowRowsAsync(PlexTvShow tvShow, CancellationToken ct)
     {
         var currentOwnedLibraryIds = await GetCurrentOwnedLibraryIdsAsync(tvShow.PlexLibraryId, PlexMediaType.TvShow, ct);
         if (currentOwnedLibraryIds.Count == 0)
@@ -289,12 +329,12 @@ public class GetMediaComparisonDetailsEndpoint
             .Include(x => x.MediaDataList)
             .Where(x => ownedEpisodeIds.Contains(x.Id))
             .ToDictionaryAsync(x => x.Id, ct);
-        var libraryTitles = await GetLibraryTitlesAsync(hits.SelectMany(x => new[] { x.RemotePlexLibraryId, x.OwnedPlexLibraryId }).Append(tvShow.PlexLibraryId), ct);
+        var librarySources = await GetLibrarySourcesAsync(hits.SelectMany(x => new[] { x.RemotePlexLibraryId, x.OwnedPlexLibraryId }).Append(tvShow.PlexLibraryId), ct);
 
-        return BuildRemoteTvRows(episodes, hits, ownedEpisodes, libraryTitles);
+        return BuildRemoteTvRows(episodes, hits, ownedEpisodes, librarySources);
     }
 
-    private async Task<List<PlexMediaComparisonDetailsRowDTO>> GetOwnedTvShowRowsAsync(PlexTvShow tvShow, CancellationToken ct)
+    private async Task<List<ComparisonDetailsRow>> GetOwnedTvShowRowsAsync(PlexTvShow tvShow, CancellationToken ct)
     {
         var currentRemoteLibraryIds = await GetCurrentRemoteLibraryIdsAsync(tvShow.PlexLibraryId, PlexMediaType.TvShow, ct);
         if (currentRemoteLibraryIds.Count == 0)
@@ -332,19 +372,19 @@ public class GetMediaComparisonDetailsEndpoint
             .Include(x => x.MediaDataList)
             .Where(x => ownedEpisodeIds.Contains(x.Id))
             .ToDictionaryAsync(x => x.Id, ct);
-        var libraryTitles = await GetLibraryTitlesAsync(hits.SelectMany(x => new[] { x.RemotePlexLibraryId, x.OwnedPlexLibraryId }).Concat(showHits.SelectMany(x => new[] { x.RemotePlexLibraryId, x.OwnedPlexLibraryId })), ct);
+        var librarySources = await GetLibrarySourcesAsync(hits.SelectMany(x => new[] { x.RemotePlexLibraryId, x.OwnedPlexLibraryId }).Concat(showHits.SelectMany(x => new[] { x.RemotePlexLibraryId, x.OwnedPlexLibraryId })), ct);
 
-        return BuildRemoteTvRows(remoteEpisodes, hits, ownedEpisodes, libraryTitles);
+        return BuildRemoteTvRows(remoteEpisodes, hits, ownedEpisodes, librarySources);
     }
 
-    private List<PlexMediaComparisonDetailsRowDTO> BuildRemoteTvRows(
+    private List<ComparisonDetailsRow> BuildRemoteTvRows(
         List<PlexTvShowEpisode> episodes,
         List<PlexEpisodeComparison> hits,
         Dictionary<int, PlexTvShowEpisode> ownedEpisodes,
-        Dictionary<int, string> libraryTitles)
+        Dictionary<int, LibrarySource> librarySources)
     {
         var hitLookup = hits.GroupBy(x => x.RemotePlexMediaId).ToDictionary(x => x.Key, x => x.ToList());
-        var childRows = new List<PlexMediaComparisonDetailsRowDTO>();
+        var childRows = new List<ComparisonDetailsRow>();
 
         foreach (var episode in episodes)
         {
@@ -361,8 +401,8 @@ public class GetMediaComparisonDetailsEndpoint
                     ownedQuality: null,
                     remoteLocation: GetLocation(episode.MediaDataList),
                     ownedLocation: string.Empty,
-                    remoteLibraryTitle: GetDictionaryValue(libraryTitles, episode.PlexLibraryId),
-                    ownedLibraryTitle: string.Empty));
+                    remoteSource: GetDictionaryValue(librarySources, episode.PlexLibraryId),
+                    ownedSource: LibrarySource.Empty));
                 continue;
             }
 
@@ -380,40 +420,52 @@ public class GetMediaComparisonDetailsEndpoint
                     ownedQuality: ownedEpisode is null ? hit.OwnedQuality : GetQuality(hit.OwnedQuality, ownedEpisode),
                     remoteLocation: GetLocation(episode.MediaDataList),
                     ownedLocation: ownedEpisode is null ? string.Empty : GetLocation(ownedEpisode.MediaDataList),
-                    remoteLibraryTitle: GetDictionaryValue(libraryTitles, hit.RemotePlexLibraryId),
-                    ownedLibraryTitle: GetDictionaryValue(libraryTitles, hit.OwnedPlexLibraryId)));
+                    remoteSource: GetDictionaryValue(librarySources, hit.RemotePlexLibraryId),
+                    ownedSource: GetDictionaryValue(librarySources, hit.OwnedPlexLibraryId)));
             }
         }
 
         return AddSeasonParents(episodes, childRows);
     }
 
-    private List<PlexMediaComparisonDetailsRowDTO> AddSeasonParents(
+    private List<ComparisonDetailsRow> AddSeasonParents(
         List<PlexTvShowEpisode> episodes,
-        List<PlexMediaComparisonDetailsRowDTO> childRows)
+        List<ComparisonDetailsRow> childRows)
     {
         if (childRows.Count == 0)
             return [];
 
         var episodeLookup = episodes.ToDictionary(x => x.Id);
-        var result = new List<PlexMediaComparisonDetailsRowDTO>();
+        var result = new List<ComparisonDetailsRow>();
         foreach (var group in childRows.GroupBy(x => episodeLookup.TryGetValue(x.PlexMediaId, out var episode) ? episode.TvShowSeason?.SeasonNumber ?? 0 : 0).OrderBy(x => x.Key))
         {
             var parentId = ++_rowId;
+            var seasonPlexMediaId = group
+                .Select(x => episodeLookup.GetValueOrDefault(x.PlexMediaId)?.TvShowSeasonId ?? 0)
+                .FirstOrDefault(x => x > 0);
             var hasMissing = group.Any(x => x.ComparisonId == PlexMediaComparisonState.Missing.ToComparisonId());
             var hasHigherQuality = group.Any(x => x.ComparisonId == PlexMediaComparisonState.HigherQuality.ToComparisonId());
-            result.Add(new PlexMediaComparisonDetailsRowDTO
+            var sourceRow = group.FirstOrDefault(x => x.RemotePlexLibraryId > 0) ?? group.First();
+            result.Add(new ComparisonDetailsRow
             {
                 Id = parentId,
                 ParentId = null,
                 Level = 0,
-                PlexMediaId = 0,
+                PlexMediaId = seasonPlexMediaId,
                 Type = PlexMediaType.Season,
                 Title = $"Season {group.Key}",
                 ComparisonId = hasMissing && hasHigherQuality
                     ? PlexMediaComparisonState.PartialAndHigherQuality.ToComparisonId()
                     : hasMissing ? PlexMediaComparisonState.Partial.ToComparisonId() : PlexMediaComparisonState.HigherQuality.ToComparisonId(),
                 IsActionable = true,
+                RemoteQuality = GetHighestQuality(group.Select(x => x.RemoteQuality)),
+                OwnedQuality = GetHighestQuality(group.Select(x => x.OwnedQuality)),
+                RemoteLibraryTitle = sourceRow.RemoteLibraryTitle,
+                OwnedLibraryTitle = sourceRow.OwnedLibraryTitle,
+                RemoteServerName = sourceRow.RemoteServerName,
+                RemotePlexLibraryId = sourceRow.RemotePlexLibraryId,
+                RemotePlexServerId = sourceRow.RemotePlexServerId,
+                OwnedServerName = sourceRow.OwnedServerName,
             });
 
             result.AddRange(group.Select(x => x with { ParentId = parentId }));
@@ -478,7 +530,7 @@ public class GetMediaComparisonDetailsEndpoint
             .ToHashSet();
     }
 
-    private PlexMediaComparisonDetailsRowDTO CreateRow(
+    private ComparisonDetailsRow CreateRow(
         int? parentId,
         int level,
         int plexMediaId,
@@ -489,8 +541,8 @@ public class GetMediaComparisonDetailsEndpoint
         VideoQuality? ownedQuality,
         string remoteLocation,
         string ownedLocation,
-        string remoteLibraryTitle,
-        string ownedLibraryTitle) =>
+        LibrarySource remoteSource,
+        LibrarySource ownedSource) =>
         new()
         {
             Id = ++_rowId,
@@ -505,11 +557,49 @@ public class GetMediaComparisonDetailsEndpoint
             OwnedQuality = ownedQuality,
             RemoteLocation = remoteLocation,
             OwnedLocation = ownedLocation,
-            RemoteLibraryTitle = remoteLibraryTitle,
-            OwnedLibraryTitle = ownedLibraryTitle,
+            RemoteLibraryTitle = remoteSource.LibraryTitle,
+            OwnedLibraryTitle = ownedSource.LibraryTitle,
+            RemoteServerName = remoteSource.ServerName,
+            RemotePlexLibraryId = remoteSource.LibraryId,
+            RemotePlexServerId = remoteSource.ServerId,
+            OwnedServerName = ownedSource.ServerName,
         };
 
-    private static PlexMediaComparisonState ToParentState(List<PlexMediaComparisonDetailsRowDTO> rows)
+    private static List<PlexMediaComparisonDetailsRowDTO> ToDtoRows(List<ComparisonDetailsRow> rows)
+    {
+        var rowsByParentId = rows.GroupBy(x => x.ParentId ?? 0).ToDictionary(x => x.Key, x => x.ToList());
+        return ToDtoRows(0, rowsByParentId);
+    }
+
+    private static List<PlexMediaComparisonDetailsRowDTO> ToDtoRows(int parentId, Dictionary<int, List<ComparisonDetailsRow>> rowsByParentId) =>
+        rowsByParentId.GetValueOrDefault(parentId, [])
+            .Select(row => new PlexMediaComparisonDetailsRowDTO
+            {
+                Id = row.Id,
+                PlexMediaId = row.PlexMediaId,
+                Type = row.Type,
+                Title = row.Title,
+                State = row.ComparisonId.ToComparisonState(),
+                RemoteQuality = row.RemoteQuality,
+                OwnedQuality = row.OwnedQuality,
+                Location = new PlexMediaComparisonDetailsLocationDTO
+                {
+                    PlexLibraryId = row.RemotePlexLibraryId,
+                    PlexServerId = row.RemotePlexServerId,
+                    ServerName = row.RemoteServerName,
+                    LibraryTitle = row.RemoteLibraryTitle,
+                },
+                Children = ToDtoRows(row.Id, rowsByParentId),
+            })
+            .ToList();
+
+    private static VideoQuality? GetHighestQuality(IEnumerable<VideoQuality?> qualities)
+    {
+        var values = qualities.OfType<VideoQuality>().ToList();
+        return values.Count == 0 ? null : values.OrderByDescending(x => x.ToId()).First();
+    }
+
+    private static PlexMediaComparisonState ToParentState(List<ComparisonDetailsRow> rows)
     {
         var hasMissing = rows.Any(x => x.ComparisonId == PlexMediaComparisonState.Missing.ToComparisonId() || x.ComparisonId == PlexMediaComparisonState.Partial.ToComparisonId());
         var hasHigherQuality = rows.Any(x => x.ComparisonId == PlexMediaComparisonState.HigherQuality.ToComparisonId());

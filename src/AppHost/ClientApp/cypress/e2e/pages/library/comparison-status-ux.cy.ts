@@ -87,20 +87,15 @@ describe('Comparison poster status UX', () => {
 							state: PlexMediaComparisonState.HigherQuality,
 							rows: [
 								{
-									id: 1,
-									parentId: null,
-									level: 0,
+									children: [],
+									plexLibraryId: movie.plexLibraryId,
 									plexMediaId: movie.id,
+									plexServerId: movie.plexServerId,
 									type: PlexMediaType.Movie,
 									title: movie.title,
 									state: PlexMediaComparisonState.HigherQuality,
-									isActionable: true,
 									remoteQuality: VideoQuality.FullHD,
 									ownedQuality: VideoQuality.HD,
-									remoteLocation: '/remote/movie.mkv',
-									ownedLocation: '/owned/movie.mkv',
-									remoteLibraryTitle: 'Remote Movies',
-									ownedLibraryTitle: 'Owned Movies',
 								},
 							],
 						}),
@@ -113,7 +108,8 @@ describe('Comparison poster status UX', () => {
 				cy.wait('@comparisonDetails');
 				cy.getCy('media-comparison-details-dialog').should('be.visible');
 				cy.getCy('media-comparison-details-table').should('contain', movie.title);
-				cy.getCy('media-comparison-details-table').should('contain', 'HD → FullHD');
+				cy.getCy('media-comparison-details-table').should('contain', '720p');
+				cy.getCy('media-comparison-details-table').should('contain', '1080p');
 			});
 	});
 });

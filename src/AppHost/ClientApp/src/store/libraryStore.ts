@@ -226,8 +226,7 @@ export const useLibraryStore = defineStore(StoreNames.LibraryStore, () => {
 			return state.progress.find((x) => x.plexLibraryId === libraryId) ?? null;
 		},
 		getIsLibrarySyncing: (libraryId: number): boolean => {
-			return state.syncQueues.some((x) =>
-				x.plexLibraryId === libraryId && [LibrarySyncJobStatus.Queued, LibrarySyncJobStatus.Processing].includes(x.status));
+			return state.syncQueues.some((x) => x.plexLibraryId === libraryId && x.status === LibrarySyncJobStatus.Processing);
 		},
 		getLibrarySyncQueueGrouped: (): ILibrarySyncProgress[] => {
 			return state.syncQueues.reduce<ILibrarySyncProgress[]>((acc, queue) => {

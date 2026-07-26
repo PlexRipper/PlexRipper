@@ -77,7 +77,7 @@
 							align="center"
 							no-wrap>
 							<QCol cols="auto">
-								<QText :value="data.location.serverName" />
+								<QText :value="serverStore.getServerName(data.location.plexServerId)" />
 							</QCol>
 							<QCol cols="auto">
 								<QIcon
@@ -85,7 +85,7 @@
 									name="mdi-arrow-right-thin" />
 							</QCol>
 							<QCol>
-								<QText :value="data.location.libraryTitle" />
+								<QText :value="libraryStore.getLibraryName(data.location.plexLibraryId)" />
 							</QCol>
 						</QRow>
 					</template>
@@ -139,6 +139,8 @@ const { t } = useI18n();
 const mediaStore = useMediaStore();
 const dialogStore = useDialogStore();
 const settingsStore = useSettingsStore();
+const libraryStore = useLibraryStore();
+const serverStore = useServerStore();
 
 const loading = ref(false);
 const comparisonRows = ref<PlexMediaComparisonDetailsRowDTO[]>([]);

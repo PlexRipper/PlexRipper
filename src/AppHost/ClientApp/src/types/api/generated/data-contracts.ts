@@ -905,30 +905,25 @@ export interface PlexMediaComparisonDetailsDTO {
   type: PlexMediaType;
 }
 
-export interface PlexMediaComparisonDetailsRowDTO {
+export interface PlexMediaComparisonDetailsLocationDTO {
+  libraryTitle: string;
   /** @format int32 */
-  comparisonId: number;
+  plexLibraryId: number;
+  /** @format int32 */
+  plexServerId: number;
+  serverName: string;
+}
+
+export interface PlexMediaComparisonDetailsRowDTO {
+  children: PlexMediaComparisonDetailsRowDTO[];
   /** @format int32 */
   id: number;
-  isActionable: boolean;
-  /** @format int32 */
-  level: number;
-  ownedLibraryTitle: string;
-  ownedLocation: string;
+  location: PlexMediaComparisonDetailsLocationDTO;
   ownedQuality?: VideoQuality | null;
-  ownedServerName: string;
-  /** @format int32 */
-  parentId?: number | null;
   /** @format int32 */
   plexMediaId: number;
-  remoteLibraryTitle: string;
-  remoteLocation: string;
-  /** @format int32 */
-  remotePlexLibraryId: number;
-  /** @format int32 */
-  remotePlexServerId: number;
   remoteQuality?: VideoQuality | null;
-  remoteServerName: string;
+  state: PlexMediaComparisonState;
   title: string;
   type: PlexMediaType;
 }

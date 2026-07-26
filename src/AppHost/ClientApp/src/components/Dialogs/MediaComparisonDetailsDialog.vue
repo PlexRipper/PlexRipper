@@ -9,6 +9,7 @@
 		@opened="onOpen">
 		<template #title>
 			<QRow
+				justify="between"
 				align="center"
 				gutter="sm">
 				<QCol cols="auto">
@@ -24,6 +25,15 @@
 						{{ selectedMediaItem?.title ?? t('general.error.unknown') }}
 					</QText>
 				</QCol>
+				<QCol cols="auto">
+					<VerticalButton
+						class="q-mr-xl"
+						:label="t('components.media-overview.comparison.download-selected')"
+						icon="mdi-download"
+						:disabled="selectedDownloadRows.length === 0"
+						cy="media-comparison-details-dialog-download-button"
+						@click="downloadRows(selectedDownloadRows)" />
+				</QCol>
 			</QRow>
 		</template>
 
@@ -31,10 +41,6 @@
 			<div
 				v-if="selectedMediaItem"
 				class="media-comparison-details">
-				<QText
-					class="media-comparison-details__description q-mb-md"
-					:value="descriptionFor(selectedMediaItem)" />
-
 				<QTreeTable
 					class="media-comparison-details__table"
 					data-cy="media-comparison-details-table"
@@ -43,35 +49,35 @@
 					:columns="comparisonColumns"
 					:selection-keys="selectedRows"
 					@selected="onSelectionChange">
-					<template #cell-title="{ data }: { data: IComparisonDetailRow }">
+					<template #cell-title="{ data }: { data: PlexMediaComparisonDetailsRowDTO }">
 						<QRow
 							align="center"
 							no-wrap>
 							<QCol cols="auto">
 								<MediaComparisonStateButton
-									:comparison-state="data.comparisonState"
+									:comparison-state="getComparisonState(data)"
 									show-tooltip
 									dense />
 							</QCol>
 							<QCol>
 								<QText
-									:cy="`media-comparison-details-title-${data.key}`"
+									:cy="`media-comparison-details-title-${getRowKey(data)}`"
 									:value="data.title" />
 							</QCol>
 						</QRow>
 					</template>
-					<template #cell-ownedQuality="{ data }: { data: IComparisonDetailRow }">
-						<MediaVideoQuality :quality="data.ownedQuality" />
+					<template #cell-ownedQuality="{ data }: { data: PlexMediaComparisonDetailsRowDTO }">
+						<MediaVideoQuality :quality="data.ownedQuality ?? VideoQuality.None" />
 					</template>
-					<template #cell-remoteQuality="{ data }: { data: IComparisonDetailRow }">
-						<MediaVideoQuality :quality="data.remoteQuality" />
+					<template #cell-remoteQuality="{ data }: { data: PlexMediaComparisonDetailsRowDTO }">
+						<MediaVideoQuality :quality="data.remoteQuality ?? VideoQuality.None" />
 					</template>
-					<template #cell-location="{ data }: { data: IComparisonDetailRow }">
+					<template #cell-location="{ data }: { data: PlexMediaComparisonDetailsRowDTO }">
 						<QRow
 							align="center"
 							no-wrap>
 							<QCol cols="auto">
-								<QText :value="data.remoteServerName" />
+								<QText :value="data.location.serverName" />
 							</QCol>
 							<QCol cols="auto">
 								<QIcon
@@ -79,16 +85,15 @@
 									name="mdi-arrow-right-thin" />
 							</QCol>
 							<QCol>
-								<QText :value="data.remoteLibraryTitle" />
+								<QText :value="data.location.libraryTitle" />
 							</QCol>
 						</QRow>
 					</template>
-					<template #cell-actions="{ data }: { data: IComparisonDetailRow }">
+					<template #cell-actions="{ data }: { data: PlexMediaComparisonDetailsRowDTO }">
 						<QRow justify="end">
 							<QCol cols="auto">
 								<IconSquareButton
-									:cy="`media-comparison-details-download-${data.key}`"
-									:disabled="!canDownload(data)"
+									:cy="`media-comparison-details-download-${getRowKey(data)}`"
 									icon="mdi-download"
 									:tooltip-text="t('components.media-overview.comparison.download-selected')"
 									dense
@@ -104,32 +109,19 @@
 				</QTreeTable>
 			</div>
 		</template>
-
-		<template #actions="{ close }">
-			<QRow justify="end">
-				<QCol cols="auto">
-					<BaseButton
-						:label="t('general.commands.close')"
-						cy="media-comparison-details-close-button"
-						@click="close" />
-				</QCol>
-				<QCol cols="auto">
-					<BaseButton
-						:label="t('components.media-overview.comparison.download-selected')"
-						:disabled="selectedDownloadRows.length === 0"
-						cy="media-comparison-details-download-selected-button"
-						@click="downloadRows(selectedDownloadRows)" />
-				</QCol>
-			</QRow>
-		</template>
 	</QCardDialog>
 </template>
 
 <script setup lang="ts">
 import { useSubscription } from '@vueuse/rxjs';
 import { get, set } from '@vueuse/core';
-import { PlexMediaComparisonState, PlexMediaType, VideoQuality } from '@dto';
-import type { DownloadMediaDTO, PlexMediaComparisonDetailsRowDTO, PlexMediaSlimDTO } from '@dto';
+import { VideoQuality } from '@dto';
+import type {
+	DownloadMediaDTO,
+	PlexMediaComparisonDetailsRowDTO,
+	PlexMediaSlimDTO,
+	PlexMediaComparisonState,
+} from '@dto';
 import { DialogType } from '@enums';
 import type { QTreeTableColumn } from '@props';
 import { QTreeTableColumnType } from '@props';
@@ -138,24 +130,8 @@ import { getPlexMediaComparisonState, getPlexMediaComparisonStateFromId } from '
 import type { TreeNode } from 'primevue/treenode';
 import type { TreeTableSelectionKeys } from 'primevue/treetable';
 
-interface IComparisonDetailRow {
-	key: string;
-	label: string;
-	title: string;
-	remoteQuality: VideoQuality;
-	ownedQuality: VideoQuality;
-	remoteServerName: string;
-	remoteLibraryTitle: string;
-	comparisonState: PlexMediaComparisonState;
-	plexMediaId: number;
-	remotePlexLibraryId: number;
-	remotePlexServerId: number;
-	type: PlexMediaComparisonDetailsRowDTO['type'];
-	children?: IComparisonDetailRow[];
-}
-
 interface IComparisonDetailTreeNode extends TreeNode {
-	data: IComparisonDetailRow;
+	data: PlexMediaComparisonDetailsRowDTO;
 	children?: IComparisonDetailTreeNode[];
 }
 
@@ -169,15 +145,9 @@ const comparisonRows = ref<PlexMediaComparisonDetailsRowDTO[]>([]);
 const selectedMediaItem = ref<PlexMediaSlimDTO | null>(null);
 const selectedRows = ref<TreeTableSelectionKeys>({});
 
-const detailRows = computed(() => get(comparisonRows)
-	.filter((row) => row.isActionable)
-	.map(mapDetailRow));
+const detailTreeRows = computed(() => mapToTreeNodes(get(comparisonRows)));
 
-const detailRowsTree = computed(() => buildDetailTree(get(detailRows)));
-
-const detailTreeRows = computed(() => mapToTreeNodes(get(detailRowsTree)));
-
-const selectedDownloadRows = computed(() => getSelectedDownloadRows(get(detailRowsTree)));
+const selectedDownloadRows = computed(() => getSelectedDownloadRows(get(comparisonRows)));
 
 const comparisonColumns: QTreeTableColumn[] = [
 	{
@@ -215,58 +185,21 @@ const comparisonColumns: QTreeTableColumn[] = [
 	},
 ];
 
-function mapDetailRow(row: PlexMediaComparisonDetailsRowDTO): IComparisonDetailRow {
-	return {
-		key: `${row.type}-${row.id}`,
-		label: row.title,
-		title: row.title,
-		ownedQuality: row.ownedQuality ?? VideoQuality.None,
-		remoteQuality: row.remoteQuality ?? VideoQuality.None,
-		remoteServerName: sourceServerLabel(row),
-		remoteLibraryTitle: sourceLibraryLabel(row),
-		comparisonState: getPlexMediaComparisonStateFromId(row.comparisonId),
-		plexMediaId: row.plexMediaId,
-		remotePlexLibraryId: row.remotePlexLibraryId,
-		remotePlexServerId: row.remotePlexServerId,
-		type: row.type,
-	};
-}
-
-function mapToTreeNodes(rows: IComparisonDetailRow[]): IComparisonDetailTreeNode[] {
+function mapToTreeNodes(rows: PlexMediaComparisonDetailsRowDTO[]): IComparisonDetailTreeNode[] {
 	return rows.map((row) => ({
-		key: row.key,
-		label: row.label,
+		key: getRowKey(row),
+		label: row.title,
 		data: row,
-		children: mapToTreeNodes(row.children ?? []),
+		children: mapToTreeNodes(row.children),
 	}));
 }
 
-function buildDetailTree(rows: IComparisonDetailRow[]): IComparisonDetailRow[] {
-	const nodesById = new Map<string, IComparisonDetailRow>();
-	const parentKeysByChildKey = new Map<string, string>();
+function getRowKey(row: PlexMediaComparisonDetailsRowDTO): string {
+	return `${row.type}-${row.id}`;
+}
 
-	for (const row of get(comparisonRows).filter((comparisonRow) => comparisonRow.isActionable)) {
-		const rowKey = `${row.type}-${row.id}`;
-		nodesById.set(rowKey, rows.find((detailRow) => detailRow.key === rowKey) as IComparisonDetailRow);
-		if (row.parentId) {
-			parentKeysByChildKey.set(rowKey, `${row.type === PlexMediaType.Episode ? PlexMediaType.Season : row.type}-${row.parentId}`);
-		}
-	}
-
-	const roots: IComparisonDetailRow[] = [];
-	for (const row of rows) {
-		const parentKey = parentKeysByChildKey.get(row.key);
-		const parent = parentKey ? nodesById.get(parentKey) : undefined;
-		if (!parent) {
-			roots.push(row);
-			continue;
-		}
-
-		parent.children ??= [];
-		parent.children.push(row);
-	}
-
-	return roots;
+function getComparisonState(row: PlexMediaComparisonDetailsRowDTO): PlexMediaComparisonState {
+	return typeof row.state === 'number' ? getPlexMediaComparisonStateFromId(row.state) : row.state;
 }
 
 function onOpen(value: unknown) {
@@ -290,23 +223,18 @@ function onSelectionChange(keys: TreeTableSelectionKeys) {
 	));
 }
 
-function getSelectedDownloadRows(rows: IComparisonDetailRow[]): IComparisonDetailRow[] {
+function getSelectedDownloadRows(rows: PlexMediaComparisonDetailsRowDTO[]): PlexMediaComparisonDetailsRowDTO[] {
 	return rows.flatMap((row) => {
 		const children = getSelectedDownloadRows(row.children ?? []);
-		if (!get(selectedRows)[row.key]?.checked)
+		if (!get(selectedRows)[getRowKey(row)]?.checked)
 			return children;
 
-		return [row, ...children].filter(canDownload);
+		return [row, ...children];
 	});
 }
 
-function canDownload(row: IComparisonDetailRow): boolean {
-	return row.plexMediaId > 0 && row.remoteQuality !== VideoQuality.None;
-}
-
-function downloadRows(rows: IComparisonDetailRow[]) {
+function downloadRows(rows: PlexMediaComparisonDetailsRowDTO[]) {
 	const downloadCommands = rows
-		.filter(canDownload)
 		.map(toDownloadMediaCommand);
 
 	if (downloadCommands.length === 0)
@@ -315,76 +243,53 @@ function downloadRows(rows: IComparisonDetailRow[]) {
 	dialogStore.openMediaConfirmationDownloadDialog(downloadCommands);
 }
 
-function toDownloadMediaCommand(row: IComparisonDetailRow): DownloadMediaDTO {
+function toDownloadMediaCommand(row: PlexMediaComparisonDetailsRowDTO): DownloadMediaDTO {
 	return {
 		type: row.type,
 		mediaIds: [row.plexMediaId],
-		plexLibraryId: row.remotePlexLibraryId,
-		plexServerId: row.remotePlexServerId,
+		plexLibraryId: row.location.plexLibraryId,
+		plexServerId: row.location.plexServerId,
 		qualities: [],
 		keepCompletedInDownloadFolder: settingsStore.downloadManagerSettings.keepCompletedInDownloadFolder,
 	};
-}
-
-function sourceServerLabel(row: PlexMediaComparisonDetailsRowDTO): string {
-	return row.remoteServerName || t('general.error.unknown');
-}
-
-function sourceLibraryLabel(row: PlexMediaComparisonDetailsRowDTO): string {
-	return row.remoteLibraryTitle || t('general.error.unknown');
-}
-
-function descriptionFor(mediaItem: PlexMediaSlimDTO): string {
-	switch (getPlexMediaComparisonState(mediaItem)) {
-		case PlexMediaComparisonState.Missing:
-			return t('components.media-overview.comparison.details-missing', { title: mediaItem.title });
-		case PlexMediaComparisonState.HigherQuality:
-			return t('components.media-overview.comparison.details-higher-quality', { title: mediaItem.title });
-		case PlexMediaComparisonState.Partial:
-			return t('components.media-overview.comparison.details-partial', { title: mediaItem.title });
-		case PlexMediaComparisonState.PartialAndHigherQuality:
-			return t('components.media-overview.comparison.details-partial-and-higher-quality', { title: mediaItem.title });
-		default:
-			return t('components.media-overview.comparison.details-not-actionable', { title: mediaItem.title });
-	}
 }
 </script>
 
 <style lang="scss">
 .media-comparison-details {
-	display: flex;
-	flex-direction: column;
-	height: 100%;
-	min-height: 0;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
 }
 
 .media-comparison-details__description {
-	flex: 0 0 auto;
+  flex: 0 0 auto;
 }
 
 .media-comparison-details__table {
-	display: flex;
-	flex: 1 1 auto;
-	flex-direction: column;
-	min-height: 0;
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 0;
 
-	.p-treetable-table-container {
-		flex: 1 1 auto;
-		min-height: 0;
-		overflow: auto;
-	}
+  .p-treetable-table-container {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: auto;
+  }
 
-	.p-treetable-thead {
-		position: sticky;
-		top: 0;
-		z-index: 2;
-	}
+  .p-treetable-thead {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+  }
 
-	.p-paginator {
-		position: sticky;
-		bottom: 0;
-		z-index: 2;
-		flex: 0 0 auto;
-	}
+  .p-paginator {
+    position: sticky;
+    bottom: 0;
+    z-index: 2;
+    flex: 0 0 auto;
+  }
 }
 </style>

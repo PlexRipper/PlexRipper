@@ -916,13 +916,19 @@ export interface PlexMediaComparisonDetailsRowDTO {
   ownedLibraryTitle: string;
   ownedLocation: string;
   ownedQuality?: VideoQuality | null;
+  ownedServerName: string;
   /** @format int32 */
   parentId?: number | null;
   /** @format int32 */
   plexMediaId: number;
   remoteLibraryTitle: string;
   remoteLocation: string;
+  /** @format int32 */
+  remotePlexLibraryId: number;
+  /** @format int32 */
+  remotePlexServerId: number;
   remoteQuality?: VideoQuality | null;
+  remoteServerName: string;
   title: string;
   type: PlexMediaType;
 }

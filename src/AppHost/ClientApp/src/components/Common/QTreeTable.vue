@@ -94,6 +94,9 @@
 				</QRow>
 			</template>
 		</Column>
+		<template #empty>
+			<slot name="empty" />
+		</template>
 	</TreeTable>
 </template>
 

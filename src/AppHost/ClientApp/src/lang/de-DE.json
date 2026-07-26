@@ -118,7 +118,7 @@
                 "details-column-location": "Location",
                 "details-column-remote-quality": "Available quality",
                 "details-column-owned-quality": "Current quality",
-                "details-column-remote-location": "Available from",
+                "details-column-remote-location": "Server",
                 "details-column-owned-location": "Current location",
                 "details-column-reason": "Reason",
                 "details-missing": "{title} is missing from this owned library. Choose remote media to download once comparison details are available.",

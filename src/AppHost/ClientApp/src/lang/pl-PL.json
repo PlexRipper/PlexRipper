@@ -154,7 +154,6 @@
         "server-dialog": {
             "header": "Konfiguracja {serverName}",
             "tabs": {
-                "download-destinations": {},
                 "server-commands": {
                     "header": "Komendy serwera"
                 },
@@ -1136,7 +1135,8 @@
             "buttons": {
                 "main-header": "Przyciski Debugowania",
                 "media-quality-header": "Wyświetlacz jakości multimediów",
-                "alert-display-header": "Nagłówek wyświetlacza alertów"
+                "alert-display-header": "Nagłówek wyświetlacza alertów",
+                "media-comparison-state-header": "Porównanie stanów mediów"
             }
         },
         "empty": {

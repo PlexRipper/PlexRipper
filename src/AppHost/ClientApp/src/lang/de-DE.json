@@ -154,7 +154,6 @@
         "server-dialog": {
             "header": "{serverName} Einstellung",
             "tabs": {
-                "download-destinations": {},
                 "server-commands": {
                     "header": "Server Befehle"
                 },
@@ -1136,7 +1135,8 @@
             "buttons": {
                 "main-header": "Schaltflächen Debug",
                 "media-quality-header": "Medienqualitätsanzeige",
-                "alert-display-header": "Kopfzeile der Alarmanzeige"
+                "alert-display-header": "Kopfzeile der Alarmanzeige",
+                "media-comparison-state-header": "Medienvergleich Staaten"
             }
         },
         "empty": {

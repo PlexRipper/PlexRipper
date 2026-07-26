@@ -79,7 +79,7 @@ const comparisonBadge = computed((): {
 			};
 		case PlexMediaComparisonState.Missing:
 			return {
-				icon: 'mdi-cloud-download-outline',
+				icon: 'mdi-video-off-outline',
 				tone: 'missing',
 			};
 		case PlexMediaComparisonState.HigherQuality:
@@ -89,7 +89,7 @@ const comparisonBadge = computed((): {
 			};
 		case PlexMediaComparisonState.Pending:
 			return {
-				icon: 'mdi-loading',
+				icon: 'mdi-progress-clock',
 				tone: 'pending',
 			};
 		case PlexMediaComparisonState.Partial:

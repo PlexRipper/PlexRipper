@@ -3673,99 +3673,7 @@
 												</translations>
 											</concept_node>
 											<concept_node>
-												<name>details-column-owned-location</name>
-												<description/>
-												<comment/>
-												<translations>
-													<translation>
-														<language>de-DE</language>
-														<approved>false</approved>
-													</translation>
-													<translation>
-														<language>en-US</language>
-														<approved>false</approved>
-													</translation>
-													<translation>
-														<language>fr-FR</language>
-														<approved>false</approved>
-													</translation>
-													<translation>
-														<language>pl-PL</language>
-														<approved>false</approved>
-													</translation>
-												</translations>
-											</concept_node>
-											<concept_node>
 												<name>details-column-owned-quality</name>
-												<description/>
-												<comment/>
-												<translations>
-													<translation>
-														<language>de-DE</language>
-														<approved>false</approved>
-													</translation>
-													<translation>
-														<language>en-US</language>
-														<approved>false</approved>
-													</translation>
-													<translation>
-														<language>fr-FR</language>
-														<approved>false</approved>
-													</translation>
-													<translation>
-														<language>pl-PL</language>
-														<approved>false</approved>
-													</translation>
-												</translations>
-											</concept_node>
-											<concept_node>
-												<name>details-column-quality</name>
-												<description/>
-												<comment/>
-												<translations>
-													<translation>
-														<language>de-DE</language>
-														<approved>false</approved>
-													</translation>
-													<translation>
-														<language>en-US</language>
-														<approved>false</approved>
-													</translation>
-													<translation>
-														<language>fr-FR</language>
-														<approved>false</approved>
-													</translation>
-													<translation>
-														<language>pl-PL</language>
-														<approved>false</approved>
-													</translation>
-												</translations>
-											</concept_node>
-											<concept_node>
-												<name>details-column-reason</name>
-												<description/>
-												<comment/>
-												<translations>
-													<translation>
-														<language>de-DE</language>
-														<approved>false</approved>
-													</translation>
-													<translation>
-														<language>en-US</language>
-														<approved>false</approved>
-													</translation>
-													<translation>
-														<language>fr-FR</language>
-														<approved>false</approved>
-													</translation>
-													<translation>
-														<language>pl-PL</language>
-														<approved>false</approved>
-													</translation>
-												</translations>
-											</concept_node>
-											<concept_node>
-												<name>details-column-remote-location</name>
 												<description/>
 												<comment/>
 												<translations>
@@ -3811,99 +3719,7 @@
 												</translations>
 											</concept_node>
 											<concept_node>
-												<name>details-column-size</name>
-												<description/>
-												<comment/>
-												<translations>
-													<translation>
-														<language>de-DE</language>
-														<approved>false</approved>
-													</translation>
-													<translation>
-														<language>en-US</language>
-														<approved>false</approved>
-													</translation>
-													<translation>
-														<language>fr-FR</language>
-														<approved>false</approved>
-													</translation>
-													<translation>
-														<language>pl-PL</language>
-														<approved>false</approved>
-													</translation>
-												</translations>
-											</concept_node>
-											<concept_node>
 												<name>details-column-title</name>
-												<description/>
-												<comment/>
-												<translations>
-													<translation>
-														<language>de-DE</language>
-														<approved>false</approved>
-													</translation>
-													<translation>
-														<language>en-US</language>
-														<approved>false</approved>
-													</translation>
-													<translation>
-														<language>fr-FR</language>
-														<approved>false</approved>
-													</translation>
-													<translation>
-														<language>pl-PL</language>
-														<approved>false</approved>
-													</translation>
-												</translations>
-											</concept_node>
-											<concept_node>
-												<name>details-higher-quality</name>
-												<description/>
-												<comment/>
-												<translations>
-													<translation>
-														<language>de-DE</language>
-														<approved>false</approved>
-													</translation>
-													<translation>
-														<language>en-US</language>
-														<approved>false</approved>
-													</translation>
-													<translation>
-														<language>fr-FR</language>
-														<approved>false</approved>
-													</translation>
-													<translation>
-														<language>pl-PL</language>
-														<approved>false</approved>
-													</translation>
-												</translations>
-											</concept_node>
-											<concept_node>
-												<name>details-library-location</name>
-												<description/>
-												<comment/>
-												<translations>
-													<translation>
-														<language>de-DE</language>
-														<approved>false</approved>
-													</translation>
-													<translation>
-														<language>en-US</language>
-														<approved>false</approved>
-													</translation>
-													<translation>
-														<language>fr-FR</language>
-														<approved>false</approved>
-													</translation>
-													<translation>
-														<language>pl-PL</language>
-														<approved>false</approved>
-													</translation>
-												</translations>
-											</concept_node>
-											<concept_node>
-												<name>details-missing</name>
 												<description/>
 												<comment/>
 												<translations>
@@ -3949,99 +3765,7 @@
 												</translations>
 											</concept_node>
 											<concept_node>
-												<name>details-not-actionable</name>
-												<description/>
-												<comment/>
-												<translations>
-													<translation>
-														<language>de-DE</language>
-														<approved>false</approved>
-													</translation>
-													<translation>
-														<language>en-US</language>
-														<approved>false</approved>
-													</translation>
-													<translation>
-														<language>fr-FR</language>
-														<approved>false</approved>
-													</translation>
-													<translation>
-														<language>pl-PL</language>
-														<approved>false</approved>
-													</translation>
-												</translations>
-											</concept_node>
-											<concept_node>
-												<name>details-partial</name>
-												<description/>
-												<comment/>
-												<translations>
-													<translation>
-														<language>de-DE</language>
-														<approved>false</approved>
-													</translation>
-													<translation>
-														<language>en-US</language>
-														<approved>false</approved>
-													</translation>
-													<translation>
-														<language>fr-FR</language>
-														<approved>false</approved>
-													</translation>
-													<translation>
-														<language>pl-PL</language>
-														<approved>false</approved>
-													</translation>
-												</translations>
-											</concept_node>
-											<concept_node>
-												<name>details-partial-and-higher-quality</name>
-												<description/>
-												<comment/>
-												<translations>
-													<translation>
-														<language>de-DE</language>
-														<approved>false</approved>
-													</translation>
-													<translation>
-														<language>en-US</language>
-														<approved>false</approved>
-													</translation>
-													<translation>
-														<language>fr-FR</language>
-														<approved>false</approved>
-													</translation>
-													<translation>
-														<language>pl-PL</language>
-														<approved>false</approved>
-													</translation>
-												</translations>
-											</concept_node>
-											<concept_node>
 												<name>download-selected</name>
-												<description/>
-												<comment/>
-												<translations>
-													<translation>
-														<language>de-DE</language>
-														<approved>false</approved>
-													</translation>
-													<translation>
-														<language>en-US</language>
-														<approved>false</approved>
-													</translation>
-													<translation>
-														<language>fr-FR</language>
-														<approved>false</approved>
-													</translation>
-													<translation>
-														<language>pl-PL</language>
-														<approved>false</approved>
-													</translation>
-												</translations>
-											</concept_node>
-											<concept_node>
-												<name>unknown</name>
 												<description/>
 												<comment/>
 												<translations>
@@ -5803,34 +5527,6 @@
 									<folder_node>
 										<name>tabs</name>
 										<children>
-											<folder_node>
-												<name>download-destinations</name>
-												<children>
-													<concept_node>
-														<name>header</name>
-														<description/>
-														<comment/>
-														<translations>
-															<translation>
-																<language>de-DE</language>
-																<approved>false</approved>
-															</translation>
-															<translation>
-																<language>en-US</language>
-																<approved>false</approved>
-															</translation>
-															<translation>
-																<language>fr-FR</language>
-																<approved>false</approved>
-															</translation>
-															<translation>
-																<language>pl-PL</language>
-																<approved>false</approved>
-															</translation>
-														</translations>
-													</concept_node>
-												</children>
-											</folder_node>
 											<folder_node>
 												<name>server-commands</name>
 												<children>
@@ -14981,6 +14677,29 @@
 											</concept_node>
 											<concept_node>
 												<name>main-header</name>
+												<description/>
+												<comment/>
+												<translations>
+													<translation>
+														<language>de-DE</language>
+														<approved>false</approved>
+													</translation>
+													<translation>
+														<language>en-US</language>
+														<approved>false</approved>
+													</translation>
+													<translation>
+														<language>fr-FR</language>
+														<approved>false</approved>
+													</translation>
+													<translation>
+														<language>pl-PL</language>
+														<approved>false</approved>
+													</translation>
+												</translations>
+											</concept_node>
+											<concept_node>
+												<name>media-comparison-state-header</name>
 												<description/>
 												<comment/>
 												<translations>

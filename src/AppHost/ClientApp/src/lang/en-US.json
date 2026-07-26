@@ -154,7 +154,6 @@
         "server-dialog": {
             "header": "{serverName} configuration",
             "tabs": {
-                "download-destinations": {},
                 "server-commands": {
                     "header": "Server Commands"
                 },
@@ -1136,7 +1135,8 @@
             "buttons": {
                 "main-header": "Buttons Debug",
                 "media-quality-header": "Media Quality Display",
-                "alert-display-header": "Alert Display Header"
+                "alert-display-header": "Alert Display Header",
+                "media-comparison-state-header": "Media Comparison States"
             }
         },
         "empty": {

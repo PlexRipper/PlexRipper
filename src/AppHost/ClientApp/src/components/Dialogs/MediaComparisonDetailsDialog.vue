@@ -49,7 +49,7 @@
 					:columns="comparisonColumns"
 					:selection-keys="selectedRows"
 					@selected="onSelectionChange">
-					<template #cell-title="{ data }: { data: PlexMediaComparisonDetailsRowDTO }">
+					<template #cell-title="{ node, data }: { node: IComparisonDetailTreeNode; data: IComparisonDetailsRow }">
 						<QRow
 							align="center"
 							no-wrap>
@@ -61,23 +61,23 @@
 							</QCol>
 							<QCol>
 								<QText
-									:cy="`media-comparison-details-title-${getRowKey(data)}`"
+									:cy="`media-comparison-details-title-${node.key}`"
 									:value="data.title" />
 							</QCol>
 						</QRow>
 					</template>
-					<template #cell-ownedQuality="{ data }: { data: PlexMediaComparisonDetailsRowDTO }">
+					<template #cell-ownedQuality="{ data }: { data: IComparisonDetailsRow }">
 						<MediaVideoQuality :quality="data.ownedQuality ?? VideoQuality.None" />
 					</template>
-					<template #cell-remoteQuality="{ data }: { data: PlexMediaComparisonDetailsRowDTO }">
+					<template #cell-remoteQuality="{ data }: { data: IComparisonDetailsRow }">
 						<MediaVideoQuality :quality="data.remoteQuality ?? VideoQuality.None" />
 					</template>
-					<template #cell-location="{ data }: { data: PlexMediaComparisonDetailsRowDTO }">
+					<template #cell-location="{ data }: { data: IComparisonDetailsRow }">
 						<QRow
 							align="center"
 							no-wrap>
 							<QCol cols="auto">
-								<QText :value="serverStore.getServerName(data.location.plexServerId)" />
+								<QText :value="serverStore.getServerName(data.plexServerId)" />
 							</QCol>
 							<QCol cols="auto">
 								<QIcon
@@ -85,15 +85,15 @@
 									name="mdi-arrow-right-thin" />
 							</QCol>
 							<QCol>
-								<QText :value="libraryStore.getLibraryName(data.location.plexLibraryId)" />
+								<QText :value="libraryStore.getLibraryName(data.plexLibraryId)" />
 							</QCol>
 						</QRow>
 					</template>
-					<template #cell-actions="{ data }: { data: PlexMediaComparisonDetailsRowDTO }">
+					<template #cell-actions="{ node, data }: { node: IComparisonDetailTreeNode; data: IComparisonDetailsRow }">
 						<QRow justify="end">
 							<QCol cols="auto">
 								<IconSquareButton
-									:cy="`media-comparison-details-download-${getRowKey(data)}`"
+									:cy="`media-comparison-details-download-${node.key}`"
 									icon="mdi-download"
 									:tooltip-text="t('components.media-overview.comparison.download-selected')"
 									dense
@@ -129,9 +129,15 @@ import { useDialogStore, useMediaStore, useSettingsStore } from '@store';
 import { getPlexMediaComparisonState, getPlexMediaComparisonStateFromId } from '@composables';
 import type { TreeNode } from 'primevue/treenode';
 import type { TreeTableSelectionKeys } from 'primevue/treetable';
+import { uniqueId } from 'lodash-es';
+
+interface IComparisonDetailsRow extends Omit<PlexMediaComparisonDetailsRowDTO, 'children'> {
+	key: string;
+	children: IComparisonDetailsRow[];
+}
 
 interface IComparisonDetailTreeNode extends TreeNode {
-	data: PlexMediaComparisonDetailsRowDTO;
+	data: IComparisonDetailsRow;
 	children?: IComparisonDetailTreeNode[];
 }
 
@@ -143,7 +149,7 @@ const libraryStore = useLibraryStore();
 const serverStore = useServerStore();
 
 const loading = ref(false);
-const comparisonRows = ref<PlexMediaComparisonDetailsRowDTO[]>([]);
+const comparisonRows = ref<IComparisonDetailsRow[]>([]);
 const selectedMediaItem = ref<PlexMediaSlimDTO | null>(null);
 const selectedRows = ref<TreeTableSelectionKeys>({});
 
@@ -187,20 +193,24 @@ const comparisonColumns: QTreeTableColumn[] = [
 	},
 ];
 
-function mapToTreeNodes(rows: PlexMediaComparisonDetailsRowDTO[]): IComparisonDetailTreeNode[] {
+function mapToTreeNodes(rows: IComparisonDetailsRow[]): IComparisonDetailTreeNode[] {
 	return rows.map((row) => ({
-		key: getRowKey(row),
+		key: row.key,
 		label: row.title,
 		data: row,
 		children: mapToTreeNodes(row.children),
 	}));
 }
 
-function getRowKey(row: PlexMediaComparisonDetailsRowDTO): string {
-	return `${row.type}-${row.id}`;
+function toComparisonRow(row: PlexMediaComparisonDetailsRowDTO): IComparisonDetailsRow {
+	return {
+		...row,
+		key: uniqueId(`${row.type}-`),
+		children: row.children.map(toComparisonRow),
+	};
 }
 
-function getComparisonState(row: PlexMediaComparisonDetailsRowDTO): PlexMediaComparisonState {
+function getComparisonState(row: IComparisonDetailsRow): PlexMediaComparisonState {
 	return typeof row.state === 'number' ? getPlexMediaComparisonStateFromId(row.state) : row.state;
 }
 
@@ -212,7 +222,7 @@ function onOpen(value: unknown) {
 	set(selectedRows, {});
 	useSubscription(
 		mediaStore.getMediaComparisonDetails(mediaItem.id, mediaItem.type).subscribe({
-			next: (details) => set(comparisonRows, details.rows),
+			next: (details) => set(comparisonRows, details.rows.map(toComparisonRow)),
 			complete: () => set(loading, false),
 			error: () => set(loading, false),
 		}),
@@ -225,17 +235,17 @@ function onSelectionChange(keys: TreeTableSelectionKeys) {
 	));
 }
 
-function getSelectedDownloadRows(rows: PlexMediaComparisonDetailsRowDTO[]): PlexMediaComparisonDetailsRowDTO[] {
+function getSelectedDownloadRows(rows: IComparisonDetailsRow[]): IComparisonDetailsRow[] {
 	return rows.flatMap((row) => {
 		const children = getSelectedDownloadRows(row.children ?? []);
-		if (!get(selectedRows)[getRowKey(row)]?.checked)
+		if (!get(selectedRows)[row.key]?.checked)
 			return children;
 
 		return [row, ...children];
 	});
 }
 
-function downloadRows(rows: PlexMediaComparisonDetailsRowDTO[]) {
+function downloadRows(rows: IComparisonDetailsRow[]) {
 	const downloadCommands = rows
 		.map(toDownloadMediaCommand);
 
@@ -245,12 +255,12 @@ function downloadRows(rows: PlexMediaComparisonDetailsRowDTO[]) {
 	dialogStore.openMediaConfirmationDownloadDialog(downloadCommands);
 }
 
-function toDownloadMediaCommand(row: PlexMediaComparisonDetailsRowDTO): DownloadMediaDTO {
+function toDownloadMediaCommand(row: IComparisonDetailsRow): DownloadMediaDTO {
 	return {
 		type: row.type,
 		mediaIds: [row.plexMediaId],
-		plexLibraryId: row.location.plexLibraryId,
-		plexServerId: row.location.plexServerId,
+		plexLibraryId: row.plexLibraryId,
+		plexServerId: row.plexServerId,
 		qualities: [],
 		keepCompletedInDownloadFolder: settingsStore.downloadManagerSettings.keepCompletedInDownloadFolder,
 	};

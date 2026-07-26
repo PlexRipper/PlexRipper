@@ -346,7 +346,11 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 			state.serverError = false;
 
 			if (state.queryHash !== data.queryHash) {
-				Log.warn(`mediaPages was cleared, with ${state.queryHash} vs ${data.queryHash}`);
+				if (state.queryHash) {
+					Log.warn(`mediaPages was cleared, with ${state.queryHash} vs ${data.queryHash}`);
+				} else {
+					Log.debug(`mediaPages was initialized with ${data.queryHash}`);
+				}
 				mediaPages.clear();
 				pendingPages.clear();
 				state.itemsLength = 0;

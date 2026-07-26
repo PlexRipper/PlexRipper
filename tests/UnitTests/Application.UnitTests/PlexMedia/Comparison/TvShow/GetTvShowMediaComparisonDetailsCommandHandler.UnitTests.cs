@@ -74,10 +74,11 @@ public class GetTvShowMediaComparisonDetailsCommandHandlerUnitTests
             seasonRow.State.ShouldBe(PlexMediaComparisonState.Partial);
             seasonRow.PlexLibraryId.ShouldBe(remoteLibrary.Id);
             seasonRow.PlexServerId.ShouldBe(remoteLibrary.PlexServerId);
-            seasonRow.Children.ShouldNotBeEmpty();
+            seasonRow.Children.Count.ShouldBe(expectedEpisodeIds.Count);
             seasonRow.Children.Select(x => x.PlexMediaId).ShouldAllBe(x => expectedEpisodeIds.Contains(x));
             seasonRow.Children.ShouldAllBe(x => x.Type == PlexMediaType.Episode);
             seasonRow.Children.ShouldAllBe(x => x.State == PlexMediaComparisonState.Missing);
+            seasonRow.Children.ShouldAllBe(x => x.Children.Count == 0);
         }
     }
 

@@ -189,9 +189,10 @@ public class GetTvShowMediaComparisonDetailsCommandHandler
                      .OrderBy(x => x.Key))
         {
             var sourceRow = group.FirstOrDefault(x => x.RemotePlexLibraryId > 0) ?? group.First();
+            var seasonRowId = ++_rowId;
             result.Add(new ComparisonDetailsRow
             {
-                RowId = ++_rowId,
+                RowId = seasonRowId,
                 ParentRowId = null,
                 Level = 0,
                 PlexMediaId = group.Select(x => episodeLookup.GetValueOrDefault(x.PlexMediaId)?.TvShowSeasonId ?? 0).FirstOrDefault(x => x > 0),
@@ -210,7 +211,7 @@ public class GetTvShowMediaComparisonDetailsCommandHandler
                 RemotePlexServerId = sourceRow.RemotePlexServerId,
             });
 
-            result.AddRange(group.Select(x => x with { ParentRowId = result[^1].RowId }));
+            result.AddRange(group.Select(x => x with { ParentRowId = seasonRowId }));
         }
 
         return result;

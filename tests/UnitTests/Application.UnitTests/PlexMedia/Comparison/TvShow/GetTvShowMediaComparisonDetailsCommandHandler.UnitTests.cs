@@ -57,12 +57,11 @@ public class GetTvShowMediaComparisonDetailsCommandHandlerUnitTests
         result.Errors.ShouldBeEmpty();
         result.Value.PlexMediaId.ShouldBe(remoteTvShow.Id);
         result.Value.Type.ShouldBe(PlexMediaType.TvShow);
-        result.Value.State.ShouldBe(PlexMediaComparisonState.Partial);
+        result.Value.State.ShouldBe(PlexMediaComparisonState.Missing);
         result.Value.Rows.Count.ShouldBe(2);
-        foreach (var seasonRow in result.Value.Rows.OrderBy(x => x.Title))
+        foreach (var seasonRow in result.Value.Rows)
         {
-            var seasonNumber = int.Parse(seasonRow.Title.Replace("Season ", string.Empty));
-            var expectedSeason = remoteSeasons.Single(x => x.SeasonNumber == seasonNumber);
+            var expectedSeason = remoteSeasons.Single(x => x.Id == seasonRow.PlexMediaId);
             var expectedEpisodeIds = remoteEpisodes
                 .Where(x => x.TvShowSeasonId == expectedSeason.Id)
                 .Select(x => x.Id)
@@ -71,7 +70,7 @@ public class GetTvShowMediaComparisonDetailsCommandHandlerUnitTests
             seasonRow.PlexMediaId.ShouldBe(expectedSeason.Id);
             seasonRow.PlexMediaId.ShouldBeGreaterThan(0);
             seasonRow.Type.ShouldBe(PlexMediaType.Season);
-            seasonRow.State.ShouldBe(PlexMediaComparisonState.Partial);
+            seasonRow.State.ShouldBe(PlexMediaComparisonState.Missing);
             seasonRow.PlexLibraryId.ShouldBe(remoteLibrary.Id);
             seasonRow.PlexServerId.ShouldBe(remoteLibrary.PlexServerId);
             seasonRow.Children.Count.ShouldBe(expectedEpisodeIds.Count);

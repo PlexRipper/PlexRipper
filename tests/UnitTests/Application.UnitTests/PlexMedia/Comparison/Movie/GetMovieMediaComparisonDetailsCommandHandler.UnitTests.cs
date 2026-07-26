@@ -44,7 +44,7 @@ public class GetMovieMediaComparisonDetailsCommandHandlerUnitTests
         result.Errors.ShouldBeEmpty();
         result.Value.PlexMediaId.ShouldBe(remoteMovie.Id);
         result.Value.Type.ShouldBe(PlexMediaType.Movie);
-        result.Value.State.ShouldBe(PlexMediaComparisonState.Partial);
+        result.Value.State.ShouldBe(PlexMediaComparisonState.Missing);
         result.Value.Rows.Count.ShouldBe(1);
         var row = result.Value.Rows.Single();
         row.PlexMediaId.ShouldBe(remoteMovie.Id);

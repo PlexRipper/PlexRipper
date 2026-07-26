@@ -42,14 +42,17 @@ internal static class PlexMediaComparisonDetailsMapper
     public static PlexMediaComparisonState ToParentState(List<ComparisonDetailsRow> rows)
     {
         var hasMissing = rows.Any(x =>
-            x.ComparisonId == PlexMediaComparisonState.Missing.ToComparisonId() ||
+            x.ComparisonId == PlexMediaComparisonState.Missing.ToComparisonId());
+        var hasPartial = rows.Any(x =>
             x.ComparisonId == PlexMediaComparisonState.Partial.ToComparisonId());
         var hasHigherQuality = rows.Any(x => x.ComparisonId == PlexMediaComparisonState.HigherQuality.ToComparisonId());
-        return (hasMissing, hasHigherQuality) switch
+        return (hasMissing, hasPartial, hasHigherQuality) switch
         {
-            (true, true) => PlexMediaComparisonState.PartialAndHigherQuality,
-            (true, false) => PlexMediaComparisonState.Partial,
-            (false, true) => PlexMediaComparisonState.HigherQuality,
+            (true, false, false) => PlexMediaComparisonState.Missing,
+            (_, true, true) => PlexMediaComparisonState.PartialAndHigherQuality,
+            (_, true, false) => PlexMediaComparisonState.Partial,
+            (true, false, true) => PlexMediaComparisonState.PartialAndHigherQuality,
+            (false, false, true) => PlexMediaComparisonState.HigherQuality,
             _ => PlexMediaComparisonState.Owned,
         };
     }

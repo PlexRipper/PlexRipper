@@ -164,7 +164,13 @@ public class GetMediaDetailByIdEndpointUnitTests : BaseEndpointUnitTest<GetMedia
         Mock.Mock<ICommandExecutor>()
             .Setup(x => x.Send(It.IsAny<ApplyComparisonStateCommand>(), It.IsAny<CancellationToken>()))
             .Callback<ICommand<Result>, CancellationToken>((cmd, _) =>
-                ((ApplyComparisonStateCommand)cmd).Items[0].ComparisonId = PlexMediaComparisonState.HigherQuality.ToComparisonId())
+            {
+                var items = ((ApplyComparisonStateCommand)cmd).Items;
+                items[0].ComparisonId = PlexMediaComparisonState.HigherQuality.ToComparisonId();
+                items[1].ComparisonId = PlexMediaComparisonState.Owned.ToComparisonId();
+                items[2].ComparisonId = PlexMediaComparisonState.HigherQuality.ToComparisonId();
+                items[3].ComparisonId = PlexMediaComparisonState.Missing.ToComparisonId();
+            })
             .ReturnsAsync(Result.Ok());
 
         // Act
@@ -253,7 +259,12 @@ public class GetMediaDetailByIdEndpointUnitTests : BaseEndpointUnitTest<GetMedia
         Mock.Mock<ICommandExecutor>()
             .Setup(x => x.Send(It.IsAny<ApplyComparisonStateCommand>(), It.IsAny<CancellationToken>()))
             .Callback<ICommand<Result>, CancellationToken>((cmd, _) =>
-                ((ApplyComparisonStateCommand)cmd).Items[0].ComparisonId = PlexMediaComparisonState.HigherQuality.ToComparisonId())
+            {
+                var items = ((ApplyComparisonStateCommand)cmd).Items;
+                items[0].ComparisonId = PlexMediaComparisonState.HigherQuality.ToComparisonId();
+                for (var i = 1; i < items.Count; i++)
+                    items[i].ComparisonId = PlexMediaComparisonState.Owned.ToComparisonId();
+            })
             .ReturnsAsync(Result.Ok());
 
         // Act

@@ -7,7 +7,13 @@ import {
 	generateResultDTO,
 } from '@mock';
 import { useMediaOverviewStore, useSettingsStore } from '@store';
-import { PlexMediaComparisonState, PlexMediaType, type PlexMediaSlimDTO, type PlexMediaStatisticsDTO } from '@dto';
+import {
+	PlexMediaComparisonState,
+	PlexMediaType,
+	type PlexLibraryDTO,
+	type PlexMediaSlimDTO,
+	type PlexMediaStatisticsDTO,
+} from '@dto';
 import { MediaSortField, SortDirection } from '@enums/mediaSortField';
 
 describe('MediaOverviewStore - Request Contracts', () => {
@@ -117,6 +123,11 @@ describe('MediaOverviewStore - Request Contracts', () => {
 		const store = useMediaOverviewStore();
 		store.libraryId = 45;
 		mockMediaResponse();
+		// requestMediaPage calls refreshLibrary when the library type is not yet known
+		mock.onGet(`/api/PlexLibrary/${store.libraryId}`).reply(200, generateResultDTO({
+			id: 45,
+			type: PlexMediaType.Movie,
+		} as PlexLibraryDTO));
 
 		// Act
 		const result = subscribeSpyTo(store.requestMediaPage(1));

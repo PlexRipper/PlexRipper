@@ -133,13 +133,23 @@ public class SyncPlexTvShowsCommandHandler : ICommandHandler<SyncPlexTvShowsComm
         bulkInsertRapport.DeletedSeasons = removeRapport.DeletedSeasons;
         bulkInsertRapport.DeletedEpisodes = removeRapport.DeletedEpisodes;
 
-        // Update counts in PlexLibrary
+        // Update counts in PlexLibrary from persisted rows so denormalized metrics cannot drift.
         var mediaSize = plexTvShows.Sum(x => x.MediaSize);
+        var metrics = await _dbContext
+            .PlexLibraries.Where(x => x.Id == plexLibraryId)
+            .Select(_ => new
+            {
+                TvShowCount = _dbContext.PlexTvShows.Count(x => x.PlexLibraryId == plexLibraryId),
+                SeasonCount = _dbContext.PlexTvShowSeason.Count(x => x.PlexLibraryId == plexLibraryId),
+                EpisodeCount = _dbContext.PlexTvShowEpisodes.Count(x => x.PlexLibraryId == plexLibraryId),
+            })
+            .FirstAsync(cancellationToken);
+
         await _dbContext.SetTvShowMediaMetrics(
             plexLibraryId,
-            bulkInsertRapport.CreatedTvShows,
-            bulkInsertRapport.CreatedSeasons,
-            bulkInsertRapport.CreatedEpisodes,
+            metrics.TvShowCount,
+            metrics.SeasonCount,
+            metrics.EpisodeCount,
             mediaSize
         );
 

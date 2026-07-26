@@ -20,7 +20,7 @@ public class GetMetadataFilterRequestValidator : Validator<GetMetadataFilterRequ
     }
 }
 
-public class GetMetadataFilter : Endpoint<GetMetadataFilterRequest, PlexMediaFilterMetadataDTO>
+public class GetMetadataFilter : Endpoint<GetMetadataFilterRequest, ResultDTO<PlexMediaFilterMetadataDTO>>
 {
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;

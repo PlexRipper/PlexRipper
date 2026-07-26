@@ -1,7 +1,7 @@
 namespace Reaparr.Application.UnitTests;
 
 public class GetMetadataFilterUnitTests : BaseEndpointUnitTest<GetMetadataFilter,
-    GetMetadataFilterRequest, PlexMediaFilterMetadataDTO>
+    GetMetadataFilterRequest, ResultDTO<PlexMediaFilterMetadataDTO>>
 {
     [Test]
     public async Task ShouldReturnSuccess_WhenAllLibraryMode()
@@ -28,8 +28,9 @@ public class GetMetadataFilterUnitTests : BaseEndpointUnitTest<GetMetadataFilter
         endpointResult.StatusCode.ShouldBe(200);
         var response = endpointResult.Response;
         response.ShouldNotBeNull();
-        response.Qualities.ShouldNotBeEmpty();
-        response.Qualities.ShouldAllBe(x => x >= -1 && x <= 10);
+        response.Value.ShouldNotBeNull();
+        response.Value.Qualities.ShouldNotBeEmpty();
+        response.Value.Qualities.ShouldAllBe(x => x >= -1 && x <= 10);
     }
 
     [Test]
@@ -63,7 +64,8 @@ public class GetMetadataFilterUnitTests : BaseEndpointUnitTest<GetMetadataFilter
 
         var response = endpointResult.Response;
         response.ShouldNotBeNull();
-        response.Qualities.ShouldNotBeEmpty();
-        response.Qualities.ShouldAllBe(x => x >= -1 && x <= 10);
+        response.Value.ShouldNotBeNull();
+        response.Value.Qualities.ShouldNotBeEmpty();
+        response.Value.Qualities.ShouldAllBe(x => x >= -1 && x <= 10);
     }
 }

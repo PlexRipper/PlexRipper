@@ -9,10 +9,20 @@ public class GetAllMediaByTypeEndpointUnitTests : BaseEndpointUnitTest<GetAllMed
     public async Task ShouldMapFriendlyRequestFiltersToMediaQueryFilter_WhenHandlingRequest()
     {
         // Arrange
+        await SetupDatabase(42, config =>
+        {
+            config.PlexServerCount = 1;
+            config.PlexMovieLibraryCount = 1;
+        });
+        var libraryId = await IDbContext.PlexLibraries
+            .Where(x => x.Type == PlexMediaType.Movie)
+            .Select(x => x.Id)
+            .FirstAsync(CancellationToken);
+
         var request = new GetAllMediaByTypeRequest
         {
             MediaType = PlexMediaType.Movie,
-            PlexLibraryId = 42,
+            PlexLibraryId = libraryId,
             Page = 2,
             PageSize = 25,
             Search = "matrix",
@@ -40,7 +50,7 @@ public class GetAllMediaByTypeEndpointUnitTests : BaseEndpointUnitTest<GetAllMed
                 x.GetMediaAsync(
                     It.Is<MediaQueryFilter>(filter =>
                         filter.MediaType == PlexMediaType.Movie
-                        && filter.PlexLibraryId == 42
+                        && filter.PlexLibraryId == libraryId
                         && filter.FilterOwnedMedia
                         && filter.FilterOfflineMedia
                         && filter.ComparisonState == PlexMediaComparisonState.Missing

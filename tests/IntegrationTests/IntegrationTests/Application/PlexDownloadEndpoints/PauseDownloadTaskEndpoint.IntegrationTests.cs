@@ -27,6 +27,8 @@ public class PauseDownloadTaskEndpointIntegrationTests : BaseIntegrationTests
                     x.SetupIdentityRequest(seed);
                 };
 
+                config.MockDownloadServiceFactory = MockDownloadService.PausableFactory;
+
                 config.FileSystemOptions = (system, dbContext) =>
                 {
                     var downloadTask = dbContext.DownloadTaskMovieFile.First();
@@ -38,15 +40,6 @@ public class PauseDownloadTaskEndpointIntegrationTests : BaseIntegrationTests
                     system.File.WriteAllBytes(downloadTask.DownloadFilePath, FakeData.GetDownloadFile(50.0 / 4.0));
                 };
             }
-        );
-
-        await container.DbContext.PlexServerConnections.ExecuteUpdateAsync(
-            x => x.SetProperty(y => y.Url, _ => "https://download.blender.org"),
-            CancellationToken
-        );
-        await container.DbContext.DownloadTaskMovieFile.ExecuteUpdateAsync(
-            x => x.SetProperty(y => y.FileLocationUrl, _ => "/peach/bigbuckbunny_movies/BigBuckBunny_320x180.mp4"),
-            CancellationToken
         );
 
         var downloadTasks = await container.DbContext.GetAllDownloadTasksByServerAsync(

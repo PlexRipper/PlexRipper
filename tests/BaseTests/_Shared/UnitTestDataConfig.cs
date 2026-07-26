@@ -1,3 +1,4 @@
+using Downloader;
 using Reaparr.Settings.Contracts;
 
 namespace Reaparr.BaseTests;
@@ -20,6 +21,9 @@ public class UnitTestDataConfig : BaseConfig<UnitTestDataConfig>
     public Action<PlexApiDataConfig>? BaseMockHttpClientOptions { get; set; }
 
     public Action<IFileSystem, IReaparrDbContext>? FileSystemOptions { get; set; }
+
+    public Func<IFile, Func<DownloadConfiguration, IDownloadService>> MockDownloadServiceFactory { get; set; } =
+        MockDownloadService.SuccessFactory;
 
     /// <summary>
     /// Optional per-test Autofac overrides. Invoked after TestModule registration so last registration wins.

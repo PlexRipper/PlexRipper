@@ -132,28 +132,9 @@ public class StartDownloadTaskEndpointIntegrationTests : BaseIntegrationTests
                     x.PlexMovieLibraryCount = 2;
                     x.MovieCount = 10;
                     x.MovieDownloadTasksCount = 1;
-                };
-
-                config.FileSystemOptions = (system, dbContext) =>
-                {
-                    var downloadTask = dbContext.DownloadTaskMovieFile.First();
-                    downloadTask.DownloadFilePath.ShouldNotBeNullOrEmpty();
-
-                    var directoryPath = system.Path.GetDirectoryName(downloadTask.DownloadFilePath);
-                    directoryPath.ShouldNotBeNullOrEmpty();
-                    system.Directory.CreateDirectory(directoryPath);
-                    system.File.WriteAllBytes(downloadTask.DownloadFilePath, FakeData.GetDownloadFile(10.0 / 4.0));
+                    x.DownloadFileSizeInMb = 1;
                 };
             }
-        );
-
-        await container.DbContext.PlexServerConnections.ExecuteUpdateAsync(
-            x => x.SetProperty(y => y.Url, _ => "https://download.blender.org"),
-            CancellationToken
-        );
-        await container.DbContext.DownloadTaskMovieFile.ExecuteUpdateAsync(
-            x => x.SetProperty(y => y.FileLocationUrl, _ => "/peach/bigbuckbunny_movies/BigBuckBunny_320x180.mp4"),
-            CancellationToken
         );
 
         var downloadTasks = await container.DbContext.GetAllDownloadTasksByServerAsync(

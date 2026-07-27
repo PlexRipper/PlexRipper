@@ -125,14 +125,17 @@ public sealed class ReaparrDbContext : DbContext, IReaparrDbContext, IReaparrDbC
         BulkConfig? bulkConfig = null,
         CancellationToken cancellationToken = default
     )
-        where T : class => await ExecuteBulkAsync(
-        () =>
-            DbContextBulkExtensions.BulkInsertAsync(
-                this,
-                entities,
-                bulkConfig,
-                cancellationToken: cancellationToken
-            ),
+        where T : class => await ExecuteSerializedWriteAsync(
+        async (_, ct) => await ExecuteBulkAsync(
+            () =>
+                DbContextBulkExtensions.BulkInsertAsync(
+                    this,
+                    entities,
+                    bulkConfig,
+                    cancellationToken: ct
+                ),
+            ct
+        ),
         cancellationToken
     );
 
@@ -141,14 +144,17 @@ public sealed class ReaparrDbContext : DbContext, IReaparrDbContext, IReaparrDbC
         BulkConfig? bulkConfig = null,
         CancellationToken cancellationToken = default
     )
-        where T : class => await ExecuteBulkAsync(
-        () =>
-            DbContextBulkExtensions.BulkUpdateAsync(
-                this,
-                entities,
-                bulkConfig,
-                cancellationToken: cancellationToken
-            ),
+        where T : class => await ExecuteSerializedWriteAsync(
+        async (_, ct) => await ExecuteBulkAsync(
+            () =>
+                DbContextBulkExtensions.BulkUpdateAsync(
+                    this,
+                    entities,
+                    bulkConfig,
+                    cancellationToken: ct
+                ),
+            ct
+        ),
         cancellationToken
     );
 
@@ -159,16 +165,19 @@ public sealed class ReaparrDbContext : DbContext, IReaparrDbContext, IReaparrDbC
         Type? type = null,
         CancellationToken cancellationToken = default
     )
-        where T : class => await ExecuteBulkAsync(
-        () =>
-            DbContextBulkExtensions.BulkInsertOrUpdateAsync(
-                this,
-                entities,
-                bulkConfig,
-                progress,
-                type,
-                cancellationToken: cancellationToken
-            ),
+        where T : class => await ExecuteSerializedWriteAsync(
+        async (_, ct) => await ExecuteBulkAsync(
+            () =>
+                DbContextBulkExtensions.BulkInsertOrUpdateAsync(
+                    this,
+                    entities,
+                    bulkConfig,
+                    progress,
+                    type,
+                    cancellationToken: ct
+                ),
+            ct
+        ),
         cancellationToken
     );
 
@@ -180,11 +189,19 @@ public sealed class ReaparrDbContext : DbContext, IReaparrDbContext, IReaparrDbC
         ((DbContext)this).ExecuteWithRetryAsync(ctx => operation((IReaparrDbContext)ctx), maxRetries,
             cancellationToken);
 
+    public Task ExecuteSerializedWriteAsync(
+        Func<IReaparrDbContext, CancellationToken, Task> operation,
+        CancellationToken cancellationToken = default) =>
+        ((DbContext)this).ExecuteSerializedWriteAsync(ct => operation(this, ct), 8, cancellationToken);
+
+
     /// <inheritdoc/>
     public Task<int> ExecuteSqlInterpolatedAsync(
         FormattableString sql,
-        CancellationToken cancellationToken = default) =>
-        this.Database.ExecuteSqlInterpolatedAsync(sql, cancellationToken);
+        CancellationToken cancellationToken = default)
+    {
+        return ((DbContext)this).ExecuteSerializedWriteAsync(ct1 => Database.ExecuteSqlInterpolatedAsync(sql, ct1), 8, cancellationToken);
+    }
 
     /// <inheritdoc/>
     public void ClearChangeTracker() => ChangeTracker.Clear();
@@ -261,10 +278,8 @@ public sealed class ReaparrDbContext : DbContext, IReaparrDbContext, IReaparrDbC
     }
 
     /// <summary>
-    /// Executes a bulk operation within a transaction context.
-    /// This method ensures that the database connection is opened and closed properly,
-    /// and that the operation is committed if successful.
-    /// This is to avoid "Prepare can only be called when the connection is open."
+    /// Executes a bulk operation with an open database connection.
+    /// EFCore.BulkExtensions requires this for SQLite to avoid "Prepare can only be called when the connection is open."
     /// </summary>
     private async Task ExecuteBulkAsync(Func<Task> operation, CancellationToken cancellationToken = default)
     {

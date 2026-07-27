@@ -92,7 +92,6 @@ public class CompareMoviePlexLibraryCommandHandler : ICommandHandler<CompareMovi
             .Select(m => new MovieProjection
             {
                 Id = m.Id,
-                Title = m.Title,
                 SearchTitle = m.SearchTitle,
                 Year = m.Year,
                 Duration = m.Duration,
@@ -109,7 +108,6 @@ public class CompareMoviePlexLibraryCommandHandler : ICommandHandler<CompareMovi
             .Select(m => new MovieProjection
             {
                 Id = m.Id,
-                Title = m.Title,
                 SearchTitle = m.SearchTitle,
                 Year = m.Year,
                 Duration = m.Duration,
@@ -184,10 +182,8 @@ public class CompareMoviePlexLibraryCommandHandler : ICommandHandler<CompareMovi
             );
 
         await _dbContext.ExecuteWithRetryAsync(
-            async ctx =>
+            async dbContext =>
             {
-                var dbContext = (IReaparrDbContext)ctx;
-
                 // 1. Delete old hit rows for this pair.
                 await dbContext.PlexMovieComparisons
                     .Where(x => x.RemotePlexLibraryId == remoteLibraryId && x.OwnedPlexLibraryId == ownedLibraryId)
@@ -300,13 +296,18 @@ public class CompareMoviePlexLibraryCommandHandler : ICommandHandler<CompareMovi
     private sealed record MovieProjection
     {
         public required int Id { get; init; }
-        public required string Title { get; init; }
         public required string SearchTitle { get; init; }
         public required int Year { get; init; }
         public required int Duration { get; init; }
         public required VideoQuality Quality { get; init; }
+        
+        // ReSharper disable once InconsistentNaming
         public required string? Guid_IMDB { get; init; }
+        
+        // ReSharper disable once InconsistentNaming
         public required int? Guid_TMDB { get; init; }
+        
+        // ReSharper disable once InconsistentNaming
         public required int? Guid_TVDB { get; init; }
     }
 }

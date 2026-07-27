@@ -116,7 +116,6 @@ public class QueueLibrarySyncJobCommandHandlerUnitTests : BaseUnitTest<QueueLibr
         );
 
         var library = IDbContext.PlexLibraries.First();
-        var server = IDbContext.PlexServers.First();
 
         var failedItem = new LibrarySyncJobQueue
         {
@@ -560,7 +559,6 @@ public class QueueLibrarySyncJobCommandHandlerUnitTests : BaseUnitTest<QueueLibr
         );
 
         var library = IDbContext.PlexLibraries.First();
-        var server = IDbContext.PlexServers.First();
 
         var cancelledItem = new LibrarySyncJobQueue
         {
@@ -769,7 +767,6 @@ public class QueueLibrarySyncJobCommandHandlerUnitTests : BaseUnitTest<QueueLibr
         );
 
         var library = IDbContext.PlexLibraries.First();
-        var server = IDbContext.PlexServers.First();
 
         var queuedItem = new LibrarySyncJobQueue
         {
@@ -820,7 +817,6 @@ public class QueueLibrarySyncJobCommandHandlerUnitTests : BaseUnitTest<QueueLibr
         );
 
         var library = IDbContext.PlexLibraries.First();
-        var server = IDbContext.PlexServers.First();
 
         // Use a single context instance to ensure the item is saved and can be queried
         var dbContext = IDbContext;
@@ -1076,7 +1072,7 @@ public class QueueLibrarySyncJobCommandHandlerUnitTests : BaseUnitTest<QueueLibr
         recentCompletedItem.CompletedAt.ShouldNotBeNull();
         Mock.Mock<ICommandExecutor>()
             .Verify(
-                x => x.Send(It.Is<CheckQueuedPlexLibraryToSyncCommand>(c => c != null), It.IsAny<CancellationToken>()),
+                x => x.Send(It.IsAny<CheckQueuedPlexLibraryToSyncCommand>(), It.IsAny<CancellationToken>()),
                 Times.Once()
             );
     }
@@ -1124,7 +1120,7 @@ public class QueueLibrarySyncJobCommandHandlerUnitTests : BaseUnitTest<QueueLibr
         queueItems[0].IsServerOffline.ShouldBeFalse();
         Mock.Mock<ICommandExecutor>()
             .Verify(
-                x => x.Send(It.Is<CheckQueuedPlexLibraryToSyncCommand>(c => c != null), It.IsAny<CancellationToken>()),
+                x => x.Send(It.IsAny<CheckQueuedPlexLibraryToSyncCommand>(), It.IsAny<CancellationToken>()),
                 Times.Once()
             );
     }

@@ -9,7 +9,7 @@ namespace Reaparr.Data;
 /// </summary>
 public sealed class MediaQueryCache : IMediaQueryCache
 {
-    private const string CacheWarmingUpMessage = "Media query cache is warming up. The media overview will appear once the cache is built on the next request.";
+    private const string CACHE_WARMING_UP_MESSAGE = "Media query cache is warming up. The media overview will appear once the cache is built on the next request.";
     private static readonly string[] _warmupSortFields =
     [
         nameof(BasePlexMedia.SearchTitle),
@@ -95,7 +95,7 @@ public sealed class MediaQueryCache : IMediaQueryCache
 
         _log.Here().Debug("Media query cache miss for {MediaType} sorted by {SortField}", filter.MediaType, sortedListKey.NormalizedAscendingSortField);
         QueueSnapshotRefresh(sortedListKey);
-        return Result.Fail(CacheWarmingUpMessage).Add503ServiceUnavailableError();
+        return Result.Fail(CACHE_WARMING_UP_MESSAGE).Add503ServiceUnavailableError();
     }
 
     /// <inheritdoc />

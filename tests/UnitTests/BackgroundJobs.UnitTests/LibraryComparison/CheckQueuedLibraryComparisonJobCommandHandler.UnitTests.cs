@@ -56,7 +56,6 @@ public class CheckQueuedLibraryComparisonJobCommandHandlerUnitTests
     public async Task ShouldRequeueProcessingItemsAndTriggerExistingJob_WhenNoComparisonWorkerIsRunning()
     {
         // Arrange
-        var jobKey = PlexLibraryComparisonJob.GetJobKey();
         var command = new CheckQueuedLibraryComparisonJobCommand();
         await SetupDatabase(72, config =>
         {
@@ -114,7 +113,6 @@ public class CheckQueuedLibraryComparisonJobCommandHandlerUnitTests
     {
         // Arrange
         var jobKey = PlexLibraryComparisonJob.GetJobKey();
-        var triggerKey = new TriggerKey($"{jobKey.Name}_trigger", jobKey.Group);
         var command = new CheckQueuedLibraryComparisonJobCommand();
         await SetupDatabase(80, config =>
         {
@@ -164,7 +162,6 @@ public class CheckQueuedLibraryComparisonJobCommandHandlerUnitTests
     public async Task ShouldTriggerExistingJob_WhenComparisonWorkerExistsAndIsNotRunning()
     {
         // Arrange
-        var jobKey = PlexLibraryComparisonJob.GetJobKey();
         var command = new CheckQueuedLibraryComparisonJobCommand();
         await SetupDatabase(81, config =>
         {
@@ -262,7 +259,6 @@ public class CheckQueuedLibraryComparisonJobCommandHandlerUnitTests
     public async Task ShouldScheduleSingleJobAndTrigger_WhenComparisonWorkerDoesNotExist()
     {
         // Arrange
-        var jobKey = PlexLibraryComparisonJob.GetJobKey();
         var command = new CheckQueuedLibraryComparisonJobCommand();
         await SetupDatabase(82, config =>
         {

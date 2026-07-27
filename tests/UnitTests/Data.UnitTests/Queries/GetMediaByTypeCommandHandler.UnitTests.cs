@@ -82,8 +82,9 @@ public class GetMediaByTypeCommandHandlerUnitTests : BaseUnitTest<GetMediaByType
         for (var i = 0; i < movieIds.Count; i++)
         {
             var year = 2000 + i;
+            var index = i;
             await dbContext.PlexMovies
-                .Where(x => x.Id == movieIds[i])
+                .Where(x => x.Id == movieIds[index])
                 .ExecuteUpdateAsync(x => x.SetProperty(y => y.Year, year), CancellationToken);
         }
 

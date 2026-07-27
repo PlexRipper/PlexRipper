@@ -1,5 +1,4 @@
 using EntityFrameworkCore.Sqlite.Concurrency;
-using EntityFrameworkCore.Sqlite.Concurrency.Models;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Reaparr.Environment;

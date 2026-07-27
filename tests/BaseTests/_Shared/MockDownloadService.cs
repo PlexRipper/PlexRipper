@@ -1,5 +1,4 @@
 using System.ComponentModel;
-using System.IO.Abstractions;
 using Downloader;
 using DownloadProgressChangedEventArgs = Downloader.DownloadProgressChangedEventArgs;
 

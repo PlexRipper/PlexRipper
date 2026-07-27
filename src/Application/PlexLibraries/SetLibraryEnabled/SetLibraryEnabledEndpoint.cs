@@ -125,10 +125,8 @@ public class SetLibraryEnabledEndpoint : Endpoint<SetLibraryEnabledRequest, Resu
         if (cancelResult.IsFailed)
             return cancelResult.LogError();
 
-        await _dbContext.ExecuteWithRetryAsync(async ctx =>
+        await _dbContext.ExecuteWithRetryAsync(async dbContext =>
         {
-            var dbContext = (IReaparrDbContext)ctx;
-
             // Purge synced media based on library type
             switch (plexLibrary.Type)
             {

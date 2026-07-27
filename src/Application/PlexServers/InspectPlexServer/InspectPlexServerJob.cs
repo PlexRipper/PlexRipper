@@ -56,7 +56,7 @@ public class InspectPlexServerJob : IJob
         }
     }
 
-    private async Task InspectPlexServer(int plexServerId, CancellationToken cancellationToken)
+    private async Task<Result> InspectPlexServer(int plexServerId, CancellationToken cancellationToken)
     {
         // Check all Plex Server Connections
         var checkResult = await _commandExecutor.Send(
@@ -67,11 +67,11 @@ public class InspectPlexServerJob : IJob
         if (checkResult.IsFailed)
         {
             checkResult.LogError();
-            return;
+            return checkResult.ToResult();
         }
 
         using var dbContext = await _dbContextFactory.CreateAsync();
-        await RefreshAndSyncLibraries(dbContext, plexServerId, cancellationToken);
+        return await RefreshAndSyncLibraries(dbContext, plexServerId, cancellationToken);
     }
 
     private async Task<Result> RefreshAndSyncLibraries(
@@ -83,7 +83,7 @@ public class InspectPlexServerJob : IJob
         // Refresh accessible libraries
         var accountsResult = await dbContext.GetPlexAccountsWithAccessAsync(plexServerId, cancellationToken);
         if (accountsResult.IsFailed)
-            return accountsResult.ToResult().LogError();
+            return accountsResult.LogError();
 
         var plexAccountId = accountsResult.Value.First().Id;
         await _commandExecutor.Send(new RefreshLibraryAccessCommand(plexAccountId, plexServerId), cancellationToken);
@@ -100,8 +100,6 @@ public class InspectPlexServerJob : IJob
             .ToListAsync(cancellationToken);
 
         // Sync library media
-        await _commandExecutor.Send(new QueueLibrarySyncJobCommand(libraryIds), cancellationToken);
-
-        return Result.Ok();
+        return await _commandExecutor.Send(new QueueLibrarySyncJobCommand(libraryIds), cancellationToken);
     }
 }

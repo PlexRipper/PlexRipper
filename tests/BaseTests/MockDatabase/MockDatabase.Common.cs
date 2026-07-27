@@ -1,7 +1,6 @@
 using EntityFrameworkCore.Sqlite.Concurrency;
 using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.Logging;
-using NaturalSort.Extension;
 
 namespace Reaparr.BaseTests;
 
@@ -13,13 +12,6 @@ public static partial class MockDatabase
     // seed operations are not reliable when many test databases are being created
     // at the same time. Keep database paths unique per test; only serialize setup.
     private static readonly SemaphoreSlim _setupLock = new(1, 1);
-
-    /// <summary>
-    /// NaturalSortComparer uses InvariantCultureIgnoreCase for deterministic test results.
-    /// Note: If UI-facing code uses CurrentCultureIgnoreCase, this difference is intentional
-    /// to prevent future confusion or drift between test and production behavior.
-    /// </summary>
-    private static readonly NaturalSortComparer _naturalComparer = new(StringComparison.InvariantCultureIgnoreCase);
 
     #region Methods
 

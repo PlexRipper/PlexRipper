@@ -22,16 +22,13 @@ public class ApplyComparisonStateCommandHandler : ICommandHandler<ApplyCompariso
 {
     private readonly IReaparrDbContext _dbContext;
     private readonly ICommandExecutor _commandExecutor;
-    private readonly ILogger _log;
 
     public ApplyComparisonStateCommandHandler(
         IReaparrDbContext dbContext,
-        ICommandExecutor commandExecutor,
-        ILogger log)
+        ICommandExecutor commandExecutor)
     {
         _dbContext = dbContext;
         _commandExecutor = commandExecutor;
-        _log = log.ForContext<ApplyComparisonStateCommandHandler>();
     }
 
     public async Task<Result> ExecuteAsync(ApplyComparisonStateCommand command, CancellationToken ct)

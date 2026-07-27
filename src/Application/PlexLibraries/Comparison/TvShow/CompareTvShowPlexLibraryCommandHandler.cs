@@ -213,10 +213,8 @@ public class CompareTvShowPlexLibraryCommandHandler : ICommandHandler<CompareTvS
         }
 
         await _dbContext.ExecuteWithRetryAsync(
-            async ctx =>
+            async dbContext =>
             {
-                var dbContext = (IReaparrDbContext)ctx;
-
                 var attemptShowRows = showRows.Select(x => new PlexTvShowComparison
                     {
                         Id = 0,
@@ -419,12 +417,22 @@ public class CompareTvShowPlexLibraryCommandHandler : ICommandHandler<CompareTvS
     private sealed record ShowProjection
     {
         public required int Id { get; init; }
+        
         public required string SearchTitle { get; init; }
+        
         public required int Year { get; init; }
+        
         public required int Duration { get; init; }
+        
         public required VideoQuality Quality { get; init; }
+        
+        // ReSharper disable once InconsistentNaming
         public required string? Guid_IMDB { get; init; }
+        
+        // ReSharper disable once InconsistentNaming
         public required int? Guid_TMDB { get; init; }
+        
+        // ReSharper disable once InconsistentNaming
         public required int? Guid_TVDB { get; init; }
     }
 

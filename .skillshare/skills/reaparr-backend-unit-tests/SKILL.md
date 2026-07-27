@@ -35,10 +35,11 @@ Do not use this skill for frontend tests (Vitest/Cypress).
 - Mocks: `Moq` with explicit verification (`Times.Once()` / `Times.Never()`).
 - Structure: Arrange -> Act -> Assert. Every test method **must** include the three comment markers `// Arrange`, `// Act`, and `// Assert` — no exceptions. Within Arrange, mock setups (`Mock.Mock<T>()`) must always be the **last step**, immediately before Act.
 - Determinism: no random behavior in tests.
+- Command-handler tests must derive from `BaseCommandUnitTest<TCommand>` and call `TestHandlerExecuteAsync(...)` in Act. Do **not** call `Sut.ExecuteAsync(...)` directly for command handlers; `TestHandlerExecuteAsync` runs the matching validator first and then executes the handler, so validator and handler behavior are tested together.
 
 ## Base Test Helpers
 
-Prefer the shared `BaseUnitTest` helpers over manual container or SUT construction.
+Prefer the shared `BaseUnitTest` helpers over manual container or SUT construction. For command handlers, prefer `BaseCommandUnitTest<TCommand>` over `BaseUnitTest<THandler>` so `TestHandlerExecuteAsync(...)` exercises validation automatically.
 
 Before adding any test-local helper or custom setup method, inspect `tests/BaseTests/_Shared/BaseUnitTest/*` and existing `tests/BaseTests/*` utilities first. Reuse an existing helper when one already fits. Do not create ad-hoc test-class helpers for behavior already covered by `BaseUnitTest`, such as app build info setup, dependency overrides, filesystem setup, environment-variable scoping, or SUT creation.
 

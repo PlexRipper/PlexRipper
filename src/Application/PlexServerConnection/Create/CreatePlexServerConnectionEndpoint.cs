@@ -68,7 +68,7 @@ public class CreatePlexServerConnectionEndpoint
         };
         _dbContext.PlexServerConnections.Add(connection);
 
-        await _dbContext.SaveChangesNewAsync(ct);
+        await _dbContext.SaveChangesAsync(ct);
 
         var result = ResultExtensions.Create201CreatedResult(connection.ToDTO());
         await Send.FluentResult(result, ct);

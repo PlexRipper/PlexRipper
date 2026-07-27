@@ -214,7 +214,7 @@ public class AddOrUpdatePlexServerCommandUnitTests : BaseUnitTest<AddOrUpdatePle
             .GetPlexServerConnections(seed, isCustom: true, plexServerId: plexServer.Id)
             .Generate(3);
         await dbContext.PlexServerConnections.AddRangeAsync(customConnections, CancellationToken);
-        await dbContext.SaveChangesNewAsync(CancellationToken);
+        await dbContext.SaveChangesAsync(CancellationToken);
 
         // Update data setup
         foreach (var conn in plexServer.PlexServerConnections.Take(4).ToList())

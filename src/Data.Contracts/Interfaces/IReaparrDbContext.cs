@@ -203,7 +203,7 @@ public interface IReaparrDbContext : IDisposable
 
     EntityEntry Entry(object entity);
 
-    Task<int> SaveChangesNewAsync(CancellationToken cancellationToken = default);
+    Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 
     void ClearChangeTracker();
 

@@ -133,7 +133,7 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandlerUnitTests
         // Create a download task for the TV-show
         var createdTvShowDownloadTask = plexTvShows.First().MapToDownloadTask();
         dbContext.DownloadTaskTvShow.Add(createdTvShowDownloadTask);
-        await dbContext.SaveChangesNewAsync(CancellationToken);
+        await dbContext.SaveChangesAsync(CancellationToken);
 
         var downloadMediaDtos = new List<DownloadMediaDTO>
         {
@@ -309,7 +309,7 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandlerUnitTests
         episodeDownloadTask.ShouldNotBeNull();
         episodeDownloadTask.UpdateInitProperty(nameof(episodeDownloadTask.PlexApiRatingKey), episode.PlexApiRatingKey);
 
-        await dbContext.SaveChangesNewAsync(CancellationToken);
+        await dbContext.SaveChangesAsync(CancellationToken);
 
         // Act
         var downloadMediaDtos = new List<DownloadMediaDTO>

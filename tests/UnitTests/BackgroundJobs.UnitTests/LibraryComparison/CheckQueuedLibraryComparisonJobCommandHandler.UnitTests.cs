@@ -29,7 +29,7 @@ public class CheckQueuedLibraryComparisonJobCommandHandlerUnitTests
             Status = LibrarySyncJobStatus.Queued,
             CreatedAt = DateTime.UtcNow,
         });
-        await dbContext.SaveChangesNewAsync(CancellationToken);
+        await dbContext.SaveChangesAsync(CancellationToken);
 
         Mock.Mock<IScheduler>()
             .Setup(x => x.GetCurrentlyExecutingJobs(It.IsAny<CancellationToken>()))
@@ -76,7 +76,7 @@ public class CheckQueuedLibraryComparisonJobCommandHandlerUnitTests
             StartedAt = DateTime.UtcNow,
             ErrorMessage = "Container stopped while processing",
         });
-        await dbContext.SaveChangesNewAsync(CancellationToken);
+        await dbContext.SaveChangesAsync(CancellationToken);
 
         Mock.Mock<IScheduler>()
             .Setup(x => x.GetCurrentlyExecutingJobs(It.IsAny<CancellationToken>()))
@@ -131,7 +131,7 @@ public class CheckQueuedLibraryComparisonJobCommandHandlerUnitTests
             Status = LibrarySyncJobStatus.Queued,
             CreatedAt = DateTime.UtcNow,
         });
-        await dbContext.SaveChangesNewAsync(CancellationToken);
+        await dbContext.SaveChangesAsync(CancellationToken);
 
         Mock.Mock<IScheduler>()
             .Setup(x => x.GetCurrentlyExecutingJobs(It.IsAny<CancellationToken>()))
@@ -180,7 +180,7 @@ public class CheckQueuedLibraryComparisonJobCommandHandlerUnitTests
             Status = LibrarySyncJobStatus.Queued,
             CreatedAt = DateTime.UtcNow,
         });
-        await dbContext.SaveChangesNewAsync(CancellationToken);
+        await dbContext.SaveChangesAsync(CancellationToken);
 
         Mock.Mock<IScheduler>()
             .Setup(x => x.GetCurrentlyExecutingJobs(It.IsAny<CancellationToken>()))
@@ -233,7 +233,7 @@ public class CheckQueuedLibraryComparisonJobCommandHandlerUnitTests
             CreatedAt = DateTime.UtcNow,
             StartedAt = DateTime.UtcNow,
         });
-        await dbContext.SaveChangesNewAsync(CancellationToken);
+        await dbContext.SaveChangesAsync(CancellationToken);
 
         Mock.Mock<IScheduler>()
             .Setup(x => x.GetCurrentlyExecutingJobs(It.IsAny<CancellationToken>()))
@@ -277,7 +277,7 @@ public class CheckQueuedLibraryComparisonJobCommandHandlerUnitTests
             Status = LibrarySyncJobStatus.Queued,
             CreatedAt = DateTime.UtcNow,
         });
-        await dbContext.SaveChangesNewAsync(CancellationToken);
+        await dbContext.SaveChangesAsync(CancellationToken);
 
         Mock.Mock<IScheduler>()
             .Setup(x => x.GetCurrentlyExecutingJobs(It.IsAny<CancellationToken>()))

@@ -157,7 +157,7 @@ public class GetMediaDetailByIdEndpointUnitTests : BaseEndpointUnitTest<GetMedia
             ownedEpisodes[1].Id,
             PlexMediaComparisonHitState.HigherQuality
         ));
-        await dbContext.SaveChangesNewAsync(CancellationToken);
+        await dbContext.SaveChangesAsync(CancellationToken);
 
         var request = new GetMediaDetailByIdEndpointRequest(remoteTvShow.Id, PlexMediaType.TvShow);
 
@@ -252,7 +252,7 @@ public class GetMediaDetailByIdEndpointUnitTests : BaseEndpointUnitTest<GetMedia
             ));
         }
 
-        await dbContext.SaveChangesNewAsync(CancellationToken);
+        await dbContext.SaveChangesAsync(CancellationToken);
 
         var request = new GetMediaDetailByIdEndpointRequest(remoteTvShow.Id, PlexMediaType.TvShow);
 
@@ -326,7 +326,7 @@ public class GetMediaDetailByIdEndpointUnitTests : BaseEndpointUnitTest<GetMedia
             RemoteLibraryUpdatedAt = remoteUpdatedAt,
             OwnedLibraryUpdatedAt = ownedUpdatedAt,
         });
-        await dbContext.SaveChangesNewAsync(CancellationToken);
+        await dbContext.SaveChangesAsync(CancellationToken);
     }
 
     private static PlexTvShowComparison CreateTvShowComparison(

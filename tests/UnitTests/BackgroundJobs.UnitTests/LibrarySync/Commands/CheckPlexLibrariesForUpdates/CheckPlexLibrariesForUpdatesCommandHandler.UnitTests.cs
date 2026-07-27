@@ -34,7 +34,7 @@ public class CheckPlexLibrariesForUpdatesCommandHandlerUnitTests
                 IsServerOwned = true,
             })
         );
-        await dbContext.SaveChangesNewAsync(CancellationToken);
+        await dbContext.SaveChangesAsync(CancellationToken);
 
         Mock.Mock<ICommandExecutor>()
             .Setup(x =>
@@ -95,7 +95,7 @@ public class CheckPlexLibrariesForUpdatesCommandHandlerUnitTests
                 IsServerOwned = true,
             }
         );
-        await dbContext.SaveChangesNewAsync(CancellationToken);
+        await dbContext.SaveChangesAsync(CancellationToken);
 
         Mock.Mock<ICommandExecutor>()
             .Setup(x =>
@@ -163,7 +163,7 @@ public class CheckPlexLibrariesForUpdatesCommandHandlerUnitTests
         libraries[3].ContentChangedAt = 40;
         libraries[3].SyncedAt = now.AddHours(-3);
         libraries[3].Outdated = true;
-        await dbContext.SaveChangesNewAsync(CancellationToken);
+        await dbContext.SaveChangesAsync(CancellationToken);
 
         var expectedLibraryIds = new[] { libraries[2].Id, libraries[3].Id };
         var accountId = await dbContext.PlexAccounts.IgnoreQueryFilters().Select(x => x.Id).FirstAsync(CancellationToken);
@@ -179,7 +179,7 @@ public class CheckPlexLibrariesForUpdatesCommandHandlerUnitTests
                 IsServerOwned = true,
             }
         );
-        await dbContext.SaveChangesNewAsync(CancellationToken);
+        await dbContext.SaveChangesAsync(CancellationToken);
         dbContext.ClearChangeTracker();
 
         var mappingExists = await dbContext.PlexAccountServers

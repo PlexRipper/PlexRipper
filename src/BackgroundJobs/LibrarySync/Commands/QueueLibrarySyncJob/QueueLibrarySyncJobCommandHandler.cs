@@ -102,7 +102,7 @@ public class QueueLibrarySyncJobCommandHandler : ICommandHandler<QueueLibrarySyn
         if (itemsToAdd.Any())
         {
             await _dbContext.LibrarySyncJobQueues.AddRangeAsync(itemsToAdd, cancellationToken);
-            await _dbContext.SaveChangesNewAsync(cancellationToken);
+            await _dbContext.SaveChangesAsync(cancellationToken);
         }
 
         if (itemsToAdd.Any() || itemsToReset.Any())

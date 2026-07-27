@@ -151,7 +151,7 @@ public class DeletePlexServerEndpointUnitTests
                 },
             ],
         });
-        await dbContext.SaveChangesNewAsync(CancellationToken);
+        await dbContext.SaveChangesAsync(CancellationToken);
 
         targetConnectionIds.ShouldNotBeEmpty();
         targetLibraryIds.ShouldNotBeEmpty();

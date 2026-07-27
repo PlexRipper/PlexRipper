@@ -69,7 +69,7 @@ public class UpdatePlexServerConnectionEndpoint
 
         _dbContext.PlexServerConnections.Update(connection);
 
-        await _dbContext.SaveChangesNewAsync(ct);
+        await _dbContext.SaveChangesAsync(ct);
 
         var connectionDb = await _dbContext.PlexServerConnections.GetAsync(req.Id, ct);
 

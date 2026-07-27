@@ -78,7 +78,7 @@ public class QueueLibrarySyncJobCommandHandlerUnitTests : BaseUnitTest<QueueLibr
         };
 
         await dbContext.LibrarySyncJobQueues.AddAsync(completedItem, CancellationToken);
-        await dbContext.SaveChangesNewAsync(CancellationToken);
+        await dbContext.SaveChangesAsync(CancellationToken);
 
         Mock.Mock<ICommandExecutor>()
             .Setup(x => x.Send(It.IsAny<CheckQueuedPlexLibraryToSyncCommand>(), It.IsAny<CancellationToken>()))
@@ -130,7 +130,7 @@ public class QueueLibrarySyncJobCommandHandlerUnitTests : BaseUnitTest<QueueLibr
         };
 
         await IDbContext.LibrarySyncJobQueues.AddAsync(failedItem, CancellationToken);
-        await IDbContext.SaveChangesNewAsync(CancellationToken);
+        await IDbContext.SaveChangesAsync(CancellationToken);
 
         Mock.Mock<ICommandExecutor>()
             .Setup(x => x.Send(It.IsAny<CheckQueuedPlexLibraryToSyncCommand>(), It.IsAny<CancellationToken>()))
@@ -260,7 +260,7 @@ public class QueueLibrarySyncJobCommandHandlerUnitTests : BaseUnitTest<QueueLibr
         };
 
         await dbContext.LibrarySyncJobQueues.AddAsync(completedItem, CancellationToken);
-        await dbContext.SaveChangesNewAsync(CancellationToken);
+        await dbContext.SaveChangesAsync(CancellationToken);
 
         await dbContext
             .PlexLibraries.Where(x => x.Id == library.Id)
@@ -315,7 +315,7 @@ public class QueueLibrarySyncJobCommandHandlerUnitTests : BaseUnitTest<QueueLibr
         };
 
         await dbContext.LibrarySyncJobQueues.AddAsync(completedItem, CancellationToken);
-        await dbContext.SaveChangesNewAsync(CancellationToken);
+        await dbContext.SaveChangesAsync(CancellationToken);
 
         var command = new QueueLibrarySyncJobCommand([library.Id], Force: true);
 
@@ -368,7 +368,7 @@ public class QueueLibrarySyncJobCommandHandlerUnitTests : BaseUnitTest<QueueLibr
         };
 
         await dbContext.LibrarySyncJobQueues.AddAsync(completedItem, CancellationToken);
-        await dbContext.SaveChangesNewAsync(CancellationToken);
+        await dbContext.SaveChangesAsync(CancellationToken);
 
         Mock.Mock<ICommandExecutor>()
             .Setup(x => x.Send(It.IsAny<CheckQueuedPlexLibraryToSyncCommand>(), It.IsAny<CancellationToken>()))
@@ -475,7 +475,7 @@ public class QueueLibrarySyncJobCommandHandlerUnitTests : BaseUnitTest<QueueLibr
             },
             CancellationToken
         );
-        await dbContext.SaveChangesNewAsync(CancellationToken);
+        await dbContext.SaveChangesAsync(CancellationToken);
 
         Mock.Mock<ICommandExecutor>()
             .Setup(x => x.Send(It.IsAny<CheckQueuedPlexLibraryToSyncCommand>(), It.IsAny<CancellationToken>()))
@@ -571,7 +571,7 @@ public class QueueLibrarySyncJobCommandHandlerUnitTests : BaseUnitTest<QueueLibr
         };
 
         await IDbContext.LibrarySyncJobQueues.AddAsync(cancelledItem, CancellationToken);
-        await IDbContext.SaveChangesNewAsync(CancellationToken);
+        await IDbContext.SaveChangesAsync(CancellationToken);
 
         var command = new QueueLibrarySyncJobCommand([library.Id]);
 
@@ -622,7 +622,7 @@ public class QueueLibrarySyncJobCommandHandlerUnitTests : BaseUnitTest<QueueLibr
         };
 
         await dbContext.LibrarySyncJobQueues.AddAsync(completedItem, CancellationToken);
-        await dbContext.SaveChangesNewAsync(CancellationToken);
+        await dbContext.SaveChangesAsync(CancellationToken);
 
         await dbContext
             .PlexLibraries.Where(x => x.Id == library.Id)
@@ -674,7 +674,7 @@ public class QueueLibrarySyncJobCommandHandlerUnitTests : BaseUnitTest<QueueLibr
         unsupportedLibrary.PlexServerId = movieLibrary.PlexServerId;
 
         await dbContext.PlexLibraries.AddAsync(unsupportedLibrary, CancellationToken);
-        await dbContext.SaveChangesNewAsync(CancellationToken);
+        await dbContext.SaveChangesAsync(CancellationToken);
 
         var command = new QueueLibrarySyncJobCommand([movieLibrary.Id, unsupportedLibrary.Id]);
 
@@ -730,7 +730,7 @@ public class QueueLibrarySyncJobCommandHandlerUnitTests : BaseUnitTest<QueueLibr
             },
             CancellationToken
         );
-        await IDbContext.SaveChangesNewAsync(CancellationToken);
+        await IDbContext.SaveChangesAsync(CancellationToken);
 
         var command = new QueueLibrarySyncJobCommand([queuedLibrary.Id, recentlySyncedLibrary.Id]);
 
@@ -778,7 +778,7 @@ public class QueueLibrarySyncJobCommandHandlerUnitTests : BaseUnitTest<QueueLibr
         };
 
         await IDbContext.LibrarySyncJobQueues.AddAsync(queuedItem, CancellationToken);
-        await IDbContext.SaveChangesNewAsync(CancellationToken);
+        await IDbContext.SaveChangesAsync(CancellationToken);
 
         Mock.Mock<ICommandExecutor>()
             .Setup(x => x.Send(It.IsAny<CheckQueuedPlexLibraryToSyncCommand>(), It.IsAny<CancellationToken>()))
@@ -831,7 +831,7 @@ public class QueueLibrarySyncJobCommandHandlerUnitTests : BaseUnitTest<QueueLibr
         };
 
         await dbContext.LibrarySyncJobQueues.AddAsync(processingItem, CancellationToken);
-        var saveResult = await dbContext.SaveChangesNewAsync(CancellationToken);
+        var saveResult = await dbContext.SaveChangesAsync(CancellationToken);
         saveResult.ShouldBeGreaterThan(0); // Ensure save actually happened
 
         // Verify the Processing item was saved using the same context instance
@@ -1039,7 +1039,7 @@ public class QueueLibrarySyncJobCommandHandlerUnitTests : BaseUnitTest<QueueLibr
             ],
             CancellationToken
         );
-        await dbContext.SaveChangesNewAsync(CancellationToken);
+        await dbContext.SaveChangesAsync(CancellationToken);
 
         var command = new QueueLibrarySyncJobCommand([oldCompletedLibrary.Id, recentCompletedLibrary.Id]);
 
@@ -1143,7 +1143,7 @@ public class QueueLibrarySyncJobCommandHandlerUnitTests : BaseUnitTest<QueueLibr
         unsupportedLibrary.PlexServerId = serverId;
 
         await dbContext.PlexLibraries.AddAsync(unsupportedLibrary, CancellationToken);
-        await dbContext.SaveChangesNewAsync(CancellationToken);
+        await dbContext.SaveChangesAsync(CancellationToken);
 
         var command = new QueueLibrarySyncJobCommand([unsupportedLibrary.Id]);
 
@@ -1229,7 +1229,7 @@ public class QueueLibrarySyncJobCommandHandlerUnitTests : BaseUnitTest<QueueLibr
         };
 
         await IDbContext.LibrarySyncJobQueues.AddRangeAsync([completedItem, failedItem, queuedItem], CancellationToken);
-        await IDbContext.SaveChangesNewAsync(CancellationToken);
+        await IDbContext.SaveChangesAsync(CancellationToken);
 
         // Queue all libraries (some new, some existing with different statuses)
 

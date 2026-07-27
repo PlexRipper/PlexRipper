@@ -96,7 +96,7 @@ public class SetLibraryEnabledEndpoint : Endpoint<SetLibraryEnabledRequest, Resu
         _log.Here().Information("Enabling PlexLibrary {PlexLibraryId}", plexLibrary.Id);
 
         plexLibrary.IsEnabled = true;
-        await _dbContext.SaveChangesNewAsync(ct);
+        await _dbContext.SaveChangesAsync(ct);
 
         // Queue a fresh sync
         var queueResult = await _commandExecutor.Send(new QueueLibrarySyncJobCommand([plexLibrary.Id]), ct);

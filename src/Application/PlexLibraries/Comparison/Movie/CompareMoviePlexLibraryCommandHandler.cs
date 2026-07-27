@@ -193,7 +193,7 @@ public class CompareMoviePlexLibraryCommandHandler : ICommandHandler<CompareMovi
                 if (hitRows.Count > 0)
                 {
                     dbContext.PlexMovieComparisons.AddRange(hitRows);
-                    await dbContext.SaveChangesNewAsync(cancellationToken);
+                    await dbContext.SaveChangesAsync(cancellationToken);
                 }
 
                 // 3. Update scope last — makes new hits visible atomically to readers.
@@ -234,7 +234,7 @@ public class CompareMoviePlexLibraryCommandHandler : ICommandHandler<CompareMovi
                     state.OwnedLibraryUpdatedAt = librarySnapshots.GetValueOrDefault(ownedLibraryId);
                 }
 
-                await dbContext.SaveChangesNewAsync(cancellationToken);
+                await dbContext.SaveChangesAsync(cancellationToken);
 
                 return 0;
             },

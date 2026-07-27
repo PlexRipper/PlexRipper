@@ -95,7 +95,7 @@ public class MoveDownloadFileJobUnitTests : BaseUnitTest<MoveDownloadFileJob>
         var dbContext = IDbContext;
         var downloadTask = await dbContext.DownloadTaskMovieFile.AsTracking().FirstAsync(CancellationToken);
         downloadTask.DownloadStatus = DownloadStatus.DownloadFinished;
-        await dbContext.SaveChangesNewAsync(CancellationToken);
+        await dbContext.SaveChangesAsync(CancellationToken);
 
         Mock.SetupCommand(It.IsAny<MoveDownloadFileFromFileTaskCommand>).ReturnsAsync(Result.Ok());
 
@@ -168,7 +168,7 @@ public class MoveDownloadFileJobUnitTests : BaseUnitTest<MoveDownloadFileJob>
         var dbContext = IDbContext;
         var downloadTask = await dbContext.DownloadTaskMovieFile.AsTracking().FirstAsync(CancellationToken);
         downloadTask.DownloadStatus = DownloadStatus.DownloadFinished;
-        await dbContext.SaveChangesNewAsync(CancellationToken);
+        await dbContext.SaveChangesAsync(CancellationToken);
 
         Mock.SetupCommand(It.IsAny<MoveDownloadFileFromFileTaskCommand>).ReturnsAsync(Result.Fail("Move failed"));
 
@@ -242,7 +242,7 @@ public class MoveDownloadFileJobUnitTests : BaseUnitTest<MoveDownloadFileJob>
         var dbContext = IDbContext;
         var downloadTask = await dbContext.DownloadTaskMovieFile.AsTracking().FirstAsync(CancellationToken);
         downloadTask.DownloadStatus = DownloadStatus.MoveFinished;
-        await dbContext.SaveChangesNewAsync(CancellationToken);
+        await dbContext.SaveChangesAsync(CancellationToken);
 
         Mock.SetupCommand(It.IsAny<MoveDownloadFileFromFileTaskCommand>).ReturnsAsync(Result.Fail("Move failed"));
 
@@ -314,7 +314,7 @@ public class MoveDownloadFileJobUnitTests : BaseUnitTest<MoveDownloadFileJob>
         var dbContext = IDbContext;
         var downloadTask = await dbContext.DownloadTaskMovieFile.AsTracking().FirstAsync(CancellationToken);
         downloadTask.DownloadStatus = DownloadStatus.MoveFinished;
-        await dbContext.SaveChangesNewAsync(CancellationToken);
+        await dbContext.SaveChangesAsync(CancellationToken);
 
         Mock.SetupCommand(It.IsAny<MoveDownloadFileFromFileTaskCommand>).ReturnsAsync(Result.Ok());
 
@@ -371,7 +371,7 @@ public class MoveDownloadFileJobUnitTests : BaseUnitTest<MoveDownloadFileJob>
         downloadTask.CurrentFileTransferBytesOffset = downloadTask.DataTotal;
         downloadTask.Percentage = 100;
         downloadTask.DownloadStatus = DownloadStatus.MoveFinished;
-        await dbContext.SaveChangesNewAsync(CancellationToken);
+        await dbContext.SaveChangesAsync(CancellationToken);
 
         Mock.SetupCommand(It.IsAny<MoveDownloadFileFromFileTaskCommand>).ReturnsAsync(Result.Ok());
 

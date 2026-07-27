@@ -142,7 +142,7 @@ public class ProcessMovieMetadataCommandHandler : ICommandHandler<ProcessMovieMe
                     processedCount++;
                 }
 
-                await dbContext.SaveChangesNewAsync(ct);
+                await dbContext.SaveChangesAsync(ct);
             }
 
             _log.Here()

@@ -71,7 +71,7 @@ public class ClearCompletedDownloadTasksByDownloadTaskKeyCommandUnitTests
             .ToListAsync(CancellationToken);
 
         downloadTasks.SetDownloadStatus(DownloadStatus.Completed);
-        await dbContext.SaveChangesNewAsync(CancellationToken);
+        await dbContext.SaveChangesAsync(CancellationToken);
 
         var taskKeys = await dbContext.DownloadTaskMovie.ProjectToKey().ToListAsync(CancellationToken);
 
@@ -123,7 +123,7 @@ public class ClearCompletedDownloadTasksByDownloadTaskKeyCommandUnitTests
             .ToListAsync(CancellationToken);
 
         downloadTasks.SetDownloadStatus(DownloadStatus.Downloading);
-        await dbContext.SaveChangesNewAsync(CancellationToken);
+        await dbContext.SaveChangesAsync(CancellationToken);
 
         var taskKeys = await dbContext.DownloadTaskMovie.ProjectToKey().ToListAsync(CancellationToken);
 
@@ -164,7 +164,7 @@ public class ClearCompletedDownloadTasksByDownloadTaskKeyCommandUnitTests
             .ToListAsync(CancellationToken);
 
         downloadTasks.SetDownloadStatus(DownloadStatus.Completed);
-        await dbContext.SaveChangesNewAsync(CancellationToken);
+        await dbContext.SaveChangesAsync(CancellationToken);
 
         var toDeleteKeys = await dbContext.DownloadTaskMovie.ProjectToKey().Take(3).ToListAsync(CancellationToken);
 
@@ -221,7 +221,7 @@ public class ClearCompletedDownloadTasksByDownloadTaskKeyCommandUnitTests
             .ToListAsync(CancellationToken);
 
         tvShowTasks.SetDownloadStatus(DownloadStatus.Completed);
-        await dbContext.SaveChangesNewAsync(CancellationToken);
+        await dbContext.SaveChangesAsync(CancellationToken);
 
         var episodeFileKey = await dbContext
             .DownloadTaskTvShowEpisodeFile.ProjectToKey()
@@ -272,7 +272,7 @@ public class ClearCompletedDownloadTasksByDownloadTaskKeyCommandUnitTests
             .Include(x => x.Children)
             .SingleAsync(CancellationToken);
         movieTask.SetDownloadStatus(DownloadStatus.Completed);
-        await dbContext.SaveChangesNewAsync(CancellationToken);
+        await dbContext.SaveChangesAsync(CancellationToken);
 
         var actualKey = await dbContext.DownloadTaskMovie.ProjectToKey().SingleAsync(CancellationToken);
         var mismatchedKey = actualKey with { Type = DownloadTaskType.TvShow };
@@ -324,7 +324,7 @@ public class ClearCompletedDownloadTasksByDownloadTaskKeyCommandUnitTests
             .Include(x => x.Children)
             .SingleAsync(CancellationToken);
         movieTask.SetDownloadStatus(DownloadStatus.Completed);
-        await dbContext.SaveChangesNewAsync(CancellationToken);
+        await dbContext.SaveChangesAsync(CancellationToken);
 
         var actualKey = await dbContext.DownloadTaskMovie.ProjectToKey().SingleAsync(CancellationToken);
         var wrongServerKey = actualKey with { PlexServerId = actualKey.PlexServerId + 1 };

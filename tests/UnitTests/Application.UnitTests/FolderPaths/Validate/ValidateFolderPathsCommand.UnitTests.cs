@@ -13,7 +13,7 @@ public class ValidateFolderPathsCommandUnitTests : BaseCommandUnitTest<ValidateF
             CancellationToken
         );
         downloadFolderPath.DirectoryPath = @"D:\Downloads";
-        await dbContext.SaveChangesNewAsync(CancellationToken);
+        await dbContext.SaveChangesAsync(CancellationToken);
         var folderPathCount = await dbContext.FolderPaths.CountAsync(CancellationToken);
 
         Mock.Mock<IDirectory>()
@@ -46,7 +46,7 @@ public class ValidateFolderPathsCommandUnitTests : BaseCommandUnitTest<ValidateF
         folderPaths.Single(x => x.Id == PlexMediaType.None.ToDefaultDestinationFolderId()).DirectoryPath = windowsDrivePath;
         folderPaths.Single(x => x.Id == PlexMediaType.Movie.ToDefaultDestinationFolderId()).DirectoryPath = linuxMountPath;
         folderPaths.Single(x => x.Id == PlexMediaType.TvShow.ToDefaultDestinationFolderId()).DirectoryPath = uncPath;
-        await dbContext.SaveChangesNewAsync(CancellationToken);
+        await dbContext.SaveChangesAsync(CancellationToken);
 
         Mock.Mock<IDirectory>()
             .Setup(x => x.Exists(It.IsAny<string>()))

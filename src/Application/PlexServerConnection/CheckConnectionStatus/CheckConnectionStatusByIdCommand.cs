@@ -132,7 +132,7 @@ public class CheckConnectionStatusByIdCommandHandler
             if (existingCount == 0)
             {
                 dbContext.PlexServerStatuses.Add(plexServerStatus);
-                await dbContext.SaveChangesNewAsync(cancellationToken);
+                await dbContext.SaveChangesAsync(cancellationToken);
             }
         }
         catch (DbUpdateException ex)

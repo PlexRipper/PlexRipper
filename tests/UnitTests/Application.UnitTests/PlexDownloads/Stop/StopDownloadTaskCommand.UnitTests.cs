@@ -207,7 +207,7 @@ public class StopDownloadTaskCommandUnitTests : BaseUnitTest<StopDownloadTaskCom
         var dbContext = IDbContext;
         var movieDownloadFileTasks = await dbContext.DownloadTaskMovieFile.AsTracking().ToListAsync(CancellationToken);
         movieDownloadFileTasks.SetDownloadStatus(DownloadStatus.MoveError);
-        await dbContext.SaveChangesNewAsync(CancellationToken);
+        await dbContext.SaveChangesAsync(CancellationToken);
 
         var movieTask = await dbContext.DownloadTaskMovie.FirstAsync(CancellationToken);
 
@@ -293,7 +293,7 @@ public class StopDownloadTaskCommandUnitTests : BaseUnitTest<StopDownloadTaskCom
         var movieTask = await dbContext.DownloadTaskMovie.FirstAsync(CancellationToken);
         var movieFileTask = await dbContext.DownloadTaskMovieFile.AsTracking().FirstAsync(CancellationToken);
         movieFileTask.DownloadStatus = DownloadStatus.MoveError;
-        await dbContext.SaveChangesNewAsync(CancellationToken);
+        await dbContext.SaveChangesAsync(CancellationToken);
 
         SetupFileSystem(fs => fs.AddFile(movieFileTask.DownloadFilePath, new MockFileData([])));
 
@@ -666,7 +666,7 @@ public class StopDownloadTaskCommandUnitTests : BaseUnitTest<StopDownloadTaskCom
         var dbContext = IDbContext;
         var movieFileTasks = await dbContext.DownloadTaskMovieFile.AsTracking().ToListAsync(CancellationToken);
         movieFileTasks.SetDownloadStatus(DownloadStatus.Completed);
-        await dbContext.SaveChangesNewAsync(CancellationToken);
+        await dbContext.SaveChangesAsync(CancellationToken);
 
         var movieTask = await dbContext.DownloadTaskMovie.FirstAsync(CancellationToken);
 
@@ -840,7 +840,7 @@ public class StopDownloadTaskCommandUnitTests : BaseUnitTest<StopDownloadTaskCom
         var dbContext = IDbContext;
         var movieFileTasks = await dbContext.DownloadTaskMovieFile.AsTracking().ToListAsync(CancellationToken);
         movieFileTasks.SetDownloadStatus(DownloadStatus.Moving);
-        await dbContext.SaveChangesNewAsync(CancellationToken);
+        await dbContext.SaveChangesAsync(CancellationToken);
 
         var movieTask = await dbContext.DownloadTaskMovie.FirstAsync(CancellationToken);
 
@@ -910,7 +910,7 @@ public class StopDownloadTaskCommandUnitTests : BaseUnitTest<StopDownloadTaskCom
         fileTask.DataReceived = 300_000_000;
         fileTask.FileDataTransferred = 300_000_000;
         fileTask.CurrentFileTransferBytesOffset = 300_000_000;
-        await dbContext.SaveChangesNewAsync(CancellationToken);
+        await dbContext.SaveChangesAsync(CancellationToken);
 
         SetupFileSystem();
 
@@ -962,7 +962,7 @@ public class StopDownloadTaskCommandUnitTests : BaseUnitTest<StopDownloadTaskCom
         fileTask.DataReceived = 200_000_000;
         fileTask.FileDataTransferred = 200_000_000;
         fileTask.CurrentFileTransferBytesOffset = 200_000_000;
-        await dbContext.SaveChangesNewAsync(CancellationToken);
+        await dbContext.SaveChangesAsync(CancellationToken);
 
         SetupFileSystem(fs => fs.AddFile(fileTask.DownloadFilePath, new MockFileData([])));
 

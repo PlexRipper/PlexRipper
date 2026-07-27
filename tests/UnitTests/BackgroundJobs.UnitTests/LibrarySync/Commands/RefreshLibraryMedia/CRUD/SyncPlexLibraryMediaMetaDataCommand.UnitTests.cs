@@ -54,7 +54,7 @@ public class SyncPlexLibraryMediaMetaDataCommandUnitTests : BaseCommandUnitTest<
 
         var dbContext = IDbContext;
         await dbContext.PlexActors.AddRangeAsync(plexActors, CancellationToken);
-        await dbContext.SaveChangesNewAsync(CancellationToken);
+        await dbContext.SaveChangesAsync(CancellationToken);
 
         var plexActorDict = plexActors.ToDictionary(x => x.Key);
 
@@ -64,7 +64,7 @@ public class SyncPlexLibraryMediaMetaDataCommandUnitTests : BaseCommandUnitTest<
             .ToList();
         dbContext = IDbContext;
         await dbContext.PlexLibraryActors.AddRangeAsync(initialPlexLibraryActors, CancellationToken);
-        await dbContext.SaveChangesNewAsync(CancellationToken);
+        await dbContext.SaveChangesAsync(CancellationToken);
 
         // Create new data with different roles
         var existingActorKeys = plexActors.Select(x => x.Key).ToHashSet();
@@ -75,7 +75,7 @@ public class SyncPlexLibraryMediaMetaDataCommandUnitTests : BaseCommandUnitTest<
             .ToList();
         var newPlexActors = newPlexApiActors.ToPlexActor();
         await dbContext.PlexActors.AddRangeAsync(newPlexActors, CancellationToken);
-        await dbContext.SaveChangesNewAsync(CancellationToken);
+        await dbContext.SaveChangesAsync(CancellationToken);
 
         // Act
         var command = new SyncPlexLibraryMediaMetaDataCommand(
@@ -124,19 +124,19 @@ public class SyncPlexLibraryMediaMetaDataCommandUnitTests : BaseCommandUnitTest<
         var plexActors = actorRoles.ToPlexActor();
         var dbContext = IDbContext;
         await dbContext.PlexActors.AddRangeAsync(plexActors, CancellationToken);
-        await dbContext.SaveChangesNewAsync(CancellationToken);
+        await dbContext.SaveChangesAsync(CancellationToken);
 
         // Create genres data
         var genreItems = FakePlexApiData.GetLibraryMediaItemGenreDTO(seed).GenerateUnique(8, x => x.Key);
         var plexGenres = genreItems.ToPlexGenre();
         await dbContext.PlexGenres.AddRangeAsync(plexGenres, CancellationToken);
-        await dbContext.SaveChangesNewAsync(CancellationToken);
+        await dbContext.SaveChangesAsync(CancellationToken);
 
         // Create countries data
         var countryItems = FakePlexApiData.GetLibraryMediaItemCountryDTO(seed).GenerateUnique(5, x => x.Key);
         var plexCountries = countryItems.ToPlexCountry();
         await dbContext.PlexCountries.AddRangeAsync(plexCountries, CancellationToken);
-        await dbContext.SaveChangesNewAsync(CancellationToken);
+        await dbContext.SaveChangesAsync(CancellationToken);
 
         // Verify initial counts are 0
         plexLibrary.ActorsCount.ShouldBe(0);
@@ -210,7 +210,7 @@ public class SyncPlexLibraryMediaMetaDataCommandUnitTests : BaseCommandUnitTest<
         var plexActors = actorRoles.ToPlexActor();
         var dbContext = IDbContext;
         await dbContext.PlexActors.AddRangeAsync(plexActors, CancellationToken);
-        await dbContext.SaveChangesNewAsync(CancellationToken);
+        await dbContext.SaveChangesAsync(CancellationToken);
 
         // Create initial relationship data
         var initialPlexLibraryActors = plexActors
@@ -218,7 +218,7 @@ public class SyncPlexLibraryMediaMetaDataCommandUnitTests : BaseCommandUnitTest<
             .Select((x) => new PlexLibraryActors(plexLibrary.Id, x.Value.Id))
             .ToList();
         await dbContext.PlexLibraryActors.AddRangeAsync(initialPlexLibraryActors, CancellationToken);
-        await dbContext.SaveChangesNewAsync(CancellationToken);
+        await dbContext.SaveChangesAsync(CancellationToken);
 
         // Set initial counts manually to simulate existing data
         await dbContext

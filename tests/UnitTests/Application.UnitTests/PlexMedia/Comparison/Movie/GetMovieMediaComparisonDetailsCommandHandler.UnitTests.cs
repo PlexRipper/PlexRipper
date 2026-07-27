@@ -32,7 +32,7 @@ public class GetMovieMediaComparisonDetailsCommandHandlerUnitTests
         var remoteMovie = await GetLibraryMovieAsync(remoteLibrary.Id);
 
         await AddCurrentScopeAsync(remoteLibrary, ownedLibrary, PlexMediaType.Movie);
-        await dbContext.SaveChangesNewAsync(CancellationToken);
+        await dbContext.SaveChangesAsync(CancellationToken);
 
         var command = new GetMovieMediaComparisonDetailsCommand(remoteMovie.Id);
 
@@ -96,7 +96,7 @@ public class GetMovieMediaComparisonDetailsCommandHandlerUnitTests
             ownedMovie.Id,
             PlexMediaComparisonHitState.Matched
         ));
-        await dbContext.SaveChangesNewAsync(CancellationToken);
+        await dbContext.SaveChangesAsync(CancellationToken);
 
         var command = new GetMovieMediaComparisonDetailsCommand(remoteMovie.Id);
 
@@ -159,7 +159,7 @@ public class GetMovieMediaComparisonDetailsCommandHandlerUnitTests
             upgradeOwnedMovie.Id,
             PlexMediaComparisonHitState.HigherQuality
         ));
-        await dbContext.SaveChangesNewAsync(CancellationToken);
+        await dbContext.SaveChangesAsync(CancellationToken);
 
         var command = new GetMovieMediaComparisonDetailsCommand(remoteMovie.Id);
 
@@ -218,7 +218,7 @@ public class GetMovieMediaComparisonDetailsCommandHandlerUnitTests
             ownedMovie.Id,
             PlexMediaComparisonHitState.Matched
         ));
-        await dbContext.SaveChangesNewAsync(CancellationToken);
+        await dbContext.SaveChangesAsync(CancellationToken);
 
         var command = new GetMovieMediaComparisonDetailsCommand(ownedMovie.Id);
 
@@ -295,7 +295,7 @@ public class GetMovieMediaComparisonDetailsCommandHandlerUnitTests
             ownedMovie.Id,
             PlexMediaComparisonHitState.Matched
         ));
-        await dbContext.SaveChangesNewAsync(CancellationToken);
+        await dbContext.SaveChangesAsync(CancellationToken);
 
         var command = new GetMovieMediaComparisonDetailsCommand(remoteMovie.Id);
 
@@ -375,6 +375,6 @@ public class GetMovieMediaComparisonDetailsCommandHandlerUnitTests
             RemoteLibraryUpdatedAt = remoteUpdatedAt,
             OwnedLibraryUpdatedAt = ownedUpdatedAt,
         });
-        await dbContext.SaveChangesNewAsync(CancellationToken);
+        await dbContext.SaveChangesAsync(CancellationToken);
     }
 }

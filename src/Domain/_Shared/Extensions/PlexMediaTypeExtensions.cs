@@ -7,9 +7,9 @@ public static class PlexMediaTypeExtensions
         return type switch
         {
             PlexMediaType.Movie => 2,
-            PlexMediaType.TvShow => 3,
-            PlexMediaType.Music => 4,
-            PlexMediaType.Photos => 5,
+            PlexMediaType.TvShow or PlexMediaType.Season or PlexMediaType.Episode => 3,
+            PlexMediaType.Music or PlexMediaType.Artist or PlexMediaType.Album or PlexMediaType.Song => 4,
+            PlexMediaType.Photos or PlexMediaType.PhotoAlbum => 5,
             PlexMediaType.OtherVideos => 6,
             PlexMediaType.Games => 7,
             _ => 1, // Used for Downloads folder

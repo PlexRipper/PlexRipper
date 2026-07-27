@@ -9,10 +9,20 @@ public class GetAllMediaByTypeEndpointUnitTests : BaseEndpointUnitTest<GetAllMed
     public async Task ShouldMapFriendlyRequestFiltersToMediaQueryFilter_WhenHandlingRequest()
     {
         // Arrange
+        await SetupDatabase(42, config =>
+        {
+            config.PlexServerCount = 1;
+            config.PlexMovieLibraryCount = 1;
+        });
+        var libraryId = await IDbContext.PlexLibraries
+            .Where(x => x.Type == PlexMediaType.Movie)
+            .Select(x => x.Id)
+            .FirstAsync(CancellationToken);
+
         var request = new GetAllMediaByTypeRequest
         {
             MediaType = PlexMediaType.Movie,
-            PlexLibraryId = 42,
+            PlexLibraryId = libraryId,
             Page = 2,
             PageSize = 25,
             Search = "matrix",
@@ -20,6 +30,7 @@ public class GetAllMediaByTypeEndpointUnitTests : BaseEndpointUnitTest<GetAllMed
             GenreId = 13,
             RoleId = 11,
             QualityId = 480,
+            ComparisonState = PlexMediaComparisonState.Missing,
             Sort = "sortIndex:asc",
             FilterOwnedMedia = true,
             FilterOfflineMedia = true,
@@ -39,9 +50,10 @@ public class GetAllMediaByTypeEndpointUnitTests : BaseEndpointUnitTest<GetAllMed
                 x.GetMediaAsync(
                     It.Is<MediaQueryFilter>(filter =>
                         filter.MediaType == PlexMediaType.Movie
-                        && filter.PlexLibraryId == 42
+                        && filter.PlexLibraryId == libraryId
                         && filter.FilterOwnedMedia
                         && filter.FilterOfflineMedia
+                        && filter.ComparisonState == PlexMediaComparisonState.Missing
                         && filter.Parameters.Page == 2
                         && filter.Parameters.PageSize == 25
                         && filter.Parameters.Sort == "sortIndex:asc"
@@ -63,7 +75,7 @@ public class GetAllMediaByTypeEndpointUnitTests : BaseEndpointUnitTest<GetAllMed
     }
 
     [Test]
-    public void ShouldRejectNonPositiveFriendlyFilterIds_WhenValidatingRequest()
+    public void ShouldRejectNonPositiveFriendlyFilterIdsButAllowAllMediaComparisonState_WhenValidatingRequest()
     {
         // Arrange
         var validator = new GetAllMediaByTypeRequestValidator();
@@ -75,6 +87,7 @@ public class GetAllMediaByTypeEndpointUnitTests : BaseEndpointUnitTest<GetAllMed
             GenreId = -1,
             RoleId = 0,
             QualityId = -1,
+            ComparisonState = PlexMediaComparisonState.Missing,
         };
 
         // Act
@@ -86,5 +99,6 @@ public class GetAllMediaByTypeEndpointUnitTests : BaseEndpointUnitTest<GetAllMed
         result.Errors.ShouldContain(x => x.PropertyName == nameof(GetAllMediaByTypeRequest.GenreId));
         result.Errors.ShouldContain(x => x.PropertyName == nameof(GetAllMediaByTypeRequest.RoleId));
         result.Errors.ShouldContain(x => x.PropertyName == nameof(GetAllMediaByTypeRequest.QualityId));
+        result.Errors.ShouldNotContain(x => x.PropertyName == nameof(GetAllMediaByTypeRequest.PlexLibraryId));
     }
 }

@@ -5,11 +5,13 @@ import { computed, markRaw, reactive, toRefs } from 'vue';
 import { get, set } from '@vueuse/core';
 import { useRouteQuery } from '@vueuse/router';
 import {
+	PlexMediaComparisonState,
 	type PlexMediaMetadataDTO,
 	type PlexMediaSlimDTO,
 	type PlexMediaStatisticsDTO,
 	PlexMediaType,
 	ViewMode,
+	type LibraryComparisonCompletedDTO,
 } from '@dto';
 import type { IMediaOverviewSort } from '@composables/event-bus';
 import { MediaSortField, SortDirection } from '@enums';
@@ -24,7 +26,6 @@ import {
 	translateVideoQuality,
 } from '@composables';
 import { useSubscription } from '@vueuse/rxjs';
-import { useI18n } from 'vue-i18n';
 
 interface IMediaOverviewStoreState {
 	libraryId: number;
@@ -88,6 +89,7 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 			roleId: 0,
 			genreId: 0,
 			qualityId: 0,
+			comparisonState: null,
 		},
 		metadataList: {
 			mediaCount: 0,
@@ -116,6 +118,7 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 	const libraryStore = useLibraryStore();
 	const mediaPages = new Map<number, readonly PlexMediaSlimDTO[]>();
 	const pendingPages = new Set<number>();
+	const comparisonRefreshKeysInFlight = new Set<string>();
 	let cacheRetryTimer: ReturnType<typeof setInterval> | null = null;
 
 	const searchQuery = useRouteQuery('q', '', { mode: 'replace' });
@@ -123,6 +126,7 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 	const genreIdQuery = useRouteQuery('genreId', 0, { mode: 'replace' });
 	const roleIdQuery = useRouteQuery('roleId', 0, { mode: 'replace' });
 	const qualityIdQuery = useRouteQuery('qualityId', 0, { mode: 'replace' });
+	const comparisonStateQuery = useRouteQuery<string>('comparisonState', '', { mode: 'replace' });
 	const scrollIndexQuery = useRouteQuery('scrollIndex', 0, { mode: 'replace' });
 	const sortQuery = useRouteQuery('sort', '', { mode: 'replace' });
 
@@ -134,6 +138,67 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 			Log.debug('Cancelling pending media requests');
 			cancelSubject$.next();
 			state.loading = false;
+		},
+		clearLibraryMediaData(libraryId: number): void {
+			Log.debug('Clearing media overview data for disabled library', { libraryId });
+			actions.cancelPendingRequests();
+			clearCacheRetryTimer();
+			mediaPages.clear();
+			pendingPages.clear();
+			state.libraryId = libraryId;
+			state.totalCount = 0;
+			state.itemsLength = 0;
+			state.queryHash = '';
+			state.selection = cloneDeep(defaultState.selection);
+			state.downloadButtonVisible = false;
+			state.lastMediaItemViewed = null;
+			state.navLoading = false;
+			state.filterMetadataLoading = false;
+			state.isDetailView = false;
+			state.allMovieCount = 0;
+			state.allTvShowCount = 0;
+			state.allSeasonCount = 0;
+			state.allEpisodeCount = 0;
+			state.allFileSize = 0;
+			state.metadataList = cloneDeep(defaultState.metadataList);
+			state.availableRoleIds = [];
+			state.availableCountryIds = [];
+			state.availableGenreIds = [];
+			state.availableQualityIds = [];
+			state.mediaPagesVersion++;
+			state.serverError = false;
+			state.cacheRetrySeconds = 0;
+		},
+		refreshCurrentMediaDataWhenComparisonCompleted(notification: LibraryComparisonCompletedDTO): Observable<PlexMediaStatisticsDTO | null> {
+			const mediaType = get(getters.getMediaType);
+			const libraryId = state.libraryId;
+
+			if (libraryId <= 0 || mediaType !== notification.mediaType || !notification.affectedLibraryIds.includes(libraryId)) {
+				return of(null);
+			}
+
+			const refreshKey = getters.getCurrentRequestKey();
+			if (comparisonRefreshKeysInFlight.has(refreshKey)) {
+				return of(null);
+			}
+
+			const pagesToRefresh = Array.from(mediaPages.keys());
+			if (pagesToRefresh.length === 0) {
+				return of(null);
+			}
+
+			comparisonRefreshKeysInFlight.add(refreshKey);
+			Log.debug('Refreshing previously requested media pages after comparison completed', {
+				libraryId,
+				mediaType,
+				pages: pagesToRefresh,
+			});
+
+			const requests = pagesToRefresh.map((page) => actions.requestMediaPage(page, state.pageSize, true));
+			return forkJoin(requests).pipe(
+				finalize(() => comparisonRefreshKeysInFlight.delete(refreshKey)),
+				map(() => null),
+			);
 		},
 		initializeLibrary(libraryId: number): Observable<PlexMediaStatisticsDTO | null> {
 			// Cancel any in-flight requests first
@@ -155,14 +220,19 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 					? libraryStore.refreshLibrary(state.libraryId)
 					: of(null),
 			).pipe(
-				switchMap(() =>
-					forkJoin([
+				switchMap(() => {
+					const library = libraryStore.getLibrary(state.libraryId);
+					if (library && (!library.isEnabled || library.syncedAt === null)) {
+						state.loading = false;
+						return of(null);
+					}
+
+					return forkJoin([
 						actions.refreshFilterMetadata(),
 						actions.refreshMetaData(),
 						actions.refreshMediaData(),
-					]),
-				),
-				map(([, , requestMediaResult]) => requestMediaResult),
+					]).pipe(map(([, , requestMediaResult]) => requestMediaResult));
+				}),
 			);
 		},
 		refreshMetaData() {
@@ -193,6 +263,8 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 			);
 		},
 		refreshMediaData(): Observable<PlexMediaStatisticsDTO | null> {
+			state.loading = true;
+			state.serverError = false;
 			state.cacheRetrySeconds = 0;
 			clearCacheRetryTimer();
 
@@ -222,9 +294,16 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 				}),
 			);
 		},
-		requestMediaPage(page: number, size: number = state.pageSize): Observable<PlexMediaStatisticsDTO | null> {
-			if (mediaPages.has(page) || pendingPages.has(page)) {
+		requestMediaPage(page: number, size: number = state.pageSize, forceRefresh: boolean = false): Observable<PlexMediaStatisticsDTO | null> {
+			if (pendingPages.has(page) || (!forceRefresh && mediaPages.has(page))) {
 				return of(null);
+			}
+
+			const mediaType = get(getters.getMediaType);
+			if (state.libraryId > 0 && mediaType === PlexMediaType.None) {
+				return libraryStore.refreshLibrary(state.libraryId).pipe(
+					switchMap((library) => library ? actions.requestMediaPage(page, size, forceRefresh) : of(null)),
+				);
 			}
 
 			pendingPages.add(page);
@@ -236,8 +315,9 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 				countryId: state.metadata.countryId > 0 ? state.metadata.countryId : undefined,
 				genreId: state.metadata.genreId > 0 ? state.metadata.genreId : undefined,
 				qualityId: state.metadata.qualityId > 0 ? state.metadata.qualityId : undefined,
+				comparisonState: state.metadata.comparisonState ?? undefined,
 				roleId: state.metadata.roleId > 0 ? state.metadata.roleId : undefined,
-				mediaType: get(getters.getMediaType),
+				mediaType,
 				plexLibraryId: state.libraryId > 0 ? state.libraryId : undefined,
 				filterOwnedMedia: settingsStore.generalSettings.hideMediaFromOwnedServers,
 				filterOfflineMedia: settingsStore.generalSettings.hideMediaFromOfflineServers,
@@ -266,16 +346,25 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 			state.serverError = false;
 
 			if (state.queryHash !== data.queryHash) {
-				Log.warn(`mediaPages was cleared, with ${state.queryHash} vs ${data.queryHash}`);
+				if (state.queryHash) {
+					Log.warn(`mediaPages was cleared, with ${state.queryHash} vs ${data.queryHash}`);
+				} else {
+					Log.debug(`mediaPages was initialized with ${data.queryHash}`);
+				}
 				mediaPages.clear();
+				pendingPages.clear();
 				state.itemsLength = 0;
+				state.currentScrollIndex = 0;
+				state.scrollDict = cloneDeep(defaultState.scrollDict);
 			}
 
 			const mediaList = Array.isArray(data.mediaList) ? data.mediaList : [];
+			const previousMediaCount = mediaPages.get(data.page)?.length ?? 0;
+			const mediaCount = data.mediaCount ?? mediaList.length;
 			mediaPages.set(data.page, markRaw(mediaList));
 			state.mediaPagesVersion++;
 			state.queryHash = data.queryHash ?? '';
-			state.itemsLength += data.mediaCount ?? mediaList.length;
+			state.itemsLength += mediaCount - previousMediaCount;
 			state.totalCount = data.totalCount ?? state.totalCount;
 
 			state.allMovieCount = data.totalMovieCount;
@@ -367,12 +456,23 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 				switchMap(() => actions.refreshMediaData()),
 			);
 		},
+		setComparisonStateFilter(comparisonState?: PlexMediaComparisonState | null): Observable<PlexMediaStatisticsDTO | null> {
+			return of(comparisonState).pipe(
+				map((value) => value && Object.values(PlexMediaComparisonState).includes(value) ? value : null),
+				tap((value) => {
+					state.metadata.comparisonState = value;
+					set(comparisonStateQuery, value ?? undefined);
+				}),
+				switchMap(() => actions.refreshMediaData()),
+			);
+		},
 		resetMetaDataFilterState() {
 			state.metadata = {
 				countryId: 0,
 				roleId: 0,
 				genreId: 0,
 				qualityId: 0,
+				comparisonState: null,
 			};
 		},
 		clearMetaDataFilter() {
@@ -381,6 +481,7 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 			set(roleIdQuery, undefined);
 			set(genreIdQuery, undefined);
 			set(qualityIdQuery, undefined);
+			set(comparisonStateQuery, undefined);
 		},
 		applyRouteQueryState() {
 			const search = String(get(searchQuery)).trim();
@@ -388,6 +489,7 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 			const genreId = Number(get(genreIdQuery));
 			const roleId = Number(get(roleIdQuery));
 			const qualityId = Number(get(qualityIdQuery));
+			const comparisonState = String(get(comparisonStateQuery)).trim();
 			const scrollIndex = Number(get(scrollIndexQuery));
 			const sort = String(get(sortQuery)).trim();
 
@@ -409,6 +511,10 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 
 			if (qualityId > 0) {
 				state.metadata.qualityId = qualityId;
+			}
+
+			if (Object.values(PlexMediaComparisonState).includes(comparisonState as PlexMediaComparisonState)) {
+				state.metadata.comparisonState = comparisonState as PlexMediaComparisonState;
 			}
 
 			if (scrollIndex > 0) {
@@ -516,11 +622,32 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 		hasNoSearchResults: computed((): boolean => {
 			return state.filterQuery != '' && get(getters.getMediaItems).length === 0;
 		}),
+		hasActiveFilter: computed((): boolean => {
+			return state.metadata.countryId > 0
+				|| state.metadata.roleId > 0
+				|| state.metadata.genreId > 0
+				|| state.metadata.qualityId > 0
+				|| state.metadata.comparisonState !== null;
+		}),
 		hasNoFilterResults: computed((): boolean => {
-			return state.metadataList.mediaCount > 0 && get(getters.getMediaItems).length === 0;
+			return get(getters.hasActiveFilter) && state.metadataList.mediaCount > 0 && get(getters.getMediaItems).length === 0;
 		}),
 		allMediaMode: computed(() => state.libraryId === 0),
 		library: computed(() => libraryStore.getLibrary(state.libraryId)),
+		getCurrentRequestKey: (): string => JSON.stringify({
+			libraryId: state.libraryId,
+			mediaType: get(getters.getMediaType),
+			pageSize: state.pageSize,
+			sort: get(getters.getSortDSL),
+			query: state.filterQuery,
+			countryId: state.metadata.countryId,
+			genreId: state.metadata.genreId,
+			qualityId: state.metadata.qualityId,
+			comparisonState: state.metadata.comparisonState,
+			roleId: state.metadata.roleId,
+			filterOwnedMedia: settingsStore.generalSettings.hideMediaFromOwnedServers,
+			filterOfflineMedia: settingsStore.generalSettings.hideMediaFromOfflineServers,
+		}),
 		getMediaItems: computed((): Readonly<PlexMediaSlimDTO[]> => {
 			void state.mediaPagesVersion; // Trigger reactive change
 			return Array.from(mediaPages.values()).flat();
@@ -589,7 +716,8 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 			return !(state.sortedState.field === MediaSortField.Title && state.sortedState.sort === SortDirection.Asc);
 		}),
 		getSortOptions: (): ISortOption[] => {
-			const { t } = useI18n({ useScope: 'global' });
+			const { $i18n } = useNuxtApp();
+			const { t } = $i18n;
 			const options: ISortOption[] = [
 				{ field: MediaSortField.Title, label: t('general.sort.title'), direction: SortDirection.NoSort },
 				{ field: MediaSortField.Year, label: t('general.sort.year'), direction: SortDirection.NoSort },
@@ -623,6 +751,22 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 		getQualities: computed(() => state.metadataList.qualities.filter((x) => {
 			return state.availableQualityIds.includes(x.id);
 		})),
+		getComparisonStateOptions: computed(() => {
+			const states = [
+				PlexMediaComparisonState.NotCompared,
+				PlexMediaComparisonState.Owned,
+				PlexMediaComparisonState.Missing,
+				PlexMediaComparisonState.HigherQuality,
+				PlexMediaComparisonState.Pending,
+				PlexMediaComparisonState.Partial,
+				PlexMediaComparisonState.PartialAndHigherQuality,
+			];
+
+			return states.map((state) => ({
+				value: state,
+				label: translateMediaComparisonState(state),
+			}));
+		}),
 		getFilterChips: computed(() => {
 			const result: {
 				text: string;
@@ -667,6 +811,15 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 					color: getVideoQualityColor(quality),
 					id: uniqueId(),
 					unset: actions.setQualityFilter(),
+				});
+			}
+
+			if (state.metadata.comparisonState) {
+				result.push({
+					text: get(getters.getComparisonStateOptions).find((x) => x.value === state.metadata.comparisonState)?.label ?? '',
+					key: 'comparisonState',
+					id: uniqueId(),
+					unset: actions.setComparisonStateFilter(),
 				});
 			}
 

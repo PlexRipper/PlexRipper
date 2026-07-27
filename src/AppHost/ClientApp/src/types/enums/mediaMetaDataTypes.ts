@@ -4,4 +4,5 @@ export enum MediaMetaDataTypes {
 	Roles = 'roles',
 	Country = 'country',
 	Quality = 'quality',
+	ComparisonState = 'comparisonState',
 }

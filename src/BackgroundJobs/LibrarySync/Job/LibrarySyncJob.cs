@@ -127,8 +127,13 @@ public class LibrarySyncJob : IJob
                         _serverId
                     );
 
-                // Mark queue item as completed
+                // Mark the primary sync queue item as completed before kicking off secondary comparison work.
                 await UpdateQueueItemAsync(LibrarySyncJobStatus.Completed);
+
+                var comparisonQueueResult = await _commandExecutor.Send(new QueueLibraryComparisonJobsForLibraryCommand(_libraryId), CancellationToken.None);
+
+                if (comparisonQueueResult.IsFailed)
+                    _log.Here().Warning("Failed to queue comparison jobs for library {LibraryId}", _libraryId);
             }
         }
 

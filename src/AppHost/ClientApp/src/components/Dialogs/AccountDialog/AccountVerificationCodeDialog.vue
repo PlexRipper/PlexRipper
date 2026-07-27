@@ -16,8 +16,8 @@
 				<QRow justify="center">
 					<QCol cols="auto">
 						<VOtpInput
-							ref="otpInput"
 							id="verification-code"
+							ref="otpInput"
 							v-model:value="accountDialogStore.verificationCode"
 							input-classes="otp-input"
 							separator=""

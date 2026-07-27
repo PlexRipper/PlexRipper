@@ -2,7 +2,7 @@
 	<q-menu
 		:offset="[0, 12]"
 		@hide="menuIndex = MediaMetaDataTypes.None">
-		<q-list style="min-width: 260px">
+		<q-list style="min-width: 400px">
 			<!-- Categories -->
 			<template v-if="menuIndex === MediaMetaDataTypes.None">
 				<q-item
@@ -15,11 +15,13 @@
 				<q-item
 					v-for="(item, index) in menuItems"
 					:key="index"
+					:data-cy="`media-filter-menu-category-${item.type}`"
 					clickable
 					@click="onMenuOpen(item.type)">
 					<q-item-section>{{ item.text }}</q-item-section>
 				</q-item>
 			</template>
+			<!-- Menu Level 2 -->
 			<template v-else>
 				<q-item
 					clickable
@@ -59,6 +61,7 @@
 				<QScroll
 					v-else
 					:fit="false"
+					width="400px"
 					:height="'260px'">
 					<!-- Show Genres Sub-Menu -->
 					<template v-if="menuIndex === MediaMetaDataTypes.Genres">
@@ -127,6 +130,29 @@
 							</q-item-section>
 						</q-item>
 					</template>
+
+					<!-- Show Comparison State Sub-Menu -->
+					<template v-if="menuIndex === MediaMetaDataTypes.ComparisonState">
+						<q-item
+							v-for="comparisonState in comparisonStateOptions"
+							:key="comparisonState.value"
+							clickable
+							@click="useSubscription(mediaOverviewStore.setComparisonStateFilter(comparisonState.value).subscribe())">
+							<q-item-section avatar>
+								<q-icon
+									v-if="comparisonState.value === mediaOverviewStore.metadata.comparisonState"
+									name="mdi-check" />
+							</q-item-section>
+							<q-item-section>
+								<MediaComparisonStateButton
+									:comparison-state="comparisonState.value"
+									show-label
+									dense
+									flat
+									:cy="`comparison-filter-option-${comparisonState.value}`" />
+							</q-item-section>
+						</q-item>
+					</template>
 				</QScroll>
 			</template>
 		</q-list>
@@ -135,12 +161,15 @@
 
 <script setup lang="ts">
 import { get, set } from '@vueuse/core';
-import { useMediaOverviewStore } from '@store';
+import { PlexMediaComparisonState, PlexMediaType } from '@dto';
+import { useLibraryStore, useMediaOverviewStore, useServerStore } from '@store';
 import { MediaMetaDataTypes } from '@enums';
 import IconButton from '@components/Buttons/IconButton.vue';
 
 const menuIndex = ref<MediaMetaDataTypes>(MediaMetaDataTypes.None);
 const mediaOverviewStore = useMediaOverviewStore();
+const libraryStore = useLibraryStore();
+const serverStore = useServerStore();
 const { t } = useI18n();
 
 const showMenuSearch = ref(false);
@@ -152,7 +181,7 @@ withDefaults(defineProps<{
 	libraryId: 0,
 });
 
-const menuItems: { text: string; type: MediaMetaDataTypes }[] = [
+const menuItems = computed((): { text: string; type: MediaMetaDataTypes }[] => [
 	{
 		text: t('components.media-filter-menu.meta-data.country'),
 		type: MediaMetaDataTypes.Country,
@@ -169,7 +198,47 @@ const menuItems: { text: string; type: MediaMetaDataTypes }[] = [
 		text: t('components.media-filter-menu.meta-data.quality'),
 		type: MediaMetaDataTypes.Quality,
 	},
-];
+	{
+		text: t('components.media-filter-menu.meta-data.comparison-state'),
+		type: MediaMetaDataTypes.ComparisonState,
+	},
+]);
+
+const isOwnedLibrary = computed(() => {
+	if (mediaOverviewStore.allMediaMode)
+		return false;
+
+	const serverId = libraryStore.getLibrary(mediaOverviewStore.libraryId)?.plexServerId ?? 0;
+	return serverStore.getServer(serverId)?.owned ?? false;
+});
+
+const possibleComparisonStates = computed((): PlexMediaComparisonState[] => {
+	const baseStates = [
+		PlexMediaComparisonState.NotCompared,
+		PlexMediaComparisonState.Owned,
+		PlexMediaComparisonState.HigherQuality,
+		PlexMediaComparisonState.Pending,
+	];
+
+	if (mediaOverviewStore.getMediaType !== PlexMediaType.TvShow)
+		return get(isOwnedLibrary) ? baseStates : [...baseStates, PlexMediaComparisonState.Missing];
+
+	return [
+		...baseStates,
+		...(get(isOwnedLibrary) ? [] : [PlexMediaComparisonState.Missing]),
+		PlexMediaComparisonState.Partial,
+		PlexMediaComparisonState.PartialAndHigherQuality,
+	];
+});
+
+const comparisonStateOptions = computed(() => {
+	return mediaOverviewStore.getComparisonStateOptions.filter((x) => {
+		if (!get(possibleComparisonStates).includes(x.value))
+			return false;
+
+		return x.label.toLowerCase().includes(get(menuFilterQuery).toLowerCase());
+	});
+});
 
 function onMenuOpen(category: MediaMetaDataTypes) {
 	set(menuIndex, category);

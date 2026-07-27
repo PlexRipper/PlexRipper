@@ -15,10 +15,23 @@
 				<QText :value="row.title" />
 			</q-td>
 		</template>
-		<!-- Media Quality bar	-->
+		<!-- Media Quality	-->
 		<template #body-cell-quality="{ row }: { row: PlexMediaSlimDTO }">
 			<q-td class="text-eclipse">
 				<MediaQuality :qualities="row.qualities" />
+			</q-td>
+		</template>
+		<!-- Comparison State -->
+		<template #body-cell-comparisonState="{ row }: { row: PlexMediaSlimDTO }">
+			<q-td class="text-center">
+				<MediaComparisonStateButton
+					:comparison-state="getPlexMediaComparisonState(row)"
+					show-tooltip
+					dense
+					rounded
+					outline
+					flat
+					:cy="`episode-comparison-chip-${getPlexMediaComparisonState(row)}`" />
 			</q-td>
 		</template>
 		<!-- Media Year -->
@@ -80,14 +93,14 @@
 import type { QTableProps } from 'quasar';
 import Convert from '@class/Convert';
 import { ButtonType } from '@enums';
-import type { PlexMediaSlimDTO } from '@dto';
+import type { DownloadMediaDTO, PlexMediaSlimDTO } from '@dto';
 import type { ISelection } from '@interfaces';
 import { getMediaTableColumns } from '@composables/mediaTableColumns';
 import {
 	type IMediaOverviewCommands,
 	sendMediaOverviewDownloadCommand,
 } from '@composables/event-bus';
-import { toDownloadMedia } from '@composables/conversion';
+import { getPlexMediaComparisonState, toDownloadMedia } from '@composables/conversion';
 import QDateTime from '@components/Common/QDateTime.vue';
 
 const mediaTableColumns = getMediaTableColumns();
@@ -96,6 +109,7 @@ const router = useRouter();
 const props = defineProps<{
 	rows: PlexMediaSlimDTO[];
 	selection: ISelection | null;
+	downloadMediaFactory?: (row: PlexMediaSlimDTO) => DownloadMediaDTO[];
 }>();
 
 const emit = defineEmits<{
@@ -129,7 +143,7 @@ const qTableProps = computed((): QTableProps => {
 function onRowAction(row: PlexMediaSlimDTO, action: IMediaOverviewCommands) {
 	switch (action.command) {
 		case 'download':
-			sendMediaOverviewDownloadCommand(toDownloadMedia(row));
+			sendMediaOverviewDownloadCommand(props.downloadMediaFactory?.(row) ?? toDownloadMedia(row));
 			break;
 		case 'open-details':
 			router.push({

@@ -22,6 +22,7 @@ public class CreateDownloadTasksEndpointIntegrationTests : BaseIntegrationTests
                     x.PlexServerCount = 1;
                     x.PlexMovieLibraryCount = 1;
                     x.MovieCount = plexMovieCount;
+                    x.DownloadFileSizeInMb = 1;
                 };
 
                 config.HttpClientOptions = (x, _) =>
@@ -35,15 +36,6 @@ public class CreateDownloadTasksEndpointIntegrationTests : BaseIntegrationTests
         // See: https://github.com/TestableIO/System.IO.Abstractions/issues/1131
         var downloadManagerSettings = container.Resolve<IDownloadManagerSettings>();
         downloadManagerSettings.DownloadSegments = 1;
-
-        await container.DbContext.PlexServerConnections.ExecuteUpdateAsync(
-            x => x.SetProperty(y => y.Url, _ => "https://download.blender.org"),
-            CancellationToken
-        );
-        await container.DbContext.PlexMovieData.ExecuteUpdateAsync(
-            x => x.SetProperty(y => y.Key, _ => "/peach/bigbuckbunny_movies/BigBuckBunny_320x180.mp4"),
-            CancellationToken
-        );
 
         var plexMovies = await container.DbContext.PlexMovies.ToListAsync(CancellationToken);
         plexMovies.Count.ShouldBe(

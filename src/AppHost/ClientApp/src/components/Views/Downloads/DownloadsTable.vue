@@ -52,16 +52,44 @@
 		</template>
 		<template #default>
 			<!-- Download Table Per Server -->
-			<PrimeTreeTable
+			<QTreeTable
 				:nodes="nodes"
 				:columns="getDownloadTableColumns"
-				:data-key="'id' as keyof DownloadProgressDTO"
-				:header-selected="downloadStore.getHeaderSelection(plexServer.id)"
-				:selected="downloadStore.getSelectedDownloadTasks(plexServer.id)"
-				:max-selection-count="downloadStore.getDownloadSelection(plexServer.id)?.maxSelectionCount"
-				@action="onTableAction($event)"
-				@all-selected="downloadStore.setAllSelectedDownloadTasks(plexServer.id, $event)"
-				@selected="downloadStore.updateSelectedDownloadTasks(plexServer.id, $event)" />
+				:selection-keys="downloadStore.getSelectedDownloadTasks(plexServer.id)"
+				@selected="downloadStore.updateSelectedDownloadTasks(plexServer.id, $event)">
+				<template #cell-title="{ data }: { data: IDownloadTableNode }">
+					<QMediaTypeIcon
+						v-if="data.mediaType"
+						:media-type="data.mediaType"
+						class="q-mr-sm"
+						:size="26" />
+					<QText
+						:cy="`column-title-${data.id}`"
+						:value="data.title" />
+				</template>
+				<template #cell-status="{ data }: { data: IDownloadTableNode }">
+					<QText
+						:cy="`column-status-${data.id}`"
+						:value="translateDownloadStatus(data.status)" />
+				</template>
+				<template #cell-actions="{ data }: { data: IDownloadTableNode }">
+					<QRow
+						justify="start"
+						no-wrap>
+						<QCol cols="auto">
+							<IconSquareButton
+								v-for="action in data.actions"
+								:key="`${data.id}-${kebabCase(action.type)}`"
+								:cy="`column-actions-${kebabCase(action.type)}-${data.id}`"
+								:disabled="action.disabled"
+								:icon="toButtonIcon(action.type)"
+								:loading="action.loading"
+								dense
+								@click.stop="onTableAction({ action: action.type, data })" />
+						</QCol>
+					</QRow>
+				</template>
+			</QTreeTable>
 		</template>
 	</q-expansion-item>
 
@@ -76,14 +104,17 @@
 
 <script setup lang="ts">
 import { get, set } from '@vueuse/core';
+import type { TreeNode } from 'primevue/treenode';
 import type { DownloadProgressDTO, PlexServerDTO } from '@dto';
 import { DownloadActions, DownloadStatus } from '@dto';
-import { DialogType } from '@enums';
+import { ButtonType, DialogType } from '@enums';
 import type { IDownloadTableNode, ISelection } from '@interfaces';
-import type { QTreeViewTableHeader } from '@props';
-import { flatMapDeep } from 'lodash-es';
+import type { QTreeTableColumn } from '@props';
+import { QTreeTableColumnType } from '@props';
+import { flatMapDeep, kebabCase } from 'lodash-es';
 import { useDownloadStore, useServerConnectionStore, useDialogStore, useServerStore, useAccountStore } from '@store';
-import { toDownloadActions } from '@composables';
+import { toDownloadActions, translateDownloadStatus } from '@composables';
+import Convert from '@class/Convert';
 import { useI18n } from '#imports';
 
 const serverStore = useServerStore();
@@ -93,6 +124,11 @@ const serverConnectionStore = useServerConnectionStore();
 const accountStore = useAccountStore();
 
 const { t } = useI18n();
+
+interface DownloadTreeNode extends TreeNode {
+	data: IDownloadTableNode;
+	children?: DownloadTreeNode[];
+}
 
 const loadingIds = ref<{
 	id: string;
@@ -111,7 +147,7 @@ defineEmits<{
 	(e: 'selected', payload: ISelection): void;
 }>();
 
-const nodes = computed((): IDownloadTableNode[] => {
+const nodes = computed((): DownloadTreeNode[] => {
 	// TODO: Move property mapping to back-end to increase performance
 	return mapToTreeNodes(downloadStore.getDownloadsByServerId(props.plexServer.id));
 });
@@ -120,13 +156,14 @@ const hasCompletedDownloads = computed((): boolean => {
 	return containsCompletedTasks(props.downloadRows);
 });
 
-function mapToTreeNodes(value: DownloadProgressDTO[]): IDownloadTableNode[] {
+function mapToTreeNodes(value: DownloadProgressDTO[]): DownloadTreeNode[] {
 	return value?.map((node) => {
-		return {
+		const children = mapToTreeNodes(node.children);
+		const data = {
 			...node,
 			key: node.id,
 			label: node.title,
-			children: mapToTreeNodes(node.children),
+			children: children.map((child) => child.data!),
 			actions: toDownloadActions(node.status).map((action) => ({
 				type: action,
 				// show loading icon on action and disable the rest
@@ -134,60 +171,67 @@ function mapToTreeNodes(value: DownloadProgressDTO[]): IDownloadTableNode[] {
 				disabled: get(loadingIds).some((y) => node.id === y.id && action !== y.action),
 			})),
 		};
+
+		return {
+			key: node.id,
+			label: node.title,
+			data,
+			children,
+		};
 	}) ?? [];
 }
 
-const getDownloadTableColumns: QTreeViewTableHeader[] = [
+const getDownloadTableColumns: QTreeTableColumn[] = [
 	{
-		label: t('components.downloads-table.columns.title'),
+		header: t('components.downloads-table.columns.title'),
 		field: 'title',
-		type: 'title',
 	},
 	{
-		label: t('components.downloads-table.columns.status'),
+		header: t('components.downloads-table.columns.status'),
 		field: 'status',
+		type: QTreeTableColumnType.Custom,
 		align: 'right',
 		width: 200,
 	},
 	{
-		label: t('components.downloads-table.columns.data-received'),
+		header: t('components.downloads-table.columns.data-received'),
 		field: 'dataReceived',
-		type: 'file-size',
+		type: QTreeTableColumnType.FileSize,
 		align: 'right',
 		width: 120,
 	},
 	{
-		label: t('components.downloads-table.columns.data-total'),
+		header: t('components.downloads-table.columns.data-total'),
 		field: 'dataTotal',
-		type: 'file-size',
+		type: QTreeTableColumnType.FileSize,
 		width: 120,
 		align: 'right',
 	},
 	{
-		label: t('components.downloads-table.columns.speed'),
+		header: t('components.downloads-table.columns.speed'),
 		field: 'downloadSpeed',
-		type: 'file-speed',
+		type: QTreeTableColumnType.FileSpeed,
 		align: 'right',
 		width: 120,
 	},
 	{
-		label: t('components.downloads-table.columns.time-remaining'),
+		header: t('components.downloads-table.columns.time-remaining'),
 		field: 'timeRemaining',
-		type: 'duration',
+		type: QTreeTableColumnType.Duration,
 		align: 'right',
 		width: 120,
 	},
 	{
-		label: t('components.downloads-table.columns.percentage'),
+		header: t('components.downloads-table.columns.percentage'),
 		field: 'percentage',
-		type: 'percentage',
+		type: QTreeTableColumnType.Percentage,
 		align: 'right',
 		width: 120,
 	},
 	{
-		label: t('components.downloads-table.columns.actions'),
+		header: t('components.downloads-table.columns.actions'),
 		field: 'actions',
-		type: 'actions',
+		type: QTreeTableColumnType.Actions,
 		width: 200,
 		align: 'right',
 		sortable: false,
@@ -215,12 +259,40 @@ function onTableAction({ action, data }: { action: DownloadActions; data: IDownl
 	}));
 }
 
+function toButtonIcon(action: DownloadActions): string {
+	switch (action) {
+		case DownloadActions.Details:
+			return Convert.buttonTypeToIcon(ButtonType.Details);
+
+		case DownloadActions.Delete:
+			return Convert.buttonTypeToIcon(ButtonType.Delete);
+
+		case DownloadActions.Start:
+			return Convert.buttonTypeToIcon(ButtonType.Start);
+
+		case DownloadActions.Pause:
+			return Convert.buttonTypeToIcon(ButtonType.Pause);
+
+		case DownloadActions.Stop:
+			return Convert.buttonTypeToIcon(ButtonType.Stop);
+
+		case DownloadActions.Clear:
+			return Convert.buttonTypeToIcon(ButtonType.Clear);
+
+		case DownloadActions.Restart:
+			return Convert.buttonTypeToIcon(ButtonType.Restart);
+
+		default:
+			return Convert.buttonTypeToIcon(ButtonType.None);
+	}
+}
+
 function toggleExpanded() {
 	set(isExpanded, !get(isExpanded));
 }
 
 function openClearCompletedDialog() {
-	if (!hasCompletedDownloads.value) {
+	if (!get(hasCompletedDownloads)) {
 		return;
 	}
 
@@ -274,7 +346,7 @@ function getAllIds(nodes: IDownloadTableNode[]): string[] {
 
 <style lang="scss">
 .inaccessible-item-text {
-	text-decoration: line-through;
-	opacity: 0.62;
+  text-decoration: line-through;
+  opacity: 0.62;
 }
 </style>

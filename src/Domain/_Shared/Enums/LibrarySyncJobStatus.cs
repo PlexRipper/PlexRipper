@@ -1,7 +1,7 @@
 namespace Reaparr.Domain;
 
 /// <summary>
-/// Represents the status of a library sync queue item.
+/// Represents the shared lifecycle status for library sync and comparison queue items.
 /// </summary>
 [JsonConverter(typeof(JsonStringEnumConverter))]
 public enum LibrarySyncJobStatus

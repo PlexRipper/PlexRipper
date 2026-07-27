@@ -64,6 +64,9 @@ public sealed class MediaQueryCache : IMediaQueryCache
         if (!string.IsNullOrWhiteSpace(filter.Parameters.Filter))
             return await BypassCacheAsync(filter, cancellationToken, "filter parameter is set");
 
+        if (filter.ComparisonState.HasValue)
+            return await BypassCacheAsync(filter, cancellationToken, "comparison state filter is set");
+
         var libraryIds = await ResolveLibraryIdsAsync(filter, cancellationToken);
         var sort = filter.Parameters.Sort.Normalize(libraryIds.Count);
         if (sort is null)
@@ -334,12 +337,12 @@ public sealed class MediaQueryCache : IMediaQueryCache
 
         if (filter.FilterOwnedMedia)
         {
-            var ownedLibraries = await dbContext.PlexAccountLibraries
-                .Where(x => x.IsLibraryOwned)
-                .Select(x => x.PlexLibraryId)
+            var ownedLibraryIds = await dbContext.PlexLibraries
+                .WhereIsOwned()
+                .Select(x => x.Id)
                 .ToListAsync(cancellationToken);
 
-            allowedPlexLibraryIds.RemoveAll(ownedLibraries.Contains);
+            allowedPlexLibraryIds.RemoveAll(ownedLibraryIds.Contains);
         }
 
         if (filter.FilterOfflineMedia)

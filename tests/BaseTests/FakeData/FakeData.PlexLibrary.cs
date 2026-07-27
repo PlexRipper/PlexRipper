@@ -21,6 +21,7 @@ public static partial class FakeData
             .RuleFor(x => x.Outdated, _ => false)
             .RuleFor(x => x.Language, f => f.Address.Country())
             .RuleFor(x => x.Uuid, _ => Guid.NewGuid().ToString())
+            .RuleFor(x => x.IsEnabled, _ => true)
             .Ignore(x => x.DefaultDestination)
             .Ignore(x => x.DefaultDestinationId)
             .Ignore(x => x.MediaSize)

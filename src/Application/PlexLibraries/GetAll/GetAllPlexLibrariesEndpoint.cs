@@ -27,7 +27,9 @@ public class GetAllPlexLibrariesEndpoint : EndpointWithoutRequest<List<PlexLibra
     public override async Task HandleAsync(CancellationToken ct)
     {
         _log.Here().DebugApiCall(HttpContext);
-        var plexLibraries = await _dbContext.PlexLibraries.ToListAsync(ct);
+        var plexLibraries = await _dbContext.PlexLibraries
+            .IgnoreIsEnabledFilter()
+            .ToListAsync(ct);
 
         await Send.FluentResult(Result.Ok(plexLibraries), x => x.ToDTO(), ct);
     }

@@ -49,7 +49,8 @@ import { useVirtualizer } from '@tanstack/vue-virtual';
 
 import { get, set, useElementBounding } from '@vueuse/core';
 import { useSubscription } from '@vueuse/rxjs';
-import type { PlexMediaSlimDTO, PlexMediaType } from '@dto';
+import { PlexMediaType } from '@dto';
+import type { PlexMediaSlimDTO } from '@dto';
 import { sendMediaOverviewDownloadCommand } from '@composables/event-bus';
 import { triggerBoxHighlight } from '@composables/animations';
 import { waitForElement } from '@composables';
@@ -196,6 +197,17 @@ function onPageReady() {
 }
 
 function onOpenMediaDetails(mediaItem: PlexMediaSlimDTO) {
+	if (mediaItem.type === PlexMediaType.Movie) {
+		router.push({
+			name: 'movies-libraryId-details-movieId',
+			params: {
+				libraryId: mediaItem.plexLibraryId.toString(),
+				movieId: mediaItem.id.toString(),
+			},
+		});
+		return;
+	}
+
 	router.push({
 		name: 'tvshows-libraryId-details-tvShowId',
 		params: {

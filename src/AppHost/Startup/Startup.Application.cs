@@ -112,7 +112,7 @@ public static partial class Startup
                 var result = ResultExtensions.Create400BadRequestResult($"Bad request: {ctx.Request.GetDisplayUrl()}");
                 var errors = failures
                     .GroupBy(f => f.PropertyName)
-                    .ToDictionary(e => e.Key, e => e.Select(m => m.ErrorMessage).ToArray());
+                    .ToDictionary(e => e.Key, e => string.Join("; ", e.Select(m => m.ErrorMessage)));
                 foreach (var reason in errors)
                     result.Errors[0].Metadata.Add(reason.Key, reason.Value);
 

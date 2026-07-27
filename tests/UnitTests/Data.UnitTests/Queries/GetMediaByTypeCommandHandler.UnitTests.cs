@@ -1,9 +1,17 @@
 using FlexQuery.NET.Models;
+using Reaparr.Application.Contracts;
 
 namespace Reaparr.Data.UnitTests;
 
 public class GetMediaByTypeCommandHandlerUnitTests : BaseUnitTest<GetMediaByTypeCommandHandler>
 {
+    public GetMediaByTypeCommandHandlerUnitTests()
+    {
+        Mock.Mock<ICommandExecutor>()
+            .Setup(x => x.Send(It.IsAny<ICommand<Result>>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result.Ok());
+    }
+
     [Test]
     public async Task ShouldReturnOnlyMoviesFromSpecificLibrary_WhenPlexLibraryIdIsSet()
     {
@@ -46,6 +54,149 @@ public class GetMediaByTypeCommandHandlerUnitTests : BaseUnitTest<GetMediaByType
         result.IsSuccess.ShouldBeTrue();
         result.Value.Items.ShouldNotBeEmpty();
         result.Value.Items.ShouldAllBe(x => x.PlexLibraryId == targetLibraryId);
+    }
+
+    [Test]
+    public async Task ShouldFilterMoviesByProjectedComparisonState_WhenComparisonStateFilterIsSet()
+    {
+        // Arrange
+        await SetupDatabase(70020, cfg =>
+        {
+            cfg.PlexServerCount = 1;
+            cfg.PlexMovieLibraryCount = 1;
+            cfg.MovieCount = 4;
+        });
+
+        var dbContext = IDbContext;
+        var targetLibraryId = await dbContext.PlexLibraries
+            .Where(x => x.Type == PlexMediaType.Movie)
+            .Select(x => x.Id)
+            .FirstAsync(CancellationToken);
+        var movieIds = await dbContext.PlexMovies
+            .Where(x => x.PlexLibraryId == targetLibraryId)
+            .OrderBy(x => x.Id)
+            .Select(x => x.Id)
+            .Take(4)
+            .ToListAsync(CancellationToken);
+
+        for (var i = 0; i < movieIds.Count; i++)
+        {
+            var year = 2000 + i;
+            await dbContext.PlexMovies
+                .Where(x => x.Id == movieIds[i])
+                .ExecuteUpdateAsync(x => x.SetProperty(y => y.Year, year), CancellationToken);
+        }
+
+        var command = new GetMediaByTypeCommand()
+        {
+            Filter = new MediaQueryFilter
+            {
+                MediaType = PlexMediaType.Movie,
+                PlexLibraryId = targetLibraryId,
+                FilterOfflineMedia = false,
+                FilterOwnedMedia = false,
+                ComparisonState = PlexMediaComparisonState.Missing,
+                Parameters = new FlexQueryParameters
+                {
+                    Page = 1,
+                    PageSize = 1,
+                    Sort = "Year:asc",
+                    Filter = null,
+                },
+            },
+        };
+
+        Mock.Mock<ICommandExecutor>()
+            .Setup(x => x.Send(It.IsAny<ApplyComparisonStateCommand>(), It.IsAny<CancellationToken>()))
+            .Callback<ICommand<Result>, CancellationToken>((projectionCommand, _) =>
+            {
+                var applyCommand = (ApplyComparisonStateCommand)projectionCommand;
+                for (var i = 0; i < applyCommand.Items.Count; i++)
+                {
+                    applyCommand.Items[i].SetComparisonState(i is 0 or 2
+                        ? PlexMediaComparisonState.Missing
+                        : PlexMediaComparisonState.Owned);
+                }
+            })
+            .ReturnsAsync(Result.Ok())
+            .Verifiable(Times.Once());
+
+        // Act
+        var result = await Sut.ExecuteAsync(command, CancellationToken);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.TotalCount.ShouldBe(2);
+        result.Value.Items.Count.ShouldBe(1);
+        result.Value.Items.ShouldAllBe(x => x.ComparisonId == PlexMediaComparisonState.Missing.ToComparisonId());
+        result.Value.NavigationIndexes
+            .Select(x => new { x.Label, x.Index })
+            .ShouldBe([
+                new { Label = "2000", Index = 0 },
+                new { Label = "2002", Index = 1 },
+            ]);
+        Mock.Mock<ICommandExecutor>().Verify();
+    }
+
+    [Test]
+    public async Task ShouldFilterMoviesByProjectedComparisonStateAcrossLibraries_WhenAllMediaModeComparisonStateFilterIsSet()
+    {
+        // Arrange
+        await SetupDatabase(70022, cfg =>
+        {
+            cfg.PlexServerCount = 1;
+            cfg.PlexMovieLibraryCount = 2;
+            cfg.MovieCount = 2;
+        });
+
+        var command = new GetMediaByTypeCommand()
+        {
+            Filter = new MediaQueryFilter
+            {
+                MediaType = PlexMediaType.Movie,
+                PlexLibraryId = 0,
+                FilterOfflineMedia = false,
+                FilterOwnedMedia = false,
+                ComparisonState = PlexMediaComparisonState.Missing,
+                Parameters = new FlexQueryParameters
+                {
+                    Page = 1,
+                    PageSize = 1,
+                    Sort = null,
+                    Filter = null,
+                },
+            },
+        };
+
+        var observedPlexLibraryIds = new List<int>();
+        Mock.Mock<ICommandExecutor>()
+            .Setup(x => x.Send(It.IsAny<ApplyComparisonStateCommand>(), It.IsAny<CancellationToken>()))
+            .Callback<ICommand<Result>, CancellationToken>((projectionCommand, _) =>
+            {
+                var applyCommand = (ApplyComparisonStateCommand)projectionCommand;
+                observedPlexLibraryIds.Add(applyCommand.PlexLibraryId);
+
+                for (var i = 0; i < applyCommand.Items.Count; i++)
+                {
+                    applyCommand.Items[i].SetComparisonState(i == 0
+                        ? PlexMediaComparisonState.Missing
+                        : PlexMediaComparisonState.Owned); 
+                }
+            })
+            .ReturnsAsync(Result.Ok())
+            .Verifiable(Times.Exactly(2));
+
+        // Act
+        var result = await Sut.ExecuteAsync(command, CancellationToken);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        observedPlexLibraryIds.ShouldAllBe(x => x > 0);
+        result.Value.TotalCount.ShouldBe(2);
+        result.Value.Items.Count.ShouldBe(1);
+        result.Value.Items.ShouldAllBe(x => x.ComparisonId == PlexMediaComparisonState.Missing.ToComparisonId());
+        result.Value.NavigationIndexes.Max(x => x.Index).ShouldBe(1);
+        Mock.Mock<ICommandExecutor>().Verify();
     }
 
     [Test]
@@ -136,8 +287,8 @@ public class GetMediaByTypeCommandHandlerUnitTests : BaseUnitTest<GetMediaByType
         // Arrange
         await SetupDatabase(70004, cfg =>
         {
-            cfg.PlexServerCount = 1;
-            cfg.PlexMovieLibraryCount = 2;
+            cfg.PlexServerCount = 2;
+            cfg.PlexMovieLibraryCount = 1;
             cfg.MovieCount = 4;
             cfg.PlexAccountCount = 1;
         });
@@ -146,12 +297,12 @@ public class GetMediaByTypeCommandHandlerUnitTests : BaseUnitTest<GetMediaByType
         var libraryToKeep = await dbContext.PlexLibraries
             .Where(x => x.Type == PlexMediaType.Movie)
             .OrderBy(x => x.Id)
-            .Select(x => x.Id)
+            .Select(x => new { x.Id, x.PlexServerId })
             .FirstAsync(CancellationToken);
 
-        await dbContext.PlexAccountLibraries
-            .Where(x => x.PlexLibraryId == libraryToKeep)
-            .ExecuteUpdateAsync(x => x.SetProperty(y => y.IsLibraryOwned, false), CancellationToken);
+        await dbContext.PlexServers
+            .Where(x => x.Id == libraryToKeep.PlexServerId)
+            .ExecuteUpdateAsync(x => x.SetProperty(y => y.OwnedOverride, false), CancellationToken);
 
         var command = new GetMediaByTypeCommand()
         {
@@ -177,7 +328,7 @@ public class GetMediaByTypeCommandHandlerUnitTests : BaseUnitTest<GetMediaByType
         // Assert
         result.IsSuccess.ShouldBeTrue();
         result.Value.Items.ShouldNotBeEmpty();
-        result.Value.Items.ShouldAllBe(x => x.PlexLibraryId == libraryToKeep);
+        result.Value.Items.ShouldAllBe(x => x.PlexLibraryId == libraryToKeep.Id);
     }
 
     [Test]

@@ -57,7 +57,14 @@ public class SchedulerService : ISchedulerService
         {
             await SetupPlexServerStatusCheckJob();
             await SetupUpdateCheckJob();
-            await SetupLibrarySyncJob();
+            var setupLibrarySyncResult = await SetupLibrarySyncJob();
+            if (setupLibrarySyncResult.IsFailed)
+                return setupLibrarySyncResult;
+
+            var setupLibraryComparisonResult = await SetupLibraryComparisonJob();
+            if (setupLibraryComparisonResult.IsFailed)
+                return setupLibraryComparisonResult;
+
             var queueLibraryUpdatesResult = await _commandExecutor.Send(
                 new QueueCheckPlexLibraryUpdatesJobCommand(),
                 CancellationToken.None
@@ -158,17 +165,28 @@ public class SchedulerService : ISchedulerService
         await _scheduler.ScheduleJob(job, trigger);
     }
 
-    private async Task SetupLibrarySyncJob()
+    private async Task<Result> SetupLibrarySyncJob()
     {
-        try
-        {
+        var cleanupResult =
             await _commandExecutor.Send(new CleanupLibrarySyncJobQueueCommand(), CancellationToken.None);
+        if (cleanupResult.IsFailed)
+            return cleanupResult.LogError();
+
+        var checkQueuedResult =
             await _commandExecutor.Send(new CheckQueuedPlexLibraryToSyncCommand(), CancellationToken.None);
-        }
-        catch (Exception ex)
-        {
-            _log.Here().Error(ex, "Failed to setup library sync job during scheduler initialization");
-        }
+        return checkQueuedResult.IsFailed ? checkQueuedResult.LogError() : Result.Ok();
+    }
+
+    private async Task<Result> SetupLibraryComparisonJob()
+    {
+        var cleanupResult =
+            await _commandExecutor.Send(new CleanupLibraryComparisonJobQueueCommand(), CancellationToken.None);
+        if (cleanupResult.IsFailed)
+            return cleanupResult.LogError();
+
+        var checkQueuedResult =
+            await _commandExecutor.Send(new CheckQueuedLibraryComparisonJobCommand(), CancellationToken.None);
+        return checkQueuedResult.IsFailed ? checkQueuedResult.LogError() : Result.Ok();
     }
 
     public async Task<List<JobStatusUpdate<string>>> GetRunningJobUpdates() =>

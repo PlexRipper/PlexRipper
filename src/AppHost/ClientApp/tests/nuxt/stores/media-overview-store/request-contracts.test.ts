@@ -7,7 +7,13 @@ import {
 	generateResultDTO,
 } from '@mock';
 import { useMediaOverviewStore, useSettingsStore } from '@store';
-import { PlexMediaType, type PlexMediaSlimDTO, type PlexMediaStatisticsDTO } from '@dto';
+import {
+	PlexMediaComparisonState,
+	PlexMediaType,
+	type PlexLibraryDTO,
+	type PlexMediaSlimDTO,
+	type PlexMediaStatisticsDTO,
+} from '@dto';
 import { MediaSortField, SortDirection } from '@enums/mediaSortField';
 
 describe('MediaOverviewStore - Request Contracts', () => {
@@ -117,6 +123,11 @@ describe('MediaOverviewStore - Request Contracts', () => {
 		const store = useMediaOverviewStore();
 		store.libraryId = 45;
 		mockMediaResponse();
+		// requestMediaPage calls refreshLibrary when the library type is not yet known
+		mock.onGet(`/api/PlexLibrary/${store.libraryId}`).reply(200, generateResultDTO({
+			id: 45,
+			type: PlexMediaType.Movie,
+		} as PlexLibraryDTO));
 
 		// Act
 		const result = subscribeSpyTo(store.requestMediaPage(1));
@@ -317,27 +328,27 @@ describe('MediaOverviewStore - Request Contracts', () => {
 		// Arrange
 		const store = useMediaOverviewStore();
 		const statistics = createMediaStatistics(2);
-		store.metadata = { countryId: 21, roleId: 11, genreId: 31, qualityId: 41 };
+		store.metadata = { countryId: 21, roleId: 11, genreId: 31, qualityId: 41, comparisonState: PlexMediaComparisonState.Missing };
 		store.addMediaPage(statistics);
 
 		// Act
 		store.resetMetaDataFilterState();
 
 		// Assert
-		expect(store.metadata).toEqual({ countryId: 0, roleId: 0, genreId: 0, qualityId: 0 });
+		expect(store.metadata).toEqual({ countryId: 0, roleId: 0, genreId: 0, qualityId: 0, comparisonState: null });
 		expect(store.getMediaItems).toEqual(statistics.mediaList);
 	});
 
 	test('Should clear metadata filter query params and reset metadata values without refreshing media', () => {
 		// Arrange
 		const store = useMediaOverviewStore();
-		store.metadata = { countryId: 21, roleId: 11, genreId: 31, qualityId: 41 };
+		store.metadata = { countryId: 21, roleId: 11, genreId: 31, qualityId: 41, comparisonState: PlexMediaComparisonState.Missing };
 
 		// Act
 		store.clearMetaDataFilter();
 
 		// Assert
-		expect(store.metadata).toEqual({ countryId: 0, roleId: 0, genreId: 0, qualityId: 0 });
+		expect(store.metadata).toEqual({ countryId: 0, roleId: 0, genreId: 0, qualityId: 0, comparisonState: null });
 		expect(mock.history.get.filter((x) => x.url === '/api/PlexMedia')).toHaveLength(0);
 	});
 
@@ -373,13 +384,15 @@ describe('MediaOverviewStore - Request Contracts', () => {
 		expect(store.queryHash).toBe(existing.queryHash);
 	});
 
-	test('Should set country, role, genre, and quality filter params when their values are positive', async () => {
+	test('Should set country, role, genre, quality, and comparison filter params when their values are set', async () => {
 		// Arrange
 		const store = useMediaOverviewStore();
+		store.libraryId = 0;
 		store.metadata.countryId = 21;
 		store.metadata.roleId = 11;
 		store.metadata.genreId = 31;
 		store.metadata.qualityId = 41;
+		store.metadata.comparisonState = PlexMediaComparisonState.Missing;
 		mockMediaResponse();
 
 		// Act
@@ -391,5 +404,6 @@ describe('MediaOverviewStore - Request Contracts', () => {
 		expect(lastMediaRequest().params.roleId).toBe(11);
 		expect(lastMediaRequest().params.genreId).toBe(31);
 		expect(lastMediaRequest().params.qualityId).toBe(41);
+		expect(lastMediaRequest().params.comparisonState).toBe(PlexMediaComparisonState.Missing);
 	});
 });

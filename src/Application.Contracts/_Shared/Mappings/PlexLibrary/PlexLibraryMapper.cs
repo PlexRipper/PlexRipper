@@ -24,6 +24,7 @@ public static class PlexLibraryMapper
             Count = plexLibrary.MediaCount,
             SeasonCount = plexLibrary.SeasonCount,
             EpisodeCount = plexLibrary.EpisodeCount,
+            IsEnabled = plexLibrary.IsEnabled,
         };
 
     public static List<PlexLibraryDTO> ToDTO(this List<PlexLibrary> plexLibraries) =>

@@ -13,8 +13,31 @@
 		</div>
 		<div class="media-overview-content">
 			<template v-if="!mediaOverviewStore.loading">
+				<QRow
+					v-if="library && !library.isEnabled"
+					class="q-mt-md"
+					justify="center"
+					gutter="md">
+					<QCol cols="auto">
+						<QAlert type="warning">
+							<QRow
+								align="center"
+								gutter="md">
+								<QCol>
+									{{ t('components.media-overview.library-disabled', { library: library.title }) }}
+								</QCol>
+								<QCol cols="auto">
+									<BaseButton
+										color="positive"
+										:label="t('components.media-overview.enable-library-button')"
+										@click="openLibraryServerSettings" />
+								</QCol>
+							</QRow>
+						</QAlert>
+					</QCol>
+				</QRow>
 				<!-- Media Overview -->
-				<template v-if="mediaOverviewStore.itemsLength && !mediaOverviewStore.hasNoSearchResults">
+				<template v-else-if="mediaOverviewStore.itemsLength && !mediaOverviewStore.hasNoSearchResults">
 					<!--	Data table display	-->
 					<QRow align="start">
 						<QCol>
@@ -47,7 +70,9 @@
 								<template v-if="mediaOverviewStore.serverError">
 									{{ t('components.media-overview.failed-to-load-media') }}
 									<template v-if="mediaOverviewStore.cacheRetrySeconds > 0">
-										{{ t('components.media-overview.retrying-in-seconds', { seconds: mediaOverviewStore.cacheRetrySeconds }) }}
+										{{
+											t('components.media-overview.retrying-in-seconds', { seconds: mediaOverviewStore.cacheRetrySeconds })
+										}}
 									</template>
 								</template>
 								<template v-else-if="mediaOverviewStore.allMediaMode">
@@ -59,10 +84,10 @@
 								<template v-else-if="mediaOverviewStore.hasNoFilterResults">
 									{{ t('components.media-overview.no-filter-results') }}
 								</template>
-								<template v-else-if="libraryStore.getLibrary(libraryId)?.syncedAt === null">
+								<template v-else-if="library?.syncedAt === null">
 									{{ t('components.media-overview.library-not-yet-synced') }}
 								</template>
-								<template v-else-if="!mediaOverviewStore.itemsLength">
+								<template v-else-if="!mediaOverviewStore.itemsLength && !mediaOverviewStore.filterQuery && !mediaOverviewStore.hasActiveFilter">
 									{{ t('components.media-overview.no-data') }}
 								</template>
 								<template v-else>
@@ -76,6 +101,8 @@
 
 			<!-- Media Selection Dialog -->
 			<MediaSelectionDialog />
+			<!-- Media Comparison Details Dialog -->
+			<MediaComparisonDetailsDialog />
 			<!-- Media Options Dialog -->
 			<MediaOptionsDialog @closed="onOptionsClosed" />
 			<!-- Loading overlay -->
@@ -89,7 +116,7 @@
 <script setup lang="ts">
 import Log from 'consola';
 import { useSubscription } from '@vueuse/rxjs';
-import { type DownloadMediaDTO, LibrarySyncJobStatus, PlexMediaType, ViewMode } from '@dto';
+import { type DownloadMediaDTO, PlexMediaType, ViewMode } from '@dto';
 import { DialogType } from '@enums';
 import type { IMediaOverviewBarActions } from '@interfaces';
 import {
@@ -110,11 +137,12 @@ const mediaOverviewStore = useMediaOverviewStore();
 const downloadStore = useDownloadStore();
 const libraryStore = useLibraryStore();
 const dialogStore = useDialogStore();
-const backgroundJobsStore = useBackgroundJobsStore();
 
 const props = defineProps<{
 	libraryId: number;
 }>();
+
+const library = computed(() => libraryStore.getLibrary(props.libraryId));
 
 function resetProgress() {
 	libraryStore.updateLibraryProgress({
@@ -135,6 +163,12 @@ function refreshLibrary() {
 	mediaOverviewStore.loading = true;
 	useSubscription(
 		libraryStore.reSyncLibrary(mediaOverviewStore.libraryId).subscribe(),
+	);
+}
+
+function openLibraryServerSettings(): void {
+	useSubscription(
+		libraryStore.setLibraryEnabled(props.libraryId, true).subscribe(),
 	);
 }
 
@@ -238,18 +272,6 @@ onMounted(() => {
 			},
 		}),
 	);
-
-	// Library sync job subscription
-	useSubscription(backgroundJobsStore.getLibrarySyncJobUpdate().subscribe((value) => {
-		const queue = value.data;
-		if (queue.plexLibraryId !== mediaOverviewStore.libraryId) {
-			return;
-		}
-
-		if (queue.status === LibrarySyncJobStatus.Completed) {
-			useSubscription(mediaOverviewStore.refreshMediaData().subscribe());
-		}
-	}));
 });
 </script>
 

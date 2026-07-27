@@ -39,24 +39,24 @@
       },
       "Microsoft.AspNetCore.SignalR.Protocols.MessagePack": {
         "type": "Direct",
-        "requested": "[10.0.9, )",
-        "resolved": "10.0.9",
-        "contentHash": "76zErsAXIb113AjnlimhFFs0XBcD8C1wpduP30EXtexlxTebayCppmp/xqpQJAQJBzTUyUo3Vr7dFlJvSnp4Tw==",
+        "requested": "[10.0.10, )",
+        "resolved": "10.0.10",
+        "contentHash": "45zHBTO1MdNZbgxuVSukryXkAl/u0+X+0rjAwuGzVK2adFmM8gprw+0D8p0WWhlAnXZFUjUtXSkdF5up1ekf6w==",
         "dependencies": {
-          "MessagePack": "2.5.301"
+          "MessagePack": "2.5.302"
         }
       },
       "Microsoft.AspNetCore.SpaServices.Extensions": {
         "type": "Direct",
-        "requested": "[10.0.9, )",
-        "resolved": "10.0.9",
-        "contentHash": "5dRWoBvcyGgyMt+AbrJluZpHtIkI10aLAnFRoH588yzLw+6o1OzXAr2KSmSlwIvDxAZ8xllbfm29No0+kRyNtA=="
+        "requested": "[10.0.10, )",
+        "resolved": "10.0.10",
+        "contentHash": "okfr9qN6PVpeABjN6cHcuhWSaIZSSmnVrdvZIlJZM2jdhFSbIOmuChJ+oySBMqbAyzBKsHxaqZcZhhWieXJAoA=="
       },
       "Microsoft.Extensions.Http.Polly": {
         "type": "Direct",
-        "requested": "[10.0.9, )",
-        "resolved": "10.0.9",
-        "contentHash": "bwfSg08DwmF6sR3HMLBLklxfHSoIgQFTsBqY+omxbNqVDPtjoGiWqMcZ5r+gSXRNEaptsXdVeN3QwHAKPspB+w==",
+        "requested": "[10.0.10, )",
+        "resolved": "10.0.10",
+        "contentHash": "ceKyX9V/C+mtapMfXQ0ClKRkxDHAW2AAJoDgTcsh7UdOteCQKB5wRTFgHJ82Lh/3O+UlPA47LRGEZkRxtz/lCA==",
         "dependencies": {
           "Polly": "7.2.4",
           "Polly.Extensions.Http": "3.0.0"
@@ -326,99 +326,99 @@
       },
       "Microsoft.AspNetCore.DataProtection.EntityFrameworkCore": {
         "type": "Transitive",
-        "resolved": "10.0.9",
-        "contentHash": "RVbqubLZLstduJDSNV9syFOdKhzUAtgtLlKDtgdccD0oPDTr4ii6XyEuKS3pxE1erFKLsxGwaXbBLgd5IHnT2A==",
+        "resolved": "10.0.10",
+        "contentHash": "aDcFxkljLWxpOsDh8Wz9Mbmj067p/nl4LouZA9gU54MeivntGqvA67Z3b4hf+oU7SiTtOCI2KPD8FDVZlH8EKA==",
         "dependencies": {
-          "Microsoft.EntityFrameworkCore": "10.0.9"
+          "Microsoft.EntityFrameworkCore": "10.0.10"
         }
       },
       "Microsoft.AspNetCore.Identity.EntityFrameworkCore": {
         "type": "Transitive",
-        "resolved": "10.0.9",
-        "contentHash": "5yHCQ6fDsOKJTCyXCHb7Q4KFPrlTF5k+u5unV7GXI89NJkvgk6nXr6jGxdBi003Sx8MzTjZGpjABLmpOZ2Pg1A==",
+        "resolved": "10.0.10",
+        "contentHash": "/ZV8RMWbWob1ZGsF5f1wVJNNlFLPKCf2ba834PpQiNhirVQ/ksup5SujtuUsvByHEZgv+9dmjC/4Xdi75axmXQ==",
         "dependencies": {
-          "Microsoft.EntityFrameworkCore.Relational": "10.0.9"
+          "Microsoft.EntityFrameworkCore.Relational": "10.0.10"
         }
       },
       "Microsoft.Data.Sqlite": {
         "type": "Transitive",
-        "resolved": "10.0.9",
-        "contentHash": "/eBwiZPcNisn0qZX+Zk4YCftlK/vnoWqv7hHnmSk8MjPxFdYYkmPObpogT0MfCCWN6oAIZnMCo0SoOtZlbbmgQ==",
+        "resolved": "10.0.10",
+        "contentHash": "58JwZ39lCvRXHfV5O6RQfbHEDu8ZsXI7weRoVRR4jrGRxxkS+qyeuGrN2xD+9VYEICApYr0iTSL6PuU+DdsvPg==",
         "dependencies": {
-          "Microsoft.Data.Sqlite.Core": "10.0.9",
+          "Microsoft.Data.Sqlite.Core": "10.0.10",
           "SQLitePCLRaw.bundle_e_sqlite3": "2.1.11",
           "SQLitePCLRaw.core": "2.1.11"
         }
       },
       "Microsoft.Data.Sqlite.Core": {
         "type": "Transitive",
-        "resolved": "10.0.9",
-        "contentHash": "iZrONyMKPjxfVZnUktqO30QjzNwAGH+AxM61s8lKQnVhgbQ3bn0hiXI129ZmVicEbIcwljyy2OVsIYUR51ZHKQ==",
+        "resolved": "10.0.10",
+        "contentHash": "TPCs0ldm7AWqcKmp6f/Xr+14sat7hx4rHfRlS4RgCURBH2thEWbAKEyX7cCWr63zVJVOJIJZTg2cBiUXa8ys6g==",
         "dependencies": {
           "SQLitePCLRaw.core": "2.1.11"
         }
       },
       "Microsoft.EntityFrameworkCore": {
         "type": "Transitive",
-        "resolved": "10.0.9",
-        "contentHash": "tu85SRzOT021V7EQlViCiAE7TqldVn469Y6lt5TEn/+XC4/MeNCHgMRSxqYuWqvF4zAQZUhCmtNEZuM3ss4LeA==",
+        "resolved": "10.0.10",
+        "contentHash": "a0V7zj/VbYP6dTdWpUgE/r2PuLKtUGe2aJ0lVKkn/wP9ZhaxUz2kQydVfvOjCv2SKxlrqdBfHhPD4Cvlf+4ffA==",
         "dependencies": {
-          "Microsoft.EntityFrameworkCore.Abstractions": "10.0.9",
-          "Microsoft.EntityFrameworkCore.Analyzers": "10.0.9"
+          "Microsoft.EntityFrameworkCore.Abstractions": "10.0.10",
+          "Microsoft.EntityFrameworkCore.Analyzers": "10.0.10"
         }
       },
       "Microsoft.EntityFrameworkCore.Abstractions": {
         "type": "Transitive",
-        "resolved": "10.0.9",
-        "contentHash": "GRMaiPkqYna/gCsyDffYDWmefGPC3hDrdMw+2rrGcQwhs6uZOsaMQXMJnoXQ35tx9SkBV2ieRRU9N/jLOO6BZw=="
+        "resolved": "10.0.10",
+        "contentHash": "bOzrFCl6uZCjaSh2bG1ToRQRdx+iXvxosCg9hFyG9OWeAzOFI4xev9OqKeWfKf/kAHyox2JnbcvLVf2ceA7sqA=="
       },
       "Microsoft.EntityFrameworkCore.Analyzers": {
         "type": "Transitive",
-        "resolved": "10.0.9",
-        "contentHash": "aiEFB+C5EsZGqxvMPazE07hbWsp4iPaufJpanGt5O+lrwv7mJLrqma5haVIgFAPCyhQkmk75XSCEubT1zUjxtA=="
+        "resolved": "10.0.10",
+        "contentHash": "2gLDordUCGf3aNOOuqtTbP5mxhiP9nk6TnvGiE3RnqT891O+Zf/qKu1PIREubs1M16A0SImr4vULBfU5BTDs1Q=="
       },
       "Microsoft.EntityFrameworkCore.InMemory": {
         "type": "Transitive",
-        "resolved": "10.0.9",
-        "contentHash": "lvlLJ7kgGivXApixK4FN7pB/aZZJ+bqdNRv2jLR0K0t2ZFIUwNylF1Mo6tMQAN8/2FsNKbv7U4S4FgSdfFtPIQ==",
+        "resolved": "10.0.10",
+        "contentHash": "QRsBDbyAoEVwPu/jesXXs4/uomaA577+hl+HsPfSuFq+uxAd6TyAklU/+OB/7bYvb+eikDuC41VTEFz9l79otA==",
         "dependencies": {
-          "Microsoft.EntityFrameworkCore": "10.0.9"
+          "Microsoft.EntityFrameworkCore": "10.0.10"
         }
       },
       "Microsoft.EntityFrameworkCore.Relational": {
         "type": "Transitive",
-        "resolved": "10.0.9",
-        "contentHash": "dEoyYKgiaZHHgOFm1WMWm1sFEsEuhPWufX4L9PekKtqd/RaIcPjkCjvbrVvJtApErb5wPSJhYvnTlxhH+p9h2g==",
+        "resolved": "10.0.10",
+        "contentHash": "wNonj40aZxia+GtuBiiD6ZqVh4h6y5Nje1bGdmzZ8/ui0QRsAN+S0SIrLHFCEGbG9cDbeaE40sh+Lr7o9rRs6g==",
         "dependencies": {
-          "Microsoft.EntityFrameworkCore": "10.0.9"
+          "Microsoft.EntityFrameworkCore": "10.0.10"
         }
       },
       "Microsoft.EntityFrameworkCore.Sqlite": {
         "type": "Transitive",
-        "resolved": "10.0.9",
-        "contentHash": "HH9/nnRF/YmRrc3hUlgXjMBYKH5kFmd5UWC81l9U0ySQhwHTcgvDPSewB8DyQHzFJzNGgG7VFK6ynC6+XQz9WA==",
+        "resolved": "10.0.10",
+        "contentHash": "kzg9MuQNJvZQxAU+piSkEzc7/1tpW6n1nVSGGMObu2GgxLK8Nf+6fvZundaznTZ+O2KhfPZ8HFNCzMH3PWDUmA==",
         "dependencies": {
-          "Microsoft.EntityFrameworkCore.Sqlite.Core": "10.0.9",
-          "Microsoft.Extensions.DependencyModel": "10.0.9",
+          "Microsoft.EntityFrameworkCore.Sqlite.Core": "10.0.10",
+          "Microsoft.Extensions.DependencyModel": "10.0.10",
           "SQLitePCLRaw.bundle_e_sqlite3": "2.1.11",
           "SQLitePCLRaw.core": "2.1.11"
         }
       },
       "Microsoft.EntityFrameworkCore.Sqlite.Core": {
         "type": "Transitive",
-        "resolved": "10.0.9",
-        "contentHash": "3bPEmACAaPJJSw+m5XwTSi3yZnVtaifa4d8gLsNMzW0Qu28jS5kADSfgJRBlq49RJ1K098VCzEDRJwM8gE6f2w==",
+        "resolved": "10.0.10",
+        "contentHash": "YbVWMIouzwTKBiLms8boa7xeRT88wI14R1msv3XExFk9n0/sa8nU7MwDa1CKtfLGMJs7O7QWuS9/xhcQ72AD2A==",
         "dependencies": {
-          "Microsoft.Data.Sqlite.Core": "10.0.9",
-          "Microsoft.EntityFrameworkCore.Relational": "10.0.9",
-          "Microsoft.Extensions.DependencyModel": "10.0.9",
+          "Microsoft.Data.Sqlite.Core": "10.0.10",
+          "Microsoft.EntityFrameworkCore.Relational": "10.0.10",
+          "Microsoft.Extensions.DependencyModel": "10.0.10",
           "SQLitePCLRaw.core": "2.1.11"
         }
       },
       "Microsoft.Extensions.DependencyModel": {
         "type": "Transitive",
-        "resolved": "10.0.9",
-        "contentHash": "SCDTQ6HubnRvTUjR7dgMKHZvNoCb03t44ttHL8trlFTGgfDteWn/0nRdOxDhcI+lTWhKgd/flCVJEtAOPhSLNg=="
+        "resolved": "10.0.10",
+        "contentHash": "rfZA1RjR021RPqSmIPovfz2aOd79TGqJ9BengbjnzIISOVwjLmuSDnhCMmiY/1c6iYvGolQ1iNGzkav0u11XEA=="
       },
       "Microsoft.IdentityModel.Abstractions": {
         "type": "Transitive",
@@ -907,10 +907,10 @@
         "dependencies": {
           "AppAny.Quartz.EntityFrameworkCore.Migrations.SQLite": "[0.6.0, )",
           "Autofac": "[9.1.0, )",
-          "Microsoft.AspNetCore.Identity.EntityFrameworkCore": "[10.0.9, )",
-          "Microsoft.Data.Sqlite": "[10.0.9, )",
-          "Microsoft.EntityFrameworkCore.InMemory": "[10.0.9, )",
-          "Microsoft.EntityFrameworkCore.Sqlite": "[10.0.9, )",
+          "Microsoft.AspNetCore.Identity.EntityFrameworkCore": "[10.0.10, )",
+          "Microsoft.Data.Sqlite": "[10.0.10, )",
+          "Microsoft.EntityFrameworkCore.InMemory": "[10.0.10, )",
+          "Microsoft.EntityFrameworkCore.Sqlite": "[10.0.10, )",
           "Reaparr.Data.Contracts": "[1.0.0, )",
           "Reaparr.FileSystem.Contracts": "[1.0.0, )",
           "Reaparr.Identity.Contracts": "[1.0.0, )",
@@ -926,8 +926,8 @@
           "EFCore.BulkExtensions.SQLite": "[10.0.1, )",
           "EntityFrameworkCore.Sqlite.Concurrency": "[10.1.0, )",
           "FlexQuery.NET.EFCore": "[2.5.0, )",
-          "Microsoft.EntityFrameworkCore": "[10.0.9, )",
-          "Microsoft.EntityFrameworkCore.Sqlite": "[10.0.9, )",
+          "Microsoft.EntityFrameworkCore": "[10.0.10, )",
+          "Microsoft.EntityFrameworkCore.Sqlite": "[10.0.10, )",
           "Reaparr.Application.Contracts": "[1.0.0, )",
           "Reaparr.Domain": "[1.0.0, )",
           "SQLitePCLRaw.lib.e_sqlite3": "[2.1.12, )"
@@ -1002,8 +1002,8 @@
         "type": "Project",
         "dependencies": {
           "FastEndpoints.Security": "[8.1.0, )",
-          "Microsoft.EntityFrameworkCore.InMemory": "[10.0.9, )",
-          "Microsoft.EntityFrameworkCore.Sqlite": "[10.0.9, )",
+          "Microsoft.EntityFrameworkCore.InMemory": "[10.0.10, )",
+          "Microsoft.EntityFrameworkCore.Sqlite": "[10.0.10, )",
           "Reaparr.Data.Contracts": "[1.0.0, )",
           "Reaparr.Identity.Contracts": "[1.0.0, )",
           "Reaparr.Logging": "[1.0.0, )",
@@ -1013,8 +1013,8 @@
       "Reaparr.Identity.Contracts": {
         "type": "Project",
         "dependencies": {
-          "Microsoft.AspNetCore.DataProtection.EntityFrameworkCore": "[10.0.9, )",
-          "Microsoft.AspNetCore.Identity.EntityFrameworkCore": "[10.0.9, )",
+          "Microsoft.AspNetCore.DataProtection.EntityFrameworkCore": "[10.0.10, )",
+          "Microsoft.AspNetCore.Identity.EntityFrameworkCore": "[10.0.10, )",
           "Reaparr.Data.Contracts": "[1.0.0, )"
         }
       },

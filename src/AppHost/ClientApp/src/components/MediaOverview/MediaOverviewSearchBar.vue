@@ -8,7 +8,8 @@
 		@update:model-value="(value) => useSubscription(mediaOverviewStore.setFilterQuery(String(value ?? '')).subscribe())">
 		<template #prepend>
 			<IconButton
-				icon="mdi-magnify">
+				icon="mdi-magnify"
+				cy="media-overview-filter-btn">
 				<MediaFilterMenu :library-id="libraryId" />
 			</IconButton>
 		</template>

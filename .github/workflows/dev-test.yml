@@ -19,10 +19,6 @@ on:
             - '.vscode/**'
             - 'README.md'
 
-concurrency:
-    group: ${{ github.workflow }}-${{ github.ref }}
-    cancel-in-progress: true
-
 jobs:
     # Check if PR is in draft
     Check-PR-Status:

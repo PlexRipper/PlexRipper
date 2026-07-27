@@ -36,6 +36,9 @@ public record GetAllMediaByTypeRequest
     [QueryParam, BindFrom("qualityId")]
     public int? QualityId { get; init; }
 
+    [QueryParam, BindFrom("comparisonState")]
+    public PlexMediaComparisonState? ComparisonState { get; init; }
+
     /// <summary>The sorting expression (e.g., "sortIndex:asc").</summary>
     [QueryParam, BindFrom("sort")]
     public string? Sort { get; init; }
@@ -63,6 +66,7 @@ public class GetAllMediaByTypeRequestValidator : Validator<GetAllMediaByTypeRequ
         RuleFor(x => x.GenreId).GreaterThan(0).When(x => x.GenreId.HasValue);
         RuleFor(x => x.RoleId).GreaterThan(0).When(x => x.RoleId.HasValue);
         RuleFor(x => x.QualityId).GreaterThan(0).When(x => x.QualityId.HasValue);
+        RuleFor(x => x.ComparisonState).IsInEnum().When(x => x.ComparisonState.HasValue);
     }
 }
 
@@ -101,6 +105,7 @@ public class GetAllMediaByTypeEndpoint : Endpoint<GetAllMediaByTypeRequest, Plex
                 PlexLibraryId = req.PlexLibraryId ?? 0,
                 FilterOfflineMedia = req.FilterOfflineMedia,
                 FilterOwnedMedia = req.FilterOwnedMedia,
+                ComparisonState = req.ComparisonState,
                 Parameters = new FlexQueryParameters
                 {
                     Filter = BuildFilter(req),

@@ -133,14 +133,28 @@ public class SyncPlexTvShowsCommandHandler : ICommandHandler<SyncPlexTvShowsComm
         bulkInsertRapport.DeletedSeasons = removeRapport.DeletedSeasons;
         bulkInsertRapport.DeletedEpisodes = removeRapport.DeletedEpisodes;
 
-        // Update counts in PlexLibrary
-        var mediaSize = plexTvShows.Sum(x => x.MediaSize);
+        // Update counts in PlexLibrary from persisted rows so denormalized metrics cannot drift.
+        var metrics = await _dbContext
+            .PlexLibraries
+            .Where(x => x.Id == plexLibraryId)
+            .Select(_ => new
+            {
+                TvShowCount = _dbContext.PlexTvShows.Count(x => x.PlexLibraryId == plexLibraryId),
+                SeasonCount = _dbContext.PlexTvShowSeason.Count(x => x.PlexLibraryId == plexLibraryId),
+                EpisodeCount = _dbContext.PlexTvShowEpisodes.Count(x => x.PlexLibraryId == plexLibraryId),
+                MediaSize = _dbContext.PlexTvShowEpisodes.Where(x => x.PlexLibraryId == plexLibraryId).Sum(x => (long?)x.MediaSize) ?? 0,
+            })
+            .FirstOrDefaultAsync(cancellationToken);
+
+        if (metrics is null)
+            return ResultExtensions.EntityNotFound(nameof(PlexLibrary), plexLibraryId).LogError();
+
         await _dbContext.SetTvShowMediaMetrics(
             plexLibraryId,
-            bulkInsertRapport.CreatedTvShows,
-            bulkInsertRapport.CreatedSeasons,
-            bulkInsertRapport.CreatedEpisodes,
-            mediaSize
+            metrics.TvShowCount,
+            metrics.SeasonCount,
+            metrics.EpisodeCount,
+            metrics.MediaSize
         );
 
         // Sync metadata such as Countries, Roles and Genre using separate DbContext instances

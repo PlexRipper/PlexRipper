@@ -30,9 +30,9 @@ public static partial class DbContextExtensions
                 arguments.ToArray()
             );
 
-            await ((DbContext)dbContext).ExecuteWithRetryAsync(async db =>
+            await dbContext.ExecuteWithRetryAsync(async db =>
             {
-                await db.Database.ExecuteSqlInterpolatedAsync(sql, ct);
+                await db.ExecuteSqlInterpolatedAsync(sql, ct);
                 return true;
             }, cancellationToken: ct);
 
@@ -70,9 +70,9 @@ public static partial class DbContextExtensions
                 $"INSERT OR IGNORE INTO PlexGenres (Name, Key) VALUES {string.Join(", ", values)}",
                 arguments.ToArray()
             );
-            await ((DbContext)dbContext).ExecuteWithRetryAsync(async db =>
+            await dbContext.ExecuteWithRetryAsync(async db =>
             {
-                await db.Database.ExecuteSqlInterpolatedAsync(sql, ct);
+                await db.ExecuteSqlInterpolatedAsync(sql, ct);
                 return true;
             }, cancellationToken: ct);
 
@@ -110,9 +110,9 @@ public static partial class DbContextExtensions
                 $"INSERT OR IGNORE INTO PlexCountries (Name, Key) VALUES {string.Join(", ", values)}",
                 arguments.ToArray()
             );
-            await ((DbContext)dbContext).ExecuteWithRetryAsync(async db =>
+            await dbContext.ExecuteWithRetryAsync(async db =>
             {
-                await db.Database.ExecuteSqlInterpolatedAsync(sql, ct);
+                await db.ExecuteSqlInterpolatedAsync(sql, ct);
                 return true;
             }, cancellationToken: ct);
 

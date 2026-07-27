@@ -1,3 +1,4 @@
+using System.Net;
 using System.Net.Mime;
 using System.Net.Sockets;
 using Microsoft.AspNetCore.WebUtilities;
@@ -174,6 +175,18 @@ public sealed class GetPlexMediaThumbnailImageEndpoint : Endpoint<GetPlexMediaTh
         {
             // Use ResponseHeadersRead to start streaming immediately without buffering
             using var response = await client.GetAsync(url, HttpCompletionOption.ResponseHeadersRead, ct);
+            if (response.StatusCode == HttpStatusCode.NoContent)
+            {
+                _log.Here()
+                    .Verbose(
+                        "Plex returned no thumbnail content from {Url}",
+                        SanitizeUrl(url)
+                    );
+                HttpContext.Response.Headers.CacheControl = "no-store";
+                await Send.FluentResult(Result.Fail("No thumbnail image content returned by Plex").Add404NotFoundError(), ct);
+                return;
+            }
+
             if (!response.IsSuccessStatusCode)
             {
                 _log.Here()

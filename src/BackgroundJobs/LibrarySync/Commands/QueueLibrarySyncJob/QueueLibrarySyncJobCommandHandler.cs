@@ -49,11 +49,14 @@ public class QueueLibrarySyncJobCommandHandler : ICommandHandler<QueueLibrarySyn
 
         var syncBufferCutoff = DateTime.UtcNow.AddHours(-3);
 
-        // Get IDs of items to reset (completed/failed)
+        var unsyncedLibraryIds = libraries.Where(x => x.SyncedAt is null).Select(x => x.Id).ToHashSet();
+
+        // Get IDs of items to reset (completed/failed/cancelled)
         var itemsToReset = existingQueues
             .Where(x =>
                 x.Status is LibrarySyncJobStatus.Failed or LibrarySyncJobStatus.Cancelled
-                || (x.Status == LibrarySyncJobStatus.Completed && x.CompletedAt <= syncBufferCutoff)
+                || (x.Status == LibrarySyncJobStatus.Completed
+                    && (command.Force || x.CompletedAt <= syncBufferCutoff || unsyncedLibraryIds.Contains(x.PlexLibraryId)))
             )
             .Select(x => x.PlexLibraryId)
             .ToList();
@@ -85,7 +88,7 @@ public class QueueLibrarySyncJobCommandHandler : ICommandHandler<QueueLibrarySyn
         // Add new items (excluding ALL existing ones, including those we just reset)
         var itemsToAdd = libraries
             .Where(x => !existingLibraryIds.Contains(x.Id))
-            .Where(x => x.SyncedAt is null || x.SyncedAt <= syncBufferCutoff)
+            .Where(x => command.Force || x.SyncedAt is null || x.SyncedAt <= syncBufferCutoff)
             .Select(x => new LibrarySyncJobQueue
             {
                 PlexLibraryId = x.Id,

@@ -189,6 +189,43 @@ public class QueueLibrarySyncJobCommandHandlerUnitTests : BaseUnitTest<QueueLibr
     }
 
     [Test]
+    public async Task ShouldQueueRecentlySyncedNewLibrary_WhenForceIsEnabled()
+    {
+        // Arrange
+        await SetupDatabase(
+            3033,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexMovieLibraryCount = 1;
+            }
+        );
+
+        var library = IDbContext.PlexLibraries.First();
+        await IDbContext
+            .PlexLibraries.Where(x => x.Id == library.Id)
+            .ExecuteUpdateAsync(x => x.SetProperty(y => y.SyncedAt, DateTime.UtcNow.AddHours(-2)), CancellationToken);
+
+        var command = new QueueLibrarySyncJobCommand([library.Id], Force: true);
+
+        Mock.Mock<ICommandExecutor>()
+            .Setup(x => x.Send(It.IsAny<CheckQueuedPlexLibraryToSyncCommand>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result.Ok())
+            .Verifiable(Times.Once());
+
+        // Act
+        var result = await Sut.ExecuteAsync(command, CancellationToken);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        var queueItems = await IDbContext.LibrarySyncJobQueues.IgnoreQueryFilters().ToListAsync(CancellationToken);
+        queueItems.Count.ShouldBe(1);
+        queueItems[0].PlexLibraryId.ShouldBe(library.Id);
+        queueItems[0].Status.ShouldBe(LibrarySyncJobStatus.Queued);
+        Mock.Mock<ICommandExecutor>().Verify();
+    }
+
+    [Test]
     public async Task ShouldSkipRecentlyCompletedLibraries_WhenCompletedWithinSyncBuffer()
     {
         // Arrange
@@ -219,6 +256,7 @@ public class QueueLibrarySyncJobCommandHandlerUnitTests : BaseUnitTest<QueueLibr
             Priority = 1,
             Status = LibrarySyncJobStatus.Completed,
             CreatedAt = DateTime.UtcNow,
+            StartedAt = DateTime.UtcNow.AddHours(-3),
             CompletedAt = DateTime.UtcNow.AddHours(-2),
         };
 
@@ -246,6 +284,113 @@ public class QueueLibrarySyncJobCommandHandlerUnitTests : BaseUnitTest<QueueLibr
                 x => x.Send(It.IsAny<CheckQueuedPlexLibraryToSyncCommand>(), It.IsAny<CancellationToken>()),
                 Times.Never()
             );
+    }
+
+    [Test]
+    public async Task ShouldResetRecentlyCompletedLibrary_WhenForceIsEnabled()
+    {
+        // Arrange
+        await SetupDatabase(
+            3034,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexMovieLibraryCount = 1;
+            }
+        );
+
+        var dbContext = IDbContext;
+        var library = dbContext.PlexLibraries.Select(x => new { x.Id, x.PlexServerId }).First();
+        await dbContext
+            .PlexLibraries.Where(x => x.Id == library.Id)
+            .ExecuteUpdateAsync(x => x.SetProperty(y => y.SyncedAt, DateTime.UtcNow.AddHours(-2)), CancellationToken);
+
+        var completedItem = new LibrarySyncJobQueue
+        {
+            PlexServerId = library.PlexServerId,
+            PlexLibraryId = library.Id,
+            Priority = 1,
+            Status = LibrarySyncJobStatus.Completed,
+            CreatedAt = DateTime.UtcNow,
+            CompletedAt = DateTime.UtcNow.AddHours(-2),
+        };
+
+        await dbContext.LibrarySyncJobQueues.AddAsync(completedItem, CancellationToken);
+        await dbContext.SaveChangesNewAsync(CancellationToken);
+
+        var command = new QueueLibrarySyncJobCommand([library.Id], Force: true);
+
+        Mock.Mock<ICommandExecutor>()
+            .Setup(x => x.Send(It.IsAny<CheckQueuedPlexLibraryToSyncCommand>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result.Ok())
+            .Verifiable(Times.Once());
+
+        // Act
+        var result = await Sut.ExecuteAsync(command, CancellationToken);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        var queueItem = await IDbContext.LibrarySyncJobQueues.IgnoreQueryFilters().SingleAsync(CancellationToken);
+        queueItem.PlexLibraryId.ShouldBe(library.Id);
+        queueItem.Status.ShouldBe(LibrarySyncJobStatus.Queued);
+        queueItem.StartedAt.ShouldBeNull();
+        queueItem.CompletedAt.ShouldBeNull();
+        Mock.Mock<ICommandExecutor>().Verify();
+    }
+
+    [Test]
+    public async Task ShouldResetRecentlyCompletedLibrary_WhenLibraryIsUnsynced()
+    {
+        // Arrange
+        await SetupDatabase(
+            3024,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexMovieLibraryCount = 1;
+            }
+        );
+
+        var dbContext = IDbContext;
+        var library = dbContext.PlexLibraries.Select(x => new { x.Id, x.PlexServerId }).First();
+        await dbContext
+            .PlexLibraries.Where(x => x.Id == library.Id)
+            .ExecuteUpdateAsync(x => x.SetProperty(y => y.SyncedAt, (DateTime?)null), CancellationToken);
+
+        var completedItem = new LibrarySyncJobQueue
+        {
+            PlexServerId = library.PlexServerId,
+            PlexLibraryId = library.Id,
+            Priority = 1,
+            Status = LibrarySyncJobStatus.Completed,
+            CreatedAt = DateTime.UtcNow,
+            StartedAt = DateTime.UtcNow.AddMinutes(-10),
+            CompletedAt = DateTime.UtcNow.AddMinutes(-5),
+        };
+
+        await dbContext.LibrarySyncJobQueues.AddAsync(completedItem, CancellationToken);
+        await dbContext.SaveChangesNewAsync(CancellationToken);
+
+        Mock.Mock<ICommandExecutor>()
+            .Setup(x => x.Send(It.IsAny<CheckQueuedPlexLibraryToSyncCommand>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result.Ok())
+            .Verifiable(Times.Once());
+
+        var command = new QueueLibrarySyncJobCommand([library.Id]);
+
+        // Act
+        var result = await Sut.ExecuteAsync(command, CancellationToken);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+
+        var queueItem = await dbContext.LibrarySyncJobQueues
+            .IgnoreQueryFilters()
+            .SingleAsync(x => x.PlexLibraryId == library.Id, CancellationToken);
+        queueItem.Status.ShouldBe(LibrarySyncJobStatus.Queued);
+        queueItem.StartedAt.ShouldBeNull();
+        queueItem.CompletedAt.ShouldBeNull();
+        Mock.Mock<ICommandExecutor>().Verify();
     }
 
     [Test]

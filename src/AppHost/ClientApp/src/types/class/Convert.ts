@@ -108,10 +108,18 @@ export const Convert = {
 				return FolderType.OtherVideosFolder;
 			case PlexMediaType.Music:
 				return FolderType.MusicFolder;
+			case PlexMediaType.Artist:
+				return FolderType.MusicFolder;
 			case PlexMediaType.Album:
 				return FolderType.MusicFolder;
 			case PlexMediaType.Song:
 				return FolderType.MusicFolder;
+			case PlexMediaType.Photos:
+				return FolderType.PhotosFolder;
+			case PlexMediaType.PhotoAlbum:
+				return FolderType.PhotosFolder;
+			case PlexMediaType.Games:
+				return FolderType.GamesVideosFolder;
 			default:
 				return FolderType.Unknown;
 		}

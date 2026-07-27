@@ -21,12 +21,19 @@ public class SetServerOwnedEndpoint : Endpoint<SetServerOwnedRequest, ResultDTO<
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
     private readonly IMediaQueryCache _mediaQueryCache;
+    private readonly ICommandExecutor _commandExecutor;
 
-    public SetServerOwnedEndpoint(ILogger log, IReaparrDbContext dbContext, IMediaQueryCache mediaQueryCache)
+    public SetServerOwnedEndpoint(
+        ILogger log,
+        IReaparrDbContext dbContext,
+        IMediaQueryCache mediaQueryCache,
+        ICommandExecutor commandExecutor
+    )
     {
         _log = log.ForContext<SetServerOwnedEndpoint>();
         _dbContext = dbContext;
         _mediaQueryCache = mediaQueryCache;
+        _commandExecutor = commandExecutor;
     }
 
     public override void Configure()
@@ -74,12 +81,26 @@ public class SetServerOwnedEndpoint : Endpoint<SetServerOwnedRequest, ResultDTO<
             return;
         }
 
-        var libraryIds = await _dbContext.PlexLibraries
+        var libraries = await _dbContext.PlexLibraries
             .IgnoreQueryFilters()
             .Where(x => x.PlexServerId == req.PlexServerId)
-            .Select(x => x.Id)
+            .Select(x => new { x.Id, x.IsEnabled })
             .ToListAsync(ct);
+        var libraryIds = libraries.Select(x => x.Id).ToList();
         _mediaQueryCache.InvalidateLibraries(libraryIds, "Plex server ownership scope changed");
+        var failedResults = new List<ResultBase>();
+        foreach (var lib in libraries.Where(x => x.IsEnabled))
+        {
+            var queueResult = await _commandExecutor.Send(new QueueLibraryComparisonJobsForLibraryCommand(lib.Id), CancellationToken.None);
+            if (queueResult.IsFailed)
+                failedResults.Add(queueResult);
+        }
+
+        if (failedResults.Count > 0)
+        {
+            await Send.FluentResult(Result.Merge(failedResults.ToArray()).LogError(), ct);
+            return;
+        }
 
         await Send.FluentResult(Result.Ok(plexServer), x => x.ToDTO(), ct);
     }

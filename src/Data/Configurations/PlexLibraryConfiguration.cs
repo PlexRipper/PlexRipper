@@ -40,6 +40,10 @@ public class PlexLibraryConfiguration : IEntityTypeConfiguration<PlexLibrary>
             .HasForeignKey(x => x.DefaultDestinationId)
             .OnDelete(DeleteBehavior.SetNull);
 
+        builder.Property(x => x.IsEnabled).HasDefaultValue(true);
+
+        builder.HasQueryFilter("IsEnabled", x => x.IsEnabled);
+
         builder.HasIndex(x => new { x.PlexServerId, x.Uuid }).IsUnique();
 
         builder.Property(c => c.Title).UseCollation(OrderByNaturalExtensions.CollationName);

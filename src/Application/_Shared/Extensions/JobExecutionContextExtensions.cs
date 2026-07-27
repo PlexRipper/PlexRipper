@@ -62,6 +62,9 @@ public static class JobExecutionContextExtensions
             // NOTE: CheckPlexLibrariesForUpdatesJob only dispatches queueing work and does not need a payload.
             case JobTypes.CheckPlexLibrariesForUpdatesJob:
 
+            // NOTE: LibraryComparisonJob runs comparison and does not need a per-job payload.
+            case JobTypes.LibraryComparisonJob:
+
             default:
                 jsonString = "{}";
                 break;

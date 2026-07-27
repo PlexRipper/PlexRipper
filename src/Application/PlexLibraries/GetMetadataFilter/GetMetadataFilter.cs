@@ -20,7 +20,7 @@ public class GetMetadataFilterRequestValidator : Validator<GetMetadataFilterRequ
     }
 }
 
-public class GetMetadataFilter : Endpoint<GetMetadataFilterRequest, PlexMediaFilterMetadataDTO>
+public class GetMetadataFilter : Endpoint<GetMetadataFilterRequest, ResultDTO<PlexMediaFilterMetadataDTO>>
 {
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
@@ -36,6 +36,7 @@ public class GetMetadataFilter : Endpoint<GetMetadataFilterRequest, PlexMediaFil
         Get(ApiRoutes.PlexLibraryController + "/{PlexLibraryId}/metadata-filter");
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<PlexMediaFilterMetadataDTO>))
+                .Produces(StatusCodes.Status404NotFound, typeof(BaseResultDTO))
                 .Produces(StatusCodes.Status500InternalServerError, typeof(BaseResultDTO))
         );
     }
@@ -46,10 +47,27 @@ public class GetMetadataFilter : Endpoint<GetMetadataFilterRequest, PlexMediaFil
 
         if (req.PlexLibraryId > 0)
         {
-            var plexLibrary = await _dbContext.PlexLibraries.GetAsync(req.PlexLibraryId, ct);
+            var plexLibrary = await _dbContext.PlexLibraries
+                .IgnoreQueryFilters()
+                .GetAsync(req.PlexLibraryId, ct);
             if (plexLibrary is null)
             {
                 await Send.FluentResult(ResultExtensions.EntityNotFound(nameof(PlexLibrary), req.PlexLibraryId), ct);
+                return;
+            }
+
+            // A disabled library has no browsable media. Return an empty filter
+            // response so the frontend can show the disabled-library alert instead
+            // of treating this as a server error.
+            if (!plexLibrary.IsEnabled)
+            {
+                await Send.FluentResult(Result.Ok(new PlexMediaFilterMetadataDTO
+                {
+                    Roles = [],
+                    Countries = [],
+                    Genres = [],
+                    Qualities = [],
+                }), ct);
                 return;
             }
 
@@ -123,20 +141,24 @@ public class GetMetadataFilter : Endpoint<GetMetadataFilterRequest, PlexMediaFil
     {
         if (mediaType == PlexMediaType.Movie)
         {
-            return await _dbContext.PlexMovieData
+            var qualities = await _dbContext.PlexMovieData
                 .ApplyWhere(plexLibraryId > 0, x => x.PlexLibraryId == plexLibraryId)
                 .GroupBy(x => x.Quality)
-                .Select(g => (int)g.Key)
+                .Select(g => g.Key)
                 .ToListAsync(ct);
+
+            return qualities.Select(x => x.ToId()).ToList();
         }
 
         if (mediaType == PlexMediaType.TvShow)
         {
-            return await _dbContext.PlexTvShowMediaQualities
+            var qualities = await _dbContext.PlexTvShowMediaQualities
                 .ApplyWhere(plexLibraryId > 0, x => x.PlexLibraryId == plexLibraryId)
                 .GroupBy(x => x.Quality)
-                .Select(g => (int)g.Key)
+                .Select(g => g.Key)
                 .ToListAsync(ct);
+
+            return qualities.Select(x => x.ToId()).ToList();
         }
 
         return [];

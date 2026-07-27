@@ -5,6 +5,7 @@
 		:full-height="fullHeight"
 		:transition-show="transitionShow"
 		:transition-hide="transitionHide"
+		:full-width="fullWidth"
 		@before-show="$emit('opened', dataValue!)"
 		@before-hide="$emit('closed')">
 		<div
@@ -82,6 +83,7 @@ const props = withDefaults(
 		type?: T;
 		width?: string;
 		fullHeight?: boolean;
+		fullWidth?: boolean;
 		contentHeight?: '100' | '80' | '60' | '40' | '20' | '0';
 		loading?: boolean;
 		persistent?: boolean;
@@ -97,6 +99,7 @@ const props = withDefaults(
 		contentHeight: '0',
 		loading: false,
 		fullHeight: false,
+		fullWidth: false,
 		persistent: false,
 		closeButton: false,
 		buttonAlign: 'between',

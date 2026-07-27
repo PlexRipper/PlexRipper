@@ -36,11 +36,13 @@ public class GetMediaDetailByIdEndpoint : Endpoint<GetMediaDetailByIdEndpointReq
 {
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
+    private readonly ICommandExecutor _commandExecutor;
 
-    public GetMediaDetailByIdEndpoint(ILogger log, IReaparrDbContext dbContext)
+    public GetMediaDetailByIdEndpoint(ILogger log, IReaparrDbContext dbContext, ICommandExecutor commandExecutor)
     {
         _log = log.ForContext<GetMediaDetailByIdEndpoint>();
         _dbContext = dbContext;
+        _commandExecutor = commandExecutor;
     }
 
     public override void Configure()
@@ -60,14 +62,15 @@ public class GetMediaDetailByIdEndpoint : Endpoint<GetMediaDetailByIdEndpointReq
         _log.Here().DebugApiCall(HttpContext, req);
         if (req.Type == PlexMediaType.Movie)
         {
-            var plexMovie = await _dbContext.PlexMovies.GetAsync(req.PlexMediaId, ct);
+            var plexMovie = await _dbContext.PlexMovies.IncludeAll().FirstOrDefaultAsync(x => x.Id == req.PlexMediaId, ct);
             if (plexMovie is null)
             {
-                await Send.FluentResult(ResultExtensions.EntityNotFound(nameof(req.Type.GetType), req.PlexMediaId), ct);
+                await Send.FluentResult(ResultExtensions.EntityNotFound(nameof(PlexMovie), req.PlexMediaId), ct);
                 return;
             }
 
             await SetNestedMovieProperties(plexMovie, ct);
+            await ApplyMovieDetailComparisonStateAsync(plexMovie, ct);
 
             await Send.FluentResult(Result.Ok(plexMovie), x => x.ToDTO(), ct);
         }
@@ -79,6 +82,8 @@ public class GetMediaDetailByIdEndpoint : Endpoint<GetMediaDetailByIdEndpointReq
                 await Send.FluentResult(plexTvShowResult, ct);
                 return;
             }
+
+            await ApplyTvShowDetailComparisonStateAsync(plexTvShowResult.Value, ct);
 
             await Send.FluentResult(plexTvShowResult, x => x.ToDTO(), ct);
         }
@@ -110,6 +115,41 @@ public class GetMediaDetailByIdEndpoint : Endpoint<GetMediaDetailByIdEndpointReq
         await SetNestedTvShowProperties(plexTvShow, ct);
 
         return Result.Ok(plexTvShow);
+    }
+
+    private async Task ApplyTvShowDetailComparisonStateAsync(PlexTvShow plexTvShow, CancellationToken ct)
+    {
+        var items = new List<PlexMediaSlimDTO> { plexTvShow.ToSlimDTOMapper() };
+        var episodes = plexTvShow.Seasons.SelectMany(s => s.Episodes).ToList();
+        foreach (var episode in episodes)
+            items.Add(episode.ToSlimDTO());
+
+        var result = await _commandExecutor.Send(new ApplyComparisonStateCommand(items, plexTvShow.PlexLibraryId, PlexMediaType.TvShow), ct);
+
+        if (result.IsFailed)
+        {
+            result.LogError();
+            return;
+        }
+
+        plexTvShow.ComparisonState = items[0].ComparisonId.ToComparisonState();
+
+        for (var i = 0; i < episodes.Count; i++)
+            episodes[i].ComparisonState = items[i + 1].ComparisonId.ToComparisonState();
+    }
+
+    private async Task ApplyMovieDetailComparisonStateAsync(PlexMovie plexMovie, CancellationToken ct)
+    {
+        var items = new List<PlexMediaSlimDTO> { plexMovie.ToSlimDTO() };
+        var result = await _commandExecutor.Send(new ApplyComparisonStateCommand(items, plexMovie.PlexLibraryId, PlexMediaType.Movie), ct);
+
+        if (result.IsFailed)
+        {
+            result.LogError();
+            return;
+        }
+
+        plexMovie.ComparisonState = items[0].ComparisonId.ToComparisonState();
     }
 
     private async Task SetNestedMovieProperties(PlexMovie plexMovie, CancellationToken ct = default)

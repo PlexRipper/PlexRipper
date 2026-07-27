@@ -1,3 +1,5 @@
+using Reaparr.BackgroundJobs.Contracts;
+
 namespace Reaparr.Application.UnitTests;
 
 public class AddOrUpdatePlexLibrariesCommandUnitTests : BaseUnitTest<AddOrUpdatePlexLibrariesCommandHandler>
@@ -31,6 +33,9 @@ public class AddOrUpdatePlexLibrariesCommandUnitTests : BaseUnitTest<AddOrUpdate
 
             plexLibraries.AddRange(list);
         }
+
+        Mock.SetupCommand(It.IsAny<QueueLibraryComparisonJobsForLibraryCommand>)
+            .ReturnsAsync(Result.Ok());
 
         // Act
         var request = new AddOrUpdatePlexLibrariesCommand
@@ -98,6 +103,9 @@ public class AddOrUpdatePlexLibrariesCommandUnitTests : BaseUnitTest<AddOrUpdate
             PlexLibraries = plexLibraries,
         };
 
+        Mock.SetupCommand(It.IsAny<QueueLibraryComparisonJobsForLibraryCommand>)
+            .ReturnsAsync(Result.Ok());
+
         // Act
         var result = await Sut.ExecuteAsync(request, CancellationToken);
 
@@ -146,6 +154,9 @@ public class AddOrUpdatePlexLibrariesCommandUnitTests : BaseUnitTest<AddOrUpdate
             PlexAccountId = plexAccount.Id,
             PlexLibraries = incomingLibraries.ToApiLibraries(updatedTime),
         };
+
+        Mock.SetupCommand(It.IsAny<QueueLibraryComparisonJobsForLibraryCommand>)
+            .ReturnsAsync(Result.Ok());
 
         // Act
         var result = await Sut.ExecuteAsync(request, CancellationToken);
@@ -230,13 +241,16 @@ public class AddOrUpdatePlexLibrariesCommandUnitTests : BaseUnitTest<AddOrUpdate
         // Create API Data
         var updatedTime = DateTime.UtcNow - TimeSpan.FromHours(4);
         var changedContentChangedAt = plexLibraries.Max(x => x.ContentChangedAt) + 1;
-
-        // Act
         var request = new AddOrUpdatePlexLibrariesCommand
         {
             PlexAccountId = plexAccount.Id,
             PlexLibraries = plexLibraries.ToApiLibraries(updatedTime, contentChangedAt: changedContentChangedAt),
         };
+
+        Mock.SetupCommand(It.IsAny<QueueLibraryComparisonJobsForLibraryCommand>)
+            .ReturnsAsync(Result.Ok());
+
+        // Act
         var result = await Sut.ExecuteAsync(request, CancellationToken);
 
         // Assert
@@ -312,6 +326,9 @@ public class AddOrUpdatePlexLibrariesCommandUnitTests : BaseUnitTest<AddOrUpdate
             PlexLibraries = [incomingLibrary],
         };
 
+        Mock.SetupCommand(It.IsAny<QueueLibraryComparisonJobsForLibraryCommand>)
+            .ReturnsAsync(Result.Ok());
+
         // Act
         var result = await Sut.ExecuteAsync(request, CancellationToken);
 
@@ -356,6 +373,9 @@ public class AddOrUpdatePlexLibrariesCommandUnitTests : BaseUnitTest<AddOrUpdate
             PlexAccountId = plexAccount.Id,
             PlexLibraries = [incomingLibrary],
         };
+
+        Mock.SetupCommand(It.IsAny<QueueLibraryComparisonJobsForLibraryCommand>)
+            .ReturnsAsync(Result.Ok());
 
         // Act
         var result = await Sut.ExecuteAsync(request, CancellationToken);
@@ -451,6 +471,9 @@ public class AddOrUpdatePlexLibrariesCommandUnitTests : BaseUnitTest<AddOrUpdate
             PlexLibraries = incomingLibraries,
         };
 
+        Mock.SetupCommand(It.IsAny<QueueLibraryComparisonJobsForLibraryCommand>)
+            .ReturnsAsync(Result.Ok());
+
         // Act
         var result = await Sut.ExecuteAsync(request, CancellationToken);
 
@@ -522,6 +545,9 @@ public class AddOrUpdatePlexLibrariesCommandUnitTests : BaseUnitTest<AddOrUpdate
             PlexLibraries = plexLibraries.ToApiLibraries(updatedTime),
         };
 
+        Mock.SetupCommand(It.IsAny<QueueLibraryComparisonJobsForLibraryCommand>)
+            .ReturnsAsync(Result.Ok());
+
         // Act
         var result = await Sut.ExecuteAsync(request, CancellationToken);
 
@@ -569,6 +595,9 @@ public class AddOrUpdatePlexLibrariesCommandUnitTests : BaseUnitTest<AddOrUpdate
             PlexAccountId = plexAccount.Id,
             PlexLibraries = new List<PlexLibrary> { plexLibrary }.ToApiLibraries(updatedTime),
         };
+
+        Mock.SetupCommand(It.IsAny<QueueLibraryComparisonJobsForLibraryCommand>)
+            .ReturnsAsync(Result.Ok());
 
         // Act
         var firstResult = await Sut.ExecuteAsync(request, CancellationToken);
@@ -637,6 +666,9 @@ public class AddOrUpdatePlexLibrariesCommandUnitTests : BaseUnitTest<AddOrUpdate
             PlexLibraries = new List<PlexLibrary> { plexLibrary }.ToApiLibraries(updatedTime),
         };
 
+        Mock.SetupCommand(It.IsAny<QueueLibraryComparisonJobsForLibraryCommand>)
+            .ReturnsAsync(Result.Ok());
+
         // Act
         var result = await Sut.ExecuteAsync(request, CancellationToken);
 
@@ -645,6 +677,56 @@ public class AddOrUpdatePlexLibrariesCommandUnitTests : BaseUnitTest<AddOrUpdate
         var historyEvents = await dbContext.PlexLibraryAccessHistoryEvents.ToListAsync(CancellationToken);
         historyEvents.Count.ShouldBe(1);
         historyEvents.Single().State.ShouldBe(PlexAccessState.Revoked);
+    }
+
+    [Test]
+    public async Task ShouldDeduplicateIncomingLibrariesByServerAndUuid_WhenPlexReturnsDuplicateRows()
+    {
+        // Arrange
+        var seed = await SetupDatabase(
+            32,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexAccountCount = 1;
+            }
+        );
+
+        var dbContext = IDbContext;
+        var plexAccount = dbContext.PlexAccounts.FirstOrDefault();
+        plexAccount.ShouldNotBeNull();
+        var plexServer = dbContext.PlexServers.Single();
+        var plexLibrary = FakeData.GetPlexLibrary(seed).Generate();
+        plexLibrary.PlexServerId = plexServer.Id;
+        plexLibrary.Uuid = "duplicate-library-uuid";
+        var duplicateLibrary = FakeData.GetPlexLibrary(seed).Generate();
+        duplicateLibrary.PlexServerId = plexServer.Id;
+        duplicateLibrary.Uuid = plexLibrary.Uuid;
+        duplicateLibrary.Title = "Duplicate payload winner";
+        duplicateLibrary.Key = "duplicate-payload-winner";
+
+        var request = new AddOrUpdatePlexLibrariesCommand
+        {
+            PlexAccountId = plexAccount.Id,
+            PlexLibraries = [plexLibrary, duplicateLibrary],
+        };
+
+        Mock.Mock<ICommandExecutor>()
+            .Setup(x => x.Send(It.IsAny<ICommand<Result>>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result.Ok());
+
+        // Act
+        var result = await Sut.ExecuteAsync(request, CancellationToken);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        var plexLibrariesDb = await dbContext.PlexLibraries.ToListAsync(CancellationToken);
+        plexLibrariesDb.Count.ShouldBe(1);
+        plexLibrariesDb.Single().Uuid.ShouldBe(plexLibrary.Uuid);
+        plexLibrariesDb.Single().Title.ShouldBe(duplicateLibrary.Title);
+        var plexAccountLibrariesDb = await dbContext.PlexAccountLibraries.ToListAsync(CancellationToken);
+        plexAccountLibrariesDb.Count.ShouldBe(1);
+        result.Value.Single().GetGranted.Count.ShouldBe(1);
     }
 
     private sealed record ExpectedLibraryMetrics(

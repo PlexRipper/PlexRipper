@@ -35,4 +35,6 @@ public record PlexLibraryDTO
     public required int SeasonCount { get; set; }
 
     public required int EpisodeCount { get; set; }
+
+    public required bool IsEnabled { get; set; }
 }

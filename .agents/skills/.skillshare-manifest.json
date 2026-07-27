@@ -1,5 +1,6 @@
 {
   "managed": {
+    "media-overview-cache": "symlink",
     "reaparr-backend": "symlink",
     "reaparr-backend-integration-tests": "symlink",
     "reaparr-backend-unit-tests": "symlink",
@@ -7,9 +8,11 @@
     "reaparr-desktop-build": "symlink",
     "reaparr-frontend": "symlink",
     "reaparr-frontend-components": "symlink",
+    "reaparr-frontend-integration-tests": "symlink",
     "reaparr-frontend-unit-tests": "symlink",
     "reaparr-git-commit": "symlink",
+    "reaparr-media-comparison": "symlink",
     "reaparr-pinia-store": "symlink"
   },
-  "updated_at": "2026-05-15T12:56:45.907836339+02:00"
+  "updated_at": "2026-07-22T23:27:11.680819355+02:00"
 }

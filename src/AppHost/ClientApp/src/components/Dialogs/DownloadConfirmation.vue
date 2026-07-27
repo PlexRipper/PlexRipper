@@ -86,9 +86,13 @@
 				outline
 				split
 				@click="onDownload(close)">
-				<QSection :header="$t('components.download-confirmation.destination.header')">
-					<!-- Download Destination -->
-					<q-list>
+				<template #default>
+					<q-list class="download-destination-menu">
+						<q-item-label header>
+							{{ $t('components.download-confirmation.destination.header') }}
+						</q-item-label>
+						<q-separator />
+						<!-- Download Destination -->
 						<q-item
 							v-for="folderPath in folderPathDestinations"
 							:key="folderPath.id"
@@ -125,7 +129,7 @@
 							</q-item-section>
 						</q-item>
 					</q-list>
-				</QSection>
+				</template>
 			</q-btn-dropdown>
 			<!--	Directory Browser	-->
 			<DirectoryBrowser @confirm="onCustomDirectorySelected" />
@@ -219,7 +223,7 @@ function openDialog(data: DownloadMediaDTO[]): void {
 		set(mediaType, PlexMediaType.Unknown);
 	}
 
-	set(selectedFolderPath, get(folderPathDestinations)[0]);
+	set(selectedFolderPath, get(folderPathDestinations)[0] ?? get(customDirectory));
 
 	set(downloadMediaCommand, data);
 	useSubscription(

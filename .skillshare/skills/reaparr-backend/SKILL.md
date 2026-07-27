@@ -33,18 +33,24 @@ Never use WebStorm MCP tools for backend work under `src/` excluding `ClientApp/
 
 After one successful MCP discovery or server health check in a session, reuse these known-good exact tool names instead of repeatedly rediscovering them:
 
-| Action | Tool | Wrapper |
-| --- | --- | --- |
-| Read file/range | `rider-official:read_file` | `mcpproxy_call_tool_read` |
-| Read full file | `rider-official:get_file_text_by_path` | `mcpproxy_call_tool_read` |
-| Create file | `rider-official:create_new_file` | `mcpproxy_call_tool_write` |
-| Replace text | `rider-official:replace_text_in_file` | `mcpproxy_call_tool_write` |
-| Search text | `rider-official:search_in_files_by_text` | `mcpproxy_call_tool_read` |
-| Search regex | `rider-official:search_in_files_by_regex` | `mcpproxy_call_tool_read` |
-| File diagnostics | `rider-official:get_file_problems` | `mcpproxy_call_tool_read` |
-| Run configurations | `rider-official:get_run_configurations` | `mcpproxy_call_tool_read` |
+| Action | Tool |
+| --- | --- |
+| Read file/range | `rider-official:read_file` |
+| Read full file | `rider-official:get_file_text_by_path` |
+| Create file | `rider-official:create_new_file` |
+| Replace text | `rider-official:replace_text_in_file` |
+| Delete file | `rider-official:delete_file` |
+| Search text | `rider-official:search_in_files_by_text` |
+| Search regex | `rider-official:search_in_files_by_regex` |
+| File diagnostics | `rider-official:get_file_problems` |
+| Run configurations | `rider-official:get_run_configurations` |
+| List run configs + status | `rider-official:list_run_configurations` |
+| Launch run config | `rider-official:start_run_configuration` |
+| Build solution | `rider-official:build_solution` |
+| Trigger IDE action | `rider-official:execute_ide_action` |
+| Console output | `rider-official:get_console_output` |
 
-Only rerun broad `mcpproxy_retrieve_tools` discovery when a needed capability is not in this table, a cached tool fails, or the target MCP server changes.
+Only rediscover tools when a needed capability is not in this table, a cached tool fails, or the target MCP server changes.
 
 ### Rider MCP retry rule
 
@@ -211,6 +217,17 @@ Rules:
 9. Re-read changed files after edits to confirm the intended changes landed.
 10. Use Rider MCP intelligence/indexing to find errors that need fixing before claiming completion. Do not run a build as an error-discovery mechanism.
 
+## Apply Backend Changes (Restart in Debug Mode)
+
+Use Rider MCP to stop and relaunch the backend in debug mode. Rider auto-builds on launch, and Hot Reload is not supported on Linux.
+
+1. `list_run_configurations`
+2. If `Reaparr Docker Development` is `running: true`, `execute_ide_action` with `actionId: "Stop"`, then `list_run_configurations` again to confirm it stopped.
+3. `start_run_configuration` with `configurationName: "Reaparr Docker Development"`, `mode: "debug"`
+4. `list_run_configurations` — confirm `running: true`
+
+All calls use `projectPath: {WorkingDirectory}`.
+
 ## Run and Test Commands
 
 Do not run `dotnet build` or project build commands for backend error discovery. Use Rider MCP diagnostics/indexing instead. Build-related execution is only allowed as part of running unit or integration tests.
@@ -219,65 +236,23 @@ Do not run `dotnet build` or project build commands for backend error discovery.
 
 When `dotnet-test-mcp` is available, always use it for backend test execution instead of terminal-style `dotnet run` commands or Rider run configurations. Exact known tools are:
 
-| Action | Tool | Wrapper |
-| --- | --- | --- |
-| List test projects | `dotnet-test-mcp:list_test_projects` | `mcpproxy_call_tool_read` |
-| List tests summary | `dotnet-test-mcp:list_tests_summary` | `mcpproxy_call_tool_read` |
-| Run single test | `dotnet-test-mcp:run_single_test` | `mcpproxy_call_tool_read` |
-| Run test class | `dotnet-test-mcp:run_all_tests_in_class` | `mcpproxy_call_tool_read` |
-| Run test project | `dotnet-test-mcp:run_all_tests_for_project` | `mcpproxy_call_tool_read` |
-| Run all tests | `dotnet-test-mcp:run_all_tests` | `mcpproxy_call_tool_read` |
+| Action | Tool |
+| --- | --- |
+| List test projects | `dotnet-test-mcp:list_test_projects` |
+| List tests summary | `dotnet-test-mcp:list_tests_summary` |
+| Run single test | `dotnet-test-mcp:run_single_test` |
+| Run test class | `dotnet-test-mcp:run_all_tests_in_class` |
+| Run test project | `dotnet-test-mcp:run_all_tests_for_project` |
+| Run all tests | `dotnet-test-mcp:run_all_tests` |
 
-Use direct calls to these exact tools after one successful MCP discovery/health check; retrieval can miss them. Fall back to Rider run configurations only when `dotnet-test-mcp` is disabled, quarantined, unhealthy, or fails with a tool/server error.
+Use direct calls to these exact tools after one successful MCP discovery/health check; retrieval can miss them. Do not fall back to Rider run configurations or terminal commands for test execution.
 
-The shell command examples below document equivalent commands for humans and for environments without `dotnet-test-mcp`; agents should prefer the MCP tools above.
+All backend test execution goes exclusively through `dotnet-test-mcp` tools. Never use terminal-style `dotnet run --project` or `dotnet test` for test execution.
 
-Before running any dotnet related command, TUnit test command, first check whether THE FINALS is running:
-
-```bash
- pgrep -afi 'GameThread|Discovery.exe'
-```
-
-If the command returns a matching game process, prefix the backend command with idle-priority I/O scheduling:
-
-```bash
-ionice -c 3 <backend-command>
-```
-
-If the command returns no matching process, run the backend command normally without `ionice`. On this machine, use `GameThread` as the authoritative process check for the running game. Do not use `ps aux | grep ...`; it can match the `grep` command itself and create a false positive.
-
-Run backend AppHost:
+### Running the backend AppHost (not test-related)
 
 ```bash
 dotnet run --project src/AppHost
-# If THE FINALS is running:
-ionice -c 3 dotnet run --project src/AppHost
-```
-
-Run a backend unit test project:
-
-```bash
-dotnet run --project tests/UnitTests/<Project>.UnitTests/<Project>.UnitTests.csproj -- --no-ansi --disable-logo
-# If THE FINALS is running:
-ionice -c 3 dotnet run --project tests/UnitTests/<Project>.UnitTests/<Project>.UnitTests.csproj -- --no-ansi --disable-logo
-```
-
-Common unit test projects:
-
-```bash
-dotnet run --project tests/UnitTests/Application.UnitTests/Application.UnitTests.csproj -- --no-ansi --disable-logo
-dotnet run --project tests/UnitTests/BackgroundJobs.UnitTests/BackgroundJobs.UnitTests.csproj -- --no-ansi --disable-logo
-# If THE FINALS is running:
-ionice -c 3 dotnet run --project tests/UnitTests/Application.UnitTests/Application.UnitTests.csproj -- --no-ansi --disable-logo
-ionice -c 3 dotnet run --project tests/UnitTests/BackgroundJobs.UnitTests/BackgroundJobs.UnitTests.csproj -- --no-ansi --disable-logo
-```
-
-Run backend integration tests:
-
-```bash
-dotnet run --project tests/IntegrationTests/IntegrationTests/IntegrationTests.csproj -- --no-ansi --disable-logo
-# If THE FINALS is running:
-ionice -c 3 dotnet run --project tests/IntegrationTests/IntegrationTests/IntegrationTests.csproj -- --no-ansi --disable-logo
 ```
 
 ## Verification Gates
@@ -321,6 +296,6 @@ Do not claim success unless Rider MCP diagnostics/indexing was used and required
 - Returning raw values or `null` from Result-based command handlers.
 - Letting Quartz job exceptions escape.
 - Weakening tests or assertions to force green.
-- Using `--filter` instead of TUnit `--treenode-filter`.
+- Using `--filter` or `--treenode-filter` shell arguments for test discovery — use `dotnet-test-mcp` tools instead.
 - Running frontend package managers for backend-only work.
-- Blocking test execution on unavailable `dotnet-test-mcp`; first check server health/quarantine and direct-call known `dotnet-test-mcp:*` tools, then use Rider run configurations only if the MCP server is genuinely unavailable.
+- Blocking test execution on unavailable `dotnet-test-mcp`; first check server health/quarantine and direct-call known `dotnet-test-mcp:*` tools. Do not fall back to terminal commands or Rider run configurations for tests.

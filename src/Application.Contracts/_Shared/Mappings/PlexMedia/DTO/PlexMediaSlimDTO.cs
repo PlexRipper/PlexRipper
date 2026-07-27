@@ -48,4 +48,11 @@ public record PlexMediaSlimDTO
     public required bool HasThumb { get; set; }
 
     public required List<PlexMediaQualityDTO> Qualities { get; init; } = [];
+
+    /// <summary>
+    /// Comparison state derived from current stored scope rows.
+    /// <see cref="PlexMediaComparisonState.NotCompared"/> when no current scopes exist.
+    /// A separate detail endpoint returns exact upgrade/missing information on user action.
+    /// </summary>
+    public int ComparisonId { get; set; }
 }

@@ -32,5 +32,8 @@ public enum JobTypes
     [JsonStringEnumMemberName(nameof(CheckPlexLibrariesForUpdatesJob))]
     CheckPlexLibrariesForUpdatesJob = 8,
 
+    [JsonStringEnumMemberName(nameof(LibraryComparisonJob))]
+    LibraryComparisonJob = 9,
+
     // Ensure to add new job types to ToJobStatusUpdate in JobExecutionContextExtensions
 }

@@ -167,6 +167,9 @@ public class BasePlexMedia : BaseEntity
     public virtual PlexMediaType Type { get; init; }
 
     [NotMapped]
+    public PlexMediaComparisonState ComparisonState { get; set; } = PlexMediaComparisonState.NotCompared;
+
+    [NotMapped]
     public string MetaDataUrl => $"/library/metadata/{PlexApiRatingKey}";
 
     [NotMapped]

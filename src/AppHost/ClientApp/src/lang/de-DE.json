@@ -47,7 +47,8 @@
             "media-count": "{seasonCount} Staffel - {episodeCount} Folgen",
             "media-count-label": "Medienanzahl:",
             "summary": "Zusammenfassung:",
-            "one-movie-count": "1 Film"
+            "one-movie-count": "1 Film",
+            "movie-file-count": "{movieFileCount} Filmdateien"
         },
         "directory-browser": {
             "path": "Pfad:",
@@ -107,7 +108,17 @@
             "no-media-items-available": "Keine Medienelemente gefunden!",
             "failed-to-load-media": "Fehler beim Laden der Medien. Der Server ist möglicherweise ausgelastet. Bitte versuchen Sie es erneut oder warten Sie, bis der Cache aufgewärmt ist.",
             "retrying-in-seconds": "Erneuter Versuch in {seconds}s...",
-            "no-filter-results": "Keine Medienergebnisse entsprechen den aktuellen Filtereinstellungen. Bitte passen Sie Ihre Filter an oder setzen Sie sie zurück, um die verfügbaren Ergebnisse anzuzeigen"
+            "no-filter-results": "Keine Medienergebnisse entsprechen den aktuellen Filtereinstellungen. Bitte passen Sie Ihre Filter an oder setzen Sie sie zurück, um die verfügbaren Ergebnisse anzuzeigen",
+            "library-disabled": "Die Mediathek \"{library}\" ist deaktiviert. Aktivieren Sie sie und synchronisieren Sie sie erneut, bevor Sie ihre Medien anzeigen.",
+            "enable-library-button": "Mediathek aktivieren",
+            "comparison": {
+                "details-column-title": "Title",
+                "details-column-location": "Location",
+                "details-column-remote-quality": "Available quality",
+                "details-column-owned-quality": "Current quality",
+                "details-no-actionable-rows": "No actionable comparison rows were returned for this media item.",
+                "download-selected": "Download selected"
+            }
         },
         "navigation-drawer": {
             "accounts": "Konten",
@@ -143,9 +154,6 @@
         "server-dialog": {
             "header": "{serverName} Einstellung",
             "tabs": {
-                "download-destinations": {
-                    "header": "Download Ziele"
-                },
                 "server-commands": {
                     "header": "Server Befehle"
                 },
@@ -158,6 +166,10 @@
                     "section-header": "Wählen Sie die bevorzugte Serververbindung aus:",
                     "add-connection-button": "Verbindung hinzufügen",
                     "check-all-connections": "Alle Verbindungen prüfen"
+                },
+                "server-libraries": {
+                    "header": "Server-Mediatheken",
+                    "sync-alert": "Wenn Sie eine Plex-Bibliothek deaktivieren, wird sie vollständig aus den Suchergebnissen ausgeblendet und ihre Mediendaten werden gelöscht. Durch Aktivieren wird sie automatisch wieder synchronisiert."
                 },
                 "server-data": {
                     "headers": {
@@ -196,7 +208,8 @@
                 "added-at": "Hinzugefügt am",
                 "updated-at": "Aktualisiert am",
                 "actions": "Aktionen",
-                "quality": "Qualität"
+                "quality": "Qualität",
+                "comparison-state": "Vergleichsstatus"
             }
         },
         "server-download-status": {
@@ -382,7 +395,8 @@
                 "country": "Land",
                 "genre": "Genre",
                 "roles": "Rollen",
-                "quality": "Qualität"
+                "quality": "Qualität",
+                "comparison-state": "Medienvergleich"
             }
         },
         "alert-display-debug": {
@@ -449,6 +463,16 @@
         }
     },
     "general": {
+        "comparison": {
+            "comparison-missing": "Fehlen",
+            "comparison-higher-quality": "Höhere Qualität verfügbar",
+            "comparison-owned": "Bereits vorhanden",
+            "comparison-not-compared": "Nicht verglichen",
+            "comparison-pending": "Vergleich läuft",
+            "comparison-partial": "Teilweise vorhanden",
+            "comparison-partial-and-higher-quality": "Teilweise + Qualität",
+            "unknown": "Unbekannter Vergleichszustand"
+        },
         "logs": {
             "level": {
                 "debug": "Debug",
@@ -1111,7 +1135,8 @@
             "buttons": {
                 "main-header": "Schaltflächen Debug",
                 "media-quality-header": "Medienqualitätsanzeige",
-                "alert-display-header": "Kopfzeile der Alarmanzeige"
+                "alert-display-header": "Kopfzeile der Alarmanzeige",
+                "media-comparison-state-header": "Medienvergleich Staaten"
             }
         },
         "empty": {

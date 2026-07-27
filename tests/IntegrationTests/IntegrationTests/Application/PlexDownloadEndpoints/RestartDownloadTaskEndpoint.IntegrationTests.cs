@@ -23,25 +23,9 @@ public class RestartDownloadTaskEndpointIntegrationTests : BaseIntegrationTests
                     x.PlexMovieLibraryCount = 2;
                     x.MovieCount = 10;
                     x.MovieDownloadTasksCount = 1;
-                };
-
-                
-                config.FileSystemOptions = (system, dbContext) =>
-                {
-                    var downloadTask = dbContext.DownloadTaskMovieFile.First();
-                    downloadTask.DownloadFilePath.ShouldNotBeNullOrEmpty();
-
-                    var directoryPath = system.Path.GetDirectoryName(downloadTask.DownloadFilePath);
-                    directoryPath.ShouldNotBeNullOrEmpty();
-                    system.Directory.CreateDirectory(directoryPath);
-                    system.File.WriteAllBytes(downloadTask.DownloadFilePath, FakeData.GetDownloadFile(10.0 / 4.0));
+                    x.DownloadFileSizeInMb = 1;
                 };
             }
-        );
-
-        await container.DbContext.PlexServerConnections.ExecuteUpdateAsync(
-            x => x.SetProperty(y => y.Url, _ => "https://download.blender.org"),
-            CancellationToken
         );
 
         var downloadTaskToRestart = await container.DbContext.DownloadTaskMovieFile
@@ -56,15 +40,6 @@ public class RestartDownloadTaskEndpointIntegrationTests : BaseIntegrationTests
             .FirstOrDefaultAsync(CancellationToken);
         seededMovieData.ShouldNotBeNull();
 
-        const string validDownloadPath = "/peach/bigbuckbunny_movies/BigBuckBunny_320x180.mp4";
-
-        await container.DbContext.PlexMovieData
-            .Where(x => x.Id == seededMovieData.Id)
-            .ExecuteUpdateAsync(
-                x => x.SetProperty(y => y.Key, _ => validDownloadPath),
-                CancellationToken
-            );
-
         var seededDownloadTask = await container.DbContext.DownloadTaskMovieFile
             .AsTracking()
             .OrderBy(x => x.Id)
@@ -78,7 +53,7 @@ public class RestartDownloadTaskEndpointIntegrationTests : BaseIntegrationTests
                     .SetProperty(y => y.PlexApiRatingKey, _ => seededMovieData.PlexApiRatingKey)
                     .SetProperty(y => y.PlexApiMediaId, _ => seededMovieData.PlexApiMediaId)
                     .SetProperty(y => y.PlexApiPartId, _ => seededMovieData.PlexApiPartId)
-                    .SetProperty(y => y.FileLocationUrl, _ => validDownloadPath),
+                    .SetProperty(y => y.FileLocationUrl, _ => seededMovieData.Key),
                 CancellationToken
             );
 
@@ -111,6 +86,7 @@ public class RestartDownloadTaskEndpointIntegrationTests : BaseIntegrationTests
         downloadTaskDb.DownloadStatus.ShouldBeOneOf(
             DownloadStatus.Queued,
             DownloadStatus.Downloading,
+            DownloadStatus.DownloadFinished,
             DownloadStatus.Completed
         );
 

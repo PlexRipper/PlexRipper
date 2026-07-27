@@ -59,6 +59,11 @@ public class SyncPlexTvShowsCommandUnitTests : BaseUnitTest<SyncPlexTvShowsComma
         dbSeasons.Count.ShouldBe(20);
         dbEpisodes.Count.ShouldBe(100);
 
+        var dbLibrary = IDbContext.PlexLibraries.First(x => x.Id == library.Id);
+        dbLibrary.TvShowCount.ShouldBe(dbPlexTvShows.Count);
+        dbLibrary.SeasonCount.ShouldBe(dbSeasons.Count);
+        dbLibrary.EpisodeCount.ShouldBe(dbEpisodes.Count);
+
         VerifyKeys(newTvShows);
     }
 

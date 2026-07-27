@@ -29,12 +29,19 @@ public class AddOrUpdatePlexLibrariesCommandHandler
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
     private readonly IMediaQueryCache _mediaQueryCache;
+    private readonly ICommandExecutor _commandExecutor;
 
-    public AddOrUpdatePlexLibrariesCommandHandler(ILogger log, IReaparrDbContext dbContext, IMediaQueryCache mediaQueryCache)
+    public AddOrUpdatePlexLibrariesCommandHandler(
+        ILogger log,
+        IReaparrDbContext dbContext,
+        IMediaQueryCache mediaQueryCache,
+        ICommandExecutor commandExecutor
+    )
     {
         _log = log.ForContext<AddOrUpdatePlexLibrariesCommandHandler>();
         _dbContext = dbContext;
         _mediaQueryCache = mediaQueryCache;
+        _commandExecutor = commandExecutor;
     }
 
     public async Task<Result<List<PlexLibraryAccessRapport>>> ExecuteAsync(
@@ -53,14 +60,22 @@ public class AddOrUpdatePlexLibrariesCommandHandler
 
         var plexServerLibrariesDict = command
             .PlexLibraries.GroupBy(x => x.PlexServerId)
-            .ToDictionary(group => group.Key, group => group.ToList());
+            .ToDictionary(
+                group => group.Key,
+                group => group
+                    .GroupBy(x => x.Uuid)
+                    .Select(x => x.Last())
+                    .ToList()
+            );
 
         foreach (var (_, incomingPlexLibraries) in plexServerLibrariesDict)
         {
             foreach (var incomingPlexLibrary in incomingPlexLibraries)
             {
                 var plexLibraryDb = await _dbContext
-                    .PlexLibraries.AsTracking()
+                    .PlexLibraries
+                    .IgnoreIsEnabledFilter()
+                    .AsTracking()
                     .FirstOrDefaultAsync(
                         x => x.PlexServerId == incomingPlexLibrary.PlexServerId && x.Uuid == incomingPlexLibrary.Uuid,
                         cancellationToken
@@ -209,8 +224,16 @@ public class AddOrUpdatePlexLibrariesCommandHandler
 
         var affectedLibraryIds = rapportList.SelectMany(x => x.Data).Select(x => x.PlexLibraryId).Distinct().ToList();
         _mediaQueryCache.InvalidateLibraries(affectedLibraryIds, "Plex library access or ownership changed");
+        var failedResults = new List<ResultBase>();
 
-        return Result.Ok(rapportList);
+        foreach (var libraryId in affectedLibraryIds)
+        {
+            var queueResult = await _commandExecutor.Send(new QueueLibraryComparisonJobsForLibraryCommand(libraryId), cancellationToken);
+            if (queueResult.IsFailed)
+                failedResults.Add(queueResult);
+        }
+
+        return failedResults.Count > 0 ? Result.Merge(failedResults.ToArray()).LogError() : Result.Ok(rapportList);
     }
 
     private async Task AddHistoryEventsAsync(

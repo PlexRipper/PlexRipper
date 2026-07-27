@@ -1,4 +1,5 @@
 using Microsoft.Extensions.DependencyInjection;
+using Reaparr.BackgroundJobs.Contracts;
 
 namespace Reaparr.Application.UnitTests;
 
@@ -197,6 +198,8 @@ public class SetServerOwnedEndpointUnitTests : BaseEndpointUnitTest<SetServerOwn
                 "Plex server ownership scope changed"
             ))
             .Verifiable(Times.Once);
+        Mock.SetupCommand(It.IsAny<QueueLibraryComparisonJobsForLibraryCommand>)
+            .ReturnsAsync(Result.Ok());
 
         // Act
         var endpointResult = await TestEndpointHandleAsync(

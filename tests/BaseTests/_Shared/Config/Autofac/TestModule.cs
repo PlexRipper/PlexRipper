@@ -1,4 +1,6 @@
 ﻿using Autofac.Extras.Quartz;
+using Downloader;
+using Moq.Contrib.HttpClient;
 using Reaparr.Application;
 using Reaparr.Settings.Contracts;
 
@@ -71,6 +73,11 @@ public class TestModule : Module
         builder.RegisterType<MockPlexApiServer>().As<IMockPlexApiServer>().SingleInstance();
 
         builder
+            .Register(ctx => Config.MockDownloadServiceFactory(ctx.Resolve<IFileSystem>().File))
+            .As<Func<DownloadConfiguration, IDownloadService>>()
+            .SingleInstance();
+
+        builder
             .Register((_, _) => Config.OverrideAppBuildInfo ?? new MockAppBuildInfo())
             .As<IAppBuildInfo>()
             .SingleInstance();
@@ -134,15 +141,33 @@ public class TestModule : Module
                         Config.HttpClientOptions.Invoke(handler, dbContext);
                     }
 
-                    var client = new HttpClient(handler.Object, disposeHandler: false);
-                    client.DefaultRequestHeaders.Add("User-Agent", "MockHttpClient");
-                    return client;
+                    handler
+                        .SetupRequest(x => x.RequestUri?.AbsolutePath == "/library/parts/653125/119385313456/file.mp4")
+                        .ReturnsAsync(new HttpResponseMessage(HttpStatusCode.OK) { Content = new ByteArrayContent([]) });
+
+                    var httpClientFactory = new Mock<IHttpClientFactory>();
+                    httpClientFactory
+                        .Setup(x => x.CreateClient(It.IsAny<string>()))
+                        .Returns(() => CreateMockHttpClient(handler));
+                    return httpClientFactory.Object;
                 })
+                .As<IHttpClientFactory>()
+                .SingleInstance();
+
+            builder
+                .Register(context => CreateMockHttpClient(context.Resolve<Mock<HttpMessageHandler>>()))
                 .As<HttpClient>()
                 .InstancePerDependency();
         }
 
         if (Config.MockConfigManager is not null)
             builder.RegisterInstance(Config.MockConfigManager).As<IConfigManager>();
+    }
+
+    private static HttpClient CreateMockHttpClient(Mock<HttpMessageHandler> handler)
+    {
+        var client = new HttpClient(handler.Object, disposeHandler: false);
+        client.DefaultRequestHeaders.Add("User-Agent", "MockHttpClient");
+        return client;
     }
 }

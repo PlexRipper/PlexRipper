@@ -28,4 +28,13 @@ public interface IProgressHubService
         AppUpdateDownloadProgressDTO progress,
         CancellationToken cancellationToken = default
     );
+    
+        
+    /// <summary>
+    /// Sends a notification that comparison work has settled for one or more libraries.
+    /// </summary>
+    Task SendLibraryComparisonCompletedAsync(
+        LibraryComparisonCompletedDTO notification,
+        CancellationToken cancellationToken = default
+    );
 }

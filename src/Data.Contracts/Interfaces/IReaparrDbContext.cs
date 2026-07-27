@@ -1,6 +1,5 @@
 using EFCore.BulkExtensions;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
-using Microsoft.EntityFrameworkCore.Storage;
 
 namespace Reaparr.Data.Contracts;
 
@@ -68,6 +67,8 @@ public interface IReaparrDbContext : IDisposable
 
     DbSet<LibrarySyncJobQueue> LibrarySyncJobQueues { get; }
 
+    DbSet<LibraryComparisonJobQueue> LibraryComparisonJobQueues { get; }
+
     #endregion
 
     #endregion
@@ -114,6 +115,20 @@ public interface IReaparrDbContext : IDisposable
 
     #endregion
 
+    #region Comparison
+
+    DbSet<PlexComparisonState> PlexComparisonScopes { get; }
+
+    DbSet<PlexMovieComparison> PlexMovieComparisons { get; }
+
+    DbSet<PlexTvShowComparison> PlexTvShowComparisons { get; }
+
+    DbSet<PlexSeasonComparison> PlexSeasonComparisons { get; }
+
+    DbSet<PlexEpisodeComparison> PlexEpisodeComparisons { get; }
+
+    #endregion
+
     string DatabaseName { get; }
 
     #endregion Properties
@@ -148,10 +163,57 @@ public interface IReaparrDbContext : IDisposable
     )
         where T : class;
 
-    Task<IDbContextTransaction> BeginTransactionAsync(CancellationToken cancellationToken = default);
+    /// <summary>
+    /// Executes an operation with automatic retry on <c>SQLITE_BUSY</c> and
+    /// <c>SQLITE_BUSY_SNAPSHOT</c> errors.
+    /// </summary>
+    /// <typeparam name="T">The result type.</typeparam>
+    /// <param name="operation">The operation to execute.</param>
+    /// <param name="maxRetries">
+    /// The maximum number of retry attempts. Each retry waits using exponential backoff
+    /// with jitter starting at 100 ms.
+    /// </param>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <returns>The result of the operation.</returns>
+    /// <remarks>
+    /// <para>
+    /// Two classes of busy error are handled:
+    /// </para>
+    /// <list type="bullet">
+    ///   <item>
+    ///     <b>SQLITE_BUSY / SQLITE_BUSY_RECOVERY / SQLITE_BUSY_TIMEOUT</b> — another
+    ///     connection holds a lock. The operation is retried after a backoff delay.
+    ///   </item>
+    ///   <item>
+    ///     <b>SQLITE_BUSY_SNAPSHOT</b> — the connection's read snapshot became stale
+    ///     after another writer committed. The entire operation is restarted so that it
+    ///     can acquire a fresh snapshot. Any data read in the failed attempt must be
+    ///     re-queried inside the operation lambda.
+    ///   </item>
+    /// </list>
+    /// <para>
+    ///   <b>SQLITE_LOCKED</b> (same-connection conflict) is not retried and propagates
+    ///   immediately, as it indicates an application-level bug.
+    /// </para>
+    /// </remarks>
+    Task<T> ExecuteWithRetryAsync<T>(
+        Func<IReaparrDbContext, Task<T>> operation,
+        int maxRetries = 3,
+        CancellationToken cancellationToken = default);
+
     EntityEntry Entry(object entity);
 
     Task<int> SaveChangesNewAsync(CancellationToken cancellationToken = default);
 
     void ClearChangeTracker();
+
+    /// <summary>
+    /// Executes the given interpolated SQL against the database and returns the number of rows affected.
+    /// </summary>
+    /// <param name="sql">The interpolated SQL command with parameters.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <returns>The number of rows affected.</returns>
+    Task<int> ExecuteSqlInterpolatedAsync(
+        FormattableString sql,
+        CancellationToken cancellationToken = default);
 }

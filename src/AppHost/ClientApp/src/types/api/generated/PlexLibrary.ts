@@ -20,6 +20,7 @@ import type {
   PlexMediaFilterMetadataDTO,
   PlexMediaMetadataDTO,
   PlexMediaType,
+  SetLibraryEnabledRequest,
 } from "./data-contracts";
 
 import { apiCheckPipe, axiosObservable } from "@api/base";
@@ -198,6 +199,27 @@ export class PlexLibrary {
       responseType: "json",
       ...params,
     }).pipe(apiCheckPipe<BaseResultDTO>);
+
+  /**
+   * No description
+   * * @tags Plexlibrary
+   * @name SetLibraryEnabledEndpoint
+   * @request PUT:/api/PlexLibrary/{PlexLibraryId}/set-library-enabled
+   * @secure
+   */
+  setLibraryEnabledEndpoint = (
+    plexLibraryId: number,
+    data: SetLibraryEnabledRequest,
+    params: RequestParams = {},
+  ) =>
+    axiosObservable<PlexLibraryDTO>({
+      url: `/api/PlexLibrary/${plexLibraryId}/set-library-enabled`,
+      method: "PUT",
+      data: data,
+      secure: true,
+      responseType: "json",
+      ...params,
+    }).pipe(apiCheckPipe<PlexLibraryDTO>);
 }
 
 export class PlexLibraryPaths {
@@ -253,5 +275,10 @@ export class PlexLibraryPaths {
   ) =>
     queryString.stringifyUrl({
       url: `/api/PlexLibrary/${plexLibraryId}/default/destination/${folderPathId}`,
+    });
+
+  static setLibraryEnabledEndpoint = (plexLibraryId: number) =>
+    queryString.stringifyUrl({
+      url: `/api/PlexLibrary/${plexLibraryId}/set-library-enabled`,
     });
 }

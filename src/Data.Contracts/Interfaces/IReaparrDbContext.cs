@@ -1,6 +1,5 @@
 using EFCore.BulkExtensions;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
-using Microsoft.EntityFrameworkCore.Storage;
 
 namespace Reaparr.Data.Contracts;
 
@@ -201,9 +200,7 @@ public interface IReaparrDbContext : IDisposable
         Func<IReaparrDbContext, Task<T>> operation,
         int maxRetries = 3,
         CancellationToken cancellationToken = default);
-    
-    
-    Task<IDbContextTransaction> BeginTransactionAsync(CancellationToken cancellationToken = default);
+
     EntityEntry Entry(object entity);
 
     Task<int> SaveChangesNewAsync(CancellationToken cancellationToken = default);

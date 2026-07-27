@@ -45,7 +45,8 @@ public class GetTvShowMediaComparisonDetailsCommandHandler
 
     private async Task<List<ComparisonDetailsRow>> GetRemoteTvShowRowsAsync(PlexTvShow tvShow, CancellationToken ct)
     {
-        var currentOwnedLibraryIds = await _dbContext.GetCurrentOwnedLibraryIds(tvShow.PlexLibraryId, PlexMediaType.TvShow, ct);
+        var currentOwnedLibraryIds =
+            await _dbContext.GetCurrentOwnedLibraryIds(tvShow.PlexLibraryId, PlexMediaType.TvShow, ct);
         if (currentOwnedLibraryIds.Count == 0)
             return [];
 
@@ -78,7 +79,8 @@ public class GetTvShowMediaComparisonDetailsCommandHandler
 
     private async Task<List<ComparisonDetailsRow>> GetOwnedTvShowRowsAsync(PlexTvShow tvShow, CancellationToken ct)
     {
-        var currentRemoteLibraryIds = await _dbContext.GetCurrentRemoteLibraryIds(tvShow.PlexLibraryId, PlexMediaType.TvShow, ct);
+        var currentRemoteLibraryIds =
+            await _dbContext.GetCurrentRemoteLibraryIds(tvShow.PlexLibraryId, PlexMediaType.TvShow, ct);
         if (currentRemoteLibraryIds.Count == 0)
             return [];
 
@@ -141,9 +143,14 @@ public class GetTvShowMediaComparisonDetailsCommandHandler
                     type: PlexMediaType.Episode,
                     title: episode.Title,
                     state: PlexMediaComparisonState.Missing,
-                    remoteQuality: episode.Quality != VideoQuality.Unknown ? episode.Quality : episode.MediaDataList.Select(x => x.VideoResolution).OrderByDescending(x => x.ToId()).FirstOrDefault(),
+                    remoteQuality: episode.Quality != VideoQuality.Unknown
+                        ? episode.Quality
+                        : episode.MediaDataList.Select(x => x.VideoResolution)
+                            .OrderByDescending(x => x.ToId())
+                            .FirstOrDefault(),
                     ownedQuality: VideoQuality.None,
-                    remoteLocation: episode.MediaDataList.Select(x => x.GetFileName).FirstOrDefault(x => !string.IsNullOrWhiteSpace(x)) ?? string.Empty,
+                    remoteLocation: episode.MediaDataList.Select(x => x.GetFileName)
+                        .FirstOrDefault(x => !string.IsNullOrWhiteSpace(x)) ?? string.Empty,
                     ownedLocation: string.Empty,
                     remotePlexLibraryId: episode.PlexLibraryId,
                     remotePlexServerId: remoteServerIds.GetValueOrDefault(episode.PlexLibraryId)));
@@ -161,10 +168,20 @@ public class GetTvShowMediaComparisonDetailsCommandHandler
                     type: PlexMediaType.Episode,
                     title: episode.Title,
                     state: PlexMediaComparisonState.HigherQuality,
-                    remoteQuality: hit.RemoteQuality != VideoQuality.Unknown ? hit.RemoteQuality : episode.MediaDataList.Select(x => x.VideoResolution).OrderByDescending(x => x.ToId()).FirstOrDefault(),
-                    ownedQuality: ownedEpisode is null || hit.OwnedQuality != VideoQuality.Unknown ? hit.OwnedQuality : ownedEpisode.MediaDataList.Select(x => x.VideoResolution).OrderByDescending(x => x.ToId()).FirstOrDefault(),
-                    remoteLocation: episode.MediaDataList.Select(x => x.GetFileName).FirstOrDefault(x => !string.IsNullOrWhiteSpace(x)) ?? string.Empty,
-                    ownedLocation: ownedEpisode?.MediaDataList.Select(x => x.GetFileName).FirstOrDefault(x => !string.IsNullOrWhiteSpace(x)) ?? string.Empty,
+                    remoteQuality: hit.RemoteQuality != VideoQuality.Unknown
+                        ? hit.RemoteQuality
+                        : episode.MediaDataList.Select(x => x.VideoResolution)
+                            .OrderByDescending(x => x.ToId())
+                            .FirstOrDefault(),
+                    ownedQuality: ownedEpisode is null || hit.OwnedQuality != VideoQuality.Unknown
+                        ? hit.OwnedQuality
+                        : ownedEpisode.MediaDataList.Select(x => x.VideoResolution)
+                            .OrderByDescending(x => x.ToId())
+                            .FirstOrDefault(),
+                    remoteLocation: episode.MediaDataList.Select(x => x.GetFileName)
+                        .FirstOrDefault(x => !string.IsNullOrWhiteSpace(x)) ?? string.Empty,
+                    ownedLocation: ownedEpisode?.MediaDataList.Select(x => x.GetFileName)
+                        .FirstOrDefault(x => !string.IsNullOrWhiteSpace(x)) ?? string.Empty,
                     remotePlexLibraryId: hit.RemotePlexLibraryId,
                     remotePlexServerId: remoteServerIds.GetValueOrDefault(hit.RemotePlexLibraryId)));
             }
@@ -189,14 +206,17 @@ public class GetTvShowMediaComparisonDetailsCommandHandler
                      .OrderBy(x => x.Key))
         {
             var sourceRow = group.FirstOrDefault(x => x.RemotePlexLibraryId > 0) ?? group.First();
-            var seasonNumber = group.Select(x => episodeLookup.GetValueOrDefault(x.PlexMediaId)?.TvShowSeason?.SeasonNumber ?? 0).FirstOrDefault();
+            var seasonNumber = group
+                .Select(x => episodeLookup.GetValueOrDefault(x.PlexMediaId)?.TvShowSeason?.SeasonNumber ?? 0)
+                .FirstOrDefault();
             var seasonRowId = ++_rowId;
             result.Add(new ComparisonDetailsRow
             {
                 RowId = seasonRowId,
                 ParentRowId = null,
                 Level = 0,
-                PlexMediaId = group.Select(x => episodeLookup.GetValueOrDefault(x.PlexMediaId)?.TvShowSeasonId ?? 0).FirstOrDefault(x => x > 0),
+                PlexMediaId = group.Select(x => episodeLookup.GetValueOrDefault(x.PlexMediaId)?.TvShowSeasonId ?? 0)
+                    .FirstOrDefault(x => x > 0),
                 Type = PlexMediaType.Season,
                 Title = $"Season {seasonNumber}",
                 ComparisonId = PlexMediaComparisonDetailsMapper.ToParentState(group.ToList()).ToComparisonId(),
@@ -213,7 +233,9 @@ public class GetTvShowMediaComparisonDetailsCommandHandler
         return result;
     }
 
-    private async Task<Dictionary<int, int>> GetPlexServerIdsByLibraryIdAsync(IEnumerable<int> plexLibraryIds, CancellationToken ct)
+    private async Task<Dictionary<int, int>> GetPlexServerIdsByLibraryIdAsync(
+        IEnumerable<int> plexLibraryIds,
+        CancellationToken ct)
     {
         var ids = plexLibraryIds.ToHashSet();
         return await _dbContext.PlexLibraries

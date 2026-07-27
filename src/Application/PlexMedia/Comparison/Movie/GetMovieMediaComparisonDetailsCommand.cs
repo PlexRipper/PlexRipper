@@ -6,6 +6,7 @@ public class GetMovieMediaComparisonDetailsCommandValidator : AbstractValidator<
 {
     public GetMovieMediaComparisonDetailsCommandValidator()
     {
+        RuleFor(x => x).NotNull();
         RuleFor(x => x.PlexMediaId).GreaterThan(0);
     }
 }

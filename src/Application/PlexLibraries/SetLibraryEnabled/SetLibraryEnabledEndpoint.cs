@@ -95,8 +95,6 @@ public class SetLibraryEnabledEndpoint : Endpoint<SetLibraryEnabledRequest, Resu
     {
         _log.Here().Information("Enabling PlexLibrary {PlexLibraryId}", plexLibrary.Id);
 
-        await using var transaction = await _dbContext.BeginTransactionAsync(ct);
-
         plexLibrary.IsEnabled = true;
         await _dbContext.SaveChangesNewAsync(ct);
 
@@ -104,8 +102,6 @@ public class SetLibraryEnabledEndpoint : Endpoint<SetLibraryEnabledRequest, Resu
         var queueResult = await _commandExecutor.Send(new QueueLibrarySyncJobCommand([plexLibrary.Id]), ct);
         if (queueResult.IsFailed)
             return queueResult.LogError();
-
-        await transaction.CommitAsync(ct);
 
         // Invalidate/re-build media query cache scopes for this library
         _mediaQueryCache.InvalidateLibrary(plexLibrary.Id, "PlexLibrary re-enabled");
@@ -129,25 +125,48 @@ public class SetLibraryEnabledEndpoint : Endpoint<SetLibraryEnabledRequest, Resu
         if (cancelResult.IsFailed)
             return cancelResult.LogError();
 
-        await using var transaction = await _dbContext.BeginTransactionAsync(ct);
+        await _dbContext.ExecuteWithRetryAsync(async ctx =>
+        {
+            var dbContext = (IReaparrDbContext)ctx;
 
-        plexLibrary.IsEnabled = false;
+            // Purge synced media based on library type
+            switch (plexLibrary.Type)
+            {
+                case PlexMediaType.Movie:
+                {
+                    var deleted = await dbContext.PlexMovies
+                        .Where(x => x.PlexLibraryId == plexLibrary.Id)
+                        .ExecuteDeleteAsync(ct);
+                    _log.Here().Information("Purged {Count} PlexMovies from library {PlexLibraryId}", deleted, plexLibrary.Id);
+                    break;
+                }
+                case PlexMediaType.TvShow:
+                {
+                    var deleted = await dbContext.PlexTvShows
+                        .Where(x => x.PlexLibraryId == plexLibrary.Id)
+                        .ExecuteDeleteAsync(ct);
+                    _log.Here().Information("Purged {Count} PlexTvShows from library {PlexLibraryId}", deleted, plexLibrary.Id);
+                    break;
+                }
+                default:
+                    _log.Here().Error("{Type} is not supported", plexLibrary.Type);
+                    break;
+            }
 
-        // Purge synced media and derived state based on library type
-        await PurgeLibraryMediaAsync(plexLibrary, ct);
+            // Reset library sync metadata and counts
+            await dbContext.PlexLibraries
+                .IgnoreIsEnabledFilter()
+                .Where(x => x.Id == plexLibrary.Id)
+                .ExecuteUpdateAsync(x => x.SetProperty(y => y.IsEnabled, false)
+                    .SetProperty(y => y.SyncedAt, (DateTime?)null)
+                    .SetProperty(y => y.Outdated, false)
+                    .SetProperty(y => y.MovieCount, 0)
+                    .SetProperty(y => y.TvShowCount, 0)
+                    .SetProperty(y => y.SeasonCount, 0)
+                    .SetProperty(y => y.EpisodeCount, 0), ct);
 
-        // Reset library sync metadata and counts
-        await _dbContext.PlexLibraries
-            .IgnoreIsEnabledFilter()
-            .Where(x => x.Id == plexLibrary.Id)
-            .ExecuteUpdateAsync(x => x.SetProperty(y => y.IsEnabled, false)
-                .SetProperty(y => y.SyncedAt, (DateTime?)null)
-                .SetProperty(y => y.Outdated, false)
-                .SetProperty(y => y.MovieCount, 0)
-                .SetProperty(y => y.TvShowCount, 0)
-                .SetProperty(y => y.SeasonCount, 0)
-                .SetProperty(y => y.EpisodeCount, 0), ct);
-        await transaction.CommitAsync(ct);
+            return 0;
+        }, cancellationToken: ct);
 
         // Remove all media query cache references to this library and rebuild affected snapshots
         _mediaQueryCache.InvalidateLibrary(plexLibrary.Id, "PlexLibrary disabled");
@@ -162,33 +181,4 @@ public class SetLibraryEnabledEndpoint : Endpoint<SetLibraryEnabledRequest, Resu
         return Result.Ok();
     }
 
-    private async Task PurgeLibraryMediaAsync(PlexLibrary plexLibrary, CancellationToken ct)
-    {
-        switch (plexLibrary.Type)
-        {
-            case PlexMediaType.Movie:
-            {
-                // Delete movies for this library (cascades to movie media data via EF configuration)
-                var deleted = await _dbContext.PlexMovies
-                    .Where(x => x.PlexLibraryId == plexLibrary.Id)
-                    .ExecuteDeleteAsync(ct);
-
-                _log.Here().Information("Purged {Count} PlexMovies from library {PlexLibraryId}", deleted, plexLibrary.Id);
-                break;
-            }
-            case PlexMediaType.TvShow:
-            {
-                // Delete TV shows
-                var deleted = await _dbContext.PlexTvShows
-                    .Where(x => x.PlexLibraryId == plexLibrary.Id)
-                    .ExecuteDeleteAsync(ct);
-
-                _log.Here().Information("Purged {Count} PlexTvShows from library {PlexLibraryId}", deleted, plexLibrary.Id);
-                break;
-            }
-            default:
-                _log.Here().Error("{Type} is not supported", plexLibrary.Type);
-                break;
-        }
     }
-}

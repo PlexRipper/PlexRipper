@@ -4,7 +4,6 @@ using AppAny.Quartz.EntityFrameworkCore.Migrations;
 using AppAny.Quartz.EntityFrameworkCore.Migrations.SQLite;
 using EFCore.BulkExtensions;
 using EntityFrameworkCore.Sqlite.Concurrency;
-using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.DependencyInjection;
 
 // ReSharper disable UnusedAutoPropertyAccessor.Global
@@ -187,9 +186,6 @@ public sealed class ReaparrDbContext : DbContext, IReaparrDbContext, IReaparrDbC
         CancellationToken cancellationToken = default) =>
         this.Database.ExecuteSqlInterpolatedAsync(sql, cancellationToken);
 
-    public Task<IDbContextTransaction> BeginTransactionAsync(CancellationToken cancellationToken = default) =>
-        Database.BeginTransactionAsync(cancellationToken);
-
     /// <inheritdoc/>
     public void ClearChangeTracker() => ChangeTracker.Clear();
 
@@ -279,15 +275,7 @@ public sealed class ReaparrDbContext : DbContext, IReaparrDbContext, IReaparrDbC
 
         try
         {
-            if (Database.CurrentTransaction is not null)
-            {
-                await operation();
-                return;
-            }
-
-            await using var tx = await BeginTransactionAsync(cancellationToken);
             await operation();
-            await tx.CommitAsync(cancellationToken);
         }
         finally
         {

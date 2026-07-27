@@ -16,6 +16,7 @@ public class ApplyRemoteTvShowComparisonStateCommandValidator
 {
     public ApplyRemoteTvShowComparisonStateCommandValidator()
     {
+        RuleFor(x => x).NotNull();
         RuleFor(x => x.Items).NotNull().WithMessage("Items must not be null.");
         RuleFor(x => x.RemoteLibraryId).GreaterThan(0).WithMessage("RemoteLibraryId must be greater than 0.");
     }

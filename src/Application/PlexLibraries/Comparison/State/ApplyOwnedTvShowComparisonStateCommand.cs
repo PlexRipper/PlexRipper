@@ -16,6 +16,7 @@ public class ApplyOwnedTvShowComparisonStateCommandValidator
 {
     public ApplyOwnedTvShowComparisonStateCommandValidator()
     {
+        RuleFor(x => x).NotNull();
         RuleFor(x => x.Items).NotNull().WithMessage("Items must not be null.");
         RuleFor(x => x.OwnedLibraryId).GreaterThan(0).WithMessage("OwnedLibraryId must be greater than 0.");
     }

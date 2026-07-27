@@ -6,6 +6,7 @@ public class GetTvShowMediaComparisonDetailsCommandValidator : AbstractValidator
 {
     public GetTvShowMediaComparisonDetailsCommandValidator()
     {
+        RuleFor(x => x).NotNull();
         RuleFor(x => x.PlexMediaId).GreaterThan(0);
     }
 }

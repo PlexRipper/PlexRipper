@@ -64,6 +64,50 @@ public class GetMediaComparisonDetailsEndpointUnitTests
     }
 
     [Test]
+    public async Task ShouldRejectRequest_WhenPlexMediaIdIsNotPositive()
+    {
+        // Arrange
+        var request = new GetMediaComparisonDetailsEndpointRequest(0, PlexMediaType.Movie);
+
+        Mock.SetupCommand<Result<PlexMediaComparisonDetailsDTO>>(x => (x as GetMovieMediaComparisonDetailsCommand) != null)
+            .ReturnsAsync(Result.Fail<PlexMediaComparisonDetailsDTO>("Unexpected dispatch"))
+            .Verifiable(Times.Never);
+        Mock.SetupCommand<Result<PlexMediaComparisonDetailsDTO>>(x => (x as GetTvShowMediaComparisonDetailsCommand) != null)
+            .ReturnsAsync(Result.Fail<PlexMediaComparisonDetailsDTO>("Unexpected dispatch"))
+            .Verifiable(Times.Never);
+
+        // Act
+        var endpointResult = await TestEndpointHandleAsync(request);
+
+        // Assert
+        endpointResult.IsValid.ShouldBeFalse();
+        endpointResult.ValidationErrors.ShouldNotBeEmpty();
+        Mock.Mock<ICommandExecutor>().Verify();
+    }
+
+    [Test]
+    public async Task ShouldRejectRequest_WhenMediaTypeIsUnsupportedByValidator()
+    {
+        // Arrange
+        var request = new GetMediaComparisonDetailsEndpointRequest(1889, PlexMediaType.Episode);
+
+        Mock.SetupCommand<Result<PlexMediaComparisonDetailsDTO>>(x => (x as GetMovieMediaComparisonDetailsCommand) != null)
+            .ReturnsAsync(Result.Fail<PlexMediaComparisonDetailsDTO>("Unexpected dispatch"))
+            .Verifiable(Times.Never);
+        Mock.SetupCommand<Result<PlexMediaComparisonDetailsDTO>>(x => (x as GetTvShowMediaComparisonDetailsCommand) != null)
+            .ReturnsAsync(Result.Fail<PlexMediaComparisonDetailsDTO>("Unexpected dispatch"))
+            .Verifiable(Times.Never);
+
+        // Act
+        var endpointResult = await TestEndpointHandleAsync(request);
+
+        // Assert
+        endpointResult.IsValid.ShouldBeFalse();
+        endpointResult.ValidationErrors.ShouldNotBeEmpty();
+        Mock.Mock<ICommandExecutor>().Verify();
+    }
+
+    [Test]
     public async Task ShouldDispatchTvShowCommand_WhenTvShowComparisonDetailsRequested()
     {
         // Arrange

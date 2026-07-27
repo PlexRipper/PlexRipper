@@ -16,6 +16,7 @@ public class ApplyRemoteMovieComparisonStateCommandValidator
 {
     public ApplyRemoteMovieComparisonStateCommandValidator()
     {
+        RuleFor(x => x).NotNull();
         RuleFor(x => x.Items).NotNull().WithMessage("Items must not be null.");
         RuleFor(x => x.RemoteLibraryId).GreaterThan(0).WithMessage("RemoteLibraryId must be greater than 0.");
     }
@@ -102,18 +103,17 @@ public class ApplyRemoteMovieComparisonStateCommandHandler
             .GroupBy(x => x.RemotePlexMediaId)
             .ToDictionary(g => g.Key, g => g.ToList());
 
-        for (var i = 0; i < items.Count; i++)
+        foreach (var item in items)
         {
-            if (!hitLookup.TryGetValue(items[i].Id, out var itemHits))
+            if (!hitLookup.TryGetValue(item.Id, out var itemHits))
             {
-                items[i].SetComparisonState(PlexMediaComparisonState.Missing);
+                item.SetComparisonState(PlexMediaComparisonState.Missing);
                 continue;
             }
 
             var higherQualityCount = itemHits.Count(x => x.HitState == PlexMediaComparisonHitState.HigherQuality);
 
-            items[i]
-                .SetComparisonState(higherQualityCount > 0
+            item.SetComparisonState(higherQualityCount > 0
                     ? PlexMediaComparisonState.HigherQuality
                     : PlexMediaComparisonState.Owned);
         }

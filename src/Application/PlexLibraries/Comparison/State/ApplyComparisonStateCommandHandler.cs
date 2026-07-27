@@ -4,6 +4,7 @@ public class ApplyComparisonStateCommandValidator : AbstractValidator<ApplyCompa
 {
     public ApplyComparisonStateCommandValidator()
     {
+        RuleFor(x => x).NotNull();
         RuleFor(x => x.Items).NotNull().WithMessage("Items must not be null.");
         RuleFor(x => x.PlexLibraryId).GreaterThanOrEqualTo(0).WithMessage("PlexLibraryId must be >= 0.");
         RuleFor(x => x.MediaType)

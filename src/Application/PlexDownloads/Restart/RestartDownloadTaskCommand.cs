@@ -129,7 +129,10 @@ public class RestartDownloadTaskCommandHandler : ICommandHandler<RestartDownload
         CancellationToken cancellationToken
     )
     {
-        var downloadTask = await _dbContext.DownloadTaskMovieFile.FirstOrDefaultAsync(x => x.Id == downloadTaskKey.Id);
+        var downloadTask = await _dbContext.DownloadTaskMovieFile.FirstOrDefaultAsync(
+            x => x.Id == downloadTaskKey.Id,
+            CancellationToken.None
+        );
         if (downloadTask is null)
             return ResultExtensions.EntityNotFound(nameof(DownloadTaskGeneric), downloadTaskKey.Id).LogError();
 
@@ -174,7 +177,7 @@ public class RestartDownloadTaskCommandHandler : ICommandHandler<RestartDownload
                 TimeRemaining = 0,
                 DestinationFolderPathId = downloadTask.DestinationFolderPathId,
             })
-            .FirstOrDefaultAsync();
+            .FirstOrDefaultAsync(cancellationToken);
 
         if (newDownloadTask is null)
         {
@@ -207,7 +210,10 @@ public class RestartDownloadTaskCommandHandler : ICommandHandler<RestartDownload
     )
     {
         var downloadTask =
-            await _dbContext.DownloadTaskTvShowEpisodeFile.FirstOrDefaultAsync(x => x.Id == downloadTaskKey.Id);
+            await _dbContext.DownloadTaskTvShowEpisodeFile.FirstOrDefaultAsync(
+                x => x.Id == downloadTaskKey.Id,
+                CancellationToken.None
+            );
         if (downloadTask is null)
             return ResultExtensions.EntityNotFound(nameof(DownloadTaskGeneric), downloadTaskKey.Id).LogError();
 
@@ -254,13 +260,14 @@ public class RestartDownloadTaskCommandHandler : ICommandHandler<RestartDownload
                 TimeRemaining = 0,
                 DestinationFolderPathId = downloadTask.DestinationFolderPathId,
             })
-            .FirstOrDefaultAsync();
+            .FirstOrDefaultAsync(CancellationToken.None);
 
         if (newDownloadTask is null)
         {
             await _downloadTaskUpdateDispatcher.OnStatusChangedAsync(
                 downloadTask.ToKey(),
-                DownloadStatus.SourceUnavailable
+                DownloadStatus.SourceUnavailable,
+                CancellationToken.None
             );
 
             await _dbContext.CreateDownloadClientLog(

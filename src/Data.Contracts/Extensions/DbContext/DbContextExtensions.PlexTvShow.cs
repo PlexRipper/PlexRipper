@@ -22,14 +22,14 @@ public static partial class DbContextExtensions
         if (plexLibraryId == 0)
             return ResultExtensions.IsZero(nameof(plexLibraryId));
 
-        var transactionResult = await context.ExecuteSerializedTransactionAsync(async (_, txCt) =>
+        var transactionResult = await context.ExecuteSerializedTransactionAsync(async (ctx, txCt) =>
         {
                 var result = new BulkInsertTvShowsRapport();
 
                 plexTvShows.SetRelationshipIds(plexServerId, plexLibraryId);
 
                 // Phase 1: Insert TV shows
-                await context.BulkInsertAsync(plexTvShows, BulkConfigPreset.Default, txCt);
+                await ctx.BulkInsertAsync(plexTvShows, BulkConfigPreset.Default, txCt);
                 result.CreatedTvShows = plexTvShows.Count;
 
                 // Phase 2: Insert seasons
@@ -45,7 +45,7 @@ public static partial class DbContextExtensions
                 }
 
                 var seasonsToInsert = seasons.Select(x => x.season).ToList();
-                await context.BulkInsertAsync(seasonsToInsert, BulkConfigPreset.Default, txCt);
+                await ctx.BulkInsertAsync(seasonsToInsert, BulkConfigPreset.Default, txCt);
                 result.CreatedSeasons = seasonsToInsert.Count;
 
                 // Phase 3: Insert episodes
@@ -63,7 +63,7 @@ public static partial class DbContextExtensions
                 }
 
                 var episodesToInsert = episodes.Select(x => x.episode).ToList();
-                await context.BulkInsertAsync(episodesToInsert, BulkConfigPreset.Default, txCt);
+                await ctx.BulkInsertAsync(episodesToInsert, BulkConfigPreset.Default, txCt);
                 result.CreatedEpisodes = episodesToInsert.Count;
 
                 // Phase 4: Insert media data
@@ -79,7 +79,7 @@ public static partial class DbContextExtensions
                     })
                     .ToList();
 
-                await context.BulkInsertAsync(mediaData, BulkConfigPreset.Default, txCt);
+                await ctx.BulkInsertAsync(mediaData, BulkConfigPreset.Default, txCt);
 
                 // Phase 5: Insert season qualities
                 var seasonQualities = mediaData
@@ -94,7 +94,7 @@ public static partial class DbContextExtensions
                     .DistinctBy(x => (x.Quality, x.PlexTvShowSeasonId))
                     .ToList();
 
-                await context.BulkInsertAsync(seasonQualities, BulkConfigPreset.Default, txCt);
+                await ctx.BulkInsertAsync(seasonQualities, BulkConfigPreset.Default, txCt);
 
                 // Phase 6: Insert TV show qualities
                 var tvShowQualities = seasonQualities
@@ -108,7 +108,7 @@ public static partial class DbContextExtensions
                     .DistinctBy(x => (x.Quality, x.PlexTvShowId))
                     .ToList();
 
-                await context.BulkInsertAsync(tvShowQualities, BulkConfigPreset.Default, txCt);
+                await ctx.BulkInsertAsync(tvShowQualities, BulkConfigPreset.Default, txCt);
 
                 foreach (var tvShow in plexTvShows)
                 {

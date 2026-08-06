@@ -121,7 +121,7 @@ public class SyncPlexLibraryMediaMetaDataCommandHandler : ICommandHandler<SyncPl
                     nameof(PlexActor)
                 );
 
-            await _dbContext.PlexLibraryActors.Where(x => x.PlexLibraryId == libraryId).ExecuteDeleteAsync();
+            await _dbContext.PlexLibraryActors.Where(x => x.PlexLibraryId == libraryId).ExecuteDeleteAsync(ct);
             stopWatch.Stop();
 
             _log.Here()
@@ -141,14 +141,11 @@ public class SyncPlexLibraryMediaMetaDataCommandHandler : ICommandHandler<SyncPl
             .ToList();
 
         _log.Here().Debug("[SyncMetaData] BulkInsertAsync actors starting ({Count} rows)", newActors.Count);
-        var insertResult = await Result.Try(
-            () => _dbContext.ExecuteSerializedTransactionAsync(async (ctx, txCt) =>
-            {
-                await ctx.PlexLibraryActors.Where(x => x.PlexLibraryId == libraryId).ExecuteDeleteAsync(txCt);
-                await ctx.BulkInsertAsync(newActors, _bulkInsertConfig, txCt);
-            }, ct),
-            e => new ExceptionalError(e)
-        );
+        var insertResult = await _dbContext.ExecuteSerializedTransactionAsync(async (ctx, txCt) =>
+        {
+            await ctx.PlexLibraryActors.Where(x => x.PlexLibraryId == libraryId).ExecuteDeleteAsync(txCt);
+            await ctx.BulkInsertAsync(newActors, _bulkInsertConfig, txCt);
+        }, ct);
         _log.Here().Debug("[SyncMetaData] BulkInsertAsync actors done. IsFailed={IsFailed}", insertResult.IsFailed);
 
         stopWatch.Stop();
@@ -198,7 +195,7 @@ public class SyncPlexLibraryMediaMetaDataCommandHandler : ICommandHandler<SyncPl
                     libraryId,
                     nameof(PlexGenre)
                 );
-            await _dbContext.PlexLibraryGenres.Where(x => x.PlexLibraryId == libraryId).ExecuteDeleteAsync();
+            await _dbContext.PlexLibraryGenres.Where(x => x.PlexLibraryId == libraryId).ExecuteDeleteAsync(ct);
 
             stopWatch.Stop();
 
@@ -215,14 +212,11 @@ public class SyncPlexLibraryMediaMetaDataCommandHandler : ICommandHandler<SyncPl
         // Reinsert genres for the library
         var newGenres = sourceDict.Select(x => new PlexLibraryGenres(libraryId, x.Value.Id)).ToList();
         _log.Here().Debug("[SyncMetaData] BulkInsertAsync genres starting ({Count} rows)", newGenres.Count);
-        var insertResult = await Result.Try(
-            () => _dbContext.ExecuteSerializedTransactionAsync(async (ctx, txCt) =>
-            {
-                await ctx.PlexLibraryGenres.Where(x => x.PlexLibraryId == libraryId).ExecuteDeleteAsync(txCt);
-                await ctx.BulkInsertAsync(newGenres, _bulkInsertConfig, txCt);
-            }, ct),
-            e => new ExceptionalError(e)
-        );
+        var insertResult = await _dbContext.ExecuteSerializedTransactionAsync(async (ctx, txCt) =>
+        {
+            await ctx.PlexLibraryGenres.Where(x => x.PlexLibraryId == libraryId).ExecuteDeleteAsync(txCt);
+            await ctx.BulkInsertAsync(newGenres, _bulkInsertConfig, txCt);
+        }, ct);
         _log.Here().Debug("[SyncMetaData] BulkInsertAsync genres done. IsFailed={IsFailed}", insertResult.IsFailed);
 
         stopWatch.Stop();
@@ -272,7 +266,7 @@ public class SyncPlexLibraryMediaMetaDataCommandHandler : ICommandHandler<SyncPl
                     libraryId,
                     nameof(PlexCountry)
                 );
-            await _dbContext.PlexLibraryCountries.Where(x => x.PlexLibraryId == libraryId).ExecuteDeleteAsync();
+            await _dbContext.PlexLibraryCountries.Where(x => x.PlexLibraryId == libraryId).ExecuteDeleteAsync(ct);
             stopWatch.Stop();
 
             _log.Here()
@@ -288,14 +282,11 @@ public class SyncPlexLibraryMediaMetaDataCommandHandler : ICommandHandler<SyncPl
         // Reinsert countries for the library
         var newCountries = sourceDict.Select(x => new PlexLibraryCountries(libraryId, x.Value.Id)).ToList();
         _log.Here().Debug("[SyncMetaData] BulkInsertAsync countries starting ({Count} rows)", newCountries.Count);
-        var insertResult = await Result.Try(
-            () => _dbContext.ExecuteSerializedTransactionAsync(async (ctx, txCt) =>
-            {
-                await ctx.PlexLibraryCountries.Where(x => x.PlexLibraryId == libraryId).ExecuteDeleteAsync(txCt);
-                await ctx.BulkInsertAsync(newCountries, _bulkInsertConfig, txCt);
-            }, ct),
-            e => new ExceptionalError(e)
-        );
+        var insertResult = await _dbContext.ExecuteSerializedTransactionAsync(async (ctx, txCt) =>
+        {
+            await ctx.PlexLibraryCountries.Where(x => x.PlexLibraryId == libraryId).ExecuteDeleteAsync(txCt);
+            await ctx.BulkInsertAsync(newCountries, _bulkInsertConfig, txCt);
+        }, ct);
         _log.Here().Debug("[SyncMetaData] BulkInsertAsync countries done. IsFailed={IsFailed}", insertResult.IsFailed);
 
         stopWatch.Stop();

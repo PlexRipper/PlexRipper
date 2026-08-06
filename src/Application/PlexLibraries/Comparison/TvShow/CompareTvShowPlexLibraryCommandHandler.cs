@@ -212,70 +212,6 @@ public class CompareTvShowPlexLibraryCommandHandler : ICommandHandler<CompareTvS
             }
         }
 
-        var attemptShowRows = showRows.Select(x => new PlexTvShowComparison
-        {
-            Id = 0,
-            RemotePlexLibraryId = x.RemotePlexLibraryId,
-            OwnedPlexLibraryId = x.OwnedPlexLibraryId,
-            RemotePlexMediaId = x.RemotePlexMediaId,
-            OwnedPlexMediaId = x.OwnedPlexMediaId,
-            HitState = x.HitState,
-            RemoteQuality = x.RemoteQuality,
-            OwnedQuality = x.OwnedQuality,
-            MatchType = x.MatchType,
-            ComparedAt = x.ComparedAt,
-        }).ToList();
-        var attemptSeasonRows = seasonRows.Select(x => new PlexSeasonComparison
-        {
-            Id = 0,
-            RemotePlexLibraryId = x.RemotePlexLibraryId,
-            OwnedPlexLibraryId = x.OwnedPlexLibraryId,
-            RemotePlexMediaId = x.RemotePlexMediaId,
-            OwnedPlexMediaId = x.OwnedPlexMediaId,
-            HitState = x.HitState,
-            RemoteQuality = x.RemoteQuality,
-            OwnedQuality = x.OwnedQuality,
-            MatchType = x.MatchType,
-            ComparedAt = x.ComparedAt,
-        }).ToList();
-        var attemptEpisodeRows = episodeRows.Select(x => new PlexEpisodeComparison
-        {
-            Id = 0,
-            RemotePlexLibraryId = x.RemotePlexLibraryId,
-            OwnedPlexLibraryId = x.OwnedPlexLibraryId,
-            RemotePlexMediaId = x.RemotePlexMediaId,
-            OwnedPlexMediaId = x.OwnedPlexMediaId,
-            HitState = x.HitState,
-            RemoteQuality = x.RemoteQuality,
-            OwnedQuality = x.OwnedQuality,
-            MatchType = x.MatchType,
-            ComparedAt = x.ComparedAt,
-        }).ToList();
-
-        // 1. Delete old hit rows for this pair.
-        await _dbContext.PlexTvShowComparisons
-            .Where(x => x.RemotePlexLibraryId == remoteLibraryId && x.OwnedPlexLibraryId == ownedLibraryId)
-            .ExecuteDeleteAsync(cancellationToken);
-
-        await _dbContext.PlexSeasonComparisons
-            .Where(x => x.RemotePlexLibraryId == remoteLibraryId && x.OwnedPlexLibraryId == ownedLibraryId)
-            .ExecuteDeleteAsync(cancellationToken);
-
-        await _dbContext.PlexEpisodeComparisons
-            .Where(x => x.RemotePlexLibraryId == remoteLibraryId && x.OwnedPlexLibraryId == ownedLibraryId)
-            .ExecuteDeleteAsync(cancellationToken);
-
-        // 2. Insert new hit rows via standard EF — goes through the write queue.
-        if (attemptShowRows.Count > 0)
-            _dbContext.PlexTvShowComparisons.AddRange(attemptShowRows);
-
-        if (attemptSeasonRows.Count > 0)
-            _dbContext.PlexSeasonComparisons.AddRange(attemptSeasonRows);
-
-        if (attemptEpisodeRows.Count > 0)
-            _dbContext.PlexEpisodeComparisons.AddRange(attemptEpisodeRows);
-
-        // 3. Update scope last — makes new hits visible atomically to readers.
         var librarySnapshots = await _dbContext.PlexLibraries
             .Where(x => x.Id == remoteLibraryId || x.Id == ownedLibraryId)
             .Select(x => new { x.Id, x.UpdatedAt })
@@ -313,7 +249,33 @@ public class CompareTvShowPlexLibraryCommandHandler : ICommandHandler<CompareTvS
             state.OwnedLibraryUpdatedAt = librarySnapshots.GetValueOrDefault(ownedLibraryId);
         }
 
-        await _dbContext.SaveChangesAsync(cancellationToken);
+        var transactionResult = await _dbContext.ExecuteSerializedTransactionAsync(async (dbContext, txCt) =>
+        {
+            await dbContext.PlexTvShowComparisons
+                .Where(x => x.RemotePlexLibraryId == remoteLibraryId && x.OwnedPlexLibraryId == ownedLibraryId)
+                .ExecuteDeleteAsync(txCt);
+
+            await dbContext.PlexSeasonComparisons
+                .Where(x => x.RemotePlexLibraryId == remoteLibraryId && x.OwnedPlexLibraryId == ownedLibraryId)
+                .ExecuteDeleteAsync(txCt);
+
+            await dbContext.PlexEpisodeComparisons
+                .Where(x => x.RemotePlexLibraryId == remoteLibraryId && x.OwnedPlexLibraryId == ownedLibraryId)
+                .ExecuteDeleteAsync(txCt);
+
+            if (showRows.Count > 0)
+                dbContext.PlexTvShowComparisons.AddRange(showRows);
+
+            if (seasonRows.Count > 0)
+                dbContext.PlexSeasonComparisons.AddRange(seasonRows);
+
+            if (episodeRows.Count > 0)
+                dbContext.PlexEpisodeComparisons.AddRange(episodeRows);
+
+            await dbContext.SaveChangesAsync(txCt);
+        }, cancellationToken);
+        if (transactionResult.IsFailed)
+            return transactionResult;
 
         _log.Here()
             .Information(

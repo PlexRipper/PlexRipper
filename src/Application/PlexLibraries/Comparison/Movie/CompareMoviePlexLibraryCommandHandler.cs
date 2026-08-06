@@ -181,19 +181,6 @@ public class CompareMoviePlexLibraryCommandHandler : ICommandHandler<CompareMovi
                 remoteMovies.Count
             );
 
-        // 1. Delete old hit rows for this pair.
-        await _dbContext.PlexMovieComparisons
-            .Where(x => x.RemotePlexLibraryId == remoteLibraryId && x.OwnedPlexLibraryId == ownedLibraryId)
-            .ExecuteDeleteAsync(cancellationToken);
-
-        // 2. Insert new hit rows via standard EF — goes through the write queue.
-        if (hitRows.Count > 0)
-        {
-            _dbContext.PlexMovieComparisons.AddRange(hitRows);
-            await _dbContext.SaveChangesAsync(cancellationToken);
-        }
-
-        // 3. Update scope last — makes new hits visible atomically to readers.
         var librarySnapshots = await _dbContext.PlexLibraries
             .Where(x => x.Id == remoteLibraryId || x.Id == ownedLibraryId)
             .Select(x => new { x.Id, x.UpdatedAt })
@@ -231,7 +218,19 @@ public class CompareMoviePlexLibraryCommandHandler : ICommandHandler<CompareMovi
             state.OwnedLibraryUpdatedAt = librarySnapshots.GetValueOrDefault(ownedLibraryId);
         }
 
-        await _dbContext.SaveChangesAsync(cancellationToken);
+        var transactionResult = await _dbContext.ExecuteSerializedTransactionAsync(async (dbContext, txCt) =>
+        {
+            await dbContext.PlexMovieComparisons
+                .Where(x => x.RemotePlexLibraryId == remoteLibraryId && x.OwnedPlexLibraryId == ownedLibraryId)
+                .ExecuteDeleteAsync(txCt);
+
+            if (hitRows.Count > 0)
+                dbContext.PlexMovieComparisons.AddRange(hitRows);
+
+            await dbContext.SaveChangesAsync(txCt);
+        }, cancellationToken);
+        if (transactionResult.IsFailed)
+            return transactionResult;
 
         _log.Here()
             .Information(

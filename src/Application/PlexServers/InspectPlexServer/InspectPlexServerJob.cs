@@ -44,9 +44,14 @@ public class InspectPlexServerJob : IJob
         try
         {
             var serverTasks = plexServerIds.Select(plexServerId => InspectPlexServer(plexServerId, cancellationToken));
-            await Task.WhenAll(serverTasks);
+            var results = await Task.WhenAll(serverTasks);
+            var failedResults = results.Where(x => x.IsFailed).ToList();
 
-            _log.Here().Information("Successfully finished the inspection of {Count}", plexServerIds.Count);
+            foreach (var failedResult in failedResults)
+                failedResult.LogError();
+
+            if (failedResults.Count == 0)
+                _log.Here().Information("Successfully finished the inspection of {Count}", plexServerIds.Count);
         }
         catch (Exception e)
         {
@@ -86,7 +91,12 @@ public class InspectPlexServerJob : IJob
             return accountsResult.LogError();
 
         var plexAccountId = accountsResult.Value.First().Id;
-        await _commandExecutor.Send(new RefreshLibraryAccessCommand(plexAccountId, plexServerId), cancellationToken);
+        var refreshResult = await _commandExecutor.Send(
+            new RefreshLibraryAccessCommand(plexAccountId, plexServerId),
+            cancellationToken
+        );
+        if (refreshResult.IsFailed)
+            return refreshResult.LogError();
 
         // Notify front-end
         await _notificationHubService.SendRefreshNotificationAsync(

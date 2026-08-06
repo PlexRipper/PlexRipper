@@ -31,21 +31,35 @@ public class ReaparrDbContextConcurrencyUnitTests : BaseUnitTest
             .ToList();
 
         // Act
+        var startBarrier = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var readyCount = 0;
+
+        async Task WaitForConcurrentStart()
+        {
+            if (Interlocked.Increment(ref readyCount) == 3)
+                startBarrier.TrySetResult();
+
+            await startBarrier.Task.WaitAsync(CancellationToken);
+        }
+
         await Task.WhenAll(
             Task.Run(async () =>
             {
                 using var dbContext = IDbContext;
+                await WaitForConcurrentStart();
                 await dbContext.BulkInsertAsync(actors, cancellationToken: CancellationToken);
             }, CancellationToken),
             Task.Run(async () =>
             {
                 using var dbContext = IDbContext;
                 dbContext.Notifications.AddRange(notifications);
+                await WaitForConcurrentStart();
                 await dbContext.SaveChangesAsync(CancellationToken);
             }, CancellationToken),
             Task.Run(async () =>
             {
                 using var dbContext = IDbContext;
+                await WaitForConcurrentStart();
                 await dbContext.PlexLibraries
                     .Where(x => x.Id == libraryId)
                     .ExecuteUpdateAsync(x => x.SetProperty(y => y.MovieCount, 42), CancellationToken);
@@ -79,26 +93,39 @@ public class ReaparrDbContextConcurrencyUnitTests : BaseUnitTest
             .ToList();
 
         // Act
-        var exceptionThrown = false;
-        try
+        using var dbContext = IDbContext;
+        var result = await dbContext.ExecuteSerializedTransactionAsync(async (context, ct) =>
         {
-            using var dbContext = IDbContext;
-            await dbContext.ExecuteSerializedTransactionAsync(async (context, ct) =>
-            {
-                await context.BulkInsertAsync(actors, cancellationToken: ct);
-                throw new InvalidOperationException("rollback test");
-            }, CancellationToken);
-        }
-        catch (InvalidOperationException)
-        {
-            exceptionThrown = true;
-        }
+            await context.BulkInsertAsync(actors, cancellationToken: ct);
+            throw new InvalidOperationException("rollback test");
+        }, CancellationToken);
 
         // Assert
         using var assertContext = IDbContext;
         var actorCount = await assertContext.PlexActors.CountAsync(x => x.Key.StartsWith("rollback-actor-"), CancellationToken);
 
-        exceptionThrown.ShouldBeTrue();
+        result.IsFailed.ShouldBeTrue();
+        result.HasException<InvalidOperationException>().ShouldBeTrue();
         actorCount.ShouldBe(0);
+    }
+
+    [Test]
+    public async Task ShouldReturnCancelledResult_WhenSerializedTransactionIsCancelled()
+    {
+        // Arrange
+        await SetupDatabase(91236);
+        using var cancellationTokenSource = new CancellationTokenSource();
+        await cancellationTokenSource.CancelAsync();
+
+        // Act
+        using var dbContext = IDbContext;
+        var result = await dbContext.ExecuteSerializedTransactionAsync(
+            (_, ct) => Task.Delay(Timeout.InfiniteTimeSpan, ct),
+            cancellationTokenSource.Token
+        );
+
+        // Assert
+        result.IsFailed.ShouldBeTrue();
+        result.IsCancelled.ShouldBeTrue();
     }
 }

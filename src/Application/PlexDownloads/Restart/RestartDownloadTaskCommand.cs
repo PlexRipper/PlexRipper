@@ -86,14 +86,14 @@ public class RestartDownloadTaskCommandHandler : ICommandHandler<RestartDownload
             switch (downloadTask.DownloadTaskType)
             {
                 case DownloadTaskType.MovieData:
-                    var refreshResult = await RefreshMovieDownloadTask(childKey);
+                    var refreshResult = await RefreshMovieDownloadTask(childKey, cancellationToken);
                     if (refreshResult.IsFailed)
                         continue;
 
                     break;
 
                 case DownloadTaskType.EpisodeData:
-                    var refreshEpisodeResult = await RefreshEpisodeMovieDownloadTask(childKey);
+                    var refreshEpisodeResult = await RefreshEpisodeMovieDownloadTask(childKey, cancellationToken);
                     if (refreshEpisodeResult.IsFailed)
                         continue;
                     break;
@@ -124,7 +124,10 @@ public class RestartDownloadTaskCommandHandler : ICommandHandler<RestartDownload
         return Result.Ok();
     }
 
-    private async Task<Result> RefreshMovieDownloadTask(DownloadTaskKey downloadTaskKey)
+    private async Task<Result> RefreshMovieDownloadTask(
+        DownloadTaskKey downloadTaskKey,
+        CancellationToken cancellationToken
+    )
     {
         var downloadTask = await _dbContext.DownloadTaskMovieFile.FirstOrDefaultAsync(x => x.Id == downloadTaskKey.Id);
         if (downloadTask is null)
@@ -194,11 +197,14 @@ public class RestartDownloadTaskCommandHandler : ICommandHandler<RestartDownload
         return await Result.Try(async Task () =>
         {
             _dbContext.DownloadTaskMovieFile.Update(newDownloadTask);
-            await _dbContext.SaveChangesAsync();
+            await _dbContext.SaveChangesAsync(cancellationToken);
         });
     }
 
-    private async Task<Result> RefreshEpisodeMovieDownloadTask(DownloadTaskKey downloadTaskKey)
+    private async Task<Result> RefreshEpisodeMovieDownloadTask(
+        DownloadTaskKey downloadTaskKey,
+        CancellationToken cancellationToken
+    )
     {
         var downloadTask =
             await _dbContext.DownloadTaskTvShowEpisodeFile.FirstOrDefaultAsync(x => x.Id == downloadTaskKey.Id);
@@ -270,7 +276,7 @@ public class RestartDownloadTaskCommandHandler : ICommandHandler<RestartDownload
         return await Result.Try(async Task () =>
         {
             _dbContext.DownloadTaskTvShowEpisodeFile.Update(newDownloadTask);
-            await _dbContext.SaveChangesAsync();
+            await _dbContext.SaveChangesAsync(cancellationToken);
         });
     }
 }

@@ -85,8 +85,7 @@ public static partial class DbContextExtensions
         if (plexLibraryId == 0)
             return ResultExtensions.IsZero(nameof(plexLibraryId));
 
-        return await Result.Try(() =>
-            context.ExecuteSerializedTransactionAsync(async (ctx, txCt) =>
+        return await context.ExecuteSerializedTransactionAsync(async (ctx, txCt) =>
             {
                 plexMovies.SetRelationshipIds(plexServerId, plexLibraryId);
 
@@ -107,7 +106,6 @@ public static partial class DbContextExtensions
                     .ToList();
 
                 await ctx.BulkInsertAsync(mediaData, BulkConfigPreset.Default, txCt);
-            }, ct)
-        );
+            }, ct);
     }
 }

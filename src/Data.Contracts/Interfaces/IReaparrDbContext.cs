@@ -185,11 +185,11 @@ public interface IReaparrDbContext : IDisposable
         int maxRetries = 3,
         CancellationToken cancellationToken = default);
 
-    Task<T> ExecuteSerializedTransactionAsync<T>(
+    Task<Result<T>> ExecuteSerializedTransactionAsync<T>(
         Func<IReaparrDbContext, CancellationToken, Task<T>> operation,
         CancellationToken cancellationToken = default);
 
-    Task ExecuteSerializedTransactionAsync(
+    Task<Result> ExecuteSerializedTransactionAsync(
         Func<IReaparrDbContext, CancellationToken, Task> operation,
         CancellationToken cancellationToken = default);
 

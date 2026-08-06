@@ -211,13 +211,13 @@ public class SyncPlexTvShowsCommandHandler : ICommandHandler<SyncPlexTvShowsComm
         }
 
         var distinctGenres = plexTvShowGenres.DistinctBy(x => new { x.PlexTvShowId, x.GenresId }).ToList();
-        var insertResult = await Result.Try(() => dbContext.ExecuteSerializedTransactionAsync(async (ctx, txCt) =>
+        var insertResult = await dbContext.ExecuteSerializedTransactionAsync(async (ctx, txCt) =>
         {
             await ctx.PlexTvShowGenres.Where(x => x.PlexLibraryId == plexLibraryId).ExecuteDeleteAsync(txCt);
             await ctx.BulkInsertAsync(distinctGenres, CreateBulkConfig(), txCt);
             await ctx.PlexLibraries.Where(x => x.Id == plexLibraryId)
                 .ExecuteUpdateAsync(p => p.SetProperty(x => x.GenresCount, distinctGenres.Count), txCt);
-        }, cancellationToken));
+        }, cancellationToken);
 
         stopWatch.StopAndLog(
             $"Synced {plexTvShowGenres.Count} {nameof(PlexTvShowGenres)} for library: {libraryName} with id: {plexLibraryId}"
@@ -258,14 +258,14 @@ public class SyncPlexTvShowsCommandHandler : ICommandHandler<SyncPlexTvShowsComm
 
         var distinctCountries = plexTvShowCountries.DistinctBy(x => new { x.PlexTvShowId, x.CountryId }).ToList();
 
-        var insertResult = await Result.Try(() => dbContext.ExecuteSerializedTransactionAsync(async (ctx, txCt) =>
+        var insertResult = await dbContext.ExecuteSerializedTransactionAsync(async (ctx, txCt) =>
         {
             await ctx.PlexTvShowCountries.Where(x => x.PlexLibraryId == plexLibraryId).ExecuteDeleteAsync(txCt);
             await ctx.BulkInsertAsync(distinctCountries, CreateBulkConfig(), txCt);
             await ctx
                 .PlexLibraries.Where(x => x.Id == plexLibraryId)
                 .ExecuteUpdateAsync(p => p.SetProperty(x => x.CountriesCount, distinctCountries.Count), txCt);
-        }, cancellationToken));
+        }, cancellationToken);
 
         stopWatch.StopAndLog(
             $"Synced {plexTvShowCountries.Count} {nameof(PlexTvShowCountries)} for library: {libraryName} with id: {plexLibraryId}"
@@ -305,14 +305,14 @@ public class SyncPlexTvShowsCommandHandler : ICommandHandler<SyncPlexTvShowsComm
         }
 
         var distinctActors = plexTvShowRoles.DistinctBy(x => new { x.PlexTvShowId, RolesId = x.PlexActorId }).ToList();
-        var insertResult = await Result.Try(() => dbContext.ExecuteSerializedTransactionAsync(async (ctx, txCt) =>
+        var insertResult = await dbContext.ExecuteSerializedTransactionAsync(async (ctx, txCt) =>
         {
             await ctx.PlexTvShowActors.Where(x => x.PlexLibraryId == plexLibraryId).ExecuteDeleteAsync(txCt);
             await ctx.BulkInsertAsync(distinctActors, CreateBulkConfig(), txCt);
             await ctx
                 .PlexLibraries.Where(x => x.Id == plexLibraryId)
                 .ExecuteUpdateAsync(p => p.SetProperty(x => x.ActorsCount, distinctActors.Count), txCt);
-        }, cancellationToken));
+        }, cancellationToken);
 
         stopWatch.StopAndLog(
             $"Synced {plexTvShowRoles.Count} {nameof(PlexTvShowActors)} for library: {libraryName} with id: {plexLibraryId}"

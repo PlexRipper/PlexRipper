@@ -110,16 +110,6 @@ public sealed class ReaparrDbContext : DbContext, IReaparrDbContext, IReaparrDbC
 
     public string DatabaseName { get; }
 
-    public Task BulkReadAsync<T>(
-        IList<T> entities,
-        BulkConfig? bulkConfig = null,
-        CancellationToken cancellationToken = default
-    )
-        where T : class => throw new NotSupportedException(
-        "BulkReadAsync is not supported in with SQLite due to issues with UseTempDB and other limitations."
-        + "Use EF native reading instead."
-    );
-
     public async Task BulkInsertAsync<T>(
         IList<T> entities,
         BulkConfig? bulkConfig = null,
@@ -158,29 +148,6 @@ public sealed class ReaparrDbContext : DbContext, IReaparrDbContext, IReaparrDbC
         cancellationToken
     );
 
-    public async Task BulkInsertOrUpdateAsync<T>(
-        IList<T> entities,
-        BulkConfig? bulkConfig = null,
-        Action<decimal>? progress = null,
-        Type? type = null,
-        CancellationToken cancellationToken = default
-    )
-        where T : class => await ExecuteSerializedWriteAsync(
-        async (_, ct) => await ExecuteBulkAsync(
-            () =>
-                DbContextBulkExtensions.BulkInsertOrUpdateAsync(
-                    this,
-                    entities,
-                    bulkConfig,
-                    progress,
-                    type,
-                    cancellationToken: ct
-                ),
-            ct
-        ),
-        cancellationToken
-    );
-
     /// <inheritdoc/>
     public Task<T> ExecuteWithRetryAsync<T>(
         Func<IReaparrDbContext, Task<T>> operation,
@@ -189,18 +156,39 @@ public sealed class ReaparrDbContext : DbContext, IReaparrDbContext, IReaparrDbC
         ((DbContext)this).ExecuteWithRetryAsync(ctx => operation((IReaparrDbContext)ctx), maxRetries,
             cancellationToken);
 
+    public Task<T> ExecuteSerializedWriteAsync<T>(
+        Func<IReaparrDbContext, CancellationToken, Task<T>> operation,
+        CancellationToken cancellationToken = default) =>
+        this.ExecuteSerializedWriteAsync(ct => operation(this, ct), 8, cancellationToken);
+
     public Task ExecuteSerializedWriteAsync(
         Func<IReaparrDbContext, CancellationToken, Task> operation,
         CancellationToken cancellationToken = default) =>
-        ((DbContext)this).ExecuteSerializedWriteAsync(ct => operation(this, ct), 8, cancellationToken);
+        this.ExecuteSerializedWriteAsync(ct => operation(this, ct), 8, cancellationToken);
 
+    public async Task<T> ExecuteSerializedTransactionAsync<T>(
+        Func<IReaparrDbContext, CancellationToken, Task<T>> operation,
+        CancellationToken cancellationToken = default)
+    {
+        T result = default!;
+        await this.ExecuteSerializedTransactionAsync(async ct =>
+        {
+            result = await operation(this, ct);
+        }, 8, cancellationToken);
+        return result;
+    }
+
+    public Task ExecuteSerializedTransactionAsync(
+        Func<IReaparrDbContext, CancellationToken, Task> operation,
+        CancellationToken cancellationToken = default) =>
+        this.ExecuteSerializedTransactionAsync(ct => operation(this, ct), 8, cancellationToken);
 
     /// <inheritdoc/>
     public Task<int> ExecuteSqlInterpolatedAsync(
         FormattableString sql,
         CancellationToken cancellationToken = default)
     {
-        return ((DbContext)this).ExecuteSerializedWriteAsync(ct1 => Database.ExecuteSqlInterpolatedAsync(sql, ct1), 8, cancellationToken);
+        return this.ExecuteSerializedWriteAsync(ct1 => Database.ExecuteSqlInterpolatedAsync(sql, ct1), 8, cancellationToken);
     }
 
     /// <inheritdoc/>

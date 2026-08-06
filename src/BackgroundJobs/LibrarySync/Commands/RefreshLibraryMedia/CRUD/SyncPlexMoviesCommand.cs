@@ -156,9 +156,6 @@ public class SyncPlexMoviesCommandHandler : ICommandHandler<SyncPlexMoviesComman
                 libraryId
             );
         var stopWatch = Stopwatch.StartNew();
-        await _dbContext
-            .PlexMovieActors.Where(x => x.PlexLibraryId == libraryId)
-            .ExecuteDeleteAsync(cancellationToken: ct);
 
         var list = new List<PlexMovieActors>();
         var keyToIdDict = plexActorsDict.ToDictionary(kv => kv.Value.Key, kv => kv.Value.Id);
@@ -177,7 +174,11 @@ public class SyncPlexMoviesCommandHandler : ICommandHandler<SyncPlexMoviesComman
         // Remove duplicates before inserting
         list = list.DistinctBy(x => new { x.PlexActorId, x.PlexMovieId }).ToList();
 
-        var insertResult = await Result.Try(() => _dbContext.BulkInsertAsync(list, _config, ct));
+        var insertResult = await Result.Try(() => _dbContext.ExecuteSerializedTransactionAsync(async (ctx, txCt) =>
+        {
+            await ctx.PlexMovieActors.Where(x => x.PlexLibraryId == libraryId).ExecuteDeleteAsync(txCt);
+            await ctx.BulkInsertAsync(list, _config, txCt);
+        }, ct));
         if (insertResult.IsFailed)
         {
             _log.Here().Error("Failed to sync movie actors: {Error}", insertResult.Errors);
@@ -207,10 +208,6 @@ public class SyncPlexMoviesCommandHandler : ICommandHandler<SyncPlexMoviesComman
             );
         var stopWatch = Stopwatch.StartNew();
 
-        await _dbContext
-            .PlexMovieGenres.Where(x => x.PlexLibraryId == libraryId)
-            .ExecuteDeleteAsync(cancellationToken: ct);
-
         var list = new List<PlexMovieGenres>();
         var keyToIdDict = plexGenreDict.ToDictionary(kv => kv.Value.Key, kv => kv.Value.Id);
 
@@ -228,7 +225,11 @@ public class SyncPlexMoviesCommandHandler : ICommandHandler<SyncPlexMoviesComman
         // Remove duplicates before inserting
         list = list.DistinctBy(x => new { x.GenresId, x.PlexMovieId }).ToList();
 
-        var insertResult = await Result.Try(() => _dbContext.BulkInsertAsync(list, _config, ct));
+        var insertResult = await Result.Try(() => _dbContext.ExecuteSerializedTransactionAsync(async (ctx, txCt) =>
+        {
+            await ctx.PlexMovieGenres.Where(x => x.PlexLibraryId == libraryId).ExecuteDeleteAsync(txCt);
+            await ctx.BulkInsertAsync(list, _config, txCt);
+        }, ct));
         if (insertResult.IsFailed)
         {
             _log.Here().Error("Failed to sync movie genres: {Error}", insertResult.Errors);
@@ -258,10 +259,6 @@ public class SyncPlexMoviesCommandHandler : ICommandHandler<SyncPlexMoviesComman
             );
         var stopWatch = Stopwatch.StartNew();
 
-        await _dbContext
-            .PlexMovieCountries.Where(x => x.PlexLibraryId == libraryId)
-            .ExecuteDeleteAsync(cancellationToken: ct);
-
         var list = new List<PlexMovieCountries>();
         var keyToIdDict = plexCountryDict.ToDictionary(kv => kv.Value.Key, kv => kv.Value.Id);
 
@@ -279,7 +276,11 @@ public class SyncPlexMoviesCommandHandler : ICommandHandler<SyncPlexMoviesComman
         // Remove duplicates before inserting
         list = list.DistinctBy(x => new { x.CountryId, x.PlexMovieId }).ToList();
 
-        var insertResult = await Result.Try(() => _dbContext.BulkInsertAsync(list, _config, ct));
+        var insertResult = await Result.Try(() => _dbContext.ExecuteSerializedTransactionAsync(async (ctx, txCt) =>
+        {
+            await ctx.PlexMovieCountries.Where(x => x.PlexLibraryId == libraryId).ExecuteDeleteAsync(txCt);
+            await ctx.BulkInsertAsync(list, _config, txCt);
+        }, ct));
         if (insertResult.IsFailed)
         {
             _log.Here().Error("Failed to sync movie countries: {Error}", insertResult.Errors);

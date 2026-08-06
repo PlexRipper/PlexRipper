@@ -71,15 +71,15 @@ public class SyncPlexLibraryMediaMetaDataCommandHandler : ICommandHandler<SyncPl
             );
 
         _log.Here().Debug("[SyncMetaData] Starting SyncGenres");
-        var syncGenresResult = await SyncGenres(genres, libraryId, libraryName);
+        var syncGenresResult = await SyncGenres(genres, libraryId, libraryName, ct);
         _log.Here().Debug("[SyncMetaData] SyncGenres done. IsFailed={IsFailed}", syncGenresResult.IsFailed);
 
         _log.Here().Debug("[SyncMetaData] Starting SyncCountries");
-        var syncCountriesResult = await SyncCountries(countries, libraryId, libraryName);
+        var syncCountriesResult = await SyncCountries(countries, libraryId, libraryName, ct);
         _log.Here().Debug("[SyncMetaData] SyncCountries done. IsFailed={IsFailed}", syncCountriesResult.IsFailed);
 
         _log.Here().Debug("[SyncMetaData] Starting SyncRoles");
-        var syncRolesResult = await SyncRoles(roles, libraryId, libraryName);
+        var syncRolesResult = await SyncRoles(roles, libraryId, libraryName, ct);
         _log.Here().Debug("[SyncMetaData] SyncRoles done. IsFailed={IsFailed}", syncRolesResult.IsFailed);
 
         var actorsCount = syncRolesResult.ValueOrDefault;
@@ -102,7 +102,8 @@ public class SyncPlexLibraryMediaMetaDataCommandHandler : ICommandHandler<SyncPl
     private async Task<Result<int>> SyncRoles(
         Dictionary<string, PlexActor> sourceDict,
         int libraryId,
-        string libraryName
+        string libraryName,
+        CancellationToken ct
     )
     {
         var stopWatch = Stopwatch.StartNew();
@@ -134,17 +135,18 @@ public class SyncPlexLibraryMediaMetaDataCommandHandler : ICommandHandler<SyncPl
             return Result.Ok(0);
         }
 
-        // Drop all actors for the library
-        await _dbContext.PlexLibraryActors.Where(x => x.PlexLibraryId == libraryId).ExecuteDeleteAsync();
-
-        // Reinsert genres for the library
+        // Reinsert actors for the library
         var newActors = sourceDict
             .Select(x => new PlexLibraryActors(libraryId: libraryId, plexActorId: x.Value.Id))
             .ToList();
 
         _log.Here().Debug("[SyncMetaData] BulkInsertAsync actors starting ({Count} rows)", newActors.Count);
         var insertResult = await Result.Try(
-            () => _dbContext.BulkInsertAsync(newActors, _bulkInsertConfig),
+            () => _dbContext.ExecuteSerializedTransactionAsync(async (ctx, txCt) =>
+            {
+                await ctx.PlexLibraryActors.Where(x => x.PlexLibraryId == libraryId).ExecuteDeleteAsync(txCt);
+                await ctx.BulkInsertAsync(newActors, _bulkInsertConfig, txCt);
+            }, ct),
             e => new ExceptionalError(e)
         );
         _log.Here().Debug("[SyncMetaData] BulkInsertAsync actors done. IsFailed={IsFailed}", insertResult.IsFailed);
@@ -178,7 +180,8 @@ public class SyncPlexLibraryMediaMetaDataCommandHandler : ICommandHandler<SyncPl
     private async Task<Result<int>> SyncGenres(
         Dictionary<string, PlexGenre> sourceDict,
         int libraryId,
-        string libraryName
+        string libraryName,
+        CancellationToken ct
     )
     {
         var stopWatch = Stopwatch.StartNew();
@@ -209,14 +212,15 @@ public class SyncPlexLibraryMediaMetaDataCommandHandler : ICommandHandler<SyncPl
             return Result.Ok(0);
         }
 
-        // Drop all genres for the library
-        await _dbContext.PlexLibraryGenres.Where(x => x.PlexLibraryId == libraryId).ExecuteDeleteAsync();
-
         // Reinsert genres for the library
         var newGenres = sourceDict.Select(x => new PlexLibraryGenres(libraryId, x.Value.Id)).ToList();
         _log.Here().Debug("[SyncMetaData] BulkInsertAsync genres starting ({Count} rows)", newGenres.Count);
         var insertResult = await Result.Try(
-            () => _dbContext.BulkInsertAsync(newGenres, _bulkInsertConfig),
+            () => _dbContext.ExecuteSerializedTransactionAsync(async (ctx, txCt) =>
+            {
+                await ctx.PlexLibraryGenres.Where(x => x.PlexLibraryId == libraryId).ExecuteDeleteAsync(txCt);
+                await ctx.BulkInsertAsync(newGenres, _bulkInsertConfig, txCt);
+            }, ct),
             e => new ExceptionalError(e)
         );
         _log.Here().Debug("[SyncMetaData] BulkInsertAsync genres done. IsFailed={IsFailed}", insertResult.IsFailed);
@@ -250,7 +254,8 @@ public class SyncPlexLibraryMediaMetaDataCommandHandler : ICommandHandler<SyncPl
     private async Task<Result<int>> SyncCountries(
         Dictionary<string, PlexCountry> sourceDict,
         int libraryId,
-        string libraryName
+        string libraryName,
+        CancellationToken ct
     )
     {
         var stopWatch = Stopwatch.StartNew();
@@ -280,14 +285,15 @@ public class SyncPlexLibraryMediaMetaDataCommandHandler : ICommandHandler<SyncPl
             return Result.Ok(0);
         }
 
-        // Drop all countries for the library
-        await _dbContext.PlexLibraryCountries.Where(x => x.PlexLibraryId == libraryId).ExecuteDeleteAsync();
-
         // Reinsert countries for the library
         var newCountries = sourceDict.Select(x => new PlexLibraryCountries(libraryId, x.Value.Id)).ToList();
         _log.Here().Debug("[SyncMetaData] BulkInsertAsync countries starting ({Count} rows)", newCountries.Count);
         var insertResult = await Result.Try(
-            () => _dbContext.BulkInsertAsync(newCountries, _bulkInsertConfig),
+            () => _dbContext.ExecuteSerializedTransactionAsync(async (ctx, txCt) =>
+            {
+                await ctx.PlexLibraryCountries.Where(x => x.PlexLibraryId == libraryId).ExecuteDeleteAsync(txCt);
+                await ctx.BulkInsertAsync(newCountries, _bulkInsertConfig, txCt);
+            }, ct),
             e => new ExceptionalError(e)
         );
         _log.Here().Debug("[SyncMetaData] BulkInsertAsync countries done. IsFailed={IsFailed}", insertResult.IsFailed);

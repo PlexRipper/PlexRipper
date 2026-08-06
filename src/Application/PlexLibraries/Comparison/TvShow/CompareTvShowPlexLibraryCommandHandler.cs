@@ -84,140 +84,140 @@ public class CompareTvShowPlexLibraryCommandHandler : ICommandHandler<CompareTvS
         CancellationToken cancellationToken
     )
     {
-        var now = DateTime.UtcNow;
-
-        var remoteShows = await LoadShowsAsync(remoteLibraryId, cancellationToken);
-        var ownedShows = await LoadShowsAsync(ownedLibraryId, cancellationToken);
-        var remoteSeasons = await LoadSeasonsAsync(remoteLibraryId, cancellationToken);
-        var ownedSeasons = await LoadSeasonsAsync(ownedLibraryId, cancellationToken);
-        var remoteEpisodes = await LoadEpisodesAsync(remoteLibraryId, cancellationToken);
-        var ownedEpisodes = await LoadEpisodesAsync(ownedLibraryId, cancellationToken);
-
-        var ownedByTmdb = ownedShows
-            .Where(x => x.Guid_TMDB.HasValue)
-            .GroupBy(x => x.Guid_TMDB!.Value)
-            .ToDictionary(g => g.Key, g => g.ToList());
-
-        var ownedByImdb = ownedShows
-            .Where(x => !string.IsNullOrEmpty(x.Guid_IMDB))
-            .GroupBy(x => x.Guid_IMDB!)
-            .ToDictionary(g => g.Key, g => g.ToList(), StringComparer.OrdinalIgnoreCase);
-
-        var ownedByTvdb = ownedShows
-            .Where(x => x.Guid_TVDB.HasValue)
-            .GroupBy(x => x.Guid_TVDB!.Value)
-            .ToDictionary(g => g.Key, g => g.ToList());
-
-        var ownedByTitleYear = ownedShows
-            .GroupBy(GetTitleYearKey, StringComparer.OrdinalIgnoreCase)
-            .ToDictionary(g => g.Key, g => g.ToList(), StringComparer.OrdinalIgnoreCase);
-
-        var ownedSeasonsByShowAndNumber = ownedSeasons
-            .GroupBy(x => (x.TvShowId, x.SeasonNumber))
-            .ToDictionary(g => g.Key, g => g.ToList());
-
-        var ownedEpisodesBySeasonAndNumber = ownedEpisodes
-            .GroupBy(x => (x.TvShowSeasonId, x.EpisodeNumber))
-            .ToDictionary(g => g.Key, g => g.ToList());
-
-        var remoteSeasonsByShow = remoteSeasons
-            .GroupBy(x => x.TvShowId)
-            .ToDictionary(g => g.Key, g => g.ToList());
-
-        var remoteEpisodesBySeason = remoteEpisodes
-            .GroupBy(x => x.TvShowSeasonId)
-            .ToDictionary(g => g.Key, g => g.ToList());
-
-        var showRows = new List<PlexTvShowComparison>();
-        var seasonRows = new List<PlexSeasonComparison>();
-        var episodeRows = new List<PlexEpisodeComparison>();
-
-        foreach (var remoteShow in remoteShows)
-        {
-            var showMatches = MatchShows(remoteShow, ownedByTmdb, ownedByImdb, ownedByTvdb, ownedByTitleYear);
-
-            foreach (var (ownedShow, showMatchType) in showMatches)
-            {
-                showRows.Add(new PlexTvShowComparison
-                {
-                    Id = 0,
-                    RemotePlexLibraryId = remoteLibraryId,
-                    OwnedPlexLibraryId = ownedLibraryId,
-                    RemotePlexMediaId = remoteShow.Id,
-                    OwnedPlexMediaId = ownedShow.Id,
-                    HitState = IsHigherQuality(remoteShow.Quality, ownedShow.Quality)
-                        ? PlexMediaComparisonHitState.HigherQuality
-                        : PlexMediaComparisonHitState.Matched,
-                    RemoteQuality = remoteShow.Quality,
-                    OwnedQuality = ownedShow.Quality,
-                    MatchType = showMatchType,
-                    ComparedAt = now,
-                });
-
-                if (!remoteSeasonsByShow.TryGetValue(remoteShow.Id, out var showSeasons))
-                    continue;
-
-                foreach (var remoteSeason in showSeasons)
-                {
-                    if (!ownedSeasonsByShowAndNumber.TryGetValue((ownedShow.Id, remoteSeason.SeasonNumber), out var seasonMatches))
-                        continue;
-
-                    foreach (var ownedSeason in seasonMatches)
-                    {
-                        seasonRows.Add(new PlexSeasonComparison
-                        {
-                            Id = 0,
-                            RemotePlexLibraryId = remoteLibraryId,
-                            OwnedPlexLibraryId = ownedLibraryId,
-                            RemotePlexMediaId = remoteSeason.Id,
-                            OwnedPlexMediaId = ownedSeason.Id,
-                            HitState = IsHigherQuality(remoteSeason.Quality, ownedSeason.Quality)
-                                ? PlexMediaComparisonHitState.HigherQuality
-                                : PlexMediaComparisonHitState.Matched,
-                            RemoteQuality = remoteSeason.Quality,
-                            OwnedQuality = ownedSeason.Quality,
-                            MatchType = PlexMediaComparisonMatchType.ParentAndChildNumbers,
-                            ComparedAt = now,
-                        });
-
-                        if (!remoteEpisodesBySeason.TryGetValue(remoteSeason.Id, out var seasonEpisodes))
-                            continue;
-
-                        foreach (var remoteEpisode in seasonEpisodes)
-                        {
-                            if (!ownedEpisodesBySeasonAndNumber.TryGetValue(
-                                    (ownedSeason.Id, remoteEpisode.EpisodeNumber),
-                                    out var episodeMatches
-                                ))
-                                continue;
-
-                            episodeRows.AddRange(episodeMatches.Select(ownedEpisode => new PlexEpisodeComparison
-                            {
-                                Id = 0,
-                                RemotePlexLibraryId = remoteLibraryId,
-                                OwnedPlexLibraryId = ownedLibraryId,
-                                RemotePlexMediaId = remoteEpisode.Id,
-                                OwnedPlexMediaId = ownedEpisode.Id,
-                                HitState = IsHigherQuality(remoteEpisode.Quality, ownedEpisode.Quality)
-                                    ? PlexMediaComparisonHitState.HigherQuality
-                                    : PlexMediaComparisonHitState.Matched,
-                                RemoteQuality = remoteEpisode.Quality,
-                                OwnedQuality = ownedEpisode.Quality,
-                                MatchType = PlexMediaComparisonMatchType.ParentAndChildNumbers,
-                                ComparedAt = now,
-                            }));
-                        }
-                    }
-                }
-            }
-        }
-
         var transactionResult = await _dbContext.ExecuteSerializedTransactionAsync(async (ctx, txCt) =>
         {
+            var now = DateTime.UtcNow;
+
             var librarySnapshots = await ctx.PlexLibraries
                 .Where(x => x.Id == remoteLibraryId || x.Id == ownedLibraryId)
                 .Select(x => new { x.Id, x.UpdatedAt })
                 .ToDictionaryAsync(x => x.Id, x => x.UpdatedAt, txCt);
+
+            var remoteShows = await LoadShowsAsync(ctx, remoteLibraryId, txCt);
+            var ownedShows = await LoadShowsAsync(ctx, ownedLibraryId, txCt);
+            var remoteSeasons = await LoadSeasonsAsync(ctx, remoteLibraryId, txCt);
+            var ownedSeasons = await LoadSeasonsAsync(ctx, ownedLibraryId, txCt);
+            var remoteEpisodes = await LoadEpisodesAsync(ctx, remoteLibraryId, txCt);
+            var ownedEpisodes = await LoadEpisodesAsync(ctx, ownedLibraryId, txCt);
+
+            var ownedByTmdb = ownedShows
+                .Where(x => x.Guid_TMDB.HasValue)
+                .GroupBy(x => x.Guid_TMDB!.Value)
+                .ToDictionary(g => g.Key, g => g.ToList());
+
+            var ownedByImdb = ownedShows
+                .Where(x => !string.IsNullOrEmpty(x.Guid_IMDB))
+                .GroupBy(x => x.Guid_IMDB!)
+                .ToDictionary(g => g.Key, g => g.ToList(), StringComparer.OrdinalIgnoreCase);
+
+            var ownedByTvdb = ownedShows
+                .Where(x => x.Guid_TVDB.HasValue)
+                .GroupBy(x => x.Guid_TVDB!.Value)
+                .ToDictionary(g => g.Key, g => g.ToList());
+
+            var ownedByTitleYear = ownedShows
+                .GroupBy(GetTitleYearKey, StringComparer.OrdinalIgnoreCase)
+                .ToDictionary(g => g.Key, g => g.ToList(), StringComparer.OrdinalIgnoreCase);
+
+            var ownedSeasonsByShowAndNumber = ownedSeasons
+                .GroupBy(x => (x.TvShowId, x.SeasonNumber))
+                .ToDictionary(g => g.Key, g => g.ToList());
+
+            var ownedEpisodesBySeasonAndNumber = ownedEpisodes
+                .GroupBy(x => (x.TvShowSeasonId, x.EpisodeNumber))
+                .ToDictionary(g => g.Key, g => g.ToList());
+
+            var remoteSeasonsByShow = remoteSeasons
+                .GroupBy(x => x.TvShowId)
+                .ToDictionary(g => g.Key, g => g.ToList());
+
+            var remoteEpisodesBySeason = remoteEpisodes
+                .GroupBy(x => x.TvShowSeasonId)
+                .ToDictionary(g => g.Key, g => g.ToList());
+
+            var showRows = new List<PlexTvShowComparison>();
+            var seasonRows = new List<PlexSeasonComparison>();
+            var episodeRows = new List<PlexEpisodeComparison>();
+
+            foreach (var remoteShow in remoteShows)
+            {
+                var showMatches = MatchShows(remoteShow, ownedByTmdb, ownedByImdb, ownedByTvdb, ownedByTitleYear);
+
+                foreach (var (ownedShow, showMatchType) in showMatches)
+                {
+                    showRows.Add(new PlexTvShowComparison
+                    {
+                        Id = 0,
+                        RemotePlexLibraryId = remoteLibraryId,
+                        OwnedPlexLibraryId = ownedLibraryId,
+                        RemotePlexMediaId = remoteShow.Id,
+                        OwnedPlexMediaId = ownedShow.Id,
+                        HitState = IsHigherQuality(remoteShow.Quality, ownedShow.Quality)
+                            ? PlexMediaComparisonHitState.HigherQuality
+                            : PlexMediaComparisonHitState.Matched,
+                        RemoteQuality = remoteShow.Quality,
+                        OwnedQuality = ownedShow.Quality,
+                        MatchType = showMatchType,
+                        ComparedAt = now,
+                    });
+
+                    if (!remoteSeasonsByShow.TryGetValue(remoteShow.Id, out var showSeasons))
+                        continue;
+
+                    foreach (var remoteSeason in showSeasons)
+                    {
+                        if (!ownedSeasonsByShowAndNumber.TryGetValue((ownedShow.Id, remoteSeason.SeasonNumber), out var seasonMatches))
+                            continue;
+
+                        foreach (var ownedSeason in seasonMatches)
+                        {
+                            seasonRows.Add(new PlexSeasonComparison
+                            {
+                                Id = 0,
+                                RemotePlexLibraryId = remoteLibraryId,
+                                OwnedPlexLibraryId = ownedLibraryId,
+                                RemotePlexMediaId = remoteSeason.Id,
+                                OwnedPlexMediaId = ownedSeason.Id,
+                                HitState = IsHigherQuality(remoteSeason.Quality, ownedSeason.Quality)
+                                    ? PlexMediaComparisonHitState.HigherQuality
+                                    : PlexMediaComparisonHitState.Matched,
+                                RemoteQuality = remoteSeason.Quality,
+                                OwnedQuality = ownedSeason.Quality,
+                                MatchType = PlexMediaComparisonMatchType.ParentAndChildNumbers,
+                                ComparedAt = now,
+                            });
+
+                            if (!remoteEpisodesBySeason.TryGetValue(remoteSeason.Id, out var seasonEpisodes))
+                                continue;
+
+                            foreach (var remoteEpisode in seasonEpisodes)
+                            {
+                                if (!ownedEpisodesBySeasonAndNumber.TryGetValue(
+                                        (ownedSeason.Id, remoteEpisode.EpisodeNumber),
+                                        out var episodeMatches
+                                    ))
+                                    continue;
+
+                                episodeRows.AddRange(episodeMatches.Select(ownedEpisode => new PlexEpisodeComparison
+                                {
+                                    Id = 0,
+                                    RemotePlexLibraryId = remoteLibraryId,
+                                    OwnedPlexLibraryId = ownedLibraryId,
+                                    RemotePlexMediaId = remoteEpisode.Id,
+                                    OwnedPlexMediaId = ownedEpisode.Id,
+                                    HitState = IsHigherQuality(remoteEpisode.Quality, ownedEpisode.Quality)
+                                        ? PlexMediaComparisonHitState.HigherQuality
+                                        : PlexMediaComparisonHitState.Matched,
+                                    RemoteQuality = remoteEpisode.Quality,
+                                    OwnedQuality = ownedEpisode.Quality,
+                                    MatchType = PlexMediaComparisonMatchType.ParentAndChildNumbers,
+                                    ComparedAt = now,
+                                }));
+                            }
+                        }
+                    }
+                }
+            }
 
             var state = await ctx.PlexComparisonScopes
                 .AsTracking()
@@ -272,25 +272,27 @@ public class CompareTvShowPlexLibraryCommandHandler : ICommandHandler<CompareTvS
                 ctx.PlexEpisodeComparisons.AddRange(episodeRows);
 
             await ctx.SaveChangesAsync(txCt);
+
+            return (showRows.Count, seasonRows.Count, episodeRows.Count);
         }, cancellationToken);
         if (transactionResult.IsFailed)
-            return transactionResult;
+            return transactionResult.ToResult();
 
         _log.Here()
             .Information(
                 "Completed TV comparison: remote library {RemoteLibId} vs owned library {OwnedLibId}, {ShowCount} show hits, {SeasonCount} season hits, {EpisodeCount} episode hits",
                 remoteLibraryId,
                 ownedLibraryId,
-                showRows.Count,
-                seasonRows.Count,
-                episodeRows.Count
+                transactionResult.Value.Item1,
+                transactionResult.Value.Item2,
+                transactionResult.Value.Item3
             );
 
         return Result.Ok();
     }
 
-    private Task<List<ShowProjection>> LoadShowsAsync(int libraryId, CancellationToken cancellationToken) =>
-        _dbContext.PlexTvShows
+    private static Task<List<ShowProjection>> LoadShowsAsync(IReaparrDbContext context, int libraryId, CancellationToken cancellationToken) =>
+        context.PlexTvShows
             .Where(x => x.PlexLibraryId == libraryId)
             .Select(x => new ShowProjection
             {
@@ -305,8 +307,8 @@ public class CompareTvShowPlexLibraryCommandHandler : ICommandHandler<CompareTvS
             })
             .ToListAsync(cancellationToken);
 
-    private Task<List<SeasonProjection>> LoadSeasonsAsync(int libraryId, CancellationToken cancellationToken) =>
-        _dbContext.PlexTvShowSeason
+    private static Task<List<SeasonProjection>> LoadSeasonsAsync(IReaparrDbContext context, int libraryId, CancellationToken cancellationToken) =>
+        context.PlexTvShowSeason
             .Where(x => x.PlexLibraryId == libraryId)
             .Select(x => new SeasonProjection
             {
@@ -317,8 +319,8 @@ public class CompareTvShowPlexLibraryCommandHandler : ICommandHandler<CompareTvS
             })
             .ToListAsync(cancellationToken);
 
-    private Task<List<EpisodeProjection>> LoadEpisodesAsync(int libraryId, CancellationToken cancellationToken) =>
-        _dbContext.PlexTvShowEpisodes
+    private static Task<List<EpisodeProjection>> LoadEpisodesAsync(IReaparrDbContext context, int libraryId, CancellationToken cancellationToken) =>
+        context.PlexTvShowEpisodes
             .Where(x => x.PlexLibraryId == libraryId)
             .Select(x => new EpisodeProjection
             {

@@ -120,7 +120,7 @@ public static partial class DbContextExtensions
                     tvShow.Quality = highestQuality ?? VideoQuality.Unknown;
                 }
 
-                await context.BulkUpdateAsync(plexTvShows, BulkConfigPreset.Default, txCt);
+                await ctx.BulkUpdateAsync(plexTvShows, BulkConfigPreset.Default, txCt);
 
                 return result;
         }, ct);

@@ -85,27 +85,27 @@ public static partial class DbContextExtensions
         if (plexLibraryId == 0)
             return ResultExtensions.IsZero(nameof(plexLibraryId));
 
-        return await Result.Try(async Task () =>
-        {
-            plexMovies.SetRelationshipIds(plexServerId, plexLibraryId);
+        return await context.ExecuteSerializedTransactionAsync(async (ctx, txCt) =>
+            {
+                plexMovies.SetRelationshipIds(plexServerId, plexLibraryId);
 
-            foreach (var movie in plexMovies)
-                movie.Quality = movie.MediaDataList.Count == 0
-                    ? VideoQuality.Unknown
-                    : movie.MediaDataList.Max(x => x.Quality);
+                foreach (var movie in plexMovies)
+                    movie.Quality = movie.MediaDataList.Count == 0
+                        ? VideoQuality.Unknown
+                        : movie.MediaDataList.Max(x => x.Quality);
 
-            await context.BulkInsertAsync(plexMovies, BulkConfigPreset.Default, ct);
+                await ctx.BulkInsertAsync(plexMovies, BulkConfigPreset.Default, txCt);
 
-            // Add movie media data for each movie
-            var mediaData = plexMovies
-                .SelectMany(x =>
-                {
-                    x.MediaDataList.SetRelationshipIds(x.PlexServerId, x.PlexLibraryId, x.Id);
-                    return x.MediaDataList;
-                })
-                .ToList();
+                // Add movie media data for each movie
+                var mediaData = plexMovies
+                    .SelectMany(x =>
+                    {
+                        x.MediaDataList.SetRelationshipIds(x.PlexServerId, x.PlexLibraryId, x.Id);
+                        return x.MediaDataList;
+                    })
+                    .ToList();
 
-            await context.BulkInsertAsync(mediaData, BulkConfigPreset.Default, ct);
-        });
+                await ctx.BulkInsertAsync(mediaData, BulkConfigPreset.Default, txCt);
+            }, ct);
     }
 }

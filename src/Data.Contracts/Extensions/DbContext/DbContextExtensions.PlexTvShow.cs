@@ -22,173 +22,109 @@ public static partial class DbContextExtensions
         if (plexLibraryId == 0)
             return ResultExtensions.IsZero(nameof(plexLibraryId));
 
-        var rapport = new BulkInsertTvShowsRapport();
-
-        plexTvShows.SetRelationshipIds(plexServerId, plexLibraryId);
-
-        // Phase 1: Insert TV shows
-        var insertTvShowsResult = await Result.Try(async Task () =>
+        var transactionResult = await context.ExecuteSerializedTransactionAsync(async (ctx, txCt) =>
         {
-            await context.BulkInsertAsync(plexTvShows, BulkConfigPreset.Default, ct);
-            rapport.CreatedTvShows = plexTvShows.Count;
-        });
+                var result = new BulkInsertTvShowsRapport();
 
-        if (insertTvShowsResult.IsFailed)
-            return await RollbackTvShowInsertAsync(context, plexLibraryId, insertTvShowsResult, ct);
+                plexTvShows.SetRelationshipIds(plexServerId, plexLibraryId);
 
-        // Phase 2: Insert seasons
-        var seasons = plexTvShows
-            .SelectMany(tvShow => tvShow.Seasons.Select(season => new { tvShow, season }))
-            .ToList();
+                // Phase 1: Insert TV shows
+                await ctx.BulkInsertAsync(plexTvShows, BulkConfigPreset.Default, txCt);
+                result.CreatedTvShows = plexTvShows.Count;
 
-        foreach (var entry in seasons)
-        {
-            entry.season.PlexServerId = entry.tvShow.PlexServerId;
-            entry.season.PlexLibraryId = entry.tvShow.PlexLibraryId;
-            entry.season.TvShowId = entry.tvShow.Id;
-        }
+                // Phase 2: Insert seasons
+                var seasons = plexTvShows
+                    .SelectMany(tvShow => tvShow.Seasons.Select(season => new { tvShow, season }))
+                    .ToList();
 
-        var seasonsToInsert = seasons.Select(x => x.season).ToList();
+                foreach (var entry in seasons)
+                {
+                    entry.season.PlexServerId = entry.tvShow.PlexServerId;
+                    entry.season.PlexLibraryId = entry.tvShow.PlexLibraryId;
+                    entry.season.TvShowId = entry.tvShow.Id;
+                }
 
-        var insertSeasonsResult = await Result.Try(async Task () =>
-        {
-            await context.BulkInsertAsync(seasonsToInsert, BulkConfigPreset.Default, ct);
-            rapport.CreatedSeasons = seasonsToInsert.Count;
-        });
+                var seasonsToInsert = seasons.Select(x => x.season).ToList();
+                await ctx.BulkInsertAsync(seasonsToInsert, BulkConfigPreset.Default, txCt);
+                result.CreatedSeasons = seasonsToInsert.Count;
 
-        if (insertSeasonsResult.IsFailed)
-            return await RollbackTvShowInsertAsync(context, plexLibraryId, insertSeasonsResult, ct);
+                // Phase 3: Insert episodes
+                var episodes = seasonsToInsert
+                    .SelectMany(season => season.Episodes.Select(episode => new { season, episode }))
+                    .ToList();
 
-        // Phase 3: Insert episodes
-        var episodes = seasonsToInsert
-            .SelectMany(season => season.Episodes.Select(episode => new { season, episode }))
-            .ToList();
+                foreach (var entry in episodes)
+                {
+                    entry.episode.PlexServerId = entry.season.PlexServerId;
+                    entry.episode.PlexLibraryId = entry.season.PlexLibraryId;
+                    entry.episode.TvShowId = entry.season.TvShowId;
+                    entry.episode.TvShowSeasonId = entry.season.Id;
+                    entry.episode.TvShowSeason = entry.season;
+                }
 
-        foreach (var entry in episodes)
-        {
-            entry.episode.PlexServerId = entry.season.PlexServerId;
-            entry.episode.PlexLibraryId = entry.season.PlexLibraryId;
-            entry.episode.TvShowId = entry.season.TvShowId;
-            entry.episode.TvShowSeasonId = entry.season.Id;
-            entry.episode.TvShowSeason = entry.season;
-        }
+                var episodesToInsert = episodes.Select(x => x.episode).ToList();
+                await ctx.BulkInsertAsync(episodesToInsert, BulkConfigPreset.Default, txCt);
+                result.CreatedEpisodes = episodesToInsert.Count;
 
-        var episodesToInsert = episodes.Select(x => x.episode).ToList();
+                // Phase 4: Insert media data
+                var mediaData = episodesToInsert
+                    .SelectMany(episode =>
+                    {
+                        episode.MediaDataList.SetRelationshipIds(episode.PlexServerId, episode.PlexLibraryId, episode.Id);
 
-        var insertEpisodesResult = await Result.Try(async Task () =>
-        {
-            await context.BulkInsertAsync(episodesToInsert, BulkConfigPreset.Default, ct);
-            rapport.CreatedEpisodes = episodesToInsert.Count;
-        });
+                        foreach (var episodeMediaData in episode.MediaDataList)
+                            episodeMediaData.PlexTvShowEpisode = episode;
 
-        if (insertEpisodesResult.IsFailed)
-            return await RollbackTvShowInsertAsync(context, plexLibraryId, insertEpisodesResult, ct);
+                        return episode.MediaDataList;
+                    })
+                    .ToList();
 
-        // Phase 4: Insert media data
-        var mediaData = episodesToInsert
-            .SelectMany(episode =>
-            {
-                episode.MediaDataList.SetRelationshipIds(episode.PlexServerId, episode.PlexLibraryId, episode.Id);
+                await ctx.BulkInsertAsync(mediaData, BulkConfigPreset.Default, txCt);
 
-                foreach (var episodeMediaData in episode.MediaDataList)
-                    episodeMediaData.PlexTvShowEpisode = episode;
+                // Phase 5: Insert season qualities
+                var seasonQualities = mediaData
+                    .Select(x => new PlexTvShowSeasonMediaQuality
+                    {
+                        Id = 0,
+                        Quality = x.Quality,
+                        PlexLibraryId = x.PlexLibraryId,
+                        PlexTvShowSeasonId = x.PlexTvShowEpisode?.TvShowSeasonId ?? 0,
+                        PlexTvShowSeason = x.PlexTvShowEpisode?.TvShowSeason,
+                    })
+                    .DistinctBy(x => (x.Quality, x.PlexTvShowSeasonId))
+                    .ToList();
 
-                return episode.MediaDataList;
-            })
-            .ToList();
+                await ctx.BulkInsertAsync(seasonQualities, BulkConfigPreset.Default, txCt);
 
-        var insertMediaDataResult = await Result.Try(async Task () =>
-            await context.BulkInsertAsync(mediaData, BulkConfigPreset.Default, ct)
-        );
+                // Phase 6: Insert TV show qualities
+                var tvShowQualities = seasonQualities
+                    .Select(x => new PlexTvShowMediaQuality
+                    {
+                        Id = 0,
+                        Quality = x.Quality,
+                        PlexLibraryId = x.PlexLibraryId,
+                        PlexTvShowId = x.PlexTvShowSeason?.TvShowId ?? 0,
+                    })
+                    .DistinctBy(x => (x.Quality, x.PlexTvShowId))
+                    .ToList();
 
-        if (insertMediaDataResult.IsFailed)
-            return await RollbackTvShowInsertAsync(context, plexLibraryId, insertMediaDataResult, ct);
+                await ctx.BulkInsertAsync(tvShowQualities, BulkConfigPreset.Default, txCt);
 
-        // Phase 5: Insert season qualities
-        var seasonQualities = mediaData
-            .Select(x => new PlexTvShowSeasonMediaQuality
-            {
-                Id = 0,
-                Quality = x.Quality,
-                PlexLibraryId = x.PlexLibraryId,
-                PlexTvShowSeasonId = x.PlexTvShowEpisode?.TvShowSeasonId ?? 0,
-                PlexTvShowSeason = x.PlexTvShowEpisode?.TvShowSeason,
-            })
-            .DistinctBy(x => (x.Quality, x.PlexTvShowSeasonId))
-            .ToList();
+                foreach (var tvShow in plexTvShows)
+                {
+                    var highestQuality = tvShowQualities
+                        .Where(x => x.PlexTvShowId == tvShow.Id)
+                        .Select(x => (VideoQuality?)x.Quality)
+                        .Max();
 
-        var insertSeasonQualitiesResult = await Result.Try(async Task () =>
-            await context.BulkInsertAsync(seasonQualities, BulkConfigPreset.Default, ct)
-        );
+                    tvShow.Quality = highestQuality ?? VideoQuality.Unknown;
+                }
 
-        if (insertSeasonQualitiesResult.IsFailed)
-            return await RollbackTvShowInsertAsync(context, plexLibraryId, insertSeasonQualitiesResult, ct);
+                await ctx.BulkUpdateAsync(plexTvShows, BulkConfigPreset.Default, txCt);
 
-        // Phase 6: Insert TV show qualities
-        var tvShowQualities = seasonQualities
-            .Select(x => new PlexTvShowMediaQuality
-            {
-                Id = 0,
-                Quality = x.Quality,
-                PlexLibraryId = x.PlexLibraryId,
-                PlexTvShowId = x.PlexTvShowSeason?.TvShowId ?? 0,
-            })
-            .DistinctBy(x => (x.Quality, x.PlexTvShowId))
-            .ToList();
+                return result;
+        }, ct);
 
-        var insertTvShowQualitiesResult = await Result.Try(async Task () =>
-            await context.BulkInsertAsync(tvShowQualities, BulkConfigPreset.Default, ct)
-        );
-
-        if (insertTvShowQualitiesResult.IsFailed)
-            return await RollbackTvShowInsertAsync(context, plexLibraryId, insertTvShowQualitiesResult, ct);
-
-        foreach (var tvShow in plexTvShows)
-        {
-            var highestQuality = tvShowQualities
-                .Where(x => x.PlexTvShowId == tvShow.Id)
-                .Select(x => (VideoQuality?)x.Quality)
-                .Max();
-
-            tvShow.Quality = highestQuality ?? VideoQuality.Unknown;
-        }
-
-        var updateTvShowQualityResult = await Result.Try(async Task () =>
-            await context.BulkUpdateAsync(plexTvShows, BulkConfigPreset.Default, ct)
-        );
-
-        if (updateTvShowQualityResult.IsFailed)
-            return await RollbackTvShowInsertAsync(context, plexLibraryId, updateTvShowQualityResult, ct);
-
-        return Result.Ok(rapport);
-    }
-
-    private static async Task<Result<BulkInsertTvShowsRapport>> RollbackTvShowInsertAsync(
-        IReaparrDbContext context,
-        int plexLibraryId,
-        Result failedResult,
-        CancellationToken ct
-    )
-    {
-        _log.Here()
-            .Warning(
-                "Rolling back partial TV show insert for PlexLibraryId: {PlexLibraryId} due to: {Errors}",
-                plexLibraryId,
-                failedResult.Errors
-            );
-
-        await Result.Try(async Task () =>
-        {
-            await context.PlexTvShowMediaQualities.Where(x => x.PlexLibraryId == plexLibraryId).ExecuteDeleteAsync(ct);
-            await context
-                .PlexTvShowSeasonMediaQualities.Where(x => x.PlexLibraryId == plexLibraryId)
-                .ExecuteDeleteAsync(ct);
-            await context.PlexTvShowEpisodeData.Where(x => x.PlexLibraryId == plexLibraryId).ExecuteDeleteAsync(ct);
-            await context.PlexTvShowEpisodes.Where(x => x.PlexLibraryId == plexLibraryId).ExecuteDeleteAsync(ct);
-            await context.PlexTvShowSeason.Where(x => x.PlexLibraryId == plexLibraryId).ExecuteDeleteAsync(ct);
-            await context.PlexTvShows.Where(x => x.PlexLibraryId == plexLibraryId).ExecuteDeleteAsync(ct);
-        });
-
-        return failedResult;
+        return transactionResult;
     }
 }

@@ -231,7 +231,7 @@ public class CleanUpDownloadTaskFoldersUnitTests : BaseUnitTest<CleanUpDownloadT
 
         completedTask.DownloadStatus = DownloadStatus.Completed;
         activeSiblingTask.DownloadStatus = DownloadStatus.Queued;
-        await dbContext.SaveChangesNewAsync(CancellationToken);
+        await dbContext.SaveChangesAsync(CancellationToken);
 
         // Act
         var request = new CleanUpDownloadTaskFoldersCommand(completedTask.ToKey());

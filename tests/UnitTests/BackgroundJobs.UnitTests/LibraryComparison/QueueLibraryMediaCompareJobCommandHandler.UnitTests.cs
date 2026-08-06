@@ -48,7 +48,7 @@ public class QueueLibraryMediaCompareJobCommandHandlerUnitTests
             RemoteLibraryUpdatedAt = remoteUpdatedAt,
             OwnedLibraryUpdatedAt = ownedUpdatedAt,
         });
-        await dbContext.SaveChangesNewAsync(CancellationToken);
+        await dbContext.SaveChangesAsync(CancellationToken);
 
         Mock.Mock<IMediaQueryCache>()
             .Setup(x => x.InvalidateLibraries(
@@ -129,7 +129,7 @@ public class QueueLibraryMediaCompareJobCommandHandlerUnitTests
             RemoteLibraryUpdatedAt = remoteUpdatedAt,
             OwnedLibraryUpdatedAt = ownedUpdatedAt,
         });
-        await dbContext.SaveChangesNewAsync(CancellationToken);
+        await dbContext.SaveChangesAsync(CancellationToken);
 
         Mock.Mock<ICommandExecutor>()
             .Setup(x => x.Send(It.IsAny<CheckQueuedLibraryComparisonJobCommand>(), It.IsAny<CancellationToken>()))

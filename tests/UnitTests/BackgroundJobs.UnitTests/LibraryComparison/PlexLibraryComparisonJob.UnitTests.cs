@@ -49,7 +49,7 @@ public class PlexLibraryComparisonJobUnitTests : BaseUnitTest<PlexLibraryCompari
                 CreatedAt = new DateTime(2026, 7, 22, 18, 2, 0, DateTimeKind.Utc),
             }
         );
-        await dbContext.SaveChangesNewAsync(CancellationToken);
+        await dbContext.SaveChangesAsync(CancellationToken);
         var jobContext = Moq.Mock.Of<IJobExecutionContext>(x => x.CancellationToken == CancellationToken);
 
         Mock.Mock<ICommandExecutor>()
@@ -124,7 +124,7 @@ public class PlexLibraryComparisonJobUnitTests : BaseUnitTest<PlexLibraryCompari
             Status = LibrarySyncJobStatus.Queued,
             CreatedAt = new DateTime(2026, 7, 22, 18, 0, 0, DateTimeKind.Utc),
         });
-        await dbContext.SaveChangesNewAsync(CancellationToken);
+        await dbContext.SaveChangesAsync(CancellationToken);
         var jobContext = Moq.Mock.Of<IJobExecutionContext>(x => x.CancellationToken == CancellationToken);
 
         Mock.Mock<ICommandExecutor>()
@@ -185,7 +185,7 @@ public class PlexLibraryComparisonJobUnitTests : BaseUnitTest<PlexLibraryCompari
             Status = LibrarySyncJobStatus.Queued,
             CreatedAt = new DateTime(2026, 7, 22, 18, 0, 0, DateTimeKind.Utc),
         });
-        await dbContext.SaveChangesNewAsync(CancellationToken);
+        await dbContext.SaveChangesAsync(CancellationToken);
         var jobContext = Moq.Mock.Of<IJobExecutionContext>(x => x.CancellationToken == CancellationToken);
 
         Mock.Mock<ICommandExecutor>()

@@ -51,7 +51,7 @@ public class CleanupLibrarySyncJobQueueCommandHandlerUnitTests : BaseUnitTest<Cl
         };
 
         await dbContext.LibrarySyncJobQueues.AddRangeAsync([completedItem, queuedItem], CancellationToken);
-        var saveResult = await dbContext.SaveChangesNewAsync(CancellationToken);
+        var saveResult = await dbContext.SaveChangesAsync(CancellationToken);
         saveResult.ShouldBeGreaterThan(0);
 
         SetupSignalRMock();
@@ -100,7 +100,7 @@ public class CleanupLibrarySyncJobQueueCommandHandlerUnitTests : BaseUnitTest<Cl
         };
 
         await dbContext.LibrarySyncJobQueues.AddAsync(failedItem, CancellationToken);
-        var saveResult = await dbContext.SaveChangesNewAsync(CancellationToken);
+        var saveResult = await dbContext.SaveChangesAsync(CancellationToken);
         saveResult.ShouldBeGreaterThan(0);
 
         // Verify the item was saved
@@ -158,7 +158,7 @@ public class CleanupLibrarySyncJobQueueCommandHandlerUnitTests : BaseUnitTest<Cl
         };
 
         await dbContext.LibrarySyncJobQueues.AddAsync(processingItem, CancellationToken);
-        var saveResult = await dbContext.SaveChangesNewAsync(CancellationToken);
+        var saveResult = await dbContext.SaveChangesAsync(CancellationToken);
         saveResult.ShouldBeGreaterThan(0);
 
         // Verify the item was saved
@@ -227,7 +227,7 @@ public class CleanupLibrarySyncJobQueueCommandHandlerUnitTests : BaseUnitTest<Cl
         };
 
         await dbContext.LibrarySyncJobQueues.AddRangeAsync([failedItem, processingItem], CancellationToken);
-        var saveResult = await dbContext.SaveChangesNewAsync(CancellationToken);
+        var saveResult = await dbContext.SaveChangesAsync(CancellationToken);
         saveResult.ShouldBeGreaterThan(0);
 
         SetupSignalRMock();
@@ -339,7 +339,7 @@ public class CleanupLibrarySyncJobQueueCommandHandlerUnitTests : BaseUnitTest<Cl
             [completedItem, failedItem, processingItem, queuedItem],
             CancellationToken
         );
-        var saveResult = await dbContext.SaveChangesNewAsync(CancellationToken);
+        var saveResult = await dbContext.SaveChangesAsync(CancellationToken);
         saveResult.ShouldBeGreaterThan(0);
 
         SetupSignalRMock();

@@ -63,7 +63,7 @@ public class CheckQueuedPlexLibraryToSyncCommandHandlerUnitTests
         };
 
         await dbContext.LibrarySyncJobQueues.AddAsync(queueItem, CancellationToken);
-        var saveResult = await dbContext.SaveChangesNewAsync(CancellationToken);
+        var saveResult = await dbContext.SaveChangesAsync(CancellationToken);
         saveResult.ShouldBeGreaterThan(0);
 
         // Verify the item was saved and is visible
@@ -126,7 +126,7 @@ public class CheckQueuedPlexLibraryToSyncCommandHandlerUnitTests
         };
 
         await dbContext.LibrarySyncJobQueues.AddAsync(queueItem, CancellationToken);
-        var saveResult = await dbContext.SaveChangesNewAsync(CancellationToken);
+        var saveResult = await dbContext.SaveChangesAsync(CancellationToken);
         saveResult.ShouldBeGreaterThan(0);
 
         // Verify the item was saved
@@ -190,7 +190,7 @@ public class CheckQueuedPlexLibraryToSyncCommandHandlerUnitTests
         };
 
         await dbContext.LibrarySyncJobQueues.AddRangeAsync([queueItem1, queueItem2], CancellationToken);
-        var saveResult = await dbContext.SaveChangesNewAsync(CancellationToken);
+        var saveResult = await dbContext.SaveChangesAsync(CancellationToken);
         saveResult.ShouldBeGreaterThan(0);
 
         // Verify the items were saved
@@ -254,7 +254,7 @@ public class CheckQueuedPlexLibraryToSyncCommandHandlerUnitTests
         };
 
         await dbContext.LibrarySyncJobQueues.AddAsync(queueItem, CancellationToken);
-        var saveResult = await dbContext.SaveChangesNewAsync(CancellationToken);
+        var saveResult = await dbContext.SaveChangesAsync(CancellationToken);
         saveResult.ShouldBeGreaterThan(0);
 
         // Verify the item was saved and is visible
@@ -331,7 +331,7 @@ public class CheckQueuedPlexLibraryToSyncCommandHandlerUnitTests
         };
 
         await dbContext.LibrarySyncJobQueues.AddRangeAsync([queueItem1, queueItem2], CancellationToken);
-        await dbContext.SaveChangesNewAsync(CancellationToken);
+        await dbContext.SaveChangesAsync(CancellationToken);
 
         var command = new CheckQueuedPlexLibraryToSyncCommand();
 
@@ -412,7 +412,7 @@ public class CheckQueuedPlexLibraryToSyncCommandHandlerUnitTests
         };
 
         await dbContext.LibrarySyncJobQueues.AddRangeAsync(queueItems, CancellationToken);
-        await dbContext.SaveChangesNewAsync(CancellationToken);
+        await dbContext.SaveChangesAsync(CancellationToken);
 
         // Setup scheduler mocks for both servers (highest priority library for each)
         var jobKey1 = LibrarySyncJob.GetJobKey(servers[0].Id, server1Libraries[0].Id);
@@ -508,7 +508,7 @@ public class CheckQueuedPlexLibraryToSyncCommandHandlerUnitTests
         };
 
         await dbContext.LibrarySyncJobQueues.AddRangeAsync([queueItem1, queueItem2], CancellationToken);
-        await dbContext.SaveChangesNewAsync(CancellationToken);
+        await dbContext.SaveChangesAsync(CancellationToken);
 
         var onlineServerJobKey = LibrarySyncJob.GetJobKey(servers[1].Id, server2Library.Id);
         Mock.Mock<IScheduler>()
@@ -592,7 +592,7 @@ public class CheckQueuedPlexLibraryToSyncCommandHandlerUnitTests
             ],
             CancellationToken
         );
-        await dbContext.SaveChangesNewAsync(CancellationToken);
+        await dbContext.SaveChangesAsync(CancellationToken);
 
         var command = new CheckQueuedPlexLibraryToSyncCommand();
 
@@ -636,7 +636,7 @@ public class CheckQueuedPlexLibraryToSyncCommandHandlerUnitTests
         };
 
         await dbContext.LibrarySyncJobQueues.AddAsync(queueItem, CancellationToken);
-        await dbContext.SaveChangesNewAsync(CancellationToken);
+        await dbContext.SaveChangesAsync(CancellationToken);
 
         var jobKey = LibrarySyncJob.GetJobKey(server.Id, library.Id);
         Mock.Mock<IScheduler>().Setup(x => x.CheckExists(jobKey, It.IsAny<CancellationToken>())).ReturnsAsync(false);
@@ -706,7 +706,7 @@ public class CheckQueuedPlexLibraryToSyncCommandHandlerUnitTests
             ],
             CancellationToken
         );
-        await dbContext.SaveChangesNewAsync(CancellationToken);
+        await dbContext.SaveChangesAsync(CancellationToken);
 
         var expectedJobKey = LibrarySyncJob.GetJobKey(servers[1].Id, queuedServerLibrary.Id);
         Mock.Mock<IScheduler>().Setup(x => x.CheckExists(expectedJobKey, It.IsAny<CancellationToken>())).ReturnsAsync(false);
@@ -773,7 +773,7 @@ public class CheckQueuedPlexLibraryToSyncCommandHandlerUnitTests
             ],
             CancellationToken
         );
-        await dbContext.SaveChangesNewAsync(CancellationToken);
+        await dbContext.SaveChangesAsync(CancellationToken);
 
         var command = new CheckQueuedPlexLibraryToSyncCommand();
 
@@ -832,7 +832,7 @@ public class CheckQueuedPlexLibraryToSyncCommandHandlerUnitTests
             ],
             CancellationToken
         );
-        await dbContext.SaveChangesNewAsync(CancellationToken);
+        await dbContext.SaveChangesAsync(CancellationToken);
 
         var existingJobKey = LibrarySyncJob.GetJobKey(servers[0].Id, firstServerLibrary.Id);
         var expectedJobKey = LibrarySyncJob.GetJobKey(servers[1].Id, secondServerLibrary.Id);
@@ -933,7 +933,7 @@ public class CheckQueuedPlexLibraryToSyncCommandHandlerUnitTests
             ],
             CancellationToken
         );
-        await dbContext.SaveChangesNewAsync(CancellationToken);
+        await dbContext.SaveChangesAsync(CancellationToken);
 
         var onlineJobKey = LibrarySyncJob.GetJobKey(servers[1].Id, onlineServerLibrary.Id);
         Mock.Mock<IScheduler>().Setup(x => x.CheckExists(onlineJobKey, It.IsAny<CancellationToken>())).ReturnsAsync(false);
@@ -1045,7 +1045,7 @@ public class CheckQueuedPlexLibraryToSyncCommandHandlerUnitTests
             [queuedItem, cancelledItem, failedItem, completedItem],
             CancellationToken
         );
-        await dbContext.SaveChangesNewAsync(CancellationToken);
+        await dbContext.SaveChangesAsync(CancellationToken);
 
         var expectedJobKey = LibrarySyncJob.GetJobKey(server.Id, libraries[0].Id);
         Mock.Mock<IScheduler>()

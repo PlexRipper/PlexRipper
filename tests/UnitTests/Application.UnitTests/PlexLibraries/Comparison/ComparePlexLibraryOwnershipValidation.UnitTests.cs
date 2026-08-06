@@ -274,7 +274,7 @@ public class CompareMoviePlexLibraryCommandOwnershipUnitTests : BaseCommandUnitT
             ownedMovie.Id,
             PlexMediaComparisonHitState.Matched
         ));
-        await dbContext.SaveChangesNewAsync(CancellationToken);
+        await dbContext.SaveChangesAsync(CancellationToken);
         await UpdateMovieMatchFieldsAsync(remoteMovie.Id, "remote only", 2001, 120, VideoQuality.FullHD);
         await UpdateMovieMatchFieldsAsync(ownedMovie.Id, "owned only", 2002, 121, VideoQuality.FullHD);
 
@@ -329,7 +329,7 @@ public class CompareMoviePlexLibraryCommandOwnershipUnitTests : BaseCommandUnitT
             RemoteLibraryUpdatedAt = new DateTime(2026, 7, 20, 14, 7, 34, DateTimeKind.Utc),
             OwnedLibraryUpdatedAt = new DateTime(2026, 7, 20, 20, 13, 32, DateTimeKind.Utc),
         });
-        await dbContext.SaveChangesNewAsync(CancellationToken);
+        await dbContext.SaveChangesAsync(CancellationToken);
 
         // Act
         var result = await TestHandlerExecuteAsync(new CompareMoviePlexLibraryCommand(remoteLibrary.Id, ownedLibrary.Id));
@@ -715,7 +715,7 @@ public class CompareTvShowPlexLibraryCommandOwnershipUnitTests : BaseCommandUnit
         dbContext.PlexTvShowComparisons.Add(CreateTvShowComparison(remoteLibrary.Id, ownedLibrary.Id, remoteShow.Id, ownedShow.Id));
         dbContext.PlexSeasonComparisons.Add(CreateSeasonComparison(remoteLibrary.Id, ownedLibrary.Id, remoteSeason.Id, ownedSeason.Id));
         dbContext.PlexEpisodeComparisons.Add(CreateEpisodeComparison(remoteLibrary.Id, ownedLibrary.Id, remoteEpisode.Id, ownedEpisode.Id));
-        await dbContext.SaveChangesNewAsync(CancellationToken);
+        await dbContext.SaveChangesAsync(CancellationToken);
         await UpdateTvShowMatchFieldsAsync(remoteShow.Id, "remote only", 2001, 120, VideoQuality.FullHD);
         await UpdateTvShowMatchFieldsAsync(ownedShow.Id, "owned only", 2002, 121, VideoQuality.FullHD);
 
@@ -780,7 +780,7 @@ public class CompareTvShowPlexLibraryCommandOwnershipUnitTests : BaseCommandUnit
             RemoteLibraryUpdatedAt = new DateTime(2026, 7, 20, 14, 7, 34, DateTimeKind.Utc),
             OwnedLibraryUpdatedAt = new DateTime(2026, 7, 20, 20, 13, 32, DateTimeKind.Utc),
         });
-        await dbContext.SaveChangesNewAsync(CancellationToken);
+        await dbContext.SaveChangesAsync(CancellationToken);
 
         // Act
         var result = await TestHandlerExecuteAsync(new CompareTvShowPlexLibraryCommand(remoteLibrary.Id, ownedLibrary.Id));

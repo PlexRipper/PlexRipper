@@ -1,5 +1,4 @@
 using System.Runtime.CompilerServices;
-using EntityFrameworkCore.Sqlite.Concurrency;
 
 namespace Reaparr.Data.Contracts;
 
@@ -30,11 +29,7 @@ public static partial class DbContextExtensions
                 arguments.ToArray()
             );
 
-            await dbContext.ExecuteWithRetryAsync(async db =>
-            {
-                await db.ExecuteSqlInterpolatedAsync(sql, ct);
-                return true;
-            }, cancellationToken: ct);
+            await dbContext.ExecuteSqlInterpolatedAsync(sql, ct);
 
             var keys = chunk.Select(a => a.Key).ToList();
             var found = await dbContext.PlexActors
@@ -70,11 +65,7 @@ public static partial class DbContextExtensions
                 $"INSERT OR IGNORE INTO PlexGenres (Name, Key) VALUES {string.Join(", ", values)}",
                 arguments.ToArray()
             );
-            await dbContext.ExecuteWithRetryAsync(async db =>
-            {
-                await db.ExecuteSqlInterpolatedAsync(sql, ct);
-                return true;
-            }, cancellationToken: ct);
+            await dbContext.ExecuteSqlInterpolatedAsync(sql, ct);
 
             var keys = chunk.Select(g => g.Key).ToList();
             var found = await dbContext.PlexGenres
@@ -110,11 +101,7 @@ public static partial class DbContextExtensions
                 $"INSERT OR IGNORE INTO PlexCountries (Name, Key) VALUES {string.Join(", ", values)}",
                 arguments.ToArray()
             );
-            await dbContext.ExecuteWithRetryAsync(async db =>
-            {
-                await db.ExecuteSqlInterpolatedAsync(sql, ct);
-                return true;
-            }, cancellationToken: ct);
+            await dbContext.ExecuteSqlInterpolatedAsync(sql, ct);
 
             var keys = chunk.Select(c => c.Key).ToList();
             var found = await dbContext.PlexCountries

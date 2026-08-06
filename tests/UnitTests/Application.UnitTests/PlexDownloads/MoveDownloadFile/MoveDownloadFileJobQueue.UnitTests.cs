@@ -18,7 +18,7 @@ public class MoveDownloadFileJobQueueUnitTests : BaseUnitTest<MoveDownloadFileJo
         var dbContext = IDbContext;
         var downloadTasks = await dbContext.DownloadTaskMovieFile.AsTracking().ToListAsync(CancellationToken);
         downloadTasks.SetDownloadStatus(DownloadStatus.Completed);
-        await dbContext.SaveChangesNewAsync(CancellationToken);
+        await dbContext.SaveChangesAsync(CancellationToken);
 
         Mock.Mock<IMoveDownloadFileScheduler>()
             .Setup(x => x.StartMoveDownloadFileJob(It.IsAny<DownloadTaskKey>()))
@@ -51,7 +51,7 @@ public class MoveDownloadFileJobQueueUnitTests : BaseUnitTest<MoveDownloadFileJo
         var dbContext = IDbContext;
         var downloadTasks = await dbContext.DownloadTaskMovieFile.AsTracking().ToListAsync(CancellationToken);
         downloadTasks.SetDownloadStatus(DownloadStatus.MoveError);
-        await dbContext.SaveChangesNewAsync(CancellationToken);
+        await dbContext.SaveChangesAsync(CancellationToken);
 
         Mock.Mock<IMoveDownloadFileScheduler>()
             .Setup(x => x.StartMoveDownloadFileJob(It.IsAny<DownloadTaskKey>()))
@@ -85,7 +85,7 @@ public class MoveDownloadFileJobQueueUnitTests : BaseUnitTest<MoveDownloadFileJo
         var dbContext = IDbContext;
         var downloadTasks = await dbContext.DownloadTaskTvShowEpisodeFile.AsTracking().ToListAsync(CancellationToken);
         downloadTasks.SetDownloadStatus(DownloadStatus.MoveError);
-        await dbContext.SaveChangesNewAsync(CancellationToken);
+        await dbContext.SaveChangesAsync(CancellationToken);
 
         Mock.Mock<IMoveDownloadFileScheduler>()
             .Setup(x => x.StartMoveDownloadFileJob(It.IsAny<DownloadTaskKey>()))
@@ -118,7 +118,7 @@ public class MoveDownloadFileJobQueueUnitTests : BaseUnitTest<MoveDownloadFileJo
         var downloadTasks = await dbContext.DownloadTaskMovieFile.AsTracking().ToListAsync(CancellationToken);
         downloadTasks[0].DownloadStatus = DownloadStatus.MoveError;
         downloadTasks[1].DownloadStatus = DownloadStatus.DownloadFinished;
-        await dbContext.SaveChangesNewAsync(CancellationToken);
+        await dbContext.SaveChangesAsync(CancellationToken);
 
         var expectedKey = downloadTasks[1].ToKey();
 
@@ -176,7 +176,7 @@ public class MoveDownloadFileJobQueueUnitTests : BaseUnitTest<MoveDownloadFileJo
         var dbContext = IDbContext;
         var downloadTasks = await dbContext.DownloadTaskMovieFile.AsTracking().ToListAsync(CancellationToken);
         downloadTasks.SetDownloadStatus(DownloadStatus.DownloadFinished);
-        await dbContext.SaveChangesNewAsync(CancellationToken);
+        await dbContext.SaveChangesAsync(CancellationToken);
 
         var startResult = Result.Fail("Scheduler failed to start job");
         Mock.Mock<IMoveDownloadFileScheduler>()
@@ -210,7 +210,7 @@ public class MoveDownloadFileJobQueueUnitTests : BaseUnitTest<MoveDownloadFileJo
         var dbContext = IDbContext;
         var downloadTasks = await dbContext.DownloadTaskMovieFile.AsTracking().ToListAsync(CancellationToken);
         downloadTasks.SetDownloadStatus(DownloadStatus.DownloadFinished);
-        await dbContext.SaveChangesNewAsync(CancellationToken);
+        await dbContext.SaveChangesAsync(CancellationToken);
 
         Mock.Mock<IMoveDownloadFileScheduler>()
             .Setup(x => x.StartMoveDownloadFileJob(It.IsAny<DownloadTaskKey>()))
@@ -259,7 +259,7 @@ public class MoveDownloadFileJobQueueUnitTests : BaseUnitTest<MoveDownloadFileJo
         await dbContext
             .DownloadTaskTvShowEpisodeFile.Where(x => x.Id == episodeFileTasks.First().Id)
             .ExecuteUpdateAsync(s => s.SetProperty(x => x.CreatedAt, now), cancellationToken: CancellationToken);
-        await dbContext.SaveChangesNewAsync(CancellationToken);
+        await dbContext.SaveChangesAsync(CancellationToken);
 
         var expectedKey = episodeFileTasks.First().ToKey();
 
@@ -304,7 +304,7 @@ public class MoveDownloadFileJobQueueUnitTests : BaseUnitTest<MoveDownloadFileJo
             .DownloadTaskTvShowEpisodeFile.AsTracking()
             .ToListAsync(CancellationToken);
         episodeFileTasks.SetDownloadStatus(DownloadStatus.DownloadFinished);
-        await dbContext.SaveChangesNewAsync(CancellationToken);
+        await dbContext.SaveChangesAsync(CancellationToken);
 
         var now = DateTime.UtcNow;
         await dbContext
@@ -316,7 +316,7 @@ public class MoveDownloadFileJobQueueUnitTests : BaseUnitTest<MoveDownloadFileJo
                 s => s.SetProperty(x => x.CreatedAt, now.AddMinutes(10)),
                 cancellationToken: CancellationToken
             );
-        await dbContext.SaveChangesNewAsync(CancellationToken);
+        await dbContext.SaveChangesAsync(CancellationToken);
 
         var expectedKey = episodeFileTasks.First().ToKey();
 
@@ -356,7 +356,7 @@ public class MoveDownloadFileJobQueueUnitTests : BaseUnitTest<MoveDownloadFileJo
         var dbContext = IDbContext;
         var downloadTasks = await dbContext.DownloadTaskTvShowEpisodeFile.AsTracking().ToListAsync(CancellationToken);
         downloadTasks.SetDownloadStatus(DownloadStatus.DownloadFinished);
-        await dbContext.SaveChangesNewAsync(CancellationToken);
+        await dbContext.SaveChangesAsync(CancellationToken);
 
         Mock.Mock<IMoveDownloadFileScheduler>()
             .Setup(x => x.StartMoveDownloadFileJob(It.IsAny<DownloadTaskKey>()))

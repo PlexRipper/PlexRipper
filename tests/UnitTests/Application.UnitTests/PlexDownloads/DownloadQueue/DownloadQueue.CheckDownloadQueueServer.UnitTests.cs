@@ -80,7 +80,7 @@ public class DownloadQueueCheckDownloadQueueUnitTests : BaseUnitTest<DownloadQue
         var dbContext = IDbContext;
         var server = await dbContext.PlexServers.AsTracking().FirstAsync(CancellationToken);
         server.IsDownloadsPausedByUser = true;
-        await dbContext.SaveChangesNewAsync(CancellationToken);
+        await dbContext.SaveChangesAsync(CancellationToken);
 
         Mock.Mock<IDownloadTaskScheduler>().Setup(x => x.StartDownloadTaskJob(It.IsAny<DownloadTaskKey>())).ReturnOk();
 
@@ -181,7 +181,7 @@ public class DownloadQueueCheckDownloadQueueUnitTests : BaseUnitTest<DownloadQue
             cancellationToken: CancellationToken
         );
         downloadTasks[0].SetDownloadStatus(DownloadStatus.Completed);
-        await IDbContext.SaveChangesNewAsync(CancellationToken);
+        await IDbContext.SaveChangesAsync(CancellationToken);
 
         Mock.Mock<IDownloadTaskScheduler>().Setup(x => x.StartDownloadTaskJob(It.IsAny<DownloadTaskKey>())).ReturnOk();
         Mock.Mock<IDownloadTaskScheduler>().Setup(x => x.IsServerDownloading(It.IsAny<int>())).ReturnsAsync(false);
@@ -216,7 +216,7 @@ public class DownloadQueueCheckDownloadQueueUnitTests : BaseUnitTest<DownloadQue
             cancellationToken: CancellationToken
         );
         downloadTasks[0].SetDownloadStatus(DownloadStatus.Completed);
-        await IDbContext.SaveChangesNewAsync(CancellationToken);
+        await IDbContext.SaveChangesAsync(CancellationToken);
 
         Mock.Mock<IDownloadTaskScheduler>().Setup(x => x.StartDownloadTaskJob(It.IsAny<DownloadTaskKey>())).ReturnOk();
         Mock.Mock<IDownloadTaskScheduler>().Setup(x => x.IsServerDownloading(It.IsAny<int>())).ReturnsAsync(false);

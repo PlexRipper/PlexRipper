@@ -54,7 +54,7 @@ public class ApplyRemoteTvShowComparisonStateCommandUnitTests
             ownedEpisodes[1].Id,
             PlexMediaComparisonHitState.Matched
         ));
-        await dbContext.SaveChangesNewAsync(CancellationToken);
+        await dbContext.SaveChangesAsync(CancellationToken);
 
         var items = new List<PlexMediaSlimDTO> { CreateTvShowItem(remoteTvShow) };
 
@@ -117,7 +117,7 @@ public class ApplyRemoteTvShowComparisonStateCommandUnitTests
             ownedEpisodes[1].Id,
             PlexMediaComparisonHitState.Matched
         ));
-        await dbContext.SaveChangesNewAsync(CancellationToken);
+        await dbContext.SaveChangesAsync(CancellationToken);
 
         var items = new List<PlexMediaSlimDTO> { CreateTvShowItem(remoteTvShow) };
 
@@ -218,7 +218,7 @@ public class ApplyRemoteTvShowComparisonStateCommandUnitTests
             ownedEpisodes[1].Id,
             PlexMediaComparisonHitState.Matched
         ));
-        await dbContext.SaveChangesNewAsync(CancellationToken);
+        await dbContext.SaveChangesAsync(CancellationToken);
 
         var items = new List<PlexMediaSlimDTO> { CreateTvShowItem(remoteTvShow) };
 
@@ -259,7 +259,7 @@ public class ApplyRemoteTvShowComparisonStateCommandUnitTests
             Status = LibrarySyncJobStatus.Queued,
             CreatedAt = DateTime.UtcNow,
         });
-        await dbContext.SaveChangesNewAsync(CancellationToken);
+        await dbContext.SaveChangesAsync(CancellationToken);
 
         var items = new List<PlexMediaSlimDTO> { CreateTvShowItem(remoteTvShow) };
 
@@ -323,7 +323,7 @@ public class ApplyRemoteTvShowComparisonStateCommandUnitTests
             RemoteLibraryUpdatedAt = remoteUpdatedAt,
             OwnedLibraryUpdatedAt = ownedUpdatedAt,
         });
-        await dbContext.SaveChangesNewAsync(CancellationToken);
+        await dbContext.SaveChangesAsync(CancellationToken);
     }
 
     private static PlexTvShowComparison CreateTvShowComparison(

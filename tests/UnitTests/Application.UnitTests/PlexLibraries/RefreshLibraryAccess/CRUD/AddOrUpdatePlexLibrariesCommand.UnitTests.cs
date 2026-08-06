@@ -224,7 +224,7 @@ public class AddOrUpdatePlexLibrariesCommandUnitTests : BaseUnitTest<AddOrUpdate
             plexLibrary.DefaultDestinationId = 5;
         }
 
-        await dbContext.SaveChangesNewAsync(CancellationToken);
+        await dbContext.SaveChangesAsync(CancellationToken);
         await dbContext.PlexLibraries.ExecuteUpdateAsync(
             x => x
                 .SetProperty(y => y.MediaSize, 123_456_789)
@@ -315,7 +315,7 @@ public class AddOrUpdatePlexLibrariesCommandUnitTests : BaseUnitTest<AddOrUpdate
         var incomingUpdatedAt = syncedAt - TimeSpan.FromMinutes(5);
         plexLibrary.SyncedAt = syncedAt;
         plexLibrary.Outdated = false;
-        await dbContext.SaveChangesNewAsync(CancellationToken);
+        await dbContext.SaveChangesAsync(CancellationToken);
 
         var incomingLibrary = new List<PlexLibrary> { plexLibrary }
             .ToApiLibraries(incomingUpdatedAt, contentChangedAt: plexLibrary.ContentChangedAt + 1)
@@ -363,7 +363,7 @@ public class AddOrUpdatePlexLibrariesCommandUnitTests : BaseUnitTest<AddOrUpdate
         var incomingUpdatedAt = syncedAt + TimeSpan.FromMinutes(5);
         plexLibrary.SyncedAt = syncedAt;
         plexLibrary.Outdated = false;
-        await dbContext.SaveChangesNewAsync(CancellationToken);
+        await dbContext.SaveChangesAsync(CancellationToken);
 
         var incomingLibrary = new List<PlexLibrary> { plexLibrary }
             .ToApiLibraries(incomingUpdatedAt, contentChangedAt: plexLibrary.ContentChangedAt + 1)
@@ -657,7 +657,7 @@ public class AddOrUpdatePlexLibrariesCommandUnitTests : BaseUnitTest<AddOrUpdate
             },
             CancellationToken
         );
-        await dbContext.SaveChangesNewAsync(CancellationToken);
+        await dbContext.SaveChangesAsync(CancellationToken);
 
         var updatedTime = DateTime.UtcNow - TimeSpan.FromMinutes(30);
         var request = new AddOrUpdatePlexLibrariesCommand

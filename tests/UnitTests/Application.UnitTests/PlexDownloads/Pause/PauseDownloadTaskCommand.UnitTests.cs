@@ -349,7 +349,7 @@ public class PauseDownloadTaskCommandUnitTests : BaseUnitTest<PauseDownloadTaskC
         fileTask.DataReceived = 500_000_000;
         fileTask.FileDataTransferred = 500_000_000;
         fileTask.CurrentFileTransferBytesOffset = 500_000_000;
-        await dbContext.SaveChangesNewAsync(CancellationToken);
+        await dbContext.SaveChangesAsync(CancellationToken);
 
         // These should never be called for a MoveFinished task
         Mock.Mock<IMoveDownloadFileScheduler>()
@@ -414,7 +414,7 @@ public class PauseDownloadTaskCommandUnitTests : BaseUnitTest<PauseDownloadTaskC
         fileTask.DataReceived = 400_000_000;
         fileTask.FileDataTransferred = 0;
         fileTask.CurrentFileTransferBytesOffset = 0;
-        await dbContext.SaveChangesNewAsync(CancellationToken);
+        await dbContext.SaveChangesAsync(CancellationToken);
 
         Mock.Mock<IMoveDownloadFileScheduler>()
             .Setup(x => x.IsDownloadFileMoving(It.IsAny<DownloadTaskKey>()))
@@ -485,7 +485,7 @@ public class PauseDownloadTaskCommandUnitTests : BaseUnitTest<PauseDownloadTaskC
         fileTask.DataReceived = 123_456;
         fileTask.DownloadSpeed = 999;
         fileTask.DirectDownloadSnapshot = snapshot;
-        await dbContext.SaveChangesNewAsync(CancellationToken);
+        await dbContext.SaveChangesAsync(CancellationToken);
 
         Mock.Mock<IDownloadTaskScheduler>()
             .Setup(x => x.IsDownloading(It.IsAny<DownloadTaskKey>(), It.IsAny<CancellationToken>()))
@@ -531,7 +531,7 @@ public class PauseDownloadTaskCommandUnitTests : BaseUnitTest<PauseDownloadTaskC
         var childTask = await IDbContext.DownloadTaskMovieFile.AsTracking().FirstAsync(CancellationToken);
         childTask.DownloadStatus = DownloadStatus.DownloadFinished;
         childTask.DownloadTaskPhase.ShouldBe(DownloadStatus.DownloadFinished.ToDownloadTaskPhase());
-        await IDbContext.SaveChangesNewAsync(CancellationToken);
+        await IDbContext.SaveChangesAsync(CancellationToken);
 
         Mock.Mock<IDownloadTaskScheduler>()
             .Setup(x => x.IsDownloading(It.IsAny<DownloadTaskKey>(), It.IsAny<CancellationToken>()))
@@ -568,7 +568,7 @@ public class PauseDownloadTaskCommandUnitTests : BaseUnitTest<PauseDownloadTaskC
         var childKey = childTask.ToKey();
 
         childTask.DownloadStatus = DownloadStatus.Downloading;
-        await IDbContext.SaveChangesNewAsync(CancellationToken);
+        await IDbContext.SaveChangesAsync(CancellationToken);
 
         Mock.Mock<IDownloadTaskScheduler>()
             .Setup(x =>
@@ -714,7 +714,7 @@ public class PauseDownloadTaskCommandUnitTests : BaseUnitTest<PauseDownloadTaskC
 
         childTask.DownloadStatus = DownloadStatus.Queued;
         childTask.DownloadTaskPhase.ShouldBe(DownloadStatus.Queued.ToDownloadTaskPhase());
-        await IDbContext.SaveChangesNewAsync(CancellationToken);
+        await IDbContext.SaveChangesAsync(CancellationToken);
 
         Mock.Mock<IDownloadTaskScheduler>()
             .Setup(x => x.IsDownloading(It.IsAny<DownloadTaskKey>(), It.IsAny<CancellationToken>()))

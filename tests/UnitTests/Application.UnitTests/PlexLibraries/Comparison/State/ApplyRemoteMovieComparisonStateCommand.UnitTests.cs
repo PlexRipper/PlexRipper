@@ -55,7 +55,7 @@ public class ApplyRemoteMovieComparisonStateCommandUnitTests
             ownedMovie.Id,
             PlexMediaComparisonHitState.Matched
         ));
-        await dbContext.SaveChangesNewAsync(CancellationToken);
+        await dbContext.SaveChangesAsync(CancellationToken);
 
         var items = new List<PlexMediaSlimDTO> { CreateMovieItem(remoteMovie) };
 
@@ -113,7 +113,7 @@ public class ApplyRemoteMovieComparisonStateCommandUnitTests
             higherQualityOwnedMovie.Id,
             PlexMediaComparisonHitState.HigherQuality
         ));
-        await dbContext.SaveChangesNewAsync(CancellationToken);
+        await dbContext.SaveChangesAsync(CancellationToken);
 
         var items = new List<PlexMediaSlimDTO> { CreateMovieItem(remoteMovie) };
 
@@ -150,7 +150,7 @@ public class ApplyRemoteMovieComparisonStateCommandUnitTests
 
         var remoteMovie = await GetLibraryMovieAsync(remoteLibrary.Id);
         await AddCurrentScopeAsync(remoteLibrary, ownedLibrary);
-        await dbContext.SaveChangesNewAsync(CancellationToken);
+        await dbContext.SaveChangesAsync(CancellationToken);
 
         var items = new List<PlexMediaSlimDTO> { CreateMovieItem(remoteMovie) };
 
@@ -204,7 +204,7 @@ public class ApplyRemoteMovieComparisonStateCommandUnitTests
             ownedMovie.Id,
             PlexMediaComparisonHitState.HigherQuality
         ));
-        await dbContext.SaveChangesNewAsync(CancellationToken);
+        await dbContext.SaveChangesAsync(CancellationToken);
 
         var items = new List<PlexMediaSlimDTO> { CreateMovieItem(remoteMovie) };
 
@@ -259,7 +259,7 @@ public class ApplyRemoteMovieComparisonStateCommandUnitTests
             Status = LibrarySyncJobStatus.Processing,
             CreatedAt = DateTime.UtcNow,
         });
-        await dbContext.SaveChangesNewAsync(CancellationToken);
+        await dbContext.SaveChangesAsync(CancellationToken);
 
         var items = new List<PlexMediaSlimDTO> { CreateMovieItem(remoteMovie) };
 
@@ -300,7 +300,7 @@ public class ApplyRemoteMovieComparisonStateCommandUnitTests
             Status = LibrarySyncJobStatus.Failed,
             CreatedAt = DateTime.UtcNow,
         });
-        await dbContext.SaveChangesNewAsync(CancellationToken);
+        await dbContext.SaveChangesAsync(CancellationToken);
 
         var items = new List<PlexMediaSlimDTO> { CreateMovieItem(remoteMovie) };
 
@@ -341,7 +341,7 @@ public class ApplyRemoteMovieComparisonStateCommandUnitTests
             Status = LibrarySyncJobStatus.Completed,
             CreatedAt = DateTime.UtcNow,
         });
-        await dbContext.SaveChangesNewAsync(CancellationToken);
+        await dbContext.SaveChangesAsync(CancellationToken);
 
         var items = new List<PlexMediaSlimDTO> { CreateMovieItem(remoteMovie) };
 
@@ -399,7 +399,7 @@ public class ApplyRemoteMovieComparisonStateCommandUnitTests
             RemoteLibraryUpdatedAt = remoteUpdatedAt,
             OwnedLibraryUpdatedAt = ownedUpdatedAt,
         });
-        await dbContext.SaveChangesNewAsync(CancellationToken);
+        await dbContext.SaveChangesAsync(CancellationToken);
     }
 
     private static PlexMovieComparison CreateMovieComparison(

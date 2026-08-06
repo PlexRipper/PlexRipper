@@ -29,7 +29,7 @@ public class CheckQueuedLibraryComparisonJobCommandHandlerUnitTests
             Status = LibrarySyncJobStatus.Queued,
             CreatedAt = DateTime.UtcNow,
         });
-        await dbContext.SaveChangesNewAsync(CancellationToken);
+        await dbContext.SaveChangesAsync(CancellationToken);
 
         Mock.Mock<IScheduler>()
             .Setup(x => x.GetCurrentlyExecutingJobs(It.IsAny<CancellationToken>()))
@@ -56,7 +56,6 @@ public class CheckQueuedLibraryComparisonJobCommandHandlerUnitTests
     public async Task ShouldRequeueProcessingItemsAndTriggerExistingJob_WhenNoComparisonWorkerIsRunning()
     {
         // Arrange
-        var jobKey = PlexLibraryComparisonJob.GetJobKey();
         var command = new CheckQueuedLibraryComparisonJobCommand();
         await SetupDatabase(72, config =>
         {
@@ -77,7 +76,7 @@ public class CheckQueuedLibraryComparisonJobCommandHandlerUnitTests
             StartedAt = DateTime.UtcNow,
             ErrorMessage = "Container stopped while processing",
         });
-        await dbContext.SaveChangesNewAsync(CancellationToken);
+        await dbContext.SaveChangesAsync(CancellationToken);
 
         Mock.Mock<IScheduler>()
             .Setup(x => x.GetCurrentlyExecutingJobs(It.IsAny<CancellationToken>()))
@@ -114,7 +113,6 @@ public class CheckQueuedLibraryComparisonJobCommandHandlerUnitTests
     {
         // Arrange
         var jobKey = PlexLibraryComparisonJob.GetJobKey();
-        var triggerKey = new TriggerKey($"{jobKey.Name}_trigger", jobKey.Group);
         var command = new CheckQueuedLibraryComparisonJobCommand();
         await SetupDatabase(80, config =>
         {
@@ -133,7 +131,7 @@ public class CheckQueuedLibraryComparisonJobCommandHandlerUnitTests
             Status = LibrarySyncJobStatus.Queued,
             CreatedAt = DateTime.UtcNow,
         });
-        await dbContext.SaveChangesNewAsync(CancellationToken);
+        await dbContext.SaveChangesAsync(CancellationToken);
 
         Mock.Mock<IScheduler>()
             .Setup(x => x.GetCurrentlyExecutingJobs(It.IsAny<CancellationToken>()))
@@ -164,7 +162,6 @@ public class CheckQueuedLibraryComparisonJobCommandHandlerUnitTests
     public async Task ShouldTriggerExistingJob_WhenComparisonWorkerExistsAndIsNotRunning()
     {
         // Arrange
-        var jobKey = PlexLibraryComparisonJob.GetJobKey();
         var command = new CheckQueuedLibraryComparisonJobCommand();
         await SetupDatabase(81, config =>
         {
@@ -183,7 +180,7 @@ public class CheckQueuedLibraryComparisonJobCommandHandlerUnitTests
             Status = LibrarySyncJobStatus.Queued,
             CreatedAt = DateTime.UtcNow,
         });
-        await dbContext.SaveChangesNewAsync(CancellationToken);
+        await dbContext.SaveChangesAsync(CancellationToken);
 
         Mock.Mock<IScheduler>()
             .Setup(x => x.GetCurrentlyExecutingJobs(It.IsAny<CancellationToken>()))
@@ -236,7 +233,7 @@ public class CheckQueuedLibraryComparisonJobCommandHandlerUnitTests
             CreatedAt = DateTime.UtcNow,
             StartedAt = DateTime.UtcNow,
         });
-        await dbContext.SaveChangesNewAsync(CancellationToken);
+        await dbContext.SaveChangesAsync(CancellationToken);
 
         Mock.Mock<IScheduler>()
             .Setup(x => x.GetCurrentlyExecutingJobs(It.IsAny<CancellationToken>()))
@@ -262,7 +259,6 @@ public class CheckQueuedLibraryComparisonJobCommandHandlerUnitTests
     public async Task ShouldScheduleSingleJobAndTrigger_WhenComparisonWorkerDoesNotExist()
     {
         // Arrange
-        var jobKey = PlexLibraryComparisonJob.GetJobKey();
         var command = new CheckQueuedLibraryComparisonJobCommand();
         await SetupDatabase(82, config =>
         {
@@ -281,7 +277,7 @@ public class CheckQueuedLibraryComparisonJobCommandHandlerUnitTests
             Status = LibrarySyncJobStatus.Queued,
             CreatedAt = DateTime.UtcNow,
         });
-        await dbContext.SaveChangesNewAsync(CancellationToken);
+        await dbContext.SaveChangesAsync(CancellationToken);
 
         Mock.Mock<IScheduler>()
             .Setup(x => x.GetCurrentlyExecutingJobs(It.IsAny<CancellationToken>()))

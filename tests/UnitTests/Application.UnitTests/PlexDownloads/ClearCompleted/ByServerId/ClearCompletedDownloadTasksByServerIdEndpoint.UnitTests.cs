@@ -24,7 +24,7 @@ public class ClearCompletedDownloadTasksByServerIdEndpointUnitTests
             .ToListAsync(CancellationToken);
 
         downloadTasks.SetDownloadStatus(DownloadStatus.Completed);
-        await dbContext.SaveChangesNewAsync(CancellationToken);
+        await dbContext.SaveChangesAsync(CancellationToken);
 
         Mock.Mock<ICommandExecutor>()
             .Setup(x => x.Send(It.IsAny<ClearCompletedDownloadTasksByServerIdCommand>(), It.IsAny<CancellationToken>()))
@@ -75,7 +75,7 @@ public class ClearCompletedDownloadTasksByServerIdEndpointUnitTests
             .ToListAsync(CancellationToken);
 
         allDownloadTasks.SetDownloadStatus(DownloadStatus.Completed);
-        await dbContext.SaveChangesNewAsync(CancellationToken);
+        await dbContext.SaveChangesAsync(CancellationToken);
 
         var targetServerId = allDownloadTasks[0].PlexServerId;
         var otherServerTaskCount = allDownloadTasks.Count(x => x.PlexServerId != targetServerId);

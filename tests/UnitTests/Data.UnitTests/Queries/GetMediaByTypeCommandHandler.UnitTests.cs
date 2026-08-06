@@ -82,8 +82,9 @@ public class GetMediaByTypeCommandHandlerUnitTests : BaseUnitTest<GetMediaByType
         for (var i = 0; i < movieIds.Count; i++)
         {
             var year = 2000 + i;
+            var index = i;
             await dbContext.PlexMovies
-                .Where(x => x.Id == movieIds[i])
+                .Where(x => x.Id == movieIds[index])
                 .ExecuteUpdateAsync(x => x.SetProperty(y => y.Year, year), CancellationToken);
         }
 
@@ -2211,7 +2212,7 @@ public class GetMediaByTypeCommandHandlerUnitTests : BaseUnitTest<GetMediaByType
         dbContext.PlexGenres.Add(genre);
         dbContext.PlexCountries.Add(country);
         dbContext.PlexActors.Add(actor);
-        await dbContext.SaveChangesNewAsync(CancellationToken);
+        await dbContext.SaveChangesAsync(CancellationToken);
 
         dbContext.PlexMovieGenres.AddRange(
             new PlexMovieGenres(genre.Id, expectedMovie.PlexLibraryId, expectedMovie.Id),
@@ -2226,7 +2227,7 @@ public class GetMediaByTypeCommandHandlerUnitTests : BaseUnitTest<GetMediaByType
             new PlexMovieActors(actor.Id, actorOnlyMovie.PlexLibraryId, actorOnlyMovie.Id)
         );
 
-        await dbContext.SaveChangesNewAsync(CancellationToken);
+        await dbContext.SaveChangesAsync(CancellationToken);
 
         await dbContext.PlexMovieData
             .Where(x => x.PlexMovieId == expectedMovie.Id)

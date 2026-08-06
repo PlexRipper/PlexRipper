@@ -143,7 +143,7 @@ public class GenerateDownloadTaskMoviesCommandHandler : ICommandHandler<Generate
             return Result.Ok(new DownloadTaskCreationReport { Movies = 0 });
 
         _dbContext.DownloadTaskMovie.AddRange(allDownloadTasks);
-        await _dbContext.SaveChangesNewAsync(cancellationToken);
+        await _dbContext.SaveChangesAsync(cancellationToken);
 
         var logs = new List<DownloadTaskMovieFileLog>();
         foreach (var downloadTaskMovie in allDownloadTasks)
@@ -162,7 +162,7 @@ public class GenerateDownloadTaskMoviesCommandHandler : ICommandHandler<Generate
         }
 
         _dbContext.DownloadTaskMovieFileLogs.AddRange(logs);
-        await _dbContext.SaveChangesNewAsync(cancellationToken);
+        await _dbContext.SaveChangesAsync(cancellationToken);
 
         return Result.Ok(new DownloadTaskCreationReport { Movies = allDownloadTasks.Count });
     }

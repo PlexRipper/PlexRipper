@@ -31,7 +31,7 @@ public class SendNotificationResultHandler : IEventHandler<SendNotificationResul
                 createdNotifications.Add(createdNotification);
             }
 
-            await dbContext.SaveChangesNewAsync(cancellationToken);
+            await dbContext.SaveChangesAsync(cancellationToken);
 
             foreach (var createdNotification in createdNotifications)
             {

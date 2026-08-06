@@ -133,13 +133,6 @@ public interface IReaparrDbContext : IDisposable
 
     #endregion Properties
 
-    Task BulkReadAsync<T>(
-        IList<T> entities,
-        BulkConfig? bulkConfig = null,
-        CancellationToken cancellationToken = default
-    )
-        where T : class;
-
     Task BulkInsertAsync<T>(
         IList<T> entities,
         BulkConfig? bulkConfig = null,
@@ -150,15 +143,6 @@ public interface IReaparrDbContext : IDisposable
     Task BulkUpdateAsync<T>(
         IList<T> entities,
         BulkConfig? bulkConfig = null,
-        CancellationToken cancellationToken = default
-    )
-        where T : class;
-
-    Task BulkInsertOrUpdateAsync<T>(
-        IList<T> entities,
-        BulkConfig? bulkConfig = null,
-        Action<decimal>? progress = null,
-        Type? type = null,
         CancellationToken cancellationToken = default
     )
         where T : class;
@@ -201,9 +185,17 @@ public interface IReaparrDbContext : IDisposable
         int maxRetries = 3,
         CancellationToken cancellationToken = default);
 
+    Task<Result<T>> ExecuteSerializedTransactionAsync<T>(
+        Func<IReaparrDbContext, CancellationToken, Task<T>> operation,
+        CancellationToken cancellationToken = default);
+
+    Task<Result> ExecuteSerializedTransactionAsync(
+        Func<IReaparrDbContext, CancellationToken, Task> operation,
+        CancellationToken cancellationToken = default);
+
     EntityEntry Entry(object entity);
 
-    Task<int> SaveChangesNewAsync(CancellationToken cancellationToken = default);
+    Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 
     void ClearChangeTracker();
 

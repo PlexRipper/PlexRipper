@@ -84,173 +84,161 @@ public class CompareMoviePlexLibraryCommandHandler : ICommandHandler<CompareMovi
         CancellationToken cancellationToken
     )
     {
-        var now = DateTime.UtcNow;
-
-        // Load remote movies with their quality
-        var remoteMovies = await _dbContext.PlexMovies
-            .Where(m => m.PlexLibraryId == remoteLibraryId)
-            .Select(m => new MovieProjection
-            {
-                Id = m.Id,
-                Title = m.Title,
-                SearchTitle = m.SearchTitle,
-                Year = m.Year,
-                Duration = m.Duration,
-                Quality = m.Quality,
-                Guid_IMDB = m.Guid_IMDB,
-                Guid_TMDB = m.Guid_TMDB,
-                Guid_TVDB = m.Guid_TVDB,
-            })
-            .ToListAsync(cancellationToken);
-
-        // Load owned movies with their quality
-        var ownedMovies = await _dbContext.PlexMovies
-            .Where(m => m.PlexLibraryId == ownedLibraryId)
-            .Select(m => new MovieProjection
-            {
-                Id = m.Id,
-                Title = m.Title,
-                SearchTitle = m.SearchTitle,
-                Year = m.Year,
-                Duration = m.Duration,
-                Quality = m.Quality,
-                Guid_IMDB = m.Guid_IMDB,
-                Guid_TMDB = m.Guid_TMDB,
-                Guid_TVDB = m.Guid_TVDB,
-            })
-            .ToListAsync(cancellationToken);
-
-        _log.Here()
-            .Debug(
-                "Loaded {RemoteCount} remote movies and {OwnedCount} owned movies for comparison",
-                remoteMovies.Count,
-                ownedMovies.Count
-            );
-
-        // Build GUID lookup dictionaries
-        var ownedByTmdb = ownedMovies
-            .Where(x => x.Guid_TMDB.HasValue)
-            .GroupBy(x => x.Guid_TMDB!.Value)
-            .ToDictionary(g => g.Key, g => g.ToList());
-
-        var ownedByImdb = ownedMovies
-            .Where(x => !string.IsNullOrEmpty(x.Guid_IMDB))
-            .GroupBy(x => x.Guid_IMDB!)
-            .ToDictionary(g => g.Key, g => g.ToList(), StringComparer.OrdinalIgnoreCase);
-
-        var ownedByTvdb = ownedMovies
-            .Where(x => x.Guid_TVDB.HasValue)
-            .GroupBy(x => x.Guid_TVDB!.Value)
-            .ToDictionary(g => g.Key, g => g.ToList());
-
-        var ownedByTitleYear = ownedMovies
-            .GroupBy(GetTitleYearKey, StringComparer.OrdinalIgnoreCase)
-            .ToDictionary(g => g.Key, g => g.ToList(), StringComparer.OrdinalIgnoreCase);
-
-        var hitRows = new List<PlexMovieComparison>();
-
-        foreach (var remote in remoteMovies)
+        var transactionResult = await _dbContext.ExecuteSerializedTransactionAsync(async (ctx, txCt) =>
         {
-            var matches = MatchMovie(remote, ownedByTmdb, ownedByImdb, ownedByTvdb, ownedByTitleYear);
+            var now = DateTime.UtcNow;
 
-            foreach (var (owned, matchType) in matches)
+            var librarySnapshots = await ctx.PlexLibraries
+                .Where(x => x.Id == remoteLibraryId || x.Id == ownedLibraryId)
+                .Select(x => new { x.Id, x.UpdatedAt })
+                .ToDictionaryAsync(x => x.Id, x => x.UpdatedAt, txCt);
+
+            // Load remote movies with their quality
+            var remoteMovies = await ctx.PlexMovies
+                .Where(m => m.PlexLibraryId == remoteLibraryId)
+                .Select(m => new MovieProjection
+                {
+                    Id = m.Id,
+                    SearchTitle = m.SearchTitle,
+                    Year = m.Year,
+                    Duration = m.Duration,
+                    Quality = m.Quality,
+                    Guid_IMDB = m.Guid_IMDB,
+                    Guid_TMDB = m.Guid_TMDB,
+                    Guid_TVDB = m.Guid_TVDB,
+                })
+                .ToListAsync(txCt);
+
+            // Load owned movies with their quality
+            var ownedMovies = await ctx.PlexMovies
+                .Where(m => m.PlexLibraryId == ownedLibraryId)
+                .Select(m => new MovieProjection
+                {
+                    Id = m.Id,
+                    SearchTitle = m.SearchTitle,
+                    Year = m.Year,
+                    Duration = m.Duration,
+                    Quality = m.Quality,
+                    Guid_IMDB = m.Guid_IMDB,
+                    Guid_TMDB = m.Guid_TMDB,
+                    Guid_TVDB = m.Guid_TVDB,
+                })
+                .ToListAsync(txCt);
+
+            _log.Here()
+                .Debug(
+                    "Loaded {RemoteCount} remote movies and {OwnedCount} owned movies for comparison",
+                    remoteMovies.Count,
+                    ownedMovies.Count
+                );
+
+            // Build GUID lookup dictionaries
+            var ownedByTmdb = ownedMovies
+                .Where(x => x.Guid_TMDB.HasValue)
+                .GroupBy(x => x.Guid_TMDB!.Value)
+                .ToDictionary(g => g.Key, g => g.ToList());
+
+            var ownedByImdb = ownedMovies
+                .Where(x => !string.IsNullOrEmpty(x.Guid_IMDB))
+                .GroupBy(x => x.Guid_IMDB!)
+                .ToDictionary(g => g.Key, g => g.ToList(), StringComparer.OrdinalIgnoreCase);
+
+            var ownedByTvdb = ownedMovies
+                .Where(x => x.Guid_TVDB.HasValue)
+                .GroupBy(x => x.Guid_TVDB!.Value)
+                .ToDictionary(g => g.Key, g => g.ToList());
+
+            var ownedByTitleYear = ownedMovies
+                .GroupBy(GetTitleYearKey, StringComparer.OrdinalIgnoreCase)
+                .ToDictionary(g => g.Key, g => g.ToList(), StringComparer.OrdinalIgnoreCase);
+
+            var hitRows = new List<PlexMovieComparison>();
+
+            foreach (var remote in remoteMovies)
             {
-                var remoteQuality = remote.Quality;
-                var ownedQuality = owned.Quality;
+                var matches = MatchMovie(remote, ownedByTmdb, ownedByImdb, ownedByTvdb, ownedByTitleYear);
 
-                hitRows.Add(new PlexMovieComparison
+                foreach (var (owned, matchType) in matches)
                 {
-                    Id = 0,
-                    RemotePlexLibraryId = remoteLibraryId,
-                    OwnedPlexLibraryId = ownedLibraryId,
-                    RemotePlexMediaId = remote.Id,
-                    OwnedPlexMediaId = owned.Id,
-                    HitState = IsHigherQuality(remoteQuality, ownedQuality)
-                        ? PlexMediaComparisonHitState.HigherQuality
-                        : PlexMediaComparisonHitState.Matched,
-                    RemoteQuality = remoteQuality,
-                    OwnedQuality = ownedQuality,
-                    MatchType = matchType,
-                    ComparedAt = now,
-                });
-            }
-        }
+                    var remoteQuality = remote.Quality;
+                    var ownedQuality = owned.Quality;
 
-        _log.Here()
-            .Debug(
-                "Produced {HitCount} comparison hit rows for {RemoteCount} remote movies",
-                hitRows.Count,
-                remoteMovies.Count
-            );
-
-        await _dbContext.ExecuteWithRetryAsync(
-            async ctx =>
-            {
-                var dbContext = (IReaparrDbContext)ctx;
-
-                // 1. Delete old hit rows for this pair.
-                await dbContext.PlexMovieComparisons
-                    .Where(x => x.RemotePlexLibraryId == remoteLibraryId && x.OwnedPlexLibraryId == ownedLibraryId)
-                    .ExecuteDeleteAsync(cancellationToken);
-
-                // 2. Insert new hit rows via standard EF — goes through the write queue.
-                if (hitRows.Count > 0)
-                {
-                    dbContext.PlexMovieComparisons.AddRange(hitRows);
-                    await dbContext.SaveChangesNewAsync(cancellationToken);
-                }
-
-                // 3. Update scope last — makes new hits visible atomically to readers.
-                var librarySnapshots = await dbContext.PlexLibraries
-                    .Where(x => x.Id == remoteLibraryId || x.Id == ownedLibraryId)
-                    .Select(x => new { x.Id, x.UpdatedAt })
-                    .ToDictionaryAsync(x => x.Id, x => x.UpdatedAt, cancellationToken);
-
-                var state = await dbContext.PlexComparisonScopes
-                    .AsTracking()
-                    .SingleOrDefaultAsync(
-                        x =>
-                            x.RemotePlexLibraryId == remoteLibraryId
-                            && x.OwnedPlexLibraryId == ownedLibraryId
-                            && x.MediaType == PlexMediaType.Movie,
-                        cancellationToken
-                    );
-
-                if (state is null)
-                {
-                    state = new PlexComparisonState
+                    hitRows.Add(new PlexMovieComparison
                     {
                         Id = 0,
                         RemotePlexLibraryId = remoteLibraryId,
                         OwnedPlexLibraryId = ownedLibraryId,
-                        MediaType = PlexMediaType.Movie,
-                        CompletedAt = now,
-                        RemoteLibraryUpdatedAt = librarySnapshots.GetValueOrDefault(remoteLibraryId),
-                        OwnedLibraryUpdatedAt = librarySnapshots.GetValueOrDefault(ownedLibraryId),
-                    };
-
-                    await dbContext.PlexComparisonScopes.AddAsync(state, cancellationToken);
+                        RemotePlexMediaId = remote.Id,
+                        OwnedPlexMediaId = owned.Id,
+                        HitState = IsHigherQuality(remoteQuality, ownedQuality)
+                            ? PlexMediaComparisonHitState.HigherQuality
+                            : PlexMediaComparisonHitState.Matched,
+                        RemoteQuality = remoteQuality,
+                        OwnedQuality = ownedQuality,
+                        MatchType = matchType,
+                        ComparedAt = now,
+                    });
                 }
-                else
+            }
+
+            _log.Here()
+                .Debug(
+                    "Produced {HitCount} comparison hit rows for {RemoteCount} remote movies",
+                    hitRows.Count,
+                    remoteMovies.Count
+                );
+
+            var state = await ctx.PlexComparisonScopes
+                .AsTracking()
+                .SingleOrDefaultAsync(
+                    x =>
+                        x.RemotePlexLibraryId == remoteLibraryId
+                        && x.OwnedPlexLibraryId == ownedLibraryId
+                        && x.MediaType == PlexMediaType.Movie,
+                    txCt
+                );
+
+            if (state is null)
+            {
+                state = new PlexComparisonState
                 {
-                    state.CompletedAt = now;
-                    state.RemoteLibraryUpdatedAt = librarySnapshots.GetValueOrDefault(remoteLibraryId);
-                    state.OwnedLibraryUpdatedAt = librarySnapshots.GetValueOrDefault(ownedLibraryId);
-                }
+                    Id = 0,
+                    RemotePlexLibraryId = remoteLibraryId,
+                    OwnedPlexLibraryId = ownedLibraryId,
+                    MediaType = PlexMediaType.Movie,
+                    CompletedAt = now,
+                    RemoteLibraryUpdatedAt = librarySnapshots.GetValueOrDefault(remoteLibraryId),
+                    OwnedLibraryUpdatedAt = librarySnapshots.GetValueOrDefault(ownedLibraryId),
+                };
 
-                await dbContext.SaveChangesNewAsync(cancellationToken);
+                await ctx.PlexComparisonScopes.AddAsync(state, txCt);
+            }
+            else
+            {
+                state.CompletedAt = now;
+                state.RemoteLibraryUpdatedAt = librarySnapshots.GetValueOrDefault(remoteLibraryId);
+                state.OwnedLibraryUpdatedAt = librarySnapshots.GetValueOrDefault(ownedLibraryId);
+            }
+            await ctx.PlexMovieComparisons
+                .Where(x => x.RemotePlexLibraryId == remoteLibraryId && x.OwnedPlexLibraryId == ownedLibraryId)
+                .ExecuteDeleteAsync(txCt);
 
-                return 0;
-            },
-            cancellationToken: cancellationToken
-        );
+            if (hitRows.Count > 0)
+                ctx.PlexMovieComparisons.AddRange(hitRows);
+
+            await ctx.SaveChangesAsync(txCt);
+
+            return hitRows.Count;
+        }, cancellationToken);
+        if (transactionResult.IsFailed)
+            return transactionResult.ToResult();
 
         _log.Here()
             .Information(
                 "Completed comparison for movies: remote library {RemoteLibId} vs owned library {OwnedLibId}, {HitCount} hits",
                 remoteLibraryId,
                 ownedLibraryId,
-                hitRows.Count
+                transactionResult.Value
             );
 
         return Result.Ok();
@@ -300,13 +288,18 @@ public class CompareMoviePlexLibraryCommandHandler : ICommandHandler<CompareMovi
     private sealed record MovieProjection
     {
         public required int Id { get; init; }
-        public required string Title { get; init; }
         public required string SearchTitle { get; init; }
         public required int Year { get; init; }
         public required int Duration { get; init; }
         public required VideoQuality Quality { get; init; }
+        
+        // ReSharper disable once InconsistentNaming
         public required string? Guid_IMDB { get; init; }
+        
+        // ReSharper disable once InconsistentNaming
         public required int? Guid_TMDB { get; init; }
+        
+        // ReSharper disable once InconsistentNaming
         public required int? Guid_TVDB { get; init; }
     }
 }

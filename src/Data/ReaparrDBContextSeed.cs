@@ -129,6 +129,6 @@ public static class ReaparrDBContextSeed
                 await db.FolderPaths.AddAsync(path, cancellationToken);
             }
 
-            await db.SaveChangesNewAsync(cancellationToken);
+            await db.SaveChangesAsync(cancellationToken);
         };
 }

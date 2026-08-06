@@ -1,7 +1,6 @@
 using EntityFrameworkCore.Sqlite.Concurrency;
 using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.Logging;
-using NaturalSort.Extension;
 
 namespace Reaparr.BaseTests;
 
@@ -13,13 +12,6 @@ public static partial class MockDatabase
     // seed operations are not reliable when many test databases are being created
     // at the same time. Keep database paths unique per test; only serialize setup.
     private static readonly SemaphoreSlim _setupLock = new(1, 1);
-
-    /// <summary>
-    /// NaturalSortComparer uses InvariantCultureIgnoreCase for deterministic test results.
-    /// Note: If UI-facing code uses CurrentCultureIgnoreCase, this difference is intentional
-    /// to prevent future confusion or drift between test and production behavior.
-    /// </summary>
-    private static readonly NaturalSortComparer _naturalComparer = new(StringComparison.InvariantCultureIgnoreCase);
 
     #region Methods
 
@@ -43,7 +35,7 @@ public static partial class MockDatabase
             context.PlexServers.Add(plexServer);
         }
 
-        await context.SaveChangesNewAsync();
+        await context.SaveChangesAsync();
         var plexServers = await context.PlexServers.ToListAsync();
 
         // Add Connection to each server
@@ -55,7 +47,7 @@ public static partial class MockDatabase
             context.PlexServerConnections.AddRange(connections);
         }
 
-        await context.SaveChangesNewAsync();
+        await context.SaveChangesAsync();
         var plexConnections = await context.PlexServerConnections.ToListAsync();
 
         // Add status to each connection
@@ -67,7 +59,7 @@ public static partial class MockDatabase
             context.PlexServerStatuses.Add(status);
         }
 
-        await context.SaveChangesNewAsync();
+        await context.SaveChangesAsync();
 
         _log.Here()
             .Debug(
@@ -120,7 +112,7 @@ public static partial class MockDatabase
         }
 
         context.PlexLibraries.AddRange(plexLibrariesToDb);
-        await context.SaveChangesNewAsync();
+        await context.SaveChangesAsync();
         return context;
     }
 
@@ -139,7 +131,7 @@ public static partial class MockDatabase
             var plexAccount = FakeData.GetPlexAccount(seed).Generate();
 
             await context.PlexAccounts.AddAsync(plexAccount);
-            await context.SaveChangesNewAsync();
+            await context.SaveChangesAsync();
 
             _log.Here()
                 .Debug(
@@ -160,7 +152,7 @@ public static partial class MockDatabase
 
             // Add account -> server relation
             context.PlexAccountServers.AddRange(plexAccountServer);
-            await context.SaveChangesNewAsync();
+            await context.SaveChangesAsync();
 
             // Add account -> library relation
             var plexAccountLibraries = plexServers
@@ -175,7 +167,7 @@ public static partial class MockDatabase
             context.PlexAccountLibraries.AddRange(plexAccountLibraries);
         }
 
-        await context.SaveChangesNewAsync();
+        await context.SaveChangesAsync();
 
         return context;
     }
@@ -201,7 +193,7 @@ public static partial class MockDatabase
             );
 
         context.PlexAccountLibraries.AddRange(plexAccountLibraries);
-        await context.SaveChangesNewAsync();
+        await context.SaveChangesAsync();
         return context;
     }
 

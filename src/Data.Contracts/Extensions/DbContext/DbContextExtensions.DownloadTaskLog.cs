@@ -164,7 +164,7 @@ public static partial class DbContextExtensions
             );
         }
 
-        await dbContext.SaveChangesNewAsync(CancellationToken.None);
+        await dbContext.SaveChangesAsync(CancellationToken.None);
     }
 
     public static async Task CreateDownloadClientLogs(
@@ -173,7 +173,7 @@ public static partial class DbContextExtensions
     )
     {
         dbContext.DownloadTaskMovieFileLogs.AddRange(logs);
-        await dbContext.SaveChangesNewAsync(CancellationToken.None);
+        await dbContext.SaveChangesAsync(CancellationToken.None);
     }
 
     public static async Task CreateDownloadClientLogs(
@@ -182,6 +182,6 @@ public static partial class DbContextExtensions
     )
     {
         dbContext.DownloadTaskTvShowEpisodeFileLogs.AddRange(logs);
-        await dbContext.SaveChangesNewAsync(CancellationToken.None);
+        await dbContext.SaveChangesAsync(CancellationToken.None);
     }
 }

@@ -46,7 +46,7 @@ public class GetTvShowMediaComparisonDetailsCommandHandlerUnitTests
         remoteEpisodes.Count.ShouldBe(4);
 
         await AddCurrentScopeAsync(remoteLibrary, ownedLibrary, PlexMediaType.TvShow);
-        await dbContext.SaveChangesNewAsync(CancellationToken);
+        await dbContext.SaveChangesAsync(CancellationToken);
 
         var command = new GetTvShowMediaComparisonDetailsCommand(remoteTvShow.Id);
 
@@ -147,7 +147,7 @@ public class GetTvShowMediaComparisonDetailsCommandHandlerUnitTests
             matchedOwnedEpisodes[1].Id,
             PlexMediaComparisonHitState.Matched
         ));
-        await dbContext.SaveChangesNewAsync(CancellationToken);
+        await dbContext.SaveChangesAsync(CancellationToken);
 
         var command = new GetTvShowMediaComparisonDetailsCommand(remoteTvShow.Id);
 
@@ -216,7 +216,7 @@ public class GetTvShowMediaComparisonDetailsCommandHandlerUnitTests
             ownedEpisodes[1].Id,
             PlexMediaComparisonHitState.HigherQuality
         ));
-        await dbContext.SaveChangesNewAsync(CancellationToken);
+        await dbContext.SaveChangesAsync(CancellationToken);
 
         var command = new GetTvShowMediaComparisonDetailsCommand(remoteTvShow.Id);
 
@@ -299,7 +299,7 @@ public class GetTvShowMediaComparisonDetailsCommandHandlerUnitTests
             ownedEpisodes[1].Id,
             PlexMediaComparisonHitState.Matched
         ));
-        await dbContext.SaveChangesNewAsync(CancellationToken);
+        await dbContext.SaveChangesAsync(CancellationToken);
 
         var command = new GetTvShowMediaComparisonDetailsCommand(ownedTvShow.Id);
 
@@ -394,7 +394,7 @@ public class GetTvShowMediaComparisonDetailsCommandHandlerUnitTests
             ownedEpisodes[1].Id,
             PlexMediaComparisonHitState.Matched
         ));
-        await dbContext.SaveChangesNewAsync(CancellationToken);
+        await dbContext.SaveChangesAsync(CancellationToken);
 
         var command = new GetTvShowMediaComparisonDetailsCommand(remoteTvShow.Id);
 
@@ -494,6 +494,6 @@ public class GetTvShowMediaComparisonDetailsCommandHandlerUnitTests
             RemoteLibraryUpdatedAt = remoteUpdatedAt,
             OwnedLibraryUpdatedAt = ownedUpdatedAt,
         });
-        await dbContext.SaveChangesNewAsync(CancellationToken);
+        await dbContext.SaveChangesAsync(CancellationToken);
     }
 }

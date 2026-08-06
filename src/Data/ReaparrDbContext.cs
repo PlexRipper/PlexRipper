@@ -110,29 +110,22 @@ public sealed class ReaparrDbContext : DbContext, IReaparrDbContext, IReaparrDbC
 
     public string DatabaseName { get; }
 
-    public Task BulkReadAsync<T>(
-        IList<T> entities,
-        BulkConfig? bulkConfig = null,
-        CancellationToken cancellationToken = default
-    )
-        where T : class => throw new NotSupportedException(
-        "BulkReadAsync is not supported in with SQLite due to issues with UseTempDB and other limitations."
-        + "Use EF native reading instead."
-    );
-
     public async Task BulkInsertAsync<T>(
         IList<T> entities,
         BulkConfig? bulkConfig = null,
         CancellationToken cancellationToken = default
     )
-        where T : class => await ExecuteBulkAsync(
-        () =>
-            DbContextBulkExtensions.BulkInsertAsync(
-                this,
-                entities,
-                bulkConfig,
-                cancellationToken: cancellationToken
-            ),
+        where T : class => await ExecuteSerializedWriteAsync(
+        async (_, ct) => await ExecuteBulkAsync(
+            () =>
+                DbContextBulkExtensions.BulkInsertAsync(
+                    this,
+                    entities,
+                    bulkConfig,
+                    cancellationToken: ct
+                ),
+            ct
+        ),
         cancellationToken
     );
 
@@ -141,34 +134,17 @@ public sealed class ReaparrDbContext : DbContext, IReaparrDbContext, IReaparrDbC
         BulkConfig? bulkConfig = null,
         CancellationToken cancellationToken = default
     )
-        where T : class => await ExecuteBulkAsync(
-        () =>
-            DbContextBulkExtensions.BulkUpdateAsync(
-                this,
-                entities,
-                bulkConfig,
-                cancellationToken: cancellationToken
-            ),
-        cancellationToken
-    );
-
-    public async Task BulkInsertOrUpdateAsync<T>(
-        IList<T> entities,
-        BulkConfig? bulkConfig = null,
-        Action<decimal>? progress = null,
-        Type? type = null,
-        CancellationToken cancellationToken = default
-    )
-        where T : class => await ExecuteBulkAsync(
-        () =>
-            DbContextBulkExtensions.BulkInsertOrUpdateAsync(
-                this,
-                entities,
-                bulkConfig,
-                progress,
-                type,
-                cancellationToken: cancellationToken
-            ),
+        where T : class => await ExecuteSerializedWriteAsync(
+        async (_, ct) => await ExecuteBulkAsync(
+            () =>
+                DbContextBulkExtensions.BulkUpdateAsync(
+                    this,
+                    entities,
+                    bulkConfig,
+                    cancellationToken: ct
+                ),
+            ct
+        ),
         cancellationToken
     );
 
@@ -180,11 +156,41 @@ public sealed class ReaparrDbContext : DbContext, IReaparrDbContext, IReaparrDbC
         ((DbContext)this).ExecuteWithRetryAsync(ctx => operation((IReaparrDbContext)ctx), maxRetries,
             cancellationToken);
 
+    public Task<T> ExecuteSerializedWriteAsync<T>(
+        Func<IReaparrDbContext, CancellationToken, Task<T>> operation,
+        CancellationToken cancellationToken = default) =>
+        this.ExecuteSerializedWriteAsync(ct => operation(this, ct), 8, cancellationToken);
+
+    public Task ExecuteSerializedWriteAsync(
+        Func<IReaparrDbContext, CancellationToken, Task> operation,
+        CancellationToken cancellationToken = default) =>
+        this.ExecuteSerializedWriteAsync(ct => operation(this, ct), 8, cancellationToken);
+
+    public Task<Result<T>> ExecuteSerializedTransactionAsync<T>(
+        Func<IReaparrDbContext, CancellationToken, Task<T>> operation,
+        CancellationToken cancellationToken = default) =>
+        Result.Try(new Func<Task<T>>(async () =>
+        {
+            T result = default!;
+            await this.ExecuteSerializedTransactionAsync(async ct =>
+            {
+                result = await operation(this, ct);
+            }, 8, cancellationToken);
+            return result;
+        }));
+
+    public Task<Result> ExecuteSerializedTransactionAsync(
+        Func<IReaparrDbContext, CancellationToken, Task> operation,
+        CancellationToken cancellationToken = default) =>
+        Result.Try(() => this.ExecuteSerializedTransactionAsync(ct => operation(this, ct), 8, cancellationToken));
+
     /// <inheritdoc/>
     public Task<int> ExecuteSqlInterpolatedAsync(
         FormattableString sql,
-        CancellationToken cancellationToken = default) =>
-        this.Database.ExecuteSqlInterpolatedAsync(sql, cancellationToken);
+        CancellationToken cancellationToken = default)
+    {
+        return this.ExecuteSerializedWriteAsync(ct1 => Database.ExecuteSqlInterpolatedAsync(sql, ct1), 8, cancellationToken);
+    }
 
     /// <inheritdoc/>
     public void ClearChangeTracker() => ChangeTracker.Clear();
@@ -261,10 +267,8 @@ public sealed class ReaparrDbContext : DbContext, IReaparrDbContext, IReaparrDbC
     }
 
     /// <summary>
-    /// Executes a bulk operation within a transaction context.
-    /// This method ensures that the database connection is opened and closed properly,
-    /// and that the operation is committed if successful.
-    /// This is to avoid "Prepare can only be called when the connection is open."
+    /// Executes a bulk operation with an open database connection.
+    /// EFCore.BulkExtensions requires this for SQLite to avoid "Prepare can only be called when the connection is open."
     /// </summary>
     private async Task ExecuteBulkAsync(Func<Task> operation, CancellationToken cancellationToken = default)
     {
@@ -312,6 +316,6 @@ public sealed class ReaparrDbContext : DbContext, IReaparrDbContext, IReaparrDbC
     /// <inheritdoc/>
     public IEnumerable<string> GetPendingMigrations() => Database.GetPendingMigrations();
 
-    public Task<int> SaveChangesNewAsync(CancellationToken cancellationToken = new()) =>
+    public new Task<int> SaveChangesAsync(CancellationToken cancellationToken = new()) =>
         this.SaveChangesSerializedAsync(8, cancellationToken);
 }

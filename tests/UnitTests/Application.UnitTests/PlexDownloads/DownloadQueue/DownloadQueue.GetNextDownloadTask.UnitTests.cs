@@ -28,7 +28,7 @@ public class DownloadQueueGetNextDownloadTaskUnitTests : BaseUnitTest<DownloadQu
             cancellationToken: CancellationToken
         );
         downloadTasks[0].SetDownloadStatus(DownloadStatus.Completed);
-        await IDbContext.SaveChangesNewAsync(CancellationToken);
+        await IDbContext.SaveChangesAsync(CancellationToken);
 
         // Act
         var nextDownloadTask = Sut.GetNextDownloadTask(downloadTasks);
@@ -52,7 +52,7 @@ public class DownloadQueueGetNextDownloadTaskUnitTests : BaseUnitTest<DownloadQu
         downloadTasks[0].SetDownloadStatus(DownloadStatus.Downloading);
         foreach (var child in downloadTasks[0].Children)
             child.SetDownloadStatus(DownloadStatus.Queued);
-        await IDbContext.SaveChangesNewAsync(CancellationToken);
+        await IDbContext.SaveChangesAsync(CancellationToken);
 
         // Act
         var nextDownloadTask = Sut.GetNextDownloadTask(downloadTasks);
@@ -74,7 +74,7 @@ public class DownloadQueueGetNextDownloadTaskUnitTests : BaseUnitTest<DownloadQu
             cancellationToken: CancellationToken
         );
         downloadTasks[0].SetDownloadStatus(DownloadStatus.Downloading);
-        await IDbContext.SaveChangesNewAsync(CancellationToken);
+        await IDbContext.SaveChangesAsync(CancellationToken);
 
         // Act
         var nextDownloadTask = Sut.GetNextDownloadTask(downloadTasks);
@@ -94,7 +94,7 @@ public class DownloadQueueGetNextDownloadTaskUnitTests : BaseUnitTest<DownloadQu
             cancellationToken: CancellationToken
         );
         downloadTasks[0].SetDownloadStatus(DownloadStatus.ServerUnreachable);
-        await IDbContext.SaveChangesNewAsync(CancellationToken);
+        await IDbContext.SaveChangesAsync(CancellationToken);
 
         // Act
         var nextDownloadTask = Sut.GetNextDownloadTask(downloadTasks);
@@ -122,7 +122,7 @@ public class DownloadQueueGetNextDownloadTaskUnitTests : BaseUnitTest<DownloadQu
         var serverUnreachableTask = downloadTasks[1].Children[0];
         serverUnreachableTask.SetDownloadStatus(DownloadStatus.ServerUnreachable);
 
-        await IDbContext.SaveChangesNewAsync(CancellationToken);
+        await IDbContext.SaveChangesAsync(CancellationToken);
 
         // Act
         var nextDownloadTask = Sut.GetNextDownloadTask(downloadTasks);
@@ -151,7 +151,7 @@ public class DownloadQueueGetNextDownloadTaskUnitTests : BaseUnitTest<DownloadQu
         queuedTask.SetDownloadStatus(DownloadStatus.Queued);
         downloadTasks[1].SetDownloadStatus(DownloadStatus.Queued);
 
-        await IDbContext.SaveChangesNewAsync(CancellationToken);
+        await IDbContext.SaveChangesAsync(CancellationToken);
 
         // Act
         var nextDownloadTask = Sut.GetNextDownloadTask(downloadTasks);
@@ -180,7 +180,7 @@ public class DownloadQueueGetNextDownloadTaskUnitTests : BaseUnitTest<DownloadQu
         queuedTask.SetDownloadStatus(DownloadStatus.Queued);
         downloadTasks[1].SetDownloadStatus(DownloadStatus.Queued);
 
-        await IDbContext.SaveChangesNewAsync(CancellationToken);
+        await IDbContext.SaveChangesAsync(CancellationToken);
 
         // Act
         var nextDownloadTask = Sut.GetNextDownloadTask(downloadTasks);
@@ -208,7 +208,7 @@ public class DownloadQueueGetNextDownloadTaskUnitTests : BaseUnitTest<DownloadQu
                 child.SetDownloadStatus(DownloadStatus.Paused);
         }
 
-        await IDbContext.SaveChangesNewAsync(CancellationToken);
+        await IDbContext.SaveChangesAsync(CancellationToken);
 
         // Act
         var nextDownloadTask = Sut.GetNextDownloadTask(downloadTasks);
@@ -232,7 +232,7 @@ public class DownloadQueueGetNextDownloadTaskUnitTests : BaseUnitTest<DownloadQu
         downloadTasks[2].SetDownloadStatus(DownloadStatus.DownloadFinished);
         downloadTasks[3].SetDownloadStatus(DownloadStatus.DownloadFinished);
         downloadTasks[4].SetDownloadStatus(DownloadStatus.DownloadFinished);
-        await IDbContext.SaveChangesNewAsync(CancellationToken);
+        await IDbContext.SaveChangesAsync(CancellationToken);
 
         // Act
         var nextDownloadTask = Sut.GetNextDownloadTask(downloadTasks);
@@ -256,7 +256,7 @@ public class DownloadQueueGetNextDownloadTaskUnitTests : BaseUnitTest<DownloadQu
         downloadTasks[2].SetDownloadStatus(DownloadStatus.DownloadFinished);
         downloadTasks[3].SetDownloadStatus(DownloadStatus.DownloadFinished);
         downloadTasks[4].SetDownloadStatus(DownloadStatus.Queued);
-        await IDbContext.SaveChangesNewAsync(CancellationToken);
+        await IDbContext.SaveChangesAsync(CancellationToken);
 
         // Act
         var nextDownloadTask = Sut.GetNextDownloadTask(downloadTasks);
@@ -286,7 +286,7 @@ public class DownloadQueueGetNextDownloadTaskUnitTests : BaseUnitTest<DownloadQu
         downloadClientErrorTask.SetDownloadStatus(DownloadStatus.DownloadClientError);
         downloadTasks[1].SetDownloadStatus(DownloadStatus.DownloadClientError);
 
-        await IDbContext.SaveChangesNewAsync(CancellationToken);
+        await IDbContext.SaveChangesAsync(CancellationToken);
 
         // Act
         var nextDownloadTask = Sut.GetNextDownloadTask(downloadTasks);
@@ -315,7 +315,7 @@ public class DownloadQueueGetNextDownloadTaskUnitTests : BaseUnitTest<DownloadQu
         errorTask.SetDownloadStatus(DownloadStatus.Error);
         downloadTasks[1].SetDownloadStatus(DownloadStatus.Error);
 
-        await IDbContext.SaveChangesNewAsync(CancellationToken);
+        await IDbContext.SaveChangesAsync(CancellationToken);
 
         // Act
         var nextDownloadTask = Sut.GetNextDownloadTask(downloadTasks);
@@ -344,7 +344,7 @@ public class DownloadQueueGetNextDownloadTaskUnitTests : BaseUnitTest<DownloadQu
         downloadClientErrorTask.SetDownloadStatus(DownloadStatus.DownloadClientError);
         downloadTasks[1].SetDownloadStatus(DownloadStatus.DownloadClientError);
 
-        await IDbContext.SaveChangesNewAsync(CancellationToken);
+        await IDbContext.SaveChangesAsync(CancellationToken);
 
         // Act
         var nextDownloadTask = Sut.GetNextDownloadTask(downloadTasks);
@@ -381,7 +381,7 @@ public class DownloadQueueGetNextDownloadTaskUnitTests : BaseUnitTest<DownloadQu
         serverUnreachableTask.SetDownloadStatus(DownloadStatus.ServerUnreachable);
         downloadTasks[3].SetDownloadStatus(DownloadStatus.ServerUnreachable);
 
-        await IDbContext.SaveChangesNewAsync(CancellationToken);
+        await IDbContext.SaveChangesAsync(CancellationToken);
 
         // Act
         var nextDownloadTask = Sut.GetNextDownloadTask(downloadTasks);

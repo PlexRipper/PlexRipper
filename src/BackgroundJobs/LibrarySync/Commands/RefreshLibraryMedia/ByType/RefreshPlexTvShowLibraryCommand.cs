@@ -59,6 +59,9 @@ public class RefreshPlexTvShowLibraryCommandHandler
             _commandExecutor.Send(new GetAllMediaSeasonsCommand(plexLibrary), cancellationToken)
         );
 
+        if (rawSeasonDataResult.IsCancelled)
+            return rawSeasonDataResult.ToResult();
+
         if (rawSeasonDataResult.IsFailed)
         {
             await _librarySyncProgressStore.UpdateErrorAsync(
@@ -73,6 +76,9 @@ public class RefreshPlexTvShowLibraryCommandHandler
         var rawEpisodesDataResult = await Result.Try(() =>
             _commandExecutor.Send(new GetAllMediaEpisodesCommand(plexLibrary), cancellationToken)
         );
+        if (rawEpisodesDataResult.IsCancelled)
+            return rawEpisodesDataResult.ToResult();
+
         if (rawEpisodesDataResult.IsFailed)
         {
             await _librarySyncProgressStore.UpdateErrorAsync(
@@ -104,6 +110,9 @@ public class RefreshPlexTvShowLibraryCommandHandler
         var syncResult = await Result.Try(() =>
             _commandExecutor.Send(new SyncPlexTvShowsCommand(command.LibraryMetadata), cancellationToken)
         );
+        if (syncResult.IsCancelled)
+            return syncResult.ToResult();
+
         if (syncResult.IsFailed)
         {
             await _librarySyncProgressStore.UpdateErrorAsync(plexLibraryId, syncResult.ToResult(), cancellationToken);

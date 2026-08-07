@@ -10,7 +10,7 @@ public class DashPlexDownloadClientStopAsyncUnitTests : BaseUnitTest<DashPlexDow
         var directoryMock = new Mock<IDirectory>();
         directoryMock.Setup(x => x.CreateDirectory(It.IsAny<string>()));
         Mock.Mock<INotificationHubService>()
-            .Setup(x => x.SendRefreshNotificationAsync(It.IsAny<RefreshDataType>(), It.IsAny<CancellationToken>()))
+            .Setup(x => x.SendRefreshNotificationAsync(It.IsAny<RefreshDataType>()))
             .Returns(Task.CompletedTask)
             .Verifiable(Times.Once());
 
@@ -107,7 +107,7 @@ public class DashPlexDownloadClientStopAsyncUnitTests : BaseUnitTest<DashPlexDow
             );
         Mock.Mock<INotificationHubService>()
             .Verify(
-                x => x.SendRefreshNotificationAsync(It.IsAny<RefreshDataType>(), It.IsAny<CancellationToken>()),
+                x => x.SendRefreshNotificationAsync(It.IsAny<RefreshDataType>()),
                 Times.Once()
             );
         dashWrapperMock.VerifyGet(x => x.DownloadCompleted, Times.Once());
@@ -169,7 +169,7 @@ public class DashPlexDownloadClientStopAsyncUnitTests : BaseUnitTest<DashPlexDow
 
         Mock.Mock<INotificationHubService>()
             .Verify(
-                x => x.SendRefreshNotificationAsync(It.IsAny<RefreshDataType>(), It.IsAny<CancellationToken>()),
+                x => x.SendRefreshNotificationAsync(It.IsAny<RefreshDataType>()),
                 Times.Once()
             );
         Mock.Mock<IDownloadTaskUpdateDispatcher>()

@@ -41,7 +41,7 @@ public class GetLibrarySectionsCommandHandler : ICommandHandler<GetLibrarySectio
             new PlexApiClientOptions { ConnectionUrl = connection.Url }
         );
 
-        var response = await client.Library.GetSectionsAsync().ToResponse();
+        var response = await client.Library.GetSectionsAsync().ToResponse(ct);
         if (response.IsFailed)
             return response.ToResult();
 

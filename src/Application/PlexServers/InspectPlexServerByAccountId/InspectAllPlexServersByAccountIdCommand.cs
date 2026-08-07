@@ -54,11 +54,17 @@ public class InspectAllPlexServersByAccountIdCommandHandler
             new RefreshPlexServerAccessCommand(plexAccountId),
             cancellationToken
         );
+        if (refreshResult.IsCancelled)
+            return refreshResult.ToResult();
+
         if (refreshResult.IsFailed)
             return refreshResult.LogError();
 
         // Retrieve all accessible servers for the PlexAccount
         var plexServers = await _dbContext.GetAccessiblePlexServers(plexAccountId, cancellationToken);
+        if (plexServers.IsCancelled)
+            return plexServers.ToResult();
+
         if (plexServers.IsFailed)
             return plexServers.LogError();
 
@@ -66,10 +72,16 @@ public class InspectAllPlexServersByAccountIdCommandHandler
             return Result.Ok();
 
         // Inspect all PlexServers
-        await _commandExecutor.Send(
+        var queueResult = await _commandExecutor.Send(
             new QueueInspectPlexServerJobCommand(plexServers.Value.Select(x => x.Id).ToList()),
-            CancellationToken.None
+            cancellationToken
         );
+
+        if (queueResult.IsCancelled)
+            return queueResult;
+
+        if (queueResult.IsFailed)
+            return queueResult.LogError();
 
         _log.Here()
             .Information(

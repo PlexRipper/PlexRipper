@@ -37,14 +37,18 @@ public class MoveDownloadFileJob : IJob
 
         async Task QueueNextAsync()
         {
-            var queueResult = await Result.Try(() => _moveDownloadFileQueue.CheckMoveDownloadFileJobQueue());
-            if (queueResult.IsFailed)
+            var queueResult = await _moveDownloadFileQueue.CheckMoveDownloadFileJobQueue(ct);
+            if (queueResult.IsCancelled)
             {
-                queueResult.LogError();
+                queueResult.LogWarning();
+                return;
             }
+
+            if (queueResult.IsFailed)
+                queueResult.LogError();
         }
 
-        try
+        var executionResult = await Result.Try(async Task () =>
         {
             var dataMap = context.JobDetail.JobDataMap;
             downloadTaskKey = dataMap.GetJsonValue<DownloadTaskKey>(DownloadTaskIdParameter);
@@ -76,7 +80,6 @@ public class MoveDownloadFileJob : IJob
                         nameof(downloadTaskKey),
                         downloadTaskKey.Id
                     );
-                await QueueNextAsync();
                 return;
             }
 
@@ -96,7 +99,6 @@ public class MoveDownloadFileJob : IJob
                         nameof(MoveDownloadFileJob),
                         downloadTaskKey
                     );
-                await QueueNextAsync();
                 return;
             }
 
@@ -144,16 +146,22 @@ public class MoveDownloadFileJob : IJob
             }
 
             await QueueNextAsync();
+        });
+
+        if (executionResult.IsCancelled)
+        {
+            executionResult.LogWarning();
         }
-        catch (Exception ex)
+        else if (executionResult.IsFailed)
         {
             _log.Here()
                 .Error(
-                    ex,
                     "Unexpected error in {JobName} for {DownloadTaskKey}",
                     nameof(MoveDownloadFileJob),
                     downloadTaskKey
                 );
+
+            executionResult.LogError();
             await QueueNextAsync();
         }
     }

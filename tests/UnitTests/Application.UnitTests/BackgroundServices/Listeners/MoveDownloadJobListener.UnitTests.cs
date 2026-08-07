@@ -6,7 +6,7 @@ public class MoveDownloadJobListenerUnitTests : BaseUnitTest<MoveDownloadJobList
     public async Task ShouldCheckMoveQueue_AfterJobExecuted()
     {
         // Arrange
-        Mock.Mock<IMoveDownloadFileQueue>().Setup(x => x.CheckMoveDownloadFileJobQueue()).ReturnsAsync(Result.Ok());
+        Mock.Mock<IMoveDownloadFileQueue>().Setup(x => x.CheckMoveDownloadFileJobQueue(CancellationToken)).ReturnsAsync(Result.Ok());
 
         Mock.Mock<IJobExecutionContext>().SetupGet(x => x.JobDetail).Returns(Mock.Mock<IJobDetail>().Object);
 
@@ -14,7 +14,7 @@ public class MoveDownloadJobListenerUnitTests : BaseUnitTest<MoveDownloadJobList
         await Sut.JobWasExecuted(Mock.Mock<IJobExecutionContext>().Object, null, CancellationToken);
 
         // Assert
-        Mock.Mock<IMoveDownloadFileQueue>().Verify(x => x.CheckMoveDownloadFileJobQueue(), Times.Once);
+        Mock.Mock<IMoveDownloadFileQueue>().Verify(x => x.CheckMoveDownloadFileJobQueue(CancellationToken), Times.Once);
         Mock.Mock<IJobExecutionContext>().VerifyGet(x => x.JobDetail, Times.Never());
     }
 
@@ -23,7 +23,7 @@ public class MoveDownloadJobListenerUnitTests : BaseUnitTest<MoveDownloadJobList
     {
         // Arrange — simulate the scenario where a move job ended in error
         // The listener must still trigger the queue so remaining DownloadFinished tasks are not stuck
-        Mock.Mock<IMoveDownloadFileQueue>().Setup(x => x.CheckMoveDownloadFileJobQueue()).ReturnsAsync(Result.Ok());
+        Mock.Mock<IMoveDownloadFileQueue>().Setup(x => x.CheckMoveDownloadFileJobQueue(CancellationToken)).ReturnsAsync(Result.Ok());
 
         Mock.Mock<IJobExecutionContext>().SetupGet(x => x.JobDetail).Returns(Mock.Mock<IJobDetail>().Object);
 
@@ -33,7 +33,7 @@ public class MoveDownloadJobListenerUnitTests : BaseUnitTest<MoveDownloadJobList
         await Sut.JobWasExecuted(Mock.Mock<IJobExecutionContext>().Object, jobException, CancellationToken);
 
         // Assert: queue check is called regardless of whether the job threw an exception
-        Mock.Mock<IMoveDownloadFileQueue>().Verify(x => x.CheckMoveDownloadFileJobQueue(), Times.Once);
+        Mock.Mock<IMoveDownloadFileQueue>().Verify(x => x.CheckMoveDownloadFileJobQueue(CancellationToken), Times.Once);
         Mock.Mock<IJobExecutionContext>().VerifyGet(x => x.JobDetail, Times.Never());
     }
 
@@ -42,7 +42,7 @@ public class MoveDownloadJobListenerUnitTests : BaseUnitTest<MoveDownloadJobList
     {
         // Arrange — listener must never throw (Quartz requirement)
         Mock.Mock<IMoveDownloadFileQueue>()
-            .Setup(x => x.CheckMoveDownloadFileJobQueue())
+            .Setup(x => x.CheckMoveDownloadFileJobQueue(CancellationToken))
             .ThrowsAsync(new InvalidOperationException("Unexpected error"));
 
         Mock.Mock<IJobExecutionContext>().SetupGet(x => x.JobDetail).Returns(Mock.Mock<IJobDetail>().Object);
@@ -53,7 +53,7 @@ public class MoveDownloadJobListenerUnitTests : BaseUnitTest<MoveDownloadJobList
 
         // Assert
         await act.ShouldNotThrowAsync();
-        Mock.Mock<IMoveDownloadFileQueue>().Verify(x => x.CheckMoveDownloadFileJobQueue(), Times.Once);
+        Mock.Mock<IMoveDownloadFileQueue>().Verify(x => x.CheckMoveDownloadFileJobQueue(CancellationToken), Times.Once);
         Mock.Mock<IJobExecutionContext>().VerifyGet(x => x.JobDetail, Times.Once());
     }
 
@@ -67,7 +67,7 @@ public class MoveDownloadJobListenerUnitTests : BaseUnitTest<MoveDownloadJobList
         await Sut.JobToBeExecuted(Mock.Mock<IJobExecutionContext>().Object, CancellationToken);
 
         // Assert — JobToBeExecuted is a no-op; the queue must never be triggered here
-        Mock.Mock<IMoveDownloadFileQueue>().Verify(x => x.CheckMoveDownloadFileJobQueue(), Times.Never);
+        Mock.Mock<IMoveDownloadFileQueue>().Verify(x => x.CheckMoveDownloadFileJobQueue(CancellationToken), Times.Never);
         Mock.Mock<IJobExecutionContext>().VerifyGet(x => x.JobDetail, Times.Never());
     }
 }

@@ -46,8 +46,7 @@ public class Boot : IHostedService
         _downloadQueue = downloadQueue;
         _librarySyncJobListener = librarySyncJobListener;
 
-        // ReSharper disable once AsyncVoidMethod
-        appLifetime.ApplicationStarted.Register(async void () => await OnStarted());
+        appLifetime.ApplicationStarted.Register(OnStarted);
         appLifetime.ApplicationStopping.Register(OnStopping);
         appLifetime.ApplicationStopped.Register(OnStopped);
     }
@@ -67,14 +66,14 @@ public class Boot : IHostedService
             return;
         }
 
-        var defaultUser = await _commandExecutor.Send(new CreateDefaultAppUserCommand(), CancellationToken.None);
+        var defaultUser = await _commandExecutor.Send(new CreateDefaultAppUserCommand(), cancellationToken);
         if (defaultUser.IsFailed)
         {
             TerminateApplication();
             return;
         }
 
-        var downloadQueueSetup = _downloadQueue.Setup();
+        var downloadQueueSetup = _downloadQueue.Setup(_appLifetime.ApplicationStopping);
         if (downloadQueueSetup.IsFailed)
         {
             TerminateApplication();
@@ -85,7 +84,7 @@ public class Boot : IHostedService
         if (recoverResult.IsFailed)
             recoverResult.LogError();
 
-        await _schedulerService.SetupAsync();
+        await _schedulerService.SetupAsync(cancellationToken);
 
         if (!_appRuntimeInfo.IsIntegrationTestMode)
         {
@@ -116,7 +115,7 @@ public class Boot : IHostedService
         _log.Here().Information("Shutting down the container");
 
         // Stop scheduler first so background jobs can't race with the auto-pause DB queries
-        await _schedulerService.StopAsync();
+        await _schedulerService.StopAsync(cancellationToken);
 
         var autoPauseResult = await _commandExecutor.Send(new AutoPauseActiveDownloadsCommand(), cancellationToken);
         if (autoPauseResult.IsFailed)
@@ -127,16 +126,29 @@ public class Boot : IHostedService
 
     #region Private Methods
 
-    private async Task OnStarted()
+    private async void OnStarted()
     {
         _log.Here().Debug("Boot.OnStarted has been called");
+        
+        var result = await Result.Try(async Task () =>
+        {
+            await _commandExecutor.Send(new NotifyArrAppsOnStartupCommand(), _appLifetime.ApplicationStopping);
+            await _commandExecutor.Send(new WarmupMediaQueryCacheCommand(), _appLifetime.ApplicationStopping);
+        }, exception =>
+        {
+            if (exception is OperationCanceledException canceledException &&
+                _appLifetime.ApplicationStopping.IsCancellationRequested)
+            {
+                _log.Here().Debug("Boot.OnStarted was cancelled because application shutdown was requested");
+                return new ExceptionalError("Operation was cancelled", exception);
+            }
 
-        await _commandExecutor.Send(new NotifyArrAppsOnStartupCommand(), _appLifetime.ApplicationStopping);
-        
-        await _commandExecutor.Send(new WarmupMediaQueryCacheCommand(), _appLifetime.ApplicationStopping);
-        
+            _log.Here().Error(exception, "Unexpected error while running post-startup tasks");
+            return new ExceptionalError(exception);
+        });
+
+        result.LogIfFailed();
     }
-    
 
     private void OnStopping()
     {

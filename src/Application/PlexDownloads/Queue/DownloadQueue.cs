@@ -17,11 +17,10 @@ public class DownloadQueue : IDownloadQueue
     private readonly ILogger _log;
     private readonly IReaparrDbContextFactory _dbContextFactory;
     private readonly IDownloadTaskScheduler _downloadTaskScheduler;
+    private Task? _workerTask;
 
     private readonly Channel<int> _plexServersToCheckChannel = Channel.CreateUnbounded<int>();
     private readonly ConcurrentDictionary<Guid, DateTime> _retryCooldownUntil = new();
-
-    private readonly CancellationToken _token = new();
 
     public DownloadQueue(
         ILogger log,
@@ -36,16 +35,50 @@ public class DownloadQueue : IDownloadQueue
 
     public bool IsBusy => _plexServersToCheckChannel.Reader.Count > 0;
 
-    public Result Setup()
+    public Result Setup() => Setup(CancellationToken.None);
+
+    public Result Setup(CancellationToken cancellationToken)
     {
-        var copyTask = Task.Factory.StartNew(ExecuteDownloadQueueCheck, TaskCreationOptions.LongRunning);
-        return copyTask.IsFaulted ? Result.Fail("ExecuteFileTasks failed due to an error").LogError() : Result.Ok();
+        if (_workerTask is not null)
+            return Result.Ok();
+
+        _workerTask = Task.Run(async () =>
+        {
+            var result = await Result.Try(async Task () =>
+            {
+                await foreach (var plexServerId in _plexServersToCheckChannel.Reader.ReadAllAsync(cancellationToken))
+                {
+                    var queueResult = await CheckDownloadQueueServer(plexServerId, cancellationToken);
+                    if (queueResult.IsCancelled)
+                    {
+                        queueResult.LogWarning();
+                        return;
+                    }
+
+                    if (queueResult.IsFailed)
+                        queueResult.LogError();
+                }
+            });
+
+            if (result.IsCancelled)
+            {
+                result.LogWarning();
+                return;
+            }
+
+            if (result.IsFailed)
+                result.LogError();
+        }, CancellationToken.None);
+        return Result.Ok();
     }
 
     /// <summary>
     /// Check the DownloadQueue for downloadTasks which can be started.
     /// </summary>
-    public async Task<Result> CheckDownloadQueue(List<int> plexServerIds)
+    public Task<Result> CheckDownloadQueue(List<int> plexServerIds) =>
+        CheckDownloadQueue(plexServerIds, CancellationToken.None);
+
+    public async Task<Result> CheckDownloadQueue(List<int> plexServerIds, CancellationToken cancellationToken)
     {
         if (!plexServerIds.Any())
             return ResultExtensions.IsEmpty(nameof(plexServerIds)).LogWarning();
@@ -57,7 +90,7 @@ public class DownloadQueue : IDownloadQueue
                 nameof(PlexServer)
             );
         foreach (var plexServerId in plexServerIds)
-            await _plexServersToCheckChannel.Writer.WriteAsync(plexServerId, _token);
+            await _plexServersToCheckChannel.Writer.WriteAsync(plexServerId, cancellationToken);
 
         return Result.Ok();
     }
@@ -72,15 +105,16 @@ public class DownloadQueue : IDownloadQueue
             .Select(x => x.Id)
             .ToListAsync(cancellationToken);
 
-        cancellationToken.ThrowIfCancellationRequested();
-
         if (!plexServerIds.Any())
             return Result.Ok();
 
-        return await CheckDownloadQueue(plexServerIds);
+        return await CheckDownloadQueue(plexServerIds, cancellationToken);
     }
 
-    internal async Task<Result<DownloadTaskGeneric>> CheckDownloadQueueServer(int plexServerId)
+    internal async Task<Result<DownloadTaskGeneric>> CheckDownloadQueueServer(
+        int plexServerId,
+        CancellationToken cancellationToken = default
+    )
     {
         if (plexServerId <= 0)
             return ResultExtensions.IsInvalidId(nameof(plexServerId), plexServerId).LogWarning();
@@ -111,7 +145,7 @@ public class DownloadQueue : IDownloadQueue
         }
 
         // Check if the server is online
-        if (!await dbContext.IsServerOnline(plexServerId, cancellationToken: _token))
+        if (!await dbContext.IsServerOnline(plexServerId))
         {
             return _log.Here()
                 .WarningResult(
@@ -120,12 +154,18 @@ public class DownloadQueue : IDownloadQueue
                 );
         }
 
-        var downloadTasks = await dbContext.GetAllDownloadTasksByServerAsync(plexServerId, cancellationToken: _token);
+        var downloadTasks = await dbContext.GetAllDownloadTasksByServerAsync(
+            plexServerId,
+            cancellationToken: cancellationToken
+        );
 
         var hasDownloadingTask = downloadTasks.Any(x => x.DownloadStatus == DownloadStatus.Downloading);
 
         // This avoids race condition where job is finishing but still registered in Quartz
-        if (hasDownloadingTask && await _downloadTaskScheduler.IsServerDownloading(plexServerId))
+        if (
+            hasDownloadingTask
+            && await _downloadTaskScheduler.IsServerDownloading(plexServerId)
+        )
         {
             return Result
                 .Fail("Cannot select the next download task because server is already downloading one.")
@@ -158,7 +198,7 @@ public class DownloadQueue : IDownloadQueue
             );
 
         _retryCooldownUntil[nextDownloadTask.Id] = DateTime.UtcNow + _retryCooldown;
-        await _downloadTaskScheduler.StartDownloadTaskJob(nextDownloadTask.ToKey());
+        await _downloadTaskScheduler.StartDownloadTaskJob(nextDownloadTask.ToKey(), cancellationToken);
 
         return Result.Ok(nextDownloadTask);
     }
@@ -190,11 +230,13 @@ public class DownloadQueue : IDownloadQueue
         if (autoPausedTask is not null)
             return Result.Ok(autoPausedTask);
 
-        var serverUnreachableTask = FindFirstLeafByStatus(downloadTasks, DownloadStatus.ServerUnreachable, IsInRetryCooldown);
+        var serverUnreachableTask =
+            FindFirstLeafByStatus(downloadTasks, DownloadStatus.ServerUnreachable, IsInRetryCooldown);
         if (serverUnreachableTask is not null)
             return Result.Ok(serverUnreachableTask);
 
-        var downloadClientErrorTask = FindFirstLeafByStatus(downloadTasks, DownloadStatus.DownloadClientError, IsInRetryCooldown);
+        var downloadClientErrorTask =
+            FindFirstLeafByStatus(downloadTasks, DownloadStatus.DownloadClientError, IsInRetryCooldown);
         if (downloadClientErrorTask is not null)
             return Result.Ok(downloadClientErrorTask);
 
@@ -231,14 +273,5 @@ public class DownloadQueue : IDownloadQueue
         }
 
         return null;
-    }
-
-    private async Task ExecuteDownloadQueueCheck()
-    {
-        while (!_token.IsCancellationRequested)
-        {
-            var item = await _plexServersToCheckChannel.Reader.ReadAsync(_token);
-            await CheckDownloadQueueServer(item);
-        }
     }
 }

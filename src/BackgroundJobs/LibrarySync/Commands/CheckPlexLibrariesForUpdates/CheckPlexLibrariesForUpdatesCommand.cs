@@ -111,6 +111,9 @@ public class CheckPlexLibrariesForUpdatesCommandHandler
 
         var queueResult =
             await _commandExecutor.Send(new QueueLibrarySyncJobCommand(outdatedLibraryIds), cancellationToken);
+        if (queueResult.IsCancelled)
+            return queueResult;
+
         if (queueResult.IsFailed)
             return queueResult.LogError();
 

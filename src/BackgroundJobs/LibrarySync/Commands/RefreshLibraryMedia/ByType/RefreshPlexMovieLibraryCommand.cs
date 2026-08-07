@@ -53,6 +53,9 @@ public class RefreshPlexMovieLibraryCommandHandler
                 cancellationToken
             );
 
+            if (syncResult.IsCancelled)
+                return syncResult.ToResult();
+
             if (syncResult.IsFailed)
             {
                 // Report movies as not yet synced on failure

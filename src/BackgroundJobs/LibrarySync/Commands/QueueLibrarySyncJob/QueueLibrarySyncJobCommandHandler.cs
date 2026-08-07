@@ -117,7 +117,17 @@ public class QueueLibrarySyncJobCommandHandler : ICommandHandler<QueueLibrarySyn
         }
 
         if (itemsToAdd.Any() || itemsToReset.Any() || queuedOrProcessingIds.Any())
-            await _commandExecutor.Send(new CheckQueuedPlexLibraryToSyncCommand(), cancellationToken);
+        {
+            var checkQueuedResult = await _commandExecutor.Send(
+                new CheckQueuedPlexLibraryToSyncCommand(),
+                cancellationToken
+            );
+            if (checkQueuedResult.IsCancelled)
+                return checkQueuedResult.LogWarning();
+
+            if (checkQueuedResult.IsFailed)
+                return checkQueuedResult.LogError();
+        }
 
         return Result.Ok();
     }

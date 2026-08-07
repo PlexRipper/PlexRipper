@@ -214,7 +214,6 @@ public static class SqliteConcurrencyExtensions
             var delayMs = 50;
             for (var attempt = 1; ; attempt++)
             {
-                cancellationToken.ThrowIfCancellationRequested();
                 try
                 {
                     return await operation(cancellationToken);

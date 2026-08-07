@@ -22,13 +22,13 @@ public class CheckPlexLibrariesForUpdatesJob : IJob
     {
         _log.Here().Debug("Executing job: {JobName}", nameof(CheckPlexLibrariesForUpdatesJob));
 
-        try
-        {
-            await _commandExecutor.Send(new CheckPlexLibrariesForUpdatesCommand(), context.CancellationToken);
-        }
-        catch (Exception e)
-        {
-            _log.Here().ErrorResult(e);
-        }
+        var result = await Result.Try(() =>
+            _commandExecutor.Send(new CheckPlexLibrariesForUpdatesCommand(), context.CancellationToken)
+        );
+
+        if (result.IsCancelled)
+            result.LogWarning();
+        else if (result.IsFailed)
+            result.LogError();
     }
 }

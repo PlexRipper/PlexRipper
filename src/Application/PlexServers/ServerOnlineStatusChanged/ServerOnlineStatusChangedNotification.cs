@@ -61,7 +61,7 @@ public class ServerOnlineStatusChangedHandler : IEventHandler<ServerOnlineStatus
                     plexServerName
                 );
 
-            await _downloadQueue.CheckDownloadQueue([notification.PlexServerId]);
+            await _downloadQueue.CheckDownloadQueue([notification.PlexServerId], cancellationToken);
             await _commandExecutor.Send(
                 new ResetFailedLibrarySyncJobsCommand(notification.PlexServerId),
                 cancellationToken

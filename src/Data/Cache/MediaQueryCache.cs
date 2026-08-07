@@ -99,11 +99,17 @@ public sealed class MediaQueryCache : IMediaQueryCache
     }
 
     /// <inheritdoc />
-    public async Task BuildCache()
+    public async Task BuildCache(CancellationToken cancellationToken = default)
     {
         // Resolve library IDs once for Movie and TvShow warmup keys
-        var movieLibraryIds = await ResolveLibraryIdsAsync(CreateWarmupFilter(PlexMediaType.Movie, _warmupSortFields[0]), CancellationToken.None);
-        var tvShowLibraryIds = await ResolveLibraryIdsAsync(CreateWarmupFilter(PlexMediaType.TvShow, _warmupSortFields[0]), CancellationToken.None);
+        var movieLibraryIds = await ResolveLibraryIdsAsync(
+            CreateWarmupFilter(PlexMediaType.Movie, _warmupSortFields[0]),
+            cancellationToken
+        );
+        var tvShowLibraryIds = await ResolveLibraryIdsAsync(
+            CreateWarmupFilter(PlexMediaType.TvShow, _warmupSortFields[0]),
+            cancellationToken
+        );
 
         var warmupFilters = _warmupMediaTypes
             .SelectMany(mediaType => _warmupSortFields
@@ -119,7 +125,9 @@ public sealed class MediaQueryCache : IMediaQueryCache
                 }))
             .ToList();
 
-        var tasks = warmupFilters.Select(x => BuildAndStoreSnapshotAsync(x.Filter, x.Key, CancellationToken.None)).ToList();
+        var tasks = warmupFilters
+            .Select(x => BuildAndStoreSnapshotAsync(x.Filter, x.Key, cancellationToken))
+            .ToList();
         var results = await Task.WhenAll(tasks);
         var failures = results.Where(x => x.IsFailed).SelectMany(x => x.Errors).ToList();
         if (failures.Count > 0)
@@ -349,7 +357,7 @@ public sealed class MediaQueryCache : IMediaQueryCache
         {
             foreach (var server in serverList)
             {
-                var isServerOnline = await dbContext.IsServerOnline(server.Id, cancellationToken);
+                var isServerOnline = await dbContext.IsServerOnline(server.Id);
                 if (!isServerOnline)
                     allowedPlexLibraryIds.RemoveAll(x => server.PlexLibraryIds.Contains(x));
             }

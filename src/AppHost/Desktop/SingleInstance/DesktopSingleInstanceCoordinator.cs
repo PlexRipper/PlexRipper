@@ -65,8 +65,11 @@ public sealed class DesktopSingleInstanceCoordinator : IDesktopSingleInstanceCoo
                 PipeOptions.Asynchronous
             );
             var connectResult = await ConnectToPrimaryInstanceAsync(client, cancellationToken);
+            if (connectResult.IsCancelled)
+                return connectResult.LogWarning();
+
             if (connectResult.IsFailed)
-                return connectResult;
+                return connectResult.LogError();
 
             await client.WriteAsync(Encoding.UTF8.GetBytes(SIGNAL_MESSAGE), cancellationToken);
             await client.FlushAsync(cancellationToken);
@@ -155,7 +158,7 @@ public sealed class DesktopSingleInstanceCoordinator : IDesktopSingleInstanceCoo
             }
             catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
             {
-                throw;
+                return ResultExtensions.TaskIsCancelled(nameof(ConnectToPrimaryInstanceAsync));
             }
             catch (OperationCanceledException) when (timeoutTokenSource.IsCancellationRequested)
             {
@@ -175,6 +178,9 @@ public sealed class DesktopSingleInstanceCoordinator : IDesktopSingleInstanceCoo
                 Math.Min(retryDelay.TotalMilliseconds * 2, _maxSignalRetryDelay.TotalMilliseconds)
             );
         }
+
+        if (cancellationToken.IsCancellationRequested)
+            return ResultExtensions.TaskIsCancelled(nameof(ConnectToPrimaryInstanceAsync));
 
         return Result.Fail("Timed out while connecting to the primary desktop instance.");
     }

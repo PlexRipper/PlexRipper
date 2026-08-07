@@ -18,7 +18,7 @@ public interface IProgressHubService
     /// <summary>
     /// Sends a background job status update to the front-end.
     /// </summary>
-    Task SendJobStatusUpdateAsync<T>(JobStatusUpdate<T> jobStatusUpdate, CancellationToken cancellationToken = default)
+    Task SendJobStatusUpdateAsync<T>(JobStatusUpdate<T> jobStatusUpdate)
         where T : class;
 
     /// <summary>

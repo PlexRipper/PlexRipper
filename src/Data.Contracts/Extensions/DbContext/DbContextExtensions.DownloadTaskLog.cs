@@ -123,7 +123,7 @@ public static partial class DbContextExtensions
             var parentId = await dbContext
                 .DownloadTaskMovieFile.Where(x => x.Id == downloadTaskKey.Id)
                 .Select(x => x.ParentId)
-                .FirstOrDefaultAsync();
+                .FirstOrDefaultAsync(CancellationToken.None);
             dbContext.DownloadTaskMovieFileLogs.Add(
                 new DownloadTaskMovieFileLog
                 {
@@ -147,7 +147,7 @@ public static partial class DbContextExtensions
                     SeasonId = x.Parent!.ParentId,
                     TvShowId = x.Parent.Parent!.ParentId,
                 })
-                .FirstOrDefaultAsync();
+                .FirstOrDefaultAsync(CancellationToken.None);
 
             dbContext.DownloadTaskTvShowEpisodeFileLogs.Add(
                 new DownloadTaskTvShowEpisodeFileLog
@@ -169,19 +169,21 @@ public static partial class DbContextExtensions
 
     public static async Task CreateDownloadClientLogs(
         this IReaparrDbContext dbContext,
-        List<DownloadTaskMovieFileLog> logs
+        List<DownloadTaskMovieFileLog> logs,
+        CancellationToken cancellationToken = default
     )
     {
         dbContext.DownloadTaskMovieFileLogs.AddRange(logs);
-        await dbContext.SaveChangesAsync(CancellationToken.None);
+        await dbContext.SaveChangesAsync(cancellationToken);
     }
 
     public static async Task CreateDownloadClientLogs(
         this IReaparrDbContext dbContext,
-        List<DownloadTaskTvShowEpisodeFileLog> logs
+        List<DownloadTaskTvShowEpisodeFileLog> logs,
+        CancellationToken cancellationToken = default
     )
     {
         dbContext.DownloadTaskTvShowEpisodeFileLogs.AddRange(logs);
-        await dbContext.SaveChangesAsync(CancellationToken.None);
+        await dbContext.SaveChangesAsync(cancellationToken);
     }
 }

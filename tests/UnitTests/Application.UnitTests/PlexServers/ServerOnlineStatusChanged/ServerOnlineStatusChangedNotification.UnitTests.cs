@@ -86,7 +86,12 @@ public class ServerOnlineStatusChangedHandlerUnitTests : BaseUnitTest<ServerOnli
             .Verifiable(Times.Once);
 
         Mock.Mock<IDownloadQueue>()
-            .Setup(x => x.CheckDownloadQueue(It.Is<List<int>>(serverIds => serverIds.SequenceEqual(new[] { targetServer.Id }))))
+            .Setup(x =>
+                x.CheckDownloadQueue(
+                    It.Is<List<int>>(serverIds => serverIds.SequenceEqual(new[] { targetServer.Id })),
+                    CancellationToken
+                )
+            )
             .ReturnsAsync(Result.Ok())
             .Verifiable(Times.Once);
 

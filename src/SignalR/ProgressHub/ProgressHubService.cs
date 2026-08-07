@@ -3,6 +3,7 @@ namespace Reaparr.SignalR;
 /// <summary>
 /// Sends progress-related SignalR messages to the front-end via <see cref="ProgressHub"/>.
 /// </summary>
+/// TODO Use Result.Try instead of try/catch in this service
 public class ProgressHubService : IProgressHubService
 {
     private readonly ILogger _log;
@@ -50,15 +51,12 @@ public class ProgressHubService : IProgressHubService
     }
 
     /// <inheritdoc/>
-    public async Task SendJobStatusUpdateAsync<T>(
-        JobStatusUpdate<T> jobStatusUpdate,
-        CancellationToken cancellationToken = default
-    )
+    public async Task SendJobStatusUpdateAsync<T>(JobStatusUpdate<T> jobStatusUpdate)
         where T : class
     {
         try
         {
-            await _hub.Clients.All.JobStatusUpdate(jobStatusUpdate.ToDTO(), cancellationToken);
+            await _hub.Clients.All.JobStatusUpdate(jobStatusUpdate.ToDTO());
         }
         catch (Exception ex)
         {

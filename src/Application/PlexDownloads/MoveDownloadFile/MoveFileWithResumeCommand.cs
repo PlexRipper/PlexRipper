@@ -66,14 +66,20 @@ public class MoveFileWithResumeCommandHandler : ICommandHandler<MoveFileWithResu
         var dataTotal = command.DataTotal;
         var moveDownloadFileProgres = command.Progress;
 
+        if (cancellationToken.IsCancellationRequested)
+            return ResultExtensions.TaskIsCancelled(nameof(MoveFileWithResumeCommand)).LogWarning();
+
         if (currentOffset > dataTotal)
             return CreateByteCountMismatchFailure(dataTotal, currentOffset, sourcePath, targetPath);
 
         var inputStreamResult = Result.Try(
             (() => _file.Open(sourcePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
         );
+        if (inputStreamResult.IsCancelled)
+            return inputStreamResult.ToResult().LogWarning();
+
         if (inputStreamResult.IsFailed)
-            return inputStreamResult.ToResult();
+            return inputStreamResult.ToResult().LogError();
 
         await using (Stream? readStream = inputStreamResult.Value)
         {
@@ -82,8 +88,11 @@ public class MoveFileWithResumeCommandHandler : ICommandHandler<MoveFileWithResu
             var writeStreamResult = Result.Try(() =>
                 _file.Open(targetPath, writeMode, FileAccess.Write, FileShare.ReadWrite)
             );
+            if (writeStreamResult.IsCancelled)
+                return writeStreamResult.ToResult().LogWarning();
+
             if (writeStreamResult.IsFailed)
-                return writeStreamResult.ToResult();
+                return writeStreamResult.ToResult().LogError();
 
             await using Stream? writeStream = writeStreamResult.Value;
 
@@ -141,8 +150,8 @@ public class MoveFileWithResumeCommandHandler : ICommandHandler<MoveFileWithResu
         if (cancellationToken.IsCancellationRequested)
             return ResultExtensions.TaskIsCancelled(nameof(MoveFileWithResumeCommandHandler));
 
-        if (currentOffset != dataTotal)
-            return CreateByteCountMismatchFailure(dataTotal, currentOffset, sourcePath, targetPath);
+            if (currentOffset != dataTotal)
+                return CreateByteCountMismatchFailure(dataTotal, currentOffset, sourcePath, targetPath);
 
         if (!cancellationToken.IsCancellationRequested && _file.Exists(sourcePath))
         {

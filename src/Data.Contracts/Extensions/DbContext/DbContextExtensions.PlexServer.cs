@@ -2,33 +2,37 @@ namespace Reaparr.Data.Contracts;
 
 public static partial class DbContextExtensions
 {
-    public static async Task<string> GetPlexServerNameById(this IReaparrDbContext dbContext, int plexServerId)
-    {
+    public static async Task<string> GetPlexServerNameById(
+        this IReaparrDbContext dbContext,
+        int plexServerId
+    ) {
         var plexServerName = await dbContext
             .PlexServers.IgnoreIsEnabledFilter()
             .Where(x => x.Id == plexServerId)
             .Select(x => x.Name)
-            .FirstOrDefaultAsync();
+            .FirstOrDefaultAsync(CancellationToken.None);
         return plexServerName ?? "Server Name Not Found";
     }
 
-    public static async Task<string> GetPlexServerMachineIdentifierById(this IReaparrDbContext dbContext, int plexServerId)
+    public static async Task<string> GetPlexServerMachineIdentifierById(
+        this IReaparrDbContext dbContext,
+        int plexServerId
+    )
     {
         var plexServer = await dbContext
             .PlexServers.IgnoreIsEnabledFilter()
-            .GetAsync(plexServerId);
+            .GetAsync(plexServerId, cancellationToken: CancellationToken.None);
         return plexServer?.MachineIdentifier ?? string.Empty;
     }
 
     public static async Task<bool> IsServerOnline(
         this IReaparrDbContext dbContext,
-        int plexServerId,
-        CancellationToken cancellationToken = default
+        int plexServerId
     )
     {
         return await dbContext
             .PlexServerStatuses.Where(x => x.PlexServerId == plexServerId && x.IsSuccessful)
-            .AnyAsync(cancellationToken);
+            .AnyAsync(CancellationToken.None);
     }  
     
     /// <summary>
@@ -43,7 +47,7 @@ public static partial class DbContextExtensions
             .IgnoreIsEnabledFilter() // Include disabled rows so we can distinguish disabled from non-existent servers.
             .Where(x => x.Id == plexServerId)
             .Select(x => (bool?)x.IsEnabled)
-            .FirstOrDefaultAsync();
+            .FirstOrDefaultAsync(CancellationToken.None);
 
         return isEnabled.HasValue && !isEnabled.Value;
     }
@@ -51,7 +55,10 @@ public static partial class DbContextExtensions
     /// <summary>
     /// Check if the <see cref="PlexServer"/> has globally paused all downloads by the user
     /// </summary>
-    public static async Task<bool> IsDownloadsPausedByUser(this IReaparrDbContext dbContext, int plexServerId)
+    public static async Task<bool> IsDownloadsPausedByUser(
+        this IReaparrDbContext dbContext,
+        int plexServerId
+    )
     {
         return await dbContext
             .PlexServers.IgnoreIsEnabledFilter()
@@ -62,8 +69,7 @@ public static partial class DbContextExtensions
     }
 
     public static async Task<List<int>> GetOnlineServerIds(
-        this IReaparrDbContext dbContext,
-        CancellationToken cancellationToken = default
+        this IReaparrDbContext dbContext
     )
     {
         return await dbContext
@@ -71,6 +77,6 @@ public static partial class DbContextExtensions
             .Where(x => x.IsSuccessful)
             .Select(x => x.PlexServerId)
             .Distinct()
-            .ToListAsync(cancellationToken);
+            .ToListAsync(CancellationToken.None);
     }
 }

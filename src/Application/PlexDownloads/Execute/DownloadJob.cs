@@ -40,7 +40,7 @@ public class DownloadJob : IJob
 
         // Jobs should swallow exceptions as otherwise Quartz will keep re-executing it
         // https://www.quartz-scheduler.net/documentation/best-practices.html#throwing-exceptions
-        try
+        var executionResult = await Result.Try(async Task () =>
         {
             var dataMap = context.JobDetail.JobDataMap;
             downloadTaskKey = dataMap.GetJsonValue<DownloadTaskKey>(DownloadTaskIdParameter);
@@ -76,7 +76,13 @@ public class DownloadJob : IJob
                 return;
             }
 
-            var result = await SetDownloadAndDestination(downloadTask);
+            var result = await SetDownloadAndDestination(downloadTask, token);
+            if (result.IsCancelled)
+            {
+                result.LogWarning();
+                return;
+            }
+
             if (result.IsFailed)
             {
                 result.LogError();
@@ -93,13 +99,19 @@ public class DownloadJob : IJob
                 ),
                 token
             );
+            if (clientTypeResult.IsCancelled)
+            {
+                clientTypeResult.LogWarning();
+                return;
+            }
+
             if (clientTypeResult.IsFailed)
             {
                 await _downloadTaskUpdateDispatcher.OnStatusChangedAsync(
                     downloadTask.ToKey(),
                     DownloadStatus.DownloadClientError,
                     clientTypeResult.ToResult(),
-                    CancellationToken.None
+                    token
                 );
                 await _eventPublisher.PublishAsync(new SendNotificationResult(clientTypeResult.ToResult()), token);
                 return;
@@ -151,24 +163,26 @@ public class DownloadJob : IJob
 
                 await _eventPublisher.PublishAsync(new SendNotificationResult(startResult), token);
             }
-        }
-        catch (Exception ex) when (ex is not OperationCanceledException)
-        {
-            _log.Here().ErrorResult(ex);
-        }
-        finally
-        {
-            _log.Here()
-                .Debug(
-                    "Exiting job: {DownloadJobName} for {DownloadTaskName} with id: {DownloadTaskId}",
-                    nameof(DownloadJob),
-                    nameof(DownloadTaskGeneric),
-                    downloadTaskKey
-                );
-        }
+        });
+
+        if (executionResult.IsCancelled)
+            executionResult.LogWarning();
+        else if (executionResult.IsFailed)
+            executionResult.LogError();
+
+        _log.Here()
+            .Debug(
+                "Exiting job: {DownloadJobName} for {DownloadTaskName} with id: {DownloadTaskId}",
+                nameof(DownloadJob),
+                nameof(DownloadTaskGeneric),
+                downloadTaskKey
+            );
     }
 
-    private async Task<Result<DownloadTaskFileBase>> SetDownloadAndDestination(DownloadTaskFileBase downloadTask)
+    private async Task<Result<DownloadTaskFileBase>> SetDownloadAndDestination(
+        DownloadTaskFileBase downloadTask,
+        CancellationToken cancellationToken
+    )
     {
         var downloadFolder = await _dbContext.GetDownloadFolder();
         downloadTask.DirectoryMeta.DownloadRootPath = downloadFolder.DirectoryPath;
@@ -179,10 +193,15 @@ public class DownloadJob : IJob
             FolderPath? destinationFolder = null;
             if (downloadTask.DestinationFolderPathId is not null && downloadTask.DestinationFolderPathId > 0)
             {
-                destinationFolder = await _dbContext.FolderPaths.GetAsync((int)downloadTask.DestinationFolderPathId);
+                destinationFolder = await _dbContext.FolderPaths.GetAsync(
+                    (int)downloadTask.DestinationFolderPathId,
+                    cancellationToken
+                );
             }
 
-            destinationFolder ??= await _dbContext.GetDestinationFolder(downloadTask.PlexLibraryId);
+            destinationFolder ??= await _dbContext.GetDestinationFolder(
+                downloadTask.PlexLibraryId
+            );
 
             if (destinationFolder is null)
                 return ResultExtensions.EntityNotFound(nameof(PlexLibrary), downloadTask.PlexLibraryId).LogError();
@@ -195,12 +214,18 @@ public class DownloadJob : IJob
             case DownloadTaskType.MovieData:
                 await _dbContext
                     .DownloadTaskMovieFile.Where(x => x.Id == downloadTask.Id)
-                    .ExecuteUpdateAsync(p => p.SetProperty(x => x.DirectoryMeta, downloadTask.DirectoryMeta));
+                    .ExecuteUpdateAsync(
+                        p => p.SetProperty(x => x.DirectoryMeta, downloadTask.DirectoryMeta),
+                        cancellationToken
+                    );
                 break;
             case DownloadTaskType.EpisodeData:
                 await _dbContext
                     .DownloadTaskTvShowEpisodeFile.Where(x => x.Id == downloadTask.Id)
-                    .ExecuteUpdateAsync(p => p.SetProperty(x => x.DirectoryMeta, downloadTask.DirectoryMeta));
+                    .ExecuteUpdateAsync(
+                        p => p.SetProperty(x => x.DirectoryMeta, downloadTask.DirectoryMeta),
+                        cancellationToken
+                    );
                 break;
             default:
                 return Result.Fail($"DownloadTaskType {downloadTask.DownloadTaskType} is not supported");

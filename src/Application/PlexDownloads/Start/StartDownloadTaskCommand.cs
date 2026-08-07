@@ -106,7 +106,13 @@ public class StartDownloadTaskCommandHandler : ICommandHandler<StartDownloadTask
             case DownloadTaskPhase.Downloading:
                 if (!await _downloadTaskScheduler.IsDownloading(nextDownloadTaskKey, cancellationToken))
                 {
-                    var startResult = await _downloadTaskScheduler.StartDownloadTaskJob(nextDownloadTaskKey);
+                    var startResult = await _downloadTaskScheduler.StartDownloadTaskJob(
+                        nextDownloadTaskKey,
+                        cancellationToken
+                    );
+                    if (startResult.IsCancelled)
+                        return startResult.LogWarning();
+
                     if (startResult.IsFailed)
                         return startResult.LogError();
 
@@ -121,6 +127,9 @@ public class StartDownloadTaskCommandHandler : ICommandHandler<StartDownloadTask
                             new PauseDownloadTaskCommand(downloadKey.Id),
                             cancellationToken
                         );
+                        if (pauseResult.IsCancelled)
+                            return pauseResult.LogWarning();
+
                         if (pauseResult.IsFailed)
                             return pauseResult.LogError();
                     }
@@ -130,9 +139,15 @@ public class StartDownloadTaskCommandHandler : ICommandHandler<StartDownloadTask
 
             case DownloadTaskPhase.FileTransfer:
                 // Multiple merging tasks can be processing at the same time
-                if (!(await _moveDownloadFileScheduler.IsDownloadFileMoving(nextDownloadTaskKey)))
+                if (!(await _moveDownloadFileScheduler.IsDownloadFileMoving(nextDownloadTaskKey, cancellationToken)))
                 {
-                    var moveResult = await _moveDownloadFileScheduler.StartMoveDownloadFileJob(nextDownloadTaskKey);
+                    var moveResult = await _moveDownloadFileScheduler.StartMoveDownloadFileJob(
+                        nextDownloadTaskKey,
+                        cancellationToken
+                    );
+                    if (moveResult.IsCancelled)
+                        return moveResult.LogWarning();
+
                     if (moveResult.IsFailed)
                         return moveResult.LogError();
                 }

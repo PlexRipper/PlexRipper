@@ -79,10 +79,16 @@ public class PauseDownloadTaskCommandHandler : ICommandHandler<PauseDownloadTask
 
             if (downloadTask.DownloadTaskPhase == DownloadTaskPhase.FileTransfer)
             {
-                var isMoving = await _moveDownloadFileScheduler.IsDownloadFileMoving(downloadTaskKey);
+                var isMoving = await _moveDownloadFileScheduler.IsDownloadFileMoving(downloadTaskKey, cancellationToken);
                 if (isMoving)
                 {
-                    var stopMoveResult = await _moveDownloadFileScheduler.StopMoveDownloadFileJob(downloadTaskKey);
+                    var stopMoveResult = await _moveDownloadFileScheduler.StopMoveDownloadFileJob(
+                        downloadTaskKey,
+                        cancellationToken
+                    );
+                    if (stopMoveResult.IsCancelled)
+                        return stopMoveResult.LogWarning();
+
                     if (stopMoveResult.IsFailed)
                         return stopMoveResult.LogError();
                 }
@@ -92,6 +98,9 @@ public class PauseDownloadTaskCommandHandler : ICommandHandler<PauseDownloadTask
                     command.AutoPause ? DownloadStatus.AutoMovePaused : DownloadStatus.MovePaused,
                     cancellationToken
                 );
+                if (resetMoveProgressResult.IsCancelled)
+                    return resetMoveProgressResult.LogWarning();
+
                 if (resetMoveProgressResult.IsFailed)
                     return resetMoveProgressResult.LogError();
 
@@ -110,6 +119,9 @@ public class PauseDownloadTaskCommandHandler : ICommandHandler<PauseDownloadTask
             }
 
             var stopResult = await _downloadTaskScheduler.StopDownloadTaskJob(downloadTaskKey, cancellationToken);
+            if (stopResult.IsCancelled)
+                return stopResult.LogWarning();
+
             if (stopResult.IsFailed)
                 return stopResult.LogError();
 

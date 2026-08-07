@@ -34,10 +34,7 @@ public class MockProgressHubService : IProgressHubService
         CancellationToken cancellationToken = default
     ) => Task.CompletedTask;
 
-    public Task SendJobStatusUpdateAsync<T>(
-        JobStatusUpdate<T> jobStatusUpdate,
-        CancellationToken cancellationToken = default
-    )
+    public Task SendJobStatusUpdateAsync<T>(JobStatusUpdate<T> jobStatusUpdate)
         where T : class
     {
         JobStatusUpdateList.Add(jobStatusUpdate.ToDTO());

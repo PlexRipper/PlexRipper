@@ -34,8 +34,14 @@ public class PlexLibraryComparisonJob : IJob
         var cancellationToken = context.CancellationToken;
         var processedCount = 0;
 
-        while (!cancellationToken.IsCancellationRequested)
+        while (true)
         {
+            if (cancellationToken.IsCancellationRequested)
+            {
+                _log.Here().Warning("Library comparison queue worker was cancelled");
+                return;
+            }
+
             var processedQueueItem = await ProcessNextQueueItemAsync(cancellationToken);
 
             if (!processedQueueItem)

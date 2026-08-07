@@ -316,6 +316,6 @@ public sealed class ReaparrDbContext : DbContext, IReaparrDbContext, IReaparrDbC
     /// <inheritdoc/>
     public IEnumerable<string> GetPendingMigrations() => Database.GetPendingMigrations();
 
-    public new Task<int> SaveChangesAsync(CancellationToken cancellationToken = new()) =>
+    public new Task<int> SaveChangesAsync(CancellationToken cancellationToken = default) =>
         this.SaveChangesSerializedAsync(8, cancellationToken);
 }

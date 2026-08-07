@@ -70,6 +70,9 @@ public class RefreshPlexServerAccessCommandHandler
             return await RemovePlexAccess(plexAccountId);
         }
 
+        if (result.IsCancelled)
+            return result.ToResult();
+
         if (result.IsFailed)
             return result.LogError();
 
@@ -85,8 +88,11 @@ public class RefreshPlexServerAccessCommandHandler
         // Add PlexServers and their PlexServerConnections
         var updateResult = await _commandExecutor.Send(
             new AddOrUpdatePlexServersCommand(serverList),
-            CancellationToken.None
+            cancellationToken
         );
+        if (updateResult.IsCancelled)
+            return updateResult.ToResult();
+
         if (updateResult.IsFailed)
             return updateResult.LogError();
 
@@ -95,6 +101,9 @@ public class RefreshPlexServerAccessCommandHandler
             new AddOrUpdatePlexAccountServersCommand(plexAccountId, serverAccessTokens),
             cancellationToken
         );
+
+        if (plexServerAccountAccessRapport.IsCancelled)
+            return plexServerAccountAccessRapport;
 
         if (plexServerAccountAccessRapport.IsFailed)
             return plexServerAccountAccessRapport.LogError();
@@ -106,8 +115,7 @@ public class RefreshPlexServerAccessCommandHandler
             );
 
         await _notificationHubService.SendRefreshNotificationAsync(
-            [RefreshDataType.PlexServer, RefreshDataType.PlexServerConnection],
-            cancellationToken
+            [RefreshDataType.PlexServer, RefreshDataType.PlexServerConnection]
         );
 
         return plexServerAccountAccessRapport;

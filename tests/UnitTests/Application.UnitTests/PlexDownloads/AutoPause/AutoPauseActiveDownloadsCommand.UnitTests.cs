@@ -35,7 +35,7 @@ public class AutoPauseActiveDownloadsCommandUnitTests : BaseUnitTest<AutoPauseAc
             .Verifiable(Times.Exactly(2));
 
         Mock.Mock<IMoveDownloadFileScheduler>()
-            .Setup(x => x.GetCurrentlyMovingKeysByServer(It.IsAny<int>()))
+            .Setup(x => x.GetCurrentlyMovingKeysByServer(It.IsAny<int>(), CancellationToken))
             .ReturnsAsync([])
             .Verifiable(Times.Exactly(4));
 
@@ -94,7 +94,7 @@ public class AutoPauseActiveDownloadsCommandUnitTests : BaseUnitTest<AutoPauseAc
             .Verifiable(Times.Exactly(2));
 
         Mock.Mock<IMoveDownloadFileScheduler>()
-            .Setup(x => x.GetCurrentlyMovingKeysByServer(serverId))
+            .Setup(x => x.GetCurrentlyMovingKeysByServer(serverId, CancellationToken))
             .ReturnsAsync([moveKey])
             .Verifiable(Times.Exactly(2));
 
@@ -144,7 +144,7 @@ public class AutoPauseActiveDownloadsCommandUnitTests : BaseUnitTest<AutoPauseAc
             .ReturnsAsync([secondPassKey]);
 
         Mock.Mock<IMoveDownloadFileScheduler>()
-            .Setup(x => x.GetCurrentlyMovingKeysByServer(serverId))
+            .Setup(x => x.GetCurrentlyMovingKeysByServer(serverId, CancellationToken))
             .ReturnsAsync([])
             .Verifiable(Times.Exactly(2));
 
@@ -199,7 +199,7 @@ public class AutoPauseActiveDownloadsCommandUnitTests : BaseUnitTest<AutoPauseAc
             .Verifiable(Times.Exactly(2));
 
         Mock.Mock<IMoveDownloadFileScheduler>()
-            .Setup(x => x.GetCurrentlyMovingKeysByServer(serverId))
+            .Setup(x => x.GetCurrentlyMovingKeysByServer(serverId, CancellationToken))
             .ReturnsAsync([])
             .Verifiable(Times.Exactly(2));
 

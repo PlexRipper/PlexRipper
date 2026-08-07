@@ -100,7 +100,9 @@ public class SyncPlexTvShowsCommandHandler : ICommandHandler<SyncPlexTvShowsComm
             plexLibraryId,
             cancellationToken: cancellationToken
         );
-        var plexServerId = await _dbContext.GetPlexServerIdFromPlexLibraryId(plexLibraryId);
+        var plexServerId = await _dbContext.GetPlexServerIdFromPlexLibraryId(
+            plexLibraryId
+        );
 
         if (string.IsNullOrWhiteSpace(plexLibraryName))
             return ResultExtensions.EntityNotFound(nameof(command.LibraryMetadata.PlexLibrary), plexLibraryId);
@@ -113,14 +115,27 @@ public class SyncPlexTvShowsCommandHandler : ICommandHandler<SyncPlexTvShowsComm
             );
 
         var stopWatch = Stopwatch.StartNew();
+        if (cancellationToken.IsCancellationRequested)
+            return ResultExtensions.TaskIsCancelled(nameof(SyncPlexTvShowsCommand)).LogWarning();
 
         var removeRapport = await RemoveMedia(plexLibraryId, CancellationToken.None);
 
         var plexTvShows = command.LibraryMetadata.PlexLibrary.TvShows.ToList();
 
         var bulkInsertRapportResult = await Result.Try(() =>
-            _dbContext.BulkInsertPlexTvShowsAsync(plexTvShows, plexServerId, plexLibraryId, cancellationToken)
+            _dbContext.BulkInsertPlexTvShowsAsync(
+                plexTvShows,
+                plexServerId,
+                plexLibraryId,
+                CancellationToken.None
+            )
         );
+
+        if (bulkInsertRapportResult.IsCancelled)
+        {
+            stopWatch.Stop();
+            return bulkInsertRapportResult.LogWarning();
+        }
 
         if (bulkInsertRapportResult.IsFailed)
         {
@@ -144,7 +159,7 @@ public class SyncPlexTvShowsCommandHandler : ICommandHandler<SyncPlexTvShowsComm
                 EpisodeCount = _dbContext.PlexTvShowEpisodes.Count(x => x.PlexLibraryId == plexLibraryId),
                 MediaSize = _dbContext.PlexTvShowEpisodes.Where(x => x.PlexLibraryId == plexLibraryId).Sum(x => (long?)x.MediaSize) ?? 0,
             })
-            .FirstOrDefaultAsync(cancellationToken);
+            .FirstOrDefaultAsync(CancellationToken.None);
 
         if (metrics is null)
             return ResultExtensions.EntityNotFound(nameof(PlexLibrary), plexLibraryId).LogError();

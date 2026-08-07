@@ -8,7 +8,7 @@ public class CleanupLibrarySyncJobQueueCommandHandlerUnitTests : BaseUnitTest<Cl
     {
         Mock.Mock<INotificationHubService>()
             .Setup(x =>
-                x.SendRefreshNotificationAsync(It.IsAny<List<RefreshDataType>>(), It.IsAny<CancellationToken>())
+                x.SendRefreshNotificationAsync(It.IsAny<List<RefreshDataType>>())
             )
             .Returns(Task.CompletedTask);
     }

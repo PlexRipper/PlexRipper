@@ -41,13 +41,19 @@ public class GetAllMediaByTypeFromPlexApiCommandHandler
         var batchSize = command.BatchSize;
 
         var tokenResult = await _dbContext.GetPlexServerTokenAsync(plexLibrary.PlexServerId, ct);
+        if (tokenResult.IsCancelled)
+            return tokenResult.ToResult().LogWarning();
+
         if (tokenResult.IsFailed)
-            return tokenResult.ToResult();
+            return tokenResult.ToResult().LogError();
 
         var plexServerConnectionResult = await _dbContext.ChoosePlexServerConnection(plexLibrary.PlexServerId, ct);
 
+        if (plexServerConnectionResult.IsCancelled)
+            return plexServerConnectionResult.ToResult().LogWarning();
+
         if (plexServerConnectionResult.IsFailed)
-            return plexServerConnectionResult.ToResult();
+            return plexServerConnectionResult.ToResult().LogError();
 
         var plexServerConnection = plexServerConnectionResult.Value;
 
@@ -64,10 +70,13 @@ public class GetAllMediaByTypeFromPlexApiCommandHandler
         var mediaList = new List<LibraryMediaItemDTO>();
 
         // Get the total size of the library
-        var totalSizeResult = await GetLibraryMediaTotalCount(client, plexLibrary.Key, mediaType);
+        var totalSizeResult = await GetLibraryMediaTotalCount(client, plexLibrary.Key, mediaType, ct);
+
+        if (totalSizeResult.IsCancelled)
+            return totalSizeResult.ToResult().LogWarning();
 
         if (totalSizeResult.IsFailed)
-            return totalSizeResult.ToResult();
+            return totalSizeResult.ToResult().LogError();
 
         var totalSize = totalSizeResult.Value;
         if (totalSize == 0)
@@ -88,8 +97,12 @@ public class GetAllMediaByTypeFromPlexApiCommandHandler
                 plexLibrary.Key,
                 index,
                 batchSize,
-                mediaType
+                mediaType,
+                ct
             );
+            if (mediaListResult.IsCancelled)
+                return mediaListResult.ToResult().LogWarning();
+
             if (mediaListResult.IsFailed)
             {
                 var result = mediaListResult.ToResult();
@@ -101,11 +114,11 @@ public class GetAllMediaByTypeFromPlexApiCommandHandler
             progressIndex += rawMediaList.Count;
 
             mediaList.AddRange(rawMediaList);
-            await SendProgress(plexLibrary.Id, mediaType, startTime, progressIndex, totalSize);
+            await SendProgress(plexLibrary.Id, mediaType, startTime, progressIndex, totalSize, ct);
 
             if (ct.IsCancellationRequested)
             {
-                return ResultExtensions.TaskIsCancelled(nameof(GetAllMediaByTypeFromPlexApiCommand)).LogInformation();
+                return ResultExtensions.TaskIsCancelled(nameof(GetAllMediaByTypeFromPlexApiCommand)).LogWarning();
             }
         }
 
@@ -124,7 +137,8 @@ public class GetAllMediaByTypeFromPlexApiCommandHandler
         PlexMediaType plexMediaType,
         DateTime startTime,
         int index,
-        int totalSize
+        int totalSize,
+        CancellationToken cancellationToken
     )
     {
         // Estimate remaining time
@@ -147,14 +161,19 @@ public class GetAllMediaByTypeFromPlexApiCommandHandler
                 Total = totalSize,
                 TimeRemaining = remainingTime,
             },
-            CancellationToken.None
+            cancellationToken
         );
     }
 
     /// <summary>
     /// Gets the total count of the media in the library.
     /// </summary>
-    private async Task<Result<int>> GetLibraryMediaTotalCount(IPlexAPI client, string libraryKey, PlexMediaType type)
+    private async Task<Result<int>> GetLibraryMediaTotalCount(
+        IPlexAPI client,
+        string libraryKey,
+        PlexMediaType type,
+        CancellationToken cancellationToken
+    )
     {
         if (!int.TryParse(libraryKey, out var libraryKeyInt))
             return ResultExtensions.IsInvalidId(nameof(libraryKey), libraryKey).LogError();
@@ -169,7 +188,7 @@ public class GetAllMediaByTypeFromPlexApiCommandHandler
                     MediaQuery = new MediaQuery { Type = type.ToPlexApiMediaType() },
                 }
             )
-            .ToResponse();
+            .ToResponse(cancellationToken);
 
         if (response.IsFailed)
             return response.ToResult();
@@ -188,7 +207,8 @@ public class GetAllMediaByTypeFromPlexApiCommandHandler
         string libraryKey,
         int startIndex,
         int batchSize,
-        PlexMediaType type
+        PlexMediaType type,
+        CancellationToken cancellationToken
     )
     {
         if (!int.TryParse(libraryKey, out var libraryKeyInt))
@@ -206,7 +226,7 @@ public class GetAllMediaByTypeFromPlexApiCommandHandler
                     MediaQuery = new MediaQuery { Type = type.ToPlexApiMediaType() },
                 }
             )
-            .ToResponse();
+            .ToResponse(cancellationToken);
 
         if (response.IsFailed)
             return response.ToResult();

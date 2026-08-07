@@ -93,7 +93,7 @@ public class DownloadClientLoginEndpoint : Endpoint<DownloadClientLoginEndpointR
         };
 
         _authDbContext.DownloadClientSessions.Add(entity);
-        await _authDbContext.SaveChangesAsync();
+        await _authDbContext.SaveChangesAsync(CancellationToken.None);
 
         return entity;
     }

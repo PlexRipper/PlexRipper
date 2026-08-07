@@ -44,12 +44,18 @@ public class ResumePlexServerDownloadsCommandHandler : ICommandHandler<ResumePle
                 .Where(x => x.Id == command.PlexServerId)
                 .ExecuteUpdateAsync(p => p.SetProperty(x => x.IsDownloadsPausedByUser, false), cancellationToken)
         );
+        if (updateResult.IsCancelled)
+            return updateResult.ToResult();
+
         if (updateResult.IsFailed)
             return updateResult.ToResult().LogError();
 
         var publishResult = await Result.Try(() =>
             _eventPublisher.PublishAsync(new CheckDownloadQueueEvent(command.PlexServerId), cancellationToken)
         );
+        if (publishResult.IsCancelled)
+            return publishResult;
+
         if (publishResult.IsFailed)
             return publishResult.LogError();
 

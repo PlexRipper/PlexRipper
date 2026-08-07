@@ -27,7 +27,7 @@ public class DownloadJobListenerUnitTests : BaseUnitTest<DownloadJobListener>
         };
 
         Mock.Mock<IMoveDownloadFileQueue>()
-            .Setup(x => x.CheckMoveDownloadFileJobQueue())
+            .Setup(x => x.CheckMoveDownloadFileJobQueue(CancellationToken))
             .ReturnsAsync(Result.Ok())
             .Verifiable(Times.Once());
         Mock.Mock<IEventPublisher>()
@@ -82,7 +82,7 @@ public class DownloadJobListenerUnitTests : BaseUnitTest<DownloadJobListener>
         };
 
         Mock.Mock<IMoveDownloadFileQueue>()
-            .Setup(x => x.CheckMoveDownloadFileJobQueue())
+            .Setup(x => x.CheckMoveDownloadFileJobQueue(CancellationToken))
             .ReturnsAsync(Result.Ok())
             .Verifiable(Times.Never());
         Mock.Mock<IEventPublisher>()
@@ -97,7 +97,7 @@ public class DownloadJobListenerUnitTests : BaseUnitTest<DownloadJobListener>
         await Sut.JobWasExecuted(jobContext, null, CancellationToken);
 
         // Assert
-        Mock.Mock<IMoveDownloadFileQueue>().Verify(x => x.CheckMoveDownloadFileJobQueue(), Times.Never());
+        Mock.Mock<IMoveDownloadFileQueue>().Verify(x => x.CheckMoveDownloadFileJobQueue(CancellationToken), Times.Never());
         Mock.Mock<IEventPublisher>()
             .Verify(
                 x =>

@@ -71,7 +71,7 @@ public class CheckAllConnectionsStatusByPlexServerHandler
             return _log.Here().ErrorResult("No connections found for the plex server {PlexServerName}", plexServerName);
         }
 
-        var previousResult = await _dbContext.IsServerOnline(plexServerId, cancellationToken: cancellationToken);
+        var previousResult = await _dbContext.IsServerOnline(plexServerId);
 
         // Create connection check tasks for all connections
         var connectionTasks = connections.Select(async plexServerConnection =>
@@ -84,9 +84,14 @@ public class CheckAllConnectionsStatusByPlexServerHandler
         var tasksResult = await Task.WhenAll(connectionTasks);
         var combinedResults = Result.Merge(tasksResult);
 
+        if (tasksResult.Any(x => x.IsCancelled))
+            return combinedResults.ToResult();
+
+        if (combinedResults.IsFailed)
+            return combinedResults.ToResult().LogError();
+
         await _notificationHubService.SendRefreshNotificationAsync(
-            [RefreshDataType.PlexServerConnection],
-            cancellationToken
+            [RefreshDataType.PlexServerConnection]
         );
 
         // Compare previous and current online status
@@ -98,7 +103,7 @@ public class CheckAllConnectionsStatusByPlexServerHandler
         {
             await _eventPublisher.PublishAsync(
                 new ServerOnlineStatusChangedNotification(plexServerId, currentOnlineStatus),
-                CancellationToken.None
+                cancellationToken
             );
         }
 

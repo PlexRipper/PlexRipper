@@ -186,7 +186,7 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandler
             })
         );
 
-        await _dbContext.CreateDownloadClientLogs(logs);
+        await _dbContext.CreateDownloadClientLogs(logs, ct);
 
         return Result.Ok(new DownloadTaskCreationReport { Episodes = downloadTasks.Count });
     }

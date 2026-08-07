@@ -48,13 +48,13 @@ public class InspectPlexServerJobUnitTests : BaseUnitTest<InspectPlexServerJob>
                     It.IsAny<CancellationToken>()
                 )
             )
-            .Returns<CheckAllConnectionsStatusByPlexServerCommand, CancellationToken>(async (command, _) =>
+            .Returns<CheckAllConnectionsStatusByPlexServerCommand, CancellationToken>(async (command, cancellationToken) =>
             {
                 startedServerIds.TryAdd(command.PlexServerId, 0);
                 if (startedServerIds.Count == plexServerIds.Count)
                     bothConnectionChecksStarted.SetResult();
 
-                await releaseConnectionChecks.Task.WaitAsync(TimeSpan.FromSeconds(5));
+                await releaseConnectionChecks.Task.WaitAsync(TimeSpan.FromSeconds(5), cancellationToken);
                 return Result.Ok(new List<PlexServerStatus>());
             })
             .Verifiable(Times.Exactly(plexServerIds.Count));
@@ -74,8 +74,7 @@ public class InspectPlexServerJobUnitTests : BaseUnitTest<InspectPlexServerJob>
                 x.SendRefreshNotificationAsync(
                     It.Is<List<RefreshDataType>>(types =>
                         types.SequenceEqual(new[] { RefreshDataType.PlexAccount, RefreshDataType.PlexLibrary })
-                    ),
-                    It.IsAny<CancellationToken>()
+                    )
                 )
             )
             .Returns(Task.CompletedTask)
@@ -121,8 +120,7 @@ public class InspectPlexServerJobUnitTests : BaseUnitTest<InspectPlexServerJob>
                     x.SendRefreshNotificationAsync(
                         It.Is<List<RefreshDataType>>(types =>
                             types.SequenceEqual(new[] { RefreshDataType.PlexAccount, RefreshDataType.PlexLibrary })
-                        ),
-                        It.IsAny<CancellationToken>()
+                        )
                     ),
                 Times.Exactly(plexServerIds.Count)
             );
@@ -180,8 +178,7 @@ public class InspectPlexServerJobUnitTests : BaseUnitTest<InspectPlexServerJob>
         Mock.Mock<INotificationHubService>()
             .Setup(x =>
                 x.SendRefreshNotificationAsync(
-                    It.IsAny<List<RefreshDataType>>(),
-                    It.IsAny<CancellationToken>()
+                    It.IsAny<List<RefreshDataType>>()
                 )
             )
             .Returns(Task.CompletedTask)
@@ -223,8 +220,7 @@ public class InspectPlexServerJobUnitTests : BaseUnitTest<InspectPlexServerJob>
             .Verify(
                 x =>
                     x.SendRefreshNotificationAsync(
-                        It.IsAny<List<RefreshDataType>>(),
-                        It.IsAny<CancellationToken>()
+                        It.IsAny<List<RefreshDataType>>()
                     ),
                 Times.Once
             );

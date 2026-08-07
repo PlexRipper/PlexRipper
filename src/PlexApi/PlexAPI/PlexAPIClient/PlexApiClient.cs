@@ -26,7 +26,14 @@ public class PlexApiClient : IPlexApiClient
         _defaultClient.Timeout = TimeSpan.FromSeconds(_options.Timeout);
     }
 
-    public async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request)
+    // The generated Speakeasy client does not expose a CancellationToken overload.
+    // Keep its required contract while callers that can supply a token use the overload below.
+    public Task<HttpResponseMessage> SendAsync(HttpRequestMessage request) => SendAsync(request, CancellationToken.None);
+
+    public async Task<HttpResponseMessage> SendAsync(
+        HttpRequestMessage request,
+        CancellationToken cancellationToken = default
+    )
     {
         request.Headers.Remove("user-agent");
         request.SetRetryCount(_options.RetryCount);
@@ -42,9 +49,9 @@ public class PlexApiClient : IPlexApiClient
 
         try
         {
-            response = await _defaultClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
+            response = await _defaultClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
         }
-        catch (TaskCanceledException)
+        catch (TaskCanceledException) when (!cancellationToken.IsCancellationRequested)
         {
             var statusCode = HttpStatusCode.RequestTimeout;
             var reasonPhrase = "Request Timeout";
@@ -72,12 +79,18 @@ public class PlexApiClient : IPlexApiClient
         }
 
         if (_log.Here().IsLogLevelEnabled(LogEventLevel.Verbose))
-            _log.Here().Verbose("Response: {Response}", await response.Content.ReadAsFormattedJsonAsync());
+            _log.Here().Verbose("Response: {Response}", await response.Content.ReadAsFormattedJsonAsync(cancellationToken));
 
         return response;
     }
 
-    public async Task<HttpRequestMessage> CloneAsync(HttpRequestMessage request)
+    // The generated Speakeasy client does not expose a CancellationToken overload.
+    public Task<HttpRequestMessage> CloneAsync(HttpRequestMessage request) => CloneAsync(request, CancellationToken.None);
+
+    public async Task<HttpRequestMessage> CloneAsync(
+        HttpRequestMessage request,
+        CancellationToken cancellationToken = default
+    )
     {
         var clone = new HttpRequestMessage(request.Method, request.RequestUri)
         {
@@ -87,7 +100,7 @@ public class PlexApiClient : IPlexApiClient
 
         if (request.Content is not null)
         {
-            var bytes = await request.Content.ReadAsByteArrayAsync().ConfigureAwait(false);
+            var bytes = await request.Content.ReadAsByteArrayAsync(cancellationToken).ConfigureAwait(false);
             clone.Content = new ByteArrayContent(bytes);
 
             foreach (var header in request.Content.Headers)

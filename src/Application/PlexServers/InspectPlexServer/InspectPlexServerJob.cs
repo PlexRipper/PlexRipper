@@ -41,24 +41,27 @@ public class InspectPlexServerJob : IJob
                 plexServerIds.Count
             );
 
-        try
+        var executionResult = await Result.Try(async Task () =>
         {
             var serverTasks = plexServerIds.Select(plexServerId => InspectPlexServer(plexServerId, cancellationToken));
             var results = await Task.WhenAll(serverTasks);
-            var failedResults = results.Where(x => x.IsFailed).ToList();
+            var cancelledResults = results.Where(x => x.IsCancelled).ToList();
+            foreach (var cancelledResult in cancelledResults)
+                cancelledResult.LogWarning();
+
+            var failedResults = results.Where(x => x.IsFailed && !x.IsCancelled).ToList();
 
             foreach (var failedResult in failedResults)
                 failedResult.LogError();
 
-            if (failedResults.Count == 0)
+            if (failedResults.Count == 0 && cancelledResults.Count == 0)
                 _log.Here().Information("Successfully finished the inspection of {Count}", plexServerIds.Count);
-        }
-        catch (Exception e)
-        {
-            // Jobs should swallow exceptions as otherwise Quartz will keep re-executing it
-            // https://www.quartz-scheduler.net/documentation/best-practices.html#throwing-exceptions
-            _log.Here().ErrorResult(e);
-        }
+        });
+
+        if (executionResult.IsCancelled)
+            executionResult.LogWarning();
+        else if (executionResult.IsFailed)
+            executionResult.LogError();
     }
 
     private async Task<Result> InspectPlexServer(int plexServerId, CancellationToken cancellationToken)
@@ -68,6 +71,9 @@ public class InspectPlexServerJob : IJob
             new CheckAllConnectionsStatusByPlexServerCommand(plexServerId, Timeout: 5),
             cancellationToken
         );
+
+        if (checkResult.IsCancelled)
+            return checkResult.ToResult();
 
         if (checkResult.IsFailed)
         {
@@ -87,6 +93,9 @@ public class InspectPlexServerJob : IJob
     {
         // Refresh accessible libraries
         var accountsResult = await dbContext.GetPlexAccountsWithAccessAsync(plexServerId, cancellationToken);
+        if (accountsResult.IsCancelled)
+            return accountsResult.ToResult();
+
         if (accountsResult.IsFailed)
             return accountsResult.LogError();
 
@@ -95,13 +104,15 @@ public class InspectPlexServerJob : IJob
             new RefreshLibraryAccessCommand(plexAccountId, plexServerId),
             cancellationToken
         );
+        if (refreshResult.IsCancelled)
+            return refreshResult.ToResult();
+
         if (refreshResult.IsFailed)
             return refreshResult.LogError();
 
         // Notify front-end
         await _notificationHubService.SendRefreshNotificationAsync(
-            [RefreshDataType.PlexAccount, RefreshDataType.PlexLibrary],
-            CancellationToken.None
+            [RefreshDataType.PlexAccount, RefreshDataType.PlexLibrary]
         );
 
         var libraryIds = await dbContext

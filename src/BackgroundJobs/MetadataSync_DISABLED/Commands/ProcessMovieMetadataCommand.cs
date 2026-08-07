@@ -70,13 +70,17 @@ public class ProcessMovieMetadataCommandHandler : ICommandHandler<ProcessMovieMe
         // Process in batches, each with its own context
         foreach (var batch in ratingKeysToProcess.Select(k => k.ToString()).Chunk(BATCH_SIZE))
         {
-            ct.ThrowIfCancellationRequested();
+            if (ct.IsCancellationRequested)
+                return ResultExtensions.TaskIsCancelled(nameof(ProcessMovieMetadataCommand)).LogWarning();
 
             var batchRatingKeys = batch.Select(int.Parse).ToHashSet();
             var result = await _commandExecutor.Send(
                 new GetDetailMetadataByRatingKeysCommand(command.ServerId, batch),
                 ct
             );
+
+            if (result.IsCancelled)
+                return result.ToResult<int>().LogWarning();
 
             if (result.IsFailed)
             {

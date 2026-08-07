@@ -109,8 +109,7 @@ public class SetLibraryEnabledEndpoint : Endpoint<SetLibraryEnabledRequest, Resu
 
         // Notify frontend
         await _notificationHubService.SendRefreshNotificationAsync(
-            [RefreshDataType.PlexLibrary, RefreshDataType.PlexLibrarySyncStatus],
-            ct
+            [RefreshDataType.PlexLibrary, RefreshDataType.PlexLibrarySyncStatus]
         );
 
         _log.Here().Information("PlexLibrary {PlexLibraryId} enabled and sync queued", plexLibrary.Id);
@@ -163,8 +162,7 @@ public class SetLibraryEnabledEndpoint : Endpoint<SetLibraryEnabledRequest, Resu
 
         // Notify frontend
         await _notificationHubService.SendRefreshNotificationAsync(
-            [RefreshDataType.PlexLibrary, RefreshDataType.PlexLibrarySyncStatus],
-            ct
+            [RefreshDataType.PlexLibrary, RefreshDataType.PlexLibrarySyncStatus]
         );
 
         _log.Here().Information("PlexLibrary {PlexLibraryId} disabled and media purged", plexLibrary.Id);

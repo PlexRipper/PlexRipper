@@ -69,6 +69,9 @@ public class ClearCompletedDownloadTasksByDownloadTaskKeyCommandHandler
             return Result.Ok(0);
 
         var deleteResult = await _commandExecutor.Send(new DeleteDownloadTasksByKeyCommand(completedKeys), ct);
+        if (deleteResult.IsCancelled)
+            return deleteResult.ToResult<int>();
+
         if (deleteResult.IsFailed)
             return deleteResult.ToResult<int>();
 

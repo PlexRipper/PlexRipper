@@ -41,7 +41,7 @@ public static class MoqExtensions
     {
         var result = mock.Mock<INotificationHubService>()
             .Setup(m =>
-                m.SendRefreshNotificationAsync(It.IsAny<List<RefreshDataType>>(), It.IsAny<CancellationToken>())
+                m.SendRefreshNotificationAsync(It.IsAny<List<RefreshDataType>>())
             )
             .Returns(Task.CompletedTask);
 

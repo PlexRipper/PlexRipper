@@ -15,15 +15,7 @@ public static class ISchedulerExtensions
         CancellationToken cancellationToken = default
     )
     {
-        try
-        {
-            await scheduler.ScheduleJob(jobDetail, trigger, cancellationToken);
-            return Result.Ok();
-        }
-        catch (Exception e)
-        {
-            return Result.Fail(new ExceptionalError(e)).LogError();
-        }
+        return await Result.Try(async Task () => await scheduler.ScheduleJob(jobDetail, trigger, cancellationToken));
     }
 
     /// <summary>
@@ -51,8 +43,11 @@ public static class ISchedulerExtensions
         {
             const int pollIntervalMs = 200;
 
-            while (!linkedCts.Token.IsCancellationRequested)
+            while (true)
             {
+                if (linkedCts.IsCancellationRequested)
+                    return;
+
                 var executingJobs = await scheduler.GetCurrentlyExecutingJobs(linkedCts.Token);
                 var isJobStillRunning = executingJobs.Any(x => Equals(x.JobDetail.Key, key));
 
@@ -70,13 +65,24 @@ public static class ISchedulerExtensions
         }
     }
 
-    public static Task<bool> StopJob(this IScheduler scheduler, JobKey key) => scheduler.Interrupt(key);
+    public static Task<bool> StopJob(
+        this IScheduler scheduler,
+        JobKey key,
+        CancellationToken cancellationToken = default
+    ) => scheduler.Interrupt(key, cancellationToken);
 
-    public static Task<bool> IsJobRunning(this IScheduler scheduler, JobKey key) => scheduler.CheckExists(key);
+    public static Task<bool> IsJobRunning(
+        this IScheduler scheduler,
+        JobKey key,
+        CancellationToken cancellationToken = default
+    ) => scheduler.CheckExists(key, cancellationToken);
 
-    public static async Task<List<JobDataMap>> GetRunningJobDataMaps(this IScheduler scheduler, Type jobType)
+    public static async Task<List<JobDataMap>> GetRunningJobDataMaps(
+        this IScheduler scheduler,
+        Type jobType
+    )
     {
-        var jobs = await scheduler.GetCurrentlyExecutingJobs();
+        var jobs = await scheduler.GetCurrentlyExecutingJobs(CancellationToken.None);
         return jobs.Where(x => x.JobInstance.GetType() == jobType).Select(x => x.JobDetail.JobDataMap).ToList();
     }
 }

@@ -143,6 +143,12 @@ public class DownloadTaskUpdateDispatcher : BackgroundService, IDownloadTaskUpda
             }
         });
 
+        if (result.IsCancelled)
+        {
+            result.LogWarning();
+            return;
+        }
+
         if (result.IsFailed)
             result.LogError();
     }
@@ -200,10 +206,10 @@ public class DownloadTaskUpdateDispatcher : BackgroundService, IDownloadTaskUpda
             }
         });
 
-        if (result.IsFailed && !result.IsCancelled)
-        {
-            result.LogIfFailed();
-        }
+        if (result.IsCancelled)
+            result.LogWarning();
+        else if (result.IsFailed)
+            result.LogError();
 
         periodicTimer.Dispose();
         _statusChannel.Writer.TryComplete();
@@ -236,10 +242,10 @@ public class DownloadTaskUpdateDispatcher : BackgroundService, IDownloadTaskUpda
             }
         });
 
-        if (result.IsFailed && !result.IsCancelled)
-        {
-            result.LogIfFailed();
-        }
+        if (result.IsCancelled)
+            result.LogWarning();
+        else if (result.IsFailed)
+            result.LogError();
     }
 
     private static void MergeImmediatePatchRequest(
@@ -276,8 +282,10 @@ public class DownloadTaskUpdateDispatcher : BackgroundService, IDownloadTaskUpda
             }
         });
 
-        if (result.IsFailed && !result.IsCancelled)
-            result.LogIfFailed();
+        if (result.IsCancelled)
+            result.LogWarning();
+        else if (result.IsFailed)
+            result.LogError();
     }
 
     /// <summary>
@@ -649,7 +657,12 @@ public class DownloadTaskUpdateDispatcher : BackgroundService, IDownloadTaskUpda
                 TimeSpan.FromSeconds(progress.TimeRemaining).ToFormattedString()
             );
 
-        await dbContext.CreateDownloadClientLog(key, NotificationLevel.Debug, DownloadStatus.Downloading, progressMsg);
+        await dbContext.CreateDownloadClientLog(
+            key,
+            NotificationLevel.Debug,
+            DownloadStatus.Downloading,
+            progressMsg
+        );
     }
 
     private bool ShouldPersistProgressDebug(Guid nodeId, DownloadTaskProgress progress)

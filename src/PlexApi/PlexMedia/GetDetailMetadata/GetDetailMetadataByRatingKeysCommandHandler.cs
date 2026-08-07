@@ -51,7 +51,7 @@ public class GetDetailMetadataByRatingKeysCommandHandler
         // Fetch detailed metadata
         var response = await client
             .Content.GetMetadataItemAsync(new GetMetadataItemRequest { Ids = command.RatingKeys.ToList() })
-            .ToResponse();
+            .ToResponse(ct);
 
         if (response.IsFailed)
         {

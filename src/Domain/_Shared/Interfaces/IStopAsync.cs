@@ -2,5 +2,5 @@
 
 public interface IStopAsync
 {
-    public Task<Result> StopAsync();
+    Task<Result> StopAsync(CancellationToken cancellationToken = default);
 }

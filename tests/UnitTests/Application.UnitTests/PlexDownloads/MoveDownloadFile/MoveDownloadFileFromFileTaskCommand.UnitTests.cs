@@ -612,9 +612,9 @@ public class MoveDownloadFileFromFileTaskCommandUnitTests : BaseUnitTest<MoveDow
         Mock.Mock<ICommandExecutor>()
             .Setup(x => x.Send(It.IsAny<MoveFileWithResumeCommand>(), It.IsAny<CancellationToken>()))
             .Returns<MoveFileWithResumeCommand, CancellationToken>(
-                async (moveCommand, _) =>
+                async (moveCommand, cancellationToken) =>
                 {
-                    await Task.Delay(1100);
+                    await Task.Delay(1100, cancellationToken);
                     moveCommand.Progress(
                         new MoveFileTransferProgressDTO
                         {

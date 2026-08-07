@@ -35,6 +35,9 @@ public class GetLibraryMediaFromPlexApiCommandHandler
             _commandExecutor.Send(new GetLibrarySectionsCommand(plexLibrary.PlexServerId), ct)
         );
 
+        if (plexLibraries.IsCancelled)
+            return plexLibraries.ToResult();
+
         if (plexLibraries.IsFailed)
             return plexLibraries.ToResult();
 
@@ -68,6 +71,9 @@ public class GetLibraryMediaFromPlexApiCommandHandler
                 ct
             )
         );
+
+        if (mediaListResult.IsCancelled)
+            return mediaListResult.ToResult();
 
         if (mediaListResult.IsFailed)
             return mediaListResult.ToResult();

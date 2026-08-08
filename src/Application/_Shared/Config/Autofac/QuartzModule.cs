@@ -31,6 +31,7 @@ public class QuartzModule : Module
                         { "quartz.threadPool.threadCount", "10" },
                         { "quartz.jobStore.type", "Quartz.Impl.AdoJobStore.JobStoreTX, Quartz" },
                         { "quartz.jobStore.misfireThreshold", "60000" },
+                        { "quartz.jobStore.dbRetryInterval", "60000" },
                         {
                             "quartz.jobStore.lockHandler.type",
                             "Quartz.Impl.AdoJobStore.UpdateLockRowSemaphore, Quartz"

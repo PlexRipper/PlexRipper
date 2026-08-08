@@ -22,16 +22,19 @@ public class QueueLibraryComparisonJobsForLibraryCommandHandler
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
     private readonly ICommandExecutor _commandExecutor;
+    private readonly IMediaQueryCache _mediaQueryCache;
 
     public QueueLibraryComparisonJobsForLibraryCommandHandler(
         ILogger log,
         IReaparrDbContext dbContext,
-        ICommandExecutor commandExecutor
+        ICommandExecutor commandExecutor,
+        IMediaQueryCache mediaQueryCache
     )
     {
         _log = log.ForContext<QueueLibraryComparisonJobsForLibraryCommandHandler>();
         _dbContext = dbContext;
         _commandExecutor = commandExecutor;
+        _mediaQueryCache = mediaQueryCache;
     }
 
     public async Task<Result> ExecuteAsync(
@@ -66,6 +69,7 @@ public class QueueLibraryComparisonJobsForLibraryCommandHandler
 
         var queuedCount = 0;
         var failedResults = new List<ResultBase>();
+        var affectedLibraryIds = new HashSet<int>();
         foreach (var pair in pairs)
         {
             var result = await _commandExecutor.Send(
@@ -79,7 +83,17 @@ public class QueueLibraryComparisonJobsForLibraryCommandHandler
                 continue;
             }
 
+            affectedLibraryIds.Add(pair.RemoteLibraryId);
+            affectedLibraryIds.Add(pair.OwnedLibraryId);
             queuedCount++;
+        }
+
+        if (affectedLibraryIds.Count > 0)
+        {
+            _mediaQueryCache.InvalidateLibraries(
+                affectedLibraryIds,
+                $"Library comparisons queued for {sourceLibrary.Type}"
+            );
         }
 
         _log.Here()

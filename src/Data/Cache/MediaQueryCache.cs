@@ -154,9 +154,29 @@ public sealed class MediaQueryCache : IMediaQueryCache
         if (affectedLibraryIds.Count == 0)
             return;
 
+        if (_metadataSnapshots.IsEmpty && _sortedListSnapshots.IsEmpty && _builds.IsEmpty)
+        {
+            _log.Here().Debug(
+                "Skipped media query cache invalidation for libraries {PlexLibraryIds}: cache is empty. Reason: {Reason}",
+                affectedLibraryIds,
+                reason
+            );
+            return;
+        }
+
         var dirtyMetadataCount = MarkKeysContainingLibraryAsDirty(_metadataSnapshots, k => k.ContainsAnyLibrary(affectedLibraryIds));
         var dirtySortedListCount = MarkKeysContainingLibraryAsDirty(_sortedListSnapshots, k => k.ContainsAnyLibrary(affectedLibraryIds));
         var inFlightCount = CountKeysContainingLibrary(_builds, k => k.ContainsAnyLibrary(affectedLibraryIds));
+
+        if (dirtyMetadataCount == 0 && dirtySortedListCount == 0 && inFlightCount == 0)
+        {
+            _log.Here().Debug(
+                "No media query cache entries matched libraries {PlexLibraryIds}. Reason: {Reason}",
+                affectedLibraryIds,
+                reason
+            );
+            return;
+        }
 
         _log.Here().Information(
             "Invalidated media query cache for libraries {PlexLibraryIds}: {Reason}. " +

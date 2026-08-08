@@ -6,7 +6,7 @@ public class QueueLibraryMediaCompareJobCommandHandlerUnitTests
     : BaseUnitTest<QueueLibraryMediaCompareJobCommandHandler>
 {
     [Test]
-    public async Task ShouldInvalidateComparisonScopeAndMediaCache_WhenCompletedQueueItemIsRequeued()
+    public async Task ShouldInvalidateComparisonScope_WhenCompletedQueueItemIsRequeued()
     {
         // Arrange
         await SetupDatabase(78, config =>
@@ -50,13 +50,6 @@ public class QueueLibraryMediaCompareJobCommandHandlerUnitTests
         });
         await dbContext.SaveChangesAsync(CancellationToken);
 
-        Mock.Mock<IMediaQueryCache>()
-            .Setup(x => x.InvalidateLibraries(
-                It.Is<IReadOnlyCollection<int>>(ids =>
-                    ids.Count == 2 && ids.Contains(remoteLibrary.Id) && ids.Contains(ownedLibrary.Id)),
-                It.Is<string>(reason => reason.Contains(PlexMediaType.Movie.ToString()))
-            ))
-            .Verifiable(Times.Once());
         Mock.Mock<ICommandExecutor>()
             .Setup(x => x.Send(It.IsAny<CheckQueuedLibraryComparisonJobCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Ok())
@@ -86,7 +79,10 @@ public class QueueLibraryMediaCompareJobCommandHandlerUnitTests
         );
         scope.RemoteLibraryUpdatedAt.ShouldBeNull();
         scope.OwnedLibraryUpdatedAt.ShouldBeNull();
-        Mock.Mock<IMediaQueryCache>().Verify();
+        Mock.Mock<IMediaQueryCache>().Verify(
+            x => x.InvalidateLibraries(It.IsAny<IReadOnlyCollection<int>>(), It.IsAny<string>()),
+            Times.Never()
+        );
         Mock.Mock<ICommandExecutor>().Verify();
     }
 

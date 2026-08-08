@@ -7,6 +7,52 @@ namespace Reaparr.Data.UnitTests;
 public class MediaQueryCacheUnitTests : BaseUnitTest<MediaQueryCache>
 {
     // ──────────────────────────────────────────────────────────────
+    // Invalidation fast paths
+    // ──────────────────────────────────────────────────────────────
+
+    [Test]
+    public void ShouldNotStartCacheBuild_WhenInvalidatingAnEmptyCache()
+    {
+        // Act
+        Sut.InvalidateLibraries([1, 2, 2], "comparison batch queued");
+
+        // Assert
+        Mock.Mock<ICommandExecutor>().Verify(
+            x => x.Send(It.IsAny<GetMediaByTypeCommand>(), It.IsAny<CancellationToken>()),
+            Times.Never()
+        );
+    }
+
+    [Test]
+    public void ShouldIgnoreInvalidLibraryIds_WhenInvalidatingCache()
+    {
+        // Act
+        Sut.InvalidateLibraries([0, -1], "invalid library IDs");
+
+        // Assert
+        Mock.Mock<ICommandExecutor>().Verify(
+            x => x.Send(It.IsAny<GetMediaByTypeCommand>(), It.IsAny<CancellationToken>()),
+            Times.Never()
+        );
+    }
+
+    [Test]
+    public void ShouldSkipInvalidation_WhenInvalidationIsSuppressed()
+    {
+        // Arrange
+        Sut.SuppressInvalidation = true;
+
+        // Act
+        Sut.InvalidateLibraries([1, 2], "sync storm");
+
+        // Assert
+        Mock.Mock<ICommandExecutor>().Verify(
+            x => x.Send(It.IsAny<GetMediaByTypeCommand>(), It.IsAny<CancellationToken>()),
+            Times.Never()
+        );
+    }
+
+    // ──────────────────────────────────────────────────────────────
     // Cache miss → 503 (no synchronous blocking)
     // ──────────────────────────────────────────────────────────────
 

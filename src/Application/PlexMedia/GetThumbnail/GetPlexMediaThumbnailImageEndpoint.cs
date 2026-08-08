@@ -48,7 +48,6 @@ public sealed class GetPlexMediaThumbnailImageEndpoint : Endpoint<GetPlexMediaTh
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly IMemoryCache _cache;
 
-    private static readonly TimeSpan _tokenCacheDuration = TimeSpan.FromMinutes(10);
     private static readonly TimeSpan _connectionCacheDuration = TimeSpan.FromMinutes(5);
 
     public GetPlexMediaThumbnailImageEndpoint(
@@ -92,6 +91,7 @@ public sealed class GetPlexMediaThumbnailImageEndpoint : Endpoint<GetPlexMediaTh
         {
             x.Produces(StatusCodes.Status200OK, typeof(byte[]), MediaTypeNames.Image.Jpeg)
                 .Produces(StatusCodes.Status304NotModified)
+                .Produces(HttpCodes.Status601PlexAuthenticationFailed, typeof(BaseResultDTO))
                 .Produces(StatusCodes.Status404NotFound, typeof(BaseResultDTO))
                 .Produces(StatusCodes.Status502BadGateway, typeof(BaseResultDTO))
                 .Produces(StatusCodes.Status500InternalServerError, typeof(BaseResultDTO));
@@ -121,7 +121,7 @@ public sealed class GetPlexMediaThumbnailImageEndpoint : Endpoint<GetPlexMediaTh
         var plexServerId = req.PlexServerId;
 
         // Fetch token and connection in parallel for better performance
-        var tokenTask = GetCachedTokenAsync(plexServerId, ct);
+        var tokenTask = (Task<Result<string>>)_dbContext.GetPlexServerTokenAsync(plexServerId, ct);
         var connectionTask = GetCachedConnectionAsync(plexServerId, ct);
 
         await Task.WhenAll(tokenTask, connectionTask);
@@ -157,31 +157,41 @@ public sealed class GetPlexMediaThumbnailImageEndpoint : Endpoint<GetPlexMediaTh
         // Use the named PlexThumbnail HttpClient with connection pooling
         var client = _httpClientFactory.CreateClient(HttpClientModule.PlexThumbnailClientName);
 
-        var baseUrl = $"{connectionResult.Value.Url}/photo/:/transcode";
-
-        var query = new Dictionary<string, string?>
-        {
-            ["width"] = req.Width.ToString(),
-            ["height"] = req.Height.ToString(),
-            ["minSize"] = "1",
-            ["upscale"] = "1",
-            ["url"] = $"/library/metadata/{req.PlexKey}/thumb/{req.MetaDataKey}?X-Plex-Token={token}",
-            ["X-Plex-Token"] = token,
-        };
-
-        var url = QueryHelpers.AddQueryString(baseUrl, query);
+        var thumbnailPath = $"/library/metadata/{req.PlexKey}/thumb/{req.MetaDataKey}";
+        var transcodeUrl = BuildTranscodeUrl(
+            connectionResult.Value.Url,
+            thumbnailPath,
+            token,
+            req.Width,
+            req.Height
+        );
+        var directUrl = BuildDirectThumbnailUrl(connectionResult.Value.Url, thumbnailPath, token);
 
         try
         {
-            // Use ResponseHeadersRead to start streaming immediately without buffering
-            using var response = await client.GetAsync(url, HttpCompletionOption.ResponseHeadersRead, ct);
-            if (response.StatusCode == HttpStatusCode.NoContent)
+            // Plex's image transcoder can reject an otherwise valid original thumbnail. In that case,
+            // fall back to the same original resource Plex Web can render instead of returning a 502.
+            using var response = await GetThumbnailResponseAsync(client, transcodeUrl, directUrl, ct);
+            if (response.StatusCode is HttpStatusCode.Unauthorized or HttpStatusCode.Forbidden)
             {
                 _log.Here()
-                    .Verbose(
-                        "Plex returned no thumbnail content from {Url}",
-                        SanitizeUrl(url)
+                    .Warning(
+                        "Plex rejected the access token while fetching a thumbnail for server {PlexServerId}. Refresh the Plex account's server access.",
+                        plexServerId
                     );
+                HttpContext.Response.Headers.CacheControl = "no-store";
+                await Send.FluentResult(
+                    Result
+                        .Fail("Plex rejected the server access token; refresh the Plex account access")
+                        .AddPlex401UnauthorizedError(),
+                    ct
+                );
+                return;
+            }
+
+            if (response.StatusCode == HttpStatusCode.NoContent)
+            {
+                _log.Here().Verbose("Plex returned no thumbnail content from {Url}", SanitizeUrl(directUrl));
                 HttpContext.Response.Headers.CacheControl = "no-store";
                 await Send.FluentResult(Result.Fail("No thumbnail image content returned by Plex").Add404NotFoundError(), ct);
                 return;
@@ -190,11 +200,12 @@ public sealed class GetPlexMediaThumbnailImageEndpoint : Endpoint<GetPlexMediaTh
             if (!response.IsSuccessStatusCode)
             {
                 _log.Here()
-                    .Verbose(
+                    .Warning(
                         "Failed to fetch Plex thumbnail from {Url} - Status: {StatusCode}",
-                        SanitizeUrl(url),
+                        SanitizeUrl(directUrl),
                         response.StatusCode
                     );
+                HttpContext.Response.Headers.CacheControl = "no-store";
                 await Send.FluentResult(Result.Fail("Failed to fetch image").Add502BadGatewayError(), ct);
                 return;
             }
@@ -237,7 +248,7 @@ public sealed class GetPlexMediaThumbnailImageEndpoint : Endpoint<GetPlexMediaTh
                         "HTTP request failed while fetching Plex thumbnail for server {PlexServerId} (key {PlexKey}). URL: {Url}",
                         plexServerId,
                         req.PlexKey,
-                        SanitizeUrl(url)
+                        SanitizeUrl(transcodeUrl)
                     );
             }
 
@@ -252,7 +263,7 @@ public sealed class GetPlexMediaThumbnailImageEndpoint : Endpoint<GetPlexMediaTh
                     "Timeout fetching Plex thumbnail for server {PlexServerId} (key {PlexKey}). URL: {Url}",
                     plexServerId,
                     req.PlexKey,
-                    SanitizeUrl(url)
+                    SanitizeUrl(transcodeUrl)
                 );
             await Send.FluentResult(Result.Fail("Request timeout").Add502BadGatewayError(), ct);
         }
@@ -270,24 +281,55 @@ public sealed class GetPlexMediaThumbnailImageEndpoint : Endpoint<GetPlexMediaTh
         }
     }
 
-    private async Task<Result<string>> GetCachedTokenAsync(int plexServerId, CancellationToken ct)
+    internal static string BuildTranscodeUrl(
+        string connectionUrl,
+        string thumbnailPath,
+        string token,
+        int width,
+        int height
+    )
     {
-        var cacheKey = $"plex_token_{plexServerId}";
-
-        // Check cache first
-        if (_cache.TryGetValue<Result<string>>(cacheKey, out var cachedResult) && cachedResult is not null)
-            return cachedResult;
-
-        // Fetch from database
-        var tokenResult = await _dbContext.GetPlexServerTokenAsync(plexServerId, ct);
-
-        // Only cache successful results
-        if (tokenResult.IsSuccess)
+        var query = new Dictionary<string, string?>
         {
-            _cache.Set(cacheKey, tokenResult, _tokenCacheDuration);
-        }
+            ["width"] = width.ToString(),
+            ["height"] = height.ToString(),
+            ["minSize"] = "1",
+            ["upscale"] = "1",
+            ["url"] = QueryHelpers.AddQueryString(thumbnailPath, "X-Plex-Token", token),
+            ["X-Plex-Token"] = token,
+        };
 
-        return tokenResult;
+        return QueryHelpers.AddQueryString($"{connectionUrl.TrimEnd('/')}/photo/:/transcode", query);
+    }
+
+    internal static string BuildDirectThumbnailUrl(string connectionUrl, string thumbnailPath, string token) =>
+        QueryHelpers.AddQueryString($"{connectionUrl.TrimEnd('/')}{thumbnailPath}", "X-Plex-Token", token);
+
+    internal async Task<HttpResponseMessage> GetThumbnailResponseAsync(
+        HttpClient client,
+        string transcodeUrl,
+        string directUrl,
+        CancellationToken ct
+    )
+    {
+        var response = await client.GetAsync(transcodeUrl, HttpCompletionOption.ResponseHeadersRead, ct);
+        if (
+            response.IsSuccessStatusCode
+            || response.StatusCode == HttpStatusCode.NoContent
+            || response.StatusCode == HttpStatusCode.Unauthorized
+            || response.StatusCode == HttpStatusCode.Forbidden
+        )
+            return response;
+
+        _log.Here()
+            .Warning(
+                "Plex thumbnail transcode failed from {Url} with status {StatusCode}; attempting the original thumbnail",
+                SanitizeUrl(transcodeUrl),
+                response.StatusCode
+            );
+        response.Dispose();
+
+        return await client.GetAsync(directUrl, HttpCompletionOption.ResponseHeadersRead, ct);
     }
 
     private async Task<Result<PlexServerConnection>> GetCachedConnectionAsync(int plexServerId, CancellationToken ct)

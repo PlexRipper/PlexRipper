@@ -49,7 +49,7 @@ public class CheckQueuedPlexLibraryToSyncCommandHandler : ICommandHandler<CheckQ
         foreach (var serverGroup in librariesByServer)
         {
             var serverId = serverGroup.Key;
-            var isServerOnline = await _dbContext.IsServerOnline(serverId, cancellationToken);
+            var isServerOnline = await _dbContext.IsServerOnline(serverId);
 
             if (!isServerOnline)
             {
@@ -104,7 +104,7 @@ public class CheckQueuedPlexLibraryToSyncCommandHandler : ICommandHandler<CheckQ
         var jobKey = LibrarySyncJob.GetJobKey(serverId, libraryId);
 
         // Check if a job already exists
-        if (await _scheduler.CheckExists(jobKey))
+        if (await _scheduler.CheckExists(jobKey, cancellationToken))
         {
             _log.Here()
                 .Warning(
@@ -125,7 +125,7 @@ public class CheckQueuedPlexLibraryToSyncCommandHandler : ICommandHandler<CheckQ
 
         var trigger = TriggerBuilder.Create().WithIdentity($"{jobKey.Name}_trigger", jobKey.Group).ForJob(jobKey).StartNow().Build();
 
-        await _scheduler.ScheduleJob(job, trigger);
+        await _scheduler.ScheduleJob(job, trigger, cancellationToken);
 
         // Mark the queue item as processing immediately to prevent
         // CheckQueuedPlexLibraryToSync from scheduling another library

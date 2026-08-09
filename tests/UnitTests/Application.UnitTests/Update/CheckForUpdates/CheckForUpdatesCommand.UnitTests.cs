@@ -39,7 +39,7 @@ public class CheckForUpdatesCommandUnitTests : BaseUnitTest<CheckForUpdatesComma
             .Verifiable(Times.Once());
         mockManager.Setup(m => m.CheckForUpdatesAsync()).ReturnsAsync(updateInfo).Verifiable(Times.Once());
         Mock.Mock<INotificationHubService>()
-            .Setup(x => x.SendRefreshNotificationAsync(RefreshDataType.UpdateAvailable, It.IsAny<CancellationToken>()))
+            .Setup(x => x.SendRefreshNotificationAsync(RefreshDataType.UpdateAvailable))
             .Returns(Task.CompletedTask)
             .Verifiable(Times.Once());
 

@@ -41,7 +41,7 @@ public class WarmupMediaQueryCacheCommandHandler : ICommandHandler<WarmupMediaQu
             // Phase 1: Warm cache immediately from existing DB data.
             // This ensures returning users see media instantly on container restart.
             _log.Here().Information("Phase 1: Building Media Query Cache from existing database state");
-            await _mediaQueryCache.BuildCache();
+            await _mediaQueryCache.BuildCache(cancellationToken);
 
             // Suppress invalidation during the library sync storm so cache-doom loops
             // are avoided. Ownership/access-triggered invalidations are deferred.
@@ -74,7 +74,7 @@ public class WarmupMediaQueryCacheCommandHandler : ICommandHandler<WarmupMediaQu
 
             // Phase 3: Final clean rebuild.
             _log.Here().Information("Phase 3: Rebuilding Media Query Cache after library sync storm settled");
-            await _mediaQueryCache.BuildCache();
+            await _mediaQueryCache.BuildCache(cancellationToken);
         });
 
     private async Task<bool> HasActiveLibrarySyncJobsAsync(CancellationToken cancellationToken)

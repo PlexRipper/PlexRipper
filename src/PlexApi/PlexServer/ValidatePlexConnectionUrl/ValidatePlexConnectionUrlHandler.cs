@@ -27,7 +27,7 @@ public class ValidatePlexConnectionUrlHandler
             }
         );
 
-        var response = await client.General.GetIdentityAsync().ToResponse();
+        var response = await client.General.GetIdentityAsync().ToResponse(ct);
         if (response.IsFailed)
             return response.ToResult();
 

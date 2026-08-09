@@ -18,40 +18,33 @@ public class NotificationHubService : INotificationHubService
     }
 
     /// <inheritdoc/>
-    public async Task SendNotificationAsync(Notification notification, CancellationToken cancellationToken = default)
+    public async Task SendNotificationAsync(Notification notification)
     {
-        try
+        var result = await Result.Try(async Task () =>
+            await _hub.Clients.All.Notification(notification.ToDTO()));
+
+        if (result.IsFailed)
         {
-            await _hub.Clients.All.Notification(notification.ToDTO(), cancellationToken);
-        }
-        catch (Exception ex)
-        {
-            _log.Here().Warning(ex, "Failed to send notification");
+            result.LogError();
+            _log.Here().Error("Failed to send notification");
         }
     }
 
     /// <inheritdoc/>
-    public async Task SendRefreshNotificationAsync(
-        RefreshDataType dataType,
-        CancellationToken cancellationToken = default
-    )
+    public async Task SendRefreshNotificationAsync(RefreshDataType dataType)
     {
-        try
+        var result = await Result.Try(async Task () =>
+            await _hub.Clients.All.RefreshNotification(dataType));
+        if (result.IsFailed)
         {
-            await _hub.Clients.All.RefreshNotification(dataType, cancellationToken);
-        }
-        catch (Exception ex)
-        {
-            _log.Here().Warning(ex, "Failed to send refresh notification");
+            result.LogError();
+            _log.Here().Error("Failed to send refresh notification");
         }
     }
 
     /// <inheritdoc/>
-    public async Task SendRefreshNotificationAsync(
-        List<RefreshDataType> dataTypes,
-        CancellationToken cancellationToken = default
-    )
+    public async Task SendRefreshNotificationAsync(List<RefreshDataType> dataTypes)
     {
-        await Task.WhenAll(dataTypes.Select(dataType => SendRefreshNotificationAsync(dataType, cancellationToken)));
+        await Task.WhenAll(dataTypes.Select(SendRefreshNotificationAsync));
     }
 }

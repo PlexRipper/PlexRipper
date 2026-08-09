@@ -67,6 +67,9 @@ public class RestartDownloadTaskCommandHandler : ICommandHandler<RestartDownload
 
             var stopResult = await _commandExecutor.Send(new StopDownloadTaskCommand(childKey.Id), cancellationToken);
 
+            if (stopResult.IsCancelled)
+                return stopResult.LogWarning();
+
             if (stopResult.IsFailed)
                 return stopResult.LogError();
 
@@ -87,15 +90,27 @@ public class RestartDownloadTaskCommandHandler : ICommandHandler<RestartDownload
             {
                 case DownloadTaskType.MovieData:
                     var refreshResult = await RefreshMovieDownloadTask(childKey, cancellationToken);
+                    if (refreshResult.IsCancelled)
+                        return refreshResult.LogWarning();
+
                     if (refreshResult.IsFailed)
+                    {
+                        refreshResult.LogError();
                         continue;
+                    }
 
                     break;
 
                 case DownloadTaskType.EpisodeData:
                     var refreshEpisodeResult = await RefreshEpisodeMovieDownloadTask(childKey, cancellationToken);
+                    if (refreshEpisodeResult.IsCancelled)
+                        return refreshEpisodeResult.LogWarning();
+
                     if (refreshEpisodeResult.IsFailed)
+                    {
+                        refreshEpisodeResult.LogError();
                         continue;
+                    }
                     break;
                 default:
                     throw new ArgumentOutOfRangeException($"The {downloadTask.DownloadTaskType} is unsupported");
@@ -131,7 +146,7 @@ public class RestartDownloadTaskCommandHandler : ICommandHandler<RestartDownload
     {
         var downloadTask = await _dbContext.DownloadTaskMovieFile.FirstOrDefaultAsync(
             x => x.Id == downloadTaskKey.Id,
-            CancellationToken.None
+            cancellationToken
         );
         if (downloadTask is null)
             return ResultExtensions.EntityNotFound(nameof(DownloadTaskGeneric), downloadTaskKey.Id).LogError();
@@ -183,7 +198,8 @@ public class RestartDownloadTaskCommandHandler : ICommandHandler<RestartDownload
         {
             await _downloadTaskUpdateDispatcher.OnStatusChangedAsync(
                 downloadTask.ToKey(),
-                DownloadStatus.SourceUnavailable
+                DownloadStatus.SourceUnavailable,
+                cancellationToken
             );
 
             await _dbContext.CreateDownloadClientLog(
@@ -212,7 +228,7 @@ public class RestartDownloadTaskCommandHandler : ICommandHandler<RestartDownload
         var downloadTask =
             await _dbContext.DownloadTaskTvShowEpisodeFile.FirstOrDefaultAsync(
                 x => x.Id == downloadTaskKey.Id,
-                CancellationToken.None
+                cancellationToken
             );
         if (downloadTask is null)
             return ResultExtensions.EntityNotFound(nameof(DownloadTaskGeneric), downloadTaskKey.Id).LogError();
@@ -274,7 +290,8 @@ public class RestartDownloadTaskCommandHandler : ICommandHandler<RestartDownload
                 downloadTask.ToKey(),
                 NotificationLevel.Information,
                 DownloadStatus.SourceUnavailable,
-                $"Could not find the original source media for download task \"{downloadTaskKey}\" with title \"{downloadTask.FullTitle}\"");
+                $"Could not find the original source media for download task \"{downloadTaskKey}\" with title \"{downloadTask.FullTitle}\""
+            );
 
             return Result.Fail(
                 $"Could not find the original source media for download task \"{downloadTaskKey}\" with title \"{downloadTask.FullTitle}\"");

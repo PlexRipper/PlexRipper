@@ -87,7 +87,7 @@ public class DbContextExtensionsPlexServerUnitTests : BaseUnitTest
         server.ShouldNotBeNull();
 
         // Act
-        var isOnline = await IDbContext.IsServerOnline(server.Id, CancellationToken);
+        var isOnline = await IDbContext.IsServerOnline(server.Id);
 
         // Assert
         isOnline.ShouldBeTrue();
@@ -110,7 +110,7 @@ public class DbContextExtensionsPlexServerUnitTests : BaseUnitTest
         await IDbContext.PlexServerStatuses.ExecuteDeleteAsync(CancellationToken);
 
         // Act
-        var isOnline = await IDbContext.IsServerOnline(server.Id, CancellationToken);
+        var isOnline = await IDbContext.IsServerOnline(server.Id);
 
         // Assert
         isOnline.ShouldBeFalse();

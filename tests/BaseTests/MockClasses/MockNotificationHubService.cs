@@ -16,28 +16,25 @@ public class MockNotificationHubService : INotificationHubService
         _log = log.ForContext<MockNotificationHubService>();
     }
 
-    public Task SendNotificationAsync(Notification notification, CancellationToken cancellationToken = default)
+    public Task SendNotificationAsync(Notification notification)
     {
-        NotificationList.Add(notification, cancellationToken);
+        NotificationList.Add(notification);
         _log.Here().Verbose("{ClassName} => {@Notification}", nameof(MockNotificationHubService), notification);
         return Task.CompletedTask;
     }
 
-    public Task SendRefreshNotificationAsync(RefreshDataType dataType, CancellationToken cancellationToken = default)
+    public Task SendRefreshNotificationAsync(RefreshDataType dataType)
     {
-        RefreshNotificationList.Add(dataType, cancellationToken);
+        RefreshNotificationList.Add(dataType);
         _log.Here().Verbose("{ClassName} => {@DataType}", nameof(MockNotificationHubService), dataType);
 
         return Task.CompletedTask;
     }
 
-    public async Task SendRefreshNotificationAsync(
-        List<RefreshDataType> dataTypes,
-        CancellationToken cancellationToken = default
-    )
+    public async Task SendRefreshNotificationAsync(List<RefreshDataType> dataTypes)
     {
         foreach (var dataType in dataTypes)
-            await SendRefreshNotificationAsync(dataType, cancellationToken);
+            await SendRefreshNotificationAsync(dataType);
     }
 
 }

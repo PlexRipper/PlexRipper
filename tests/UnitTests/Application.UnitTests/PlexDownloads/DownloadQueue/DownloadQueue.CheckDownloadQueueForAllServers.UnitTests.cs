@@ -17,10 +17,14 @@ public class DownloadQueueCheckDownloadQueueForAllServersUnitTests : BaseUnitTes
             }
         );
 
-        Mock.Mock<IDownloadTaskScheduler>().Setup(x => x.StartDownloadTaskJob(It.IsAny<DownloadTaskKey>())).ReturnOk();
-        Mock.Mock<IDownloadTaskScheduler>().Setup(x => x.IsServerDownloading(It.IsAny<int>())).ReturnsAsync(false);
+        Mock.Mock<IDownloadTaskScheduler>()
+            .Setup(x => x.StartDownloadTaskJob(It.IsAny<DownloadTaskKey>(), CancellationToken))
+            .ReturnOk();
+        Mock.Mock<IDownloadTaskScheduler>()
+            .Setup(x => x.IsServerDownloading(It.IsAny<int>()))
+            .ReturnsAsync(false);
 
-        Sut.Setup();
+        Sut.Setup(CancellationToken);
 
         // Act
         var result = await Sut.CheckDownloadQueueForAllServers(CancellationToken);
@@ -31,7 +35,7 @@ public class DownloadQueueCheckDownloadQueueForAllServersUnitTests : BaseUnitTes
         await ShouldEventuallyAsync(() =>
         {
             Mock.Mock<IDownloadTaskScheduler>()
-                .Verify(x => x.StartDownloadTaskJob(It.IsAny<DownloadTaskKey>()), Times.Once);
+                .Verify(x => x.StartDownloadTaskJob(It.IsAny<DownloadTaskKey>(), CancellationToken), Times.Once);
         });
     }
 

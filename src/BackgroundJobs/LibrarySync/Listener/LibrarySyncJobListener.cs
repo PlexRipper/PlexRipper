@@ -39,25 +39,27 @@ public class LibrarySyncJobListener : ILibrarySyncJobListener
     }
 
     /// <inheritdoc/>
-    public async Task JobToBeExecuted(IJobExecutionContext context, CancellationToken cancellationToken = new())
+    public async Task JobToBeExecuted(IJobExecutionContext context, CancellationToken cancellationToken = default)
     {
         // Source: https://www.quartz-scheduler.net/documentation/quartz-3.x/tutorial/trigger-and-job-listeners.html
         // Make sure your trigger and job listeners never throw an exception (use a try-catch) and that they can handle internal problems. Jobs can get stuck after Quartz is unable to determine whether required logic in listener was completed successfully when listener notification failed.
-        try
+        var result = await Result.Try(async Task () =>
         {
             _log.Here().Debug("JobToBeExecuted for job: {JobKey}", context.JobDetail.Key.ToString());
 
             await SendStatusUpdate(context, JobStatus.Started, cancellationToken);
-        }
-        catch (Exception ex)
+        });
+
+        if (result.IsFailed && !result.IsCancelled)
         {
             _log.Here()
                 .Error(
-                    ex,
                     "Failed to check the {Name} queue after a job was executed: {JobDetail}",
                     Name,
                     context.JobDetail
                 );
+
+            result.LogIfFailed();
         }
     }
 
@@ -65,31 +67,33 @@ public class LibrarySyncJobListener : ILibrarySyncJobListener
     public async Task JobWasExecuted(
         IJobExecutionContext context,
         JobExecutionException? jobException,
-        CancellationToken cancellationToken = new()
+        CancellationToken cancellationToken = default
     )
     {
         // Source: https://www.quartz-scheduler.net/documentation/quartz-3.x/tutorial/trigger-and-job-listeners.html
         // Make sure your trigger and job listeners never throw an exception (use a try-catch) and that they can handle internal problems. Jobs can get stuck after Quartz is unable to determine whether required logic in listener was completed successfully when listener notification failed.
-        try
+        var result = await Result.Try(async Task () =>
         {
             _log.Here().Debug("JobWasExecuted for job: {JobKey}", context.JobDetail.Key.ToString());
 
             await SendStatusUpdate(context, JobStatus.Completed, cancellationToken);
-        }
-        catch (Exception ex)
+        });
+
+        if (result.IsFailed && !result.IsCancelled)
         {
             _log.Here()
                 .Error(
-                    ex,
                     "Failed to check the {Name} queue after a job was executed: {JobDetail}",
                     Name,
                     context.JobDetail
                 );
+
+            result.LogIfFailed();
         }
     }
 
     /// <inheritdoc/>
-    public Task JobExecutionVetoed(IJobExecutionContext context, CancellationToken cancellationToken = new()) =>
+    public Task JobExecutionVetoed(IJobExecutionContext context, CancellationToken cancellationToken = default) =>
         Task.CompletedTask;
 
     private async Task SendStatusUpdate(
@@ -98,52 +102,38 @@ public class LibrarySyncJobListener : ILibrarySyncJobListener
         CancellationToken cancellationToken
     )
     {
-        try
-        {
-            var serverId = context.JobDetail.JobDataMap.GetInt(LibrarySyncJob.ServerIdParameter);
-            var libraryId = context.JobDetail.JobDataMap.GetInt(LibrarySyncJob.LibraryIdParameter);
+        var serverId = context.JobDetail.JobDataMap.GetInt(LibrarySyncJob.ServerIdParameter);
+        var libraryId = context.JobDetail.JobDataMap.GetInt(LibrarySyncJob.LibraryIdParameter);
 
-            using var dbContext = await _dbContextFactory.CreateAsync();
-            var queue = await dbContext.LibrarySyncJobQueues.FirstOrDefaultAsync(
-                x => x.PlexServerId == serverId && x.PlexLibraryId == libraryId,
-                cancellationToken: cancellationToken
-            );
+        using var dbContext = await _dbContextFactory.CreateAsync();
+        var queue = await dbContext.LibrarySyncJobQueues.FirstOrDefaultAsync(
+            x => x.PlexServerId == serverId && x.PlexLibraryId == libraryId,
+            CancellationToken.None
+        );
 
-            if (queue == null)
-            {
-                _log.Here()
-                    .Warning(
-                        "Queue item not found for server {ServerId}, library {LibraryId} when sending status update",
-                        serverId,
-                        libraryId
-                    );
-                return;
-            }
-
-            var statusUpdate = new JobStatusUpdate<LibrarySyncJobQueueDTO>(
-                JobTypes.LibrarySyncJob,
-                jobStatus,
-                queue.ToDTO(),
-                context.FireInstanceId,
-                context.FireTimeUtc.UtcDateTime
-            );
-
-            await _progressHubService.SendJobStatusUpdateAsync(statusUpdate, cancellationToken);
-
-            await _notificationHubService.SendRefreshNotificationAsync(
-                [RefreshDataType.PlexLibrary, RefreshDataType.PlexLibrarySyncStatus],
-                cancellationToken
-            );
-        }
-        catch (Exception ex)
+        if (queue == null)
         {
             _log.Here()
-                .Error(
-                    ex,
-                    "Failed to send status update for job {JobKey} with status {JobStatus}",
-                    context.JobDetail.Key.ToString(),
-                    jobStatus
+                .Warning(
+                    "Queue item not found for server {ServerId}, library {LibraryId} when sending status update",
+                    serverId,
+                    libraryId
                 );
+            return;
         }
+
+        var statusUpdate = new JobStatusUpdate<LibrarySyncJobQueueDTO>(
+            JobTypes.LibrarySyncJob,
+            jobStatus,
+            queue.ToDTO(),
+            context.FireInstanceId,
+            context.FireTimeUtc.UtcDateTime
+        );
+
+        await _progressHubService.SendJobStatusUpdateAsync(statusUpdate);
+
+        await _notificationHubService.SendRefreshNotificationAsync(
+            [RefreshDataType.PlexLibrary, RefreshDataType.PlexLibrarySyncStatus]
+        );
     }
 }

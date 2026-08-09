@@ -36,7 +36,7 @@ public class GetAccessiblePlexServersCommandHandler
 
         var clientId = plexAccount.ClientId;
 
-        var plexDevicesResult = await GetDevices(plexAccountToken, clientId);
+        var plexDevicesResult = await GetDevices(plexAccountToken, clientId, ct);
         if (plexDevicesResult.IsFailed)
             return plexDevicesResult.ToResult();
 
@@ -108,7 +108,11 @@ public class GetAccessiblePlexServersCommandHandler
         return Result.Ok(plexServers);
     }
 
-    private async Task<Result<List<PlexDevice>>> GetDevices(string plexToken, string clientId)
+    private async Task<Result<List<PlexDevice>>> GetDevices(
+        string plexToken,
+        string clientId,
+        CancellationToken cancellationToken
+    )
     {
         var plexTvClient = _plexApiClientFactory.CreateTvClient(
             plexToken,
@@ -117,7 +121,7 @@ public class GetAccessiblePlexServersCommandHandler
         var result = await Task.WhenAll(
             plexTvClient
                 .Plex.GetServerResourcesAsync(new GetServerResourcesRequest { ClientIdentifier = clientId })
-                .ToResponse(),
+                .ToResponse(cancellationToken),
             plexTvClient
                 .Plex.GetServerResourcesAsync(
                     new GetServerResourcesRequest()
@@ -128,8 +132,11 @@ public class GetAccessiblePlexServersCommandHandler
                         IncludeIPv6 = IncludeIPv6.True,
                     }
                 )
-                .ToResponse()
+                .ToResponse(cancellationToken)
         );
+
+        if (result.Any(x => x.IsCancelled))
+            return ResultExtensions.TaskIsCancelled(nameof(GetAccessiblePlexServersCommand));
 
         if (result[0].IsFailed && result[1].IsFailed)
             return Result.Merge(result[0].ToResult(), result[1].ToResult());

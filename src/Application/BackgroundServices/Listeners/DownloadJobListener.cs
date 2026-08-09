@@ -25,12 +25,12 @@ public class DownloadJobListener : IDownloadJobListener
     public async Task JobWasExecuted(
         IJobExecutionContext context,
         JobExecutionException? jobException,
-        CancellationToken cancellationToken = new()
+        CancellationToken cancellationToken = default
     )
     {
         // Source: https://www.quartz-scheduler.net/documentation/quartz-3.x/tutorial/trigger-and-job-listeners.html
         // Make sure your trigger and job listeners never throw an exception (use a try-catch) and that they can handle internal problems. Jobs can get stuck after Quartz is unable to determine whether required logic in listener was completed successfully when listener notification failed.
-        try
+        var result = await Result.Try(async Task () =>
         {
             _log.Here().Debug("JobWasExecuted for job: {JobKey}", context.JobDetail.Key.ToString());
             var dataMap = context.JobDetail.JobDataMap;
@@ -52,7 +52,7 @@ public class DownloadJobListener : IDownloadJobListener
                         "DownloadTask with id: {DownloadTaskId} has finished downloading, starting moveDownloadJob and executing DownloadQueueCheck",
                         downloadTaskKey.Id
                     );
-                await _moveDownloadFileQueue.CheckMoveDownloadFileJobQueue();
+                await _moveDownloadFileQueue.CheckMoveDownloadFileJobQueue(cancellationToken);
             }
 
             _log.Here()
@@ -65,22 +65,24 @@ public class DownloadJobListener : IDownloadJobListener
                 new CheckDownloadQueueEvent(downloadTaskKey.PlexServerId),
                 cancellationToken
             );
-        }
-        catch (Exception ex)
+        });
+
+        if (result.IsFailed && !result.IsCancelled)
         {
             _log.Here()
                 .Error(
-                    ex,
                     "Failed to check the {Name} queue after a job was executed: {JobDetail}",
                     Name,
                     context.JobDetail
                 );
+
+            result.LogIfFailed();
         }
     }
 
-    public Task JobToBeExecuted(IJobExecutionContext context, CancellationToken cancellationToken = new()) =>
+    public Task JobToBeExecuted(IJobExecutionContext context, CancellationToken cancellationToken = default) =>
         Task.CompletedTask;
 
-    public Task JobExecutionVetoed(IJobExecutionContext context, CancellationToken cancellationToken = new()) =>
+    public Task JobExecutionVetoed(IJobExecutionContext context, CancellationToken cancellationToken = default) =>
         Task.CompletedTask;
 }

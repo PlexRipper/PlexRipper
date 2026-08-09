@@ -34,8 +34,14 @@ public class PlexLibraryComparisonJob : IJob
         var cancellationToken = context.CancellationToken;
         var processedCount = 0;
 
-        while (!cancellationToken.IsCancellationRequested)
+        while (true)
         {
+            if (cancellationToken.IsCancellationRequested)
+            {
+                _log.Here().Warning("Library comparison queue worker was cancelled");
+                return;
+            }
+
             var processedQueueItem = await ProcessNextQueueItemAsync(cancellationToken);
 
             if (!processedQueueItem)
@@ -97,10 +103,28 @@ public class PlexLibraryComparisonJob : IJob
             _ => Result.Fail($"Library comparison for media type {queueItem.MediaType} is not yet implemented"),
         };
 
+        if (result.IsCancelled)
+        {
+            await UpdateQueueItemAsync(
+                queueItem,
+                LibrarySyncJobStatus.Queued,
+                "Library comparison was cancelled and requeued",
+                CancellationToken.None
+            );
+            _log.Here()
+                .Warning(
+                    "Comparison queue item was cancelled and requeued for remote {RemoteLibId} vs owned {OwnedLibId}, {MediaType}",
+                    queueItem.RemotePlexLibraryId,
+                    queueItem.OwnedPlexLibraryId,
+                    queueItem.MediaType
+                );
+            return false;
+        }
+
         if (result.IsFailed)
         {
             result.LogError();
-            await UpdateQueueItemAsync(queueItem, LibrarySyncJobStatus.Failed, result.ToString(), cancellationToken);
+            await UpdateQueueItemAsync(queueItem, LibrarySyncJobStatus.Failed, result.ToString(), CancellationToken.None);
             _log.Here()
                 .Warning(
                     "Comparison queue item failed for remote {RemoteLibId} vs owned {OwnedLibId}, {MediaType}",
@@ -111,7 +135,7 @@ public class PlexLibraryComparisonJob : IJob
         }
         else
         {
-            await UpdateQueueItemAsync(queueItem, LibrarySyncJobStatus.Completed, null, cancellationToken);
+            await UpdateQueueItemAsync(queueItem, LibrarySyncJobStatus.Completed, null, CancellationToken.None);
             _log.Here()
                 .Information(
                     "Comparison queue item completed for remote {RemoteLibId} vs owned {OwnedLibId}, {MediaType}",
@@ -120,6 +144,9 @@ public class PlexLibraryComparisonJob : IJob
                     queueItem.MediaType
                 );
         }
+
+        if (cancellationToken.IsCancellationRequested)
+            return false;
 
         await SendCompletionNotificationIfSettledAsync(queueItem, cancellationToken);
         return true;
@@ -168,8 +195,7 @@ public class PlexLibraryComparisonJob : IJob
                 AffectedLibraryIds = affectedLibraryIds.Distinct().ToList(),
                 MediaType = queueItem.MediaType,
                 CompletedAt = DateTime.UtcNow,
-            },
-            cancellationToken
+            }
         );
     }
 

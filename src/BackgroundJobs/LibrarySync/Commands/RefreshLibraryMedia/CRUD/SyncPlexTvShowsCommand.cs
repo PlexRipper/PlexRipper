@@ -100,7 +100,9 @@ public class SyncPlexTvShowsCommandHandler : ICommandHandler<SyncPlexTvShowsComm
             plexLibraryId,
             cancellationToken: cancellationToken
         );
-        var plexServerId = await _dbContext.GetPlexServerIdFromPlexLibraryId(plexLibraryId);
+        var plexServerId = await _dbContext.GetPlexServerIdFromPlexLibraryId(
+            plexLibraryId
+        );
 
         if (string.IsNullOrWhiteSpace(plexLibraryName))
             return ResultExtensions.EntityNotFound(nameof(command.LibraryMetadata.PlexLibrary), plexLibraryId);
@@ -113,14 +115,28 @@ public class SyncPlexTvShowsCommandHandler : ICommandHandler<SyncPlexTvShowsComm
             );
 
         var stopWatch = Stopwatch.StartNew();
+        if (cancellationToken.IsCancellationRequested)
+            return ResultExtensions.TaskIsCancelled(nameof(SyncPlexTvShowsCommand)).LogWarning();
 
+        // Point of no return: once RemoveMedia starts, complete all persistence without caller cancellation.
         var removeRapport = await RemoveMedia(plexLibraryId, CancellationToken.None);
 
         var plexTvShows = command.LibraryMetadata.PlexLibrary.TvShows.ToList();
 
         var bulkInsertRapportResult = await Result.Try(() =>
-            _dbContext.BulkInsertPlexTvShowsAsync(plexTvShows, plexServerId, plexLibraryId, cancellationToken)
+            _dbContext.BulkInsertPlexTvShowsAsync(
+                plexTvShows,
+                plexServerId,
+                plexLibraryId,
+                CancellationToken.None
+            )
         );
+
+        if (bulkInsertRapportResult.IsCancelled)
+        {
+            stopWatch.Stop();
+            return bulkInsertRapportResult.LogWarning();
+        }
 
         if (bulkInsertRapportResult.IsFailed)
         {
@@ -144,7 +160,7 @@ public class SyncPlexTvShowsCommandHandler : ICommandHandler<SyncPlexTvShowsComm
                 EpisodeCount = _dbContext.PlexTvShowEpisodes.Count(x => x.PlexLibraryId == plexLibraryId),
                 MediaSize = _dbContext.PlexTvShowEpisodes.Where(x => x.PlexLibraryId == plexLibraryId).Sum(x => (long?)x.MediaSize) ?? 0,
             })
-            .FirstOrDefaultAsync(cancellationToken);
+            .FirstOrDefaultAsync(CancellationToken.None);
 
         if (metrics is null)
             return ResultExtensions.EntityNotFound(nameof(PlexLibrary), plexLibraryId).LogError();
@@ -164,9 +180,9 @@ public class SyncPlexTvShowsCommandHandler : ICommandHandler<SyncPlexTvShowsComm
         var actorDict = command.LibraryMetadata.PlexActors;
 
         ResultBase[] results = await Task.WhenAll(
-            SyncTvShowGenres(plexTvShows, genreDict, plexLibraryId, plexLibraryName, cancellationToken),
-            SyncTvShowCountries(plexTvShows, countryDict, plexLibraryId, plexLibraryName, cancellationToken),
-            SyncTvShowActors(plexTvShows, actorDict, plexLibraryId, plexLibraryName, cancellationToken)
+            SyncTvShowGenres(plexTvShows, genreDict, plexLibraryId, plexLibraryName, CancellationToken.None),
+            SyncTvShowCountries(plexTvShows, countryDict, plexLibraryId, plexLibraryName, CancellationToken.None),
+            SyncTvShowActors(plexTvShows, actorDict, plexLibraryId, plexLibraryName, CancellationToken.None)
         );
 
         var mergeResult = Result.Merge(results);

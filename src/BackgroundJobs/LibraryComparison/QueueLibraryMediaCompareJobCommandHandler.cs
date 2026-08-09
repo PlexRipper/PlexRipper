@@ -19,19 +19,16 @@ public class QueueLibraryMediaCompareJobCommandHandler : ICommandHandler<QueueLi
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
     private readonly ICommandExecutor _commandExecutor;
-    private readonly IMediaQueryCache _mediaQueryCache;
 
     public QueueLibraryMediaCompareJobCommandHandler(
         ILogger log,
         IReaparrDbContext dbContext,
-        ICommandExecutor commandExecutor,
-        IMediaQueryCache mediaQueryCache
+        ICommandExecutor commandExecutor
     )
     {
         _log = log.ForContext<QueueLibraryMediaCompareJobCommandHandler>();
         _dbContext = dbContext;
         _commandExecutor = commandExecutor;
-        _mediaQueryCache = mediaQueryCache;
     }
 
     public async Task<Result> ExecuteAsync(
@@ -125,10 +122,5 @@ public class QueueLibraryMediaCompareJobCommandHandler : ICommandHandler<QueueLi
                     .SetProperty(y => y.OwnedLibraryUpdatedAt, (DateTime?)null),
                 cancellationToken
             );
-
-        _mediaQueryCache.InvalidateLibraries(
-            [remoteLibraryId, ownedLibraryId],
-            $"Library comparison queued for {mediaType}"
-        );
     }
 }

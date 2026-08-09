@@ -96,8 +96,6 @@ public class QueueInspectPlexServerJobCommandHandler : ICommandHandler<QueueInsp
             .StartNow()
             .Build();
 
-        await _scheduler.ScheduleJobAsync(job, trigger, cancellationToken);
-
-        return Result.Ok();
+        return await _scheduler.ScheduleJobAsync(job, trigger, cancellationToken);
     }
 }

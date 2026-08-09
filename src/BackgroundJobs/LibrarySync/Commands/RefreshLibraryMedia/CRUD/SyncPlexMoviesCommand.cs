@@ -64,14 +64,17 @@ public class SyncPlexMoviesCommandHandler : ICommandHandler<SyncPlexMoviesComman
             );
 
         var stopWatch = Stopwatch.StartNew();
+        if (cancellationToken.IsCancellationRequested)
+            return ResultExtensions.TaskIsCancelled(nameof(SyncPlexMoviesCommand)).LogWarning();
 
         // Point of no return: once RemoveMedia starts, old data is gone.
         // Always run to completion regardless of cancellation to avoid partial deletions.
-        await RemoveMedia(plexLibraryId, CancellationToken.None);
+        var completionToken = CancellationToken.None;
+        await RemoveMedia(plexLibraryId, completionToken);
 
         var plexMovies = command.LibraryMetadata.PlexLibrary.Movies.ToList();
         var insertResult = await Result.Try(() =>
-            _dbContext.BulkInsertPlexMoviesAsync(plexMovies, plexServerId, plexLibraryId, ct: cancellationToken)
+            _dbContext.BulkInsertPlexMoviesAsync(plexMovies, plexServerId, plexLibraryId, ct: completionToken)
         );
         if (insertResult.IsCancelled)
         {
@@ -109,7 +112,7 @@ public class SyncPlexMoviesCommandHandler : ICommandHandler<SyncPlexMoviesComman
             command.LibraryMetadata.PlexCountries,
             plexLibraryId,
             libraryName,
-            cancellationToken
+            completionToken
         );
 
         var syncGenreResult = await SyncMovieGenres(
@@ -117,7 +120,7 @@ public class SyncPlexMoviesCommandHandler : ICommandHandler<SyncPlexMoviesComman
             command.LibraryMetadata.PlexGenres,
             plexLibraryId,
             libraryName,
-            cancellationToken
+            completionToken
         );
 
         var syncActorResult = await SyncMovieActors(
@@ -125,7 +128,7 @@ public class SyncPlexMoviesCommandHandler : ICommandHandler<SyncPlexMoviesComman
             command.LibraryMetadata.PlexActors,
             plexLibraryId,
             libraryName,
-            cancellationToken
+            completionToken
         );
 
         var mergeResult = Result.Merge(syncActorResult, syncGenreResult, syncCountriesResult);

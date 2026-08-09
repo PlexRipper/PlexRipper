@@ -18,7 +18,10 @@ public class MoveDownloadFileJobQueue : IMoveDownloadFileQueue
     }
 
     /// <inheritdoc/>
-    public async Task<Result> CheckMoveDownloadFileJobQueue()
+    public Task<Result> CheckMoveDownloadFileJobQueue() => CheckMoveDownloadFileJobQueue(CancellationToken.None);
+
+    /// <inheritdoc/>
+    public async Task<Result> CheckMoveDownloadFileJobQueue(CancellationToken cancellationToken)
     {
         // Create a new DbContext for this operation to avoid threading issues
         using var dbContext = await _dbContextFactory.CreateAsync();
@@ -63,7 +66,7 @@ public class MoveDownloadFileJobQueue : IMoveDownloadFileQueue
                 PlexLibraryId = x.PlexLibraryId,
                 Type = x.Type,
             })
-            .FirstOrDefaultAsync();
+            .FirstOrDefaultAsync(cancellationToken);
 
         if (key is null)
         {
@@ -71,7 +74,7 @@ public class MoveDownloadFileJobQueue : IMoveDownloadFileQueue
             return Result.Ok();
         }
 
-        var startResult = await _moveDownloadFileScheduler.StartMoveDownloadFileJob(key);
+        var startResult = await _moveDownloadFileScheduler.StartMoveDownloadFileJob(key, cancellationToken);
         return startResult.IsSuccess ? Result.Ok() : startResult;
     }
 }

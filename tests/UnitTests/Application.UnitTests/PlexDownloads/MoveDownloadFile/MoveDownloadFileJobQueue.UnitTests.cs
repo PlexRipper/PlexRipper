@@ -21,18 +21,18 @@ public class MoveDownloadFileJobQueueUnitTests : BaseUnitTest<MoveDownloadFileJo
         await dbContext.SaveChangesAsync(CancellationToken);
 
         Mock.Mock<IMoveDownloadFileScheduler>()
-            .Setup(x => x.StartMoveDownloadFileJob(It.IsAny<DownloadTaskKey>()))
+            .Setup(x => x.StartMoveDownloadFileJob(It.IsAny<DownloadTaskKey>(), CancellationToken))
             .ReturnsAsync(Result.Ok())
             .Verifiable(Times.Never);
 
         // Act
-        var result = await Sut.CheckMoveDownloadFileJobQueue();
+        var result = await Sut.CheckMoveDownloadFileJobQueue(CancellationToken);
 
         // Assert: returns success — "nothing to move" is not an error, just a no-op
         result.ShouldNotBeNull();
         result.IsSuccess.ShouldBeTrue();
         Mock.Mock<IMoveDownloadFileScheduler>()
-            .Verify(x => x.StartMoveDownloadFileJob(It.IsAny<DownloadTaskKey>()), Times.Never);
+            .Verify(x => x.StartMoveDownloadFileJob(It.IsAny<DownloadTaskKey>(), CancellationToken), Times.Never);
     }
 
     [Test]
@@ -54,17 +54,17 @@ public class MoveDownloadFileJobQueueUnitTests : BaseUnitTest<MoveDownloadFileJo
         await dbContext.SaveChangesAsync(CancellationToken);
 
         Mock.Mock<IMoveDownloadFileScheduler>()
-            .Setup(x => x.StartMoveDownloadFileJob(It.IsAny<DownloadTaskKey>()))
+            .Setup(x => x.StartMoveDownloadFileJob(It.IsAny<DownloadTaskKey>(), CancellationToken))
             .ReturnsAsync(Result.Ok());
 
         // Act
-        var result = await Sut.CheckMoveDownloadFileJobQueue();
+        var result = await Sut.CheckMoveDownloadFileJobQueue(CancellationToken);
 
         // Assert
         result.ShouldNotBeNull();
         result.IsSuccess.ShouldBeTrue();
         Mock.Mock<IMoveDownloadFileScheduler>()
-            .Verify(x => x.StartMoveDownloadFileJob(It.IsAny<DownloadTaskKey>()), Times.Once);
+            .Verify(x => x.StartMoveDownloadFileJob(It.IsAny<DownloadTaskKey>(), CancellationToken), Times.Once);
     }
 
     [Test]
@@ -88,17 +88,17 @@ public class MoveDownloadFileJobQueueUnitTests : BaseUnitTest<MoveDownloadFileJo
         await dbContext.SaveChangesAsync(CancellationToken);
 
         Mock.Mock<IMoveDownloadFileScheduler>()
-            .Setup(x => x.StartMoveDownloadFileJob(It.IsAny<DownloadTaskKey>()))
+            .Setup(x => x.StartMoveDownloadFileJob(It.IsAny<DownloadTaskKey>(), CancellationToken))
             .ReturnsAsync(Result.Ok());
 
         // Act
-        var result = await Sut.CheckMoveDownloadFileJobQueue();
+        var result = await Sut.CheckMoveDownloadFileJobQueue(CancellationToken);
 
         // Assert
         result.ShouldNotBeNull();
         result.IsSuccess.ShouldBeTrue();
         Mock.Mock<IMoveDownloadFileScheduler>()
-            .Verify(x => x.StartMoveDownloadFileJob(It.IsAny<DownloadTaskKey>()), Times.Once);
+            .Verify(x => x.StartMoveDownloadFileJob(It.IsAny<DownloadTaskKey>(), CancellationToken), Times.Once);
     }
 
     [Test]
@@ -124,18 +124,18 @@ public class MoveDownloadFileJobQueueUnitTests : BaseUnitTest<MoveDownloadFileJo
 
         DownloadTaskKey? capturedKey = null;
         Mock.Mock<IMoveDownloadFileScheduler>()
-            .Setup(x => x.StartMoveDownloadFileJob(It.IsAny<DownloadTaskKey>()))
-            .Callback<DownloadTaskKey>(k => capturedKey = k)
+            .Setup(x => x.StartMoveDownloadFileJob(It.IsAny<DownloadTaskKey>(), CancellationToken))
+            .Callback<DownloadTaskKey, CancellationToken>((k, _) => capturedKey = k)
             .ReturnsAsync(Result.Ok());
 
         // Act
-        var result = await Sut.CheckMoveDownloadFileJobQueue();
+        var result = await Sut.CheckMoveDownloadFileJobQueue(CancellationToken);
 
         // Assert: the DownloadFinished task is preferred over MoveError
         result.ShouldNotBeNull();
         result.IsSuccess.ShouldBeTrue();
         Mock.Mock<IMoveDownloadFileScheduler>()
-            .Verify(x => x.StartMoveDownloadFileJob(It.IsAny<DownloadTaskKey>()), Times.Once);
+            .Verify(x => x.StartMoveDownloadFileJob(It.IsAny<DownloadTaskKey>(), CancellationToken), Times.Once);
         capturedKey.ShouldNotBeNull();
         capturedKey.ShouldBe(expectedKey);
     }
@@ -147,17 +147,17 @@ public class MoveDownloadFileJobQueueUnitTests : BaseUnitTest<MoveDownloadFileJo
         await SetupDatabase(9, config => config.PlexServerCount = 1);
 
         Mock.Mock<IMoveDownloadFileScheduler>()
-            .Setup(x => x.StartMoveDownloadFileJob(It.IsAny<DownloadTaskKey>()))
+            .Setup(x => x.StartMoveDownloadFileJob(It.IsAny<DownloadTaskKey>(), CancellationToken))
             .ReturnsAsync(Result.Ok());
 
         // Act
-        var result = await Sut.CheckMoveDownloadFileJobQueue();
+        var result = await Sut.CheckMoveDownloadFileJobQueue(CancellationToken);
 
         // Assert: no task available is not an error, job is never started
         result.ShouldNotBeNull();
         result.IsSuccess.ShouldBeTrue();
         Mock.Mock<IMoveDownloadFileScheduler>()
-            .Verify(x => x.StartMoveDownloadFileJob(It.IsAny<DownloadTaskKey>()), Times.Never);
+            .Verify(x => x.StartMoveDownloadFileJob(It.IsAny<DownloadTaskKey>(), CancellationToken), Times.Never);
     }
 
     [Test]
@@ -180,18 +180,18 @@ public class MoveDownloadFileJobQueueUnitTests : BaseUnitTest<MoveDownloadFileJo
 
         var startResult = Result.Fail("Scheduler failed to start job");
         Mock.Mock<IMoveDownloadFileScheduler>()
-            .Setup(x => x.StartMoveDownloadFileJob(It.IsAny<DownloadTaskKey>()))
+            .Setup(x => x.StartMoveDownloadFileJob(It.IsAny<DownloadTaskKey>(), CancellationToken))
             .ReturnsAsync(startResult);
 
         // Act
-        var result = await Sut.CheckMoveDownloadFileJobQueue();
+        var result = await Sut.CheckMoveDownloadFileJobQueue(CancellationToken);
 
         // Assert: the scheduler failure is propagated back to the caller
         result.ShouldNotBeNull();
         result.IsFailed.ShouldBeTrue();
         result.Errors.ShouldBe(startResult.Errors);
         Mock.Mock<IMoveDownloadFileScheduler>()
-            .Verify(x => x.StartMoveDownloadFileJob(It.IsAny<DownloadTaskKey>()), Times.Once);
+            .Verify(x => x.StartMoveDownloadFileJob(It.IsAny<DownloadTaskKey>(), CancellationToken), Times.Once);
     }
 
     [Test]
@@ -213,17 +213,17 @@ public class MoveDownloadFileJobQueueUnitTests : BaseUnitTest<MoveDownloadFileJo
         await dbContext.SaveChangesAsync(CancellationToken);
 
         Mock.Mock<IMoveDownloadFileScheduler>()
-            .Setup(x => x.StartMoveDownloadFileJob(It.IsAny<DownloadTaskKey>()))
+            .Setup(x => x.StartMoveDownloadFileJob(It.IsAny<DownloadTaskKey>(), CancellationToken))
             .ReturnsAsync(Result.Ok());
 
         // Act
-        var result = await Sut.CheckMoveDownloadFileJobQueue();
+        var result = await Sut.CheckMoveDownloadFileJobQueue(CancellationToken);
 
         // Assert
         result.ShouldNotBeNull();
         result.IsSuccess.ShouldBeTrue();
         Mock.Mock<IMoveDownloadFileScheduler>()
-            .Verify(x => x.StartMoveDownloadFileJob(It.IsAny<DownloadTaskKey>()), Times.Once);
+            .Verify(x => x.StartMoveDownloadFileJob(It.IsAny<DownloadTaskKey>(), CancellationToken), Times.Once);
     }
 
     [Test]
@@ -265,18 +265,18 @@ public class MoveDownloadFileJobQueueUnitTests : BaseUnitTest<MoveDownloadFileJo
 
         DownloadTaskKey? capturedKey = null;
         Mock.Mock<IMoveDownloadFileScheduler>()
-            .Setup(x => x.StartMoveDownloadFileJob(It.IsAny<DownloadTaskKey>()))
-            .Callback<DownloadTaskKey>(k => capturedKey = k)
+            .Setup(x => x.StartMoveDownloadFileJob(It.IsAny<DownloadTaskKey>(), CancellationToken))
+            .Callback<DownloadTaskKey, CancellationToken>((k, _) => capturedKey = k)
             .ReturnsAsync(Result.Ok());
 
         // Act
-        var result = await Sut.CheckMoveDownloadFileJobQueue();
+        var result = await Sut.CheckMoveDownloadFileJobQueue(CancellationToken);
 
         // Assert: the oldest file is preferred regardless of type
         result.ShouldNotBeNull();
         result.IsSuccess.ShouldBeTrue();
         Mock.Mock<IMoveDownloadFileScheduler>()
-            .Verify(x => x.StartMoveDownloadFileJob(It.IsAny<DownloadTaskKey>()), Times.Once);
+            .Verify(x => x.StartMoveDownloadFileJob(It.IsAny<DownloadTaskKey>(), CancellationToken), Times.Once);
         capturedKey.ShouldNotBeNull();
         capturedKey.ShouldBe(expectedKey);
     }
@@ -322,18 +322,18 @@ public class MoveDownloadFileJobQueueUnitTests : BaseUnitTest<MoveDownloadFileJo
 
         DownloadTaskKey? capturedKey = null;
         Mock.Mock<IMoveDownloadFileScheduler>()
-            .Setup(x => x.StartMoveDownloadFileJob(It.IsAny<DownloadTaskKey>()))
-            .Callback<DownloadTaskKey>(k => capturedKey = k)
+            .Setup(x => x.StartMoveDownloadFileJob(It.IsAny<DownloadTaskKey>(), CancellationToken))
+            .Callback<DownloadTaskKey, CancellationToken>((k, _) => capturedKey = k)
             .ReturnsAsync(Result.Ok());
 
         // Act
-        var result = await Sut.CheckMoveDownloadFileJobQueue();
+        var result = await Sut.CheckMoveDownloadFileJobQueue(CancellationToken);
 
         // Assert
         result.ShouldNotBeNull();
         result.IsSuccess.ShouldBeTrue();
         Mock.Mock<IMoveDownloadFileScheduler>()
-            .Verify(x => x.StartMoveDownloadFileJob(It.IsAny<DownloadTaskKey>()), Times.Once);
+            .Verify(x => x.StartMoveDownloadFileJob(It.IsAny<DownloadTaskKey>(), CancellationToken), Times.Once);
         capturedKey.ShouldNotBeNull();
         capturedKey.ShouldBe(expectedKey);
     }
@@ -359,16 +359,16 @@ public class MoveDownloadFileJobQueueUnitTests : BaseUnitTest<MoveDownloadFileJo
         await dbContext.SaveChangesAsync(CancellationToken);
 
         Mock.Mock<IMoveDownloadFileScheduler>()
-            .Setup(x => x.StartMoveDownloadFileJob(It.IsAny<DownloadTaskKey>()))
+            .Setup(x => x.StartMoveDownloadFileJob(It.IsAny<DownloadTaskKey>(), CancellationToken))
             .ReturnsAsync(Result.Ok());
 
         // Act
-        var result = await Sut.CheckMoveDownloadFileJobQueue();
+        var result = await Sut.CheckMoveDownloadFileJobQueue(CancellationToken);
 
         // Assert
         result.ShouldNotBeNull();
         result.IsSuccess.ShouldBeTrue();
         Mock.Mock<IMoveDownloadFileScheduler>()
-            .Verify(x => x.StartMoveDownloadFileJob(It.IsAny<DownloadTaskKey>()), Times.Once);
+            .Verify(x => x.StartMoveDownloadFileJob(It.IsAny<DownloadTaskKey>(), CancellationToken), Times.Once);
     }
 }

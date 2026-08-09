@@ -97,7 +97,7 @@ public class GetMediaByTypeCommandHandler : ICommandHandler<GetMediaByTypeComman
             {
                 foreach (var server in serverList)
                 {
-                    var isServerOnline = await _dbContext.IsServerOnline(server.Id, ct);
+                    var isServerOnline = await _dbContext.IsServerOnline(server.Id);
                     if (!isServerOnline)
                     {
                         allowedPlexLibraryIds.RemoveAll(x => server.PlexLibraryIds.Contains(x));

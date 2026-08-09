@@ -16,7 +16,10 @@ public static partial class DbContextExtensions
         return plexLibraryName ?? "Library Name Not Found";
     }
 
-    public static async Task<int> GetPlexServerIdFromPlexLibraryId(this IReaparrDbContext dbContext, int plexLibraryId)
+    public static async Task<int> GetPlexServerIdFromPlexLibraryId(
+        this IReaparrDbContext dbContext,
+        int plexLibraryId
+    )
     {
         return await dbContext
             .PlexLibraries.Where(x => x.Id == plexLibraryId)

@@ -179,6 +179,34 @@ public class PlexApiClientUnitTests : BaseUnitTest<Func<PlexApiClientOptions?, P
     }
 
     [Test]
+    public async Task ShouldPropagateCancellation_WhenCallerCancelsRequest()
+    {
+        // Arrange
+        var requestStarted = new TaskCompletionSource<CancellationToken>(TaskCreationOptions.RunContinuationsAsynchronously);
+        SetupHttpClient(config =>
+            config
+                .SetupAnyRequest()
+                .Returns<HttpRequestMessage, CancellationToken>(async (_, cancellationToken) =>
+                {
+                    requestStarted.TrySetResult(cancellationToken);
+                    await Task.Delay(Timeout.InfiniteTimeSpan, cancellationToken);
+                    return new HttpResponseMessage(HttpStatusCode.OK);
+                })
+        );
+        var client = Sut(new PlexApiClientOptions { ConnectionUrl = "http://localhost", RetryProgressAction = null });
+        using var cancellationTokenSource = new CancellationTokenSource();
+
+        // Act
+        var sendTask = client.SendAsync(new HttpRequestMessage(), cancellationTokenSource.Token);
+        var observedToken = await requestStarted.Task.WaitAsync(TimeSpan.FromSeconds(5));
+        cancellationTokenSource.Cancel();
+
+        // Assert
+        observedToken.CanBeCanceled.ShouldBeTrue();
+        await Should.ThrowAsync<OperationCanceledException>(() => sendTask.WaitAsync(TimeSpan.FromSeconds(5)));
+    }
+
+    [Test]
     public async Task ShouldReturnBadGatewayResponse_WhenHttpRequestExceptionOccurs()
     {
         // Set up the mocked HttpClient to throw an HttpRequestException

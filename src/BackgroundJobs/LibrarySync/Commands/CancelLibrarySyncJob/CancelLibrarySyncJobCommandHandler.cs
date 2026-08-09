@@ -60,7 +60,7 @@ public class CancelLibrarySyncJobCommandHandler : ICommandHandler<CancelLibraryS
         var serverId = queueItem.PlexServerId;
         var jobKey = LibrarySyncJob.GetJobKey(serverId, plexLibraryId);
 
-        var wasInterrupted = await _scheduler.Interrupt(jobKey, CancellationToken.None);
+        var wasInterrupted = await _scheduler.Interrupt(jobKey, cancellationToken);
         if (wasInterrupted)
         {
             _log.Here()
@@ -81,7 +81,7 @@ public class CancelLibrarySyncJobCommandHandler : ICommandHandler<CancelLibraryS
                             .SetProperty(x => x.CompletedAt, DateTime.UtcNow)
                             .SetProperty(x => x.ErrorMessage, (string?)null)
                             .SetProperty(x => x.IsServerOffline, false),
-                    cancellationToken: CancellationToken.None
+                    cancellationToken: cancellationToken
                 );
 
             _log.Here()
@@ -92,8 +92,7 @@ public class CancelLibrarySyncJobCommandHandler : ICommandHandler<CancelLibraryS
                 );
 
             await _notificationHubService.SendRefreshNotificationAsync(
-                [RefreshDataType.PlexLibrarySyncStatus],
-                CancellationToken.None
+                [RefreshDataType.PlexLibrarySyncStatus]
             );
         }
 

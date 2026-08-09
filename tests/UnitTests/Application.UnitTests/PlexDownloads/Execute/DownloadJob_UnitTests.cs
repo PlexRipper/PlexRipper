@@ -53,7 +53,7 @@ public class DownloadJobUnitTests : BaseUnitTest<DownloadJob>
         downloadTaskResult.ShouldNotBeNull();
 
         var downloadFolder = await IDbContext.GetDownloadFolder();
-        await IDbContext.GetDefaultDestinationFolderPath(PlexMediaType.Movie, CancellationToken);
+        await IDbContext.GetDefaultDestinationFolderPath(PlexMediaType.Movie);
 
         downloadTaskResult.DirectoryMeta.DownloadRootPath.ShouldBe(downloadFolder.DirectoryPath);
         downloadTaskResult.DirectoryMeta.DestinationRootPath.ShouldBe(expectedDestinationRootPath);

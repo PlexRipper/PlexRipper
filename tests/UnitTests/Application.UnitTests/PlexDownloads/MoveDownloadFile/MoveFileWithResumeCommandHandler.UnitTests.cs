@@ -149,14 +149,14 @@ public class MoveFileWithResumeCommandHandlerUnitTests : BaseUnitTest<MoveFileWi
         };
 
         var result = await Sut.ExecuteAsync(command, cts.Token);
+
         result.IsCancelled.ShouldBeTrue();
 
         var file = Mock.Container.Resolve<IFile>();
         using var targetStream = file.Open(targetPath, FileMode.Open, FileAccess.Read, FileShare.Read);
 
-        // Only first chunk (1MB) should have been written before cancellation check breaks
-        targetStream.Length.ShouldBeGreaterThan(0);
-        targetStream.Length.ShouldBeLessThan(content.LongLength);
+        // Cancellation was requested before the first read, so no bytes should be written.
+        targetStream.Length.ShouldBe(0);
     }
 
     [Test]
@@ -189,6 +189,7 @@ public class MoveFileWithResumeCommandHandlerUnitTests : BaseUnitTest<MoveFileWi
         };
 
         var result = await Sut.ExecuteAsync(command, cts.Token);
+
         result.IsCancelled.ShouldBeTrue();
 
         var file = Mock.Container.Resolve<IFile>();

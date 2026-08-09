@@ -20,6 +20,9 @@
         <PackageReference Include="Velopack" Version="0.0.1298" />
     </ItemGroup>
     <ItemGroup>
+        <InternalsVisibleTo Include="Reaparr.Application.UnitTests" />
+    </ItemGroup>
+    <ItemGroup>
         <ProjectReference Include="..\Application.Contracts\Application.Contracts.csproj" />
         <ProjectReference Include="..\BackgroundJobs.Contracts\BackgroundJobs.Contracts.csproj" />
         <ProjectReference Include="..\Data.Contracts\Data.Contracts.csproj" />

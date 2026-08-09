@@ -39,7 +39,7 @@ public class ReaparrDbContextManager : IReaparrDbContextManager
         _file = file;
     }
 
-    public async Task<Result> SetupAsync()
+    public async Task<Result> SetupAsync(CancellationToken cancellationToken = default)
     {
         if (_appRuntimeInfo.IsIntegrationTestMode)
         {
@@ -47,6 +47,9 @@ public class ReaparrDbContextManager : IReaparrDbContextManager
             return Result.Ok();
         }
 
+        if (cancellationToken.IsCancellationRequested)
+            return ResultExtensions.TaskIsCancelled(nameof(SetupAsync));
+        
         if (_file.Exists(DatabasePath))
         {
             // Check if the database can be connected to.

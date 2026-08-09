@@ -612,9 +612,9 @@ public class MoveDownloadFileFromFileTaskCommandUnitTests : BaseUnitTest<MoveDow
         Mock.Mock<ICommandExecutor>()
             .Setup(x => x.Send(It.IsAny<MoveFileWithResumeCommand>(), It.IsAny<CancellationToken>()))
             .Returns<MoveFileWithResumeCommand, CancellationToken>(
-                async (moveCommand, _) =>
+                async (moveCommand, cancellationToken) =>
                 {
-                    await Task.Delay(1100);
+                    await Task.Delay(1100, cancellationToken);
                     moveCommand.Progress(
                         new MoveFileTransferProgressDTO
                         {
@@ -850,7 +850,7 @@ public class MoveDownloadFileFromFileTaskCommandUnitTests : BaseUnitTest<MoveDow
     }
 
     [Test]
-    public async Task ShouldRenameAndComplete_WhenDestinationMatchesSourceWithoutReapTempSuffixAndCancellationIsRequested()
+    public async Task ShouldRenameAndComplete_WhenInPlaceDestinationMatchesSourceWithoutReapTempSuffix()
     {
         // Arrange
         await SetupDatabase(
@@ -919,13 +919,10 @@ public class MoveDownloadFileFromFileTaskCommandUnitTests : BaseUnitTest<MoveDow
             .Returns(Task.CompletedTask)
             .Verifiable(Times.AtLeastOnce());
 
-        var cancellationTokenSource = new CancellationTokenSource();
-        await cancellationTokenSource.CancelAsync();
-
         // Act
         var result = await Sut.ExecuteAsync(
             new MoveDownloadFileFromFileTaskCommand(downloadFileTask.ToKey()),
-            cancellationTokenSource.Token
+            CancellationToken
         );
 
         // Assert
@@ -1276,7 +1273,7 @@ public class MoveDownloadFileFromFileTaskCommandUnitTests : BaseUnitTest<MoveDow
     }
 
     [Test]
-    public async Task ShouldTreatMoveAsFinished_WhenSourceIsMissingDestinationExistsAndCancellationIsRequested()
+    public async Task ShouldTreatMoveAsFinished_WhenSourceIsMissingAndDestinationExists()
     {
         // Arrange
         await SetupDatabase(
@@ -1336,13 +1333,13 @@ public class MoveDownloadFileFromFileTaskCommandUnitTests : BaseUnitTest<MoveDow
             .Returns(Task.CompletedTask)
             .Verifiable(Times.AtLeastOnce());
 
-        var cancellationTokenSource = new CancellationTokenSource();
-        await cancellationTokenSource.CancelAsync();
-
         // Act
+        // Reconciliation must finish from durable filesystem state even if no move is required. The
+        // handler should not be invoked with an already-cancelled token now that cancellation is
+        // propagated through its initial database lookup.
         var result = await Sut.ExecuteAsync(
             new MoveDownloadFileFromFileTaskCommand(downloadFileTask.ToKey()),
-            cancellationTokenSource.Token
+            CancellationToken
         );
 
         // Assert
@@ -1706,7 +1703,7 @@ public class MoveDownloadFileFromFileTaskCommandUnitTests : BaseUnitTest<MoveDow
         );
 
         // Assert
-        result.IsSuccess.ShouldBeTrue();
+        result.IsCancelled.ShouldBeTrue();
 
         Mock.Mock<IDownloadTaskUpdateDispatcher>()
             .Verify(

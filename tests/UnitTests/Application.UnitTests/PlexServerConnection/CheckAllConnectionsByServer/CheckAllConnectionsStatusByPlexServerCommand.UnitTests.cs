@@ -102,7 +102,7 @@ public class CheckAllConnectionsStatusByPlexServerCommandUnitTests
 
         Mock.Mock<INotificationHubService>()
             .Setup(m =>
-                m.SendRefreshNotificationAsync(It.IsAny<List<RefreshDataType>>(), It.IsAny<CancellationToken>())
+                m.SendRefreshNotificationAsync(It.IsAny<List<RefreshDataType>>())
             )
             .Returns(Task.CompletedTask)
             .Verifiable(Times.Once);
@@ -184,7 +184,7 @@ public class CheckAllConnectionsStatusByPlexServerCommandUnitTests
 
         Mock.Mock<INotificationHubService>()
             .Setup(m =>
-                m.SendRefreshNotificationAsync(It.IsAny<List<RefreshDataType>>(), It.IsAny<CancellationToken>())
+                m.SendRefreshNotificationAsync(It.IsAny<List<RefreshDataType>>())
             )
             .Returns(Task.CompletedTask)
             .Verifiable(Times.Once);
@@ -245,7 +245,7 @@ public class CheckAllConnectionsStatusByPlexServerCommandUnitTests
 
         Mock.Mock<INotificationHubService>()
             .Setup(m =>
-                m.SendRefreshNotificationAsync(It.IsAny<List<RefreshDataType>>(), It.IsAny<CancellationToken>())
+                m.SendRefreshNotificationAsync(It.IsAny<List<RefreshDataType>>())
             )
             .Returns(Task.CompletedTask)
             .Verifiable(Times.Once);
@@ -321,7 +321,7 @@ public class CheckAllConnectionsStatusByPlexServerCommandUnitTests
 
         Mock.Mock<INotificationHubService>()
             .Setup(m =>
-                m.SendRefreshNotificationAsync(It.IsAny<List<RefreshDataType>>(), It.IsAny<CancellationToken>())
+                m.SendRefreshNotificationAsync(It.IsAny<List<RefreshDataType>>())
             )
             .Returns(Task.CompletedTask)
             .Verifiable(Times.Once);

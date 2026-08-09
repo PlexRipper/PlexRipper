@@ -94,8 +94,7 @@ public class CreateDownloadTasksCommandHandler
             await _eventPublisher.PublishAsync(new CheckDownloadQueueEvent(uniquePlexServers), cancellationToken);
 
             await _notificationHubService.SendRefreshNotificationAsync(
-                [RefreshDataType.DownloadTasks],
-                cancellationToken
+                [RefreshDataType.DownloadTasks]
             );
         }
 

@@ -359,9 +359,8 @@ public class DownloadTaskUpdateDispatcherUnitTests : BaseUnitTest<DownloadTaskUp
         sequences.Count.ShouldBeGreaterThanOrEqualTo(2);
         sequences.Distinct().Count().ShouldBe(sequences.Count);
 
-        var orderedSequences = sequences.OrderBy(x => x).ToList();
-        for (var i = 1; i < orderedSequences.Count; i++)
-            orderedSequences[i].ShouldBe(orderedSequences[i - 1] + 1);
+        for (var i = 1; i < sequences.Count; i++)
+            sequences[i].ShouldBeGreaterThan(sequences[i - 1]);
     }
 
     [Test]

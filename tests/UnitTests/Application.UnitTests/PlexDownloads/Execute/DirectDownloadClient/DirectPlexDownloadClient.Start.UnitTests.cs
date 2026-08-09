@@ -695,7 +695,7 @@ public class DirectPlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDow
         downloadServiceMock
             .Setup(x => x.DownloadFileTaskAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
             .Returns<string, string, CancellationToken>(
-                async (_, targetPath, _) =>
+                async (_, targetPath, cancellationToken) =>
                 {
                     SetupVerifiedFile(fileMock, Mock.Mock<IFileInfoFactory>(), targetPath, downloadTask.DataTotal);
 
@@ -706,7 +706,7 @@ public class DirectPlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDow
                         new DownloadStartedEventArgs("test.mkv", 10 * 1024)
                     );
                     // Allow async subscription handlers a moment to process
-                    await Task.Delay(100);
+                    await Task.Delay(100, cancellationToken);
                     downloadServiceMock.Raise(
                         x => x.DownloadProgressChanged += null,
                         downloadServiceMock.Object,
@@ -888,11 +888,11 @@ public class DirectPlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDow
         downloadServiceMock
             .Setup(x => x.DownloadFileTaskAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
             .Returns<string, string, CancellationToken>(
-                async (_, targetPath, _) =>
+                async (_, targetPath, cancellationToken) =>
                 {
                     SetupVerifiedFile(fileMock, Mock.Mock<IFileInfoFactory>(), targetPath, downloadTask.DataTotal);
 
-                    await Task.Delay(50); // allow observable subscriptions to run
+                    await Task.Delay(50, cancellationToken); // allow observable subscriptions to run
                     downloadServiceMock.Raise(
                         x => x.DownloadFileCompleted += null,
                         downloadServiceMock.Object,
@@ -1107,7 +1107,7 @@ public class DirectPlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDow
         downloadServiceMock
             .Setup(x => x.DownloadFileTaskAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
             .Returns<string, string, CancellationToken>(
-                async (_, targetPath, _) =>
+                async (_, targetPath, cancellationToken) =>
                 {
                     SetupVerifiedFile(fileMock, Mock.Mock<IFileInfoFactory>(), targetPath, downloadTask.DataTotal);
 
@@ -1122,7 +1122,7 @@ public class DirectPlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDow
                         }
                     );
                     // Wait beyond the 500 ms sample window so the Rx handler fires and persists
-                    await Task.Delay(700);
+                    await Task.Delay(700, cancellationToken);
                     downloadServiceMock.Raise(
                         x => x.DownloadFileCompleted += null,
                         downloadServiceMock.Object,
@@ -1793,6 +1793,81 @@ public class DirectPlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDow
                         It.IsAny<DirectDownloadSnapshot?>()
                     ),
                 Times.AtLeastOnce()
+            );
+    }
+
+    [Test]
+    public async Task ShouldReturnCancelledResult_WhenDownloaderThrowsForCallerCancellation()
+    {
+        // Arrange
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Setup(x =>
+                x.OnStatusChangedAsync(
+                    It.IsAny<DownloadTaskKey>(),
+                    It.IsAny<Domain.DownloadStatus>(),
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .Returns(Task.CompletedTask);
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Setup(x =>
+                x.OnProgressUpdated(
+                    It.IsAny<DownloadTaskKey>(),
+                    It.IsAny<DownloadTaskProgress>(),
+                    It.IsAny<DirectDownloadSnapshot?>()
+                )
+            );
+
+        await SetupDatabase(
+            99990,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexAccountCount = 1;
+                config.MovieDownloadTasksCount = 1;
+            }
+        );
+
+        var downloadTask = await IDbContext.DownloadTaskMovieFile.FirstAsync(CancellationToken);
+        var serverMachineIdentifier = await IDbContext.GetPlexServerMachineIdentifierById(downloadTask.PlexServerId);
+        SetupSpeedLimitMocks(serverMachineIdentifier);
+        SetupCommandExecutor();
+
+        var cancellationTokenSource = new CancellationTokenSource();
+        var downloadServiceMock = new Mock<IDownloadService>();
+        downloadServiceMock.Setup(x => x.Clear()).Returns(Task.CompletedTask);
+        downloadServiceMock.Setup(x => x.CancelTaskAsync()).Returns(Task.CompletedTask);
+        downloadServiceMock
+            .Setup(x =>
+                x.DownloadFileTaskAsync(
+                    It.IsAny<string>(),
+                    It.IsAny<string>(),
+                    cancellationTokenSource.Token
+                )
+            )
+            .Returns<string, string, CancellationToken>(
+                (_, _, token) =>
+                {
+                    cancellationTokenSource.Cancel();
+                    return Task.FromCanceled(token);
+                }
+            );
+
+        // Act
+        var sut = CreateSut(downloadServiceMock);
+        var result = await sut.Start(downloadTask.ToKey(), cancellationTokenSource.Token);
+
+        // Assert
+        result.IsCancelled.ShouldBeTrue();
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Verify(
+                x =>
+                    x.OnStatusChangedAsync(
+                        It.IsAny<DownloadTaskKey>(),
+                        DomainDownloadStatus.DownloadFinished,
+                        It.IsAny<CancellationToken>()
+                    ),
+                Times.Never()
             );
     }
 

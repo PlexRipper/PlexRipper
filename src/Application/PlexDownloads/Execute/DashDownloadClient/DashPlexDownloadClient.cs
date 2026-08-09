@@ -67,6 +67,9 @@ public class DashPlexDownloadClient : IPlexDownloadClient
         if (downloadUrlResult.IsCancelled)
         {
             var stoppedResult = await SetDownloadStatusAsync(DownloadStatus.Stopped, downloadUrlResult.ToResult());
+            if (stoppedResult.IsCancelled)
+                return stoppedResult;
+
             if (stoppedResult.IsFailed)
                 return stoppedResult.LogError();
 
@@ -79,6 +82,9 @@ public class DashPlexDownloadClient : IPlexDownloadClient
                 ? DownloadStatus.ServerUnreachable
                 : DownloadStatus.SourceUnavailable;
             var statusResult = await SetDownloadStatusAsync(status, downloadUrlResult.ToResult());
+            if (statusResult.IsCancelled)
+                return statusResult;
+
             if (statusResult.IsFailed)
                 return statusResult.LogError();
 
@@ -90,9 +96,15 @@ public class DashPlexDownloadClient : IPlexDownloadClient
             new EnsureDownloadDirectoryCommand(downloadTask.DownloadDirectory, downloadTask.DataTotal),
             cancellationToken
         );
+        if (ensureDirectoryResult.IsCancelled)
+            return ensureDirectoryResult;
+
         if (ensureDirectoryResult.IsFailed)
         {
             var storageErrorResult = await SetDownloadStatusAsync(DownloadStatus.StorageError, ensureDirectoryResult);
+            if (storageErrorResult.IsCancelled)
+                return storageErrorResult;
+
             if (storageErrorResult.IsFailed)
                 return storageErrorResult.LogError();
 
@@ -105,10 +117,10 @@ public class DashPlexDownloadClient : IPlexDownloadClient
         {
             await PersistDashOutputFileName(downloadTask, normalizedFileName, cancellationToken);
             downloadTask.FileName = normalizedFileName;
+
             // Ensure the new filename is propagated to the front-end
             await _notificationHubService.SendRefreshNotificationAsync(
-                RefreshDataType.DownloadTasks,
-                cancellationToken
+                RefreshDataType.DownloadTasks
             );
         }
 
@@ -116,26 +128,39 @@ public class DashPlexDownloadClient : IPlexDownloadClient
 
         // Execute dash stream download
         var downloadingResult = await SetDownloadStatusAsync(DownloadStatus.Downloading);
+        if (downloadingResult.IsCancelled)
+            return downloadingResult;
+
         if (downloadingResult.IsFailed)
             return downloadingResult.LogError();
 
         var options = await CreateDashOptions(downloadTask, downloadUrlResult.Value.DownloadUrl);
-        await using var cancellationRegistration = cancellationToken.Register(() =>
+        var dashStartTask = _dashWrapper.StartAsync(options);
+        try
         {
-            _ = _dashWrapper.StopAsync();
-        });
-        var startResult = await _dashWrapper.StartAsync(options);
-        if (startResult.IsCancelled || startResult.IsFailed)
-            return startResult;
+            var startResult = await dashStartTask.WaitAsync(cancellationToken);
+            if (startResult.IsCancelled || startResult.IsFailed)
+                return startResult;
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            var stopResult = await _dashWrapper.StopAsync();
+            if (stopResult.IsFailed)
+                return stopResult.LogError();
+
+            return ResultExtensions.TaskIsCancelled(nameof(DashPlexDownloadClient));
+        }
 
         // Small delay before disposing this client to ensure everything is processing correctly
-        await Task.Delay(2000);
-        return Result.Ok();
+        return await Result.Try(async Task () => await Task.Delay(2000, cancellationToken));
     }
 
     public async Task<Result> StopAsync()
     {
         var stopResult = await _dashWrapper.StopAsync();
+        if (stopResult.IsCancelled)
+            return stopResult;
+
         if (stopResult.IsFailed)
             return stopResult;
 
@@ -143,6 +168,9 @@ public class DashPlexDownloadClient : IPlexDownloadClient
             return Result.Ok();
 
         var stoppedResult = await SetDownloadStatusAsync(DownloadStatus.Stopped);
+        if (stoppedResult.IsCancelled)
+            return stoppedResult;
+
         if (stoppedResult.IsFailed)
             return stoppedResult.LogError();
 
@@ -154,7 +182,9 @@ public class DashPlexDownloadClient : IPlexDownloadClient
         string downloadUrl
     )
     {
-        var serverMachineIdentifier = await _dbContext.GetPlexServerMachineIdentifierById(downloadTask.PlexServerId);
+        var serverMachineIdentifier = await _dbContext.GetPlexServerMachineIdentifierById(
+            downloadTask.PlexServerId
+        );
         var speedLimitKb = _serverSettings.GetDownloadSpeedLimit(serverMachineIdentifier);
 
         return new DashMpdCliOptions
@@ -233,10 +263,7 @@ public class DashPlexDownloadClient : IPlexDownloadClient
             _dashWrapper
                 .DownloadCompleted.TakeUntil(_destroy)
                 .Select(completed =>
-                    Observable.FromAsync(async _ =>
-                    {
-                        await HandleDownloadCompleted(key, completed);
-                    })
+                    Observable.FromAsync(async _ => await HandleDownloadCompleted(key, completed))
                 )
                 .Concat()
                 .Subscribe()

@@ -71,6 +71,13 @@ public class RefreshPlexAccountAccessEndpoint
         {
             var serverAccessResult = await _commandExecutor.Send(new RefreshPlexServerAccessCommand(plexAccountId), ct);
 
+            if (serverAccessResult.IsCancelled)
+            {
+                serverAccessResult.LogWarning();
+                await Send.FluentResult(serverAccessResult.ToResult(), CancellationToken.None);
+                return;
+            }
+
             if (serverAccessResult.IsFailed)
             {
                 serverAccessResult.LogError();
@@ -124,8 +131,15 @@ public class RefreshPlexAccountAccessEndpoint
                 // Update library access
                 var libraryAccessResult = await _commandExecutor.Send(
                     new RefreshLibraryAccessCommand(plexAccountId),
-                    CancellationToken.None
+                    ct
                 );
+
+                if (libraryAccessResult.IsCancelled)
+                {
+                    libraryAccessResult.LogWarning();
+                    await Send.FluentResult(libraryAccessResult.ToResult(), CancellationToken.None);
+                    return;
+                }
 
                 if (libraryAccessResult.IsFailed)
                 {
@@ -141,8 +155,7 @@ public class RefreshPlexAccountAccessEndpoint
 
         // Send notifications to the client to refresh the PlexServerConnection data
         await _notificationHubService.SendRefreshNotificationAsync(
-            [RefreshDataType.PlexAccount, RefreshDataType.PlexServer, RefreshDataType.PlexServerConnection],
-            CancellationToken.None
+            [RefreshDataType.PlexAccount, RefreshDataType.PlexServer, RefreshDataType.PlexServerConnection]
         );
 
         await Send.FluentResult(Result.Ok(_list), ct);

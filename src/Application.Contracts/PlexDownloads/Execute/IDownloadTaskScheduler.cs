@@ -2,7 +2,7 @@ namespace Reaparr.Application.Contracts;
 
 public interface IDownloadTaskScheduler
 {
-    Task<Result> StartDownloadTaskJob(DownloadTaskKey downloadTaskKey);
+    Task<Result> StartDownloadTaskJob(DownloadTaskKey downloadTaskKey, CancellationToken cancellationToken);
 
     Task<Result> StopDownloadTaskJob(
         DownloadTaskKey downloadTaskKey,

@@ -87,6 +87,7 @@ public class RestartDownloadTaskEndpointIntegrationTests : BaseIntegrationTests
             DownloadStatus.Queued,
             DownloadStatus.Downloading,
             DownloadStatus.DownloadFinished,
+            DownloadStatus.Moving,
             DownloadStatus.Completed
         );
 

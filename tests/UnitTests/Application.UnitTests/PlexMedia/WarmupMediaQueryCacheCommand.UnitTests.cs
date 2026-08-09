@@ -13,7 +13,7 @@ public class WarmupMediaQueryCacheCommandHandlerUnitTests : BaseUnitTest<WarmupM
         Mock.Mock<IMediaQueryCache>()
             .SetupProperty(x => x.SuppressInvalidation);
         Mock.Mock<IMediaQueryCache>()
-            .Setup(x => x.BuildCache())
+            .Setup(x => x.BuildCache(It.IsAny<CancellationToken>()))
             .Returns(Task.CompletedTask);
 
         OverrideSyncQuietPeriod(TimeSpan.Zero);
@@ -24,10 +24,9 @@ public class WarmupMediaQueryCacheCommandHandlerUnitTests : BaseUnitTest<WarmupM
         // Assert
         result.IsSuccess.ShouldBeTrue();
         result.Errors.Count.ShouldBe(0);
-        Mock.Mock<IMediaQueryCache>().Verify(
-            x => x.BuildCache(),
-            Times.Exactly(2)
-        );
+        Mock.Mock<IMediaQueryCache>()
+            .Invocations.Count(x => x.Method.Name == nameof(IMediaQueryCache.BuildCache))
+            .ShouldBe(2);
         Mock.Mock<IMediaQueryCache>().Verify(
             x => x.GetMediaAsync(It.IsAny<MediaQueryFilter>(), It.IsAny<CancellationToken>()),
             Times.Never
@@ -44,7 +43,7 @@ public class WarmupMediaQueryCacheCommandHandlerUnitTests : BaseUnitTest<WarmupM
         Mock.Mock<IMediaQueryCache>()
             .SetupProperty(x => x.SuppressInvalidation);
         Mock.Mock<IMediaQueryCache>()
-            .Setup(x => x.BuildCache())
+            .Setup(x => x.BuildCache(It.IsAny<CancellationToken>()))
             .ThrowsAsync(expectedException);
 
         OverrideSyncQuietPeriod(TimeSpan.Zero);
@@ -55,10 +54,9 @@ public class WarmupMediaQueryCacheCommandHandlerUnitTests : BaseUnitTest<WarmupM
         // Assert
         result.IsFailed.ShouldBeTrue();
         result.Errors.Count.ShouldBeGreaterThan(0);
-        Mock.Mock<IMediaQueryCache>().Verify(
-            x => x.BuildCache(),
-            Times.Once
-        );
+        Mock.Mock<IMediaQueryCache>()
+            .Invocations.Count(x => x.Method.Name == nameof(IMediaQueryCache.BuildCache))
+            .ShouldBe(1);
     }
 
     [Test]
@@ -70,7 +68,7 @@ public class WarmupMediaQueryCacheCommandHandlerUnitTests : BaseUnitTest<WarmupM
         Mock.Mock<IMediaQueryCache>()
             .SetupProperty(x => x.SuppressInvalidation);
         Mock.Mock<IMediaQueryCache>()
-            .Setup(x => x.BuildCache())
+            .Setup(x => x.BuildCache(It.IsAny<CancellationToken>()))
             .Returns(Task.CompletedTask);
 
         OverrideSyncQuietPeriod(TimeSpan.Zero);

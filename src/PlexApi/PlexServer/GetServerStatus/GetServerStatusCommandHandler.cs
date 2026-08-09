@@ -15,7 +15,7 @@ public class GetServerStatusCommandHandler : ICommandHandler<GetServerStatusComm
     {
         var connection = await _dbContext.PlexServerConnections.GetAsync(
             command.PlexServerConnectionId,
-            CancellationToken.None
+            ct
         );
 
         if (connection is null)
@@ -32,7 +32,10 @@ public class GetServerStatusCommandHandler : ICommandHandler<GetServerStatusComm
             }
         );
 
-        var responseResult = await client.General.GetIdentityAsync().ToResponse();
+        var responseResult = await client.General.GetIdentityAsync().ToResponse(ct);
+
+        if (responseResult.IsCancelled)
+            return responseResult.ToResult();
 
         var statusCode = responseResult.IsSuccess
             ? responseResult.Value.StatusCode

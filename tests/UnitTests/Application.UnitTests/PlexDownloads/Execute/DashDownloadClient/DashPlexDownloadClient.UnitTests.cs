@@ -9,7 +9,7 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
     private DashPlexDownloadClient CreateSut(Mock<IDashMpdCliWrapper> dashWrapperMock)
     {
         Mock.Mock<INotificationHubService>()
-            .Setup(x => x.SendRefreshNotificationAsync(It.IsAny<RefreshDataType>(), It.IsAny<CancellationToken>()))
+            .Setup(x => x.SendRefreshNotificationAsync(It.IsAny<RefreshDataType>()))
             .Returns(Task.CompletedTask);
 
         return Mock.Create<DashPlexDownloadClient>(new NamedParameter("dashWrapper", dashWrapperMock.Object));
@@ -118,7 +118,7 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
             );
 
         Mock.Mock<INotificationHubService>()
-            .Setup(x => x.SendRefreshNotificationAsync(It.IsAny<RefreshDataType>(), It.IsAny<CancellationToken>()))
+            .Setup(x => x.SendRefreshNotificationAsync(It.IsAny<RefreshDataType>()))
             .Returns(Task.CompletedTask);
 
         var sut = CreateSut(dashWrapperMock);
@@ -140,7 +140,7 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
             );
         Mock.Mock<INotificationHubService>()
             .Verify(
-                x => x.SendRefreshNotificationAsync(It.IsAny<RefreshDataType>(), It.IsAny<CancellationToken>()),
+                x => x.SendRefreshNotificationAsync(It.IsAny<RefreshDataType>()),
                 Times.Once()
             );
         Mock.Mock<ICommandExecutor>()
@@ -224,7 +224,7 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
             );
         Mock.Mock<INotificationHubService>()
             .Verify(
-                x => x.SendRefreshNotificationAsync(It.IsAny<RefreshDataType>(), It.IsAny<CancellationToken>()),
+                x => x.SendRefreshNotificationAsync(It.IsAny<RefreshDataType>()),
                 Times.Never()
             );
     }
@@ -293,7 +293,7 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
             );
         Mock.Mock<INotificationHubService>()
             .Verify(
-                x => x.SendRefreshNotificationAsync(It.IsAny<RefreshDataType>(), It.IsAny<CancellationToken>()),
+                x => x.SendRefreshNotificationAsync(It.IsAny<RefreshDataType>()),
                 Times.Never()
             );
     }
@@ -349,7 +349,7 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
             );
 
         Mock.Mock<INotificationHubService>()
-            .Setup(x => x.SendRefreshNotificationAsync(It.IsAny<RefreshDataType>(), It.IsAny<CancellationToken>()))
+            .Setup(x => x.SendRefreshNotificationAsync(It.IsAny<RefreshDataType>()))
             .Returns(Task.CompletedTask);
 
         var progressSubject = new Subject<DashDownloadProgress>();
@@ -390,7 +390,7 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
             );
         Mock.Mock<INotificationHubService>()
             .Verify(
-                x => x.SendRefreshNotificationAsync(It.IsAny<RefreshDataType>(), It.IsAny<CancellationToken>()),
+                x => x.SendRefreshNotificationAsync(It.IsAny<RefreshDataType>()),
                 Times.Once()
             );
         Mock.Mock<ICommandExecutor>()
@@ -452,7 +452,7 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
             );
 
         Mock.Mock<INotificationHubService>()
-            .Setup(x => x.SendRefreshNotificationAsync(It.IsAny<RefreshDataType>(), It.IsAny<CancellationToken>()))
+            .Setup(x => x.SendRefreshNotificationAsync(It.IsAny<RefreshDataType>()))
             .Returns(Task.CompletedTask);
 
         var progressSubject = new Subject<DashDownloadProgress>();
@@ -493,7 +493,7 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
             );
         Mock.Mock<INotificationHubService>()
             .Verify(
-                x => x.SendRefreshNotificationAsync(It.IsAny<RefreshDataType>(), It.IsAny<CancellationToken>()),
+                x => x.SendRefreshNotificationAsync(It.IsAny<RefreshDataType>()),
                 Times.Once()
             );
         Mock.Mock<ICommandExecutor>()
@@ -560,7 +560,7 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
         var networkTimeoutResult = Result.Fail("Download failed: network timeout: fetching DASH manifest timed out");
 
         Mock.Mock<INotificationHubService>()
-            .Setup(x => x.SendRefreshNotificationAsync(It.IsAny<RefreshDataType>(), It.IsAny<CancellationToken>()))
+            .Setup(x => x.SendRefreshNotificationAsync(It.IsAny<RefreshDataType>()))
             .Returns(Task.CompletedTask);
 
         var dashWrapperMock = new Mock<IDashMpdCliWrapper>();
@@ -595,7 +595,7 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
             );
         Mock.Mock<INotificationHubService>()
             .Verify(
-                x => x.SendRefreshNotificationAsync(It.IsAny<RefreshDataType>(), It.IsAny<CancellationToken>()),
+                x => x.SendRefreshNotificationAsync(It.IsAny<RefreshDataType>()),
                 Times.Once()
             );
         Mock.Mock<ICommandExecutor>()
@@ -697,7 +697,7 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
             );
         Mock.Mock<INotificationHubService>()
             .Verify(
-                x => x.SendRefreshNotificationAsync(It.IsAny<RefreshDataType>(), It.IsAny<CancellationToken>()),
+                x => x.SendRefreshNotificationAsync(It.IsAny<RefreshDataType>()),
                 Times.Once()
             );
     }
@@ -793,7 +793,7 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
             );
         Mock.Mock<INotificationHubService>()
             .Verify(
-                x => x.SendRefreshNotificationAsync(It.IsAny<RefreshDataType>(), It.IsAny<CancellationToken>()),
+                x => x.SendRefreshNotificationAsync(It.IsAny<RefreshDataType>()),
                 Times.Once()
             );
     }
@@ -887,7 +887,7 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
             );
         Mock.Mock<INotificationHubService>()
             .Verify(
-                x => x.SendRefreshNotificationAsync(It.IsAny<RefreshDataType>(), It.IsAny<CancellationToken>()),
+                x => x.SendRefreshNotificationAsync(It.IsAny<RefreshDataType>()),
                 Times.Once()
             );
     }
@@ -971,8 +971,74 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
             );
         Mock.Mock<INotificationHubService>()
             .Verify(
-                x => x.SendRefreshNotificationAsync(It.IsAny<RefreshDataType>(), It.IsAny<CancellationToken>()),
+                x => x.SendRefreshNotificationAsync(It.IsAny<RefreshDataType>()),
                 Times.Once()
             );
+    }
+
+    [Test]
+    public async Task ShouldStopDashProcessAndReturnCancelled_WhenCallerCancelsDuringStart()
+    {
+        // Arrange
+        await SetupDatabase(
+            12010,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexAccountCount = 1;
+                config.MovieDownloadTasksCount = 1;
+            }
+        );
+
+        var downloadTask = await IDbContext.DownloadTaskMovieFile.FirstAsync(CancellationToken);
+        var serverMachineIdentifier = await IDbContext.GetPlexServerMachineIdentifierById(downloadTask.PlexServerId);
+        SetupSpeedLimit(serverMachineIdentifier, 0);
+        SetupCommandExecutor();
+        var dashStartEntered = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Setup(x =>
+                x.OnStatusChangedAsync(
+                    It.IsAny<DownloadTaskKey>(),
+                    It.IsAny<DownloadStatus>(),
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .Returns(Task.CompletedTask);
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Setup(x =>
+                x.OnProgressUpdated(
+                    It.IsAny<DownloadTaskKey>(),
+                    It.IsAny<DownloadTaskProgress>(),
+                    It.IsAny<DirectDownloadSnapshot?>()
+                )
+            );
+
+        var dashWrapperMock = new Mock<IDashMpdCliWrapper>();
+        dashWrapperMock.Setup(x => x.Progress).Returns(Observable.Empty<DashDownloadProgress>());
+        dashWrapperMock.Setup(x => x.StandardOutput).Returns(Observable.Empty<string>());
+        dashWrapperMock.Setup(x => x.DownloadCompleted).Returns(Observable.Empty<DashDownloadCompletedEventArgs>());
+        dashWrapperMock
+            .Setup(x => x.StartAsync(It.IsAny<DashMpdCliOptions>()))
+            .Returns(() =>
+            {
+                dashStartEntered.TrySetResult();
+                return new TaskCompletionSource<Result>(TaskCreationOptions.RunContinuationsAsynchronously).Task;
+            });
+        dashWrapperMock.Setup(x => x.StopAsync()).ReturnsAsync(Result.Ok()).Verifiable(Times.Once());
+        dashWrapperMock.Setup(x => x.DisposeAsync()).Returns(ValueTask.CompletedTask);
+
+        using var cancellationTokenSource = new CancellationTokenSource();
+        var sut = CreateSut(dashWrapperMock);
+
+        // Act
+        var startTask = sut.Start(downloadTask.ToKey(), cancellationTokenSource.Token);
+        await dashStartEntered.Task.WaitAsync(TimeSpan.FromSeconds(5));
+        cancellationTokenSource.Cancel();
+        var result = await startTask.WaitAsync(TimeSpan.FromSeconds(5));
+
+        // Assert
+        result.IsCancelled.ShouldBeTrue();
+        dashWrapperMock.Verify();
     }
 }

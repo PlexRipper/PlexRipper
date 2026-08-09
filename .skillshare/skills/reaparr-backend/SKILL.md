@@ -29,6 +29,17 @@ Rider MCP is mandatory for backend work. All backend file operations, searches, 
 
 Never use WebStorm MCP tools for backend work under `src/` excluding `ClientApp/`, `tests/UnitTests/`, or `tests/IntegrationTests/`. WebStorm MCP is reserved for frontend work under `src/AppHost/ClientApp/`.
 
+### Uncommitted-change reviews
+
+When asked to review, audit, or correct uncommitted backend changes, always perform the review through Rider MCP:
+
+- Use Rider MCP to enumerate and inspect the current uncommitted changes.
+- Use Rider MCP to read each changed file and its surrounding code, inspect symbols and usages, and apply corrections.
+- Use Rider MCP diagnostics, build, and test tools to validate the corrected change set.
+- Do not substitute raw `git diff`, shell search commands, codebase-memory, or autonomous subagents for the Rider MCP review.
+- Git may only be used for an explicitly requested Git operation; it is not the code-review interface.
+- Review every uncommitted backend change, including staged and unstaged changes, before claiming the audit is complete.
+
 ### Backend MCP fast path
 
 After one successful MCP discovery or server health check in a session, reuse these known-good exact tool names instead of repeatedly rediscovering them:
@@ -161,6 +172,116 @@ Bad:
 _log.Information("Refreshing Plex server access");
 _log.Error(ex, "Failed to queue library sync job");
 ```
+
+## Result Handling
+
+Reaparr uses `FluentResults` as the normal error boundary for commands, jobs, services, and other fallible backend operations. Preserve the distinction between success, cancellation, expected domain failures, and unexpected failures.
+
+### Prefer `Result.Try` over `try/catch`
+
+Use `Result.Try` before reaching for a manual `try/catch`. It is the standard project mechanism for converting thrown exceptions and cancelled operations into `Result` values.
+
+```csharp
+var result = await Result.Try(async Task () =>
+{
+    await DoWorkAsync(cancellationToken);
+});
+```
+
+Use a manual `try/catch` only when `Result.Try` cannot express the required behavior, such as:
+- translating a specific external exception into a specific HTTP or domain error;
+- guaranteeing cleanup in `finally`;
+- containing exceptions at framework boundaries such as Quartz listeners/jobs or `async void` lifetime callbacks;
+- distinguishing caller cancellation from a timeout with an exception filter;
+- performing bounded best-effort cleanup after the original operation was cancelled.
+
+Never add a broad `catch (Exception)` merely to return `Result.Fail`; use `Result.Try`. If a framework boundary must catch broadly, log the exception and ensure it cannot escape that boundary.
+
+### Handle cancellation before failure
+
+When a called method can be cancelled, always check `IsCancelled` before checking `IsFailed`. Cancellation may also satisfy failure predicates, but expected cancellation must not be handled or logged as an ordinary error.
+
+Always call `LogWarning()` on a cancelled result and return that result:
+
+```csharp
+var result = await RunOperation(cancellationToken);
+if (result.IsCancelled)
+    return result.LogWarning();
+
+if (result.IsFailed)
+    return result.LogError();
+
+return result;
+```
+
+Do **not** use `cancellationToken.ThrowIfCancellationRequested()` to propagate a cancelled `Result`. Check `result.IsCancelled`, call `LogWarning()`, and return the cancelled result instead. This preserves FluentResults cancellation semantics and avoids turning a handled cancellation back into exception control flow.
+
+For methods that return `Result<T>`, follow the same rule and return the original cancelled generic result whenever the signature permits. If a framework callback cannot return `Result`, inspect and warning-log the cancelled result, then exit the callback cleanly.
+
+### Always log failed results
+
+Every failed, non-cancelled result must pass through `LogError()` at the handling or return boundary:
+
+```csharp
+if (result.IsCancelled)
+    return result.LogWarning();
+
+if (result.IsFailed)
+    return result.LogError();
+```
+
+Apply this to generic results and merged results as well. Inspect and log the result before reading `.Value`. Never silently discard a failed command, event publication, scheduler operation, notification, database operation, or cleanup result.
+
+Avoid these patterns:
+
+```csharp
+// Wrong: cancellation is treated as an ordinary error.
+if (result.IsFailed)
+    return result.LogError();
+
+// Wrong: cancellation is converted back into exception control flow.
+if (result.IsCancelled)
+    cancellationToken.ThrowIfCancellationRequested();
+
+// Wrong: a failed result is propagated without logging.
+return result;
+
+// Wrong: Result.Try should own this exception boundary.
+try
+{
+    await DoWorkAsync(cancellationToken);
+}
+catch (Exception ex)
+{
+    return Result.Fail(ex.Message);
+}
+```
+
+### Result composition and propagation
+
+- Return the original failed or cancelled result when signatures are compatible; this preserves error types and metadata.
+- Use `ToResult()` only when converting `Result<T>` to non-generic `Result` is required.
+- Use `Result.Merge(...)` for independent result-producing operations, then apply the same cancellation-first and failure-logging checks to the merged result.
+- Never read `.Value` until success is established.
+- Do not replace structured errors with only `error.Message`; retain `ExceptionalError`, HTTP/status metadata, and domain error types.
+- Use existing `ResultExtensions` helpers for validation, not-found, conflict, timeout, and other expected failures so API metadata remains intact.
+- Do not use `LogIfFailed()` where cancellation and ordinary failure require different severity; branch on `IsCancelled` first.
+- Avoid duplicate logging at every stack frame. Log at the boundary that handles or returns the result, and always log results consumed locally rather than propagated.
+- When using `Result.Try`, inspect its returned result. Do not assume wrapping an operation is sufficient by itself.
+
+### Cancellation-token use with Results
+
+Pass the caller's token through async work for which cancellation is useful, including long-running EF Core queries, scheduler calls, command/event dispatch, SignalR calls, HTTP calls, file operations, and delays. Cancellation must be observable by cancellable work, but once represented as a cancelled `Result`, propagate it as a result rather than throwing.
+
+Do not pass a `CancellationToken` to simple database queries that return a single result and are expected to complete immediately. Cancellation adds no useful behavior to operations such as a straightforward `FirstOrDefaultAsync(...)`, `SingleOrDefaultAsync(...)`, `FindAsync(...)`, `AnyAsync(...)`, or similarly trivial scalar/key lookup. Prefer the overload without a token for these queries. Continue passing a token to genuinely expensive queries, projections over substantial data, batch operations, writes, transactions, and other work where cancellation can meaningfully interrupt execution.
+
+`CancellationToken.None` is intentional and must be respected. It may be used for work that must not be cancelled, including required state transitions or framework-owned operations whose completion is necessary for consistency. Do not mechanically replace `CancellationToken.None` with a caller token. Evaluate the operation's cancellation semantics first, and preserve `CancellationToken.None` where non-cancellability is deliberate.
+
+After cancellation has been accepted, terminal-state persistence may need a separate cleanup token so an already-cancelled request or job token does not prevent recording `Cancelled`, `Paused`, or another durable state. Use `CancellationToken.None` when that persistence must complete and the operation is known to be short and bounded by its underlying infrastructure. For potentially blocking or externally dependent cleanup, prefer a separate short timeout token. Such cleanup must:
+- be contained at the framework boundary so cleanup exceptions cannot escape;
+- log cleanup timeout/cancellation as a warning;
+- log other cleanup failures as errors;
+- avoid an unbounded token only when the operation could block indefinitely.
 
 ## Code File and Folder Creation Rule
 

@@ -61,7 +61,7 @@ public class LibrarySyncJob : IJob
             );
 
         // Check if the server is online before starting sync
-        var isServerOnline = await _dbContext.IsServerOnline(_serverId, cancellationToken);
+        var isServerOnline = await _dbContext.IsServerOnline(_serverId);
         if (!isServerOnline)
         {
             var serverName = await _dbContext.GetPlexServerNameById(_serverId);
@@ -71,7 +71,10 @@ public class LibrarySyncJob : IJob
                     serverName,
                     _serverId
                 );
-            await UpdateQueueItemAsync(LibrarySyncJobStatus.Queued, isServerOffline: true);
+            await UpdateQueueItemAsync(
+                LibrarySyncJobStatus.Queued,
+                isServerOffline: true
+            );
         }
         else
         {
@@ -94,7 +97,17 @@ public class LibrarySyncJob : IJob
                         _serverId,
                         _libraryId
                     );
+
+                // The Quartz job token is already cancelled, so use a short-lived token
+                // to persist the cancellation and continue processing the queue.
+                using var cleanupTokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+                var cleanupToken = cleanupTokenSource.Token;
+
                 await UpdateQueueItemAsync(LibrarySyncJobStatus.Cancelled);
+                await _notificationHubService.SendRefreshNotificationAsync([RefreshDataType.PlexLibrary]);
+                await _commandExecutor.Send(new CheckQueuedPlexLibraryToSyncCommand(), cleanupToken);
+
+                return;
             }
             else if (result.IsFailed)
             {
@@ -130,7 +143,10 @@ public class LibrarySyncJob : IJob
                 // Mark the primary sync queue item as completed before kicking off secondary comparison work.
                 await UpdateQueueItemAsync(LibrarySyncJobStatus.Completed);
 
-                var comparisonQueueResult = await _commandExecutor.Send(new QueueLibraryComparisonJobsForLibraryCommand(_libraryId), CancellationToken.None);
+                var comparisonQueueResult = await _commandExecutor.Send(
+                    new QueueLibraryComparisonJobsForLibraryCommand(_libraryId),
+                    cancellationToken
+                );
 
                 if (comparisonQueueResult.IsFailed)
                     _log.Here().Warning("Failed to queue comparison jobs for library {LibraryId}", _libraryId);
@@ -139,12 +155,11 @@ public class LibrarySyncJob : IJob
 
         // Send PlexLibrary refresh notification
         await _notificationHubService.SendRefreshNotificationAsync(
-            [RefreshDataType.PlexLibrary],
-            CancellationToken.None
+            [RefreshDataType.PlexLibrary]
         );
 
         // Schedule the next library from the queue
-        await _commandExecutor.Send(new CheckQueuedPlexLibraryToSyncCommand(), CancellationToken.None);
+        await _commandExecutor.Send(new CheckQueuedPlexLibraryToSyncCommand(), cancellationToken);
     }
 
     private async Task UpdateQueueItemAsync(
@@ -166,7 +181,7 @@ public class LibrarySyncJob : IJob
                             .SetProperty(x => x.StartedAt, (DateTime?)null)
                             .SetProperty(x => x.ErrorMessage, (string?)null)
                             .SetProperty(x => x.IsServerOffline, isServerOffline),
-                    cancellationToken: CancellationToken.None
+                    CancellationToken.None
                 );
                 break;
 
@@ -176,7 +191,7 @@ public class LibrarySyncJob : IJob
                         s.SetProperty(x => x.Status, status)
                             .SetProperty(x => x.StartedAt, DateTime.UtcNow)
                             .SetProperty(x => x.IsServerOffline, false),
-                    cancellationToken: CancellationToken.None
+                    CancellationToken.None
                 );
                 break;
 
@@ -186,7 +201,7 @@ public class LibrarySyncJob : IJob
                         s.SetProperty(x => x.Status, status)
                             .SetProperty(x => x.CompletedAt, DateTime.UtcNow)
                             .SetProperty(x => x.IsServerOffline, false),
-                    cancellationToken: CancellationToken.None
+                    CancellationToken.None
                 );
                 break;
 
@@ -197,7 +212,7 @@ public class LibrarySyncJob : IJob
                             .SetProperty(x => x.CompletedAt, DateTime.UtcNow)
                             .SetProperty(x => x.ErrorMessage, errorMessage)
                             .SetProperty(x => x.IsServerOffline, isServerOffline),
-                    cancellationToken: CancellationToken.None
+                    CancellationToken.None
                 );
                 break;
 
@@ -208,7 +223,7 @@ public class LibrarySyncJob : IJob
                             .SetProperty(x => x.CompletedAt, DateTime.UtcNow)
                             .SetProperty(x => x.ErrorMessage, (string?)null)
                             .SetProperty(x => x.IsServerOffline, false),
-                    cancellationToken: CancellationToken.None
+                    CancellationToken.None
                 );
                 break;
 
@@ -232,8 +247,7 @@ public class LibrarySyncJob : IJob
         }
 
         await _notificationHubService.SendRefreshNotificationAsync(
-            [RefreshDataType.PlexLibrarySyncStatus],
-            CancellationToken.None
+            [RefreshDataType.PlexLibrarySyncStatus]
         );
     }
 }

@@ -43,32 +43,40 @@ public class SchedulerService : ISchedulerService
     /// <summary>
     /// Will start the <see cref="IScheduler"/> of Quartz for all the background services.
     /// </summary>
-    /// <returns></returns>
-    public async Task<Result> SetupAsync()
+    public async Task<Result> SetupAsync(CancellationToken cancellationToken = default)
     {
         SetupListeners();
         if (!_scheduler.IsStarted)
         {
             _log.Here().Debug("Starting Quartz Scheduler");
-            await _scheduler.Start();
+            await _scheduler.Start(cancellationToken);
         }
 
         if (!_appRuntimeInfo.IsIntegrationTestMode)
         {
-            await SetupPlexServerStatusCheckJob();
-            await SetupUpdateCheckJob();
-            var setupLibrarySyncResult = await SetupLibrarySyncJob();
+            await SetupPlexServerStatusCheckJob(cancellationToken);
+            await SetupUpdateCheckJob(cancellationToken);
+            var setupLibrarySyncResult = await SetupLibrarySyncJob(cancellationToken);
+            if (setupLibrarySyncResult.IsCancelled)
+                return setupLibrarySyncResult;
+
             if (setupLibrarySyncResult.IsFailed)
                 return setupLibrarySyncResult;
 
-            var setupLibraryComparisonResult = await SetupLibraryComparisonJob();
+            var setupLibraryComparisonResult = await SetupLibraryComparisonJob(cancellationToken);
+            if (setupLibraryComparisonResult.IsCancelled)
+                return setupLibraryComparisonResult;
+
             if (setupLibraryComparisonResult.IsFailed)
                 return setupLibraryComparisonResult;
 
             var queueLibraryUpdatesResult = await _commandExecutor.Send(
                 new QueueCheckPlexLibraryUpdatesJobCommand(),
-                CancellationToken.None
+                cancellationToken
             );
+
+            if (queueLibraryUpdatesResult.IsCancelled)
+                return queueLibraryUpdatesResult;
 
             if (queueLibraryUpdatesResult.IsFailed)
                 return queueLibraryUpdatesResult.LogError();
@@ -79,20 +87,22 @@ public class SchedulerService : ISchedulerService
             : Result.Fail($"Could not start Scheduler {_scheduler.SchedulerName}").LogError();
     }
 
-    public async Task<Result> StopAsync()
+    public async Task<Result> StopAsync(CancellationToken cancellationToken  = default)
     {
         if (!_scheduler.IsShutdown)
         {
             _log.Here().Debug("Shutting down Quartz Scheduler");
 
-            foreach (var runningJob in await _scheduler.GetCurrentlyExecutingJobs())
+            foreach (var runningJob in await _scheduler.GetCurrentlyExecutingJobs(cancellationToken))
             {
                 _log.Here().Warning("Stopping running job {JobKey}", runningJob.JobDetail.Key.ToString());
-                await _scheduler.Interrupt(runningJob.JobDetail.Key);
+                await _scheduler.Interrupt(runningJob.JobDetail.Key, cancellationToken);
             }
 
             // Jobs can be interrupted and later resume from where they left off
-            await _scheduler.Shutdown(true).WaitAsync(TimeSpan.FromSeconds(15));
+            await _scheduler
+                .Shutdown(true, cancellationToken)
+                .WaitAsync(TimeSpan.FromSeconds(15), cancellationToken);
         }
 
         return _scheduler.IsStarted ? Result.Ok() : Result.Fail("Could not shutdown Scheduler").LogError();
@@ -125,11 +135,11 @@ public class SchedulerService : ISchedulerService
         await Task.Delay(1000, cancellationToken);
     }
 
-    private async Task SetupPlexServerStatusCheckJob()
+    private async Task SetupPlexServerStatusCheckJob(CancellationToken cancellationToken)
     {
         var key = CheckAllConnectionsStatusByPlexServerJob.GetJobKey();
 
-        if (await _scheduler.CheckExists(key, CancellationToken.None))
+        if (await _scheduler.CheckExists(key, cancellationToken))
         {
             return;
         }
@@ -143,14 +153,14 @@ public class SchedulerService : ISchedulerService
             .WithSimpleSchedule(x => x.WithIntervalInMinutes(10).RepeatForever())
             .Build();
 
-        await _scheduler.ScheduleJob(job, trigger);
+        await _scheduler.ScheduleJob(job, trigger, cancellationToken);
     }
 
-    private async Task SetupUpdateCheckJob()
+    private async Task SetupUpdateCheckJob(CancellationToken cancellationToken)
     {
         var key = CheckForUpdateJob.GetJobKey();
 
-        if (await _scheduler.CheckExists(key, CancellationToken.None))
+        if (await _scheduler.CheckExists(key, cancellationToken))
             return;
 
         var job = JobBuilder.Create<CheckForUpdateJob>().WithIdentity(key).Build();
@@ -162,30 +172,42 @@ public class SchedulerService : ISchedulerService
             .WithSimpleSchedule(x => x.WithIntervalInHours(1).RepeatForever())
             .Build();
 
-        await _scheduler.ScheduleJob(job, trigger);
+        await _scheduler.ScheduleJob(job, trigger, cancellationToken);
     }
 
-    private async Task<Result> SetupLibrarySyncJob()
+    private async Task<Result> SetupLibrarySyncJob(CancellationToken cancellationToken)
     {
         var cleanupResult =
-            await _commandExecutor.Send(new CleanupLibrarySyncJobQueueCommand(), CancellationToken.None);
+            await _commandExecutor.Send(new CleanupLibrarySyncJobQueueCommand(), cancellationToken);
+        if (cleanupResult.IsCancelled)
+            return cleanupResult;
+
         if (cleanupResult.IsFailed)
             return cleanupResult.LogError();
 
         var checkQueuedResult =
-            await _commandExecutor.Send(new CheckQueuedPlexLibraryToSyncCommand(), CancellationToken.None);
+            await _commandExecutor.Send(new CheckQueuedPlexLibraryToSyncCommand(), cancellationToken);
+        if (checkQueuedResult.IsCancelled)
+            return checkQueuedResult;
+
         return checkQueuedResult.IsFailed ? checkQueuedResult.LogError() : Result.Ok();
     }
 
-    private async Task<Result> SetupLibraryComparisonJob()
+    private async Task<Result> SetupLibraryComparisonJob(CancellationToken cancellationToken)
     {
         var cleanupResult =
-            await _commandExecutor.Send(new CleanupLibraryComparisonJobQueueCommand(), CancellationToken.None);
+            await _commandExecutor.Send(new CleanupLibraryComparisonJobQueueCommand(), cancellationToken);
+        if (cleanupResult.IsCancelled)
+            return cleanupResult;
+
         if (cleanupResult.IsFailed)
             return cleanupResult.LogError();
 
         var checkQueuedResult =
-            await _commandExecutor.Send(new CheckQueuedLibraryComparisonJobCommand(), CancellationToken.None);
+            await _commandExecutor.Send(new CheckQueuedLibraryComparisonJobCommand(), cancellationToken);
+        if (checkQueuedResult.IsCancelled)
+            return checkQueuedResult;
+
         return checkQueuedResult.IsFailed ? checkQueuedResult.LogError() : Result.Ok();
     }
 

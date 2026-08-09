@@ -57,7 +57,7 @@ public class StopDownloadTaskCommandHandler : ICommandHandler<StopDownloadTaskCo
             }
 
             var isDownloading = await _downloadTaskScheduler.IsDownloading(downloadTaskKey, cancellationToken);
-            var isMoving = await _moveDownloadFileScheduler.IsDownloadFileMoving(downloadTaskKey);
+            var isMoving = await _moveDownloadFileScheduler.IsDownloadFileMoving(downloadTaskKey, cancellationToken);
 
             if (stopOnlyActiveChildren && !isDownloading && !isMoving)
             {
@@ -75,6 +75,9 @@ public class StopDownloadTaskCommandHandler : ICommandHandler<StopDownloadTaskCo
             if (isDownloading)
             {
                 var stopResult = await _downloadTaskScheduler.StopDownloadTaskJob(downloadTaskKey, cancellationToken);
+                if (stopResult.IsCancelled)
+                    return stopResult.LogWarning();
+
                 if (stopResult.IsFailed)
                 {
                     // At most one download task runs per server; if stopping it fails there is
@@ -85,7 +88,13 @@ public class StopDownloadTaskCommandHandler : ICommandHandler<StopDownloadTaskCo
 
             if (isMoving)
             {
-                var stopMoveResult = await _moveDownloadFileScheduler.StopMoveDownloadFileJob(downloadTaskKey);
+                var stopMoveResult = await _moveDownloadFileScheduler.StopMoveDownloadFileJob(
+                    downloadTaskKey,
+                    cancellationToken
+                );
+                if (stopMoveResult.IsCancelled)
+                    return stopMoveResult.LogWarning();
+
                 if (stopMoveResult.IsFailed)
                     return stopMoveResult.LogError();
             }
@@ -101,6 +110,9 @@ public class StopDownloadTaskCommandHandler : ICommandHandler<StopDownloadTaskCo
                     new DeleteDownloadTaskFilesCommand([downloadTaskKey]),
                     cancellationToken
                 );
+                if (deleteFilesResult.IsCancelled)
+                    return deleteFilesResult.LogWarning();
+
                 if (deleteFilesResult.IsFailed)
                     return deleteFilesResult.LogError();
             }

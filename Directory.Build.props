@@ -7,6 +7,9 @@
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
         <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+        <!-- Require forwarding an in-scope CancellationToken to cancellable async APIs. -->
+        <AnalysisLevel>latest</AnalysisLevel>
+        <WarningsAsErrors>$(WarningsAsErrors);CA2016</WarningsAsErrors>
         <ReaparrRuntimeMode Condition="'$(ReaparrRuntimeMode)' == ''">docker</ReaparrRuntimeMode>
         <ReaparrRuntimeIdentifier Condition="'$(ReaparrRuntimeIdentifier)' == '' and '$(RuntimeIdentifier)' != ''"
             >$(RuntimeIdentifier)</ReaparrRuntimeIdentifier

@@ -95,6 +95,9 @@ public class CheckConnectionStatusByIdCommandHandler
             cancellationToken
         );
 
+        if (serverStatusResult.IsCancelled)
+            return serverStatusResult;
+
         if (serverStatusResult.IsFailed)
             return serverStatusResult.LogError();
 
@@ -137,7 +140,9 @@ public class CheckConnectionStatusByIdCommandHandler
         }
         catch (DbUpdateException ex)
         {
-            return Result.Fail(new ExceptionalError($"Failed to upsert {nameof(PlexServerStatus)} due to relational integrity changes.", ex))
+            return Result
+                .Fail(new ExceptionalError(
+                    $"Failed to upsert {nameof(PlexServerStatus)} due to relational integrity changes.", ex))
                 .LogError();
         }
 

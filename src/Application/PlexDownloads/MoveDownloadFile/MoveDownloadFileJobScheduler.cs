@@ -15,13 +15,17 @@ public class MoveDownloadFileJobScheduler : IMoveDownloadFileScheduler
     /// Should only be called by the <see cref="MoveDownloadFileJobQueue"/> to start a new <see cref="MoveDownloadFileJob"/>.
     /// </summary>
     /// <param name="downloadTaskKey"> The key of the <see cref="DownloadTaskGeneric"/> to merge/move. </param>
-    public async Task<Result> StartMoveDownloadFileJob(DownloadTaskKey downloadTaskKey)
+    /// <param name="cancellationToken"></param>
+    public async Task<Result> StartMoveDownloadFileJob(
+        DownloadTaskKey downloadTaskKey,
+        CancellationToken cancellationToken
+    )
     {
         if (!downloadTaskKey.IsValid)
             return ResultExtensions.IsInvalidId(nameof(DownloadTaskKey), downloadTaskKey.Id).LogWarning();
 
         var jobKey = MoveDownloadFileJob.GetJobKey(downloadTaskKey.Id);
-        if (await _scheduler.IsJobRunning(jobKey))
+        if (await _scheduler.IsJobRunning(jobKey, cancellationToken))
             return Result.Fail($"{nameof(MoveDownloadFileJob)} with {jobKey} already exists").LogWarning();
 
         var job = JobBuilder
@@ -32,12 +36,15 @@ public class MoveDownloadFileJobScheduler : IMoveDownloadFileScheduler
 
         var trigger = TriggerBuilder.Create().WithIdentity($"{jobKey.Name}_trigger", jobKey.Group).StartNow().Build();
 
-        await _scheduler.ScheduleJob(job, trigger);
+        await _scheduler.ScheduleJob(job, trigger, cancellationToken);
 
         return Result.Ok();
     }
 
-    public async Task<Result> StopMoveDownloadFileJob(DownloadTaskKey downloadTaskKey)
+    public async Task<Result> StopMoveDownloadFileJob(
+        DownloadTaskKey downloadTaskKey,
+        CancellationToken cancellationToken
+    )
     {
         if (!downloadTaskKey.IsValid)
             return ResultExtensions.IsInvalidId(nameof(DownloadTaskKey), downloadTaskKey.Id).LogWarning();
@@ -50,27 +57,29 @@ public class MoveDownloadFileJobScheduler : IMoveDownloadFileScheduler
             );
 
         var jobKey = MoveDownloadFileJob.GetJobKey(downloadTaskKey.Id);
-        if (!await _scheduler.IsJobRunning(jobKey))
+        if (!await _scheduler.IsJobRunning(jobKey, cancellationToken))
         {
             return Result
                 .Fail($"{nameof(MoveDownloadFileJob)} with {jobKey} cannot be stopped because it is not running")
                 .LogWarning();
         }
 
-        var wasStopped = await _scheduler.StopJob(jobKey);
+        var wasStopped = await _scheduler.StopJob(jobKey, cancellationToken);
 
         return !wasStopped
             ? Result.Fail($"Failed to stop {nameof(DownloadTaskKey)} with id {downloadTaskKey.Id}").LogError()
             : Result.Ok();
     }
 
-    public async Task<bool> IsDownloadFileMoving(DownloadTaskKey downloadTaskKey) =>
-        await _scheduler.IsJobRunningAsync(MoveDownloadFileJob.GetJobKey(downloadTaskKey.Id));
+    public async Task<bool> IsDownloadFileMoving(DownloadTaskKey downloadTaskKey, CancellationToken cancellationToken) =>
+        await _scheduler.IsJobRunningAsync(MoveDownloadFileJob.GetJobKey(downloadTaskKey.Id), cancellationToken);
 
     public async Task<bool> IsAnyMoveDownloadFileJobRunning() =>
         (await _scheduler.GetRunningJobDataMaps(typeof(MoveDownloadFileJob))).Any();
 
-    public async Task<List<DownloadTaskKey>> GetCurrentlyMovingKeysByServer(int plexServerId)
+    public async Task<List<DownloadTaskKey>> GetCurrentlyMovingKeysByServer(
+        int plexServerId
+    )
     {
         var data = await _scheduler.GetRunningJobDataMaps(typeof(MoveDownloadFileJob));
         return data.Select(x => x.GetJsonValue<DownloadTaskKey>(MoveDownloadFileJob.DownloadTaskIdParameter))
@@ -79,4 +88,3 @@ public class MoveDownloadFileJobScheduler : IMoveDownloadFileScheduler
             .ToList();
     }
 }
-

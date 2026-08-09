@@ -168,6 +168,6 @@ public class LibrarySyncProgressStore : ILibrarySyncProgressStore
             Errors = progress.Errors,
         };
 
-        await _progressHubService.SendLibraryProgressUpdateAsync(dto, cancellationToken);
+        await _progressHubService.SendLibraryProgressUpdateAsync(dto);
     }
 }

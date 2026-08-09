@@ -67,7 +67,7 @@ public class GetDashTranscodeDecisionCommandHandler
 
         var decisionResponse = await client
             .Transcoder.MakeDecisionAsync(decisionRequest.ToMakeDecisionRequest())
-            .ToResponse();
+            .ToResponse(cancellationToken);
 
         if (decisionResponse.IsFailed)
             return decisionResponse.ToResult();

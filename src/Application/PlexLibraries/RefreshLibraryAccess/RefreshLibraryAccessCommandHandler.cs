@@ -45,6 +45,9 @@ public class RefreshLibraryAccessHandler
         if (plexServerId == 0)
         {
             var result = await _dbContext.GetAccessiblePlexServers(plexAccountId, cancellationToken);
+            if (result.IsCancelled)
+                return result.ToResult();
+
             if (result.IsFailed)
                 return result.ToResult();
 
@@ -87,6 +90,10 @@ public class RefreshLibraryAccessHandler
             })
         );
 
+        var cancelledResults = libraryResults.Where(x => x.IsCancelled).ToList();
+        if (cancelledResults.Any())
+            return Result.Merge(cancelledResults.ToResult()).ToResult();
+
         if (libraryResults.All(x => x.IsFailed))
             return Result.Merge(libraryResults).ToResult();
 
@@ -96,6 +103,9 @@ public class RefreshLibraryAccessHandler
             new AddOrUpdatePlexLibrariesCommand { PlexAccountId = plexAccountId, PlexLibraries = plexLibraries },
             cancellationToken
         );
+
+        if (updateResult.IsCancelled)
+            return updateResult.ToResult();
 
         if (updateResult.IsFailed)
         {
@@ -128,6 +138,9 @@ public class RefreshLibraryAccessHandler
                 new GetLibrarySectionsCommand(plexServerId, plexAccountId),
                 cancellationToken
             );
+
+            if (libraries.IsCancelled)
+                return libraries.ToResult();
 
             if (libraries.IsFailed)
             {

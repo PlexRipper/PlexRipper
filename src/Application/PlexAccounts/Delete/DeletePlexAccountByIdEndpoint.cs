@@ -110,8 +110,7 @@ public class DeletePlexAccountByIdEndpoint : Endpoint<DeletePlexAccountByIdReque
                 RefreshDataType.PlexServer,
                 RefreshDataType.PlexServerConnection,
                 RefreshDataType.PlexLibrary,
-            ],
-            ct
+            ]
         );
 
         await Send.FluentResult(Result.Ok(), ct);

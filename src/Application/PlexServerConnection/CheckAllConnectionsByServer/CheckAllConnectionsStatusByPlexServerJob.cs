@@ -29,7 +29,7 @@ public class CheckAllConnectionsStatusByPlexServerJob : IJob
 
     public async Task Execute(IJobExecutionContext context)
     {
-        try
+        var result = await Result.Try(async Task () =>
         {
             var cancellationToken = context.CancellationToken;
             var plexServers = _dbContext.PlexServers
@@ -56,7 +56,7 @@ public class CheckAllConnectionsStatusByPlexServerJob : IJob
 
             await _progressHubService.SendJobStatusUpdateAsync(update);
 
-            await Task.WhenAll(
+            var connectionResults = await Task.WhenAll(
                 plexServers.Select(async plexServer =>
                     await _commandExecutor.Send(
                         new CheckAllConnectionsStatusByPlexServerCommand(plexServer.Id),
@@ -64,6 +64,17 @@ public class CheckAllConnectionsStatusByPlexServerJob : IJob
                     )
                 )
             );
+
+            var cancelledResults = connectionResults.Where(x => x.IsCancelled).ToList();
+            foreach (var cancelledResult in cancelledResults)
+                cancelledResult.LogWarning();
+
+            var failedResults = connectionResults.Where(x => x.IsFailed && !x.IsCancelled).ToList();
+            foreach (var failedResult in failedResults)
+                failedResult.LogError();
+
+            if (cancelledResults.Count > 0 || failedResults.Count > 0)
+                return;
 
             // Send completed job status update
             update.Status = JobStatus.Completed;
@@ -75,10 +86,11 @@ public class CheckAllConnectionsStatusByPlexServerJob : IJob
                     nameof(CheckAllConnectionsStatusByPlexServerJob),
                     plexServers.Select(x => x.Id).ToList()
                 );
-        }
-        catch (Exception e)
-        {
-            _log.Here().ErrorResult(e);
-        }
+        });
+
+        if (result.IsCancelled)
+            result.LogWarning();
+        else if (result.IsFailed)
+            result.LogError();
     }
 }

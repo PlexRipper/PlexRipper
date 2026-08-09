@@ -47,7 +47,9 @@ public class PausePlexServerDownloadsCommandHandler : ICommandHandler<PausePlexS
             .PlexServers.Where(x => x.Id == command.PlexServerId)
             .ExecuteUpdateAsync(p => p.SetProperty(x => x.IsDownloadsPausedByUser, true), cancellationToken);
 
-        var downloadingKeys = await _downloadTaskScheduler.GetCurrentlyDownloadingKeysByServer(command.PlexServerId);
+        var downloadingKeys = await _downloadTaskScheduler.GetCurrentlyDownloadingKeysByServer(
+            command.PlexServerId
+        );
         foreach (var downloadKey in downloadingKeys)
         {
             await _commandExecutor.Send(new PauseDownloadTaskCommand(downloadKey.Id), cancellationToken);

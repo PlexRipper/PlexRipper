@@ -66,14 +66,20 @@ public class MoveFileWithResumeCommandHandler : ICommandHandler<MoveFileWithResu
         var dataTotal = command.DataTotal;
         var moveDownloadFileProgres = command.Progress;
 
+        if (cancellationToken.IsCancellationRequested)
+            return ResultExtensions.TaskIsCancelled(nameof(MoveFileWithResumeCommand)).LogWarning();
+
         if (currentOffset > dataTotal)
             return CreateByteCountMismatchFailure(dataTotal, currentOffset, sourcePath, targetPath);
 
         var inputStreamResult = Result.Try(
             (() => _file.Open(sourcePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
         );
+        if (inputStreamResult.IsCancelled)
+            return inputStreamResult.ToResult().LogWarning();
+
         if (inputStreamResult.IsFailed)
-            return inputStreamResult.ToResult();
+            return inputStreamResult.ToResult().LogError();
 
         await using (Stream? readStream = inputStreamResult.Value)
         {
@@ -82,8 +88,11 @@ public class MoveFileWithResumeCommandHandler : ICommandHandler<MoveFileWithResu
             var writeStreamResult = Result.Try(() =>
                 _file.Open(targetPath, writeMode, FileAccess.Write, FileShare.ReadWrite)
             );
+            if (writeStreamResult.IsCancelled)
+                return writeStreamResult.ToResult().LogWarning();
+
             if (writeStreamResult.IsFailed)
-                return writeStreamResult.ToResult();
+                return writeStreamResult.ToResult().LogError();
 
             await using Stream? writeStream = writeStreamResult.Value;
 
@@ -105,10 +114,45 @@ public class MoveFileWithResumeCommandHandler : ICommandHandler<MoveFileWithResu
             var previousDataTransferred = 0L;
 
             var buffer = new byte[_bufferSize];
-            int bytesRead;
-            while ((bytesRead = await readStream.ReadAsync(buffer, 0, buffer.Length, CancellationToken.None)) > 0)
+            while (true)
             {
-                await writeStream.WriteAsync(buffer, 0, bytesRead, CancellationToken.None);
+                var readResult = await Result.Try(async Task<int> () =>
+                    await readStream.ReadAsync(buffer, 0, buffer.Length, cancellationToken));
+
+                if (readResult.IsCancelled || cancellationToken.IsCancellationRequested)
+                {
+                    _log.Here()
+                        .Warning(
+                            "User cancellation requested during file move from {SourcePath} to {TargetPath}",
+                            sourcePath,
+                            targetPath
+                        );
+                    return ResultExtensions.TaskIsCancelled(nameof(MoveFileWithResumeCommandHandler));
+                }
+
+                if (readResult.IsFailed)
+                    return readResult.ToResult().LogError();
+
+                var bytesRead = readResult.Value;
+                if (bytesRead == 0)
+                    break;
+
+                var writeResult = await Result.Try(async Task () =>
+                    await writeStream.WriteAsync(buffer, 0, bytesRead, cancellationToken));
+
+                if (writeResult.IsCancelled || cancellationToken.IsCancellationRequested)
+                {
+                    _log.Here()
+                        .Warning(
+                            "User cancellation requested during file move from {SourcePath} to {TargetPath}",
+                            sourcePath,
+                            targetPath
+                        );
+                    return ResultExtensions.TaskIsCancelled(nameof(MoveFileWithResumeCommandHandler));
+                }
+
+                if (writeResult.IsFailed)
+                    return writeResult.LogError();
 
                 currentOffset += bytesRead;
                 previousDataTransferred += bytesRead;
@@ -124,17 +168,6 @@ public class MoveFileWithResumeCommandHandler : ICommandHandler<MoveFileWithResu
                         ),
                     }
                 );
-
-                if (cancellationToken.IsCancellationRequested)
-                {
-                    _log.Here()
-                        .Warning(
-                            "User Cancellation requested during file move form {SourcePath} to {TargetPath}",
-                            sourcePath,
-                            targetPath
-                        );
-                    return ResultExtensions.TaskIsCancelled(nameof(MoveFileWithResumeCommandHandler));
-                }
             }
         }
 

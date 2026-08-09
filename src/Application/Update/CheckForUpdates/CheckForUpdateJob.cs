@@ -22,15 +22,14 @@ public class CheckForUpdateJob : IJob
     {
         _log.Here().Debug("Executing job: {JobName}", nameof(CheckForUpdateJob));
 
-        try
-        {
-            await _commandExecutor.Send(new CheckForUpdatesCommand(), context.CancellationToken);
-        }
-        catch (Exception e)
-        {
-            // Jobs must not throw — Quartz would otherwise keep re-executing
-            // https://www.quartz-scheduler.net/documentation/best-practices.html#throwing-exceptions
-            _log.Here().ErrorResult(e);
-        }
+        // Jobs must not throw — Quartz would otherwise keep re-executing.
+        var result = await Result.Try(() =>
+            _commandExecutor.Send(new CheckForUpdatesCommand(), context.CancellationToken)
+        );
+
+        if (result.IsCancelled)
+            result.LogWarning();
+        else if (result.IsFailed)
+            result.LogError();
     }
 }

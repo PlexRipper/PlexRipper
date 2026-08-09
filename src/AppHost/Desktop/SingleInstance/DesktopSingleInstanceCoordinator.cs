@@ -56,7 +56,7 @@ public sealed class DesktopSingleInstanceCoordinator : IDesktopSingleInstanceCoo
     /// <inheritdoc />
     public async Task<Result> SignalPrimaryInstanceAsync(CancellationToken cancellationToken)
     {
-        try
+        return await Result.Try(async Task<Result> () =>
         {
             await using var client = new NamedPipeClientStream(
                 ".",
@@ -65,17 +65,16 @@ public sealed class DesktopSingleInstanceCoordinator : IDesktopSingleInstanceCoo
                 PipeOptions.Asynchronous
             );
             var connectResult = await ConnectToPrimaryInstanceAsync(client, cancellationToken);
+            if (connectResult.IsCancelled)
+                return connectResult.LogWarning();
+
             if (connectResult.IsFailed)
-                return connectResult;
+                return connectResult.LogError();
 
             await client.WriteAsync(Encoding.UTF8.GetBytes(SIGNAL_MESSAGE), cancellationToken);
             await client.FlushAsync(cancellationToken);
             return Result.Ok();
-        }
-        catch (Exception e)
-        {
-            return Result.Fail(new ExceptionalError(e)).LogError();
-        }
+        });
     }
 
     /// <inheritdoc />
@@ -148,33 +147,21 @@ public sealed class DesktopSingleInstanceCoordinator : IDesktopSingleInstanceCoo
 
         while (!linkedTokenSource.Token.IsCancellationRequested)
         {
-            try
-            {
-                await client.ConnectAsync(retryDelay, linkedTokenSource.Token);
-                return Result.Ok();
-            }
-            catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
-            {
-                throw;
-            }
-            catch (OperationCanceledException) when (timeoutTokenSource.IsCancellationRequested)
-            {
-                break;
-            }
-            catch (TimeoutException)
-            {
-                // The primary may still be starting its listener; retry until the total timeout expires.
-            }
-            catch (IOException)
-            {
-                // The pipe may not exist yet while the primary process is still starting.
-            }
+            var connectResult = await Result.Try(async Task () =>
+                await client.ConnectAsync(retryDelay, linkedTokenSource.Token));
+            
+            if (connectResult.IsSuccess || connectResult.IsCancelled)
+                return connectResult;
 
-            await Task.Delay(retryDelay, cancellationToken);
+            await Result.Try(async Task () => await Task.Delay(retryDelay, cancellationToken));
+
             retryDelay = TimeSpan.FromMilliseconds(
                 Math.Min(retryDelay.TotalMilliseconds * 2, _maxSignalRetryDelay.TotalMilliseconds)
             );
         }
+
+        if (cancellationToken.IsCancellationRequested)
+            return ResultExtensions.TaskIsCancelled(nameof(ConnectToPrimaryInstanceAsync));
 
         return Result.Fail("Timed out while connecting to the primary desktop instance.");
     }

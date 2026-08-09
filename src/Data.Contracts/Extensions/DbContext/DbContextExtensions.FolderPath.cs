@@ -4,17 +4,25 @@ namespace Reaparr.Data.Contracts;
 
 public static partial class DbContextExtensions
 {
-    public static async Task<FolderPath> GetDownloadFolder(this IReaparrDbContext dbContext)
+    public static async Task<FolderPath> GetDownloadFolder(
+        this IReaparrDbContext dbContext
+    )
     {
         // This is the default download folder, which always exists in the database
-        return (await dbContext.FolderPaths.FirstOrDefaultAsync(x => x.FolderType == FolderType.DownloadFolder))!;
+        return (await dbContext.FolderPaths.FirstOrDefaultAsync(
+            x => x.FolderType == FolderType.DownloadFolder,
+            CancellationToken.None
+        ))!;
     }
 
-    public static async Task<FolderPath?> GetDestinationFolder(this IReaparrDbContext dbContext, int plexLibraryId)
+    public static async Task<FolderPath?> GetDestinationFolder(
+        this IReaparrDbContext dbContext,
+        int plexLibraryId
+    )
     {
         var plexLibrary = await dbContext
             .PlexLibraries.Include(x => x.DefaultDestination)
-            .FirstOrDefaultAsync(x => x.Id == plexLibraryId);
+            .FirstOrDefaultAsync(x => x.Id == plexLibraryId, CancellationToken.None);
 
         if (plexLibrary is null)
         {
@@ -37,12 +45,11 @@ public static partial class DbContextExtensions
     /// <returns></returns>
     public static async Task<FolderPath> GetDefaultDestinationFolderPath(
         this IReaparrDbContext dbContext,
-        PlexMediaType mediaType,
-        CancellationToken token = default
+        PlexMediaType mediaType
     )
     {
         var id = mediaType.ToDefaultDestinationFolderId();
         // Default folder paths always exist
-        return (await dbContext.FolderPaths.GetAsync(id, token))!;
+        return (await dbContext.FolderPaths.GetAsync(id, CancellationToken.None))!;
     }
 }

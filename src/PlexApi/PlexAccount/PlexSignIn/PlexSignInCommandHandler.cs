@@ -46,7 +46,7 @@ public class PlexSignInCommandHandler : ICommandHandler<PlexSignInCommand, Resul
                     },
                 }
             )
-            .ToResponse();
+            .ToResponse(ct);
 
         if (response.IsFailed)
             return response.ToResult().LogError();

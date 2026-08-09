@@ -16,12 +16,19 @@ public static class HttpClientExtensions
     /// <param name="operation"> The SpeakEasy Plex SDK endpoint method to convert the result for </param>
     /// <typeparam name="T"></typeparam>
     /// <returns></returns>
-    public static async Task<Result<T>> ToResponse<T>(this Task<T> operation)
+    public static async Task<Result<T>> ToResponse<T>(
+        this Task<T> operation,
+        CancellationToken cancellationToken = default
+    )
         where T : class
     {
         try
         {
+            if (cancellationToken.IsCancellationRequested)
+                return ResultExtensions.TaskIsCancelled(nameof(ToResponse)).LogWarning();
+
             var response = await operation;
+
             var httpResponseMessage = response.GetHttpResponseMessage();
 
             if (!httpResponseMessage.IsSuccessStatusCode)
@@ -40,6 +47,10 @@ public static class HttpClientExtensions
         catch (ResponseValidationException e)
         {
             return Result.Fail(new ExceptionalError(e).WithMetadata("json body", e.Body)).LogError();
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            return ResultExtensions.TaskIsCancelled(nameof(ToResponse)).LogWarning();
         }
         catch (TaskCanceledException e)
         {
@@ -125,7 +136,10 @@ public static class HttpClientExtensions
             as HttpResponseMessage
         )!;
 
-    public static async Task<string> ReadAsFormattedJsonAsync(this HttpContent? content)
+    public static async Task<string> ReadAsFormattedJsonAsync(
+        this HttpContent? content,
+        CancellationToken cancellationToken = default
+    )
     {
         if (content == null)
             return "HttpContent is null.";
@@ -163,7 +177,7 @@ public static class HttpClientExtensions
 
         try
         {
-            var stringResponse = await content.ReadAsStringAsync();
+            var stringResponse = await content.ReadAsStringAsync(cancellationToken);
             if (string.IsNullOrWhiteSpace(stringResponse))
                 return "Content is empty.";
 

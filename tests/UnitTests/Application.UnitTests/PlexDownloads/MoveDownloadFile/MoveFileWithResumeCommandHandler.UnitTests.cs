@@ -148,7 +148,9 @@ public class MoveFileWithResumeCommandHandlerUnitTests : BaseUnitTest<MoveFileWi
             Progress = _ => { },
         };
 
-        await Should.ThrowAsync<OperationCanceledException>(() => Sut.ExecuteAsync(command, cts.Token));
+        var result = await Sut.ExecuteAsync(command, cts.Token);
+
+        result.IsCancelled.ShouldBeTrue();
 
         var file = Mock.Container.Resolve<IFile>();
         using var targetStream = file.Open(targetPath, FileMode.Open, FileAccess.Read, FileShare.Read);
@@ -186,7 +188,9 @@ public class MoveFileWithResumeCommandHandlerUnitTests : BaseUnitTest<MoveFileWi
             },
         };
 
-        await Should.ThrowAsync<OperationCanceledException>(() => Sut.ExecuteAsync(command, cts.Token));
+        var result = await Sut.ExecuteAsync(command, cts.Token);
+
+        result.IsCancelled.ShouldBeTrue();
 
         var file = Mock.Container.Resolve<IFile>();
         using var targetStream = file.Open(targetPath, FileMode.Open, FileAccess.Read, FileShare.Read);
@@ -445,7 +449,9 @@ public class MoveFileWithResumeCommandHandlerUnitTests : BaseUnitTest<MoveFileWi
             Progress = _ => { },
         };
 
-        await Should.ThrowAsync<OperationCanceledException>(() => Sut.ExecuteAsync(command, cts.Token));
+        var result = await Sut.ExecuteAsync(command, cts.Token);
+
+        result.IsCancelled.ShouldBeTrue();
 
         var file = Mock.Container.Resolve<IFile>();
         file.Exists(sourcePath).ShouldBeTrue();

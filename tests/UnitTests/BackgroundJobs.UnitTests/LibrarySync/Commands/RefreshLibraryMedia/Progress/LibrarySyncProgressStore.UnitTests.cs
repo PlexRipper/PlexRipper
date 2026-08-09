@@ -14,7 +14,7 @@ public class LibrarySyncProgressStoreUnitTests : BaseUnitTest<LibrarySyncProgres
             .Setup(x =>
                 x.SendLibraryProgressUpdateAsync(It.IsAny<LibrarySyncProgressDTO>())
             )
-            .Callback<LibrarySyncProgressDTO, CancellationToken>((dto, _) => capturedDto = dto)
+            .Callback<LibrarySyncProgressDTO>(dto => capturedDto = dto)
             .Returns(Task.CompletedTask);
 
         // Act
@@ -44,7 +44,7 @@ public class LibrarySyncProgressStoreUnitTests : BaseUnitTest<LibrarySyncProgres
             .Setup(x =>
                 x.SendLibraryProgressUpdateAsync(It.IsAny<LibrarySyncProgressDTO>())
             )
-            .Callback<LibrarySyncProgressDTO, CancellationToken>((dto, _) => capturedDto = dto)
+            .Callback<LibrarySyncProgressDTO>(dto => capturedDto = dto)
             .Returns(Task.CompletedTask);
 
         await Sut.StartAsync(1, PlexMediaType.Movie, CancellationToken);
@@ -85,7 +85,7 @@ public class LibrarySyncProgressStoreUnitTests : BaseUnitTest<LibrarySyncProgres
             .Setup(x =>
                 x.SendLibraryProgressUpdateAsync(It.IsAny<LibrarySyncProgressDTO>())
             )
-            .Callback<LibrarySyncProgressDTO, CancellationToken>((dto, _) => capturedDto = dto)
+            .Callback<LibrarySyncProgressDTO>(dto => capturedDto = dto)
             .Returns(Task.CompletedTask);
 
         await Sut.StartAsync(2, PlexMediaType.TvShow, CancellationToken);
@@ -148,7 +148,7 @@ public class LibrarySyncProgressStoreUnitTests : BaseUnitTest<LibrarySyncProgres
             .Setup(x =>
                 x.SendLibraryProgressUpdateAsync(It.IsAny<LibrarySyncProgressDTO>())
             )
-            .Callback<LibrarySyncProgressDTO, CancellationToken>((dto, _) => capturedDto = dto)
+            .Callback<LibrarySyncProgressDTO>(dto => capturedDto = dto)
             .Returns(Task.CompletedTask);
 
         await Sut.StartAsync(3, PlexMediaType.TvShow, CancellationToken);
@@ -210,7 +210,7 @@ public class LibrarySyncProgressStoreUnitTests : BaseUnitTest<LibrarySyncProgres
             .Setup(x =>
                 x.SendLibraryProgressUpdateAsync(It.IsAny<LibrarySyncProgressDTO>())
             )
-            .Callback<LibrarySyncProgressDTO, CancellationToken>((dto, _) => capturedDto = dto)
+            .Callback<LibrarySyncProgressDTO>(dto => capturedDto = dto)
             .Returns(Task.CompletedTask);
 
         await Sut.StartAsync(4, PlexMediaType.TvShow, CancellationToken);
@@ -312,7 +312,7 @@ public class LibrarySyncProgressStoreUnitTests : BaseUnitTest<LibrarySyncProgres
             .Setup(x =>
                 x.SendLibraryProgressUpdateAsync(It.IsAny<LibrarySyncProgressDTO>())
             )
-            .Callback<LibrarySyncProgressDTO, CancellationToken>((dto, _) => capturedDto = dto)
+            .Callback<LibrarySyncProgressDTO>(dto => capturedDto = dto)
             .Returns(Task.CompletedTask);
 
         const int plexLibraryId = 42;

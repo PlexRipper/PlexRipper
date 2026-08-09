@@ -135,10 +135,21 @@ public class DashPlexDownloadClient : IPlexDownloadClient
             return downloadingResult.LogError();
 
         var options = await CreateDashOptions(downloadTask, downloadUrlResult.Value.DownloadUrl);
-        await using var cancellationRegistration = cancellationToken.Register(() => { _ = _dashWrapper.StopAsync(); });
-        var startResult = await _dashWrapper.StartAsync(options);
-        if (startResult.IsCancelled || startResult.IsFailed)
-            return startResult;
+        var dashStartTask = _dashWrapper.StartAsync(options);
+        try
+        {
+            var startResult = await dashStartTask.WaitAsync(cancellationToken);
+            if (startResult.IsCancelled || startResult.IsFailed)
+                return startResult;
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            var stopResult = await _dashWrapper.StopAsync();
+            if (stopResult.IsFailed)
+                return stopResult.LogError();
+
+            return ResultExtensions.TaskIsCancelled(nameof(DashPlexDownloadClient));
+        }
 
         // Small delay before disposing this client to ensure everything is processing correctly
         return await Result.Try(async Task () => await Task.Delay(2000, cancellationToken));

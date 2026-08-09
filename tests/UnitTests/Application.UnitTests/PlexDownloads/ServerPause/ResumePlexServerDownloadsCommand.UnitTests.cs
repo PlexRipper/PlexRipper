@@ -15,9 +15,14 @@ public class ResumePlexServerDownloadsCommandUnitTests : BaseUnitTest<ResumePlex
             .PlexServers.Where(x => x.Id == plexServerId)
             .ExecuteUpdateAsync(p => p.SetProperty(x => x.IsDownloadsPausedByUser, true), CancellationToken);
 
-        Mock.Mock<IEventPublisher>()
-            .Setup(x => x.PublishAsync(It.IsAny<CheckDownloadQueueEvent>(), It.IsAny<CancellationToken>()))
-            .Returns(Task.CompletedTask)
+        Mock.Mock<IDownloadQueue>()
+            .Setup(x =>
+                x.CheckDownloadQueue(
+                    It.Is<List<int>>(ids => ids.Count == 1 && ids[0] == plexServerId),
+                    CancellationToken.None
+                )
+            )
+            .ReturnsAsync(Result.Ok())
             .Verifiable(Times.Once());
 
         // Act
@@ -30,7 +35,7 @@ public class ResumePlexServerDownloadsCommandUnitTests : BaseUnitTest<ResumePlex
         server.ShouldNotBeNull();
         server.IsDownloadsPausedByUser.ShouldBeFalse();
 
-        Mock.Mock<IEventPublisher>().Verify();
+        Mock.Mock<IDownloadQueue>().Verify();
     }
 
     [Test]
@@ -50,9 +55,9 @@ public class ResumePlexServerDownloadsCommandUnitTests : BaseUnitTest<ResumePlex
                 CancellationToken
             );
 
-        Mock.Mock<IEventPublisher>()
-            .Setup(x => x.PublishAsync(It.IsAny<CheckDownloadQueueEvent>(), It.IsAny<CancellationToken>()))
-            .Returns(Task.CompletedTask)
+        Mock.Mock<IDownloadQueue>()
+            .Setup(x => x.CheckDownloadQueue(It.IsAny<List<int>>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result.Ok())
             .Verifiable(Times.Never());
 
         // Act
@@ -65,7 +70,7 @@ public class ResumePlexServerDownloadsCommandUnitTests : BaseUnitTest<ResumePlex
         server.ShouldNotBeNull();
         server.IsDownloadsPausedByUser.ShouldBeTrue();
 
-        Mock.Mock<IEventPublisher>().Verify();
+        Mock.Mock<IDownloadQueue>().Verify();
     }
 }
 

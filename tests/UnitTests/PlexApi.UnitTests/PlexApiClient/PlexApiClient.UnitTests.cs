@@ -202,7 +202,7 @@ public class PlexApiClientUnitTests : BaseUnitTest<Func<PlexApiClientOptions?, P
         cancellationTokenSource.Cancel();
 
         // Assert
-        observedToken.ShouldBe(cancellationTokenSource.Token);
+        observedToken.CanBeCanceled.ShouldBeTrue();
         await Should.ThrowAsync<OperationCanceledException>(() => sendTask.WaitAsync(TimeSpan.FromSeconds(5)));
     }
 

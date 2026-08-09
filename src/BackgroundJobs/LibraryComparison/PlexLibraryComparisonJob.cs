@@ -124,7 +124,7 @@ public class PlexLibraryComparisonJob : IJob
         if (result.IsFailed)
         {
             result.LogError();
-            await UpdateQueueItemAsync(queueItem, LibrarySyncJobStatus.Failed, result.ToString(), cancellationToken);
+            await UpdateQueueItemAsync(queueItem, LibrarySyncJobStatus.Failed, result.ToString(), CancellationToken.None);
             _log.Here()
                 .Warning(
                     "Comparison queue item failed for remote {RemoteLibId} vs owned {OwnedLibId}, {MediaType}",
@@ -135,7 +135,7 @@ public class PlexLibraryComparisonJob : IJob
         }
         else
         {
-            await UpdateQueueItemAsync(queueItem, LibrarySyncJobStatus.Completed, null, cancellationToken);
+            await UpdateQueueItemAsync(queueItem, LibrarySyncJobStatus.Completed, null, CancellationToken.None);
             _log.Here()
                 .Information(
                     "Comparison queue item completed for remote {RemoteLibId} vs owned {OwnedLibId}, {MediaType}",
@@ -144,6 +144,9 @@ public class PlexLibraryComparisonJob : IJob
                     queueItem.MediaType
                 );
         }
+
+        if (cancellationToken.IsCancellationRequested)
+            return false;
 
         await SendCompletionNotificationIfSettledAsync(queueItem, cancellationToken);
         return true;

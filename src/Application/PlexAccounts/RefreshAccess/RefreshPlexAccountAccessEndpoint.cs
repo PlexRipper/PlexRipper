@@ -71,6 +71,13 @@ public class RefreshPlexAccountAccessEndpoint
         {
             var serverAccessResult = await _commandExecutor.Send(new RefreshPlexServerAccessCommand(plexAccountId), ct);
 
+            if (serverAccessResult.IsCancelled)
+            {
+                serverAccessResult.LogWarning();
+                await Send.FluentResult(serverAccessResult.ToResult(), CancellationToken.None);
+                return;
+            }
+
             if (serverAccessResult.IsFailed)
             {
                 serverAccessResult.LogError();
@@ -130,7 +137,8 @@ public class RefreshPlexAccountAccessEndpoint
                 if (libraryAccessResult.IsCancelled)
                 {
                     libraryAccessResult.LogWarning();
-                    continue;
+                    await Send.FluentResult(libraryAccessResult.ToResult(), CancellationToken.None);
+                    return;
                 }
 
                 if (libraryAccessResult.IsFailed)

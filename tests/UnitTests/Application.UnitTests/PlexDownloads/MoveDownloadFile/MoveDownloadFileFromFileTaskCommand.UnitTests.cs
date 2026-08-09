@@ -1706,7 +1706,7 @@ public class MoveDownloadFileFromFileTaskCommandUnitTests : BaseUnitTest<MoveDow
         );
 
         // Assert
-        result.IsSuccess.ShouldBeTrue();
+        result.IsCancelled.ShouldBeTrue();
 
         Mock.Mock<IDownloadTaskUpdateDispatcher>()
             .Verify(

@@ -19,20 +19,14 @@ public class MockProgressHubService : IProgressHubService
         _log = log.ForContext<MockProgressHubService>();
     }
 
-    public Task SendLibraryProgressUpdateAsync(
-        LibrarySyncProgressDTO progress,
-        CancellationToken cancellationToken = default
-    )
+    public Task SendLibraryProgressUpdateAsync(LibrarySyncProgressDTO progress)
     {
-        LibraryProgressUpdateList.Add(progress, cancellationToken);
+        LibraryProgressUpdateList.Add(progress, CancellationToken.None);
         _log.Here().Verbose("{ClassName} => {@LibraryProgress}", nameof(MockProgressHubService), progress);
         return Task.CompletedTask;
     }
 
-    public Task SendServerConnectionCheckStatusProgressAsync(
-        ServerConnectionCheckStatusProgress progress,
-        CancellationToken cancellationToken = default
-    ) => Task.CompletedTask;
+    public Task SendServerConnectionCheckStatusProgressAsync(ServerConnectionCheckStatusProgress progress) => Task.CompletedTask;
 
     public Task SendJobStatusUpdateAsync<T>(JobStatusUpdate<T> jobStatusUpdate)
         where T : class
@@ -43,23 +37,17 @@ public class MockProgressHubService : IProgressHubService
         return Task.CompletedTask;
     }
 
-    public Task SendAppUpdateDownloadProgressAsync(
-        AppUpdateDownloadProgressDTO progress,
-        CancellationToken cancellationToken = default
-    )
+    public Task SendAppUpdateDownloadProgressAsync(AppUpdateDownloadProgressDTO progress)
     {
-        AppDownloadProgressList.Add(progress, cancellationToken);
+        AppDownloadProgressList.Add(progress, CancellationToken.None);
         _log.Here().Verbose("{ClassName} => {@AppDownloadProgress}", nameof(MockProgressHubService), progress);
         return Task.CompletedTask;
     }
     
     
-    public Task SendLibraryComparisonCompletedAsync(
-        LibraryComparisonCompletedDTO notification,
-        CancellationToken cancellationToken = default
-    )
+    public Task SendLibraryComparisonCompletedAsync(LibraryComparisonCompletedDTO notification)
     {
-        LibraryComparisonCompletedList.Add(notification, cancellationToken);
+        LibraryComparisonCompletedList.Add(notification, CancellationToken.None);
         _log.Here().Verbose("{ClassName} => {@Notification}", nameof(MockProgressHubService), notification);
 
         return Task.CompletedTask;

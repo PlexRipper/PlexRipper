@@ -36,8 +36,7 @@ public class DownloadUpdateEndpointUnitTests : BaseEndpointWithoutRequestUnitTes
             .Verify(
                 x =>
                     x.SendAppUpdateDownloadProgressAsync(
-                        It.IsAny<AppUpdateDownloadProgressDTO>(),
-                        It.IsAny<CancellationToken>()
+                        It.IsAny<AppUpdateDownloadProgressDTO>()
                     ),
                 Times.Never
             );
@@ -80,8 +79,7 @@ public class DownloadUpdateEndpointUnitTests : BaseEndpointWithoutRequestUnitTes
             .Verify(
                 x =>
                     x.SendAppUpdateDownloadProgressAsync(
-                        It.IsAny<AppUpdateDownloadProgressDTO>(),
-                        It.IsAny<CancellationToken>()
+                        It.IsAny<AppUpdateDownloadProgressDTO>()
                     ),
                 Times.Never
             );
@@ -118,8 +116,7 @@ public class DownloadUpdateEndpointUnitTests : BaseEndpointWithoutRequestUnitTes
         Mock.Mock<IProgressHubService>()
             .Setup(s =>
                 s.SendAppUpdateDownloadProgressAsync(
-                    It.IsAny<AppUpdateDownloadProgressDTO>(),
-                    It.IsAny<CancellationToken>()
+                    It.IsAny<AppUpdateDownloadProgressDTO>()
                 )
             )
             .Callback<AppUpdateDownloadProgressDTO, CancellationToken>(

@@ -3,7 +3,6 @@ namespace Reaparr.SignalR;
 /// <summary>
 /// Sends progress-related SignalR messages to the front-end via <see cref="ProgressHub"/>.
 /// </summary>
-/// TODO Use Result.Try instead of try/catch in this service
 public class ProgressHubService : IProgressHubService
 {
     private readonly ILogger _log;
@@ -19,34 +18,28 @@ public class ProgressHubService : IProgressHubService
     }
 
     /// <inheritdoc/>
-    public async Task SendLibraryProgressUpdateAsync(
-        LibrarySyncProgressDTO progress,
-        CancellationToken cancellationToken = default
-    )
+    public async Task SendLibraryProgressUpdateAsync(LibrarySyncProgressDTO progress)
     {
-        try
+        var result = await Result.Try(async Task () =>
+            await _hub.Clients.All.LibraryProgress(progress, CancellationToken.None));
+
+        if (result.IsFailed)
         {
-            await _hub.Clients.All.LibraryProgress(progress, cancellationToken);
-        }
-        catch (Exception ex)
-        {
-            _log.Here().Warning(ex, "Failed to send library progress update");
+            result.LogWarning();
+            _log.Here().Warning("Failed to send library progress update");
         }
     }
 
     /// <inheritdoc/>
-    public async Task SendServerConnectionCheckStatusProgressAsync(
-        ServerConnectionCheckStatusProgress progress,
-        CancellationToken cancellationToken = default
-    )
+    public async Task SendServerConnectionCheckStatusProgressAsync(ServerConnectionCheckStatusProgress progress)
     {
-        try
+        var result = await Result.Try(async Task () =>
+            await _hub.Clients.All.ServerConnectionCheckStatusProgress(progress.ToDTO(), CancellationToken.None));
+
+        if (result.IsFailed)
         {
-            await _hub.Clients.All.ServerConnectionCheckStatusProgress(progress.ToDTO(), cancellationToken);
-        }
-        catch (Exception ex)
-        {
-            _log.Here().Warning(ex, "Failed to send server connection check status progress");
+            result.LogWarning();
+            _log.Here().Warning("Failed to send server connection check status progress");
         }
     }
 
@@ -54,46 +47,39 @@ public class ProgressHubService : IProgressHubService
     public async Task SendJobStatusUpdateAsync<T>(JobStatusUpdate<T> jobStatusUpdate)
         where T : class
     {
-        try
+        var result = await Result.Try(async Task () =>
+            await _hub.Clients.All.JobStatusUpdate(jobStatusUpdate.ToDTO(), CancellationToken.None));
+
+        if (result.IsFailed)
         {
-            await _hub.Clients.All.JobStatusUpdate(jobStatusUpdate.ToDTO());
-        }
-        catch (Exception ex)
-        {
-            _log.Here().Warning(ex, "Failed to send job status update");
+            result.LogWarning();
+            _log.Here().Warning("Failed to send job status update");
         }
     }
 
     /// <inheritdoc/>
-    public async Task SendAppUpdateDownloadProgressAsync(
-        AppUpdateDownloadProgressDTO progress,
-        CancellationToken cancellationToken = default
-    )
+    public async Task SendAppUpdateDownloadProgressAsync(AppUpdateDownloadProgressDTO progress)
     {
-        try
+        var result = await Result.Try(async Task () =>
+            await _hub.Clients.All.AppUpdateDownloadProgress(progress, CancellationToken.None));
+
+        if (result.IsFailed)
         {
-            await _hub.Clients.All.AppUpdateDownloadProgress(progress, cancellationToken);
-        }
-        catch (Exception ex)
-        {
-            _log.Here().Warning(ex, "Failed to send app download progress");
+            result.LogWarning();
+            _log.Here().Warning("Failed to send app download progress");
         }
     }
     
     /// <inheritdoc/>
-    public async Task SendLibraryComparisonCompletedAsync(
-        LibraryComparisonCompletedDTO notification,
-        CancellationToken cancellationToken = default
-    )
+    public async Task SendLibraryComparisonCompletedAsync(LibraryComparisonCompletedDTO notification)
     {
-        try
+        var result = await Result.Try(async Task () =>
+            await _hub.Clients.All.LibraryComparisonCompleted(notification, CancellationToken.None));
+
+        if (result.IsFailed)
         {
-            await _hub.Clients.All.LibraryComparisonCompleted(notification, cancellationToken);
-        }
-        catch (Exception ex)
-        {
-            _log.Here().Warning(ex, "Failed to send library comparison completed notification");
+            result.LogWarning();
+            _log.Here().Warning("Failed to send library comparison completed notification");
         }
     }
-
 }

@@ -62,8 +62,7 @@ public class PlexLibraryComparisonJobUnitTests : BaseUnitTest<PlexLibraryCompari
                     notification.MediaType == PlexMediaType.Movie
                     && notification.AffectedLibraryIds.Count == 2
                     && notification.AffectedLibraryIds.Contains(remoteLibrary.Id)
-                    && notification.AffectedLibraryIds.Contains(otherRemoteLibrary.Id)),
-                It.IsAny<CancellationToken>()
+                    && notification.AffectedLibraryIds.Contains(otherRemoteLibrary.Id))
             ))
             .Returns(Task.CompletedTask)
             .Verifiable(Times.Once());
@@ -73,8 +72,7 @@ public class PlexLibraryComparisonJobUnitTests : BaseUnitTest<PlexLibraryCompari
                     notification.MediaType == PlexMediaType.Movie
                     && notification.AffectedLibraryIds.Count == 2
                     && notification.AffectedLibraryIds.Contains(otherRemoteLibrary.Id)
-                    && notification.AffectedLibraryIds.Contains(ownedLibrary.Id)),
-                It.IsAny<CancellationToken>()
+                    && notification.AffectedLibraryIds.Contains(ownedLibrary.Id))
             ))
             .Returns(Task.CompletedTask)
             .Verifiable(Times.Once());
@@ -96,8 +94,7 @@ public class PlexLibraryComparisonJobUnitTests : BaseUnitTest<PlexLibraryCompari
         Mock.Mock<IProgressHubService>()
             .Verify(
                 x => x.SendLibraryComparisonCompletedAsync(
-                    It.IsAny<LibraryComparisonCompletedDTO>(),
-                    It.IsAny<CancellationToken>()),
+                    It.IsAny<LibraryComparisonCompletedDTO>()),
                 Times.Exactly(2)
             );
     }
@@ -142,8 +139,7 @@ public class PlexLibraryComparisonJobUnitTests : BaseUnitTest<PlexLibraryCompari
                     && notification.AffectedLibraryIds.Count == 2
                     && notification.AffectedLibraryIds.Contains(remoteLibrary.Id)
                     && notification.AffectedLibraryIds.Contains(ownedLibrary.Id)
-                    && notification.CompletedAt.Kind == DateTimeKind.Utc),
-                It.IsAny<CancellationToken>()
+                    && notification.CompletedAt.Kind == DateTimeKind.Utc)
             ))
             .Returns(Task.CompletedTask)
             .Verifiable(Times.Once());
@@ -202,8 +198,7 @@ public class PlexLibraryComparisonJobUnitTests : BaseUnitTest<PlexLibraryCompari
                     notification.MediaType == PlexMediaType.Movie
                     && notification.AffectedLibraryIds.Count == 2
                     && notification.AffectedLibraryIds.Contains(remoteLibrary.Id)
-                    && notification.AffectedLibraryIds.Contains(ownedLibrary.Id)),
-                It.IsAny<CancellationToken>()
+                    && notification.AffectedLibraryIds.Contains(ownedLibrary.Id))
             ))
             .Returns(Task.CompletedTask)
             .Verifiable(Times.Once());

@@ -192,8 +192,7 @@ public class PlexLibraryComparisonJob : IJob
                 AffectedLibraryIds = affectedLibraryIds.Distinct().ToList(),
                 MediaType = queueItem.MediaType,
                 CompletedAt = DateTime.UtcNow,
-            },
-            cancellationToken
+            }
         );
     }
 

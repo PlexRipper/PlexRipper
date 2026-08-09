@@ -114,10 +114,45 @@ public class MoveFileWithResumeCommandHandler : ICommandHandler<MoveFileWithResu
             var previousDataTransferred = 0L;
 
             var buffer = new byte[_bufferSize];
-            int bytesRead;
-            while ((bytesRead = await readStream.ReadAsync(buffer, 0, buffer.Length, CancellationToken.None)) > 0)
+            while (true)
             {
-                await writeStream.WriteAsync(buffer, 0, bytesRead, CancellationToken.None);
+                var readResult = await Result.Try(async Task<int> () =>
+                    await readStream.ReadAsync(buffer, 0, buffer.Length, cancellationToken));
+
+                if (readResult.IsCancelled || cancellationToken.IsCancellationRequested)
+                {
+                    _log.Here()
+                        .Warning(
+                            "User cancellation requested during file move from {SourcePath} to {TargetPath}",
+                            sourcePath,
+                            targetPath
+                        );
+                    return ResultExtensions.TaskIsCancelled(nameof(MoveFileWithResumeCommandHandler));
+                }
+
+                if (readResult.IsFailed)
+                    return readResult.ToResult().LogError();
+
+                var bytesRead = readResult.Value;
+                if (bytesRead == 0)
+                    break;
+
+                var writeResult = await Result.Try(async Task () =>
+                    await writeStream.WriteAsync(buffer, 0, bytesRead, cancellationToken));
+
+                if (writeResult.IsCancelled || cancellationToken.IsCancellationRequested)
+                {
+                    _log.Here()
+                        .Warning(
+                            "User cancellation requested during file move from {SourcePath} to {TargetPath}",
+                            sourcePath,
+                            targetPath
+                        );
+                    return ResultExtensions.TaskIsCancelled(nameof(MoveFileWithResumeCommandHandler));
+                }
+
+                if (writeResult.IsFailed)
+                    return writeResult.LogError();
 
                 currentOffset += bytesRead;
                 previousDataTransferred += bytesRead;
@@ -133,25 +168,14 @@ public class MoveFileWithResumeCommandHandler : ICommandHandler<MoveFileWithResu
                         ),
                     }
                 );
-
-                if (cancellationToken.IsCancellationRequested)
-                {
-                    _log.Here()
-                        .Warning(
-                            "User Cancellation requested during file move form {SourcePath} to {TargetPath}",
-                            sourcePath,
-                            targetPath
-                        );
-                    return ResultExtensions.TaskIsCancelled(nameof(MoveFileWithResumeCommandHandler));
-                }
             }
         }
 
         if (cancellationToken.IsCancellationRequested)
             return ResultExtensions.TaskIsCancelled(nameof(MoveFileWithResumeCommandHandler));
 
-            if (currentOffset != dataTotal)
-                return CreateByteCountMismatchFailure(dataTotal, currentOffset, sourcePath, targetPath);
+        if (currentOffset != dataTotal)
+            return CreateByteCountMismatchFailure(dataTotal, currentOffset, sourcePath, targetPath);
 
         if (!cancellationToken.IsCancellationRequested && _file.Exists(sourcePath))
         {

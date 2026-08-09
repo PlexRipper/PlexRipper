@@ -51,7 +51,7 @@ public class NotificationHub : Hub<INotificationHub>, INotificationHub
     }
 
     /// <inheritdoc/>
-    public async Task Notification(NotificationDTO notification, CancellationToken cancellationToken = default)
+    public async Task Notification(NotificationDTO notification)
     {
         _log.Here()
             .Debug(
@@ -59,13 +59,13 @@ public class NotificationHub : Hub<INotificationHub>, INotificationHub
                 nameof(MessageTypes.Notification),
                 notification
             );
-        await Clients.All.Notification(notification, cancellationToken);
+        await Clients.All.Notification(notification);
     }
 
     /// <inheritdoc/>
-    public async Task RefreshNotification(RefreshDataType dataType, CancellationToken cancellationToken = default)
+    public async Task RefreshNotification(RefreshDataType dataType)
     {
         _log.Here().Debug("Sending refresh notification: {@DataType}", dataType);
-        await Clients.All.RefreshNotification(dataType, cancellationToken);
+        await Clients.All.RefreshNotification(dataType);
     }
 }

@@ -43,8 +43,7 @@ public class AutoPauseActiveDownloadsCommandHandler : ICommandHandler<AutoPauseA
                     plexServerId
                 );
                 var activeMoves = await _moveDownloadFileScheduler.GetCurrentlyMovingKeysByServer(
-                    plexServerId,
-                    cancellationToken
+                    plexServerId
                 );
 
                 foreach (var activeKey in activeDownloads.Concat(activeMoves).Distinct())

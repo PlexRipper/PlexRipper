@@ -33,6 +33,8 @@ public class ValidatePlexTvTokenCommandHandler
         var client = _plexApiClientFactory.CreateTvClient(command.AuthenticationToken);
 
         var response = await client.Authentication.GetTokenDetailsAsync(new GetTokenDetailsRequest()).ToResponse(ct);
+        if (response.IsCancelled || response.IsFailed)
+            return response.ToResult();
 
         var isValid = response.Value.RawResponse.IsSuccessStatusCode;
         var result = response.ToApiResult(x => new ValidatePlexTokenCommandResult

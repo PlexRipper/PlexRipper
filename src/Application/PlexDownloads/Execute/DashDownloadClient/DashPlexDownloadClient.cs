@@ -141,8 +141,7 @@ public class DashPlexDownloadClient : IPlexDownloadClient
             return startResult;
 
         // Small delay before disposing this client to ensure everything is processing correctly
-        await Task.Delay(2000, cancellationToken);
-        return Result.Ok();
+        return await Result.Try(async Task () => await Task.Delay(2000, cancellationToken));
     }
 
     public async Task<Result> StopAsync()

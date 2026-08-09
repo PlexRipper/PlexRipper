@@ -103,6 +103,24 @@ public class PlexLibraryComparisonJob : IJob
             _ => Result.Fail($"Library comparison for media type {queueItem.MediaType} is not yet implemented"),
         };
 
+        if (result.IsCancelled)
+        {
+            await UpdateQueueItemAsync(
+                queueItem,
+                LibrarySyncJobStatus.Queued,
+                "Library comparison was cancelled and requeued",
+                CancellationToken.None
+            );
+            _log.Here()
+                .Warning(
+                    "Comparison queue item was cancelled and requeued for remote {RemoteLibId} vs owned {OwnedLibId}, {MediaType}",
+                    queueItem.RemotePlexLibraryId,
+                    queueItem.OwnedPlexLibraryId,
+                    queueItem.MediaType
+                );
+            return false;
+        }
+
         if (result.IsFailed)
         {
             result.LogError();

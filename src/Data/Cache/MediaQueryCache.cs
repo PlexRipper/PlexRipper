@@ -9,7 +9,9 @@ namespace Reaparr.Data;
 /// </summary>
 public sealed class MediaQueryCache : IMediaQueryCache
 {
-    private const string CACHE_WARMING_UP_MESSAGE = "Media query cache is warming up. The media overview will appear once the cache is built on the next request.";
+    private const string CACHE_WARMING_UP_MESSAGE =
+        "Media query cache is warming up. The media overview will appear once the cache is built on the next request.";
+
     private static readonly string[] _warmupSortFields =
     [
         nameof(BasePlexMedia.SearchTitle),
@@ -28,8 +30,13 @@ public sealed class MediaQueryCache : IMediaQueryCache
     ];
 
     private readonly ConcurrentDictionary<MediaQueryMetadataKey, MediaQueryMetadataSnapshot> _metadataSnapshots = new();
-    private readonly ConcurrentDictionary<MediaQuerySortedListKey, MediaQuerySortedListSnapshot> _sortedListSnapshots = new();
-    private readonly ConcurrentDictionary<MediaQuerySortedListKey, Lazy<Task<Result<MediaQueryBuildResult>>>> _builds = new();
+
+    private readonly ConcurrentDictionary<MediaQuerySortedListKey, MediaQuerySortedListSnapshot> _sortedListSnapshots =
+        new();
+
+    private readonly ConcurrentDictionary<MediaQuerySortedListKey, Lazy<Task<Result<MediaQueryBuildResult>>>> _builds =
+        new();
+
     private readonly ConcurrentDictionary<MediaQuerySortedListKey, long> _buildVersions = new();
     private readonly ConcurrentDictionary<MediaQuerySortedListKey, bool> _dirtyKeys = new();
 
@@ -38,7 +45,11 @@ public sealed class MediaQueryCache : IMediaQueryCache
     private readonly IGeneralSettings _generalSettings;
     private readonly ILogger _log;
 
-    public MediaQueryCache(ILogger log, ICommandExecutor commandExecutor, IReaparrDbContextFactory dbContextFactory, IGeneralSettings generalSettings)
+    public MediaQueryCache(
+        ILogger log,
+        ICommandExecutor commandExecutor,
+        IReaparrDbContextFactory dbContextFactory,
+        IGeneralSettings generalSettings)
     {
         _log = log.ForContext<MediaQueryCache>();
         _commandExecutor = commandExecutor;
@@ -89,11 +100,15 @@ public sealed class MediaQueryCache : IMediaQueryCache
             if (_dirtyKeys.ContainsKey(sortedListKey))
                 QueueSnapshotRefresh(sortedListKey);
 
-            _log.Here().Debug("Media query cache hit for {MediaType} sorted by {SortField}", filter.MediaType, sortedListKey.NormalizedAscendingSortField);
+            _log.Here()
+                .Debug("Media query cache hit for {MediaType} sorted by {SortField}", filter.MediaType,
+                    sortedListKey.NormalizedAscendingSortField);
             return Result.Ok(CreatePage(filter, metadataSnapshot, sortedListSnapshot, sort.Descending));
         }
 
-        _log.Here().Debug("Media query cache miss for {MediaType} sorted by {SortField}", filter.MediaType, sortedListKey.NormalizedAscendingSortField);
+        _log.Here()
+            .Debug("Media query cache miss for {MediaType} sorted by {SortField}", filter.MediaType,
+                sortedListKey.NormalizedAscendingSortField);
         QueueSnapshotRefresh(sortedListKey);
         return Result.Fail(CACHE_WARMING_UP_MESSAGE).Add503ServiceUnavailableError();
     }
@@ -119,7 +134,8 @@ public sealed class MediaQueryCache : IMediaQueryCache
                     var libraryIds = mediaType == PlexMediaType.Movie ? movieLibraryIds : tvShowLibraryIds;
                     var normalizedSort = MediaSortNormalizer.Normalize(filter.Parameters.Sort, libraryIds.Count)!;
                     var key = new MediaQuerySortedListKey(
-                        new MediaQueryMetadataKey(mediaType, libraryIds, filter.FilterOfflineMedia, filter.FilterOwnedMedia),
+                        new MediaQueryMetadataKey(mediaType, libraryIds, filter.FilterOfflineMedia,
+                            filter.FilterOwnedMedia),
                         normalizedSort.Field);
                     return (Filter: filter, Key: key);
                 }))
@@ -129,14 +145,24 @@ public sealed class MediaQueryCache : IMediaQueryCache
             .Select(x => BuildAndStoreSnapshotAsync(x.Filter, x.Key, cancellationToken))
             .ToList();
         var results = await Task.WhenAll(tasks);
-        var failures = results.Where(x => x.IsFailed).SelectMany(x => x.Errors).ToList();
-        if (failures.Count > 0)
+        if (results.Any(x => x.IsCancelled))
         {
-            _log.Here().Warning("Media query cache warmup completed with {FailureCount} failed snapshot builds", failures.Count);
+            _log.Here().Warning("Media query cache warmup was cancelled");
             return;
         }
 
-        _log.Here().Information("Media query cache warmup completed with {SnapshotCount} all-library sorted snapshots", results.Length);
+        var failures = results.Where(x => x.IsFailed).SelectMany(x => x.Errors).ToList();
+        if (failures.Count > 0)
+        {
+            _log.Here()
+                .Warning("Media query cache warmup completed with {FailureCount} failed snapshot builds",
+                    failures.Count);
+            return;
+        }
+
+        _log.Here()
+            .Information("Media query cache warmup completed with {SnapshotCount} all-library sorted snapshots",
+                results.Length);
     }
 
     /// <inheritdoc />
@@ -147,41 +173,50 @@ public sealed class MediaQueryCache : IMediaQueryCache
     {
         if (SuppressInvalidation)
         {
-            _log.Here().Debug("Skipping media query cache invalidation for libraries {PlexLibraryIds}: suppression active. Reason: {Reason}", plexLibraryIds, reason);
+            _log.Here()
+                .Debug(
+                    "Skipping media query cache invalidation for libraries {PlexLibraryIds}: suppression active. Reason: {Reason}",
+                    plexLibraryIds, reason);
             return;
         }
+
         var affectedLibraryIds = plexLibraryIds.Where(x => x > 0).ToHashSet();
         if (affectedLibraryIds.Count == 0)
             return;
 
         if (_metadataSnapshots.IsEmpty && _sortedListSnapshots.IsEmpty && _builds.IsEmpty)
         {
-            _log.Here().Debug(
-                "Skipped media query cache invalidation for libraries {PlexLibraryIds}: cache is empty. Reason: {Reason}",
-                affectedLibraryIds,
-                reason
-            );
+            _log.Here()
+                .Debug(
+                    "Skipped media query cache invalidation for libraries {PlexLibraryIds}: cache is empty. Reason: {Reason}",
+                    affectedLibraryIds,
+                    reason
+                );
             return;
         }
 
-        var dirtyMetadataCount = MarkKeysContainingLibraryAsDirty(_metadataSnapshots, k => k.ContainsAnyLibrary(affectedLibraryIds));
-        var dirtySortedListCount = MarkKeysContainingLibraryAsDirty(_sortedListSnapshots, k => k.ContainsAnyLibrary(affectedLibraryIds));
+        var dirtyMetadataCount =
+            MarkKeysContainingLibraryAsDirty(_metadataSnapshots, k => k.ContainsAnyLibrary(affectedLibraryIds));
+        var dirtySortedListCount =
+            MarkKeysContainingLibraryAsDirty(_sortedListSnapshots, k => k.ContainsAnyLibrary(affectedLibraryIds));
         var inFlightCount = CountKeysContainingLibrary(_builds, k => k.ContainsAnyLibrary(affectedLibraryIds));
 
         if (dirtyMetadataCount == 0 && dirtySortedListCount == 0 && inFlightCount == 0)
         {
-            _log.Here().Debug(
-                "No media query cache entries matched libraries {PlexLibraryIds}. Reason: {Reason}",
-                affectedLibraryIds,
-                reason
-            );
+            _log.Here()
+                .Debug(
+                    "No media query cache entries matched libraries {PlexLibraryIds}. Reason: {Reason}",
+                    affectedLibraryIds,
+                    reason
+                );
             return;
         }
 
-        _log.Here().Information(
-            "Invalidated media query cache for libraries {PlexLibraryIds}: {Reason}. " +
-            "Marked {MetadataCount} metadata, {SortedListCount} sorted-lists as dirty, {InFlightCount} in-flight builds.",
-            affectedLibraryIds, reason, dirtyMetadataCount, dirtySortedListCount, inFlightCount);
+        _log.Here()
+            .Information(
+                "Invalidated media query cache for libraries {PlexLibraryIds}: {Reason}. " +
+                "Marked {MetadataCount} metadata, {SortedListCount} sorted-lists as dirty, {InFlightCount} in-flight builds.",
+                affectedLibraryIds, reason, dirtyMetadataCount, dirtySortedListCount, inFlightCount);
     }
 
     // ── Background refresh helpers ────────────────────────────────
@@ -200,6 +235,7 @@ public sealed class MediaQueryCache : IMediaQueryCache
                 {
                     _dirtyKeys.TryRemove(sortedListKey, out bool _);
                     var result = await BuildAndStoreSnapshotAsync(sortedListKey, CancellationToken.None);
+
                     // If version was bumped during the build, the result may be stale.
                     // Re-mark dirty so the next read queues a fresh build.
                     if (result.IsSuccess
@@ -207,9 +243,10 @@ public sealed class MediaQueryCache : IMediaQueryCache
                         && currentVersion > startVersion)
                     {
                         _dirtyKeys.TryAdd(sortedListKey, true);
-                        _log.Here().Debug(
-                            "Snapshot build for {SortedListKey} was stale (version {StartVersion} → {CurrentVersion}), re-marking dirty",
-                            sortedListKey, startVersion, currentVersion);
+                        _log.Here()
+                            .Debug(
+                                "Snapshot build for {SortedListKey} was stale (version {StartVersion} → {CurrentVersion}), re-marking dirty",
+                                sortedListKey, startVersion, currentVersion);
                     }
 
                     return result;
@@ -229,7 +266,9 @@ public sealed class MediaQueryCache : IMediaQueryCache
         }
         catch (Exception ex)
         {
-            _log.Here().Error(ex, "Unhandled error in snapshot refresh background observer for {SortedListKey}", sortedListKey);
+            _log.Here()
+                .Error(ex, "Unhandled error in snapshot refresh background observer for {SortedListKey}",
+                    sortedListKey);
         }
         finally
         {
@@ -254,7 +293,8 @@ public sealed class MediaQueryCache : IMediaQueryCache
             PlexLibraryId = plexLibraryId,
             FilterOfflineMedia = sortedListKey.MetadataKey.FilterOfflineMedia,
             FilterOwnedMedia = sortedListKey.MetadataKey.FilterOwnedMedia,
-            Parameters = new FlexQueryParameters { Sort = $"{sortedListKey.NormalizedAscendingSortField}:asc", Page = null, PageSize = null },
+            Parameters = new FlexQueryParameters
+                { Sort = $"{sortedListKey.NormalizedAscendingSortField}:asc", Page = null, PageSize = null },
         };
 
         var sort = filter.Parameters.Sort.Normalize(libraryIds.Count);
@@ -284,8 +324,6 @@ public sealed class MediaQueryCache : IMediaQueryCache
 
         return buildResult;
     }
-
-
 
     /// <summary>
     /// Executes the media query with paging and user filters removed, producing both metadata
@@ -342,7 +380,9 @@ public sealed class MediaQueryCache : IMediaQueryCache
     /// <summary>
     /// Resolves the effective library id set for the request.
     /// </summary>
-    private async Task<IReadOnlyList<int>> ResolveLibraryIdsAsync(MediaQueryFilter filter, CancellationToken cancellationToken)
+    private async Task<IReadOnlyList<int>> ResolveLibraryIdsAsync(
+        MediaQueryFilter filter,
+        CancellationToken cancellationToken)
     {
         if (filter.PlexLibraryId > 0)
             return [filter.PlexLibraryId];
@@ -510,10 +550,14 @@ public sealed class MediaQueryCache : IMediaQueryCache
         PlexLibraryId = 0,
         FilterOfflineMedia = _generalSettings.HideMediaFromOfflineServers,
         FilterOwnedMedia = _generalSettings.HideMediaFromOwnedServers,
-        Parameters = new FlexQueryParameters { Query = null, Filter = null, Sort = $"{sortField}:asc", Page = null, PageSize = null },
+        Parameters = new FlexQueryParameters
+            { Query = null, Filter = null, Sort = $"{sortField}:asc", Page = null, PageSize = null },
     };
 
-    private Task<Result<PagedMediaQueryResult>> BypassCacheAsync(MediaQueryFilter filter, CancellationToken cancellationToken, string? reason)
+    private Task<Result<PagedMediaQueryResult>> BypassCacheAsync(
+        MediaQueryFilter filter,
+        CancellationToken cancellationToken,
+        string? reason)
     {
         if (!string.IsNullOrWhiteSpace(reason))
             _log.Here().Debug("Bypassing media query cache: {Reason}", reason);
@@ -521,7 +565,9 @@ public sealed class MediaQueryCache : IMediaQueryCache
         return _commandExecutor.Send(new GetMediaByTypeCommand { Filter = filter }, cancellationToken);
     }
 
-    private static MediaQueryMetadataSnapshot CreateMetadataSnapshot(MediaQueryMetadataKey key, PagedMediaQueryResult result) => new()
+    private static MediaQueryMetadataSnapshot CreateMetadataSnapshot(
+        MediaQueryMetadataKey key,
+        PagedMediaQueryResult result) => new()
     {
         Key = key,
         Roles = result.Roles.ToList(),

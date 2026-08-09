@@ -37,7 +37,7 @@ public class MockProgressHubService : IProgressHubService
     public Task SendJobStatusUpdateAsync<T>(JobStatusUpdate<T> jobStatusUpdate)
         where T : class
     {
-        JobStatusUpdateList.Add(jobStatusUpdate.ToDTO());
+        JobStatusUpdateList.Add(jobStatusUpdate.ToDTO(), CancellationToken.None);
         _log.Here().Verbose("{ClassName} => {@JobStatusUpdate}", nameof(MockProgressHubService), jobStatusUpdate);
 
         return Task.CompletedTask;

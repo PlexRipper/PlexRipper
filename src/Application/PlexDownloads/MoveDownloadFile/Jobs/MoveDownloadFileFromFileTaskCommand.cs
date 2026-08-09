@@ -111,7 +111,7 @@ public class MoveDownloadFileFromFileTaskCommandHandler : ICommandHandler<MoveDo
                     await _downloadTaskUpdateDispatcher.OnStatusChangedAsync(
                         key,
                         DownloadStatus.MoveFinished,
-                        cancellationToken
+                        CancellationToken.None
                     );
                     _log.Here()
                         .Debug(
@@ -150,7 +150,7 @@ public class MoveDownloadFileFromFileTaskCommandHandler : ICommandHandler<MoveDo
                 await _downloadTaskUpdateDispatcher.OnStatusChangedAsync(
                     key,
                     DownloadStatus.MoveFinished,
-                    cancellationToken
+                    CancellationToken.None
                 );
                 _log.Here().Debug("Move marked finished via existing destination file for {DownloadTaskId}", key.Id);
                 return Result.Ok();
@@ -389,7 +389,9 @@ public class MoveDownloadFileFromFileTaskCommandHandler : ICommandHandler<MoveDo
             );
             moveDownloadFileProgress?.OnNext(downloadTask.ToFileTransferProgress());
 
-            return Result.Ok();
+            return ResultExtensions
+                .TaskIsCancelled(nameof(MoveDownloadFileFromFileTaskCommandHandler))
+                .LogWarning();
         }
         catch (Exception ex)
         {

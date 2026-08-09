@@ -13,9 +13,4 @@ public interface IMoveDownloadFileScheduler
     Task<bool> IsAnyMoveDownloadFileJobRunning();
 
     Task<List<DownloadTaskKey>> GetCurrentlyMovingKeysByServer(int plexServerId);
-
-    Task<List<DownloadTaskKey>> GetCurrentlyMovingKeysByServer(
-        int plexServerId,
-        CancellationToken cancellationToken
-    ) => GetCurrentlyMovingKeysByServer(plexServerId);
 }

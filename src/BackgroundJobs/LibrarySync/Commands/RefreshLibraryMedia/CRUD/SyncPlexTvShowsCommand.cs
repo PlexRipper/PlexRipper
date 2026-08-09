@@ -118,6 +118,7 @@ public class SyncPlexTvShowsCommandHandler : ICommandHandler<SyncPlexTvShowsComm
         if (cancellationToken.IsCancellationRequested)
             return ResultExtensions.TaskIsCancelled(nameof(SyncPlexTvShowsCommand)).LogWarning();
 
+        // Point of no return: once RemoveMedia starts, complete all persistence without caller cancellation.
         var removeRapport = await RemoveMedia(plexLibraryId, CancellationToken.None);
 
         var plexTvShows = command.LibraryMetadata.PlexLibrary.TvShows.ToList();
@@ -179,9 +180,9 @@ public class SyncPlexTvShowsCommandHandler : ICommandHandler<SyncPlexTvShowsComm
         var actorDict = command.LibraryMetadata.PlexActors;
 
         ResultBase[] results = await Task.WhenAll(
-            SyncTvShowGenres(plexTvShows, genreDict, plexLibraryId, plexLibraryName, cancellationToken),
-            SyncTvShowCountries(plexTvShows, countryDict, plexLibraryId, plexLibraryName, cancellationToken),
-            SyncTvShowActors(plexTvShows, actorDict, plexLibraryId, plexLibraryName, cancellationToken)
+            SyncTvShowGenres(plexTvShows, genreDict, plexLibraryId, plexLibraryName, CancellationToken.None),
+            SyncTvShowCountries(plexTvShows, countryDict, plexLibraryId, plexLibraryName, CancellationToken.None),
+            SyncTvShowActors(plexTvShows, actorDict, plexLibraryId, plexLibraryName, CancellationToken.None)
         );
 
         var mergeResult = Result.Merge(results);

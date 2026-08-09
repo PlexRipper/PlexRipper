@@ -77,12 +77,8 @@ public class MoveDownloadFileJobScheduler : IMoveDownloadFileScheduler
     public async Task<bool> IsAnyMoveDownloadFileJobRunning() =>
         (await _scheduler.GetRunningJobDataMaps(typeof(MoveDownloadFileJob))).Any();
 
-    public Task<List<DownloadTaskKey>> GetCurrentlyMovingKeysByServer(int plexServerId) =>
-        GetCurrentlyMovingKeysByServer(plexServerId, CancellationToken.None);
-
     public async Task<List<DownloadTaskKey>> GetCurrentlyMovingKeysByServer(
-        int plexServerId,
-        CancellationToken cancellationToken
+        int plexServerId
     )
     {
         var data = await _scheduler.GetRunningJobDataMaps(typeof(MoveDownloadFileJob));

@@ -135,6 +135,9 @@ public class GetAccessiblePlexServersCommandHandler
                 .ToResponse(cancellationToken)
         );
 
+        if (result.Any(x => x.IsCancelled))
+            return ResultExtensions.TaskIsCancelled(nameof(GetAccessiblePlexServersCommand));
+
         if (result[0].IsFailed && result[1].IsFailed)
             return Result.Merge(result[0].ToResult(), result[1].ToResult());
 

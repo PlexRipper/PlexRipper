@@ -14,17 +14,17 @@ public class ResumePlexServerDownloadsCommandHandler : ICommandHandler<ResumePle
 {
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
-    private readonly IEventPublisher _eventPublisher;
+    private readonly IDownloadQueue _downloadQueue;
 
     public ResumePlexServerDownloadsCommandHandler(
         ILogger log,
         IReaparrDbContext dbContext,
-        IEventPublisher eventPublisher
+        IDownloadQueue downloadQueue
     )
     {
         _log = log.ForContext<ResumePlexServerDownloadsCommandHandler>();
         _dbContext = dbContext;
-        _eventPublisher = eventPublisher;
+        _downloadQueue = downloadQueue;
     }
 
     public async Task<Result> ExecuteAsync(
@@ -50,14 +50,19 @@ public class ResumePlexServerDownloadsCommandHandler : ICommandHandler<ResumePle
         if (updateResult.IsFailed)
             return updateResult.ToResult().LogError();
 
-        var publishResult = await Result.Try(() =>
-            _eventPublisher.PublishAsync(new CheckDownloadQueueEvent(command.PlexServerId), cancellationToken)
+        // The resume has committed, so its queue wake-up must no longer be tied to the request token.
+        // The boot-time all-server queue check provides reconciliation if the process stops before this is queued.
+        var queueResult = await Result.Try(() =>
+            _downloadQueue.CheckDownloadQueue([command.PlexServerId], CancellationToken.None)
         );
-        if (publishResult.IsCancelled)
-            return publishResult;
+        if (queueResult.IsCancelled)
+            return queueResult.LogWarning();
 
-        if (publishResult.IsFailed)
-            return publishResult.LogError();
+        if (queueResult.IsFailed)
+            return queueResult.LogError();
+
+        if (cancellationToken.IsCancellationRequested)
+            return ResultExtensions.TaskIsCancelled(nameof(ResumePlexServerDownloadsCommand));
 
         return Result.Ok();
     }

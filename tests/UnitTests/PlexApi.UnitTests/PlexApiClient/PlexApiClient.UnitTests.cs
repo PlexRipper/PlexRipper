@@ -182,16 +182,28 @@ public class PlexApiClientUnitTests : BaseUnitTest<Func<PlexApiClientOptions?, P
     public async Task ShouldPropagateCancellation_WhenCallerCancelsRequest()
     {
         // Arrange
-        SetupHttpClient(config => config.SetupAnyRequest().ThrowsAsync(new TaskCanceledException()));
+        var requestStarted = new TaskCompletionSource<CancellationToken>(TaskCreationOptions.RunContinuationsAsynchronously);
+        SetupHttpClient(config =>
+            config
+                .SetupAnyRequest()
+                .Returns<HttpRequestMessage, CancellationToken>(async (_, cancellationToken) =>
+                {
+                    requestStarted.TrySetResult(cancellationToken);
+                    await Task.Delay(Timeout.InfiniteTimeSpan, cancellationToken);
+                    return new HttpResponseMessage(HttpStatusCode.OK);
+                })
+        );
         var client = Sut(new PlexApiClientOptions { ConnectionUrl = "http://localhost", RetryProgressAction = null });
-        var cancellationTokenSource = new CancellationTokenSource();
-        cancellationTokenSource.Cancel();
+        using var cancellationTokenSource = new CancellationTokenSource();
 
         // Act
-        var action = () => client.SendAsync(new HttpRequestMessage(), cancellationTokenSource.Token);
+        var sendTask = client.SendAsync(new HttpRequestMessage(), cancellationTokenSource.Token);
+        var observedToken = await requestStarted.Task.WaitAsync(TimeSpan.FromSeconds(5));
+        cancellationTokenSource.Cancel();
 
         // Assert
-        await Should.ThrowAsync<OperationCanceledException>(action);
+        observedToken.ShouldBe(cancellationTokenSource.Token);
+        await Should.ThrowAsync<OperationCanceledException>(() => sendTask.WaitAsync(TimeSpan.FromSeconds(5)));
     }
 
     [Test]

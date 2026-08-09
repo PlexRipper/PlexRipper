@@ -127,6 +127,12 @@ public class RefreshPlexAccountAccessEndpoint
                     ct
                 );
 
+                if (libraryAccessResult.IsCancelled)
+                {
+                    libraryAccessResult.LogWarning();
+                    continue;
+                }
+
                 if (libraryAccessResult.IsFailed)
                 {
                     libraryAccessResult.LogError();

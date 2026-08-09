@@ -19,19 +19,27 @@ public class DownloadTaskScheduler : IDownloadTaskScheduler
         if (!downloadTaskKey.IsValid)
             return ResultExtensions.IsInvalidId(nameof(DownloadTaskKey), downloadTaskKey.Id).LogWarning();
 
-        var jobKey = DownloadJob.GetJobKey(downloadTaskKey.Id);
-        if (await _scheduler.IsJobRunning(jobKey, cancellationToken))
-            return Result.Fail($"{nameof(DownloadJob)} with {jobKey} already exists").LogWarning();
+        return await Result.Try(async Task<Result> () =>
+        {
+            var jobKey = DownloadJob.GetJobKey(downloadTaskKey.Id);
+            if (await _scheduler.IsJobRunning(jobKey, cancellationToken))
+                return Result.Fail($"{nameof(DownloadJob)} with {jobKey} already exists").LogWarning();
 
-        var job = JobBuilder
-            .Create<DownloadJob>()
-            .UsingJobData(DownloadJob.DownloadTaskIdParameter, JsonSerializer.Serialize(downloadTaskKey))
-            .WithIdentity(jobKey)
-            .Build();
+            var job = JobBuilder
+                .Create<DownloadJob>()
+                .UsingJobData(DownloadJob.DownloadTaskIdParameter, JsonSerializer.Serialize(downloadTaskKey))
+                .WithIdentity(jobKey)
+                .Build();
 
-        var trigger = TriggerBuilder.Create().WithIdentity($"{jobKey.Name}_trigger", jobKey.Group).StartNow().Build();
+            var trigger = TriggerBuilder.Create()
+                .WithIdentity($"{jobKey.Name}_trigger", jobKey.Group)
+                .StartNow()
+                .Build();
 
-        return await Result.Try(async Task() => await _scheduler.ScheduleJob(job, trigger, cancellationToken));
+            await _scheduler.ScheduleJob(job, trigger, cancellationToken);
+            return Result.Ok();
+        });
+
     }
 
     public async Task<Result> StopDownloadTaskJob(
@@ -43,26 +51,31 @@ public class DownloadTaskScheduler : IDownloadTaskScheduler
         if (!downloadTaskKey.IsValid)
             return ResultExtensions.IsInvalidId(nameof(DownloadTaskKey), downloadTaskKey.Id).LogWarning();
 
-        _log.Here().Information("Stopping DownloadClient for DownloadTaskId {DownloadTaskId}", downloadTaskKey);
+        return await Result.Try(async Task<Result> () =>
+            {
+                _log.Here().Information("Stopping DownloadClient for DownloadTaskId {DownloadTaskId}", downloadTaskKey);
 
-        var jobKey = DownloadJob.GetJobKey(downloadTaskKey.Id);
-        if (!await _scheduler.IsJobRunning(jobKey, cancellationToken))
-        {
-            return Result
-                .Fail($"{nameof(DownloadJob)} with {jobKey} cannot be stopped because it is not running")
-                .LogWarning();
-        }
+                var jobKey = DownloadJob.GetJobKey(downloadTaskKey.Id);
+                if (!await _scheduler.IsJobRunning(jobKey, cancellationToken))
+                {
+                    return Result
+                        .Fail($"{nameof(DownloadJob)} with {jobKey} cannot be stopped because it is not running")
+                        .LogWarning();
+                }
 
-        var stopResult = await _scheduler.StopJob(jobKey, cancellationToken);
-        if (!stopResult)
-            return Result.Fail($"Failed to stop {nameof(DownloadTaskGeneric)} with id {downloadTaskKey}").LogError();
+                var stopResult = await _scheduler.StopJob(jobKey, cancellationToken);
+                if (!stopResult)
+                    return Result.Fail($"Failed to stop {nameof(DownloadTaskGeneric)} with id {downloadTaskKey}")
+                        .LogError();
 
-        if (waitForCompletion)
-        {
-            await AwaitDownloadTaskJob(downloadTaskKey.Id, cancellationToken);
-        }
+                if (waitForCompletion)
+                {
+                    await AwaitDownloadTaskJob(downloadTaskKey.Id, cancellationToken);
+                }
 
-        return Result.Ok();
+                return Result.Ok();
+            }
+        );
     }
 
     public async Task AwaitDownloadTaskJob(Guid downloadTaskId, CancellationToken cancellationToken = default)

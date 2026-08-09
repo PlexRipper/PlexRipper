@@ -1035,7 +1035,7 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
         var startTask = sut.Start(downloadTask.ToKey(), cancellationTokenSource.Token);
         await dashStartEntered.Task.WaitAsync(TimeSpan.FromSeconds(5));
         cancellationTokenSource.Cancel();
-        var result = await startTask;
+        var result = await startTask.WaitAsync(TimeSpan.FromSeconds(5));
 
         // Assert
         result.IsCancelled.ShouldBeTrue();

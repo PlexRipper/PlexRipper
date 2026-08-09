@@ -850,7 +850,7 @@ public class MoveDownloadFileFromFileTaskCommandUnitTests : BaseUnitTest<MoveDow
     }
 
     [Test]
-    public async Task ShouldRenameAndComplete_WhenDestinationMatchesSourceWithoutReapTempSuffix()
+    public async Task ShouldRenameAndComplete_WhenInPlaceDestinationMatchesSourceWithoutReapTempSuffix()
     {
         // Arrange
         await SetupDatabase(

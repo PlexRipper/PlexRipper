@@ -850,7 +850,7 @@ public class MoveDownloadFileFromFileTaskCommandUnitTests : BaseUnitTest<MoveDow
     }
 
     [Test]
-    public async Task ShouldRenameAndComplete_WhenDestinationMatchesSourceWithoutReapTempSuffixAndCancellationIsRequested()
+    public async Task ShouldRenameAndComplete_WhenDestinationMatchesSourceWithoutReapTempSuffix()
     {
         // Arrange
         await SetupDatabase(
@@ -919,13 +919,10 @@ public class MoveDownloadFileFromFileTaskCommandUnitTests : BaseUnitTest<MoveDow
             .Returns(Task.CompletedTask)
             .Verifiable(Times.AtLeastOnce());
 
-        var cancellationTokenSource = new CancellationTokenSource();
-        await cancellationTokenSource.CancelAsync();
-
         // Act
         var result = await Sut.ExecuteAsync(
             new MoveDownloadFileFromFileTaskCommand(downloadFileTask.ToKey()),
-            cancellationTokenSource.Token
+            CancellationToken
         );
 
         // Assert

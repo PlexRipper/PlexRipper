@@ -119,8 +119,8 @@ public class DownloadUpdateEndpointUnitTests : BaseEndpointWithoutRequestUnitTes
                     It.IsAny<AppUpdateDownloadProgressDTO>()
                 )
             )
-            .Callback<AppUpdateDownloadProgressDTO, CancellationToken>(
-                (dto, _) =>
+            .Callback<AppUpdateDownloadProgressDTO>(
+                dto =>
                 {
                     capturedDtos.Add(dto);
                     if (capturedDtos.Count == 2)

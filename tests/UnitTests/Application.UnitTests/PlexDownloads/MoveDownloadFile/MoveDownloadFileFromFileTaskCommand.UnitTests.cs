@@ -1276,7 +1276,7 @@ public class MoveDownloadFileFromFileTaskCommandUnitTests : BaseUnitTest<MoveDow
     }
 
     [Test]
-    public async Task ShouldTreatMoveAsFinished_WhenSourceIsMissingDestinationExistsAndCancellationIsRequested()
+    public async Task ShouldTreatMoveAsFinished_WhenSourceIsMissingAndDestinationExists()
     {
         // Arrange
         await SetupDatabase(
@@ -1336,13 +1336,13 @@ public class MoveDownloadFileFromFileTaskCommandUnitTests : BaseUnitTest<MoveDow
             .Returns(Task.CompletedTask)
             .Verifiable(Times.AtLeastOnce());
 
-        var cancellationTokenSource = new CancellationTokenSource();
-        await cancellationTokenSource.CancelAsync();
-
         // Act
+        // Reconciliation must finish from durable filesystem state even if no move is required. The
+        // handler should not be invoked with an already-cancelled token now that cancellation is
+        // propagated through its initial database lookup.
         var result = await Sut.ExecuteAsync(
             new MoveDownloadFileFromFileTaskCommand(downloadFileTask.ToKey()),
-            cancellationTokenSource.Token
+            CancellationToken
         );
 
         // Assert

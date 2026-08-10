@@ -19,6 +19,7 @@ import type {
   SetServerAliasRequest,
   SetServerEnabledRequest,
   SetServerOwnedRequest,
+  SyncPlexServerMediaEndpointRequest,
 } from "./data-contracts";
 
 import { apiCheckPipe, axiosObservable } from "@api/base";
@@ -250,11 +251,13 @@ export class PlexServer {
    */
   syncPlexServerMediaEndpoint = (
     plexServerId: number,
+    data: SyncPlexServerMediaEndpointRequest,
     params: RequestParams = {},
   ) =>
     axiosObservable<BaseResultDTO>({
       url: `/api/PlexServer/${plexServerId}/sync`,
       method: "POST",
+      data: data,
       secure: true,
       responseType: "json",
       ...params,

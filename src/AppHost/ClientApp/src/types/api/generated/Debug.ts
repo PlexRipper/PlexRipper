@@ -12,12 +12,7 @@
 
 import type { RequestParams } from "./http-client";
 
-import type {
-  LiveLogEventDTO,
-  MovieLibraryComparisonDebugResponseDTO,
-  PlexMediaType,
-  TvShowLibraryComparisonDebugResponseDTO,
-} from "./data-contracts";
+import type { LiveLogEventDTO, PlexMediaType } from "./data-contracts";
 
 import { apiCheckPipe, axiosObservable } from "@api/base";
 import queryString from "query-string";
@@ -62,56 +57,6 @@ export class Debug {
       responseType: "json",
       ...params,
     }).pipe(apiCheckPipe<LiveLogEventDTO[]>);
-
-  /**
-   * No description
-   * * @tags Debug
-   * @name GetMovieLibraryComparisonDebugEndpoint
-   * @request GET:/api/Debug/movie-library-comparison
-   * @secure
-   */
-  getMovieLibraryComparisonDebugEndpoint = (
-    query: {
-      /** @format int32 */
-      ownedLibraryId: number;
-      /** @format int32 */
-      remoteLibraryId: number;
-    },
-    params: RequestParams = {},
-  ) =>
-    axiosObservable<MovieLibraryComparisonDebugResponseDTO>({
-      url: `/api/Debug/movie-library-comparison`,
-      method: "GET",
-      params: query,
-      secure: true,
-      responseType: "json",
-      ...params,
-    }).pipe(apiCheckPipe<MovieLibraryComparisonDebugResponseDTO>);
-
-  /**
-   * No description
-   * * @tags Debug
-   * @name GetTvShowLibraryComparisonDebugEndpoint
-   * @request GET:/api/Debug/tv-show-library-comparison
-   * @secure
-   */
-  getTvShowLibraryComparisonDebugEndpoint = (
-    query: {
-      /** @format int32 */
-      ownedLibraryId: number;
-      /** @format int32 */
-      remoteLibraryId: number;
-    },
-    params: RequestParams = {},
-  ) =>
-    axiosObservable<TvShowLibraryComparisonDebugResponseDTO>({
-      url: `/api/Debug/tv-show-library-comparison`,
-      method: "GET",
-      params: query,
-      secure: true,
-      responseType: "json",
-      ...params,
-    }).pipe(apiCheckPipe<TvShowLibraryComparisonDebugResponseDTO>);
 }
 
 export class DebugPaths {
@@ -124,26 +69,4 @@ export class DebugPaths {
 
   static getAllLogsEndpoint = () =>
     queryString.stringifyUrl({ url: `/api/Debug/logs` });
-
-  static getMovieLibraryComparisonDebugEndpoint = (query: {
-    /** @format int32 */
-    ownedLibraryId: number;
-    /** @format int32 */
-    remoteLibraryId: number;
-  }) =>
-    queryString.stringifyUrl({
-      url: `/api/Debug/movie-library-comparison`,
-      query,
-    });
-
-  static getTvShowLibraryComparisonDebugEndpoint = (query: {
-    /** @format int32 */
-    ownedLibraryId: number;
-    /** @format int32 */
-    remoteLibraryId: number;
-  }) =>
-    queryString.stringifyUrl({
-      url: `/api/Debug/tv-show-library-comparison`,
-      query,
-    });
 }

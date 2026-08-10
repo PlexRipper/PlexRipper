@@ -55,15 +55,19 @@ function getDisplayValue(value: string): string {
 @use '@/assets/scss/variables' as *;
 
 .alphabet-navigation-container {
+  height: 100%;
+  min-height: 0;
+  max-height: none;
   display: flex;
   align-content: stretch;
   align-items: stretch;
   align-self: stretch;
   justify-content: center;
   flex: 0 0 30px;
-  max-height: $page-height-minus-app-bar-minus-media-overview-bar;
 
   .alphabet-navigation {
+    height: 100%;
+    min-height: 0;
     display: flex;
     justify-content: space-around;
     flex: 0 0 100%;

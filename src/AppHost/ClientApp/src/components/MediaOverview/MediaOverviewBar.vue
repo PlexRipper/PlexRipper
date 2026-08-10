@@ -222,6 +222,8 @@ function changeView(viewMode: ViewMode) {
 
 .media-overview-bar {
   @extend .fade-out-border;
+  height: $media-overview-bar-height;
+  flex: 0 0 auto;
 }
 
 .q-fab__label {

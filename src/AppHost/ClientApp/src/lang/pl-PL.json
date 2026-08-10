@@ -100,6 +100,7 @@
             }
         },
         "media-overview": {
+            "library-inaccessible": "Ta biblioteka stała się niedostępna, ponieważ żadne konto Plex nie ma już do niej dostępu.",
             "is-refreshing": "Odświeżanie danych biblioteki \"{library}\" z {server}",
             "could-not-display": "Nie można wyświetlić tej biblioteki.",
             "no-data": "Biblioteka została zsynchronizowana, ale nie zawiera żadnych multimediów.",

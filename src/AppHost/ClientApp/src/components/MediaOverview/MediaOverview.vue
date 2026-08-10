@@ -10,6 +10,22 @@
 				:detail-mode="false"
 				:library-id="libraryId"
 				@action="onAction" />
+      <!-- Library Inaccessible Alert -->
+      <q-banner
+          v-if="isLibraryInaccessible"
+          class="media-overview-inaccessible-banner bg-warning text-black"
+          dense
+          role="status"
+          aria-live="polite"
+          data-cy="media-overview-inaccessible-library-banner">
+        <template #avatar>
+          <q-icon
+              name="mdi-alert"
+              aria-hidden="true" />
+        </template>
+        <strong>{{ $t('components.media-overview.library-inaccessible-title') }}</strong>
+        {{ $t('components.media-overview.library-inaccessible') }}
+      </q-banner>
 		</div>
 		<div class="media-overview-content">
 			<template v-if="!mediaOverviewStore.loading">
@@ -124,15 +140,16 @@ import { type DownloadMediaDTO, PlexMediaType, ViewMode } from '@dto';
 import { DialogType } from '@enums';
 import type { IMediaOverviewBarActions } from '@interfaces';
 import {
-	listenMediaOverviewDownloadCommand,
-	sendMediaOverviewDownloadCommand,
-	useDialogStore,
-	useDownloadStore,
-	useI18n,
-	useLibraryStore,
-	useMediaOverviewBarDownloadCommandBus,
-	useMediaOverviewStore,
-	useSettingsStore,
+  listenMediaOverviewDownloadCommand,
+  sendMediaOverviewDownloadCommand,
+  useAccountStore,
+  useDialogStore,
+  useDownloadStore,
+  useI18n,
+  useLibraryStore,
+  useMediaOverviewBarDownloadCommandBus,
+  useMediaOverviewStore,
+  useSettingsStore,
 } from '#imports';
 
 const { t } = useI18n();
@@ -141,12 +158,23 @@ const mediaOverviewStore = useMediaOverviewStore();
 const downloadStore = useDownloadStore();
 const libraryStore = useLibraryStore();
 const dialogStore = useDialogStore();
+const accountStore = useAccountStore();
 
 const props = defineProps<{
 	libraryId: number;
 }>();
 
 const library = computed(() => libraryStore.getLibrary(props.libraryId));
+const isLibraryInaccessible = computed(() => {
+  if (props.libraryId <= 0) {
+    return false;
+  }
+
+  const library = libraryStore.getLibrary(props.libraryId);
+  return !library
+      || !accountStore.getHasAccountServerAccess(library.plexServerId)
+      || !accountStore.getHasAccountLibraryAccess(library.id);
+});
 
 function resetProgress() {
 	libraryStore.updateLibraryProgress({

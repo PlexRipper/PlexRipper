@@ -100,7 +100,8 @@
             }
         },
         "media-overview": {
-            "library-inaccessible": "This library has become inaccessible because no Plex accounts have access to it anymore.",
+            "library-inaccessible-title": "Library inaccessible.",
+            "library-inaccessible": "No enabled Plex accounts have access to this library anymore.",
             "is-refreshing": "Refreshing library \"{library}\" data from {server}",
             "could-not-display": "Could not display this library.",
             "no-data": "The library has been synced but contains no media.",

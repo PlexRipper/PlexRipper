@@ -150,17 +150,7 @@
 			</q-menu>
 		</VerticalButton>
 	</q-toolbar>
-	<q-banner
-		v-if="isLibraryInaccessible"
-		class="media-overview-inaccessible-banner bg-warning text-black"
-		dense
-		data-cy="media-overview-inaccessible-library-banner">
-		<template #avatar>
-			<q-icon name="mdi-alert" />
-		</template>
-		{{ $t('components.media-overview.library-inaccessible') }}
-	</q-banner>
-	</div>
+  </div>
 </template>
 
 <script lang="ts" setup>
@@ -168,10 +158,13 @@ import type { PlexMediaDTO } from '@dto';
 import { ViewMode } from '@dto';
 import { SortDirection } from '@enums';
 import type { IMediaOverviewBarActions, IViewOptions } from '@interfaces';
-import { useAccountStore, useMediaOverviewBarDownloadCommandBus, useMediaOverviewStore, useSettingsStore } from '#imports';
+import {
+	useMediaOverviewBarDownloadCommandBus,
+	useMediaOverviewStore,
+	useSettingsStore,
+} from '#imports';
 
 const mediaOverviewStore = useMediaOverviewStore();
-const accountStore = useAccountStore();
 const downloadCommandBus = useMediaOverviewBarDownloadCommandBus();
 
 const settingsStore = useSettingsStore();
@@ -185,9 +178,6 @@ const props = withDefaults(defineProps<{
 	detailMode: false,
 });
 
-const isLibraryInaccessible = computed(() =>
-	props.libraryId > 0 && !accountStore.getHasAccountLibraryAccess(props.libraryId),
-);
 
 defineEmits<{
 	(e: 'action', payload: IMediaOverviewBarActions): void;
@@ -232,12 +222,6 @@ function changeView(viewMode: ViewMode) {
 
 .media-overview-bar {
   @extend .fade-out-border;
-
-  height: $media-overview-bar-height;
-}
-
-.media-overview-inaccessible-banner {
-  border-top: 1px solid rgb(0 0 0 / 18%);
 }
 
 .q-fab__label {

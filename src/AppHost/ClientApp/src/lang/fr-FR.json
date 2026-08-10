@@ -612,15 +612,16 @@
     },
     "refresh-mode-dialog": {
         "incremental": "Actualisation incrémentielle",
-        "force": "Forcer l’actualisation",
-        "force-warning": "Une actualisation forcée supprime et reconstruit les entrées multimédias stockées par Reaparr. Les fichiers téléchargés ne sont pas supprimés.",
+        "full-reset": "Réinitialisation complète",
         "library": {
-            "title": "Actualiser la bibliothèque",
-            "text": "Choisissez comment Reaparr doit actualiser cette bibliothèque. Une actualisation incrémentielle ne met à jour que les médias modifiés et est généralement plus rapide."
+            "title": "Actualiser {libraryName}",
+            "text": "Choisissez comment Reaparr doit actualiser cette bibliothèque. Une actualisation incrémentielle ne met à jour que les médias modifiés et est généralement plus rapide.",
+            "full-reset-warning": "Une réinitialisation complète supprime de Reaparr toutes les entrées multimédias de cette bibliothèque, puis les reconstruit à partir de Plex. Les fichiers téléchargés ne sont pas supprimés."
         },
         "server": {
-            "title": "Actualiser les bibliothèques du serveur",
-            "text": "Choisissez comment Reaparr doit actualiser toutes les bibliothèques de ce serveur. Une actualisation incrémentielle ne met à jour que les médias modifiés et est généralement plus rapide."
+            "title": "Actualiser toutes les bibliothèques de {serverName}",
+            "text": "Choisissez comment Reaparr doit actualiser toutes les bibliothèques de ce serveur. Une actualisation incrémentielle ne met à jour que les médias modifiés et est généralement plus rapide.",
+            "full-reset-warning": "Une réinitialisation complète supprime de Reaparr toutes les entrées multimédias de toutes les bibliothèques de ce serveur, puis les reconstruit à partir de Plex. Les fichiers téléchargés ne sont pas supprimés."
         }
     },
     "confirmation": {

@@ -65,6 +65,9 @@ public static class JobExecutionContextExtensions
             // NOTE: LibraryComparisonJob runs comparison and does not need a per-job payload.
             case JobTypes.LibraryComparisonJob:
 
+            // NOTE: RefreshPlexAccountAccessJob refreshes all enabled accounts and does not need a payload.
+            case JobTypes.RefreshPlexAccountAccessJob:
+
             default:
                 jsonString = "{}";
                 break;

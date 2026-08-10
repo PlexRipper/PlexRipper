@@ -54,6 +54,7 @@ public class SchedulerService : ISchedulerService
 
         if (!_appRuntimeInfo.IsIntegrationTestMode)
         {
+            await SetupRefreshPlexAccountAccessJob(cancellationToken);
             await SetupPlexServerStatusCheckJob(cancellationToken);
             await SetupUpdateCheckJob(cancellationToken);
             var setupLibrarySyncResult = await SetupLibrarySyncJob(cancellationToken);
@@ -173,6 +174,27 @@ public class SchedulerService : ISchedulerService
             .Build();
 
         await _scheduler.ScheduleJob(job, trigger, cancellationToken);
+    }
+
+    private async Task SetupRefreshPlexAccountAccessJob(CancellationToken cancellationToken)
+    {
+        var key = RefreshPlexAccountAccessJob.GetJobKey();
+
+        if (await _scheduler.CheckExists(key, cancellationToken))
+            return;
+
+        var job = JobBuilder.Create<RefreshPlexAccountAccessJob>().WithIdentity(key).Build();
+
+        var trigger = TriggerBuilder
+            .Create()
+            .WithIdentity($"{key.Name}_trigger", key.Group)
+            .ForJob(job)
+            .StartNow()
+            .WithSimpleSchedule(x => x.WithIntervalInHours(6).RepeatForever())
+            .Build();
+
+        await _scheduler.ScheduleJob(job, trigger, cancellationToken);
+        _log.Here().Information("Scheduled Plex account access refresh every six hours");
     }
 
     private async Task<Result> SetupLibrarySyncJob(CancellationToken cancellationToken)

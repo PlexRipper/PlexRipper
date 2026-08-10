@@ -1,6 +1,10 @@
 namespace Reaparr.Application;
 
-public record RefreshLibraryMediaEndpointRequest(int PlexLibraryId);
+public record RefreshLibraryMediaEndpointRequest(
+    int PlexLibraryId,
+    bool ForceLibrarySync = false,
+    bool ForceMediaRefresh = false
+);
 
 public class RefreshLibraryMediaEndpointRequestValidator : Validator<RefreshLibraryMediaEndpointRequest>
 {
@@ -39,7 +43,14 @@ public class RefreshLibraryMediaEndpoint : Endpoint<RefreshLibraryMediaEndpointR
     {
         _log.Here().DebugApiCall(HttpContext, req);
 
-        var result = await _commandExecutor.Send(new QueueLibrarySyncJobCommand([req.PlexLibraryId], Force: true), ct);
+        var result = await _commandExecutor.Send(
+            new QueueLibrarySyncJobCommand(
+                [req.PlexLibraryId],
+                req.ForceLibrarySync,
+                req.ForceMediaRefresh
+            ),
+            ct
+        );
         if (result.IsFailed)
         {
             await Send.FluentResult(result, ct);

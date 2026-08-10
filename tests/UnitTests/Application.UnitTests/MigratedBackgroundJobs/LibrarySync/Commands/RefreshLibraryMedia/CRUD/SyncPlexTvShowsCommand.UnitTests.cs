@@ -152,12 +152,18 @@ public class SyncPlexTvShowsCommandUnitTests : BaseUnitTest<SyncPlexTvShowsComma
         result.Value.CreatedTvShows.ShouldBe(0);
         result.Value.UpdatedTvShows.ShouldBe(0);
         result.Value.DeletedTvShows.ShouldBe(0);
+        result.Value.UnchangedTvShows.ShouldBe(1);
         result.Value.CreatedSeasons.ShouldBe(0);
         result.Value.UpdatedSeasons.ShouldBe(1);
         result.Value.DeletedSeasons.ShouldBe(0);
+        result.Value.UnchangedSeasons.ShouldBe(1);
         result.Value.CreatedEpisodes.ShouldBe(1);
         result.Value.UpdatedEpisodes.ShouldBe(1);
         result.Value.DeletedEpisodes.ShouldBe(0);
+        result.Value.UnchangedEpisodes.ShouldBe(3);
+        result.Value.ToString().ShouldContain("UnchangedTvShows: 1");
+        result.Value.ToString().ShouldContain("UnchangedSeasons: 1");
+        result.Value.ToString().ShouldContain("UnchangedEpisodes: 3");
 
         var persisted = IDbContext
             .PlexTvShows.AsNoTracking()
@@ -320,6 +326,47 @@ public class SyncPlexTvShowsCommandUnitTests : BaseUnitTest<SyncPlexTvShowsComma
         secondResult.Value.CreatedEpisodes.ShouldBe(0);
         secondResult.Value.UpdatedEpisodes.ShouldBe(0);
         secondResult.Value.DeletedEpisodes.ShouldBe(0);
+    }
+
+    [Test]
+    public async Task ShouldReplaceAllTvShows_WhenForceMediaRefreshIsTrue()
+    {
+        // Arrange
+        await SetupDatabase(
+            11871,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexTvShowLibraryCount = 1;
+                config.TvShowCount = 2;
+                config.TvShowSeasonCount = 1;
+                config.TvShowEpisodeCount = 1;
+            }
+        );
+        var library = IDbContext.PlexLibraries.First();
+        var shows = IDbContext
+            .PlexTvShows.AsNoTracking()
+            .Include(x => x.Seasons)
+            .ThenInclude(x => x.Episodes)
+            .ThenInclude(x => x.MediaDataList)
+            .OrderBy(x => x.Id)
+            .ToList();
+        var originalIds = shows.Select(x => x.Id).ToList();
+        SetIds(library, shows);
+        library.TvShows.AddRange(shows);
+        var command = new SyncPlexTvShowsCommand(
+            new InsertMediaMetaDataCommandResponse(library),
+            ForceMediaRefresh: true
+        );
+
+        // Act
+        var result = await Sut.ExecuteAsync(command, CancellationToken);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue(result.Errors.FirstOrDefault()?.Message);
+        var replacedShows = IDbContext.PlexTvShows.AsNoTracking().OrderBy(x => x.Id).ToList();
+        replacedShows.Count.ShouldBe(2);
+        replacedShows.Select(x => x.Id).ShouldNotBe(originalIds);
     }
 
     [Test]

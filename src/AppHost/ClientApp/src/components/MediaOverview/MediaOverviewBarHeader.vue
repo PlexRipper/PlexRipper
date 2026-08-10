@@ -14,7 +14,9 @@
 						{{ serverStore.getServerName(server.id) }}
 					</span>
 					{{ $t('general.delimiter.dash') }}
-					<span :class="{ 'inaccessible-item-text': !accountStore.getHasAccountLibraryAccess(library.id) }">
+					<span
+						:class="{ 'inaccessible-library-title': !hasLibraryAccess }"
+						data-cy="media-overview-library-title">
 						{{ libraryStore.getLibraryName(library.id) }}
 					</span>
 				</q-item-label>
@@ -88,6 +90,14 @@ const props = withDefaults(defineProps<{
 
 const server = computed(() => serverStore.getServer(get(library)?.plexServerId ?? -1));
 const library = computed(() => libraryStore.getLibrary(props.libraryId));
+const hasLibraryAccess = computed(() => {
+	const currentLibrary = get(library);
+	const currentServer = get(server);
+	return !!currentLibrary
+		&& !!currentServer
+		&& accountStore.getHasAccountServerAccess(currentServer.id)
+		&& accountStore.getHasAccountLibraryAccess(currentLibrary.id);
+});
 
 const { t } = useI18n();
 
@@ -159,8 +169,13 @@ function mediaTypeToAllText(mediaType: PlexMediaType): string {
 </script>
 
 <style lang="scss">
-.inaccessible-item-text {
+.inaccessible-item-text,
+.inaccessible-library-title {
   text-decoration: line-through;
   opacity: 0.62;
+}
+
+.inaccessible-library-title {
+  color: var(--q-grey-6);
 }
 </style>

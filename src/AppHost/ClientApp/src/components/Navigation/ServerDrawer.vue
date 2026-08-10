@@ -50,7 +50,11 @@
 					:key="y"
 					v-ripple
 					clickable
-					:class="{ 'active-library-item': isActiveLibrary(library.id) }"
+					:class="{
+						'active-library-item': isActiveLibrary(library.id),
+						'inaccessible-library-item': !hasLibraryAccess(server.id, library.id),
+					}"
+					:data-cy="`server-drawer-library-${library.id}`"
 					active-class="text-orange"
 					@click="openMediaPage(library)">
 					<q-item-section avatar>
@@ -63,7 +67,7 @@
 						<span
 							:class="{
 								'active-library-text': isActiveLibrary(library.id),
-								'inaccessible-item-text': !accountStore.getHasAccountLibraryAccess(library.id),
+								'inaccessible-item-text': !hasLibraryAccess(server.id, library.id),
 							}">
 							{{ libraryStore.getLibraryName(library.id) }}
 						</span>
@@ -133,6 +137,11 @@ const serverConnectionStore = useServerConnectionStore();
 const accountStore = useAccountStore();
 
 // Check if a library is currently active based on route
+function hasLibraryAccess(serverId: number, libraryId: number): boolean {
+	return accountStore.getHasAccountServerAccess(serverId)
+		&& accountStore.getHasAccountLibraryAccess(libraryId);
+}
+
 function isActiveLibrary(libraryId: number): boolean {
 	const currentLibraryId = route.params.libraryId;
 	return currentLibraryId !== undefined && Number(currentLibraryId) === libraryId;
@@ -218,9 +227,13 @@ function runReSyncAccount(): void {
   white-space: nowrap;
 }
 
-.inaccessible-item-text {
-  text-decoration: line-through;
+.inaccessible-library-item {
+  color: var(--q-grey-6);
   opacity: 0.62;
+
+  .inaccessible-item-text {
+    text-decoration: line-through;
+  }
 }
 
 .server-sync-icon {

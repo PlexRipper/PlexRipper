@@ -50,7 +50,7 @@ public class AddOrUpdatePlexLibrariesCommandUnitTests : BaseUnitTest<AddOrUpdate
             plexLibraries.AddRange(list);
         }
 
-        Mock.SetupCommand(It.IsAny<ScheduleAffectedLibraryComparisonJobsCommand>)
+        Mock.SetupCommand<Result>(() => It.IsAny<QueueLibrarySyncJobCommand>())
             .ReturnsAsync(Result.Ok());
 
         // Act
@@ -88,6 +88,20 @@ public class AddOrUpdatePlexLibrariesCommandUnitTests : BaseUnitTest<AddOrUpdate
             plexAccountLibrary.PlexServerId.ShouldBeInRange(1, serverCount);
             plexAccountLibrary.PlexLibraryId.ShouldBeInRange(1, serverCount * libraryCount);
         }
+
+        var expectedLibraryIds = plexLibrariesDb.Select(x => x.Id).OrderBy(x => x).ToList();
+        Mock.Mock<ICommandExecutor>()
+            .Verify(
+                x => x.Send(
+                    It.Is<QueueLibrarySyncJobCommand>(command =>
+                        command.PlexLibraryIds.OrderBy(id => id).SequenceEqual(expectedLibraryIds)
+                        && !command.ForceLibrarySync
+                        && !command.ForceMediaRefresh
+                    ),
+                    It.IsAny<CancellationToken>()
+                ),
+                Times.Once
+            );
     }
 
     [Test]
@@ -311,6 +325,20 @@ public class AddOrUpdatePlexLibrariesCommandUnitTests : BaseUnitTest<AddOrUpdate
             plexAccountLibrary.PlexServerId.ShouldBeInRange(1, serverCount);
             plexAccountLibrary.PlexLibraryId.ShouldBeInRange(1, serverCount * libraryCount);
         }
+
+        Mock.Mock<ICommandExecutor>()
+            .Verify(
+                x => x.Send(
+                    It.Is<QueueLibrarySyncJobCommand>(command =>
+                        command.PlexLibraryIds.OrderBy(id => id)
+                            .SequenceEqual(plexLibrariesDb.Select(y => y.Id).OrderBy(id => id))
+                        && !command.ForceLibrarySync
+                        && !command.ForceMediaRefresh
+                    ),
+                    It.IsAny<CancellationToken>()
+                ),
+                Times.Once
+            );
     }
 
     [Test]
@@ -359,6 +387,11 @@ public class AddOrUpdatePlexLibrariesCommandUnitTests : BaseUnitTest<AddOrUpdate
         updatedLibrary.SyncedAt.ShouldBe(syncedAt);
         updatedLibrary.ContentChangedAt.ShouldBe(incomingLibrary.ContentChangedAt);
         updatedLibrary.Outdated.ShouldBeFalse();
+        Mock.Mock<ICommandExecutor>()
+            .Verify(
+                x => x.Send(It.IsAny<QueueLibrarySyncJobCommand>(), It.IsAny<CancellationToken>()),
+                Times.Never
+            );
     }
 
     [Test]
@@ -393,7 +426,7 @@ public class AddOrUpdatePlexLibrariesCommandUnitTests : BaseUnitTest<AddOrUpdate
             PlexLibraries = [incomingLibrary],
         };
 
-        Mock.SetupCommand(It.IsAny<ScheduleAffectedLibraryComparisonJobsCommand>)
+        Mock.SetupCommand<Result>(() => It.IsAny<QueueLibrarySyncJobCommand>())
             .ReturnsAsync(Result.Ok());
 
         // Act
@@ -407,6 +440,18 @@ public class AddOrUpdatePlexLibrariesCommandUnitTests : BaseUnitTest<AddOrUpdate
         updatedLibrary.SyncedAt.ShouldBe(syncedAt);
         updatedLibrary.ContentChangedAt.ShouldBe(incomingLibrary.ContentChangedAt);
         updatedLibrary.Outdated.ShouldBeTrue();
+        Mock.Mock<ICommandExecutor>()
+            .Verify(
+                x => x.Send(
+                    It.Is<QueueLibrarySyncJobCommand>(command =>
+                        command.PlexLibraryIds.SequenceEqual(new[] { updatedLibrary.Id })
+                        && !command.ForceLibrarySync
+                        && !command.ForceMediaRefresh
+                    ),
+                    It.IsAny<CancellationToken>()
+                ),
+                Times.Once
+            );
     }
 
     [Test]
@@ -464,7 +509,8 @@ public class AddOrUpdatePlexLibrariesCommandUnitTests : BaseUnitTest<AddOrUpdate
 
         var updatedTime = DateTime.UtcNow - TimeSpan.FromHours(3);
         var changedContentChangedAt = existingLibraries.Max(x => x.ContentChangedAt) + 1;
-        var incomingLibraries = existingLibraries.ToApiLibraries(updatedTime, contentChangedAt: changedContentChangedAt);
+        var incomingLibraries =
+            existingLibraries.ToApiLibraries(updatedTime, contentChangedAt: changedContentChangedAt);
         for (var i = 0; i < incomingLibraries.Count; i++)
         {
             var incomingLibrary = incomingLibraries[i];

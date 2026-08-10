@@ -97,6 +97,10 @@ public class BackgroundJobScheduler : IBackgroundJobScheduler
                 CheckAllConnectionsStatusByPlexServerJob.GetJobKey(),
                 "0 */10 * * * *" // Every 10 minutes
             ),
+            CreateCronTicker<RefreshPlexAccountAccessJob>(
+                RefreshPlexAccountAccessJob.GetJobKey(),
+                "0 0 */6 * * *" // Every 6 hours
+            ),
         };
 
         using var dbContext = await _dbContextFactory.CreateAsync();

@@ -49,5 +49,8 @@ public static class BackgroundJobsRegistration
                 ServiceLifetime.Transient
             )
             .WithPriority(TickerTaskPriority.Low);
+
+        services.MapTicker<RefreshPlexAccountAccessJob, RefreshPlexAccountAccessJobPayload>(ServiceLifetime.Transient)
+            .WithPriority(TickerTaskPriority.Low);
     }
 }

@@ -1,6 +1,5 @@
 <template>
 	<QCardDialog
-		persistent
 		:name="DialogType.RefreshMediaDialog"
 		width="600px"
 		button-align="between"
@@ -20,15 +19,15 @@
 				@click="close" />
 			<div class="row q-gutter-sm">
 				<BaseButton
-					color="positive"
-					cy="refresh-mode-incremental-button"
-					:label="t('refresh-mode-dialog.incremental')"
-					@click="select(false)" />
-				<BaseButton
 					color="negative"
 					cy="refresh-mode-full-reset-button"
-					:label="t('refresh-mode-dialog.full-reset')"
+					:label="t('components.refresh-mode-dialog.full-reset')"
 					@click="select(true)" />
+				<BaseButton
+					color="positive"
+					cy="refresh-mode-incremental-button"
+					:label="t('components.refresh-mode-dialog.incremental')"
+					@click="select(false)" />
 			</div>
 		</template>
 	</QCardDialog>
@@ -55,14 +54,14 @@ const emit = defineEmits<{
 const { t } = useI18n();
 const dialogStore = useDialogStore();
 const title = computed(() => props.scope === 'server'
-	? t('refresh-mode-dialog.server.title', { serverName: props.serverName })
-	: t('refresh-mode-dialog.library.title', { libraryName: props.libraryName }));
+	? t('components.refresh-mode-dialog.server.title', { serverName: props.serverName })
+	: t('components.refresh-mode-dialog.library.title', { libraryName: props.libraryName }));
 const text = computed(() => props.scope === 'server'
-	? t('refresh-mode-dialog.server.text')
-	: t('refresh-mode-dialog.library.text'));
+	? t('components.refresh-mode-dialog.server.text')
+	: t('components.refresh-mode-dialog.library.text'));
 const warning = computed(() => props.scope === 'server'
-	? t('refresh-mode-dialog.server.full-reset-warning')
-	: t('refresh-mode-dialog.library.full-reset-warning'));
+	? t('components.refresh-mode-dialog.server.full-reset-warning')
+	: t('components.refresh-mode-dialog.library.full-reset-warning'));
 
 function close(): void {
 	dialogStore.closeDialog(DialogType.RefreshMediaDialog);

@@ -1,6 +1,9 @@
 namespace Reaparr.BackgroundJobs;
 
-public record RefreshPlexTvShowLibraryCommand(InsertMediaMetaDataCommandResponse LibraryMetadata)
+public record RefreshPlexTvShowLibraryCommand(
+    InsertMediaMetaDataCommandResponse LibraryMetadata,
+    bool ForceMediaRefresh = false
+)
     : ICommand<Result<PlexLibrary>>;
 
 public class RefreshPlexTvShowLibraryCommandValidator : AbstractValidator<RefreshPlexTvShowLibraryCommand>
@@ -108,7 +111,10 @@ public class RefreshPlexTvShowLibraryCommandHandler
 
         // Write all the tv-show, season and episode to the database
         var syncResult = await Result.Try(() =>
-            _commandExecutor.Send(new SyncPlexTvShowsCommand(command.LibraryMetadata), cancellationToken)
+            _commandExecutor.Send(
+                new SyncPlexTvShowsCommand(command.LibraryMetadata, command.ForceMediaRefresh),
+                cancellationToken
+            )
         );
         if (syncResult.IsCancelled)
             return syncResult.ToResult();

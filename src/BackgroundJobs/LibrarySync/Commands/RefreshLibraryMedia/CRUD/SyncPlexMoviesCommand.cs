@@ -6,7 +6,10 @@ namespace Reaparr.BackgroundJobs;
 /// Incrementally syncs the PlexMovies of a PlexLibrary.
 /// In addition to syncing the PlexMovies, also syncs the related entities such as actors, genres and countries.
 /// </summary>
-public record SyncPlexMoviesCommand(InsertMediaMetaDataCommandResponse LibraryMetadata)
+public record SyncPlexMoviesCommand(
+    InsertMediaMetaDataCommandResponse LibraryMetadata,
+    bool ForceMediaRefresh = false
+)
     : ICommand<Result<CrudMoviesReport>>;
 
 public class SyncPlexMoviesCommandValidator : AbstractValidator<SyncPlexMoviesCommand>
@@ -67,6 +70,14 @@ public class SyncPlexMoviesCommandHandler : ICommandHandler<SyncPlexMoviesComman
         var stopWatch = Stopwatch.StartNew();
         var plexMovies = command.LibraryMetadata.PlexLibrary.Movies.ToList();
         var report = new CrudMoviesReport();
+        if (command.ForceMediaRefresh)
+        {
+            await _dbContext
+                .PlexMovies.Where(x => x.PlexLibraryId == plexLibraryId)
+                .ExecuteDeleteAsync(cancellationToken);
+            _dbContext.ClearChangeTracker();
+        }
+
         var reconcileResult = await ReconcileMovies(
             plexMovies,
             plexServerId,
@@ -170,6 +181,7 @@ public class SyncPlexMoviesCommandHandler : ICommandHandler<SyncPlexMoviesComman
         report.CreatedMovies = created.Count;
         report.UpdatedMovies = updated.Count;
         report.DeletedMovies = deleted.Count;
+        report.UnchangedMovies = incomingMovies.Count - created.Count - updated.Count;
 
         return await _dbContext.ExecuteSerializedTransactionAsync(async (ctx, txCt) =>
         {
@@ -362,8 +374,11 @@ public record CrudMoviesReport
 
     public int DeletedMovies { get; set; }
 
+    public int UnchangedMovies { get; set; }
+
     public override string ToString() => $@"
         CreatedMovies: {CreatedMovies}
         UpdatedMovies: {UpdatedMovies}
-        DeletedMovies: {DeletedMovies}";
+        DeletedMovies: {DeletedMovies}
+        UnchangedMovies: {UnchangedMovies}";
 }

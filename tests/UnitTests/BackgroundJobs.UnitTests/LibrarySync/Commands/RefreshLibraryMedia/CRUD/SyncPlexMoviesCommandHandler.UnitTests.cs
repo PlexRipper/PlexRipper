@@ -70,6 +70,8 @@ public class SyncPlexMoviesCommandHandlerUnitTests : BaseUnitTest<SyncPlexMovies
         result.Value.CreatedMovies.ShouldBe(0);
         result.Value.UpdatedMovies.ShouldBe(0);
         result.Value.DeletedMovies.ShouldBe(0);
+        result.Value.UnchangedMovies.ShouldBe(10);
+        result.Value.ToString().ShouldContain("UnchangedMovies: 10");
         foreach (var movie in IDbContext.PlexMovies.AsNoTracking())
             movie.Id.ShouldBe(idsByKey[movie.PlexApiRatingKey]);
     }
@@ -266,6 +268,38 @@ public class SyncPlexMoviesCommandHandlerUnitTests : BaseUnitTest<SyncPlexMovies
         // Assert
         result.IsCancelled.ShouldBeTrue();
         IDbContext.PlexMovies.Select(x => x.Id).Order().ShouldBe(originalIds);
+    }
+
+    [Test]
+    public async Task ShouldReplaceAllMovies_WhenForceMediaRefreshIsTrue()
+    {
+        // Arrange
+        await SetupDatabase(
+            713457,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexMovieLibraryCount = 1;
+                config.MovieCount = 2;
+            }
+        );
+        var library = IDbContext.PlexLibraries.First();
+        var movies = IDbContext.PlexMovies.AsNoTracking().OrderBy(x => x.Id).ToList();
+        var originalIds = movies.Select(x => x.Id).ToList();
+        library.Movies.AddRange(movies);
+        var command = new SyncPlexMoviesCommand(
+            new InsertMediaMetaDataCommandResponse(library),
+            ForceMediaRefresh: true
+        );
+
+        // Act
+        var result = await Sut.ExecuteAsync(command, CancellationToken);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        var replacedMovies = IDbContext.PlexMovies.AsNoTracking().OrderBy(x => x.Id).ToList();
+        replacedMovies.Count.ShouldBe(2);
+        replacedMovies.Select(x => x.Id).ShouldNotBe(originalIds);
     }
 
     [Test]

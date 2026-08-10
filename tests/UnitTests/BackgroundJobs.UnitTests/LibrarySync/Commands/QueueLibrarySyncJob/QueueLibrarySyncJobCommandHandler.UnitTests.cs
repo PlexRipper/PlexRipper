@@ -3,6 +3,35 @@ namespace Reaparr.BackgroundJobs.UnitTests;
 public class QueueLibrarySyncJobCommandHandlerUnitTests : BaseUnitTest<QueueLibrarySyncJobCommandHandler>
 {
     [Test]
+    public async Task ShouldPersistForceMediaRefresh_WhenQueuingNewLibrary()
+    {
+        // Arrange
+        await SetupDatabase(
+            3000,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexMovieLibraryCount = 1;
+            }
+        );
+        var library = IDbContext.PlexLibraries.First();
+        await IDbContext
+            .PlexLibraries.Where(x => x.Id == library.Id)
+            .ExecuteUpdateAsync(x => x.SetProperty(y => y.SyncedAt, (DateTime?)null), CancellationToken);
+        Mock.Mock<ICommandExecutor>()
+            .Setup(x => x.Send(It.IsAny<CheckQueuedPlexLibraryToSyncCommand>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result.Ok());
+        var command = new QueueLibrarySyncJobCommand([library.Id], ForceMediaRefresh: true);
+
+        // Act
+        var result = await Sut.ExecuteAsync(command, CancellationToken);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        IDbContext.LibrarySyncJobQueues.Single().ForceMediaRefresh.ShouldBeTrue();
+    }
+
+    [Test]
     public async Task ShouldQueueNewLibraries_WhenLibrariesDoNotExistInQueue()
     {
         // Arrange
@@ -205,7 +234,7 @@ public class QueueLibrarySyncJobCommandHandlerUnitTests : BaseUnitTest<QueueLibr
             .PlexLibraries.Where(x => x.Id == library.Id)
             .ExecuteUpdateAsync(x => x.SetProperty(y => y.SyncedAt, DateTime.UtcNow.AddHours(-2)), CancellationToken);
 
-        var command = new QueueLibrarySyncJobCommand([library.Id], Force: true);
+        var command = new QueueLibrarySyncJobCommand([library.Id], ForceLibrarySync: true);
 
         Mock.Mock<ICommandExecutor>()
             .Setup(x => x.Send(It.IsAny<CheckQueuedPlexLibraryToSyncCommand>(), It.IsAny<CancellationToken>()))
@@ -317,7 +346,7 @@ public class QueueLibrarySyncJobCommandHandlerUnitTests : BaseUnitTest<QueueLibr
         await dbContext.LibrarySyncJobQueues.AddAsync(completedItem, CancellationToken);
         await dbContext.SaveChangesAsync(CancellationToken);
 
-        var command = new QueueLibrarySyncJobCommand([library.Id], Force: true);
+        var command = new QueueLibrarySyncJobCommand([library.Id], ForceLibrarySync: true);
 
         Mock.Mock<ICommandExecutor>()
             .Setup(x => x.Send(It.IsAny<CheckQueuedPlexLibraryToSyncCommand>(), It.IsAny<CancellationToken>()))
@@ -795,6 +824,7 @@ public class QueueLibrarySyncJobCommandHandlerUnitTests : BaseUnitTest<QueueLibr
         queueItems.Count.ShouldBe(1);
         queueItems[0].Status.ShouldBe(LibrarySyncJobStatus.Queued);
         queueItems[0].PlexLibraryId.ShouldBe(library.Id);
+
         // Should still call CheckQueuedPlexLibraryToSyncCommand even when skipping
         Mock.Mock<ICommandExecutor>()
             .Verify(
@@ -853,6 +883,7 @@ public class QueueLibrarySyncJobCommandHandlerUnitTests : BaseUnitTest<QueueLibr
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
+
         // Use AsNoTracking to see the actual database state
         var queueItems = await IDbContext.LibrarySyncJobQueues.AsNoTracking().ToListAsync(CancellationToken);
         queueItems.Count.ShouldBe(1);
@@ -1131,10 +1162,7 @@ public class QueueLibrarySyncJobCommandHandlerUnitTests : BaseUnitTest<QueueLibr
         // Arrange
         await SetupDatabase(
             3021,
-            config =>
-            {
-                config.PlexServerCount = 1;
-            }
+            config => { config.PlexServerCount = 1; }
         );
 
         var dbContext = IDbContext;
@@ -1153,7 +1181,8 @@ public class QueueLibrarySyncJobCommandHandlerUnitTests : BaseUnitTest<QueueLibr
         // Assert
         result.IsSuccess.ShouldBeTrue();
         result.Errors.Count.ShouldBe(0);
-        var savedLibrary = await dbContext.PlexLibraries.AsNoTracking().FirstAsync(x => x.Id == unsupportedLibrary.Id, CancellationToken);
+        var savedLibrary = await dbContext.PlexLibraries.AsNoTracking()
+            .FirstAsync(x => x.Id == unsupportedLibrary.Id, CancellationToken);
         savedLibrary.Type.ShouldBe(PlexMediaType.Music);
         var queueItems = await dbContext.LibrarySyncJobQueues.AsNoTracking().ToListAsync(CancellationToken);
         queueItems.ShouldBeEmpty();

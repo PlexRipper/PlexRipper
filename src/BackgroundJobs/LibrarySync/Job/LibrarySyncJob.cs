@@ -9,6 +9,7 @@ public class LibrarySyncJob : IJob
 {
     public const string ServerIdParameter = nameof(ServerIdParameter);
     public const string LibraryIdParameter = nameof(LibraryIdParameter);
+    public const string ForceMediaRefreshParameter = nameof(ForceMediaRefreshParameter);
 
     private readonly ILogger _log;
     private readonly ICommandExecutor _commandExecutor;
@@ -16,6 +17,7 @@ public class LibrarySyncJob : IJob
     private readonly IReaparrDbContext _dbContext;
     private int _serverId;
     private int _libraryId;
+    private bool _forceMediaRefresh;
 
     public LibrarySyncJob(
         ILogger log,
@@ -51,6 +53,8 @@ public class LibrarySyncJob : IJob
 
         _serverId = dataMap.GetInt(ServerIdParameter);
         _libraryId = dataMap.GetInt(LibraryIdParameter);
+        _forceMediaRefresh = dataMap.ContainsKey(ForceMediaRefreshParameter)
+            && dataMap.GetBoolean(ForceMediaRefreshParameter);
 
         _log.Here()
             .Debug(
@@ -85,7 +89,10 @@ public class LibrarySyncJob : IJob
 
             // Execute the library sync command
             var result = await Result.Try(() =>
-                _commandExecutor.Send(new RefreshLibraryMediaCommand(_libraryId), context.CancellationToken)
+                _commandExecutor.Send(
+                    new RefreshLibraryMediaCommand(_libraryId, _forceMediaRefresh),
+                    context.CancellationToken
+                )
             );
 
             if (result.IsCancelled)
@@ -200,6 +207,7 @@ public class LibrarySyncJob : IJob
                     s =>
                         s.SetProperty(x => x.Status, status)
                             .SetProperty(x => x.CompletedAt, DateTime.UtcNow)
+                            .SetProperty(x => x.ForceMediaRefresh, false)
                             .SetProperty(x => x.IsServerOffline, false),
                     CancellationToken.None
                 );

@@ -6,7 +6,10 @@ namespace Reaparr.BackgroundJobs;
 /// Incrementally syncs the PlexTvShows of a PlexLibrary.
 /// In addition to syncing the PlexTvShows, also syncs the related entities such as actors, genres and countries.
 /// </summary>
-public record SyncPlexTvShowsCommand(InsertMediaMetaDataCommandResponse LibraryMetadata)
+public record SyncPlexTvShowsCommand(
+    InsertMediaMetaDataCommandResponse LibraryMetadata,
+    bool ForceMediaRefresh = false
+)
     : ICommand<Result<BulkInsertTvShowsRapport>>;
 
 public class SyncPlexTvShowsCommandValidator : AbstractValidator<SyncPlexTvShowsCommand>
@@ -119,6 +122,14 @@ public class SyncPlexTvShowsCommandHandler : ICommandHandler<SyncPlexTvShowsComm
         var stopWatch = Stopwatch.StartNew();
         var plexTvShows = command.LibraryMetadata.PlexLibrary.TvShows.ToList();
         var bulkInsertRapport = new BulkInsertTvShowsRapport();
+        if (command.ForceMediaRefresh)
+        {
+            await _dbContext
+                .PlexTvShows.Where(x => x.PlexLibraryId == plexLibraryId)
+                .ExecuteDeleteAsync(cancellationToken);
+            _dbContext.ClearChangeTracker();
+        }
+
         var reconcileResult = await ReconcileTvShows(
             plexTvShows,
             plexServerId,
@@ -273,12 +284,15 @@ public class SyncPlexTvShowsCommandHandler : ICommandHandler<SyncPlexTvShowsComm
         report.CreatedTvShows = createdShows.Count;
         report.UpdatedTvShows = updatedShows.Count;
         report.DeletedTvShows = deletedShows.Count;
+        report.UnchangedTvShows = incomingShows.Count - createdShows.Count - updatedShows.Count;
         report.CreatedSeasons = createdSeasons.Count;
         report.UpdatedSeasons = updatedSeasons.Count;
         report.DeletedSeasons = deletedSeasons.Count;
+        report.UnchangedSeasons = incomingSeasons.Count - createdSeasons.Count - updatedSeasons.Count;
         report.CreatedEpisodes = createdEpisodes.Count;
         report.UpdatedEpisodes = updatedEpisodes.Count;
         report.DeletedEpisodes = deletedEpisodes.Count;
+        report.UnchangedEpisodes = incomingEpisodes.Count - createdEpisodes.Count - updatedEpisodes.Count;
 
         return await _dbContext.ExecuteSerializedTransactionAsync(async (ctx, txCt) =>
         {

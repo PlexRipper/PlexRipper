@@ -168,7 +168,9 @@ public sealed class ReaparrDbContext : DbContext, IReaparrDbContext, IReaparrDbC
 
     public Task<Result<T>> ExecuteSerializedTransactionAsync<T>(
         Func<IReaparrDbContext, CancellationToken, Task<T>> operation,
-        CancellationToken cancellationToken = default) =>
+        CancellationToken cancellationToken = default) => Database.CurrentTransaction is not null
+        ? Result.Try(() => operation(this, cancellationToken))
+        :
         Result.Try(new Func<Task<T>>(async () =>
         {
             T result = default!;
@@ -181,7 +183,9 @@ public sealed class ReaparrDbContext : DbContext, IReaparrDbContext, IReaparrDbC
 
     public Task<Result> ExecuteSerializedTransactionAsync(
         Func<IReaparrDbContext, CancellationToken, Task> operation,
-        CancellationToken cancellationToken = default) =>
+        CancellationToken cancellationToken = default) => Database.CurrentTransaction is not null
+        ? Result.Try(() => operation(this, cancellationToken))
+        :
         Result.Try(() => this.ExecuteSerializedTransactionAsync(ct => operation(this, ct), 8, cancellationToken));
 
     /// <inheritdoc/>

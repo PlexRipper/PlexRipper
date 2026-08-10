@@ -28,19 +28,16 @@ public class AddOrUpdatePlexLibrariesCommandHandler
 {
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
-    private readonly IMediaQueryCache _mediaQueryCache;
     private readonly ICommandExecutor _commandExecutor;
 
     public AddOrUpdatePlexLibrariesCommandHandler(
         ILogger log,
         IReaparrDbContext dbContext,
-        IMediaQueryCache mediaQueryCache,
         ICommandExecutor commandExecutor
     )
     {
         _log = log.ForContext<AddOrUpdatePlexLibrariesCommandHandler>();
         _dbContext = dbContext;
-        _mediaQueryCache = mediaQueryCache;
         _commandExecutor = commandExecutor;
     }
 
@@ -50,6 +47,8 @@ public class AddOrUpdatePlexLibrariesCommandHandler
     )
     {
         List<PlexLibraryAccessRapport> rapportList = [];
+        List<PlexLibrary> newPlexLibraries = [];
+        HashSet<int> changedPlexLibraryIds = [];
 
         var plexAccountId = command.PlexAccountId;
 
@@ -86,6 +85,7 @@ public class AddOrUpdatePlexLibrariesCommandHandler
                     _log.Here()
                         .Debug("Adding PlexLibrary {PlexLibraryName} to the database", incomingPlexLibrary.Title);
                     await _dbContext.PlexLibraries.AddAsync(incomingPlexLibrary, cancellationToken);
+                    newPlexLibraries.Add(incomingPlexLibrary);
                 }
                 else
                 {
@@ -95,7 +95,7 @@ public class AddOrUpdatePlexLibrariesCommandHandler
                             incomingPlexLibrary.Title,
                             incomingPlexLibrary.Id
                         );
-                    
+
                     incomingPlexLibrary.Id = plexLibraryDb.Id;
 
                     plexLibraryDb.Title = incomingPlexLibrary.Title;
@@ -108,10 +108,13 @@ public class AddOrUpdatePlexLibrariesCommandHandler
                     plexLibraryDb.ContentChangedAt = incomingPlexLibrary.ContentChangedAt;
                     plexLibraryDb.Uuid = incomingPlexLibrary.Uuid;
                     plexLibraryDb.Language = incomingPlexLibrary.Language;
-                    plexLibraryDb.Outdated = plexLibraryDb.Outdated
-                        || (incomingPlexLibrary.ContentChangedAt != previousContentChangedAt
-                            && (plexLibraryDb.SyncedAt is null
-                                || incomingPlexLibrary.UpdatedAt > plexLibraryDb.SyncedAt));
+
+                    var contentChangedAfterLastSync = incomingPlexLibrary.ContentChangedAt != previousContentChangedAt
+                                                      && (plexLibraryDb.SyncedAt is null ||
+                                                          incomingPlexLibrary.UpdatedAt > plexLibraryDb.SyncedAt);
+                    plexLibraryDb.Outdated = plexLibraryDb.Outdated || contentChangedAfterLastSync;
+                    if (contentChangedAfterLastSync)
+                        changedPlexLibraryIds.Add(plexLibraryDb.Id);
                 }
             }
 
@@ -222,18 +225,23 @@ public class AddOrUpdatePlexLibrariesCommandHandler
         foreach (var rapport in rapportList)
             _log.Here().Information(rapport.ToString());
 
-        var affectedLibraryIds = rapportList.SelectMany(x => x.Data).Select(x => x.PlexLibraryId).Distinct().ToList();
-        _mediaQueryCache.InvalidateLibraries(affectedLibraryIds, "Plex library access or ownership changed");
-        var failedResults = new List<ResultBase>();
+        var libraryIdsToSync = newPlexLibraries
+            .Select(x => x.Id)
+            .Concat(changedPlexLibraryIds)
+            .Distinct()
+            .ToList();
 
-        foreach (var libraryId in affectedLibraryIds)
+        if (libraryIdsToSync.Count > 0)
         {
-            var queueResult = await _commandExecutor.Send(new QueueLibraryComparisonJobsForLibraryCommand(libraryId), cancellationToken);
+            var queueResult = await _commandExecutor.Send(
+                new QueueLibrarySyncJobCommand(libraryIdsToSync),
+                cancellationToken
+            );
             if (queueResult.IsFailed)
-                failedResults.Add(queueResult);
+                return queueResult.ToResult<List<PlexLibraryAccessRapport>>().LogError();
         }
 
-        return failedResults.Count > 0 ? Result.Merge(failedResults.ToArray()).LogError() : Result.Ok(rapportList);
+        return Result.Ok(rapportList);
     }
 
     private async Task AddHistoryEventsAsync(

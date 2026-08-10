@@ -289,12 +289,13 @@ onMounted(() => {
 @use '@/assets/scss/variables.scss' as *;
 
 #poster-table {
+  flex: 1 1 auto;
+  width: 100%;
+  height: 100%;
   overflow-y: auto;
   overflow-x: hidden;
   // Required for absolute positioning of virtual rows inside the spacer div
   position: relative;
-
-  max-height: calc($page-height-minus-app-bar-minus-media-overview-bar);
 }
 
 .poster-table-item {

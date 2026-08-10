@@ -610,6 +610,19 @@
             "quality-4320-uhd-8k": "8K (4320p)"
         }
     },
+    "refresh-mode-dialog": {
+        "incremental": "Incremental refresh",
+        "force": "Force refresh",
+        "force-warning": "Force refresh deletes and rebuilds Reaparr's stored media entries. Downloaded files are not deleted.",
+        "library": {
+            "title": "Refresh library",
+            "text": "Choose how Reaparr should refresh this library. An incremental refresh updates only changed media and is usually faster."
+        },
+        "server": {
+            "title": "Refresh server libraries",
+            "text": "Choose how Reaparr should refresh every library on this server. An incremental refresh updates only changed media and is usually faster."
+        }
+    },
     "confirmation": {
         "delete-account": {
             "text": "This will delete this Plex account from Reaparr! \n\nThis will also delete all inaccessible Plex shared servers, Plex libraries and all media that is contained within. Any active downloads that are started or queued with this account will be canceled and deleted. Completed downloads will remain untouched.",

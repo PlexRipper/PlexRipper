@@ -610,6 +610,19 @@
             "quality-4320-uhd-8k": "8K (4320p)"
         }
     },
+    "refresh-mode-dialog": {
+        "incremental": "Inkrementell aktualisieren",
+        "force": "Vollständige Aktualisierung erzwingen",
+        "force-warning": "Bei einer vollständigen Aktualisierung werden die in Reaparr gespeicherten Medieneinträge gelöscht und neu aufgebaut. Heruntergeladene Dateien werden nicht gelöscht.",
+        "library": {
+            "title": "Bibliothek aktualisieren",
+            "text": "Wählen Sie aus, wie Reaparr diese Bibliothek aktualisieren soll. Eine inkrementelle Aktualisierung übernimmt nur geänderte Medien und ist normalerweise schneller."
+        },
+        "server": {
+            "title": "Serverbibliotheken aktualisieren",
+            "text": "Wählen Sie aus, wie Reaparr alle Bibliotheken auf diesem Server aktualisieren soll. Eine inkrementelle Aktualisierung übernimmt nur geänderte Medien und ist normalerweise schneller."
+        }
+    },
     "confirmation": {
         "delete-account": {
             "text": "Dadurch wird dieses Plex-Konto aus Reaparr gelöscht!\n\nDadurch werden auch alle unzugänglichen Plex-Shared-Server, Plex-Bibliotheken und alle darin enthaltenen Medien gelöscht. Alle aktiven Downloads, die mit diesem Konto gestartet oder in die Warteschlange gestellt werden, werden abgebrochen und gelöscht. Abgeschlossene Downloads bleiben unberührt.",

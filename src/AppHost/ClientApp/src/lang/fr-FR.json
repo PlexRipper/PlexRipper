@@ -610,6 +610,19 @@
             "quality-4320-uhd-8k": "8K (4320p)"
         }
     },
+    "refresh-mode-dialog": {
+        "incremental": "Actualisation incrémentielle",
+        "force": "Forcer l’actualisation",
+        "force-warning": "Une actualisation forcée supprime et reconstruit les entrées multimédias stockées par Reaparr. Les fichiers téléchargés ne sont pas supprimés.",
+        "library": {
+            "title": "Actualiser la bibliothèque",
+            "text": "Choisissez comment Reaparr doit actualiser cette bibliothèque. Une actualisation incrémentielle ne met à jour que les médias modifiés et est généralement plus rapide."
+        },
+        "server": {
+            "title": "Actualiser les bibliothèques du serveur",
+            "text": "Choisissez comment Reaparr doit actualiser toutes les bibliothèques de ce serveur. Une actualisation incrémentielle ne met à jour que les médias modifiés et est généralement plus rapide."
+        }
+    },
     "confirmation": {
         "delete-account": {
             "text": "Cela supprimera ce compte Plex de Reaparr !\n\nCela supprimera également tous les serveurs partagés Plex inaccessibles, les bibliothèques Plex et tous les médias qu'ils contiennent. Tous les téléchargements actifs démarrés ou mis en file d'attente avec ce compte seront annulés et supprimés. Les téléchargements terminés resteront intacts.",

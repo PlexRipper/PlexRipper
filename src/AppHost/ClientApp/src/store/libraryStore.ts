@@ -101,11 +101,12 @@ export const useLibraryStore = defineStore(StoreNames.LibraryStore, () => {
 		/**
      * Re-syncs a library by re-requesting all media from the Plex server.
      * @param libraryId
+     * @param forceMediaRefresh Whether to replace all stored media entries before rebuilding the library.
      */
-		reSyncLibrary(libraryId: number): Observable<PlexLibraryDTO | null> {
+		reSyncLibrary(libraryId: number, forceMediaRefresh = false): Observable<PlexLibraryDTO | null> {
 			return plexLibraryApi.refreshLibraryMediaEndpoint(libraryId, {
 				forceLibrarySync: true,
-				forceMediaRefresh: false,
+				forceMediaRefresh,
 			}).pipe(tap((library) => actions.updateLibrary(library.value)), switchMap((library): Observable<PlexLibraryDTO | null> => of(getters.getLibrary(library.value?.id ?? 0))));
 		},
 		cancelLibrarySync(libraryId: number) {

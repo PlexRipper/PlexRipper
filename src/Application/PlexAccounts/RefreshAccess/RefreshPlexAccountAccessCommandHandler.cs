@@ -101,16 +101,15 @@ public class RefreshPlexAccountAccessCommandHandler
             }
 
             var serverAccessRapport = serverAccessResult.Value;
-            if (serverAccessRapport.Access.All(x => x.State == PlexAccessState.Revoked))
-            {
-                var libraryAccessRapport = await RemoveRevokedLibraryAccess(
-                    plexAccount,
-                    serverAccessRapport,
-                    cancellationToken
-                );
-                rapports.Add(ToDTO(serverAccessRapport, libraryAccessRapport));
-                continue;
-            }
+            var lostServerIds = serverAccessRapport.Access
+                .Where(x => x.State == PlexAccessState.Revoked)
+                .Select(x => x.PlexServerId)
+                .ToList();
+
+            if (lostServerIds.Count > 0)
+                await _dbContext.PlexAccountLibraries
+                    .Where(x => x.PlexAccountId == plexAccount.Id && lostServerIds.Contains(x.PlexServerId))
+                    .ExecuteDeleteAsync(cancellationToken);
 
             var libraryAccessResult = await _commandExecutor.Send(
                 new RefreshLibraryAccessCommand(plexAccount.Id),

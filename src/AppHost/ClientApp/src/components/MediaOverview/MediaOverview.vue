@@ -109,6 +109,8 @@
 			<QLoadingOverlay :loading="!libraryStore.getIsLibrarySyncing(libraryId) && mediaOverviewStore.loading" />
 			<!-- Download confirmation dialog	-->
 			<DownloadConfirmation @download="downloadStore.downloadMedia($event)" />
+			<!-- Library refresh mode dialog -->
+			<RefreshModeDialog @select="refreshLibrary" />
 		</div>
 	</template>
 </template>
@@ -158,11 +160,11 @@ function resetProgress() {
 	});
 }
 
-function refreshLibrary() {
+function refreshLibrary(forceMediaRefresh: boolean): void {
 	resetProgress();
 	mediaOverviewStore.loading = true;
 	useSubscription(
-		libraryStore.reSyncLibrary(mediaOverviewStore.libraryId).subscribe(),
+		libraryStore.reSyncLibrary(mediaOverviewStore.libraryId, forceMediaRefresh).subscribe(),
 	);
 }
 
@@ -213,7 +215,7 @@ function onAction(event: IMediaOverviewBarActions) {
 			dialogStore.openDialog(DialogType.MediaSelectionDialog);
 			break;
 		case 'refresh-library':
-			refreshLibrary();
+			dialogStore.openDialog(DialogType.RefreshMediaDialog);
 			break;
 		case 'media-options-dialog':
 			dialogStore.openDialog(DialogType.MediaOptionsDialog);

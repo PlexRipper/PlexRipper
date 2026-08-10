@@ -610,6 +610,19 @@
             "quality-4320-uhd-8k": "8K (4320p)"
         }
     },
+    "refresh-mode-dialog": {
+        "incremental": "Odświeżanie przyrostowe",
+        "force": "Wymuś pełne odświeżenie",
+        "force-warning": "Pełne odświeżenie usuwa i ponownie tworzy wpisy multimediów zapisane w Reaparr. Pobrane pliki nie zostaną usunięte.",
+        "library": {
+            "title": "Odśwież bibliotekę",
+            "text": "Wybierz sposób odświeżenia tej biblioteki przez Reaparr. Odświeżanie przyrostowe aktualizuje tylko zmienione multimedia i zwykle jest szybsze."
+        },
+        "server": {
+            "title": "Odśwież biblioteki serwera",
+            "text": "Wybierz sposób odświeżenia wszystkich bibliotek na tym serwerze przez Reaparr. Odświeżanie przyrostowe aktualizuje tylko zmienione multimedia i zwykle jest szybsze."
+        }
+    },
     "confirmation": {
         "delete-account": {
             "text": "Spowoduje to usunięcie tego konta Plex z Reaparr!\n\nSpowoduje to również usunięcie wszystkich niedostępnych serwerów współdzielonych Plex, bibliotek Plex i wszystkich zawartych w nich multimediów. Wszelkie aktywne pliki do pobrania, które zostały rozpoczęte lub ustawione w kolejce na tym koncie, zostaną anulowane i usunięte. Zakończone pobieranie pozostanie nietknięte.",

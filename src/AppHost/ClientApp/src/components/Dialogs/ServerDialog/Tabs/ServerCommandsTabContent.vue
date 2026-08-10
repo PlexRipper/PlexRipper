@@ -19,7 +19,7 @@
 			:disabled="inspectLoading || deleteLoading"
 			:loading="syncLoading"
 			:label="$t('general.commands.sync-server-libraries')"
-			@click="syncServerLibraries" />
+			@click="dialogStore.openDialog(DialogType.RefreshMediaDialog)" />
 	</HelpRow>
 	<HelpRow
 		disable-responsive
@@ -32,6 +32,9 @@
 			:label="$t('general.commands.delete-server')"
 			@click="dialogStore.openDialog(DialogType.ServerDeleteConfirmationDialog)" />
 	</HelpRow>
+	<RefreshModeDialog
+		scope="server"
+		@select="syncServerLibraries" />
 	<ConfirmationDialog
 		:confirm-loading="deleteLoading"
 		:name="DialogType.ServerDeleteConfirmationDialog"
@@ -64,7 +67,7 @@ const syncLoading = ref(false);
 const inspectLoading = ref(false);
 const deleteLoading = ref(false);
 
-function syncServerLibraries(): void {
+function syncServerLibraries(forceMediaRefresh: boolean): void {
 	if (!props.plexServer) {
 		return;
 	}
@@ -72,8 +75,8 @@ function syncServerLibraries(): void {
 	useSubscription(
 		plexServerApi
 			.syncPlexServerMediaEndpoint(props.plexServer.id, {
-				forceLibrarySync: false,
-				forceMediaRefresh: false,
+				forceLibrarySync: true,
+				forceMediaRefresh,
 			})
 			.subscribe({
 				next: (result) => {

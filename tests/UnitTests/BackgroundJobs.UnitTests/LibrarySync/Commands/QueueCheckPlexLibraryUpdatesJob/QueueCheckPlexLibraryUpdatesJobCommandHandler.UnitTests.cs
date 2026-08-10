@@ -3,7 +3,7 @@ using Quartz;
 namespace Reaparr.BackgroundJobs.UnitTests;
 
 public class QueueCheckPlexLibraryUpdatesJobCommandHandlerUnitTests
-    : BaseUnitTest<QueueCheckPlexLibraryUpdatesJobCommandHandler>
+    : BaseCommandUnitTest<QueueCheckPlexLibraryUpdatesJobCommand>
 {
     [Test]
     public async Task ShouldScheduleCheckPlexLibrariesJobEveryThreeHours_WhenJobDoesNotExist()
@@ -18,7 +18,7 @@ public class QueueCheckPlexLibraryUpdatesJobCommandHandlerUnitTests
             .ReturnsAsync(DateTimeOffset.UtcNow);
 
         // Act
-        var result = await Sut.ExecuteAsync(command, CancellationToken);
+        var result = await TestHandlerExecuteAsync(command);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -34,6 +34,7 @@ public class QueueCheckPlexLibraryUpdatesJobCommandHandlerUnitTests
                             t.Key.Name == $"{jobKey.Name}_trigger"
                             && t.Key.Group == jobKey.Group
                             && t.JobKey.Equals(jobKey)
+                            && t.StartTimeUtc > DateTimeOffset.UtcNow.AddHours(2).AddMinutes(59)
                             && ((ISimpleTrigger)t).RepeatCount == -1
                             && ((ISimpleTrigger)t).RepeatInterval == TimeSpan.FromHours(3)
                         ),
@@ -44,20 +45,23 @@ public class QueueCheckPlexLibraryUpdatesJobCommandHandlerUnitTests
     }
 
     [Test]
-    public async Task ShouldDeleteExistingJobBeforeScheduling_WhenJobAlreadyExists()
+    public async Task ShouldReplaceExistingJobWithThreeHourSchedule_WhenJobExists()
     {
         // Arrange
         var jobKey = CheckPlexLibrariesForUpdatesJob.GetJobKey();
+        var triggerKey = new TriggerKey($"{jobKey.Name}_trigger", jobKey.Group);
         var command = new QueueCheckPlexLibraryUpdatesJobCommand();
 
         Mock.Mock<IScheduler>().Setup(x => x.CheckExists(jobKey, It.IsAny<CancellationToken>())).ReturnsAsync(true);
-        Mock.Mock<IScheduler>().Setup(x => x.DeleteJob(jobKey, It.IsAny<CancellationToken>())).ReturnsAsync(true);
+        Mock.Mock<IScheduler>()
+            .Setup(x => x.DeleteJob(jobKey, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(true);
         Mock.Mock<IScheduler>()
             .Setup(x => x.ScheduleJob(It.IsAny<IJobDetail>(), It.IsAny<ITrigger>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(DateTimeOffset.UtcNow);
 
         // Act
-        var result = await Sut.ExecuteAsync(command, CancellationToken);
+        var result = await TestHandlerExecuteAsync(command);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -70,9 +74,9 @@ public class QueueCheckPlexLibraryUpdatesJobCommandHandlerUnitTests
                     x.ScheduleJob(
                         It.Is<IJobDetail>(j => j.Key.Equals(jobKey)),
                         It.Is<ITrigger>(t =>
-                            t.Key.Name == $"{jobKey.Name}_trigger"
-                            && t.Key.Group == jobKey.Group
+                            t.Key.Equals(triggerKey)
                             && t.JobKey.Equals(jobKey)
+                            && t.StartTimeUtc > DateTimeOffset.UtcNow.AddHours(2).AddMinutes(59)
                             && ((ISimpleTrigger)t).RepeatCount == -1
                             && ((ISimpleTrigger)t).RepeatInterval == TimeSpan.FromHours(3)
                         ),

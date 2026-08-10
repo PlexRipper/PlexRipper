@@ -4,7 +4,7 @@ using Reaparr.BackgroundJobs.Contracts;
 namespace Reaparr.AppHost;
 
 /// <summary>
-/// The Boot class is used to sequentially start various processes needed to start Reaparr.
+/// Sequentially starts the processes needed to run Reaparr.
 /// </summary>
 public class Boot : IHostedService
 {
@@ -13,11 +13,8 @@ public class Boot : IHostedService
     private readonly Serilog.ILogger _log;
     private readonly ICommandExecutor _commandExecutor;
     private readonly IAppRuntimeInfo _appRuntimeInfo;
-
     private readonly IHostApplicationLifetime _appLifetime;
-
     private readonly ISchedulerService _schedulerService;
-
     private readonly IDownloadQueue _downloadQueue;
     private readonly ILibrarySyncJobListener _librarySyncJobListener;
 
@@ -26,7 +23,7 @@ public class Boot : IHostedService
     #region Constructor
 
     /// <summary>
-    /// The Boot class is used to sequentially start various processes needed to start Reaparr.
+    /// Creates the hosted service responsible for ordered application startup.
     /// </summary>
     public Boot(
         Serilog.ILogger log,
@@ -80,19 +77,6 @@ public class Boot : IHostedService
             return;
         }
 
-        var recoverResult = await _commandExecutor.Send(new RecoverInterruptedDownloadsCommand(), cancellationToken);
-        if (recoverResult.IsFailed)
-            recoverResult.LogError();
-
-        await _schedulerService.SetupAsync(cancellationToken);
-
-        if (!_appRuntimeInfo.IsIntegrationTestMode)
-        {
-            var bootQueueKickResult = await _downloadQueue.CheckDownloadQueueForAllServers(cancellationToken);
-            if (bootQueueKickResult.IsFailed)
-                bootQueueKickResult.LogError();
-        }
-
         var librarySyncListenerSetup = _librarySyncJobListener.Setup();
         if (librarySyncListenerSetup.IsFailed)
         {
@@ -100,7 +84,37 @@ public class Boot : IHostedService
             return;
         }
 
-        _log.Here().Information("Finished Initiating boot process");
+        // Clean-up DB from possible crash or unclean shutdown
+        var recoverInterruptedDownloads = await _commandExecutor.Send(
+            new RecoverInterruptedDownloadsCommand(),
+            cancellationToken
+        );
+        recoverInterruptedDownloads.LogIfFailed();
+
+        var cleanupLibrarySyncJobQueue = await _commandExecutor.Send(
+            new CleanupLibrarySyncJobQueueCommand(),
+            cancellationToken
+        );
+        cleanupLibrarySyncJobQueue.LogIfFailed();
+
+        var cleanupLibraryComparisonJobQueue = await _commandExecutor.Send(
+            new CleanupLibraryComparisonJobQueueCommand(),
+            cancellationToken
+        );
+        cleanupLibraryComparisonJobQueue.LogIfFailed();
+
+        var schedulerSetup = await _schedulerService.SetupAsync(cancellationToken);
+        if (schedulerSetup.IsCancelled)
+            return;
+
+        if (schedulerSetup.IsFailed)
+        {
+            schedulerSetup.LogError();
+            TerminateApplication();
+            return;
+        }
+
+        _log.Here().Information("Finished initiating boot process");
     }
 
     private void TerminateApplication()
@@ -109,7 +123,7 @@ public class Boot : IHostedService
         _appLifetime.StopApplication();
     }
 
-    /// <inheritdoc/>
+    /// <inheritdoc />
     public async Task StopAsync(CancellationToken cancellationToken)
     {
         _log.Here().Information("Shutting down the container");
@@ -129,25 +143,49 @@ public class Boot : IHostedService
     private async void OnStarted()
     {
         _log.Here().Debug("Boot.OnStarted has been called");
-        
-        var result = await Result.Try(async Task () =>
-        {
-            await _commandExecutor.Send(new NotifyArrAppsOnStartupCommand(), _appLifetime.ApplicationStopping);
+
+        var warmupMediaQueryCacheResult =
             await _commandExecutor.Send(new WarmupMediaQueryCacheCommand(), _appLifetime.ApplicationStopping);
-        }, exception =>
-        {
-            if (exception is OperationCanceledException canceledException &&
-                _appLifetime.ApplicationStopping.IsCancellationRequested)
-            {
-                _log.Here().Debug("Boot.OnStarted was cancelled because application shutdown was requested");
-                return new ExceptionalError("Operation was cancelled", exception);
-            }
+        warmupMediaQueryCacheResult.LogIfFailed();
 
-            _log.Here().Error(exception, "Unexpected error while running post-startup tasks");
-            return new ExceptionalError(exception);
-        });
+        var notifyArrAppsOnStartupResult =
+            await _commandExecutor.Send(new NotifyArrAppsOnStartupCommand(), _appLifetime.ApplicationStopping);
+        notifyArrAppsOnStartupResult.LogIfFailed();
 
-        result.LogIfFailed();
+        var refreshPlexAccountAccess = await _commandExecutor.Send(
+            new RefreshPlexAccountAccessCommand(),
+            _appLifetime.ApplicationStopping
+        );
+        refreshPlexAccountAccess.LogIfFailed();
+
+        var checkAllPlexServerConnections = await _commandExecutor.Send(
+            new CheckAllPlexServerConnectionsCommand(),
+            _appLifetime.ApplicationStopping
+        );
+        checkAllPlexServerConnections.LogIfFailed();
+
+        var checkPlexLibrariesForUpdates = await _commandExecutor.Send(
+            new CheckPlexLibrariesForUpdatesCommand(),
+            _appLifetime.ApplicationStopping
+        );
+        checkPlexLibrariesForUpdates.LogIfFailed();
+
+        var checkQueuedPlexLibraryToSync = await _commandExecutor.Send(
+            new CheckQueuedPlexLibraryToSyncCommand(),
+            _appLifetime.ApplicationStopping
+        );
+        checkQueuedPlexLibraryToSync.LogIfFailed();
+
+        var checkQueuedLibraryComparisonJob = await _commandExecutor.Send(
+            new CheckQueuedLibraryComparisonJobCommand(),
+            _appLifetime.ApplicationStopping
+        );
+        checkQueuedLibraryComparisonJob.LogIfFailed();
+
+        var checkDownloadQueue = await _downloadQueue.CheckDownloadQueueForAllServers(
+            _appLifetime.ApplicationStopping
+        );
+        checkDownloadQueue.LogIfFailed();
     }
 
     private void OnStopping()

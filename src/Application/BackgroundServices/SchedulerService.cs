@@ -1,4 +1,4 @@
-﻿using Quartz.Impl.Matchers;
+using Quartz.Impl.Matchers;
 
 namespace Reaparr.Application;
 
@@ -41,46 +41,40 @@ public class SchedulerService : ISchedulerService
     #region Public
 
     /// <summary>
-    /// Will start the <see cref="IScheduler"/> of Quartz for all the background services.
+    /// Registers scheduler-owned listeners, recreates recurring schedules, and starts Quartz.
     /// </summary>
     public async Task<Result> SetupAsync(CancellationToken cancellationToken = default)
     {
         SetupListeners();
-        if (!_scheduler.IsStarted)
-        {
-            _log.Here().Debug("Starting Quartz Scheduler");
-            await _scheduler.Start(cancellationToken);
-        }
 
         if (!_appRuntimeInfo.IsIntegrationTestMode)
         {
-            await SetupRefreshPlexAccountAccessJob(cancellationToken);
-            await SetupPlexServerStatusCheckJob(cancellationToken);
-            await SetupUpdateCheckJob(cancellationToken);
+            var setupRefreshPlexAccountAccessResult = await SetupRefreshPlexAccountAccessJob(cancellationToken);
+            setupRefreshPlexAccountAccessResult.LogIfFailed();
+
+            var setupPlexServerStatusCheckResult = await SetupPlexServerStatusCheckJob(cancellationToken);
+            setupPlexServerStatusCheckResult.LogIfFailed();
+
+            var setupUpdateCheckResult = await SetupUpdateCheckJob(cancellationToken);
+            setupUpdateCheckResult.LogIfFailed();
+
             var setupLibrarySyncResult = await SetupLibrarySyncJob(cancellationToken);
             if (setupLibrarySyncResult.IsCancelled)
                 return setupLibrarySyncResult;
 
-            if (setupLibrarySyncResult.IsFailed)
-                return setupLibrarySyncResult;
+            setupLibrarySyncResult.LogIfFailed();
 
             var setupLibraryComparisonResult = await SetupLibraryComparisonJob(cancellationToken);
             if (setupLibraryComparisonResult.IsCancelled)
                 return setupLibraryComparisonResult;
 
-            if (setupLibraryComparisonResult.IsFailed)
-                return setupLibraryComparisonResult;
+            setupLibraryComparisonResult.LogIfFailed();
+        }
 
-            var queueLibraryUpdatesResult = await _commandExecutor.Send(
-                new QueueCheckPlexLibraryUpdatesJobCommand(),
-                cancellationToken
-            );
-
-            if (queueLibraryUpdatesResult.IsCancelled)
-                return queueLibraryUpdatesResult;
-
-            if (queueLibraryUpdatesResult.IsFailed)
-                return queueLibraryUpdatesResult.LogError();
+        if (!_scheduler.IsStarted)
+        {
+            _log.Here().Debug("Starting Quartz Scheduler");
+            await _scheduler.Start(cancellationToken);
         }
 
         return _scheduler.IsStarted
@@ -88,7 +82,7 @@ public class SchedulerService : ISchedulerService
             : Result.Fail($"Could not start Scheduler {_scheduler.SchedulerName}").LogError();
     }
 
-    public async Task<Result> StopAsync(CancellationToken cancellationToken  = default)
+    public async Task<Result> StopAsync(CancellationToken cancellationToken = default)
     {
         if (!_scheduler.IsShutdown)
         {
@@ -121,6 +115,63 @@ public class SchedulerService : ISchedulerService
         );
     }
 
+    private async Task<Result> SetupRefreshPlexAccountAccessJob(CancellationToken cancellationToken)
+        {
+            var key = RefreshPlexAccountAccessJob.GetJobKey();
+            if (await _scheduler.CheckExists(key, cancellationToken))
+                await _scheduler.DeleteJob(key, cancellationToken);
+
+            var job = JobBuilder.Create<RefreshPlexAccountAccessJob>().WithIdentity(key).Build();
+            var trigger = TriggerBuilder
+                .Create()
+                .WithIdentity($"{key.Name}_trigger", key.Group)
+                .ForJob(job)
+                .StartAt(DateTimeOffset.UtcNow.AddHours(6))
+                .WithSimpleSchedule(x => x.WithIntervalInHours(6).RepeatForever())
+                .Build();
+
+        return await Result.Try(async Task () => await _scheduler.ScheduleJob(job, trigger, cancellationToken));
+    }
+
+    private async Task<Result> SetupPlexServerStatusCheckJob(CancellationToken cancellationToken)
+        {
+            var key = CheckAllConnectionsStatusByPlexServerJob.GetJobKey();
+            if (await _scheduler.CheckExists(key, cancellationToken))
+                await _scheduler.DeleteJob(key, cancellationToken);
+
+            var job = JobBuilder.Create<CheckAllConnectionsStatusByPlexServerJob>().WithIdentity(key).Build();
+            var trigger = TriggerBuilder
+                .Create()
+                .WithIdentity($"{key.Name}_trigger", key.Group)
+                .ForJob(job)
+                .StartAt(DateTimeOffset.UtcNow.AddMinutes(10))
+                .WithSimpleSchedule(x => x.WithIntervalInMinutes(10).RepeatForever())
+                .Build();
+
+        return await Result.Try(async Task () => await _scheduler.ScheduleJob(job, trigger, cancellationToken));
+    }
+
+    private async Task<Result> SetupUpdateCheckJob(CancellationToken cancellationToken)
+        {
+            var key = CheckForUpdateJob.GetJobKey();
+            if (await _scheduler.CheckExists(key, cancellationToken))
+                await _scheduler.DeleteJob(key, cancellationToken);
+
+            var job = JobBuilder.Create<CheckForUpdateJob>().WithIdentity(key).Build();
+            var trigger = TriggerBuilder
+                .Create()
+                .WithIdentity($"{key.Name}_trigger", key.Group)
+                .ForJob(job)
+                .StartAt(DateTimeOffset.UtcNow.AddHours(1))
+                .WithSimpleSchedule(x => x.WithIntervalInHours(1).RepeatForever())
+                .Build();
+
+        return await Result.Try(async Task () => await _scheduler.ScheduleJob(job, trigger, cancellationToken));
+    }
+
+    private Task<Result> SetupLibrarySyncJob(CancellationToken cancellationToken) =>
+        _commandExecutor.Send(new QueueCheckPlexLibraryUpdatesJobCommand(), cancellationToken);
+
     public async Task AwaitScheduler(CancellationToken cancellationToken = default)
     {
         await Task.Delay(1000, cancellationToken);
@@ -136,95 +187,8 @@ public class SchedulerService : ISchedulerService
         await Task.Delay(1000, cancellationToken);
     }
 
-    private async Task SetupPlexServerStatusCheckJob(CancellationToken cancellationToken)
-    {
-        var key = CheckAllConnectionsStatusByPlexServerJob.GetJobKey();
-
-        if (await _scheduler.CheckExists(key, cancellationToken))
-        {
-            return;
-        }
-
-        var job = JobBuilder.Create<CheckAllConnectionsStatusByPlexServerJob>().WithIdentity(key).Build();
-
-        var trigger = TriggerBuilder
-            .Create()
-            .WithIdentity($"{key.Name}_trigger", key.Group)
-            .ForJob(job)
-            .WithSimpleSchedule(x => x.WithIntervalInMinutes(10).RepeatForever())
-            .Build();
-
-        await _scheduler.ScheduleJob(job, trigger, cancellationToken);
-    }
-
-    private async Task SetupUpdateCheckJob(CancellationToken cancellationToken)
-    {
-        var key = CheckForUpdateJob.GetJobKey();
-
-        if (await _scheduler.CheckExists(key, cancellationToken))
-            return;
-
-        var job = JobBuilder.Create<CheckForUpdateJob>().WithIdentity(key).Build();
-
-        var trigger = TriggerBuilder
-            .Create()
-            .WithIdentity($"{key.Name}_trigger", key.Group)
-            .ForJob(job)
-            .WithSimpleSchedule(x => x.WithIntervalInHours(1).RepeatForever())
-            .Build();
-
-        await _scheduler.ScheduleJob(job, trigger, cancellationToken);
-    }
-
-    private async Task SetupRefreshPlexAccountAccessJob(CancellationToken cancellationToken)
-    {
-        var key = RefreshPlexAccountAccessJob.GetJobKey();
-
-        if (await _scheduler.CheckExists(key, cancellationToken))
-            return;
-
-        var job = JobBuilder.Create<RefreshPlexAccountAccessJob>().WithIdentity(key).Build();
-
-        var trigger = TriggerBuilder
-            .Create()
-            .WithIdentity($"{key.Name}_trigger", key.Group)
-            .ForJob(job)
-            .StartNow()
-            .WithSimpleSchedule(x => x.WithIntervalInHours(6).RepeatForever())
-            .Build();
-
-        await _scheduler.ScheduleJob(job, trigger, cancellationToken);
-        _log.Here().Information("Scheduled Plex account access refresh every six hours");
-    }
-
-    private async Task<Result> SetupLibrarySyncJob(CancellationToken cancellationToken)
-    {
-        var cleanupResult =
-            await _commandExecutor.Send(new CleanupLibrarySyncJobQueueCommand(), cancellationToken);
-        if (cleanupResult.IsCancelled)
-            return cleanupResult;
-
-        if (cleanupResult.IsFailed)
-            return cleanupResult.LogError();
-
-        var checkQueuedResult =
-            await _commandExecutor.Send(new CheckQueuedPlexLibraryToSyncCommand(), cancellationToken);
-        if (checkQueuedResult.IsCancelled)
-            return checkQueuedResult;
-
-        return checkQueuedResult.IsFailed ? checkQueuedResult.LogError() : Result.Ok();
-    }
-
     private async Task<Result> SetupLibraryComparisonJob(CancellationToken cancellationToken)
     {
-        var cleanupResult =
-            await _commandExecutor.Send(new CleanupLibraryComparisonJobQueueCommand(), cancellationToken);
-        if (cleanupResult.IsCancelled)
-            return cleanupResult;
-
-        if (cleanupResult.IsFailed)
-            return cleanupResult.LogError();
-
         var checkQueuedResult =
             await _commandExecutor.Send(new CheckQueuedLibraryComparisonJobCommand(), cancellationToken);
         if (checkQueuedResult.IsCancelled)

@@ -27,8 +27,6 @@ public class QueueCheckPlexLibraryUpdatesJobCommandHandler
     {
         var key = CheckPlexLibrariesForUpdatesJob.GetJobKey();
 
-        const int intervalHours = 3;
-
         if (await _scheduler.CheckExists(key, cancellationToken))
         {
             await _scheduler.DeleteJob(key, cancellationToken);
@@ -36,18 +34,16 @@ public class QueueCheckPlexLibraryUpdatesJobCommandHandler
         }
 
         var job = JobBuilder.Create<CheckPlexLibrariesForUpdatesJob>().WithIdentity(key).Build();
-
         var trigger = TriggerBuilder
             .Create()
             .WithIdentity($"{key.Name}_trigger", key.Group)
             .ForJob(job)
-            .StartNow()
-            .WithSimpleSchedule(x => x.WithIntervalInHours(intervalHours).RepeatForever())
+            .StartAt(DateTimeOffset.UtcNow.AddHours(3))
+            .WithSimpleSchedule(x => x.WithIntervalInHours(3).RepeatForever())
             .Build();
 
         await _scheduler.ScheduleJob(job, trigger, cancellationToken);
-        _log.Here()
-            .Information("Scheduled automatic Plex library sync check every {IntervalHours} hours", intervalHours);
+        _log.Here().Information("Scheduled automatic Plex library sync check every 3 hours");
 
         return Result.Ok();
     }

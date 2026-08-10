@@ -47,10 +47,15 @@ public class CheckPlexLibrariesForUpdatesCommandHandler
             return Result.Ok();
         }
 
+        var usableAccountIds = _dbContext
+            .PlexAccounts.Where(x => x.IsValidated)
+            .Select(x => x.Id);
+
         var accountMappings = await _dbContext
             .PlexAccountServers
             .AsNoTracking()
             .Where(x => enabledServerIds.Contains(x.PlexServerId))
+            .Where(x => usableAccountIds.Contains(x.PlexAccountId))
             .GroupBy(x => x.PlexServerId)
             .Select(x => new
             {
@@ -92,9 +97,16 @@ public class CheckPlexLibrariesForUpdatesCommandHandler
             return Result.Ok();
         }
 
+        var accessibleLibraryIds = _dbContext
+            .PlexAccountLibraries.AsNoTracking()
+            .Where(x => serversWithTokenMappings.Contains(x.PlexServerId))
+            .Where(x => usableAccountIds.Contains(x.PlexAccountId))
+            .Select(x => x.PlexLibraryId);
+
         var outdatedLibraryIds = await _dbContext
             .PlexLibraries.AsNoTracking()
             .Where(x => serversWithTokenMappings.Contains(x.PlexServerId))
+            .Where(x => accessibleLibraryIds.Contains(x.Id))
             .Where(x => x.Type == PlexMediaType.Movie || x.Type == PlexMediaType.TvShow)
             .Where(x => x.Outdated)
             .Select(x => x.Id)

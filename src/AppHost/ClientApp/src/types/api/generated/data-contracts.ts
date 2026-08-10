@@ -555,6 +555,7 @@ export enum JobTypes {
   CheckForUpdateJob = "CheckForUpdateJob",
   CheckPlexLibrariesForUpdatesJob = "CheckPlexLibrariesForUpdatesJob",
   LibraryComparisonJob = "LibraryComparisonJob",
+  RefreshPlexAccountAccessJob = "RefreshPlexAccountAccessJob",
 }
 
 export interface LanguageSettingsDTO {
@@ -1823,11 +1824,14 @@ export interface ValidatePlexServerConnectionEndpointRequest {
 }
 
 export interface ValidatePlexTokenEndpointRequest {
-  /** @format int32 */
-  plexAccountId: number;
   displayName: string;
   /** @minLength 5 */
   manualAuthenticationToken: string;
+  /**
+   * @format int32
+   * @min 0
+   */
+  plexAccountId: number;
 }
 
 export interface ValidatePlexTokenEndpointResponse {

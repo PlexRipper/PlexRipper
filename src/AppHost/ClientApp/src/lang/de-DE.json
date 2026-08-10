@@ -460,6 +460,20 @@
                 }
             },
             "title": "Radarr-Integration"
+        },
+        "refresh-mode-dialog": {
+            "incremental": "Inkrementell aktualisieren",
+            "full-reset": "Vollständig zurücksetzen",
+            "library": {
+                "title": "Plex-Bibliothek {libraryName} aktualisieren",
+                "text": "Wählen Sie aus, wie Reaparr diese Bibliothek aktualisieren soll. Eine inkrementelle Aktualisierung übernimmt nur geänderte Medien und ist normalerweise schneller.",
+                "full-reset-warning": "Beim vollständigen Zurücksetzen werden alle Mediendatensätze dieser Bibliothek aus Reaparr gelöscht und anschließend anhand von Plex neu aufgebaut. Heruntergeladene Dateien werden nicht gelöscht."
+            },
+            "server": {
+                "title": "Aktualisiere alle Plex-Bibliotheken in {serverName}",
+                "text": "Wählen Sie aus, wie Reaparr alle Bibliotheken auf diesem Server aktualisieren soll. Eine inkrementelle Aktualisierung übernimmt nur geänderte Medien und ist normalerweise schneller.",
+                "full-reset-warning": "Beim vollständigen Zurücksetzen werden alle Mediendatensätze aller Bibliotheken dieses Servers aus Reaparr gelöscht und anschließend anhand von Plex neu aufgebaut. Heruntergeladene Dateien werden nicht gelöscht."
+            }
         }
     },
     "general": {
@@ -608,20 +622,6 @@
             "quality-1440-qhd": "QHD (1440p)",
             "quality-2160-uhd-4k": "4K (2160p)",
             "quality-4320-uhd-8k": "8K (4320p)"
-        }
-    },
-    "refresh-mode-dialog": {
-        "incremental": "Inkrementell aktualisieren",
-        "full-reset": "Vollständig zurücksetzen",
-        "library": {
-            "title": "{libraryName} aktualisieren",
-            "text": "Wählen Sie aus, wie Reaparr diese Bibliothek aktualisieren soll. Eine inkrementelle Aktualisierung übernimmt nur geänderte Medien und ist normalerweise schneller.",
-            "full-reset-warning": "Beim vollständigen Zurücksetzen werden alle Mediendatensätze dieser Bibliothek aus Reaparr gelöscht und anschließend anhand von Plex neu aufgebaut. Heruntergeladene Dateien werden nicht gelöscht."
-        },
-        "server": {
-            "title": "Alle Bibliotheken in {serverName} aktualisieren",
-            "text": "Wählen Sie aus, wie Reaparr alle Bibliotheken auf diesem Server aktualisieren soll. Eine inkrementelle Aktualisierung übernimmt nur geänderte Medien und ist normalerweise schneller.",
-            "full-reset-warning": "Beim vollständigen Zurücksetzen werden alle Mediendatensätze aller Bibliotheken dieses Servers aus Reaparr gelöscht und anschließend anhand von Plex neu aufgebaut. Heruntergeladene Dateien werden nicht gelöscht."
         }
     },
     "confirmation": {

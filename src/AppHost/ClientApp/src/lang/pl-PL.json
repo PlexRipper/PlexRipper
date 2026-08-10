@@ -460,6 +460,20 @@
                 }
             },
             "title": "Integracja Radar"
+        },
+        "refresh-mode-dialog": {
+            "incremental": "Odświeżanie przyrostowe",
+            "full-reset": "Pełny reset",
+            "library": {
+                "title": "Odśwież bibliotekę Plex {libraryName} ",
+                "text": "Wybierz sposób odświeżenia tej biblioteki przez Reaparr. Odświeżanie przyrostowe aktualizuje tylko zmienione multimedia i zwykle jest szybsze.",
+                "full-reset-warning": "Pełny reset usuwa z Reaparr wszystkie rekordy multimediów tej biblioteki, a następnie odbudowuje je na podstawie danych z Plex. Pobrane pliki nie zostaną usunięte."
+            },
+            "server": {
+                "title": "Odśwież wszystkie biblioteki Plex w {serverName}",
+                "text": "Wybierz sposób odświeżenia wszystkich bibliotek na tym serwerze przez Reaparr. Odświeżanie przyrostowe aktualizuje tylko zmienione multimedia i zwykle jest szybsze.",
+                "full-reset-warning": "Pełny reset usuwa z Reaparr wszystkie rekordy multimediów każdej biblioteki na tym serwerze, a następnie odbudowuje je na podstawie danych z Plex. Pobrane pliki nie zostaną usunięte."
+            }
         }
     },
     "general": {
@@ -608,20 +622,6 @@
             "quality-1440-qhd": "QHD (1440p)",
             "quality-2160-uhd-4k": "4K (2160p)",
             "quality-4320-uhd-8k": "8K (4320p)"
-        }
-    },
-    "refresh-mode-dialog": {
-        "incremental": "Odświeżanie przyrostowe",
-        "full-reset": "Pełny reset",
-        "library": {
-            "title": "Odśwież {libraryName}",
-            "text": "Wybierz sposób odświeżenia tej biblioteki przez Reaparr. Odświeżanie przyrostowe aktualizuje tylko zmienione multimedia i zwykle jest szybsze.",
-            "full-reset-warning": "Pełny reset usuwa z Reaparr wszystkie rekordy multimediów tej biblioteki, a następnie odbudowuje je na podstawie danych z Plex. Pobrane pliki nie zostaną usunięte."
-        },
-        "server": {
-            "title": "Odśwież wszystkie biblioteki na {serverName}",
-            "text": "Wybierz sposób odświeżenia wszystkich bibliotek na tym serwerze przez Reaparr. Odświeżanie przyrostowe aktualizuje tylko zmienione multimedia i zwykle jest szybsze.",
-            "full-reset-warning": "Pełny reset usuwa z Reaparr wszystkie rekordy multimediów każdej biblioteki na tym serwerze, a następnie odbudowuje je na podstawie danych z Plex. Pobrane pliki nie zostaną usunięte."
         }
     },
     "confirmation": {

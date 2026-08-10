@@ -1,10 +1,14 @@
 namespace Reaparr.Application;
 
-public record RefreshLibraryMediaEndpointRequest(
-    int PlexLibraryId,
-    bool ForceLibrarySync = false,
-    bool ForceMediaRefresh = false
-);
+public record RefreshLibraryMediaEndpointRequest
+{
+    [RouteParam]
+    public int PlexLibraryId { get; init; }
+    
+    public bool ForceLibrarySync { get; init; }
+
+    public bool ForceMediaRefresh { get; init; }
+}
 
 public class RefreshLibraryMediaEndpointRequestValidator : Validator<RefreshLibraryMediaEndpointRequest>
 {
@@ -29,7 +33,7 @@ public class RefreshLibraryMediaEndpoint : Endpoint<RefreshLibraryMediaEndpointR
 
     public override void Configure()
     {
-        Get(ApiRoutes.PlexLibraryController + "/refresh/{PlexLibraryId}");
+        Post(ApiRoutes.PlexLibraryController + "/refresh/{PlexLibraryId}");
 
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<PlexLibraryDTO>))

@@ -34,7 +34,7 @@ public class CompareTvShowPlexLibraryCommandHandler : ICommandHandler<CompareTvS
             var (remoteLibraryId, ownedLibraryId) = command;
 
             _log.Here()
-                .Information(
+                .Verbose(
                     "Starting TV show comparison: remote library {RemoteLibId} vs owned library {OwnedLibId}",
                     remoteLibraryId,
                     ownedLibraryId

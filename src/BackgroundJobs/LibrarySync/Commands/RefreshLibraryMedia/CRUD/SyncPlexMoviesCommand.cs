@@ -3,7 +3,7 @@ using EFCore.BulkExtensions;
 namespace Reaparr.BackgroundJobs;
 
 /// <summary>
-/// Syncs the PlexMovies of a PlexLibrary by first deleting all existing media and then reinserting the new media.
+/// Incrementally syncs the PlexMovies of a PlexLibrary.
 /// In addition to syncing the PlexMovies, also syncs the related entities such as actors, genres and countries.
 /// </summary>
 public record SyncPlexMoviesCommand(InsertMediaMetaDataCommandResponse LibraryMetadata)
@@ -36,8 +36,6 @@ public class SyncPlexMoviesCommandHandler : ICommandHandler<SyncPlexMoviesComman
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
 
-    private readonly CrudMoviesReport _report = new();
-
     private readonly BulkConfig? _config = new() { BatchSize = 500, SetOutputIdentity = true };
 
     public SyncPlexMoviesCommandHandler(ILogger log, IReaparrDbContext dbContext)
@@ -51,6 +49,9 @@ public class SyncPlexMoviesCommandHandler : ICommandHandler<SyncPlexMoviesComman
         CancellationToken cancellationToken
     )
     {
+        if (cancellationToken.IsCancellationRequested)
+            return ResultExtensions.TaskIsCancelled(nameof(SyncPlexMoviesCommand)).LogWarning();
+
         var plexLibraryId = command.LibraryMetadata.PlexLibraryId;
         var plexServerId = command.LibraryMetadata.PlexLibrary.PlexServerId;
 
@@ -58,51 +59,35 @@ public class SyncPlexMoviesCommandHandler : ICommandHandler<SyncPlexMoviesComman
 
         _log.Here()
             .Debug(
-                "Starting syncing of movies in library: {PlexLibraryName} with id: {PlexLibraryId} by first removing all media and then reinserting it",
+                "Starting incremental sync of movies in library: {PlexLibraryName} with id: {PlexLibraryId}",
                 libraryName,
                 plexLibraryId
             );
 
         var stopWatch = Stopwatch.StartNew();
-        if (cancellationToken.IsCancellationRequested)
-            return ResultExtensions.TaskIsCancelled(nameof(SyncPlexMoviesCommand)).LogWarning();
-
-        // Point of no return: once RemoveMedia starts, old data is gone.
-        // Always run to completion regardless of cancellation to avoid partial deletions.
-        var completionToken = CancellationToken.None;
-        await RemoveMedia(plexLibraryId, completionToken);
-
         var plexMovies = command.LibraryMetadata.PlexLibrary.Movies.ToList();
-        var insertResult = await Result.Try(() =>
-            _dbContext.BulkInsertPlexMoviesAsync(plexMovies, plexServerId, plexLibraryId, ct: completionToken)
+        var report = new CrudMoviesReport();
+        var reconcileResult = await ReconcileMovies(
+            plexMovies,
+            plexServerId,
+            plexLibraryId,
+            report,
+            cancellationToken
         );
-        if (insertResult.IsCancelled)
-        {
-            _log.Here()
-                .Information(
-                    "Insertion of movies was cancelled for library: {PlexLibraryName} with id: {PlexLibraryId}. Old media data has already been removed and cannot be restored. Cancellation was requested: {CancellationRequested}",
-                    libraryName,
-                    plexLibraryId,
-                    cancellationToken.IsCancellationRequested
-                );
-            await RemoveMedia(plexLibraryId, CancellationToken.None);
-            return insertResult;
-        }
+        if (reconcileResult.IsCancelled)
+            return reconcileResult;
 
-        if (insertResult.IsFailed)
+        if (reconcileResult.IsFailed)
         {
             _log.Here()
                 .Error(
-                    "Failed to insert movies for library: {PlexLibraryName} with id: {PlexLibraryId}. Error: {Error}",
+                    "Failed to reconcile movies for library: {PlexLibraryName} with id: {PlexLibraryId}. Error: {Error}",
                     libraryName,
                     plexLibraryId,
-                    insertResult.Errors
+                    reconcileResult.Errors
                 );
-            await RemoveMedia(plexLibraryId, CancellationToken.None);
-            return insertResult;
+            return reconcileResult;
         }
-
-        _report.CreatedMovies = plexMovies.Count;
 
         var mediaSize = plexMovies.Sum(x => x.MediaSize);
         await _dbContext.SetMovieMediaMetrics(plexLibraryId, plexMovies.Count, mediaSize);
@@ -112,7 +97,7 @@ public class SyncPlexMoviesCommandHandler : ICommandHandler<SyncPlexMoviesComman
             command.LibraryMetadata.PlexCountries,
             plexLibraryId,
             libraryName,
-            completionToken
+            cancellationToken
         );
 
         var syncGenreResult = await SyncMovieGenres(
@@ -120,7 +105,7 @@ public class SyncPlexMoviesCommandHandler : ICommandHandler<SyncPlexMoviesComman
             command.LibraryMetadata.PlexGenres,
             plexLibraryId,
             libraryName,
-            completionToken
+            cancellationToken
         );
 
         var syncActorResult = await SyncMovieActors(
@@ -128,7 +113,7 @@ public class SyncPlexMoviesCommandHandler : ICommandHandler<SyncPlexMoviesComman
             command.LibraryMetadata.PlexActors,
             plexLibraryId,
             libraryName,
-            completionToken
+            cancellationToken
         );
 
         var mergeResult = Result.Merge(syncActorResult, syncGenreResult, syncCountriesResult);
@@ -139,9 +124,80 @@ public class SyncPlexMoviesCommandHandler : ICommandHandler<SyncPlexMoviesComman
 
         stopWatch.StopAndLog($"Finished media syncing plexLibrary: {libraryName} with id: {plexLibraryId}");
 
-        _log.Here().Debug(_report.ToString());
+        _log.Here().Information(report.ToString());
 
-        return Result.Ok(_report);
+        return Result.Ok(report);
+    }
+
+    private async Task<Result> ReconcileMovies(
+        List<PlexMovie> incomingMovies,
+        int plexServerId,
+        int plexLibraryId,
+        CrudMoviesReport report,
+        CancellationToken cancellationToken
+    )
+    {
+        var currentMovies = await _dbContext
+            .PlexMovies.AsNoTracking()
+            .Where(x => x.PlexLibraryId == plexLibraryId)
+            .ToListAsync(cancellationToken);
+        _dbContext.PlexMovies.Local.Clear();
+        var currentByKey = currentMovies.ToDictionary(x => x.PlexApiRatingKey);
+        var incomingKeys = incomingMovies.Select(x => x.PlexApiRatingKey).ToHashSet();
+        var created = new List<PlexMovie>();
+        var updated = new List<PlexMovie>();
+
+        incomingMovies.SetRelationshipIds(plexServerId, plexLibraryId);
+        foreach (var movie in incomingMovies)
+        {
+            if (!currentByKey.TryGetValue(movie.PlexApiRatingKey, out var current))
+            {
+                created.Add(movie);
+                continue;
+            }
+
+            movie.Id = current.Id;
+            if (movie.UpdatedAt != current.UpdatedAt)
+                updated.Add(movie);
+        }
+
+        var deleted = currentMovies.Where(x => !incomingKeys.Contains(x.PlexApiRatingKey)).ToList();
+        foreach (var movie in created.Concat(updated))
+            movie.Quality = movie.MediaDataList.Count == 0
+                ? VideoQuality.Unknown
+                : movie.MediaDataList.Max(x => x.Quality);
+
+        report.CreatedMovies = created.Count;
+        report.UpdatedMovies = updated.Count;
+        report.DeletedMovies = deleted.Count;
+
+        return await _dbContext.ExecuteSerializedTransactionAsync(async (ctx, txCt) =>
+        {
+            var updatedIds = updated.Select(x => x.Id).ToList();
+            if (updatedIds.Count > 0)
+                await ctx.PlexMovieData.Where(x => updatedIds.Contains(x.PlexMovieId)).ExecuteDeleteAsync(txCt);
+
+            var deletedIds = deleted.Select(x => x.Id).ToList();
+            if (deletedIds.Count > 0)
+                await ctx.PlexMovies.Where(x => deletedIds.Contains(x.Id)).ExecuteDeleteAsync(txCt);
+
+            if (updated.Count > 0)
+                await ctx.BulkUpdateAsync(updated, BulkConfigPreset.Default, txCt);
+
+            if (created.Count > 0)
+                await ctx.BulkInsertAsync(created, BulkConfigPreset.Default, txCt);
+
+            var mediaData = created
+                .Concat(updated)
+                .SelectMany(movie =>
+                {
+                    movie.MediaDataList.SetRelationshipIds(movie.PlexServerId, movie.PlexLibraryId, movie.Id);
+                    return movie.MediaDataList;
+                })
+                .ToList();
+            if (mediaData.Count > 0)
+                await ctx.BulkInsertAsync(mediaData, BulkConfigPreset.Default, txCt);
+        }, cancellationToken);
     }
 
     private async Task<Result<int>> SyncMovieActors(
@@ -296,18 +352,6 @@ public class SyncPlexMoviesCommandHandler : ICommandHandler<SyncPlexMoviesComman
 
         return Result.Ok(list.Count);
     }
-
-    private async Task RemoveMedia(int plexLibraryId, CancellationToken cancellationToken)
-    {
-        await _dbContext
-            .PlexMovieData.Where(x => x.PlexLibraryId == plexLibraryId)
-            .ExecuteDeleteAsync(cancellationToken);
-
-        // Then remove the movies
-        _report.DeletedMovies = await _dbContext
-            .PlexMovies.Where(x => x.PlexLibraryId == plexLibraryId)
-            .ExecuteDeleteAsync(cancellationToken);
-    }
 }
 
 public record CrudMoviesReport
@@ -318,8 +362,7 @@ public record CrudMoviesReport
 
     public int DeletedMovies { get; set; }
 
-    public override string ToString() =>
-        $@"
+    public override string ToString() => $@"
         CreatedMovies: {CreatedMovies}
         UpdatedMovies: {UpdatedMovies}
         DeletedMovies: {DeletedMovies}";

@@ -83,7 +83,7 @@ public class PlexLibraryComparisonJob : IJob
             );
 
         _log.Here()
-            .Debug(
+            .Verbose(
                 "Executing comparison queue item: remote library {RemoteLibId} vs owned library {OwnedLibId} for {MediaType}",
                 queueItem.RemotePlexLibraryId,
                 queueItem.OwnedPlexLibraryId,

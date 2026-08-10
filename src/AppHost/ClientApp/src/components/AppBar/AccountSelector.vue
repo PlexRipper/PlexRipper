@@ -33,7 +33,7 @@
 							<q-btn
 								flat
 								icon="mdi-refresh"
-								:loading="accountStore.accessSyncLoading"
+								:loading="account.loading"
 								:disabled="accountStore.accessSyncLoading"
 								:data-cy="`refresh-account-${account.id}-btn`"
 								@click.stop="runReSyncAccount(account.id)" />
@@ -79,7 +79,7 @@ const accountsDisplay = computed(() => {
 		{
 			id: 0,
 			displayName: t('components.account-selector.all-accounts'),
-			loading: accountStore.accessSyncLoading,
+			loading: accountStore.accessSyncLoading && accountStore.accessSyncLoadingAccountId === 0,
 			username: '',
 		},
 		...accountStore.accounts
@@ -88,7 +88,7 @@ const accountsDisplay = computed(() => {
 				return {
 					id: x.id,
 					displayName: accountStore.getAccountDisplayName(x.id),
-					loading: accountStore.accessSyncLoading,
+					loading: accountStore.accessSyncLoading && accountStore.accessSyncLoadingAccountId === x.id,
 					username: accountStore.getAccountUserName(x.id),
 				};
 			}),

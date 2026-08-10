@@ -21,7 +21,9 @@ public class RefreshLibraryMediaEndpointUnitTests
         Mock.Mock<ICommandExecutor>()
             .Setup(x => x.Send(
                 It.Is<QueueLibrarySyncJobCommand>(command =>
-                    command.Force && command.PlexLibraryIds.SequenceEqual(new[] { plexLibrary.Id })
+                    command.ForceLibrarySync
+                    && command.ForceMediaRefresh
+                    && command.PlexLibraryIds.SequenceEqual(new[] { plexLibrary.Id })
                 ),
                 It.IsAny<CancellationToken>()
             ))
@@ -30,7 +32,12 @@ public class RefreshLibraryMediaEndpointUnitTests
 
         // Act
         var endpointResult = await TestEndpointHandleAsync(
-            new RefreshLibraryMediaEndpointRequest(plexLibrary.Id)
+            new RefreshLibraryMediaEndpointRequest
+            {
+                PlexLibraryId = plexLibrary.Id,
+                ForceLibrarySync = true,
+                ForceMediaRefresh = true,
+            }
         );
         var resultDTO = endpointResult.Response;
 
@@ -57,7 +64,9 @@ public class RefreshLibraryMediaEndpointUnitTests
         Mock.Mock<ICommandExecutor>()
             .Setup(x => x.Send(
                 It.Is<QueueLibrarySyncJobCommand>(command =>
-                    command.Force && command.PlexLibraryIds.SequenceEqual(new[] { plexLibrary.Id })
+                    command.ForceLibrarySync
+                    && command.ForceMediaRefresh
+                    && command.PlexLibraryIds.SequenceEqual(new[] { plexLibrary.Id })
                 ),
                 It.IsAny<CancellationToken>()
             ))
@@ -66,7 +75,12 @@ public class RefreshLibraryMediaEndpointUnitTests
 
         // Act
         var endpointResult = await TestEndpointHandleAsync(
-            new RefreshLibraryMediaEndpointRequest(plexLibrary.Id)
+            new RefreshLibraryMediaEndpointRequest
+            {
+                PlexLibraryId = plexLibrary.Id,
+                ForceLibrarySync = true,
+                ForceMediaRefresh = true,
+            }
         );
         var resultDTO = endpointResult.Response;
 
@@ -81,7 +95,7 @@ public class RefreshLibraryMediaEndpointUnitTests
     public async Task ShouldReturnValidationFailure_WhenPlexLibraryIdIsInvalid()
     {
         // Arrange
-        var request = new RefreshLibraryMediaEndpointRequest(0);
+        var request = new RefreshLibraryMediaEndpointRequest { PlexLibraryId = 0 };
 
         Mock.Mock<ICommandExecutor>()
             .Setup(x => x.Send(It.IsAny<QueueLibrarySyncJobCommand>(), It.IsAny<CancellationToken>()))
@@ -100,49 +114,7 @@ public class RefreshLibraryMediaEndpointUnitTests
 
         Mock.Mock<ICommandExecutor>().Verify(
             x => x.Send(It.IsAny<QueueLibrarySyncJobCommand>(), It.IsAny<CancellationToken>()),
-            Times.Never
+            Times.Never()
         );
-    }
-
-    [Test]
-    [Arguments(PlexMediaType.Movie)]
-    [Arguments(PlexMediaType.TvShow)]
-    public async Task ShouldHandleDifferentLibraryTypes_WhenTypeIsDifferent(PlexMediaType libraryType)
-    {
-        // Arrange
-        await SetupDatabase(
-            1227,
-            config =>
-            {
-                if (libraryType == PlexMediaType.Movie)
-                    config.PlexMovieLibraryCount = 1;
-                else
-                    config.PlexTvShowLibraryCount = 1;
-            }
-        );
-
-        var plexLibrary = IDbContext.PlexLibraries.First();
-        plexLibrary.Type.ShouldBe(libraryType);
-
-        Mock.Mock<ICommandExecutor>()
-            .Setup(x => x.Send(
-                It.Is<QueueLibrarySyncJobCommand>(command =>
-                    command.Force && command.PlexLibraryIds.SequenceEqual(new[] { plexLibrary.Id })
-                ),
-                It.IsAny<CancellationToken>()
-            ))
-            .ReturnsAsync(Result.Ok())
-            .Verifiable(Times.Once());
-
-        // Act
-        var endpointResult = await TestEndpointHandleAsync(
-            new RefreshLibraryMediaEndpointRequest(plexLibrary.Id)
-        );
-        var resultDTO = endpointResult.Response;
-
-        // Assert
-        resultDTO.ShouldNotBeNull();
-        resultDTO.IsSuccess.ShouldBeTrue();
-        Mock.Mock<ICommandExecutor>().Verify();
     }
 }

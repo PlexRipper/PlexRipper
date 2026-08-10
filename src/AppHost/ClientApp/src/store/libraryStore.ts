@@ -14,7 +14,13 @@ import {
 import { StoreNames, type ISetupResult } from '@interfaces';
 import { plexLibraryApi } from '@api';
 import { RefreshDataType } from '@dto';
-import { useBackgroundJobsStore, useMediaOverviewStore, useServerStore, useSettingsStore, useSignalrStore } from '@store';
+import {
+	useBackgroundJobsStore,
+	useMediaOverviewStore,
+	useServerStore,
+	useSettingsStore,
+	useSignalrStore,
+} from '@store';
 import { cloneDeep } from 'lodash-es';
 import Log from 'consola';
 
@@ -97,7 +103,10 @@ export const useLibraryStore = defineStore(StoreNames.LibraryStore, () => {
      * @param libraryId
      */
 		reSyncLibrary(libraryId: number): Observable<PlexLibraryDTO | null> {
-			return plexLibraryApi.refreshLibraryMediaEndpoint(libraryId).pipe(tap((library) => actions.updateLibrary(library.value)), switchMap((library): Observable<PlexLibraryDTO | null> => of(getters.getLibrary(library.value?.id ?? 0))));
+			return plexLibraryApi.refreshLibraryMediaEndpoint(libraryId, {
+				forceLibrarySync: true,
+				forceMediaRefresh: false,
+			}).pipe(tap((library) => actions.updateLibrary(library.value)), switchMap((library): Observable<PlexLibraryDTO | null> => of(getters.getLibrary(library.value?.id ?? 0))));
 		},
 		cancelLibrarySync(libraryId: number) {
 			return plexLibraryApi.cancelLibrarySyncEndpoint(libraryId);

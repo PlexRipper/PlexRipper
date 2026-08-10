@@ -612,15 +612,16 @@
     },
     "refresh-mode-dialog": {
         "incremental": "Incremental refresh",
-        "force": "Force refresh",
-        "force-warning": "Force refresh deletes and rebuilds Reaparr's stored media entries. Downloaded files are not deleted.",
+        "full-reset": "Full reset",
         "library": {
-            "title": "Refresh library",
-            "text": "Choose how Reaparr should refresh this library. An incremental refresh updates only changed media and is usually faster."
+            "title": "Refresh {libraryName}",
+            "text": "Choose how Reaparr should refresh this library. An incremental refresh updates only changed media and is usually faster.",
+            "full-reset-warning": "A full reset deletes all media records for this library from Reaparr and then rebuilds them from Plex. Downloaded files are not deleted."
         },
         "server": {
-            "title": "Refresh server libraries",
-            "text": "Choose how Reaparr should refresh every library on this server. An incremental refresh updates only changed media and is usually faster."
+            "title": "Refresh all libraries in {serverName}",
+            "text": "Choose how Reaparr should refresh all libraries in this server. An incremental refresh updates only changed media and is usually faster.",
+            "full-reset-warning": "A full reset deletes all media records for every library on this server from Reaparr and then rebuilds them from Plex. Downloaded files are not deleted."
         }
     },
     "confirmation": {

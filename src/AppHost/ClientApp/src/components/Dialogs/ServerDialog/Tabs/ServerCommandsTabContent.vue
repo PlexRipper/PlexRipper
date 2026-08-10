@@ -34,6 +34,7 @@
 	</HelpRow>
 	<RefreshModeDialog
 		scope="server"
+		:server-name="serverStore.getServerName(plexServerId)"
 		@select="syncServerLibraries" />
 	<ConfirmationDialog
 		:confirm-loading="deleteLoading"
@@ -49,7 +50,6 @@
 <script setup lang="ts">
 import { set } from '@vueuse/core';
 import { useSubscription } from '@vueuse/rxjs';
-import type { PlexServerDTO } from '@dto';
 import { DialogType } from '@enums';
 import { plexServerApi } from '@api';
 import { useDialogStore, useServerStore } from '@store';
@@ -59,7 +59,7 @@ const dialogStore = useDialogStore();
 const serverStore = useServerStore();
 
 const props = defineProps<{
-	plexServer: PlexServerDTO | null;
+	plexServerId: number;
 	isVisible: boolean;
 }>();
 
@@ -68,10 +68,7 @@ const inspectLoading = ref(false);
 const deleteLoading = ref(false);
 
 function syncServerLibraries(forceMediaRefresh: boolean): void {
-	if (!props.plexServer) {
-		return;
-	}
-	const plexServerId = props.plexServer.id;
+	const plexServerId = props.plexServerId;
 	set(syncLoading, true);
 	useSubscription(
 		plexServerApi
@@ -96,12 +93,9 @@ function syncServerLibraries(forceMediaRefresh: boolean): void {
 }
 
 function inspectServer(): void {
-	if (!props.plexServer) {
-		return;
-	}
 	set(inspectLoading, true);
 	useSubscription(
-		plexServerApi.queueInspectPlexServerJobEndpoint(props.plexServer.id).subscribe({
+		plexServerApi.queueInspectPlexServerJobEndpoint(props.plexServerId).subscribe({
 			next: () => {
 				set(inspectLoading, false);
 			},
@@ -113,12 +107,9 @@ function inspectServer(): void {
 }
 
 function deleteServer(): void {
-	if (!props.plexServer) {
-		return;
-	}
 	set(deleteLoading, true);
 	useSubscription(
-		serverStore.deleteServer(props.plexServer.id).subscribe({
+		serverStore.deleteServer(props.plexServerId).subscribe({
 			next: (result) => {
 				set(deleteLoading, false);
 				if (!result.isSuccess) {

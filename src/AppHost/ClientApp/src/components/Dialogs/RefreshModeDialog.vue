@@ -11,7 +11,7 @@
 		<template #default>
 			<p>{{ text }}</p>
 			<QAlert type="warning">
-				{{ t('refresh-mode-dialog.force-warning') }}
+				{{ warning }}
 			</QAlert>
 		</template>
 		<template #actions>
@@ -26,8 +26,8 @@
 					@click="select(false)" />
 				<BaseButton
 					color="negative"
-					cy="refresh-mode-force-button"
-					:label="t('refresh-mode-dialog.force')"
+					cy="refresh-mode-full-reset-button"
+					:label="t('refresh-mode-dialog.full-reset')"
 					@click="select(true)" />
 			</div>
 		</template>
@@ -40,8 +40,12 @@ import { useDialogStore, useI18n } from '#imports';
 
 const props = withDefaults(defineProps<{
 	scope?: 'library' | 'server';
+	libraryName?: string;
+	serverName?: string;
 }>(), {
 	scope: 'library',
+	libraryName: '',
+	serverName: '',
 });
 
 const emit = defineEmits<{
@@ -51,11 +55,14 @@ const emit = defineEmits<{
 const { t } = useI18n();
 const dialogStore = useDialogStore();
 const title = computed(() => props.scope === 'server'
-	? t('refresh-mode-dialog.server.title')
-	: t('refresh-mode-dialog.library.title'));
+	? t('refresh-mode-dialog.server.title', { serverName: props.serverName })
+	: t('refresh-mode-dialog.library.title', { libraryName: props.libraryName }));
 const text = computed(() => props.scope === 'server'
 	? t('refresh-mode-dialog.server.text')
 	: t('refresh-mode-dialog.library.text'));
+const warning = computed(() => props.scope === 'server'
+	? t('refresh-mode-dialog.server.full-reset-warning')
+	: t('refresh-mode-dialog.library.full-reset-warning'));
 
 function close(): void {
 	dialogStore.closeDialog(DialogType.RefreshMediaDialog);

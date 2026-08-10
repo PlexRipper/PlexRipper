@@ -612,15 +612,16 @@
     },
     "refresh-mode-dialog": {
         "incremental": "Odświeżanie przyrostowe",
-        "force": "Wymuś pełne odświeżenie",
-        "force-warning": "Pełne odświeżenie usuwa i ponownie tworzy wpisy multimediów zapisane w Reaparr. Pobrane pliki nie zostaną usunięte.",
+        "full-reset": "Pełny reset",
         "library": {
-            "title": "Odśwież bibliotekę",
-            "text": "Wybierz sposób odświeżenia tej biblioteki przez Reaparr. Odświeżanie przyrostowe aktualizuje tylko zmienione multimedia i zwykle jest szybsze."
+            "title": "Odśwież {libraryName}",
+            "text": "Wybierz sposób odświeżenia tej biblioteki przez Reaparr. Odświeżanie przyrostowe aktualizuje tylko zmienione multimedia i zwykle jest szybsze.",
+            "full-reset-warning": "Pełny reset usuwa z Reaparr wszystkie rekordy multimediów tej biblioteki, a następnie odbudowuje je na podstawie danych z Plex. Pobrane pliki nie zostaną usunięte."
         },
         "server": {
-            "title": "Odśwież biblioteki serwera",
-            "text": "Wybierz sposób odświeżenia wszystkich bibliotek na tym serwerze przez Reaparr. Odświeżanie przyrostowe aktualizuje tylko zmienione multimedia i zwykle jest szybsze."
+            "title": "Odśwież wszystkie biblioteki na {serverName}",
+            "text": "Wybierz sposób odświeżenia wszystkich bibliotek na tym serwerze przez Reaparr. Odświeżanie przyrostowe aktualizuje tylko zmienione multimedia i zwykle jest szybsze.",
+            "full-reset-warning": "Pełny reset usuwa z Reaparr wszystkie rekordy multimediów każdej biblioteki na tym serwerze, a następnie odbudowuje je na podstawie danych z Plex. Pobrane pliki nie zostaną usunięte."
         }
     },
     "confirmation": {

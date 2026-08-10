@@ -110,7 +110,9 @@
 			<!-- Download confirmation dialog	-->
 			<DownloadConfirmation @download="downloadStore.downloadMedia($event)" />
 			<!-- Library refresh mode dialog -->
-			<RefreshModeDialog @select="refreshLibrary" />
+			<RefreshModeDialog
+				:library-name="libraryStore.getLibraryName(libraryId)"
+				@select="refreshLibrary" />
 		</div>
 	</template>
 </template>

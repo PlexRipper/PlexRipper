@@ -67,6 +67,61 @@ public class ValidatePlexTokenEndpointUnitTests : BaseEndpointUnitTest<ValidateP
     }
 
     [Test]
+    public async Task ShouldPersistInvalidValidationResult_WhenExistingAccountIsUnauthorized()
+    {
+        // Arrange
+        await SetupDatabase(93205, config => config.PlexAccountCount = 1);
+        var plexAccount = await IDbContext.PlexAccounts.AsTracking().FirstAsync(CancellationToken);
+        var originalUsername = plexAccount.Username;
+        var originalToken = plexAccount.CustomAuthenticationToken;
+
+        var commandResult = new ValidatePlexTokenCommandResult
+        {
+            ClientId = string.Empty,
+            Username = "external-user-must-not-be-saved",
+            Email = string.Empty,
+            Title = string.Empty,
+            PlexId = 0,
+            Uuid = string.Empty,
+            AuthenticationToken = "external-token-must-not-be-saved",
+            IsValidated = false,
+            ValidatedAt = null,
+            Is2Fa = false,
+        };
+
+        Mock.Mock<ICommandExecutor>()
+            .Setup(x => x.Send(It.IsAny<ValidatePlexTokenCommand>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result.Ok(commandResult).AddPlex401UnauthorizedError());
+
+        // Act
+        var endpointResult = await TestEndpointHandleAsync(
+            new ValidatePlexTokenEndpointRequest
+            {
+                PlexAccountId = plexAccount.Id,
+                DisplayName = plexAccount.DisplayName,
+                ManualAuthenticationToken = plexAccount.GetAuthToken,
+            }
+        );
+
+        // Assert
+        var endpointResponse = endpointResult.Response;
+        endpointResponse.ShouldNotBeNull();
+        endpointResponse.IsSuccess.ShouldBeTrue();
+        var response = endpointResponse.Value;
+        response.ShouldNotBeNull();
+        response.IsUnAuthorized.ShouldBeTrue();
+
+        var persistedAccount = await IDbContext.PlexAccounts.SingleAsync(x => x.Id == plexAccount.Id, CancellationToken);
+        persistedAccount.IsValidated.ShouldBeFalse();
+        persistedAccount.ValidatedAt.ShouldBeNull();
+        persistedAccount.Username.ShouldBe(originalUsername);
+        persistedAccount.CustomAuthenticationToken.ShouldBe(originalToken);
+
+        Mock.Mock<INotificationHubService>()
+            .Verify(x => x.SendRefreshNotificationAsync(RefreshDataType.PlexAccount), Times.Once());
+    }
+
+    [Test]
     public async Task ShouldMarkUnauthorized_WhenThePlexAPIRespondsWithA401()
     {
         // Arrange

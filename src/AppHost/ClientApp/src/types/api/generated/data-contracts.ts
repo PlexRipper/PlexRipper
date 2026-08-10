@@ -1967,6 +1967,8 @@ export interface ValidatePlexServerConnectionEndpointRequest {
 }
 
 export interface ValidatePlexTokenEndpointRequest {
+  /** @format int32 */
+  plexAccountId: number;
   displayName: string;
   /** @minLength 5 */
   manualAuthenticationToken: string;

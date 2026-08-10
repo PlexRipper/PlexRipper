@@ -115,6 +115,7 @@ export const useAccountDialogStore = defineStore(StoreNames.AccountDialogStore, 
 			state.validateLoading = true;
 
 			return plexAccountApi.validatePlexTokenEndpoint({
+				plexAccountId: state.id,
 				displayName: state.displayName,
 				manualAuthenticationToken: state.customAuthenticationToken,
 			}).pipe(

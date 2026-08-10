@@ -2,6 +2,11 @@ namespace Reaparr.Application;
 
 public record ValidatePlexTokenEndpointRequest
 {
+    /// <summary>
+    /// The database account to update after validation. A value of 0 indicates an account that has not been created yet.
+    /// </summary>
+    public int PlexAccountId { get; init; }
+
     public required string DisplayName { get; init; } = "UnknownDisplayName";
     public required string ManualAuthenticationToken { get; init; }
 }
@@ -35,6 +40,7 @@ public class ValidatePlexTokenPlexAccountRequestValidator : Validator<ValidatePl
 {
     public ValidatePlexTokenPlexAccountRequestValidator()
     {
+        RuleFor(x => x.PlexAccountId).GreaterThanOrEqualTo(0);
         RuleFor(x => x.ManualAuthenticationToken).NotEmpty().MinimumLength(5);
     }
 }
@@ -43,12 +49,21 @@ public class ValidatePlexTokenEndpoint
     : Endpoint<ValidatePlexTokenEndpointRequest, ResultDTO<ValidatePlexTokenEndpointResponse>>
 {
     private readonly ILogger _log;
+    private readonly IReaparrDbContext _dbContext;
     private readonly ICommandExecutor _commandExecutor;
+    private readonly INotificationHubService _notificationHubService;
 
-    public ValidatePlexTokenEndpoint(ILogger log, ICommandExecutor commandExecutor)
+    public ValidatePlexTokenEndpoint(
+        ILogger log,
+        IReaparrDbContext dbContext,
+        ICommandExecutor commandExecutor,
+        INotificationHubService notificationHubService
+    )
     {
         _log = log.ForContext<ValidatePlexTokenEndpoint>();
+        _dbContext = dbContext;
         _commandExecutor = commandExecutor;
+        _notificationHubService = notificationHubService;
     }
 
     public override void Configure()
@@ -75,6 +90,8 @@ public class ValidatePlexTokenEndpoint
         // If the PlexAPI rejects the token with 401 Unauthorized
         if (validateResult.HasPlex401UnauthorizedError())
         {
+            await PersistValidationResult(req.PlexAccountId, false, null, ct);
+
             _log.Here()
                 .Warning(
                     "Failed to validate the PlexAccount Authentication Token for user {PlexAccountDisplayName} from the PlexApi",
@@ -101,6 +118,13 @@ public class ValidatePlexTokenEndpoint
 
         if (validateResult.IsSuccess)
         {
+            await PersistValidationResult(
+                req.PlexAccountId,
+                validateResult.Value.IsValidated,
+                validateResult.Value.ValidatedAt,
+                ct
+            );
+
             _log.Here()
                 .Information(
                     "Successfully validated the PlexAccount Authentication Token for user {PlexAccountDisplayName} from the PlexApi",
@@ -127,5 +151,35 @@ public class ValidatePlexTokenEndpoint
 
         // Default: return all errors if none of the above conditions matched
         await Send.FluentResult(validateResult, ct);
+    }
+
+    private async Task PersistValidationResult(
+        int plexAccountId,
+        bool isValidated,
+        DateTime? validatedAt,
+        CancellationToken ct
+    )
+    {
+        // Validation is also used before account creation, when there is no database row to update yet.
+        if (plexAccountId <= 0)
+            return;
+
+        var plexAccount = await _dbContext.PlexAccounts.AsTracking().GetAsync(plexAccountId, ct);
+        if (plexAccount is null)
+        {
+            _log.Here()
+                .Warning(
+                    "Could not persist token validation result because PlexAccount with id {PlexAccountId} was not found",
+                    plexAccountId
+                );
+            return;
+        }
+
+        // Only persist validation state. Data returned by the external API must not overwrite other account fields.
+        plexAccount.IsValidated = isValidated;
+        plexAccount.ValidatedAt = isValidated ? validatedAt : null;
+        await _dbContext.SaveChangesAsync(ct);
+
+        await _notificationHubService.SendRefreshNotificationAsync(RefreshDataType.PlexAccount);
     }
 }

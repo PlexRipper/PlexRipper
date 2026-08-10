@@ -100,6 +100,7 @@
             }
         },
         "media-overview": {
+            "library-inaccessible": "Diese Mediathek ist nicht mehr zugänglich, da kein Plex-Konto mehr darauf zugreifen kann.",
             "is-refreshing": "Mediathek \"{library}\" daten von {server} werden aktualisiert",
             "could-not-display": "Kann die Mediathek nicht anzeigen",
             "no-data": "Die Bibliothek wurde synchronisiert, enthält aber keine Medien.",

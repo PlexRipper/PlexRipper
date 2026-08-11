@@ -1,7 +1,8 @@
+using TickerQ.Utilities.Base;
+
 namespace Reaparr.Application;
 
-
-public class MoveDownloadFileJob : IJob
+public class MoveDownloadFileJob : BaseBackgroundJob<DownloadTaskKey, MoveDownloadFileJobUpdateDTO>
 {
     private readonly ILogger _log;
     private readonly ICommandExecutor _commandExecutor;
@@ -14,8 +15,10 @@ public class MoveDownloadFileJob : IJob
         ICommandExecutor commandExecutor,
         IReaparrDbContext dbContext,
         IDownloadTaskUpdateDispatcher downloadTaskUpdateDispatcher,
-        IMoveDownloadFileQueue moveDownloadFileQueue
-    )
+        IMoveDownloadFileQueue moveDownloadFileQueue,
+        IProgressHubService progressHubService,
+        INotificationHubService notificationHubService
+    ) : base(log, progressHubService, notificationHubService)
     {
         _log = log.ForContext<MoveDownloadFileJob>();
         _commandExecutor = commandExecutor;
@@ -24,41 +27,22 @@ public class MoveDownloadFileJob : IJob
         _moveDownloadFileQueue = moveDownloadFileQueue;
     }
 
-    public const string DownloadTaskIdParameter = "DownloadTaskId";
+    protected override JobTypes JobType => JobTypes.MoveDownloadFileJob;
 
-    public static JobKey GetJobKey(Guid id) => new($"{DownloadTaskIdParameter}_{id}", nameof(MoveDownloadFileJob));
+    protected override List<RefreshDataType> RefreshDataTypes => [RefreshDataType.DownloadTasks];
 
-    public async Task Execute(IJobExecutionContext context)
+    public static JobKeyV2 GetJobKey(Guid id) =>
+        new($"{nameof(JobTypes.MoveDownloadFileJob)}_{id}", JobTypes.MoveDownloadFileJob);
+
+    protected override async Task ExecuteJobAsync(
+        TickerFunctionContext<DownloadTaskKey> context,
+        CancellationToken cancellationToken
+    )
     {
-        // Jobs should swallow exceptions as otherwise Quartz will keep re-executing it
-        // https://www.quartz-scheduler.net/documentation/best-practices.html#throwing-exceptions
-        var ct = context.CancellationToken;
-        DownloadTaskKey? downloadTaskKey = null;
+        var downloadTaskKey = context.Request;
 
-        async Task QueueNextAsync()
+        try
         {
-            var queueResult = await _moveDownloadFileQueue.CheckMoveDownloadFileJobQueue(ct);
-            if (queueResult.IsCancelled)
-            {
-                queueResult.LogWarning();
-                return;
-            }
-
-            if (queueResult.IsFailed)
-                queueResult.LogError();
-        }
-
-        var executionResult = await Result.Try(async Task () =>
-        {
-            var dataMap = context.JobDetail.JobDataMap;
-            downloadTaskKey = dataMap.GetJsonValue<DownloadTaskKey>(DownloadTaskIdParameter);
-            if (downloadTaskKey is null)
-            {
-                ResultExtensions.IsNull(nameof(DownloadTaskKey)).LogError();
-                await QueueNextAsync();
-                return;
-            }
-
             _log.Here()
                 .Information(
                     "Executing job: {NameOfMoveDownloadJob} for {NameOfFileTaskId} with id: {FileTaskId}",
@@ -68,7 +52,10 @@ public class MoveDownloadFileJob : IJob
                 );
 
             var moveResult = await Result.Try(() =>
-                _commandExecutor.Send(new MoveDownloadFileFromFileTaskCommand(downloadTaskKey), ct)
+                _commandExecutor.Send(
+                    new MoveDownloadFileFromFileTaskCommand(downloadTaskKey),
+                    cancellationToken
+                )
             );
 
             if (moveResult.IsCancelled)
@@ -86,11 +73,12 @@ public class MoveDownloadFileJob : IJob
             if (moveResult.IsFailed)
             {
                 _log.Here().Error("Failed to move all files for {DownloadTaskKey}", downloadTaskKey);
-                await QueueNextAsync();
                 return;
             }
 
-            var downloadTaskResult = await Result.Try(() => _dbContext.GetDownloadTaskFileAsync(downloadTaskKey, ct));
+            var downloadTaskResult = await Result.Try(() =>
+                _dbContext.GetDownloadTaskFileAsync(downloadTaskKey, cancellationToken)
+            );
             if (downloadTaskResult.IsCancelled)
             {
                 _log.Here()
@@ -105,7 +93,6 @@ public class MoveDownloadFileJob : IJob
             if (downloadTaskResult.IsFailed)
             {
                 downloadTaskResult.LogError();
-                await QueueNextAsync();
                 return;
             }
 
@@ -113,17 +100,22 @@ public class MoveDownloadFileJob : IJob
             if (downloadTask is null)
             {
                 ResultExtensions.EntityNotFound(nameof(DownloadTaskGeneric), downloadTaskKey.Id).LogError();
-                await QueueNextAsync();
                 return;
             }
 
             if (downloadTask.DownloadStatus is DownloadStatus.MoveFinished)
             {
-                await _downloadTaskUpdateDispatcher.OnStatusChangedAsync(downloadTaskKey, DownloadStatus.Completed, ct);
+                await _downloadTaskUpdateDispatcher.OnStatusChangedAsync(
+                    downloadTaskKey,
+                    DownloadStatus.Completed,
+                    cancellationToken
+                );
 
-                // Clean up the Download task folders
                 var cleanupResult = await Result.Try(() =>
-                    _commandExecutor.Send(new CleanUpDownloadTaskFoldersCommand(downloadTaskKey), ct)
+                    _commandExecutor.Send(
+                        new CleanUpDownloadTaskFoldersCommand(downloadTaskKey),
+                        cancellationToken
+                    )
                 );
                 if (cleanupResult.IsCancelled)
                 {
@@ -133,36 +125,37 @@ public class MoveDownloadFileJob : IJob
                             nameof(MoveDownloadFileJob),
                             downloadTaskKey
                         );
-                    await QueueNextAsync();
                     return;
                 }
 
                 if (cleanupResult.IsFailed)
-                {
                     cleanupResult.LogError();
-                    await QueueNextAsync();
-                    return;
-                }
             }
-
-            await QueueNextAsync();
-        });
-
-        if (executionResult.IsCancelled)
-        {
-            executionResult.LogWarning();
         }
-        else if (executionResult.IsFailed)
+        catch (Exception e)
         {
             _log.Here()
                 .Error(
+                    e,
                     "Unexpected error in {JobName} for {DownloadTaskKey}",
                     nameof(MoveDownloadFileJob),
                     downloadTaskKey
                 );
-
-            executionResult.LogError();
-            await QueueNextAsync();
+        }
+        finally
+        {
+            var queueResult = await _moveDownloadFileQueue.CheckMoveDownloadFileJobQueue(cancellationToken);
+            if (queueResult.IsCancelled)
+                queueResult.LogWarning();
+            else if (queueResult.IsFailed)
+                queueResult.LogError();
         }
     }
+
+    protected override Task<MoveDownloadFileJobUpdateDTO?> GetStatusUpdateDataAsync(
+        TickerFunctionContext<DownloadTaskKey> context,
+        CancellationToken cancellationToken
+    ) => Task.FromResult<MoveDownloadFileJobUpdateDTO?>(
+        new MoveDownloadFileJobUpdateDTO { DownloadTaskId = context.Request }
+    );
 }

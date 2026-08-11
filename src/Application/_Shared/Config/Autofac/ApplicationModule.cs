@@ -38,7 +38,6 @@ public class ApplicationModule : Module
         
         builder.RegisterType<SchedulerService>().As<ISchedulerService>().SingleInstance();
         builder.RegisterType<AllJobListener>().As<IAllJobListener>().SingleInstance();
-        builder.RegisterType<MoveDownloadJobListener>().As<IMoveDownloadJobListener>().SingleInstance();
         builder
             .RegisterType<DownloadTaskUpdateDispatcher>()
             .As<IDownloadTaskUpdateDispatcher>()

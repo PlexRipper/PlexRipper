@@ -1,84 +1,11 @@
+using TickerQ.Utilities.Base;
+
 namespace Reaparr.Application.UnitTests;
 
 public class MoveDownloadFileJobUnitTests : BaseUnitTest<MoveDownloadFileJob>
 {
-    private IJobExecutionContext SetupJobContext(DownloadTaskKey key)
-    {
-        IDictionary<string, object> dict = new Dictionary<string, object>
-        {
-            { MoveDownloadFileJob.DownloadTaskIdParameter, JsonSerializer.Serialize(key) },
-        };
-        Mock.Mock<IJobExecutionContext>().SetupGet(x => x.JobDetail.JobDataMap).Returns(new JobDataMap(dict));
-        Mock.Mock<IJobExecutionContext>().SetupGet(x => x.CancellationToken).Returns(CancellationToken);
-        return Mock.Create<IJobExecutionContext>();
-    }
-
-    [Test]
-    public async Task ShouldNotThrow_WhenJobDataMapContainsInvalidDownloadTaskJson()
-    {
-        // Arrange
-        IDictionary<string, object> dict = new Dictionary<string, object>
-        {
-            { MoveDownloadFileJob.DownloadTaskIdParameter, "not-json" },
-        };
-
-        Mock.Mock<IJobExecutionContext>().SetupGet(x => x.JobDetail.JobDataMap).Returns(new JobDataMap(dict));
-        Mock.Mock<IJobExecutionContext>().SetupGet(x => x.CancellationToken).Returns(CancellationToken);
-
-        var context = Mock.Create<IJobExecutionContext>();
-
-        Mock.SetupCommand(It.IsAny<MoveDownloadFileFromFileTaskCommand>)
-            .ReturnsAsync(Result.Ok())
-            .Verifiable(Times.Never);
-
-        Mock.Mock<IMoveDownloadFileQueue>()
-            .Setup(x => x.CheckMoveDownloadFileJobQueue(It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result.Ok())
-            .Verifiable(Times.Once);
-
-        // Act
-        var act = async () => await Sut.Execute(context);
-
-        // Assert
-        await act.ShouldNotThrowAsync();
-
-        Mock.Mock<ICommandExecutor>()
-            .Verify(
-                x => x.Send(It.IsAny<MoveDownloadFileFromFileTaskCommand>(), It.IsAny<CancellationToken>()),
-                Times.Never()
-            );
-        Mock.Mock<IMoveDownloadFileQueue>().Verify(x => x.CheckMoveDownloadFileJobQueue(It.IsAny<CancellationToken>()), Times.Once());
-    }
-
-    [Test]
-    public async Task ShouldQueueNext_WhenJobDataMapDoesNotContainDownloadTaskId()
-    {
-        // Arrange
-        Mock.Mock<IJobExecutionContext>().SetupGet(x => x.JobDetail.JobDataMap).Returns(new JobDataMap());
-        Mock.Mock<IJobExecutionContext>().SetupGet(x => x.CancellationToken).Returns(CancellationToken);
-
-        var context = Mock.Create<IJobExecutionContext>();
-
-        Mock.SetupCommand(It.IsAny<MoveDownloadFileFromFileTaskCommand>).ReturnsAsync(Result.Ok());
-
-        Mock.Mock<IMoveDownloadFileQueue>()
-            .Setup(x => x.CheckMoveDownloadFileJobQueue(It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result.Ok())
-            .Verifiable(Times.Once);
-
-        // Act
-        var act = async () => await Sut.Execute(context);
-
-        // Assert
-        await act.ShouldNotThrowAsync();
-
-        Mock.Mock<ICommandExecutor>()
-            .Verify(
-                x => x.Send(It.IsAny<MoveDownloadFileFromFileTaskCommand>(), It.IsAny<CancellationToken>()),
-                Times.Never()
-            );
-        Mock.Mock<IMoveDownloadFileQueue>().Verify(x => x.CheckMoveDownloadFileJobQueue(It.IsAny<CancellationToken>()), Times.Once());
-    }
+    private static TickerFunctionContext<DownloadTaskKey> SetupJobContext(DownloadTaskKey key) =>
+        new(new TickerFunctionContext(), key);
 
     [Test]
     public async Task ShouldDispatchCompletedStatus_WhenMoveSucceeds()
@@ -123,7 +50,7 @@ public class MoveDownloadFileJobUnitTests : BaseUnitTest<MoveDownloadFileJob>
         var context = SetupJobContext(downloadTask.ToKey());
 
         // Act
-        await Sut.Execute(context);
+        await Sut.ExecuteAsync(context, CancellationToken);
 
         // Assert
         var after = await dbContext.GetDownloadTaskFileAsync(downloadTask.ToKey(), CancellationToken);
@@ -196,7 +123,7 @@ public class MoveDownloadFileJobUnitTests : BaseUnitTest<MoveDownloadFileJob>
         var context = SetupJobContext(downloadTask.ToKey());
 
         // Act
-        await Sut.Execute(context);
+        await Sut.ExecuteAsync(context, CancellationToken);
 
         // Assert: status stays at DownloadFinished (the command handler sets MoveError,
         // but since the command is mocked to fail without touching the DB, status is unchanged)
@@ -269,7 +196,7 @@ public class MoveDownloadFileJobUnitTests : BaseUnitTest<MoveDownloadFileJob>
         var context = SetupJobContext(downloadTask.ToKey());
 
         // Act
-        await Sut.Execute(context);
+        await Sut.ExecuteAsync(context, CancellationToken);
 
         // Assert
         var after = await dbContext.GetDownloadTaskFileAsync(downloadTask.ToKey(), CancellationToken);
@@ -338,7 +265,7 @@ public class MoveDownloadFileJobUnitTests : BaseUnitTest<MoveDownloadFileJob>
         var context = SetupJobContext(downloadTask.ToKey());
 
         // Act
-        var act = async () => await Sut.Execute(context);
+        var act = async () => await Sut.ExecuteAsync(context, CancellationToken);
 
         // Assert
         await act.ShouldNotThrowAsync();
@@ -395,7 +322,7 @@ public class MoveDownloadFileJobUnitTests : BaseUnitTest<MoveDownloadFileJob>
         var context = SetupJobContext(downloadTask.ToKey());
 
         // Act
-        await Sut.Execute(context);
+        await Sut.ExecuteAsync(context, CancellationToken);
 
         // Assert
         var after = await dbContext

@@ -38,14 +38,7 @@ public static class JobExecutionContextExtensions
                 break;
 
             case JobTypes.MoveDownloadFileJob:
-                jsonString = ToJsonString(
-                    new MoveDownloadFileJobUpdateDTO
-                    {
-                        DownloadTaskId = dataMap.GetJsonValue<DownloadTaskKey>(
-                            MoveDownloadFileJob.DownloadTaskIdParameter
-                        )!,
-                    }
-                );
+                // TickerQ jobs publish their own strongly typed lifecycle updates.
                 break;
 
             // NOTE: LibrarySyncJob handles its own status updates via SignalR in LibrarySyncJobListener

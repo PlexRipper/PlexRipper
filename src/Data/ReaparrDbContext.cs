@@ -56,8 +56,6 @@ public sealed class ReaparrDbContext : DbContext, IReaparrDbContext, IReaparrDbC
 
     public DbSet<LibrarySyncJobQueue> LibrarySyncJobQueues { get; set; }
 
-    public DbSet<LibraryComparisonJobQueue> LibraryComparisonJobQueues { get; set; }
-
     public DbSet<JobTimeTicker> TimeTickers { get; set; }
 
     public DbSet<JobCronTicker> CronTickers { get; set; }

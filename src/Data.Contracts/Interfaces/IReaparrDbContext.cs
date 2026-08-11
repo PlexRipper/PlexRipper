@@ -68,8 +68,6 @@ public interface IReaparrDbContext : IDisposable
 
     DbSet<LibrarySyncJobQueue> LibrarySyncJobQueues { get; }
 
-    DbSet<LibraryComparisonJobQueue> LibraryComparisonJobQueues { get; }
-
     #endregion
 
     #region BackgroundJobs

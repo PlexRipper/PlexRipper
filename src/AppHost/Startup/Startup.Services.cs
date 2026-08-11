@@ -13,6 +13,7 @@ using NSwag.Generation.Processors.Security;
 using Reaparr.Application.Contracts;
 using Reaparr.Identity.Contracts;
 using Serilog.Sinks.AspNetCore.App.SignalR.Extensions;
+using TickerQ.DependencyInjection;
 
 namespace Reaparr.AppHost;
 
@@ -209,6 +210,9 @@ public static partial class Startup
 
         // Removing all registered IHttpMessageHandlerBuilderFilter instances to disable built-in HttpClient logging
         services.RemoveAll<IHttpMessageHandlerBuilderFilter>();
+        
+        // Register https://tickerq.net/
+        services.AddTickerQ();
     }
 
     private static void ConfigureAuthenticationServices(

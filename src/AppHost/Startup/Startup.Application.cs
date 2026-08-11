@@ -1,6 +1,7 @@
 using System.Reflection;
 using FastEndpoints.Swagger;
 using Microsoft.AspNetCore.Http.Extensions;
+using TickerQ.DependencyInjection;
 
 namespace Reaparr.AppHost;
 
@@ -119,5 +120,8 @@ public static partial class Startup
                 return result.LogError();
             };
         });
+        
+        // Set up TickerQ - https://tickerq.net/
+        app.UseTickerQ();
     }
 }

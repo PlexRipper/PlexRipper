@@ -1,11 +1,20 @@
+using TickerQ.Utilities.Base;
+using TickerQ.Utilities.Interfaces;
+
 namespace Reaparr.Application;
+
+public record LibrarySyncJobPayload
+{
+    public int PlexServerId { get; set; }
+
+    public int PlexLibraryId { get; set; }
+}
 
 /// <summary>
 /// Quartz job that syncs a single library and chains to the next library if provided.
 /// Uses per-server locking to ensure only one library sync runs per server at a time.
 /// </summary>
-[DisallowConcurrentExecution]
-public class LibrarySyncJob : IJob
+public class LibrarySyncJob : ITickerFunction<LibrarySyncJobPayload>
 {
     public const string ServerIdParameter = nameof(ServerIdParameter);
     public const string LibraryIdParameter = nameof(LibraryIdParameter);
@@ -30,33 +39,26 @@ public class LibrarySyncJob : IJob
         _dbContext = dbContext;
     }
 
-    public static JobKey GetJobKey(int serverId, int libraryId) =>
-        new($"{nameof(JobTypes.LibrarySyncJob)}_{serverId}_{libraryId}", nameof(JobTypes.LibrarySyncJob));
+    public static JobKeyV2 GetJobKey(int serverId, int libraryId) =>
+        new($"{nameof(JobTypes.LibrarySyncJob)}_{serverId}_{libraryId}", JobTypes.LibrarySyncJob);
 
-    public async Task Execute(IJobExecutionContext context)
+    public async Task ExecuteAsync(
+        TickerFunctionContext<LibrarySyncJobPayload> context,
+        CancellationToken cancellationToken = default)
     {
-        var dataMap = context.JobDetail.JobDataMap;
-        var cancellationToken = context.CancellationToken;
+        _serverId = context.Request.PlexServerId;
+        _libraryId = context.Request.PlexLibraryId;
 
-        if (!dataMap.ContainsKey(ServerIdParameter) || !dataMap.ContainsKey(LibraryIdParameter))
-        {
-            _log.Here()
-                .Error(
-                    "Missing required parameters in job data map. ServerId: {ServerId}, LibraryId: {LibraryId}",
-                    dataMap.ContainsKey(ServerIdParameter),
-                    dataMap.ContainsKey(LibraryIdParameter)
-                );
-            return;
-        }
-
-        _serverId = dataMap.GetInt(ServerIdParameter);
-        _libraryId = dataMap.GetInt(LibraryIdParameter);
-
+        var serverName = await _dbContext.GetPlexServerNameById(_serverId);
+        var libraryName = await _dbContext.GetPlexLibraryNameById(_libraryId);
+        
         _log.Here()
             .Debug(
-                "Executing job: {LibrarySyncJobName} for server {ServerId}, library {LibraryId}",
+                "Executing job: {LibrarySyncJobName} for server {ServerName} with id {ServerId} and library {LibraryName} with id {LibraryId}",
                 nameof(LibrarySyncJob),
+                serverName,
                 _serverId,
+                libraryName,
                 _libraryId
             );
 
@@ -64,7 +66,6 @@ public class LibrarySyncJob : IJob
         var isServerOnline = await _dbContext.IsServerOnline(_serverId);
         if (!isServerOnline)
         {
-            var serverName = await _dbContext.GetPlexServerNameById(_serverId);
             _log.Here()
                 .Warning(
                     "Server {ServerName} with id {ServerId} is offline, marking queue item and skipping sync",
@@ -85,7 +86,7 @@ public class LibrarySyncJob : IJob
 
             // Execute the library sync command
             var result = await Result.Try(() =>
-                _commandExecutor.Send(new RefreshLibraryMediaCommand(_libraryId), context.CancellationToken)
+                _commandExecutor.Send(new RefreshLibraryMediaCommand(_libraryId), cancellationToken)
             );
 
             if (result.IsCancelled)
@@ -109,7 +110,8 @@ public class LibrarySyncJob : IJob
 
                 return;
             }
-            else if (result.IsFailed)
+
+            if (result.IsFailed)
             {
                 result.LogError();
 

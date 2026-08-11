@@ -12,9 +12,12 @@ public class CheckQueuedPlexLibraryToSyncCommandHandler : ICommandHandler<CheckQ
 {
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
-    private readonly IScheduler _scheduler;
+    private readonly IBackgroundJobScheduler _scheduler;
 
-    public CheckQueuedPlexLibraryToSyncCommandHandler(ILogger log, IReaparrDbContext dbContext, IScheduler scheduler)
+    public CheckQueuedPlexLibraryToSyncCommandHandler(
+        ILogger log,
+        IReaparrDbContext dbContext,
+        IBackgroundJobScheduler scheduler)
     {
         _log = log.ForContext<CheckQueuedPlexLibraryToSyncCommandHandler>();
         _dbContext = dbContext;
@@ -104,7 +107,7 @@ public class CheckQueuedPlexLibraryToSyncCommandHandler : ICommandHandler<CheckQ
         var jobKey = LibrarySyncJob.GetJobKey(serverId, libraryId);
 
         // Check if a job already exists
-        if (await _scheduler.CheckExists(jobKey, cancellationToken))
+        if (await _scheduler.CheckExists(jobKey))
         {
             _log.Here()
                 .Warning(
@@ -115,17 +118,14 @@ public class CheckQueuedPlexLibraryToSyncCommandHandler : ICommandHandler<CheckQ
             return;
         }
 
-        var jobDataMap = new JobDataMap
-        {
-            [LibrarySyncJob.ServerIdParameter] = serverId,
-            [LibrarySyncJob.LibraryIdParameter] = libraryId,
-        };
-
-        var job = JobBuilder.Create<LibrarySyncJob>().WithIdentity(jobKey).SetJobData(jobDataMap).Build();
-
-        var trigger = TriggerBuilder.Create().WithIdentity($"{jobKey.Name}_trigger", jobKey.Group).ForJob(jobKey).StartNow().Build();
-
-        await _scheduler.ScheduleJob(job, trigger, cancellationToken);
+        // Schedule the job
+        await _scheduler.ExecuteJob<LibrarySyncJob, LibrarySyncJobPayload>(
+            jobKey,
+            new LibrarySyncJobPayload
+            {
+                PlexServerId = serverId,
+                PlexLibraryId = libraryId,
+            }, cancellationToken);
 
         // Mark the queue item as processing immediately to prevent
         // CheckQueuedPlexLibraryToSync from scheduling another library

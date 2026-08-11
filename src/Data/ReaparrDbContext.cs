@@ -58,6 +58,12 @@ public sealed class ReaparrDbContext : DbContext, IReaparrDbContext, IReaparrDbC
 
     public DbSet<LibraryComparisonJobQueue> LibraryComparisonJobQueues { get; set; }
 
+    public DbSet<JobTimeTicker> TimeTickers { get; set; }
+
+    public DbSet<JobCronTicker> CronTickers { get; set; }
+
+    public DbSet<CronTickerOccurrenceEntity<JobCronTicker>> CronTickerOccurrences { get; set; }
+
     public DbSet<DownloadTaskMovie> DownloadTaskMovie { get; set; }
 
     public DbSet<DownloadTaskMovieFile> DownloadTaskMovieFile { get; set; }
@@ -238,6 +244,7 @@ public sealed class ReaparrDbContext : DbContext, IReaparrDbContext, IReaparrDbC
 
         Database.OpenConnection();
     }
+    
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
@@ -272,12 +279,24 @@ public sealed class ReaparrDbContext : DbContext, IReaparrDbContext, IReaparrDbC
         
         builder.Entity<JobTimeTicker>(b =>
         {
+            b.Property(x => x.JobKey).HasMaxLength(256);
             b.HasIndex(x => x.JobKey);
+            b.Property(e => e.JobType)
+                .HasMaxLength(100)
+                .HasConversion(x => x.ToJobTypesString(), x => x.ToJobTypes())
+                .IsUnicode(false);
+            b.HasIndex(x => x.JobType);
         });     
         
         builder.Entity<JobCronTicker>(b =>
         {
+            b.Property(x => x.JobKey).HasMaxLength(256);
             b.HasIndex(x => x.JobKey);
+            b.Property(e => e.JobType)
+                .HasMaxLength(100)
+                .HasConversion(x => x.ToJobTypesString(), x => x.ToJobTypes())
+                .IsUnicode(false);
+            b.HasIndex(x => x.JobType);
         });
         
         base.OnModelCreating(builder);

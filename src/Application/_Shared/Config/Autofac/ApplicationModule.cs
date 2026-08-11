@@ -34,6 +34,8 @@ public class ApplicationModule : Module
             .Keyed<IPlexDownloadClient>(PlexDownloadClientType.Dash)
             .InstancePerDependency();
 
+        builder.RegisterType<BackgroundJobScheduler>().As<IBackgroundJobScheduler>().SingleInstance();
+        
         builder.RegisterType<SchedulerService>().As<ISchedulerService>().SingleInstance();
         builder.RegisterType<AllJobListener>().As<IAllJobListener>().SingleInstance();
         builder.RegisterType<DownloadJobListener>().As<IDownloadJobListener>().SingleInstance();

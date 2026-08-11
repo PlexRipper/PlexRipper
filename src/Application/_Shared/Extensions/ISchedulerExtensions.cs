@@ -4,9 +4,9 @@ public static class ISchedulerExtensions
 {
     public static Task<bool> IsJobRunningAsync(
         this IScheduler scheduler,
-        JobKey key,
+        JobKey keyV2,
         CancellationToken cancellationToken = default
-    ) => scheduler.CheckExists(key, cancellationToken);
+    ) => scheduler.CheckExists(keyV2, cancellationToken);
 
     public static async Task<Result> ScheduleJobAsync(
         this IScheduler scheduler,
@@ -22,7 +22,7 @@ public static class ISchedulerExtensions
     /// Waits for a job to complete execution with a configurable timeout.
     /// </summary>
     /// <param name="scheduler">The Quartz scheduler instance.</param>
-    /// <param name="key">The job key to monitor.</param>
+    /// <param name="keyV2">The job key to monitor.</param>
     /// <param name="cancellationToken">External cancellation token.</param>
     /// <param name="timeoutSeconds">Maximum seconds to wait before returning (default 30).</param>
     /// <remarks>
@@ -31,7 +31,7 @@ public static class ISchedulerExtensions
     /// </remarks>
     public static async Task AwaitJobCompletion(
         this IScheduler scheduler,
-        JobKey key,
+        JobKey keyV2,
         CancellationToken cancellationToken = default,
         int timeoutSeconds = 30
     )
@@ -49,7 +49,7 @@ public static class ISchedulerExtensions
                     return;
 
                 var executingJobs = await scheduler.GetCurrentlyExecutingJobs(linkedCts.Token);
-                var isJobStillRunning = executingJobs.Any(x => Equals(x.JobDetail.Key, key));
+                var isJobStillRunning = executingJobs.Any(x => Equals(x.JobDetail.Key, keyV2));
 
                 if (!isJobStillRunning)
                     return;
@@ -67,15 +67,15 @@ public static class ISchedulerExtensions
 
     public static Task<bool> StopJob(
         this IScheduler scheduler,
-        JobKey key,
+        JobKey keyV2,
         CancellationToken cancellationToken = default
-    ) => scheduler.Interrupt(key, cancellationToken);
+    ) => scheduler.Interrupt(keyV2, cancellationToken);
 
     public static Task<bool> IsJobRunning(
         this IScheduler scheduler,
-        JobKey key,
+        JobKey keyV2,
         CancellationToken cancellationToken = default
-    ) => scheduler.CheckExists(key, cancellationToken);
+    ) => scheduler.CheckExists(keyV2, cancellationToken);
 
     public static async Task<List<JobDataMap>> GetRunningJobDataMaps(
         this IScheduler scheduler,

@@ -1,4 +1,13 @@
-namespace Reaparr.BackgroundJobs;
+namespace Reaparr.Application;
+
+/// <summary>
+/// Normalizes persisted library comparison queue rows during scheduler startup.
+/// </summary>
+/// <remarks>
+/// Completed rows are disposable, while interrupted or failed rows are made queued again so shutdowns do not lose work.
+/// </remarks>
+public record CleanupLibraryComparisonJobQueueCommand : ICommand<Result>;
+
 
 /// <summary>
 /// Validates startup cleanup requests for the persisted library comparison queue.

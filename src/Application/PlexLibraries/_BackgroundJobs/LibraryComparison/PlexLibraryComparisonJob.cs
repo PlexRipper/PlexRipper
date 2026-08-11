@@ -1,4 +1,4 @@
-namespace Reaparr.BackgroundJobs;
+namespace Reaparr.Application;
 
 /// <summary>
 /// Singleton Quartz worker that drains persisted library comparison queue rows.

@@ -1,4 +1,16 @@
-namespace Reaparr.BackgroundJobs;
+namespace Reaparr.Application;
+
+/// <summary>
+/// Upserts one persisted comparison queue item for a remote-to-owned library pair and media type.
+/// </summary>
+/// <param name="RemotePlexLibraryId">The non-owned source library to compare from.</param>
+/// <param name="OwnedPlexLibraryId">The owned target library to compare against.</param>
+/// <param name="MediaType">The media family handled by the comparison worker.</param>
+public record QueueLibraryMediaCompareJobCommand(
+    int RemotePlexLibraryId,
+    int OwnedPlexLibraryId,
+    PlexMediaType MediaType
+) : ICommand<Result>;
 
 public class QueueLibraryMediaCompareJobCommandValidator : AbstractValidator<QueueLibraryMediaCompareJobCommand>
 {
@@ -47,7 +59,8 @@ public class QueueLibraryMediaCompareJobCommandHandler : ICommandHandler<QueueLi
                 cancellationToken
             );
         var shouldInvalidateComparisonState = existingQueueItem is null
-            || existingQueueItem.Status is LibrarySyncJobStatus.Completed or LibrarySyncJobStatus.Failed or LibrarySyncJobStatus.Cancelled;
+                                              || existingQueueItem.Status is LibrarySyncJobStatus.Completed
+                                                  or LibrarySyncJobStatus.Failed or LibrarySyncJobStatus.Cancelled;
 
         if (existingQueueItem is null)
         {
@@ -57,6 +70,7 @@ public class QueueLibraryMediaCompareJobCommandHandler : ICommandHandler<QueueLi
                     RemotePlexLibraryId = remoteLibraryId,
                     OwnedPlexLibraryId = ownedLibraryId,
                     MediaType = mediaType,
+
                     // Lower numeric values run first; movie comparisons are quicker and should drain before TV comparisons.
                     Priority = mediaType == PlexMediaType.Movie ? 1 : 2,
                     Status = LibrarySyncJobStatus.Queued,
@@ -66,8 +80,10 @@ public class QueueLibraryMediaCompareJobCommandHandler : ICommandHandler<QueueLi
             );
             await _dbContext.SaveChangesAsync(cancellationToken);
         }
+
         // Leave queued or processing rows alone; they already represent the latest requested work.
-        else if (existingQueueItem.Status is LibrarySyncJobStatus.Completed or LibrarySyncJobStatus.Failed or LibrarySyncJobStatus.Cancelled)
+        else if (existingQueueItem.Status is LibrarySyncJobStatus.Completed or LibrarySyncJobStatus.Failed
+                 or LibrarySyncJobStatus.Cancelled)
         {
             await _dbContext.LibraryComparisonJobQueues
                 .Where(x =>
@@ -88,10 +104,13 @@ public class QueueLibraryMediaCompareJobCommandHandler : ICommandHandler<QueueLi
         if (shouldInvalidateComparisonState)
             await InvalidateComparisonStateAsync(remoteLibraryId, ownedLibraryId, mediaType, cancellationToken);
 
-        var checkQueuedResult = await _commandExecutor.Send(new CheckQueuedLibraryComparisonJobCommand(), cancellationToken);
+        var checkQueuedResult =
+            await _commandExecutor.Send(new CheckQueuedLibraryComparisonJobCommand(), cancellationToken);
 
         if (checkQueuedResult.IsFailed)
-            _log.Here().Warning("Failed to wake library comparison queue worker: {Errors}", string.Join(", ", checkQueuedResult.Errors));
+            _log.Here()
+                .Warning("Failed to wake library comparison queue worker: {Errors}",
+                    string.Join(", ", checkQueuedResult.Errors));
 
         _log.Here()
             .Verbose(

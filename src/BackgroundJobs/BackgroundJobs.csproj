@@ -38,4 +38,7 @@
         <Using Include="Reaparr.SignalR.Contracts" />
         <Using Include="Serilog" />
     </ItemGroup>
+    <ItemGroup>
+      <Folder Include="_Shared\Mappers\" />
+    </ItemGroup>
 </Project>

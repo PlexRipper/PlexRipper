@@ -19,7 +19,6 @@ public class Boot : IHostedService
     private readonly ISchedulerService _schedulerService;
 
     private readonly IDownloadQueue _downloadQueue;
-    private readonly ILibrarySyncJobListener _librarySyncJobListener;
 
     #endregion
 
@@ -34,8 +33,7 @@ public class Boot : IHostedService
         IAppRuntimeInfo appRuntimeInfo,
         IHostApplicationLifetime appLifetime,
         ISchedulerService schedulerService,
-        IDownloadQueue downloadQueue,
-        ILibrarySyncJobListener librarySyncJobListener
+        IDownloadQueue downloadQueue
     )
     {
         _log = log.ForContext<Boot>();
@@ -44,7 +42,6 @@ public class Boot : IHostedService
         _appLifetime = appLifetime;
         _schedulerService = schedulerService;
         _downloadQueue = downloadQueue;
-        _librarySyncJobListener = librarySyncJobListener;
 
         appLifetime.ApplicationStarted.Register(OnStarted);
         appLifetime.ApplicationStopping.Register(OnStopping);
@@ -91,13 +88,6 @@ public class Boot : IHostedService
             var bootQueueKickResult = await _downloadQueue.CheckDownloadQueueForAllServers(cancellationToken);
             if (bootQueueKickResult.IsFailed)
                 bootQueueKickResult.LogError();
-        }
-
-        var librarySyncListenerSetup = _librarySyncJobListener.Setup();
-        if (librarySyncListenerSetup.IsFailed)
-        {
-            TerminateApplication();
-            return;
         }
 
         _log.Here().Information("Finished Initiating boot process");

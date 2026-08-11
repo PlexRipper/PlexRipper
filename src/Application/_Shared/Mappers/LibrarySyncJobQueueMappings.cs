@@ -1,4 +1,4 @@
-namespace Reaparr.BackgroundJobs.Contracts;
+namespace Reaparr.Application;
 
 public static class LibrarySyncJobQueueMappings
 {

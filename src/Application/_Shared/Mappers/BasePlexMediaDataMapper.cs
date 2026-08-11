@@ -1,7 +1,7 @@
 using System.Text;
 using System.Text.RegularExpressions;
 
-namespace Reaparr.BackgroundJobs;
+namespace Reaparr.Application;
 
 public static class BasePlexMediaDataMapper
 {

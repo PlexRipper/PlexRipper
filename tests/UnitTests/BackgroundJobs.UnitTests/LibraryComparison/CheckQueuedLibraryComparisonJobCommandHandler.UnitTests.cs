@@ -1,4 +1,5 @@
 using Quartz;
+using Reaparr.Application;
 
 namespace Reaparr.BackgroundJobs.UnitTests;
 

@@ -1,5 +1,7 @@
 namespace Reaparr.Application;
 
+public record QueueCheckPlexLibraryUpdatesJobCommand : ICommand<Result>;
+
 public class QueueCheckPlexLibraryUpdatesJobCommandValidator : AbstractValidator<QueueCheckPlexLibraryUpdatesJobCommand>
 {
     public QueueCheckPlexLibraryUpdatesJobCommandValidator()

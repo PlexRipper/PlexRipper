@@ -1,5 +1,7 @@
 namespace Reaparr.Application;
 
+public record ResetFailedLibrarySyncJobsCommand(int PlexServerId) : ICommand<Result>;
+
 public class ResetFailedLibrarySyncJobsCommandValidator : AbstractValidator<ResetFailedLibrarySyncJobsCommand>
 {
     public ResetFailedLibrarySyncJobsCommandValidator()

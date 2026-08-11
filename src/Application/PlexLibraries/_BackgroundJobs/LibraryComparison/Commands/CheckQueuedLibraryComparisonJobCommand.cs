@@ -1,4 +1,11 @@
-namespace Reaparr.BackgroundJobs;
+using Reaparr.BackgroundJobs;
+
+namespace Reaparr.Application;
+
+/// <summary>
+/// Starts or nudges the singleton library comparison queue worker when persisted queued work exists.
+/// </summary>
+public record CheckQueuedLibraryComparisonJobCommand : ICommand<Result>;
 
 /// <summary>
 /// Validates requests to wake the persisted library comparison queue worker.

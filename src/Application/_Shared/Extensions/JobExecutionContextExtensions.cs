@@ -26,12 +26,7 @@ public static class JobExecutionContextExtensions
                 // Type is CheckAllConnectionStatusUpdateDTO, but it is not passed in here.
                 break;
             case JobTypes.DownloadJob:
-                jsonString = ToJsonString(
-                    new DownloadJobUpdateDTO
-                    {
-                        Id = dataMap.GetJsonValue<DownloadTaskKey>(DownloadJob.DownloadTaskIdParameter)!,
-                    }
-                );
+                // TickerQ jobs publish their own strongly typed lifecycle updates.
                 break;
             case JobTypes.InspectPlexServerJob:
                 jsonString = ToJsonString(

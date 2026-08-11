@@ -11,7 +11,6 @@ public class SchedulerService : ISchedulerService
     private readonly IAppRuntimeInfo _appRuntimeInfo;
     private readonly ICommandExecutor _commandExecutor;
     private readonly IAllJobListener _allJobListener;
-    private readonly IDownloadJobListener _downloadJobListener;
 
     #endregion
 
@@ -22,8 +21,7 @@ public class SchedulerService : ISchedulerService
         IScheduler scheduler,
         IAppRuntimeInfo appRuntimeInfo,
         ICommandExecutor commandExecutor,
-        IAllJobListener allJobListener,
-        IDownloadJobListener downloadJobListener
+        IAllJobListener allJobListener
     )
     {
         _log = log.ForContext<SchedulerService>();
@@ -31,7 +29,6 @@ public class SchedulerService : ISchedulerService
         _appRuntimeInfo = appRuntimeInfo;
         _commandExecutor = commandExecutor;
         _allJobListener = allJobListener;
-        _downloadJobListener = downloadJobListener;
     }
 
     #endregion
@@ -95,10 +92,6 @@ public class SchedulerService : ISchedulerService
     {
         _log.Here().Debug("Setting up Quartz listeners");
         _scheduler.ListenerManager.AddJobListener(_allJobListener, GroupMatcher<JobKey>.AnyGroup());
-        _scheduler.ListenerManager.AddJobListener(
-            _downloadJobListener,
-            GroupMatcher<JobKey>.GroupEquals(DownloadJob.GetJobKey(Guid.Empty).Group)
-        );
     }
 
     public async Task AwaitScheduler(CancellationToken cancellationToken = default)

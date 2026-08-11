@@ -25,6 +25,8 @@ public interface IBackgroundJobScheduler
 
     Task<bool> Interrupt(JobKeyV2 jobKey, CancellationToken cancellationToken = default);
 
+    Task<bool> IsJobRunning(JobKeyV2 jobKey, CancellationToken cancellationToken = default);
+
     Task<bool> CheckExists(JobKeyV2 jobKey);
 }
 
@@ -71,6 +73,40 @@ public class BackgroundJobScheduler : IBackgroundJobScheduler
         }
 
         return false;
+    }
+
+    public async Task<bool> IsJobRunning(
+        JobKeyV2 jobKey,
+        CancellationToken cancellationToken = default
+    )
+    {
+        using var dbContext = await _contextFactory.CreateAsync();
+
+        var activeStatuses = new[]
+        {
+            TickerStatus.Idle,
+            TickerStatus.Queued,
+            TickerStatus.InProgress,
+        };
+
+        if (
+            await dbContext.TimeTickers.AnyAsync(
+                x =>
+                    x.JobKey == jobKey.Name
+                    && x.JobType == jobKey.Type
+                    && activeStatuses.Contains(x.Status),
+                cancellationToken
+            )
+        )
+            return true;
+
+        return await dbContext.CronTickerOccurrences.AnyAsync(
+            x =>
+                x.CronTicker.JobKey == jobKey.Name
+                && x.CronTicker.JobType == jobKey.Type
+                && activeStatuses.Contains(x.Status),
+            cancellationToken
+        );
     }
 
     public async Task<bool> CheckExists(JobKeyV2 jobKey)

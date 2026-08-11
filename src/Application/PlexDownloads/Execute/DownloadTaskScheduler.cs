@@ -1,14 +1,22 @@
+using TickerQ.Utilities.Enums;
+
 namespace Reaparr.Application;
 
 public class DownloadTaskScheduler : IDownloadTaskScheduler
 {
     private readonly ILogger _log;
-    private readonly IScheduler _scheduler;
+    private readonly IBackgroundJobScheduler _scheduler;
+    private readonly IReaparrDbContextFactory _dbContextFactory;
 
-    public DownloadTaskScheduler(ILogger log, IScheduler scheduler)
+    public DownloadTaskScheduler(
+        ILogger log,
+        IBackgroundJobScheduler scheduler,
+        IReaparrDbContextFactory dbContextFactory
+    )
     {
         _log = log.ForContext<DownloadTaskScheduler>();
         _scheduler = scheduler;
+        _dbContextFactory = dbContextFactory;
     }
 
     public async Task<Result> StartDownloadTaskJob(
@@ -25,19 +33,14 @@ public class DownloadTaskScheduler : IDownloadTaskScheduler
             if (await _scheduler.IsJobRunning(jobKey, cancellationToken))
                 return Result.Fail($"{nameof(DownloadJob)} with {jobKey} already exists").LogWarning();
 
-            var job = JobBuilder
-                .Create<DownloadJob>()
-                .UsingJobData(DownloadJob.DownloadTaskIdParameter, JsonSerializer.Serialize(downloadTaskKey))
-                .WithIdentity(jobKey)
-                .Build();
-
-            var trigger = TriggerBuilder.Create()
-                .WithIdentity($"{jobKey.Name}_trigger", jobKey.Group)
-                .StartNow()
-                .Build();
-
-            await _scheduler.ScheduleJob(job, trigger, cancellationToken);
-            return Result.Ok();
+            var tickerResult = await _scheduler.ExecuteJob<DownloadJob, DownloadTaskKey>(
+                jobKey,
+                downloadTaskKey,
+                cancellationToken
+            );
+            return tickerResult.IsSucceeded
+                ? Result.Ok()
+                : Result.Fail($"Failed to start {nameof(DownloadJob)} with {jobKey}").LogError();
         });
 
     }
@@ -63,7 +66,7 @@ public class DownloadTaskScheduler : IDownloadTaskScheduler
                         .LogWarning();
                 }
 
-                var stopResult = await _scheduler.StopJob(jobKey, cancellationToken);
+                var stopResult = await _scheduler.Interrupt(jobKey, cancellationToken);
                 if (!stopResult)
                     return Result.Fail($"Failed to stop {nameof(DownloadTaskGeneric)} with id {downloadTaskKey}")
                         .LogError();
@@ -84,21 +87,34 @@ public class DownloadTaskScheduler : IDownloadTaskScheduler
         if (!await _scheduler.IsJobRunning(jobKey, cancellationToken))
             return;
 
-        await _scheduler.AwaitJobCompletion(jobKey, cancellationToken, timeoutSeconds: 30);
+        var timeoutAt = DateTime.UtcNow.AddSeconds(30);
+        while (await _scheduler.IsJobRunning(jobKey, cancellationToken) && DateTime.UtcNow < timeoutAt)
+            await Task.Delay(100, cancellationToken);
     }
 
     public Task<bool> IsDownloading(DownloadTaskKey downloadTaskKey, CancellationToken cancellationToken = default)
     {
         var jobKey = DownloadJob.GetJobKey(downloadTaskKey.Id);
-        return _scheduler.IsJobRunningAsync(jobKey, cancellationToken);
+        return _scheduler.IsJobRunning(jobKey, cancellationToken);
     }
 
     public async Task<List<DownloadTaskKey>> GetCurrentlyDownloadingKeysByServer(
         int plexServerId
     )
     {
-        var data = await _scheduler.GetRunningJobDataMaps(typeof(DownloadJob));
-        return data.Select(x => x.GetJsonValue<DownloadTaskKey>(DownloadJob.DownloadTaskIdParameter))
+        using var dbContext = await _dbContextFactory.CreateAsync();
+        var requests = await dbContext.TimeTickers
+            .Where(x =>
+                x.JobType == JobTypes.DownloadJob
+                && (x.Status == TickerStatus.Idle
+                    || x.Status == TickerStatus.Queued
+                    || x.Status == TickerStatus.InProgress)
+            )
+            .Select(x => x.Request)
+            .ToListAsync();
+
+        return requests
+            .Select(x => JsonSerializer.Deserialize<DownloadTaskKey>(x))
             .OfType<DownloadTaskKey>()
             .Where(x => x.PlexServerId == plexServerId)
             .ToList();

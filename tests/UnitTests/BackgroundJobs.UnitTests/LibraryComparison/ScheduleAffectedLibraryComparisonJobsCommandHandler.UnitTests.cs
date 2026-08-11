@@ -3,8 +3,8 @@ using Reaparr.Data.Contracts;
 
 namespace Reaparr.BackgroundJobs.UnitTests;
 
-public class QueueLibraryComparisonJobsForLibraryCommandHandlerUnitTests
-    : BaseUnitTest<QueueLibraryComparisonJobsForLibraryCommandHandler>
+public class ScheduleAffectedLibraryComparisonJobsCommandHandlerUnitTests
+    : BaseUnitTest<ScheduleAffectedLibraryComparisonJobsCommandHandler>
 {
     [Test]
     public async Task ShouldInvalidateDistinctLibrariesOnce_WhenMultipleComparisonJobsAreQueued()
@@ -37,7 +37,7 @@ public class QueueLibraryComparisonJobsForLibraryCommandHandlerUnitTests
         Mock.Mock<IMediaQueryCache>()
             .Setup(x => x.InvalidateLibraries(It.IsAny<IReadOnlyCollection<int>>(), It.IsAny<string>()));
 
-        var command = new QueueLibraryComparisonJobsForLibraryCommand(remoteLibrary.Id);
+        var command = new ScheduleAffectedLibraryComparisonJobsCommand(remoteLibrary.Id);
 
         // Act
         var result = await Sut.ExecuteAsync(command, CancellationToken);
@@ -99,7 +99,7 @@ public class QueueLibraryComparisonJobsForLibraryCommandHandlerUnitTests
         Mock.Mock<IMediaQueryCache>()
             .Setup(x => x.InvalidateLibraries(It.IsAny<IReadOnlyCollection<int>>(), It.IsAny<string>()));
 
-        var command = new QueueLibraryComparisonJobsForLibraryCommand(remoteLibrary.Id);
+        var command = new ScheduleAffectedLibraryComparisonJobsCommand(remoteLibrary.Id);
 
         // Act
         var result = await Sut.ExecuteAsync(command, CancellationToken);
@@ -150,7 +150,7 @@ public class QueueLibraryComparisonJobsForLibraryCommandHandlerUnitTests
         Mock.Mock<IMediaQueryCache>()
             .Setup(x => x.InvalidateLibraries(It.IsAny<IReadOnlyCollection<int>>(), It.IsAny<string>()));
 
-        var command = new QueueLibraryComparisonJobsForLibraryCommand(ownedLibrary.Id);
+        var command = new ScheduleAffectedLibraryComparisonJobsCommand(ownedLibrary.Id);
 
         // Act
         var result = await Sut.ExecuteAsync(command, CancellationToken);
@@ -196,7 +196,7 @@ public class QueueLibraryComparisonJobsForLibraryCommandHandlerUnitTests
             .Where(x => serverIds.Contains(x.Id))
             .ExecuteUpdateAsync(x => x.SetProperty(y => y.OwnedOverride, false), CancellationToken);
 
-        var command = new QueueLibraryComparisonJobsForLibraryCommand(libraries[0].Id);
+        var command = new ScheduleAffectedLibraryComparisonJobsCommand(libraries[0].Id);
 
         // Act
         var result = await Sut.ExecuteAsync(command, CancellationToken);
@@ -241,7 +241,7 @@ public class QueueLibraryComparisonJobsForLibraryCommandHandlerUnitTests
             .Setup(x => x.Send(It.IsAny<ScheduleLibraryComparisonJobCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Fail("queue failed"));
 
-        var command = new QueueLibraryComparisonJobsForLibraryCommand(remoteLibrary.Id);
+        var command = new ScheduleAffectedLibraryComparisonJobsCommand(remoteLibrary.Id);
 
         // Act
         var result = await Sut.ExecuteAsync(command, CancellationToken);

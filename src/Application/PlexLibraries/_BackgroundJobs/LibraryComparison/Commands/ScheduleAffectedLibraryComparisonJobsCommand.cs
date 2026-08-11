@@ -6,15 +6,15 @@ namespace Reaparr.Application;
 /// <param name="PlexLibraryId">
 /// The library whose sync, ownership, or access change should refresh comparison cache rows.
 /// </param>
-public record QueueLibraryComparisonJobsForLibraryCommand(int PlexLibraryId) : ICommand<Result>;
+public record ScheduleAffectedLibraryComparisonJobsCommand(int PlexLibraryId) : ICommand<Result>;
 
 /// <summary>
 /// Validates requests to discover comparison pairs affected by one library.
 /// </summary>
-public class QueueLibraryComparisonJobsForLibraryCommandValidator
-    : AbstractValidator<QueueLibraryComparisonJobsForLibraryCommand>
+public class ScheduleAffectedLibraryComparisonJobsCommandValidator
+    : AbstractValidator<ScheduleAffectedLibraryComparisonJobsCommand>
 {
-    public QueueLibraryComparisonJobsForLibraryCommandValidator()
+    public ScheduleAffectedLibraryComparisonJobsCommandValidator()
     {
         RuleFor(x => x).NotNull();
         RuleFor(x => x.PlexLibraryId).GreaterThan(0);
@@ -24,29 +24,29 @@ public class QueueLibraryComparisonJobsForLibraryCommandValidator
 /// <summary>
 /// Discovers compatible remote-to-owned library pairs for one changed library and schedules each affected comparison.
 /// </summary>
-public class QueueLibraryComparisonJobsForLibraryCommandHandler
-    : ICommandHandler<QueueLibraryComparisonJobsForLibraryCommand, Result>
+public class ScheduleAffectedLibraryComparisonJobsCommandHandler
+    : ICommandHandler<ScheduleAffectedLibraryComparisonJobsCommand, Result>
 {
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
     private readonly ICommandExecutor _commandExecutor;
     private readonly IMediaQueryCache _mediaQueryCache;
 
-    public QueueLibraryComparisonJobsForLibraryCommandHandler(
+    public ScheduleAffectedLibraryComparisonJobsCommandHandler(
         ILogger log,
         IReaparrDbContext dbContext,
         ICommandExecutor commandExecutor,
         IMediaQueryCache mediaQueryCache
     )
     {
-        _log = log.ForContext<QueueLibraryComparisonJobsForLibraryCommandHandler>();
+        _log = log.ForContext<ScheduleAffectedLibraryComparisonJobsCommandHandler>();
         _dbContext = dbContext;
         _commandExecutor = commandExecutor;
         _mediaQueryCache = mediaQueryCache;
     }
 
     public async Task<Result> ExecuteAsync(
-        QueueLibraryComparisonJobsForLibraryCommand command,
+        ScheduleAffectedLibraryComparisonJobsCommand command,
         CancellationToken cancellationToken
     )
     {

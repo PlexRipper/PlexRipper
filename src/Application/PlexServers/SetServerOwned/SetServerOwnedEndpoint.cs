@@ -91,7 +91,7 @@ public class SetServerOwnedEndpoint : Endpoint<SetServerOwnedRequest, ResultDTO<
         var failedResults = new List<ResultBase>();
         foreach (var lib in libraries.Where(x => x.IsEnabled))
         {
-            var queueResult = await _commandExecutor.Send(new QueueLibraryComparisonJobsForLibraryCommand(lib.Id), ct);
+            var queueResult = await _commandExecutor.Send(new ScheduleAffectedLibraryComparisonJobsCommand(lib.Id), ct);
             if (queueResult.IsCancelled)
             {
                 await Send.FluentResult(queueResult, ct);

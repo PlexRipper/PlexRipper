@@ -151,7 +151,7 @@ public class LibrarySyncJob : BaseBackgroundJob<LibrarySyncJobPayload, LibrarySy
                 await UpdateQueueItemAsync(LibrarySyncJobStatus.Completed);
 
                 var comparisonQueueResult = await _commandExecutor.Send(
-                    new QueueLibraryComparisonJobsForLibraryCommand(_libraryId),
+                    new ScheduleAffectedLibraryComparisonJobsCommand(_libraryId),
                     cancellationToken
                 );
 

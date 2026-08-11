@@ -34,7 +34,7 @@ public class AddOrUpdatePlexLibrariesCommandUnitTests : BaseUnitTest<AddOrUpdate
             plexLibraries.AddRange(list);
         }
 
-        Mock.SetupCommand(It.IsAny<QueueLibraryComparisonJobsForLibraryCommand>)
+        Mock.SetupCommand(It.IsAny<ScheduleAffectedLibraryComparisonJobsCommand>)
             .ReturnsAsync(Result.Ok());
 
         // Act
@@ -103,7 +103,7 @@ public class AddOrUpdatePlexLibrariesCommandUnitTests : BaseUnitTest<AddOrUpdate
             PlexLibraries = plexLibraries,
         };
 
-        Mock.SetupCommand(It.IsAny<QueueLibraryComparisonJobsForLibraryCommand>)
+        Mock.SetupCommand(It.IsAny<ScheduleAffectedLibraryComparisonJobsCommand>)
             .ReturnsAsync(Result.Ok());
 
         // Act
@@ -155,7 +155,7 @@ public class AddOrUpdatePlexLibrariesCommandUnitTests : BaseUnitTest<AddOrUpdate
             PlexLibraries = incomingLibraries.ToApiLibraries(updatedTime),
         };
 
-        Mock.SetupCommand(It.IsAny<QueueLibraryComparisonJobsForLibraryCommand>)
+        Mock.SetupCommand(It.IsAny<ScheduleAffectedLibraryComparisonJobsCommand>)
             .ReturnsAsync(Result.Ok());
 
         // Act
@@ -247,7 +247,7 @@ public class AddOrUpdatePlexLibrariesCommandUnitTests : BaseUnitTest<AddOrUpdate
             PlexLibraries = plexLibraries.ToApiLibraries(updatedTime, contentChangedAt: changedContentChangedAt),
         };
 
-        Mock.SetupCommand(It.IsAny<QueueLibraryComparisonJobsForLibraryCommand>)
+        Mock.SetupCommand(It.IsAny<ScheduleAffectedLibraryComparisonJobsCommand>)
             .ReturnsAsync(Result.Ok());
 
         // Act
@@ -326,7 +326,7 @@ public class AddOrUpdatePlexLibrariesCommandUnitTests : BaseUnitTest<AddOrUpdate
             PlexLibraries = [incomingLibrary],
         };
 
-        Mock.SetupCommand(It.IsAny<QueueLibraryComparisonJobsForLibraryCommand>)
+        Mock.SetupCommand(It.IsAny<ScheduleAffectedLibraryComparisonJobsCommand>)
             .ReturnsAsync(Result.Ok());
 
         // Act
@@ -374,7 +374,7 @@ public class AddOrUpdatePlexLibrariesCommandUnitTests : BaseUnitTest<AddOrUpdate
             PlexLibraries = [incomingLibrary],
         };
 
-        Mock.SetupCommand(It.IsAny<QueueLibraryComparisonJobsForLibraryCommand>)
+        Mock.SetupCommand(It.IsAny<ScheduleAffectedLibraryComparisonJobsCommand>)
             .ReturnsAsync(Result.Ok());
 
         // Act
@@ -471,7 +471,7 @@ public class AddOrUpdatePlexLibrariesCommandUnitTests : BaseUnitTest<AddOrUpdate
             PlexLibraries = incomingLibraries,
         };
 
-        Mock.SetupCommand(It.IsAny<QueueLibraryComparisonJobsForLibraryCommand>)
+        Mock.SetupCommand(It.IsAny<ScheduleAffectedLibraryComparisonJobsCommand>)
             .ReturnsAsync(Result.Ok());
 
         // Act
@@ -545,7 +545,7 @@ public class AddOrUpdatePlexLibrariesCommandUnitTests : BaseUnitTest<AddOrUpdate
             PlexLibraries = plexLibraries.ToApiLibraries(updatedTime),
         };
 
-        Mock.SetupCommand(It.IsAny<QueueLibraryComparisonJobsForLibraryCommand>)
+        Mock.SetupCommand(It.IsAny<ScheduleAffectedLibraryComparisonJobsCommand>)
             .ReturnsAsync(Result.Ok());
 
         // Act
@@ -596,7 +596,7 @@ public class AddOrUpdatePlexLibrariesCommandUnitTests : BaseUnitTest<AddOrUpdate
             PlexLibraries = new List<PlexLibrary> { plexLibrary }.ToApiLibraries(updatedTime),
         };
 
-        Mock.SetupCommand(It.IsAny<QueueLibraryComparisonJobsForLibraryCommand>)
+        Mock.SetupCommand(It.IsAny<ScheduleAffectedLibraryComparisonJobsCommand>)
             .ReturnsAsync(Result.Ok());
 
         // Act
@@ -666,7 +666,7 @@ public class AddOrUpdatePlexLibrariesCommandUnitTests : BaseUnitTest<AddOrUpdate
             PlexLibraries = new List<PlexLibrary> { plexLibrary }.ToApiLibraries(updatedTime),
         };
 
-        Mock.SetupCommand(It.IsAny<QueueLibraryComparisonJobsForLibraryCommand>)
+        Mock.SetupCommand(It.IsAny<ScheduleAffectedLibraryComparisonJobsCommand>)
             .ReturnsAsync(Result.Ok());
 
         // Act

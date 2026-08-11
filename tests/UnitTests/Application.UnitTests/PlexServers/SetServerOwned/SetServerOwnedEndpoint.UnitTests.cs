@@ -198,7 +198,7 @@ public class SetServerOwnedEndpointUnitTests : BaseEndpointUnitTest<SetServerOwn
                 "Plex server ownership scope changed"
             ))
             .Verifiable(Times.Once);
-        Mock.SetupCommand(It.IsAny<QueueLibraryComparisonJobsForLibraryCommand>)
+        Mock.SetupCommand(It.IsAny<ScheduleAffectedLibraryComparisonJobsCommand>)
             .ReturnsAsync(Result.Ok());
 
         // Act

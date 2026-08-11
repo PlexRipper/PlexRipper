@@ -228,7 +228,7 @@ public class AddOrUpdatePlexLibrariesCommandHandler
 
         foreach (var libraryId in affectedLibraryIds)
         {
-            var queueResult = await _commandExecutor.Send(new QueueLibraryComparisonJobsForLibraryCommand(libraryId), cancellationToken);
+            var queueResult = await _commandExecutor.Send(new ScheduleAffectedLibraryComparisonJobsCommand(libraryId), cancellationToken);
             if (queueResult.IsFailed)
                 failedResults.Add(queueResult);
         }

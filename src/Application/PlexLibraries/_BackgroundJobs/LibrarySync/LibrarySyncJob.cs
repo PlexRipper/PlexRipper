@@ -14,37 +14,42 @@ public record LibrarySyncJobPayload
 /// Quartz job that syncs a single library and chains to the next library if provided.
 /// Uses per-server locking to ensure only one library sync runs per server at a time.
 /// </summary>
-public class LibrarySyncJob : ITickerFunction<LibrarySyncJobPayload>
+public class LibrarySyncJob : BaseBackgroundJob<LibrarySyncJobPayload, LibrarySyncJobQueueDTO>
 {
-    public const string ServerIdParameter = nameof(ServerIdParameter);
-    public const string LibraryIdParameter = nameof(LibraryIdParameter);
-
     private readonly ILogger _log;
+    private readonly IReaparrDbContextFactory _dbContextFactory;
     private readonly ICommandExecutor _commandExecutor;
     private readonly INotificationHubService _notificationHubService;
     private readonly IReaparrDbContext _dbContext;
     private int _serverId;
     private int _libraryId;
+    
+    protected override JobTypes JobType => JobTypes.LibrarySyncJob;
+
+    protected override List<RefreshDataType> RefreshDataTypes =>
+        [RefreshDataType.PlexLibrary, RefreshDataType.PlexLibrarySyncStatus];
 
     public LibrarySyncJob(
         ILogger log,
+        IReaparrDbContextFactory dbContextFactory,
         ICommandExecutor commandExecutor,
         INotificationHubService notificationHubService,
-        IReaparrDbContext dbContext
-    )
+        IProgressHubService progressHubService
+    ): base(log, progressHubService, notificationHubService)
     {
         _log = log.ForContext<LibrarySyncJob>();
+        _dbContextFactory = dbContextFactory;
+        _dbContext = dbContextFactory.Create();
         _commandExecutor = commandExecutor;
         _notificationHubService = notificationHubService;
-        _dbContext = dbContext;
     }
 
     public static JobKeyV2 GetJobKey(int serverId, int libraryId) =>
         new($"{nameof(JobTypes.LibrarySyncJob)}_{serverId}_{libraryId}", JobTypes.LibrarySyncJob);
 
-    public async Task ExecuteAsync(
+    protected override async Task ExecuteJobAsync(
         TickerFunctionContext<LibrarySyncJobPayload> context,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken)
     {
         _serverId = context.Request.PlexServerId;
         _libraryId = context.Request.PlexLibraryId;
@@ -164,6 +169,8 @@ public class LibrarySyncJob : ITickerFunction<LibrarySyncJobPayload>
         await _commandExecutor.Send(new CheckQueuedPlexLibraryToSyncCommand(), cancellationToken);
     }
 
+
+
     private async Task UpdateQueueItemAsync(
         LibrarySyncJobStatus status,
         string? errorMessage = null,
@@ -247,9 +254,29 @@ public class LibrarySyncJob : ITickerFunction<LibrarySyncJobPayload>
                     );
                 break;
         }
+    }
+    
 
-        await _notificationHubService.SendRefreshNotificationAsync(
-            [RefreshDataType.PlexLibrarySyncStatus]
+    
+    protected override async Task<LibrarySyncJobQueueDTO?> GetStatusUpdateDataAsync(TickerFunctionContext<LibrarySyncJobPayload> context, CancellationToken cancellationToken)
+    {
+        using var dbContext = await _dbContextFactory.CreateAsync();
+        var queue = await dbContext.LibrarySyncJobQueues.FirstOrDefaultAsync(
+            x => x.PlexServerId == _serverId && x.PlexLibraryId == _libraryId,
+            CancellationToken.None
         );
+
+        if (queue == null)
+        {
+            _log.Here()
+                .Warning(
+                    "Queue item not found for server {ServerId}, library {LibraryId} when sending status update",
+                    _serverId,
+                    _libraryId
+                );
+            return null;
+        }
+
+        return queue.ToDTO();
     }
 }

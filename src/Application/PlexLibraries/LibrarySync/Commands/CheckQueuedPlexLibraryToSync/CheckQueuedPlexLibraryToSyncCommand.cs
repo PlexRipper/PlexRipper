@@ -1,5 +1,8 @@
 namespace Reaparr.Application;
 
+public record CheckQueuedPlexLibraryToSyncCommand : ICommand<Result>;
+
+
 public class CheckQueuedPlexLibraryToSyncCommandValidator : AbstractValidator<CheckQueuedPlexLibraryToSyncCommand>
 {
     public CheckQueuedPlexLibraryToSyncCommandValidator()

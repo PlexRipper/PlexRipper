@@ -60,7 +60,7 @@ public class SyncPlexLibraryMediaMetaDataCommandHandler : ICommandHandler<SyncPl
         var genres = command.LibraryMetadata.PlexGenres;
         var countries = command.LibraryMetadata.PlexCountries;
 
-        var libraryName = await _dbContext.GetPlexLibraryNameById(libraryId, ct);
+        var libraryName = await _dbContext.GetPlexLibraryNameById(libraryId);
         _log.Here()
             .Debug(
                 "[SyncMetaData] Got library name '{LibraryName}'. Actors={ActorCount}, Genres={GenreCount}, Countries={CountryCount}",

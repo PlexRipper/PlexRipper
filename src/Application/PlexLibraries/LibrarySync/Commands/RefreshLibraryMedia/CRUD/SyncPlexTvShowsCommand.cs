@@ -97,8 +97,7 @@ public class SyncPlexTvShowsCommandHandler : ICommandHandler<SyncPlexTvShowsComm
         var plexLibraryId = command.LibraryMetadata.PlexLibraryId;
 
         var plexLibraryName = await _dbContext.GetPlexLibraryNameById(
-            plexLibraryId,
-            cancellationToken: cancellationToken
+            plexLibraryId
         );
         var plexServerId = await _dbContext.GetPlexServerIdFromPlexLibraryId(
             plexLibraryId

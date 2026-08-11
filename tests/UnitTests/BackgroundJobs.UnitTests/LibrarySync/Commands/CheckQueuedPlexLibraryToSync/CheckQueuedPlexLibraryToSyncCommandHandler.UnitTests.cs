@@ -281,7 +281,7 @@ public class CheckQueuedPlexLibraryToSyncCommandHandlerUnitTests
         // Verify that GetPlexServerNameById and GetPlexLibraryNameById are called
         // This is implicit in the handler's execution - the handler calls these methods
         var serverName = await dbContext.GetPlexServerNameById(server.Id);
-        var libraryName = await dbContext.GetPlexLibraryNameById(library.Id, CancellationToken);
+        var libraryName = await dbContext.GetPlexLibraryNameById(library.Id);
         serverName.ShouldNotBeNullOrEmpty();
         libraryName.ShouldNotBeNullOrEmpty();
         Mock.Mock<IScheduler>()

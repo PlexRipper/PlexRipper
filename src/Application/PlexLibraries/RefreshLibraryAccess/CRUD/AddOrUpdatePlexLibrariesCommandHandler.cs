@@ -209,7 +209,7 @@ public class AddOrUpdatePlexLibrariesCommandHandler
 
                 foreach (var lostLibraryId in lostLibraryIds)
                 {
-                    var libraryName = await _dbContext.GetPlexLibraryNameById(lostLibraryId, cancellationToken);
+                    var libraryName = await _dbContext.GetPlexLibraryNameById(lostLibraryId);
                     rapport.AddRevoked(lostLibraryId, libraryName);
                 }
             }

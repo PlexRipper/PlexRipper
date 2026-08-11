@@ -54,7 +54,7 @@ public class SyncPlexMoviesCommandHandler : ICommandHandler<SyncPlexMoviesComman
         var plexLibraryId = command.LibraryMetadata.PlexLibraryId;
         var plexServerId = command.LibraryMetadata.PlexLibrary.PlexServerId;
 
-        var libraryName = await _dbContext.GetPlexLibraryNameById(plexLibraryId, cancellationToken);
+        var libraryName = await _dbContext.GetPlexLibraryNameById(plexLibraryId);
 
         _log.Here()
             .Debug(

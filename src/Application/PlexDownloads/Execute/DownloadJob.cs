@@ -2,7 +2,7 @@
 
 namespace Reaparr.Application;
 
-[DisallowConcurrentExecution]
+
 public class DownloadJob : IJob
 {
     private readonly ILogger _log;

@@ -4,7 +4,7 @@ namespace Reaparr.BackgroundJobs;
 /// Quartz job that syncs detailed metadata (Parts/Streams) for a specific Plex server.
 /// Runs after LibrarySyncJob completes and processes all media items that need enrichment.
 /// </summary>
-[DisallowConcurrentExecution]
+
 public class MetadataSyncJob : IJob
 {
     public const string ServerIdParameter = nameof(ServerIdParameter);

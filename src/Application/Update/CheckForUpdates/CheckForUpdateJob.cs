@@ -4,7 +4,7 @@ namespace Reaparr.Application;
 /// Dispatches <see cref="CheckForUpdatesCommand"/> on a recurring schedule.
 /// The command handles update checking and notifies the front-end when an update is found.
 /// </summary>
-[DisallowConcurrentExecution]
+
 public class CheckForUpdateJob : IJob
 {
     private readonly ICommandExecutor _commandExecutor;

@@ -3,7 +3,7 @@ namespace Reaparr.Application;
 /// <summary>
 /// This job will check the status of all connections for a given Plex Server and runs periodically.
 /// </summary>
-[DisallowConcurrentExecution]
+
 public class CheckAllConnectionsStatusByPlexServerJob : IJob
 {
     private readonly ILogger _log;

@@ -3,7 +3,7 @@ namespace Reaparr.Application;
 /// <summary>
 /// Periodically checks whether Plex libraries changed and queues full library syncs only when needed.
 /// </summary>
-[DisallowConcurrentExecution]
+
 public class CheckPlexLibrariesForUpdatesJob : IJob
 {
     private readonly ILogger _log;

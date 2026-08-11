@@ -1,6 +1,6 @@
 namespace Reaparr.Application;
 
-[DisallowConcurrentExecution]
+
 public class MoveDownloadFileJob : IJob
 {
     private readonly ILogger _log;

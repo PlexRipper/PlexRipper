@@ -272,13 +272,11 @@ public sealed class ReaparrDbContext : DbContext, IReaparrDbContext, IReaparrDbC
         
         builder.Entity<JobTimeTicker>(b =>
         {
-            b.Property(x => x.JobKey).HasMaxLength(64);
             b.HasIndex(x => x.JobKey);
         });     
         
         builder.Entity<JobCronTicker>(b =>
         {
-            b.Property(x => x.JobKey).HasMaxLength(64);
             b.HasIndex(x => x.JobKey);
         });
         

@@ -53,5 +53,9 @@ public class ApplicationModule : Module
                 )
             ))
             .SingleInstance();
+        
+        builder.RegisterType<LibrarySyncProgressStore>().As<ILibrarySyncProgressStore>().SingleInstance();
+        builder.RegisterType<LibrarySyncJobListener>().As<ILibrarySyncJobListener>().SingleInstance();
+
     }
 }

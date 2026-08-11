@@ -266,9 +266,21 @@ public sealed class ReaparrDbContext : DbContext, IReaparrDbContext, IReaparrDbC
         builder.AddQuartz(x => x.UseSqlite());
         
         // Setup TickerQ
-        builder.ApplyConfiguration(new TimeTickerConfigurations<TimeTickerEntity>());
-        builder.ApplyConfiguration(new CronTickerConfigurations<CronTickerEntity>());
-        builder.ApplyConfiguration(new CronTickerOccurrenceConfigurations<CronTickerEntity>());
+        builder.ApplyConfiguration(new TimeTickerConfigurations<JobTimeTicker>());
+        builder.ApplyConfiguration(new CronTickerConfigurations<JobCronTicker>());
+        builder.ApplyConfiguration(new CronTickerOccurrenceConfigurations<JobCronTicker>());
+        
+        builder.Entity<JobTimeTicker>(b =>
+        {
+            b.Property(x => x.JobKey).HasMaxLength(64);
+            b.HasIndex(x => x.JobKey);
+        });     
+        
+        builder.Entity<JobCronTicker>(b =>
+        {
+            b.Property(x => x.JobKey).HasMaxLength(64);
+            b.HasIndex(x => x.JobKey);
+        });
         
         base.OnModelCreating(builder);
     }

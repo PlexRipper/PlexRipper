@@ -11,6 +11,7 @@ using Microsoft.Extensions.Http;
 using NSwag;
 using NSwag.Generation.Processors.Security;
 using Reaparr.Application.Contracts;
+using Reaparr.Data.Contracts;
 using Reaparr.Identity.Contracts;
 using Serilog.Sinks.AspNetCore.App.SignalR.Extensions;
 using TickerQ.DependencyInjection;
@@ -214,7 +215,7 @@ public static partial class Startup
         services.RemoveAll<IHttpMessageHandlerBuilderFilter>();
         
         // Register https://tickerq.net/
-        services.AddTickerQ(opt =>
+        services.AddTickerQ<JobTimeTicker, JobCronTicker>(opt =>
         {
             opt.AddOperationalStore(ef =>
             {

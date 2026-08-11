@@ -1719,7 +1719,8 @@
           "Microsoft.EntityFrameworkCore.Sqlite": "[10.0.10, )",
           "Reaparr.Application.Contracts": "[1.0.0, )",
           "Reaparr.Domain": "[1.0.0, )",
-          "SQLitePCLRaw.lib.e_sqlite3": "[2.1.12, )"
+          "SQLitePCLRaw.lib.e_sqlite3": "[2.1.12, )",
+          "TickerQ.Utilities": "[10.4.0, )"
         }
       },
       "Reaparr.Domain": {

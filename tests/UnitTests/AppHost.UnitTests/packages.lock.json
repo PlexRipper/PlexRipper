@@ -1546,6 +1546,14 @@
           "TickerQ.Utilities": "10.4.0"
         }
       },
+      "TickerQ.Dashboard": {
+        "type": "Transitive",
+        "resolved": "10.4.0",
+        "contentHash": "U84ExmfEB6jGMFEJKq4TKaItSHY4vvIvXmslkLpWaKqowV+BCJrslcELNj+e9ieHZP4WUkJ4wk7RmDttkmVFjg==",
+        "dependencies": {
+          "TickerQ.Utilities": "10.4.0"
+        }
+      },
       "TickerQ.EntityFrameworkCore": {
         "type": "Transitive",
         "resolved": "10.4.0",
@@ -1659,6 +1667,7 @@
           "Reaparr.SignalR": "[1.0.0, )",
           "Serilog.AspNetCore": "[10.0.0, )",
           "Serilog.Sinks.AspNetCore.App.SignalR": "[1.2.2, )",
+          "TickerQ.Dashboard": "[10.4.0, )",
           "Velopack": "[0.0.1298, )"
         }
       },

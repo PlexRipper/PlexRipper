@@ -110,6 +110,15 @@
           "Serilog": "3.1.1"
         }
       },
+      "TickerQ.Dashboard": {
+        "type": "Direct",
+        "requested": "[10.4.0, )",
+        "resolved": "10.4.0",
+        "contentHash": "U84ExmfEB6jGMFEJKq4TKaItSHY4vvIvXmslkLpWaKqowV+BCJrslcELNj+e9ieHZP4WUkJ4wk7RmDttkmVFjg==",
+        "dependencies": {
+          "TickerQ.Utilities": "10.4.0"
+        }
+      },
       "Velopack": {
         "type": "Direct",
         "requested": "[0.0.1298, )",

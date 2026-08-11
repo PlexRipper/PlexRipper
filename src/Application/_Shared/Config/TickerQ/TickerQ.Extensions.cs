@@ -11,5 +11,9 @@ public static class TickerQExtensions
         // Keep the job transient so a job instance (and its DbContext dependency)
         // can never be retained and reused after that execution scope is disposed.
         services.MapTicker<LibrarySyncJob, LibrarySyncJobPayload>(ServiceLifetime.Transient);
+        services.MapTicker<PlexLibraryComparisonJob, PlexLibraryComparisonJobPayload>(ServiceLifetime.Transient);
+        services.MapTicker<CheckPlexLibrariesForUpdatesJob, CheckPlexLibrariesForUpdatesJobPayload>(
+            ServiceLifetime.Transient
+        ).WithCron("0 0 */3 * * *");
     }
 }

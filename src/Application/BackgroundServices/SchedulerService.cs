@@ -62,17 +62,6 @@ public class SchedulerService : ISchedulerService
 
             if (setupLibrarySyncResult.IsFailed)
                 return setupLibrarySyncResult;
-
-            var queueLibraryUpdatesResult = await _commandExecutor.Send(
-                new QueueCheckPlexLibraryUpdatesJobCommand(),
-                cancellationToken
-            );
-
-            if (queueLibraryUpdatesResult.IsCancelled)
-                return queueLibraryUpdatesResult;
-
-            if (queueLibraryUpdatesResult.IsFailed)
-                return queueLibraryUpdatesResult.LogError();
         }
 
         return _scheduler.IsStarted

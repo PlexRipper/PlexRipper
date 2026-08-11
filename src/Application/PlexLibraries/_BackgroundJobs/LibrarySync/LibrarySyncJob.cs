@@ -1,5 +1,4 @@
 using TickerQ.Utilities.Base;
-using TickerQ.Utilities.Interfaces;
 
 namespace Reaparr.Application;
 

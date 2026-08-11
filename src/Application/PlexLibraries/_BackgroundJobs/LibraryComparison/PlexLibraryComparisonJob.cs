@@ -12,8 +12,7 @@ public record PlexLibraryComparisonJobPayload
 /// <summary>
 /// Compares one remote Plex library with one owned Plex library.
 /// </summary>
-public class PlexLibraryComparisonJob
-    : BaseBackgroundJob<PlexLibraryComparisonJobPayload, LibraryComparisonCompletedDTO>
+public class PlexLibraryComparisonJob : BaseBackgroundJob<PlexLibraryComparisonJobPayload, LibraryComparisonCompletedDTO>
 {
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;

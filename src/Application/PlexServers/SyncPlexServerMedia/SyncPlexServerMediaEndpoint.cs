@@ -7,6 +7,10 @@ public record SyncPlexServerMediaEndpointRequest
 {
     [RouteParam]
     public int PlexServerId { get; init; }
+
+    public bool ForceLibrarySync { get; init; }
+
+    public bool ForceMediaRefresh { get; init; }
 }
 
 public class SyncPlexServerMediaEndpointRequestValidator : Validator<SyncPlexServerMediaEndpointRequest>
@@ -69,7 +73,10 @@ public class SyncPlexServerMediaEndpoint : Endpoint<SyncPlexServerMediaEndpointR
             return;
         }
 
-        var result = await _commandExecutor.Send(new QueueLibrarySyncJobCommand(libraryIds, Force: true), ct);
+        var result = await _commandExecutor.Send(
+            new QueueLibrarySyncJobCommand(libraryIds, req.ForceLibrarySync, req.ForceMediaRefresh),
+            ct
+        );
         await Send.FluentResult(result, ct);
     }
 }

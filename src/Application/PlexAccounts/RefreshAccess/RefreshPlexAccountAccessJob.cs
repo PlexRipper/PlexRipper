@@ -37,6 +37,6 @@ public class RefreshPlexAccountAccessJob
     {
         var result = await _commandExecutor.Send(new RefreshPlexAccountAccessCommand(), cancellationToken);
         if (result.IsFailed)
-            throw new InvalidOperationException(string.Join(Environment.NewLine, result.Errors.Select(x => x.Message)));
+            throw new InvalidOperationException(string.Join(System.Environment.NewLine, result.Errors.Select(x => x.Message)));
     }
 }

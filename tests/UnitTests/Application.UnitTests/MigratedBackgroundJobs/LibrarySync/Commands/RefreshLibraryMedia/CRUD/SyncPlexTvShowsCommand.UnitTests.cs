@@ -10,6 +10,147 @@ public class SyncPlexTvShowsCommandUnitTests : BaseUnitTest<SyncPlexTvShowsComma
     }
 
     [Test]
+    public async Task ShouldMoveEpisodeBeforeDeletingItsOldSeason()
+    {
+        // Arrange
+        await SetupDatabase(
+            11878,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexTvShowLibraryCount = 1;
+                config.TvShowCount = 1;
+                config.TvShowSeasonCount = 2;
+                config.TvShowEpisodeCount = 1;
+            }
+        );
+        var library = IDbContext.PlexLibraries.First();
+        var show = IDbContext.PlexTvShows
+            .AsNoTracking()
+            .Include(x => x.Seasons)
+            .ThenInclude(x => x.Episodes)
+            .ThenInclude(x => x.MediaDataList)
+            .Single();
+        var oldSeason = show.Seasons.OrderBy(x => x.Id).First();
+        var newSeason = show.Seasons.OrderBy(x => x.Id).Last();
+        var episode = oldSeason.Episodes.Single();
+        var episodeId = episode.Id;
+        var episodeUpdatedAt = episode.UpdatedAt;
+        var mediaDataCount = IDbContext.PlexTvShowEpisodeData.Count(x => x.PlexTvShowEpisodeId == episodeId);
+
+        oldSeason.Episodes.Remove(episode);
+        show.Seasons.Remove(oldSeason);
+        episode.ParentKey = newSeason.PlexApiRatingKey;
+        episode.ParentGuid = newSeason.Guid;
+        newSeason.Episodes.Add(episode);
+        SetIds(library, [show]);
+        library.TvShows.Add(show);
+
+        // Act
+        var result = await Sut.ExecuteAsync(
+            new SyncPlexTvShowsCommand(new InsertMediaMetaDataCommandResponse(library)),
+            CancellationToken
+        );
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue(result.Errors.FirstOrDefault()?.Message);
+        result.Value.CreatedTvShows.ShouldBe(0);
+        result.Value.UpdatedTvShows.ShouldBe(0);
+        result.Value.DeletedTvShows.ShouldBe(0);
+        result.Value.UnchangedTvShows.ShouldBe(1);
+        result.Value.CreatedSeasons.ShouldBe(0);
+        result.Value.UpdatedSeasons.ShouldBe(0);
+        result.Value.DeletedSeasons.ShouldBe(1);
+        result.Value.UnchangedSeasons.ShouldBe(1);
+        result.Value.CreatedEpisodes.ShouldBe(0);
+        result.Value.UpdatedEpisodes.ShouldBe(1);
+        result.Value.DeletedEpisodes.ShouldBe(0);
+        result.Value.UnchangedEpisodes.ShouldBe(1);
+
+        var persistedEpisode = IDbContext.PlexTvShowEpisodes.AsNoTracking().Single(x => x.Id == episodeId);
+        persistedEpisode.TvShowSeasonId.ShouldBe(newSeason.Id);
+        persistedEpisode.ParentKey.ShouldBe(newSeason.PlexApiRatingKey);
+        persistedEpisode.UpdatedAt.ShouldBe(episodeUpdatedAt);
+        IDbContext.PlexTvShowSeason.AsNoTracking().Any(x => x.Id == oldSeason.Id).ShouldBeFalse();
+        IDbContext.PlexTvShowEpisodes.Count(x => x.PlexLibraryId == library.Id).ShouldBe(2);
+        IDbContext.PlexTvShowEpisodeData.Count(x => x.PlexTvShowEpisodeId == episodeId).ShouldBe(mediaDataCount);
+    }
+
+    [Test]
+    public async Task ShouldMoveSeasonAndEpisodesBeforeDeletingItsOldShow()
+    {
+        // Arrange
+        await SetupDatabase(
+            11879,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexTvShowLibraryCount = 1;
+                config.TvShowCount = 2;
+                config.TvShowSeasonCount = 1;
+                config.TvShowEpisodeCount = 1;
+            }
+        );
+        var library = IDbContext.PlexLibraries.First();
+        var shows = IDbContext.PlexTvShows
+            .AsNoTracking()
+            .Include(x => x.Seasons)
+            .ThenInclude(x => x.Episodes)
+            .ThenInclude(x => x.MediaDataList)
+            .OrderBy(x => x.Id)
+            .ToList();
+        var oldShow = shows.First();
+        var newShow = shows.Last();
+        var season = oldShow.Seasons.Single();
+        var episode = season.Episodes.Single();
+        var seasonId = season.Id;
+        var episodeId = episode.Id;
+        var seasonUpdatedAt = season.UpdatedAt;
+        var episodeUpdatedAt = episode.UpdatedAt;
+
+        oldShow.Seasons.Remove(season);
+        season.ParentKey = newShow.PlexApiRatingKey;
+        season.ParentGuid = newShow.Guid;
+        newShow.Seasons.Add(season);
+        SetIds(library, [newShow]);
+        library.TvShows.Add(newShow);
+
+        // Act
+        var result = await Sut.ExecuteAsync(
+            new SyncPlexTvShowsCommand(new InsertMediaMetaDataCommandResponse(library)),
+            CancellationToken
+        );
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue(result.Errors.FirstOrDefault()?.Message);
+        result.Value.CreatedTvShows.ShouldBe(0);
+        result.Value.UpdatedTvShows.ShouldBe(0);
+        result.Value.DeletedTvShows.ShouldBe(1);
+        result.Value.UnchangedTvShows.ShouldBe(1);
+        result.Value.CreatedSeasons.ShouldBe(0);
+        result.Value.UpdatedSeasons.ShouldBe(1);
+        result.Value.DeletedSeasons.ShouldBe(0);
+        result.Value.UnchangedSeasons.ShouldBe(1);
+        result.Value.CreatedEpisodes.ShouldBe(0);
+        result.Value.UpdatedEpisodes.ShouldBe(1);
+        result.Value.DeletedEpisodes.ShouldBe(0);
+        result.Value.UnchangedEpisodes.ShouldBe(1);
+
+        IDbContext.PlexTvShows.AsNoTracking().Any(x => x.Id == oldShow.Id).ShouldBeFalse();
+        var persistedSeason = IDbContext.PlexTvShowSeason.AsNoTracking().Single(x => x.Id == seasonId);
+        persistedSeason.TvShowId.ShouldBe(newShow.Id);
+        persistedSeason.ParentKey.ShouldBe(newShow.PlexApiRatingKey);
+        persistedSeason.UpdatedAt.ShouldBe(seasonUpdatedAt);
+        var persistedEpisode = IDbContext.PlexTvShowEpisodes.AsNoTracking().Single(x => x.Id == episodeId);
+        persistedEpisode.TvShowId.ShouldBe(newShow.Id);
+        persistedEpisode.TvShowSeasonId.ShouldBe(seasonId);
+        persistedEpisode.UpdatedAt.ShouldBe(episodeUpdatedAt);
+        IDbContext.PlexTvShows.Count(x => x.PlexLibraryId == library.Id).ShouldBe(1);
+        IDbContext.PlexTvShowSeason.Count(x => x.PlexLibraryId == library.Id).ShouldBe(2);
+        IDbContext.PlexTvShowEpisodes.Count(x => x.PlexLibraryId == library.Id).ShouldBe(2);
+    }
+
+    [Test]
     public async Task ShouldCreateAllTvShows_WhenNoneExists()
     {
         // Arrange

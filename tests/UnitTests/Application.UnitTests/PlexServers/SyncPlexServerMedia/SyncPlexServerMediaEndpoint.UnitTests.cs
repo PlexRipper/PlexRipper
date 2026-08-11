@@ -65,7 +65,7 @@ public class SyncPlexServerMediaEndpointUnitTests : BaseEndpointUnitTest<SyncPle
         Mock.Mock<ICommandExecutor>()
             .Verify(
                 x => x.Send(
-                    It.Is<QueueLibrarySyncJobCommand>(cmd => cmd.PlexLibraryIds.Count == 2 && cmd.Force),
+                    It.Is<QueueLibrarySyncJobCommand>(cmd => cmd.PlexLibraryIds.Count == 2),
                     It.IsAny<CancellationToken>()
                 ),
                 Times.Once()

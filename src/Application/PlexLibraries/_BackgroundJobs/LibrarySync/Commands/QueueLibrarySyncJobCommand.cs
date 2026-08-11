@@ -3,7 +3,11 @@ namespace Reaparr.Application;
 /// <summary>
 /// Queues one or more library sync job for the specified Plex library IDs.
 /// </summary>
-public record QueueLibrarySyncJobCommand(List<int> PlexLibraryIds, bool Force = false) : ICommand<Result>;
+public record QueueLibrarySyncJobCommand(
+    List<int> PlexLibraryIds,
+    bool ForceLibrarySync = false,
+    bool ForceMediaRefresh = false
+) : ICommand<Result>;
 
 
 public class QueueLibrarySyncJobCommandValidator : AbstractValidator<QueueLibrarySyncJobCommand>

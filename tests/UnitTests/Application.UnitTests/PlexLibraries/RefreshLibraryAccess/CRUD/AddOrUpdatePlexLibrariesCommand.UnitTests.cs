@@ -18,6 +18,12 @@ public class AddOrUpdatePlexLibrariesCommandUnitTests : BaseUnitTest<AddOrUpdate
                 It.IsAny<CancellationToken>()
             ))
             .ReturnsAsync(Result.Ok());
+        Mock.Mock<ICommandExecutor>()
+            .Setup(x => x.Send(
+                It.IsAny<QueueLibrarySyncJobCommand>(),
+                It.IsAny<CancellationToken>()
+            ))
+            .ReturnsAsync(Result.Ok());
     }
 
     [Test]

@@ -1,7 +1,7 @@
 namespace Reaparr.Application;
 
 /// <summary>
-/// Requests comparison queue entries for every compatible remote-to-owned library pair affected by one library.
+/// Schedules comparisons for every compatible remote-to-owned library pair affected by one library.
 /// </summary>
 /// <param name="PlexLibraryId">
 /// The library whose sync, ownership, or access change should refresh comparison cache rows.
@@ -22,7 +22,7 @@ public class QueueLibraryComparisonJobsForLibraryCommandValidator
 }
 
 /// <summary>
-/// Discovers compatible remote-to-owned library pairs for one changed library and queues each affected comparison.
+/// Discovers compatible remote-to-owned library pairs for one changed library and schedules each affected comparison.
 /// </summary>
 public class QueueLibraryComparisonJobsForLibraryCommandHandler
     : ICommandHandler<QueueLibraryComparisonJobsForLibraryCommand, Result>
@@ -70,18 +70,18 @@ public class QueueLibraryComparisonJobsForLibraryCommandHandler
         var pairs = sourceLibrary.IsOwned
             ? targetLibraries
                 .Where(x => !x.IsOwned)
-                .Select(x => (RemoteLibraryId: x.Id, OwnedLibraryId: sourceLibrary.Id))
+                .Select(x => (OwnedLibraryId: sourceLibrary.Id, RemoteLibraryId: x.Id))
             : targetLibraries
                 .Where(x => x.IsOwned)
-                .Select(x => (RemoteLibraryId: sourceLibrary.Id, OwnedLibraryId: x.Id));
+                .Select(x => (OwnedLibraryId: x.Id, RemoteLibraryId: sourceLibrary.Id));
 
-        var queuedCount = 0;
+        var scheduledCount = 0;
         var failedResults = new List<ResultBase>();
         var affectedLibraryIds = new HashSet<int>();
         foreach (var pair in pairs)
         {
             var result = await _commandExecutor.Send(
-                new QueueLibraryMediaCompareJobCommand(pair.RemoteLibraryId, pair.OwnedLibraryId, sourceLibrary.Type),
+                new ScheduleLibraryComparisonJobCommand(pair.OwnedLibraryId, pair.RemoteLibraryId),
                 cancellationToken
             );
 
@@ -93,21 +93,21 @@ public class QueueLibraryComparisonJobsForLibraryCommandHandler
 
             affectedLibraryIds.Add(pair.RemoteLibraryId);
             affectedLibraryIds.Add(pair.OwnedLibraryId);
-            queuedCount++;
+            scheduledCount++;
         }
 
         if (affectedLibraryIds.Count > 0)
         {
             _mediaQueryCache.InvalidateLibraries(
                 affectedLibraryIds,
-                $"Library comparisons queued for {sourceLibrary.Type}"
+                $"Library comparisons scheduled for {sourceLibrary.Type}"
             );
         }
 
         _log.Here()
             .Debug(
-                "Queued {QueuedCount} library comparison jobs affected by library {PlexLibraryId}",
-                queuedCount,
+                "Scheduled {ScheduledCount} library comparison jobs affected by library {PlexLibraryId}",
+                scheduledCount,
                 sourceLibrary.Id
             );
 

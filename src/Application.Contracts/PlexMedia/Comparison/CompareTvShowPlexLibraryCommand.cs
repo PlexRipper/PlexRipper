@@ -5,6 +5,6 @@ namespace Reaparr.Application.Contracts;
 /// Produces show, season, and episode comparison hit rows plus a scope row.
 /// </summary>
 public record CompareTvShowPlexLibraryCommand(
-    int RemotePlexLibraryId,
-    int OwnedPlexLibraryId
+    int OwnedPlexLibraryId,
+    int RemotePlexLibraryId
 ) : ICommand<Result>;

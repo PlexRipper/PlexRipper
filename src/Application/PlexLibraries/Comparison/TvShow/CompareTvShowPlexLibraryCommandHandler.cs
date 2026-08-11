@@ -5,8 +5,8 @@ public class CompareTvShowPlexLibraryCommandValidator : AbstractValidator<Compar
     public CompareTvShowPlexLibraryCommandValidator()
     {
         RuleFor(x => x).NotNull();
-        RuleFor(x => x.RemotePlexLibraryId).GreaterThan(0).NotEqual(x => x.OwnedPlexLibraryId);
         RuleFor(x => x.OwnedPlexLibraryId).GreaterThan(0);
+        RuleFor(x => x.RemotePlexLibraryId).GreaterThan(0).NotEqual(x => x.OwnedPlexLibraryId);
     }
 }
 
@@ -31,7 +31,7 @@ public class CompareTvShowPlexLibraryCommandHandler : ICommandHandler<CompareTvS
     {
         return await Result.Try(new Func<Task<Result>>(async () =>
         {
-            var (remoteLibraryId, ownedLibraryId) = command;
+            var (ownedLibraryId, remoteLibraryId) = command;
 
             _log.Here()
                 .Information(
@@ -40,18 +40,18 @@ public class CompareTvShowPlexLibraryCommandHandler : ICommandHandler<CompareTvS
                     ownedLibraryId
                 );
 
-            var validationResult = await ValidateLibrariesAsync(remoteLibraryId, ownedLibraryId, cancellationToken);
+            var validationResult = await ValidateLibrariesAsync(ownedLibraryId, remoteLibraryId, cancellationToken);
 
             if (validationResult.IsFailed)
                 return validationResult;
 
-            return await CompareTvShowsAsync(remoteLibraryId, ownedLibraryId, cancellationToken);
+            return await CompareTvShowsAsync(ownedLibraryId, remoteLibraryId, cancellationToken);
         }));
     }
 
     private async Task<Result> ValidateLibrariesAsync(
-        int remoteLibraryId,
         int ownedLibraryId,
+        int remoteLibraryId,
         CancellationToken cancellationToken
     )
     {
@@ -79,8 +79,8 @@ public class CompareTvShowPlexLibraryCommandHandler : ICommandHandler<CompareTvS
     }
 
     private async Task<Result> CompareTvShowsAsync(
-        int remoteLibraryId,
         int ownedLibraryId,
+        int remoteLibraryId,
         CancellationToken cancellationToken
     )
     {

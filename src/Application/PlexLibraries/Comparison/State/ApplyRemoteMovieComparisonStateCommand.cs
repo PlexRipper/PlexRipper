@@ -80,7 +80,7 @@ public class ApplyRemoteMovieComparisonStateCommandHandler
 
         if (currentOwnedLibraryIds.Count == 0)
         {
-            if (await HasPendingComparisonAsync(command.RemoteLibraryId, ownedLibraries.Keys.ToHashSet(), ct))
+            if (await HasPendingComparisonAsync(ownedLibraries.Keys.ToHashSet(), command.RemoteLibraryId, ct))
             {
                 foreach (var item in items)
                     item.SetComparisonState(PlexMediaComparisonState.Pending);
@@ -114,20 +114,18 @@ public class ApplyRemoteMovieComparisonStateCommandHandler
             var higherQualityCount = itemHits.Count(x => x.HitState == PlexMediaComparisonHitState.HigherQuality);
 
             item.SetComparisonState(higherQualityCount > 0
-                    ? PlexMediaComparisonState.HigherQuality
-                    : PlexMediaComparisonState.Owned);
+                ? PlexMediaComparisonState.HigherQuality
+                : PlexMediaComparisonState.Owned);
         }
 
         return Result.Ok();
     }
 
     private async Task<bool> HasPendingComparisonAsync(
-        int remoteLibraryId,
         HashSet<int> ownedLibraryIds,
-        CancellationToken ct) => await _dbContext.LibraryComparisonJobQueues
-        .AnyAsync(x =>
-            x.RemotePlexLibraryId == remoteLibraryId
-            && x.MediaType == PlexMediaType.Movie
-            && ownedLibraryIds.Contains(x.OwnedPlexLibraryId)
-            && (x.Status == LibrarySyncJobStatus.Queued || x.Status == LibrarySyncJobStatus.Processing), ct);
+        int remoteLibraryId,
+        CancellationToken ct) => await _dbContext.HasActiveLibraryComparisonAsync(
+        ownedLibraryIds.Select(x => PlexLibraryComparisonJob.GetJobKey(x, remoteLibraryId)),
+        ct
+    );
 }

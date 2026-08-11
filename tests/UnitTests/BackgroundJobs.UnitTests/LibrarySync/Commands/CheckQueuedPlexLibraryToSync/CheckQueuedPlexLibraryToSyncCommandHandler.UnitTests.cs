@@ -1,4 +1,5 @@
 using Reaparr.Application;
+using Reaparr.Application.Contracts;
 using Reaparr.Data.Contracts;
 using TickerQ.Utilities.Models;
 

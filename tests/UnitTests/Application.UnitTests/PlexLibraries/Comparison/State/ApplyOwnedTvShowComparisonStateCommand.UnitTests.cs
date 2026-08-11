@@ -149,14 +149,12 @@ public class ApplyOwnedTvShowComparisonStateCommandUnitTests
         await SetOwnedOverrideAsync(ownedLibrary.PlexServerId, true);
 
         var ownedTvShow = await GetLibraryTvShowAsync(ownedLibrary.Id);
-        dbContext.LibraryComparisonJobQueues.Add(new LibraryComparisonJobQueue
+        dbContext.TimeTickers.Add(new JobTimeTicker
         {
-            RemotePlexLibraryId = remoteLibrary.Id,
-            OwnedPlexLibraryId = ownedLibrary.Id,
-            MediaType = PlexMediaType.TvShow,
-            Priority = 2,
-            Status = LibrarySyncJobStatus.Processing,
-            CreatedAt = DateTime.UtcNow,
+            Function = nameof(PlexLibraryComparisonJob),
+            Request = [],
+            JobKey = PlexLibraryComparisonJob.GetJobKey(ownedLibrary.Id, remoteLibrary.Id).Name,
+            JobType = JobTypes.LibraryComparisonJob,
         });
         await dbContext.SaveChangesAsync(CancellationToken);
 

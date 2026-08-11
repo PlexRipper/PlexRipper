@@ -1,4 +1,6 @@
-namespace Reaparr.Application;
+using System.Diagnostics.CodeAnalysis;
+
+namespace Reaparr.Application.Contracts;
 
 public record JobKeyV2
 {

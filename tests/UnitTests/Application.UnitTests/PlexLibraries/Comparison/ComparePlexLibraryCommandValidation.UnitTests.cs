@@ -17,7 +17,7 @@ public class CompareMoviePlexLibraryCommandValidationUnitTests : BaseCommandUnit
         await SetOwnedOverrideAsync(ownedLibrary.PlexServerId, true);
 
         // Act
-        var result = await TestHandlerExecuteAsync(new CompareMoviePlexLibraryCommand(999_999, ownedLibrary.Id));
+        var result = await TestHandlerExecuteAsync(new CompareMoviePlexLibraryCommand(ownedLibrary.Id, 999_999));
 
         // Assert
         result.IsFailed.ShouldBeTrue();
@@ -42,7 +42,7 @@ public class CompareMoviePlexLibraryCommandValidationUnitTests : BaseCommandUnit
         await SetOwnedOverrideAsync(remoteLibrary.PlexServerId, false);
 
         // Act
-        var result = await TestHandlerExecuteAsync(new CompareMoviePlexLibraryCommand(remoteLibrary.Id, 999_999));
+        var result = await TestHandlerExecuteAsync(new CompareMoviePlexLibraryCommand(999_999, remoteLibrary.Id));
 
         // Assert
         result.IsFailed.ShouldBeTrue();
@@ -70,7 +70,7 @@ public class CompareMoviePlexLibraryCommandValidationUnitTests : BaseCommandUnit
         await SetOwnedOverrideAsync(ownedLibrary.PlexServerId, true);
 
         // Act
-        var result = await TestHandlerExecuteAsync(new CompareMoviePlexLibraryCommand(remoteLibrary.Id, ownedLibrary.Id));
+        var result = await TestHandlerExecuteAsync(new CompareMoviePlexLibraryCommand(ownedLibrary.Id, remoteLibrary.Id));
 
         // Assert
         result.IsFailed.ShouldBeTrue();
@@ -98,7 +98,7 @@ public class CompareMoviePlexLibraryCommandValidationUnitTests : BaseCommandUnit
         await SetOwnedOverrideAsync(ownedLibrary.PlexServerId, false);
 
         // Act
-        var result = await TestHandlerExecuteAsync(new CompareMoviePlexLibraryCommand(remoteLibrary.Id, ownedLibrary.Id));
+        var result = await TestHandlerExecuteAsync(new CompareMoviePlexLibraryCommand(ownedLibrary.Id, remoteLibrary.Id));
 
         // Assert
         result.IsFailed.ShouldBeTrue();
@@ -167,7 +167,7 @@ public class CompareTvShowPlexLibraryCommandValidationUnitTests : BaseCommandUni
         await SetOwnedOverrideAsync(ownedLibrary.PlexServerId, true);
 
         // Act
-        var result = await TestHandlerExecuteAsync(new CompareTvShowPlexLibraryCommand(999_999, ownedLibrary.Id));
+        var result = await TestHandlerExecuteAsync(new CompareTvShowPlexLibraryCommand(ownedLibrary.Id, 999_999));
 
         // Assert
         result.IsFailed.ShouldBeTrue();
@@ -192,7 +192,7 @@ public class CompareTvShowPlexLibraryCommandValidationUnitTests : BaseCommandUni
         await SetOwnedOverrideAsync(remoteLibrary.PlexServerId, false);
 
         // Act
-        var result = await TestHandlerExecuteAsync(new CompareTvShowPlexLibraryCommand(remoteLibrary.Id, 999_999));
+        var result = await TestHandlerExecuteAsync(new CompareTvShowPlexLibraryCommand(999_999, remoteLibrary.Id));
 
         // Assert
         result.IsFailed.ShouldBeTrue();
@@ -220,7 +220,7 @@ public class CompareTvShowPlexLibraryCommandValidationUnitTests : BaseCommandUni
         await SetOwnedOverrideAsync(ownedLibrary.PlexServerId, true);
 
         // Act
-        var result = await TestHandlerExecuteAsync(new CompareTvShowPlexLibraryCommand(remoteLibrary.Id, ownedLibrary.Id));
+        var result = await TestHandlerExecuteAsync(new CompareTvShowPlexLibraryCommand(ownedLibrary.Id, remoteLibrary.Id));
 
         // Assert
         result.IsFailed.ShouldBeTrue();
@@ -248,7 +248,7 @@ public class CompareTvShowPlexLibraryCommandValidationUnitTests : BaseCommandUni
         await SetOwnedOverrideAsync(ownedLibrary.PlexServerId, false);
 
         // Act
-        var result = await TestHandlerExecuteAsync(new CompareTvShowPlexLibraryCommand(remoteLibrary.Id, ownedLibrary.Id));
+        var result = await TestHandlerExecuteAsync(new CompareTvShowPlexLibraryCommand(ownedLibrary.Id, remoteLibrary.Id));
 
         // Assert
         result.IsFailed.ShouldBeTrue();

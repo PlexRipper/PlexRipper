@@ -24,7 +24,7 @@ public class CompareMoviePlexLibraryCommandOwnershipUnitTests : BaseCommandUnitT
         await SetOwnedOverrideAsync(ownedLibrary.PlexServerId, true);
 
         // Act
-        var result = await TestHandlerExecuteAsync(new CompareMoviePlexLibraryCommand(remoteLibrary.Id, ownedLibrary.Id));
+        var result = await TestHandlerExecuteAsync(new CompareMoviePlexLibraryCommand(ownedLibrary.Id, remoteLibrary.Id));
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -67,7 +67,7 @@ public class CompareMoviePlexLibraryCommandOwnershipUnitTests : BaseCommandUnitT
         await UpdateMovieMatchFieldsAsync(ownedMovies[1].Id, "tmdb owned two", 2021, 100, VideoQuality.FullHD, tmdbGuid: 4242);
 
         // Act
-        var result = await TestHandlerExecuteAsync(new CompareMoviePlexLibraryCommand(remoteLibrary.Id, ownedLibrary.Id));
+        var result = await TestHandlerExecuteAsync(new CompareMoviePlexLibraryCommand(ownedLibrary.Id, remoteLibrary.Id));
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -109,7 +109,7 @@ public class CompareMoviePlexLibraryCommandOwnershipUnitTests : BaseCommandUnitT
         await UpdateMovieMatchFieldsAsync(ownedMovies[1].Id, "same title", 2001, 120, VideoQuality.HD, tmdbGuid: 222, imdbGuid: "tt-priority");
 
         // Act
-        var result = await TestHandlerExecuteAsync(new CompareMoviePlexLibraryCommand(remoteLibrary.Id, ownedLibrary.Id));
+        var result = await TestHandlerExecuteAsync(new CompareMoviePlexLibraryCommand(ownedLibrary.Id, remoteLibrary.Id));
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -149,7 +149,7 @@ public class CompareMoviePlexLibraryCommandOwnershipUnitTests : BaseCommandUnitT
         await UpdateMovieMatchFieldsAsync(ownedMovies[1].Id, "duration title", 1995, 456, VideoQuality.FullHD);
 
         // Act
-        var result = await TestHandlerExecuteAsync(new CompareMoviePlexLibraryCommand(remoteLibrary.Id, ownedLibrary.Id));
+        var result = await TestHandlerExecuteAsync(new CompareMoviePlexLibraryCommand(ownedLibrary.Id, remoteLibrary.Id));
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -188,7 +188,7 @@ public class CompareMoviePlexLibraryCommandOwnershipUnitTests : BaseCommandUnitT
         await UpdateMovieMatchFieldsAsync(ownedMovie.Id, "fallback title", 2003, 321, VideoQuality.FullHD);
 
         // Act
-        var result = await TestHandlerExecuteAsync(new CompareMoviePlexLibraryCommand(remoteLibrary.Id, ownedLibrary.Id));
+        var result = await TestHandlerExecuteAsync(new CompareMoviePlexLibraryCommand(ownedLibrary.Id, remoteLibrary.Id));
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -230,7 +230,7 @@ public class CompareMoviePlexLibraryCommandOwnershipUnitTests : BaseCommandUnitT
         await UpdateMovieMatchFieldsAsync(ownedMovies[1].Id, "same movie duration", 2026, 120, VideoQuality.FullHD);
 
         // Act
-        var result = await TestHandlerExecuteAsync(new CompareMoviePlexLibraryCommand(remoteLibrary.Id, ownedLibrary.Id));
+        var result = await TestHandlerExecuteAsync(new CompareMoviePlexLibraryCommand(ownedLibrary.Id, remoteLibrary.Id));
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -279,7 +279,7 @@ public class CompareMoviePlexLibraryCommandOwnershipUnitTests : BaseCommandUnitT
         await UpdateMovieMatchFieldsAsync(ownedMovie.Id, "owned only", 2002, 121, VideoQuality.FullHD);
 
         // Act
-        var result = await TestHandlerExecuteAsync(new CompareMoviePlexLibraryCommand(remoteLibrary.Id, ownedLibrary.Id));
+        var result = await TestHandlerExecuteAsync(new CompareMoviePlexLibraryCommand(ownedLibrary.Id, remoteLibrary.Id));
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -332,7 +332,7 @@ public class CompareMoviePlexLibraryCommandOwnershipUnitTests : BaseCommandUnitT
         await dbContext.SaveChangesAsync(CancellationToken);
 
         // Act
-        var result = await TestHandlerExecuteAsync(new CompareMoviePlexLibraryCommand(remoteLibrary.Id, ownedLibrary.Id));
+        var result = await TestHandlerExecuteAsync(new CompareMoviePlexLibraryCommand(ownedLibrary.Id, remoteLibrary.Id));
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -435,7 +435,7 @@ public class CompareTvShowPlexLibraryCommandOwnershipUnitTests : BaseCommandUnit
         await SetOwnedOverrideAsync(ownedLibrary.PlexServerId, true);
 
         // Act
-        var result = await TestHandlerExecuteAsync(new CompareTvShowPlexLibraryCommand(remoteLibrary.Id, ownedLibrary.Id));
+        var result = await TestHandlerExecuteAsync(new CompareTvShowPlexLibraryCommand(ownedLibrary.Id, remoteLibrary.Id));
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -480,7 +480,7 @@ public class CompareTvShowPlexLibraryCommandOwnershipUnitTests : BaseCommandUnit
         await UpdateTvShowMatchFieldsAsync(ownedShows[1].Id, "tmdb owned show two", 2021, 100, VideoQuality.FullHD, tmdbGuid: 5151);
 
         // Act
-        var result = await TestHandlerExecuteAsync(new CompareTvShowPlexLibraryCommand(remoteLibrary.Id, ownedLibrary.Id));
+        var result = await TestHandlerExecuteAsync(new CompareTvShowPlexLibraryCommand(ownedLibrary.Id, remoteLibrary.Id));
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -525,7 +525,7 @@ public class CompareTvShowPlexLibraryCommandOwnershipUnitTests : BaseCommandUnit
         await UpdateTvShowMatchFieldsAsync(ownedShows[1].Id, "same show", 2001, 120, VideoQuality.HD, tmdbGuid: 222, imdbGuid: "tt-tv-priority");
 
         // Act
-        var result = await TestHandlerExecuteAsync(new CompareTvShowPlexLibraryCommand(remoteLibrary.Id, ownedLibrary.Id));
+        var result = await TestHandlerExecuteAsync(new CompareTvShowPlexLibraryCommand(ownedLibrary.Id, remoteLibrary.Id));
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -566,7 +566,7 @@ public class CompareTvShowPlexLibraryCommandOwnershipUnitTests : BaseCommandUnit
         await UpdateTvShowMatchFieldsAsync(ownedShow.Id, "numbered show", 2011, 500, VideoQuality.HD, tmdbGuid: 2222);
 
         // Act
-        var result = await TestHandlerExecuteAsync(new CompareTvShowPlexLibraryCommand(remoteLibrary.Id, ownedLibrary.Id));
+        var result = await TestHandlerExecuteAsync(new CompareTvShowPlexLibraryCommand(ownedLibrary.Id, remoteLibrary.Id));
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -618,7 +618,7 @@ public class CompareTvShowPlexLibraryCommandOwnershipUnitTests : BaseCommandUnit
         await UpdateTvShowMatchFieldsAsync(ownedShows[1].Id, "same title duration", 2026, 120, VideoQuality.FullHD);
 
         // Act
-        var result = await TestHandlerExecuteAsync(new CompareTvShowPlexLibraryCommand(remoteLibrary.Id, ownedLibrary.Id));
+        var result = await TestHandlerExecuteAsync(new CompareTvShowPlexLibraryCommand(ownedLibrary.Id, remoteLibrary.Id));
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -663,7 +663,7 @@ public class CompareTvShowPlexLibraryCommandOwnershipUnitTests : BaseCommandUnit
         await UpdateSeasonNumberAsync(ownedSeason.Id, 99);
 
         // Act
-        var result = await TestHandlerExecuteAsync(new CompareTvShowPlexLibraryCommand(remoteLibrary.Id, ownedLibrary.Id));
+        var result = await TestHandlerExecuteAsync(new CompareTvShowPlexLibraryCommand(ownedLibrary.Id, remoteLibrary.Id));
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -720,7 +720,7 @@ public class CompareTvShowPlexLibraryCommandOwnershipUnitTests : BaseCommandUnit
         await UpdateTvShowMatchFieldsAsync(ownedShow.Id, "owned only", 2002, 121, VideoQuality.FullHD);
 
         // Act
-        var result = await TestHandlerExecuteAsync(new CompareTvShowPlexLibraryCommand(remoteLibrary.Id, ownedLibrary.Id));
+        var result = await TestHandlerExecuteAsync(new CompareTvShowPlexLibraryCommand(ownedLibrary.Id, remoteLibrary.Id));
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -783,7 +783,7 @@ public class CompareTvShowPlexLibraryCommandOwnershipUnitTests : BaseCommandUnit
         await dbContext.SaveChangesAsync(CancellationToken);
 
         // Act
-        var result = await TestHandlerExecuteAsync(new CompareTvShowPlexLibraryCommand(remoteLibrary.Id, ownedLibrary.Id));
+        var result = await TestHandlerExecuteAsync(new CompareTvShowPlexLibraryCommand(ownedLibrary.Id, remoteLibrary.Id));
 
         // Assert
         result.IsSuccess.ShouldBeTrue();

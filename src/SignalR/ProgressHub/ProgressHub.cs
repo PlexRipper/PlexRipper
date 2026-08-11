@@ -101,14 +101,4 @@ public class ProgressHub : Hub<IProgressHub>, IProgressHub
             );
         await Clients.All.AppUpdateDownloadProgress(appUpdateDownloadProgress, cancellationToken);
     }
-    
-    /// <inheritdoc/>
-    public async Task LibraryComparisonCompleted(
-        LibraryComparisonCompletedDTO notification,
-        CancellationToken cancellationToken = default
-    )
-    {
-        _log.Here().Debug("Sending {JobName} notification: {@Notification}", nameof(MessageTypes.LibraryComparisonCompleted), notification);
-        await Clients.All.LibraryComparisonCompleted(notification, cancellationToken);
     }
-}

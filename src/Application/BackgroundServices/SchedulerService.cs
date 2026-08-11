@@ -63,13 +63,6 @@ public class SchedulerService : ISchedulerService
             if (setupLibrarySyncResult.IsFailed)
                 return setupLibrarySyncResult;
 
-            var setupLibraryComparisonResult = await SetupLibraryComparisonJob(cancellationToken);
-            if (setupLibraryComparisonResult.IsCancelled)
-                return setupLibraryComparisonResult;
-
-            if (setupLibraryComparisonResult.IsFailed)
-                return setupLibraryComparisonResult;
-
             var queueLibraryUpdatesResult = await _commandExecutor.Send(
                 new QueueCheckPlexLibraryUpdatesJobCommand(),
                 cancellationToken
@@ -187,24 +180,6 @@ public class SchedulerService : ISchedulerService
 
         var checkQueuedResult =
             await _commandExecutor.Send(new CheckQueuedPlexLibraryToSyncCommand(), cancellationToken);
-        if (checkQueuedResult.IsCancelled)
-            return checkQueuedResult;
-
-        return checkQueuedResult.IsFailed ? checkQueuedResult.LogError() : Result.Ok();
-    }
-
-    private async Task<Result> SetupLibraryComparisonJob(CancellationToken cancellationToken)
-    {
-        var cleanupResult =
-            await _commandExecutor.Send(new CleanupLibraryComparisonJobQueueCommand(), cancellationToken);
-        if (cleanupResult.IsCancelled)
-            return cleanupResult;
-
-        if (cleanupResult.IsFailed)
-            return cleanupResult.LogError();
-
-        var checkQueuedResult =
-            await _commandExecutor.Send(new CheckQueuedLibraryComparisonJobCommand(), cancellationToken);
         if (checkQueuedResult.IsCancelled)
             return checkQueuedResult;
 

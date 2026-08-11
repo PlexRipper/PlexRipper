@@ -18,11 +18,6 @@ public interface IProgressHubService
     Task SendAppUpdateDownloadProgressAsync(AppUpdateDownloadProgressDTO progress);
 
     /// <summary>
-    /// Sends a notification that comparison work has settled for one or more libraries.
-    /// </summary>
-    Task SendLibraryComparisonCompletedAsync(LibraryComparisonCompletedDTO notification);
-
-    /// <summary>
     /// Sends a background job status update to the front-end.
     /// </summary>
     Task SendJobStatusUpdateAsync<T>(JobStatusUpdate<T> jobStatusUpdate)

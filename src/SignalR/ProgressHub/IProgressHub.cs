@@ -38,16 +38,4 @@ public interface IProgressHub
         AppUpdateDownloadProgressDTO appUpdateDownloadProgress,
         CancellationToken cancellationToken = default
     );
-    
-    
-    /// <summary>
-    ///  Sends a library comparison completed notification to the front-end.
-    /// </summary>
-    /// <param name="notification">The completed comparison notification payload.</param>
-    /// <param name="cancellationToken"> The <see cref="CancellationToken"/> to use.</param>
-    /// <returns></returns>
-    Task LibraryComparisonCompleted(
-        LibraryComparisonCompletedDTO notification,
-        CancellationToken cancellationToken = default
-    );
 }

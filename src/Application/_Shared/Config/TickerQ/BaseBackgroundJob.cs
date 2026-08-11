@@ -40,20 +40,21 @@ public abstract class BaseBackgroundJob<TPayload, TUpdate> : ITickerFunction<TPa
 
         await PublishStatusUpdate(context, JobStatus.Started, jobStartTime);
 
-        var result = await Result.Try(async Task() => await ExecuteJobAsync(context, cancellationToken));
-        if (result.IsSuccess)
+        try
         {
+            await ExecuteJobAsync(context, cancellationToken);
             await PublishStatusUpdate(context, JobStatus.Completed, jobStartTime);
-            return;
         }
-        
-        if (result.IsCancelled) 
+        catch (OperationCanceledException)
         {
             await PublishStatusUpdate(context, JobStatus.Cancelled, jobStartTime);
-            return;
+            throw; // Needs to throw for ThinkerQ to mark as Cancelled
         }
-    
-        await PublishStatusUpdate(context, JobStatus.Failed, jobStartTime);
+        catch
+        {
+            await PublishStatusUpdate(context, JobStatus.Failed, jobStartTime);
+            throw; // Needs to throw for ThinkQ to mark as failed
+        }
     }
 
     protected abstract Task ExecuteJobAsync(
@@ -61,10 +62,10 @@ public abstract class BaseBackgroundJob<TPayload, TUpdate> : ITickerFunction<TPa
         CancellationToken cancellationToken
     );
 
-    protected abstract Task<TUpdate?> GetStatusUpdateDataAsync(
+    protected virtual async Task<TUpdate?> GetStatusUpdateDataAsync(
         TickerFunctionContext<TPayload> context,
         CancellationToken cancellationToken
-    );
+    ) => null;
 
     private async Task PublishStatusUpdate(
         TickerFunctionContext<TPayload> context,

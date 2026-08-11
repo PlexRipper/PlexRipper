@@ -32,7 +32,7 @@ public class QueueLibraryComparisonJobsForLibraryCommandHandlerUnitTests
             .ExecuteUpdateAsync(x => x.SetProperty(y => y.OwnedOverride, true), CancellationToken);
 
         Mock.Mock<ICommandExecutor>()
-            .Setup(x => x.Send(It.IsAny<QueueLibraryMediaCompareJobCommand>(), It.IsAny<CancellationToken>()))
+            .Setup(x => x.Send(It.IsAny<ScheduleLibraryComparisonJobCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Ok());
         Mock.Mock<IMediaQueryCache>()
             .Setup(x => x.InvalidateLibraries(It.IsAny<IReadOnlyCollection<int>>(), It.IsAny<string>()));
@@ -45,14 +45,14 @@ public class QueueLibraryComparisonJobsForLibraryCommandHandlerUnitTests
         // Assert
         result.IsSuccess.ShouldBeTrue();
         Mock.Mock<ICommandExecutor>().Verify(
-            x => x.Send(It.IsAny<QueueLibraryMediaCompareJobCommand>(), It.IsAny<CancellationToken>()),
+            x => x.Send(It.IsAny<ScheduleLibraryComparisonJobCommand>(), It.IsAny<CancellationToken>()),
             Times.Exactly(ownedLibraries.Count)
         );
         Mock.Mock<IMediaQueryCache>().Verify(
             x => x.InvalidateLibraries(
                 It.Is<IReadOnlyCollection<int>>(ids =>
                     ids.Count == libraries.Count && libraries.All(library => ids.Contains(library.Id))),
-                $"Library comparisons queued for {PlexMediaType.Movie}"
+                $"Library comparisons scheduled for {PlexMediaType.Movie}"
             ),
             Times.Once()
         );
@@ -86,13 +86,13 @@ public class QueueLibraryComparisonJobsForLibraryCommandHandlerUnitTests
 
         Mock.Mock<ICommandExecutor>()
             .Setup(x => x.Send(
-                It.Is<QueueLibraryMediaCompareJobCommand>(command =>
+                It.Is<ScheduleLibraryComparisonJobCommand>(command =>
                     command.OwnedPlexLibraryId == successfulOwnedLibrary.Id),
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Ok());
         Mock.Mock<ICommandExecutor>()
             .Setup(x => x.Send(
-                It.Is<QueueLibraryMediaCompareJobCommand>(command =>
+                It.Is<ScheduleLibraryComparisonJobCommand>(command =>
                     command.OwnedPlexLibraryId == failedOwnedLibrary.Id),
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Fail("queue failed"));
@@ -113,7 +113,7 @@ public class QueueLibraryComparisonJobsForLibraryCommandHandlerUnitTests
                     && ids.Contains(remoteLibrary.Id)
                     && ids.Contains(successfulOwnedLibrary.Id)
                     && !ids.Contains(failedOwnedLibrary.Id)),
-                $"Library comparisons queued for {PlexMediaType.Movie}"
+                $"Library comparisons scheduled for {PlexMediaType.Movie}"
             ),
             Times.Once()
         );
@@ -145,7 +145,7 @@ public class QueueLibraryComparisonJobsForLibraryCommandHandlerUnitTests
             .ExecuteUpdateAsync(x => x.SetProperty(y => y.OwnedOverride, true), CancellationToken);
 
         Mock.Mock<ICommandExecutor>()
-            .Setup(x => x.Send(It.IsAny<QueueLibraryMediaCompareJobCommand>(), It.IsAny<CancellationToken>()))
+            .Setup(x => x.Send(It.IsAny<ScheduleLibraryComparisonJobCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Ok());
         Mock.Mock<IMediaQueryCache>()
             .Setup(x => x.InvalidateLibraries(It.IsAny<IReadOnlyCollection<int>>(), It.IsAny<string>()));
@@ -161,10 +161,9 @@ public class QueueLibraryComparisonJobsForLibraryCommandHandlerUnitTests
         {
             Mock.Mock<ICommandExecutor>().Verify(
                 x => x.Send(
-                    It.Is<QueueLibraryMediaCompareJobCommand>(queuedCommand =>
-                        queuedCommand.RemotePlexLibraryId == remoteLibrary.Id
-                        && queuedCommand.OwnedPlexLibraryId == ownedLibrary.Id
-                        && queuedCommand.MediaType == PlexMediaType.Movie),
+                    It.Is<ScheduleLibraryComparisonJobCommand>(scheduledCommand =>
+                        scheduledCommand.OwnedPlexLibraryId == ownedLibrary.Id
+                        && scheduledCommand.RemotePlexLibraryId == remoteLibrary.Id),
                     It.IsAny<CancellationToken>()),
                 Times.Once()
             );
@@ -173,7 +172,7 @@ public class QueueLibraryComparisonJobsForLibraryCommandHandlerUnitTests
             x => x.InvalidateLibraries(
                 It.Is<IReadOnlyCollection<int>>(ids =>
                     ids.Count == libraries.Count && libraries.All(library => ids.Contains(library.Id))),
-                $"Library comparisons queued for {PlexMediaType.Movie}"
+                $"Library comparisons scheduled for {PlexMediaType.Movie}"
             ),
             Times.Once()
         );
@@ -205,7 +204,7 @@ public class QueueLibraryComparisonJobsForLibraryCommandHandlerUnitTests
         // Assert
         result.IsSuccess.ShouldBeTrue();
         Mock.Mock<ICommandExecutor>().Verify(
-            x => x.Send(It.IsAny<QueueLibraryMediaCompareJobCommand>(), It.IsAny<CancellationToken>()),
+            x => x.Send(It.IsAny<ScheduleLibraryComparisonJobCommand>(), It.IsAny<CancellationToken>()),
             Times.Never()
         );
         Mock.Mock<IMediaQueryCache>().Verify(
@@ -239,7 +238,7 @@ public class QueueLibraryComparisonJobsForLibraryCommandHandlerUnitTests
             .ExecuteUpdateAsync(x => x.SetProperty(y => y.OwnedOverride, true), CancellationToken);
 
         Mock.Mock<ICommandExecutor>()
-            .Setup(x => x.Send(It.IsAny<QueueLibraryMediaCompareJobCommand>(), It.IsAny<CancellationToken>()))
+            .Setup(x => x.Send(It.IsAny<ScheduleLibraryComparisonJobCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Fail("queue failed"));
 
         var command = new QueueLibraryComparisonJobsForLibraryCommand(remoteLibrary.Id);

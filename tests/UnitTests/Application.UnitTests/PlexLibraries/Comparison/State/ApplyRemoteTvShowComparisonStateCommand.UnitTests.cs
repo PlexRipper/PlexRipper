@@ -250,14 +250,12 @@ public class ApplyRemoteTvShowComparisonStateCommandUnitTests
         await SetOwnedOverrideAsync(ownedLibrary.PlexServerId, true);
 
         var remoteTvShow = await GetLibraryTvShowAsync(remoteLibrary.Id);
-        dbContext.LibraryComparisonJobQueues.Add(new LibraryComparisonJobQueue
+        dbContext.TimeTickers.Add(new JobTimeTicker
         {
-            RemotePlexLibraryId = remoteLibrary.Id,
-            OwnedPlexLibraryId = ownedLibrary.Id,
-            MediaType = PlexMediaType.TvShow,
-            Priority = 2,
-            Status = LibrarySyncJobStatus.Queued,
-            CreatedAt = DateTime.UtcNow,
+            Function = nameof(PlexLibraryComparisonJob),
+            Request = [],
+            JobKey = PlexLibraryComparisonJob.GetJobKey(ownedLibrary.Id, remoteLibrary.Id).Name,
+            JobType = JobTypes.LibraryComparisonJob,
         });
         await dbContext.SaveChangesAsync(CancellationToken);
 

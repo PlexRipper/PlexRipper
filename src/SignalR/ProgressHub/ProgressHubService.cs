@@ -69,17 +69,4 @@ public class ProgressHubService : IProgressHubService
             _log.Here().Warning("Failed to send app download progress");
         }
     }
-    
-    /// <inheritdoc/>
-    public async Task SendLibraryComparisonCompletedAsync(LibraryComparisonCompletedDTO notification)
-    {
-        var result = await Result.Try(async Task () =>
-            await _hub.Clients.All.LibraryComparisonCompleted(notification, CancellationToken.None));
-
-        if (result.IsFailed)
-        {
-            result.LogWarning();
-            _log.Here().Warning("Failed to send library comparison completed notification");
-        }
     }
-}

@@ -1,223 +1,153 @@
+using TickerQ.Utilities.Base;
+
 namespace Reaparr.Application;
 
+public record PlexLibraryComparisonJobPayload
+{
+    public required int OwnedPlexLibraryId { get; init; }
+
+    public required int RemotePlexLibraryId { get; init; }
+}
+
 /// <summary>
-/// Singleton Quartz worker that drains persisted library comparison queue rows.
+/// Compares one remote Plex library with one owned Plex library.
 /// </summary>
-/// <remarks>
-/// Each execution drains queued remote-to-owned library pairs one at a time until no persisted work remains.
-/// </remarks>
-[DisallowConcurrentExecution]
-public class PlexLibraryComparisonJob : IJob
+public class PlexLibraryComparisonJob
+    : BaseBackgroundJob<PlexLibraryComparisonJobPayload, LibraryComparisonCompletedDTO>
 {
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
     private readonly ICommandExecutor _commandExecutor;
-    private readonly IProgressHubService _progressHubService;
 
     public PlexLibraryComparisonJob(
         ILogger log,
         IReaparrDbContext dbContext,
         ICommandExecutor commandExecutor,
+        INotificationHubService notificationHubService,
         IProgressHubService progressHubService
     )
+        : base(log, progressHubService, notificationHubService)
     {
         _log = log.ForContext<PlexLibraryComparisonJob>();
         _dbContext = dbContext;
         _commandExecutor = commandExecutor;
-        _progressHubService = progressHubService;
     }
 
-    public static JobKey GetJobKey() => new(nameof(JobTypes.LibraryComparisonJob), nameof(JobTypes.LibraryComparisonJob));
+    protected override JobTypes JobType => JobTypes.LibraryComparisonJob;
 
-    public async Task Execute(IJobExecutionContext context)
+    protected override List<RefreshDataType> RefreshDataTypes => [RefreshDataType.PlexLibrary];
+
+    public static JobKeyV2 GetJobKey(int ownedPlexLibraryId, int remotePlexLibraryId) => new(
+        $"{nameof(JobTypes.LibraryComparisonJob)}_{ownedPlexLibraryId}_{remotePlexLibraryId}",
+        JobTypes.LibraryComparisonJob
+    );
+
+    protected override async Task ExecuteJobAsync(
+        TickerFunctionContext<PlexLibraryComparisonJobPayload> context,
+        CancellationToken cancellationToken
+    )
     {
-        var cancellationToken = context.CancellationToken;
-        var processedCount = 0;
+        var payload = context.Request;
+        var libraries = await _dbContext.PlexLibraries
+            .Where(x => x.Id == payload.RemotePlexLibraryId || x.Id == payload.OwnedPlexLibraryId)
+            .SelectOwnership()
+            .ToListAsync(cancellationToken);
 
-        while (true)
-        {
-            if (cancellationToken.IsCancellationRequested)
-            {
-                _log.Here().Warning("Library comparison queue worker was cancelled");
-                return;
-            }
+        var remoteLibrary = libraries.SingleOrDefault(x => x.Id == payload.RemotePlexLibraryId)
+                            ?? throw new InvalidOperationException(
+                                $"Remote Plex library {payload.RemotePlexLibraryId} was not found"
+                            );
+        var ownedLibrary = libraries.SingleOrDefault(x => x.Id == payload.OwnedPlexLibraryId)
+                           ?? throw new InvalidOperationException(
+                               $"Owned Plex library {payload.OwnedPlexLibraryId} was not found"
+                           );
 
-            var processedQueueItem = await ProcessNextQueueItemAsync(cancellationToken);
+        if (remoteLibrary.Id == ownedLibrary.Id)
+            throw new InvalidOperationException("A Plex library cannot be compared with itself");
 
-            if (!processedQueueItem)
-                break;
+        if (remoteLibrary.IsOwned)
+            throw new InvalidOperationException(
+                $"Remote Plex library {remoteLibrary.Id} is currently marked as owned"
+            );
 
-            processedCount++;
-        }
+        if (!ownedLibrary.IsOwned)
+            throw new InvalidOperationException(
+                $"Owned Plex library {ownedLibrary.Id} is currently marked as remote"
+            );
 
-        _log.Here().Debug("Library comparison queue worker finished after processing {Count} items", processedCount);
-    }
-
-    private async Task<bool> ProcessNextQueueItemAsync(CancellationToken cancellationToken)
-    {
-        var queueItem = await _dbContext.LibraryComparisonJobQueues
-            .Where(x => x.Status == LibrarySyncJobStatus.Queued)
-            .OrderBy(x => x.Priority)
-            .ThenBy(x => x.CreatedAt)
-            .FirstOrDefaultAsync(cancellationToken);
-
-        if (queueItem is null)
-        {
-            _log.Here().Debug("No queued library comparison jobs found");
-            return false;
-        }
-
-        await _dbContext.LibraryComparisonJobQueues
-            .Where(x =>
-                x.RemotePlexLibraryId == queueItem.RemotePlexLibraryId
-                && x.OwnedPlexLibraryId == queueItem.OwnedPlexLibraryId
-                && x.MediaType == queueItem.MediaType
-            )
-            .ExecuteUpdateAsync(
-                x => x.SetProperty(y => y.Status, LibrarySyncJobStatus.Processing)
-                    .SetProperty(y => y.StartedAt, DateTime.UtcNow)
-                    .SetProperty(y => y.CompletedAt, (DateTime?)null)
-                    .SetProperty(y => y.Attempts, y => y.Attempts + 1)
-                    .SetProperty(y => y.ErrorMessage, (string?)null),
-                cancellationToken
+        if (remoteLibrary.Type != ownedLibrary.Type)
+            throw new InvalidOperationException(
+                $"Cannot compare {remoteLibrary.Type} library {remoteLibrary.Id} with {ownedLibrary.Type} library {ownedLibrary.Id}"
             );
 
         _log.Here()
-            .Debug(
-                "Executing comparison queue item: remote library {RemoteLibId} vs owned library {OwnedLibId} for {MediaType}",
-                queueItem.RemotePlexLibraryId,
-                queueItem.OwnedPlexLibraryId,
-                queueItem.MediaType
+            .Information(
+                "Comparing remote library {RemoteLibraryId} with owned library {OwnedLibraryId} for {MediaType}",
+                remoteLibrary.Id,
+                ownedLibrary.Id,
+                remoteLibrary.Type
             );
 
-        var result = queueItem.MediaType switch
+        Result result;
+        switch (remoteLibrary.Type)
         {
-            PlexMediaType.Movie => await _commandExecutor.Send(
-                new CompareMoviePlexLibraryCommand(queueItem.RemotePlexLibraryId, queueItem.OwnedPlexLibraryId),
-                cancellationToken
-            ),
-            PlexMediaType.TvShow => await _commandExecutor.Send(
-                new CompareTvShowPlexLibraryCommand(queueItem.RemotePlexLibraryId, queueItem.OwnedPlexLibraryId),
-                cancellationToken
-            ),
-            _ => Result.Fail($"Library comparison for media type {queueItem.MediaType} is not yet implemented"),
-        };
+            case PlexMediaType.Movie:
+                result = await _commandExecutor.Send(
+                    new CompareMoviePlexLibraryCommand(ownedLibrary.Id, remoteLibrary.Id),
+                    cancellationToken
+                );
+                break;
+            case PlexMediaType.TvShow:
+                result = await _commandExecutor.Send(
+                    new CompareTvShowPlexLibraryCommand(ownedLibrary.Id, remoteLibrary.Id),
+                    cancellationToken
+                );
+                break;
+            default:
+                result = Result.Fail(
+                    $"Library comparisons are not supported for media type {remoteLibrary.Type}"
+                );
+                break;
+        }
 
         if (result.IsCancelled)
-        {
-            await UpdateQueueItemAsync(
-                queueItem,
-                LibrarySyncJobStatus.Queued,
-                "Library comparison was cancelled and requeued",
-                CancellationToken.None
-            );
-            _log.Here()
-                .Warning(
-                    "Comparison queue item was cancelled and requeued for remote {RemoteLibId} vs owned {OwnedLibId}, {MediaType}",
-                    queueItem.RemotePlexLibraryId,
-                    queueItem.OwnedPlexLibraryId,
-                    queueItem.MediaType
-                );
-            return false;
-        }
+            throw new OperationCanceledException(cancellationToken);
 
         if (result.IsFailed)
         {
             result.LogError();
-            await UpdateQueueItemAsync(queueItem, LibrarySyncJobStatus.Failed, result.ToString(), CancellationToken.None);
-            _log.Here()
-                .Warning(
-                    "Comparison queue item failed for remote {RemoteLibId} vs owned {OwnedLibId}, {MediaType}",
-                    queueItem.RemotePlexLibraryId,
-                    queueItem.OwnedPlexLibraryId,
-                    queueItem.MediaType
-                );
-        }
-        else
-        {
-            await UpdateQueueItemAsync(queueItem, LibrarySyncJobStatus.Completed, null, CancellationToken.None);
-            _log.Here()
-                .Information(
-                    "Comparison queue item completed for remote {RemoteLibId} vs owned {OwnedLibId}, {MediaType}",
-                    queueItem.RemotePlexLibraryId,
-                    queueItem.OwnedPlexLibraryId,
-                    queueItem.MediaType
-                );
+            throw new InvalidOperationException(
+                $"Comparison of remote library {remoteLibrary.Id} with owned library {ownedLibrary.Id} failed: "
+                + string.Join("; ", result.Errors.Select(x => x.Message).ToArray())
+            );
         }
 
-        if (cancellationToken.IsCancellationRequested)
-            return false;
-
-        await SendCompletionNotificationIfSettledAsync(queueItem, cancellationToken);
-        return true;
-    }
-
-    private async Task UpdateQueueItemAsync(
-        LibraryComparisonJobQueue queueItem,
-        LibrarySyncJobStatus status,
-        string? errorMessage,
-        CancellationToken cancellationToken
-    )
-    {
-        await _dbContext.LibraryComparisonJobQueues
-            .Where(x =>
-                x.RemotePlexLibraryId == queueItem.RemotePlexLibraryId
-                && x.OwnedPlexLibraryId == queueItem.OwnedPlexLibraryId
-                && x.MediaType == queueItem.MediaType
-            )
-            .ExecuteUpdateAsync(
-                x => x.SetProperty(y => y.Status, status)
-                    .SetProperty(y => y.CompletedAt, DateTime.UtcNow)
-                    .SetProperty(y => y.ErrorMessage, errorMessage),
-                cancellationToken
+        _log.Here()
+            .Information(
+                "Compared remote library {RemoteLibraryId} with owned library {OwnedLibraryId}",
+                remoteLibrary.Id,
+                ownedLibrary.Id
             );
     }
 
-    private async Task SendCompletionNotificationIfSettledAsync(
-        LibraryComparisonJobQueue queueItem,
+    protected override async Task<LibraryComparisonCompletedDTO?> GetStatusUpdateDataAsync(
+        TickerFunctionContext<PlexLibraryComparisonJobPayload> context,
         CancellationToken cancellationToken
     )
     {
-        var affectedLibraryIds = new List<int>();
+        var payload = context.Request;
+        var mediaType = await _dbContext.PlexLibraries
+            .Where(x => x.Id == payload.RemotePlexLibraryId)
+            .Select(x => (PlexMediaType?)x.Type)
+            .SingleOrDefaultAsync(cancellationToken);
 
-        if (await IsRemoteLibrarySettledAsync(queueItem, cancellationToken))
-            affectedLibraryIds.Add(queueItem.RemotePlexLibraryId);
-
-        if (await IsOwnedLibrarySettledAsync(queueItem, cancellationToken))
-            affectedLibraryIds.Add(queueItem.OwnedPlexLibraryId);
-
-        if (affectedLibraryIds.Count == 0)
-            return;
-
-        await _progressHubService.SendLibraryComparisonCompletedAsync(
-            new LibraryComparisonCompletedDTO
+        return mediaType is null
+            ? null
+            : new LibraryComparisonCompletedDTO
             {
-                AffectedLibraryIds = affectedLibraryIds.Distinct().ToList(),
-                MediaType = queueItem.MediaType,
+                AffectedLibraryIds = [payload.OwnedPlexLibraryId, payload.RemotePlexLibraryId],
+                MediaType = mediaType.Value,
                 CompletedAt = DateTime.UtcNow,
-            }
-        );
+            };
     }
-
-    private async Task<bool> IsRemoteLibrarySettledAsync(
-        LibraryComparisonJobQueue queueItem,
-        CancellationToken cancellationToken
-    ) =>
-        !await _dbContext.LibraryComparisonJobQueues.AnyAsync(
-            x => x.RemotePlexLibraryId == queueItem.RemotePlexLibraryId
-                 && x.MediaType == queueItem.MediaType
-                 && (x.Status == LibrarySyncJobStatus.Queued || x.Status == LibrarySyncJobStatus.Processing),
-            cancellationToken
-        );
-
-    private async Task<bool> IsOwnedLibrarySettledAsync(
-        LibraryComparisonJobQueue queueItem,
-        CancellationToken cancellationToken
-    ) =>
-        !await _dbContext.LibraryComparisonJobQueues.AnyAsync(
-            x => x.OwnedPlexLibraryId == queueItem.OwnedPlexLibraryId
-                 && x.MediaType == queueItem.MediaType
-                 && (x.Status == LibrarySyncJobStatus.Queued || x.Status == LibrarySyncJobStatus.Processing),
-            cancellationToken
-        );
 }

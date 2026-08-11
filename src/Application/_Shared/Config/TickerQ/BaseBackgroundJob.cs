@@ -44,6 +44,32 @@ public abstract class BaseBackgroundJob<TPayload, TUpdate> : ITickerFunction<TPa
         {
             await ExecuteJobAsync(context, cancellationToken);
             await PublishStatusUpdate(context, JobStatus.Completed, jobStartTime);
+
+            // Follow-up work runs after clients receive completion and must not
+            // change an already completed primary job to failed.
+            try
+            {
+                await ExecuteAfterCompletionAsync(context, cancellationToken);
+            }
+            catch (OperationCanceledException)
+            {
+                _log.Here()
+                    .Warning(
+                        "Post-completion work was cancelled for {JobType} ticker {TickerId}",
+                        JobType,
+                        context.Id
+                    );
+            }
+            catch (Exception e)
+            {
+                _log.Here()
+                    .Warning(
+                        e,
+                        "Post-completion work failed for {JobType} ticker {TickerId}",
+                        JobType,
+                        context.Id
+                    );
+            }
         }
         catch (OperationCanceledException)
         {
@@ -61,6 +87,11 @@ public abstract class BaseBackgroundJob<TPayload, TUpdate> : ITickerFunction<TPa
         TickerFunctionContext<TPayload> context,
         CancellationToken cancellationToken
     );
+
+    protected virtual Task ExecuteAfterCompletionAsync(
+        TickerFunctionContext<TPayload> context,
+        CancellationToken cancellationToken
+    ) => Task.CompletedTask;
 
     protected virtual async Task<TUpdate?> GetStatusUpdateDataAsync(
         TickerFunctionContext<TPayload> context,

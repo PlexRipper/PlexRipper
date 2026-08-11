@@ -12,7 +12,8 @@ public record PlexLibraryComparisonJobPayload
 /// <summary>
 /// Compares one remote Plex library with one owned Plex library.
 /// </summary>
-public class PlexLibraryComparisonJob : BaseBackgroundJob<PlexLibraryComparisonJobPayload, LibraryComparisonCompletedDTO>
+public class
+    PlexLibraryComparisonJob : BaseBackgroundJob<PlexLibraryComparisonJobPayload, LibraryComparisonCompletedDTO>
 {
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
@@ -34,7 +35,7 @@ public class PlexLibraryComparisonJob : BaseBackgroundJob<PlexLibraryComparisonJ
 
     protected override JobTypes JobType => JobTypes.LibraryComparisonJob;
 
-    protected override List<RefreshDataType> RefreshDataTypes => [RefreshDataType.PlexLibrary];
+    protected override List<RefreshDataType> RefreshDataTypes => [];
 
     public static JobKeyV2 GetJobKey(int ownedPlexLibraryId, int remotePlexLibraryId) => new(
         $"{nameof(JobTypes.LibraryComparisonJob)}_{ownedPlexLibraryId}_{remotePlexLibraryId}",

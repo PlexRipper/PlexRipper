@@ -144,7 +144,6 @@ public class LibrarySyncJob : BaseBackgroundJob<LibrarySyncJobPayload, LibrarySy
                         serverId
                     );
 
-                // Mark the primary sync queue item as completed before kicking off secondary comparison work.
                 await UpdateQueueItemAsync(context, LibrarySyncJobStatus.Completed);
 
                 var comparisonQueueResult = await _commandExecutor.Send(
@@ -153,7 +152,11 @@ public class LibrarySyncJob : BaseBackgroundJob<LibrarySyncJobPayload, LibrarySy
                 );
 
                 if (comparisonQueueResult.IsFailed)
-                    _log.Here().Warning("Failed to queue comparison jobs for library {LibraryId}", libraryId);
+                    _log.Here()
+                        .Warning(
+                            "Failed to queue comparison jobs for library {LibraryId}",
+                            libraryId
+                        );
             }
         }
 

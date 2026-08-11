@@ -17,6 +17,7 @@
         <PackageReference Include="Polly.Core" Version="8.6.6" />
         <PackageReference Include="Quartz.Serialization.SystemTextJson" Version="3.18.2" />
         <PackageReference Include="Semver" Version="3.0.0" />
+        <PackageReference Include="TickerQ" Version="10.4.0" />
         <PackageReference Include="Velopack" Version="0.0.1298" />
     </ItemGroup>
     <ItemGroup>

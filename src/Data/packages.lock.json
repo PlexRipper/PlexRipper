@@ -121,6 +121,17 @@
           "SQLitePCLRaw.core": "3.0.3"
         }
       },
+      "TickerQ.EntityFrameworkCore": {
+        "type": "Direct",
+        "requested": "[10.4.0, )",
+        "resolved": "10.4.0",
+        "contentHash": "uYyiI/DSNRwt/R9/+diLDA2bVXtIn4V0/RYBPbYcmdTJbuF6PDc5pdcj/DKnhR7L670HeJu2m55PSAR6qj9K6g==",
+        "dependencies": {
+          "FlexLabs.EntityFrameworkCore.Upsert": "[10.0.0, 11.0.0)",
+          "Microsoft.EntityFrameworkCore.Relational": "[10.0.0, 11.0.0)",
+          "TickerQ.Utilities": "10.4.0"
+        }
+      },
       "AppAny.Quartz.EntityFrameworkCore.Migrations": {
         "type": "Transitive",
         "resolved": "0.6.0",
@@ -206,6 +217,14 @@
         "type": "Transitive",
         "resolved": "8.1.0",
         "contentHash": "i3VqYn4b9UjpvXFkcCRXZq5lMzQ13dlLab7BWh/19aVY8pvQT9v643ViCdga47zir7y2twnYOIjRIy9Fln2dWw=="
+      },
+      "FlexLabs.EntityFrameworkCore.Upsert": {
+        "type": "Transitive",
+        "resolved": "10.0.0",
+        "contentHash": "qFVp1j1yZFApE4uXplTodeSybz/pfjGM/zBfwgtnkZqw7ZV1YFmF0AEebQmmNsndANQmv+aNi7aXdOhOVFfs7Q==",
+        "dependencies": {
+          "Microsoft.EntityFrameworkCore.Relational": "[10.0.0, 11.0.0)"
+        }
       },
       "FlexQuery.NET": {
         "type": "Transitive",
@@ -624,6 +643,11 @@
         "resolved": "4.4.1",
         "contentHash": "uDl8qdX7SGEGAvczy0qZw00ekEmCFz1KAyDf9H6AykZhplfWT9xfZDryGGp0HkGkeUZ6HL4iLUjZp/NgciktGw=="
       },
+      "ncrontab": {
+        "type": "Transitive",
+        "resolved": "3.3.0",
+        "contentHash": "oNHphZD7YiqHJoqX5Myw+lfDDTnnI2i+mCuil8MW2gyHaEejhLOdsS9pqVUGAEIJsu4+OL+m3UmkBcw2gkdtsg=="
+      },
       "NetTopologySuite": {
         "type": "Transitive",
         "resolved": "2.6.0",
@@ -837,6 +861,19 @@
         "type": "Transitive",
         "resolved": "10.1.0",
         "contentHash": "0R+m7DvS2QuDcFOfDGtyGErRrgXOl4/z2tbNLX2RfvlYJjlVcKG+wMIBfZO8vxGtTNwNxffTG4ibFRwd0jkM7w=="
+      },
+      "TickerQ.Utilities": {
+        "type": "Transitive",
+        "resolved": "10.4.0",
+        "contentHash": "JBzaR2xNUEAaA+sRBifuNCGakKMmChwCbZULSQm+rBkAw/j/Z/E1POtYEloK8QulzKRlxx0TaQLa9LJSbQi3tw==",
+        "dependencies": {
+          "Microsoft.Extensions.Caching.Abstractions": "[10.0.0, 11.0.0)",
+          "Microsoft.Extensions.Configuration.Abstractions": "[10.0.0, 11.0.0)",
+          "Microsoft.Extensions.DependencyInjection.Abstractions": "[10.0.0, 11.0.0)",
+          "Microsoft.Extensions.Hosting.Abstractions": "[10.0.0, 11.0.0)",
+          "Microsoft.Extensions.Logging.Abstractions": "[10.0.0, 11.0.0)",
+          "NCrontab": "3.3.0"
+        }
       },
       "Xdg.Directories": {
         "type": "Transitive",

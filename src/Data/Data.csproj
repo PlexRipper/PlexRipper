@@ -25,6 +25,7 @@
         <PackageReference Include="SQLitePCLRaw.core" Version="3.0.3" />
         <PackageReference Include="SQLitePCLRaw.lib.e_sqlite3" Version="3.53.3" />
         <PackageReference Include="SQLitePCLRaw.provider.e_sqlite3" Version="3.0.3" />
+        <PackageReference Include="TickerQ.EntityFrameworkCore" Version="10.4.0" />
     </ItemGroup>
     <ItemGroup>
         <ProjectReference Include="..\Data.Contracts\Data.Contracts.csproj" />

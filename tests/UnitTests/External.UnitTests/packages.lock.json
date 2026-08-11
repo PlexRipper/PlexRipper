@@ -247,6 +247,14 @@
           "xunit.v3.extensibility.core": "3.2.2"
         }
       },
+      "FlexLabs.EntityFrameworkCore.Upsert": {
+        "type": "Transitive",
+        "resolved": "10.0.0",
+        "contentHash": "qFVp1j1yZFApE4uXplTodeSybz/pfjGM/zBfwgtnkZqw7ZV1YFmF0AEebQmmNsndANQmv+aNi7aXdOhOVFfs7Q==",
+        "dependencies": {
+          "Microsoft.EntityFrameworkCore.Relational": "[10.0.0, 11.0.0)"
+        }
+      },
       "FlexQuery.NET": {
         "type": "Transitive",
         "resolved": "2.5.0",
@@ -1037,6 +1045,11 @@
         "resolved": "4.4.1",
         "contentHash": "uDl8qdX7SGEGAvczy0qZw00ekEmCFz1KAyDf9H6AykZhplfWT9xfZDryGGp0HkGkeUZ6HL4iLUjZp/NgciktGw=="
       },
+      "ncrontab": {
+        "type": "Transitive",
+        "resolved": "3.3.0",
+        "contentHash": "oNHphZD7YiqHJoqX5Myw+lfDDTnnI2i+mCuil8MW2gyHaEejhLOdsS9pqVUGAEIJsu4+OL+m3UmkBcw2gkdtsg=="
+      },
       "NetTopologySuite": {
         "type": "Transitive",
         "resolved": "2.6.0",
@@ -1495,6 +1508,37 @@
         "resolved": "10.1.0",
         "contentHash": "0R+m7DvS2QuDcFOfDGtyGErRrgXOl4/z2tbNLX2RfvlYJjlVcKG+wMIBfZO8vxGtTNwNxffTG4ibFRwd0jkM7w=="
       },
+      "TickerQ": {
+        "type": "Transitive",
+        "resolved": "10.4.0",
+        "contentHash": "Pg5LpcLeS/qg60SWzkY8RSZqk2iP/WYhQ0fBtRbz6R+0QV6cg1EddwIgFse/uB1989b95rq4LxVkpKzoGgrlhw==",
+        "dependencies": {
+          "TickerQ.Utilities": "10.4.0"
+        }
+      },
+      "TickerQ.EntityFrameworkCore": {
+        "type": "Transitive",
+        "resolved": "10.4.0",
+        "contentHash": "uYyiI/DSNRwt/R9/+diLDA2bVXtIn4V0/RYBPbYcmdTJbuF6PDc5pdcj/DKnhR7L670HeJu2m55PSAR6qj9K6g==",
+        "dependencies": {
+          "FlexLabs.EntityFrameworkCore.Upsert": "[10.0.0, 11.0.0)",
+          "Microsoft.EntityFrameworkCore.Relational": "[10.0.0, 11.0.0)",
+          "TickerQ.Utilities": "10.4.0"
+        }
+      },
+      "TickerQ.Utilities": {
+        "type": "Transitive",
+        "resolved": "10.4.0",
+        "contentHash": "JBzaR2xNUEAaA+sRBifuNCGakKMmChwCbZULSQm+rBkAw/j/Z/E1POtYEloK8QulzKRlxx0TaQLa9LJSbQi3tw==",
+        "dependencies": {
+          "Microsoft.Extensions.Caching.Abstractions": "[10.0.0, 11.0.0)",
+          "Microsoft.Extensions.Configuration.Abstractions": "[10.0.0, 11.0.0)",
+          "Microsoft.Extensions.DependencyInjection.Abstractions": "[10.0.0, 11.0.0)",
+          "Microsoft.Extensions.Hosting.Abstractions": "[10.0.0, 11.0.0)",
+          "Microsoft.Extensions.Logging.Abstractions": "[10.0.0, 11.0.0)",
+          "NCrontab": "3.3.0"
+        }
+      },
       "TUnit.Assertions": {
         "type": "Transitive",
         "resolved": "1.45.29",
@@ -1612,6 +1656,7 @@
           "Reaparr.Settings.Contracts": "[1.0.0, )",
           "Reaparr.SignalR.Contracts": "[1.0.0, )",
           "Semver": "[3.0.0, )",
+          "TickerQ": "[10.4.0, )",
           "Velopack": "[0.0.1298, )"
         }
       },
@@ -1674,7 +1719,8 @@
           "Reaparr.Settings.Contracts": "[1.0.0, )",
           "SQLitePCLRaw.core": "[3.0.3, )",
           "SQLitePCLRaw.lib.e_sqlite3": "[3.53.3, )",
-          "SQLitePCLRaw.provider.e_sqlite3": "[3.0.3, )"
+          "SQLitePCLRaw.provider.e_sqlite3": "[3.0.3, )",
+          "TickerQ.EntityFrameworkCore": "[10.4.0, )"
         }
       },
       "Reaparr.Data.Contracts": {

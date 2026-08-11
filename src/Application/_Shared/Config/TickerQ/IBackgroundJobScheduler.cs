@@ -1,4 +1,5 @@
 using TickerQ.Utilities;
+using TickerQ.Utilities.Enums;
 using TickerQ.Utilities.Interfaces;
 using TickerQ.Utilities.Interfaces.Managers;
 using TickerQ.Utilities.Models;
@@ -76,14 +77,23 @@ public class BackgroundJobScheduler : IBackgroundJobScheduler
     {
         using var dbContext = await _contextFactory.CreateAsync();
 
-        var timeTickerExists = await dbContext.TimeTickers.AnyAsync(
-            x => x.JobKey == jobKey.Name && x.JobType == jobKey.Type,
+        // Time tickers are retained after execution as job history. Only an active
+        // ticker should prevent another run with the same key from being scheduled.
+        // Completed, failed, and cancelled tickers must not block a re-run.
+        var activeTimeTickerExists = await dbContext.TimeTickers.AnyAsync(
+            x => x.JobKey == jobKey.Name
+                 && x.JobType == jobKey.Type
+                 && (x.Status == TickerStatus.Idle
+                     || x.Status == TickerStatus.Queued
+                     || x.Status == TickerStatus.InProgress),
             CancellationToken.None
         );
 
-        if (timeTickerExists)
+        if (activeTimeTickerExists)
             return true;
 
+        // A cron ticker is a persistent schedule rather than an execution record,
+        // so its definition existing is sufficient here.
         return await dbContext.CronTickers.AnyAsync(
             x => x.JobKey == jobKey.Name && x.JobType == jobKey.Type,
             CancellationToken.None

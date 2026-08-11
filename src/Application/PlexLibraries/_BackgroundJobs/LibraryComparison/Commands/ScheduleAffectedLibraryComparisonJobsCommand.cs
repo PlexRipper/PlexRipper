@@ -75,6 +75,11 @@ public class ScheduleAffectedLibraryComparisonJobsCommandHandler
                 .Where(x => x.IsOwned)
                 .Select(x => (OwnedLibraryId: x.Id, RemoteLibraryId: sourceLibrary.Id));
 
+        var sourceLibraryDetails = await _dbContext.PlexLibraries
+            .Where(x => x.Id == sourceLibrary.Id)
+            .Select(x => new { x.PlexServerId, LibraryName = x.Title })
+            .SingleAsync(cancellationToken);
+        var serverName = await _dbContext.GetPlexServerNameById(sourceLibraryDetails.PlexServerId);
         var scheduledCount = 0;
         var failedResults = new List<ResultBase>();
         var affectedLibraryIds = new HashSet<int>();
@@ -85,8 +90,23 @@ public class ScheduleAffectedLibraryComparisonJobsCommandHandler
                 cancellationToken
             );
 
+            if (result.IsCancelled)
+            {
+                _log.Here()
+                    .Warning(
+                        "Scheduling affected library comparisons was cancelled for server {ServerName} ({ServerId}), library {LibraryName} ({LibraryId})",
+                        serverName,
+                        sourceLibraryDetails.PlexServerId,
+                        sourceLibraryDetails.LibraryName,
+                        sourceLibrary.Id
+                    );
+                failedResults.Add(result);
+                continue;
+            }
+
             if (result.IsFailed)
             {
+                result.LogWarning();
                 failedResults.Add(result);
                 continue;
             }
@@ -111,6 +131,6 @@ public class ScheduleAffectedLibraryComparisonJobsCommandHandler
                 sourceLibrary.Id
             );
 
-        return failedResults.Count > 0 ? Result.Merge(failedResults.ToArray()).LogError() : Result.Ok();
+        return failedResults.Count > 0 ? Result.Merge(failedResults.ToArray()) : Result.Ok();
     }
 }

@@ -20,9 +20,7 @@ public class LibrarySyncJob : BaseBackgroundJob<LibrarySyncJobPayload, LibrarySy
     private readonly ICommandExecutor _commandExecutor;
     private readonly INotificationHubService _notificationHubService;
     private readonly IReaparrDbContext _dbContext;
-    private int _serverId;
-    private int _libraryId;
-    
+
     protected override JobTypes JobType => JobTypes.LibrarySyncJob;
 
     protected override List<RefreshDataType> RefreshDataTypes =>
@@ -34,7 +32,7 @@ public class LibrarySyncJob : BaseBackgroundJob<LibrarySyncJobPayload, LibrarySy
         ICommandExecutor commandExecutor,
         INotificationHubService notificationHubService,
         IProgressHubService progressHubService
-    ): base(log, progressHubService, notificationHubService)
+    ) : base(log, progressHubService, notificationHubService)
     {
         _log = log.ForContext<LibrarySyncJob>();
         _dbContextFactory = dbContextFactory;
@@ -50,47 +48,47 @@ public class LibrarySyncJob : BaseBackgroundJob<LibrarySyncJobPayload, LibrarySy
         TickerFunctionContext<LibrarySyncJobPayload> context,
         CancellationToken cancellationToken)
     {
-        _serverId = context.Request.PlexServerId;
-        _libraryId = context.Request.PlexLibraryId;
+        var serverId = context.Request.PlexServerId;
+        var libraryId = context.Request.PlexLibraryId;
 
-        var serverName = await _dbContext.GetPlexServerNameById(_serverId);
-        var libraryName = await _dbContext.GetPlexLibraryNameById(_libraryId);
-        
+        var serverName = await _dbContext.GetPlexServerNameById(serverId);
+        var libraryName = await _dbContext.GetPlexLibraryNameById(libraryId);
+
         _log.Here()
             .Debug(
                 "Executing job: {LibrarySyncJobName} for server {ServerName} with id {ServerId} and library {LibraryName} with id {LibraryId}",
                 nameof(LibrarySyncJob),
                 serverName,
-                _serverId,
+                serverId,
                 libraryName,
-                _libraryId
+                libraryId
             );
 
         // Check if the server is online before starting sync
-        var isServerOnline = await _dbContext.IsServerOnline(_serverId);
+        var isServerOnline = await _dbContext.IsServerOnline(serverId);
         if (!isServerOnline)
         {
             _log.Here()
                 .Warning(
                     "Server {ServerName} with id {ServerId} is offline, marking queue item and skipping sync",
                     serverName,
-                    _serverId
+                    serverId
                 );
-            await UpdateQueueItemAsync(
+            await UpdateQueueItemAsync(context,
                 LibrarySyncJobStatus.Queued,
                 isServerOffline: true
             );
         }
         else
         {
-            await UpdateQueueItemAsync(LibrarySyncJobStatus.Processing);
+            await UpdateQueueItemAsync(context, LibrarySyncJobStatus.Processing);
 
             // Jobs should swallow exceptions as otherwise Quartz will keep re-executing it
             // https://www.quartz-scheduler.net/documentation/best-practices.html#throwing-exceptions
 
             // Execute the library sync command
             var result = await Result.Try(() =>
-                _commandExecutor.Send(new RefreshLibraryMediaCommand(_libraryId), cancellationToken)
+                _commandExecutor.Send(new RefreshLibraryMediaCommand(libraryId), cancellationToken)
             );
 
             if (result.IsCancelled)
@@ -99,8 +97,8 @@ public class LibrarySyncJob : BaseBackgroundJob<LibrarySyncJobPayload, LibrarySy
                     .Information(
                         "{LibrarySyncJobName} for server {ServerId}, library {LibraryId} has been cancelled",
                         nameof(LibrarySyncJob),
-                        _serverId,
-                        _libraryId
+                        serverId,
+                        libraryId
                     );
 
                 // The Quartz job token is already cancelled, so use a short-lived token
@@ -108,7 +106,7 @@ public class LibrarySyncJob : BaseBackgroundJob<LibrarySyncJobPayload, LibrarySy
                 using var cleanupTokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(10));
                 var cleanupToken = cleanupTokenSource.Token;
 
-                await UpdateQueueItemAsync(LibrarySyncJobStatus.Cancelled);
+                await UpdateQueueItemAsync(context, LibrarySyncJobStatus.Cancelled);
                 await _notificationHubService.SendRefreshNotificationAsync([RefreshDataType.PlexLibrary]);
                 await _commandExecutor.Send(new CheckQueuedPlexLibraryToSyncCommand(), cleanupToken);
 
@@ -126,12 +124,12 @@ public class LibrarySyncJob : BaseBackgroundJob<LibrarySyncJobPayload, LibrarySy
                 _log.Here()
                     .Warning(
                         "Library sync failed for server {ServerId}, library {LibraryId}. Queue item marked as failed. Server offline: {IsServerOffline}",
-                        _serverId,
-                        _libraryId,
+                        serverId,
+                        libraryId,
                         isServerOffline
                     );
 
-                await UpdateQueueItemAsync(
+                await UpdateQueueItemAsync(context,
                     LibrarySyncJobStatus.Failed,
                     errorMessage: result.Errors.FirstOrDefault()?.Message,
                     isServerOffline: isServerOffline
@@ -142,20 +140,20 @@ public class LibrarySyncJob : BaseBackgroundJob<LibrarySyncJobPayload, LibrarySy
                 _log.Here()
                     .Information(
                         "Successfully synced library {LibraryId} for server {ServerId}",
-                        _libraryId,
-                        _serverId
+                        libraryId,
+                        serverId
                     );
 
                 // Mark the primary sync queue item as completed before kicking off secondary comparison work.
-                await UpdateQueueItemAsync(LibrarySyncJobStatus.Completed);
+                await UpdateQueueItemAsync(context, LibrarySyncJobStatus.Completed);
 
                 var comparisonQueueResult = await _commandExecutor.Send(
-                    new ScheduleAffectedLibraryComparisonJobsCommand(_libraryId),
+                    new ScheduleAffectedLibraryComparisonJobsCommand(libraryId),
                     cancellationToken
                 );
 
                 if (comparisonQueueResult.IsFailed)
-                    _log.Here().Warning("Failed to queue comparison jobs for library {LibraryId}", _libraryId);
+                    _log.Here().Warning("Failed to queue comparison jobs for library {LibraryId}", libraryId);
             }
         }
 
@@ -168,16 +166,18 @@ public class LibrarySyncJob : BaseBackgroundJob<LibrarySyncJobPayload, LibrarySy
         await _commandExecutor.Send(new CheckQueuedPlexLibraryToSyncCommand(), cancellationToken);
     }
 
-
-
     private async Task UpdateQueueItemAsync(
+        TickerFunctionContext<LibrarySyncJobPayload> context,
         LibrarySyncJobStatus status,
         string? errorMessage = null,
         bool isServerOffline = false
     )
     {
+        var serverId = context.Request.PlexServerId;
+        var libraryId = context.Request.PlexLibraryId;
+
         var query = _dbContext.LibrarySyncJobQueues.Where(x =>
-            x.PlexServerId == _serverId && x.PlexLibraryId == _libraryId
+            x.PlexServerId == serverId && x.PlexLibraryId == libraryId
         );
 
         switch (status)
@@ -239,8 +239,8 @@ public class LibrarySyncJob : BaseBackgroundJob<LibrarySyncJobPayload, LibrarySy
                 _log.Here()
                     .Warning(
                         "Attempted to set LibrarySyncJobStatus to Unknown for server {ServerId}, library {LibraryId}",
-                        _serverId,
-                        _libraryId
+                        serverId,
+                        libraryId
                     );
                 break;
             default:
@@ -248,21 +248,28 @@ public class LibrarySyncJob : BaseBackgroundJob<LibrarySyncJobPayload, LibrarySy
                     .Warning(
                         "Attempted to set LibrarySyncJobStatus to invalid value {Status} for server {ServerId}, library {LibraryId}",
                         status,
-                        _serverId,
-                        _libraryId
+                        serverId,
+                        libraryId
                     );
                 break;
         }
     }
-    
 
-    
-    protected override async Task<LibrarySyncJobQueueDTO?> GetStatusUpdateDataAsync(TickerFunctionContext<LibrarySyncJobPayload> context, CancellationToken cancellationToken)
+    protected override async Task<LibrarySyncJobQueueDTO?> GetStatusUpdateDataAsync(
+        TickerFunctionContext<LibrarySyncJobPayload> context,
+        CancellationToken cancellationToken
+    )
     {
+        // The base job publishes Started before ExecuteJobAsync initializes the
+        // instance fields. Always use the payload so the initial SignalR update
+        // looks up the actual queue item instead of server/library 0.
+        var serverId = context.Request.PlexServerId;
+        var libraryId = context.Request.PlexLibraryId;
+
         using var dbContext = await _dbContextFactory.CreateAsync();
         var queue = await dbContext.LibrarySyncJobQueues.FirstOrDefaultAsync(
-            x => x.PlexServerId == _serverId && x.PlexLibraryId == _libraryId,
-            CancellationToken.None
+            x => x.PlexServerId == serverId && x.PlexLibraryId == libraryId,
+            cancellationToken
         );
 
         if (queue == null)
@@ -270,8 +277,8 @@ public class LibrarySyncJob : BaseBackgroundJob<LibrarySyncJobPayload, LibrarySy
             _log.Here()
                 .Warning(
                     "Queue item not found for server {ServerId}, library {LibraryId} when sending status update",
-                    _serverId,
-                    _libraryId
+                    serverId,
+                    libraryId
                 );
             return null;
         }

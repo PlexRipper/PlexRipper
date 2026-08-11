@@ -5,6 +5,8 @@ using AppAny.Quartz.EntityFrameworkCore.Migrations.SQLite;
 using EFCore.BulkExtensions;
 using EntityFrameworkCore.Sqlite.Concurrency;
 using Microsoft.Extensions.DependencyInjection;
+using TickerQ.EntityFrameworkCore.Configurations;
+using TickerQ.Utilities.Entities;
 
 // ReSharper disable UnusedAutoPropertyAccessor.Global
 
@@ -262,7 +264,12 @@ public sealed class ReaparrDbContext : DbContext, IReaparrDbContext, IReaparrDbC
         builder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
 
         builder.AddQuartz(x => x.UseSqlite());
-
+        
+        // Setup TickerQ
+        builder.ApplyConfiguration(new TimeTickerConfigurations<TimeTickerEntity>());
+        builder.ApplyConfiguration(new CronTickerConfigurations<CronTickerEntity>());
+        builder.ApplyConfiguration(new CronTickerOccurrenceConfigurations<CronTickerEntity>());
+        
         base.OnModelCreating(builder);
     }
 

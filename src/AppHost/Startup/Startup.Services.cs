@@ -14,6 +14,8 @@ using Reaparr.Application.Contracts;
 using Reaparr.Identity.Contracts;
 using Serilog.Sinks.AspNetCore.App.SignalR.Extensions;
 using TickerQ.DependencyInjection;
+using TickerQ.EntityFrameworkCore.Customizer;
+using TickerQ.EntityFrameworkCore.DependencyInjection;
 
 namespace Reaparr.AppHost;
 
@@ -212,7 +214,14 @@ public static partial class Startup
         services.RemoveAll<IHttpMessageHandlerBuilderFilter>();
         
         // Register https://tickerq.net/
-        services.AddTickerQ();
+        services.AddTickerQ(opt =>
+        {
+            opt.AddOperationalStore(ef =>
+            {
+                ef.UseApplicationDbContext<ReaparrDbContext>(ConfigurationType.IgnoreModelCustomizer);
+            });
+        });
+        services.RegisterBackgroundJobs();
     }
 
     private static void ConfigureAuthenticationServices(

@@ -55,7 +55,6 @@ public class SchedulerService : ISchedulerService
         if (!_appRuntimeInfo.IsIntegrationTestMode)
         {
             await SetupPlexServerStatusCheckJob(cancellationToken);
-            await SetupUpdateCheckJob(cancellationToken);
             var setupLibrarySyncResult = await SetupLibrarySyncJob(cancellationToken);
             if (setupLibrarySyncResult.IsCancelled)
                 return setupLibrarySyncResult;
@@ -133,25 +132,6 @@ public class SchedulerService : ISchedulerService
             .WithIdentity($"{key.Name}_trigger", key.Group)
             .ForJob(job)
             .WithSimpleSchedule(x => x.WithIntervalInMinutes(10).RepeatForever())
-            .Build();
-
-        await _scheduler.ScheduleJob(job, trigger, cancellationToken);
-    }
-
-    private async Task SetupUpdateCheckJob(CancellationToken cancellationToken)
-    {
-        var key = CheckForUpdateJob.GetJobKey();
-
-        if (await _scheduler.CheckExists(key, cancellationToken))
-            return;
-
-        var job = JobBuilder.Create<CheckForUpdateJob>().WithIdentity(key).Build();
-
-        var trigger = TriggerBuilder
-            .Create()
-            .WithIdentity($"{key.Name}_trigger", key.Group)
-            .ForJob(job)
-            .WithSimpleSchedule(x => x.WithIntervalInHours(1).RepeatForever())
             .Build();
 
         await _scheduler.ScheduleJob(job, trigger, cancellationToken);

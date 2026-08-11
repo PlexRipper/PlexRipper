@@ -15,5 +15,7 @@ public static class TickerQExtensions
         services.MapTicker<CheckPlexLibrariesForUpdatesJob, CheckPlexLibrariesForUpdatesJobPayload>(
             ServiceLifetime.Transient
         ).WithCron("0 0 */3 * * *");
+        services.MapTicker<CheckForUpdateJob, CheckForUpdateJobPayload>(ServiceLifetime.Transient)
+            .WithCron("0 0 * * * *");
     }
 }

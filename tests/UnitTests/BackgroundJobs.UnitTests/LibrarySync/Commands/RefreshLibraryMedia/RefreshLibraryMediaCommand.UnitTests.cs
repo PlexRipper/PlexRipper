@@ -1,3 +1,4 @@
+using Reaparr.Application;
 using Reaparr.PlexApi.Contracts;
 
 namespace Reaparr.BackgroundJobs.UnitTests;

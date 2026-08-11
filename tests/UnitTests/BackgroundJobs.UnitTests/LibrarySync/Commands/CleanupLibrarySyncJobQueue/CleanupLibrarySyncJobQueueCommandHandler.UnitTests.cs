@@ -1,3 +1,4 @@
+using Reaparr.Application;
 using Reaparr.SignalR.Contracts;
 
 namespace Reaparr.BackgroundJobs.UnitTests;

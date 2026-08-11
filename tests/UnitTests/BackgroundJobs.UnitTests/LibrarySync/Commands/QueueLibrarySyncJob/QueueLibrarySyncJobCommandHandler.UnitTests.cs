@@ -1,3 +1,5 @@
+using Reaparr.Application;
+
 namespace Reaparr.BackgroundJobs.UnitTests;
 
 public class QueueLibrarySyncJobCommandHandlerUnitTests : BaseUnitTest<QueueLibrarySyncJobCommandHandler>

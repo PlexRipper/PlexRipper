@@ -1,3 +1,5 @@
+using TickerQ.Utilities.Enums;
+
 namespace Reaparr.Application;
 
 /// <summary>
@@ -74,6 +76,24 @@ public class ScheduleAffectedLibraryComparisonJobsCommandHandler
             : targetLibraries
                 .Where(x => x.IsOwned)
                 .Select(x => (OwnedLibraryId: x.Id, RemoteLibraryId: sourceLibrary.Id));
+
+        // Resolve active comparison keys once before dispatching child commands, so repeated updates do not spam
+        // schedule requests for pairs that are already queued or running.
+        var activeComparisonJobKeys = await _dbContext.TimeTickers
+            .Where(x =>
+                x.JobType == JobTypes.LibraryComparisonJob
+                && (x.Status == TickerStatus.Idle
+                    || x.Status == TickerStatus.Queued
+                    || x.Status == TickerStatus.InProgress)
+            )
+            .Select(x => x.JobKey)
+            .ToHashSetAsync(cancellationToken);
+
+        pairs = pairs.Where(pair =>
+            !activeComparisonJobKeys.Contains(
+                PlexLibraryComparisonJob.GetJobKey(pair.OwnedLibraryId, pair.RemoteLibraryId).Name
+            )
+        );
 
         var sourceLibraryDetails = await _dbContext.PlexLibraries
             .Where(x => x.Id == sourceLibrary.Id)

@@ -206,9 +206,7 @@ public class DownloadTaskUpdateDispatcher : BackgroundService, IDownloadTaskUpda
             }
         });
 
-        if (result.IsCancelled)
-            result.LogWarning();
-        else if (result.IsFailed)
+        if (!result.IsCancelled && result.IsFailed)
             result.LogError();
 
         periodicTimer.Dispose();

@@ -6,7 +6,6 @@ using TickerQ.Utilities.Models;
 
 namespace Reaparr.Application;
 
-
 /// <summary>
 /// Implements Reaparr background-job lifecycle and persistence operations using TickerQ.
 /// </summary>
@@ -283,6 +282,11 @@ public class BackgroundJobScheduler : IBackgroundJobScheduler
         Request = TickerHelper.CreateTickerRequest(request),
         RequestJson = request switch
         {
+            LibrarySyncJobPayload payload => new JobTimeTickerRequestProperties
+            {
+                PlexLibraryId = payload.PlexLibraryId,
+                PlexServerId = payload.PlexServerId,
+            },
             PlexLibraryComparisonJobPayload payload => new JobTimeTickerRequestProperties
             {
                 OwnedPlexLibraryId = payload.OwnedPlexLibraryId,

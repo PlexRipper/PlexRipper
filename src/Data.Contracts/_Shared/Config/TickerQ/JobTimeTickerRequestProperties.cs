@@ -7,6 +7,16 @@ namespace Reaparr.Data.Contracts;
 public sealed record JobTimeTickerRequestProperties
 {
     /// <summary>
+    /// Used when querying <see cref="JobTypes.LibrarySyncJob"/>
+    /// </summary>
+    public int PlexServerId { get; init; }
+
+    /// <summary>
+    /// Used when querying <see cref="JobTypes.LibrarySyncJob"/>
+    /// </summary>
+    public int PlexLibraryId { get; init; }
+    
+    /// <summary>
     /// Used when querying <see cref="JobTypes.LibraryComparisonJob"/>
     /// </summary>
     public int OwnedPlexLibraryId { get; init; }

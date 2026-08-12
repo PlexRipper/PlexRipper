@@ -65,16 +65,14 @@ public class CheckAllConnectionsStatusByPlexServerJob
 
         var failedResults = connectionResults.Where(x => x.IsFailed && !x.IsCancelled).ToList();
         foreach (var failedResult in failedResults)
-            failedResult.LogError();
-
-        if (failedResults.Count > 0)
-            throw new InvalidOperationException("One or more Plex server connection checks failed");
+            failedResult.LogWarning();
 
         _log.Here()
             .Debug(
-                "{JobName} for servers with ids: {PlexServerIds} completed",
+                "{JobName} for servers with ids: {PlexServerIds} completed with {FailedServerCount} unavailable servers",
                 nameof(CheckAllConnectionsStatusByPlexServerJob),
-                plexServerIds
+                plexServerIds,
+                failedResults.Count
             );
     }
 

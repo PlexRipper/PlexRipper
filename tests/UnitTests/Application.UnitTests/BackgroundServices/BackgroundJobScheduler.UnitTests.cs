@@ -39,6 +39,7 @@ public class BackgroundJobSchedulerUnitTests
             Mock.Of<ILogger>(),
             Mock.Of<IReaparrDbContextFactory>(),
             tickerManager.Object,
+            Mock.Of<ICronTickerManager<JobCronTicker>>(),
             Mock.Of<ITickerQHostScheduler>(),
             Mock.Of<IAppRuntimeInfo>(),
             Mock.Of<ICommandExecutor>()

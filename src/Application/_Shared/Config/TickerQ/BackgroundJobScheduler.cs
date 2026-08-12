@@ -14,6 +14,7 @@ public class BackgroundJobScheduler : IBackgroundJobScheduler
     private readonly ILogger _log;
     private readonly IReaparrDbContextFactory _dbContextFactory;
     private readonly ITimeTickerManager<JobTimeTicker> _tickerManager;
+    private readonly ICronTickerManager<JobCronTicker> _cronTickerManager;
     private readonly ITickerQHostScheduler _hostScheduler;
     private readonly IAppRuntimeInfo _appRuntimeInfo;
     private readonly ICommandExecutor _commandExecutor;
@@ -27,6 +28,7 @@ public class BackgroundJobScheduler : IBackgroundJobScheduler
     /// <param name="log">The application logger used for scheduler lifecycle diagnostics.</param>
     /// <param name="dbContextFactory">The factory used to query persisted ticker and occurrence state.</param>
     /// <param name="tickerManager">The TickerQ manager used to create one-time tickers.</param>
+    /// <param name="cronTickerManager">The TickerQ manager used to create recurring tickers.</param>
     /// <param name="hostScheduler">The TickerQ host lifecycle controller.</param>
     /// <param name="appRuntimeInfo">Runtime-mode information used to suppress production recovery work in integration tests.</param>
     /// <param name="commandExecutor">The command dispatcher used to clean up and restore library synchronization jobs.</param>
@@ -34,6 +36,7 @@ public class BackgroundJobScheduler : IBackgroundJobScheduler
         ILogger log,
         IReaparrDbContextFactory dbContextFactory,
         ITimeTickerManager<JobTimeTicker> tickerManager,
+        ICronTickerManager<JobCronTicker> cronTickerManager,
         ITickerQHostScheduler hostScheduler,
         IAppRuntimeInfo appRuntimeInfo,
         ICommandExecutor commandExecutor
@@ -42,6 +45,7 @@ public class BackgroundJobScheduler : IBackgroundJobScheduler
         _log = log.ForContext<BackgroundJobScheduler>();
         _dbContextFactory = dbContextFactory;
         _tickerManager = tickerManager;
+        _cronTickerManager = cronTickerManager;
         _hostScheduler = hostScheduler;
         _appRuntimeInfo = appRuntimeInfo;
         _commandExecutor = commandExecutor;
@@ -61,6 +65,10 @@ public class BackgroundJobScheduler : IBackgroundJobScheduler
             await _hostScheduler.StartAsync(cancellationToken);
         }
 
+        var setupCronTickersResult = await SetupCronTickers(cancellationToken);
+        if (setupCronTickersResult.IsCancelled || setupCronTickersResult.IsFailed)
+            return setupCronTickersResult;
+
         if (!_appRuntimeInfo.IsIntegrationTestMode)
         {
             var setupLibrarySyncResult = await SetupLibrarySyncJobs(cancellationToken);
@@ -72,6 +80,72 @@ public class BackgroundJobScheduler : IBackgroundJobScheduler
             ? Result.Ok()
             : Result.Fail("Could not start BackgroundJobScheduler scheduler").LogError();
     }
+
+    private async Task<Result> SetupCronTickers(CancellationToken cancellationToken)
+    {
+        var cronTickers = new[]
+        {
+            CreateCronTicker<CheckPlexLibrariesForUpdatesJob>(
+                CheckPlexLibrariesForUpdatesJob.GetJobKey(),
+                "0 0 */3 * * *" // Every 3 hours
+            ),
+            CreateCronTicker<CheckForUpdateJob>(
+                CheckForUpdateJob.GetJobKey(),
+                "0 0 * * * *" // Every hour
+            ),
+            CreateCronTicker<CheckAllConnectionsStatusByPlexServerJob>(
+                CheckAllConnectionsStatusByPlexServerJob.GetJobKey(),
+                "0 */10 * * * *" // Every 10 minutes
+            ),
+        };
+
+        using var dbContext = await _dbContextFactory.CreateAsync();
+        var existingTickers = await dbContext.CronTickers
+            .AsNoTracking()
+            .Where(x => cronTickers.Select(y => y.Function).Contains(x.Function))
+            .ToListAsync(cancellationToken);
+
+        foreach (var cronTicker in cronTickers)
+        {
+            var existingTicker = existingTickers.FirstOrDefault(x => x.Function == cronTicker.Function);
+            if (
+                existingTicker is not null
+                && existingTicker.JobKey == cronTicker.JobKey
+                && existingTicker.JobType == cronTicker.JobType
+                && existingTicker.Expression == cronTicker.Expression
+            )
+                continue;
+
+            TickerResult<JobCronTicker> tickerResult;
+            if (existingTicker is null)
+            {
+                tickerResult = await _cronTickerManager.AddAsync(cronTicker, cancellationToken);
+            }
+            else
+            {
+                existingTicker.JobKey = cronTicker.JobKey;
+                existingTicker.JobType = cronTicker.JobType;
+                existingTicker.Expression = cronTicker.Expression;
+                tickerResult = await _cronTickerManager.UpdateAsync(existingTicker, cancellationToken);
+            }
+
+            if (!tickerResult.IsSucceeded)
+                return tickerResult.Exception is null
+                    ? Result.Fail($"Failed to register recurring background job {cronTicker.JobKey}")
+                    : Result.Fail(new ExceptionalError(tickerResult.Exception));
+        }
+
+        return Result.Ok();
+    }
+
+    private static JobCronTicker CreateCronTicker<TFunction>(JobKey jobKey, string expression) => new()
+    {
+        Function = typeof(TFunction).Name,
+        Expression = expression,
+        IsEnabled = true,
+        JobKey = jobKey.Name,
+        JobType = jobKey.Type,
+    };
 
     /// <summary>
     /// Removes stale library synchronization queue entries and enqueues any libraries that still require synchronization.

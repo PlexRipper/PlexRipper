@@ -8,9 +8,10 @@ public static class BackgroundJobsRegistration
 {
     public static void RegisterBackgroundJobs(this IServiceCollection services)
     {
-        // TickerQ resolves the job from a new service scope for every execution.
-        // Keep the job transient so a job instance (and its DbContext dependency)
-        // can never be retained and reused after that execution scope is disposed.
+
+        /*
+         * TimeTicker Jobs - One off jobs
+         */
         services.MapTicker<DownloadJob, DownloadTaskKey>(ServiceLifetime.Transient)
             .WithPriority(TickerTaskPriority.LongRunning);
 
@@ -19,10 +20,10 @@ public static class BackgroundJobsRegistration
 
         services.MapTicker<InspectPlexServerJob, InspectPlexServerJobPayload>(ServiceLifetime.Transient)
             .WithPriority(TickerTaskPriority.LongRunning);
-        
+
         services.MapTicker<LibrarySyncJob, LibrarySyncJobPayload>(ServiceLifetime.Transient)
             .WithPriority(TickerTaskPriority.LongRunning);
-        
+
         services.MapTicker<MetadataSyncJob, MetadataSyncJobPayload>(ServiceLifetime.Transient)
             .WithPriority(TickerTaskPriority.Low)
             .WithMaxConcurrency(2);
@@ -31,21 +32,22 @@ public static class BackgroundJobsRegistration
             .WithPriority(TickerTaskPriority.Low)
             .WithMaxConcurrency(1);
 
+        /*
+         * Cron Jobs
+         * Note: Also update registration in BackgroundJobScheduler.SetupCronTickers()
+         */
         services
             .MapTicker<CheckPlexLibrariesForUpdatesJob, CheckPlexLibrariesForUpdatesJobPayload>(ServiceLifetime
                 .Transient)
-            .WithPriority(TickerTaskPriority.Low)
-            .WithCron("0 0 */3 * * *"); // Every 3 hours
+            .WithPriority(TickerTaskPriority.Low);
 
         services.MapTicker<CheckForUpdateJob, CheckForUpdateJobPayload>(ServiceLifetime.Transient)
-            .WithPriority(TickerTaskPriority.Low)
-            .WithCron("0 0 * * * *");
+            .WithPriority(TickerTaskPriority.Low);
 
         services
             .MapTicker<CheckAllConnectionsStatusByPlexServerJob, CheckAllConnectionsStatusByPlexServerJobPayload>(
                 ServiceLifetime.Transient
             )
-            .WithPriority(TickerTaskPriority.Low)
-            .WithCron("0 */10 * * * *"); // Every 10 minutes
+            .WithPriority(TickerTaskPriority.Low);
     }
 }

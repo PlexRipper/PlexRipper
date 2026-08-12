@@ -1,4 +1,5 @@
 using TickerQ.Utilities.Enums;
+using TickerQ.Utilities.Models;
 
 namespace Reaparr.Application;
 
@@ -27,6 +28,8 @@ public class ScheduleLibraryComparisonJobCommandValidator
 public class ScheduleLibraryComparisonJobCommandHandler
     : ICommandHandler<ScheduleLibraryComparisonJobCommand, Result>
 {
+    private static readonly TimeSpan _comparisonJobDelay = TimeSpan.FromMinutes(2);
+
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
     private readonly IBackgroundJobScheduler _backgroundJobScheduler;
@@ -91,18 +94,27 @@ public class ScheduleLibraryComparisonJobCommandHandler
             return Result.Ok();
         }
 
-        var tickerResult = await _backgroundJobScheduler.ExecuteJob<
-            PlexLibraryComparisonJob,
-            PlexLibraryComparisonJobPayload
-        >(
-            jobKey,
-            new PlexLibraryComparisonJobPayload
-            {
-                RemotePlexLibraryId = remoteLibrary.Id,
-                OwnedPlexLibraryId = ownedLibrary.Id,
-            },
-            cancellationToken
-        );
+        TickerResult<JobTimeTicker> tickerResult;
+        try
+        {
+            tickerResult = await _backgroundJobScheduler.ScheduleJob<
+                PlexLibraryComparisonJob,
+                PlexLibraryComparisonJobPayload
+            >(
+                jobKey,
+                new PlexLibraryComparisonJobPayload
+                {
+                    RemotePlexLibraryId = remoteLibrary.Id,
+                    OwnedPlexLibraryId = ownedLibrary.Id,
+                },
+                DateTime.UtcNow.Add(_comparisonJobDelay),
+                cancellationToken
+            );
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            return ResultExtensions.TaskIsCancelled(nameof(ScheduleLibraryComparisonJobCommand));
+        }
 
         if (!tickerResult.IsSucceeded)
             return tickerResult.Exception is null
@@ -110,8 +122,8 @@ public class ScheduleLibraryComparisonJobCommandHandler
                 : Result.Fail(new ExceptionalError(tickerResult.Exception));
 
         _log.Here()
-            .Debug(
-                "Scheduled library comparison job for remote library {RemoteLibraryId} and owned library {OwnedLibraryId}",
+            .Verbose(
+                "Scheduled deferred library comparison job for remote library {RemoteLibraryId} and owned library {OwnedLibraryId}",
                 remoteLibrary.Id,
                 ownedLibrary.Id
             );

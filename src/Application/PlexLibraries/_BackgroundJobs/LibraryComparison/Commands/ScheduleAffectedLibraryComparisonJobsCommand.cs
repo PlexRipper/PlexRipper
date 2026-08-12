@@ -93,15 +93,14 @@ public class ScheduleAffectedLibraryComparisonJobsCommandHandler
             if (result.IsCancelled)
             {
                 _log.Here()
-                    .Warning(
-                        "Scheduling affected library comparisons was cancelled for server {ServerName} ({ServerId}), library {LibraryName} ({LibraryId})",
+                    .Debug(
+                        "Stopped scheduling affected library comparisons because shutdown was requested for server {ServerName} ({ServerId}), library {LibraryName} ({LibraryId})",
                         serverName,
                         sourceLibraryDetails.PlexServerId,
                         sourceLibraryDetails.LibraryName,
                         sourceLibrary.Id
                     );
-                failedResults.Add(result);
-                continue;
+                return result;
             }
 
             if (result.IsFailed)

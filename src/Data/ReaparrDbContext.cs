@@ -278,7 +278,9 @@ public sealed class ReaparrDbContext : DbContext, IReaparrDbContext, IReaparrDbC
             b.Property(e => e.JobType)
                 .HasMaxLength(100)
                 .HasConversion(x => x.ToJobTypesString(), x => x.ToJobTypes())
-                .IsUnicode(false);
+                .IsUnicode(false)
+                .HasDefaultValue(JobTypes.None)
+                .HasSentinel(JobTypes.None);
             b.HasIndex(x => x.JobType);
         });     
         
@@ -289,7 +291,9 @@ public sealed class ReaparrDbContext : DbContext, IReaparrDbContext, IReaparrDbC
             b.Property(e => e.JobType)
                 .HasMaxLength(100)
                 .HasConversion(x => x.ToJobTypesString(), x => x.ToJobTypes())
-                .IsUnicode(false);
+                .IsUnicode(false)
+                .HasDefaultValue(JobTypes.None)
+                .HasSentinel(JobTypes.None);
             b.HasIndex(x => x.JobType);
         });
         

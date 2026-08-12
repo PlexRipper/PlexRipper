@@ -9,7 +9,10 @@ public enum JobTypes
     // NOTE: Make sure the indexes are correct, 1,2,3,4,5 etc. and that there is no skip in between
     // Otherwise the TypeScript DTO translator in the front-end starts messing up
     [JsonStringEnumMemberName(nameof(Unknown))]
-    Unknown = 0,
+    Unknown = -1,
+
+    [JsonStringEnumMemberName(nameof(None))]
+    None = 0,
 
     [JsonStringEnumMemberName(nameof(CheckAllConnectionsStatusByPlexServerJob))]
     CheckAllConnectionsStatusByPlexServerJob = 1,

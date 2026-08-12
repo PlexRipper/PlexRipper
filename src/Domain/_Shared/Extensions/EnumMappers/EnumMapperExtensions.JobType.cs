@@ -5,6 +5,7 @@ public static partial class EnumMapperExtensions
     private static readonly Dictionary<string, JobTypes> _jobTypesMap = new(StringComparer.Ordinal)
     {
         ["Unknown"] = JobTypes.Unknown,
+        ["None"] = JobTypes.None,
         ["CheckAllConnectionsStatusByPlexServerJob"] = JobTypes.CheckAllConnectionsStatusByPlexServerJob,
         ["DownloadJob"] = JobTypes.DownloadJob,
         ["MoveDownloadFileJob"] = JobTypes.MoveDownloadFileJob,

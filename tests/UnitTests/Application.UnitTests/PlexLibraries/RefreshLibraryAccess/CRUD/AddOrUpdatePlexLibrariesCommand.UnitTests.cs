@@ -1,4 +1,3 @@
-using Reaparr.BackgroundJobs.Contracts;
 
 namespace Reaparr.Application.UnitTests;
 

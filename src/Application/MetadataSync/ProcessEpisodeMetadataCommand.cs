@@ -1,4 +1,4 @@
-namespace Reaparr.BackgroundJobs;
+namespace Reaparr.Application;
 
 /// <summary>
 /// Command to process episode metadata enrichment for a specific Plex server.

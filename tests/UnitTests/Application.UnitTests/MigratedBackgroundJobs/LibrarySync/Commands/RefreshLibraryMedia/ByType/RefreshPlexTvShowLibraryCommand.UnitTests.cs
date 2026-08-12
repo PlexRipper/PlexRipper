@@ -2,7 +2,7 @@ using Reaparr.Application;
 using Reaparr.Data.Contracts;
 using Reaparr.PlexApi.Contracts;
 
-namespace Reaparr.BackgroundJobs.UnitTests;
+namespace Reaparr.Application.UnitTests;
 
 public class RefreshPlexTvShowLibraryCommandUnitTests : BaseUnitTest<RefreshPlexTvShowLibraryCommandHandler>
 {

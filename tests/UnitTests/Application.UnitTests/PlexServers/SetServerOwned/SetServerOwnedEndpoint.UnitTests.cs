@@ -1,5 +1,4 @@
 using Microsoft.Extensions.DependencyInjection;
-using Reaparr.BackgroundJobs.Contracts;
 
 namespace Reaparr.Application.UnitTests;
 

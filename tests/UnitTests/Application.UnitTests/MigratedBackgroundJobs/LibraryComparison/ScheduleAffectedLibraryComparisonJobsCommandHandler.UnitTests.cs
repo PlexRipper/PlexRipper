@@ -1,7 +1,7 @@
 using Reaparr.Application;
 using Reaparr.Data.Contracts;
 
-namespace Reaparr.BackgroundJobs.UnitTests;
+namespace Reaparr.Application.UnitTests;
 
 public class ScheduleAffectedLibraryComparisonJobsCommandHandlerUnitTests
     : BaseUnitTest<ScheduleAffectedLibraryComparisonJobsCommandHandler>

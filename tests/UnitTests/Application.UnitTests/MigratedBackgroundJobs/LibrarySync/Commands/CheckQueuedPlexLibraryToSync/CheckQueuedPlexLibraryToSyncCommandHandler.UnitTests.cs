@@ -3,7 +3,7 @@ using Reaparr.Application.Contracts;
 using Reaparr.Data.Contracts;
 using TickerQ.Utilities.Models;
 
-namespace Reaparr.BackgroundJobs.UnitTests;
+namespace Reaparr.Application.UnitTests;
 
 public class CheckQueuedPlexLibraryToSyncCommandHandlerUnitTests
     : BaseUnitTest<CheckQueuedPlexLibraryToSyncCommandHandler>

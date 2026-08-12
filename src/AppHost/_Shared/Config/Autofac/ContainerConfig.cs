@@ -29,7 +29,6 @@ public static class ContainerConfig
         builder.RegisterModule<FileSystemModule>();
         builder.RegisterModule<PlexApiModule>();
         builder.RegisterModule<SettingsModule>();
-        builder.RegisterModule<BackgroundJobsModule>();
         builder.RegisterModule<SignalrModule>();
 
         // Presentation

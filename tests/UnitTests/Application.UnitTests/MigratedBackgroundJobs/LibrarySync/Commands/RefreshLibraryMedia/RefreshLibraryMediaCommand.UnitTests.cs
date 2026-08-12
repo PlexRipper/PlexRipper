@@ -1,7 +1,7 @@
 using Reaparr.Application;
 using Reaparr.PlexApi.Contracts;
 
-namespace Reaparr.BackgroundJobs.UnitTests;
+namespace Reaparr.Application.UnitTests;
 
 public class RefreshLibraryMediaCommandUnitTests : BaseCommandUnitTest<RefreshLibraryMediaCommand>
 {

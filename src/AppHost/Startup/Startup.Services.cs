@@ -73,7 +73,6 @@ public static partial class Startup
                 // Reference the assemblies that contain the FastEndpoints or ICommand implementations
                 Assembly.GetAssembly(typeof(AppHostModule))!,
                 Assembly.GetAssembly(typeof(ApplicationModule))!,
-                Assembly.GetAssembly(typeof(BackgroundJobsModule))!,
                 Assembly.GetAssembly(typeof(DataModule))!,
                 Assembly.GetAssembly(typeof(PlexApiModule))!,
                 Assembly.GetAssembly(typeof(PublicApiModule))!,

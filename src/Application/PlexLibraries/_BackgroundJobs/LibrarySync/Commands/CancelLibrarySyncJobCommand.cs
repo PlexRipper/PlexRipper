@@ -1,5 +1,3 @@
-using Reaparr.BackgroundJobs;
-
 namespace Reaparr.Application;
 
 public record CancelLibrarySyncJobCommand(int PlexLibraryId) : ICommand<Result>;

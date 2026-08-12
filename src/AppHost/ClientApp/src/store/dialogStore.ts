@@ -45,6 +45,9 @@ export const useDialogStore = defineStore(StoreNames.DialogStore, () => {
 		openServerSettingsDialog(plexServerId: number): void {
 			state.dialogUpdate.next({ name: DialogType.ServerSettingsDialog, state: true, data: plexServerId });
 		},
+		openSyncServerMediaDialog(plexServerId?: number): void {
+			state.dialogUpdate.next({ name: DialogType.SyncServerMediaDialog, state: true, data: plexServerId });
+		},
 		openDownloadTaskDetailsDialog(downloadTaskId: string): void {
 			state.dialogUpdate.next({ name: DialogType.DownloadDetailsDialog, state: true, data: downloadTaskId });
 		},

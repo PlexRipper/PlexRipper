@@ -54,7 +54,6 @@
 import { get, set } from '@vueuse/core';
 import { JobStatus, JobTypes } from '@dto';
 import { useSubscription } from '@vueuse/rxjs';
-import { DialogType } from '@enums';
 import { useBackgroundJobsStore, useDialogStore, useI18n } from '#imports';
 
 const size = 32;
@@ -102,7 +101,7 @@ const menuItems = computed(() => {
 			label: t('components.background-activity-toggle-button.syncing-media'),
 			icon: 'mdi-server-network',
 			cy: JobTypes.LibrarySyncJob + 'activity-button',
-			action: () => dialogStore.openDialog(DialogType.SyncServerMediaDialog),
+			action: () => dialogStore.openSyncServerMediaDialog(),
 		});
 	}
 

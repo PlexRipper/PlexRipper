@@ -1,8 +1,10 @@
 <template>
 	<QCardDialog
 		full-height
+		:type="0 as number"
 		:name="DialogType.SyncServerMediaDialog"
 		cy="sync-server-media-dialog"
+		@opened="onOpened"
 		@closed="onClosed">
 		<template #top-row>
 			<!-- The total progress -->
@@ -116,9 +118,10 @@ const libraryStore = useLibraryStore();
 
 const expanded = ref<number[]>([]);
 /**
- * The plex server ids that are being checked
+ * When set, only progress for the server that initiated the sync is displayed.
+ * A null value keeps the background activity dialog's all-server view.
  */
-const plexServerIds = ref<number[]>([]);
+const plexServerId = ref<number | null>(null);
 
 const libraryProgressList = computed(() => get(plexServerNodes).flatMap((x) => x.children).flatMap((x) => x.progress));
 
@@ -130,7 +133,7 @@ const totalPercentage = computed(() => {
 	return sum(nodes.map((x) => x.percentage)) / nodes.length;
 });
 
-const plexServers = computed(() => serverStore.getServers([...get(plexServerNodes).map((x) => x.id), ...get(plexServerIds)].filter((x, i, a) => a.indexOf(x) == i)));
+const plexServers = computed(() => serverStore.getServers(get(plexServerNodes).map((x) => x.id)));
 
 const getProgressText = computed(() => {
 	if (get(plexServers).length === 0) {
@@ -156,41 +159,47 @@ const getProgressText = computed(() => {
 const plexServerNodes = computed((): IPlexMediaSyncServerNode[] => {
 	let uniqueIndex = 0;
 
-	return libraryStore.getLibrarySyncQueueGrouped().map((server) => {
-		const percentage = server.progress.length > 0
-			? meanBy(server.progress, (x) => x.percentage ?? 0)
-			: 0;
-		return {
-			id: server.serverId,
-			index: uniqueIndex++,
-			type: 'server',
-			title: serverStore.getServerName(server.serverId),
-			percentage: percentage,
-			completed: percentage === 100,
-			children: server.progress.map((libraryProgress) => {
-				const library = libraryStore.getLibrary(libraryProgress.plexLibraryId);
-				return {
-					id: libraryProgress.plexLibraryId,
-					index: uniqueIndex++,
-					type: 'library',
-					mediaType: library?.type,
-					percentage: libraryProgress.percentage ?? 0,
-					title: library?.title ?? t('general.error.unknown'),
-					completed: libraryProgress.isComplete ?? false,
-					progress: libraryProgress,
-					children: [],
-				};
-			}),
-		};
-	});
+	return libraryStore
+		.getLibrarySyncQueueGrouped(get(plexServerId) ?? undefined)
+		.map((server) => {
+			const percentage = server.progress.length > 0
+				? meanBy(server.progress, (x) => x.percentage ?? 0)
+				: 0;
+			return {
+				id: server.serverId,
+				index: uniqueIndex++,
+				type: 'server',
+				title: serverStore.getServerName(server.serverId),
+				percentage: percentage,
+				completed: percentage === 100,
+				children: server.progress.map((libraryProgress) => {
+					const library = libraryStore.getLibrary(libraryProgress.plexLibraryId);
+					return {
+						id: libraryProgress.plexLibraryId,
+						index: uniqueIndex++,
+						type: 'library',
+						mediaType: library?.type,
+						percentage: libraryProgress.percentage ?? 0,
+						title: library?.title ?? t('general.error.unknown'),
+						completed: libraryProgress.isComplete ?? false,
+						progress: libraryProgress,
+						children: [],
+					};
+				}),
+			};
+		});
 });
 
 function isServer(node: IPlexMediaSyncServerNode): boolean {
 	return node.type === 'server';
 }
 
+function onOpened(serverId?: number): void {
+	set(plexServerId, serverId ?? null);
+}
+
 function onClosed(): void {
-	set(plexServerIds, []);
+	set(plexServerId, null);
 	set(expanded, []);
 	libraryStore.clearCompletedSyncQueues();
 }

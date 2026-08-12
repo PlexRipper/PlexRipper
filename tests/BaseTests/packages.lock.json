@@ -1259,14 +1259,6 @@
           "Quartz.Extensions.DependencyInjection": "3.18.2"
         }
       },
-      "Quartz.Serialization.SystemTextJson": {
-        "type": "Transitive",
-        "resolved": "3.18.2",
-        "contentHash": "FZAV4mUwnl4yNSa73ZuQNvBOZeyuPTUW4M8Mxa0XAFHUwgHGEYmqOVSgaztAET+a/fUGNBzj0eEPW2pZMQPYuA==",
-        "dependencies": {
-          "Quartz": "3.18.2"
-        }
-      },
       "Semver": {
         "type": "Transitive",
         "resolved": "3.0.0",
@@ -1646,14 +1638,12 @@
       "Reaparr.Application": {
         "type": "Project",
         "dependencies": {
-          "Autofac.Extras.Quartz": "[11.0.0, )",
           "Downloader": "[5.5.0, )",
           "FastEndpoints": "[8.1.0, )",
           "FastEndpoints.Security": "[8.1.0, )",
           "FastEndpoints.Swagger": "[8.1.0, )",
           "Polly": "[8.6.5, )",
           "Polly.Core": "[8.6.6, )",
-          "Quartz.Serialization.SystemTextJson": "[3.18.2, )",
           "Reaparr.Application.Contracts": "[1.0.0, )",
           "Reaparr.Data.Contracts": "[1.0.0, )",
           "Reaparr.Domain": "[1.0.0, )",
@@ -1673,7 +1663,6 @@
       "Reaparr.Application.Contracts": {
         "type": "Project",
         "dependencies": {
-          "Quartz": "[3.18.2, )",
           "Reaparr.Domain": "[1.0.0, )"
         }
       },

@@ -8,12 +8,6 @@
         "resolved": "1.3.0",
         "contentHash": "jzzLpmz7F6LyBh5FTZy8/4dEYVcAG9VjBPKryZ82LIoUuupcBkCSXzaeS/4oYcp/rBC8yVLcDstJ8CIv9n2IFw=="
       },
-      "Quartz": {
-        "type": "Direct",
-        "requested": "[3.18.2, )",
-        "resolved": "3.18.2",
-        "contentHash": "/KaRLj7jv84RSIR/UtAWnzYRmS7o/mA6CdEuoLwxhLa9Nfl7Q1keMA7Fe/r2BzRfDf+7YpN1QNEYSSU89DA3OA=="
-      },
       "Autofac": {
         "type": "Transitive",
         "resolved": "9.1.0",

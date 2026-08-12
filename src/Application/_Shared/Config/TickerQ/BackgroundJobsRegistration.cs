@@ -4,7 +4,7 @@ using TickerQ.Utilities.Enums;
 
 namespace Reaparr.Application;
 
-public static class TickerQExtensions
+public static class BackgroundJobsRegistration
 {
     public static void RegisterBackgroundJobs(this IServiceCollection services)
     {

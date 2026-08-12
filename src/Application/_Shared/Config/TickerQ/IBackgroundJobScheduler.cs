@@ -58,6 +58,18 @@ public interface IBackgroundJobScheduler : ISetupAsync, IStopAsync
     Task<bool> Interrupt(JobKey jobKey, CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// Deletes queued one-time tickers and requests cooperative cancellation for running tickers matching the exact
+    /// supplied job keys. Completed history is retained.
+    /// </summary>
+    /// <param name="jobKeys">The exact logical job names and types to invalidate.</param>
+    /// <param name="cancellationToken">A token that cancels database lookup and queued-ticker deletion.</param>
+    /// <returns>A result containing the number deleted and the number for which cancellation was requested.</returns>
+    Task<Result<BackgroundJobInvalidationResult>> DeleteBatchJobs(
+        IReadOnlyCollection<JobKey> jobKeys,
+        CancellationToken cancellationToken = default
+    );
+
+    /// <summary>
     /// Determines whether a one-time ticker or cron occurrence with the supplied logical key currently has an active
     /// status. Idle, queued, and in-progress records are considered running for application coordination purposes.
     /// </summary>
@@ -73,7 +85,7 @@ public interface IBackgroundJobScheduler : ISetupAsync, IStopAsync
     /// </summary>
     /// <param name="jobKey">The logical job name and type to locate.</param>
     /// <returns><see langword="true"/> when a matching active time ticker or cron definition exists; otherwise, <see langword="false"/>.</returns>
-    Task<bool> CheckExists(JobKey jobKey);
+    Task<bool> IsQueued(JobKey jobKey);
 
     /// <summary>
     /// Retrieves application-level status records for all one-time tickers and cron occurrences that are idle, queued,

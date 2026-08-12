@@ -226,9 +226,20 @@ public class AddOrUpdatePlexLibrariesCommandHandler
         _mediaQueryCache.InvalidateLibraries(affectedLibraryIds, "Plex library access or ownership changed");
         var failedResults = new List<ResultBase>();
 
+        var invalidationResult = await _commandExecutor.Send(
+            new InvalidateLibraryComparisonJobsCommand(affectedLibraryIds),
+            cancellationToken
+        );
+        if (invalidationResult.IsFailed)
+            return invalidationResult.ToResult().LogError();
+
         foreach (var libraryId in affectedLibraryIds)
         {
-            var queueResult = await _commandExecutor.Send(new ScheduleAffectedLibraryComparisonJobsCommand(libraryId), cancellationToken);
+            var queueResult = await _commandExecutor.Send(
+                new ScheduleAffectedLibraryComparisonJobsCommand(libraryId
+                ),
+                cancellationToken
+            );
             if (queueResult.IsFailed)
                 failedResults.Add(queueResult);
         }

@@ -19,7 +19,7 @@ public class BackgroundJobScheduler : IBackgroundJobScheduler
     private readonly IAppRuntimeInfo _appRuntimeInfo;
     private readonly ICommandExecutor _commandExecutor;
 
-    private static TickerStatus[] ActiveStatuses => [TickerStatus.Idle, TickerStatus.Queued, TickerStatus.InProgress];
+    private static IEnumerable<TickerStatus> QueuedStatuses => [TickerStatus.Idle, TickerStatus.Queued];
 
     /// <summary>
     /// Initializes a scheduler that controls the TickerQ host, persists and queries tickers, and performs application
@@ -138,6 +138,65 @@ public class BackgroundJobScheduler : IBackgroundJobScheduler
     }
 
     /// <inheritdoc />
+    public async Task<Result<BackgroundJobInvalidationResult>> DeleteBatchJobs(
+        IReadOnlyCollection<JobKey> jobKeys,
+        CancellationToken cancellationToken = default
+    )
+    {
+        if (jobKeys.Count == 0)
+            return Result.Ok(new BackgroundJobInvalidationResult(0, 0));
+
+        using var dbContext = await _dbContextFactory.CreateAsync();
+        var matchingTickers = new List<(Guid Id, TickerStatus Status)>();
+        foreach (var group in jobKeys.Distinct().GroupBy(x => x.Type))
+        {
+            var names = group.Select(x => x.Name).ToList();
+            var tickers = await dbContext.TimeTickers
+                .Where(x =>
+                    x.JobType == group.Key
+                    && names.Contains(x.JobKey)
+                    && (x.Status == TickerStatus.Idle
+                        || x.Status == TickerStatus.Queued
+                        || x.Status == TickerStatus.InProgress)
+                )
+                .Select(x => new ValueTuple<Guid, TickerStatus>(x.Id, x.Status))
+                .ToListAsync(cancellationToken);
+            matchingTickers.AddRange(tickers);
+        }
+
+        var queuedIds = matchingTickers
+            .Where(x => x.Status is TickerStatus.Idle or TickerStatus.Queued)
+            .Select(x => x.Id)
+            .Distinct()
+            .ToList();
+        var runningIds = matchingTickers
+            .Where(x => x.Status == TickerStatus.InProgress)
+            .Select(x => x.Id)
+            .Distinct()
+            .ToList();
+
+        var deletedCount = 0;
+        if (queuedIds.Count > 0)
+        {
+            var deleteResult = await _tickerManager.DeleteBatchAsync(queuedIds, cancellationToken);
+            if (!deleteResult.IsSucceeded)
+                return deleteResult.Exception is null
+                    ? Result.Fail("Failed to delete queued background jobs")
+                    : Result.Fail(new ExceptionalError(deleteResult.Exception));
+
+            deletedCount = queuedIds.Count;
+        }
+
+        var cancellationRequestedCount = runningIds.Count(
+            TickerCancellationTokenManager.RequestTickerCancellationById
+        );
+
+        return Result.Ok(
+            new BackgroundJobInvalidationResult(deletedCount, cancellationRequestedCount)
+        );
+    }
+
+    /// <inheritdoc />
     public async Task<bool> IsJobRunning(
         JobKey jobKey,
         CancellationToken cancellationToken = default
@@ -150,7 +209,7 @@ public class BackgroundJobScheduler : IBackgroundJobScheduler
                 x =>
                     x.JobKey == jobKey.Name
                     && x.JobType == jobKey.Type
-                    && Enumerable.Contains(ActiveStatuses, x.Status),
+                    && x.Status == TickerStatus.InProgress,
                 cancellationToken
             )
         )
@@ -160,13 +219,13 @@ public class BackgroundJobScheduler : IBackgroundJobScheduler
             x =>
                 x.CronTicker.JobKey == jobKey.Name
                 && x.CronTicker.JobType == jobKey.Type
-                && Enumerable.Contains(ActiveStatuses, x.Status),
+                && x.Status == TickerStatus.InProgress,
             cancellationToken
         );
     }
 
     /// <inheritdoc />
-    public async Task<bool> CheckExists(JobKey jobKey)
+    public async Task<bool> IsQueued(JobKey jobKey)
     {
         using var dbContext = await _dbContextFactory.CreateAsync();
 
@@ -174,13 +233,12 @@ public class BackgroundJobScheduler : IBackgroundJobScheduler
             await dbContext.TimeTickers.AnyAsync(x =>
                 x.JobKey == jobKey.Name
                 && x.JobType == jobKey.Type
-                && Enumerable.Contains(ActiveStatuses, x.Status)
+                && QueuedStatuses.Contains(x.Status)
             )
         )
             return true;
 
-        return await dbContext.CronTickers.AnyAsync(x => x.JobKey == jobKey.Name && x.JobType == jobKey.Type
-        );
+        return await dbContext.CronTickers.AnyAsync(x => x.JobKey == jobKey.Name && x.JobType == jobKey.Type);
     }
 
     /// <inheritdoc />
@@ -264,12 +322,12 @@ public class BackgroundJobScheduler : IBackgroundJobScheduler
         using var dbContext = await _dbContextFactory.CreateAsync();
 
         var timeTickers = await dbContext
-            .TimeTickers.Where(x => Enumerable.Contains(ActiveStatuses, x.Status))
+            .TimeTickers.Where(x => x.Status == TickerStatus.InProgress)
             .Select(x => new { x.JobType, x.Request, x.Id, x.CreatedAt })
             .ToListAsync(cancellationToken);
 
         var cronTickers = await dbContext
-            .CronTickerOccurrences.Where(x => Enumerable.Contains(ActiveStatuses, x.Status))
+            .CronTickerOccurrences.Where(x => x.Status == TickerStatus.InProgress)
             .Select(x => new { x.CronTicker.JobType, x.CronTicker.Request, x.Id, x.CreatedAt })
             .ToListAsync(cancellationToken);
 

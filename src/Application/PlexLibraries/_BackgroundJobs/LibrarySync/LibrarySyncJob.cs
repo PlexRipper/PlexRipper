@@ -83,6 +83,13 @@ public class LibrarySyncJob : BaseBackgroundJob<LibrarySyncJobPayload, LibrarySy
         {
             await UpdateQueueItemAsync(context, LibrarySyncJobStatus.Processing);
 
+            var invalidationResult = await _commandExecutor.Send(
+                new InvalidateLibraryComparisonJobsCommand([libraryId]),
+                cancellationToken
+            );
+
+            invalidationResult.LogIfFailed();
+            
             // Convert command exceptions to a Result so the queue state can be persisted before this ticker completes.
             // Execute the library sync command
             var result = await Result.Try(() =>

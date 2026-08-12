@@ -109,13 +109,16 @@ public class CheckQueuedPlexLibraryToSyncCommandHandler : ICommandHandler<CheckQ
     {
         var jobKey = LibrarySyncJob.GetJobKey(serverId, libraryId);
 
-        // Check if a job already exists
-        if (await _scheduler.CheckExists(jobKey))
+        if (await _scheduler.IsQueued(jobKey))
         {
+            var serverName = _dbContext.GetPlexServerNameById(serverId);
+            var libraryName = _dbContext.GetPlexLibraryNameById(libraryId);
             _log.Here()
                 .Warning(
-                    "Library sync job already exists for server {ServerId}, library {LibraryId}",
+                    "Library sync job already queued for server: {ServerName} with id: {ServerId}, library {LibraryName} with id: {LibraryId}",
+                    serverName,
                     serverId,
+                    libraryName,
                     libraryId
                 );
             return;

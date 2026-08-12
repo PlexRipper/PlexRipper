@@ -3,6 +3,23 @@ namespace Reaparr.Application.UnitTests;
 
 public class AddOrUpdatePlexLibrariesCommandUnitTests : BaseUnitTest<AddOrUpdatePlexLibrariesCommandHandler>
 {
+    [Before(Test)]
+    public void SetupComparisonJobLifecycle()
+    {
+        Mock.Mock<ICommandExecutor>()
+            .Setup(x => x.Send(
+                It.IsAny<InvalidateLibraryComparisonJobsCommand>(),
+                It.IsAny<CancellationToken>()
+            ))
+            .ReturnsAsync(Result.Ok(new BackgroundJobInvalidationResult(0, 0)));
+        Mock.Mock<ICommandExecutor>()
+            .Setup(x => x.Send(
+                It.IsAny<ScheduleAffectedLibraryComparisonJobsCommand>(),
+                It.IsAny<CancellationToken>()
+            ))
+            .ReturnsAsync(Result.Ok());
+    }
+
     [Test]
     public async Task ShouldAddAllPlexLibraries_WhenNoneExistInTheDatabase()
     {

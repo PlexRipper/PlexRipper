@@ -12,28 +12,24 @@ public static class BackgroundJobsRegistration
         // Keep the job transient so a job instance (and its DbContext dependency)
         // can never be retained and reused after that execution scope is disposed.
         services.MapTicker<DownloadJob, DownloadTaskKey>(ServiceLifetime.Transient)
-            .WithPriority(TickerTaskPriority.LongRunning)
-            .WithMaxConcurrency(4);
+            .WithPriority(TickerTaskPriority.LongRunning);
 
         services.MapTicker<MoveDownloadFileJob, DownloadTaskKey>(ServiceLifetime.Transient)
-            .WithPriority(TickerTaskPriority.LongRunning)
-            .WithMaxConcurrency(1);
+            .WithPriority(TickerTaskPriority.LongRunning);
 
         services.MapTicker<InspectPlexServerJob, InspectPlexServerJobPayload>(ServiceLifetime.Transient)
-            .WithPriority(TickerTaskPriority.LongRunning)
-            .WithMaxConcurrency(1);
-
+            .WithPriority(TickerTaskPriority.LongRunning);
+        
+        services.MapTicker<LibrarySyncJob, LibrarySyncJobPayload>(ServiceLifetime.Transient)
+            .WithPriority(TickerTaskPriority.LongRunning);
+        
         services.MapTicker<MetadataSyncJob, MetadataSyncJobPayload>(ServiceLifetime.Transient)
             .WithPriority(TickerTaskPriority.Low)
             .WithMaxConcurrency(2);
 
-        services.MapTicker<LibrarySyncJob, LibrarySyncJobPayload>(ServiceLifetime.Transient)
-            .WithPriority(TickerTaskPriority.LongRunning)
-            .WithMaxConcurrency(4);
-
         services.MapTicker<PlexLibraryComparisonJob, PlexLibraryComparisonJobPayload>(ServiceLifetime.Transient)
             .WithPriority(TickerTaskPriority.Low)
-            .WithMaxConcurrency(2);
+            .WithMaxConcurrency(1);
 
         services
             .MapTicker<CheckPlexLibrariesForUpdatesJob, CheckPlexLibrariesForUpdatesJobPayload>(ServiceLifetime

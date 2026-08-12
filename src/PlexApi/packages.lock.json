@@ -611,13 +611,6 @@
           "Reaparr.Domain": "[1.0.0, )"
         }
       },
-      "Reaparr.BackgroundJobs.Contracts": {
-        "type": "Project",
-        "dependencies": {
-          "Quartz": "[3.18.2, )",
-          "Reaparr.Domain": "[1.0.0, )"
-        }
-      },
       "Reaparr.Data.Contracts": {
         "type": "Project",
         "dependencies": {

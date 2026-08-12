@@ -40,7 +40,6 @@
     </ItemGroup>
     <ItemGroup>
         <ProjectReference Include="..\Application\Application.csproj"/>
-        <ProjectReference Include="..\BackgroundJobs\BackgroundJobs.csproj"/>
         <ProjectReference Include="..\Data\Data.csproj"/>
         <ProjectReference Include="..\External\External.csproj"/>
         <ProjectReference Include="..\FileSystem\FileSystem.csproj"/>
@@ -67,7 +66,6 @@
         <Using Include="Microsoft.Extensions.Logging"/>
         <Using Include="Microsoft.EntityFrameworkCore"/>
         <Using Include="Reaparr.Application"/>
-        <Using Include="Reaparr.BackgroundJobs"/>
         <Using Include="Reaparr.Data"/>
         <Using Include="Reaparr.Domain"/>
         <Using Include="Reaparr.Environment"/>

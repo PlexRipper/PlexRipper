@@ -199,7 +199,7 @@ public class BackgroundJobScheduler : IBackgroundJobScheduler
             JobType = jobKey.Type,
         };
 
-        return _tickerManager.AddAsync(ticker, cancellationToken);
+        return AddTickerWithoutCallerExecutionContext(ticker, cancellationToken);
     }
 
     /// <inheritdoc />
@@ -219,7 +219,25 @@ public class BackgroundJobScheduler : IBackgroundJobScheduler
             JobType = jobKey.Type,
             ExecutionTime = executionTime ?? DateTime.UtcNow,
         };
-        return _tickerManager.AddAsync(ticker, cancellationToken);
+        return AddTickerWithoutCallerExecutionContext(ticker, cancellationToken);
+    }
+
+    /// <summary>
+    /// Hands a ticker to TickerQ without flowing request-scoped AsyncLocal state into its immediate-dispatch worker.
+    /// TickerQ creates a dedicated service scope for each execution, but its immediate dispatch path queues work while
+    /// still on the caller's execution context. Suppressing flow at this background-work boundary prevents an ambient
+    /// HttpContext and other request state from outliving their request.
+    /// </summary>
+    private Task<TickerResult<JobTimeTicker>> AddTickerWithoutCallerExecutionContext(
+        JobTimeTicker ticker,
+        CancellationToken cancellationToken
+    )
+    {
+        if (ExecutionContext.IsFlowSuppressed())
+            return _tickerManager.AddAsync(ticker, cancellationToken);
+
+        using (ExecutionContext.SuppressFlow())
+            return _tickerManager.AddAsync(ticker, cancellationToken);
     }
 
     /// <inheritdoc />

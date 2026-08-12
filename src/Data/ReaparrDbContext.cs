@@ -270,7 +270,7 @@ public sealed class ReaparrDbContext : DbContext, IReaparrDbContext, IReaparrDbC
         builder.ApplyConfiguration(new TimeTickerConfigurations<JobTimeTicker>());
         builder.ApplyConfiguration(new CronTickerConfigurations<JobCronTicker>());
         builder.ApplyConfiguration(new CronTickerOccurrenceConfigurations<JobCronTicker>());
-        
+
         builder.Entity<JobTimeTicker>(b =>
         {
             b.Property(x => x.JobKey).HasMaxLength(256);
@@ -282,6 +282,7 @@ public sealed class ReaparrDbContext : DbContext, IReaparrDbContext, IReaparrDbC
                 .HasDefaultValue(JobTypes.None)
                 .HasSentinel(JobTypes.None);
             b.HasIndex(x => x.JobType);
+            b.OwnsOne(x => x.RequestJson, request => request.ToJson());
         });     
         
         builder.Entity<JobCronTicker>(b =>

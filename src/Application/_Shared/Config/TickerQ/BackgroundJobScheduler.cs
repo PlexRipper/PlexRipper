@@ -191,13 +191,7 @@ public class BackgroundJobScheduler : IBackgroundJobScheduler
     )
         where TFunction : class, ITickerFunction<TRequest>
     {
-        var ticker = new JobTimeTicker
-        {
-            Function = TickerFunctionProvider.GetFunctionName<TFunction>(),
-            Request = TickerHelper.CreateTickerRequest(request),
-            JobKey = jobKey.Name,
-            JobType = jobKey.Type,
-        };
+        var ticker = CreateTimeTicker<TFunction, TRequest>(jobKey, request);
 
         return AddTickerWithoutCallerExecutionContext(ticker, cancellationToken);
     }
@@ -211,16 +205,31 @@ public class BackgroundJobScheduler : IBackgroundJobScheduler
     )
         where TFunction : class, ITickerFunction<TRequest>
     {
-        var ticker = new JobTimeTicker
-        {
-            Function = TickerFunctionProvider.GetFunctionName<TFunction>(),
-            Request = TickerHelper.CreateTickerRequest(request),
-            JobKey = jobKey.Name,
-            JobType = jobKey.Type,
-            ExecutionTime = executionTime ?? DateTime.UtcNow,
-        };
+        var ticker = CreateTimeTicker<TFunction, TRequest>(jobKey, request);
+        ticker.ExecutionTime = executionTime ?? DateTime.UtcNow;
         return AddTickerWithoutCallerExecutionContext(ticker, cancellationToken);
     }
+
+    private static JobTimeTicker CreateTimeTicker<TFunction, TRequest>(
+        JobKey jobKey,
+        TRequest request
+    )
+        where TFunction : class, ITickerFunction<TRequest> => new()
+    {
+        Function = TickerFunctionProvider.GetFunctionName<TFunction>(),
+        Request = TickerHelper.CreateTickerRequest(request),
+        RequestJson = request switch
+        {
+            PlexLibraryComparisonJobPayload payload => new JobTimeTickerRequestProperties
+            {
+                OwnedPlexLibraryId = payload.OwnedPlexLibraryId,
+                RemotePlexLibraryId = payload.RemotePlexLibraryId,
+            },
+            _ => null,
+        },
+        JobKey = jobKey.Name,
+        JobType = jobKey.Type,
+    };
 
     /// <summary>
     /// Hands a ticker to TickerQ without flowing request-scoped AsyncLocal state into its immediate-dispatch worker.

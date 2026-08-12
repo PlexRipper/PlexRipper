@@ -63,7 +63,13 @@ public class SyncPlexServerMediaEndpointUnitTests : BaseEndpointUnitTest<SyncPle
         endpointResult.Response.IsSuccess.ShouldBeTrue();
 
         Mock.Mock<ICommandExecutor>()
-            .Verify(x => x.Send(It.Is<QueueLibrarySyncJobCommand>(cmd => cmd.PlexLibraryIds.Count == 2), It.IsAny<CancellationToken>()), Times.Once());
+            .Verify(
+                x => x.Send(
+                    It.Is<QueueLibrarySyncJobCommand>(cmd => cmd.PlexLibraryIds.Count == 2 && cmd.Force),
+                    It.IsAny<CancellationToken>()
+                ),
+                Times.Once()
+            );
     }
 
     [Test]

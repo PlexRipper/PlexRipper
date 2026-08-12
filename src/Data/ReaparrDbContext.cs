@@ -156,9 +156,9 @@ public sealed class ReaparrDbContext : DbContext, IReaparrDbContext, IReaparrDbC
     public Task<T> ExecuteWithRetryAsync<T>(
         Func<IReaparrDbContext, Task<T>> operation,
         int maxRetries = 3,
-        CancellationToken cancellationToken = default) =>
-        ((DbContext)this).ExecuteWithRetryAsync(ctx => operation((IReaparrDbContext)ctx), maxRetries,
-            cancellationToken);
+        CancellationToken cancellationToken = default) => ((DbContext)this).ExecuteWithRetryAsync(
+        ctx => operation((IReaparrDbContext)ctx), maxRetries,
+        cancellationToken);
 
     public Task<T> ExecuteSerializedWriteAsync<T>(
         Func<IReaparrDbContext, CancellationToken, Task<T>> operation,
@@ -172,28 +172,26 @@ public sealed class ReaparrDbContext : DbContext, IReaparrDbContext, IReaparrDbC
 
     public Task<Result<T>> ExecuteSerializedTransactionAsync<T>(
         Func<IReaparrDbContext, CancellationToken, Task<T>> operation,
-        CancellationToken cancellationToken = default) =>
-        Result.Try(new Func<Task<T>>(async () =>
-        {
-            T result = default!;
-            await this.ExecuteSerializedTransactionAsync(async ct =>
-            {
-                result = await operation(this, ct);
-            }, 8, cancellationToken);
-            return result;
-        }));
+        CancellationToken cancellationToken = default) => Result.Try(new Func<Task<T>>(async () =>
+    {
+        T result = default!;
+        await this.ExecuteSerializedTransactionAsync(async ct => { result = await operation(this, ct); }, 8,
+            cancellationToken);
+        return result;
+    }));
 
     public Task<Result> ExecuteSerializedTransactionAsync(
         Func<IReaparrDbContext, CancellationToken, Task> operation,
-        CancellationToken cancellationToken = default) =>
-        Result.Try(() => this.ExecuteSerializedTransactionAsync(ct => operation(this, ct), 8, cancellationToken));
+        CancellationToken cancellationToken = default) => Result.Try(() =>
+        this.ExecuteSerializedTransactionAsync(ct => operation(this, ct), 8, cancellationToken));
 
     /// <inheritdoc/>
     public Task<int> ExecuteSqlInterpolatedAsync(
         FormattableString sql,
         CancellationToken cancellationToken = default)
     {
-        return this.ExecuteSerializedWriteAsync(ct1 => Database.ExecuteSqlInterpolatedAsync(sql, ct1), 8, cancellationToken);
+        return this.ExecuteSerializedWriteAsync(ct1 => Database.ExecuteSqlInterpolatedAsync(sql, ct1), 8,
+            cancellationToken);
     }
 
     /// <inheritdoc/>
@@ -240,7 +238,6 @@ public sealed class ReaparrDbContext : DbContext, IReaparrDbContext, IReaparrDbC
 
         Database.OpenConnection();
     }
-    
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
@@ -264,40 +261,15 @@ public sealed class ReaparrDbContext : DbContext, IReaparrDbContext, IReaparrDbC
     protected override void OnModelCreating(ModelBuilder builder)
     {
         builder.UseCollation(OrderByNaturalExtensions.CollationName);
-        builder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
-        
+
         // Setup TickerQ
         builder.ApplyConfiguration(new TimeTickerConfigurations<JobTimeTicker>());
         builder.ApplyConfiguration(new CronTickerConfigurations<JobCronTicker>());
         builder.ApplyConfiguration(new CronTickerOccurrenceConfigurations<JobCronTicker>());
 
-        builder.Entity<JobTimeTicker>(b =>
-        {
-            b.Property(x => x.JobKey).HasMaxLength(256);
-            b.HasIndex(x => x.JobKey);
-            b.Property(e => e.JobType)
-                .HasMaxLength(100)
-                .HasConversion(x => x.ToJobTypesString(), x => x.ToJobTypes())
-                .IsUnicode(false)
-                .HasDefaultValue(JobTypes.None)
-                .HasSentinel(JobTypes.None);
-            b.HasIndex(x => x.JobType);
-            b.OwnsOne(x => x.RequestJson, request => request.ToJson());
-        });     
-        
-        builder.Entity<JobCronTicker>(b =>
-        {
-            b.Property(x => x.JobKey).HasMaxLength(256);
-            b.HasIndex(x => x.JobKey);
-            b.Property(e => e.JobType)
-                .HasMaxLength(100)
-                .HasConversion(x => x.ToJobTypesString(), x => x.ToJobTypes())
-                .IsUnicode(false)
-                .HasDefaultValue(JobTypes.None)
-                .HasSentinel(JobTypes.None);
-            b.HasIndex(x => x.JobType);
-        });
-        
+        // Configurations need to override TickerQ default configurations
+        builder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
+
         base.OnModelCreating(builder);
     }
 

@@ -138,13 +138,13 @@ public class BackgroundJobScheduler : IBackgroundJobScheduler
     }
 
     /// <inheritdoc />
-    public async Task<Result<BackgroundJobInvalidationResult>> DeleteBatchJobs(
+    public async Task<Result> DeleteBatchJobs(
         IReadOnlyCollection<JobKey> jobKeys,
         CancellationToken cancellationToken = default
     )
     {
         if (jobKeys.Count == 0)
-            return Result.Ok(new BackgroundJobInvalidationResult(0, 0));
+            return Result.Ok();
 
         using var dbContext = await _dbContextFactory.CreateAsync();
         var matchingTickers = new List<(Guid Id, TickerStatus Status)>();
@@ -191,9 +191,14 @@ public class BackgroundJobScheduler : IBackgroundJobScheduler
             TickerCancellationTokenManager.RequestTickerCancellationById
         );
 
-        return Result.Ok(
-            new BackgroundJobInvalidationResult(deletedCount, cancellationRequestedCount)
-        );
+        _log.Here()
+            .Debug(
+                "Invalidated background jobs: deleted {DeletedCount}, requested cancellation for {CancellationCount}",
+                deletedCount,
+                cancellationRequestedCount
+            );
+
+        return Result.Ok();
     }
 
     /// <inheritdoc />

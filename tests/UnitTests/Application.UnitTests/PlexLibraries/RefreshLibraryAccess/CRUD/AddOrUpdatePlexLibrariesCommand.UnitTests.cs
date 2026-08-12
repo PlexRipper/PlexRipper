@@ -11,7 +11,7 @@ public class AddOrUpdatePlexLibrariesCommandUnitTests : BaseUnitTest<AddOrUpdate
                 It.IsAny<InvalidateLibraryComparisonJobsCommand>(),
                 It.IsAny<CancellationToken>()
             ))
-            .ReturnsAsync(Result.Ok(new BackgroundJobInvalidationResult(0, 0)));
+            .ReturnsAsync(Result.Ok());
         Mock.Mock<ICommandExecutor>()
             .Setup(x => x.Send(
                 It.IsAny<ScheduleAffectedLibraryComparisonJobsCommand>(),

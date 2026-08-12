@@ -4,9 +4,9 @@ namespace Reaparr.Application;
 
 public record LibrarySyncJobPayload
 {
-    public int PlexServerId { get; set; }
+    public required int PlexServerId { get; init; }
 
-    public int PlexLibraryId { get; set; }
+    public  required int PlexLibraryId { get; init; }
 }
 
 /// <summary>

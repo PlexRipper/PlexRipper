@@ -22,7 +22,6 @@ public class InvalidateLibraryComparisonJobsCommandUnitTests
         );
         await dbContext.SaveChangesAsync(CancellationToken);
 
-        var expected = new BackgroundJobInvalidationResult(2, 0);
         Mock.Mock<IBackgroundJobScheduler>()
             .Setup(x => x.DeleteBatchJobs(
                 It.Is<IReadOnlyCollection<JobKey>>(keys =>
@@ -32,7 +31,7 @@ public class InvalidateLibraryComparisonJobsCommandUnitTests
                 ),
                 CancellationToken
             ))
-            .ReturnsAsync(Result.Ok(expected));
+            .ReturnsAsync(Result.Ok());
 
         // Act
         var result = await Sut.ExecuteAsync(
@@ -42,7 +41,6 @@ public class InvalidateLibraryComparisonJobsCommandUnitTests
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
-        result.Value.ShouldBe(expected);
         Mock.Mock<IBackgroundJobScheduler>().VerifyAll();
     }
 

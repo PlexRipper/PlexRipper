@@ -63,8 +63,8 @@ public interface IBackgroundJobScheduler : ISetupAsync, IStopAsync
     /// </summary>
     /// <param name="jobKeys">The exact logical job names and types to invalidate.</param>
     /// <param name="cancellationToken">A token that cancels database lookup and queued-ticker deletion.</param>
-    /// <returns>A result containing the number deleted and the number for which cancellation was requested.</returns>
-    Task<Result<BackgroundJobInvalidationResult>> DeleteBatchJobs(
+    /// <returns>A successful result when all queued deletions were accepted.</returns>
+    Task<Result> DeleteBatchJobs(
         IReadOnlyCollection<JobKey> jobKeys,
         CancellationToken cancellationToken = default
     );

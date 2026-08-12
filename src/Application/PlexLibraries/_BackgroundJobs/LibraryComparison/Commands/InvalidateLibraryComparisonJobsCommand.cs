@@ -5,7 +5,7 @@ namespace Reaparr.Application;
 /// Queued jobs are deleted; running jobs receive cooperative cancellation and retain their history.
 /// </summary>
 public record InvalidateLibraryComparisonJobsCommand(IReadOnlyCollection<int> PlexLibraryIds)
-    : ICommand<Result<BackgroundJobInvalidationResult>>;
+    : ICommand<Result>;
 
 public class InvalidateLibraryComparisonJobsCommandValidator
     : AbstractValidator<InvalidateLibraryComparisonJobsCommand>
@@ -19,7 +19,7 @@ public class InvalidateLibraryComparisonJobsCommandValidator
 }
 
 public class InvalidateLibraryComparisonJobsCommandHandler
-    : ICommandHandler<InvalidateLibraryComparisonJobsCommand, Result<BackgroundJobInvalidationResult>>
+    : ICommandHandler<InvalidateLibraryComparisonJobsCommand, Result>
 {
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
@@ -36,7 +36,7 @@ public class InvalidateLibraryComparisonJobsCommandHandler
         _backgroundJobScheduler = backgroundJobScheduler;
     }
 
-    public async Task<Result<BackgroundJobInvalidationResult>> ExecuteAsync(
+    public async Task<Result> ExecuteAsync(
         InvalidateLibraryComparisonJobsCommand command,
         CancellationToken cancellationToken
     )
@@ -62,15 +62,7 @@ public class InvalidateLibraryComparisonJobsCommandHandler
         );
 
         if (result.IsSuccess)
-        {
-            _log.Here()
-                .Debug(
-                    "Invalidated comparison jobs for libraries {LibraryIds}: deleted {DeletedCount}, requested cancellation for {CancellationCount}",
-                    command.PlexLibraryIds,
-                    result.Value.DeletedCount,
-                    result.Value.CancellationRequestedCount
-                );
-        }
+            _log.Here().Debug("Invalidated comparison jobs for libraries {LibraryIds}", command.PlexLibraryIds);
 
         return result;
     }

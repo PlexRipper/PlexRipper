@@ -106,14 +106,8 @@ public class LibrarySyncJob : BaseBackgroundJob<LibrarySyncJobPayload, LibrarySy
                         libraryId
                     );
 
-                // The TickerQ execution token is already cancelled, so use a short-lived token
-                // to persist the cancellation and continue processing the queue.
-                using var cleanupTokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(10));
-                var cleanupToken = cleanupTokenSource.Token;
-
                 await UpdateQueueItemAsync(context, LibrarySyncJobStatus.Cancelled);
                 await _notificationHubService.SendRefreshNotificationAsync([RefreshDataType.PlexLibrary]);
-                await _commandExecutor.Send(new CheckQueuedPlexLibraryToSyncCommand(), cleanupToken);
 
                 return;
             }
@@ -150,18 +144,6 @@ public class LibrarySyncJob : BaseBackgroundJob<LibrarySyncJobPayload, LibrarySy
                     );
 
                 await UpdateQueueItemAsync(context, LibrarySyncJobStatus.Completed);
-
-                var comparisonQueueResult = await _commandExecutor.Send(
-                    new ScheduleAffectedLibraryComparisonJobsCommand(libraryId),
-                    cancellationToken
-                );
-
-                if (comparisonQueueResult.IsFailed)
-                    _log.Here()
-                        .Warning(
-                            "Failed to queue comparison jobs for library {LibraryId}",
-                            libraryId
-                        );
             }
         }
 
@@ -169,9 +151,45 @@ public class LibrarySyncJob : BaseBackgroundJob<LibrarySyncJobPayload, LibrarySy
         await _notificationHubService.SendRefreshNotificationAsync(
             [RefreshDataType.PlexLibrary]
         );
+    }
 
-        // Schedule the next library from the queue
-        await _commandExecutor.Send(new CheckQueuedPlexLibraryToSyncCommand(), cancellationToken);
+    protected override async Task ExecuteAfterCompletionAsync(
+        TickerFunctionContext<LibrarySyncJobPayload> context,
+        CancellationToken cancellationToken
+    )
+    {
+        // Schedule the next library only after the terminal job status has been sent to the frontend.
+        // The execution token can already be cancelled when the current sync was cancelled,
+        // so use a bounded cleanup token to ensure queue processing can continue.
+        using var cleanupTokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+        var cleanupToken = cleanupTokenSource.Token;
+        var libraryId = context.Request.PlexLibraryId;
+        var serverId = context.Request.PlexServerId;
+
+        using var dbContext = await _dbContextFactory.CreateAsync();
+        var queueStatus = await dbContext
+            .LibrarySyncJobQueues.Where(x =>
+                x.PlexServerId == serverId && x.PlexLibraryId == libraryId
+            )
+            .Select(x => x.Status)
+            .FirstOrDefaultAsync(cleanupToken);
+
+        if (queueStatus == LibrarySyncJobStatus.Completed)
+        {
+            var comparisonQueueResult = await _commandExecutor.Send(
+                new ScheduleAffectedLibraryComparisonJobsCommand(libraryId),
+                cleanupToken
+            );
+
+            if (comparisonQueueResult.IsFailed)
+                _log.Here()
+                    .Warning(
+                        "Failed to queue comparison jobs for library {LibraryId}",
+                        libraryId
+                    );
+        }
+
+        await _commandExecutor.Send(new CheckQueuedPlexLibraryToSyncCommand(), cleanupToken);
     }
 
     private async Task UpdateQueueItemAsync(

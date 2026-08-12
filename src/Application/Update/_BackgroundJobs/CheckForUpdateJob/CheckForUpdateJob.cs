@@ -28,6 +28,8 @@ public class CheckForUpdateJob : BaseBackgroundJob<CheckForUpdateJobPayload, App
 
     protected override JobTypes JobType => JobTypes.CheckForUpdateJob;
 
+    public static JobKey GetJobKey() => new(nameof(JobTypes.CheckForUpdateJob), JobTypes.CheckForUpdateJob);
+
     protected override async Task ExecuteJobAsync(
         TickerFunctionContext<CheckForUpdateJobPayload> context,
         CancellationToken cancellationToken

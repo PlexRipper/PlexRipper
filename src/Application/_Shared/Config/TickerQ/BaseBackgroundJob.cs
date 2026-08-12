@@ -74,12 +74,12 @@ public abstract class BaseBackgroundJob<TPayload, TUpdate> : ITickerFunction<TPa
         catch (OperationCanceledException)
         {
             await PublishStatusUpdate(context, JobStatus.Cancelled, jobStartTime);
-            throw; // Needs to throw for ThinkerQ to mark as Cancelled
+            throw; // Needs to throw for TickerQ to mark as canceled
         }
         catch
         {
             await PublishStatusUpdate(context, JobStatus.Failed, jobStartTime);
-            throw; // Needs to throw for ThinkQ to mark as failed
+            throw; // Needs to throw for TickerQ to mark as failed
         }
     }
 
@@ -93,10 +93,10 @@ public abstract class BaseBackgroundJob<TPayload, TUpdate> : ITickerFunction<TPa
         CancellationToken cancellationToken
     ) => Task.CompletedTask;
 
-    protected virtual async Task<TUpdate?> GetStatusUpdateDataAsync(
+    protected virtual Task<TUpdate?> GetStatusUpdateDataAsync(
         TickerFunctionContext<TPayload> context,
         CancellationToken cancellationToken
-    ) => null;
+    ) => Task.FromResult<TUpdate?>(null);
 
     private async Task PublishStatusUpdate(
         TickerFunctionContext<TPayload> context,

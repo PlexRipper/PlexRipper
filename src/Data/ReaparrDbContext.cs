@@ -1,7 +1,5 @@
 using System.Data;
 using System.Reflection;
-using AppAny.Quartz.EntityFrameworkCore.Migrations;
-using AppAny.Quartz.EntityFrameworkCore.Migrations.SQLite;
 using EFCore.BulkExtensions;
 using EntityFrameworkCore.Sqlite.Concurrency;
 using Microsoft.Extensions.DependencyInjection;
@@ -267,8 +265,6 @@ public sealed class ReaparrDbContext : DbContext, IReaparrDbContext, IReaparrDbC
     {
         builder.UseCollation(OrderByNaturalExtensions.CollationName);
         builder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
-
-        builder.AddQuartz(x => x.UseSqlite());
         
         // Setup TickerQ
         builder.ApplyConfiguration(new TimeTickerConfigurations<JobTimeTicker>());

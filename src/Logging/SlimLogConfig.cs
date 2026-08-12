@@ -48,7 +48,6 @@ public class SlimLogConfig
             // These filters: No XML encryptor configured. Key {*} may be persisted to storage in unencrypted form.
             // This can be ignored because we use proper auth: https://github.com/dotnet/aspnetcore/issues/3309#issuecomment-404246838
             .Filter.ByExcluding(Matching.FromSource("Microsoft.AspNetCore.DataProtection.KeyManagement.XmlKeyManager"))
-            .MinimumLevel.Override("Quartz", LogEventLevel.Warning)
             .Enrich.FromLogContext();
 
         if (UseInteractiveSinks)

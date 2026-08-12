@@ -22,7 +22,7 @@ public class InspectPlexServerJob : BaseBackgroundJob<InspectPlexServerJobPayloa
     protected override List<RefreshDataType> RefreshDataTypes =>
         [RefreshDataType.PlexServer, RefreshDataType.PlexServerConnection, RefreshDataType.PlexLibrary];
 
-    public static JobKeyV2 GetJobKey(int plexServerId) =>
+    public static JobKey GetJobKey(int plexServerId) =>
         new($"{nameof(JobTypes.InspectPlexServerJob)}_{plexServerId}", JobTypes.InspectPlexServerJob);
 
     public InspectPlexServerJob(

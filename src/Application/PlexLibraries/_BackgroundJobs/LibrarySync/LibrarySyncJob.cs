@@ -41,7 +41,7 @@ public class LibrarySyncJob : BaseBackgroundJob<LibrarySyncJobPayload, LibrarySy
         _notificationHubService = notificationHubService;
     }
 
-    public static JobKeyV2 GetJobKey(int serverId, int libraryId) =>
+    public static JobKey GetJobKey(int serverId, int libraryId) =>
         new($"{nameof(JobTypes.LibrarySyncJob)}_{serverId}_{libraryId}", JobTypes.LibrarySyncJob);
 
     protected override async Task ExecuteJobAsync(

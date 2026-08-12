@@ -25,7 +25,7 @@ public interface IBackgroundJobScheduler : ISetupAsync, IStopAsync
     /// <param name="cancellationToken">A token that cancels creation of the ticker; it does not interrupt the job after it has started.</param>
     /// <returns>A task containing TickerQ's result and, when successful, the persisted one-time ticker.</returns>
     Task<TickerResult<JobTimeTicker>> ExecuteJob<TFunction, TRequest>(
-        JobKeyV2 jobKey,
+        JobKey jobKey,
         TRequest request,
         CancellationToken cancellationToken = default
     )
@@ -44,7 +44,7 @@ public interface IBackgroundJobScheduler : ISetupAsync, IStopAsync
     /// <returns>A task containing TickerQ's result and, when successful, the persisted scheduled ticker.</returns>
     // ReSharper disable once UnusedMember.Global -- Part of the scheduler abstraction for delayed jobs.
     Task<TickerResult<JobTimeTicker>> ScheduleJob<TFunction, TRequest>(
-        JobKeyV2 jobKey,
+        JobKey jobKey,
         TRequest request,
         DateTime? executionTime = null,
         CancellationToken cancellationToken = default
@@ -58,7 +58,7 @@ public interface IBackgroundJobScheduler : ISetupAsync, IStopAsync
     /// <param name="jobKey">The logical job name and type whose current occurrence should be interrupted.</param>
     /// <param name="cancellationToken">A token that cancels the database lookup used to find matching ticker identifiers.</param>
     /// <returns><see langword="true"/> when TickerQ accepted a cancellation request; otherwise, <see langword="false"/>.</returns>
-    Task<bool> Interrupt(JobKeyV2 jobKey, CancellationToken cancellationToken = default);
+    Task<bool> Interrupt(JobKey jobKey, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Determines whether a one-time ticker or cron occurrence with the supplied logical key currently has an active
@@ -67,7 +67,7 @@ public interface IBackgroundJobScheduler : ISetupAsync, IStopAsync
     /// <param name="jobKey">The logical job name and type to inspect.</param>
     /// <param name="cancellationToken">A token that cancels the database query.</param>
     /// <returns><see langword="true"/> when an active matching ticker or occurrence exists; otherwise, <see langword="false"/>.</returns>
-    Task<bool> IsJobRunning(JobKeyV2 jobKey, CancellationToken cancellationToken = default);
+    Task<bool> IsJobRunning(JobKey jobKey, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Determines whether the scheduler contains an active one-time ticker or a registered cron ticker with the
@@ -76,7 +76,7 @@ public interface IBackgroundJobScheduler : ISetupAsync, IStopAsync
     /// </summary>
     /// <param name="jobKey">The logical job name and type to locate.</param>
     /// <returns><see langword="true"/> when a matching active time ticker or cron definition exists; otherwise, <see langword="false"/>.</returns>
-    Task<bool> CheckExists(JobKeyV2 jobKey);
+    Task<bool> CheckExists(JobKey jobKey);
 
     /// <summary>
     /// Retrieves application-level status records for all one-time tickers and cron occurrences that are idle, queued,
@@ -203,7 +203,7 @@ public class BackgroundJobScheduler : IBackgroundJobScheduler
     }
 
     /// <inheritdoc />
-    public async Task<bool> Interrupt(JobKeyV2 jobKey, CancellationToken cancellationToken = default)
+    public async Task<bool> Interrupt(JobKey jobKey, CancellationToken cancellationToken = default)
     {
         using var dbContext = await _dbContextFactory.CreateAsync();
 
@@ -227,7 +227,7 @@ public class BackgroundJobScheduler : IBackgroundJobScheduler
 
     /// <inheritdoc />
     public async Task<bool> IsJobRunning(
-        JobKeyV2 jobKey,
+        JobKey jobKey,
         CancellationToken cancellationToken = default
     )
     {
@@ -254,7 +254,7 @@ public class BackgroundJobScheduler : IBackgroundJobScheduler
     }
 
     /// <inheritdoc />
-    public async Task<bool> CheckExists(JobKeyV2 jobKey)
+    public async Task<bool> CheckExists(JobKey jobKey)
     {
         using var dbContext = await _dbContextFactory.CreateAsync();
 
@@ -273,7 +273,7 @@ public class BackgroundJobScheduler : IBackgroundJobScheduler
 
     /// <inheritdoc />
     public Task<TickerResult<JobTimeTicker>> ExecuteJob<TFunction, TRequest>(
-        JobKeyV2 jobKey,
+        JobKey jobKey,
         TRequest request,
         CancellationToken cancellationToken = default
     )
@@ -292,7 +292,7 @@ public class BackgroundJobScheduler : IBackgroundJobScheduler
 
     /// <inheritdoc />
     public Task<TickerResult<JobTimeTicker>> ScheduleJob<TFunction, TRequest>(
-        JobKeyV2 jobKey,
+        JobKey jobKey,
         TRequest request,
         DateTime? executionTime = null,
         CancellationToken cancellationToken = default

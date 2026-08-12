@@ -39,7 +39,7 @@ public class MetadataSyncJob : BaseBackgroundJob<MetadataSyncJobPayload, Metadat
 
     protected override List<RefreshDataType> RefreshDataTypes => [RefreshDataType.PlexLibrary];
 
-    public static JobKeyV2 GetJobKey(int serverId) =>
+    public static JobKey GetJobKey(int serverId) =>
         new($"{nameof(JobTypes.MetadataSyncJob)}_{serverId}", JobTypes.MetadataSyncJob);
 
     protected override async Task ExecuteJobAsync(

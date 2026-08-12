@@ -40,7 +40,7 @@ public class DownloadJob : BaseBackgroundJob<DownloadTaskKey, DownloadJobUpdateD
 
     protected override List<RefreshDataType> RefreshDataTypes => [RefreshDataType.DownloadTasks];
 
-    public static JobKeyV2 GetJobKey(Guid id) =>
+    public static JobKey GetJobKey(Guid id) =>
         new($"{nameof(JobTypes.DownloadJob)}_{id}", JobTypes.DownloadJob);
 
     protected override async Task ExecuteJobAsync(

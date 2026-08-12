@@ -31,7 +31,7 @@ public class MoveDownloadFileJob : BaseBackgroundJob<DownloadTaskKey, MoveDownlo
 
     protected override List<RefreshDataType> RefreshDataTypes => [RefreshDataType.DownloadTasks];
 
-    public static JobKeyV2 GetJobKey(Guid id) =>
+    public static JobKey GetJobKey(Guid id) =>
         new($"{nameof(JobTypes.MoveDownloadFileJob)}_{id}", JobTypes.MoveDownloadFileJob);
 
     protected override async Task ExecuteJobAsync(

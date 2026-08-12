@@ -37,7 +37,7 @@ public class
 
     protected override List<RefreshDataType> RefreshDataTypes => [];
 
-    public static JobKeyV2 GetJobKey(int ownedPlexLibraryId, int remotePlexLibraryId) => new(
+    public static JobKey GetJobKey(int ownedPlexLibraryId, int remotePlexLibraryId) => new(
         $"{nameof(JobTypes.LibraryComparisonJob)}_{ownedPlexLibraryId}_{remotePlexLibraryId}",
         JobTypes.LibraryComparisonJob
     );

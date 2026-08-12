@@ -6,7 +6,7 @@ public static partial class DbContextExtensions
 {
     public static Task<bool> HasActiveLibraryComparisonAsync(
         this IReaparrDbContext dbContext,
-        IEnumerable<JobKeyV2> jobKeys,
+        IEnumerable<JobKey> jobKeys,
         CancellationToken cancellationToken
     ) => dbContext.TimeTickers.AnyAsync(
         x => jobKeys.Select(y => y.Name).Contains(x.JobKey)

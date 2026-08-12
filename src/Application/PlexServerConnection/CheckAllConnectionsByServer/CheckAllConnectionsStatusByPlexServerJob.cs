@@ -32,7 +32,7 @@ public class CheckAllConnectionsStatusByPlexServerJob
     protected override List<RefreshDataType> RefreshDataTypes =>
         [RefreshDataType.PlexServer, RefreshDataType.PlexServerConnection];
 
-    public static JobKeyV2 GetJobKey() =>
+    public static JobKey GetJobKey() =>
         new(
             nameof(JobTypes.CheckAllConnectionsStatusByPlexServerJob),
             JobTypes.CheckAllConnectionsStatusByPlexServerJob

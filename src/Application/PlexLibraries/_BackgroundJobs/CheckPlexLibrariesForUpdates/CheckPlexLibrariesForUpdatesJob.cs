@@ -32,7 +32,7 @@ public class CheckPlexLibrariesForUpdatesJob
 
     protected override JobTypes JobType => JobTypes.CheckPlexLibrariesForUpdatesJob;
 
-    public static JobKeyV2 GetJobKey() => new(
+    public static JobKey GetJobKey() => new(
         nameof(JobTypes.CheckPlexLibrariesForUpdatesJob),
         JobTypes.CheckPlexLibrariesForUpdatesJob
     );

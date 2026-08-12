@@ -29,11 +29,11 @@ public class CheckQueuedPlexLibraryToSyncCommandHandlerUnitTests
         // Assert
         result.IsSuccess.ShouldBeTrue();
         Mock.Mock<IBackgroundJobScheduler>()
-            .Verify(x => x.CheckExists(It.IsAny<JobKeyV2>()), Times.Never());
+            .Verify(x => x.CheckExists(It.IsAny<JobKey>()), Times.Never());
         Mock.Mock<IBackgroundJobScheduler>()
             .Verify(
                 x => x.ExecuteJob<LibrarySyncJob, LibrarySyncJobPayload>(
-                    It.IsAny<JobKeyV2>(),
+                    It.IsAny<JobKey>(),
                     It.IsAny<LibrarySyncJobPayload>(),
                     It.IsAny<CancellationToken>()
                 ),
@@ -83,7 +83,7 @@ public class CheckQueuedPlexLibraryToSyncCommandHandlerUnitTests
         Mock.Mock<IBackgroundJobScheduler>().Setup(x => x.CheckExists(jobKey)).ReturnsAsync(false);
         Mock.Mock<IBackgroundJobScheduler>()
             .Setup(x => x.ExecuteJob<LibrarySyncJob, LibrarySyncJobPayload>(
-                    It.IsAny<JobKeyV2>(),
+                    It.IsAny<JobKey>(),
                     It.IsAny<LibrarySyncJobPayload>(),
                     It.IsAny<CancellationToken>()
                 ))
@@ -100,7 +100,7 @@ public class CheckQueuedPlexLibraryToSyncCommandHandlerUnitTests
             .Verify(
                 x =>
                     x.ExecuteJob<LibrarySyncJob, LibrarySyncJobPayload>(
-                        It.Is<JobKeyV2>(j => j.Equals(jobKey)),
+                        It.Is<JobKey>(j => j.Equals(jobKey)),
                         It.IsAny<LibrarySyncJobPayload>(),
                         It.IsAny<CancellationToken>()
                     ),
@@ -158,7 +158,7 @@ public class CheckQueuedPlexLibraryToSyncCommandHandlerUnitTests
         Mock.Mock<IBackgroundJobScheduler>()
             .Verify(
                 x => x.ExecuteJob<LibrarySyncJob, LibrarySyncJobPayload>(
-                    It.IsAny<JobKeyV2>(),
+                    It.IsAny<JobKey>(),
                     It.IsAny<LibrarySyncJobPayload>(),
                     It.IsAny<CancellationToken>()
                 ),
@@ -215,11 +215,11 @@ public class CheckQueuedPlexLibraryToSyncCommandHandlerUnitTests
 
         var expectedJobKey = LibrarySyncJob.GetJobKey(server.Id, libraries[1].Id); // Should schedule the one with priority 1
         Mock.Mock<IBackgroundJobScheduler>()
-            .Setup(x => x.CheckExists(It.IsAny<JobKeyV2>()))
+            .Setup(x => x.CheckExists(It.IsAny<JobKey>()))
             .ReturnsAsync(false);
         Mock.Mock<IBackgroundJobScheduler>()
             .Setup(x => x.ExecuteJob<LibrarySyncJob, LibrarySyncJobPayload>(
-                    It.IsAny<JobKeyV2>(),
+                    It.IsAny<JobKey>(),
                     It.IsAny<LibrarySyncJobPayload>(),
                     It.IsAny<CancellationToken>()
                 ))
@@ -236,7 +236,7 @@ public class CheckQueuedPlexLibraryToSyncCommandHandlerUnitTests
             .Verify(
                 x =>
                     x.ExecuteJob<LibrarySyncJob, LibrarySyncJobPayload>(
-                        It.Is<JobKeyV2>(j => j.Equals(expectedJobKey)),
+                        It.Is<JobKey>(j => j.Equals(expectedJobKey)),
                         It.IsAny<LibrarySyncJobPayload>(),
                         It.IsAny<CancellationToken>()
                     ),
@@ -286,7 +286,7 @@ public class CheckQueuedPlexLibraryToSyncCommandHandlerUnitTests
         Mock.Mock<IBackgroundJobScheduler>().Setup(x => x.CheckExists(jobKey)).ReturnsAsync(false);
         Mock.Mock<IBackgroundJobScheduler>()
             .Setup(x => x.ExecuteJob<LibrarySyncJob, LibrarySyncJobPayload>(
-                    It.IsAny<JobKeyV2>(),
+                    It.IsAny<JobKey>(),
                     It.IsAny<LibrarySyncJobPayload>(),
                     It.IsAny<CancellationToken>()
                 ))
@@ -308,7 +308,7 @@ public class CheckQueuedPlexLibraryToSyncCommandHandlerUnitTests
         Mock.Mock<IBackgroundJobScheduler>()
             .Verify(
                 x => x.ExecuteJob<LibrarySyncJob, LibrarySyncJobPayload>(
-                    It.IsAny<JobKeyV2>(),
+                    It.IsAny<JobKey>(),
                     It.IsAny<LibrarySyncJobPayload>(),
                     It.IsAny<CancellationToken>()
                 ),
@@ -371,7 +371,7 @@ public class CheckQueuedPlexLibraryToSyncCommandHandlerUnitTests
         Mock.Mock<IBackgroundJobScheduler>()
             .Verify(
                 x => x.ExecuteJob<LibrarySyncJob, LibrarySyncJobPayload>(
-                    It.IsAny<JobKeyV2>(),
+                    It.IsAny<JobKey>(),
                     It.IsAny<LibrarySyncJobPayload>(),
                     It.IsAny<CancellationToken>()
                 ),
@@ -449,11 +449,11 @@ public class CheckQueuedPlexLibraryToSyncCommandHandlerUnitTests
         var jobKey2 = LibrarySyncJob.GetJobKey(servers[1].Id, server2Libraries[0].Id);
 
         Mock.Mock<IBackgroundJobScheduler>()
-            .Setup(x => x.CheckExists(It.IsAny<JobKeyV2>()))
+            .Setup(x => x.CheckExists(It.IsAny<JobKey>()))
             .ReturnsAsync(false);
         Mock.Mock<IBackgroundJobScheduler>()
             .Setup(x => x.ExecuteJob<LibrarySyncJob, LibrarySyncJobPayload>(
-                    It.IsAny<JobKeyV2>(),
+                    It.IsAny<JobKey>(),
                     It.IsAny<LibrarySyncJobPayload>(),
                     It.IsAny<CancellationToken>()
                 ))
@@ -471,7 +471,7 @@ public class CheckQueuedPlexLibraryToSyncCommandHandlerUnitTests
         Mock.Mock<IBackgroundJobScheduler>()
             .Verify(
                 x => x.ExecuteJob<LibrarySyncJob, LibrarySyncJobPayload>(
-                    It.IsAny<JobKeyV2>(),
+                    It.IsAny<JobKey>(),
                     It.IsAny<LibrarySyncJobPayload>(),
                     It.IsAny<CancellationToken>()
                 ),
@@ -483,7 +483,7 @@ public class CheckQueuedPlexLibraryToSyncCommandHandlerUnitTests
             .Verify(
                 x =>
                     x.ExecuteJob<LibrarySyncJob, LibrarySyncJobPayload>(
-                        It.Is<JobKeyV2>(j => j.Equals(jobKey1)),
+                        It.Is<JobKey>(j => j.Equals(jobKey1)),
                         It.IsAny<LibrarySyncJobPayload>(),
                         It.IsAny<CancellationToken>()
                     ),
@@ -493,7 +493,7 @@ public class CheckQueuedPlexLibraryToSyncCommandHandlerUnitTests
             .Verify(
                 x =>
                     x.ExecuteJob<LibrarySyncJob, LibrarySyncJobPayload>(
-                        It.Is<JobKeyV2>(j => j.Equals(jobKey2)),
+                        It.Is<JobKey>(j => j.Equals(jobKey2)),
                         It.IsAny<LibrarySyncJobPayload>(),
                         It.IsAny<CancellationToken>()
                     ),
@@ -554,7 +554,7 @@ public class CheckQueuedPlexLibraryToSyncCommandHandlerUnitTests
             .ReturnsAsync(false);
         Mock.Mock<IBackgroundJobScheduler>()
             .Setup(x => x.ExecuteJob<LibrarySyncJob, LibrarySyncJobPayload>(
-                    It.IsAny<JobKeyV2>(),
+                    It.IsAny<JobKey>(),
                     It.IsAny<LibrarySyncJobPayload>(),
                     It.IsAny<CancellationToken>()
                 ))
@@ -572,7 +572,7 @@ public class CheckQueuedPlexLibraryToSyncCommandHandlerUnitTests
         Mock.Mock<IBackgroundJobScheduler>()
             .Verify(
                 x => x.ExecuteJob<LibrarySyncJob, LibrarySyncJobPayload>(
-                    It.IsAny<JobKeyV2>(),
+                    It.IsAny<JobKey>(),
                     It.IsAny<LibrarySyncJobPayload>(),
                     It.IsAny<CancellationToken>()
                 ),
@@ -582,7 +582,7 @@ public class CheckQueuedPlexLibraryToSyncCommandHandlerUnitTests
             .Verify(
                 x =>
                     x.ExecuteJob<LibrarySyncJob, LibrarySyncJobPayload>(
-                        It.Is<JobKeyV2>(j => j.Equals(onlineServerJobKey)),
+                        It.Is<JobKey>(j => j.Equals(onlineServerJobKey)),
                         It.IsAny<LibrarySyncJobPayload>(),
                         It.IsAny<CancellationToken>()
                     ),
@@ -650,7 +650,7 @@ public class CheckQueuedPlexLibraryToSyncCommandHandlerUnitTests
         Mock.Mock<IBackgroundJobScheduler>()
             .Verify(
                 x => x.ExecuteJob<LibrarySyncJob, LibrarySyncJobPayload>(
-                    It.IsAny<JobKeyV2>(),
+                    It.IsAny<JobKey>(),
                     It.IsAny<LibrarySyncJobPayload>(),
                     It.IsAny<CancellationToken>()
                 ),
@@ -692,7 +692,7 @@ public class CheckQueuedPlexLibraryToSyncCommandHandlerUnitTests
         Mock.Mock<IBackgroundJobScheduler>().Setup(x => x.CheckExists(jobKey)).ReturnsAsync(false);
         Mock.Mock<IBackgroundJobScheduler>()
             .Setup(x => x.ExecuteJob<LibrarySyncJob, LibrarySyncJobPayload>(
-                    It.IsAny<JobKeyV2>(),
+                    It.IsAny<JobKey>(),
                     It.IsAny<LibrarySyncJobPayload>(),
                     It.IsAny<CancellationToken>()
                 ))
@@ -711,7 +711,7 @@ public class CheckQueuedPlexLibraryToSyncCommandHandlerUnitTests
             .Verify(
                 x =>
                     x.ExecuteJob<LibrarySyncJob, LibrarySyncJobPayload>(
-                        It.Is<JobKeyV2>(j => j.Equals(jobKey)),
+                        It.Is<JobKey>(j => j.Equals(jobKey)),
                         It.IsAny<LibrarySyncJobPayload>(),
                         It.IsAny<CancellationToken>()
                     ),
@@ -766,7 +766,7 @@ public class CheckQueuedPlexLibraryToSyncCommandHandlerUnitTests
         Mock.Mock<IBackgroundJobScheduler>().Setup(x => x.CheckExists(expectedJobKey)).ReturnsAsync(false);
         Mock.Mock<IBackgroundJobScheduler>()
             .Setup(x => x.ExecuteJob<LibrarySyncJob, LibrarySyncJobPayload>(
-                    It.IsAny<JobKeyV2>(),
+                    It.IsAny<JobKey>(),
                     It.IsAny<LibrarySyncJobPayload>(),
                     It.IsAny<CancellationToken>()
                 ))
@@ -783,7 +783,7 @@ public class CheckQueuedPlexLibraryToSyncCommandHandlerUnitTests
             .Verify(
                 x =>
                     x.ExecuteJob<LibrarySyncJob, LibrarySyncJobPayload>(
-                        It.Is<JobKeyV2>(j => j.Equals(expectedJobKey)),
+                        It.Is<JobKey>(j => j.Equals(expectedJobKey)),
                         It.IsAny<LibrarySyncJobPayload>(),
                         It.IsAny<CancellationToken>()
                     ),
@@ -846,7 +846,7 @@ public class CheckQueuedPlexLibraryToSyncCommandHandlerUnitTests
         Mock.Mock<IBackgroundJobScheduler>()
             .Verify(
                 x => x.ExecuteJob<LibrarySyncJob, LibrarySyncJobPayload>(
-                    It.IsAny<JobKeyV2>(),
+                    It.IsAny<JobKey>(),
                     It.IsAny<LibrarySyncJobPayload>(),
                     It.IsAny<CancellationToken>()
                 ),
@@ -902,7 +902,7 @@ public class CheckQueuedPlexLibraryToSyncCommandHandlerUnitTests
         Mock.Mock<IBackgroundJobScheduler>().Setup(x => x.CheckExists(expectedJobKey)).ReturnsAsync(false);
         Mock.Mock<IBackgroundJobScheduler>()
             .Setup(x => x.ExecuteJob<LibrarySyncJob, LibrarySyncJobPayload>(
-                    It.IsAny<JobKeyV2>(),
+                    It.IsAny<JobKey>(),
                     It.IsAny<LibrarySyncJobPayload>(),
                     It.IsAny<CancellationToken>()
                 ))
@@ -922,7 +922,7 @@ public class CheckQueuedPlexLibraryToSyncCommandHandlerUnitTests
             .Verify(
                 x =>
                     x.ExecuteJob<LibrarySyncJob, LibrarySyncJobPayload>(
-                        It.Is<JobKeyV2>(j => j.Equals(expectedJobKey)),
+                        It.Is<JobKey>(j => j.Equals(expectedJobKey)),
                         It.Is<LibrarySyncJobPayload>(payload =>
                             payload.PlexServerId == servers[1].Id
                             && payload.PlexLibraryId == secondServerLibrary.Id
@@ -935,7 +935,7 @@ public class CheckQueuedPlexLibraryToSyncCommandHandlerUnitTests
             .Verify(
                 x =>
                     x.ExecuteJob<LibrarySyncJob, LibrarySyncJobPayload>(
-                        It.Is<JobKeyV2>(j => j.Equals(existingJobKey)),
+                        It.Is<JobKey>(j => j.Equals(existingJobKey)),
                         It.IsAny<LibrarySyncJobPayload>(),
                         It.IsAny<CancellationToken>()
                     ),
@@ -944,7 +944,7 @@ public class CheckQueuedPlexLibraryToSyncCommandHandlerUnitTests
         Mock.Mock<IBackgroundJobScheduler>()
             .Verify(
                 x => x.ExecuteJob<LibrarySyncJob, LibrarySyncJobPayload>(
-                    It.IsAny<JobKeyV2>(),
+                    It.IsAny<JobKey>(),
                     It.IsAny<LibrarySyncJobPayload>(),
                     It.IsAny<CancellationToken>()
                 ),
@@ -1004,7 +1004,7 @@ public class CheckQueuedPlexLibraryToSyncCommandHandlerUnitTests
         Mock.Mock<IBackgroundJobScheduler>().Setup(x => x.CheckExists(onlineJobKey)).ReturnsAsync(false);
         Mock.Mock<IBackgroundJobScheduler>()
             .Setup(x => x.ExecuteJob<LibrarySyncJob, LibrarySyncJobPayload>(
-                    It.IsAny<JobKeyV2>(),
+                    It.IsAny<JobKey>(),
                     It.IsAny<LibrarySyncJobPayload>(),
                     It.IsAny<CancellationToken>()
                 ))
@@ -1033,7 +1033,7 @@ public class CheckQueuedPlexLibraryToSyncCommandHandlerUnitTests
             .Verify(
                 x =>
                     x.ExecuteJob<LibrarySyncJob, LibrarySyncJobPayload>(
-                        It.Is<JobKeyV2>(j => j.Equals(onlineJobKey)),
+                        It.Is<JobKey>(j => j.Equals(onlineJobKey)),
                         It.Is<LibrarySyncJobPayload>(payload =>
                             payload.PlexServerId == servers[1].Id
                             && payload.PlexLibraryId == onlineServerLibrary.Id
@@ -1045,7 +1045,7 @@ public class CheckQueuedPlexLibraryToSyncCommandHandlerUnitTests
         Mock.Mock<IBackgroundJobScheduler>()
             .Verify(
                 x => x.ExecuteJob<LibrarySyncJob, LibrarySyncJobPayload>(
-                    It.IsAny<JobKeyV2>(),
+                    It.IsAny<JobKey>(),
                     It.IsAny<LibrarySyncJobPayload>(),
                     It.IsAny<CancellationToken>()
                 ),
@@ -1121,7 +1121,7 @@ public class CheckQueuedPlexLibraryToSyncCommandHandlerUnitTests
             .ReturnsAsync(false);
         Mock.Mock<IBackgroundJobScheduler>()
             .Setup(x => x.ExecuteJob<LibrarySyncJob, LibrarySyncJobPayload>(
-                    It.IsAny<JobKeyV2>(),
+                    It.IsAny<JobKey>(),
                     It.IsAny<LibrarySyncJobPayload>(),
                     It.IsAny<CancellationToken>()
                 ))
@@ -1139,7 +1139,7 @@ public class CheckQueuedPlexLibraryToSyncCommandHandlerUnitTests
         Mock.Mock<IBackgroundJobScheduler>()
             .Verify(
                 x => x.ExecuteJob<LibrarySyncJob, LibrarySyncJobPayload>(
-                    It.IsAny<JobKeyV2>(),
+                    It.IsAny<JobKey>(),
                     It.IsAny<LibrarySyncJobPayload>(),
                     It.IsAny<CancellationToken>()
                 ),
@@ -1149,7 +1149,7 @@ public class CheckQueuedPlexLibraryToSyncCommandHandlerUnitTests
             .Verify(
                 x =>
                     x.ExecuteJob<LibrarySyncJob, LibrarySyncJobPayload>(
-                        It.Is<JobKeyV2>(j => j.Equals(expectedJobKey)),
+                        It.Is<JobKey>(j => j.Equals(expectedJobKey)),
                         It.IsAny<LibrarySyncJobPayload>(),
                         It.IsAny<CancellationToken>()
                     ),

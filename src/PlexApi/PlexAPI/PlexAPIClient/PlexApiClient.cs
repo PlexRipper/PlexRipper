@@ -1,7 +1,6 @@
 using System.Net;
 using System.Text.Json;
 using HttpClientToCurl.Extensions;
-using Reaparr.Application.Contracts;
 using Serilog.Events;
 
 namespace Reaparr.PlexApi;
@@ -28,11 +27,12 @@ public class PlexApiClient : IPlexApiClient
 
     // The generated Speakeasy client does not expose a CancellationToken overload.
     // Keep its required contract while callers that can supply a token use the overload below.
-    public Task<HttpResponseMessage> SendAsync(HttpRequestMessage request) => SendAsync(request, CancellationToken.None);
+    public Task<HttpResponseMessage> SendAsync(HttpRequestMessage request) =>
+        SendAsync(request, CancellationToken.None);
 
     public async Task<HttpResponseMessage> SendAsync(
         HttpRequestMessage request,
-        CancellationToken cancellationToken = default
+        CancellationToken cancellationToken
     )
     {
         request.Headers.Remove("user-agent");
@@ -49,7 +49,8 @@ public class PlexApiClient : IPlexApiClient
 
         try
         {
-            response = await _defaultClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
+            response = await _defaultClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead,
+                cancellationToken);
         }
         catch (TaskCanceledException) when (!cancellationToken.IsCancellationRequested)
         {
@@ -79,17 +80,19 @@ public class PlexApiClient : IPlexApiClient
         }
 
         if (_log.Here().IsLogLevelEnabled(LogEventLevel.Verbose))
-            _log.Here().Verbose("Response: {Response}", await response.Content.ReadAsFormattedJsonAsync(cancellationToken));
+            _log.Here()
+                .Verbose("Response: {Response}", await response.Content.ReadAsFormattedJsonAsync(cancellationToken));
 
         return response;
     }
 
     // The generated Speakeasy client does not expose a CancellationToken overload.
-    public Task<HttpRequestMessage> CloneAsync(HttpRequestMessage request) => CloneAsync(request, CancellationToken.None);
+    public Task<HttpRequestMessage> CloneAsync(HttpRequestMessage request) =>
+        CloneAsync(request, CancellationToken.None);
 
     public async Task<HttpRequestMessage> CloneAsync(
         HttpRequestMessage request,
-        CancellationToken cancellationToken = default
+        CancellationToken cancellationToken
     )
     {
         var clone = new HttpRequestMessage(request.Method, request.RequestUri)
@@ -135,38 +138,38 @@ public class PlexApiClient : IPlexApiClient
 
     private void SendCompletedProgress(HttpRequestMessage request, HttpStatusCode statusCode, string reasonPhrase)
     {
-        request.GetRetryProgressCallback()?.Invoke(
-            new HttpRequestRetryProgress
-            {
-                RetryAttemptIndex = _options.RetryCount,
-                RetryAttemptCount = _options.RetryCount,
-                TimeToNextRetry = 0,
-                StatusCode = (int)statusCode,
-                ConnectionSuccessful = false,
-                Completed = true,
-                Message = reasonPhrase,
-                ErrorMessage = reasonPhrase,
-                RequestUri = request.RequestUri?.ToString() ?? "unknown",
-            }
-        );
+        request.GetRetryProgressCallback()
+            ?.Invoke(
+                new HttpRequestRetryProgress
+                {
+                    RetryAttemptIndex = _options.RetryCount,
+                    RetryAttemptCount = _options.RetryCount,
+                    TimeToNextRetry = 0,
+                    StatusCode = (int)statusCode,
+                    ConnectionSuccessful = false,
+                    Completed = true,
+                    Message = reasonPhrase,
+                    ErrorMessage = reasonPhrase,
+                    RequestUri = request.RequestUri?.ToString() ?? "unknown",
+                }
+            );
     }
 
     private HttpResponseMessage CreateErrorResponse(
         HttpRequestMessage request,
         HttpStatusCode statusCode,
         string reasonPhrase
-    ) =>
-        new(statusCode)
-        {
-            RequestMessage = request,
-            ReasonPhrase = reasonPhrase,
-            Content = JsonSerializer
-                .Serialize(
-                    new PlexError(reasonPhrase) { Code = (int)statusCode, Status = (int)statusCode },
-                    DefaultJsonSerializerOptions.ConfigStandard
-                )
-                .ToStringContent(),
-        };
+    ) => new(statusCode)
+    {
+        RequestMessage = request,
+        ReasonPhrase = reasonPhrase,
+        Content = JsonSerializer
+            .Serialize(
+                new PlexError(reasonPhrase) { Code = (int)statusCode, Status = (int)statusCode },
+                DefaultJsonSerializerOptions.ConfigStandard
+            )
+            .ToStringContent(),
+    };
 
     public void Dispose()
     {

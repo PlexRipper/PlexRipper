@@ -125,14 +125,14 @@ public class Boot : IHostedService
     private async void OnStarted()
     {
         _log.Here().Debug("Boot.OnStarted has been called");
-        
+
         var result = await Result.Try(async Task () =>
         {
             await _commandExecutor.Send(new NotifyArrAppsOnStartupCommand(), _appLifetime.ApplicationStopping);
             await _commandExecutor.Send(new WarmupMediaQueryCacheCommand(), _appLifetime.ApplicationStopping);
         }, exception =>
         {
-            if (exception is OperationCanceledException canceledException &&
+            if (exception is OperationCanceledException &&
                 _appLifetime.ApplicationStopping.IsCancellationRequested)
             {
                 _log.Here().Debug("Boot.OnStarted was cancelled because application shutdown was requested");

@@ -1,5 +1,3 @@
-using Reaparr.Application;
-
 namespace Reaparr.BaseTests;
 
 public static class TestHttpClientExtensions

@@ -1,4 +1,3 @@
-using Reaparr.SignalR.Contracts;
 using TickerQ.Utilities.Base;
 
 namespace Reaparr.Application.UnitTests;

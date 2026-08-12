@@ -78,7 +78,7 @@ public class LibrarySyncProgressStore : ILibrarySyncProgressStore
         _store[plexLibraryId] = progress;
 
         // Send initial progress update to clients
-        await SendProgressUpdateAsync(progress, cancellationToken);
+        await SendProgressUpdateAsync(progress);
     }
 
     public async Task UpdateItemAsync(
@@ -99,6 +99,7 @@ public class LibrarySyncProgressStore : ILibrarySyncProgressStore
                     {
                         if (i.MediaType != item.MediaType)
                             return i;
+
                         replaced = true;
                         return item;
                     })
@@ -114,7 +115,7 @@ public class LibrarySyncProgressStore : ILibrarySyncProgressStore
             }
         );
 
-        await SendProgressUpdateAsync(plexLibraryId, cancellationToken);
+        await SendProgressUpdateAsync(plexLibraryId);
     }
 
     public async Task UpdateErrorAsync(
@@ -129,12 +130,12 @@ public class LibrarySyncProgressStore : ILibrarySyncProgressStore
             (_, existing) => existing with { Errors = errorResult.Errors }
         );
 
-        await SendProgressUpdateAsync(updated, cancellationToken);
+        await SendProgressUpdateAsync(updated);
 
         _store.TryRemove(plexLibraryId, out _);
     }
 
-    private async Task SendProgressUpdateAsync(int plexLibraryId, CancellationToken cancellationToken = default)
+    private async Task SendProgressUpdateAsync(int plexLibraryId)
     {
         if (!_store.TryGetValue(plexLibraryId, out var progress))
         {
@@ -147,10 +148,10 @@ public class LibrarySyncProgressStore : ILibrarySyncProgressStore
             return;
         }
 
-        await SendProgressUpdateAsync(progress, cancellationToken);
+        await SendProgressUpdateAsync(progress);
     }
 
-    private async Task SendProgressUpdateAsync(LibraryProgress progress, CancellationToken cancellationToken = default)
+    private async Task SendProgressUpdateAsync(LibraryProgress progress)
     {
         var dto = new LibrarySyncProgressDTO
         {

@@ -41,14 +41,13 @@ public static partial class DbContextExtensions
     /// </summary>
     /// <param name="mediaType"> The <see cref="PlexMediaType"/> to get the default destination <see cref="FolderPath"/> for.</param>
     /// <param name="dbContext"> The <see cref="IReaparrDbContext"/> to use.</param>
-    /// <param name="token">The <see cref="CancellationToken"/> to use.</param>
-    /// <returns></returns>
     public static async Task<FolderPath> GetDefaultDestinationFolderPath(
         this IReaparrDbContext dbContext,
         PlexMediaType mediaType
     )
     {
         var id = mediaType.ToDefaultDestinationFolderId();
+
         // Default folder paths always exist
         return (await dbContext.FolderPaths.GetAsync(id, CancellationToken.None))!;
     }

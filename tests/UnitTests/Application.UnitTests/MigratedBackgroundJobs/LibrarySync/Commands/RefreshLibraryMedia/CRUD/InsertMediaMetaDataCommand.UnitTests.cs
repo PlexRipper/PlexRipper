@@ -1,6 +1,3 @@
-using Reaparr.Application;
-using Reaparr.PlexApi.Contracts;
-
 namespace Reaparr.Application.UnitTests;
 
 public class InsertMediaMetaDataCommandUnitTests : BaseCommandUnitTest<InsertMediaMetaDataCommand>
@@ -523,20 +520,19 @@ public class InsertMediaMetaDataCommandUnitTests : BaseCommandUnitTest<InsertMed
         // Create actors with special characters
         var baseActors = FakePlexApiData.GetLibraryMediaItemActorDTO(seed).Generate(5);
         var specialActors = baseActors
-            .Select(
-                (actor, index) =>
-                    actor with
+            .Select((actor, index) =>
+                actor with
+                {
+                    Name = index switch
                     {
-                        Name = index switch
-                        {
-                            0 => "José María Aznar",
-                            1 => "André François",
-                            2 => "张三丰",
-                            3 => "محمد عبدالله",
-                            4 => "Björk Guðmundsdóttir",
-                            _ => actor.Name,
-                        },
-                    }
+                        0 => "José María Aznar",
+                        1 => "André François",
+                        2 => "张三丰",
+                        3 => "محمد عبدالله",
+                        4 => "Björk Guðmundsdóttir",
+                        _ => actor.Name,
+                    },
+                }
             )
             .ToList();
 
@@ -658,13 +654,12 @@ public class InsertMediaMetaDataCommandUnitTests : BaseCommandUnitTest<InsertMed
         // Create actors with very long names
         var baseActors = FakePlexApiData.GetLibraryMediaItemActorDTO(seed).GenerateUnique(3, x => x.Key);
         var longNameActors = baseActors
-            .Select(
-                (actor, index) =>
-                    actor with
-                    {
-                        // Very long name
-                        Name = new string('A', 250) + index,
-                    }
+            .Select((actor, index) =>
+                actor with
+                {
+                    // Very long name
+                    Name = new string('A', 250) + index,
+                }
             )
             .ToList();
 

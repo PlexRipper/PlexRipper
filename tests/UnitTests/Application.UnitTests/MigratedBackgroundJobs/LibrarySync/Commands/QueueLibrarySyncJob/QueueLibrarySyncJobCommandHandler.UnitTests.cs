@@ -1,5 +1,3 @@
-using Reaparr.Application;
-
 namespace Reaparr.Application.UnitTests;
 
 public class QueueLibrarySyncJobCommandHandlerUnitTests : BaseUnitTest<QueueLibrarySyncJobCommandHandler>
@@ -797,6 +795,7 @@ public class QueueLibrarySyncJobCommandHandlerUnitTests : BaseUnitTest<QueueLibr
         queueItems.Count.ShouldBe(1);
         queueItems[0].Status.ShouldBe(LibrarySyncJobStatus.Queued);
         queueItems[0].PlexLibraryId.ShouldBe(library.Id);
+
         // Should still call CheckQueuedPlexLibraryToSyncCommand even when skipping
         Mock.Mock<ICommandExecutor>()
             .Verify(
@@ -855,6 +854,7 @@ public class QueueLibrarySyncJobCommandHandlerUnitTests : BaseUnitTest<QueueLibr
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
+
         // Use AsNoTracking to see the actual database state
         var queueItems = await IDbContext.LibrarySyncJobQueues.AsNoTracking().ToListAsync(CancellationToken);
         queueItems.Count.ShouldBe(1);
@@ -1133,10 +1133,7 @@ public class QueueLibrarySyncJobCommandHandlerUnitTests : BaseUnitTest<QueueLibr
         // Arrange
         await SetupDatabase(
             3021,
-            config =>
-            {
-                config.PlexServerCount = 1;
-            }
+            config => { config.PlexServerCount = 1; }
         );
 
         var dbContext = IDbContext;
@@ -1155,7 +1152,8 @@ public class QueueLibrarySyncJobCommandHandlerUnitTests : BaseUnitTest<QueueLibr
         // Assert
         result.IsSuccess.ShouldBeTrue();
         result.Errors.Count.ShouldBe(0);
-        var savedLibrary = await dbContext.PlexLibraries.AsNoTracking().FirstAsync(x => x.Id == unsupportedLibrary.Id, CancellationToken);
+        var savedLibrary = await dbContext.PlexLibraries.AsNoTracking()
+            .FirstAsync(x => x.Id == unsupportedLibrary.Id, CancellationToken);
         savedLibrary.Type.ShouldBe(PlexMediaType.Music);
         var queueItems = await dbContext.LibrarySyncJobQueues.AsNoTracking().ToListAsync(CancellationToken);
         queueItems.ShouldBeEmpty();

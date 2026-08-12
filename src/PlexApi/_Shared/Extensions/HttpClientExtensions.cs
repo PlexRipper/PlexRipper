@@ -14,6 +14,7 @@ public static class HttpClientExtensions
     /// This will convert from SpeakEasy exceptions to the use of FluentResults
     /// </summary>
     /// <param name="operation"> The SpeakEasy Plex SDK endpoint method to convert the result for </param>
+    /// <param name="cancellationToken">A token that cancels the HTTP call.</param>
     /// <typeparam name="T"></typeparam>
     /// <returns></returns>
     public static async Task<Result<T>> ToResponse<T>(
@@ -130,11 +131,10 @@ public static class HttpClientExtensions
         return Result.Fail("Request failed").AddStatusCode(response.StatusCode).WithErrors(errors ?? []);
     }
 
-    private static HttpResponseMessage GetHttpResponseMessage<T>(this T response) =>
-        (
-            typeof(T).GetProperty(nameof(PostUsersSignInDataResponse.RawResponse))!.GetValue(response)
+    private static HttpResponseMessage GetHttpResponseMessage<T>(this T response) => (
+        typeof(T).GetProperty(nameof(PostUsersSignInDataResponse.RawResponse))!.GetValue(response)
             as HttpResponseMessage
-        )!;
+    )!;
 
     public static async Task<string> ReadAsFormattedJsonAsync(
         this HttpContent? content,

@@ -121,7 +121,7 @@ public sealed class GetPlexMediaThumbnailImageEndpoint : Endpoint<GetPlexMediaTh
         var plexServerId = req.PlexServerId;
 
         // Fetch token and connection in parallel for better performance
-        var tokenTask = (Task<Result<string>>)_dbContext.GetPlexServerTokenAsync(plexServerId, ct);
+        var tokenTask = _dbContext.GetPlexServerTokenAsync(plexServerId, ct);
         var connectionTask = GetCachedConnectionAsync(plexServerId, ct);
 
         await Task.WhenAll(tokenTask, connectionTask);
@@ -193,7 +193,8 @@ public sealed class GetPlexMediaThumbnailImageEndpoint : Endpoint<GetPlexMediaTh
             {
                 _log.Here().Verbose("Plex returned no thumbnail content from {Url}", SanitizeUrl(directUrl));
                 HttpContext.Response.Headers.CacheControl = "no-store";
-                await Send.FluentResult(Result.Fail("No thumbnail image content returned by Plex").Add404NotFoundError(), ct);
+                await Send.FluentResult(
+                    Result.Fail("No thumbnail image content returned by Plex").Add404NotFoundError(), ct);
                 return;
             }
 

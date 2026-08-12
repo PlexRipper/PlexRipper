@@ -1,6 +1,3 @@
-using Reaparr.Application;
-using Reaparr.Data.Contracts;
-
 namespace Reaparr.Application.UnitTests;
 
 public class ScheduleAffectedLibraryComparisonJobsCommandHandlerUnitTests
@@ -44,18 +41,20 @@ public class ScheduleAffectedLibraryComparisonJobsCommandHandlerUnitTests
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
-        Mock.Mock<ICommandExecutor>().Verify(
-            x => x.Send(It.IsAny<ScheduleLibraryComparisonJobCommand>(), It.IsAny<CancellationToken>()),
-            Times.Exactly(ownedLibraries.Count)
-        );
-        Mock.Mock<IMediaQueryCache>().Verify(
-            x => x.InvalidateLibraries(
-                It.Is<IReadOnlyCollection<int>>(ids =>
-                    ids.Count == libraries.Count && libraries.All(library => ids.Contains(library.Id))),
-                $"Library comparisons scheduled for {PlexMediaType.Movie}"
-            ),
-            Times.Once()
-        );
+        Mock.Mock<ICommandExecutor>()
+            .Verify(
+                x => x.Send(It.IsAny<ScheduleLibraryComparisonJobCommand>(), It.IsAny<CancellationToken>()),
+                Times.Exactly(ownedLibraries.Count)
+            );
+        Mock.Mock<IMediaQueryCache>()
+            .Verify(
+                x => x.InvalidateLibraries(
+                    It.Is<IReadOnlyCollection<int>>(ids =>
+                        ids.Count == libraries.Count && libraries.All(library => ids.Contains(library.Id))),
+                    $"Library comparisons scheduled for {PlexMediaType.Movie}"
+                ),
+                Times.Once()
+            );
     }
 
     [Test]
@@ -106,17 +105,18 @@ public class ScheduleAffectedLibraryComparisonJobsCommandHandlerUnitTests
 
         // Assert
         result.IsFailed.ShouldBeTrue();
-        Mock.Mock<IMediaQueryCache>().Verify(
-            x => x.InvalidateLibraries(
-                It.Is<IReadOnlyCollection<int>>(ids =>
-                    ids.Count == 2
-                    && ids.Contains(remoteLibrary.Id)
-                    && ids.Contains(successfulOwnedLibrary.Id)
-                    && !ids.Contains(failedOwnedLibrary.Id)),
-                $"Library comparisons scheduled for {PlexMediaType.Movie}"
-            ),
-            Times.Once()
-        );
+        Mock.Mock<IMediaQueryCache>()
+            .Verify(
+                x => x.InvalidateLibraries(
+                    It.Is<IReadOnlyCollection<int>>(ids =>
+                        ids.Count == 2
+                        && ids.Contains(remoteLibrary.Id)
+                        && ids.Contains(successfulOwnedLibrary.Id)
+                        && !ids.Contains(failedOwnedLibrary.Id)),
+                    $"Library comparisons scheduled for {PlexMediaType.Movie}"
+                ),
+                Times.Once()
+            );
     }
 
     [Test]
@@ -159,23 +159,26 @@ public class ScheduleAffectedLibraryComparisonJobsCommandHandlerUnitTests
         result.IsSuccess.ShouldBeTrue();
         foreach (var remoteLibrary in remoteLibraries)
         {
-            Mock.Mock<ICommandExecutor>().Verify(
-                x => x.Send(
-                    It.Is<ScheduleLibraryComparisonJobCommand>(scheduledCommand =>
-                        scheduledCommand.OwnedPlexLibraryId == ownedLibrary.Id
-                        && scheduledCommand.RemotePlexLibraryId == remoteLibrary.Id),
-                    It.IsAny<CancellationToken>()),
+            Mock.Mock<ICommandExecutor>()
+                .Verify(
+                    x => x.Send(
+                        It.Is<ScheduleLibraryComparisonJobCommand>(scheduledCommand =>
+                            scheduledCommand.OwnedPlexLibraryId == ownedLibrary.Id
+                            && scheduledCommand.RemotePlexLibraryId == remoteLibrary.Id),
+                        It.IsAny<CancellationToken>()),
+                    Times.Once()
+                );
+        }
+
+        Mock.Mock<IMediaQueryCache>()
+            .Verify(
+                x => x.InvalidateLibraries(
+                    It.Is<IReadOnlyCollection<int>>(ids =>
+                        ids.Count == libraries.Count && libraries.All(library => ids.Contains(library.Id))),
+                    $"Library comparisons scheduled for {PlexMediaType.Movie}"
+                ),
                 Times.Once()
             );
-        }
-        Mock.Mock<IMediaQueryCache>().Verify(
-            x => x.InvalidateLibraries(
-                It.Is<IReadOnlyCollection<int>>(ids =>
-                    ids.Count == libraries.Count && libraries.All(library => ids.Contains(library.Id))),
-                $"Library comparisons scheduled for {PlexMediaType.Movie}"
-            ),
-            Times.Once()
-        );
     }
 
     [Test]
@@ -203,14 +206,16 @@ public class ScheduleAffectedLibraryComparisonJobsCommandHandlerUnitTests
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
-        Mock.Mock<ICommandExecutor>().Verify(
-            x => x.Send(It.IsAny<ScheduleLibraryComparisonJobCommand>(), It.IsAny<CancellationToken>()),
-            Times.Never()
-        );
-        Mock.Mock<IMediaQueryCache>().Verify(
-            x => x.InvalidateLibraries(It.IsAny<IReadOnlyCollection<int>>(), It.IsAny<string>()),
-            Times.Never()
-        );
+        Mock.Mock<ICommandExecutor>()
+            .Verify(
+                x => x.Send(It.IsAny<ScheduleLibraryComparisonJobCommand>(), It.IsAny<CancellationToken>()),
+                Times.Never()
+            );
+        Mock.Mock<IMediaQueryCache>()
+            .Verify(
+                x => x.InvalidateLibraries(It.IsAny<IReadOnlyCollection<int>>(), It.IsAny<string>()),
+                Times.Never()
+            );
     }
 
     [Test]
@@ -248,9 +253,10 @@ public class ScheduleAffectedLibraryComparisonJobsCommandHandlerUnitTests
 
         // Assert
         result.IsFailed.ShouldBeTrue();
-        Mock.Mock<IMediaQueryCache>().Verify(
-            x => x.InvalidateLibraries(It.IsAny<IReadOnlyCollection<int>>(), It.IsAny<string>()),
-            Times.Never()
-        );
+        Mock.Mock<IMediaQueryCache>()
+            .Verify(
+                x => x.InvalidateLibraries(It.IsAny<IReadOnlyCollection<int>>(), It.IsAny<string>()),
+                Times.Never()
+            );
     }
 }

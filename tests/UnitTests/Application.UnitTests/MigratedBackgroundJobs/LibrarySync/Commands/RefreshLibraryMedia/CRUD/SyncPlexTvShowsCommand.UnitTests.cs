@@ -1,5 +1,3 @@
-using Reaparr.Application;
-
 namespace Reaparr.Application.UnitTests;
 
 public class SyncPlexTvShowsCommandUnitTests : BaseUnitTest<SyncPlexTvShowsCommandHandler>
@@ -87,8 +85,8 @@ public class SyncPlexTvShowsCommandUnitTests : BaseUnitTest<SyncPlexTvShowsComma
 
         var library = IDbContext
             .PlexLibraries.Include(x => x.TvShows)
-                .ThenInclude(x => x.Seasons)
-                    .ThenInclude(x => x.Episodes)
+            .ThenInclude(x => x.Seasons)
+            .ThenInclude(x => x.Episodes)
             .First();
         library.ShouldNotBeNull();
 
@@ -290,7 +288,7 @@ public class SyncPlexTvShowsCommandUnitTests : BaseUnitTest<SyncPlexTvShowsComma
         var plexLibraryId = newTvShows.First().PlexLibraryId;
         var dbPlexTvShows = IDbContext
             .PlexTvShows.Include(x => x.Seasons)
-                .ThenInclude(x => x.Episodes)
+            .ThenInclude(x => x.Episodes)
             .Where(x => x.PlexLibraryId == plexLibraryId)
             .ToList();
         var dbSeasons = dbPlexTvShows.SelectMany(x => x.Seasons).ToList();

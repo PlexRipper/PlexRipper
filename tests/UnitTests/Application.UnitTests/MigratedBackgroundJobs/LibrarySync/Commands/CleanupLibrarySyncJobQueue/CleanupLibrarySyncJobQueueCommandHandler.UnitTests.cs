@@ -1,6 +1,3 @@
-using Reaparr.Application;
-using Reaparr.SignalR.Contracts;
-
 namespace Reaparr.Application.UnitTests;
 
 public class CleanupLibrarySyncJobQueueCommandHandlerUnitTests : BaseUnitTest<CleanupLibrarySyncJobQueueCommandHandler>
@@ -63,6 +60,7 @@ public class CleanupLibrarySyncJobQueueCommandHandlerUnitTests : BaseUnitTest<Cl
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
+
         // Use AsNoTracking to see ExecuteDeleteAsync changes
         var remainingItems = await dbContext.LibrarySyncJobQueues.AsNoTracking().ToListAsync(CancellationToken);
         remainingItems.Count.ShouldBe(1);
@@ -118,6 +116,7 @@ public class CleanupLibrarySyncJobQueueCommandHandlerUnitTests : BaseUnitTest<Cl
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
+
         // Use AsNoTracking to see ExecuteUpdateAsync changes
         var updatedItems = await dbContext
             .LibrarySyncJobQueues.AsNoTracking()
@@ -178,6 +177,7 @@ public class CleanupLibrarySyncJobQueueCommandHandlerUnitTests : BaseUnitTest<Cl
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
+
         // Use AsNoTracking to see ExecuteUpdateAsync changes
         var updatedItem = await dbContext
             .LibrarySyncJobQueues.AsNoTracking()
@@ -239,6 +239,7 @@ public class CleanupLibrarySyncJobQueueCommandHandlerUnitTests : BaseUnitTest<Cl
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
+
         // Use AsNoTracking to see ExecuteUpdateAsync changes
         var updatedItems = await dbContext.LibrarySyncJobQueues.AsNoTracking().ToListAsync(CancellationToken);
         updatedItems.Count.ShouldBe(2);
@@ -351,8 +352,10 @@ public class CleanupLibrarySyncJobQueueCommandHandlerUnitTests : BaseUnitTest<Cl
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
+
         // Use AsNoTracking to see ExecuteDeleteAsync and ExecuteUpdateAsync changes
         var remainingItems = await dbContext.LibrarySyncJobQueues.AsNoTracking().ToListAsync(CancellationToken);
+
         // Completed item should be deleted, failed and processing should be requeued, queued should remain
         remainingItems.Count.ShouldBe(3);
         var allQueued = remainingItems.All(x => x.Status == LibrarySyncJobStatus.Queued);

@@ -1,6 +1,3 @@
-using Reaparr.Application;
-using Reaparr.PlexApi.Contracts;
-
 namespace Reaparr.Application.UnitTests;
 
 public class RefreshLibraryMediaCommandUnitTests : BaseCommandUnitTest<RefreshLibraryMediaCommand>
@@ -44,10 +41,7 @@ public class RefreshLibraryMediaCommandUnitTests : BaseCommandUnitTest<RefreshLi
         // Arrange
         await SetupDatabase(
             1337,
-            config =>
-            {
-                config.PlexMovieLibraryCount = 0;
-            }
+            config => { config.PlexMovieLibraryCount = 0; }
         );
 
         // Act
@@ -102,16 +96,15 @@ public class RefreshLibraryMediaCommandUnitTests : BaseCommandUnitTest<RefreshLi
             .ExecuteUpdateAsync(s => s.SetProperty(x => x.Outdated, true), CancellationToken);
 
         Mock.SetupCommand(It.IsAny<GetLibraryMediaFromPlexApiCommand>)
-            .ReturnsAsync(
-                (ICommand<Result<LibraryMetadata>> _, CancellationToken _) =>
-                    Result.Ok(
-                        new LibraryMetadata(updatedLibrary)
-                        {
-                            Countries = [],
-                            Genres = [],
-                            Actors = [],
-                        }
-                    )
+            .ReturnsAsync((ICommand<Result<LibraryMetadata>> _, CancellationToken _) =>
+                Result.Ok(
+                    new LibraryMetadata(updatedLibrary)
+                    {
+                        Countries = [],
+                        Genres = [],
+                        Actors = [],
+                    }
+                )
             );
         Mock.SetupCommand(It.IsAny<InsertMediaMetaDataCommand>)
             .ReturnsAsync(Result.Ok(new InsertMediaMetaDataCommandResponse(updatedLibrary)));

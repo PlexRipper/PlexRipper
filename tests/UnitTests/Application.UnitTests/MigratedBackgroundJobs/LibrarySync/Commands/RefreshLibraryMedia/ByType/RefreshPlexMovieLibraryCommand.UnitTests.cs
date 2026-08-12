@@ -1,6 +1,3 @@
-using Reaparr.Application;
-using Reaparr.Data.Contracts;
-
 namespace Reaparr.Application.UnitTests;
 
 public class RefreshPlexMovieLibraryCommandUnitTests : BaseUnitTest<RefreshPlexMovieLibraryCommandHandler>

@@ -1,9 +1,6 @@
-using System.Data;
 using EntityFrameworkCore.Sqlite.Concurrency.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Data.Sqlite;
-using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace EntityFrameworkCore.Sqlite.Concurrency;
 
@@ -36,10 +33,8 @@ public static class SqliteConcurrencyExtensions
             .GetOptimizedConnectionString(connectionString);
 
         // Use the connection string with EF Core to allow proper pooling
-        optionsBuilder.UseSqlite(enhancedConnectionString, sqliteOptions =>
-        {
-            sqliteOptions.CommandTimeout(options.CommandTimeout);
-        });
+        optionsBuilder.UseSqlite(enhancedConnectionString,
+            sqliteOptions => { sqliteOptions.CommandTimeout(options.CommandTimeout); });
 
         // Add interceptors for PRAGMAs, performance, and concurrency
         var interceptor = SqliteConnectionEnhancer.GetInterceptor(enhancedConnectionString, options);
@@ -47,7 +42,6 @@ public static class SqliteConcurrencyExtensions
 
         return optionsBuilder;
     }
-
 
     /// <summary>
     /// Executes an operation with automatic retry on <c>SQLITE_BUSY</c> and
@@ -108,7 +102,7 @@ public static class SqliteConcurrencyExtensions
                 // [baseDelay, 2×baseDelay] to prevent synchronized retry storms ("thundering
                 // herd") when multiple threads hit contention simultaneously.
                 var baseDelay = 100 * Math.Pow(2, attempt);
-                var jitter    = Random.Shared.NextDouble() * baseDelay;
+                var jitter = Random.Shared.NextDouble() * baseDelay;
                 await Task.Delay(TimeSpan.FromMilliseconds(baseDelay + jitter), cancellationToken);
 
                 // For SQLITE_BUSY_SNAPSHOT the operation lambda will restart on the next
@@ -147,11 +141,10 @@ public static class SqliteConcurrencyExtensions
     public static Task<int> SaveChangesSerializedAsync(
         this DbContext context,
         int maxRetries = 3,
-        CancellationToken cancellationToken = default) =>
-        context.SaveChangesSerializedAsync(
-            context.SaveChangesAsync,
-            maxRetries,
-            cancellationToken);
+        CancellationToken cancellationToken = default) => context.SaveChangesSerializedAsync(
+        context.SaveChangesAsync,
+        maxRetries,
+        cancellationToken);
 
     /// <summary>
     /// Saves all changes in the context while holding the shared per-database write lock,
@@ -212,7 +205,7 @@ public static class SqliteConcurrencyExtensions
         return await queue.EnqueueAsync(async () =>
         {
             var delayMs = 50;
-            for (var attempt = 1; ; attempt++)
+            for (var attempt = 1;; attempt++)
             {
                 try
                 {
@@ -282,13 +275,12 @@ public static class SqliteConcurrencyExtensions
 
     // EF Core wraps SqliteException in DbUpdateException when SaveChangesAsync fails,
     // so we need to unwrap one level to classify the error.
-    private static bool IsRetryableSqliteBusy(Exception ex) =>
-        ex switch
-        {
-            SqliteException se                                          => SqliteErrorCodes.IsRetryableBusy(se),
-            DbUpdateException { InnerException: SqliteException inner } => SqliteErrorCodes.IsRetryableBusy(inner),
-            _                                                           => false
-        };
+    private static bool IsRetryableSqliteBusy(Exception ex) => ex switch
+    {
+        SqliteException se => SqliteErrorCodes.IsRetryableBusy(se),
+        DbUpdateException { InnerException: SqliteException inner } => SqliteErrorCodes.IsRetryableBusy(inner),
+        _ => false
+    };
 
     /// <summary>
     /// Performs a bulk insert with optimized settings and optional app-level locking.

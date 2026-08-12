@@ -1,5 +1,3 @@
-using Reaparr.Application;
-
 namespace Reaparr.Application.UnitTests;
 
 public class ResetFailedLibrarySyncJobsCommandHandlerUnitTests : BaseUnitTest<ResetFailedLibrarySyncJobsCommandHandler>
@@ -291,6 +289,7 @@ public class ResetFailedLibrarySyncJobsCommandHandlerUnitTests : BaseUnitTest<Re
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
+
         // CheckQueuedCommand should not be called when no jobs were reset
         Mock.Mock<ICommandExecutor>()
             .Verify(

@@ -1,6 +1,3 @@
-using Reaparr.Application;
-using Reaparr.SignalR.Contracts;
-
 namespace Reaparr.Application.UnitTests;
 
 public class LibrarySyncProgressStoreUnitTests : BaseUnitTest<LibrarySyncProgressStore>

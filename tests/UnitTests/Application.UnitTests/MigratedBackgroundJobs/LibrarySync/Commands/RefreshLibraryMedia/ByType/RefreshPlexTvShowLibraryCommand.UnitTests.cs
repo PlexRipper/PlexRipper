@@ -1,7 +1,3 @@
-using Reaparr.Application;
-using Reaparr.Data.Contracts;
-using Reaparr.PlexApi.Contracts;
-
 namespace Reaparr.Application.UnitTests;
 
 public class RefreshPlexTvShowLibraryCommandUnitTests : BaseUnitTest<RefreshPlexTvShowLibraryCommandHandler>
@@ -75,8 +71,8 @@ public class RefreshPlexTvShowLibraryCommandUnitTests : BaseUnitTest<RefreshPlex
     {
         Mock.Mock<ICommandExecutor>()
             .Setup(x => x.Send(It.IsAny<SyncPlexTvShowsCommand>(), It.IsAny<CancellationToken>()))
-            .Callback<ICommand<Result<BulkInsertTvShowsRapport>>, CancellationToken>(
-                (cmd, _) => capture((SyncPlexTvShowsCommand)cmd)
+            .Callback<ICommand<Result<BulkInsertTvShowsRapport>>, CancellationToken>((cmd, _) =>
+                capture((SyncPlexTvShowsCommand)cmd)
             )
             .ReturnsAsync(Result.Ok(rapport ?? new BulkInsertTvShowsRapport()));
     }
@@ -165,10 +161,7 @@ public class RefreshPlexTvShowLibraryCommandUnitTests : BaseUnitTest<RefreshPlex
         // Arrange
         await SetupDatabase(
             9426,
-            config =>
-            {
-                config.TvShowCount = 3;
-            }
+            config => { config.TvShowCount = 3; }
         );
         var testLibrary = IDbContext.PlexLibraries.Include(x => x.TvShows).First();
 
@@ -238,10 +231,7 @@ public class RefreshPlexTvShowLibraryCommandUnitTests : BaseUnitTest<RefreshPlex
         // Arrange
         var seed = await SetupDatabase(
             9428,
-            config =>
-            {
-                config.TvShowCount = 3;
-            }
+            config => { config.TvShowCount = 3; }
         );
         var testLibrary = IDbContext.PlexLibraries.Include(x => x.TvShows).First();
 
@@ -310,6 +300,7 @@ public class RefreshPlexTvShowLibraryCommandUnitTests : BaseUnitTest<RefreshPlex
         result.IsSuccess.ShouldBeTrue();
         capturedCommand.ShouldNotBeNull();
         var tvShow = capturedCommand.LibraryMetadata.PlexLibrary.TvShows.First();
+
         // Only the valid season (with ParentGuid set) should be assigned to the show
         tvShow.Seasons.ShouldHaveSingleItem();
         tvShow.Seasons.First().Guid.ShouldBe(validSeason.Guid);
@@ -357,6 +348,7 @@ public class RefreshPlexTvShowLibraryCommandUnitTests : BaseUnitTest<RefreshPlex
         result.IsSuccess.ShouldBeTrue();
         capturedCommand.ShouldNotBeNull();
         var tvShowSeason = capturedCommand.LibraryMetadata.PlexLibrary.TvShows.First().Seasons.First();
+
         // Only the valid episode (with ParentGuid set) should be assigned to the season
         tvShowSeason.Episodes.ShouldHaveSingleItem();
         tvShowSeason.Episodes.First().Guid.ShouldBe(validEpisode.Guid);
@@ -400,6 +392,7 @@ public class RefreshPlexTvShowLibraryCommandUnitTests : BaseUnitTest<RefreshPlex
         // Assert
         result.IsSuccess.ShouldBeTrue();
         capturedCommand.ShouldNotBeNull();
+
         // The TV show should have no seasons assigned (orphan was ignored)
         capturedCommand.LibraryMetadata.PlexLibrary.TvShows.First().Seasons.ShouldBeEmpty();
     }

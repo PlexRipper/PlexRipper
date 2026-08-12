@@ -1,5 +1,3 @@
-using Reaparr.Application;
-
 namespace Reaparr.Application.UnitTests;
 
 public class SyncPlexLibraryMediaMetaDataCommandUnitTests : BaseCommandUnitTest<SyncPlexLibraryMediaMetaDataCommand>

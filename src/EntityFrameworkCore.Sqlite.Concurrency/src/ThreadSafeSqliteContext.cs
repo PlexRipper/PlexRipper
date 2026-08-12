@@ -1,7 +1,6 @@
 using EntityFrameworkCore.Sqlite.Concurrency.Models;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Sqlite.Infrastructure.Internal;
 
 namespace EntityFrameworkCore.Sqlite.Concurrency;
@@ -35,7 +34,8 @@ public class ThreadSafeSqliteContext<TContext> : DbContext where TContext : DbCo
         if (extension?.ConnectionString != null)
             _connectionString = SqliteConnectionEnhancer.GetOptimizedConnectionString(extension.ConnectionString);
         else if (extension?.Connection != null)
-            _connectionString = SqliteConnectionEnhancer.GetOptimizedConnectionString(extension.Connection.ConnectionString);
+            _connectionString =
+                SqliteConnectionEnhancer.GetOptimizedConnectionString(extension.Connection.ConnectionString);
     }
 
     private SqliteWriteQueue WriteQueue
@@ -126,7 +126,7 @@ public class ThreadSafeSqliteContext<TContext> : DbContext where TContext : DbCo
 
                     // Exponential backoff with full jitter: sleep in [baseDelay, 2×baseDelay].
                     var baseDelay = 100 * Math.Pow(2, attempt);
-                    var jitter    = Random.Shared.NextDouble() * baseDelay;
+                    var jitter = Random.Shared.NextDouble() * baseDelay;
                     await Task.Delay(TimeSpan.FromMilliseconds(baseDelay + jitter), ct);
                 }
             }
@@ -188,7 +188,6 @@ public class ThreadSafeSqliteContext<TContext> : DbContext where TContext : DbCo
             }
         }, ct);
     }
-
 
     private SqliteConcurrencyOptions? _options;
 

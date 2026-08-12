@@ -110,7 +110,7 @@ public class BaseContainer : IDisposable
 
     public ReaparrDbContext ReaparrDbContext => Resolve<ReaparrDbContext>();
 
-    public ISchedulerService SchedulerService => Resolve<ISchedulerService>();
+    public IBackgroundJobScheduler BackgroundJobScheduler => Resolve<IBackgroundJobScheduler>();
 
     public IDownloadTaskScheduler DownloadTaskScheduler => Resolve<IDownloadTaskScheduler>();
 

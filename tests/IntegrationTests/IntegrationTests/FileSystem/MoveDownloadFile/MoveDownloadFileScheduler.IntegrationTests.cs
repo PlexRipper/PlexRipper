@@ -49,7 +49,7 @@ public class MoveDownloadFileSchedulerIntegrationTests : BaseIntegrationTests
 
         // Act
         var startResult = await container.MoveDownloadFileScheduler.StartMoveDownloadFileJob(downloadTask.ToKey(), CancellationToken);
-        await container.SchedulerService.AwaitScheduler(CancellationToken);
+        await container.BackgroundJobScheduler.AwaitScheduler(CancellationToken);
 
         // Assert
         startResult.IsSuccess.ShouldBeTrue();
@@ -159,7 +159,7 @@ public class MoveDownloadFileSchedulerIntegrationTests : BaseIntegrationTests
 
         // Act
         var startResult = await container.MoveDownloadFileScheduler.StartMoveDownloadFileJob(downloadTask.ToKey(), CancellationToken);
-        await container.SchedulerService.AwaitScheduler(CancellationToken);
+        await container.BackgroundJobScheduler.AwaitScheduler(CancellationToken);
 
         // Assert
         startResult.IsSuccess.ShouldBeTrue();

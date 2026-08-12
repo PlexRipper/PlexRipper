@@ -1,5 +1,4 @@
-﻿using Autofac.Extras.Quartz;
-using Downloader;
+﻿using Downloader;
 using Moq.Contrib.HttpClient;
 using Reaparr.Application;
 using Reaparr.Settings.Contracts;
@@ -103,11 +102,6 @@ public class TestModule : Module
             .SingleInstance();
 
         SetMockedDependencies(builder);
-
-        // Register Quartz dependencies
-        builder.RegisterModule(
-            new QuartzAutofacFactoryModule { ConfigurationProvider = _ => QuartzModule.TestQuartzConfiguration() }
-        );
     }
 
     private void SetMockedDependencies(ContainerBuilder builder)

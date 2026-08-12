@@ -35,9 +35,6 @@ public class ApplicationModule : Module
             .InstancePerDependency();
 
         builder.RegisterType<BackgroundJobScheduler>().As<IBackgroundJobScheduler>().SingleInstance();
-        
-        builder.RegisterType<SchedulerService>().As<ISchedulerService>().SingleInstance();
-        builder.RegisterType<AllJobListener>().As<IAllJobListener>().SingleInstance();
         builder
             .RegisterType<DownloadTaskUpdateDispatcher>()
             .As<IDownloadTaskUpdateDispatcher>()

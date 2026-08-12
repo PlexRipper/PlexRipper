@@ -15,7 +15,7 @@ public class Boot : IHostedService
 
     private readonly IHostApplicationLifetime _appLifetime;
 
-    private readonly ISchedulerService _schedulerService;
+    private readonly IBackgroundJobScheduler _backgroundJobScheduler;
 
     private readonly IDownloadQueue _downloadQueue;
 
@@ -31,7 +31,7 @@ public class Boot : IHostedService
         ICommandExecutor commandExecutor,
         IAppRuntimeInfo appRuntimeInfo,
         IHostApplicationLifetime appLifetime,
-        ISchedulerService schedulerService,
+        IBackgroundJobScheduler backgroundJobScheduler,
         IDownloadQueue downloadQueue
     )
     {
@@ -39,7 +39,7 @@ public class Boot : IHostedService
         _commandExecutor = commandExecutor;
         _appRuntimeInfo = appRuntimeInfo;
         _appLifetime = appLifetime;
-        _schedulerService = schedulerService;
+        _backgroundJobScheduler = backgroundJobScheduler;
         _downloadQueue = downloadQueue;
 
         appLifetime.ApplicationStarted.Register(OnStarted);
@@ -80,7 +80,12 @@ public class Boot : IHostedService
         if (recoverResult.IsFailed)
             recoverResult.LogError();
 
-        await _schedulerService.SetupAsync(cancellationToken);
+        var schedulerSetupResult = await _backgroundJobScheduler.SetupAsync(cancellationToken);
+        if (schedulerSetupResult.IsFailed)
+        {
+            TerminateApplication();
+            return;
+        }
 
         if (!_appRuntimeInfo.IsIntegrationTestMode)
         {
@@ -104,7 +109,9 @@ public class Boot : IHostedService
         _log.Here().Information("Shutting down the container");
 
         // Stop scheduler first so background jobs can't race with the auto-pause DB queries
-        await _schedulerService.StopAsync(cancellationToken);
+        var schedulerStopResult = await _backgroundJobScheduler.StopAsync(cancellationToken);
+        if (schedulerStopResult.IsFailed)
+            schedulerStopResult.LogError();
 
         var autoPauseResult = await _commandExecutor.Send(new AutoPauseActiveDownloadsCommand(), cancellationToken);
         if (autoPauseResult.IsFailed)

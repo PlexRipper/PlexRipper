@@ -15,13 +15,14 @@ public record GetAllBackgroundJobsEndpointRequest
     public required bool UseMockData { get; init; }
 }
 
-public class GetAllBackgroundJobsEndpoint : Endpoint<GetAllBackgroundJobsEndpointRequest, ResultDTO<List<JobStatusUpdateDTO>>>
+public class
+    GetAllBackgroundJobsEndpoint : Endpoint<GetAllBackgroundJobsEndpointRequest, ResultDTO<List<JobStatusUpdateDTO>>>
 {
-    private readonly ISchedulerService _schedulerService;
+    private readonly IBackgroundJobScheduler _backgroundJobScheduler;
 
-    public GetAllBackgroundJobsEndpoint(ISchedulerService schedulerService)
+    public GetAllBackgroundJobsEndpoint(IBackgroundJobScheduler backgroundJobScheduler)
     {
-        _schedulerService = schedulerService;
+        _backgroundJobScheduler = backgroundJobScheduler;
     }
 
     public override void Configure()
@@ -41,7 +42,7 @@ public class GetAllBackgroundJobsEndpoint : Endpoint<GetAllBackgroundJobsEndpoin
         }
         else
         {
-            var result = await _schedulerService.GetRunningJobUpdates();
+            var result = await _backgroundJobScheduler.GetCurrentlyExecutingJobs(ct);
 
             await Send.FluentResult(Result.Ok(result), x => x.ToDTO(), ct);
         }

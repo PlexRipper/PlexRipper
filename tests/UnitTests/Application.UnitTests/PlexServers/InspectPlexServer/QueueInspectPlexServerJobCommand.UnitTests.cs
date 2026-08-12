@@ -1,7 +1,19 @@
+using System.Reflection;
+using TickerQ.Utilities.Models;
+
 namespace Reaparr.Application.UnitTests;
 
 public class QueueInspectPlexServerJobCommandUnitTests : BaseUnitTest<QueueInspectPlexServerJobCommandHandler>
 {
+    private static TickerResult<JobTimeTicker> SuccessfulTickerResult() =>
+        (TickerResult<JobTimeTicker>)Activator.CreateInstance(
+            typeof(TickerResult<JobTimeTicker>),
+            BindingFlags.Instance | BindingFlags.NonPublic,
+            binder: null,
+            args: [new JobTimeTicker()],
+            culture: null
+        )!;
+
     [Test]
     public void ShouldRejectNullPlexServerIds_WhenQueueingInspectJob()
     {
@@ -47,14 +59,20 @@ public class QueueInspectPlexServerJobCommandUnitTests : BaseUnitTest<QueueInspe
             .Where(x => x.Id == disabledServerId)
             .ExecuteUpdateAsync(x => x.SetProperty(y => y.IsEnabled, false), CancellationToken);
 
-        Mock.Mock<IScheduler>()
-            .Setup(x => x.GetCurrentlyExecutingJobs(It.IsAny<CancellationToken>()))
-            .ReturnsAsync([])
+        Mock.Mock<IBackgroundJobScheduler>()
+            .Setup(x => x.IsJobRunning(It.IsAny<JobKeyV2>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(false)
             .Verifiable(Times.Once());
 
-        Mock.Mock<IScheduler>()
-            .Setup(x => x.ScheduleJob(It.IsAny<IJobDetail>(), It.IsAny<ITrigger>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(DateTimeOffset.UtcNow)
+        Mock.Mock<IBackgroundJobScheduler>()
+            .Setup(x =>
+                x.ExecuteJob<InspectPlexServerJob, InspectPlexServerJobPayload>(
+                    It.IsAny<JobKeyV2>(),
+                    It.IsAny<InspectPlexServerJobPayload>(),
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .ReturnsAsync(SuccessfulTickerResult())
             .Verifiable(Times.Once());
 
         // Act
@@ -62,7 +80,7 @@ public class QueueInspectPlexServerJobCommandUnitTests : BaseUnitTest<QueueInspe
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
-        Mock.Mock<IScheduler>().Verify();
+        Mock.Mock<IBackgroundJobScheduler>().Verify();
     }
 
     [Test]
@@ -71,14 +89,20 @@ public class QueueInspectPlexServerJobCommandUnitTests : BaseUnitTest<QueueInspe
         // Arrange
         await SetupDatabase(91108, config => config.PlexServerCount = 1);
 
-        Mock.Mock<IScheduler>()
-            .Setup(x => x.GetCurrentlyExecutingJobs(It.IsAny<CancellationToken>()))
-            .ReturnsAsync([])
+        Mock.Mock<IBackgroundJobScheduler>()
+            .Setup(x => x.IsJobRunning(It.IsAny<JobKeyV2>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(false)
             .Verifiable(Times.Never());
 
-        Mock.Mock<IScheduler>()
-            .Setup(x => x.ScheduleJob(It.IsAny<IJobDetail>(), It.IsAny<ITrigger>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(DateTimeOffset.UtcNow)
+        Mock.Mock<IBackgroundJobScheduler>()
+            .Setup(x =>
+                x.ExecuteJob<InspectPlexServerJob, InspectPlexServerJobPayload>(
+                    It.IsAny<JobKeyV2>(),
+                    It.IsAny<InspectPlexServerJobPayload>(),
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .ReturnsAsync(SuccessfulTickerResult())
             .Verifiable(Times.Never());
 
         // Act
@@ -87,7 +111,7 @@ public class QueueInspectPlexServerJobCommandUnitTests : BaseUnitTest<QueueInspe
         // Assert
         result.IsFailed.ShouldBeTrue();
         result.Errors.ShouldContain(x => x.Message.Contains("No Plex servers", StringComparison.OrdinalIgnoreCase));
-        Mock.Mock<IScheduler>().Verify();
+        Mock.Mock<IBackgroundJobScheduler>().Verify();
     }
 
     [Test]
@@ -99,14 +123,20 @@ public class QueueInspectPlexServerJobCommandUnitTests : BaseUnitTest<QueueInspe
         var dbContext = IDbContext;
         var existingServerId = (await dbContext.PlexServers.IgnoreIsEnabledFilter().FirstAsync(CancellationToken)).Id;
 
-        Mock.Mock<IScheduler>()
-            .Setup(x => x.GetCurrentlyExecutingJobs(It.IsAny<CancellationToken>()))
-            .ReturnsAsync([])
+        Mock.Mock<IBackgroundJobScheduler>()
+            .Setup(x => x.IsJobRunning(It.IsAny<JobKeyV2>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(false)
             .Verifiable(Times.Once());
 
-        Mock.Mock<IScheduler>()
-            .Setup(x => x.ScheduleJob(It.IsAny<IJobDetail>(), It.IsAny<ITrigger>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(DateTimeOffset.UtcNow)
+        Mock.Mock<IBackgroundJobScheduler>()
+            .Setup(x =>
+                x.ExecuteJob<InspectPlexServerJob, InspectPlexServerJobPayload>(
+                    It.IsAny<JobKeyV2>(),
+                    It.IsAny<InspectPlexServerJobPayload>(),
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .ReturnsAsync(SuccessfulTickerResult())
             .Verifiable(Times.Once());
 
         // Act
@@ -114,7 +144,7 @@ public class QueueInspectPlexServerJobCommandUnitTests : BaseUnitTest<QueueInspe
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
-        Mock.Mock<IScheduler>().Verify();
+        Mock.Mock<IBackgroundJobScheduler>().Verify();
     }
 
     [Test]
@@ -123,15 +153,21 @@ public class QueueInspectPlexServerJobCommandUnitTests : BaseUnitTest<QueueInspe
         // Arrange
         await SetupDatabase(91121, config => config.PlexServerCount = 2);
 
-        Mock.Mock<IScheduler>()
-            .Setup(x => x.GetCurrentlyExecutingJobs(It.IsAny<CancellationToken>()))
-            .ReturnsAsync([])
-            .Verifiable(Times.Once());
+        Mock.Mock<IBackgroundJobScheduler>()
+            .Setup(x => x.IsJobRunning(It.IsAny<JobKeyV2>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(false)
+            .Verifiable(Times.Exactly(2));
 
-        Mock.Mock<IScheduler>()
-            .Setup(x => x.ScheduleJob(It.IsAny<IJobDetail>(), It.IsAny<ITrigger>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(DateTimeOffset.UtcNow)
-            .Verifiable(Times.Once());
+        Mock.Mock<IBackgroundJobScheduler>()
+            .Setup(x =>
+                x.ExecuteJob<InspectPlexServerJob, InspectPlexServerJobPayload>(
+                    It.IsAny<JobKeyV2>(),
+                    It.IsAny<InspectPlexServerJobPayload>(),
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .ReturnsAsync(SuccessfulTickerResult())
+            .Verifiable(Times.Exactly(2));
 
         var serverIds = await IDbContext.PlexServers.IgnoreIsEnabledFilter().Select(x => x.Id).ToListAsync(CancellationToken);
 
@@ -140,7 +176,7 @@ public class QueueInspectPlexServerJobCommandUnitTests : BaseUnitTest<QueueInspe
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
-        Mock.Mock<IScheduler>().Verify();
+        Mock.Mock<IBackgroundJobScheduler>().Verify();
     }
 
     [Test]
@@ -153,14 +189,20 @@ public class QueueInspectPlexServerJobCommandUnitTests : BaseUnitTest<QueueInspe
         await IDbContext.PlexServers.IgnoreIsEnabledFilter().Where(x => ids.Contains(x.Id))
             .ExecuteUpdateAsync(x => x.SetProperty(y => y.IsEnabled, false), CancellationToken);
 
-        Mock.Mock<IScheduler>()
-            .Setup(x => x.GetCurrentlyExecutingJobs(It.IsAny<CancellationToken>()))
-            .ReturnsAsync([])
-            .Verifiable(Times.Once());
+        Mock.Mock<IBackgroundJobScheduler>()
+            .Setup(x => x.IsJobRunning(It.IsAny<JobKeyV2>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(false)
+            .Verifiable(Times.Never());
 
-        Mock.Mock<IScheduler>()
-            .Setup(x => x.ScheduleJob(It.IsAny<IJobDetail>(), It.IsAny<ITrigger>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(DateTimeOffset.UtcNow)
+        Mock.Mock<IBackgroundJobScheduler>()
+            .Setup(x =>
+                x.ExecuteJob<InspectPlexServerJob, InspectPlexServerJobPayload>(
+                    It.IsAny<JobKeyV2>(),
+                    It.IsAny<InspectPlexServerJobPayload>(),
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .ReturnsAsync(SuccessfulTickerResult())
             .Verifiable(Times.Never());
 
         // Act
@@ -169,7 +211,7 @@ public class QueueInspectPlexServerJobCommandUnitTests : BaseUnitTest<QueueInspe
         // Assert
         result.IsFailed.ShouldBeTrue();
         result.Errors.ShouldContain(x => x.Message.Contains("No enabled Plex servers", StringComparison.OrdinalIgnoreCase));
-        Mock.Mock<IScheduler>().Verify();
+        Mock.Mock<IBackgroundJobScheduler>().Verify();
     }
 
     [Test]
@@ -182,22 +224,28 @@ public class QueueInspectPlexServerJobCommandUnitTests : BaseUnitTest<QueueInspe
         await IDbContext.PlexServers.IgnoreIsEnabledFilter().Where(x => x.Id == ids[1])
             .ExecuteUpdateAsync(x => x.SetProperty(y => y.IsEnabled, false), CancellationToken);
 
-        Mock.Mock<IScheduler>()
-            .Setup(x => x.GetCurrentlyExecutingJobs(It.IsAny<CancellationToken>()))
-            .ReturnsAsync([])
-            .Verifiable(Times.Once());
+        Mock.Mock<IBackgroundJobScheduler>()
+            .Setup(x => x.IsJobRunning(It.IsAny<JobKeyV2>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(false)
+            .Verifiable(Times.Exactly(2));
 
-        Mock.Mock<IScheduler>()
-            .Setup(x => x.ScheduleJob(It.IsAny<IJobDetail>(), It.IsAny<ITrigger>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(DateTimeOffset.UtcNow)
-            .Verifiable(Times.Once());
+        Mock.Mock<IBackgroundJobScheduler>()
+            .Setup(x =>
+                x.ExecuteJob<InspectPlexServerJob, InspectPlexServerJobPayload>(
+                    It.IsAny<JobKeyV2>(),
+                    It.IsAny<InspectPlexServerJobPayload>(),
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .ReturnsAsync(SuccessfulTickerResult())
+            .Verifiable(Times.Exactly(2));
 
         // Act
         var result = await Sut.ExecuteAsync(new QueueInspectPlexServerJobCommand(ids), CancellationToken);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
-        Mock.Mock<IScheduler>().Verify();
+        Mock.Mock<IBackgroundJobScheduler>().Verify();
     }
 
     [Test]
@@ -208,14 +256,20 @@ public class QueueInspectPlexServerJobCommandUnitTests : BaseUnitTest<QueueInspe
 
         var existingId = (await IDbContext.PlexServers.IgnoreIsEnabledFilter().FirstAsync(CancellationToken)).Id;
 
-        Mock.Mock<IScheduler>()
-            .Setup(x => x.GetCurrentlyExecutingJobs(It.IsAny<CancellationToken>()))
-            .ReturnsAsync([])
+        Mock.Mock<IBackgroundJobScheduler>()
+            .Setup(x => x.IsJobRunning(It.IsAny<JobKeyV2>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(false)
             .Verifiable(Times.Once());
 
-        Mock.Mock<IScheduler>()
-            .Setup(x => x.ScheduleJob(It.IsAny<IJobDetail>(), It.IsAny<ITrigger>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(DateTimeOffset.UtcNow)
+        Mock.Mock<IBackgroundJobScheduler>()
+            .Setup(x =>
+                x.ExecuteJob<InspectPlexServerJob, InspectPlexServerJobPayload>(
+                    It.IsAny<JobKeyV2>(),
+                    It.IsAny<InspectPlexServerJobPayload>(),
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .ReturnsAsync(SuccessfulTickerResult())
             .Verifiable(Times.Once());
 
         // Act
@@ -223,7 +277,7 @@ public class QueueInspectPlexServerJobCommandUnitTests : BaseUnitTest<QueueInspe
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
-        Mock.Mock<IScheduler>().Verify();
+        Mock.Mock<IBackgroundJobScheduler>().Verify();
     }
 
     [Test]
@@ -236,14 +290,20 @@ public class QueueInspectPlexServerJobCommandUnitTests : BaseUnitTest<QueueInspe
         await IDbContext.PlexServers.IgnoreIsEnabledFilter().Where(x => x.Id == disabledId)
             .ExecuteUpdateAsync(x => x.SetProperty(y => y.IsEnabled, false), CancellationToken);
 
-        Mock.Mock<IScheduler>()
-            .Setup(x => x.GetCurrentlyExecutingJobs(It.IsAny<CancellationToken>()))
-            .ReturnsAsync([])
-            .Verifiable(Times.Once());
+        Mock.Mock<IBackgroundJobScheduler>()
+            .Setup(x => x.IsJobRunning(It.IsAny<JobKeyV2>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(false)
+            .Verifiable(Times.Never());
 
-        Mock.Mock<IScheduler>()
-            .Setup(x => x.ScheduleJob(It.IsAny<IJobDetail>(), It.IsAny<ITrigger>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(DateTimeOffset.UtcNow)
+        Mock.Mock<IBackgroundJobScheduler>()
+            .Setup(x =>
+                x.ExecuteJob<InspectPlexServerJob, InspectPlexServerJobPayload>(
+                    It.IsAny<JobKeyV2>(),
+                    It.IsAny<InspectPlexServerJobPayload>(),
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .ReturnsAsync(SuccessfulTickerResult())
             .Verifiable(Times.Never());
 
         // Act
@@ -251,7 +311,7 @@ public class QueueInspectPlexServerJobCommandUnitTests : BaseUnitTest<QueueInspe
 
         // Assert
         result.IsFailed.ShouldBeTrue();
-        Mock.Mock<IScheduler>().Verify();
+        Mock.Mock<IBackgroundJobScheduler>().Verify();
     }
 }
 

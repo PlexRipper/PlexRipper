@@ -10,7 +10,7 @@ public record LibrarySyncJobPayload
 }
 
 /// <summary>
-/// Quartz job that syncs a single library and chains to the next library if provided.
+/// TickerQ job that syncs a single library and chains to the next queued library.
 /// Uses per-server locking to ensure only one library sync runs per server at a time.
 /// </summary>
 public class LibrarySyncJob : BaseBackgroundJob<LibrarySyncJobPayload, LibrarySyncJobQueueDTO>
@@ -83,9 +83,7 @@ public class LibrarySyncJob : BaseBackgroundJob<LibrarySyncJobPayload, LibrarySy
         {
             await UpdateQueueItemAsync(context, LibrarySyncJobStatus.Processing);
 
-            // Jobs should swallow exceptions as otherwise Quartz will keep re-executing it
-            // https://www.quartz-scheduler.net/documentation/best-practices.html#throwing-exceptions
-
+            // Convert command exceptions to a Result so the queue state can be persisted before this ticker completes.
             // Execute the library sync command
             var result = await Result.Try(() =>
                 _commandExecutor.Send(new RefreshLibraryMediaCommand(libraryId), cancellationToken)
@@ -101,7 +99,7 @@ public class LibrarySyncJob : BaseBackgroundJob<LibrarySyncJobPayload, LibrarySy
                         libraryId
                     );
 
-                // The Quartz job token is already cancelled, so use a short-lived token
+                // The TickerQ execution token is already cancelled, so use a short-lived token
                 // to persist the cancellation and continue processing the queue.
                 using var cleanupTokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(10));
                 var cleanupToken = cleanupTokenSource.Token;

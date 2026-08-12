@@ -19,6 +19,12 @@ public static class TickerQExtensions
             .WithMaxConcurrency(1)
             .WithPriority(TickerTaskPriority.LongRunning);
 
+        services.MapTicker<InspectPlexServerJob, InspectPlexServerJobPayload>(ServiceLifetime.Transient)
+            .WithMaxConcurrency(2);
+
+        services.MapTicker<MetadataSyncJob, MetadataSyncJobPayload>(ServiceLifetime.Transient)
+            .WithPriority(TickerTaskPriority.Low);
+
         services.MapTicker<LibrarySyncJob, LibrarySyncJobPayload>(ServiceLifetime.Transient)
             .WithMaxConcurrency(4)
             .WithPriority(TickerTaskPriority.LongRunning);
@@ -36,5 +42,12 @@ public static class TickerQExtensions
         services.MapTicker<CheckForUpdateJob, CheckForUpdateJobPayload>(ServiceLifetime.Transient)
             .WithPriority(TickerTaskPriority.Low)
             .WithCron("0 0 * * * *");
+
+        services
+            .MapTicker<CheckAllConnectionsStatusByPlexServerJob, CheckAllConnectionsStatusByPlexServerJobPayload>(
+                ServiceLifetime.Transient
+            )
+            .WithPriority(TickerTaskPriority.Low)
+            .WithCron("0 */10 * * * *"); // Every 10 minutes
     }
 }

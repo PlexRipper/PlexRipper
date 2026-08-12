@@ -1,96 +1,98 @@
+using TickerQ.Utilities.Base;
+
 namespace Reaparr.Application;
 
-/// <summary>
-/// This job will check the status of all connections for a given Plex Server and runs periodically.
-/// </summary>
+public sealed record CheckAllConnectionsStatusByPlexServerJobPayload;
 
-public class CheckAllConnectionsStatusByPlexServerJob : IJob
+/// <summary>
+/// Checks the status of every connection for every Plex server.
+/// </summary>
+public class CheckAllConnectionsStatusByPlexServerJob
+    : BaseBackgroundJob<CheckAllConnectionsStatusByPlexServerJobPayload, CheckAllConnectionStatusUpdateDTO>
 {
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
     private readonly ICommandExecutor _commandExecutor;
-    private readonly IProgressHubService _progressHubService;
-
-    public static JobKey GetJobKey() =>
-        new(nameof(CheckAllConnectionsStatusByPlexServerJob), nameof(CheckAllConnectionsStatusByPlexServerJob));
 
     public CheckAllConnectionsStatusByPlexServerJob(
         ILogger log,
         IReaparrDbContext dbContext,
         ICommandExecutor commandExecutor,
-        IProgressHubService progressHubService
-    )
+        IProgressHubService progressHubService,
+        INotificationHubService notificationHubService
+    ) : base(log, progressHubService, notificationHubService)
     {
         _log = log.ForContext<CheckAllConnectionsStatusByPlexServerJob>();
         _dbContext = dbContext;
         _commandExecutor = commandExecutor;
-        _progressHubService = progressHubService;
     }
 
-    public async Task Execute(IJobExecutionContext context)
+    protected override JobTypes JobType => JobTypes.CheckAllConnectionsStatusByPlexServerJob;
+
+    protected override List<RefreshDataType> RefreshDataTypes =>
+        [RefreshDataType.PlexServer, RefreshDataType.PlexServerConnection];
+
+    public static JobKeyV2 GetJobKey() =>
+        new(
+            nameof(JobTypes.CheckAllConnectionsStatusByPlexServerJob),
+            JobTypes.CheckAllConnectionsStatusByPlexServerJob
+        );
+
+    protected override async Task ExecuteJobAsync(
+        TickerFunctionContext<CheckAllConnectionsStatusByPlexServerJobPayload> context,
+        CancellationToken cancellationToken
+    )
     {
-        var result = await Result.Try(async Task () =>
-        {
-            var cancellationToken = context.CancellationToken;
-            var plexServers = _dbContext.PlexServers
-                .Include(x => x.PlexServerConnections)
-                .ToList();
+        var plexServerIds = await _dbContext.PlexServers.Select(x => x.Id).ToListAsync(cancellationToken);
+        if (plexServerIds.Count == 0)
+            return;
 
-            if (!plexServers.Any())
-            {
-                return;
-            }
-
-            // Send start job status update
-            var update = new JobStatusUpdate<CheckAllConnectionStatusUpdateDTO>(
-                JobTypes.CheckAllConnectionsStatusByPlexServerJob,
-                JobStatus.Started,
-                new CheckAllConnectionStatusUpdateDTO
-                {
-                    PlexServersWithConnectionIds = plexServers.ToDictionary(
-                        x => x.Id,
-                        x => x.PlexServerConnections.Select(y => y.Id).ToList()
-                    ),
-                }
-            );
-
-            await _progressHubService.SendJobStatusUpdateAsync(update);
-
-            var connectionResults = await Task.WhenAll(
-                plexServers.Select(async plexServer =>
-                    await _commandExecutor.Send(
-                        new CheckAllConnectionsStatusByPlexServerCommand(plexServer.Id),
-                        cancellationToken
-                    )
+        var connectionResults = await Task.WhenAll(
+            plexServerIds.Select(plexServerId =>
+                _commandExecutor.Send(
+                    new CheckAllConnectionsStatusByPlexServerCommand(plexServerId),
+                    cancellationToken
                 )
+            )
+        );
+
+        var cancelledResults = connectionResults.Where(x => x.IsCancelled).ToList();
+        foreach (var cancelledResult in cancelledResults)
+            cancelledResult.LogWarning();
+
+        if (cancelledResults.Count > 0)
+            throw new OperationCanceledException(cancellationToken);
+
+        var failedResults = connectionResults.Where(x => x.IsFailed && !x.IsCancelled).ToList();
+        foreach (var failedResult in failedResults)
+            failedResult.LogError();
+
+        if (failedResults.Count > 0)
+            throw new InvalidOperationException("One or more Plex server connection checks failed");
+
+        _log.Here()
+            .Debug(
+                "{JobName} for servers with ids: {PlexServerIds} completed",
+                nameof(CheckAllConnectionsStatusByPlexServerJob),
+                plexServerIds
             );
+    }
 
-            var cancelledResults = connectionResults.Where(x => x.IsCancelled).ToList();
-            foreach (var cancelledResult in cancelledResults)
-                cancelledResult.LogWarning();
+    protected override async Task<CheckAllConnectionStatusUpdateDTO?> GetStatusUpdateDataAsync(
+        TickerFunctionContext<CheckAllConnectionsStatusByPlexServerJobPayload> context,
+        CancellationToken cancellationToken
+    )
+    {
+        var plexServers = await _dbContext.PlexServers
+            .Include(x => x.PlexServerConnections)
+            .ToListAsync(cancellationToken);
 
-            var failedResults = connectionResults.Where(x => x.IsFailed && !x.IsCancelled).ToList();
-            foreach (var failedResult in failedResults)
-                failedResult.LogError();
-
-            if (cancelledResults.Count > 0 || failedResults.Count > 0)
-                return;
-
-            // Send completed job status update
-            update.Status = JobStatus.Completed;
-            await _progressHubService.SendJobStatusUpdateAsync(update);
-
-            _log.Here()
-                .Debug(
-                    "{JobName} for servers with ids: {PlexServerIds} completed",
-                    nameof(CheckAllConnectionsStatusByPlexServerJob),
-                    plexServers.Select(x => x.Id).ToList()
-                );
-        });
-
-        if (result.IsCancelled)
-            result.LogWarning();
-        else if (result.IsFailed)
-            result.LogError();
+        return new CheckAllConnectionStatusUpdateDTO
+        {
+            PlexServersWithConnectionIds = plexServers.ToDictionary(
+                x => x.Id,
+                x => x.PlexServerConnections.Select(y => y.Id).ToList()
+            ),
+        };
     }
 }

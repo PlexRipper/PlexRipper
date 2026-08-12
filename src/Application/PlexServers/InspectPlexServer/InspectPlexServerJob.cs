@@ -1,25 +1,37 @@
+using TickerQ.Utilities.Base;
+
 namespace Reaparr.Application;
+
+public sealed record InspectPlexServerJobPayload
+{
+    public required List<int> PlexServerIds { get; init; }
+}
 
 /// <summary>
 /// Executed on a new Plex Account to check all connections and refresh libraries.
 /// </summary>
-public class InspectPlexServerJob : IJob
+public class InspectPlexServerJob : BaseBackgroundJob<InspectPlexServerJobPayload, InspectPlexServerJobUpdateDTO>
 {
-    public static string PlexServerIdsParameter => "plexServerIds";
-
     private readonly IReaparrDbContextFactory _dbContextFactory;
     private readonly INotificationHubService _notificationHubService;
     private readonly ILogger _log;
     private readonly ICommandExecutor _commandExecutor;
 
-    public static JobKey GetJobKey() => new(Guid.NewGuid().ToString(), nameof(InspectPlexServerJob));
+    protected override JobTypes JobType => JobTypes.InspectPlexServerJob;
+
+    protected override List<RefreshDataType> RefreshDataTypes =>
+        [RefreshDataType.PlexServer, RefreshDataType.PlexServerConnection, RefreshDataType.PlexLibrary];
+
+    public static JobKeyV2 GetJobKey(int plexServerId) =>
+        new($"{nameof(JobTypes.InspectPlexServerJob)}_{plexServerId}", JobTypes.InspectPlexServerJob);
 
     public InspectPlexServerJob(
         ILogger log,
         ICommandExecutor commandExecutor,
         IReaparrDbContextFactory dbContextFactory,
+        IProgressHubService progressHubService,
         INotificationHubService notificationHubService
-    )
+    ) : base(log, progressHubService, notificationHubService)
     {
         _log = log.ForContext<InspectPlexServerJob>();
         _commandExecutor = commandExecutor;
@@ -27,12 +39,12 @@ public class InspectPlexServerJob : IJob
         _notificationHubService = notificationHubService;
     }
 
-    public async Task Execute(IJobExecutionContext context)
+    protected override async Task ExecuteJobAsync(
+        TickerFunctionContext<InspectPlexServerJobPayload> context,
+        CancellationToken cancellationToken
+    )
     {
-        var dataMap = context.JobDetail.JobDataMap;
-        var cancellationToken = context.CancellationToken;
-
-        var plexServerIds = dataMap.GetIntListValue(PlexServerIdsParameter);
+        var plexServerIds = context.Request.PlexServerIds;
 
         _log.Here()
             .Debug(
@@ -41,28 +53,26 @@ public class InspectPlexServerJob : IJob
                 plexServerIds.Count
             );
 
-        var executionResult = await Result.Try(async Task () =>
-        {
-            var serverTasks = plexServerIds.Select(plexServerId => InspectPlexServer(plexServerId, cancellationToken));
-            var results = await Task.WhenAll(serverTasks);
-            var cancelledResults = results.Where(x => x.IsCancelled).ToList();
-            foreach (var cancelledResult in cancelledResults)
-                cancelledResult.LogWarning();
+        var serverTasks = plexServerIds.Select(plexServerId => InspectPlexServer(plexServerId, cancellationToken));
+        var results = await Task.WhenAll(serverTasks);
+        var cancelledResults = results.Where(x => x.IsCancelled).ToList();
+        foreach (var cancelledResult in cancelledResults)
+            cancelledResult.LogWarning();
 
-            var failedResults = results.Where(x => x.IsFailed && !x.IsCancelled).ToList();
+        var failedResults = results.Where(x => x.IsFailed && !x.IsCancelled).ToList();
+        foreach (var failedResult in failedResults)
+            failedResult.LogError();
 
-            foreach (var failedResult in failedResults)
-                failedResult.LogError();
-
-            if (failedResults.Count == 0 && cancelledResults.Count == 0)
-                _log.Here().Information("Successfully finished the inspection of {Count}", plexServerIds.Count);
-        });
-
-        if (executionResult.IsCancelled)
-            executionResult.LogWarning();
-        else if (executionResult.IsFailed)
-            executionResult.LogError();
+        if (failedResults.Count == 0 && cancelledResults.Count == 0)
+            _log.Here().Information("Successfully finished the inspection of {Count}", plexServerIds.Count);
     }
+
+    protected override Task<InspectPlexServerJobUpdateDTO?> GetStatusUpdateDataAsync(
+        TickerFunctionContext<InspectPlexServerJobPayload> context,
+        CancellationToken cancellationToken
+    ) => Task.FromResult<InspectPlexServerJobUpdateDTO?>(
+        new InspectPlexServerJobUpdateDTO { PlexServerIds = context.Request.PlexServerIds }
+    );
 
     private async Task<Result> InspectPlexServer(int plexServerId, CancellationToken cancellationToken)
     {

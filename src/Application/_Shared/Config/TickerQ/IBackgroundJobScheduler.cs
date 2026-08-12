@@ -6,7 +6,7 @@ using TickerQ.Utilities.Models;
 
 namespace Reaparr.Application;
 
-public interface IBackgroundJobScheduler
+public interface IBackgroundJobScheduler : ISetupAsync, IStopAsync
 {
     Task<TickerResult<JobTimeTicker>> ExecuteJob<TFunction, TRequest>(
         JobKeyV2 jobKey,
@@ -28,25 +28,92 @@ public interface IBackgroundJobScheduler
     Task<bool> IsJobRunning(JobKeyV2 jobKey, CancellationToken cancellationToken = default);
 
     Task<bool> CheckExists(JobKeyV2 jobKey);
+
+    Task<List<JobStatusUpdate<string>>> GetCurrentlyExecutingJobs(CancellationToken cancellationToken = default);
+
+    Task AwaitScheduler(CancellationToken cancellationToken = default);
 }
 
 public class BackgroundJobScheduler : IBackgroundJobScheduler
 {
-    private readonly IReaparrDbContextFactory _contextFactory;
+    private readonly ILogger _log;
+    private readonly IReaparrDbContextFactory _dbContextFactory;
     private readonly ITimeTickerManager<JobTimeTicker> _tickerManager;
+    private readonly ITickerQHostScheduler _hostScheduler;
+    private readonly IAppRuntimeInfo _appRuntimeInfo;
+    private readonly ICommandExecutor _commandExecutor;
+
+    private static TickerStatus[] ActiveStatuses => [TickerStatus.Idle, TickerStatus.Queued, TickerStatus.InProgress];
 
     public BackgroundJobScheduler(
-        IReaparrDbContextFactory contextFactory,
-        ITimeTickerManager<JobTimeTicker> tickerManager
+        ILogger log,
+        IReaparrDbContextFactory dbContextFactory,
+        ITimeTickerManager<JobTimeTicker> tickerManager,
+        ITickerQHostScheduler hostScheduler,
+        IAppRuntimeInfo appRuntimeInfo,
+        ICommandExecutor commandExecutor
     )
     {
-        _contextFactory = contextFactory;
+        _log = log.ForContext<BackgroundJobScheduler>();
+        _dbContextFactory = dbContextFactory;
         _tickerManager = tickerManager;
+        _hostScheduler = hostScheduler;
+        _appRuntimeInfo = appRuntimeInfo;
+        _commandExecutor = commandExecutor;
+    }
+
+    public async Task<Result> SetupAsync(CancellationToken cancellationToken = default)
+    {
+        if (!_hostScheduler.IsRunning)
+        {
+            _log.Here().Debug("Starting BackgroundJobScheduler scheduler");
+            await _hostScheduler.StartAsync(cancellationToken);
+        }
+
+        if (!_appRuntimeInfo.IsIntegrationTestMode)
+        {
+            var setupLibrarySyncResult = await SetupLibrarySyncJobs(cancellationToken);
+            if (setupLibrarySyncResult.IsCancelled || setupLibrarySyncResult.IsFailed)
+                return setupLibrarySyncResult;
+        }
+
+        return _hostScheduler.IsRunning
+            ? Result.Ok()
+            : Result.Fail("Could not start BackgroundJobScheduler scheduler").LogError();
+    }
+
+    private async Task<Result> SetupLibrarySyncJobs(CancellationToken cancellationToken)
+    {
+        var cleanupResult = await _commandExecutor.Send(new CleanupLibrarySyncJobQueueCommand(), cancellationToken);
+        if (cleanupResult.IsCancelled)
+            return cleanupResult.LogWarning();
+
+        if (cleanupResult.IsFailed)
+            return cleanupResult.LogError();
+
+        var checkQueuedResult = await _commandExecutor.Send(
+            new CheckQueuedPlexLibraryToSyncCommand(),
+            cancellationToken
+        );
+        return checkQueuedResult.IsFailed ? checkQueuedResult.LogError() : checkQueuedResult;
+    }
+
+    public async Task<Result> StopAsync(CancellationToken cancellationToken = default)
+    {
+        if (!_hostScheduler.IsRunning)
+            return Result.Ok();
+
+        _log.Here().Debug("Stopping BackgroundJobScheduler");
+        await _hostScheduler.StopAsync(cancellationToken);
+
+        return !_hostScheduler.IsRunning
+            ? Result.Ok()
+            : Result.Fail("Could not stop BackgroundJobScheduler").LogError();
     }
 
     public async Task<bool> Interrupt(JobKeyV2 jobKey, CancellationToken cancellationToken = default)
     {
-        using var dbContext = await _contextFactory.CreateAsync();
+        using var dbContext = await _dbContextFactory.CreateAsync();
 
         var timeTickerIds = await dbContext
             .TimeTickers.Where(x => x.JobKey == jobKey.Name && x.JobType == jobKey.Type)
@@ -80,21 +147,14 @@ public class BackgroundJobScheduler : IBackgroundJobScheduler
         CancellationToken cancellationToken = default
     )
     {
-        using var dbContext = await _contextFactory.CreateAsync();
-
-        var activeStatuses = new[]
-        {
-            TickerStatus.Idle,
-            TickerStatus.Queued,
-            TickerStatus.InProgress,
-        };
+        using var dbContext = await _dbContextFactory.CreateAsync();
 
         if (
             await dbContext.TimeTickers.AnyAsync(
                 x =>
                     x.JobKey == jobKey.Name
                     && x.JobType == jobKey.Type
-                    && activeStatuses.Contains(x.Status),
+                    && ActiveStatuses.Contains(x.Status),
                 cancellationToken
             )
         )
@@ -104,35 +164,25 @@ public class BackgroundJobScheduler : IBackgroundJobScheduler
             x =>
                 x.CronTicker.JobKey == jobKey.Name
                 && x.CronTicker.JobType == jobKey.Type
-                && activeStatuses.Contains(x.Status),
+                && ActiveStatuses.Contains(x.Status),
             cancellationToken
         );
     }
 
     public async Task<bool> CheckExists(JobKeyV2 jobKey)
     {
-        using var dbContext = await _contextFactory.CreateAsync();
+        using var dbContext = await _dbContextFactory.CreateAsync();
 
-        // Time tickers are retained after execution as job history. Only an active
-        // ticker should prevent another run with the same key from being scheduled.
-        // Completed, failed, and cancelled tickers must not block a re-run.
-        var activeTimeTickerExists = await dbContext.TimeTickers.AnyAsync(
-            x => x.JobKey == jobKey.Name
-                 && x.JobType == jobKey.Type
-                 && (x.Status == TickerStatus.Idle
-                     || x.Status == TickerStatus.Queued
-                     || x.Status == TickerStatus.InProgress),
-            CancellationToken.None
-        );
-
-        if (activeTimeTickerExists)
+        if (
+            await dbContext.TimeTickers.AnyAsync(x =>
+                x.JobKey == jobKey.Name
+                && x.JobType == jobKey.Type
+                && ActiveStatuses.Contains(x.Status)
+            )
+        )
             return true;
 
-        // A cron ticker is a persistent schedule rather than an execution record,
-        // so its definition existing is sufficient here.
-        return await dbContext.CronTickers.AnyAsync(
-            x => x.JobKey == jobKey.Name && x.JobType == jobKey.Type,
-            CancellationToken.None
+        return await dbContext.CronTickers.AnyAsync(x => x.JobKey == jobKey.Name && x.JobType == jobKey.Type
         );
     }
 
@@ -162,15 +212,55 @@ public class BackgroundJobScheduler : IBackgroundJobScheduler
     )
         where TFunction : class, ITickerFunction<TRequest>
     {
-        var ticker = new JobTimeTicker
+        var ticker = new JobTimeTicker()
         {
             Function = TickerFunctionProvider.GetFunctionName<TFunction>(),
-            ExecutionTime = executionTime,
             Request = TickerHelper.CreateTickerRequest(request),
             JobKey = jobKey.Name,
             JobType = jobKey.Type,
         };
-
+        ticker.ExecutionTime = executionTime ?? DateTime.UtcNow;
         return _tickerManager.AddAsync(ticker, cancellationToken);
     }
+
+    public async Task AwaitScheduler(CancellationToken cancellationToken = default)
+    {
+        while ((await GetCurrentlyExecutingJobs(cancellationToken)).Count > 0)
+            await Task.Delay(250, cancellationToken);
+    }
+
+    public async Task<List<JobStatusUpdate<string>>> GetCurrentlyExecutingJobs(
+        CancellationToken cancellationToken = default
+    )
+    {
+        using var dbContext = await _dbContextFactory.CreateAsync();
+
+        var timeTickers = await dbContext
+            .TimeTickers.Where(x => ActiveStatuses.Contains(x.Status))
+            .Select(x => new { x.JobType, x.Request, x.Id, x.CreatedAt })
+            .ToListAsync(cancellationToken);
+
+        var cronTickers = await dbContext
+            .CronTickerOccurrences.Where(x => ActiveStatuses.Contains(x.Status))
+            .Select(x => new { x.CronTicker.JobType, x.CronTicker.Request, x.Id, x.CreatedAt })
+            .ToListAsync(cancellationToken);
+
+        return timeTickers
+            .Select(x => ToJobStatusUpdate(x.JobType, x.Request, x.Id, x.CreatedAt))
+            .Concat(cronTickers.Select(x => ToJobStatusUpdate(x.JobType, x.Request, x.Id, x.CreatedAt)))
+            .ToList();
+    }
+
+    private static JobStatusUpdate<string> ToJobStatusUpdate(
+        JobTypes jobType,
+        byte[]? request,
+        Guid id,
+        DateTime createdAt
+    ) => new(
+        jobType,
+        JobStatus.Started,
+        request is null ? string.Empty : System.Text.Encoding.UTF8.GetString(request),
+        id.ToString(),
+        createdAt
+    );
 }

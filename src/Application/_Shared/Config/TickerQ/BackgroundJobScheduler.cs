@@ -150,7 +150,7 @@ public class BackgroundJobScheduler : IBackgroundJobScheduler
                 x =>
                     x.JobKey == jobKey.Name
                     && x.JobType == jobKey.Type
-                    && Array.IndexOf(ActiveStatuses, x.Status) >= 0,
+                    && Enumerable.Contains(ActiveStatuses, x.Status),
                 cancellationToken
             )
         )
@@ -160,7 +160,7 @@ public class BackgroundJobScheduler : IBackgroundJobScheduler
             x =>
                 x.CronTicker.JobKey == jobKey.Name
                 && x.CronTicker.JobType == jobKey.Type
-                && Array.IndexOf(ActiveStatuses, x.Status) >= 0,
+                && Enumerable.Contains(ActiveStatuses, x.Status),
             cancellationToken
         );
     }
@@ -174,7 +174,7 @@ public class BackgroundJobScheduler : IBackgroundJobScheduler
             await dbContext.TimeTickers.AnyAsync(x =>
                 x.JobKey == jobKey.Name
                 && x.JobType == jobKey.Type
-                && Array.IndexOf(ActiveStatuses, x.Status) >= 0
+                && Enumerable.Contains(ActiveStatuses, x.Status)
             )
         )
             return true;
@@ -237,12 +237,12 @@ public class BackgroundJobScheduler : IBackgroundJobScheduler
         using var dbContext = await _dbContextFactory.CreateAsync();
 
         var timeTickers = await dbContext
-            .TimeTickers.Where(x => Array.IndexOf(ActiveStatuses, x.Status) >= 0)
+            .TimeTickers.Where(x => Enumerable.Contains(ActiveStatuses, x.Status))
             .Select(x => new { x.JobType, x.Request, x.Id, x.CreatedAt })
             .ToListAsync(cancellationToken);
 
         var cronTickers = await dbContext
-            .CronTickerOccurrences.Where(x => Array.IndexOf(ActiveStatuses, x.Status) >= 0)
+            .CronTickerOccurrences.Where(x => Enumerable.Contains(ActiveStatuses, x.Status))
             .Select(x => new { x.CronTicker.JobType, x.CronTicker.Request, x.Id, x.CreatedAt })
             .ToListAsync(cancellationToken);
 

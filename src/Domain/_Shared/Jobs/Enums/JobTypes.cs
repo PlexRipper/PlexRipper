@@ -44,6 +44,5 @@ public enum JobTypes
     [JsonStringEnumMemberName(nameof(RefreshPlexAccountAccessJob))]
     RefreshPlexAccountAccessJob = 10,
 
-    // Ensure to add new job types to ToJobStatusUpdate in JobExecutionContextExtensions
     // Ensure to also add in EnumMapperExtensions.JobType.cs
 }

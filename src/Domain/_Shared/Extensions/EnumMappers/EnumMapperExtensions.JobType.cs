@@ -14,6 +14,7 @@ public static partial class EnumMapperExtensions
         ["MetadataSyncJob"] = JobTypes.MetadataSyncJob,
         ["CheckForUpdateJob"] = JobTypes.CheckForUpdateJob,
         ["CheckPlexLibrariesForUpdatesJob"] = JobTypes.CheckPlexLibrariesForUpdatesJob,
+        ["RefreshPlexAccountAccessJob"] = JobTypes.RefreshPlexAccountAccessJob,
         ["LibraryComparisonJob"] = JobTypes.LibraryComparisonJob,
     };
 

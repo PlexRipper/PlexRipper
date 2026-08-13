@@ -19,6 +19,7 @@ public class LibrarySyncJob : BaseBackgroundJob<LibrarySyncJobPayload, LibrarySy
     private readonly IReaparrDbContextFactory _dbContextFactory;
     private readonly ICommandExecutor _commandExecutor;
     private readonly INotificationHubService _notificationHubService;
+    private readonly IBackgroundJobScheduler _backgroundJobScheduler;
     private readonly IReaparrDbContext _dbContext;
 
     protected override JobTypes JobType => JobTypes.LibrarySyncJob;
@@ -31,7 +32,8 @@ public class LibrarySyncJob : BaseBackgroundJob<LibrarySyncJobPayload, LibrarySy
         IReaparrDbContextFactory dbContextFactory,
         ICommandExecutor commandExecutor,
         INotificationHubService notificationHubService,
-        IProgressHubService progressHubService
+        IProgressHubService progressHubService,
+        IBackgroundJobScheduler backgroundJobScheduler
     ) : base(log, progressHubService, notificationHubService)
     {
         _log = log.ForContext<LibrarySyncJob>();
@@ -39,6 +41,7 @@ public class LibrarySyncJob : BaseBackgroundJob<LibrarySyncJobPayload, LibrarySy
         _dbContext = dbContextFactory.Create();
         _commandExecutor = commandExecutor;
         _notificationHubService = notificationHubService;
+        _backgroundJobScheduler = backgroundJobScheduler;
     }
 
     public static JobKey GetJobKey(int serverId, int libraryId) =>
@@ -116,9 +119,31 @@ public class LibrarySyncJob : BaseBackgroundJob<LibrarySyncJobPayload, LibrarySy
             {
                 result.LogError();
 
+                var syncResult = result.ToResult();
+
+                if (syncResult.HasPlex401UnauthorizedError() || syncResult.Has401UnauthorizedError())
+                {
+                    _log.Here()
+                        .Warning(
+                            "Library sync failed for server {ServerId}, library {LibraryId} because the Plex token is unauthorized. Dequeuing library sync job.",
+                            serverId,
+                            libraryId
+                        );
+
+                    var deleteResult = await _backgroundJobScheduler.DeleteBatchJobs(
+                        [GetJobKey(serverId, libraryId)],
+                        cancellationToken
+                    );
+
+                    if (deleteResult.IsFailed)
+                        deleteResult.LogWarning();
+                    
+                    return;
+                }
+
                 // Check if failure was due to the server being offline (504 Gateway Timeout)
                 // TODO make "Server offline" a generic FluentResult check as this can happen in other places as well and we want to handle it consistently across the app
-                var isServerOffline = result.ToResult().Has504GatewayTimeoutError();
+                var isServerOffline = syncResult.Has504GatewayTimeoutError();
 
                 _log.Here()
                     .Warning(
@@ -128,7 +153,8 @@ public class LibrarySyncJob : BaseBackgroundJob<LibrarySyncJobPayload, LibrarySy
                         isServerOffline
                     );
 
-                await UpdateQueueItemAsync(context,
+                await UpdateQueueItemAsync(
+                    context,
                     LibrarySyncJobStatus.Failed,
                     errorMessage: result.Errors.FirstOrDefault()?.Message,
                     isServerOffline: isServerOffline
@@ -146,11 +172,6 @@ public class LibrarySyncJob : BaseBackgroundJob<LibrarySyncJobPayload, LibrarySy
                 await UpdateQueueItemAsync(context, LibrarySyncJobStatus.Completed);
             }
         }
-
-        // Send PlexLibrary refresh notification
-        await _notificationHubService.SendRefreshNotificationAsync(
-            [RefreshDataType.PlexLibrary]
-        );
     }
 
     protected override async Task ExecuteAfterCompletionAsync(

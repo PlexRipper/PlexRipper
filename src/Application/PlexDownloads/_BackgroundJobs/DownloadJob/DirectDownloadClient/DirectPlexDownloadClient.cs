@@ -163,19 +163,28 @@ public class DirectPlexDownloadClient : IPlexDownloadClient
 
         var result = await Result.Try(async Task () =>
         {
-            if (downloadTask.DirectDownloadSnapshot is not null)
+            if (downloadTask.DirectDownloadSnapshot is { Chunks.Count: > 0 } snapshot)
             {
                 await SendDownloadClientLog(
                     NotificationLevel.Information,
                     Domain.DownloadStatus.Downloading,
                     $"Resuming {_filename} download from pause"
                 );
-                var progress = downloadTask.DirectDownloadSnapshot.ToDownloadPackage();
+                var progress = snapshot.ToDownloadPackage();
                 progress.Urls = [downloadUrl]; // Ensure we use the latest connection string
                 await _downloader.DownloadFileTaskAsync(progress, cancellationToken);
             }
             else
             {
+                if (downloadTask.DirectDownloadSnapshot is not null)
+                {
+                    _log.Here()
+                        .Warning(
+                            "Ignoring invalid resume snapshot without chunks for {MediaFileName}; starting a fresh download",
+                            _filename
+                        );
+                }
+
                 var downloaderTargetPath = Path.Combine(downloadTask.DownloadDirectory, downloadTask.FileName);
                 await _downloader.DownloadFileTaskAsync(downloadUrl, downloaderTargetPath, cancellationToken);
             }

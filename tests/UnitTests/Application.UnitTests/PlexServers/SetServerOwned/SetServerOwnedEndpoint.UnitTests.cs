@@ -4,6 +4,23 @@ namespace Reaparr.Application.UnitTests;
 
 public class SetServerOwnedEndpointUnitTests : BaseEndpointUnitTest<SetServerOwnedEndpoint, SetServerOwnedRequest, ResultDTO<PlexServerDTO>>
 {
+    [Before(Test)]
+    public void SetupComparisonJobLifecycle()
+    {
+        Mock.Mock<ICommandExecutor>()
+            .Setup(x => x.Send(
+                It.IsAny<InvalidateLibraryComparisonJobsCommand>(),
+                It.IsAny<CancellationToken>()
+            ))
+            .ReturnsAsync(Result.Ok());
+        Mock.Mock<ICommandExecutor>()
+            .Setup(x => x.Send(
+                It.IsAny<ScheduleAffectedLibraryComparisonJobsCommand>(),
+                It.IsAny<CancellationToken>()
+            ))
+            .ReturnsAsync(Result.Ok());
+    }
+
     [Test]
     public async Task ShouldPersistOwnedOverrideOnPlexServer_WhenRequestIsValid()
     {

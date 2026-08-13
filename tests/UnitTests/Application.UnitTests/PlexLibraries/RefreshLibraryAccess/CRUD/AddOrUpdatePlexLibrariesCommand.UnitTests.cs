@@ -229,6 +229,9 @@ public class AddOrUpdatePlexLibrariesCommandUnitTests : BaseUnitTest<AddOrUpdate
         plexAccount.ShouldNotBeNull();
         var plexServers = await dbContext.PlexServers.ToListAsync(CancellationToken);
         plexServers.ShouldNotBeNull();
+        var destinationFolderId = await dbContext.FolderPaths
+            .Select(x => x.Id)
+            .FirstAsync(CancellationToken);
 
         // Set values that should not be overwritten by refreshing the libraries
         var syncedAtDateTime = DateTime.UtcNow - TimeSpan.FromHours(6);
@@ -237,7 +240,7 @@ public class AddOrUpdatePlexLibrariesCommandUnitTests : BaseUnitTest<AddOrUpdate
         {
             // Should not be overwritten because this happens when media is synced
             plexLibrary.SyncedAt = syncedAtDateTime;
-            plexLibrary.DefaultDestinationId = 5;
+            plexLibrary.DefaultDestinationId = destinationFolderId;
         }
 
         await dbContext.SaveChangesAsync(CancellationToken);
@@ -291,7 +294,7 @@ public class AddOrUpdatePlexLibrariesCommandUnitTests : BaseUnitTest<AddOrUpdate
             plexLibraryDb.UpdatedAt.ShouldBe(updatedTime);
             plexLibraryDb.SyncedAt.ShouldBe(syncedAtDateTime);
             plexLibraryDb.Outdated.ShouldBeTrue();
-            plexLibraryDb.DefaultDestinationId.ShouldBe(5);
+            plexLibraryDb.DefaultDestinationId.ShouldBe(destinationFolderId);
             plexLibraryDb.MediaSize.ShouldBe(123_456_789);
             plexLibraryDb.MovieCount.ShouldBe(11);
             plexLibraryDb.TvShowCount.ShouldBe(12);

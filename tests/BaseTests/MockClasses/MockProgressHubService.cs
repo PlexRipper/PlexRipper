@@ -10,8 +10,6 @@ public class MockProgressHubService : IProgressHubService
 
     public BlockingCollection<JobStatusUpdateDTO> JobStatusUpdateList { get; } = new();
 
-    public BlockingCollection<LibraryComparisonCompletedDTO> LibraryComparisonCompletedList { get; } = new();
-
     public BlockingCollection<AppUpdateDownloadProgressDTO> AppDownloadProgressList { get; } = new();
 
     public MockProgressHubService(ILogger log)
@@ -41,15 +39,6 @@ public class MockProgressHubService : IProgressHubService
     {
         AppDownloadProgressList.Add(progress, CancellationToken.None);
         _log.Here().Verbose("{ClassName} => {@AppDownloadProgress}", nameof(MockProgressHubService), progress);
-        return Task.CompletedTask;
-    }
-    
-    
-    public Task SendLibraryComparisonCompletedAsync(LibraryComparisonCompletedDTO notification)
-    {
-        LibraryComparisonCompletedList.Add(notification, CancellationToken.None);
-        _log.Here().Verbose("{ClassName} => {@Notification}", nameof(MockProgressHubService), notification);
-
         return Task.CompletedTask;
     }
 }

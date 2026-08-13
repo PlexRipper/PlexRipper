@@ -1,22 +1,15 @@
 using System.Collections.Concurrent;
-using Reaparr.BackgroundJobs.Contracts;
+using TickerQ.Utilities.Base;
 
 namespace Reaparr.Application.UnitTests;
 
 public class InspectPlexServerJobUnitTests : BaseUnitTest<InspectPlexServerJob>
 {
-    private IJobExecutionContext SetupJobContext(List<int> plexServerIds)
-    {
-        IDictionary<string, object> dict = new Dictionary<string, object>
-        {
-            { InspectPlexServerJob.PlexServerIdsParameter, JsonSerializer.Serialize(plexServerIds) },
-        };
-
-        Mock.Mock<IJobExecutionContext>().SetupGet(x => x.JobDetail.JobDataMap).Returns(new JobDataMap(dict));
-        Mock.Mock<IJobExecutionContext>().SetupGet(x => x.CancellationToken).Returns(CancellationToken);
-
-        return Mock.Create<IJobExecutionContext>();
-    }
+    private static TickerFunctionContext<InspectPlexServerJobPayload> SetupJobContext(List<int> plexServerIds) =>
+        new(
+            new TickerFunctionContext(),
+            new InspectPlexServerJobPayload { PlexServerIds = plexServerIds }
+        );
 
     [Test]
     public async Task ShouldInspectServersInParallel_WhenMultipleServersAreQueued()
@@ -81,7 +74,7 @@ public class InspectPlexServerJobUnitTests : BaseUnitTest<InspectPlexServerJob>
             .Verifiable(Times.Exactly(plexServerIds.Count));
 
         // Act
-        var executeTask = Sut.Execute(context);
+        var executeTask = Sut.ExecuteAsync(context, CancellationToken);
         await bothConnectionChecksStarted.Task.WaitAsync(TimeSpan.FromSeconds(5));
         executeTask.IsCompleted.ShouldBeFalse();
         releaseConnectionChecks.SetResult();
@@ -185,7 +178,7 @@ public class InspectPlexServerJobUnitTests : BaseUnitTest<InspectPlexServerJob>
             .Verifiable(Times.Once);
 
         // Act
-        await Sut.Execute(context);
+        await Sut.ExecuteAsync(context, CancellationToken);
 
         // Assert
         Mock.Mock<ICommandExecutor>()

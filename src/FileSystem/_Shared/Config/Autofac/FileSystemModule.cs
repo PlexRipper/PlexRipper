@@ -1,7 +1,5 @@
 using System.IO.Abstractions;
-using System.Reflection;
 using Autofac;
-using Autofac.Extras.Quartz;
 using Module = Autofac.Module;
 
 namespace Reaparr.FileSystem;
@@ -14,11 +12,7 @@ public class FileSystemModule : Module
     /// <inheritdoc/>
     protected override void Load(ContainerBuilder builder)
     {
-        var assembly = Assembly.GetExecutingAssembly();
-
         builder.RegisterType<DiskProvider>().As<IDiskProvider>().SingleInstance();
-
-        builder.RegisterModule(new QuartzAutofacJobsModule(assembly));
 
         // System.IO.Abstractions
         builder.RegisterType<System.IO.Abstractions.FileSystem>().As<IFileSystem>().SingleInstance();

@@ -15,7 +15,7 @@
         <PackageReference Include="Polly" Version="8.6.6" />
     </ItemGroup>
     <ItemGroup>
-        <ProjectReference Include="..\BackgroundJobs.Contracts\BackgroundJobs.Contracts.csproj" />
+        <ProjectReference Include="..\Application.Contracts\Application.Contracts.csproj" />
         <ProjectReference Include="..\Data.Contracts\Data.Contracts.csproj" />
         <ProjectReference Include="..\PlexApi.Contracts\PlexApi.Contracts.csproj" />
         <Compile Remove="Common\OpenPlexApiFactory.cs" />
@@ -28,7 +28,7 @@
         <Using Include="FluentResults" />
         <Using Include="FluentValidation" />
         <Using Include="Microsoft.AspNetCore.Http" />
-        <Using Include="Reaparr.BackgroundJobs.Contracts" />
+        <Using Include="Reaparr.Application.Contracts" />
         <Using Include="Reaparr.Domain" />
         <Using Include="Reaparr.Logging" />
         <Using Include="Reaparr.Data.Contracts" />

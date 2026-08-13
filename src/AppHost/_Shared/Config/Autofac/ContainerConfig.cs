@@ -29,14 +29,12 @@ public static class ContainerConfig
         builder.RegisterModule<FileSystemModule>();
         builder.RegisterModule<PlexApiModule>();
         builder.RegisterModule<SettingsModule>();
-        builder.RegisterModule<BackgroundJobsModule>();
         builder.RegisterModule<SignalrModule>();
 
         // Presentation
         builder.RegisterModule<AppHostModule>();
 
         // Packages
-        builder.RegisterModule<QuartzModule>();
         builder.RegisterModule<FastEndpointsModule>();
     }
 }

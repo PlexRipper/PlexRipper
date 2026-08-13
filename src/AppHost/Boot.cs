@@ -1,5 +1,4 @@
 using Reaparr.Application.Contracts;
-using Reaparr.BackgroundJobs.Contracts;
 
 namespace Reaparr.AppHost;
 
@@ -16,10 +15,9 @@ public class Boot : IHostedService
 
     private readonly IHostApplicationLifetime _appLifetime;
 
-    private readonly ISchedulerService _schedulerService;
+    private readonly IBackgroundJobScheduler _backgroundJobScheduler;
 
     private readonly IDownloadQueue _downloadQueue;
-    private readonly ILibrarySyncJobListener _librarySyncJobListener;
 
     #endregion
 
@@ -33,18 +31,16 @@ public class Boot : IHostedService
         ICommandExecutor commandExecutor,
         IAppRuntimeInfo appRuntimeInfo,
         IHostApplicationLifetime appLifetime,
-        ISchedulerService schedulerService,
-        IDownloadQueue downloadQueue,
-        ILibrarySyncJobListener librarySyncJobListener
+        IBackgroundJobScheduler backgroundJobScheduler,
+        IDownloadQueue downloadQueue
     )
     {
         _log = log.ForContext<Boot>();
         _commandExecutor = commandExecutor;
         _appRuntimeInfo = appRuntimeInfo;
         _appLifetime = appLifetime;
-        _schedulerService = schedulerService;
+        _backgroundJobScheduler = backgroundJobScheduler;
         _downloadQueue = downloadQueue;
-        _librarySyncJobListener = librarySyncJobListener;
 
         appLifetime.ApplicationStarted.Register(OnStarted);
         appLifetime.ApplicationStopping.Register(OnStopping);
@@ -84,20 +80,18 @@ public class Boot : IHostedService
         if (recoverResult.IsFailed)
             recoverResult.LogError();
 
-        await _schedulerService.SetupAsync(cancellationToken);
+        var schedulerSetupResult = await _backgroundJobScheduler.SetupAsync(cancellationToken);
+        if (schedulerSetupResult.IsFailed)
+        {
+            TerminateApplication();
+            return;
+        }
 
         if (!_appRuntimeInfo.IsIntegrationTestMode)
         {
             var bootQueueKickResult = await _downloadQueue.CheckDownloadQueueForAllServers(cancellationToken);
             if (bootQueueKickResult.IsFailed)
                 bootQueueKickResult.LogError();
-        }
-
-        var librarySyncListenerSetup = _librarySyncJobListener.Setup();
-        if (librarySyncListenerSetup.IsFailed)
-        {
-            TerminateApplication();
-            return;
         }
 
         _log.Here().Information("Finished Initiating boot process");
@@ -115,7 +109,9 @@ public class Boot : IHostedService
         _log.Here().Information("Shutting down the container");
 
         // Stop scheduler first so background jobs can't race with the auto-pause DB queries
-        await _schedulerService.StopAsync(cancellationToken);
+        var schedulerStopResult = await _backgroundJobScheduler.StopAsync(cancellationToken);
+        if (schedulerStopResult.IsFailed)
+            schedulerStopResult.LogError();
 
         var autoPauseResult = await _commandExecutor.Send(new AutoPauseActiveDownloadsCommand(), cancellationToken);
         if (autoPauseResult.IsFailed)
@@ -129,14 +125,14 @@ public class Boot : IHostedService
     private async void OnStarted()
     {
         _log.Here().Debug("Boot.OnStarted has been called");
-        
+
         var result = await Result.Try(async Task () =>
         {
             await _commandExecutor.Send(new NotifyArrAppsOnStartupCommand(), _appLifetime.ApplicationStopping);
             await _commandExecutor.Send(new WarmupMediaQueryCacheCommand(), _appLifetime.ApplicationStopping);
         }, exception =>
         {
-            if (exception is OperationCanceledException canceledException &&
+            if (exception is OperationCanceledException &&
                 _appLifetime.ApplicationStopping.IsCancellationRequested)
             {
                 _log.Here().Debug("Boot.OnStarted was cancelled because application shutdown was requested");

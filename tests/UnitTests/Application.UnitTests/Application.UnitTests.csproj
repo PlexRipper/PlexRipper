@@ -23,7 +23,6 @@
     <ItemGroup>
         <Using Include="Autofac" />
         <Using Include="Microsoft.EntityFrameworkCore" />
-        <Using Include="Quartz" />
         <Using Include="Reaparr.Application.Contracts" />
         <Using Include="Reaparr.Data.Contracts" />
         <Using Include="Reaparr.Environment" />

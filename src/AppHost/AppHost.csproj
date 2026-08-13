@@ -15,86 +15,83 @@
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
     </PropertyGroup>
     <ItemGroup>
-        <InternalsVisibleTo Include="FluentResultExtension.UnitTests" />
-        <InternalsVisibleTo Include="Reaparr.AppHost.UnitTests" />
-        <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="11.0.0" />
+        <InternalsVisibleTo Include="FluentResultExtension.UnitTests"/>
+        <InternalsVisibleTo Include="Reaparr.AppHost.UnitTests"/>
+        <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="11.0.0"/>
         <PackageReference Include="CSharpier.MsBuild" Version="1.3.0">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="FastEndpoints.Security" Version="8.1.0" />
-        <PackageReference Include="FastEndpoints.Swagger" Version="8.1.0" />
-        <PackageReference Include="Microsoft.AspNetCore.SignalR.Protocols.MessagePack" Version="10.0.10" />
-        <PackageReference Include="Microsoft.AspNetCore.SpaServices.Extensions" Version="10.0.10" />
-        <PackageReference Include="Microsoft.Extensions.Http.Polly" Version="10.0.10" />
-        <PackageReference Include="Photino.NET" Version="4.0.16" />
-        <PackageReference Include="Velopack" Version="0.0.1298" />
-        <PackageReference Include="Quartz" Version="3.18.2" />
-        <PackageReference Include="Quartz.Extensions.Hosting" Version="3.18.2" />
-        <PackageReference Include="Serilog.AspNetCore" Version="10.0.0" />
-        <PackageReference Include="Serilog.Sinks.AspNetCore.App.SignalR" Version="1.2.2" />
+        <PackageReference Include="FastEndpoints.Security" Version="8.1.0"/>
+        <PackageReference Include="FastEndpoints.Swagger" Version="8.1.0"/>
+        <PackageReference Include="Microsoft.AspNetCore.SignalR.Protocols.MessagePack" Version="10.0.10"/>
+        <PackageReference Include="Microsoft.AspNetCore.SpaServices.Extensions" Version="10.0.10"/>
+        <PackageReference Include="Microsoft.Extensions.Http.Polly" Version="10.0.10"/>
+        <PackageReference Include="Photino.NET" Version="4.0.16"/>
+        <PackageReference Include="TickerQ.Dashboard" Version="10.4.0"/>
+        <PackageReference Include="Velopack" Version="0.0.1298"/>
+        <PackageReference Include="Serilog.AspNetCore" Version="10.0.0"/>
+        <PackageReference Include="Serilog.Sinks.AspNetCore.App.SignalR" Version="1.2.2"/>
     </ItemGroup>
     <ItemGroup>
-        <EmbeddedResource Include="Desktop\Window\Templates\DesktopStartupFailureDialog.html" />
+        <EmbeddedResource Include="Desktop\Window\Templates\DesktopStartupFailureDialog.html"/>
     </ItemGroup>
     <ItemGroup>
-        <ProjectReference Include="..\Application\Application.csproj" />
-        <ProjectReference Include="..\BackgroundJobs\BackgroundJobs.csproj" />
-        <ProjectReference Include="..\Data\Data.csproj" />
-        <ProjectReference Include="..\External\External.csproj" />
-        <ProjectReference Include="..\FileSystem\FileSystem.csproj" />
-        <ProjectReference Include="..\Identity\Identity.csproj" />
-        <ProjectReference Include="..\PlexApi\PlexApi.csproj" />
-        <ProjectReference Include="..\PublicAPI\PublicAPI.csproj" />
-        <ProjectReference Include="..\Settings\Settings.csproj" />
-        <ProjectReference Include="..\SignalR\SignalR.csproj" />
+        <ProjectReference Include="..\Application\Application.csproj"/>
+        <ProjectReference Include="..\Data\Data.csproj"/>
+        <ProjectReference Include="..\External\External.csproj"/>
+        <ProjectReference Include="..\FileSystem\FileSystem.csproj"/>
+        <ProjectReference Include="..\Identity\Identity.csproj"/>
+        <ProjectReference Include="..\PlexApi\PlexApi.csproj"/>
+        <ProjectReference Include="..\PublicAPI\PublicAPI.csproj"/>
+        <ProjectReference Include="..\Settings\Settings.csproj"/>
+        <ProjectReference Include="..\SignalR\SignalR.csproj"/>
     </ItemGroup>
     <ItemGroup>
-        <Using Include="Autofac" />
-        <Using Include="System.ComponentModel.DataAnnotations" />
-        <Using Include="System.ComponentModel.DataAnnotations.Schema" />
-        <Using Include="FastEndpoints" />
-        <Using Include="FluentResults" />
-        <Using Include="FluentValidation" />
-        <Using Include="Microsoft.AspNetCore.Http" />
-        <Using Include="Microsoft.AspNetCore.Builder" />
-        <Using Include="Microsoft.AspNetCore.Hosting" />
-        <Using Include="Microsoft.AspNetCore.Routing" />
-        <Using Include="Microsoft.Extensions.Configuration" />
-        <Using Include="Microsoft.Extensions.DependencyInjection" />
-        <Using Include="Microsoft.Extensions.Hosting" />
-        <Using Include="Microsoft.Extensions.Logging" />
-        <Using Include="Microsoft.EntityFrameworkCore" />
-        <Using Include="Reaparr.Application" />
-        <Using Include="Reaparr.BackgroundJobs" />
-        <Using Include="Reaparr.Data" />
-        <Using Include="Reaparr.Domain" />
-        <Using Include="Reaparr.Environment" />
-        <Using Include="Reaparr.External" />
-        <Using Include="Reaparr.FileSystem" />
-        <Using Include="Reaparr.Identity" />
-        <Using Include="Reaparr.Logging" />
-        <Using Include="Reaparr.PlexApi" />
-        <Using Include="Reaparr.PublicAPI" />
-        <Using Include="Reaparr.Settings" />
-        <Using Include="Reaparr.SignalR" />
-        <Using Include="Serilog" />
-        <Using Include="System.Net.Http.Json" />
+        <Using Include="Autofac"/>
+        <Using Include="System.ComponentModel.DataAnnotations"/>
+        <Using Include="System.ComponentModel.DataAnnotations.Schema"/>
+        <Using Include="FastEndpoints"/>
+        <Using Include="FluentResults"/>
+        <Using Include="FluentValidation"/>
+        <Using Include="Microsoft.AspNetCore.Http"/>
+        <Using Include="Microsoft.AspNetCore.Builder"/>
+        <Using Include="Microsoft.AspNetCore.Hosting"/>
+        <Using Include="Microsoft.AspNetCore.Routing"/>
+        <Using Include="Microsoft.Extensions.Configuration"/>
+        <Using Include="Microsoft.Extensions.DependencyInjection"/>
+        <Using Include="Microsoft.Extensions.Hosting"/>
+        <Using Include="Microsoft.Extensions.Logging"/>
+        <Using Include="Microsoft.EntityFrameworkCore"/>
+        <Using Include="Reaparr.Application"/>
+        <Using Include="Reaparr.Data"/>
+        <Using Include="Reaparr.Domain"/>
+        <Using Include="Reaparr.Environment"/>
+        <Using Include="Reaparr.External"/>
+        <Using Include="Reaparr.FileSystem"/>
+        <Using Include="Reaparr.Identity"/>
+        <Using Include="Reaparr.Logging"/>
+        <Using Include="Reaparr.PlexApi"/>
+        <Using Include="Reaparr.PublicAPI"/>
+        <Using Include="Reaparr.Settings"/>
+        <Using Include="Reaparr.SignalR"/>
+        <Using Include="Serilog"/>
+        <Using Include="System.Net.Http.Json"/>
     </ItemGroup>
     <ItemGroup>
-        <None Remove="AppHost.csproj.DotSettings" />
-        <None Remove="ClientApp\**" />
+        <None Remove="AppHost.csproj.DotSettings"/>
+        <None Remove="ClientApp\**"/>
     </ItemGroup>
     <ItemGroup>
-        <Compile Remove="ClientApp\**" />
+        <Compile Remove="ClientApp\**"/>
     </ItemGroup>
     <ItemGroup>
-        <EmbeddedResource Remove="ClientApp\**" />
+        <EmbeddedResource Remove="ClientApp\**"/>
     </ItemGroup>
     <ItemGroup>
-        <Content Remove="ClientApp\**" />
+        <Content Remove="ClientApp\**"/>
     </ItemGroup>
     <ItemGroup>
-        <Folder Include="wwwroot\" />
+        <Folder Include="wwwroot\"/>
     </ItemGroup>
 </Project>

@@ -1,10 +1,26 @@
 using Microsoft.Extensions.DependencyInjection;
-using Reaparr.BackgroundJobs.Contracts;
 
 namespace Reaparr.Application.UnitTests;
 
 public class SetServerOwnedEndpointUnitTests : BaseEndpointUnitTest<SetServerOwnedEndpoint, SetServerOwnedRequest, ResultDTO<PlexServerDTO>>
 {
+    [Before(Test)]
+    public void SetupComparisonJobLifecycle()
+    {
+        Mock.Mock<ICommandExecutor>()
+            .Setup(x => x.Send(
+                It.IsAny<InvalidateLibraryComparisonJobsCommand>(),
+                It.IsAny<CancellationToken>()
+            ))
+            .ReturnsAsync(Result.Ok());
+        Mock.Mock<ICommandExecutor>()
+            .Setup(x => x.Send(
+                It.IsAny<ScheduleAffectedLibraryComparisonJobsCommand>(),
+                It.IsAny<CancellationToken>()
+            ))
+            .ReturnsAsync(Result.Ok());
+    }
+
     [Test]
     public async Task ShouldPersistOwnedOverrideOnPlexServer_WhenRequestIsValid()
     {
@@ -198,7 +214,7 @@ public class SetServerOwnedEndpointUnitTests : BaseEndpointUnitTest<SetServerOwn
                 "Plex server ownership scope changed"
             ))
             .Verifiable(Times.Once);
-        Mock.SetupCommand(It.IsAny<QueueLibraryComparisonJobsForLibraryCommand>)
+        Mock.SetupCommand(It.IsAny<ScheduleAffectedLibraryComparisonJobsCommand>)
             .ReturnsAsync(Result.Ok());
 
         // Act

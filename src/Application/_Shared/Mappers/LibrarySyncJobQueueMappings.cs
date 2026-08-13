@@ -1,0 +1,18 @@
+namespace Reaparr.Application;
+
+public static class LibrarySyncJobQueueMappings
+{
+    public static LibrarySyncJobQueueDTO ToDTO(this LibrarySyncJobQueue source) =>
+        new()
+        {
+            Priority = source.Priority,
+            Status = source.Status,
+            CreatedAt = source.CreatedAt,
+            StartedAt = source.StartedAt,
+            CompletedAt = source.CompletedAt,
+            IsServerOffline = source.IsServerOffline,
+            ErrorMessage = source.ErrorMessage,
+            PlexLibraryId = source.PlexLibraryId,
+            PlexServerId = source.PlexServerId,
+        };
+}

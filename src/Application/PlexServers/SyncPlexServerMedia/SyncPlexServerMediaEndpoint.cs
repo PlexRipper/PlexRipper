@@ -69,7 +69,7 @@ public class SyncPlexServerMediaEndpoint : Endpoint<SyncPlexServerMediaEndpointR
             return;
         }
 
-        var result = await _commandExecutor.Send(new QueueLibrarySyncJobCommand(libraryIds), ct);
+        var result = await _commandExecutor.Send(new QueueLibrarySyncJobCommand(libraryIds, Force: true), ct);
         await Send.FluentResult(result, ct);
     }
 }

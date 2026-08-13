@@ -80,7 +80,7 @@ public class ApplyRemoteTvShowComparisonStateCommandHandler
 
         if (currentOwnedLibraryIds.Count == 0)
         {
-            if (await HasPendingComparisonAsync(command.RemoteLibraryId, ownedLibraries.Keys.ToHashSet(), ct))
+            if (await HasPendingComparisonAsync(ownedLibraries.Keys.ToHashSet(), command.RemoteLibraryId, ct))
             {
                 foreach (var item in items)
                     item.SetComparisonState(PlexMediaComparisonState.Pending);
@@ -109,12 +109,12 @@ public class ApplyRemoteTvShowComparisonStateCommandHandler
             .Select(g => new { TvShowId = g.Key, Count = g.Count() })
             .ToDictionaryAsync(x => x.TvShowId, x => x.Count, ct);
         var episodeHits = await (
-            from comparison in _dbContext.PlexEpisodeComparisons
-            join episode in _dbContext.PlexTvShowEpisodes on comparison.RemotePlexMediaId equals episode.Id
-            where comparison.RemotePlexLibraryId == command.RemoteLibraryId
-                  && currentOwnedLibraryIds.Contains(comparison.OwnedPlexLibraryId)
-                  && itemIds.Contains(episode.TvShowId)
-            select new { episode.TvShowId, comparison.RemotePlexMediaId, comparison.HitState })
+                from comparison in _dbContext.PlexEpisodeComparisons
+                join episode in _dbContext.PlexTvShowEpisodes on comparison.RemotePlexMediaId equals episode.Id
+                where comparison.RemotePlexLibraryId == command.RemoteLibraryId
+                      && currentOwnedLibraryIds.Contains(comparison.OwnedPlexLibraryId)
+                      && itemIds.Contains(episode.TvShowId)
+                select new { episode.TvShowId, comparison.RemotePlexMediaId, comparison.HitState })
             .ToListAsync(ct);
 
         var episodeHitLookup = episodeHits
@@ -138,7 +138,8 @@ public class ApplyRemoteTvShowComparisonStateCommandHandler
                 continue;
             }
 
-            var showHigherQualityCount = showHitsForItem!.Count(x => x.HitState == PlexMediaComparisonHitState.HigherQuality);
+            var showHigherQualityCount =
+                showHitsForItem!.Count(x => x.HitState == PlexMediaComparisonHitState.HigherQuality);
 
             remoteEpisodeCountLookup.TryGetValue(showId, out var remoteEpisodeCount);
             episodeHitLookup.TryGetValue(showId, out var episodeHitSummary);
@@ -160,13 +161,10 @@ public class ApplyRemoteTvShowComparisonStateCommandHandler
     }
 
     private async Task<bool> HasPendingComparisonAsync(
-        int remoteLibraryId,
         HashSet<int> ownedLibraryIds,
-        CancellationToken ct) =>
-        await _dbContext.LibraryComparisonJobQueues
-            .AnyAsync(x =>
-                x.RemotePlexLibraryId == remoteLibraryId
-                && x.MediaType == PlexMediaType.TvShow
-                && ownedLibraryIds.Contains(x.OwnedPlexLibraryId)
-                && (x.Status == LibrarySyncJobStatus.Queued || x.Status == LibrarySyncJobStatus.Processing), ct);
+        int remoteLibraryId,
+        CancellationToken ct) => await _dbContext.HasActiveLibraryComparisonAsync(
+        ownedLibraryIds.Select(x => PlexLibraryComparisonJob.GetJobKey(x, remoteLibraryId)),
+        ct
+    );
 }

@@ -17,7 +17,7 @@ public class DbContextExtensionsPlexLibraryUnitTests : BaseUnitTest
         var library = IDbContext.PlexLibraries.First();
 
         // Act
-        var name = await IDbContext.GetPlexLibraryNameById(library.Id, CancellationToken);
+        var name = await IDbContext.GetPlexLibraryNameById(library.Id);
 
         // Assert
         name.ShouldBe(library.Title);
@@ -30,7 +30,7 @@ public class DbContextExtensionsPlexLibraryUnitTests : BaseUnitTest
         await SetupDatabase(12301);
 
         // Act
-        var name = await IDbContext.GetPlexLibraryNameById(9999, CancellationToken);
+        var name = await IDbContext.GetPlexLibraryNameById(9999);
 
         // Assert
         name.ShouldBe("Library Name Not Found");

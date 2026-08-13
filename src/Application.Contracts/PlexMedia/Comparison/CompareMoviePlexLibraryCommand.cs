@@ -6,6 +6,6 @@ namespace Reaparr.Application.Contracts;
 /// movie comparison state efficiently.
 /// </summary>
 public record CompareMoviePlexLibraryCommand(
-    int RemotePlexLibraryId,
-    int OwnedPlexLibraryId
+    int OwnedPlexLibraryId,
+    int RemotePlexLibraryId
 ) : ICommand<Result>;

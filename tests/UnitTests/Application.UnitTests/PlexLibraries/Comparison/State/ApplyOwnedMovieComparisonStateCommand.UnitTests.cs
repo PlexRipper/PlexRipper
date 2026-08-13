@@ -70,14 +70,12 @@ public class ApplyOwnedMovieComparisonStateCommandUnitTests
         await SetLibraryUpdatedAtAsync(ownedLibrary.Id, new DateTime(2026, 7, 22, 10, 5, 0, DateTimeKind.Utc));
 
         var ownedMovie = await GetLibraryMovieAsync(ownedLibrary.Id);
-        dbContext.LibraryComparisonJobQueues.Add(new LibraryComparisonJobQueue
+        dbContext.TimeTickers.Add(new JobTimeTicker
         {
-            RemotePlexLibraryId = remoteLibrary.Id,
-            OwnedPlexLibraryId = ownedLibrary.Id,
-            MediaType = PlexMediaType.Movie,
-            Priority = 1,
-            Status = LibrarySyncJobStatus.Queued,
-            CreatedAt = DateTime.UtcNow,
+            Function = nameof(PlexLibraryComparisonJob),
+            Request = [],
+            JobKey = PlexLibraryComparisonJob.GetJobKey(ownedLibrary.Id, remoteLibrary.Id).Name,
+            JobType = JobTypes.LibraryComparisonJob,
         });
         await dbContext.SaveChangesAsync(CancellationToken);
 
@@ -156,17 +154,6 @@ public class ApplyOwnedMovieComparisonStateCommandUnitTests
         await SetOwnedOverrideAsync(ownedLibrary.PlexServerId, true);
 
         var ownedMovie = await GetLibraryMovieAsync(ownedLibrary.Id);
-        dbContext.LibraryComparisonJobQueues.Add(new LibraryComparisonJobQueue
-        {
-            RemotePlexLibraryId = remoteLibrary.Id,
-            OwnedPlexLibraryId = ownedLibrary.Id,
-            MediaType = PlexMediaType.Movie,
-            Priority = 1,
-            Status = LibrarySyncJobStatus.Completed,
-            CreatedAt = DateTime.UtcNow,
-        });
-        await dbContext.SaveChangesAsync(CancellationToken);
-
         var items = new List<PlexMediaSlimDTO> { CreateMovieItem(ownedMovie) };
 
         // Act

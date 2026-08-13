@@ -10,13 +10,12 @@ public class DirectPlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDow
     // Shared helpers
     // -------------------------------------------------------------------------
 
-    private static DownloadPackage MakeDownloadPackage(long totalBytes = 10 * 1024) =>
-        new()
-        {
-            TotalFileSize = totalBytes,
-            FileName = "test.mp4",
-            Urls = ["http://plex/test.mp4"],
-        };
+    private static DownloadPackage MakeDownloadPackage(long totalBytes = 10 * 1024) => new()
+    {
+        TotalFileSize = totalBytes,
+        FileName = "test.mp4",
+        Urls = ["http://plex/test.mp4"],
+    };
 
     /// <summary>
     /// Creates a mock IDownloadService whose DownloadFileTaskAsync(url, path, ct) raises a single
@@ -24,13 +23,18 @@ public class DirectPlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDow
     /// The Package property and UserState on the completed event are both populated so that
     /// the production DownloadFileCompleted handler does not throw a NullReferenceException.
     /// </summary>
-    private static void SetupVerifiedFile(Mock<IFile> fileMock, Mock<IFileInfoFactory> fileInfoFactoryMock, string path, long size)
+    private static void SetupVerifiedFile(
+        Mock<IFile> fileMock,
+        Mock<IFileInfoFactory> fileInfoFactoryMock,
+        string path,
+        long size)
     {
         var fileInfoMock = new Mock<IFileInfo>();
         fileInfoMock.Setup(x => x.Length).Returns(size);
 
         fileMock.Setup(x => x.Exists(path)).Returns(true);
-        fileMock.Setup(x => x.ReadAllBytes(path)).Throws(new InvalidOperationException("File length verification must not read the file contents."));
+        fileMock.Setup(x => x.ReadAllBytes(path))
+            .Throws(new InvalidOperationException("File length verification must not read the file contents."));
         fileInfoFactoryMock.Setup(x => x.New(It.IsAny<string>())).Returns(fileInfoMock.Object);
     }
 
@@ -49,8 +53,7 @@ public class DirectPlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDow
         mock.Setup(x => x.Package).Returns(package);
 
         mock.Setup(x => x.DownloadFileTaskAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
-            .Returns<string, string, CancellationToken>(
-                (_, targetPath, _) =>
+            .Returns<string, string, CancellationToken>((_, targetPath, _) =>
                 {
                     SetupVerifiedFile(fileMock, fileInfoFactoryMock, targetPath, totalBytes);
 
@@ -67,6 +70,7 @@ public class DirectPlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDow
                     mock.Raise(
                         x => x.DownloadFileCompleted += null,
                         mock.Object,
+
                         // UserState must be a DownloadPackage — the production handler casts it
                         new AsyncCompletedEventArgs(null, false, package)
                     );
@@ -270,8 +274,8 @@ public class DirectPlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDow
                     It.IsAny<CancellationToken>()
                 )
             )
-            .Callback<ICommand<Result>, CancellationToken>(
-                (command, _) => ensureDirectoryCommand = (EnsureDownloadDirectoryCommand)command
+            .Callback<ICommand<Result>, CancellationToken>((command, _) =>
+                ensureDirectoryCommand = (EnsureDownloadDirectoryCommand)command
             )
             .ReturnsAsync(Result.Ok());
 
@@ -363,8 +367,7 @@ public class DirectPlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDow
 
         downloadServiceMock
             .Setup(x => x.DownloadFileTaskAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
-            .Returns<string, string, CancellationToken>(
-                (_, targetPath, _) =>
+            .Returns<string, string, CancellationToken>((_, targetPath, _) =>
                 {
                     SetupVerifiedFile(fileMock, Mock.Mock<IFileInfoFactory>(), targetPath, downloadTask.DataTotal);
 
@@ -694,8 +697,7 @@ public class DirectPlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDow
         downloadServiceMock.Setup(x => x.Package).Returns(dlPackage);
         downloadServiceMock
             .Setup(x => x.DownloadFileTaskAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
-            .Returns<string, string, CancellationToken>(
-                async (_, targetPath, cancellationToken) =>
+            .Returns<string, string, CancellationToken>(async (_, targetPath, cancellationToken) =>
                 {
                     SetupVerifiedFile(fileMock, Mock.Mock<IFileInfoFactory>(), targetPath, downloadTask.DataTotal);
 
@@ -705,6 +707,7 @@ public class DirectPlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDow
                         downloadServiceMock.Object,
                         new DownloadStartedEventArgs("test.mkv", 10 * 1024)
                     );
+
                     // Allow async subscription handlers a moment to process
                     await Task.Delay(100, cancellationToken);
                     downloadServiceMock.Raise(
@@ -759,8 +762,7 @@ public class DirectPlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDow
                     It.IsAny<CancellationToken>()
                 )
             )
-            .Callback<DownloadTaskKey, Domain.DownloadStatus, CancellationToken>(
-                (_, status, _) =>
+            .Callback<DownloadTaskKey, Domain.DownloadStatus, CancellationToken>((_, status, _) =>
                 {
                     if (status == DomainDownloadStatus.Downloading)
                         downloadingStatusWasSetBeforeDownloadStarted = true;
@@ -802,8 +804,7 @@ public class DirectPlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDow
         downloadServiceMock.Setup(x => x.Package).Returns(package);
         downloadServiceMock
             .Setup(x => x.DownloadFileTaskAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
-            .Returns<string, string, CancellationToken>(
-                (_, _, _) =>
+            .Returns<string, string, CancellationToken>((_, _, _) =>
                 {
                     downloadingStatusWasSetBeforeDownloadStarted.ShouldBeTrue();
                     return Task.CompletedTask;
@@ -887,8 +888,7 @@ public class DirectPlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDow
         downloadServiceMock.Setup(x => x.Package).Returns(speedPackage);
         downloadServiceMock
             .Setup(x => x.DownloadFileTaskAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
-            .Returns<string, string, CancellationToken>(
-                async (_, targetPath, cancellationToken) =>
+            .Returns<string, string, CancellationToken>(async (_, targetPath, cancellationToken) =>
                 {
                     SetupVerifiedFile(fileMock, Mock.Mock<IFileInfoFactory>(), targetPath, downloadTask.DataTotal);
 
@@ -928,7 +928,12 @@ public class DirectPlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDow
     }
 
     [Test]
-    public async Task ShouldCallResumeOverload_WhenDirectDownloadSnapshotExists()
+    [Arguments(1, true)]
+    [Arguments(0, false)]
+    public async Task ShouldOnlyCallResumeOverload_WhenDirectDownloadSnapshotContainsChunks(
+        int snapshotChunkCount,
+        bool shouldResume
+    )
     {
         // Arrange
         Mock.Mock<IDownloadTaskUpdateDispatcher>()
@@ -972,9 +977,9 @@ public class DirectPlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDow
             TotalFileSize = downloadTask.DataTotal,
             FileName = downloadTask.FileName,
             DownloadingFileExtension = FilePathExtensions.TempDownloadFileSuffix,
-            Chunks =
-            [
-                new DirectDownloadSnapshotChunk
+            Chunks = Enumerable
+                .Range(0, snapshotChunkCount)
+                .Select(_ => new DirectDownloadSnapshotChunk
                 {
                     Id = Guid.NewGuid().ToString(),
                     Start = 0,
@@ -982,8 +987,8 @@ public class DirectPlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDow
                     Position = downloadTask.DataTotal / 2,
                     MaxTryAgainOnFailure = 3,
                     Timeout = 1000,
-                },
-            ],
+                })
+                .ToList(),
             IsSupportDownloadInRange = true,
         };
 
@@ -1005,8 +1010,7 @@ public class DirectPlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDow
         downloadServiceMock.Setup(x => x.Package).Returns(resumePackage);
         downloadServiceMock
             .Setup(x => x.DownloadFileTaskAsync(It.IsAny<DownloadPackage>(), It.IsAny<CancellationToken>()))
-            .Returns<DownloadPackage, CancellationToken>(
-                (pkg, _) =>
+            .Returns<DownloadPackage, CancellationToken>((pkg, _) =>
                 {
                     capturedPackage = pkg;
                     SetupVerifiedFile(
@@ -1018,6 +1022,7 @@ public class DirectPlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDow
                     downloadServiceMock.Raise(
                         x => x.DownloadFileCompleted += null,
                         downloadServiceMock.Object,
+
                         // UserState must be a DownloadPackage — the production handler casts and dereferences it
                         new AsyncCompletedEventArgs(null, false, resumePackage)
                     );
@@ -1034,19 +1039,27 @@ public class DirectPlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDow
         // Assert
         result.IsSuccess.ShouldBeTrue();
 
-        // Resume path must use the DownloadPackage overload, not the URL-string overload
+        // A snapshot without chunks cannot be resumed by Downloader because it calculates zero concurrent tasks.
         downloadServiceMock.Verify(
             x => x.DownloadFileTaskAsync(It.IsAny<DownloadPackage>(), It.IsAny<CancellationToken>()),
-            Times.Once
+            shouldResume ? Times.Once() : Times.Never()
         );
         downloadServiceMock.Verify(
             x => x.DownloadFileTaskAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()),
-            Times.Never
+            shouldResume ? Times.Never() : Times.Once()
         );
 
-        // The stale URL from the snapshot must be replaced with the fresh authenticated URL
-        capturedPackage.ShouldNotBeNull();
-        capturedPackage!.Urls.ShouldNotContain("http://old-plex-url/file.mkv");
+        if (shouldResume)
+        {
+            // The stale URL from the snapshot must be replaced with the fresh authenticated URL
+            capturedPackage.ShouldNotBeNull();
+            capturedPackage!.Urls.ShouldNotContain("http://old-plex-url/file.mkv");
+        }
+        else
+        {
+            capturedPackage.ShouldBeNull();
+        }
+
         Mock.Mock<ICommandExecutor>()
             .Verify(x => x.Send(It.IsAny<GetDirectDownloadUrlCommand>(), It.IsAny<CancellationToken>()), Times.Once());
     }
@@ -1106,8 +1119,7 @@ public class DirectPlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDow
 
         downloadServiceMock
             .Setup(x => x.DownloadFileTaskAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
-            .Returns<string, string, CancellationToken>(
-                async (_, targetPath, cancellationToken) =>
+            .Returns<string, string, CancellationToken>(async (_, targetPath, cancellationToken) =>
                 {
                     SetupVerifiedFile(fileMock, Mock.Mock<IFileInfoFactory>(), targetPath, downloadTask.DataTotal);
 
@@ -1121,11 +1133,13 @@ public class DirectPlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDow
                             BytesPerSecondSpeed = 1024,
                         }
                     );
+
                     // Wait beyond the 500 ms sample window so the Rx handler fires and persists
                     await Task.Delay(700, cancellationToken);
                     downloadServiceMock.Raise(
                         x => x.DownloadFileCompleted += null,
                         downloadServiceMock.Object,
+
                         // UserState must be a DownloadPackage — the production handler casts and dereferences it
                         new AsyncCompletedEventArgs(null, false, fakePackage)
                     );
@@ -1273,8 +1287,7 @@ public class DirectPlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDow
         downloadServiceMock.Setup(x => x.Package).Returns(completionPackage);
         downloadServiceMock
             .Setup(x => x.DownloadFileTaskAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
-            .Returns<string, string, CancellationToken>(
-                (_, targetPath, _) =>
+            .Returns<string, string, CancellationToken>((_, targetPath, _) =>
                 {
                     SetupVerifiedFile(fileMock, Mock.Mock<IFileInfoFactory>(), targetPath, downloadTask.DataTotal);
 
@@ -1363,8 +1376,7 @@ public class DirectPlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDow
         downloadServiceMock.Setup(x => x.Package).Returns(completionPackage);
         downloadServiceMock
             .Setup(x => x.DownloadFileTaskAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
-            .Returns<string, string, CancellationToken>(
-                (_, targetPath, _) =>
+            .Returns<string, string, CancellationToken>((_, targetPath, _) =>
                 {
                     SetupVerifiedFile(fileMock, fileInfoFactoryMock, targetPath, verifiedFileSize);
 
@@ -1641,8 +1653,7 @@ public class DirectPlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDow
         downloadServiceMock.Setup(x => x.Package).Returns(package);
         downloadServiceMock
             .Setup(x => x.DownloadFileTaskAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
-            .Returns<string, string, CancellationToken>(
-                (_, targetPath, _) =>
+            .Returns<string, string, CancellationToken>((_, targetPath, _) =>
                 {
                     SetupVerifiedFile(fileMock, fileInfoFactoryMock, targetPath, incompleteSize);
 
@@ -1746,8 +1757,7 @@ public class DirectPlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDow
         downloadServiceMock.Setup(x => x.Package).Returns(package);
         downloadServiceMock
             .Setup(x => x.DownloadFileTaskAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
-            .Returns<string, string, CancellationToken>(
-                async (_, targetPath, _) =>
+            .Returns<string, string, CancellationToken>(async (_, targetPath, _) =>
                 {
                     SetupVerifiedFile(fileMock, fileInfoFactoryMock, targetPath, downloadTask.DataTotal);
 
@@ -1789,7 +1799,8 @@ public class DirectPlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDow
                 x =>
                     x.OnProgressUpdated(
                         It.IsAny<DownloadTaskKey>(),
-                        It.Is<DownloadTaskProgress>(p => p.Percentage == 100 && p.DataReceived == downloadTask.DataTotal),
+                        It.Is<DownloadTaskProgress>(p =>
+                            p.Percentage == 100 && p.DataReceived == downloadTask.DataTotal),
                         It.IsAny<DirectDownloadSnapshot?>()
                     ),
                 Times.AtLeastOnce()
@@ -1845,8 +1856,7 @@ public class DirectPlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDow
                     cancellationTokenSource.Token
                 )
             )
-            .Returns<string, string, CancellationToken>(
-                (_, _, token) =>
+            .Returns<string, string, CancellationToken>((_, _, token) =>
                 {
                     cancellationTokenSource.Cancel();
                     return Task.FromCanceled(token);
@@ -1919,8 +1929,7 @@ public class DirectPlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDow
         downloadServiceMock.Setup(x => x.CancelTaskAsync()).Returns(Task.CompletedTask);
         downloadServiceMock
             .Setup(x => x.DownloadFileTaskAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
-            .Returns<string, string, CancellationToken>(
-                (_, _, _) =>
+            .Returns<string, string, CancellationToken>((_, _, _) =>
                 {
                     downloadServiceMock.Raise(
                         x => x.DownloadFileCompleted += null,

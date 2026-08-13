@@ -68,10 +68,11 @@ function syncServerLibraries(): void {
 	if (!props.plexServer) {
 		return;
 	}
+	const plexServerId = props.plexServer.id;
 	set(syncLoading, true);
 	useSubscription(
 		plexServerApi
-			.syncPlexServerMediaEndpoint(props.plexServer.id)
+			.syncPlexServerMediaEndpoint(plexServerId)
 			.subscribe({
 				next: (result) => {
 					set(syncLoading, false);
@@ -79,7 +80,7 @@ function syncServerLibraries(): void {
 						return;
 					}
 					dialogStore.closeDialog(DialogType.ServerSettingsDialog);
-					dialogStore.openDialog(DialogType.SyncServerMediaDialog);
+					dialogStore.openSyncServerMediaDialog(plexServerId);
 				},
 				error: () => {
 					set(syncLoading, false);

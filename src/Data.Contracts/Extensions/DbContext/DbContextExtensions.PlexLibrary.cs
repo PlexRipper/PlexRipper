@@ -4,15 +4,14 @@ public static partial class DbContextExtensions
 {
     public static async Task<string> GetPlexLibraryNameById(
         this IReaparrDbContext dbContext,
-        int plexLibraryId,
-        CancellationToken cancellationToken = default
+        int plexLibraryId
     )
     {
         var plexLibraryName = await dbContext
             .PlexLibraries.IgnoreIsEnabledFilter()
             .Where(x => x.Id == plexLibraryId)
             .Select(x => x.Title)
-            .FirstOrDefaultAsync(cancellationToken);
+            .FirstOrDefaultAsync(CancellationToken.None);
         return plexLibraryName ?? "Library Name Not Found";
     }
 

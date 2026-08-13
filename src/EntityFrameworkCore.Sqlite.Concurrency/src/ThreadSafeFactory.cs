@@ -1,8 +1,5 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Data.Sqlite;
-using System;
-using System.Threading.Tasks;
-using EntityFrameworkCore.Sqlite.Concurrency;
 using EntityFrameworkCore.Sqlite.Concurrency.Models;
 using Microsoft.Extensions.DependencyInjection;
 

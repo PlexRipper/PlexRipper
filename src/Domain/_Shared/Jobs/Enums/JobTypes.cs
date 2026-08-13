@@ -1,12 +1,18 @@
 namespace Reaparr.Domain;
 
+/// <summary>
+/// The various background job types that Reaparr can run. 
+/// </summary>
 [JsonConverter(typeof(JsonStringEnumConverter))]
 public enum JobTypes
 {
     // NOTE: Make sure the indexes are correct, 1,2,3,4,5 etc. and that there is no skip in between
     // Otherwise the TypeScript DTO translator in the front-end starts messing up
     [JsonStringEnumMemberName(nameof(Unknown))]
-    Unknown = 0,
+    Unknown = -1,
+
+    [JsonStringEnumMemberName(nameof(None))]
+    None = 0,
 
     [JsonStringEnumMemberName(nameof(CheckAllConnectionsStatusByPlexServerJob))]
     CheckAllConnectionsStatusByPlexServerJob = 1,
@@ -36,4 +42,5 @@ public enum JobTypes
     LibraryComparisonJob = 9,
 
     // Ensure to add new job types to ToJobStatusUpdate in JobExecutionContextExtensions
+    // Ensure to also add in EnumMapperExtensions.JobType.cs
 }

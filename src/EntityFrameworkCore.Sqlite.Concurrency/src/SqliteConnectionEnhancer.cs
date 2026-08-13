@@ -1,10 +1,8 @@
 using System.Collections.Concurrent;
 using System.Data.Common;
-using System.Text;
 using EntityFrameworkCore.Sqlite.Concurrency.Models;
 using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.Logging;
-
 
 namespace EntityFrameworkCore.Sqlite.Concurrency;
 
@@ -23,6 +21,7 @@ public static class SqliteConnectionEnhancer
     private static readonly ConcurrentDictionary<string, SemaphoreSlim> _writeLocks = new();
 
 #if !NETSTANDARD2_0
+
     // Shared interceptors per connection string to avoid leaking background tasks
     private static readonly ConcurrentDictionary<string, SqliteConcurrencyInterceptor> _interceptors = new();
 #endif
@@ -118,6 +117,7 @@ public static class SqliteConnectionEnhancer
                     $"Interceptors are shared per connection string and must be configured consistently.",
                     nameof(options));
             }
+
             return existingInterceptor;
         }
 
@@ -195,7 +195,7 @@ public static class SqliteConnectionEnhancer
         if (connection is not SqliteConnection sqliteConnection)
             return;
 
-        var builder   = new SqliteConnectionStringBuilder(sqliteConnection.ConnectionString);
+        var builder = new SqliteConnectionStringBuilder(sqliteConnection.ConnectionString);
         var dataSource = builder.DataSource;
 
         if (string.IsNullOrEmpty(dataSource))
@@ -230,8 +230,14 @@ public static class SqliteConnectionEnhancer
             var shmPath = dbFullPath + "-shm";
             if (File.Exists(shmPath))
             {
-                try { File.Delete(shmPath); }
-                catch { /* locked by live process — leave it alone */ }
+                try
+                {
+                    File.Delete(shmPath);
+                }
+                catch
+                {
+                    /* locked by live process — leave it alone */
+                }
             }
 
             _preparedDatabases.TryAdd(dbFullPath, true);
@@ -243,11 +249,15 @@ public static class SqliteConnectionEnhancer
         try
         {
             if (!File.Exists(path)) return;
+
             var attrs = File.GetAttributes(path);
             if ((attrs & FileAttributes.ReadOnly) != 0)
                 File.SetAttributes(path, attrs & ~FileAttributes.ReadOnly);
         }
-        catch { /* best-effort */ }
+        catch
+        {
+            /* best-effort */
+        }
     }
 
     /// <summary>
@@ -428,6 +438,7 @@ public static class SqliteConnectionEnhancer
             return new WalCheckpointStatus(false, 0, 0);
 
         using var command = connection.CreateCommand();
+
         // PRAGMA wal_checkpoint(PASSIVE) returns a single row: (busy, log, checkpointed)
         // busy        — 1 if blocked by an active reader, 0 otherwise
         // log         — total WAL frames
@@ -438,8 +449,8 @@ public static class SqliteConnectionEnhancer
         if (!await reader.ReadAsync(cancellationToken))
             return new WalCheckpointStatus(false, 0, 0);
 
-        var busy         = reader.GetInt32(0) != 0;
-        var totalFrames  = reader.GetInt32(1);
+        var busy = reader.GetInt32(0) != 0;
+        var totalFrames = reader.GetInt32(1);
         var checkpointed = reader.GetInt32(2);
 
         return new WalCheckpointStatus(busy, totalFrames, checkpointed);

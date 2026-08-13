@@ -72,10 +72,4 @@ public enum MessageTypes
     /// </summary>
     [JsonStringEnumMemberName(nameof(LogEvent))]
     LogEvent = 11,
-
-    /// <summary>
-    ///  Library comparison completed message type.
-    /// </summary>
-    [JsonStringEnumMemberName(nameof(LibraryComparisonCompleted))]
-    LibraryComparisonCompleted = 12,
 }

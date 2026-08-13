@@ -1,7 +1,5 @@
-﻿using Autofac.Extras.Quartz;
-using Downloader;
+﻿using Downloader;
 using Moq.Contrib.HttpClient;
-using Reaparr.Application;
 using Reaparr.Settings.Contracts;
 
 namespace Reaparr.BaseTests;
@@ -18,50 +16,46 @@ public class TestModule : Module
     {
         // Database context can be setup once and then retrieved by its DB name.
         builder
-            .Register(
-                (ctx, _) =>
-                    MockDatabase.GetMemoryReaparrDbContext(
-                        ctx.Resolve<IPathProvider>(),
-                        ctx.Resolve<IAppRuntimeInfo>(),
-                        MemoryDbName
-                    )
+            .Register((ctx, _) =>
+                MockDatabase.GetMemoryReaparrDbContext(
+                    ctx.Resolve<IPathProvider>(),
+                    ctx.Resolve<IAppRuntimeInfo>(),
+                    MemoryDbName
+                )
             )
             .As<ReaparrDbContext>()
             .InstancePerDependency();
 
         builder
-            .Register(
-                (ctx, _) =>
-                    MockDatabase.GetMemoryReaparrDbContext(
-                        ctx.Resolve<IPathProvider>(),
-                        ctx.Resolve<IAppRuntimeInfo>(),
-                        MemoryDbName
-                    )
+            .Register((ctx, _) =>
+                MockDatabase.GetMemoryReaparrDbContext(
+                    ctx.Resolve<IPathProvider>(),
+                    ctx.Resolve<IAppRuntimeInfo>(),
+                    MemoryDbName
+                )
             )
             .As<IReaparrDbContext>()
             .As<IReaparrDbContextDatabase>()
             .InstancePerDependency();
 
         builder
-            .Register(
-                (ctx, _) =>
-                    MockDatabase.GetMemoryAuthDbContext(
-                        ctx.Resolve<IPathProvider>(),
-                        ctx.Resolve<IAppRuntimeInfo>(),
-                        MemoryDbName
-                    )
+            .Register((ctx, _) =>
+                MockDatabase.GetMemoryAuthDbContext(
+                    ctx.Resolve<IPathProvider>(),
+                    ctx.Resolve<IAppRuntimeInfo>(),
+                    MemoryDbName
+                )
             )
             .As<AuthDbContext>()
             .InstancePerDependency();
 
         builder
-            .Register(
-                (ctx, _) =>
-                    MockDatabase.GetMemoryAuthDbContext(
-                        ctx.Resolve<IPathProvider>(),
-                        ctx.Resolve<IAppRuntimeInfo>(),
-                        MemoryDbName
-                    )
+            .Register((ctx, _) =>
+                MockDatabase.GetMemoryAuthDbContext(
+                    ctx.Resolve<IPathProvider>(),
+                    ctx.Resolve<IAppRuntimeInfo>(),
+                    MemoryDbName
+                )
             )
             .As<IAuthDbContext>()
             .As<IAuthDbContextDatabase>()
@@ -83,8 +77,7 @@ public class TestModule : Module
             .SingleInstance();
 
         builder
-            .Register(
-                (_, _) =>
+            .Register((_, _) =>
                 {
                     var runtimeInfo = new MockAppRuntimeInfo { IsIntegrationTestMode = true, IsUnmasked = true };
                     Config.OverrideAppRuntimeInfo?.Invoke(runtimeInfo);
@@ -95,19 +88,13 @@ public class TestModule : Module
             .SingleInstance();
 
         builder
-            .Register(
-                (ctx, _) =>
-                    new MockPathProvider(MemoryDbName, ctx.Resolve<IAppBuildInfo>(), ctx.Resolve<IAppRuntimeInfo>())
+            .Register((ctx, _) =>
+                new MockPathProvider(MemoryDbName, ctx.Resolve<IAppBuildInfo>(), ctx.Resolve<IAppRuntimeInfo>())
             )
             .As<IPathProvider>()
             .SingleInstance();
 
         SetMockedDependencies(builder);
-
-        // Register Quartz dependencies
-        builder.RegisterModule(
-            new QuartzAutofacFactoryModule { ConfigurationProvider = _ => QuartzModule.TestQuartzConfiguration() }
-        );
     }
 
     private void SetMockedDependencies(ContainerBuilder builder)
@@ -143,7 +130,8 @@ public class TestModule : Module
 
                     handler
                         .SetupRequest(x => x.RequestUri?.AbsolutePath == "/library/parts/653125/119385313456/file.mp4")
-                        .ReturnsAsync(new HttpResponseMessage(HttpStatusCode.OK) { Content = new ByteArrayContent([]) });
+                        .ReturnsAsync(new HttpResponseMessage(HttpStatusCode.OK)
+                            { Content = new ByteArrayContent([]) });
 
                     var httpClientFactory = new Mock<IHttpClientFactory>();
                     httpClientFactory

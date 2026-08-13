@@ -9,7 +9,9 @@ public class GetAllBackgroundJobsEndpointUnitTests : BaseEndpointUnitTest<GetAll
     public async Task ShouldReturnEmptyList_WhenNoBackgroundJobIsRunning()
     {
         // Arrange
-        Mock.Mock<ISchedulerService>().Setup(x => x.GetRunningJobUpdates()).ReturnsAsync([]);
+        Mock.Mock<IBackgroundJobScheduler>()
+            .Setup(x => x.GetCurrentlyExecutingJobs(It.IsAny<CancellationToken>()))
+            .ReturnsAsync([]);
 
         // Act
         var endpointResult = await TestEndpointHandleAsync(new GetAllBackgroundJobsEndpointRequest());
@@ -29,7 +31,9 @@ public class GetAllBackgroundJobsEndpointUnitTests : BaseEndpointUnitTest<GetAll
         // Arrange
         var jobUpdate = new JobStatusUpdate<string>(JobTypes.DownloadJob, JobStatus.Started, Guid.NewGuid().ToString());
         var list = new List<JobStatusUpdate<string>> { jobUpdate };
-        Mock.Mock<ISchedulerService>().Setup(x => x.GetRunningJobUpdates()).ReturnsAsync(list);
+        Mock.Mock<IBackgroundJobScheduler>()
+            .Setup(x => x.GetCurrentlyExecutingJobs(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(list);
 
         // Act
         var endpointResult = await TestEndpointHandleAsync(new GetAllBackgroundJobsEndpointRequest());
@@ -117,7 +121,9 @@ public class GetAllBackgroundJobsEndpointUnitTests : BaseEndpointUnitTest<GetAll
             checkAllConnectionsStatusJobUpdate,
         };
 
-        Mock.Mock<ISchedulerService>().Setup(x => x.GetRunningJobUpdates()).ReturnsAsync(list);
+        Mock.Mock<IBackgroundJobScheduler>()
+            .Setup(x => x.GetCurrentlyExecutingJobs(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(list);
 
         // Act
         var endpointResult = await TestEndpointHandleAsync(new GetAllBackgroundJobsEndpointRequest());

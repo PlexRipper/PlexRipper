@@ -9,5 +9,11 @@ public enum JobStatus
     Started = 0,
 
     [JsonStringEnumMemberName(nameof(Completed))]
-    Completed = 1,
+    Completed = 1,  
+    
+    [JsonStringEnumMemberName(nameof(Cancelled))]
+    Cancelled = 2,   
+    
+    [JsonStringEnumMemberName(nameof(Failed))]
+    Failed = 3,
 }

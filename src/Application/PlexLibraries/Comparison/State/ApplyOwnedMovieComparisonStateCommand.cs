@@ -116,10 +116,9 @@ public class ApplyOwnedMovieComparisonStateCommandHandler
     private async Task<bool> HasPendingComparisonAsync(
         int ownedLibraryId,
         HashSet<int> remoteLibraryIds,
-        CancellationToken ct) => await _dbContext.LibraryComparisonJobQueues
-        .AnyAsync(x =>
-            x.OwnedPlexLibraryId == ownedLibraryId
-            && x.MediaType == PlexMediaType.Movie
-            && remoteLibraryIds.Contains(x.RemotePlexLibraryId)
-            && (x.Status == LibrarySyncJobStatus.Queued || x.Status == LibrarySyncJobStatus.Processing), ct);
+        CancellationToken ct) => await _dbContext.HasActiveLibraryComparisonAsync(
+        remoteLibraryIds
+            .Select(x => PlexLibraryComparisonJob.GetJobKey(ownedLibraryId, x)),
+        ct
+    );
 }

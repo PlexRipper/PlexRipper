@@ -505,6 +505,48 @@ public class DbContextExtensionsPlexServerConnectionUnitTests : BaseUnitTest
     }
 
     [Test]
+    public async Task ShouldFallbackToValidatedMainAccountToken_WhenNonMainAccountIsNotValidated()
+    {
+        // Arrange
+        var seed = await SetupDatabase(
+            12104,
+            cfg =>
+            {
+                cfg.PlexServerCount = 1;
+                cfg.PlexAccountCount = 1;
+            }
+        );
+        var db = IDbContext;
+        var server = db.PlexServers.First();
+        var mainAccess = db.PlexAccountServers.First(x => x.PlexServerId == server.Id);
+
+        var nonMain = FakeData.GetPlexAccount(seed).Generate();
+        nonMain.UpdateInitProperty(nameof(PlexAccount.IsMain), false);
+        nonMain.IsValidated = false;
+        db.PlexAccounts.Add(nonMain);
+        await db.SaveChangesAsync(CancellationToken);
+
+        db.PlexAccountServers.Add(
+            new PlexAccountServer
+            {
+                PlexAccountId = nonMain.Id,
+                PlexServerId = server.Id,
+                AuthToken = "INVALID_NON_MAIN_TOKEN",
+                AuthTokenCreationDate = DateTime.UtcNow,
+                IsServerOwned = false,
+            }
+        );
+        await db.SaveChangesAsync(CancellationToken);
+
+        // Act
+        var result = await db.GetPlexServerTokenAsync(server.Id, CancellationToken);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.ShouldBe(mainAccess.AuthToken);
+    }
+
+    [Test]
     public async Task ShouldReturnFailedResult_WhenNoTokensAvailable()
     {
         // Arrange
@@ -547,5 +589,59 @@ public class DbContextExtensionsPlexServerConnectionUnitTests : BaseUnitTest
         // Assert
         result.IsSuccess.ShouldBeTrue();
         result.Value.ShouldBe(access.AuthToken);
+    }
+
+    [Test]
+    public async Task ShouldReturnFailedResult_WhenOnlyAccountIsNotValidated()
+    {
+        // Arrange
+        await SetupDatabase(
+            12105,
+            cfg =>
+            {
+                cfg.PlexServerCount = 1;
+                cfg.PlexAccountCount = 1;
+            }
+        );
+        var db = IDbContext;
+        var access = db.PlexAccountServers.First();
+        await db
+            .PlexAccounts.Where(x => x.Id == access.PlexAccountId)
+            .ExecuteUpdateAsync(x => x.SetProperty(y => y.IsValidated, false), CancellationToken);
+
+        // Act
+        var result = await db.GetPlexServerTokenAsync(access.PlexServerId, CancellationToken);
+
+        // Assert
+        result.IsFailed.ShouldBeTrue();
+    }
+
+    [Test]
+    public async Task ShouldReturnFailedResult_WhenSpecificAccountIsNotValidated()
+    {
+        // Arrange
+        await SetupDatabase(
+            12106,
+            cfg =>
+            {
+                cfg.PlexServerCount = 1;
+                cfg.PlexAccountCount = 1;
+            }
+        );
+        var db = IDbContext;
+        var access = db.PlexAccountServers.First();
+        await db
+            .PlexAccounts.Where(x => x.Id == access.PlexAccountId)
+            .ExecuteUpdateAsync(x => x.SetProperty(y => y.IsValidated, false), CancellationToken);
+
+        // Act
+        var result = await db.GetPlexServerTokenAsync(
+            access.PlexServerId,
+            access.PlexAccountId,
+            CancellationToken
+        );
+
+        // Assert
+        result.IsFailed.ShouldBeTrue();
     }
 }

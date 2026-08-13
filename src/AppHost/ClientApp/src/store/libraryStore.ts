@@ -228,20 +228,22 @@ export const useLibraryStore = defineStore(StoreNames.LibraryStore, () => {
 		getIsLibrarySyncing: (libraryId: number): boolean => {
 			return state.syncQueues.some((x) => x.plexLibraryId === libraryId && x.status === LibrarySyncJobStatus.Processing);
 		},
-		getLibrarySyncQueueGrouped: (): ILibrarySyncProgress[] => {
-			return state.syncQueues.reduce<ILibrarySyncProgress[]>((acc, queue) => {
-				const progress = state.progress.find((p) => p.plexLibraryId === queue.plexLibraryId);
-				const queueWithProgress = { ...queue, ...progress } as LibrarySyncJobQueueDTO & LibrarySyncProgressDTO;
-				const existing = acc.find((x) => x.serverId === queue.plexServerId);
-				if (existing) {
-					existing.progress.push(queueWithProgress);
-				} else {
-					acc.push({
-						serverId: queue.plexServerId, progress: [queueWithProgress],
-					});
-				}
-				return acc;
-			}, []);
+		getLibrarySyncQueueGrouped: (plexServerId?: number): ILibrarySyncProgress[] => {
+			return state.syncQueues
+				.filter((queue) => plexServerId === undefined || queue.plexServerId === plexServerId)
+				.reduce<ILibrarySyncProgress[]>((acc, queue) => {
+					const progress = state.progress.find((p) => p.plexLibraryId === queue.plexLibraryId);
+					const queueWithProgress = { ...queue, ...progress } as LibrarySyncJobQueueDTO & LibrarySyncProgressDTO;
+					const existing = acc.find((x) => x.serverId === queue.plexServerId);
+					if (existing) {
+						existing.progress.push(queueWithProgress);
+					} else {
+						acc.push({
+							serverId: queue.plexServerId, progress: [queueWithProgress],
+						});
+					}
+					return acc;
+				}, []);
 		},
 	};
 	return {

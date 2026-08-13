@@ -135,7 +135,7 @@ public abstract class BaseEndpointUnitTestBase<TEndpoint, TResponse> : BaseUnitT
                 s.AddTransient(_ => IsDatabaseSetup ? IAuthDbContext : Mock.Create<IAuthDbContext>());
                 s.AddTransient(_ => Mock.Create<IAuthDbContextFactory>());
                 s.AddTransient(_ => Mock.Mock<ICommandExecutor>().Object);
-                s.AddSingleton(_ => Mock.Create<ISchedulerService>());
+                s.AddSingleton(_ => Mock.Create<IBackgroundJobScheduler>());
                 s.AddSingleton(_ => Mock.Mock<IProgressHubService>().Object);
                 s.AddSingleton(_ => Mock.Mock<IDownloadHubService>().Object);
                 s.AddSingleton(_ => Mock.Mock<INotificationHubService>().Object);

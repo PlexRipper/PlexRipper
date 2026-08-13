@@ -62,7 +62,7 @@ public class RefreshLibraryMediaEndpointIntegrationTests : BaseIntegrationTests
         testResult.Response.IsSuccessStatusCode.ShouldBeTrue();
 
         // Wait for the scheduler to finish the library sync job
-        await container.SchedulerService.AwaitScheduler(CancellationToken);
+        await container.BackgroundJobScheduler.AwaitScheduler(CancellationToken);
 
         // Verify the library was refreshed
         var dbContext = container.DbContext;
@@ -161,7 +161,7 @@ public class RefreshLibraryMediaEndpointIntegrationTests : BaseIntegrationTests
         testResult.Response.IsSuccessStatusCode.ShouldBeTrue();
 
         // Wait for the scheduler to finish the library sync job
-        await container.SchedulerService.AwaitScheduler(CancellationToken);
+        await container.BackgroundJobScheduler.AwaitScheduler(CancellationToken);
 
         // Verify the library was refreshed
         var dbContext = container.DbContext;

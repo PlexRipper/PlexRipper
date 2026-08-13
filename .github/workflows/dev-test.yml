@@ -222,8 +222,6 @@ jobs:
                         project_name: AppHost.UnitTests
                     -   test_project: tests/UnitTests/Application.UnitTests/Application.UnitTests.csproj
                         project_name: Application.UnitTests
-                    -   test_project: tests/UnitTests/BackgroundJobs.UnitTests/BackgroundJobs.UnitTests.csproj
-                        project_name: BackgroundJobs.UnitTests
                     -   test_project: tests/UnitTests/BaseTests.UnitTests/BaseTests.UnitTests.csproj
                         project_name: BaseTests.UnitTests
                     -   test_project: tests/UnitTests/Build.UnitTests/Build.UnitTests.csproj

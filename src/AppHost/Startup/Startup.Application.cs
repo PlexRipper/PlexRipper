@@ -1,6 +1,8 @@
 using System.Reflection;
 using FastEndpoints.Swagger;
 using Microsoft.AspNetCore.Http.Extensions;
+using TickerQ.DependencyInjection;
+using TickerQ.Utilities.Enums;
 
 namespace Reaparr.AppHost;
 
@@ -33,8 +35,7 @@ public static partial class Startup
         // This has to always be first
         app.UseCors(CorsConfiguration);
 
-        app.Use(
-            async (ctx, next) =>
+        app.Use(async (ctx, next) =>
             {
                 // Rewrite legacy/public API v2 routes
                 if (ctx.Request.Path.StartsWithSegments("/api/v2", out var remaining))
@@ -119,5 +120,8 @@ public static partial class Startup
                 return result.LogError();
             };
         });
+
+        // Set up TickerQ - https://tickerq.net/
+        app.UseTickerQ(TickerQStartMode.Manual);
     }
 }

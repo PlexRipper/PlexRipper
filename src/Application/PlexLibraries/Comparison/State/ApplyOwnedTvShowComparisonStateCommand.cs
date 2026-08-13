@@ -49,7 +49,8 @@ public class ApplyOwnedTvShowComparisonStateCommandHandler
 
         if (ownedUpdatedAt is null)
         {
-            _log.Here().Warning("Owned TV library {LibraryId} not found for comparison projection", command.OwnedLibraryId);
+            _log.Here()
+                .Warning("Owned TV library {LibraryId} not found for comparison projection", command.OwnedLibraryId);
             return Result.Ok();
         }
 
@@ -123,12 +124,15 @@ public class ApplyOwnedTvShowComparisonStateCommandHandler
             .ToDictionary(g => g.Key, g => g.Select(x => x.OwnedPlexMediaId).Distinct().ToList());
 
         var episodeHits = await (
-            from comparison in _dbContext.PlexEpisodeComparisons
-            join episode in _dbContext.PlexTvShowEpisodes on comparison.OwnedPlexMediaId equals episode.Id
-            where currentRemoteLibraryIds.Contains(comparison.RemotePlexLibraryId)
-                  && comparison.OwnedPlexLibraryId == command.OwnedLibraryId
-                  && itemIds.Contains(episode.TvShowId)
-            select new { episode.TvShowId, comparison.RemotePlexMediaId, comparison.OwnedPlexMediaId, comparison.HitState })
+                from comparison in _dbContext.PlexEpisodeComparisons
+                join episode in _dbContext.PlexTvShowEpisodes on comparison.OwnedPlexMediaId equals episode.Id
+                where currentRemoteLibraryIds.Contains(comparison.RemotePlexLibraryId)
+                      && comparison.OwnedPlexLibraryId == command.OwnedLibraryId
+                      && itemIds.Contains(episode.TvShowId)
+                select new
+                {
+                    episode.TvShowId, comparison.RemotePlexMediaId, comparison.OwnedPlexMediaId, comparison.HitState
+                })
             .ToListAsync(ct);
 
         var episodeHitLookup = episodeHits
@@ -174,11 +178,6 @@ public class ApplyOwnedTvShowComparisonStateCommandHandler
     private async Task<bool> HasPendingComparisonAsync(
         int ownedLibraryId,
         HashSet<int> remoteLibraryIds,
-        CancellationToken ct) =>
-        await _dbContext.LibraryComparisonJobQueues
-            .AnyAsync(x =>
-                x.OwnedPlexLibraryId == ownedLibraryId
-                && x.MediaType == PlexMediaType.TvShow
-                && remoteLibraryIds.Contains(x.RemotePlexLibraryId)
-                && (x.Status == LibrarySyncJobStatus.Queued || x.Status == LibrarySyncJobStatus.Processing), ct);
+        CancellationToken ct) => await _dbContext.HasActiveLibraryComparisonAsync(
+        remoteLibraryIds.Select(x => PlexLibraryComparisonJob.GetJobKey(ownedLibraryId, x)), ct);
 }

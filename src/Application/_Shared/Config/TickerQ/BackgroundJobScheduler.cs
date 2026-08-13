@@ -372,27 +372,38 @@ public class BackgroundJobScheduler : IBackgroundJobScheduler
         JobKey jobKey,
         TRequest request
     )
-        where TFunction : class, ITickerFunction<TRequest> => new()
+        where TFunction : class, ITickerFunction<TRequest>
     {
-        Function = TickerFunctionProvider.GetFunctionName<TFunction>(),
-        Request = TickerHelper.CreateTickerRequest(request),
-        RequestJson = request switch
+        if (request is null)
+            throw new InvalidOperationException($"Background job {jobKey.Name} cannot be queued without a request");
+
+        var serializedRequest = TickerHelper.CreateTickerRequest(request);
+        if (serializedRequest is not { Length: > 0 })
+            throw new InvalidOperationException(
+                $"Background job {jobKey.Name} cannot be queued without a serialized request");
+
+        return new JobTimeTicker
         {
-            LibrarySyncJobPayload payload => new JobTimeTickerRequestProperties
+            Function = TickerFunctionProvider.GetFunctionName<TFunction>(),
+            Request = serializedRequest,
+            RequestJson = request switch
             {
-                PlexLibraryId = payload.PlexLibraryId,
-                PlexServerId = payload.PlexServerId,
+                LibrarySyncJobPayload payload => new JobTimeTickerRequestProperties
+                {
+                    PlexLibraryId = payload.PlexLibraryId,
+                    PlexServerId = payload.PlexServerId,
+                },
+                PlexLibraryComparisonJobPayload payload => new JobTimeTickerRequestProperties
+                {
+                    OwnedPlexLibraryId = payload.OwnedPlexLibraryId,
+                    RemotePlexLibraryId = payload.RemotePlexLibraryId,
+                },
+                _ => null,
             },
-            PlexLibraryComparisonJobPayload payload => new JobTimeTickerRequestProperties
-            {
-                OwnedPlexLibraryId = payload.OwnedPlexLibraryId,
-                RemotePlexLibraryId = payload.RemotePlexLibraryId,
-            },
-            _ => null,
-        },
-        JobKey = jobKey.Name,
-        JobType = jobKey.Type,
-    };
+            JobKey = jobKey.Name,
+            JobType = jobKey.Type,
+        };
+    }
 
     /// <summary>
     /// Hands a ticker to TickerQ without flowing request-scoped AsyncLocal state into its immediate-dispatch worker.

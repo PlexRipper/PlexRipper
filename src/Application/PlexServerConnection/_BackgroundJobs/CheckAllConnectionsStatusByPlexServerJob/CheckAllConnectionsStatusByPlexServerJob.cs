@@ -42,7 +42,9 @@ public class CheckAllConnectionsStatusByPlexServerJob
         TickerFunctionContext<CheckAllConnectionsStatusByPlexServerJobPayload> context,
         CancellationToken cancellationToken
     )
-    {
+    {      
+        context.CronOccurrenceOperations.SkipIfAlreadyRunning();
+
         var plexServerIds = await _dbContext.PlexServers.Select(x => x.Id).ToListAsync(cancellationToken);
         if (plexServerIds.Count == 0)
             return;

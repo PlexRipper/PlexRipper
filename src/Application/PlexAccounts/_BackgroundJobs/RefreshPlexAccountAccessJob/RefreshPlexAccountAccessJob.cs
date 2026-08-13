@@ -37,6 +37,8 @@ public class RefreshPlexAccountAccessJob
         CancellationToken cancellationToken
     )
     {
+        context.CronOccurrenceOperations.SkipIfAlreadyRunning();
+
         _log.Here().Debug("Executing job: {JobName}", nameof(RefreshPlexAccountAccessJob));
 
         var result = await _commandExecutor.Send(new RefreshPlexAccountAccessCommand(), cancellationToken);

@@ -42,6 +42,8 @@ public class CheckPlexLibrariesForUpdatesJob
         CancellationToken cancellationToken
     )
     {
+        context.CronOccurrenceOperations.SkipIfAlreadyRunning();
+
         _log.Here().Debug("Executing job: {JobName}", nameof(CheckPlexLibrariesForUpdatesJob));
 
         var enabledServerIds = await _dbContext.PlexServers

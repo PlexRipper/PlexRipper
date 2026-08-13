@@ -1,6 +1,7 @@
 {
   "managed": {
     "media-overview-cache": "symlink",
+    "reaparr-autofix-pr": "symlink",
     "reaparr-backend": "symlink",
     "reaparr-backend-integration-tests": "symlink",
     "reaparr-backend-unit-tests": "symlink",
@@ -14,5 +15,5 @@
     "reaparr-media-comparison": "symlink",
     "reaparr-pinia-store": "symlink"
   },
-  "updated_at": "2026-07-22T23:27:11.680819355+02:00"
+  "updated_at": "2026-08-13T10:14:15.782951056+02:00"
 }

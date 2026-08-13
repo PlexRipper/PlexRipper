@@ -1,3 +1,6 @@
+using TickerQ.Utilities.Enums;
+using TickerQ.Utilities.Models;
+
 namespace Reaparr.Application.UnitTests;
 
 public class ScheduleAffectedLibraryComparisonJobsCommandUnitTests
@@ -25,10 +28,27 @@ public class ScheduleAffectedLibraryComparisonJobsCommandUnitTests
         {
             Function = nameof(PlexLibraryComparisonJob),
             Request = [],
+            RequestJson = new JobTimeTickerRequestProperties
+            {
+                OwnedPlexLibraryId = ownedLibrary.Id,
+                RemotePlexLibraryId = remoteLibrary.Id,
+            },
             JobKey = jobKey.Name,
             JobType = jobKey.Type,
         };
-        await IDbContext.BulkInsertAsync([ticker], cancellationToken: CancellationToken);
+        var dbContext = IDbContext;
+        dbContext.TimeTickers.Add(ticker);
+        await dbContext.SaveChangesAsync(CancellationToken);
+        await dbContext.TimeTickers.ExecuteUpdateAsync(
+            x => x.SetProperty(y => y.Status, TickerStatus.Idle),
+            CancellationToken
+        );
+        var persistedTicker = await dbContext.TimeTickers
+            .AsNoTracking()
+            .SingleAsync(CancellationToken);
+        persistedTicker.JobKey.ShouldBe(jobKey.Name);
+        persistedTicker.JobType.ShouldBe(jobKey.Type);
+        persistedTicker.Status.ShouldBe(TickerStatus.Idle);
 
         // Act
         var result = await Sut.ExecuteAsync(

@@ -10,6 +10,7 @@ public sealed record RefreshPlexAccountAccessJobPayload;
 public class RefreshPlexAccountAccessJob
     : BaseBackgroundJob<RefreshPlexAccountAccessJobPayload, RefreshPlexAccountAccessRapportDTO>
 {
+    private readonly ILogger _log;
     private readonly ICommandExecutor _commandExecutor;
 
     public RefreshPlexAccountAccessJob(
@@ -19,6 +20,7 @@ public class RefreshPlexAccountAccessJob
         INotificationHubService notificationHubService
     ) : base(log, progressHubService, notificationHubService)
     {
+        _log = log.ForContext<RefreshPlexAccountAccessJob>();
         _commandExecutor = commandExecutor;
     }
 
@@ -35,8 +37,29 @@ public class RefreshPlexAccountAccessJob
         CancellationToken cancellationToken
     )
     {
+        _log.Here().Debug("Executing job: {JobName}", nameof(RefreshPlexAccountAccessJob));
+
         var result = await _commandExecutor.Send(new RefreshPlexAccountAccessCommand(), cancellationToken);
+
+        if (result.IsCancelled)
+        {
+            result.LogWarning();
+            throw new OperationCanceledException(cancellationToken);
+        }
+
         if (result.IsFailed)
-            throw new InvalidOperationException(string.Join(System.Environment.NewLine, result.Errors.Select(x => x.Message)));
+        {
+            result.LogError();
+            throw new InvalidOperationException(
+                string.Join(System.Environment.NewLine, result.Errors.Select(x => x.Message))
+            );
+        }
+
+        _log.Here()
+            .Debug(
+                "{JobName} refreshed access for {PlexAccountCount} Plex accounts",
+                nameof(RefreshPlexAccountAccessJob),
+                result.Value.Count
+            );
     }
 }

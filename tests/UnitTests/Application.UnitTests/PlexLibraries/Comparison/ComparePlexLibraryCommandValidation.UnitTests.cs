@@ -132,7 +132,7 @@ public class CompareMoviePlexLibraryCommandValidationUnitTests : BaseCommandUnit
         await SetOwnedOverrideAsync(ownedTvLibrary.PlexServerId, true);
 
         // Act
-        var result = await TestHandlerExecuteAsync(new CompareMoviePlexLibraryCommand(remoteMovieLibrary.Id, ownedTvLibrary.Id));
+        var result = await TestHandlerExecuteAsync(new CompareMoviePlexLibraryCommand(ownedTvLibrary.Id, remoteMovieLibrary.Id));
 
         // Assert
         result.IsFailed.ShouldBeTrue();

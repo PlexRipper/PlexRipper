@@ -20,8 +20,8 @@ public interface IBackgroundJobScheduler : ISetupAsync, IStopAsync
     /// <param name="jobKey">The stable logical name and Reaparr job type used to identify the job.</param>
     /// <param name="request">The payload to serialize and pass to the background-job function.</param>
     /// <param name="cancellationToken">A token that cancels creation of the ticker; it does not interrupt the job after it has started.</param>
-    /// <returns>A task containing TickerQ's result and, when successful, the persisted one-time ticker.</returns>
-    Task<TickerResult<JobTimeTicker>> ExecuteJob<TFunction, TRequest>(
+    /// <returns>A successful result when the ticker was created; otherwise, a failed result.</returns>
+    Task<Result<JobTimeTicker>> ExecuteJob<TFunction, TRequest>(
         JobKey jobKey,
         TRequest request,
         CancellationToken cancellationToken = default
@@ -38,10 +38,10 @@ public interface IBackgroundJobScheduler : ISetupAsync, IStopAsync
     /// <param name="request">The payload to serialize and pass to the background-job function.</param>
     /// <param name="executionTime">The UTC time at which the job should become eligible to run, or <see langword="null"/> to use the current UTC time.</param>
     /// <param name="cancellationToken">A token that cancels creation of the ticker; it does not interrupt the job after it has started.</param>
-    /// <returns>A task containing TickerQ's result and, when successful, the persisted scheduled ticker.</returns>
+    /// <returns>A successful result when the ticker was created; otherwise, a failed result.</returns>
 
     // ReSharper disable once UnusedMember.Global -- Part of the scheduler abstraction for delayed jobs.
-    Task<TickerResult<JobTimeTicker>> ScheduleJob<TFunction, TRequest>(
+    Task<Result<JobTimeTicker>> ScheduleJob<TFunction, TRequest>(
         JobKey jobKey,
         TRequest request,
         DateTime? executionTime = null,
@@ -52,7 +52,7 @@ public interface IBackgroundJobScheduler : ISetupAsync, IStopAsync
     /// <summary>
     /// Creates multiple one-time tickers in one persistence operation.
     /// </summary>
-    Task<TickerResult<List<JobTimeTicker>>> ScheduleJobs<TFunction, TRequest>(
+    Task<Result<List<JobTimeTicker>>> ScheduleJobs<TFunction, TRequest>(
         IReadOnlyCollection<(JobKey JobKey, TRequest Request)> jobs,
         DateTime? executionTime = null,
         CancellationToken cancellationToken = default

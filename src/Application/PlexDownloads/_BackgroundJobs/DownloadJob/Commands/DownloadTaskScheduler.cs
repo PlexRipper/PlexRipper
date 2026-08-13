@@ -33,14 +33,14 @@ public class DownloadTaskScheduler : IDownloadTaskScheduler
             if (await _scheduler.IsJobRunning(jobKey, cancellationToken))
                 return Result.Fail($"{nameof(DownloadJob)} with {jobKey} already exists").LogWarning();
 
-            var tickerResult = await _scheduler.ExecuteJob<DownloadJob, DownloadTaskKey>(
+            var schedulingResult = await _scheduler.ExecuteJob<DownloadJob, DownloadTaskKey>(
                 jobKey,
                 downloadTaskKey,
                 cancellationToken
             );
-            return tickerResult.IsSucceeded
-                ? Result.Ok()
-                : Result.Fail($"Failed to start {nameof(DownloadJob)} with {jobKey}").LogError();
+
+            schedulingResult.LogIfFailed();
+            return schedulingResult.ToResult();
         });
 
     }

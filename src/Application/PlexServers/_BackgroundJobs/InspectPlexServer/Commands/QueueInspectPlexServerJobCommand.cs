@@ -97,7 +97,7 @@ public class QueueInspectPlexServerJobCommandHandler : ICommandHandler<QueueInsp
             )
         );
 
-        return schedulingResults.All(x => x.IsSucceeded)
+        return schedulingResults.All(x => x.IsSuccess)
             ? Result.Ok()
             : Result.Fail("One or more Plex server inspection jobs could not be scheduled").LogError();
     }

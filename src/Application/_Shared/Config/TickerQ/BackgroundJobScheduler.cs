@@ -320,7 +320,7 @@ public class BackgroundJobScheduler : IBackgroundJobScheduler
     }
 
     /// <inheritdoc />
-    public Task<TickerResult<JobTimeTicker>> ExecuteJob<TFunction, TRequest>(
+    public Task<Result<JobTimeTicker>> ExecuteJob<TFunction, TRequest>(
         JobKey jobKey,
         TRequest request,
         CancellationToken cancellationToken = default
@@ -333,7 +333,7 @@ public class BackgroundJobScheduler : IBackgroundJobScheduler
     }
 
     /// <inheritdoc />
-    public Task<TickerResult<JobTimeTicker>> ScheduleJob<TFunction, TRequest>(
+    public Task<Result<JobTimeTicker>> ScheduleJob<TFunction, TRequest>(
         JobKey jobKey,
         TRequest request,
         DateTime? executionTime = null,
@@ -347,7 +347,7 @@ public class BackgroundJobScheduler : IBackgroundJobScheduler
     }
 
     /// <inheritdoc />
-    public Task<TickerResult<List<JobTimeTicker>>> ScheduleJobs<TFunction, TRequest>(
+    public Task<Result<List<JobTimeTicker>>> ScheduleJobs<TFunction, TRequest>(
         IReadOnlyCollection<(JobKey JobKey, TRequest Request)> jobs,
         DateTime? executionTime = null,
         CancellationToken cancellationToken = default
@@ -396,28 +396,51 @@ public class BackgroundJobScheduler : IBackgroundJobScheduler
     /// still on the caller's execution context. Suppressing flow at this background-work boundary prevents an ambient
     /// HttpContext and other request state from outliving their request.
     /// </summary>
-    private Task<TickerResult<JobTimeTicker>> AddTickerWithoutCallerExecutionContext(
+    private async Task<Result<JobTimeTicker>> AddTickerWithoutCallerExecutionContext(
         JobTimeTicker ticker,
         CancellationToken cancellationToken
     )
     {
+        Task<TickerResult<JobTimeTicker>> addTask;
         if (ExecutionContext.IsFlowSuppressed())
-            return _tickerManager.AddAsync(ticker, cancellationToken);
+            addTask = _tickerManager.AddAsync(ticker, cancellationToken);
+        else
+        {
+            using (ExecutionContext.SuppressFlow())
+                addTask = _tickerManager.AddAsync(ticker, cancellationToken);
+        }
 
-        using (ExecutionContext.SuppressFlow())
-            return _tickerManager.AddAsync(ticker, cancellationToken);
+        var tickerResult = await addTask;
+        return ToResult(tickerResult, $"Failed to schedule background job {ticker.JobKey}");
     }
 
-    private Task<TickerResult<List<JobTimeTicker>>> AddTickersWithoutCallerExecutionContext(
+    private async Task<Result<List<JobTimeTicker>>> AddTickersWithoutCallerExecutionContext(
         List<JobTimeTicker> tickers,
         CancellationToken cancellationToken
     )
     {
+        Task<TickerResult<List<JobTimeTicker>>> addTask;
         if (ExecutionContext.IsFlowSuppressed())
-            return _tickerManager.AddBatchAsync(tickers, cancellationToken);
+            addTask = _tickerManager.AddBatchAsync(tickers, cancellationToken);
+        else
+        {
+            using (ExecutionContext.SuppressFlow())
+                addTask = _tickerManager.AddBatchAsync(tickers, cancellationToken);
+        }
 
-        using (ExecutionContext.SuppressFlow())
-            return _tickerManager.AddBatchAsync(tickers, cancellationToken);
+        var tickerResult = await addTask;
+        return ToResult(tickerResult, "Failed to schedule background jobs");
+    }
+
+    private static Result<T> ToResult<T>(TickerResult<T> tickerResult, string errorMessage)
+        where T : class
+    {
+        if (tickerResult.IsSucceeded)
+            return Result.Ok(tickerResult.Result);
+
+        return tickerResult.Exception is null
+            ? Result.Fail<T>(errorMessage)
+            : Result.Fail<T>(new ExceptionalError(tickerResult.Exception));
     }
 
     /// <inheritdoc />

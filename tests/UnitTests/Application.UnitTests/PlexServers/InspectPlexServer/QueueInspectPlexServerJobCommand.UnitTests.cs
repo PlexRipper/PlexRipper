@@ -1,18 +1,8 @@
-using System.Reflection;
-using TickerQ.Utilities.Models;
-
 namespace Reaparr.Application.UnitTests;
 
 public class QueueInspectPlexServerJobCommandUnitTests : BaseUnitTest<QueueInspectPlexServerJobCommandHandler>
 {
-    private static TickerResult<JobTimeTicker> SuccessfulTickerResult() =>
-        (TickerResult<JobTimeTicker>)Activator.CreateInstance(
-            typeof(TickerResult<JobTimeTicker>),
-            BindingFlags.Instance | BindingFlags.NonPublic,
-            binder: null,
-            args: [new JobTimeTicker()],
-            culture: null
-        )!;
+    private static Result<JobTimeTicker> SuccessfulTickerResult() => Result.Ok(new JobTimeTicker());
 
     [Test]
     public void ShouldRejectNullPlexServerIds_WhenQueueingInspectJob()

@@ -110,7 +110,7 @@ public class ScheduleAffectedLibraryComparisonJobsCommandHandler
         if (comparisonJobs.Count == 0)
             return Result.Ok();
 
-        var tickerResult = await _backgroundJobScheduler.ScheduleJobs<
+        var schedulingResult = await _backgroundJobScheduler.ScheduleJobs<
             PlexLibraryComparisonJob,
             PlexLibraryComparisonJobPayload
         >(
@@ -119,10 +119,8 @@ public class ScheduleAffectedLibraryComparisonJobsCommandHandler
             cancellationToken
         );
 
-        if (!tickerResult.IsSucceeded)
-            return tickerResult.Exception is null
-                ? Result.Fail("Failed to schedule affected library comparison jobs")
-                : Result.Fail(new ExceptionalError(tickerResult.Exception));
+        if (schedulingResult.IsFailed)
+            return schedulingResult.ToResult().LogError();
 
         _log.Here()
             .Debug(

@@ -34,15 +34,13 @@ public class MoveDownloadFileJobScheduler : IMoveDownloadFileScheduler
         if (await _scheduler.IsJobRunning(jobKey, cancellationToken))
             return Result.Fail($"{nameof(MoveDownloadFileJob)} with {jobKey} already exists").LogWarning();
 
-        var tickerResult = await _scheduler.ExecuteJob<MoveDownloadFileJob, DownloadTaskKey>(
+        var schedulingResult = await _scheduler.ExecuteJob<MoveDownloadFileJob, DownloadTaskKey>(
             jobKey,
             downloadTaskKey,
             cancellationToken
         );
-
-        return tickerResult.IsSucceeded
-            ? Result.Ok()
-            : Result.Fail($"Failed to start {nameof(MoveDownloadFileJob)} with {jobKey}").LogError();
+        schedulingResult.LogIfFailed();
+        return schedulingResult.ToResult();
     }
 
     public async Task<Result> StopMoveDownloadFileJob(

@@ -1,6 +1,3 @@
-using System.Reflection;
-using TickerQ.Utilities.Models;
-
 namespace Reaparr.Application.UnitTests;
 
 public class ScheduleAffectedLibraryComparisonJobsCommandUnitTests
@@ -195,12 +192,6 @@ public class ScheduleAffectedLibraryComparisonJobsCommandUnitTests
             .ExecuteUpdateAsync(x => x.SetProperty(y => y.OwnedOverride, isOwned), CancellationToken);
     }
 
-    private static TickerResult<List<JobTimeTicker>> CreateSuccessfulTickerBatchResult() =>
-        (TickerResult<List<JobTimeTicker>>)Activator.CreateInstance(
-            typeof(TickerResult<List<JobTimeTicker>>),
-            BindingFlags.Instance | BindingFlags.NonPublic,
-            binder: null,
-            args: [new List<JobTimeTicker>()],
-            culture: null
-        )!;
+    private static Result<List<JobTimeTicker>> CreateSuccessfulTickerBatchResult() =>
+        Result.Ok(new List<JobTimeTicker>());
 }

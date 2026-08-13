@@ -30,14 +30,14 @@ public class QueueMetadataSyncCommandHandler : ICommandHandler<QueueMetadataSync
             return Result.Ok();
         }
 
-        var tickerResult = await _scheduler.ExecuteJob<MetadataSyncJob, MetadataSyncJobPayload>(
+        var schedulingResult = await _scheduler.ExecuteJob<MetadataSyncJob, MetadataSyncJobPayload>(
             jobKey,
             new MetadataSyncJobPayload { ServerId = command.ServerId },
             cancellationToken
         );
 
-        if (!tickerResult.IsSucceeded)
-            return Result.Fail($"Failed to schedule MetadataSyncJob for server {command.ServerId}").LogError();
+        if (schedulingResult.IsFailed)
+            return schedulingResult.LogError();
 
         _log.Here().Information("Scheduled MetadataSyncJob for server {ServerId}", command.ServerId);
         return Result.Ok();

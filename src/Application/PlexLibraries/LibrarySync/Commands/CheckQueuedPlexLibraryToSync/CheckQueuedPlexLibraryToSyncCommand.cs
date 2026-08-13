@@ -124,19 +124,10 @@ public class CheckQueuedPlexLibraryToSyncCommandHandler : ICommandHandler<CheckQ
             return;
         }
 
-        // Schedule the job
-        await _scheduler.ExecuteJob<LibrarySyncJob, LibrarySyncJobPayload>(
-            jobKey,
-            new LibrarySyncJobPayload
-            {
-                PlexServerId = serverId,
-                PlexLibraryId = libraryId,
-            }, cancellationToken);
-
-        // Mark the queue item as processing immediately to prevent
-        // CheckQueuedPlexLibraryToSync from scheduling another library
-        // for the same server before the job starts executing.
-        await _dbContext
+        // Mark the queue item as processing before scheduling to prevent
+        // concurrent CheckQueuedPlexLibraryToSync executions from scheduling
+        // the same library more than once.
+        var updatedRows = await _dbContext
             .LibrarySyncJobQueues.Where(x =>
                 x.PlexServerId == serverId
                 && x.PlexLibraryId == libraryId
@@ -146,6 +137,25 @@ public class CheckQueuedPlexLibraryToSyncCommandHandler : ICommandHandler<CheckQ
                 x => x.SetProperty(y => y.Status, LibrarySyncJobStatus.Processing),
                 cancellationToken
             );
+
+        if (updatedRows == 0)
+        {
+            _log.Here()
+                .Warning(
+                    "Skipping library sync job scheduling for server {ServerId} and library {LibraryId} because the queue item was already claimed",
+                    serverId,
+                    libraryId
+                );
+            return;
+        }
+
+        await _scheduler.ExecuteJob<LibrarySyncJob, LibrarySyncJobPayload>(
+            jobKey,
+            new LibrarySyncJobPayload
+            {
+                PlexServerId = serverId,
+                PlexLibraryId = libraryId,
+            }, cancellationToken);
 
         _log.Here()
             .Debug("Scheduled library sync job for server {ServerId} and library {LibraryId}", serverId, libraryId);

@@ -15,6 +15,67 @@ public class LibrarySyncJobUnitTests : BaseUnitTest<LibrarySyncJob>
     );
 
     [Test]
+    public async Task ShouldSkipDuplicateDelivery_WhenQueueItemHasAlreadyBeenClaimed()
+    {
+        // Arrange
+        await SetupDatabase(
+            55100,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexMovieLibraryCount = 1;
+            }
+        );
+
+        var server = await IDbContext.PlexServers.FirstAsync(CancellationToken);
+        var library = await IDbContext.PlexLibraries.FirstAsync(CancellationToken);
+        await IDbContext.LibrarySyncJobQueues.AddAsync(
+            new LibrarySyncJobQueue
+            {
+                PlexServerId = server.Id,
+                PlexLibraryId = library.Id,
+                Priority = 1,
+                Status = LibrarySyncJobStatus.Processing,
+                CreatedAt = DateTime.UtcNow,
+                StartedAt = DateTime.UtcNow,
+            },
+            CancellationToken
+        );
+        await IDbContext.SaveChangesAsync(CancellationToken);
+
+        var context = SetupJobContext(server.Id, library.Id);
+
+        // Act
+        await Sut.ExecuteAsync(context, CancellationToken);
+
+        // Assert
+        Mock.Mock<ICommandExecutor>()
+            .Verify(
+                x =>
+                    x.Send(
+                        It.IsAny<InvalidateLibraryComparisonJobsCommand>(),
+                        It.IsAny<CancellationToken>()
+                    ),
+                Times.Never
+            );
+        Mock.Mock<ICommandExecutor>()
+            .Verify(
+                x => x.Send(It.IsAny<RefreshLibraryMediaCommand>(), It.IsAny<CancellationToken>()),
+                Times.Never
+            );
+        Mock.Mock<IBackgroundJobScheduler>()
+            .Verify(
+                x =>
+                    x.ExecuteJob<LibrarySyncJob, LibrarySyncJobPayload>(
+                        It.IsAny<JobKey>(),
+                        It.IsAny<LibrarySyncJobPayload>(),
+                        It.IsAny<CancellationToken>()
+                    ),
+                Times.Never
+            );
+    }
+
+    [Test]
     public async Task ShouldDequeueItself_WhenLibrarySyncFailsWithPlexUnauthorized()
     {
         // Arrange

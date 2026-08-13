@@ -21,6 +21,7 @@ public class LibrarySyncJob : BaseBackgroundJob<LibrarySyncJobPayload, LibrarySy
     private readonly INotificationHubService _notificationHubService;
     private readonly IBackgroundJobScheduler _backgroundJobScheduler;
     private readonly IReaparrDbContext _dbContext;
+    private bool _skipAfterCompletion;
 
     protected override JobTypes JobType => JobTypes.LibrarySyncJob;
 
@@ -51,6 +52,8 @@ public class LibrarySyncJob : BaseBackgroundJob<LibrarySyncJobPayload, LibrarySy
         TickerFunctionContext<LibrarySyncJobPayload> context,
         CancellationToken cancellationToken)
     {
+        _skipAfterCompletion = false;
+
         var serverId = context.Request.PlexServerId;
         var libraryId = context.Request.PlexLibraryId;
 
@@ -84,7 +87,11 @@ public class LibrarySyncJob : BaseBackgroundJob<LibrarySyncJobPayload, LibrarySy
         }
         else
         {
-            await UpdateQueueItemAsync(context, LibrarySyncJobStatus.Processing);
+            if (!await TryClaimQueueItemForProcessingAsync(serverId, libraryId))
+            {
+                _skipAfterCompletion = true;
+                return;
+            }
 
             var invalidationResult = await _commandExecutor.Send(
                 new InvalidateLibraryComparisonJobsCommand([libraryId]),
@@ -137,8 +144,6 @@ public class LibrarySyncJob : BaseBackgroundJob<LibrarySyncJobPayload, LibrarySy
 
                     if (deleteResult.IsFailed)
                         deleteResult.LogWarning();
-                    
-                    return;
                 }
 
                 // Check if failure was due to the server being offline (504 Gateway Timeout)
@@ -179,6 +184,17 @@ public class LibrarySyncJob : BaseBackgroundJob<LibrarySyncJobPayload, LibrarySy
         CancellationToken cancellationToken
     )
     {
+        if (_skipAfterCompletion)
+        {
+            _log.Here()
+                .Debug(
+                    "Skipping post-completion work for duplicate or stale library sync job for server {ServerId}, library {LibraryId}",
+                    context.Request.PlexServerId,
+                    context.Request.PlexLibraryId
+                );
+            return;
+        }
+
         // Schedule the next library first so expensive comparison scheduling cannot stall the sync queue.
         // Use an independent bounded token because the ticker execution token may already be cancelled.
         using (var queueTokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(10)))
@@ -216,6 +232,63 @@ public class LibrarySyncJob : BaseBackgroundJob<LibrarySyncJobPayload, LibrarySy
                         libraryId
                     );
         }
+    }
+
+    private async Task<bool> TryClaimQueueItemForProcessingAsync(int serverId, int libraryId)
+    {
+        var startedAt = DateTime.UtcNow;
+        var updatedRows = await _dbContext
+            .LibrarySyncJobQueues.Where(x =>
+                x.PlexServerId == serverId
+                && x.PlexLibraryId == libraryId
+                && (
+                    x.Status == LibrarySyncJobStatus.Queued
+                    || (x.Status == LibrarySyncJobStatus.Processing && x.StartedAt == null)
+                )
+            )
+            .ExecuteUpdateAsync(
+                s =>
+                    s.SetProperty(x => x.Status, LibrarySyncJobStatus.Processing)
+                        .SetProperty(x => x.StartedAt, startedAt)
+                        .SetProperty(x => x.CompletedAt, (DateTime?)null)
+                        .SetProperty(x => x.ErrorMessage, (string?)null)
+                        .SetProperty(x => x.IsServerOffline, false),
+                CancellationToken.None
+            );
+
+        if (updatedRows > 0)
+            return true;
+
+        var queueState = await _dbContext
+            .LibrarySyncJobQueues.Where(x =>
+                x.PlexServerId == serverId && x.PlexLibraryId == libraryId
+            )
+            .Select(x => new { x.Status, x.StartedAt, x.CompletedAt })
+            .FirstOrDefaultAsync(CancellationToken.None);
+
+        if (queueState is null)
+        {
+            _log.Here()
+                .Warning(
+                    "Skipping library sync job for server {ServerId}, library {LibraryId} because the queue item no longer exists",
+                    serverId,
+                    libraryId
+                );
+        }
+        else
+        {
+            _log.Here()
+                .Warning(
+                    "Skipping duplicate or stale library sync job for server {ServerId}, library {LibraryId}. Queue status: {Status}, started at: {StartedAt}, completed at: {CompletedAt}",
+                    serverId,
+                    libraryId,
+                    queueState.Status,
+                    queueState.StartedAt,
+                    queueState.CompletedAt
+                );
+        }
+
+        return false;
     }
 
     private async Task UpdateQueueItemAsync(

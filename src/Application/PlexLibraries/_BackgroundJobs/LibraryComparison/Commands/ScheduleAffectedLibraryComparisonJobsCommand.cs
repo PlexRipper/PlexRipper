@@ -29,22 +29,21 @@ public class ScheduleAffectedLibraryComparisonJobsCommandValidator
 public class ScheduleAffectedLibraryComparisonJobsCommandHandler
     : ICommandHandler<ScheduleAffectedLibraryComparisonJobsCommand, Result>
 {
+    private static readonly TimeSpan _comparisonJobDelay = TimeSpan.FromMinutes(2);
+
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
-    private readonly ICommandExecutor _commandExecutor;
-    private readonly IMediaQueryCache _mediaQueryCache;
+    private readonly IBackgroundJobScheduler _backgroundJobScheduler;
 
     public ScheduleAffectedLibraryComparisonJobsCommandHandler(
         ILogger log,
         IReaparrDbContext dbContext,
-        ICommandExecutor commandExecutor,
-        IMediaQueryCache mediaQueryCache
+        IBackgroundJobScheduler backgroundJobScheduler
     )
     {
         _log = log.ForContext<ScheduleAffectedLibraryComparisonJobsCommandHandler>();
         _dbContext = dbContext;
-        _commandExecutor = commandExecutor;
-        _mediaQueryCache = mediaQueryCache;
+        _backgroundJobScheduler = backgroundJobScheduler;
     }
 
     public async Task<Result> ExecuteAsync(
@@ -95,61 +94,43 @@ public class ScheduleAffectedLibraryComparisonJobsCommandHandler
             )
         );
 
-        var sourceLibraryDetails = await _dbContext.PlexLibraries
-            .Where(x => x.Id == sourceLibrary.Id)
-            .Select(x => new { x.PlexServerId, LibraryName = x.Title })
-            .SingleAsync(cancellationToken);
-        var serverName = await _dbContext.GetPlexServerNameById(sourceLibraryDetails.PlexServerId);
-        var scheduledCount = 0;
-        var failedResults = new List<ResultBase>();
-        var affectedLibraryIds = new HashSet<int>();
-        foreach (var pair in pairs)
-        {
-            var result = await _commandExecutor.Send(
-                new ScheduleLibraryComparisonJobCommand(pair.OwnedLibraryId, pair.RemoteLibraryId),
-                cancellationToken
-            );
-
-            if (result.IsCancelled)
+        var comparisonJobs = pairs
+            .Select(pair =>
             {
-                _log.Here()
-                    .Debug(
-                        "Stopped scheduling affected library comparisons because shutdown was requested for server {ServerName} ({ServerId}), library {LibraryName} ({LibraryId})",
-                        serverName,
-                        sourceLibraryDetails.PlexServerId,
-                        sourceLibraryDetails.LibraryName,
-                        sourceLibrary.Id
-                    );
-                return result;
-            }
+                var jobKey = PlexLibraryComparisonJob.GetJobKey(pair.OwnedLibraryId, pair.RemoteLibraryId);
+                var payload = new PlexLibraryComparisonJobPayload
+                {
+                    OwnedPlexLibraryId = pair.OwnedLibraryId,
+                    RemotePlexLibraryId = pair.RemoteLibraryId,
+                };
+                return (jobKey, payload);
+            })
+            .ToList();
 
-            if (result.IsFailed)
-            {
-                result.LogWarning();
-                failedResults.Add(result);
-                continue;
-            }
+        if (comparisonJobs.Count == 0)
+            return Result.Ok();
 
-            affectedLibraryIds.Add(pair.RemoteLibraryId);
-            affectedLibraryIds.Add(pair.OwnedLibraryId);
-            scheduledCount++;
-        }
+        var tickerResult = await _backgroundJobScheduler.ScheduleJobs<
+            PlexLibraryComparisonJob,
+            PlexLibraryComparisonJobPayload
+        >(
+            comparisonJobs,
+            DateTime.UtcNow.Add(_comparisonJobDelay),
+            cancellationToken
+        );
 
-        if (affectedLibraryIds.Count > 0)
-        {
-            _mediaQueryCache.InvalidateLibraries(
-                affectedLibraryIds,
-                $"Library comparisons scheduled for {sourceLibrary.Type}"
-            );
-        }
+        if (!tickerResult.IsSucceeded)
+            return tickerResult.Exception is null
+                ? Result.Fail("Failed to schedule affected library comparison jobs")
+                : Result.Fail(new ExceptionalError(tickerResult.Exception));
 
         _log.Here()
             .Debug(
                 "Scheduled {ScheduledCount} library comparison jobs affected by library {PlexLibraryId}",
-                scheduledCount,
+                comparisonJobs.Count,
                 sourceLibrary.Id
             );
 
-        return failedResults.Count > 0 ? Result.Merge(failedResults.ToArray()) : Result.Ok();
+        return Result.Ok();
     }
 }

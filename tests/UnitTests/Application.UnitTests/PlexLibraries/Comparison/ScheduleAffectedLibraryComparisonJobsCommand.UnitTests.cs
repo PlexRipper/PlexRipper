@@ -1,3 +1,4 @@
+using System.Reflection;
 using TickerQ.Utilities.Models;
 
 namespace Reaparr.Application.UnitTests;
@@ -40,11 +41,151 @@ public class ScheduleAffectedLibraryComparisonJobsCommandUnitTests
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
-        Mock.Mock<ICommandExecutor>()
+        Mock.Mock<IBackgroundJobScheduler>()
             .Verify(
-                x => x.Send(It.IsAny<ScheduleLibraryComparisonJobCommand>(), It.IsAny<CancellationToken>()),
+                x => x.ScheduleJobs<PlexLibraryComparisonJob, PlexLibraryComparisonJobPayload>(
+                    It.IsAny<IReadOnlyCollection<(JobKey JobKey, PlexLibraryComparisonJobPayload Request)>>(),
+                    It.IsAny<DateTime?>(),
+                    It.IsAny<CancellationToken>()
+                ),
                 Times.Never
             );
+    }
+
+    [Test]
+    public async Task ShouldBatchComparisonJobsAndInvalidateDistinctLibraries_WhenRemoteLibraryChanges()
+    {
+        // Arrange
+        await SetupDatabase(79, config =>
+        {
+            config.PlexServerCount = 3;
+            config.PlexMovieLibraryCount = 1;
+            config.PlexAccountCount = 1;
+        });
+        var libraries = await IDbContext.PlexLibraries.OrderBy(x => x.Id).ToListAsync(CancellationToken);
+        var remoteLibrary = libraries[0];
+        var ownedLibraries = libraries.Skip(1).ToList();
+        var ownedServerIds = ownedLibraries.Select(x => x.PlexServerId).ToList();
+
+        await IDbContext.PlexServers
+            .Where(x => x.Id == remoteLibrary.PlexServerId)
+            .ExecuteUpdateAsync(x => x.SetProperty(y => y.OwnedOverride, false), CancellationToken);
+        await IDbContext.PlexServers
+            .Where(x => ownedServerIds.Contains(x.Id))
+            .ExecuteUpdateAsync(x => x.SetProperty(y => y.OwnedOverride, true), CancellationToken);
+
+        var command = new ScheduleAffectedLibraryComparisonJobsCommand(remoteLibrary.Id);
+        Mock.Mock<IBackgroundJobScheduler>()
+            .Setup(x => x.ScheduleJobs<PlexLibraryComparisonJob, PlexLibraryComparisonJobPayload>(
+                It.IsAny<IReadOnlyCollection<(JobKey JobKey, PlexLibraryComparisonJobPayload Request)>>(),
+                It.IsAny<DateTime?>(),
+                It.IsAny<CancellationToken>()
+            ))
+            .ReturnsAsync(CreateSuccessfulTickerBatchResult());
+
+        // Act
+        var result = await Sut.ExecuteAsync(command, CancellationToken);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        Mock.Mock<IBackgroundJobScheduler>()
+            .Verify(
+                x => x.ScheduleJobs<PlexLibraryComparisonJob, PlexLibraryComparisonJobPayload>(
+                    It.Is<IReadOnlyCollection<(JobKey JobKey, PlexLibraryComparisonJobPayload Request)>>(jobs =>
+                        jobs.Count == ownedLibraries.Count
+                        && ownedLibraries.All(owned => jobs.Any(job =>
+                            job.Request.OwnedPlexLibraryId == owned.Id
+                            && job.Request.RemotePlexLibraryId == remoteLibrary.Id))),
+                    It.IsAny<DateTime?>(),
+                    It.IsAny<CancellationToken>()
+                ),
+                Times.Once
+            );
+    }
+
+    [Test]
+    public async Task ShouldBatchRemoteLibraries_WhenOwnedLibraryChanges()
+    {
+        // Arrange
+        await SetupDatabase(81, config =>
+        {
+            config.PlexServerCount = 3;
+            config.PlexMovieLibraryCount = 1;
+            config.PlexAccountCount = 1;
+        });
+        var libraries = await IDbContext.PlexLibraries.OrderBy(x => x.Id).ToListAsync(CancellationToken);
+        var remoteLibraries = libraries.Take(2).ToList();
+        var ownedLibrary = libraries[2];
+        var remoteServerIds = remoteLibraries.Select(x => x.PlexServerId).ToList();
+
+        await IDbContext.PlexServers
+            .Where(x => remoteServerIds.Contains(x.Id))
+            .ExecuteUpdateAsync(x => x.SetProperty(y => y.OwnedOverride, false), CancellationToken);
+        await IDbContext.PlexServers
+            .Where(x => x.Id == ownedLibrary.PlexServerId)
+            .ExecuteUpdateAsync(x => x.SetProperty(y => y.OwnedOverride, true), CancellationToken);
+
+        var command = new ScheduleAffectedLibraryComparisonJobsCommand(ownedLibrary.Id);
+        Mock.Mock<IBackgroundJobScheduler>()
+            .Setup(x => x.ScheduleJobs<PlexLibraryComparisonJob, PlexLibraryComparisonJobPayload>(
+                It.IsAny<IReadOnlyCollection<(JobKey JobKey, PlexLibraryComparisonJobPayload Request)>>(),
+                It.IsAny<DateTime?>(),
+                It.IsAny<CancellationToken>()
+            ))
+            .ReturnsAsync(CreateSuccessfulTickerBatchResult());
+
+        // Act
+        var result = await Sut.ExecuteAsync(command, CancellationToken);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        Mock.Mock<IBackgroundJobScheduler>()
+            .Verify(
+                x => x.ScheduleJobs<PlexLibraryComparisonJob, PlexLibraryComparisonJobPayload>(
+                    It.Is<IReadOnlyCollection<(JobKey JobKey, PlexLibraryComparisonJobPayload Request)>>(jobs =>
+                        jobs.Count == remoteLibraries.Count
+                        && remoteLibraries.All(remote => jobs.Any(job =>
+                            job.Request.OwnedPlexLibraryId == ownedLibrary.Id
+                            && job.Request.RemotePlexLibraryId == remote.Id))),
+                    It.IsAny<DateTime?>(),
+                    It.IsAny<CancellationToken>()
+                ),
+                Times.Once
+            );
+    }
+
+    [Test]
+    public async Task ShouldNotQueueOrInvalidate_WhenNoCompatibleOwnedLibraryExists()
+    {
+        // Arrange
+        await SetupDatabase(82, config =>
+        {
+            config.PlexServerCount = 2;
+            config.PlexMovieLibraryCount = 1;
+            config.PlexAccountCount = 1;
+        });
+        var libraries = await IDbContext.PlexLibraries.ToListAsync(CancellationToken);
+        var serverIds = libraries.Select(x => x.PlexServerId).ToList();
+        await IDbContext.PlexServers
+            .Where(x => serverIds.Contains(x.Id))
+            .ExecuteUpdateAsync(x => x.SetProperty(y => y.OwnedOverride, false), CancellationToken);
+        var command = new ScheduleAffectedLibraryComparisonJobsCommand(libraries[0].Id);
+
+        // Act
+        var result = await Sut.ExecuteAsync(command, CancellationToken);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        Mock.Mock<IBackgroundJobScheduler>()
+            .Verify(
+                x => x.ScheduleJobs<PlexLibraryComparisonJob, PlexLibraryComparisonJobPayload>(
+                    It.IsAny<IReadOnlyCollection<(JobKey JobKey, PlexLibraryComparisonJobPayload Request)>>(),
+                    It.IsAny<DateTime?>(),
+                    It.IsAny<CancellationToken>()
+                ),
+                Times.Never
+            );
+
     }
 
     private async Task SetOwnedOverrideAsync(int plexServerId, bool isOwned)
@@ -53,4 +194,13 @@ public class ScheduleAffectedLibraryComparisonJobsCommandUnitTests
             .Where(x => x.Id == plexServerId)
             .ExecuteUpdateAsync(x => x.SetProperty(y => y.OwnedOverride, isOwned), CancellationToken);
     }
+
+    private static TickerResult<List<JobTimeTicker>> CreateSuccessfulTickerBatchResult() =>
+        (TickerResult<List<JobTimeTicker>>)Activator.CreateInstance(
+            typeof(TickerResult<List<JobTimeTicker>>),
+            BindingFlags.Instance | BindingFlags.NonPublic,
+            binder: null,
+            args: [new List<JobTimeTicker>()],
+            culture: null
+        )!;
 }

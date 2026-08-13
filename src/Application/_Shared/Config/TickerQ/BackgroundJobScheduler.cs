@@ -346,6 +346,24 @@ public class BackgroundJobScheduler : IBackgroundJobScheduler
         return AddTickerWithoutCallerExecutionContext(ticker, cancellationToken);
     }
 
+    /// <inheritdoc />
+    public Task<TickerResult<List<JobTimeTicker>>> ScheduleJobs<TFunction, TRequest>(
+        IReadOnlyCollection<(JobKey JobKey, TRequest Request)> jobs,
+        DateTime? executionTime = null,
+        CancellationToken cancellationToken = default
+    )
+        where TFunction : class, ITickerFunction<TRequest>
+    {
+        var scheduledAt = executionTime ?? DateTime.UtcNow;
+        var tickers = jobs
+            .Select(x => CreateTimeTicker<TFunction, TRequest>(x.JobKey, x.Request))
+            .ToList();
+        foreach (var ticker in tickers)
+            ticker.ExecutionTime = scheduledAt;
+
+        return AddTickersWithoutCallerExecutionContext(tickers, cancellationToken);
+    }
+
     private static JobTimeTicker CreateTimeTicker<TFunction, TRequest>(
         JobKey jobKey,
         TRequest request
@@ -388,6 +406,18 @@ public class BackgroundJobScheduler : IBackgroundJobScheduler
 
         using (ExecutionContext.SuppressFlow())
             return _tickerManager.AddAsync(ticker, cancellationToken);
+    }
+
+    private Task<TickerResult<List<JobTimeTicker>>> AddTickersWithoutCallerExecutionContext(
+        List<JobTimeTicker> tickers,
+        CancellationToken cancellationToken
+    )
+    {
+        if (ExecutionContext.IsFlowSuppressed())
+            return _tickerManager.AddBatchAsync(tickers, cancellationToken);
+
+        using (ExecutionContext.SuppressFlow())
+            return _tickerManager.AddBatchAsync(tickers, cancellationToken);
     }
 
     /// <inheritdoc />

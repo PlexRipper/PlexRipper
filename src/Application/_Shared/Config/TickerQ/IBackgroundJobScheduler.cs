@@ -39,10 +39,21 @@ public interface IBackgroundJobScheduler : ISetupAsync, IStopAsync
     /// <param name="executionTime">The UTC time at which the job should become eligible to run, or <see langword="null"/> to use the current UTC time.</param>
     /// <param name="cancellationToken">A token that cancels creation of the ticker; it does not interrupt the job after it has started.</param>
     /// <returns>A task containing TickerQ's result and, when successful, the persisted scheduled ticker.</returns>
+
     // ReSharper disable once UnusedMember.Global -- Part of the scheduler abstraction for delayed jobs.
     Task<TickerResult<JobTimeTicker>> ScheduleJob<TFunction, TRequest>(
         JobKey jobKey,
         TRequest request,
+        DateTime? executionTime = null,
+        CancellationToken cancellationToken = default
+    )
+        where TFunction : class, ITickerFunction<TRequest>;
+
+    /// <summary>
+    /// Creates multiple one-time tickers in one persistence operation.
+    /// </summary>
+    Task<TickerResult<List<JobTimeTicker>>> ScheduleJobs<TFunction, TRequest>(
+        IReadOnlyCollection<(JobKey JobKey, TRequest Request)> jobs,
         DateTime? executionTime = null,
         CancellationToken cancellationToken = default
     )

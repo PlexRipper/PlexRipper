@@ -6,7 +6,7 @@ public record LibrarySyncJobPayload
 {
     public required int PlexServerId { get; init; }
 
-    public  required int PlexLibraryId { get; init; }
+    public required int PlexLibraryId { get; init; }
 }
 
 /// <summary>
@@ -89,7 +89,7 @@ public class LibrarySyncJob : BaseBackgroundJob<LibrarySyncJobPayload, LibrarySy
             );
 
             invalidationResult.LogIfFailed();
-            
+
             // Convert command exceptions to a Result so the queue state can be persisted before this ticker completes.
             // Execute the library sync command
             var result = await Result.Try(() =>
@@ -158,27 +158,34 @@ public class LibrarySyncJob : BaseBackgroundJob<LibrarySyncJobPayload, LibrarySy
         CancellationToken cancellationToken
     )
     {
-        // Schedule the next library only after the terminal job status has been sent to the frontend.
-        // The execution token can already be cancelled when the current sync was cancelled,
-        // so use a bounded cleanup token to ensure queue processing can continue.
-        using var cleanupTokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(10));
-        var cleanupToken = cleanupTokenSource.Token;
+        // Schedule the next library first so expensive comparison scheduling cannot stall the sync queue.
+        // Use an independent bounded token because the ticker execution token may already be cancelled.
+        using (var queueTokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(10)))
+        {
+            var queueResult = await _commandExecutor.Send(
+                new CheckQueuedPlexLibraryToSyncCommand(),
+                queueTokenSource.Token
+            );
+
+            if (queueResult.IsFailed)
+                queueResult.LogWarning();
+        }
+
         var libraryId = context.Request.PlexLibraryId;
         var serverId = context.Request.PlexServerId;
-
         using var dbContext = await _dbContextFactory.CreateAsync();
         var queueStatus = await dbContext
             .LibrarySyncJobQueues.Where(x =>
                 x.PlexServerId == serverId && x.PlexLibraryId == libraryId
             )
             .Select(x => x.Status)
-            .FirstOrDefaultAsync(cleanupToken);
+            .FirstOrDefaultAsync(cancellationToken);
 
         if (queueStatus == LibrarySyncJobStatus.Completed)
         {
             var comparisonQueueResult = await _commandExecutor.Send(
                 new ScheduleAffectedLibraryComparisonJobsCommand(libraryId),
-                cleanupToken
+                cancellationToken
             );
 
             if (comparisonQueueResult.IsFailed)
@@ -188,8 +195,6 @@ public class LibrarySyncJob : BaseBackgroundJob<LibrarySyncJobPayload, LibrarySy
                         libraryId
                     );
         }
-
-        await _commandExecutor.Send(new CheckQueuedPlexLibraryToSyncCommand(), cleanupToken);
     }
 
     private async Task UpdateQueueItemAsync(

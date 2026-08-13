@@ -101,7 +101,7 @@ public class CheckConnectionStatusByIdCommandHandler
         if (serverStatusResult.IsFailed)
             return serverStatusResult.LogError();
 
-        // Add plexServer status to DB, the PlexServerStatus table functions as a server log.
+        // Store the latest Plex server status for this connection.
         var plexServerStatus = serverStatusResult.Value;
 
         var relationExists = await dbContext.PlexServerConnections
@@ -117,35 +117,41 @@ public class CheckConnectionStatusByIdCommandHandler
                 .LogWarning();
         }
 
-        try
-        {
-            var existingCount = await dbContext
-                .PlexServerStatuses.Where(x => x.PlexServerConnectionId == plexServerStatus.PlexServerConnectionId)
-                .ExecuteUpdateAsync(
-                    setters =>
-                        setters
-                            .SetProperty(x => x.IsSuccessful, plexServerStatus.IsSuccessful)
-                            .SetProperty(x => x.StatusCode, plexServerStatus.StatusCode)
-                            .SetProperty(x => x.StatusMessage, plexServerStatus.StatusMessage)
-                            .SetProperty(x => x.LastChecked, plexServerStatus.LastChecked)
-                            .SetProperty(x => x.PlexServerId, plexServerStatus.PlexServerId),
-                    cancellationToken
-                );
-
-            if (existingCount == 0)
+        var upsertResult = await dbContext.ExecuteSerializedTransactionAsync(
+            async (transactionContext, ct) =>
             {
-                dbContext.PlexServerStatuses.Add(plexServerStatus);
-                await dbContext.SaveChangesAsync(cancellationToken);
-            }
-        }
-        catch (DbUpdateException ex)
+                var existingCount = await transactionContext
+                    .PlexServerStatuses.Where(x => x.PlexServerConnectionId == plexServerStatus.PlexServerConnectionId)
+                    .ExecuteUpdateAsync(
+                        setters =>
+                            setters
+                                .SetProperty(x => x.IsSuccessful, plexServerStatus.IsSuccessful)
+                                .SetProperty(x => x.StatusCode, plexServerStatus.StatusCode)
+                                .SetProperty(x => x.StatusMessage, plexServerStatus.StatusMessage)
+                                .SetProperty(x => x.LastChecked, plexServerStatus.LastChecked)
+                                .SetProperty(x => x.PlexServerId, plexServerStatus.PlexServerId),
+                        ct
+                    );
+
+                if (existingCount == 0)
+                {
+                    transactionContext.PlexServerStatuses.Add(plexServerStatus);
+                    await transactionContext.SaveChangesAsync(ct);
+                }
+
+                return plexServerStatus;
+            },
+            cancellationToken
+        );
+
+        if (upsertResult.IsFailed)
         {
-            return Result
-                .Fail(new ExceptionalError(
-                    $"Failed to upsert {nameof(PlexServerStatus)} due to relational integrity changes.", ex))
+            return upsertResult
+                .ToResult()
+                .WithError($"Failed to upsert {nameof(PlexServerStatus)} due to relational integrity changes.")
                 .LogError();
         }
 
-        return serverStatusResult.Value;
+        return upsertResult.Value;
     }
 }

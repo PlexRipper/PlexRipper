@@ -291,7 +291,7 @@ public class SyncPlexTvShowsCommandHandler : ICommandHandler<SyncPlexTvShowsComm
         report.DeletedEpisodes = deletedEpisodes.Count;
         report.UnchangedEpisodes = incomingEpisodes.Count - createdEpisodes.Count - updatedEpisodes.Count;
 
-        return await _dbContext.ExecuteSerializedTransactionAsync(
+        return await _dbContext.ExecuteTransactionAsync(
             async (ctx, txCt) =>
             {
                 if (forceMediaRefresh)
@@ -453,7 +453,7 @@ public class SyncPlexTvShowsCommandHandler : ICommandHandler<SyncPlexTvShowsComm
         }
 
         var distinctGenres = plexTvShowGenres.DistinctBy(x => new { x.PlexTvShowId, x.GenresId }).ToList();
-        var insertResult = await dbContext.ExecuteSerializedTransactionAsync(
+        var insertResult = await dbContext.ExecuteTransactionAsync(
             async (ctx, txCt) =>
             {
                 await ctx.PlexTvShowGenres.Where(x => x.PlexLibraryId == plexLibraryId).ExecuteDeleteAsync(txCt);
@@ -504,7 +504,7 @@ public class SyncPlexTvShowsCommandHandler : ICommandHandler<SyncPlexTvShowsComm
 
         var distinctCountries = plexTvShowCountries.DistinctBy(x => new { x.PlexTvShowId, x.CountryId }).ToList();
 
-        var insertResult = await dbContext.ExecuteSerializedTransactionAsync(
+        var insertResult = await dbContext.ExecuteTransactionAsync(
             async (ctx, txCt) =>
             {
                 await ctx.PlexTvShowCountries.Where(x => x.PlexLibraryId == plexLibraryId).ExecuteDeleteAsync(txCt);
@@ -554,7 +554,7 @@ public class SyncPlexTvShowsCommandHandler : ICommandHandler<SyncPlexTvShowsComm
         }
 
         var distinctActors = plexTvShowRoles.DistinctBy(x => new { x.PlexTvShowId, RolesId = x.PlexActorId }).ToList();
-        var insertResult = await dbContext.ExecuteSerializedTransactionAsync(
+        var insertResult = await dbContext.ExecuteTransactionAsync(
             async (ctx, txCt) =>
             {
                 await ctx.PlexTvShowActors.Where(x => x.PlexLibraryId == plexLibraryId).ExecuteDeleteAsync(txCt);

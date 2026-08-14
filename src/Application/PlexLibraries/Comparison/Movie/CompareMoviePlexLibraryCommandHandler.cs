@@ -182,7 +182,7 @@ public class CompareMoviePlexLibraryCommandHandler : ICommandHandler<CompareMovi
                 remoteMovies.Count
             );
 
-        var transactionResult = await _dbContext.ExecuteSerializedTransactionAsync(
+        var transactionResult = await _dbContext.ExecuteTransactionAsync(
             async (ctx, txCt) =>
             {
                 var currentLibrarySnapshots = await ctx

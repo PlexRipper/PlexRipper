@@ -50,6 +50,7 @@ describe('AccountDialogStore.validatePlexToken()', () => {
 		expect(accountDialogStore.plexId).toEqual(42);
 		expect(accountDialogStore.title).toEqual('User Title');
 		expect(accountDialogStore.email).toEqual('user@test.dev');
+		expect(mock.history.post[0]?.data).toContain('"plexAccountId":0');
 		expect(openDialogSpy).toHaveBeenCalledWith('account-token-validate-dialog');
 	});
 

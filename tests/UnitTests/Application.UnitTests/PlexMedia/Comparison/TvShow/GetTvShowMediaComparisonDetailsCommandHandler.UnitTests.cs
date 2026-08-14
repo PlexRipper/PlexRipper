@@ -33,12 +33,12 @@ public class GetTvShowMediaComparisonDetailsCommandHandlerUnitTests
         ownedLibrary = await GetLibraryAsync(ownedLibrary.Id);
 
         var remoteTvShow = await GetLibraryTvShowAsync(remoteLibrary.Id);
-        var remoteSeasons = await dbContext.PlexTvShowSeason
-            .Where(x => x.TvShowId == remoteTvShow.Id)
+        var remoteSeasons = await dbContext
+            .PlexTvShowSeason.Where(x => x.TvShowId == remoteTvShow.Id)
             .OrderBy(x => x.SeasonNumber)
             .ToListAsync(CancellationToken);
-        var remoteEpisodes = await dbContext.PlexTvShowEpisodes
-            .Where(x => x.TvShowId == remoteTvShow.Id)
+        var remoteEpisodes = await dbContext
+            .PlexTvShowEpisodes.Where(x => x.TvShowId == remoteTvShow.Id)
             .OrderBy(x => x.TvShowSeasonId)
             .ThenBy(x => x.EpisodeNumber)
             .ToListAsync(CancellationToken);
@@ -116,37 +116,38 @@ public class GetTvShowMediaComparisonDetailsCommandHandlerUnitTests
 
         var remoteTvShow = await GetLibraryTvShowAsync(remoteLibrary.Id);
         var matchedOwnedTvShow = await GetLibraryTvShowAsync(matchedOwnedLibrary.Id);
-        var remoteEpisodes = await dbContext.PlexTvShowEpisodes
-            .Where(x => x.PlexLibraryId == remoteLibrary.Id)
+        var remoteEpisodes = await dbContext
+            .PlexTvShowEpisodes.Where(x => x.PlexLibraryId == remoteLibrary.Id)
             .OrderBy(x => x.Id)
             .ToListAsync(CancellationToken);
-        var matchedOwnedEpisodes = await dbContext.PlexTvShowEpisodes
-            .Where(x => x.PlexLibraryId == matchedOwnedLibrary.Id)
+        var matchedOwnedEpisodes = await dbContext
+            .PlexTvShowEpisodes.Where(x => x.PlexLibraryId == matchedOwnedLibrary.Id)
             .OrderBy(x => x.Id)
             .ToListAsync(CancellationToken);
 
         await AddCurrentScopeAsync(remoteLibrary, matchedOwnedLibrary, PlexMediaType.TvShow);
         await AddCurrentScopeAsync(remoteLibrary, missingOwnedLibrary, PlexMediaType.TvShow);
-        dbContext.PlexTvShowComparisons.Add(CreateTvShowComparison(
-            remoteLibrary.Id,
-            matchedOwnedLibrary.Id,
-            remoteTvShow.Id,
-            matchedOwnedTvShow.Id
-        ));
-        dbContext.PlexEpisodeComparisons.Add(CreateEpisodeComparison(
-            remoteLibrary.Id,
-            matchedOwnedLibrary.Id,
-            remoteEpisodes[0].Id,
-            matchedOwnedEpisodes[0].Id,
-            PlexMediaComparisonHitState.Matched
-        ));
-        dbContext.PlexEpisodeComparisons.Add(CreateEpisodeComparison(
-            remoteLibrary.Id,
-            matchedOwnedLibrary.Id,
-            remoteEpisodes[1].Id,
-            matchedOwnedEpisodes[1].Id,
-            PlexMediaComparisonHitState.Matched
-        ));
+        dbContext.PlexTvShowComparisons.Add(
+            CreateTvShowComparison(remoteLibrary.Id, matchedOwnedLibrary.Id, remoteTvShow.Id, matchedOwnedTvShow.Id)
+        );
+        dbContext.PlexEpisodeComparisons.Add(
+            CreateEpisodeComparison(
+                remoteLibrary.Id,
+                matchedOwnedLibrary.Id,
+                remoteEpisodes[0].Id,
+                matchedOwnedEpisodes[0].Id,
+                PlexMediaComparisonHitState.Matched
+            )
+        );
+        dbContext.PlexEpisodeComparisons.Add(
+            CreateEpisodeComparison(
+                remoteLibrary.Id,
+                matchedOwnedLibrary.Id,
+                remoteEpisodes[1].Id,
+                matchedOwnedEpisodes[1].Id,
+                PlexMediaComparisonHitState.Matched
+            )
+        );
         await dbContext.SaveChangesAsync(CancellationToken);
 
         var command = new GetTvShowMediaComparisonDetailsCommand(remoteTvShow.Id);
@@ -190,32 +191,36 @@ public class GetTvShowMediaComparisonDetailsCommandHandlerUnitTests
         ownedLibrary = await GetLibraryAsync(ownedLibrary.Id);
 
         var remoteTvShow = await GetLibraryTvShowAsync(remoteLibrary.Id);
-        var remoteEpisodes = await dbContext.PlexTvShowEpisodes
-            .Where(x => x.TvShowId == remoteTvShow.Id)
+        var remoteEpisodes = await dbContext
+            .PlexTvShowEpisodes.Where(x => x.TvShowId == remoteTvShow.Id)
             .OrderBy(x => x.Id)
             .ToListAsync(CancellationToken);
-        var ownedEpisodes = await dbContext.PlexTvShowEpisodes
-            .Where(x => x.PlexLibraryId == ownedLibrary.Id)
+        var ownedEpisodes = await dbContext
+            .PlexTvShowEpisodes.Where(x => x.PlexLibraryId == ownedLibrary.Id)
             .OrderBy(x => x.Id)
             .ToListAsync(CancellationToken);
         remoteEpisodes.Count.ShouldBe(2);
         ownedEpisodes.Count.ShouldBe(2);
 
         await AddCurrentScopeAsync(remoteLibrary, ownedLibrary, PlexMediaType.TvShow);
-        dbContext.PlexEpisodeComparisons.Add(CreateEpisodeComparison(
-            remoteLibrary.Id,
-            ownedLibrary.Id,
-            remoteEpisodes[0].Id,
-            ownedEpisodes[0].Id,
-            PlexMediaComparisonHitState.Matched
-        ));
-        dbContext.PlexEpisodeComparisons.Add(CreateEpisodeComparison(
-            remoteLibrary.Id,
-            ownedLibrary.Id,
-            remoteEpisodes[1].Id,
-            ownedEpisodes[1].Id,
-            PlexMediaComparisonHitState.HigherQuality
-        ));
+        dbContext.PlexEpisodeComparisons.Add(
+            CreateEpisodeComparison(
+                remoteLibrary.Id,
+                ownedLibrary.Id,
+                remoteEpisodes[0].Id,
+                ownedEpisodes[0].Id,
+                PlexMediaComparisonHitState.Matched
+            )
+        );
+        dbContext.PlexEpisodeComparisons.Add(
+            CreateEpisodeComparison(
+                remoteLibrary.Id,
+                ownedLibrary.Id,
+                remoteEpisodes[1].Id,
+                ownedEpisodes[1].Id,
+                PlexMediaComparisonHitState.HigherQuality
+            )
+        );
         await dbContext.SaveChangesAsync(CancellationToken);
 
         var command = new GetTvShowMediaComparisonDetailsCommand(remoteTvShow.Id);
@@ -274,31 +279,37 @@ public class GetTvShowMediaComparisonDetailsCommandHandlerUnitTests
 
         var remoteTvShow = await GetLibraryTvShowAsync(remoteLibrary.Id);
         var ownedTvShow = await GetLibraryTvShowAsync(ownedLibrary.Id);
-        var remoteEpisodes = await dbContext.PlexTvShowEpisodes
-            .Where(x => x.PlexLibraryId == remoteLibrary.Id)
+        var remoteEpisodes = await dbContext
+            .PlexTvShowEpisodes.Where(x => x.PlexLibraryId == remoteLibrary.Id)
             .OrderBy(x => x.Id)
             .ToListAsync(CancellationToken);
-        var ownedEpisodes = await dbContext.PlexTvShowEpisodes
-            .Where(x => x.PlexLibraryId == ownedLibrary.Id)
+        var ownedEpisodes = await dbContext
+            .PlexTvShowEpisodes.Where(x => x.PlexLibraryId == ownedLibrary.Id)
             .OrderBy(x => x.Id)
             .ToListAsync(CancellationToken);
 
         await AddCurrentScopeAsync(remoteLibrary, ownedLibrary, PlexMediaType.TvShow);
-        dbContext.PlexTvShowComparisons.Add(CreateTvShowComparison(remoteLibrary.Id, ownedLibrary.Id, remoteTvShow.Id, ownedTvShow.Id));
-        dbContext.PlexEpisodeComparisons.Add(CreateEpisodeComparison(
-            remoteLibrary.Id,
-            ownedLibrary.Id,
-            remoteEpisodes[0].Id,
-            ownedEpisodes[0].Id,
-            PlexMediaComparisonHitState.Matched
-        ));
-        dbContext.PlexEpisodeComparisons.Add(CreateEpisodeComparison(
-            remoteLibrary.Id,
-            ownedLibrary.Id,
-            remoteEpisodes[1].Id,
-            ownedEpisodes[1].Id,
-            PlexMediaComparisonHitState.Matched
-        ));
+        dbContext.PlexTvShowComparisons.Add(
+            CreateTvShowComparison(remoteLibrary.Id, ownedLibrary.Id, remoteTvShow.Id, ownedTvShow.Id)
+        );
+        dbContext.PlexEpisodeComparisons.Add(
+            CreateEpisodeComparison(
+                remoteLibrary.Id,
+                ownedLibrary.Id,
+                remoteEpisodes[0].Id,
+                ownedEpisodes[0].Id,
+                PlexMediaComparisonHitState.Matched
+            )
+        );
+        dbContext.PlexEpisodeComparisons.Add(
+            CreateEpisodeComparison(
+                remoteLibrary.Id,
+                ownedLibrary.Id,
+                remoteEpisodes[1].Id,
+                ownedEpisodes[1].Id,
+                PlexMediaComparisonHitState.Matched
+            )
+        );
         await dbContext.SaveChangesAsync(CancellationToken);
 
         var command = new GetTvShowMediaComparisonDetailsCommand(ownedTvShow.Id);
@@ -370,30 +381,34 @@ public class GetTvShowMediaComparisonDetailsCommandHandlerUnitTests
         ownedLibrary = await GetLibraryAsync(ownedLibrary.Id);
 
         var remoteTvShow = await GetLibraryTvShowAsync(remoteLibrary.Id);
-        var remoteEpisodes = await dbContext.PlexTvShowEpisodes
-            .Where(x => x.PlexLibraryId == remoteLibrary.Id)
+        var remoteEpisodes = await dbContext
+            .PlexTvShowEpisodes.Where(x => x.PlexLibraryId == remoteLibrary.Id)
             .OrderBy(x => x.Id)
             .ToListAsync(CancellationToken);
-        var ownedEpisodes = await dbContext.PlexTvShowEpisodes
-            .Where(x => x.PlexLibraryId == ownedLibrary.Id)
+        var ownedEpisodes = await dbContext
+            .PlexTvShowEpisodes.Where(x => x.PlexLibraryId == ownedLibrary.Id)
             .OrderBy(x => x.Id)
             .ToListAsync(CancellationToken);
 
         await AddCurrentScopeAsync(remoteLibrary, ownedLibrary, PlexMediaType.TvShow);
-        dbContext.PlexEpisodeComparisons.Add(CreateEpisodeComparison(
-            remoteLibrary.Id,
-            ownedLibrary.Id,
-            remoteEpisodes[0].Id,
-            ownedEpisodes[0].Id,
-            PlexMediaComparisonHitState.Matched
-        ));
-        dbContext.PlexEpisodeComparisons.Add(CreateEpisodeComparison(
-            remoteLibrary.Id,
-            ownedLibrary.Id,
-            remoteEpisodes[1].Id,
-            ownedEpisodes[1].Id,
-            PlexMediaComparisonHitState.Matched
-        ));
+        dbContext.PlexEpisodeComparisons.Add(
+            CreateEpisodeComparison(
+                remoteLibrary.Id,
+                ownedLibrary.Id,
+                remoteEpisodes[0].Id,
+                ownedEpisodes[0].Id,
+                PlexMediaComparisonHitState.Matched
+            )
+        );
+        dbContext.PlexEpisodeComparisons.Add(
+            CreateEpisodeComparison(
+                remoteLibrary.Id,
+                ownedLibrary.Id,
+                remoteEpisodes[1].Id,
+                ownedEpisodes[1].Id,
+                PlexMediaComparisonHitState.Matched
+            )
+        );
         await dbContext.SaveChangesAsync(CancellationToken);
 
         var command = new GetTvShowMediaComparisonDetailsCommand(remoteTvShow.Id);
@@ -411,33 +426,30 @@ public class GetTvShowMediaComparisonDetailsCommandHandlerUnitTests
 
     private async Task SetOwnedOverrideAsync(int plexServerId, bool ownedOverride)
     {
-        await IDbContext.PlexServers
-            .Where(x => x.Id == plexServerId)
+        await IDbContext
+            .PlexServers.Where(x => x.Id == plexServerId)
             .ExecuteUpdateAsync(x => x.SetProperty(y => y.OwnedOverride, ownedOverride), CancellationToken);
     }
 
     private async Task SetLibraryUpdatedAtAsync(int plexLibraryId, DateTime updatedAt)
     {
-        await IDbContext.PlexLibraries
-            .Where(x => x.Id == plexLibraryId)
+        await IDbContext
+            .PlexLibraries.Where(x => x.Id == plexLibraryId)
             .ExecuteUpdateAsync(x => x.SetProperty(y => y.UpdatedAt, updatedAt), CancellationToken);
     }
 
     private async Task<PlexLibrary> GetLibraryAsync(int plexLibraryId) =>
-        await IDbContext.PlexLibraries
-            .Where(x => x.Id == plexLibraryId)
-            .SingleAsync(CancellationToken);
+        await IDbContext.PlexLibraries.Where(x => x.Id == plexLibraryId).SingleAsync(CancellationToken);
 
     private async Task<PlexTvShow> GetLibraryTvShowAsync(int plexLibraryId) =>
-        await IDbContext.PlexTvShows
-            .Where(x => x.PlexLibraryId == plexLibraryId)
-            .SingleAsync(CancellationToken);
+        await IDbContext.PlexTvShows.Where(x => x.PlexLibraryId == plexLibraryId).SingleAsync(CancellationToken);
 
     private static PlexTvShowComparison CreateTvShowComparison(
         int remotePlexLibraryId,
         int ownedPlexLibraryId,
         int remotePlexMediaId,
-        int ownedPlexMediaId) =>
+        int ownedPlexMediaId
+    ) =>
         new()
         {
             Id = 0,
@@ -457,7 +469,8 @@ public class GetTvShowMediaComparisonDetailsCommandHandlerUnitTests
         int ownedPlexLibraryId,
         int remotePlexMediaId,
         int ownedPlexMediaId,
-        PlexMediaComparisonHitState hitState) =>
+        PlexMediaComparisonHitState hitState
+    ) =>
         new()
         {
             Id = 0,
@@ -467,33 +480,40 @@ public class GetTvShowMediaComparisonDetailsCommandHandlerUnitTests
             OwnedPlexMediaId = ownedPlexMediaId,
             HitState = hitState,
             RemoteQuality = VideoQuality.FullHD,
-            OwnedQuality = hitState == PlexMediaComparisonHitState.HigherQuality ? VideoQuality.HD : VideoQuality.FullHD,
+            OwnedQuality =
+                hitState == PlexMediaComparisonHitState.HigherQuality ? VideoQuality.HD : VideoQuality.FullHD,
             MatchType = PlexMediaComparisonMatchType.ParentAndChildNumbers,
             ComparedAt = DateTime.UtcNow,
         };
 
-    private async Task AddCurrentScopeAsync(PlexLibrary remoteLibrary, PlexLibrary ownedLibrary, PlexMediaType mediaType)
+    private async Task AddCurrentScopeAsync(
+        PlexLibrary remoteLibrary,
+        PlexLibrary ownedLibrary,
+        PlexMediaType mediaType
+    )
     {
-        var remoteUpdatedAt = await IDbContext.PlexLibraries
-            .Where(x => x.Id == remoteLibrary.Id)
+        var remoteUpdatedAt = await IDbContext
+            .PlexLibraries.Where(x => x.Id == remoteLibrary.Id)
             .Select(x => x.UpdatedAt)
             .SingleAsync(CancellationToken);
-        var ownedUpdatedAt = await IDbContext.PlexLibraries
-            .Where(x => x.Id == ownedLibrary.Id)
+        var ownedUpdatedAt = await IDbContext
+            .PlexLibraries.Where(x => x.Id == ownedLibrary.Id)
             .Select(x => x.UpdatedAt)
             .SingleAsync(CancellationToken);
 
         var dbContext = IDbContext;
-        dbContext.PlexComparisonScopes.Add(new PlexComparisonState
-        {
-            Id = 0,
-            RemotePlexLibraryId = remoteLibrary.Id,
-            OwnedPlexLibraryId = ownedLibrary.Id,
-            MediaType = mediaType,
-            CompletedAt = DateTime.UtcNow,
-            RemoteLibraryUpdatedAt = remoteUpdatedAt,
-            OwnedLibraryUpdatedAt = ownedUpdatedAt,
-        });
+        dbContext.PlexComparisonScopes.Add(
+            new PlexComparisonState
+            {
+                Id = 0,
+                RemotePlexLibraryId = remoteLibrary.Id,
+                OwnedPlexLibraryId = ownedLibrary.Id,
+                MediaType = mediaType,
+                CompletedAt = DateTime.UtcNow,
+                RemoteLibraryUpdatedAt = remoteUpdatedAt,
+                OwnedLibraryUpdatedAt = ownedUpdatedAt,
+            }
+        );
         await dbContext.SaveChangesAsync(CancellationToken);
     }
 }

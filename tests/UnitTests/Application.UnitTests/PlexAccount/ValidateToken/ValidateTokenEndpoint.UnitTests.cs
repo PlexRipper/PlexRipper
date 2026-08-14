@@ -1,7 +1,11 @@
 ﻿namespace Reaparr.Application.UnitTests;
 
-public class ValidatePlexTokenEndpointUnitTests : BaseEndpointUnitTest<ValidatePlexTokenEndpoint,
-    ValidatePlexTokenEndpointRequest, ResultDTO<ValidatePlexTokenEndpointResponse>>
+public class ValidatePlexTokenEndpointUnitTests
+    : BaseEndpointUnitTest<
+        ValidatePlexTokenEndpoint,
+        ValidatePlexTokenEndpointRequest,
+        ResultDTO<ValidatePlexTokenEndpointResponse>
+    >
 {
     [Test]
     public async Task ShouldValidateThePlexToken_WhenTokenIsValid()
@@ -64,6 +68,67 @@ public class ValidatePlexTokenEndpointUnitTests : BaseEndpointUnitTest<ValidateP
 
         Mock.Mock<ICommandExecutor>()
             .Verify(x => x.Send(It.IsAny<ValidatePlexTokenCommand>(), It.IsAny<CancellationToken>()), Times.Once());
+    }
+
+    [Test]
+    public async Task ShouldPersistInvalidValidationResult_WhenExistingAccountIsUnauthorized()
+    {
+        // Arrange
+        await SetupDatabase(93205, config => config.PlexAccountCount = 1);
+        var plexAccount = await IDbContext.PlexAccounts.AsTracking().FirstAsync(CancellationToken);
+        var originalUsername = plexAccount.Username;
+        var originalToken = plexAccount.CustomAuthenticationToken;
+
+        var commandResult = new ValidatePlexTokenCommandResult
+        {
+            ClientId = string.Empty,
+            Username = "external-user-must-not-be-saved",
+            Email = string.Empty,
+            Title = string.Empty,
+            PlexId = 0,
+            Uuid = string.Empty,
+            AuthenticationToken = "external-token-must-not-be-saved",
+            IsValidated = false,
+            ValidatedAt = null,
+            Is2Fa = false,
+        };
+
+        Mock.Mock<ICommandExecutor>()
+            .Setup(x => x.Send(It.IsAny<ValidatePlexTokenCommand>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result.Ok(commandResult).AddPlex401UnauthorizedError());
+        Mock.Mock<INotificationHubService>()
+            .Setup(x => x.SendRefreshNotificationAsync(RefreshDataType.PlexAccount))
+            .Returns(Task.CompletedTask);
+
+        // Act
+        var endpointResult = await TestEndpointHandleAsync(
+            new ValidatePlexTokenEndpointRequest
+            {
+                PlexAccountId = plexAccount.Id,
+                DisplayName = plexAccount.DisplayName,
+                ManualAuthenticationToken = plexAccount.GetAuthToken,
+            }
+        );
+
+        // Assert
+        var endpointResponse = endpointResult.Response;
+        endpointResponse.ShouldNotBeNull();
+        endpointResponse.IsSuccess.ShouldBeTrue();
+        var response = endpointResponse.Value;
+        response.ShouldNotBeNull();
+        response.IsUnAuthorized.ShouldBeTrue();
+
+        var persistedAccount = await IDbContext.PlexAccounts.SingleAsync(
+            x => x.Id == plexAccount.Id,
+            CancellationToken
+        );
+        persistedAccount.IsValidated.ShouldBeFalse();
+        persistedAccount.ValidatedAt.ShouldBeNull();
+        persistedAccount.Username.ShouldBe(originalUsername);
+        persistedAccount.CustomAuthenticationToken.ShouldBe(originalToken);
+
+        Mock.Mock<INotificationHubService>()
+            .Verify(x => x.SendRefreshNotificationAsync(RefreshDataType.PlexAccount), Times.Once());
     }
 
     [Test]

@@ -111,11 +111,12 @@ public static class SqliteConnectionEnhancer
             if (!existingInterceptor.Options.Equals(options))
             {
                 throw new ArgumentException(
-                    $"Mismatched SqliteConcurrencyOptions for connection string. " +
-                    $"Existing options: {FormatOptions(existingInterceptor.Options)}, " +
-                    $"Incoming options: {FormatOptions(options)}. " +
-                    $"Interceptors are shared per connection string and must be configured consistently.",
-                    nameof(options));
+                    $"Mismatched SqliteConcurrencyOptions for connection string. "
+                        + $"Existing options: {FormatOptions(existingInterceptor.Options)}, "
+                        + $"Incoming options: {FormatOptions(options)}. "
+                        + $"Interceptors are shared per connection string and must be configured consistently.",
+                    nameof(options)
+                );
             }
 
             return existingInterceptor;
@@ -126,12 +127,12 @@ public static class SqliteConnectionEnhancer
 
     private static string FormatOptions(SqliteConcurrencyOptions options)
     {
-        return $"[MaxRetryAttempts={options.MaxRetryAttempts}, " +
-               $"BusyTimeout={options.BusyTimeout}, " +
-               $"CommandTimeout={options.CommandTimeout}, " +
-               $"WalAutoCheckpoint={options.WalAutoCheckpoint}, " +
-               $"SynchronousMode={options.SynchronousMode}, " +
-               $"UpgradeTransactionsToImmediate={options.UpgradeTransactionsToImmediate}]";
+        return $"[MaxRetryAttempts={options.MaxRetryAttempts}, "
+            + $"BusyTimeout={options.BusyTimeout}, "
+            + $"CommandTimeout={options.CommandTimeout}, "
+            + $"WalAutoCheckpoint={options.WalAutoCheckpoint}, "
+            + $"SynchronousMode={options.SynchronousMode}, "
+            + $"UpgradeTransactionsToImmediate={options.UpgradeTransactionsToImmediate}]";
     }
 #endif
 
@@ -148,11 +149,12 @@ public static class SqliteConnectionEnhancer
         // this incompatibility. See https://www.sqlite.org/wal.html for details.
         if (builder.Cache == SqliteCacheMode.Shared)
             throw new ArgumentException(
-                "Cache=Shared is incompatible with WAL mode and cannot be used with " +
-                "ThreadSafeEFCore.SQLite. Remove 'Cache=Shared' from your connection string. " +
-                "Connection pooling (Pooling=true) is enabled automatically and provides " +
-                "efficient connection reuse without the WAL incompatibility.",
-                nameof(originalConnectionString));
+                "Cache=Shared is incompatible with WAL mode and cannot be used with "
+                    + "ThreadSafeEFCore.SQLite. Remove 'Cache=Shared' from your connection string. "
+                    + "Connection pooling (Pooling=true) is enabled automatically and provides "
+                    + "efficient connection reuse without the WAL incompatibility.",
+                nameof(originalConnectionString)
+            );
 
         builder.Pooling = true;
         builder.ForeignKeys = true;
@@ -248,7 +250,8 @@ public static class SqliteConnectionEnhancer
     {
         try
         {
-            if (!File.Exists(path)) return;
+            if (!File.Exists(path))
+                return;
 
             var attrs = File.GetAttributes(path);
             if ((attrs & FileAttributes.ReadOnly) != 0)
@@ -312,20 +315,24 @@ public static class SqliteConnectionEnhancer
                     }
                     catch (SqliteException ex) when (ex.SqliteErrorCode == 8) // SQLITE_READONLY
                     {
-                        logger?.LogWarning(ex,
-                            "Could not enable WAL mode for '{DataSource}' " +
-                            "(SQLITE_READONLY, extended code: {Extended}). " +
-                            "The database will use the default journal mode — concurrent read/write " +
-                            "performance will be reduced. To resolve: ensure the database directory " +
-                            "is writable and delete any stale .db-shm / .db-wal files alongside the " +
-                            "database, then restart the application.",
-                            dataSource, ex.SqliteExtendedErrorCode);
+                        logger?.LogWarning(
+                            ex,
+                            "Could not enable WAL mode for '{DataSource}' "
+                                + "(SQLITE_READONLY, extended code: {Extended}). "
+                                + "The database will use the default journal mode — concurrent read/write "
+                                + "performance will be reduced. To resolve: ensure the database directory "
+                                + "is writable and delete any stale .db-shm / .db-wal files alongside the "
+                                + "database, then restart the application.",
+                            dataSource,
+                            ex.SqliteExtendedErrorCode
+                        );
                     }
 
                     try
                     {
                         using var initCommand = sqliteConnection.CreateCommand();
-                        initCommand.CommandText = $@"
+                        initCommand.CommandText =
+                            $@"
                             -- 4 096 bytes aligns with modern OS page sizes (ext4, NTFS, APFS) and is the
                             -- SQLite recommended default. Changing page_size after data exists has no effect
                             -- without a VACUUM, so this is a no-op on pre-existing databases.
@@ -350,10 +357,12 @@ public static class SqliteConnectionEnhancer
                     }
                     catch (Exception ex)
                     {
-                        logger?.LogWarning(ex,
-                            "One or more database-initialization PRAGMAs failed for '{DataSource}'. " +
-                            "The connection-scoped PRAGMAs (busy_timeout, cache_size, etc.) will still be applied.",
-                            dataSource);
+                        logger?.LogWarning(
+                            ex,
+                            "One or more database-initialization PRAGMAs failed for '{DataSource}'. "
+                                + "The connection-scoped PRAGMAs (busy_timeout, cache_size, etc.) will still be applied.",
+                            dataSource
+                        );
                     }
 
                     // Mark as initialized regardless of partial failures above so that the
@@ -366,7 +375,8 @@ public static class SqliteConnectionEnhancer
         // 2. Connection-scoped PRAGMAs — applied on every connection open.
         //    These are per-connection settings that are not stored in the database file.
         using var command = sqliteConnection.CreateCommand();
-        command.CommandText = $@"
+        command.CommandText =
+            $@"
             -- How long (ms) this connection will spin waiting for a lock before returning
             -- SQLITE_BUSY. This is the first layer of busy handling; the library adds a
             -- second layer (application-level retry with jitter) because SQLite bypasses
@@ -432,7 +442,8 @@ public static class SqliteConnectionEnhancer
     /// </remarks>
     public static async Task<WalCheckpointStatus> GetWalCheckpointStatusAsync(
         DbConnection connection,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default
+    )
     {
         if (connection is not SqliteConnection)
             return new WalCheckpointStatus(false, 0, 0);
@@ -499,15 +510,15 @@ public static class SqliteConnectionEnhancer
     public static async Task<bool> TryReleaseMigrationLockAsync(
         DbConnection connection,
         bool release = true,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default
+    )
     {
         if (connection is not SqliteConnection)
             return false;
 
         // Check whether the migrations lock table exists at all.
         using var tableCmd = connection.CreateCommand();
-        tableCmd.CommandText =
-            "SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='__EFMigrationsLock';";
+        tableCmd.CommandText = "SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='__EFMigrationsLock';";
         var tableCount = (long)(await tableCmd.ExecuteScalarAsync(cancellationToken) ?? 0L);
         if (tableCount == 0)
             return false;

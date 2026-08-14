@@ -16,5 +16,5 @@ public class ReaparrDbContextFactory : IReaparrDbContextFactory
 
     public IReaparrDbContext Create() => _factory();
 
-   public Task<IReaparrDbContext> CreateAsync() => Task.FromResult(_factory());
+    public Task<IReaparrDbContext> CreateAsync() => Task.FromResult(_factory());
 }

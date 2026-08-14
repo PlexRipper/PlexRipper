@@ -1,6 +1,14 @@
 namespace Reaparr.Application;
 
-public record RefreshLibraryMediaEndpointRequest(int PlexLibraryId);
+public record RefreshLibraryMediaEndpointRequest
+{
+    [RouteParam]
+    public int PlexLibraryId { get; init; }
+
+    public bool ForceLibrarySync { get; init; }
+
+    public bool ForceMediaRefresh { get; init; }
+}
 
 public class RefreshLibraryMediaEndpointRequestValidator : Validator<RefreshLibraryMediaEndpointRequest>
 {
@@ -25,7 +33,7 @@ public class RefreshLibraryMediaEndpoint : Endpoint<RefreshLibraryMediaEndpointR
 
     public override void Configure()
     {
-        Get(ApiRoutes.PlexLibraryController + "/refresh/{PlexLibraryId}");
+        Post(ApiRoutes.PlexLibraryController + "/refresh/{PlexLibraryId}");
 
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<PlexLibraryDTO>))
@@ -39,7 +47,10 @@ public class RefreshLibraryMediaEndpoint : Endpoint<RefreshLibraryMediaEndpointR
     {
         _log.Here().DebugApiCall(HttpContext, req);
 
-        var result = await _commandExecutor.Send(new QueueLibrarySyncJobCommand([req.PlexLibraryId], Force: true), ct);
+        var result = await _commandExecutor.Send(
+            new QueueLibrarySyncJobCommand([req.PlexLibraryId], req.ForceLibrarySync, req.ForceMediaRefresh),
+            ct
+        );
         if (result.IsFailed)
         {
             await Send.FluentResult(result, ct);

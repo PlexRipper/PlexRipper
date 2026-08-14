@@ -19,7 +19,7 @@
 			:disabled="inspectLoading || deleteLoading"
 			:loading="syncLoading"
 			:label="$t('general.commands.sync-server-libraries')"
-			@click="syncServerLibraries" />
+			@click="dialogStore.openDialog(DialogType.RefreshMediaDialog)" />
 	</HelpRow>
 	<HelpRow
 		disable-responsive
@@ -32,6 +32,10 @@
 			:label="$t('general.commands.delete-server')"
 			@click="dialogStore.openDialog(DialogType.ServerDeleteConfirmationDialog)" />
 	</HelpRow>
+	<RefreshModeDialog
+		scope="server"
+		:server-name="serverStore.getServerName(plexServerId)"
+		@select="syncServerLibraries" />
 	<ConfirmationDialog
 		:confirm-loading="deleteLoading"
 		:name="DialogType.ServerDeleteConfirmationDialog"
@@ -46,7 +50,6 @@
 <script setup lang="ts">
 import { set } from '@vueuse/core';
 import { useSubscription } from '@vueuse/rxjs';
-import type { PlexServerDTO } from '@dto';
 import { DialogType } from '@enums';
 import { plexServerApi } from '@api';
 import { useDialogStore, useServerStore } from '@store';
@@ -56,7 +59,7 @@ const dialogStore = useDialogStore();
 const serverStore = useServerStore();
 
 const props = defineProps<{
-	plexServer: PlexServerDTO | null;
+	plexServerId: number;
 	isVisible: boolean;
 }>();
 
@@ -64,15 +67,16 @@ const syncLoading = ref(false);
 const inspectLoading = ref(false);
 const deleteLoading = ref(false);
 
-function syncServerLibraries(): void {
-	if (!props.plexServer) {
-		return;
-	}
-	const plexServerId = props.plexServer.id;
+function syncServerLibraries(forceMediaRefresh: boolean): void {
+	const plexServerId = props.plexServerId;
 	set(syncLoading, true);
 	useSubscription(
 		plexServerApi
-			.syncPlexServerMediaEndpoint(plexServerId)
+			.syncPlexServerMediaEndpoint(plexServerId, {
+				plexServerId,
+				forceLibrarySync: true,
+				forceMediaRefresh,
+			})
 			.subscribe({
 				next: (result) => {
 					set(syncLoading, false);
@@ -90,12 +94,9 @@ function syncServerLibraries(): void {
 }
 
 function inspectServer(): void {
-	if (!props.plexServer) {
-		return;
-	}
 	set(inspectLoading, true);
 	useSubscription(
-		plexServerApi.queueInspectPlexServerJobEndpoint(props.plexServer.id).subscribe({
+		plexServerApi.queueInspectPlexServerJobEndpoint(props.plexServerId).subscribe({
 			next: () => {
 				set(inspectLoading, false);
 			},
@@ -107,12 +108,9 @@ function inspectServer(): void {
 }
 
 function deleteServer(): void {
-	if (!props.plexServer) {
-		return;
-	}
 	set(deleteLoading, true);
 	useSubscription(
-		serverStore.deleteServer(props.plexServer.id).subscribe({
+		serverStore.deleteServer(props.plexServerId).subscribe({
 			next: (result) => {
 				set(deleteLoading, false);
 				if (!result.isSuccess) {

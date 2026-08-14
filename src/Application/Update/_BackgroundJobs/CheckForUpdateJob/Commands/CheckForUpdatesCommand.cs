@@ -113,9 +113,7 @@ public class CheckForUpdatesCommandHandler : ICommandHandler<CheckForUpdatesComm
                     _appBuildInfo.InformationalVersion
                 );
 
-            await _notificationHubService.SendRefreshNotificationAsync(
-                RefreshDataType.UpdateAvailable
-            );
+            await _notificationHubService.SendRefreshNotificationAsync(RefreshDataType.UpdateAvailable);
             return Result.Ok(
                 new AppUpdateCheckResult
                 {
@@ -133,9 +131,7 @@ public class CheckForUpdatesCommandHandler : ICommandHandler<CheckForUpdatesComm
             var targetVersion = nonDesktopUpdateResult.Value.TargetFullRelease.Version.ToString();
             _log.Here().Information("Update available: {Version}", targetVersion);
 
-            await _notificationHubService.SendRefreshNotificationAsync(
-                RefreshDataType.UpdateAvailable
-            );
+            await _notificationHubService.SendRefreshNotificationAsync(RefreshDataType.UpdateAvailable);
             return Result.Ok(
                 new AppUpdateCheckResult
                 {

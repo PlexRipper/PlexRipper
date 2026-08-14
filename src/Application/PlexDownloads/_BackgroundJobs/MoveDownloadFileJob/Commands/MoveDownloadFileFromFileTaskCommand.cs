@@ -389,9 +389,7 @@ public class MoveDownloadFileFromFileTaskCommandHandler : ICommandHandler<MoveDo
             );
             moveDownloadFileProgress?.OnNext(downloadTask.ToFileTransferProgress());
 
-            return ResultExtensions
-                .TaskIsCancelled(nameof(MoveDownloadFileFromFileTaskCommandHandler))
-                .LogWarning();
+            return ResultExtensions.TaskIsCancelled(nameof(MoveDownloadFileFromFileTaskCommandHandler)).LogWarning();
         }
         catch (Exception ex)
         {

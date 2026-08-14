@@ -105,10 +105,7 @@ public static class FastEndpointsExtensions
     /// <param name="sender">The response sender associated with the current endpoint.</param>
     /// <param name="result">The result to convert and send.</param>
     /// <param name="ct">Token to observe while sending the response.</param>
-    public static Task FluentResult<T>(
-        this IResponseSender sender,
-        Result<T> result,
-        CancellationToken ct = default) =>
+    public static Task FluentResult<T>(this IResponseSender sender, Result<T> result, CancellationToken ct = default) =>
         sender.SendFluentResultDTOAsync(result.ToResultDTO(), ct: ct);
 
     /// <summary>
@@ -136,5 +133,6 @@ public static class FastEndpointsExtensions
         TResponse resultDTO,
         CancellationToken ct = default
     )
-        where TResponse : BaseResultDTO => ep.HttpContext.Response.SendAsync(resultDTO, resultDTO.StatusCode, cancellation: ct);
+        where TResponse : BaseResultDTO =>
+        ep.HttpContext.Response.SendAsync(resultDTO, resultDTO.StatusCode, cancellation: ct);
 }

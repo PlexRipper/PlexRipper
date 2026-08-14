@@ -69,15 +69,13 @@ public class LogConfig : SlimLogConfig
     /// Provides an extended sink configuration with file and Seq sinks.
     /// </summary>
     /// <param name="minimumLogLevel">The global minimum log level used before sink-specific filtering.</param>
-    protected virtual LoggerConfiguration GetExtendedConfiguration(
-        LogEventLevel minimumLogLevel = LogEventLevel.Debug
-    )
+    protected virtual LoggerConfiguration GetExtendedConfiguration(LogEventLevel minimumLogLevel = LogEventLevel.Debug)
     {
         var config = GetBaseConfiguration(minimumLogLevel);
-        
+
         if (!string.IsNullOrEmpty(_appRuntimeInfo.SEQ_Url))
             config = config.WriteTo.Seq(_appRuntimeInfo.SEQ_Url, restrictedToMinimumLevel: minimumLogLevel);
-        
+
         return config.WriteTo.File(
             FileTemplate, // This should always be plain file as not to log ASCII characters
             Path.Combine(_pathProvider.LogsDirectory, "log.txt"),

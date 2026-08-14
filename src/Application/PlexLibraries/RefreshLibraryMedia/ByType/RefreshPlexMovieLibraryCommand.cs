@@ -1,7 +1,9 @@
 namespace Reaparr.Application;
 
-public record RefreshPlexMovieLibraryCommand(InsertMediaMetaDataCommandResponse LibraryMetadata)
-    : ICommand<Result<PlexLibrary>>;
+public record RefreshPlexMovieLibraryCommand(
+    InsertMediaMetaDataCommandResponse LibraryMetadata,
+    bool ForceMediaRefresh = false
+) : ICommand<Result<PlexLibrary>>;
 
 public class RefreshPlexMovieLibraryCommandValidator : AbstractValidator<RefreshPlexMovieLibraryCommand>
 {
@@ -46,77 +48,51 @@ public class RefreshPlexMovieLibraryCommandHandler
         var plexLibraryId = command.LibraryMetadata.PlexLibraryId;
         var movieCount = plexLibrary.Movies.Count;
 
-        if (plexLibrary.Movies.Any())
+        var syncResult = await _commandExecutor.Send(
+            new SyncPlexMoviesCommand(command.LibraryMetadata, command.ForceMediaRefresh),
+            cancellationToken
+        );
+
+        if (syncResult.IsCancelled)
+            return syncResult.ToResult();
+
+        if (syncResult.IsFailed)
         {
-            var syncResult = await _commandExecutor.Send(
-                new SyncPlexMoviesCommand(command.LibraryMetadata),
-                cancellationToken
-            );
-
-            if (syncResult.IsCancelled)
-                return syncResult.ToResult();
-
-            if (syncResult.IsFailed)
-            {
-                // Report movies as not yet synced on failure
-                await _librarySyncProgressStore.UpdateItemAsync(
-                    plexLibraryId,
-                    new LibraryProgressItem
-                    {
-                        MediaType = PlexMediaType.Movie,
-                        Received = 0,
-                        Total = movieCount,
-                        TimeRemaining = TimeSpan.Zero,
-                    },
-                    cancellationToken
-                );
-
-                return syncResult.ToResult().LogError();
-            }
-
-            _log.Here()
-                .Information(
-                    "Successfully refreshed library {PlexLibraryName} with id: {PlexLibraryId}",
-                    plexLibrary.Title,
-                    plexLibrary.Id
-                );
-
-            // Report movies as successfully synced
-            await _librarySyncProgressStore.UpdateItemAsync(
-                plexLibraryId,
-                new LibraryProgressItem
-                {
-                    MediaType = PlexMediaType.Movie,
-                    Received = movieCount,
-                    Total = movieCount,
-                    TimeRemaining = TimeSpan.Zero,
-                },
-                cancellationToken
-            );
-        }
-        else
-        {
-            _log.Here()
-                .Warning(
-                    "No Movies were found for library {PlexLibraryName} with id: {PlexLibraryId}",
-                    plexLibrary.Title,
-                    plexLibrary.Id
-                );
-
+            // Report movies as not yet synced on failure
             await _librarySyncProgressStore.UpdateItemAsync(
                 plexLibraryId,
                 new LibraryProgressItem
                 {
                     MediaType = PlexMediaType.Movie,
                     Received = 0,
-                    Total = 0,
+                    Total = movieCount,
                     TimeRemaining = TimeSpan.Zero,
                 },
                 cancellationToken
             );
 
-            await _dbContext.SetMovieMediaMetrics(plexLibraryId, 0, 0);
+            return syncResult.ToResult().LogError();
         }
+
+        _log.Here()
+            .Information(
+                "Successfully refreshed library {PlexLibraryName} with id: {PlexLibraryId}",
+                plexLibrary.Title,
+                plexLibrary.Id
+            );
+
+        // Report movies as successfully synced
+        await _librarySyncProgressStore.UpdateItemAsync(
+            plexLibraryId,
+            new LibraryProgressItem
+            {
+                MediaType = PlexMediaType.Movie,
+                Received = movieCount,
+                Total = movieCount,
+                TimeRemaining = TimeSpan.Zero,
+            },
+            cancellationToken
+        );
 
         _mediaQueryCache.InvalidateLibrary(plexLibraryId, "Movie library media refresh completed");
 

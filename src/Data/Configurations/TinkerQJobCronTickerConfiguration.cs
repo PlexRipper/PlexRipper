@@ -6,12 +6,11 @@ public class TinkerQJobCronTickerConfiguration : IEntityTypeConfiguration<JobCro
     {
         builder.ToTable("TinkerQ_JobCronTickers");
 
-        builder.Property(x => x.JobKey)
-            .HasColumnOrder(2)
-            .HasMaxLength(256);
+        builder.Property(x => x.JobKey).HasColumnOrder(2).HasMaxLength(256);
         builder.HasIndex(x => x.JobKey);
 
-        builder.Property(e => e.JobType)
+        builder
+            .Property(e => e.JobType)
             .HasColumnOrder(3)
             .HasMaxLength(100)
             .HasConversion(x => x.ToJobTypesString(), x => x.ToJobTypes())

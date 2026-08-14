@@ -18,10 +18,12 @@ public class ReaparrDbContextConcurrencyUnitTests : BaseUnitTest
         using var setupContext = IDbContext;
         var libraryId = await setupContext.PlexLibraries.Select(x => x.Id).FirstAsync(CancellationToken);
 
-        var actors = Enumerable.Range(1, 50)
+        var actors = Enumerable
+            .Range(1, 50)
             .Select(x => new PlexActor { Name = $"Concurrent actor {x}", Key = $"concurrent-actor-{x}" })
             .ToList();
-        var notifications = Enumerable.Range(1, 25)
+        var notifications = Enumerable
+            .Range(1, 25)
             .Select(x => new Notification
             {
                 Level = NotificationLevel.Information,
@@ -43,38 +45,50 @@ public class ReaparrDbContextConcurrencyUnitTests : BaseUnitTest
         }
 
         await Task.WhenAll(
-            Task.Run(async () =>
-            {
-                using var dbContext = IDbContext;
-                await WaitForConcurrentStart();
-                await dbContext.BulkInsertAsync(actors, cancellationToken: CancellationToken);
-            }, CancellationToken),
-            Task.Run(async () =>
-            {
-                using var dbContext = IDbContext;
-                dbContext.Notifications.AddRange(notifications);
-                await WaitForConcurrentStart();
-                await dbContext.SaveChangesAsync(CancellationToken);
-            }, CancellationToken),
-            Task.Run(async () =>
-            {
-                using var dbContext = IDbContext;
-                await WaitForConcurrentStart();
-                await dbContext.PlexLibraries
-                    .Where(x => x.Id == libraryId)
-                    .ExecuteUpdateAsync(x => x.SetProperty(y => y.MovieCount, 42), CancellationToken);
-            }, CancellationToken)
+            Task.Run(
+                async () =>
+                {
+                    using var dbContext = IDbContext;
+                    await WaitForConcurrentStart();
+                    await dbContext.BulkInsertAsync(actors, cancellationToken: CancellationToken);
+                },
+                CancellationToken
+            ),
+            Task.Run(
+                async () =>
+                {
+                    using var dbContext = IDbContext;
+                    dbContext.Notifications.AddRange(notifications);
+                    await WaitForConcurrentStart();
+                    await dbContext.SaveChangesAsync(CancellationToken);
+                },
+                CancellationToken
+            ),
+            Task.Run(
+                async () =>
+                {
+                    using var dbContext = IDbContext;
+                    await WaitForConcurrentStart();
+                    await dbContext
+                        .PlexLibraries.Where(x => x.Id == libraryId)
+                        .ExecuteUpdateAsync(x => x.SetProperty(y => y.MovieCount, 42), CancellationToken);
+                },
+                CancellationToken
+            )
         );
 
         // Assert
         using var assertContext = IDbContext;
-        var actorCount = await assertContext.PlexActors.CountAsync(x => x.Key.StartsWith("concurrent-actor-"), CancellationToken);
+        var actorCount = await assertContext.PlexActors.CountAsync(
+            x => x.Key.StartsWith("concurrent-actor-"),
+            CancellationToken
+        );
         var notificationCount = await assertContext.Notifications.CountAsync(
             x => x.Message.StartsWith("Concurrent notification"),
             CancellationToken
         );
-        var movieCount = await assertContext.PlexLibraries
-            .Where(x => x.Id == libraryId)
+        var movieCount = await assertContext
+            .PlexLibraries.Where(x => x.Id == libraryId)
             .Select(x => x.MovieCount)
             .SingleAsync(CancellationToken);
 
@@ -88,21 +102,28 @@ public class ReaparrDbContextConcurrencyUnitTests : BaseUnitTest
     {
         // Arrange
         await SetupDatabase(91235);
-        var actors = Enumerable.Range(1, 10)
+        var actors = Enumerable
+            .Range(1, 10)
             .Select(x => new PlexActor { Name = $"Rollback actor {x}", Key = $"rollback-actor-{x}" })
             .ToList();
 
         // Act
         using var dbContext = IDbContext;
-        var result = await dbContext.ExecuteSerializedTransactionAsync(async (context, ct) =>
-        {
-            await context.BulkInsertAsync(actors, cancellationToken: ct);
-            throw new InvalidOperationException("rollback test");
-        }, CancellationToken);
+        var result = await dbContext.ExecuteSerializedTransactionAsync(
+            async (context, ct) =>
+            {
+                await context.BulkInsertAsync(actors, cancellationToken: ct);
+                throw new InvalidOperationException("rollback test");
+            },
+            CancellationToken
+        );
 
         // Assert
         using var assertContext = IDbContext;
-        var actorCount = await assertContext.PlexActors.CountAsync(x => x.Key.StartsWith("rollback-actor-"), CancellationToken);
+        var actorCount = await assertContext.PlexActors.CountAsync(
+            x => x.Key.StartsWith("rollback-actor-"),
+            CancellationToken
+        );
 
         result.IsFailed.ShouldBeTrue();
         result.HasException<InvalidOperationException>().ShouldBeTrue();

@@ -13,11 +13,13 @@ import { cloneDeep } from 'lodash-es';
 interface IAccountStoreState {
 	accounts: PlexAccountDTO[];
 	accessSyncLoading: boolean;
+	accessSyncLoadingAccountId: number | null;
 }
 
 export const useAccountStore = defineStore(StoreNames.AccountStore, () => {
 	const defaultState = {
 		accessSyncLoading: false,
+		accessSyncLoadingAccountId: null,
 		accounts: [],
 	};
 
@@ -48,6 +50,7 @@ export const useAccountStore = defineStore(StoreNames.AccountStore, () => {
 		},
 		reSyncAccount(accountId: number) {
 			state.accessSyncLoading = true;
+			state.accessSyncLoadingAccountId = accountId;
 			return plexAccountApi.refreshPlexAccountAccessEndpoint(accountId).pipe(
 				switchMap((result) => {
 					if (!result.isSuccess) {
@@ -60,7 +63,12 @@ export const useAccountStore = defineStore(StoreNames.AccountStore, () => {
 						libraryStore.refreshLibraries(),
 					]).pipe(switchMap(() => of(result)));
 				}),
-				finalize(() => state.accessSyncLoading = false),
+				finalize(() => {
+					if (state.accessSyncLoadingAccountId === accountId) {
+						state.accessSyncLoading = false;
+						state.accessSyncLoadingAccountId = null;
+					}
+				}),
 			);
 		},
 		/**

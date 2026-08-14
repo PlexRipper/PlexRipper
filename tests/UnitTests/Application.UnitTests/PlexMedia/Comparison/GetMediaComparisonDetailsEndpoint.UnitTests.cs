@@ -1,27 +1,36 @@
 namespace Reaparr.Application.UnitTests;
 
 public class GetMediaComparisonDetailsEndpointUnitTests
-    : BaseEndpointUnitTest<GetMediaComparisonDetailsEndpoint, GetMediaComparisonDetailsEndpointRequest, ResultDTO<PlexMediaComparisonDetailsDTO>>
+    : BaseEndpointUnitTest<
+        GetMediaComparisonDetailsEndpoint,
+        GetMediaComparisonDetailsEndpointRequest,
+        ResultDTO<PlexMediaComparisonDetailsDTO>
+    >
 {
     [Test]
     public async Task ShouldDispatchMovieCommand_WhenMovieComparisonDetailsRequested()
     {
         // Arrange
         var request = new GetMediaComparisonDetailsEndpointRequest(1887, PlexMediaType.Movie);
-        var commandResult = Result.Ok(new PlexMediaComparisonDetailsDTO
-        {
-            PlexMediaId = request.PlexMediaId,
-            Type = PlexMediaType.Movie,
-            State = PlexMediaComparisonState.Owned,
-            Rows = [],
-        });
+        var commandResult = Result.Ok(
+            new PlexMediaComparisonDetailsDTO
+            {
+                PlexMediaId = request.PlexMediaId,
+                Type = PlexMediaType.Movie,
+                State = PlexMediaComparisonState.Owned,
+                Rows = [],
+            }
+        );
 
         Mock.SetupCommand<Result<PlexMediaComparisonDetailsDTO>>(x =>
-                (x as GetMovieMediaComparisonDetailsCommand) != null &&
-                ((GetMovieMediaComparisonDetailsCommand)x).PlexMediaId == request.PlexMediaId)
+                (x as GetMovieMediaComparisonDetailsCommand) != null
+                && ((GetMovieMediaComparisonDetailsCommand)x).PlexMediaId == request.PlexMediaId
+            )
             .ReturnsAsync(commandResult)
             .Verifiable(Times.Once);
-        Mock.SetupCommand<Result<PlexMediaComparisonDetailsDTO>>(x => (x as GetTvShowMediaComparisonDetailsCommand) != null)
+        Mock.SetupCommand<Result<PlexMediaComparisonDetailsDTO>>(x =>
+                (x as GetTvShowMediaComparisonDetailsCommand) != null
+            )
             .ReturnsAsync(commandResult)
             .Verifiable(Times.Never);
 
@@ -45,10 +54,14 @@ public class GetMediaComparisonDetailsEndpointUnitTests
         var endpoint = SetupEndpointUnitTest<GetMediaComparisonDetailsEndpoint>();
         endpoint.HttpContext.Response.Body = new MemoryStream();
 
-        Mock.SetupCommand<Result<PlexMediaComparisonDetailsDTO>>(x => (x as GetMovieMediaComparisonDetailsCommand) != null)
+        Mock.SetupCommand<Result<PlexMediaComparisonDetailsDTO>>(x =>
+                (x as GetMovieMediaComparisonDetailsCommand) != null
+            )
             .ReturnsAsync(Result.Fail<PlexMediaComparisonDetailsDTO>("Unexpected dispatch"))
             .Verifiable(Times.Never);
-        Mock.SetupCommand<Result<PlexMediaComparisonDetailsDTO>>(x => (x as GetTvShowMediaComparisonDetailsCommand) != null)
+        Mock.SetupCommand<Result<PlexMediaComparisonDetailsDTO>>(x =>
+                (x as GetTvShowMediaComparisonDetailsCommand) != null
+            )
             .ReturnsAsync(Result.Fail<PlexMediaComparisonDetailsDTO>("Unexpected dispatch"))
             .Verifiable(Times.Never);
 
@@ -69,10 +82,14 @@ public class GetMediaComparisonDetailsEndpointUnitTests
         // Arrange
         var request = new GetMediaComparisonDetailsEndpointRequest(0, PlexMediaType.Movie);
 
-        Mock.SetupCommand<Result<PlexMediaComparisonDetailsDTO>>(x => (x as GetMovieMediaComparisonDetailsCommand) != null)
+        Mock.SetupCommand<Result<PlexMediaComparisonDetailsDTO>>(x =>
+                (x as GetMovieMediaComparisonDetailsCommand) != null
+            )
             .ReturnsAsync(Result.Fail<PlexMediaComparisonDetailsDTO>("Unexpected dispatch"))
             .Verifiable(Times.Never);
-        Mock.SetupCommand<Result<PlexMediaComparisonDetailsDTO>>(x => (x as GetTvShowMediaComparisonDetailsCommand) != null)
+        Mock.SetupCommand<Result<PlexMediaComparisonDetailsDTO>>(x =>
+                (x as GetTvShowMediaComparisonDetailsCommand) != null
+            )
             .ReturnsAsync(Result.Fail<PlexMediaComparisonDetailsDTO>("Unexpected dispatch"))
             .Verifiable(Times.Never);
 
@@ -91,10 +108,14 @@ public class GetMediaComparisonDetailsEndpointUnitTests
         // Arrange
         var request = new GetMediaComparisonDetailsEndpointRequest(1889, PlexMediaType.Episode);
 
-        Mock.SetupCommand<Result<PlexMediaComparisonDetailsDTO>>(x => (x as GetMovieMediaComparisonDetailsCommand) != null)
+        Mock.SetupCommand<Result<PlexMediaComparisonDetailsDTO>>(x =>
+                (x as GetMovieMediaComparisonDetailsCommand) != null
+            )
             .ReturnsAsync(Result.Fail<PlexMediaComparisonDetailsDTO>("Unexpected dispatch"))
             .Verifiable(Times.Never);
-        Mock.SetupCommand<Result<PlexMediaComparisonDetailsDTO>>(x => (x as GetTvShowMediaComparisonDetailsCommand) != null)
+        Mock.SetupCommand<Result<PlexMediaComparisonDetailsDTO>>(x =>
+                (x as GetTvShowMediaComparisonDetailsCommand) != null
+            )
             .ReturnsAsync(Result.Fail<PlexMediaComparisonDetailsDTO>("Unexpected dispatch"))
             .Verifiable(Times.Never);
 
@@ -112,20 +133,25 @@ public class GetMediaComparisonDetailsEndpointUnitTests
     {
         // Arrange
         var request = new GetMediaComparisonDetailsEndpointRequest(1888, PlexMediaType.TvShow);
-        var commandResult = Result.Ok(new PlexMediaComparisonDetailsDTO
-        {
-            PlexMediaId = request.PlexMediaId,
-            Type = PlexMediaType.TvShow,
-            State = PlexMediaComparisonState.Owned,
-            Rows = [],
-        });
+        var commandResult = Result.Ok(
+            new PlexMediaComparisonDetailsDTO
+            {
+                PlexMediaId = request.PlexMediaId,
+                Type = PlexMediaType.TvShow,
+                State = PlexMediaComparisonState.Owned,
+                Rows = [],
+            }
+        );
 
-        Mock.SetupCommand<Result<PlexMediaComparisonDetailsDTO>>(x => (x as GetMovieMediaComparisonDetailsCommand) != null)
+        Mock.SetupCommand<Result<PlexMediaComparisonDetailsDTO>>(x =>
+                (x as GetMovieMediaComparisonDetailsCommand) != null
+            )
             .ReturnsAsync(commandResult)
             .Verifiable(Times.Never);
         Mock.SetupCommand<Result<PlexMediaComparisonDetailsDTO>>(x =>
-                (x as GetTvShowMediaComparisonDetailsCommand) != null &&
-                ((GetTvShowMediaComparisonDetailsCommand)x).PlexMediaId == request.PlexMediaId)
+                (x as GetTvShowMediaComparisonDetailsCommand) != null
+                && ((GetTvShowMediaComparisonDetailsCommand)x).PlexMediaId == request.PlexMediaId
+            )
             .ReturnsAsync(commandResult)
             .Verifiable(Times.Once);
 

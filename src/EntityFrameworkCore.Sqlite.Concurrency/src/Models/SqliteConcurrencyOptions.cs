@@ -156,27 +156,41 @@ public class SqliteConcurrencyOptions : IEquatable<SqliteConcurrencyOptions>
     public void Validate()
     {
         if (MaxRetryAttempts <= 0)
-            throw new ArgumentOutOfRangeException(nameof(MaxRetryAttempts),
-                MaxRetryAttempts, "MaxRetryAttempts must be greater than zero.");
+            throw new ArgumentOutOfRangeException(
+                nameof(MaxRetryAttempts),
+                MaxRetryAttempts,
+                "MaxRetryAttempts must be greater than zero."
+            );
 
         if (BusyTimeout < TimeSpan.Zero)
-            throw new ArgumentOutOfRangeException(nameof(BusyTimeout),
-                BusyTimeout, "BusyTimeout must be non-negative.");
+            throw new ArgumentOutOfRangeException(
+                nameof(BusyTimeout),
+                BusyTimeout,
+                "BusyTimeout must be non-negative."
+            );
 
         if (CommandTimeout < 0)
-            throw new ArgumentOutOfRangeException(nameof(CommandTimeout),
-                CommandTimeout, "CommandTimeout must be non-negative.");
+            throw new ArgumentOutOfRangeException(
+                nameof(CommandTimeout),
+                CommandTimeout,
+                "CommandTimeout must be non-negative."
+            );
 
         if (WalAutoCheckpoint < 0)
-            throw new ArgumentOutOfRangeException(nameof(WalAutoCheckpoint),
-                WalAutoCheckpoint, "WalAutoCheckpoint must be non-negative (0 disables auto-checkpoint).");
+            throw new ArgumentOutOfRangeException(
+                nameof(WalAutoCheckpoint),
+                WalAutoCheckpoint,
+                "WalAutoCheckpoint must be non-negative (0 disables auto-checkpoint)."
+            );
     }
 
     /// <inheritdoc />
     public bool Equals(SqliteConcurrencyOptions? other)
     {
-        if (other is null) return false;
-        if (ReferenceEquals(this, other)) return true;
+        if (other is null)
+            return false;
+        if (ReferenceEquals(this, other))
+            return true;
         return MaxRetryAttempts == other.MaxRetryAttempts
             && BusyTimeout.Equals(other.BusyTimeout)
             && CommandTimeout == other.CommandTimeout
@@ -191,20 +205,24 @@ public class SqliteConcurrencyOptions : IEquatable<SqliteConcurrencyOptions>
     /// <inheritdoc />
     public override bool Equals(object? obj)
     {
-        if (obj is null) return false;
-        if (ReferenceEquals(this, obj)) return true;
-        if (obj.GetType() != GetType()) return false;
+        if (obj is null)
+            return false;
+        if (ReferenceEquals(this, obj))
+            return true;
+        if (obj.GetType() != GetType())
+            return false;
         return Equals((SqliteConcurrencyOptions)obj);
     }
 
     /// <inheritdoc />
-    public override int GetHashCode()
-        => HashCode.Combine(
+    public override int GetHashCode() =>
+        HashCode.Combine(
             MaxRetryAttempts,
             BusyTimeout,
             CommandTimeout,
             WalAutoCheckpoint,
             SynchronousMode,
             UpgradeTransactionsToImmediate,
-            WriteQueueCapacity);
+            WriteQueueCapacity
+        );
 }

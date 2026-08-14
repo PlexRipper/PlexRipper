@@ -135,7 +135,6 @@ public class PlexServer : BaseEntity
     [NotMapped]
     public bool Owned => OwnedOverride ?? PlexAccountServers.Any(x => x.IsServerOwned);
 
-    
     /// <summary>
     /// Gets the last known server status.
     /// </summary>

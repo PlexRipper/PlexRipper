@@ -1,24 +1,32 @@
 <template>
 	<QSection :header="$t('pages.debug.buttons.media-comparison-state-header')">
-		<QRow class="q-col-gutter-xl">
-			<QCol cols="3">
-				<div class="column q-gutter-sm">
-					<MediaComparisonStateButton
-						v-for="comparisonState in comparisonStates"
-						:key="`icon-${comparisonState}`"
-						:comparison-state="comparisonState"
-						show-tooltip />
-				</div>
+		<QRow
+			v-for="comparisonState in comparisonStates"
+			:key="`icon-${comparisonState}`"
+			class="q-my-sm">
+			<QCol
+				cols="3"
+				text-align="center">
+				<MediaComparisonStateButton
+					:comparison-state="comparisonState"
+					dense
+					show-tooltip />
 			</QCol>
 
-			<QCol cols="6">
-				<div class="column q-gutter-sm">
-					<MediaComparisonStateButton
-						v-for="comparisonState in comparisonStates"
-						:key="`label-${comparisonState}`"
-						:comparison-state="comparisonState"
-						show-label />
-				</div>
+			<QCol
+				cols="3"
+				text-align="center">
+				<MediaComparisonStateButton
+					:comparison-state="comparisonState"
+					show-tooltip />
+			</QCol>
+
+			<QCol
+				cols="6"
+				text-align="center">
+				<MediaComparisonStateButton
+					:comparison-state="comparisonState"
+					show-label />
 			</QCol>
 		</QRow>
 	</QSection>

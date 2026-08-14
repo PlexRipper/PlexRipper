@@ -32,16 +32,15 @@ public class ResumePlexServerDownloadsCommandHandler : ICommandHandler<ResumePle
         CancellationToken cancellationToken
     )
     {
-        var plexServer = await _dbContext.PlexServers
-            .GetAsync(command.PlexServerId, cancellationToken);
+        var plexServer = await _dbContext.PlexServers.GetAsync(command.PlexServerId, cancellationToken);
         if (plexServer is null)
             return ResultExtensions.EntityNotFound(nameof(PlexServer), command.PlexServerId).LogError();
 
         _log.Here().Information("Unpausing PlexServer with id: {PlexServerId}", command.PlexServerId);
 
         var updateResult = await Result.Try(() =>
-            _dbContext.PlexServers
-                .Where(x => x.Id == command.PlexServerId)
+            _dbContext
+                .PlexServers.Where(x => x.Id == command.PlexServerId)
                 .ExecuteUpdateAsync(p => p.SetProperty(x => x.IsDownloadsPausedByUser, false), cancellationToken)
         );
         if (updateResult.IsCancelled)

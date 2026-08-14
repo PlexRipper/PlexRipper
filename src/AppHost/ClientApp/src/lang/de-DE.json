@@ -100,6 +100,8 @@
             }
         },
         "media-overview": {
+            "library-inaccessible-title": "Mediathek nicht zugänglich.",
+            "library-inaccessible": "Kein aktiviertes Plex-Konto kann mehr auf diese Mediathek zugreifen.",
             "is-refreshing": "Mediathek \"{library}\" daten von {server} werden aktualisiert",
             "could-not-display": "Kann die Mediathek nicht anzeigen",
             "no-data": "Die Bibliothek wurde synchronisiert, enthält aber keine Medien.",
@@ -460,6 +462,20 @@
                 }
             },
             "title": "Radarr-Integration"
+        },
+        "refresh-mode-dialog": {
+            "incremental": "Inkrementell aktualisieren",
+            "full-reset": "Vollständig zurücksetzen",
+            "library": {
+                "title": "Plex-Bibliothek {libraryName} aktualisieren",
+                "text": "Wählen Sie aus, wie Reaparr diese Bibliothek aktualisieren soll. Eine inkrementelle Aktualisierung übernimmt nur geänderte Medien und ist normalerweise schneller.",
+                "full-reset-warning": "Beim vollständigen Zurücksetzen werden alle Mediendatensätze dieser Bibliothek aus Reaparr gelöscht und anschließend anhand von Plex neu aufgebaut. Heruntergeladene Dateien werden nicht gelöscht."
+            },
+            "server": {
+                "title": "Aktualisiere alle Plex-Bibliotheken in {serverName}",
+                "text": "Wählen Sie aus, wie Reaparr alle Bibliotheken auf diesem Server aktualisieren soll. Eine inkrementelle Aktualisierung übernimmt nur geänderte Medien und ist normalerweise schneller.",
+                "full-reset-warning": "Beim vollständigen Zurücksetzen werden alle Mediendatensätze aller Bibliotheken dieses Servers aus Reaparr gelöscht und anschließend anhand von Plex neu aufgebaut. Heruntergeladene Dateien werden nicht gelöscht."
+            }
         }
     },
     "general": {

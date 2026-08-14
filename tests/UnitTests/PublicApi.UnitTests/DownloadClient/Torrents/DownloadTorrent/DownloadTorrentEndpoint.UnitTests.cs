@@ -3,7 +3,8 @@ using BencodeNET.Torrents;
 
 namespace Reaparr.PublicAPI.UnitTests;
 
-public class DownloadTorrentEndpointUnitTests : BaseEndpointUnitTest<DownloadTorrentEndpoint, DownloadTorrentEndpointRequest>
+public class DownloadTorrentEndpointUnitTests
+    : BaseEndpointUnitTest<DownloadTorrentEndpoint, DownloadTorrentEndpointRequest>
 {
     [Test]
     public async Task ShouldReturnValidTorrent_WhenEpisodeExists()

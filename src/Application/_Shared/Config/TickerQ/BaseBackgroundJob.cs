@@ -54,21 +54,12 @@ public abstract class BaseBackgroundJob<TPayload, TUpdate> : ITickerFunction<TPa
             catch (OperationCanceledException)
             {
                 _log.Here()
-                    .Warning(
-                        "Post-completion work was cancelled for {JobType} ticker {TickerId}",
-                        JobType,
-                        context.Id
-                    );
+                    .Warning("Post-completion work was cancelled for {JobType} ticker {TickerId}", JobType, context.Id);
             }
             catch (Exception e)
             {
                 _log.Here()
-                    .Warning(
-                        e,
-                        "Post-completion work failed for {JobType} ticker {TickerId}",
-                        JobType,
-                        context.Id
-                    );
+                    .Warning(e, "Post-completion work failed for {JobType} ticker {TickerId}", JobType, context.Id);
             }
         }
         catch (OperationCanceledException)
@@ -119,13 +110,7 @@ public abstract class BaseBackgroundJob<TPayload, TUpdate> : ITickerFunction<TPa
             }
 
             await _progressHubService.SendJobStatusUpdateAsync(
-                new JobStatusUpdate<TUpdate>(
-                    JobType,
-                    status,
-                    data,
-                    context.Id.ToString(),
-                    jobStartTime
-                )
+                new JobStatusUpdate<TUpdate>(JobType, status, data, context.Id.ToString(), jobStartTime)
             );
 
             if (RefreshDataTypes.Count > 0)

@@ -5,7 +5,8 @@ namespace Reaparr.Application;
 /// </summary>
 /// <param name="PlexLibraryId">The id of the <see cref="PlexLibrary"/> to retrieve.</param>
 /// <returns>Returns the PlexLibrary with the containing media.</returns>
-public record RefreshLibraryMediaCommand(int PlexLibraryId) : ICommand<Result<PlexLibrary>>;
+public record RefreshLibraryMediaCommand(int PlexLibraryId, bool ForceMediaRefresh = false)
+    : ICommand<Result<PlexLibrary>>;
 
 public class RefreshLibraryMediaCommandValidator : AbstractValidator<RefreshLibraryMediaCommand>
 {
@@ -46,9 +47,18 @@ public class RefreshLibraryMediaCommandHandler : ICommandHandler<RefreshLibraryM
         if (syncLibraryMediaResult.IsFailed)
             return syncLibraryMediaResult.ToResult();
 
+        return await PersistLibraryMediaAsync(command, syncLibraryMediaResult.Value, ct);
+    }
+
+    private async Task<Result<PlexLibrary>> PersistLibraryMediaAsync(
+        RefreshLibraryMediaCommand command,
+        LibraryMetadata libraryMetadata,
+        CancellationToken ct
+    )
+    {
         // Phase 2: Insert the new / unique media metadata into the database
         var insertPlexLibraryMediaMetaDataResult = await _commandExecutor.Send(
-            new InsertMediaMetaDataCommand(syncLibraryMediaResult.Value),
+            new InsertMediaMetaDataCommand(libraryMetadata),
             ct
         );
         if (insertPlexLibraryMediaMetaDataResult.IsFailed)
@@ -64,15 +74,21 @@ public class RefreshLibraryMediaCommandHandler : ICommandHandler<RefreshLibraryM
             return syncPlexLibraryMediaMetaDataResult.LogError();
 
         // Phase 4: Continue with retrieving the rest of the media such as seasons/episodes based on the media type
-        var newPlexLibrary = syncLibraryMediaResult.Value.Library;
+        var newPlexLibrary = libraryMetadata.Library;
         var refreshLibraryResult = newPlexLibrary.Type switch
         {
             PlexMediaType.Movie => await _commandExecutor.Send(
-                new RefreshPlexMovieLibraryCommand(insertPlexLibraryMediaMetaDataResult.Value),
+                new RefreshPlexMovieLibraryCommand(
+                    insertPlexLibraryMediaMetaDataResult.Value,
+                    command.ForceMediaRefresh
+                ),
                 ct
             ),
             PlexMediaType.TvShow => await _commandExecutor.Send(
-                new RefreshPlexTvShowLibraryCommand(insertPlexLibraryMediaMetaDataResult.Value),
+                new RefreshPlexTvShowLibraryCommand(
+                    insertPlexLibraryMediaMetaDataResult.Value,
+                    command.ForceMediaRefresh
+                ),
                 ct
             ),
             _ => Result.Ok(newPlexLibrary),
@@ -84,7 +100,7 @@ public class RefreshLibraryMediaCommandHandler : ICommandHandler<RefreshLibraryM
                 .Warning(
                     "Library type {LibraryType} is currently not supported by Reaparr. Coming from library with id: {LibraryId}",
                     newPlexLibrary.Type,
-                    plexLibrary.Id
+                    command.PlexLibraryId
                 );
 
             return Result.Ok(newPlexLibrary);
@@ -96,10 +112,7 @@ public class RefreshLibraryMediaCommandHandler : ICommandHandler<RefreshLibraryM
         var syncedAt = DateTime.UtcNow;
         await _dbContext
             .PlexLibraries.Where(x => x.Id == command.PlexLibraryId)
-            .ExecuteUpdateAsync(
-                s => s.SetProperty(x => x.SyncedAt, syncedAt).SetProperty(x => x.Outdated, false),
-                ct
-            );
+            .ExecuteUpdateAsync(s => s.SetProperty(x => x.SyncedAt, syncedAt).SetProperty(x => x.Outdated, false), ct);
 
         var syncedLibrary = await _dbContext.PlexLibraries.GetAsync(command.PlexLibraryId, ct);
         if (syncedLibrary is null)

@@ -50,11 +50,11 @@ public class RefreshLibraryMediaEndpointIntegrationTests : BaseIntegrationTests
         var client = container.GetApiClient();
         await client.SignIn();
 
-        var testResult = await client.GETAsync<
+        var testResult = await client.POSTAsync<
             RefreshLibraryMediaEndpoint,
             RefreshLibraryMediaEndpointRequest,
             ResultDTO<PlexLibraryDTO>
-        >(new RefreshLibraryMediaEndpointRequest(plexLibrary.Id));
+        >(new RefreshLibraryMediaEndpointRequest() { PlexLibraryId = plexLibrary.Id });
 
         // Assert
         var result = testResult.Result;
@@ -149,11 +149,11 @@ public class RefreshLibraryMediaEndpointIntegrationTests : BaseIntegrationTests
         var client = container.GetApiClient();
         await client.SignIn();
 
-        var testResult = await client.GETAsync<
+        var testResult = await client.POSTAsync<
             RefreshLibraryMediaEndpoint,
             RefreshLibraryMediaEndpointRequest,
             ResultDTO<PlexLibraryDTO>
-        >(new RefreshLibraryMediaEndpointRequest(plexLibrary.Id));
+        >(new RefreshLibraryMediaEndpointRequest { PlexLibraryId = plexLibrary.Id });
 
         // Assert
         var result = testResult.Result;

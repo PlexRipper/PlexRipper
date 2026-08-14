@@ -3,12 +3,7 @@ namespace Reaparr.Data;
 public sealed class UtcDateTimeConverter : ValueConverter<DateTime, DateTime>
 {
     public UtcDateTimeConverter()
-        : base(
-            value => ToUtc(value),
-            value => DateTime.SpecifyKind(value, DateTimeKind.Utc)
-        )
-    {
-    }
+        : base(value => ToUtc(value), value => DateTime.SpecifyKind(value, DateTimeKind.Utc)) { }
 
     private static DateTime ToUtc(DateTime value) =>
         value.Kind switch

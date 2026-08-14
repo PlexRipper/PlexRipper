@@ -1,4 +1,5 @@
 namespace Reaparr.Application;
+
 /// <summary>
 /// This is a command to clean up the library sync job queue by removing completed or failed jobs.
 /// NOTE: This should only be run once on startup to ensure the queue is clean.
@@ -47,9 +48,7 @@ public class CleanupLibrarySyncJobQueueCommandHandler : ICommandHandler<CleanupL
             )
             .ResetJobsToQueuedAsync(cancellationToken);
 
-        await _notificationHubService.SendRefreshNotificationAsync(
-            [RefreshDataType.PlexLibrarySyncStatus]
-        );
+        await _notificationHubService.SendRefreshNotificationAsync([RefreshDataType.PlexLibrarySyncStatus]);
 
         _log.Here().Debug("Cleaned up library sync job queue.");
 

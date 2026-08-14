@@ -1,6 +1,7 @@
 namespace Reaparr.Application.UnitTests;
 
-public class StopDownloadTaskEndpointUnitTests : BaseEndpointUnitTest<StopDownloadTaskEndpoint, StopDownloadTaskEndpointRequest, BaseResultDTO>
+public class StopDownloadTaskEndpointUnitTests
+    : BaseEndpointUnitTest<StopDownloadTaskEndpoint, StopDownloadTaskEndpointRequest, BaseResultDTO>
 {
     [Test]
     public async Task ShouldReturnSuccessResult_WhenCommandSucceeds()
@@ -12,7 +13,9 @@ public class StopDownloadTaskEndpointUnitTests : BaseEndpointUnitTest<StopDownlo
         Mock.SetupCommand(It.IsAny<StopDownloadTaskCommand>).ReturnsAsync(Result.Ok());
 
         // Act
-        var endpointResult = await TestEndpointHandleAsync(new StopDownloadTaskEndpointRequest { DownloadTaskGuid = guid });
+        var endpointResult = await TestEndpointHandleAsync(
+            new StopDownloadTaskEndpointRequest { DownloadTaskGuid = guid }
+        );
         var result = endpointResult.Response;
 
         // Assert
@@ -39,7 +42,9 @@ public class StopDownloadTaskEndpointUnitTests : BaseEndpointUnitTest<StopDownlo
         Mock.SetupCommand(It.IsAny<StopDownloadTaskCommand>).ReturnsAsync(Result.Fail("Stop failed"));
 
         // Act
-        var endpointResult = await TestEndpointHandleAsync(new StopDownloadTaskEndpointRequest { DownloadTaskGuid = guid });
+        var endpointResult = await TestEndpointHandleAsync(
+            new StopDownloadTaskEndpointRequest { DownloadTaskGuid = guid }
+        );
         var result = endpointResult.Response;
 
         // Assert

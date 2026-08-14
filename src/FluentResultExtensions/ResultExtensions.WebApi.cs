@@ -587,8 +587,7 @@ public static partial class ResultExtensions
         || result.HasException<IOException>()
         || result.HasException<UnauthorizedAccessException>();
 
-    public static bool HasStorageError<T>(this Result<T> result) =>
-        result.ToResult().HasStorageError();
+    public static bool HasStorageError<T>(this Result<T> result) => result.ToResult().HasStorageError();
 
     #endregion
 }

@@ -10,7 +10,7 @@ public record JobKey
         Name = name;
         Type = type;
     }
-    
+
     public required string Name { get; init; }
 
     public required JobTypes Type { get; init; }

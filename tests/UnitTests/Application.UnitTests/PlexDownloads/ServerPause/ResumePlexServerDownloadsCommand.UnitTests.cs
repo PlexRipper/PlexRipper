@@ -73,4 +73,3 @@ public class ResumePlexServerDownloadsCommandUnitTests : BaseUnitTest<ResumePlex
         Mock.Mock<IDownloadQueue>().Verify();
     }
 }
-

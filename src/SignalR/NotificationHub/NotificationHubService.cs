@@ -20,8 +20,7 @@ public class NotificationHubService : INotificationHubService
     /// <inheritdoc/>
     public async Task SendNotificationAsync(Notification notification)
     {
-        var result = await Result.Try(async Task () =>
-            await _hub.Clients.All.Notification(notification.ToDTO()));
+        var result = await Result.Try(async Task () => await _hub.Clients.All.Notification(notification.ToDTO()));
 
         if (result.IsFailed)
         {
@@ -33,8 +32,7 @@ public class NotificationHubService : INotificationHubService
     /// <inheritdoc/>
     public async Task SendRefreshNotificationAsync(RefreshDataType dataType)
     {
-        var result = await Result.Try(async Task () =>
-            await _hub.Clients.All.RefreshNotification(dataType));
+        var result = await Result.Try(async Task () => await _hub.Clients.All.RefreshNotification(dataType));
         if (result.IsFailed)
         {
             result.LogError();

@@ -117,7 +117,8 @@ public class MoveFileWithResumeCommandHandler : ICommandHandler<MoveFileWithResu
             while (true)
             {
                 var readResult = await Result.Try(async Task<int> () =>
-                    await readStream.ReadAsync(buffer, 0, buffer.Length, cancellationToken));
+                    await readStream.ReadAsync(buffer, 0, buffer.Length, cancellationToken)
+                );
 
                 if (readResult.IsCancelled || cancellationToken.IsCancellationRequested)
                 {
@@ -138,7 +139,8 @@ public class MoveFileWithResumeCommandHandler : ICommandHandler<MoveFileWithResu
                     break;
 
                 var writeResult = await Result.Try(async Task () =>
-                    await writeStream.WriteAsync(buffer, 0, bytesRead, cancellationToken));
+                    await writeStream.WriteAsync(buffer, 0, bytesRead, cancellationToken)
+                );
 
                 if (writeResult.IsCancelled || cancellationToken.IsCancellationRequested)
                 {
@@ -196,8 +198,10 @@ public class MoveFileWithResumeCommandHandler : ICommandHandler<MoveFileWithResu
         long transferredBytes,
         string sourcePath,
         string targetPath
-    ) => Result.Fail(
-            $"Move ended with a byte count mismatch. Expected {expectedBytes} bytes but transferred {transferredBytes} bytes from '{sourcePath}' to '{targetPath}'."
-        )
-        .LogError();
+    ) =>
+        Result
+            .Fail(
+                $"Move ended with a byte count mismatch. Expected {expectedBytes} bytes but transferred {transferredBytes} bytes from '{sourcePath}' to '{targetPath}'."
+            )
+            .LogError();
 }

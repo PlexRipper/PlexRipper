@@ -16,6 +16,7 @@ import { ContentType } from "./http-client";
 import type {
   BaseResultDTO,
   PlexServerDTO,
+  SyncPlexServerMediaEndpointRequest,
   SetServerAliasRequest,
   SetServerEnabledRequest,
   SetServerOwnedRequest,
@@ -250,12 +251,15 @@ export class PlexServer {
    */
   syncPlexServerMediaEndpoint = (
     plexServerId: number,
+    data: SyncPlexServerMediaEndpointRequest,
     params: RequestParams = {},
   ) =>
     axiosObservable<BaseResultDTO>({
       url: `/api/PlexServer/${plexServerId}/sync`,
       method: "POST",
+      data: data,
       secure: true,
+      type: ContentType.Json,
       responseType: "json",
       ...params,
     }).pipe(apiCheckPipe<BaseResultDTO>);

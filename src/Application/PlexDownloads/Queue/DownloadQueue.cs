@@ -42,33 +42,38 @@ public class DownloadQueue : IDownloadQueue
         if (_workerTask is not null)
             return Result.Ok();
 
-        _workerTask = Task.Run(async () =>
-        {
-            var result = await Result.Try(async Task () =>
+        _workerTask = Task.Run(
+            async () =>
             {
-                await foreach (var plexServerId in _plexServersToCheckChannel.Reader.ReadAllAsync(cancellationToken))
+                var result = await Result.Try(async Task () =>
                 {
-                    var queueResult = await CheckDownloadQueueServer(plexServerId, cancellationToken);
-                    if (queueResult.IsCancelled)
+                    await foreach (
+                        var plexServerId in _plexServersToCheckChannel.Reader.ReadAllAsync(cancellationToken)
+                    )
                     {
-                        queueResult.LogWarning();
-                        return;
+                        var queueResult = await CheckDownloadQueueServer(plexServerId, cancellationToken);
+                        if (queueResult.IsCancelled)
+                        {
+                            queueResult.LogWarning();
+                            return;
+                        }
+
+                        if (queueResult.IsFailed)
+                            queueResult.LogError();
                     }
+                });
 
-                    if (queueResult.IsFailed)
-                        queueResult.LogError();
+                if (result.IsCancelled)
+                {
+                    result.LogWarning();
+                    return;
                 }
-            });
 
-            if (result.IsCancelled)
-            {
-                result.LogWarning();
-                return;
-            }
-
-            if (result.IsFailed)
-                result.LogError();
-        }, CancellationToken.None);
+                if (result.IsFailed)
+                    result.LogError();
+            },
+            CancellationToken.None
+        );
         return Result.Ok();
     }
 
@@ -100,10 +105,7 @@ public class DownloadQueue : IDownloadQueue
     {
         using var dbContext = await _dbContextFactory.CreateAsync();
 
-        var plexServerIds = await dbContext.PlexServers
-            .AsNoTracking()
-            .Select(x => x.Id)
-            .ToListAsync(cancellationToken);
+        var plexServerIds = await dbContext.PlexServers.AsNoTracking().Select(x => x.Id).ToListAsync(cancellationToken);
 
         if (!plexServerIds.Any())
             return Result.Ok();
@@ -162,10 +164,7 @@ public class DownloadQueue : IDownloadQueue
         var hasDownloadingTask = downloadTasks.Any(x => x.DownloadStatus == DownloadStatus.Downloading);
 
         // Avoid a race where the persisted task still says downloading while its TickerQ job is finishing.
-        if (
-            hasDownloadingTask
-            && await _downloadTaskScheduler.IsServerDownloading(plexServerId)
-        )
+        if (hasDownloadingTask && await _downloadTaskScheduler.IsServerDownloading(plexServerId))
         {
             return Result
                 .Fail("Cannot select the next download task because server is already downloading one.")
@@ -230,13 +229,19 @@ public class DownloadQueue : IDownloadQueue
         if (autoPausedTask is not null)
             return Result.Ok(autoPausedTask);
 
-        var serverUnreachableTask =
-            FindFirstLeafByStatus(downloadTasks, DownloadStatus.ServerUnreachable, IsInRetryCooldown);
+        var serverUnreachableTask = FindFirstLeafByStatus(
+            downloadTasks,
+            DownloadStatus.ServerUnreachable,
+            IsInRetryCooldown
+        );
         if (serverUnreachableTask is not null)
             return Result.Ok(serverUnreachableTask);
 
-        var downloadClientErrorTask =
-            FindFirstLeafByStatus(downloadTasks, DownloadStatus.DownloadClientError, IsInRetryCooldown);
+        var downloadClientErrorTask = FindFirstLeafByStatus(
+            downloadTasks,
+            DownloadStatus.DownloadClientError,
+            IsInRetryCooldown
+        );
         if (downloadClientErrorTask is not null)
             return Result.Ok(downloadClientErrorTask);
 

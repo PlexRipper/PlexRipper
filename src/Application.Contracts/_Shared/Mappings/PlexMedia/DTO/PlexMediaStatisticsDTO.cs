@@ -12,7 +12,7 @@ public class PlexMediaStatisticsDTO
     public required int PageSize { get; set; }
 
     public required int TotalCount { get; set; }
-    
+
     public required int MediaCount { get; set; }
 
     public required int MovieCount { get; set; }
@@ -38,7 +38,7 @@ public class PlexMediaStatisticsDTO
     public required List<PlexMediaSlimDTO> MediaList { get; init; }
 
     public required List<MediaNavigationIndexDTO> NavigationIndexes { get; set; } = [];
-    
+
     /// <summary>
     /// Gets or sets the list of distinct roles available in the media items of the <see cref="PlexLibrary"/>.
     /// </summary>

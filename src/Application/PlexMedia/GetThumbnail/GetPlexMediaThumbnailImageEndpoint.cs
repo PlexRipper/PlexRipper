@@ -158,13 +158,7 @@ public sealed class GetPlexMediaThumbnailImageEndpoint : Endpoint<GetPlexMediaTh
         var client = _httpClientFactory.CreateClient(HttpClientModule.PlexThumbnailClientName);
 
         var thumbnailPath = $"/library/metadata/{req.PlexKey}/thumb/{req.MetaDataKey}";
-        var transcodeUrl = BuildTranscodeUrl(
-            connectionResult.Value.Url,
-            thumbnailPath,
-            token,
-            req.Width,
-            req.Height
-        );
+        var transcodeUrl = BuildTranscodeUrl(connectionResult.Value.Url, thumbnailPath, token, req.Width, req.Height);
         var directUrl = BuildDirectThumbnailUrl(connectionResult.Value.Url, thumbnailPath, token);
 
         try
@@ -194,7 +188,9 @@ public sealed class GetPlexMediaThumbnailImageEndpoint : Endpoint<GetPlexMediaTh
                 _log.Here().Verbose("Plex returned no thumbnail content from {Url}", SanitizeUrl(directUrl));
                 HttpContext.Response.Headers.CacheControl = "no-store";
                 await Send.FluentResult(
-                    Result.Fail("No thumbnail image content returned by Plex").Add404NotFoundError(), ct);
+                    Result.Fail("No thumbnail image content returned by Plex").Add404NotFoundError(),
+                    ct
+                );
                 return;
             }
 

@@ -30,11 +30,7 @@ internal class DesktopBuildWorkflowUnitTests : BaseUnitTest<DesktopRunBuildComma
         // DesktopRunBuildCommandHandler resolves BuildPaths from DI. BuildPaths requires a
         // rootDirectory string constructor parameter, so tests must register it explicitly.
         // We use /repo because the test filesystem and assertions are arranged under that root.
-        SetupDependencies(builder =>
-            builder.Register(_ => "/repo")
-                .As<string>()
-                .SingleInstance()
-        );
+        SetupDependencies(builder => builder.Register(_ => "/repo").As<string>().SingleInstance());
 
         Mock.Mock<ICommandExecutor>()
             .Setup(x => x.Send(It.IsAny<DesktopPublishBuildCommand>(), It.IsAny<CancellationToken>()))

@@ -54,7 +54,9 @@ public class StartDownloadTaskCommandHandler : ICommandHandler<StartDownloadTask
         if (!downloadableChildTasks.Any())
             return ResultExtensions.IsEmpty(nameof(downloadableChildTasks)).LogWarning();
 
-        var nextDownloadTask = downloadableChildTasks.FirstOrDefault(x => _resumablePausedStatuses.Contains(x.DownloadStatus));
+        var nextDownloadTask = downloadableChildTasks.FirstOrDefault(x =>
+            _resumablePausedStatuses.Contains(x.DownloadStatus)
+        );
         nextDownloadTask ??= downloadableChildTasks.FirstOrDefault(x =>
             x.DownloadTaskPhase != DownloadTaskPhase.Completed
         );
@@ -78,9 +80,9 @@ public class StartDownloadTaskCommandHandler : ICommandHandler<StartDownloadTask
             var statusesToQueue = nextDownloadTask.DownloadStatus switch
             {
                 DownloadStatus.Paused
-                    or DownloadStatus.AutoPaused
-                    or DownloadStatus.MovePaused
-                    or DownloadStatus.AutoMovePaused => _resumablePausedStatuses,
+                or DownloadStatus.AutoPaused
+                or DownloadStatus.MovePaused
+                or DownloadStatus.AutoMovePaused => _resumablePausedStatuses,
                 DownloadStatus.Stopped => [DownloadStatus.Stopped],
                 _ => [],
             };

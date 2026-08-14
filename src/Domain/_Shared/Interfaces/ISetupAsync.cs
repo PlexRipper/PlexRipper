@@ -8,5 +8,4 @@ public interface ISetupAsync
     /// <param name="cancellationToken"></param>
     /// <returns>Result.</returns>
     Task<Result> SetupAsync(CancellationToken cancellationToken = default);
-
 }

@@ -76,5 +76,5 @@ public enum SqliteSynchronousMode
     /// Has no additional benefit beyond <see cref="Full"/> in WAL mode.
     /// </para>
     /// </summary>
-    Extra = 3
+    Extra = 3,
 }

@@ -11,12 +11,19 @@ public class PlexLibraryAccessHistoryEventConfiguration : IEntityTypeConfigurati
         builder.Property(x => x.State).IsRequired().HasConversion<int>();
         builder.Property(x => x.CreatedAt).IsRequired();
 
-        builder.HasIndex(x => new { x.PlexAccountId,
-            OccurredAtUtc = x.CreatedAt });
-        builder.HasIndex(x => new { x.PlexAccountId, x.PlexServerId,
-            OccurredAtUtc = x.CreatedAt });
-        builder.HasIndex(x => new { x.PlexAccountId, x.PlexLibraryId,
-            OccurredAtUtc = x.CreatedAt });
+        builder.HasIndex(x => new { x.PlexAccountId, OccurredAtUtc = x.CreatedAt });
+        builder.HasIndex(x => new
+        {
+            x.PlexAccountId,
+            x.PlexServerId,
+            OccurredAtUtc = x.CreatedAt,
+        });
+        builder.HasIndex(x => new
+        {
+            x.PlexAccountId,
+            x.PlexLibraryId,
+            OccurredAtUtc = x.CreatedAt,
+        });
         builder.HasIndex(x => x.RefreshRunId);
     }
 }

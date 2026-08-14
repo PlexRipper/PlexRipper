@@ -106,7 +106,10 @@ public class GenerateDownloadTaskTvShowsCommandHandler
             }
 
             // Insert the tvShowDownloadTask into the database
-            report = report with { TvShows = report.TvShows + tvShowsToInsert.Count };
+            report = report with
+            {
+                TvShows = report.TvShows + tvShowsToInsert.Count,
+            };
             _dbContext.DownloadTaskTvShow.AddRange(tvShowsToInsert);
             await _dbContext.SaveChangesAsync(cancellationToken);
 

@@ -19,9 +19,7 @@ public class ApplyUpdateEndpointUnitTests : BaseEndpointWithoutRequestUnitTest<A
         var mockManager = new Mock<UpdateManager>(mockSource.Object, null!, mockLocator.Object);
 
         // Act
-        var endpointResult = await TestEndpointHandleAsync(
-            extraServices: s => s.AddSingleton(_ => mockManager.Object)
-        );
+        var endpointResult = await TestEndpointHandleAsync(extraServices: s => s.AddSingleton(_ => mockManager.Object));
         var result = endpointResult.Response;
 
         // Assert

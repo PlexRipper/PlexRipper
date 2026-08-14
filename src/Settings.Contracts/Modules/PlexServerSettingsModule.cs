@@ -30,7 +30,6 @@ public record PlexServerSettingsModule
     public string GetServerNameAlias(string machineIdentifier) =>
         FindOrAddServerSettingsModel(machineIdentifier)?.PlexServerName ?? string.Empty;
 
-
     public bool GetAllowStreamDownloader(string machineIdentifier) =>
         FindOrAddServerSettingsModel(machineIdentifier)?.AllowStreamDownloader ?? false;
 
@@ -59,7 +58,6 @@ public record PlexServerSettingsModule
             OnPropertyChanged(nameof(model.PlexServerName));
         }
     }
-
 
     #endregion
 

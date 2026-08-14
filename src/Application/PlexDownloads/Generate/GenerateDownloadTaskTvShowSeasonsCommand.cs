@@ -1,6 +1,7 @@
 namespace Reaparr.Application;
 
-public record GenerateDownloadTaskTvShowSeasonsCommand(CreateDownloadTasksRequest Request) : ICommand<Result<DownloadTaskCreationReport>>;
+public record GenerateDownloadTaskTvShowSeasonsCommand(CreateDownloadTasksRequest Request)
+    : ICommand<Result<DownloadTaskCreationReport>>;
 
 public class GenerateDownloadTaskTvShowSeasonsCommandValidator
     : AbstractValidator<GenerateDownloadTaskTvShowSeasonsCommand>

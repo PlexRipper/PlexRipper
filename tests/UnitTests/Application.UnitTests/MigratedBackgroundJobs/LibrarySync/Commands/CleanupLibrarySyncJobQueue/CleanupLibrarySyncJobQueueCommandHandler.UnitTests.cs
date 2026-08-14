@@ -5,9 +5,7 @@ public class CleanupLibrarySyncJobQueueCommandHandlerUnitTests : BaseUnitTest<Cl
     private void SetupSignalRMock()
     {
         Mock.Mock<INotificationHubService>()
-            .Setup(x =>
-                x.SendRefreshNotificationAsync(It.IsAny<List<RefreshDataType>>())
-            )
+            .Setup(x => x.SendRefreshNotificationAsync(It.IsAny<List<RefreshDataType>>()))
             .Returns(Task.CompletedTask);
     }
 

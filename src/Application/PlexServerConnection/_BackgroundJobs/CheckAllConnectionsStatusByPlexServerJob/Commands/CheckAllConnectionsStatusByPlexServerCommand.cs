@@ -61,7 +61,8 @@ public class CheckAllConnectionsStatusByPlexServerHandler
         var plexServerName = await _dbContext.GetPlexServerNameById(plexServerId);
         if (!plexServer.IsEnabled)
         {
-            return ResultExtensions.ServerIsDisabled(plexServerName, plexServerId, nameof(CheckAllConnectionsStatusByPlexServerCommand))
+            return ResultExtensions
+                .ServerIsDisabled(plexServerName, plexServerId, nameof(CheckAllConnectionsStatusByPlexServerCommand))
                 .LogError();
         }
 
@@ -90,9 +91,7 @@ public class CheckAllConnectionsStatusByPlexServerHandler
         if (combinedResults.IsFailed)
             return combinedResults.ToResult().LogError();
 
-        await _notificationHubService.SendRefreshNotificationAsync(
-            [RefreshDataType.PlexServerConnection]
-        );
+        await _notificationHubService.SendRefreshNotificationAsync([RefreshDataType.PlexServerConnection]);
 
         // Compare previous and current online status
         var currentOnlineStatus = tasksResult.Any(statusResult =>

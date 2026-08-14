@@ -10,7 +10,13 @@ public class PlexComparisonStateConfiguration : IEntityTypeConfiguration<PlexCom
             .HasConversion(x => x.ToPlexMediaTypeString(), x => x.ToPlexMediaType())
             .IsUnicode(false);
 
-        builder.HasIndex(x => new { x.RemotePlexLibraryId, x.OwnedPlexLibraryId, x.MediaType })
+        builder
+            .HasIndex(x => new
+            {
+                x.RemotePlexLibraryId,
+                x.OwnedPlexLibraryId,
+                x.MediaType,
+            })
             .IsUnique();
     }
 }

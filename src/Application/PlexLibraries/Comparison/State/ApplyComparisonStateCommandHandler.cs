@@ -23,9 +23,7 @@ public class ApplyComparisonStateCommandHandler : ICommandHandler<ApplyCompariso
     private readonly IReaparrDbContext _dbContext;
     private readonly ICommandExecutor _commandExecutor;
 
-    public ApplyComparisonStateCommandHandler(
-        IReaparrDbContext dbContext,
-        ICommandExecutor commandExecutor)
+    public ApplyComparisonStateCommandHandler(IReaparrDbContext dbContext, ICommandExecutor commandExecutor)
     {
         _dbContext = dbContext;
         _commandExecutor = commandExecutor;
@@ -37,27 +35,33 @@ public class ApplyComparisonStateCommandHandler : ICommandHandler<ApplyCompariso
         if (items.Count == 0 || command.PlexLibraryId == 0)
             return Result.Ok();
 
-        var isOwned = await _dbContext.PlexLibraries
-            .WhereIsOwned()
-            .AnyAsync(x => x.Id == command.PlexLibraryId, ct);
+        var isOwned = await _dbContext.PlexLibraries.WhereIsOwned().AnyAsync(x => x.Id == command.PlexLibraryId, ct);
 
         if (isOwned)
         {
             if (command.MediaType == PlexMediaType.Movie)
                 return await _commandExecutor.Send(
-                    new ApplyOwnedMovieComparisonStateCommand(items, command.PlexLibraryId), ct);
+                    new ApplyOwnedMovieComparisonStateCommand(items, command.PlexLibraryId),
+                    ct
+                );
             if (command.MediaType == PlexMediaType.TvShow)
                 return await _commandExecutor.Send(
-                    new ApplyOwnedTvShowComparisonStateCommand(items, command.PlexLibraryId), ct);
+                    new ApplyOwnedTvShowComparisonStateCommand(items, command.PlexLibraryId),
+                    ct
+                );
         }
         else
         {
             if (command.MediaType == PlexMediaType.Movie)
                 return await _commandExecutor.Send(
-                    new ApplyRemoteMovieComparisonStateCommand(items, command.PlexLibraryId), ct);
+                    new ApplyRemoteMovieComparisonStateCommand(items, command.PlexLibraryId),
+                    ct
+                );
             if (command.MediaType == PlexMediaType.TvShow)
                 return await _commandExecutor.Send(
-                    new ApplyRemoteTvShowComparisonStateCommand(items, command.PlexLibraryId), ct);
+                    new ApplyRemoteTvShowComparisonStateCommand(items, command.PlexLibraryId),
+                    ct
+                );
         }
 
         return Result.Ok();

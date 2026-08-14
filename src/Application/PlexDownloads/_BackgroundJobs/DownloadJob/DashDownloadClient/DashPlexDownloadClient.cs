@@ -119,9 +119,7 @@ public class DashPlexDownloadClient : IPlexDownloadClient
             downloadTask.FileName = normalizedFileName;
 
             // Ensure the new filename is propagated to the front-end
-            await _notificationHubService.SendRefreshNotificationAsync(
-                RefreshDataType.DownloadTasks
-            );
+            await _notificationHubService.SendRefreshNotificationAsync(RefreshDataType.DownloadTasks);
         }
 
         SetupDownloadListeners(downloadTaskKey);
@@ -177,14 +175,9 @@ public class DashPlexDownloadClient : IPlexDownloadClient
         return Result.Ok();
     }
 
-    private async Task<DashMpdCliOptions> CreateDashOptions(
-        DownloadTaskFileBase downloadTask,
-        string downloadUrl
-    )
+    private async Task<DashMpdCliOptions> CreateDashOptions(DownloadTaskFileBase downloadTask, string downloadUrl)
     {
-        var serverMachineIdentifier = await _dbContext.GetPlexServerMachineIdentifierById(
-            downloadTask.PlexServerId
-        );
+        var serverMachineIdentifier = await _dbContext.GetPlexServerMachineIdentifierById(downloadTask.PlexServerId);
         var speedLimitKb = _serverSettings.GetDownloadSpeedLimit(serverMachineIdentifier);
 
         return new DashMpdCliOptions
@@ -242,8 +235,7 @@ public class DashPlexDownloadClient : IPlexDownloadClient
     {
         _subscriptions.Add(
             _dashWrapper
-                .Progress
-                .TakeUntil(_destroy)
+                .Progress.TakeUntil(_destroy)
                 .Subscribe(progress =>
                 {
                     _lastProgressUpdate = new DownloadTaskProgress
@@ -262,9 +254,7 @@ public class DashPlexDownloadClient : IPlexDownloadClient
         _subscriptions.Add(
             _dashWrapper
                 .DownloadCompleted.TakeUntil(_destroy)
-                .Select(completed =>
-                    Observable.FromAsync(async _ => await HandleDownloadCompleted(key, completed))
-                )
+                .Select(completed => Observable.FromAsync(async _ => await HandleDownloadCompleted(key, completed)))
                 .Concat()
                 .Subscribe()
         );

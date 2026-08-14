@@ -3,10 +3,10 @@ using EFCore.BulkExtensions;
 namespace Reaparr.Application;
 
 /// <summary>
-/// Syncs the PlexTvShows of a PlexLibrary by first deleting all existing media and then reinserting the new media.
+/// Incrementally syncs the PlexTvShows of a PlexLibrary.
 /// In addition to syncing the PlexTvShows, also syncs the related entities such as actors, genres and countries.
 /// </summary>
-public record SyncPlexTvShowsCommand(InsertMediaMetaDataCommandResponse LibraryMetadata)
+public record SyncPlexTvShowsCommand(InsertMediaMetaDataCommandResponse LibraryMetadata, bool ForceMediaRefresh = false)
     : ICommand<Result<BulkInsertTvShowsRapport>>;
 
 public class SyncPlexTvShowsCommandValidator : AbstractValidator<SyncPlexTvShowsCommand>
@@ -94,70 +94,60 @@ public class SyncPlexTvShowsCommandHandler : ICommandHandler<SyncPlexTvShowsComm
         CancellationToken cancellationToken
     )
     {
+        if (cancellationToken.IsCancellationRequested)
+            return ResultExtensions.TaskIsCancelled(nameof(SyncPlexTvShowsCommand)).LogWarning();
+
         var plexLibraryId = command.LibraryMetadata.PlexLibraryId;
 
-        var plexLibraryName = await _dbContext.GetPlexLibraryNameById(
-            plexLibraryId
-        );
-        var plexServerId = await _dbContext.GetPlexServerIdFromPlexLibraryId(
-            plexLibraryId
-        );
+        var plexLibraryName = await _dbContext.GetPlexLibraryNameById(plexLibraryId);
+        var plexServerId = await _dbContext.GetPlexServerIdFromPlexLibraryId(plexLibraryId);
 
         if (string.IsNullOrWhiteSpace(plexLibraryName))
             return ResultExtensions.EntityNotFound(nameof(command.LibraryMetadata.PlexLibrary), plexLibraryId);
 
         _log.Here()
             .Debug(
-                "Starting syncing of tv shows in library: {PlexLibraryName} with id:  {PlexLibraryId} by first removing all media and then reinserting it",
+                "Starting incremental sync of TV shows in library: {PlexLibraryName} with id: {PlexLibraryId}",
                 plexLibraryName,
                 plexLibraryId
             );
 
         var stopWatch = Stopwatch.StartNew();
-        if (cancellationToken.IsCancellationRequested)
-            return ResultExtensions.TaskIsCancelled(nameof(SyncPlexTvShowsCommand)).LogWarning();
-
-        // Point of no return: once RemoveMedia starts, complete all persistence without caller cancellation.
-        var removeRapport = await RemoveMedia(plexLibraryId, CancellationToken.None);
-
         var plexTvShows = command.LibraryMetadata.PlexLibrary.TvShows.ToList();
-
-        var bulkInsertRapportResult = await Result.Try(() =>
-            _dbContext.BulkInsertPlexTvShowsAsync(
-                plexTvShows,
-                plexServerId,
-                plexLibraryId,
-                CancellationToken.None
-            )
+        var bulkInsertRapport = new BulkInsertTvShowsRapport();
+        var reconcileResult = await ReconcileTvShows(
+            plexTvShows,
+            plexServerId,
+            plexLibraryId,
+            bulkInsertRapport,
+            command.ForceMediaRefresh,
+            cancellationToken
         );
 
-        if (bulkInsertRapportResult.IsCancelled)
+        if (reconcileResult.IsCancelled)
         {
             stopWatch.Stop();
-            return bulkInsertRapportResult.LogWarning();
+            return reconcileResult.LogWarning();
         }
 
-        if (bulkInsertRapportResult.IsFailed)
+        if (reconcileResult.IsFailed)
         {
             stopWatch.Stop();
-            return bulkInsertRapportResult.LogError();
+            return reconcileResult.LogError();
         }
-
-        var bulkInsertRapport = bulkInsertRapportResult.Value;
-        bulkInsertRapport.DeletedTvShows = removeRapport.DeletedTvShows;
-        bulkInsertRapport.DeletedSeasons = removeRapport.DeletedSeasons;
-        bulkInsertRapport.DeletedEpisodes = removeRapport.DeletedEpisodes;
 
         // Update counts in PlexLibrary from persisted rows so denormalized metrics cannot drift.
         var metrics = await _dbContext
-            .PlexLibraries
-            .Where(x => x.Id == plexLibraryId)
+            .PlexLibraries.Where(x => x.Id == plexLibraryId)
             .Select(_ => new
             {
                 TvShowCount = _dbContext.PlexTvShows.Count(x => x.PlexLibraryId == plexLibraryId),
                 SeasonCount = _dbContext.PlexTvShowSeason.Count(x => x.PlexLibraryId == plexLibraryId),
                 EpisodeCount = _dbContext.PlexTvShowEpisodes.Count(x => x.PlexLibraryId == plexLibraryId),
-                MediaSize = _dbContext.PlexTvShowEpisodes.Where(x => x.PlexLibraryId == plexLibraryId).Sum(x => (long?)x.MediaSize) ?? 0,
+                MediaSize = _dbContext
+                    .PlexTvShowEpisodes.Where(x => x.PlexLibraryId == plexLibraryId)
+                    .Sum(x => (long?)x.MediaSize)
+                    ?? 0,
             })
             .FirstOrDefaultAsync(CancellationToken.None);
 
@@ -195,6 +185,243 @@ public class SyncPlexTvShowsCommandHandler : ICommandHandler<SyncPlexTvShowsComm
         return Result.Ok(bulkInsertRapport);
     }
 
+    private async Task<Result> ReconcileTvShows(
+        List<PlexTvShow> incomingShows,
+        int plexServerId,
+        int plexLibraryId,
+        BulkInsertTvShowsRapport report,
+        bool forceMediaRefresh,
+        CancellationToken cancellationToken
+    )
+    {
+        var currentShows = await _dbContext
+            .PlexTvShows.AsNoTracking()
+            .Include(x => x.Seasons)
+                .ThenInclude(x => x.Episodes)
+            .Where(x => x.PlexLibraryId == plexLibraryId)
+            .ToListAsync(cancellationToken);
+        _dbContext.PlexTvShows.Local.Clear();
+        _dbContext.PlexTvShowSeason.Local.Clear();
+        _dbContext.PlexTvShowEpisodes.Local.Clear();
+        var currentShowByKey = currentShows.ToDictionary(x => x.PlexApiRatingKey);
+        var currentSeasons = currentShows.SelectMany(x => x.Seasons).ToList();
+        var currentSeasonByKey = currentSeasons.ToDictionary(x => x.PlexApiRatingKey);
+        var currentEpisodes = currentSeasons.SelectMany(x => x.Episodes).ToList();
+        var currentEpisodeByKey = currentEpisodes.ToDictionary(x => x.PlexApiRatingKey);
+
+        incomingShows.SetRelationshipIds(plexServerId, plexLibraryId);
+        var incomingSeasons = incomingShows.SelectMany(x => x.Seasons).ToList();
+        var incomingEpisodes = incomingSeasons.SelectMany(x => x.Episodes).ToList();
+
+        var createdShows = new List<PlexTvShow>();
+        var updatedShows = new List<PlexTvShow>();
+        foreach (var show in incomingShows)
+        {
+            if (!currentShowByKey.TryGetValue(show.PlexApiRatingKey, out var current))
+                createdShows.Add(show);
+            else
+            {
+                show.Id = current.Id;
+                if (show.UpdatedAt != current.UpdatedAt)
+                    updatedShows.Add(show);
+            }
+        }
+
+        var createdSeasons = new List<PlexTvShowSeason>();
+        var updatedSeasons = new List<PlexTvShowSeason>();
+        foreach (var season in incomingSeasons)
+        {
+            if (!currentSeasonByKey.TryGetValue(season.PlexApiRatingKey, out var current))
+                createdSeasons.Add(season);
+            else
+            {
+                season.Id = current.Id;
+                if (season.UpdatedAt != current.UpdatedAt || season.ParentKey != current.ParentKey)
+                    updatedSeasons.Add(season);
+            }
+        }
+
+        var movedSeasonKeys = updatedSeasons
+            .Where(x => x.ParentKey != currentSeasonByKey[x.PlexApiRatingKey].ParentKey)
+            .Select(x => x.PlexApiRatingKey)
+            .ToHashSet();
+        var createdEpisodes = new List<PlexTvShowEpisode>();
+        var updatedEpisodes = new List<PlexTvShowEpisode>();
+        foreach (var episode in incomingEpisodes)
+        {
+            if (!currentEpisodeByKey.TryGetValue(episode.PlexApiRatingKey, out var current))
+                createdEpisodes.Add(episode);
+            else
+            {
+                episode.Id = current.Id;
+                if (
+                    episode.UpdatedAt != current.UpdatedAt
+                    || episode.ParentKey != current.ParentKey
+                    || movedSeasonKeys.Contains(episode.ParentKey)
+                )
+                    updatedEpisodes.Add(episode);
+            }
+        }
+
+        var incomingShowKeys = incomingShows.Select(x => x.PlexApiRatingKey).ToHashSet();
+        var incomingSeasonKeys = incomingSeasons.Select(x => x.PlexApiRatingKey).ToHashSet();
+        var incomingEpisodeKeys = incomingEpisodes.Select(x => x.PlexApiRatingKey).ToHashSet();
+        var deletedShows = currentShows.Where(x => !incomingShowKeys.Contains(x.PlexApiRatingKey)).ToList();
+        var deletedSeasons = currentSeasons.Where(x => !incomingSeasonKeys.Contains(x.PlexApiRatingKey)).ToList();
+        var deletedEpisodes = currentEpisodes.Where(x => !incomingEpisodeKeys.Contains(x.PlexApiRatingKey)).ToList();
+
+        foreach (var show in incomingShows)
+            show.Quality =
+                show.Seasons.SelectMany(x => x.Episodes)
+                    .SelectMany(x => x.MediaDataList)
+                    .Select(x => (VideoQuality?)x.Quality)
+                    .Max()
+                ?? VideoQuality.Unknown;
+
+        report.CreatedTvShows = createdShows.Count;
+        report.UpdatedTvShows = updatedShows.Count;
+        report.DeletedTvShows = deletedShows.Count;
+        report.UnchangedTvShows = incomingShows.Count - createdShows.Count - updatedShows.Count;
+        report.CreatedSeasons = createdSeasons.Count;
+        report.UpdatedSeasons = updatedSeasons.Count;
+        report.DeletedSeasons = deletedSeasons.Count;
+        report.UnchangedSeasons = incomingSeasons.Count - createdSeasons.Count - updatedSeasons.Count;
+        report.CreatedEpisodes = createdEpisodes.Count;
+        report.UpdatedEpisodes = updatedEpisodes.Count;
+        report.DeletedEpisodes = deletedEpisodes.Count;
+        report.UnchangedEpisodes = incomingEpisodes.Count - createdEpisodes.Count - updatedEpisodes.Count;
+
+        return await _dbContext.ExecuteSerializedTransactionAsync(
+            async (ctx, txCt) =>
+            {
+                if (forceMediaRefresh)
+                {
+                    await ctx.PlexTvShows.Where(x => x.PlexLibraryId == plexLibraryId).ExecuteDeleteAsync(txCt);
+                    createdShows = incomingShows;
+                    createdSeasons = incomingSeasons;
+                    createdEpisodes = incomingEpisodes;
+                    updatedShows = [];
+                    updatedSeasons = [];
+                    updatedEpisodes = [];
+                    deletedShows = currentShows;
+                    deletedSeasons = currentSeasons;
+                    deletedEpisodes = currentEpisodes;
+                }
+
+                var changedSeasonIds = createdSeasons.Concat(updatedSeasons).Select(x => x.Id).ToList();
+                if (changedSeasonIds.Count > 0)
+                    await ctx
+                        .PlexTvShowSeasonMediaQualities.Where(x => changedSeasonIds.Contains(x.PlexTvShowSeasonId))
+                        .ExecuteDeleteAsync(txCt);
+
+                var changedShowIds = createdShows.Concat(updatedShows).Select(x => x.Id).ToList();
+                if (changedShowIds.Count > 0)
+                    await ctx
+                        .PlexTvShowMediaQualities.Where(x => changedShowIds.Contains(x.PlexTvShowId))
+                        .ExecuteDeleteAsync(txCt);
+
+                var updatedEpisodeIds = updatedEpisodes.Select(x => x.Id).ToList();
+                if (updatedEpisodeIds.Count > 0)
+                    await ctx
+                        .PlexTvShowEpisodeData.Where(x => updatedEpisodeIds.Contains(x.PlexTvShowEpisodeId))
+                        .ExecuteDeleteAsync(txCt);
+
+                var deletedEpisodeIds = deletedEpisodes.Select(x => x.Id).ToList();
+                if (deletedEpisodeIds.Count > 0)
+                    await ctx.PlexTvShowEpisodes.Where(x => deletedEpisodeIds.Contains(x.Id)).ExecuteDeleteAsync(txCt);
+
+                var deletedSeasonIds = deletedSeasons.Select(x => x.Id).ToList();
+                var deletedShowIds = deletedShows.Select(x => x.Id).ToList();
+
+                if (updatedShows.Count > 0)
+                    await ctx.BulkUpdateAsync(updatedShows, BulkConfigPreset.Default, txCt);
+                if (createdShows.Count > 0)
+                    await ctx.BulkInsertAsync(createdShows, BulkConfigPreset.Default, txCt);
+
+                foreach (var show in incomingShows)
+                foreach (var season in show.Seasons)
+                    season.TvShowId = show.Id;
+
+                if (updatedSeasons.Count > 0)
+                    await ctx.BulkUpdateAsync(updatedSeasons, BulkConfigPreset.Default, txCt);
+                if (createdSeasons.Count > 0)
+                    await ctx.BulkInsertAsync(createdSeasons, BulkConfigPreset.Default, txCt);
+
+                foreach (var show in incomingShows)
+                foreach (var season in show.Seasons)
+                foreach (var episode in season.Episodes)
+                {
+                    episode.TvShowId = show.Id;
+                    episode.TvShowSeasonId = season.Id;
+                }
+
+                if (updatedEpisodes.Count > 0)
+                    await ctx.BulkUpdateAsync(updatedEpisodes, BulkConfigPreset.Default, txCt);
+                if (createdEpisodes.Count > 0)
+                    await ctx.BulkInsertAsync(createdEpisodes, BulkConfigPreset.Default, txCt);
+
+                var changedMediaData = createdEpisodes
+                    .Concat(updatedEpisodes)
+                    .SelectMany(episode =>
+                    {
+                        episode.MediaDataList.SetRelationshipIds(
+                            episode.PlexServerId,
+                            episode.PlexLibraryId,
+                            episode.Id
+                        );
+                        return episode.MediaDataList;
+                    })
+                    .ToList();
+                if (changedMediaData.Count > 0)
+                    await ctx.BulkInsertAsync(changedMediaData, BulkConfigPreset.Default, txCt);
+
+                // Re-parent surviving children before deleting obsolete parents with cascading foreign keys.
+                if (deletedSeasonIds.Count > 0)
+                    await ctx.PlexTvShowSeason.Where(x => deletedSeasonIds.Contains(x.Id)).ExecuteDeleteAsync(txCt);
+                if (deletedShowIds.Count > 0)
+                    await ctx.PlexTvShows.Where(x => deletedShowIds.Contains(x.Id)).ExecuteDeleteAsync(txCt);
+
+                var seasonQualities = createdSeasons
+                    .Concat(updatedSeasons)
+                    .SelectMany(season =>
+                        season
+                            .Episodes.SelectMany(episode => episode.MediaDataList)
+                            .Select(mediaData => new PlexTvShowSeasonMediaQuality
+                            {
+                                Id = 0,
+                                Quality = mediaData.Quality,
+                                PlexLibraryId = plexLibraryId,
+                                PlexTvShowSeasonId = season.Id,
+                                PlexTvShowSeason = season,
+                            })
+                    )
+                    .DistinctBy(x => (x.Quality, x.PlexTvShowSeasonId))
+                    .ToList();
+                if (seasonQualities.Count > 0)
+                    await ctx.BulkInsertAsync(seasonQualities, BulkConfigPreset.Default, txCt);
+
+                var tvShowQualities = createdShows
+                    .Concat(updatedShows)
+                    .SelectMany(show =>
+                        show.Seasons.SelectMany(season => season.Episodes)
+                            .SelectMany(episode => episode.MediaDataList)
+                            .Select(mediaData => new PlexTvShowMediaQuality
+                            {
+                                Id = 0,
+                                Quality = mediaData.Quality,
+                                PlexLibraryId = plexLibraryId,
+                                PlexTvShowId = show.Id,
+                            })
+                    )
+                    .DistinctBy(x => (x.Quality, x.PlexTvShowId))
+                    .ToList();
+                if (tvShowQualities.Count > 0)
+                    await ctx.BulkInsertAsync(tvShowQualities, BulkConfigPreset.Default, txCt);
+            },
+            cancellationToken
+        );
+    }
+
     private async Task<Result> SyncTvShowGenres(
         List<PlexTvShow> plexTvShows,
         Dictionary<string, PlexGenre> genreDict,
@@ -226,13 +453,17 @@ public class SyncPlexTvShowsCommandHandler : ICommandHandler<SyncPlexTvShowsComm
         }
 
         var distinctGenres = plexTvShowGenres.DistinctBy(x => new { x.PlexTvShowId, x.GenresId }).ToList();
-        var insertResult = await dbContext.ExecuteSerializedTransactionAsync(async (ctx, txCt) =>
-        {
-            await ctx.PlexTvShowGenres.Where(x => x.PlexLibraryId == plexLibraryId).ExecuteDeleteAsync(txCt);
-            await ctx.BulkInsertAsync(distinctGenres, CreateBulkConfig(), txCt);
-            await ctx.PlexLibraries.Where(x => x.Id == plexLibraryId)
-                .ExecuteUpdateAsync(p => p.SetProperty(x => x.GenresCount, distinctGenres.Count), txCt);
-        }, cancellationToken);
+        var insertResult = await dbContext.ExecuteSerializedTransactionAsync(
+            async (ctx, txCt) =>
+            {
+                await ctx.PlexTvShowGenres.Where(x => x.PlexLibraryId == plexLibraryId).ExecuteDeleteAsync(txCt);
+                await ctx.BulkInsertAsync(distinctGenres, CreateBulkConfig(), txCt);
+                await ctx
+                    .PlexLibraries.Where(x => x.Id == plexLibraryId)
+                    .ExecuteUpdateAsync(p => p.SetProperty(x => x.GenresCount, distinctGenres.Count), txCt);
+            },
+            cancellationToken
+        );
 
         stopWatch.StopAndLog(
             $"Synced {plexTvShowGenres.Count} {nameof(PlexTvShowGenres)} for library: {libraryName} with id: {plexLibraryId}"
@@ -273,14 +504,17 @@ public class SyncPlexTvShowsCommandHandler : ICommandHandler<SyncPlexTvShowsComm
 
         var distinctCountries = plexTvShowCountries.DistinctBy(x => new { x.PlexTvShowId, x.CountryId }).ToList();
 
-        var insertResult = await dbContext.ExecuteSerializedTransactionAsync(async (ctx, txCt) =>
-        {
-            await ctx.PlexTvShowCountries.Where(x => x.PlexLibraryId == plexLibraryId).ExecuteDeleteAsync(txCt);
-            await ctx.BulkInsertAsync(distinctCountries, CreateBulkConfig(), txCt);
-            await ctx
-                .PlexLibraries.Where(x => x.Id == plexLibraryId)
-                .ExecuteUpdateAsync(p => p.SetProperty(x => x.CountriesCount, distinctCountries.Count), txCt);
-        }, cancellationToken);
+        var insertResult = await dbContext.ExecuteSerializedTransactionAsync(
+            async (ctx, txCt) =>
+            {
+                await ctx.PlexTvShowCountries.Where(x => x.PlexLibraryId == plexLibraryId).ExecuteDeleteAsync(txCt);
+                await ctx.BulkInsertAsync(distinctCountries, CreateBulkConfig(), txCt);
+                await ctx
+                    .PlexLibraries.Where(x => x.Id == plexLibraryId)
+                    .ExecuteUpdateAsync(p => p.SetProperty(x => x.CountriesCount, distinctCountries.Count), txCt);
+            },
+            cancellationToken
+        );
 
         stopWatch.StopAndLog(
             $"Synced {plexTvShowCountries.Count} {nameof(PlexTvShowCountries)} for library: {libraryName} with id: {plexLibraryId}"
@@ -320,39 +554,22 @@ public class SyncPlexTvShowsCommandHandler : ICommandHandler<SyncPlexTvShowsComm
         }
 
         var distinctActors = plexTvShowRoles.DistinctBy(x => new { x.PlexTvShowId, RolesId = x.PlexActorId }).ToList();
-        var insertResult = await dbContext.ExecuteSerializedTransactionAsync(async (ctx, txCt) =>
-        {
-            await ctx.PlexTvShowActors.Where(x => x.PlexLibraryId == plexLibraryId).ExecuteDeleteAsync(txCt);
-            await ctx.BulkInsertAsync(distinctActors, CreateBulkConfig(), txCt);
-            await ctx
-                .PlexLibraries.Where(x => x.Id == plexLibraryId)
-                .ExecuteUpdateAsync(p => p.SetProperty(x => x.ActorsCount, distinctActors.Count), txCt);
-        }, cancellationToken);
+        var insertResult = await dbContext.ExecuteSerializedTransactionAsync(
+            async (ctx, txCt) =>
+            {
+                await ctx.PlexTvShowActors.Where(x => x.PlexLibraryId == plexLibraryId).ExecuteDeleteAsync(txCt);
+                await ctx.BulkInsertAsync(distinctActors, CreateBulkConfig(), txCt);
+                await ctx
+                    .PlexLibraries.Where(x => x.Id == plexLibraryId)
+                    .ExecuteUpdateAsync(p => p.SetProperty(x => x.ActorsCount, distinctActors.Count), txCt);
+            },
+            cancellationToken
+        );
 
         stopWatch.StopAndLog(
             $"Synced {plexTvShowRoles.Count} {nameof(PlexTvShowActors)} for library: {libraryName} with id: {plexLibraryId}"
         );
 
         return insertResult;
-    }
-
-    private async Task<BulkInsertTvShowsRapport> RemoveMedia(int plexLibraryId, CancellationToken cancellationToken)
-    {
-        await _dbContext
-            .PlexTvShowEpisodeData.Where(e => e.PlexLibraryId == plexLibraryId)
-            .ExecuteDeleteAsync(cancellationToken);
-
-        return new BulkInsertTvShowsRapport
-        {
-            DeletedEpisodes = await _dbContext
-                .PlexTvShowEpisodes.Where(e => e.PlexLibraryId == plexLibraryId)
-                .ExecuteDeleteAsync(cancellationToken),
-            DeletedSeasons = await _dbContext
-                .PlexTvShowSeason.Where(s => s.PlexLibraryId == plexLibraryId)
-                .ExecuteDeleteAsync(cancellationToken),
-            DeletedTvShows = await _dbContext
-                .PlexTvShows.Where(tv => tv.PlexLibraryId == plexLibraryId)
-                .ExecuteDeleteAsync(cancellationToken),
-        };
     }
 }

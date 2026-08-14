@@ -15,7 +15,7 @@ public sealed record JobTimeTickerRequestProperties
     /// Used when querying <see cref="JobTypes.LibrarySyncJob"/>
     /// </summary>
     public int PlexLibraryId { get; init; }
-    
+
     /// <summary>
     /// Used when querying <see cref="JobTypes.LibraryComparisonJob"/>
     /// </summary>

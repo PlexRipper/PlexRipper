@@ -150,13 +150,11 @@ public sealed class TorrentsInfoEndpoint : Endpoint<TorrentsInfoEndpointRequest,
         await Task.WhenAll(episodeFilesTask, movieFilesTask);
 
         var episodeInfos = episodeFilesTask
-            .Result
-            .Where(x => MatchesFilters(x, hashesFilter, categoryFilter))
+            .Result.Where(x => MatchesFilters(x, hashesFilter, categoryFilter))
             .Select(MapToTorrentInfo)
             .ToList();
         var movieInfos = movieFilesTask
-            .Result
-            .Where(x => MatchesFilters(x, hashesFilter, categoryFilter))
+            .Result.Where(x => MatchesFilters(x, hashesFilter, categoryFilter))
             .Select(MapToTorrentInfo)
             .ToList();
 
@@ -183,7 +181,7 @@ public sealed class TorrentsInfoEndpoint : Endpoint<TorrentsInfoEndpointRequest,
         // Setting ratio_limit=0 with ratio=0 satisfies the (ratio_limit - ratio <= 0.001) check.
         var isReadyForRemoval =
             file.DownloadStatus
-                is DownloadStatus.Completed
+            is DownloadStatus.Completed
                 or DownloadStatus.MoveFinished
                 or DownloadStatus.DownloadFinished;
 

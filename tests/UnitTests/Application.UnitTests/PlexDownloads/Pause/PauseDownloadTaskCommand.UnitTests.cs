@@ -286,7 +286,10 @@ public class PauseDownloadTaskCommandUnitTests : BaseUnitTest<PauseDownloadTaskC
         Mock.Mock<IDownloadTaskScheduler>()
             .Verify(x => x.StopDownloadTaskJob(It.IsAny<DownloadTaskKey>(), It.IsAny<CancellationToken>()), Times.Once);
         Mock.Mock<IMoveDownloadFileScheduler>()
-            .Verify(x => x.StopMoveDownloadFileJob(It.IsAny<DownloadTaskKey>(), It.IsAny<CancellationToken>()), Times.Once);
+            .Verify(
+                x => x.StopMoveDownloadFileJob(It.IsAny<DownloadTaskKey>(), It.IsAny<CancellationToken>()),
+                Times.Once
+            );
         Mock.Mock<IDownloadTaskUpdateDispatcher>()
             .Verify(
                 x =>
@@ -387,7 +390,10 @@ public class PauseDownloadTaskCommandUnitTests : BaseUnitTest<PauseDownloadTaskC
         after.DataReceived.ShouldBe(500_000_000L); // download bytes must not reset
 
         Mock.Mock<IMoveDownloadFileScheduler>()
-            .Verify(x => x.StopMoveDownloadFileJob(It.IsAny<DownloadTaskKey>(), It.IsAny<CancellationToken>()), Times.Never);
+            .Verify(
+                x => x.StopMoveDownloadFileJob(It.IsAny<DownloadTaskKey>(), It.IsAny<CancellationToken>()),
+                Times.Never
+            );
     }
 
     [Test]
@@ -445,7 +451,10 @@ public class PauseDownloadTaskCommandUnitTests : BaseUnitTest<PauseDownloadTaskC
         after.DataReceived.ShouldBe(400_000_000L); // download bytes must not reset
 
         Mock.Mock<IMoveDownloadFileScheduler>()
-            .Verify(x => x.StopMoveDownloadFileJob(It.IsAny<DownloadTaskKey>(), It.IsAny<CancellationToken>()), Times.Never);
+            .Verify(
+                x => x.StopMoveDownloadFileJob(It.IsAny<DownloadTaskKey>(), It.IsAny<CancellationToken>()),
+                Times.Never
+            );
     }
 
     [Test]
@@ -549,20 +558,28 @@ public class PauseDownloadTaskCommandUnitTests : BaseUnitTest<PauseDownloadTaskC
 
         Mock.Mock<IDownloadTaskUpdateDispatcher>()
             .Setup(x =>
-                x.OnStatusChangedAsync(It.IsAny<DownloadTaskKey>(), It.IsAny<DownloadStatus>(), It.IsAny<CancellationToken>())
+                x.OnStatusChangedAsync(
+                    It.IsAny<DownloadTaskKey>(),
+                    It.IsAny<DownloadStatus>(),
+                    It.IsAny<CancellationToken>()
+                )
             )
             .Returns(Task.CompletedTask);
 
-        var result = await Sut.ExecuteAsync(new PauseDownloadTaskCommand(parentTask.Id, AutoPause: true), CancellationToken);
+        var result = await Sut.ExecuteAsync(
+            new PauseDownloadTaskCommand(parentTask.Id, AutoPause: true),
+            CancellationToken
+        );
 
         result.IsSuccess.ShouldBeTrue();
         Mock.Mock<IDownloadTaskUpdateDispatcher>()
             .Verify(
-                x => x.OnStatusChangedAsync(
-                    It.Is<DownloadTaskKey>(k => k.Id == childTask.Id),
-                    DownloadStatus.AutoPaused,
-                    It.IsAny<CancellationToken>()
-                ),
+                x =>
+                    x.OnStatusChangedAsync(
+                        It.Is<DownloadTaskKey>(k => k.Id == childTask.Id),
+                        DownloadStatus.AutoPaused,
+                        It.IsAny<CancellationToken>()
+                    ),
                 Times.Once
             );
     }
@@ -573,8 +590,14 @@ public class PauseDownloadTaskCommandUnitTests : BaseUnitTest<PauseDownloadTaskC
         // Arrange
         await SetupDatabase(67004, config => config.MovieDownloadTasksCount = 1);
 
-        var parentTask = await IDbContext.DownloadTaskMovie.OrderBy(x => x.Id).AsTracking().FirstAsync(CancellationToken);
-        var childTask = await IDbContext.DownloadTaskMovieFile.OrderBy(x => x.Id).AsTracking().FirstAsync(CancellationToken);
+        var parentTask = await IDbContext
+            .DownloadTaskMovie.OrderBy(x => x.Id)
+            .AsTracking()
+            .FirstAsync(CancellationToken);
+        var childTask = await IDbContext
+            .DownloadTaskMovieFile.OrderBy(x => x.Id)
+            .AsTracking()
+            .FirstAsync(CancellationToken);
         var childKey = childTask.ToKey();
 
         childTask.DownloadStatus = DownloadStatus.Downloading;
@@ -582,10 +605,7 @@ public class PauseDownloadTaskCommandUnitTests : BaseUnitTest<PauseDownloadTaskC
 
         Mock.Mock<IDownloadTaskScheduler>()
             .Setup(x =>
-                x.IsDownloading(
-                    It.Is<DownloadTaskKey>(key => key.Id == childKey.Id),
-                    It.IsAny<CancellationToken>()
-                )
+                x.IsDownloading(It.Is<DownloadTaskKey>(key => key.Id == childKey.Id), It.IsAny<CancellationToken>())
             )
             .ReturnsAsync(true);
         Mock.Mock<IDownloadTaskScheduler>()
@@ -609,25 +629,30 @@ public class PauseDownloadTaskCommandUnitTests : BaseUnitTest<PauseDownloadTaskC
             .Verifiable(Times.Once);
 
         // Act
-        var result = await Sut.ExecuteAsync(new PauseDownloadTaskCommand(parentTask.Id, AutoPause: true), CancellationToken);
+        var result = await Sut.ExecuteAsync(
+            new PauseDownloadTaskCommand(parentTask.Id, AutoPause: true),
+            CancellationToken
+        );
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
         Mock.Mock<IDownloadTaskScheduler>()
             .Verify(
-                x => x.StopDownloadTaskJob(
-                    It.Is<DownloadTaskKey>(key => key.Id == childKey.Id),
-                    It.IsAny<CancellationToken>()
-                ),
+                x =>
+                    x.StopDownloadTaskJob(
+                        It.Is<DownloadTaskKey>(key => key.Id == childKey.Id),
+                        It.IsAny<CancellationToken>()
+                    ),
                 Times.Once
             );
         Mock.Mock<IDownloadTaskUpdateDispatcher>()
             .Verify(
-                x => x.OnStatusChangedAsync(
-                    It.Is<DownloadTaskKey>(key => key.Id == childKey.Id),
-                    DownloadStatus.AutoPaused,
-                    It.IsAny<CancellationToken>()
-                ),
+                x =>
+                    x.OnStatusChangedAsync(
+                        It.Is<DownloadTaskKey>(key => key.Id == childKey.Id),
+                        DownloadStatus.AutoPaused,
+                        It.IsAny<CancellationToken>()
+                    ),
                 Times.Once
             );
     }
@@ -649,7 +674,6 @@ public class PauseDownloadTaskCommandUnitTests : BaseUnitTest<PauseDownloadTaskC
                 CancellationToken
             );
 
-
         Mock.Mock<IMoveDownloadFileScheduler>()
             .Setup(x => x.IsDownloadFileMoving(It.IsAny<DownloadTaskKey>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(false);
@@ -660,11 +684,18 @@ public class PauseDownloadTaskCommandUnitTests : BaseUnitTest<PauseDownloadTaskC
 
         Mock.Mock<IDownloadTaskUpdateDispatcher>()
             .Setup(x =>
-                x.OnStatusChangedAsync(It.IsAny<DownloadTaskKey>(), It.IsAny<DownloadStatus>(), It.IsAny<CancellationToken>())
+                x.OnStatusChangedAsync(
+                    It.IsAny<DownloadTaskKey>(),
+                    It.IsAny<DownloadStatus>(),
+                    It.IsAny<CancellationToken>()
+                )
             )
             .Returns(Task.CompletedTask);
 
-        var result = await Sut.ExecuteAsync(new PauseDownloadTaskCommand(parentTask.Id, AutoPause: true), CancellationToken);
+        var result = await Sut.ExecuteAsync(
+            new PauseDownloadTaskCommand(parentTask.Id, AutoPause: true),
+            CancellationToken
+        );
 
         result.IsSuccess.ShouldBeTrue();
 
@@ -706,7 +737,10 @@ public class PauseDownloadTaskCommandUnitTests : BaseUnitTest<PauseDownloadTaskC
             .Verifiable(Times.Once);
 
         // Act
-        var result = await Sut.ExecuteAsync(new PauseDownloadTaskCommand(parentTask.Id, AutoPause: true), CancellationToken);
+        var result = await Sut.ExecuteAsync(
+            new PauseDownloadTaskCommand(parentTask.Id, AutoPause: true),
+            CancellationToken
+        );
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -740,22 +774,29 @@ public class PauseDownloadTaskCommandUnitTests : BaseUnitTest<PauseDownloadTaskC
 
         Mock.Mock<IDownloadTaskUpdateDispatcher>()
             .Setup(x =>
-                x.OnStatusChangedAsync(It.IsAny<DownloadTaskKey>(), It.IsAny<DownloadStatus>(), It.IsAny<CancellationToken>())
+                x.OnStatusChangedAsync(
+                    It.IsAny<DownloadTaskKey>(),
+                    It.IsAny<DownloadStatus>(),
+                    It.IsAny<CancellationToken>()
+                )
             )
             .Returns(Task.CompletedTask);
 
-        var result = await Sut.ExecuteAsync(new PauseDownloadTaskCommand(parentTask.Id, AutoPause: true), CancellationToken);
+        var result = await Sut.ExecuteAsync(
+            new PauseDownloadTaskCommand(parentTask.Id, AutoPause: true),
+            CancellationToken
+        );
 
         result.IsSuccess.ShouldBeTrue();
         Mock.Mock<IDownloadTaskUpdateDispatcher>()
             .Verify(
-                x => x.OnStatusChangedAsync(
-                    It.Is<DownloadTaskKey>(k => k.Id == childTask.Id),
-                    DownloadStatus.AutoPaused,
-                    It.IsAny<CancellationToken>()
-                ),
+                x =>
+                    x.OnStatusChangedAsync(
+                        It.Is<DownloadTaskKey>(k => k.Id == childTask.Id),
+                        DownloadStatus.AutoPaused,
+                        It.IsAny<CancellationToken>()
+                    ),
                 Times.Once
             );
     }
 }
-

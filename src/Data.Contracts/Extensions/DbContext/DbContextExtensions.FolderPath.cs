@@ -4,21 +4,18 @@ namespace Reaparr.Data.Contracts;
 
 public static partial class DbContextExtensions
 {
-    public static async Task<FolderPath> GetDownloadFolder(
-        this IReaparrDbContext dbContext
-    )
+    public static async Task<FolderPath> GetDownloadFolder(this IReaparrDbContext dbContext)
     {
         // This is the default download folder, which always exists in the database
-        return (await dbContext.FolderPaths.FirstOrDefaultAsync(
-            x => x.FolderType == FolderType.DownloadFolder,
-            CancellationToken.None
-        ))!;
+        return (
+            await dbContext.FolderPaths.FirstOrDefaultAsync(
+                x => x.FolderType == FolderType.DownloadFolder,
+                CancellationToken.None
+            )
+        )!;
     }
 
-    public static async Task<FolderPath?> GetDestinationFolder(
-        this IReaparrDbContext dbContext,
-        int plexLibraryId
-    )
+    public static async Task<FolderPath?> GetDestinationFolder(this IReaparrDbContext dbContext, int plexLibraryId)
     {
         var plexLibrary = await dbContext
             .PlexLibraries.Include(x => x.DefaultDestination)

@@ -1,6 +1,7 @@
 namespace Reaparr.Application.UnitTests;
 
-public class CheckForUpdateEndpointUnitTests : BaseEndpointWithoutRequestUnitTest<CheckForUpdateEndpoint, ResultDTO<AppUpdateCheckDTO>>
+public class CheckForUpdateEndpointUnitTests
+    : BaseEndpointWithoutRequestUnitTest<CheckForUpdateEndpoint, ResultDTO<AppUpdateCheckDTO>>
 {
     private const string STABLE_VERSION = "0.38.0";
     private const string DEV_VERSION = "0.38.0-dev.6";

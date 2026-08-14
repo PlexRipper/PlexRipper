@@ -100,6 +100,8 @@
             }
         },
         "media-overview": {
+            "library-inaccessible-title": "Bibliothèque inaccessible.",
+            "library-inaccessible": "Aucun compte Plex activé n'a désormais accès à cette bibliothèque.",
             "is-refreshing": "Rafraîchir la bibliothèque \"{library}\" de donnée depuis le {server}",
             "could-not-display": "Impossible de trouver une bibliothèque disponible.",
             "no-data": "La bibliothèque a été synchronisée mais ne contient aucun média.",
@@ -460,6 +462,20 @@
                 }
             },
             "title": "Intégration Radarr"
+        },
+        "refresh-mode-dialog": {
+            "incremental": "Actualisation incrémentielle",
+            "full-reset": "Réinitialisation complète",
+            "library": {
+                "title": "Actualiser la bibliothèque Plex {libraryName} ",
+                "text": "Choisissez comment Reaparr doit actualiser cette bibliothèque. Une actualisation incrémentielle ne met à jour que les médias modifiés et est généralement plus rapide.",
+                "full-reset-warning": "Une réinitialisation complète supprime de Reaparr toutes les entrées multimédias de cette bibliothèque, puis les reconstruit à partir de Plex. Les fichiers téléchargés ne sont pas supprimés."
+            },
+            "server": {
+                "title": "Actualiser toutes les bibliothèques Plex dans {serverName}",
+                "text": "Choisissez comment Reaparr doit actualiser toutes les bibliothèques de ce serveur. Une actualisation incrémentielle ne met à jour que les médias modifiés et est généralement plus rapide.",
+                "full-reset-warning": "Une réinitialisation complète supprime de Reaparr toutes les entrées multimédias de toutes les bibliothèques de ce serveur, puis les reconstruit à partir de Plex. Les fichiers téléchargés ne sont pas supprimés."
+            }
         }
     },
     "general": {

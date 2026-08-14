@@ -19,11 +19,7 @@ internal class DesktopPublishWorkflowUnitTests : BaseUnitTest<DesktopPublishBuil
         // DesktopPublishBuildCommandHandler resolves BuildPaths from DI. BuildPaths requires a
         // rootDirectory string constructor parameter, so tests must register it explicitly.
         // /repo matches the mocked filesystem layout used by this test suite.
-        SetupDependencies(builder =>
-            builder.Register(_ => "/repo")
-                .As<string>()
-                .SingleInstance()
-        );
+        SetupDependencies(builder => builder.Register(_ => "/repo").As<string>().SingleInstance());
 
         Mock.Mock<IDesktopCommandRunner>()
             .Setup(x => x.RequireCommandAsync(It.IsAny<string>()))
@@ -62,15 +58,9 @@ internal class DesktopPublishWorkflowUnitTests : BaseUnitTest<DesktopPublishBuil
             SkipRestore = true,
         };
 
-        SetupDependencies(builder =>
-            builder.Register(_ => "/repo")
-                .As<string>()
-                .SingleInstance()
-        );
+        SetupDependencies(builder => builder.Register(_ => "/repo").As<string>().SingleInstance());
 
-        Mock.Mock<IDesktopCommandRunner>()
-            .Setup(x => x.RequireCommandAsync("dotnet"))
-            .Returns(Task.CompletedTask);
+        Mock.Mock<IDesktopCommandRunner>().Setup(x => x.RequireCommandAsync("dotnet")).Returns(Task.CompletedTask);
 
         Mock.Mock<IDesktopCommandRunner>()
             .Setup(x => x.RunCommandAsync("dotnet", It.IsAny<IReadOnlyList<string>>(), It.IsAny<string?>()))
@@ -94,7 +84,10 @@ internal class DesktopPublishWorkflowUnitTests : BaseUnitTest<DesktopPublishBuil
         result.Value.ShouldBe(0);
         Mock.Mock<IDesktopCommandRunner>().Verify(x => x.RequireCommandAsync("dotnet"), Times.Once());
         Mock.Mock<IDesktopCommandRunner>()
-            .Verify(x => x.RunCommandAsync("dotnet", It.IsAny<IReadOnlyList<string>>(), It.IsAny<string?>()), Times.Once());
+            .Verify(
+                x => x.RunCommandAsync("dotnet", It.IsAny<IReadOnlyList<string>>(), It.IsAny<string?>()),
+                Times.Once()
+            );
         Mock.Mock<IDesktopCommandRunner>().Verify();
     }
 }

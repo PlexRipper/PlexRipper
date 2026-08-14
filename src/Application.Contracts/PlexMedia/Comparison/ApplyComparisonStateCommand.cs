@@ -8,8 +8,5 @@ namespace Reaparr.Application.Contracts;
 /// <param name="Items">The overview page items. Modified in-place.</param>
 /// <param name="PlexLibraryId">The Plex library being browsed. 0 = all-library, skipped.</param>
 /// <param name="MediaType">Movie or TvShow.</param>
-public record ApplyComparisonStateCommand(
-    List<PlexMediaSlimDTO> Items,
-    int PlexLibraryId,
-    PlexMediaType MediaType
-) : ICommand<Result>;
+public record ApplyComparisonStateCommand(List<PlexMediaSlimDTO> Items, int PlexLibraryId, PlexMediaType MediaType)
+    : ICommand<Result>;

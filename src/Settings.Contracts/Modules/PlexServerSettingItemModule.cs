@@ -26,7 +26,6 @@ public record PlexServerSettingItemModule : BaseSettingsModule<PlexServerSetting
         set => SetProperty(ref field, value);
     }
 
-
     public required bool AllowStreamDownloader
     {
         get;

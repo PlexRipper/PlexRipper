@@ -1,6 +1,7 @@
 namespace Reaparr.PublicAPI.UnitTests;
 
-public class GetTorrentFilesEndpointUnitTests : BaseEndpointUnitTest<GetTorrentFilesEndpoint, GetTorrentFilesRequest, List<QBittorrentTorrentFile>>
+public class GetTorrentFilesEndpointUnitTests
+    : BaseEndpointUnitTest<GetTorrentFilesEndpoint, GetTorrentFilesRequest, List<QBittorrentTorrentFile>>
 {
     [Test]
     public async Task ShouldReturnEmptyList_WhenHashMatchesNoFiles()

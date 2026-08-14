@@ -39,7 +39,6 @@ public interface IBackgroundJobScheduler : ISetupAsync, IStopAsync
     /// <param name="executionTime">The UTC time at which the job should become eligible to run, or <see langword="null"/> to use the current UTC time.</param>
     /// <param name="cancellationToken">A token that cancels creation of the ticker; it does not interrupt the job after it has started.</param>
     /// <returns>A successful result when the ticker was created; otherwise, a failed result.</returns>
-
     // ReSharper disable once UnusedMember.Global -- Part of the scheduler abstraction for delayed jobs.
     Task<Result<JobTimeTicker>> ScheduleJob<TFunction, TRequest>(
         JobKey jobKey,
@@ -75,10 +74,7 @@ public interface IBackgroundJobScheduler : ISetupAsync, IStopAsync
     /// <param name="jobKeys">The exact logical job names and types to invalidate.</param>
     /// <param name="cancellationToken">A token that cancels database lookup and queued-ticker deletion.</param>
     /// <returns>A successful result when all queued deletions were accepted.</returns>
-    Task<Result> DeleteBatchJobs(
-        IReadOnlyCollection<JobKey> jobKeys,
-        CancellationToken cancellationToken = default
-    );
+    Task<Result> DeleteBatchJobs(IReadOnlyCollection<JobKey> jobKeys, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Determines whether a one-time ticker or cron occurrence with the supplied logical key currently has an active

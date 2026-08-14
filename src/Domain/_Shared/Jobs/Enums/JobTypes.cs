@@ -1,7 +1,7 @@
 namespace Reaparr.Domain;
 
 /// <summary>
-/// The various background job types that Reaparr can run. 
+/// The various background job types that Reaparr can run.
 /// </summary>
 [JsonConverter(typeof(JsonStringEnumConverter))]
 public enum JobTypes
@@ -41,6 +41,8 @@ public enum JobTypes
     [JsonStringEnumMemberName(nameof(LibraryComparisonJob))]
     LibraryComparisonJob = 9,
 
-    // Ensure to add new job types to ToJobStatusUpdate in JobExecutionContextExtensions
+    [JsonStringEnumMemberName(nameof(RefreshPlexAccountAccessJob))]
+    RefreshPlexAccountAccessJob = 10,
+
     // Ensure to also add in EnumMapperExtensions.JobType.cs
 }

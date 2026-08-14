@@ -13,7 +13,8 @@ public abstract class BaseCommandUnitTest<TCommand> : BaseUnitTest
         var validatorTypeShortName = commandType.Name.Replace("Command", "CommandValidator");
         var validatorType =
             commandType.Assembly.GetTypes().FirstOrDefault(t => t.FullName == validatorTypeName)
-            ?? AppDomain.CurrentDomain.GetAssemblies()
+            ?? AppDomain
+                .CurrentDomain.GetAssemblies()
                 .SelectMany(x => x.GetTypes())
                 .SingleOrDefault(t => t.Name == validatorTypeShortName)
             ?? throw new InvalidOperationException(
@@ -40,7 +41,8 @@ public abstract class BaseCommandUnitTest<TCommand> : BaseUnitTest
         var handlerTypeShortName = commandType.Name.Replace("Command", "CommandHandler");
         var handlerType =
             typeof(TCommand).Assembly.GetType(handlerTypeName)
-            ?? AppDomain.CurrentDomain.GetAssemblies()
+            ?? AppDomain
+                .CurrentDomain.GetAssemblies()
                 .SelectMany(x => x.GetTypes())
                 .SingleOrDefault(t => t.Name == handlerTypeShortName)
             ?? throw new InvalidOperationException(
@@ -75,7 +77,8 @@ public abstract class BaseCommandUnitTest<TCommand> : BaseUnitTest
         var handlerTypeShortName = commandType.Name.Replace("Command", "CommandHandler");
         var handlerType =
             typeof(TCommand).Assembly.GetType(handlerTypeName)
-            ?? AppDomain.CurrentDomain.GetAssemblies()
+            ?? AppDomain
+                .CurrentDomain.GetAssemblies()
                 .SelectMany(x => x.GetTypes())
                 .SingleOrDefault(t => t.Name == handlerTypeShortName)
             ?? throw new InvalidOperationException(

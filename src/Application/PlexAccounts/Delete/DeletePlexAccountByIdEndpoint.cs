@@ -58,12 +58,12 @@ public class DeletePlexAccountByIdEndpoint : Endpoint<DeletePlexAccountByIdReque
             return;
         }
 
-        var affectedLibraryIds = await _dbContext.PlexAccountLibraries
-            .Where(x => x.PlexAccountId == req.PlexAccountId)
+        var affectedLibraryIds = await _dbContext
+            .PlexAccountLibraries.Where(x => x.PlexAccountId == req.PlexAccountId)
             .Select(x => x.PlexLibraryId)
             .ToListAsync(ct);
-        var affectedServerIds = await _dbContext.PlexAccountServers
-            .Where(x => x.PlexAccountId == req.PlexAccountId)
+        var affectedServerIds = await _dbContext
+            .PlexAccountServers.Where(x => x.PlexAccountId == req.PlexAccountId)
             .Select(x => x.PlexServerId)
             .ToListAsync(ct);
 
@@ -85,8 +85,8 @@ public class DeletePlexAccountByIdEndpoint : Endpoint<DeletePlexAccountByIdReque
 
         if (affectedServerIds.Count > 0)
         {
-            var serverLibraryIds = await _dbContext.PlexLibraries
-                .IgnoreQueryFilters()
+            var serverLibraryIds = await _dbContext
+                .PlexLibraries.IgnoreQueryFilters()
                 .Where(x => affectedServerIds.Contains(x.PlexServerId))
                 .Select(x => x.Id)
                 .ToListAsync(ct);
@@ -104,14 +104,12 @@ public class DeletePlexAccountByIdEndpoint : Endpoint<DeletePlexAccountByIdReque
                 deletedLibrariesCount
             );
 
-        await _notificationHubService.SendRefreshNotificationAsync(
-            [
-                RefreshDataType.PlexAccount,
-                RefreshDataType.PlexServer,
-                RefreshDataType.PlexServerConnection,
-                RefreshDataType.PlexLibrary,
-            ]
-        );
+        await _notificationHubService.SendRefreshNotificationAsync([
+            RefreshDataType.PlexAccount,
+            RefreshDataType.PlexServer,
+            RefreshDataType.PlexServerConnection,
+            RefreshDataType.PlexLibrary,
+        ]);
 
         await Send.FluentResult(Result.Ok(), ct);
     }

@@ -6,12 +6,15 @@ public class CompareMoviePlexLibraryCommandValidationUnitTests : BaseCommandUnit
     public async Task ShouldReturnFailure_WhenRemoteLibraryDoesNotExist()
     {
         // Arrange
-        await SetupDatabase(76, config =>
-        {
-            config.PlexServerCount = 1;
-            config.PlexMovieLibraryCount = 1;
-            config.PlexAccountCount = 1;
-        });
+        await SetupDatabase(
+            76,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexMovieLibraryCount = 1;
+                config.PlexAccountCount = 1;
+            }
+        );
 
         var ownedLibrary = await IDbContext.PlexLibraries.SingleAsync(CancellationToken);
         await SetOwnedOverrideAsync(ownedLibrary.PlexServerId, true);
@@ -31,12 +34,15 @@ public class CompareMoviePlexLibraryCommandValidationUnitTests : BaseCommandUnit
     public async Task ShouldReturnFailure_WhenOwnedLibraryDoesNotExist()
     {
         // Arrange
-        await SetupDatabase(77, config =>
-        {
-            config.PlexServerCount = 1;
-            config.PlexMovieLibraryCount = 1;
-            config.PlexAccountCount = 1;
-        });
+        await SetupDatabase(
+            77,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexMovieLibraryCount = 1;
+                config.PlexAccountCount = 1;
+            }
+        );
 
         var remoteLibrary = await IDbContext.PlexLibraries.SingleAsync(CancellationToken);
         await SetOwnedOverrideAsync(remoteLibrary.PlexServerId, false);
@@ -56,12 +62,15 @@ public class CompareMoviePlexLibraryCommandValidationUnitTests : BaseCommandUnit
     public async Task ShouldReturnFailure_WhenRemoteLibraryIsOwned()
     {
         // Arrange
-        await SetupDatabase(78, config =>
-        {
-            config.PlexServerCount = 2;
-            config.PlexMovieLibraryCount = 1;
-            config.PlexAccountCount = 1;
-        });
+        await SetupDatabase(
+            78,
+            config =>
+            {
+                config.PlexServerCount = 2;
+                config.PlexMovieLibraryCount = 1;
+                config.PlexAccountCount = 1;
+            }
+        );
 
         var libraries = await IDbContext.PlexLibraries.OrderBy(x => x.Id).ToListAsync(CancellationToken);
         var remoteLibrary = libraries[0];
@@ -70,7 +79,9 @@ public class CompareMoviePlexLibraryCommandValidationUnitTests : BaseCommandUnit
         await SetOwnedOverrideAsync(ownedLibrary.PlexServerId, true);
 
         // Act
-        var result = await TestHandlerExecuteAsync(new CompareMoviePlexLibraryCommand(ownedLibrary.Id, remoteLibrary.Id));
+        var result = await TestHandlerExecuteAsync(
+            new CompareMoviePlexLibraryCommand(ownedLibrary.Id, remoteLibrary.Id)
+        );
 
         // Assert
         result.IsFailed.ShouldBeTrue();
@@ -84,12 +95,15 @@ public class CompareMoviePlexLibraryCommandValidationUnitTests : BaseCommandUnit
     public async Task ShouldReturnFailure_WhenOwnedLibraryIsRemote()
     {
         // Arrange
-        await SetupDatabase(79, config =>
-        {
-            config.PlexServerCount = 2;
-            config.PlexMovieLibraryCount = 1;
-            config.PlexAccountCount = 1;
-        });
+        await SetupDatabase(
+            79,
+            config =>
+            {
+                config.PlexServerCount = 2;
+                config.PlexMovieLibraryCount = 1;
+                config.PlexAccountCount = 1;
+            }
+        );
 
         var libraries = await IDbContext.PlexLibraries.OrderBy(x => x.Id).ToListAsync(CancellationToken);
         var remoteLibrary = libraries[0];
@@ -98,7 +112,9 @@ public class CompareMoviePlexLibraryCommandValidationUnitTests : BaseCommandUnit
         await SetOwnedOverrideAsync(ownedLibrary.PlexServerId, false);
 
         // Act
-        var result = await TestHandlerExecuteAsync(new CompareMoviePlexLibraryCommand(ownedLibrary.Id, remoteLibrary.Id));
+        var result = await TestHandlerExecuteAsync(
+            new CompareMoviePlexLibraryCommand(ownedLibrary.Id, remoteLibrary.Id)
+        );
 
         // Assert
         result.IsFailed.ShouldBeTrue();
@@ -112,27 +128,34 @@ public class CompareMoviePlexLibraryCommandValidationUnitTests : BaseCommandUnit
     public async Task ShouldReturnFailure_WhenLibrariesAreNotBothMovieLibraries()
     {
         // Arrange
-        await SetupDatabase(80, config =>
-        {
-            config.PlexServerCount = 2;
-            config.PlexMovieLibraryCount = 1;
-            config.PlexTvShowLibraryCount = 1;
-            config.PlexAccountCount = 1;
-        });
+        await SetupDatabase(
+            80,
+            config =>
+            {
+                config.PlexServerCount = 2;
+                config.PlexMovieLibraryCount = 1;
+                config.PlexTvShowLibraryCount = 1;
+                config.PlexAccountCount = 1;
+            }
+        );
 
-        var remoteMovieLibrary = await IDbContext.PlexLibraries
-            .Where(x => x.Type == PlexMediaType.Movie)
+        var remoteMovieLibrary = await IDbContext
+            .PlexLibraries.Where(x => x.Type == PlexMediaType.Movie)
             .OrderBy(x => x.Id)
             .FirstAsync(CancellationToken);
-        var ownedTvLibrary = await IDbContext.PlexLibraries
-            .Where(x => x.Type == PlexMediaType.TvShow && x.PlexServerId != remoteMovieLibrary.PlexServerId)
+        var ownedTvLibrary = await IDbContext
+            .PlexLibraries.Where(x =>
+                x.Type == PlexMediaType.TvShow && x.PlexServerId != remoteMovieLibrary.PlexServerId
+            )
             .OrderBy(x => x.Id)
             .FirstAsync(CancellationToken);
         await SetOwnedOverrideAsync(remoteMovieLibrary.PlexServerId, false);
         await SetOwnedOverrideAsync(ownedTvLibrary.PlexServerId, true);
 
         // Act
-        var result = await TestHandlerExecuteAsync(new CompareMoviePlexLibraryCommand(ownedTvLibrary.Id, remoteMovieLibrary.Id));
+        var result = await TestHandlerExecuteAsync(
+            new CompareMoviePlexLibraryCommand(ownedTvLibrary.Id, remoteMovieLibrary.Id)
+        );
 
         // Assert
         result.IsFailed.ShouldBeTrue();
@@ -144,8 +167,8 @@ public class CompareMoviePlexLibraryCommandValidationUnitTests : BaseCommandUnit
 
     private async Task SetOwnedOverrideAsync(int plexServerId, bool ownedOverride)
     {
-        await IDbContext.PlexServers
-            .Where(x => x.Id == plexServerId)
+        await IDbContext
+            .PlexServers.Where(x => x.Id == plexServerId)
             .ExecuteUpdateAsync(x => x.SetProperty(y => y.OwnedOverride, ownedOverride), CancellationToken);
     }
 }
@@ -156,12 +179,15 @@ public class CompareTvShowPlexLibraryCommandValidationUnitTests : BaseCommandUni
     public async Task ShouldReturnFailure_WhenRemoteLibraryDoesNotExist()
     {
         // Arrange
-        await SetupDatabase(81, config =>
-        {
-            config.PlexServerCount = 1;
-            config.PlexTvShowLibraryCount = 1;
-            config.PlexAccountCount = 1;
-        });
+        await SetupDatabase(
+            81,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexTvShowLibraryCount = 1;
+                config.PlexAccountCount = 1;
+            }
+        );
 
         var ownedLibrary = await IDbContext.PlexLibraries.SingleAsync(CancellationToken);
         await SetOwnedOverrideAsync(ownedLibrary.PlexServerId, true);
@@ -181,12 +207,15 @@ public class CompareTvShowPlexLibraryCommandValidationUnitTests : BaseCommandUni
     public async Task ShouldReturnFailure_WhenOwnedLibraryDoesNotExist()
     {
         // Arrange
-        await SetupDatabase(82, config =>
-        {
-            config.PlexServerCount = 1;
-            config.PlexTvShowLibraryCount = 1;
-            config.PlexAccountCount = 1;
-        });
+        await SetupDatabase(
+            82,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexTvShowLibraryCount = 1;
+                config.PlexAccountCount = 1;
+            }
+        );
 
         var remoteLibrary = await IDbContext.PlexLibraries.SingleAsync(CancellationToken);
         await SetOwnedOverrideAsync(remoteLibrary.PlexServerId, false);
@@ -206,12 +235,15 @@ public class CompareTvShowPlexLibraryCommandValidationUnitTests : BaseCommandUni
     public async Task ShouldReturnFailure_WhenRemoteLibraryIsOwned()
     {
         // Arrange
-        await SetupDatabase(83, config =>
-        {
-            config.PlexServerCount = 2;
-            config.PlexTvShowLibraryCount = 1;
-            config.PlexAccountCount = 1;
-        });
+        await SetupDatabase(
+            83,
+            config =>
+            {
+                config.PlexServerCount = 2;
+                config.PlexTvShowLibraryCount = 1;
+                config.PlexAccountCount = 1;
+            }
+        );
 
         var libraries = await IDbContext.PlexLibraries.OrderBy(x => x.Id).ToListAsync(CancellationToken);
         var remoteLibrary = libraries[0];
@@ -220,7 +252,9 @@ public class CompareTvShowPlexLibraryCommandValidationUnitTests : BaseCommandUni
         await SetOwnedOverrideAsync(ownedLibrary.PlexServerId, true);
 
         // Act
-        var result = await TestHandlerExecuteAsync(new CompareTvShowPlexLibraryCommand(ownedLibrary.Id, remoteLibrary.Id));
+        var result = await TestHandlerExecuteAsync(
+            new CompareTvShowPlexLibraryCommand(ownedLibrary.Id, remoteLibrary.Id)
+        );
 
         // Assert
         result.IsFailed.ShouldBeTrue();
@@ -234,12 +268,15 @@ public class CompareTvShowPlexLibraryCommandValidationUnitTests : BaseCommandUni
     public async Task ShouldReturnFailure_WhenOwnedLibraryIsRemote()
     {
         // Arrange
-        await SetupDatabase(84, config =>
-        {
-            config.PlexServerCount = 2;
-            config.PlexTvShowLibraryCount = 1;
-            config.PlexAccountCount = 1;
-        });
+        await SetupDatabase(
+            84,
+            config =>
+            {
+                config.PlexServerCount = 2;
+                config.PlexTvShowLibraryCount = 1;
+                config.PlexAccountCount = 1;
+            }
+        );
 
         var libraries = await IDbContext.PlexLibraries.OrderBy(x => x.Id).ToListAsync(CancellationToken);
         var remoteLibrary = libraries[0];
@@ -248,7 +285,9 @@ public class CompareTvShowPlexLibraryCommandValidationUnitTests : BaseCommandUni
         await SetOwnedOverrideAsync(ownedLibrary.PlexServerId, false);
 
         // Act
-        var result = await TestHandlerExecuteAsync(new CompareTvShowPlexLibraryCommand(ownedLibrary.Id, remoteLibrary.Id));
+        var result = await TestHandlerExecuteAsync(
+            new CompareTvShowPlexLibraryCommand(ownedLibrary.Id, remoteLibrary.Id)
+        );
 
         // Assert
         result.IsFailed.ShouldBeTrue();
@@ -262,27 +301,32 @@ public class CompareTvShowPlexLibraryCommandValidationUnitTests : BaseCommandUni
     public async Task ShouldReturnFailure_WhenLibrariesAreNotBothTvShowLibraries()
     {
         // Arrange
-        await SetupDatabase(85, config =>
-        {
-            config.PlexServerCount = 2;
-            config.PlexMovieLibraryCount = 1;
-            config.PlexTvShowLibraryCount = 1;
-            config.PlexAccountCount = 1;
-        });
+        await SetupDatabase(
+            85,
+            config =>
+            {
+                config.PlexServerCount = 2;
+                config.PlexMovieLibraryCount = 1;
+                config.PlexTvShowLibraryCount = 1;
+                config.PlexAccountCount = 1;
+            }
+        );
 
-        var remoteTvLibrary = await IDbContext.PlexLibraries
-            .Where(x => x.Type == PlexMediaType.TvShow)
+        var remoteTvLibrary = await IDbContext
+            .PlexLibraries.Where(x => x.Type == PlexMediaType.TvShow)
             .OrderBy(x => x.Id)
             .FirstAsync(CancellationToken);
-        var ownedMovieLibrary = await IDbContext.PlexLibraries
-            .Where(x => x.Type == PlexMediaType.Movie && x.PlexServerId != remoteTvLibrary.PlexServerId)
+        var ownedMovieLibrary = await IDbContext
+            .PlexLibraries.Where(x => x.Type == PlexMediaType.Movie && x.PlexServerId != remoteTvLibrary.PlexServerId)
             .OrderBy(x => x.Id)
             .FirstAsync(CancellationToken);
         await SetOwnedOverrideAsync(remoteTvLibrary.PlexServerId, false);
         await SetOwnedOverrideAsync(ownedMovieLibrary.PlexServerId, true);
 
         // Act
-        var result = await TestHandlerExecuteAsync(new CompareTvShowPlexLibraryCommand(ownedMovieLibrary.Id, remoteTvLibrary.Id));
+        var result = await TestHandlerExecuteAsync(
+            new CompareTvShowPlexLibraryCommand(ownedMovieLibrary.Id, remoteTvLibrary.Id)
+        );
 
         // Assert
         result.IsFailed.ShouldBeTrue();
@@ -294,8 +338,8 @@ public class CompareTvShowPlexLibraryCommandValidationUnitTests : BaseCommandUni
 
     private async Task SetOwnedOverrideAsync(int plexServerId, bool ownedOverride)
     {
-        await IDbContext.PlexServers
-            .Where(x => x.Id == plexServerId)
+        await IDbContext
+            .PlexServers.Where(x => x.Id == plexServerId)
             .ExecuteUpdateAsync(x => x.SetProperty(y => y.OwnedOverride, ownedOverride), CancellationToken);
     }
 }

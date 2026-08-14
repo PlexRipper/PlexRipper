@@ -35,8 +35,8 @@ public class GetPlexServerByIdEndpoint : Endpoint<GetPlexServerByIdEndpointReque
     public override async Task HandleAsync(GetPlexServerByIdEndpointRequest req, CancellationToken ct)
     {
         _log.Here().DebugApiCall(HttpContext, req);
-        var plexServer = await _dbContext.PlexServers
-            .IgnoreIsEnabledFilter()
+        var plexServer = await _dbContext
+            .PlexServers.IgnoreIsEnabledFilter()
             .Include(x => x.PlexAccountServers)
             .GetAsync(req.PlexServerId, ct);
 

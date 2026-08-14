@@ -190,7 +190,9 @@ public class DesktopModeUnitTests : BaseUnitTest<DesktopMode>
         await sut.StartAsync(CancellationToken);
 
         // Act
-        window.ExternalLinkHandler!.Invoke(new DesktopMessageDTO { Type = DesktopMessageType.DesktopReady, Value = "ready" });
+        window.ExternalLinkHandler!.Invoke(
+            new DesktopMessageDTO { Type = DesktopMessageType.DesktopReady, Value = "ready" }
+        );
 
         // Assert
         window.OpenedExternalUrls.ShouldBeEmpty();

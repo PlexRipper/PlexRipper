@@ -77,7 +77,9 @@ public class DesktopMode : IDesktopMode
 
         _log.Here().Information("Desktop window initialized and navigation requested");
         _window.RegisterWindowClosingHandler(OnWindowClosing);
-        _window.RegisterDesktopMessageHandler(message => HandleDesktopMessages(window, desktopReadyCompletion, message));
+        _window.RegisterDesktopMessageHandler(message =>
+            HandleDesktopMessages(window, desktopReadyCompletion, message)
+        );
 
         _browserFallbackLaunched = false;
         _ = MonitorDesktopReadyTimeoutAsync(uriResult.Value, window, desktopReadyCompletion);
@@ -156,11 +158,7 @@ public class DesktopMode : IDesktopMode
     {
         if (!ReferenceEquals(_window, window))
         {
-            _log.Here()
-                .Warning(
-                    "Received desktop message for a stale desktop window session: {@Message}",
-                    message
-                );
+            _log.Here().Warning("Received desktop message for a stale desktop window session: {@Message}", message);
             return;
         }
 
@@ -251,10 +249,7 @@ public class DesktopMode : IDesktopMode
         {
             window.OpenExternalBrowser(uri);
             _log.Here()
-                .Information(
-                    "Launched external browser fallback to {Uri} after embedded desktop render timeout",
-                    uri
-                );
+                .Information("Launched external browser fallback to {Uri} after embedded desktop render timeout", uri);
         }
         catch (Exception ex)
         {

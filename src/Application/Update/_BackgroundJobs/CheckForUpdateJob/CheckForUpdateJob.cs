@@ -35,6 +35,8 @@ public class CheckForUpdateJob : BaseBackgroundJob<CheckForUpdateJobPayload, App
         CancellationToken cancellationToken
     )
     {
+        context.CronOccurrenceOperations?.SkipIfAlreadyRunning();
+
         _log.Here().Debug("Executing job: {JobName}", nameof(CheckForUpdateJob));
 
         var result = await _commandExecutor.Send(new CheckForUpdatesCommand(), cancellationToken);

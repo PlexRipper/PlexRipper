@@ -19,6 +19,7 @@ export enum DialogType {
 	MediaOptionsDialog = 'media-options-dialog',
 	ResetDatabaseConfirmationDialog = 'reset-database-confirmation-dialog',
 	RefreshAccountAccessDialog = 'refresh-account-access-dialog',
+	RefreshMediaDialog = 'refresh-media-dialog',
 	ServerDeleteConfirmationDialog = 'server-delete-confirmation-dialog',
 	ServerHideConfirmationDialog = 'server-hide-confirmation-dialog',
 	ServerSettingsDialog = 'server-settings-dialog',

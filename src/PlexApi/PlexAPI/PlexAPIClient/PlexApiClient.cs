@@ -30,10 +30,7 @@ public class PlexApiClient : IPlexApiClient
     public Task<HttpResponseMessage> SendAsync(HttpRequestMessage request) =>
         SendAsync(request, CancellationToken.None);
 
-    public async Task<HttpResponseMessage> SendAsync(
-        HttpRequestMessage request,
-        CancellationToken cancellationToken
-    )
+    public async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
     {
         request.Headers.Remove("user-agent");
         request.SetRetryCount(_options.RetryCount);
@@ -49,8 +46,11 @@ public class PlexApiClient : IPlexApiClient
 
         try
         {
-            response = await _defaultClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead,
-                cancellationToken);
+            response = await _defaultClient.SendAsync(
+                request,
+                HttpCompletionOption.ResponseHeadersRead,
+                cancellationToken
+            );
         }
         catch (TaskCanceledException) when (!cancellationToken.IsCancellationRequested)
         {
@@ -90,10 +90,7 @@ public class PlexApiClient : IPlexApiClient
     public Task<HttpRequestMessage> CloneAsync(HttpRequestMessage request) =>
         CloneAsync(request, CancellationToken.None);
 
-    public async Task<HttpRequestMessage> CloneAsync(
-        HttpRequestMessage request,
-        CancellationToken cancellationToken
-    )
+    public async Task<HttpRequestMessage> CloneAsync(HttpRequestMessage request, CancellationToken cancellationToken)
     {
         var clone = new HttpRequestMessage(request.Method, request.RequestUri)
         {
@@ -138,7 +135,8 @@ public class PlexApiClient : IPlexApiClient
 
     private void SendCompletedProgress(HttpRequestMessage request, HttpStatusCode statusCode, string reasonPhrase)
     {
-        request.GetRetryProgressCallback()
+        request
+            .GetRetryProgressCallback()
             ?.Invoke(
                 new HttpRequestRetryProgress
                 {
@@ -159,17 +157,18 @@ public class PlexApiClient : IPlexApiClient
         HttpRequestMessage request,
         HttpStatusCode statusCode,
         string reasonPhrase
-    ) => new(statusCode)
-    {
-        RequestMessage = request,
-        ReasonPhrase = reasonPhrase,
-        Content = JsonSerializer
-            .Serialize(
-                new PlexError(reasonPhrase) { Code = (int)statusCode, Status = (int)statusCode },
-                DefaultJsonSerializerOptions.ConfigStandard
-            )
-            .ToStringContent(),
-    };
+    ) =>
+        new(statusCode)
+        {
+            RequestMessage = request,
+            ReasonPhrase = reasonPhrase,
+            Content = JsonSerializer
+                .Serialize(
+                    new PlexError(reasonPhrase) { Code = (int)statusCode, Status = (int)statusCode },
+                    DefaultJsonSerializerOptions.ConfigStandard
+                )
+                .ToStringContent(),
+        };
 
     public void Dispose()
     {

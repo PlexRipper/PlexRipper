@@ -125,7 +125,8 @@ public class DbContextExtensionsPlexServerUnitTests : BaseUnitTest
         var dbContext = IDbContext;
         var server = await dbContext.PlexServers.IgnoreIsEnabledFilter().FirstAsync(CancellationToken);
 
-        await dbContext.PlexServers.IgnoreIsEnabledFilter()
+        await dbContext
+            .PlexServers.IgnoreIsEnabledFilter()
             .Where(x => x.Id == server.Id)
             .ExecuteUpdateAsync(x => x.SetProperty(y => y.IsEnabled, false), CancellationToken);
 
@@ -165,4 +166,3 @@ public class DbContextExtensionsPlexServerUnitTests : BaseUnitTest
         result.ShouldBeFalse();
     }
 }
-

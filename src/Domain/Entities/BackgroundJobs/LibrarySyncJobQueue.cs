@@ -51,6 +51,12 @@ public class LibrarySyncJobQueue
     [Column(Order = 7)]
     public string? ErrorMessage { get; init; }
 
+    /// <summary>
+    /// Gets or sets a value indicating whether all media in the library must be replaced during this sync.
+    /// </summary>
+    [Column(Order = 10)]
+    public bool ForceMediaRefresh { get; init; }
+
     #endregion
 
     #region Relationships

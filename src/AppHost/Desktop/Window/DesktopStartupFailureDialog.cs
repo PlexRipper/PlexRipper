@@ -41,10 +41,7 @@ public class DesktopStartupFailureDialog
     {
         var safeLogsDirectory = _pathProvider.LogsDirectory;
         var details = BuildDetails(errorResult);
-        IReadOnlyCollection<string> logContent = _logBufferService
-            .GetAll()
-            .Select(x => x.ToString())
-            .ToList();
+        IReadOnlyCollection<string> logContent = _logBufferService.GetAll().Select(x => x.ToString()).ToList();
         var html = BuildHtmlFromTemplate(details, logContent);
 
         var window = new PhotinoWindow()
@@ -96,13 +93,10 @@ public class DesktopStartupFailureDialog
         }
 
         var normalizedLogsDirectory =
-            logsDirectory.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar) + Path.DirectorySeparatorChar;
+            logsDirectory.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar)
+            + Path.DirectorySeparatorChar;
 
-        var fallbackUri = new UriBuilder
-        {
-            Scheme = Uri.UriSchemeFile,
-            Path = normalizedLogsDirectory,
-        }.Uri;
+        var fallbackUri = new UriBuilder { Scheme = Uri.UriSchemeFile, Path = normalizedLogsDirectory }.Uri;
 
         TryOpenPath(fallbackUri.AbsoluteUri);
     }

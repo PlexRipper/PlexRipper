@@ -176,8 +176,8 @@ public class AddOrUpdatePlexAccountServersCommandHandler
                 );
         }
 
-        var affectedLibraryIds = await _dbContext.PlexLibraries
-            .IgnoreQueryFilters()
+        var affectedLibraryIds = await _dbContext
+            .PlexLibraries.IgnoreQueryFilters()
             .Where(x => changedPlexServerIds.Contains(x.PlexServerId))
             .Select(x => x.Id)
             .ToListAsync(cancellationToken);

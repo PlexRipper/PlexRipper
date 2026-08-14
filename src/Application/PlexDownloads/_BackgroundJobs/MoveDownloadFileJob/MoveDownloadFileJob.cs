@@ -18,7 +18,8 @@ public class MoveDownloadFileJob : BaseBackgroundJob<DownloadTaskKey, MoveDownlo
         IMoveDownloadFileQueue moveDownloadFileQueue,
         IProgressHubService progressHubService,
         INotificationHubService notificationHubService
-    ) : base(log, progressHubService, notificationHubService)
+    )
+        : base(log, progressHubService, notificationHubService)
     {
         _log = log.ForContext<MoveDownloadFileJob>();
         _commandExecutor = commandExecutor;
@@ -52,10 +53,7 @@ public class MoveDownloadFileJob : BaseBackgroundJob<DownloadTaskKey, MoveDownlo
                 );
 
             var moveResult = await Result.Try(() =>
-                _commandExecutor.Send(
-                    new MoveDownloadFileFromFileTaskCommand(downloadTaskKey),
-                    cancellationToken
-                )
+                _commandExecutor.Send(new MoveDownloadFileFromFileTaskCommand(downloadTaskKey), cancellationToken)
             );
 
             if (moveResult.IsCancelled)
@@ -112,10 +110,7 @@ public class MoveDownloadFileJob : BaseBackgroundJob<DownloadTaskKey, MoveDownlo
                 );
 
                 var cleanupResult = await Result.Try(() =>
-                    _commandExecutor.Send(
-                        new CleanUpDownloadTaskFoldersCommand(downloadTaskKey),
-                        cancellationToken
-                    )
+                    _commandExecutor.Send(new CleanUpDownloadTaskFoldersCommand(downloadTaskKey), cancellationToken)
                 );
                 if (cleanupResult.IsCancelled)
                 {
@@ -155,7 +150,8 @@ public class MoveDownloadFileJob : BaseBackgroundJob<DownloadTaskKey, MoveDownlo
     protected override Task<MoveDownloadFileJobUpdateDTO?> GetStatusUpdateDataAsync(
         TickerFunctionContext<DownloadTaskKey> context,
         CancellationToken cancellationToken
-    ) => Task.FromResult<MoveDownloadFileJobUpdateDTO?>(
-        new MoveDownloadFileJobUpdateDTO { DownloadTaskId = context.Request }
-    );
+    ) =>
+        Task.FromResult<MoveDownloadFileJobUpdateDTO?>(
+            new MoveDownloadFileJobUpdateDTO { DownloadTaskId = context.Request }
+        );
 }

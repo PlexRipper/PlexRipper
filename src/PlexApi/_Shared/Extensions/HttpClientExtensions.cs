@@ -131,10 +131,11 @@ public static class HttpClientExtensions
         return Result.Fail("Request failed").AddStatusCode(response.StatusCode).WithErrors(errors ?? []);
     }
 
-    private static HttpResponseMessage GetHttpResponseMessage<T>(this T response) => (
-        typeof(T).GetProperty(nameof(PostUsersSignInDataResponse.RawResponse))!.GetValue(response)
+    private static HttpResponseMessage GetHttpResponseMessage<T>(this T response) =>
+        (
+            typeof(T).GetProperty(nameof(PostUsersSignInDataResponse.RawResponse))!.GetValue(response)
             as HttpResponseMessage
-    )!;
+        )!;
 
     public static async Task<string> ReadAsFormattedJsonAsync(
         this HttpContent? content,

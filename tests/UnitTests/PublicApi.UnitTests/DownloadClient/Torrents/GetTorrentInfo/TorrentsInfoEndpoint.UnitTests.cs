@@ -3,7 +3,8 @@ using Reaparr.PublicAPI.Contracts;
 
 namespace Reaparr.PublicAPI.UnitTests;
 
-public class TorrentsInfoEndpointUnitTests : BaseEndpointUnitTest<TorrentsInfoEndpoint, TorrentsInfoEndpointRequest, List<QBittorrentTorrentInfo>>
+public class TorrentsInfoEndpointUnitTests
+    : BaseEndpointUnitTest<TorrentsInfoEndpoint, TorrentsInfoEndpointRequest, List<QBittorrentTorrentInfo>>
 {
     [Test]
     public async Task ShouldReturnRatioLimitZero_WhenStatusIsCompleted()
@@ -96,12 +97,15 @@ public class TorrentsInfoEndpointUnitTests : BaseEndpointUnitTest<TorrentsInfoEn
     public async Task ShouldReturnEmptyList_WhenServerIsOwned()
     {
         // Arrange
-        await SetupDatabase(5106, config =>
-        {
-            config.PlexServerCount = 1;
-            config.MovieCount = 1;
-            config.MovieDownloadTasksCount = 1;
-        });
+        await SetupDatabase(
+            5106,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.MovieCount = 1;
+                config.MovieDownloadTasksCount = 1;
+            }
+        );
 
         var dbContext = IDbContext;
         var movieFile = await dbContext.DownloadTaskMovieFile.FirstAsync(CancellationToken);
@@ -116,7 +120,9 @@ public class TorrentsInfoEndpointUnitTests : BaseEndpointUnitTest<TorrentsInfoEn
         await dbContext
             .DownloadTaskMovieFile.Where(x => x.Id == movieFile.Id)
             .ExecuteUpdateAsync(
-                x => x.SetProperty(p => p.HashId, "hash-owned").SetProperty(p => p.DownloadStatus, DownloadStatus.Completed),
+                x =>
+                    x.SetProperty(p => p.HashId, "hash-owned")
+                        .SetProperty(p => p.DownloadStatus, DownloadStatus.Completed),
                 CancellationToken
             );
 
@@ -133,13 +139,16 @@ public class TorrentsInfoEndpointUnitTests : BaseEndpointUnitTest<TorrentsInfoEn
         testResult.Response.ShouldNotBeNull();
         testResult.Response.ShouldBeEmpty();
 
-        var persisted = await dbContext.DownloadTaskMovieFile.Where(x => x.Id == movieFile.Id)
+        var persisted = await dbContext
+            .DownloadTaskMovieFile.Where(x => x.Id == movieFile.Id)
             .Select(x => new { x.HashId, x.DownloadStatus })
             .FirstAsync(CancellationToken);
         persisted.HashId.ShouldBe("hash-owned");
         persisted.DownloadStatus.ShouldBe(DownloadStatus.Completed);
 
-        var server = await dbContext.PlexServers.IgnoreIsEnabledFilter().FirstAsync(x => x.Id == movieFile.PlexServerId, CancellationToken);
+        var server = await dbContext
+            .PlexServers.IgnoreIsEnabledFilter()
+            .FirstAsync(x => x.Id == movieFile.PlexServerId, CancellationToken);
         server.IsEnabled.ShouldBeTrue();
         server.OwnedOverride.ShouldBe(true);
     }
@@ -179,11 +188,7 @@ public class TorrentsInfoEndpointUnitTests : BaseEndpointUnitTest<TorrentsInfoEn
 
         // Act
         var endpointResult = await TestEndpointHandleAsync(
-            new TorrentsInfoEndpointRequest
-            {
-                Hashes = hash,
-                Category = IntegrationDefinitions.RADARR_DEFAULT_CATEGORY,
-            }
+            new TorrentsInfoEndpointRequest { Hashes = hash, Category = IntegrationDefinitions.RADARR_DEFAULT_CATEGORY }
         );
 
         var persistedRow = await dbContext
@@ -193,7 +198,7 @@ public class TorrentsInfoEndpointUnitTests : BaseEndpointUnitTest<TorrentsInfoEn
 
         endpointResult.ShouldNotBeNull();
         endpointResult.Response.ShouldNotBeNull();
-        
+
         return (endpointResult.Response, persistedRow.DownloadStatus, persistedRow.HashId);
     }
 }

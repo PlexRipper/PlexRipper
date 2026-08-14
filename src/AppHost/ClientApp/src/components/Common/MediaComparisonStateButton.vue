@@ -190,7 +190,7 @@ function onClick() {
 .media-comparison-state-button--dense {
   .q-btn {
     min-height: 2em;
-    padding: 0 0.5em;
+    padding: 0.25em;
   }
 }
 </style>

@@ -60,25 +60,18 @@
 									</span>
 								</div>
 							</QCol>
-							<!-- Progress Bar -->
+							<!-- Time Remaining -->
 							<QCol
-								cols="8"
-								:style="{ 'max-width': `600px !important` }">
-								<QRow
-									no-wrap
-									justify="end">
-									<!-- Time Remaining -->
-									<QCol>
-										<QCountdown
-											v-if="!node.completed"
-											:value="node.progress?.timeRemaining ?? ''" />
-									</QCol>
-									<!--	Plex Media Sync Progress -->
-									<QCol
-										style="max-width: 300px;">
-										<QProgressBar :value="node.percentage" />
-									</QCol>
-								</QRow>
+								cols="4"
+								text-align="center">
+								<QCountdown
+									v-if="!isServer(node)"
+									data-cy="sync-server-media-dialog-library-eta"
+									:value="libraryStore.getLibraryProgress(node.id)?.timeRemaining ?? ''" />
+							</QCol>
+							<!-- Plex Media Sync Progress -->
+							<QCol cols="4">
+								<QProgressBar :value="node.percentage" />
 							</QCol>
 						</QRow>
 					</template>

@@ -192,15 +192,18 @@ public interface IReaparrDbContext : IDisposable
     Task<T> ExecuteWithRetryAsync<T>(
         Func<IReaparrDbContext, Task<T>> operation,
         int maxRetries = 3,
-        CancellationToken cancellationToken = default);
+        CancellationToken cancellationToken = default
+    );
 
     Task<Result<T>> ExecuteSerializedTransactionAsync<T>(
         Func<IReaparrDbContext, CancellationToken, Task<T>> operation,
-        CancellationToken cancellationToken = default);
+        CancellationToken cancellationToken = default
+    );
 
     Task<Result> ExecuteSerializedTransactionAsync(
         Func<IReaparrDbContext, CancellationToken, Task> operation,
-        CancellationToken cancellationToken = default);
+        CancellationToken cancellationToken = default
+    );
 
     EntityEntry Entry(object entity);
 
@@ -214,7 +217,5 @@ public interface IReaparrDbContext : IDisposable
     /// <param name="sql">The interpolated SQL command with parameters.</param>
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>The number of rows affected.</returns>
-    Task<int> ExecuteSqlInterpolatedAsync(
-        FormattableString sql,
-        CancellationToken cancellationToken = default);
+    Task<int> ExecuteSqlInterpolatedAsync(FormattableString sql, CancellationToken cancellationToken = default);
 }

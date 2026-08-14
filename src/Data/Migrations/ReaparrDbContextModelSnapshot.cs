@@ -335,6 +335,10 @@ namespace Reaparr.Data.Migrations
                         .HasColumnType("TEXT")
                         .HasColumnOrder(7);
 
+                    b.Property<bool>("ForceMediaRefresh")
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(10);
+
                     b.Property<bool>("IsServerOffline")
                         .HasColumnType("INTEGER")
                         .HasColumnOrder(6);

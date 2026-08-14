@@ -14,6 +14,7 @@ public static partial class EnumMapperExtensions
         ["MetadataSyncJob"] = JobTypes.MetadataSyncJob,
         ["CheckForUpdateJob"] = JobTypes.CheckForUpdateJob,
         ["CheckPlexLibrariesForUpdatesJob"] = JobTypes.CheckPlexLibrariesForUpdatesJob,
+        ["RefreshPlexAccountAccessJob"] = JobTypes.RefreshPlexAccountAccessJob,
         ["LibraryComparisonJob"] = JobTypes.LibraryComparisonJob,
     };
 
@@ -30,10 +31,7 @@ public static partial class EnumMapperExtensions
         if (_jobTypesMap.TryGetValue(value, out var jobType))
             return jobType;
 
-        _log.Here().Error(
-            "Failed to convert string {Value} to type {NameOfJobTypes}",
-            value,
-            nameof(JobTypes));
+        _log.Here().Error("Failed to convert string {Value} to type {NameOfJobTypes}", value, nameof(JobTypes));
 
         throw new ArgumentOutOfRangeException(nameof(value), value, null);
     }
@@ -54,10 +52,7 @@ public static partial class EnumMapperExtensions
                 return key;
         }
 
-        _log.Here().Error(
-            "Failed to convert {Value} to string for type {NameOfJobTypes}",
-            value,
-            nameof(JobTypes));
+        _log.Here().Error("Failed to convert {Value} to string for type {NameOfJobTypes}", value, nameof(JobTypes));
 
         throw new ArgumentOutOfRangeException(nameof(value), value, null);
     }

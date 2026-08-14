@@ -93,9 +93,7 @@ public class CancelLibrarySyncJobCommandHandler : ICommandHandler<CancelLibraryS
                     plexLibraryId
                 );
 
-            await _notificationHubService.SendRefreshNotificationAsync(
-                [RefreshDataType.PlexLibrarySyncStatus]
-            );
+            await _notificationHubService.SendRefreshNotificationAsync([RefreshDataType.PlexLibrarySyncStatus]);
         }
 
         return Result.Ok();

@@ -125,6 +125,4 @@ public static class PlexMediaSlimDTOMapper
         };
 
     #endregion
-
-
 }

@@ -15,23 +15,25 @@ internal static class PlexMediaComparisonDetailsMapper
         string remoteLocation,
         string ownedLocation,
         int remotePlexLibraryId,
-        int remotePlexServerId) => new()
-    {
-        RowId = rowId,
-        ParentRowId = parentRowId,
-        Level = level,
-        PlexMediaId = plexMediaId,
-        Type = type,
-        Title = title,
-        ComparisonId = state.ToComparisonId(),
-        IsActionable = true,
-        RemoteQuality = remoteQuality,
-        OwnedQuality = ownedQuality,
-        RemoteLocation = remoteLocation,
-        OwnedLocation = ownedLocation,
-        RemotePlexLibraryId = remotePlexLibraryId,
-        RemotePlexServerId = remotePlexServerId,
-    };
+        int remotePlexServerId
+    ) =>
+        new()
+        {
+            RowId = rowId,
+            ParentRowId = parentRowId,
+            Level = level,
+            PlexMediaId = plexMediaId,
+            Type = type,
+            Title = title,
+            ComparisonId = state.ToComparisonId(),
+            IsActionable = true,
+            RemoteQuality = remoteQuality,
+            OwnedQuality = ownedQuality,
+            RemoteLocation = remoteLocation,
+            OwnedLocation = ownedLocation,
+            RemotePlexLibraryId = remotePlexLibraryId,
+            RemotePlexServerId = remotePlexServerId,
+        };
 
     public static List<PlexMediaComparisonDetailsRowDTO> ToDtoRows(List<ComparisonDetailsRow> rows)
     {
@@ -41,10 +43,8 @@ internal static class PlexMediaComparisonDetailsMapper
 
     public static PlexMediaComparisonState ToParentState(List<ComparisonDetailsRow> rows)
     {
-        var hasMissing = rows.Any(x =>
-            x.ComparisonId == PlexMediaComparisonState.Missing.ToComparisonId());
-        var hasPartial = rows.Any(x =>
-            x.ComparisonId == PlexMediaComparisonState.Partial.ToComparisonId());
+        var hasMissing = rows.Any(x => x.ComparisonId == PlexMediaComparisonState.Missing.ToComparisonId());
+        var hasPartial = rows.Any(x => x.ComparisonId == PlexMediaComparisonState.Partial.ToComparisonId());
         var hasHigherQuality = rows.Any(x => x.ComparisonId == PlexMediaComparisonState.HigherQuality.ToComparisonId());
         return (hasMissing, hasPartial, hasHigherQuality) switch
         {
@@ -65,18 +65,21 @@ internal static class PlexMediaComparisonDetailsMapper
 
     private static List<PlexMediaComparisonDetailsRowDTO> ToDtoRows(
         int parentRowId,
-        Dictionary<int, List<ComparisonDetailsRow>> rowsByParentRowId) => rowsByParentRowId.GetValueOrDefault(parentRowId, [])
-        .Select(row => new PlexMediaComparisonDetailsRowDTO
-        {
-            PlexMediaId = row.PlexMediaId,
-            Type = row.Type,
-            Title = row.Title,
-            State = row.ComparisonId.ToComparisonState(),
-            RemoteQuality = row.RemoteQuality,
-            OwnedQuality = row.OwnedQuality,
-            PlexLibraryId = row.RemotePlexLibraryId,
-            PlexServerId = row.RemotePlexServerId,
-            Children = ToDtoRows(row.RowId, rowsByParentRowId),
-        })
-        .ToList();
+        Dictionary<int, List<ComparisonDetailsRow>> rowsByParentRowId
+    ) =>
+        rowsByParentRowId
+            .GetValueOrDefault(parentRowId, [])
+            .Select(row => new PlexMediaComparisonDetailsRowDTO
+            {
+                PlexMediaId = row.PlexMediaId,
+                Type = row.Type,
+                Title = row.Title,
+                State = row.ComparisonId.ToComparisonState(),
+                RemoteQuality = row.RemoteQuality,
+                OwnedQuality = row.OwnedQuality,
+                PlexLibraryId = row.RemotePlexLibraryId,
+                PlexServerId = row.RemotePlexServerId,
+                Children = ToDtoRows(row.RowId, rowsByParentRowId),
+            })
+            .ToList();
 }

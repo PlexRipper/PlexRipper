@@ -47,9 +47,7 @@ public class GetLibraryMediaMetadata : Endpoint<GetLibraryMediaMetadataRequest, 
         if (req.PlexLibraryId > 0)
         {
             // First, verify the library exists
-            var plexLibrary = await _dbContext.PlexLibraries
-                .IgnoreQueryFilters()
-                .GetAsync(req.PlexLibraryId, ct);
+            var plexLibrary = await _dbContext.PlexLibraries.IgnoreQueryFilters().GetAsync(req.PlexLibraryId, ct);
             if (plexLibrary is null)
             {
                 await Send.FluentResult(ResultExtensions.EntityNotFound(nameof(PlexLibrary), req.PlexLibraryId), ct);
@@ -61,18 +59,23 @@ public class GetLibraryMediaMetadata : Endpoint<GetLibraryMediaMetadataRequest, 
             // of treating this as a server error.
             if (!plexLibrary.IsEnabled)
             {
-                await Send.FluentResult(Result.Ok(new PlexMediaMetadataDTO
-                {
-                    MediaCount = 0,
-                    Roles = [],
-                    Countries = [],
-                    Genres = [],
-                    Qualities = [],
-                    RoleCount = 0,
-                    CountryCount = 0,
-                    GenreCount = 0,
-                    QualityCount = 0,
-                }), ct);
+                await Send.FluentResult(
+                    Result.Ok(
+                        new PlexMediaMetadataDTO
+                        {
+                            MediaCount = 0,
+                            Roles = [],
+                            Countries = [],
+                            Genres = [],
+                            Qualities = [],
+                            RoleCount = 0,
+                            CountryCount = 0,
+                            GenreCount = 0,
+                            QualityCount = 0,
+                        }
+                    ),
+                    ct
+                );
                 return;
             }
 

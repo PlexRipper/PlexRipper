@@ -101,4 +101,4 @@ public class ProgressHub : Hub<IProgressHub>, IProgressHub
             );
         await Clients.All.AppUpdateDownloadProgress(appUpdateDownloadProgress, cancellationToken);
     }
-    }
+}

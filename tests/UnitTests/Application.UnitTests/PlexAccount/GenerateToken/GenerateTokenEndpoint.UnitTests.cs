@@ -1,6 +1,11 @@
 ﻿namespace Reaparr.Application.UnitTests;
 
-public class GenerateTokenEndpointUnitTests : BaseEndpointUnitTest<GeneratePlexTokenEndpoint, GeneratePlexTokenEndpointRequest, ResultDTO<GeneratePlexTokenResponse>>
+public class GenerateTokenEndpointUnitTests
+    : BaseEndpointUnitTest<
+        GeneratePlexTokenEndpoint,
+        GeneratePlexTokenEndpointRequest,
+        ResultDTO<GeneratePlexTokenResponse>
+    >
 {
     [Test]
     public async Task ShouldGenerateToken_WhenSignInIsSuccessful()

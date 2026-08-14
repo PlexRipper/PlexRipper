@@ -160,7 +160,12 @@ public class DownloadTaskUpdateDispatcher : BackgroundService, IDownloadTaskUpda
         DirectDownloadSnapshot? snapshot = null
     )
     {
-        if (_statusByNodeId.GetValueOrDefault(key.Id) is DownloadStatus.Paused or DownloadStatus.AutoPaused or DownloadStatus.Deleted)
+        if (
+            _statusByNodeId.GetValueOrDefault(key.Id)
+            is DownloadStatus.Paused
+                or DownloadStatus.AutoPaused
+                or DownloadStatus.Deleted
+        )
             return;
 
         var update = new BufferedProgressUpdate
@@ -655,12 +660,7 @@ public class DownloadTaskUpdateDispatcher : BackgroundService, IDownloadTaskUpda
                 TimeSpan.FromSeconds(progress.TimeRemaining).ToFormattedString()
             );
 
-        await dbContext.CreateDownloadClientLog(
-            key,
-            NotificationLevel.Debug,
-            DownloadStatus.Downloading,
-            progressMsg
-        );
+        await dbContext.CreateDownloadClientLog(key, NotificationLevel.Debug, DownloadStatus.Downloading, progressMsg);
     }
 
     private bool ShouldPersistProgressDebug(Guid nodeId, DownloadTaskProgress progress)

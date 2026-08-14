@@ -34,13 +34,14 @@ public class ReaparrDbDesignTimeContext : IDesignTimeDbContextFactory<ReaparrDbC
 
         public bool IsDevRelease => true;
 
-        public OperatingSystemPlatform CurrentOS => true switch
-        {
-            _ when OperatingSystem.IsWindows() => OperatingSystemPlatform.Windows,
-            _ when OperatingSystem.IsMacOS() => OperatingSystemPlatform.Osx,
-            _ when OperatingSystem.IsLinux() => OperatingSystemPlatform.Linux,
-            _ => OperatingSystemPlatform.Unknown,
-        };
+        public OperatingSystemPlatform CurrentOS =>
+            true switch
+            {
+                _ when OperatingSystem.IsWindows() => OperatingSystemPlatform.Windows,
+                _ when OperatingSystem.IsMacOS() => OperatingSystemPlatform.Osx,
+                _ when OperatingSystem.IsLinux() => OperatingSystemPlatform.Linux,
+                _ => OperatingSystemPlatform.Unknown,
+            };
 
         public bool IsWindows => OperatingSystem.IsWindows();
 

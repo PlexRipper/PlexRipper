@@ -2,20 +2,23 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Reaparr.Application.UnitTests;
 
-public class GetAllMediaByTypeEndpointUnitTests : BaseEndpointUnitTest<GetAllMediaByTypeEndpoint,
-    GetAllMediaByTypeRequest, PlexMediaStatisticsDTO>
+public class GetAllMediaByTypeEndpointUnitTests
+    : BaseEndpointUnitTest<GetAllMediaByTypeEndpoint, GetAllMediaByTypeRequest, PlexMediaStatisticsDTO>
 {
     [Test]
     public async Task ShouldMapFriendlyRequestFiltersToMediaQueryFilter_WhenHandlingRequest()
     {
         // Arrange
-        await SetupDatabase(42, config =>
-        {
-            config.PlexServerCount = 1;
-            config.PlexMovieLibraryCount = 1;
-        });
-        var libraryId = await IDbContext.PlexLibraries
-            .Where(x => x.Type == PlexMediaType.Movie)
+        await SetupDatabase(
+            42,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexMovieLibraryCount = 1;
+            }
+        );
+        var libraryId = await IDbContext
+            .PlexLibraries.Where(x => x.Type == PlexMediaType.Movie)
             .Select(x => x.Id)
             .FirstAsync(CancellationToken);
 
@@ -36,13 +39,16 @@ public class GetAllMediaByTypeEndpointUnitTests : BaseEndpointUnitTest<GetAllMed
             FilterOfflineMedia = true,
         };
 
-        var expectedFilter = string.Join('&', [
-            $"SearchTitle:contains:{request.Search}",
-            $"Countries:any:Id:eq:{request.CountryId}",
-            $"Actors:any:Id:eq:{request.RoleId}",
-            $"Genres:any:Id:eq:{request.GenreId}",
-            $"MediaDataList:any:Quality:eq:{request.QualityId!.Value.ToVideoQuality()}",
-        ]);
+        var expectedFilter = string.Join(
+            '&',
+            [
+                $"SearchTitle:contains:{request.Search}",
+                $"Countries:any:Id:eq:{request.CountryId}",
+                $"Actors:any:Id:eq:{request.RoleId}",
+                $"Genres:any:Id:eq:{request.GenreId}",
+                $"MediaDataList:any:Quality:eq:{request.QualityId!.Value.ToVideoQuality()}",
+            ]
+        );
 
         var mediaQueryCache = new Mock<IMediaQueryCache>(MockBehavior.Strict);
         mediaQueryCache
@@ -57,7 +63,8 @@ public class GetAllMediaByTypeEndpointUnitTests : BaseEndpointUnitTest<GetAllMed
                         && filter.Parameters.Page == 2
                         && filter.Parameters.PageSize == 25
                         && filter.Parameters.Sort == "sortIndex:asc"
-                        && filter.Parameters.Filter == expectedFilter),
+                        && filter.Parameters.Filter == expectedFilter
+                    ),
                     It.IsAny<CancellationToken>()
                 )
             )
@@ -65,10 +72,7 @@ public class GetAllMediaByTypeEndpointUnitTests : BaseEndpointUnitTest<GetAllMed
             .Verifiable(Times.Once());
 
         // Act
-        await TestEndpointHandleAsync(
-            request,
-            services => services.AddSingleton(_ => mediaQueryCache.Object)
-        );
+        await TestEndpointHandleAsync(request, services => services.AddSingleton(_ => mediaQueryCache.Object));
 
         // Assert
         mediaQueryCache.Verify();

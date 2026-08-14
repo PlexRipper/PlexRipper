@@ -9,7 +9,10 @@ public class EnumMapperExtensionsDownloadStatusUnitTests : BaseUnitTest
         {
             var statusString = status.ToDownloadStatusString();
 
-            statusString.ShouldBe(status.ToString(), $"Missing {status.ToString()} from {nameof(EnumMapperExtensions)}");
+            statusString.ShouldBe(
+                status.ToString(),
+                $"Missing {status.ToString()} from {nameof(EnumMapperExtensions)}"
+            );
 
             var parsedStatus = statusString.ToDownloadStatus();
             parsedStatus.ShouldBe(status);

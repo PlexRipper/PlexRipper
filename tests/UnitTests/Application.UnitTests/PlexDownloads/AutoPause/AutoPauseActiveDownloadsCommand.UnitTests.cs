@@ -39,8 +39,7 @@ public class AutoPauseActiveDownloadsCommandUnitTests : BaseUnitTest<AutoPauseAc
             .ReturnsAsync([])
             .Verifiable(Times.Exactly(4));
 
-        Mock.SetupCommand<Result>(c => c is PauseDownloadTaskCommand)
-            .Returns(Task.FromResult(Result.Ok()));
+        Mock.SetupCommand<Result>(c => c is PauseDownloadTaskCommand).Returns(Task.FromResult(Result.Ok()));
 
         // Act
         var result = await Sut.ExecuteAsync(new AutoPauseActiveDownloadsCommand(), CancellationToken);
@@ -53,19 +52,21 @@ public class AutoPauseActiveDownloadsCommandUnitTests : BaseUnitTest<AutoPauseAc
 
         Mock.Mock<ICommandExecutor>()
             .Verify(
-                x => x.Send(
-                    It.Is<PauseDownloadTaskCommand>(c => c.DownloadTaskGuid == keyA.Id && c.AutoPause),
-                    CancellationToken
-                ),
+                x =>
+                    x.Send(
+                        It.Is<PauseDownloadTaskCommand>(c => c.DownloadTaskGuid == keyA.Id && c.AutoPause),
+                        CancellationToken
+                    ),
                 Times.Exactly(2)
             );
 
         Mock.Mock<ICommandExecutor>()
             .Verify(
-                x => x.Send(
-                    It.Is<PauseDownloadTaskCommand>(c => c.DownloadTaskGuid == keyB.Id && c.AutoPause),
-                    CancellationToken
-                ),
+                x =>
+                    x.Send(
+                        It.Is<PauseDownloadTaskCommand>(c => c.DownloadTaskGuid == keyB.Id && c.AutoPause),
+                        CancellationToken
+                    ),
                 Times.Exactly(2)
             );
     }
@@ -98,8 +99,7 @@ public class AutoPauseActiveDownloadsCommandUnitTests : BaseUnitTest<AutoPauseAc
             .ReturnsAsync([moveKey])
             .Verifiable(Times.Exactly(2));
 
-        Mock.SetupCommand<Result>(c => c is PauseDownloadTaskCommand)
-            .Returns(Task.FromResult(Result.Ok()));
+        Mock.SetupCommand<Result>(c => c is PauseDownloadTaskCommand).Returns(Task.FromResult(Result.Ok()));
 
         // Act
         var result = await Sut.ExecuteAsync(new AutoPauseActiveDownloadsCommand(), CancellationToken);
@@ -110,10 +110,11 @@ public class AutoPauseActiveDownloadsCommandUnitTests : BaseUnitTest<AutoPauseAc
         Mock.Mock<IMoveDownloadFileScheduler>().Verify();
         Mock.Mock<ICommandExecutor>()
             .Verify(
-                x => x.Send(
-                    It.Is<PauseDownloadTaskCommand>(c => c.DownloadTaskGuid == moveKey.Id && c.AutoPause),
-                    CancellationToken
-                ),
+                x =>
+                    x.Send(
+                        It.Is<PauseDownloadTaskCommand>(c => c.DownloadTaskGuid == moveKey.Id && c.AutoPause),
+                        CancellationToken
+                    ),
                 Times.Exactly(2)
             );
     }
@@ -148,8 +149,7 @@ public class AutoPauseActiveDownloadsCommandUnitTests : BaseUnitTest<AutoPauseAc
             .ReturnsAsync([])
             .Verifiable(Times.Exactly(2));
 
-        Mock.SetupCommand<Result>(c => c is PauseDownloadTaskCommand)
-            .Returns(Task.FromResult(Result.Ok()));
+        Mock.SetupCommand<Result>(c => c is PauseDownloadTaskCommand).Returns(Task.FromResult(Result.Ok()));
 
         // Act
         var result = await Sut.ExecuteAsync(new AutoPauseActiveDownloadsCommand(), CancellationToken);
@@ -159,18 +159,20 @@ public class AutoPauseActiveDownloadsCommandUnitTests : BaseUnitTest<AutoPauseAc
         Mock.Mock<IMoveDownloadFileScheduler>().Verify();
         Mock.Mock<ICommandExecutor>()
             .Verify(
-                x => x.Send(
-                    It.Is<PauseDownloadTaskCommand>(c => c.DownloadTaskGuid == firstPassKey.Id && c.AutoPause),
-                    CancellationToken
-                ),
+                x =>
+                    x.Send(
+                        It.Is<PauseDownloadTaskCommand>(c => c.DownloadTaskGuid == firstPassKey.Id && c.AutoPause),
+                        CancellationToken
+                    ),
                 Times.Once
             );
         Mock.Mock<ICommandExecutor>()
             .Verify(
-                x => x.Send(
-                    It.Is<PauseDownloadTaskCommand>(c => c.DownloadTaskGuid == secondPassKey.Id && c.AutoPause),
-                    CancellationToken
-                ),
+                x =>
+                    x.Send(
+                        It.Is<PauseDownloadTaskCommand>(c => c.DownloadTaskGuid == secondPassKey.Id && c.AutoPause),
+                        CancellationToken
+                    ),
                 Times.Once
             );
     }

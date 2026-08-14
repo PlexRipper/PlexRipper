@@ -3,13 +3,31 @@
 	<MediaOverviewRefresh
 		v-if="libraryStore.getIsLibrarySyncing(libraryId)"
 		:library-id="libraryId" />
-	<template v-else>
+	<div
+		v-else
+		class="media-overview-layout">
 		<div class="media-overview-bar">
 			<!--	Overview bar	-->
 			<MediaOverviewBar
 				:detail-mode="false"
 				:library-id="libraryId"
 				@action="onAction" />
+			<!-- Library Inaccessible Alert -->
+			<q-banner
+				v-if="isLibraryInaccessible"
+				class="media-overview-inaccessible-banner bg-warning text-black"
+				dense
+				role="status"
+				aria-live="polite"
+				data-cy="media-overview-inaccessible-library-banner">
+				<template #avatar>
+					<q-icon
+						name="mdi-alert"
+						aria-hidden="true" />
+				</template>
+				<strong>{{ $t('components.media-overview.library-inaccessible-title') }}</strong>
+				{{ $t('components.media-overview.library-inaccessible') }}
+			</q-banner>
 		</div>
 		<div class="media-overview-content">
 			<template v-if="!mediaOverviewStore.loading">
@@ -39,7 +57,9 @@
 				<!-- Media Overview -->
 				<template v-else-if="mediaOverviewStore.itemsLength && !mediaOverviewStore.hasNoSearchResults">
 					<!--	Data table display	-->
-					<QRow align="start">
+					<QRow
+						class="media-overview-results"
+						align="start">
 						<QCol>
 							<template v-if="mediaOverviewStore.getMediaViewMode === ViewMode.Table">
 								<MediaTable
@@ -109,8 +129,12 @@
 			<QLoadingOverlay :loading="!libraryStore.getIsLibrarySyncing(libraryId) && mediaOverviewStore.loading" />
 			<!-- Download confirmation dialog	-->
 			<DownloadConfirmation @download="downloadStore.downloadMedia($event)" />
+			<!-- Library refresh mode dialog -->
+			<RefreshModeDialog
+				:library-name="libraryStore.getLibraryName(libraryId)"
+				@select="refreshLibrary" />
 		</div>
-	</template>
+	</div>
 </template>
 
 <script setup lang="ts">
@@ -122,6 +146,7 @@ import type { IMediaOverviewBarActions } from '@interfaces';
 import {
 	listenMediaOverviewDownloadCommand,
 	sendMediaOverviewDownloadCommand,
+	useAccountStore,
 	useDialogStore,
 	useDownloadStore,
 	useI18n,
@@ -137,12 +162,23 @@ const mediaOverviewStore = useMediaOverviewStore();
 const downloadStore = useDownloadStore();
 const libraryStore = useLibraryStore();
 const dialogStore = useDialogStore();
+const accountStore = useAccountStore();
 
 const props = defineProps<{
 	libraryId: number;
 }>();
 
 const library = computed(() => libraryStore.getLibrary(props.libraryId));
+const isLibraryInaccessible = computed(() => {
+	if (props.libraryId <= 0) {
+		return false;
+	}
+
+	const library = libraryStore.getLibrary(props.libraryId);
+	return !library
+		|| !accountStore.getHasAccountServerAccess(library.plexServerId)
+		|| !accountStore.getHasAccountLibraryAccess(library.id);
+});
 
 function resetProgress() {
 	libraryStore.updateLibraryProgress({
@@ -158,11 +194,11 @@ function resetProgress() {
 	});
 }
 
-function refreshLibrary() {
+function refreshLibrary(forceMediaRefresh: boolean): void {
 	resetProgress();
 	mediaOverviewStore.loading = true;
 	useSubscription(
-		libraryStore.reSyncLibrary(mediaOverviewStore.libraryId).subscribe(),
+		libraryStore.reSyncLibrary(mediaOverviewStore.libraryId, forceMediaRefresh).subscribe(),
 	);
 }
 
@@ -213,7 +249,7 @@ function onAction(event: IMediaOverviewBarActions) {
 			dialogStore.openDialog(DialogType.MediaSelectionDialog);
 			break;
 		case 'refresh-library':
-			refreshLibrary();
+			dialogStore.openDialog(DialogType.RefreshMediaDialog);
 			break;
 		case 'media-options-dialog':
 			dialogStore.openDialog(DialogType.MediaOptionsDialog);
@@ -277,6 +313,34 @@ onMounted(() => {
 
 <style lang="scss">
 @use '@/assets/scss/variables.scss' as *;
+
+.media-overview-layout {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.media-overview-content {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.media-overview-results {
+  height: 100%;
+  min-height: 0;
+
+  > .col,
+  > [class*='col-'] {
+    display: flex;
+    height: 100%;
+    min-height: 0;
+  }
+}
 
 #media-container,
 .media-table-container,

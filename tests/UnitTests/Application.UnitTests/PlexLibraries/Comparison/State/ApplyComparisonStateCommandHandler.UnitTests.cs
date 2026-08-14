@@ -1,20 +1,20 @@
 namespace Reaparr.Application.UnitTests;
 
-public class ApplyComparisonStateCommandHandlerUnitTests
-    : BaseCommandUnitTest<ApplyComparisonStateCommand>
+public class ApplyComparisonStateCommandHandlerUnitTests : BaseCommandUnitTest<ApplyComparisonStateCommand>
 {
-    
-
     [Test]
     public async Task ShouldReturnSuccessWithoutDispatch_WhenItemsAreEmpty()
     {
         // Arrange
-        await SetupDatabase(70, config =>
-        {
-            config.PlexServerCount = 1;
-            config.PlexMovieLibraryCount = 1;
-            config.PlexAccountCount = 1;
-        });
+        await SetupDatabase(
+            70,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexMovieLibraryCount = 1;
+                config.PlexAccountCount = 1;
+            }
+        );
 
         var command = new ApplyComparisonStateCommand([], 1, PlexMediaType.Movie);
 
@@ -62,12 +62,15 @@ public class ApplyComparisonStateCommandHandlerUnitTests
     public async Task ShouldDispatchOwnedMovieProjection_WhenMovieLibraryIsOwned()
     {
         // Arrange
-        await SetupDatabase(71, config =>
-        {
-            config.PlexServerCount = 1;
-            config.PlexMovieLibraryCount = 1;
-            config.PlexAccountCount = 1;
-        });
+        await SetupDatabase(
+            71,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexMovieLibraryCount = 1;
+                config.PlexAccountCount = 1;
+            }
+        );
 
         var library = await IDbContext.PlexLibraries.SingleAsync(CancellationToken);
         await SetOwnedOverrideAsync(library.PlexServerId, true);
@@ -77,7 +80,8 @@ public class ApplyComparisonStateCommandHandlerUnitTests
         Mock.SetupCommand<Result>(x =>
                 (x as ApplyOwnedMovieComparisonStateCommand) != null
                 && ((ApplyOwnedMovieComparisonStateCommand)x).OwnedLibraryId == library.Id
-                && ReferenceEquals(((ApplyOwnedMovieComparisonStateCommand)x).Items, items))
+                && ReferenceEquals(((ApplyOwnedMovieComparisonStateCommand)x).Items, items)
+            )
             .ReturnsAsync(Result.Ok())
             .Verifiable(Times.Once);
         Mock.SetupCommand<Result>(x => x is ApplyRemoteMovieComparisonStateCommand)
@@ -97,12 +101,15 @@ public class ApplyComparisonStateCommandHandlerUnitTests
     public async Task ShouldDispatchRemoteMovieProjection_WhenMovieLibraryIsNotOwned()
     {
         // Arrange
-        await SetupDatabase(72, config =>
-        {
-            config.PlexServerCount = 1;
-            config.PlexMovieLibraryCount = 1;
-            config.PlexAccountCount = 1;
-        });
+        await SetupDatabase(
+            72,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexMovieLibraryCount = 1;
+                config.PlexAccountCount = 1;
+            }
+        );
 
         var library = await IDbContext.PlexLibraries.SingleAsync(CancellationToken);
         await SetOwnedOverrideAsync(library.PlexServerId, false);
@@ -115,7 +122,8 @@ public class ApplyComparisonStateCommandHandlerUnitTests
         Mock.SetupCommand<Result>(x =>
                 (x as ApplyRemoteMovieComparisonStateCommand) != null
                 && ((ApplyRemoteMovieComparisonStateCommand)x).RemoteLibraryId == library.Id
-                && ReferenceEquals(((ApplyRemoteMovieComparisonStateCommand)x).Items, items))
+                && ReferenceEquals(((ApplyRemoteMovieComparisonStateCommand)x).Items, items)
+            )
             .ReturnsAsync(Result.Ok())
             .Verifiable(Times.Once);
 
@@ -132,12 +140,15 @@ public class ApplyComparisonStateCommandHandlerUnitTests
     public async Task ShouldDispatchOwnedTvShowProjection_WhenTvShowLibraryIsOwned()
     {
         // Arrange
-        await SetupDatabase(73, config =>
-        {
-            config.PlexServerCount = 1;
-            config.PlexTvShowLibraryCount = 1;
-            config.PlexAccountCount = 1;
-        });
+        await SetupDatabase(
+            73,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexTvShowLibraryCount = 1;
+                config.PlexAccountCount = 1;
+            }
+        );
 
         var library = await IDbContext.PlexLibraries.SingleAsync(CancellationToken);
         await SetOwnedOverrideAsync(library.PlexServerId, true);
@@ -147,7 +158,8 @@ public class ApplyComparisonStateCommandHandlerUnitTests
         Mock.SetupCommand<Result>(x =>
                 (x as ApplyOwnedTvShowComparisonStateCommand) != null
                 && ((ApplyOwnedTvShowComparisonStateCommand)x).OwnedLibraryId == library.Id
-                && ReferenceEquals(((ApplyOwnedTvShowComparisonStateCommand)x).Items, items))
+                && ReferenceEquals(((ApplyOwnedTvShowComparisonStateCommand)x).Items, items)
+            )
             .ReturnsAsync(Result.Ok())
             .Verifiable(Times.Once);
         Mock.SetupCommand<Result>(x => x is ApplyRemoteTvShowComparisonStateCommand)
@@ -167,12 +179,15 @@ public class ApplyComparisonStateCommandHandlerUnitTests
     public async Task ShouldDispatchRemoteTvShowProjection_WhenTvShowLibraryIsNotOwned()
     {
         // Arrange
-        await SetupDatabase(74, config =>
-        {
-            config.PlexServerCount = 1;
-            config.PlexTvShowLibraryCount = 1;
-            config.PlexAccountCount = 1;
-        });
+        await SetupDatabase(
+            74,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexTvShowLibraryCount = 1;
+                config.PlexAccountCount = 1;
+            }
+        );
 
         var library = await IDbContext.PlexLibraries.SingleAsync(CancellationToken);
         await SetOwnedOverrideAsync(library.PlexServerId, false);
@@ -185,7 +200,8 @@ public class ApplyComparisonStateCommandHandlerUnitTests
         Mock.SetupCommand<Result>(x =>
                 (x as ApplyRemoteTvShowComparisonStateCommand) != null
                 && ((ApplyRemoteTvShowComparisonStateCommand)x).RemoteLibraryId == library.Id
-                && ReferenceEquals(((ApplyRemoteTvShowComparisonStateCommand)x).Items, items))
+                && ReferenceEquals(((ApplyRemoteTvShowComparisonStateCommand)x).Items, items)
+            )
             .ReturnsAsync(Result.Ok())
             .Verifiable(Times.Once);
 
@@ -202,12 +218,15 @@ public class ApplyComparisonStateCommandHandlerUnitTests
     public async Task ShouldReturnFailureWithoutDispatch_WhenMediaTypeIsUnsupported()
     {
         // Arrange
-        await SetupDatabase(75, config =>
-        {
-            config.PlexServerCount = 1;
-            config.PlexMovieLibraryCount = 1;
-            config.PlexAccountCount = 1;
-        });
+        await SetupDatabase(
+            75,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexMovieLibraryCount = 1;
+                config.PlexAccountCount = 1;
+            }
+        );
 
         var library = await IDbContext.PlexLibraries.SingleAsync(CancellationToken);
         var command = new ApplyComparisonStateCommand(
@@ -240,8 +259,8 @@ public class ApplyComparisonStateCommandHandlerUnitTests
 
     private async Task SetOwnedOverrideAsync(int plexServerId, bool ownedOverride)
     {
-        await IDbContext.PlexServers
-            .Where(x => x.Id == plexServerId)
+        await IDbContext
+            .PlexServers.Where(x => x.Id == plexServerId)
             .ExecuteUpdateAsync(x => x.SetProperty(y => y.OwnedOverride, ownedOverride), CancellationToken);
     }
 

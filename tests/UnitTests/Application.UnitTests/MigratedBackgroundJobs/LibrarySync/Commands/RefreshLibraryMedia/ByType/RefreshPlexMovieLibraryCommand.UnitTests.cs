@@ -28,8 +28,7 @@ public class RefreshPlexMovieLibraryCommandUnitTests : BaseUnitTest<RefreshPlexM
             .Setup(x => x.Send(It.IsAny<SyncPlexMoviesCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Ok(new CrudMoviesReport()));
 
-        Mock.Mock<IMediaQueryCache>()
-            .Setup(x => x.InvalidateLibrary(It.IsAny<int>(), It.IsAny<string>()));
+        Mock.Mock<IMediaQueryCache>().Setup(x => x.InvalidateLibrary(It.IsAny<int>(), It.IsAny<string>()));
 
         // Act
         var result = await Sut.ExecuteAsync(
@@ -76,8 +75,7 @@ public class RefreshPlexMovieLibraryCommandUnitTests : BaseUnitTest<RefreshPlexM
             .Setup(x => x.Send(It.IsAny<SyncPlexMoviesCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Ok(new CrudMoviesReport()));
 
-        Mock.Mock<IMediaQueryCache>()
-            .Setup(x => x.InvalidateLibrary(It.IsAny<int>(), It.IsAny<string>()));
+        Mock.Mock<IMediaQueryCache>().Setup(x => x.InvalidateLibrary(It.IsAny<int>(), It.IsAny<string>()));
 
         // Act
         await Sut.ExecuteAsync(
@@ -112,8 +110,11 @@ public class RefreshPlexMovieLibraryCommandUnitTests : BaseUnitTest<RefreshPlexM
             )
             .Returns(Task.CompletedTask);
 
-        Mock.Mock<IMediaQueryCache>()
-            .Setup(x => x.InvalidateLibrary(It.IsAny<int>(), It.IsAny<string>()));
+        Mock.Mock<ICommandExecutor>()
+            .Setup(x => x.Send(It.IsAny<SyncPlexMoviesCommand>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result.Ok(new CrudMoviesReport()));
+
+        Mock.Mock<IMediaQueryCache>().Setup(x => x.InvalidateLibrary(It.IsAny<int>(), It.IsAny<string>()));
 
         // Act
         var result = await Sut.ExecuteAsync(
@@ -127,6 +128,8 @@ public class RefreshPlexMovieLibraryCommandUnitTests : BaseUnitTest<RefreshPlexM
         updatedLibrary.ShouldNotBeNull();
         updatedLibrary.SyncedAt.ShouldBe(originalSyncedAt);
 
+        Mock.Mock<ICommandExecutor>()
+            .Verify(x => x.Send(It.IsAny<SyncPlexMoviesCommand>(), It.IsAny<CancellationToken>()), Times.Once());
         Mock.Mock<ILibrarySyncProgressStore>()
             .Verify(
                 x => x.UpdateItemAsync(It.IsAny<int>(), It.IsAny<LibraryProgressItem>(), It.IsAny<CancellationToken>()),
@@ -164,8 +167,7 @@ public class RefreshPlexMovieLibraryCommandUnitTests : BaseUnitTest<RefreshPlexM
             .Setup(x => x.Send(It.IsAny<SyncPlexMoviesCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Ok(new CrudMoviesReport()));
 
-        Mock.Mock<IMediaQueryCache>()
-            .Setup(x => x.InvalidateLibrary(It.IsAny<int>(), It.IsAny<string>()));
+        Mock.Mock<IMediaQueryCache>().Setup(x => x.InvalidateLibrary(It.IsAny<int>(), It.IsAny<string>()));
 
         // Act
         var result = await Sut.ExecuteAsync(

@@ -55,9 +55,7 @@ public static class MediaSortNormalizer
     {
         if (string.IsNullOrWhiteSpace(sort))
         {
-            var titleField = libraryCount == 1
-                ? DEFAULT_TITLE_SORT_SINGLE_LIBRARY
-                : DEFAULT_TITLE_SORT_MULTI_LIBRARY;
+            var titleField = libraryCount == 1 ? DEFAULT_TITLE_SORT_SINGLE_LIBRARY : DEFAULT_TITLE_SORT_MULTI_LIBRARY;
 
             return new Result(titleField, false);
         }
@@ -74,9 +72,7 @@ public static class MediaSortNormalizer
         if (field is null)
             return null;
 
-        var direction = parts.Length == 2 && !string.IsNullOrWhiteSpace(parts[1])
-            ? parts[1]
-            : "asc";
+        var direction = parts.Length == 2 && !string.IsNullOrWhiteSpace(parts[1]) ? parts[1] : "asc";
 
         var descending = direction.Equals("desc", StringComparison.OrdinalIgnoreCase);
         if (!descending && !direction.Equals("asc", StringComparison.OrdinalIgnoreCase))
@@ -92,12 +88,8 @@ public static class MediaSortNormalizer
     private static string? NormalizeField(this string requested, int libraryCount)
     {
         if (_titleFields.Contains(requested))
-            return libraryCount == 1
-                ? DEFAULT_TITLE_SORT_SINGLE_LIBRARY
-                : DEFAULT_TITLE_SORT_MULTI_LIBRARY;
+            return libraryCount == 1 ? DEFAULT_TITLE_SORT_SINGLE_LIBRARY : DEFAULT_TITLE_SORT_MULTI_LIBRARY;
 
-        return _fieldMap.TryGetValue(requested, out var canonical)
-            ? canonical
-            : null;
+        return _fieldMap.TryGetValue(requested, out var canonical) ? canonical : null;
     }
 }

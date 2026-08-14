@@ -163,7 +163,7 @@ jobs:
                 with:
                     install: false
                     record: true
-                    browser: firefox
+                    browser: chrome
                     start: bun run static-server
                     parallel: true
                     working-directory: ./src/AppHost/ClientApp/

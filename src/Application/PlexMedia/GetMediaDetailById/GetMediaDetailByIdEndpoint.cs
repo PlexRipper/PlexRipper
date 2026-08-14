@@ -62,7 +62,9 @@ public class GetMediaDetailByIdEndpoint : Endpoint<GetMediaDetailByIdEndpointReq
         _log.Here().DebugApiCall(HttpContext, req);
         if (req.Type == PlexMediaType.Movie)
         {
-            var plexMovie = await _dbContext.PlexMovies.IncludeAll().FirstOrDefaultAsync(x => x.Id == req.PlexMediaId, ct);
+            var plexMovie = await _dbContext
+                .PlexMovies.IncludeAll()
+                .FirstOrDefaultAsync(x => x.Id == req.PlexMediaId, ct);
             if (plexMovie is null)
             {
                 await Send.FluentResult(ResultExtensions.EntityNotFound(nameof(PlexMovie), req.PlexMediaId), ct);
@@ -124,7 +126,10 @@ public class GetMediaDetailByIdEndpoint : Endpoint<GetMediaDetailByIdEndpointReq
         foreach (var episode in episodes)
             items.Add(episode.ToSlimDTO());
 
-        var result = await _commandExecutor.Send(new ApplyComparisonStateCommand(items, plexTvShow.PlexLibraryId, PlexMediaType.TvShow), ct);
+        var result = await _commandExecutor.Send(
+            new ApplyComparisonStateCommand(items, plexTvShow.PlexLibraryId, PlexMediaType.TvShow),
+            ct
+        );
 
         if (result.IsFailed)
         {
@@ -141,7 +146,10 @@ public class GetMediaDetailByIdEndpoint : Endpoint<GetMediaDetailByIdEndpointReq
     private async Task ApplyMovieDetailComparisonStateAsync(PlexMovie plexMovie, CancellationToken ct)
     {
         var items = new List<PlexMediaSlimDTO> { plexMovie.ToSlimDTO() };
-        var result = await _commandExecutor.Send(new ApplyComparisonStateCommand(items, plexMovie.PlexLibraryId, PlexMediaType.Movie), ct);
+        var result = await _commandExecutor.Send(
+            new ApplyComparisonStateCommand(items, plexMovie.PlexLibraryId, PlexMediaType.Movie),
+            ct
+        );
 
         if (result.IsFailed)
         {

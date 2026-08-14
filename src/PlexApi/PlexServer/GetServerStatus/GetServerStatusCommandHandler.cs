@@ -13,10 +13,7 @@ public class GetServerStatusCommandHandler : ICommandHandler<GetServerStatusComm
 
     public async Task<Result<PlexServerStatus>> ExecuteAsync(GetServerStatusCommand command, CancellationToken ct)
     {
-        var connection = await _dbContext.PlexServerConnections.GetAsync(
-            command.PlexServerConnectionId,
-            ct
-        );
+        var connection = await _dbContext.PlexServerConnections.GetAsync(command.PlexServerConnectionId, ct);
 
         if (connection is null)
             return ResultExtensions.EntityNotFound(nameof(PlexServerConnection), command.PlexServerConnectionId);

@@ -138,7 +138,6 @@ public class GetAccessiblePlexServersUnitTests : BaseUnitTest<GetAccessiblePlexS
             plexDevice.Connections.Add(testConnection);
         }
 
-
         SetCallMock(response1, response2);
 
         // Act
@@ -161,7 +160,6 @@ public class GetAccessiblePlexServersUnitTests : BaseUnitTest<GetAccessiblePlexS
         await SetupDatabase(1234, config => config.PlexAccountCount = 1);
         var plexAccount = await IDbContext.PlexAccounts.FirstOrDefaultAsync(CancellationToken);
         plexAccount.ShouldNotBeNull();
-
 
         var response1 = new GetServerResourcesResponse
         {
@@ -213,7 +211,6 @@ public class GetAccessiblePlexServersUnitTests : BaseUnitTest<GetAccessiblePlexS
         var plexAccount = await IDbContext.PlexAccounts.FirstOrDefaultAsync(CancellationToken);
         plexAccount.ShouldNotBeNull();
 
-
         var serverCount = 2;
 
         var response1 = new GetServerResourcesResponse
@@ -255,7 +252,6 @@ public class GetAccessiblePlexServersUnitTests : BaseUnitTest<GetAccessiblePlexS
         await SetupDatabase(1234, config => config.PlexAccountCount = 1);
         var plexAccount = await IDbContext.PlexAccounts.FirstOrDefaultAsync(CancellationToken);
         plexAccount.ShouldNotBeNull();
-
 
         var serverCount = 5;
         var response1 = FakePlexApiData.GetServerResourcesResponse(
@@ -299,7 +295,6 @@ public class GetAccessiblePlexServersUnitTests : BaseUnitTest<GetAccessiblePlexS
         await SetupDatabase(1234, config => config.PlexAccountCount = 1);
         var plexAccount = await IDbContext.PlexAccounts.FirstOrDefaultAsync(CancellationToken);
         plexAccount.ShouldNotBeNull();
-
 
         var serverResource1 = FakePlexApiData.GetServerResource(new Seed(939)).Generate(2);
         serverResource1[0].Connections.Clear();

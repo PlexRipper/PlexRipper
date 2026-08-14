@@ -27,12 +27,12 @@ public static partial class EnumMapperExtensions
         ["SourceUnavailable"] = DownloadStatus.SourceUnavailable,
         ["Restarting"] = DownloadStatus.Restarting,
     };
-    
+
     private static readonly Dictionary<DownloadStatus, string> _statusToString = _stringToStatus.ToDictionary(
         x => x.Value,
         x => x.Key
     );
-    
+
     /// <summary>
     /// Converts string to <see cref="DownloadStatus"/> by a fast method.
     /// </summary>
@@ -45,7 +45,7 @@ public static partial class EnumMapperExtensions
             return status;
 
         _log.Here().Error("Failed to convert string {Value} to {DownloadStatus}", value, nameof(DownloadStatus));
-        
+
         throw new ArgumentOutOfRangeException(nameof(value), value, null);
     }
 
@@ -59,13 +59,9 @@ public static partial class EnumMapperExtensions
     {
         if (_statusToString.TryGetValue(value, out var statusString))
             return statusString;
-        
+
         _log.Here()
-            .Error(
-                "Failed to convert {Value} to string of type {NameOfDownloadStatus}",
-                value,
-                nameof(DownloadStatus)
-            );
+            .Error("Failed to convert {Value} to string of type {NameOfDownloadStatus}", value, nameof(DownloadStatus));
 
         throw new ArgumentOutOfRangeException(nameof(value), value, null);
     }

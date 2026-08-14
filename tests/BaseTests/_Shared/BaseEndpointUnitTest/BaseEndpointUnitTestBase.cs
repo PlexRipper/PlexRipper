@@ -43,12 +43,14 @@ public abstract class BaseEndpointUnitTestBase<TEndpoint, TResponse> : BaseUnitT
             .Where(t =>
                 t is { IsAbstract: false, IsInterface: false }
                 && t.GetInterfaces()
-                    .Any(i => i.IsGenericType
-                              && i.GetGenericTypeDefinition() == typeof(IValidator<>)
-                              && i.GenericTypeArguments[0] == requestType)
+                    .Any(i =>
+                        i.IsGenericType
+                        && i.GetGenericTypeDefinition() == typeof(IValidator<>)
+                        && i.GenericTypeArguments[0] == requestType
+                    )
             )
             .ToList();
-        
+
         var validator = validatorTypes.Count switch
         {
             0 => null,
@@ -77,7 +79,10 @@ public abstract class BaseEndpointUnitTestBase<TEndpoint, TResponse> : BaseUnitT
     /// checks those paths in that order and resets the body stream after reading so tests may still
     /// assert against the raw response body when needed.
     /// </remarks>
-    protected static async Task<TResponse?> GetEndpointResponseAsync(TEndpoint endpoint, CancellationToken cancellationToken)
+    protected static async Task<TResponse?> GetEndpointResponseAsync(
+        TEndpoint endpoint,
+        CancellationToken cancellationToken
+    )
     {
         try
         {
@@ -85,7 +90,8 @@ public abstract class BaseEndpointUnitTestBase<TEndpoint, TResponse> : BaseUnitT
             if (responseProperty?.GetValue(endpoint) is TResponse response)
                 return response;
         }
-        catch (Exception ex) when (ex is NotSupportedException or TargetInvocationException { InnerException: NotSupportedException })
+        catch (Exception ex)
+            when (ex is NotSupportedException or TargetInvocationException { InnerException: NotSupportedException })
         {
             // Some FastEndpoints response DTOs cannot be auto-created because they have required members.
             // Those endpoints still write their response to the HTTP body via SendAsync/Send.FluentResult.
@@ -145,7 +151,9 @@ public abstract class BaseEndpointUnitTestBase<TEndpoint, TResponse> : BaseUnitT
                 s.AddSingleton(_ =>
                 {
                     var mediaQueryCache = new Mock<IMediaQueryCache>(MockBehavior.Loose);
-                    mediaQueryCache.Setup(x => x.InvalidateLibraries(It.IsAny<IReadOnlyCollection<int>>(), It.IsAny<string>()));
+                    mediaQueryCache.Setup(x =>
+                        x.InvalidateLibraries(It.IsAny<IReadOnlyCollection<int>>(), It.IsAny<string>())
+                    );
                     mediaQueryCache.Setup(x => x.InvalidateLibrary(It.IsAny<int>(), It.IsAny<string>()));
                     return mediaQueryCache.Object;
                 });

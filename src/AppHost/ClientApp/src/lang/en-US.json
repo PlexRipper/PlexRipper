@@ -100,6 +100,8 @@
             }
         },
         "media-overview": {
+            "library-inaccessible-title": "Library inaccessible.",
+            "library-inaccessible": "No enabled Plex accounts have access to this library anymore.",
             "is-refreshing": "Refreshing library \"{library}\" data from {server}",
             "could-not-display": "Could not display this library.",
             "no-data": "The library has been synced but contains no media.",
@@ -460,6 +462,20 @@
                 }
             },
             "title": "Radarr Integration"
+        },
+        "refresh-mode-dialog": {
+            "incremental": "Incremental refresh",
+            "full-reset": "Full reset",
+            "library": {
+                "title": "Refresh {libraryName} Plex library",
+                "text": "Choose how Reaparr should refresh this library. An incremental refresh updates only changed media and is usually faster.",
+                "full-reset-warning": "A full reset deletes all media records for this library from Reaparr and then rebuilds them from Plex. Downloaded files are not deleted."
+            },
+            "server": {
+                "title": "Refresh all Plex libraries in {serverName}",
+                "text": "Choose how Reaparr should refresh all libraries in this server. An incremental refresh updates only changed media and is usually faster.",
+                "full-reset-warning": "A full reset deletes all media records for every library on this server from Reaparr and then rebuilds them from Plex. Downloaded files are not deleted."
+            }
         }
     },
     "general": {

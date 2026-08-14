@@ -19,10 +19,7 @@ public class DownloadJobUnitTests : BaseUnitTest<DownloadJob>
         var testDownloadTask = IDbContext.DownloadTaskMovieFile.First();
         var expectedDestinationRootPath = testDownloadTask.DirectoryMeta.DestinationRootPath;
         Mock.Mock<IDownloadManagerSettings>().Setup(x => x.DownloadSegments).Returns(4);
-        var context = new TickerFunctionContext<DownloadTaskKey>(
-            new TickerFunctionContext(),
-            testDownloadTask.ToKey()
-        );
+        var context = new TickerFunctionContext<DownloadTaskKey>(new TickerFunctionContext(), testDownloadTask.ToKey());
         Mock.Mock<ICommandExecutor>()
             .Setup(x => x.Send(It.IsAny<DeterminePlexDownloadClientCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Ok(PlexDownloadClientType.Direct))
@@ -83,10 +80,7 @@ public class DownloadJobUnitTests : BaseUnitTest<DownloadJob>
         );
 
         var testDownloadTask = IDbContext.DownloadTaskMovieFile.First();
-        var context = new TickerFunctionContext<DownloadTaskKey>(
-            new TickerFunctionContext(),
-            testDownloadTask.ToKey()
-        );
+        var context = new TickerFunctionContext<DownloadTaskKey>(new TickerFunctionContext(), testDownloadTask.ToKey());
         Mock.Mock<ICommandExecutor>()
             .Setup(x => x.Send(It.IsAny<DeterminePlexDownloadClientCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Ok(PlexDownloadClientType.Direct))
@@ -138,10 +132,7 @@ public class DownloadJobUnitTests : BaseUnitTest<DownloadJob>
         testDownloadTask.DownloadStatus = DownloadStatus.SourceUnavailable;
         await IDbContext.SaveChangesAsync(CancellationToken);
 
-        var context = new TickerFunctionContext<DownloadTaskKey>(
-            new TickerFunctionContext(),
-            testDownloadTask.ToKey()
-        );
+        var context = new TickerFunctionContext<DownloadTaskKey>(new TickerFunctionContext(), testDownloadTask.ToKey());
 
         Mock.Mock<ICommandExecutor>()
             .Setup(x => x.Send(It.IsAny<DeterminePlexDownloadClientCommand>(), It.IsAny<CancellationToken>()))
@@ -225,10 +216,7 @@ public class DownloadJobUnitTests : BaseUnitTest<DownloadJob>
 
         var testDownloadTask = IDbContext.DownloadTaskMovieFile.First();
         await IDbContext.SetDownloadStatus(testDownloadTask.ToKey(), DownloadStatus.DownloadFinished);
-        var context = new TickerFunctionContext<DownloadTaskKey>(
-            new TickerFunctionContext(),
-            testDownloadTask.ToKey()
-        );
+        var context = new TickerFunctionContext<DownloadTaskKey>(new TickerFunctionContext(), testDownloadTask.ToKey());
 
         Mock.Mock<ICommandExecutor>()
             .Setup(x => x.Send(It.IsAny<DeterminePlexDownloadClientCommand>(), It.IsAny<CancellationToken>()))
@@ -274,10 +262,7 @@ public class DownloadJobUnitTests : BaseUnitTest<DownloadJob>
         );
 
         var testDownloadTask = IDbContext.DownloadTaskMovieFile.First();
-        var context = new TickerFunctionContext<DownloadTaskKey>(
-            new TickerFunctionContext(),
-            testDownloadTask.ToKey()
-        );
+        var context = new TickerFunctionContext<DownloadTaskKey>(new TickerFunctionContext(), testDownloadTask.ToKey());
 
         Mock.Mock<ICommandExecutor>()
             .Setup(x => x.Send(It.IsAny<DeterminePlexDownloadClientCommand>(), It.IsAny<CancellationToken>()))
@@ -346,5 +331,4 @@ public class DownloadJobUnitTests : BaseUnitTest<DownloadJob>
         );
         downloadClientMock.Verify(x => x.DisposeAsync(), Times.Once());
     }
-
 }

@@ -9,7 +9,8 @@ namespace EntityFrameworkCore.Sqlite.Concurrency;
 /// A thread-safe SQLite context that provides application-level serialization for writes.
 /// </summary>
 /// <typeparam name="TContext">The type of the actual DbContext.</typeparam>
-public class ThreadSafeSqliteContext<TContext> : DbContext where TContext : DbContext
+public class ThreadSafeSqliteContext<TContext> : DbContext
+    where TContext : DbContext
 {
     private readonly string? _connectionString;
 
@@ -26,7 +27,8 @@ public class ThreadSafeSqliteContext<TContext> : DbContext where TContext : DbCo
     /// Initializes a new instance of the <see cref="ThreadSafeSqliteContext{TContext}"/> class using options.
     /// </summary>
     /// <param name="options">The options.</param>
-    public ThreadSafeSqliteContext(DbContextOptions options) : base(options)
+    public ThreadSafeSqliteContext(DbContextOptions options)
+        : base(options)
     {
 #pragma warning disable EF1001
         var extension = options.FindExtension<SqliteOptionsExtension>();
@@ -34,8 +36,9 @@ public class ThreadSafeSqliteContext<TContext> : DbContext where TContext : DbCo
         if (extension?.ConnectionString != null)
             _connectionString = SqliteConnectionEnhancer.GetOptimizedConnectionString(extension.ConnectionString);
         else if (extension?.Connection != null)
-            _connectionString =
-                SqliteConnectionEnhancer.GetOptimizedConnectionString(extension.Connection.ConnectionString);
+            _connectionString = SqliteConnectionEnhancer.GetOptimizedConnectionString(
+                extension.Connection.ConnectionString
+            );
     }
 
     private SqliteWriteQueue WriteQueue
@@ -83,54 +86,58 @@ public class ThreadSafeSqliteContext<TContext> : DbContext where TContext : DbCo
     ///   not retried, as it indicates an application-level bug.
     /// </para>
     /// </remarks>
-    public async Task<T> ExecuteWriteAsync<T>(
-        Func<TContext, Task<T>> operation,
-        CancellationToken ct = default)
+    public async Task<T> ExecuteWriteAsync<T>(Func<TContext, Task<T>> operation, CancellationToken ct = default)
     {
         var maxRetryAttempts = Options.MaxRetryAttempts;
 
-        return await WriteQueue.EnqueueAsync(async () =>
-        {
-            int attempt = 0;
-            while (true)
+        return await WriteQueue.EnqueueAsync(
+            async () =>
             {
-                try
+                int attempt = 0;
+                while (true)
                 {
-                    // The interceptor will upgrade this BEGIN to BEGIN IMMEDIATE, ensuring
-                    // no later statement in the transaction fails with SQLITE_BUSY before
-                    // commit (as long as UpgradeTransactionsToImmediate is true).
-                    await using var transaction = await Database.BeginTransactionAsync(
-                        System.Data.IsolationLevel.Serializable, ct);
-
-                    var result = await operation((TContext)(object)this);
-                    await SaveChangesAsync(ct);
-                    await transaction.CommitAsync(ct);
-
-                    return result;
-                }
-                catch (SqliteException ex) when (SqliteErrorCodes.IsAnyBusy(ex))
-                {
-                    attempt++;
-                    if (attempt >= maxRetryAttempts)
+                    try
                     {
-                        var kind = SqliteErrorCodes.IsBusySnapshot(ex)
-                            ? "SQLITE_BUSY_SNAPSHOT (stale read snapshot — another writer committed after this transaction began)"
-                            : $"SQLITE_BUSY (extended code {ex.SqliteExtendedErrorCode})";
+                        // The interceptor will upgrade this BEGIN to BEGIN IMMEDIATE, ensuring
+                        // no later statement in the transaction fails with SQLITE_BUSY before
+                        // commit (as long as UpgradeTransactionsToImmediate is true).
+                        await using var transaction = await Database.BeginTransactionAsync(
+                            System.Data.IsolationLevel.Serializable,
+                            ct
+                        );
 
-                        throw new TimeoutException(
-                            $"SQLite database busy after {attempt} retry attempt(s). " +
-                            $"Error: {kind}. " +
-                            $"Consider increasing MaxRetryAttempts or BusyTimeout.",
-                            ex);
+                        var result = await operation((TContext)(object)this);
+                        await SaveChangesAsync(ct);
+                        await transaction.CommitAsync(ct);
+
+                        return result;
                     }
+                    catch (SqliteException ex) when (SqliteErrorCodes.IsAnyBusy(ex))
+                    {
+                        attempt++;
+                        if (attempt >= maxRetryAttempts)
+                        {
+                            var kind = SqliteErrorCodes.IsBusySnapshot(ex)
+                                ? "SQLITE_BUSY_SNAPSHOT (stale read snapshot — another writer committed after this transaction began)"
+                                : $"SQLITE_BUSY (extended code {ex.SqliteExtendedErrorCode})";
 
-                    // Exponential backoff with full jitter: sleep in [baseDelay, 2×baseDelay].
-                    var baseDelay = 100 * Math.Pow(2, attempt);
-                    var jitter = Random.Shared.NextDouble() * baseDelay;
-                    await Task.Delay(TimeSpan.FromMilliseconds(baseDelay + jitter), ct);
+                            throw new TimeoutException(
+                                $"SQLite database busy after {attempt} retry attempt(s). "
+                                    + $"Error: {kind}. "
+                                    + $"Consider increasing MaxRetryAttempts or BusyTimeout.",
+                                ex
+                            );
+                        }
+
+                        // Exponential backoff with full jitter: sleep in [baseDelay, 2×baseDelay].
+                        var baseDelay = 100 * Math.Pow(2, attempt);
+                        var jitter = Random.Shared.NextDouble() * baseDelay;
+                        await Task.Delay(TimeSpan.FromMilliseconds(baseDelay + jitter), ct);
+                    }
                 }
-            }
-        }, ct);
+            },
+            ct
+        );
     }
 
     /// <summary>
@@ -138,15 +145,16 @@ public class ThreadSafeSqliteContext<TContext> : DbContext where TContext : DbCo
     /// </summary>
     /// <param name="operation">The operation to execute.</param>
     /// <param name="ct">The cancellation token.</param>
-    public async Task ExecuteWriteAsync(
-        Func<TContext, Task> operation,
-        CancellationToken ct = default)
+    public async Task ExecuteWriteAsync(Func<TContext, Task> operation, CancellationToken ct = default)
     {
-        await ExecuteWriteAsync(async ctx =>
-        {
-            await operation(ctx);
-            return true;
-        }, ct);
+        await ExecuteWriteAsync(
+            async ctx =>
+            {
+                await operation(ctx);
+                return true;
+            },
+            ct
+        );
     }
 
     /// <summary>
@@ -161,9 +169,7 @@ public class ThreadSafeSqliteContext<TContext> : DbContext where TContext : DbCo
     /// short to avoid blocking WAL checkpoint completion, which can cause the WAL file to
     /// grow and degrade read performance over time.
     /// </remarks>
-    public async Task<T> ExecuteReadAsync<T>(
-        Func<TContext, Task<T>> operation,
-        CancellationToken ct = default)
+    public async Task<T> ExecuteReadAsync<T>(Func<TContext, Task<T>> operation, CancellationToken ct = default)
     {
         return await operation((TContext)(object)this);
     }
@@ -174,19 +180,21 @@ public class ThreadSafeSqliteContext<TContext> : DbContext where TContext : DbCo
     /// <typeparam name="T">The entity type.</typeparam>
     /// <param name="entities">The entities to insert.</param>
     /// <param name="ct">The cancellation token.</param>
-    public async Task BulkInsertSafeAsync<T>(
-        IList<T> entities,
-        CancellationToken ct = default) where T : class
+    public async Task BulkInsertSafeAsync<T>(IList<T> entities, CancellationToken ct = default)
+        where T : class
     {
-        await ExecuteWriteAsync(async ctx =>
-        {
-            foreach (var batch in entities.Chunk(1000))
+        await ExecuteWriteAsync(
+            async ctx =>
             {
-                await ctx.AddRangeAsync(batch, ct);
-                await ctx.SaveChangesAsync(ct);
-                ctx.ChangeTracker.Clear();
-            }
-        }, ct);
+                foreach (var batch in entities.Chunk(1000))
+                {
+                    await ctx.AddRangeAsync(batch, ct);
+                    await ctx.SaveChangesAsync(ct);
+                    ctx.ChangeTracker.Clear();
+                }
+            },
+            ct
+        );
     }
 
     private SqliteConcurrencyOptions? _options;
@@ -195,7 +203,8 @@ public class ThreadSafeSqliteContext<TContext> : DbContext where TContext : DbCo
     {
         get
         {
-            if (_options != null) return _options;
+            if (_options != null)
+                return _options;
 
             // Read the options configured via UseSqliteWithConcurrency so that
             // MaxRetryAttempts, WriteQueueCapacity, etc. reflect the user's settings.

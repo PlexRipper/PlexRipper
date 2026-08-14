@@ -28,32 +28,32 @@ public class RestartDownloadTaskEndpointIntegrationTests : BaseIntegrationTests
             }
         );
 
-        var downloadTaskToRestart = await container.DbContext.DownloadTaskMovieFile
-            .AsNoTracking()
+        var downloadTaskToRestart = await container
+            .DbContext.DownloadTaskMovieFile.AsNoTracking()
             .OrderBy(x => x.Id)
             .FirstAsync(CancellationToken);
 
-        var seededMovieData = await container.DbContext.PlexMovieData
-            .AsNoTracking()
+        var seededMovieData = await container
+            .DbContext.PlexMovieData.AsNoTracking()
             .Where(x => x.PlexLibraryId == downloadTaskToRestart.PlexLibraryId)
             .OrderBy(x => x.Id)
             .FirstOrDefaultAsync(CancellationToken);
         seededMovieData.ShouldNotBeNull();
 
-        var seededDownloadTask = await container.DbContext.DownloadTaskMovieFile
-            .AsTracking()
+        var seededDownloadTask = await container
+            .DbContext.DownloadTaskMovieFile.AsTracking()
             .OrderBy(x => x.Id)
             .FirstOrDefaultAsync(CancellationToken);
         seededDownloadTask.ShouldNotBeNull();
 
-        await container.DbContext.DownloadTaskMovieFile
-            .Where(x => x.Id == seededDownloadTask.Id)
+        await container
+            .DbContext.DownloadTaskMovieFile.Where(x => x.Id == seededDownloadTask.Id)
             .ExecuteUpdateAsync(
-                x => x
-                    .SetProperty(y => y.PlexApiRatingKey, _ => seededMovieData.PlexApiRatingKey)
-                    .SetProperty(y => y.PlexApiMediaId, _ => seededMovieData.PlexApiMediaId)
-                    .SetProperty(y => y.PlexApiPartId, _ => seededMovieData.PlexApiPartId)
-                    .SetProperty(y => y.FileLocationUrl, _ => seededMovieData.Key),
+                x =>
+                    x.SetProperty(y => y.PlexApiRatingKey, _ => seededMovieData.PlexApiRatingKey)
+                        .SetProperty(y => y.PlexApiMediaId, _ => seededMovieData.PlexApiMediaId)
+                        .SetProperty(y => y.PlexApiPartId, _ => seededMovieData.PlexApiPartId)
+                        .SetProperty(y => y.FileLocationUrl, _ => seededMovieData.Key),
                 CancellationToken
             );
 
@@ -98,7 +98,7 @@ public class RestartDownloadTaskEndpointIntegrationTests : BaseIntegrationTests
             CancellationToken
         );
 
-        // Assert 
+        // Assert
         var result = testResult.Result;
         result.IsSuccess.ShouldBeTrue();
         finalDownload.ShouldNotBeNull();

@@ -85,14 +85,14 @@ public static partial class DbContextExtensions
         if (plexLibraryId == 0)
             return ResultExtensions.IsZero(nameof(plexLibraryId));
 
-        return await context.ExecuteSerializedTransactionAsync(async (ctx, txCt) =>
+        return await context.ExecuteSerializedTransactionAsync(
+            async (ctx, txCt) =>
             {
                 plexMovies.SetRelationshipIds(plexServerId, plexLibraryId);
 
                 foreach (var movie in plexMovies)
-                    movie.Quality = movie.MediaDataList.Count == 0
-                        ? VideoQuality.Unknown
-                        : movie.MediaDataList.Max(x => x.Quality);
+                    movie.Quality =
+                        movie.MediaDataList.Count == 0 ? VideoQuality.Unknown : movie.MediaDataList.Max(x => x.Quality);
 
                 await ctx.BulkInsertAsync(plexMovies, BulkConfigPreset.Default, txCt);
 
@@ -106,6 +106,8 @@ public static partial class DbContextExtensions
                     .ToList();
 
                 await ctx.BulkInsertAsync(mediaData, BulkConfigPreset.Default, txCt);
-            }, ct);
+            },
+            ct
+        );
     }
 }

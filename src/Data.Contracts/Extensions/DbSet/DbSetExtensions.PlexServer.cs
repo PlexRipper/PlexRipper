@@ -16,15 +16,15 @@ public static partial class DbSetExtensions
 
     public static IQueryable<PlexServer> IncludeConnections(this IQueryable<PlexServer> plexServer) =>
         plexServer.Include(x => x.PlexServerConnections).AsQueryable();
-    
 
     public static IQueryable<PlexServer> IgnoreIsEnabledFilter(this IQueryable<PlexServer> query) =>
         query.IgnoreQueryFilters(["IsEnabled"]);
 
     public static IQueryable<PlexServer> WhereIsOwned(this IQueryable<PlexServer> query) => query.IsOwnedHelper(true);
 
-    public static IQueryable<PlexServer> WhereIsNotOwned(this IQueryable<PlexServer> query) => query.IsOwnedHelper(false);
-    
+    public static IQueryable<PlexServer> WhereIsNotOwned(this IQueryable<PlexServer> query) =>
+        query.IsOwnedHelper(false);
+
     private static IQueryable<PlexServer> IsOwnedHelper(this IQueryable<PlexServer> query, bool owned)
     {
         if (owned)
@@ -36,6 +36,4 @@ public static partial class DbSetExtensions
             x.OwnedOverride == false || (x.OwnedOverride == null && !x.PlexAccountServers.Any(y => y.IsServerOwned))
         );
     }
-
-
 }

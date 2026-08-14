@@ -9,8 +9,8 @@ public enum PlexMediaComparisonState
     /// <summary>
     /// Invalid or unmapped persisted comparison state fallback.
     /// </summary>
-    Unknown = -1,   
-    
+    Unknown = -1,
+
     /// <summary>
     /// No current comparison scope for this media's library pair.
     /// Show the muted "not compared yet" chip; never show missing/HQ badges.
@@ -26,7 +26,7 @@ public enum PlexMediaComparisonState
     /// When comparison work is queued or processing and no current scope is available yet.
     /// </summary>
     Pending = 2,
-    
+
     /// <summary>
     /// Current scope exists; this media has no hit in any current owned library (anti-join result).
     /// </summary>

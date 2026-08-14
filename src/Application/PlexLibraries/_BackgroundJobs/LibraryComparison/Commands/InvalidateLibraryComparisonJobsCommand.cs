@@ -4,11 +4,9 @@ namespace Reaparr.Application;
 /// Invalidates every active comparison job in which one of the supplied libraries participates.
 /// Queued jobs are deleted; running jobs receive cooperative cancellation and retain their history.
 /// </summary>
-public record InvalidateLibraryComparisonJobsCommand(IReadOnlyCollection<int> PlexLibraryIds)
-    : ICommand<Result>;
+public record InvalidateLibraryComparisonJobsCommand(IReadOnlyCollection<int> PlexLibraryIds) : ICommand<Result>;
 
-public class InvalidateLibraryComparisonJobsCommandValidator
-    : AbstractValidator<InvalidateLibraryComparisonJobsCommand>
+public class InvalidateLibraryComparisonJobsCommandValidator : AbstractValidator<InvalidateLibraryComparisonJobsCommand>
 {
     public InvalidateLibraryComparisonJobsCommandValidator()
     {
@@ -42,24 +40,21 @@ public class InvalidateLibraryComparisonJobsCommandHandler
     )
     {
         var libraryIds = command.PlexLibraryIds.Distinct().ToList();
-        var matchingJobKeys = await _dbContext.TimeTickers
-            .Where(x =>
+        var matchingJobKeys = await _dbContext
+            .TimeTickers.Where(x =>
                 x.JobType == JobTypes.LibraryComparisonJob
                 && x.RequestJson != null
-                && (libraryIds.Contains(x.RequestJson.OwnedPlexLibraryId)
-                    || libraryIds.Contains(x.RequestJson.RemotePlexLibraryId))
+                && (
+                    libraryIds.Contains(x.RequestJson.OwnedPlexLibraryId)
+                    || libraryIds.Contains(x.RequestJson.RemotePlexLibraryId)
+                )
             )
             .Select(x => x.JobKey)
             .ToListAsync(cancellationToken);
 
-        var jobKeys = matchingJobKeys
-            .Select(x => new JobKey(x, JobTypes.LibraryComparisonJob))
-            .ToList();
+        var jobKeys = matchingJobKeys.Select(x => new JobKey(x, JobTypes.LibraryComparisonJob)).ToList();
 
-        var result = await _backgroundJobScheduler.DeleteBatchJobs(
-            jobKeys,
-            cancellationToken
-        );
+        var result = await _backgroundJobScheduler.DeleteBatchJobs(jobKeys, cancellationToken);
 
         if (result.IsSuccess)
             _log.Here().Debug("Invalidated comparison jobs for libraries {LibraryIds}", command.PlexLibraryIds);

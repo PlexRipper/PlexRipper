@@ -3,8 +3,11 @@ namespace Reaparr.Application;
 /// <summary>
 /// Queues one or more library sync job for the specified Plex library IDs.
 /// </summary>
-public record QueueLibrarySyncJobCommand(List<int> PlexLibraryIds, bool Force = false) : ICommand<Result>;
-
+public record QueueLibrarySyncJobCommand(
+    List<int> PlexLibraryIds,
+    bool ForceLibrarySync = false,
+    bool ForceMediaRefresh = false
+) : ICommand<Result>;
 
 public class QueueLibrarySyncJobCommandValidator : AbstractValidator<QueueLibrarySyncJobCommand>
 {
@@ -61,16 +64,36 @@ public class QueueLibrarySyncJobCommandHandler : ICommandHandler<QueueLibrarySyn
         var itemsToReset = existingQueues
             .Where(x =>
                 x.Status is LibrarySyncJobStatus.Failed or LibrarySyncJobStatus.Cancelled
-                || (x.Status == LibrarySyncJobStatus.Completed
-                    && (command.Force || x.CompletedAt <= syncBufferCutoff || unsyncedLibraryIds.Contains(x.PlexLibraryId)))
+                || (
+                    x.Status == LibrarySyncJobStatus.Completed
+                    && (
+                        command.ForceLibrarySync
+                        || x.CompletedAt <= syncBufferCutoff
+                        || unsyncedLibraryIds.Contains(x.PlexLibraryId)
+                    )
+                )
             )
             .Select(x => x.PlexLibraryId)
+            .ToList();
+
+        var queuedForceRefreshLibraryIds = existingQueues
+            .Where(x => x.Status == LibrarySyncJobStatus.Queued)
+            .Select(x => x.PlexLibraryId)
+            .Concat(itemsToReset)
+            .Distinct()
             .ToList();
 
         // Reset completed/failed items
         if (itemsToReset.Any())
         {
             await _dbContext.LibrarySyncJobQueues.ResetLibrarySyncJobQueue(itemsToReset, token: cancellationToken);
+        }
+
+        if (command.ForceMediaRefresh && queuedForceRefreshLibraryIds.Any())
+        {
+            await _dbContext
+                .LibrarySyncJobQueues.Where(x => queuedForceRefreshLibraryIds.Contains(x.PlexLibraryId))
+                .ExecuteUpdateAsync(x => x.SetProperty(y => y.ForceMediaRefresh, true), cancellationToken);
         }
 
         // Get ALL existing library IDs (including those we just reset, which are now Queued)
@@ -94,7 +117,7 @@ public class QueueLibrarySyncJobCommandHandler : ICommandHandler<QueueLibrarySyn
         // Add new items (excluding ALL existing ones, including those we just reset)
         var itemsToAdd = libraries
             .Where(x => !existingLibraryIds.Contains(x.Id))
-            .Where(x => command.Force || x.SyncedAt is null || x.SyncedAt <= syncBufferCutoff)
+            .Where(x => command.ForceLibrarySync || x.SyncedAt is null || x.SyncedAt <= syncBufferCutoff)
             .Select(x => new LibrarySyncJobQueue
             {
                 PlexLibraryId = x.Id,
@@ -102,6 +125,7 @@ public class QueueLibrarySyncJobCommandHandler : ICommandHandler<QueueLibrarySyn
                 Priority = GetPriority(x.Type),
                 Status = LibrarySyncJobStatus.Queued,
                 CreatedAt = DateTime.UtcNow,
+                ForceMediaRefresh = command.ForceMediaRefresh,
             })
             .ToList();
 

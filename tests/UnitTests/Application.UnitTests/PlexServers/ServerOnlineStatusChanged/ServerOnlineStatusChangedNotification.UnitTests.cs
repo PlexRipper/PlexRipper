@@ -1,4 +1,3 @@
-
 namespace Reaparr.Application.UnitTests;
 
 public class ServerOnlineStatusChangedHandlerUnitTests : BaseUnitTest<ServerOnlineStatusChangedHandler>
@@ -12,26 +11,33 @@ public class ServerOnlineStatusChangedHandlerUnitTests : BaseUnitTest<ServerOnli
             builder.RegisterInstance(mediaQueryCache.Object).As<IMediaQueryCache>().SingleInstance()
         );
 
-        await SetupDatabase(91301, config =>
-        {
-            config.PlexServerCount = 2;
-            config.PlexMovieLibraryCount = 2;
-            config.PlexTvShowLibraryCount = 2;
-        });
+        await SetupDatabase(
+            91301,
+            config =>
+            {
+                config.PlexServerCount = 2;
+                config.PlexMovieLibraryCount = 2;
+                config.PlexTvShowLibraryCount = 2;
+            }
+        );
 
         var dbContext = IDbContext;
         var targetServer = await dbContext.PlexServers.OrderBy(x => x.Id).FirstAsync(CancellationToken);
-        var expectedLibraryIds = await dbContext.PlexLibraries
-            .Where(x => x.PlexServerId == targetServer.Id)
+        var expectedLibraryIds = await dbContext
+            .PlexLibraries.Where(x => x.PlexServerId == targetServer.Id)
             .Select(x => x.Id)
             .OrderBy(x => x)
             .ToListAsync(CancellationToken);
 
         mediaQueryCache
-            .Setup(x => x.InvalidateLibraries(
-                It.Is<IReadOnlyCollection<int>>(libraryIds => libraryIds.OrderBy(id => id).SequenceEqual(expectedLibraryIds)),
-                "Plex server online status changed"
-            ))
+            .Setup(x =>
+                x.InvalidateLibraries(
+                    It.Is<IReadOnlyCollection<int>>(libraryIds =>
+                        libraryIds.OrderBy(id => id).SequenceEqual(expectedLibraryIds)
+                    ),
+                    "Plex server online status changed"
+                )
+            )
             .Verifiable(Times.Once);
 
         Mock.Mock<IDownloadQueue>()
@@ -62,26 +68,33 @@ public class ServerOnlineStatusChangedHandlerUnitTests : BaseUnitTest<ServerOnli
             builder.RegisterInstance(mediaQueryCache.Object).As<IMediaQueryCache>().SingleInstance()
         );
 
-        await SetupDatabase(91302, config =>
-        {
-            config.PlexServerCount = 2;
-            config.PlexMovieLibraryCount = 2;
-            config.PlexTvShowLibraryCount = 2;
-        });
+        await SetupDatabase(
+            91302,
+            config =>
+            {
+                config.PlexServerCount = 2;
+                config.PlexMovieLibraryCount = 2;
+                config.PlexTvShowLibraryCount = 2;
+            }
+        );
 
         var dbContext = IDbContext;
         var targetServer = await dbContext.PlexServers.OrderBy(x => x.Id).FirstAsync(CancellationToken);
-        var expectedLibraryIds = await dbContext.PlexLibraries
-            .Where(x => x.PlexServerId == targetServer.Id)
+        var expectedLibraryIds = await dbContext
+            .PlexLibraries.Where(x => x.PlexServerId == targetServer.Id)
             .Select(x => x.Id)
             .OrderBy(x => x)
             .ToListAsync(CancellationToken);
 
         mediaQueryCache
-            .Setup(x => x.InvalidateLibraries(
-                It.Is<IReadOnlyCollection<int>>(libraryIds => libraryIds.OrderBy(id => id).SequenceEqual(expectedLibraryIds)),
-                "Plex server online status changed"
-            ))
+            .Setup(x =>
+                x.InvalidateLibraries(
+                    It.Is<IReadOnlyCollection<int>>(libraryIds =>
+                        libraryIds.OrderBy(id => id).SequenceEqual(expectedLibraryIds)
+                    ),
+                    "Plex server online status changed"
+                )
+            )
             .Verifiable(Times.Once);
 
         Mock.Mock<IDownloadQueue>()
@@ -95,10 +108,12 @@ public class ServerOnlineStatusChangedHandlerUnitTests : BaseUnitTest<ServerOnli
             .Verifiable(Times.Once);
 
         Mock.Mock<ICommandExecutor>()
-            .Setup(x => x.Send(
-                It.Is<ResetFailedLibrarySyncJobsCommand>(command => command.PlexServerId == targetServer.Id),
-                It.IsAny<CancellationToken>()
-            ))
+            .Setup(x =>
+                x.Send(
+                    It.Is<ResetFailedLibrarySyncJobsCommand>(command => command.PlexServerId == targetServer.Id),
+                    It.IsAny<CancellationToken>()
+                )
+            )
             .ReturnsAsync(Result.Ok())
             .Verifiable(Times.Once);
 

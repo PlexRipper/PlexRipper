@@ -30,8 +30,14 @@ public class DownloadTaskScheduler : IDownloadTaskScheduler
         return await Result.Try(async Task<Result> () =>
         {
             var jobKey = DownloadJob.GetJobKey(downloadTaskKey.Id);
-            if (await _scheduler.IsJobRunning(jobKey, cancellationToken))
-                return Result.Fail($"{nameof(DownloadJob)} with {jobKey} already exists").LogWarning();
+            if (
+                await _scheduler.IsJobRunning(jobKey, cancellationToken)
+                || await _scheduler.IsQueued(jobKey)
+            )
+            {
+                _log.Here().Debug("{DownloadJobName} with {JobKey} is already scheduled", nameof(DownloadJob), jobKey);
+                return Result.Ok();
+            }
 
             var schedulingResult = await _scheduler.ExecuteJob<DownloadJob, DownloadTaskKey>(
                 jobKey,

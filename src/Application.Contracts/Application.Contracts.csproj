@@ -14,6 +14,7 @@
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
+        <PackageReference Include="Quartz" Version="3.19.1" />
     </ItemGroup>
     <ItemGroup>
         <Using Include="FastEndpoints" />
@@ -21,6 +22,7 @@
         <Using Include="FluentValidation" />
         <Using Include="Reaparr.Domain" />
         <Using Include="Reaparr.FluentResultExtensions" />
+        <Using Include="Quartz" />
         <Using Include="System.Text.Json.Serialization" />
     </ItemGroup>
 </Project>

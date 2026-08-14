@@ -29,6 +29,7 @@
         <Using Include="Bogus.Premium" />
         <Using Include="ByteSizeLib" />
         <Using Include="Microsoft.EntityFrameworkCore" />
+        <Using Include="Quartz" />
         <Using Include="Reaparr.Application" />
         <Using Include="Reaparr.Application.Contracts" />
         <Using Include="Reaparr.Data" />

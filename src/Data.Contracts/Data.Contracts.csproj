@@ -17,7 +17,6 @@
         <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.10" />
         <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.10" />
         <PackageReference Include="SQLitePCLRaw.lib.e_sqlite3" Version="2.1.12" />
-        <PackageReference Include="TickerQ.Utilities" Version="10.4.0" />
     </ItemGroup>
     <ItemGroup>
         <Using Include="FluentResults" />

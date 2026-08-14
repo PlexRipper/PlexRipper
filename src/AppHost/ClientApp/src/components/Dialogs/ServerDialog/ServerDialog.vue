@@ -111,7 +111,7 @@
 							name="server-commands"
 							data-cy="server-dialog-tab-content-5">
 							<ServerCommandsTabContent
-                :plex-server-id="plexServerId"
+								:plex-server-id="plexServerId"
 								:is-visible="isVisible" />
 						</q-tab-panel>
 					</q-tab-panels>

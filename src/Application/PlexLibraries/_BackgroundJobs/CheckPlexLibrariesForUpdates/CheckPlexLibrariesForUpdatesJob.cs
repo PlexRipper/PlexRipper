@@ -42,7 +42,7 @@ public class CheckPlexLibrariesForUpdatesJob
         CancellationToken cancellationToken
     )
     {
-        context.CronOccurrenceOperations.SkipIfAlreadyRunning();
+        context.CronOccurrenceOperations?.SkipIfAlreadyRunning();
 
         _log.Here().Debug("Executing job: {JobName}", nameof(CheckPlexLibrariesForUpdatesJob));
 

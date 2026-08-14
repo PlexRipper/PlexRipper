@@ -50,7 +50,7 @@ public class RefreshLibraryMediaEndpointIntegrationTests : BaseIntegrationTests
         var client = container.GetApiClient();
         await client.SignIn();
 
-        var testResult = await client.GETAsync<
+        var testResult = await client.POSTAsync<
             RefreshLibraryMediaEndpoint,
             RefreshLibraryMediaEndpointRequest,
             ResultDTO<PlexLibraryDTO>
@@ -152,7 +152,7 @@ public class RefreshLibraryMediaEndpointIntegrationTests : BaseIntegrationTests
         var client = container.GetApiClient();
         await client.SignIn();
 
-        var testResult = await client.GETAsync<
+        var testResult = await client.POSTAsync<
             RefreshLibraryMediaEndpoint,
             RefreshLibraryMediaEndpointRequest,
             ResultDTO<PlexLibraryDTO>

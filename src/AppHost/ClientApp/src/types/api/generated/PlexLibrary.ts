@@ -11,6 +11,7 @@
  */
 
 import type { RequestParams } from "./http-client";
+import { ContentType } from "./http-client";
 
 import type {
   BaseResultDTO,
@@ -20,6 +21,7 @@ import type {
   PlexMediaFilterMetadataDTO,
   PlexMediaMetadataDTO,
   PlexMediaType,
+  RefreshLibraryMediaEndpointRequest,
   SetLibraryEnabledRequest,
 } from "./data-contracts";
 
@@ -165,17 +167,20 @@ export class PlexLibrary {
    * No description
    * * @tags Plexlibrary
    * @name RefreshLibraryMediaEndpoint
-   * @request GET:/api/PlexLibrary/refresh/{PlexLibraryId}
+   * @request POST:/api/PlexLibrary/refresh/{PlexLibraryId}
    * @secure
    */
   refreshLibraryMediaEndpoint = (
     plexLibraryId: number,
+    data: RefreshLibraryMediaEndpointRequest,
     params: RequestParams = {},
   ) =>
     axiosObservable<PlexLibraryDTO>({
       url: `/api/PlexLibrary/refresh/${plexLibraryId}`,
-      method: "GET",
+      method: "POST",
+      data: data,
       secure: true,
+      type: ContentType.Json,
       responseType: "json",
       ...params,
     }).pipe(apiCheckPipe<PlexLibraryDTO>);

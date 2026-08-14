@@ -1148,6 +1148,13 @@ export interface PlexRoleDTO {
   name: string;
 }
 
+export interface SyncPlexServerMediaEndpointRequest {
+  /** @format int32 */
+  plexServerId: number;
+  forceLibrarySync: boolean;
+  forceMediaRefresh: boolean;
+}
+
 export interface PlexServerAccessRapportDTO {
   isServerOffline: boolean;
   libraryAccess: PlexLibraryAccessRapportDTO[];
@@ -1949,6 +1956,13 @@ export interface ValidatePlexCredentialsDTO {
   uuid: string;
   /** @format date-time */
   validatedAt?: string | null;
+}
+
+export interface RefreshLibraryMediaEndpointRequest {
+  /** @format int32 */
+  plexLibraryId: number;
+  forceLibrarySync: boolean;
+  forceMediaRefresh: boolean;
 }
 
 export interface ValidatePlexCredentialsEndpointRequest {

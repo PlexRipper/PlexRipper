@@ -61,12 +61,17 @@ public class DownloadTaskScheduler : IDownloadTaskScheduler
             _log.Here().Information("Stopping DownloadClient for DownloadTaskId {DownloadTaskId}", downloadTaskKey);
 
             var jobKey = DownloadJob.GetJobKey(downloadTaskKey.Id);
-            if (!await _scheduler.IsJobRunning(jobKey, cancellationToken))
+            var isRunning = await _scheduler.IsJobRunning(jobKey, cancellationToken);
+            var isQueued = await _scheduler.IsQueued(jobKey);
+            if (!isRunning && !isQueued)
             {
                 return Result
-                    .Fail($"{nameof(DownloadJob)} with {jobKey} cannot be stopped because it is not running")
+                    .Fail($"{nameof(DownloadJob)} with {jobKey} cannot be stopped because it is not scheduled")
                     .LogWarning();
             }
+
+            if (isQueued && !isRunning)
+                return await _scheduler.DeleteBatchJobs([jobKey], cancellationToken);
 
             var stopResult = await _scheduler.Interrupt(jobKey, cancellationToken);
             if (!stopResult)

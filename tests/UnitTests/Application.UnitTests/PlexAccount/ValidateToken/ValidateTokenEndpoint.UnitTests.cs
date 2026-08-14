@@ -1,7 +1,11 @@
 ﻿namespace Reaparr.Application.UnitTests;
 
-public class ValidatePlexTokenEndpointUnitTests : BaseEndpointUnitTest<ValidatePlexTokenEndpoint,
-    ValidatePlexTokenEndpointRequest, ResultDTO<ValidatePlexTokenEndpointResponse>>
+public class ValidatePlexTokenEndpointUnitTests
+    : BaseEndpointUnitTest<
+        ValidatePlexTokenEndpoint,
+        ValidatePlexTokenEndpointRequest,
+        ResultDTO<ValidatePlexTokenEndpointResponse>
+    >
 {
     [Test]
     public async Task ShouldValidateThePlexToken_WhenTokenIsValid()
@@ -92,6 +96,9 @@ public class ValidatePlexTokenEndpointUnitTests : BaseEndpointUnitTest<ValidateP
         Mock.Mock<ICommandExecutor>()
             .Setup(x => x.Send(It.IsAny<ValidatePlexTokenCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Ok(commandResult).AddPlex401UnauthorizedError());
+        Mock.Mock<INotificationHubService>()
+            .Setup(x => x.SendRefreshNotificationAsync(RefreshDataType.PlexAccount))
+            .Returns(Task.CompletedTask);
 
         // Act
         var endpointResult = await TestEndpointHandleAsync(
@@ -111,7 +118,10 @@ public class ValidatePlexTokenEndpointUnitTests : BaseEndpointUnitTest<ValidateP
         response.ShouldNotBeNull();
         response.IsUnAuthorized.ShouldBeTrue();
 
-        var persistedAccount = await IDbContext.PlexAccounts.SingleAsync(x => x.Id == plexAccount.Id, CancellationToken);
+        var persistedAccount = await IDbContext.PlexAccounts.SingleAsync(
+            x => x.Id == plexAccount.Id,
+            CancellationToken
+        );
         persistedAccount.IsValidated.ShouldBeFalse();
         persistedAccount.ValidatedAt.ShouldBeNull();
         persistedAccount.Username.ShouldBe(originalUsername);

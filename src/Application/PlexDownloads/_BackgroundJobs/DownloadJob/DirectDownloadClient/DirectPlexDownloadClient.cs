@@ -29,6 +29,9 @@ public class DirectPlexDownloadClient : IPlexDownloadClient
     private int _isDisposed;
     private int _completionCallbackReceived;
     private int _lastObservedProgressPercentagePercent;
+    private readonly TaskCompletionSource<bool> _completionCallbackProcessed = new(
+        TaskCreationOptions.RunContinuationsAsynchronously
+    );
 
     public DirectPlexDownloadClient(
         ILogger log,
@@ -192,13 +195,16 @@ public class DirectPlexDownloadClient : IPlexDownloadClient
         if (result.IsFailed)
             return result.LogError();
 
+        if (Volatile.Read(ref _completionCallbackReceived) != 0)
+        {
+            // The downloader event is observed synchronously, but its Rx callback performs asynchronous persistence.
+            // Do not let DownloadJob run its completion hook until DownloadFinished (or a failure status) is stored.
+            await _completionCallbackProcessed.Task.WaitAsync(cancellationToken);
+        }
         // Guard against client library edge cases where progress reaches 100% but
         // DownloadFileCompleted is never raised. We only reconcile after observing
         // terminal progress so we do not misclassify ordinary interrupted downloads.
-        if (
-            Volatile.Read(ref _completionCallbackReceived) == 0
-            && Volatile.Read(ref _lastObservedProgressPercentagePercent) >= 100
-        )
+        else if (Volatile.Read(ref _lastObservedProgressPercentagePercent) >= 100)
         {
             var reconciliationResult = await ReconcileMissingCompletionCallbackAsync(
                 downloadTaskKey,
@@ -304,54 +310,64 @@ public class DirectPlexDownloadClient : IPlexDownloadClient
                 .Select(args =>
                     Observable.FromAsync(async _ =>
                     {
-                        var package = args.UserState as DownloadPackage;
-                        _log.Here().Debug("The UserState at time of completion: {@Package}", package);
-                        if (args.Cancelled)
+                        try
                         {
-                            var statusResult = await SetDownloadStatusAsync(Domain.DownloadStatus.Paused);
-                            statusResult.LogIfFailed();
-                            return;
+                            var package = args.UserState as DownloadPackage;
+                            _log.Here().Debug("The UserState at time of completion: {@Package}", package);
+                            if (args.Cancelled)
+                            {
+                                var statusResult = await SetDownloadStatusAsync(Domain.DownloadStatus.Paused);
+                                statusResult.LogIfFailed();
+                                return;
+                            }
+
+                            if (args.Error != null)
+                            {
+                                var downloadErrorResult = Result.Fail(new ExceptionalError(args.Error)).LogError();
+                                var failedStatus =
+                                    downloadErrorResult.Has404NotFoundError()
+                                        ? Domain.DownloadStatus.SourceUnavailable
+                                    : downloadErrorResult.IsServerUnreachable()
+                                        ? Domain.DownloadStatus.ServerUnreachable
+                                    : downloadErrorResult.HasStorageError()
+                                        ? Domain.DownloadStatus.StorageError
+                                    : Domain.DownloadStatus.Error;
+
+                                var statusResult = await SetDownloadStatusAsync(failedStatus, downloadErrorResult);
+                                statusResult.LogIfFailed();
+                                return;
+                            }
+
+                            var completionResult = VerifyCompletedDownload(package, downloadFilePath, expectedFileSize);
+                            if (completionResult.IsFailed)
+                            {
+                                var statusResult = await SetDownloadStatusAsync(
+                                    Domain.DownloadStatus.Error,
+                                    completionResult.ToResult()
+                                );
+                                statusResult.LogIfFailed();
+                                return;
+                            }
+
+                            var verifiedFileSize = completionResult.Value;
+                            var progress = new DownloadTaskProgress
+                            {
+                                DataTotal = verifiedFileSize,
+                                Percentage = 100,
+                                DataReceived = verifiedFileSize,
+                                DownloadSpeed = 0,
+                                TimeRemaining = 0,
+                            };
+
+                            _downloadTaskUpdateDispatcher.OnProgressUpdated(key, progress, package!.ToSnapshot());
+
+                            var finishResult = await SetDownloadStatusAsync(Domain.DownloadStatus.DownloadFinished);
+                            finishResult.LogIfFailed();
                         }
-
-                        if (args.Error != null)
+                        finally
                         {
-                            var downloadErrorResult = Result.Fail(new ExceptionalError(args.Error)).LogError();
-                            var failedStatus =
-                                downloadErrorResult.Has404NotFoundError() ? Domain.DownloadStatus.SourceUnavailable
-                                : downloadErrorResult.IsServerUnreachable() ? Domain.DownloadStatus.ServerUnreachable
-                                : downloadErrorResult.HasStorageError() ? Domain.DownloadStatus.StorageError
-                                : Domain.DownloadStatus.Error;
-
-                            var statusResult = await SetDownloadStatusAsync(failedStatus, downloadErrorResult);
-                            statusResult.LogIfFailed();
-                            return;
+                            _completionCallbackProcessed.TrySetResult(true);
                         }
-
-                        var completionResult = VerifyCompletedDownload(package, downloadFilePath, expectedFileSize);
-                        if (completionResult.IsFailed)
-                        {
-                            var statusResult = await SetDownloadStatusAsync(
-                                Domain.DownloadStatus.Error,
-                                completionResult.ToResult()
-                            );
-                            statusResult.LogIfFailed();
-                            return;
-                        }
-
-                        var verifiedFileSize = completionResult.Value;
-                        var progress = new DownloadTaskProgress
-                        {
-                            DataTotal = verifiedFileSize,
-                            Percentage = 100,
-                            DataReceived = verifiedFileSize,
-                            DownloadSpeed = 0,
-                            TimeRemaining = 0,
-                        };
-
-                        _downloadTaskUpdateDispatcher.OnProgressUpdated(key, progress, package!.ToSnapshot());
-
-                        var finishResult = await SetDownloadStatusAsync(Domain.DownloadStatus.DownloadFinished);
-                        finishResult.LogIfFailed();
                     })
                 )
                 .Concat()

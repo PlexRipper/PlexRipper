@@ -1247,6 +1247,97 @@ public class DirectPlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDow
     }
 
     [Test]
+    public async Task ShouldWaitForCompletionStatusPersistence_WhenCompletionEventHandlerIsAsync()
+    {
+        // Arrange
+        await SetupDatabase(
+            88891,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexAccountCount = 1;
+                config.MovieDownloadTasksCount = 1;
+            }
+        );
+
+        var downloadTask = await IDbContext.DownloadTaskMovieFile.FirstAsync(CancellationToken);
+        var serverMachineIdentifier = await IDbContext.GetPlexServerMachineIdentifierById(downloadTask.PlexServerId);
+        SetupSpeedLimitMocks(serverMachineIdentifier);
+        SetupCommandExecutor();
+
+        var completionHandlerStarted = new TaskCompletionSource<bool>(
+            TaskCreationOptions.RunContinuationsAsynchronously
+        );
+        var allowCompletionPersistence = new TaskCompletionSource<bool>(
+            TaskCreationOptions.RunContinuationsAsynchronously
+        );
+
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Setup(x =>
+                x.OnStatusChangedAsync(
+                    It.IsAny<DownloadTaskKey>(),
+                    DomainDownloadStatus.Downloading,
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .Returns(Task.CompletedTask);
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Setup(x =>
+                x.OnStatusChangedAsync(
+                    It.IsAny<DownloadTaskKey>(),
+                    DomainDownloadStatus.DownloadFinished,
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .Returns(async () =>
+            {
+                completionHandlerStarted.TrySetResult(true);
+                await allowCompletionPersistence.Task;
+            });
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Setup(x =>
+                x.OnProgressUpdated(
+                    It.IsAny<DownloadTaskKey>(),
+                    It.IsAny<DownloadTaskProgress>(),
+                    It.IsAny<DirectDownloadSnapshot?>()
+                )
+            );
+
+        var package = MakeDownloadPackage(downloadTask.DataTotal);
+        var fileMock = new Mock<IFile>();
+        var fileInfoFactoryMock = new Mock<IFileInfoFactory>();
+        var downloadServiceMock = new Mock<IDownloadService>();
+        downloadServiceMock.Setup(x => x.Clear()).Returns(Task.CompletedTask);
+        downloadServiceMock.Setup(x => x.CancelTaskAsync()).Returns(Task.CompletedTask);
+        downloadServiceMock.Setup(x => x.Package).Returns(package);
+        downloadServiceMock
+            .Setup(x => x.DownloadFileTaskAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .Returns<string, string, CancellationToken>((_, targetPath, _) =>
+            {
+                SetupVerifiedFile(fileMock, fileInfoFactoryMock, targetPath, downloadTask.DataTotal);
+                downloadServiceMock.Raise(
+                    x => x.DownloadFileCompleted += null,
+                    downloadServiceMock.Object,
+                    new AsyncCompletedEventArgs(null, false, package)
+                );
+                return Task.CompletedTask;
+            });
+
+        var sut = CreateSut(downloadServiceMock, fileMock, fileInfoFactoryMock);
+
+        // Act
+        var startTask = sut.Start(downloadTask.ToKey(), CancellationToken);
+        await completionHandlerStarted.Task.WaitAsync(TimeSpan.FromSeconds(5));
+
+        // Assert
+        startTask.IsCompleted.ShouldBeFalse();
+
+        allowCompletionPersistence.TrySetResult(true);
+        var result = await startTask;
+        result.IsSuccess.ShouldBeTrue();
+    }
+
+    [Test]
     public async Task ShouldPersistVerifiedFileSize_WhenCompletionEventHasZeroReceivedBytes()
     {
         // Arrange

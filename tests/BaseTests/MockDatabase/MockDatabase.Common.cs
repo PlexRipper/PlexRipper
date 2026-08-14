@@ -335,12 +335,11 @@ public static partial class MockDatabase
         var optionsBuilder = new DbContextOptionsBuilder<TContext>();
         var databaseConnectionString = DatabaseConnectionString(dbName);
         optionsBuilder.AddInterceptors(new NaturalSortCollationInterceptor());
-        optionsBuilder.UseSqliteWithConcurrency(
+        optionsBuilder.UseSqlite(
             databaseConnectionString,
             options =>
             {
-                options.BusyTimeout = TimeSpan.FromSeconds(5);
-                options.MaxRetryAttempts = 8;
+                options.CommandTimeout(5);
             }
         );
 

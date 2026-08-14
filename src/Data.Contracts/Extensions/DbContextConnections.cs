@@ -1,4 +1,3 @@
-using EntityFrameworkCore.Sqlite.Concurrency;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Reaparr.Environment;
@@ -37,12 +36,11 @@ public static class DbContextConnections
 
         optionsBuilder.AddInterceptors(_collationInterceptor);
 
-        optionsBuilder.UseSqliteWithConcurrency(
+        optionsBuilder.UseSqlite(
             GetConnectionString(pathProvider),
             options =>
             {
-                options.BusyTimeout = TimeSpan.FromSeconds(30);
-                options.MaxRetryAttempts = 8;
+                options.CommandTimeout(120);
             }
         );
 

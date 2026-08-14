@@ -1,7 +1,6 @@
 using System.Data;
 using System.Reflection;
 using EFCore.BulkExtensions;
-using EntityFrameworkCore.Sqlite.Concurrency;
 using Microsoft.Extensions.DependencyInjection;
 using TickerQ.EntityFrameworkCore.Configurations;
 using TickerQ.Utilities.Entities;

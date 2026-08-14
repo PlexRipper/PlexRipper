@@ -124,8 +124,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Build", "tools\Build\Build.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Build.UnitTests", "tests\UnitTests\Build.UnitTests\Build.UnitTests.csproj", "{9415742C-C8E8-4EAD-8232-0695CB39531F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EFCore.Sqlite.Concurrency", "src\EntityFrameworkCore.Sqlite.Concurrency\EFCore.Sqlite.Concurrency.csproj", "{9957D4A0-3D2C-4948-AB77-AF5E4330325F}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -296,10 +294,6 @@ Global
 		{9415742C-C8E8-4EAD-8232-0695CB39531F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9415742C-C8E8-4EAD-8232-0695CB39531F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9415742C-C8E8-4EAD-8232-0695CB39531F}.Release|Any CPU.Build.0 = Release|Any CPU
-		{9957D4A0-3D2C-4948-AB77-AF5E4330325F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{9957D4A0-3D2C-4948-AB77-AF5E4330325F}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{9957D4A0-3D2C-4948-AB77-AF5E4330325F}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{9957D4A0-3D2C-4948-AB77-AF5E4330325F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -355,7 +349,6 @@ Global
 		{E7B9D386-0DAC-481D-89F5-4A7A43A8AC0F} = {BC7C4F2B-5B33-4A5F-9718-3A672B10A312}
 		{8EC49C5A-AD3B-416F-91D9-9A757FFB7FCA} = {A408562A-B7E2-41E6-ABD1-49EA634C182B}
 		{9415742C-C8E8-4EAD-8232-0695CB39531F} = {BC7C4F2B-5B33-4A5F-9718-3A672B10A312}
-		{9957D4A0-3D2C-4948-AB77-AF5E4330325F} = {8122B8B2-AE24-42A2-8B9E-9A18C7A8DE49}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {B4C02A51-7A0F-40AF-B559-20772614ED60}

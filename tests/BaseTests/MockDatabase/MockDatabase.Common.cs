@@ -246,15 +246,6 @@ public static partial class MockDatabase
         return new AuthDbContext(optionsBuilder.Options, pathProvider, appRuntimeInfo, dbName);
     }
 
-    public static string DatabaseConnectionString(string dbName = "") =>
-        // https://docs.microsoft.com/en-us/dotnet/standard/data/sqlite/in-memory-databases
-        new SqliteConnectionStringBuilder
-        {
-            Mode = SqliteOpenMode.Memory,
-            ForeignKeys = true,
-            DataSource = dbName,
-        }.ToString();
-
     public static async Task Setup(
         this (ReaparrDbContext, AuthDbContext) context,
         Seed seed,
@@ -333,15 +324,7 @@ public static partial class MockDatabase
         where TContext : DbContext
     {
         var optionsBuilder = new DbContextOptionsBuilder<TContext>();
-        var databaseConnectionString = DatabaseConnectionString(dbName);
-        optionsBuilder.AddInterceptors(new NaturalSortCollationInterceptor());
-        optionsBuilder.UseSqlite(
-            databaseConnectionString,
-            options =>
-            {
-                options.CommandTimeout(5);
-            }
-        );
+        optionsBuilder.ConfigureSqlite(dbName, SqliteOpenMode.Memory);
 
         optionsBuilder.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
         optionsBuilder.EnableSensitiveDataLogging();

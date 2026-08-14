@@ -3,7 +3,28 @@ namespace Reaparr.Data.UnitTests;
 public class ReaparrDbContextConcurrencyUnitTests : BaseUnitTest
 {
     [Test]
-    public async Task ShouldSerializeBulkAndBatchWrites_WhenRunConcurrently()
+    public async Task ShouldApplyBusyTimeoutToEveryOpenedConnection()
+    {
+        // Arrange
+        await SetupDatabase(91233);
+
+        // Act
+        var busyTimeouts = new List<long>();
+        for (var i = 0; i < 2; i++)
+        {
+            using var dbContext = (ReaparrDbContext)IDbContext;
+            await dbContext.Database.OpenConnectionAsync(CancellationToken);
+            await using var command = dbContext.Database.GetDbConnection().CreateCommand();
+            command.CommandText = "PRAGMA busy_timeout;";
+            busyTimeouts.Add((long)(await command.ExecuteScalarAsync(CancellationToken))!);
+        }
+
+        // Assert
+        busyTimeouts.ShouldAllBe(x => x == 120000);
+    }
+
+    [Test]
+    public async Task ShouldCompleteBulkAndBatchWrites_WhenContendingThroughSqlite()
     {
         // Arrange
         await SetupDatabase(
@@ -98,7 +119,7 @@ public class ReaparrDbContextConcurrencyUnitTests : BaseUnitTest
     }
 
     [Test]
-    public async Task ShouldRollbackBulkInsert_WhenSerializedTransactionFails()
+    public async Task ShouldRollbackBulkInsert_WhenTransactionFails()
     {
         // Arrange
         await SetupDatabase(91235);
@@ -109,7 +130,7 @@ public class ReaparrDbContextConcurrencyUnitTests : BaseUnitTest
 
         // Act
         using var dbContext = IDbContext;
-        var result = await dbContext.ExecuteSerializedTransactionAsync(
+        var result = await dbContext.ExecuteTransactionAsync(
             async (context, ct) =>
             {
                 await context.BulkInsertAsync(actors, cancellationToken: ct);
@@ -131,7 +152,7 @@ public class ReaparrDbContextConcurrencyUnitTests : BaseUnitTest
     }
 
     [Test]
-    public async Task ShouldReturnCancelledResult_WhenSerializedTransactionIsCancelled()
+    public async Task ShouldReturnCancelledResult_WhenTransactionIsCancelled()
     {
         // Arrange
         await SetupDatabase(91236);
@@ -140,7 +161,7 @@ public class ReaparrDbContextConcurrencyUnitTests : BaseUnitTest
 
         // Act
         using var dbContext = IDbContext;
-        var result = await dbContext.ExecuteSerializedTransactionAsync(
+        var result = await dbContext.ExecuteTransactionAsync(
             (_, ct) => Task.Delay(Timeout.InfiniteTimeSpan, ct),
             cancellationTokenSource.Token
         );

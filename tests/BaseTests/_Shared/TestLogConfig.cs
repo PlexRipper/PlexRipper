@@ -7,7 +7,6 @@ public class TestLogConfig : LogConfig
     public TestLogConfig(IAppRuntimeInfo appRuntimeInfo, IPathProvider pathProvider)
         : base(appRuntimeInfo, pathProvider) { }
 
-
     /// <inheritdoc/>
     protected override bool UseInteractiveSinks => true;
 

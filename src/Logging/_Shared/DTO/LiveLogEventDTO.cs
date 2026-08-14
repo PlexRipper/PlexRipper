@@ -45,7 +45,7 @@ public class LiveLogEventDTO
 
         if (Exception != null)
             logLine += $"{System.Environment.NewLine}{Exception}";
-        
+
         return logLine;
     }
 }

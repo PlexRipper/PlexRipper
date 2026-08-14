@@ -51,7 +51,8 @@ public class SetServerOwnedEndpoint : Endpoint<SetServerOwnedRequest, ResultDTO<
     {
         _log.Here().DebugApiCall(HttpContext, req);
 
-        var plexServerExists = await _dbContext.PlexServers.IgnoreIsEnabledFilter()
+        var plexServerExists = await _dbContext
+            .PlexServers.IgnoreIsEnabledFilter()
             .AnyAsync(x => x.Id == req.PlexServerId, ct);
         if (!plexServerExists)
         {
@@ -59,8 +60,8 @@ public class SetServerOwnedEndpoint : Endpoint<SetServerOwnedRequest, ResultDTO<
             return;
         }
 
-        var updateCount = await _dbContext.PlexServers
-            .IgnoreIsEnabledFilter()
+        var updateCount = await _dbContext
+            .PlexServers.IgnoreIsEnabledFilter()
             .Where(x => x.Id == req.PlexServerId)
             .ExecuteUpdateAsync(x => x.SetProperty(y => y.OwnedOverride, req.IsOwned), ct);
 
@@ -70,8 +71,8 @@ public class SetServerOwnedEndpoint : Endpoint<SetServerOwnedRequest, ResultDTO<
             return;
         }
 
-        var plexServer = await _dbContext.PlexServers
-            .IgnoreIsEnabledFilter()
+        var plexServer = await _dbContext
+            .PlexServers.IgnoreIsEnabledFilter()
             .Include(x => x.PlexAccountServers)
             .GetAsync(req.PlexServerId, ct);
 
@@ -81,13 +82,13 @@ public class SetServerOwnedEndpoint : Endpoint<SetServerOwnedRequest, ResultDTO<
             return;
         }
 
-        var libraries = await _dbContext.PlexLibraries
-            .IgnoreQueryFilters()
+        var libraries = await _dbContext
+            .PlexLibraries.IgnoreQueryFilters()
             .Where(x => x.PlexServerId == req.PlexServerId)
             .Select(x => new { x.Id, x.IsEnabled })
             .ToListAsync(ct);
         var libraryIds = libraries.Select(x => x.Id).ToList();
-        
+
         _mediaQueryCache.InvalidateLibraries(libraryIds, "Plex server ownership scope changed");
 
         var invalidationResult = await _commandExecutor.Send(
@@ -103,10 +104,7 @@ public class SetServerOwnedEndpoint : Endpoint<SetServerOwnedRequest, ResultDTO<
         var failedResults = new List<ResultBase>();
         foreach (var lib in libraries.Where(x => x.IsEnabled))
         {
-            var queueResult = await _commandExecutor.Send(
-                new ScheduleAffectedLibraryComparisonJobsCommand(lib.Id),
-                ct
-            );
+            var queueResult = await _commandExecutor.Send(new ScheduleAffectedLibraryComparisonJobsCommand(lib.Id), ct);
             if (queueResult.IsCancelled)
             {
                 await Send.FluentResult(queueResult, ct);

@@ -139,10 +139,7 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
                 Times.Once()
             );
         Mock.Mock<INotificationHubService>()
-            .Verify(
-                x => x.SendRefreshNotificationAsync(It.IsAny<RefreshDataType>()),
-                Times.Once()
-            );
+            .Verify(x => x.SendRefreshNotificationAsync(It.IsAny<RefreshDataType>()), Times.Once());
         Mock.Mock<ICommandExecutor>()
             .Verify(
                 x => x.Send(It.IsAny<ICommand<Result<GetTranscodeUrlResult>>>(), It.IsAny<CancellationToken>()),
@@ -223,10 +220,7 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
                 Times.Never()
             );
         Mock.Mock<INotificationHubService>()
-            .Verify(
-                x => x.SendRefreshNotificationAsync(It.IsAny<RefreshDataType>()),
-                Times.Never()
-            );
+            .Verify(x => x.SendRefreshNotificationAsync(It.IsAny<RefreshDataType>()), Times.Never());
     }
 
     [Test]
@@ -292,10 +286,7 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
                 Times.Once()
             );
         Mock.Mock<INotificationHubService>()
-            .Verify(
-                x => x.SendRefreshNotificationAsync(It.IsAny<RefreshDataType>()),
-                Times.Never()
-            );
+            .Verify(x => x.SendRefreshNotificationAsync(It.IsAny<RefreshDataType>()), Times.Never());
     }
 
     [Test]
@@ -389,10 +380,7 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
                 Times.Once()
             );
         Mock.Mock<INotificationHubService>()
-            .Verify(
-                x => x.SendRefreshNotificationAsync(It.IsAny<RefreshDataType>()),
-                Times.Once()
-            );
+            .Verify(x => x.SendRefreshNotificationAsync(It.IsAny<RefreshDataType>()), Times.Once());
         Mock.Mock<ICommandExecutor>()
             .Verify(
                 x => x.Send(It.IsAny<ICommand<Result<GetTranscodeUrlResult>>>(), It.IsAny<CancellationToken>()),
@@ -492,10 +480,7 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
                 Times.Once()
             );
         Mock.Mock<INotificationHubService>()
-            .Verify(
-                x => x.SendRefreshNotificationAsync(It.IsAny<RefreshDataType>()),
-                Times.Once()
-            );
+            .Verify(x => x.SendRefreshNotificationAsync(It.IsAny<RefreshDataType>()), Times.Once());
         Mock.Mock<ICommandExecutor>()
             .Verify(
                 x => x.Send(It.IsAny<ICommand<Result<GetTranscodeUrlResult>>>(), It.IsAny<CancellationToken>()),
@@ -594,10 +579,7 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
                 Times.Once()
             );
         Mock.Mock<INotificationHubService>()
-            .Verify(
-                x => x.SendRefreshNotificationAsync(It.IsAny<RefreshDataType>()),
-                Times.Once()
-            );
+            .Verify(x => x.SendRefreshNotificationAsync(It.IsAny<RefreshDataType>()), Times.Once());
         Mock.Mock<ICommandExecutor>()
             .Verify(
                 x => x.Send(It.IsAny<ICommand<Result<GetTranscodeUrlResult>>>(), It.IsAny<CancellationToken>()),
@@ -696,10 +678,7 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
                 Times.Once()
             );
         Mock.Mock<INotificationHubService>()
-            .Verify(
-                x => x.SendRefreshNotificationAsync(It.IsAny<RefreshDataType>()),
-                Times.Once()
-            );
+            .Verify(x => x.SendRefreshNotificationAsync(It.IsAny<RefreshDataType>()), Times.Once());
     }
 
     [Test]
@@ -792,10 +771,7 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
                 Times.Once()
             );
         Mock.Mock<INotificationHubService>()
-            .Verify(
-                x => x.SendRefreshNotificationAsync(It.IsAny<RefreshDataType>()),
-                Times.Once()
-            );
+            .Verify(x => x.SendRefreshNotificationAsync(It.IsAny<RefreshDataType>()), Times.Once());
     }
 
     [Test]
@@ -886,10 +862,7 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
                 Times.Once()
             );
         Mock.Mock<INotificationHubService>()
-            .Verify(
-                x => x.SendRefreshNotificationAsync(It.IsAny<RefreshDataType>()),
-                Times.Once()
-            );
+            .Verify(x => x.SendRefreshNotificationAsync(It.IsAny<RefreshDataType>()), Times.Once());
     }
 
     [Test]
@@ -970,10 +943,7 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
                 Times.Once()
             );
         Mock.Mock<INotificationHubService>()
-            .Verify(
-                x => x.SendRefreshNotificationAsync(It.IsAny<RefreshDataType>()),
-                Times.Once()
-            );
+            .Verify(x => x.SendRefreshNotificationAsync(It.IsAny<RefreshDataType>()), Times.Once());
     }
 
     [Test]

@@ -24,7 +24,8 @@ public class MockProgressHubService : IProgressHubService
         return Task.CompletedTask;
     }
 
-    public Task SendServerConnectionCheckStatusProgressAsync(ServerConnectionCheckStatusProgress progress) => Task.CompletedTask;
+    public Task SendServerConnectionCheckStatusProgressAsync(ServerConnectionCheckStatusProgress progress) =>
+        Task.CompletedTask;
 
     public Task SendJobStatusUpdateAsync<T>(JobStatusUpdate<T> jobStatusUpdate)
         where T : class

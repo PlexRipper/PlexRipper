@@ -6,8 +6,7 @@ public interface IMoveDownloadFileQueue
     /// Will check for any downloadTask that has finished downloading and start a moveDownloadJob for it.
     /// </summary>
     /// <returns> Result with the DownloadTaskKey that was started or a warning if no DownloadTask was found. </returns>
-    Task<Result> CheckMoveDownloadFileJobQueue() =>
-        CheckMoveDownloadFileJobQueue(CancellationToken.None);
+    Task<Result> CheckMoveDownloadFileJobQueue() => CheckMoveDownloadFileJobQueue(CancellationToken.None);
 
     Task<Result> CheckMoveDownloadFileJobQueue(CancellationToken cancellationToken);
 }

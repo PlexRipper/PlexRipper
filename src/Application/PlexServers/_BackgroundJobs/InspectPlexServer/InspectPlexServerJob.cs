@@ -31,7 +31,8 @@ public class InspectPlexServerJob : BaseBackgroundJob<InspectPlexServerJobPayloa
         IReaparrDbContextFactory dbContextFactory,
         IProgressHubService progressHubService,
         INotificationHubService notificationHubService
-    ) : base(log, progressHubService, notificationHubService)
+    )
+        : base(log, progressHubService, notificationHubService)
     {
         _log = log.ForContext<InspectPlexServerJob>();
         _commandExecutor = commandExecutor;
@@ -70,9 +71,10 @@ public class InspectPlexServerJob : BaseBackgroundJob<InspectPlexServerJobPayloa
     protected override Task<InspectPlexServerJobUpdateDTO?> GetStatusUpdateDataAsync(
         TickerFunctionContext<InspectPlexServerJobPayload> context,
         CancellationToken cancellationToken
-    ) => Task.FromResult<InspectPlexServerJobUpdateDTO?>(
-        new InspectPlexServerJobUpdateDTO { PlexServerIds = context.Request.PlexServerIds }
-    );
+    ) =>
+        Task.FromResult<InspectPlexServerJobUpdateDTO?>(
+            new InspectPlexServerJobUpdateDTO { PlexServerIds = context.Request.PlexServerIds }
+        );
 
     private async Task<Result> InspectPlexServer(int plexServerId, CancellationToken cancellationToken)
     {
@@ -121,9 +123,10 @@ public class InspectPlexServerJob : BaseBackgroundJob<InspectPlexServerJobPayloa
             return refreshResult.LogError();
 
         // Notify front-end
-        await _notificationHubService.SendRefreshNotificationAsync(
-            [RefreshDataType.PlexAccount, RefreshDataType.PlexLibrary]
-        );
+        await _notificationHubService.SendRefreshNotificationAsync([
+            RefreshDataType.PlexAccount,
+            RefreshDataType.PlexLibrary,
+        ]);
 
         var libraryIds = await dbContext
             .PlexLibraries.Where(x => x.PlexServerId == plexServerId)

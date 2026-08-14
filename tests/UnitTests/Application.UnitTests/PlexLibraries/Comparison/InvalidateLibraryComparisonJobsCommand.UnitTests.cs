@@ -23,14 +23,14 @@ public class InvalidateLibraryComparisonJobsCommandUnitTests
         await dbContext.SaveChangesAsync(CancellationToken);
 
         Mock.Mock<IBackgroundJobScheduler>()
-            .Setup(x => x.DeleteBatchJobs(
-                It.Is<IReadOnlyCollection<JobKey>>(keys =>
-                    keys.Count == 2
-                    && keys.Any(x => x == ownedJobKey)
-                    && keys.Any(x => x == remoteJobKey)
-                ),
-                CancellationToken
-            ))
+            .Setup(x =>
+                x.DeleteBatchJobs(
+                    It.Is<IReadOnlyCollection<JobKey>>(keys =>
+                        keys.Count == 2 && keys.Any(x => x == ownedJobKey) && keys.Any(x => x == remoteJobKey)
+                    ),
+                    CancellationToken
+                )
+            )
             .ReturnsAsync(Result.Ok());
 
         // Act
@@ -44,20 +44,17 @@ public class InvalidateLibraryComparisonJobsCommandUnitTests
         Mock.Mock<IBackgroundJobScheduler>().VerifyAll();
     }
 
-    private static JobTimeTicker CreateTicker(
-        JobKey jobKey,
-        int ownedPlexLibraryId,
-        int remotePlexLibraryId
-    ) => new()
-    {
-        Function = nameof(PlexLibraryComparisonJob),
-        Request = [],
-        RequestJson = new JobTimeTickerRequestProperties
+    private static JobTimeTicker CreateTicker(JobKey jobKey, int ownedPlexLibraryId, int remotePlexLibraryId) =>
+        new()
         {
-            OwnedPlexLibraryId = ownedPlexLibraryId,
-            RemotePlexLibraryId = remotePlexLibraryId,
-        },
-        JobKey = jobKey.Name,
-        JobType = jobKey.Type,
-    };
+            Function = nameof(PlexLibraryComparisonJob),
+            Request = [],
+            RequestJson = new JobTimeTickerRequestProperties
+            {
+                OwnedPlexLibraryId = ownedPlexLibraryId,
+                RemotePlexLibraryId = remotePlexLibraryId,
+            },
+            JobKey = jobKey.Name,
+            JobType = jobKey.Type,
+        };
 }

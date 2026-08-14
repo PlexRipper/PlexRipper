@@ -8,10 +8,9 @@ public class ValidateFolderPathsCommandUnitTests : BaseCommandUnitTest<ValidateF
         // Arrange
         await SetupDatabase(59901);
         var dbContext = IDbContext;
-        var downloadFolderPath = await dbContext.FolderPaths.AsTracking().SingleAsync(
-            x => x.Id == PlexMediaType.None.ToDefaultDestinationFolderId(),
-            CancellationToken
-        );
+        var downloadFolderPath = await dbContext
+            .FolderPaths.AsTracking()
+            .SingleAsync(x => x.Id == PlexMediaType.None.ToDefaultDestinationFolderId(), CancellationToken);
         downloadFolderPath.DirectoryPath = @"D:\Downloads";
         await dbContext.SaveChangesAsync(CancellationToken);
         var folderPathCount = await dbContext.FolderPaths.CountAsync(CancellationToken);
@@ -43,8 +42,10 @@ public class ValidateFolderPathsCommandUnitTests : BaseCommandUnitTest<ValidateF
         var linuxMountPath = "/mnt/plex/g/Films";
         var uncPath = @"\\server\share\Series";
 
-        folderPaths.Single(x => x.Id == PlexMediaType.None.ToDefaultDestinationFolderId()).DirectoryPath = windowsDrivePath;
-        folderPaths.Single(x => x.Id == PlexMediaType.Movie.ToDefaultDestinationFolderId()).DirectoryPath = linuxMountPath;
+        folderPaths.Single(x => x.Id == PlexMediaType.None.ToDefaultDestinationFolderId()).DirectoryPath =
+            windowsDrivePath;
+        folderPaths.Single(x => x.Id == PlexMediaType.Movie.ToDefaultDestinationFolderId()).DirectoryPath =
+            linuxMountPath;
         folderPaths.Single(x => x.Id == PlexMediaType.TvShow.ToDefaultDestinationFolderId()).DirectoryPath = uncPath;
         await dbContext.SaveChangesAsync(CancellationToken);
 

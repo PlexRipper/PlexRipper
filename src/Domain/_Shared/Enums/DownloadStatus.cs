@@ -50,7 +50,7 @@ public enum DownloadStatus
     /// </summary>
     [JsonStringEnumMemberName(nameof(MovePaused))]
     MovePaused = 6,
-    
+
     /// <summary>
     /// Move process is auto-paused by the system (shutdown/crash recovery) and can be auto-resumed.
     /// </summary>

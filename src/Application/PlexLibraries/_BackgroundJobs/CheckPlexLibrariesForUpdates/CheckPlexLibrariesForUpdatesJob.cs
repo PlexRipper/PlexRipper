@@ -32,10 +32,8 @@ public class CheckPlexLibrariesForUpdatesJob
 
     protected override JobTypes JobType => JobTypes.CheckPlexLibrariesForUpdatesJob;
 
-    public static JobKey GetJobKey() => new(
-        nameof(JobTypes.CheckPlexLibrariesForUpdatesJob),
-        JobTypes.CheckPlexLibrariesForUpdatesJob
-    );
+    public static JobKey GetJobKey() =>
+        new(nameof(JobTypes.CheckPlexLibrariesForUpdatesJob), JobTypes.CheckPlexLibrariesForUpdatesJob);
 
     protected override async Task ExecuteJobAsync(
         TickerFunctionContext<CheckPlexLibrariesForUpdatesJobPayload> context,
@@ -46,9 +44,7 @@ public class CheckPlexLibrariesForUpdatesJob
 
         _log.Here().Debug("Executing job: {JobName}", nameof(CheckPlexLibrariesForUpdatesJob));
 
-        var enabledServerIds = await _dbContext.PlexServers
-            .Select(x => x.Id)
-            .ToListAsync(cancellationToken);
+        var enabledServerIds = await _dbContext.PlexServers.Select(x => x.Id).ToListAsync(cancellationToken);
 
         if (enabledServerIds.Count == 0)
         {
@@ -56,14 +52,10 @@ public class CheckPlexLibrariesForUpdatesJob
             return;
         }
 
-        var accountMappings = await _dbContext.PlexAccountServers
-            .Where(x => enabledServerIds.Contains(x.PlexServerId))
+        var accountMappings = await _dbContext
+            .PlexAccountServers.Where(x => enabledServerIds.Contains(x.PlexServerId))
             .GroupBy(x => x.PlexServerId)
-            .Select(x => new
-            {
-                PlexServerId = x.Key,
-                PlexAccountId = x.Min(y => y.PlexAccountId),
-            })
+            .Select(x => new { PlexServerId = x.Key, PlexAccountId = x.Min(y => y.PlexAccountId) })
             .ToDictionaryAsync(x => x.PlexServerId, x => x.PlexAccountId, cancellationToken);
 
         var serversWithTokenMappings = new List<int>();
@@ -102,8 +94,8 @@ public class CheckPlexLibrariesForUpdatesJob
             return;
         }
 
-        var outdatedLibraryIds = await _dbContext.PlexLibraries
-            .AsNoTracking()
+        var outdatedLibraryIds = await _dbContext
+            .PlexLibraries.AsNoTracking()
             .Where(x => serversWithTokenMappings.Contains(x.PlexServerId))
             .Where(x => x.Type == PlexMediaType.Movie || x.Type == PlexMediaType.TvShow)
             .Where(x => x.Outdated)

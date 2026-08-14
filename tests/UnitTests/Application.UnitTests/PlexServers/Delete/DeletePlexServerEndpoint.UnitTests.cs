@@ -9,28 +9,34 @@ public class DeletePlexServerEndpointUnitTests
     public async Task ShouldDeleteServerAndDirectRelatedData_WhenServerExists()
     {
         // Arrange
-        await SetupDatabase(91301, config =>
-        {
-            config.PlexAccountCount = 1;
-            config.PlexServerCount = 2;
-            config.PlexMovieLibraryCount = 2;
-        });
+        await SetupDatabase(
+            91301,
+            config =>
+            {
+                config.PlexAccountCount = 1;
+                config.PlexServerCount = 2;
+                config.PlexMovieLibraryCount = 2;
+            }
+        );
 
         var dbContext = IDbContext;
-        var servers = await dbContext.PlexServers.IgnoreIsEnabledFilter().OrderBy(x => x.Id).ToListAsync(CancellationToken);
+        var servers = await dbContext
+            .PlexServers.IgnoreIsEnabledFilter()
+            .OrderBy(x => x.Id)
+            .ToListAsync(CancellationToken);
         var targetServerId = servers[0].Id;
         var otherServerId = servers[1].Id;
 
-        var targetConnectionIds = await dbContext.PlexServerConnections
-            .Where(x => x.PlexServerId == targetServerId)
+        var targetConnectionIds = await dbContext
+            .PlexServerConnections.Where(x => x.PlexServerId == targetServerId)
             .Select(x => x.Id)
             .ToListAsync(CancellationToken);
-        var targetLibraryIds = await dbContext.PlexLibraries
-            .Where(x => x.PlexServerId == targetServerId)
+        var targetLibraryIds = await dbContext
+            .PlexLibraries.Where(x => x.PlexServerId == targetServerId)
             .Select(x => x.Id)
             .ToListAsync(CancellationToken);
-        var otherLibraryIds = await dbContext.PlexLibraries
-            .Where(x => x.PlexServerId == otherServerId)
+        var otherLibraryIds = await dbContext
+            .PlexLibraries.Where(x => x.PlexServerId == otherServerId)
             .Select(x => x.Id)
             .ToListAsync(CancellationToken);
 
@@ -41,160 +47,208 @@ public class DeletePlexServerEndpointUnitTests
         var otherMovieDownloadId = Guid.Parse("91301000-0000-0000-0000-000000000003");
         var otherMovieFileDownloadId = Guid.Parse("91301000-0000-0000-0000-000000000004");
 
-        dbContext.DownloadTaskMovie.Add(new DownloadTaskMovie
-        {
-            Id = targetMovieDownloadId,
-            PlexApiRatingKey = 913011,
-            Title = "Target server movie",
-            FullTitle = "Target server movie",
-            DownloadStatus = DownloadStatus.Queued,
-            CreatedAt = DateTime.UtcNow,
-            PlexServerId = targetServerId,
-            PlexLibraryId = targetLibraryId,
-            Year = 2026,
-            DataReceived = 0,
-            FileDataTransferred = 0,
-            DataTotal = 0,
-            DownloadSpeed = 0,
-            FileTransferSpeed = 0,
-            Children =
-            [
-                new DownloadTaskMovieFile
-                {
-                    Id = targetMovieFileDownloadId,
-                    PlexApiRatingKey = 913011,
-                    Title = "Target server movie file",
-                    FullTitle = "Target server movie file",
-                    DownloadStatus = DownloadStatus.Queued,
-                    CreatedAt = DateTime.UtcNow,
-                    PlexServerId = targetServerId,
-                    PlexLibraryId = targetLibraryId,
-                    PlexApiMediaId = 913012,
-                    PlexApiPartId = 913013,
-                    FileName = "target-server-movie.mkv",
-                    FileLocationUrl = "/library/parts/913013/file.mkv",
-                    HashId = "target-server-movie-hash",
-                    Quality = VideoQuality.FullHD,
-                    DirectoryMeta = CreateDownloadTaskDirectory(),
-                    DataReceived = 0,
-                    DataTotal = 10,
-                    DownloadSpeed = 0,
-                    DirectDownloadSnapshot = null,
-                    DownloadClientType = PlexDownloadClientType.Direct,
-                    FileTransferSpeed = 0,
-                    FileDataTransferred = 0,
-                    TimeRemaining = 0,
-                    DestinationFolderPathId = null,
-                    Parent = null,
-                    ParentId = targetMovieDownloadId,
-                    Logs =
-                    [
-                        new DownloadTaskMovieFileLog
-                        {
-                            Status = DownloadStatus.Queued,
-                            LogLevel = NotificationLevel.Information,
-                            Message = "Target server download queued",
-                            CreatedAt = DateTime.UtcNow,
-                            DownloadTaskFileId = targetMovieFileDownloadId,
-                            DownloadTaskMovieId = targetMovieDownloadId,
-                        },
-                    ],
-                },
-            ],
-        });
-        dbContext.DownloadTaskMovie.Add(new DownloadTaskMovie
-        {
-            Id = otherMovieDownloadId,
-            PlexApiRatingKey = 913021,
-            Title = "Other server movie",
-            FullTitle = "Other server movie",
-            DownloadStatus = DownloadStatus.Queued,
-            CreatedAt = DateTime.UtcNow,
-            PlexServerId = otherServerId,
-            PlexLibraryId = otherLibraryId,
-            Year = 2026,
-            DataReceived = 0,
-            FileDataTransferred = 0,
-            DataTotal = 0,
-            DownloadSpeed = 0,
-            FileTransferSpeed = 0,
-            Children =
-            [
-                new DownloadTaskMovieFile
-                {
-                    Id = otherMovieFileDownloadId,
-                    PlexApiRatingKey = 913021,
-                    Title = "Other server movie file",
-                    FullTitle = "Other server movie file",
-                    DownloadStatus = DownloadStatus.Queued,
-                    CreatedAt = DateTime.UtcNow,
-                    PlexServerId = otherServerId,
-                    PlexLibraryId = otherLibraryId,
-                    PlexApiMediaId = 913022,
-                    PlexApiPartId = 913023,
-                    FileName = "other-server-movie.mkv",
-                    FileLocationUrl = "/library/parts/913023/file.mkv",
-                    HashId = "other-server-movie-hash",
-                    Quality = VideoQuality.FullHD,
-                    DirectoryMeta = CreateDownloadTaskDirectory(),
-                    DataReceived = 0,
-                    DataTotal = 10,
-                    DownloadSpeed = 0,
-                    DirectDownloadSnapshot = null,
-                    DownloadClientType = PlexDownloadClientType.Direct,
-                    FileTransferSpeed = 0,
-                    FileDataTransferred = 0,
-                    TimeRemaining = 0,
-                    DestinationFolderPathId = null,
-                    Parent = null,
-                    ParentId = otherMovieDownloadId,
-                },
-            ],
-        });
+        dbContext.DownloadTaskMovie.Add(
+            new DownloadTaskMovie
+            {
+                Id = targetMovieDownloadId,
+                PlexApiRatingKey = 913011,
+                Title = "Target server movie",
+                FullTitle = "Target server movie",
+                DownloadStatus = DownloadStatus.Queued,
+                CreatedAt = DateTime.UtcNow,
+                PlexServerId = targetServerId,
+                PlexLibraryId = targetLibraryId,
+                Year = 2026,
+                DataReceived = 0,
+                FileDataTransferred = 0,
+                DataTotal = 0,
+                DownloadSpeed = 0,
+                FileTransferSpeed = 0,
+                Children =
+                [
+                    new DownloadTaskMovieFile
+                    {
+                        Id = targetMovieFileDownloadId,
+                        PlexApiRatingKey = 913011,
+                        Title = "Target server movie file",
+                        FullTitle = "Target server movie file",
+                        DownloadStatus = DownloadStatus.Queued,
+                        CreatedAt = DateTime.UtcNow,
+                        PlexServerId = targetServerId,
+                        PlexLibraryId = targetLibraryId,
+                        PlexApiMediaId = 913012,
+                        PlexApiPartId = 913013,
+                        FileName = "target-server-movie.mkv",
+                        FileLocationUrl = "/library/parts/913013/file.mkv",
+                        HashId = "target-server-movie-hash",
+                        Quality = VideoQuality.FullHD,
+                        DirectoryMeta = CreateDownloadTaskDirectory(),
+                        DataReceived = 0,
+                        DataTotal = 10,
+                        DownloadSpeed = 0,
+                        DirectDownloadSnapshot = null,
+                        DownloadClientType = PlexDownloadClientType.Direct,
+                        FileTransferSpeed = 0,
+                        FileDataTransferred = 0,
+                        TimeRemaining = 0,
+                        DestinationFolderPathId = null,
+                        Parent = null,
+                        ParentId = targetMovieDownloadId,
+                        Logs =
+                        [
+                            new DownloadTaskMovieFileLog
+                            {
+                                Status = DownloadStatus.Queued,
+                                LogLevel = NotificationLevel.Information,
+                                Message = "Target server download queued",
+                                CreatedAt = DateTime.UtcNow,
+                                DownloadTaskFileId = targetMovieFileDownloadId,
+                                DownloadTaskMovieId = targetMovieDownloadId,
+                            },
+                        ],
+                    },
+                ],
+            }
+        );
+        dbContext.DownloadTaskMovie.Add(
+            new DownloadTaskMovie
+            {
+                Id = otherMovieDownloadId,
+                PlexApiRatingKey = 913021,
+                Title = "Other server movie",
+                FullTitle = "Other server movie",
+                DownloadStatus = DownloadStatus.Queued,
+                CreatedAt = DateTime.UtcNow,
+                PlexServerId = otherServerId,
+                PlexLibraryId = otherLibraryId,
+                Year = 2026,
+                DataReceived = 0,
+                FileDataTransferred = 0,
+                DataTotal = 0,
+                DownloadSpeed = 0,
+                FileTransferSpeed = 0,
+                Children =
+                [
+                    new DownloadTaskMovieFile
+                    {
+                        Id = otherMovieFileDownloadId,
+                        PlexApiRatingKey = 913021,
+                        Title = "Other server movie file",
+                        FullTitle = "Other server movie file",
+                        DownloadStatus = DownloadStatus.Queued,
+                        CreatedAt = DateTime.UtcNow,
+                        PlexServerId = otherServerId,
+                        PlexLibraryId = otherLibraryId,
+                        PlexApiMediaId = 913022,
+                        PlexApiPartId = 913023,
+                        FileName = "other-server-movie.mkv",
+                        FileLocationUrl = "/library/parts/913023/file.mkv",
+                        HashId = "other-server-movie-hash",
+                        Quality = VideoQuality.FullHD,
+                        DirectoryMeta = CreateDownloadTaskDirectory(),
+                        DataReceived = 0,
+                        DataTotal = 10,
+                        DownloadSpeed = 0,
+                        DirectDownloadSnapshot = null,
+                        DownloadClientType = PlexDownloadClientType.Direct,
+                        FileTransferSpeed = 0,
+                        FileDataTransferred = 0,
+                        TimeRemaining = 0,
+                        DestinationFolderPathId = null,
+                        Parent = null,
+                        ParentId = otherMovieDownloadId,
+                    },
+                ],
+            }
+        );
         await dbContext.SaveChangesAsync(CancellationToken);
 
         targetConnectionIds.ShouldNotBeEmpty();
         targetLibraryIds.ShouldNotBeEmpty();
-        (await dbContext.PlexAccountServers.AnyAsync(x => x.PlexServerId == targetServerId, CancellationToken)).ShouldBeTrue();
-        (await dbContext.DownloadTaskMovie.AnyAsync(x => x.Id == targetMovieDownloadId, CancellationToken)).ShouldBeTrue();
-        (await dbContext.DownloadTaskMovieFile.AnyAsync(x => x.Id == targetMovieFileDownloadId, CancellationToken)).ShouldBeTrue();
-        (await dbContext.DownloadTaskMovieFileLogs.AnyAsync(x => x.DownloadTaskMovieId == targetMovieDownloadId, CancellationToken)).ShouldBeTrue();
+        (
+            await dbContext.PlexAccountServers.AnyAsync(x => x.PlexServerId == targetServerId, CancellationToken)
+        ).ShouldBeTrue();
+        (
+            await dbContext.DownloadTaskMovie.AnyAsync(x => x.Id == targetMovieDownloadId, CancellationToken)
+        ).ShouldBeTrue();
+        (
+            await dbContext.DownloadTaskMovieFile.AnyAsync(x => x.Id == targetMovieFileDownloadId, CancellationToken)
+        ).ShouldBeTrue();
+        (
+            await dbContext.DownloadTaskMovieFileLogs.AnyAsync(
+                x => x.DownloadTaskMovieId == targetMovieDownloadId,
+                CancellationToken
+            )
+        ).ShouldBeTrue();
 
         // Act
-        var endpointResult = await TestEndpointHandleAsync(new DeletePlexServerEndpointRequest { PlexServerId = targetServerId });
+        var endpointResult = await TestEndpointHandleAsync(
+            new DeletePlexServerEndpointRequest { PlexServerId = targetServerId }
+        );
         var result = endpointResult.Response;
 
         // Assert
         result.ShouldNotBeNull();
         result.IsSuccess.ShouldBeTrue();
-        (await dbContext.PlexServers.IgnoreIsEnabledFilter().AnyAsync(x => x.Id == targetServerId, CancellationToken)).ShouldBeFalse();
-        (await dbContext.PlexServerConnections.AnyAsync(x => x.PlexServerId == targetServerId, CancellationToken)).ShouldBeFalse();
-        (await dbContext.PlexServerStatuses.AnyAsync(x => x.PlexServerId == targetServerId, CancellationToken)).ShouldBeFalse();
-        (await dbContext.PlexAccountServers.AnyAsync(x => x.PlexServerId == targetServerId, CancellationToken)).ShouldBeFalse();
-        (await dbContext.PlexLibraries.AnyAsync(x => x.PlexServerId == targetServerId, CancellationToken)).ShouldBeFalse();
-        (await dbContext.DownloadTaskMovie.AnyAsync(x => x.Id == targetMovieDownloadId, CancellationToken)).ShouldBeFalse();
-        (await dbContext.DownloadTaskMovieFile.AnyAsync(x => x.Id == targetMovieFileDownloadId, CancellationToken)).ShouldBeFalse();
-        (await dbContext.DownloadTaskMovieFileLogs.AnyAsync(x => x.DownloadTaskMovieId == targetMovieDownloadId, CancellationToken)).ShouldBeFalse();
-        (await dbContext.PlexServers.IgnoreIsEnabledFilter().AnyAsync(x => x.Id == otherServerId, CancellationToken)).ShouldBeTrue();
-        (await dbContext.DownloadTaskMovie.AnyAsync(x => x.Id == otherMovieDownloadId, CancellationToken)).ShouldBeTrue();
-        (await dbContext.DownloadTaskMovieFile.AnyAsync(x => x.Id == otherMovieFileDownloadId, CancellationToken)).ShouldBeTrue();
+        (
+            await dbContext.PlexServers.IgnoreIsEnabledFilter().AnyAsync(x => x.Id == targetServerId, CancellationToken)
+        ).ShouldBeFalse();
+        (
+            await dbContext.PlexServerConnections.AnyAsync(x => x.PlexServerId == targetServerId, CancellationToken)
+        ).ShouldBeFalse();
+        (
+            await dbContext.PlexServerStatuses.AnyAsync(x => x.PlexServerId == targetServerId, CancellationToken)
+        ).ShouldBeFalse();
+        (
+            await dbContext.PlexAccountServers.AnyAsync(x => x.PlexServerId == targetServerId, CancellationToken)
+        ).ShouldBeFalse();
+        (
+            await dbContext.PlexLibraries.AnyAsync(x => x.PlexServerId == targetServerId, CancellationToken)
+        ).ShouldBeFalse();
+        (
+            await dbContext.DownloadTaskMovie.AnyAsync(x => x.Id == targetMovieDownloadId, CancellationToken)
+        ).ShouldBeFalse();
+        (
+            await dbContext.DownloadTaskMovieFile.AnyAsync(x => x.Id == targetMovieFileDownloadId, CancellationToken)
+        ).ShouldBeFalse();
+        (
+            await dbContext.DownloadTaskMovieFileLogs.AnyAsync(
+                x => x.DownloadTaskMovieId == targetMovieDownloadId,
+                CancellationToken
+            )
+        ).ShouldBeFalse();
+        (
+            await dbContext.PlexServers.IgnoreIsEnabledFilter().AnyAsync(x => x.Id == otherServerId, CancellationToken)
+        ).ShouldBeTrue();
+        (
+            await dbContext.DownloadTaskMovie.AnyAsync(x => x.Id == otherMovieDownloadId, CancellationToken)
+        ).ShouldBeTrue();
+        (
+            await dbContext.DownloadTaskMovieFile.AnyAsync(x => x.Id == otherMovieFileDownloadId, CancellationToken)
+        ).ShouldBeTrue();
     }
 
     [Test]
     public async Task ShouldInvalidateServerLibraries_WhenServerIsDeleted()
     {
         // Arrange
-        await SetupDatabase(91304, config =>
-        {
-            config.PlexServerCount = 2;
-            config.PlexMovieLibraryCount = 2;
-            config.PlexTvShowLibraryCount = 2;
-        });
+        await SetupDatabase(
+            91304,
+            config =>
+            {
+                config.PlexServerCount = 2;
+                config.PlexMovieLibraryCount = 2;
+                config.PlexTvShowLibraryCount = 2;
+            }
+        );
 
         var dbContext = IDbContext;
-        var server = await dbContext.PlexServers.IgnoreIsEnabledFilter().OrderBy(x => x.Id).FirstAsync(CancellationToken);
-        var expectedLibraryIds = await dbContext.PlexLibraries
-            .IgnoreQueryFilters()
+        var server = await dbContext
+            .PlexServers.IgnoreIsEnabledFilter()
+            .OrderBy(x => x.Id)
+            .FirstAsync(CancellationToken);
+        var expectedLibraryIds = await dbContext
+            .PlexLibraries.IgnoreQueryFilters()
             .Where(x => x.PlexServerId == server.Id)
             .Select(x => x.Id)
             .OrderBy(x => x)
@@ -202,10 +256,14 @@ public class DeletePlexServerEndpointUnitTests
         var mediaQueryCache = new Mock<IMediaQueryCache>(MockBehavior.Strict);
 
         mediaQueryCache
-            .Setup(x => x.InvalidateLibraries(
-                It.Is<IReadOnlyCollection<int>>(libraryIds => libraryIds.OrderBy(id => id).SequenceEqual(expectedLibraryIds)),
-                "Plex server deleted"
-            ))
+            .Setup(x =>
+                x.InvalidateLibraries(
+                    It.Is<IReadOnlyCollection<int>>(libraryIds =>
+                        libraryIds.OrderBy(id => id).SequenceEqual(expectedLibraryIds)
+                    ),
+                    "Plex server deleted"
+                )
+            )
             .Verifiable(Times.Once);
 
         // Act
@@ -218,7 +276,9 @@ public class DeletePlexServerEndpointUnitTests
         // Assert
         result.ShouldNotBeNull();
         result.IsSuccess.ShouldBeTrue();
-        (await dbContext.PlexServers.IgnoreIsEnabledFilter().AnyAsync(x => x.Id == server.Id, CancellationToken)).ShouldBeFalse();
+        (
+            await dbContext.PlexServers.IgnoreIsEnabledFilter().AnyAsync(x => x.Id == server.Id, CancellationToken)
+        ).ShouldBeFalse();
         mediaQueryCache.Verify();
     }
 
@@ -241,18 +301,23 @@ public class DeletePlexServerEndpointUnitTests
 
         var dbContext = IDbContext;
         var server = await dbContext.PlexServers.IgnoreIsEnabledFilter().FirstAsync(CancellationToken);
-        await dbContext.PlexServers.IgnoreIsEnabledFilter()
+        await dbContext
+            .PlexServers.IgnoreIsEnabledFilter()
             .Where(x => x.Id == server.Id)
             .ExecuteUpdateAsync(x => x.SetProperty(y => y.IsEnabled, false), CancellationToken);
 
         // Act
-        var endpointResult = await TestEndpointHandleAsync(new DeletePlexServerEndpointRequest { PlexServerId = server.Id });
+        var endpointResult = await TestEndpointHandleAsync(
+            new DeletePlexServerEndpointRequest { PlexServerId = server.Id }
+        );
         var result = endpointResult.Response;
 
         // Assert
         result.ShouldNotBeNull();
         result.IsSuccess.ShouldBeTrue();
-        (await dbContext.PlexServers.IgnoreIsEnabledFilter().AnyAsync(x => x.Id == server.Id, CancellationToken)).ShouldBeFalse();
+        (
+            await dbContext.PlexServers.IgnoreIsEnabledFilter().AnyAsync(x => x.Id == server.Id, CancellationToken)
+        ).ShouldBeFalse();
     }
 
     [Test]

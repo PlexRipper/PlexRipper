@@ -27,7 +27,12 @@ public static partial class DbContextExtensions
 
         if (!plexServer.IsEnabled)
         {
-            return _log.Here().ErrorResult("Cannot choose PlexServer connection, server {ServerName} with id {Id} is disabled", plexServer.Name, plexServerId);
+            return _log.Here()
+                .ErrorResult(
+                    "Cannot choose PlexServer connection, server {ServerName} with id {Id} is disabled",
+                    plexServer.Name,
+                    plexServerId
+                );
         }
 
         var plexServerConnections = plexServer.PlexServerConnections;

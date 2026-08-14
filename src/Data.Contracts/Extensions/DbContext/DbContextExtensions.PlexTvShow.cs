@@ -22,8 +22,9 @@ public static partial class DbContextExtensions
         if (plexLibraryId == 0)
             return ResultExtensions.IsZero(nameof(plexLibraryId));
 
-        var transactionResult = await context.ExecuteSerializedTransactionAsync(async (ctx, txCt) =>
-        {
+        var transactionResult = await context.ExecuteSerializedTransactionAsync(
+            async (ctx, txCt) =>
+            {
                 var result = new BulkInsertTvShowsRapport();
 
                 plexTvShows.SetRelationshipIds(plexServerId, plexLibraryId);
@@ -70,7 +71,11 @@ public static partial class DbContextExtensions
                 var mediaData = episodesToInsert
                     .SelectMany(episode =>
                     {
-                        episode.MediaDataList.SetRelationshipIds(episode.PlexServerId, episode.PlexLibraryId, episode.Id);
+                        episode.MediaDataList.SetRelationshipIds(
+                            episode.PlexServerId,
+                            episode.PlexLibraryId,
+                            episode.Id
+                        );
 
                         foreach (var episodeMediaData in episode.MediaDataList)
                             episodeMediaData.PlexTvShowEpisode = episode;
@@ -123,7 +128,9 @@ public static partial class DbContextExtensions
                 await ctx.BulkUpdateAsync(plexTvShows, BulkConfigPreset.Default, txCt);
 
                 return result;
-        }, ct);
+            },
+            ct
+        );
 
         return transactionResult;
     }

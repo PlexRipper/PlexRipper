@@ -90,9 +90,9 @@ public class QueueLibrarySyncJobCommandHandlerUnitTests : BaseUnitTest<QueueLibr
         await dbContext
             .PlexLibraries.Where(x => x.Id == library.Id)
             .ExecuteUpdateAsync(
-                x => x
-                    .SetProperty(y => y.SyncedAt, DateTime.UtcNow.AddHours(-2))
-                    .SetProperty(y => y.UpdatedAt, DateTime.UtcNow.AddHours(-1)),
+                x =>
+                    x.SetProperty(y => y.SyncedAt, DateTime.UtcNow.AddHours(-2))
+                        .SetProperty(y => y.UpdatedAt, DateTime.UtcNow.AddHours(-1)),
                 CancellationToken
             );
 
@@ -271,9 +271,9 @@ public class QueueLibrarySyncJobCommandHandlerUnitTests : BaseUnitTest<QueueLibr
         await dbContext
             .PlexLibraries.Where(x => x.Id == library.Id)
             .ExecuteUpdateAsync(
-                x => x
-                    .SetProperty(y => y.SyncedAt, DateTime.UtcNow.AddHours(-2))
-                    .SetProperty(y => y.UpdatedAt, DateTime.UtcNow.AddHours(-1)),
+                x =>
+                    x.SetProperty(y => y.SyncedAt, DateTime.UtcNow.AddHours(-2))
+                        .SetProperty(y => y.UpdatedAt, DateTime.UtcNow.AddHours(-1)),
                 CancellationToken
             );
 
@@ -294,9 +294,9 @@ public class QueueLibrarySyncJobCommandHandlerUnitTests : BaseUnitTest<QueueLibr
         await dbContext
             .PlexLibraries.Where(x => x.Id == library.Id)
             .ExecuteUpdateAsync(
-                x => x
-                    .SetProperty(y => y.SyncedAt, DateTime.UtcNow.AddHours(-2))
-                    .SetProperty(y => y.UpdatedAt, DateTime.UtcNow.AddHours(-1)),
+                x =>
+                    x.SetProperty(y => y.SyncedAt, DateTime.UtcNow.AddHours(-2))
+                        .SetProperty(y => y.UpdatedAt, DateTime.UtcNow.AddHours(-1)),
                 CancellationToken
             );
 
@@ -412,8 +412,8 @@ public class QueueLibrarySyncJobCommandHandlerUnitTests : BaseUnitTest<QueueLibr
         // Assert
         result.IsSuccess.ShouldBeTrue();
 
-        var queueItem = await dbContext.LibrarySyncJobQueues
-            .IgnoreQueryFilters()
+        var queueItem = await dbContext
+            .LibrarySyncJobQueues.IgnoreQueryFilters()
             .SingleAsync(x => x.PlexLibraryId == library.Id, CancellationToken);
         queueItem.Status.ShouldBe(LibrarySyncJobStatus.Queued);
         queueItem.StartedAt.ShouldBeNull();
@@ -440,9 +440,7 @@ public class QueueLibrarySyncJobCommandHandlerUnitTests : BaseUnitTest<QueueLibr
         await dbContext
             .PlexLibraries.Where(x => x.Id == library.Id)
             .ExecuteUpdateAsync(
-                x => x
-                    .SetProperty(y => y.SyncedAt, syncedAt)
-                    .SetProperty(y => y.UpdatedAt, syncedAt.AddMinutes(-5)),
+                x => x.SetProperty(y => y.SyncedAt, syncedAt).SetProperty(y => y.UpdatedAt, syncedAt.AddMinutes(-5)),
                 CancellationToken
             );
 
@@ -486,9 +484,7 @@ public class QueueLibrarySyncJobCommandHandlerUnitTests : BaseUnitTest<QueueLibr
         await dbContext
             .PlexLibraries.Where(x => x.Id == library.Id)
             .ExecuteUpdateAsync(
-                x => x
-                    .SetProperty(y => y.SyncedAt, syncedAt)
-                    .SetProperty(y => y.UpdatedAt, syncedAt.AddMinutes(-5)),
+                x => x.SetProperty(y => y.SyncedAt, syncedAt).SetProperty(y => y.UpdatedAt, syncedAt.AddMinutes(-5)),
                 CancellationToken
             );
 
@@ -547,9 +543,9 @@ public class QueueLibrarySyncJobCommandHandlerUnitTests : BaseUnitTest<QueueLibr
         await IDbContext
             .PlexLibraries.Where(x => x.Id == library.Id)
             .ExecuteUpdateAsync(
-                x => x
-                    .SetProperty(y => y.SyncedAt, DateTime.UtcNow.AddHours(-4))
-                    .SetProperty(y => y.UpdatedAt, DateTime.UtcNow.AddHours(-1)),
+                x =>
+                    x.SetProperty(y => y.SyncedAt, DateTime.UtcNow.AddHours(-4))
+                        .SetProperty(y => y.UpdatedAt, DateTime.UtcNow.AddHours(-1)),
                 CancellationToken
             );
 
@@ -656,9 +652,9 @@ public class QueueLibrarySyncJobCommandHandlerUnitTests : BaseUnitTest<QueueLibr
         await dbContext
             .PlexLibraries.Where(x => x.Id == library.Id)
             .ExecuteUpdateAsync(
-                x => x
-                    .SetProperty(y => y.SyncedAt, DateTime.UtcNow.AddHours(-2))
-                    .SetProperty(y => y.UpdatedAt, DateTime.UtcNow.AddHours(-1)),
+                x =>
+                    x.SetProperty(y => y.SyncedAt, DateTime.UtcNow.AddHours(-2))
+                        .SetProperty(y => y.UpdatedAt, DateTime.UtcNow.AddHours(-1)),
                 CancellationToken
             );
 
@@ -1041,9 +1037,9 @@ public class QueueLibrarySyncJobCommandHandlerUnitTests : BaseUnitTest<QueueLibr
         await dbContext
             .PlexLibraries.Where(x => x.Id == oldCompletedLibrary.Id || x.Id == recentCompletedLibrary.Id)
             .ExecuteUpdateAsync(
-                x => x
-                    .SetProperty(y => y.SyncedAt, DateTime.UtcNow.AddHours(-2))
-                    .SetProperty(y => y.UpdatedAt, DateTime.UtcNow.AddHours(-1)),
+                x =>
+                    x.SetProperty(y => y.SyncedAt, DateTime.UtcNow.AddHours(-2))
+                        .SetProperty(y => y.UpdatedAt, DateTime.UtcNow.AddHours(-1)),
                 CancellationToken
             );
 
@@ -1162,7 +1158,10 @@ public class QueueLibrarySyncJobCommandHandlerUnitTests : BaseUnitTest<QueueLibr
         // Arrange
         await SetupDatabase(
             3021,
-            config => { config.PlexServerCount = 1; }
+            config =>
+            {
+                config.PlexServerCount = 1;
+            }
         );
 
         var dbContext = IDbContext;
@@ -1181,7 +1180,8 @@ public class QueueLibrarySyncJobCommandHandlerUnitTests : BaseUnitTest<QueueLibr
         // Assert
         result.IsSuccess.ShouldBeTrue();
         result.Errors.Count.ShouldBe(0);
-        var savedLibrary = await dbContext.PlexLibraries.AsNoTracking()
+        var savedLibrary = await dbContext
+            .PlexLibraries.AsNoTracking()
             .FirstAsync(x => x.Id == unsupportedLibrary.Id, CancellationToken);
         savedLibrary.Type.ShouldBe(PlexMediaType.Music);
         var queueItems = await dbContext.LibrarySyncJobQueues.AsNoTracking().ToListAsync(CancellationToken);
@@ -1219,9 +1219,9 @@ public class QueueLibrarySyncJobCommandHandlerUnitTests : BaseUnitTest<QueueLibr
         await IDbContext
             .PlexLibraries.Where(x => allLibraryIds.Contains(x.Id))
             .ExecuteUpdateAsync(
-                x => x
-                    .SetProperty(y => y.SyncedAt, DateTime.UtcNow.AddHours(-4))
-                    .SetProperty(y => y.UpdatedAt, DateTime.UtcNow.AddHours(-1)),
+                x =>
+                    x.SetProperty(y => y.SyncedAt, DateTime.UtcNow.AddHours(-4))
+                        .SetProperty(y => y.UpdatedAt, DateTime.UtcNow.AddHours(-1)),
                 CancellationToken
             );
 

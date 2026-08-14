@@ -300,12 +300,20 @@ public static partial class MockDatabase
                 reaparrContext = await reaparrContext.AddPlexTvShows(seed, options);
 
             if (config.MovieDownloadTasksCount > 0)
-                reaparrContext =
-                    await reaparrContext.AddDownloadTaskMovies(seed, pathProvider, appRuntimeInfo, options);
+                reaparrContext = await reaparrContext.AddDownloadTaskMovies(
+                    seed,
+                    pathProvider,
+                    appRuntimeInfo,
+                    options
+                );
 
             if (config.TvShowDownloadTasksCount > 0)
-                reaparrContext =
-                    await reaparrContext.AddDownloadTaskTvShows(seed, pathProvider, appRuntimeInfo, options);
+                reaparrContext = await reaparrContext.AddDownloadTaskTvShows(
+                    seed,
+                    pathProvider,
+                    appRuntimeInfo,
+                    options
+                );
 
             if (config.AccountHasAccessToAllLibraries)
                 reaparrContext = await reaparrContext.AddPlexAccountLibraries();

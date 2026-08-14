@@ -2,22 +2,17 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Reaparr.Application.UnitTests;
 
-public class SetServerOwnedEndpointUnitTests : BaseEndpointUnitTest<SetServerOwnedEndpoint, SetServerOwnedRequest, ResultDTO<PlexServerDTO>>
+public class SetServerOwnedEndpointUnitTests
+    : BaseEndpointUnitTest<SetServerOwnedEndpoint, SetServerOwnedRequest, ResultDTO<PlexServerDTO>>
 {
     [Before(Test)]
     public void SetupComparisonJobLifecycle()
     {
         Mock.Mock<ICommandExecutor>()
-            .Setup(x => x.Send(
-                It.IsAny<InvalidateLibraryComparisonJobsCommand>(),
-                It.IsAny<CancellationToken>()
-            ))
+            .Setup(x => x.Send(It.IsAny<InvalidateLibraryComparisonJobsCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Ok());
         Mock.Mock<ICommandExecutor>()
-            .Setup(x => x.Send(
-                It.IsAny<ScheduleAffectedLibraryComparisonJobsCommand>(),
-                It.IsAny<CancellationToken>()
-            ))
+            .Setup(x => x.Send(It.IsAny<ScheduleAffectedLibraryComparisonJobsCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Ok());
     }
 
@@ -30,18 +25,23 @@ public class SetServerOwnedEndpointUnitTests : BaseEndpointUnitTest<SetServerOwn
         var dbContext = IDbContext;
         var plexServer = await dbContext.PlexServers.IgnoreIsEnabledFilter().FirstAsync(CancellationToken);
 
-        await dbContext.PlexServers.IgnoreIsEnabledFilter()
+        await dbContext
+            .PlexServers.IgnoreIsEnabledFilter()
             .Where(x => x.Id == plexServer.Id)
             .ExecuteUpdateAsync(x => x.SetProperty(y => y.OwnedOverride, (bool?)null), CancellationToken);
 
         // Act
-        var endpointResult = await TestEndpointHandleAsync(new SetServerOwnedRequest { PlexServerId = plexServer.Id, IsOwned = true });
+        var endpointResult = await TestEndpointHandleAsync(
+            new SetServerOwnedRequest { PlexServerId = plexServer.Id, IsOwned = true }
+        );
 
         // Assert
         endpointResult.Response.ShouldNotBeNull();
         endpointResult.Response.IsSuccess.ShouldBe(true);
 
-        var updatedServer = await dbContext.PlexServers.IgnoreIsEnabledFilter().FirstAsync(x => x.Id == plexServer.Id, CancellationToken);
+        var updatedServer = await dbContext
+            .PlexServers.IgnoreIsEnabledFilter()
+            .FirstAsync(x => x.Id == plexServer.Id, CancellationToken);
         updatedServer.OwnedOverride.ShouldBe(true);
     }
 
@@ -54,18 +54,23 @@ public class SetServerOwnedEndpointUnitTests : BaseEndpointUnitTest<SetServerOwn
         var dbContext = IDbContext;
         var plexServer = await dbContext.PlexServers.IgnoreIsEnabledFilter().FirstAsync(CancellationToken);
 
-        await dbContext.PlexServers.IgnoreIsEnabledFilter()
+        await dbContext
+            .PlexServers.IgnoreIsEnabledFilter()
             .Where(x => x.Id == plexServer.Id)
             .ExecuteUpdateAsync(x => x.SetProperty(y => y.OwnedOverride, true), CancellationToken);
 
         // Act
-        var endpointResult = await TestEndpointHandleAsync(new SetServerOwnedRequest { PlexServerId = plexServer.Id, IsOwned = false });
+        var endpointResult = await TestEndpointHandleAsync(
+            new SetServerOwnedRequest { PlexServerId = plexServer.Id, IsOwned = false }
+        );
 
         // Assert
         endpointResult.Response.ShouldNotBeNull();
         endpointResult.Response.IsSuccess.ShouldBe(true);
 
-        var updatedServer = await dbContext.PlexServers.IgnoreIsEnabledFilter().FirstAsync(x => x.Id == plexServer.Id, CancellationToken);
+        var updatedServer = await dbContext
+            .PlexServers.IgnoreIsEnabledFilter()
+            .FirstAsync(x => x.Id == plexServer.Id, CancellationToken);
         updatedServer.OwnedOverride.ShouldBe(false);
     }
 
@@ -76,7 +81,9 @@ public class SetServerOwnedEndpointUnitTests : BaseEndpointUnitTest<SetServerOwn
         await SetupDatabase(91110, config => config.PlexServerCount = 0);
 
         // Act
-        var endpointResult = await TestEndpointHandleAsync(new SetServerOwnedRequest { PlexServerId = 9999, IsOwned = true });
+        var endpointResult = await TestEndpointHandleAsync(
+            new SetServerOwnedRequest { PlexServerId = 9999, IsOwned = true }
+        );
 
         // Assert
         endpointResult.ShouldNotBeNull();
@@ -91,17 +98,23 @@ public class SetServerOwnedEndpointUnitTests : BaseEndpointUnitTest<SetServerOwn
         await SetupDatabase(91111, config => config.PlexServerCount = 1);
         var db = IDbContext;
         var server = await db.PlexServers.IgnoreIsEnabledFilter().FirstAsync(CancellationToken);
-        await db.PlexServers.IgnoreIsEnabledFilter().Where(x => x.Id == server.Id)
+        await db
+            .PlexServers.IgnoreIsEnabledFilter()
+            .Where(x => x.Id == server.Id)
             .ExecuteUpdateAsync(x => x.SetProperty(y => y.IsEnabled, false), CancellationToken);
 
         // Act
-        var endpointResult = await TestEndpointHandleAsync(new SetServerOwnedRequest { PlexServerId = server.Id, IsOwned = true });
+        var endpointResult = await TestEndpointHandleAsync(
+            new SetServerOwnedRequest { PlexServerId = server.Id, IsOwned = true }
+        );
 
         // Assert
         endpointResult.ShouldNotBeNull();
         endpointResult.Response.ShouldNotBeNull();
         endpointResult.Response.IsSuccess.ShouldBe(true);
-        var updated = await db.PlexServers.IgnoreIsEnabledFilter().FirstAsync(x => x.Id == server.Id, CancellationToken);
+        var updated = await db
+            .PlexServers.IgnoreIsEnabledFilter()
+            .FirstAsync(x => x.Id == server.Id, CancellationToken);
         updated.IsEnabled.ShouldBe(false);
         updated.OwnedOverride.ShouldBe(true);
     }
@@ -118,7 +131,9 @@ public class SetServerOwnedEndpointUnitTests : BaseEndpointUnitTest<SetServerOwn
         await TestEndpointHandleAsync(new SetServerOwnedRequest { PlexServerId = server.Id, IsOwned = false });
 
         // Assert
-        var updated = await db.PlexServers.IgnoreIsEnabledFilter().FirstAsync(x => x.Id == server.Id, CancellationToken);
+        var updated = await db
+            .PlexServers.IgnoreIsEnabledFilter()
+            .FirstAsync(x => x.Id == server.Id, CancellationToken);
         updated.OwnedOverride.ShouldBe(false);
     }
 
@@ -129,17 +144,23 @@ public class SetServerOwnedEndpointUnitTests : BaseEndpointUnitTest<SetServerOwn
         await SetupDatabase(91113, config => config.PlexServerCount = 1);
         var db = IDbContext;
         var server = await db.PlexServers.IgnoreIsEnabledFilter().FirstAsync(CancellationToken);
-        await db.PlexServers.IgnoreIsEnabledFilter().Where(x => x.Id == server.Id)
+        await db
+            .PlexServers.IgnoreIsEnabledFilter()
+            .Where(x => x.Id == server.Id)
             .ExecuteUpdateAsync(x => x.SetProperty(y => y.OwnedOverride, (bool?)null), CancellationToken);
 
         // Act
-        var endpointResult = await TestEndpointHandleAsync(new SetServerOwnedRequest { PlexServerId = server.Id, IsOwned = true });
+        var endpointResult = await TestEndpointHandleAsync(
+            new SetServerOwnedRequest { PlexServerId = server.Id, IsOwned = true }
+        );
 
         // Assert
         endpointResult.ShouldNotBeNull();
         endpointResult.Response.ShouldNotBeNull();
         endpointResult.Response.IsSuccess.ShouldBe(true);
-        var updated = await db.PlexServers.IgnoreIsEnabledFilter().FirstAsync(x => x.Id == server.Id, CancellationToken);
+        var updated = await db
+            .PlexServers.IgnoreIsEnabledFilter()
+            .FirstAsync(x => x.Id == server.Id, CancellationToken);
         updated.OwnedOverride.ShouldBe(true);
     }
 
@@ -150,17 +171,23 @@ public class SetServerOwnedEndpointUnitTests : BaseEndpointUnitTest<SetServerOwn
         await SetupDatabase(91114, config => config.PlexServerCount = 1);
         var db = IDbContext;
         var server = await db.PlexServers.IgnoreIsEnabledFilter().FirstAsync(CancellationToken);
-        await db.PlexServers.IgnoreIsEnabledFilter().Where(x => x.Id == server.Id)
+        await db
+            .PlexServers.IgnoreIsEnabledFilter()
+            .Where(x => x.Id == server.Id)
             .ExecuteUpdateAsync(x => x.SetProperty(y => y.OwnedOverride, (bool?)null), CancellationToken);
 
         // Act
-        var endpointResult = await TestEndpointHandleAsync(new SetServerOwnedRequest { PlexServerId = server.Id, IsOwned = false });
+        var endpointResult = await TestEndpointHandleAsync(
+            new SetServerOwnedRequest { PlexServerId = server.Id, IsOwned = false }
+        );
 
         // Assert
         endpointResult.ShouldNotBeNull();
         endpointResult.Response.ShouldNotBeNull();
         endpointResult.Response.IsSuccess.ShouldBe(true);
-        var updated = await db.PlexServers.IgnoreIsEnabledFilter().FirstAsync(x => x.Id == server.Id, CancellationToken);
+        var updated = await db
+            .PlexServers.IgnoreIsEnabledFilter()
+            .FirstAsync(x => x.Id == server.Id, CancellationToken);
         updated.OwnedOverride.ShouldBe(false);
     }
 
@@ -175,7 +202,9 @@ public class SetServerOwnedEndpointUnitTests : BaseEndpointUnitTest<SetServerOwn
         var otherId = servers[1].Id;
 
         // Act
-        var endpointResult = await TestEndpointHandleAsync(new SetServerOwnedRequest { PlexServerId = targetId, IsOwned = true });
+        var endpointResult = await TestEndpointHandleAsync(
+            new SetServerOwnedRequest { PlexServerId = targetId, IsOwned = true }
+        );
 
         // Assert
         endpointResult.ShouldNotBeNull();
@@ -191,17 +220,23 @@ public class SetServerOwnedEndpointUnitTests : BaseEndpointUnitTest<SetServerOwn
     public async Task ShouldInvalidateServerLibraries_WhenChangingOwnedOverride()
     {
         // Arrange
-        await SetupDatabase(91116, config =>
-        {
-            config.PlexServerCount = 2;
-            config.PlexMovieLibraryCount = 2;
-            config.PlexTvShowLibraryCount = 2;
-        });
+        await SetupDatabase(
+            91116,
+            config =>
+            {
+                config.PlexServerCount = 2;
+                config.PlexMovieLibraryCount = 2;
+                config.PlexTvShowLibraryCount = 2;
+            }
+        );
 
         var dbContext = IDbContext;
-        var server = await dbContext.PlexServers.IgnoreIsEnabledFilter().OrderBy(x => x.Id).FirstAsync(CancellationToken);
-        var expectedLibraryIds = await dbContext.PlexLibraries
-            .IgnoreQueryFilters()
+        var server = await dbContext
+            .PlexServers.IgnoreIsEnabledFilter()
+            .OrderBy(x => x.Id)
+            .FirstAsync(CancellationToken);
+        var expectedLibraryIds = await dbContext
+            .PlexLibraries.IgnoreQueryFilters()
             .Where(x => x.PlexServerId == server.Id)
             .Select(x => x.Id)
             .OrderBy(x => x)
@@ -209,13 +244,16 @@ public class SetServerOwnedEndpointUnitTests : BaseEndpointUnitTest<SetServerOwn
         var mediaQueryCache = new Mock<IMediaQueryCache>(MockBehavior.Strict);
 
         mediaQueryCache
-            .Setup(x => x.InvalidateLibraries(
-                It.Is<IReadOnlyCollection<int>>(libraryIds => libraryIds.OrderBy(id => id).SequenceEqual(expectedLibraryIds)),
-                "Plex server ownership scope changed"
-            ))
+            .Setup(x =>
+                x.InvalidateLibraries(
+                    It.Is<IReadOnlyCollection<int>>(libraryIds =>
+                        libraryIds.OrderBy(id => id).SequenceEqual(expectedLibraryIds)
+                    ),
+                    "Plex server ownership scope changed"
+                )
+            )
             .Verifiable(Times.Once);
-        Mock.SetupCommand(It.IsAny<ScheduleAffectedLibraryComparisonJobsCommand>)
-            .ReturnsAsync(Result.Ok());
+        Mock.SetupCommand(It.IsAny<ScheduleAffectedLibraryComparisonJobsCommand>).ReturnsAsync(Result.Ok());
 
         // Act
         var endpointResult = await TestEndpointHandleAsync(
@@ -242,4 +280,3 @@ public class SetServerOwnedEndpointUnitTests : BaseEndpointUnitTest<SetServerOwn
         result.IsValid.ShouldBe(false);
     }
 }
-

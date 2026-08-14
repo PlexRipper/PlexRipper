@@ -68,7 +68,9 @@ public class PlexApiClientUnitTests : BaseUnitTest<Func<PlexApiClientOptions?, P
 
         // Arrange
         var progressUpdates = new List<HttpRequestRetryProgress>();
-        var client = Sut(new PlexApiClientOptions { ConnectionUrl = "http://localhost", RetryProgressAction = progressUpdates.Add });
+        var client = Sut(
+            new PlexApiClientOptions { ConnectionUrl = "http://localhost", RetryProgressAction = progressUpdates.Add }
+        );
 
         // Act
         var responseMessage = await client.SendAsync(new HttpRequestMessage());
@@ -182,16 +184,20 @@ public class PlexApiClientUnitTests : BaseUnitTest<Func<PlexApiClientOptions?, P
     public async Task ShouldPropagateCancellation_WhenCallerCancelsRequest()
     {
         // Arrange
-        var requestStarted = new TaskCompletionSource<CancellationToken>(TaskCreationOptions.RunContinuationsAsynchronously);
+        var requestStarted = new TaskCompletionSource<CancellationToken>(
+            TaskCreationOptions.RunContinuationsAsynchronously
+        );
         SetupHttpClient(config =>
             config
                 .SetupAnyRequest()
-                .Returns<HttpRequestMessage, CancellationToken>(async (_, cancellationToken) =>
-                {
-                    requestStarted.TrySetResult(cancellationToken);
-                    await Task.Delay(Timeout.InfiniteTimeSpan, cancellationToken);
-                    return new HttpResponseMessage(HttpStatusCode.OK);
-                })
+                .Returns<HttpRequestMessage, CancellationToken>(
+                    async (_, cancellationToken) =>
+                    {
+                        requestStarted.TrySetResult(cancellationToken);
+                        await Task.Delay(Timeout.InfiniteTimeSpan, cancellationToken);
+                        return new HttpResponseMessage(HttpStatusCode.OK);
+                    }
+                )
         );
         var client = Sut(new PlexApiClientOptions { ConnectionUrl = "http://localhost", RetryProgressAction = null });
         using var cancellationTokenSource = new CancellationTokenSource();
@@ -217,7 +223,9 @@ public class PlexApiClientUnitTests : BaseUnitTest<Func<PlexApiClientOptions?, P
 
         // Arrange
         var progressUpdates = new List<HttpRequestRetryProgress>();
-        var client = Sut(new PlexApiClientOptions { ConnectionUrl = "http://localhost", RetryProgressAction = progressUpdates.Add });
+        var client = Sut(
+            new PlexApiClientOptions { ConnectionUrl = "http://localhost", RetryProgressAction = progressUpdates.Add }
+        );
 
         // Act
         var responseMessage = await client.SendAsync(new HttpRequestMessage());

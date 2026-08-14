@@ -6,13 +6,10 @@ namespace Reaparr.Application;
 /// </summary>
 /// <param name="Items">The overview page items from an owned library. Modified in-place.</param>
 /// <param name="OwnedLibraryId">The owned movie Plex library being browsed.</param>
-public record ApplyOwnedMovieComparisonStateCommand(
-    List<PlexMediaSlimDTO> Items,
-    int OwnedLibraryId
-) : ICommand<Result>;
+public record ApplyOwnedMovieComparisonStateCommand(List<PlexMediaSlimDTO> Items, int OwnedLibraryId)
+    : ICommand<Result>;
 
-public class ApplyOwnedMovieComparisonStateCommandValidator
-    : AbstractValidator<ApplyOwnedMovieComparisonStateCommand>
+public class ApplyOwnedMovieComparisonStateCommandValidator : AbstractValidator<ApplyOwnedMovieComparisonStateCommand>
 {
     public ApplyOwnedMovieComparisonStateCommandValidator()
     {
@@ -34,16 +31,14 @@ public class ApplyOwnedMovieComparisonStateCommandHandler
         _log = log.ForContext<ApplyOwnedMovieComparisonStateCommandHandler>();
     }
 
-    public async Task<Result> ExecuteAsync(
-        ApplyOwnedMovieComparisonStateCommand command,
-        CancellationToken ct)
+    public async Task<Result> ExecuteAsync(ApplyOwnedMovieComparisonStateCommand command, CancellationToken ct)
     {
         var items = command.Items;
         if (items.Count == 0)
             return Result.Ok();
 
-        var ownedUpdatedAt = await _dbContext.PlexLibraries
-            .Where(x => x.Id == command.OwnedLibraryId)
+        var ownedUpdatedAt = await _dbContext
+            .PlexLibraries.Where(x => x.Id == command.OwnedLibraryId)
             .Select(x => x.UpdatedAt)
             .SingleOrDefaultAsync(ct);
 
@@ -54,8 +49,8 @@ public class ApplyOwnedMovieComparisonStateCommandHandler
             return Result.Ok();
         }
 
-        var remoteLibraries = await _dbContext.PlexLibraries
-            .WhereIsNotOwned()
+        var remoteLibraries = await _dbContext
+            .PlexLibraries.WhereIsNotOwned()
             .Where(x => x.Type == PlexMediaType.Movie)
             .Select(x => new { x.Id, x.UpdatedAt })
             .ToDictionaryAsync(x => x.Id, x => x.UpdatedAt, ct);
@@ -63,18 +58,20 @@ public class ApplyOwnedMovieComparisonStateCommandHandler
         if (remoteLibraries.Count == 0)
             return Result.Ok();
 
-        var scopeRows = await _dbContext.PlexComparisonScopes
-            .Where(x =>
+        var scopeRows = await _dbContext
+            .PlexComparisonScopes.Where(x =>
                 x.OwnedPlexLibraryId == command.OwnedLibraryId
                 && x.MediaType == PlexMediaType.Movie
-                && remoteLibraries.Keys.Contains(x.RemotePlexLibraryId))
+                && remoteLibraries.Keys.Contains(x.RemotePlexLibraryId)
+            )
             .ToListAsync(ct);
 
         var currentRemoteLibraryIds = scopeRows
             .Where(x =>
                 x.OwnedLibraryUpdatedAt == ownedUpdatedAt
                 && remoteLibraries.TryGetValue(x.RemotePlexLibraryId, out var remoteUpdatedAt)
-                && x.RemoteLibraryUpdatedAt == remoteUpdatedAt)
+                && x.RemoteLibraryUpdatedAt == remoteUpdatedAt
+            )
             .Select(x => x.RemotePlexLibraryId)
             .ToHashSet();
 
@@ -91,12 +88,13 @@ public class ApplyOwnedMovieComparisonStateCommandHandler
 
         var itemIds = items.Select(x => x.Id).ToHashSet();
 
-        var upgradeIds = await _dbContext.PlexMovieComparisons
-            .Where(x =>
+        var upgradeIds = await _dbContext
+            .PlexMovieComparisons.Where(x =>
                 currentRemoteLibraryIds.Contains(x.RemotePlexLibraryId)
                 && x.OwnedPlexLibraryId == command.OwnedLibraryId
                 && itemIds.Contains(x.OwnedPlexMediaId)
-                && x.HitState == PlexMediaComparisonHitState.HigherQuality)
+                && x.HitState == PlexMediaComparisonHitState.HigherQuality
+            )
             .Select(x => x.OwnedPlexMediaId)
             .Distinct()
             .ToListAsync(ct);
@@ -105,9 +103,9 @@ public class ApplyOwnedMovieComparisonStateCommandHandler
 
         foreach (var item in items)
         {
-            item.SetComparisonState(upgradeIdSet.Contains(item.Id)
-                ? PlexMediaComparisonState.HigherQuality
-                : PlexMediaComparisonState.Owned);
+            item.SetComparisonState(
+                upgradeIdSet.Contains(item.Id) ? PlexMediaComparisonState.HigherQuality : PlexMediaComparisonState.Owned
+            );
         }
 
         return Result.Ok();
@@ -116,9 +114,10 @@ public class ApplyOwnedMovieComparisonStateCommandHandler
     private async Task<bool> HasPendingComparisonAsync(
         int ownedLibraryId,
         HashSet<int> remoteLibraryIds,
-        CancellationToken ct) => await _dbContext.HasActiveLibraryComparisonAsync(
-        remoteLibraryIds
-            .Select(x => PlexLibraryComparisonJob.GetJobKey(ownedLibraryId, x)),
-        ct
-    );
+        CancellationToken ct
+    ) =>
+        await _dbContext.HasActiveLibraryComparisonAsync(
+            remoteLibraryIds.Select(x => PlexLibraryComparisonJob.GetJobKey(ownedLibraryId, x)),
+            ct
+        );
 }

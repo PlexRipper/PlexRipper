@@ -1,7 +1,11 @@
 namespace Reaparr.Application.UnitTests;
 
 public class ClearCompletedDownloadTasksByServerIdEndpointUnitTests
-    : BaseEndpointUnitTest<ClearCompletedDownloadTasksByServerIdEndpoint, ClearCompletedDownloadTasksByServerIdEndpointRequest, ResultDTO<CountResponseDTO>>
+    : BaseEndpointUnitTest<
+        ClearCompletedDownloadTasksByServerIdEndpoint,
+        ClearCompletedDownloadTasksByServerIdEndpointRequest,
+        ResultDTO<CountResponseDTO>
+    >
 {
     [Test]
     public async Task ShouldRemoveAllCompletedDownloadTasksForServer_WhenClearCompletedByServerIdEndpointIsCalled()
@@ -35,10 +39,7 @@ public class ClearCompletedDownloadTasksByServerIdEndpointUnitTests
 
         // Act
         var endpointResult = await TestEndpointHandleAsync(
-            new ClearCompletedDownloadTasksByServerIdEndpointRequest
-            {
-                PlexServerId = downloadTasks[0].PlexServerId,
-            }
+            new ClearCompletedDownloadTasksByServerIdEndpointRequest { PlexServerId = downloadTasks[0].PlexServerId }
         );
         var result = endpointResult.Response;
 

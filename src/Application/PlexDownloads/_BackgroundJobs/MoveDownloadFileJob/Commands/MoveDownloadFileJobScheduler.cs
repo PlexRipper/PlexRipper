@@ -73,31 +73,29 @@ public class MoveDownloadFileJobScheduler : IMoveDownloadFileScheduler
             : Result.Ok();
     }
 
-    public Task<bool> IsDownloadFileMoving(
-        DownloadTaskKey downloadTaskKey,
-        CancellationToken cancellationToken
-    ) => _scheduler.IsJobRunning(MoveDownloadFileJob.GetJobKey(downloadTaskKey.Id), cancellationToken);
+    public Task<bool> IsDownloadFileMoving(DownloadTaskKey downloadTaskKey, CancellationToken cancellationToken) =>
+        _scheduler.IsJobRunning(MoveDownloadFileJob.GetJobKey(downloadTaskKey.Id), cancellationToken);
 
     public async Task<bool> IsAnyMoveDownloadFileJobRunning()
     {
         using var dbContext = await _dbContextFactory.CreateAsync();
         return await dbContext.TimeTickers.AnyAsync(x =>
             x.JobType == JobTypes.MoveDownloadFileJob
-            && (x.Status == TickerStatus.Idle
-                || x.Status == TickerStatus.Queued
-                || x.Status == TickerStatus.InProgress)
+            && (x.Status == TickerStatus.Idle || x.Status == TickerStatus.Queued || x.Status == TickerStatus.InProgress)
         );
     }
 
     public async Task<List<DownloadTaskKey>> GetCurrentlyMovingKeysByServer(int plexServerId)
     {
         using var dbContext = await _dbContextFactory.CreateAsync();
-        var requests = await dbContext.TimeTickers
-            .Where(x =>
+        var requests = await dbContext
+            .TimeTickers.Where(x =>
                 x.JobType == JobTypes.MoveDownloadFileJob
-                && (x.Status == TickerStatus.Idle
+                && (
+                    x.Status == TickerStatus.Idle
                     || x.Status == TickerStatus.Queued
-                    || x.Status == TickerStatus.InProgress)
+                    || x.Status == TickerStatus.InProgress
+                )
             )
             .Select(x => x.Request)
             .ToListAsync();

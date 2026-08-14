@@ -36,7 +36,8 @@ public sealed record EndpointUnitTestResult<TEndpoint, TResponse>
     /// <summary>
     /// Gets both standalone validator failures and failures collected by FastEndpoints itself.
     /// </summary>
-    public IReadOnlyList<ValidationFailure> ValidationErrors => [.. (ValidationResult?.Errors ?? []), ..Endpoint.ValidationFailures];
+    public IReadOnlyList<ValidationFailure> ValidationErrors =>
+        [.. (ValidationResult?.Errors ?? []), .. Endpoint.ValidationFailures];
 
     /// <summary>
     /// Gets whether the request type had a validator available to the endpoint unit test helper.

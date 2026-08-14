@@ -33,8 +33,8 @@ public class QueueInspectPlexServerJobCommandHandler : ICommandHandler<QueueInsp
     )
     {
         var plexServerIds = command.PlexServerIds;
-        var plexServers = await _dbContext.PlexServers
-            .IgnoreIsEnabledFilter()
+        var plexServers = await _dbContext
+            .PlexServers.IgnoreIsEnabledFilter()
             .Where(x => plexServerIds.Contains(x.Id))
             .ToListAsync(cancellationToken);
 
@@ -49,8 +49,10 @@ public class QueueInspectPlexServerJobCommandHandler : ICommandHandler<QueueInsp
         if (disabledServerIds.Any())
         {
             _log.Here()
-                .Warning("Skipping disabled PlexServerIds when queueing InspectPlexServerJob: {PlexServerIds}",
-                    disabledServerIds);
+                .Warning(
+                    "Skipping disabled PlexServerIds when queueing InspectPlexServerJob: {PlexServerIds}",
+                    disabledServerIds
+                );
         }
 
         var foundServerIds = plexServers.Select(x => x.Id).ToHashSet();
@@ -83,7 +85,8 @@ public class QueueInspectPlexServerJobCommandHandler : ICommandHandler<QueueInsp
             _log.Here()
                 .Warning(
                     "No enabled Plex servers available to queue for InspectPlexServerJob from requested ids {PlexServerIds}",
-                    plexServerIds);
+                    plexServerIds
+                );
             return Result.Fail("No enabled Plex servers were found for the requested ids").LogWarning();
         }
 

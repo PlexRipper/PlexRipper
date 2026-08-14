@@ -1,6 +1,5 @@
 namespace Reaparr.Application;
 
-
 public class RefreshLibraryAccessValidator : AbstractValidator<RefreshLibraryAccessCommand>
 {
     public RefreshLibraryAccessValidator()
@@ -61,7 +60,11 @@ public class RefreshLibraryAccessHandler
             if (plexServer is not null)
             {
                 if (!plexServer.IsEnabled)
-                    return ResultExtensions.ServerIsDisabled(plexServer.Name, plexServer.Id, nameof(RefreshLibraryAccessCommand));
+                    return ResultExtensions.ServerIsDisabled(
+                        plexServer.Name,
+                        plexServer.Id,
+                        nameof(RefreshLibraryAccessCommand)
+                    );
 
                 plexServers.Add(plexServer);
             }

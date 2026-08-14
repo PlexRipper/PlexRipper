@@ -134,8 +134,8 @@ public class GetAllMediaByTypeEndpoint : Endpoint<GetAllMediaByTypeRequest, Plex
 
         if (!string.IsNullOrWhiteSpace(req.Search))
         {
-            var searchTerms = req.Search
-                .ToLowerInvariant()
+            var searchTerms = req
+                .Search.ToLowerInvariant()
                 .Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
                 .Where(x => x.Length >= 2)
                 .Distinct();
@@ -159,34 +159,32 @@ public class GetAllMediaByTypeEndpoint : Endpoint<GetAllMediaByTypeRequest, Plex
         return filters.Count == 0 ? string.Empty : string.Join('&', filters);
     }
 
-    private static string EscapeFlexValue(string value) => value
-        .Replace("\\", "\\\\")
-        .Replace("\"", "\\\"")
-        .Replace(":", "\\:")
-        .Replace("&", "\\&");
+    private static string EscapeFlexValue(string value) =>
+        value.Replace("\\", "\\\\").Replace("\"", "\\\"").Replace(":", "\\:").Replace("&", "\\&");
 
-    public static PlexMediaStatisticsDTO ToStatisticsDTO(PagedMediaQueryResult source) => new()
-    {
-        QueryHash = source.QueryHash,
-        Page = source.Page,
-        PageSize = source.PageSize,
-        MovieCount = source.MovieCount,
-        TvShowCount = source.TvShowCount,
-        SeasonCount = source.SeasonCount,
-        EpisodeCount = source.EpisodeCount,
-        TotalMovieCount = source.TotalMovieCount,
-        TotalTvShowCount = source.TotalTvShowCount,
-        TotalSeasonCount = source.TotalSeasonCount,
-        TotalEpisodeCount = source.TotalEpisodeCount,
-        MediaSize = source.MediaSize,
-        TotalMediaSize = source.TotalMediaSize,
-        MediaCount = source.MediaCount,
-        MediaList = source.Items,
-        NavigationIndexes = source.NavigationIndexes,
-        Roles = source.Roles,
-        Countries = source.Countries,
-        Genres = source.Genres,
-        Qualities = source.Qualities,
-        TotalCount = source.TotalCount,
-    };
+    public static PlexMediaStatisticsDTO ToStatisticsDTO(PagedMediaQueryResult source) =>
+        new()
+        {
+            QueryHash = source.QueryHash,
+            Page = source.Page,
+            PageSize = source.PageSize,
+            MovieCount = source.MovieCount,
+            TvShowCount = source.TvShowCount,
+            SeasonCount = source.SeasonCount,
+            EpisodeCount = source.EpisodeCount,
+            TotalMovieCount = source.TotalMovieCount,
+            TotalTvShowCount = source.TotalTvShowCount,
+            TotalSeasonCount = source.TotalSeasonCount,
+            TotalEpisodeCount = source.TotalEpisodeCount,
+            MediaSize = source.MediaSize,
+            TotalMediaSize = source.TotalMediaSize,
+            MediaCount = source.MediaCount,
+            MediaList = source.Items,
+            NavigationIndexes = source.NavigationIndexes,
+            Roles = source.Roles,
+            Countries = source.Countries,
+            Genres = source.Genres,
+            Qualities = source.Qualities,
+            TotalCount = source.TotalCount,
+        };
 }

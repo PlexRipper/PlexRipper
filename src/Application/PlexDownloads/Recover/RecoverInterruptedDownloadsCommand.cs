@@ -24,20 +24,35 @@ public class RecoverInterruptedDownloadsCommandHandler : ICommandHandler<Recover
 
     public async Task<Result> ExecuteAsync(
         RecoverInterruptedDownloadsCommand command,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken
+    )
     {
         using var dbContext = await _dbContextFactory.CreateAsync();
 
-        var movieFileZombies = await dbContext.DownloadTaskMovieFile
-            .AsNoTracking()
+        var movieFileZombies = await dbContext
+            .DownloadTaskMovieFile.AsNoTracking()
             .Where(x => x.DownloadStatus == DownloadStatus.Downloading || x.DownloadStatus == DownloadStatus.Moving)
-            .Select(x => new { x.Id, x.FullTitle, x.PlexServerId, x.PlexLibraryId, x.DownloadStatus })
+            .Select(x => new
+            {
+                x.Id,
+                x.FullTitle,
+                x.PlexServerId,
+                x.PlexLibraryId,
+                x.DownloadStatus,
+            })
             .ToListAsync(cancellationToken);
 
-        var episodeFileZombies = await dbContext.DownloadTaskTvShowEpisodeFile
-            .AsNoTracking()
+        var episodeFileZombies = await dbContext
+            .DownloadTaskTvShowEpisodeFile.AsNoTracking()
             .Where(x => x.DownloadStatus == DownloadStatus.Downloading || x.DownloadStatus == DownloadStatus.Moving)
-            .Select(x => new { x.Id, x.FullTitle, x.PlexServerId, x.PlexLibraryId, x.DownloadStatus })
+            .Select(x => new
+            {
+                x.Id,
+                x.FullTitle,
+                x.PlexServerId,
+                x.PlexLibraryId,
+                x.DownloadStatus,
+            })
             .ToListAsync(cancellationToken);
 
         var totalReset = 0;

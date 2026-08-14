@@ -54,10 +54,7 @@ public class RefreshLibraryMediaEndpointIntegrationTests : BaseIntegrationTests
             RefreshLibraryMediaEndpoint,
             RefreshLibraryMediaEndpointRequest,
             ResultDTO<PlexLibraryDTO>
-        >(new RefreshLibraryMediaEndpointRequest()
-        {
-            PlexLibraryId = plexLibrary.Id,
-        });
+        >(new RefreshLibraryMediaEndpointRequest() { PlexLibraryId = plexLibrary.Id });
 
         // Assert
         var result = testResult.Result;
@@ -156,10 +153,7 @@ public class RefreshLibraryMediaEndpointIntegrationTests : BaseIntegrationTests
             RefreshLibraryMediaEndpoint,
             RefreshLibraryMediaEndpointRequest,
             ResultDTO<PlexLibraryDTO>
-        >(new RefreshLibraryMediaEndpointRequest
-        {
-            PlexLibraryId = plexLibrary.Id,
-        });
+        >(new RefreshLibraryMediaEndpointRequest { PlexLibraryId = plexLibrary.Id });
 
         // Assert
         var result = testResult.Result;

@@ -56,10 +56,8 @@ public partial class BaseUnitTest
             .Register(_ =>
             {
                 var mock = new Mock<IMediaQueryCache>(MockBehavior.Loose);
-                mock
-                    .Setup(x => x.InvalidateLibraries(It.IsAny<IReadOnlyCollection<int>>(), It.IsAny<string>()));
-                mock
-                    .Setup(x => x.InvalidateLibrary(It.IsAny<int>(), It.IsAny<string>()));
+                mock.Setup(x => x.InvalidateLibraries(It.IsAny<IReadOnlyCollection<int>>(), It.IsAny<string>()));
+                mock.Setup(x => x.InvalidateLibrary(It.IsAny<int>(), It.IsAny<string>()));
                 return mock.Object;
             })
             .As<IMediaQueryCache>()

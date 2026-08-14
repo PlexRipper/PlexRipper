@@ -52,7 +52,8 @@ public class GenerateDownloadTaskTvShowsCommandHandlerUnitTests
             },
         };
 
-        Mock.SetupCommand(It.IsAny<GenerateDownloadTaskTvShowSeasonsCommand>).ReturnsAsync(Result.Ok(new DownloadTaskCreationReport()));
+        Mock.SetupCommand(It.IsAny<GenerateDownloadTaskTvShowSeasonsCommand>)
+            .ReturnsAsync(Result.Ok(new DownloadTaskCreationReport()));
 
         // Act
         var command = new GenerateDownloadTaskTvShowsCommand(tvShows);
@@ -122,7 +123,8 @@ public class GenerateDownloadTaskTvShowsCommandHandlerUnitTests
         };
 
         const string customPath = "/custom/destination/path";
-        Mock.SetupCommand(It.IsAny<GenerateDownloadTaskTvShowSeasonsCommand>).ReturnsAsync(Result.Ok(new DownloadTaskCreationReport()));
+        Mock.SetupCommand(It.IsAny<GenerateDownloadTaskTvShowSeasonsCommand>)
+            .ReturnsAsync(Result.Ok(new DownloadTaskCreationReport()));
 
         // Act
         var request = new CreateDownloadTasksRequest(tvShows, null, customPath);

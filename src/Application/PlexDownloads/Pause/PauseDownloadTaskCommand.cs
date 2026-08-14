@@ -79,7 +79,10 @@ public class PauseDownloadTaskCommandHandler : ICommandHandler<PauseDownloadTask
 
             if (downloadTask.DownloadTaskPhase == DownloadTaskPhase.FileTransfer)
             {
-                var isMoving = await _moveDownloadFileScheduler.IsDownloadFileMoving(downloadTaskKey, cancellationToken);
+                var isMoving = await _moveDownloadFileScheduler.IsDownloadFileMoving(
+                    downloadTaskKey,
+                    cancellationToken
+                );
                 if (isMoving)
                 {
                     var stopMoveResult = await _moveDownloadFileScheduler.StopMoveDownloadFileJob(

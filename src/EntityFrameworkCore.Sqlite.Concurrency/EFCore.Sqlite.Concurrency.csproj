@@ -1,5 +1,4 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
     <PropertyGroup>
         <TargetFrameworks>net10.0;</TargetFrameworks>
         <ImplicitUsings>enable</ImplicitUsings>
@@ -8,7 +7,6 @@
         <RootNamespace>EntityFrameworkCore.Sqlite.Concurrency</RootNamespace>
         <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
-
 
         <!-- Core Package Identity -->
         <PackageId>EntityFrameworkCore.Sqlite.Concurrency</PackageId>
@@ -79,7 +77,7 @@ NO BREAKING CHANGES — all existing call sites compile and behave correctly wit
         <!-- Debug Symbol Configuration -->
         <IncludeSymbols>true</IncludeSymbols>
         <SymbolPackageFormat>snupkg</SymbolPackageFormat>
-        
+
         <!-- Deterministic Builds for CI -->
         <ContinuousIntegrationBuild Condition="'$(GITHUB_ACTIONS)' == 'true'">true</ContinuousIntegrationBuild>
     </PropertyGroup>
@@ -132,7 +130,7 @@ NO BREAKING CHANGES — all existing call sites compile and behave correctly wit
     <!-- Packaged Files -->
     <ItemGroup>
         <None Update="packages.lock.json">
-          <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </None>
     </ItemGroup>
 </Project>

@@ -1,4 +1,3 @@
-
 namespace Reaparr.Application.UnitTests;
 
 public class RefreshLibraryMediaEndpointUnitTests
@@ -19,14 +18,16 @@ public class RefreshLibraryMediaEndpointUnitTests
         var plexLibrary = IDbContext.PlexLibraries.First();
 
         Mock.Mock<ICommandExecutor>()
-            .Setup(x => x.Send(
-                It.Is<QueueLibrarySyncJobCommand>(command =>
-                    command.ForceLibrarySync
-                    && command.ForceMediaRefresh
-                    && command.PlexLibraryIds.SequenceEqual(new[] { plexLibrary.Id })
-                ),
-                It.IsAny<CancellationToken>()
-            ))
+            .Setup(x =>
+                x.Send(
+                    It.Is<QueueLibrarySyncJobCommand>(command =>
+                        command.ForceLibrarySync
+                        && command.ForceMediaRefresh
+                        && command.PlexLibraryIds.SequenceEqual(new[] { plexLibrary.Id })
+                    ),
+                    It.IsAny<CancellationToken>()
+                )
+            )
             .ReturnsAsync(Result.Ok())
             .Verifiable(Times.Once());
 
@@ -62,14 +63,16 @@ public class RefreshLibraryMediaEndpointUnitTests
         var plexLibrary = IDbContext.PlexLibraries.First();
 
         Mock.Mock<ICommandExecutor>()
-            .Setup(x => x.Send(
-                It.Is<QueueLibrarySyncJobCommand>(command =>
-                    command.ForceLibrarySync
-                    && command.ForceMediaRefresh
-                    && command.PlexLibraryIds.SequenceEqual(new[] { plexLibrary.Id })
-                ),
-                It.IsAny<CancellationToken>()
-            ))
+            .Setup(x =>
+                x.Send(
+                    It.Is<QueueLibrarySyncJobCommand>(command =>
+                        command.ForceLibrarySync
+                        && command.ForceMediaRefresh
+                        && command.PlexLibraryIds.SequenceEqual(new[] { plexLibrary.Id })
+                    ),
+                    It.IsAny<CancellationToken>()
+                )
+            )
             .ReturnsAsync(Result.Fail("Failed to refresh library"))
             .Verifiable(Times.Once());
 
@@ -112,9 +115,7 @@ public class RefreshLibraryMediaEndpointUnitTests
             x.PropertyName == nameof(RefreshLibraryMediaEndpointRequest.PlexLibraryId)
         );
 
-        Mock.Mock<ICommandExecutor>().Verify(
-            x => x.Send(It.IsAny<QueueLibrarySyncJobCommand>(), It.IsAny<CancellationToken>()),
-            Times.Never()
-        );
+        Mock.Mock<ICommandExecutor>()
+            .Verify(x => x.Send(It.IsAny<QueueLibrarySyncJobCommand>(), It.IsAny<CancellationToken>()), Times.Never());
     }
 }

@@ -105,8 +105,7 @@ public class BackgroundJobScheduler : IBackgroundJobScheduler
 
         using var dbContext = await _dbContextFactory.CreateAsync();
         var existingTickers = await dbContext
-            .CronTickers
-            .Where(x => cronTickers.Select(y => y.Function).Contains(x.Function))
+            .CronTickers.Where(x => cronTickers.Select(y => y.Function).Contains(x.Function))
             .ToListAsync(cancellationToken);
 
         foreach (var cronTicker in cronTickers)
@@ -206,9 +205,7 @@ public class BackgroundJobScheduler : IBackgroundJobScheduler
             return true;
 
         var cronOccurrenceIds = await dbContext
-            .CronTickerOccurrences.Where(x =>
-                x.CronTicker.JobKey == jobKey.Name && x.CronTicker.JobType == jobKey.Type
-            )
+            .CronTickerOccurrences.Where(x => x.CronTicker.JobKey == jobKey.Name && x.CronTicker.JobType == jobKey.Type)
             .Select(x => x.Id)
             .ToListAsync(cancellationToken);
 
@@ -384,10 +381,7 @@ public class BackgroundJobScheduler : IBackgroundJobScheduler
         }
 
         var serializedRequest = TickerHelper.CreateTickerRequest(request);
-        if (
-            serializedRequest is not { Length: > 0 }
-            || serializedRequest.AsSpan().SequenceEqual("{}"u8)
-        )
+        if (serializedRequest is not { Length: > 0 } || serializedRequest.AsSpan().SequenceEqual("{}"u8))
         {
             error = $"Background job {jobKey.Name} cannot be queued without a serialized request";
             return false;
@@ -487,12 +481,24 @@ public class BackgroundJobScheduler : IBackgroundJobScheduler
 
         var timeTickers = await dbContext
             .TimeTickers.Where(x => x.Status == TickerStatus.InProgress)
-            .Select(x => new { x.JobType, x.Request, x.Id, x.CreatedAt })
+            .Select(x => new
+            {
+                x.JobType,
+                x.Request,
+                x.Id,
+                x.CreatedAt,
+            })
             .ToListAsync(cancellationToken);
 
         var cronTickers = await dbContext
             .CronTickerOccurrences.Where(x => x.Status == TickerStatus.InProgress)
-            .Select(x => new { x.CronTicker.JobType, x.CronTicker.Request, x.Id, x.CreatedAt })
+            .Select(x => new
+            {
+                x.CronTicker.JobType,
+                x.CronTicker.Request,
+                x.Id,
+                x.CreatedAt,
+            })
             .ToListAsync(cancellationToken);
 
         return timeTickers
@@ -514,7 +520,8 @@ public class BackgroundJobScheduler : IBackgroundJobScheduler
         byte[]? request,
         Guid id,
         DateTime createdAt
-    ) => new(
+    ) =>
+        new(
             jobType,
             JobStatus.Started,
             request is null ? string.Empty : System.Text.Encoding.UTF8.GetString(request),

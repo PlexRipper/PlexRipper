@@ -5,14 +5,11 @@ namespace Reaparr.Application.UnitTests;
 
 public class LibrarySyncJobUnitTests : BaseUnitTest<LibrarySyncJob>
 {
-    private static TickerFunctionContext<LibrarySyncJobPayload> SetupJobContext(int serverId, int libraryId) => new(
-        new TickerFunctionContext(),
-        new LibrarySyncJobPayload
-        {
-            PlexServerId = serverId,
-            PlexLibraryId = libraryId,
-        }
-    );
+    private static TickerFunctionContext<LibrarySyncJobPayload> SetupJobContext(int serverId, int libraryId) =>
+        new(
+            new TickerFunctionContext(),
+            new LibrarySyncJobPayload { PlexServerId = serverId, PlexLibraryId = libraryId }
+        );
 
     [Test]
     public async Task ShouldSkipDuplicateDelivery_WhenQueueItemHasAlreadyBeenClaimed()
@@ -51,18 +48,11 @@ public class LibrarySyncJobUnitTests : BaseUnitTest<LibrarySyncJob>
         // Assert
         Mock.Mock<ICommandExecutor>()
             .Verify(
-                x =>
-                    x.Send(
-                        It.IsAny<InvalidateLibraryComparisonJobsCommand>(),
-                        It.IsAny<CancellationToken>()
-                    ),
+                x => x.Send(It.IsAny<InvalidateLibraryComparisonJobsCommand>(), It.IsAny<CancellationToken>()),
                 Times.Never
             );
         Mock.Mock<ICommandExecutor>()
-            .Verify(
-                x => x.Send(It.IsAny<RefreshLibraryMediaCommand>(), It.IsAny<CancellationToken>()),
-                Times.Never
-            );
+            .Verify(x => x.Send(It.IsAny<RefreshLibraryMediaCommand>(), It.IsAny<CancellationToken>()), Times.Never);
         Mock.Mock<IBackgroundJobScheduler>()
             .Verify(
                 x =>
@@ -105,28 +95,13 @@ public class LibrarySyncJobUnitTests : BaseUnitTest<LibrarySyncJob>
 
         var expectedJobKey = LibrarySyncJob.GetJobKey(server.Id, library.Id);
         Mock.Mock<ICommandExecutor>()
-            .Setup(x =>
-                x.Send(
-                    It.IsAny<InvalidateLibraryComparisonJobsCommand>(),
-                    It.IsAny<CancellationToken>()
-                )
-            )
+            .Setup(x => x.Send(It.IsAny<InvalidateLibraryComparisonJobsCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Ok());
         Mock.Mock<ICommandExecutor>()
-            .Setup(x =>
-                x.Send(
-                    It.IsAny<RefreshLibraryMediaCommand>(),
-                    It.IsAny<CancellationToken>()
-                )
-            )
+            .Setup(x => x.Send(It.IsAny<RefreshLibraryMediaCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Fail<PlexLibrary>("Unauthorized").Add401UnauthorizedError());
         Mock.Mock<ICommandExecutor>()
-            .Setup(x =>
-                x.Send(
-                    It.IsAny<CheckQueuedPlexLibraryToSyncCommand>(),
-                    It.IsAny<CancellationToken>()
-                )
-            )
+            .Setup(x => x.Send(It.IsAny<CheckQueuedPlexLibraryToSyncCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Ok());
         Mock.Mock<IBackgroundJobScheduler>()
             .Setup(x =>

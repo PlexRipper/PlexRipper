@@ -126,22 +126,24 @@ public class Boot : IHostedService
     {
         _log.Here().Debug("Boot.OnStarted has been called");
 
-        var result = await Result.Try(async Task () =>
-        {
-            await _commandExecutor.Send(new NotifyArrAppsOnStartupCommand(), _appLifetime.ApplicationStopping);
-            await _commandExecutor.Send(new WarmupMediaQueryCacheCommand(), _appLifetime.ApplicationStopping);
-        }, exception =>
-        {
-            if (exception is OperationCanceledException &&
-                _appLifetime.ApplicationStopping.IsCancellationRequested)
+        var result = await Result.Try(
+            async Task () =>
             {
-                _log.Here().Debug("Boot.OnStarted was cancelled because application shutdown was requested");
-                return new ExceptionalError("Operation was cancelled", exception);
-            }
+                await _commandExecutor.Send(new NotifyArrAppsOnStartupCommand(), _appLifetime.ApplicationStopping);
+                await _commandExecutor.Send(new WarmupMediaQueryCacheCommand(), _appLifetime.ApplicationStopping);
+            },
+            exception =>
+            {
+                if (exception is OperationCanceledException && _appLifetime.ApplicationStopping.IsCancellationRequested)
+                {
+                    _log.Here().Debug("Boot.OnStarted was cancelled because application shutdown was requested");
+                    return new ExceptionalError("Operation was cancelled", exception);
+                }
 
-            _log.Here().Error(exception, "Unexpected error while running post-startup tasks");
-            return new ExceptionalError(exception);
-        });
+                _log.Here().Error(exception, "Unexpected error while running post-startup tasks");
+                return new ExceptionalError(exception);
+            }
+        );
 
         result.LogIfFailed();
     }

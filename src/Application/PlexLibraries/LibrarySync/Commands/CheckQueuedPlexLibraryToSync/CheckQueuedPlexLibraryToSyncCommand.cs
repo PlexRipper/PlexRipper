@@ -2,7 +2,6 @@ namespace Reaparr.Application;
 
 public record CheckQueuedPlexLibraryToSyncCommand : ICommand<Result>;
 
-
 public class CheckQueuedPlexLibraryToSyncCommandValidator : AbstractValidator<CheckQueuedPlexLibraryToSyncCommand>
 {
     public CheckQueuedPlexLibraryToSyncCommandValidator()
@@ -20,7 +19,8 @@ public class CheckQueuedPlexLibraryToSyncCommandHandler : ICommandHandler<CheckQ
     public CheckQueuedPlexLibraryToSyncCommandHandler(
         ILogger log,
         IReaparrDbContext dbContext,
-        IBackgroundJobScheduler scheduler)
+        IBackgroundJobScheduler scheduler
+    )
     {
         _log = log.ForContext<CheckQueuedPlexLibraryToSyncCommandHandler>();
         _dbContext = dbContext;
@@ -129,14 +129,9 @@ public class CheckQueuedPlexLibraryToSyncCommandHandler : ICommandHandler<CheckQ
         // the same library more than once.
         var updatedRows = await _dbContext
             .LibrarySyncJobQueues.Where(x =>
-                x.PlexServerId == serverId
-                && x.PlexLibraryId == libraryId
-                && x.Status == LibrarySyncJobStatus.Queued
+                x.PlexServerId == serverId && x.PlexLibraryId == libraryId && x.Status == LibrarySyncJobStatus.Queued
             )
-            .ExecuteUpdateAsync(
-                x => x.SetProperty(y => y.Status, LibrarySyncJobStatus.Processing),
-                cancellationToken
-            );
+            .ExecuteUpdateAsync(x => x.SetProperty(y => y.Status, LibrarySyncJobStatus.Processing), cancellationToken);
 
         if (updatedRows == 0)
         {
@@ -151,16 +146,14 @@ public class CheckQueuedPlexLibraryToSyncCommandHandler : ICommandHandler<CheckQ
 
         var scheduleResult = await _scheduler.ExecuteJob<LibrarySyncJob, LibrarySyncJobPayload>(
             jobKey,
-            new LibrarySyncJobPayload
-            {
-                PlexServerId = serverId,
-                PlexLibraryId = libraryId,
-            }, cancellationToken);
+            new LibrarySyncJobPayload { PlexServerId = serverId, PlexLibraryId = libraryId },
+            cancellationToken
+        );
 
         if (scheduleResult.IsFailed || scheduleResult.IsCancelled)
         {
-            await _dbContext.LibrarySyncJobQueues
-                .Where(x =>
+            await _dbContext
+                .LibrarySyncJobQueues.Where(x =>
                     x.PlexServerId == serverId
                     && x.PlexLibraryId == libraryId
                     && x.Status == LibrarySyncJobStatus.Processing

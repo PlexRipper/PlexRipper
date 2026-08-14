@@ -21,13 +21,16 @@ public class ApplyRemoteMovieComparisonStateCommandUnitTests
     public async Task ShouldMarkOwned_WhenItemMatchesAnyCurrentOwnedLibrary()
     {
         // Arrange
-        await SetupDatabase(41, config =>
-        {
-            config.PlexServerCount = 3;
-            config.PlexMovieLibraryCount = 1;
-            config.PlexAccountCount = 1;
-            config.MovieCount = 1;
-        });
+        await SetupDatabase(
+            41,
+            config =>
+            {
+                config.PlexServerCount = 3;
+                config.PlexMovieLibraryCount = 1;
+                config.PlexAccountCount = 1;
+                config.MovieCount = 1;
+            }
+        );
 
         var dbContext = IDbContext;
         var libraries = await dbContext.PlexLibraries.OrderBy(x => x.Id).ToListAsync(CancellationToken);
@@ -48,13 +51,15 @@ public class ApplyRemoteMovieComparisonStateCommandUnitTests
         var ownedMovie = await GetLibraryMovieAsync(matchedOwnedLibrary.Id);
         await AddCurrentScopeAsync(remoteLibrary, matchedOwnedLibrary);
         await AddCurrentScopeAsync(remoteLibrary, missingOwnedLibrary);
-        dbContext.PlexMovieComparisons.Add(CreateMovieComparison(
-            remoteLibrary.Id,
-            matchedOwnedLibrary.Id,
-            remoteMovie.Id,
-            ownedMovie.Id,
-            PlexMediaComparisonHitState.Matched
-        ));
+        dbContext.PlexMovieComparisons.Add(
+            CreateMovieComparison(
+                remoteLibrary.Id,
+                matchedOwnedLibrary.Id,
+                remoteMovie.Id,
+                ownedMovie.Id,
+                PlexMediaComparisonHitState.Matched
+            )
+        );
         await dbContext.SaveChangesAsync(CancellationToken);
 
         var items = new List<PlexMediaSlimDTO> { CreateMovieItem(remoteMovie) };
@@ -71,13 +76,16 @@ public class ApplyRemoteMovieComparisonStateCommandUnitTests
     public async Task ShouldMarkHigherQuality_WhenAnyCurrentOwnedLibraryHitIsHigherQuality()
     {
         // Arrange
-        await SetupDatabase(42, config =>
-        {
-            config.PlexServerCount = 3;
-            config.PlexMovieLibraryCount = 1;
-            config.PlexAccountCount = 1;
-            config.MovieCount = 1;
-        });
+        await SetupDatabase(
+            42,
+            config =>
+            {
+                config.PlexServerCount = 3;
+                config.PlexMovieLibraryCount = 1;
+                config.PlexAccountCount = 1;
+                config.MovieCount = 1;
+            }
+        );
 
         var dbContext = IDbContext;
         var libraries = await dbContext.PlexLibraries.OrderBy(x => x.Id).ToListAsync(CancellationToken);
@@ -89,7 +97,10 @@ public class ApplyRemoteMovieComparisonStateCommandUnitTests
         await SetOwnedOverrideAsync(higherQualityOwnedLibrary.PlexServerId, true);
         await SetLibraryUpdatedAtAsync(remoteLibrary.Id, new DateTime(2026, 7, 21, 17, 24, 15, DateTimeKind.Utc));
         await SetLibraryUpdatedAtAsync(matchedOwnedLibrary.Id, new DateTime(2026, 7, 21, 14, 8, 33, DateTimeKind.Utc));
-        await SetLibraryUpdatedAtAsync(higherQualityOwnedLibrary.Id, new DateTime(2026, 7, 21, 14, 8, 33, DateTimeKind.Utc));
+        await SetLibraryUpdatedAtAsync(
+            higherQualityOwnedLibrary.Id,
+            new DateTime(2026, 7, 21, 14, 8, 33, DateTimeKind.Utc)
+        );
         remoteLibrary = await GetLibraryAsync(remoteLibrary.Id);
         matchedOwnedLibrary = await GetLibraryAsync(matchedOwnedLibrary.Id);
         higherQualityOwnedLibrary = await GetLibraryAsync(higherQualityOwnedLibrary.Id);
@@ -99,20 +110,24 @@ public class ApplyRemoteMovieComparisonStateCommandUnitTests
         var higherQualityOwnedMovie = await GetLibraryMovieAsync(higherQualityOwnedLibrary.Id);
         await AddCurrentScopeAsync(remoteLibrary, matchedOwnedLibrary);
         await AddCurrentScopeAsync(remoteLibrary, higherQualityOwnedLibrary);
-        dbContext.PlexMovieComparisons.Add(CreateMovieComparison(
-            remoteLibrary.Id,
-            matchedOwnedLibrary.Id,
-            remoteMovie.Id,
-            matchedOwnedMovie.Id,
-            PlexMediaComparisonHitState.Matched
-        ));
-        dbContext.PlexMovieComparisons.Add(CreateMovieComparison(
-            remoteLibrary.Id,
-            higherQualityOwnedLibrary.Id,
-            remoteMovie.Id,
-            higherQualityOwnedMovie.Id,
-            PlexMediaComparisonHitState.HigherQuality
-        ));
+        dbContext.PlexMovieComparisons.Add(
+            CreateMovieComparison(
+                remoteLibrary.Id,
+                matchedOwnedLibrary.Id,
+                remoteMovie.Id,
+                matchedOwnedMovie.Id,
+                PlexMediaComparisonHitState.Matched
+            )
+        );
+        dbContext.PlexMovieComparisons.Add(
+            CreateMovieComparison(
+                remoteLibrary.Id,
+                higherQualityOwnedLibrary.Id,
+                remoteMovie.Id,
+                higherQualityOwnedMovie.Id,
+                PlexMediaComparisonHitState.HigherQuality
+            )
+        );
         await dbContext.SaveChangesAsync(CancellationToken);
 
         var items = new List<PlexMediaSlimDTO> { CreateMovieItem(remoteMovie) };
@@ -129,13 +144,16 @@ public class ApplyRemoteMovieComparisonStateCommandUnitTests
     public async Task ShouldMarkMissing_WhenItemHasNoHitsInAnyCurrentOwnedLibrary()
     {
         // Arrange
-        await SetupDatabase(43, config =>
-        {
-            config.PlexServerCount = 2;
-            config.PlexMovieLibraryCount = 1;
-            config.PlexAccountCount = 1;
-            config.MovieCount = 1;
-        });
+        await SetupDatabase(
+            43,
+            config =>
+            {
+                config.PlexServerCount = 2;
+                config.PlexMovieLibraryCount = 1;
+                config.PlexAccountCount = 1;
+                config.MovieCount = 1;
+            }
+        );
 
         var dbContext = IDbContext;
         var libraries = await dbContext.PlexLibraries.OrderBy(x => x.Id).ToListAsync(CancellationToken);
@@ -166,13 +184,16 @@ public class ApplyRemoteMovieComparisonStateCommandUnitTests
     public async Task ShouldLeaveNotCompared_WhenOnlyScopeIsStaleAndNoComparisonIsQueued()
     {
         // Arrange
-        await SetupDatabase(44, config =>
-        {
-            config.PlexServerCount = 2;
-            config.PlexMovieLibraryCount = 1;
-            config.PlexAccountCount = 1;
-            config.MovieCount = 1;
-        });
+        await SetupDatabase(
+            44,
+            config =>
+            {
+                config.PlexServerCount = 2;
+                config.PlexMovieLibraryCount = 1;
+                config.PlexAccountCount = 1;
+                config.MovieCount = 1;
+            }
+        );
 
         var dbContext = IDbContext;
         var libraries = await dbContext.PlexLibraries.OrderBy(x => x.Id).ToListAsync(CancellationToken);
@@ -187,23 +208,27 @@ public class ApplyRemoteMovieComparisonStateCommandUnitTests
 
         var remoteMovie = await GetLibraryMovieAsync(remoteLibrary.Id);
         var ownedMovie = await GetLibraryMovieAsync(ownedLibrary.Id);
-        dbContext.PlexComparisonScopes.Add(new PlexComparisonState
-        {
-            Id = 0,
-            RemotePlexLibraryId = remoteLibrary.Id,
-            OwnedPlexLibraryId = ownedLibrary.Id,
-            MediaType = PlexMediaType.Movie,
-            CompletedAt = DateTime.UtcNow,
-            RemoteLibraryUpdatedAt = new DateTime(2026, 7, 21, 17, 24, 15, DateTimeKind.Utc),
-            OwnedLibraryUpdatedAt = ownedLibrary.UpdatedAt,
-        });
-        dbContext.PlexMovieComparisons.Add(CreateMovieComparison(
-            remoteLibrary.Id,
-            ownedLibrary.Id,
-            remoteMovie.Id,
-            ownedMovie.Id,
-            PlexMediaComparisonHitState.HigherQuality
-        ));
+        dbContext.PlexComparisonScopes.Add(
+            new PlexComparisonState
+            {
+                Id = 0,
+                RemotePlexLibraryId = remoteLibrary.Id,
+                OwnedPlexLibraryId = ownedLibrary.Id,
+                MediaType = PlexMediaType.Movie,
+                CompletedAt = DateTime.UtcNow,
+                RemoteLibraryUpdatedAt = new DateTime(2026, 7, 21, 17, 24, 15, DateTimeKind.Utc),
+                OwnedLibraryUpdatedAt = ownedLibrary.UpdatedAt,
+            }
+        );
+        dbContext.PlexMovieComparisons.Add(
+            CreateMovieComparison(
+                remoteLibrary.Id,
+                ownedLibrary.Id,
+                remoteMovie.Id,
+                ownedMovie.Id,
+                PlexMediaComparisonHitState.HigherQuality
+            )
+        );
         await dbContext.SaveChangesAsync(CancellationToken);
 
         var items = new List<PlexMediaSlimDTO> { CreateMovieItem(remoteMovie) };
@@ -220,13 +245,16 @@ public class ApplyRemoteMovieComparisonStateCommandUnitTests
     public async Task ShouldMarkPending_WhenOnlyScopeIsStaleAndComparisonIsQueued()
     {
         // Arrange
-        await SetupDatabase(45, config =>
-        {
-            config.PlexServerCount = 2;
-            config.PlexMovieLibraryCount = 1;
-            config.PlexAccountCount = 1;
-            config.MovieCount = 1;
-        });
+        await SetupDatabase(
+            45,
+            config =>
+            {
+                config.PlexServerCount = 2;
+                config.PlexMovieLibraryCount = 1;
+                config.PlexAccountCount = 1;
+                config.MovieCount = 1;
+            }
+        );
 
         var dbContext = IDbContext;
         var libraries = await dbContext.PlexLibraries.OrderBy(x => x.Id).ToListAsync(CancellationToken);
@@ -240,23 +268,27 @@ public class ApplyRemoteMovieComparisonStateCommandUnitTests
         ownedLibrary = await GetLibraryAsync(ownedLibrary.Id);
 
         var remoteMovie = await GetLibraryMovieAsync(remoteLibrary.Id);
-        dbContext.PlexComparisonScopes.Add(new PlexComparisonState
-        {
-            Id = 0,
-            RemotePlexLibraryId = remoteLibrary.Id,
-            OwnedPlexLibraryId = ownedLibrary.Id,
-            MediaType = PlexMediaType.Movie,
-            CompletedAt = DateTime.UtcNow,
-            RemoteLibraryUpdatedAt = new DateTime(2026, 7, 21, 17, 24, 15, DateTimeKind.Utc),
-            OwnedLibraryUpdatedAt = ownedLibrary.UpdatedAt,
-        });
-        dbContext.TimeTickers.Add(new JobTimeTicker
-        {
-            Function = nameof(PlexLibraryComparisonJob),
-            Request = [],
-            JobKey = PlexLibraryComparisonJob.GetJobKey(ownedLibrary.Id, remoteLibrary.Id).Name,
-            JobType = JobTypes.LibraryComparisonJob,
-        });
+        dbContext.PlexComparisonScopes.Add(
+            new PlexComparisonState
+            {
+                Id = 0,
+                RemotePlexLibraryId = remoteLibrary.Id,
+                OwnedPlexLibraryId = ownedLibrary.Id,
+                MediaType = PlexMediaType.Movie,
+                CompletedAt = DateTime.UtcNow,
+                RemoteLibraryUpdatedAt = new DateTime(2026, 7, 21, 17, 24, 15, DateTimeKind.Utc),
+                OwnedLibraryUpdatedAt = ownedLibrary.UpdatedAt,
+            }
+        );
+        dbContext.TimeTickers.Add(
+            new JobTimeTicker
+            {
+                Function = nameof(PlexLibraryComparisonJob),
+                Request = [],
+                JobKey = PlexLibraryComparisonJob.GetJobKey(ownedLibrary.Id, remoteLibrary.Id).Name,
+                JobType = JobTypes.LibraryComparisonJob,
+            }
+        );
         await dbContext.SaveChangesAsync(CancellationToken);
 
         var items = new List<PlexMediaSlimDTO> { CreateMovieItem(remoteMovie) };
@@ -273,13 +305,16 @@ public class ApplyRemoteMovieComparisonStateCommandUnitTests
     public async Task ShouldIgnoreFailedQueue_WhenNoCurrentScopeExists()
     {
         // Arrange
-        await SetupDatabase(47, config =>
-        {
-            config.PlexServerCount = 2;
-            config.PlexMovieLibraryCount = 1;
-            config.PlexAccountCount = 1;
-            config.MovieCount = 1;
-        });
+        await SetupDatabase(
+            47,
+            config =>
+            {
+                config.PlexServerCount = 2;
+                config.PlexMovieLibraryCount = 1;
+                config.PlexAccountCount = 1;
+                config.MovieCount = 1;
+            }
+        );
 
         var dbContext = IDbContext;
         var libraries = await dbContext.PlexLibraries.OrderBy(x => x.Id).ToListAsync(CancellationToken);
@@ -303,13 +338,16 @@ public class ApplyRemoteMovieComparisonStateCommandUnitTests
     public async Task ShouldIgnoreCompletedQueue_WhenNoCurrentScopeExists()
     {
         // Arrange
-        await SetupDatabase(46, config =>
-        {
-            config.PlexServerCount = 2;
-            config.PlexMovieLibraryCount = 1;
-            config.PlexAccountCount = 1;
-            config.MovieCount = 1;
-        });
+        await SetupDatabase(
+            46,
+            config =>
+            {
+                config.PlexServerCount = 2;
+                config.PlexMovieLibraryCount = 1;
+                config.PlexAccountCount = 1;
+                config.MovieCount = 1;
+            }
+        );
 
         var dbContext = IDbContext;
         var libraries = await dbContext.PlexLibraries.OrderBy(x => x.Id).ToListAsync(CancellationToken);
@@ -331,50 +369,48 @@ public class ApplyRemoteMovieComparisonStateCommandUnitTests
 
     private async Task SetOwnedOverrideAsync(int plexServerId, bool ownedOverride)
     {
-        await IDbContext.PlexServers
-            .Where(x => x.Id == plexServerId)
+        await IDbContext
+            .PlexServers.Where(x => x.Id == plexServerId)
             .ExecuteUpdateAsync(x => x.SetProperty(y => y.OwnedOverride, ownedOverride), CancellationToken);
     }
 
     private async Task SetLibraryUpdatedAtAsync(int plexLibraryId, DateTime updatedAt)
     {
-        await IDbContext.PlexLibraries
-            .Where(x => x.Id == plexLibraryId)
+        await IDbContext
+            .PlexLibraries.Where(x => x.Id == plexLibraryId)
             .ExecuteUpdateAsync(x => x.SetProperty(y => y.UpdatedAt, updatedAt), CancellationToken);
     }
 
     private async Task<PlexLibrary> GetLibraryAsync(int plexLibraryId) =>
-        await IDbContext.PlexLibraries
-            .Where(x => x.Id == plexLibraryId)
-            .SingleAsync(CancellationToken);
+        await IDbContext.PlexLibraries.Where(x => x.Id == plexLibraryId).SingleAsync(CancellationToken);
 
     private async Task<PlexMovie> GetLibraryMovieAsync(int plexLibraryId) =>
-        await IDbContext.PlexMovies
-            .Where(x => x.PlexLibraryId == plexLibraryId)
-            .SingleAsync(CancellationToken);
+        await IDbContext.PlexMovies.Where(x => x.PlexLibraryId == plexLibraryId).SingleAsync(CancellationToken);
 
     private async Task AddCurrentScopeAsync(PlexLibrary remoteLibrary, PlexLibrary ownedLibrary)
     {
-        var remoteUpdatedAt = await IDbContext.PlexLibraries
-            .Where(x => x.Id == remoteLibrary.Id)
+        var remoteUpdatedAt = await IDbContext
+            .PlexLibraries.Where(x => x.Id == remoteLibrary.Id)
             .Select(x => x.UpdatedAt)
             .SingleAsync(CancellationToken);
-        var ownedUpdatedAt = await IDbContext.PlexLibraries
-            .Where(x => x.Id == ownedLibrary.Id)
+        var ownedUpdatedAt = await IDbContext
+            .PlexLibraries.Where(x => x.Id == ownedLibrary.Id)
             .Select(x => x.UpdatedAt)
             .SingleAsync(CancellationToken);
 
         var dbContext = IDbContext;
-        dbContext.PlexComparisonScopes.Add(new PlexComparisonState
-        {
-            Id = 0,
-            RemotePlexLibraryId = remoteLibrary.Id,
-            OwnedPlexLibraryId = ownedLibrary.Id,
-            MediaType = PlexMediaType.Movie,
-            CompletedAt = DateTime.UtcNow,
-            RemoteLibraryUpdatedAt = remoteUpdatedAt,
-            OwnedLibraryUpdatedAt = ownedUpdatedAt,
-        });
+        dbContext.PlexComparisonScopes.Add(
+            new PlexComparisonState
+            {
+                Id = 0,
+                RemotePlexLibraryId = remoteLibrary.Id,
+                OwnedPlexLibraryId = ownedLibrary.Id,
+                MediaType = PlexMediaType.Movie,
+                CompletedAt = DateTime.UtcNow,
+                RemoteLibraryUpdatedAt = remoteUpdatedAt,
+                OwnedLibraryUpdatedAt = ownedUpdatedAt,
+            }
+        );
         await dbContext.SaveChangesAsync(CancellationToken);
     }
 
@@ -383,7 +419,8 @@ public class ApplyRemoteMovieComparisonStateCommandUnitTests
         int ownedPlexLibraryId,
         int remotePlexMediaId,
         int ownedPlexMediaId,
-        PlexMediaComparisonHitState hitState) =>
+        PlexMediaComparisonHitState hitState
+    ) =>
         new()
         {
             Id = 0,
@@ -393,7 +430,8 @@ public class ApplyRemoteMovieComparisonStateCommandUnitTests
             OwnedPlexMediaId = ownedPlexMediaId,
             HitState = hitState,
             RemoteQuality = VideoQuality.FullHD,
-            OwnedQuality = hitState == PlexMediaComparisonHitState.HigherQuality ? VideoQuality.HD : VideoQuality.FullHD,
+            OwnedQuality =
+                hitState == PlexMediaComparisonHitState.HigherQuality ? VideoQuality.HD : VideoQuality.FullHD,
             MatchType = PlexMediaComparisonMatchType.TmdbGuid,
             ComparedAt = DateTime.UtcNow,
         };

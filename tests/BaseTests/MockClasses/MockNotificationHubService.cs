@@ -10,7 +10,6 @@ public class MockNotificationHubService : INotificationHubService
 
     public BlockingCollection<RefreshDataType> RefreshNotificationList { get; } = new();
 
-
     public MockNotificationHubService(ILogger log)
     {
         _log = log.ForContext<MockNotificationHubService>();
@@ -36,5 +35,4 @@ public class MockNotificationHubService : INotificationHubService
         foreach (var dataType in dataTypes)
             await SendRefreshNotificationAsync(dataType);
     }
-
 }

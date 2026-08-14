@@ -55,8 +55,8 @@ public class SetLibraryEnabledEndpoint : Endpoint<SetLibraryEnabledRequest, Resu
     {
         _log.Here().DebugApiCall(HttpContext, req);
 
-        var plexLibrary = await _dbContext.PlexLibraries
-            .IgnoreIsEnabledFilter()
+        var plexLibrary = await _dbContext
+            .PlexLibraries.IgnoreIsEnabledFilter()
             .FirstOrDefaultAsync(x => x.Id == req.PlexLibraryId, ct);
 
         if (plexLibrary is null)
@@ -76,8 +76,8 @@ public class SetLibraryEnabledEndpoint : Endpoint<SetLibraryEnabledRequest, Resu
         }
 
         // Re-fetch with ignore filter to return updated entity including IsEnabled
-        var updatedLibrary = await _dbContext.PlexLibraries
-            .AsNoTracking()
+        var updatedLibrary = await _dbContext
+            .PlexLibraries.AsNoTracking()
             .IgnoreIsEnabledFilter()
             .FirstOrDefaultAsync(x => x.Id == req.PlexLibraryId, ct);
 
@@ -94,8 +94,8 @@ public class SetLibraryEnabledEndpoint : Endpoint<SetLibraryEnabledRequest, Resu
     {
         _log.Here().Information("Enabling PlexLibrary {PlexLibraryId}", plexLibrary.Id);
 
-        await _dbContext.PlexLibraries
-            .IgnoreIsEnabledFilter()
+        await _dbContext
+            .PlexLibraries.IgnoreIsEnabledFilter()
             .Where(x => x.Id == plexLibrary.Id)
             .ExecuteUpdateAsync(x => x.SetProperty(y => y.IsEnabled, true), ct);
 
@@ -108,9 +108,10 @@ public class SetLibraryEnabledEndpoint : Endpoint<SetLibraryEnabledRequest, Resu
         _mediaQueryCache.InvalidateLibrary(plexLibrary.Id, "PlexLibrary re-enabled");
 
         // Notify frontend
-        await _notificationHubService.SendRefreshNotificationAsync(
-            [RefreshDataType.PlexLibrary, RefreshDataType.PlexLibrarySyncStatus]
-        );
+        await _notificationHubService.SendRefreshNotificationAsync([
+            RefreshDataType.PlexLibrary,
+            RefreshDataType.PlexLibrarySyncStatus,
+        ]);
 
         _log.Here().Information("PlexLibrary {PlexLibraryId} enabled and sync queued", plexLibrary.Id);
         return Result.Ok();
@@ -126,44 +127,53 @@ public class SetLibraryEnabledEndpoint : Endpoint<SetLibraryEnabledRequest, Resu
             return cancelResult.LogError();
 
         // Purge synced media and reset metadata atomically.
-        var deleteResult = await _dbContext.ExecuteSerializedTransactionAsync(async (dbContext, txCt) =>
-        {
-            var deletedCount = plexLibrary.Type switch
+        var deleteResult = await _dbContext.ExecuteSerializedTransactionAsync(
+            async (dbContext, txCt) =>
             {
-                PlexMediaType.Movie => await dbContext.PlexMovies
-                    .Where(x => x.PlexLibraryId == plexLibrary.Id)
-                    .ExecuteDeleteAsync(txCt),
-                PlexMediaType.TvShow => await dbContext.PlexTvShows
-                    .Where(x => x.PlexLibraryId == plexLibrary.Id)
-                    .ExecuteDeleteAsync(txCt),
-                _ => throw new ArgumentOutOfRangeException(nameof(plexLibrary.Type), plexLibrary.Type, null),
-            };
+                var deletedCount = plexLibrary.Type switch
+                {
+                    PlexMediaType.Movie => await dbContext
+                        .PlexMovies.Where(x => x.PlexLibraryId == plexLibrary.Id)
+                        .ExecuteDeleteAsync(txCt),
+                    PlexMediaType.TvShow => await dbContext
+                        .PlexTvShows.Where(x => x.PlexLibraryId == plexLibrary.Id)
+                        .ExecuteDeleteAsync(txCt),
+                    _ => throw new ArgumentOutOfRangeException(nameof(plexLibrary.Type), plexLibrary.Type, null),
+                };
 
-            await dbContext.PlexLibraries
-                .IgnoreIsEnabledFilter()
-                .Where(x => x.Id == plexLibrary.Id)
-                .ExecuteUpdateAsync(x => x.SetProperty(y => y.IsEnabled, false)
-                    .SetProperty(y => y.SyncedAt, (DateTime?)null)
-                    .SetProperty(y => y.Outdated, false)
-                    .SetProperty(y => y.MovieCount, 0)
-                    .SetProperty(y => y.TvShowCount, 0)
-                    .SetProperty(y => y.SeasonCount, 0)
-                    .SetProperty(y => y.EpisodeCount, 0), txCt);
+                await dbContext
+                    .PlexLibraries.IgnoreIsEnabledFilter()
+                    .Where(x => x.Id == plexLibrary.Id)
+                    .ExecuteUpdateAsync(
+                        x =>
+                            x.SetProperty(y => y.IsEnabled, false)
+                                .SetProperty(y => y.SyncedAt, (DateTime?)null)
+                                .SetProperty(y => y.Outdated, false)
+                                .SetProperty(y => y.MovieCount, 0)
+                                .SetProperty(y => y.TvShowCount, 0)
+                                .SetProperty(y => y.SeasonCount, 0)
+                                .SetProperty(y => y.EpisodeCount, 0),
+                        txCt
+                    );
 
-            return deletedCount;
-        }, ct);
+                return deletedCount;
+            },
+            ct
+        );
         if (deleteResult.IsFailed)
             return deleteResult.ToResult().LogError();
 
-        _log.Here().Information("Purged {Count} media items from library {PlexLibraryId}", deleteResult.Value, plexLibrary.Id);
+        _log.Here()
+            .Information("Purged {Count} media items from library {PlexLibraryId}", deleteResult.Value, plexLibrary.Id);
 
         // Remove all media query cache references to this library and rebuild affected snapshots
         _mediaQueryCache.InvalidateLibrary(plexLibrary.Id, "PlexLibrary disabled");
 
         // Notify frontend
-        await _notificationHubService.SendRefreshNotificationAsync(
-            [RefreshDataType.PlexLibrary, RefreshDataType.PlexLibrarySyncStatus]
-        );
+        await _notificationHubService.SendRefreshNotificationAsync([
+            RefreshDataType.PlexLibrary,
+            RefreshDataType.PlexLibrarySyncStatus,
+        ]);
 
         _log.Here().Information("PlexLibrary {PlexLibraryId} disabled and media purged", plexLibrary.Id);
         return Result.Ok();

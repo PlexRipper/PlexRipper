@@ -26,7 +26,8 @@ public record BulkInsertTvShowsRapport
 
     public int UnchangedEpisodes { get; set; }
 
-    public override string ToString() => $@"
+    public override string ToString() =>
+        $@"
         CreatedTvShows: {CreatedTvShows}
         UpdatedTvShows: {UpdatedTvShows}
         DeletedTvShows: {DeletedTvShows}

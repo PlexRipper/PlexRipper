@@ -1,6 +1,7 @@
 namespace Reaparr.Application.UnitTests;
 
-public class DeleteDownloadTaskEndpointUnitTests : BaseEndpointUnitTest<DeleteDownloadTaskEndpoint, DeleteDownloadTaskEndpointRequest, BaseResultDTO>
+public class DeleteDownloadTaskEndpointUnitTests
+    : BaseEndpointUnitTest<DeleteDownloadTaskEndpoint, DeleteDownloadTaskEndpointRequest, BaseResultDTO>
 {
     [Test]
     public async Task ShouldDispatchDeleteCommand_WhenDownloadTaskIdIsGiven()
@@ -127,7 +128,9 @@ public class DeleteDownloadTaskEndpointUnitTests : BaseEndpointUnitTest<DeleteDo
             );
 
         // Act
-        var endpointResult = await TestEndpointHandleAsync(new DeleteDownloadTaskEndpointRequest { DownloadTaskIds = [movieId] });
+        var endpointResult = await TestEndpointHandleAsync(
+            new DeleteDownloadTaskEndpointRequest { DownloadTaskIds = [movieId] }
+        );
         var result = endpointResult.Response;
 
         // Assert

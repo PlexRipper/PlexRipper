@@ -1,6 +1,7 @@
 ﻿namespace Reaparr.Application.UnitTests;
 
-public class CreatePlexAccountEndpointUnitTests : BaseEndpointUnitTest<CreatePlexAccountEndpoint, CreatePlexAccountEndpointRequest, ResultDTO<PlexAccountDTO>>
+public class CreatePlexAccountEndpointUnitTests
+    : BaseEndpointUnitTest<CreatePlexAccountEndpoint, CreatePlexAccountEndpointRequest, ResultDTO<PlexAccountDTO>>
 {
     [Test]
     public async Task CreatePlexAccountAsync_ShouldSuccessResult_WhenAccountIsValid()
@@ -38,12 +39,18 @@ public class CreatePlexAccountEndpointUnitTests : BaseEndpointUnitTest<CreatePle
         endpointResult.ShouldNotBeNull();
         endpointResult.Response.ShouldNotBeNull();
         endpointResult.Response.IsSuccess.ShouldBeTrue();
-        var createdAccount = await IDbContext.PlexAccounts.SingleOrDefaultAsync(x => x.Username == newAccount.Username, CancellationToken);
+        var createdAccount = await IDbContext.PlexAccounts.SingleOrDefaultAsync(
+            x => x.Username == newAccount.Username,
+            CancellationToken
+        );
         createdAccount.ShouldNotBeNull();
         createdAccount.Username.ShouldBe(newAccount.Username);
 
         Mock.Mock<ICommandExecutor>()
-            .Verify(x => x.Send(It.IsAny<InspectAllPlexServersByAccountIdCommand>(), It.IsAny<CancellationToken>()), Times.Once);
+            .Verify(
+                x => x.Send(It.IsAny<InspectAllPlexServersByAccountIdCommand>(), It.IsAny<CancellationToken>()),
+                Times.Once
+            );
     }
 
     [Test]
@@ -85,10 +92,16 @@ public class CreatePlexAccountEndpointUnitTests : BaseEndpointUnitTest<CreatePle
         endpointResult.ShouldNotBeNull();
         endpointResult.Response.ShouldNotBeNull();
         endpointResult.Response.IsSuccess.ShouldBeFalse();
-        var duplicateAccounts = await IDbContext.PlexAccounts.CountAsync(x => x.Username == duplicateUsername, CancellationToken);
+        var duplicateAccounts = await IDbContext.PlexAccounts.CountAsync(
+            x => x.Username == duplicateUsername,
+            CancellationToken
+        );
         duplicateAccounts.ShouldBe(1);
 
         Mock.Mock<ICommandExecutor>()
-            .Verify(x => x.Send(It.IsAny<InspectAllPlexServersByAccountIdCommand>(), It.IsAny<CancellationToken>()), Times.Never);
+            .Verify(
+                x => x.Send(It.IsAny<InspectAllPlexServersByAccountIdCommand>(), It.IsAny<CancellationToken>()),
+                Times.Never
+            );
     }
 }

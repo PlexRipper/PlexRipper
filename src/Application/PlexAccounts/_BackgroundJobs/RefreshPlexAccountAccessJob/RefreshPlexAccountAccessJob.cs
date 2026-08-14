@@ -18,7 +18,8 @@ public class RefreshPlexAccountAccessJob
         ICommandExecutor commandExecutor,
         IProgressHubService progressHubService,
         INotificationHubService notificationHubService
-    ) : base(log, progressHubService, notificationHubService)
+    )
+        : base(log, progressHubService, notificationHubService)
     {
         _log = log.ForContext<RefreshPlexAccountAccessJob>();
         _commandExecutor = commandExecutor;

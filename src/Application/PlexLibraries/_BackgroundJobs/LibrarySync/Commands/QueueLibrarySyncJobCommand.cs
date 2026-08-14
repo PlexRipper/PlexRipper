@@ -9,7 +9,6 @@ public record QueueLibrarySyncJobCommand(
     bool ForceMediaRefresh = false
 ) : ICommand<Result>;
 
-
 public class QueueLibrarySyncJobCommandValidator : AbstractValidator<QueueLibrarySyncJobCommand>
 {
     public QueueLibrarySyncJobCommandValidator()
@@ -65,10 +64,14 @@ public class QueueLibrarySyncJobCommandHandler : ICommandHandler<QueueLibrarySyn
         var itemsToReset = existingQueues
             .Where(x =>
                 x.Status is LibrarySyncJobStatus.Failed or LibrarySyncJobStatus.Cancelled
-                || (x.Status == LibrarySyncJobStatus.Completed
-                    && (command.ForceLibrarySync
+                || (
+                    x.Status == LibrarySyncJobStatus.Completed
+                    && (
+                        command.ForceLibrarySync
                         || x.CompletedAt <= syncBufferCutoff
-                        || unsyncedLibraryIds.Contains(x.PlexLibraryId)))
+                        || unsyncedLibraryIds.Contains(x.PlexLibraryId)
+                    )
+                )
             )
             .Select(x => x.PlexLibraryId)
             .ToList();
@@ -89,9 +92,7 @@ public class QueueLibrarySyncJobCommandHandler : ICommandHandler<QueueLibrarySyn
         if (command.ForceMediaRefresh && queuedForceRefreshLibraryIds.Any())
         {
             await _dbContext
-                .LibrarySyncJobQueues.Where(x =>
-                    queuedForceRefreshLibraryIds.Contains(x.PlexLibraryId)
-                )
+                .LibrarySyncJobQueues.Where(x => queuedForceRefreshLibraryIds.Contains(x.PlexLibraryId))
                 .ExecuteUpdateAsync(x => x.SetProperty(y => y.ForceMediaRefresh, true), cancellationToken);
         }
 

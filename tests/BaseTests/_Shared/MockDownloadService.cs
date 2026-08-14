@@ -27,11 +27,13 @@ public static class MockDownloadService
         mock.Setup(x => x.DownloadFileTaskAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
             .Returns<string, string, CancellationToken>((_, targetPath, _) => Complete(mock, file, targetPath));
         mock.Setup(x => x.DownloadFileTaskAsync(It.IsAny<DownloadPackage>(), It.IsAny<CancellationToken>()))
-            .Returns<DownloadPackage, CancellationToken>((package, _) =>
-            {
-                Complete(mock, file, package.FileName);
-                return Task.FromResult(Stream.Null);
-            });
+            .Returns<DownloadPackage, CancellationToken>(
+                (package, _) =>
+                {
+                    Complete(mock, file, package.FileName);
+                    return Task.FromResult(Stream.Null);
+                }
+            );
 
         return mock.Object;
     }
@@ -49,33 +51,39 @@ public static class MockDownloadService
                 return Task.CompletedTask;
             });
         mock.Setup(x => x.DownloadFileTaskAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
-            .Returns<string, string, CancellationToken>(async (_, targetPath, cancellationToken) =>
-            {
-                // DirectPlexDownloadClient verifies the final, non-.reaptemp path after completion.
-                var finalPath = targetPath.RemoveReapTempSuffix();
-                await file.WriteAllBytesAsync(finalPath, FakeData.GetDownloadFile(DOWNLOAD_FILE_SIZE_IN_MIB), cancellationToken);
-                // ReSharper disable once MethodHasAsyncOverload
-                //DownloadProgressChanged and DownloadFileCompleted are void event handlers (AsyncCompletedEventArgs/DownloadProgressChangedEventArgs events), so Moq's RaiseAsync is not appropriate here and can fail to raise the events. Match the working Complete path and use mock.Raise(...), dropping the await.
-                mock.Raise(
-                    x => x.DownloadProgressChanged += null,
-                    mock.Object,
-                    new DownloadProgressChangedEventArgs("Main")
-                    {
-                        TotalBytesToReceive = mock.Object.Package.TotalFileSize,
-                        ReceivedBytesSize = mock.Object.Package.TotalFileSize / 2,
-                        BytesPerSecondSpeed = 1024,
-                    }
-                );
+            .Returns<string, string, CancellationToken>(
+                async (_, targetPath, cancellationToken) =>
+                {
+                    // DirectPlexDownloadClient verifies the final, non-.reaptemp path after completion.
+                    var finalPath = targetPath.RemoveReapTempSuffix();
+                    await file.WriteAllBytesAsync(
+                        finalPath,
+                        FakeData.GetDownloadFile(DOWNLOAD_FILE_SIZE_IN_MIB),
+                        cancellationToken
+                    );
+                    // ReSharper disable once MethodHasAsyncOverload
+                    //DownloadProgressChanged and DownloadFileCompleted are void event handlers (AsyncCompletedEventArgs/DownloadProgressChangedEventArgs events), so Moq's RaiseAsync is not appropriate here and can fail to raise the events. Match the working Complete path and use mock.Raise(...), dropping the await.
+                    mock.Raise(
+                        x => x.DownloadProgressChanged += null,
+                        mock.Object,
+                        new DownloadProgressChangedEventArgs("Main")
+                        {
+                            TotalBytesToReceive = mock.Object.Package.TotalFileSize,
+                            ReceivedBytesSize = mock.Object.Package.TotalFileSize / 2,
+                            BytesPerSecondSpeed = 1024,
+                        }
+                    );
 
-                await stopped.Task.WaitAsync(cancellationToken);
-                // DownloadProgressChanged and DownloadFileCompleted are void event handlers (AsyncCompletedEventArgs/DownloadProgressChangedEventArgs events), so Moq's RaiseAsync is not appropriate here and can fail to raise the events. Match the working Complete path and use mock.Raise(...), dropping the await.
-                // ReSharper disable once MethodHasAsyncOverload
-                mock.Raise(
-                    x => x.DownloadFileCompleted += null,
-                    mock.Object,
-                    new AsyncCompletedEventArgs(null, true, mock.Object.Package)
-                );
-            });
+                    await stopped.Task.WaitAsync(cancellationToken);
+                    // DownloadProgressChanged and DownloadFileCompleted are void event handlers (AsyncCompletedEventArgs/DownloadProgressChangedEventArgs events), so Moq's RaiseAsync is not appropriate here and can fail to raise the events. Match the working Complete path and use mock.Raise(...), dropping the await.
+                    // ReSharper disable once MethodHasAsyncOverload
+                    mock.Raise(
+                        x => x.DownloadFileCompleted += null,
+                        mock.Object,
+                        new AsyncCompletedEventArgs(null, true, mock.Object.Package)
+                    );
+                }
+            );
 
         return mock.Object;
     }

@@ -21,8 +21,8 @@ public class GetAllPlexServerConnectionsEndpoint : EndpointWithoutRequest<List<P
 
     public override async Task HandleAsync(CancellationToken ct)
     {
-        var plexServers = await _dbContext.PlexServers
-            .Include(x => x.PlexServerConnections)
+        var plexServers = await _dbContext
+            .PlexServers.Include(x => x.PlexServerConnections)
                 .ThenInclude(x => x.LatestConnectionStatus)
             .ToListAsync(ct);
 

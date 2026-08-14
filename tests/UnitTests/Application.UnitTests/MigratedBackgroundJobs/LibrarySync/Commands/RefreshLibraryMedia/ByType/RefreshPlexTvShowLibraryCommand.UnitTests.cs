@@ -53,8 +53,7 @@ public class RefreshPlexTvShowLibraryCommandUnitTests : BaseUnitTest<RefreshPlex
 
     private void SetupMediaQueryCacheInvalidate()
     {
-        Mock.Mock<IMediaQueryCache>()
-            .Setup(x => x.InvalidateLibrary(It.IsAny<int>(), It.IsAny<string>()));
+        Mock.Mock<IMediaQueryCache>().Setup(x => x.InvalidateLibrary(It.IsAny<int>(), It.IsAny<string>()));
     }
 
     private void SetupSyncCommandSuccess(BulkInsertTvShowsRapport? rapport = null)
@@ -71,8 +70,8 @@ public class RefreshPlexTvShowLibraryCommandUnitTests : BaseUnitTest<RefreshPlex
     {
         Mock.Mock<ICommandExecutor>()
             .Setup(x => x.Send(It.IsAny<SyncPlexTvShowsCommand>(), It.IsAny<CancellationToken>()))
-            .Callback<ICommand<Result<BulkInsertTvShowsRapport>>, CancellationToken>((cmd, _) =>
-                capture((SyncPlexTvShowsCommand)cmd)
+            .Callback<ICommand<Result<BulkInsertTvShowsRapport>>, CancellationToken>(
+                (cmd, _) => capture((SyncPlexTvShowsCommand)cmd)
             )
             .ReturnsAsync(Result.Ok(rapport ?? new BulkInsertTvShowsRapport()));
     }
@@ -161,7 +160,10 @@ public class RefreshPlexTvShowLibraryCommandUnitTests : BaseUnitTest<RefreshPlex
         // Arrange
         await SetupDatabase(
             9426,
-            config => { config.TvShowCount = 3; }
+            config =>
+            {
+                config.TvShowCount = 3;
+            }
         );
         var testLibrary = IDbContext.PlexLibraries.Include(x => x.TvShows).First();
 
@@ -231,7 +233,10 @@ public class RefreshPlexTvShowLibraryCommandUnitTests : BaseUnitTest<RefreshPlex
         // Arrange
         var seed = await SetupDatabase(
             9428,
-            config => { config.TvShowCount = 3; }
+            config =>
+            {
+                config.TvShowCount = 3;
+            }
         );
         var testLibrary = IDbContext.PlexLibraries.Include(x => x.TvShows).First();
 

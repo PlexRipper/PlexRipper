@@ -5,7 +5,4 @@ namespace Reaparr.Application.Contracts;
 /// Produces comparison hit rows and a scope row so browse queries can project
 /// movie comparison state efficiently.
 /// </summary>
-public record CompareMoviePlexLibraryCommand(
-    int OwnedPlexLibraryId,
-    int RemotePlexLibraryId
-) : ICommand<Result>;
+public record CompareMoviePlexLibraryCommand(int OwnedPlexLibraryId, int RemotePlexLibraryId) : ICommand<Result>;

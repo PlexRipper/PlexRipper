@@ -10,8 +10,7 @@ public class WarmupMediaQueryCacheCommandHandlerUnitTests : BaseUnitTest<WarmupM
         // Arrange
         await SetupDatabase(8237);
 
-        Mock.Mock<IMediaQueryCache>()
-            .SetupProperty(x => x.SuppressInvalidation);
+        Mock.Mock<IMediaQueryCache>().SetupProperty(x => x.SuppressInvalidation);
         Mock.Mock<IMediaQueryCache>()
             .Setup(x => x.BuildCache(It.IsAny<CancellationToken>()))
             .Returns(Task.CompletedTask);
@@ -27,10 +26,8 @@ public class WarmupMediaQueryCacheCommandHandlerUnitTests : BaseUnitTest<WarmupM
         Mock.Mock<IMediaQueryCache>()
             .Invocations.Count(x => x.Method.Name == nameof(IMediaQueryCache.BuildCache))
             .ShouldBe(2);
-        Mock.Mock<IMediaQueryCache>().Verify(
-            x => x.GetMediaAsync(It.IsAny<MediaQueryFilter>(), It.IsAny<CancellationToken>()),
-            Times.Never
-        );
+        Mock.Mock<IMediaQueryCache>()
+            .Verify(x => x.GetMediaAsync(It.IsAny<MediaQueryFilter>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Test]
@@ -40,8 +37,7 @@ public class WarmupMediaQueryCacheCommandHandlerUnitTests : BaseUnitTest<WarmupM
         var expectedException = new InvalidOperationException("Build cache failed");
         await SetupDatabase(8237);
 
-        Mock.Mock<IMediaQueryCache>()
-            .SetupProperty(x => x.SuppressInvalidation);
+        Mock.Mock<IMediaQueryCache>().SetupProperty(x => x.SuppressInvalidation);
         Mock.Mock<IMediaQueryCache>()
             .Setup(x => x.BuildCache(It.IsAny<CancellationToken>()))
             .ThrowsAsync(expectedException);
@@ -65,8 +61,7 @@ public class WarmupMediaQueryCacheCommandHandlerUnitTests : BaseUnitTest<WarmupM
         // Arrange
         await SetupDatabase(8237);
 
-        Mock.Mock<IMediaQueryCache>()
-            .SetupProperty(x => x.SuppressInvalidation);
+        Mock.Mock<IMediaQueryCache>().SetupProperty(x => x.SuppressInvalidation);
         Mock.Mock<IMediaQueryCache>()
             .Setup(x => x.BuildCache(It.IsAny<CancellationToken>()))
             .Returns(Task.CompletedTask);
@@ -89,8 +84,7 @@ public class WarmupMediaQueryCacheCommandHandlerUnitTests : BaseUnitTest<WarmupM
     private void OverrideSyncQuietPeriod(TimeSpan period)
     {
         typeof(WarmupMediaQueryCacheCommandHandler)
-            .GetProperty("SyncQuietPeriod",
-                BindingFlags.NonPublic | BindingFlags.Instance)!
+            .GetProperty("SyncQuietPeriod", BindingFlags.NonPublic | BindingFlags.Instance)!
             .SetValue(Sut, period);
     }
 }

@@ -104,11 +104,10 @@ public class CheckConnectionStatusByIdCommandHandler
         // Store the latest Plex server status for this connection.
         var plexServerStatus = serverStatusResult.Value;
 
-        var relationExists = await dbContext.PlexServerConnections
-            .AnyAsync(
-                x => x.Id == plexServerStatus.PlexServerConnectionId && x.PlexServerId == plexServerStatus.PlexServerId,
-                cancellationToken
-            );
+        var relationExists = await dbContext.PlexServerConnections.AnyAsync(
+            x => x.Id == plexServerStatus.PlexServerConnectionId && x.PlexServerId == plexServerStatus.PlexServerId,
+            cancellationToken
+        );
 
         if (!relationExists)
         {

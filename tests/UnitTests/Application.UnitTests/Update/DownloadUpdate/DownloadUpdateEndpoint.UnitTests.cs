@@ -33,13 +33,7 @@ public class DownloadUpdateEndpointUnitTests : BaseEndpointWithoutRequestUnitTes
             Times.Never
         );
         Mock.Mock<IProgressHubService>()
-            .Verify(
-                x =>
-                    x.SendAppUpdateDownloadProgressAsync(
-                        It.IsAny<AppUpdateDownloadProgressDTO>()
-                    ),
-                Times.Never
-            );
+            .Verify(x => x.SendAppUpdateDownloadProgressAsync(It.IsAny<AppUpdateDownloadProgressDTO>()), Times.Never);
         mockSource.VerifyNoOtherCalls();
     }
 
@@ -76,13 +70,7 @@ public class DownloadUpdateEndpointUnitTests : BaseEndpointWithoutRequestUnitTes
             Times.Once
         );
         Mock.Mock<IProgressHubService>()
-            .Verify(
-                x =>
-                    x.SendAppUpdateDownloadProgressAsync(
-                        It.IsAny<AppUpdateDownloadProgressDTO>()
-                    ),
-                Times.Never
-            );
+            .Verify(x => x.SendAppUpdateDownloadProgressAsync(It.IsAny<AppUpdateDownloadProgressDTO>()), Times.Never);
         mockSource.VerifyNoOtherCalls();
     }
 
@@ -114,19 +102,13 @@ public class DownloadUpdateEndpointUnitTests : BaseEndpointWithoutRequestUnitTes
             .Returns(Task.CompletedTask)
             .Verifiable(Times.Once());
         Mock.Mock<IProgressHubService>()
-            .Setup(s =>
-                s.SendAppUpdateDownloadProgressAsync(
-                    It.IsAny<AppUpdateDownloadProgressDTO>()
-                )
-            )
-            .Callback<AppUpdateDownloadProgressDTO>(
-                dto =>
-                {
-                    capturedDtos.Add(dto);
-                    if (capturedDtos.Count == 2)
-                        progressSent.TrySetResult();
-                }
-            )
+            .Setup(s => s.SendAppUpdateDownloadProgressAsync(It.IsAny<AppUpdateDownloadProgressDTO>()))
+            .Callback<AppUpdateDownloadProgressDTO>(dto =>
+            {
+                capturedDtos.Add(dto);
+                if (capturedDtos.Count == 2)
+                    progressSent.TrySetResult();
+            })
             .Returns(Task.CompletedTask)
             .Verifiable(Times.Exactly(2));
 

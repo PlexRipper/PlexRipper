@@ -51,8 +51,8 @@ public class ScheduleAffectedLibraryComparisonJobsCommandHandler
         CancellationToken cancellationToken
     )
     {
-        var sourceLibrary = await _dbContext.PlexLibraries
-            .Where(x => x.Id == command.PlexLibraryId)
+        var sourceLibrary = await _dbContext
+            .PlexLibraries.Where(x => x.Id == command.PlexLibraryId)
             .SelectOwnership()
             .SingleOrDefaultAsync(cancellationToken);
 
@@ -62,8 +62,8 @@ public class ScheduleAffectedLibraryComparisonJobsCommandHandler
         if (sourceLibrary.Type is not PlexMediaType.Movie and not PlexMediaType.TvShow)
             return Result.Ok();
 
-        var targetLibraries = await _dbContext.PlexLibraries
-            .Where(x => x.Id != sourceLibrary.Id && x.Type == sourceLibrary.Type)
+        var targetLibraries = await _dbContext
+            .PlexLibraries.Where(x => x.Id != sourceLibrary.Id && x.Type == sourceLibrary.Type)
             .SelectOwnership()
             .ToListAsync(cancellationToken);
 
@@ -78,12 +78,14 @@ public class ScheduleAffectedLibraryComparisonJobsCommandHandler
 
         // Resolve active comparison keys once before dispatching child commands, so repeated updates do not spam
         // schedule requests for pairs that are already queued or running.
-        var activeComparisonJobKeys = await _dbContext.TimeTickers
-            .Where(x =>
+        var activeComparisonJobKeys = await _dbContext
+            .TimeTickers.Where(x =>
                 x.JobType == JobTypes.LibraryComparisonJob
-                && (x.Status == TickerStatus.Idle
+                && (
+                    x.Status == TickerStatus.Idle
                     || x.Status == TickerStatus.Queued
-                    || x.Status == TickerStatus.InProgress)
+                    || x.Status == TickerStatus.InProgress
+                )
             )
             .Select(x => x.JobKey)
             .ToHashSetAsync(cancellationToken);
@@ -113,11 +115,7 @@ public class ScheduleAffectedLibraryComparisonJobsCommandHandler
         var schedulingResult = await _backgroundJobScheduler.ScheduleJobs<
             PlexLibraryComparisonJob,
             PlexLibraryComparisonJobPayload
-        >(
-            comparisonJobs,
-            DateTime.UtcNow.Add(_comparisonJobDelay),
-            cancellationToken
-        );
+        >(comparisonJobs, DateTime.UtcNow.Add(_comparisonJobDelay), cancellationToken);
 
         if (schedulingResult.IsFailed)
             return schedulingResult.ToResult().LogError();

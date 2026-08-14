@@ -60,9 +60,8 @@ public static partial class FakeData
                 {
                     movie.FullTitle = $"{movie.Title} ({movie.Year})";
 
-                    movie.Quality = movie.MediaDataList.Count == 0
-                        ? VideoQuality.Unknown
-                        : movie.MediaDataList.Max(x => x.Quality);
+                    movie.Quality =
+                        movie.MediaDataList.Count == 0 ? VideoQuality.Unknown : movie.MediaDataList.Max(x => x.Quality);
                     movie.MediaSize = movie.MediaDataList.Sum(x => x.Size);
                 }
             );
@@ -129,11 +128,13 @@ public static partial class FakeData
 
                     tvShow.ChildCount = tvShow.Seasons.Count;
                     tvShow.GrandChildCount = tvShow.Seasons.Sum(season => season.Episodes.Count);
-                    tvShow.Quality = tvShow.Seasons
-                        .SelectMany(season => season.Episodes)
-                        .SelectMany(episode => episode.MediaDataList)
-                        .Select(mediaData => (VideoQuality?)mediaData.Quality)
-                        .Max() ?? VideoQuality.Unknown;
+                    tvShow.Quality =
+                        tvShow
+                            .Seasons.SelectMany(season => season.Episodes)
+                            .SelectMany(episode => episode.MediaDataList)
+                            .Select(mediaData => (VideoQuality?)mediaData.Quality)
+                            .Max()
+                        ?? VideoQuality.Unknown;
                     tvShow.MediaSize = tvShow.Seasons.Sum(season => season.MediaSize);
                 }
             );

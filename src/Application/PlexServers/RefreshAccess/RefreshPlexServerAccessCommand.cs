@@ -114,9 +114,10 @@ public class RefreshPlexServerAccessCommandHandler
                 plexAccountName
             );
 
-        await _notificationHubService.SendRefreshNotificationAsync(
-            [RefreshDataType.PlexServer, RefreshDataType.PlexServerConnection]
-        );
+        await _notificationHubService.SendRefreshNotificationAsync([
+            RefreshDataType.PlexServer,
+            RefreshDataType.PlexServerConnection,
+        ]);
 
         return plexServerAccountAccessRapport;
     }
@@ -134,8 +135,8 @@ public class RefreshPlexServerAccessCommandHandler
             .ToListAsync();
 
         var affectedServerIds = plexServers.Select(x => x.PlexServerId).ToList();
-        var affectedLibraryIds = await _dbContext.PlexLibraries
-            .IgnoreQueryFilters()
+        var affectedLibraryIds = await _dbContext
+            .PlexLibraries.IgnoreQueryFilters()
             .Where(x => affectedServerIds.Contains(x.PlexServerId))
             .Select(x => x.Id)
             .ToListAsync();

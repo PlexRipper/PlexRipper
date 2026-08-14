@@ -1,22 +1,26 @@
-
 namespace Reaparr.Application.UnitTests;
 
-public class SyncPlexServerMediaEndpointUnitTests : BaseEndpointUnitTest<SyncPlexServerMediaEndpoint, SyncPlexServerMediaEndpointRequest, BaseResultDTO>
+public class SyncPlexServerMediaEndpointUnitTests
+    : BaseEndpointUnitTest<SyncPlexServerMediaEndpoint, SyncPlexServerMediaEndpointRequest, BaseResultDTO>
 {
     [Test]
     public async Task ShouldReturnBadRequestAndSkipQueue_WhenServerIsDisabled()
     {
         // Arrange
-        await SetupDatabase(91104, config =>
-        {
-            config.PlexServerCount = 1;
-            config.PlexMovieLibraryCount = 1;
-        });
+        await SetupDatabase(
+            91104,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexMovieLibraryCount = 1;
+            }
+        );
 
         var dbContext = IDbContext;
         var plexServer = await dbContext.PlexServers.IgnoreIsEnabledFilter().FirstAsync(CancellationToken);
 
-        await dbContext.PlexServers.IgnoreIsEnabledFilter()
+        await dbContext
+            .PlexServers.IgnoreIsEnabledFilter()
             .Where(x => x.Id == plexServer.Id)
             .ExecuteUpdateAsync(x => x.SetProperty(y => y.IsEnabled, false), CancellationToken);
 
@@ -26,12 +30,16 @@ public class SyncPlexServerMediaEndpointUnitTests : BaseEndpointUnitTest<SyncPle
             .Verifiable(Times.Never());
 
         // Act
-        var endpointResult = await TestEndpointHandleAsync(new SyncPlexServerMediaEndpointRequest { PlexServerId = plexServer.Id });
+        var endpointResult = await TestEndpointHandleAsync(
+            new SyncPlexServerMediaEndpointRequest { PlexServerId = plexServer.Id }
+        );
 
         // Assert
         endpointResult.Response.ShouldNotBeNull();
         endpointResult.Response.IsSuccess.ShouldBeFalse();
-        endpointResult.Response.Errors.ShouldContain(x => x.Message.Contains("disabled", StringComparison.OrdinalIgnoreCase));
+        endpointResult.Response.Errors.ShouldContain(x =>
+            x.Message.Contains("disabled", StringComparison.OrdinalIgnoreCase)
+        );
 
         Mock.Mock<ICommandExecutor>()
             .Verify(x => x.Send(It.IsAny<QueueLibrarySyncJobCommand>(), It.IsAny<CancellationToken>()), Times.Never());
@@ -41,11 +49,14 @@ public class SyncPlexServerMediaEndpointUnitTests : BaseEndpointUnitTest<SyncPle
     public async Task ShouldQueueLibrarySyncJob_WhenServerIsEnabledAndLibrariesExist()
     {
         // Arrange
-        await SetupDatabase(91106, config =>
-        {
-            config.PlexServerCount = 1;
-            config.PlexMovieLibraryCount = 2;
-        });
+        await SetupDatabase(
+            91106,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexMovieLibraryCount = 2;
+            }
+        );
 
         var dbContext = IDbContext;
         var plexServerId = (await dbContext.PlexServers.IgnoreIsEnabledFilter().FirstAsync(CancellationToken)).Id;
@@ -56,7 +67,9 @@ public class SyncPlexServerMediaEndpointUnitTests : BaseEndpointUnitTest<SyncPle
             .Verifiable(Times.Once());
 
         // Act
-        var endpointResult = await TestEndpointHandleAsync(new SyncPlexServerMediaEndpointRequest { PlexServerId = plexServerId });
+        var endpointResult = await TestEndpointHandleAsync(
+            new SyncPlexServerMediaEndpointRequest { PlexServerId = plexServerId }
+        );
 
         // Assert
         endpointResult.Response.ShouldNotBeNull();
@@ -64,10 +77,11 @@ public class SyncPlexServerMediaEndpointUnitTests : BaseEndpointUnitTest<SyncPle
 
         Mock.Mock<ICommandExecutor>()
             .Verify(
-                x => x.Send(
-                    It.Is<QueueLibrarySyncJobCommand>(cmd => cmd.PlexLibraryIds.Count == 2),
-                    It.IsAny<CancellationToken>()
-                ),
+                x =>
+                    x.Send(
+                        It.Is<QueueLibrarySyncJobCommand>(cmd => cmd.PlexLibraryIds.Count == 2),
+                        It.IsAny<CancellationToken>()
+                    ),
                 Times.Once()
             );
     }
@@ -76,11 +90,14 @@ public class SyncPlexServerMediaEndpointUnitTests : BaseEndpointUnitTest<SyncPle
     public async Task ShouldReturnBadRequestAndSkipQueue_WhenEnabledServerHasNoLibraries()
     {
         // Arrange
-        await SetupDatabase(91107, config =>
-        {
-            config.PlexServerCount = 1;
-            config.PlexMovieLibraryCount = 0;
-        });
+        await SetupDatabase(
+            91107,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexMovieLibraryCount = 0;
+            }
+        );
 
         var dbContext = IDbContext;
         var plexServerId = (await dbContext.PlexServers.IgnoreIsEnabledFilter().FirstAsync(CancellationToken)).Id;
@@ -91,12 +108,16 @@ public class SyncPlexServerMediaEndpointUnitTests : BaseEndpointUnitTest<SyncPle
             .Verifiable(Times.Never());
 
         // Act
-        var endpointResult = await TestEndpointHandleAsync(new SyncPlexServerMediaEndpointRequest { PlexServerId = plexServerId });
+        var endpointResult = await TestEndpointHandleAsync(
+            new SyncPlexServerMediaEndpointRequest { PlexServerId = plexServerId }
+        );
 
         // Assert
         endpointResult.Response.ShouldNotBeNull();
         endpointResult.Response.IsSuccess.ShouldBeFalse();
-        endpointResult.Response.Errors.ShouldContain(x => x.Message.Contains("no libraries", StringComparison.OrdinalIgnoreCase));
+        endpointResult.Response.Errors.ShouldContain(x =>
+            x.Message.Contains("no libraries", StringComparison.OrdinalIgnoreCase)
+        );
 
         Mock.Mock<ICommandExecutor>()
             .Verify(x => x.Send(It.IsAny<QueueLibrarySyncJobCommand>(), It.IsAny<CancellationToken>()), Times.Never());
@@ -106,17 +127,23 @@ public class SyncPlexServerMediaEndpointUnitTests : BaseEndpointUnitTest<SyncPle
     public async Task ShouldNotQueueLibrariesFromDifferentServer_WhenSyncingSingleServer()
     {
         // Arrange
-        await SetupDatabase(91116, config =>
-        {
-            config.PlexServerCount = 2;
-            config.PlexMovieLibraryCount = 2;
-        });
+        await SetupDatabase(
+            91116,
+            config =>
+            {
+                config.PlexServerCount = 2;
+                config.PlexMovieLibraryCount = 2;
+            }
+        );
 
         var db = IDbContext;
         var servers = await db.PlexServers.IgnoreIsEnabledFilter().OrderBy(x => x.Id).ToListAsync(CancellationToken);
         var targetServerId = servers[0].Id;
 
-        var targetLibraryCount = await db.PlexLibraries.CountAsync(x => x.PlexServerId == targetServerId, CancellationToken);
+        var targetLibraryCount = await db.PlexLibraries.CountAsync(
+            x => x.PlexServerId == targetServerId,
+            CancellationToken
+        );
 
         Mock.Mock<ICommandExecutor>()
             .Setup(x => x.Send(It.IsAny<QueueLibrarySyncJobCommand>(), It.IsAny<CancellationToken>()))
@@ -124,14 +151,23 @@ public class SyncPlexServerMediaEndpointUnitTests : BaseEndpointUnitTest<SyncPle
             .Verifiable(Times.Once());
 
         // Act
-        var endpointResult = await TestEndpointHandleAsync(new SyncPlexServerMediaEndpointRequest { PlexServerId = targetServerId });
+        var endpointResult = await TestEndpointHandleAsync(
+            new SyncPlexServerMediaEndpointRequest { PlexServerId = targetServerId }
+        );
 
         // Assert
         endpointResult.ShouldNotBeNull();
         endpointResult.Response.ShouldNotBeNull();
         endpointResult.Response.IsSuccess.ShouldBeTrue();
         Mock.Mock<ICommandExecutor>()
-            .Verify(x => x.Send(It.Is<QueueLibrarySyncJobCommand>(cmd => cmd.PlexLibraryIds.Count == targetLibraryCount), It.IsAny<CancellationToken>()), Times.Once());
+            .Verify(
+                x =>
+                    x.Send(
+                        It.Is<QueueLibrarySyncJobCommand>(cmd => cmd.PlexLibraryIds.Count == targetLibraryCount),
+                        It.IsAny<CancellationToken>()
+                    ),
+                Times.Once()
+            );
     }
 
     [Test]
@@ -146,7 +182,9 @@ public class SyncPlexServerMediaEndpointUnitTests : BaseEndpointUnitTest<SyncPle
             .Verifiable(Times.Never());
 
         // Act
-        var endpointResult = await TestEndpointHandleAsync(new SyncPlexServerMediaEndpointRequest { PlexServerId = 9999 });
+        var endpointResult = await TestEndpointHandleAsync(
+            new SyncPlexServerMediaEndpointRequest { PlexServerId = 9999 }
+        );
 
         // Assert
         endpointResult.ShouldNotBeNull();
@@ -160,15 +198,20 @@ public class SyncPlexServerMediaEndpointUnitTests : BaseEndpointUnitTest<SyncPle
     public async Task ShouldStillFailWhenServerDisabledEvenIfLibrariesExist()
     {
         // Arrange
-        await SetupDatabase(91118, config =>
-        {
-            config.PlexServerCount = 1;
-            config.PlexMovieLibraryCount = 2;
-        });
+        await SetupDatabase(
+            91118,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexMovieLibraryCount = 2;
+            }
+        );
 
         var db = IDbContext;
         var serverId = (await db.PlexServers.IgnoreIsEnabledFilter().FirstAsync(CancellationToken)).Id;
-        await db.PlexServers.IgnoreIsEnabledFilter().Where(x => x.Id == serverId)
+        await db
+            .PlexServers.IgnoreIsEnabledFilter()
+            .Where(x => x.Id == serverId)
             .ExecuteUpdateAsync(x => x.SetProperty(y => y.IsEnabled, false), CancellationToken);
 
         Mock.Mock<ICommandExecutor>()
@@ -177,13 +220,17 @@ public class SyncPlexServerMediaEndpointUnitTests : BaseEndpointUnitTest<SyncPle
             .Verifiable(Times.Never());
 
         // Act
-        var endpointResult = await TestEndpointHandleAsync(new SyncPlexServerMediaEndpointRequest { PlexServerId = serverId });
+        var endpointResult = await TestEndpointHandleAsync(
+            new SyncPlexServerMediaEndpointRequest { PlexServerId = serverId }
+        );
 
         // Assert
         endpointResult.ShouldNotBeNull();
         endpointResult.Response.ShouldNotBeNull();
         endpointResult.Response.IsSuccess.ShouldBeFalse();
-        endpointResult.Response.Errors.ShouldContain(x => x.Message.Contains("disabled", StringComparison.OrdinalIgnoreCase));
+        endpointResult.Response.Errors.ShouldContain(x =>
+            x.Message.Contains("disabled", StringComparison.OrdinalIgnoreCase)
+        );
         Mock.Mock<ICommandExecutor>()
             .Verify(x => x.Send(It.IsAny<QueueLibrarySyncJobCommand>(), It.IsAny<CancellationToken>()), Times.Never());
     }
@@ -192,18 +239,23 @@ public class SyncPlexServerMediaEndpointUnitTests : BaseEndpointUnitTest<SyncPle
     public async Task ShouldAllowSyncForEnabledServer_WhenAnotherServerIsDisabled()
     {
         // Arrange
-        await SetupDatabase(91119, config =>
-        {
-            config.PlexServerCount = 2;
-            config.PlexMovieLibraryCount = 1;
-        });
+        await SetupDatabase(
+            91119,
+            config =>
+            {
+                config.PlexServerCount = 2;
+                config.PlexMovieLibraryCount = 1;
+            }
+        );
 
         var db = IDbContext;
         var servers = await db.PlexServers.IgnoreIsEnabledFilter().OrderBy(x => x.Id).ToListAsync(CancellationToken);
         var enabledServerId = servers[0].Id;
         var disabledServerId = servers[1].Id;
 
-        await db.PlexServers.IgnoreIsEnabledFilter().Where(x => x.Id == disabledServerId)
+        await db
+            .PlexServers.IgnoreIsEnabledFilter()
+            .Where(x => x.Id == disabledServerId)
             .ExecuteUpdateAsync(x => x.SetProperty(y => y.IsEnabled, false), CancellationToken);
 
         Mock.Mock<ICommandExecutor>()
@@ -212,7 +264,9 @@ public class SyncPlexServerMediaEndpointUnitTests : BaseEndpointUnitTest<SyncPle
             .Verifiable(Times.Once());
 
         // Act
-        var endpointResult = await TestEndpointHandleAsync(new SyncPlexServerMediaEndpointRequest { PlexServerId = enabledServerId });
+        var endpointResult = await TestEndpointHandleAsync(
+            new SyncPlexServerMediaEndpointRequest { PlexServerId = enabledServerId }
+        );
 
         // Assert
         endpointResult.ShouldNotBeNull();
@@ -239,11 +293,14 @@ public class SyncPlexServerMediaEndpointUnitTests : BaseEndpointUnitTest<SyncPle
     public async Task ShouldQueueSingleLibrary_WhenServerHasExactlyOneLibrary()
     {
         // Arrange
-        await SetupDatabase(91120, config =>
-        {
-            config.PlexServerCount = 1;
-            config.PlexMovieLibraryCount = 1;
-        });
+        await SetupDatabase(
+            91120,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexMovieLibraryCount = 1;
+            }
+        );
 
         var db = IDbContext;
         var serverId = (await db.PlexServers.IgnoreIsEnabledFilter().FirstAsync(CancellationToken)).Id;
@@ -254,14 +311,22 @@ public class SyncPlexServerMediaEndpointUnitTests : BaseEndpointUnitTest<SyncPle
             .Verifiable(Times.Once());
 
         // Act
-        var endpointResult = await TestEndpointHandleAsync(new SyncPlexServerMediaEndpointRequest { PlexServerId = serverId });
+        var endpointResult = await TestEndpointHandleAsync(
+            new SyncPlexServerMediaEndpointRequest { PlexServerId = serverId }
+        );
 
         // Assert
         endpointResult.ShouldNotBeNull();
         endpointResult.Response.ShouldNotBeNull();
         endpointResult.Response.IsSuccess.ShouldBeTrue();
         Mock.Mock<ICommandExecutor>()
-            .Verify(x => x.Send(It.Is<QueueLibrarySyncJobCommand>(cmd => cmd.PlexLibraryIds.Count == 1), It.IsAny<CancellationToken>()), Times.Once());
+            .Verify(
+                x =>
+                    x.Send(
+                        It.Is<QueueLibrarySyncJobCommand>(cmd => cmd.PlexLibraryIds.Count == 1),
+                        It.IsAny<CancellationToken>()
+                    ),
+                Times.Once()
+            );
     }
 }
-

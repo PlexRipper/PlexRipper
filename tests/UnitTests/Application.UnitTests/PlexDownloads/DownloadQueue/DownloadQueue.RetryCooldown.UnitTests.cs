@@ -17,7 +17,9 @@ public class DownloadQueueRetryCooldownUnitTests : BaseUnitTest<DownloadQueue>
             }
         );
 
-        Mock.Mock<IDownloadTaskScheduler>().Setup(x => x.StartDownloadTaskJob(It.IsAny<DownloadTaskKey>(), It.IsAny<CancellationToken>())).ReturnOk();
+        Mock.Mock<IDownloadTaskScheduler>()
+            .Setup(x => x.StartDownloadTaskJob(It.IsAny<DownloadTaskKey>(), It.IsAny<CancellationToken>()))
+            .ReturnOk();
         Mock.Mock<IDownloadTaskScheduler>().Setup(x => x.IsServerDownloading(It.IsAny<int>())).ReturnsAsync(false);
 
         // Act
@@ -31,7 +33,10 @@ public class DownloadQueueRetryCooldownUnitTests : BaseUnitTest<DownloadQueue>
         secondPick.Value.ShouldNotBeNull();
         secondPick.Value.Id.ShouldNotBe(firstPick.Value.Id);
         Mock.Mock<IDownloadTaskScheduler>()
-            .Verify(x => x.StartDownloadTaskJob(It.IsAny<DownloadTaskKey>(), It.IsAny<CancellationToken>()), Times.Exactly(2));
+            .Verify(
+                x => x.StartDownloadTaskJob(It.IsAny<DownloadTaskKey>(), It.IsAny<CancellationToken>()),
+                Times.Exactly(2)
+            );
     }
 
     [Test]
@@ -69,7 +74,9 @@ public class DownloadQueueRetryCooldownUnitTests : BaseUnitTest<DownloadQueue>
 
         await IDbContext.SaveChangesAsync(CancellationToken);
 
-        Mock.Mock<IDownloadTaskScheduler>().Setup(x => x.StartDownloadTaskJob(It.IsAny<DownloadTaskKey>(), It.IsAny<CancellationToken>())).ReturnOk();
+        Mock.Mock<IDownloadTaskScheduler>()
+            .Setup(x => x.StartDownloadTaskJob(It.IsAny<DownloadTaskKey>(), It.IsAny<CancellationToken>()))
+            .ReturnOk();
         Mock.Mock<IDownloadTaskScheduler>().Setup(x => x.IsServerDownloading(It.IsAny<int>())).ReturnsAsync(false);
 
         // Act
@@ -87,6 +94,9 @@ public class DownloadQueueRetryCooldownUnitTests : BaseUnitTest<DownloadQueue>
         secondPick.Value.Id.ShouldNotBe(queuedTask.Id);
 
         Mock.Mock<IDownloadTaskScheduler>()
-            .Verify(x => x.StartDownloadTaskJob(It.IsAny<DownloadTaskKey>(), It.IsAny<CancellationToken>()), Times.Exactly(2));
+            .Verify(
+                x => x.StartDownloadTaskJob(It.IsAny<DownloadTaskKey>(), It.IsAny<CancellationToken>()),
+                Times.Exactly(2)
+            );
     }
 }

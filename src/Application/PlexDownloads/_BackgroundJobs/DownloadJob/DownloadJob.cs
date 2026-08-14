@@ -1,9 +1,7 @@
 ﻿using Autofac.Features.Indexed;
-
 using TickerQ.Utilities.Base;
 
 namespace Reaparr.Application;
-
 
 public class DownloadJob : BaseBackgroundJob<DownloadTaskKey, DownloadJobUpdateDTO>
 {
@@ -25,7 +23,8 @@ public class DownloadJob : BaseBackgroundJob<DownloadTaskKey, DownloadJobUpdateD
         IIndex<PlexDownloadClientType, IPlexDownloadClient> plexDownloadClientFactory,
         IProgressHubService progressHubService,
         INotificationHubService notificationHubService
-    ) : base(log, progressHubService, notificationHubService)
+    )
+        : base(log, progressHubService, notificationHubService)
     {
         _log = log.ForContext<DownloadJob>();
         _commandExecutor = commandExecutor;
@@ -40,8 +39,7 @@ public class DownloadJob : BaseBackgroundJob<DownloadTaskKey, DownloadJobUpdateD
 
     protected override List<RefreshDataType> RefreshDataTypes => [RefreshDataType.DownloadTasks];
 
-    public static JobKey GetJobKey(Guid id) =>
-        new($"{nameof(JobTypes.DownloadJob)}_{id}", JobTypes.DownloadJob);
+    public static JobKey GetJobKey(Guid id) => new($"{nameof(JobTypes.DownloadJob)}_{id}", JobTypes.DownloadJob);
 
     protected override async Task ExecuteJobAsync(
         TickerFunctionContext<DownloadTaskKey> context,
@@ -234,9 +232,7 @@ public class DownloadJob : BaseBackgroundJob<DownloadTaskKey, DownloadJobUpdateD
                 );
             }
 
-            destinationFolder ??= await _dbContext.GetDestinationFolder(
-                downloadTask.PlexLibraryId
-            );
+            destinationFolder ??= await _dbContext.GetDestinationFolder(downloadTask.PlexLibraryId);
 
             if (destinationFolder is null)
                 return ResultExtensions.EntityNotFound(nameof(PlexLibrary), downloadTask.PlexLibraryId).LogError();

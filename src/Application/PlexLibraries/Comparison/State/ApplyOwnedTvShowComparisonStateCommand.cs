@@ -6,13 +6,10 @@ namespace Reaparr.Application;
 /// </summary>
 /// <param name="Items">The overview page items from an owned library. Modified in-place.</param>
 /// <param name="OwnedLibraryId">The owned TV show Plex library being browsed.</param>
-public record ApplyOwnedTvShowComparisonStateCommand(
-    List<PlexMediaSlimDTO> Items,
-    int OwnedLibraryId
-) : ICommand<Result>;
+public record ApplyOwnedTvShowComparisonStateCommand(List<PlexMediaSlimDTO> Items, int OwnedLibraryId)
+    : ICommand<Result>;
 
-public class ApplyOwnedTvShowComparisonStateCommandValidator
-    : AbstractValidator<ApplyOwnedTvShowComparisonStateCommand>
+public class ApplyOwnedTvShowComparisonStateCommandValidator : AbstractValidator<ApplyOwnedTvShowComparisonStateCommand>
 {
     public ApplyOwnedTvShowComparisonStateCommandValidator()
     {
@@ -34,16 +31,14 @@ public class ApplyOwnedTvShowComparisonStateCommandHandler
         _log = log.ForContext<ApplyOwnedTvShowComparisonStateCommandHandler>();
     }
 
-    public async Task<Result> ExecuteAsync(
-        ApplyOwnedTvShowComparisonStateCommand command,
-        CancellationToken ct)
+    public async Task<Result> ExecuteAsync(ApplyOwnedTvShowComparisonStateCommand command, CancellationToken ct)
     {
         var items = command.Items;
         if (items.Count == 0)
             return Result.Ok();
 
-        var ownedUpdatedAt = await _dbContext.PlexLibraries
-            .Where(x => x.Id == command.OwnedLibraryId)
+        var ownedUpdatedAt = await _dbContext
+            .PlexLibraries.Where(x => x.Id == command.OwnedLibraryId)
             .Select(x => x.UpdatedAt)
             .SingleOrDefaultAsync(ct);
 
@@ -54,8 +49,8 @@ public class ApplyOwnedTvShowComparisonStateCommandHandler
             return Result.Ok();
         }
 
-        var remoteLibraries = await _dbContext.PlexLibraries
-            .WhereIsNotOwned()
+        var remoteLibraries = await _dbContext
+            .PlexLibraries.WhereIsNotOwned()
             .Where(x => x.Type == PlexMediaType.TvShow)
             .Select(x => new { x.Id, x.UpdatedAt })
             .ToDictionaryAsync(x => x.Id, x => x.UpdatedAt, ct);
@@ -63,18 +58,20 @@ public class ApplyOwnedTvShowComparisonStateCommandHandler
         if (remoteLibraries.Count == 0)
             return Result.Ok();
 
-        var scopeRows = await _dbContext.PlexComparisonScopes
-            .Where(x =>
+        var scopeRows = await _dbContext
+            .PlexComparisonScopes.Where(x =>
                 x.OwnedPlexLibraryId == command.OwnedLibraryId
                 && x.MediaType == PlexMediaType.TvShow
-                && remoteLibraries.Keys.Contains(x.RemotePlexLibraryId))
+                && remoteLibraries.Keys.Contains(x.RemotePlexLibraryId)
+            )
             .ToListAsync(ct);
 
         var currentRemoteLibraryIds = scopeRows
             .Where(x =>
                 x.OwnedLibraryUpdatedAt == ownedUpdatedAt
                 && remoteLibraries.TryGetValue(x.RemotePlexLibraryId, out var remoteUpdatedAt)
-                && x.RemoteLibraryUpdatedAt == remoteUpdatedAt)
+                && x.RemoteLibraryUpdatedAt == remoteUpdatedAt
+            )
             .Select(x => x.RemotePlexLibraryId)
             .ToHashSet();
 
@@ -91,31 +88,33 @@ public class ApplyOwnedTvShowComparisonStateCommandHandler
 
         var itemIds = items.Select(x => x.Id).ToHashSet();
 
-        var showUpgradeIds = await _dbContext.PlexTvShowComparisons
-            .Where(x =>
+        var showUpgradeIds = await _dbContext
+            .PlexTvShowComparisons.Where(x =>
                 currentRemoteLibraryIds.Contains(x.RemotePlexLibraryId)
                 && x.OwnedPlexLibraryId == command.OwnedLibraryId
                 && itemIds.Contains(x.OwnedPlexMediaId)
-                && x.HitState == PlexMediaComparisonHitState.HigherQuality)
+                && x.HitState == PlexMediaComparisonHitState.HigherQuality
+            )
             .Select(x => x.OwnedPlexMediaId)
             .Distinct()
             .ToListAsync(ct);
 
         var showUpgradeIdSet = showUpgradeIds.ToHashSet();
 
-        var remoteEpisodeCounts = await _dbContext.PlexTvShowEpisodes
-            .Where(x => currentRemoteLibraryIds.Contains(x.PlexLibraryId))
+        var remoteEpisodeCounts = await _dbContext
+            .PlexTvShowEpisodes.Where(x => currentRemoteLibraryIds.Contains(x.PlexLibraryId))
             .GroupBy(x => x.TvShowId)
             .Select(g => new { RemotePlexMediaId = g.Key, Count = g.Count() })
             .ToListAsync(ct);
 
         var remoteEpisodeCountLookup = remoteEpisodeCounts.ToDictionary(x => x.RemotePlexMediaId, x => x.Count);
 
-        var showHits = await _dbContext.PlexTvShowComparisons
-            .Where(x =>
+        var showHits = await _dbContext
+            .PlexTvShowComparisons.Where(x =>
                 currentRemoteLibraryIds.Contains(x.RemotePlexLibraryId)
                 && x.OwnedPlexLibraryId == command.OwnedLibraryId
-                && itemIds.Contains(x.OwnedPlexMediaId))
+                && itemIds.Contains(x.OwnedPlexMediaId)
+            )
             .Select(x => new { x.RemotePlexMediaId, x.OwnedPlexMediaId })
             .ToListAsync(ct);
 
@@ -124,16 +123,20 @@ public class ApplyOwnedTvShowComparisonStateCommandHandler
             .ToDictionary(g => g.Key, g => g.Select(x => x.OwnedPlexMediaId).Distinct().ToList());
 
         var episodeHits = await (
-                from comparison in _dbContext.PlexEpisodeComparisons
-                join episode in _dbContext.PlexTvShowEpisodes on comparison.OwnedPlexMediaId equals episode.Id
-                where currentRemoteLibraryIds.Contains(comparison.RemotePlexLibraryId)
-                      && comparison.OwnedPlexLibraryId == command.OwnedLibraryId
-                      && itemIds.Contains(episode.TvShowId)
-                select new
-                {
-                    episode.TvShowId, comparison.RemotePlexMediaId, comparison.OwnedPlexMediaId, comparison.HitState
-                })
-            .ToListAsync(ct);
+            from comparison in _dbContext.PlexEpisodeComparisons
+            join episode in _dbContext.PlexTvShowEpisodes on comparison.OwnedPlexMediaId equals episode.Id
+            where
+                currentRemoteLibraryIds.Contains(comparison.RemotePlexLibraryId)
+                && comparison.OwnedPlexLibraryId == command.OwnedLibraryId
+                && itemIds.Contains(episode.TvShowId)
+            select new
+            {
+                episode.TvShowId,
+                comparison.RemotePlexMediaId,
+                comparison.OwnedPlexMediaId,
+                comparison.HitState,
+            }
+        ).ToListAsync(ct);
 
         var episodeHitLookup = episodeHits
             .GroupBy(x => x.TvShowId)
@@ -143,14 +146,17 @@ public class ApplyOwnedTvShowComparisonStateCommandHandler
                 {
                     MatchedCount = g.Select(x => x.OwnedPlexMediaId).Distinct().Count(),
                     HigherQualityCount = g.Count(x => x.HitState == PlexMediaComparisonHitState.HigherQuality),
-                });
+                }
+            );
 
         var remoteEpisodeCountByOwnedShow = remoteToOwnedShowLookup
-            .SelectMany(x => x.Value.Select(ownedShowId => new
-            {
-                OwnedShowId = ownedShowId,
-                RemoteEpisodeCount = remoteEpisodeCountLookup.GetValueOrDefault(x.Key),
-            }))
+            .SelectMany(x =>
+                x.Value.Select(ownedShowId => new
+                {
+                    OwnedShowId = ownedShowId,
+                    RemoteEpisodeCount = remoteEpisodeCountLookup.GetValueOrDefault(x.Key),
+                })
+            )
             .GroupBy(x => x.OwnedShowId)
             .ToDictionary(x => x.Key, x => x.Max(y => y.RemoteEpisodeCount));
 
@@ -163,13 +169,15 @@ public class ApplyOwnedTvShowComparisonStateCommandHandler
             var hasPartialMissingChildren = remoteEpisodeCount > 0 && matchedEpisodeCount < remoteEpisodeCount;
             var hasHigherQuality = showUpgradeIdSet.Contains(showId) || episodeHitSummary?.HigherQualityCount > 0;
 
-            item.SetComparisonState((hasPartialMissingChildren, hasHigherQuality) switch
-            {
-                (true, true) => PlexMediaComparisonState.PartialAndHigherQuality,
-                (true, false) => PlexMediaComparisonState.Partial,
-                (false, true) => PlexMediaComparisonState.HigherQuality,
-                _ => PlexMediaComparisonState.Owned,
-            });
+            item.SetComparisonState(
+                (hasPartialMissingChildren, hasHigherQuality) switch
+                {
+                    (true, true) => PlexMediaComparisonState.PartialAndHigherQuality,
+                    (true, false) => PlexMediaComparisonState.Partial,
+                    (false, true) => PlexMediaComparisonState.HigherQuality,
+                    _ => PlexMediaComparisonState.Owned,
+                }
+            );
         }
 
         return Result.Ok();
@@ -178,6 +186,10 @@ public class ApplyOwnedTvShowComparisonStateCommandHandler
     private async Task<bool> HasPendingComparisonAsync(
         int ownedLibraryId,
         HashSet<int> remoteLibraryIds,
-        CancellationToken ct) => await _dbContext.HasActiveLibraryComparisonAsync(
-        remoteLibraryIds.Select(x => PlexLibraryComparisonJob.GetJobKey(ownedLibraryId, x)), ct);
+        CancellationToken ct
+    ) =>
+        await _dbContext.HasActiveLibraryComparisonAsync(
+            remoteLibraryIds.Select(x => PlexLibraryComparisonJob.GetJobKey(ownedLibraryId, x)),
+            ct
+        );
 }

@@ -24,17 +24,25 @@ public static partial class DbSetExtensions
             x.Id,
             x.Type,
             x.PlexServer!.OwnedOverride == true
-            || (x.PlexServer!.OwnedOverride == null
-                && (x.PlexAccountLibraries.Any(y => y.IsLibraryOwned)
-                    || x.PlexServer.PlexAccountServers.Any(y => y.IsServerOwned)))
+                || (
+                    x.PlexServer!.OwnedOverride == null
+                    && (
+                        x.PlexAccountLibraries.Any(y => y.IsLibraryOwned)
+                        || x.PlexServer.PlexAccountServers.Any(y => y.IsServerOwned)
+                    )
+                )
         ));
 
     public static IQueryable<PlexLibrary> WhereIsOwned(this IQueryable<PlexLibrary> query) =>
         query.Where(x =>
             x.PlexServer!.OwnedOverride == true
-            || (x.PlexServer!.OwnedOverride == null
-                && (x.PlexAccountLibraries.Any(y => y.IsLibraryOwned)
-                    || x.PlexServer.PlexAccountServers.Any(y => y.IsServerOwned)))
+            || (
+                x.PlexServer!.OwnedOverride == null
+                && (
+                    x.PlexAccountLibraries.Any(y => y.IsLibraryOwned)
+                    || x.PlexServer.PlexAccountServers.Any(y => y.IsServerOwned)
+                )
+            )
         );
 
     /// <summary>
@@ -52,8 +60,10 @@ public static partial class DbSetExtensions
     public static IQueryable<PlexLibrary> WhereIsNotOwned(this IQueryable<PlexLibrary> query) =>
         query.Where(x =>
             x.PlexServer!.OwnedOverride == false
-            || (x.PlexServer!.OwnedOverride == null
+            || (
+                x.PlexServer!.OwnedOverride == null
                 && !x.PlexAccountLibraries.Any(y => y.IsLibraryOwned)
-                && !x.PlexServer.PlexAccountServers.Any(y => y.IsServerOwned))
+                && !x.PlexServer.PlexAccountServers.Any(y => y.IsServerOwned)
+            )
         );
 }

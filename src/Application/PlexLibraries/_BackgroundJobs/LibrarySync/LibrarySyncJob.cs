@@ -35,7 +35,8 @@ public class LibrarySyncJob : BaseBackgroundJob<LibrarySyncJobPayload, LibrarySy
         INotificationHubService notificationHubService,
         IProgressHubService progressHubService,
         IBackgroundJobScheduler backgroundJobScheduler
-    ) : base(log, progressHubService, notificationHubService)
+    )
+        : base(log, progressHubService, notificationHubService)
     {
         _log = log.ForContext<LibrarySyncJob>();
         _dbContextFactory = dbContextFactory;
@@ -50,7 +51,8 @@ public class LibrarySyncJob : BaseBackgroundJob<LibrarySyncJobPayload, LibrarySy
 
     protected override async Task ExecuteJobAsync(
         TickerFunctionContext<LibrarySyncJobPayload> context,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken
+    )
     {
         _skipAfterCompletion = false;
 
@@ -87,10 +89,7 @@ public class LibrarySyncJob : BaseBackgroundJob<LibrarySyncJobPayload, LibrarySy
                     serverName,
                     serverId
                 );
-            await UpdateQueueItemAsync(context,
-                LibrarySyncJobStatus.Queued,
-                isServerOffline: true
-            );
+            await UpdateQueueItemAsync(context, LibrarySyncJobStatus.Queued, isServerOffline: true);
         }
         else
         {
@@ -172,11 +171,7 @@ public class LibrarySyncJob : BaseBackgroundJob<LibrarySyncJobPayload, LibrarySy
             else
             {
                 _log.Here()
-                    .Information(
-                        "Successfully synced library {LibraryId} for server {ServerId}",
-                        libraryId,
-                        serverId
-                    );
+                    .Information("Successfully synced library {LibraryId} for server {ServerId}", libraryId, serverId);
 
                 await UpdateQueueItemAsync(context, LibrarySyncJobStatus.Completed);
             }
@@ -216,9 +211,7 @@ public class LibrarySyncJob : BaseBackgroundJob<LibrarySyncJobPayload, LibrarySy
         var serverId = context.Request.PlexServerId;
         using var dbContext = await _dbContextFactory.CreateAsync();
         var queueStatus = await dbContext
-            .LibrarySyncJobQueues.Where(x =>
-                x.PlexServerId == serverId && x.PlexLibraryId == libraryId
-            )
+            .LibrarySyncJobQueues.Where(x => x.PlexServerId == serverId && x.PlexLibraryId == libraryId)
             .Select(x => x.Status)
             .FirstOrDefaultAsync(cancellationToken);
 
@@ -230,11 +223,7 @@ public class LibrarySyncJob : BaseBackgroundJob<LibrarySyncJobPayload, LibrarySy
             );
 
             if (comparisonQueueResult.IsFailed)
-                _log.Here()
-                    .Warning(
-                        "Failed to queue comparison jobs for library {LibraryId}",
-                        libraryId
-                    );
+                _log.Here().Warning("Failed to queue comparison jobs for library {LibraryId}", libraryId);
         }
     }
 
@@ -261,9 +250,7 @@ public class LibrarySyncJob : BaseBackgroundJob<LibrarySyncJobPayload, LibrarySy
             );
 
         var queueState = await _dbContext
-            .LibrarySyncJobQueues.Where(x =>
-                x.PlexServerId == serverId && x.PlexLibraryId == libraryId
-            )
+            .LibrarySyncJobQueues.Where(x => x.PlexServerId == serverId && x.PlexLibraryId == libraryId)
             .FirstOrDefaultAsync(CancellationToken.None);
 
         if (updatedRows > 0)

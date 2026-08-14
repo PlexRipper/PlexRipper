@@ -50,7 +50,7 @@ public class ApplicationModule : Module
                 )
             ))
             .SingleInstance();
-        
+
         builder.RegisterType<LibrarySyncProgressStore>().As<ILibrarySyncProgressStore>().SingleInstance();
     }
 }

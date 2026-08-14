@@ -3,8 +3,7 @@ namespace Reaparr.Application;
 public record RefreshPlexTvShowLibraryCommand(
     InsertMediaMetaDataCommandResponse LibraryMetadata,
     bool ForceMediaRefresh = false
-)
-    : ICommand<Result<PlexLibrary>>;
+) : ICommand<Result<PlexLibrary>>;
 
 public class RefreshPlexTvShowLibraryCommandValidator : AbstractValidator<RefreshPlexTvShowLibraryCommand>
 {

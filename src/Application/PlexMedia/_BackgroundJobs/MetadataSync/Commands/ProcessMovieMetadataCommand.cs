@@ -142,7 +142,7 @@ public class ProcessMovieMetadataCommandHandler : ICommandHandler<ProcessMovieMe
                         continue;
                     }
 
-                   // partToUpdate.UpdateStreamMetadata(metadataItem, mediaItem, partItem);
+                    // partToUpdate.UpdateStreamMetadata(metadataItem, mediaItem, partItem);
                     processedCount++;
                 }
 

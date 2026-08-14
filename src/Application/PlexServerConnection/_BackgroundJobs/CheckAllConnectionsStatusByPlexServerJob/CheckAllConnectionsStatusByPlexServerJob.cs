@@ -20,7 +20,8 @@ public class CheckAllConnectionsStatusByPlexServerJob
         ICommandExecutor commandExecutor,
         IProgressHubService progressHubService,
         INotificationHubService notificationHubService
-    ) : base(log, progressHubService, notificationHubService)
+    )
+        : base(log, progressHubService, notificationHubService)
     {
         _log = log.ForContext<CheckAllConnectionsStatusByPlexServerJob>();
         _dbContext = dbContext;
@@ -42,7 +43,7 @@ public class CheckAllConnectionsStatusByPlexServerJob
         TickerFunctionContext<CheckAllConnectionsStatusByPlexServerJobPayload> context,
         CancellationToken cancellationToken
     )
-    {      
+    {
         context.CronOccurrenceOperations?.SkipIfAlreadyRunning();
 
         var plexServerIds = await _dbContext.PlexServers.Select(x => x.Id).ToListAsync(cancellationToken);
@@ -51,10 +52,7 @@ public class CheckAllConnectionsStatusByPlexServerJob
 
         var connectionResults = await Task.WhenAll(
             plexServerIds.Select(plexServerId =>
-                _commandExecutor.Send(
-                    new CheckAllConnectionsStatusByPlexServerCommand(plexServerId),
-                    cancellationToken
-                )
+                _commandExecutor.Send(new CheckAllConnectionsStatusByPlexServerCommand(plexServerId), cancellationToken)
             )
         );
 
@@ -83,8 +81,8 @@ public class CheckAllConnectionsStatusByPlexServerJob
         CancellationToken cancellationToken
     )
     {
-        var plexServers = await _dbContext.PlexServers
-            .Include(x => x.PlexServerConnections)
+        var plexServers = await _dbContext
+            .PlexServers.Include(x => x.PlexServerConnections)
             .ToListAsync(cancellationToken);
 
         return new CheckAllConnectionStatusUpdateDTO

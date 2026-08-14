@@ -12,8 +12,8 @@ public record PlexLibraryComparisonJobPayload
 /// <summary>
 /// Compares one remote Plex library with one owned Plex library.
 /// </summary>
-public class
-    PlexLibraryComparisonJob : BaseBackgroundJob<PlexLibraryComparisonJobPayload, LibraryComparisonCompletedDTO>
+public class PlexLibraryComparisonJob
+    : BaseBackgroundJob<PlexLibraryComparisonJobPayload, LibraryComparisonCompletedDTO>
 {
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
@@ -37,10 +37,11 @@ public class
 
     protected override List<RefreshDataType> RefreshDataTypes => [];
 
-    public static JobKey GetJobKey(int ownedPlexLibraryId, int remotePlexLibraryId) => new(
-        $"{nameof(JobTypes.LibraryComparisonJob)}_{ownedPlexLibraryId}_{remotePlexLibraryId}",
-        JobTypes.LibraryComparisonJob
-    );
+    public static JobKey GetJobKey(int ownedPlexLibraryId, int remotePlexLibraryId) =>
+        new(
+            $"{nameof(JobTypes.LibraryComparisonJob)}_{ownedPlexLibraryId}_{remotePlexLibraryId}",
+            JobTypes.LibraryComparisonJob
+        );
 
     protected override async Task ExecuteJobAsync(
         TickerFunctionContext<PlexLibraryComparisonJobPayload> context,
@@ -48,32 +49,26 @@ public class
     )
     {
         var payload = context.Request;
-        var libraries = await _dbContext.PlexLibraries
-            .Where(x => x.Id == payload.RemotePlexLibraryId || x.Id == payload.OwnedPlexLibraryId)
+        var libraries = await _dbContext
+            .PlexLibraries.Where(x => x.Id == payload.RemotePlexLibraryId || x.Id == payload.OwnedPlexLibraryId)
             .SelectOwnership()
             .ToListAsync(cancellationToken);
 
-        var remoteLibrary = libraries.SingleOrDefault(x => x.Id == payload.RemotePlexLibraryId)
-                            ?? throw new InvalidOperationException(
-                                $"Remote Plex library {payload.RemotePlexLibraryId} was not found"
-                            );
-        var ownedLibrary = libraries.SingleOrDefault(x => x.Id == payload.OwnedPlexLibraryId)
-                           ?? throw new InvalidOperationException(
-                               $"Owned Plex library {payload.OwnedPlexLibraryId} was not found"
-                           );
+        var remoteLibrary =
+            libraries.SingleOrDefault(x => x.Id == payload.RemotePlexLibraryId)
+            ?? throw new InvalidOperationException($"Remote Plex library {payload.RemotePlexLibraryId} was not found");
+        var ownedLibrary =
+            libraries.SingleOrDefault(x => x.Id == payload.OwnedPlexLibraryId)
+            ?? throw new InvalidOperationException($"Owned Plex library {payload.OwnedPlexLibraryId} was not found");
 
         if (remoteLibrary.Id == ownedLibrary.Id)
             throw new InvalidOperationException("A Plex library cannot be compared with itself");
 
         if (remoteLibrary.IsOwned)
-            throw new InvalidOperationException(
-                $"Remote Plex library {remoteLibrary.Id} is currently marked as owned"
-            );
+            throw new InvalidOperationException($"Remote Plex library {remoteLibrary.Id} is currently marked as owned");
 
         if (!ownedLibrary.IsOwned)
-            throw new InvalidOperationException(
-                $"Owned Plex library {ownedLibrary.Id} is currently marked as remote"
-            );
+            throw new InvalidOperationException($"Owned Plex library {ownedLibrary.Id} is currently marked as remote");
 
         if (remoteLibrary.Type != ownedLibrary.Type)
             throw new InvalidOperationException(
@@ -104,9 +99,7 @@ public class
                 );
                 break;
             default:
-                result = Result.Fail(
-                    $"Library comparisons are not supported for media type {remoteLibrary.Type}"
-                );
+                result = Result.Fail($"Library comparisons are not supported for media type {remoteLibrary.Type}");
                 break;
         }
 
@@ -118,7 +111,7 @@ public class
             result.LogError();
             throw new InvalidOperationException(
                 $"Comparison of remote library {remoteLibrary.Id} with owned library {ownedLibrary.Id} failed: "
-                + string.Join("; ", result.Errors.Select(x => x.Message).ToArray())
+                    + string.Join("; ", result.Errors.Select(x => x.Message).ToArray())
             );
         }
 
@@ -136,8 +129,8 @@ public class
     )
     {
         var payload = context.Request;
-        var mediaType = await _dbContext.PlexLibraries
-            .Where(x => x.Id == payload.RemotePlexLibraryId)
+        var mediaType = await _dbContext
+            .PlexLibraries.Where(x => x.Id == payload.RemotePlexLibraryId)
             .Select(x => (PlexMediaType?)x.Type)
             .SingleOrDefaultAsync(cancellationToken);
 

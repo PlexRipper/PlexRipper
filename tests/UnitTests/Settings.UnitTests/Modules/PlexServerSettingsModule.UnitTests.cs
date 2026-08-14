@@ -48,7 +48,6 @@ public class PlexServerSettingsModuleUnitTests : BaseUnitTest<PlexServerSettings
         speedLimit.ShouldBe(0);
     }
 
-
     [Test]
     public void ShouldEmitValuesWhenChanged_WhenSubscribedToTheObservable()
     {

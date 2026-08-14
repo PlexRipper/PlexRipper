@@ -1,7 +1,7 @@
 namespace Reaparr.Domain;
 
 /// <summary>
-/// The various background job types that Reaparr can run. 
+/// The various background job types that Reaparr can run.
 /// </summary>
 [JsonConverter(typeof(JsonStringEnumConverter))]
 public enum JobTypes

@@ -17,10 +17,8 @@ public class MediaQueryCacheUnitTests : BaseUnitTest<MediaQueryCache>
         Sut.InvalidateLibraries([1, 2, 2], "comparison batch queued");
 
         // Assert
-        Mock.Mock<ICommandExecutor>().Verify(
-            x => x.Send(It.IsAny<GetMediaByTypeCommand>(), It.IsAny<CancellationToken>()),
-            Times.Never()
-        );
+        Mock.Mock<ICommandExecutor>()
+            .Verify(x => x.Send(It.IsAny<GetMediaByTypeCommand>(), It.IsAny<CancellationToken>()), Times.Never());
     }
 
     [Test]
@@ -30,10 +28,8 @@ public class MediaQueryCacheUnitTests : BaseUnitTest<MediaQueryCache>
         Sut.InvalidateLibraries([0, -1], "invalid library IDs");
 
         // Assert
-        Mock.Mock<ICommandExecutor>().Verify(
-            x => x.Send(It.IsAny<GetMediaByTypeCommand>(), It.IsAny<CancellationToken>()),
-            Times.Never()
-        );
+        Mock.Mock<ICommandExecutor>()
+            .Verify(x => x.Send(It.IsAny<GetMediaByTypeCommand>(), It.IsAny<CancellationToken>()), Times.Never());
     }
 
     [Test]
@@ -46,10 +42,8 @@ public class MediaQueryCacheUnitTests : BaseUnitTest<MediaQueryCache>
         Sut.InvalidateLibraries([1, 2], "sync storm");
 
         // Assert
-        Mock.Mock<ICommandExecutor>().Verify(
-            x => x.Send(It.IsAny<GetMediaByTypeCommand>(), It.IsAny<CancellationToken>()),
-            Times.Never()
-        );
+        Mock.Mock<ICommandExecutor>()
+            .Verify(x => x.Send(It.IsAny<GetMediaByTypeCommand>(), It.IsAny<CancellationToken>()), Times.Never());
     }
 
     // ──────────────────────────────────────────────────────────────
@@ -60,12 +54,15 @@ public class MediaQueryCacheUnitTests : BaseUnitTest<MediaQueryCache>
     public async Task ShouldReturn503ServiceUnavailable_WhenCacheIsCold()
     {
         // Arrange
-        await SetupDatabase(70307, cfg =>
-        {
-            cfg.PlexServerCount = 1;
-            cfg.PlexMovieLibraryCount = 1;
-            cfg.MovieCount = 5;
-        });
+        await SetupDatabase(
+            70307,
+            cfg =>
+            {
+                cfg.PlexServerCount = 1;
+                cfg.PlexMovieLibraryCount = 1;
+                cfg.MovieCount = 5;
+            }
+        );
 
         var filter = CreateFilter(sort: "sortIndex:asc", page: 1, pageSize: 10);
 
@@ -82,12 +79,15 @@ public class MediaQueryCacheUnitTests : BaseUnitTest<MediaQueryCache>
     public async Task ShouldReturn503_WhenConcurrentRequestsMissSameSnapshot()
     {
         // Arrange
-        await SetupDatabase(70315, cfg =>
-        {
-            cfg.PlexServerCount = 1;
-            cfg.PlexMovieLibraryCount = 1;
-            cfg.MovieCount = 30;
-        });
+        await SetupDatabase(
+            70315,
+            cfg =>
+            {
+                cfg.PlexServerCount = 1;
+                cfg.PlexMovieLibraryCount = 1;
+                cfg.MovieCount = 30;
+            }
+        );
 
         var firstFilter = CreateFilter(sort: "sortIndex:asc", page: 1, pageSize: 5);
         var secondFilter = CreateFilter(sort: "sortIndex:asc", page: 2, pageSize: 5);
@@ -95,7 +95,8 @@ public class MediaQueryCacheUnitTests : BaseUnitTest<MediaQueryCache>
         // Act
         var results = await Task.WhenAll(
             Sut.GetMediaAsync(firstFilter, CancellationToken),
-            Sut.GetMediaAsync(secondFilter, CancellationToken));
+            Sut.GetMediaAsync(secondFilter, CancellationToken)
+        );
 
         // Assert
         results.ShouldAllBe(x => x.IsFailed);
@@ -110,23 +111,28 @@ public class MediaQueryCacheUnitTests : BaseUnitTest<MediaQueryCache>
     public async Task ShouldBypassCache_WhenQueryParameterIsSet()
     {
         // Arrange
-        await SetupDatabase(70304, cfg =>
-        {
-            cfg.PlexServerCount = 1;
-            cfg.PlexMovieLibraryCount = 1;
-            cfg.MovieCount = 5;
-        });
+        await SetupDatabase(
+            70304,
+            cfg =>
+            {
+                cfg.PlexServerCount = 1;
+                cfg.PlexMovieLibraryCount = 1;
+                cfg.MovieCount = 5;
+            }
+        );
 
         var filter = CreateFilter(query: "alpha", sort: "sortIndex:asc", page: 2, pageSize: 2);
         GetMediaByTypeCommand? capturedCommand = null;
 
         Mock.Mock<ICommandExecutor>()
             .Setup(x => x.Send(It.IsAny<GetMediaByTypeCommand>(), It.IsAny<CancellationToken>()))
-            .Returns<GetMediaByTypeCommand, CancellationToken>((command, _) =>
-            {
-                capturedCommand = command;
-                return Task.FromResult(Result.Ok(CreateResult([101, 102])));
-            })
+            .Returns<GetMediaByTypeCommand, CancellationToken>(
+                (command, _) =>
+                {
+                    capturedCommand = command;
+                    return Task.FromResult(Result.Ok(CreateResult([101, 102])));
+                }
+            )
             .Verifiable(Times.Once());
 
         // Act
@@ -144,23 +150,28 @@ public class MediaQueryCacheUnitTests : BaseUnitTest<MediaQueryCache>
     public async Task ShouldBypassCache_WhenFilterParameterIsSet()
     {
         // Arrange
-        await SetupDatabase(70305, cfg =>
-        {
-            cfg.PlexServerCount = 1;
-            cfg.PlexMovieLibraryCount = 1;
-            cfg.MovieCount = 5;
-        });
+        await SetupDatabase(
+            70305,
+            cfg =>
+            {
+                cfg.PlexServerCount = 1;
+                cfg.PlexMovieLibraryCount = 1;
+                cfg.MovieCount = 5;
+            }
+        );
 
         var filter = CreateFilter(filter: "Genres:any:Id:eq:1", sort: "sortIndex:asc", page: 3, pageSize: 2);
         GetMediaByTypeCommand? capturedCommand = null;
 
         Mock.Mock<ICommandExecutor>()
             .Setup(x => x.Send(It.IsAny<GetMediaByTypeCommand>(), It.IsAny<CancellationToken>()))
-            .Returns<GetMediaByTypeCommand, CancellationToken>((command, _) =>
-            {
-                capturedCommand = command;
-                return Task.FromResult(Result.Ok(CreateResult([201, 202])));
-            })
+            .Returns<GetMediaByTypeCommand, CancellationToken>(
+                (command, _) =>
+                {
+                    capturedCommand = command;
+                    return Task.FromResult(Result.Ok(CreateResult([201, 202])));
+                }
+            )
             .Verifiable(Times.Once());
 
         // Act
@@ -178,23 +189,28 @@ public class MediaQueryCacheUnitTests : BaseUnitTest<MediaQueryCache>
     public async Task ShouldBypassCache_WhenSortContainsMultipleFields()
     {
         // Arrange
-        await SetupDatabase(70306, cfg =>
-        {
-            cfg.PlexServerCount = 1;
-            cfg.PlexMovieLibraryCount = 1;
-            cfg.MovieCount = 5;
-        });
+        await SetupDatabase(
+            70306,
+            cfg =>
+            {
+                cfg.PlexServerCount = 1;
+                cfg.PlexMovieLibraryCount = 1;
+                cfg.MovieCount = 5;
+            }
+        );
 
         var filter = CreateFilter(sort: "year:asc,title:desc", page: 4, pageSize: 2);
         GetMediaByTypeCommand? capturedCommand = null;
 
         Mock.Mock<ICommandExecutor>()
             .Setup(x => x.Send(It.IsAny<GetMediaByTypeCommand>(), It.IsAny<CancellationToken>()))
-            .Returns<GetMediaByTypeCommand, CancellationToken>((command, _) =>
-            {
-                capturedCommand = command;
-                return Task.FromResult(Result.Ok(CreateResult([301, 302])));
-            })
+            .Returns<GetMediaByTypeCommand, CancellationToken>(
+                (command, _) =>
+                {
+                    capturedCommand = command;
+                    return Task.FromResult(Result.Ok(CreateResult([301, 302])));
+                }
+            )
             .Verifiable(Times.Once());
 
         // Act
@@ -217,24 +233,29 @@ public class MediaQueryCacheUnitTests : BaseUnitTest<MediaQueryCache>
     public async Task ShouldWarmAllLibraryMovieAndTvShowSnapshots_WhenBuildCacheRuns()
     {
         // Arrange
-        await SetupDatabase(70316, cfg =>
-        {
-            cfg.PlexServerCount = 1;
-            cfg.PlexMovieLibraryCount = 1;
-            cfg.PlexTvShowLibraryCount = 1;
-            cfg.MovieCount = 2;
-            cfg.TvShowCount = 2;
-        });
+        await SetupDatabase(
+            70316,
+            cfg =>
+            {
+                cfg.PlexServerCount = 1;
+                cfg.PlexMovieLibraryCount = 1;
+                cfg.PlexTvShowLibraryCount = 1;
+                cfg.MovieCount = 2;
+                cfg.TvShowCount = 2;
+            }
+        );
 
         var capturedCommands = new List<GetMediaByTypeCommand>();
 
         Mock.Mock<ICommandExecutor>()
             .Setup(x => x.Send(It.IsAny<GetMediaByTypeCommand>(), It.IsAny<CancellationToken>()))
-            .Returns<GetMediaByTypeCommand, CancellationToken>((command, _) =>
-            {
-                capturedCommands.Add(command);
-                return Task.FromResult(Result.Ok(CreateResult([1, 2], command.Filter.MediaType)));
-            })
+            .Returns<GetMediaByTypeCommand, CancellationToken>(
+                (command, _) =>
+                {
+                    capturedCommands.Add(command);
+                    return Task.FromResult(Result.Ok(CreateResult([1, 2], command.Filter.MediaType)));
+                }
+            )
             .Verifiable(Times.Exactly(14));
 
         Mock.Mock<IGeneralSettings>().Setup(x => x.HideMediaFromOfflineServers).Returns(true);
@@ -257,16 +278,19 @@ public class MediaQueryCacheUnitTests : BaseUnitTest<MediaQueryCache>
     public async Task ShouldHitWarmedCache_WhenRequestingAllLibraries()
     {
         // Arrange
-        await SetupDatabase(70302, cfg =>
-        {
-            cfg.PlexServerCount = 1;
-            cfg.PlexMovieLibraryCount = 1;
-            cfg.MovieCount = 30;
-        });
+        await SetupDatabase(
+            70302,
+            cfg =>
+            {
+                cfg.PlexServerCount = 1;
+                cfg.PlexMovieLibraryCount = 1;
+                cfg.MovieCount = 30;
+            }
+        );
 
         // Setup mocks for warmup
-        var allMovieIds = await IDbContext.PlexMovies
-            .OrderBy(x => x.SearchTitle)
+        var allMovieIds = await IDbContext
+            .PlexMovies.OrderBy(x => x.SearchTitle)
             .Select(x => x.Id)
             .ToListAsync(CancellationToken);
 
@@ -275,8 +299,9 @@ public class MediaQueryCacheUnitTests : BaseUnitTest<MediaQueryCache>
 
         Mock.Mock<ICommandExecutor>()
             .Setup(x => x.Send(It.IsAny<GetMediaByTypeCommand>(), It.IsAny<CancellationToken>()))
-            .Returns<GetMediaByTypeCommand, CancellationToken>((command, _) =>
-                Task.FromResult(Result.Ok(CreateResult(allMovieIds, command.Filter.MediaType))));
+            .Returns<GetMediaByTypeCommand, CancellationToken>(
+                (command, _) => Task.FromResult(Result.Ok(CreateResult(allMovieIds, command.Filter.MediaType)))
+            );
 
         await Sut.BuildCache();
 
@@ -301,15 +326,18 @@ public class MediaQueryCacheUnitTests : BaseUnitTest<MediaQueryCache>
     public async Task ShouldReuseAscendingSnapshotAndReverseItems_WhenDescendingSortRequested()
     {
         // Arrange
-        await SetupDatabase(70303, cfg =>
-        {
-            cfg.PlexServerCount = 1;
-            cfg.PlexMovieLibraryCount = 1;
-            cfg.MovieCount = 25;
-        });
+        await SetupDatabase(
+            70303,
+            cfg =>
+            {
+                cfg.PlexServerCount = 1;
+                cfg.PlexMovieLibraryCount = 1;
+                cfg.MovieCount = 25;
+            }
+        );
 
-        var allMovieIds = await IDbContext.PlexMovies
-            .OrderBy(x => x.SearchTitle)
+        var allMovieIds = await IDbContext
+            .PlexMovies.OrderBy(x => x.SearchTitle)
             .Select(x => x.Id)
             .ToListAsync(CancellationToken);
 
@@ -318,8 +346,9 @@ public class MediaQueryCacheUnitTests : BaseUnitTest<MediaQueryCache>
 
         Mock.Mock<ICommandExecutor>()
             .Setup(x => x.Send(It.IsAny<GetMediaByTypeCommand>(), It.IsAny<CancellationToken>()))
-            .Returns<GetMediaByTypeCommand, CancellationToken>((command, _) =>
-                Task.FromResult(Result.Ok(CreateResult(allMovieIds, command.Filter.MediaType))));
+            .Returns<GetMediaByTypeCommand, CancellationToken>(
+                (command, _) => Task.FromResult(Result.Ok(CreateResult(allMovieIds, command.Filter.MediaType)))
+            );
 
         await Sut.BuildCache();
 
@@ -344,15 +373,18 @@ public class MediaQueryCacheUnitTests : BaseUnitTest<MediaQueryCache>
     public async Task ShouldReturnEmptyItemsWithMetadata_WhenRequestedPageIsBeyondSnapshotRange()
     {
         // Arrange
-        await SetupDatabase(70313, cfg =>
-        {
-            cfg.PlexServerCount = 1;
-            cfg.PlexMovieLibraryCount = 1;
-            cfg.MovieCount = 12;
-        });
+        await SetupDatabase(
+            70313,
+            cfg =>
+            {
+                cfg.PlexServerCount = 1;
+                cfg.PlexMovieLibraryCount = 1;
+                cfg.MovieCount = 12;
+            }
+        );
 
-        var allMovieIds = await IDbContext.PlexMovies
-            .OrderBy(x => x.SearchTitle)
+        var allMovieIds = await IDbContext
+            .PlexMovies.OrderBy(x => x.SearchTitle)
             .Select(x => x.Id)
             .ToListAsync(CancellationToken);
 
@@ -361,8 +393,12 @@ public class MediaQueryCacheUnitTests : BaseUnitTest<MediaQueryCache>
 
         Mock.Mock<ICommandExecutor>()
             .Setup(x => x.Send(It.IsAny<GetMediaByTypeCommand>(), It.IsAny<CancellationToken>()))
-            .Returns<GetMediaByTypeCommand, CancellationToken>((command, _) =>
-                Task.FromResult(Result.Ok(CreateResult(allMovieIds, command.Filter.MediaType, totalMediaSize: 12345))));
+            .Returns<GetMediaByTypeCommand, CancellationToken>(
+                (command, _) =>
+                    Task.FromResult(
+                        Result.Ok(CreateResult(allMovieIds, command.Filter.MediaType, totalMediaSize: 12345))
+                    )
+            );
 
         await Sut.BuildCache();
         Mock.Mock<ICommandExecutor>().Reset();
@@ -385,15 +421,18 @@ public class MediaQueryCacheUnitTests : BaseUnitTest<MediaQueryCache>
     public async Task ShouldReturnAllItems_WhenRequestedPageSizeIsNull()
     {
         // Arrange
-        await SetupDatabase(70312, cfg =>
-        {
-            cfg.PlexServerCount = 1;
-            cfg.PlexMovieLibraryCount = 1;
-            cfg.MovieCount = 12;
-        });
+        await SetupDatabase(
+            70312,
+            cfg =>
+            {
+                cfg.PlexServerCount = 1;
+                cfg.PlexMovieLibraryCount = 1;
+                cfg.MovieCount = 12;
+            }
+        );
 
-        var allMovieIds = await IDbContext.PlexMovies
-            .OrderBy(x => x.SearchTitle)
+        var allMovieIds = await IDbContext
+            .PlexMovies.OrderBy(x => x.SearchTitle)
             .Select(x => x.Id)
             .ToListAsync(CancellationToken);
 
@@ -402,8 +441,9 @@ public class MediaQueryCacheUnitTests : BaseUnitTest<MediaQueryCache>
 
         Mock.Mock<ICommandExecutor>()
             .Setup(x => x.Send(It.IsAny<GetMediaByTypeCommand>(), It.IsAny<CancellationToken>()))
-            .Returns<GetMediaByTypeCommand, CancellationToken>((command, _) =>
-                Task.FromResult(Result.Ok(CreateResult(allMovieIds, command.Filter.MediaType))));
+            .Returns<GetMediaByTypeCommand, CancellationToken>(
+                (command, _) => Task.FromResult(Result.Ok(CreateResult(allMovieIds, command.Filter.MediaType)))
+            );
 
         await Sut.BuildCache();
         Mock.Mock<ICommandExecutor>().Reset();
@@ -424,15 +464,18 @@ public class MediaQueryCacheUnitTests : BaseUnitTest<MediaQueryCache>
     public async Task ShouldReturnEmptyFilterArrays_InPageResponse()
     {
         // Arrange
-        await SetupDatabase(70320, cfg =>
-        {
-            cfg.PlexServerCount = 1;
-            cfg.PlexMovieLibraryCount = 1;
-            cfg.MovieCount = 10;
-        });
+        await SetupDatabase(
+            70320,
+            cfg =>
+            {
+                cfg.PlexServerCount = 1;
+                cfg.PlexMovieLibraryCount = 1;
+                cfg.MovieCount = 10;
+            }
+        );
 
-        var allMovieIds = await IDbContext.PlexMovies
-            .OrderBy(x => x.SearchTitle)
+        var allMovieIds = await IDbContext
+            .PlexMovies.OrderBy(x => x.SearchTitle)
             .Select(x => x.Id)
             .ToListAsync(CancellationToken);
 
@@ -441,8 +484,9 @@ public class MediaQueryCacheUnitTests : BaseUnitTest<MediaQueryCache>
 
         Mock.Mock<ICommandExecutor>()
             .Setup(x => x.Send(It.IsAny<GetMediaByTypeCommand>(), It.IsAny<CancellationToken>()))
-            .Returns<GetMediaByTypeCommand, CancellationToken>((command, _) =>
-                Task.FromResult(Result.Ok(CreateResult(allMovieIds, command.Filter.MediaType))));
+            .Returns<GetMediaByTypeCommand, CancellationToken>(
+                (command, _) => Task.FromResult(Result.Ok(CreateResult(allMovieIds, command.Filter.MediaType)))
+            );
 
         await Sut.BuildCache();
         Mock.Mock<ICommandExecutor>().Reset();
@@ -468,19 +512,22 @@ public class MediaQueryCacheUnitTests : BaseUnitTest<MediaQueryCache>
     public async Task ShouldReturnStaleData_WhenInvalidationMarksSnapshotDirty()
     {
         // Arrange
-        await SetupDatabase(70317, cfg =>
-        {
-            cfg.PlexServerCount = 1;
-            cfg.PlexMovieLibraryCount = 1;
-            cfg.MovieCount = 20;
-        });
+        await SetupDatabase(
+            70317,
+            cfg =>
+            {
+                cfg.PlexServerCount = 1;
+                cfg.PlexMovieLibraryCount = 1;
+                cfg.MovieCount = 20;
+            }
+        );
 
-        var libraryId = await IDbContext.PlexLibraries
-            .Where(x => x.Type == PlexMediaType.Movie)
+        var libraryId = await IDbContext
+            .PlexLibraries.Where(x => x.Type == PlexMediaType.Movie)
             .Select(x => x.Id)
             .FirstAsync(CancellationToken);
-        var allMovieIds = await IDbContext.PlexMovies
-            .OrderBy(x => x.SearchTitle)
+        var allMovieIds = await IDbContext
+            .PlexMovies.OrderBy(x => x.SearchTitle)
             .Select(x => x.Id)
             .ToListAsync(CancellationToken);
 
@@ -489,8 +536,9 @@ public class MediaQueryCacheUnitTests : BaseUnitTest<MediaQueryCache>
 
         Mock.Mock<ICommandExecutor>()
             .Setup(x => x.Send(It.IsAny<GetMediaByTypeCommand>(), It.IsAny<CancellationToken>()))
-            .Returns<GetMediaByTypeCommand, CancellationToken>((command, _) =>
-                Task.FromResult(Result.Ok(CreateResult(allMovieIds, command.Filter.MediaType))));
+            .Returns<GetMediaByTypeCommand, CancellationToken>(
+                (command, _) => Task.FromResult(Result.Ok(CreateResult(allMovieIds, command.Filter.MediaType)))
+            );
 
         await Sut.BuildCache();
         Mock.Mock<ICommandExecutor>().Reset();
@@ -517,19 +565,22 @@ public class MediaQueryCacheUnitTests : BaseUnitTest<MediaQueryCache>
     public async Task ShouldNotEmptyState_WhenInvalidationHitsAndSubsequentRequestUsesStaleSnapshot()
     {
         // Arrange
-        await SetupDatabase(70323, cfg =>
-        {
-            cfg.PlexServerCount = 1;
-            cfg.PlexMovieLibraryCount = 1;
-            cfg.MovieCount = 15;
-        });
+        await SetupDatabase(
+            70323,
+            cfg =>
+            {
+                cfg.PlexServerCount = 1;
+                cfg.PlexMovieLibraryCount = 1;
+                cfg.MovieCount = 15;
+            }
+        );
 
-        var libraryId = await IDbContext.PlexLibraries
-            .Where(x => x.Type == PlexMediaType.Movie)
+        var libraryId = await IDbContext
+            .PlexLibraries.Where(x => x.Type == PlexMediaType.Movie)
             .Select(x => x.Id)
             .FirstAsync(CancellationToken);
-        var allMovieIds = await IDbContext.PlexMovies
-            .OrderBy(x => x.SearchTitle)
+        var allMovieIds = await IDbContext
+            .PlexMovies.OrderBy(x => x.SearchTitle)
             .Select(x => x.Id)
             .ToListAsync(CancellationToken);
 
@@ -538,8 +589,9 @@ public class MediaQueryCacheUnitTests : BaseUnitTest<MediaQueryCache>
 
         Mock.Mock<ICommandExecutor>()
             .Setup(x => x.Send(It.IsAny<GetMediaByTypeCommand>(), It.IsAny<CancellationToken>()))
-            .Returns<GetMediaByTypeCommand, CancellationToken>((command, _) =>
-                Task.FromResult(Result.Ok(CreateResult(allMovieIds, command.Filter.MediaType))));
+            .Returns<GetMediaByTypeCommand, CancellationToken>(
+                (command, _) => Task.FromResult(Result.Ok(CreateResult(allMovieIds, command.Filter.MediaType)))
+            );
 
         await Sut.BuildCache();
         Mock.Mock<ICommandExecutor>().Reset();
@@ -560,21 +612,24 @@ public class MediaQueryCacheUnitTests : BaseUnitTest<MediaQueryCache>
     public async Task ShouldNotRebuild_WhenInvalidatingUnrelatedLibrary()
     {
         // Arrange
-        await SetupDatabase(70318, cfg =>
-        {
-            cfg.PlexServerCount = 1;
-            cfg.PlexMovieLibraryCount = 2;
-            cfg.MovieCount = 10;
-        });
+        await SetupDatabase(
+            70318,
+            cfg =>
+            {
+                cfg.PlexServerCount = 1;
+                cfg.PlexMovieLibraryCount = 2;
+                cfg.MovieCount = 10;
+            }
+        );
 
-        var libraryIds = await IDbContext.PlexLibraries
-            .Where(x => x.Type == PlexMediaType.Movie)
+        var libraryIds = await IDbContext
+            .PlexLibraries.Where(x => x.Type == PlexMediaType.Movie)
             .Select(x => x.Id)
             .OrderBy(x => x)
             .ToListAsync(CancellationToken);
         var unrelatedId = libraryIds[0] + libraryIds[1] + 999;
-        var allMovieIds = await IDbContext.PlexMovies
-            .OrderBy(x => x.SearchTitle)
+        var allMovieIds = await IDbContext
+            .PlexMovies.OrderBy(x => x.SearchTitle)
             .Select(x => x.Id)
             .ToListAsync(CancellationToken);
 
@@ -583,8 +638,9 @@ public class MediaQueryCacheUnitTests : BaseUnitTest<MediaQueryCache>
 
         Mock.Mock<ICommandExecutor>()
             .Setup(x => x.Send(It.IsAny<GetMediaByTypeCommand>(), It.IsAny<CancellationToken>()))
-            .Returns<GetMediaByTypeCommand, CancellationToken>((command, _) =>
-                Task.FromResult(Result.Ok(CreateResult(allMovieIds, command.Filter.MediaType))));
+            .Returns<GetMediaByTypeCommand, CancellationToken>(
+                (command, _) => Task.FromResult(Result.Ok(CreateResult(allMovieIds, command.Filter.MediaType)))
+            );
 
         await Sut.BuildCache();
         Mock.Mock<ICommandExecutor>().Reset();
@@ -615,60 +671,65 @@ public class MediaQueryCacheUnitTests : BaseUnitTest<MediaQueryCache>
         string? filter = null,
         string? sort = "sortIndex:asc",
         int? page = 1,
-        int? pageSize = 10) => new()
-    {
-        MediaType = mediaType,
-        PlexLibraryId = plexLibraryId,
-        FilterOfflineMedia = filterOfflineMedia,
-        FilterOwnedMedia = filterOwnedMedia,
-        Parameters = new FlexQueryParameters
+        int? pageSize = 10
+    ) =>
+        new()
         {
-            Query = query,
-            Filter = filter,
-            Sort = sort,
-            Page = page,
-            PageSize = pageSize,
-        },
-    };
+            MediaType = mediaType,
+            PlexLibraryId = plexLibraryId,
+            FilterOfflineMedia = filterOfflineMedia,
+            FilterOwnedMedia = filterOwnedMedia,
+            Parameters = new FlexQueryParameters
+            {
+                Query = query,
+                Filter = filter,
+                Sort = sort,
+                Page = page,
+                PageSize = pageSize,
+            },
+        };
 
     private static PagedMediaQueryResult CreateResult(
         IReadOnlyCollection<int> ids,
         PlexMediaType mediaType = PlexMediaType.Movie,
-        long totalMediaSize = 0) => new()
-    {
-        TotalCount = ids.Count,
-        MediaCount = ids.Count,
-        MovieCount = mediaType == PlexMediaType.Movie ? ids.Count : 0,
-        TvShowCount = mediaType == PlexMediaType.TvShow ? ids.Count : 0,
-        MediaSize = totalMediaSize,
-        TotalMediaSize = totalMediaSize,
-        Roles = [1, 2],
-        Countries = [3],
-        Genres = [4, 5],
-        Qualities = [6],
-        NavigationIndexes = [new MediaNavigationIndexDTO { Label = "A", Index = 0 }],
-        Items = ids.Select((id, index) => CreateItem(id, index, mediaType)).ToList(),
-    };
+        long totalMediaSize = 0
+    ) =>
+        new()
+        {
+            TotalCount = ids.Count,
+            MediaCount = ids.Count,
+            MovieCount = mediaType == PlexMediaType.Movie ? ids.Count : 0,
+            TvShowCount = mediaType == PlexMediaType.TvShow ? ids.Count : 0,
+            MediaSize = totalMediaSize,
+            TotalMediaSize = totalMediaSize,
+            Roles = [1, 2],
+            Countries = [3],
+            Genres = [4, 5],
+            Qualities = [6],
+            NavigationIndexes = [new MediaNavigationIndexDTO { Label = "A", Index = 0 }],
+            Items = ids.Select((id, index) => CreateItem(id, index, mediaType)).ToList(),
+        };
 
-    private static PlexMediaSlimDTO CreateItem(int id, int index, PlexMediaType mediaType) => new()
-    {
-        Id = id,
-        PlexApiRatingKey = id,
-        PlexApiMetaDataKey = id,
-        Title = $"Media {index:D3}",
-        SearchTitle = $"Media {index:D3}",
-        SortIndex = index + 1,
-        Year = 2000 + index,
-        Duration = 100 + index,
-        MediaSize = 1000 + index,
-        ChildCount = mediaType == PlexMediaType.TvShow ? 1 : 0,
-        GrandChildCount = mediaType == PlexMediaType.TvShow ? 2 : 0,
-        AddedAt = DateTime.UnixEpoch.AddDays(index),
-        UpdatedAt = DateTime.UnixEpoch.AddDays(index + 1),
-        PlexLibraryId = 1,
-        PlexServerId = 1,
-        Type = mediaType,
-        HasThumb = false,
-        Qualities = new List<PlexMediaQualityDTO>(),
-    };
+    private static PlexMediaSlimDTO CreateItem(int id, int index, PlexMediaType mediaType) =>
+        new()
+        {
+            Id = id,
+            PlexApiRatingKey = id,
+            PlexApiMetaDataKey = id,
+            Title = $"Media {index:D3}",
+            SearchTitle = $"Media {index:D3}",
+            SortIndex = index + 1,
+            Year = 2000 + index,
+            Duration = 100 + index,
+            MediaSize = 1000 + index,
+            ChildCount = mediaType == PlexMediaType.TvShow ? 1 : 0,
+            GrandChildCount = mediaType == PlexMediaType.TvShow ? 2 : 0,
+            AddedAt = DateTime.UnixEpoch.AddDays(index),
+            UpdatedAt = DateTime.UnixEpoch.AddDays(index + 1),
+            PlexLibraryId = 1,
+            PlexServerId = 1,
+            Type = mediaType,
+            HasThumb = false,
+            Qualities = new List<PlexMediaQualityDTO>(),
+        };
 }

@@ -45,7 +45,10 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandler
         _dbContext = dbContext;
     }
 
-    public async Task<Result<DownloadTaskCreationReport>> ExecuteAsync(GenerateDownloadTaskTvShowEpisodesCommand command, CancellationToken ct)
+    public async Task<Result<DownloadTaskCreationReport>> ExecuteAsync(
+        GenerateDownloadTaskTvShowEpisodesCommand command,
+        CancellationToken ct
+    )
     {
         var request = command.Request;
         var groupedList = command.Request.DownloadMedias.MergeAndGroupList();

@@ -1,6 +1,6 @@
 using EntityFrameworkCore.Sqlite.Concurrency.Models;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Data.Sqlite;
+using Microsoft.EntityFrameworkCore;
 
 namespace EntityFrameworkCore.Sqlite.Concurrency;
 
@@ -22,19 +22,24 @@ public static class SqliteConcurrencyExtensions
     public static DbContextOptionsBuilder UseSqliteWithConcurrency(
         this DbContextOptionsBuilder optionsBuilder,
         string connectionString,
-        Action<SqliteConcurrencyOptions>? configure = null)
+        Action<SqliteConcurrencyOptions>? configure = null
+    )
     {
         var options = new SqliteConcurrencyOptions();
         configure?.Invoke(options);
         options.Validate();
 
         // Get the enhanced connection string
-        var enhancedConnectionString = SqliteConnectionEnhancer
-            .GetOptimizedConnectionString(connectionString);
+        var enhancedConnectionString = SqliteConnectionEnhancer.GetOptimizedConnectionString(connectionString);
 
         // Use the connection string with EF Core to allow proper pooling
-        optionsBuilder.UseSqlite(enhancedConnectionString,
-            sqliteOptions => { sqliteOptions.CommandTimeout(options.CommandTimeout); });
+        optionsBuilder.UseSqlite(
+            enhancedConnectionString,
+            sqliteOptions =>
+            {
+                sqliteOptions.CommandTimeout(options.CommandTimeout);
+            }
+        );
 
         // Add interceptors for PRAGMAs, performance, and concurrency
         var interceptor = SqliteConnectionEnhancer.GetInterceptor(enhancedConnectionString, options);
@@ -81,7 +86,8 @@ public static class SqliteConcurrencyExtensions
         this DbContext context,
         Func<DbContext, Task<T>> operation,
         int maxRetries = 3,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default
+    )
     {
         int attempt = 0;
         while (true)
@@ -141,10 +147,8 @@ public static class SqliteConcurrencyExtensions
     public static Task<int> SaveChangesSerializedAsync(
         this DbContext context,
         int maxRetries = 3,
-        CancellationToken cancellationToken = default) => context.SaveChangesSerializedAsync(
-        context.SaveChangesAsync,
-        maxRetries,
-        cancellationToken);
+        CancellationToken cancellationToken = default
+    ) => context.SaveChangesSerializedAsync(context.SaveChangesAsync, maxRetries, cancellationToken);
 
     /// <summary>
     /// Saves all changes in the context while holding the shared per-database write lock,
@@ -171,7 +175,8 @@ public static class SqliteConcurrencyExtensions
         this DbContext context,
         Func<CancellationToken, Task<int>> saveChangesAsync,
         int maxRetries = 3,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default
+    )
     {
         ArgumentNullException.ThrowIfNull(saveChangesAsync);
 
@@ -191,7 +196,8 @@ public static class SqliteConcurrencyExtensions
         this DbContext context,
         Func<CancellationToken, Task<T>> operation,
         int maxRetries = 3,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default
+    )
     {
         ArgumentNullException.ThrowIfNull(operation);
 
@@ -202,22 +208,25 @@ public static class SqliteConcurrencyExtensions
         var enhancedConnectionString = SqliteConnectionEnhancer.GetOptimizedConnectionString(connectionString);
         var queue = SqliteConnectionEnhancer.GetWriteQueue(enhancedConnectionString);
 
-        return await queue.EnqueueAsync(async () =>
-        {
-            var delayMs = 50;
-            for (var attempt = 1;; attempt++)
+        return await queue.EnqueueAsync(
+            async () =>
             {
-                try
+                var delayMs = 50;
+                for (var attempt = 1; ; attempt++)
                 {
-                    return await operation(cancellationToken);
+                    try
+                    {
+                        return await operation(cancellationToken);
+                    }
+                    catch (Exception ex) when (attempt < maxRetries && IsRetryableSqliteBusy(ex))
+                    {
+                        await Task.Delay(delayMs, cancellationToken);
+                        delayMs = Math.Min(delayMs * 2, 2000);
+                    }
                 }
-                catch (Exception ex) when (attempt < maxRetries && IsRetryableSqliteBusy(ex))
-                {
-                    await Task.Delay(delayMs, cancellationToken);
-                    delayMs = Math.Min(delayMs * 2, 2000);
-                }
-            }
-        }, cancellationToken);
+            },
+            cancellationToken
+        );
     }
 
     /// <summary>
@@ -231,15 +240,20 @@ public static class SqliteConcurrencyExtensions
         this DbContext context,
         Func<CancellationToken, Task> operation,
         int maxRetries = 3,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default
+    )
     {
         ArgumentNullException.ThrowIfNull(operation);
 
-        await context.ExecuteSerializedWriteAsync(async ct =>
-        {
-            await operation(ct);
-            return 0;
-        }, maxRetries, cancellationToken);
+        await context.ExecuteSerializedWriteAsync(
+            async ct =>
+            {
+                await operation(ct);
+                return 0;
+            },
+            maxRetries,
+            cancellationToken
+        );
     }
 
     /// <summary>
@@ -253,34 +267,40 @@ public static class SqliteConcurrencyExtensions
         this DbContext context,
         Func<CancellationToken, Task> operation,
         int maxRetries = 3,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default
+    )
     {
         ArgumentNullException.ThrowIfNull(operation);
 
-        await context.ExecuteSerializedWriteAsync(async ct =>
-        {
-            await using var transaction = await context.Database.BeginTransactionAsync(ct);
-            try
+        await context.ExecuteSerializedWriteAsync(
+            async ct =>
             {
-                await operation(ct);
-                await transaction.CommitAsync(ct);
-            }
-            catch
-            {
-                await transaction.RollbackAsync(CancellationToken.None);
-                throw;
-            }
-        }, maxRetries, cancellationToken);
+                await using var transaction = await context.Database.BeginTransactionAsync(ct);
+                try
+                {
+                    await operation(ct);
+                    await transaction.CommitAsync(ct);
+                }
+                catch
+                {
+                    await transaction.RollbackAsync(CancellationToken.None);
+                    throw;
+                }
+            },
+            maxRetries,
+            cancellationToken
+        );
     }
 
     // EF Core wraps SqliteException in DbUpdateException when SaveChangesAsync fails,
     // so we need to unwrap one level to classify the error.
-    private static bool IsRetryableSqliteBusy(Exception ex) => ex switch
-    {
-        SqliteException se => SqliteErrorCodes.IsRetryableBusy(se),
-        DbUpdateException { InnerException: SqliteException inner } => SqliteErrorCodes.IsRetryableBusy(inner),
-        _ => false
-    };
+    private static bool IsRetryableSqliteBusy(Exception ex) =>
+        ex switch
+        {
+            SqliteException se => SqliteErrorCodes.IsRetryableBusy(se),
+            DbUpdateException { InnerException: SqliteException inner } => SqliteErrorCodes.IsRetryableBusy(inner),
+            _ => false,
+        };
 
     /// <summary>
     /// Performs a bulk insert with optimized settings and optional app-level locking.
@@ -292,7 +312,9 @@ public static class SqliteConcurrencyExtensions
     public static async Task BulkInsertOptimizedAsync<T>(
         this DbContext context,
         IEnumerable<T> entities,
-        CancellationToken cancellationToken = default) where T : class
+        CancellationToken cancellationToken = default
+    )
+        where T : class
     {
         if (SqliteConnectionEnhancer.IsWriteLockHeld.Value)
         {
@@ -302,14 +324,17 @@ public static class SqliteConcurrencyExtensions
             return;
         }
 
-        await context.ExecuteSerializedTransactionAsync(async ct =>
-        {
-            foreach (var batch in entities.Chunk(1000))
+        await context.ExecuteSerializedTransactionAsync(
+            async ct =>
             {
-                await context.AddRangeAsync(batch, ct);
-                await context.SaveChangesAsync(ct);
-                context.ChangeTracker.Clear();
-            }
-        }, cancellationToken: cancellationToken);
+                foreach (var batch in entities.Chunk(1000))
+                {
+                    await context.AddRangeAsync(batch, ct);
+                    await context.SaveChangesAsync(ct);
+                    context.ChangeTracker.Clear();
+                }
+            },
+            cancellationToken: cancellationToken
+        );
     }
 }

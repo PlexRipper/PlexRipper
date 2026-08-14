@@ -48,7 +48,10 @@ public class MoveDownloadFileSchedulerIntegrationTests : BaseIntegrationTests
         var expectedDestinationPath = downloadTask.DestinationFilePath;
 
         // Act
-        var startResult = await container.MoveDownloadFileScheduler.StartMoveDownloadFileJob(downloadTask.ToKey(), CancellationToken);
+        var startResult = await container.MoveDownloadFileScheduler.StartMoveDownloadFileJob(
+            downloadTask.ToKey(),
+            CancellationToken
+        );
         await container.BackgroundJobScheduler.AwaitScheduler(CancellationToken);
 
         // Assert
@@ -158,7 +161,10 @@ public class MoveDownloadFileSchedulerIntegrationTests : BaseIntegrationTests
         var destinationPath = downloadTask.DestinationFilePath;
 
         // Act
-        var startResult = await container.MoveDownloadFileScheduler.StartMoveDownloadFileJob(downloadTask.ToKey(), CancellationToken);
+        var startResult = await container.MoveDownloadFileScheduler.StartMoveDownloadFileJob(
+            downloadTask.ToKey(),
+            CancellationToken
+        );
         await container.BackgroundJobScheduler.AwaitScheduler(CancellationToken);
 
         // Assert

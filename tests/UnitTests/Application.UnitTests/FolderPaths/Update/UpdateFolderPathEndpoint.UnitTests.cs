@@ -1,6 +1,7 @@
 namespace Reaparr.Application.UnitTests;
 
-public class UpdateFolderPathEndpointUnitTests : BaseEndpointUnitTest<UpdateFolderPathEndpoint, UpdateFolderPathEndpointRequest, ResultDTO<FolderPathDTO>>
+public class UpdateFolderPathEndpointUnitTests
+    : BaseEndpointUnitTest<UpdateFolderPathEndpoint, UpdateFolderPathEndpointRequest, ResultDTO<FolderPathDTO>>
 {
     [Test]
     public async Task ShouldUpdateFolderPath_WhenFolderPathExists()

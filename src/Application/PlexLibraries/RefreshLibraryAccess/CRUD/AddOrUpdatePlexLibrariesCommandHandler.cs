@@ -59,21 +59,14 @@ public class AddOrUpdatePlexLibrariesCommandHandler
 
         var plexServerLibrariesDict = command
             .PlexLibraries.GroupBy(x => x.PlexServerId)
-            .ToDictionary(
-                group => group.Key,
-                group => group
-                    .GroupBy(x => x.Uuid)
-                    .Select(x => x.Last())
-                    .ToList()
-            );
+            .ToDictionary(group => group.Key, group => group.GroupBy(x => x.Uuid).Select(x => x.Last()).ToList());
 
         foreach (var (_, incomingPlexLibraries) in plexServerLibrariesDict)
         {
             foreach (var incomingPlexLibrary in incomingPlexLibraries)
             {
                 var plexLibraryDb = await _dbContext
-                    .PlexLibraries
-                    .IgnoreIsEnabledFilter()
+                    .PlexLibraries.IgnoreIsEnabledFilter()
                     .AsTracking()
                     .FirstOrDefaultAsync(
                         x => x.PlexServerId == incomingPlexLibrary.PlexServerId && x.Uuid == incomingPlexLibrary.Uuid,
@@ -109,9 +102,9 @@ public class AddOrUpdatePlexLibrariesCommandHandler
                     plexLibraryDb.Uuid = incomingPlexLibrary.Uuid;
                     plexLibraryDb.Language = incomingPlexLibrary.Language;
 
-                    var contentChangedAfterLastSync = incomingPlexLibrary.ContentChangedAt != previousContentChangedAt
-                                                      && (plexLibraryDb.SyncedAt is null ||
-                                                          incomingPlexLibrary.UpdatedAt > plexLibraryDb.SyncedAt);
+                    var contentChangedAfterLastSync =
+                        incomingPlexLibrary.ContentChangedAt != previousContentChangedAt
+                        && (plexLibraryDb.SyncedAt is null || incomingPlexLibrary.UpdatedAt > plexLibraryDb.SyncedAt);
                     plexLibraryDb.Outdated = plexLibraryDb.Outdated || contentChangedAfterLastSync;
                     if (contentChangedAfterLastSync)
                         changedPlexLibraryIds.Add(plexLibraryDb.Id);
@@ -225,11 +218,7 @@ public class AddOrUpdatePlexLibrariesCommandHandler
         foreach (var rapport in rapportList)
             _log.Here().Information(rapport.ToString());
 
-        var libraryIdsToSync = newPlexLibraries
-            .Select(x => x.Id)
-            .Concat(changedPlexLibraryIds)
-            .Distinct()
-            .ToList();
+        var libraryIdsToSync = newPlexLibraries.Select(x => x.Id).Concat(changedPlexLibraryIds).Distinct().ToList();
 
         if (libraryIdsToSync.Count > 0)
         {
@@ -273,8 +262,8 @@ public class AddOrUpdatePlexLibrariesCommandHandler
 
         var updatedRows = rapportList
             .SelectMany(rapport =>
-                rapport.Data
-                    .Where(x => x.State == PlexAccessState.Updated)
+                rapport
+                    .Data.Where(x => x.State == PlexAccessState.Updated)
                     .Select(row => new
                     {
                         rapport.PlexServerId,

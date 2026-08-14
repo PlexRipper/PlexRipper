@@ -32,8 +32,8 @@ public class MediaQueryFilterUnitTests : BaseUnitTest<MediaQueryFilterUnitTests>
 
         // Assert
         originalHash.ShouldBe(duplicateHash);
-    }  
-    
+    }
+
     [Test]
     public void ShouldHaveDifferentHash_WhenSortingChanged()
     {
@@ -53,19 +53,21 @@ public class MediaQueryFilterUnitTests : BaseUnitTest<MediaQueryFilterUnitTests>
         int? page = null,
         int? pageSize = null,
         string? sort = null,
-        string? filter = null) => new()
-    {
-        MediaType = PlexMediaType.Movie,
-        PlexLibraryId = 7,
-        FilterOfflineMedia = true,
-        FilterOwnedMedia = false,
-        Parameters = new FlexQueryParameters
+        string? filter = null
+    ) =>
+        new()
         {
-            Page = page,
-            PageSize = pageSize,
-            Sort = sort,
-            Filter = filter,
-            Query = "Title ~= 'Matrix'",
-        },
-    };
+            MediaType = PlexMediaType.Movie,
+            PlexLibraryId = 7,
+            FilterOfflineMedia = true,
+            FilterOwnedMedia = false,
+            Parameters = new FlexQueryParameters
+            {
+                Page = page,
+                PageSize = pageSize,
+                Sort = sort,
+                Filter = filter,
+                Query = "Title ~= 'Matrix'",
+            },
+        };
 }

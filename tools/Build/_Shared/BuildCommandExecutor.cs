@@ -52,8 +52,7 @@ internal sealed class BuildCommandExecutor : ICommandExecutor
         }
         catch (Exception ex)
         {
-            _log.Here()
-                .Error(ex, "Failed to execute build command {CommandType}", command.GetType().Name);
+            _log.Here().Error(ex, "Failed to execute build command {CommandType}", command.GetType().Name);
             return Fail<TResult>(ex.Message);
         }
     }

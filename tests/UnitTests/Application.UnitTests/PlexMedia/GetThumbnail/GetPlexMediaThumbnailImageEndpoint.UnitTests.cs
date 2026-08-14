@@ -23,9 +23,9 @@ public class GetPlexMediaThumbnailImageEndpointUnitTests : BaseUnitTest<GetPlexM
 
         query["width"].ToString().ShouldBe("300");
         query["height"].ToString().ShouldBe("450");
-        query["url"].ToString().ShouldBe(
-            "/library/metadata/481523/thumb/1772632750?X-Plex-Token=token%2Bwith%26reserved%3Dcharacters"
-        );
+        query["url"]
+            .ToString()
+            .ShouldBe("/library/metadata/481523/thumb/1772632750?X-Plex-Token=token%2Bwith%26reserved%3Dcharacters");
         query["X-Plex-Token"].ToString().ShouldBe(token);
     }
 
@@ -38,9 +38,7 @@ public class GetPlexMediaThumbnailImageEndpointUnitTests : BaseUnitTest<GetPlexM
             "plex-token"
         );
 
-        url.ShouldBe(
-            "https://plex.example:32400/library/metadata/481523/thumb/1772632750?X-Plex-Token=plex-token"
-        );
+        url.ShouldBe("https://plex.example:32400/library/metadata/481523/thumb/1772632750?X-Plex-Token=plex-token");
     }
 
     [Test]
@@ -49,10 +47,7 @@ public class GetPlexMediaThumbnailImageEndpointUnitTests : BaseUnitTest<GetPlexM
         // Arrange
         var handler = new StubHttpMessageHandler(
             new HttpResponseMessage(HttpStatusCode.InternalServerError),
-            new HttpResponseMessage(HttpStatusCode.OK)
-            {
-                Content = new ByteArrayContent([1, 2, 3]),
-            }
+            new HttpResponseMessage(HttpStatusCode.OK) { Content = new ByteArrayContent([1, 2, 3]) }
         );
         using var client = new HttpClient(handler);
         var endpoint = new GetPlexMediaThumbnailImageEndpoint(
@@ -73,12 +68,10 @@ public class GetPlexMediaThumbnailImageEndpointUnitTests : BaseUnitTest<GetPlexM
 
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
-        handler.RequestUris.ShouldBe(
-            [
-                new Uri("https://plex.example/photo/:/transcode"),
-                new Uri("https://plex.example/library/metadata/1/thumb/2"),
-            ]
-        );
+        handler.RequestUris.ShouldBe([
+            new Uri("https://plex.example/photo/:/transcode"),
+            new Uri("https://plex.example/library/metadata/1/thumb/2"),
+        ]);
     }
 
     [Test]

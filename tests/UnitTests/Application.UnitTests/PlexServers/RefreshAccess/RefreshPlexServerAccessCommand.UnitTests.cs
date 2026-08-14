@@ -36,36 +36,45 @@ public class RefreshPlexServerAccessCommandUnitTests : BaseUnitTest<RefreshPlexS
     public async Task ShouldInvalidateAffectedLibraries_WhenAccessibleServersAreRevoked()
     {
         // Arrange
-        await SetupDatabase(66198, config =>
-        {
-            config.PlexAccountCount = 1;
-            config.PlexServerCount = 2;
-            config.PlexMovieLibraryCount = 2;
-            config.PlexTvShowLibraryCount = 2;
-        });
+        await SetupDatabase(
+            66198,
+            config =>
+            {
+                config.PlexAccountCount = 1;
+                config.PlexServerCount = 2;
+                config.PlexMovieLibraryCount = 2;
+                config.PlexTvShowLibraryCount = 2;
+            }
+        );
 
         var dbContext = IDbContext;
         var plexAccount = await dbContext.PlexAccounts.FirstAsync(CancellationToken);
-        var expectedLibraryIds = await dbContext.PlexLibraries
-            .IgnoreQueryFilters()
+        var expectedLibraryIds = await dbContext
+            .PlexLibraries.IgnoreQueryFilters()
             .OrderBy(x => x.Id)
             .Select(x => x.Id)
             .ToListAsync(CancellationToken);
         var mediaQueryCache = new Mock<IMediaQueryCache>(MockBehavior.Strict);
 
         Mock.Mock<ICommandExecutor>()
-            .Setup(x => x.Send(
-                It.Is<GetAccessiblePlexServersCommand>(command => command.PlexAccountId == plexAccount.Id),
-                It.IsAny<CancellationToken>()
-            ))
+            .Setup(x =>
+                x.Send(
+                    It.Is<GetAccessiblePlexServersCommand>(command => command.PlexAccountId == plexAccount.Id),
+                    It.IsAny<CancellationToken>()
+                )
+            )
             .ReturnsAsync(new List<PlexServerAccessDTO>())
             .Verifiable(Times.Once);
 
         mediaQueryCache
-            .Setup(x => x.InvalidateLibraries(
-                It.Is<IReadOnlyCollection<int>>(libraryIds => libraryIds.OrderBy(id => id).SequenceEqual(expectedLibraryIds)),
-                "Plex server access revoked"
-            ))
+            .Setup(x =>
+                x.InvalidateLibraries(
+                    It.Is<IReadOnlyCollection<int>>(libraryIds =>
+                        libraryIds.OrderBy(id => id).SequenceEqual(expectedLibraryIds)
+                    ),
+                    "Plex server access revoked"
+                )
+            )
             .Verifiable(Times.Once);
 
         // Act
@@ -77,7 +86,9 @@ public class RefreshPlexServerAccessCommandUnitTests : BaseUnitTest<RefreshPlexS
         // Assert
         result.IsSuccess.ShouldBeTrue();
         result.Value.Access.Count.ShouldBe(2);
-        (await dbContext.PlexAccountServers.AnyAsync(x => x.PlexAccountId == plexAccount.Id, CancellationToken)).ShouldBeFalse();
+        (
+            await dbContext.PlexAccountServers.AnyAsync(x => x.PlexAccountId == plexAccount.Id, CancellationToken)
+        ).ShouldBeFalse();
         Mock.Mock<ICommandExecutor>().Verify();
         mediaQueryCache.Verify();
     }

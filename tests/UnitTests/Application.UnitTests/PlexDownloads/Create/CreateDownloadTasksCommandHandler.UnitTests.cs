@@ -34,9 +34,7 @@ public class CreateDownloadTasksCommandHandlerUnitTests : BaseUnitTest<CreateDow
             .Verifiable(Times.Once());
         Mock.PublishEvent(It.IsAny<CheckDownloadQueueEvent>).Returns(Task.CompletedTask);
         Mock.Mock<INotificationHubService>()
-            .Setup(x =>
-                x.SendRefreshNotificationAsync(It.IsAny<List<RefreshDataType>>())
-            )
+            .Setup(x => x.SendRefreshNotificationAsync(It.IsAny<List<RefreshDataType>>()))
             .Returns(Task.CompletedTask)
             .Verifiable(Times.Once());
 
@@ -123,9 +121,7 @@ public class CreateDownloadTasksCommandHandlerUnitTests : BaseUnitTest<CreateDow
             .Verifiable(Times.Never());
         Mock.PublishEvent(It.IsAny<CheckDownloadQueueEvent>).Returns(Task.CompletedTask);
         Mock.Mock<INotificationHubService>()
-            .Setup(x =>
-                x.SendRefreshNotificationAsync(It.IsAny<List<RefreshDataType>>())
-            )
+            .Setup(x => x.SendRefreshNotificationAsync(It.IsAny<List<RefreshDataType>>()))
             .Returns(Task.CompletedTask)
             .Verifiable(Times.Once());
 
@@ -189,9 +185,7 @@ public class CreateDownloadTasksCommandHandlerUnitTests : BaseUnitTest<CreateDow
             .Verifiable(Times.Never());
         Mock.PublishEvent(It.IsAny<CheckDownloadQueueEvent>).Returns(Task.CompletedTask);
         Mock.Mock<INotificationHubService>()
-            .Setup(x =>
-                x.SendRefreshNotificationAsync(It.IsAny<List<RefreshDataType>>())
-            )
+            .Setup(x => x.SendRefreshNotificationAsync(It.IsAny<List<RefreshDataType>>()))
             .Returns(Task.CompletedTask)
             .Verifiable(Times.Never());
 
@@ -220,10 +214,7 @@ public class CreateDownloadTasksCommandHandlerUnitTests : BaseUnitTest<CreateDow
             );
         Mock.VerifyNotification(It.IsAny<CheckDownloadQueueEvent>, Times.Never);
         Mock.Mock<INotificationHubService>()
-            .Verify(
-                x => x.SendRefreshNotificationAsync(It.IsAny<List<RefreshDataType>>()),
-                Times.Never()
-            );
+            .Verify(x => x.SendRefreshNotificationAsync(It.IsAny<List<RefreshDataType>>()), Times.Never());
     }
 
     [Test]
@@ -238,9 +229,7 @@ public class CreateDownloadTasksCommandHandlerUnitTests : BaseUnitTest<CreateDow
         Mock.SetupCommand(It.IsAny<GenerateDownloadTaskTvShowEpisodesCommand>).ReturnsAsync(Result.Ok(_episodesReport));
         Mock.PublishEvent(It.IsAny<CheckDownloadQueueEvent>).Returns(Task.CompletedTask);
         Mock.Mock<INotificationHubService>()
-            .Setup(x =>
-                x.SendRefreshNotificationAsync(It.IsAny<List<RefreshDataType>>())
-            )
+            .Setup(x => x.SendRefreshNotificationAsync(It.IsAny<List<RefreshDataType>>()))
             .Returns(Task.CompletedTask);
 
         var downloadMediaDtos = new List<DownloadMediaDTO>
@@ -265,9 +254,6 @@ public class CreateDownloadTasksCommandHandlerUnitTests : BaseUnitTest<CreateDow
         result.Errors.ShouldContain(x => x.Message.Contains("Movie generation failed"));
         Mock.VerifyNotification(It.IsAny<CheckDownloadQueueEvent>, Times.Never);
         Mock.Mock<INotificationHubService>()
-            .Verify(
-                x => x.SendRefreshNotificationAsync(It.IsAny<List<RefreshDataType>>()),
-                Times.Never()
-            );
+            .Verify(x => x.SendRefreshNotificationAsync(It.IsAny<List<RefreshDataType>>()), Times.Never());
     }
 }

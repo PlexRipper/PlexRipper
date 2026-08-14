@@ -26,29 +26,27 @@ public class GetPlexLibraryAccessTimelineEndpoint : EndpointWithoutRequest<PlexL
     {
         _log.Here().DebugApiCall(HttpContext);
 
-        var events = (await _dbContext.PlexLibraryAccessHistoryEvents
-            .Select(x => new PlexLibraryAccessTimelineEventDTO
-            {
-                Id = x.Id,
-                RefreshRunId = x.RefreshRunId,
-                PlexAccountId = x.PlexAccountId,
-                PlexAccountName = x.PlexAccountNameSnapshot ?? string.Empty,
-                PlexServerId = x.PlexServerId,
-                PlexServerName = x.PlexServerNameSnapshot,
-                PlexLibraryId = x.PlexLibraryId,
-                PlexLibraryName = x.PlexLibraryNameSnapshot,
-                State = x.State,
-                CreatedAt = x.CreatedAt,
-            })
-            .OrderBy(x => x.PlexServerName)
-            .ThenBy(x => x.PlexLibraryName)
-            .ToListAsync(ct));
+        var events = (
+            await _dbContext
+                .PlexLibraryAccessHistoryEvents.Select(x => new PlexLibraryAccessTimelineEventDTO
+                {
+                    Id = x.Id,
+                    RefreshRunId = x.RefreshRunId,
+                    PlexAccountId = x.PlexAccountId,
+                    PlexAccountName = x.PlexAccountNameSnapshot ?? string.Empty,
+                    PlexServerId = x.PlexServerId,
+                    PlexServerName = x.PlexServerNameSnapshot,
+                    PlexLibraryId = x.PlexLibraryId,
+                    PlexLibraryName = x.PlexLibraryNameSnapshot,
+                    State = x.State,
+                    CreatedAt = x.CreatedAt,
+                })
+                .OrderBy(x => x.PlexServerName)
+                .ThenBy(x => x.PlexLibraryName)
+                .ToListAsync(ct)
+        );
 
-        var response = new PlexLibraryAccessTimelineDTO
-        {
-            Events = events,
-            CurrentState = ToCurrentState(events),
-        };
+        var response = new PlexLibraryAccessTimelineDTO { Events = events, CurrentState = ToCurrentState(events) };
 
         await Send.FluentResult(Result.Ok(response), x => x, ct);
     }
@@ -56,7 +54,14 @@ public class GetPlexLibraryAccessTimelineEndpoint : EndpointWithoutRequest<PlexL
     private static List<PlexLibraryAccessCurrentStateDTO> ToCurrentState(List<PlexLibraryAccessTimelineEventDTO> events)
     {
         List<PlexLibraryAccessCurrentStateLibraryDTO> accessibleLibraries = [];
-        foreach (var eventGroup in events.GroupBy(x => new { x.PlexAccountId, x.PlexServerId, x.PlexLibraryId }))
+        foreach (
+            var eventGroup in events.GroupBy(x => new
+            {
+                x.PlexAccountId,
+                x.PlexServerId,
+                x.PlexLibraryId,
+            })
+        )
         {
             var accessibleLibrary = ToAccessibleLibraryOrDefault(
                 eventGroup.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id).ToList()

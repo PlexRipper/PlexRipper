@@ -34,7 +34,8 @@ public class GenerateDownloadTaskMoviesCommandValidator : AbstractValidator<Gene
     }
 }
 
-public class GenerateDownloadTaskMoviesCommandHandler : ICommandHandler<GenerateDownloadTaskMoviesCommand, Result<DownloadTaskCreationReport>>
+public class GenerateDownloadTaskMoviesCommandHandler
+    : ICommandHandler<GenerateDownloadTaskMoviesCommand, Result<DownloadTaskCreationReport>>
 {
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;

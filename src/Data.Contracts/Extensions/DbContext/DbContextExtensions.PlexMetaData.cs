@@ -9,7 +9,8 @@ public static partial class DbContextExtensions
     public static async Task<Dictionary<string, int>> InsertOrIgnorePlexActorsAsync(
         this IReaparrDbContext dbContext,
         IReadOnlyCollection<PlexActor> entities,
-        CancellationToken ct)
+        CancellationToken ct
+    )
     {
         var result = new Dictionary<string, int>(entities.Count);
 
@@ -32,8 +33,8 @@ public static partial class DbContextExtensions
             await dbContext.ExecuteSqlInterpolatedAsync(sql, ct);
 
             var keys = chunk.Select(a => a.Key).ToList();
-            var found = await dbContext.PlexActors
-                .Where(a => keys.Contains(a.Key))
+            var found = await dbContext
+                .PlexActors.Where(a => keys.Contains(a.Key))
                 .Select(a => new { a.Key, a.Id })
                 .ToListAsync(ct);
             foreach (var a in found)
@@ -46,7 +47,8 @@ public static partial class DbContextExtensions
     public static async Task<Dictionary<string, int>> InsertOrIgnorePlexGenresAsync(
         this IReaparrDbContext dbContext,
         IReadOnlyCollection<PlexGenre> entities,
-        CancellationToken ct)
+        CancellationToken ct
+    )
     {
         var result = new Dictionary<string, int>(entities.Count);
 
@@ -68,8 +70,8 @@ public static partial class DbContextExtensions
             await dbContext.ExecuteSqlInterpolatedAsync(sql, ct);
 
             var keys = chunk.Select(g => g.Key).ToList();
-            var found = await dbContext.PlexGenres
-                .Where(g => keys.Contains(g.Key))
+            var found = await dbContext
+                .PlexGenres.Where(g => keys.Contains(g.Key))
                 .Select(g => new { g.Key, g.Id })
                 .ToListAsync(ct);
             foreach (var g in found)
@@ -82,7 +84,8 @@ public static partial class DbContextExtensions
     public static async Task<Dictionary<string, int>> InsertOrIgnorePlexCountriesAsync(
         this IReaparrDbContext dbContext,
         IReadOnlyCollection<PlexCountry> entities,
-        CancellationToken ct)
+        CancellationToken ct
+    )
     {
         var result = new Dictionary<string, int>(entities.Count);
 
@@ -104,8 +107,8 @@ public static partial class DbContextExtensions
             await dbContext.ExecuteSqlInterpolatedAsync(sql, ct);
 
             var keys = chunk.Select(c => c.Key).ToList();
-            var found = await dbContext.PlexCountries
-                .Where(c => keys.Contains(c.Key))
+            var found = await dbContext
+                .PlexCountries.Where(c => keys.Contains(c.Key))
                 .Select(c => new { c.Key, c.Id })
                 .ToListAsync(ct);
             foreach (var c in found)

@@ -44,12 +44,16 @@ public class CreateDownloadTasksEndpoint : Endpoint<CreateDownloadTasksEndpointR
 
         var result = await _commandExecutor.Send(new CreateDownloadTasksCommand(req.Request), ct);
 
-        await Send.FluentResult(result, report => new DownloadTaskCreationReportDTO
-        {
-            Movies = report.Movies,
-            TvShows = report.TvShows,
-            Seasons = report.Seasons,
-            Episodes = report.Episodes,
-        }, ct);
+        await Send.FluentResult(
+            result,
+            report => new DownloadTaskCreationReportDTO
+            {
+                Movies = report.Movies,
+                TvShows = report.TvShows,
+                Seasons = report.Seasons,
+                Episodes = report.Episodes,
+            },
+            ct
+        );
     }
 }

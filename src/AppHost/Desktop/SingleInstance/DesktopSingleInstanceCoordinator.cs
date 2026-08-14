@@ -148,8 +148,9 @@ public sealed class DesktopSingleInstanceCoordinator : IDesktopSingleInstanceCoo
         while (!linkedTokenSource.Token.IsCancellationRequested)
         {
             var connectResult = await Result.Try(async Task () =>
-                await client.ConnectAsync(retryDelay, linkedTokenSource.Token));
-            
+                await client.ConnectAsync(retryDelay, linkedTokenSource.Token)
+            );
+
             if (connectResult.IsSuccess || connectResult.IsCancelled)
                 return connectResult;
 

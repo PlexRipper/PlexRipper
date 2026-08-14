@@ -240,7 +240,8 @@ public class RefreshPlexAccountAccessCommandHandler
     private static RefreshPlexAccountAccessRapportDTO ToDTO(
         RefreshPlexServerAccessRapport serverAccessRapport,
         PlexLibraryAccessRefreshResponse libraryAccessRapport
-    ) => new(serverAccessRapport.PlexAccountId, serverAccessRapport.PlexAccountName)
+    ) =>
+        new(serverAccessRapport.PlexAccountId, serverAccessRapport.PlexAccountName)
         {
             Access = serverAccessRapport
                 .Access.Select(x => new PlexServerAccessRapportDTO

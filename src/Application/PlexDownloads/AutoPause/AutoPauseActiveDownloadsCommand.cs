@@ -27,8 +27,8 @@ public class AutoPauseActiveDownloadsCommandHandler : ICommandHandler<AutoPauseA
 
     public async Task<Result> ExecuteAsync(AutoPauseActiveDownloadsCommand command, CancellationToken cancellationToken)
     {
-        var plexServerIds = await _dbContext.PlexServers
-            .AsNoTracking()
+        var plexServerIds = await _dbContext
+            .PlexServers.AsNoTracking()
             .Select(x => x.Id)
             .ToListAsync(cancellationToken);
 
@@ -39,12 +39,8 @@ public class AutoPauseActiveDownloadsCommandHandler : ICommandHandler<AutoPauseA
         {
             for (var pass = 1; pass <= 2; pass++)
             {
-                var activeDownloads = await _downloadTaskScheduler.GetCurrentlyDownloadingKeysByServer(
-                    plexServerId
-                );
-                var activeMoves = await _moveDownloadFileScheduler.GetCurrentlyMovingKeysByServer(
-                    plexServerId
-                );
+                var activeDownloads = await _downloadTaskScheduler.GetCurrentlyDownloadingKeysByServer(plexServerId);
+                var activeMoves = await _moveDownloadFileScheduler.GetCurrentlyMovingKeysByServer(plexServerId);
 
                 foreach (var activeKey in activeDownloads.Concat(activeMoves).Distinct())
                 {

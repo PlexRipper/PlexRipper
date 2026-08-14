@@ -12,6 +12,5 @@ public interface IServerSettingsModule : IServerSettings
 
     string GetServerNameAlias(string machineIdentifier);
 
-
     bool GetAllowStreamDownloader(string machineIdentifier);
 }

@@ -101,9 +101,7 @@ public class CheckAllConnectionsStatusByPlexServerCommandUnitTests
         await dbContext.SaveChangesAsync(CancellationToken);
 
         Mock.Mock<INotificationHubService>()
-            .Setup(m =>
-                m.SendRefreshNotificationAsync(It.IsAny<List<RefreshDataType>>())
-            )
+            .Setup(m => m.SendRefreshNotificationAsync(It.IsAny<List<RefreshDataType>>()))
             .Returns(Task.CompletedTask)
             .Verifiable(Times.Once);
 
@@ -139,7 +137,11 @@ public class CheckAllConnectionsStatusByPlexServerCommandUnitTests
         result.IsSuccess.ShouldBeTrue();
         Mock.Mock<ICommandExecutor>()
             .Verify(
-                x => x.Send(It.Is<CheckConnectionStatusByIdCommand>(command => command.Timeout == 10), It.IsAny<CancellationToken>()),
+                x =>
+                    x.Send(
+                        It.Is<CheckConnectionStatusByIdCommand>(command => command.Timeout == 10),
+                        It.IsAny<CancellationToken>()
+                    ),
                 Times.AtLeastOnce()
             );
         Mock.Mock<IEventPublisher>()
@@ -183,9 +185,7 @@ public class CheckAllConnectionsStatusByPlexServerCommandUnitTests
         await dbContext.SaveChangesAsync(CancellationToken);
 
         Mock.Mock<INotificationHubService>()
-            .Setup(m =>
-                m.SendRefreshNotificationAsync(It.IsAny<List<RefreshDataType>>())
-            )
+            .Setup(m => m.SendRefreshNotificationAsync(It.IsAny<List<RefreshDataType>>()))
             .Returns(Task.CompletedTask)
             .Verifiable(Times.Once);
 
@@ -244,9 +244,7 @@ public class CheckAllConnectionsStatusByPlexServerCommandUnitTests
         var connections = dbContext.PlexServerConnections.Where(x => x.PlexServerId == 1).ToList();
 
         Mock.Mock<INotificationHubService>()
-            .Setup(m =>
-                m.SendRefreshNotificationAsync(It.IsAny<List<RefreshDataType>>())
-            )
+            .Setup(m => m.SendRefreshNotificationAsync(It.IsAny<List<RefreshDataType>>()))
             .Returns(Task.CompletedTask)
             .Verifiable(Times.Once);
 
@@ -320,9 +318,7 @@ public class CheckAllConnectionsStatusByPlexServerCommandUnitTests
         await dbContext.SaveChangesAsync(CancellationToken);
 
         Mock.Mock<INotificationHubService>()
-            .Setup(m =>
-                m.SendRefreshNotificationAsync(It.IsAny<List<RefreshDataType>>())
-            )
+            .Setup(m => m.SendRefreshNotificationAsync(It.IsAny<List<RefreshDataType>>()))
             .Returns(Task.CompletedTask)
             .Verifiable(Times.Once);
 

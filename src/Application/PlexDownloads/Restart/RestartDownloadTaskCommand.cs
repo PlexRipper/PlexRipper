@@ -151,10 +151,11 @@ public class RestartDownloadTaskCommandHandler : ICommandHandler<RestartDownload
         if (downloadTask is null)
             return ResultExtensions.EntityNotFound(nameof(DownloadTaskGeneric), downloadTaskKey.Id).LogError();
 
-        var newDownloadTask = await _dbContext.PlexMovieData
-            .Include(x => x.PlexMovie)
+        var newDownloadTask = await _dbContext
+            .PlexMovieData.Include(x => x.PlexMovie)
             .Where(x =>
-                x.PlexApiMediaId == downloadTask.PlexApiMediaId && x.PlexApiPartId == downloadTask.PlexApiPartId)
+                x.PlexApiMediaId == downloadTask.PlexApiMediaId && x.PlexApiPartId == downloadTask.PlexApiPartId
+            )
             .Select(x => new DownloadTaskMovieFile
             {
                 Id = downloadTask.Id,
@@ -210,7 +211,8 @@ public class RestartDownloadTaskCommandHandler : ICommandHandler<RestartDownload
             );
 
             return Result.Fail(
-                $"Could not find the original source media for download task \"{downloadTaskKey}\" with title \"{downloadTask.FullTitle}\"");
+                $"Could not find the original source media for download task \"{downloadTaskKey}\" with title \"{downloadTask.FullTitle}\""
+            );
         }
 
         return await Result.Try(async Task () =>
@@ -225,20 +227,20 @@ public class RestartDownloadTaskCommandHandler : ICommandHandler<RestartDownload
         CancellationToken cancellationToken
     )
     {
-        var downloadTask =
-            await _dbContext.DownloadTaskTvShowEpisodeFile.FirstOrDefaultAsync(
-                x => x.Id == downloadTaskKey.Id,
-                cancellationToken
-            );
+        var downloadTask = await _dbContext.DownloadTaskTvShowEpisodeFile.FirstOrDefaultAsync(
+            x => x.Id == downloadTaskKey.Id,
+            cancellationToken
+        );
         if (downloadTask is null)
             return ResultExtensions.EntityNotFound(nameof(DownloadTaskGeneric), downloadTaskKey.Id).LogError();
 
-        var newDownloadTask = await _dbContext.PlexTvShowEpisodeData
-            .Include(x => x.PlexTvShowEpisode)
-            .ThenInclude(x => x!.TvShowSeason)
-            .ThenInclude(x => x!.TvShow)
+        var newDownloadTask = await _dbContext
+            .PlexTvShowEpisodeData.Include(x => x.PlexTvShowEpisode)
+                .ThenInclude(x => x!.TvShowSeason)
+                    .ThenInclude(x => x!.TvShow)
             .Where(x =>
-                x.PlexApiMediaId == downloadTask.PlexApiMediaId && x.PlexApiPartId == downloadTask.PlexApiPartId)
+                x.PlexApiMediaId == downloadTask.PlexApiMediaId && x.PlexApiPartId == downloadTask.PlexApiPartId
+            )
             .Select(x => new DownloadTaskTvShowEpisodeFile
             {
                 Id = downloadTask.Id,
@@ -294,7 +296,8 @@ public class RestartDownloadTaskCommandHandler : ICommandHandler<RestartDownload
             );
 
             return Result.Fail(
-                $"Could not find the original source media for download task \"{downloadTaskKey}\" with title \"{downloadTask.FullTitle}\"");
+                $"Could not find the original source media for download task \"{downloadTaskKey}\" with title \"{downloadTask.FullTitle}\""
+            );
         }
 
         return await Result.Try(async Task () =>

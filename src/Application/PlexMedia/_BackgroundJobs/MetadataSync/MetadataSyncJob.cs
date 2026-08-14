@@ -28,7 +28,8 @@ public class MetadataSyncJob : BaseBackgroundJob<MetadataSyncJobPayload, Metadat
         IReaparrDbContextFactory dbContextFactory,
         IProgressHubService progressHubService,
         INotificationHubService notificationHubService
-    ) : base(log, progressHubService, notificationHubService)
+    )
+        : base(log, progressHubService, notificationHubService)
     {
         _log = log.ForContext<MetadataSyncJob>();
         _commandExecutor = commandExecutor;
@@ -90,7 +91,8 @@ public class MetadataSyncJob : BaseBackgroundJob<MetadataSyncJobPayload, Metadat
     protected override Task<MetadataSyncJobUpdateDTO?> GetStatusUpdateDataAsync(
         TickerFunctionContext<MetadataSyncJobPayload> context,
         CancellationToken cancellationToken
-    ) => Task.FromResult<MetadataSyncJobUpdateDTO?>(
-        new MetadataSyncJobUpdateDTO { ServerId = context.Request.ServerId }
-    );
+    ) =>
+        Task.FromResult<MetadataSyncJobUpdateDTO?>(
+            new MetadataSyncJobUpdateDTO { ServerId = context.Request.ServerId }
+        );
 }

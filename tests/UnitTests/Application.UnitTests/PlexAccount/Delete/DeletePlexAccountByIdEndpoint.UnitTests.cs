@@ -1,7 +1,7 @@
 ﻿namespace Reaparr.Application.UnitTests;
 
-public class DeletePlexAccountByIdEndpointUnitTests : BaseEndpointUnitTest<DeletePlexAccountByIdEndpoint,
-    DeletePlexAccountByIdRequest, BaseResultDTO>
+public class DeletePlexAccountByIdEndpointUnitTests
+    : BaseEndpointUnitTest<DeletePlexAccountByIdEndpoint, DeletePlexAccountByIdRequest, BaseResultDTO>
 {
     [Test]
     public async Task ShouldDeleteAllRelatedDataWhenAccountIsDeleted()
@@ -46,16 +46,20 @@ public class DeletePlexAccountByIdEndpointUnitTests : BaseEndpointUnitTest<Delet
     public async Task ShouldDeleteOnlyUnreferencedServersAndLibraries_AfterRemovingDeletedAccountAccess()
     {
         // Arrange
-        await SetupDatabase(91102, config =>
-        {
-            config.PlexAccountCount = 2;
-            config.PlexServerCount = 2;
-            config.PlexMovieLibraryCount = 2;
-        });
+        await SetupDatabase(
+            91102,
+            config =>
+            {
+                config.PlexAccountCount = 2;
+                config.PlexServerCount = 2;
+                config.PlexMovieLibraryCount = 2;
+            }
+        );
 
         var dbContext = IDbContext;
         var accounts = await dbContext.PlexAccounts.OrderBy(x => x.Id).ToListAsync(CancellationToken);
-        var servers = await dbContext.PlexServers.IgnoreIsEnabledFilter()
+        var servers = await dbContext
+            .PlexServers.IgnoreIsEnabledFilter()
             .OrderBy(x => x.Id)
             .ToListAsync(CancellationToken);
         var libraries = await dbContext.PlexLibraries.OrderBy(x => x.Id).ToListAsync(CancellationToken);
@@ -141,7 +145,8 @@ public class DeletePlexAccountByIdEndpointUnitTests : BaseEndpointUnitTest<Delet
         endpoint.Response.ShouldNotBeNull();
         endpoint.Response.IsSuccess.ShouldBeTrue();
 
-        var remainingServers = await dbContext.PlexServers.IgnoreIsEnabledFilter()
+        var remainingServers = await dbContext
+            .PlexServers.IgnoreIsEnabledFilter()
             .Select(x => x.Id)
             .ToListAsync(CancellationToken);
         remainingServers.ShouldContain(sharedServerId);
@@ -151,13 +156,14 @@ public class DeletePlexAccountByIdEndpointUnitTests : BaseEndpointUnitTest<Delet
         remainingLibraries.ShouldContain(sharedLibraryId);
         remainingLibraries.ShouldNotContain(deleteOnlyLibraryId);
 
-        var remainingAccountServerLinks = await dbContext.PlexAccountServers
-            .Where(x => x.PlexAccountId == keepAccountId)
+        var remainingAccountServerLinks = await dbContext
+            .PlexAccountServers.Where(x => x.PlexAccountId == keepAccountId)
             .ToListAsync(CancellationToken);
         remainingAccountServerLinks.Count.ShouldBe(1);
         remainingAccountServerLinks[0].PlexServerId.ShouldBe(sharedServerId);
 
-        var deletedAccountLinks = await dbContext.PlexAccountServers.Where(x => x.PlexAccountId == deleteAccountId)
+        var deletedAccountLinks = await dbContext
+            .PlexAccountServers.Where(x => x.PlexAccountId == deleteAccountId)
             .ToListAsync(CancellationToken);
         deletedAccountLinks.ShouldBeEmpty();
     }

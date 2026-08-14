@@ -1,4 +1,3 @@
-
 namespace Reaparr.Application.UnitTests;
 
 public class AddOrUpdatePlexLibrariesCommandUnitTests : BaseUnitTest<AddOrUpdatePlexLibrariesCommandHandler>
@@ -7,22 +6,13 @@ public class AddOrUpdatePlexLibrariesCommandUnitTests : BaseUnitTest<AddOrUpdate
     public void SetupComparisonJobLifecycle()
     {
         Mock.Mock<ICommandExecutor>()
-            .Setup(x => x.Send(
-                It.IsAny<InvalidateLibraryComparisonJobsCommand>(),
-                It.IsAny<CancellationToken>()
-            ))
+            .Setup(x => x.Send(It.IsAny<InvalidateLibraryComparisonJobsCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Ok());
         Mock.Mock<ICommandExecutor>()
-            .Setup(x => x.Send(
-                It.IsAny<ScheduleAffectedLibraryComparisonJobsCommand>(),
-                It.IsAny<CancellationToken>()
-            ))
+            .Setup(x => x.Send(It.IsAny<ScheduleAffectedLibraryComparisonJobsCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Ok());
         Mock.Mock<ICommandExecutor>()
-            .Setup(x => x.Send(
-                It.IsAny<QueueLibrarySyncJobCommand>(),
-                It.IsAny<CancellationToken>()
-            ))
+            .Setup(x => x.Send(It.IsAny<QueueLibrarySyncJobCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Ok());
     }
 
@@ -56,8 +46,7 @@ public class AddOrUpdatePlexLibrariesCommandUnitTests : BaseUnitTest<AddOrUpdate
             plexLibraries.AddRange(list);
         }
 
-        Mock.SetupCommand<Result>(() => It.IsAny<QueueLibrarySyncJobCommand>())
-            .ReturnsAsync(Result.Ok());
+        Mock.SetupCommand<Result>(() => It.IsAny<QueueLibrarySyncJobCommand>()).ReturnsAsync(Result.Ok());
 
         // Act
         var request = new AddOrUpdatePlexLibrariesCommand
@@ -98,14 +87,15 @@ public class AddOrUpdatePlexLibrariesCommandUnitTests : BaseUnitTest<AddOrUpdate
         var expectedLibraryIds = plexLibrariesDb.Select(x => x.Id).OrderBy(x => x).ToList();
         Mock.Mock<ICommandExecutor>()
             .Verify(
-                x => x.Send(
-                    It.Is<QueueLibrarySyncJobCommand>(command =>
-                        command.PlexLibraryIds.OrderBy(id => id).SequenceEqual(expectedLibraryIds)
-                        && !command.ForceLibrarySync
-                        && !command.ForceMediaRefresh
+                x =>
+                    x.Send(
+                        It.Is<QueueLibrarySyncJobCommand>(command =>
+                            command.PlexLibraryIds.OrderBy(id => id).SequenceEqual(expectedLibraryIds)
+                            && !command.ForceLibrarySync
+                            && !command.ForceMediaRefresh
+                        ),
+                        It.IsAny<CancellationToken>()
                     ),
-                    It.IsAny<CancellationToken>()
-                ),
                 Times.Once
             );
     }
@@ -139,8 +129,7 @@ public class AddOrUpdatePlexLibrariesCommandUnitTests : BaseUnitTest<AddOrUpdate
             PlexLibraries = plexLibraries,
         };
 
-        Mock.SetupCommand(It.IsAny<ScheduleAffectedLibraryComparisonJobsCommand>)
-            .ReturnsAsync(Result.Ok());
+        Mock.SetupCommand(It.IsAny<ScheduleAffectedLibraryComparisonJobsCommand>).ReturnsAsync(Result.Ok());
 
         // Act
         var result = await Sut.ExecuteAsync(request, CancellationToken);
@@ -191,8 +180,7 @@ public class AddOrUpdatePlexLibrariesCommandUnitTests : BaseUnitTest<AddOrUpdate
             PlexLibraries = incomingLibraries.ToApiLibraries(updatedTime),
         };
 
-        Mock.SetupCommand(It.IsAny<ScheduleAffectedLibraryComparisonJobsCommand>)
-            .ReturnsAsync(Result.Ok());
+        Mock.SetupCommand(It.IsAny<ScheduleAffectedLibraryComparisonJobsCommand>).ReturnsAsync(Result.Ok());
 
         // Act
         var result = await Sut.ExecuteAsync(request, CancellationToken);
@@ -218,10 +206,7 @@ public class AddOrUpdatePlexLibrariesCommandUnitTests : BaseUnitTest<AddOrUpdate
             .ToList();
         grantedLibraryIdsNullable.ShouldAllBe(x => x.HasValue);
 
-        var grantedLibraryIds = grantedLibraryIdsNullable
-            .Select(x => x!.Value)
-            .OrderBy(x => x)
-            .ToList();
+        var grantedLibraryIds = grantedLibraryIdsNullable.Select(x => x!.Value).OrderBy(x => x).ToList();
         grantedLibraryIds.ShouldBe(incomingLibraries.Select(x => x.Id).OrderBy(x => x).ToList());
 
         historyEvents.Select(x => x.RefreshRunId).Distinct().Count().ShouldBe(1);
@@ -249,9 +234,7 @@ public class AddOrUpdatePlexLibrariesCommandUnitTests : BaseUnitTest<AddOrUpdate
         plexAccount.ShouldNotBeNull();
         var plexServers = await dbContext.PlexServers.ToListAsync(CancellationToken);
         plexServers.ShouldNotBeNull();
-        var destinationFolderId = await dbContext.FolderPaths
-            .Select(x => x.Id)
-            .FirstAsync(CancellationToken);
+        var destinationFolderId = await dbContext.FolderPaths.Select(x => x.Id).FirstAsync(CancellationToken);
 
         // Set values that should not be overwritten by refreshing the libraries
         var syncedAtDateTime = DateTime.UtcNow - TimeSpan.FromHours(6);
@@ -265,15 +248,15 @@ public class AddOrUpdatePlexLibrariesCommandUnitTests : BaseUnitTest<AddOrUpdate
 
         await dbContext.SaveChangesAsync(CancellationToken);
         await dbContext.PlexLibraries.ExecuteUpdateAsync(
-            x => x
-                .SetProperty(y => y.MediaSize, 123_456_789)
-                .SetProperty(y => y.MovieCount, 11)
-                .SetProperty(y => y.TvShowCount, 12)
-                .SetProperty(y => y.SeasonCount, 13)
-                .SetProperty(y => y.EpisodeCount, 14)
-                .SetProperty(y => y.ActorsCount, 15)
-                .SetProperty(y => y.GenresCount, 16)
-                .SetProperty(y => y.CountriesCount, 17),
+            x =>
+                x.SetProperty(y => y.MediaSize, 123_456_789)
+                    .SetProperty(y => y.MovieCount, 11)
+                    .SetProperty(y => y.TvShowCount, 12)
+                    .SetProperty(y => y.SeasonCount, 13)
+                    .SetProperty(y => y.EpisodeCount, 14)
+                    .SetProperty(y => y.ActorsCount, 15)
+                    .SetProperty(y => y.GenresCount, 16)
+                    .SetProperty(y => y.CountriesCount, 17),
             CancellationToken
         );
 
@@ -286,8 +269,7 @@ public class AddOrUpdatePlexLibrariesCommandUnitTests : BaseUnitTest<AddOrUpdate
             PlexLibraries = plexLibraries.ToApiLibraries(updatedTime, contentChangedAt: changedContentChangedAt),
         };
 
-        Mock.SetupCommand(It.IsAny<ScheduleAffectedLibraryComparisonJobsCommand>)
-            .ReturnsAsync(Result.Ok());
+        Mock.SetupCommand(It.IsAny<ScheduleAffectedLibraryComparisonJobsCommand>).ReturnsAsync(Result.Ok());
 
         // Act
         var result = await Sut.ExecuteAsync(request, CancellationToken);
@@ -334,15 +316,17 @@ public class AddOrUpdatePlexLibrariesCommandUnitTests : BaseUnitTest<AddOrUpdate
 
         Mock.Mock<ICommandExecutor>()
             .Verify(
-                x => x.Send(
-                    It.Is<QueueLibrarySyncJobCommand>(command =>
-                        command.PlexLibraryIds.OrderBy(id => id)
-                            .SequenceEqual(plexLibrariesDb.Select(y => y.Id).OrderBy(id => id))
-                        && !command.ForceLibrarySync
-                        && !command.ForceMediaRefresh
+                x =>
+                    x.Send(
+                        It.Is<QueueLibrarySyncJobCommand>(command =>
+                            command
+                                .PlexLibraryIds.OrderBy(id => id)
+                                .SequenceEqual(plexLibrariesDb.Select(y => y.Id).OrderBy(id => id))
+                            && !command.ForceLibrarySync
+                            && !command.ForceMediaRefresh
+                        ),
+                        It.IsAny<CancellationToken>()
                     ),
-                    It.IsAny<CancellationToken>()
-                ),
                 Times.Once
             );
     }
@@ -379,8 +363,7 @@ public class AddOrUpdatePlexLibrariesCommandUnitTests : BaseUnitTest<AddOrUpdate
             PlexLibraries = [incomingLibrary],
         };
 
-        Mock.SetupCommand(It.IsAny<ScheduleAffectedLibraryComparisonJobsCommand>)
-            .ReturnsAsync(Result.Ok());
+        Mock.SetupCommand(It.IsAny<ScheduleAffectedLibraryComparisonJobsCommand>).ReturnsAsync(Result.Ok());
 
         // Act
         var result = await Sut.ExecuteAsync(request, CancellationToken);
@@ -394,10 +377,7 @@ public class AddOrUpdatePlexLibrariesCommandUnitTests : BaseUnitTest<AddOrUpdate
         updatedLibrary.ContentChangedAt.ShouldBe(incomingLibrary.ContentChangedAt);
         updatedLibrary.Outdated.ShouldBeFalse();
         Mock.Mock<ICommandExecutor>()
-            .Verify(
-                x => x.Send(It.IsAny<QueueLibrarySyncJobCommand>(), It.IsAny<CancellationToken>()),
-                Times.Never
-            );
+            .Verify(x => x.Send(It.IsAny<QueueLibrarySyncJobCommand>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Test]
@@ -432,8 +412,7 @@ public class AddOrUpdatePlexLibrariesCommandUnitTests : BaseUnitTest<AddOrUpdate
             PlexLibraries = [incomingLibrary],
         };
 
-        Mock.SetupCommand<Result>(() => It.IsAny<QueueLibrarySyncJobCommand>())
-            .ReturnsAsync(Result.Ok());
+        Mock.SetupCommand<Result>(() => It.IsAny<QueueLibrarySyncJobCommand>()).ReturnsAsync(Result.Ok());
 
         // Act
         var result = await Sut.ExecuteAsync(request, CancellationToken);
@@ -448,14 +427,15 @@ public class AddOrUpdatePlexLibrariesCommandUnitTests : BaseUnitTest<AddOrUpdate
         updatedLibrary.Outdated.ShouldBeTrue();
         Mock.Mock<ICommandExecutor>()
             .Verify(
-                x => x.Send(
-                    It.Is<QueueLibrarySyncJobCommand>(command =>
-                        command.PlexLibraryIds.SequenceEqual(new[] { updatedLibrary.Id })
-                        && !command.ForceLibrarySync
-                        && !command.ForceMediaRefresh
+                x =>
+                    x.Send(
+                        It.Is<QueueLibrarySyncJobCommand>(command =>
+                            command.PlexLibraryIds.SequenceEqual(new[] { updatedLibrary.Id })
+                            && !command.ForceLibrarySync
+                            && !command.ForceMediaRefresh
+                        ),
+                        It.IsAny<CancellationToken>()
                     ),
-                    It.IsAny<CancellationToken>()
-                ),
                 Times.Once
             );
     }
@@ -476,9 +456,7 @@ public class AddOrUpdatePlexLibrariesCommandUnitTests : BaseUnitTest<AddOrUpdate
 
         var dbContext = IDbContext;
         var plexAccount = await dbContext.PlexAccounts.FirstAsync(CancellationToken);
-        var existingLibraries = await dbContext.PlexLibraries
-            .OrderBy(x => x.Id)
-            .ToListAsync(CancellationToken);
+        var existingLibraries = await dbContext.PlexLibraries.OrderBy(x => x.Id).ToListAsync(CancellationToken);
         existingLibraries.Count.ShouldBe(3);
 
         var expectedMetrics = new Dictionary<int, ExpectedLibraryMetrics>();
@@ -497,26 +475,28 @@ public class AddOrUpdatePlexLibrariesCommandUnitTests : BaseUnitTest<AddOrUpdate
             );
             expectedMetrics.Add(library.Id, metrics);
 
-            await dbContext.PlexLibraries
-                .Where(x => x.Id == library.Id)
+            await dbContext
+                .PlexLibraries.Where(x => x.Id == library.Id)
                 .ExecuteUpdateAsync(
-                    x => x
-                        .SetProperty(y => y.MediaSize, metrics.MediaSize)
-                        .SetProperty(y => y.MovieCount, metrics.MovieCount)
-                        .SetProperty(y => y.TvShowCount, metrics.TvShowCount)
-                        .SetProperty(y => y.SeasonCount, metrics.SeasonCount)
-                        .SetProperty(y => y.EpisodeCount, metrics.EpisodeCount)
-                        .SetProperty(y => y.ActorsCount, metrics.ActorsCount)
-                        .SetProperty(y => y.GenresCount, metrics.GenresCount)
-                        .SetProperty(y => y.CountriesCount, metrics.CountriesCount),
+                    x =>
+                        x.SetProperty(y => y.MediaSize, metrics.MediaSize)
+                            .SetProperty(y => y.MovieCount, metrics.MovieCount)
+                            .SetProperty(y => y.TvShowCount, metrics.TvShowCount)
+                            .SetProperty(y => y.SeasonCount, metrics.SeasonCount)
+                            .SetProperty(y => y.EpisodeCount, metrics.EpisodeCount)
+                            .SetProperty(y => y.ActorsCount, metrics.ActorsCount)
+                            .SetProperty(y => y.GenresCount, metrics.GenresCount)
+                            .SetProperty(y => y.CountriesCount, metrics.CountriesCount),
                     CancellationToken
                 );
         }
 
         var updatedTime = DateTime.UtcNow - TimeSpan.FromHours(3);
         var changedContentChangedAt = existingLibraries.Max(x => x.ContentChangedAt) + 1;
-        var incomingLibraries =
-            existingLibraries.ToApiLibraries(updatedTime, contentChangedAt: changedContentChangedAt);
+        var incomingLibraries = existingLibraries.ToApiLibraries(
+            updatedTime,
+            contentChangedAt: changedContentChangedAt
+        );
         for (var i = 0; i < incomingLibraries.Count; i++)
         {
             var incomingLibrary = incomingLibraries[i];
@@ -542,8 +522,7 @@ public class AddOrUpdatePlexLibrariesCommandUnitTests : BaseUnitTest<AddOrUpdate
             PlexLibraries = incomingLibraries,
         };
 
-        Mock.SetupCommand(It.IsAny<ScheduleAffectedLibraryComparisonJobsCommand>)
-            .ReturnsAsync(Result.Ok());
+        Mock.SetupCommand(It.IsAny<ScheduleAffectedLibraryComparisonJobsCommand>).ReturnsAsync(Result.Ok());
 
         // Act
         var result = await Sut.ExecuteAsync(request, CancellationToken);
@@ -555,9 +534,7 @@ public class AddOrUpdatePlexLibrariesCommandUnitTests : BaseUnitTest<AddOrUpdate
         result.Value.Single().GetGranted.Count.ShouldBe(0);
         result.Value.Single().GetRevoked.Count.ShouldBe(0);
 
-        var updatedLibraries = await dbContext.PlexLibraries
-            .OrderBy(x => x.Id)
-            .ToListAsync(CancellationToken);
+        var updatedLibraries = await dbContext.PlexLibraries.OrderBy(x => x.Id).ToListAsync(CancellationToken);
         updatedLibraries.Count.ShouldBe(existingLibraries.Count);
         foreach (var updatedLibrary in updatedLibraries)
         {
@@ -616,8 +593,7 @@ public class AddOrUpdatePlexLibrariesCommandUnitTests : BaseUnitTest<AddOrUpdate
             PlexLibraries = plexLibraries.ToApiLibraries(updatedTime),
         };
 
-        Mock.SetupCommand(It.IsAny<ScheduleAffectedLibraryComparisonJobsCommand>)
-            .ReturnsAsync(Result.Ok());
+        Mock.SetupCommand(It.IsAny<ScheduleAffectedLibraryComparisonJobsCommand>).ReturnsAsync(Result.Ok());
 
         // Act
         var result = await Sut.ExecuteAsync(request, CancellationToken);
@@ -667,8 +643,7 @@ public class AddOrUpdatePlexLibrariesCommandUnitTests : BaseUnitTest<AddOrUpdate
             PlexLibraries = new List<PlexLibrary> { plexLibrary }.ToApiLibraries(updatedTime),
         };
 
-        Mock.SetupCommand(It.IsAny<ScheduleAffectedLibraryComparisonJobsCommand>)
-            .ReturnsAsync(Result.Ok());
+        Mock.SetupCommand(It.IsAny<ScheduleAffectedLibraryComparisonJobsCommand>).ReturnsAsync(Result.Ok());
 
         // Act
         var firstResult = await Sut.ExecuteAsync(request, CancellationToken);
@@ -737,8 +712,7 @@ public class AddOrUpdatePlexLibrariesCommandUnitTests : BaseUnitTest<AddOrUpdate
             PlexLibraries = new List<PlexLibrary> { plexLibrary }.ToApiLibraries(updatedTime),
         };
 
-        Mock.SetupCommand(It.IsAny<ScheduleAffectedLibraryComparisonJobsCommand>)
-            .ReturnsAsync(Result.Ok());
+        Mock.SetupCommand(It.IsAny<ScheduleAffectedLibraryComparisonJobsCommand>).ReturnsAsync(Result.Ok());
 
         // Act
         var result = await Sut.ExecuteAsync(request, CancellationToken);

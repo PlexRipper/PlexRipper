@@ -43,8 +43,8 @@ public class ServerOnlineStatusChangedHandler : IEventHandler<ServerOnlineStatus
     {
         using (var dbContext = await _dbContextFactory.CreateAsync())
         {
-            var libraryIds = await dbContext.PlexLibraries
-                .Where(x => x.PlexServerId == notification.PlexServerId)
+            var libraryIds = await dbContext
+                .PlexLibraries.Where(x => x.PlexServerId == notification.PlexServerId)
                 .Select(x => x.Id)
                 .ToListAsync(cancellationToken);
             _mediaQueryCache.InvalidateLibraries(libraryIds, "Plex server online status changed");

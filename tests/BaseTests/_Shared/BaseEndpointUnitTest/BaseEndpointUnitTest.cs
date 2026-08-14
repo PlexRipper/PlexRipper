@@ -7,8 +7,7 @@ namespace Reaparr.BaseTests;
 /// </summary>
 /// <typeparam name="TEndpoint">The endpoint type under test.</typeparam>
 /// <typeparam name="TRequest">The request DTO type accepted by the endpoint.</typeparam>
-public abstract class BaseEndpointUnitTest<TEndpoint, TRequest>
-    : BaseEndpointUnitTestBase<TEndpoint, object>
+public abstract class BaseEndpointUnitTest<TEndpoint, TRequest> : BaseEndpointUnitTestBase<TEndpoint, object>
     where TEndpoint : Endpoint<TRequest>
     where TRequest : class
 {
@@ -125,7 +124,7 @@ public abstract class BaseEndpointWithoutRequestUnitTest<TEndpoint, TResponse>
     )
     {
         var endpoint = SetupEndpointUnitTest<TEndpoint>(extraServices);
-        
+
         endpoint.HttpContext.Response.Body = new MemoryStream();
 
         await endpoint.HandleAsync(CancellationToken);

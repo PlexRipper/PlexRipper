@@ -31,8 +31,6 @@ public partial class BaseUnitTest
         Mock = AutoMock.GetStrict(SetDefaultBuilder);
     }
 
-
-
     public virtual void Dispose()
     {
         if (IsDatabaseSetup)

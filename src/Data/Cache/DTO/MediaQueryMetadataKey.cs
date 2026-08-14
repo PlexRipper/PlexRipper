@@ -14,7 +14,8 @@ internal sealed class MediaQueryMetadataKey : IEquatable<MediaQueryMetadataKey>
         PlexMediaType mediaType,
         IEnumerable<int> libraryIds,
         bool filterOfflineMedia,
-        bool filterOwnedMedia)
+        bool filterOwnedMedia
+    )
     {
         MediaType = mediaType;
         _libraryIds = libraryIds.Distinct().OrderBy(x => x).ToArray();

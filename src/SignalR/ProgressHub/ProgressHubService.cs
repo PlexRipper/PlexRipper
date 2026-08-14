@@ -21,7 +21,8 @@ public class ProgressHubService : IProgressHubService
     public async Task SendLibraryProgressUpdateAsync(LibrarySyncProgressDTO progress)
     {
         var result = await Result.Try(async Task () =>
-            await _hub.Clients.All.LibraryProgress(progress, CancellationToken.None));
+            await _hub.Clients.All.LibraryProgress(progress, CancellationToken.None)
+        );
 
         if (result.IsFailed)
         {
@@ -34,7 +35,8 @@ public class ProgressHubService : IProgressHubService
     public async Task SendServerConnectionCheckStatusProgressAsync(ServerConnectionCheckStatusProgress progress)
     {
         var result = await Result.Try(async Task () =>
-            await _hub.Clients.All.ServerConnectionCheckStatusProgress(progress.ToDTO(), CancellationToken.None));
+            await _hub.Clients.All.ServerConnectionCheckStatusProgress(progress.ToDTO(), CancellationToken.None)
+        );
 
         if (result.IsFailed)
         {
@@ -48,7 +50,8 @@ public class ProgressHubService : IProgressHubService
         where T : class
     {
         var result = await Result.Try(async Task () =>
-            await _hub.Clients.All.JobStatusUpdate(jobStatusUpdate.ToDTO(), CancellationToken.None));
+            await _hub.Clients.All.JobStatusUpdate(jobStatusUpdate.ToDTO(), CancellationToken.None)
+        );
 
         if (result.IsFailed)
         {
@@ -61,7 +64,8 @@ public class ProgressHubService : IProgressHubService
     public async Task SendAppUpdateDownloadProgressAsync(AppUpdateDownloadProgressDTO progress)
     {
         var result = await Result.Try(async Task () =>
-            await _hub.Clients.All.AppUpdateDownloadProgress(progress, CancellationToken.None));
+            await _hub.Clients.All.AppUpdateDownloadProgress(progress, CancellationToken.None)
+        );
 
         if (result.IsFailed)
         {
@@ -69,4 +73,4 @@ public class ProgressHubService : IProgressHubService
             _log.Here().Warning("Failed to send app download progress");
         }
     }
-    }
+}

@@ -39,21 +39,28 @@ public static class SqliteConcurrencyServiceCollectionExtensions
         this IServiceCollection services,
         string connectionString,
         Action<SqliteConcurrencyOptions>? configure = null,
-        ServiceLifetime contextLifetime = ServiceLifetime.Scoped)
+        ServiceLifetime contextLifetime = ServiceLifetime.Scoped
+    )
         where TContext : DbContext
     {
-        services.AddDbContext<TContext>((provider, options) =>
-        {
-            options.UseSqliteWithConcurrency(connectionString, o =>
+        services.AddDbContext<TContext>(
+            (provider, options) =>
             {
-                configure?.Invoke(o);
+                options.UseSqliteWithConcurrency(
+                    connectionString,
+                    o =>
+                    {
+                        configure?.Invoke(o);
 
-                // Inject the singleton ILoggerFactory so the interceptor can emit
-                // structured logs without the caller having to wire it up manually.
-                if (o.LoggerFactory is null)
-                    o.LoggerFactory = provider.GetService<ILoggerFactory>();
-            });
-        }, contextLifetime);
+                        // Inject the singleton ILoggerFactory so the interceptor can emit
+                        // structured logs without the caller having to wire it up manually.
+                        if (o.LoggerFactory is null)
+                            o.LoggerFactory = provider.GetService<ILoggerFactory>();
+                    }
+                );
+            },
+            contextLifetime
+        );
 
         return services;
     }
@@ -109,21 +116,28 @@ public static class SqliteConcurrencyServiceCollectionExtensions
         this IServiceCollection services,
         string connectionString,
         Action<SqliteConcurrencyOptions>? configure = null,
-        ServiceLifetime factoryLifetime = ServiceLifetime.Singleton)
+        ServiceLifetime factoryLifetime = ServiceLifetime.Singleton
+    )
         where TContext : DbContext
     {
-        services.AddDbContextFactory<TContext>((provider, options) =>
-        {
-            options.UseSqliteWithConcurrency(connectionString, o =>
+        services.AddDbContextFactory<TContext>(
+            (provider, options) =>
             {
-                configure?.Invoke(o);
+                options.UseSqliteWithConcurrency(
+                    connectionString,
+                    o =>
+                    {
+                        configure?.Invoke(o);
 
-                // Inject the singleton ILoggerFactory so the interceptor can emit
-                // structured logs without the caller having to wire it up manually.
-                if (o.LoggerFactory is null)
-                    o.LoggerFactory = provider.GetService<ILoggerFactory>();
-            });
-        }, factoryLifetime);
+                        // Inject the singleton ILoggerFactory so the interceptor can emit
+                        // structured logs without the caller having to wire it up manually.
+                        if (o.LoggerFactory is null)
+                            o.LoggerFactory = provider.GetService<ILoggerFactory>();
+                    }
+                );
+            },
+            factoryLifetime
+        );
 
         return services;
     }

@@ -1,6 +1,11 @@
 namespace Reaparr.Application.UnitTests;
 
-public class GetAllBackgroundJobsEndpointUnitTests : BaseEndpointUnitTest<GetAllBackgroundJobsEndpoint, GetAllBackgroundJobsEndpointRequest, ResultDTO<List<JobStatusUpdateDTO>>>
+public class GetAllBackgroundJobsEndpointUnitTests
+    : BaseEndpointUnitTest<
+        GetAllBackgroundJobsEndpoint,
+        GetAllBackgroundJobsEndpointRequest,
+        ResultDTO<List<JobStatusUpdateDTO>>
+    >
 {
     private string ToJsonString<T>(T value) =>
         value is null ? string.Empty : JsonSerializer.Serialize(value, DefaultJsonSerializerOptions.ConfigStandard);

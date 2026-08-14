@@ -40,9 +40,7 @@ public static class MoqExtensions
     )
     {
         var result = mock.Mock<INotificationHubService>()
-            .Setup(m =>
-                m.SendRefreshNotificationAsync(It.IsAny<List<RefreshDataType>>())
-            )
+            .Setup(m => m.SendRefreshNotificationAsync(It.IsAny<List<RefreshDataType>>()))
             .Returns(Task.CompletedTask);
 
         if (isVerifiable)

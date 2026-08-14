@@ -10,17 +10,17 @@ internal sealed class SqliteWriteQueue : IAsyncDisposable
     internal SqliteWriteQueue(int? capacity)
     {
         _channel = capacity.HasValue
-            ? Channel.CreateBounded<IWriteRequest>(new BoundedChannelOptions(capacity.Value)
-            {
-                FullMode = BoundedChannelFullMode.Wait,
-                SingleReader = true,
-                SingleWriter = false
-            })
-            : Channel.CreateUnbounded<IWriteRequest>(new UnboundedChannelOptions
-            {
-                SingleReader = true,
-                SingleWriter = false
-            });
+            ? Channel.CreateBounded<IWriteRequest>(
+                new BoundedChannelOptions(capacity.Value)
+                {
+                    FullMode = BoundedChannelFullMode.Wait,
+                    SingleReader = true,
+                    SingleWriter = false,
+                }
+            )
+            : Channel.CreateUnbounded<IWriteRequest>(
+                new UnboundedChannelOptions { SingleReader = true, SingleWriter = false }
+            );
 
         _writerTask = Task.Run(RunAsync);
     }
@@ -49,8 +49,14 @@ internal sealed class SqliteWriteQueue : IAsyncDisposable
             while (_channel.Reader.TryRead(out var req))
             {
                 SqliteConnectionEnhancer.IsWriteLockHeld.Value = true;
-                try   { await req.ExecuteAsync(); }
-                finally { SqliteConnectionEnhancer.IsWriteLockHeld.Value = false; }
+                try
+                {
+                    await req.ExecuteAsync();
+                }
+                finally
+                {
+                    SqliteConnectionEnhancer.IsWriteLockHeld.Value = false;
+                }
             }
         }
 #else
@@ -84,8 +90,7 @@ internal interface IWriteRequest
 internal sealed class WriteRequest<T> : IWriteRequest
 {
     private readonly Func<Task<T>> _work;
-    internal readonly TaskCompletionSource<T> Completion =
-        new(TaskCreationOptions.RunContinuationsAsynchronously);
+    internal readonly TaskCompletionSource<T> Completion = new(TaskCreationOptions.RunContinuationsAsynchronously);
 
     internal WriteRequest(Func<Task<T>> work) => _work = work;
 

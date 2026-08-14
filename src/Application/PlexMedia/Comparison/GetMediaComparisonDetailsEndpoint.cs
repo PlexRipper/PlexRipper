@@ -54,8 +54,14 @@ public class GetMediaComparisonDetailsEndpoint
 
         var result = req.Type switch
         {
-            PlexMediaType.Movie => await _commandExecutor.Send(new GetMovieMediaComparisonDetailsCommand(req.PlexMediaId), ct),
-            PlexMediaType.TvShow => await _commandExecutor.Send(new GetTvShowMediaComparisonDetailsCommand(req.PlexMediaId), ct),
+            PlexMediaType.Movie => await _commandExecutor.Send(
+                new GetMovieMediaComparisonDetailsCommand(req.PlexMediaId),
+                ct
+            ),
+            PlexMediaType.TvShow => await _commandExecutor.Send(
+                new GetTvShowMediaComparisonDetailsCommand(req.PlexMediaId),
+                ct
+            ),
             _ => Result.Fail<PlexMediaComparisonDetailsDTO>("Unsupported media type"),
         };
 

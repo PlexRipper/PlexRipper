@@ -147,11 +147,7 @@ public class DirectPlexDownloadClient : IPlexDownloadClient
             return ensureDirectoryResult;
         }
 
-        await SetupDownloadListeners(
-            downloadTaskKey,
-            downloadTask.DownloadFilePath,
-            downloadTask.DataTotal
-        );
+        await SetupDownloadListeners(downloadTaskKey, downloadTask.DownloadFilePath, downloadTask.DataTotal);
         var downloadingStatusResult = await SetDownloadStatusAsync(Domain.DownloadStatus.Downloading);
         if (downloadingStatusResult.IsCancelled)
             return downloadingStatusResult;
@@ -253,21 +249,18 @@ public class DirectPlexDownloadClient : IPlexDownloadClient
         return Result.Ok();
     }
 
-    private async Task SetupDownloadListeners(
-        DownloadTaskKey key,
-        string downloadFilePath,
-        long expectedFileSize
-    )
+    private async Task SetupDownloadListeners(DownloadTaskKey key, string downloadFilePath, long expectedFileSize)
     {
         // Setup DownloadLimit Subscription
-        var serverMachineIdentifier = await _dbContext.GetPlexServerMachineIdentifierById(
-            key.PlexServerId
-        );
+        var serverMachineIdentifier = await _dbContext.GetPlexServerMachineIdentifierById(key.PlexServerId);
         _subscriptions.Add(
             _serverSettings
                 .GetDownloadSpeedLimitObservable(serverMachineIdentifier)
                 .TakeUntil(_destroy)
-                .Subscribe(value => { _configuration.MaximumBytesPerSecond = Math.Max(0, value) * 1024; })
+                .Subscribe(value =>
+                {
+                    _configuration.MaximumBytesPerSecond = Math.Max(0, value) * 1024;
+                })
         );
 
         // Setup DownloadProgressChanged Subscription
@@ -337,8 +330,10 @@ public class DirectPlexDownloadClient : IPlexDownloadClient
                         var completionResult = VerifyCompletedDownload(package, downloadFilePath, expectedFileSize);
                         if (completionResult.IsFailed)
                         {
-                            var statusResult = await SetDownloadStatusAsync(Domain.DownloadStatus.Error,
-                                completionResult.ToResult());
+                            var statusResult = await SetDownloadStatusAsync(
+                                Domain.DownloadStatus.Error,
+                                completionResult.ToResult()
+                            );
                             statusResult.LogIfFailed();
                             return;
                         }
@@ -420,11 +415,13 @@ public class DirectPlexDownloadClient : IPlexDownloadClient
     private Result<long> VerifyCompletedDownload(
         DownloadPackage? package,
         string downloadFilePath,
-        long expectedFileSize)
+        long expectedFileSize
+    )
     {
         if (package is null)
         {
-            return Result.Fail<long>(
+            return Result
+                .Fail<long>(
                     $"Download completion for {_filename} did not include a download package; refusing to mark as complete."
                 )
                 .LogError();
@@ -435,7 +432,8 @@ public class DirectPlexDownloadClient : IPlexDownloadClient
 
         if (!_file.Exists(existingPath))
         {
-            return Result.Fail<long>(
+            return Result
+                .Fail<long>(
                     $"Download completion for {_filename} could not be verified because no completed file exists at '{completedFilePath}' or '{downloadFilePath}'. Expected {expectedFileSize} bytes. Package reported {package.ReceivedBytesSize} received bytes, {package.TotalFileSize} total bytes and {package.SaveProgress:F2}% save progress."
                 )
                 .LogError();
@@ -444,7 +442,8 @@ public class DirectPlexDownloadClient : IPlexDownloadClient
         var actualFileSize = _fileInfoFactory.New(existingPath).Length;
         if (actualFileSize < expectedFileSize)
         {
-            return Result.Fail<long>(
+            return Result
+                .Fail<long>(
                     $"Download completion for {_filename} was rejected because the file is incomplete. Expected {expectedFileSize} bytes but found {actualFileSize} bytes at '{existingPath}'. Package reported {package.ReceivedBytesSize} received bytes, {package.TotalFileSize} total bytes and {package.SaveProgress:F2}% save progress."
                 )
                 .LogError();

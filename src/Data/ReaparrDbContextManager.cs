@@ -49,7 +49,7 @@ public class ReaparrDbContextManager : IReaparrDbContextManager
 
         if (cancellationToken.IsCancellationRequested)
             return ResultExtensions.TaskIsCancelled(nameof(SetupAsync));
-        
+
         if (_file.Exists(DatabasePath))
         {
             // Check if the database can be connected to.

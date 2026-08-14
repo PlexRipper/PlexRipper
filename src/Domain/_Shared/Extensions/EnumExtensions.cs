@@ -12,7 +12,7 @@ public static class EnumExtensions
     }
 
     public static int ToComparisonId(this PlexMediaComparisonState value) => (int)value;
-    
+
     public static PlexMediaComparisonState ToComparisonState(this int value) =>
         Enum.IsDefined(typeof(PlexMediaComparisonState), value)
             ? (PlexMediaComparisonState)value

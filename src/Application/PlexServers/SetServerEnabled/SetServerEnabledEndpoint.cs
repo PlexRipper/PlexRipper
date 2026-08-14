@@ -22,11 +22,7 @@ public class SetServerEnabledEndpoint : Endpoint<SetServerEnabledRequest, Result
     private readonly IReaparrDbContext _dbContext;
     private readonly IMediaQueryCache _mediaQueryCache;
 
-    public SetServerEnabledEndpoint(
-        ILogger log,
-        IReaparrDbContext dbContext,
-        IMediaQueryCache mediaQueryCache
-    )
+    public SetServerEnabledEndpoint(ILogger log, IReaparrDbContext dbContext, IMediaQueryCache mediaQueryCache)
     {
         _log = log.ForContext<SetServerEnabledEndpoint>();
         _dbContext = dbContext;
@@ -55,8 +51,8 @@ public class SetServerEnabledEndpoint : Endpoint<SetServerEnabledRequest, Result
             return;
         }
 
-        var updateCount = await _dbContext.PlexServers
-            .IgnoreIsEnabledFilter()
+        var updateCount = await _dbContext
+            .PlexServers.IgnoreIsEnabledFilter()
             .Where(x => x.Id == req.PlexServerId)
             .ExecuteUpdateAsync(p => p.SetProperty(x => x.IsEnabled, req.IsEnabled), ct);
 
@@ -67,13 +63,14 @@ public class SetServerEnabledEndpoint : Endpoint<SetServerEnabledRequest, Result
                 var serverName = await _dbContext.GetPlexServerNameById(req.PlexServerId);
                 await Send.FluentResult(
                     ResultExtensions.ServerIsDisabled(serverName, req.PlexServerId, nameof(GetPlexServerByIdEndpoint)),
-                    ct);
+                    ct
+                );
                 return;
             }
         }
 
-        var plexServer = await _dbContext.PlexServers
-            .IgnoreIsEnabledFilter()
+        var plexServer = await _dbContext
+            .PlexServers.IgnoreIsEnabledFilter()
             .Include(x => x.PlexAccountServers)
             .GetAsync(req.PlexServerId, ct);
 
@@ -83,8 +80,8 @@ public class SetServerEnabledEndpoint : Endpoint<SetServerEnabledRequest, Result
             return;
         }
 
-        var libraryIds = await _dbContext.PlexLibraries
-            .IgnoreQueryFilters()
+        var libraryIds = await _dbContext
+            .PlexLibraries.IgnoreQueryFilters()
             .Where(x => x.PlexServerId == req.PlexServerId)
             .Select(x => x.Id)
             .ToListAsync(ct);

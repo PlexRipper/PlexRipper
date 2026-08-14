@@ -21,6 +21,7 @@ public partial class BaseUnitTest : IDisposable
             DataBaseSetupGuard();
 
             return MockDatabase.GetMemoryReaparrDbContext(
+                Mock.Container.Resolve<ILogger>(),
                 Mock.Container.Resolve<IPathProvider>(),
                 Mock.Container.Resolve<IAppRuntimeInfo>(),
                 _databaseName
@@ -46,6 +47,7 @@ public partial class BaseUnitTest : IDisposable
             DataBaseSetupGuard();
 
             return MockDatabase.GetMemoryAuthDbContext(
+                Mock.Container.Resolve<ILogger>(),
                 Mock.Container.Resolve<IPathProvider>(),
                 Mock.Container.Resolve<IAppRuntimeInfo>(),
                 _databaseName
@@ -75,6 +77,7 @@ public partial class BaseUnitTest : IDisposable
         var mockPathProvider = Mock.Container.Resolve<IPathProvider>();
         var mockAppRuntimeInfo = Mock.Container.Resolve<IAppRuntimeInfo>();
         var (reaparrContext, authContext) = MockDatabase.GetMemoryDbContext(
+            Mock.Container.Resolve<ILogger>(),
             mockPathProvider,
             mockAppRuntimeInfo,
             _databaseName

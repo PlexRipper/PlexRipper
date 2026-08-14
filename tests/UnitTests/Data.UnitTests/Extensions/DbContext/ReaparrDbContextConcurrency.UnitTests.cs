@@ -3,24 +3,24 @@ namespace Reaparr.Data.UnitTests;
 public class ReaparrDbContextConcurrencyUnitTests : BaseUnitTest
 {
     [Test]
-    public async Task ShouldApplyBusyTimeoutToEveryOpenedConnection()
+    public async Task ShouldApplyDefaultCommandTimeoutToEveryOpenedConnection()
     {
         // Arrange
         await SetupDatabase(91233);
 
         // Act
-        var busyTimeouts = new List<long>();
+        var commandTimeouts = new List<int>();
         for (var i = 0; i < 2; i++)
         {
-            using var dbContext = (ReaparrDbContext)IDbContext;
+            await using var dbContext = (ReaparrDbContext)IDbContext;
             await dbContext.Database.OpenConnectionAsync(CancellationToken);
-            await using var command = dbContext.Database.GetDbConnection().CreateCommand();
-            command.CommandText = "PRAGMA busy_timeout;";
-            busyTimeouts.Add((long)(await command.ExecuteScalarAsync(CancellationToken))!);
+            commandTimeouts.Add(
+                ((Microsoft.Data.Sqlite.SqliteConnection)dbContext.Database.GetDbConnection()).DefaultTimeout
+            );
         }
 
         // Assert
-        busyTimeouts.ShouldAllBe(x => x == 120000);
+        commandTimeouts.ShouldAllBe(x => x == 120);
     }
 
     [Test]

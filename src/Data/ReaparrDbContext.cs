@@ -14,7 +14,7 @@ namespace Reaparr.Data;
 public sealed class ReaparrDbContext : DbContext, IReaparrDbContext, IReaparrDbContextDatabase
 {
     private const int MAX_TRANSACTION_ATTEMPTS = 2;
-    private static readonly ILogger _log = Log.ForContext<ReaparrDbContext>();
+    private readonly ILogger _log;
     private readonly IPathProvider _pathProvider;
     private readonly IAppRuntimeInfo _appRuntimeInfo;
     public DbSet<PlexAccount> PlexAccounts { get; set; }
@@ -255,8 +255,9 @@ public sealed class ReaparrDbContext : DbContext, IReaparrDbContext, IReaparrDbC
     /// <inheritdoc/>
     public void ClearChangeTracker() => ChangeTracker.Clear();
 
-    public ReaparrDbContext(IPathProvider pathProvider, IAppRuntimeInfo appRuntimeInfo)
+    public ReaparrDbContext(ILogger log, IPathProvider pathProvider, IAppRuntimeInfo appRuntimeInfo)
     {
+        _log = log.ForContext<ReaparrDbContext>();
         _pathProvider = pathProvider;
         _appRuntimeInfo = appRuntimeInfo;
         DatabaseName = pathProvider.DatabaseName;
@@ -269,11 +270,13 @@ public sealed class ReaparrDbContext : DbContext, IReaparrDbContext, IReaparrDbC
     [ActivatorUtilitiesConstructor]
     public ReaparrDbContext(
         DbContextOptions<ReaparrDbContext> options,
+        ILogger log,
         IPathProvider pathProvider,
         IAppRuntimeInfo appRuntimeInfo
     )
         : base(options)
     {
+        _log = log.ForContext<ReaparrDbContext>();
         _pathProvider = pathProvider;
         _appRuntimeInfo = appRuntimeInfo;
         DatabaseName = pathProvider.DatabaseName;
@@ -284,12 +287,14 @@ public sealed class ReaparrDbContext : DbContext, IReaparrDbContext, IReaparrDbC
     /// </summary>
     public ReaparrDbContext(
         DbContextOptions<ReaparrDbContext> options,
+        ILogger log,
         IPathProvider pathProvider,
         IAppRuntimeInfo appRuntimeInfo,
         string databaseName
     )
         : base(options)
     {
+        _log = log.ForContext<ReaparrDbContext>();
         _pathProvider = pathProvider;
         _appRuntimeInfo = appRuntimeInfo;
         DatabaseName = databaseName;
@@ -354,7 +359,19 @@ public sealed class ReaparrDbContext : DbContext, IReaparrDbContext, IReaparrDbC
     }
 
     /// <inheritdoc/>
-    public bool CanConnect() => Database.CanConnect();
+    public bool CanConnect()
+    {
+        if (!Database.CanConnect())
+        {
+            _log.Error("Database {DatabaseName} is not connectable", DatabaseName);
+            return false;
+        }
+
+        var result = Result.Try(() => DbContextConnections.EnableWriteAheadLogging(Database.GetDbConnection()));
+        result.LogIfFailed();
+
+        return result.IsSuccess;
+    }
 
     /// <inheritdoc/>
     public bool IsInMemory() => Database.IsInMemory();
@@ -376,7 +393,12 @@ public sealed class ReaparrDbContext : DbContext, IReaparrDbContext, IReaparrDbC
     }
 
     /// <inheritdoc/>
-    public Result Migrate() => Result.Try(() => Database.Migrate(), e => new ExceptionalError(e));
+    public Result Migrate() =>
+        Result.Try(() =>
+        {
+            DbContextConnections.EnableWriteAheadLogging(Database.GetDbConnection());
+            Database.Migrate();
+        });
 
     /// <inheritdoc/>
     public IEnumerable<string> GetPendingMigrations() => Database.GetPendingMigrations();

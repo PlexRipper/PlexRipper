@@ -10,6 +10,22 @@ namespace Reaparr.Data.Contracts;
 public static class DbContextConnections
 {
     private const int BUSY_TIMEOUT_SECONDS = 120;
+    private const int WAL_AUTO_CHECKPOINT_PAGES = 1000;
+    private const int JOURNAL_SIZE_LIMIT_BYTES = 134217728;
+    private const int MEMORY_MAP_SIZE_BYTES = 268435456;
+    private const int PAGE_CACHE_SIZE_KIBIBYTES = 20000;
+
+    private static readonly string _providerSpecificConnectionPragmas = $"""
+        PRAGMA wal_autocheckpoint = {WAL_AUTO_CHECKPOINT_PAGES};
+        PRAGMA journal_size_limit = {JOURNAL_SIZE_LIMIT_BYTES};
+        PRAGMA mmap_size = {MEMORY_MAP_SIZE_BYTES};
+        PRAGMA temp_store = MEMORY;
+        PRAGMA cache_size = -{PAGE_CACHE_SIZE_KIBIBYTES};
+        PRAGMA synchronous = NORMAL;
+        PRAGMA locking_mode = NORMAL;
+        PRAGMA secure_delete = OFF;
+        """;
+
     private static readonly OnConnectionOpenInterceptor _connectionOpenInterceptor = new();
 
     public static string GetConnectionString(string dataSource, SqliteOpenMode mode) =>
@@ -29,10 +45,31 @@ public static class DbContextConnections
     )
     {
         optionsBuilder.AddInterceptors(_connectionOpenInterceptor);
-        optionsBuilder.UseSqlite(
-            GetConnectionString(dataSource, mode),
-            options => options.CommandTimeout(BUSY_TIMEOUT_SECONDS + 5) // command handling does not expire before SQLite’s BUSY_TIMEOUT_SECONDS.
-        );
+        optionsBuilder.UseSqlite(GetConnectionString(dataSource, mode));
+    }
+
+    public static void EnableWriteAheadLogging(DbConnection connection)
+    {
+        if (connection is not SqliteConnection sqliteConnection)
+            throw new InvalidOperationException("WAL mode can only be enabled for a SQLite connection.");
+
+        var openedHere = sqliteConnection.State != System.Data.ConnectionState.Open;
+        if (openedHere)
+            sqliteConnection.Open();
+
+        try
+        {
+            using var command = sqliteConnection.CreateCommand();
+            command.CommandText = "PRAGMA journal_mode = WAL;";
+            var journalMode = command.ExecuteScalar()?.ToString();
+            if (!string.Equals(journalMode, "wal", StringComparison.OrdinalIgnoreCase))
+                throw new InvalidOperationException("SQLite did not enable WAL mode for the configured database.");
+        }
+        finally
+        {
+            if (openedHere)
+                sqliteConnection.Close();
+        }
     }
 
     public static void DefaultConfiguration(
@@ -90,7 +127,7 @@ public static class DbContextConnections
             sqliteConnection.CreateCollation(OrderByNaturalExtensions.CollationName, (x, y) => _comparer.Compare(x, y));
 
             using var command = sqliteConnection.CreateCommand();
-            command.CommandText = $"PRAGMA busy_timeout = {BUSY_TIMEOUT_SECONDS * 1000};";
+            command.CommandText = _providerSpecificConnectionPragmas;
             command.ExecuteNonQuery();
         }
     }

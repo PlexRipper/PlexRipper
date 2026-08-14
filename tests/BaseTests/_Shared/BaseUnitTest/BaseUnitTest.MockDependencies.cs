@@ -68,6 +68,7 @@ public partial class BaseUnitTest
             .Register(
                 (ctx, _) =>
                     MockDatabase.GetMemoryReaparrDbContext(
+                        ctx.Resolve<ILogger>(),
                         ctx.Resolve<IPathProvider>(),
                         ctx.Resolve<IAppRuntimeInfo>(),
                         _databaseName
@@ -80,6 +81,7 @@ public partial class BaseUnitTest
             .Register(
                 (ctx, _) =>
                     MockDatabase.GetMemoryReaparrDbContext(
+                        ctx.Resolve<ILogger>(),
                         ctx.Resolve<IPathProvider>(),
                         ctx.Resolve<IAppRuntimeInfo>(),
                         _databaseName
@@ -92,6 +94,7 @@ public partial class BaseUnitTest
             .Register(
                 (ctx, _) =>
                     MockDatabase.GetMemoryAuthDbContext(
+                        ctx.Resolve<ILogger>(),
                         ctx.Resolve<IPathProvider>(),
                         ctx.Resolve<IAppRuntimeInfo>(),
                         _databaseName
@@ -104,6 +107,7 @@ public partial class BaseUnitTest
             .Register(
                 (ctx, _) =>
                     MockDatabase.GetMemoryAuthDbContext(
+                        ctx.Resolve<ILogger>(),
                         ctx.Resolve<IPathProvider>(),
                         ctx.Resolve<IAppRuntimeInfo>(),
                         _databaseName
@@ -116,19 +120,25 @@ public partial class BaseUnitTest
             .Register(
                 (ctx, _) =>
                 {
+                    var logger = ctx.Resolve<ILogger>();
                     var pathProvider = ctx.Resolve<IPathProvider>();
                     var appRuntimeInfo = ctx.Resolve<IAppRuntimeInfo>();
                     var factoryMock = new Mock<IReaparrDbContextFactory>(MockBehavior.Strict);
                     factoryMock
                         .Setup(x => x.Create())
                         .Returns(() =>
-                            MockDatabase.GetMemoryReaparrDbContext(pathProvider, appRuntimeInfo, _databaseName)
+                            MockDatabase.GetMemoryReaparrDbContext(logger, pathProvider, appRuntimeInfo, _databaseName)
                         );
                     factoryMock
                         .Setup(x => x.CreateAsync())
                         .Returns(() =>
                             Task.FromResult<IReaparrDbContext>(
-                                MockDatabase.GetMemoryReaparrDbContext(pathProvider, appRuntimeInfo, _databaseName)
+                                MockDatabase.GetMemoryReaparrDbContext(
+                                    logger,
+                                    pathProvider,
+                                    appRuntimeInfo,
+                                    _databaseName
+                                )
                             )
                         );
                     return factoryMock.Object;
@@ -141,19 +151,20 @@ public partial class BaseUnitTest
             .Register(
                 (ctx, _) =>
                 {
+                    var logger = ctx.Resolve<ILogger>();
                     var pathProvider = ctx.Resolve<IPathProvider>();
                     var appRuntimeInfo = ctx.Resolve<IAppRuntimeInfo>();
                     var factoryMock = new Mock<IAuthDbContextFactory>(MockBehavior.Strict);
                     factoryMock
                         .Setup(x => x.Create())
                         .Returns(() =>
-                            MockDatabase.GetMemoryAuthDbContext(pathProvider, appRuntimeInfo, _databaseName)
+                            MockDatabase.GetMemoryAuthDbContext(logger, pathProvider, appRuntimeInfo, _databaseName)
                         );
                     factoryMock
                         .Setup(x => x.CreateAsync())
                         .Returns(() =>
                             Task.FromResult<IAuthDbContext>(
-                                MockDatabase.GetMemoryAuthDbContext(pathProvider, appRuntimeInfo, _databaseName)
+                                MockDatabase.GetMemoryAuthDbContext(logger, pathProvider, appRuntimeInfo, _databaseName)
                             )
                         );
                     return factoryMock.Object;

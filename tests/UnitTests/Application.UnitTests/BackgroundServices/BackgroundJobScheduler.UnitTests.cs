@@ -293,7 +293,10 @@ public class BackgroundJobSchedulerUnitTests
                 culture: null
             )!;
 
-    private sealed record TestTickerPayload;
+    private sealed record TestTickerPayload
+    {
+        public string Value { get; init; } = "test";
+    }
 
     private sealed class EmptyTickerPayload
     {

@@ -84,7 +84,7 @@ public class CheckQueuedPlexLibraryToSyncCommandHandlerUnitTests
                 It.IsAny<LibrarySyncJobPayload>(),
                 It.IsAny<CancellationToken>()
             ))
-            .ReturnsAsync((Result<JobTimeTicker>)null!);
+            .ReturnsAsync(Result.Ok(new JobTimeTicker()));
 
         // Act
         var command = new CheckQueuedPlexLibraryToSyncCommand();
@@ -221,7 +221,7 @@ public class CheckQueuedPlexLibraryToSyncCommandHandlerUnitTests
                 It.IsAny<LibrarySyncJobPayload>(),
                 It.IsAny<CancellationToken>()
             ))
-            .ReturnsAsync((Result<JobTimeTicker>)null!);
+            .ReturnsAsync(Result.Ok(new JobTimeTicker()));
 
         var command = new CheckQueuedPlexLibraryToSyncCommand();
 
@@ -288,7 +288,7 @@ public class CheckQueuedPlexLibraryToSyncCommandHandlerUnitTests
                 It.IsAny<LibrarySyncJobPayload>(),
                 It.IsAny<CancellationToken>()
             ))
-            .ReturnsAsync((Result<JobTimeTicker>)null!);
+            .ReturnsAsync(Result.Ok(new JobTimeTicker()));
 
         var command = new CheckQueuedPlexLibraryToSyncCommand();
 
@@ -456,7 +456,7 @@ public class CheckQueuedPlexLibraryToSyncCommandHandlerUnitTests
                 It.IsAny<LibrarySyncJobPayload>(),
                 It.IsAny<CancellationToken>()
             ))
-            .ReturnsAsync((Result<JobTimeTicker>)null!);
+            .ReturnsAsync(Result.Ok(new JobTimeTicker()));
 
         var command = new CheckQueuedPlexLibraryToSyncCommand();
 
@@ -557,7 +557,7 @@ public class CheckQueuedPlexLibraryToSyncCommandHandlerUnitTests
                 It.IsAny<LibrarySyncJobPayload>(),
                 It.IsAny<CancellationToken>()
             ))
-            .ReturnsAsync((Result<JobTimeTicker>)null!);
+            .ReturnsAsync(Result.Ok(new JobTimeTicker()));
 
         var command = new CheckQueuedPlexLibraryToSyncCommand();
 
@@ -695,7 +695,7 @@ public class CheckQueuedPlexLibraryToSyncCommandHandlerUnitTests
                 It.IsAny<LibrarySyncJobPayload>(),
                 It.IsAny<CancellationToken>()
             ))
-            .ReturnsAsync((Result<JobTimeTicker>)null!);
+            .ReturnsAsync(Result.Ok(new JobTimeTicker()));
 
         var command = new CheckQueuedPlexLibraryToSyncCommand();
 
@@ -769,7 +769,7 @@ public class CheckQueuedPlexLibraryToSyncCommandHandlerUnitTests
                 It.IsAny<LibrarySyncJobPayload>(),
                 It.IsAny<CancellationToken>()
             ))
-            .ReturnsAsync((Result<JobTimeTicker>)null!);
+            .ReturnsAsync(Result.Ok(new JobTimeTicker()));
 
         var command = new CheckQueuedPlexLibraryToSyncCommand();
 
@@ -905,7 +905,7 @@ public class CheckQueuedPlexLibraryToSyncCommandHandlerUnitTests
                 It.IsAny<LibrarySyncJobPayload>(),
                 It.IsAny<CancellationToken>()
             ))
-            .ReturnsAsync((Result<JobTimeTicker>)null!);
+            .ReturnsAsync(Result.Ok(new JobTimeTicker()));
 
         var command = new CheckQueuedPlexLibraryToSyncCommand();
 
@@ -1007,7 +1007,7 @@ public class CheckQueuedPlexLibraryToSyncCommandHandlerUnitTests
                 It.IsAny<LibrarySyncJobPayload>(),
                 It.IsAny<CancellationToken>()
             ))
-            .ReturnsAsync((Result<JobTimeTicker>)null!);
+            .ReturnsAsync(Result.Ok(new JobTimeTicker()));
 
         var command = new CheckQueuedPlexLibraryToSyncCommand();
 
@@ -1124,7 +1124,7 @@ public class CheckQueuedPlexLibraryToSyncCommandHandlerUnitTests
                 It.IsAny<LibrarySyncJobPayload>(),
                 It.IsAny<CancellationToken>()
             ))
-            .ReturnsAsync((Result<JobTimeTicker>)null!);
+            .ReturnsAsync(Result.Ok(new JobTimeTicker()));
 
         var command = new CheckQueuedPlexLibraryToSyncCommand();
 

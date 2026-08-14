@@ -384,7 +384,10 @@ public class BackgroundJobScheduler : IBackgroundJobScheduler
         }
 
         var serializedRequest = TickerHelper.CreateTickerRequest(request);
-        if (serializedRequest is not { Length: > 0 })
+        if (
+            serializedRequest is not { Length: > 0 }
+            || serializedRequest.AsSpan().SequenceEqual("{}"u8)
+        )
         {
             error = $"Background job {jobKey.Name} cannot be queued without a serialized request";
             return false;

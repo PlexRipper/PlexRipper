@@ -104,8 +104,8 @@ public class BackgroundJobScheduler : IBackgroundJobScheduler
         };
 
         using var dbContext = await _dbContextFactory.CreateAsync();
-        var existingTickers = await dbContext.CronTickers
-            .AsNoTracking()
+        var existingTickers = await dbContext
+            .CronTickers
             .Where(x => cronTickers.Select(y => y.Function).Contains(x.Function))
             .ToListAsync(cancellationToken);
 
@@ -142,14 +142,15 @@ public class BackgroundJobScheduler : IBackgroundJobScheduler
         return Result.Ok();
     }
 
-    private static JobCronTicker CreateCronTicker<TFunction>(JobKey jobKey, string expression) => new()
-    {
-        Function = typeof(TFunction).Name,
-        Expression = expression,
-        IsEnabled = true,
-        JobKey = jobKey.Name,
-        JobType = jobKey.Type,
-    };
+    private static JobCronTicker CreateCronTicker<TFunction>(JobKey jobKey, string expression) =>
+        new()
+        {
+            Function = typeof(TFunction).Name,
+            Expression = expression,
+            IsEnabled = true,
+            JobKey = jobKey.Name,
+            JobType = jobKey.Type,
+        };
 
     /// <summary>
     /// Removes stale library synchronization queue entries and enqueues any libraries that still require synchronization.
@@ -228,13 +229,15 @@ public class BackgroundJobScheduler : IBackgroundJobScheduler
         foreach (var group in jobKeys.Distinct().GroupBy(x => x.Type))
         {
             var names = group.Select(x => x.Name).ToList();
-            var tickers = await dbContext.TimeTickers
-                .Where(x =>
+            var tickers = await dbContext
+                .TimeTickers.Where(x =>
                     x.JobType == group.Key
                     && names.Contains(x.JobKey)
-                    && (x.Status == TickerStatus.Idle
+                    && (
+                        x.Status == TickerStatus.Idle
                         || x.Status == TickerStatus.Queued
-                        || x.Status == TickerStatus.InProgress)
+                        || x.Status == TickerStatus.InProgress
+                    )
                 )
                 .Select(x => new ValueTuple<Guid, TickerStatus>(x.Id, x.Status))
                 .ToListAsync(cancellationToken);
@@ -264,9 +267,7 @@ public class BackgroundJobScheduler : IBackgroundJobScheduler
             deletedCount = queuedIds.Count;
         }
 
-        var cancellationRequestedCount = runningIds.Count(
-            TickerCancellationTokenManager.RequestTickerCancellationById
-        );
+        var cancellationRequestedCount = runningIds.Count(TickerCancellationTokenManager.RequestTickerCancellationById);
 
         _log.Here()
             .Debug(
@@ -279,19 +280,13 @@ public class BackgroundJobScheduler : IBackgroundJobScheduler
     }
 
     /// <inheritdoc />
-    public async Task<bool> IsJobRunning(
-        JobKey jobKey,
-        CancellationToken cancellationToken = default
-    )
+    public async Task<bool> IsJobRunning(JobKey jobKey, CancellationToken cancellationToken = default)
     {
         using var dbContext = await _dbContextFactory.CreateAsync();
 
         if (
             await dbContext.TimeTickers.AnyAsync(
-                x =>
-                    x.JobKey == jobKey.Name
-                    && x.JobType == jobKey.Type
-                    && x.Status == TickerStatus.InProgress,
+                x => x.JobKey == jobKey.Name && x.JobType == jobKey.Type && x.Status == TickerStatus.InProgress,
                 cancellationToken
             )
         )
@@ -313,9 +308,7 @@ public class BackgroundJobScheduler : IBackgroundJobScheduler
 
         if (
             await dbContext.TimeTickers.AnyAsync(x =>
-                x.JobKey == jobKey.Name
-                && x.JobType == jobKey.Type
-                && QueuedStatuses.Contains(x.Status)
+                x.JobKey == jobKey.Name && x.JobType == jobKey.Type && QueuedStatuses.Contains(x.Status)
             )
         )
             return true;
@@ -331,7 +324,8 @@ public class BackgroundJobScheduler : IBackgroundJobScheduler
     )
         where TFunction : class, ITickerFunction<TRequest>
     {
-        var ticker = CreateTimeTicker<TFunction, TRequest>(jobKey, request);
+        if (!TryCreateTimeTicker<TFunction, TRequest>(jobKey, request, out var ticker, out var error))
+            return Task.FromResult(Result.Fail<JobTimeTicker>(error));
 
         return AddTickerWithoutCallerExecutionContext(ticker, cancellationToken);
     }
@@ -345,7 +339,9 @@ public class BackgroundJobScheduler : IBackgroundJobScheduler
     )
         where TFunction : class, ITickerFunction<TRequest>
     {
-        var ticker = CreateTimeTicker<TFunction, TRequest>(jobKey, request);
+        if (!TryCreateTimeTicker<TFunction, TRequest>(jobKey, request, out var ticker, out var error))
+            return Task.FromResult(Result.Fail<JobTimeTicker>(error));
+
         ticker.ExecutionTime = executionTime ?? DateTime.UtcNow;
         return AddTickerWithoutCallerExecutionContext(ticker, cancellationToken);
     }
@@ -359,30 +355,42 @@ public class BackgroundJobScheduler : IBackgroundJobScheduler
         where TFunction : class, ITickerFunction<TRequest>
     {
         var scheduledAt = executionTime ?? DateTime.UtcNow;
-        var tickers = jobs
-            .Select(x => CreateTimeTicker<TFunction, TRequest>(x.JobKey, x.Request))
-            .ToList();
-        foreach (var ticker in tickers)
+        var tickers = new List<JobTimeTicker>(jobs.Count);
+        foreach (var (jobKey, request) in jobs)
+        {
+            if (!TryCreateTimeTicker<TFunction, TRequest>(jobKey, request, out var ticker, out var error))
+                return Task.FromResult(Result.Fail<List<JobTimeTicker>>(error));
+
             ticker.ExecutionTime = scheduledAt;
+            tickers.Add(ticker);
+        }
 
         return AddTickersWithoutCallerExecutionContext(tickers, cancellationToken);
     }
 
-    private static JobTimeTicker CreateTimeTicker<TFunction, TRequest>(
+    private static bool TryCreateTimeTicker<TFunction, TRequest>(
         JobKey jobKey,
-        TRequest request
+        TRequest request,
+        out JobTimeTicker ticker,
+        out string error
     )
         where TFunction : class, ITickerFunction<TRequest>
     {
+        ticker = null!;
         if (request is null)
-            throw new InvalidOperationException($"Background job {jobKey.Name} cannot be queued without a request");
+        {
+            error = $"Background job {jobKey.Name} cannot be queued without a request";
+            return false;
+        }
 
         var serializedRequest = TickerHelper.CreateTickerRequest(request);
         if (serializedRequest is not { Length: > 0 })
-            throw new InvalidOperationException(
-                $"Background job {jobKey.Name} cannot be queued without a serialized request");
+        {
+            error = $"Background job {jobKey.Name} cannot be queued without a serialized request";
+            return false;
+        }
 
-        return new JobTimeTicker
+        ticker = new JobTimeTicker
         {
             Function = TickerFunctionProvider.GetFunctionName<TFunction>(),
             Request = serializedRequest,
@@ -403,6 +411,8 @@ public class BackgroundJobScheduler : IBackgroundJobScheduler
             JobKey = jobKey.Name,
             JobType = jobKey.Type,
         };
+        error = string.Empty;
+        return true;
     }
 
     /// <summary>
@@ -502,10 +512,10 @@ public class BackgroundJobScheduler : IBackgroundJobScheduler
         Guid id,
         DateTime createdAt
     ) => new(
-        jobType,
-        JobStatus.Started,
-        request is null ? string.Empty : System.Text.Encoding.UTF8.GetString(request),
-        id.ToString(),
-        createdAt
-    );
+            jobType,
+            JobStatus.Started,
+            request is null ? string.Empty : System.Text.Encoding.UTF8.GetString(request),
+            id.ToString(),
+            createdAt
+        );
 }

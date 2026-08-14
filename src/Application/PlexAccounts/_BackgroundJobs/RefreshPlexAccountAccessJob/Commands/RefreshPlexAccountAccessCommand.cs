@@ -7,7 +7,6 @@ namespace Reaparr.Application;
 public record RefreshPlexAccountAccessCommand(int PlexAccountId = 0)
     : ICommand<Result<List<RefreshPlexAccountAccessRapportDTO>>>;
 
-
 public class RefreshPlexAccountAccessCommandValidator : AbstractValidator<RefreshPlexAccountAccessCommand>
 {
     public RefreshPlexAccountAccessCommandValidator()
@@ -109,15 +108,27 @@ public class RefreshPlexAccountAccessCommandHandler
             }
 
             var serverAccessRapport = serverAccessResult.Value;
-            var lostServerIds = serverAccessRapport.Access
-                .Where(x => x.State == PlexAccessState.Revoked)
+            var lostServerIds = serverAccessRapport
+                .Access.Where(x => x.State == PlexAccessState.Revoked)
                 .Select(x => x.PlexServerId)
                 .ToList();
 
             if (lostServerIds.Count > 0)
-                await _dbContext.PlexAccountLibraries
-                    .Where(x => x.PlexAccountId == plexAccount.Id && lostServerIds.Contains(x.PlexServerId))
+            {
+                var deletedLibraryIds = await _dbContext
+                    .PlexAccountLibraries.Where(x =>
+                        x.PlexAccountId == plexAccount.Id && lostServerIds.Contains(x.PlexServerId)
+                    )
+                    .Select(x => x.PlexLibraryId)
+                    .Distinct()
+                    .ToListAsync(cancellationToken);
+                await _dbContext
+                    .PlexAccountLibraries.Where(x =>
+                        x.PlexAccountId == plexAccount.Id && lostServerIds.Contains(x.PlexServerId)
+                    )
                     .ExecuteDeleteAsync(cancellationToken);
+                _mediaQueryCache.InvalidateLibraries(deletedLibraryIds, "Plex account server access revoked");
+            }
 
             var libraryAccessResult = await _commandExecutor.Send(
                 new RefreshLibraryAccessCommand(plexAccount.Id),
@@ -136,9 +147,12 @@ public class RefreshPlexAccountAccessCommandHandler
             rapports.Add(ToDTO(serverAccessRapport, libraryAccessResult.Value));
         }
 
-        await _notificationHubService.SendRefreshNotificationAsync(
-            [RefreshDataType.PlexAccount, RefreshDataType.PlexServer, RefreshDataType.PlexServerConnection]
-        );
+        await _notificationHubService.SendRefreshNotificationAsync([
+            RefreshDataType.PlexAccount,
+            RefreshDataType.PlexServer,
+            RefreshDataType.PlexServerConnection,
+            RefreshDataType.PlexLibrary,
+        ]);
 
         return Result.Ok(rapports);
     }
@@ -156,25 +170,31 @@ public class RefreshPlexAccountAccessCommandHandler
 
         var serverAccessRapport = new RefreshPlexServerAccessRapport(plexAccount.Id, plexAccount.DisplayName);
         serverAccessRapport.Access.AddRange(
-            plexServers.Select(x =>
-                new RefreshPlexServerAccessRapportRow(PlexAccessState.Revoked, x.PlexServerId, x.Name)
-            )
+            plexServers.Select(x => new RefreshPlexServerAccessRapportRow(
+                PlexAccessState.Revoked,
+                x.PlexServerId,
+                x.Name
+            ))
         );
 
-        var libraryAccessRapport = await RemoveRevokedLibraryAccess(
-            plexAccount,
-            serverAccessRapport,
+        PlexLibraryAccessRefreshResponse? libraryAccessRapport = null;
+        var transactionResult = await _dbContext.ExecuteSerializedTransactionAsync(
+            async (ctx, txCt) =>
+            {
+                libraryAccessRapport = await RemoveRevokedLibraryAccess(ctx, plexAccount, serverAccessRapport, txCt);
+
+                await ctx.PlexAccountServers.Where(x => x.PlexAccountId == plexAccount.Id).ExecuteDeleteAsync(txCt);
+            },
             cancellationToken
         );
+        if (transactionResult.IsFailed)
+            throw new InvalidOperationException("Failed to revoke all Plex account access");
 
-        await _dbContext
-            .PlexAccountServers.Where(x => x.PlexAccountId == plexAccount.Id)
-            .ExecuteDeleteAsync(cancellationToken);
-
-        return ToDTO(serverAccessRapport, libraryAccessRapport);
+        return ToDTO(serverAccessRapport, libraryAccessRapport!);
     }
 
     private async Task<PlexLibraryAccessRefreshResponse> RemoveRevokedLibraryAccess(
+        IReaparrDbContext dbContext,
         PlexAccount plexAccount,
         RefreshPlexServerAccessRapport serverAccessRapport,
         CancellationToken cancellationToken
@@ -185,8 +205,9 @@ public class RefreshPlexAccountAccessCommandHandler
             .Select(x => x.PlexServerId)
             .ToList();
 
-        var lostLibraryAccess = await _dbContext
-            .PlexAccountLibraries.Include(x => x.PlexLibrary)
+        var lostLibraryAccess = await dbContext
+            .PlexAccountLibraries.IgnoreQueryFilters()
+            .Include(x => x.PlexLibrary)
             .Include(x => x.PlexServer)
             .Where(x => x.PlexAccountId == plexAccount.Id && lostServerAccess.Contains(x.PlexServerId))
             .ToListAsync(cancellationToken);
@@ -206,7 +227,7 @@ public class RefreshPlexAccountAccessCommandHandler
         };
 
         var affectedLibraryIds = lostLibraryAccess.Select(x => x.PlexLibraryId).Distinct().ToList();
-        await _dbContext
+        await dbContext
             .PlexAccountLibraries.Where(x =>
                 x.PlexAccountId == plexAccount.Id && lostServerAccess.Contains(x.PlexServerId)
             )
@@ -220,26 +241,26 @@ public class RefreshPlexAccountAccessCommandHandler
         RefreshPlexServerAccessRapport serverAccessRapport,
         PlexLibraryAccessRefreshResponse libraryAccessRapport
     ) => new(serverAccessRapport.PlexAccountId, serverAccessRapport.PlexAccountName)
-    {
-        Access = serverAccessRapport
-            .Access.Select(x => new PlexServerAccessRapportDTO
-            {
-                State = x.State,
-                PlexServerId = x.PlexServerId,
-                PlexServerName = x.PlexServerName,
-                IsServerOffline = libraryAccessRapport.OfflineServers.Contains(x.PlexServerId),
-                LibraryAccess = libraryAccessRapport
-                    .Reports.Where(y => y.PlexServerId == x.PlexServerId)
-                    .SelectMany(y => y.Data)
-                    .Select(y => new PlexLibraryAccessRapportDTO
-                    {
-                        PlexLibraryName = y.PlexLibraryName,
-                        PlexServerId = y.PlexServerId,
-                        State = y.State,
-                        PlexLibraryId = y.PlexLibraryId,
-                    })
-                    .ToList(),
-            })
-            .ToList(),
-    };
+        {
+            Access = serverAccessRapport
+                .Access.Select(x => new PlexServerAccessRapportDTO
+                {
+                    State = x.State,
+                    PlexServerId = x.PlexServerId,
+                    PlexServerName = x.PlexServerName,
+                    IsServerOffline = libraryAccessRapport.OfflineServers.Contains(x.PlexServerId),
+                    LibraryAccess = libraryAccessRapport
+                        .Reports.Where(y => y.PlexServerId == x.PlexServerId)
+                        .SelectMany(y => y.Data)
+                        .Select(y => new PlexLibraryAccessRapportDTO
+                        {
+                            PlexLibraryName = y.PlexLibraryName,
+                            PlexServerId = y.PlexServerId,
+                            State = y.State,
+                            PlexLibraryId = y.PlexLibraryId,
+                        })
+                        .ToList(),
+                })
+                .ToList(),
+        };
 }

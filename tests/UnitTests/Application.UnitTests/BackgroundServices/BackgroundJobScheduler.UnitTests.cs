@@ -86,16 +86,56 @@ public class BackgroundJobSchedulerUnitTests
 
         // Assert
         tickerManager.Verify(
-            x => x.AddBatchAsync(
-                It.Is<List<JobTimeTicker>>(tickers => tickers.Count == 2),
-                It.IsAny<CancellationToken>()
-            ),
+            x =>
+                x.AddBatchAsync(
+                    It.Is<List<JobTimeTicker>>(tickers => tickers.Count == 2),
+                    It.IsAny<CancellationToken>()
+                ),
             Times.Once
         );
-        tickerManager.Verify(
-            x => x.AddAsync(It.IsAny<JobTimeTicker>(), It.IsAny<CancellationToken>()),
-            Times.Never
+        tickerManager.Verify(x => x.AddAsync(It.IsAny<JobTimeTicker>(), It.IsAny<CancellationToken>()), Times.Never);
+    }
+
+    [Test]
+    public async Task ShouldFailWithoutQueueing_WhenRequestIsNull()
+    {
+        // Arrange
+        var tickerManager = new Mock<ITimeTickerManager<JobTimeTicker>>();
+        var scheduler = CreateScheduler(tickerManager.Object);
+
+        // Act
+        var result = await scheduler.ExecuteJob<TestTickerFunction, TestTickerPayload>(
+            new JobKey("null-request-test", JobTypes.LibrarySyncJob),
+            null!,
+            CancellationToken.None
         );
+
+        // Assert
+        result.IsFailed.ShouldBeTrue();
+        result.Errors.Single().Message.ShouldBe("Background job null-request-test cannot be queued without a request");
+        tickerManager.Verify(x => x.AddAsync(It.IsAny<JobTimeTicker>(), It.IsAny<CancellationToken>()), Times.Never);
+    }
+
+    [Test]
+    public async Task ShouldFailWithoutQueueing_WhenSerializedRequestIsEmpty()
+    {
+        // Arrange
+        var tickerManager = new Mock<ITimeTickerManager<JobTimeTicker>>();
+        var scheduler = CreateScheduler(tickerManager.Object);
+
+        // Act
+        var result = await scheduler.ScheduleJob<TestTickerFunction, EmptyTickerPayload>(
+            new JobKey("empty-request-test", JobTypes.LibrarySyncJob),
+            new EmptyTickerPayload(),
+            cancellationToken: CancellationToken.None
+        );
+
+        // Assert
+        result.IsFailed.ShouldBeTrue();
+        result
+            .Errors.Single()
+            .Message.ShouldBe("Background job empty-request-test cannot be queued without a serialized request");
+        tickerManager.Verify(x => x.AddAsync(It.IsAny<JobTimeTicker>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Test]
@@ -222,40 +262,54 @@ public class BackgroundJobSchedulerUnitTests
         secondRequestJson.RemotePlexLibraryId.ShouldBe(22);
     }
 
-    private static BackgroundJobScheduler CreateScheduler(ITimeTickerManager<JobTimeTicker> tickerManager) => new(
-        Mock.Of<ILogger>(),
-        Mock.Of<IReaparrDbContextFactory>(),
-        tickerManager,
-        Mock.Of<ICronTickerManager<JobCronTicker>>(),
-        Mock.Of<ITickerQHostScheduler>(),
-        Mock.Of<IAppRuntimeInfo>(),
-        Mock.Of<ICommandExecutor>()
-    );
+    private static BackgroundJobScheduler CreateScheduler(ITimeTickerManager<JobTimeTicker> tickerManager) =>
+        new(
+            Mock.Of<ILogger>(),
+            Mock.Of<IReaparrDbContextFactory>(),
+            tickerManager,
+            Mock.Of<ICronTickerManager<JobCronTicker>>(),
+            Mock.Of<ITickerQHostScheduler>(),
+            Mock.Of<IAppRuntimeInfo>(),
+            Mock.Of<ICommandExecutor>()
+        );
 
     private static TickerResult<JobTimeTicker> CreateSuccessfulTickerResult() =>
-        (TickerResult<JobTimeTicker>)Activator.CreateInstance(
-            typeof(TickerResult<JobTimeTicker>),
-            BindingFlags.Instance | BindingFlags.NonPublic,
-            binder: null,
-            args: [new JobTimeTicker()],
-            culture: null
-        )!;
+        (TickerResult<JobTimeTicker>)
+            Activator.CreateInstance(
+                typeof(TickerResult<JobTimeTicker>),
+                BindingFlags.Instance | BindingFlags.NonPublic,
+                binder: null,
+                args: [new JobTimeTicker()],
+                culture: null
+            )!;
 
     private static TickerResult<List<JobTimeTicker>> CreateSuccessfulTickerBatchResult() =>
-        (TickerResult<List<JobTimeTicker>>)Activator.CreateInstance(
-            typeof(TickerResult<List<JobTimeTicker>>),
-            BindingFlags.Instance | BindingFlags.NonPublic,
-            binder: null,
-            args: [new List<JobTimeTicker>()],
-            culture: null
-        )!;
+        (TickerResult<List<JobTimeTicker>>)
+            Activator.CreateInstance(
+                typeof(TickerResult<List<JobTimeTicker>>),
+                BindingFlags.Instance | BindingFlags.NonPublic,
+                binder: null,
+                args: [new List<JobTimeTicker>()],
+                culture: null
+            )!;
 
     private sealed record TestTickerPayload;
 
-    private sealed class TestTickerFunction : ITickerFunction<TestTickerPayload>
+    private sealed class EmptyTickerPayload
+    {
+        [System.Text.Json.Serialization.JsonIgnore]
+        public string Ignored { get; init; } = string.Empty;
+    }
+
+    private sealed class TestTickerFunction : ITickerFunction<TestTickerPayload>, ITickerFunction<EmptyTickerPayload>
     {
         public Task ExecuteAsync(
             TickerFunctionContext<TestTickerPayload> context,
+            CancellationToken cancellationToken = default
+        ) => Task.CompletedTask;
+
+        public Task ExecuteAsync(
+            TickerFunctionContext<EmptyTickerPayload> context,
             CancellationToken cancellationToken = default
         ) => Task.CompletedTask;
     }

@@ -70,6 +70,13 @@ public class LibrarySyncJob : BaseBackgroundJob<LibrarySyncJobPayload, LibrarySy
                 libraryId
             );
 
+        var queueItem = await TryClaimQueueItemForProcessingAsync(serverId, libraryId);
+        if (queueItem is null)
+        {
+            _skipAfterCompletion = true;
+            return;
+        }
+
         // Check if the server is online before starting sync
         var isServerOnline = await _dbContext.IsServerOnline(serverId);
         if (!isServerOnline)
@@ -87,12 +94,6 @@ public class LibrarySyncJob : BaseBackgroundJob<LibrarySyncJobPayload, LibrarySy
         }
         else
         {
-            if (!await TryClaimQueueItemForProcessingAsync(serverId, libraryId))
-            {
-                _skipAfterCompletion = true;
-                return;
-            }
-
             var invalidationResult = await _commandExecutor.Send(
                 new InvalidateLibraryComparisonJobsCommand([libraryId]),
                 cancellationToken
@@ -103,7 +104,10 @@ public class LibrarySyncJob : BaseBackgroundJob<LibrarySyncJobPayload, LibrarySy
             // Convert command exceptions to a Result so the queue state can be persisted before this ticker completes.
             // Execute the library sync command
             var result = await Result.Try(() =>
-                _commandExecutor.Send(new RefreshLibraryMediaCommand(libraryId), cancellationToken)
+                _commandExecutor.Send(
+                    new RefreshLibraryMediaCommand(libraryId, queueItem.ForceMediaRefresh),
+                    cancellationToken
+                )
             );
 
             if (result.IsCancelled)
@@ -234,7 +238,7 @@ public class LibrarySyncJob : BaseBackgroundJob<LibrarySyncJobPayload, LibrarySy
         }
     }
 
-    private async Task<bool> TryClaimQueueItemForProcessingAsync(int serverId, int libraryId)
+    private async Task<LibrarySyncJobQueue?> TryClaimQueueItemForProcessingAsync(int serverId, int libraryId)
     {
         var startedAt = DateTime.UtcNow;
         var updatedRows = await _dbContext
@@ -256,15 +260,14 @@ public class LibrarySyncJob : BaseBackgroundJob<LibrarySyncJobPayload, LibrarySy
                 CancellationToken.None
             );
 
-        if (updatedRows > 0)
-            return true;
-
         var queueState = await _dbContext
             .LibrarySyncJobQueues.Where(x =>
                 x.PlexServerId == serverId && x.PlexLibraryId == libraryId
             )
-            .Select(x => new { x.Status, x.StartedAt, x.CompletedAt })
             .FirstOrDefaultAsync(CancellationToken.None);
+
+        if (updatedRows > 0)
+            return queueState;
 
         if (queueState is null)
         {
@@ -288,7 +291,7 @@ public class LibrarySyncJob : BaseBackgroundJob<LibrarySyncJobPayload, LibrarySy
                 );
         }
 
-        return false;
+        return null;
     }
 
     private async Task UpdateQueueItemAsync(

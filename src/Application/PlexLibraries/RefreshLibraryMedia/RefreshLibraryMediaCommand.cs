@@ -47,36 +47,6 @@ public class RefreshLibraryMediaCommandHandler : ICommandHandler<RefreshLibraryM
         if (syncLibraryMediaResult.IsFailed)
             return syncLibraryMediaResult.ToResult();
 
-        if (command.ForceMediaRefresh)
-        {
-            var replacementResult = await _dbContext.ExecuteSerializedTransactionAsync(
-                async (ctx, transactionCt) =>
-                {
-                    await ctx.PlexLibraryActors.Where(x => x.PlexLibraryId == command.PlexLibraryId)
-                        .ExecuteDeleteAsync(transactionCt);
-                    await ctx.PlexLibraryGenres.Where(x => x.PlexLibraryId == command.PlexLibraryId)
-                        .ExecuteDeleteAsync(transactionCt);
-                    await ctx.PlexLibraryCountries.Where(x => x.PlexLibraryId == command.PlexLibraryId)
-                        .ExecuteDeleteAsync(transactionCt);
-
-                    var result = await PersistLibraryMediaAsync(
-                        command,
-                        syncLibraryMediaResult.Value,
-                        transactionCt
-                    );
-                    if (result.IsFailed)
-                        throw new InvalidOperationException(result.Errors.FirstOrDefault()?.Message);
-
-                    return result.Value;
-                },
-                ct
-            );
-
-            return replacementResult.IsFailed
-                ? replacementResult.LogError()
-                : Result.Ok(replacementResult.Value);
-        }
-
         return await PersistLibraryMediaAsync(command, syncLibraryMediaResult.Value, ct);
     }
 
@@ -86,7 +56,6 @@ public class RefreshLibraryMediaCommandHandler : ICommandHandler<RefreshLibraryM
         CancellationToken ct
     )
     {
-
         // Phase 2: Insert the new / unique media metadata into the database
         var insertPlexLibraryMediaMetaDataResult = await _commandExecutor.Send(
             new InsertMediaMetaDataCommand(libraryMetadata),

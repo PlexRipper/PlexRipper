@@ -149,13 +149,30 @@ public class CheckQueuedPlexLibraryToSyncCommandHandler : ICommandHandler<CheckQ
             return;
         }
 
-        await _scheduler.ExecuteJob<LibrarySyncJob, LibrarySyncJobPayload>(
+        var scheduleResult = await _scheduler.ExecuteJob<LibrarySyncJob, LibrarySyncJobPayload>(
             jobKey,
             new LibrarySyncJobPayload
             {
                 PlexServerId = serverId,
                 PlexLibraryId = libraryId,
             }, cancellationToken);
+
+        if (scheduleResult.IsFailed || scheduleResult.IsCancelled)
+        {
+            await _dbContext.LibrarySyncJobQueues
+                .Where(x =>
+                    x.PlexServerId == serverId
+                    && x.PlexLibraryId == libraryId
+                    && x.Status == LibrarySyncJobStatus.Processing
+                    && x.StartedAt == null
+                )
+                .ExecuteUpdateAsync(
+                    x => x.SetProperty(y => y.Status, LibrarySyncJobStatus.Queued),
+                    CancellationToken.None
+                );
+            scheduleResult.LogIfFailed();
+            return;
+        }
 
         _log.Here()
             .Debug("Scheduled library sync job for server {ServerId} and library {LibraryId}", serverId, libraryId);

@@ -25,11 +25,11 @@ public class SyncPlexTvShowsCommandUnitTests : BaseUnitTest<SyncPlexTvShowsComma
             }
         );
         var library = IDbContext.PlexLibraries.First();
-        var show = IDbContext.PlexTvShows
-            .AsNoTracking()
+        var show = IDbContext
+            .PlexTvShows.AsNoTracking()
             .Include(x => x.Seasons)
-            .ThenInclude(x => x.Episodes)
-            .ThenInclude(x => x.MediaDataList)
+                .ThenInclude(x => x.Episodes)
+                    .ThenInclude(x => x.MediaDataList)
             .Single();
         var oldSeason = show.Seasons.OrderBy(x => x.Id).First();
         var newSeason = show.Seasons.OrderBy(x => x.Id).Last();
@@ -92,11 +92,11 @@ public class SyncPlexTvShowsCommandUnitTests : BaseUnitTest<SyncPlexTvShowsComma
             }
         );
         var library = IDbContext.PlexLibraries.First();
-        var shows = IDbContext.PlexTvShows
-            .AsNoTracking()
+        var shows = IDbContext
+            .PlexTvShows.AsNoTracking()
             .Include(x => x.Seasons)
-            .ThenInclude(x => x.Episodes)
-            .ThenInclude(x => x.MediaDataList)
+                .ThenInclude(x => x.Episodes)
+                    .ThenInclude(x => x.MediaDataList)
             .OrderBy(x => x.Id)
             .ToList();
         var oldShow = shows.First();
@@ -189,7 +189,7 @@ public class SyncPlexTvShowsCommandUnitTests : BaseUnitTest<SyncPlexTvShowsComma
         result.IsSuccess.ShouldBeTrue();
         var dbPlexTvShows = IDbContext
             .PlexTvShows.Include(x => x.Seasons)
-            .ThenInclude(x => x.Episodes)
+                .ThenInclude(x => x.Episodes)
             .Where(x => x.PlexLibraryId == library.Id)
             .ToList();
 
@@ -259,11 +259,7 @@ public class SyncPlexTvShowsCommandUnitTests : BaseUnitTest<SyncPlexTvShowsComma
         );
 
         var library = IDbContext.PlexLibraries.First();
-        var show = IDbContext
-            .PlexTvShows.AsNoTracking()
-            .Include(x => x.Seasons)
-            .ThenInclude(x => x.Episodes)
-            .Single();
+        var show = IDbContext.PlexTvShows.AsNoTracking().Include(x => x.Seasons).ThenInclude(x => x.Episodes).Single();
         var originalShowId = show.Id;
         var updatedSeason = show.Seasons.OrderBy(x => x.Id).First();
         var unchangedSeason = show.Seasons.OrderBy(x => x.Id).Last();
@@ -275,9 +271,7 @@ public class SyncPlexTvShowsCommandUnitTests : BaseUnitTest<SyncPlexTvShowsComma
         var originalUnchangedEpisodeId = unchangedEpisode.Id;
         updatedSeason.UpdatedAt = updatedSeason.UpdatedAt?.AddSeconds(1) ?? DateTime.UtcNow;
         updatedEpisode.UpdatedAt = updatedEpisode.UpdatedAt?.AddSeconds(1) ?? DateTime.UtcNow;
-        var createdEpisode = FakeData
-            .GetPlexTvShowEpisode(seed, x => x.IncludeMultiPartEpisodes = true)
-            .Generate();
+        var createdEpisode = FakeData.GetPlexTvShowEpisode(seed, x => x.IncludeMultiPartEpisodes = true).Generate();
         unchangedSeason.Episodes.Add(createdEpisode);
         SetIds(library, [show]);
         library.TvShows.Add(show);
@@ -309,20 +303,25 @@ public class SyncPlexTvShowsCommandUnitTests : BaseUnitTest<SyncPlexTvShowsComma
         var persisted = IDbContext
             .PlexTvShows.AsNoTracking()
             .Include(x => x.Seasons)
-            .ThenInclude(x => x.Episodes)
+                .ThenInclude(x => x.Episodes)
             .Single();
         persisted.Id.ShouldBe(originalShowId);
-        persisted.Seasons.Single(x => x.PlexApiRatingKey == updatedSeason.PlexApiRatingKey)
+        persisted
+            .Seasons.Single(x => x.PlexApiRatingKey == updatedSeason.PlexApiRatingKey)
             .Id.ShouldBe(originalUpdatedSeasonId);
-        persisted.Seasons.Single(x => x.PlexApiRatingKey == unchangedSeason.PlexApiRatingKey)
+        persisted
+            .Seasons.Single(x => x.PlexApiRatingKey == unchangedSeason.PlexApiRatingKey)
             .Id.ShouldBe(originalUnchangedSeasonId);
         var persistedEpisodes = persisted.Seasons.SelectMany(x => x.Episodes).ToList();
-        persistedEpisodes.Single(x => x.PlexApiRatingKey == updatedEpisode.PlexApiRatingKey)
+        persistedEpisodes
+            .Single(x => x.PlexApiRatingKey == updatedEpisode.PlexApiRatingKey)
             .Id.ShouldBe(originalUpdatedEpisodeId);
-        persistedEpisodes.Single(x => x.PlexApiRatingKey == unchangedEpisode.PlexApiRatingKey)
+        persistedEpisodes
+            .Single(x => x.PlexApiRatingKey == unchangedEpisode.PlexApiRatingKey)
             .Id.ShouldBe(originalUnchangedEpisodeId);
-        var persistedCreatedEpisode =
-            persistedEpisodes.Single(x => x.PlexApiRatingKey == createdEpisode.PlexApiRatingKey);
+        var persistedCreatedEpisode = persistedEpisodes.Single(x =>
+            x.PlexApiRatingKey == createdEpisode.PlexApiRatingKey
+        );
         persistedCreatedEpisode.Id.ShouldBeGreaterThan(0);
         persistedCreatedEpisode.TvShowId.ShouldBe(persisted.Id);
         persistedCreatedEpisode.TvShowSeasonId.ShouldBe(originalUnchangedSeasonId);
@@ -349,8 +348,8 @@ public class SyncPlexTvShowsCommandUnitTests : BaseUnitTest<SyncPlexTvShowsComma
         var show = IDbContext
             .PlexTvShows.AsNoTracking()
             .Include(x => x.Seasons)
-            .ThenInclude(x => x.Episodes)
-            .ThenInclude(x => x.MediaDataList)
+                .ThenInclude(x => x.Episodes)
+                    .ThenInclude(x => x.MediaDataList)
             .Single();
         var episodes = show.Seasons.Single().Episodes.OrderBy(x => x.Id).ToList();
         var unchanged = episodes[0];
@@ -370,10 +369,7 @@ public class SyncPlexTvShowsCommandUnitTests : BaseUnitTest<SyncPlexTvShowsComma
         // Assert
         result.IsSuccess.ShouldBeTrue();
         result.Value.UpdatedEpisodes.ShouldBe(1);
-        var persistedEpisodes = IDbContext
-            .PlexTvShowEpisodes.AsNoTracking()
-            .Include(x => x.MediaDataList)
-            .ToList();
+        var persistedEpisodes = IDbContext.PlexTvShowEpisodes.AsNoTracking().Include(x => x.MediaDataList).ToList();
         persistedEpisodes
             .Single(x => x.PlexApiRatingKey == unchanged.PlexApiRatingKey)
             .MediaDataList.Select(x => x.Id)
@@ -417,11 +413,7 @@ public class SyncPlexTvShowsCommandUnitTests : BaseUnitTest<SyncPlexTvShowsComma
         // Assert
         result.IsSuccess.ShouldBeTrue();
         IDbContext.PlexTvShows.Count(x => x.PlexLibraryId == target.Id).ShouldBe(0);
-        IDbContext
-            .PlexTvShows.Where(x => x.PlexLibraryId == other.Id)
-            .Select(x => x.Id)
-            .Order()
-            .ShouldBe(otherShowIds);
+        IDbContext.PlexTvShows.Where(x => x.PlexLibraryId == other.Id).Select(x => x.Id).Order().ShouldBe(otherShowIds);
     }
 
     [Test]
@@ -440,11 +432,7 @@ public class SyncPlexTvShowsCommandUnitTests : BaseUnitTest<SyncPlexTvShowsComma
             }
         );
         var library = IDbContext.PlexLibraries.First();
-        var show = IDbContext
-            .PlexTvShows.AsNoTracking()
-            .Include(x => x.Seasons)
-            .ThenInclude(x => x.Episodes)
-            .Single();
+        var show = IDbContext.PlexTvShows.AsNoTracking().Include(x => x.Seasons).ThenInclude(x => x.Episodes).Single();
         show.Seasons.Single().Episodes.Single().UpdatedAt = DateTime.UtcNow.AddYears(1);
         SetIds(library, [show]);
         library.TvShows.Add(show);
@@ -474,7 +462,7 @@ public class SyncPlexTvShowsCommandUnitTests : BaseUnitTest<SyncPlexTvShowsComma
     {
         // Arrange
         await SetupDatabase(
-            11871,
+            11873,
             config =>
             {
                 config.PlexServerCount = 1;
@@ -488,8 +476,8 @@ public class SyncPlexTvShowsCommandUnitTests : BaseUnitTest<SyncPlexTvShowsComma
         var shows = IDbContext
             .PlexTvShows.AsNoTracking()
             .Include(x => x.Seasons)
-            .ThenInclude(x => x.Episodes)
-            .ThenInclude(x => x.MediaDataList)
+                .ThenInclude(x => x.Episodes)
+                    .ThenInclude(x => x.MediaDataList)
             .OrderBy(x => x.Id)
             .ToList();
         var originalIds = shows.Select(x => x.Id).ToList();
@@ -507,7 +495,7 @@ public class SyncPlexTvShowsCommandUnitTests : BaseUnitTest<SyncPlexTvShowsComma
         result.IsSuccess.ShouldBeTrue(result.Errors.FirstOrDefault()?.Message);
         var replacedShows = IDbContext.PlexTvShows.AsNoTracking().OrderBy(x => x.Id).ToList();
         replacedShows.Count.ShouldBe(2);
-        replacedShows.Select(x => x.Id).ShouldNotBe(originalIds);
+        replacedShows.Select(x => x.Id).ShouldAllBe(id => !originalIds.Contains(id));
     }
 
     [Test]
@@ -564,7 +552,7 @@ public class SyncPlexTvShowsCommandUnitTests : BaseUnitTest<SyncPlexTvShowsComma
         var shows = IDbContext
             .PlexTvShows.AsNoTracking()
             .Include(x => x.Seasons)
-            .ThenInclude(x => x.Episodes)
+                .ThenInclude(x => x.Episodes)
             .OrderBy(x => x.Id)
             .ToList();
         var actor = FakeData.GetPlexActors(seed).Generate();
@@ -608,8 +596,8 @@ public class SyncPlexTvShowsCommandUnitTests : BaseUnitTest<SyncPlexTvShowsComma
 
         var library = IDbContext
             .PlexLibraries.Include(x => x.TvShows)
-            .ThenInclude(x => x.Seasons)
-            .ThenInclude(x => x.Episodes)
+                .ThenInclude(x => x.Seasons)
+                    .ThenInclude(x => x.Episodes)
             .First();
         library.ShouldNotBeNull();
 
@@ -803,8 +791,10 @@ public class SyncPlexTvShowsCommandUnitTests : BaseUnitTest<SyncPlexTvShowsComma
         {
             var findResult = plexTvShows.Find(x => x.PlexApiRatingKey == plexTvShow.PlexApiRatingKey);
             findResult.ShouldNotBeNull();
-            if (plexTvShow.UpdatedAt !=
-                tvShowsDb.Find(x => x.PlexApiRatingKey == plexTvShow.PlexApiRatingKey)?.UpdatedAt)
+            if (
+                plexTvShow.UpdatedAt
+                != tvShowsDb.Find(x => x.PlexApiRatingKey == plexTvShow.PlexApiRatingKey)?.UpdatedAt
+            )
                 findResult.Title.Contains("TEST").ShouldBeTrue();
         }
 
@@ -819,7 +809,7 @@ public class SyncPlexTvShowsCommandUnitTests : BaseUnitTest<SyncPlexTvShowsComma
         var plexLibraryId = newTvShows.First().PlexLibraryId;
         var dbPlexTvShows = IDbContext
             .PlexTvShows.Include(x => x.Seasons)
-            .ThenInclude(x => x.Episodes)
+                .ThenInclude(x => x.Episodes)
             .Where(x => x.PlexLibraryId == plexLibraryId)
             .ToList();
         var dbSeasons = dbPlexTvShows.SelectMany(x => x.Seasons).ToList();

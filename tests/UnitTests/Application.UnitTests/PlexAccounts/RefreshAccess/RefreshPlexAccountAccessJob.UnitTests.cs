@@ -12,12 +12,7 @@ public class RefreshPlexAccountAccessJobUnitTests : BaseUnitTest<RefreshPlexAcco
     {
         // Arrange
         Mock.Mock<ICommandExecutor>()
-            .Setup(x =>
-                x.Send(
-                    It.IsAny<RefreshPlexAccountAccessCommand>(),
-                    It.IsAny<CancellationToken>()
-                )
-            )
+            .Setup(x => x.Send(It.IsAny<RefreshPlexAccountAccessCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Ok(new List<RefreshPlexAccountAccessRapportDTO>()));
 
         // Act
@@ -27,11 +22,31 @@ public class RefreshPlexAccountAccessJobUnitTests : BaseUnitTest<RefreshPlexAcco
         await action.ShouldNotThrowAsync();
         Mock.Mock<ICommandExecutor>()
             .Verify(
-                x =>
-                    x.Send(
-                        It.IsAny<RefreshPlexAccountAccessCommand>(),
-                        It.IsAny<CancellationToken>()
-                    ),
+                x => x.Send(It.IsAny<RefreshPlexAccountAccessCommand>(), It.IsAny<CancellationToken>()),
+                Times.Once()
+            );
+    }
+
+    [Test]
+    public async Task ShouldComplete_WhenAccountAccessRefreshIsCancelled()
+    {
+        // Arrange
+        Mock.Mock<ICommandExecutor>()
+            .Setup(x => x.Send(It.IsAny<RefreshPlexAccountAccessCommand>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(
+                ResultExtensions
+                    .TaskIsCancelled(nameof(RefreshPlexAccountAccessCommand))
+                    .ToResult<List<RefreshPlexAccountAccessRapportDTO>>()
+            );
+
+        // Act
+        var action = () => Sut.ExecuteAsync(SetupJobContext(), CancellationToken);
+
+        // Assert
+        await action.ShouldNotThrowAsync();
+        Mock.Mock<ICommandExecutor>()
+            .Verify(
+                x => x.Send(It.IsAny<RefreshPlexAccountAccessCommand>(), It.IsAny<CancellationToken>()),
                 Times.Once()
             );
     }
@@ -41,12 +56,7 @@ public class RefreshPlexAccountAccessJobUnitTests : BaseUnitTest<RefreshPlexAcco
     {
         // Arrange
         Mock.Mock<ICommandExecutor>()
-            .Setup(x =>
-                x.Send(
-                    It.IsAny<RefreshPlexAccountAccessCommand>(),
-                    It.IsAny<CancellationToken>()
-                )
-            )
+            .Setup(x => x.Send(It.IsAny<RefreshPlexAccountAccessCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Fail<List<RefreshPlexAccountAccessRapportDTO>>("Refresh failed"));
 
         // Act

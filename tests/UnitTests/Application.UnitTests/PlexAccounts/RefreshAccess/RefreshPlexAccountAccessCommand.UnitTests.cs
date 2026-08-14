@@ -42,8 +42,10 @@ public class RefreshPlexAccountAccessCommandUnitTests : BaseUnitTest<RefreshPlex
         Mock.Mock<ICommandExecutor>()
             .Verify(x => x.Send(It.IsAny<ValidatePlexTokenCommand>(), It.IsAny<CancellationToken>()), Times.Once());
         Mock.Mock<ICommandExecutor>()
-            .Verify(x => x.Send(It.IsAny<RefreshPlexServerAccessCommand>(), It.IsAny<CancellationToken>()),
-                Times.Once());
+            .Verify(
+                x => x.Send(It.IsAny<RefreshPlexServerAccessCommand>(), It.IsAny<CancellationToken>()),
+                Times.Once()
+            );
         Mock.Mock<ICommandExecutor>()
             .Verify(x => x.Send(It.IsAny<RefreshLibraryAccessCommand>(), It.IsAny<CancellationToken>()), Times.Once());
     }
@@ -51,19 +53,22 @@ public class RefreshPlexAccountAccessCommandUnitTests : BaseUnitTest<RefreshPlex
     [Test]
     public async Task ShouldRemoveLibraryAccessForRevokedServer_WhenOtherServerAccessRemains()
     {
-        await SetupDatabase(77603, config =>
-        {
-            config.PlexAccountCount = 1;
-            config.PlexServerCount = 2;
-            config.PlexMovieLibraryCount = 1;
-        });
+        await SetupDatabase(
+            77603,
+            config =>
+            {
+                config.PlexAccountCount = 1;
+                config.PlexServerCount = 2;
+                config.PlexMovieLibraryCount = 1;
+            }
+        );
 
         var plexAccount = await IDbContext.PlexAccounts.FirstAsync(CancellationToken);
         var plexServers = await IDbContext.PlexServers.OrderBy(x => x.Id).Take(2).ToListAsync(CancellationToken);
         var retainedServer = plexServers[0];
         var revokedServer = plexServers[1];
-        var revokedLibrary = await IDbContext.PlexLibraries
-            .IgnoreQueryFilters()
+        var revokedLibrary = await IDbContext
+            .PlexLibraries.IgnoreQueryFilters()
             .FirstAsync(x => x.PlexServerId == revokedServer.Id, CancellationToken);
 
         IDbContext.PlexAccountServers.AddRange(
@@ -125,18 +130,19 @@ public class RefreshPlexAccountAccessCommandUnitTests : BaseUnitTest<RefreshPlex
             .Setup(x => x.SendRefreshNotificationAsync(It.IsAny<List<RefreshDataType>>()))
             .Returns(Task.CompletedTask);
 
-        var result = await Sut.ExecuteAsync(
-            new RefreshPlexAccountAccessCommand(plexAccount.Id),
-            CancellationToken
-        );
+        var result = await Sut.ExecuteAsync(new RefreshPlexAccountAccessCommand(plexAccount.Id), CancellationToken);
 
         result.IsSuccess.ShouldBeTrue();
-        (await IDbContext.PlexAccountLibraries.AnyAsync(
-            x => x.PlexAccountId == plexAccount.Id && x.PlexServerId == revokedServer.Id,
-            CancellationToken
-        )).ShouldBeFalse();
-        result.Value.Single().Access.Single(x => x.PlexServerId == revokedServer.Id).State
-            .ShouldBe(PlexAccessState.Revoked);
+        (
+            await IDbContext.PlexAccountLibraries.AnyAsync(
+                x => x.PlexAccountId == plexAccount.Id && x.PlexServerId == revokedServer.Id,
+                CancellationToken
+            )
+        ).ShouldBeFalse();
+        result
+            .Value.Single()
+            .Access.Single(x => x.PlexServerId == revokedServer.Id)
+            .State.ShouldBe(PlexAccessState.Revoked);
     }
 
     [Test]
@@ -157,13 +163,16 @@ public class RefreshPlexAccountAccessCommandUnitTests : BaseUnitTest<RefreshPlex
         var result = await Sut.ExecuteAsync(new RefreshPlexAccountAccessCommand(), CancellationToken);
 
         result.IsSuccess.ShouldBeTrue();
-        var updatedAccount = await IDbContext.PlexAccounts.FirstAsync(CancellationToken);
+        IDbContext.ClearChangeTracker();
+        var updatedAccount = await IDbContext.PlexAccounts.AsNoTracking().FirstAsync(CancellationToken);
         updatedAccount.IsValidated.ShouldBeFalse();
         updatedAccount.ValidatedAt.ShouldBeNull();
         updatedAccount.IsEnabled.ShouldBeTrue();
         Mock.Mock<ICommandExecutor>()
-            .Verify(x => x.Send(It.IsAny<RefreshPlexServerAccessCommand>(), It.IsAny<CancellationToken>()),
-                Times.Never());
+            .Verify(
+                x => x.Send(It.IsAny<RefreshPlexServerAccessCommand>(), It.IsAny<CancellationToken>()),
+                Times.Never()
+            );
         Mock.Mock<ICommandExecutor>()
             .Verify(x => x.Send(It.IsAny<RefreshLibraryAccessCommand>(), It.IsAny<CancellationToken>()), Times.Never());
     }

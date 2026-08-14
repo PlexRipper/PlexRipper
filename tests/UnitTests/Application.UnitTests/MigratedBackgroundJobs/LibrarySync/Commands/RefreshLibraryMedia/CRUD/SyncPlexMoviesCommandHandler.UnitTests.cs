@@ -150,11 +150,7 @@ public class SyncPlexMoviesCommandHandlerUnitTests : BaseUnitTest<SyncPlexMovies
         result.Value.UpdatedMovies.ShouldBe(1);
         result.Value.DeletedMovies.ShouldBe(0);
 
-        var persisted = IDbContext
-            .PlexMovies.AsNoTracking()
-            .Include(x => x.MediaDataList)
-            .OrderBy(x => x.Id)
-            .ToList();
+        var persisted = IDbContext.PlexMovies.AsNoTracking().Include(x => x.MediaDataList).OrderBy(x => x.Id).ToList();
         var persistedUnchanged = persisted.Single(x => x.PlexApiRatingKey == unchanged.PlexApiRatingKey);
         var persistedChanged = persisted.Single(x => x.PlexApiRatingKey == changed.PlexApiRatingKey);
         persistedUnchanged.Id.ShouldBe(unchangedId);
@@ -181,11 +177,7 @@ public class SyncPlexMoviesCommandHandlerUnitTests : BaseUnitTest<SyncPlexMovies
         var libraries = IDbContext.PlexLibraries.OrderBy(x => x.Id).ToList();
         var target = libraries[0];
         var other = libraries[1];
-        var otherIds = IDbContext
-            .PlexMovies.Where(x => x.PlexLibraryId == other.Id)
-            .Select(x => x.Id)
-            .Order()
-            .ToList();
+        var otherIds = IDbContext.PlexMovies.Where(x => x.PlexLibraryId == other.Id).Select(x => x.Id).Order().ToList();
 
         // Act
         var result = await Sut.ExecuteAsync(
@@ -197,11 +189,7 @@ public class SyncPlexMoviesCommandHandlerUnitTests : BaseUnitTest<SyncPlexMovies
         result.IsSuccess.ShouldBeTrue();
         result.Value.DeletedMovies.ShouldBe(3);
         IDbContext.PlexMovies.Count(x => x.PlexLibraryId == target.Id).ShouldBe(0);
-        IDbContext
-            .PlexMovies.Where(x => x.PlexLibraryId == other.Id)
-            .Select(x => x.Id)
-            .Order()
-            .ShouldBe(otherIds);
+        IDbContext.PlexMovies.Where(x => x.PlexLibraryId == other.Id).Select(x => x.Id).Order().ShouldBe(otherIds);
     }
 
     [Test]
@@ -275,7 +263,7 @@ public class SyncPlexMoviesCommandHandlerUnitTests : BaseUnitTest<SyncPlexMovies
     {
         // Arrange
         await SetupDatabase(
-            713457,
+            713459,
             config =>
             {
                 config.PlexServerCount = 1;
@@ -299,7 +287,7 @@ public class SyncPlexMoviesCommandHandlerUnitTests : BaseUnitTest<SyncPlexMovies
         result.IsSuccess.ShouldBeTrue();
         var replacedMovies = IDbContext.PlexMovies.AsNoTracking().OrderBy(x => x.Id).ToList();
         replacedMovies.Count.ShouldBe(2);
-        replacedMovies.Select(x => x.Id).ShouldNotBe(originalIds);
+        replacedMovies.Select(x => x.Id).ShouldAllBe(id => !originalIds.Contains(id));
     }
 
     [Test]

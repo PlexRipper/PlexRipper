@@ -364,5 +364,6 @@ Global
 		File = src\.run\Reaparr Back-End Development.run.xml
 		File = src\AppHost\ClientApp\.run\Nuxt Dev + Debug.run.xml
 		File = src\AppHost\ClientApp\.run\dev.run.xml
+		File = src\AppHost\ClientApp\.run\Browser Debug.run.xml
 	EndGlobalSection
 EndGlobal

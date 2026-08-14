@@ -3,8 +3,7 @@ namespace Reaparr.Application;
 public record RefreshPlexMovieLibraryCommand(
     InsertMediaMetaDataCommandResponse LibraryMetadata,
     bool ForceMediaRefresh = false
-)
-    : ICommand<Result<PlexLibrary>>;
+) : ICommand<Result<PlexLibrary>>;
 
 public class RefreshPlexMovieLibraryCommandValidator : AbstractValidator<RefreshPlexMovieLibraryCommand>
 {
@@ -13,9 +12,6 @@ public class RefreshPlexMovieLibraryCommandValidator : AbstractValidator<Refresh
         RuleFor(x => x.LibraryMetadata).NotNull();
         RuleFor(x => x.LibraryMetadata.PlexLibrary).NotNull();
         RuleFor(x => x.LibraryMetadata.PlexLibraryId).GreaterThan(0);
-        RuleFor(x => x.LibraryMetadata.PlexLibrary.Movies.Count)
-            .GreaterThan(0)
-            .WithMessage("PlexLibrary must contain Movies to continue with the refresh process.");
     }
 }
 

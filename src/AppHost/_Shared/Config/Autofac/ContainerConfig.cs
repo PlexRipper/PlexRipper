@@ -36,5 +36,6 @@ public static class ContainerConfig
 
         // Packages
         builder.RegisterModule<FastEndpointsModule>();
+        builder.RegisterModule<QuartzModule>();
     }
 }

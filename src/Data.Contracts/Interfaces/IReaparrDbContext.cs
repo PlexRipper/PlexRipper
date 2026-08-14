@@ -142,6 +142,14 @@ public interface IReaparrDbContext : IDisposable
 
     #endregion Properties
 
+    /// <summary>
+    /// Inserts the supplied entities using the configured bulk-operation behavior.
+    /// </summary>
+    /// <typeparam name="T">The entity type to insert.</typeparam>
+    /// <param name="entities">The entities to insert.</param>
+    /// <param name="bulkConfig">The optional bulk-operation configuration.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <returns>A task that represents the asynchronous bulk-insert operation.</returns>
     Task BulkInsertAsync<T>(
         IList<T> entities,
         BulkConfig? bulkConfig = null,
@@ -149,6 +157,14 @@ public interface IReaparrDbContext : IDisposable
     )
         where T : class;
 
+    /// <summary>
+    /// Updates the supplied entities using the configured bulk-operation behavior.
+    /// </summary>
+    /// <typeparam name="T">The entity type to update.</typeparam>
+    /// <param name="entities">The entities to update.</param>
+    /// <param name="bulkConfig">The optional bulk-operation configuration.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <returns>A task that represents the asynchronous bulk-update operation.</returns>
     Task BulkUpdateAsync<T>(
         IList<T> entities,
         BulkConfig? bulkConfig = null,
@@ -157,62 +173,52 @@ public interface IReaparrDbContext : IDisposable
         where T : class;
 
     /// <summary>
-    /// Executes an operation with automatic retry on <c>SQLITE_BUSY</c> and
-    /// <c>SQLITE_BUSY_SNAPSHOT</c> errors.
+    /// Executes an operation in a short immediate write transaction and returns its result.
     /// </summary>
-    /// <typeparam name="T">The result type.</typeparam>
-    /// <param name="operation">The operation to execute.</param>
-    /// <param name="maxRetries">
-    /// The maximum number of retry attempts. Each retry waits using exponential backoff
-    /// with jitter starting at 100 ms.
-    /// </param>
+    /// <typeparam name="T">The type returned by the transactional operation.</typeparam>
+    /// <param name="operation">The operation to execute using this database context.</param>
     /// <param name="cancellationToken">The cancellation token.</param>
-    /// <returns>The result of the operation.</returns>
-    /// <remarks>
-    /// <para>
-    /// Two classes of busy error are handled:
-    /// </para>
-    /// <list type="bullet">
-    ///   <item>
-    ///     <b>SQLITE_BUSY / SQLITE_BUSY_RECOVERY / SQLITE_BUSY_TIMEOUT</b> — another
-    ///     connection holds a lock. The operation is retried after a backoff delay.
-    ///   </item>
-    ///   <item>
-    ///     <b>SQLITE_BUSY_SNAPSHOT</b> — the connection's read snapshot became stale
-    ///     after another writer committed. The entire operation is restarted so that it
-    ///     can acquire a fresh snapshot. Any data read in the failed attempt must be
-    ///     re-queried inside the operation lambda.
-    ///   </item>
-    /// </list>
-    /// <para>
-    ///   <b>SQLITE_LOCKED</b> (same-connection conflict) is not retried and propagates
-    ///   immediately, as it indicates an application-level bug.
-    /// </para>
-    /// </remarks>
-    Task<T> ExecuteWithRetryAsync<T>(
-        Func<IReaparrDbContext, Task<T>> operation,
-        int maxRetries = 3,
-        CancellationToken cancellationToken = default
-    );
-
-    Task<Result<T>> ExecuteSerializedTransactionAsync<T>(
+    /// <returns>
+    /// A result containing the operation value when the transaction succeeds, or failure information when it fails.
+    /// </returns>
+    Task<Result<T>> ExecuteTransactionAsync<T>(
         Func<IReaparrDbContext, CancellationToken, Task<T>> operation,
         CancellationToken cancellationToken = default
     );
 
-    Task<Result> ExecuteSerializedTransactionAsync(
+    /// <summary>
+    /// Executes an operation in a short immediate write transaction.
+    /// </summary>
+    /// <param name="operation">The operation to execute using this database context.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <returns>A result indicating whether the transaction succeeded or failed.</returns>
+    Task<Result> ExecuteTransactionAsync(
         Func<IReaparrDbContext, CancellationToken, Task> operation,
         CancellationToken cancellationToken = default
     );
 
+    /// <summary>
+    /// Gets the change-tracking entry for the supplied entity.
+    /// </summary>
+    /// <param name="entity">The entity whose tracking information should be retrieved.</param>
+    /// <returns>The change-tracking entry for the entity.</returns>
     EntityEntry Entry(object entity);
 
+    /// <summary>
+    /// Saves all tracked changes to the database asynchronously.
+    /// </summary>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <returns>The number of state entries written to the database.</returns>
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 
+    /// <summary>
+    /// Removes all tracked entities from the change tracker.
+    /// </summary>
+    /// <returns>This method does not return a value.</returns>
     void ClearChangeTracker();
 
     /// <summary>
-    /// Executes the given interpolated SQL against the database and returns the number of rows affected.
+    /// Executes interpolated SQL against the database and returns the number of affected rows.
     /// </summary>
     /// <param name="sql">The interpolated SQL command with parameters.</param>
     /// <param name="cancellationToken">The cancellation token.</param>

@@ -1,3 +1,5 @@
+using Moq.Contrib.HttpClient;
+
 namespace Reaparr.IntegrationTests;
 
 public class RefreshPlexAccountAccessEndpointIntegrationTestsIntegrationTests : BaseIntegrationTests
@@ -26,6 +28,17 @@ public class RefreshPlexAccountAccessEndpointIntegrationTestsIntegrationTests : 
                     x.MovieLibraryCount = plexLibraryCount;
                     x.MoviesPerLibraryCount = 25;
                     x.SetServerResourcesResponse = HttpStatusCode.Unauthorized;
+                };
+                config.HttpClientOptions = (handler, _) =>
+                {
+                    handler
+                        .SetupRequest(HttpMethod.Get, "https://plex.tv/api/v2/user")
+                        .ReturnsAsync(
+                            (HttpRequestMessage req, CancellationToken _) =>
+                                FakePlexApiData
+                                    .GetPlexUnauthorizedResponseMessage(req)
+                                    .ToJsonHttpResponse(req, HttpStatusCode.Unauthorized)
+                        );
                 };
             }
         );

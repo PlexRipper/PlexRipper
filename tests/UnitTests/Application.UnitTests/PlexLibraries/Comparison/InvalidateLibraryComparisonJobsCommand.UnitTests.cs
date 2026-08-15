@@ -16,11 +16,30 @@ public class InvalidateLibraryComparisonJobsCommandUnitTests
         var ownedJobKey = PlexLibraryComparisonJob.GetJobKey(affectedLibraryId, 34);
         var remoteJobKey = PlexLibraryComparisonJob.GetJobKey(56, affectedLibraryId);
         var scheduler = Mock.Mock<IScheduler>();
+        var ownedJobDetail = new Mock<IJobDetail>();
+        ownedJobDetail
+            .SetupGet(x => x.JobDataMap)
+            .Returns(new PlexLibraryComparisonJobPayload(affectedLibraryId, 34).ToJobDataMap());
+        var remoteJobDetail = new Mock<IJobDetail>();
+        remoteJobDetail
+            .SetupGet(x => x.JobDataMap)
+            .Returns(new PlexLibraryComparisonJobPayload(56, affectedLibraryId).ToJobDataMap());
+        var unaffectedJobKey = PlexLibraryComparisonJob.GetJobKey(7, 8);
+        var unaffectedJobDetail = new Mock<IJobDetail>();
+        unaffectedJobDetail
+            .SetupGet(x => x.JobDataMap)
+            .Returns(new PlexLibraryComparisonJobPayload(7, 8).ToJobDataMap());
+
         scheduler
             .Setup(x =>
                 x.GetJobKeys(GroupMatcher<JobKey>.GroupEquals(nameof(JobTypes.LibraryComparisonJob)), CancellationToken)
             )
-            .ReturnsAsync([ownedJobKey, remoteJobKey, PlexLibraryComparisonJob.GetJobKey(7, 8)]);
+            .ReturnsAsync([ownedJobKey, remoteJobKey, unaffectedJobKey]);
+        scheduler.Setup(x => x.GetJobDetail(ownedJobKey, CancellationToken)).ReturnsAsync(ownedJobDetail.Object);
+        scheduler.Setup(x => x.GetJobDetail(remoteJobKey, CancellationToken)).ReturnsAsync(remoteJobDetail.Object);
+        scheduler
+            .Setup(x => x.GetJobDetail(unaffectedJobKey, CancellationToken))
+            .ReturnsAsync(unaffectedJobDetail.Object);
         scheduler
             .Setup(x =>
                 x.DeleteJobs(

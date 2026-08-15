@@ -14,13 +14,9 @@ public class QueueInspectPlexServerJobCommandHandler : ICommandHandler<QueueInsp
 {
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
-    private readonly IBackgroundJobScheduler _scheduler;
+    private readonly IScheduler _scheduler;
 
-    public QueueInspectPlexServerJobCommandHandler(
-        ILogger log,
-        IReaparrDbContext dbContext,
-        IBackgroundJobScheduler scheduler
-    )
+    public QueueInspectPlexServerJobCommandHandler(ILogger log, IReaparrDbContext dbContext, IScheduler scheduler)
     {
         _log = log.ForContext<QueueInspectPlexServerJobCommandHandler>();
         _dbContext = dbContext;
@@ -94,7 +90,7 @@ public class QueueInspectPlexServerJobCommandHandler : ICommandHandler<QueueInsp
             queuedServerIds.Select(serverId =>
                 _scheduler.ExecuteJob<InspectPlexServerJob, InspectPlexServerJobPayload>(
                     InspectPlexServerJob.GetJobKey(serverId),
-                    new InspectPlexServerJobPayload { PlexServerIds = [serverId] },
+                    new InspectPlexServerJobPayload([serverId]),
                     cancellationToken
                 )
             )

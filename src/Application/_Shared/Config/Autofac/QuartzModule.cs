@@ -17,11 +17,11 @@ public class QuartzModule : Module
 
         // Register Quartz dependencies
         // Source: https://www.quartz-scheduler.net/
-        builder.RegisterType<QuartzSchedulerService>().SingleInstance();
         builder.RegisterType<AllJobListener>().SingleInstance();
         builder.RegisterType<DownloadJobListener>().SingleInstance();
         builder.RegisterType<LibrarySyncJobListener>().SingleInstance();
         builder.RegisterType<ReaparrSchedulerListener>().SingleInstance();
+        builder.RegisterType<BackgroundJobsSetup>().As<IBackgroundJobsSetup>().SingleInstance();
 
         // Source: https://github.com/alphacloud/Autofac.Extras.Quartz
         builder.RegisterModule(

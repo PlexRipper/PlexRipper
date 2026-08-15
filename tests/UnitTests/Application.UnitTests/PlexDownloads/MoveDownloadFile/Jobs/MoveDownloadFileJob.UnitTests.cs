@@ -1,11 +1,21 @@
-using TickerQ.Utilities.Base;
+using Quartz;
 
 namespace Reaparr.Application.UnitTests;
 
 public class MoveDownloadFileJobUnitTests : BaseUnitTest<MoveDownloadFileJob>
 {
-    private static TickerFunctionContext<DownloadTaskKey> SetupJobContext(DownloadTaskKey key) =>
-        new(new TickerFunctionContext(), key);
+    private static IJobExecutionContext SetupJobContext(DownloadTaskKey key)
+    {
+        var jobDetail = new Mock<IJobDetail>();
+        jobDetail
+            .SetupGet(x => x.JobDataMap)
+            .Returns(new MoveDownloadFileJobPayload(key).ToJobDataMap());
+
+        var context = new Mock<IJobExecutionContext>();
+        context.SetupGet(x => x.JobDetail).Returns(jobDetail.Object);
+        context.SetupGet(x => x.CancellationToken).Returns(CancellationToken.None);
+        return context.Object;
+    }
 
     [Test]
     public async Task ShouldDispatchCompletedStatus_WhenMoveSucceeds()
@@ -50,7 +60,7 @@ public class MoveDownloadFileJobUnitTests : BaseUnitTest<MoveDownloadFileJob>
         var context = SetupJobContext(downloadTask.ToKey());
 
         // Act
-        await Sut.ExecuteAsync(context, CancellationToken);
+        await Sut.Execute(context);
 
         // Assert
         var after = await dbContext.GetDownloadTaskFileAsync(downloadTask.ToKey(), CancellationToken);
@@ -124,7 +134,7 @@ public class MoveDownloadFileJobUnitTests : BaseUnitTest<MoveDownloadFileJob>
         var context = SetupJobContext(downloadTask.ToKey());
 
         // Act
-        await Sut.ExecuteAsync(context, CancellationToken);
+        await Sut.Execute(context);
 
         // Assert: status stays at DownloadFinished (the command handler sets MoveError,
         // but since the command is mocked to fail without touching the DB, status is unchanged)
@@ -198,7 +208,7 @@ public class MoveDownloadFileJobUnitTests : BaseUnitTest<MoveDownloadFileJob>
         var context = SetupJobContext(downloadTask.ToKey());
 
         // Act
-        await Sut.ExecuteAsync(context, CancellationToken);
+        await Sut.Execute(context);
 
         // Assert
         var after = await dbContext.GetDownloadTaskFileAsync(downloadTask.ToKey(), CancellationToken);
@@ -270,7 +280,7 @@ public class MoveDownloadFileJobUnitTests : BaseUnitTest<MoveDownloadFileJob>
         var context = SetupJobContext(downloadTask.ToKey());
 
         // Act
-        var act = async () => await Sut.ExecuteAsync(context, CancellationToken);
+        var act = async () => await Sut.Execute(context);
 
         // Assert
         await act.ShouldNotThrowAsync();
@@ -328,7 +338,7 @@ public class MoveDownloadFileJobUnitTests : BaseUnitTest<MoveDownloadFileJob>
         var context = SetupJobContext(downloadTask.ToKey());
 
         // Act
-        await Sut.ExecuteAsync(context, CancellationToken);
+        await Sut.Execute(context);
 
         // Assert
         var after = await dbContext

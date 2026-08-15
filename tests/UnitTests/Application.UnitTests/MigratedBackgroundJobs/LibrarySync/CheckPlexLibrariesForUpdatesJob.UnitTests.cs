@@ -1,9 +1,16 @@
-using TickerQ.Utilities.Base;
+using Quartz;
 
 namespace Reaparr.Application.UnitTests;
 
 public class CheckPlexLibrariesForUpdatesJobUnitTests : BaseUnitTest<CheckPlexLibrariesForUpdatesJob>
 {
+    private static IJobExecutionContext SetupJobContext()
+    {
+        var context = new Mock<IJobExecutionContext>();
+        context.SetupGet(x => x.CancellationToken).Returns(CancellationToken.None);
+        return context.Object;
+    }
+
     [Test]
     public async Task ShouldRefreshLibraryAccessForEnabledServers_WhenAutoSyncIsEnabled()
     {
@@ -56,16 +63,10 @@ public class CheckPlexLibrariesForUpdatesJobUnitTests : BaseUnitTest<CheckPlexLi
             .Setup(x => x.Send(It.IsAny<QueueLibrarySyncJobCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Ok())
             .Verifiable(Times.Never());
-        Mock.Mock<IProgressHubService>()
-            .Setup(x => x.SendJobStatusUpdateAsync(It.IsAny<JobStatusUpdate<CheckPlexLibrariesForUpdatesJobUpdate>>()))
-            .Returns(Task.CompletedTask);
-        var context = new TickerFunctionContext<CheckPlexLibrariesForUpdatesJobPayload>(
-            new TickerFunctionContext(),
-            new CheckPlexLibrariesForUpdatesJobPayload()
-        );
+        var context = SetupJobContext();
 
         // Act
-        await Sut.ExecuteAsync(context, CancellationToken);
+        await Sut.Execute(context);
 
         // Assert
         Mock.Mock<ICommandExecutor>().Verify();
@@ -123,16 +124,10 @@ public class CheckPlexLibrariesForUpdatesJobUnitTests : BaseUnitTest<CheckPlexLi
             .Setup(x => x.Send(It.IsAny<QueueLibrarySyncJobCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Ok())
             .Verifiable(Times.Never());
-        Mock.Mock<IProgressHubService>()
-            .Setup(x => x.SendJobStatusUpdateAsync(It.IsAny<JobStatusUpdate<CheckPlexLibrariesForUpdatesJobUpdate>>()))
-            .Returns(Task.CompletedTask);
-        var context = new TickerFunctionContext<CheckPlexLibrariesForUpdatesJobPayload>(
-            new TickerFunctionContext(),
-            new CheckPlexLibrariesForUpdatesJobPayload()
-        );
+        var context = SetupJobContext();
 
         // Act
-        await Sut.ExecuteAsync(context, CancellationToken);
+        await Sut.Execute(context);
 
         // Assert
         Mock.Mock<ICommandExecutor>().Verify();
@@ -223,16 +218,10 @@ public class CheckPlexLibrariesForUpdatesJobUnitTests : BaseUnitTest<CheckPlexLi
             )
             .ReturnsAsync(Result.Ok())
             .Verifiable(Times.Once());
-        Mock.Mock<IProgressHubService>()
-            .Setup(x => x.SendJobStatusUpdateAsync(It.IsAny<JobStatusUpdate<CheckPlexLibrariesForUpdatesJobUpdate>>()))
-            .Returns(Task.CompletedTask);
-        var context = new TickerFunctionContext<CheckPlexLibrariesForUpdatesJobPayload>(
-            new TickerFunctionContext(),
-            new CheckPlexLibrariesForUpdatesJobPayload()
-        );
+        var context = SetupJobContext();
 
         // Act
-        await Sut.ExecuteAsync(context, CancellationToken);
+        await Sut.Execute(context);
 
         // Assert
         Mock.Mock<ICommandExecutor>().Verify();

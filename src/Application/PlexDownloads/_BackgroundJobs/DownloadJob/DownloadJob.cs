@@ -2,6 +2,8 @@
 
 namespace Reaparr.Application;
 
+public sealed record DownloadJobPayload(DownloadTaskKey DownloadTaskKey);
+
 [DisallowConcurrentExecution]
 public class DownloadJob : IJob
 {
@@ -29,22 +31,25 @@ public class DownloadJob : IJob
         _plexDownloadClientFactory = plexDownloadClientFactory;
     }
 
-    public static string DownloadTaskIdParameter => "DownloadTaskId";
-
-    public static JobKey GetJobKey(Guid id) => new($"{DownloadTaskIdParameter}_{id}", nameof(DownloadJob));
+    public static JobKey GetJobKey(Guid id) => new($"{nameof(DownloadJob)}_{id}", nameof(DownloadJob));
 
     public async Task Execute(IJobExecutionContext context)
     {
-        DownloadTaskKey? downloadTaskKey = null;
+        var payloadResult = context.GetRequiredPayload<DownloadJobPayload>();
+        if (payloadResult.IsFailed)
+        {
+            context.SetResult(JobStatus.Failed, payloadResult);
+            payloadResult.LogError();
+            return;
+        }
+
+        var downloadTaskKey = payloadResult.Value.DownloadTaskKey;
         var token = context.CancellationToken;
 
         // Jobs should swallow exceptions as otherwise Quartz will keep re-executing it
         // https://www.quartz-scheduler.net/documentation/best-practices.html#throwing-exceptions
         var executionResult = await Result.Try(async Task () =>
         {
-            var dataMap = context.JobDetail.JobDataMap;
-            downloadTaskKey = dataMap.GetJsonValue<DownloadTaskKey>(DownloadTaskIdParameter);
-
             _log.Here()
                 .Debug(
                     "Executing job: {DownloadJobName} for {DownloadTaskIdName} with id: {DownloadTaskId}",
@@ -166,9 +171,15 @@ public class DownloadJob : IJob
         });
 
         if (executionResult.IsCancelled)
+        {
+            context.SetResult(JobStatus.Cancelled, executionResult);
             executionResult.LogWarning();
+        }
         else if (executionResult.IsFailed)
+        {
+            context.SetResult(JobStatus.Failed, executionResult);
             executionResult.LogError();
+        }
 
         _log.Here()
             .Debug(

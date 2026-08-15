@@ -1,3 +1,4 @@
+using Quartz;
 using Reaparr.Application.Contracts;
 
 namespace Reaparr.AppHost;
@@ -15,7 +16,8 @@ public class Boot : IHostedService
 
     private readonly IHostApplicationLifetime _appLifetime;
 
-    private readonly IBackgroundJobScheduler _backgroundJobScheduler;
+    private readonly IScheduler _scheduler;
+    private readonly IBackgroundJobsSetup _backgroundJobsSetup;
 
     private readonly IDownloadQueue _downloadQueue;
 
@@ -31,7 +33,8 @@ public class Boot : IHostedService
         ICommandExecutor commandExecutor,
         IAppRuntimeInfo appRuntimeInfo,
         IHostApplicationLifetime appLifetime,
-        IBackgroundJobScheduler backgroundJobScheduler,
+        IScheduler scheduler,
+        IBackgroundJobsSetup backgroundJobsSetup,
         IDownloadQueue downloadQueue
     )
     {
@@ -39,7 +42,8 @@ public class Boot : IHostedService
         _commandExecutor = commandExecutor;
         _appRuntimeInfo = appRuntimeInfo;
         _appLifetime = appLifetime;
-        _backgroundJobScheduler = backgroundJobScheduler;
+        _scheduler = scheduler;
+        _backgroundJobsSetup = backgroundJobsSetup;
         _downloadQueue = downloadQueue;
 
         appLifetime.ApplicationStarted.Register(OnStarted);
@@ -80,9 +84,11 @@ public class Boot : IHostedService
         if (recoverResult.IsFailed)
             recoverResult.LogError();
 
-        var schedulerSetupResult = await _backgroundJobScheduler.SetupAsync(cancellationToken);
-        if (schedulerSetupResult.IsFailed)
+        // Start Quartz scheduler
+        var setupResult = await _backgroundJobsSetup.SetupAsync(cancellationToken);
+        if (setupResult.IsFailed)
         {
+            setupResult.LogError();
             TerminateApplication();
             return;
         }
@@ -108,10 +114,16 @@ public class Boot : IHostedService
     {
         _log.Here().Information("Shutting down the container");
 
-        // Stop scheduler first so background jobs can't race with the auto-pause DB queries
-        var schedulerStopResult = await _backgroundJobScheduler.StopAsync(cancellationToken);
-        if (schedulerStopResult.IsFailed)
-            schedulerStopResult.LogError();
+        // Stop acquiring work, interrupt cooperative jobs, and bound shutdown so host termination cannot hang forever.
+        if (!_scheduler.IsShutdown)
+        {
+            using var shutdownTimeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+            shutdownTimeout.CancelAfter(TimeSpan.FromSeconds(30));
+            await _scheduler.Standby(shutdownTimeout.Token);
+            foreach (var context in await _scheduler.GetCurrentlyExecutingJobs(shutdownTimeout.Token))
+                await _scheduler.Interrupt(context.FireInstanceId, shutdownTimeout.Token);
+            await _scheduler.Shutdown(waitForJobsToComplete: true, shutdownTimeout.Token);
+        }
 
         var autoPauseResult = await _commandExecutor.Send(new AutoPauseActiveDownloadsCommand(), cancellationToken);
         if (autoPauseResult.IsFailed)

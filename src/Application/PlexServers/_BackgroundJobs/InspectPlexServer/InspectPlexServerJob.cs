@@ -1,18 +1,19 @@
 namespace Reaparr.Application;
 
+public sealed record InspectPlexServerJobPayload(IReadOnlyCollection<int> PlexServerIds);
+
 /// <summary>
 /// Executed on a new Plex Account to check all connections and refresh libraries.
 /// </summary>
 public class InspectPlexServerJob : IJob
 {
-    public static string PlexServerIdsParameter => "plexServerIds";
-
     private readonly IReaparrDbContextFactory _dbContextFactory;
     private readonly INotificationHubService _notificationHubService;
     private readonly ILogger _log;
     private readonly ICommandExecutor _commandExecutor;
 
-    public static JobKey GetJobKey() => new(Guid.NewGuid().ToString(), nameof(InspectPlexServerJob));
+    public static JobKey GetJobKey(int plexServerId) =>
+        new($"{nameof(InspectPlexServerJob)}_{plexServerId}", nameof(InspectPlexServerJob));
 
     public InspectPlexServerJob(
         ILogger log,
@@ -29,10 +30,16 @@ public class InspectPlexServerJob : IJob
 
     public async Task Execute(IJobExecutionContext context)
     {
-        var dataMap = context.JobDetail.JobDataMap;
-        var cancellationToken = context.CancellationToken;
+        var payloadResult = context.GetRequiredPayload<InspectPlexServerJobPayload>();
+        if (payloadResult.IsFailed)
+        {
+            context.SetResult(JobStatus.Failed, payloadResult);
+            payloadResult.LogError();
+            return;
+        }
 
-        var plexServerIds = dataMap.GetIntListValue(PlexServerIdsParameter);
+        var cancellationToken = context.CancellationToken;
+        var plexServerIds = payloadResult.Value.PlexServerIds;
 
         _log.Here()
             .Debug(
@@ -56,12 +63,26 @@ public class InspectPlexServerJob : IJob
 
             if (failedResults.Count == 0 && cancelledResults.Count == 0)
                 _log.Here().Information("Successfully finished the inspection of {Count}", plexServerIds.Count);
+            else
+                context.SetResult(
+                    cancelledResults.Count > 0 ? JobStatus.Cancelled : JobStatus.Failed,
+                    (cancelledResults.Count > 0 ? cancelledResults : failedResults)
+                        .FirstOrDefault()
+                        ?.Errors.FirstOrDefault()
+                        ?.Message
+                );
         });
 
         if (executionResult.IsCancelled)
+        {
+            context.SetResult(JobStatus.Cancelled, executionResult);
             executionResult.LogWarning();
+        }
         else if (executionResult.IsFailed)
+        {
+            context.SetResult(JobStatus.Failed, executionResult);
             executionResult.LogError();
+        }
     }
 
     private async Task<Result> InspectPlexServer(int plexServerId, CancellationToken cancellationToken)

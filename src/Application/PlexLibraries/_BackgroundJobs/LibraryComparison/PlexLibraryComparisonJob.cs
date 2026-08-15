@@ -1,5 +1,7 @@
 namespace Reaparr.Application;
 
+public sealed record PlexLibraryComparisonJobPayload(int OwnedPlexLibraryId, int RemotePlexLibraryId);
+
 /// <summary>
 /// Compares one remote Plex library with one owned Plex library.
 /// </summary>
@@ -20,10 +22,6 @@ public class PlexLibraryComparisonJob : IJob
 
     protected List<RefreshDataType> RefreshDataTypes => [];
 
-    public string OwnedPlexLibraryIdParameter => "OwnedPlexLibraryId";
-
-    public string RemotePlexLibraryIdParameter => "RemotePlexLibraryId";
-
     public static JobKey GetJobKey(int ownedPlexLibraryId, int remotePlexLibraryId) =>
         new(
             $"{nameof(JobTypes.LibraryComparisonJob)}_{ownedPlexLibraryId}_{remotePlexLibraryId}",
@@ -32,10 +30,17 @@ public class PlexLibraryComparisonJob : IJob
 
     public async Task Execute(IJobExecutionContext context)
     {
-        var cancellationToken = context.CancellationToken;
+        var payloadResult = context.GetRequiredPayload<PlexLibraryComparisonJobPayload>();
+        if (payloadResult.IsFailed)
+        {
+            context.SetResult(JobStatus.Failed, payloadResult);
+            payloadResult.LogError();
+            return;
+        }
 
-        var ownedPlexLibraryId = context.MergedJobDataMap.GetIntValue(OwnedPlexLibraryIdParameter);
-        var remotePlexLibraryId = context.MergedJobDataMap.GetIntValue(RemotePlexLibraryIdParameter);
+        var cancellationToken = context.CancellationToken;
+        var ownedPlexLibraryId = payloadResult.Value.OwnedPlexLibraryId;
+        var remotePlexLibraryId = payloadResult.Value.RemotePlexLibraryId;
 
         var libraries = await _dbContext
             .PlexLibraries.Where(x => x.Id == remotePlexLibraryId || x.Id == ownedPlexLibraryId)

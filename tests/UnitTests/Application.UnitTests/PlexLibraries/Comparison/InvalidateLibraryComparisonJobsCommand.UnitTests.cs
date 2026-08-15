@@ -1,4 +1,5 @@
-using TickerQ.Utilities.Models;
+using Quartz;
+using Quartz.Impl.Matchers;
 
 namespace Reaparr.Application.UnitTests;
 
@@ -14,24 +15,22 @@ public class InvalidateLibraryComparisonJobsCommandUnitTests
         var affectedLibraryId = 12;
         var ownedJobKey = PlexLibraryComparisonJob.GetJobKey(affectedLibraryId, 34);
         var remoteJobKey = PlexLibraryComparisonJob.GetJobKey(56, affectedLibraryId);
-        var dbContext = IDbContext;
-        dbContext.TimeTickers.AddRange(
-            CreateTicker(ownedJobKey, affectedLibraryId, 34),
-            CreateTicker(remoteJobKey, 56, affectedLibraryId),
-            CreateTicker(PlexLibraryComparisonJob.GetJobKey(7, 8), 7, 8)
-        );
-        await dbContext.SaveChangesAsync(CancellationToken);
-
-        Mock.Mock<IBackgroundJobScheduler>()
+        var scheduler = Mock.Mock<IScheduler>();
+        scheduler
             .Setup(x =>
-                x.DeleteBatchJobs(
+                x.GetJobKeys(GroupMatcher<JobKey>.GroupEquals(nameof(JobTypes.LibraryComparisonJob)), CancellationToken)
+            )
+            .ReturnsAsync([ownedJobKey, remoteJobKey, PlexLibraryComparisonJob.GetJobKey(7, 8)]);
+        scheduler
+            .Setup(x =>
+                x.DeleteJobs(
                     It.Is<IReadOnlyCollection<JobKey>>(keys =>
                         keys.Count == 2 && keys.Any(x => x == ownedJobKey) && keys.Any(x => x == remoteJobKey)
                     ),
                     CancellationToken
                 )
             )
-            .ReturnsAsync(Result.Ok());
+            .ReturnsAsync(true);
 
         // Act
         var result = await Sut.ExecuteAsync(
@@ -41,20 +40,6 @@ public class InvalidateLibraryComparisonJobsCommandUnitTests
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
-        Mock.Mock<IBackgroundJobScheduler>().VerifyAll();
+        scheduler.VerifyAll();
     }
-
-    private static JobTimeTicker CreateTicker(JobKey jobKey, int ownedPlexLibraryId, int remotePlexLibraryId) =>
-        new()
-        {
-            Function = nameof(PlexLibraryComparisonJob),
-            Request = [],
-            RequestJson = new JobTimeTickerRequestProperties
-            {
-                OwnedPlexLibraryId = ownedPlexLibraryId,
-                RemotePlexLibraryId = remotePlexLibraryId,
-            },
-            JobKey = jobKey.Name,
-            JobType = jobKey.Type,
-        };
 }

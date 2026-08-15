@@ -163,7 +163,7 @@ public class DownloadQueue : IDownloadQueue
 
         var hasDownloadingTask = downloadTasks.Any(x => x.DownloadStatus == DownloadStatus.Downloading);
 
-        // Avoid a race where the persisted task still says downloading while its TickerQ job is finishing.
+        // Avoid a race where the persisted task still says downloading while its Quartz job is finishing.
         if (hasDownloadingTask && await _downloadTaskScheduler.IsServerDownloading(plexServerId))
         {
             return Result

@@ -1,7 +1,5 @@
 namespace Reaparr.Application;
 
-public sealed record RefreshPlexAccountAccessJobPayload;
-
 /// <summary>
 /// Periodically validates enabled Plex accounts and refreshes their server and library access.
 /// </summary>
@@ -26,24 +24,23 @@ public class RefreshPlexAccountAccessJob : IJob
 
     public async Task Execute(IJobExecutionContext context)
     {
-        _log.Here().Debug("Executing job: {JobName}", nameof(RefreshPlexAccountAccessJob));
-
         var cancellationToken = context.CancellationToken;
+        _log.Here().Debug("Executing job: {JobName}", nameof(RefreshPlexAccountAccessJob));
 
         var result = await _commandExecutor.Send(new RefreshPlexAccountAccessCommand(), cancellationToken);
 
         if (result.IsCancelled)
         {
+            context.SetResult(JobStatus.Cancelled, result);
             result.LogWarning();
-            throw new OperationCanceledException(cancellationToken);
+            return;
         }
 
         if (result.IsFailed)
         {
+            context.SetResult(JobStatus.Failed, result);
             result.LogError();
-            throw new InvalidOperationException(
-                string.Join(System.Environment.NewLine, result.Errors.Select(x => x.Message))
-            );
+            return;
         }
 
         _log.Here()

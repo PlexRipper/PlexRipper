@@ -1,15 +1,21 @@
-using TickerQ.Utilities.Base;
-using TickerQ.Utilities.Models;
+using Quartz;
 
 namespace Reaparr.Application.UnitTests;
 
 public class LibrarySyncJobUnitTests : BaseUnitTest<LibrarySyncJob>
 {
-    private static TickerFunctionContext<LibrarySyncJobPayload> SetupJobContext(int serverId, int libraryId) =>
-        new(
-            new TickerFunctionContext(),
-            new LibrarySyncJobPayload { PlexServerId = serverId, PlexLibraryId = libraryId }
-        );
+    private static IJobExecutionContext SetupJobContext(int serverId, int libraryId)
+    {
+        var jobDetail = new Mock<IJobDetail>();
+        jobDetail
+            .SetupGet(x => x.JobDataMap)
+            .Returns(new LibrarySyncJobPayload(serverId, libraryId).ToJobDataMap());
+
+        var context = new Mock<IJobExecutionContext>();
+        context.SetupGet(x => x.JobDetail).Returns(jobDetail.Object);
+        context.SetupGet(x => x.CancellationToken).Returns(CancellationToken.None);
+        return context.Object;
+    }
 
     [Test]
     public async Task ShouldSkipDuplicateDelivery_WhenQueueItemHasAlreadyBeenClaimed()
@@ -43,7 +49,7 @@ public class LibrarySyncJobUnitTests : BaseUnitTest<LibrarySyncJob>
         var context = SetupJobContext(server.Id, library.Id);
 
         // Act
-        await Sut.ExecuteAsync(context, CancellationToken);
+        await Sut.Execute(context);
 
         // Assert
         Mock.Mock<ICommandExecutor>()
@@ -53,14 +59,9 @@ public class LibrarySyncJobUnitTests : BaseUnitTest<LibrarySyncJob>
             );
         Mock.Mock<ICommandExecutor>()
             .Verify(x => x.Send(It.IsAny<RefreshLibraryMediaCommand>(), It.IsAny<CancellationToken>()), Times.Never);
-        Mock.Mock<IBackgroundJobScheduler>()
+        Mock.Mock<IScheduler>()
             .Verify(
-                x =>
-                    x.ExecuteJob<LibrarySyncJob, LibrarySyncJobPayload>(
-                        It.IsAny<JobKey>(),
-                        It.IsAny<LibrarySyncJobPayload>(),
-                        It.IsAny<CancellationToken>()
-                    ),
+                x => x.ScheduleJob(It.IsAny<IJobDetail>(), It.IsAny<ITrigger>(), It.IsAny<CancellationToken>()),
                 Times.Never
             );
     }
@@ -103,16 +104,16 @@ public class LibrarySyncJobUnitTests : BaseUnitTest<LibrarySyncJob>
         Mock.Mock<ICommandExecutor>()
             .Setup(x => x.Send(It.IsAny<CheckQueuedPlexLibraryToSyncCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Ok());
-        Mock.Mock<IBackgroundJobScheduler>()
+        Mock.Mock<IScheduler>()
             .Setup(x =>
-                x.DeleteBatchJobs(
+                x.DeleteJobs(
                     It.Is<IReadOnlyCollection<JobKey>>(jobKeys =>
                         jobKeys.Count == 1 && jobKeys.Contains(expectedJobKey)
                     ),
                     It.IsAny<CancellationToken>()
                 )
             )
-            .ReturnsAsync(Result.Ok());
+            .ReturnsAsync(true);
         Mock.Mock<INotificationHubService>()
             .Setup(x => x.SendRefreshNotificationAsync(It.IsAny<List<RefreshDataType>>()))
             .Returns(Task.CompletedTask);
@@ -121,13 +122,13 @@ public class LibrarySyncJobUnitTests : BaseUnitTest<LibrarySyncJob>
             .Returns(Task.CompletedTask);
 
         // Act
-        await Sut.ExecuteAsync(SetupJobContext(server.Id, library.Id), CancellationToken);
+        await Sut.Execute(SetupJobContext(server.Id, library.Id));
 
         // Assert
-        Mock.Mock<IBackgroundJobScheduler>()
+        Mock.Mock<IScheduler>()
             .Verify(
                 x =>
-                    x.DeleteBatchJobs(
+                    x.DeleteJobs(
                         It.Is<IReadOnlyCollection<JobKey>>(jobKeys =>
                             jobKeys.Count == 1 && jobKeys.Contains(expectedJobKey)
                         ),

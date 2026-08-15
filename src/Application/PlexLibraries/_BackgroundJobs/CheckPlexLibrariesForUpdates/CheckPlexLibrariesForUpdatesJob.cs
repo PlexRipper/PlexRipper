@@ -61,7 +61,11 @@ public class CheckPlexLibrariesForUpdatesJob : IJob
             );
 
             if (refreshResult.IsCancelled)
-                throw new OperationCanceledException(cancellationToken);
+            {
+                context.SetResult(JobStatus.Cancelled, refreshResult);
+                refreshResult.LogWarning();
+                return;
+            }
 
             if (refreshResult.IsFailed)
             {
@@ -101,14 +105,16 @@ public class CheckPlexLibrariesForUpdatesJob : IJob
         );
 
         if (queueResult.IsCancelled)
-            throw new OperationCanceledException(cancellationToken);
+        {
+            context.SetResult(JobStatus.Cancelled, queueResult);
+            queueResult.LogWarning();
+            return;
+        }
 
         if (queueResult.IsFailed)
         {
+            context.SetResult(JobStatus.Failed, queueResult);
             queueResult.LogError();
-            throw new InvalidOperationException(
-                $"Failed to queue outdated Plex libraries for automatic sync: {string.Join("; ", queueResult.Errors.Select(x => x.Message))}"
-            );
         }
     }
 }

@@ -1,3 +1,6 @@
+using Quartz;
+using Quartz.Impl.Matchers;
+
 namespace Reaparr.Application.UnitTests;
 
 public class GetAllBackgroundJobsEndpointUnitTests
@@ -10,13 +13,32 @@ public class GetAllBackgroundJobsEndpointUnitTests
     private string ToJsonString<T>(T value) =>
         value is null ? string.Empty : JsonSerializer.Serialize(value, DefaultJsonSerializerOptions.ConfigStandard);
 
+    private void SetupScheduler(IEnumerable<IJobExecutionContext> executingJobs)
+    {
+        Mock.Mock<IScheduler>()
+            .Setup(x => x.GetCurrentlyExecutingJobs(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(executingJobs.ToArray());
+        Mock.Mock<IScheduler>()
+            .Setup(x => x.GetJobKeys(It.IsAny<GroupMatcher<JobKey>>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Array.Empty<JobKey>());
+    }
+
+    private static IJobExecutionContext CreateExecutingJob(JobStatusUpdate<string> update)
+    {
+        var jobDetail = new Mock<IJobDetail>();
+        jobDetail.SetupGet(x => x.Key).Returns(new JobKey(update.Id, update.JobType.ToString()));
+
+        var context = new Mock<IJobExecutionContext>();
+        context.SetupGet(x => x.JobDetail).Returns(jobDetail.Object);
+        context.SetupGet(x => x.FireTimeUtc).Returns(update.JobStartTime);
+        return context.Object;
+    }
+
     [Test]
     public async Task ShouldReturnEmptyList_WhenNoBackgroundJobIsRunning()
     {
         // Arrange
-        Mock.Mock<IBackgroundJobScheduler>()
-            .Setup(x => x.GetCurrentlyExecutingJobs(It.IsAny<CancellationToken>()))
-            .ReturnsAsync([]);
+        SetupScheduler([]);
 
         // Act
         var endpointResult = await TestEndpointHandleAsync(new GetAllBackgroundJobsEndpointRequest());
@@ -35,10 +57,7 @@ public class GetAllBackgroundJobsEndpointUnitTests
     {
         // Arrange
         var jobUpdate = new JobStatusUpdate<string>(JobTypes.DownloadJob, JobStatus.Started, Guid.NewGuid().ToString());
-        var list = new List<JobStatusUpdate<string>> { jobUpdate };
-        Mock.Mock<IBackgroundJobScheduler>()
-            .Setup(x => x.GetCurrentlyExecutingJobs(It.IsAny<CancellationToken>()))
-            .ReturnsAsync(list);
+        SetupScheduler([CreateExecutingJob(jobUpdate)]);
 
         // Act
         var endpointResult = await TestEndpointHandleAsync(new GetAllBackgroundJobsEndpointRequest());
@@ -102,7 +121,7 @@ public class GetAllBackgroundJobsEndpointUnitTests
 
         var moveDownloadJobUpdate = new JobStatusUpdate<string>(
             JobTypes.MoveDownloadFileJob,
-            JobStatus.Completed,
+            JobStatus.Started,
             ToJsonString(moveDownloadJobUpdatePayload),
             Guid.NewGuid().ToString()
         );
@@ -126,9 +145,7 @@ public class GetAllBackgroundJobsEndpointUnitTests
             checkAllConnectionsStatusJobUpdate,
         };
 
-        Mock.Mock<IBackgroundJobScheduler>()
-            .Setup(x => x.GetCurrentlyExecutingJobs(It.IsAny<CancellationToken>()))
-            .ReturnsAsync(list);
+        SetupScheduler(list.Select(CreateExecutingJob));
 
         // Act
         var endpointResult = await TestEndpointHandleAsync(new GetAllBackgroundJobsEndpointRequest());
@@ -142,20 +159,12 @@ public class GetAllBackgroundJobsEndpointUnitTests
         responseValue.Count.ShouldBe(list.Count);
 
         // Validate each job type
-        ValidateJobStatusUpdate(responseValue[0], downloadJobUpdate, downloadJobUpdatePayload);
-        ValidateJobStatusUpdate(responseValue[1], inspectPlexServerJobUpdate, inspectPlexServerJobUpdatePayload);
-        ValidateJobStatusUpdate(responseValue[2], moveDownloadJobUpdate, moveDownloadJobUpdatePayload);
-        ValidateJobStatusUpdate(
-            responseValue[3],
-            checkAllConnectionsStatusJobUpdate,
-            checkAllConnectionsStatusJobUpdatePayload
-        );
+        ValidateJobStatusUpdate(responseValue[0], downloadJobUpdate);
+        ValidateJobStatusUpdate(responseValue[1], inspectPlexServerJobUpdate);
+        ValidateJobStatusUpdate(responseValue[2], moveDownloadJobUpdate);
+        ValidateJobStatusUpdate(responseValue[3], checkAllConnectionsStatusJobUpdate);
 
-        static void ValidateJobStatusUpdate<T>(
-            JobStatusUpdateDTO actual,
-            JobStatusUpdate<string> expected,
-            T expectedPayload
-        )
+        static void ValidateJobStatusUpdate(JobStatusUpdateDTO actual, JobStatusUpdate<string> expected)
         {
             actual.ShouldNotBeNull();
             actual.Id.ShouldBe(expected.Id);
@@ -163,9 +172,7 @@ public class GetAllBackgroundJobsEndpointUnitTests
             actual.Status.ShouldBe(expected.Status);
             actual.JobStartTime.ShouldBe(expected.JobStartTime);
 
-            actual.JsonString.ShouldNotBeNullOrEmpty();
-            var actualPayload = JsonSerializer.Deserialize<T>(actual.JsonString);
-            actualPayload.ShouldBeEquivalentTo(expectedPayload);
+            actual.JsonString.ShouldBeEmpty();
         }
     }
 }

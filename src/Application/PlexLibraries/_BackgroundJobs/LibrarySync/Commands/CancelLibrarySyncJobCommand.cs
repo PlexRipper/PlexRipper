@@ -14,13 +14,13 @@ public class CancelLibrarySyncJobCommandHandler : ICommandHandler<CancelLibraryS
 {
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
-    private readonly IBackgroundJobScheduler _scheduler;
+    private readonly IScheduler _scheduler;
     private readonly INotificationHubService _notificationHubService;
 
     public CancelLibrarySyncJobCommandHandler(
         ILogger log,
         IReaparrDbContext dbContext,
-        IBackgroundJobScheduler scheduler,
+        IScheduler scheduler,
         INotificationHubService notificationHubService
     )
     {

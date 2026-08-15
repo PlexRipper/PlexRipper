@@ -1,5 +1,7 @@
 namespace Reaparr.Application;
 
+public sealed record MoveDownloadFileJobPayload(DownloadTaskKey DownloadTaskKey);
+
 [DisallowConcurrentExecution]
 public class MoveDownloadFileJob : IJob
 {
@@ -24,16 +26,22 @@ public class MoveDownloadFileJob : IJob
         _moveDownloadFileQueue = moveDownloadFileQueue;
     }
 
-    public const string DownloadTaskIdParameter = "DownloadTaskId";
-
-    public static JobKey GetJobKey(Guid id) => new($"{DownloadTaskIdParameter}_{id}", nameof(MoveDownloadFileJob));
+    public static JobKey GetJobKey(Guid id) => new($"{nameof(MoveDownloadFileJob)}_{id}", nameof(MoveDownloadFileJob));
 
     public async Task Execute(IJobExecutionContext context)
     {
+        var payloadResult = context.GetRequiredPayload<MoveDownloadFileJobPayload>();
+        if (payloadResult.IsFailed)
+        {
+            context.SetResult(JobStatus.Failed, payloadResult);
+            payloadResult.LogError();
+            return;
+        }
+
         // Jobs should swallow exceptions as otherwise Quartz will keep re-executing it
         // https://www.quartz-scheduler.net/documentation/best-practices.html#throwing-exceptions
         var ct = context.CancellationToken;
-        DownloadTaskKey? downloadTaskKey = null;
+        var downloadTaskKey = payloadResult.Value.DownloadTaskKey;
 
         async Task QueueNextAsync()
         {
@@ -50,15 +58,6 @@ public class MoveDownloadFileJob : IJob
 
         var executionResult = await Result.Try(async Task () =>
         {
-            var dataMap = context.JobDetail.JobDataMap;
-            downloadTaskKey = dataMap.GetJsonValue<DownloadTaskKey>(DownloadTaskIdParameter);
-            if (downloadTaskKey is null)
-            {
-                ResultExtensions.IsNull(nameof(DownloadTaskKey)).LogError();
-                await QueueNextAsync();
-                return;
-            }
-
             _log.Here()
                 .Information(
                     "Executing job: {NameOfMoveDownloadJob} for {NameOfFileTaskId} with id: {FileTaskId}",
@@ -150,10 +149,12 @@ public class MoveDownloadFileJob : IJob
 
         if (executionResult.IsCancelled)
         {
+            context.SetResult(JobStatus.Cancelled, executionResult);
             executionResult.LogWarning();
         }
         else if (executionResult.IsFailed)
         {
+            context.SetResult(JobStatus.Failed, executionResult);
             _log.Here()
                 .Error(
                     "Unexpected error in {JobName} for {DownloadTaskKey}",

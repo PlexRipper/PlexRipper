@@ -1,22 +1,14 @@
-using TickerQ.Utilities.Enums;
-
 namespace Reaparr.Application;
 
 public class DownloadTaskScheduler : IDownloadTaskScheduler
 {
     private readonly ILogger _log;
-    private readonly IBackgroundJobScheduler _scheduler;
-    private readonly IReaparrDbContextFactory _dbContextFactory;
+    private readonly IScheduler _scheduler;
 
-    public DownloadTaskScheduler(
-        ILogger log,
-        IBackgroundJobScheduler scheduler,
-        IReaparrDbContextFactory dbContextFactory
-    )
+    public DownloadTaskScheduler(ILogger log, IScheduler scheduler)
     {
         _log = log.ForContext<DownloadTaskScheduler>();
         _scheduler = scheduler;
-        _dbContextFactory = dbContextFactory;
     }
 
     public async Task<Result> StartDownloadTaskJob(
@@ -36,9 +28,9 @@ public class DownloadTaskScheduler : IDownloadTaskScheduler
                 return Result.Ok();
             }
 
-            var schedulingResult = await _scheduler.ExecuteJob<DownloadJob, DownloadTaskKey>(
+            var schedulingResult = await _scheduler.ExecuteJob<DownloadJob, DownloadJobPayload>(
                 jobKey,
-                downloadTaskKey,
+                new DownloadJobPayload(downloadTaskKey),
                 cancellationToken
             );
 
@@ -107,21 +99,10 @@ public class DownloadTaskScheduler : IDownloadTaskScheduler
 
     public async Task<List<DownloadTaskKey>> GetCurrentlyDownloadingKeysByServer(int plexServerId)
     {
-        using var dbContext = await _dbContextFactory.CreateAsync();
-        var requests = await dbContext
-            .TimeTickers.Where(x =>
-                x.JobType == JobTypes.DownloadJob
-                && (
-                    x.Status == TickerStatus.Idle
-                    || x.Status == TickerStatus.Queued
-                    || x.Status == TickerStatus.InProgress
-                )
-            )
-            .Select(x => x.Request)
-            .ToListAsync();
-
+        var keys = await _scheduler.GetJobKeys(JobTypes.DownloadJob);
+        var requests = await Task.WhenAll(keys.Select(x => _scheduler.GetJobDetail(x)));
         return requests
-            .Select(x => JsonSerializer.Deserialize<DownloadTaskKey>(x))
+            .Select(x => x?.JobDataMap.GetPayload<DownloadJobPayload>()?.DownloadTaskKey)
             .OfType<DownloadTaskKey>()
             .Where(x => x.PlexServerId == plexServerId)
             .ToList();

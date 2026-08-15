@@ -1,11 +1,15 @@
-using TickerQ.Utilities.Base;
+using Quartz;
 
 namespace Reaparr.Application.UnitTests;
 
 public class CheckAllConnectionsStatusByPlexServerJobUnitTests : BaseUnitTest<CheckAllConnectionsStatusByPlexServerJob>
 {
-    private static TickerFunctionContext<CheckAllConnectionsStatusByPlexServerJobPayload> SetupJobContext() =>
-        new(new TickerFunctionContext(), new CheckAllConnectionsStatusByPlexServerJobPayload());
+    private static IJobExecutionContext SetupJobContext()
+    {
+        var context = new Mock<IJobExecutionContext>();
+        context.SetupGet(x => x.CancellationToken).Returns(CancellationToken.None);
+        return context.Object;
+    }
 
     [Test]
     public async Task ShouldComplete_WhenOneOrMorePlexServersAreUnavailable()
@@ -36,7 +40,7 @@ public class CheckAllConnectionsStatusByPlexServerJobUnitTests : BaseUnitTest<Ch
             );
 
         // Act
-        var action = () => Sut.ExecuteAsync(SetupJobContext(), CancellationToken);
+        var action = () => Sut.Execute(SetupJobContext());
 
         // Assert
         await action.ShouldNotThrowAsync();

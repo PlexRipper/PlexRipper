@@ -28,8 +28,14 @@ public class CheckForUpdateJob : IJob
         );
 
         if (result.IsCancelled)
+        {
+            context.SetResult(JobStatus.Cancelled, result);
             result.LogWarning();
+        }
         else if (result.IsFailed)
+        {
+            context.SetResult(JobStatus.Failed, result);
             result.LogError();
+        }
     }
 }

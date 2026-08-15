@@ -1,14 +1,11 @@
 namespace Reaparr.Application;
 
-public sealed record MetadataSyncJobPayload
-{
-    public required int ServerId { get; init; }
-}
-
 public sealed record MetadataSyncJobUpdateDTO
 {
     public required int ServerId { get; init; }
 }
+
+public sealed record MetadataSyncJobPayload(int ServerId);
 
 /// <summary>
 /// Syncs detailed metadata for a specific Plex server.
@@ -27,8 +24,6 @@ public class MetadataSyncJob : IJob
         _dbContextFactory = dbContextFactory;
     }
 
-    public const string ServerIdParameter = nameof(ServerIdParameter);
-
     protected JobTypes JobType => JobTypes.MetadataSyncJob;
 
     protected List<RefreshDataType> RefreshDataTypes => [RefreshDataType.PlexLibrary];
@@ -38,16 +33,16 @@ public class MetadataSyncJob : IJob
 
     public async Task Execute(IJobExecutionContext context)
     {
-        var dataMap = context.JobDetail.JobDataMap;
-        var cancellationToken = context.CancellationToken;
-
-        if (!dataMap.ContainsKey(ServerIdParameter))
+        var payloadResult = context.GetRequiredPayload<MetadataSyncJobPayload>();
+        if (payloadResult.IsFailed)
         {
-            _log.Here().Error("Missing required parameter {Parameter} in job data map", ServerIdParameter);
+            context.SetResult(JobStatus.Failed, payloadResult);
+            payloadResult.LogError();
             return;
         }
 
-        var serverId = dataMap.GetInt(ServerIdParameter);
+        var cancellationToken = context.CancellationToken;
+        var serverId = payloadResult.Value.ServerId;
         using var dbContext = await _dbContextFactory.CreateAsync();
         var serverName = await dbContext.GetPlexServerNameById(serverId);
         var isServerOnline = await dbContext.IsServerOnline(serverId);

@@ -72,7 +72,16 @@ public class CheckAllConnectionsStatusByPlexServerJob : IJob
                 failedResult.LogError();
 
             if (cancelledResults.Count > 0 || failedResults.Count > 0)
+            {
+                context.SetResult(
+                    cancelledResults.Count > 0 ? JobStatus.Cancelled : JobStatus.Failed,
+                    (cancelledResults.Count > 0 ? cancelledResults : failedResults)
+                        .FirstOrDefault()
+                        ?.Errors.FirstOrDefault()
+                        ?.Message
+                );
                 return;
+            }
 
             // Send completed job status update
             update.Status = JobStatus.Completed;
@@ -87,8 +96,14 @@ public class CheckAllConnectionsStatusByPlexServerJob : IJob
         });
 
         if (result.IsCancelled)
+        {
+            context.SetResult(JobStatus.Cancelled, result);
             result.LogWarning();
+        }
         else if (result.IsFailed)
+        {
+            context.SetResult(JobStatus.Failed, result);
             result.LogError();
+        }
     }
 }

@@ -1,3 +1,6 @@
+using Quartz;
+using Quartz.Spi;
+
 namespace Reaparr.Application.UnitTests;
 
 public class ApplyOwnedTvShowComparisonStateCommandUnitTests
@@ -170,16 +173,25 @@ public class ApplyOwnedTvShowComparisonStateCommandUnitTests
         await SetOwnedOverrideAsync(ownedLibrary.PlexServerId, true);
 
         var ownedTvShow = await GetLibraryTvShowAsync(ownedLibrary.Id);
-        dbContext.TimeTickers.Add(
-            new JobTimeTicker
-            {
-                Function = nameof(PlexLibraryComparisonJob),
-                Request = [],
-                JobKey = PlexLibraryComparisonJob.GetJobKey(ownedLibrary.Id, remoteLibrary.Id).Name,
-                JobType = JobTypes.LibraryComparisonJob,
-            }
-        );
-        await dbContext.SaveChangesAsync(CancellationToken);
+        Mock.Mock<IScheduler>()
+            .Setup(x =>
+                x.CheckExists(
+                    PlexLibraryComparisonJob.GetJobKey(ownedLibrary.Id, remoteLibrary.Id),
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .ReturnsAsync(true);
+        Mock.Mock<IScheduler>()
+            .Setup(x =>
+                x.GetTriggersOfJob(
+                    PlexLibraryComparisonJob.GetJobKey(ownedLibrary.Id, remoteLibrary.Id),
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .ReturnsAsync([new Mock<IOperableTrigger>().Object]);
+        Mock.Mock<IScheduler>()
+            .Setup(x => x.GetTriggerState(It.IsAny<TriggerKey>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(TriggerState.Normal);
 
         var items = new List<PlexMediaSlimDTO> { CreateTvShowItem(ownedTvShow) };
 

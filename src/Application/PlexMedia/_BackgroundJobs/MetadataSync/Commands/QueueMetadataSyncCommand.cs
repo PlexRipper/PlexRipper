@@ -12,10 +12,10 @@ public class QueueMetadataSyncCommandValidator : AbstractValidator<QueueMetadata
 
 public class QueueMetadataSyncCommandHandler : ICommandHandler<QueueMetadataSyncCommand, Result>
 {
-    private readonly IBackgroundJobScheduler _scheduler;
+    private readonly IScheduler _scheduler;
     private readonly ILogger _log;
 
-    public QueueMetadataSyncCommandHandler(IBackgroundJobScheduler scheduler, ILogger log)
+    public QueueMetadataSyncCommandHandler(IScheduler scheduler, ILogger log)
     {
         _scheduler = scheduler;
         _log = log.ForContext<QueueMetadataSyncCommandHandler>();
@@ -32,7 +32,7 @@ public class QueueMetadataSyncCommandHandler : ICommandHandler<QueueMetadataSync
 
         var schedulingResult = await _scheduler.ExecuteJob<MetadataSyncJob, MetadataSyncJobPayload>(
             jobKey,
-            new MetadataSyncJobPayload { ServerId = command.ServerId },
+            new MetadataSyncJobPayload(command.ServerId),
             cancellationToken
         );
 

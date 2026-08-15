@@ -1,10 +1,17 @@
-using TickerQ.Utilities.Base;
+using Quartz;
 
 namespace Reaparr.Application.UnitTests;
 
 public class CheckForUpdateJobUnitTests : BaseUnitTest<CheckForUpdateJob>
 {
     private const string CURRENT_VERSION = "1.2.3";
+
+    private static IJobExecutionContext SetupJobContext()
+    {
+        var context = new Mock<IJobExecutionContext>();
+        context.SetupGet(x => x.CancellationToken).Returns(CancellationToken.None);
+        return context.Object;
+    }
 
     [Test]
     public async Task ShouldDispatchCheckForUpdatesCommand_WhenJobExecutes()
@@ -22,16 +29,10 @@ public class CheckForUpdateJobUnitTests : BaseUnitTest<CheckForUpdateJob>
             .Setup(x => x.Send(It.IsAny<CheckForUpdatesCommand>(), CancellationToken))
             .ReturnsAsync(Result.Ok(noUpdate))
             .Verifiable(Times.Once());
-        Mock.Mock<IProgressHubService>()
-            .Setup(x => x.SendJobStatusUpdateAsync(It.IsAny<JobStatusUpdate<AppUpdateCheckResult>>()))
-            .Returns(Task.CompletedTask);
-        var context = new TickerFunctionContext<CheckForUpdateJobPayload>(
-            new TickerFunctionContext(),
-            new CheckForUpdateJobPayload()
-        );
+        var context = SetupJobContext();
 
         // Act
-        await Sut.ExecuteAsync(context, CancellationToken);
+        await Sut.Execute(context);
 
         // Assert
         Mock.Mock<ICommandExecutor>()
@@ -46,15 +47,10 @@ public class CheckForUpdateJobUnitTests : BaseUnitTest<CheckForUpdateJob>
             .Setup(x => x.Send(It.IsAny<CheckForUpdatesCommand>(), CancellationToken))
             .ThrowsAsync(new InvalidOperationException("Update check failed"))
             .Verifiable(Times.Once());
-        var context = new TickerFunctionContext<CheckForUpdateJobPayload>(
-            new TickerFunctionContext(),
-            new CheckForUpdateJobPayload()
-        );
+        var context = SetupJobContext();
 
         // Act
-        var exception = await Should.ThrowAsync<InvalidOperationException>(() =>
-            Sut.ExecuteAsync(context, CancellationToken)
-        );
+        var exception = await Should.ThrowAsync<InvalidOperationException>(() => Sut.Execute(context));
 
         // Assert
         exception.Message.ShouldBe("Update check failed");

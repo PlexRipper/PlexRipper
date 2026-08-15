@@ -1,5 +1,7 @@
 namespace Reaparr.Application;
 
+public sealed record LibrarySyncJobPayload(int ServerId, int LibraryId);
+
 /// <summary>
 /// Quartz job that syncs a single library and chains to the next library if provided.
 /// Uses per-server locking to ensure only one library sync runs per server at a time.
@@ -7,9 +9,6 @@ namespace Reaparr.Application;
 [DisallowConcurrentExecution]
 public class LibrarySyncJob : IJob
 {
-    public const string ServerIdParameter = nameof(ServerIdParameter);
-    public const string LibraryIdParameter = nameof(LibraryIdParameter);
-
     private readonly ILogger _log;
     private readonly ICommandExecutor _commandExecutor;
     private readonly INotificationHubService _notificationHubService;
@@ -35,22 +34,17 @@ public class LibrarySyncJob : IJob
 
     public async Task Execute(IJobExecutionContext context)
     {
-        var dataMap = context.JobDetail.JobDataMap;
-        var cancellationToken = context.CancellationToken;
-
-        if (!dataMap.ContainsKey(ServerIdParameter) || !dataMap.ContainsKey(LibraryIdParameter))
+        var payloadResult = context.GetRequiredPayload<LibrarySyncJobPayload>();
+        if (payloadResult.IsFailed)
         {
-            _log.Here()
-                .Error(
-                    "Missing required parameters in job data map. ServerId: {ServerId}, LibraryId: {LibraryId}",
-                    dataMap.ContainsKey(ServerIdParameter),
-                    dataMap.ContainsKey(LibraryIdParameter)
-                );
+            context.SetResult(JobStatus.Failed, payloadResult);
+            payloadResult.LogError();
             return;
         }
 
-        _serverId = dataMap.GetInt(ServerIdParameter);
-        _libraryId = dataMap.GetInt(LibraryIdParameter);
+        var cancellationToken = context.CancellationToken;
+        _serverId = payloadResult.Value.ServerId;
+        _libraryId = payloadResult.Value.LibraryId;
 
         _log.Here()
             .Debug(
@@ -87,6 +81,7 @@ public class LibrarySyncJob : IJob
 
             if (result.IsCancelled)
             {
+                context.SetResult(JobStatus.Cancelled, result);
                 _log.Here()
                     .Information(
                         "{LibrarySyncJobName} for server {ServerId}, library {LibraryId} has been cancelled",
@@ -108,6 +103,7 @@ public class LibrarySyncJob : IJob
             }
             else if (result.IsFailed)
             {
+                context.SetResult(JobStatus.Failed, result);
                 result.LogError();
 
                 // Check if failure was due to the server being offline (504 Gateway Timeout)

@@ -1,3 +1,6 @@
+using Quartz;
+using Quartz.Spi;
+
 namespace Reaparr.Application.UnitTests;
 
 public class ApplyRemoteMovieComparisonStateCommandUnitTests
@@ -280,15 +283,15 @@ public class ApplyRemoteMovieComparisonStateCommandUnitTests
                 OwnedLibraryUpdatedAt = ownedLibrary.UpdatedAt,
             }
         );
-        dbContext.TimeTickers.Add(
-            new JobTimeTicker
-            {
-                Function = nameof(PlexLibraryComparisonJob),
-                Request = [],
-                JobKey = PlexLibraryComparisonJob.GetJobKey(ownedLibrary.Id, remoteLibrary.Id).Name,
-                JobType = JobTypes.LibraryComparisonJob,
-            }
-        );
+        Mock.Mock<IScheduler>()
+            .Setup(x => x.CheckExists(PlexLibraryComparisonJob.GetJobKey(ownedLibrary.Id, remoteLibrary.Id), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(true);
+        Mock.Mock<IScheduler>()
+            .Setup(x => x.GetTriggersOfJob(PlexLibraryComparisonJob.GetJobKey(ownedLibrary.Id, remoteLibrary.Id), It.IsAny<CancellationToken>()))
+            .ReturnsAsync([new Mock<IOperableTrigger>().Object]);
+        Mock.Mock<IScheduler>()
+            .Setup(x => x.GetTriggerState(It.IsAny<TriggerKey>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(TriggerState.Normal);
         await dbContext.SaveChangesAsync(CancellationToken);
 
         var items = new List<PlexMediaSlimDTO> { CreateMovieItem(remoteMovie) };

@@ -1,112 +1,88 @@
-using TickerQ.Utilities.Base;
-
 namespace Reaparr.Application;
 
-public record LibrarySyncJobPayload
-{
-    public required int PlexServerId { get; init; }
-
-    public required int PlexLibraryId { get; init; }
-}
-
 /// <summary>
-/// TickerQ job that syncs a single library and chains to the next queued library.
+/// Quartz job that syncs a single library and chains to the next library if provided.
 /// Uses per-server locking to ensure only one library sync runs per server at a time.
 /// </summary>
-public class LibrarySyncJob : BaseBackgroundJob<LibrarySyncJobPayload, LibrarySyncJobQueueDTO>
+[DisallowConcurrentExecution]
+public class LibrarySyncJob : IJob
 {
+    public const string ServerIdParameter = nameof(ServerIdParameter);
+    public const string LibraryIdParameter = nameof(LibraryIdParameter);
+
     private readonly ILogger _log;
-    private readonly IReaparrDbContextFactory _dbContextFactory;
     private readonly ICommandExecutor _commandExecutor;
     private readonly INotificationHubService _notificationHubService;
-    private readonly IBackgroundJobScheduler _backgroundJobScheduler;
     private readonly IReaparrDbContext _dbContext;
-    private bool _skipAfterCompletion;
-
-    protected override JobTypes JobType => JobTypes.LibrarySyncJob;
-
-    protected override List<RefreshDataType> RefreshDataTypes =>
-        [RefreshDataType.PlexLibrary, RefreshDataType.PlexLibrarySyncStatus];
+    private int _serverId;
+    private int _libraryId;
 
     public LibrarySyncJob(
         ILogger log,
-        IReaparrDbContextFactory dbContextFactory,
         ICommandExecutor commandExecutor,
         INotificationHubService notificationHubService,
-        IProgressHubService progressHubService,
-        IBackgroundJobScheduler backgroundJobScheduler
+        IReaparrDbContext dbContext
     )
-        : base(log, progressHubService, notificationHubService)
     {
         _log = log.ForContext<LibrarySyncJob>();
-        _dbContextFactory = dbContextFactory;
-        _dbContext = dbContextFactory.Create();
         _commandExecutor = commandExecutor;
         _notificationHubService = notificationHubService;
-        _backgroundJobScheduler = backgroundJobScheduler;
+        _dbContext = dbContext;
     }
 
     public static JobKey GetJobKey(int serverId, int libraryId) =>
-        new($"{nameof(JobTypes.LibrarySyncJob)}_{serverId}_{libraryId}", JobTypes.LibrarySyncJob);
+        new($"{nameof(JobTypes.LibrarySyncJob)}_{serverId}_{libraryId}", nameof(JobTypes.LibrarySyncJob));
 
-    protected override async Task ExecuteJobAsync(
-        TickerFunctionContext<LibrarySyncJobPayload> context,
-        CancellationToken cancellationToken
-    )
+    public async Task Execute(IJobExecutionContext context)
     {
-        _skipAfterCompletion = false;
+        var dataMap = context.JobDetail.JobDataMap;
+        var cancellationToken = context.CancellationToken;
 
-        var serverId = context.Request.PlexServerId;
-        var libraryId = context.Request.PlexLibraryId;
-
-        var serverName = await _dbContext.GetPlexServerNameById(serverId);
-        var libraryName = await _dbContext.GetPlexLibraryNameById(libraryId);
-
-        _log.Here()
-            .Debug(
-                "Executing job: {LibrarySyncJobName} for server {ServerName} with id {ServerId} and library {LibraryName} with id {LibraryId}",
-                nameof(LibrarySyncJob),
-                serverName,
-                serverId,
-                libraryName,
-                libraryId
-            );
-
-        var queueItem = await TryClaimQueueItemForProcessingAsync(serverId, libraryId);
-        if (queueItem is null)
+        if (!dataMap.ContainsKey(ServerIdParameter) || !dataMap.ContainsKey(LibraryIdParameter))
         {
-            _skipAfterCompletion = true;
+            _log.Here()
+                .Error(
+                    "Missing required parameters in job data map. ServerId: {ServerId}, LibraryId: {LibraryId}",
+                    dataMap.ContainsKey(ServerIdParameter),
+                    dataMap.ContainsKey(LibraryIdParameter)
+                );
             return;
         }
 
+        _serverId = dataMap.GetInt(ServerIdParameter);
+        _libraryId = dataMap.GetInt(LibraryIdParameter);
+
+        _log.Here()
+            .Debug(
+                "Executing job: {LibrarySyncJobName} for server {ServerId}, library {LibraryId}",
+                nameof(LibrarySyncJob),
+                _serverId,
+                _libraryId
+            );
+
         // Check if the server is online before starting sync
-        var isServerOnline = await _dbContext.IsServerOnline(serverId);
+        var isServerOnline = await _dbContext.IsServerOnline(_serverId);
         if (!isServerOnline)
         {
+            var serverName = await _dbContext.GetPlexServerNameById(_serverId);
             _log.Here()
                 .Warning(
                     "Server {ServerName} with id {ServerId} is offline, marking queue item and skipping sync",
                     serverName,
-                    serverId
+                    _serverId
                 );
-            await UpdateQueueItemAsync(context, LibrarySyncJobStatus.Queued, isServerOffline: true);
+            await UpdateQueueItemAsync(LibrarySyncJobStatus.Queued, isServerOffline: true);
         }
         else
         {
-            var invalidationResult = await _commandExecutor.Send(
-                new InvalidateLibraryComparisonJobsCommand([libraryId]),
-                cancellationToken
-            );
+            await UpdateQueueItemAsync(LibrarySyncJobStatus.Processing);
 
-            invalidationResult.LogIfFailed();
+            // Jobs should swallow exceptions as otherwise Quartz will keep re-executing it
+            // https://www.quartz-scheduler.net/documentation/best-practices.html#throwing-exceptions
 
-            // Convert command exceptions to a Result so the queue state can be persisted before this ticker completes.
             // Execute the library sync command
             var result = await Result.Try(() =>
-                _commandExecutor.Send(
-                    new RefreshLibraryMediaCommand(libraryId, queueItem.ForceMediaRefresh),
-                    cancellationToken
-                )
+                _commandExecutor.Send(new RefreshLibraryMediaCommand(_libraryId), context.CancellationToken)
             );
 
             if (result.IsCancelled)
@@ -115,54 +91,38 @@ public class LibrarySyncJob : BaseBackgroundJob<LibrarySyncJobPayload, LibrarySy
                     .Information(
                         "{LibrarySyncJobName} for server {ServerId}, library {LibraryId} has been cancelled",
                         nameof(LibrarySyncJob),
-                        serverId,
-                        libraryId
+                        _serverId,
+                        _libraryId
                     );
 
-                await UpdateQueueItemAsync(context, LibrarySyncJobStatus.Cancelled);
+                // The Quartz job token is already cancelled, so use a short-lived token
+                // to persist the cancellation and continue processing the queue.
+                using var cleanupTokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+                var cleanupToken = cleanupTokenSource.Token;
+
+                await UpdateQueueItemAsync(LibrarySyncJobStatus.Cancelled);
                 await _notificationHubService.SendRefreshNotificationAsync([RefreshDataType.PlexLibrary]);
+                await _commandExecutor.Send(new CheckQueuedPlexLibraryToSyncCommand(), cleanupToken);
 
                 return;
             }
-
-            if (result.IsFailed)
+            else if (result.IsFailed)
             {
                 result.LogError();
 
-                var syncResult = result.ToResult();
-
-                if (syncResult.HasPlex401UnauthorizedError() || syncResult.Has401UnauthorizedError())
-                {
-                    _log.Here()
-                        .Warning(
-                            "Library sync failed for server {ServerId}, library {LibraryId} because the Plex token is unauthorized. Dequeuing library sync job.",
-                            serverId,
-                            libraryId
-                        );
-
-                    var deleteResult = await _backgroundJobScheduler.DeleteBatchJobs(
-                        [GetJobKey(serverId, libraryId)],
-                        cancellationToken
-                    );
-
-                    if (deleteResult.IsFailed)
-                        deleteResult.LogWarning();
-                }
-
                 // Check if failure was due to the server being offline (504 Gateway Timeout)
                 // TODO make "Server offline" a generic FluentResult check as this can happen in other places as well and we want to handle it consistently across the app
-                var isServerOffline = syncResult.Has504GatewayTimeoutError();
+                var isServerOffline = result.ToResult().Has504GatewayTimeoutError();
 
                 _log.Here()
                     .Warning(
                         "Library sync failed for server {ServerId}, library {LibraryId}. Queue item marked as failed. Server offline: {IsServerOffline}",
-                        serverId,
-                        libraryId,
+                        _serverId,
+                        _libraryId,
                         isServerOffline
                     );
 
                 await UpdateQueueItemAsync(
-                    context,
                     LibrarySyncJobStatus.Failed,
                     errorMessage: result.Errors.FirstOrDefault()?.Message,
                     isServerOffline: isServerOffline
@@ -171,128 +131,32 @@ public class LibrarySyncJob : BaseBackgroundJob<LibrarySyncJobPayload, LibrarySy
             else
             {
                 _log.Here()
-                    .Information("Successfully synced library {LibraryId} for server {ServerId}", libraryId, serverId);
+                    .Information(
+                        "Successfully synced library {LibraryId} for server {ServerId}",
+                        _libraryId,
+                        _serverId
+                    );
 
-                await UpdateQueueItemAsync(context, LibrarySyncJobStatus.Completed);
+                // Mark the primary sync queue item as completed before kicking off secondary comparison work.
+                await UpdateQueueItemAsync(LibrarySyncJobStatus.Completed);
             }
         }
-    }
 
-    protected override async Task ExecuteAfterCompletionAsync(
-        TickerFunctionContext<LibrarySyncJobPayload> context,
-        CancellationToken cancellationToken
-    )
-    {
-        if (_skipAfterCompletion)
-        {
-            _log.Here()
-                .Debug(
-                    "Skipping post-completion work for duplicate or stale library sync job for server {ServerId}, library {LibraryId}",
-                    context.Request.PlexServerId,
-                    context.Request.PlexLibraryId
-                );
-            return;
-        }
+        // Send PlexLibrary refresh notification
+        await _notificationHubService.SendRefreshNotificationAsync([RefreshDataType.PlexLibrary]);
 
-        // Schedule the next library first so expensive comparison scheduling cannot stall the sync queue.
-        // Use an independent bounded token because the ticker execution token may already be cancelled.
-        using (var queueTokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(10)))
-        {
-            var queueResult = await _commandExecutor.Send(
-                new CheckQueuedPlexLibraryToSyncCommand(),
-                queueTokenSource.Token
-            );
-
-            if (queueResult.IsFailed)
-                queueResult.LogWarning();
-        }
-
-        var libraryId = context.Request.PlexLibraryId;
-        var serverId = context.Request.PlexServerId;
-        using var dbContext = await _dbContextFactory.CreateAsync();
-        var queueStatus = await dbContext
-            .LibrarySyncJobQueues.Where(x => x.PlexServerId == serverId && x.PlexLibraryId == libraryId)
-            .Select(x => x.Status)
-            .FirstOrDefaultAsync(cancellationToken);
-
-        if (queueStatus == LibrarySyncJobStatus.Completed)
-        {
-            var comparisonQueueResult = await _commandExecutor.Send(
-                new ScheduleAffectedLibraryComparisonJobsCommand(libraryId),
-                cancellationToken
-            );
-
-            if (comparisonQueueResult.IsFailed)
-                _log.Here().Warning("Failed to queue comparison jobs for library {LibraryId}", libraryId);
-        }
-    }
-
-    private async Task<LibrarySyncJobQueue?> TryClaimQueueItemForProcessingAsync(int serverId, int libraryId)
-    {
-        var startedAt = DateTime.UtcNow;
-        var updatedRows = await _dbContext
-            .LibrarySyncJobQueues.Where(x =>
-                x.PlexServerId == serverId
-                && x.PlexLibraryId == libraryId
-                && (
-                    x.Status == LibrarySyncJobStatus.Queued
-                    || (x.Status == LibrarySyncJobStatus.Processing && x.StartedAt == null)
-                )
-            )
-            .ExecuteUpdateAsync(
-                s =>
-                    s.SetProperty(x => x.Status, LibrarySyncJobStatus.Processing)
-                        .SetProperty(x => x.StartedAt, startedAt)
-                        .SetProperty(x => x.CompletedAt, (DateTime?)null)
-                        .SetProperty(x => x.ErrorMessage, (string?)null)
-                        .SetProperty(x => x.IsServerOffline, false),
-                CancellationToken.None
-            );
-
-        var queueState = await _dbContext
-            .LibrarySyncJobQueues.Where(x => x.PlexServerId == serverId && x.PlexLibraryId == libraryId)
-            .FirstOrDefaultAsync(CancellationToken.None);
-
-        if (updatedRows > 0)
-            return queueState;
-
-        if (queueState is null)
-        {
-            _log.Here()
-                .Warning(
-                    "Skipping library sync job for server {ServerId}, library {LibraryId} because the queue item no longer exists",
-                    serverId,
-                    libraryId
-                );
-        }
-        else
-        {
-            _log.Here()
-                .Warning(
-                    "Skipping duplicate or stale library sync job for server {ServerId}, library {LibraryId}. Queue status: {Status}, started at: {StartedAt}, completed at: {CompletedAt}",
-                    serverId,
-                    libraryId,
-                    queueState.Status,
-                    queueState.StartedAt,
-                    queueState.CompletedAt
-                );
-        }
-
-        return null;
+        // Schedule the next library from the queue
+        await _commandExecutor.Send(new CheckQueuedPlexLibraryToSyncCommand(), cancellationToken);
     }
 
     private async Task UpdateQueueItemAsync(
-        TickerFunctionContext<LibrarySyncJobPayload> context,
         LibrarySyncJobStatus status,
         string? errorMessage = null,
         bool isServerOffline = false
     )
     {
-        var serverId = context.Request.PlexServerId;
-        var libraryId = context.Request.PlexLibraryId;
-
         var query = _dbContext.LibrarySyncJobQueues.Where(x =>
-            x.PlexServerId == serverId && x.PlexLibraryId == libraryId
+            x.PlexServerId == _serverId && x.PlexLibraryId == _libraryId
         );
 
         switch (status)
@@ -354,8 +218,8 @@ public class LibrarySyncJob : BaseBackgroundJob<LibrarySyncJobPayload, LibrarySy
                 _log.Here()
                     .Warning(
                         "Attempted to set LibrarySyncJobStatus to Unknown for server {ServerId}, library {LibraryId}",
-                        serverId,
-                        libraryId
+                        _serverId,
+                        _libraryId
                     );
                 break;
             default:
@@ -363,41 +227,12 @@ public class LibrarySyncJob : BaseBackgroundJob<LibrarySyncJobPayload, LibrarySy
                     .Warning(
                         "Attempted to set LibrarySyncJobStatus to invalid value {Status} for server {ServerId}, library {LibraryId}",
                         status,
-                        serverId,
-                        libraryId
+                        _serverId,
+                        _libraryId
                     );
                 break;
         }
-    }
 
-    protected override async Task<LibrarySyncJobQueueDTO?> GetStatusUpdateDataAsync(
-        TickerFunctionContext<LibrarySyncJobPayload> context,
-        CancellationToken cancellationToken
-    )
-    {
-        // The base job publishes Started before ExecuteJobAsync initializes the
-        // instance fields. Always use the payload so the initial SignalR update
-        // looks up the actual queue item instead of server/library 0.
-        var serverId = context.Request.PlexServerId;
-        var libraryId = context.Request.PlexLibraryId;
-
-        using var dbContext = await _dbContextFactory.CreateAsync();
-        var queue = await dbContext.LibrarySyncJobQueues.FirstOrDefaultAsync(
-            x => x.PlexServerId == serverId && x.PlexLibraryId == libraryId,
-            cancellationToken
-        );
-
-        if (queue == null)
-        {
-            _log.Here()
-                .Warning(
-                    "Queue item not found for server {ServerId}, library {LibraryId} when sending status update",
-                    serverId,
-                    libraryId
-                );
-            return null;
-        }
-
-        return queue.ToDTO();
+        await _notificationHubService.SendRefreshNotificationAsync([RefreshDataType.PlexLibrarySyncStatus]);
     }
 }

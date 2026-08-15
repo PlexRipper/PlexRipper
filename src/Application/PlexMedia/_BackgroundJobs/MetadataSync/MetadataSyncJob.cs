@@ -1,5 +1,3 @@
-using TickerQ.Utilities.Base;
-
 namespace Reaparr.Application;
 
 public sealed record MetadataSyncJobPayload
@@ -16,39 +14,40 @@ public sealed record MetadataSyncJobUpdateDTO
 /// Syncs detailed metadata for a specific Plex server.
 /// This job is registered but is not scheduled automatically.
 /// </summary>
-public class MetadataSyncJob : BaseBackgroundJob<MetadataSyncJobPayload, MetadataSyncJobUpdateDTO>
+public class MetadataSyncJob : IJob
 {
     private readonly ILogger _log;
     private readonly ICommandExecutor _commandExecutor;
     private readonly IReaparrDbContextFactory _dbContextFactory;
 
-    public MetadataSyncJob(
-        ILogger log,
-        ICommandExecutor commandExecutor,
-        IReaparrDbContextFactory dbContextFactory,
-        IProgressHubService progressHubService,
-        INotificationHubService notificationHubService
-    )
-        : base(log, progressHubService, notificationHubService)
+    public MetadataSyncJob(ILogger log, ICommandExecutor commandExecutor, IReaparrDbContextFactory dbContextFactory)
     {
         _log = log.ForContext<MetadataSyncJob>();
         _commandExecutor = commandExecutor;
         _dbContextFactory = dbContextFactory;
     }
 
-    protected override JobTypes JobType => JobTypes.MetadataSyncJob;
+    public const string ServerIdParameter = nameof(ServerIdParameter);
 
-    protected override List<RefreshDataType> RefreshDataTypes => [RefreshDataType.PlexLibrary];
+    protected JobTypes JobType => JobTypes.MetadataSyncJob;
+
+    protected List<RefreshDataType> RefreshDataTypes => [RefreshDataType.PlexLibrary];
 
     public static JobKey GetJobKey(int serverId) =>
-        new($"{nameof(JobTypes.MetadataSyncJob)}_{serverId}", JobTypes.MetadataSyncJob);
+        new($"{nameof(JobTypes.MetadataSyncJob)}_{serverId}", nameof(JobTypes.MetadataSyncJob));
 
-    protected override async Task ExecuteJobAsync(
-        TickerFunctionContext<MetadataSyncJobPayload> context,
-        CancellationToken cancellationToken
-    )
+    public async Task Execute(IJobExecutionContext context)
     {
-        var serverId = context.Request.ServerId;
+        var dataMap = context.JobDetail.JobDataMap;
+        var cancellationToken = context.CancellationToken;
+
+        if (!dataMap.ContainsKey(ServerIdParameter))
+        {
+            _log.Here().Error("Missing required parameter {Parameter} in job data map", ServerIdParameter);
+            return;
+        }
+
+        var serverId = dataMap.GetInt(ServerIdParameter);
         using var dbContext = await _dbContextFactory.CreateAsync();
         var serverName = await dbContext.GetPlexServerNameById(serverId);
         var isServerOnline = await dbContext.IsServerOnline(serverId);
@@ -87,12 +86,4 @@ public class MetadataSyncJob : BaseBackgroundJob<MetadataSyncJobPayload, Metadat
                 processedCount
             );
     }
-
-    protected override Task<MetadataSyncJobUpdateDTO?> GetStatusUpdateDataAsync(
-        TickerFunctionContext<MetadataSyncJobPayload> context,
-        CancellationToken cancellationToken
-    ) =>
-        Task.FromResult<MetadataSyncJobUpdateDTO?>(
-            new MetadataSyncJobUpdateDTO { ServerId = context.Request.ServerId }
-        );
 }

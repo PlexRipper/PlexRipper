@@ -44,6 +44,21 @@ public class DbContextConnectionsUnitTests : BaseUnitTest
         configurations.ShouldAllBe(x => x == ExpectedConfiguration);
     }
 
+    [Test]
+    public void ShouldUseSharedCacheForInMemoryDatabases()
+    {
+        // Arrange
+
+        // Act
+        var connectionString = DbContextConnections.GetConnectionString(
+            $"reaparr-in-memory-{Guid.NewGuid():N}",
+            SqliteOpenMode.Memory
+        );
+
+        // Assert
+        new SqliteConnectionStringBuilder(connectionString).Cache.ShouldBe(SqliteCacheMode.Shared);
+    }
+
     private static readonly SqliteConfiguration ExpectedConfiguration = new(
         120,
         1000,

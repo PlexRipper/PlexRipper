@@ -34,6 +34,7 @@ public static class DbContextConnections
             Mode = mode,
             ForeignKeys = true,
             DataSource = dataSource,
+            Cache = mode == SqliteOpenMode.Memory ? SqliteCacheMode.Shared : SqliteCacheMode.Default,
             Pooling = true,
             DefaultTimeout = BUSY_TIMEOUT_SECONDS,
         }.ToString();
@@ -52,6 +53,9 @@ public static class DbContextConnections
     {
         if (connection is not SqliteConnection sqliteConnection)
             throw new InvalidOperationException("WAL mode can only be enabled for a SQLite connection.");
+
+        if (new SqliteConnectionStringBuilder(sqliteConnection.ConnectionString).Mode == SqliteOpenMode.Memory)
+            return;
 
         var openedHere = sqliteConnection.State != System.Data.ConnectionState.Open;
         if (openedHere)

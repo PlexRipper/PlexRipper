@@ -1,6 +1,5 @@
 using EFCore.BulkExtensions;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
-using TickerQ.Utilities.Entities;
 
 namespace Reaparr.Data.Contracts;
 
@@ -67,16 +66,6 @@ public interface IReaparrDbContext : IDisposable
     DbSet<PlexServerStatus> PlexServerStatuses { get; }
 
     DbSet<LibrarySyncJobQueue> LibrarySyncJobQueues { get; }
-
-    #endregion
-
-    #region BackgroundJobs
-
-    DbSet<JobTimeTicker> TimeTickers { get; }
-
-    DbSet<JobCronTicker> CronTickers { get; }
-
-    DbSet<CronTickerOccurrenceEntity<JobCronTicker>> CronTickerOccurrences { get; }
 
     #endregion
 

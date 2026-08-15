@@ -6,7 +6,6 @@ using AppAny.Quartz.EntityFrameworkCore.Migrations.SQLite;
 using EFCore.BulkExtensions;
 using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.DependencyInjection;
-using TickerQ.Utilities.Entities;
 
 // ReSharper disable UnusedAutoPropertyAccessor.Global
 
@@ -57,12 +56,6 @@ public sealed class ReaparrDbContext : DbContext, IReaparrDbContext, IReaparrDbC
     public DbSet<PlexServerStatus> PlexServerStatuses { get; set; }
 
     public DbSet<LibrarySyncJobQueue> LibrarySyncJobQueues { get; set; }
-
-    public DbSet<JobTimeTicker> TimeTickers { get; set; }
-
-    public DbSet<JobCronTicker> CronTickers { get; set; }
-
-    public DbSet<CronTickerOccurrenceEntity<JobCronTicker>> CronTickerOccurrences { get; set; }
 
     public DbSet<DownloadTaskMovie> DownloadTaskMovie { get; set; }
 
@@ -326,7 +319,6 @@ public sealed class ReaparrDbContext : DbContext, IReaparrDbContext, IReaparrDbC
 
         builder.AddQuartz(x => x.UseSqlite());
 
-        // Configurations need to override TickerQ default configurations
         builder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
 
         base.OnModelCreating(builder);

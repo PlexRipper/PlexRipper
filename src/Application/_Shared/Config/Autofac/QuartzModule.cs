@@ -15,9 +15,15 @@ public class QuartzModule : Module
     {
         var assembly = Assembly.GetExecutingAssembly();
 
-        // Source: https://github.com/alphacloud/Autofac.Extras.Quartz
-
         // Register Quartz dependencies
+        // Source: https://www.quartz-scheduler.net/
+        builder.RegisterType<QuartzSchedulerService>().SingleInstance();
+        builder.RegisterType<AllJobListener>().SingleInstance();
+        builder.RegisterType<DownloadJobListener>().SingleInstance();
+        builder.RegisterType<LibrarySyncJobListener>().SingleInstance();
+        builder.RegisterType<ReaparrSchedulerListener>().SingleInstance();
+
+        // Source: https://github.com/alphacloud/Autofac.Extras.Quartz
         builder.RegisterModule(
             new QuartzAutofacFactoryModule
             {

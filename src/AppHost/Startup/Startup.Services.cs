@@ -14,10 +14,6 @@ using Reaparr.Application.Contracts;
 using Reaparr.Data.Contracts;
 using Reaparr.Identity.Contracts;
 using Serilog.Sinks.AspNetCore.App.SignalR.Extensions;
-using TickerQ.Dashboard.DependencyInjection;
-using TickerQ.DependencyInjection;
-using TickerQ.EntityFrameworkCore.Customizer;
-using TickerQ.EntityFrameworkCore.DependencyInjection;
 
 namespace Reaparr.AppHost;
 
@@ -213,19 +209,6 @@ public static partial class Startup
 
         // Removing all registered IHttpMessageHandlerBuilderFilter instances to disable built-in HttpClient logging
         services.RemoveAll<IHttpMessageHandlerBuilderFilter>();
-
-        // Register https://tickerq.net/
-        services.AddTickerQ<JobTimeTicker, JobCronTicker>(opt =>
-        {
-            if (env.IsDevelopment())
-                opt.AddDashboard();
-
-            opt.AddOperationalStore(ef =>
-            {
-                ef.UseApplicationDbContext<ReaparrDbContext>(ConfigurationType.IgnoreModelCustomizer);
-            });
-        });
-        services.RegisterBackgroundJobs();
     }
 
     private static void ConfigureAuthenticationServices(

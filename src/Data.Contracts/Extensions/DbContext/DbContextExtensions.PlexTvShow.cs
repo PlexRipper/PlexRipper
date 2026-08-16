@@ -22,7 +22,7 @@ public static partial class DbContextExtensions
         if (plexLibraryId == 0)
             return ResultExtensions.IsZero(nameof(plexLibraryId));
 
-        var transactionResult = await context.ExecuteSerializedTransactionAsync(
+        var transactionResult = await context.ExecuteTransactionAsync(
             async (ctx, txCt) =>
             {
                 var result = new BulkInsertTvShowsRapport();

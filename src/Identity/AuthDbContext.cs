@@ -3,11 +3,13 @@ using Microsoft.AspNetCore.DataProtection.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Reaparr.Environment;
+using Serilog;
 
 namespace Reaparr.Identity;
 
 public sealed class AuthDbContext : IdentityDbContext<AppUser>, IAuthDbContext, IAuthDbContextDatabase
 {
+    private readonly ILogger _log;
     private readonly IPathProvider _pathProvider;
 
     private readonly IAppRuntimeInfo _appRuntimeInfo;
@@ -18,8 +20,9 @@ public sealed class AuthDbContext : IdentityDbContext<AppUser>, IAuthDbContext, 
     public DbSet<DownloadClientSession> DownloadClientSessions { get; set; }
 
     [ActivatorUtilitiesConstructor]
-    public AuthDbContext(IPathProvider pathProvider, IAppRuntimeInfo appRuntimeInfo)
+    public AuthDbContext(ILogger log, IPathProvider pathProvider, IAppRuntimeInfo appRuntimeInfo)
     {
+        _log = log.ForContext<AuthDbContext>();
         _pathProvider = pathProvider;
         _appRuntimeInfo = appRuntimeInfo;
         DatabaseName = pathProvider.DatabaseName;
@@ -27,11 +30,13 @@ public sealed class AuthDbContext : IdentityDbContext<AppUser>, IAuthDbContext, 
 
     public AuthDbContext(
         DbContextOptions<AuthDbContext> options,
+        ILogger log,
         IPathProvider pathProvider,
         IAppRuntimeInfo appRuntimeInfo
     )
         : base(options)
     {
+        _log = log.ForContext<AuthDbContext>();
         _pathProvider = pathProvider;
         _appRuntimeInfo = appRuntimeInfo;
 
@@ -40,12 +45,14 @@ public sealed class AuthDbContext : IdentityDbContext<AppUser>, IAuthDbContext, 
 
     public AuthDbContext(
         DbContextOptions<AuthDbContext> options,
+        ILogger log,
         IPathProvider pathProvider,
         IAppRuntimeInfo appRuntimeInfo,
         string databaseName
     )
         : base(options)
     {
+        _log = log.ForContext<AuthDbContext>();
         _pathProvider = pathProvider;
         _appRuntimeInfo = appRuntimeInfo;
 
@@ -62,7 +69,19 @@ public sealed class AuthDbContext : IdentityDbContext<AppUser>, IAuthDbContext, 
     }
 
     /// <inheritdoc/>
-    public bool CanConnect() => Database.CanConnect();
+    public bool CanConnect()
+    {
+        if (!Database.CanConnect())
+        {
+            _log.Error("Database {DatabaseName} is not connectable", DatabaseName);
+            return false;
+        }
+
+        var result = Result.Try(() => DbContextConnections.EnableWriteAheadLogging(Database.GetDbConnection()));
+        result.LogIfFailed();
+
+        return result.IsSuccess;
+    }
 
     /// <inheritdoc/>
     public bool IsInMemory() => Database.IsInMemory();
@@ -71,20 +90,17 @@ public sealed class AuthDbContext : IdentityDbContext<AppUser>, IAuthDbContext, 
     public void CloseConnection() => Database.CloseConnection();
 
     /// <inheritdoc/>
-    public Result<bool> EnsureDeleted()
-    {
-        try
-        {
-            return Result.Ok(Database.EnsureDeleted());
-        }
-        catch (Exception e)
-        {
-            return Result.Fail(new ExceptionalError(e));
-        }
-    }
+    public Result<bool> EnsureDeleted() => Result.Try(() => Database.EnsureDeleted());
 
     /// <inheritdoc/>
-    public Result Migrate() => Result.Try(() => Database.Migrate(), e => new ExceptionalError(e));
+    public Result Migrate() =>
+        Result
+            .Try(() =>
+            {
+                DbContextConnections.EnableWriteAheadLogging(Database.GetDbConnection());
+                Database.Migrate();
+            })
+            .LogIfFailed();
 
     /// <inheritdoc/>
     public IEnumerable<string> GetPendingMigrations() => Database.GetPendingMigrations();

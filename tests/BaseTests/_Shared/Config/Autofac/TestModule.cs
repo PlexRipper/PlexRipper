@@ -19,6 +19,7 @@ public class TestModule : Module
             .Register(
                 (ctx, _) =>
                     MockDatabase.GetMemoryReaparrDbContext(
+                        ctx.Resolve<ILogger>(),
                         ctx.Resolve<IPathProvider>(),
                         ctx.Resolve<IAppRuntimeInfo>(),
                         MemoryDbName
@@ -31,6 +32,7 @@ public class TestModule : Module
             .Register(
                 (ctx, _) =>
                     MockDatabase.GetMemoryReaparrDbContext(
+                        ctx.Resolve<ILogger>(),
                         ctx.Resolve<IPathProvider>(),
                         ctx.Resolve<IAppRuntimeInfo>(),
                         MemoryDbName
@@ -44,6 +46,7 @@ public class TestModule : Module
             .Register(
                 (ctx, _) =>
                     MockDatabase.GetMemoryAuthDbContext(
+                        ctx.Resolve<ILogger>(),
                         ctx.Resolve<IPathProvider>(),
                         ctx.Resolve<IAppRuntimeInfo>(),
                         MemoryDbName
@@ -56,6 +59,7 @@ public class TestModule : Module
             .Register(
                 (ctx, _) =>
                     MockDatabase.GetMemoryAuthDbContext(
+                        ctx.Resolve<ILogger>(),
                         ctx.Resolve<IPathProvider>(),
                         ctx.Resolve<IAppRuntimeInfo>(),
                         MemoryDbName

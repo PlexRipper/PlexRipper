@@ -85,7 +85,7 @@ public static partial class DbContextExtensions
         if (plexLibraryId == 0)
             return ResultExtensions.IsZero(nameof(plexLibraryId));
 
-        return await context.ExecuteSerializedTransactionAsync(
+        return await context.ExecuteTransactionAsync(
             async (ctx, txCt) =>
             {
                 plexMovies.SetRelationshipIds(plexServerId, plexLibraryId);

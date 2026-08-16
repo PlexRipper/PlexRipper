@@ -1,7 +1,8 @@
 using System.Data;
+using System.Diagnostics;
 using System.Reflection;
 using EFCore.BulkExtensions;
-using EntityFrameworkCore.Sqlite.Concurrency;
+using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.DependencyInjection;
 using TickerQ.EntityFrameworkCore.Configurations;
 using TickerQ.Utilities.Entities;
@@ -12,6 +13,8 @@ namespace Reaparr.Data;
 
 public sealed class ReaparrDbContext : DbContext, IReaparrDbContext, IReaparrDbContextDatabase
 {
+    private const int MAX_TRANSACTION_ATTEMPTS = 2;
+    private readonly ILogger _log;
     private readonly IPathProvider _pathProvider;
     private readonly IAppRuntimeInfo _appRuntimeInfo;
     public DbSet<PlexAccount> PlexAccounts { get; set; }
@@ -114,98 +117,145 @@ public sealed class ReaparrDbContext : DbContext, IReaparrDbContext, IReaparrDbC
 
     public string DatabaseName { get; }
 
+    /// <inheritdoc/>
     public async Task BulkInsertAsync<T>(
         IList<T> entities,
         BulkConfig? bulkConfig = null,
         CancellationToken cancellationToken = default
     )
         where T : class =>
-        await ExecuteSerializedWriteAsync(
-            async (_, ct) =>
-                await ExecuteBulkAsync(
-                    () => DbContextBulkExtensions.BulkInsertAsync(this, entities, bulkConfig, cancellationToken: ct),
-                    ct
+        await ExecuteBulkAsync(
+            () =>
+                DbContextBulkExtensions.BulkInsertAsync(
+                    this,
+                    entities,
+                    bulkConfig,
+                    cancellationToken: cancellationToken
                 ),
             cancellationToken
         );
 
+    /// <inheritdoc/>
     public async Task BulkUpdateAsync<T>(
         IList<T> entities,
         BulkConfig? bulkConfig = null,
         CancellationToken cancellationToken = default
     )
         where T : class =>
-        await ExecuteSerializedWriteAsync(
-            async (_, ct) =>
-                await ExecuteBulkAsync(
-                    () => DbContextBulkExtensions.BulkUpdateAsync(this, entities, bulkConfig, cancellationToken: ct),
-                    ct
+        await ExecuteBulkAsync(
+            () =>
+                DbContextBulkExtensions.BulkUpdateAsync(
+                    this,
+                    entities,
+                    bulkConfig,
+                    cancellationToken: cancellationToken
                 ),
             cancellationToken
         );
 
     /// <inheritdoc/>
-    public Task<T> ExecuteWithRetryAsync<T>(
-        Func<IReaparrDbContext, Task<T>> operation,
-        int maxRetries = 3,
-        CancellationToken cancellationToken = default
-    ) =>
-        ((DbContext)this).ExecuteWithRetryAsync(
-            ctx => operation((IReaparrDbContext)ctx),
-            maxRetries,
-            cancellationToken
-        );
-
-    public Task<T> ExecuteSerializedWriteAsync<T>(
+    public Task<Result<T>> ExecuteTransactionAsync<T>(
         Func<IReaparrDbContext, CancellationToken, Task<T>> operation,
         CancellationToken cancellationToken = default
-    ) => this.ExecuteSerializedWriteAsync(ct => operation(this, ct), 8, cancellationToken);
-
-    public Task ExecuteSerializedWriteAsync(
-        Func<IReaparrDbContext, CancellationToken, Task> operation,
-        CancellationToken cancellationToken = default
-    ) => this.ExecuteSerializedWriteAsync(ct => operation(this, ct), 8, cancellationToken);
-
-    public Task<Result<T>> ExecuteSerializedTransactionAsync<T>(
-        Func<IReaparrDbContext, CancellationToken, Task<T>> operation,
-        CancellationToken cancellationToken = default
-    ) =>
-        Result.Try(
-            new Func<Task<T>>(async () =>
-            {
-                T result = default!;
-                await this.ExecuteSerializedTransactionAsync(
-                    async ct =>
-                    {
-                        result = await operation(this, ct);
-                    },
-                    8,
-                    cancellationToken
-                );
-                return result;
-            })
-        );
-
-    public Task<Result> ExecuteSerializedTransactionAsync(
-        Func<IReaparrDbContext, CancellationToken, Task> operation,
-        CancellationToken cancellationToken = default
-    ) => Result.Try(() => this.ExecuteSerializedTransactionAsync(ct => operation(this, ct), 8, cancellationToken));
+    ) => Result.Try(() => ExecuteTransactionWithRetryAsync(operation, cancellationToken));
 
     /// <inheritdoc/>
-    public Task<int> ExecuteSqlInterpolatedAsync(FormattableString sql, CancellationToken cancellationToken = default)
+    public Task<Result> ExecuteTransactionAsync(
+        Func<IReaparrDbContext, CancellationToken, Task> operation,
+        CancellationToken cancellationToken = default
+    ) => Result.Try(() => ExecuteTransactionWithRetryAsync(operation, cancellationToken));
+
+    /// <inheritdoc/>
+    public Task<int> ExecuteSqlInterpolatedAsync(
+        FormattableString sql,
+        CancellationToken cancellationToken = default
+    ) => Database.ExecuteSqlInterpolatedAsync(sql, cancellationToken);
+
+    private async Task<T> ExecuteTransactionWithRetryAsync<T>(
+        Func<IReaparrDbContext, CancellationToken, Task<T>> operation,
+        CancellationToken cancellationToken
+    )
     {
-        return this.ExecuteSerializedWriteAsync(
-            ct1 => Database.ExecuteSqlInterpolatedAsync(sql, ct1),
-            8,
+        ArgumentNullException.ThrowIfNull(operation);
+        var stopwatch = Stopwatch.StartNew();
+
+        for (var attempt = 1; ; attempt++)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            var openedHere = Database.GetDbConnection().State != ConnectionState.Open;
+
+            try
+            {
+                if (openedHere)
+                    await Database.OpenConnectionAsync(cancellationToken);
+
+                await using var transaction = await Database.BeginTransactionAsync(cancellationToken);
+
+                try
+                {
+                    var result = await operation(this, cancellationToken);
+                    await transaction.CommitAsync(cancellationToken);
+                    return result;
+                }
+                catch
+                {
+                    await transaction.RollbackAsync(CancellationToken.None);
+                    throw;
+                }
+                finally
+                {
+                    ChangeTracker.Clear();
+                }
+            }
+            catch (SqliteException ex) when (IsRetryableLockFailure(ex) && attempt < MAX_TRANSACTION_ATTEMPTS)
+            {
+                await Task.Delay(Random.Shared.Next(75, 151), cancellationToken);
+            }
+            catch (SqliteException ex) when (IsRetryableLockFailure(ex))
+            {
+                _log.Error(
+                    ex,
+                    "SQLite {OperationCategory} failed after {AttemptCount} transaction attempts and {ElapsedMilliseconds} ms",
+                    "write transaction",
+                    attempt,
+                    stopwatch.ElapsedMilliseconds
+                );
+                throw;
+            }
+            finally
+            {
+                if (openedHere)
+                    await Database.CloseConnectionAsync();
+            }
+        }
+    }
+
+    private Task ExecuteTransactionWithRetryAsync(
+        Func<IReaparrDbContext, CancellationToken, Task> operation,
+        CancellationToken cancellationToken
+    ) =>
+        ExecuteTransactionWithRetryAsync(
+            async (context, ct) =>
+            {
+                await operation(context, ct);
+                return 0;
+            },
             cancellationToken
         );
+
+    private static bool IsRetryableLockFailure(SqliteException exception)
+    {
+        const int sqliteBusy = 5;
+        const int sqliteLocked = 6;
+        return exception.SqliteErrorCode is sqliteBusy or sqliteLocked;
     }
 
     /// <inheritdoc/>
     public void ClearChangeTracker() => ChangeTracker.Clear();
 
-    public ReaparrDbContext(IPathProvider pathProvider, IAppRuntimeInfo appRuntimeInfo)
+    public ReaparrDbContext(ILogger log, IPathProvider pathProvider, IAppRuntimeInfo appRuntimeInfo)
     {
+        _log = log.ForContext<ReaparrDbContext>();
         _pathProvider = pathProvider;
         _appRuntimeInfo = appRuntimeInfo;
         DatabaseName = pathProvider.DatabaseName;
@@ -218,11 +268,13 @@ public sealed class ReaparrDbContext : DbContext, IReaparrDbContext, IReaparrDbC
     [ActivatorUtilitiesConstructor]
     public ReaparrDbContext(
         DbContextOptions<ReaparrDbContext> options,
+        ILogger log,
         IPathProvider pathProvider,
         IAppRuntimeInfo appRuntimeInfo
     )
         : base(options)
     {
+        _log = log.ForContext<ReaparrDbContext>();
         _pathProvider = pathProvider;
         _appRuntimeInfo = appRuntimeInfo;
         DatabaseName = pathProvider.DatabaseName;
@@ -233,12 +285,14 @@ public sealed class ReaparrDbContext : DbContext, IReaparrDbContext, IReaparrDbC
     /// </summary>
     public ReaparrDbContext(
         DbContextOptions<ReaparrDbContext> options,
+        ILogger log,
         IPathProvider pathProvider,
         IAppRuntimeInfo appRuntimeInfo,
         string databaseName
     )
         : base(options)
     {
+        _log = log.ForContext<ReaparrDbContext>();
         _pathProvider = pathProvider;
         _appRuntimeInfo = appRuntimeInfo;
         DatabaseName = databaseName;
@@ -303,7 +357,19 @@ public sealed class ReaparrDbContext : DbContext, IReaparrDbContext, IReaparrDbC
     }
 
     /// <inheritdoc/>
-    public bool CanConnect() => Database.CanConnect();
+    public bool CanConnect()
+    {
+        if (!Database.CanConnect())
+        {
+            _log.Error("Database {DatabaseName} is not connectable", DatabaseName);
+            return false;
+        }
+
+        var result = Result.Try(() => DbContextConnections.EnableWriteAheadLogging(Database.GetDbConnection()));
+        result.LogIfFailed();
+
+        return result.IsSuccess;
+    }
 
     /// <inheritdoc/>
     public bool IsInMemory() => Database.IsInMemory();
@@ -325,11 +391,17 @@ public sealed class ReaparrDbContext : DbContext, IReaparrDbContext, IReaparrDbC
     }
 
     /// <inheritdoc/>
-    public Result Migrate() => Result.Try(() => Database.Migrate(), e => new ExceptionalError(e));
+    public Result Migrate() =>
+        Result.Try(() =>
+        {
+            DbContextConnections.EnableWriteAheadLogging(Database.GetDbConnection());
+            Database.Migrate();
+        });
 
     /// <inheritdoc/>
     public IEnumerable<string> GetPendingMigrations() => Database.GetPendingMigrations();
 
+    /// <inheritdoc/>
     public new Task<int> SaveChangesAsync(CancellationToken cancellationToken = default) =>
-        this.SaveChangesSerializedAsync(8, cancellationToken);
+        base.SaveChangesAsync(cancellationToken);
 }

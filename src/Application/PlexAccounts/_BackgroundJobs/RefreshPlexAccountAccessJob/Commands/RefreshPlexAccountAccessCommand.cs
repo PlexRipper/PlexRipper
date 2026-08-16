@@ -178,7 +178,7 @@ public class RefreshPlexAccountAccessCommandHandler
         );
 
         PlexLibraryAccessRefreshResponse? libraryAccessRapport = null;
-        var transactionResult = await _dbContext.ExecuteSerializedTransactionAsync(
+        var transactionResult = await _dbContext.ExecuteTransactionAsync(
             async (ctx, txCt) =>
             {
                 libraryAccessRapport = await RemoveRevokedLibraryAccess(ctx, plexAccount, serverAccessRapport, txCt);

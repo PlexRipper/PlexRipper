@@ -127,7 +127,7 @@ public class SetLibraryEnabledEndpoint : Endpoint<SetLibraryEnabledRequest, Resu
             return cancelResult.LogError();
 
         // Purge synced media and reset metadata atomically.
-        var deleteResult = await _dbContext.ExecuteSerializedTransactionAsync(
+        var deleteResult = await _dbContext.ExecuteTransactionAsync(
             async (dbContext, txCt) =>
             {
                 var deletedCount = plexLibrary.Type switch

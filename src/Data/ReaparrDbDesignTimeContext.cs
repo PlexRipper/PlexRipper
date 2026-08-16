@@ -15,7 +15,7 @@ public class ReaparrDbDesignTimeContext : IDesignTimeDbContextFactory<ReaparrDbC
         IAppBuildInfo designTimeBuildInfo = new DesignTimeAppBuildInfo();
         IPathProvider pathProvider = new PathProvider(designTimeBuildInfo, appRuntimeInfo);
 
-        return new ReaparrDbContext(pathProvider, appRuntimeInfo);
+        return new ReaparrDbContext(Log.Logger, pathProvider, appRuntimeInfo);
     }
 
     private sealed class DesignTimeAppBuildInfo : IAppBuildInfo

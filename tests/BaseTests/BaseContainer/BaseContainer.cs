@@ -56,7 +56,7 @@ public class BaseContainer : IDisposable
 
         // Setup database
         await MockDatabase
-            .GetMemoryDbContext(mockPathProvider, mockAppRuntimeInfo, memoryDbName)
+            .GetMemoryDbContext(log, mockPathProvider, mockAppRuntimeInfo, memoryDbName)
             .Setup(seed, mockPathProvider, mockAppRuntimeInfo, config.DatabaseOptions);
 
         var container = new BaseContainer(log, seed, memoryDbName, testFileSystemRootPath, options);

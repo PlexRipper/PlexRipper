@@ -116,7 +116,7 @@ public class CheckConnectionStatusByIdCommandHandler
                 .LogWarning();
         }
 
-        var upsertResult = await dbContext.ExecuteSerializedTransactionAsync(
+        var upsertResult = await dbContext.ExecuteTransactionAsync(
             async (transactionContext, ct) =>
             {
                 var existingCount = await transactionContext

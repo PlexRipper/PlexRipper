@@ -113,37 +113,10 @@
           "NuGet.Versioning": "6.14.0"
         }
       },
-      "AppAny.Quartz.EntityFrameworkCore.Migrations": {
-        "type": "Transitive",
-        "resolved": "0.6.0",
-        "contentHash": "hhhg6TeGEl5qczPD67xhJ9IYCpZ7PAd6CNiaA9vqK9a8y9tdXUp/Nkca19oTs55BxF8mmNSNUTjnO4T7lhKnvQ==",
-        "dependencies": {
-          "Microsoft.EntityFrameworkCore": "10.0.8"
-        }
-      },
-      "AppAny.Quartz.EntityFrameworkCore.Migrations.SQLite": {
-        "type": "Transitive",
-        "resolved": "0.6.0",
-        "contentHash": "gyRyO8EFn3u0AmnJCBBVDzjSKwfJUkrMIFWHL7ox/tp5buezNjWb7K6pyM33wkRRbSvhNqKSQhjoYYkSwPsBMw==",
-        "dependencies": {
-          "AppAny.Quartz.EntityFrameworkCore.Migrations": "0.6.0",
-          "Microsoft.EntityFrameworkCore.Sqlite": "10.0.8"
-        }
-      },
       "Autofac": {
         "type": "Transitive",
         "resolved": "9.1.0",
         "contentHash": "onT/BcnnfWcQNXiuC7R/0h8ALQzRdsAI20gpB7nfrudXpFMXdVZKz1umdtHXDwjc/bmWEsrCBAxck3+Arnk15g=="
-      },
-      "Autofac.Extras.Quartz": {
-        "type": "Transitive",
-        "resolved": "11.0.0",
-        "contentHash": "EAojmP/iI02TnUndDLYa6MHS5OySVqntKA7owGRm8J/w4x2QwA/TTqOfSHWmtZ1BrZ17Bttko/JO6vssJAgQYQ==",
-        "dependencies": {
-          "Autofac": "[9.0.0, 10.0.0)",
-          "JetBrains.Annotations": "2025.2.4",
-          "Quartz": "[3.16.1, 4.0.0)"
-        }
       },
       "BencodeNET": {
         "type": "Transitive",
@@ -637,11 +610,6 @@
           "Polly": "7.1.0"
         }
       },
-      "Quartz": {
-        "type": "Transitive",
-        "resolved": "3.16.1",
-        "contentHash": "U8SCG2bOmmVdM4tArsJcYbFF8GYTUXj9Zjl9fL7Xt0BWTRIFAmqx3T7k20eJUcmIqYBa3eAk7MOS/yJhfG5xAA=="
-      },
       "Semver": {
         "type": "Transitive",
         "resolved": "3.0.0",
@@ -861,14 +829,6 @@
         "resolved": "16.3.0",
         "contentHash": "SgMOdxbz8X65z8hraIs6hOEdnkH6hESTAIUa7viEngHOYaH+6q5XJmwr1+yb9vJpNQ19hCQY69xbFsLtXpobQA=="
       },
-      "EntityFrameworkCore.Sqlite.Concurrency": {
-        "type": "Project",
-        "dependencies": {
-          "Microsoft.Data.Sqlite": "[10.0.10, )",
-          "Microsoft.EntityFrameworkCore.Sqlite": "[10.0.10, )",
-          "SQLitePCLRaw.lib.e_sqlite3": "[2.1.12, )"
-        }
-      },
       "Reaparr.Application": {
         "type": "Project",
         "dependencies": {
@@ -903,7 +863,6 @@
       "Reaparr.Data": {
         "type": "Project",
         "dependencies": {
-          "AppAny.Quartz.EntityFrameworkCore.Migrations.SQLite": "[0.6.0, )",
           "Autofac": "[9.1.0, )",
           "Microsoft.AspNetCore.Identity.EntityFrameworkCore": "[10.0.10, )",
           "Microsoft.Data.Sqlite": "[10.0.10, )",
@@ -923,7 +882,6 @@
         "type": "Project",
         "dependencies": {
           "EFCore.BulkExtensions.SQLite": "[10.0.1, )",
-          "EntityFrameworkCore.Sqlite.Concurrency": "[10.1.0, )",
           "FlexQuery.NET.EFCore": "[2.5.0, )",
           "Microsoft.EntityFrameworkCore": "[10.0.10, )",
           "Microsoft.EntityFrameworkCore.Sqlite": "[10.0.10, )",
@@ -976,7 +934,6 @@
         "type": "Project",
         "dependencies": {
           "Autofac": "[9.1.0, )",
-          "Autofac.Extras.Quartz": "[11.0.0, )",
           "Reaparr.Application.Contracts": "[1.0.0, )",
           "Reaparr.Data.Contracts": "[1.0.0, )",
           "Reaparr.FileSystem.Contracts": "[1.0.0, )",

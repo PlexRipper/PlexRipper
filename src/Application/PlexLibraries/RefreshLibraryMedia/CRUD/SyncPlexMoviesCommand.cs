@@ -173,7 +173,7 @@ public class SyncPlexMoviesCommandHandler : ICommandHandler<SyncPlexMoviesComman
         report.DeletedMovies = deleted.Count;
         report.UnchangedMovies = incomingMovies.Count - created.Count - updated.Count;
 
-        return await _dbContext.ExecuteSerializedTransactionAsync(
+        return await _dbContext.ExecuteTransactionAsync(
             async (ctx, txCt) =>
             {
                 if (forceMediaRefresh)
@@ -250,7 +250,7 @@ public class SyncPlexMoviesCommandHandler : ICommandHandler<SyncPlexMoviesComman
         // Remove duplicates before inserting
         list = list.DistinctBy(x => new { x.PlexActorId, x.PlexMovieId }).ToList();
 
-        var insertResult = await _dbContext.ExecuteSerializedTransactionAsync(
+        var insertResult = await _dbContext.ExecuteTransactionAsync(
             async (ctx, txCt) =>
             {
                 await ctx.PlexMovieActors.Where(x => x.PlexLibraryId == libraryId).ExecuteDeleteAsync(txCt);
@@ -304,7 +304,7 @@ public class SyncPlexMoviesCommandHandler : ICommandHandler<SyncPlexMoviesComman
         // Remove duplicates before inserting
         list = list.DistinctBy(x => new { x.GenresId, x.PlexMovieId }).ToList();
 
-        var insertResult = await _dbContext.ExecuteSerializedTransactionAsync(
+        var insertResult = await _dbContext.ExecuteTransactionAsync(
             async (ctx, txCt) =>
             {
                 await ctx.PlexMovieGenres.Where(x => x.PlexLibraryId == libraryId).ExecuteDeleteAsync(txCt);
@@ -358,7 +358,7 @@ public class SyncPlexMoviesCommandHandler : ICommandHandler<SyncPlexMoviesComman
         // Remove duplicates before inserting
         list = list.DistinctBy(x => new { x.CountryId, x.PlexMovieId }).ToList();
 
-        var insertResult = await _dbContext.ExecuteSerializedTransactionAsync(
+        var insertResult = await _dbContext.ExecuteTransactionAsync(
             async (ctx, txCt) =>
             {
                 await ctx.PlexMovieCountries.Where(x => x.PlexLibraryId == libraryId).ExecuteDeleteAsync(txCt);

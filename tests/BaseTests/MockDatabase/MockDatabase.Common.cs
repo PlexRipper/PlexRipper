@@ -1,4 +1,3 @@
-using EntityFrameworkCore.Sqlite.Concurrency;
 using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.Logging;
 
@@ -207,11 +206,13 @@ public static partial class MockDatabase
     /// Creates an in-memory database only to be used for unit and integration testing.
     /// Passing in the same dbName will create a new context for the same database
     /// </summary>
+    /// <param name="logger">The ILogger implementation</param>
     /// <param name="pathProvider">The path provider to use for the DbContext, can be shared between contexts that should have the same sandboxed file paths. Use CreatePathProvider(dbName) to create a new one with unique paths based on the dbName.</param>
     /// <param name="appRuntimeInfo">The app runtime info to use for the DbContext, can be shared between contexts that should have the same app runtime info. Use CreateAppRuntimeInfo(dbName) to create a new one with unique values based on the dbName.</param>
     /// <param name="dbName">leave empty to generate a random one</param>
     /// <returns>A <see cref="ReaparrDbContext" /> in memory instance.</returns>
     public static (ReaparrDbContext, AuthDbContext) GetMemoryDbContext(
+        Serilog.ILogger logger,
         IPathProvider pathProvider,
         IAppRuntimeInfo appRuntimeInfo,
         string dbName = ""
@@ -220,12 +221,13 @@ public static partial class MockDatabase
         dbName = string.IsNullOrEmpty(dbName) ? GetMemoryDatabaseName() : dbName;
 
         return (
-            GetMemoryReaparrDbContext(pathProvider, appRuntimeInfo, dbName),
-            GetMemoryAuthDbContext(pathProvider, appRuntimeInfo, dbName)
+            GetMemoryReaparrDbContext(logger, pathProvider, appRuntimeInfo, dbName),
+            GetMemoryAuthDbContext(logger, pathProvider, appRuntimeInfo, dbName)
         );
     }
 
     public static ReaparrDbContext GetMemoryReaparrDbContext(
+        Serilog.ILogger logger,
         IPathProvider pathProvider,
         IAppRuntimeInfo appRuntimeInfo,
         string dbName = ""
@@ -233,10 +235,11 @@ public static partial class MockDatabase
     {
         var optionsBuilder = GetDbContextOptionsBuilder<ReaparrDbContext>(dbName);
 
-        return new ReaparrDbContext(optionsBuilder.Options, pathProvider, appRuntimeInfo, dbName);
+        return new ReaparrDbContext(optionsBuilder.Options, logger, pathProvider, appRuntimeInfo, dbName);
     }
 
     public static AuthDbContext GetMemoryAuthDbContext(
+        Serilog.ILogger logger,
         IPathProvider pathProvider,
         IAppRuntimeInfo appRuntimeInfo,
         string dbName = ""
@@ -244,17 +247,8 @@ public static partial class MockDatabase
     {
         var optionsBuilder = GetDbContextOptionsBuilder<AuthDbContext>(dbName);
 
-        return new AuthDbContext(optionsBuilder.Options, pathProvider, appRuntimeInfo, dbName);
+        return new AuthDbContext(optionsBuilder.Options, logger, pathProvider, appRuntimeInfo, dbName);
     }
-
-    public static string DatabaseConnectionString(string dbName = "") =>
-        // https://docs.microsoft.com/en-us/dotnet/standard/data/sqlite/in-memory-databases
-        new SqliteConnectionStringBuilder
-        {
-            Mode = SqliteOpenMode.Memory,
-            ForeignKeys = true,
-            DataSource = dbName,
-        }.ToString();
 
     public static async Task Setup(
         this (ReaparrDbContext, AuthDbContext) context,
@@ -334,16 +328,7 @@ public static partial class MockDatabase
         where TContext : DbContext
     {
         var optionsBuilder = new DbContextOptionsBuilder<TContext>();
-        var databaseConnectionString = DatabaseConnectionString(dbName);
-        optionsBuilder.AddInterceptors(new NaturalSortCollationInterceptor());
-        optionsBuilder.UseSqliteWithConcurrency(
-            databaseConnectionString,
-            options =>
-            {
-                options.BusyTimeout = TimeSpan.FromSeconds(5);
-                options.MaxRetryAttempts = 8;
-            }
-        );
+        optionsBuilder.ConfigureSqlite(dbName, SqliteOpenMode.Memory);
 
         optionsBuilder.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
         optionsBuilder.EnableSensitiveDataLogging();

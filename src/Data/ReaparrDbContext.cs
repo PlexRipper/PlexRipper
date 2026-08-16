@@ -189,9 +189,7 @@ public sealed class ReaparrDbContext : DbContext, IReaparrDbContext, IReaparrDbC
                 if (openedHere)
                     await Database.OpenConnectionAsync(cancellationToken);
 
-                await using var transaction = ((SqliteConnection)Database.GetDbConnection()).BeginTransaction(
-                    deferred: false
-                );
+                await using var transaction = await Database.BeginTransactionAsync(cancellationToken);
 
                 try
                 {

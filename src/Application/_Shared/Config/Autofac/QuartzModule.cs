@@ -35,6 +35,8 @@ public class QuartzModule : Module
                         SqliteOpenMode.ReadWriteCreate
                     );
 
+                    QuartzSqliteConnectionProvider.ConfigureConnectionString(connectionString);
+
                     var schedulerBuilder = SchedulerBuilder
                         .Create()
                         .WithName("Reaparr Scheduler")

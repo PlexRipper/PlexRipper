@@ -317,9 +317,9 @@ public sealed class ReaparrDbContext : DbContext, IReaparrDbContext, IReaparrDbC
     {
         builder.UseCollation(OrderByNaturalExtensions.CollationName);
 
-        builder.AddQuartz(x => x.UseSqlite());
-
         builder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
+
+        builder.AddQuartz(x => x.UseSqlite());
 
         base.OnModelCreating(builder);
     }

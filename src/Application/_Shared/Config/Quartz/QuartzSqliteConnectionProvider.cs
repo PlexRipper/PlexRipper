@@ -18,6 +18,10 @@ namespace Reaparr.Application;
 /// </summary>
 public sealed class QuartzSqliteConnectionProvider : IDbProvider
 {
+    // Quartz creates custom providers through reflection and does not populate
+    // IDbProvider.ConnectionString for this provider type. Store the application
+    // connection string before Quartz creates the provider instance.
+    private static string _configuredConnectionString = "";
     private readonly DbProviderFactory _factory;
     private string _connectionString = "";
 
@@ -28,6 +32,15 @@ public sealed class QuartzSqliteConnectionProvider : IDbProvider
     public QuartzSqliteConnectionProvider()
     {
         _factory = SqliteFactory.Instance;
+    }
+
+    /// <summary>
+    /// Configures the connection string used by reflection-created Quartz provider instances.
+    /// </summary>
+    public static void ConfigureConnectionString(string connectionString)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(connectionString);
+        _configuredConnectionString = connectionString;
     }
 
     /// <inheritdoc />
@@ -44,20 +57,21 @@ public sealed class QuartzSqliteConnectionProvider : IDbProvider
     }
 
     /// <inheritdoc />
-    public DbMetadata Metadata => new()
-    {
-        ProductName = "Microsoft.Data.Sqlite",
-        AssemblyName = "Microsoft.Data.Sqlite",
-        ParameterNamePrefix = "@",
-        BindByName = true,
-        UseParameterNamePrefixInParameterCollection = true,
-    };
+    public DbMetadata Metadata =>
+        new()
+        {
+            ProductName = "Microsoft.Data.Sqlite",
+            AssemblyName = "Microsoft.Data.Sqlite",
+            ParameterNamePrefix = "@",
+            BindByName = true,
+            UseParameterNamePrefixInParameterCollection = true,
+        };
 
     /// <inheritdoc />
     public DbCommand CreateCommand()
     {
-        var cmd = _factory.CreateCommand()
-            ?? throw new InvalidOperationException("SqliteFactory returned null command");
+        var cmd =
+            _factory.CreateCommand() ?? throw new InvalidOperationException("SqliteFactory returned null command");
 
         return cmd;
     }
@@ -65,10 +79,22 @@ public sealed class QuartzSqliteConnectionProvider : IDbProvider
     /// <inheritdoc />
     public DbConnection CreateConnection()
     {
-        var conn = _factory.CreateConnection()
+        var conn =
+            _factory.CreateConnection()
             ?? throw new InvalidOperationException("SqliteFactory returned null connection");
 
-        conn.ConnectionString = _connectionString;
+        var connectionString = string.IsNullOrWhiteSpace(_connectionString)
+            ? _configuredConnectionString
+            : _connectionString;
+
+        if (string.IsNullOrWhiteSpace(connectionString))
+        {
+            throw new InvalidOperationException(
+                "Quartz SQLite connection provider has not been configured with a connection string."
+            );
+        }
+
+        conn.ConnectionString = connectionString;
 
         // Quartz calls CreateConnection() then Open(). We hook StateChange
         // to apply PRAGMAs on every Open() — this is the same pattern as
@@ -77,18 +103,7 @@ public sealed class QuartzSqliteConnectionProvider : IDbProvider
         {
             if (args.CurrentState == ConnectionState.Open)
             {
-                using var pragmaCmd = conn.CreateCommand();
-                pragmaCmd.CommandText = """
-                    PRAGMA journal_mode = WAL;
-                    PRAGMA synchronous = NORMAL;
-                    PRAGMA busy_timeout = 30000;
-                    PRAGMA cache_size = -20000;
-                    PRAGMA mmap_size = 268435456;
-                    PRAGMA temp_store = MEMORY;
-                    PRAGMA locking_mode = NORMAL;
-                    PRAGMA secure_delete = OFF;
-                    """;
-                pragmaCmd.ExecuteNonQuery();
+                DbContextConnections.ConfigureOpenedSqliteConnection(conn);
             }
         };
 

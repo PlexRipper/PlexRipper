@@ -26,6 +26,7 @@ public static class DbContextConnections
         PRAGMA secure_delete = OFF;
         """;
 
+    private static readonly NaturalSortComparer _naturalSortComparer = new(StringComparison.OrdinalIgnoreCase);
     private static readonly OnConnectionOpenInterceptor _connectionOpenInterceptor = new();
 
     public static string GetConnectionString(string dataSource, SqliteOpenMode mode) =>
@@ -47,6 +48,25 @@ public static class DbContextConnections
     {
         optionsBuilder.AddInterceptors(_connectionOpenInterceptor);
         optionsBuilder.UseSqlite(GetConnectionString(dataSource, mode));
+    }
+
+    /// <summary>
+    /// Applies Reaparr's SQLite connection-level configuration to an already-open connection.
+    /// This is shared by EF Core and non-EF Core consumers, such as Quartz's ADO job store.
+    /// </summary>
+    public static void ConfigureOpenedSqliteConnection(DbConnection connection)
+    {
+        if (connection is not SqliteConnection sqliteConnection)
+            return;
+
+        sqliteConnection.CreateCollation(
+            OrderByNaturalExtensions.CollationName,
+            (x, y) => _naturalSortComparer.Compare(x, y)
+        );
+
+        using var command = sqliteConnection.CreateCommand();
+        command.CommandText = _providerSpecificConnectionPragmas;
+        command.ExecuteNonQuery();
     }
 
     public static void EnableWriteAheadLogging(DbConnection connection)
@@ -105,11 +125,9 @@ public static class DbContextConnections
 
     private sealed class OnConnectionOpenInterceptor : DbConnectionInterceptor
     {
-        private static readonly NaturalSortComparer _comparer = new(StringComparison.OrdinalIgnoreCase);
-
         public override void ConnectionOpened(DbConnection connection, ConnectionEndEventData eventData)
         {
-            ConfigureConnection(connection);
+            ConfigureOpenedSqliteConnection(connection);
             base.ConnectionOpened(connection, eventData);
         }
 
@@ -119,20 +137,8 @@ public static class DbContextConnections
             CancellationToken cancellationToken = default
         )
         {
-            ConfigureConnection(connection);
+            ConfigureOpenedSqliteConnection(connection);
             await base.ConnectionOpenedAsync(connection, eventData, cancellationToken);
-        }
-
-        private static void ConfigureConnection(DbConnection connection)
-        {
-            if (connection is not SqliteConnection sqliteConnection)
-                return;
-
-            sqliteConnection.CreateCollation(OrderByNaturalExtensions.CollationName, (x, y) => _comparer.Compare(x, y));
-
-            using var command = sqliteConnection.CreateCommand();
-            command.CommandText = _providerSpecificConnectionPragmas;
-            command.ExecuteNonQuery();
         }
     }
 }

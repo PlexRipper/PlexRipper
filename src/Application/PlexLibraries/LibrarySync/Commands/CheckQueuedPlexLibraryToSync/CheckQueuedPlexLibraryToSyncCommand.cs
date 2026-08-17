@@ -107,8 +107,8 @@ public class CheckQueuedPlexLibraryToSyncCommandHandler : ICommandHandler<CheckQ
 
         if (await _scheduler.IsQueued(jobKey, cancellationToken))
         {
-            var serverName = _dbContext.GetPlexServerNameById(serverId);
-            var libraryName = _dbContext.GetPlexLibraryNameById(libraryId);
+            var serverName = await _dbContext.GetPlexServerNameById(serverId);
+            var libraryName = await _dbContext.GetPlexLibraryNameById(libraryId);
             _log.Here()
                 .Warning(
                     "Library sync job already queued for server: {ServerName} with id: {ServerId}, library {LibraryName} with id: {LibraryId}",

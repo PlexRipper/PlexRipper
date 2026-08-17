@@ -6,6 +6,9 @@ namespace Reaparr.Environment;
 public class AppRuntimeInfo : IAppRuntimeInfo
 {
     /// <inheritdoc/>
+    public string AppRunId { get; } = Guid.NewGuid().ToString("N");
+
+    /// <inheritdoc/>
     public bool IsAuthenticationDisabled => IsTrue(GetEnvironmentVariable(EnvKeys.DisableAuthentication));
 
     /// <inheritdoc/>

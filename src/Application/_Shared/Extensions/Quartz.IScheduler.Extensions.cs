@@ -4,32 +4,10 @@ namespace Reaparr.Application;
 
 public static partial class QuartzExtensions
 {
-    public static Task<Result<DateTimeOffset>> ExecuteJob<TJob, TPayload>(
+    public static async Task<Result<DateTimeOffset>> ExecuteJob<TJob, TPayload>(
         this IScheduler scheduler,
         JobKey jobKey,
         TPayload payload,
-        CancellationToken cancellationToken = default,
-        DateTimeOffset? executeAt = null
-    )
-        where TJob : IJob => scheduler.ExecuteJob<TJob>(jobKey, payload.ToJobDataMap(), cancellationToken, executeAt);
-
-    public static Task<Result> ExecuteJobs<TJob, TPayload>(
-        this IScheduler scheduler,
-        IReadOnlyCollection<(JobKey JobKey, TPayload Payload)> jobs,
-        CancellationToken cancellationToken = default,
-        DateTimeOffset? executeAt = null
-    )
-        where TJob : IJob =>
-        scheduler.ExecuteJobs<TJob>(
-            jobs.Select(x => (x.JobKey, x.Payload.ToJobDataMap())).ToList(),
-            cancellationToken,
-            executeAt
-        );
-
-    public static async Task<Result<DateTimeOffset>> ExecuteJob<TJob>(
-        this IScheduler scheduler,
-        JobKey jobKey,
-        JobDataMap jobDataMap,
         CancellationToken cancellationToken = default,
         DateTimeOffset? executeAt = null
     )
@@ -44,7 +22,7 @@ public static partial class QuartzExtensions
         var job = JobBuilder
             .Create<TJob>()
             .WithIdentity(jobKey)
-            .UsingJobData(jobDataMap)
+            .UsingJobData(payload.ToJobDataMap())
             .DisallowConcurrentExecution()
             .RequestRecovery()
             .Build();
@@ -52,15 +30,21 @@ public static partial class QuartzExtensions
         triggerBuilder = executeAt.HasValue ? triggerBuilder.StartAt(executeAt.Value) : triggerBuilder.StartNow();
         var trigger = triggerBuilder.WithSimpleSchedule(x => x.WithMisfireHandlingInstructionFireNow()).Build();
 
-        try
-        {
-            return Result.Ok(await scheduler.ScheduleJob(job, trigger, cancellationToken));
-        }
-        catch (ObjectAlreadyExistsException)
-        {
-            return Result.Ok(DateTimeOffset.MinValue);
-        }
+        return await Result.Try(async Task () => await scheduler.ScheduleJob(job, trigger, cancellationToken));
     }
+
+    public static Task<Result> ExecuteJobs<TJob, TPayload>(
+        this IScheduler scheduler,
+        IReadOnlyCollection<(JobKey JobKey, TPayload Payload)> jobs,
+        CancellationToken cancellationToken = default,
+        DateTimeOffset? executeAt = null
+    )
+        where TJob : IJob =>
+        scheduler.ExecuteJobs<TJob>(
+            jobs.Select(x => (x.JobKey, x.Payload.ToJobDataMap())).ToList(),
+            cancellationToken,
+            executeAt
+        );
 
     public static async Task<Result> ExecuteJobs<TJob>(
         this IScheduler scheduler,

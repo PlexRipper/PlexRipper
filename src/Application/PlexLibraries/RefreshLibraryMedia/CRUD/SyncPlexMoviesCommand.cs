@@ -189,12 +189,18 @@ public class SyncPlexMoviesCommandHandler : ICommandHandler<SyncPlexMoviesComman
                 }
 
                 var updatedIds = updated.Select(x => x.Id).ToList();
-                if (updatedIds.Count > 0)
-                    await ctx.PlexMovieData.Where(x => updatedIds.Contains(x.PlexMovieId)).ExecuteDeleteAsync(txCt);
+                await ctx.BulkDeleteByIdsAsync(
+                    updatedIds,
+                    (db, ids) => db.PlexMovieData.Where(x => ids.Contains(x.PlexMovieId)),
+                    txCt
+                );
 
                 var deletedIds = deleted.Select(x => x.Id).ToList();
-                if (deletedIds.Count > 0)
-                    await ctx.PlexMovies.Where(x => deletedIds.Contains(x.Id)).ExecuteDeleteAsync(txCt);
+                await ctx.BulkDeleteByIdsAsync(
+                    deletedIds,
+                    (db, ids) => db.PlexMovies.Where(x => ids.Contains(x.Id)),
+                    txCt
+                );
 
                 if (updated.Count > 0)
                     await ctx.BulkUpdateAsync(updated, BulkConfigPreset.Default, txCt);

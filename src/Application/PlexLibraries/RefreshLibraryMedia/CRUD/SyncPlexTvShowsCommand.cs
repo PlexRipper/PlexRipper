@@ -309,26 +309,32 @@ public class SyncPlexTvShowsCommandHandler : ICommandHandler<SyncPlexTvShowsComm
                 }
 
                 var changedSeasonIds = createdSeasons.Concat(updatedSeasons).Select(x => x.Id).ToList();
-                if (changedSeasonIds.Count > 0)
-                    await ctx
-                        .PlexTvShowSeasonMediaQualities.Where(x => changedSeasonIds.Contains(x.PlexTvShowSeasonId))
-                        .ExecuteDeleteAsync(txCt);
+                await ctx.BulkDeleteByIdsAsync(
+                    changedSeasonIds,
+                    (db, ids) => db.PlexTvShowSeasonMediaQualities.Where(x => ids.Contains(x.PlexTvShowSeasonId)),
+                    txCt
+                );
 
                 var changedShowIds = createdShows.Concat(updatedShows).Select(x => x.Id).ToList();
-                if (changedShowIds.Count > 0)
-                    await ctx
-                        .PlexTvShowMediaQualities.Where(x => changedShowIds.Contains(x.PlexTvShowId))
-                        .ExecuteDeleteAsync(txCt);
+                await ctx.BulkDeleteByIdsAsync(
+                    changedShowIds,
+                    (db, ids) => db.PlexTvShowMediaQualities.Where(x => ids.Contains(x.PlexTvShowId)),
+                    txCt
+                );
 
                 var updatedEpisodeIds = updatedEpisodes.Select(x => x.Id).ToList();
-                if (updatedEpisodeIds.Count > 0)
-                    await ctx
-                        .PlexTvShowEpisodeData.Where(x => updatedEpisodeIds.Contains(x.PlexTvShowEpisodeId))
-                        .ExecuteDeleteAsync(txCt);
+                await ctx.BulkDeleteByIdsAsync(
+                    updatedEpisodeIds,
+                    (db, ids) => db.PlexTvShowEpisodeData.Where(x => ids.Contains(x.PlexTvShowEpisodeId)),
+                    txCt
+                );
 
                 var deletedEpisodeIds = deletedEpisodes.Select(x => x.Id).ToList();
-                if (deletedEpisodeIds.Count > 0)
-                    await ctx.PlexTvShowEpisodes.Where(x => deletedEpisodeIds.Contains(x.Id)).ExecuteDeleteAsync(txCt);
+                await ctx.BulkDeleteByIdsAsync(
+                    deletedEpisodeIds,
+                    (db, ids) => db.PlexTvShowEpisodes.Where(x => ids.Contains(x.Id)),
+                    txCt
+                );
 
                 var deletedSeasonIds = deletedSeasons.Select(x => x.Id).ToList();
                 var deletedShowIds = deletedShows.Select(x => x.Id).ToList();
@@ -376,10 +382,16 @@ public class SyncPlexTvShowsCommandHandler : ICommandHandler<SyncPlexTvShowsComm
                     await ctx.BulkInsertAsync(changedMediaData, BulkConfigPreset.Default, txCt);
 
                 // Re-parent surviving children before deleting obsolete parents with cascading foreign keys.
-                if (deletedSeasonIds.Count > 0)
-                    await ctx.PlexTvShowSeason.Where(x => deletedSeasonIds.Contains(x.Id)).ExecuteDeleteAsync(txCt);
-                if (deletedShowIds.Count > 0)
-                    await ctx.PlexTvShows.Where(x => deletedShowIds.Contains(x.Id)).ExecuteDeleteAsync(txCt);
+                await ctx.BulkDeleteByIdsAsync(
+                    deletedSeasonIds,
+                    (db, ids) => db.PlexTvShowSeason.Where(x => ids.Contains(x.Id)),
+                    txCt
+                );
+                await ctx.BulkDeleteByIdsAsync(
+                    deletedShowIds,
+                    (db, ids) => db.PlexTvShows.Where(x => ids.Contains(x.Id)),
+                    txCt
+                );
 
                 var seasonQualities = createdSeasons
                     .Concat(updatedSeasons)

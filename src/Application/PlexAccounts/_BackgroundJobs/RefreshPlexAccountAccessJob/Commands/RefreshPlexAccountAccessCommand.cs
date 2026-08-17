@@ -186,11 +186,11 @@ public class RefreshPlexAccountAccessCommandHandler
         var transactionResult = await _dbContext.ExecuteTransactionAsync(
             async (ctx, txCt) =>
             {
-                await ctx
-                    .PlexAccountLibraries.Where(x =>
-                        x.PlexAccountId == plexAccount.Id && libraryAccess.LostServerAccess.Contains(x.PlexServerId)
-                    )
-                    .ExecuteDeleteAsync(txCt);
+                await ctx.BulkDeleteByIdsAsync(
+                    libraryAccess.LostServerAccess,
+                    (db, ids) => db.PlexAccountLibraries.Where(x => x.PlexAccountId == plexAccount.Id && ids.Contains(x.PlexServerId)),
+                    txCt
+                );
                 await ctx.PlexAccountServers.Where(x => x.PlexAccountId == plexAccount.Id).ExecuteDeleteAsync(txCt);
             },
             cancellationToken

@@ -41,20 +41,32 @@ public class DeleteDownloadTasksByKeyCommandHandler : ICommandHandler<DeleteDown
         var episodeIds = byType[DownloadTaskType.Episode].ToList();
         var episodeFileIds = byType[DownloadTaskType.EpisodeData].Concat(byType[DownloadTaskType.EpisodePart]).ToList();
 
-        if (movieIds.Count > 0)
-            await _dbContext.DownloadTaskMovie.Where(x => movieIds.Contains(x.Id)).ExecuteDeleteAsync(ct);
-        if (movieFileIds.Count > 0)
-            await _dbContext.DownloadTaskMovieFile.Where(x => movieFileIds.Contains(x.Id)).ExecuteDeleteAsync(ct);
-        if (tvShowIds.Count > 0)
-            await _dbContext.DownloadTaskTvShow.Where(x => tvShowIds.Contains(x.Id)).ExecuteDeleteAsync(ct);
-        if (seasonIds.Count > 0)
-            await _dbContext.DownloadTaskTvShowSeason.Where(x => seasonIds.Contains(x.Id)).ExecuteDeleteAsync(ct);
-        if (episodeIds.Count > 0)
-            await _dbContext.DownloadTaskTvShowEpisode.Where(x => episodeIds.Contains(x.Id)).ExecuteDeleteAsync(ct);
-        if (episodeFileIds.Count > 0)
-            await _dbContext
-                .DownloadTaskTvShowEpisodeFile.Where(x => episodeFileIds.Contains(x.Id))
-                .ExecuteDeleteAsync(ct);
+        await _dbContext.BulkDeleteByIdsAsync(movieIds, (db, ids) => db.DownloadTaskMovie.Where(x => ids.Contains(x.Id)), ct);
+        await _dbContext.BulkDeleteByIdsAsync(
+            movieFileIds,
+            (db, ids) => db.DownloadTaskMovieFile.Where(x => ids.Contains(x.Id)),
+            ct
+        );
+        await _dbContext.BulkDeleteByIdsAsync(
+            tvShowIds,
+            (db, ids) => db.DownloadTaskTvShow.Where(x => ids.Contains(x.Id)),
+            ct
+        );
+        await _dbContext.BulkDeleteByIdsAsync(
+            seasonIds,
+            (db, ids) => db.DownloadTaskTvShowSeason.Where(x => ids.Contains(x.Id)),
+            ct
+        );
+        await _dbContext.BulkDeleteByIdsAsync(
+            episodeIds,
+            (db, ids) => db.DownloadTaskTvShowEpisode.Where(x => ids.Contains(x.Id)),
+            ct
+        );
+        await _dbContext.BulkDeleteByIdsAsync(
+            episodeFileIds,
+            (db, ids) => db.DownloadTaskTvShowEpisodeFile.Where(x => ids.Contains(x.Id)),
+            ct
+        );
 
         // Exclude roots that were already directly deleted above — orphan cleanup only
         // applies to roots whose children were removed, not roots deleted explicitly.

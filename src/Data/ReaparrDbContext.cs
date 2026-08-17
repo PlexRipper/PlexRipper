@@ -355,7 +355,11 @@ public sealed class ReaparrDbContext : DbContext, IReaparrDbContext, IReaparrDbC
             return false;
         }
 
-        var result = Result.Try(() => DbContextConnections.EnableWriteAheadLogging(Database.GetDbConnection()));
+        var result = Result.Try(() =>
+        {
+            DbContextConnections.InitializeDatabase(Database.GetDbConnection());
+            DbContextConnections.EnableWriteAheadLogging(Database.GetDbConnection());
+        });
         result.LogIfFailed();
 
         return result.IsSuccess;
@@ -384,6 +388,7 @@ public sealed class ReaparrDbContext : DbContext, IReaparrDbContext, IReaparrDbC
     public Result Migrate() =>
         Result.Try(() =>
         {
+            DbContextConnections.InitializeDatabase(Database.GetDbConnection());
             DbContextConnections.EnableWriteAheadLogging(Database.GetDbConnection());
             Database.Migrate();
         });

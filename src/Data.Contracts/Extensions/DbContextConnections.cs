@@ -15,7 +15,10 @@ public static class DbContextConnections
     private const int MEMORY_MAP_SIZE_BYTES = 268435456;
     private const int PAGE_CACHE_SIZE_KIBIBYTES = 20000;
 
-    private static readonly string _providerSpecificConnectionPragmas = $"""
+    // These settings are database-wide or connection-local tuning, rather than requirements
+    // for normal query execution. They are applied once while the database is initialized;
+    // applying them to every pooled connection creates needless write/lock activity.
+    private static readonly string _databaseInitializationPragmas = $"""
         PRAGMA wal_autocheckpoint = {WAL_AUTO_CHECKPOINT_PAGES};
         PRAGMA journal_size_limit = {JOURNAL_SIZE_LIMIT_BYTES};
         PRAGMA mmap_size = {MEMORY_MAP_SIZE_BYTES};
@@ -51,22 +54,54 @@ public static class DbContextConnections
     }
 
     /// <summary>
-    /// Applies Reaparr's SQLite connection-level configuration to an already-open connection.
-    /// This is shared by EF Core and non-EF Core consumers, such as Quartz's ADO job store.
+    /// Configures requirements that must exist on every physical SQLite connection.
+    /// Busy timeout is supplied by <see cref="GetConnectionString"/> and verified here;
+    /// no PRAGMAs are reset when a pooled connection is opened.
     /// </summary>
     public static void ConfigureOpenedSqliteConnection(DbConnection connection)
     {
         if (connection is not SqliteConnection sqliteConnection)
             return;
 
+        if (sqliteConnection.DefaultTimeout != BUSY_TIMEOUT_SECONDS)
+        {
+            throw new InvalidOperationException(
+                $"SQLite connection busy timeout must be {BUSY_TIMEOUT_SECONDS} seconds; "
+                    + $"configured value was {sqliteConnection.DefaultTimeout} seconds."
+            );
+        }
+
         sqliteConnection.CreateCollation(
             OrderByNaturalExtensions.CollationName,
             (x, y) => _naturalSortComparer.Compare(x, y)
         );
+    }
 
-        using var command = sqliteConnection.CreateCommand();
-        command.CommandText = _providerSpecificConnectionPragmas;
-        command.ExecuteNonQuery();
+    /// <summary>
+    /// Applies database tuning once during startup, migration, or connectivity validation.
+    /// </summary>
+    public static void InitializeDatabase(DbConnection connection)
+    {
+        if (connection is not SqliteConnection sqliteConnection)
+            throw new InvalidOperationException("SQLite configuration can only be applied to a SQLite connection.");
+
+        var openedHere = sqliteConnection.State != System.Data.ConnectionState.Open;
+        if (openedHere)
+            sqliteConnection.Open();
+
+        try
+        {
+            ConfigureOpenedSqliteConnection(sqliteConnection);
+
+            using var command = sqliteConnection.CreateCommand();
+            command.CommandText = _databaseInitializationPragmas;
+            command.ExecuteNonQuery();
+        }
+        finally
+        {
+            if (openedHere)
+                sqliteConnection.Close();
+        }
     }
 
     public static void EnableWriteAheadLogging(DbConnection connection)

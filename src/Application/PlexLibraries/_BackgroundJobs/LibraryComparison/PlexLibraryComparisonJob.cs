@@ -136,12 +136,5 @@ public class PlexLibraryComparisonJob : IJob
             );
             return;
         }
-
-        _log.Here()
-            .Information(
-                "Compared remote library {RemoteLibraryId} with owned library {OwnedLibraryId}",
-                remoteLibrary.Id,
-                ownedLibrary.Id
-            );
     }
 }

@@ -6,7 +6,7 @@ namespace Reaparr.Data.UnitTests;
 public class DbContextConnectionsUnitTests : BaseUnitTest
 {
     [Test]
-    public async Task ShouldApplyPhaseOneConfigurationToEveryPhysicalConnection()
+    public async Task ShouldKeepBusyTimeoutOnEveryPhysicalConnection()
     {
         // Arrange
         var databasePath = Path.Combine(Path.GetTempPath(), $"reaparr-sqlite-config-{Guid.NewGuid():N}.db");
@@ -17,6 +17,7 @@ public class DbContextConnectionsUnitTests : BaseUnitTest
         var authOptions = new DbContextOptionsBuilder<AuthDbContext>();
         authOptions.ConfigureSqlite(databasePath, SqliteOpenMode.ReadWriteCreate);
         await using var setupContext = new ReaparrDbContext(reaparrOptions.Options, Log, pathProvider, appRuntimeInfo);
+        DbContextConnections.InitializeDatabase(setupContext.Database.GetDbConnection());
         DbContextConnections.EnableWriteAheadLogging(setupContext.Database.GetDbConnection());
 
         // Act
@@ -45,6 +46,36 @@ public class DbContextConnectionsUnitTests : BaseUnitTest
     }
 
     [Test]
+    public async Task ShouldNotResetDatabasePragmasWhenOpeningConnections()
+    {
+        // Arrange
+        var databasePath = Path.Combine(Path.GetTempPath(), $"reaparr-sqlite-config-{Guid.NewGuid():N}.db");
+        var options = new DbContextOptionsBuilder<ReaparrDbContext>();
+        options.ConfigureSqlite(databasePath, SqliteOpenMode.ReadWriteCreate);
+        var pathProvider = new MockPathProvider($"sqlite-config-{Guid.NewGuid():N}");
+        var appRuntimeInfo = new MockAppRuntimeInfo();
+
+        await using var setupContext = new ReaparrDbContext(options.Options, Log, pathProvider, appRuntimeInfo);
+        DbContextConnections.InitializeDatabase(setupContext.Database.GetDbConnection());
+        DbContextConnections.EnableWriteAheadLogging(setupContext.Database.GetDbConnection());
+
+        await using var command = setupContext.Database.GetDbConnection().CreateCommand();
+        command.CommandText = "PRAGMA cache_size = -1234;";
+        await setupContext.Database.OpenConnectionAsync();
+        await command.ExecuteNonQueryAsync();
+        await setupContext.Database.CloseConnectionAsync();
+
+        // Act
+        await using var context = new ReaparrDbContext(options.Options, Log, pathProvider, appRuntimeInfo);
+        var configuration = await ReadConfiguration(context);
+        var cacheSize = await ReadInt64(context.Database.GetDbConnection(), "cache_size");
+
+        // Assert
+        configuration.DefaultCommandTimeout.ShouldBe(120);
+        cacheSize.ShouldBe(-1234);
+    }
+
+    [Test]
     public void ShouldUseSharedCacheForInMemoryDatabases()
     {
         // Arrange
@@ -59,18 +90,7 @@ public class DbContextConnectionsUnitTests : BaseUnitTest
         new SqliteConnectionStringBuilder(connectionString).Cache.ShouldBe(SqliteCacheMode.Shared);
     }
 
-    private static readonly SqliteConfiguration ExpectedConfiguration = new(
-        120,
-        1000,
-        134217728,
-        268435456,
-        2,
-        -20000,
-        1,
-        "normal",
-        0,
-        "wal"
-    );
+    private static readonly SqliteConfiguration ExpectedConfiguration = new(120, "wal");
 
     private static async Task<SqliteConfiguration> ReadConfiguration(DbContext context)
     {
@@ -79,14 +99,6 @@ public class DbContextConnectionsUnitTests : BaseUnitTest
 
         return new SqliteConfiguration(
             ((SqliteConnection)connection).DefaultTimeout,
-            await ReadInt64(connection, "wal_autocheckpoint"),
-            await ReadInt64(connection, "journal_size_limit"),
-            await ReadInt64(connection, "mmap_size"),
-            await ReadInt64(connection, "temp_store"),
-            await ReadInt64(connection, "cache_size"),
-            await ReadInt64(connection, "synchronous"),
-            await ReadText(connection, "locking_mode"),
-            await ReadInt64(connection, "secure_delete"),
             await ReadText(connection, "journal_mode")
         );
     }
@@ -105,16 +117,5 @@ public class DbContextConnectionsUnitTests : BaseUnitTest
         return (string)(await command.ExecuteScalarAsync())!;
     }
 
-    private sealed record SqliteConfiguration(
-        long DefaultCommandTimeout,
-        long WalAutoCheckpoint,
-        long JournalSizeLimit,
-        long MmapSize,
-        long TempStore,
-        long CacheSize,
-        long Synchronous,
-        string LockingMode,
-        long SecureDelete,
-        string JournalMode
-    );
+    private sealed record SqliteConfiguration(long DefaultCommandTimeout, string JournalMode);
 }

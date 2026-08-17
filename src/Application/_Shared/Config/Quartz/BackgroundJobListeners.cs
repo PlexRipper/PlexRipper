@@ -1,4 +1,3 @@
-using Quartz.Impl.Matchers;
 using Quartz.Listener;
 
 namespace Reaparr.Application;
@@ -35,39 +34,35 @@ public sealed class AllJobListener : IJobListener
     public string Name => nameof(AllJobListener);
 
     public Task JobExecutionVetoed(IJobExecutionContext context, CancellationToken cancellationToken = default) =>
-        PublishSafely(context, JobStatus.Cancelled, cancellationToken);
+        Publish(context, JobStatus.Cancelled);
 
     public Task JobToBeExecuted(IJobExecutionContext context, CancellationToken cancellationToken = default) =>
-        PublishSafely(context, JobStatus.Started, cancellationToken);
+        Publish(context, JobStatus.Started);
 
     public Task JobWasExecuted(
         IJobExecutionContext context,
         JobExecutionException? jobException,
         CancellationToken cancellationToken = default
-    ) => PublishSafely(context, BackgroundJobTerminalOutcome.From(context, jobException).Status, cancellationToken);
+    ) => Publish(context, BackgroundJobTerminalOutcome.From(context, jobException).Status);
 
-    private async Task PublishSafely(
-        IJobExecutionContext context,
-        JobStatus status,
-        CancellationToken cancellationToken
-    )
+    private async Task Publish(IJobExecutionContext context, JobStatus status)
     {
-        try
+        var result = await Result.Try(async Task () =>
         {
             var update = new JobStatusUpdate<string>(
                 JobStatusUpdateMapper.ToJobType(context.JobDetail.Key.Group),
                 status,
-                string.Empty,
+                context.GetPayloadAsJson(),
                 context.JobDetail.Key.Name,
                 context.FireTimeUtc.UtcDateTime
             );
             await _progressHubService.SendJobStatusUpdateAsync(update);
-        }
-        catch (Exception exception)
-            when (exception is not OperationCanceledException || !cancellationToken.IsCancellationRequested)
+        });
+
+        if (result.IsFailed && !result.IsCancelled)
         {
-            _log.Here()
-                .Error(exception, "Failed to publish Quartz lifecycle event for {JobKey}", context.JobDetail.Key);
+            result.WithError($"Failed to publish Quartz lifecycle event for {context.JobDetail.Key}");
+            result.LogError();
         }
     }
 }

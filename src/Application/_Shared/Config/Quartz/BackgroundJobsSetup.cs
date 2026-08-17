@@ -2,6 +2,8 @@ using Quartz.Impl.Matchers;
 
 namespace Reaparr.Application;
 
+public interface IBackgroundJobsSetup : ISetupAsync, IStopAsync { }
+
 public sealed class BackgroundJobsSetup : IBackgroundJobsSetup
 {
     private readonly IScheduler _scheduler;

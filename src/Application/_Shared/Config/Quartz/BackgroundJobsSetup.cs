@@ -36,10 +36,17 @@ public sealed class BackgroundJobsSetup : IBackgroundJobsSetup
         {
             RegisterListeners();
 
-            if (!_appRuntimeInfo.IsIntegrationTestMode)
-                await SetupRecurringJobs(cancellationToken);
+            if (_appRuntimeInfo.IsIntegrationTestMode)
+            {
+                await _scheduler.Start(cancellationToken);
+                return;
+            }
+
+            await SetupRecurringJobs(cancellationToken);
 
             await _scheduler.Start(cancellationToken);
+
+            await TriggerRecurringJobs(cancellationToken);
         });
     }
 
@@ -151,6 +158,14 @@ public sealed class BackgroundJobsSetup : IBackgroundJobsSetup
 
             await _scheduler.ScheduleJob(job, trigger, cancellationToken);
         }
+    }
+
+    private async Task TriggerRecurringJobs(CancellationToken cancellationToken)
+    {
+        await _scheduler.TriggerJob(CheckAllConnectionsStatusByPlexServerJob.GetJobKey(), cancellationToken);
+        await _scheduler.TriggerJob(CheckPlexLibrariesForUpdatesJob.GetJobKey(), cancellationToken);
+        await _scheduler.TriggerJob(RefreshPlexAccountAccessJob.GetJobKey(), cancellationToken);
+        await _scheduler.TriggerJob(CheckForUpdateJob.GetJobKey(), cancellationToken);
     }
 
     public async Task<Result> StopAsync(CancellationToken cancellationToken = default)

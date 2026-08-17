@@ -59,7 +59,7 @@ public class DownloadQueue : IDownloadQueue
                         }
 
                         if (queueResult.IsFailed)
-                            queueResult.LogError();
+                            queueResult.LogWarning();
                     }
                 });
 

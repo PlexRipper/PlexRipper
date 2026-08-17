@@ -2,7 +2,6 @@
 using System.Reflection;
 using Autofac.Extras.Quartz;
 using Microsoft.Data.Sqlite;
-using Quartz;
 using Quartz.Impl.AdoJobStore;
 using Reaparr.Domain.Autofac;
 using Module = Autofac.Module;
@@ -20,7 +19,7 @@ public class QuartzModule : Module
         builder.RegisterType<AllJobListener>().SingleInstance();
         builder.RegisterType<DownloadJobListener>().SingleInstance();
         builder.RegisterType<LibrarySyncJobListener>().SingleInstance();
-        builder.RegisterType<ReaparrSchedulerListener>().SingleInstance();
+        builder.RegisterType<SchedulerListener>().SingleInstance();
         builder.RegisterType<BackgroundJobsSetup>().As<IBackgroundJobsSetup>().SingleInstance();
 
         // Source: https://github.com/alphacloud/Autofac.Extras.Quartz

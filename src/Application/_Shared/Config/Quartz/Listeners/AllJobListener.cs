@@ -1,0 +1,56 @@
+namespace Reaparr.Application;
+
+public sealed class AllJobListener : IJobListener
+{
+    private readonly ILogger _log;
+    private readonly IProgressHubService _progressHubService;
+
+    public AllJobListener(ILogger log, IProgressHubService progressHubService)
+    {
+        _log = log.ForContext<AllJobListener>();
+        _progressHubService = progressHubService;
+    }
+
+    public string Name => nameof(AllJobListener);
+
+    public Task JobExecutionVetoed(IJobExecutionContext context, CancellationToken cancellationToken = default) =>
+        Publish(context, JobStatus.Cancelled);
+
+    public Task JobToBeExecuted(IJobExecutionContext context, CancellationToken cancellationToken = default) =>
+        Publish(context, JobStatus.Started);
+
+    public Task JobWasExecuted(
+        IJobExecutionContext context,
+        JobExecutionException? jobException,
+        CancellationToken cancellationToken = default
+    ) => Publish(context, BackgroundJobTerminalOutcome.From(context, jobException).Status);
+
+    private async Task Publish(IJobExecutionContext context, JobStatus status)
+    {
+        var result = await Result.Try(async Task () =>
+        {
+            var update = new JobStatusUpdate<string>(
+                JobStatusUpdateMapper.ToJobType(context.JobDetail.Key.Group),
+                status,
+                context.GetPayloadAsJson(),
+                context.JobDetail.Key.Name,
+                context.FireTimeUtc.UtcDateTime
+            );
+            await _progressHubService.SendJobStatusUpdateAsync(update);
+
+            _log.Here()
+                .Verbose(
+                    "Published Quartz lifecycle event for {JobName} with status {JobStatus}: {JobUpdate}",
+                    context.JobDetail.Key,
+                    status,
+                    update
+                );
+        });
+
+        if (result.IsFailed && !result.IsCancelled)
+        {
+            result.WithError($"Failed to publish Quartz lifecycle event for {context.JobDetail.Key}");
+            result.LogError();
+        }
+    }
+}

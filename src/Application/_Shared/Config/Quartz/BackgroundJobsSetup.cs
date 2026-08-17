@@ -2,7 +2,7 @@ using Quartz.Impl.Matchers;
 
 namespace Reaparr.Application;
 
-public interface IBackgroundJobsSetup : ISetupAsync, IStopAsync { }
+public interface IBackgroundJobsSetup : ISetupAsync, IStopAsync;
 
 public sealed class BackgroundJobsSetup : IBackgroundJobsSetup
 {
@@ -11,7 +11,7 @@ public sealed class BackgroundJobsSetup : IBackgroundJobsSetup
     private readonly AllJobListener _allJobListener;
     private readonly DownloadJobListener _downloadJobListener;
     private readonly LibrarySyncJobListener _librarySyncJobListener;
-    private readonly ReaparrSchedulerListener _schedulerListener;
+    private readonly SchedulerListener _schedulerListener;
 
     public BackgroundJobsSetup(
         IScheduler scheduler,
@@ -19,7 +19,7 @@ public sealed class BackgroundJobsSetup : IBackgroundJobsSetup
         AllJobListener allJobListener,
         DownloadJobListener downloadJobListener,
         LibrarySyncJobListener librarySyncJobListener,
-        ReaparrSchedulerListener schedulerListener
+        SchedulerListener schedulerListener
     )
     {
         _scheduler = scheduler;
@@ -78,7 +78,7 @@ public sealed class BackgroundJobsSetup : IBackgroundJobsSetup
                 .WithIdentity(jobKey.Name, jobKey.Group)
                 .ForJob(jobKey)
                 .WithCronSchedule(
-                    "0 0/10 * * * ?",
+                    "0 0/10 * * * ?", // Every 10 minutes
                     x => x.InTimeZone(TimeZoneInfo.Utc).WithMisfireHandlingInstructionDoNothing()
                 )
                 .Build();
@@ -100,7 +100,7 @@ public sealed class BackgroundJobsSetup : IBackgroundJobsSetup
                 .WithIdentity(jobKey.Name, jobKey.Group)
                 .ForJob(jobKey)
                 .WithCronSchedule(
-                    "0 0 0/3 * * ?",
+                    "0 0 0/3 * * ?", // Every 3 hours
                     x => x.InTimeZone(TimeZoneInfo.Utc).WithMisfireHandlingInstructionDoNothing()
                 )
                 .Build();
@@ -122,7 +122,7 @@ public sealed class BackgroundJobsSetup : IBackgroundJobsSetup
                 .WithIdentity(jobKey.Name, jobKey.Group)
                 .ForJob(jobKey)
                 .WithCronSchedule(
-                    "0 0 0/6 * * ?",
+                    "0 0 0/6 * * ?", // Every 6 hours
                     x => x.InTimeZone(TimeZoneInfo.Utc).WithMisfireHandlingInstructionDoNothing()
                 )
                 .Build();
@@ -144,7 +144,7 @@ public sealed class BackgroundJobsSetup : IBackgroundJobsSetup
                 .WithIdentity(jobKey.Name, jobKey.Group)
                 .ForJob(jobKey)
                 .WithCronSchedule(
-                    "0 0 * * * ?",
+                    "0 0 * * * ?", // Every hour
                     x => x.InTimeZone(TimeZoneInfo.Utc).WithMisfireHandlingInstructionDoNothing()
                 )
                 .Build();

@@ -44,7 +44,7 @@ public class QuartzModule : Module
                         .UsePersistentStore(store =>
                         {
                             // https://www.quartz-scheduler.net/documentation/quartz-3.x/packages/system-text-json.html#configuring
-                            store.UseProperties = true;
+                            store.UseProperties = false;
                             store.UseSystemTextJsonSerializer();
                             // False because Autofac is initialized before the database. By the time the database is set up, the schema has already been validated.
                             store.PerformSchemaValidation = false;

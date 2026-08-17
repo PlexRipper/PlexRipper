@@ -114,20 +114,12 @@ public class Boot : IHostedService
     {
         _log.Here().Information("Shutting down the container");
 
-        // Stop acquiring work, interrupt cooperative jobs, and bound shutdown so host termination cannot hang forever.
-        if (!_scheduler.IsShutdown)
-        {
-            using var shutdownTimeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-            shutdownTimeout.CancelAfter(TimeSpan.FromSeconds(30));
-            await _scheduler.Standby(shutdownTimeout.Token);
-            foreach (var context in await _scheduler.GetCurrentlyExecutingJobs(shutdownTimeout.Token))
-                await _scheduler.Interrupt(context.FireInstanceId, shutdownTimeout.Token);
-            await _scheduler.Shutdown(waitForJobsToComplete: true, shutdownTimeout.Token);
-        }
-
         var autoPauseResult = await _commandExecutor.Send(new AutoPauseActiveDownloadsCommand(), cancellationToken);
         if (autoPauseResult.IsFailed)
             autoPauseResult.LogError();
+
+        var stopResult = await _backgroundJobsSetup.StopAsync(cancellationToken);
+        stopResult.LogIfFailed();
     }
 
     #endregion

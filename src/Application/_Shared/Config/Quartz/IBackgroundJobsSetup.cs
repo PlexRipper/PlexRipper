@@ -1,3 +1,3 @@
 namespace Reaparr.Application;
 
-public interface IBackgroundJobsSetup : ISetupAsync { }
+public interface IBackgroundJobsSetup : ISetupAsync, IStopAsync { }

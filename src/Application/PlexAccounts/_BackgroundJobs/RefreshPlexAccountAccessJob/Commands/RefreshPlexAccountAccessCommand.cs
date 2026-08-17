@@ -177,12 +177,20 @@ public class RefreshPlexAccountAccessCommandHandler
             ))
         );
 
-        PlexLibraryAccessRefreshResponse? libraryAccessRapport = null;
+        var libraryAccess = await BuildRevokedLibraryAccessResponse(
+            plexAccount,
+            serverAccessRapport,
+            cancellationToken
+        );
+
         var transactionResult = await _dbContext.ExecuteTransactionAsync(
             async (ctx, txCt) =>
             {
-                libraryAccessRapport = await RemoveRevokedLibraryAccess(ctx, plexAccount, serverAccessRapport, txCt);
-
+                await ctx
+                    .PlexAccountLibraries.Where(x =>
+                        x.PlexAccountId == plexAccount.Id && libraryAccess.LostServerAccess.Contains(x.PlexServerId)
+                    )
+                    .ExecuteDeleteAsync(txCt);
                 await ctx.PlexAccountServers.Where(x => x.PlexAccountId == plexAccount.Id).ExecuteDeleteAsync(txCt);
             },
             cancellationToken
@@ -190,11 +198,15 @@ public class RefreshPlexAccountAccessCommandHandler
         if (transactionResult.IsFailed)
             throw new InvalidOperationException("Failed to revoke all Plex account access");
 
-        return ToDTO(serverAccessRapport, libraryAccessRapport!);
+        _mediaQueryCache.InvalidateLibraries(libraryAccess.AffectedLibraryIds, "Plex account library access revoked");
+        return ToDTO(serverAccessRapport, libraryAccess.Response);
     }
 
-    private async Task<PlexLibraryAccessRefreshResponse> RemoveRevokedLibraryAccess(
-        IReaparrDbContext dbContext,
+    private async Task<(
+        PlexLibraryAccessRefreshResponse Response,
+        List<int> AffectedLibraryIds,
+        List<int> LostServerAccess
+    )> BuildRevokedLibraryAccessResponse(
         PlexAccount plexAccount,
         RefreshPlexServerAccessRapport serverAccessRapport,
         CancellationToken cancellationToken
@@ -205,7 +217,7 @@ public class RefreshPlexAccountAccessCommandHandler
             .Select(x => x.PlexServerId)
             .ToList();
 
-        var lostLibraryAccess = await dbContext
+        var lostLibraryAccess = await _dbContext
             .PlexAccountLibraries.IgnoreQueryFilters()
             .Include(x => x.PlexLibrary)
             .Include(x => x.PlexServer)
@@ -227,14 +239,7 @@ public class RefreshPlexAccountAccessCommandHandler
         };
 
         var affectedLibraryIds = lostLibraryAccess.Select(x => x.PlexLibraryId).Distinct().ToList();
-        await dbContext
-            .PlexAccountLibraries.Where(x =>
-                x.PlexAccountId == plexAccount.Id && lostServerAccess.Contains(x.PlexServerId)
-            )
-            .ExecuteDeleteAsync(cancellationToken);
-        _mediaQueryCache.InvalidateLibraries(affectedLibraryIds, "Plex account library access revoked");
-
-        return response;
+        return (response, affectedLibraryIds, lostServerAccess);
     }
 
     private static RefreshPlexAccountAccessRapportDTO ToDTO(

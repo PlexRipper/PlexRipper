@@ -17,8 +17,7 @@ public class PlexTvShowConfiguration : IEntityTypeConfiguration<PlexTvShow>
             .WithMany(x => x.PlexTvShowActors)
             .UsingEntity<PlexTvShowActors>(
                 l => l.HasOne<PlexActor>().WithMany().HasForeignKey(e => e.PlexActorId),
-                r => r.HasOne<PlexTvShow>().WithMany().HasForeignKey(e => e.PlexTvShowId),
-                j => j.HasIndex(e => new { e.PlexActorId, e.PlexTvShowId })
+                r => r.HasOne<PlexTvShow>().WithMany().HasForeignKey(e => e.PlexTvShowId)
             );
 
         builder
@@ -26,8 +25,7 @@ public class PlexTvShowConfiguration : IEntityTypeConfiguration<PlexTvShow>
             .WithMany(x => x.PlexTvShowGenres)
             .UsingEntity<PlexTvShowGenres>(
                 l => l.HasOne<PlexGenre>().WithMany().HasForeignKey(e => e.GenresId),
-                r => r.HasOne<PlexTvShow>().WithMany().HasForeignKey(e => e.PlexTvShowId),
-                j => j.HasIndex(e => new { e.GenresId, e.PlexTvShowId })
+                r => r.HasOne<PlexTvShow>().WithMany().HasForeignKey(e => e.PlexTvShowId)
             );
 
         builder
@@ -35,8 +33,7 @@ public class PlexTvShowConfiguration : IEntityTypeConfiguration<PlexTvShow>
             .WithMany(x => x.PlexTvShowCountries)
             .UsingEntity<PlexTvShowCountries>(
                 l => l.HasOne<PlexCountry>().WithMany().HasForeignKey(e => e.CountryId),
-                r => r.HasOne<PlexTvShow>().WithMany().HasForeignKey(e => e.PlexTvShowId),
-                j => j.HasIndex(e => new { e.CountryId, e.PlexTvShowId })
+                r => r.HasOne<PlexTvShow>().WithMany().HasForeignKey(e => e.PlexTvShowId)
             );
 
         builder

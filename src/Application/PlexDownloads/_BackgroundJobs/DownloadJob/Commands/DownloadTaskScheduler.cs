@@ -83,12 +83,8 @@ public class DownloadTaskScheduler : IDownloadTaskScheduler
     public async Task AwaitDownloadTaskJob(Guid downloadTaskId, CancellationToken cancellationToken = default)
     {
         var jobKey = DownloadJob.GetJobKey(downloadTaskId);
-        if (!await _scheduler.IsJobRunning(jobKey, cancellationToken))
-            return;
-
-        var timeoutAt = DateTime.UtcNow.AddSeconds(30);
-        while (await _scheduler.IsJobRunning(jobKey, cancellationToken) && DateTime.UtcNow < timeoutAt)
-            await Task.Delay(100, cancellationToken);
+        var result = await _scheduler.AwaitJobCompletion(jobKey, cancellationToken);
+        result.LogIfFailed();
     }
 
     public Task<bool> IsDownloading(DownloadTaskKey downloadTaskKey, CancellationToken cancellationToken = default)
@@ -99,10 +95,10 @@ public class DownloadTaskScheduler : IDownloadTaskScheduler
 
     public async Task<List<DownloadTaskKey>> GetCurrentlyDownloadingKeysByServer(int plexServerId)
     {
-        var keys = await _scheduler.GetJobKeys(JobTypes.DownloadJob);
-        var requests = await Task.WhenAll(keys.Select(x => _scheduler.GetJobDetail(x)));
-        return requests
-            .Select(x => x?.JobDataMap.GetPayload<DownloadJobPayload>()?.DownloadTaskKey)
+        var contexts = await _scheduler.GetCurrentlyExecutingJobs(CancellationToken.None);
+        return contexts
+            .Where(x => x.JobDetail.Key.Group == nameof(JobTypes.DownloadJob))
+            .Select(x => x.MergedJobDataMap.GetPayload<DownloadJobPayload>()?.DownloadTaskKey)
             .OfType<DownloadTaskKey>()
             .Where(x => x.PlexServerId == plexServerId)
             .ToList();

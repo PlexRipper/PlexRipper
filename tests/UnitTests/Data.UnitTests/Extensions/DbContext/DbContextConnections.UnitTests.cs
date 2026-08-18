@@ -46,7 +46,7 @@ public class DbContextConnectionsUnitTests : BaseUnitTest
     }
 
     [Test]
-    public async Task ShouldNotResetDatabasePragmasWhenOpeningConnections()
+    public async Task ShouldApplyConnectionPragmasWhenOpeningConnections()
     {
         // Arrange
         var databasePath = Path.Combine(Path.GetTempPath(), $"reaparr-sqlite-config-{Guid.NewGuid():N}.db");
@@ -60,8 +60,8 @@ public class DbContextConnectionsUnitTests : BaseUnitTest
         DbContextConnections.EnableWriteAheadLogging(setupContext.Database.GetDbConnection());
 
         await using var command = setupContext.Database.GetDbConnection().CreateCommand();
-        command.CommandText = "PRAGMA cache_size = -1234;";
         await setupContext.Database.OpenConnectionAsync();
+        command.CommandText = "PRAGMA cache_size = -1234;";
         await command.ExecuteNonQueryAsync();
         await setupContext.Database.CloseConnectionAsync();
 
@@ -72,7 +72,7 @@ public class DbContextConnectionsUnitTests : BaseUnitTest
 
         // Assert
         configuration.DefaultCommandTimeout.ShouldBe(120);
-        cacheSize.ShouldBe(-1234);
+        cacheSize.ShouldBe(-20000);
     }
 
     [Test]

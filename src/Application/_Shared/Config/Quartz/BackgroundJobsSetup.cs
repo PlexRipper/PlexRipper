@@ -170,15 +170,16 @@ public sealed class BackgroundJobsSetup : IBackgroundJobsSetup
 
     public async Task<Result> StopAsync(CancellationToken cancellationToken = default)
     {
-        using var shutdownTimeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-        shutdownTimeout.CancelAfter(TimeSpan.FromSeconds(30));
-        await _scheduler.Standby(shutdownTimeout.Token);
+        return await Result.Try(async Task () =>
+        {
+            using var shutdownTimeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+            shutdownTimeout.CancelAfter(TimeSpan.FromSeconds(30));
+            await _scheduler.Standby(shutdownTimeout.Token);
 
-        foreach (var context in await _scheduler.GetCurrentlyExecutingJobs(shutdownTimeout.Token))
-            await _scheduler.Interrupt(context.FireInstanceId, shutdownTimeout.Token);
+            foreach (var context in await _scheduler.GetCurrentlyExecutingJobs(shutdownTimeout.Token))
+                await _scheduler.Interrupt(context.FireInstanceId, shutdownTimeout.Token);
 
-        await _scheduler.Shutdown(waitForJobsToComplete: true, shutdownTimeout.Token);
-
-        return Result.Ok();
+            await _scheduler.Shutdown(waitForJobsToComplete: true, shutdownTimeout.Token);
+        });
     }
 }

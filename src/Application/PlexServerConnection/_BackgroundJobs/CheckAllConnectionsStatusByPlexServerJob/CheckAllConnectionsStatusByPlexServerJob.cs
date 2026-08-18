@@ -32,7 +32,9 @@ public class CheckAllConnectionsStatusByPlexServerJob : IJob
         var result = await Result.Try(async Task () =>
         {
             var cancellationToken = context.CancellationToken;
-            var plexServers = _dbContext.PlexServers.Include(x => x.PlexServerConnections).ToList();
+            var plexServers = await _dbContext
+                .PlexServers.Include(x => x.PlexServerConnections)
+                .ToListAsync(cancellationToken);
 
             if (!plexServers.Any())
             {
@@ -104,6 +106,10 @@ public class CheckAllConnectionsStatusByPlexServerJob : IJob
         {
             context.SetResult(JobStatus.Failed, result);
             result.LogError();
+        }
+        else
+        {
+            context.SetResult(JobStatus.Completed);
         }
     }
 }

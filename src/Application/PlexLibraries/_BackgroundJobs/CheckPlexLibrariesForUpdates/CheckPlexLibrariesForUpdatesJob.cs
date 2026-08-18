@@ -33,6 +33,7 @@ public class CheckPlexLibrariesForUpdatesJob : IJob
         if (enabledServerIds.Count == 0)
         {
             _log.Here().Debug("No enabled Plex servers found for automatic library sync");
+            context.SetResult(JobStatus.Completed);
             return;
         }
 
@@ -79,6 +80,7 @@ public class CheckPlexLibrariesForUpdatesJob : IJob
         if (serversWithTokenMappings.Count == 0)
         {
             _log.Here().Debug("No Plex servers with token mappings found for automatic library sync");
+            context.SetResult(JobStatus.Completed);
             return;
         }
 
@@ -93,6 +95,7 @@ public class CheckPlexLibrariesForUpdatesJob : IJob
         if (outdatedLibraryIds.Count == 0)
         {
             _log.Here().Debug("No outdated Plex libraries found for automatic sync");
+            context.SetResult(JobStatus.Completed);
             return;
         }
 
@@ -115,6 +118,9 @@ public class CheckPlexLibrariesForUpdatesJob : IJob
         {
             context.SetResult(JobStatus.Failed, queueResult);
             queueResult.LogError();
+            return;
         }
+
+        context.SetResult(JobStatus.Completed);
     }
 }

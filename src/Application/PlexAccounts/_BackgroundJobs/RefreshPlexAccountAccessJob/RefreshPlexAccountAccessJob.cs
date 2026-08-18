@@ -49,5 +49,6 @@ public class RefreshPlexAccountAccessJob : IJob
                 nameof(RefreshPlexAccountAccessJob),
                 result.Value.Count
             );
+        context.SetResult(JobStatus.Completed);
     }
 }

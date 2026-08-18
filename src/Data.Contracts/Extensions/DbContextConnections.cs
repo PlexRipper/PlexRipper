@@ -15,18 +15,18 @@ public static class DbContextConnections
     private const int MEMORY_MAP_SIZE_BYTES = 268435456;
     private const int PAGE_CACHE_SIZE_KIBIBYTES = 20000;
 
-    // These settings are database-wide or connection-local tuning, rather than requirements
-    // for normal query execution. They are applied once while the database is initialized;
-    // applying them to every pooled connection creates needless write/lock activity.
     private static readonly string _databaseInitializationPragmas = $"""
         PRAGMA wal_autocheckpoint = {WAL_AUTO_CHECKPOINT_PAGES};
         PRAGMA journal_size_limit = {JOURNAL_SIZE_LIMIT_BYTES};
         PRAGMA mmap_size = {MEMORY_MAP_SIZE_BYTES};
+        PRAGMA locking_mode = NORMAL;
+        PRAGMA secure_delete = OFF;
+        """;
+
+    private static readonly string _connectionPragmas = $"""
         PRAGMA temp_store = MEMORY;
         PRAGMA cache_size = -{PAGE_CACHE_SIZE_KIBIBYTES};
         PRAGMA synchronous = NORMAL;
-        PRAGMA locking_mode = NORMAL;
-        PRAGMA secure_delete = OFF;
         """;
 
     private static readonly NaturalSortComparer _naturalSortComparer = new(StringComparison.OrdinalIgnoreCase);
@@ -62,6 +62,10 @@ public static class DbContextConnections
     {
         if (connection is not SqliteConnection sqliteConnection)
             return;
+
+        using var command = sqliteConnection.CreateCommand();
+        command.CommandText = _connectionPragmas;
+        command.ExecuteNonQuery();
 
         sqliteConnection.CreateCollation(
             OrderByNaturalExtensions.CollationName,

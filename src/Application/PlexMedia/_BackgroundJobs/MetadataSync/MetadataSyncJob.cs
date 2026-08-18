@@ -53,6 +53,7 @@ public class MetadataSyncJob : IJob
         {
             _log.Here()
                 .Warning("Server {ServerName} ({ServerId}) is offline, skipping metadata sync", serverName, serverId);
+            context.SetResult(JobStatus.Completed);
             return;
         }
 
@@ -63,6 +64,17 @@ public class MetadataSyncJob : IJob
         );
         if (movieResult.IsSuccess)
             processedCount += movieResult.Value;
+        else if (movieResult.IsCancelled)
+        {
+            context.SetResult(JobStatus.Cancelled, movieResult);
+            return;
+        }
+        else
+        {
+            context.SetResult(JobStatus.Failed, movieResult);
+            movieResult.LogError();
+            return;
+        }
 
         var episodeResult = await _commandExecutor.Send(
             new ProcessEpisodeMetadataCommand(serverId, serverName),
@@ -70,6 +82,17 @@ public class MetadataSyncJob : IJob
         );
         if (episodeResult.IsSuccess)
             processedCount += episodeResult.Value;
+        else if (episodeResult.IsCancelled)
+        {
+            context.SetResult(JobStatus.Cancelled, episodeResult);
+            return;
+        }
+        else
+        {
+            context.SetResult(JobStatus.Failed, episodeResult);
+            episodeResult.LogError();
+            return;
+        }
 
         _log.Here()
             .Information(
@@ -80,5 +103,6 @@ public class MetadataSyncJob : IJob
                 serverId,
                 processedCount
             );
+        context.SetResult(JobStatus.Completed);
     }
 }

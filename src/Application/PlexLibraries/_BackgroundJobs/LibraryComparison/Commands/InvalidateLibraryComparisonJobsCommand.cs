@@ -37,10 +37,7 @@ public class InvalidateLibraryComparisonJobsCommandHandler
         var comparisonJobKeys = await _scheduler.GetJobKeys(JobTypes.LibraryComparisonJob, cancellationToken);
         var comparisonJobs = await Task.WhenAll(
             comparisonJobKeys.Select(async jobKey =>
-                (
-                    JobKey: jobKey,
-                    Detail: await _scheduler.GetJobDetail(jobKey, cancellationToken)
-                )
+                (JobKey: jobKey, Detail: await _scheduler.GetJobDetail(jobKey, cancellationToken))
             )
         );
 
@@ -49,8 +46,10 @@ public class InvalidateLibraryComparisonJobsCommandHandler
             {
                 var payload = x.Detail?.JobDataMap.GetPayload<PlexLibraryComparisonJobPayload>();
                 return payload is not null
-                    && (affectedLibraryIds.Contains(payload.OwnedPlexLibraryId)
-                        || affectedLibraryIds.Contains(payload.RemotePlexLibraryId));
+                    && (
+                        affectedLibraryIds.Contains(payload.OwnedPlexLibraryId)
+                        || affectedLibraryIds.Contains(payload.RemotePlexLibraryId)
+                    );
             })
             .Select(x => x.JobKey)
             .ToList();

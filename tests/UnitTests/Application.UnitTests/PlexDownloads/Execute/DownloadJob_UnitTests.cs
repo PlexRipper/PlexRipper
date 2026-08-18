@@ -8,9 +8,7 @@ public class DownloadJobUnitTests : BaseUnitTest<DownloadJob>
     private static IJobExecutionContext SetupJobContext(DownloadTaskKey key)
     {
         var jobDetail = new Mock<IJobDetail>();
-        jobDetail
-            .SetupGet(x => x.JobDataMap)
-            .Returns(new DownloadJobPayload(key).ToJobDataMap());
+        jobDetail.SetupGet(x => x.JobDataMap).Returns(new DownloadJobPayload(key).ToJobDataMap());
 
         var context = new Mock<IJobExecutionContext>();
         context.SetupGet(x => x.JobDetail).Returns(jobDetail.Object);

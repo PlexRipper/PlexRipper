@@ -114,6 +114,20 @@ public class Boot : IHostedService
     {
         _log.Here().Information("Shutting down the container");
 
+        var activeMoveJobs = (await _scheduler.GetCurrentlyExecutingJobs(cancellationToken))
+            .Where(x => x.JobDetail.Key.Group == nameof(JobTypes.MoveDownloadFileJob))
+            .ToList();
+        foreach (var context in activeMoveJobs)
+            await _scheduler.Interrupt(context.FireInstanceId, cancellationToken);
+
+        var moveJobsResult = await _scheduler.WaitForJobsToFinish(
+            activeMoveJobs.Select(x => x.JobDetail.Key),
+            TimeSpan.FromSeconds(30),
+            cancellationToken
+        );
+        if (moveJobsResult.IsFailed)
+            moveJobsResult.LogError();
+
         var autoPauseResult = await _commandExecutor.Send(new AutoPauseActiveDownloadsCommand(), cancellationToken);
         if (autoPauseResult.IsFailed)
             autoPauseResult.LogError();

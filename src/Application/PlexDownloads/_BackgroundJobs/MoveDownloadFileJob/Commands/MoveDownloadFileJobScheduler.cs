@@ -69,16 +69,16 @@ public class MoveDownloadFileJobScheduler : IMoveDownloadFileScheduler
         _scheduler.IsJobRunning(MoveDownloadFileJob.GetJobKey(downloadTaskKey.Id), cancellationToken);
 
     public async Task<bool> IsAnyMoveDownloadFileJobRunning() =>
-        (await _scheduler.GetJobKeys(JobTypes.MoveDownloadFileJob)).Count > 0;
+        (await _scheduler.GetCurrentlyExecutingJobs()).Any(x =>
+            x.JobDetail.Key.Group == nameof(JobTypes.MoveDownloadFileJob)
+        );
 
     public async Task<List<DownloadTaskKey>> GetCurrentlyMovingKeysByServer(int plexServerId)
     {
-        var keys = await _scheduler.GetJobKeys(JobTypes.MoveDownloadFileJob);
-        var requests = await Task.WhenAll(keys.Select(x => _scheduler.GetJobDetail(x)));
-        return requests
-            .Select(x =>
-                x?.JobDataMap.GetPayload<MoveDownloadFileJobPayload>()?.DownloadTaskKey
-            )
+        var contexts = await _scheduler.GetCurrentlyExecutingJobs(CancellationToken.None);
+        return contexts
+            .Where(x => x.JobDetail.Key.Group == nameof(JobTypes.MoveDownloadFileJob))
+            .Select(x => x.MergedJobDataMap.GetPayload<MoveDownloadFileJobPayload>()?.DownloadTaskKey)
             .OfType<DownloadTaskKey>()
             .Where(x => x.PlexServerId == plexServerId)
             .ToList();

@@ -18,10 +18,6 @@ public class PlexLibraryComparisonJob : IJob
         _commandExecutor = commandExecutor;
     }
 
-    protected JobTypes JobType => JobTypes.LibraryComparisonJob;
-
-    protected List<RefreshDataType> RefreshDataTypes => [];
-
     public static JobKey GetJobKey(int ownedPlexLibraryId, int remotePlexLibraryId) =>
         new(
             $"{nameof(JobTypes.LibraryComparisonJob)}_{ownedPlexLibraryId}_{remotePlexLibraryId}",
@@ -51,6 +47,7 @@ public class PlexLibraryComparisonJob : IJob
         if (ownedLibrary is null)
         {
             _log.Warning("Owned Plex library {PlexLibraryId} was not found", ownedPlexLibraryId);
+            context.SetResult(JobStatus.Failed, $"Owned Plex library {ownedPlexLibraryId} was not found");
             return;
         }
 
@@ -58,24 +55,28 @@ public class PlexLibraryComparisonJob : IJob
         if (remoteLibrary is null)
         {
             _log.Warning("Remote Plex library {PlexLibraryId} was not found", remotePlexLibraryId);
+            context.SetResult(JobStatus.Failed, $"Remote Plex library {remotePlexLibraryId} was not found");
             return;
         }
 
         if (remoteLibrary.Id == ownedLibrary.Id)
         {
             _log.Warning("A Plex library cannot be compared with itself: {PlexLibraryId}", remoteLibrary.Id);
+            context.SetResult(JobStatus.Failed, "A Plex library cannot be compared with itself");
             return;
         }
 
         if (remoteLibrary.IsOwned)
         {
             _log.Warning("Remote Plex library {PlexLibraryId} is currently marked as owned", remoteLibrary.Id);
+            context.SetResult(JobStatus.Failed, $"Remote Plex library {remoteLibrary.Id} is currently marked as owned");
             return;
         }
 
         if (!ownedLibrary.IsOwned)
         {
             _log.Warning("Owned Plex library {PlexLibraryId} is currently marked as remote", ownedLibrary.Id);
+            context.SetResult(JobStatus.Failed, $"Owned Plex library {ownedLibrary.Id} is currently marked as remote");
             return;
         }
 
@@ -88,6 +89,7 @@ public class PlexLibraryComparisonJob : IJob
                 ownedLibrary.Type,
                 ownedLibrary.Id
             );
+            context.SetResult(JobStatus.Failed, "Library media types do not match");
             return;
         }
 
@@ -116,17 +118,20 @@ public class PlexLibraryComparisonJob : IJob
                 break;
             default:
                 result = Result.Fail($"Library comparisons are not supported for media type {remoteLibrary.Type}");
+                context.SetResult(JobStatus.Failed, result);
                 break;
         }
 
         if (result.IsCancelled)
         {
+            context.SetResult(JobStatus.Cancelled, result);
             result.LogWarning();
             return;
         }
 
         if (result.IsFailed)
         {
+            context.SetResult(JobStatus.Failed, result);
             result.LogError();
             _log.Error(
                 "Comparison of remote library {RemoteLibraryId} with owned library {OwnedLibraryId} failed: {Errors}",
@@ -136,5 +141,7 @@ public class PlexLibraryComparisonJob : IJob
             );
             return;
         }
+
+        context.SetResult(JobStatus.Completed);
     }
 }

@@ -30,7 +30,9 @@ public static partial class QuartzExtensions
         triggerBuilder = executeAt.HasValue ? triggerBuilder.StartAt(executeAt.Value) : triggerBuilder.StartNow();
         var trigger = triggerBuilder.WithSimpleSchedule(x => x.WithMisfireHandlingInstructionFireNow()).Build();
 
-        return await Result.Try(async Task () => await scheduler.ScheduleJob(job, trigger, cancellationToken));
+        return await Result.Try(async Task<DateTimeOffset> () =>
+            await scheduler.ScheduleJob(job, trigger, cancellationToken)
+        );
     }
 
     public static Task<Result> ExecuteJobs<TJob, TPayload>(
@@ -113,7 +115,7 @@ public static partial class QuartzExtensions
         if (await scheduler.CheckExists(key, cancellationToken))
             await scheduler.DeleteJob(key, cancellationToken);
 
-        if (executing && waitForCompletion)
+        if (executing && waitForCompletion && !cancellationToken.IsCancellationRequested)
             await scheduler.AwaitJobCompletion(key, cancellationToken);
 
         return Result.Ok();
@@ -125,11 +127,14 @@ public static partial class QuartzExtensions
         CancellationToken cancellationToken = default
     )
     {
+        if (!keys.Any())
+            return Result.Ok();
+
         await scheduler.DeleteJobs(keys.ToList(), cancellationToken);
         return Result.Ok();
     }
 
-    public static async Task AwaitJobCompletion(
+    public static async Task<Result> AwaitJobCompletion(
         this IScheduler scheduler,
         JobKey key,
         CancellationToken cancellationToken = default,
@@ -142,8 +147,13 @@ public static partial class QuartzExtensions
         {
             while (await scheduler.IsJobExecuting(key, timeout.Token))
                 await Task.Delay(200, timeout.Token);
+
+            return Result.Ok();
         }
-        catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested) { }
+        catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested)
+        {
+            return Result.Fail($"Timed out waiting for Quartz job {key} to complete");
+        }
     }
 
     public static async Task<IReadOnlyCollection<IJobExecutionContext>> GetActiveJobs(
@@ -157,29 +167,37 @@ public static partial class QuartzExtensions
         CancellationToken cancellationToken = default
     ) => await scheduler.IsQueued(key, cancellationToken) || await scheduler.IsJobExecuting(key, cancellationToken);
 
-    public static Task WaitForJobsToFinish(
+    public static async Task<Result> WaitForJobsToFinish(
         this IScheduler scheduler,
         IEnumerable<JobKey> keys,
         TimeSpan timeout,
         CancellationToken cancellationToken = default
-    ) =>
-        Task.WhenAll(
+    )
+    {
+        var results = await Task.WhenAll(
             keys.Distinct()
                 .Select(key =>
                     scheduler.AwaitJobCompletion(key, cancellationToken, (int)Math.Ceiling(timeout.TotalSeconds))
                 )
         );
+        return results.FirstOrDefault(x => x.IsFailed) ?? Result.Ok();
+    }
 
-    public static async Task AwaitScheduler(this IScheduler scheduler, CancellationToken cancellationToken = default)
+    public static async Task<Result> AwaitScheduler(
+        this IScheduler scheduler,
+        CancellationToken cancellationToken = default
+    )
     {
         var timeoutAt = DateTime.UtcNow.AddSeconds(30);
         while (DateTime.UtcNow < timeoutAt)
         {
             if ((await scheduler.GetCurrentlyExecutingJobs(cancellationToken)).Count == 0)
-                return;
+                return Result.Ok();
 
             await Task.Delay(100, cancellationToken);
         }
+
+        return Result.Fail("Timed out waiting for Quartz scheduler jobs to complete");
     }
 
     public static async Task<IReadOnlyCollection<JobKey>> GetJobKeys(
@@ -194,22 +212,28 @@ public static partial class QuartzExtensions
         CancellationToken cancellationToken = default
     )
     {
-        foreach (var key in keys)
-        {
-            if (await scheduler.IsActive(key, cancellationToken))
-                return true;
-        }
+        var requestedKeys = keys.ToHashSet();
+        if (requestedKeys.Count == 0)
+            return false;
 
-        return false;
+        var executingKeys = (await scheduler.GetCurrentlyExecutingJobs(cancellationToken))
+            .Select(x => x.JobDetail.Key)
+            .ToHashSet();
+        var queuedKeys = await scheduler.GetJobKeys(GroupMatcher<JobKey>.AnyGroup(), cancellationToken);
+
+        return queuedKeys.Concat(executingKeys).Any(requestedKeys.Contains);
     }
 
-    public static async Task<List<JobStatusUpdate<string>>> GetRunningJobUpdates(this IScheduler scheduler)
+    public static async Task<List<JobStatusUpdate<string>>> GetRunningJobUpdates(
+        this IScheduler scheduler,
+        CancellationToken cancellationToken = default
+    )
     {
-        return (await scheduler.GetCurrentlyExecutingJobs())
+        return (await scheduler.GetCurrentlyExecutingJobs(cancellationToken))
             .Select(context => new JobStatusUpdate<string>(
                 JobStatusUpdateMapper.ToJobType(context.JobDetail.Key.Group),
                 JobStatus.Started,
-                JsonSerializer.Serialize(context.MergedJobDataMap, DefaultJsonSerializerOptions.ConfigStandard),
+                context.GetPayloadAsJson(),
                 context.JobDetail.Key.Name,
                 context.FireTimeUtc.UtcDateTime
             ))

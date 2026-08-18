@@ -42,7 +42,7 @@ public class GetAllBackgroundJobsEndpoint
         }
         else
         {
-            var result = await _schedulerService.GetRunningJobUpdates();
+            var result = await _schedulerService.GetRunningJobUpdates(ct);
 
             await Send.FluentResult(Result.Ok(result), x => x.ToDTO(), ct);
         }

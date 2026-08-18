@@ -12,8 +12,9 @@ public sealed record BackgroundJobTerminalOutcome(JobStatus Status, string? Erro
         if (exception is null)
             return new(JobStatus.Completed, null);
 
-        return exception.InnerException is OperationCanceledException
-            ? new(JobStatus.Cancelled, exception.Message)
-            : new(JobStatus.Failed, exception.GetBaseException().Message);
+        var baseException = exception.GetBaseException();
+        return baseException is OperationCanceledException
+            ? new(JobStatus.Cancelled, baseException.Message)
+            : new(JobStatus.Failed, baseException.Message);
     }
 }

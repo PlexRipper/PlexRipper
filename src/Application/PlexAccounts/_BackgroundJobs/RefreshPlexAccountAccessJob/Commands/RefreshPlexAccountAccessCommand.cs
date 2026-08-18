@@ -79,7 +79,16 @@ public class RefreshPlexAccountAccessCommandHandler
                         plexAccount.DisplayName
                     );
 
-                rapports.Add(await RevokeAllAccess(plexAccount, cancellationToken));
+                var revokeResult = await RevokeAllAccess(plexAccount, cancellationToken);
+                if (revokeResult.IsCancelled)
+                    return revokeResult.ToResult();
+                if (revokeResult.IsFailed)
+                {
+                    revokeResult.LogError();
+                    continue;
+                }
+
+                rapports.Add(revokeResult.Value);
                 continue;
             }
 
@@ -157,7 +166,7 @@ public class RefreshPlexAccountAccessCommandHandler
         return Result.Ok(rapports);
     }
 
-    private async Task<RefreshPlexAccountAccessRapportDTO> RevokeAllAccess(
+    private async Task<Result<RefreshPlexAccountAccessRapportDTO>> RevokeAllAccess(
         PlexAccount plexAccount,
         CancellationToken cancellationToken
     )
@@ -188,7 +197,10 @@ public class RefreshPlexAccountAccessCommandHandler
             {
                 await ctx.BulkDeleteByIdsAsync(
                     libraryAccess.LostServerAccess,
-                    (db, ids) => db.PlexAccountLibraries.Where(x => x.PlexAccountId == plexAccount.Id && ids.Contains(x.PlexServerId)),
+                    (db, lostServerIds) =>
+                        db.PlexAccountLibraries.Where(x =>
+                            x.PlexAccountId == plexAccount.Id && lostServerIds.Contains(x.PlexServerId)
+                        ),
                     txCt
                 );
                 await ctx.PlexAccountServers.Where(x => x.PlexAccountId == plexAccount.Id).ExecuteDeleteAsync(txCt);
@@ -196,7 +208,7 @@ public class RefreshPlexAccountAccessCommandHandler
             cancellationToken
         );
         if (transactionResult.IsFailed)
-            throw new InvalidOperationException("Failed to revoke all Plex account access");
+            return Result.Fail(transactionResult.Errors);
 
         _mediaQueryCache.InvalidateLibraries(libraryAccess.AffectedLibraryIds, "Plex account library access revoked");
         return ToDTO(serverAccessRapport, libraryAccess.Response);

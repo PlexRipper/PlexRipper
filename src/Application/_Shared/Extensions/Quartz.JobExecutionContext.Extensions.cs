@@ -60,7 +60,11 @@ public static partial class QuartzExtensions
             case JobTypes.Unknown:
             case JobTypes.None:
             default:
-                throw new ArgumentOutOfRangeException($"Unknown job type {context.GetJobType()}");
+                throw new ArgumentOutOfRangeException(
+                    nameof(context),
+                    context.GetJobType(),
+                    $"Unknown job type {context.GetJobType()}"
+                );
         }
     }
 }

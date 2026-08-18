@@ -31,17 +31,17 @@ public class ScheduleAffectedLibraryComparisonJobsCommandHandler
 
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
-    private readonly IScheduler _backgroundJobScheduler;
+    private readonly IScheduler _scheduler;
 
     public ScheduleAffectedLibraryComparisonJobsCommandHandler(
         ILogger log,
         IReaparrDbContext dbContext,
-        IScheduler backgroundJobScheduler
+        IScheduler scheduler
     )
     {
         _log = log.ForContext<ScheduleAffectedLibraryComparisonJobsCommandHandler>();
         _dbContext = dbContext;
-        _backgroundJobScheduler = backgroundJobScheduler;
+        _scheduler = scheduler;
     }
 
     public async Task<Result> ExecuteAsync(
@@ -76,15 +76,13 @@ public class ScheduleAffectedLibraryComparisonJobsCommandHandler
 
         // Resolve active comparison keys once before dispatching child commands, so repeated updates do not spam
         // schedule requests for pairs that are already queued or running.
-        var activeComparisonJobKeys = (
-            await _backgroundJobScheduler.GetJobKeys(JobTypes.LibraryComparisonJob, cancellationToken)
-        )
-            .Select(x => x.Name)
+        var activeComparisonJobKeys = (await _scheduler.GetJobKeys(JobTypes.LibraryComparisonJob, cancellationToken))
+            .Select(x => x)
             .ToHashSet();
 
         pairs = pairs.Where(pair =>
             !activeComparisonJobKeys.Contains(
-                PlexLibraryComparisonJob.GetJobKey(pair.OwnedLibraryId, pair.RemoteLibraryId).Name
+                PlexLibraryComparisonJob.GetJobKey(pair.OwnedLibraryId, pair.RemoteLibraryId)
             )
         );
 
@@ -100,10 +98,7 @@ public class ScheduleAffectedLibraryComparisonJobsCommandHandler
         if (comparisonJobs.Count == 0)
             return Result.Ok();
 
-        var schedulingResult = await _backgroundJobScheduler.ExecuteJobs<
-            PlexLibraryComparisonJob,
-            PlexLibraryComparisonJobPayload
-        >(
+        var schedulingResult = await _scheduler.ExecuteJobs<PlexLibraryComparisonJob, PlexLibraryComparisonJobPayload>(
             comparisonJobs,
             cancellationToken,
             DateTimeOffset.UtcNow.Add(_comparisonJobDelay)

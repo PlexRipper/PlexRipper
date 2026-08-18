@@ -75,6 +75,7 @@ public class CancelLibrarySyncJobCommandHandler : ICommandHandler<CancelLibraryS
         else
         {
             // Job is queued but not yet executing — mark it as cancelled directly.
+            await _scheduler.DeleteJob(jobKey, cancellationToken);
             await _dbContext
                 .LibrarySyncJobQueues.Where(x => x.PlexServerId == serverId && x.PlexLibraryId == plexLibraryId)
                 .ExecuteUpdateAsync(

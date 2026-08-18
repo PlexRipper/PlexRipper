@@ -18,10 +18,6 @@ namespace Reaparr.Application;
 /// </summary>
 public sealed class QuartzSqliteConnectionProvider : IDbProvider
 {
-    // Quartz creates custom providers through reflection and does not populate
-    // IDbProvider.ConnectionString for this provider type. Store the application
-    // connection string before Quartz creates the provider instance.
-    private static string _configuredConnectionString = "";
     private readonly DbProviderFactory _factory;
     private string _connectionString = "";
 
@@ -32,15 +28,6 @@ public sealed class QuartzSqliteConnectionProvider : IDbProvider
     public QuartzSqliteConnectionProvider()
     {
         _factory = SqliteFactory.Instance;
-    }
-
-    /// <summary>
-    /// Configures the connection string used by reflection-created Quartz provider instances.
-    /// </summary>
-    public static void ConfigureConnectionString(string connectionString)
-    {
-        ArgumentException.ThrowIfNullOrWhiteSpace(connectionString);
-        _configuredConnectionString = connectionString;
     }
 
     /// <inheritdoc />
@@ -83,18 +70,14 @@ public sealed class QuartzSqliteConnectionProvider : IDbProvider
             _factory.CreateConnection()
             ?? throw new InvalidOperationException("SqliteFactory returned null connection");
 
-        var connectionString = string.IsNullOrWhiteSpace(_connectionString)
-            ? _configuredConnectionString
-            : _connectionString;
-
-        if (string.IsNullOrWhiteSpace(connectionString))
+        if (string.IsNullOrWhiteSpace(_connectionString))
         {
             throw new InvalidOperationException(
                 "Quartz SQLite connection provider has not been configured with a connection string."
             );
         }
 
-        conn.ConnectionString = connectionString;
+        conn.ConnectionString = _connectionString;
 
         // Quartz calls CreateConnection() then Open(). We hook StateChange
         // to apply PRAGMAs on every Open() — this is the same pattern as

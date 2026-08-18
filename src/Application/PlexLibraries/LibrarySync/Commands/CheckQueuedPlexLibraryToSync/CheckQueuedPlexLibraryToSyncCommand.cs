@@ -120,6 +120,20 @@ public class CheckQueuedPlexLibraryToSyncCommandHandler : ICommandHandler<CheckQ
             return;
         }
 
+        var claimed = await _dbContext.LibrarySyncJobQueues
+            .Where(x =>
+                x.PlexServerId == serverId
+                && x.PlexLibraryId == libraryId
+                && x.Status == LibrarySyncJobStatus.Queued
+            )
+            .ExecuteUpdateAsync(
+                s => s.SetProperty(x => x.Status, LibrarySyncJobStatus.Processing)
+                    .SetProperty(x => x.StartedAt, DateTime.UtcNow),
+                cancellationToken
+            );
+        if (claimed != 1)
+            return;
+
         var scheduleResult = await _scheduler.ExecuteJob<LibrarySyncJob, LibrarySyncJobPayload>(
             jobKey,
             new LibrarySyncJobPayload(serverId, libraryId),
@@ -128,6 +142,17 @@ public class CheckQueuedPlexLibraryToSyncCommandHandler : ICommandHandler<CheckQ
 
         if (scheduleResult.IsFailed || scheduleResult.IsCancelled)
         {
+            await _dbContext.LibrarySyncJobQueues
+                .Where(x =>
+                    x.PlexServerId == serverId
+                    && x.PlexLibraryId == libraryId
+                    && x.Status == LibrarySyncJobStatus.Processing
+                )
+                .ExecuteUpdateAsync(
+                    s => s.SetProperty(x => x.Status, LibrarySyncJobStatus.Queued)
+                        .SetProperty(x => x.StartedAt, (DateTime?)null),
+                    cancellationToken
+                );
             scheduleResult.LogIfFailed();
             return;
         }

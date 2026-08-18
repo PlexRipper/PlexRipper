@@ -7,12 +7,11 @@ public class MoveDownloadFileJobUnitTests : BaseUnitTest<MoveDownloadFileJob>
     private static IJobExecutionContext SetupJobContext(DownloadTaskKey key)
     {
         var jobDetail = new Mock<IJobDetail>();
-        jobDetail
-            .SetupGet(x => x.JobDataMap)
-            .Returns(new MoveDownloadFileJobPayload(key).ToJobDataMap());
+        jobDetail.SetupGet(x => x.JobDataMap).Returns(new MoveDownloadFileJobPayload(key).ToJobDataMap());
 
         var context = new Mock<IJobExecutionContext>();
         context.SetupGet(x => x.JobDetail).Returns(jobDetail.Object);
+        context.SetupGet(x => x.MergedJobDataMap).Returns(jobDetail.Object.JobDataMap);
         context.SetupGet(x => x.CancellationToken).Returns(CancellationToken.None);
         return context.Object;
     }

@@ -267,8 +267,11 @@ public static partial class MockDatabase
         await _setupLock.WaitAsync();
         try
         {
-            reaparrContext.Migrate();
-            authContext.Migrate();
+            var reaparrMigrationResult = reaparrContext.Migrate();
+            var authMigrationResult = authContext.Migrate();
+
+            var migrationResult = Result.Merge(reaparrMigrationResult, authMigrationResult);
+            migrationResult.IsSuccess.ShouldBeTrue(migrationResult.ToString());
 
             // PlexServers and Libraries added
             _log.Here()

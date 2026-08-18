@@ -171,7 +171,15 @@ public class MoveDownloadFileSchedulerIntegrationTests : BaseIntegrationTests
         // Assert
         startResult.IsSuccess.ShouldBeTrue();
 
-        var downloadTaskDb = await container.DbContext.GetDownloadTaskAsync(downloadTask.ToKey(), CancellationToken);
+        await WaitForDatabaseConditionAsync(async () =>
+        {
+            using var dbContext = await container.Resolve<IReaparrDbContextFactory>().CreateAsync();
+            var task = await dbContext.GetDownloadTaskAsync(downloadTask.ToKey(), CancellationToken);
+            return task?.DownloadStatus == DownloadStatus.MoveError;
+        });
+
+        using var dbContext = await container.Resolve<IReaparrDbContextFactory>().CreateAsync();
+        var downloadTaskDb = await dbContext.GetDownloadTaskAsync(downloadTask.ToKey(), CancellationToken);
         downloadTaskDb.ShouldNotBeNull();
         downloadTaskDb.DownloadStatus.ShouldBe(DownloadStatus.MoveError);
 

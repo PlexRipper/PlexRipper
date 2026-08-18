@@ -77,4 +77,18 @@ public class QuartzModule : Module
 
         return schedulerBuilder.Properties;
     }
+
+    public static NameValueCollection TestQuartzConfiguration()
+    {
+        var schedulerBuilder = SchedulerBuilder
+            .Create()
+            .WithName("TestReaparr Scheduler_" + Guid.NewGuid())
+            .WithId(Guid.NewGuid().ToString())
+            .UseDefaultThreadPool(10);
+
+        schedulerBuilder.InterruptJobsOnShutdownWithWait = true;
+        schedulerBuilder.MisfireThreshold = TimeSpan.FromMinutes(5);
+
+        return schedulerBuilder.Properties;
+    }
 }

@@ -63,14 +63,6 @@ public static class DbContextConnections
         if (connection is not SqliteConnection sqliteConnection)
             return;
 
-        if (sqliteConnection.DefaultTimeout != BUSY_TIMEOUT_SECONDS)
-        {
-            throw new InvalidOperationException(
-                $"SQLite connection busy timeout must be {BUSY_TIMEOUT_SECONDS} seconds; "
-                    + $"configured value was {sqliteConnection.DefaultTimeout} seconds."
-            );
-        }
-
         sqliteConnection.CreateCollation(
             OrderByNaturalExtensions.CollationName,
             (x, y) => _naturalSortComparer.Compare(x, y)

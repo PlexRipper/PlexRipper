@@ -23,48 +23,7 @@ public class QuartzModule : Module
         builder.RegisterType<BackgroundJobsSetup>().As<IBackgroundJobsSetup>().SingleInstance();
 
         // Source: https://github.com/alphacloud/Autofac.Extras.Quartz
-        builder.RegisterModule(
-            new QuartzAutofacFactoryModule
-            {
-                ConfigurationProvider = context =>
-                {
-                    var pathProvider = context.Resolve<IPathProvider>();
-                    var connectionString = DbContextConnections.GetConnectionString(
-                        pathProvider.DatabasePath,
-                        SqliteOpenMode.ReadWriteCreate
-                    );
-
-                    var schedulerBuilder = SchedulerBuilder
-                        .Create()
-                        .WithName("Reaparr Scheduler")
-                        .UseDefaultThreadPool(10)
-                        .UsePersistentStore(store =>
-                        {
-                            // https://www.quartz-scheduler.net/documentation/quartz-3.x/packages/system-text-json.html#configuring
-                            store.UseProperties = false;
-                            store.UseSystemTextJsonSerializer();
-                            // False because Autofac is initialized before the database. By the time the database is set up, the schema has already been validated.
-                            store.PerformSchemaValidation = false;
-                            store.RetryInterval = TimeSpan.FromMinutes(2);
-                            store.UseGenericDatabase<SQLiteDelegate>(
-                                provider: "SQLite-Microsoft",
-                                dataSourceName: "default",
-                                configurer: database =>
-                                {
-                                    database.ConnectionString = connectionString;
-                                    database.TablePrefix = "QRTZ_";
-                                    database.UseConnectionProvider<QuartzSqliteConnectionProvider>();
-                                }
-                            );
-                        });
-
-                    schedulerBuilder.InterruptJobsOnShutdownWithWait = true;
-                    schedulerBuilder.MisfireThreshold = TimeSpan.FromMinutes(5);
-
-                    return schedulerBuilder.Properties;
-                },
-            }
-        );
+        builder.RegisterModule(new QuartzAutofacFactoryModule { ConfigurationProvider = ConfigurationProvider });
 
         // register all Quartz jobs
         builder.RegisterModule(new QuartzAutofacJobsModule(assembly));
@@ -73,17 +32,49 @@ public class QuartzModule : Module
         builder.Register(_ => new ScopedDependency("global")).AsImplementedInterfaces().SingleInstance();
     }
 
-    public static NameValueCollection TestQuartzConfiguration() =>
-        // During integration testing, we cannot use a real JobStore so we revert to default
-        new()
-        {
-            // The unique identifier for the scheduler is needed to prevent conflicts when running multiple schedulers in integration tests
-            { "quartz.scheduler.instanceName", "TestReaparr_Scheduler" + Guid.NewGuid() },
-            { "quartz.scheduler.instanceId", Guid.NewGuid().ToString() },
-            { "quartz.serializer.type", "stj" },
-            { "quartz.jobStore.type", "Quartz.Simpl.RAMJobStore, Quartz" },
-            { "quartz.threadPool.type", "Quartz.Simpl.SimpleThreadPool, Quartz" },
-            { "quartz.threadPool.threadCount", "10" },
-            { "quartz.jobStore.misfireThreshold", "60000" },
-        };
+    private NameValueCollection ConfigurationProvider(IComponentContext context)
+    {
+        var pathProvider = context.Resolve<IPathProvider>();
+        var runtimeInfo = context.Resolve<IAppRuntimeInfo>();
+
+        var connectionString = DbContextConnections.GetConnectionString(
+            pathProvider.DatabasePath,
+            SqliteOpenMode.ReadWriteCreate
+        );
+
+        var schedulerName = !runtimeInfo.IsIntegrationTestMode
+            ? "Reaparr Scheduler"
+            : "TestReaparr Scheduler_" + Guid.NewGuid();
+        var schedulerBuilder = SchedulerBuilder
+            .Create()
+            .WithName(schedulerName)
+            .WithId(Guid.NewGuid().ToString())
+            .UseDefaultThreadPool(10)
+            .UsePersistentStore(store =>
+            {
+                // https://www.quartz-scheduler.net/documentation/quartz-3.x/packages/system-text-json.html#configuring
+                store.UseProperties = false;
+                store.UseSystemTextJsonSerializer();
+                // False because Autofac is initialized before the database. By the time the database is set up, the schema has already been validated.
+                store.PerformSchemaValidation = false;
+                store.RetryInterval = TimeSpan.FromMinutes(2);
+                store.UseGenericDatabase<SQLiteDelegate>(
+                    provider: "SQLite-Microsoft",
+                    dataSourceName: "default",
+                    configurer: database =>
+                    {
+                        database.ConnectionString = connectionString;
+                        database.TablePrefix = "QRTZ_";
+                        database.UseConnectionProvider<QuartzSqliteConnectionProvider>();
+                    }
+                );
+            });
+
+        schedulerBuilder.Properties["quartz.dataSource.default.connectionProvider.connectionString"] = connectionString;
+
+        schedulerBuilder.InterruptJobsOnShutdownWithWait = true;
+        schedulerBuilder.MisfireThreshold = TimeSpan.FromMinutes(5);
+
+        return schedulerBuilder.Properties;
+    }
 }

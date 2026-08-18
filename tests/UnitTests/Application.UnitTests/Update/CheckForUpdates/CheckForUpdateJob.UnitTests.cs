@@ -6,10 +6,11 @@ public class CheckForUpdateJobUnitTests : BaseUnitTest<CheckForUpdateJob>
 {
     private const string CURRENT_VERSION = "1.2.3";
 
-    private static IJobExecutionContext SetupJobContext()
+    private static IJobExecutionContext SetupJobContext(CancellationToken cancellationToken)
     {
         var context = new Mock<IJobExecutionContext>();
-        context.SetupGet(x => x.CancellationToken).Returns(CancellationToken.None);
+        context.SetupProperty(x => x.Result);
+        context.SetupGet(x => x.CancellationToken).Returns(cancellationToken);
         return context.Object;
     }
 
@@ -29,7 +30,7 @@ public class CheckForUpdateJobUnitTests : BaseUnitTest<CheckForUpdateJob>
             .Setup(x => x.Send(It.IsAny<CheckForUpdatesCommand>(), CancellationToken))
             .ReturnsAsync(Result.Ok(noUpdate))
             .Verifiable(Times.Once());
-        var context = SetupJobContext();
+        var context = SetupJobContext(CancellationToken);
 
         // Act
         await Sut.Execute(context);
@@ -40,20 +41,22 @@ public class CheckForUpdateJobUnitTests : BaseUnitTest<CheckForUpdateJob>
     }
 
     [Test]
-    public async Task ShouldRethrowException_WhenCommandExecutorThrows()
+    public async Task ShouldSetFailedResult_WhenCommandExecutorThrows()
     {
         // Arrange
         Mock.Mock<ICommandExecutor>()
             .Setup(x => x.Send(It.IsAny<CheckForUpdatesCommand>(), CancellationToken))
             .ThrowsAsync(new InvalidOperationException("Update check failed"))
             .Verifiable(Times.Once());
-        var context = SetupJobContext();
+        var context = SetupJobContext(CancellationToken);
 
         // Act
-        var exception = await Should.ThrowAsync<InvalidOperationException>(() => Sut.Execute(context));
+        await Sut.Execute(context);
 
         // Assert
-        exception.Message.ShouldBe("Update check failed");
+        var result = context.Result.ShouldBeOfType<BackgroundJobResult>();
+        result.Status.ShouldBe(JobStatus.Failed);
+        result.ErrorSummary.ShouldBe("Update check failed");
         Mock.Mock<ICommandExecutor>()
             .Verify(x => x.Send(It.IsAny<CheckForUpdatesCommand>(), CancellationToken), Times.Once());
     }

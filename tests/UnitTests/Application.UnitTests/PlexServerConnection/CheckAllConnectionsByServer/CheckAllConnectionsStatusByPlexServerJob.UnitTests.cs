@@ -38,6 +38,9 @@ public class CheckAllConnectionsStatusByPlexServerJobUnitTests : BaseUnitTest<Ch
                             : Result.Ok(new List<PlexServerStatus>())
                     )
             );
+        Mock.Mock<IProgressHubService>()
+            .Setup(x => x.SendJobStatusUpdateAsync(It.IsAny<JobStatusUpdate<CheckAllConnectionStatusUpdateDTO>>()))
+            .Returns(Task.CompletedTask);
 
         // Act
         var action = () => Sut.Execute(SetupJobContext());

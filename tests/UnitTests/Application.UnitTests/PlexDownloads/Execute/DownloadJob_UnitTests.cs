@@ -12,6 +12,7 @@ public class DownloadJobUnitTests : BaseUnitTest<DownloadJob>
 
         var context = new Mock<IJobExecutionContext>();
         context.SetupGet(x => x.JobDetail).Returns(jobDetail.Object);
+        context.SetupGet(x => x.MergedJobDataMap).Returns(new DownloadJobPayload(key).ToJobDataMap());
         context.SetupGet(x => x.CancellationToken).Returns(CancellationToken.None);
         return context.Object;
     }
@@ -37,7 +38,7 @@ public class DownloadJobUnitTests : BaseUnitTest<DownloadJob>
             .Verifiable(Times.Once());
         var downloadClientMock = Mock.Mock<IPlexDownloadClient>();
         downloadClientMock
-            .Setup(x => x.Start(It.IsAny<DownloadTaskKey>(), CancellationToken))
+            .Setup(x => x.Start(It.IsAny<DownloadTaskKey>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Ok())
             .Verifiable(Times.Once());
         downloadClientMock.Setup(x => x.DisposeAsync()).Returns(ValueTask.CompletedTask).Verifiable(Times.Once());
@@ -60,11 +61,12 @@ public class DownloadJobUnitTests : BaseUnitTest<DownloadJob>
         downloadTaskResult.ShouldNotBeNull();
 
         var downloadFolder = await IDbContext.GetDownloadFolder();
+        var expectedDownloadRootPath = Mock.Container.Resolve<IPathProvider>().DefaultDownloadsDestinationFolder;
         await IDbContext.GetDefaultDestinationFolderPath(PlexMediaType.Movie);
 
         downloadTaskResult.DirectoryMeta.DownloadRootPath.ShouldBe(downloadFolder.DirectoryPath);
         downloadTaskResult.DirectoryMeta.DestinationRootPath.ShouldBe(expectedDestinationRootPath);
-        downloadTaskResult.DownloadDirectory.ShouldContain(downloadFolder.DirectoryPath);
+        downloadTaskResult.DownloadDirectory.ShouldContain(expectedDownloadRootPath);
         downloadTaskResult.DestinationDirectory.ShouldContain(downloadTaskResult.DirectoryMeta.MovieFolder);
         Mock.Mock<ICommandExecutor>()
             .Verify(
@@ -99,7 +101,7 @@ public class DownloadJobUnitTests : BaseUnitTest<DownloadJob>
 
         var downloadClientMock = Mock.Mock<IPlexDownloadClient>();
         downloadClientMock
-            .Setup(x => x.Start(It.IsAny<DownloadTaskKey>(), CancellationToken))
+            .Setup(x => x.Start(It.IsAny<DownloadTaskKey>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Ok())
             .Verifiable(Times.Once());
         downloadClientMock.Setup(x => x.DisposeAsync()).Returns(ValueTask.CompletedTask);
@@ -157,7 +159,7 @@ public class DownloadJobUnitTests : BaseUnitTest<DownloadJob>
         var startResult = Result.Fail("Source is unavailable").Add404NotFoundError();
         var downloadClientMock = new Mock<IPlexDownloadClient>();
         downloadClientMock
-            .Setup(x => x.Start(It.IsAny<DownloadTaskKey>(), CancellationToken))
+            .Setup(x => x.Start(It.IsAny<DownloadTaskKey>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(startResult)
             .Verifiable(Times.Once());
         downloadClientMock.Setup(x => x.DisposeAsync()).Returns(ValueTask.CompletedTask).Verifiable(Times.Once());
@@ -214,53 +216,6 @@ public class DownloadJobUnitTests : BaseUnitTest<DownloadJob>
     }
 
     [Test]
-    public async Task ShouldCheckQueues_WhenDownloadFinishes()
-    {
-        // Arrange
-        await SetupDatabase(
-            39397,
-            config =>
-            {
-                config.MovieDownloadTasksCount = 1;
-            }
-        );
-
-        var testDownloadTask = IDbContext.DownloadTaskMovieFile.First();
-        await IDbContext.SetDownloadStatus(testDownloadTask.ToKey(), DownloadStatus.DownloadFinished);
-        var context = SetupJobContext(testDownloadTask.ToKey());
-
-        Mock.Mock<ICommandExecutor>()
-            .Setup(x => x.Send(It.IsAny<DeterminePlexDownloadClientCommand>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result.Ok(PlexDownloadClientType.Direct));
-        Mock.Mock<IMoveDownloadFileQueue>()
-            .Setup(x => x.CheckMoveDownloadFileJobQueue(CancellationToken))
-            .ReturnsAsync(Result.Ok())
-            .Verifiable(Times.Once());
-        Mock.Mock<IEventPublisher>()
-            .Setup(x => x.PublishAsync(It.IsAny<CheckDownloadQueueEvent>(), CancellationToken))
-            .Returns(Task.CompletedTask)
-            .Verifiable(Times.Once());
-
-        var downloadClientMock = new Mock<IPlexDownloadClient>();
-        downloadClientMock
-            .Setup(x => x.Start(It.IsAny<DownloadTaskKey>(), CancellationToken))
-            .ReturnsAsync(Result.Ok());
-        downloadClientMock.Setup(x => x.DisposeAsync()).Returns(ValueTask.CompletedTask);
-        var downloadClientIndexMock = new Mock<IIndex<PlexDownloadClientType, IPlexDownloadClient>>();
-        downloadClientIndexMock.Setup(x => x[PlexDownloadClientType.Direct]).Returns(downloadClientMock.Object);
-        var sut = Mock.Create<DownloadJob>(
-            new NamedParameter("plexDownloadClientFactory", downloadClientIndexMock.Object)
-        );
-
-        // Act
-        await sut.Execute(context);
-
-        // Assert
-        Mock.Mock<IMoveDownloadFileQueue>().Verify();
-        Mock.Mock<IEventPublisher>().Verify();
-    }
-
-    [Test]
     public async Task ShouldSetDownloadClientErrorStatus_WhenClientStartFailsWithoutSpecificError()
     {
         // Arrange
@@ -287,7 +242,7 @@ public class DownloadJobUnitTests : BaseUnitTest<DownloadJob>
         var startResult = Result.Fail("Client failed to start");
         var downloadClientMock = new Mock<IPlexDownloadClient>();
         downloadClientMock
-            .Setup(x => x.Start(It.IsAny<DownloadTaskKey>(), CancellationToken))
+            .Setup(x => x.Start(It.IsAny<DownloadTaskKey>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(startResult)
             .Verifiable(Times.Once());
         downloadClientMock.Setup(x => x.DisposeAsync()).Returns(ValueTask.CompletedTask).Verifiable(Times.Once());

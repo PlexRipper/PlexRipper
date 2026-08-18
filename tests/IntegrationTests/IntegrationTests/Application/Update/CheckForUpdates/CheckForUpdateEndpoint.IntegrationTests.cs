@@ -31,22 +31,19 @@ public class CheckForUpdateEndpointIntegrationTests : BaseIntegrationTests
                 };
                 config.OverrideServices = builder =>
                 {
-                    builder
-                        .Register(_ => CreateCommandExecutor(updateResult))
-                        .As<ICommandExecutor>()
-                        .InstancePerDependency();
+                    builder.Register(_ => CreateCommandExecutor(updateResult)).As<ICommandExecutor>().SingleInstance();
                 };
             }
         );
 
         var client = container.GetApiClient();
-        await client.SignIn();
 
         // Act
         var response = await client.GETAsync<CheckForUpdateEndpoint, ResultDTO<AppUpdateCheckDTO>>();
 
         // Assert
-        response.Response.StatusCode.ShouldBe(HttpStatusCode.OK);
+        var responseContent = await response.Response.Content.ReadAsStringAsync(CancellationToken);
+        response.Response.StatusCode.ShouldBe(HttpStatusCode.OK, responseContent);
         response.Result.IsSuccess.ShouldBeTrue();
         response.Result.Errors.ShouldBeEmpty();
 
@@ -91,21 +88,18 @@ public class CheckForUpdateEndpointIntegrationTests : BaseIntegrationTests
                     CurrentOS = OperatingSystemPlatform.Linux,
                 };
                 config.OverrideServices = builder =>
-                    builder
-                        .Register(_ => CreateCommandExecutor(updateResult))
-                        .As<ICommandExecutor>()
-                        .InstancePerDependency();
+                    builder.Register(_ => CreateCommandExecutor(updateResult)).As<ICommandExecutor>().SingleInstance();
             }
         );
 
         var client = container.GetApiClient();
-        await client.SignIn();
 
         // Act
         var response = await client.GETAsync<CheckForUpdateEndpoint, ResultDTO<AppUpdateCheckDTO>>();
 
         // Assert
-        response.Response.StatusCode.ShouldBe(HttpStatusCode.OK);
+        var responseContent = await response.Response.Content.ReadAsStringAsync(CancellationToken);
+        response.Response.StatusCode.ShouldBe(HttpStatusCode.OK, responseContent);
         response.Result.IsSuccess.ShouldBeTrue();
         response.Result.Errors.ShouldBeEmpty();
 
@@ -154,21 +148,18 @@ public class CheckForUpdateEndpointIntegrationTests : BaseIntegrationTests
                     CurrentOS = OperatingSystemPlatform.Linux,
                 };
                 config.OverrideServices = builder =>
-                    builder
-                        .Register(_ => CreateCommandExecutor(updateResult))
-                        .As<ICommandExecutor>()
-                        .InstancePerDependency();
+                    builder.Register(_ => CreateCommandExecutor(updateResult)).As<ICommandExecutor>().SingleInstance();
             }
         );
 
         var client = container.GetApiClient();
-        await client.SignIn();
 
         // Act
         var response = await client.GETAsync<CheckForUpdateEndpoint, ResultDTO<AppUpdateCheckDTO>>();
 
         // Assert
-        response.Response.StatusCode.ShouldBe(HttpStatusCode.OK);
+        var responseContent = await response.Response.Content.ReadAsStringAsync(CancellationToken);
+        response.Response.StatusCode.ShouldBe(HttpStatusCode.OK, responseContent);
         response.Result.IsSuccess.ShouldBeTrue();
         response.Result.Errors.ShouldBeEmpty();
 
@@ -216,21 +207,18 @@ public class CheckForUpdateEndpointIntegrationTests : BaseIntegrationTests
                     CurrentOS = OperatingSystemPlatform.Linux,
                 };
                 config.OverrideServices = builder =>
-                    builder
-                        .Register(_ => CreateCommandExecutor(updateResult))
-                        .As<ICommandExecutor>()
-                        .InstancePerDependency();
+                    builder.Register(_ => CreateCommandExecutor(updateResult)).As<ICommandExecutor>().SingleInstance();
             }
         );
 
         var client = container.GetApiClient();
-        await client.SignIn();
 
         // Act
         var response = await client.GETAsync<CheckForUpdateEndpoint, ResultDTO<AppUpdateCheckDTO>>();
 
         // Assert
-        response.Response.StatusCode.ShouldBe(HttpStatusCode.OK);
+        var responseContent = await response.Response.Content.ReadAsStringAsync(CancellationToken);
+        response.Response.StatusCode.ShouldBe(HttpStatusCode.OK, responseContent);
         response.Result.IsSuccess.ShouldBeTrue();
         response.Result.Errors.ShouldBeEmpty();
 
@@ -270,21 +258,18 @@ public class CheckForUpdateEndpointIntegrationTests : BaseIntegrationTests
                     CurrentOS = OperatingSystemPlatform.Linux,
                 };
                 config.OverrideServices = builder =>
-                    builder
-                        .Register(_ => CreateCommandExecutor(updateResult))
-                        .As<ICommandExecutor>()
-                        .InstancePerDependency();
+                    builder.Register(_ => CreateCommandExecutor(updateResult)).As<ICommandExecutor>().SingleInstance();
             }
         );
 
         var client = container.GetApiClient();
-        await client.SignIn();
 
         // Act
         var response = await client.GETAsync<CheckForUpdateEndpoint, ResultDTO<AppUpdateCheckDTO>>();
 
         // Assert
-        response.Response.StatusCode.ShouldBe(HttpStatusCode.OK);
+        var responseContent = await response.Response.Content.ReadAsStringAsync(CancellationToken);
+        response.Response.StatusCode.ShouldBe(HttpStatusCode.OK, responseContent);
         response.Result.IsSuccess.ShouldBeTrue();
         response.Result.Errors.ShouldBeEmpty();
 
@@ -296,15 +281,7 @@ public class CheckForUpdateEndpointIntegrationTests : BaseIntegrationTests
     }
 
     private static FakeCommandExecutor CreateCommandExecutor(AppUpdateCheckResult updateResult) =>
-        new FakeCommandExecutor()
-            .Intercept<GetGitHubReleasesCommand, Result<IReadOnlyList<ReleaseNote>>>(
-                (_, _) => Task.FromResult(Result.Ok(updateResult.ReleaseNotes))
-            )
-            .Intercept<CheckForUpdatesCommand, Result<AppUpdateCheckResult>>(
-                (_, _) =>
-                {
-                    var expectedResult = Result.Ok(updateResult);
-                    return Task.FromResult(expectedResult);
-                }
-            );
+        new FakeCommandExecutor().Intercept<CheckForUpdatesCommand, Result<AppUpdateCheckResult>>(
+            (_, _) => Task.FromResult(Result.Ok(updateResult))
+        );
 }

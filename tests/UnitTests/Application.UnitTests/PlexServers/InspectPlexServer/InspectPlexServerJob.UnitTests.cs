@@ -8,12 +8,13 @@ public class InspectPlexServerJobUnitTests : BaseUnitTest<InspectPlexServerJob>
     private static IJobExecutionContext SetupJobContext(List<int> plexServerIds)
     {
         var jobDetail = new Mock<IJobDetail>();
-        jobDetail
-            .SetupGet(x => x.JobDataMap)
-            .Returns(new InspectPlexServerJobPayload(plexServerIds).ToJobDataMap());
+        jobDetail.SetupGet(x => x.JobDataMap).Returns(new InspectPlexServerJobPayload(plexServerIds).ToJobDataMap());
 
         var context = new Mock<IJobExecutionContext>();
         context.SetupGet(x => x.JobDetail).Returns(jobDetail.Object);
+        context
+            .SetupGet(x => x.MergedJobDataMap)
+            .Returns(new InspectPlexServerJobPayload(plexServerIds).ToJobDataMap());
         context.SetupGet(x => x.CancellationToken).Returns(CancellationToken.None);
         return context.Object;
     }

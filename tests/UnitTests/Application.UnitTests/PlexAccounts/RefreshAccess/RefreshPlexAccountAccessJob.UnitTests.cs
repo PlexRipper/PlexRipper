@@ -7,6 +7,7 @@ public class RefreshPlexAccountAccessJobUnitTests : BaseUnitTest<RefreshPlexAcco
     private static IJobExecutionContext SetupJobContext()
     {
         var context = new Mock<IJobExecutionContext>();
+        context.SetupProperty(x => x.Result);
         context.SetupGet(x => x.CancellationToken).Returns(CancellationToken.None);
         return context.Object;
     }
@@ -63,10 +64,14 @@ public class RefreshPlexAccountAccessJobUnitTests : BaseUnitTest<RefreshPlexAcco
             .Setup(x => x.Send(It.IsAny<RefreshPlexAccountAccessCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Fail<List<RefreshPlexAccountAccessRapportDTO>>("Refresh failed"));
 
+        var context = SetupJobContext();
+
         // Act
-        var action = () => Sut.Execute(SetupJobContext());
+        await Sut.Execute(context);
 
         // Assert
-        await action.ShouldThrowAsync<InvalidOperationException>();
+        var result = context.Result.ShouldBeOfType<BackgroundJobResult>();
+        result.Status.ShouldBe(JobStatus.Failed);
+        result.ErrorSummary.ShouldBe("Refresh failed");
     }
 }

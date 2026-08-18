@@ -66,13 +66,18 @@ public class ScheduleAffectedLibraryComparisonJobsCommandHandler
             .ToListAsync(cancellationToken);
 
         // Comparison always flows remote-to-owned, regardless of which side changed.
-        var pairs = sourceLibrary.IsOwned
-            ? targetLibraries
-                .Where(x => !x.IsOwned)
-                .Select(x => (OwnedLibraryId: sourceLibrary.Id, RemoteLibraryId: x.Id))
-            : targetLibraries
-                .Where(x => x.IsOwned)
-                .Select(x => (OwnedLibraryId: x.Id, RemoteLibraryId: sourceLibrary.Id));
+        var pairs = (
+            sourceLibrary.IsOwned
+                ? targetLibraries
+                    .Where(x => !x.IsOwned)
+                    .Select(x => (OwnedLibraryId: sourceLibrary.Id, RemoteLibraryId: x.Id))
+                : targetLibraries
+                    .Where(x => x.IsOwned)
+                    .Select(x => (OwnedLibraryId: x.Id, RemoteLibraryId: sourceLibrary.Id))
+        ).ToList();
+
+        if (!pairs.Any())
+            return Result.Ok();
 
         // Resolve active comparison keys once before dispatching child commands, so repeated updates do not spam
         // schedule requests for pairs that are already queued or running.
@@ -80,11 +85,13 @@ public class ScheduleAffectedLibraryComparisonJobsCommandHandler
             .Select(x => x)
             .ToHashSet();
 
-        pairs = pairs.Where(pair =>
-            !activeComparisonJobKeys.Contains(
-                PlexLibraryComparisonJob.GetJobKey(pair.OwnedLibraryId, pair.RemoteLibraryId)
+        pairs = pairs
+            .Where(pair =>
+                !activeComparisonJobKeys.Contains(
+                    PlexLibraryComparisonJob.GetJobKey(pair.OwnedLibraryId, pair.RemoteLibraryId)
+                )
             )
-        );
+            .ToList();
 
         var comparisonJobs = pairs
             .Select(pair =>

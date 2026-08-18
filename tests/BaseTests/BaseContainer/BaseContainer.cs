@@ -47,7 +47,8 @@ public class BaseContainer : IDisposable
         var config = UnitTestDataConfig.FromOptions(options);
         var memoryDbName = MockDatabase.GetMemoryDatabaseName();
         var mockAppRuntimeInfo = ResolveRuntimeInfo(config);
-        var mockPathProvider = new MockPathProvider(memoryDbName, new MockAppBuildInfo(), mockAppRuntimeInfo);
+        var mockAppBuildInfo = config.OverrideAppBuildInfo ?? new MockAppBuildInfo();
+        var mockPathProvider = new MockPathProvider(memoryDbName, mockAppBuildInfo, mockAppRuntimeInfo);
 
         // Create isolated filesystem
         var testFileSystemRootPath = IntegrationTestFileSystemSandbox.Create(memoryDbName, log, mockPathProvider);

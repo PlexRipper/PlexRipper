@@ -81,6 +81,12 @@ public class ScheduleAffectedLibraryComparisonJobsCommandUnitTests
         var command = new ScheduleAffectedLibraryComparisonJobsCommand(remoteLibrary.Id);
         Mock.Mock<IScheduler>()
             .Setup(x =>
+                x.GetJobKeys(GroupMatcher<JobKey>.GroupEquals(nameof(JobTypes.LibraryComparisonJob)), CancellationToken)
+            )
+            .ReturnsAsync([]);
+        Mock.Mock<IScheduler>().Setup(x => x.CheckExists(It.IsAny<JobKey>(), CancellationToken)).ReturnsAsync(false);
+        Mock.Mock<IScheduler>()
+            .Setup(x =>
                 x.ScheduleJobs(
                     It.IsAny<IReadOnlyDictionary<IJobDetail, IReadOnlyCollection<ITrigger>>>(),
                     false,
@@ -143,6 +149,12 @@ public class ScheduleAffectedLibraryComparisonJobsCommandUnitTests
         var command = new ScheduleAffectedLibraryComparisonJobsCommand(ownedLibrary.Id);
         Mock.Mock<IScheduler>()
             .Setup(x =>
+                x.GetJobKeys(GroupMatcher<JobKey>.GroupEquals(nameof(JobTypes.LibraryComparisonJob)), CancellationToken)
+            )
+            .ReturnsAsync([]);
+        Mock.Mock<IScheduler>().Setup(x => x.CheckExists(It.IsAny<JobKey>(), CancellationToken)).ReturnsAsync(false);
+        Mock.Mock<IScheduler>()
+            .Setup(x =>
                 x.ScheduleJobs(
                     It.IsAny<IReadOnlyDictionary<IJobDetail, IReadOnlyCollection<ITrigger>>>(),
                     false,
@@ -168,7 +180,9 @@ public class ScheduleAffectedLibraryComparisonJobsCommandUnitTests
                                     == ownedLibrary.Id
                                 && remoteLibraries
                                     .Select(x => x.Id)
-                                    .Contains(job.JobDataMap.GetPayload<PlexLibraryComparisonJobPayload>()!.RemotePlexLibraryId)
+                                    .Contains(
+                                        job.JobDataMap.GetPayload<PlexLibraryComparisonJobPayload>()!.RemotePlexLibraryId
+                                    )
                             )
                         ),
                         false,

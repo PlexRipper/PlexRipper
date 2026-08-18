@@ -30,6 +30,7 @@ public class GetAllBackgroundJobsEndpointUnitTests
 
         var context = new Mock<IJobExecutionContext>();
         context.SetupGet(x => x.JobDetail).Returns(jobDetail.Object);
+        context.SetupGet(x => x.MergedJobDataMap).Returns(new JobDataMap { ["Payload"] = update.Data });
         context.SetupGet(x => x.FireTimeUtc).Returns(update.JobStartTime);
         return context.Object;
     }
@@ -172,7 +173,12 @@ public class GetAllBackgroundJobsEndpointUnitTests
             actual.Status.ShouldBe(expected.Status);
             actual.JobStartTime.ShouldBe(expected.JobStartTime);
 
-            actual.JsonString.ShouldBeEmpty();
+            actual.JsonString.ShouldBe(
+                JsonSerializer.Serialize(
+                    new JobDataMap { ["Payload"] = expected.Data },
+                    DefaultJsonSerializerOptions.ConfigStandard
+                )
+            );
         }
     }
 }

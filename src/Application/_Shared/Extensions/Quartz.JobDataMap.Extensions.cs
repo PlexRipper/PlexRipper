@@ -46,6 +46,9 @@ public static partial class QuartzExtensions
                     if (int.TryParse(value, out var intValue))
                         return intValue;
 
+                    if (value is not null && (value.StartsWith('[') || value.StartsWith('{')))
+                        return JsonSerializer.Deserialize<JsonElement>(value);
+
                     return value;
                 }
             );

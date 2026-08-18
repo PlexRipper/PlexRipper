@@ -7,6 +7,7 @@
     "reaparr-backend-unit-tests": "symlink",
     "reaparr-command-handler-patterns": "symlink",
     "reaparr-desktop-build": "symlink",
+    "reaparr-fix-back-end-tests": "symlink",
     "reaparr-frontend": "symlink",
     "reaparr-frontend-components": "symlink",
     "reaparr-frontend-integration-tests": "symlink",
@@ -15,5 +16,5 @@
     "reaparr-media-comparison": "symlink",
     "reaparr-pinia-store": "symlink"
   },
-  "updated_at": "2026-08-13T10:14:15.782951056+02:00"
+  "updated_at": "2026-08-18T14:13:25.29286766+02:00"
 }

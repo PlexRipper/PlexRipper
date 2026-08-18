@@ -71,7 +71,8 @@ public class LogConfig : SlimLogConfig
     /// <param name="minimumLogLevel">The global minimum log level used before sink-specific filtering.</param>
     protected virtual LoggerConfiguration GetExtendedConfiguration(LogEventLevel minimumLogLevel = LogEventLevel.Debug)
     {
-        var config = GetBaseConfiguration(minimumLogLevel);
+        var config = GetBaseConfiguration(minimumLogLevel)
+            .Enrich.WithProperty("AppRunId", _appRuntimeInfo.AppRunId);
 
         if (!string.IsNullOrEmpty(_appRuntimeInfo.SEQ_Url))
             config = config.WriteTo.Seq(_appRuntimeInfo.SEQ_Url, restrictedToMinimumLevel: minimumLogLevel);

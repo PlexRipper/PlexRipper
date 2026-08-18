@@ -1,22 +1,14 @@
-using TickerQ.Utilities.Enums;
-
 namespace Reaparr.Application;
 
 public class MoveDownloadFileJobScheduler : IMoveDownloadFileScheduler
 {
     private readonly ILogger _log;
-    private readonly IBackgroundJobScheduler _scheduler;
-    private readonly IReaparrDbContextFactory _dbContextFactory;
+    private readonly IScheduler _scheduler;
 
-    public MoveDownloadFileJobScheduler(
-        ILogger log,
-        IBackgroundJobScheduler scheduler,
-        IReaparrDbContextFactory dbContextFactory
-    )
+    public MoveDownloadFileJobScheduler(ILogger log, IScheduler scheduler)
     {
         _log = log.ForContext<MoveDownloadFileJobScheduler>();
         _scheduler = scheduler;
-        _dbContextFactory = dbContextFactory;
     }
 
     /// <summary>
@@ -34,9 +26,9 @@ public class MoveDownloadFileJobScheduler : IMoveDownloadFileScheduler
         if (await _scheduler.IsJobRunning(jobKey, cancellationToken))
             return Result.Fail($"{nameof(MoveDownloadFileJob)} with {jobKey} already exists").LogWarning();
 
-        var schedulingResult = await _scheduler.ExecuteJob<MoveDownloadFileJob, DownloadTaskKey>(
+        var schedulingResult = await _scheduler.ExecuteJob<MoveDownloadFileJob, MoveDownloadFileJobPayload>(
             jobKey,
-            downloadTaskKey,
+            new MoveDownloadFileJobPayload(downloadTaskKey),
             cancellationToken
         );
         schedulingResult.LogIfFailed();
@@ -76,32 +68,17 @@ public class MoveDownloadFileJobScheduler : IMoveDownloadFileScheduler
     public Task<bool> IsDownloadFileMoving(DownloadTaskKey downloadTaskKey, CancellationToken cancellationToken) =>
         _scheduler.IsJobRunning(MoveDownloadFileJob.GetJobKey(downloadTaskKey.Id), cancellationToken);
 
-    public async Task<bool> IsAnyMoveDownloadFileJobRunning()
-    {
-        using var dbContext = await _dbContextFactory.CreateAsync();
-        return await dbContext.TimeTickers.AnyAsync(x =>
-            x.JobType == JobTypes.MoveDownloadFileJob
-            && (x.Status == TickerStatus.Idle || x.Status == TickerStatus.Queued || x.Status == TickerStatus.InProgress)
+    public async Task<bool> IsAnyMoveDownloadFileJobRunning() =>
+        (await _scheduler.GetCurrentlyExecutingJobs()).Any(x =>
+            x.JobDetail.Key.Group == nameof(JobTypes.MoveDownloadFileJob)
         );
-    }
 
     public async Task<List<DownloadTaskKey>> GetCurrentlyMovingKeysByServer(int plexServerId)
     {
-        using var dbContext = await _dbContextFactory.CreateAsync();
-        var requests = await dbContext
-            .TimeTickers.Where(x =>
-                x.JobType == JobTypes.MoveDownloadFileJob
-                && (
-                    x.Status == TickerStatus.Idle
-                    || x.Status == TickerStatus.Queued
-                    || x.Status == TickerStatus.InProgress
-                )
-            )
-            .Select(x => x.Request)
-            .ToListAsync();
-
-        return requests
-            .Select(x => JsonSerializer.Deserialize<DownloadTaskKey>(x))
+        var contexts = await _scheduler.GetCurrentlyExecutingJobs(CancellationToken.None);
+        return contexts
+            .Where(x => x.JobDetail.Key.Group == nameof(JobTypes.MoveDownloadFileJob))
+            .Select(x => x.MergedJobDataMap.GetPayload<MoveDownloadFileJobPayload>()?.DownloadTaskKey)
             .OfType<DownloadTaskKey>()
             .Where(x => x.PlexServerId == plexServerId)
             .ToList();

@@ -1,3 +1,7 @@
+using Quartz;
+using Quartz.Impl.Matchers;
+using Quartz.Spi;
+
 namespace Reaparr.Application.UnitTests;
 
 public class ApplyRemoteTvShowComparisonStateCommandUnitTests
@@ -291,16 +295,29 @@ public class ApplyRemoteTvShowComparisonStateCommandUnitTests
         await SetOwnedOverrideAsync(ownedLibrary.PlexServerId, true);
 
         var remoteTvShow = await GetLibraryTvShowAsync(remoteLibrary.Id);
-        dbContext.TimeTickers.Add(
-            new JobTimeTicker
-            {
-                Function = nameof(PlexLibraryComparisonJob),
-                Request = [],
-                JobKey = PlexLibraryComparisonJob.GetJobKey(ownedLibrary.Id, remoteLibrary.Id).Name,
-                JobType = JobTypes.LibraryComparisonJob,
-            }
-        );
-        await dbContext.SaveChangesAsync(CancellationToken);
+        Mock.Mock<IScheduler>()
+            .Setup(x =>
+                x.CheckExists(
+                    PlexLibraryComparisonJob.GetJobKey(ownedLibrary.Id, remoteLibrary.Id),
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .ReturnsAsync(true);
+        Mock.Mock<IScheduler>()
+            .Setup(x =>
+                x.GetTriggersOfJob(
+                    PlexLibraryComparisonJob.GetJobKey(ownedLibrary.Id, remoteLibrary.Id),
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .ReturnsAsync([new Mock<IOperableTrigger>().Object]);
+        Mock.Mock<IScheduler>()
+            .Setup(x => x.GetTriggerState(It.IsAny<TriggerKey>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(TriggerState.Normal);
+        Mock.Mock<IScheduler>().Setup(x => x.GetCurrentlyExecutingJobs(It.IsAny<CancellationToken>())).ReturnsAsync([]);
+        Mock.Mock<IScheduler>()
+            .Setup(x => x.GetJobKeys(It.IsAny<GroupMatcher<JobKey>>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync([PlexLibraryComparisonJob.GetJobKey(ownedLibrary.Id, remoteLibrary.Id)]);
 
         var items = new List<PlexMediaSlimDTO> { CreateTvShowItem(remoteTvShow) };
 

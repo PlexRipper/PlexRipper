@@ -251,7 +251,7 @@ public class DownloadQueueCheckDownloadQueueUnitTests : BaseUnitTest<DownloadQue
     {
         // Arrange
         // This test simulates the race condition where a download job has finished and updated
-        // the database status to DownloadFinished, but the TickerQ job is still in the process
+        // the database status to DownloadFinished, but the Quartz job is still in the process
         // of cleaning up and hasn't been removed from the scheduler yet.
         await SetupDatabase(
             88234,

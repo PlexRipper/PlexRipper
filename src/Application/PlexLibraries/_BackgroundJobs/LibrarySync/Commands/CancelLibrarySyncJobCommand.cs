@@ -14,13 +14,13 @@ public class CancelLibrarySyncJobCommandHandler : ICommandHandler<CancelLibraryS
 {
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
-    private readonly IBackgroundJobScheduler _scheduler;
+    private readonly IScheduler _scheduler;
     private readonly INotificationHubService _notificationHubService;
 
     public CancelLibrarySyncJobCommandHandler(
         ILogger log,
         IReaparrDbContext dbContext,
-        IBackgroundJobScheduler scheduler,
+        IScheduler scheduler,
         INotificationHubService notificationHubService
     )
     {
@@ -71,12 +71,20 @@ public class CancelLibrarySyncJobCommandHandler : ICommandHandler<CancelLibraryS
                     serverId,
                     plexLibraryId
                 );
+
+            var completionResult = await _scheduler.AwaitJobCompletion(jobKey, cancellationToken);
+            if (completionResult.IsFailed)
+                return completionResult;
         }
         else
         {
             // Job is queued but not yet executing — mark it as cancelled directly.
-            await _dbContext
+            if (!await _scheduler.DeleteJob(jobKey, cancellationToken))
+                return Result.Fail($"Library sync job for library {plexLibraryId} changed state while cancelling");
+
+            var cancelled = await _dbContext
                 .LibrarySyncJobQueues.Where(x => x.PlexServerId == serverId && x.PlexLibraryId == plexLibraryId)
+                .Where(x => x.Status == LibrarySyncJobStatus.Queued || x.Status == LibrarySyncJobStatus.Processing)
                 .ExecuteUpdateAsync(
                     s =>
                         s.SetProperty(x => x.Status, LibrarySyncJobStatus.Cancelled)
@@ -85,6 +93,8 @@ public class CancelLibrarySyncJobCommandHandler : ICommandHandler<CancelLibraryS
                             .SetProperty(x => x.IsServerOffline, false),
                     cancellationToken: cancellationToken
                 );
+            if (cancelled != 1)
+                return Result.Fail($"Library sync job for library {plexLibraryId} changed state while cancelling");
 
             _log.Here()
                 .Information(

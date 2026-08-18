@@ -1,11 +1,11 @@
 using System.Data;
 using System.Diagnostics;
 using System.Reflection;
+using AppAny.Quartz.EntityFrameworkCore.Migrations;
+using AppAny.Quartz.EntityFrameworkCore.Migrations.SQLite;
 using EFCore.BulkExtensions;
 using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.DependencyInjection;
-using TickerQ.EntityFrameworkCore.Configurations;
-using TickerQ.Utilities.Entities;
 
 // ReSharper disable UnusedAutoPropertyAccessor.Global
 
@@ -56,12 +56,6 @@ public sealed class ReaparrDbContext : DbContext, IReaparrDbContext, IReaparrDbC
     public DbSet<PlexServerStatus> PlexServerStatuses { get; set; }
 
     public DbSet<LibrarySyncJobQueue> LibrarySyncJobQueues { get; set; }
-
-    public DbSet<JobTimeTicker> TimeTickers { get; set; }
-
-    public DbSet<JobCronTicker> CronTickers { get; set; }
-
-    public DbSet<CronTickerOccurrenceEntity<JobCronTicker>> CronTickerOccurrences { get; set; }
 
     public DbSet<DownloadTaskMovie> DownloadTaskMovie { get; set; }
 
@@ -323,13 +317,9 @@ public sealed class ReaparrDbContext : DbContext, IReaparrDbContext, IReaparrDbC
     {
         builder.UseCollation(OrderByNaturalExtensions.CollationName);
 
-        // Setup TickerQ
-        builder.ApplyConfiguration(new TimeTickerConfigurations<JobTimeTicker>());
-        builder.ApplyConfiguration(new CronTickerConfigurations<JobCronTicker>());
-        builder.ApplyConfiguration(new CronTickerOccurrenceConfigurations<JobCronTicker>());
-
-        // Configurations need to override TickerQ default configurations
         builder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
+
+        builder.AddQuartz(x => x.UseSqlite());
 
         base.OnModelCreating(builder);
     }
@@ -365,7 +355,11 @@ public sealed class ReaparrDbContext : DbContext, IReaparrDbContext, IReaparrDbC
             return false;
         }
 
-        var result = Result.Try(() => DbContextConnections.EnableWriteAheadLogging(Database.GetDbConnection()));
+        var result = Result.Try(() =>
+        {
+            DbContextConnections.InitializeDatabase(Database.GetDbConnection());
+            DbContextConnections.EnableWriteAheadLogging(Database.GetDbConnection());
+        });
         result.LogIfFailed();
 
         return result.IsSuccess;
@@ -394,6 +388,7 @@ public sealed class ReaparrDbContext : DbContext, IReaparrDbContext, IReaparrDbC
     public Result Migrate() =>
         Result.Try(() =>
         {
+            DbContextConnections.InitializeDatabase(Database.GetDbConnection());
             DbContextConnections.EnableWriteAheadLogging(Database.GetDbConnection());
             Database.Migrate();
         });

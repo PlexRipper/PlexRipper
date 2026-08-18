@@ -20,18 +20,12 @@ public class InvalidateLibraryComparisonJobsCommandHandler
     : ICommandHandler<InvalidateLibraryComparisonJobsCommand, Result>
 {
     private readonly ILogger _log;
-    private readonly IReaparrDbContext _dbContext;
-    private readonly IBackgroundJobScheduler _backgroundJobScheduler;
+    private readonly IScheduler _scheduler;
 
-    public InvalidateLibraryComparisonJobsCommandHandler(
-        ILogger log,
-        IReaparrDbContext dbContext,
-        IBackgroundJobScheduler backgroundJobScheduler
-    )
+    public InvalidateLibraryComparisonJobsCommandHandler(ILogger log, IScheduler scheduler)
     {
         _log = log.ForContext<InvalidateLibraryComparisonJobsCommandHandler>();
-        _dbContext = dbContext;
-        _backgroundJobScheduler = backgroundJobScheduler;
+        _scheduler = scheduler;
     }
 
     public async Task<Result> ExecuteAsync(
@@ -39,22 +33,28 @@ public class InvalidateLibraryComparisonJobsCommandHandler
         CancellationToken cancellationToken
     )
     {
-        var libraryIds = command.PlexLibraryIds.Distinct().ToList();
-        var matchingJobKeys = await _dbContext
-            .TimeTickers.Where(x =>
-                x.JobType == JobTypes.LibraryComparisonJob
-                && x.RequestJson != null
-                && (
-                    libraryIds.Contains(x.RequestJson.OwnedPlexLibraryId)
-                    || libraryIds.Contains(x.RequestJson.RemotePlexLibraryId)
-                )
+        var affectedLibraryIds = command.PlexLibraryIds.ToHashSet();
+        var comparisonJobKeys = await _scheduler.GetJobKeys(JobTypes.LibraryComparisonJob, cancellationToken);
+        var comparisonJobs = await Task.WhenAll(
+            comparisonJobKeys.Select(async jobKey =>
+                (JobKey: jobKey, Detail: await _scheduler.GetJobDetail(jobKey, cancellationToken))
             )
+        );
+
+        var jobKeysToDelete = comparisonJobs
+            .Where(x =>
+            {
+                var payload = x.Detail?.JobDataMap.GetPayload<PlexLibraryComparisonJobPayload>();
+                return payload is not null
+                    && (
+                        affectedLibraryIds.Contains(payload.OwnedPlexLibraryId)
+                        || affectedLibraryIds.Contains(payload.RemotePlexLibraryId)
+                    );
+            })
             .Select(x => x.JobKey)
-            .ToListAsync(cancellationToken);
+            .ToList();
 
-        var jobKeys = matchingJobKeys.Select(x => new JobKey(x, JobTypes.LibraryComparisonJob)).ToList();
-
-        var result = await _backgroundJobScheduler.DeleteBatchJobs(jobKeys, cancellationToken);
+        var result = await _scheduler.DeleteBatchJobs(jobKeysToDelete, cancellationToken);
 
         if (result.IsSuccess)
             _log.Here().Debug("Invalidated comparison jobs for libraries {LibraryIds}", command.PlexLibraryIds);

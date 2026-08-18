@@ -24,11 +24,13 @@ public class ApplyRemoteMovieComparisonStateCommandHandler
 {
     private readonly IReaparrDbContext _dbContext;
     private readonly ILogger _log;
+    private readonly IScheduler _scheduler;
 
-    public ApplyRemoteMovieComparisonStateCommandHandler(IReaparrDbContext dbContext, ILogger log)
+    public ApplyRemoteMovieComparisonStateCommandHandler(IReaparrDbContext dbContext, ILogger log, IScheduler scheduler)
     {
         _dbContext = dbContext;
         _log = log.ForContext<ApplyRemoteMovieComparisonStateCommandHandler>();
+        _scheduler = scheduler;
     }
 
     public async Task<Result> ExecuteAsync(ApplyRemoteMovieComparisonStateCommand command, CancellationToken ct)
@@ -77,7 +79,13 @@ public class ApplyRemoteMovieComparisonStateCommandHandler
 
         if (currentOwnedLibraryIds.Count == 0)
         {
-            if (await HasPendingComparisonAsync(ownedLibraries.Keys.ToHashSet(), command.RemoteLibraryId, ct))
+            var hasActiveJobs = await _scheduler.HasActiveJobs(
+                ownedLibraries
+                    .Keys.ToHashSet()
+                    .Select(x => PlexLibraryComparisonJob.GetJobKey(x, command.RemoteLibraryId)),
+                ct
+            );
+            if (hasActiveJobs)
             {
                 foreach (var item in items)
                     item.SetComparisonState(PlexMediaComparisonState.Pending);
@@ -121,14 +129,4 @@ public class ApplyRemoteMovieComparisonStateCommandHandler
 
         return Result.Ok();
     }
-
-    private async Task<bool> HasPendingComparisonAsync(
-        HashSet<int> ownedLibraryIds,
-        int remoteLibraryId,
-        CancellationToken ct
-    ) =>
-        await _dbContext.HasActiveLibraryComparisonAsync(
-            ownedLibraryIds.Select(x => PlexLibraryComparisonJob.GetJobKey(x, remoteLibraryId)),
-            ct
-        );
 }

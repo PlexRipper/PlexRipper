@@ -71,6 +71,15 @@
           "Photino.Native": "4.0.22"
         }
       },
+      "Quartz.Extensions.Hosting": {
+        "type": "Direct",
+        "requested": "[3.19.1, )",
+        "resolved": "3.19.1",
+        "contentHash": "gp6EUrreKcU/Az6b2bZNeebxJWMrmlLItXRmR9nX9zUSmMzQTIDWR7NTm3SsdmsoDBbrIU9vhkLD3uv1y5mMzA==",
+        "dependencies": {
+          "Quartz.Extensions.DependencyInjection": "3.19.1"
+        }
+      },
       "Serilog.AspNetCore": {
         "type": "Direct",
         "requested": "[10.0.0, )",
@@ -95,15 +104,6 @@
           "Serilog": "3.1.1"
         }
       },
-      "TickerQ.Dashboard": {
-        "type": "Direct",
-        "requested": "[10.4.0, )",
-        "resolved": "10.4.0",
-        "contentHash": "U84ExmfEB6jGMFEJKq4TKaItSHY4vvIvXmslkLpWaKqowV+BCJrslcELNj+e9ieHZP4WUkJ4wk7RmDttkmVFjg==",
-        "dependencies": {
-          "TickerQ.Utilities": "10.4.0"
-        }
-      },
       "Velopack": {
         "type": "Direct",
         "requested": "[0.0.1298, )",
@@ -113,10 +113,37 @@
           "NuGet.Versioning": "6.14.0"
         }
       },
+      "AppAny.Quartz.EntityFrameworkCore.Migrations": {
+        "type": "Transitive",
+        "resolved": "0.6.0",
+        "contentHash": "hhhg6TeGEl5qczPD67xhJ9IYCpZ7PAd6CNiaA9vqK9a8y9tdXUp/Nkca19oTs55BxF8mmNSNUTjnO4T7lhKnvQ==",
+        "dependencies": {
+          "Microsoft.EntityFrameworkCore": "10.0.8"
+        }
+      },
+      "AppAny.Quartz.EntityFrameworkCore.Migrations.SQLite": {
+        "type": "Transitive",
+        "resolved": "0.6.0",
+        "contentHash": "gyRyO8EFn3u0AmnJCBBVDzjSKwfJUkrMIFWHL7ox/tp5buezNjWb7K6pyM33wkRRbSvhNqKSQhjoYYkSwPsBMw==",
+        "dependencies": {
+          "AppAny.Quartz.EntityFrameworkCore.Migrations": "0.6.0",
+          "Microsoft.EntityFrameworkCore.Sqlite": "10.0.8"
+        }
+      },
       "Autofac": {
         "type": "Transitive",
         "resolved": "9.1.0",
         "contentHash": "onT/BcnnfWcQNXiuC7R/0h8ALQzRdsAI20gpB7nfrudXpFMXdVZKz1umdtHXDwjc/bmWEsrCBAxck3+Arnk15g=="
+      },
+      "Autofac.Extras.Quartz": {
+        "type": "Transitive",
+        "resolved": "11.0.0",
+        "contentHash": "EAojmP/iI02TnUndDLYa6MHS5OySVqntKA7owGRm8J/w4x2QwA/TTqOfSHWmtZ1BrZ17Bttko/JO6vssJAgQYQ==",
+        "dependencies": {
+          "Autofac": "[9.0.0, 10.0.0)",
+          "JetBrains.Annotations": "2025.2.4",
+          "Quartz": "[3.16.1, 4.0.0)"
+        }
       },
       "BencodeNET": {
         "type": "Transitive",
@@ -200,14 +227,6 @@
         "type": "Transitive",
         "resolved": "8.1.0",
         "contentHash": "i3VqYn4b9UjpvXFkcCRXZq5lMzQ13dlLab7BWh/19aVY8pvQT9v643ViCdga47zir7y2twnYOIjRIy9Fln2dWw=="
-      },
-      "FlexLabs.EntityFrameworkCore.Upsert": {
-        "type": "Transitive",
-        "resolved": "10.0.0",
-        "contentHash": "qFVp1j1yZFApE4uXplTodeSybz/pfjGM/zBfwgtnkZqw7ZV1YFmF0AEebQmmNsndANQmv+aNi7aXdOhOVFfs7Q==",
-        "dependencies": {
-          "Microsoft.EntityFrameworkCore.Relational": "[10.0.0, 11.0.0)"
-        }
       },
       "FlexQuery.NET": {
         "type": "Transitive",
@@ -447,11 +466,6 @@
         "resolved": "4.4.1",
         "contentHash": "uDl8qdX7SGEGAvczy0qZw00ekEmCFz1KAyDf9H6AykZhplfWT9xfZDryGGp0HkGkeUZ6HL4iLUjZp/NgciktGw=="
       },
-      "ncrontab": {
-        "type": "Transitive",
-        "resolved": "3.3.0",
-        "contentHash": "oNHphZD7YiqHJoqX5Myw+lfDDTnnI2i+mCuil8MW2gyHaEejhLOdsS9pqVUGAEIJsu4+OL+m3UmkBcw2gkdtsg=="
-      },
       "NetTopologySuite": {
         "type": "Transitive",
         "resolved": "2.6.0",
@@ -608,6 +622,27 @@
         "contentHash": "drrG+hB3pYFY7w1c3BD+lSGYvH2oIclH8GRSehgfyP5kjnFnHKQuuBhuHLv+PWyFuaTDyk/vfRpnxOzd11+J8g==",
         "dependencies": {
           "Polly": "7.1.0"
+        }
+      },
+      "Quartz": {
+        "type": "Transitive",
+        "resolved": "3.19.1",
+        "contentHash": "u+kAlmReZLLpKRG9TcPt8gP0H5e8Nff11fh9tz52e4B+GtXm9cLBOe/bfGcDs4IQftmEcxakpfTzOlsZdv9ekg=="
+      },
+      "Quartz.Extensions.DependencyInjection": {
+        "type": "Transitive",
+        "resolved": "3.19.1",
+        "contentHash": "6UKrPvWQBgOslVnhD6OgFBjBA3kO7kUc4bM2EXG8b+vSgB/EHqVP8cLOb9RePZQJb5OJeNunN9dNEmGLpg5wuw==",
+        "dependencies": {
+          "Quartz": "3.19.1"
+        }
+      },
+      "Quartz.Serialization.SystemTextJson": {
+        "type": "Transitive",
+        "resolved": "3.19.1",
+        "contentHash": "O2gM5JdvLiSwU79vIn93HbYKMv9NTblk6v2tcceo1qfGrWJqJuqAvM3xmZC6RSINXWOEXAQPeLb/dYjSX9l1XA==",
+        "dependencies": {
+          "Quartz": "3.19.1"
         }
       },
       "Semver": {
@@ -793,32 +828,6 @@
         "resolved": "10.1.0",
         "contentHash": "0R+m7DvS2QuDcFOfDGtyGErRrgXOl4/z2tbNLX2RfvlYJjlVcKG+wMIBfZO8vxGtTNwNxffTG4ibFRwd0jkM7w=="
       },
-      "TickerQ": {
-        "type": "Transitive",
-        "resolved": "10.4.0",
-        "contentHash": "Pg5LpcLeS/qg60SWzkY8RSZqk2iP/WYhQ0fBtRbz6R+0QV6cg1EddwIgFse/uB1989b95rq4LxVkpKzoGgrlhw==",
-        "dependencies": {
-          "TickerQ.Utilities": "10.4.0"
-        }
-      },
-      "TickerQ.EntityFrameworkCore": {
-        "type": "Transitive",
-        "resolved": "10.4.0",
-        "contentHash": "uYyiI/DSNRwt/R9/+diLDA2bVXtIn4V0/RYBPbYcmdTJbuF6PDc5pdcj/DKnhR7L670HeJu2m55PSAR6qj9K6g==",
-        "dependencies": {
-          "FlexLabs.EntityFrameworkCore.Upsert": "[10.0.0, 11.0.0)",
-          "Microsoft.EntityFrameworkCore.Relational": "[10.0.0, 11.0.0)",
-          "TickerQ.Utilities": "10.4.0"
-        }
-      },
-      "TickerQ.Utilities": {
-        "type": "Transitive",
-        "resolved": "10.4.0",
-        "contentHash": "JBzaR2xNUEAaA+sRBifuNCGakKMmChwCbZULSQm+rBkAw/j/Z/E1POtYEloK8QulzKRlxx0TaQLa9LJSbQi3tw==",
-        "dependencies": {
-          "NCrontab": "3.3.0"
-        }
-      },
       "Xdg.Directories": {
         "type": "Transitive",
         "resolved": "0.1.2",
@@ -832,12 +841,14 @@
       "Reaparr.Application": {
         "type": "Project",
         "dependencies": {
+          "Autofac.Extras.Quartz": "[11.0.0, )",
           "Downloader": "[5.5.0, )",
           "FastEndpoints": "[8.1.0, )",
           "FastEndpoints.Security": "[8.1.0, )",
           "FastEndpoints.Swagger": "[8.1.0, )",
           "Polly": "[8.6.5, )",
           "Polly.Core": "[8.6.6, )",
+          "Quartz.Serialization.SystemTextJson": "[3.19.1, )",
           "Reaparr.Application.Contracts": "[1.0.0, )",
           "Reaparr.Data.Contracts": "[1.0.0, )",
           "Reaparr.Domain": "[1.0.0, )",
@@ -850,19 +861,20 @@
           "Reaparr.Settings.Contracts": "[1.0.0, )",
           "Reaparr.SignalR.Contracts": "[1.0.0, )",
           "Semver": "[3.0.0, )",
-          "TickerQ": "[10.4.0, )",
           "Velopack": "[0.0.1298, )"
         }
       },
       "Reaparr.Application.Contracts": {
         "type": "Project",
         "dependencies": {
+          "Quartz": "[3.19.1, )",
           "Reaparr.Domain": "[1.0.0, )"
         }
       },
       "Reaparr.Data": {
         "type": "Project",
         "dependencies": {
+          "AppAny.Quartz.EntityFrameworkCore.Migrations.SQLite": "[0.6.0, )",
           "Autofac": "[9.1.0, )",
           "Microsoft.AspNetCore.Identity.EntityFrameworkCore": "[10.0.10, )",
           "Microsoft.Data.Sqlite": "[10.0.10, )",
@@ -874,8 +886,7 @@
           "Reaparr.Settings.Contracts": "[1.0.0, )",
           "SQLitePCLRaw.core": "[3.0.3, )",
           "SQLitePCLRaw.lib.e_sqlite3": "[3.53.3, )",
-          "SQLitePCLRaw.provider.e_sqlite3": "[3.0.3, )",
-          "TickerQ.EntityFrameworkCore": "[10.4.0, )"
+          "SQLitePCLRaw.provider.e_sqlite3": "[3.0.3, )"
         }
       },
       "Reaparr.Data.Contracts": {
@@ -887,8 +898,7 @@
           "Microsoft.EntityFrameworkCore.Sqlite": "[10.0.10, )",
           "Reaparr.Application.Contracts": "[1.0.0, )",
           "Reaparr.Domain": "[1.0.0, )",
-          "SQLitePCLRaw.lib.e_sqlite3": "[2.1.12, )",
-          "TickerQ.Utilities": "[10.4.0, )"
+          "SQLitePCLRaw.lib.e_sqlite3": "[2.1.12, )"
         }
       },
       "Reaparr.Domain": {

@@ -16,4 +16,7 @@ public enum JobStatus
 
     [JsonStringEnumMemberName(nameof(Failed))]
     Failed = 3,
+
+    [JsonStringEnumMemberName(nameof(Queued))]
+    Queued = 4,
 }

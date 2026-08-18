@@ -14,13 +14,9 @@ public class CheckQueuedPlexLibraryToSyncCommandHandler : ICommandHandler<CheckQ
 {
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
-    private readonly IBackgroundJobScheduler _scheduler;
+    private readonly IScheduler _scheduler;
 
-    public CheckQueuedPlexLibraryToSyncCommandHandler(
-        ILogger log,
-        IReaparrDbContext dbContext,
-        IBackgroundJobScheduler scheduler
-    )
+    public CheckQueuedPlexLibraryToSyncCommandHandler(ILogger log, IReaparrDbContext dbContext, IScheduler scheduler)
     {
         _log = log.ForContext<CheckQueuedPlexLibraryToSyncCommandHandler>();
         _dbContext = dbContext;
@@ -109,10 +105,10 @@ public class CheckQueuedPlexLibraryToSyncCommandHandler : ICommandHandler<CheckQ
     {
         var jobKey = LibrarySyncJob.GetJobKey(serverId, libraryId);
 
-        if (await _scheduler.IsQueued(jobKey))
+        if (await _scheduler.IsQueued(jobKey, cancellationToken))
         {
-            var serverName = _dbContext.GetPlexServerNameById(serverId);
-            var libraryName = _dbContext.GetPlexLibraryNameById(libraryId);
+            var serverName = await _dbContext.GetPlexServerNameById(serverId);
+            var libraryName = await _dbContext.GetPlexLibraryNameById(libraryId);
             _log.Here()
                 .Warning(
                     "Library sync job already queued for server: {ServerName} with id: {ServerId}, library {LibraryName} with id: {LibraryId}",
@@ -124,43 +120,37 @@ public class CheckQueuedPlexLibraryToSyncCommandHandler : ICommandHandler<CheckQ
             return;
         }
 
-        // Mark the queue item as processing before scheduling to prevent
-        // concurrent CheckQueuedPlexLibraryToSync executions from scheduling
-        // the same library more than once.
-        var updatedRows = await _dbContext
-            .LibrarySyncJobQueues.Where(x =>
-                x.PlexServerId == serverId && x.PlexLibraryId == libraryId && x.Status == LibrarySyncJobStatus.Queued
+        var claimed = await _dbContext.LibrarySyncJobQueues
+            .Where(x =>
+                x.PlexServerId == serverId
+                && x.PlexLibraryId == libraryId
+                && x.Status == LibrarySyncJobStatus.Queued
             )
-            .ExecuteUpdateAsync(x => x.SetProperty(y => y.Status, LibrarySyncJobStatus.Processing), cancellationToken);
-
-        if (updatedRows == 0)
-        {
-            _log.Here()
-                .Warning(
-                    "Skipping library sync job scheduling for server {ServerId} and library {LibraryId} because the queue item was already claimed",
-                    serverId,
-                    libraryId
-                );
+            .ExecuteUpdateAsync(
+                s => s.SetProperty(x => x.Status, LibrarySyncJobStatus.Processing)
+                    .SetProperty(x => x.StartedAt, DateTime.UtcNow),
+                cancellationToken
+            );
+        if (claimed != 1)
             return;
-        }
 
         var scheduleResult = await _scheduler.ExecuteJob<LibrarySyncJob, LibrarySyncJobPayload>(
             jobKey,
-            new LibrarySyncJobPayload { PlexServerId = serverId, PlexLibraryId = libraryId },
+            new LibrarySyncJobPayload(serverId, libraryId),
             cancellationToken
         );
 
         if (scheduleResult.IsFailed || scheduleResult.IsCancelled)
         {
-            await _dbContext
-                .LibrarySyncJobQueues.Where(x =>
+            await _dbContext.LibrarySyncJobQueues
+                .Where(x =>
                     x.PlexServerId == serverId
                     && x.PlexLibraryId == libraryId
                     && x.Status == LibrarySyncJobStatus.Processing
-                    && x.StartedAt == null
                 )
                 .ExecuteUpdateAsync(
-                    x => x.SetProperty(y => y.Status, LibrarySyncJobStatus.Queued),
+                    s => s.SetProperty(x => x.Status, LibrarySyncJobStatus.Queued)
+                        .SetProperty(x => x.StartedAt, (DateTime?)null),
                     CancellationToken.None
                 );
             scheduleResult.LogIfFailed();

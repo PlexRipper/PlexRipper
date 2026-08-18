@@ -1,3 +1,5 @@
+using Autofac;
+
 namespace Reaparr.IntegrationTests;
 
 public class CreateAccountIntegrationTests : BaseIntegrationTests
@@ -29,6 +31,16 @@ public class CreateAccountIntegrationTests : BaseIntegrationTests
                     x.MovieLibraryCount = libraryCount;
                     x.MoviesPerLibraryCount = 25;
                 };
+
+                config.OverrideServices = builder =>
+                    builder
+                        .Register(_ =>
+                            new FakeCommandExecutor().Intercept<QueueLibrarySyncJobCommand, Result>(
+                                (_, _) => Task.FromResult(Result.Ok())
+                            )
+                        )
+                        .As<ICommandExecutor>()
+                        .InstancePerDependency();
             }
         );
 

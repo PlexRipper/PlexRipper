@@ -233,7 +233,10 @@ public static partial class MockDatabase
         string dbName = ""
     )
     {
-        var optionsBuilder = GetDbContextOptionsBuilder<ReaparrDbContext>(dbName);
+        var optionsBuilder = GetDbContextOptionsBuilder<ReaparrDbContext>(
+            appRuntimeInfo.IsIntegrationTestMode ? pathProvider.DatabasePath : dbName,
+            appRuntimeInfo.IsIntegrationTestMode ? SqliteOpenMode.ReadWriteCreate : SqliteOpenMode.Memory
+        );
 
         return new ReaparrDbContext(optionsBuilder.Options, logger, pathProvider, appRuntimeInfo, dbName);
     }
@@ -245,7 +248,10 @@ public static partial class MockDatabase
         string dbName = ""
     )
     {
-        var optionsBuilder = GetDbContextOptionsBuilder<AuthDbContext>(dbName);
+        var optionsBuilder = GetDbContextOptionsBuilder<AuthDbContext>(
+            appRuntimeInfo.IsIntegrationTestMode ? pathProvider.DatabasePath : dbName,
+            appRuntimeInfo.IsIntegrationTestMode ? SqliteOpenMode.ReadWriteCreate : SqliteOpenMode.Memory
+        );
 
         return new AuthDbContext(optionsBuilder.Options, logger, pathProvider, appRuntimeInfo, dbName);
     }
@@ -267,8 +273,11 @@ public static partial class MockDatabase
         await _setupLock.WaitAsync();
         try
         {
-            reaparrContext.Migrate();
-            authContext.Migrate();
+            var reaparrMigrationResult = reaparrContext.Migrate();
+            var authMigrationResult = authContext.Migrate();
+
+            var migrationResult = Result.Merge(reaparrMigrationResult, authMigrationResult);
+            migrationResult.IsSuccess.ShouldBeTrue(migrationResult.ToString());
 
             // PlexServers and Libraries added
             _log.Here()
@@ -324,11 +333,14 @@ public static partial class MockDatabase
 
     #endregion
 
-    private static DbContextOptionsBuilder<TContext> GetDbContextOptionsBuilder<TContext>(string dbName)
+    private static DbContextOptionsBuilder<TContext> GetDbContextOptionsBuilder<TContext>(
+        string dataSource,
+        SqliteOpenMode mode
+    )
         where TContext : DbContext
     {
         var optionsBuilder = new DbContextOptionsBuilder<TContext>();
-        optionsBuilder.ConfigureSqlite(dbName, SqliteOpenMode.Memory);
+        optionsBuilder.ConfigureSqlite(dataSource, mode);
 
         optionsBuilder.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
         optionsBuilder.EnableSensitiveDataLogging();

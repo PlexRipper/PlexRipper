@@ -57,10 +57,6 @@ public class MoveDownloadFileSchedulerIntegrationTests : BaseIntegrationTests
         // Assert
         startResult.IsSuccess.ShouldBeTrue();
 
-        var downloadTaskDb = await container.DbContext.GetDownloadTaskAsync(downloadTask.ToKey(), CancellationToken);
-        downloadTaskDb.ShouldNotBeNull();
-        downloadTaskDb.DownloadStatus.ShouldBe(DownloadStatus.Completed);
-
         var patchDeadline = DateTime.UtcNow.AddSeconds(5);
         var completedPatchReceived = false;
         while (DateTime.UtcNow < patchDeadline)
@@ -76,6 +72,11 @@ public class MoveDownloadFileSchedulerIntegrationTests : BaseIntegrationTests
         }
 
         completedPatchReceived.ShouldBeTrue();
+
+        var verificationDbContext = container.Resolve<IReaparrDbContext>();
+        var downloadTaskDb = await verificationDbContext.GetDownloadTaskAsync(downloadTask.ToKey(), CancellationToken);
+        downloadTaskDb.ShouldNotBeNull();
+        downloadTaskDb.DownloadStatus.ShouldBe(DownloadStatus.Completed);
 
         var fileSystem = container.Resolve<IFileSystem>();
         fileSystem
@@ -170,7 +171,15 @@ public class MoveDownloadFileSchedulerIntegrationTests : BaseIntegrationTests
         // Assert
         startResult.IsSuccess.ShouldBeTrue();
 
-        var downloadTaskDb = await container.DbContext.GetDownloadTaskAsync(downloadTask.ToKey(), CancellationToken);
+        await WaitForDatabaseConditionAsync(async () =>
+        {
+            using var dbContext = await container.Resolve<IReaparrDbContextFactory>().CreateAsync();
+            var task = await dbContext.GetDownloadTaskAsync(downloadTask.ToKey(), CancellationToken);
+            return task?.DownloadStatus == DownloadStatus.MoveError;
+        });
+
+        using var dbContext = await container.Resolve<IReaparrDbContextFactory>().CreateAsync();
+        var downloadTaskDb = await dbContext.GetDownloadTaskAsync(downloadTask.ToKey(), CancellationToken);
         downloadTaskDb.ShouldNotBeNull();
         downloadTaskDb.DownloadStatus.ShouldBe(DownloadStatus.MoveError);
 

@@ -1,5 +1,3 @@
-using TickerQ.Utilities.Enums;
-
 namespace Reaparr.Application;
 
 /// <summary>
@@ -33,17 +31,17 @@ public class ScheduleAffectedLibraryComparisonJobsCommandHandler
 
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
-    private readonly IBackgroundJobScheduler _backgroundJobScheduler;
+    private readonly IScheduler _scheduler;
 
     public ScheduleAffectedLibraryComparisonJobsCommandHandler(
         ILogger log,
         IReaparrDbContext dbContext,
-        IBackgroundJobScheduler backgroundJobScheduler
+        IScheduler scheduler
     )
     {
         _log = log.ForContext<ScheduleAffectedLibraryComparisonJobsCommandHandler>();
         _dbContext = dbContext;
-        _backgroundJobScheduler = backgroundJobScheduler;
+        _scheduler = scheduler;
     }
 
     public async Task<Result> ExecuteAsync(
@@ -68,54 +66,50 @@ public class ScheduleAffectedLibraryComparisonJobsCommandHandler
             .ToListAsync(cancellationToken);
 
         // Comparison always flows remote-to-owned, regardless of which side changed.
-        var pairs = sourceLibrary.IsOwned
-            ? targetLibraries
-                .Where(x => !x.IsOwned)
-                .Select(x => (OwnedLibraryId: sourceLibrary.Id, RemoteLibraryId: x.Id))
-            : targetLibraries
-                .Where(x => x.IsOwned)
-                .Select(x => (OwnedLibraryId: x.Id, RemoteLibraryId: sourceLibrary.Id));
+        var pairs = (
+            sourceLibrary.IsOwned
+                ? targetLibraries
+                    .Where(x => !x.IsOwned)
+                    .Select(x => (OwnedLibraryId: sourceLibrary.Id, RemoteLibraryId: x.Id))
+                : targetLibraries
+                    .Where(x => x.IsOwned)
+                    .Select(x => (OwnedLibraryId: x.Id, RemoteLibraryId: sourceLibrary.Id))
+        ).ToList();
+
+        if (!pairs.Any())
+            return Result.Ok();
 
         // Resolve active comparison keys once before dispatching child commands, so repeated updates do not spam
         // schedule requests for pairs that are already queued or running.
-        var activeComparisonJobKeys = await _dbContext
-            .TimeTickers.Where(x =>
-                x.JobType == JobTypes.LibraryComparisonJob
-                && (
-                    x.Status == TickerStatus.Idle
-                    || x.Status == TickerStatus.Queued
-                    || x.Status == TickerStatus.InProgress
+        var activeComparisonJobKeys = (await _scheduler.GetJobKeys(JobTypes.LibraryComparisonJob, cancellationToken))
+            .Select(x => x)
+            .ToHashSet();
+
+        pairs = pairs
+            .Where(pair =>
+                !activeComparisonJobKeys.Contains(
+                    PlexLibraryComparisonJob.GetJobKey(pair.OwnedLibraryId, pair.RemoteLibraryId)
                 )
             )
-            .Select(x => x.JobKey)
-            .ToHashSetAsync(cancellationToken);
-
-        pairs = pairs.Where(pair =>
-            !activeComparisonJobKeys.Contains(
-                PlexLibraryComparisonJob.GetJobKey(pair.OwnedLibraryId, pair.RemoteLibraryId).Name
-            )
-        );
+            .ToList();
 
         var comparisonJobs = pairs
             .Select(pair =>
-            {
-                var jobKey = PlexLibraryComparisonJob.GetJobKey(pair.OwnedLibraryId, pair.RemoteLibraryId);
-                var payload = new PlexLibraryComparisonJobPayload
-                {
-                    OwnedPlexLibraryId = pair.OwnedLibraryId,
-                    RemotePlexLibraryId = pair.RemoteLibraryId,
-                };
-                return (jobKey, payload);
-            })
+                (
+                    PlexLibraryComparisonJob.GetJobKey(pair.OwnedLibraryId, pair.RemoteLibraryId),
+                    new PlexLibraryComparisonJobPayload(pair.OwnedLibraryId, pair.RemoteLibraryId)
+                )
+            )
             .ToList();
 
         if (comparisonJobs.Count == 0)
             return Result.Ok();
 
-        var schedulingResult = await _backgroundJobScheduler.ScheduleJobs<
-            PlexLibraryComparisonJob,
-            PlexLibraryComparisonJobPayload
-        >(comparisonJobs, DateTime.UtcNow.Add(_comparisonJobDelay), cancellationToken);
+        var schedulingResult = await _scheduler.ExecuteJobs<PlexLibraryComparisonJob, PlexLibraryComparisonJobPayload>(
+            comparisonJobs,
+            cancellationToken,
+            DateTimeOffset.UtcNow.Add(_comparisonJobDelay)
+        );
 
         if (schedulingResult.IsFailed)
             return schedulingResult.ToResult().LogError();

@@ -1,16 +1,17 @@
 ﻿using Autofac.Features.Indexed;
-using TickerQ.Utilities.Base;
 
 namespace Reaparr.Application;
 
-public class DownloadJob : BaseBackgroundJob<DownloadTaskKey, DownloadJobUpdateDTO>
+public sealed record DownloadJobPayload(DownloadTaskKey DownloadTaskKey);
+
+[DisallowConcurrentExecution]
+public class DownloadJob : IJob
 {
     private readonly ILogger _log;
     private readonly ICommandExecutor _commandExecutor;
     private readonly IReaparrDbContext _dbContext;
     private readonly IDownloadTaskUpdateDispatcher _downloadTaskUpdateDispatcher;
     private readonly IEventPublisher _eventPublisher;
-    private readonly IMoveDownloadFileQueue _moveDownloadFileQueue;
     private readonly IIndex<PlexDownloadClientType, IPlexDownloadClient> _plexDownloadClientFactory;
 
     public DownloadJob(
@@ -19,46 +20,49 @@ public class DownloadJob : BaseBackgroundJob<DownloadTaskKey, DownloadJobUpdateD
         IReaparrDbContext dbContext,
         IDownloadTaskUpdateDispatcher downloadTaskUpdateDispatcher,
         IEventPublisher eventPublisher,
-        IMoveDownloadFileQueue moveDownloadFileQueue,
-        IIndex<PlexDownloadClientType, IPlexDownloadClient> plexDownloadClientFactory,
-        IProgressHubService progressHubService,
-        INotificationHubService notificationHubService
+        IIndex<PlexDownloadClientType, IPlexDownloadClient> plexDownloadClientFactory
     )
-        : base(log, progressHubService, notificationHubService)
     {
         _log = log.ForContext<DownloadJob>();
         _commandExecutor = commandExecutor;
         _dbContext = dbContext;
         _downloadTaskUpdateDispatcher = downloadTaskUpdateDispatcher;
         _eventPublisher = eventPublisher;
-        _moveDownloadFileQueue = moveDownloadFileQueue;
         _plexDownloadClientFactory = plexDownloadClientFactory;
     }
 
-    protected override JobTypes JobType => JobTypes.DownloadJob;
+    public static JobKey GetJobKey(Guid id) => new($"{nameof(DownloadJob)}_{id}", nameof(DownloadJob));
 
-    protected override List<RefreshDataType> RefreshDataTypes => [RefreshDataType.DownloadTasks];
-
-    public static JobKey GetJobKey(Guid id) => new($"{nameof(JobTypes.DownloadJob)}_{id}", JobTypes.DownloadJob);
-
-    protected override async Task ExecuteJobAsync(
-        TickerFunctionContext<DownloadTaskKey> context,
-        CancellationToken cancellationToken
-    )
+    public async Task Execute(IJobExecutionContext context)
     {
-        var downloadTaskKey = context.Request;
-        var token = cancellationToken;
-
-        _log.Here()
-            .Debug(
-                "Executing job: {DownloadJobName} for {DownloadTaskIdName} with id: {DownloadTaskId}",
-                nameof(DownloadJob),
-                nameof(downloadTaskKey),
-                downloadTaskKey
-            );
-
-        try
+        var payloadResult = context.GetRequiredPayload<DownloadJobPayload>();
+        if (payloadResult.IsFailed)
         {
+            context.SetResult(JobStatus.Failed, payloadResult);
+            payloadResult.LogError();
+            return;
+        }
+
+        var downloadTaskKey = payloadResult.Value.DownloadTaskKey;
+        var token = context.CancellationToken;
+
+        // Jobs should swallow exceptions as otherwise Quartz will keep re-executing it
+        // https://www.quartz-scheduler.net/documentation/best-practices.html#throwing-exceptions
+        var executionResult = await Result.Try(async Task () =>
+        {
+            _log.Here()
+                .Debug(
+                    "Executing job: {DownloadJobName} for {DownloadTaskIdName} with id: {DownloadTaskId}",
+                    nameof(DownloadJob),
+                    nameof(downloadTaskKey),
+                    downloadTaskKey
+                );
+            if (downloadTaskKey is null)
+            {
+                ResultExtensions.IsNull(nameof(DownloadTaskKey)).LogError();
+                return;
+            }
+
             // Create the multiple download worker tasks which will split up the work
             var downloadTask = await _dbContext.GetDownloadTaskFileAsync(downloadTaskKey, token);
             if (downloadTask is null)
@@ -164,52 +168,26 @@ public class DownloadJob : BaseBackgroundJob<DownloadTaskKey, DownloadJobUpdateD
 
                 await _eventPublisher.PublishAsync(new SendNotificationResult(startResult), token);
             }
-        }
-        finally
+        });
+
+        if (executionResult.IsCancelled)
         {
-            _log.Here()
-                .Debug(
-                    "Exiting job: {DownloadJobName} for {DownloadTaskName} with id: {DownloadTaskId}",
-                    nameof(DownloadJob),
-                    nameof(DownloadTaskGeneric),
-                    downloadTaskKey
-                );
+            context.SetResult(JobStatus.Cancelled, executionResult);
+            executionResult.LogWarning();
         }
-    }
-
-    protected override Task<DownloadJobUpdateDTO?> GetStatusUpdateDataAsync(
-        TickerFunctionContext<DownloadTaskKey> context,
-        CancellationToken cancellationToken
-    ) => Task.FromResult<DownloadJobUpdateDTO?>(new DownloadJobUpdateDTO { Id = context.Request });
-
-    protected override async Task ExecuteAfterCompletionAsync(
-        TickerFunctionContext<DownloadTaskKey> context,
-        CancellationToken cancellationToken
-    )
-    {
-        var downloadTaskKey = context.Request;
-        var status = await _dbContext.GetDownloadTaskStatusAsync(downloadTaskKey, cancellationToken);
-
-        if (status == DownloadStatus.DownloadFinished)
+        else if (executionResult.IsFailed)
         {
-            _log.Here()
-                .Debug(
-                    "DownloadTask with id: {DownloadTaskId} has finished downloading, starting moveDownloadJob and executing DownloadQueueCheck",
-                    downloadTaskKey.Id
-                );
-            await _moveDownloadFileQueue.CheckMoveDownloadFileJobQueue(cancellationToken);
+            context.SetResult(JobStatus.Failed, executionResult);
+            executionResult.LogError();
         }
 
         _log.Here()
             .Debug(
-                "DownloadTask with id: {DownloadTaskId} ended with status {DownloadStatus}, executing DownloadQueueCheck",
-                downloadTaskKey.Id,
-                status
+                "Exiting job: {DownloadJobName} for {DownloadTaskName} with id: {DownloadTaskId}",
+                nameof(DownloadJob),
+                nameof(DownloadTaskGeneric),
+                downloadTaskKey
             );
-        await _eventPublisher.PublishAsync(
-            new CheckDownloadQueueEvent(downloadTaskKey.PlexServerId),
-            cancellationToken
-        );
     }
 
     private async Task<Result<DownloadTaskFileBase>> SetDownloadAndDestination(

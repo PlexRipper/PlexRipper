@@ -15,17 +15,21 @@ public static class DbContextConnections
     private const int MEMORY_MAP_SIZE_BYTES = 268435456;
     private const int PAGE_CACHE_SIZE_KIBIBYTES = 20000;
 
-    private static readonly string _providerSpecificConnectionPragmas = $"""
+    private static readonly string _databaseInitializationPragmas = $"""
         PRAGMA wal_autocheckpoint = {WAL_AUTO_CHECKPOINT_PAGES};
         PRAGMA journal_size_limit = {JOURNAL_SIZE_LIMIT_BYTES};
         PRAGMA mmap_size = {MEMORY_MAP_SIZE_BYTES};
-        PRAGMA temp_store = MEMORY;
-        PRAGMA cache_size = -{PAGE_CACHE_SIZE_KIBIBYTES};
-        PRAGMA synchronous = NORMAL;
         PRAGMA locking_mode = NORMAL;
         PRAGMA secure_delete = OFF;
         """;
 
+    private static readonly string _connectionPragmas = $"""
+        PRAGMA temp_store = MEMORY;
+        PRAGMA cache_size = -{PAGE_CACHE_SIZE_KIBIBYTES};
+        PRAGMA synchronous = NORMAL;
+        """;
+
+    private static readonly NaturalSortComparer _naturalSortComparer = new(StringComparison.OrdinalIgnoreCase);
     private static readonly OnConnectionOpenInterceptor _connectionOpenInterceptor = new();
 
     public static string GetConnectionString(string dataSource, SqliteOpenMode mode) =>
@@ -47,6 +51,53 @@ public static class DbContextConnections
     {
         optionsBuilder.AddInterceptors(_connectionOpenInterceptor);
         optionsBuilder.UseSqlite(GetConnectionString(dataSource, mode));
+    }
+
+    /// <summary>
+    /// Configures requirements that must exist on every physical SQLite connection.
+    /// Busy timeout is supplied by <see cref="GetConnectionString"/> and verified here;
+    /// no PRAGMAs are reset when a pooled connection is opened.
+    /// </summary>
+    public static void ConfigureOpenedSqliteConnection(DbConnection connection)
+    {
+        if (connection is not SqliteConnection sqliteConnection)
+            return;
+
+        using var command = sqliteConnection.CreateCommand();
+        command.CommandText = _connectionPragmas;
+        command.ExecuteNonQuery();
+
+        sqliteConnection.CreateCollation(
+            OrderByNaturalExtensions.CollationName,
+            (x, y) => _naturalSortComparer.Compare(x, y)
+        );
+    }
+
+    /// <summary>
+    /// Applies database tuning once during startup, migration, or connectivity validation.
+    /// </summary>
+    public static void InitializeDatabase(DbConnection connection)
+    {
+        if (connection is not SqliteConnection sqliteConnection)
+            throw new InvalidOperationException("SQLite configuration can only be applied to a SQLite connection.");
+
+        var openedHere = sqliteConnection.State != System.Data.ConnectionState.Open;
+        if (openedHere)
+            sqliteConnection.Open();
+
+        try
+        {
+            ConfigureOpenedSqliteConnection(sqliteConnection);
+
+            using var command = sqliteConnection.CreateCommand();
+            command.CommandText = _databaseInitializationPragmas;
+            command.ExecuteNonQuery();
+        }
+        finally
+        {
+            if (openedHere)
+                sqliteConnection.Close();
+        }
     }
 
     public static void EnableWriteAheadLogging(DbConnection connection)
@@ -105,11 +156,9 @@ public static class DbContextConnections
 
     private sealed class OnConnectionOpenInterceptor : DbConnectionInterceptor
     {
-        private static readonly NaturalSortComparer _comparer = new(StringComparison.OrdinalIgnoreCase);
-
         public override void ConnectionOpened(DbConnection connection, ConnectionEndEventData eventData)
         {
-            ConfigureConnection(connection);
+            ConfigureOpenedSqliteConnection(connection);
             base.ConnectionOpened(connection, eventData);
         }
 
@@ -119,20 +168,8 @@ public static class DbContextConnections
             CancellationToken cancellationToken = default
         )
         {
-            ConfigureConnection(connection);
+            ConfigureOpenedSqliteConnection(connection);
             await base.ConnectionOpenedAsync(connection, eventData, cancellationToken);
-        }
-
-        private static void ConfigureConnection(DbConnection connection)
-        {
-            if (connection is not SqliteConnection sqliteConnection)
-                return;
-
-            sqliteConnection.CreateCollation(OrderByNaturalExtensions.CollationName, (x, y) => _comparer.Compare(x, y));
-
-            using var command = sqliteConnection.CreateCommand();
-            command.CommandText = _providerSpecificConnectionPragmas;
-            command.ExecuteNonQuery();
         }
     }
 }

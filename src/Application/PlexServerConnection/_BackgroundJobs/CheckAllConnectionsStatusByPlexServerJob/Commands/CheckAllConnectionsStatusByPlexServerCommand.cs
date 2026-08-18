@@ -110,7 +110,7 @@ public class CheckAllConnectionsStatusByPlexServerHandler
             return Result.Ok(combinedResults.Value.ToList());
 
         return _log.Here()
-            .ErrorResult(
+            .WarningResult(
                 "All connections to plex server with name: {PlexServerName} and id: {PlexServerId} failed to connect",
                 plexServerName,
                 plexServerId

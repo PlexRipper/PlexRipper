@@ -40,7 +40,7 @@ public static class LogFactory
         Log.Logger = logConfig.GetLogger(minimumLogLevel);
         var log = Create();
 
-        log.Here().Information("Starting Reaparr!");
+        log.Here().Information("Starting Reaparr! App run ID: {AppRunId}", appRuntimeInfo.AppRunId);
 
         log.Here().Information("Logging level set to {LogLevel}", MinimumLogLevel);
 

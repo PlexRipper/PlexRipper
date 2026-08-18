@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
@@ -22,19 +23,19 @@ public class ReaparrWebApplicationFactory : WebApplicationFactory<Program>
         Seed = seed;
         MemoryDbName = memoryDbName;
         _config = UnitTestDataConfig.FromOptions(options);
+    }
 
-        this.WithWebHostBuilder(builder =>
+    protected override void ConfigureWebHost(IWebHostBuilder builder)
+    {
+        // Disable caching by using custom configurations
+        builder.UseSetting("cacheEnabled", "false");
+
+        builder.ConfigureTestServices(services =>
         {
-            // Disable caching by using custom configurations
-            builder.UseSetting("cacheEnabled", "false");
-
-            builder.ConfigureTestServices(services =>
-            {
-                // https://learn.microsoft.com/en-us/aspnet/core/test/integration-tests?view=aspnetcore-9.0#mock-authentication
-                services
-                    .AddAuthentication(defaultScheme: "TestScheme")
-                    .AddScheme<AuthenticationSchemeOptions, TestAuthHandler>("TestScheme", _ => { });
-            });
+            // https://learn.microsoft.com/en-us/aspnet/core/test/integration-tests?view=aspnetcore-9.0#mock-authentication
+            services
+                .AddAuthentication(defaultScheme: "TestScheme")
+                .AddScheme<AuthenticationSchemeOptions, TestAuthHandler>("TestScheme", _ => { });
         });
     }
 

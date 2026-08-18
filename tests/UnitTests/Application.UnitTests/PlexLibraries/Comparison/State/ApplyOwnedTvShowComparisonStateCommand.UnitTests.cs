@@ -1,3 +1,7 @@
+using Quartz;
+using Quartz.Impl.Matchers;
+using Quartz.Spi;
+
 namespace Reaparr.Application.UnitTests;
 
 public class ApplyOwnedTvShowComparisonStateCommandUnitTests
@@ -105,6 +109,7 @@ public class ApplyOwnedTvShowComparisonStateCommandUnitTests
 
         var remoteTvShow = await GetLibraryTvShowAsync(remoteLibrary.Id);
         var ownedTvShow = await GetLibraryTvShowAsync(ownedLibrary.Id);
+        var trigger = new Mock<IOperableTrigger>();
         var remoteEpisodes = await GetLibraryEpisodesAsync(remoteLibrary.Id);
         var ownedEpisodes = await GetLibraryEpisodesAsync(ownedLibrary.Id);
         await AddCurrentScopeAsync(remoteLibrary, ownedLibrary);
@@ -170,16 +175,32 @@ public class ApplyOwnedTvShowComparisonStateCommandUnitTests
         await SetOwnedOverrideAsync(ownedLibrary.PlexServerId, true);
 
         var ownedTvShow = await GetLibraryTvShowAsync(ownedLibrary.Id);
-        dbContext.TimeTickers.Add(
-            new JobTimeTicker
-            {
-                Function = nameof(PlexLibraryComparisonJob),
-                Request = [],
-                JobKey = PlexLibraryComparisonJob.GetJobKey(ownedLibrary.Id, remoteLibrary.Id).Name,
-                JobType = JobTypes.LibraryComparisonJob,
-            }
-        );
-        await dbContext.SaveChangesAsync(CancellationToken);
+        var triggerKey = PlexLibraryComparisonJob.GetJobKey(ownedLibrary.Id, remoteLibrary.Id).Name;
+        var trigger = new Mock<IOperableTrigger>();
+        trigger.SetupGet(x => x.Key).Returns(new TriggerKey(triggerKey, nameof(JobTypes.LibraryComparisonJob)));
+        Mock.Mock<IScheduler>()
+            .Setup(x =>
+                x.CheckExists(
+                    PlexLibraryComparisonJob.GetJobKey(ownedLibrary.Id, remoteLibrary.Id),
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .ReturnsAsync(true);
+        Mock.Mock<IScheduler>()
+            .Setup(x =>
+                x.GetTriggersOfJob(
+                    PlexLibraryComparisonJob.GetJobKey(ownedLibrary.Id, remoteLibrary.Id),
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .ReturnsAsync([trigger.Object]);
+        Mock.Mock<IScheduler>()
+            .Setup(x => x.GetTriggerState(It.IsAny<TriggerKey>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(TriggerState.Normal);
+        Mock.Mock<IScheduler>().Setup(x => x.GetCurrentlyExecutingJobs(It.IsAny<CancellationToken>())).ReturnsAsync([]);
+        Mock.Mock<IScheduler>()
+            .Setup(x => x.GetJobKeys(It.IsAny<GroupMatcher<JobKey>>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync([PlexLibraryComparisonJob.GetJobKey(ownedLibrary.Id, remoteLibrary.Id)]);
 
         var items = new List<PlexMediaSlimDTO> { CreateTvShowItem(ownedTvShow) };
 

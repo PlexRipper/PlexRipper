@@ -18,11 +18,11 @@ public record GetAllBackgroundJobsEndpointRequest
 public class GetAllBackgroundJobsEndpoint
     : Endpoint<GetAllBackgroundJobsEndpointRequest, ResultDTO<List<JobStatusUpdateDTO>>>
 {
-    private readonly IBackgroundJobScheduler _backgroundJobScheduler;
+    private readonly IScheduler _schedulerService;
 
-    public GetAllBackgroundJobsEndpoint(IBackgroundJobScheduler backgroundJobScheduler)
+    public GetAllBackgroundJobsEndpoint(IScheduler schedulerService)
     {
-        _backgroundJobScheduler = backgroundJobScheduler;
+        _schedulerService = schedulerService;
     }
 
     public override void Configure()
@@ -42,7 +42,7 @@ public class GetAllBackgroundJobsEndpoint
         }
         else
         {
-            var result = await _backgroundJobScheduler.GetCurrentlyExecutingJobs(ct);
+            var result = await _schedulerService.GetRunningJobUpdates(ct);
 
             await Send.FluentResult(Result.Ok(result), x => x.ToDTO(), ct);
         }

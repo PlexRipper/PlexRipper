@@ -1,5 +1,5 @@
-using TickerQ.Utilities.Enums;
-using TickerQ.Utilities.Models;
+using Quartz;
+using Quartz.Impl.Matchers;
 
 namespace Reaparr.Application.UnitTests;
 
@@ -27,29 +27,11 @@ public class ScheduleAffectedLibraryComparisonJobsCommandUnitTests
         await SetOwnedOverrideAsync(ownedLibrary.PlexServerId, true);
 
         var jobKey = PlexLibraryComparisonJob.GetJobKey(ownedLibrary.Id, remoteLibrary.Id);
-        var ticker = new JobTimeTicker
-        {
-            Function = nameof(PlexLibraryComparisonJob),
-            Request = [],
-            RequestJson = new JobTimeTickerRequestProperties
-            {
-                OwnedPlexLibraryId = ownedLibrary.Id,
-                RemotePlexLibraryId = remoteLibrary.Id,
-            },
-            JobKey = jobKey.Name,
-            JobType = jobKey.Type,
-        };
-        var dbContext = IDbContext;
-        dbContext.TimeTickers.Add(ticker);
-        await dbContext.SaveChangesAsync(CancellationToken);
-        await dbContext.TimeTickers.ExecuteUpdateAsync(
-            x => x.SetProperty(y => y.Status, TickerStatus.Idle),
-            CancellationToken
-        );
-        var persistedTicker = await dbContext.TimeTickers.AsNoTracking().SingleAsync(CancellationToken);
-        persistedTicker.JobKey.ShouldBe(jobKey.Name);
-        persistedTicker.JobType.ShouldBe(jobKey.Type);
-        persistedTicker.Status.ShouldBe(TickerStatus.Idle);
+        Mock.Mock<IScheduler>()
+            .Setup(x =>
+                x.GetJobKeys(GroupMatcher<JobKey>.GroupEquals(nameof(JobTypes.LibraryComparisonJob)), CancellationToken)
+            )
+            .ReturnsAsync([jobKey]);
 
         // Act
         var result = await Sut.ExecuteAsync(
@@ -59,12 +41,12 @@ public class ScheduleAffectedLibraryComparisonJobsCommandUnitTests
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
-        Mock.Mock<IBackgroundJobScheduler>()
+        Mock.Mock<IScheduler>()
             .Verify(
                 x =>
-                    x.ScheduleJobs<PlexLibraryComparisonJob, PlexLibraryComparisonJobPayload>(
-                        It.IsAny<IReadOnlyCollection<(JobKey JobKey, PlexLibraryComparisonJobPayload Request)>>(),
-                        It.IsAny<DateTime?>(),
+                    x.ScheduleJobs(
+                        It.IsAny<IReadOnlyDictionary<IJobDetail, IReadOnlyCollection<ITrigger>>>(),
+                        false,
                         It.IsAny<CancellationToken>()
                     ),
                 Times.Never
@@ -97,35 +79,42 @@ public class ScheduleAffectedLibraryComparisonJobsCommandUnitTests
             .ExecuteUpdateAsync(x => x.SetProperty(y => y.OwnedOverride, true), CancellationToken);
 
         var command = new ScheduleAffectedLibraryComparisonJobsCommand(remoteLibrary.Id);
-        Mock.Mock<IBackgroundJobScheduler>()
+        Mock.Mock<IScheduler>()
             .Setup(x =>
-                x.ScheduleJobs<PlexLibraryComparisonJob, PlexLibraryComparisonJobPayload>(
-                    It.IsAny<IReadOnlyCollection<(JobKey JobKey, PlexLibraryComparisonJobPayload Request)>>(),
-                    It.IsAny<DateTime?>(),
+                x.GetJobKeys(GroupMatcher<JobKey>.GroupEquals(nameof(JobTypes.LibraryComparisonJob)), CancellationToken)
+            )
+            .ReturnsAsync([]);
+        Mock.Mock<IScheduler>().Setup(x => x.CheckExists(It.IsAny<JobKey>(), CancellationToken)).ReturnsAsync(false);
+        Mock.Mock<IScheduler>()
+            .Setup(x =>
+                x.ScheduleJobs(
+                    It.IsAny<IReadOnlyDictionary<IJobDetail, IReadOnlyCollection<ITrigger>>>(),
+                    false,
                     It.IsAny<CancellationToken>()
                 )
             )
-            .ReturnsAsync(CreateSuccessfulTickerBatchResult());
+            .Returns(Task.CompletedTask);
 
         // Act
         var result = await Sut.ExecuteAsync(command, CancellationToken);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
-        Mock.Mock<IBackgroundJobScheduler>()
+        Mock.Mock<IScheduler>()
             .Verify(
                 x =>
-                    x.ScheduleJobs<PlexLibraryComparisonJob, PlexLibraryComparisonJobPayload>(
-                        It.Is<IReadOnlyCollection<(JobKey JobKey, PlexLibraryComparisonJobPayload Request)>>(jobs =>
+                    x.ScheduleJobs(
+                        It.Is<IReadOnlyDictionary<IJobDetail, IReadOnlyCollection<ITrigger>>>(jobs =>
                             jobs.Count == ownedLibraries.Count
-                            && ownedLibraries.All(owned =>
-                                jobs.Any(job =>
-                                    job.Request.OwnedPlexLibraryId == owned.Id
-                                    && job.Request.RemotePlexLibraryId == remoteLibrary.Id
-                                )
+                            && jobs.Keys.All(job =>
+                                job.Key.Group == nameof(JobTypes.LibraryComparisonJob)
+                                && job.JobDataMap.GetPayload<PlexLibraryComparisonJobPayload>()!.OwnedPlexLibraryId
+                                    != remoteLibrary.Id
+                                && job.JobDataMap.GetPayload<PlexLibraryComparisonJobPayload>()!.RemotePlexLibraryId
+                                    == remoteLibrary.Id
                             )
                         ),
-                        It.IsAny<DateTime?>(),
+                        false,
                         It.IsAny<CancellationToken>()
                     ),
                 Times.Once
@@ -158,35 +147,45 @@ public class ScheduleAffectedLibraryComparisonJobsCommandUnitTests
             .ExecuteUpdateAsync(x => x.SetProperty(y => y.OwnedOverride, true), CancellationToken);
 
         var command = new ScheduleAffectedLibraryComparisonJobsCommand(ownedLibrary.Id);
-        Mock.Mock<IBackgroundJobScheduler>()
+        Mock.Mock<IScheduler>()
             .Setup(x =>
-                x.ScheduleJobs<PlexLibraryComparisonJob, PlexLibraryComparisonJobPayload>(
-                    It.IsAny<IReadOnlyCollection<(JobKey JobKey, PlexLibraryComparisonJobPayload Request)>>(),
-                    It.IsAny<DateTime?>(),
+                x.GetJobKeys(GroupMatcher<JobKey>.GroupEquals(nameof(JobTypes.LibraryComparisonJob)), CancellationToken)
+            )
+            .ReturnsAsync([]);
+        Mock.Mock<IScheduler>().Setup(x => x.CheckExists(It.IsAny<JobKey>(), CancellationToken)).ReturnsAsync(false);
+        Mock.Mock<IScheduler>()
+            .Setup(x =>
+                x.ScheduleJobs(
+                    It.IsAny<IReadOnlyDictionary<IJobDetail, IReadOnlyCollection<ITrigger>>>(),
+                    false,
                     It.IsAny<CancellationToken>()
                 )
             )
-            .ReturnsAsync(CreateSuccessfulTickerBatchResult());
+            .Returns(Task.CompletedTask);
 
         // Act
         var result = await Sut.ExecuteAsync(command, CancellationToken);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
-        Mock.Mock<IBackgroundJobScheduler>()
+        Mock.Mock<IScheduler>()
             .Verify(
                 x =>
-                    x.ScheduleJobs<PlexLibraryComparisonJob, PlexLibraryComparisonJobPayload>(
-                        It.Is<IReadOnlyCollection<(JobKey JobKey, PlexLibraryComparisonJobPayload Request)>>(jobs =>
+                    x.ScheduleJobs(
+                        It.Is<IReadOnlyDictionary<IJobDetail, IReadOnlyCollection<ITrigger>>>(jobs =>
                             jobs.Count == remoteLibraries.Count
-                            && remoteLibraries.All(remote =>
-                                jobs.Any(job =>
-                                    job.Request.OwnedPlexLibraryId == ownedLibrary.Id
-                                    && job.Request.RemotePlexLibraryId == remote.Id
-                                )
+                            && jobs.Keys.All(job =>
+                                job.Key.Group == nameof(JobTypes.LibraryComparisonJob)
+                                && job.JobDataMap.GetPayload<PlexLibraryComparisonJobPayload>()!.OwnedPlexLibraryId
+                                    == ownedLibrary.Id
+                                && remoteLibraries
+                                    .Select(x => x.Id)
+                                    .Contains(
+                                        job.JobDataMap.GetPayload<PlexLibraryComparisonJobPayload>()!.RemotePlexLibraryId
+                                    )
                             )
                         ),
-                        It.IsAny<DateTime?>(),
+                        false,
                         It.IsAny<CancellationToken>()
                     ),
                 Times.Once
@@ -218,12 +217,12 @@ public class ScheduleAffectedLibraryComparisonJobsCommandUnitTests
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
-        Mock.Mock<IBackgroundJobScheduler>()
+        Mock.Mock<IScheduler>()
             .Verify(
                 x =>
-                    x.ScheduleJobs<PlexLibraryComparisonJob, PlexLibraryComparisonJobPayload>(
-                        It.IsAny<IReadOnlyCollection<(JobKey JobKey, PlexLibraryComparisonJobPayload Request)>>(),
-                        It.IsAny<DateTime?>(),
+                    x.ScheduleJobs(
+                        It.IsAny<IReadOnlyDictionary<IJobDetail, IReadOnlyCollection<ITrigger>>>(),
+                        false,
                         It.IsAny<CancellationToken>()
                     ),
                 Times.Never
@@ -236,7 +235,4 @@ public class ScheduleAffectedLibraryComparisonJobsCommandUnitTests
             .PlexServers.Where(x => x.Id == plexServerId)
             .ExecuteUpdateAsync(x => x.SetProperty(y => y.OwnedOverride, isOwned), CancellationToken);
     }
-
-    private static Result<List<JobTimeTicker>> CreateSuccessfulTickerBatchResult() =>
-        Result.Ok(new List<JobTimeTicker>());
 }

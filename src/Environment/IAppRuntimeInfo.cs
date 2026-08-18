@@ -101,6 +101,12 @@ public interface IAppRuntimeInfo
     string SEQ_Url { get; }
 
     /// <summary>
+    /// Gets the unique identifier for this application process lifetime. It is attached to every
+    /// structured log event so Seq queries can isolate the current or a specific application run.
+    /// </summary>
+    string AppRunId { get; }
+
+    /// <summary>
     /// Gets the configured Serilog log level from <c>LOG_LEVEL</c>. Defaults to <see cref="LogEventLevel.Debug"/>.
     /// </summary>
     LogEventLevel LogLevel { get; }

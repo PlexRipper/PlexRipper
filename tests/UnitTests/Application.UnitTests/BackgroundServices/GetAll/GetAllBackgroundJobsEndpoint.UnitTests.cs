@@ -30,10 +30,71 @@ public class GetAllBackgroundJobsEndpointUnitTests
 
         var context = new Mock<IJobExecutionContext>();
         context.SetupGet(x => x.JobDetail).Returns(jobDetail.Object);
-        context.SetupGet(x => x.MergedJobDataMap).Returns(new JobDataMap { ["Payload"] = update.Data });
+        context.SetupGet(x => x.MergedJobDataMap).Returns(CreateJobDataMap(update));
         context.SetupGet(x => x.FireTimeUtc).Returns(update.JobStartTime);
         return context.Object;
     }
+
+    private static JobDataMap CreateJobDataMap(JobStatusUpdate<string> update)
+    {
+        return update.JobType switch
+        {
+            JobTypes.DownloadJob => new DownloadJobPayload(
+                TryDeserialize<DownloadJobUpdateDTO>(update.Data)?.Id
+                    ?? new DownloadTaskKey
+                    {
+                        Type = DownloadTaskType.TvShow,
+                        Id = Guid.Parse(update.Data),
+                        PlexServerId = 1,
+                        PlexLibraryId = 1,
+                    }
+            ).ToJobDataMap(),
+            JobTypes.MoveDownloadFileJob => new MoveDownloadFileJobPayload(
+                Deserialize<MoveDownloadFileJobUpdateDTO>(update.Data).DownloadTaskId
+            ).ToJobDataMap(),
+            JobTypes.InspectPlexServerJob => new InspectPlexServerJobPayload(
+                Deserialize<InspectPlexServerJobUpdateDTO>(update.Data).PlexServerIds
+            ).ToJobDataMap(),
+            _ => new JobDataMap(),
+        };
+
+        static T? TryDeserialize<T>(string json)
+            where T : class
+        {
+            try
+            {
+                return Deserialize<T>(json);
+            }
+            catch (JsonException)
+            {
+                return null;
+            }
+        }
+
+        static T Deserialize<T>(string json) =>
+            JsonSerializer.Deserialize<T>(json, DefaultJsonSerializerOptions.ConfigStandard)!;
+    }
+
+    private static string ExpectedPayloadJson(JobStatusUpdate<string> update) =>
+        update.JobType switch
+        {
+            JobTypes.DownloadJob => JsonSerializer.Serialize(
+                new DownloadJobPayload(Deserialize<DownloadJobUpdateDTO>(update.Data).Id),
+                DefaultJsonSerializerOptions.ConfigStandard
+            ),
+            JobTypes.MoveDownloadFileJob => JsonSerializer.Serialize(
+                new MoveDownloadFileJobPayload(Deserialize<MoveDownloadFileJobUpdateDTO>(update.Data).DownloadTaskId),
+                DefaultJsonSerializerOptions.ConfigStandard
+            ),
+            JobTypes.InspectPlexServerJob => JsonSerializer.Serialize(
+                new InspectPlexServerJobPayload(Deserialize<InspectPlexServerJobUpdateDTO>(update.Data).PlexServerIds),
+                DefaultJsonSerializerOptions.ConfigStandard
+            ),
+            _ => "{}",
+        };
+
+    private static T Deserialize<T>(string json) =>
+        JsonSerializer.Deserialize<T>(json, DefaultJsonSerializerOptions.ConfigStandard)!;
 
     [Test]
     public async Task ShouldReturnEmptyList_WhenNoBackgroundJobIsRunning()
@@ -172,13 +233,7 @@ public class GetAllBackgroundJobsEndpointUnitTests
             actual.JobType.ShouldBe(expected.JobType);
             actual.Status.ShouldBe(expected.Status);
             actual.JobStartTime.ShouldBe(expected.JobStartTime);
-
-            actual.JsonString.ShouldBe(
-                JsonSerializer.Serialize(
-                    new JobDataMap { ["Payload"] = expected.Data },
-                    DefaultJsonSerializerOptions.ConfigStandard
-                )
-            );
+            actual.JsonString.ShouldBe(ExpectedPayloadJson(expected));
         }
     }
 }

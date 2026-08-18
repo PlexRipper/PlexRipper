@@ -1,4 +1,5 @@
 using Quartz;
+using Quartz.Impl.Matchers;
 using Quartz.Spi;
 
 namespace Reaparr.Application.UnitTests;
@@ -211,6 +212,11 @@ public class ApplyRemoteMovieComparisonStateCommandUnitTests
 
         var remoteMovie = await GetLibraryMovieAsync(remoteLibrary.Id);
         var ownedMovie = await GetLibraryMovieAsync(ownedLibrary.Id);
+        Mock.Mock<IScheduler>().Setup(x => x.GetCurrentlyExecutingJobs(It.IsAny<CancellationToken>())).ReturnsAsync([]);
+        Mock.Mock<IScheduler>()
+            .Setup(x => x.GetJobKeys(It.IsAny<GroupMatcher<JobKey>>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync([]);
+
         dbContext.PlexComparisonScopes.Add(
             new PlexComparisonState
             {
@@ -284,14 +290,28 @@ public class ApplyRemoteMovieComparisonStateCommandUnitTests
             }
         );
         Mock.Mock<IScheduler>()
-            .Setup(x => x.CheckExists(PlexLibraryComparisonJob.GetJobKey(ownedLibrary.Id, remoteLibrary.Id), It.IsAny<CancellationToken>()))
+            .Setup(x =>
+                x.CheckExists(
+                    PlexLibraryComparisonJob.GetJobKey(ownedLibrary.Id, remoteLibrary.Id),
+                    It.IsAny<CancellationToken>()
+                )
+            )
             .ReturnsAsync(true);
         Mock.Mock<IScheduler>()
-            .Setup(x => x.GetTriggersOfJob(PlexLibraryComparisonJob.GetJobKey(ownedLibrary.Id, remoteLibrary.Id), It.IsAny<CancellationToken>()))
+            .Setup(x =>
+                x.GetTriggersOfJob(
+                    PlexLibraryComparisonJob.GetJobKey(ownedLibrary.Id, remoteLibrary.Id),
+                    It.IsAny<CancellationToken>()
+                )
+            )
             .ReturnsAsync([new Mock<IOperableTrigger>().Object]);
         Mock.Mock<IScheduler>()
             .Setup(x => x.GetTriggerState(It.IsAny<TriggerKey>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(TriggerState.Normal);
+        Mock.Mock<IScheduler>().Setup(x => x.GetCurrentlyExecutingJobs(It.IsAny<CancellationToken>())).ReturnsAsync([]);
+        Mock.Mock<IScheduler>()
+            .Setup(x => x.GetJobKeys(It.IsAny<GroupMatcher<JobKey>>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync([PlexLibraryComparisonJob.GetJobKey(ownedLibrary.Id, remoteLibrary.Id)]);
         await dbContext.SaveChangesAsync(CancellationToken);
 
         var items = new List<PlexMediaSlimDTO> { CreateMovieItem(remoteMovie) };
@@ -327,6 +347,11 @@ public class ApplyRemoteMovieComparisonStateCommandUnitTests
         await SetOwnedOverrideAsync(ownedLibrary.PlexServerId, true);
 
         var remoteMovie = await GetLibraryMovieAsync(remoteLibrary.Id);
+        Mock.Mock<IScheduler>().Setup(x => x.GetCurrentlyExecutingJobs(It.IsAny<CancellationToken>())).ReturnsAsync([]);
+        Mock.Mock<IScheduler>()
+            .Setup(x => x.GetJobKeys(It.IsAny<GroupMatcher<JobKey>>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync([]);
+
         var items = new List<PlexMediaSlimDTO> { CreateMovieItem(remoteMovie) };
 
         // Act
@@ -360,6 +385,11 @@ public class ApplyRemoteMovieComparisonStateCommandUnitTests
         await SetOwnedOverrideAsync(ownedLibrary.PlexServerId, true);
 
         var remoteMovie = await GetLibraryMovieAsync(remoteLibrary.Id);
+        Mock.Mock<IScheduler>().Setup(x => x.GetCurrentlyExecutingJobs(It.IsAny<CancellationToken>())).ReturnsAsync([]);
+        Mock.Mock<IScheduler>()
+            .Setup(x => x.GetJobKeys(It.IsAny<GroupMatcher<JobKey>>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync([]);
+
         var items = new List<PlexMediaSlimDTO> { CreateMovieItem(remoteMovie) };
 
         // Act

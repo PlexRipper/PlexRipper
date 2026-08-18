@@ -109,6 +109,7 @@ public class ApplyOwnedTvShowComparisonStateCommandUnitTests
 
         var remoteTvShow = await GetLibraryTvShowAsync(remoteLibrary.Id);
         var ownedTvShow = await GetLibraryTvShowAsync(ownedLibrary.Id);
+        var trigger = new Mock<IOperableTrigger>();
         var remoteEpisodes = await GetLibraryEpisodesAsync(remoteLibrary.Id);
         var ownedEpisodes = await GetLibraryEpisodesAsync(ownedLibrary.Id);
         await AddCurrentScopeAsync(remoteLibrary, ownedLibrary);
@@ -174,6 +175,9 @@ public class ApplyOwnedTvShowComparisonStateCommandUnitTests
         await SetOwnedOverrideAsync(ownedLibrary.PlexServerId, true);
 
         var ownedTvShow = await GetLibraryTvShowAsync(ownedLibrary.Id);
+        var triggerKey = PlexLibraryComparisonJob.GetJobKey(ownedLibrary.Id, remoteLibrary.Id).Name;
+        var trigger = new Mock<IOperableTrigger>();
+        trigger.SetupGet(x => x.Key).Returns(new TriggerKey(triggerKey, nameof(JobTypes.LibraryComparisonJob)));
         Mock.Mock<IScheduler>()
             .Setup(x =>
                 x.CheckExists(
@@ -189,7 +193,7 @@ public class ApplyOwnedTvShowComparisonStateCommandUnitTests
                     It.IsAny<CancellationToken>()
                 )
             )
-            .ReturnsAsync([new Mock<IOperableTrigger>().Object]);
+            .ReturnsAsync([trigger.Object]);
         Mock.Mock<IScheduler>()
             .Setup(x => x.GetTriggerState(It.IsAny<TriggerKey>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(TriggerState.Normal);

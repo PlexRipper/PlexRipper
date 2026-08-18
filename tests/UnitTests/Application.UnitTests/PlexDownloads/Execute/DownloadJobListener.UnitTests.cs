@@ -23,7 +23,14 @@ public class DownloadJobListenerUnitTests : BaseUnitTest<DownloadJobListener>
             .ReturnsAsync(Result.Ok())
             .Verifiable(Times.Once());
         Mock.Mock<IEventPublisher>()
-            .Setup(x => x.PublishAsync(It.IsAny<CheckDownloadQueueEvent>(), CancellationToken))
+            .Setup(x =>
+                x.PublishAsync(
+                    It.Is<CheckDownloadQueueEvent>(eventData =>
+                        eventData.PlexServerIds.SequenceEqual(new[] { downloadTask.PlexServerId })
+                    ),
+                    CancellationToken
+                )
+            )
             .Returns(Task.CompletedTask)
             .Verifiable(Times.Once());
 

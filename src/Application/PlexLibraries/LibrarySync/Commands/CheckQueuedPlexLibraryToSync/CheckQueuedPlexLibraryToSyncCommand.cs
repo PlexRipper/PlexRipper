@@ -151,7 +151,7 @@ public class CheckQueuedPlexLibraryToSyncCommandHandler : ICommandHandler<CheckQ
                 .ExecuteUpdateAsync(
                     s => s.SetProperty(x => x.Status, LibrarySyncJobStatus.Queued)
                         .SetProperty(x => x.StartedAt, (DateTime?)null),
-                    cancellationToken
+                    CancellationToken.None
                 );
             scheduleResult.LogIfFailed();
             return;

@@ -114,6 +114,7 @@ public class Boot : IHostedService
     {
         _log.Here().Information("Shutting down the container");
 
+        await _scheduler.Standby(cancellationToken);
         var activeMoveJobs = (await _scheduler.GetCurrentlyExecutingJobs(cancellationToken))
             .Where(x => x.JobDetail.Key.Group == nameof(JobTypes.MoveDownloadFileJob))
             .ToList();

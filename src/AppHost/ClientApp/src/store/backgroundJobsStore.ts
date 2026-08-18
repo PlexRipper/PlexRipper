@@ -113,8 +113,10 @@ export const useBackgroundJobsStore = defineStore(StoreNames.BackgroundJobsStore
 			status: JobStatus | null = null,
 		): Observable<JobStatusUpdateDTO<CheckAllConnectionStatusUpdateDTO>> =>
 			getters.getJobStatusUpdate(JobTypes.CheckAllConnectionsStatusByPlexServerJob, status),
+
 		getInspectPlexServerJobUpdate: (status: JobStatus | null = null): Observable<JobStatusUpdateDTO<InspectPlexServerJobUpdateDTO>> =>
 			getters.getJobStatusUpdate(JobTypes.InspectPlexServerJob, status),
+
 		getLibrarySyncJobUpdate: (status: JobStatus | null = null): Observable<JobStatusUpdateDTO<LibrarySyncJobQueueDTO>> =>
 			getters.getJobStatusUpdate(JobTypes.LibrarySyncJob, status),
 	};

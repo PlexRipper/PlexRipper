@@ -196,17 +196,21 @@ public class SyncPlexTvShowsCommandHandler : ICommandHandler<SyncPlexTvShowsComm
     {
         var currentShows = await _dbContext
             .PlexTvShows.AsNoTracking()
-            .Include(x => x.Seasons)
-                .ThenInclude(x => x.Episodes)
             .Where(x => x.PlexLibraryId == plexLibraryId)
+            .Select(x => new CurrentShow(x.Id, x.PlexApiRatingKey, x.UpdatedAt))
             .ToListAsync(cancellationToken);
-        _dbContext.PlexTvShows.Local.Clear();
-        _dbContext.PlexTvShowSeason.Local.Clear();
-        _dbContext.PlexTvShowEpisodes.Local.Clear();
+        var currentSeasons = await _dbContext
+            .PlexTvShowSeason.AsNoTracking()
+            .Where(x => x.PlexLibraryId == plexLibraryId)
+            .Select(x => new CurrentSeason(x.Id, x.PlexApiRatingKey, x.UpdatedAt, x.ParentKey))
+            .ToListAsync(cancellationToken);
+        var currentEpisodes = await _dbContext
+            .PlexTvShowEpisodes.AsNoTracking()
+            .Where(x => x.PlexLibraryId == plexLibraryId)
+            .Select(x => new CurrentEpisode(x.Id, x.PlexApiRatingKey, x.UpdatedAt, x.ParentKey))
+            .ToListAsync(cancellationToken);
         var currentShowByKey = currentShows.ToDictionary(x => x.PlexApiRatingKey);
-        var currentSeasons = currentShows.SelectMany(x => x.Seasons).ToList();
         var currentSeasonByKey = currentSeasons.ToDictionary(x => x.PlexApiRatingKey);
-        var currentEpisodes = currentSeasons.SelectMany(x => x.Episodes).ToList();
         var currentEpisodeByKey = currentEpisodes.ToDictionary(x => x.PlexApiRatingKey);
 
         incomingShows.SetRelationshipIds(plexServerId, plexLibraryId);
@@ -433,6 +437,12 @@ public class SyncPlexTvShowsCommandHandler : ICommandHandler<SyncPlexTvShowsComm
             cancellationToken
         );
     }
+
+    private sealed record CurrentShow(int Id, int PlexApiRatingKey, DateTime? UpdatedAt);
+
+    private sealed record CurrentSeason(int Id, int PlexApiRatingKey, DateTime? UpdatedAt, int ParentKey);
+
+    private sealed record CurrentEpisode(int Id, int PlexApiRatingKey, DateTime? UpdatedAt, int ParentKey);
 
     private async Task<Result> SyncTvShowGenres(
         List<PlexTvShow> plexTvShows,

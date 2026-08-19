@@ -26,7 +26,6 @@ import type {
 	ServerDownloadProgressDTO,
 	ServerDownloadProgressMessagePackDTO,
 	LiveLogEventDTO,
-	LibraryComparisonCompletedDTO,
 } from '@dto';
 import { RefreshDataType, MessageTypes } from '@dto';
 import type { IRetryPolicy } from '@microsoft/signalr/src/IRetryPolicy';
@@ -35,7 +34,6 @@ import {
 	useBackgroundJobsStore,
 	useNotificationsStore,
 	useLibraryStore,
-	useMediaOverviewStore,
 } from '@store';
 import Axios from 'axios';
 import { MessagePackHubProtocol } from '@microsoft/signalr-protocol-msgpack';

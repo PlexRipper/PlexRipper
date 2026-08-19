@@ -216,6 +216,93 @@ public class DownloadJobUnitTests : BaseUnitTest<DownloadJob>
     }
 
     [Test]
+    public async Task ShouldSetAuthErrorStatus_WhenClientStartFailsWithoutAuthenticationToken()
+    {
+        // Arrange
+        await SetupDatabase(
+            39397,
+            config =>
+            {
+                config.MovieDownloadTasksCount = 1;
+            }
+        );
+
+        var testDownloadTask = IDbContext.DownloadTaskMovieFile.First();
+        var context = SetupJobContext(testDownloadTask.ToKey());
+
+        Mock.Mock<ICommandExecutor>()
+            .Setup(x => x.Send(It.IsAny<DeterminePlexDownloadClientCommand>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result.Ok(PlexDownloadClientType.Direct))
+            .Verifiable(Times.Once());
+        Mock.Mock<IEventPublisher>()
+            .Setup(x => x.PublishAsync(It.IsAny<SendNotificationResult>(), It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.Once());
+
+        var startResult = Result
+            .Fail("Could not find any authenticationToken for PlexServer with id: 15")
+            .AddPlex401UnauthorizedError();
+        var downloadClientMock = new Mock<IPlexDownloadClient>();
+        downloadClientMock
+            .Setup(x => x.Start(It.IsAny<DownloadTaskKey>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(startResult)
+            .Verifiable(Times.Once());
+        downloadClientMock.Setup(x => x.DisposeAsync()).Returns(ValueTask.CompletedTask).Verifiable(Times.Once());
+
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Setup(x =>
+                x.OnStatusChangedAsync(
+                    It.IsAny<DownloadTaskKey>(),
+                    It.IsAny<DownloadStatus>(),
+                    It.IsAny<Result>(),
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.Once());
+
+        var downloadClientIndexMock = new Mock<IIndex<PlexDownloadClientType, IPlexDownloadClient>>();
+        downloadClientIndexMock.Setup(x => x[PlexDownloadClientType.Direct]).Returns(downloadClientMock.Object);
+
+        var sut = Mock.Create<DownloadJob>(
+            new NamedParameter("plexDownloadClientFactory", downloadClientIndexMock.Object)
+        );
+
+        // Act
+        await sut.Execute(context);
+
+        // Assert
+        startResult.IsFailed.ShouldBeTrue();
+        startResult.Errors.Count.ShouldBeGreaterThan(0);
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Verify(
+                x =>
+                    x.OnStatusChangedAsync(
+                        It.Is<DownloadTaskKey>(key => key.Id == testDownloadTask.Id),
+                        DownloadStatus.AuthError,
+                        startResult,
+                        CancellationToken.None
+                    ),
+                Times.Once()
+            );
+        Mock.Mock<ICommandExecutor>()
+            .Verify(
+                x => x.Send(It.IsAny<DeterminePlexDownloadClientCommand>(), It.IsAny<CancellationToken>()),
+                Times.Once()
+            );
+        Mock.Mock<IEventPublisher>()
+            .Verify(
+                x => x.PublishAsync(It.IsAny<SendNotificationResult>(), It.IsAny<CancellationToken>()),
+                Times.Once()
+            );
+        downloadClientMock.Verify(
+            x => x.Start(It.Is<DownloadTaskKey>(key => key.Id == testDownloadTask.Id), It.IsAny<CancellationToken>()),
+            Times.Once()
+        );
+        downloadClientMock.Verify(x => x.DisposeAsync(), Times.Once());
+    }
+
+    [Test]
     public async Task ShouldSetDownloadClientErrorStatus_WhenClientStartFailsWithoutSpecificError()
     {
         // Arrange

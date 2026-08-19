@@ -154,7 +154,8 @@ public class DownloadJob : IJob
             else if (startResult.IsFailed)
             {
                 var failedStatus =
-                    startResult.Has404NotFoundError() ? DownloadStatus.SourceUnavailable
+                    startResult.HasPlex401UnauthorizedError() ? DownloadStatus.AuthError
+                    : startResult.Has404NotFoundError() ? DownloadStatus.SourceUnavailable
                     : startResult.IsServerUnreachable() ? DownloadStatus.ServerUnreachable
                     : startResult.HasStorageError() ? DownloadStatus.StorageError
                     : DownloadStatus.DownloadClientError;

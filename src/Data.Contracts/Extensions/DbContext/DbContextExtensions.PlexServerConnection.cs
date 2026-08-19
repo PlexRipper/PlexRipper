@@ -176,6 +176,7 @@ public static partial class DbContextExtensions
 
             return Result
                 .Fail($"Could not find any authenticationToken for PlexServer with id: {plexServerId}")
+                .AddPlex401UnauthorizedError()
                 .LogError();
         }
 

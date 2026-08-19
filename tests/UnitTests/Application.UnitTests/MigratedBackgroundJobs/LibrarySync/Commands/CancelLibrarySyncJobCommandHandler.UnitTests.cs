@@ -39,6 +39,7 @@ public class CancelLibrarySyncJobCommandHandlerUnitTests : BaseCommandUnitTest<C
             .Setup(x => x.DeleteJob(jobKey, It.IsAny<CancellationToken>()))
             .ReturnsAsync(false)
             .Verifiable(Times.Once());
+        Mock.Mock<IScheduler>().Setup(x => x.GetCurrentlyExecutingJobs(It.IsAny<CancellationToken>())).ReturnsAsync([]);
         Mock.Mock<INotificationHubService>()
             .Setup(x => x.SendRefreshNotificationAsync(It.IsAny<List<RefreshDataType>>()))
             .Returns(Task.CompletedTask)
@@ -84,23 +85,17 @@ public class CancelLibrarySyncJobCommandHandlerUnitTests : BaseCommandUnitTest<C
         var command = new CancelLibrarySyncJobCommand(library.Id);
         var jobKey = LibrarySyncJob.GetJobKey(library.PlexServerId, library.Id);
 
-        var interruptCallCount = 0;
         Mock.Mock<IScheduler>()
-            .Setup(x => x.Interrupt(jobKey, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(() =>
-            {
-                interruptCallCount++;
-                return interruptCallCount == 1 ? false : true;
-            })
-            .Verifiable(Times.Exactly(2));
+            .SetupSequence(x => x.Interrupt(jobKey, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(false)
+            .ReturnsAsync(true);
         Mock.Mock<IScheduler>()
             .Setup(x => x.DeleteJob(jobKey, It.IsAny<CancellationToken>()))
             .ReturnsAsync(false)
             .Verifiable(Times.Once());
         Mock.Mock<IScheduler>()
-            .Setup(x => x.AwaitJobCompletion(jobKey, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result.Ok())
-            .Verifiable(Times.Once());
+            .Setup(x => x.GetCurrentlyExecutingJobs(It.IsAny<CancellationToken>()))
+            .ReturnsAsync([]);
 
         // Act
         var result = await TestHandlerExecuteAsync(command);
@@ -111,6 +106,8 @@ public class CancelLibrarySyncJobCommandHandlerUnitTests : BaseCommandUnitTest<C
         var updatedQueueItem = await dbContext.LibrarySyncJobQueues.AsNoTracking().SingleAsync(CancellationToken);
         updatedQueueItem.Status.ShouldBe(LibrarySyncJobStatus.Processing);
         updatedQueueItem.CompletedAt.ShouldBeNull();
+        Mock.Mock<IScheduler>().Verify(x => x.Interrupt(jobKey, It.IsAny<CancellationToken>()), Times.Exactly(2));
+        Mock.Mock<IScheduler>().Verify(x => x.DeleteJob(jobKey, It.IsAny<CancellationToken>()), Times.Once());
         Mock.Mock<IScheduler>().Verify();
     }
 }

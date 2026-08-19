@@ -163,6 +163,80 @@ public class GetTvShowMediaComparisonDetailsCommandHandlerUnitTests
     }
 
     [Test]
+    public async Task ShouldSelectEpisodeRowDeterministically_WhenHigherQualityHitsHaveEqualRemoteQualityAndLibraryId()
+    {
+        // Arrange
+        await SetupDatabase(
+            63504,
+            config =>
+            {
+                config.PlexServerCount = 2;
+                config.PlexTvShowLibraryCount = 1;
+                config.PlexAccountCount = 1;
+                config.TvShowCount = 1;
+                config.TvShowSeasonCount = 1;
+                config.TvShowEpisodeCount = 2;
+            }
+        );
+
+        var dbContext = IDbContext;
+        var libraries = await dbContext.PlexLibraries.OrderBy(x => x.Id).ToListAsync(CancellationToken);
+        var remoteLibrary = libraries[0];
+        var ownedLibrary = libraries[1];
+        await SetOwnedOverrideAsync(remoteLibrary.PlexServerId, false);
+        await SetOwnedOverrideAsync(ownedLibrary.PlexServerId, true);
+        await SetLibraryUpdatedAtAsync(remoteLibrary.Id, new DateTime(2026, 8, 2, 10, 5, 14, DateTimeKind.Utc));
+        await SetLibraryUpdatedAtAsync(ownedLibrary.Id, new DateTime(2026, 8, 2, 9, 45, 2, DateTimeKind.Utc));
+        remoteLibrary = await GetLibraryAsync(remoteLibrary.Id);
+        ownedLibrary = await GetLibraryAsync(ownedLibrary.Id);
+
+        var remoteTvShow = await GetLibraryTvShowAsync(remoteLibrary.Id);
+        var remoteEpisode = await dbContext
+            .PlexTvShowEpisodes.Where(x => x.PlexLibraryId == remoteLibrary.Id)
+            .OrderBy(x => x.Id)
+            .FirstAsync(CancellationToken);
+        var ownedEpisodes = await dbContext
+            .PlexTvShowEpisodes.Where(x => x.PlexLibraryId == ownedLibrary.Id)
+            .OrderBy(x => x.Id)
+            .ToListAsync(CancellationToken);
+
+        await AddCurrentScopeAsync(remoteLibrary, ownedLibrary, PlexMediaType.TvShow);
+        dbContext.PlexEpisodeComparisons.Add(
+            CreateEpisodeComparison(
+                remoteLibrary.Id,
+                ownedLibrary.Id,
+                remoteEpisode.Id,
+                ownedEpisodes[0].Id,
+                PlexMediaComparisonHitState.HigherQuality,
+                VideoQuality.HD
+            )
+        );
+        dbContext.PlexEpisodeComparisons.Add(
+            CreateEpisodeComparison(
+                remoteLibrary.Id,
+                ownedLibrary.Id,
+                remoteEpisode.Id,
+                ownedEpisodes[1].Id,
+                PlexMediaComparisonHitState.HigherQuality,
+                VideoQuality.SD
+            )
+        );
+        await dbContext.SaveChangesAsync(CancellationToken);
+
+        var command = new GetTvShowMediaComparisonDetailsCommand(remoteTvShow.Id);
+
+        // Act
+        var result = await TestHandlerExecuteAsync<PlexMediaComparisonDetailsDTO>(command);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        result.Errors.ShouldBeEmpty();
+        var episodeRow = result.Value.Rows.Single().Children.Single(x => x.PlexMediaId == remoteEpisode.Id);
+        episodeRow.PlexMediaId.ShouldBe(remoteEpisode.Id);
+        episodeRow.OwnedQuality.ShouldBe(VideoQuality.HD);
+    }
+
+    [Test]
     public async Task ShouldReturnOnlyHigherQualityEpisodeRows_WhenRemoteTvShowHasOwnedMatches()
     {
         // Arrange
@@ -568,7 +642,8 @@ public class GetTvShowMediaComparisonDetailsCommandHandlerUnitTests
         int ownedPlexLibraryId,
         int remotePlexMediaId,
         int ownedPlexMediaId,
-        PlexMediaComparisonHitState hitState
+        PlexMediaComparisonHitState hitState,
+        VideoQuality? ownedQuality = null
     ) =>
         new()
         {
@@ -580,7 +655,8 @@ public class GetTvShowMediaComparisonDetailsCommandHandlerUnitTests
             HitState = hitState,
             RemoteQuality = VideoQuality.FullHD,
             OwnedQuality =
-                hitState == PlexMediaComparisonHitState.HigherQuality ? VideoQuality.HD : VideoQuality.FullHD,
+                ownedQuality
+                ?? (hitState == PlexMediaComparisonHitState.HigherQuality ? VideoQuality.HD : VideoQuality.FullHD),
             MatchType = PlexMediaComparisonMatchType.ParentAndChildNumbers,
             ComparedAt = DateTime.UtcNow,
         };

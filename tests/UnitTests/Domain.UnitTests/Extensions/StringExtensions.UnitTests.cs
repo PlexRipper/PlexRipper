@@ -7,6 +7,9 @@ public class StringExtensionsUnitTests : BaseUnitTest
     [Arguments("RANDOM MOVIE: # · GREAT")]
     public void ShouldFilterAllInvalidCharsFromName_WhenGivenInvalidName(string testString)
     {
+        // Arrange
+        testString += Path.GetInvalidFileNameChars().First();
+
         // Act
         var result = testString.SanitizeFolderName();
 

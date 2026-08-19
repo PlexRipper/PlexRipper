@@ -17,6 +17,48 @@ public class CheckAllConnectionsStatusByPlexServerJobUnitTests : BaseUnitTest<Ch
     }
 
     [Test]
+    public async Task ShouldSetFailedStatus_WhenCommandThrows()
+    {
+        // Arrange
+        await SetupDatabase(135045, config => config.PlexServerCount = 1);
+        Mock.Mock<ICommandExecutor>()
+            .Setup(x => x.Send(It.IsAny<CheckAllConnectionsStatusByPlexServerCommand>(), It.IsAny<CancellationToken>()))
+            .ThrowsAsync(new InvalidOperationException("connection check failed"));
+        Mock.Mock<IProgressHubService>()
+            .Setup(x => x.SendJobStatusUpdateAsync(It.IsAny<JobStatusUpdate<CheckAllConnectionStatusUpdateDTO>>()))
+            .Returns(Task.CompletedTask);
+        var context = SetupJobContext();
+
+        // Act
+        await Sut.Execute(context.Object);
+
+        // Assert
+        var update = context.Object.Result.ShouldBeOfType<JobStatusUpdate<CheckAllConnectionStatusUpdateDTO>>();
+        update.Status.ShouldBe(JobStatus.Failed);
+    }
+
+    [Test]
+    public async Task ShouldSetCancelledStatus_WhenCommandIsCancelled()
+    {
+        // Arrange
+        await SetupDatabase(135046, config => config.PlexServerCount = 1);
+        Mock.Mock<ICommandExecutor>()
+            .Setup(x => x.Send(It.IsAny<CheckAllConnectionsStatusByPlexServerCommand>(), It.IsAny<CancellationToken>()))
+            .Returns(Task.FromCanceled<Result<List<PlexServerStatus>>>(new CancellationToken(true)));
+        Mock.Mock<IProgressHubService>()
+            .Setup(x => x.SendJobStatusUpdateAsync(It.IsAny<JobStatusUpdate<CheckAllConnectionStatusUpdateDTO>>()))
+            .Returns(Task.CompletedTask);
+        var context = SetupJobContext();
+
+        // Act
+        await Sut.Execute(context.Object);
+
+        // Assert
+        var update = context.Object.Result.ShouldBeOfType<JobStatusUpdate<CheckAllConnectionStatusUpdateDTO>>();
+        update.Status.ShouldBe(JobStatus.Cancelled);
+    }
+
+    [Test]
     public async Task ShouldComplete_WhenOneOrMorePlexServersAreUnavailable()
     {
         // Arrange
@@ -38,6 +80,9 @@ public class CheckAllConnectionsStatusByPlexServerJobUnitTests : BaseUnitTest<Ch
             x => x.PlexServerConnections.Select(y => y.Id).ToList()
         );
 
+        Mock.Mock<IProgressHubService>()
+            .Setup(x => x.SendJobStatusUpdateAsync(It.IsAny<JobStatusUpdate<CheckAllConnectionStatusUpdateDTO>>()))
+            .Returns(Task.CompletedTask);
         Mock.Mock<ICommandExecutor>()
             .Setup(x => x.Send(It.IsAny<CheckAllConnectionsStatusByPlexServerCommand>(), It.IsAny<CancellationToken>()))
             .Returns<CheckAllConnectionsStatusByPlexServerCommand, CancellationToken>(

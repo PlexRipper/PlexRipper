@@ -55,9 +55,11 @@ public class CheckAllConnectionsStatusByPlexServerJob : IJob
 
             var connectionResults = await Task.WhenAll(
                 plexServers.Select(async plexServer =>
-                    await _commandExecutor.Send(
-                        new CheckAllConnectionsStatusByPlexServerCommand(plexServer.Id),
-                        cancellationToken
+                    await Result.Try(() =>
+                        _commandExecutor.Send(
+                            new CheckAllConnectionsStatusByPlexServerCommand(plexServer.Id),
+                            cancellationToken
+                        )
                     )
                 )
             );
@@ -83,5 +85,19 @@ public class CheckAllConnectionsStatusByPlexServerJob : IJob
                     plexServers.Select(x => x.Id).ToList()
                 );
         });
+
+        if (result.IsCancelled)
+        {
+            context.SetCronJobPayload(JobStatus.Cancelled, payload);
+            result.LogWarning();
+            return;
+        }
+
+        if (result.IsFailed)
+        {
+            context.SetCronJobPayload(JobStatus.Failed, payload);
+            result.LogError();
+            return;
+        }
     }
 }

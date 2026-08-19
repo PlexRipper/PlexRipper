@@ -533,6 +533,9 @@ export interface IntegrationsSettingsDTO {
 export enum JobStatus {
   Started = "Started",
   Completed = "Completed",
+  Cancelled = "Cancelled",
+  Failed = "Failed",
+  Queued = "Queued",
 }
 
 export interface JobStatusUpdateDTO {
@@ -545,7 +548,7 @@ export interface JobStatusUpdateDTO {
 }
 
 export enum JobTypes {
-  Unknown = "Unknown",
+  None = "None",
   CheckAllConnectionsStatusByPlexServerJob = "CheckAllConnectionsStatusByPlexServerJob",
   DownloadJob = "DownloadJob",
   MoveDownloadFileJob = "MoveDownloadFileJob",
@@ -555,6 +558,8 @@ export enum JobTypes {
   CheckForUpdateJob = "CheckForUpdateJob",
   CheckPlexLibrariesForUpdatesJob = "CheckPlexLibrariesForUpdatesJob",
   LibraryComparisonJob = "LibraryComparisonJob",
+  RefreshPlexAccountAccessJob = "RefreshPlexAccountAccessJob",
+  Unknown = "Unknown",
 }
 
 export interface LanguageSettingsDTO {
@@ -691,40 +696,10 @@ export enum MessageTypes {
   RefreshNotification = "RefreshNotification",
   AppUpdateDownloadProgress = "AppUpdateDownloadProgress",
   LogEvent = "LogEvent",
-  LibraryComparisonCompleted = "LibraryComparisonCompleted",
 }
 
 export interface MoveDownloadFileJobUpdateDTO {
   id: DownloadTaskKey;
-}
-
-export interface MovieLibraryComparisonDebugHitDTO {
-  /** @format date-time */
-  comparedAt: string;
-  matchType: PlexMediaComparisonMatchType;
-  /** @format int32 */
-  ownedMediaId: number;
-  ownedQuality: VideoQuality;
-  ownedTitle: string;
-  /** @format int32 */
-  ownedYear: number;
-  /** @format int32 */
-  remoteMediaId: number;
-  remoteQuality: VideoQuality;
-  remoteTitle: string;
-  /** @format int32 */
-  remoteYear: number;
-}
-
-export interface MovieLibraryComparisonDebugResponseDTO {
-  higherQuality: MovieLibraryComparisonDebugHitDTO[];
-  matched: MovieLibraryComparisonDebugHitDTO[];
-  /** @format int32 */
-  missingCount: number;
-  /** @format int32 */
-  ownedLibraryId: number;
-  /** @format int32 */
-  remoteLibraryId: number;
 }
 
 export interface NetworkSettingsDTO {
@@ -918,16 +893,6 @@ export interface PlexMediaComparisonDetailsRowDTO {
   state: PlexMediaComparisonState;
   title: string;
   type: PlexMediaType;
-}
-
-export enum PlexMediaComparisonMatchType {
-  None = "None",
-  TmdbGuid = "TmdbGuid",
-  ImdbGuid = "ImdbGuid",
-  TvdbGuid = "TvdbGuid",
-  NormalizedTitleAndYear = "NormalizedTitleAndYear",
-  NormalizedTitleYearAndDuration = "NormalizedTitleYearAndDuration",
-  ParentAndChildNumbers = "ParentAndChildNumbers",
 }
 
 export enum PlexMediaComparisonState {
@@ -1148,13 +1113,6 @@ export interface PlexRoleDTO {
   name: string;
 }
 
-export interface SyncPlexServerMediaEndpointRequest {
-  /** @format int32 */
-  plexServerId: number;
-  forceLibrarySync: boolean;
-  forceMediaRefresh: boolean;
-}
-
 export interface PlexServerAccessRapportDTO {
   isServerOffline: boolean;
   libraryAccess: PlexLibraryAccessRapportDTO[];
@@ -1255,6 +1213,11 @@ export enum RefreshDataType {
   PlexServerConnection = "PlexServerConnection",
   DownloadTasks = "DownloadTasks",
   UpdateAvailable = "UpdateAvailable",
+}
+
+export interface RefreshLibraryMediaEndpointRequest {
+  forceLibrarySync: boolean;
+  forceMediaRefresh: boolean;
 }
 
 export interface RefreshPlexAccountAccessRapportDTO {
@@ -1498,15 +1461,6 @@ export interface ResultDTOOfListOfString {
   value?: string[] | null;
 }
 
-export interface ResultDTOOfMovieLibraryComparisonDebugResponseDTO {
-  errors: ErrorDTO[];
-  isSuccess: boolean;
-  /** @format int32 */
-  statusCode: number;
-  successes: SuccessDTO[];
-  value?: MovieLibraryComparisonDebugResponseDTO | null;
-}
-
 export interface ResultDTOOfPlexAccountDTO {
   errors: ErrorDTO[];
   isSuccess: boolean;
@@ -1651,15 +1605,6 @@ export interface ResultDTOOfTestConnectionToSonarrEndpointResponse {
   value?: TestConnectionToSonarrEndpointResponse | null;
 }
 
-export interface ResultDTOOfTvShowLibraryComparisonDebugResponseDTO {
-  errors: ErrorDTO[];
-  isSuccess: boolean;
-  /** @format int32 */
-  statusCode: number;
-  successes: SuccessDTO[];
-  value?: TvShowLibraryComparisonDebugResponseDTO | null;
-}
-
 export interface ResultDTOOfUserClaimsDTO {
   errors: ErrorDTO[];
   isSuccess: boolean;
@@ -1781,6 +1726,11 @@ export interface SuccessDTO {
   metadata: Record<string, any>;
 }
 
+export interface SyncPlexServerMediaEndpointRequest {
+  forceLibrarySync: boolean;
+  forceMediaRefresh: boolean;
+}
+
 export enum TestConnectionStatus {
   Unknown = "Unknown",
   Success = "Success",
@@ -1795,103 +1745,6 @@ export interface TestConnectionToRadarrEndpointResponse {
 
 export interface TestConnectionToSonarrEndpointResponse {
   result: TestConnectionStatus;
-}
-
-export interface TvShowLibraryComparisonDebugEpisodeHitDTO {
-  /** @format date-time */
-  comparedAt: string;
-  matchType: PlexMediaComparisonMatchType;
-  /** @format int32 */
-  ownedEpisodeNumber: number;
-  /** @format int32 */
-  ownedMediaId: number;
-  ownedQuality: VideoQuality;
-  /** @format int32 */
-  ownedSeasonId: number;
-  ownedTitle: string;
-  /** @format int32 */
-  ownedTvShowId: number;
-  /** @format int32 */
-  remoteEpisodeNumber: number;
-  /** @format int32 */
-  remoteMediaId: number;
-  remoteQuality: VideoQuality;
-  /** @format int32 */
-  remoteSeasonId: number;
-  remoteTitle: string;
-  /** @format int32 */
-  remoteTvShowId: number;
-}
-
-export interface TvShowLibraryComparisonDebugResponseDTO {
-  episodes: TvShowLibraryComparisonDebugSectionDTOOfTvShowLibraryComparisonDebugEpisodeHitDTO;
-  /** @format int32 */
-  ownedLibraryId: number;
-  /** @format int32 */
-  remoteLibraryId: number;
-  seasons: TvShowLibraryComparisonDebugSectionDTOOfTvShowLibraryComparisonDebugSeasonHitDTO;
-  shows: TvShowLibraryComparisonDebugSectionDTOOfTvShowLibraryComparisonDebugShowHitDTO;
-}
-
-export interface TvShowLibraryComparisonDebugSeasonHitDTO {
-  /** @format date-time */
-  comparedAt: string;
-  matchType: PlexMediaComparisonMatchType;
-  /** @format int32 */
-  ownedMediaId: number;
-  ownedQuality: VideoQuality;
-  /** @format int32 */
-  ownedSeasonNumber: number;
-  ownedTitle: string;
-  /** @format int32 */
-  ownedTvShowId: number;
-  /** @format int32 */
-  remoteMediaId: number;
-  remoteQuality: VideoQuality;
-  /** @format int32 */
-  remoteSeasonNumber: number;
-  remoteTitle: string;
-  /** @format int32 */
-  remoteTvShowId: number;
-}
-
-export interface TvShowLibraryComparisonDebugSectionDTOOfTvShowLibraryComparisonDebugEpisodeHitDTO {
-  higherQuality: TvShowLibraryComparisonDebugEpisodeHitDTO[];
-  matched: TvShowLibraryComparisonDebugEpisodeHitDTO[];
-  /** @format int32 */
-  missingCount: number;
-}
-
-export interface TvShowLibraryComparisonDebugSectionDTOOfTvShowLibraryComparisonDebugSeasonHitDTO {
-  higherQuality: TvShowLibraryComparisonDebugSeasonHitDTO[];
-  matched: TvShowLibraryComparisonDebugSeasonHitDTO[];
-  /** @format int32 */
-  missingCount: number;
-}
-
-export interface TvShowLibraryComparisonDebugSectionDTOOfTvShowLibraryComparisonDebugShowHitDTO {
-  higherQuality: TvShowLibraryComparisonDebugShowHitDTO[];
-  matched: TvShowLibraryComparisonDebugShowHitDTO[];
-  /** @format int32 */
-  missingCount: number;
-}
-
-export interface TvShowLibraryComparisonDebugShowHitDTO {
-  /** @format date-time */
-  comparedAt: string;
-  matchType: PlexMediaComparisonMatchType;
-  /** @format int32 */
-  ownedMediaId: number;
-  ownedQuality: VideoQuality;
-  ownedTitle: string;
-  /** @format int32 */
-  ownedYear: number;
-  /** @format int32 */
-  remoteMediaId: number;
-  remoteQuality: VideoQuality;
-  remoteTitle: string;
-  /** @format int32 */
-  remoteYear: number;
 }
 
 /** @example {"username":"ReaparrRocks","password":"R€Aℙℙ@rr69"} */
@@ -1958,13 +1811,6 @@ export interface ValidatePlexCredentialsDTO {
   validatedAt?: string | null;
 }
 
-export interface RefreshLibraryMediaEndpointRequest {
-  /** @format int32 */
-  plexLibraryId: number;
-  forceLibrarySync: boolean;
-  forceMediaRefresh: boolean;
-}
-
 export interface ValidatePlexCredentialsEndpointRequest {
   clientId: string;
   displayName: string;
@@ -1981,11 +1827,14 @@ export interface ValidatePlexServerConnectionEndpointRequest {
 }
 
 export interface ValidatePlexTokenEndpointRequest {
-  /** @format int32 */
-  plexAccountId: number;
   displayName: string;
   /** @minLength 5 */
   manualAuthenticationToken: string;
+  /**
+   * @format int32
+   * @min 0
+   */
+  plexAccountId: number;
 }
 
 export interface ValidatePlexTokenEndpointResponse {

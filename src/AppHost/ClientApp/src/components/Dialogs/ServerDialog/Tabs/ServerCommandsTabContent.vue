@@ -38,6 +38,7 @@
 		@select="syncServerLibraries" />
 	<ConfirmationDialog
 		:confirm-loading="deleteLoading"
+		:disable-cancel="deleteLoading"
 		:name="DialogType.ServerDeleteConfirmationDialog"
 		:title="$t('confirmation.delete-server.title')"
 		:text="$t('confirmation.delete-server.text')"

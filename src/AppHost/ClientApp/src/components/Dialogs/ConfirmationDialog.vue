@@ -21,6 +21,7 @@
 		<template #actions>
 			<CancelButton
 				cy="confirmation-dialog-cancel-button"
+				:disabled="disableCancel"
 				@click="cancel" />
 			<ConfirmButton
 				cy="confirmation-dialog-confirmation-button"
@@ -47,10 +48,12 @@ const props = withDefaults(defineProps<{
 	warning?: string;
 	confirmLabel?: string;
 	confirmLoading?: boolean;
+	disableCancel?: boolean;
 }>(), {
 	warning: '',
 	confirmLabel: '',
 	confirmLoading: false,
+	disableCancel: false,
 });
 
 const emit = defineEmits<{

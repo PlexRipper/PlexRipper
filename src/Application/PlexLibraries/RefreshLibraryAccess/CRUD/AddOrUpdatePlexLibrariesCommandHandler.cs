@@ -86,7 +86,7 @@ public class AddOrUpdatePlexLibrariesCommandHandler
                         .Debug(
                             "Updating PlexLibrary {PlexLibraryName} with id: {PlexLibraryId} in the database",
                             incomingPlexLibrary.Title,
-                            incomingPlexLibrary.Id
+                            plexLibraryDb.Id
                         );
 
                     incomingPlexLibrary.Id = plexLibraryDb.Id;

@@ -232,15 +232,36 @@ public class GetTvShowMediaComparisonDetailsCommandHandler
         var episodeLookup = episodes.ToDictionary(x => x.Id);
         var result = new List<ComparisonDetailsRow>();
         foreach (
-            var group in childRows
-                .GroupBy(x => episodeLookup.TryGetValue(x.PlexMediaId, out var episode) ? episode.TvShowSeasonId : 0)
-                .OrderBy(x => x.Key)
+            var seasonGroup in childRows
+                .GroupBy(x =>
+                {
+                    var episode = episodeLookup.GetValueOrDefault(x.PlexMediaId);
+                    var seasonNumber = episode?.TvShowSeason?.SeasonNumber ?? -1;
+                    return (
+                        SeasonNumber: seasonNumber,
+                        UnknownSeasonId: seasonNumber < 0 ? episode?.TvShowSeasonId ?? 0 : 0
+                    );
+                })
+                .OrderBy(x => x.Key.SeasonNumber < 0)
+                .ThenBy(x => x.Key.SeasonNumber)
+                .ThenBy(x => x.Key.UnknownSeasonId)
         )
         {
-            var sourceRow = group.FirstOrDefault(x => x.RemotePlexLibraryId > 0) ?? group.First();
-            var seasonNumber = group
-                .Select(x => episodeLookup.GetValueOrDefault(x.PlexMediaId)?.TvShowSeason?.SeasonNumber ?? 0)
-                .FirstOrDefault();
+            var rows = seasonGroup
+                .GroupBy(x =>
+                {
+                    var episodeNumber = episodeLookup.GetValueOrDefault(x.PlexMediaId)?.EpisodeNumber ?? -1;
+                    return (EpisodeNumber: episodeNumber, UnknownEpisodeId: episodeNumber < 0 ? x.PlexMediaId : 0);
+                })
+                .OrderBy(x => x.Key.EpisodeNumber < 0)
+                .ThenBy(x => x.Key.EpisodeNumber)
+                .ThenBy(x => x.First().Title)
+                .ThenBy(x => x.Key.UnknownEpisodeId)
+                .Select(x =>
+                    x.OrderByDescending(y => y.RemoteQuality.ToId()).ThenBy(y => y.RemotePlexLibraryId).First()
+                )
+                .ToList();
+            var sourceRow = rows.FirstOrDefault(x => x.RemotePlexLibraryId > 0) ?? rows.First();
             var seasonRowId = ++_rowId;
             result.Add(
                 new ComparisonDetailsRow
@@ -248,25 +269,22 @@ public class GetTvShowMediaComparisonDetailsCommandHandler
                     RowId = seasonRowId,
                     ParentRowId = null,
                     Level = 0,
-                    PlexMediaId = group
-                        .Select(x => episodeLookup.GetValueOrDefault(x.PlexMediaId)?.TvShowSeasonId ?? 0)
-                        .FirstOrDefault(x => x > 0),
+                    PlexMediaId = episodeLookup.GetValueOrDefault(sourceRow.PlexMediaId)?.TvShowSeasonId ?? 0,
                     Type = PlexMediaType.Season,
-                    Title = $"Season {seasonNumber}",
-                    ComparisonId = PlexMediaComparisonDetailsMapper.ToParentState(group.ToList()).ToComparisonId(),
+                    Title =
+                        seasonGroup.Key.SeasonNumber < 0 ? "Unknown Season" : $"Season {seasonGroup.Key.SeasonNumber}",
+                    ComparisonId = PlexMediaComparisonDetailsMapper.ToParentState(rows).ToComparisonId(),
                     IsActionable = true,
                     RemoteQuality = PlexMediaComparisonDetailsMapper.GetHighestQuality(
-                        group.Select(x => x.RemoteQuality)
+                        rows.Select(x => x.RemoteQuality)
                     ),
-                    OwnedQuality = PlexMediaComparisonDetailsMapper.GetHighestQuality(
-                        group.Select(x => x.OwnedQuality)
-                    ),
+                    OwnedQuality = PlexMediaComparisonDetailsMapper.GetHighestQuality(rows.Select(x => x.OwnedQuality)),
                     RemotePlexLibraryId = sourceRow.RemotePlexLibraryId,
                     RemotePlexServerId = sourceRow.RemotePlexServerId,
                 }
             );
 
-            result.AddRange(group.Select(x => x with { ParentRowId = seasonRowId }));
+            result.AddRange(rows.Select(x => x with { ParentRowId = seasonRowId }));
         }
 
         return result;

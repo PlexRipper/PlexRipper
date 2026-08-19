@@ -36,5 +36,12 @@ public class PlexTvShowEpisode : BasePlexMedia
     [NotMapped]
     public override PlexMediaType Type => PlexMediaType.Episode;
 
+    /// <summary>
+    /// Gets or sets the expected season number for this episode. This property is not mapped to the database and is used for internal calculations or display purposes.
+    /// This is used when the episode is not linked to a season with a season number, but we still want to know what season it is expected to be in.
+    /// </summary>
+    [NotMapped]
+    public int ExpectedSeasonNumber { get; set; } = -1;
+
     #endregion
 }

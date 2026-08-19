@@ -194,6 +194,48 @@ namespace Reaparr.PlexApi.UnitTests
         }
 
         [Test]
+        public void ShouldMapMissingIndexesToMinusOne_WhenApiResponseOmitsIndexes()
+        {
+            // Arrange
+            var sourceData = new Metadata
+            {
+                RatingKey = "456",
+                Key = "/library/metadata/456",
+                Type = "episode",
+                Title = "Unknown episode",
+            };
+
+            // Act
+            var result = sourceData.ToMediaItemDTO();
+
+            // Assert
+            result.Index.ShouldBe(-1);
+            result.ParentIndex.ShouldBe(-1);
+        }
+
+        [Test]
+        public void ShouldPreserveZeroIndexes_WhenApiResponseContainsZeroIndexes()
+        {
+            // Arrange
+            var sourceData = new Metadata
+            {
+                RatingKey = "456",
+                Key = "/library/metadata/456",
+                Type = "episode",
+                Title = "Special",
+                Index = 0,
+                ParentIndex = 0,
+            };
+
+            // Act
+            var result = sourceData.ToMediaItemDTO();
+
+            // Assert
+            result.Index.ShouldBe(0);
+            result.ParentIndex.ShouldBe(0);
+        }
+
+        [Test]
         public void ShouldMapAllPropertiesCorrectly_WhenApiResponseHasTvShowValues()
         {
             // Arrange

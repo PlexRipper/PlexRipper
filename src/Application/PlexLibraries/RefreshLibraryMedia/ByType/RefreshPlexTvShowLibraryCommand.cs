@@ -235,6 +235,25 @@ public class RefreshPlexTvShowLibraryCommandHandler
                 plexTvShowSeason.Episodes = episodes;
                 plexTvShowSeason.ChildCount = episodes.Count;
 
+                if (plexTvShowSeason.SeasonNumber < 0)
+                {
+                    var expectedSeasonNumbers = episodes
+                        .Where(x => x.ExpectedSeasonNumber >= 0)
+                        .Select(x => x.ExpectedSeasonNumber)
+                        .Distinct()
+                        .ToList();
+                    if (expectedSeasonNumbers.Count == 1)
+                        plexTvShowSeason.SeasonNumber = expectedSeasonNumbers[0];
+                    else if (expectedSeasonNumbers.Count > 1)
+                        _log.Here()
+                            .Warning(
+                                "Season {PlexApiRatingKey} in library {PlexLibraryId} has conflicting episode parent indexes: {ParentIndexes}",
+                                plexTvShowSeason.PlexApiRatingKey,
+                                plexLibrary.Id,
+                                expectedSeasonNumbers
+                            );
+                }
+
                 // Remove episodes that have been assigned
                 episodesBySeasonKey.Remove(plexTvShowSeason.Guid);
 
@@ -250,6 +269,20 @@ public class RefreshPlexTvShowLibraryCommandHandler
             plexTvShow.Duration = plexTvShow.Seasons.Sum(x => x.Duration);
             plexTvShow.GrandChildCount = plexTvShow.Seasons.Sum(x => x.ChildCount);
         }
+
+        var unresolvedSeasonCount = rawTvShowData.SelectMany(x => x.Seasons).Count(x => x.SeasonNumber < 0);
+        var unresolvedEpisodeCount = rawTvShowData
+            .SelectMany(x => x.Seasons)
+            .SelectMany(x => x.Episodes)
+            .Count(x => x.EpisodeNumber < 0);
+        if (unresolvedSeasonCount > 0 || unresolvedEpisodeCount > 0)
+            _log.Here()
+                .Warning(
+                    "Library {PlexLibraryId} contains {UnresolvedSeasonCount} unresolved seasons and {UnresolvedEpisodeCount} unresolved episodes",
+                    plexLibrary.Id,
+                    unresolvedSeasonCount,
+                    unresolvedEpisodeCount
+                );
     }
 
     private (List<PlexTvShowSeason> validSeasons, List<PlexTvShowEpisode> validEpisodes) Filter(

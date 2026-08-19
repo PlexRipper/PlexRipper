@@ -56,4 +56,37 @@ public class DownloadTaskExtensionsCalculateUnitTests : BaseUnitTest
         downloadTasks.SelectMany(x => x.Children).SelectMany(x => x.Children).ShouldAllBe(x => x.DataTotal == 10000);
         downloadTasks.SelectMany(x => x.Children).SelectMany(x => x.Children).ShouldAllBe(x => x.Percentage == 50);
     }
+
+    [Test]
+    public async Task ShouldCalculateRootTimeRemaining_FromTotalReceivedAndTotalSize()
+    {
+        // Arrange
+        await SetupDatabase(
+            72870,
+            config =>
+            {
+                config.TvShowDownloadTasksCount = 5;
+                config.TvShowSeasonDownloadTasksCount = 5;
+                config.TvShowEpisodeDownloadTasksCount = 5;
+            }
+        );
+
+        var downloadTask = await IDbContext.DownloadTaskTvShow.IncludeAll().FirstAsync(CancellationToken);
+        var files = downloadTask.Children.SelectMany(x => x.Children).SelectMany(x => x.Children).ToList();
+        files.ForEach(x => x.DataTotal = 10_000);
+        files.Take(5).ToList().ForEach(x => x.DataReceived = 10_000);
+        files[5].DataReceived = 5_000;
+        files[5].DownloadSpeed = 20;
+        files[5].TimeRemaining = 250;
+
+        // Act
+        var result = downloadTask.ToGeneric();
+        result.Calculate();
+
+        // Assert
+        result.DataReceived.ShouldBe(55_000);
+        result.DataTotal.ShouldBe(250_000);
+        result.DownloadSpeed.ShouldBe(20);
+        result.TimeRemaining.ShouldBe(9_750);
+    }
 }

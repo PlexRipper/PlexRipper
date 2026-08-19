@@ -17,7 +17,10 @@ public static partial class DownloadTaskExtensions
         downloadTask.DataReceived = downloadTask.Children.Select(x => x.DataReceived).Sum();
         downloadTask.DataTotal = downloadTask.Children.Select(x => x.DataTotal).Sum();
         downloadTask.Percentage = downloadTask.Children.Average(x => x.Percentage);
-        downloadTask.TimeRemaining = downloadTask.Children.Sum(x => x.TimeRemaining);
+        downloadTask.TimeRemaining = DataFormat.GetTimeRemaining(
+            Math.Max(0, downloadTask.DataTotal - downloadTask.DataReceived),
+            downloadTask.DownloadSpeed
+        );
         downloadTask.DownloadStatus = DownloadTaskActions.Aggregate(
             downloadTask.Children.Select(x => x.DownloadStatus).ToList()
         );

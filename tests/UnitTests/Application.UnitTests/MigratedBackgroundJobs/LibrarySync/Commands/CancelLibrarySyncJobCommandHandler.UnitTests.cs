@@ -56,4 +56,61 @@ public class CancelLibrarySyncJobCommandHandlerUnitTests : BaseCommandUnitTest<C
         Mock.Mock<IScheduler>().Verify();
         Mock.Mock<INotificationHubService>().Verify();
     }
+
+    [Test]
+    public async Task ShouldWaitForJobCompletion_WhenDeleteJobFailsButSecondInterruptSucceeds()
+    {
+        // Arrange
+        await SetupDatabase(
+            3101,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexMovieLibraryCount = 1;
+            }
+        );
+        var dbContext = IDbContext;
+        var library = dbContext.PlexLibraries.Single();
+        var queueItem = new LibrarySyncJobQueue
+        {
+            PlexServerId = library.PlexServerId,
+            PlexLibraryId = library.Id,
+            Priority = 1,
+            Status = LibrarySyncJobStatus.Processing,
+            CreatedAt = DateTime.UtcNow,
+        };
+        await dbContext.LibrarySyncJobQueues.AddAsync(queueItem, CancellationToken);
+        await dbContext.SaveChangesAsync(CancellationToken);
+        var command = new CancelLibrarySyncJobCommand(library.Id);
+        var jobKey = LibrarySyncJob.GetJobKey(library.PlexServerId, library.Id);
+
+        var interruptCallCount = 0;
+        Mock.Mock<IScheduler>()
+            .Setup(x => x.Interrupt(jobKey, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(() =>
+            {
+                interruptCallCount++;
+                return interruptCallCount == 1 ? false : true;
+            })
+            .Verifiable(Times.Exactly(2));
+        Mock.Mock<IScheduler>()
+            .Setup(x => x.DeleteJob(jobKey, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(false)
+            .Verifiable(Times.Once());
+        Mock.Mock<IScheduler>()
+            .Setup(x => x.AwaitJobCompletion(jobKey, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result.Ok())
+            .Verifiable(Times.Once());
+
+        // Act
+        var result = await TestHandlerExecuteAsync(command);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        result.Errors.Count.ShouldBe(0);
+        var updatedQueueItem = await dbContext.LibrarySyncJobQueues.AsNoTracking().SingleAsync(CancellationToken);
+        updatedQueueItem.Status.ShouldBe(LibrarySyncJobStatus.Processing);
+        updatedQueueItem.CompletedAt.ShouldBeNull();
+        Mock.Mock<IScheduler>().Verify();
+    }
 }

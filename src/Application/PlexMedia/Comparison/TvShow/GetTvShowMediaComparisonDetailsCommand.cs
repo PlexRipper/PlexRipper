@@ -258,7 +258,11 @@ public class GetTvShowMediaComparisonDetailsCommandHandler
                 .ThenBy(x => x.First().Title)
                 .ThenBy(x => x.Key.UnknownEpisodeId)
                 .Select(x =>
-                    x.OrderByDescending(y => y.RemoteQuality.ToId()).ThenBy(y => y.RemotePlexLibraryId).First()
+                    x.OrderByDescending(y => y.RemoteQuality.ToId())
+                        .ThenBy(y => y.RemotePlexLibraryId)
+                        .ThenBy(y => y.RemotePlexServerId)
+                        .ThenBy(y => y.PlexMediaId)
+                        .First()
                 )
                 .ToList();
             var sourceRow = rows.FirstOrDefault(x => x.RemotePlexLibraryId > 0) ?? rows.First();

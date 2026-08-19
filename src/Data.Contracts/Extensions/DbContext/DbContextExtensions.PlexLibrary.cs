@@ -42,7 +42,8 @@ public static partial class DbContextExtensions
         CancellationToken cancellationToken
     )
     {
-        var libraryExists = await dbContext.PlexLibraries.AnyAsync(x => x.Id == libraryId, cancellationToken);
+        var libraryExists = await dbContext
+            .PlexLibraries.AnyAsync(x => x.Id == libraryId && !x.Outdated, cancellationToken);
         if (!libraryExists)
             return [];
 
@@ -51,7 +52,7 @@ public static partial class DbContextExtensions
                 ? await dbContext
                     .PlexComparisonScopes.Where(x => x.RemotePlexLibraryId == libraryId && x.MediaType == mediaType)
                     .Join(
-                        dbContext.PlexLibraries.WhereIsOwned().Where(x => x.Type == mediaType),
+                        dbContext.PlexLibraries.WhereIsOwned().Where(x => x.Type == mediaType && !x.Outdated),
                         scope => scope.OwnedPlexLibraryId,
                         library => library.Id,
                         (_, library) => library.Id
@@ -60,7 +61,7 @@ public static partial class DbContextExtensions
                 : await dbContext
                     .PlexComparisonScopes.Where(x => x.OwnedPlexLibraryId == libraryId && x.MediaType == mediaType)
                     .Join(
-                        dbContext.PlexLibraries.WhereIsNotOwned().Where(x => x.Type == mediaType),
+                        dbContext.PlexLibraries.WhereIsNotOwned().Where(x => x.Type == mediaType && !x.Outdated),
                         scope => scope.RemotePlexLibraryId,
                         library => library.Id,
                         (_, library) => library.Id

@@ -95,7 +95,6 @@ public class AddOrUpdatePlexLibrariesCommandHandler
                     plexLibraryDb.Key = incomingPlexLibrary.Key;
                     plexLibraryDb.CreatedAt = incomingPlexLibrary.CreatedAt;
                     plexLibraryDb.UpdatedAt = incomingPlexLibrary.UpdatedAt;
-                    var previousContentChangedAt = plexLibraryDb.ContentChangedAt;
 
                     plexLibraryDb.ScannedAt = incomingPlexLibrary.ScannedAt;
                     plexLibraryDb.ContentChangedAt = incomingPlexLibrary.ContentChangedAt;
@@ -103,9 +102,8 @@ public class AddOrUpdatePlexLibrariesCommandHandler
                     plexLibraryDb.Language = incomingPlexLibrary.Language;
 
                     var contentChangedAfterLastSync =
-                        incomingPlexLibrary.ContentChangedAt != previousContentChangedAt
-                        && (plexLibraryDb.SyncedAt is null || incomingPlexLibrary.UpdatedAt > plexLibraryDb.SyncedAt);
-                    plexLibraryDb.Outdated = plexLibraryDb.Outdated || contentChangedAfterLastSync;
+                        incomingPlexLibrary.ContentChangedAt != plexLibraryDb.SyncedContentChangedAt;
+                    plexLibraryDb.Outdated |= contentChangedAfterLastSync;
                     if (contentChangedAfterLastSync)
                         changedPlexLibraryIds.Add(plexLibraryDb.Id);
                 }
@@ -182,8 +180,6 @@ public class AddOrUpdatePlexLibrariesCommandHandler
                             incomingPlexLibrary.Name,
                             plexServerName
                         );
-
-                    rapport.AddUpdated(plexLibraryId, incomingPlexLibrary.Name);
                 }
             }
 
@@ -230,7 +226,14 @@ public class AddOrUpdatePlexLibrariesCommandHandler
                 return queueResult.ToResult<List<PlexLibraryAccessRapport>>().LogError();
         }
 
-        var affectedLibraryIds = rapportList.SelectMany(x => x.Data).Select(x => x.PlexLibraryId).Distinct().ToList();
+        var newLibraryIds = newPlexLibraries.Select(x => x.Id).ToHashSet();
+        var affectedLibraryIds = rapportList
+            .SelectMany(x => x.Data)
+            .Where(x => x.State is PlexAccessState.Granted or PlexAccessState.Revoked)
+            .Select(x => x.PlexLibraryId)
+            .Where(x => !newLibraryIds.Contains(x))
+            .Distinct()
+            .ToList();
         var invalidationResult = await _commandExecutor.Send(
             new InvalidateLibraryComparisonJobsCommand(affectedLibraryIds),
             cancellationToken

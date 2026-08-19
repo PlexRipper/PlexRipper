@@ -57,15 +57,14 @@ public class ApplyOwnedMovieComparisonStateCommandHandler
         if (remoteLibraryIds.Count == 0)
             return Result.Ok();
 
-        var scopeRows = await _dbContext
+        var currentRemoteLibraryIds = await _dbContext
             .PlexComparisonScopes.Where(x =>
                 x.OwnedPlexLibraryId == command.OwnedLibraryId
                 && x.MediaType == PlexMediaType.Movie
                 && remoteLibraryIds.Contains(x.RemotePlexLibraryId)
             )
-            .ToListAsync(ct);
-
-        var currentRemoteLibraryIds = scopeRows.Select(x => x.RemotePlexLibraryId).ToHashSet();
+            .Select(x => x.RemotePlexLibraryId)
+            .ToHashSetAsync(ct);
 
         if (currentRemoteLibraryIds.Count == 0)
         {

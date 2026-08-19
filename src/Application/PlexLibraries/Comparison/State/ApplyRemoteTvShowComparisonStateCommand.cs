@@ -62,15 +62,14 @@ public class ApplyRemoteTvShowComparisonStateCommandHandler
         if (ownedLibraryIds.Count == 0)
             return Result.Ok();
 
-        var scopeRows = await _dbContext
+        var currentOwnedLibraryIds = await _dbContext
             .PlexComparisonScopes.Where(x =>
                 x.RemotePlexLibraryId == command.RemoteLibraryId
                 && x.MediaType == PlexMediaType.TvShow
                 && ownedLibraryIds.Contains(x.OwnedPlexLibraryId)
             )
-            .ToListAsync(ct);
-
-        var currentOwnedLibraryIds = scopeRows.Select(x => x.OwnedPlexLibraryId).ToHashSet();
+            .Select(x => x.OwnedPlexLibraryId)
+            .ToHashSetAsync(ct);
 
         if (currentOwnedLibraryIds.Count == 0)
         {
@@ -106,11 +105,6 @@ public class ApplyRemoteTvShowComparisonStateCommandHandler
 
         var showHitLookup = showHits.GroupBy(x => x.RemotePlexMediaId).ToDictionary(g => g.Key, g => g.ToList());
 
-        var remoteEpisodeCountLookup = await _dbContext
-            .PlexTvShowEpisodes.Where(x => itemIds.Contains(x.TvShowId))
-            .GroupBy(x => x.TvShowId)
-            .Select(g => new { TvShowId = g.Key, Count = g.Count() })
-            .ToDictionaryAsync(x => x.TvShowId, x => x.Count, ct);
         var episodeHits = await (
             from comparison in _dbContext.PlexEpisodeComparisons
             join episode in _dbContext.PlexTvShowEpisodes on comparison.RemotePlexMediaId equals episode.Id
@@ -152,7 +146,7 @@ public class ApplyRemoteTvShowComparisonStateCommandHandler
                 x.HitState == PlexMediaComparisonHitState.HigherQuality
             );
 
-            remoteEpisodeCountLookup.TryGetValue(showId, out var remoteEpisodeCount);
+            var remoteEpisodeCount = items[i].GrandChildCount;
             episodeHitLookup.TryGetValue(showId, out var episodeHitSummary);
             var matchedEpisodeCount = episodeHitSummary?.MatchedCount ?? 0;
             var hasPartialMissingChildren = remoteEpisodeCount > 0 && matchedEpisodeCount < remoteEpisodeCount;

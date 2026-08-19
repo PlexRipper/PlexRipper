@@ -245,9 +245,9 @@ public class DownloadTaskUpdateDispatcher : BackgroundService, IDownloadTaskUpda
             }
         });
 
-        if (result.IsCancelled)
+        if (result.IsCancelled && !stoppingToken.IsCancellationRequested)
             result.LogWarning();
-        else if (result.IsFailed)
+        else if (result.IsFailed && !result.IsCancelled)
             result.LogError();
     }
 
@@ -285,9 +285,9 @@ public class DownloadTaskUpdateDispatcher : BackgroundService, IDownloadTaskUpda
             }
         });
 
-        if (result.IsCancelled)
+        if (result.IsCancelled && !stoppingToken.IsCancellationRequested)
             result.LogWarning();
-        else if (result.IsFailed)
+        else if (result.IsFailed && !result.IsCancelled)
             result.LogError();
     }
 

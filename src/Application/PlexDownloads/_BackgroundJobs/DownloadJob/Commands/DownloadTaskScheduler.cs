@@ -66,12 +66,12 @@ public class DownloadTaskScheduler : IDownloadTaskScheduler
                 return await _scheduler.DeleteBatchJobs([jobKey], cancellationToken);
 
             var stopResult = await _scheduler.Interrupt(jobKey, cancellationToken);
-            if (!stopResult)
+            if (!stopResult && await _scheduler.IsJobRunning(jobKey, cancellationToken))
                 return Result
                     .Fail($"Failed to stop {nameof(DownloadTaskGeneric)} with id {downloadTaskKey}")
                     .LogError();
 
-            if (waitForCompletion)
+            if (stopResult && waitForCompletion)
             {
                 await AwaitDownloadTaskJob(downloadTaskKey.Id, cancellationToken);
             }

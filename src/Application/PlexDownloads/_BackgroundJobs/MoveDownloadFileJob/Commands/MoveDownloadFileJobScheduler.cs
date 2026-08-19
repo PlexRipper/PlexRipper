@@ -59,10 +59,10 @@ public class MoveDownloadFileJobScheduler : IMoveDownloadFileScheduler
         }
 
         var wasStopped = await _scheduler.Interrupt(jobKey, cancellationToken);
+        if (!wasStopped && await _scheduler.IsJobRunning(jobKey, cancellationToken))
+            return Result.Fail($"Failed to stop {nameof(DownloadTaskKey)} with id {downloadTaskKey.Id}").LogError();
 
-        return !wasStopped
-            ? Result.Fail($"Failed to stop {nameof(DownloadTaskKey)} with id {downloadTaskKey.Id}").LogError()
-            : Result.Ok();
+        return Result.Ok();
     }
 
     public Task<bool> IsDownloadFileMoving(DownloadTaskKey downloadTaskKey, CancellationToken cancellationToken) =>

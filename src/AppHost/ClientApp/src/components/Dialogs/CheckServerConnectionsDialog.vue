@@ -269,11 +269,9 @@ onMounted(() => {
 		signalrStore
 			.getAllServerConnectionProgress()
 			.subscribe((connections) => {
-				if (get(activeServerIds).length === 0) {
-					set(connectionProgress, []);
-					return;
-				}
-				set(connectionProgress, connections.filter((progress) => get(activeServerIds).includes(progress.plexServerId)));
+				set(connectionProgress, get(plexServerIds).length > 0
+					? connections.filter((progress) => get(plexServerIds).includes(progress.plexServerId))
+					: connections);
 			}),
 	);
 

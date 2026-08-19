@@ -331,9 +331,18 @@
             }
         },
         "sync-server-media-dialog": {
-            "completed": "All media has been synced!",
-            "checking-progress": "Syncing {count} of {total} Plex library",
-            "fetching-servers": "Retrieving accessible servers for syncing media"
+            "checking-progress": "Finished {count} of {total} Plex library syncs",
+            "fetching-servers": "Retrieving accessible servers for syncing media",
+            "finished": "Sync finished: {completed} completed, {failed} failed, {cancelled} cancelled",
+            "no-active-syncs": "No active library syncs",
+            "status": {
+                "unknown": "Unknown",
+                "queued": "Queued",
+                "processing": "Processing",
+                "completed": "Completed",
+                "failed": "Failed",
+                "cancelled": "Cancelled"
+            }
         },
         "authentication-overview": {
             "validation": {

@@ -11,45 +11,173 @@ namespace Reaparr.Data.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropIndex(
+                name: "IX_PlexTvShowGenres_GenresId_PlexTvShowId",
+                table: "PlexTvShowGenres");
+
+            migrationBuilder.DropIndex(
+                name: "IX_PlexTvShowCountries_CountryId_PlexTvShowId",
+                table: "PlexTvShowCountries");
+
+            migrationBuilder.DropIndex(
+                name: "IX_PlexTvShowActors_PlexActorId_PlexTvShowId",
+                table: "PlexTvShowActors");
+
+            migrationBuilder.DropIndex(
+                name: "IX_PlexMovieGenres_GenresId_PlexMovieId",
+                table: "PlexMovieGenres");
+
+            migrationBuilder.DropIndex(
+                name: "IX_PlexMovieCountries_CountryId_PlexMovieId",
+                table: "PlexMovieCountries");
+
+            migrationBuilder.DropIndex(
+                name: "IX_PlexMovieActors_PlexActorId_PlexMovieId",
+                table: "PlexMovieActors");
+
+            migrationBuilder.AlterColumn<string>(
+                name: "Uuid",
+                table: "PlexLibraries",
+                type: "TEXT",
+                nullable: false,
+                oldClrType: typeof(string),
+                oldType: "TEXT")
+                .Annotation("Relational:ColumnOrder", 11)
+                .OldAnnotation("Relational:ColumnOrder", 10);
+
+            migrationBuilder.AlterColumn<int>(
+                name: "TvShowCount",
+                table: "PlexLibraries",
+                type: "INTEGER",
+                nullable: false,
+                oldClrType: typeof(int),
+                oldType: "INTEGER")
+                .Annotation("Relational:ColumnOrder", 15)
+                .OldAnnotation("Relational:ColumnOrder", 14);
+
+            migrationBuilder.AlterColumn<DateTime>(
+                name: "SyncedAt",
+                table: "PlexLibraries",
+                type: "TEXT",
+                nullable: true,
+                oldClrType: typeof(DateTime),
+                oldType: "TEXT",
+                oldNullable: true)
+                .Annotation("Relational:ColumnOrder", 10)
+                .OldAnnotation("Relational:ColumnOrder", 9);
+
+            migrationBuilder.AlterColumn<int>(
+                name: "SeasonCount",
+                table: "PlexLibraries",
+                type: "INTEGER",
+                nullable: false,
+                oldClrType: typeof(int),
+                oldType: "INTEGER")
+                .Annotation("Relational:ColumnOrder", 16)
+                .OldAnnotation("Relational:ColumnOrder", 15);
+
+            migrationBuilder.AlterColumn<bool>(
+                name: "Outdated",
+                table: "PlexLibraries",
+                type: "INTEGER",
+                nullable: false,
+                oldClrType: typeof(bool),
+                oldType: "INTEGER")
+                .Annotation("Relational:ColumnOrder", 21)
+                .OldAnnotation("Relational:ColumnOrder", 20);
+
+            migrationBuilder.AlterColumn<int>(
+                name: "MovieCount",
+                table: "PlexLibraries",
+                type: "INTEGER",
+                nullable: false,
+                oldClrType: typeof(int),
+                oldType: "INTEGER")
+                .Annotation("Relational:ColumnOrder", 14)
+                .OldAnnotation("Relational:ColumnOrder", 13);
+
+            migrationBuilder.AlterColumn<long>(
+                name: "MediaSize",
+                table: "PlexLibraries",
+                type: "INTEGER",
+                nullable: false,
+                oldClrType: typeof(long),
+                oldType: "INTEGER")
+                .Annotation("Relational:ColumnOrder", 13)
+                .OldAnnotation("Relational:ColumnOrder", 12);
+
+            migrationBuilder.AlterColumn<string>(
+                name: "Language",
+                table: "PlexLibraries",
+                type: "TEXT",
+                nullable: false,
+                oldClrType: typeof(string),
+                oldType: "TEXT")
+                .Annotation("Relational:ColumnOrder", 12)
+                .OldAnnotation("Relational:ColumnOrder", 11);
+
+            migrationBuilder.AlterColumn<int>(
+                name: "GenresCount",
+                table: "PlexLibraries",
+                type: "INTEGER",
+                nullable: false,
+                oldClrType: typeof(int),
+                oldType: "INTEGER")
+                .Annotation("Relational:ColumnOrder", 19)
+                .OldAnnotation("Relational:ColumnOrder", 18);
+
+            migrationBuilder.AlterColumn<int>(
+                name: "EpisodeCount",
+                table: "PlexLibraries",
+                type: "INTEGER",
+                nullable: false,
+                oldClrType: typeof(int),
+                oldType: "INTEGER")
+                .Annotation("Relational:ColumnOrder", 17)
+                .OldAnnotation("Relational:ColumnOrder", 16);
+
+            migrationBuilder.AlterColumn<int>(
+                name: "CountriesCount",
+                table: "PlexLibraries",
+                type: "INTEGER",
+                nullable: false,
+                oldClrType: typeof(int),
+                oldType: "INTEGER")
+                .Annotation("Relational:ColumnOrder", 20)
+                .OldAnnotation("Relational:ColumnOrder", 19);
+
+            migrationBuilder.AlterColumn<int>(
+                name: "ActorsCount",
+                table: "PlexLibraries",
+                type: "INTEGER",
+                nullable: false,
+                oldClrType: typeof(int),
+                oldType: "INTEGER")
+                .Annotation("Relational:ColumnOrder", 18)
+                .OldAnnotation("Relational:ColumnOrder", 17);
+
             migrationBuilder.AddColumn<bool>(
                 name: "IsEnabled",
                 table: "PlexLibraries",
                 type: "INTEGER",
                 nullable: false,
                 defaultValue: true)
-                .Annotation("Relational:ColumnOrder", 21);
+                .Annotation("Relational:ColumnOrder", 22);
 
-            migrationBuilder.CreateTable(
-                name: "BackgroundJobLibraryComparisonJobQueues",
-                columns: table => new
-                {
-                    Priority = table.Column<int>(type: "INTEGER", nullable: false),
-                    Status = table.Column<string>(type: "TEXT", unicode: false, maxLength: 50, nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    StartedAt = table.Column<DateTime>(type: "TEXT", nullable: true),
-                    CompletedAt = table.Column<DateTime>(type: "TEXT", nullable: true),
-                    Attempts = table.Column<int>(type: "INTEGER", nullable: false),
-                    ErrorMessage = table.Column<string>(type: "TEXT", nullable: true),
-                    RemotePlexLibraryId = table.Column<int>(type: "INTEGER", nullable: false),
-                    OwnedPlexLibraryId = table.Column<int>(type: "INTEGER", nullable: false),
-                    MediaType = table.Column<string>(type: "TEXT", unicode: false, maxLength: 50, nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_BackgroundJobLibraryComparisonJobQueues", x => new { x.RemotePlexLibraryId, x.OwnedPlexLibraryId, x.MediaType });
-                    table.ForeignKey(
-                        name: "FK_BackgroundJobLibraryComparisonJobQueues_PlexLibraries_OwnedPlexLibraryId",
-                        column: x => x.OwnedPlexLibraryId,
-                        principalTable: "PlexLibraries",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_BackgroundJobLibraryComparisonJobQueues_PlexLibraries_RemotePlexLibraryId",
-                        column: x => x.RemotePlexLibraryId,
-                        principalTable: "PlexLibraries",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
+            migrationBuilder.AddColumn<long>(
+                name: "SyncedContentChangedAt",
+                table: "PlexLibraries",
+                type: "INTEGER",
+                nullable: true)
+                .Annotation("Relational:ColumnOrder", 9);
+
+            migrationBuilder.AddColumn<bool>(
+                name: "ForceMediaRefresh",
+                table: "BackgroundJobLibrarySyncJobQueues",
+                type: "INTEGER",
+                nullable: false,
+                defaultValue: false)
+                .Annotation("Relational:ColumnOrder", 10);
 
             migrationBuilder.CreateTable(
                 name: "PlexComparisonScopes",
@@ -60,9 +188,7 @@ namespace Reaparr.Data.Migrations
                     RemotePlexLibraryId = table.Column<int>(type: "INTEGER", nullable: false),
                     OwnedPlexLibraryId = table.Column<int>(type: "INTEGER", nullable: false),
                     MediaType = table.Column<string>(type: "TEXT", unicode: false, maxLength: 50, nullable: false),
-                    CompletedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    RemoteLibraryUpdatedAt = table.Column<DateTime>(type: "TEXT", nullable: true),
-                    OwnedLibraryUpdatedAt = table.Column<DateTime>(type: "TEXT", nullable: true)
+                    CompletedAt = table.Column<DateTime>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -262,16 +388,6 @@ namespace Reaparr.Data.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_BackgroundJobLibraryComparisonJobQueues_OwnedPlexLibraryId",
-                table: "BackgroundJobLibraryComparisonJobQueues",
-                column: "OwnedPlexLibraryId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_BackgroundJobLibraryComparisonJobQueues_Status_Priority_CreatedAt",
-                table: "BackgroundJobLibraryComparisonJobQueues",
-                columns: new[] { "Status", "Priority", "CreatedAt" });
-
-            migrationBuilder.CreateIndex(
                 name: "IX_PlexComparisonScopes_OwnedPlexLibraryId",
                 table: "PlexComparisonScopes",
                 column: "OwnedPlexLibraryId");
@@ -391,9 +507,6 @@ namespace Reaparr.Data.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "BackgroundJobLibraryComparisonJobQueues");
-
-            migrationBuilder.DropTable(
                 name: "PlexComparisonScopes");
 
             migrationBuilder.DropTable(
@@ -411,6 +524,165 @@ namespace Reaparr.Data.Migrations
             migrationBuilder.DropColumn(
                 name: "IsEnabled",
                 table: "PlexLibraries");
+
+            migrationBuilder.DropColumn(
+                name: "SyncedContentChangedAt",
+                table: "PlexLibraries");
+
+            migrationBuilder.DropColumn(
+                name: "ForceMediaRefresh",
+                table: "BackgroundJobLibrarySyncJobQueues");
+
+            migrationBuilder.AlterColumn<string>(
+                name: "Uuid",
+                table: "PlexLibraries",
+                type: "TEXT",
+                nullable: false,
+                oldClrType: typeof(string),
+                oldType: "TEXT")
+                .Annotation("Relational:ColumnOrder", 10)
+                .OldAnnotation("Relational:ColumnOrder", 11);
+
+            migrationBuilder.AlterColumn<int>(
+                name: "TvShowCount",
+                table: "PlexLibraries",
+                type: "INTEGER",
+                nullable: false,
+                oldClrType: typeof(int),
+                oldType: "INTEGER")
+                .Annotation("Relational:ColumnOrder", 14)
+                .OldAnnotation("Relational:ColumnOrder", 15);
+
+            migrationBuilder.AlterColumn<DateTime>(
+                name: "SyncedAt",
+                table: "PlexLibraries",
+                type: "TEXT",
+                nullable: true,
+                oldClrType: typeof(DateTime),
+                oldType: "TEXT",
+                oldNullable: true)
+                .Annotation("Relational:ColumnOrder", 9)
+                .OldAnnotation("Relational:ColumnOrder", 10);
+
+            migrationBuilder.AlterColumn<int>(
+                name: "SeasonCount",
+                table: "PlexLibraries",
+                type: "INTEGER",
+                nullable: false,
+                oldClrType: typeof(int),
+                oldType: "INTEGER")
+                .Annotation("Relational:ColumnOrder", 15)
+                .OldAnnotation("Relational:ColumnOrder", 16);
+
+            migrationBuilder.AlterColumn<bool>(
+                name: "Outdated",
+                table: "PlexLibraries",
+                type: "INTEGER",
+                nullable: false,
+                oldClrType: typeof(bool),
+                oldType: "INTEGER")
+                .Annotation("Relational:ColumnOrder", 20)
+                .OldAnnotation("Relational:ColumnOrder", 21);
+
+            migrationBuilder.AlterColumn<int>(
+                name: "MovieCount",
+                table: "PlexLibraries",
+                type: "INTEGER",
+                nullable: false,
+                oldClrType: typeof(int),
+                oldType: "INTEGER")
+                .Annotation("Relational:ColumnOrder", 13)
+                .OldAnnotation("Relational:ColumnOrder", 14);
+
+            migrationBuilder.AlterColumn<long>(
+                name: "MediaSize",
+                table: "PlexLibraries",
+                type: "INTEGER",
+                nullable: false,
+                oldClrType: typeof(long),
+                oldType: "INTEGER")
+                .Annotation("Relational:ColumnOrder", 12)
+                .OldAnnotation("Relational:ColumnOrder", 13);
+
+            migrationBuilder.AlterColumn<string>(
+                name: "Language",
+                table: "PlexLibraries",
+                type: "TEXT",
+                nullable: false,
+                oldClrType: typeof(string),
+                oldType: "TEXT")
+                .Annotation("Relational:ColumnOrder", 11)
+                .OldAnnotation("Relational:ColumnOrder", 12);
+
+            migrationBuilder.AlterColumn<int>(
+                name: "GenresCount",
+                table: "PlexLibraries",
+                type: "INTEGER",
+                nullable: false,
+                oldClrType: typeof(int),
+                oldType: "INTEGER")
+                .Annotation("Relational:ColumnOrder", 18)
+                .OldAnnotation("Relational:ColumnOrder", 19);
+
+            migrationBuilder.AlterColumn<int>(
+                name: "EpisodeCount",
+                table: "PlexLibraries",
+                type: "INTEGER",
+                nullable: false,
+                oldClrType: typeof(int),
+                oldType: "INTEGER")
+                .Annotation("Relational:ColumnOrder", 16)
+                .OldAnnotation("Relational:ColumnOrder", 17);
+
+            migrationBuilder.AlterColumn<int>(
+                name: "CountriesCount",
+                table: "PlexLibraries",
+                type: "INTEGER",
+                nullable: false,
+                oldClrType: typeof(int),
+                oldType: "INTEGER")
+                .Annotation("Relational:ColumnOrder", 19)
+                .OldAnnotation("Relational:ColumnOrder", 20);
+
+            migrationBuilder.AlterColumn<int>(
+                name: "ActorsCount",
+                table: "PlexLibraries",
+                type: "INTEGER",
+                nullable: false,
+                oldClrType: typeof(int),
+                oldType: "INTEGER")
+                .Annotation("Relational:ColumnOrder", 17)
+                .OldAnnotation("Relational:ColumnOrder", 18);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PlexTvShowGenres_GenresId_PlexTvShowId",
+                table: "PlexTvShowGenres",
+                columns: new[] { "GenresId", "PlexTvShowId" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PlexTvShowCountries_CountryId_PlexTvShowId",
+                table: "PlexTvShowCountries",
+                columns: new[] { "CountryId", "PlexTvShowId" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PlexTvShowActors_PlexActorId_PlexTvShowId",
+                table: "PlexTvShowActors",
+                columns: new[] { "PlexActorId", "PlexTvShowId" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PlexMovieGenres_GenresId_PlexMovieId",
+                table: "PlexMovieGenres",
+                columns: new[] { "GenresId", "PlexMovieId" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PlexMovieCountries_CountryId_PlexMovieId",
+                table: "PlexMovieCountries",
+                columns: new[] { "CountryId", "PlexMovieId" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PlexMovieActors_PlexActorId_PlexMovieId",
+                table: "PlexMovieActors",
+                columns: new[] { "PlexActorId", "PlexMovieId" });
         }
     }
 }

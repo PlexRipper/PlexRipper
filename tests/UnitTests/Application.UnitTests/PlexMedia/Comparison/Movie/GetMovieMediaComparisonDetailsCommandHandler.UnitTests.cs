@@ -385,8 +385,6 @@ public class GetMovieMediaComparisonDetailsCommandHandlerUnitTests
                 OwnedPlexLibraryId = ownedLibrary.Id,
                 MediaType = mediaType,
                 CompletedAt = DateTime.UtcNow,
-                RemoteLibraryUpdatedAt = remoteUpdatedAt,
-                OwnedLibraryUpdatedAt = ownedUpdatedAt,
             }
         );
         await dbContext.SaveChangesAsync(CancellationToken);

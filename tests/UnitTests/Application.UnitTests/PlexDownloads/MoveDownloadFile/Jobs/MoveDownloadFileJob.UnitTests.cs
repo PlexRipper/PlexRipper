@@ -4,7 +4,10 @@ namespace Reaparr.Application.UnitTests;
 
 public class MoveDownloadFileJobUnitTests : BaseUnitTest<MoveDownloadFileJob>
 {
-    private static IJobExecutionContext SetupJobContext(DownloadTaskKey key)
+    private static IJobExecutionContext SetupJobContext(
+        DownloadTaskKey key,
+        CancellationToken cancellationToken = default
+    )
     {
         var jobDetail = new Mock<IJobDetail>();
         jobDetail.SetupGet(x => x.JobDataMap).Returns(new MoveDownloadFileJobPayload(key).ToJobDataMap());
@@ -12,7 +15,7 @@ public class MoveDownloadFileJobUnitTests : BaseUnitTest<MoveDownloadFileJob>
         var context = new Mock<IJobExecutionContext>();
         context.SetupGet(x => x.JobDetail).Returns(jobDetail.Object);
         context.SetupGet(x => x.MergedJobDataMap).Returns(jobDetail.Object.JobDataMap);
-        context.SetupGet(x => x.CancellationToken).Returns(CancellationToken.None);
+        context.SetupGet(x => x.CancellationToken).Returns(cancellationToken);
         return context.Object;
     }
 
@@ -88,6 +91,50 @@ public class MoveDownloadFileJobUnitTests : BaseUnitTest<MoveDownloadFileJob>
                     ),
                 Times.Once()
             );
+    }
+
+    [Test]
+    public async Task ShouldUseNonCancellableFinalization_WhenMoveSucceeds()
+    {
+        // Arrange
+        await SetupDatabase(
+            11006,
+            config =>
+            {
+                config.MovieDownloadTasksCount = 1;
+            }
+        );
+
+        var downloadTask = await IDbContext.DownloadTaskMovieFile.AsTracking().FirstAsync(CancellationToken);
+        downloadTask.DownloadStatus = DownloadStatus.DownloadFinished;
+        await IDbContext.SaveChangesAsync(CancellationToken);
+        await IDbContext.SetDownloadStatus(downloadTask.ToKey(), DownloadStatus.MoveFinished);
+
+        Mock.SetupCommand(It.IsAny<MoveDownloadFileFromFileTaskCommand>).ReturnsAsync(Result.Ok());
+        Mock.SetupCommand(It.IsAny<CleanUpDownloadTaskFoldersCommand>).ReturnsAsync(Result.Ok()).Verifiable(Times.Once);
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Setup(x =>
+                x.OnStatusChangedAsync(
+                    It.Is<DownloadTaskKey>(k => k == downloadTask.ToKey()),
+                    DownloadStatus.Completed,
+                    CancellationToken.None
+                )
+            )
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.Once);
+        Mock.Mock<IMoveDownloadFileQueue>()
+            .Setup(x => x.CheckMoveDownloadFileJobQueue(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result.Ok());
+
+        var context = SetupJobContext(downloadTask.ToKey());
+
+        // Act
+        await Sut.Execute(context);
+
+        // Assert
+        Mock.Mock<IDownloadTaskUpdateDispatcher>().Verify();
+        Mock.Mock<ICommandExecutor>()
+            .Verify(x => x.Send(It.IsAny<CleanUpDownloadTaskFoldersCommand>(), CancellationToken.None), Times.Once);
     }
 
     [Test]

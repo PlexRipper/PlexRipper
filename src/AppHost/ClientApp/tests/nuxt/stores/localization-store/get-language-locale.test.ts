@@ -1,6 +1,6 @@
 import { describe, beforeAll, beforeEach, test, expect, vi } from 'vitest';
 import { createPinia, setActivePinia } from 'pinia';
-import { ref } from 'vue';
+import { ref, isReactive } from 'vue';
 import type { LocaleObject } from '@nuxtjs/i18n';
 import { baseSetup, baseVars, getAxiosMock } from '@services-test-base';
 import Log from 'consola';
@@ -37,6 +37,22 @@ describe('LocalizationStore.getLanguageLocale', () => {
 		// Assert
 		expect(localizationStore.getLanguageLocale.code).toEqual('en-US');
 		expect(localizationStore.getLanguageLocale.text).toEqual('English');
+	});
+
+	test('Should keep the i18n runtime object out of deep Vue reactivity', () => {
+		// Arrange
+		const localizationStore = useLocalizationStore();
+		const i18n = {
+			locale: ref('en-US'),
+			locales: [{ code: 'en-US', name: 'English' }] as LocaleObject[],
+			setLocale: vi.fn().mockResolvedValue(undefined),
+		} as unknown as I18nObjectType;
+
+		// Act
+		localizationStore.setI18nObject(i18n);
+
+		// Assert
+		expect(isReactive(localizationStore.i18nRef)).toEqual(false);
 	});
 
 	test('Should return a safe fallback locale when i18n object is not set', () => {

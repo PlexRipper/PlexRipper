@@ -63,13 +63,12 @@ public class DownloadQueue : IDownloadQueue
                     }
                 });
 
-                if (result.IsCancelled)
-                {
-                    result.LogWarning();
+                if (result.IsCancelled && cancellationToken.IsCancellationRequested)
                     return;
-                }
 
-                if (result.IsFailed)
+                if (result.IsCancelled)
+                    result.LogWarning();
+                else if (result.IsFailed)
                     result.LogError();
             },
             CancellationToken.None

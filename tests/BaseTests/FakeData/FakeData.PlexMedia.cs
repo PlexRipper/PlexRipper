@@ -194,6 +194,7 @@ public static partial class FakeData
             .Ignore(x => x.TvShowSeason)
             .Ignore(x => x.ParentGuid)
             .Ignore(x => x.EpisodeNumber)
+            .RuleFor(x => x.ExpectedSeasonNumber, _ => -1)
             .RuleFor(x => x.ParentKey, _ => GetUniqueNumber())
             .RuleFor(x => x.Title, f => f.PlexMedia().MediaTitle(PlexMediaType.Episode))
             .RuleFor(x => x.Guid, f => f.PlexMedia().Guid(PlexMediaType.Episode))

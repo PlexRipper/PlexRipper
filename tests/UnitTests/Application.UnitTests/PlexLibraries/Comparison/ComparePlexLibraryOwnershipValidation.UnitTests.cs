@@ -428,8 +428,6 @@ public class CompareMoviePlexLibraryCommandOwnershipUnitTests : BaseCommandUnitT
                 OwnedPlexLibraryId = ownedLibrary.Id,
                 MediaType = PlexMediaType.Movie,
                 CompletedAt = new DateTime(2026, 7, 20, 22, 19, 16, DateTimeKind.Utc),
-                RemoteLibraryUpdatedAt = new DateTime(2026, 7, 20, 14, 7, 34, DateTimeKind.Utc),
-                OwnedLibraryUpdatedAt = new DateTime(2026, 7, 20, 20, 13, 32, DateTimeKind.Utc),
             }
         );
         await dbContext.SaveChangesAsync(CancellationToken);
@@ -449,8 +447,6 @@ public class CompareMoviePlexLibraryCommandOwnershipUnitTests : BaseCommandUnitT
                 && x.MediaType == PlexMediaType.Movie,
             CancellationToken
         );
-        scope.RemoteLibraryUpdatedAt.ShouldBe(remoteUpdatedAt);
-        scope.OwnedLibraryUpdatedAt.ShouldBe(ownedUpdatedAt);
     }
 
     private async Task SetOwnedOverrideAsync(int plexServerId, bool ownedOverride)
@@ -1027,8 +1023,6 @@ public class CompareTvShowPlexLibraryCommandOwnershipUnitTests : BaseCommandUnit
                 OwnedPlexLibraryId = ownedLibrary.Id,
                 MediaType = PlexMediaType.TvShow,
                 CompletedAt = new DateTime(2026, 7, 20, 22, 19, 16, DateTimeKind.Utc),
-                RemoteLibraryUpdatedAt = new DateTime(2026, 7, 20, 14, 7, 34, DateTimeKind.Utc),
-                OwnedLibraryUpdatedAt = new DateTime(2026, 7, 20, 20, 13, 32, DateTimeKind.Utc),
             }
         );
         await dbContext.SaveChangesAsync(CancellationToken);
@@ -1048,8 +1042,6 @@ public class CompareTvShowPlexLibraryCommandOwnershipUnitTests : BaseCommandUnit
                 && x.MediaType == PlexMediaType.TvShow,
             CancellationToken
         );
-        scope.RemoteLibraryUpdatedAt.ShouldBe(remoteUpdatedAt);
-        scope.OwnedLibraryUpdatedAt.ShouldBe(ownedUpdatedAt);
     }
 
     private async Task SetOwnedOverrideAsync(int plexServerId, bool ownedOverride)

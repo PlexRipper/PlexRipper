@@ -120,7 +120,7 @@ onMounted(() => {
 	useSubscription(
 		backgroundJobStore.getCheckPlexServerConnectionsJobUpdate(JobStatus.Started)
 			.subscribe(({ data }) => {
-				set(checkPlexServerConnections, data.plexServersWithConnectionIds);
+				set(checkPlexServerConnections, data.plexServersWithConnectionIds ?? {});
 			}),
 	);
 

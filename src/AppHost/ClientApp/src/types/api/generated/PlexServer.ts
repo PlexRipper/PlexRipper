@@ -16,10 +16,10 @@ import { ContentType } from "./http-client";
 import type {
   BaseResultDTO,
   PlexServerDTO,
-  SyncPlexServerMediaEndpointRequest,
   SetServerAliasRequest,
   SetServerEnabledRequest,
   SetServerOwnedRequest,
+  SyncPlexServerMediaEndpointRequest,
 } from "./data-contracts";
 
 import { apiCheckPipe, axiosObservable } from "@api/base";
@@ -259,7 +259,6 @@ export class PlexServer {
       method: "POST",
       data: data,
       secure: true,
-      type: ContentType.Json,
       responseType: "json",
       ...params,
     }).pipe(apiCheckPipe<BaseResultDTO>);

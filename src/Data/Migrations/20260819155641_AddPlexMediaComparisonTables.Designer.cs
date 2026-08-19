@@ -11,7 +11,7 @@ using Reaparr.Data;
 namespace Reaparr.Data.Migrations
 {
     [DbContext(typeof(ReaparrDbContext))]
-    [Migration("20260725172225_AddPlexMediaComparisonTables")]
+    [Migration("20260819155641_AddPlexMediaComparisonTables")]
     partial class AddPlexMediaComparisonTables
     {
         /// <inheritdoc />
@@ -598,61 +598,6 @@ namespace Reaparr.Data.Migrations
                     b.ToTable("FolderPaths");
                 });
 
-            modelBuilder.Entity("Reaparr.Domain.LibraryComparisonJobQueue", b =>
-                {
-                    b.Property<int>("RemotePlexLibraryId")
-                        .HasColumnType("INTEGER")
-                        .HasColumnOrder(8);
-
-                    b.Property<int>("OwnedPlexLibraryId")
-                        .HasColumnType("INTEGER")
-                        .HasColumnOrder(9);
-
-                    b.Property<string>("MediaType")
-                        .HasMaxLength(50)
-                        .IsUnicode(false)
-                        .HasColumnType("TEXT");
-
-                    b.Property<int>("Attempts")
-                        .HasColumnType("INTEGER")
-                        .HasColumnOrder(6);
-
-                    b.Property<DateTime?>("CompletedAt")
-                        .HasColumnType("TEXT")
-                        .HasColumnOrder(5);
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("TEXT")
-                        .HasColumnOrder(3);
-
-                    b.Property<string>("ErrorMessage")
-                        .HasColumnType("TEXT")
-                        .HasColumnOrder(7);
-
-                    b.Property<int>("Priority")
-                        .HasColumnType("INTEGER")
-                        .HasColumnOrder(1);
-
-                    b.Property<DateTime?>("StartedAt")
-                        .HasColumnType("TEXT")
-                        .HasColumnOrder(4);
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .IsUnicode(false)
-                        .HasColumnType("TEXT")
-                        .HasColumnOrder(2);
-
-                    b.HasKey("RemotePlexLibraryId", "OwnedPlexLibraryId", "MediaType");
-
-                    b.HasIndex("OwnedPlexLibraryId");
-
-                    b.HasIndex("Status", "Priority", "CreatedAt");
-
-                    b.ToTable("BackgroundJobLibraryComparisonJobQueues");
-                });
-
             modelBuilder.Entity("Reaparr.Domain.LibrarySyncJobQueue", b =>
                 {
                     b.Property<int>("PlexServerId")
@@ -674,6 +619,10 @@ namespace Reaparr.Data.Migrations
                     b.Property<string>("ErrorMessage")
                         .HasColumnType("TEXT")
                         .HasColumnOrder(7);
+
+                    b.Property<bool>("ForceMediaRefresh")
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(10);
 
                     b.Property<bool>("IsServerOffline")
                         .HasColumnType("INTEGER")
@@ -912,14 +861,8 @@ namespace Reaparr.Data.Migrations
                         .IsUnicode(false)
                         .HasColumnType("TEXT");
 
-                    b.Property<DateTime?>("OwnedLibraryUpdatedAt")
-                        .HasColumnType("TEXT");
-
                     b.Property<int>("OwnedPlexLibraryId")
                         .HasColumnType("INTEGER");
-
-                    b.Property<DateTime?>("RemoteLibraryUpdatedAt")
-                        .HasColumnType("TEXT");
 
                     b.Property<int>("RemotePlexLibraryId")
                         .HasColumnType("INTEGER");
@@ -1039,7 +982,7 @@ namespace Reaparr.Data.Migrations
 
                     b.Property<int>("ActorsCount")
                         .HasColumnType("INTEGER")
-                        .HasColumnOrder(17);
+                        .HasColumnOrder(18);
 
                     b.Property<long>("ContentChangedAt")
                         .HasColumnType("INTEGER")
@@ -1047,7 +990,7 @@ namespace Reaparr.Data.Migrations
 
                     b.Property<int>("CountriesCount")
                         .HasColumnType("INTEGER")
-                        .HasColumnOrder(19);
+                        .HasColumnOrder(20);
 
                     b.Property<DateTime?>("CreatedAt")
                         .HasColumnType("TEXT")
@@ -1058,17 +1001,17 @@ namespace Reaparr.Data.Migrations
 
                     b.Property<int>("EpisodeCount")
                         .HasColumnType("INTEGER")
-                        .HasColumnOrder(16);
+                        .HasColumnOrder(17);
 
                     b.Property<int>("GenresCount")
                         .HasColumnType("INTEGER")
-                        .HasColumnOrder(18);
+                        .HasColumnOrder(19);
 
                     b.Property<bool>("IsEnabled")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER")
                         .HasDefaultValue(true)
-                        .HasColumnOrder(21);
+                        .HasColumnOrder(22);
 
                     b.Property<string>("Key")
                         .IsRequired()
@@ -1078,7 +1021,7 @@ namespace Reaparr.Data.Migrations
                     b.Property<string>("Language")
                         .IsRequired()
                         .HasColumnType("TEXT")
-                        .HasColumnOrder(11);
+                        .HasColumnOrder(12);
 
                     b.Property<int>("MediaCount")
                         .ValueGeneratedOnAddOrUpdate()
@@ -1087,15 +1030,15 @@ namespace Reaparr.Data.Migrations
 
                     b.Property<long>("MediaSize")
                         .HasColumnType("INTEGER")
-                        .HasColumnOrder(12);
+                        .HasColumnOrder(13);
 
                     b.Property<int>("MovieCount")
                         .HasColumnType("INTEGER")
-                        .HasColumnOrder(13);
+                        .HasColumnOrder(14);
 
                     b.Property<bool>("Outdated")
                         .HasColumnType("INTEGER")
-                        .HasColumnOrder(20);
+                        .HasColumnOrder(21);
 
                     b.Property<int>("PlexServerId")
                         .HasColumnType("INTEGER");
@@ -1106,10 +1049,14 @@ namespace Reaparr.Data.Migrations
 
                     b.Property<int>("SeasonCount")
                         .HasColumnType("INTEGER")
-                        .HasColumnOrder(15);
+                        .HasColumnOrder(16);
 
                     b.Property<DateTime?>("SyncedAt")
                         .HasColumnType("TEXT")
+                        .HasColumnOrder(10);
+
+                    b.Property<long?>("SyncedContentChangedAt")
+                        .HasColumnType("INTEGER")
                         .HasColumnOrder(9);
 
                     b.Property<string>("Title")
@@ -1120,7 +1067,7 @@ namespace Reaparr.Data.Migrations
 
                     b.Property<int>("TvShowCount")
                         .HasColumnType("INTEGER")
-                        .HasColumnOrder(14);
+                        .HasColumnOrder(15);
 
                     b.Property<string>("Type")
                         .IsRequired()
@@ -1136,7 +1083,7 @@ namespace Reaparr.Data.Migrations
                     b.Property<string>("Uuid")
                         .IsRequired()
                         .HasColumnType("TEXT")
-                        .HasColumnOrder(10);
+                        .HasColumnOrder(11);
 
                     b.HasKey("Id");
 
@@ -1403,8 +1350,6 @@ namespace Reaparr.Data.Migrations
 
                     b.HasIndex("PlexMovieId");
 
-                    b.HasIndex("PlexActorId", "PlexMovieId");
-
                     b.ToTable("PlexMovieActors");
                 });
 
@@ -1476,8 +1421,6 @@ namespace Reaparr.Data.Migrations
 
                     b.HasIndex("PlexMovieId");
 
-                    b.HasIndex("CountryId", "PlexMovieId");
-
                     b.ToTable("PlexMovieCountries");
                 });
 
@@ -1498,8 +1441,6 @@ namespace Reaparr.Data.Migrations
                     b.HasKey("GenresId", "PlexMovieId");
 
                     b.HasIndex("PlexMovieId");
-
-                    b.HasIndex("GenresId", "PlexMovieId");
 
                     b.ToTable("PlexMovieGenres");
                 });
@@ -2032,8 +1973,6 @@ namespace Reaparr.Data.Migrations
 
                     b.HasIndex("PlexTvShowId");
 
-                    b.HasIndex("PlexActorId", "PlexTvShowId");
-
                     b.ToTable("PlexTvShowActors");
                 });
 
@@ -2104,8 +2043,6 @@ namespace Reaparr.Data.Migrations
                     b.HasKey("CountryId", "PlexTvShowId");
 
                     b.HasIndex("PlexTvShowId");
-
-                    b.HasIndex("CountryId", "PlexTvShowId");
 
                     b.ToTable("PlexTvShowCountries");
                 });
@@ -2374,8 +2311,6 @@ namespace Reaparr.Data.Migrations
                     b.HasKey("GenresId", "PlexTvShowId");
 
                     b.HasIndex("PlexTvShowId");
-
-                    b.HasIndex("GenresId", "PlexTvShowId");
 
                     b.ToTable("PlexTvShowGenres");
                 });
@@ -2884,25 +2819,6 @@ namespace Reaparr.Data.Migrations
                     b.Navigation("PlexLibrary");
 
                     b.Navigation("PlexServer");
-                });
-
-            modelBuilder.Entity("Reaparr.Domain.LibraryComparisonJobQueue", b =>
-                {
-                    b.HasOne("Reaparr.Domain.PlexLibrary", "OwnedPlexLibrary")
-                        .WithMany()
-                        .HasForeignKey("OwnedPlexLibraryId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Reaparr.Domain.PlexLibrary", "RemotePlexLibrary")
-                        .WithMany()
-                        .HasForeignKey("RemotePlexLibraryId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("OwnedPlexLibrary");
-
-                    b.Navigation("RemotePlexLibrary");
                 });
 
             modelBuilder.Entity("Reaparr.Domain.LibrarySyncJobQueue", b =>

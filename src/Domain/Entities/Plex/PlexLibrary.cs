@@ -53,9 +53,15 @@ public class PlexLibrary : BaseEntity
     public long ContentChangedAt { get; set; }
 
     /// <summary>
-    /// Gets or sets the DateTime this <see cref="PlexLibrary"/> had its media last synced with the PlexApi.
+    /// Gets or sets the Plex content changestamp consumed by the last successful media sync and comparison scheduling.
     /// </summary>
     [Column(Order = 9)]
+    public long? SyncedContentChangedAt { get; set; }
+
+    /// <summary>
+    /// Gets or sets the DateTime this <see cref="PlexLibrary"/> had its media last synced with the PlexApi.
+    /// </summary>
+    [Column(Order = 10)]
     public DateTime? SyncedAt { get; set; }
 
     /// <summary>
@@ -63,67 +69,67 @@ public class PlexLibrary : BaseEntity
     /// Can be a valid GUID or a Plex generated UUID.
     /// <remarks>Value is set by the PlexApi</remarks>
     /// </summary>
-    [Column(Order = 10)]
+    [Column(Order = 11)]
     public required string Uuid { get; set; }
 
     /// <summary>
     ///
     /// <remarks>Value is set by the PlexApi</remarks>
     /// </summary>
-    [Column(Order = 11)]
+    [Column(Order = 12)]
     public required string Language { get; set; }
 
     /// <summary>
     /// Gets the total file size of the nested media.
     /// </summary>
-    [Column(Order = 12)]
+    [Column(Order = 13)]
     public long MediaSize { get; init; }
 
     /// <summary>
     /// Gets the total <see cref="PlexMovie"/> count.
     /// </summary>
-    [Column(Order = 13)]
+    [Column(Order = 14)]
     public int MovieCount { get; init; }
 
     /// <summary>
     /// Gets the total <see cref="PlexTvShow"/> count.
     /// </summary>
-    [Column(Order = 14)]
+    [Column(Order = 15)]
     public int TvShowCount { get; init; }
 
     /// <summary>
     /// Gets the total <see cref="PlexTvShowSeason"/> count of all <see cref="PlexTvShow">PlexTvShows</see> in this library.
     /// </summary>
-    [Column(Order = 15)]
+    [Column(Order = 16)]
     public int SeasonCount { get; init; }
 
     /// <summary>
     /// Gets the total <see cref="PlexTvShowEpisode"/> count of all <see cref="PlexTvShow">PlexTvShows</see> in this library.
     /// </summary>
-    [Column(Order = 16)]
+    [Column(Order = 17)]
     public int EpisodeCount { get; init; }
 
-    [Column(Order = 17)]
+    [Column(Order = 18)]
     public int ActorsCount { get; init; }
 
-    [Column(Order = 18)]
+    [Column(Order = 19)]
     public int GenresCount { get; init; }
 
-    [Column(Order = 19)]
+    [Column(Order = 20)]
     public int CountriesCount { get; init; }
 
     /// <summary>
     /// Gets a value indicating whether this <see cref="PlexLibrary"/> needs to be synced with Reaparr.
     /// This is dependent on <see cref="ContentChangedAt"/>, when a higher value is set from the Plex API, then its marked as outdated.
     /// </summary>
-    [Column(Order = 20)]
+    [Column(Order = 21)]
     public bool Outdated { get; set; }
 
     /// <summary>
     /// Gets or sets a value indicating whether this <see cref="PlexLibrary"/> is enabled.
     /// When disabled, the library is excluded from normal workflows and its synced media data is purged.
     /// </summary>
-    [Column(Order = 21)]
+    [Column(Order = 22)]
     public bool IsEnabled { get; set; } = true;
 
     /// <summary>

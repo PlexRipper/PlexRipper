@@ -606,7 +606,7 @@ public class RestartDownloadTaskCommandUnitTests : BaseUnitTest<RestartDownloadT
         after.HashId.ShouldBe(before.HashId);
         after.DestinationFolderPathId.ShouldBe(before.DestinationFolderPathId);
         after.DataReceived.ShouldBe(0);
-        after.DataTotal.ShouldBe(0);
+        after.DataTotal.ShouldBe(before.DataTotal);
         after.DownloadSpeed.ShouldBe(0);
         after.FileTransferSpeed.ShouldBe(0);
         after.FileDataTransferred.ShouldBe(0);
@@ -699,7 +699,7 @@ public class RestartDownloadTaskCommandUnitTests : BaseUnitTest<RestartDownloadT
         after.HashId.ShouldBe(before.HashId);
         after.DestinationFolderPathId.ShouldBe(before.DestinationFolderPathId);
         after.DataReceived.ShouldBe(0);
-        after.DataTotal.ShouldBe(0);
+        after.DataTotal.ShouldBe(before.DataTotal);
         after.DownloadSpeed.ShouldBe(0);
         after.FileTransferSpeed.ShouldBe(0);
         after.FileDataTransferred.ShouldBe(0);

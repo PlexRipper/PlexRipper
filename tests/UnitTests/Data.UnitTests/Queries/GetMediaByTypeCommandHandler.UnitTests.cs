@@ -50,6 +50,15 @@ public class GetMediaByTypeCommandHandlerUnitTests : BaseUnitTest<GetMediaByType
             },
         };
 
+        var projectedLibraryIds = new List<int>();
+        Mock.Mock<ICommandExecutor>()
+            .Setup(x => x.Send(It.IsAny<ApplyComparisonStateCommand>(), It.IsAny<CancellationToken>()))
+            .Callback<ICommand<Result>, CancellationToken>(
+                (x, _) => projectedLibraryIds.Add(((ApplyComparisonStateCommand)x).PlexLibraryId)
+            )
+            .ReturnsAsync(Result.Ok())
+            .Verifiable(Times.Once());
+
         // Act
         var result = await Sut.ExecuteAsync(command, CancellationToken);
 
@@ -57,6 +66,8 @@ public class GetMediaByTypeCommandHandlerUnitTests : BaseUnitTest<GetMediaByType
         result.IsSuccess.ShouldBeTrue();
         result.Value.Items.ShouldNotBeEmpty();
         result.Value.Items.ShouldAllBe(x => x.PlexLibraryId == targetLibraryId);
+        projectedLibraryIds.ShouldBe([targetLibraryId]);
+        Mock.Mock<ICommandExecutor>().Verify();
     }
 
     [Test]
@@ -252,6 +263,15 @@ public class GetMediaByTypeCommandHandlerUnitTests : BaseUnitTest<GetMediaByType
             },
         };
 
+        var projectedLibraryIds = new List<int>();
+        Mock.Mock<ICommandExecutor>()
+            .Setup(x => x.Send(It.IsAny<ApplyComparisonStateCommand>(), It.IsAny<CancellationToken>()))
+            .Callback<ICommand<Result>, CancellationToken>(
+                (x, _) => projectedLibraryIds.Add(((ApplyComparisonStateCommand)x).PlexLibraryId)
+            )
+            .ReturnsAsync(Result.Ok())
+            .Verifiable(Times.Once());
+
         // Act
         var result = await Sut.ExecuteAsync(command, CancellationToken);
 
@@ -259,6 +279,65 @@ public class GetMediaByTypeCommandHandlerUnitTests : BaseUnitTest<GetMediaByType
         result.IsSuccess.ShouldBeTrue();
         result.Value.Items.ShouldNotBeEmpty();
         result.Value.Items.ShouldAllBe(x => x.PlexLibraryId == targetLibraryId);
+        projectedLibraryIds.ShouldBe([targetLibraryId]);
+        Mock.Mock<ICommandExecutor>().Verify();
+    }
+
+    [Test]
+    public async Task ShouldProjectTvShowsPerLibrary_WhenPlexLibraryIdIsZero()
+    {
+        // Arrange
+        await SetupDatabase(
+            70037,
+            cfg =>
+            {
+                cfg.PlexServerCount = 1;
+                cfg.PlexTvShowLibraryCount = 3;
+                cfg.TvShowCount = 2;
+            }
+        );
+
+        var command = new GetMediaByTypeCommand()
+        {
+            Filter = new MediaQueryFilter
+            {
+                MediaType = PlexMediaType.TvShow,
+                PlexLibraryId = 0,
+                FilterOfflineMedia = false,
+                FilterOwnedMedia = false,
+                Parameters = new FlexQueryParameters
+                {
+                    Page = null,
+                    PageSize = null,
+                    Sort = null,
+                    Filter = null,
+                },
+            },
+        };
+
+        var projectedLibraryIds = new List<int>();
+        Mock.Mock<ICommandExecutor>()
+            .Setup(x => x.Send(It.IsAny<ApplyComparisonStateCommand>(), It.IsAny<CancellationToken>()))
+            .Callback<ICommand<Result>, CancellationToken>(
+                (x, _) =>
+                {
+                    var applyCommand = (ApplyComparisonStateCommand)x;
+                    projectedLibraryIds.Add(applyCommand.PlexLibraryId);
+                    applyCommand.Items.ShouldAllBe(item => item.PlexLibraryId == applyCommand.PlexLibraryId);
+                }
+            )
+            .ReturnsAsync(Result.Ok())
+            .Verifiable(Times.Exactly(3));
+
+        // Act
+        var result = await Sut.ExecuteAsync(command, CancellationToken);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.Items.Select(x => x.PlexLibraryId).Distinct().Count().ShouldBe(3);
+        projectedLibraryIds.Distinct().Count().ShouldBe(3);
+        projectedLibraryIds.ShouldAllBe(x => x > 0);
+        Mock.Mock<ICommandExecutor>().Verify();
     }
 
     [Test]
@@ -300,6 +379,63 @@ public class GetMediaByTypeCommandHandlerUnitTests : BaseUnitTest<GetMediaByType
         result.IsSuccess.ShouldBeTrue();
         result.Value.Items.ShouldNotBeEmpty();
         result.Value.Items.Select(x => x.PlexLibraryId).Distinct().Count().ShouldBe(2);
+    }
+
+    [Test]
+    public async Task ShouldProjectMoviesPerLibrary_WhenPlexLibraryIdIsZero()
+    {
+        // Arrange
+        await SetupDatabase(
+            70038,
+            cfg =>
+            {
+                cfg.PlexServerCount = 1;
+                cfg.PlexMovieLibraryCount = 3;
+                cfg.MovieCount = 2;
+            }
+        );
+
+        var command = new GetMediaByTypeCommand()
+        {
+            Filter = new MediaQueryFilter
+            {
+                MediaType = PlexMediaType.Movie,
+                PlexLibraryId = 0,
+                FilterOfflineMedia = false,
+                FilterOwnedMedia = false,
+                Parameters = new FlexQueryParameters
+                {
+                    Page = null,
+                    PageSize = null,
+                    Sort = null,
+                    Filter = null,
+                },
+            },
+        };
+
+        var projectedLibraryIds = new List<int>();
+        Mock.Mock<ICommandExecutor>()
+            .Setup(x => x.Send(It.IsAny<ApplyComparisonStateCommand>(), It.IsAny<CancellationToken>()))
+            .Callback<ICommand<Result>, CancellationToken>(
+                (x, _) =>
+                {
+                    var applyCommand = (ApplyComparisonStateCommand)x;
+                    projectedLibraryIds.Add(applyCommand.PlexLibraryId);
+                    applyCommand.Items.ShouldAllBe(item => item.PlexLibraryId == applyCommand.PlexLibraryId);
+                }
+            )
+            .ReturnsAsync(Result.Ok())
+            .Verifiable(Times.Exactly(3));
+
+        // Act
+        var result = await Sut.ExecuteAsync(command, CancellationToken);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.Items.Select(x => x.PlexLibraryId).Distinct().Count().ShouldBe(3);
+        projectedLibraryIds.Distinct().Count().ShouldBe(3);
+        projectedLibraryIds.ShouldAllBe(x => x > 0);
+        Mock.Mock<ICommandExecutor>().Verify();
     }
 
     [Test]

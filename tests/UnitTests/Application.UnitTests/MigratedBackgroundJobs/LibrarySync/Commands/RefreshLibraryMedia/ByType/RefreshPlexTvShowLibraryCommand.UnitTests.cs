@@ -312,6 +312,91 @@ public class RefreshPlexTvShowLibraryCommandUnitTests : BaseUnitTest<RefreshPlex
     }
 
     [Test]
+    public async Task ShouldRepairMissingSeasonNumber_WhenEpisodeParentIndexesAgree()
+    {
+        // Arrange
+        var seed = await SetupDatabase(
+            11004,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexTvShowLibraryCount = 1;
+                config.TvShowCount = 1;
+            }
+        );
+        var testLibrary = IDbContext.PlexLibraries.Include(x => x.TvShows).First();
+        SetupProgressStoreMocks();
+
+        var season = FakeData.GetPlexTvShowSeason(seed).Generate(1).First();
+        season.ParentGuid = testLibrary.TvShows.First().Guid;
+        season.SeasonNumber = -1;
+        var episodes = FakeData.GetPlexTvShowEpisode(seed).Generate(2);
+        foreach (var episode in episodes)
+        {
+            episode.ParentGuid = season.Guid;
+            episode.ExpectedSeasonNumber = 4;
+        }
+
+        SetupCommandExecutorForMedia([season], episodes);
+        SyncPlexTvShowsCommand? capturedCommand = null;
+        SetupSyncCommandCapture(cmd => capturedCommand = cmd);
+        SetupMediaQueryCacheInvalidate();
+
+        // Act
+        var result = await Sut.ExecuteAsync(
+            new RefreshPlexTvShowLibraryCommand(new InsertMediaMetaDataCommandResponse(testLibrary)),
+            CancellationToken
+        );
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        capturedCommand.ShouldNotBeNull();
+        capturedCommand.LibraryMetadata.PlexLibrary.TvShows.Single().Seasons.Single().SeasonNumber.ShouldBe(4);
+    }
+
+    [Test]
+    public async Task ShouldKeepMissingSeasonNumber_WhenEpisodeParentIndexesConflict()
+    {
+        // Arrange
+        var seed = await SetupDatabase(
+            11005,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexTvShowLibraryCount = 1;
+                config.TvShowCount = 1;
+            }
+        );
+        var testLibrary = IDbContext.PlexLibraries.Include(x => x.TvShows).First();
+        SetupProgressStoreMocks();
+
+        var season = FakeData.GetPlexTvShowSeason(seed).Generate(1).First();
+        season.ParentGuid = testLibrary.TvShows.First().Guid;
+        season.SeasonNumber = -1;
+        var episodes = FakeData.GetPlexTvShowEpisode(seed).Generate(2);
+        episodes[0].ParentGuid = season.Guid;
+        episodes[0].ExpectedSeasonNumber = 4;
+        episodes[1].ParentGuid = season.Guid;
+        episodes[1].ExpectedSeasonNumber = 5;
+
+        SetupCommandExecutorForMedia([season], episodes);
+        SyncPlexTvShowsCommand? capturedCommand = null;
+        SetupSyncCommandCapture(cmd => capturedCommand = cmd);
+        SetupMediaQueryCacheInvalidate();
+
+        // Act
+        var result = await Sut.ExecuteAsync(
+            new RefreshPlexTvShowLibraryCommand(new InsertMediaMetaDataCommandResponse(testLibrary)),
+            CancellationToken
+        );
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        capturedCommand.ShouldNotBeNull();
+        capturedCommand.LibraryMetadata.PlexLibrary.TvShows.Single().Seasons.Single().SeasonNumber.ShouldBe(-1);
+    }
+
+    [Test]
     public async Task ShouldFilterOutEpisodesWithNullParentGuid_WhenBuildingTree()
     {
         // Arrange

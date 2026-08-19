@@ -30,8 +30,11 @@ public class RecoverInterruptedDownloadsCommandHandler : ICommandHandler<Recover
         using var dbContext = await _dbContextFactory.CreateAsync();
 
         var movieFileZombies = await dbContext
-            .DownloadTaskMovieFile.AsNoTracking()
-            .Where(x => x.DownloadStatus == DownloadStatus.Downloading || x.DownloadStatus == DownloadStatus.Moving)
+            .DownloadTaskMovieFile.Where(x =>
+                x.DownloadStatus == DownloadStatus.Downloading
+                || x.DownloadStatus == DownloadStatus.Moving
+                || x.DownloadStatus == DownloadStatus.MoveFinished
+            )
             .Select(x => new
             {
                 x.Id,
@@ -43,8 +46,11 @@ public class RecoverInterruptedDownloadsCommandHandler : ICommandHandler<Recover
             .ToListAsync(cancellationToken);
 
         var episodeFileZombies = await dbContext
-            .DownloadTaskTvShowEpisodeFile.AsNoTracking()
-            .Where(x => x.DownloadStatus == DownloadStatus.Downloading || x.DownloadStatus == DownloadStatus.Moving)
+            .DownloadTaskTvShowEpisodeFile.Where(x =>
+                x.DownloadStatus == DownloadStatus.Downloading
+                || x.DownloadStatus == DownloadStatus.Moving
+                || x.DownloadStatus == DownloadStatus.MoveFinished
+            )
             .Select(x => new
             {
                 x.Id,
@@ -59,6 +65,13 @@ public class RecoverInterruptedDownloadsCommandHandler : ICommandHandler<Recover
 
         foreach (var zombie in movieFileZombies)
         {
+            var resetStatus = zombie.DownloadStatus switch
+            {
+                DownloadStatus.Moving => DownloadStatus.AutoMovePaused,
+                DownloadStatus.MoveFinished => DownloadStatus.Completed,
+                _ => DownloadStatus.AutoPaused,
+            };
+
             _log.Here()
                 .Warning(
                     "Recovering interrupted download task {DownloadTaskId} ({FullTitle}) on PlexServer {PlexServerId} — was left in {DownloadStatus} across a restart, resetting to {ResetStatus}",
@@ -66,9 +79,7 @@ public class RecoverInterruptedDownloadsCommandHandler : ICommandHandler<Recover
                     zombie.FullTitle,
                     zombie.PlexServerId,
                     zombie.DownloadStatus,
-                    zombie.DownloadStatus == DownloadStatus.Moving
-                        ? DownloadStatus.AutoMovePaused
-                        : DownloadStatus.AutoPaused
+                    resetStatus
                 );
 
             await _downloadTaskUpdateDispatcher.OnStatusChangedAsync(
@@ -79,9 +90,7 @@ public class RecoverInterruptedDownloadsCommandHandler : ICommandHandler<Recover
                     PlexServerId = zombie.PlexServerId,
                     PlexLibraryId = zombie.PlexLibraryId,
                 },
-                zombie.DownloadStatus == DownloadStatus.Moving
-                    ? DownloadStatus.AutoMovePaused
-                    : DownloadStatus.AutoPaused,
+                resetStatus,
                 cancellationToken
             );
 
@@ -90,6 +99,13 @@ public class RecoverInterruptedDownloadsCommandHandler : ICommandHandler<Recover
 
         foreach (var zombie in episodeFileZombies)
         {
+            var resetStatus = zombie.DownloadStatus switch
+            {
+                DownloadStatus.Moving => DownloadStatus.AutoMovePaused,
+                DownloadStatus.MoveFinished => DownloadStatus.Completed,
+                _ => DownloadStatus.AutoPaused,
+            };
+
             _log.Here()
                 .Warning(
                     "Recovering interrupted download task {DownloadTaskId} ({FullTitle}) on PlexServer {PlexServerId} — was left in {DownloadStatus} across a restart, resetting to {ResetStatus}",
@@ -97,9 +113,7 @@ public class RecoverInterruptedDownloadsCommandHandler : ICommandHandler<Recover
                     zombie.FullTitle,
                     zombie.PlexServerId,
                     zombie.DownloadStatus,
-                    zombie.DownloadStatus == DownloadStatus.Moving
-                        ? DownloadStatus.AutoMovePaused
-                        : DownloadStatus.AutoPaused
+                    resetStatus
                 );
 
             await _downloadTaskUpdateDispatcher.OnStatusChangedAsync(
@@ -110,9 +124,7 @@ public class RecoverInterruptedDownloadsCommandHandler : ICommandHandler<Recover
                     PlexServerId = zombie.PlexServerId,
                     PlexLibraryId = zombie.PlexLibraryId,
                 },
-                zombie.DownloadStatus == DownloadStatus.Moving
-                    ? DownloadStatus.AutoMovePaused
-                    : DownloadStatus.AutoPaused,
+                resetStatus,
                 cancellationToken
             );
 

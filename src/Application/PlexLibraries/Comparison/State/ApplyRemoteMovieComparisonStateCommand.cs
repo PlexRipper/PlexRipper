@@ -39,49 +39,37 @@ public class ApplyRemoteMovieComparisonStateCommandHandler
         if (items.Count == 0)
             return Result.Ok();
 
-        var remoteUpdatedAt = await _dbContext
-            .PlexLibraries.Where(x => x.Id == command.RemoteLibraryId)
-            .Select(x => x.UpdatedAt)
-            .SingleOrDefaultAsync(ct);
+        var remoteLibraryExists = await _dbContext.PlexLibraries.AnyAsync(x => x.Id == command.RemoteLibraryId, ct);
 
-        if (remoteUpdatedAt is null)
+        if (!remoteLibraryExists)
         {
             _log.Here()
                 .Warning("Remote library {LibraryId} not found for comparison projection", command.RemoteLibraryId);
             return Result.Ok();
         }
 
-        var ownedLibraries = await _dbContext
+        var ownedLibraryIds = await _dbContext
             .PlexLibraries.WhereIsOwned()
             .Where(x => x.Type == PlexMediaType.Movie)
-            .Select(x => new { x.Id, x.UpdatedAt })
-            .ToDictionaryAsync(x => x.Id, x => x.UpdatedAt, ct);
+            .Select(x => x.Id)
+            .ToHashSetAsync(ct);
 
-        if (ownedLibraries.Count == 0)
+        if (ownedLibraryIds.Count == 0)
             return Result.Ok();
 
-        var scopeRows = await _dbContext
+        var currentOwnedLibraryIds = await _dbContext
             .PlexComparisonScopes.Where(x =>
                 x.RemotePlexLibraryId == command.RemoteLibraryId
                 && x.MediaType == PlexMediaType.Movie
-                && ownedLibraries.Keys.Contains(x.OwnedPlexLibraryId)
-            )
-            .ToListAsync(ct);
-
-        var currentOwnedLibraryIds = scopeRows
-            .Where(x =>
-                x.RemoteLibraryUpdatedAt == remoteUpdatedAt
-                && ownedLibraries.TryGetValue(x.OwnedPlexLibraryId, out var ownedUpdatedAt)
-                && x.OwnedLibraryUpdatedAt == ownedUpdatedAt
+                && ownedLibraryIds.Contains(x.OwnedPlexLibraryId)
             )
             .Select(x => x.OwnedPlexLibraryId)
-            .ToHashSet();
+            .ToHashSetAsync(ct);
 
         if (currentOwnedLibraryIds.Count == 0)
         {
             var hasActiveJobs = await _scheduler.HasActiveJobs(
-                ownedLibraries
-                    .Keys.ToHashSet()
+                ownedLibraryIds
                     .Select(x => PlexLibraryComparisonJob.GetJobKey(x, command.RemoteLibraryId)),
                 ct
             );

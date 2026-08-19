@@ -4,9 +4,8 @@ namespace Reaparr.Domain;
 /// Stores the completed comparison scope for one remote library, one owned library, and one media type.
 /// </summary>
 /// <remarks>
-/// This table answers whether hit rows are meaningful for a library pair. Without a current scope row, missing hit rows
-/// mean "not compared yet" rather than "missing". A scope is current only while the captured remote and owned library
-/// update timestamps still match the live library timestamps.
+/// This table answers whether hit rows are meaningful for a library pair. Without a scope row, missing hit rows mean
+/// "not compared yet" rather than "missing". Content freshness is tracked once per library by <see cref="PlexLibrary"/>.
 /// </remarks>
 public class PlexComparisonState : BaseEntity
 {
@@ -29,16 +28,6 @@ public class PlexComparisonState : BaseEntity
     /// UTC timestamp when this comparison scope completed successfully.
     /// </summary>
     public required DateTime CompletedAt { get; set; }
-
-    /// <summary>
-    /// Remote library update timestamp captured when this comparison completed; used to detect stale comparison results.
-    /// </summary>
-    public DateTime? RemoteLibraryUpdatedAt { get; set; }
-
-    /// <summary>
-    /// Owned library update timestamp captured when this comparison completed; used to detect stale comparison results.
-    /// </summary>
-    public DateTime? OwnedLibraryUpdatedAt { get; set; }
 
     /// <summary>
     /// Navigation to the remote library source.

@@ -1,6 +1,6 @@
 import Log from 'consola';
 import { acceptHMRUpdate, defineStore } from 'pinia';
-import { reactive, computed, toRefs, unref } from 'vue';
+import { reactive, computed, toRefs, unref, markRaw } from 'vue';
 import type { Observable } from 'rxjs';
 import { of } from 'rxjs';
 import { get } from '@vueuse/core';
@@ -47,8 +47,8 @@ export const useLocalizationStore = defineStore(StoreNames.LocalizationStore, ()
 				return;
 			}
 
-			// @ts-expect-error - This is a valid assignment, TypeScript is being retarted here.
-			state.i18nRef = i18n;
+			// @ts-expect-error Vue's reactive state type unwraps refs, but this external runtime object must remain raw.
+			state.i18nRef = markRaw(i18n);
 			actions.changeLanguageLocale(get(i18n.locale));
 		},
 		changeLanguageLocale(isoCode: Locale) {
@@ -86,7 +86,7 @@ export const useLocalizationStore = defineStore(StoreNames.LocalizationStore, ()
 			}
 
 			const locales = unref(state.i18nRef.locales) as LocaleObject[];
-			const locale = locales.find((locale) => locale.code === state.i18nRef.locale) as LocaleObject | undefined;
+			const locale = locales.find((locale) => locale.code === unref(state.i18nRef.locale)) as LocaleObject | undefined;
 			return actions.toILocalConfig(locale);
 		}),
 		getLanguageLocaleOptions: computed((): ILocaleConfig[] => {

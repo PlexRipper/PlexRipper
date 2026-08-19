@@ -1,6 +1,6 @@
 namespace Reaparr.Application;
 
-public sealed record LibrarySyncJobPayload(int ServerId, int LibraryId);
+public sealed record LibrarySyncJobPayload(int ServerId, int LibraryId, bool ForceMediaRefresh = false);
 
 /// <summary>
 /// Quartz job that syncs a single library and chains to the next library if provided.
@@ -71,12 +71,17 @@ public class LibrarySyncJob : IJob
         {
             await UpdateQueueItemAsync(LibrarySyncJobStatus.Processing);
 
+            var forceMediaRefresh = payloadResult.Value.ForceMediaRefresh;
+
             // Jobs should swallow exceptions as otherwise Quartz will keep re-executing it
             // https://www.quartz-scheduler.net/documentation/best-practices.html#throwing-exceptions
 
             // Execute the library sync command
             var result = await Result.Try(() =>
-                _commandExecutor.Send(new RefreshLibraryMediaCommand(_libraryId), context.CancellationToken)
+                _commandExecutor.Send(
+                    new RefreshLibraryMediaCommand(_libraryId, forceMediaRefresh),
+                    context.CancellationToken
+                )
             );
 
             if (result.IsCancelled)
@@ -133,7 +138,6 @@ public class LibrarySyncJob : IJob
                         _serverId
                     );
 
-                // Mark the primary sync queue item as completed before kicking off secondary comparison work.
                 await UpdateQueueItemAsync(LibrarySyncJobStatus.Completed);
             }
         }

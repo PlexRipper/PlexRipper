@@ -185,7 +185,7 @@ public class ApplyRemoteMovieComparisonStateCommandUnitTests
     }
 
     [Test]
-    public async Task ShouldLeaveNotCompared_WhenOnlyScopeIsStaleAndNoComparisonIsQueued()
+    public async Task ShouldUseCompletedScope_WhenLibraryMetadataChangedAndNoComparisonIsQueued()
     {
         // Arrange
         await SetupDatabase(
@@ -225,8 +225,6 @@ public class ApplyRemoteMovieComparisonStateCommandUnitTests
                 OwnedPlexLibraryId = ownedLibrary.Id,
                 MediaType = PlexMediaType.Movie,
                 CompletedAt = DateTime.UtcNow,
-                RemoteLibraryUpdatedAt = new DateTime(2026, 7, 21, 17, 24, 15, DateTimeKind.Utc),
-                OwnedLibraryUpdatedAt = ownedLibrary.UpdatedAt,
             }
         );
         dbContext.PlexMovieComparisons.Add(
@@ -247,11 +245,11 @@ public class ApplyRemoteMovieComparisonStateCommandUnitTests
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
-        items[0].ComparisonId.ShouldBe(PlexMediaComparisonState.NotCompared.ToComparisonId());
+        items[0].ComparisonId.ShouldBe(PlexMediaComparisonState.HigherQuality.ToComparisonId());
     }
 
     [Test]
-    public async Task ShouldMarkPending_WhenOnlyScopeIsStaleAndComparisonIsQueued()
+    public async Task ShouldUseCompletedScope_WhenLibraryMetadataChangedAndComparisonIsQueued()
     {
         // Arrange
         await SetupDatabase(
@@ -285,8 +283,6 @@ public class ApplyRemoteMovieComparisonStateCommandUnitTests
                 OwnedPlexLibraryId = ownedLibrary.Id,
                 MediaType = PlexMediaType.Movie,
                 CompletedAt = DateTime.UtcNow,
-                RemoteLibraryUpdatedAt = new DateTime(2026, 7, 21, 17, 24, 15, DateTimeKind.Utc),
-                OwnedLibraryUpdatedAt = ownedLibrary.UpdatedAt,
             }
         );
         Mock.Mock<IScheduler>()
@@ -321,7 +317,7 @@ public class ApplyRemoteMovieComparisonStateCommandUnitTests
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
-        items[0].ComparisonId.ShouldBe(PlexMediaComparisonState.Pending.ToComparisonId());
+        items[0].ComparisonId.ShouldBe(PlexMediaComparisonState.Missing.ToComparisonId());
     }
 
     [Test]
@@ -422,15 +418,6 @@ public class ApplyRemoteMovieComparisonStateCommandUnitTests
 
     private async Task AddCurrentScopeAsync(PlexLibrary remoteLibrary, PlexLibrary ownedLibrary)
     {
-        var remoteUpdatedAt = await IDbContext
-            .PlexLibraries.Where(x => x.Id == remoteLibrary.Id)
-            .Select(x => x.UpdatedAt)
-            .SingleAsync(CancellationToken);
-        var ownedUpdatedAt = await IDbContext
-            .PlexLibraries.Where(x => x.Id == ownedLibrary.Id)
-            .Select(x => x.UpdatedAt)
-            .SingleAsync(CancellationToken);
-
         var dbContext = IDbContext;
         dbContext.PlexComparisonScopes.Add(
             new PlexComparisonState
@@ -440,8 +427,6 @@ public class ApplyRemoteMovieComparisonStateCommandUnitTests
                 OwnedPlexLibraryId = ownedLibrary.Id,
                 MediaType = PlexMediaType.Movie,
                 CompletedAt = DateTime.UtcNow,
-                RemoteLibraryUpdatedAt = remoteUpdatedAt,
-                OwnedLibraryUpdatedAt = ownedUpdatedAt,
             }
         );
         await dbContext.SaveChangesAsync(CancellationToken);

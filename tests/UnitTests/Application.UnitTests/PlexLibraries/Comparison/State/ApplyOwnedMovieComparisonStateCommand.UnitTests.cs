@@ -243,8 +243,6 @@ public class ApplyOwnedMovieComparisonStateCommandUnitTests : BaseCommandUnitTes
                 OwnedPlexLibraryId = ownedLibrary.Id,
                 MediaType = PlexMediaType.Movie,
                 CompletedAt = DateTime.UtcNow,
-                RemoteLibraryUpdatedAt = remoteUpdatedAt,
-                OwnedLibraryUpdatedAt = ownedUpdatedAt,
             }
         );
         await dbContext.SaveChangesAsync(CancellationToken);

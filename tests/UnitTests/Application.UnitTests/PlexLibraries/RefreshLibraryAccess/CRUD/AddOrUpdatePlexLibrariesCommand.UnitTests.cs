@@ -332,7 +332,7 @@ public class AddOrUpdatePlexLibrariesCommandUnitTests : BaseUnitTest<AddOrUpdate
     }
 
     [Test]
-    public async Task ShouldNotMarkLibraryOutdated_WhenContentChangedButUpdatedBeforeLastSync()
+    public async Task ShouldNotMarkLibraryOutdated_WhenContentChangeWasAlreadySynced()
     {
         // Arrange
         await SetupDatabase(
@@ -351,11 +351,12 @@ public class AddOrUpdatePlexLibrariesCommandUnitTests : BaseUnitTest<AddOrUpdate
         var syncedAt = DateTime.UtcNow - TimeSpan.FromHours(1);
         var incomingUpdatedAt = syncedAt - TimeSpan.FromMinutes(5);
         plexLibrary.SyncedAt = syncedAt;
+        plexLibrary.SyncedContentChangedAt = plexLibrary.ContentChangedAt + 1;
         plexLibrary.Outdated = false;
         await dbContext.SaveChangesAsync(CancellationToken);
 
         var incomingLibrary = new List<PlexLibrary> { plexLibrary }
-            .ToApiLibraries(incomingUpdatedAt, contentChangedAt: plexLibrary.ContentChangedAt + 1)
+            .ToApiLibraries(incomingUpdatedAt, contentChangedAt: plexLibrary.SyncedContentChangedAt)
             .Single();
         var request = new AddOrUpdatePlexLibrariesCommand
         {

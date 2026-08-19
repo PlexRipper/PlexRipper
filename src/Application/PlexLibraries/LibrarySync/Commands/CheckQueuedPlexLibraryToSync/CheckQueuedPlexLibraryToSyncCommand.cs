@@ -95,13 +95,23 @@ public class CheckQueuedPlexLibraryToSyncCommandHandler : ICommandHandler<CheckQ
 
             var nextLibrary = serverGroup.OrderBy(x => x.Priority).First();
 
-            await ScheduleLibrarySyncJob(serverId, nextLibrary.PlexLibraryId, cancellationToken);
+            await ScheduleLibrarySyncJob(
+                serverId,
+                nextLibrary.PlexLibraryId,
+                nextLibrary.ForceMediaRefresh,
+                cancellationToken
+            );
         }
 
         return Result.Ok();
     }
 
-    private async Task ScheduleLibrarySyncJob(int serverId, int libraryId, CancellationToken cancellationToken)
+    private async Task ScheduleLibrarySyncJob(
+        int serverId,
+        int libraryId,
+        bool forceMediaRefresh,
+        CancellationToken cancellationToken
+    )
     {
         var jobKey = LibrarySyncJob.GetJobKey(serverId, libraryId);
 
@@ -136,7 +146,7 @@ public class CheckQueuedPlexLibraryToSyncCommandHandler : ICommandHandler<CheckQ
 
         var scheduleResult = await _scheduler.ExecuteJob<LibrarySyncJob, LibrarySyncJobPayload>(
             jobKey,
-            new LibrarySyncJobPayload(serverId, libraryId),
+            new LibrarySyncJobPayload(serverId, libraryId, forceMediaRefresh),
             cancellationToken
         );
 

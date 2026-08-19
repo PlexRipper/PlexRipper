@@ -56,6 +56,45 @@ describe('LibraryStore.getLibrarySyncQueueGrouped()', () => {
 		expect(result[0]?.progress[0]?.isComplete).toBe(false);
 	});
 
+	test('Should project terminal queue statuses as complete without SignalR progress', () => {
+		// Arrange
+		const libraryStore = useLibraryStore();
+		libraryStore.syncQueues = [
+			generateLibrarySyncJobQueue({ plexLibraryId: 11, plexServerId: 1, status: LibrarySyncJobStatus.Completed }),
+			generateLibrarySyncJobQueue({ plexLibraryId: 12, plexServerId: 1, status: LibrarySyncJobStatus.Failed }),
+			generateLibrarySyncJobQueue({ plexLibraryId: 13, plexServerId: 1, status: LibrarySyncJobStatus.Cancelled }),
+		];
+
+		// Act
+		const result = libraryStore.getLibrarySyncQueueGrouped(1);
+
+		// Assert
+		expect(result[0]?.progress.map(({ percentage, isComplete }) => ({ percentage, isComplete }))).toEqual([
+			{ percentage: 100, isComplete: true },
+			{ percentage: 100, isComplete: true },
+			{ percentage: 100, isComplete: true },
+		]);
+	});
+
+	test('Should hide terminal queues completed before the cutoff while preserving active queues', () => {
+		// Arrange
+		const libraryStore = useLibraryStore();
+		const cutoff = new Date('2026-01-01T12:00:00.000Z');
+		libraryStore.syncQueues = [
+			generateLibrarySyncJobQueue({ plexLibraryId: 11, plexServerId: 1, status: LibrarySyncJobStatus.Completed, completedAt: '2026-01-01T11:59:59.999Z' }),
+			generateLibrarySyncJobQueue({ plexLibraryId: 12, plexServerId: 1, status: LibrarySyncJobStatus.Failed, completedAt: cutoff.toISOString() }),
+			generateLibrarySyncJobQueue({ plexLibraryId: 13, plexServerId: 1, status: LibrarySyncJobStatus.Cancelled }),
+			generateLibrarySyncJobQueue({ plexLibraryId: 14, plexServerId: 1, status: LibrarySyncJobStatus.Processing }),
+			generateLibrarySyncJobQueue({ plexLibraryId: 15, plexServerId: 1, status: LibrarySyncJobStatus.Queued }),
+		];
+
+		// Act
+		const result = libraryStore.getLibrarySyncQueueGrouped(1, cutoff);
+
+		// Assert
+		expect(result[0]?.progress.map((queue) => queue.plexLibraryId)).toEqual([12, 14, 15]);
+	});
+
 	test('Should return queues for all Plex servers when no server is requested', () => {
 		// Arrange
 		const libraryStore = useLibraryStore();

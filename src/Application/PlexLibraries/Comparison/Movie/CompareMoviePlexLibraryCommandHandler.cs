@@ -83,8 +83,8 @@ public class CompareMoviePlexLibraryCommandHandler : ICommandHandler<CompareMovi
         var now = DateTime.UtcNow;
         var librarySnapshots = await _dbContext
             .PlexLibraries.Where(x => x.Id == remoteLibraryId || x.Id == ownedLibraryId)
-            .Select(x => new { x.Id, x.UpdatedAt })
-            .ToDictionaryAsync(x => x.Id, x => x.UpdatedAt, cancellationToken);
+            .Select(x => new { x.Id, x.ContentChangedAt })
+            .ToDictionaryAsync(x => x.Id, x => x.ContentChangedAt, cancellationToken);
 
         // Load remote movies with their quality
         var remoteMovies = await _dbContext
@@ -187,8 +187,8 @@ public class CompareMoviePlexLibraryCommandHandler : ICommandHandler<CompareMovi
             {
                 var currentLibrarySnapshots = await ctx
                     .PlexLibraries.Where(x => x.Id == remoteLibraryId || x.Id == ownedLibraryId)
-                    .Select(x => new { x.Id, x.UpdatedAt })
-                    .ToDictionaryAsync(x => x.Id, x => x.UpdatedAt, txCt);
+                    .Select(x => new { x.Id, x.ContentChangedAt })
+                    .ToDictionaryAsync(x => x.Id, x => x.ContentChangedAt, txCt);
 
                 var librariesChanged =
                     librarySnapshots.Count != currentLibrarySnapshots.Count
@@ -219,8 +219,6 @@ public class CompareMoviePlexLibraryCommandHandler : ICommandHandler<CompareMovi
                         OwnedPlexLibraryId = ownedLibraryId,
                         MediaType = PlexMediaType.Movie,
                         CompletedAt = now,
-                        RemoteLibraryUpdatedAt = librarySnapshots.GetValueOrDefault(remoteLibraryId),
-                        OwnedLibraryUpdatedAt = librarySnapshots.GetValueOrDefault(ownedLibraryId),
                     };
 
                     await ctx.PlexComparisonScopes.AddAsync(state, txCt);
@@ -228,8 +226,6 @@ public class CompareMoviePlexLibraryCommandHandler : ICommandHandler<CompareMovi
                 else
                 {
                     state.CompletedAt = now;
-                    state.RemoteLibraryUpdatedAt = librarySnapshots.GetValueOrDefault(remoteLibraryId);
-                    state.OwnedLibraryUpdatedAt = librarySnapshots.GetValueOrDefault(ownedLibraryId);
                 }
 
                 await ctx

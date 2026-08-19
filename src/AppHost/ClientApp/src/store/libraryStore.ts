@@ -105,7 +105,6 @@ export const useLibraryStore = defineStore(StoreNames.LibraryStore, () => {
      */
 		reSyncLibrary(libraryId: number, forceMediaRefresh = false): Observable<PlexLibraryDTO | null> {
 			return plexLibraryApi.refreshLibraryMediaEndpoint(libraryId, {
-				plexLibraryId: libraryId,
 				forceLibrarySync: true,
 				forceMediaRefresh,
 			}).pipe(tap((library) => actions.updateLibrary(library.value)), switchMap((library): Observable<PlexLibraryDTO | null> => of(getters.getLibrary(library.value?.id ?? 0))));
@@ -170,35 +169,6 @@ export const useLibraryStore = defineStore(StoreNames.LibraryStore, () => {
 		}, $reset() {
 			Object.assign(state, cloneDeep(defaultState));
 		},
-		/**
-     * Clears completed sync queue items and their associated progress for all servers
-     * where all items for that server are completed.
-     */
-		clearCompletedSyncQueues(): void {
-			// Group queues by server
-			const serverIds = [...new Set(state.syncQueues.map((x) => x.plexServerId))];
-			const libraryIdsToClear: number[] = [];
-			const serverIdsToClear: number[] = [];
-
-			// Find servers where ALL items are completed
-			for (const serverId of serverIds) {
-				const serverQueues = state.syncQueues.filter((x) => x.plexServerId === serverId);
-				if (serverQueues.length > 0 && serverQueues.every((x) => x.status === LibrarySyncJobStatus.Completed)) {
-					serverIdsToClear.push(serverId);
-					libraryIdsToClear.push(...serverQueues.map((x) => x.plexLibraryId));
-				}
-			}
-
-			if (serverIdsToClear.length > 0) {
-				// Remove completed items from the queue
-				const remainingQueues = state.syncQueues.filter((x) => !serverIdsToClear.includes(x.plexServerId));
-				state.syncQueues.splice(0, state.syncQueues.length, ...remainingQueues);
-
-				// Remove progress items for cleared libraries
-				const remainingProgress = state.progress.filter((x) => !libraryIdsToClear.includes(x.plexLibraryId));
-				state.progress.splice(0, state.progress.length, ...remainingProgress);
-			}
-		},
 	};
 	const getters = {
 		/**
@@ -239,12 +209,22 @@ export const useLibraryStore = defineStore(StoreNames.LibraryStore, () => {
 		getIsLibrarySyncing: (libraryId: number): boolean => {
 			return state.syncQueues.some((x) => x.plexLibraryId === libraryId && x.status === LibrarySyncJobStatus.Processing);
 		},
-		getLibrarySyncQueueGrouped: (plexServerId?: number): ILibrarySyncProgress[] => {
+		getLibrarySyncQueueGrouped: (plexServerId?: number, terminalCutoff?: Date): ILibrarySyncProgress[] => {
 			return state.syncQueues
 				.filter((queue) => plexServerId === undefined || queue.plexServerId === plexServerId)
+				.filter((queue) => {
+					const isTerminal = [LibrarySyncJobStatus.Completed, LibrarySyncJobStatus.Failed, LibrarySyncJobStatus.Cancelled].includes(queue.status);
+					return !isTerminal || terminalCutoff === undefined || (!!queue.completedAt && Date.parse(queue.completedAt) >= terminalCutoff.getTime());
+				})
 				.reduce<ILibrarySyncProgress[]>((acc, queue) => {
 					const progress = state.progress.find((p) => p.plexLibraryId === queue.plexLibraryId);
-					const queueWithProgress = { ...queue, ...progress } as LibrarySyncJobQueueDTO & LibrarySyncProgressDTO;
+					const isTerminal = [LibrarySyncJobStatus.Completed, LibrarySyncJobStatus.Failed, LibrarySyncJobStatus.Cancelled].includes(queue.status);
+					const queueWithProgress = {
+						...queue,
+						...progress,
+						percentage: isTerminal ? 100 : progress?.percentage,
+						isComplete: isTerminal || progress?.isComplete,
+					} as LibrarySyncJobQueueDTO & LibrarySyncProgressDTO;
 					const existing = acc.find((x) => x.serverId === queue.plexServerId);
 					if (existing) {
 						existing.progress.push(queueWithProgress);

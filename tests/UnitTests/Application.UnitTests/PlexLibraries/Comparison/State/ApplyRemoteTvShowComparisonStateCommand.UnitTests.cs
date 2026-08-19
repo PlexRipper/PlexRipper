@@ -273,6 +273,79 @@ public class ApplyRemoteTvShowComparisonStateCommandUnitTests
     }
 
     [Test]
+    public async Task ShouldUseProjectedEpisodeCount_WhenEpisodeTableContainsAdditionalRows()
+    {
+        // Arrange
+        await SetupDatabase(
+            67,
+            config =>
+            {
+                config.PlexServerCount = 2;
+                config.PlexTvShowLibraryCount = 1;
+                config.PlexAccountCount = 1;
+                config.TvShowCount = 1;
+                config.TvShowSeasonCount = 1;
+                config.TvShowEpisodeCount = 3;
+            }
+        );
+
+        var dbContext = IDbContext;
+        var libraries = await dbContext.PlexLibraries.OrderBy(x => x.Id).ToListAsync(CancellationToken);
+        var remoteLibrary = libraries[0];
+        var ownedLibrary = libraries[1];
+        await SetOwnedOverrideAsync(remoteLibrary.PlexServerId, false);
+        await SetOwnedOverrideAsync(ownedLibrary.PlexServerId, true);
+        var remoteTvShow = await GetLibraryTvShowAsync(remoteLibrary.Id);
+        var ownedTvShow = await GetLibraryTvShowAsync(ownedLibrary.Id);
+        var remoteEpisodes = await GetLibraryEpisodesAsync(remoteLibrary.Id);
+        var ownedEpisodes = await GetLibraryEpisodesAsync(ownedLibrary.Id);
+        await AddCurrentScopeAsync(remoteLibrary, ownedLibrary);
+        dbContext.PlexTvShowComparisons.Add(
+            CreateTvShowComparison(
+                remoteLibrary.Id,
+                ownedLibrary.Id,
+                remoteTvShow.Id,
+                ownedTvShow.Id,
+                PlexMediaComparisonHitState.Matched
+            )
+        );
+        dbContext.PlexEpisodeComparisons.AddRange(
+            CreateEpisodeComparison(
+                remoteLibrary.Id,
+                ownedLibrary.Id,
+                remoteEpisodes[0].Id,
+                ownedEpisodes[0].Id,
+                PlexMediaComparisonHitState.Matched
+            ),
+            CreateEpisodeComparison(
+                remoteLibrary.Id,
+                ownedLibrary.Id,
+                remoteEpisodes[1].Id,
+                ownedEpisodes[1].Id,
+                PlexMediaComparisonHitState.Matched
+            )
+        );
+        await dbContext.SaveChangesAsync(CancellationToken);
+
+        var remoteTvShowId = remoteTvShow.Id;
+        await dbContext
+            .PlexTvShows.Where(x => x.Id == remoteTvShowId)
+            .ExecuteUpdateAsync(x => x.SetProperty(y => y.GrandChildCount, 2), CancellationToken);
+        remoteTvShow = await GetLibraryTvShowAsync(remoteLibrary.Id);
+        var items = new List<PlexMediaSlimDTO> { CreateTvShowItem(remoteTvShow) };
+
+        // Act
+        var result = await TestHandlerExecuteAsync(
+            new ApplyRemoteTvShowComparisonStateCommand(items, remoteLibrary.Id)
+        );
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        result.Errors.ShouldBeEmpty();
+        items[0].ComparisonId.ShouldBe(PlexMediaComparisonState.Owned.ToComparisonId());
+    }
+
+    [Test]
     public async Task ShouldMarkPending_WhenNoCurrentTvScopeAndComparisonIsQueued()
     {
         // Arrange
@@ -377,8 +450,6 @@ public class ApplyRemoteTvShowComparisonStateCommandUnitTests
                 OwnedPlexLibraryId = ownedLibrary.Id,
                 MediaType = PlexMediaType.TvShow,
                 CompletedAt = DateTime.UtcNow,
-                RemoteLibraryUpdatedAt = remoteUpdatedAt,
-                OwnedLibraryUpdatedAt = ownedUpdatedAt,
             }
         );
         await dbContext.SaveChangesAsync(CancellationToken);

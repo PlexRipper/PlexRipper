@@ -335,8 +335,6 @@ public class GetMediaDetailByIdEndpointUnitTests
                 OwnedPlexLibraryId = ownedLibrary.Id,
                 MediaType = PlexMediaType.TvShow,
                 CompletedAt = DateTime.UtcNow,
-                RemoteLibraryUpdatedAt = remoteUpdatedAt,
-                OwnedLibraryUpdatedAt = ownedUpdatedAt,
             }
         );
         await dbContext.SaveChangesAsync(CancellationToken);

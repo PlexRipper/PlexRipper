@@ -43,22 +43,22 @@ public class DeletePlexServerEndpoint : Endpoint<DeletePlexServerEndpointRequest
     {
         _log.Here().DebugApiCall(HttpContext, req);
 
-        var plexServer = await _dbContext.PlexServers.IgnoreIsEnabledFilter().GetAsync(req.PlexServerId, ct);
-
-        if (plexServer is null)
-        {
-            await Send.FluentResult(ResultExtensions.EntityNotFound(nameof(PlexServer), req.PlexServerId), ct);
-            return;
-        }
-
         var libraryIds = await _dbContext
             .PlexLibraries.IgnoreQueryFilters()
             .Where(x => x.PlexServerId == req.PlexServerId)
             .Select(x => x.Id)
             .ToListAsync(ct);
 
-        _dbContext.PlexServers.Remove(plexServer);
-        await _dbContext.SaveChangesAsync(ct);
+        var deletedPlexServersCount = await _dbContext
+            .PlexServers.IgnoreIsEnabledFilter()
+            .Where(x => x.Id == req.PlexServerId)
+            .ExecuteDeleteAsync(ct);
+
+        if (deletedPlexServersCount == 0)
+        {
+            await Send.FluentResult(ResultExtensions.EntityNotFound(nameof(PlexServer), req.PlexServerId), ct);
+            return;
+        }
 
         _mediaQueryCache.InvalidateLibraries(libraryIds, "Plex server deleted");
 

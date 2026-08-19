@@ -29,32 +29,29 @@ public class CheckAllConnectionsStatusByPlexServerJob : IJob
 
     public async Task Execute(IJobExecutionContext context)
     {
+        var cancellationToken = context.CancellationToken;
+        var plexServers = await _dbContext
+            .PlexServers.Include(x => x.PlexServerConnections)
+            .ToListAsync(cancellationToken);
+
+        if (!plexServers.Any())
+        {
+            return;
+        }
+
+        // Send start job status update
+        var payload = new CheckAllConnectionStatusUpdateDTO
+        {
+            PlexServersWithConnectionIds = plexServers.ToDictionary(
+                x => x.Id,
+                x => x.PlexServerConnections.Select(y => y.Id).ToList()
+            ),
+        };
+
         var result = await Result.Try(async Task () =>
         {
-            var cancellationToken = context.CancellationToken;
-            var plexServers = await _dbContext
-                .PlexServers.Include(x => x.PlexServerConnections)
-                .ToListAsync(cancellationToken);
-
-            if (!plexServers.Any())
-            {
-                return;
-            }
-
-            // Send start job status update
-            var update = new JobStatusUpdate<CheckAllConnectionStatusUpdateDTO>(
-                JobTypes.CheckAllConnectionsStatusByPlexServerJob,
-                JobStatus.Started,
-                new CheckAllConnectionStatusUpdateDTO
-                {
-                    PlexServersWithConnectionIds = plexServers.ToDictionary(
-                        x => x.Id,
-                        x => x.PlexServerConnections.Select(y => y.Id).ToList()
-                    ),
-                }
-            );
-
-            await _progressHubService.SendJobStatusUpdateAsync(update);
+            var startedUpdate = context.SetCronJobPayload(JobStatus.Started, payload);
+            await _progressHubService.SendJobStatusUpdateAsync(startedUpdate);
 
             var connectionResults = await Task.WhenAll(
                 plexServers.Select(async plexServer =>
@@ -75,19 +72,9 @@ public class CheckAllConnectionsStatusByPlexServerJob : IJob
 
             if (cancelledResults.Count > 0 || failedResults.Count > 0)
             {
-                context.SetResult(
-                    cancelledResults.Count > 0 ? JobStatus.Cancelled : JobStatus.Failed,
-                    (cancelledResults.Count > 0 ? cancelledResults : failedResults)
-                        .FirstOrDefault()
-                        ?.Errors.FirstOrDefault()
-                        ?.Message
-                );
+                context.SetCronJobPayload(cancelledResults.Count > 0 ? JobStatus.Cancelled : JobStatus.Failed, payload);
                 return;
             }
-
-            // Send completed job status update
-            update.Status = JobStatus.Completed;
-            await _progressHubService.SendJobStatusUpdateAsync(update);
 
             _log.Here()
                 .Debug(
@@ -96,20 +83,5 @@ public class CheckAllConnectionsStatusByPlexServerJob : IJob
                     plexServers.Select(x => x.Id).ToList()
                 );
         });
-
-        if (result.IsCancelled)
-        {
-            context.SetResult(JobStatus.Cancelled, result);
-            result.LogWarning();
-        }
-        else if (result.IsFailed)
-        {
-            context.SetResult(JobStatus.Failed, result);
-            result.LogError();
-        }
-        else
-        {
-            context.SetResult(JobStatus.Completed);
-        }
     }
 }

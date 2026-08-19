@@ -8,6 +8,21 @@ public static partial class QuartzExtensions
     public static void SetResult(this IJobExecutionContext context, JobStatus status, string? errorSummary = null) =>
         context.Result = new BackgroundJobResult(status, errorSummary);
 
+    public static JobStatusUpdate<TPayload> SetCronJobPayload<TPayload>(
+        this IJobExecutionContext context,
+        JobStatus status,
+        TPayload payload
+    )
+        where TPayload : class
+    {
+        var update = new JobStatusUpdate<TPayload>(context.GetJobType(), status, payload);
+        context.Result = update;
+        return update;
+    }
+
+    public static TPayload? GetCronJobPayload<TPayload>(this IJobExecutionContext context)
+        where TPayload : class => (context.Result as JobStatusUpdate<TPayload>)?.Data;
+
     public static JobTypes GetJobType(this IJobExecutionContext context) =>
         JobStatusUpdateMapper.ToJobType(context.JobDetail.Key.Group);
 
@@ -50,10 +65,13 @@ public static partial class QuartzExtensions
                     context.MergedJobDataMap.GetPayload<PlexLibraryComparisonJobPayload>(),
                     DefaultJsonSerializerOptions.ConfigStandard
                 );
-            // CRON jobs have no payload, so we return an empty JSON object.
+            case JobTypes.CheckAllConnectionsStatusByPlexServerJob:
+                var payload = context.GetCronJobPayload<CheckAllConnectionStatusUpdateDTO>();
+                return payload is null
+                    ? defaultJson
+                    : JsonSerializer.Serialize(payload, DefaultJsonSerializerOptions.ConfigStandard);
             case JobTypes.MetadataSyncJob:
             case JobTypes.CheckForUpdateJob:
-            case JobTypes.CheckAllConnectionsStatusByPlexServerJob:
             case JobTypes.CheckPlexLibrariesForUpdatesJob:
             case JobTypes.RefreshPlexAccountAccessJob:
                 return defaultJson;

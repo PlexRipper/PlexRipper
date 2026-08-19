@@ -105,7 +105,6 @@ export const useLibraryStore = defineStore(StoreNames.LibraryStore, () => {
      */
 		reSyncLibrary(libraryId: number, forceMediaRefresh = false): Observable<PlexLibraryDTO | null> {
 			return plexLibraryApi.refreshLibraryMediaEndpoint(libraryId, {
-				plexLibraryId: libraryId,
 				forceLibrarySync: true,
 				forceMediaRefresh,
 			}).pipe(tap((library) => actions.updateLibrary(library.value)), switchMap((library): Observable<PlexLibraryDTO | null> => of(getters.getLibrary(library.value?.id ?? 0))));

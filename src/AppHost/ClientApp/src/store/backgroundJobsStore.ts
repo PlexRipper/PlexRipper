@@ -7,7 +7,7 @@ import { catchError, filter, map, take, switchMap, tap } from 'rxjs/operators';
 import { StoreNames, type ISetupResult } from '@interfaces';
 import type {
 	CheckAllConnectionStatusUpdateDTO, InspectPlexServerJobUpdateDTO,
-	JobStatusUpdateDTO as ApiJobStatusUpdateDTO, LibrarySyncJobQueueDTO,
+	JobStatusUpdateDTO as ApiJobStatusUpdateDTO, LibraryComparisonCompletedDTO, LibrarySyncJobQueueDTO,
 } from '@dto';
 import {
 	JobStatus,
@@ -34,6 +34,7 @@ export const useBackgroundJobsStore = defineStore(StoreNames.BackgroundJobsStore
 	const libraryStore = useLibraryStore();
 	const settingsStore = useSettingsStore();
 	const connectionStore = useServerConnectionStore();
+	const mediaOverviewStore = useMediaOverviewStore();
 
 	// Actions
 	const actions = {
@@ -58,6 +59,8 @@ export const useBackgroundJobsStore = defineStore(StoreNames.BackgroundJobsStore
 				.getCheckPlexServerConnectionsJobUpdate(JobStatus.Completed)
 				.pipe(switchMap(() => connectionStore.refreshPlexServerConnections()))
 				.subscribe();
+
+			getters.getLibraryComparisonJobUpdate().pipe(switchMap((value) => mediaOverviewStore.refreshCurrentMediaDataWhenComparisonCompleted(value.data))).subscribe();
 
 			return backgroundJobsApi.getAllBackgroundJobsEndpoint().pipe(
 				tap((response) => {
@@ -119,6 +122,8 @@ export const useBackgroundJobsStore = defineStore(StoreNames.BackgroundJobsStore
 
 		getLibrarySyncJobUpdate: (status: JobStatus | null = null): Observable<JobStatusUpdateDTO<LibrarySyncJobQueueDTO>> =>
 			getters.getJobStatusUpdate(JobTypes.LibrarySyncJob, status),
+		getLibraryComparisonJobUpdate: (status: JobStatus | null = null): Observable<JobStatusUpdateDTO<LibraryComparisonCompletedDTO>> =>
+			getters.getJobStatusUpdate(JobTypes.LibraryComparisonJob, status),
 	};
 
 	return {

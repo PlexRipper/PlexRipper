@@ -177,8 +177,6 @@ export const useSignalrStore = defineStore(StoreNames.SignalrStore, () => {
 
 		progressHubConnection?.on(MessageTypes.AppUpdateDownloadProgress, (data: AppUpdateDownloadProgressDTO) => state.appUpdateDownloadProgressSubject.next(data));
 
-		progressHubConnection?.on(MessageTypes.LibraryComparisonCompleted, (data: LibraryComparisonCompletedDTO) => useMediaOverviewStore().refreshCurrentMediaDataWhenComparisonCompleted(data).subscribe());
-
 		notificationHubConnection?.on(MessageTypes.Notification, (data: NotificationDTO) => notificationsStore.setNotification(data));
 
 		notificationHubConnection?.on(MessageTypes.RefreshNotification, (data: RefreshDataType) => {

@@ -73,7 +73,6 @@ function syncServerLibraries(forceMediaRefresh: boolean): void {
 	useSubscription(
 		plexServerApi
 			.syncPlexServerMediaEndpoint(plexServerId, {
-				plexServerId,
 				forceLibrarySync: true,
 				forceMediaRefresh,
 			})

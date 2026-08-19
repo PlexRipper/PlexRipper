@@ -173,6 +173,77 @@ public class RecoverInterruptedDownloadsCommandUnitTests : BaseUnitTest<RecoverI
     }
 
     [Test]
+    public async Task ShouldSetCompleted_ForMoveFinishedMovieAndEpisodeFileTasks()
+    {
+        // Arrange
+        await SetupDatabase(
+            68115,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexMovieLibraryCount = 1;
+                config.MovieCount = 1;
+                config.MovieDownloadTasksCount = 1;
+                config.TvShowCount = 1;
+                config.TvShowDownloadTasksCount = 1;
+                config.TvShowSeasonDownloadTasksCount = 1;
+                config.TvShowEpisodeDownloadTasksCount = 1;
+            }
+        );
+
+        var movieFile = await IDbContext.DownloadTaskMovieFile.FirstAsync(CancellationToken);
+        var episodeFile = await IDbContext.DownloadTaskTvShowEpisodeFile.FirstAsync(CancellationToken);
+        await IDbContext
+            .DownloadTaskMovieFile.Where(x => x.Id == movieFile.Id)
+            .ExecuteUpdateAsync(
+                p => p.SetProperty(x => x.DownloadStatus, DownloadStatus.MoveFinished),
+                CancellationToken
+            );
+        await IDbContext
+            .DownloadTaskTvShowEpisodeFile.Where(x => x.Id == episodeFile.Id)
+            .ExecuteUpdateAsync(
+                p => p.SetProperty(x => x.DownloadStatus, DownloadStatus.MoveFinished),
+                CancellationToken
+            );
+
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Setup(x =>
+                x.OnStatusChangedAsync(
+                    It.IsAny<DownloadTaskKey>(),
+                    DownloadStatus.Completed,
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .Returns(Task.CompletedTask);
+
+        // Act
+        var result = await Sut.ExecuteAsync(new RecoverInterruptedDownloadsCommand(), CancellationToken);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Verify(
+                x =>
+                    x.OnStatusChangedAsync(
+                        It.Is<DownloadTaskKey>(k => k.Id == movieFile.Id),
+                        DownloadStatus.Completed,
+                        It.IsAny<CancellationToken>()
+                    ),
+                Times.Once
+            );
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Verify(
+                x =>
+                    x.OnStatusChangedAsync(
+                        It.Is<DownloadTaskKey>(k => k.Id == episodeFile.Id),
+                        DownloadStatus.Completed,
+                        It.IsAny<CancellationToken>()
+                    ),
+                Times.Once
+            );
+    }
+
+    [Test]
     public async Task ShouldOnlyRecoverActiveStatuses_WhenMixedStatusesExist()
     {
         // Arrange

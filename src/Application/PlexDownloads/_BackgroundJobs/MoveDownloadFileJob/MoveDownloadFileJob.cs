@@ -89,17 +89,9 @@ public class MoveDownloadFileJob : IJob
                 return;
             }
 
-            var downloadTaskResult = await Result.Try(() => _dbContext.GetDownloadTaskFileAsync(downloadTaskKey, ct));
-            if (downloadTaskResult.IsCancelled)
-            {
-                _log.Here()
-                    .Warning(
-                        "{JobName} for {DownloadTaskKey} was cancelled",
-                        nameof(MoveDownloadFileJob),
-                        downloadTaskKey
-                    );
-                return;
-            }
+            var downloadTaskResult = await Result.Try(() =>
+                _dbContext.GetDownloadTaskFileAsync(downloadTaskKey, CancellationToken.None)
+            );
 
             if (downloadTaskResult.IsFailed)
             {
@@ -118,11 +110,18 @@ public class MoveDownloadFileJob : IJob
 
             if (downloadTask.DownloadStatus is DownloadStatus.MoveFinished)
             {
-                await _downloadTaskUpdateDispatcher.OnStatusChangedAsync(downloadTaskKey, DownloadStatus.Completed, ct);
+                await _downloadTaskUpdateDispatcher.OnStatusChangedAsync(
+                    downloadTaskKey,
+                    DownloadStatus.Completed,
+                    CancellationToken.None
+                );
 
                 // Clean up the Download task folders
                 var cleanupResult = await Result.Try(() =>
-                    _commandExecutor.Send(new CleanUpDownloadTaskFoldersCommand(downloadTaskKey), ct)
+                    _commandExecutor.Send(
+                        new CleanUpDownloadTaskFoldersCommand(downloadTaskKey),
+                        CancellationToken.None
+                    )
                 );
                 if (cleanupResult.IsCancelled)
                 {

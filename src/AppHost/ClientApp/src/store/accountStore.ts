@@ -6,7 +6,7 @@ import { finalize, map, switchMap, tap } from 'rxjs/operators';
 import type { CreatePlexAccountEndpointRequest, PlexAccountDTO } from '@dto';
 import { RefreshDataType } from '@dto';
 import { StoreNames, type ISetupResult } from '@interfaces';
-import { plexAccountApi } from '@api';
+import { plexAccountApi, plexServerApi } from '@api';
 import { useLibraryStore, useServerStore, useSettingsStore, useSignalrStore } from '@store';
 import { cloneDeep } from 'lodash-es';
 
@@ -14,12 +14,14 @@ interface IAccountStoreState {
 	accounts: PlexAccountDTO[];
 	accessSyncLoading: boolean;
 	accessSyncLoadingAccountId: number | null;
+	refreshingServerIds: Set<number>;
 }
 
 export const useAccountStore = defineStore(StoreNames.AccountStore, () => {
 	const defaultState = {
 		accessSyncLoading: false,
 		accessSyncLoadingAccountId: null,
+		refreshingServerIds: new Set<number>(),
 		accounts: [],
 	};
 
@@ -46,6 +48,23 @@ export const useAccountStore = defineStore(StoreNames.AccountStore, () => {
 						state.accounts = result.value;
 					}
 				}),
+			);
+		},
+		reSyncServer(serverId: number) {
+			state.refreshingServerIds.add(serverId);
+			return plexServerApi.refreshPlexServerAccountsAccessEndpoint(serverId).pipe(
+				switchMap((result) => {
+					if (!result.isSuccess) {
+						return of(result);
+					}
+
+					return forkJoin([
+						actions.refreshAccounts(),
+						serverStore.refreshPlexServers(),
+						libraryStore.refreshLibraries(),
+					]).pipe(switchMap(() => of(result)));
+				}),
+				finalize(() => state.refreshingServerIds.delete(serverId)),
 			);
 		},
 		reSyncAccount(accountId: number) {

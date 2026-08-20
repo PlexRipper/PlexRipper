@@ -77,10 +77,10 @@
 			<!-- No libraries available -->
 			<template v-else>
 				<q-item
-					v-if="!accountStore.accessSyncLoading"
+					v-if="!accountStore.refreshingServerIds.has(server.id)"
 					:data-cy="`server-drawer-item-${server.id}-no-libraries`"
 					clickable
-					@click="runReSyncAccount">
+					@click="runReSyncAccount(server.id)">
 					<q-item-section>{{ t('components.server-drawer.no-libraries') }}</q-item-section>
 				</q-item>
 				<q-item
@@ -115,8 +115,6 @@
 <script setup lang="ts">
 import Log from 'consola';
 import { type PlexLibraryDTO, PlexMediaType } from '@dto';
-import { useSubscription } from '@vueuse/rxjs';
-import { tap } from 'rxjs/operators';
 import {
 	useLibraryStore,
 	useServerStore,
@@ -196,17 +194,12 @@ function openMediaPage(library: PlexLibraryDTO): void {
 	}
 }
 
-function runReSyncAccount(): void {
-	useSubscription(
-		accountStore
-			.reSyncAccount(0)
-			.pipe(tap((data) => {
-				if (data.isSuccess) {
-					dialogStore.openRefreshPlexAccountAccessDialog(data.value ?? []);
-				}
-			}))
-			.subscribe(),
-	);
+function runReSyncAccount(serverId: number): void {
+	if (accountStore.refreshingServerIds.has(serverId)) {
+		return;
+	}
+
+	accountStore.reSyncServer(serverId).subscribe();
 }
 </script>
 

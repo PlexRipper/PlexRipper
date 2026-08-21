@@ -95,6 +95,7 @@
 
 	<!-- Clear Completed Confirmation Dialog  -->
 	<ConfirmationDialog
+		:id="plexServer.id"
 		:confirm-loading="clearCompletedLoading"
 		:name="DialogType.ClearCompletedDownloadsConfirmationDialog"
 		:title="t('components.downloads-table.clear-completed.confirmation.title')"
@@ -296,11 +297,11 @@ function openClearCompletedDialog() {
 		return;
 	}
 
-	dialogStore.openDialog(DialogType.ClearCompletedDownloadsConfirmationDialog);
+	dialogStore.openDialog(DialogType.ClearCompletedDownloadsConfirmationDialog, props.plexServer.id);
 }
 
 function closeClearCompletedDialog() {
-	dialogStore.closeDialog(DialogType.ClearCompletedDownloadsConfirmationDialog);
+	dialogStore.closeDialog(DialogType.ClearCompletedDownloadsConfirmationDialog, props.plexServer.id);
 }
 
 function clearCompletedByServer() {

@@ -13,4 +13,6 @@ public interface IDownloadFileTransferProgress
     long FileDataTransferred { get; set; }
 
     long CurrentFileTransferBytesOffset { get; set; }
+
+    int TimeRemaining { get; set; }
 }

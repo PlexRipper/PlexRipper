@@ -201,6 +201,7 @@ public abstract class DownloadTaskFileBase : DownloadTaskBase, IDownloadTaskProg
             FileTransferSpeed = FileTransferSpeed,
             FileDataTransferred = FileDataTransferred,
             CurrentFileTransferBytesOffset = CurrentFileTransferBytesOffset,
+            TimeRemaining = TimeRemaining,
         };
 
     #endregion

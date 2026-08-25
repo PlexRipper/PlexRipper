@@ -786,6 +786,7 @@ public static partial class DbContextExtensions
                                     x => x.CurrentFileTransferBytesOffset,
                                     progress.CurrentFileTransferBytesOffset
                                 )
+                                .SetProperty(x => x.TimeRemaining, progress.TimeRemaining)
                                 .SetProperty(
                                     x => x.Percentage,
                                     x =>
@@ -807,6 +808,7 @@ public static partial class DbContextExtensions
                                     x => x.CurrentFileTransferBytesOffset,
                                     progress.CurrentFileTransferBytesOffset
                                 )
+                                .SetProperty(x => x.TimeRemaining, progress.TimeRemaining)
                                 .SetProperty(
                                     x => x.Percentage,
                                     x =>

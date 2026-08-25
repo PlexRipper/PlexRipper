@@ -9,13 +9,13 @@ public class WarmupMediaQueryCacheCommandHandlerUnitTests : BaseUnitTest<WarmupM
     {
         // Arrange
         await SetupDatabase(8237);
+        OverrideSyncQuietPeriod(TimeSpan.Zero);
 
-        Mock.Mock<IMediaQueryCache>().SetupProperty(x => x.SuppressInvalidation);
+        Mock.Mock<IMediaQueryCache>().SetupProperty(x => x.SuppressInvalidation, true);
         Mock.Mock<IMediaQueryCache>()
             .Setup(x => x.BuildCache(It.IsAny<CancellationToken>()))
-            .Returns(Task.CompletedTask);
-
-        OverrideSyncQuietPeriod(TimeSpan.Zero);
+            .ReturnsAsync(Result.Ok())
+            .Verifiable(Times.Once());
 
         // Act
         var result = await Sut.ExecuteAsync(new WarmupMediaQueryCacheCommand(), CancellationToken);
@@ -23,26 +23,23 @@ public class WarmupMediaQueryCacheCommandHandlerUnitTests : BaseUnitTest<WarmupM
         // Assert
         result.IsSuccess.ShouldBeTrue();
         result.Errors.Count.ShouldBe(0);
-        Mock.Mock<IMediaQueryCache>()
-            .Invocations.Count(x => x.Method.Name == nameof(IMediaQueryCache.BuildCache))
-            .ShouldBe(2);
+        Mock.Mock<IMediaQueryCache>().Verify();
         Mock.Mock<IMediaQueryCache>()
             .Verify(x => x.GetMediaAsync(It.IsAny<MediaQueryFilter>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Test]
-    public async Task ShouldReturnFailure_WhenFirstBuildFails()
+    public async Task ShouldReturnFailure_WhenFinalBuildFails()
     {
         // Arrange
-        var expectedException = new InvalidOperationException("Build cache failed");
         await SetupDatabase(8237);
+        OverrideSyncQuietPeriod(TimeSpan.Zero);
 
-        Mock.Mock<IMediaQueryCache>().SetupProperty(x => x.SuppressInvalidation);
+        Mock.Mock<IMediaQueryCache>().SetupProperty(x => x.SuppressInvalidation, true);
         Mock.Mock<IMediaQueryCache>()
             .Setup(x => x.BuildCache(It.IsAny<CancellationToken>()))
-            .ThrowsAsync(expectedException);
-
-        OverrideSyncQuietPeriod(TimeSpan.Zero);
+            .ReturnsAsync(Result.Fail("Build cache failed"))
+            .Verifiable(Times.Once());
 
         // Act
         var result = await Sut.ExecuteAsync(new WarmupMediaQueryCacheCommand(), CancellationToken);
@@ -50,32 +47,37 @@ public class WarmupMediaQueryCacheCommandHandlerUnitTests : BaseUnitTest<WarmupM
         // Assert
         result.IsFailed.ShouldBeTrue();
         result.Errors.Count.ShouldBeGreaterThan(0);
-        Mock.Mock<IMediaQueryCache>()
-            .Invocations.Count(x => x.Method.Name == nameof(IMediaQueryCache.BuildCache))
-            .ShouldBe(1);
+        Mock.Mock<IMediaQueryCache>().Object.SuppressInvalidation.ShouldBeFalse();
+        Mock.Mock<IMediaQueryCache>().Verify();
     }
 
     [Test]
-    public async Task ShouldSuppressInvalidationDuringSyncStorm_ThenUnsuppressAndRebuild()
+    public async Task ShouldKeepInvalidationSuppressed_UntilFinalBuildCompletes()
     {
         // Arrange
         await SetupDatabase(8237);
+        OverrideSyncQuietPeriod(TimeSpan.Zero);
 
-        Mock.Mock<IMediaQueryCache>().SetupProperty(x => x.SuppressInvalidation);
+        Mock.Mock<IMediaQueryCache>().SetupProperty(x => x.SuppressInvalidation, true);
         Mock.Mock<IMediaQueryCache>()
             .Setup(x => x.BuildCache(It.IsAny<CancellationToken>()))
-            .Returns(Task.CompletedTask);
-
-        OverrideSyncQuietPeriod(TimeSpan.Zero);
+            .Returns(() =>
+            {
+                Mock.Mock<IMediaQueryCache>().Object.SuppressInvalidation.ShouldBeTrue();
+                return Task.FromResult(Result.Ok());
+            })
+            .Verifiable(Times.Once());
 
         // Act
         var result = await Sut.ExecuteAsync(new WarmupMediaQueryCacheCommand(), CancellationToken);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
+        result.Errors.Count.ShouldBe(0);
         var mock = Mock.Mock<IMediaQueryCache>();
-        mock.VerifySet(x => x.SuppressInvalidation = true, Times.Once);
+        mock.Object.SuppressInvalidation.ShouldBeFalse();
         mock.VerifySet(x => x.SuppressInvalidation = false, Times.Once);
+        mock.Verify();
     }
 
     /// <summary>

@@ -1,5 +1,6 @@
 using Quartz;
 using Reaparr.Application.Contracts;
+using Reaparr.Data.Contracts;
 
 namespace Reaparr.AppHost;
 
@@ -18,6 +19,7 @@ public class Boot : IHostedService
 
     private readonly IScheduler _scheduler;
     private readonly IBackgroundJobsSetup _backgroundJobsSetup;
+    private readonly IMediaQueryCache _mediaQueryCache;
 
     private readonly IDownloadQueue _downloadQueue;
 
@@ -35,6 +37,7 @@ public class Boot : IHostedService
         IHostApplicationLifetime appLifetime,
         IScheduler scheduler,
         IBackgroundJobsSetup backgroundJobsSetup,
+        IMediaQueryCache mediaQueryCache,
         IDownloadQueue downloadQueue
     )
     {
@@ -44,6 +47,7 @@ public class Boot : IHostedService
         _appLifetime = appLifetime;
         _scheduler = scheduler;
         _backgroundJobsSetup = backgroundJobsSetup;
+        _mediaQueryCache = mediaQueryCache;
         _downloadQueue = downloadQueue;
 
         appLifetime.ApplicationStarted.Register(OnStarted);
@@ -84,10 +88,28 @@ public class Boot : IHostedService
         if (recoverResult.IsFailed)
             recoverResult.LogError();
 
-        // Start Quartz scheduler
+        _mediaQueryCache.SuppressInvalidation = true;
+        var cacheWarmupResult = await _mediaQueryCache.BuildCache(cancellationToken);
+        if (cacheWarmupResult.IsCancelled)
+        {
+            _mediaQueryCache.SuppressInvalidation = false;
+            cacheWarmupResult.LogWarning();
+            return;
+        }
+
+        if (cacheWarmupResult.IsFailed)
+        {
+            _mediaQueryCache.SuppressInvalidation = false;
+            cacheWarmupResult.LogError();
+            TerminateApplication();
+            return;
+        }
+
+        // Start Quartz only after the initial media query cache is ready.
         var setupResult = await _backgroundJobsSetup.SetupAsync(cancellationToken);
         if (setupResult.IsFailed)
         {
+            _mediaQueryCache.SuppressInvalidation = false;
             setupResult.LogError();
             TerminateApplication();
             return;

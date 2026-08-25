@@ -121,7 +121,7 @@ public sealed class MediaQueryCache : IMediaQueryCache
     }
 
     /// <inheritdoc />
-    public async Task BuildCache(CancellationToken cancellationToken = default)
+    public async Task<Result> BuildCache(CancellationToken cancellationToken = default)
     {
         // Resolve library IDs once for Movie and TvShow warmup keys
         var movieLibraryIds = await ResolveLibraryIdsAsync(
@@ -156,21 +156,21 @@ public sealed class MediaQueryCache : IMediaQueryCache
 
         var tasks = warmupFilters.Select(x => BuildAndStoreSnapshotAsync(x.Filter, x.Key, cancellationToken)).ToList();
         var results = await Task.WhenAll(tasks);
+        var result = Result.Merge(results);
         if (results.Any(x => x.IsCancelled))
         {
             _log.Here().Warning("Media query cache warmup was cancelled");
-            return;
+            return result.ToResult();
         }
 
-        var failures = results.Where(x => x.IsFailed).SelectMany(x => x.Errors).ToList();
-        if (failures.Count > 0)
+        if (result.IsFailed)
         {
             _log.Here()
                 .Warning(
                     "Media query cache warmup completed with {FailureCount} failed snapshot builds",
-                    failures.Count
+                    result.Errors.Count
                 );
-            return;
+            return result.ToResult();
         }
 
         _log.Here()
@@ -178,6 +178,7 @@ public sealed class MediaQueryCache : IMediaQueryCache
                 "Media query cache warmup completed with {SnapshotCount} all-library sorted snapshots",
                 results.Length
             );
+        return Result.Ok();
     }
 
     /// <inheritdoc />

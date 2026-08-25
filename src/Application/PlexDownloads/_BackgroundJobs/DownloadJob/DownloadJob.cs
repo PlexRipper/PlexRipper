@@ -48,6 +48,7 @@ public class DownloadJob : IJob
 
         // Jobs should swallow exceptions as otherwise Quartz will keep re-executing it
         // https://www.quartz-scheduler.net/documentation/best-practices.html#throwing-exceptions
+        var downloadResult = Result.Ok();
         var executionResult = await Result.Try(async Task () =>
         {
             _log.Here()
@@ -153,6 +154,7 @@ public class DownloadJob : IJob
             }
             else if (startResult.IsFailed)
             {
+                downloadResult = startResult;
                 var failedStatus =
                     startResult.HasPlex401UnauthorizedError() ? DownloadStatus.AuthError
                     : startResult.Has404NotFoundError() ? DownloadStatus.SourceUnavailable
@@ -171,15 +173,16 @@ public class DownloadJob : IJob
             }
         });
 
-        if (executionResult.IsCancelled)
+        var terminalResult = executionResult.IsSuccess ? downloadResult : executionResult;
+        if (terminalResult.IsCancelled)
         {
-            context.SetResult(JobStatus.Cancelled, executionResult);
-            executionResult.LogWarning();
+            context.SetResult(JobStatus.Cancelled, terminalResult);
+            terminalResult.LogWarning();
         }
-        else if (executionResult.IsFailed)
+        else if (terminalResult.IsFailed)
         {
-            context.SetResult(JobStatus.Failed, executionResult);
-            executionResult.LogError();
+            context.SetResult(JobStatus.Failed, terminalResult);
+            terminalResult.LogError();
         }
 
         _log.Here()

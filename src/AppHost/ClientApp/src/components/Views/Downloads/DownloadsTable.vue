@@ -190,7 +190,6 @@ const getDownloadTableColumns: QTreeTableColumn[] = [
 	{
 		header: t('components.downloads-table.columns.status'),
 		field: 'status',
-		type: QTreeTableColumnType.Custom,
 		align: 'right',
 		width: 200,
 	},
@@ -219,7 +218,7 @@ const getDownloadTableColumns: QTreeTableColumn[] = [
 		header: t('components.downloads-table.columns.time-remaining'),
 		field: 'timeRemaining',
 		type: QTreeTableColumnType.Duration,
-		align: 'right',
+		align: 'left',
 		width: 120,
 	},
 	{

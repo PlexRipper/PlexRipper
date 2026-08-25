@@ -11,6 +11,10 @@
 		:scroll-height="scrollHeight"
 		:scrollable="scrollable"
 		:size="size">
+		<!-- @vue-ignore PrimeVue's TreeTableSlots type omits the documented nodetoggleicon slot. -->
+		<template #nodetoggleicon="{ expanded }">
+			<QIcon :name="expanded ? 'mdi-chevron-down' : 'mdi-chevron-right'" />
+		</template>
 		<Column
 			v-for="(column, columnIndex) in columns"
 			:key="column.field"
@@ -38,7 +42,8 @@
 			<template #body="{ node }: { node: QTreeNode<TData> }">
 				<QRow
 					align="center"
-					no-wrap>
+					no-wrap
+					:class="{ 'q-tree-table-title-cell': isTitleColumn(column, columnIndex) }">
 					<QCheckbox
 						v-if="isSelectionColumn(column, columnIndex)"
 						:model-value="getNodeSelectionValue(node)"
@@ -426,5 +431,23 @@ button.p-treetable-toggler.p-link::before {
 // this element contains the full row, by making it relative the pseudochild can size itself based on this
 .p-treetable .p-treetable-tbody > tr {
 	position: relative;
+}
+
+.q-tree-table-title-cell {
+	min-width: 0;
+
+	> :last-child {
+		min-width: 0;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+
+		.q-text {
+			display: block;
+			overflow: hidden;
+			text-overflow: ellipsis;
+			white-space: nowrap;
+		}
+	}
 }
 </style>

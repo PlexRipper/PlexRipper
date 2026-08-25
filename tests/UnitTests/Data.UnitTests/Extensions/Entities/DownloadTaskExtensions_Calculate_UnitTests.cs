@@ -89,4 +89,31 @@ public class DownloadTaskExtensionsCalculateUnitTests : BaseUnitTest
         result.DownloadSpeed.ShouldBe(20);
         result.TimeRemaining.ShouldBe(9_750);
     }
+
+    [Test]
+    public async Task ShouldCalculateMovingRootTimeRemaining_FromFileTransferProgress()
+    {
+        // Arrange
+        await SetupDatabase(
+            72871,
+            config => config.MovieDownloadTasksCount = 1
+        );
+
+        var downloadTask = await IDbContext.DownloadTaskMovie.IncludeAll().FirstAsync(CancellationToken);
+        var downloadFile = downloadTask.Children.Single();
+        downloadFile.DownloadStatus = DownloadStatus.Moving;
+        downloadFile.DataTotal = 1_000;
+        downloadFile.DataReceived = 1_000;
+        downloadFile.DownloadSpeed = 0;
+        downloadFile.FileDataTransferred = 500;
+        downloadFile.FileTransferSpeed = 50;
+
+        // Act
+        var result = downloadTask.ToGeneric();
+        result.Calculate();
+
+        // Assert
+        result.DownloadStatus.ShouldBe(DownloadStatus.Moving);
+        result.TimeRemaining.ShouldBe(10);
+    }
 }

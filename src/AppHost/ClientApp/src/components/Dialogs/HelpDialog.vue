@@ -23,7 +23,7 @@
 			<q-btn
 				:label="t('general.commands.close')"
 				flat
-				@click="close" />
+				@click="() => close()" />
 		</template>
 	</QCardDialog>
 </template>

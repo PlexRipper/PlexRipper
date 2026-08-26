@@ -13,7 +13,9 @@
 		:size="size">
 		<!-- @vue-ignore PrimeVue's TreeTableSlots type omits the documented nodetoggleicon slot. -->
 		<template #nodetoggleicon="{ expanded }">
-			<QIcon :name="expanded ? 'mdi-chevron-down' : 'mdi-chevron-right'" />
+			<QIcon
+				:name="expanded ? 'mdi-chevron-down' : 'mdi-chevron-right'"
+				size="32px" />
 		</template>
 		<Column
 			v-for="(column, columnIndex) in columns"
@@ -377,77 +379,77 @@ function normalizeNodeSelection(
 @use '@/assets/scss/variables' as *;
 
 .p-treetable {
-	table {
-		white-space: nowrap;
-		table-layout: fixed;
-		width: 100%;
-	}
+  table {
+    white-space: nowrap;
+    table-layout: fixed;
+    width: 100%;
+  }
 
-	.p-treetable-header {
-		color: inherit;
-		background: transparent;
-		border: none;
-	}
+  .p-treetable-header {
+    color: inherit;
+    background: transparent;
+    border: none;
+  }
 
-	.p-treetable-thead > tr > th {
-		color: inherit;
-		background: transparent;
-		border-top: 0.13rem solid rgba(255, 255, 255, 0.28);
-		border-bottom: 0.13rem solid rgba(255, 255, 255, 0.28);
-	}
+  .p-treetable-thead > tr > th {
+    color: inherit;
+    background: transparent;
+    border-top: 0.13rem solid rgba(255, 255, 255, 0.28);
+    border-bottom: 0.13rem solid rgba(255, 255, 255, 0.28);
+  }
 
-	.p-treetable-tbody > tr {
-		color: inherit;
-		background: transparent;
-		border-bottom: 0.13rem solid rgba(255, 255, 255, 0.28);
+  .p-treetable-tbody > tr {
+    color: inherit;
+    background: transparent;
+    border-bottom: 0.13rem solid rgba(255, 255, 255, 0.28);
 
-		&:focus {
-			outline: none;
-		}
-	}
+    &:focus {
+      outline: none;
+    }
+  }
 
-	.p-paginator {
-		color: inherit;
-		background: transparent;
-	}
+  .p-paginator {
+    color: inherit;
+    background: transparent;
+  }
 }
 
 //this creates a pseudochild of the button the size of the first anscestor with "relative" size
 button.p-treetable-toggler.p-link::before {
-	content: '';
-	display: block;
-	position: absolute;
-	top: 0;
-	left: 0;
-	right: 0;
-	bottom: 0;
+  content: '';
+  display: block;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
 }
 
 //this element originally had "relative" size, overwriting it allow the pseudochild to be sized relative to a later anscestor
 .p-treetable-toggler {
-	position: static;
+  position: static;
 }
 
 // this element contains the full row, by making it relative the pseudochild can size itself based on this
 .p-treetable .p-treetable-tbody > tr {
-	position: relative;
+  position: relative;
 }
 
 .q-tree-table-title-cell {
-	min-width: 0;
+  min-width: 0;
 
-	> :last-child {
-		min-width: 0;
-		overflow: hidden;
-		text-overflow: ellipsis;
-		white-space: nowrap;
+  > :last-child {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 
-		.q-text {
-			display: block;
-			overflow: hidden;
-			text-overflow: ellipsis;
-			white-space: nowrap;
-		}
-	}
+    .q-text {
+      display: block;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+  }
 }
 </style>

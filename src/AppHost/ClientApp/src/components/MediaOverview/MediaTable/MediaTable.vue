@@ -8,9 +8,12 @@
 			:selected="mediaOverviewStore.isRootSelected"
 			class="media-table--header"
 			@selected="mediaOverviewStore.setRootSelected($event)" />
-		<div
-			id="media-table-scroll"
-			ref="qTableRef"
+		<QScroll
+			ref="scrollAreaRef"
+			scroll-id="media-table-scroll"
+			:fit="false"
+			height="calc(100vh - 137px)"
+			width="100%"
 			:class="['media-table--content', isScrollable ? 'scroll' : '']"
 			data-cy="media-table-scroll">
 			<!-- Total height spacer — required by TanStack Virtual to define the scrollable area -->
@@ -27,6 +30,7 @@
 						transform: `translateY(${virtualRow.start}px)`,
 					}"
 					class="media-table--intersection highlight-border-box"
+					:data-media-id="getRowItem(virtualRow.index)?.id"
 					:data-scroll-index="virtualRow.index">
 					<MediaTableRow
 						v-if="getRowItem(virtualRow.index)"
@@ -47,7 +51,7 @@
 					</div>
 				</div>
 			</div>
-		</div>
+		</QScroll>
 	</div>
 </template>
 
@@ -60,12 +64,18 @@ import type { PlexMediaSlimDTO } from '@dto';
 import type { ISelection } from '@interfaces';
 import {
 	triggerBoxHighlight,
+	waitForElement,
 	useMediaOverviewStore,
 } from '#imports';
 import { getMediaTableColumns } from '~/composables/mediaTableColumns';
 
 const mediaOverviewStore = useMediaOverviewStore();
 const mediaTableColumns = getMediaTableColumns();
+type QScrollInstance = {
+	getScrollTarget: () => HTMLElement | null;
+};
+
+const scrollAreaRef = ref<QScrollInstance | null>(null);
 const qTableRef = ref<HTMLElement | null>(null);
 const scrollTargetElement = ref<HTMLElement | null>(null);
 const autoScrollEnabled = ref(false);
@@ -105,7 +115,7 @@ const BROWSER_MAX_CSS_HEIGHT = 33_000_000;
 const rowVirtualizer = useVirtualizer(
 	computed(() => ({
 		count: props.rows?.length ?? mediaOverviewStore.itemsLength,
-		getScrollElement: () => get(qTableRef),
+		getScrollElement,
 		estimateSize: () => ROW_HEIGHT,
 		overscan: 10,
 		getItemKey: (index: number) => getRowItem(index)?.id ?? index,
@@ -133,6 +143,14 @@ const rowVirtualizer = useVirtualizer(
 );
 
 const safeTotalSize = computed(() => Math.min(rowVirtualizer.value.getTotalSize(), BROWSER_MAX_CSS_HEIGHT));
+
+function getScrollElement(): HTMLElement | null {
+	const target = get(scrollAreaRef)?.getScrollTarget() ?? null;
+	if (target !== get(qTableRef)) {
+		set(qTableRef, target);
+	}
+	return target;
+}
 
 function getRowItem(index: number): PlexMediaSlimDTO | undefined {
 	return props.rows?.[index] ?? mediaOverviewStore.getMediaItemsForRange(index, index + 1).at(0);
@@ -165,29 +183,55 @@ function updateSelectedRow(mediaId: number, state: boolean) {
 	} as ISelection);
 }
 
-function scrollToIndex(index: number) {
-	const container = get(qTableRef);
+function scrollToIndex(index: number, highlight = true) {
+	const container = getScrollElement();
 	if (!container) {
 		Log.error(`Could not find scroll container reference`);
 		return;
 	}
 
 	set(autoScrollEnabled, true);
-	set(pendingHighlightIndex, index);
+	if (highlight)
+		set(pendingHighlightIndex, index);
 	get(rowVirtualizer).scrollToIndex(index, { align: 'start' });
 }
 
+function highlightPendingMedia() {
+	const pendingMediaHighlightId = get(mediaOverviewStore.pendingMediaHighlightId);
+	if (pendingMediaHighlightId === null)
+		return;
+
+	const container = getScrollElement();
+	waitForElement(container, `[data-media-id="${pendingMediaHighlightId}"]`).then((element) => {
+		if (get(mediaOverviewStore.pendingMediaHighlightId) !== pendingMediaHighlightId)
+			return;
+
+		if (element)
+			triggerBoxHighlight(element);
+		mediaOverviewStore.consumePendingMediaHighlight(pendingMediaHighlightId);
+	});
+}
+
 onMounted(() => {
+	// Listen for scroll to navigation index command
+	useSubscription(mediaOverviewStore.getScrollCommand().subscribe(({ index, highlight }) => {
+		scrollToIndex(index, highlight);
+	}));
+
+	const requestedScrollIndex = get(mediaOverviewStore.currentScrollIndex);
+	if (requestedScrollIndex > 0) {
+		scrollToIndex(requestedScrollIndex - 1, get(mediaOverviewStore.pendingMediaHighlightId) === null);
+	}
+
+	highlightPendingMedia();
+	if (get(mediaOverviewStore.pendingMediaHighlightId) !== null)
+		return;
+
 	const lastMediaItemViewed = get(mediaOverviewStore.lastMediaItemViewed);
-	if (lastMediaItemViewed && lastMediaItemViewed.sortIndex > 0) {
+	if (requestedScrollIndex <= 0 && lastMediaItemViewed && lastMediaItemViewed.sortIndex > 0) {
 		// If we have a last viewed media item, scroll to it
 		scrollToIndex(lastMediaItemViewed.sortIndex - 1);
 	}
-
-	// Listen for scroll to navigation index command
-	useSubscription(mediaOverviewStore.getScrollCommand().subscribe((scrollIndex) => {
-		scrollToIndex(scrollIndex);
-	}));
 });
 </script>
 

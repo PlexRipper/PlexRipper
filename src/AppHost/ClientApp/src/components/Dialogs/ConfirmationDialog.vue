@@ -1,5 +1,6 @@
 <template>
 	<QCardDialog
+		:id="id"
 		persistent
 		:name="name"
 		width="500px"
@@ -21,6 +22,7 @@
 		<template #actions>
 			<CancelButton
 				cy="confirmation-dialog-cancel-button"
+				:disabled="disableCancel"
 				@click="cancel" />
 			<ConfirmButton
 				cy="confirmation-dialog-confirmation-button"
@@ -42,15 +44,19 @@ const dialogStore = useDialogStore();
 
 const props = withDefaults(defineProps<{
 	name: DialogType;
+	id?: number;
 	title: string;
 	text: string;
 	warning?: string;
 	confirmLabel?: string;
 	confirmLoading?: boolean;
+	disableCancel?: boolean;
 }>(), {
 	warning: '',
+	id: 0,
 	confirmLabel: '',
 	confirmLoading: false,
+	disableCancel: false,
 });
 
 const emit = defineEmits<{
@@ -65,7 +71,7 @@ const confirmationText = computed(() => ({
 
 function cancel() {
 	emit('cancel');
-	dialogStore.closeDialog(props.name);
+	dialogStore.closeDialog(props.name, props.id);
 }
 
 function confirm() {

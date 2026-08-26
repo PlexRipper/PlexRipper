@@ -95,6 +95,7 @@
 
 	<!-- Clear Completed Confirmation Dialog  -->
 	<ConfirmationDialog
+		:id="plexServer.id"
 		:confirm-loading="clearCompletedLoading"
 		:name="DialogType.ClearCompletedDownloadsConfirmationDialog"
 		:title="t('components.downloads-table.clear-completed.confirmation.title')"
@@ -189,9 +190,8 @@ const getDownloadTableColumns: QTreeTableColumn[] = [
 	{
 		header: t('components.downloads-table.columns.status'),
 		field: 'status',
-		type: QTreeTableColumnType.Custom,
 		align: 'right',
-		width: 200,
+		width: 150,
 	},
 	{
 		header: t('components.downloads-table.columns.data-received'),
@@ -218,7 +218,7 @@ const getDownloadTableColumns: QTreeTableColumn[] = [
 		header: t('components.downloads-table.columns.time-remaining'),
 		field: 'timeRemaining',
 		type: QTreeTableColumnType.Duration,
-		align: 'right',
+		align: 'left',
 		width: 120,
 	},
 	{
@@ -232,7 +232,7 @@ const getDownloadTableColumns: QTreeTableColumn[] = [
 		header: t('components.downloads-table.columns.actions'),
 		field: 'actions',
 		type: QTreeTableColumnType.Actions,
-		width: 200,
+		width: 150,
 		align: 'right',
 		sortable: false,
 	},
@@ -296,11 +296,11 @@ function openClearCompletedDialog() {
 		return;
 	}
 
-	dialogStore.openDialog(DialogType.ClearCompletedDownloadsConfirmationDialog);
+	dialogStore.openDialog(DialogType.ClearCompletedDownloadsConfirmationDialog, props.plexServer.id);
 }
 
 function closeClearCompletedDialog() {
-	dialogStore.closeDialog(DialogType.ClearCompletedDownloadsConfirmationDialog);
+	dialogStore.closeDialog(DialogType.ClearCompletedDownloadsConfirmationDialog, props.plexServer.id);
 }
 
 function clearCompletedByServer() {

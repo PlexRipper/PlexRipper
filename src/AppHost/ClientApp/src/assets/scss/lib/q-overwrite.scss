@@ -177,52 +177,57 @@ body {
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 // * Scrollbars
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-// Source: https://codepen.io/Hawkeye64/pen/bGRXBOY?editors=1100
 :root {
-  --scrollbar-width-height: 10px;
-
-  --scrollbar-track: $primary;
-  --scrollbar-thumb: rgb(204, 231, 255);
-  --scrollbar-thumb-hover: rgb(33, 118, 210);
-
-  // Background color of the scrollbar
-  --scrollbar-track-dark: $dark-shadow-color;
-  --scrollbar-thumb-dark: rgb(140, 4, 4);
-  --scrollbar-thumb-hover-dark: red;
+  // Match the visible thumb to the custom QScroll component.
+  --scrollbar-width-height: 9px;
+  --scrollbar-track: transparent;
+  --scrollbar-thumb: rgba(210, 0, 0, 0.75);
+  --scrollbar-thumb-hover: red;
 }
 
-// Only apply to Firefox
-@-moz-document url-prefix() {
-  * {
-    scrollbar-color: red transparent;
-    scrollbar-width: auto;
-  }
+// Firefox and browsers without WebKit scrollbar pseudo-elements.
+* {
+  scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+  scrollbar-width: thin;
 }
 
 ::-webkit-scrollbar {
   width: var(--scrollbar-width-height);
   height: var(--scrollbar-width-height);
-  transition: all 1s;
 }
 
-// the track (progress bar) of the scrollbar
-::-webkit-scrollbar-track {
-  // border-top: var(--markdown-border)
-  background: var(--scrollbar-track-dark);
-  box-shadow: inset 0 0 4px var(--scrollbar-track-dark);
+::-webkit-scrollbar-button {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  background: none !important;
+  border: 0 !important;
 }
 
-// the bottom corner of the scrollbar, where both horizontal and vertical scrollbars meet
+::-webkit-scrollbar-track,
+::-webkit-scrollbar-track-piece,
+::-webkit-scrollbar-track-piece:start,
+::-webkit-scrollbar-track-piece:end {
+  background: var(--scrollbar-track);
+  background-image: none;
+}
+
 ::-webkit-scrollbar-corner {
-  background: var(--scrollbar-track-dark);
+  background: var(--scrollbar-track);
 }
 
-// the draggable scrolling handle
+// The 2px transparent border leaves a 5px visible thumb inside the 9px track.
 ::-webkit-scrollbar-thumb {
-  background: var(--scrollbar-thumb-dark);
+  background: var(--scrollbar-thumb);
+  border: 2px solid transparent;
   border-radius: 5px;
+  background-clip: content-box;
 
   &:hover {
-    background: var(--scrollbar-thumb-hover-dark);
+    background: var(--scrollbar-thumb-hover);
   }
 }

@@ -9,6 +9,7 @@ services:
         environment:
             - PUID=1000
             - PGID=1000
+            - UMASK=002 # Create group-writable files (0664) and directories (0775)
             - TZ=America/New_York
             # Debug environment variables
             - LOG_LEVEL=INFORMATION         # Set the logging level in the docker logging

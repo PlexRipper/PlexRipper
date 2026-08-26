@@ -296,7 +296,7 @@ onMounted(() => {
 				const maxAttempts = 10;
 				for (let attempt = 0; attempt < maxAttempts; attempt++) {
 					await nextTick();
-					mediaOverviewStore.scrollToIndex(targetIndex);
+					mediaOverviewStore.scrollToIndex(targetIndex, false);
 					await new Promise((resolve) => setTimeout(resolve, 100));
 
 					const container = document.querySelector<HTMLElement>('#poster-table');

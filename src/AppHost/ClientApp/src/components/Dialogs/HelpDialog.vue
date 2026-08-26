@@ -23,7 +23,7 @@
 			<q-btn
 				:label="t('general.commands.close')"
 				flat
-				@click="close" />
+				@click="() => close()" />
 		</template>
 	</QCardDialog>
 </template>
@@ -54,8 +54,11 @@ function onClose() {
 }
 
 // Markdown-it plugin to add target="_blank" and rel="noopener noreferrer" to all links
-function markdownItTargetBlank(md: MarkdownIt) {
-	const d = md.renderer.rules.link_open || ((t, i, o, _, s) => s.renderToken(t, i, o));
+function markdownItTargetBlank(md: MarkdownIt): void {
+	const d = md.renderer.rules.link_open;
+	if (!d) {
+		return;
+	}
 	md.renderer.rules.link_open = (t, i, o, e, s) => {
 		const a = t[i].attrIndex('target');
 		if (a < 0) t[i].attrPush(['target', '_blank']);

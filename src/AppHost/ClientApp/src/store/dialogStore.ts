@@ -27,11 +27,11 @@ export const useDialogStore = defineStore(StoreNames.DialogStore, () => {
 		setup(): Observable<ISetupResult> {
 			return of({ name: StoreNames.DialogStore, isSuccess: true });
 		},
-		closeDialog(name: DialogType): void {
-			state.dialogUpdate.next({ name, state: false, data: {} as unknown });
+		closeDialog(name: DialogType, id?: number): void {
+			state.dialogUpdate.next({ name, state: false, data: {} as unknown, id });
 		},
-		openDialog(name: DialogType): void {
-			state.dialogUpdate.next({ name, state: true, data: {} as unknown });
+		openDialog(name: DialogType, id?: number): void {
+			state.dialogUpdate.next({ name, state: true, data: {} as unknown, id });
 		},
 		openCheckServerConnectionsDialog(data: CheckAllConnectionStatusUpdateDTO): void {
 			state.dialogUpdate.next({ name: DialogType.CheckServerConnectionDialogName, state: true, data });

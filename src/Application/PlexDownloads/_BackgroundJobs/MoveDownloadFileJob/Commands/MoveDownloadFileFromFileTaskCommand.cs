@@ -101,6 +101,7 @@ public class MoveDownloadFileFromFileTaskCommandHandler : ICommandHandler<MoveDo
 
                     downloadTask.CurrentFileTransferBytesOffset = downloadTask.DataTotal;
                     downloadTask.FileDataTransferred = downloadTask.DataTotal;
+                    downloadTask.TimeRemaining = 0;
                     await _dbContext.UpdateDownloadFileTransferProgress(
                         key,
                         downloadTask.ToFileTransferProgress(),
@@ -140,6 +141,7 @@ public class MoveDownloadFileFromFileTaskCommandHandler : ICommandHandler<MoveDo
 
                 downloadTask.CurrentFileTransferBytesOffset = downloadTask.DataTotal;
                 downloadTask.FileDataTransferred = downloadTask.DataTotal;
+                downloadTask.TimeRemaining = 0;
                 await _dbContext.UpdateDownloadFileTransferProgress(
                     key,
                     downloadTask.ToFileTransferProgress(),
@@ -186,6 +188,7 @@ public class MoveDownloadFileFromFileTaskCommandHandler : ICommandHandler<MoveDo
 
                 downloadTask.CurrentFileTransferBytesOffset = downloadTask.DataTotal;
                 downloadTask.FileDataTransferred = downloadTask.DataTotal;
+                downloadTask.TimeRemaining = 0;
                 await _dbContext.UpdateDownloadFileTransferProgress(
                     key,
                     downloadTask.ToFileTransferProgress(),
@@ -238,6 +241,7 @@ public class MoveDownloadFileFromFileTaskCommandHandler : ICommandHandler<MoveDo
 
                 downloadTask.CurrentFileTransferBytesOffset = downloadTask.DataTotal;
                 downloadTask.FileDataTransferred = downloadTask.DataTotal;
+                downloadTask.TimeRemaining = 0;
                 await _dbContext.UpdateDownloadFileTransferProgress(
                     key,
                     downloadTask.ToFileTransferProgress(),
@@ -357,6 +361,7 @@ public class MoveDownloadFileFromFileTaskCommandHandler : ICommandHandler<MoveDo
             // Instant finish on rename
             downloadTask.CurrentFileTransferBytesOffset = downloadTask.DataTotal;
             downloadTask.FileDataTransferred = downloadTask.DataTotal;
+            downloadTask.TimeRemaining = 0;
             await _dbContext.UpdateDownloadFileTransferProgress(
                 key,
                 downloadTask.ToFileTransferProgress(),
@@ -382,6 +387,7 @@ public class MoveDownloadFileFromFileTaskCommandHandler : ICommandHandler<MoveDo
                 DownloadStatus.MovePaused,
                 CancellationToken.None
             );
+            downloadTask.TimeRemaining = 0;
             await _dbContext.UpdateDownloadFileTransferProgress(
                 key,
                 downloadTask.ToFileTransferProgress(),
@@ -456,6 +462,10 @@ public class MoveDownloadFileFromFileTaskCommandHandler : ICommandHandler<MoveDo
             downloadTask.CurrentFileTransferBytesOffset = progress.Transferred;
             downloadTask.FileDataTransferred = progress.Transferred;
             downloadTask.FileTransferSpeed = progress.FileTransferSpeed;
+            downloadTask.TimeRemaining = DataFormat.GetTimeRemaining(
+                Math.Max(0, downloadTask.DataTotal - progress.Transferred),
+                progress.FileTransferSpeed
+            );
             var rawPercent =
                 downloadTask.DataTotal > 0 ? (decimal)progress.Transferred / downloadTask.DataTotal * 100m : 0m;
             downloadTask.Percentage = Math.Clamp(rawPercent, 0m, 100m);

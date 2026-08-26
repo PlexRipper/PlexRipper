@@ -36,22 +36,13 @@ public class WarmupMediaQueryCacheCommandHandler : ICommandHandler<WarmupMediaQu
     protected virtual TimeSpan SyncQuietPeriod { get; set; } = _librarySyncQuietPeriod;
 
     public async Task<Result> ExecuteAsync(WarmupMediaQueryCacheCommand command, CancellationToken cancellationToken) =>
-        await Result.Try(async Task () =>
+        await Result.Try(async Task<Result> () =>
         {
-            // Phase 1: Warm cache immediately from existing DB data.
-            // This ensures returning users see media instantly on container restart.
-            _log.Here().Information("Phase 1: Building Media Query Cache from existing database state");
-            await _mediaQueryCache.BuildCache(cancellationToken);
-
-            // Suppress invalidation during the library sync storm so cache-doom loops
-            // are avoided. Ownership/access-triggered invalidations are deferred.
-            // Wrap in try/finally so cancellation always resets the flag.
-            _mediaQueryCache.SuppressInvalidation = true;
-            _log.Here().Debug("Media query cache invalidation suppressed until sync storm settles");
+            _log.Here().Debug("Media query cache invalidation remains suppressed until sync storm settles");
 
             try
             {
-                // Phase 2: Wait for all library sync jobs to quiesce.
+                // Wait for all library sync jobs to quiesce.
                 while (true)
                 {
                     while (await HasActiveLibrarySyncJobsAsync(cancellationToken))
@@ -65,16 +56,15 @@ public class WarmupMediaQueryCacheCommandHandler : ICommandHandler<WarmupMediaQu
 
                     _log.Here().Debug("New library sync jobs detected after quiet period, waiting again");
                 }
+
+                _log.Here().Information("Rebuilding Media Query Cache after library sync storm settled");
+                return await _mediaQueryCache.BuildCache(cancellationToken);
             }
             finally
             {
-                // Always reset the suppression flag, even on cancellation.
+                // Always reset the suppression flag after the final build, even on failure or cancellation.
                 _mediaQueryCache.SuppressInvalidation = false;
             }
-
-            // Phase 3: Final clean rebuild.
-            _log.Here().Information("Phase 3: Rebuilding Media Query Cache after library sync storm settled");
-            await _mediaQueryCache.BuildCache(cancellationToken);
         });
 
     private async Task<bool> HasActiveLibrarySyncJobsAsync(CancellationToken cancellationToken)

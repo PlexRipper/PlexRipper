@@ -1,5 +1,6 @@
 <template>
 	<q-scroll-area
+		ref="scrollAreaRef"
 		:style="{ 'height': props.fit ? 'none' : props.height, 'max-width': props.fit ? 'none' : props.width }"
 		:class="[props.fit ? 'fit' : '']"
 		:thumb-style="thumbStyle"
@@ -10,16 +11,39 @@
 
 <script setup lang="ts">
 import type { VueStyleObjectProp } from 'quasar';
+import { get } from '@vueuse/core';
 
 const props = withDefaults(defineProps<{
 	fit?: boolean;
 	height?: string | number;
+	scrollId?: string;
 	width?: string | number;
 }>(), {
 	fit: true,
 	height: '400px',
+	scrollId: undefined,
 	width: '300px',
 });
+
+type QScrollAreaInstance = {
+	getScrollTarget: () => Element;
+};
+
+const scrollAreaRef = ref<QScrollAreaInstance | null>(null);
+
+function getScrollTarget(): HTMLElement | null {
+	const target = get(scrollAreaRef)?.getScrollTarget();
+	return target instanceof HTMLElement ? target : null;
+}
+
+onMounted(() => {
+	const target = getScrollTarget();
+	if (target && props.scrollId) {
+		target.id = props.scrollId;
+	}
+});
+
+defineExpose({ getScrollTarget });
 
 const thumbStyle: VueStyleObjectProp = {
 	right: '4px',

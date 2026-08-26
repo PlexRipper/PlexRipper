@@ -1,5 +1,5 @@
 import { DialogType } from '@enums';
-import { PlexAccountPaths } from '@api-urls';
+import { PlexServerPaths } from '@api-urls';
 import { generateRefreshPlexAccountAccessRapportDTO, generateResultDTO } from '@mock';
 
 describe('Side bar', () => {
@@ -17,15 +17,14 @@ describe('Side bar', () => {
 				plexAccounts, plexLibraries, plexServers,
 			});
 
-			cy.intercept('GET', PlexAccountPaths.refreshPlexAccountAccessEndpoint(0), {
-				statusCode: 200,
-				body: generateResultDTO(data), delay: 200,
-			});
-
 			for (const server of plexServers) {
+				cy.intercept('POST', PlexServerPaths.refreshPlexServerAccountsAccessEndpoint(server.id), {
+					statusCode: 200,
+					body: generateResultDTO(data), delay: 200,
+				});
+
 				cy.getCy(`server-drawer-item-${server.id}`).click();
 				cy.getCy(`server-drawer-item-${server.id}-no-libraries`).click();
-				cy.getCy(`server-drawer-item-${server.id}-refresh-loading`).should('be.visible');
 
 				cy.getCy(DialogType.RefreshAccountAccessDialog).should('be.visible');
 				cy.getCy('refresh-account-access-dialog-hide-btn').click();

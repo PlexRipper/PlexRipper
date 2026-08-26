@@ -80,57 +80,69 @@
 		<!-- Download Actions -->
 		<template #actions="{ close }">
 			<CancelButton @click="close()" />
-			<q-btn-dropdown
-				color="green"
-				label="Download"
-				outline
-				split
-				@click="onDownload(close)">
-				<template #default>
-					<q-list class="download-destination-menu">
-						<q-item-label header>
-							{{ $t('components.download-confirmation.destination.header') }}
-						</q-item-label>
-						<q-separator />
-						<!-- Download Destination -->
-						<q-item
-							v-for="folderPath in folderPathDestinations"
-							:key="folderPath.id"
-							clickable
-							tag="label">
-							<q-item-section avatar>
-								<q-radio
-									v-model="selectedFolderPath"
-									:val="folderPath" />
-							</q-item-section>
-							<q-item-section>
-								<q-item-label>{{ folderPath.displayName }}</q-item-label>
-								<q-item-label caption>
-									{{ folderPath.directory }}
-								</q-item-label>
-							</q-item-section>
-						</q-item>
-						<!-- Custom Directory -->
-						<q-item
-							clickable
-							@click="dialogStore.openDirectoryBrowserDialog(customDirectory)">
-							<q-item-section avatar>
-								<q-radio
-									v-model="selectedFolderPath"
-									:val="customDirectory" />
-							</q-item-section>
-							<q-item-section>
-								<q-item-label>
-									{{ $t('components.download-confirmation.destination.custom-destination-option') }}
-								</q-item-label>
-								<q-item-label caption>
-									{{ customDirectory.directory }}
-								</q-item-label>
-							</q-item-section>
-						</q-item>
-					</q-list>
-				</template>
-			</q-btn-dropdown>
+			<div class="download-confirmation-actions">
+				<div
+					class="download-confirmation-destination"
+					:title="selectedFolderPath.directory">
+					<QText
+						:value="t('components.download-confirmation.destination.selected')"
+						bold="" />
+					<QText
+						:value="selectedDestination"
+						class="download-confirmation-destination-path" />
+				</div>
+				<q-btn-dropdown
+					color="green"
+					label="Download"
+					outline
+					split
+					@click="onDownload(close)">
+					<template #default>
+						<q-list class="download-destination-menu">
+							<q-item-label header>
+								{{ $t('components.download-confirmation.destination.header') }}
+							</q-item-label>
+							<q-separator />
+							<!-- Download Destination -->
+							<q-item
+								v-for="folderPath in folderPathDestinations"
+								:key="folderPath.id"
+								clickable
+								tag="label">
+								<q-item-section avatar>
+									<q-radio
+										v-model="selectedFolderPath"
+										:val="folderPath" />
+								</q-item-section>
+								<q-item-section>
+									<q-item-label>{{ folderPath.displayName }}</q-item-label>
+									<q-item-label caption>
+										{{ folderPath.directory }}
+									</q-item-label>
+								</q-item-section>
+							</q-item>
+							<!-- Custom Directory -->
+							<q-item
+								clickable
+								@click="dialogStore.openDirectoryBrowserDialog(customDirectory)">
+								<q-item-section avatar>
+									<q-radio
+										v-model="selectedFolderPath"
+										:val="customDirectory" />
+								</q-item-section>
+								<q-item-section>
+									<q-item-label>
+										{{ $t('components.download-confirmation.destination.custom-destination-option') }}
+									</q-item-label>
+									<q-item-label caption>
+										{{ customDirectory.directory }}
+									</q-item-label>
+								</q-item-section>
+							</q-item>
+						</q-list>
+					</template>
+				</q-btn-dropdown>
+			</div>
 			<!--	Directory Browser	-->
 			<DirectoryBrowser @confirm="onCustomDirectorySelected" />
 		</template>
@@ -210,6 +222,8 @@ const selectedFolderPath = ref<FolderPathDTO>(get(customDirectory));
 
 const folderPathDestinations = computed(() => folderPathStore.getFolderPaths().filter((x) => x.mediaType === get(mediaType)));
 
+const selectedDestination = computed(() => get(selectedFolderPath).directory || t('components.download-confirmation.destination.not-set'));
+
 function openDialog(data: DownloadMediaDTO[]): void {
 	set(loading, true);
 	reset();
@@ -265,6 +279,25 @@ function reset() {
 </script>
 
 <style lang="scss">
+.download-confirmation-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  min-width: 0;
+}
+
+.download-confirmation-destination {
+  min-width: 0;
+  max-width: 320px;
+}
+
+.download-confirmation-destination-path {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .download-confirmation-table-header {
   padding-right: 10px;
 

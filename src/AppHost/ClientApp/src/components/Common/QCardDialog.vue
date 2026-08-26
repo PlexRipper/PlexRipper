@@ -92,6 +92,7 @@ const props = withDefaults(
 		transitionHide?: string;
 		buttonAlign?: 'start' | 'center' | 'end' | 'between' | 'around' | 'evenly';
 		cy?: string;
+		id?: number;
 	}>(),
 	{
 		type: undefined,
@@ -106,6 +107,7 @@ const props = withDefaults(
 		transitionShow: 'fade',
 		transitionHide: 'fade',
 		cy: 'q-card-dialog-cy',
+		id: 0,
 	},
 );
 
@@ -120,13 +122,18 @@ const parentValue = computed(() => {
 	return get(dataValue);
 });
 
-function openDialog(value: T) {
-	// Data value should always be set first before opening, since that value is emitted on open
+function openDialog(value: T, id?: number) {
+	if (!(props.id === 0 || props.id === id)) {
+		return;
+	}
 	set(dataValue, value);
 	set(showDialog, true);
 }
 
-function closeDialog() {
+function closeDialog(id?: number) {
+	if (!(props.id === 0 || props.id === id)) {
+		return;
+	}
 	set(showDialog, false);
 }
 
@@ -137,13 +144,13 @@ const styles = computed(() => {
 onMounted(() => {
 	useSubscription(
 		dialogStore.getDialogState()
-			.subscribe(({ name, state, data }) => {
+			.subscribe(({ name, state, data, id }) => {
 				if (name !== props.name) {
 					return;
 				}
 
 				if (state) {
-					openDialog(data as T);
+					openDialog(data as T, id);
 				} else {
 					closeDialog();
 				}

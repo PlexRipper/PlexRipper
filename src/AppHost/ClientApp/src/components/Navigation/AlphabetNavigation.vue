@@ -37,6 +37,7 @@ watch(() => mediaOverviewStore.navLoading, (isLoading) => {
 
 function onLetterClick(label: string, scrollIndex: number) {
 	clickedLabel.value = label;
+	mediaOverviewStore.clearPendingMediaHighlight();
 	mediaOverviewStore.scrollToIndex(scrollIndex);
 }
 

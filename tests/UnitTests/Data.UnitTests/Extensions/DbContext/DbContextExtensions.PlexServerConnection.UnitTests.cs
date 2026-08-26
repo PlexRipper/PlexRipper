@@ -570,6 +570,7 @@ public class DbContextExtensionsPlexServerConnectionUnitTests : BaseUnitTest
 
         // Assert
         result.IsFailed.ShouldBeTrue();
+        result.HasPlex401UnauthorizedError().ShouldBeTrue();
     }
 
     [Test]

@@ -48,6 +48,7 @@ public class DownloadJob : IJob
 
         // Jobs should swallow exceptions as otherwise Quartz will keep re-executing it
         // https://www.quartz-scheduler.net/documentation/best-practices.html#throwing-exceptions
+        var downloadResult = Result.Ok();
         var executionResult = await Result.Try(async Task () =>
         {
             _log.Here()
@@ -153,32 +154,42 @@ public class DownloadJob : IJob
             }
             else if (startResult.IsFailed)
             {
+                downloadResult = startResult;
                 var failedStatus =
-                    startResult.Has404NotFoundError() ? DownloadStatus.SourceUnavailable
+                    startResult.HasPlex401UnauthorizedError() ? DownloadStatus.AuthError
+                    : startResult.Has404NotFoundError() ? DownloadStatus.SourceUnavailable
                     : startResult.IsServerUnreachable() ? DownloadStatus.ServerUnreachable
                     : startResult.HasStorageError() ? DownloadStatus.StorageError
                     : DownloadStatus.DownloadClientError;
 
-                await _downloadTaskUpdateDispatcher.OnStatusChangedAsync(
+                var persistedStatus = await _dbContext.GetDownloadTaskStatusAsync(
                     downloadTask.ToKey(),
-                    failedStatus,
-                    startResult,
                     CancellationToken.None
                 );
+                if (persistedStatus != failedStatus)
+                {
+                    await _downloadTaskUpdateDispatcher.OnStatusChangedAsync(
+                        downloadTask.ToKey(),
+                        failedStatus,
+                        startResult,
+                        CancellationToken.None
+                    );
+                }
 
                 await _eventPublisher.PublishAsync(new SendNotificationResult(startResult), token);
             }
         });
 
-        if (executionResult.IsCancelled)
+        var terminalResult = executionResult.IsSuccess ? downloadResult : executionResult;
+        if (terminalResult.IsCancelled)
         {
-            context.SetResult(JobStatus.Cancelled, executionResult);
-            executionResult.LogWarning();
+            context.SetResult(JobStatus.Cancelled, terminalResult);
+            terminalResult.LogWarning();
         }
-        else if (executionResult.IsFailed)
+        else if (terminalResult.IsFailed)
         {
-            context.SetResult(JobStatus.Failed, executionResult);
-            executionResult.LogError();
+            context.SetResult(JobStatus.Failed, terminalResult);
+            terminalResult.LogError();
         }
 
         _log.Here()

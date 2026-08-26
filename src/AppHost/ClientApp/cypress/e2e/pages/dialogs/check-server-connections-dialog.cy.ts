@@ -34,10 +34,9 @@ describe('Check server connections dialog', () => {
 			}
 			const loadingInProgressConnection = loadingConnections[1]!;
 
-			cy.hubPublishInspectPlexServerJob(
-				JobStatus.Started,
-				serversUnderTest.map((x) => x.id),
-			);
+			for (const server of serversUnderTest) {
+				cy.hubPublishInspectPlexServerJob(JobStatus.Started, [server.id]);
+			}
 
 			cy.getCy('check-server-connection-dialog').should('exist').and('be.visible');
 

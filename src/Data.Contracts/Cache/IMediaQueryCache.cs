@@ -4,7 +4,7 @@ public interface IMediaQueryCache
 {
     Task<Result<PagedMediaQueryResult>> GetMediaAsync(MediaQueryFilter filter, CancellationToken cancellationToken);
 
-    Task BuildCache(CancellationToken cancellationToken = default);
+    Task<Result> BuildCache(CancellationToken cancellationToken = default);
 
     void InvalidateLibrary(int plexLibraryId, string reason);
 

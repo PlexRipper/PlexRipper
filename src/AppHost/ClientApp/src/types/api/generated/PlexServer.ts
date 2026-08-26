@@ -16,6 +16,7 @@ import { ContentType } from "./http-client";
 import type {
   BaseResultDTO,
   PlexServerDTO,
+  RefreshPlexAccountAccessRapportDTO,
   SetServerAliasRequest,
   SetServerEnabledRequest,
   SetServerOwnedRequest,
@@ -119,6 +120,25 @@ export class PlexServer {
       responseType: "json",
       ...params,
     }).pipe(apiCheckPipe<BaseResultDTO>);
+
+  /**
+   * No description
+   * * @tags Plexserver
+   * @name RefreshPlexServerAccountsAccessEndpoint
+   * @request POST:/api/PlexServer/{PlexServerId}/refresh-access
+   * @secure
+   */
+  refreshPlexServerAccountsAccessEndpoint = (
+    plexServerId: number,
+    params: RequestParams = {},
+  ) =>
+    axiosObservable<RefreshPlexAccountAccessRapportDTO[]>({
+      url: `/api/PlexServer/${plexServerId}/refresh-access`,
+      method: "POST",
+      secure: true,
+      responseType: "json",
+      ...params,
+    }).pipe(apiCheckPipe<RefreshPlexAccountAccessRapportDTO[]>);
 
   /**
    * No description
@@ -285,6 +305,11 @@ export class PlexServerPaths {
   static queueInspectPlexServerJobEndpoint = (plexServerId: number) =>
     queryString.stringifyUrl({
       url: `/api/PlexServer/${plexServerId}/inspect`,
+    });
+
+  static refreshPlexServerAccountsAccessEndpoint = (plexServerId: number) =>
+    queryString.stringifyUrl({
+      url: `/api/PlexServer/${plexServerId}/refresh-access`,
     });
 
   static refreshPlexServerConnectionsEndpoint = (plexServerId: number) =>

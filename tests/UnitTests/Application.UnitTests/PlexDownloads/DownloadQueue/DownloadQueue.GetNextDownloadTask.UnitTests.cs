@@ -84,7 +84,7 @@ public class DownloadQueueGetNextDownloadTaskUnitTests : BaseUnitTest<DownloadQu
     }
 
     [Test]
-    public async Task ShouldHaveServerUnreachableDownloadTask_WhenADownloadTaskIsAlreadyDownloading()
+    public async Task ShouldSelectQueuedLeaf_WhenOnlyParentIsServerUnreachable()
     {
         // Arrange
         await SetupDatabase(69598, config => config.TvShowDownloadTasksCount = 5);
@@ -162,7 +162,7 @@ public class DownloadQueueGetNextDownloadTaskUnitTests : BaseUnitTest<DownloadQu
     }
 
     [Test]
-    public async Task ShouldSelectServerUnreachableTask_WhenRetryMetadataWouldPreviouslyBlock()
+    public async Task ShouldSelectServerUnreachableTask_WhenRetryMetadataAllows()
     {
         // Arrange
         await SetupDatabase(51423, config => config.MovieDownloadTasksCount = 2);

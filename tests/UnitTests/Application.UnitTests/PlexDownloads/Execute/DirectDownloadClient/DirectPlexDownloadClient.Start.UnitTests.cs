@@ -6,9 +6,34 @@ namespace Reaparr.Application.UnitTests;
 
 public class DirectPlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDownloadClient>
 {
+    public enum CompletionFailureKind
+    {
+        Timeout,
+        NetworkTimeoutMessage,
+        TimedOutMessage,
+        Storage,
+        UnauthorizedStorage,
+        HttpRequest,
+        Argument,
+        NotSupported,
+        Format,
+        Unknown,
+    }
+
+    public enum DirectFailureKind
+    {
+        HttpRequest,
+        Storage,
+        Unknown,
+    }
+
     // -------------------------------------------------------------------------
     // Shared helpers
     // -------------------------------------------------------------------------
+
+    private static bool ContainsExceptionType(Exception exception, Type expectedType) =>
+        exception.GetType() == expectedType
+        || (exception.InnerException is not null && ContainsExceptionType(exception.InnerException, expectedType));
 
     private static DownloadPackage MakeDownloadPackage(long totalBytes = 10 * 1024) =>
         new()
@@ -451,7 +476,7 @@ public class DirectPlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDow
                 )
             )
             .Returns(Task.CompletedTask)
-            .Verifiable(Times.Once());
+            .Verifiable(Times.Exactly(2));
         Mock.Mock<IDownloadTaskUpdateDispatcher>()
             .Setup(x =>
                 x.OnProgressUpdated(
@@ -507,7 +532,7 @@ public class DirectPlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDow
                 )
             )
             .Returns(Task.CompletedTask)
-            .Verifiable(Times.Once());
+            .Verifiable(Times.Exactly(2));
         Mock.Mock<IDownloadTaskUpdateDispatcher>()
             .Setup(x =>
                 x.OnProgressUpdated(
@@ -775,7 +800,7 @@ public class DirectPlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDow
                 }
             )
             .Returns(Task.CompletedTask)
-            .Verifiable(Times.Once());
+            .Verifiable(Times.Exactly(2));
         Mock.Mock<IDownloadTaskUpdateDispatcher>()
             .Setup(x =>
                 x.OnProgressUpdated(
@@ -802,7 +827,7 @@ public class DirectPlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDow
         SetupSpeedLimitMocks(serverMachineIdentifier);
         SetupCommandExecutor();
 
-        var package = MakeDownloadPackage();
+        var package = MakeDownloadPackage(downloadTask.DataTotal);
         var fileMock = new Mock<IFile>();
         var downloadServiceMock = new Mock<IDownloadService>();
         downloadServiceMock.Setup(x => x.Clear()).Returns(Task.CompletedTask);
@@ -811,9 +836,15 @@ public class DirectPlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDow
         downloadServiceMock
             .Setup(x => x.DownloadFileTaskAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
             .Returns<string, string, CancellationToken>(
-                (_, _, _) =>
+                (_, targetPath, _) =>
                 {
                     downloadingStatusWasSetBeforeDownloadStarted.ShouldBeTrue();
+                    SetupVerifiedFile(fileMock, Mock.Mock<IFileInfoFactory>(), targetPath, downloadTask.DataTotal);
+                    downloadServiceMock.Raise(
+                        x => x.DownloadFileCompleted += null,
+                        downloadServiceMock.Object,
+                        new AsyncCompletedEventArgs(null, false, package)
+                    );
                     return Task.CompletedTask;
                 }
             );
@@ -1016,6 +1047,20 @@ public class DirectPlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDow
         downloadServiceMock.Setup(x => x.Clear()).Returns(Task.CompletedTask);
         downloadServiceMock.Setup(x => x.CancelTaskAsync()).Returns(Task.CompletedTask);
         downloadServiceMock.Setup(x => x.Package).Returns(resumePackage);
+        downloadServiceMock
+            .Setup(x => x.DownloadFileTaskAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .Returns<string, string, CancellationToken>(
+                (_, targetPath, _) =>
+                {
+                    SetupVerifiedFile(fileMock, Mock.Mock<IFileInfoFactory>(), targetPath, downloadTask.DataTotal);
+                    downloadServiceMock.Raise(
+                        x => x.DownloadFileCompleted += null,
+                        downloadServiceMock.Object,
+                        new AsyncCompletedEventArgs(null, false, resumePackage)
+                    );
+                    return Task.CompletedTask;
+                }
+            );
         downloadServiceMock
             .Setup(x => x.DownloadFileTaskAsync(It.IsAny<DownloadPackage>(), It.IsAny<CancellationToken>()))
             .Returns<DownloadPackage, CancellationToken>(
@@ -1312,16 +1357,18 @@ public class DirectPlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDow
         downloadServiceMock.Setup(x => x.Package).Returns(package);
         downloadServiceMock
             .Setup(x => x.DownloadFileTaskAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
-            .Returns<string, string, CancellationToken>((_, targetPath, _) =>
-            {
-                SetupVerifiedFile(fileMock, fileInfoFactoryMock, targetPath, downloadTask.DataTotal);
-                downloadServiceMock.Raise(
-                    x => x.DownloadFileCompleted += null,
-                    downloadServiceMock.Object,
-                    new AsyncCompletedEventArgs(null, false, package)
-                );
-                return Task.CompletedTask;
-            });
+            .Returns<string, string, CancellationToken>(
+                (_, targetPath, _) =>
+                {
+                    SetupVerifiedFile(fileMock, fileInfoFactoryMock, targetPath, downloadTask.DataTotal);
+                    downloadServiceMock.Raise(
+                        x => x.DownloadFileCompleted += null,
+                        downloadServiceMock.Object,
+                        new AsyncCompletedEventArgs(null, false, package)
+                    );
+                    return Task.CompletedTask;
+                }
+            );
 
         var sut = CreateSut(downloadServiceMock, fileMock, fileInfoFactoryMock);
 
@@ -1774,7 +1821,8 @@ public class DirectPlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDow
         var result = await sut.Start(downloadTask.ToKey(), CancellationToken);
 
         // Assert
-        result.IsSuccess.ShouldBeTrue();
+        result.IsFailed.ShouldBeTrue();
+        result.ToString().ShouldContain("file is incomplete");
         Mock.Mock<IDownloadTaskUpdateDispatcher>()
             .Verify(
                 x =>
@@ -1807,6 +1855,160 @@ public class DirectPlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDow
                         It.IsAny<DirectDownloadSnapshot?>()
                     ),
                 Times.Never()
+            );
+    }
+
+    [Test]
+    public async Task ShouldReturnFailure_WhenCompletionEventIsMissingAndFileCannotBeVerified()
+    {
+        // Arrange
+        await SetupDatabase(
+            99985,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexAccountCount = 1;
+                config.MovieDownloadTasksCount = 1;
+            }
+        );
+        var downloadTask = await IDbContext.DownloadTaskMovieFile.FirstAsync(CancellationToken);
+        var serverMachineIdentifier = await IDbContext.GetPlexServerMachineIdentifierById(downloadTask.PlexServerId);
+        var fileMock = new Mock<IFile>();
+        var downloadServiceMock = new Mock<IDownloadService>();
+
+        SetupSpeedLimitMocks(serverMachineIdentifier);
+        SetupCommandExecutor();
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Setup(x =>
+                x.OnStatusChangedAsync(
+                    It.IsAny<DownloadTaskKey>(),
+                    DomainDownloadStatus.Downloading,
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .Returns(Task.CompletedTask);
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Setup(x =>
+                x.OnStatusChangedAsync(
+                    It.IsAny<DownloadTaskKey>(),
+                    DomainDownloadStatus.Error,
+                    It.IsAny<Result>(),
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .Returns(Task.CompletedTask);
+        downloadServiceMock.Setup(x => x.Clear()).Returns(Task.CompletedTask);
+        downloadServiceMock.Setup(x => x.Package).Returns(MakeDownloadPackage(downloadTask.DataTotal));
+        downloadServiceMock
+            .Setup(x => x.DownloadFileTaskAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask);
+        fileMock.Setup(x => x.Exists(It.IsAny<string>())).Returns(false);
+
+        // Act
+        var result = await CreateSut(downloadServiceMock, fileMock).Start(downloadTask.ToKey(), CancellationToken);
+
+        // Assert
+        result.IsFailed.ShouldBeTrue();
+        fileMock.Verify(x => x.Exists(It.IsAny<string>()), Times.AtLeastOnce());
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Verify(
+                x =>
+                    x.OnStatusChangedAsync(
+                        It.IsAny<DownloadTaskKey>(),
+                        DomainDownloadStatus.DownloadFinished,
+                        It.IsAny<CancellationToken>()
+                    ),
+                Times.Never()
+            );
+    }
+
+    [Test]
+    public async Task ShouldProcessOnlyFirstCompletionEvent_WhenDownloaderRaisesDuplicateCompletion()
+    {
+        // Arrange
+        await SetupDatabase(
+            99984,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexAccountCount = 1;
+                config.MovieDownloadTasksCount = 1;
+            }
+        );
+        var downloadTask = await IDbContext.DownloadTaskMovieFile.FirstAsync(CancellationToken);
+        var serverMachineIdentifier = await IDbContext.GetPlexServerMachineIdentifierById(downloadTask.PlexServerId);
+        var fileMock = new Mock<IFile>();
+        var fileInfoFactoryMock = new Mock<IFileInfoFactory>();
+        var downloadServiceMock = new Mock<IDownloadService>();
+        var package = MakeDownloadPackage(downloadTask.DataTotal);
+
+        SetupSpeedLimitMocks(serverMachineIdentifier);
+        SetupCommandExecutor();
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Setup(x =>
+                x.OnStatusChangedAsync(
+                    It.IsAny<DownloadTaskKey>(),
+                    It.IsAny<DomainDownloadStatus>(),
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .Returns(Task.CompletedTask);
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Setup(x =>
+                x.OnProgressUpdated(
+                    It.IsAny<DownloadTaskKey>(),
+                    It.IsAny<DownloadTaskProgress>(),
+                    It.IsAny<DirectDownloadSnapshot?>()
+                )
+            );
+        downloadServiceMock.Setup(x => x.Clear()).Returns(Task.CompletedTask);
+        downloadServiceMock.Setup(x => x.Package).Returns(package);
+        downloadServiceMock
+            .Setup(x => x.DownloadFileTaskAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .Returns<string, string, CancellationToken>(
+                (_, targetPath, _) =>
+                {
+                    SetupVerifiedFile(fileMock, fileInfoFactoryMock, targetPath, downloadTask.DataTotal);
+                    var completion = new AsyncCompletedEventArgs(null, false, package);
+                    downloadServiceMock.Raise(
+                        x => x.DownloadFileCompleted += null,
+                        downloadServiceMock.Object,
+                        completion
+                    );
+                    downloadServiceMock.Raise(
+                        x => x.DownloadFileCompleted += null,
+                        downloadServiceMock.Object,
+                        completion
+                    );
+                    return Task.CompletedTask;
+                }
+            );
+
+        // Act
+        var result = await CreateSut(downloadServiceMock, fileMock, fileInfoFactoryMock)
+            .Start(downloadTask.ToKey(), CancellationToken);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Verify(
+                x =>
+                    x.OnStatusChangedAsync(
+                        It.IsAny<DownloadTaskKey>(),
+                        DomainDownloadStatus.DownloadFinished,
+                        It.IsAny<CancellationToken>()
+                    ),
+                Times.Once()
+            );
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Verify(
+                x =>
+                    x.OnProgressUpdated(
+                        It.IsAny<DownloadTaskKey>(),
+                        It.Is<DownloadTaskProgress>(p => p.Percentage == 100),
+                        It.IsAny<DirectDownloadSnapshot?>()
+                    ),
+                Times.Once()
             );
     }
 
@@ -1908,6 +2110,435 @@ public class DirectPlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDow
                         It.IsAny<DirectDownloadSnapshot?>()
                     ),
                 Times.AtLeastOnce()
+            );
+    }
+
+    [Test]
+    [Arguments(CompletionFailureKind.Timeout, DomainDownloadStatus.ServerUnreachable)]
+    [Arguments(CompletionFailureKind.NetworkTimeoutMessage, DomainDownloadStatus.ServerUnreachable)]
+    [Arguments(CompletionFailureKind.TimedOutMessage, DomainDownloadStatus.ServerUnreachable)]
+    [Arguments(CompletionFailureKind.Storage, DomainDownloadStatus.StorageError)]
+    [Arguments(CompletionFailureKind.UnauthorizedStorage, DomainDownloadStatus.StorageError)]
+    [Arguments(CompletionFailureKind.HttpRequest, DomainDownloadStatus.Error)]
+    [Arguments(CompletionFailureKind.Argument, DomainDownloadStatus.Error)]
+    [Arguments(CompletionFailureKind.NotSupported, DomainDownloadStatus.Error)]
+    [Arguments(CompletionFailureKind.Format, DomainDownloadStatus.Error)]
+    [Arguments(CompletionFailureKind.Unknown, DomainDownloadStatus.Error)]
+    public async Task ShouldSetExpectedStatus_WhenCompletionCallbackReportsError(
+        CompletionFailureKind failureKind,
+        DomainDownloadStatus expectedStatus
+    )
+    {
+        // Arrange
+        await SetupDatabase(
+            99988,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexAccountCount = 1;
+                config.MovieDownloadTasksCount = 1;
+            }
+        );
+
+        var downloadTask = await IDbContext.DownloadTaskMovieFile.FirstAsync(CancellationToken);
+        var serverMachineIdentifier = await IDbContext.GetPlexServerMachineIdentifierById(downloadTask.PlexServerId);
+        var downloadServiceMock = new Mock<IDownloadService>();
+        Exception exception = failureKind switch
+        {
+            CompletionFailureKind.Timeout => new TimeoutException("Plex request timed out."),
+            CompletionFailureKind.NetworkTimeoutMessage => new InvalidOperationException(
+                "Network timeout while reading."
+            ),
+            CompletionFailureKind.TimedOutMessage => new InvalidOperationException("The request timed out."),
+            CompletionFailureKind.Storage => new IOException("Disk write failed."),
+            CompletionFailureKind.UnauthorizedStorage => new UnauthorizedAccessException("Access denied."),
+            CompletionFailureKind.HttpRequest => new HttpRequestException("Connection reset."),
+            CompletionFailureKind.Argument => new ArgumentException("Invalid downloader argument."),
+            CompletionFailureKind.NotSupported => new NotSupportedException("Unsupported operation."),
+            CompletionFailureKind.Format => new FormatException("Malformed response."),
+            _ => new InvalidOperationException("Unexpected downloader failure."),
+        };
+
+        SetupSpeedLimitMocks(serverMachineIdentifier);
+        SetupCommandExecutor();
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Setup(x =>
+                x.OnStatusChangedAsync(
+                    It.IsAny<DownloadTaskKey>(),
+                    DomainDownloadStatus.Downloading,
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.Once());
+        downloadServiceMock.Setup(x => x.Clear()).Returns(Task.CompletedTask);
+        downloadServiceMock.Setup(x => x.CancelTaskAsync()).Returns(Task.CompletedTask);
+        downloadServiceMock
+            .Setup(x => x.DownloadFileTaskAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .Returns(() =>
+            {
+                downloadServiceMock.Raise(
+                    x => x.DownloadFileCompleted += null,
+                    downloadServiceMock.Object,
+                    new AsyncCompletedEventArgs(exception, false, null)
+                );
+                return Task.CompletedTask;
+            });
+
+        // Act
+        var sut = CreateSut(downloadServiceMock);
+        var result = await sut.Start(downloadTask.ToKey(), CancellationToken);
+
+        // Assert
+        result.IsFailed.ShouldBeTrue();
+        result.Errors.ShouldNotBeEmpty();
+        result.ToString().ShouldContain(exception.Message);
+        Mock.Mock<IDownloadTaskUpdateDispatcher>().Verify();
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Verify(
+                x =>
+                    x.OnStatusChangedAsync(
+                        It.IsAny<DownloadTaskKey>(),
+                        DomainDownloadStatus.DownloadFinished,
+                        It.IsAny<CancellationToken>()
+                    ),
+                Times.Never()
+            );
+        downloadServiceMock.Verify(
+            x => x.DownloadFileTaskAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()),
+            Times.Once()
+        );
+    }
+
+    [Test]
+    [Arguments(DirectFailureKind.HttpRequest)]
+    [Arguments(DirectFailureKind.Storage)]
+    [Arguments(DirectFailureKind.Unknown)]
+    public async Task ShouldFailWithoutRetry_WhenDownloaderThrowsNonTransientException(DirectFailureKind failureKind)
+    {
+        // Arrange
+        await SetupDatabase(
+            99986,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexAccountCount = 1;
+                config.MovieDownloadTasksCount = 1;
+            }
+        );
+
+        var downloadTask = await IDbContext.DownloadTaskMovieFile.FirstAsync(CancellationToken);
+        var serverMachineIdentifier = await IDbContext.GetPlexServerMachineIdentifierById(downloadTask.PlexServerId);
+        var downloadServiceMock = new Mock<IDownloadService>();
+        Exception exception = failureKind switch
+        {
+            DirectFailureKind.HttpRequest => new HttpRequestException("Connection reset."),
+            DirectFailureKind.Storage => new IOException("Read failed."),
+            _ => new InvalidOperationException("Unexpected direct failure."),
+        };
+
+        SetupSpeedLimitMocks(serverMachineIdentifier);
+        SetupCommandExecutor();
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Setup(x =>
+                x.OnStatusChangedAsync(
+                    It.IsAny<DownloadTaskKey>(),
+                    DomainDownloadStatus.Downloading,
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.Once());
+        downloadServiceMock.Setup(x => x.Clear()).Returns(Task.CompletedTask);
+        downloadServiceMock.Setup(x => x.CancelTaskAsync()).Returns(Task.CompletedTask);
+        downloadServiceMock
+            .Setup(x => x.DownloadFileTaskAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .ThrowsAsync(exception);
+
+        // Act
+        var sut = CreateSut(downloadServiceMock);
+        var result = await sut.Start(downloadTask.ToKey(), CancellationToken);
+
+        // Assert
+        result.IsFailed.ShouldBeTrue();
+        result.Errors.OfType<ExceptionalError>().ShouldContain(x => ReferenceEquals(x.Exception, exception));
+        downloadServiceMock.Verify(
+            x => x.DownloadFileTaskAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()),
+            Times.Once()
+        );
+        Mock.Mock<IDownloadTaskUpdateDispatcher>().Verify();
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Verify(
+                x =>
+                    x.OnStatusChangedAsync(
+                        It.IsAny<DownloadTaskKey>(),
+                        DomainDownloadStatus.DownloadFinished,
+                        It.IsAny<CancellationToken>()
+                    ),
+                Times.Never()
+            );
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Verify(
+                x =>
+                    x.OnStatusChangedAsync(
+                        It.IsAny<DownloadTaskKey>(),
+                        DomainDownloadStatus.ServerUnreachable,
+                        It.IsAny<Result>(),
+                        It.IsAny<CancellationToken>()
+                    ),
+                Times.Never()
+            );
+    }
+
+    [Test]
+    public async Task ShouldSetDownloadFinished_WhenTransportRetryRecovers()
+    {
+        // Arrange
+        await SetupDatabase(
+            99987,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexAccountCount = 1;
+                config.MovieDownloadTasksCount = 1;
+            }
+        );
+
+        var downloadTask = await IDbContext.DownloadTaskMovieFile.FirstAsync(CancellationToken);
+        var serverMachineIdentifier = await IDbContext.GetPlexServerMachineIdentifierById(downloadTask.PlexServerId);
+        var fileMock = new Mock<IFile>();
+        var fileInfoFactoryMock = new Mock<IFileInfoFactory>();
+        var downloadServiceMock = new Mock<IDownloadService>();
+        var package = MakeDownloadPackage(downloadTask.DataTotal);
+        package.SaveProgress = 60;
+        package.Chunks = [new Chunk(0, downloadTask.DataTotal) { Position = downloadTask.DataTotal * 3 / 5 }];
+        var resumedPackages = new List<DownloadPackage>();
+        var attempt = 0;
+
+        SetupSpeedLimitMocks(serverMachineIdentifier);
+        SetupCommandExecutor();
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Setup(x =>
+                x.OnStatusChangedAsync(
+                    It.IsAny<DownloadTaskKey>(),
+                    DomainDownloadStatus.Downloading,
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.Once());
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Setup(x =>
+                x.OnStatusChangedAsync(
+                    It.IsAny<DownloadTaskKey>(),
+                    DomainDownloadStatus.DownloadFinished,
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.Once());
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Setup(x =>
+                x.OnProgressUpdated(
+                    It.IsAny<DownloadTaskKey>(),
+                    It.IsAny<DownloadTaskProgress>(),
+                    It.IsAny<DirectDownloadSnapshot?>()
+                )
+            );
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Setup(x =>
+                x.OnStatusChangedAsync(
+                    It.IsAny<DownloadTaskKey>(),
+                    DomainDownloadStatus.ServerUnreachable,
+                    It.IsAny<Result>(),
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .Returns(Task.CompletedTask);
+        downloadServiceMock.Setup(x => x.Clear()).Returns(Task.CompletedTask);
+        downloadServiceMock.Setup(x => x.CancelTaskAsync()).Returns(Task.CompletedTask);
+        downloadServiceMock.Setup(x => x.Package).Returns(package);
+        downloadServiceMock
+            .Setup(x => x.DownloadFileTaskAsync(It.IsAny<DownloadPackage>(), It.IsAny<CancellationToken>()))
+            .Returns<DownloadPackage, CancellationToken>(
+                (resumePackage, _) =>
+                {
+                    resumedPackages.Add(resumePackage);
+                    SetupVerifiedFile(
+                        fileMock,
+                        fileInfoFactoryMock,
+                        downloadTask.DownloadFilePath.RemoveReapTempSuffix(),
+                        downloadTask.DataTotal
+                    );
+                    downloadServiceMock.Raise(
+                        x => x.DownloadFileCompleted += null,
+                        downloadServiceMock.Object,
+                        new AsyncCompletedEventArgs(null, false, package)
+                    );
+                    return Task.FromResult(Stream.Null);
+                }
+            );
+        downloadServiceMock
+            .Setup(x => x.DownloadFileTaskAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .Returns<string, string, CancellationToken>(
+                (_, targetPath, _) =>
+                {
+                    if (Interlocked.Increment(ref attempt) == 1)
+                    {
+                        downloadServiceMock.Raise(
+                            x => x.DownloadFileCompleted += null,
+                            downloadServiceMock.Object,
+                            new AsyncCompletedEventArgs(
+                                new TaskCanceledException("Temporary transport cancellation."),
+                                false,
+                                package
+                            )
+                        );
+                        return Task.CompletedTask;
+                    }
+
+                    SetupVerifiedFile(fileMock, fileInfoFactoryMock, targetPath, downloadTask.DataTotal);
+                    downloadServiceMock.Raise(
+                        x => x.DownloadFileCompleted += null,
+                        downloadServiceMock.Object,
+                        new AsyncCompletedEventArgs(null, false, package)
+                    );
+                    return Task.CompletedTask;
+                }
+            );
+
+        // Act
+        var sut = CreateSut(downloadServiceMock, fileMock, fileInfoFactoryMock);
+        var result = await sut.Start(downloadTask.ToKey(), CancellationToken);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        result.Errors.Count.ShouldBe(0);
+        downloadServiceMock.Verify(
+            x => x.DownloadFileTaskAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()),
+            Times.Once()
+        );
+        downloadServiceMock.Verify(
+            x => x.DownloadFileTaskAsync(It.IsAny<DownloadPackage>(), It.IsAny<CancellationToken>()),
+            Times.Once()
+        );
+        downloadServiceMock.Verify(x => x.Clear(), Times.Once());
+        resumedPackages.Count.ShouldBe(1);
+        resumedPackages[0].SaveProgress.ShouldBe(package.SaveProgress);
+        resumedPackages[0].Chunks.Single().Position.ShouldBe(package.Chunks.Single().Position);
+        Mock.Mock<ICommandExecutor>()
+            .Verify(
+                x => x.Send(It.IsAny<GetDirectDownloadUrlCommand>(), It.IsAny<CancellationToken>()),
+                Times.Exactly(2)
+            );
+        Mock.Mock<ICommandExecutor>()
+            .Verify(
+                x => x.Send(It.IsAny<EnsureDownloadDirectoryCommand>(), It.IsAny<CancellationToken>()),
+                Times.Once()
+            );
+        Mock.Mock<IDownloadTaskUpdateDispatcher>().Verify();
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Verify(
+                x =>
+                    x.OnStatusChangedAsync(
+                        It.IsAny<DownloadTaskKey>(),
+                        DomainDownloadStatus.ServerUnreachable,
+                        It.IsAny<Result>(),
+                        It.IsAny<CancellationToken>()
+                    ),
+                Times.Never()
+            );
+    }
+
+    [Test]
+    public async Task ShouldSetServerUnreachable_WhenTransportRetryIsExhausted()
+    {
+        // Arrange
+        await SetupDatabase(
+            99989,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexAccountCount = 1;
+                config.MovieDownloadTasksCount = 1;
+            }
+        );
+
+        var downloadTask = await IDbContext.DownloadTaskMovieFile.FirstAsync(CancellationToken);
+        var serverMachineIdentifier = await IDbContext.GetPlexServerMachineIdentifierById(downloadTask.PlexServerId);
+        var downloadServiceMock = new Mock<IDownloadService>();
+
+        SetupSpeedLimitMocks(serverMachineIdentifier);
+        SetupCommandExecutor();
+
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Setup(x =>
+                x.OnStatusChangedAsync(
+                    It.IsAny<DownloadTaskKey>(),
+                    It.IsAny<Domain.DownloadStatus>(),
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.Once());
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Setup(x =>
+                x.OnProgressUpdated(
+                    It.IsAny<DownloadTaskKey>(),
+                    It.IsAny<DownloadTaskProgress>(),
+                    It.IsAny<DirectDownloadSnapshot?>()
+                )
+            );
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Setup(x =>
+                x.OnStatusChangedAsync(
+                    It.IsAny<DownloadTaskKey>(),
+                    DomainDownloadStatus.ServerUnreachable,
+                    It.IsAny<Result>(),
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .Returns(Task.CompletedTask);
+        downloadServiceMock.Setup(x => x.Clear()).Returns(Task.CompletedTask);
+        downloadServiceMock.Setup(x => x.CancelTaskAsync()).Returns(Task.CompletedTask);
+        downloadServiceMock
+            .Setup(x => x.DownloadFileTaskAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .Returns(() =>
+            {
+                downloadServiceMock.Raise(
+                    x => x.DownloadFileCompleted += null,
+                    downloadServiceMock.Object,
+                    new AsyncCompletedEventArgs(
+                        new TaskCanceledException("Transport connection cancelled."),
+                        false,
+                        null
+                    )
+                );
+                return Task.CompletedTask;
+            });
+
+        // Act
+        var sut = CreateSut(downloadServiceMock);
+        var result = await sut.Start(downloadTask.ToKey(), CancellationToken);
+
+        // Assert
+        result.IsFailed.ShouldBeTrue();
+        result.IsCancelled.ShouldBeFalse();
+        downloadServiceMock.Verify(
+            x => x.DownloadFileTaskAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()),
+            Times.Exactly(3)
+        );
+        result.IsServerUnreachable().ShouldBeTrue();
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Verify(
+                x =>
+                    x.OnStatusChangedAsync(
+                        It.IsAny<DownloadTaskKey>(),
+                        DomainDownloadStatus.ServerUnreachable,
+                        It.IsAny<Result>(),
+                        It.IsAny<CancellationToken>()
+                    ),
+                Times.Once()
             );
     }
 

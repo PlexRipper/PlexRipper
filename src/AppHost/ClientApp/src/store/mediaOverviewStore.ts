@@ -39,6 +39,8 @@ interface IMediaOverviewStoreState {
 	downloadButtonVisible: boolean;
 	filterQuery: string;
 	lastMediaItemViewed: PlexMediaSlimDTO | null;
+	pendingMediaHighlightId: number | null;
+	pendingMediaHighlightLibraryId: number | null;
 	loading: boolean;
 	navLoading: boolean;
 	filterMetadataLoading: boolean;
@@ -57,7 +59,7 @@ interface IMediaOverviewStoreState {
 	// Meant to update to signify a reactive change in the mediaPages
 	mediaPagesVersion: number;
 	currentScrollIndex: number;
-	scrollCommand: BehaviorSubject<number>;
+	scrollCommand: BehaviorSubject<{ index: number; highlight: boolean }>;
 	serverError: boolean;
 	cacheRetrySeconds: number;
 }
@@ -75,6 +77,8 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 		filterQuery: '',
 		queryHash: '',
 		lastMediaItemViewed: null,
+		pendingMediaHighlightId: null,
+		pendingMediaHighlightLibraryId: null,
 		loading: false,
 		navLoading: false,
 		filterMetadataLoading: false,
@@ -108,7 +112,7 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 		availableQualityIds: [],
 		mediaPagesVersion: 0,
 		currentScrollIndex: 0,
-		scrollCommand: new BehaviorSubject<number>(0),
+		scrollCommand: new BehaviorSubject<{ index: number; highlight: boolean }>({ index: 0, highlight: false }),
 		serverError: false,
 		cacheRetrySeconds: 0,
 	};
@@ -152,6 +156,7 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 			state.selection = cloneDeep(defaultState.selection);
 			state.downloadButtonVisible = false;
 			state.lastMediaItemViewed = null;
+			state.pendingMediaHighlightId = null;
 			state.navLoading = false;
 			state.filterMetadataLoading = false;
 			state.isDetailView = false;
@@ -203,6 +208,8 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 		initializeLibrary(libraryId: number): Observable<PlexMediaStatisticsDTO | null> {
 			// Cancel any in-flight requests first
 			actions.cancelPendingRequests();
+			const pendingMediaHighlightId = state.pendingMediaHighlightId;
+			const pendingMediaHighlightLibraryId = state.pendingMediaHighlightLibraryId;
 
 			Log.debug('Initializing library', { libraryId, mediaType: get(getters.getMediaType) });
 
@@ -210,6 +217,10 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 
 			// Update state
 			state.libraryId = libraryId;
+			if (pendingMediaHighlightLibraryId === libraryId) {
+				state.pendingMediaHighlightId = pendingMediaHighlightId;
+				state.pendingMediaHighlightLibraryId = pendingMediaHighlightLibraryId;
+			}
 
 			// Apply url query params
 			actions.applyRouteQueryState();
@@ -407,13 +418,13 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 
 			return of([]);
 		},
-		scrollToIndex(scrollIndex: number) {
+		scrollToIndex(scrollIndex: number, highlight = true) {
 			if (scrollIndex < 0 || scrollIndex >= state.totalCount) {
 				Log.warn(`Scroll index ${scrollIndex} is out of bounds for total count ${state.totalCount}`);
 				return;
 			}
 
-			actions.requestRange(scrollIndex - 50, scrollIndex + 50).subscribe(() => state.scrollCommand.next(scrollIndex));
+			actions.requestRange(scrollIndex - 50, scrollIndex + 50).subscribe(() => state.scrollCommand.next({ index: scrollIndex, highlight }));
 		},
 		setCountryFilter(countryId?: number | null): Observable<PlexMediaStatisticsDTO | null> {
 			return of(countryId).pipe(
@@ -565,6 +576,19 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 			state.currentScrollIndex = scrollIndex;
 			set(scrollIndexQuery, scrollIndex);
 		},
+		setPendingMediaHighlight(mediaId: number, libraryId: number) {
+			state.pendingMediaHighlightId = mediaId;
+			state.pendingMediaHighlightLibraryId = libraryId;
+		},
+		clearPendingMediaHighlight() {
+			state.pendingMediaHighlightId = null;
+			state.pendingMediaHighlightLibraryId = null;
+		},
+		consumePendingMediaHighlight(mediaId: number) {
+			if (state.pendingMediaHighlightId === mediaId) {
+				actions.clearPendingMediaHighlight();
+			}
+		},
 		setFilterQuery(query: string): Observable<PlexMediaStatisticsDTO | null> {
 			state.filterQuery = query;
 			set(searchQuery, query);
@@ -654,7 +678,7 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 			void state.mediaPagesVersion; // Trigger reactive change
 			return Array.from(mediaPages.values()).flat();
 		}),
-		getScrollCommand(): Observable<number> {
+		getScrollCommand(): Observable<{ index: number; highlight: boolean }> {
 			return state.scrollCommand.asObservable();
 		},
 		getMediaItemsForRange: (start: number, end: number): Readonly<PlexMediaSlimDTO[]> => {

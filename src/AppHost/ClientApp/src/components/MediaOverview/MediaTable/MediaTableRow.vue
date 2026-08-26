@@ -140,6 +140,7 @@ const props = withDefaults(
 );
 
 const router = useRouter();
+const mediaOverviewStore = useMediaOverviewStore();
 const { t, n } = useI18n();
 
 defineEmits<{
@@ -152,6 +153,7 @@ function onRowAction(action: IMediaOverviewCommands) {
 			sendMediaOverviewDownloadCommand(toDownloadMedia(props.row));
 			break;
 		case 'open-details':
+			mediaOverviewStore.setPendingMediaHighlight(props.row.id, mediaOverviewStore.libraryId);
 			router.push({
 				name: 'tvshows-libraryId-details-tvShowId',
 				params: {

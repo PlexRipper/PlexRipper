@@ -312,14 +312,14 @@ describe('MediaOverviewStore - Request Contracts', () => {
 		// Arrange
 		const store = useMediaOverviewStore();
 		store.totalCount = 10;
-		const commands: number[] = [];
+		const commands: { index: number; highlight: boolean }[] = [];
 		const subscription = store.getScrollCommand().subscribe((value) => commands.push(value));
 
 		// Act
 		store.scrollToIndex(10);
 
 		// Assert
-		expect(commands).toEqual([0]);
+		expect(commands).toEqual([{ index: 0, highlight: false }]);
 		expect(mock.history.get.filter((x) => x.url === '/api/PlexMedia')).toHaveLength(0);
 		subscription.unsubscribe();
 	});

@@ -30,6 +30,7 @@
 							v-if="rowItem.item"
 							:media-item="rowItem.item"
 							:active="true"
+							:data-media-id="rowItem.item.id"
 							:data-scroll-index="rowItem.index"
 							@download="sendMediaOverviewDownloadCommand($event)"
 							@open-media-details="onOpenMediaDetails" />
@@ -100,6 +101,7 @@ const rowVirtualizer = useVirtualizer(
 
 			// Throttle scroll-index persistence: only run every 500ms to avoid layout thrashing
 			persistScrollIndex();
+			void highlightPendingMedia();
 		},
 	})),
 );
@@ -208,18 +210,39 @@ watch(containerWidth, (width) => {
 function onPageReady() {
 	const requestedScrollIndex = get(mediaOverviewStore.currentScrollIndex);
 	if (requestedScrollIndex > 0) {
-		scrollToIndex(requestedScrollIndex - 1);
+		scrollToIndex(requestedScrollIndex - 1, get(mediaOverviewStore.pendingMediaHighlightId) === null);
+	}
+
+	highlightPendingMedia();
+	if (get(mediaOverviewStore.pendingMediaHighlightId) !== null) {
 		return;
 	}
 
 	const lastMediaItemViewed = get(mediaOverviewStore.lastMediaItemViewed);
-	if (lastMediaItemViewed && lastMediaItemViewed.sortIndex > 0) {
-		// If we have a last viewed media item, scroll to it
+	if (requestedScrollIndex <= 0 && lastMediaItemViewed && lastMediaItemViewed.sortIndex > 0)
 		scrollToIndex(lastMediaItemViewed.sortIndex - 1);
+}
+
+async function highlightPendingMedia() {
+	const pendingMediaHighlightId = get(mediaOverviewStore.pendingMediaHighlightId);
+	if (pendingMediaHighlightId === null) {
+		return;
+	}
+
+	const element = await waitForElement(getScrollElement(), `[data-media-id="${pendingMediaHighlightId}"]`);
+	if (!element) {
+		mediaOverviewStore.consumePendingMediaHighlight(pendingMediaHighlightId);
+		return;
+	}
+
+	if (get(mediaOverviewStore.pendingMediaHighlightId) === pendingMediaHighlightId) {
+		triggerBoxHighlight(element);
+		mediaOverviewStore.consumePendingMediaHighlight(pendingMediaHighlightId);
 	}
 }
 
 function onOpenMediaDetails(mediaItem: PlexMediaSlimDTO) {
+	mediaOverviewStore.setPendingMediaHighlight(mediaItem.id, mediaOverviewStore.libraryId);
 	if (mediaItem.type === PlexMediaType.Movie) {
 		router.push({
 			name: 'movies-libraryId-details-movieId',
@@ -269,7 +292,7 @@ function requestPagesAroundViewport() {
 	}, 200);
 }
 
-function scrollToIndex(index: number) {
+function scrollToIndex(index: number, highlight = true) {
 	const container = getScrollElement();
 	if (!container) {
 		Log.error('Could not find scroll container reference: ', container);
@@ -286,24 +309,26 @@ function scrollToIndex(index: number) {
 	const rowIndex = Math.floor(index / get(gridItems));
 	get(rowVirtualizer).scrollToIndex(rowIndex, { align: 'start' });
 
-	// Highlight after render
-	waitForElement(container, `[data-scroll-index="${index}"]`).then((element) => {
-		if (element) {
-			triggerBoxHighlight(element);
-		}
-	});
+	if (highlight) {
+		// Highlight after render
+		waitForElement(container, `[data-scroll-index="${index}"]`).then((element) => {
+			if (element) {
+				triggerBoxHighlight(element);
+			}
+		});
+	}
 }
 
 onMounted(() => {
 	// Listen for scroll to navigation index command
-	useSubscription(mediaOverviewStore.getScrollCommand().subscribe((scrollIndex) => {
+	useSubscription(mediaOverviewStore.getScrollCommand().subscribe(({ index, highlight }) => {
 		if (!getScrollElement()) {
 			Log.error('Could not find container with reference: ', get(scrollContainerRef));
 			return;
 		}
 
 		// Scroll immediately for responsiveness, then prefetch nearby pages in background
-		scrollToIndex(scrollIndex);
+		scrollToIndex(index, highlight);
 	}));
 });
 </script>

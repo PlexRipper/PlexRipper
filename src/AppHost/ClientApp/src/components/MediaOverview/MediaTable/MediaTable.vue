@@ -30,6 +30,7 @@
 						transform: `translateY(${virtualRow.start}px)`,
 					}"
 					class="media-table--intersection highlight-border-box"
+					:data-media-id="getRowItem(virtualRow.index)?.id"
 					:data-scroll-index="virtualRow.index">
 					<MediaTableRow
 						v-if="getRowItem(virtualRow.index)"
@@ -63,6 +64,7 @@ import type { PlexMediaSlimDTO } from '@dto';
 import type { ISelection } from '@interfaces';
 import {
 	triggerBoxHighlight,
+	waitForElement,
 	useMediaOverviewStore,
 } from '#imports';
 import { getMediaTableColumns } from '~/composables/mediaTableColumns';
@@ -181,7 +183,7 @@ function updateSelectedRow(mediaId: number, state: boolean) {
 	} as ISelection);
 }
 
-function scrollToIndex(index: number) {
+function scrollToIndex(index: number, highlight = true) {
 	const container = getScrollElement();
 	if (!container) {
 		Log.error(`Could not find scroll container reference`);
@@ -189,24 +191,44 @@ function scrollToIndex(index: number) {
 	}
 
 	set(autoScrollEnabled, true);
-	set(pendingHighlightIndex, index);
+	if (highlight)
+		set(pendingHighlightIndex, index);
 	get(rowVirtualizer).scrollToIndex(index, { align: 'start' });
+}
+
+function highlightPendingMedia() {
+	const pendingMediaHighlightId = get(mediaOverviewStore.pendingMediaHighlightId);
+	if (pendingMediaHighlightId === null)
+		return;
+
+	const container = getScrollElement();
+	waitForElement(container, `[data-media-id="${pendingMediaHighlightId}"]`).then((element) => {
+		if (get(mediaOverviewStore.pendingMediaHighlightId) !== pendingMediaHighlightId)
+			return;
+
+		if (element)
+			triggerBoxHighlight(element);
+		mediaOverviewStore.consumePendingMediaHighlight(pendingMediaHighlightId);
+	});
 }
 
 onMounted(() => {
 	// Listen for scroll to navigation index command
-	useSubscription(mediaOverviewStore.getScrollCommand().subscribe((scrollIndex) => {
-		scrollToIndex(scrollIndex);
+	useSubscription(mediaOverviewStore.getScrollCommand().subscribe(({ index, highlight }) => {
+		scrollToIndex(index, highlight);
 	}));
 
 	const requestedScrollIndex = get(mediaOverviewStore.currentScrollIndex);
 	if (requestedScrollIndex > 0) {
-		scrollToIndex(requestedScrollIndex - 1);
-		return;
+		scrollToIndex(requestedScrollIndex - 1, get(mediaOverviewStore.pendingMediaHighlightId) === null);
 	}
 
+	highlightPendingMedia();
+	if (get(mediaOverviewStore.pendingMediaHighlightId) !== null)
+		return;
+
 	const lastMediaItemViewed = get(mediaOverviewStore.lastMediaItemViewed);
-	if (lastMediaItemViewed && lastMediaItemViewed.sortIndex > 0) {
+	if (requestedScrollIndex <= 0 && lastMediaItemViewed && lastMediaItemViewed.sortIndex > 0) {
 		// If we have a last viewed media item, scroll to it
 		scrollToIndex(lastMediaItemViewed.sortIndex - 1);
 	}

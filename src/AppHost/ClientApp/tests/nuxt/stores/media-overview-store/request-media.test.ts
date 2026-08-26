@@ -227,8 +227,6 @@ describe('MediaOverviewStore.requestMedia()', () => {
 		// Arrange
 		const mediaOverviewStore = useMediaOverviewStore();
 		mediaOverviewStore.setCurrentScrollIndex(199);
-		mediaOverviewStore.$patch({ currentScrollIndex: 0 });
-		mediaOverviewStore.applyRouteQueryState();
 		const media = generatePlexMediaStatisticsDTO(generatePlexMediaSlims({
 			config: { movieCount: 1 },
 			partialData: {
@@ -244,5 +242,33 @@ describe('MediaOverviewStore.requestMedia()', () => {
 
 		// Assert
 		expect(mediaOverviewStore.currentScrollIndex).toBe(199);
+	});
+
+	test('Should consume a pending media highlight only for the matching media', () => {
+		// Arrange
+		const mediaOverviewStore = useMediaOverviewStore();
+		mediaOverviewStore.setPendingMediaHighlight(42, 1);
+
+		// Act
+		mediaOverviewStore.consumePendingMediaHighlight(41);
+
+		// Assert
+		expect(mediaOverviewStore.pendingMediaHighlightId).toBe(42);
+
+		mediaOverviewStore.consumePendingMediaHighlight(42);
+		expect(mediaOverviewStore.pendingMediaHighlightId).toBeNull();
+	});
+
+	test('Should preserve a pending media highlight for the all-media overview', () => {
+		// Arrange
+		const mediaOverviewStore = useMediaOverviewStore();
+		mediaOverviewStore.setPendingMediaHighlight(42, 0);
+
+		// Act
+		mediaOverviewStore.initializeLibrary(0);
+
+		// Assert
+		expect(mediaOverviewStore.pendingMediaHighlightId).toBe(42);
+		expect(mediaOverviewStore.pendingMediaHighlightLibraryId).toBe(0);
 	});
 });

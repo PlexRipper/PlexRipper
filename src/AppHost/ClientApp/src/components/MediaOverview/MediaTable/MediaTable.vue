@@ -194,16 +194,22 @@ function scrollToIndex(index: number) {
 }
 
 onMounted(() => {
+	// Listen for scroll to navigation index command
+	useSubscription(mediaOverviewStore.getScrollCommand().subscribe((scrollIndex) => {
+		scrollToIndex(scrollIndex);
+	}));
+
+	const requestedScrollIndex = get(mediaOverviewStore.currentScrollIndex);
+	if (requestedScrollIndex > 0) {
+		scrollToIndex(requestedScrollIndex - 1);
+		return;
+	}
+
 	const lastMediaItemViewed = get(mediaOverviewStore.lastMediaItemViewed);
 	if (lastMediaItemViewed && lastMediaItemViewed.sortIndex > 0) {
 		// If we have a last viewed media item, scroll to it
 		scrollToIndex(lastMediaItemViewed.sortIndex - 1);
 	}
-
-	// Listen for scroll to navigation index command
-	useSubscription(mediaOverviewStore.getScrollCommand().subscribe((scrollIndex) => {
-		scrollToIndex(scrollIndex);
-	}));
 });
 </script>
 

@@ -21,6 +21,7 @@ describe('Display media collection on the Library detail page', () => {
 
 				cy.get('[data-cy="poster-table"]', { timeout: 20000 })
 					.should('exist')
+					.find('.q-scrollarea__container')
 					.scrollTo('bottom', { duration: 10000 });
 				const movieList = mediaData.find((x) => x.libraryId === movieLibrary.id)?.media ?? [];
 				cy.get(`[data-scroll-index="${movieList.length - 1}"]`, { timeout: 20000 })

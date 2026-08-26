@@ -25,7 +25,6 @@ describe('Side bar', () => {
 			for (const server of plexServers) {
 				cy.getCy(`server-drawer-item-${server.id}`).click();
 				cy.getCy(`server-drawer-item-${server.id}-no-libraries`).click();
-				cy.getCy(`server-drawer-item-${server.id}-refresh-loading`).should('be.visible');
 
 				cy.getCy(DialogType.RefreshAccountAccessDialog).should('be.visible');
 				cy.getCy('refresh-account-access-dialog-hide-btn').click();

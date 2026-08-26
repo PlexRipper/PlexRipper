@@ -206,6 +206,12 @@ watch(containerWidth, (width) => {
 });
 
 function onPageReady() {
+	const requestedScrollIndex = get(mediaOverviewStore.currentScrollIndex);
+	if (requestedScrollIndex > 0) {
+		scrollToIndex(requestedScrollIndex - 1);
+		return;
+	}
+
 	const lastMediaItemViewed = get(mediaOverviewStore.lastMediaItemViewed);
 	if (lastMediaItemViewed && lastMediaItemViewed.sortIndex > 0) {
 		// If we have a last viewed media item, scroll to it

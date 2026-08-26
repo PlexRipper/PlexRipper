@@ -222,4 +222,27 @@ describe('MediaOverviewStore.requestMedia()', () => {
 			['D', 2],
 		]);
 	});
+
+	test('Should preserve the URL scroll index when the first media page initializes the cache', () => {
+		// Arrange
+		const mediaOverviewStore = useMediaOverviewStore();
+		mediaOverviewStore.setCurrentScrollIndex(199);
+		mediaOverviewStore.$patch({ currentScrollIndex: 0 });
+		mediaOverviewStore.applyRouteQueryState();
+		const media = generatePlexMediaStatisticsDTO(generatePlexMediaSlims({
+			config: { movieCount: 1 },
+			partialData: {
+				plexServerId: 1,
+				plexLibraryId: 1,
+				type: PlexMediaType.Movie,
+			},
+		}));
+		media.queryHash = 'initial-query';
+
+		// Act
+		mediaOverviewStore.addMediaPage(media);
+
+		// Assert
+		expect(mediaOverviewStore.currentScrollIndex).toBe(199);
+	});
 });

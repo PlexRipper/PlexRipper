@@ -354,7 +354,9 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 				mediaPages.clear();
 				pendingPages.clear();
 				state.itemsLength = 0;
-				state.currentScrollIndex = 0;
+				if (state.queryHash) {
+					state.currentScrollIndex = 0;
+				}
 				state.scrollDict = cloneDeep(defaultState.scrollDict);
 			}
 

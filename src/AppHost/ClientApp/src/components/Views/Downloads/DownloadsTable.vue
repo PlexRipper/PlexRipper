@@ -191,7 +191,7 @@ const getDownloadTableColumns: QTreeTableColumn[] = [
 		header: t('components.downloads-table.columns.status'),
 		field: 'status',
 		align: 'right',
-		width: 200,
+		width: 150,
 	},
 	{
 		header: t('components.downloads-table.columns.data-received'),
@@ -232,7 +232,7 @@ const getDownloadTableColumns: QTreeTableColumn[] = [
 		header: t('components.downloads-table.columns.actions'),
 		field: 'actions',
 		type: QTreeTableColumnType.Actions,
-		width: 200,
+		width: 150,
 		align: 'right',
 		sortable: false,
 	},

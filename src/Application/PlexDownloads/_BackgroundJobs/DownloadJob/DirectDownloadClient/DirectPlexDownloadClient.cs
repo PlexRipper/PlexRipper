@@ -141,12 +141,14 @@ public class DirectPlexDownloadClient : IPlexDownloadClient
 
         var downloaderStartStopwatch = Stopwatch.StartNew();
 
-        var retryPipeline = new ResiliencePipelineBuilder()
+        var retryAttempt = 0;
+        DirectDownloadSnapshot? latestCallbackSnapshot = null;
+        var retryPipeline = new ResiliencePipelineBuilder<Result>()
             .AddRetry(
-                new RetryStrategyOptions
+                new RetryStrategyOptions<Result>
                 {
-                    ShouldHandle = new PredicateBuilder().Handle<TaskCanceledException>(_ =>
-                        !cancellationToken.IsCancellationRequested
+                    ShouldHandle = new PredicateBuilder<Result>().HandleResult(result =>
+                        result.HasException<TaskCanceledException>() && !cancellationToken.IsCancellationRequested
                     ),
                     MaxRetryAttempts = MAX_TRANSIENT_DOWNLOAD_RETRIES,
                     Delay = TimeSpan.FromSeconds(3),
@@ -168,10 +170,14 @@ public class DirectPlexDownloadClient : IPlexDownloadClient
             )
             .Build();
 
-        var result = await Result.Try(async Task () =>
+        var result = await Result.Try(async Task<Result> () =>
             await retryPipeline.ExecuteAsync(
                 async token =>
                 {
+                    var attempt = retryAttempt++;
+                    if (attempt > 0)
+                        await _downloader.Clear();
+
                     var completionSource = new TaskCompletionSource<AsyncCompletedEventArgs>(
                         TaskCreationOptions.RunContinuationsAsynchronously
                     );
@@ -181,9 +187,41 @@ public class DirectPlexDownloadClient : IPlexDownloadClient
 
                     try
                     {
+                        var attemptDownloadUrl = downloadUrl;
+                        if (attempt > 0)
+                        {
+                            var attemptUrlResult = await _commandExecutor.Send(
+                                new GetDirectDownloadUrlCommand(
+                                    downloadTask.PlexServerId,
+                                    downloadTask.FileLocationUrl
+                                ),
+                                token
+                            );
+                            if (!attemptUrlResult.IsSuccess)
+                                return attemptUrlResult.ToResult();
+
+                            attemptDownloadUrl = attemptUrlResult.Value;
+                        }
                         using var retryDbContext = await _dbContextFactory.CreateAsync();
                         var latestDownloadTask = await retryDbContext.GetDownloadTaskFileAsync(downloadTaskKey, token);
-                        var snapshot = latestDownloadTask?.DirectDownloadSnapshot;
+                        var persistedSnapshot = latestDownloadTask?.DirectDownloadSnapshot;
+                        var snapshot =
+                            latestCallbackSnapshot is not null
+                            && (
+                                persistedSnapshot is null
+                                || latestCallbackSnapshot.SaveProgress >= persistedSnapshot.SaveProgress
+                            )
+                                ? latestCallbackSnapshot
+                                : persistedSnapshot;
+                        _log.Here()
+                            .Debug(
+                                "Starting direct download attempt {DownloadAttempt} for {DownloadTaskId} ({MediaFileName}) from {SnapshotProgress}% with {SnapshotChunkCount} chunks",
+                                attempt + 1,
+                                downloadTaskKey.Id,
+                                _filename,
+                                snapshot?.SaveProgress ?? 0,
+                                snapshot?.Chunks.Count ?? 0
+                            );
                         if (snapshot is { Chunks.Count: > 0 })
                         {
                             await SendDownloadClientLog(
@@ -192,7 +230,7 @@ public class DirectPlexDownloadClient : IPlexDownloadClient
                                 $"Resuming {_filename} download from pause"
                             );
                             var progress = snapshot.ToDownloadPackage();
-                            progress.Urls = [downloadUrl]; // Ensure we use the latest connection string
+                            progress.Urls = [attemptDownloadUrl]; // Ensure we use the latest connection string
                             await _downloader.DownloadFileTaskAsync(progress, token);
                         }
                         else
@@ -210,16 +248,29 @@ public class DirectPlexDownloadClient : IPlexDownloadClient
                                 downloadTask.DownloadDirectory,
                                 downloadTask.FileName
                             );
-                            await _downloader.DownloadFileTaskAsync(downloadUrl, downloaderTargetPath, token);
+                            await _downloader.DownloadFileTaskAsync(attemptDownloadUrl, downloaderTargetPath, token);
                         }
 
                         if (completionSource.Task.IsCompleted)
-                            await ProcessDownloadCompletedAsync(
-                                completionSource.Task.Result,
+                        {
+                            var completionArgs = completionSource.Task.Result;
+                            latestCallbackSnapshot = (completionArgs.UserState as DownloadPackage)?.ToSnapshot();
+                            return await ProcessDownloadCompletedAsync(
+                                completionArgs,
                                 downloadTaskKey,
                                 downloadTask.DownloadFilePath,
                                 downloadTask.DataTotal
                             );
+                        }
+                        else
+                        {
+                            var reconciliationResult = await ReconcileMissingCompletionCallbackAsync(
+                                downloadTaskKey,
+                                downloadTask.DownloadFilePath,
+                                downloadTask.DataTotal
+                            );
+                            return reconciliationResult;
+                        }
                     }
                     finally
                     {
@@ -232,15 +283,16 @@ public class DirectPlexDownloadClient : IPlexDownloadClient
 
         var transportCancellation = result
             .Errors.OfType<ExceptionalError>()
-            .Select(error => error.Exception)
-            .OfType<TaskCanceledException>()
-            .FirstOrDefault();
+            .FirstOrDefault(error => error.Exception is TaskCanceledException);
         if (transportCancellation is not null && !cancellationToken.IsCancellationRequested)
         {
             result = Result
                 .Fail(
                     new ExceptionalError(
-                        new IOException("Direct download transport connection was cancelled.", transportCancellation)
+                        new IOException(
+                            "Direct download transport connection was cancelled.",
+                            transportCancellation.Exception
+                        )
                     )
                 )
                 .Add503ServiceUnavailableError();
@@ -250,19 +302,6 @@ public class DirectPlexDownloadClient : IPlexDownloadClient
 
         if (!result.IsSuccess)
             return result.IsCancelled ? result : result.LogError();
-        // Guard against client library edge cases where progress reaches 100% but
-        // DownloadFileCompleted is never raised. We only reconcile after observing
-        // terminal progress so we do not misclassify ordinary interrupted downloads.
-        else if (Volatile.Read(ref _lastObservedProgressPercentagePercent) >= 100)
-        {
-            var reconciliationResult = await ReconcileMissingCompletionCallbackAsync(
-                downloadTaskKey,
-                downloadTask.DownloadFilePath,
-                downloadTask.DataTotal
-            );
-            if (!reconciliationResult.IsSuccess)
-                return reconciliationResult;
-        }
 
         _log.Here()
             .Debug(
@@ -391,7 +430,7 @@ public class DirectPlexDownloadClient : IPlexDownloadClient
         return Result.Ok();
     }
 
-    private async Task ProcessDownloadCompletedAsync(
+    private async Task<Result> ProcessDownloadCompletedAsync(
         AsyncCompletedEventArgs args,
         DownloadTaskKey key,
         string downloadFilePath,
@@ -403,24 +442,26 @@ public class DirectPlexDownloadClient : IPlexDownloadClient
         if (args.Cancelled)
         {
             await SetDownloadStatusAsync(Domain.DownloadStatus.Paused);
-            return;
+            return Result.Ok();
         }
 
         if (args.Error is not null)
         {
+            var errorResult = Result.Fail(new ExceptionalError(args.Error));
             if (args.Error is TaskCanceledException)
-                throw args.Error;
+                return errorResult;
 
-            var errorResult = Result.Fail(new ExceptionalError(args.Error)).LogError();
+            errorResult.LogError();
             await SetDownloadStatusAsync(GetFailureStatus(errorResult), errorResult);
-            throw args.Error;
+            return errorResult;
         }
 
         var completionResult = VerifyCompletedDownload(package, downloadFilePath, expectedFileSize);
         if (completionResult.IsFailed)
         {
-            await SetDownloadStatusAsync(Domain.DownloadStatus.Error, completionResult.ToResult());
-            throw new InvalidOperationException(completionResult.ToString());
+            var failure = completionResult.ToResult();
+            await SetDownloadStatusAsync(Domain.DownloadStatus.Error, failure);
+            return failure;
         }
 
         var verifiedFileSize = completionResult.Value;
@@ -437,6 +478,7 @@ public class DirectPlexDownloadClient : IPlexDownloadClient
             package!.ToSnapshot()
         );
         await SetDownloadStatusAsync(Domain.DownloadStatus.DownloadFinished);
+        return Result.Ok();
     }
 
     private static Domain.DownloadStatus GetFailureStatus(Result result) =>

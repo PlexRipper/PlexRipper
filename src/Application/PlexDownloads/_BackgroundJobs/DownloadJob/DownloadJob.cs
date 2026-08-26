@@ -162,12 +162,19 @@ public class DownloadJob : IJob
                     : startResult.HasStorageError() ? DownloadStatus.StorageError
                     : DownloadStatus.DownloadClientError;
 
-                await _downloadTaskUpdateDispatcher.OnStatusChangedAsync(
+                var persistedStatus = await _dbContext.GetDownloadTaskStatusAsync(
                     downloadTask.ToKey(),
-                    failedStatus,
-                    startResult,
                     CancellationToken.None
                 );
+                if (persistedStatus != failedStatus)
+                {
+                    await _downloadTaskUpdateDispatcher.OnStatusChangedAsync(
+                        downloadTask.ToKey(),
+                        failedStatus,
+                        startResult,
+                        CancellationToken.None
+                    );
+                }
 
                 await _eventPublisher.PublishAsync(new SendNotificationResult(startResult), token);
             }

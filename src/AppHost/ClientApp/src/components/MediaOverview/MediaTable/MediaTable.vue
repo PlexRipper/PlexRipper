@@ -8,9 +8,12 @@
 			:selected="mediaOverviewStore.isRootSelected"
 			class="media-table--header"
 			@selected="mediaOverviewStore.setRootSelected($event)" />
-		<div
-			id="media-table-scroll"
-			ref="qTableRef"
+		<QScroll
+			ref="scrollAreaRef"
+			scroll-id="media-table-scroll"
+			:fit="false"
+			height="calc(100vh - 137px)"
+			width="100%"
 			:class="['media-table--content', isScrollable ? 'scroll' : '']"
 			data-cy="media-table-scroll">
 			<!-- Total height spacer — required by TanStack Virtual to define the scrollable area -->
@@ -47,7 +50,7 @@
 					</div>
 				</div>
 			</div>
-		</div>
+		</QScroll>
 	</div>
 </template>
 
@@ -66,6 +69,11 @@ import { getMediaTableColumns } from '~/composables/mediaTableColumns';
 
 const mediaOverviewStore = useMediaOverviewStore();
 const mediaTableColumns = getMediaTableColumns();
+type QScrollInstance = {
+	getScrollTarget: () => HTMLElement | null;
+};
+
+const scrollAreaRef = ref<QScrollInstance | null>(null);
 const qTableRef = ref<HTMLElement | null>(null);
 const scrollTargetElement = ref<HTMLElement | null>(null);
 const autoScrollEnabled = ref(false);
@@ -105,7 +113,7 @@ const BROWSER_MAX_CSS_HEIGHT = 33_000_000;
 const rowVirtualizer = useVirtualizer(
 	computed(() => ({
 		count: props.rows?.length ?? mediaOverviewStore.itemsLength,
-		getScrollElement: () => get(qTableRef),
+		getScrollElement,
 		estimateSize: () => ROW_HEIGHT,
 		overscan: 10,
 		getItemKey: (index: number) => getRowItem(index)?.id ?? index,
@@ -133,6 +141,14 @@ const rowVirtualizer = useVirtualizer(
 );
 
 const safeTotalSize = computed(() => Math.min(rowVirtualizer.value.getTotalSize(), BROWSER_MAX_CSS_HEIGHT));
+
+function getScrollElement(): HTMLElement | null {
+	const target = get(scrollAreaRef)?.getScrollTarget() ?? null;
+	if (target !== get(qTableRef)) {
+		set(qTableRef, target);
+	}
+	return target;
+}
 
 function getRowItem(index: number): PlexMediaSlimDTO | undefined {
 	return props.rows?.[index] ?? mediaOverviewStore.getMediaItemsForRange(index, index + 1).at(0);
@@ -166,7 +182,7 @@ function updateSelectedRow(mediaId: number, state: boolean) {
 }
 
 function scrollToIndex(index: number) {
-	const container = get(qTableRef);
+	const container = getScrollElement();
 	if (!container) {
 		Log.error(`Could not find scroll container reference`);
 		return;

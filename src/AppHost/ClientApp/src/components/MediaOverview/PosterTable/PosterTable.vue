@@ -1,46 +1,49 @@
 <template>
 	<!-- Poster display -->
-	<div
-		id="poster-table"
-		ref="scrollContainerRef"
-		:style="{ paddingLeft: `${gridPaddingLeft}px` }"
+	<QScroll
+		ref="scrollAreaRef"
+		scroll-id="poster-table"
 		data-cy="poster-table">
-		<!-- Total height spacer — required by TanStack Virtual to define the scrollable area -->
 		<div
-			:data-pages-version="mediaOverviewStore.mediaPagesVersion"
-			:style="{ height: `${safeTotalSize}px`, position: 'relative' }">
-			<!-- Only virtual rows are rendered, positioned absolutely via translateY -->
+			class="poster-table-content"
+			:style="{ paddingLeft: `${gridPaddingLeft}px` }">
+			<!-- Total height spacer — required by TanStack Virtual to define the scrollable area -->
 			<div
-				v-for="virtualRow in rowVirtualizer.getVirtualItems()"
-				:key="virtualRow.index"
-				:style="{
-					position: 'absolute',
-					top: 0,
-					left: 0,
-					width: '100%',
-					transform: `translateY(${virtualRow.start}px)`,
-					display: 'flex',
-				}">
-				<template
-					v-for="rowItem in getRowItems(virtualRow.index)"
-					:key="rowItem.item?.id ?? `skeleton-${rowItem.index}`">
-					<MediaPoster
-						v-if="rowItem.item"
-						:media-item="rowItem.item"
-						:active="true"
-						:data-scroll-index="rowItem.index"
-						@download="sendMediaOverviewDownloadCommand($event)"
-						@open-media-details="onOpenMediaDetails" />
-					<div
-						v-else
-						class="media-poster-placeholder">
-						<div class="media-poster-placeholder__image" />
-						<div class="media-poster-placeholder__quality" />
-					</div>
-				</template>
+				:data-pages-version="mediaOverviewStore.mediaPagesVersion"
+				:style="{ height: `${safeTotalSize}px`, position: 'relative' }">
+				<!-- Only virtual rows are rendered, positioned absolutely via translateY -->
+				<div
+					v-for="virtualRow in rowVirtualizer.getVirtualItems()"
+					:key="virtualRow.index"
+					:style="{
+						position: 'absolute',
+						top: 0,
+						left: 0,
+						width: '100%',
+						transform: `translateY(${virtualRow.start}px)`,
+						display: 'flex',
+					}">
+					<template
+						v-for="rowItem in getRowItems(virtualRow.index)"
+						:key="rowItem.item?.id ?? `skeleton-${rowItem.index}`">
+						<MediaPoster
+							v-if="rowItem.item"
+							:media-item="rowItem.item"
+							:active="true"
+							:data-scroll-index="rowItem.index"
+							@download="sendMediaOverviewDownloadCommand($event)"
+							@open-media-details="onOpenMediaDetails" />
+						<div
+							v-else
+							class="media-poster-placeholder">
+							<div class="media-poster-placeholder__image" />
+							<div class="media-poster-placeholder__quality" />
+						</div>
+					</template>
+				</div>
 			</div>
 		</div>
-	</div>
+	</QScroll>
 </template>
 
 <script setup lang="ts">
@@ -58,6 +61,11 @@ import { useRouter, useMediaOverviewStore } from '#imports';
 
 const mediaOverviewStore = useMediaOverviewStore();
 
+type QScrollInstance = {
+	getScrollTarget: () => HTMLElement | null;
+};
+
+const scrollAreaRef = ref<QScrollInstance | null>(null);
 const scrollContainerRef = ref<HTMLElement | null>(null);
 const posterCardWidth = ref(200 + 32);
 const posterCardHeight = ref(340 + 32);
@@ -78,7 +86,7 @@ const rowCount = computed(() => Math.ceil(mediaOverviewStore.totalCount / get(gr
 const rowVirtualizer = useVirtualizer(
 	computed(() => ({
 		count: get(rowCount),
-		getScrollElement: () => get(scrollContainerRef),
+		getScrollElement,
 		estimateSize: () => get(posterCardHeight),
 		// Render extra rows above and below viewport for smoother jumps
 		overscan: 10,
@@ -100,6 +108,14 @@ const rowVirtualizer = useVirtualizer(
 // This guard ensures the spacer div never exceeds that limit regardless of item count or column count.
 const BROWSER_MAX_CSS_HEIGHT = 33_000_000;
 const safeTotalSize = computed(() => Math.min(rowVirtualizer.value.getTotalSize(), BROWSER_MAX_CSS_HEIGHT));
+
+function getScrollElement(): HTMLElement | null {
+	const target = get(scrollAreaRef)?.getScrollTarget() ?? null;
+	if (target !== get(scrollContainerRef)) {
+		set(scrollContainerRef, target);
+	}
+	return target;
+}
 
 // Returns the loaded items belonging to a given row index, preserving each item's global index.
 function getRowItems(rowIndex: number): { item: PlexMediaSlimDTO | null; index: number }[] {
@@ -127,13 +143,14 @@ function getRowItems(rowIndex: number): { item: PlexMediaSlimDTO | null; index: 
 
 // Throttled scroll-index persistence — avoids DOM queries + BCR calls on every scroll tick.
 let persistTimer: ReturnType<typeof setTimeout> | null = null;
+
 function persistScrollIndex() {
 	if (persistTimer)
 		return;
 
 	persistTimer = setTimeout(() => {
 		persistTimer = null;
-		const container = get(scrollContainerRef);
+		const container = getScrollElement();
 		if (!container)
 			return;
 
@@ -219,6 +236,7 @@ function onOpenMediaDetails(mediaItem: PlexMediaSlimDTO) {
 
 // Throttled page-prefetch during scrolling — avoids firing HTTP requests on every scroll tick.
 let prefetchTimer: ReturnType<typeof setTimeout> | null = null;
+
 function requestPagesAroundViewport() {
 	if (prefetchTimer)
 		return;
@@ -246,7 +264,7 @@ function requestPagesAroundViewport() {
 }
 
 function scrollToIndex(index: number) {
-	const container = get(scrollContainerRef);
+	const container = getScrollElement();
 	if (!container) {
 		Log.error('Could not find scroll container reference: ', container);
 		return;
@@ -273,7 +291,7 @@ function scrollToIndex(index: number) {
 onMounted(() => {
 	// Listen for scroll to navigation index command
 	useSubscription(mediaOverviewStore.getScrollCommand().subscribe((scrollIndex) => {
-		if (!get(scrollContainerRef)) {
+		if (!getScrollElement()) {
 			Log.error('Could not find container with reference: ', get(scrollContainerRef));
 			return;
 		}
@@ -288,14 +306,10 @@ onMounted(() => {
 @use '@/assets/scss/_mixins.scss';
 @use '@/assets/scss/variables.scss' as *;
 
-#poster-table {
-  flex: 1 1 auto;
-  width: 100%;
-  height: 100%;
-  overflow-y: auto;
-  overflow-x: hidden;
-  // Required for absolute positioning of virtual rows inside the spacer div
+.poster-table-content {
   position: relative;
+  width: 100%;
+  min-height: 100%;
 }
 
 .poster-table-item {

@@ -596,6 +596,9 @@
     },
     "download-notification": {
       "movie": "Lade {count} Film herunter | Lade {count} Filme herunter",
+      "tv-show": "Lade {count} TV-Serie herunter | Lade {count} TV-Serien herunter",
+      "season": "Lade {count} Staffel herunter | Lade {count} Staffeln herunter",
+      "episode": "Lade {count} Episode herunter | Lade {count} Episoden herunter",
       "tv-show-detail-v0": "Lade 1 TV-Serie mit 1 Staffel und 1 Episode herunter",
       "tv-show-detail-v1": "Lade 1 TV-Serie mit 1 Staffel und {episodes} Episoden herunter",
       "tv-show-detail-v2": "Lade 1 TV-Serie mit {seasons} Staffeln und 1 Episode herunter",

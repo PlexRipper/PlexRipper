@@ -596,6 +596,9 @@
     },
     "download-notification": {
       "movie": "Pobieranie {count} filmu | Pobieranie {count} filmów | Pobieranie {count} filmów",
+      "tv-show": "Pobieranie {count} serialu | Pobieranie {count} seriali | Pobieranie {count} seriali",
+      "season": "Pobieranie {count} sezonu | Pobieranie {count} sezonów | Pobieranie {count} sezonów",
+      "episode": "Pobieranie {count} odcinka | Pobieranie {count} odcinków | Pobieranie {count} odcinków",
       "tv-show-detail-v0": "Pobieranie 1 serialu z 1 sezonem i 1 odcinkiem",
       "tv-show-detail-v1": "Pobieranie 1 serialu z 1 sezonem i {episodes} odcinkami",
       "tv-show-detail-v2": "Pobieranie 1 serialu z {seasons} sezonami i 1 odcinkiem",

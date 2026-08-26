@@ -596,6 +596,9 @@
     },
     "download-notification": {
       "movie": "Downloading {count} movie | Downloading {count} movies",
+      "tv-show": "Downloading {count} TV show | Downloading {count} TV shows",
+      "season": "Downloading {count} season | Downloading {count} seasons",
+      "episode": "Downloading {count} episode | Downloading {count} episodes",
       "tv-show-detail-v0": "Downloading 1 TV show with 1 season and 1 episode",
       "tv-show-detail-v1": "Downloading 1 TV show with 1 season and {episodes} episodes",
       "tv-show-detail-v2": "Downloading 1 TV show with {seasons} seasons and 1 episode",

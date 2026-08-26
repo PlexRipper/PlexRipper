@@ -1,5 +1,35 @@
 Reaparr Changelog
 
+# [0.39.0-dev.2](https://github.com/Reaparr/Reaparr/compare/v0.39.0-dev.1...v0.39.0-dev.2) (2026-08-26)
+
+
+### Bug Fixes
+
+* **WebAPI:** Add UMASK environment variable for group-writable files ([6d43c92](https://github.com/Reaparr/Reaparr/commit/6d43c9246fd5c1e09c4d5581f16675592001b996))
+* **Web-UI:** Adjust column widths in downloads table ([41c1a9d](https://github.com/Reaparr/Reaparr/commit/41c1a9d405b09fee8d73b9aeac2faf27c33b288c))
+* **Web-UI:** Disable cancel button when deleting a server ([9a027e3](https://github.com/Reaparr/Reaparr/commit/9a027e30e80d27cc0a7c95e35386318cfdc53f4b))
+* **WebAPI:** Downloading from a server which has not auth token anymo… ([#649](https://github.com/Reaparr/Reaparr/issues/649)) ([5b7becd](https://github.com/Reaparr/Reaparr/commit/5b7becdf25a5058366d6737ff24a3b53db6ba501))
+* **WebAPI:** Downloading from a server which has not auth token anymore will now correctly make as AuthError ([6519804](https://github.com/Reaparr/Reaparr/commit/6519804a9c7651281aeb7d6be8abfadac60cc500))
+* **Web-UI:** Enhance download notification translations for TV shows, seasons, and episodes ([3deb5a7](https://github.com/Reaparr/Reaparr/commit/3deb5a788d0db93fc42453e1a23d28b45f669fc9))
+* **WebAPI:** Enhance download task retry logic and status handling ([981c712](https://github.com/Reaparr/Reaparr/commit/981c712ea2759866a3643bdf46922b94f2344695))
+* **WebAPI:** Enhance media query cache initialization before background jobs ([d6bd17a](https://github.com/Reaparr/Reaparr/commit/d6bd17af40f5883eb290611fca6f7beddcf443a2))
+* **WebAPI:** Fix the missing ETA when downloaded files are moved ([49d432f](https://github.com/Reaparr/Reaparr/commit/49d432f76b9b9ae1bd8199a65c3f1958a4065ceb))
+* **Web-UI:** Fixed the clear completion dialog clearing the wrong Download table of completed download tasks ([c198a5c](https://github.com/Reaparr/Reaparr/commit/c198a5c33bbd356ab679c17c7db4b2cc8f195018))
+* **Web-UI:** Fixed the media overview not returning to the last scroll position ([793bb4a](https://github.com/Reaparr/Reaparr/commit/793bb4ad6c48b533af7dcf90a269b9bcf68b82da))
+* **Web-UI:** Normalize scrollbar styling ([d03a2af](https://github.com/Reaparr/Reaparr/commit/d03a2afa8f0ec11e5de4ce99c9572dbd4e740bb1))
+* **WebAPI:** Optimize Plex server deletion logic ([f501fb4](https://github.com/Reaparr/Reaparr/commit/f501fb47e1d0bcf54bd455baeda6e2b742cc42c9))
+* **WebAPI:** Re-implement retry logic for download tasks especially when the connection is poor ([646b805](https://github.com/Reaparr/Reaparr/commit/646b805433607545f52832b3c4b885861b845b05))
+* **Web-UI:** Restore server access refresh flow ([f30cd32](https://github.com/Reaparr/Reaparr/commit/f30cd3279b448360dc0b56e2bd41c0afa8fd8f59))
+* **WebAPI:** Restore transient download retries ([6c2c844](https://github.com/Reaparr/Reaparr/commit/6c2c8448f222f4a6f260c353ff277d2a09e39e3c))
+* **WebAPI:** Update time remaining calculation for moving download tasks ([ca02598](https://github.com/Reaparr/Reaparr/commit/ca02598a79a0edd7c0c278fa6e82ee57d26666ad))
+
+
+### Features
+
+* **WebAPI:** Add seperate refresh access endpoint for Plex server accounts ([3f1fc47](https://github.com/Reaparr/Reaparr/commit/3f1fc4777dfa28a8a9a343526f33290df77f0f53))
+* **Web-UI:** Add the selected destination in the download confirmation dialog next to the download button ([ef7cea5](https://github.com/Reaparr/Reaparr/commit/ef7cea53d1877491fecbbc1010ddf99674610324))
+* **Web-UI:** Media highlight the last viewed media when navigating ([a1af839](https://github.com/Reaparr/Reaparr/commit/a1af83969e27627ba58a7a4d2096952c04ecf7db))
+
 # [0.39.0-dev.1](https://github.com/Reaparr/Reaparr/compare/v0.38.3...v0.39.0-dev.1) (2026-08-19)
 
 

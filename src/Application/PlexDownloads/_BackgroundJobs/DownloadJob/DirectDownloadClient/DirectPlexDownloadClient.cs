@@ -449,10 +449,7 @@ public class DirectPlexDownloadClient : IPlexDownloadClient
         {
             var errorResult = Result.Fail(new ExceptionalError(args.Error));
             if (args.Error is TaskCanceledException)
-            {
-                await SetDownloadStatusAsync(Domain.DownloadStatus.Paused);
                 return errorResult;
-            }
 
             errorResult.LogError();
             await SetDownloadStatusAsync(GetFailureStatus(errorResult), errorResult);

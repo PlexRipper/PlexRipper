@@ -115,6 +115,8 @@
 <script setup lang="ts">
 import Log from 'consola';
 import { type PlexLibraryDTO, PlexMediaType } from '@dto';
+import { useSubscription } from '@vueuse/rxjs';
+import { tap } from 'rxjs/operators';
 import {
 	useLibraryStore,
 	useServerStore,
@@ -199,7 +201,13 @@ function runReSyncAccount(serverId: number): void {
 		return;
 	}
 
-	accountStore.reSyncServer(serverId).subscribe();
+	useSubscription(
+		accountStore.reSyncServer(serverId).pipe(tap((data) => {
+			if (data.isSuccess) {
+				dialogStore.openRefreshPlexAccountAccessDialog(data.value ?? []);
+			}
+		})).subscribe(),
+	);
 }
 </script>
 

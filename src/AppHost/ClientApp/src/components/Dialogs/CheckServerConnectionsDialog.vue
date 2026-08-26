@@ -279,7 +279,7 @@ onMounted(() => {
 	useSubscription(
 		backgroundJobStore.getInspectPlexServerJobUpdate(JobStatus.Started)
 			.subscribe(({ data }) => {
-				set(plexServerIds, data.plexServerIds);
+				set(plexServerIds, [...new Set([...get(plexServerIds), ...data.plexServerIds])]);
 
 				dialogStore.openCheckServerConnectionsDialog({
 					plexServersWithConnectionIds: data.plexServerIds.reduce(

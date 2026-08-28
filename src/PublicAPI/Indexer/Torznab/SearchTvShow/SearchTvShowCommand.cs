@@ -70,12 +70,19 @@ public class SearchTvShowCommandHandler : ICommandHandler<SearchTvShowCommand, R
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
     private readonly INetworkSettings _networkSettings;
+    private readonly IIntegrationsSettings _integrationsSettings;
 
-    public SearchTvShowCommandHandler(ILogger log, IReaparrDbContext dbContext, INetworkSettings networkSettings)
+    public SearchTvShowCommandHandler(
+        ILogger log,
+        IReaparrDbContext dbContext,
+        INetworkSettings networkSettings,
+        IIntegrationsSettings integrationsSettings
+    )
     {
         _log = log.ForContext<SearchTvShowCommandHandler>();
         _dbContext = dbContext;
         _networkSettings = networkSettings;
+        _integrationsSettings = integrationsSettings;
     }
 
     public async Task<Result<TorznabMediaSearchResponseDTO>> ExecuteAsync(
@@ -201,9 +208,12 @@ public class SearchTvShowCommandHandler : ICommandHandler<SearchTvShowCommand, R
 
             // FORCE this to be a string, and not an implicit URL type by Flurl
             // ReSharper disable once SuggestVarOrType_BuiltInTypes
+            // The apikey is carried on the link because Sonarr/Radarr fetch release URLs
+            // through their indexer HTTP path, which holds no download client session.
             string torrentDownloadUrl = _networkSettings
                 .Url.AppendPathSegment(PublicApiRoutes.DownloadTorrent)
-                .SetQueryParams(torrentMetadata.Values);
+                .SetQueryParams(torrentMetadata.Values)
+                .SetQueryParam("apikey", _integrationsSettings.ReaparrApiKey);
 
             _log.Here()
                 .Verbose(

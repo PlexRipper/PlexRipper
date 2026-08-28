@@ -16,7 +16,10 @@ public class DownloadClientAuthenticationPreProcessor<TRequest> : IPreProcessor<
         var cookies = ctx.HttpContext.Request.Cookies;
         var requestPath = ctx.HttpContext.Request.Path;
         var userAgent = ctx.HttpContext.Request.Headers["User-Agent"].ToString();
-        if (!cookies.TryGetValue("SID", out var sid) || string.IsNullOrWhiteSpace(sid))
+        if (
+            !cookies.TryGetValue(DownloadClientSessionAuthenticator.SID_COOKIE, out var sid)
+            || string.IsNullOrWhiteSpace(sid)
+        )
         {
             _log.Here()
                 .Warning(
@@ -28,9 +31,9 @@ public class DownloadClientAuthenticationPreProcessor<TRequest> : IPreProcessor<
             return;
         }
 
-        if (!(await IsValidSession(sid, ct)))
+        if (!await DownloadClientSessionAuthenticator.IsValidSessionAsync(_authDbContextFactory, _log, sid, ct))
         {
-            ExpireSidCookie(ctx.HttpContext);
+            DownloadClientSessionAuthenticator.ExpireSidCookie(ctx.HttpContext);
             _log.Here()
                 .Warning(
                     "Invalid or expired download client session SID cookie from {UserAgent} for request to '{RequestPath}'",
@@ -54,46 +57,5 @@ public class DownloadClientAuthenticationPreProcessor<TRequest> : IPreProcessor<
 
             await ctx.HttpContext.Response.SendForbiddenAsync(cancellation: ct);
         }
-    }
-
-    private static void ExpireSidCookie(HttpContext httpContext)
-    {
-        var isHttps = httpContext.Request.IsHttps;
-        var options = new CookieOptions
-        {
-            Path = "/",
-            HttpOnly = true,
-            Secure = isHttps,
-            SameSite = isHttps ? SameSiteMode.None : SameSiteMode.Lax,
-            Expires = DateTimeOffset.UnixEpoch,
-        };
-        httpContext.Response.Cookies.Delete("SID", options);
-    }
-
-    private async Task<bool> IsValidSession(string sid, CancellationToken ct)
-    {
-        if (string.IsNullOrWhiteSpace(sid))
-            return false;
-
-        using var authDbContext = await _authDbContextFactory.CreateAsync();
-
-        var entity = await authDbContext.DownloadClientSessions.FirstOrDefaultAsync(x => x.Sid == sid, ct);
-        if (entity is null)
-            return false;
-
-        if (entity.ExpiresAt <= DateTimeOffset.UtcNow)
-        {
-            _log.Here()
-                .Debug(
-                    "Download client session with SID '{Sid}' has expired at {ExpiresAt} and will be removed.",
-                    sid,
-                    entity.ExpiresAt
-                );
-            authDbContext.DownloadClientSessions.Remove(entity);
-            await authDbContext.SaveChangesAsync(ct);
-            return false;
-        }
-
-        return true;
     }
 }

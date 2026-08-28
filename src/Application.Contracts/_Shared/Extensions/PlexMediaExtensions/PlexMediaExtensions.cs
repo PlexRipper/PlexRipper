@@ -2,7 +2,10 @@ namespace Reaparr.Application.Contracts;
 
 public static class PlexMediaExtensions
 {
-    public static DownloadTaskMovie MapToDownloadTask(this PlexMovie plexMovie) =>
+    public static DownloadTaskMovie MapToDownloadTask(
+        this PlexMovie plexMovie,
+        IntegrationIdentity? integrationIdentity
+    ) =>
         new()
         {
             Id = default,
@@ -22,9 +25,13 @@ public static class PlexMediaExtensions
             FileDataTransferred = 0,
             FileTransferSpeed = 0,
             Children = [],
+            IntegrationId = integrationIdentity?.Id,
         };
 
-    public static DownloadTaskTvShow MapToDownloadTask(this PlexTvShow plexTvShow) =>
+    public static DownloadTaskTvShow MapToDownloadTask(
+        this PlexTvShow plexTvShow,
+        IntegrationIdentity? integrationIdentity
+    ) =>
         new()
         {
             Id = default,
@@ -44,9 +51,13 @@ public static class PlexMediaExtensions
             Children = [],
             FileTransferSpeed = 0,
             FileDataTransferred = 0,
+            IntegrationId = integrationIdentity?.Id,
         };
 
-    public static DownloadTaskTvShowSeason MapToDownloadTask(this PlexTvShowSeason plexTvShowSeason) =>
+    public static DownloadTaskTvShowSeason MapToDownloadTask(
+        this PlexTvShowSeason plexTvShowSeason,
+        IntegrationIdentity? integrationIdentity
+    ) =>
         new()
         {
             Id = default,
@@ -68,9 +79,13 @@ public static class PlexMediaExtensions
             Parent = null,
             FileTransferSpeed = 0,
             FileDataTransferred = 0,
+            IntegrationId = integrationIdentity?.Id,
         };
 
-    public static DownloadTaskTvShowEpisode MapToDownloadTask(this PlexTvShowEpisode plexTvShowEpisode) =>
+    public static DownloadTaskTvShowEpisode MapToDownloadTask(
+        this PlexTvShowEpisode plexTvShowEpisode,
+        IntegrationIdentity? integrationIdentity
+    ) =>
         new()
         {
             Id = default,
@@ -92,12 +107,14 @@ public static class PlexMediaExtensions
             Parent = null,
             FileTransferSpeed = 0,
             FileDataTransferred = 0,
+            IntegrationId = integrationIdentity?.Id,
         };
 
     public static DownloadTaskMovieFile MapToDownloadTask(
         this PlexMovieMediaData plexMediaData,
         PlexMovie plexMovie,
         CreateDownloadTasksRequest request,
+        string downloadRootPath,
         bool keepCompletedInDownloadFolder
     ) =>
         new()
@@ -124,7 +141,7 @@ public static class PlexMediaExtensions
             Quality = plexMediaData.VideoResolution,
             DirectoryMeta = new DownloadTaskDirectory
             {
-                DownloadRootPath = string.Empty,
+                DownloadRootPath = downloadRootPath,
                 DestinationRootPath = request.CustomDestinationFolderPath,
                 MovieFolder = plexMovie.Title.SanitizeFolderName(),
                 TvShowFolder = string.Empty,
@@ -138,12 +155,15 @@ public static class PlexMediaExtensions
             Title = plexMediaData.GetFileName,
             DirectDownloadSnapshot = null,
             DownloadClientType = PlexDownloadClientType.Direct,
+            SonarrIntegrationId = request.Integration?.Type == IntegrationType.Sonarr ? request.Integration.Id : null,
+            RadarrIntegrationId = request.Integration?.Type == IntegrationType.Radarr ? request.Integration.Id : null,
         };
 
     public static DownloadTaskTvShowEpisodeFile MapToDownloadTask(
         this PlexTvShowEpisodeMediaData plexMediaData,
         PlexTvShowEpisode plexTvShowEpisode,
         CreateDownloadTasksRequest request,
+        string downloadRootPath,
         bool keepCompletedInDownloadFolder
     )
     {
@@ -176,7 +196,7 @@ public static class PlexMediaExtensions
             Quality = plexMediaData.VideoResolution,
             DirectoryMeta = new DownloadTaskDirectory
             {
-                DownloadRootPath = string.Empty,
+                DownloadRootPath = downloadRootPath,
                 DestinationRootPath = request.CustomDestinationFolderPath,
                 MovieFolder = string.Empty,
                 TvShowFolder = plexTvShowEpisode.TvShow.Title.SanitizeFolderName(),
@@ -190,6 +210,8 @@ public static class PlexMediaExtensions
             Title = plexMediaData.GetFileName,
             DirectDownloadSnapshot = null,
             DownloadClientType = PlexDownloadClientType.Direct,
+            SonarrIntegrationId = request.Integration?.Type == IntegrationType.Sonarr ? request.Integration.Id : null,
+            RadarrIntegrationId = request.Integration?.Type == IntegrationType.Radarr ? request.Integration.Id : null,
         };
     }
 }

@@ -55,6 +55,7 @@ public class GenerateDownloadTaskTvShowSeasonsCommandHandler
 
         var episodesIds = new List<DownloadMediaDTO>();
         var seasonsToInsert = new List<DownloadTaskTvShowSeason>();
+        var request = command.Request;
 
         foreach (var downloadMediaDto in plexSeasonList)
         {
@@ -78,15 +79,19 @@ public class GenerateDownloadTaskTvShowSeasonsCommandHandler
             foreach (var season in plexTvShowSeasons)
             {
                 // Check if the tvShowDownloadTask has already been created
-                var downloadTaskTvShow = await _dbContext.GetDownloadTaskTvShowByRatingKeyQuery(
-                    season.PlexServerId,
-                    season.TvShow!.PlexApiRatingKey,
-                    cancellationToken
-                );
+                var downloadTaskTvShow = await _dbContext
+                    .DownloadTaskTvShow.WhereIntegrationIs(request.Integration)
+                    .Include(x => x.Children)
+                    .SingleOrDefaultAsync(
+                        x =>
+                            x.PlexServerId == season.PlexServerId
+                            && x.PlexApiRatingKey == season.TvShow!.PlexApiRatingKey,
+                        cancellationToken
+                    );
                 if (downloadTaskTvShow is null)
                 {
                     // Insert the tvShowDownloadTask into the database
-                    downloadTaskTvShow = season.TvShow.MapToDownloadTask();
+                    downloadTaskTvShow = season.TvShow!.MapToDownloadTask(request.Integration);
                     _dbContext.DownloadTaskTvShow.Add(downloadTaskTvShow);
                     await _dbContext.SaveChangesAsync(cancellationToken);
                 }
@@ -97,7 +102,7 @@ public class GenerateDownloadTaskTvShowSeasonsCommandHandler
                 );
                 if (downloadTaskTvShowSeason is null)
                 {
-                    var seasonDownloadTask = season.MapToDownloadTask();
+                    var seasonDownloadTask = season.MapToDownloadTask(request.Integration);
                     seasonDownloadTask.ParentId = downloadTaskTvShow.Id;
                     seasonsToInsert.Add(seasonDownloadTask);
                 }
@@ -124,8 +129,9 @@ public class GenerateDownloadTaskTvShowSeasonsCommandHandler
             new GenerateDownloadTaskTvShowEpisodesCommand(
                 new CreateDownloadTasksRequest(
                     episodesIds,
-                    command.Request.DestinationFolderPathId,
-                    command.Request.CustomDestinationFolderPath
+                    destinationFolderPathId: command.Request.DestinationFolderPathId,
+                    customDestinationFolderPath: command.Request.CustomDestinationFolderPath,
+                    integration: request.Integration
                 )
             ),
             cancellationToken

@@ -177,7 +177,7 @@ public class RestartDownloadTaskCommandHandler : ICommandHandler<RestartDownload
                 Quality = x.VideoResolution,
                 DirectoryMeta = new DownloadTaskDirectory
                 {
-                    DownloadRootPath = string.Empty,
+                    DownloadRootPath = downloadTask.DirectoryMeta.DownloadRootPath,
                     DestinationRootPath = downloadTask.DirectoryMeta.DestinationRootPath,
                     MovieFolder = x.PlexMovie.Title.SanitizeFolderName(),
                     TvShowFolder = string.Empty,
@@ -192,6 +192,7 @@ public class RestartDownloadTaskCommandHandler : ICommandHandler<RestartDownload
                 FileDataTransferred = 0,
                 TimeRemaining = 0,
                 DestinationFolderPathId = downloadTask.DestinationFolderPathId,
+                IntegrationId = downloadTask.IntegrationId,
             })
             .FirstOrDefaultAsync(cancellationToken);
 
@@ -262,7 +263,7 @@ public class RestartDownloadTaskCommandHandler : ICommandHandler<RestartDownload
                 Quality = x.VideoResolution,
                 DirectoryMeta = new DownloadTaskDirectory
                 {
-                    DownloadRootPath = string.Empty,
+                    DownloadRootPath = downloadTask.DirectoryMeta.DownloadRootPath,
                     DestinationRootPath = downloadTask.DirectoryMeta.DestinationRootPath,
                     MovieFolder = string.Empty,
                     TvShowFolder = x.PlexTvShowEpisode!.TvShow!.Title.SanitizeFolderName(),
@@ -277,6 +278,7 @@ public class RestartDownloadTaskCommandHandler : ICommandHandler<RestartDownload
                 FileDataTransferred = 0,
                 TimeRemaining = 0,
                 DestinationFolderPathId = downloadTask.DestinationFolderPathId,
+                IntegrationId = downloadTask.IntegrationId,
             })
             .FirstOrDefaultAsync(CancellationToken.None);
 

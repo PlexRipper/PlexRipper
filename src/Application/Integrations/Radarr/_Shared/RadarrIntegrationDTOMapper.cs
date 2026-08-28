@@ -10,7 +10,7 @@ public static class RadarrIntegrationDTOMapper
             Url = source.BaseUrl,
             ApiKey = source.RadarrApiKey,
             Category = source.Category,
-            DownloadPath = source.DownloadPath,
+            DownloadFolderId = source.DownloadFolderId,
             ProvisioningState = source.ProvisioningState,
         };
 }

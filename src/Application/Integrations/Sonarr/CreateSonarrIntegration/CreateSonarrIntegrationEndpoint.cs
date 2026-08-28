@@ -6,7 +6,7 @@ public record CreateSonarrIntegrationRequest
     public required string Url { get; init; }
     public required string ApiKey { get; init; }
     public required string Category { get; init; }
-    public string? DownloadPath { get; init; }
+    public int? DownloadFolderId { get; init; }
 }
 
 public class CreateSonarrIntegrationRequestValidator : Validator<CreateSonarrIntegrationRequest>
@@ -17,18 +17,10 @@ public class CreateSonarrIntegrationRequestValidator : Validator<CreateSonarrInt
         RuleFor(x => x.Url)
             .NotEmpty()
             .MaximumLength(SonarrIntegration.BaseUrlMaxLength)
-            .Must(IsHttpUrl)
             .WithMessage("URL must be an absolute http/https URL.");
         RuleFor(x => x.ApiKey).NotEmpty().MaximumLength(SonarrIntegration.ApiKeyMaxLength);
         RuleFor(x => x.Category).NotEmpty().MaximumLength(SonarrIntegration.CategoryMaxLength);
-        RuleFor(x => x.DownloadPath).MaximumLength(SonarrIntegration.DownloadPathMaxLength);
     }
-
-    private static bool IsHttpUrl(string value) =>
-        Uri.TryCreate(value.TrimEnd('/'), UriKind.Absolute, out var uri)
-        && (uri.Scheme == Uri.UriSchemeHttp || uri.Scheme == Uri.UriSchemeHttps)
-        && string.IsNullOrEmpty(uri.Query)
-        && string.IsNullOrEmpty(uri.Fragment);
 }
 
 public class CreateSonarrIntegrationEndpoint : Endpoint<CreateSonarrIntegrationRequest, ResultDTO<SonarrIntegrationDTO>>
@@ -54,7 +46,21 @@ public class CreateSonarrIntegrationEndpoint : Endpoint<CreateSonarrIntegrationR
         var url = req.Url.Trim().TrimEnd('/');
         var apiKey = req.ApiKey.Trim();
         var category = req.Category.Trim();
-        var downloadPath = string.IsNullOrWhiteSpace(req.DownloadPath) ? null : req.DownloadPath.Trim();
+
+        if (
+            req.DownloadFolderId is not null
+            && !await _dbContext.FolderPaths.AnyAsync(
+                x => x.Id == req.DownloadFolderId && x.FolderType == FolderType.DownloadFolder,
+                ct
+            )
+        )
+        {
+            await Send.FluentResult(
+                ResultExtensions.Create400BadRequestResult("The selected download folder is invalid."),
+                ct
+            );
+            return;
+        }
 
         var hasConflict = await _dbContext.SonarrIntegrations.AnyAsync(
             x => x.Name == name || x.Category == category || x.BaseUrl == url,
@@ -79,7 +85,7 @@ public class CreateSonarrIntegrationEndpoint : Endpoint<CreateSonarrIntegrationR
             SonarrApiKey = apiKey,
             ReaparrApiKey = Guid.NewGuid().ToString("N"),
             Category = category,
-            DownloadPath = downloadPath,
+            DownloadFolderId = req.DownloadFolderId,
             ProvisioningState = IntegrationProvisioningState.Unconfigured,
         };
         _dbContext.SonarrIntegrations.Add(integration);

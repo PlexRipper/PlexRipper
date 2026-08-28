@@ -6,7 +6,7 @@ public record CreateRadarrIntegrationRequest
     public required string Url { get; init; }
     public required string ApiKey { get; init; }
     public required string Category { get; init; }
-    public string? DownloadPath { get; init; }
+    public int? DownloadFolderId { get; init; }
 }
 
 public class CreateRadarrIntegrationRequestValidator : Validator<CreateRadarrIntegrationRequest>
@@ -17,18 +17,10 @@ public class CreateRadarrIntegrationRequestValidator : Validator<CreateRadarrInt
         RuleFor(x => x.Url)
             .NotEmpty()
             .MaximumLength(RadarrIntegration.BaseUrlMaxLength)
-            .Must(IsHttpUrl)
             .WithMessage("URL must be an absolute http/https URL.");
         RuleFor(x => x.ApiKey).NotEmpty().MaximumLength(RadarrIntegration.ApiKeyMaxLength);
         RuleFor(x => x.Category).NotEmpty().MaximumLength(RadarrIntegration.CategoryMaxLength);
-        RuleFor(x => x.DownloadPath).MaximumLength(RadarrIntegration.DownloadPathMaxLength);
     }
-
-    private static bool IsHttpUrl(string value) =>
-        Uri.TryCreate(value.TrimEnd('/'), UriKind.Absolute, out var uri)
-        && (uri.Scheme == Uri.UriSchemeHttp || uri.Scheme == Uri.UriSchemeHttps)
-        && string.IsNullOrEmpty(uri.Query)
-        && string.IsNullOrEmpty(uri.Fragment);
 }
 
 public class CreateRadarrIntegrationEndpoint : Endpoint<CreateRadarrIntegrationRequest, ResultDTO<RadarrIntegrationDTO>>
@@ -54,7 +46,21 @@ public class CreateRadarrIntegrationEndpoint : Endpoint<CreateRadarrIntegrationR
         var url = req.Url.Trim().TrimEnd('/');
         var apiKey = req.ApiKey.Trim();
         var category = req.Category.Trim();
-        var downloadPath = string.IsNullOrWhiteSpace(req.DownloadPath) ? null : req.DownloadPath.Trim();
+
+        if (
+            req.DownloadFolderId is not null
+            && !await _dbContext.FolderPaths.AnyAsync(
+                x => x.Id == req.DownloadFolderId && x.FolderType == FolderType.DownloadFolder,
+                ct
+            )
+        )
+        {
+            await Send.FluentResult(
+                ResultExtensions.Create400BadRequestResult("The selected download folder is invalid."),
+                ct
+            );
+            return;
+        }
 
         var hasConflict = await _dbContext.RadarrIntegrations.AnyAsync(
             x => x.Name == name || x.Category == category || x.BaseUrl == url,
@@ -79,7 +85,7 @@ public class CreateRadarrIntegrationEndpoint : Endpoint<CreateRadarrIntegrationR
             RadarrApiKey = apiKey,
             ReaparrApiKey = Guid.NewGuid().ToString("N"),
             Category = category,
-            DownloadPath = downloadPath,
+            DownloadFolderId = req.DownloadFolderId,
             ProvisioningState = IntegrationProvisioningState.Unconfigured,
         };
         _dbContext.RadarrIntegrations.Add(integration);

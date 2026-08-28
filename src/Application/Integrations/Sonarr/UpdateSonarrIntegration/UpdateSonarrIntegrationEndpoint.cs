@@ -8,7 +8,7 @@ public record UpdateSonarrIntegrationRequest
     public required string Url { get; init; }
     public required string ApiKey { get; init; }
     public required string Category { get; init; }
-    public string? DownloadPath { get; init; }
+    public int? DownloadFolderId { get; init; }
 }
 
 public class UpdateSonarrIntegrationRequestValidator : Validator<UpdateSonarrIntegrationRequest>
@@ -24,7 +24,6 @@ public class UpdateSonarrIntegrationRequestValidator : Validator<UpdateSonarrInt
             .WithMessage("URL must be an absolute http/https URL.");
         RuleFor(x => x.ApiKey).NotEmpty().MaximumLength(SonarrIntegration.ApiKeyMaxLength);
         RuleFor(x => x.Category).NotEmpty().MaximumLength(SonarrIntegration.CategoryMaxLength);
-        RuleFor(x => x.DownloadPath).MaximumLength(SonarrIntegration.DownloadPathMaxLength);
     }
 
     private static bool IsHttpUrl(string value) =>
@@ -67,7 +66,21 @@ public class UpdateSonarrIntegrationEndpoint : Endpoint<UpdateSonarrIntegrationR
         var url = req.Url.Trim().TrimEnd('/');
         var apiKey = req.ApiKey.Trim();
         var category = req.Category.Trim();
-        var downloadPath = string.IsNullOrWhiteSpace(req.DownloadPath) ? null : req.DownloadPath.Trim();
+
+        if (
+            req.DownloadFolderId is not null
+            && !await _dbContext.FolderPaths.AnyAsync(
+                x => x.Id == req.DownloadFolderId && x.FolderType == FolderType.DownloadFolder,
+                ct
+            )
+        )
+        {
+            await Send.FluentResult(
+                ResultExtensions.Create400BadRequestResult("The selected download folder is invalid."),
+                ct
+            );
+            return;
+        }
 
         var hasConflict = await _dbContext.SonarrIntegrations.AnyAsync(
             x => x.Id != integration.Id && (x.Name == name || x.Category == category || x.BaseUrl == url),
@@ -94,7 +107,7 @@ public class UpdateSonarrIntegrationEndpoint : Endpoint<UpdateSonarrIntegrationR
         integration.BaseUrl = url;
         integration.SonarrApiKey = apiKey;
         integration.Category = category;
-        integration.DownloadPath = downloadPath;
+        integration.DownloadFolderId = req.DownloadFolderId;
         await _dbContext.SaveChangesAsync(ct);
 
         await Send.FluentResult(Result.Ok(integration), model => model.ToDTO(), ct);

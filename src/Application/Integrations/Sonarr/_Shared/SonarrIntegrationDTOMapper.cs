@@ -10,7 +10,7 @@ public static class SonarrIntegrationDTOMapper
             Url = source.BaseUrl,
             ApiKey = source.SonarrApiKey,
             Category = source.Category,
-            DownloadPath = source.DownloadPath,
+            DownloadFolderId = source.DownloadFolderId,
             ProvisioningState = source.ProvisioningState,
         };
 }

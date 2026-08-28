@@ -208,7 +208,11 @@ public class DownloadJob : IJob
     {
         if (string.IsNullOrWhiteSpace(downloadTask.DirectoryMeta.DownloadRootPath))
         {
-            var downloadFolder = await _dbContext.GetDownloadFolder();
+            var integration = (
+                downloadTask.SonarrIntegrationId,
+                downloadTask.RadarrIntegrationId
+            ).ToIntegrationIdentity();
+            var downloadFolder = await _dbContext.GetDownloadFolder(integration);
             downloadTask.DirectoryMeta.DownloadRootPath = downloadFolder.DirectoryPath;
         }
 

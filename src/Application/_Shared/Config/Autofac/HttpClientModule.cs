@@ -7,8 +7,6 @@ namespace Reaparr.Application;
 public static class HttpClientModule
 {
     public static readonly string DefaultClientName = string.Empty;
-    internal static readonly string SonarrClientName = "Sonarr";
-    internal static readonly string RadarrClientName = "Radarr";
     public static readonly string PlexThumbnailClientName = "PlexThumbnail";
     internal static readonly string GitHubClientName = "GitHub";
 
@@ -29,63 +27,6 @@ public static class HttpClientModule
                 }
             );
     }
-
-    public static void RegisterSonarrHttpClient(this IServiceCollection services)
-    {
-        services
-            .AddHttpClient(
-                SonarrClientName,
-                (sp, client) =>
-                {
-                    var settings = (ISonarrSettings?)sp.GetService(typeof(ISonarrSettings));
-                    if (settings == null || string.IsNullOrWhiteSpace(settings.SonarrBaseUrl))
-                        return;
-
-                    if (!Uri.TryCreate(settings.SonarrBaseUrl.Trim().TrimEnd('/'), UriKind.Absolute, out var baseUri))
-                        return;
-
-                    client.BaseAddress = baseUri;
-                    client.Timeout = TimeSpan.FromSeconds(15);
-                    client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-
-                    if (!string.IsNullOrWhiteSpace(settings.SonarrApiKey))
-                        client.DefaultRequestHeaders.Add("X-Api-Key", settings.SonarrApiKey);
-                }
-            )
-            .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler { AllowAutoRedirect = false });
-    }
-
-    public static HttpClient CreateSonarrHttpClient(this IHttpClientFactory factory) =>
-        factory.CreateClient(SonarrClientName);
-
-    public static void RegisterRadarrHttpClient(this IServiceCollection services)
-    {
-        services
-            .AddHttpClient(
-                RadarrClientName,
-                (sp, client) =>
-                {
-                    var settings = (IRadarrSettings?)sp.GetService(typeof(IRadarrSettings));
-                    if (settings == null || string.IsNullOrWhiteSpace(settings.RadarrBaseUrl))
-                        return;
-
-                    var normalizedBaseUrl = settings.RadarrBaseUrl.Trim().TrimEnd('/') + "/";
-                    if (!Uri.TryCreate(normalizedBaseUrl, UriKind.Absolute, out var baseUri))
-                        return;
-
-                    client.BaseAddress = baseUri;
-                    client.Timeout = TimeSpan.FromSeconds(15);
-                    client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-
-                    if (!string.IsNullOrWhiteSpace(settings.RadarrApiKey))
-                        client.DefaultRequestHeaders.Add("X-Api-Key", settings.RadarrApiKey);
-                }
-            )
-            .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler { AllowAutoRedirect = false });
-    }
-
-    public static HttpClient CreateRadarrHttpClient(this IHttpClientFactory factory) =>
-        factory.CreateClient(RadarrClientName);
 
     public static void RegisterPlexThumbnailHttpClient(this IServiceCollection services)
     {

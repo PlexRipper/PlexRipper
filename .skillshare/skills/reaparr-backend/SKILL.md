@@ -19,6 +19,19 @@ Backend work includes code, tests, configuration, plans, reviews, debugging, and
 
 Do not use this skill for frontend-only work under `src/AppHost/ClientApp/`; use the Reaparr frontend skills instead.
 
+## Vertical-slice structure
+
+Application endpoints are organized by operation, not grouped into product-level aggregate files.
+
+- Put each endpoint operation in its own descriptively named folder under the relevant feature/product area.
+- Keep the endpoint, its request/response contracts, and its validator in that operation's endpoint file unless the existing slice uses separate files.
+- A C# endpoint file must declare only one FastEndpoints endpoint class.
+- Never create aggregate files such as `SonarrIntegrationEndpoints.cs`, `RadarrIntegrationEndpoints.cs`, `ManagementEndpoints.cs`, or any other `*Endpoints.cs` file containing multiple endpoint operations.
+- When adding related detail, setup, and delete operations, create sibling slices such as `GetSonarrIntegration/`, `SetupSonarrIntegration/`, and `DeleteSonarrIntegration/` rather than grouping them by product in one file.
+- Before creating files, inspect the nearest existing endpoint siblings through Rider and match their folder/file organization.
+
+Generic minimal-file or DRY guidance must not override this structure. In Reaparr, the operation is the vertical slice.
+
 ## Required Tooling
 
 Rider MCP is mandatory for backend work. All backend file operations, searches, symbol inspection, refactors, and diagnostics must use Rider MCP tools first:

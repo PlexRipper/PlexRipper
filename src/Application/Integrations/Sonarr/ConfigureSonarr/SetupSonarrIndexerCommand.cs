@@ -3,6 +3,7 @@ namespace Reaparr.Application;
 public record SetupSonarrIndexerCommand : ICommand<Result<SetupSonarrIndexerCommandResult>>
 {
     public required int DownloadClientId { get; init; }
+    public Guid IntegrationId { get; init; }
 }
 
 public record SetupSonarrIndexerCommandResult
@@ -15,8 +16,7 @@ public class SetupSonarrIndexerCommandHandler
 {
     private readonly ILogger _log;
     private readonly ICommandExecutor _commandExecutor;
-    private readonly ISonarrSettings _sonarrSettings;
-    private readonly IIntegrationsSettings _integrationsSettings;
+    private readonly IReaparrDbContext _dbContext;
     private readonly INetworkSettings _networkSettings;
 
     private readonly string _indexerName = "Reaparr";
@@ -24,15 +24,13 @@ public class SetupSonarrIndexerCommandHandler
     public SetupSonarrIndexerCommandHandler(
         ILogger log,
         ICommandExecutor commandExecutor,
-        ISonarrSettings sonarrSettings,
-        IIntegrationsSettings integrationsSettings,
+        IReaparrDbContext dbContext,
         INetworkSettings networkSettings
     )
     {
         _log = log.ForContext<SetupSonarrIndexerCommandHandler>();
         _commandExecutor = commandExecutor;
-        _sonarrSettings = sonarrSettings;
-        _integrationsSettings = integrationsSettings;
+        _dbContext = dbContext;
         _networkSettings = networkSettings;
     }
 
@@ -41,25 +39,30 @@ public class SetupSonarrIndexerCommandHandler
         CancellationToken ct
     )
     {
-        if (!_sonarrSettings.IsValidApiKey())
-            return Result.Fail("Sonarr settings are invalid: ApiKey is invalid.").LogError();
-
-        if (!_sonarrSettings.IsValidUrl())
-            return Result.Fail("Sonarr settings are invalid: BaseUrl is invalid.").LogError();
+        var integration =
+            command.IntegrationId == Guid.Empty
+                ? null
+                : await _dbContext
+                    .SonarrIntegrations.AsNoTracking()
+                    .SingleOrDefaultAsync(x => x.Id == command.IntegrationId, ct);
+        if (integration is null)
+            return Result.Fail("The Sonarr integration was not found.").LogError();
 
         _log.Here().Information("Setting up Sonarr indexer '{IndexerName}'...", _indexerName);
 
         // Check for existing indexers
-        var getResult = await _commandExecutor.Send(new SonarrApiGetIndexersCommand(), ct);
+        var getResult = await _commandExecutor.Send(new SonarrApiGetIndexersCommand(integration.Id), ct);
         if (getResult.IsFailed)
             return Result
                 .Fail("Failed to retrieve existing indexers from Sonarr.")
                 .WithErrors(getResult.Errors)
                 .LogError();
 
-        var existing = getResult.Value.FirstOrDefault(d =>
-            string.Equals(d.Name, _indexerName, StringComparison.OrdinalIgnoreCase)
-        );
+        var existing =
+            getResult.Value.FirstOrDefault(d => d.Id == integration.ExternalIndexerId)
+            ?? getResult.Value.FirstOrDefault(d =>
+                string.Equals(d.Name, _indexerName, StringComparison.OrdinalIgnoreCase)
+            );
 
         if (existing is not null)
         {
@@ -68,9 +71,10 @@ public class SetupSonarrIndexerCommandHandler
             var updateResult = await _commandExecutor.Send(
                 new SonarrApiUpdateIndexerCommand
                 {
+                    IntegrationId = integration.Id,
                     Id = existing.Id,
                     ForceSave = true,
-                    Resource = BuildIndexerResource(command.DownloadClientId),
+                    Resource = BuildIndexerResource(command.DownloadClientId, existing.Id, integration),
                 },
                 ct
             );
@@ -87,8 +91,9 @@ public class SetupSonarrIndexerCommandHandler
         var createResult = await _commandExecutor.Send(
             new SonarrApiCreateIndexerCommand
             {
+                IntegrationId = integration.Id,
                 ForceSave = true,
-                Resource = BuildIndexerResource(command.DownloadClientId),
+                Resource = BuildIndexerResource(command.DownloadClientId, null, integration),
             },
             ct
         );
@@ -100,11 +105,11 @@ public class SetupSonarrIndexerCommandHandler
         return Result.Ok(new SetupSonarrIndexerCommandResult { IndexerId = createResult.Value.Id });
     }
 
-    private SonarrIndexerContractDTO BuildIndexerResource(int downloadClientId)
+    private SonarrIndexerContractDTO BuildIndexerResource(int downloadClientId, int? id, SonarrIntegration integration)
     {
         // FORCE this to be a string, and not an implicit URL type by Flurl
         // ReSharper disable once SuggestVarOrType_BuiltInTypes
-        string baseUrl = _networkSettings.Url.AppendPathSegment("api/public/indexer");
+        string baseUrl = _networkSettings.Url.AppendPathSegment($"api/public/integrations/{integration.Id}/indexer");
 
         return new SonarrIndexerContractDTO
         {
@@ -122,7 +127,7 @@ public class SetupSonarrIndexerCommandHandler
             [
                 new SonarrIndexerContractFieldDTO { Name = "baseUrl", Value = baseUrl },
                 new SonarrIndexerContractFieldDTO { Name = "apiPath", Value = "/api" },
-                new SonarrIndexerContractFieldDTO { Name = "apiKey", Value = _integrationsSettings.ReaparrApiKey },
+                new SonarrIndexerContractFieldDTO { Name = "apiKey", Value = integration.ReaparrApiKey },
                 new SonarrIndexerContractFieldDTO
                 {
                     Name = "categories",

@@ -27,7 +27,7 @@ public class RadarrHttpClientFactory : IRadarrHttpClientFactory
             using var dbContext = await _dbContextFactory.CreateAsync();
             var integration = await dbContext
                 .RadarrIntegrations.Where(x => x.Id == integrationId)
-                .Select(x => new { x.BaseUrl, x.ApiKey })
+                .Select(x => new { x.BaseUrl, ApiKey = x.RadarrApiKey })
                 .SingleOrDefaultAsync(ct);
             return integration is null ? null : (integration.BaseUrl, integration.ApiKey);
         });

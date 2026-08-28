@@ -1,17 +1,17 @@
 namespace Reaparr.Application;
 
-public record SetupSonarrIntegrationRequest
+public record SetupRadarrIntegrationRequest
 {
     [RouteParam]
     public Guid IntegrationId { get; init; }
 }
 
-public class SetupSonarrIntegrationEndpoint : Endpoint<SetupSonarrIntegrationRequest, ResultDTO<SonarrIntegrationDTO>>
+public class SetupRadarrIntegrationEndpoint : Endpoint<SetupRadarrIntegrationRequest, ResultDTO<RadarrIntegrationDTO>>
 {
     private readonly IReaparrDbContext _dbContext;
     private readonly ICommandExecutor _commandExecutor;
 
-    public SetupSonarrIntegrationEndpoint(IReaparrDbContext dbContext, ICommandExecutor commandExecutor)
+    public SetupRadarrIntegrationEndpoint(IReaparrDbContext dbContext, ICommandExecutor commandExecutor)
     {
         _dbContext = dbContext;
         _commandExecutor = commandExecutor;
@@ -19,29 +19,29 @@ public class SetupSonarrIntegrationEndpoint : Endpoint<SetupSonarrIntegrationReq
 
     public override void Configure()
     {
-        Post(ApiRoutes.IntegrationController + "/Sonarr/{integrationId:guid}/Setup");
+        Post(ApiRoutes.IntegrationController + "/Radarr/{integrationId:guid}/Setup");
         Roles(DefaultUserAppCredentials.DefaultAdminRole);
         Description(x =>
-            x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<SonarrIntegrationDTO>))
+            x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<RadarrIntegrationDTO>))
                 .Produces(StatusCodes.Status400BadRequest, typeof(BaseResultDTO))
                 .Produces(StatusCodes.Status404NotFound, typeof(BaseResultDTO))
                 .Produces(StatusCodes.Status500InternalServerError, typeof(BaseResultDTO))
         );
     }
 
-    public override async Task HandleAsync(SetupSonarrIntegrationRequest req, CancellationToken ct)
+    public override async Task HandleAsync(SetupRadarrIntegrationRequest req, CancellationToken ct)
     {
         var integration = await _dbContext
-            .SonarrIntegrations.AsTracking()
+            .RadarrIntegrations.AsTracking()
             .SingleOrDefaultAsync(x => x.Id == req.IntegrationId, ct);
         if (integration is null)
         {
-            await Send.FluentResult(ResultExtensions.EntityNotFound(nameof(SonarrIntegration), req.IntegrationId), ct);
+            await Send.FluentResult(ResultExtensions.EntityNotFound(nameof(RadarrIntegration), req.IntegrationId), ct);
             return;
         }
 
         var downloadClientResult = await _commandExecutor.Send(
-            new SetupSonarrDownloadClientCommand { IntegrationId = integration.Id },
+            new SetupRadarrDownloadClientCommand { IntegrationId = integration.Id },
             ct
         );
         if (downloadClientResult.IsFailed)
@@ -54,7 +54,7 @@ public class SetupSonarrIntegrationEndpoint : Endpoint<SetupSonarrIntegrationReq
         await _dbContext.SaveChangesAsync(ct);
 
         var indexerResult = await _commandExecutor.Send(
-            new SetupSonarrIndexerCommand
+            new SetupRadarrIndexerCommand
             {
                 IntegrationId = integration.Id,
                 DownloadClientId = downloadClientResult.Value.DownloadClientId,

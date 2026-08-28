@@ -27,7 +27,7 @@ public class SonarrHttpClientFactory : ISonarrHttpClientFactory
             using var dbContext = await _dbContextFactory.CreateAsync();
             var integration = await dbContext
                 .SonarrIntegrations.Where(x => x.Id == integrationId)
-                .Select(x => new { x.BaseUrl, x.ApiKey })
+                .Select(x => new { x.BaseUrl, ApiKey = x.SonarrApiKey })
                 .SingleOrDefaultAsync(ct);
             return integration is null ? null : (integration.BaseUrl, integration.ApiKey);
         });

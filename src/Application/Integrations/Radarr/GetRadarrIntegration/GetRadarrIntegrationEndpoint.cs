@@ -1,36 +1,36 @@
 namespace Reaparr.Application;
 
-public record GetSonarrIntegrationRequest
+public record GetRadarrIntegrationRequest
 {
     [RouteParam]
     public Guid IntegrationId { get; init; }
 }
 
-public class GetSonarrIntegrationEndpoint : Endpoint<GetSonarrIntegrationRequest, ResultDTO<SonarrIntegrationDTO>>
+public class GetRadarrIntegrationEndpoint : Endpoint<GetRadarrIntegrationRequest, ResultDTO<RadarrIntegrationDTO>>
 {
     private readonly IReaparrDbContext _dbContext;
 
-    public GetSonarrIntegrationEndpoint(IReaparrDbContext dbContext) => _dbContext = dbContext;
+    public GetRadarrIntegrationEndpoint(IReaparrDbContext dbContext) => _dbContext = dbContext;
 
     public override void Configure()
     {
-        Get(ApiRoutes.IntegrationController + "/Sonarr/{integrationId:guid}");
+        Get(ApiRoutes.IntegrationController + "/Radarr/{integrationId:guid}");
         Roles(DefaultUserAppCredentials.DefaultAdminRole);
         Description(x =>
-            x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<SonarrIntegrationDTO>))
+            x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<RadarrIntegrationDTO>))
                 .Produces(StatusCodes.Status404NotFound, typeof(BaseResultDTO))
                 .Produces(StatusCodes.Status500InternalServerError, typeof(BaseResultDTO))
         );
     }
 
-    public override async Task HandleAsync(GetSonarrIntegrationRequest req, CancellationToken ct)
+    public override async Task HandleAsync(GetRadarrIntegrationRequest req, CancellationToken ct)
     {
         var integration = await _dbContext
-            .SonarrIntegrations.AsNoTracking()
+            .RadarrIntegrations.AsNoTracking()
             .SingleOrDefaultAsync(x => x.Id == req.IntegrationId, ct);
         if (integration is null)
         {
-            await Send.FluentResult(ResultExtensions.EntityNotFound(nameof(SonarrIntegration), req.IntegrationId), ct);
+            await Send.FluentResult(ResultExtensions.EntityNotFound(nameof(RadarrIntegration), req.IntegrationId), ct);
             return;
         }
 

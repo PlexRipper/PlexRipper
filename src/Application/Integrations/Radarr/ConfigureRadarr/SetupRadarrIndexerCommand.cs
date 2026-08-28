@@ -3,6 +3,7 @@ namespace Reaparr.Application;
 public record SetupRadarrIndexerCommand : ICommand<Result<SetupRadarrIndexerCommandResult>>
 {
     public required int DownloadClientId { get; init; }
+    public Guid IntegrationId { get; init; }
 }
 
 public record SetupRadarrIndexerCommandResult
@@ -15,8 +16,7 @@ public class SetupRadarrIndexerCommandHandler
 {
     private readonly ILogger _log;
     private readonly ICommandExecutor _commandExecutor;
-    private readonly IRadarrSettings _radarrSettings;
-    private readonly IIntegrationsSettings _integrationsSettings;
+    private readonly IReaparrDbContext _dbContext;
     private readonly INetworkSettings _networkSettings;
 
     private readonly string _indexerName = "Reaparr";
@@ -24,15 +24,13 @@ public class SetupRadarrIndexerCommandHandler
     public SetupRadarrIndexerCommandHandler(
         ILogger log,
         ICommandExecutor commandExecutor,
-        IRadarrSettings radarrSettings,
-        IIntegrationsSettings integrationsSettings,
+        IReaparrDbContext dbContext,
         INetworkSettings networkSettings
     )
     {
         _log = log.ForContext<SetupRadarrIndexerCommandHandler>();
         _commandExecutor = commandExecutor;
-        _radarrSettings = radarrSettings;
-        _integrationsSettings = integrationsSettings;
+        _dbContext = dbContext;
         _networkSettings = networkSettings;
     }
 
@@ -41,25 +39,26 @@ public class SetupRadarrIndexerCommandHandler
         CancellationToken ct
     )
     {
-        if (!_radarrSettings.IsValidApiKey())
-            return Result.Fail("Radarr settings are invalid: ApiKey is invalid.").LogError();
-
-        if (!_radarrSettings.IsValidUrl())
-            return Result.Fail("Radarr settings are invalid: BaseUrl is invalid.").LogError();
+        var integration = command.IntegrationId == Guid.Empty
+            ? null
+            : await _dbContext.RadarrIntegrations.AsNoTracking().SingleOrDefaultAsync(x => x.Id == command.IntegrationId, ct);
+        if (integration is null)
+            return Result.Fail("The Radarr integration was not found.").LogError();
 
         _log.Here().Information("Setting up Radarr indexer '{IndexerName}'...", _indexerName);
 
         // Check for existing indexers
-        var getResult = await _commandExecutor.Send(new RadarrApiGetIndexersCommand(), ct);
+        var getResult = await _commandExecutor.Send(new RadarrApiGetIndexersCommand(integration.Id), ct);
         if (getResult.IsFailed)
             return Result
                 .Fail("Failed to retrieve existing indexers from Radarr.")
                 .WithErrors(getResult.Errors)
                 .LogError();
 
-        var existing = getResult.Value.FirstOrDefault(d =>
-            string.Equals(d.Name, _indexerName, StringComparison.OrdinalIgnoreCase)
-        );
+        var existing = getResult.Value.FirstOrDefault(d => d.Id == integration.ExternalIndexerId)
+            ?? getResult.Value.FirstOrDefault(d =>
+                string.Equals(d.Name, _indexerName, StringComparison.OrdinalIgnoreCase)
+            );
 
         if (existing is not null)
         {
@@ -68,9 +67,10 @@ public class SetupRadarrIndexerCommandHandler
             var updateResult = await _commandExecutor.Send(
                 new RadarrApiUpdateIndexerCommand
                 {
+                    IntegrationId = integration.Id,
                     Id = existing.Id,
                     ForceSave = true,
-                    Resource = BuildIndexerResource(command.DownloadClientId, existing.Id),
+                    Resource = BuildIndexerResource(command.DownloadClientId, existing.Id, integration),
                 },
                 ct
             );
@@ -87,8 +87,9 @@ public class SetupRadarrIndexerCommandHandler
         var createResult = await _commandExecutor.Send(
             new RadarrApiCreateIndexerCommand
             {
+                IntegrationId = integration.Id,
                 ForceSave = true,
-                Resource = BuildIndexerResource(command.DownloadClientId, 0),
+                Resource = BuildIndexerResource(command.DownloadClientId, 0, integration),
             },
             ct
         );
@@ -100,11 +101,11 @@ public class SetupRadarrIndexerCommandHandler
         return Result.Ok(new SetupRadarrIndexerCommandResult { IndexerId = createResult.Value.Id });
     }
 
-    private RadarrIndexerContractDTO BuildIndexerResource(int downloadClientId, int? id = null)
+    private RadarrIndexerContractDTO BuildIndexerResource(int downloadClientId, int? id, RadarrIntegration integration)
     {
         // FORCE this to be a string, and not an implicit URL type by Flurl
         // ReSharper disable once SuggestVarOrType_BuiltInTypes
-        string baseUrl = _networkSettings.Url.AppendPathSegment("api/public/indexer");
+        string baseUrl = _networkSettings.Url.AppendPathSegment($"api/public/integrations/{integration.Id}/indexer");
 
         return new RadarrIndexerContractDTO
         {
@@ -122,7 +123,7 @@ public class SetupRadarrIndexerCommandHandler
             [
                 new RadarrIndexerContractFieldDTO { Name = "baseUrl", Value = baseUrl },
                 new RadarrIndexerContractFieldDTO { Name = "apiPath", Value = "/api" },
-                new RadarrIndexerContractFieldDTO { Name = "apiKey", Value = _integrationsSettings.ReaparrApiKey },
+                new RadarrIndexerContractFieldDTO { Name = "apiKey", Value = integration.ReaparrApiKey },
                 new RadarrIndexerContractFieldDTO
                 {
                     Name = "categories",

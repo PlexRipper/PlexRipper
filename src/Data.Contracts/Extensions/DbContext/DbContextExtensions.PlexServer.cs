@@ -66,4 +66,27 @@ public static partial class DbContextExtensions
             .Distinct()
             .ToListAsync(CancellationToken.None);
     }
+
+    /// <summary>
+    /// Servers that are online AND whose downloads are not paused by the user.
+    ///
+    /// The Torznab indexer should only advertise media it can actually deliver. Media from a
+    /// paused server yields releases that Sonarr/Radarr happily grab and then wait on
+    /// forever, because the download task is created and never picked up.
+    /// </summary>
+    public static async Task<List<int>> GetDownloadableServerIds(this IReaparrDbContext dbContext)
+    {
+        var pausedServerIds = await dbContext
+            .PlexServers.AsNoTracking()
+            .Where(x => x.IsDownloadsPausedByUser)
+            .Select(x => x.Id)
+            .ToListAsync(CancellationToken.None);
+
+        return await dbContext
+            .PlexServerStatuses.AsNoTracking()
+            .Where(x => x.IsSuccessful && !pausedServerIds.Contains(x.PlexServerId))
+            .Select(x => x.PlexServerId)
+            .Distinct()
+            .ToListAsync(CancellationToken.None);
+    }
 }

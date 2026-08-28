@@ -1,15 +1,15 @@
 namespace Reaparr.Application;
 
-public record SonarApiGetDownloadClientsCommand : ICommand<Result<List<DownloadClientResourceDTO>>>;
+public record SonarApiGetDownloadClientsCommand(Guid IntegrationId) : ICommand<Result<List<DownloadClientResourceDTO>>>;
 
 public class SonarApiGetDownloadClientsCommandHandler
     : ICommandHandler<SonarApiGetDownloadClientsCommand, Result<List<DownloadClientResourceDTO>>>
 {
-    private readonly HttpClient _client;
+    private readonly ISonarrHttpClientFactory _sonarrHttpClientFactory;
 
-    public SonarApiGetDownloadClientsCommandHandler(IHttpClientFactory httpClientFactory)
+    public SonarApiGetDownloadClientsCommandHandler(ISonarrHttpClientFactory sonarrHttpClientFactory)
     {
-        _client = httpClientFactory.CreateSonarrHttpClient();
+        _sonarrHttpClientFactory = sonarrHttpClientFactory;
     }
 
     public async Task<Result<List<DownloadClientResourceDTO>>> ExecuteAsync(
@@ -23,7 +23,12 @@ public class SonarApiGetDownloadClientsCommandHandler
                 HttpMethod.Get,
                 new Uri("/api/v3/downloadclient", UriKind.Relative)
             );
-            var response = await _client.SendAsync(httpRequest, cancellationToken);
+            var clientResult = await _sonarrHttpClientFactory.CreateAsync(command.IntegrationId, cancellationToken);
+            if (clientResult.IsFailed)
+                return clientResult.ToResult<List<DownloadClientResourceDTO>>();
+
+            using var client = clientResult.Value;
+            var response = await client.SendAsync(httpRequest, cancellationToken);
             var body = await response.Content.ReadAsStringAsync(cancellationToken);
 
             if (!response.IsSuccessStatusCode)

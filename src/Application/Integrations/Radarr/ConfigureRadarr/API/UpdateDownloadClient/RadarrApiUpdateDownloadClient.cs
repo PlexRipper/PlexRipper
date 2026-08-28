@@ -2,6 +2,7 @@ namespace Reaparr.Application;
 
 public record RadarrApiUpdateDownloadClientCommand : ICommand<Result<RadarrDownloadClientResourceDTO>>
 {
+    public required Guid IntegrationId { get; init; }
     public required int Id { get; init; }
     public required bool ForceSave { get; init; }
     public required RadarrDownloadContractDTO Resource { get; init; }
@@ -20,12 +21,12 @@ public class RadarrApiUpdateDownloadClientCommandHandler
     : ICommandHandler<RadarrApiUpdateDownloadClientCommand, Result<RadarrDownloadClientResourceDTO>>
 {
     private readonly ILogger _log;
-    private readonly HttpClient _client;
+    private readonly IRadarrHttpClientFactory _radarrHttpClientFactory;
 
-    public RadarrApiUpdateDownloadClientCommandHandler(ILogger logger, IHttpClientFactory httpClientFactory)
+    public RadarrApiUpdateDownloadClientCommandHandler(ILogger logger, IRadarrHttpClientFactory radarrHttpClientFactory)
     {
         _log = logger.ForContext<RadarrApiUpdateDownloadClientCommandHandler>();
-        _client = httpClientFactory.CreateRadarrHttpClient();
+        _radarrHttpClientFactory = radarrHttpClientFactory;
     }
 
     public async Task<Result<RadarrDownloadClientResourceDTO>> ExecuteAsync(
@@ -46,7 +47,13 @@ public class RadarrApiUpdateDownloadClientCommandHandler
             using var httpRequest = new HttpRequestMessage(HttpMethod.Put, requestUri);
             httpRequest.Content = json.ToStringContent();
 
-            var response = await _client.SendAsync(httpRequest, cancellationToken);
+            var clientResult = await _radarrHttpClientFactory.CreateAsync(command.IntegrationId, cancellationToken);
+            if (clientResult.IsFailed)
+                return clientResult.ToResult<RadarrDownloadClientResourceDTO>();
+
+            using var client = clientResult.Value;
+
+            var response = await client.SendAsync(httpRequest, cancellationToken);
             var body = await response.Content.ReadAsStringAsync(cancellationToken);
             if (!response.IsSuccessStatusCode)
             {

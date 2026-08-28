@@ -2,6 +2,7 @@ namespace Reaparr.Application;
 
 public record RadarrApiUpdateIndexerCommand : ICommand<Result<RadarrIndexerResourceDTO>>
 {
+    public required Guid IntegrationId { get; init; }
     public required int Id { get; init; }
     public required bool ForceSave { get; init; }
 
@@ -21,12 +22,12 @@ public class RadarrApiUpdateIndexerCommandHandler
     : ICommandHandler<RadarrApiUpdateIndexerCommand, Result<RadarrIndexerResourceDTO>>
 {
     private readonly ILogger _log;
-    private readonly HttpClient _client;
+    private readonly IRadarrHttpClientFactory _radarrHttpClientFactory;
 
-    public RadarrApiUpdateIndexerCommandHandler(ILogger logger, IHttpClientFactory httpClientFactory)
+    public RadarrApiUpdateIndexerCommandHandler(ILogger logger, IRadarrHttpClientFactory radarrHttpClientFactory)
     {
         _log = logger.ForContext<RadarrApiUpdateIndexerCommandHandler>();
-        _client = httpClientFactory.CreateRadarrHttpClient();
+        _radarrHttpClientFactory = radarrHttpClientFactory;
     }
 
     public async Task<Result<RadarrIndexerResourceDTO>> ExecuteAsync(
@@ -46,7 +47,13 @@ public class RadarrApiUpdateIndexerCommandHandler
             using var httpRequest = new HttpRequestMessage(HttpMethod.Put, requestUri);
             httpRequest.Content = json.ToStringContent();
 
-            var response = await _client.SendAsync(httpRequest, cancellationToken);
+            var clientResult = await _radarrHttpClientFactory.CreateAsync(command.IntegrationId, cancellationToken);
+            if (clientResult.IsFailed)
+                return clientResult.ToResult<RadarrIndexerResourceDTO>();
+
+            using var client = clientResult.Value;
+
+            var response = await client.SendAsync(httpRequest, cancellationToken);
             var body = await response.Content.ReadAsStringAsync(cancellationToken);
             if (!response.IsSuccessStatusCode)
             {

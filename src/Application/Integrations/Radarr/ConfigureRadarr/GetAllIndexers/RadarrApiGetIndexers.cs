@@ -1,15 +1,15 @@
 namespace Reaparr.Application;
 
-public record RadarrApiGetIndexersCommand : ICommand<Result<List<RadarrIndexerResourceDTO>>>;
+public record RadarrApiGetIndexersCommand(Guid IntegrationId) : ICommand<Result<List<RadarrIndexerResourceDTO>>>;
 
 public class RadarrApiGetIndexersCommandHandler
     : ICommandHandler<RadarrApiGetIndexersCommand, Result<List<RadarrIndexerResourceDTO>>>
 {
-    private readonly HttpClient _client;
+    private readonly IRadarrHttpClientFactory _radarrHttpClientFactory;
 
-    public RadarrApiGetIndexersCommandHandler(IHttpClientFactory httpClientFactory)
+    public RadarrApiGetIndexersCommandHandler(IRadarrHttpClientFactory radarrHttpClientFactory)
     {
-        _client = httpClientFactory.CreateRadarrHttpClient();
+        _radarrHttpClientFactory = radarrHttpClientFactory;
     }
 
     public async Task<Result<List<RadarrIndexerResourceDTO>>> ExecuteAsync(
@@ -23,7 +23,13 @@ public class RadarrApiGetIndexersCommandHandler
                 HttpMethod.Get,
                 new Uri("/api/v3/indexer", UriKind.Relative)
             );
-            var response = await _client.SendAsync(httpRequest, cancellationToken);
+            var clientResult = await _radarrHttpClientFactory.CreateAsync(command.IntegrationId, cancellationToken);
+            if (clientResult.IsFailed)
+                return clientResult.ToResult<List<RadarrIndexerResourceDTO>>();
+
+            using var client = clientResult.Value;
+
+            var response = await client.SendAsync(httpRequest, cancellationToken);
             var body = await response.Content.ReadAsStringAsync(cancellationToken);
 
             if (!response.IsSuccessStatusCode)

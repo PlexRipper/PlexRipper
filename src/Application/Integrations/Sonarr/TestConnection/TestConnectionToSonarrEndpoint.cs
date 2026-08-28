@@ -49,12 +49,12 @@ public class TestConnectionToSonarrEndpoint
     : Endpoint<TestConnectionToSonarrEndpointRequest, TestConnectionToSonarrEndpointResponse>
 {
     private readonly ILogger _log;
-    private readonly HttpClient _client;
+    private readonly ISonarrHttpClientFactory _sonarrHttpClientFactory;
 
-    public TestConnectionToSonarrEndpoint(ILogger log, IHttpClientFactory httpClientFactory)
+    public TestConnectionToSonarrEndpoint(ILogger log, ISonarrHttpClientFactory sonarrHttpClientFactory)
     {
         _log = log.ForContext<TestConnectionToSonarrEndpoint>();
-        _client = httpClientFactory.CreateSonarrHttpClient();
+        _sonarrHttpClientFactory = sonarrHttpClientFactory;
     }
 
     public override void Configure()
@@ -71,17 +71,19 @@ public class TestConnectionToSonarrEndpoint
     {
         _log.Here().DebugApiCall(HttpContext, req);
 
-        var baseUrl = req.Url.TrimEnd('/');
+        var clientResult = _sonarrHttpClientFactory.Create(req.Url, req.ApiKey);
+        if (clientResult.IsFailed)
+        {
+            await Send.FluentResult(clientResult.ToResult<TestConnectionToSonarrEndpointResponse>(), ct);
+            return;
+        }
 
-        var url = new Url(baseUrl).AppendPathSegments("api", "v3", "system", "status");
-
-        using var httpRequest = new HttpRequestMessage(System.Net.Http.HttpMethod.Get, url.ToString());
-        httpRequest.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-        httpRequest.Headers.Add("X-Api-Key", req.ApiKey);
+        using var client = clientResult.Value;
+        using var httpRequest = new HttpRequestMessage(System.Net.Http.HttpMethod.Get, "api/v3/system/status");
 
         var result = await Result.Try(async Task () =>
         {
-            using var httpResponse = await _client.SendAsync(httpRequest, HttpCompletionOption.ResponseHeadersRead, ct);
+            using var httpResponse = await client.SendAsync(httpRequest, HttpCompletionOption.ResponseHeadersRead, ct);
             if (httpResponse.IsSuccessStatusCode)
             {
                 await SendTestResult(TestConnectionStatus.Success, ct);

@@ -1,15 +1,15 @@
 namespace Reaparr.Application;
 
-public record SonarrApiGetIndexersCommand : ICommand<Result<List<IndexerResourceDTO>>>;
+public record SonarrApiGetIndexersCommand(Guid IntegrationId) : ICommand<Result<List<IndexerResourceDTO>>>;
 
 public class SonarrApiGetIndexersCommandHandler
     : ICommandHandler<SonarrApiGetIndexersCommand, Result<List<IndexerResourceDTO>>>
 {
-    private readonly HttpClient _client;
+    private readonly ISonarrHttpClientFactory _sonarrHttpClientFactory;
 
-    public SonarrApiGetIndexersCommandHandler(IHttpClientFactory httpClientFactory)
+    public SonarrApiGetIndexersCommandHandler(ISonarrHttpClientFactory sonarrHttpClientFactory)
     {
-        _client = httpClientFactory.CreateSonarrHttpClient();
+        _sonarrHttpClientFactory = sonarrHttpClientFactory;
     }
 
     public async Task<Result<List<IndexerResourceDTO>>> ExecuteAsync(
@@ -23,7 +23,12 @@ public class SonarrApiGetIndexersCommandHandler
                 HttpMethod.Get,
                 new Uri("/api/v3/indexer", UriKind.Relative)
             );
-            var response = await _client.SendAsync(httpRequest, cancellationToken);
+            var clientResult = await _sonarrHttpClientFactory.CreateAsync(command.IntegrationId, cancellationToken);
+            if (clientResult.IsFailed)
+                return clientResult.ToResult<List<IndexerResourceDTO>>();
+
+            using var client = clientResult.Value;
+            var response = await client.SendAsync(httpRequest, cancellationToken);
             var body = await response.Content.ReadAsStringAsync(cancellationToken);
 
             if (!response.IsSuccessStatusCode)

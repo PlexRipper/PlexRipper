@@ -2,6 +2,7 @@ namespace Reaparr.Application;
 
 public record SonarrApiCreateDownloadClientCommand : ICommand<Result<SonarrDownloadContractDTO>>
 {
+    public required Guid IntegrationId { get; init; }
     public required bool ForceSave { get; init; }
 
     public required SonarrDownloadContractDTO Resource { get; init; }
@@ -11,12 +12,12 @@ public class SonarApiCreateDownloadClientCommandHandler
     : ICommandHandler<SonarrApiCreateDownloadClientCommand, Result<SonarrDownloadContractDTO>>
 {
     private readonly ILogger _log;
-    private readonly HttpClient _client;
+    private readonly ISonarrHttpClientFactory _sonarrHttpClientFactory;
 
-    public SonarApiCreateDownloadClientCommandHandler(ILogger logger, IHttpClientFactory httpClientFactory)
+    public SonarApiCreateDownloadClientCommandHandler(ILogger logger, ISonarrHttpClientFactory sonarrHttpClientFactory)
     {
         _log = logger.ForContext<SonarApiCreateDownloadClientCommandHandler>();
-        _client = httpClientFactory.CreateSonarrHttpClient();
+        _sonarrHttpClientFactory = sonarrHttpClientFactory;
     }
 
     public async Task<Result<SonarrDownloadContractDTO>> ExecuteAsync(
@@ -36,7 +37,12 @@ public class SonarApiCreateDownloadClientCommandHandler
             using var httpRequest = new HttpRequestMessage(HttpMethod.Post, requestUri);
             httpRequest.Content = json.ToStringContent();
 
-            var response = await _client.SendAsync(httpRequest, cancellationToken);
+            var clientResult = await _sonarrHttpClientFactory.CreateAsync(command.IntegrationId, cancellationToken);
+            if (clientResult.IsFailed)
+                return clientResult.ToResult<SonarrDownloadContractDTO>();
+
+            using var client = clientResult.Value;
+            var response = await client.SendAsync(httpRequest, cancellationToken);
             var body = await response.Content.ReadAsStringAsync(cancellationToken);
             if (!response.IsSuccessStatusCode)
             {

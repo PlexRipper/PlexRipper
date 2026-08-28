@@ -2,6 +2,7 @@ namespace Reaparr.Application;
 
 public record SonarrApiUpdateIndexerCommand : ICommand<Result<SonarrIndexerContractDTO>>
 {
+    public required Guid IntegrationId { get; init; }
     public required int Id { get; init; }
     public required bool ForceSave { get; init; }
 
@@ -21,12 +22,12 @@ public class SonarrApiUpdateIndexerCommandHandler
     : ICommandHandler<SonarrApiUpdateIndexerCommand, Result<SonarrIndexerContractDTO>>
 {
     private readonly ILogger _log;
-    private readonly HttpClient _client;
+    private readonly ISonarrHttpClientFactory _sonarrHttpClientFactory;
 
-    public SonarrApiUpdateIndexerCommandHandler(ILogger logger, IHttpClientFactory httpClientFactory)
+    public SonarrApiUpdateIndexerCommandHandler(ILogger logger, ISonarrHttpClientFactory sonarrHttpClientFactory)
     {
         _log = logger.ForContext<SonarrApiUpdateIndexerCommandHandler>();
-        _client = httpClientFactory.CreateSonarrHttpClient();
+        _sonarrHttpClientFactory = sonarrHttpClientFactory;
     }
 
     public async Task<Result<SonarrIndexerContractDTO>> ExecuteAsync(
@@ -46,7 +47,12 @@ public class SonarrApiUpdateIndexerCommandHandler
             using var httpRequest = new HttpRequestMessage(HttpMethod.Put, requestUri);
             httpRequest.Content = json.ToStringContent();
 
-            var response = await _client.SendAsync(httpRequest, cancellationToken);
+            var clientResult = await _sonarrHttpClientFactory.CreateAsync(command.IntegrationId, cancellationToken);
+            if (clientResult.IsFailed)
+                return clientResult.ToResult<SonarrIndexerContractDTO>();
+
+            using var client = clientResult.Value;
+            var response = await client.SendAsync(httpRequest, cancellationToken);
             var body = await response.Content.ReadAsStringAsync(cancellationToken);
 
             if (!response.IsSuccessStatusCode)

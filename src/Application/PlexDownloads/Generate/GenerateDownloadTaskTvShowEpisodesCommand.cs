@@ -246,16 +246,17 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandler
     )
     {
         // Check if the SeasonDownloadTask has already been created
-        var downloadTaskTvShowSeason = downloadTaskTvShow.Children.FirstOrDefault(x =>
-            x.PlexApiRatingKey == plexSeason.PlexApiRatingKey && x.IntegrationId == downloadTaskTvShow.IntegrationId
-        );
+        var integration = (
+            downloadTaskTvShow.SonarrIntegrationId,
+            downloadTaskTvShow.RadarrIntegrationId
+        ).ToIntegrationIdentity();
+        var downloadTaskTvShowSeason = downloadTaskTvShow
+            .Children.AsQueryable()
+            .WhereIntegrationIs(integration)
+            .FirstOrDefault(x => x.PlexApiRatingKey == plexSeason.PlexApiRatingKey);
 
         if (downloadTaskTvShowSeason is null)
         {
-            var integration = (
-                downloadTaskTvShow.SonarrIntegrationId,
-                downloadTaskTvShow.RadarrIntegrationId
-            ).ToIntegrationIdentity();
             downloadTaskTvShowSeason = plexSeason.MapToDownloadTask(integration);
             downloadTaskTvShowSeason.ParentId = downloadTaskTvShow.Id;
             downloadTaskTvShow.Children.Add(downloadTaskTvShowSeason);

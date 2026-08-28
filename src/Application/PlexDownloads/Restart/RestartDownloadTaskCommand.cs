@@ -192,7 +192,8 @@ public class RestartDownloadTaskCommandHandler : ICommandHandler<RestartDownload
                 FileDataTransferred = 0,
                 TimeRemaining = 0,
                 DestinationFolderPathId = downloadTask.DestinationFolderPathId,
-                IntegrationId = downloadTask.IntegrationId,
+                SonarrIntegrationId = downloadTask.SonarrIntegrationId,
+                RadarrIntegrationId = downloadTask.RadarrIntegrationId,
             })
             .FirstOrDefaultAsync(cancellationToken);
 
@@ -278,7 +279,8 @@ public class RestartDownloadTaskCommandHandler : ICommandHandler<RestartDownload
                 FileDataTransferred = 0,
                 TimeRemaining = 0,
                 DestinationFolderPathId = downloadTask.DestinationFolderPathId,
-                IntegrationId = downloadTask.IntegrationId,
+                SonarrIntegrationId = downloadTask.SonarrIntegrationId,
+                RadarrIntegrationId = downloadTask.RadarrIntegrationId,
             })
             .FirstOrDefaultAsync(CancellationToken.None);
 

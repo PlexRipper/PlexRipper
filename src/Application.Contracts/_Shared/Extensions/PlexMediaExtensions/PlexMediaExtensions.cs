@@ -25,7 +25,8 @@ public static class PlexMediaExtensions
             FileDataTransferred = 0,
             FileTransferSpeed = 0,
             Children = [],
-            IntegrationId = integrationIdentity?.Id,
+            SonarrIntegrationId = integrationIdentity?.Type == IntegrationType.Sonarr ? integrationIdentity.Id : null,
+            RadarrIntegrationId = integrationIdentity?.Type == IntegrationType.Radarr ? integrationIdentity.Id : null,
         };
 
     public static DownloadTaskTvShow MapToDownloadTask(
@@ -51,7 +52,8 @@ public static class PlexMediaExtensions
             Children = [],
             FileTransferSpeed = 0,
             FileDataTransferred = 0,
-            IntegrationId = integrationIdentity?.Id,
+            SonarrIntegrationId = integrationIdentity?.Type == IntegrationType.Sonarr ? integrationIdentity.Id : null,
+            RadarrIntegrationId = integrationIdentity?.Type == IntegrationType.Radarr ? integrationIdentity.Id : null,
         };
 
     public static DownloadTaskTvShowSeason MapToDownloadTask(
@@ -79,7 +81,10 @@ public static class PlexMediaExtensions
             Parent = null,
             FileTransferSpeed = 0,
             FileDataTransferred = 0,
-            IntegrationId = integrationIdentity?.Id,
+            SonarrIntegrationId =
+                integrationIdentity?.Type == IntegrationType.Sonarr ? integrationIdentity.Id : null,
+            RadarrIntegrationId =
+                integrationIdentity?.Type == IntegrationType.Radarr ? integrationIdentity.Id : null,
         };
 
     public static DownloadTaskTvShowEpisode MapToDownloadTask(
@@ -107,7 +112,10 @@ public static class PlexMediaExtensions
             Parent = null,
             FileTransferSpeed = 0,
             FileDataTransferred = 0,
-            IntegrationId = integrationIdentity?.Id,
+            SonarrIntegrationId =
+                integrationIdentity?.Type == IntegrationType.Sonarr ? integrationIdentity.Id : null,
+            RadarrIntegrationId =
+                integrationIdentity?.Type == IntegrationType.Radarr ? integrationIdentity.Id : null,
         };
 
     public static DownloadTaskMovieFile MapToDownloadTask(

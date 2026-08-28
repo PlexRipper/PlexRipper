@@ -71,6 +71,8 @@ public interface IReaparrDbContext : IDisposable
 
     #endregion
 
+    DbSet<Integration> Integrations { get; }
+
     #region DownloadTasks
 
     DbSet<DownloadTaskMovie> DownloadTaskMovie { get; }

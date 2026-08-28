@@ -45,6 +45,10 @@ public abstract class DownloadTaskBase : BaseEntityGuid
     [Column(Order = 7)]
     public required int PlexLibraryId { get; set; }
 
+    [Column(Order = 8)]
+    public Guid? IntegrationId { get; set; }
+
+    public Integration? Integration { get; init; }
     #endregion
 
     #region Helpers

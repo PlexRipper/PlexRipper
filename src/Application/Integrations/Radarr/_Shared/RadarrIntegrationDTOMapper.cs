@@ -6,7 +6,7 @@ public static class RadarrIntegrationDTOMapper
         new()
         {
             Id = source.Id,
-            Name = source.Name,
+            Name = source.DisplayName,
             Url = source.BaseUrl,
             ApiKey = source.RadarrApiKey,
             Category = source.Category,

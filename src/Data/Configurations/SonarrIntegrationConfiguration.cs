@@ -4,12 +4,13 @@ public class SonarrIntegrationConfiguration : IEntityTypeConfiguration<SonarrInt
 {
     public void Configure(EntityTypeBuilder<SonarrIntegration> builder)
     {
+        builder.ToTable("IntegrationsSonarr");
         builder
             .Property(x => x.ProvisioningState)
             .HasMaxLength(20)
             .HasConversion(x => x.ToIntegrationProvisioningStateString(), x => x.ToIntegrationProvisioningState())
             .IsUnicode(false);
-        builder.HasIndex(x => x.Name).IsUnique();
+        builder.HasIndex(x => x.DisplayName).IsUnique();
         builder.HasIndex(x => x.BaseUrl).IsUnique();
         builder.HasIndex(x => x.Category).IsUnique();
         builder.HasIndex(x => x.ReaparrApiKey).IsUnique();

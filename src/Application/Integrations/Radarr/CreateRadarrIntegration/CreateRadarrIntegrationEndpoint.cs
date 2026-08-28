@@ -13,13 +13,10 @@ public class CreateRadarrIntegrationRequestValidator : Validator<CreateRadarrInt
 {
     public CreateRadarrIntegrationRequestValidator()
     {
-        RuleFor(x => x.Name).NotEmpty().MaximumLength(RadarrIntegration.NameMaxLength);
-        RuleFor(x => x.Url)
-            .NotEmpty()
-            .MaximumLength(RadarrIntegration.BaseUrlMaxLength)
-            .WithMessage("URL must be an absolute http/https URL.");
-        RuleFor(x => x.ApiKey).NotEmpty().MaximumLength(RadarrIntegration.ApiKeyMaxLength);
-        RuleFor(x => x.Category).NotEmpty().MaximumLength(RadarrIntegration.CategoryMaxLength);
+        RuleFor(x => x.Name).NotEmpty();
+        RuleFor(x => x.Url).NotEmpty().WithMessage("URL must be an absolute http/https URL.");
+        RuleFor(x => x.ApiKey).NotEmpty();
+        RuleFor(x => x.Category).NotEmpty();
     }
 }
 
@@ -63,7 +60,7 @@ public class CreateRadarrIntegrationEndpoint : Endpoint<CreateRadarrIntegrationR
         }
 
         var hasConflict = await _dbContext.RadarrIntegrations.AnyAsync(
-            x => x.Name == name || x.Category == category || x.BaseUrl == url,
+            x => x.DisplayName == name || x.Category == category || x.BaseUrl == url,
             ct
         );
         if (hasConflict)
@@ -80,7 +77,7 @@ public class CreateRadarrIntegrationEndpoint : Endpoint<CreateRadarrIntegrationR
         var integration = new RadarrIntegration
         {
             Id = Guid.NewGuid(),
-            Name = name,
+            DisplayName = name,
             BaseUrl = url,
             RadarrApiKey = apiKey,
             ReaparrApiKey = Guid.NewGuid().ToString("N"),

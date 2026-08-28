@@ -17,13 +17,10 @@ public class UpdateRadarrIntegrationRequestValidator : Validator<UpdateRadarrInt
     public UpdateRadarrIntegrationRequestValidator()
     {
         RuleFor(x => x.IntegrationId).NotEmpty();
-        RuleFor(x => x.Name).NotEmpty().MaximumLength(RadarrIntegration.NameMaxLength);
-        RuleFor(x => x.Url)
-            .NotEmpty()
-            .MaximumLength(RadarrIntegration.BaseUrlMaxLength)
-            .WithMessage("URL must be an absolute http/https URL.");
-        RuleFor(x => x.ApiKey).NotEmpty().MaximumLength(RadarrIntegration.ApiKeyMaxLength);
-        RuleFor(x => x.Category).NotEmpty().MaximumLength(RadarrIntegration.CategoryMaxLength);
+        RuleFor(x => x.Name).NotEmpty();
+        RuleFor(x => x.Url).NotEmpty().WithMessage("URL must be an absolute http/https URL.");
+        RuleFor(x => x.ApiKey).NotEmpty();
+        RuleFor(x => x.Category).NotEmpty();
     }
 }
 
@@ -77,7 +74,7 @@ public class UpdateRadarrIntegrationEndpoint : Endpoint<UpdateRadarrIntegrationR
         }
 
         var hasConflict = await _dbContext.RadarrIntegrations.AnyAsync(
-            x => x.Id != integration.Id && (x.Name == name || x.Category == category || x.BaseUrl == url),
+            x => x.Id != integration.Id && (x.DisplayName == name || x.Category == category || x.BaseUrl == url),
             ct
         );
         if (hasConflict)
@@ -97,7 +94,7 @@ public class UpdateRadarrIntegrationEndpoint : Endpoint<UpdateRadarrIntegrationR
         )
             integration.ProvisioningState = IntegrationProvisioningState.ChangesPending;
 
-        integration.Name = name;
+        integration.DisplayName = name;
         integration.BaseUrl = url;
         integration.RadarrApiKey = apiKey;
         integration.Category = category;

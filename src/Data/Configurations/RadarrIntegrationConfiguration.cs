@@ -4,12 +4,13 @@ public class RadarrIntegrationConfiguration : IEntityTypeConfiguration<RadarrInt
 {
     public void Configure(EntityTypeBuilder<RadarrIntegration> builder)
     {
+        builder.ToTable("IntegrationsRadarr");
         builder
             .Property(x => x.ProvisioningState)
             .HasMaxLength(20)
             .HasConversion(x => x.ToIntegrationProvisioningStateString(), x => x.ToIntegrationProvisioningState())
             .IsUnicode(false);
-        builder.HasIndex(x => x.Name).IsUnique();
+        builder.HasIndex(x => x.DisplayName).IsUnique();
         builder.HasIndex(x => x.BaseUrl).IsUnique();
         builder.HasIndex(x => x.Category).IsUnique();
         builder.HasIndex(x => x.ReaparrApiKey).IsUnique();

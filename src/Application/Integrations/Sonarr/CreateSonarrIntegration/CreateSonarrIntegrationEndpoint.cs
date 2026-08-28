@@ -13,13 +13,10 @@ public class CreateSonarrIntegrationRequestValidator : Validator<CreateSonarrInt
 {
     public CreateSonarrIntegrationRequestValidator()
     {
-        RuleFor(x => x.Name).NotEmpty().MaximumLength(SonarrIntegration.NameMaxLength);
-        RuleFor(x => x.Url)
-            .NotEmpty()
-            .MaximumLength(SonarrIntegration.BaseUrlMaxLength)
-            .WithMessage("URL must be an absolute http/https URL.");
-        RuleFor(x => x.ApiKey).NotEmpty().MaximumLength(SonarrIntegration.ApiKeyMaxLength);
-        RuleFor(x => x.Category).NotEmpty().MaximumLength(SonarrIntegration.CategoryMaxLength);
+        RuleFor(x => x.Name).NotEmpty();
+        RuleFor(x => x.Url).NotEmpty().WithMessage("URL must be an absolute http/https URL.");
+        RuleFor(x => x.ApiKey).NotEmpty();
+        RuleFor(x => x.Category).NotEmpty();
     }
 }
 
@@ -63,7 +60,7 @@ public class CreateSonarrIntegrationEndpoint : Endpoint<CreateSonarrIntegrationR
         }
 
         var hasConflict = await _dbContext.SonarrIntegrations.AnyAsync(
-            x => x.Name == name || x.Category == category || x.BaseUrl == url,
+            x => x.DisplayName == name || x.Category == category || x.BaseUrl == url,
             ct
         );
         if (hasConflict)
@@ -80,7 +77,7 @@ public class CreateSonarrIntegrationEndpoint : Endpoint<CreateSonarrIntegrationR
         var integration = new SonarrIntegration
         {
             Id = Guid.NewGuid(),
-            Name = name,
+            DisplayName = name,
             BaseUrl = url,
             SonarrApiKey = apiKey,
             ReaparrApiKey = Guid.NewGuid().ToString("N"),

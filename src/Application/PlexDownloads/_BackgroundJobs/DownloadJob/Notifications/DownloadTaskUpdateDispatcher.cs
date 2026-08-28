@@ -111,7 +111,7 @@ public class DownloadTaskUpdateDispatcher : BackgroundService, IDownloadTaskUpda
             }
 
             var changedParentKeys = await DetermineDownloadStatusAsync(dbContext, key, cancellationToken);
-            var rootKey = await dbContext.GetRootDownloadTaskKeyAsync(key, cancellationToken);
+            var rootKey = await dbContext.GetRootDownloadTaskKeyAsync(key, cancellationToken: cancellationToken);
             if (rootKey is null)
                 return;
 
@@ -555,7 +555,7 @@ public class DownloadTaskUpdateDispatcher : BackgroundService, IDownloadTaskUpda
         if (_scopeByNodeId.TryGetValue(key.Id, out var cachedScope))
             return cachedScope;
 
-        var rootKey = await dbContext.GetRootDownloadTaskKeyAsync(key, cancellationToken);
+        var rootKey = await dbContext.GetRootDownloadTaskKeyAsync(key, cancellationToken: cancellationToken);
         if (rootKey is null)
             return null;
 

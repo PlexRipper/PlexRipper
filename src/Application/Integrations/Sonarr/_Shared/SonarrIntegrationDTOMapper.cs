@@ -6,7 +6,7 @@ public static class SonarrIntegrationDTOMapper
         new()
         {
             Id = source.Id,
-            Name = source.Name,
+            Name = source.DisplayName,
             Url = source.BaseUrl,
             ApiKey = source.SonarrApiKey,
             Category = source.Category,

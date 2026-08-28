@@ -16,14 +16,10 @@ public class UpdateSonarrIntegrationRequestValidator : Validator<UpdateSonarrInt
     public UpdateSonarrIntegrationRequestValidator()
     {
         RuleFor(x => x.IntegrationId).NotEmpty();
-        RuleFor(x => x.Name).NotEmpty().MaximumLength(SonarrIntegration.NameMaxLength);
-        RuleFor(x => x.Url)
-            .NotEmpty()
-            .MaximumLength(SonarrIntegration.BaseUrlMaxLength)
-            .Must(IsHttpUrl)
-            .WithMessage("URL must be an absolute http/https URL.");
-        RuleFor(x => x.ApiKey).NotEmpty().MaximumLength(SonarrIntegration.ApiKeyMaxLength);
-        RuleFor(x => x.Category).NotEmpty().MaximumLength(SonarrIntegration.CategoryMaxLength);
+        RuleFor(x => x.Name).NotEmpty();
+        RuleFor(x => x.Url).NotEmpty().Must(IsHttpUrl).WithMessage("URL must be an absolute http/https URL.");
+        RuleFor(x => x.ApiKey).NotEmpty();
+        RuleFor(x => x.Category).NotEmpty();
     }
 
     private static bool IsHttpUrl(string value) =>
@@ -83,7 +79,7 @@ public class UpdateSonarrIntegrationEndpoint : Endpoint<UpdateSonarrIntegrationR
         }
 
         var hasConflict = await _dbContext.SonarrIntegrations.AnyAsync(
-            x => x.Id != integration.Id && (x.Name == name || x.Category == category || x.BaseUrl == url),
+            x => x.Id != integration.Id && (x.DisplayName == name || x.Category == category || x.BaseUrl == url),
             ct
         );
         if (hasConflict)
@@ -103,7 +99,7 @@ public class UpdateSonarrIntegrationEndpoint : Endpoint<UpdateSonarrIntegrationR
         )
             integration.ProvisioningState = IntegrationProvisioningState.ChangesPending;
 
-        integration.Name = name;
+        integration.DisplayName = name;
         integration.BaseUrl = url;
         integration.SonarrApiKey = apiKey;
         integration.Category = category;

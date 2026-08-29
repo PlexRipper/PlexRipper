@@ -24,7 +24,7 @@ public class GetAllCategoriesEndpoint : EndpointWithoutRequest<object>
         _log.Here().DebugApiCall(HttpContext);
 
         var identity = HttpContext.GetIntegrationIdentity();
-        var integration = await _dbContext.GetIntegrationSettings(identity, ct);
+        var integration = await HttpContext.GetIntegrationSettings(_dbContext, identity, ct);
         var downloadFolder = await _dbContext.GetDownloadFolder(identity);
 
         var categories = new Dictionary<string, object>

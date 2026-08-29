@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using Flurl;
 using Reaparr.Application.Contracts;
 using Reaparr.Environment;
@@ -9,6 +10,13 @@ namespace Reaparr.PublicAPI;
 
 public record SearchMovieCommand : ICommand<Result<TorznabMediaSearchResponseDTO>>
 {
+    [SetsRequiredMembers]
+    public SearchMovieCommand()
+    {
+        Query = string.Empty;
+        Integration = new IntegrationIdentity(IntegrationType.Radarr, Guid.Empty);
+    }
+
     public required string Query { get; init; }
 
     public required int Limit { get; init; }

@@ -15,7 +15,6 @@ public class GetRadarrIntegrationEndpoint : Endpoint<GetRadarrIntegrationRequest
     public override void Configure()
     {
         Get(ApiRoutes.IntegrationController + "/Radarr/{integrationId:guid}");
-        Roles(DefaultUserAppCredentials.DefaultAdminRole);
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<RadarrIntegrationDTO>))
                 .Produces(StatusCodes.Status404NotFound, typeof(BaseResultDTO))

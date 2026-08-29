@@ -15,7 +15,6 @@ public class GetSonarrIntegrationEndpoint : Endpoint<GetSonarrIntegrationRequest
     public override void Configure()
     {
         Get(ApiRoutes.IntegrationController + "/Sonarr/{integrationId:guid}");
-        Roles(DefaultUserAppCredentials.DefaultAdminRole);
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<SonarrIntegrationDTO>))
                 .Produces(StatusCodes.Status404NotFound, typeof(BaseResultDTO))

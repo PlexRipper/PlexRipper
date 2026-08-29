@@ -28,7 +28,6 @@ public class DeleteRadarrIntegrationEndpoint : Endpoint<DeleteRadarrIntegrationR
     public override void Configure()
     {
         Delete(ApiRoutes.IntegrationController + "/Radarr/{integrationId:guid}");
-        Roles(DefaultUserAppCredentials.DefaultAdminRole);
     }
 
     public override async Task HandleAsync(DeleteRadarrIntegrationRequest req, CancellationToken ct)
@@ -71,11 +70,13 @@ public class DeleteRadarrIntegrationEndpoint : Endpoint<DeleteRadarrIntegrationR
         CancellationToken ct
     )
     {
-        foreach (var resource in new[]
-                 {
-                     (Name: "indexer", Id: integration.ExternalIndexerId),
-                     (Name: "downloadclient", Id: integration.ExternalDownloadClientId),
-                 })
+        foreach (
+            var resource in new[]
+            {
+                (Name: "indexer", Id: integration.ExternalIndexerId),
+                (Name: "downloadclient", Id: integration.ExternalDownloadClientId),
+            }
+        )
         {
             if (resource.Id is null)
                 continue;

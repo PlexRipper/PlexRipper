@@ -20,7 +20,6 @@ public class SetupSonarrIntegrationEndpoint : Endpoint<SetupSonarrIntegrationReq
     public override void Configure()
     {
         Post(ApiRoutes.IntegrationController + "/Sonarr/{integrationId:guid}/Setup");
-        Roles(DefaultUserAppCredentials.DefaultAdminRole);
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<SonarrIntegrationDTO>))
                 .Produces(StatusCodes.Status400BadRequest, typeof(BaseResultDTO))

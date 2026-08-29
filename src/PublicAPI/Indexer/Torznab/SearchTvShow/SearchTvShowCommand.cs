@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using Flurl;
 using Reaparr.Application.Contracts;
 
@@ -7,6 +8,14 @@ namespace Reaparr.PublicAPI;
 
 public record SearchTvShowCommand : ICommand<Result<TorznabMediaSearchResponseDTO>>
 {
+    [SetsRequiredMembers]
+    public SearchTvShowCommand()
+    {
+        Query = string.Empty;
+        IMDB_ID = string.Empty;
+        Integration = new IntegrationIdentity(IntegrationType.Sonarr, Guid.Empty);
+    }
+
     public required string Query { get; init; }
 
     public required int Season { get; init; }

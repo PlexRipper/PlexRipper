@@ -29,7 +29,6 @@ public class CreateRadarrIntegrationEndpoint : Endpoint<CreateRadarrIntegrationR
     public override void Configure()
     {
         Post(ApiRoutes.IntegrationController + "/Radarr/Configure");
-        Roles(DefaultUserAppCredentials.DefaultAdminRole);
         Description(x =>
             x.Produces(StatusCodes.Status201Created, typeof(ResultDTO<RadarrIntegrationDTO>))
                 .Produces(StatusCodes.Status400BadRequest, typeof(BaseResultDTO))

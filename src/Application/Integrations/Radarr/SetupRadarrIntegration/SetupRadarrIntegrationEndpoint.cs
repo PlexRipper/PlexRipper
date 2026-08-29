@@ -20,7 +20,6 @@ public class SetupRadarrIntegrationEndpoint : Endpoint<SetupRadarrIntegrationReq
     public override void Configure()
     {
         Post(ApiRoutes.IntegrationController + "/Radarr/{integrationId:guid}/Setup");
-        Roles(DefaultUserAppCredentials.DefaultAdminRole);
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<RadarrIntegrationDTO>))
                 .Produces(StatusCodes.Status400BadRequest, typeof(BaseResultDTO))

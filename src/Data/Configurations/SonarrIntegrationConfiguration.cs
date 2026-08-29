@@ -13,7 +13,8 @@ public class SonarrIntegrationConfiguration : IEntityTypeConfiguration<SonarrInt
         builder.HasIndex(x => x.DisplayName).IsUnique();
         builder.HasIndex(x => x.BaseUrl).IsUnique();
         builder.HasIndex(x => x.Category).IsUnique();
-        builder.HasIndex(x => x.ReaparrApiKey).IsUnique();
+        builder.Property(x => x.QBittorrentApiKey).HasMaxLength(32).IsUnicode(false);
+        builder.Property(x => x.TorznabApiKey).HasMaxLength(32).IsUnicode(false);
         builder
             .HasOne(x => x.DownloadFolder)
             .WithMany()

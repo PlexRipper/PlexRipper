@@ -49,6 +49,8 @@ public class LogConfig : SlimLogConfig
                     "Token",
                     "Password",
                     "ApiKey",
+                    "QBittorrentApiKey",
+                    "TorznabApiKey",
                     "VerificationCode",
                     "Authorization",
                     "SID",

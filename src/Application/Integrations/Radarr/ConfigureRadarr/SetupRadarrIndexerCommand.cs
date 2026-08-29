@@ -39,9 +39,12 @@ public class SetupRadarrIndexerCommandHandler
         CancellationToken ct
     )
     {
-        var integration = command.IntegrationId == Guid.Empty
-            ? null
-            : await _dbContext.RadarrIntegrations.AsNoTracking().SingleOrDefaultAsync(x => x.Id == command.IntegrationId, ct);
+        var integration =
+            command.IntegrationId == Guid.Empty
+                ? null
+                : await _dbContext
+                    .RadarrIntegrations.AsNoTracking()
+                    .SingleOrDefaultAsync(x => x.Id == command.IntegrationId, ct);
         if (integration is null)
             return Result.Fail("The Radarr integration was not found.").LogError();
 
@@ -55,7 +58,8 @@ public class SetupRadarrIndexerCommandHandler
                 .WithErrors(getResult.Errors)
                 .LogError();
 
-        var existing = getResult.Value.FirstOrDefault(d => d.Id == integration.ExternalIndexerId)
+        var existing =
+            getResult.Value.FirstOrDefault(d => d.Id == integration.ExternalIndexerId)
             ?? getResult.Value.FirstOrDefault(d =>
                 string.Equals(d.Name, _indexerName, StringComparison.OrdinalIgnoreCase)
             );
@@ -123,7 +127,11 @@ public class SetupRadarrIndexerCommandHandler
             [
                 new RadarrIndexerContractFieldDTO { Name = "baseUrl", Value = baseUrl },
                 new RadarrIndexerContractFieldDTO { Name = "apiPath", Value = "/api" },
-                new RadarrIndexerContractFieldDTO { Name = "apiKey", Value = integration.ReaparrApiKey },
+                new RadarrIndexerContractFieldDTO
+                {
+                    Name = IntegrationDefinitions.INDEXER_API_KEY,
+                    Value = integration.TorznabApiKey,
+                },
                 new RadarrIndexerContractFieldDTO
                 {
                     Name = "categories",

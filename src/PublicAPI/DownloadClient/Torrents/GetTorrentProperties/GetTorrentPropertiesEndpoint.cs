@@ -47,16 +47,19 @@ public sealed class GetTorrentPropertiesEndpoint : Endpoint<GetTorrentProperties
     public override async Task HandleAsync(GetTorrentPropertiesRequest req, CancellationToken ct)
     {
         _log.Here().DebugApiCall(HttpContext, req);
+        var integration = HttpContext.GetIntegrationIdentity();
 
         var file = await _dbContext
-            .DownloadTaskTvShowEpisodeFile.Where(x => x.HashId == req.Hash)
+            .DownloadTaskTvShowEpisodeFile.WhereIntegrationIs(integration)
+            .Where(x => x.HashId == req.Hash)
             .Select(x => (DownloadTaskFileBase)x)
             .FirstOrDefaultAsync(ct);
 
         if (file is null)
         {
             file = await _dbContext
-                .DownloadTaskMovieFile.Where(x => x.HashId == req.Hash)
+                .DownloadTaskMovieFile.WhereIntegrationIs(integration)
+                .Where(x => x.HashId == req.Hash)
                 .Select(x => (DownloadTaskFileBase)x)
                 .FirstOrDefaultAsync(ct);
         }

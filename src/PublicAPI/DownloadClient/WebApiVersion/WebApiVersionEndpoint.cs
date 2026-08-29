@@ -20,6 +20,6 @@ public class WebApiVersionEndpoint : EndpointWithoutRequest<string>
     {
         _log.Here().DebugApiCall(HttpContext);
 
-        await Send.StringAsync("2.11.4", cancellation: ct);
+        await Send.StringAsync(QBittorrentCompatibility.WebApiVersion, cancellation: ct);
     }
 }

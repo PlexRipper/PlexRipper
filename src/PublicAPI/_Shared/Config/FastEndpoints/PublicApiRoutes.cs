@@ -2,11 +2,15 @@
 
 public static class PublicApiRoutes
 {
-    public static string Base => "/api/public";
+    public const string Base = "/api/public/integrations/{integrationId:guid}";
 
-    public static string Indexer => Base + "/indexer/api";
+    public const string IndexerBase = Base + "/indexer";
 
-    public static string DownloadClient => Base + "/download-client/api/v2";
+    public const string Indexer = IndexerBase + "/api";
 
-    public static string DownloadTorrent => DownloadClient + "/torrents/download";
+    public const string DownloadTorrent = IndexerBase + "/download";
+
+    public const string DownloadClientBase = Base + "/download-client";
+
+    public const string DownloadClient = DownloadClientBase + "/api/v2";
 }

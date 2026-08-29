@@ -74,7 +74,8 @@ public class SetupRadarrDownloadClientCommandHandler
 
             var list = result.Value;
 
-            var currentDownloadClient = list.FirstOrDefault(d => d.Id == integration.ExternalDownloadClientId)
+            var currentDownloadClient =
+                list.FirstOrDefault(d => d.Id == integration.ExternalDownloadClientId)
                 ?? list.FirstOrDefault(d =>
                     string.Equals(d.Name, DOWNLOAD_CLIENT_NAME, StringComparison.OrdinalIgnoreCase)
                 );
@@ -146,7 +147,7 @@ public class SetupRadarrDownloadClientCommandHandler
                 new() { Name = "port", Value = reaparrBaseUri.Port },
                 new() { Name = "useSsl", Value = useSsl },
                 new() { Name = "urlBase", Value = urlBase },
-                new() { Name = "apiKey", Value = integration.ReaparrApiKey },
+                new() { Name = IntegrationDefinitions.INDEXER_API_KEY, Value = integration.QBittorrentApiKey },
                 new() { Name = "movieCategory", Value = integration.Category },
                 new() { Name = "recentMoviePriority", Value = 0 },
                 new() { Name = "olderMoviePriority", Value = 0 },

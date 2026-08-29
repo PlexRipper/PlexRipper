@@ -8,6 +8,14 @@ public static class IntegrationIdentityExtensions
     public static IntegrationIdentity ToRadarrIdentity(this Guid integrationId) =>
         new(IntegrationType.Radarr, integrationId);
 
+    public static bool Supports(this IntegrationIdentity identity, PlexMediaType mediaType) =>
+        identity.Type switch
+        {
+            IntegrationType.Sonarr => mediaType == PlexMediaType.Episode,
+            IntegrationType.Radarr => mediaType == PlexMediaType.Movie,
+            _ => false,
+        };
+
     public static IntegrationIdentity? ToIntegrationIdentity(
         this (Guid? SonarrIntegrationId, Guid? RadarrIntegrationId) integrationIds
     )

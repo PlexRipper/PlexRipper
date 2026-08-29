@@ -6,7 +6,8 @@ public class SonarrIntegration : BaseEntityGuid
     public required string BaseUrl { get; set; }
 
     public required string SonarrApiKey { get; set; }
-    public required string ReaparrApiKey { get; set; }
+    public required string QBittorrentApiKey { get; set; }
+    public required string TorznabApiKey { get; set; }
     public required string Category { get; set; }
     public int? DownloadFolderId { get; set; }
     public FolderPath? DownloadFolder { get; set; }

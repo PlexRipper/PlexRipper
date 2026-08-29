@@ -23,7 +23,7 @@ public class GetPreferencesEndpoint : EndpointWithoutRequest<object>
     {
         _log.Here().DebugApiCall(HttpContext);
 
-        var downloadFolder = await _dbContext.GetDownloadFolder();
+        var downloadFolder = await _dbContext.GetDownloadFolder(HttpContext.GetIntegrationIdentity());
 
         // Normally qBittorrent returns a big JSON with settings
         // You only need a minimal subset that Sonarr expects

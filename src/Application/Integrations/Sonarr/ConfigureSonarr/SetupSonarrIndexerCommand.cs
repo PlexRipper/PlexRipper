@@ -127,7 +127,11 @@ public class SetupSonarrIndexerCommandHandler
             [
                 new SonarrIndexerContractFieldDTO { Name = "baseUrl", Value = baseUrl },
                 new SonarrIndexerContractFieldDTO { Name = "apiPath", Value = "/api" },
-                new SonarrIndexerContractFieldDTO { Name = "apiKey", Value = integration.ReaparrApiKey },
+                new SonarrIndexerContractFieldDTO
+                {
+                    Name = IntegrationDefinitions.INDEXER_API_KEY,
+                    Value = integration.TorznabApiKey,
+                },
                 new SonarrIndexerContractFieldDTO
                 {
                     Name = "categories",

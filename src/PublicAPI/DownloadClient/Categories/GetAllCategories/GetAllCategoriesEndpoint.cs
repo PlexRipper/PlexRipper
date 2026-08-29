@@ -23,21 +23,13 @@ public class GetAllCategoriesEndpoint : EndpointWithoutRequest<object>
     {
         _log.Here().DebugApiCall(HttpContext);
 
-        var downloadFolder = await _dbContext.GetDownloadFolder();
+        var identity = HttpContext.GetIntegrationIdentity();
+        var integration = await _dbContext.GetIntegrationSettings(identity, ct);
+        var downloadFolder = await _dbContext.GetDownloadFolder(identity);
 
         var categories = new Dictionary<string, object>
         {
-            // This is the default category and avoids having to implement and track custom categories for Sonarr
-            [IntegrationDefinitions.SONARR_DEFAULT_CATEGORY] = new
-            {
-                name = IntegrationDefinitions.SONARR_DEFAULT_CATEGORY,
-                savePath = downloadFolder.DirectoryPath,
-            },
-            [IntegrationDefinitions.RADARR_DEFAULT_CATEGORY] = new
-            {
-                name = IntegrationDefinitions.RADARR_DEFAULT_CATEGORY,
-                savePath = downloadFolder.DirectoryPath,
-            },
+            [integration.Category] = new { name = integration.Category, savePath = downloadFolder.DirectoryPath },
         };
 
         await Send.OkAsync(categories, cancellation: ct);

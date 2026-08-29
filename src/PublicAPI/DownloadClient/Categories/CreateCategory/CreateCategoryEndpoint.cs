@@ -12,10 +12,12 @@ public record CreateCategoryRequest
 public class CreateCategoryEndpoint : Endpoint<CreateCategoryRequest>
 {
     private readonly ILogger _log;
+    private readonly IReaparrDbContext _dbContext;
 
-    public CreateCategoryEndpoint(ILogger logger)
+    public CreateCategoryEndpoint(ILogger logger, IReaparrDbContext dbContext)
     {
         _log = logger.ForContext<CreateCategoryEndpoint>();
+        _dbContext = dbContext;
     }
 
     public override void Configure()
@@ -30,6 +32,12 @@ public class CreateCategoryEndpoint : Endpoint<CreateCategoryRequest>
     public override async Task HandleAsync(CreateCategoryRequest req, CancellationToken ct)
     {
         _log.Here().DebugApiCall(HttpContext, req);
+        var integration = await _dbContext.GetIntegrationSettings(HttpContext.GetIntegrationIdentity(), ct);
+        if (!string.Equals(req.Category, integration.Category, StringComparison.Ordinal))
+        {
+            await Send.ErrorsAsync(403, cancellation: ct);
+            return;
+        }
         await Send.OkAsync(cancellation: ct);
     }
 }

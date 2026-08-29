@@ -149,7 +149,7 @@ public class SetupSonarrDownloadClientCommandHandler
                 new() { Name = "port", Value = reaparrBaseUri.Port },
                 new() { Name = "useSsl", Value = useSsl },
                 new() { Name = "urlBase", Value = urlBase },
-                new() { Name = "apiKey", Value = integration.ReaparrApiKey },
+                new() { Name = "apiKey", Value = integration.QBittorrentApiKey },
                 new() { Name = "tvCategory", Value = integration.Category },
                 new() { Name = "tvImportedCategory" },
                 new() { Name = "recentTvPriority", Value = 0 },

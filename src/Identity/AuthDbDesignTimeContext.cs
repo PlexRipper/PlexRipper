@@ -1,10 +1,10 @@
 using Microsoft.EntityFrameworkCore.Design;
 
-namespace Reaparr.Data;
+namespace Reaparr.Identity;
 
-public class ReaparrDbDesignTimeContext : IDesignTimeDbContextFactory<ReaparrDbContext>
+public class AuthDbDesignTimeContext : IDesignTimeDbContextFactory<AuthDbContext>
 {
-    public ReaparrDbContext CreateDbContext(string[] args)
+    public AuthDbContext CreateDbContext(string[] args)
     {
         IAppRuntimeInfo appRuntimeInfo = new AppRuntimeInfo();
 
@@ -15,6 +15,6 @@ public class ReaparrDbDesignTimeContext : IDesignTimeDbContextFactory<ReaparrDbC
         IAppBuildInfo designTimeBuildInfo = new DesignTimeAppBuildInfo();
         IPathProvider pathProvider = new PathProvider(designTimeBuildInfo, appRuntimeInfo);
 
-        return new ReaparrDbContext(Log.Logger, pathProvider, appRuntimeInfo);
+        return new AuthDbContext(Log.Logger, pathProvider, appRuntimeInfo);
     }
 }

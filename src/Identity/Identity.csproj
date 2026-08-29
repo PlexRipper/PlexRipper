@@ -5,6 +5,7 @@
     </PropertyGroup>
     <ItemGroup>
         <ProjectReference Include="..\Data.Contracts\Data.Contracts.csproj" />
+        <ProjectReference Include="..\Environment\Environment.csproj" />
         <ProjectReference Include="..\Identity.Contracts\Identity.Contracts.csproj" />
         <ProjectReference Include="..\Logging\Logging.csproj" />
     </ItemGroup>
@@ -35,7 +36,9 @@
         <Using Include="Microsoft.EntityFrameworkCore.Migrations" />
         <Using Include="Microsoft.EntityFrameworkCore.Storage.ValueConversion" />
         <Using Include="Reaparr.Data.Contracts" />
+        <Using Include="Reaparr.Environment" />
         <Using Include="Reaparr.Identity.Contracts" />
         <Using Include="Reaparr.Logging" />
+        <Using Include="Serilog" />
     </ItemGroup>
 </Project>

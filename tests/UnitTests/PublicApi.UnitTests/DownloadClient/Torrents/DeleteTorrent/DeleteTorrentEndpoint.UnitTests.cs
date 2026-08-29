@@ -1,3 +1,4 @@
+using Microsoft.Extensions.DependencyInjection;
 using Reaparr.Application.Contracts;
 
 namespace Reaparr.PublicAPI.UnitTests;
@@ -73,6 +74,26 @@ public class DeleteTorrentEndpointUnitTests : BaseEndpointUnitTest<DeleteTorrent
                     ),
                 Times.Once
             );
+    }
+
+    private new Task<Seed> SetupDatabase(int seed, Action<FakeDataConfig>? configure = null) =>
+        base.SetupDatabase(
+            seed,
+            config =>
+            {
+                configure?.Invoke(config);
+                config.RadarrIntegrationCount = 1;
+                config.AssignUnownedDownloadTasksToRadarrIntegration = true;
+            }
+        );
+
+    private async Task<EndpointUnitTestResult<DeleteTorrentEndpoint, object>> TestEndpointHandleAsync(
+        DeleteTorrentRequest request,
+        Action<IServiceCollection>? extraServices = null
+    )
+    {
+        var identity = (await IDbContext.RadarrIntegrations.SingleAsync(CancellationToken)).Id.ToRadarrIdentity();
+        return await base.TestEndpointHandleAsync(request, extraServices, identity);
     }
 
     [Test]

@@ -1,3 +1,4 @@
+using Reaparr.Application.Contracts;
 using Reaparr.Settings.Contracts;
 
 namespace Reaparr.PublicAPI.UnitTests;
@@ -33,6 +34,11 @@ public class SearchMovieCommandUnitTests : BaseUnitTest<SearchMovieCommandHandle
             Offset = offset,
             IMDB_ID = string.Empty,
             TMDB_ID = 0,
+            Integration = new IntegrationIdentity(
+                IntegrationType.Radarr,
+                Guid.Parse("62655300-0000-0000-0000-000000000001")
+            ),
+            TorznabApiKey = "integration-key",
         };
 
         var movies = await IDbContext
@@ -84,7 +90,8 @@ public class SearchMovieCommandUnitTests : BaseUnitTest<SearchMovieCommandHandle
             item.Attributes.Any(a => a.Name == "videoCodec").ShouldBeTrue();
             item.Attributes.Any(a => a.Name == "audioCodec").ShouldBeTrue();
 
-            item.Link.ShouldContain(PublicApiRoutes.DownloadTorrent);
+            item.Link.ShouldContain("/api/public/integrations/62655300-0000-0000-0000-000000000001/indexer/download");
+            item.Link.ShouldContain("apikey=integration-key");
             item.Link.ShouldContain("Type=Movie");
             item.Link.ShouldContain("MediaId=");
             item.Link.ShouldContain("DataId=");
@@ -137,7 +144,9 @@ public class SearchMovieCommandUnitTests : BaseUnitTest<SearchMovieCommandHandle
 
         var expectedTitles = movie.MediaDataList.OrderBy(md => md.PlexApiPartId).Select(md => md.GetFileName).ToList();
         result.Value.Channel.Items.Select(i => i.Title).ToList().ShouldBe(expectedTitles);
-        result.Value.Channel.Items.All(i => i.Link.Contains(PublicApiRoutes.DownloadTorrent)).ShouldBeTrue();
+        result
+            .Value.Channel.Items.All(i => i.Link.Contains("/indexer/download", StringComparison.Ordinal))
+            .ShouldBeTrue();
 
         var movieExists = await dbContext.PlexMovies.AnyAsync(m => m.Id == movie.Id, CancellationToken);
         movieExists.ShouldBeTrue();

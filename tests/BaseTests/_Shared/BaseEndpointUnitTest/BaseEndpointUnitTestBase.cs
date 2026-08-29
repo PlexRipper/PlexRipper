@@ -2,6 +2,7 @@ using System.Reflection;
 using System.Text;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Reaparr.PublicAPI;
 
 namespace Reaparr.BaseTests;
 
@@ -162,5 +163,33 @@ public abstract class BaseEndpointUnitTestBase<TEndpoint, TResponse> : BaseUnitT
                 extraServices?.Invoke(s);
             });
         });
+    }
+
+    protected async Task AuthenticateIntegrationAsync(TEndpoint endpoint, IntegrationIdentity identity)
+    {
+        using var dbContext = IDbContext;
+        var apiKey =
+            identity.Type == IntegrationType.Sonarr
+                ? await dbContext
+                    .SonarrIntegrations.Where(x => x.Id == identity.Id)
+                    .Select(x => x.QBittorrentApiKey)
+                    .SingleAsync()
+                : await dbContext
+                    .RadarrIntegrations.Where(x => x.Id == identity.Id)
+                    .Select(x => x.QBittorrentApiKey)
+                    .SingleAsync();
+
+        endpoint.HttpContext.Request.RouteValues["integrationId"] = identity.Id.ToString();
+        endpoint.HttpContext.Request.Headers.Authorization = $"Bearer {apiKey}";
+        var authenticatedIdentity = await endpoint.HttpContext.AuthenticateBearerAsync(dbContext, CancellationToken);
+        authenticatedIdentity.ShouldBe(identity);
+    }
+
+    protected async Task AuthenticateEndpointIntegrationAsync(TEndpoint endpoint, IntegrationIdentity? identity)
+    {
+        if (identity is null)
+            return;
+
+        await AuthenticateIntegrationAsync(endpoint, identity);
     }
 }

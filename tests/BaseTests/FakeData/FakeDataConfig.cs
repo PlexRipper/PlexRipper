@@ -14,6 +14,12 @@ public class FakeDataConfig : BaseConfig<FakeDataConfig>
     /// </summary>
     public int PlexAccountCount { get; set; } = 0;
 
+    public int RadarrIntegrationCount { get; set; } = 0;
+
+    public int SonarrIntegrationCount { get; set; } = 0;
+
+    public bool AssignUnownedDownloadTasksToRadarrIntegration { get; set; }
+
     public int MovieCount { get; set; } = 0;
 
     public int TvShowCount { get; set; } = 0;

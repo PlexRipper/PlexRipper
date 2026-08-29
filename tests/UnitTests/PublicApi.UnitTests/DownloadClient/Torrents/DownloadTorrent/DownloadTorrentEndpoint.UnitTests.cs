@@ -1,5 +1,6 @@
 using BencodeNET.Parsing;
 using BencodeNET.Torrents;
+using Reaparr.Application.Contracts;
 
 namespace Reaparr.PublicAPI.UnitTests;
 
@@ -20,8 +21,10 @@ public class DownloadTorrentEndpointUnitTests
                 config.TvShowCount = 10;
                 config.TvShowSeasonCount = 3;
                 config.TvShowEpisodeCount = 5;
+                config.SonarrIntegrationCount = 1;
             }
         );
+        var integration = await IDbContext.SonarrIntegrations.SingleAsync(CancellationToken);
 
         var server = await IDbContext.PlexServers.FirstOrDefaultAsync(CancellationToken);
         server.ShouldNotBeNull();
@@ -47,7 +50,7 @@ public class DownloadTorrentEndpointUnitTests
         };
 
         // Act
-        var endpointResult = await TestEndpointHandleAsync(req);
+        var endpointResult = await TestEndpointHandleAsync(req, integrationIdentity: integration.Id.ToSonarrIdentity());
         var buffer = endpointResult.Endpoint.HttpContext.Response.Body;
 
         // Assert – response is a torrent file with the correct content type
@@ -90,8 +93,10 @@ public class DownloadTorrentEndpointUnitTests
                 config.PlexServerCount = 1;
                 config.PlexMovieLibraryCount = 1;
                 config.MovieCount = 1;
+                config.RadarrIntegrationCount = 1;
             }
         );
+        var integration = await IDbContext.RadarrIntegrations.SingleAsync(CancellationToken);
 
         var server = await IDbContext.PlexServers.FirstOrDefaultAsync(CancellationToken);
         server.ShouldNotBeNull();
@@ -117,7 +122,7 @@ public class DownloadTorrentEndpointUnitTests
         };
 
         // Act
-        var endpointResult = await TestEndpointHandleAsync(req);
+        var endpointResult = await TestEndpointHandleAsync(req, integrationIdentity: integration.Id.ToRadarrIdentity());
         var buffer = endpointResult.Endpoint.HttpContext.Response.Body;
 
         // Assert – response is a torrent file with the correct content type
@@ -162,8 +167,10 @@ public class DownloadTorrentEndpointUnitTests
                 config.PlexTvShowLibraryCount = 1;
                 config.MovieCount = 0;
                 config.TvShowCount = 0;
+                config.SonarrIntegrationCount = 1;
             }
         );
+        var integration = await IDbContext.SonarrIntegrations.SingleAsync(CancellationToken);
 
         var server = await IDbContext.PlexServers.FirstOrDefaultAsync(CancellationToken);
         server.ShouldNotBeNull();
@@ -187,7 +194,7 @@ public class DownloadTorrentEndpointUnitTests
         };
 
         // Act
-        var endpointResult = await TestEndpointHandleAsync(req);
+        var endpointResult = await TestEndpointHandleAsync(req, integrationIdentity: integration.Id.ToSonarrIdentity());
 
         // Assert
         endpointResult.StatusCode.ShouldBe(StatusCodes.Status404NotFound);

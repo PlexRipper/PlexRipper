@@ -16,7 +16,11 @@ public static partial class FakeData
             .Ignore(x => x.PlexServerId)
             .Ignore(x => x.PlexServer)
             .Ignore(x => x.PlexLibraryId)
-            .Ignore(x => x.PlexLibrary);
+            .Ignore(x => x.PlexLibrary)
+            .Ignore(x => x.SonarrIntegrationId)
+            .Ignore(x => x.SonarrIntegration)
+            .Ignore(x => x.RadarrIntegrationId)
+            .Ignore(x => x.RadarrIntegration);
     }
 
     private static Faker<T> ApplyDownloadTaskParentBase<T>(this Faker<T> faker, DownloadTaskType downloadTaskType)

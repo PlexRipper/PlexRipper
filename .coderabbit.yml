@@ -47,6 +47,9 @@ reviews:
         - "!**/*.DotSettings"
         - "!**/*.DotSettings.*"
 
+        # Temporary PR-size reduction
+        - "!**/*.UnitTests.cs"
+
         # Dependency lockfiles
         - "!**/bun.lock"
 

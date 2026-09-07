@@ -501,14 +501,6 @@ namespace Reaparr.Data.Migrations
                         .HasColumnType("INTEGER")
                         .HasColumnOrder(6);
 
-                    b.Property<Guid?>("RadarrIntegrationId")
-                        .HasColumnType("TEXT")
-                        .HasColumnOrder(9);
-
-                    b.Property<Guid?>("SonarrIntegrationId")
-                        .HasColumnType("TEXT")
-                        .HasColumnOrder(8);
-
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasColumnType("TEXT")
@@ -520,10 +512,6 @@ namespace Reaparr.Data.Migrations
                     b.HasIndex("PlexLibraryId");
 
                     b.HasIndex("PlexServerId");
-
-                    b.HasIndex("RadarrIntegrationId");
-
-                    b.HasIndex("SonarrIntegrationId");
 
                     b.ToTable((string)null);
 
@@ -2519,138 +2507,6 @@ namespace Reaparr.Data.Migrations
                     b.ToTable("PlexTvShowSeasonMediaQualities");
                 });
 
-            modelBuilder.Entity("Reaparr.Domain.RadarrIntegration", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT")
-                        .HasColumnOrder(0);
-
-                    b.Property<string>("BaseUrl")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Category")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("DisplayName")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<int?>("DownloadFolderId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int?>("ExternalDownloadClientId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int?>("ExternalIndexerId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("ProvisioningState")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .IsUnicode(false)
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("QBittorrentApiKey")
-                        .IsRequired()
-                        .HasMaxLength(32)
-                        .IsUnicode(false)
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("RadarrApiKey")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("TorznabApiKey")
-                        .IsRequired()
-                        .HasMaxLength(32)
-                        .IsUnicode(false)
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("BaseUrl")
-                        .IsUnique();
-
-                    b.HasIndex("Category")
-                        .IsUnique();
-
-                    b.HasIndex("DisplayName")
-                        .IsUnique();
-
-                    b.HasIndex("DownloadFolderId");
-
-                    b.ToTable("IntegrationsRadarr", (string)null);
-                });
-
-            modelBuilder.Entity("Reaparr.Domain.SonarrIntegration", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT")
-                        .HasColumnOrder(0);
-
-                    b.Property<string>("BaseUrl")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Category")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("DisplayName")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<int?>("DownloadFolderId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int?>("ExternalDownloadClientId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int?>("ExternalIndexerId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("ProvisioningState")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .IsUnicode(false)
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("QBittorrentApiKey")
-                        .IsRequired()
-                        .HasMaxLength(32)
-                        .IsUnicode(false)
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("SonarrApiKey")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("TorznabApiKey")
-                        .IsRequired()
-                        .HasMaxLength(32)
-                        .IsUnicode(false)
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("BaseUrl")
-                        .IsUnique();
-
-                    b.HasIndex("Category")
-                        .IsUnique();
-
-                    b.HasIndex("DisplayName")
-                        .IsUnique();
-
-                    b.HasIndex("DownloadFolderId");
-
-                    b.ToTable("IntegrationsSonarr", (string)null);
-                });
-
             modelBuilder.Entity("Reaparr.Domain.DownloadTaskFileBase", b =>
                 {
                     b.HasBaseType("Reaparr.Domain.DownloadTaskBase");
@@ -2957,23 +2813,9 @@ namespace Reaparr.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Reaparr.Domain.RadarrIntegration", "RadarrIntegration")
-                        .WithMany("DownloadTasks")
-                        .HasForeignKey("RadarrIntegrationId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
-                    b.HasOne("Reaparr.Domain.SonarrIntegration", "SonarrIntegration")
-                        .WithMany("DownloadTasks")
-                        .HasForeignKey("SonarrIntegrationId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
                     b.Navigation("PlexLibrary");
 
                     b.Navigation("PlexServer");
-
-                    b.Navigation("RadarrIntegration");
-
-                    b.Navigation("SonarrIntegration");
                 });
 
             modelBuilder.Entity("Reaparr.Domain.LibrarySyncJobQueue", b =>
@@ -3543,26 +3385,6 @@ namespace Reaparr.Data.Migrations
                     b.Navigation("PlexTvShowSeason");
                 });
 
-            modelBuilder.Entity("Reaparr.Domain.RadarrIntegration", b =>
-                {
-                    b.HasOne("Reaparr.Domain.FolderPath", "DownloadFolder")
-                        .WithMany()
-                        .HasForeignKey("DownloadFolderId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
-                    b.Navigation("DownloadFolder");
-                });
-
-            modelBuilder.Entity("Reaparr.Domain.SonarrIntegration", b =>
-                {
-                    b.HasOne("Reaparr.Domain.FolderPath", "DownloadFolder")
-                        .WithMany()
-                        .HasForeignKey("DownloadFolderId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
-                    b.Navigation("DownloadFolder");
-                });
-
             modelBuilder.Entity("Reaparr.Domain.DownloadTaskMovieFileLog", b =>
                 {
                     b.HasOne("Reaparr.Domain.DownloadTaskMovieFile", "DownloadTaskFile")
@@ -3736,16 +3558,6 @@ namespace Reaparr.Data.Migrations
                     b.Navigation("Episodes");
 
                     b.Navigation("Qualities");
-                });
-
-            modelBuilder.Entity("Reaparr.Domain.RadarrIntegration", b =>
-                {
-                    b.Navigation("DownloadTasks");
-                });
-
-            modelBuilder.Entity("Reaparr.Domain.SonarrIntegration", b =>
-                {
-                    b.Navigation("DownloadTasks");
                 });
 
             modelBuilder.Entity("Reaparr.Domain.DownloadTaskMovieFile", b =>

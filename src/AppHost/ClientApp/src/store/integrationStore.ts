@@ -75,7 +75,10 @@ export const useIntegrationStore = defineStore(StoreNames.IntegrationStore, () =
 		refresh() {
 			return integrationApi.getIntegrationsEndpoint().pipe(
 				tap((result) => {
-					if (result.isSuccess) state.items = result.value ?? [];
+					if (result.isSuccess) {
+						state.items = result.value ?? [];
+						if (state.testResult) updateSummaryConnectionStatus(state.testResult);
+					}
 				}),
 			);
 		},
@@ -101,14 +104,20 @@ export const useIntegrationStore = defineStore(StoreNames.IntegrationStore, () =
 			state.isTesting = true;
 			state.testResult = null;
 			state.error = null;
-			const query = { apiKey: state.draft.apiKey, url: state.draft.url };
+			const query = {
+				apiKey: state.draft.apiKey,
+				url: state.draft.url,
+				...(state.detail ? { integrationId: state.detail.id } : {}),
+			};
 			const request = state.draft.type === IntegrationType.Radarr
 				? integrationApi.testConnectionToRadarrEndpoint(query)
 				: integrationApi.testConnectionToSonarrEndpoint(query);
 			return request.pipe(
 				tap((result) => {
-					if (result.isSuccess && result.value) state.testResult = result.value;
-					else state.error = result;
+					if (result.value) {
+						state.testResult = result.value;
+						updateSummaryConnectionStatus(result.value);
+					} else state.error = result;
 				}),
 				catchError(handleError),
 				finalize(() => (state.isTesting = false)),
@@ -179,6 +188,30 @@ export const useIntegrationStore = defineStore(StoreNames.IntegrationStore, () =
 		state.error = null;
 		state.testResult = null;
 		state.requiresSetupPrompt = false;
+	}
+
+	function updateSummaryConnectionStatus(result: TestConnectionResult): void {
+		if (!state.detail) return;
+
+		const index = state.items.findIndex((item) => item.id === state.detail!.id);
+		state.detail = {
+			...state.detail,
+			lastConnectionTestStatus: result.result,
+			lastConnectionTestHttpStatusCode: result.httpStatusCode,
+			lastConnectionTestErrorMessage: result.errorMessage,
+			lastConnectionTestedAt: result.testedAt,
+		};
+		if (index === -1) return;
+
+		const integration = state.items[index];
+		if (!integration) return;
+		state.items.splice(index, 1, {
+			...integration,
+			lastConnectionTestStatus: result.result,
+			lastConnectionTestHttpStatusCode: result.httpStatusCode,
+			lastConnectionTestErrorMessage: result.errorMessage,
+			lastConnectionTestedAt: result.testedAt,
+		});
 	}
 
 	function setDetail(type: IntegrationType, detail: RadarrIntegrationDTO | SonarrIntegrationDTO): void {

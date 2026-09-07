@@ -560,6 +560,7 @@ export enum IntegrationSetupProgressStage {
   Connecting = "Connecting",
   DownloadClient = "DownloadClient",
   Indexer = "Indexer",
+  Validation = "Validation",
   Done = "Done",
 }
 

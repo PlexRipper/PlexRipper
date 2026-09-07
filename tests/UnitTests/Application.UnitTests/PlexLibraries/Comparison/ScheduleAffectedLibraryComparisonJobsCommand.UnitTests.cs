@@ -229,10 +229,4 @@ public class ScheduleAffectedLibraryComparisonJobsCommandUnitTests
             );
     }
 
-    private async Task SetOwnedOverrideAsync(int plexServerId, bool isOwned)
-    {
-        await IDbContext
-            .PlexServers.Where(x => x.Id == plexServerId)
-            .ExecuteUpdateAsync(x => x.SetProperty(y => y.OwnedOverride, isOwned), CancellationToken);
-    }
 }

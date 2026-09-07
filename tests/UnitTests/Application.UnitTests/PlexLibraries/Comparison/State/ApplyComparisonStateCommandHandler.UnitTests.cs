@@ -257,13 +257,6 @@ public class ApplyComparisonStateCommandHandlerUnitTests : BaseCommandUnitTest<A
         Mock.Mock<ICommandExecutor>().Verify();
     }
 
-    private async Task SetOwnedOverrideAsync(int plexServerId, bool ownedOverride)
-    {
-        await IDbContext
-            .PlexServers.Where(x => x.Id == plexServerId)
-            .ExecuteUpdateAsync(x => x.SetProperty(y => y.OwnedOverride, ownedOverride), CancellationToken);
-    }
-
     private static PlexMediaSlimDTO CreateItem(int id, PlexMediaType mediaType) =>
         new()
         {

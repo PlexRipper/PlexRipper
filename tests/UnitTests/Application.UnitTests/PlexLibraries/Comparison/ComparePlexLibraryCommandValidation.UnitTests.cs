@@ -165,12 +165,6 @@ public class CompareMoviePlexLibraryCommandValidationUnitTests : BaseCommandUnit
         scopeCount.ShouldBe(0);
     }
 
-    private async Task SetOwnedOverrideAsync(int plexServerId, bool ownedOverride)
-    {
-        await IDbContext
-            .PlexServers.Where(x => x.Id == plexServerId)
-            .ExecuteUpdateAsync(x => x.SetProperty(y => y.OwnedOverride, ownedOverride), CancellationToken);
-    }
 }
 
 public class CompareTvShowPlexLibraryCommandValidationUnitTests : BaseCommandUnitTest<CompareTvShowPlexLibraryCommand>
@@ -336,10 +330,4 @@ public class CompareTvShowPlexLibraryCommandValidationUnitTests : BaseCommandUni
         scopeCount.ShouldBe(0);
     }
 
-    private async Task SetOwnedOverrideAsync(int plexServerId, bool ownedOverride)
-    {
-        await IDbContext
-            .PlexServers.Where(x => x.Id == plexServerId)
-            .ExecuteUpdateAsync(x => x.SetProperty(y => y.OwnedOverride, ownedOverride), CancellationToken);
-    }
 }

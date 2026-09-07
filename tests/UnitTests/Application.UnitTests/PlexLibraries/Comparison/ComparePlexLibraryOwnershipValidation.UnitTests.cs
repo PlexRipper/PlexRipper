@@ -449,20 +449,6 @@ public class CompareMoviePlexLibraryCommandOwnershipUnitTests : BaseCommandUnitT
         );
     }
 
-    private async Task SetOwnedOverrideAsync(int plexServerId, bool ownedOverride)
-    {
-        await IDbContext
-            .PlexServers.Where(x => x.Id == plexServerId)
-            .ExecuteUpdateAsync(x => x.SetProperty(y => y.OwnedOverride, ownedOverride), CancellationToken);
-    }
-
-    private async Task SetLibraryUpdatedAtAsync(int plexLibraryId, DateTime updatedAt)
-    {
-        await IDbContext
-            .PlexLibraries.Where(x => x.Id == plexLibraryId)
-            .ExecuteUpdateAsync(x => x.SetProperty(y => y.UpdatedAt, updatedAt), CancellationToken);
-    }
-
     private async Task<List<PlexMovie>> GetLibraryMoviesAsync(int plexLibraryId) =>
         await IDbContext
             .PlexMovies.Where(x => x.PlexLibraryId == plexLibraryId)
@@ -495,26 +481,6 @@ public class CompareMoviePlexLibraryCommandOwnershipUnitTests : BaseCommandUnitT
             );
     }
 
-    private static PlexMovieComparison CreateMovieComparison(
-        int remotePlexLibraryId,
-        int ownedPlexLibraryId,
-        int remotePlexMediaId,
-        int ownedPlexMediaId,
-        PlexMediaComparisonHitState hitState
-    ) =>
-        new()
-        {
-            Id = 0,
-            RemotePlexLibraryId = remotePlexLibraryId,
-            OwnedPlexLibraryId = ownedPlexLibraryId,
-            RemotePlexMediaId = remotePlexMediaId,
-            OwnedPlexMediaId = ownedPlexMediaId,
-            HitState = hitState,
-            RemoteQuality = VideoQuality.FullHD,
-            OwnedQuality = VideoQuality.FullHD,
-            MatchType = PlexMediaComparisonMatchType.TmdbGuid,
-            ComparedAt = DateTime.UtcNow,
-        };
 }
 
 public class CompareTvShowPlexLibraryCommandOwnershipUnitTests : BaseCommandUnitTest<CompareTvShowPlexLibraryCommand>
@@ -1044,20 +1010,6 @@ public class CompareTvShowPlexLibraryCommandOwnershipUnitTests : BaseCommandUnit
         );
     }
 
-    private async Task SetOwnedOverrideAsync(int plexServerId, bool ownedOverride)
-    {
-        await IDbContext
-            .PlexServers.Where(x => x.Id == plexServerId)
-            .ExecuteUpdateAsync(x => x.SetProperty(y => y.OwnedOverride, ownedOverride), CancellationToken);
-    }
-
-    private async Task SetLibraryUpdatedAtAsync(int plexLibraryId, DateTime updatedAt)
-    {
-        await IDbContext
-            .PlexLibraries.Where(x => x.Id == plexLibraryId)
-            .ExecuteUpdateAsync(x => x.SetProperty(y => y.UpdatedAt, updatedAt), CancellationToken);
-    }
-
     private async Task<List<PlexTvShow>> GetLibraryTvShowsAsync(int plexLibraryId) =>
         await IDbContext
             .PlexTvShows.Where(x => x.PlexLibraryId == plexLibraryId)
@@ -1067,12 +1019,6 @@ public class CompareTvShowPlexLibraryCommandOwnershipUnitTests : BaseCommandUnit
     private async Task<List<PlexTvShowSeason>> GetLibrarySeasonsAsync(int plexLibraryId) =>
         await IDbContext
             .PlexTvShowSeason.Where(x => x.PlexLibraryId == plexLibraryId)
-            .OrderBy(x => x.Id)
-            .ToListAsync(CancellationToken);
-
-    private async Task<List<PlexTvShowEpisode>> GetLibraryEpisodesAsync(int plexLibraryId) =>
-        await IDbContext
-            .PlexTvShowEpisodes.Where(x => x.PlexLibraryId == plexLibraryId)
             .OrderBy(x => x.Id)
             .ToListAsync(CancellationToken);
 
@@ -1109,63 +1055,4 @@ public class CompareTvShowPlexLibraryCommandOwnershipUnitTests : BaseCommandUnit
             .ExecuteUpdateAsync(x => x.SetProperty(y => y.SeasonNumber, seasonNumber), CancellationToken);
     }
 
-    private static PlexTvShowComparison CreateTvShowComparison(
-        int remotePlexLibraryId,
-        int ownedPlexLibraryId,
-        int remotePlexMediaId,
-        int ownedPlexMediaId
-    ) =>
-        new()
-        {
-            Id = 0,
-            RemotePlexLibraryId = remotePlexLibraryId,
-            OwnedPlexLibraryId = ownedPlexLibraryId,
-            RemotePlexMediaId = remotePlexMediaId,
-            OwnedPlexMediaId = ownedPlexMediaId,
-            HitState = PlexMediaComparisonHitState.Matched,
-            RemoteQuality = VideoQuality.FullHD,
-            OwnedQuality = VideoQuality.FullHD,
-            MatchType = PlexMediaComparisonMatchType.TmdbGuid,
-            ComparedAt = DateTime.UtcNow,
-        };
-
-    private static PlexSeasonComparison CreateSeasonComparison(
-        int remotePlexLibraryId,
-        int ownedPlexLibraryId,
-        int remotePlexMediaId,
-        int ownedPlexMediaId
-    ) =>
-        new()
-        {
-            Id = 0,
-            RemotePlexLibraryId = remotePlexLibraryId,
-            OwnedPlexLibraryId = ownedPlexLibraryId,
-            RemotePlexMediaId = remotePlexMediaId,
-            OwnedPlexMediaId = ownedPlexMediaId,
-            HitState = PlexMediaComparisonHitState.Matched,
-            RemoteQuality = VideoQuality.FullHD,
-            OwnedQuality = VideoQuality.FullHD,
-            MatchType = PlexMediaComparisonMatchType.ParentAndChildNumbers,
-            ComparedAt = DateTime.UtcNow,
-        };
-
-    private static PlexEpisodeComparison CreateEpisodeComparison(
-        int remotePlexLibraryId,
-        int ownedPlexLibraryId,
-        int remotePlexMediaId,
-        int ownedPlexMediaId
-    ) =>
-        new()
-        {
-            Id = 0,
-            RemotePlexLibraryId = remotePlexLibraryId,
-            OwnedPlexLibraryId = ownedPlexLibraryId,
-            RemotePlexMediaId = remotePlexMediaId,
-            OwnedPlexMediaId = ownedPlexMediaId,
-            HitState = PlexMediaComparisonHitState.Matched,
-            RemoteQuality = VideoQuality.FullHD,
-            OwnedQuality = VideoQuality.FullHD,
-            MatchType = PlexMediaComparisonMatchType.ParentAndChildNumbers,
-            ComparedAt = DateTime.UtcNow,
-        };
 }

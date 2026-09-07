@@ -10,16 +10,125 @@ reviews:
     collapse_walkthrough: true
     changed_files_summary: false
     sequence_diagrams: false
+    enable_prompt_for_ai_agents: false
+
     path_filters:
-        - src/**/*.cs
-        - tests/**/*.cs
-        - "!src/**/Migrations/**"
+        # Source code
+        - "src/**/*.cs"
+        - "src/**/*.ts"
+        - "src/**/*.vue"
+        - "src/AppHost/ClientApp/eslint.config.mjs"
+        - "src/AppHost/ClientApp/cypress/**/*.ts"
+        - "tests/**/*.cs"
+        - "tools/**/*.cs"
+
+        # Project / build configuration
+        - "src/**/*.csproj"
+        - "tests/**/*.csproj"
+        - "tools/**/*.csproj"
+        - "Directory.Build.props"
+
+        # Review configuration and CI workflows
+        - ".coderabbit.yml"
+        - ".github/workflows/**/*.yml"
+        - ".github/workflows/**/*.yaml"
+        - ".github/actions/**/*.yml"
+        - ".github/actions/**/*.yaml"
+        - "docker/**"
+
+        # Generated code
         - "!**/Generated/**"
+        - "!**/generated/**"
         - "!**/*.g.cs"
-        - "!**/*.csproj"
+        - "!**/*.generated.cs"
+        - "!**/*.generated.ts"
+
+        # Project / IDE metadata
         - "!**/*.DotSettings"
-        - "!**/packages.lock.json"
+        - "!**/*.DotSettings.*"
+
+        # Dependency lockfiles
+        - "!**/bun.lock"
+
+        # Images / static assets
+        - "!**/*.svg"
+        - "!**/*.png"
+        - "!**/*.jpg"
+        - "!**/*.jpeg"
+        - "!**/*.gif"
+        - "!**/*.webp"
+        - "!**/*.ico"
+        - "!**/*.avif"
+
+        # JSON files
+        - "!**/*.json"
+
+    path_instructions:
+        - path: "src/AppHost/ClientApp/cypress/**/*.ts"
+          instructions: |
+            Prefer deterministic, condition-based waits and aliased network intercepts over fixed delays.
+            Require meaningful assertions and do not broadly suppress uncaught application exceptions.
+
+        - path: "**/*.cs"
+          instructions: |
+            Check async code for cancellation, exception handling, and correct Result/error propagation.
+            For EF Core, review query translation, tracking, N+1 queries, and transaction boundaries.
+            For FastEndpoints, verify validation and authorization remain at trust boundaries.
+            Prefer focused fixes and existing project patterns over speculative refactors; keep tests deterministic.
+
+        - path: "src/**/Migrations/**/*.cs"
+          instructions: |
+            Treat EF Core migrations as production schema changes. Check that Up and Down are safe,
+            reversible where practical, data transformations preserve existing data, and indexes,
+            constraints, and column changes match the intended model without destructive surprises.
+
+        - path: "**/*.csproj"
+          instructions: |
+            Review target frameworks, project references, package references, analyzers, and build/publish
+            settings for unintended dependency, compatibility, or deployment changes.
+
+        - path: "Directory.Build.props"
+          instructions: |
+            Treat shared MSBuild changes as solution-wide behavior. Check compiler/analyzer settings,
+            warning policies, target frameworks, and runtime properties for unintended project impact.
+
+        - path: "src/AppHost/ClientApp/src/**/*.ts"
+          instructions: |
+            Follow the existing Nuxt 4, Vue 3, Pinia, and generated API conventions.
+            Check reactivity, SSR/client boundaries, type safety, accessibility, and deterministic async handling.
+            Prefer project utilities and Nuxt auto-imports over duplicate helpers; use consola instead of console logging.
+
+        - path: "src/AppHost/ClientApp/src/**/*.vue"
+          instructions: |
+            Follow the existing Nuxt 4/Vue 3 Composition API and SFC block-order conventions.
+            Check accessibility, stable Cypress selectors, reactivity, async state, and component boundaries.
+            Keep orchestration in stores/composables and components focused on presentation.
+
+        - path: ".github/workflows/**"
+          instructions: |
+            Treat workflow changes as security-sensitive. Check least-privilege permissions, action pinning,
+            untrusted pull-request input injection, secret exposure, and safe job/step conditions.
+
+        - path: ".github/actions/**"
+          instructions: |
+            Review composite actions as workflow code: check input handling, least privilege, action pinning,
+            secret exposure, shell safety, and behavior when called from untrusted pull requests.
+
+        - path: "docker/**"
+          instructions: |
+            Check Docker build reproducibility, dependency and base-image supply-chain risk, secret leakage,
+            multi-stage boundaries, shell failure handling, image size, and runtime privilege assumptions.
+
+    tools:
+        eslint:
+            config_file: "src/AppHost/ClientApp/eslint.config.mjs"
+        actionlint:
+            enabled: true
+        zizmor:
+            enabled: true
+        hadolint:
+            enabled: true
+
     auto_review:
         enabled: true
         drafts: false
-    

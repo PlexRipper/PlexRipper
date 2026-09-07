@@ -7,7 +7,7 @@
 		:type="{} as FolderPathDTO"
 		@opened="open">
 		<template #title>
-			{{ t('components.directory-browser.select-path', { pathName: path?.displayName ?? '' }) }}
+			{{ dialogTitle }}
 		</template>
 		<template #top-row>
 			<QRow>
@@ -119,7 +119,7 @@ import Log from 'consola';
 import { useSubscription } from '@vueuse/rxjs';
 import { get, set } from '@vueuse/core';
 import type { FileSystemModelDTO, FolderPathDTO } from '@dto';
-import { FileSystemEntityType } from '@dto';
+import { FileSystemEntityType, FolderType } from '@dto';
 import { folderPathApi } from '@api';
 import { DialogType } from '@enums';
 import { useDialogStore } from '@store';
@@ -152,6 +152,24 @@ const emit = defineEmits<{
 
 const isCurrentWritable = computed(() => {
 	return get(currentPathModel)?.hasWritePermission ?? false;
+});
+
+const dialogTitle = computed(() => {
+	const folderPath = get(path);
+	if (folderPath?.id !== 0) {
+		return t('components.directory-browser.select-path', { pathName: folderPath?.displayName ?? '' });
+	}
+
+	switch (folderPath.folderType) {
+		case FolderType.DownloadFolder:
+			return t('components.directory-browser.add-download-path');
+		case FolderType.MovieFolder:
+			return t('components.directory-browser.add-movie-path');
+		case FolderType.TvShowFolder:
+			return t('components.directory-browser.add-tv-show-path');
+		default:
+			return t('components.directory-browser.select-path', { pathName: folderPath.displayName });
+	}
 });
 
 function rowClass(hasReadPermission: boolean) {

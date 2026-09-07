@@ -2,7 +2,7 @@
 	<q-list class="editable-text">
 		<q-item
 			clickable
-			class="editable-text-item">
+			class="editable-text-item items-center">
 			<template v-if="!editMode">
 				<q-item-section>
 					<QText
@@ -14,9 +14,9 @@
 						:align="align" />
 				</q-item-section>
 				<q-icon
-					class="q-pt-sm"
+					class="q-ml-sm"
 					name="mdi-square-edit-outline"
-					size="md" />
+					size="sm" />
 			</template>
 			<QPopupEdit
 				v-slot="scope"

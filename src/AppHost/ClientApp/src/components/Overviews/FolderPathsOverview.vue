@@ -13,11 +13,10 @@
 			</QCol>
 		</QRow>
 	</template>
-	<template v-else>
+	<template v-else-if="onlyDefaults">
 		<QSection
-			v-for="(folderGroup, i) in folderPathStore.getFolderPathsGroups(onlyDefaults)"
-			:key="i"
-			:header="!onlyDefaults ? folderGroup.header : ''">
+			v-for="(folderGroup, i) in folderPathStore.getFolderPathsGroups(true)"
+			:key="i">
 			<template v-if="folderGroup.paths.length > 0">
 				<HelpRow
 					v-for="folderPath in folderGroup.paths"
@@ -57,14 +56,13 @@
 						</QCol>
 						<!--	Delete Button -->
 						<QCol
-							v-if="folderGroup.IsFolderDeletable"
+							v-if="folderGroup.IsFolderDeletable && !folderPath.isDefault"
 							cols="auto">
-							<DeleteIconButton @click="deleteFolderPath(folderPath.id)" />
+							<DeleteIconButton @click="deleteFolderPath(folderPath)" />
 						</QCol>
 					</QRow>
 				</HelpRow>
 			</template>
-			<!--	Add Path Button	-->
 			<QRow
 				v-if="folderGroup.isFolderAddable"
 				class="q-my-sm"
@@ -75,15 +73,120 @@
 			</QRow>
 		</QSection>
 	</template>
+	<template v-else>
+		<QSection
+			:header="$t('components.folder-paths-overview.main.header')">
+			<q-tabs
+				v-model="activeTab"
+				active-color="primary"
+				align="justify"
+				indicator-color="primary"
+				class="folder-path-tabs">
+				<q-tab
+					v-for="tab in folderPathTabs"
+					:key="tab.name"
+					:name="tab.name"
+					:data-cy="`folder-path-tab-${tab.name}`">
+					<q-icon
+						v-if="tab.name === 'download'"
+						name="mdi-download"
+						class="q-mr-sm" />
+					<QMediaTypeIcon
+						v-else
+						:media-type="tab.mediaType"
+						class="q-mr-sm" />
+					<span>{{ tab.label }}</span>
+				</q-tab>
+			</q-tabs>
+			<q-tab-panels
+				v-model="activeTab"
+				animated>
+				<q-tab-panel
+					v-for="tab in folderPathTabs"
+					:key="tab.name"
+					:name="tab.name"
+					class="q-pa-none q-mt-md">
+					<HelpRow
+						v-for="folderPath in tab.paths"
+						:key="folderPath.id"
+						disable-responsive
+						:col-label="3"
+						:col-content="8"
+						:edit-model="folderPath.displayName"
+						:allow-label-edit="!folderPath.isDefault"
+						:title="toTranslation(folderPath.folderType).title"
+						:label="toTranslation(folderPath.folderType).label"
+						:text="toTranslation(folderPath.folderType).text"
+						@update:edit-model="saveDisplayName(folderPath.id, $event!)">
+						<QRow
+							no-wrap
+							align="center"
+							:cy="`${getFolderPathCyPrefix(folderPath)}-row`">
+							<QCol
+								cols="grow"
+								class="folder-path-directory">
+								<q-input
+									:model-value="folderPath.directory"
+									class="folder-path-input"
+									:data-cy="`${getFolderPathCyPrefix(folderPath)}-input`"
+									readonly>
+									<IconSquareButton
+										:cy="`${getFolderPathCyPrefix(folderPath)}-edit-button`"
+										icon="mdi-folder-open-outline"
+										@click="dialogStore.openDirectoryBrowserDialog(folderPath)" />
+								</q-input>
+							</QCol>
+							<QCol
+								:width="56"
+								class="folder-path-action">
+								<ValidIcon
+									:cy="`${getFolderPathCyPrefix(folderPath)}-valid-icon`"
+									:invalid-text="$t('general.alerts.invalid-directory')"
+									:valid="folderPath.isValid ? ValidationLevel.Valid : ValidationLevel.Invalid"
+									:valid-text="$t('general.alerts.valid-directory')" />
+							</QCol>
+							<QCol
+								:width="56"
+								class="folder-path-action">
+								<DeleteIconButton
+									v-if="!folderPath.isDefault"
+									:cy="`${getFolderPathCyPrefix(folderPath)}-delete-button`"
+									@click="deleteFolderPath(folderPath)" />
+							</QCol>
+						</QRow>
+					</HelpRow>
+					<QRow
+						v-if="tab.isFolderAddable"
+						class="q-my-sm"
+						justify="center">
+						<QCol cols="auto">
+							<AddIconButton
+								:cy="`${tab.name}-add-button`"
+								@click="addFolderPath(tab)" />
+						</QCol>
+					</QRow>
+				</q-tab-panel>
+			</q-tab-panels>
+		</QSection>
+	</template>
+
+	<ConfirmationDialog
+		:name="DialogType.FolderPathDeleteConfirmationDialog"
+		:title="$t('confirmation.delete-folder-path.title')"
+		:text="$t('confirmation.delete-folder-path.text', { displayName: pendingDeleteFolderPath?.displayName ?? '' })"
+		:confirm-label="$t('general.commands.delete')"
+		@cancel="cancelDeleteFolderPath"
+		@confirm="confirmDeleteFolderPath" />
 
 	<!--	Directory Browser	-->
 	<DirectoryBrowser @confirm="confirmDirectoryBrowser" />
 </template>
 
 <script lang="ts" setup>
-import { type FolderPathDTO, FolderType } from '@dto';
+import { get, set } from '@vueuse/core';
+import { type FolderPathDTO, FolderType, PlexMediaType } from '@dto';
 import type { IHelp, IFolderPathGroup } from '@interfaces';
-import { ValidationLevel } from '@enums';
+import { DialogType, ValidationLevel } from '@enums';
 import { kebabCase } from 'lodash-es';
 import { showErrorNotification, useDialogStore, useFolderPathStore, useI18n, useSubscription } from '#imports';
 
@@ -91,9 +194,50 @@ const { t } = useI18n();
 
 const dialogStore = useDialogStore();
 const folderPathStore = useFolderPathStore();
+const activeTab = ref('download');
+const pendingDeleteFolderPath = ref<FolderPathDTO | null>(null);
+
+type FolderPathTab = Pick<IFolderPathGroup, 'paths' | 'mediaType' | 'folderType' | 'isFolderAddable'> & {
+	name: 'download' | 'movie' | 'tv-show';
+	label: string;
+};
 
 withDefaults(defineProps<{ onlyDefaults?: boolean }>(), {
 	onlyDefaults: false,
+});
+
+const folderPathTabs = computed<FolderPathTab[]>(() => {
+	const allPaths = folderPathStore.getFolderPaths();
+	const definitions = [
+		{
+			name: 'download' as const,
+			label: t('components.folder-paths-overview.tabs.download'),
+			mediaType: PlexMediaType.None,
+			folderType: FolderType.DownloadFolder,
+		},
+		{
+			name: 'movie' as const,
+			label: t('components.folder-paths-overview.tabs.movie'),
+			mediaType: PlexMediaType.Movie,
+			folderType: FolderType.MovieFolder,
+		},
+		{
+			name: 'tv-show' as const,
+			label: t('components.folder-paths-overview.tabs.tv-show'),
+			mediaType: PlexMediaType.TvShow,
+			folderType: FolderType.TvShowFolder,
+		},
+	];
+
+	return definitions.map((definition) => {
+		const paths = allPaths.filter((folderPath) => folderPath.folderType === definition.folderType);
+
+		return {
+			...definition,
+			paths: paths.sort((left, right) => Number(right.isDefault) - Number(left.isDefault)),
+			isFolderAddable: true,
+		};
+	});
 });
 
 const confirmDirectoryBrowser = (path: FolderPathDTO): void => {
@@ -118,9 +262,12 @@ const confirmDirectoryBrowser = (path: FolderPathDTO): void => {
 	}
 };
 
-function addFolderPath(folderGroup: IFolderPathGroup): void {
+function addFolderPath(folderGroup: Pick<IFolderPathGroup, 'folderType' | 'mediaType'>): void {
 	let displayName = '';
 	switch (folderGroup.folderType) {
+		case FolderType.DownloadFolder:
+			displayName = t('components.folder-paths-overview.download.default-name');
+			break;
 		case FolderType.MovieFolder:
 			displayName = t('components.folder-paths-overview.movie.default-name');
 			break;
@@ -142,8 +289,42 @@ function addFolderPath(folderGroup: IFolderPathGroup): void {
 	});
 }
 
-function deleteFolderPath(id: number): void {
-	folderPathStore.deleteFolderPath(id).subscribe();
+function deleteFolderPath(folderPath: FolderPathDTO): void {
+	if (folderPath.isDefault) {
+		return;
+	}
+
+	set(pendingDeleteFolderPath, folderPath);
+	dialogStore.openDialog(DialogType.FolderPathDeleteConfirmationDialog);
+}
+
+function cancelDeleteFolderPath(): void {
+	set(pendingDeleteFolderPath, null);
+}
+
+function confirmDeleteFolderPath(): void {
+	const folderPath = get(pendingDeleteFolderPath);
+	if (!folderPath) {
+		return;
+	}
+
+	useSubscription(
+		folderPathStore.deleteFolderPath(folderPath.id).subscribe({
+			next: (result) => {
+				if (result.isSuccess) {
+					dialogStore.closeDialog(DialogType.FolderPathDeleteConfirmationDialog);
+					set(pendingDeleteFolderPath, null);
+				}
+			},
+			error(err) {
+				showErrorNotification(err);
+			},
+		}),
+	);
+}
+
+function getFolderPathCyPrefix(folderPath: FolderPathDTO): string {
+	return `${folderPath.isDefault ? 'default' : 'custom'}-${kebabCase(folderPath.folderType)}`;
 }
 
 function toTranslation(type: FolderType): IHelp {
@@ -183,6 +364,24 @@ function saveDisplayName(id: number, value: string) {
 </script>
 
 <style lang="scss">
+.folder-path-tabs {
+  min-height: 72px;
+
+  .q-tab {
+    min-height: 72px;
+  }
+}
+
+.folder-path-directory {
+  min-width: 0;
+}
+
+.folder-path-action {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .folder-path-input {
   .q-field__control {
     // Ensures the folder button is outlined to the right border

@@ -51,6 +51,9 @@
       "movie-file-count": "{movieFileCount} Filmdateien"
     },
     "directory-browser": {
+      "add-download-path": "Neuen benutzerdefinierten Downloadpfad hinzufügen",
+      "add-movie-path": "Neuen Filmordnerpfad hinzufügen",
+      "add-tv-show-path": "Neuen TV-Show-Ordnerpfad hinzufügen",
       "path": "Pfad:",
       "select-path": "Wähle {pathName}",
       "type": "Typ:",
@@ -143,8 +146,17 @@
       "no-notifications": "keine Benachrichtigungen verfügbar"
     },
     "folder-paths-overview": {
+      "tabs": {
+        "download": "Downloadpfade",
+        "movie": "Filmpfade",
+        "tv-show": "TV-Show-Pfade"
+      },
       "main": {
-        "header": "Standart Pfad"
+        "header": "Ordnerpfade"
+      },
+      "download": {
+        "header": "Downloadpfade",
+        "default-name": "Integrations-Downloadpfad"
       },
       "movie": {
         "header": "Filme Pfad",
@@ -649,6 +661,10 @@
     "disable-server": {
       "text": "Dadurch wird der Server deaktiviert und ist weder in der Ansicht noch in den Suchergebnissen sichtbar. Er wird auch nicht mehr synchronisiert. Sie können den Server wieder aktivieren, indem Sie zu Einstellungen → Benutzeroberfläche → Plex-Server aktivieren gehen.",
       "title": "Sind Sie sicher?"
+    },
+    "delete-folder-path": {
+      "text": "Ordnerpfad \"{displayName}\" löschen?",
+      "title": "Ordnerpfad löschen?"
     },
     "delete-server": {
       "text": "Sie sind dabei, diesen Server zu löschen. Löschen Sie diesen Server nur, wenn Sie keinen Zugriff mehr darauf haben. Wenn Sie noch Zugriff auf diesen Plex-Server haben, wird er beim nächsten Aktualisieren Ihres Plex-Kontos wieder erscheinen. Deaktivieren Sie den Server stattdessen, damit er ausgeblendet bleibt.",

@@ -12,7 +12,7 @@ export default defineComponent({
 			BaseButton,
 			{
 				...mergeProps(this.$props, {
-					icon: 'mdi-plus-box-outline',
+					icon: 'mdi-plus',
 					size: 'xl',
 				} as IBaseButtonProps),
 			},

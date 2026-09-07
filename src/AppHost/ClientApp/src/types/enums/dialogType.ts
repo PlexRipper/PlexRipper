@@ -12,6 +12,7 @@ export enum DialogType {
 	ClearCompletedDownloadsConfirmationDialog = 'clear-completed-downloads-confirmation-dialog',
 	DownloadDetailsDialog = 'download-details-dialog',
 	DownloadDetailsDeleteLogsConfirmationDialog = 'download-details-delete-logs-confirmation-dialog',
+	FolderPathDeleteConfirmationDialog = 'folder-path-delete-confirmation-dialog',
 	HelpInfoDialog = 'help-info-dialog',
 	MediaDownloadConfirmationDialog = 'media-download-confirmation-dialog',
 	MediaComparisonDetailsDialog = 'media-comparison-details-dialog',

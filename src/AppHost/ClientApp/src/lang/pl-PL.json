@@ -51,6 +51,9 @@
       "movie-file-count": "{movieFileCount} pliki filmowe"
     },
     "directory-browser": {
+      "add-download-path": "Dodaj nową niestandardową ścieżkę pobierania",
+      "add-movie-path": "Dodaj nową ścieżkę folderu filmów",
+      "add-tv-show-path": "Dodaj nową ścieżkę folderu programów telewizyjnych",
       "path": "Ścieżka:",
       "select-path": "Wybierz {pathName}",
       "type": "Typ: ",
@@ -143,8 +146,17 @@
       "no-notifications": "Brak dostępnych powiadomień"
     },
     "folder-paths-overview": {
+      "tabs": {
+        "download": "Ścieżki pobierania",
+        "movie": "Ścieżki filmów",
+        "tv-show": "Ścieżki programów telewizyjnych"
+      },
       "main": {
-        "header": "Domyślne ścieżki"
+        "header": "Ścieżki folderów"
+      },
+      "download": {
+        "header": "Ścieżki pobierania",
+        "default-name": "Ścieżka pobierania integracji"
       },
       "movie": {
         "header": "Ścieżki Filmowe",
@@ -650,6 +662,10 @@
       "text": "Spowoduje to wyłączenie i ukrycie serwera w wynikach wyszukiwania oraz uniemożliwi jego synchronizację. Możesz ponownie włączyć ten serwer, przechodząc do Ustawień -> Interfejs użytkownika -> Włącz serwery Plex.",
       "title": "Jesteś pewny?"
     },
+    "delete-folder-path": {
+      "text": "Usunąć ścieżkę folderu \"{displayName}\"?",
+      "title": "Usunąć ścieżkę folderu?"
+    },
     "delete-server": {
       "text": "Zamierzasz usunąć ten serwer. Usuń ten serwer tylko wtedy, gdy nie masz już do niego dostępu. Jeśli nadal masz dostęp do tego serwera Plex, pojawi się ponownie przy następnym odświeżeniu konta Plex. W takim przypadku wyłącz serwer, aby pozostał ukryty.",
       "title": "Usunąć serwer?",
@@ -891,17 +907,17 @@
       },
       "paths": {
         "download-folder": {
-          "label": "Ścieżka pobierania",
+          "label": "Domyślna ścieżka pobierania",
           "text": "Ścieżka, do której zostaną pobrane wszystkie pliki w kilku częściach, a następnie połączone w jedną całość w folderze docelowym.",
           "title": "Ścieżka pobierania"
         },
         "movie-folder": {
-          "label": "Ścieżka Filmów",
+          "label": "Domyślna ścieżka filmów",
           "text": "Domyślna ścieżka filmów w przypadku, gdy nie wybrano niestandardowego miejsca docelowego.",
           "title": "Ścieżka Filmów"
         },
         "tv-show-folder": {
-          "label": "Ścieżka Seriali",
+          "label": "Domyślna ścieżka programów telewizyjnych",
           "text": "Domyślna ścieżka seriali w przypadku, gdy nie wybrano żadnego niestandardowego miejsca docelowego.",
           "title": "Ścieżka Seriali"
         }

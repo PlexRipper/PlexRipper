@@ -51,6 +51,9 @@
       "movie-file-count": "{movieFileCount} Movie files"
     },
     "directory-browser": {
+      "add-download-path": "Add New Custom Download Path",
+      "add-movie-path": "Add New Movie Folder Path",
+      "add-tv-show-path": "Add New TV Show Folder Path",
       "path": "Path:",
       "select-path": "Select {pathName}",
       "type": "Type:",
@@ -143,8 +146,17 @@
       "no-notifications": "No notifications available"
     },
     "folder-paths-overview": {
+      "tabs": {
+        "download": "Download Paths",
+        "movie": "Movie Paths",
+        "tv-show": "TV Show Paths"
+      },
       "main": {
-        "header": "Default Paths"
+        "header": "Folder Paths"
+      },
+      "download": {
+        "header": "Download Paths",
+        "default-name": "Integration Download Path"
       },
       "movie": {
         "header": "Movie Paths",
@@ -650,6 +662,10 @@
       "text": "This will disable and hide the server from view, search results and will not be synced anymore. You can enable this server again by going to settings -> UI -> Enable Plex Servers",
       "title": "Are you sure?"
     },
+    "delete-folder-path": {
+      "text": "Delete the folder path \"{displayName}\"?",
+      "title": "Delete folder path?"
+    },
     "delete-server": {
       "text": "You are about to delete this server. Only delete this server if you no longer have access to it. If you still have access to this Plex server, it will appear again the next time your Plex account refreshes. In that case, disable the server instead so it stays hidden.",
       "title": "Delete server?",
@@ -891,17 +907,17 @@
       },
       "paths": {
         "download-folder": {
-          "label": "Download Path",
+          "label": "Default Download Path",
           "text": "The path all files will be downloaded to in multiple parts before being merged into one in their destination folder.",
           "title": "Download Path"
         },
         "movie-folder": {
-          "label": "Movie Path",
+          "label": "Default Movie Path",
           "text": "The default path of Movies when no custom destination has been selected.",
           "title": "Movie Path"
         },
         "tv-show-folder": {
-          "label": "TV-Show Path",
+          "label": "Default TV Show Path",
           "text": "The default path of TV-Show when no custom destination has been selected.",
           "title": "TV-Show Path"
         }

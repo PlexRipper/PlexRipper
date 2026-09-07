@@ -34,7 +34,9 @@
 			</QText>
 			<EditableText
 				v-else
-				v-model="editModel" />
+				v-model="editModel"
+				align="right"
+				class="full-width" />
 		</QCol>
 
 		<!-- Default Form Slot -->

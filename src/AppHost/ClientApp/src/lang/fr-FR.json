@@ -51,6 +51,9 @@
       "movie-file-count": "{movieFileCount} fichiers de film"
     },
     "directory-browser": {
+      "add-download-path": "Ajouter un nouveau chemin de téléchargement personnalisé",
+      "add-movie-path": "Ajouter un nouveau chemin de dossier de films",
+      "add-tv-show-path": "Ajouter un nouveau chemin de dossier de séries TV",
       "path": "Chemin d'accès;",
       "select-path": "Sélectionner {pathName}",
       "type": "Type:",
@@ -144,7 +147,11 @@
     },
     "folder-paths-overview": {
       "main": {
-        "header": "Chemin d'accès par défaut"
+        "header": "Chemins de dossiers"
+      },
+      "download": {
+        "header": "Chemins de téléchargement",
+        "default-name": "Chemin de téléchargement d'intégration"
       },
       "movie": {
         "header": "Dossier films",
@@ -649,6 +656,10 @@
     "disable-server": {
       "text": "Cela désactivera et masquera le serveur, l'empêchant d'apparaître dans les résultats de recherche et la synchronisation. Vous pouvez le réactiver en allant dans Paramètres > Interface utilisateur > Activer les serveurs Plex.",
       "title": "Êtes vous sûr ?"
+    },
+    "delete-folder-path": {
+      "text": "Supprimer le chemin de dossier \"{displayName}\" ?",
+      "title": "Supprimer le chemin de dossier ?"
     },
     "delete-server": {
       "text": "Vous êtes sur le point de supprimer ce serveur. Supprimez ce serveur uniquement si vous n'y avez plus accès. Si vous avez toujours accès à ce serveur Plex, il réapparaîtra lors de la prochaine actualisation de votre compte Plex. Dans ce cas, désactivez plutôt le serveur afin qu'il reste masqué.",

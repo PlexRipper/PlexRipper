@@ -9,4 +9,8 @@ public record RadarrIntegrationDTO
     public required string Category { get; init; }
     public int? DownloadFolderId { get; init; }
     public required IntegrationProvisioningState ProvisioningState { get; init; }
+    public TestConnectionStatus LastConnectionTestStatus { get; init; }
+    public int? LastConnectionTestHttpStatusCode { get; init; }
+    public string? LastConnectionTestErrorMessage { get; init; }
+    public DateTime? LastConnectionTestedAt { get; init; }
 }

@@ -36,6 +36,11 @@ public class MockProgressHubService : IProgressHubService
         return Task.CompletedTask;
     }
 
+    public async Task SendIntegrationSetupProgressAsync(IntegrationSetupProgressDTO progress)
+    {
+        await Task.CompletedTask;
+    }
+
     public Task SendAppUpdateDownloadProgressAsync(AppUpdateDownloadProgressDTO progress)
     {
         AppDownloadProgressList.Add(progress, CancellationToken.None);

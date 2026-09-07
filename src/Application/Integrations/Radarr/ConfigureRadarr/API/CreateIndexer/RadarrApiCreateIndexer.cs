@@ -36,7 +36,7 @@ public class RadarrApiCreateIndexerCommandHandler
             using var httpRequest = new HttpRequestMessage(HttpMethod.Post, requestUri);
             httpRequest.Content = json.ToStringContent();
 
-            var clientResult = await _radarrHttpClientFactory.CreateAsync(command.IntegrationId, cancellationToken);
+            var clientResult = await _radarrHttpClientFactory.CreateAsync(command.IntegrationId);
             if (clientResult.IsFailed)
                 return clientResult.ToResult<RadarrIndexerResourceDTO>();
             using var client = clientResult.Value;

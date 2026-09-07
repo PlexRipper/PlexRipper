@@ -23,7 +23,7 @@ public class SonarApiGetDownloadClientsCommandHandler
                 HttpMethod.Get,
                 new Uri("/api/v3/downloadclient", UriKind.Relative)
             );
-            var clientResult = await _sonarrHttpClientFactory.CreateAsync(command.IntegrationId, cancellationToken);
+            var clientResult = await _sonarrHttpClientFactory.CreateAsync(command.IntegrationId);
             if (clientResult.IsFailed)
                 return clientResult.ToResult<List<DownloadClientResourceDTO>>();
 

@@ -12,5 +12,9 @@ public static class RadarrIntegrationDTOMapper
             Category = source.Category,
             DownloadFolderId = source.DownloadFolderId,
             ProvisioningState = source.ProvisioningState,
+            LastConnectionTestStatus = source.LastConnectionTestStatus,
+            LastConnectionTestHttpStatusCode = source.LastConnectionTestHttpStatusCode,
+            LastConnectionTestErrorMessage = source.LastConnectionTestErrorMessage,
+            LastConnectionTestedAt = source.LastConnectionTestedAt,
         };
 }

@@ -25,9 +25,10 @@ public class RadarrHttpClientFactoryUnitTests : BaseUnitTest<RadarrHttpClientFac
         await SetupDatabase(626561);
         var sut = Mock.Create<RadarrHttpClientFactory>();
 
-        var result = await sut.CreateAsync(Guid.NewGuid(), CancellationToken);
+        var result = await sut.CreateAsync(Guid.NewGuid());
 
         result.IsFailed.ShouldBeTrue();
-        result.Errors.ShouldContain(x => x.Message == "The Radarr integration was not found.");
+        result.Has404NotFoundError().ShouldBeTrue();
+        result.Errors.ShouldContain(x => x.Message.Contains(nameof(RadarrIntegration)));
     }
 }

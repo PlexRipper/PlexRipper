@@ -4,7 +4,7 @@ namespace Reaparr.Application;
 
 public interface IRadarrHttpClientFactory
 {
-    Task<Result<HttpClient>> CreateAsync(Guid integrationId, CancellationToken ct);
+    Task<Result<HttpClient>> CreateAsync(Guid integrationId);
 
     Result<HttpClient> Create(string baseUrl, string apiKey);
 }
@@ -20,7 +20,7 @@ public class RadarrHttpClientFactory : IRadarrHttpClientFactory
         _dbContextFactory = dbContextFactory;
     }
 
-    public async Task<Result<HttpClient>> CreateAsync(Guid integrationId, CancellationToken ct)
+    public async Task<Result<HttpClient>> CreateAsync(Guid integrationId)
     {
         var result = await Result.Try(async Task<(string BaseUrl, string ApiKey)?> () =>
         {
@@ -28,11 +28,9 @@ public class RadarrHttpClientFactory : IRadarrHttpClientFactory
             var integration = await dbContext
                 .RadarrIntegrations.Where(x => x.Id == integrationId)
                 .Select(x => new { x.BaseUrl, ApiKey = x.RadarrApiKey })
-                .SingleOrDefaultAsync(ct);
+                .SingleOrDefaultAsync(CancellationToken.None);
             return integration is null ? null : (integration.BaseUrl, integration.ApiKey);
         });
-        if (result.IsCancelled)
-            return result.ToResult().LogWarning();
         if (result.IsFailed)
             return result.ToResult().LogError();
         if (result.Value is null)

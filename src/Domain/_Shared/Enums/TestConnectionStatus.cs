@@ -1,4 +1,4 @@
-namespace Reaparr.Application;
+namespace Reaparr.Domain;
 
 [JsonConverter(typeof(JsonStringEnumConverter))]
 public enum TestConnectionStatus

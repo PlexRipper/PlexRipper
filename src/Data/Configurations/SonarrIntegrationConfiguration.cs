@@ -16,6 +16,13 @@ public class SonarrIntegrationConfiguration : IEntityTypeConfiguration<SonarrInt
         builder.Property(x => x.QBittorrentApiKey).HasMaxLength(32).IsUnicode(false);
         builder.Property(x => x.TorznabApiKey).HasMaxLength(32).IsUnicode(false);
         builder
+            .Property(x => x.LastConnectionTestStatus)
+            .HasConversion<string>()
+            .HasMaxLength(20)
+            .HasDefaultValue(TestConnectionStatus.Unknown)
+            .IsUnicode(false);
+        builder.Property(x => x.LastConnectionTestErrorMessage).HasMaxLength(200);
+        builder
             .HasOne(x => x.DownloadFolder)
             .WithMany()
             .HasForeignKey(x => x.DownloadFolderId)

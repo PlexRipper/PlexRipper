@@ -1,104 +1,109 @@
 namespace Reaparr.Application;
 
 /// <summary>
-/// Fired once after Reaparr is fully listening (via <c>IHostApplicationLifetime.ApplicationStarted</c>).
-/// It performs two things that together prevent Radarr/Sonarr from losing download-progress tracking
-/// after Reaparr restarts.
+/// Tests every configured Radarr and Sonarr integration after Reaparr starts, persists each latest
+/// connection result, and asks reachable Arr instances to retest their download clients.
 /// </summary>
-/// <remarks>
-/// <b>Root cause of the problem</b><br/>
-/// When Reaparr restarts there is a brief window where Radarr/Sonarr try to reach it and fail.
-/// Radarr (and Sonarr) use an escalating back-off system
-/// (<c>ProviderStatusServiceBase / DownloadClientStatusService</c>) that records each failure and sets
-/// <c>DisabledTill</c> using the period table <c>{ 0, 60, 300, 900, 1800, 3600, … }</c> seconds.
-/// Once a client's <c>DisabledTill</c> is in the future,
-/// <c>DownloadClientFactory.DownloadHandlingEnabled(filterBlockedClients: true)</c> excludes it from
-/// <c>DownloadMonitoringService.Refresh()</c>. Because the blocked client is never polled,
-/// <c>RecordSuccess</c> is never called, <c>DisabledTill</c> never clears — a self-reinforcing deadlock
-/// that only breaks when the block expires naturally (up to an hour) or Radarr/Sonarr is restarted.
-///
-/// <b>Fix 1 — clear stale sessions</b><br/>
-/// Reaparr stores qBittorrent-compatible session SIDs in <c>DownloadClientSessions</c>. Radarr/Sonarr
-/// cache the SID from the login response and reuse it on subsequent requests. After a restart the old
-/// SID is gone, so requests arrive with a stale SID and are rejected with 403. Clearing the table on
-/// startup forces a clean re-authentication on the very first request rather than relying on the
-/// session TTL (30 min) to expire naturally.
-///
-/// <b>Fix 2 — call <c>POST /api/v3/downloadclient/testall</c></b><br/>
-/// This endpoint on Radarr/Sonarr uses <c>_providerFactory.All()</c> — intentionally bypassing
-/// <c>DownloadHandlingEnabled(filterBlockedClients: true)</c> — and calls
-/// <c>_providerFactory.Test(definition)</c> for every enabled client. A passing test immediately
-/// calls <c>RecordSuccess</c>, which sets <c>DisabledTill = null</c> and restores normal monitoring.
-/// A 400 response is expected when one or more clients fail their test, but <c>RecordSuccess</c> is
-/// still called for the clients that passed, so the response is treated as a non-fatal outcome.
-/// </remarks>
 public record NotifyArrAppsOnStartupCommand : ICommand<Result>;
+
+public class NotifyArrAppsOnStartupCommandValidator : AbstractValidator<NotifyArrAppsOnStartupCommand>
+{
+    public NotifyArrAppsOnStartupCommandValidator() => RuleFor(x => x).NotNull();
+}
 
 public class NotifyArrAppsOnStartupCommandHandler : ICommandHandler<NotifyArrAppsOnStartupCommand, Result>
 {
-    private readonly IAuthDbContext _authDbContext;
-    private readonly IRadarrSettings _radarrSettings;
-    private readonly ISonarrSettings _sonarrSettings;
-    private readonly IHttpClientFactory _httpClientFactory;
+    private readonly ILogger _log;
+    private readonly IReaparrDbContext _dbContext;
+    private readonly ICommandExecutor _commandExecutor;
+    private readonly IRadarrHttpClientFactory _radarrHttpClientFactory;
+    private readonly ISonarrHttpClientFactory _sonarrHttpClientFactory;
 
     public NotifyArrAppsOnStartupCommandHandler(
-        IAuthDbContext authDbContext,
-        IRadarrSettings radarrSettings,
-        ISonarrSettings sonarrSettings,
-        IHttpClientFactory httpClientFactory
+        ILogger log,
+        IReaparrDbContext dbContext,
+        ICommandExecutor commandExecutor,
+        IRadarrHttpClientFactory radarrHttpClientFactory,
+        ISonarrHttpClientFactory sonarrHttpClientFactory
     )
     {
-        _authDbContext = authDbContext;
-        _radarrSettings = radarrSettings;
-        _sonarrSettings = sonarrSettings;
-        _httpClientFactory = httpClientFactory;
+        _log = log.ForContext<NotifyArrAppsOnStartupCommandHandler>();
+        _dbContext = dbContext;
+        _commandExecutor = commandExecutor;
+        _radarrHttpClientFactory = radarrHttpClientFactory;
+        _sonarrHttpClientFactory = sonarrHttpClientFactory;
     }
 
     public async Task<Result> ExecuteAsync(NotifyArrAppsOnStartupCommand command, CancellationToken ct)
     {
-        // Wipe stale sessions so Radarr/Sonarr are forced to re-authenticate immediately
-        // rather than carrying over a SID from the previous process lifetime.
-        await _authDbContext.DownloadClientSessions.ExecuteDeleteAsync(ct);
+        var radarrIds = await _dbContext
+            .RadarrIntegrations.Where(x => x.ProvisioningState == IntegrationProvisioningState.Configured)
+            .Select(x => x.Id)
+            .ToListAsync(ct);
+        var sonarrIds = await _dbContext
+            .SonarrIntegrations.Where(x => x.ProvisioningState == IntegrationProvisioningState.Configured)
+            .Select(x => x.Id)
+            .ToListAsync(ct);
 
-        // Only call testall when the arr app is actually configured — skip the HTTP round-trip
-        // if the user has not set up the integration.
-        if (_radarrSettings.IsConfigured && _radarrSettings.IsValidUrl() && _radarrSettings.IsValidApiKey())
-        {
-            var radarrResult = await Result.Try(() => TestAllAsync(_httpClientFactory.CreateRadarrHttpClient(), ct));
-            radarrResult.LogIfFailed();
-        }
+        _log.Here()
+            .Debug(
+                "Testing {RadarrIntegrationCount} Radarr and {SonarrIntegrationCount} Sonarr integrations on startup",
+                radarrIds.Count,
+                sonarrIds.Count
+            );
+        var results = await Task.WhenAll(
+            radarrIds.Select(id => TestRadarrAsync(id, ct)).Concat(sonarrIds.Select(id => TestSonarrAsync(id, ct)))
+        );
 
-        if (_sonarrSettings.IsConfigured && _sonarrSettings.IsValidUrl() && _sonarrSettings.IsValidApiKey())
-        {
-            var sonarrResult = await Result.Try(() => TestAllAsync(_httpClientFactory.CreateSonarrHttpClient(), ct));
-            sonarrResult.LogIfFailed();
-        }
+        var cancelledResult = results.FirstOrDefault(x => x.IsCancelled);
+        if (cancelledResult is not null)
+            return cancelledResult.LogWarning();
+
+        foreach (var result in results.Where(x => x.IsFailed))
+            result.LogError();
 
         return Result.Ok();
     }
 
-    /// <summary>
-    /// Calls <c>POST /api/v3/downloadclient/testall</c> on the given arr app.
-    /// </summary>
-    /// <remarks>
-    /// The endpoint returns <c>200 OK</c> when all clients pass or <c>400 Bad Request</c> when at
-    /// least one fails. Either way, <c>RecordSuccess</c> is called for every client that passes,
-    /// clearing its <c>DisabledTill</c> value and restoring it to active monitoring. Anything other
-    /// than 200/400 (e.g. 502/503 — arr app unreachable) is logged as a warning but does not fail
-    /// the overall startup sequence.
-    /// </remarks>
-    private static async Task TestAllAsync(HttpClient client, CancellationToken ct)
+    private async Task<Result> TestRadarrAsync(Guid integrationId, CancellationToken ct)
     {
-        using var request = new HttpRequestMessage(
-            HttpMethod.Post,
-            new Uri("/api/v3/downloadclient/testall", UriKind.Relative)
+        var connectionResult = await _commandExecutor.Send(
+            new TestConnectionToRadarrCommand(integrationId, null, null),
+            ct
         );
-        var result = await client.SendResultAsync(request, cancellationToken: ct);
+        if (connectionResult.IsCancelled)
+            return connectionResult.ToResult();
+        if (connectionResult.IsFailed || connectionResult.Value.Status != TestConnectionStatus.Success)
+            return connectionResult.ToResult();
 
-        // 400 means some download clients failed their test, but the arr app still
-        // called RecordSuccess for passing clients, which clears the DisabledTill
-        // backoff that would otherwise block download monitoring after a restart.
-        if (result.IsFailed && !result.Has400BadRequestError())
-            result.ToResult().LogError();
+        var clientResult = await _radarrHttpClientFactory.CreateAsync(integrationId);
+        if (clientResult.IsCancelled)
+            return clientResult.ToResult();
+        if (clientResult.IsFailed)
+            return clientResult.ToResult();
+
+        using var client = clientResult.Value;
+        return await client.TestAllRadarrDownloadClientsAsync(ct);
+    }
+
+    private async Task<Result> TestSonarrAsync(Guid integrationId, CancellationToken ct)
+    {
+        var connectionResult = await _commandExecutor.Send(
+            new TestConnectionToSonarrCommand(integrationId, null, null),
+            ct
+        );
+        if (connectionResult.IsCancelled)
+            return connectionResult.ToResult();
+        if (connectionResult.IsFailed || connectionResult.Value.Status != TestConnectionStatus.Success)
+            return connectionResult.ToResult();
+
+        var clientResult = await _sonarrHttpClientFactory.CreateAsync(integrationId);
+        if (clientResult.IsCancelled)
+            return clientResult.ToResult();
+        if (clientResult.IsFailed)
+            return clientResult.ToResult();
+
+        using var client = clientResult.Value;
+        return await client.TestAllSonarrDownloadClientsAsync(ct);
     }
 }

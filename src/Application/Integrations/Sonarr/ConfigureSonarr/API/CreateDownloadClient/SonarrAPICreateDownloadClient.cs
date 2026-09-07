@@ -37,7 +37,7 @@ public class SonarApiCreateDownloadClientCommandHandler
             using var httpRequest = new HttpRequestMessage(HttpMethod.Post, requestUri);
             httpRequest.Content = json.ToStringContent();
 
-            var clientResult = await _sonarrHttpClientFactory.CreateAsync(command.IntegrationId, cancellationToken);
+            var clientResult = await _sonarrHttpClientFactory.CreateAsync(command.IntegrationId);
             if (clientResult.IsFailed)
                 return clientResult.ToResult<SonarrDownloadContractDTO>();
 

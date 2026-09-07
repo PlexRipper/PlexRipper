@@ -25,9 +25,10 @@ public class SonarrHttpClientFactoryUnitTests : BaseUnitTest<SonarrHttpClientFac
         await SetupDatabase(626560);
         var sut = Mock.Create<SonarrHttpClientFactory>();
 
-        var result = await sut.CreateAsync(Guid.NewGuid(), CancellationToken);
+        var result = await sut.CreateAsync(Guid.NewGuid());
 
         result.IsFailed.ShouldBeTrue();
-        result.Errors.ShouldContain(x => x.Message == "The Sonarr integration was not found.");
+        result.Has404NotFoundError().ShouldBeTrue();
+        result.Errors.ShouldContain(x => x.Message.Contains(nameof(SonarrIntegration)));
     }
 }

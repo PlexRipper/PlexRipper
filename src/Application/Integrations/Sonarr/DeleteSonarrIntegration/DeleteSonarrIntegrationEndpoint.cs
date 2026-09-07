@@ -41,7 +41,7 @@ public class DeleteSonarrIntegrationEndpoint : Endpoint<DeleteSonarrIntegrationR
             return;
         }
 
-        var clientResult = await _sonarrHttpClientFactory.CreateAsync(integration.Id, ct);
+        var clientResult = await _sonarrHttpClientFactory.CreateAsync(integration.Id);
         if (clientResult.IsFailed && !req.Force)
         {
             await Send.FluentResult(clientResult.ToResult(), ct);

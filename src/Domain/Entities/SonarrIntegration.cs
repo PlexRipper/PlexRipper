@@ -14,5 +14,9 @@ public class SonarrIntegration : BaseEntityGuid
     public int? ExternalDownloadClientId { get; set; }
     public int? ExternalIndexerId { get; set; }
     public required IntegrationProvisioningState ProvisioningState { get; set; }
+    public TestConnectionStatus LastConnectionTestStatus { get; set; }
+    public int? LastConnectionTestHttpStatusCode { get; set; }
+    public string? LastConnectionTestErrorMessage { get; set; }
+    public DateTime? LastConnectionTestedAt { get; set; }
     public ICollection<DownloadTaskBase> DownloadTasks { get; set; } = [];
 }

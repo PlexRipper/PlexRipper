@@ -41,7 +41,7 @@ public class DeleteRadarrIntegrationEndpoint : Endpoint<DeleteRadarrIntegrationR
             return;
         }
 
-        var clientResult = await _radarrHttpClientFactory.CreateAsync(integration.Id, ct);
+        var clientResult = await _radarrHttpClientFactory.CreateAsync(integration.Id);
         if (clientResult.IsFailed && !req.Force)
         {
             await Send.FluentResult(clientResult.ToResult(), ct);

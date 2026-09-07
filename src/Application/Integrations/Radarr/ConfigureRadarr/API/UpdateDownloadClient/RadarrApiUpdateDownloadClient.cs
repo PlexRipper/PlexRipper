@@ -47,7 +47,7 @@ public class RadarrApiUpdateDownloadClientCommandHandler
             using var httpRequest = new HttpRequestMessage(HttpMethod.Put, requestUri);
             httpRequest.Content = json.ToStringContent();
 
-            var clientResult = await _radarrHttpClientFactory.CreateAsync(command.IntegrationId, cancellationToken);
+            var clientResult = await _radarrHttpClientFactory.CreateAsync(command.IntegrationId);
             if (clientResult.IsFailed)
                 return clientResult.ToResult<RadarrDownloadClientResourceDTO>();
 

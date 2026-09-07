@@ -11,6 +11,10 @@ public record IntegrationSummary
     public int? ExternalDownloadClientId { get; init; }
     public int? ExternalIndexerId { get; init; }
     public required IntegrationProvisioningState ProvisioningState { get; init; }
+    public TestConnectionStatus LastConnectionTestStatus { get; init; }
+    public int? LastConnectionTestHttpStatusCode { get; init; }
+    public string? LastConnectionTestErrorMessage { get; init; }
+    public DateTime? LastConnectionTestedAt { get; init; }
 }
 
 public class GetIntegrationsEndpoint : EndpointWithoutRequest<List<IntegrationSummary>>
@@ -48,6 +52,10 @@ public class GetIntegrationsEndpoint : EndpointWithoutRequest<List<IntegrationSu
                 ExternalDownloadClientId = x.ExternalDownloadClientId,
                 ExternalIndexerId = x.ExternalIndexerId,
                 ProvisioningState = x.ProvisioningState,
+                LastConnectionTestStatus = x.LastConnectionTestStatus,
+                LastConnectionTestHttpStatusCode = x.LastConnectionTestHttpStatusCode,
+                LastConnectionTestErrorMessage = x.LastConnectionTestErrorMessage,
+                LastConnectionTestedAt = x.LastConnectionTestedAt,
             })
             .ToListAsync(ct);
         var radarr = await _dbContext
@@ -62,6 +70,10 @@ public class GetIntegrationsEndpoint : EndpointWithoutRequest<List<IntegrationSu
                 ExternalDownloadClientId = x.ExternalDownloadClientId,
                 ExternalIndexerId = x.ExternalIndexerId,
                 ProvisioningState = x.ProvisioningState,
+                LastConnectionTestStatus = x.LastConnectionTestStatus,
+                LastConnectionTestHttpStatusCode = x.LastConnectionTestHttpStatusCode,
+                LastConnectionTestErrorMessage = x.LastConnectionTestErrorMessage,
+                LastConnectionTestedAt = x.LastConnectionTestedAt,
             })
             .ToListAsync(ct);
 

@@ -24,7 +24,7 @@ public class RadarrApiGetDownloadClientsCommandHandler
                 HttpMethod.Get,
                 new Uri("/api/v3/downloadclient", UriKind.Relative)
             );
-            var clientResult = await _radarrHttpClientFactory.CreateAsync(command.IntegrationId, cancellationToken);
+            var clientResult = await _radarrHttpClientFactory.CreateAsync(command.IntegrationId);
             if (clientResult.IsFailed)
                 return clientResult.ToResult<List<RadarrDownloadClientResourceDTO>>();
 

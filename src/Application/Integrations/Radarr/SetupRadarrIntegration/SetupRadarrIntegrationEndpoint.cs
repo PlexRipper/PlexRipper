@@ -10,11 +10,17 @@ public class SetupRadarrIntegrationEndpoint : Endpoint<SetupRadarrIntegrationReq
 {
     private readonly IReaparrDbContext _dbContext;
     private readonly ICommandExecutor _commandExecutor;
+    private readonly IProgressHubService _progressHubService;
 
-    public SetupRadarrIntegrationEndpoint(IReaparrDbContext dbContext, ICommandExecutor commandExecutor)
+    public SetupRadarrIntegrationEndpoint(
+        IReaparrDbContext dbContext,
+        ICommandExecutor commandExecutor,
+        IProgressHubService progressHubService
+    )
     {
         _dbContext = dbContext;
         _commandExecutor = commandExecutor;
+        _progressHubService = progressHubService;
     }
 
     public override void Configure()
@@ -45,13 +51,53 @@ public class SetupRadarrIntegrationEndpoint : Endpoint<SetupRadarrIntegrationReq
         );
         if (downloadClientResult.IsFailed)
         {
+            var error = string.Join("; ", downloadClientResult.Errors.Select(x => x.Message));
+            await _progressHubService.SendIntegrationSetupProgressAsync(
+                new IntegrationSetupProgressDTO
+                {
+                    IntegrationId = integration.Id,
+                    Stage = IntegrationSetupProgressStage.Connecting,
+                    IsRunning = false,
+                    IsSuccess = false,
+                    Error = error,
+                }
+            );
+            await _progressHubService.SendIntegrationSetupProgressAsync(
+                new IntegrationSetupProgressDTO
+                {
+                    IntegrationId = integration.Id,
+                    Stage = IntegrationSetupProgressStage.DownloadClient,
+                    IsRunning = false,
+                    IsSuccess = false,
+                    Error = error,
+                }
+            );
             await Send.FluentResult(downloadClientResult.ToResult(), ct);
             return;
         }
 
+        await _progressHubService.SendIntegrationSetupProgressAsync(
+            new IntegrationSetupProgressDTO
+            {
+                IntegrationId = integration.Id,
+                Stage = IntegrationSetupProgressStage.DownloadClient,
+                IsRunning = false,
+                IsSuccess = true,
+            }
+        );
+
         integration.ExternalDownloadClientId = downloadClientResult.Value.DownloadClientId;
         await _dbContext.SaveChangesAsync(ct);
 
+        await _progressHubService.SendIntegrationSetupProgressAsync(
+            new IntegrationSetupProgressDTO
+            {
+                IntegrationId = integration.Id,
+                Stage = IntegrationSetupProgressStage.Indexer,
+                IsRunning = true,
+                IsSuccess = false,
+            }
+        );
         var indexerResult = await _commandExecutor.Send(
             new SetupRadarrIndexerCommand
             {
@@ -62,13 +108,42 @@ public class SetupRadarrIntegrationEndpoint : Endpoint<SetupRadarrIntegrationReq
         );
         if (indexerResult.IsFailed)
         {
+            await _progressHubService.SendIntegrationSetupProgressAsync(
+                new IntegrationSetupProgressDTO
+                {
+                    IntegrationId = integration.Id,
+                    Stage = IntegrationSetupProgressStage.Indexer,
+                    IsRunning = false,
+                    IsSuccess = false,
+                    Error = string.Join("; ", indexerResult.Errors.Select(x => x.Message)),
+                }
+            );
             await Send.FluentResult(indexerResult.ToResult(), ct);
             return;
         }
 
+        await _progressHubService.SendIntegrationSetupProgressAsync(
+            new IntegrationSetupProgressDTO
+            {
+                IntegrationId = integration.Id,
+                Stage = IntegrationSetupProgressStage.Indexer,
+                IsRunning = false,
+                IsSuccess = true,
+            }
+        );
+
         integration.ExternalIndexerId = indexerResult.Value.IndexerId;
         integration.ProvisioningState = IntegrationProvisioningState.Configured;
         await _dbContext.SaveChangesAsync(ct);
+        await _progressHubService.SendIntegrationSetupProgressAsync(
+            new IntegrationSetupProgressDTO
+            {
+                IntegrationId = integration.Id,
+                Stage = IntegrationSetupProgressStage.Done,
+                IsRunning = false,
+                IsSuccess = true,
+            }
+        );
         await Send.FluentResult(Result.Ok(integration), model => model.ToDTO(), ct);
     }
 }

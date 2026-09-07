@@ -101,4 +101,9 @@ public class ProgressHub : Hub<IProgressHub>, IProgressHub
             );
         await Clients.All.AppUpdateDownloadProgress(appUpdateDownloadProgress, cancellationToken);
     }
+
+    public async Task IntegrationSetupProgress(IntegrationSetupProgressDTO progress, CancellationToken cancellationToken = default)
+    {
+        await Clients.All.IntegrationSetupProgress(progress, cancellationToken);
+    }
 }

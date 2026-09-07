@@ -60,6 +60,19 @@ public class ProgressHubService : IProgressHubService
         }
     }
 
+    public async Task SendIntegrationSetupProgressAsync(IntegrationSetupProgressDTO progress)
+    {
+        var result = await Result.Try(async Task () =>
+            await _hub.Clients.All.IntegrationSetupProgress(progress, CancellationToken.None)
+        );
+
+        if (result.IsFailed)
+        {
+            result.LogWarning();
+            _log.Here().Warning("Failed to send integration setup progress update");
+        }
+    }
+
     /// <inheritdoc/>
     public async Task SendAppUpdateDownloadProgressAsync(AppUpdateDownloadProgressDTO progress)
     {

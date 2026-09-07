@@ -38,4 +38,6 @@ public interface IProgressHub
         AppUpdateDownloadProgressDTO appUpdateDownloadProgress,
         CancellationToken cancellationToken = default
     );
+
+    Task IntegrationSetupProgress(IntegrationSetupProgressDTO progress, CancellationToken cancellationToken = default);
 }

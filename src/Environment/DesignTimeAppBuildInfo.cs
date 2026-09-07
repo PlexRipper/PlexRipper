@@ -30,6 +30,4 @@ public sealed class DesignTimeAppBuildInfo : IAppBuildInfo
     public bool IsLinux => OperatingSystem.IsLinux();
 
     public bool IsMacOS => OperatingSystem.IsMacOS();
-
-    public bool IsUnknown => !IsWindows && !IsLinux && !IsMacOS;
 }

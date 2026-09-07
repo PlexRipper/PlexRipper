@@ -17,6 +17,7 @@ public class SetupSonarrDownloadClientCommandHandler
     private readonly ICommandExecutor _commandExecutor;
     private readonly IReaparrDbContext _dbContext;
     private readonly INetworkSettings _networkSettings;
+    private readonly IProgressHubService _progressHubService;
 
     private const string DOWNLOAD_CLIENT_NAME = "Reaparr DownloadClient";
 
@@ -27,13 +28,15 @@ public class SetupSonarrDownloadClientCommandHandler
         ILogger log,
         ICommandExecutor commandExecutor,
         IReaparrDbContext dbContext,
-        INetworkSettings networkSettings
+        INetworkSettings networkSettings,
+        IProgressHubService progressHubService
     )
     {
         _log = log.ForContext<SetupSonarrDownloadClientCommandHandler>();
         _commandExecutor = commandExecutor;
         _dbContext = dbContext;
         _networkSettings = networkSettings;
+        _progressHubService = progressHubService;
     }
 
     public async Task<Result<SetupSonarrDownloadClientCommandResult>> ExecuteAsync(
@@ -56,6 +59,16 @@ public class SetupSonarrDownloadClientCommandHandler
         )
             return Result.Fail("Sonarr BaseUrl is invalid.").LogError();
 
+        await _progressHubService.SendIntegrationSetupProgressAsync(
+            new IntegrationSetupProgressDTO
+            {
+                IntegrationId = integration.Id,
+                Stage = IntegrationSetupProgressStage.Connecting,
+                IsRunning = true,
+                IsSuccess = false,
+            }
+        );
+
         _log.Here()
             .Debug(
                 "Setting up Sonarr download client. SonarrBaseUrl: {SonarrBaseUrl}, ReaparrBaseUrl: {ReaparrBaseUrl}",
@@ -65,6 +78,16 @@ public class SetupSonarrDownloadClientCommandHandler
 
         try
         {
+            await _progressHubService.SendIntegrationSetupProgressAsync(
+                new IntegrationSetupProgressDTO
+                {
+                    IntegrationId = integration.Id,
+                    Stage = IntegrationSetupProgressStage.Connecting,
+                    IsRunning = false,
+                    IsSuccess = true,
+                }
+            );
+
             var result = await _commandExecutor.Send(new SonarApiGetDownloadClientsCommand(integration.Id), ct);
             if (result.IsFailed)
                 return Result

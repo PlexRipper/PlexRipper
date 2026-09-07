@@ -17,6 +17,7 @@ public class SetupRadarrDownloadClientCommandHandler
     private readonly ICommandExecutor _commandExecutor;
     private readonly IReaparrDbContext _dbContext;
     private readonly INetworkSettings _networkSettings;
+    private readonly IProgressHubService _progressHubService;
 
     private const string DOWNLOAD_CLIENT_NAME = "Reaparr DownloadClient";
 
@@ -27,13 +28,15 @@ public class SetupRadarrDownloadClientCommandHandler
         ILogger log,
         ICommandExecutor commandExecutor,
         IReaparrDbContext dbContext,
-        INetworkSettings networkSettings
+        INetworkSettings networkSettings,
+        IProgressHubService progressHubService
     )
     {
         _log = log.ForContext<SetupRadarrDownloadClientCommandHandler>();
         _commandExecutor = commandExecutor;
         _dbContext = dbContext;
         _networkSettings = networkSettings;
+        _progressHubService = progressHubService;
     }
 
     public async Task<Result<SetupRadarrDownloadClientCommandResult>> ExecuteAsync(
@@ -56,6 +59,16 @@ public class SetupRadarrDownloadClientCommandHandler
         )
             return Result.Fail("Radarr BaseUrl is invalid.").LogError();
 
+        await _progressHubService.SendIntegrationSetupProgressAsync(
+            new IntegrationSetupProgressDTO
+            {
+                IntegrationId = integration.Id,
+                Stage = IntegrationSetupProgressStage.Connecting,
+                IsRunning = true,
+                IsSuccess = false,
+            }
+        );
+
         _log.Here()
             .Debug(
                 "Setting up Radarr download client. RadarrBaseUrl: {RadarrBaseUrl}, ReaparrBaseUrl: {ReaparrBaseUrl}",
@@ -65,6 +78,16 @@ public class SetupRadarrDownloadClientCommandHandler
 
         try
         {
+            await _progressHubService.SendIntegrationSetupProgressAsync(
+                new IntegrationSetupProgressDTO
+                {
+                    IntegrationId = integration.Id,
+                    Stage = IntegrationSetupProgressStage.Connecting,
+                    IsRunning = false,
+                    IsSuccess = true,
+                }
+            );
+
             var result = await _commandExecutor.Send(new RadarrApiGetDownloadClientsCommand(integration.Id), ct);
             if (result.IsFailed)
                 return Result

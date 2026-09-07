@@ -32,4 +32,26 @@ describe('Side bar', () => {
 			}
 		});
 	});
+
+	it('Should strike through a server when all of its libraries are inaccessible', () => {
+		cy.basePageSetup({
+			plexAccountCount: 1,
+			plexServerCount: 1,
+			plexMovieLibraryCount: 1,
+			plexTvShowLibraryCount: 0,
+			override: {
+				plexAccounts: (accounts) => accounts.map((account) => ({ ...account, plexLibraryAccess: [] })),
+			},
+		});
+		cy.visitEmptyPage();
+
+		cy.getPageData().then(({ plexServers }) => {
+			const server = plexServers[0]!;
+
+			cy.getCy(`server-drawer-item-${server.id}`)
+				.find('.server-name-text')
+				.should('have.class', 'inaccessible-item-text')
+				.and('have.css', 'text-decoration-line', 'line-through');
+		});
+	});
 });

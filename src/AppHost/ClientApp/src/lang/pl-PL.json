@@ -146,11 +146,6 @@
       "no-notifications": "Brak dostępnych powiadomień"
     },
     "folder-paths-overview": {
-      "tabs": {
-        "download": "Ścieżki pobierania",
-        "movie": "Ścieżki filmów",
-        "tv-show": "Ścieżki programów telewizyjnych"
-      },
       "main": {
         "header": "Ścieżki folderów"
       },

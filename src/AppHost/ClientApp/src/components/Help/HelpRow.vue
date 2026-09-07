@@ -1,5 +1,7 @@
 <template>
-	<QRow no-wrap>
+	<QRow
+		no-wrap
+		:align="align">
 		<QCol
 			class="help-row-label"
 			:cols="colLabel"
@@ -68,6 +70,7 @@ const props = withDefaults(defineProps<Partial<IHelp> & {
 	disableResponsive?: boolean;
 	colContent?: ColLevels;
 	colLabel?: ColLevels;
+	align?: 'start' | 'center' | 'end';
 }>(), {
 	label: '',
 	title: '',
@@ -77,6 +80,7 @@ const props = withDefaults(defineProps<Partial<IHelp> & {
 	disableResponsive: false,
 	colLabel: 6,
 	colContent: 6,
+	align: 'center',
 });
 
 const help = computed(() => props.value ?? {

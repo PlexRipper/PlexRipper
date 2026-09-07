@@ -146,11 +146,6 @@
       "no-notifications": "keine Benachrichtigungen verfügbar"
     },
     "folder-paths-overview": {
-      "tabs": {
-        "download": "Downloadpfade",
-        "movie": "Filmpfade",
-        "tv-show": "TV-Show-Pfade"
-      },
       "main": {
         "header": "Ordnerpfade"
       },

@@ -8,7 +8,7 @@ import { type FolderPathDTO, FolderType, PlexMediaType } from '@dto';
 import { StoreNames, type ISetupResult, type IFolderPathGroup } from '@interfaces';
 import { folderPathApi } from '@api';
 import { useI18n } from 'vue-i18n';
-import { cloneDeep } from 'lodash-es';
+import { cloneDeep, orderBy } from 'lodash-es';
 
 interface IFolderPathStoreState {
 	folderPaths: FolderPathDTO[];
@@ -115,56 +115,53 @@ export const useFolderPathStore = defineStore(StoreNames.FolderPathStore, () => 
 		},
 		getDefaultFolderPaths: computed(() => state.folderPaths.filter((x) => x.id === 1 || x.id === 2 || x.id === 3)),
 		areDefaultFolderPathsValid: computed(() =>
-			get(getters.getDefaultFolderPaths).every((x) => x.isValid),
+			get(getters.getDefaultFolderPaths).every((x: FolderPathDTO) => x.isValid),
 		),
-		getFolderPathsGroups: (onlyDefaults: boolean) => {
+		getFolderPathsGroups: (onlyDefaults: boolean): IFolderPathGroup[] => {
 			const { t } = useI18n();
-			const folderPathGroups: IFolderPathGroup[] = [];
-			// Default Paths
-			folderPathGroups.push({
+			const defaultFolderPathGroup: IFolderPathGroup = {
 				header: t('components.folder-paths-overview.main.header'),
-				// The first 3 folderPaths are always the default ones.
 				paths: get(getters.getDefaultFolderPaths),
 				mediaType: PlexMediaType.None,
 				folderType: FolderType.None,
-				IsFolderDeletable: false,
+				isFolderDeletable: false,
 				isFolderNameEditable: false,
 				isFolderAddable: false,
-			});
+			};
 
 			if (onlyDefaults) {
-				return folderPathGroups;
+				return [defaultFolderPathGroup];
 			}
 
-			const defaultPaths = folderPathGroups[0]!.paths;
+			const folderPathGroupDefinitions: Pick<IFolderPathGroup, 'header' | 'mediaType' | 'folderType'>[] = [
+				{
+					header: t('components.folder-paths-overview.download.header'),
+					mediaType: PlexMediaType.None,
+					folderType: FolderType.DownloadFolder,
+				},
+				{
+					header: t('components.folder-paths-overview.movie.header'),
+					mediaType: PlexMediaType.Movie,
+					folderType: FolderType.MovieFolder,
+				},
+				{
+					header: t('components.folder-paths-overview.tv-show.header'),
+					mediaType: PlexMediaType.TvShow,
+					folderType: FolderType.TvShowFolder,
+				},
+			];
 
-			// Movie Paths
-			folderPathGroups.push({
-				header: t('components.folder-paths-overview.movie.header'),
-				paths: state.folderPaths.filter(
-					(x) => x.folderType === FolderType.MovieFolder && !defaultPaths.some((y) => y.id === x.id),
+			return folderPathGroupDefinitions.map((definition) => ({
+				...definition,
+				paths: orderBy(
+					state.folderPaths.filter((x) => x.folderType === definition.folderType),
+					['isDefault'],
+					['desc'],
 				),
-				mediaType: PlexMediaType.Movie,
-				folderType: FolderType.MovieFolder,
-				IsFolderDeletable: true,
+				isFolderDeletable: true,
 				isFolderNameEditable: true,
 				isFolderAddable: true,
-			});
-
-			// TvShow Paths
-			folderPathGroups.push({
-				header: t('components.folder-paths-overview.tv-show.header'),
-				paths: state.folderPaths.filter(
-					(x) => x.folderType === FolderType.TvShowFolder && !defaultPaths.some((y) => y.id === x.id),
-				),
-				mediaType: PlexMediaType.TvShow,
-				folderType: FolderType.TvShowFolder,
-				IsFolderDeletable: true,
-				isFolderNameEditable: true,
-				isFolderAddable: true,
-			});
-
-			return folderPathGroups;
+			}));
 		},
 	};
 

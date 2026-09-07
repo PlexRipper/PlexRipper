@@ -7,5 +7,5 @@ export interface IFolderPathGroup {
 	folderType: FolderType;
 	isFolderNameEditable: boolean;
 	isFolderAddable: boolean;
-	IsFolderDeletable: boolean;
+	isFolderDeletable: boolean;
 }

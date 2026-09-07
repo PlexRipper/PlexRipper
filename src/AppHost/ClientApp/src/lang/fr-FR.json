@@ -536,6 +536,7 @@
       "go-to-setup-page": "Aller à la page de configuration",
       "hide": "Cacher",
       "check-connection": "Vérifier la connexion",
+      "save-and-setup": "Enregistrer et configurer",
       "next": "Suivant",
       "not-validated": "Pas validaté",
       "reset": "Réinitialiser",
@@ -902,23 +903,44 @@
       },
       "paths": {
         "download-folder": {
-          "label": "Dossier de téléchargement",
+          "label": "Chemin de téléchargement par défaut",
           "text": "Le dossier où tout les fichiers vont être téléchargé en plusieurs parties avant d'être réassemblé en un seul dans le dossier de destination.",
           "title": "Dossier de téléchargement"
         },
         "movie-folder": {
-          "label": "Dossier des film",
+          "label": "Chemin de films par défaut",
           "text": "Le dossier par défaut des films quant aucun dossier personnalisé n'a été sélectionné.",
           "title": "Dossier des film"
         },
         "tv-show-folder": {
-          "label": "Dossier des série",
+          "label": "Chemin de séries TV par défaut",
           "text": "Le dossier par défaut des séries quant aucun dossier personnalisé n'a été sélectionné.",
           "title": "Dossier des série"
         }
       },
       "integrations": {
+        "choose-title": "Ajouter une intégration",
+        "test-failed-title": "Échec du test de l'intégration",
+        "test-success": "Connexion réussie",
+        "test-failed": "Échec de la connexion",
         "sonarr": {
+          "add-title": "Ajouter l'intégration Sonarr",
+          "edit-title": "Modifier l'intégration Sonarr",
+          "display-name": {
+            "label": "Nom affiché Sonarr",
+            "text": "Le nom utilisé pour identifier cette intégration Sonarr dans Reaparr.",
+            "title": "Nom affiché de l'intégration Sonarr"
+          },
+          "category": {
+            "label": "Catégorie qBittorrent Sonarr",
+            "text": "La catégorie qBittorrent utilisée par cette intégration Sonarr pour séparer ses téléchargements.",
+            "title": "Catégorie qBittorrent de l'intégration Sonarr"
+          },
+          "download-folder": {
+            "label": "Dossier de téléchargement Sonarr",
+            "text": "Sélectionnez le dossier dans lequel les téléchargements de cette intégration Sonarr seront enregistrés. Seuls les dossiers configurés comme dossiers de téléchargement sont disponibles.",
+            "title": "Dossier de téléchargement de l'intégration Sonarr"
+          },
           "api-key-input": {
             "label": "Clé API Sonarr",
             "text": "Accédez à Sonarr: Paramètres → Général → Sécurité → Clé API, copiez la clé API et collez-la dans ce champ.",

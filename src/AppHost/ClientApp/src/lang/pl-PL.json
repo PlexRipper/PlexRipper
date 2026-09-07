@@ -536,6 +536,7 @@
       "go-to-setup-page": "Przejdź do strony konfiguracji",
       "hide": "Ukryj",
       "check-connection": "Sprawdź połączenie",
+      "save-and-setup": "Zapisz i skonfiguruj",
       "next": "Następne",
       "not-validated": "Nie zweryfikowane",
       "reset": "Zresetuj",
@@ -918,7 +919,28 @@
         }
       },
       "integrations": {
+        "choose-title": "Dodaj integrację",
+        "test-failed-title": "Test integracji nie powiódł się",
+        "test-success": "Połączenie udane",
+        "test-failed": "Połączenie nie powiodło się",
         "sonarr": {
+          "add-title": "Dodaj integrację Sonarr",
+          "edit-title": "Edytuj integrację Sonarr",
+          "display-name": {
+            "label": "Nazwa wyświetlana Sonarr",
+            "text": "Nazwa używana do identyfikowania tej integracji Sonarr w Reaparr.",
+            "title": "Nazwa wyświetlana integracji Sonarr"
+          },
+          "category": {
+            "label": "Kategoria qBittorrent Sonarr",
+            "text": "Kategoria qBittorrent używana przez tę integrację Sonarr do oddzielenia jej pobrań.",
+            "title": "Kategoria qBittorrent integracji Sonarr"
+          },
+          "download-folder": {
+            "label": "Folder pobierania Sonarr",
+            "text": "Wybierz folder, w którym będą przechowywane pobrane pliki tej integracji Sonarr. Dostępne są tylko foldery skonfigurowane jako foldery pobierania.",
+            "title": "Folder pobierania integracji Sonarr"
+          },
           "api-key-input": {
             "label": "Klucz API Sonarr",
             "text": "Przejdź do Sonarr: Ustawienia → Ogólne → Bezpieczeństwo → Klucz API i skopiuj klucz API z tego miejsca i wklej go w tym polu",
@@ -943,6 +965,23 @@
           }
         },
         "radarr": {
+          "add-title": "Dodaj integrację Radarr",
+          "edit-title": "Edytuj integrację Radarr",
+          "display-name": {
+            "label": "Nazwa wyświetlana Radarr",
+            "text": "Nazwa używana do identyfikowania tej integracji Radarr w Reaparr.",
+            "title": "Nazwa wyświetlana integracji Radarr"
+          },
+          "category": {
+            "label": "Kategoria qBittorrent Radarr",
+            "text": "Kategoria qBittorrent używana przez tę integrację Radarr do oddzielenia jej pobrań.",
+            "title": "Kategoria qBittorrent integracji Radarr"
+          },
+          "download-folder": {
+            "label": "Folder pobierania Radarr",
+            "text": "Wybierz folder, w którym będą przechowywane pobrane pliki tej integracji Radarr. Dostępne są tylko foldery skonfigurowane jako foldery pobierania.",
+            "title": "Folder pobierania integracji Radarr"
+          },
           "api-key-input": {
             "label": "Klucz API Radarr",
             "text": "Przejdź do Radarr: Ustawienia → Ogólne → Bezpieczeństwo → Klucz API i skopiuj klucz API z tego miejsca i wklej go w tym polu",

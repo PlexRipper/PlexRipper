@@ -26,6 +26,7 @@ import type {
 	ServerDownloadProgressDTO,
 	ServerDownloadProgressMessagePackDTO,
 	LiveLogEventDTO,
+	IntegrationSetupProgressDTO,
 } from '@dto';
 import { RefreshDataType, MessageTypes } from '@dto';
 import type { IRetryPolicy } from '@microsoft/signalr/src/IRetryPolicy';
@@ -54,6 +55,7 @@ export const useSignalrStore = defineStore(StoreNames.SignalrStore, () => {
 		refreshDataNotificationSubject: Subject<RefreshDataType>;
 		appUpdateDownloadProgressSubject: Subject<AppUpdateDownloadProgressDTO>;
 		logEventSubject: Subject<LiveLogEventDTO>;
+		integrationSetupProgressSubject: Subject<IntegrationSetupProgressDTO>;
 	}
 
 	const defaultState: ISignalRStoreState = {
@@ -65,6 +67,7 @@ export const useSignalrStore = defineStore(StoreNames.SignalrStore, () => {
 		refreshDataNotificationSubject: new Subject<RefreshDataType>(),
 		appUpdateDownloadProgressSubject: new Subject<AppUpdateDownloadProgressDTO>(),
 		logEventSubject: new Subject<LiveLogEventDTO>(),
+		integrationSetupProgressSubject: new Subject<IntegrationSetupProgressDTO>(),
 	};
 
 	const state = reactive<ISignalRStoreState>(cloneDeep(defaultState));
@@ -174,6 +177,8 @@ export const useSignalrStore = defineStore(StoreNames.SignalrStore, () => {
 		progressHubConnection?.on(MessageTypes.JobStatusUpdate, (data) => backgroundStore.setStatusJobUpdate(data));
 
 		progressHubConnection?.on(MessageTypes.AppUpdateDownloadProgress, (data: AppUpdateDownloadProgressDTO) => state.appUpdateDownloadProgressSubject.next(data));
+
+		progressHubConnection?.on(MessageTypes.IntegrationSetupProgress, (data: IntegrationSetupProgressDTO) => state.integrationSetupProgressSubject.next(data));
 
 		notificationHubConnection?.on(MessageTypes.Notification, (data: NotificationDTO) => notificationsStore.setNotification(data));
 

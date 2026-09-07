@@ -30,6 +30,7 @@
 			<SyncServerMediaDialog />
 			<RefreshAccountAccessDialog />
 			<UpdateAvailableDialog />
+			<IntegrationSetupDialog />
 		</PageLoadOverlay>
 		<!--	Background	-->
 		<Background :hide-background="isEmptyLayout || isLoading" />

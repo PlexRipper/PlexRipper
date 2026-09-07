@@ -536,6 +536,7 @@
       "go-to-setup-page": "springe zur Einrichtungsseite",
       "hide": "verstecken",
       "check-connection": "Verbindung prüfen",
+      "save-and-setup": "Speichern und einrichten",
       "next": "weiter",
       "not-validated": "nicht überprüft",
       "reset": "zurück setzen",
@@ -907,18 +908,39 @@
           "title": "Download Pfad"
         },
         "movie-folder": {
-          "label": "Filme Pfad",
+          "label": "Standard-Filmpfad",
           "text": "Standartpfad für Filme wenn kein individueller Pfad angegeben wurde.",
           "title": "Filme Pfad"
         },
         "tv-show-folder": {
-          "label": "Serien Pfad",
+          "label": "Standard-TV-Show-Pfad",
           "text": "Standartpfad für Serien wenn kein individueller Pfad angegeben wurde.",
           "title": "Serien Pfad"
         }
       },
       "integrations": {
+        "choose-title": "Integration hinzufügen",
+        "test-failed-title": "Integrationstest fehlgeschlagen",
+        "test-success": "Verbindung erfolgreich",
+        "test-failed": "Verbindung fehlgeschlagen",
         "sonarr": {
+          "add-title": "Sonarr-Integration hinzufügen",
+          "edit-title": "Sonarr-Integration bearbeiten",
+          "display-name": {
+            "label": "Sonarr-Anzeigename",
+            "text": "Der Name, mit dem diese Sonarr-Integration in Reaparr identifiziert wird.",
+            "title": "Anzeigename der Sonarr-Integration"
+          },
+          "category": {
+            "label": "Sonarr-qBittorrent-Kategorie",
+            "text": "Die qBittorrent-Kategorie, die diese Sonarr-Integration verwendet, um ihre Downloads getrennt zu halten.",
+            "title": "qBittorrent-Kategorie der Sonarr-Integration"
+          },
+          "download-folder": {
+            "label": "Sonarr-Downloadordner",
+            "text": "Wählen Sie den Ordner aus, in dem die Downloads dieser Sonarr-Integration gespeichert werden. Es stehen nur als Downloadordner konfigurierte Ordner zur Verfügung.",
+            "title": "Downloadordner der Sonarr-Integration"
+          },
           "api-key-input": {
             "label": "Sonarr API-Schlüssel",
             "text": "Gehen Sie in Sonarr zu: Einstellungen → Allgemein → Sicherheit → API-Schlüssel, kopieren Sie den API-Schlüssel und fügen Sie ihn in dieses Feld ein.",
@@ -943,6 +965,23 @@
           }
         },
         "radarr": {
+          "add-title": "Radarr-Integration hinzufügen",
+          "edit-title": "Radarr-Integration bearbeiten",
+          "display-name": {
+            "label": "Radarr-Anzeigename",
+            "text": "Der Name, mit dem diese Radarr-Integration in Reaparr identifiziert wird.",
+            "title": "Anzeigename der Radarr-Integration"
+          },
+          "category": {
+            "label": "Radarr-qBittorrent-Kategorie",
+            "text": "Die qBittorrent-Kategorie, die diese Radarr-Integration verwendet, um ihre Downloads getrennt zu halten.",
+            "title": "qBittorrent-Kategorie der Radarr-Integration"
+          },
+          "download-folder": {
+            "label": "Radarr-Downloadordner",
+            "text": "Wählen Sie den Ordner aus, in dem die Downloads dieser Radarr-Integration gespeichert werden. Es stehen nur als Downloadordner konfigurierte Ordner zur Verfügung.",
+            "title": "Downloadordner der Radarr-Integration"
+          },
           "api-key-input": {
             "label": "Radarr API-Schlüssel",
             "text": "Gehen Sie in Radarr zu: Einstellungen → Allgemein → Sicherheit → API-Schlüssel, kopieren Sie den API-Schlüssel und fügen Sie ihn in dieses Feld ein.",

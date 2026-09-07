@@ -536,6 +536,7 @@
       "go-to-setup-page": "Go To Setup Page",
       "hide": "Hide",
       "check-connection": "Check Connection",
+      "save-and-setup": "Save and Setup",
       "next": "Next",
       "not-validated": "Not validated",
       "reset": "Reset",
@@ -918,7 +919,28 @@
         }
       },
       "integrations": {
+        "choose-title": "Add integration",
+        "test-failed-title": "Integration test failed",
+        "test-success": "Connection successful",
+        "test-failed": "Connection failed",
         "sonarr": {
+          "add-title": "Add Sonarr integration",
+          "edit-title": "Edit Sonarr integration",
+          "display-name": {
+            "label": "Sonarr Display Name",
+            "text": "The name used to identify this Sonarr integration in Reaparr.",
+            "title": "Sonarr Integration Display Name"
+          },
+          "download-folder": {
+            "label": "Sonarr Download Folder",
+            "text": "Select the folder where this Sonarr integration's downloads will be stored. Only folders configured as Download folders are available.",
+            "title": "Sonarr Integration Download Folder"
+          },
+          "category": {
+            "label": "Sonarr qBittorrent Category",
+            "text": "The qBittorrent category used by this Sonarr integration to keep its downloads separate.",
+            "title": "Sonarr Integration qBittorrent Category"
+          },
           "api-key-input": {
             "label": "Sonarr API Key",
             "text": "Go to Sonarr: Settings → General → Security → API Key and copy the API key from there and paste in this field",
@@ -943,6 +965,23 @@
           }
         },
         "radarr": {
+          "add-title": "Add Radarr integration",
+          "edit-title": "Edit Radarr integration",
+          "display-name": {
+            "label": "Radarr Display Name",
+            "text": "The name used to identify this Radarr integration in Reaparr.",
+            "title": "Radarr Integration Display Name"
+          },
+          "download-folder": {
+            "label": "Radarr Download Folder",
+            "text": "Select the folder where this Radarr integration's downloads will be stored. Only folders configured as Download folders are available.",
+            "title": "Radarr Integration Download Folder"
+          },
+          "category": {
+            "label": "Radarr qBittorrent Category",
+            "text": "The qBittorrent category used by this Radarr integration to keep its downloads separate.",
+            "title": "Radarr Integration qBittorrent Category"
+          },
           "api-key-input": {
             "label": "Radarr API Key",
             "text": "Go to Radarr: Settings → General → Security → API Key and copy the API key from there and paste in this field",

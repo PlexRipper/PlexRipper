@@ -40,6 +40,7 @@ public class CreateSonarrIntegrationEndpointUnitTests
         integration.QBittorrentApiKey.ShouldStartWith("qbt_");
         integration.QBittorrentApiKey.Length.ShouldBe(32);
         integration.TorznabApiKey.Length.ShouldBe(32);
+        integration.TorznabApiKey.ShouldNotBe(integration.QBittorrentApiKey);
     }
 
     [Test]

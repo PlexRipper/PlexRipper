@@ -8,7 +8,8 @@ public record SetupSonarrIndexerCommand : ICommand<Result<SetupSonarrIndexerComm
 
 public record SetupSonarrIndexerCommandResult
 {
-    public int IndexerId { get; set; }
+    public int IndexerId { get; init; }
+    public required SonarrIndexerContractDTO Resource { get; init; }
 }
 
 public class SetupSonarrIndexerCommandHandler
@@ -50,7 +51,6 @@ public class SetupSonarrIndexerCommandHandler
 
         _log.Here().Information("Setting up Sonarr indexer '{IndexerName}'...", _indexerName);
 
-        // Check for existing indexers
         var getResult = await _commandExecutor.Send(new SonarrApiGetIndexersCommand(integration.Id), ct);
         if (getResult.IsFailed)
             return Result
@@ -67,14 +67,14 @@ public class SetupSonarrIndexerCommandHandler
         if (existing is not null)
         {
             _log.Here().Information("Indexer '{IndexerName}' already exists in Sonarr. Updating...", _indexerName);
-            // Update existing indexer
+            var resource = BuildIndexerResource(command.DownloadClientId, existing.Id, integration);
             var updateResult = await _commandExecutor.Send(
                 new SonarrApiUpdateIndexerCommand
                 {
                     IntegrationId = integration.Id,
                     Id = existing.Id,
                     ForceSave = true,
-                    Resource = BuildIndexerResource(command.DownloadClientId, existing.Id, integration),
+                    Resource = resource,
                 },
                 ct
             );
@@ -83,17 +83,19 @@ public class SetupSonarrIndexerCommandHandler
                 return updateResult.LogError();
 
             _log.Here().Information("Successfully updated indexer '{IndexerName}' in Sonarr.", _indexerName);
-            return Result.Ok(new SetupSonarrIndexerCommandResult { IndexerId = updateResult.Value.Id });
+            return Result.Ok(
+                new SetupSonarrIndexerCommandResult { IndexerId = updateResult.Value.Id, Resource = resource }
+            );
         }
 
-        // Create a new indexer
         _log.Here().Information("Creating new indexer '{IndexerName}' in Sonarr...", _indexerName);
+        var createResource = BuildIndexerResource(command.DownloadClientId, null, integration);
         var createResult = await _commandExecutor.Send(
             new SonarrApiCreateIndexerCommand
             {
                 IntegrationId = integration.Id,
                 ForceSave = true,
-                Resource = BuildIndexerResource(command.DownloadClientId, null, integration),
+                Resource = createResource,
             },
             ct
         );
@@ -101,8 +103,11 @@ public class SetupSonarrIndexerCommandHandler
         if (createResult.IsFailed)
             return createResult.LogError();
 
+        createResource.Id = createResult.Value.Id;
         _log.Here().Information("Successfully created indexer '{IndexerName}' in Sonarr.", _indexerName);
-        return Result.Ok(new SetupSonarrIndexerCommandResult { IndexerId = createResult.Value.Id });
+        return Result.Ok(
+            new SetupSonarrIndexerCommandResult { IndexerId = createResult.Value.Id, Resource = createResource }
+        );
     }
 
     private SonarrIndexerContractDTO BuildIndexerResource(int downloadClientId, int? id, SonarrIntegration integration)
@@ -113,6 +118,7 @@ public class SetupSonarrIndexerCommandHandler
 
         return new SonarrIndexerContractDTO
         {
+            Id = id ?? 0,
             Name = _indexerName,
             EnableRss = true,
             EnableAutomaticSearch = true,
@@ -127,11 +133,7 @@ public class SetupSonarrIndexerCommandHandler
             [
                 new SonarrIndexerContractFieldDTO { Name = "baseUrl", Value = baseUrl },
                 new SonarrIndexerContractFieldDTO { Name = "apiPath", Value = "/api" },
-                new SonarrIndexerContractFieldDTO
-                {
-                    Name = IntegrationDefinitions.INDEXER_API_KEY,
-                    Value = integration.TorznabApiKey,
-                },
+                new SonarrIndexerContractFieldDTO { Name = "apiKey", Value = integration.TorznabApiKey },
                 new SonarrIndexerContractFieldDTO
                 {
                     Name = "categories",

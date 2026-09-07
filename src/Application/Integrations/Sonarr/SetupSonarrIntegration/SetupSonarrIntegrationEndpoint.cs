@@ -133,6 +133,50 @@ public class SetupSonarrIntegrationEndpoint : Endpoint<SetupSonarrIntegrationReq
         );
 
         integration.ExternalIndexerId = indexerResult.Value.IndexerId;
+        await _dbContext.SaveChangesAsync(ct);
+
+        await _progressHubService.SendIntegrationSetupProgressAsync(
+            new IntegrationSetupProgressDTO
+            {
+                IntegrationId = integration.Id,
+                Stage = IntegrationSetupProgressStage.Validation,
+                IsRunning = true,
+                IsSuccess = false,
+            }
+        );
+        var validationResult = await _commandExecutor.Send(
+            new ValidateSonarrIntegrationCommand(
+                integration.Id,
+                downloadClientResult.Value.Resource,
+                indexerResult.Value.Resource
+            ),
+            ct
+        );
+        if (validationResult.IsFailed)
+        {
+            await _progressHubService.SendIntegrationSetupProgressAsync(
+                new IntegrationSetupProgressDTO
+                {
+                    IntegrationId = integration.Id,
+                    Stage = IntegrationSetupProgressStage.Validation,
+                    IsRunning = false,
+                    IsSuccess = false,
+                    Error = string.Join("; ", validationResult.Errors.Select(x => x.Message)),
+                }
+            );
+            await Send.FluentResult(validationResult, ct);
+            return;
+        }
+
+        await _progressHubService.SendIntegrationSetupProgressAsync(
+            new IntegrationSetupProgressDTO
+            {
+                IntegrationId = integration.Id,
+                Stage = IntegrationSetupProgressStage.Validation,
+                IsRunning = false,
+                IsSuccess = true,
+            }
+        );
         integration.ProvisioningState = IntegrationProvisioningState.Configured;
         await _dbContext.SaveChangesAsync(ct);
         await _progressHubService.SendIntegrationSetupProgressAsync(

@@ -8,6 +8,7 @@ public record SetupRadarrDownloadClientCommand : ICommand<Result<SetupRadarrDown
 public record SetupRadarrDownloadClientCommandResult
 {
     public int DownloadClientId { get; init; }
+    public required RadarrDownloadContractDTO Resource { get; init; }
 }
 
 public class SetupRadarrDownloadClientCommandHandler
@@ -96,6 +97,7 @@ public class SetupRadarrDownloadClientCommandHandler
                     .LogError();
 
             var list = result.Value;
+            var resource = BuildDownloadClientResource(_networkSettings.Uri, integration);
 
             var currentDownloadClient =
                 list.FirstOrDefault(d => d.Id == integration.ExternalDownloadClientId)
@@ -105,13 +107,14 @@ public class SetupRadarrDownloadClientCommandHandler
 
             if (currentDownloadClient != null)
             {
+                resource.Id = currentDownloadClient.Id;
                 var updateResult = await _commandExecutor.Send(
                     new RadarrApiUpdateDownloadClientCommand
                     {
                         IntegrationId = integration.Id,
                         Id = currentDownloadClient.Id,
                         ForceSave = true,
-                        Resource = BuildDownloadClientResource(_networkSettings.Uri, integration),
+                        Resource = resource,
                     },
                     ct
                 );
@@ -120,7 +123,11 @@ public class SetupRadarrDownloadClientCommandHandler
                     return updateResult.WithError(PUBLIC_URL_HINT).LogError();
 
                 return Result.Ok(
-                    new SetupRadarrDownloadClientCommandResult { DownloadClientId = updateResult.Value.Id }
+                    new SetupRadarrDownloadClientCommandResult
+                    {
+                        DownloadClientId = updateResult.Value.Id,
+                        Resource = resource,
+                    }
                 );
             }
 
@@ -128,7 +135,8 @@ public class SetupRadarrDownloadClientCommandHandler
                 new RadarrApiCreateDownloadClientCommand
                 {
                     IntegrationId = integration.Id,
-                    Resource = BuildDownloadClientResource(_networkSettings.Uri, integration),
+                    ForceSave = true,
+                    Resource = resource,
                 },
                 ct
             );
@@ -136,7 +144,14 @@ public class SetupRadarrDownloadClientCommandHandler
             if (createResult.IsFailed)
                 return createResult.WithError(PUBLIC_URL_HINT).LogError();
 
-            return Result.Ok(new SetupRadarrDownloadClientCommandResult { DownloadClientId = createResult.Value.Id });
+            resource.Id = createResult.Value.Id;
+            return Result.Ok(
+                new SetupRadarrDownloadClientCommandResult
+                {
+                    DownloadClientId = createResult.Value.Id,
+                    Resource = resource,
+                }
+            );
         }
         catch (TaskCanceledException e)
         {
@@ -170,7 +185,7 @@ public class SetupRadarrDownloadClientCommandHandler
                 new() { Name = "port", Value = reaparrBaseUri.Port },
                 new() { Name = "useSsl", Value = useSsl },
                 new() { Name = "urlBase", Value = urlBase },
-                new() { Name = IntegrationDefinitions.INDEXER_API_KEY, Value = integration.QBittorrentApiKey },
+                new() { Name = "apiKey", Value = integration.QBittorrentApiKey },
                 new() { Name = "movieCategory", Value = integration.Category },
                 new() { Name = "recentMoviePriority", Value = 0 },
                 new() { Name = "olderMoviePriority", Value = 0 },

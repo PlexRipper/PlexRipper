@@ -8,7 +8,8 @@ public record SetupRadarrIndexerCommand : ICommand<Result<SetupRadarrIndexerComm
 
 public record SetupRadarrIndexerCommandResult
 {
-    public int IndexerId { get; set; }
+    public int IndexerId { get; init; }
+    public required RadarrIndexerContractDTO Resource { get; init; }
 }
 
 public class SetupRadarrIndexerCommandHandler
@@ -67,14 +68,14 @@ public class SetupRadarrIndexerCommandHandler
         if (existing is not null)
         {
             _log.Here().Information("Indexer '{IndexerName}' already exists in Radarr. Updating...", _indexerName);
-            // Update existing indexer
+            var updateResource = BuildIndexerResource(command.DownloadClientId, existing.Id, integration);
             var updateResult = await _commandExecutor.Send(
                 new RadarrApiUpdateIndexerCommand
                 {
                     IntegrationId = integration.Id,
                     Id = existing.Id,
                     ForceSave = true,
-                    Resource = BuildIndexerResource(command.DownloadClientId, existing.Id, integration),
+                    Resource = updateResource,
                 },
                 ct
             );
@@ -83,17 +84,20 @@ public class SetupRadarrIndexerCommandHandler
                 return updateResult.LogError();
 
             _log.Here().Information("Successfully updated indexer '{IndexerName}' in Radarr.", _indexerName);
-            return Result.Ok(new SetupRadarrIndexerCommandResult { IndexerId = updateResult.Value.Id });
+            return Result.Ok(
+                new SetupRadarrIndexerCommandResult { IndexerId = updateResult.Value.Id, Resource = updateResource }
+            );
         }
 
         // Create a new indexer
         _log.Here().Information("Creating new indexer '{IndexerName}' in Radarr...", _indexerName);
+        var resource = BuildIndexerResource(command.DownloadClientId, 0, integration);
         var createResult = await _commandExecutor.Send(
             new RadarrApiCreateIndexerCommand
             {
                 IntegrationId = integration.Id,
                 ForceSave = true,
-                Resource = BuildIndexerResource(command.DownloadClientId, 0, integration),
+                Resource = resource,
             },
             ct
         );
@@ -101,8 +105,11 @@ public class SetupRadarrIndexerCommandHandler
         if (createResult.IsFailed)
             return createResult.LogError();
 
-        _log.Here().Information("Successfully created indexer '{IndexerName}' in Radarr.", _indexerName);
-        return Result.Ok(new SetupRadarrIndexerCommandResult { IndexerId = createResult.Value.Id });
+        resource.Id = createResult.Value.Id;
+        _log.Here().Information("Successfully created indexer '{IndexerName}' in Radarr", _indexerName);
+        return Result.Ok(
+            new SetupRadarrIndexerCommandResult { IndexerId = createResult.Value.Id, Resource = resource }
+        );
     }
 
     private RadarrIndexerContractDTO BuildIndexerResource(int downloadClientId, int? id, RadarrIntegration integration)
@@ -127,11 +134,7 @@ public class SetupRadarrIndexerCommandHandler
             [
                 new RadarrIndexerContractFieldDTO { Name = "baseUrl", Value = baseUrl },
                 new RadarrIndexerContractFieldDTO { Name = "apiPath", Value = "/api" },
-                new RadarrIndexerContractFieldDTO
-                {
-                    Name = IntegrationDefinitions.INDEXER_API_KEY,
-                    Value = integration.TorznabApiKey,
-                },
+                new RadarrIndexerContractFieldDTO { Name = "apiKey", Value = integration.TorznabApiKey },
                 new RadarrIndexerContractFieldDTO
                 {
                     Name = "categories",

@@ -161,6 +161,18 @@ public static class SonarrHttpClientExtensions
         );
     }
 
+    public static Task<Result> TestSonarrDownloadClientAsync(
+        this HttpClient client,
+        SonarrDownloadContractDTO resource,
+        CancellationToken ct
+    ) => client.TestSonarrResourceAsync("api/v3/downloadclient/test", resource, "download client", ct);
+
+    public static Task<Result> TestSonarrIndexerAsync(
+        this HttpClient client,
+        SonarrIndexerContractDTO resource,
+        CancellationToken ct
+    ) => client.TestSonarrResourceAsync("api/v3/indexer/test", resource, "indexer", ct);
+
     public static async Task<Result> DeleteSonarrResourcesAsync(
         this HttpClient client,
         int? externalIndexerId,
@@ -209,6 +221,27 @@ public static class SonarrHttpClientExtensions
         return result.Value.IsSuccessStatusCode || result.Value.StatusCode == HttpStatusCode.BadRequest
             ? Result.Ok()
             : Result.Fail($"Failed to test Sonarr download clients. StatusCode: {result.Value.StatusCode}");
+    }
+
+    private static async Task<Result> TestSonarrResourceAsync<T>(
+        this HttpClient client,
+        string path,
+        T resource,
+        string resourceName,
+        CancellationToken ct
+    )
+    {
+        var result = await client.SendSonarrAsync(CreateJsonRequest(HttpMethod.Post, path, resource), ct);
+        if (result.IsCancelled)
+            return result.ToResult().LogWarning();
+        if (result.IsFailed)
+            return result.ToResult().LogError();
+        return result.Value.IsSuccessStatusCode
+            ? Result.Ok()
+            : Result
+                .Fail($"Failed to validate Reaparr {resourceName} in Sonarr. StatusCode: {result.Value.StatusCode}")
+                .WithError(result.Value.Body)
+                .LogError();
     }
 
     private static async Task<Result<T>> SendSonarrAsync<T>(

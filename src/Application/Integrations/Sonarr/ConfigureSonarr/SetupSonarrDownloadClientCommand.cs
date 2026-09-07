@@ -8,6 +8,7 @@ public record SetupSonarrDownloadClientCommand : ICommand<Result<SetupSonarrDown
 public record SetupSonarrDownloadClientCommandResult
 {
     public int DownloadClientId { get; init; }
+    public required SonarrDownloadContractDTO Resource { get; init; }
 }
 
 public class SetupSonarrDownloadClientCommandHandler
@@ -96,6 +97,7 @@ public class SetupSonarrDownloadClientCommandHandler
                     .LogError();
 
             var list = result.Value;
+            var resource = BuildDownloadClientResource(_networkSettings.Uri, integration);
 
             var currentDownloadClient =
                 list.FirstOrDefault(d => d.Id == integration.ExternalDownloadClientId)
@@ -105,13 +107,14 @@ public class SetupSonarrDownloadClientCommandHandler
 
             if (currentDownloadClient != null)
             {
+                resource.Id = currentDownloadClient.Id;
                 var updateResult = await _commandExecutor.Send(
                     new SonarApiUpdateDownloadClientCommand
                     {
                         IntegrationId = integration.Id,
                         Id = currentDownloadClient.Id,
                         ForceSave = true,
-                        Resource = BuildDownloadClientResource(_networkSettings.Uri, integration),
+                        Resource = resource,
                     },
                     ct
                 );
@@ -120,7 +123,11 @@ public class SetupSonarrDownloadClientCommandHandler
                     return updateResult.WithError(PUBLIC_URL_HINT).LogError();
 
                 return Result.Ok(
-                    new SetupSonarrDownloadClientCommandResult { DownloadClientId = updateResult.Value.Id }
+                    new SetupSonarrDownloadClientCommandResult
+                    {
+                        DownloadClientId = updateResult.Value.Id,
+                        Resource = resource,
+                    }
                 );
             }
 
@@ -128,8 +135,8 @@ public class SetupSonarrDownloadClientCommandHandler
                 new SonarrApiCreateDownloadClientCommand
                 {
                     IntegrationId = integration.Id,
-                    ForceSave = false,
-                    Resource = BuildDownloadClientResource(_networkSettings.Uri, integration),
+                    ForceSave = true,
+                    Resource = resource,
                 },
                 ct
             );
@@ -137,7 +144,14 @@ public class SetupSonarrDownloadClientCommandHandler
             if (createResult.IsFailed)
                 return createResult.WithError(PUBLIC_URL_HINT).LogError();
 
-            return Result.Ok(new SetupSonarrDownloadClientCommandResult { DownloadClientId = createResult.Value.Id });
+            resource.Id = createResult.Value.Id;
+            return Result.Ok(
+                new SetupSonarrDownloadClientCommandResult
+                {
+                    DownloadClientId = createResult.Value.Id,
+                    Resource = resource,
+                }
+            );
         }
         catch (TaskCanceledException e)
         {

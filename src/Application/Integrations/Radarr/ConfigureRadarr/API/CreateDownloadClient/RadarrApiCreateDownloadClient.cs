@@ -3,6 +3,7 @@ namespace Reaparr.Application;
 public record RadarrApiCreateDownloadClientCommand : ICommand<Result<RadarrDownloadClientResourceDTO>>
 {
     public required Guid IntegrationId { get; init; }
+    public required bool ForceSave { get; init; }
     public required RadarrDownloadContractDTO Resource { get; init; }
 }
 
@@ -26,6 +27,6 @@ public class RadarrApiCreateDownloadClientCommandHandler
             return clientResult.ToResult<RadarrDownloadClientResourceDTO>();
 
         using var client = clientResult.Value;
-        return await client.CreateRadarrDownloadClientAsync(command.Resource, cancellationToken);
+        return await client.CreateRadarrDownloadClientAsync(command.ForceSave, command.Resource, cancellationToken);
     }
 }

@@ -60,13 +60,18 @@ public static class RadarrHttpClientExtensions
 
     public static Task<Result<RadarrDownloadClientResourceDTO>> CreateRadarrDownloadClientAsync(
         this HttpClient client,
+        bool forceSave,
         RadarrDownloadContractDTO resource,
         CancellationToken ct
     )
     {
         _log.Here().Debug("Creating Radarr download client with name {DownloadClientName}", resource.Name);
         return client.SendRadarrAsync(
-            CreateJsonRequest(HttpMethod.Post, "api/v3/downloadclient", resource),
+            CreateJsonRequest(
+                HttpMethod.Post,
+                $"api/v3/downloadclient?forceSave={forceSave.ToString().ToLowerInvariant()}",
+                resource
+            ),
             "Failed to create download client in Radarr",
             static body =>
                 JsonSerializer.Deserialize<RadarrDownloadClientResourceDTO>(
@@ -162,6 +167,18 @@ public static class RadarrHttpClientExtensions
         );
     }
 
+    public static Task<Result> TestRadarrDownloadClientAsync(
+        this HttpClient client,
+        RadarrDownloadContractDTO resource,
+        CancellationToken ct
+    ) => client.TestRadarrResourceAsync("api/v3/downloadclient/test", resource, "download client", ct);
+
+    public static Task<Result> TestRadarrIndexerAsync(
+        this HttpClient client,
+        RadarrIndexerContractDTO resource,
+        CancellationToken ct
+    ) => client.TestRadarrResourceAsync("api/v3/indexer/test", resource, "indexer", ct);
+
     public static async Task<Result> DeleteRadarrResourcesAsync(
         this HttpClient client,
         int? externalIndexerId,
@@ -210,6 +227,27 @@ public static class RadarrHttpClientExtensions
         return result.Value.IsSuccessStatusCode || result.Value.StatusCode == HttpStatusCode.BadRequest
             ? Result.Ok()
             : Result.Fail($"Failed to test Radarr download clients. StatusCode: {result.Value.StatusCode}");
+    }
+
+    private static async Task<Result> TestRadarrResourceAsync<T>(
+        this HttpClient client,
+        string path,
+        T resource,
+        string resourceName,
+        CancellationToken ct
+    )
+    {
+        var result = await client.SendRadarrAsync(CreateJsonRequest(HttpMethod.Post, path, resource), ct);
+        if (result.IsCancelled)
+            return result.ToResult().LogWarning();
+        if (result.IsFailed)
+            return result.ToResult().LogError();
+        return result.Value.IsSuccessStatusCode
+            ? Result.Ok()
+            : Result
+                .Fail($"Failed to validate Reaparr {resourceName} in Radarr. StatusCode: {result.Value.StatusCode}")
+                .WithError(result.Value.Body)
+                .LogError();
     }
 
     private static async Task<Result<T>> SendRadarrAsync<T>(

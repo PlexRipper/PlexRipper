@@ -14,5 +14,6 @@ public enum IntegrationSetupProgressStage
     Connecting,
     DownloadClient,
     Indexer,
+    Validation,
     Done,
 }

@@ -31,6 +31,7 @@ describe('IntegrationStore', () => {
 		const detail = {
 			id: 'id', name: 'Sonarr', url: 'http://sonarr', apiKey: 'key', category: 'sonarr', downloadFolderId: null,
 			provisioningState: IntegrationProvisioningState.Unconfigured,
+			lastConnectionTestStatus: TestConnectionStatus.Unknown,
 		};
 		const create = vi.spyOn(integrationApi, 'createSonarrIntegrationEndpoint').mockReturnValue(success(detail));
 		vi.spyOn(integrationApi, 'getIntegrationsEndpoint').mockReturnValue(success([]));
@@ -38,7 +39,13 @@ describe('IntegrationStore', () => {
 		const result = subscribeSpyTo(store.save());
 
 		expect(result.getLastValue()?.isSuccess).toBe(true);
-		expect(create).toHaveBeenCalledWith({ name: 'Sonarr', url: 'http://sonarr', apiKey: 'key', category: 'sonarr', downloadFolderId: null });
+		expect(create).toHaveBeenCalledWith({
+			name: 'Sonarr',
+			url: 'http://sonarr',
+			apiKey: 'key',
+			category: 'sonarr',
+			downloadFolderId: null,
+		});
 		expect(store.detail?.type).toBe(IntegrationType.Sonarr);
 		expect(store.requiresSetupPrompt).toBe(true);
 	});
@@ -47,12 +54,18 @@ describe('IntegrationStore', () => {
 		const store = useIntegrationStore();
 		store.openAdd(IntegrationType.Radarr);
 		Object.assign(store.draft, { url: 'http://radarr', apiKey: 'key' });
+		const testResult = {
+			result: TestConnectionStatus.Success,
+			httpStatusCode: 200,
+			errorMessage: null,
+			testedAt: '2026-09-07T12:00:00Z',
+		};
 		const testConnection = vi.spyOn(integrationApi, 'testConnectionToRadarrEndpoint')
-			.mockReturnValue(success({ result: TestConnectionStatus.Success }));
+			.mockReturnValue(success(testResult));
 
 		subscribeSpyTo(store.test());
 
 		expect(testConnection).toHaveBeenCalledWith({ url: 'http://radarr', apiKey: 'key' });
-		expect(store.testStatus).toBe(TestConnectionStatus.Success);
+		expect(store.testResult).toEqual(testResult);
 	});
 });

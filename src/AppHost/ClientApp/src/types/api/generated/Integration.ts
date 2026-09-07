@@ -151,9 +151,11 @@ export class Integration {
    * @secure
    */
   testConnectionToRadarrEndpoint = (
-    query: {
-      apiKey: string;
-      url: string;
+    query?: {
+      apiKey?: string | null;
+      /** @format guid */
+      integrationId?: string | null;
+      url?: string | null;
     },
     params: RequestParams = {},
   ) =>
@@ -293,9 +295,11 @@ export class Integration {
    * @secure
    */
   testConnectionToSonarrEndpoint = (
-    query: {
-      apiKey: string;
-      url: string;
+    query?: {
+      apiKey?: string | null;
+      /** @format guid */
+      integrationId?: string | null;
+      url?: string | null;
     },
     params: RequestParams = {},
   ) =>
@@ -362,9 +366,11 @@ export class IntegrationPaths {
       url: `/api/Integration/Radarr/${integrationId}/Setup`,
     });
 
-  static testConnectionToRadarrEndpoint = (query: {
-    apiKey: string;
-    url: string;
+  static testConnectionToRadarrEndpoint = (query?: {
+    apiKey?: string | null;
+    /** @format guid */
+    integrationId?: string | null;
+    url?: string | null;
   }) =>
     queryString.stringifyUrl({
       url: `/api/Integration/Radarr/TestConnection`,
@@ -403,9 +409,11 @@ export class IntegrationPaths {
       url: `/api/Integration/Sonarr/${integrationId}/Setup`,
     });
 
-  static testConnectionToSonarrEndpoint = (query: {
-    apiKey: string;
-    url: string;
+  static testConnectionToSonarrEndpoint = (query?: {
+    apiKey?: string | null;
+    /** @format guid */
+    integrationId?: string | null;
+    url?: string | null;
   }) =>
     queryString.stringifyUrl({
       url: `/api/Integration/Sonarr/TestConnection`,

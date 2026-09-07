@@ -1,48 +1,21 @@
 <template>
 	<!-- Edit Account -->
-	<q-card
+	<OverviewCard
 		v-if="account"
+		mode="edit"
 		class="account-card"
-		:data-cy="`account-card-id-${account.id}`"
-		@click="$emit('open-dialog', account)">
-		<q-card-section v-if="!isNew">
-			{{ accountStore.getAccountDisplayName(account.id) }}
-		</q-card-section>
-		<q-card-section>
-			<!-- Validation Chip -->
-			<QGlowChip
-				v-if="account?.isValidated"
-				color="positive"
-				:value="$t('general.commands.validated')" />
-			<QGlowChip
-				v-else
-				color="negative"
-				:value="$t('general.commands.not-validated')" />
-			<!-- IsEnabled Chip -->
-			<QGlowChip
-				v-if="account?.isEnabled"
-				color="positive"
-				:value="$t('general.commands.enabled')" />
-			<QGlowChip
-				v-else
-				color="negative"
-				:value="$t('general.commands.disabled')" />
-		</q-card-section>
-	</q-card>
+		:cy="`account-card-id-${account.id}`"
+		icon="plex"
+		:title="accountStore.getAccountDisplayName(account.id)"
+		:chips="accountChips"
+		@click="$emit('open-dialog', account)" />
 	<!-- Add new account -->
-	<q-card
+	<OverviewCard
 		v-else-if="isNew"
+		mode="add"
 		class="account-card"
-		data-cy="account-overview-add-account"
-		@click="$emit('open-dialog', null)">
-		<q-card-section
-			v-if="isNew"
-			class="text-center">
-			<q-icon
-				name="mdi-plus-box-outline"
-				style="font-size: 90px" />
-		</q-card-section>
-	</q-card>
+		cy="account-overview-add-account"
+		@click="$emit('open-dialog', null)" />
 	<!-- Account was invalid -->
 	<q-card v-else>
 		<q-card-section>
@@ -65,17 +38,18 @@ const props = defineProps<{
 defineEmits<{ (e: 'open-dialog', account: PlexAccountDTO | null): void }>();
 
 const isNew = computed(() => !props.account);
+const accountChips = computed<Array<{ value: string; color: 'positive' | 'negative' }>>(() => {
+	if (!props.account) return [];
+
+	return [
+		{
+			value: props.account.isValidated ? t('general.commands.validated') : t('general.commands.not-validated'),
+			color: props.account.isValidated ? 'positive' : 'negative',
+		},
+		{
+			value: props.account.isEnabled ? t('general.commands.enabled') : t('general.commands.disabled'),
+			color: props.account.isEnabled ? 'positive' : 'negative',
+		},
+	];
+});
 </script>
-
-<style lang="scss">
-.account-card {
-	border: 2px solid red;
-	max-height: 124px;
-
-	&:hover {
-		box-shadow: 0 0 20px 3px red;
-		cursor: pointer;
-		transition: box-shadow 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
-	}
-}
-</style>

@@ -1,6 +1,6 @@
 import { route } from '@fixtures';
 import { IntegrationPaths } from '@api/generated/Integration';
-import { IntegrationProvisioningState, IntegrationType, type IntegrationSummary } from '@dto';
+import { IntegrationProvisioningState, IntegrationType, TestConnectionStatus, type IntegrationSummary } from '@dto';
 import { generateResultDTO } from '@mock';
 
 describe('Manage integrations', () => {
@@ -11,6 +11,7 @@ describe('Manage integrations', () => {
 		baseUrl: 'http://localhost:8989',
 		category: 'sonarr',
 		provisioningState: IntegrationProvisioningState.Configured,
+		lastConnectionTestStatus: TestConnectionStatus.Unknown,
 		downloadFolderId: null,
 		externalDownloadClientId: 1,
 		externalIndexerId: 2,
@@ -47,6 +48,7 @@ describe('Manage integrations', () => {
 				category: sonarr.category,
 				downloadFolderId: null,
 				provisioningState: sonarr.provisioningState,
+				lastConnectionTestStatus: TestConnectionStatus.Unknown,
 			}),
 		}).as('getSonarr');
 

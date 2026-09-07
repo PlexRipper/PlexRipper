@@ -17,21 +17,11 @@
 				cols="12"
 				sm="6"
 				md="3">
-				<QCard
-					flat
-					bordered
-					class="integration-add-card flex flex-center"
-					data-cy="add-integration"
-					role="button"
-					tabindex="0"
+				<OverviewCard
+					mode="add"
+					cy="add-integration"
 					:aria-label="$t('help.settings.integrations.choose-title')"
-					@click="openAdd"
-					@keydown.enter="openAdd"
-					@keydown.space.prevent="openAdd">
-					<QIcon
-						name="mdi-plus-box-outline"
-						style="font-size: 90px" />
-				</QCard>
+					@click="openAdd" />
 			</QCol>
 		</QRow>
 		<IntegrationDialog />
@@ -62,22 +52,3 @@ function openEdit(integration: IntegrationSummary): void {
 
 onMounted(refresh);
 </script>
-
-<style lang="scss">
-.integration-add-card {
-  border: 2px solid red;
-  max-height: 124px;
-  min-height: 124px;
-  transition: box-shadow 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
-
-  &:hover {
-    box-shadow: 0 0 20px 3px red;
-    cursor: pointer;
-  }
-
-  &:focus-visible {
-    outline: 2px solid white;
-    outline-offset: 3px;
-  }
-}
-</style>

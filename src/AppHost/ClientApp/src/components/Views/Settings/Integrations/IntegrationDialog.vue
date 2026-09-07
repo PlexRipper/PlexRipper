@@ -12,6 +12,7 @@
 				v-if="store.detail || stage === 2"
 				class="row items-center q-gutter-sm">
 				<QImg
+					no-spinner
 					:src="integrationLogo"
 					:alt="store.draft.type"
 					fit="contain"
@@ -24,26 +25,27 @@
 		<template #default>
 			<div
 				v-if="!store.detail && stage === 1"
-				class="row q-col-gutter-md">
+				class="row q-col-gutter-md q-pa-sm">
 				<div
-					v-for="type in types"
-					:key="type"
+					v-for="integrationType in integrationTypes"
+					:key="integrationType.type"
 					class="col-12 col-sm-6">
 					<QCard
 						flat
 						bordered
-						class="cursor-pointer"
-						:data-cy="`integration-type-${type.toLowerCase()}`"
-						@click="selectType(type)">
+						class="q-ma-md red-glow-hover"
+						:data-cy="`integration-type-${integrationType.type.toLowerCase()}`"
+						@click="selectType(integrationType.type)">
 						<QCardSection class="text-center">
 							<QImg
-								:src="type === IntegrationType.Radarr ? '/img/logo/radarr.png' : '/img/logo/sonarr.png'"
-								:alt="type"
+								no-spinner
+								:src="integrationType.icon"
+								:alt="integrationType.type"
 								fit="contain"
 								width="64px"
 								height="64px" />
 							<div class="text-h6 q-mt-sm">
-								{{ type }}
+								{{ integrationType.type }}
 							</div>
 						</QCardSection>
 					</QCard>
@@ -60,12 +62,17 @@
 					{{ formatError(store.error) }}
 				</QBanner>
 				<QBanner
-					v-if="store.testStatus"
+					v-if="store.testResult"
 					rounded
-					:class="store.testStatus === TestConnectionStatus.Success ? 'bg-positive text-white' : 'bg-negative text-white'">
-					{{
-						store.testStatus === TestConnectionStatus.Success ? $t('help.settings.integrations.test-success') : $t('help.settings.integrations.test-failed')
-					}}
+					:class="store.testResult.result === TestConnectionStatus.Success ? 'bg-positive text-white' : 'bg-negative text-white'">
+					<div>
+						{{
+							store.testResult.result === TestConnectionStatus.Success ? $t('help.settings.integrations.test-success') : $t('help.settings.integrations.test-failed')
+						}}
+					</div>
+					<div class="text-caption">
+						{{ formatTestDetails() }}
+					</div>
 				</QBanner>
 				<HelpRow
 					:label="integrationHelp.displayName.label"
@@ -184,11 +191,15 @@ const store = useIntegrationStore();
 const alertStore = useAlertStore();
 const dialogStore = useDialogStore();
 const folderPathStore = useFolderPathStore();
-const types = [IntegrationType.Sonarr, IntegrationType.Radarr];
+const integrationTypes = [
+	{ type: IntegrationType.Sonarr, icon: '/img/logo/sonarr.svg' },
+	{ type: IntegrationType.Radarr, icon: '/img/logo/radarr.svg' },
+] as const;
 const stage = ref(1);
 const requiredRules = [(value: string) => Boolean(value?.trim()) || 'Required'];
 const downloadFolders = computed(() => folderPathStore.folderPaths.filter((folderPath) => folderPath.folderType === FolderType.DownloadFolder));
-const integrationLogo = computed(() => store.draft.type === IntegrationType.Radarr ? '/img/logo/radarr.png' : '/img/logo/sonarr.png');
+const integrationLogo = computed(() => integrationTypes.find(({ type }) => type === store.draft.type)?.icon ?? '');
+
 const integrationTitle = computed(() => {
 	if (store.draft.type === IntegrationType.Radarr) {
 		return store.detail ? $t('help.settings.integrations.radarr.edit-title') : $t('help.settings.integrations.radarr.add-title');
@@ -259,7 +270,7 @@ const integrationHelp = computed(() => {
 watch(
 	() => [store.draft.url, store.draft.apiKey],
 	() => {
-		if (!store.isTesting) store.testStatus = null;
+		if (!store.isTesting) store.testResult = null;
 	},
 );
 
@@ -267,7 +278,9 @@ function open(event: unknown): void {
 	const integration = event as IntegrationSummary | null;
 	set(stage, integration ? 2 : 1);
 	if (integration) useSubscription(store.openEdit(integration).subscribe());
-	else store.openAdd();
+	else {
+		store.openAdd();
+	}
 }
 
 function selectType(type: IntegrationType): void {
@@ -279,13 +292,23 @@ function formatError(error: unknown): string {
 	return typeof error === 'string' ? error : $t('help.settings.integrations.test-failed');
 }
 
+function formatTestDetails(): string {
+	if (!store.testResult) return '';
+
+	return [
+		store.testResult.httpStatusCode ? `HTTP ${store.testResult.httpStatusCode}` : null,
+		store.testResult.errorMessage,
+		new Date(store.testResult.testedAt).toLocaleString(),
+	].filter(Boolean).join(' · ');
+}
+
 function test(): void {
 	useSubscription(store.test().subscribe((result) => {
 		if (!result || !result.isSuccess || result.value?.result !== TestConnectionStatus.Success) {
 			alertStore.showAlert({
 				id: 0,
 				title: $t('help.settings.integrations.test-failed-title'),
-				text: result?.errors?.map((error) => error.message).join('\n') || result?.value?.result || formatError(store.error),
+				text: result?.errors?.map((error) => error.message).join('\n') || result?.value?.errorMessage || result?.value?.result || formatError(store.error),
 			});
 		}
 	}));

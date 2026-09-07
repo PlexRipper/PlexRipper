@@ -574,6 +574,12 @@ export interface IntegrationSummary {
   externalIndexerId?: number | null;
   /** @format guid */
   id: string;
+  lastConnectionTestErrorMessage?: string | null;
+  /** @format int32 */
+  lastConnectionTestHttpStatusCode?: number | null;
+  lastConnectionTestStatus: TestConnectionStatus;
+  /** @format date-time */
+  lastConnectionTestedAt?: string | null;
   name: string;
   provisioningState: IntegrationProvisioningState;
   type: IntegrationType;
@@ -1269,6 +1275,12 @@ export interface RadarrIntegrationDTO {
   downloadFolderId?: number | null;
   /** @format guid */
   id: string;
+  lastConnectionTestErrorMessage?: string | null;
+  /** @format int32 */
+  lastConnectionTestHttpStatusCode?: number | null;
+  lastConnectionTestStatus: TestConnectionStatus;
+  /** @format date-time */
+  lastConnectionTestedAt?: string | null;
   name: string;
   provisioningState: IntegrationProvisioningState;
   url: string;
@@ -1824,6 +1836,12 @@ export interface SonarrIntegrationDTO {
   downloadFolderId?: number | null;
   /** @format guid */
   id: string;
+  lastConnectionTestErrorMessage?: string | null;
+  /** @format int32 */
+  lastConnectionTestHttpStatusCode?: number | null;
+  lastConnectionTestStatus: TestConnectionStatus;
+  /** @format date-time */
+  lastConnectionTestedAt?: string | null;
   name: string;
   provisioningState: IntegrationProvisioningState;
   url: string;
@@ -1854,11 +1872,21 @@ export enum TestConnectionStatus {
 }
 
 export interface TestConnectionToRadarrEndpointResponse {
+  errorMessage?: string | null;
+  /** @format int32 */
+  httpStatusCode?: number | null;
   result: TestConnectionStatus;
+  /** @format date-time */
+  testedAt: string;
 }
 
 export interface TestConnectionToSonarrEndpointResponse {
+  errorMessage?: string | null;
+  /** @format int32 */
+  httpStatusCode?: number | null;
   result: TestConnectionStatus;
+  /** @format date-time */
+  testedAt: string;
 }
 
 /** @example {"username":"ReaparrRocks","password":"R€Aℙℙ@rr69"} */

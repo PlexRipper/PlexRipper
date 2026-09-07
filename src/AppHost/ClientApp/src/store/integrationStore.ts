@@ -9,7 +9,8 @@ import { integrationApi } from '@api';
 import {
 	IntegrationProvisioningState,
 	IntegrationType,
-	type TestConnectionStatus,
+	type TestConnectionToRadarrEndpointResponse,
+	type TestConnectionToSonarrEndpointResponse,
 	type IntegrationSummary,
 	type RadarrIntegrationDTO,
 	type SonarrIntegrationDTO,
@@ -26,6 +27,7 @@ interface IIntegrationDraft {
 }
 
 type IntegrationDetail = (RadarrIntegrationDTO | SonarrIntegrationDTO) & { type: IntegrationType };
+type TestConnectionResult = TestConnectionToRadarrEndpointResponse | TestConnectionToSonarrEndpointResponse;
 
 interface IIntegrationStoreState {
 	items: IntegrationSummary[];
@@ -35,13 +37,13 @@ interface IIntegrationStoreState {
 	isSaving: boolean;
 	isSettingUp: boolean;
 	isDeleting: boolean;
-	testStatus: TestConnectionStatus | null;
+	testResult: TestConnectionResult | null;
 	error: unknown;
 	requiresSetupPrompt: boolean;
 }
 
 function emptyDraft(type = IntegrationType.Sonarr): IIntegrationDraft {
-	return { type, name: '', url: '', apiKey: '', category: '', downloadFolderId: null };
+	return { type, name: '', url: '', apiKey: '', category: `Reaparr ${type}`, downloadFolderId: 1 };
 }
 
 export const useIntegrationStore = defineStore(StoreNames.IntegrationStore, () => {
@@ -53,7 +55,7 @@ export const useIntegrationStore = defineStore(StoreNames.IntegrationStore, () =
 		isSaving: false,
 		isSettingUp: false,
 		isDeleting: false,
-		testStatus: null,
+		testResult: null,
 		error: null,
 		requiresSetupPrompt: false,
 	};
@@ -97,7 +99,7 @@ export const useIntegrationStore = defineStore(StoreNames.IntegrationStore, () =
 		},
 		test() {
 			state.isTesting = true;
-			state.testStatus = null;
+			state.testResult = null;
 			state.error = null;
 			const query = { apiKey: state.draft.apiKey, url: state.draft.url };
 			const request = state.draft.type === IntegrationType.Radarr
@@ -105,7 +107,7 @@ export const useIntegrationStore = defineStore(StoreNames.IntegrationStore, () =
 				: integrationApi.testConnectionToSonarrEndpoint(query);
 			return request.pipe(
 				tap((result) => {
-					if (result.isSuccess && result.value) state.testStatus = result.value.result;
+					if (result.isSuccess && result.value) state.testResult = result.value;
 					else state.error = result;
 				}),
 				catchError(handleError),
@@ -146,7 +148,9 @@ export const useIntegrationStore = defineStore(StoreNames.IntegrationStore, () =
 			state.error = null;
 			const request: Observable<{ isSuccess: boolean }> = (state.detail.type === IntegrationType.Radarr
 				? integrationApi.deleteRadarrIntegrationEndpoint(state.detail.id, { Force: force })
-				: integrationApi.deleteSonarrIntegrationEndpoint(state.detail.id, { Force: force })) as Observable<{ isSuccess: boolean }>;
+				: integrationApi.deleteSonarrIntegrationEndpoint(state.detail.id, { Force: force })) as Observable<{
+				isSuccess: boolean;
+			}>;
 			return request.pipe(
 				switchMap((result) => {
 					if (!result.isSuccess) {
@@ -173,7 +177,7 @@ export const useIntegrationStore = defineStore(StoreNames.IntegrationStore, () =
 
 	function resetOperationState(): void {
 		state.error = null;
-		state.testStatus = null;
+		state.testResult = null;
 		state.requiresSetupPrompt = false;
 	}
 
@@ -215,7 +219,10 @@ export const useIntegrationStore = defineStore(StoreNames.IntegrationStore, () =
 		};
 	}
 
-	function handleSaveResult(type: IntegrationType, result: { isSuccess: boolean; value?: RadarrIntegrationDTO | SonarrIntegrationDTO | null }): void {
+	function handleSaveResult(type: IntegrationType, result: {
+		isSuccess: boolean;
+		value?: RadarrIntegrationDTO | SonarrIntegrationDTO | null;
+	}): void {
 		if (result.isSuccess && result.value) {
 			setDetail(type, result.value);
 			state.requiresSetupPrompt = result.value.provisioningState !== IntegrationProvisioningState.Configured;

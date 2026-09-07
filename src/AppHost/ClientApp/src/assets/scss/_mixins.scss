@@ -117,6 +117,15 @@ body {
   box-shadow: variables.$box-shadow;
 }
 
+.red-glow-hover {
+  transition: box-shadow 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+
+  &:hover {
+    box-shadow: 0 0 20px 3px red !important;
+    cursor: pointer;
+  }
+}
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 // * Size
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *

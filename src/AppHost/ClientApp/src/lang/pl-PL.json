@@ -923,6 +923,10 @@
         "test-failed-title": "Test integracji nie powiódł się",
         "test-success": "Połączenie udane",
         "test-failed": "Połączenie nie powiodło się",
+        "connection-status": {
+          "connected": "Połączono",
+          "unconnected": "Nie połączono"
+        },
         "sonarr": {
           "add-title": "Dodaj integrację Sonarr",
           "edit-title": "Edytuj integrację Sonarr",

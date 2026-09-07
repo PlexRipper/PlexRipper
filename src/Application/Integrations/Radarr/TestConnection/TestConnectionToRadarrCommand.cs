@@ -29,17 +29,14 @@ public class TestConnectionToRadarrCommandValidator : AbstractValidator<TestConn
 public class TestConnectionToRadarrCommandHandler
     : ICommandHandler<TestConnectionToRadarrCommand, Result<TestConnectionResult>>
 {
-    private readonly ILogger _log;
     private readonly IReaparrDbContextFactory _dbContextFactory;
     private readonly IRadarrHttpClientFactory _radarrHttpClientFactory;
 
     public TestConnectionToRadarrCommandHandler(
-        ILogger log,
         IReaparrDbContextFactory dbContextFactory,
         IRadarrHttpClientFactory radarrHttpClientFactory
     )
     {
-        _log = log.ForContext<TestConnectionToRadarrCommandHandler>();
         _dbContextFactory = dbContextFactory;
         _radarrHttpClientFactory = radarrHttpClientFactory;
     }
@@ -87,37 +84,7 @@ public class TestConnectionToRadarrCommandHandler
             return clientResult.ToResult<TestConnectionResult>().LogError();
 
         using var client = clientResult.Value;
-        using var request = new HttpRequestMessage(HttpMethod.Get, "api/v3/system/status");
-        try
-        {
-            using var response = await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, ct);
-            var statusCode = (int)response.StatusCode;
-            if (response.IsSuccessStatusCode)
-                return Result.Ok(CreateResult(TestConnectionStatus.Success, statusCode, null));
-
-            var status = statusCode == StatusCodes.Status401Unauthorized
-                ? TestConnectionStatus.InvalidApiKey
-                : TestConnectionStatus.ConnectionFailed;
-            var error = response.ReasonPhrase ?? $"HTTP {statusCode}";
-            _log.Here().Warning("Radarr connection test failed: {Reason}", error);
-            return Result.Ok(CreateResult(status, statusCode, error));
-        }
-        catch (OperationCanceledException) when (ct.IsCancellationRequested)
-        {
-            return ResultExtensions.TaskIsCancelled(nameof(TestConnectionToRadarrCommand))
-                .ToResult<TestConnectionResult>()
-                .LogWarning();
-        }
-        catch (TaskCanceledException exception)
-        {
-            _log.Here().Warning(exception, "Radarr connection test timed out");
-            return Result.Ok(CreateResult(TestConnectionStatus.ConnectionFailed, null, "Connection timed out."));
-        }
-        catch (HttpRequestException exception)
-        {
-            _log.Here().Warning(exception, "Radarr connection test failed");
-            return Result.Ok(CreateResult(TestConnectionStatus.ConnectionFailed, null, "Connection failed."));
-        }
+        return await client.TestRadarrConnectionAsync(ct);
     }
 
     private static bool IsHttp(Uri uri) => uri.Scheme == Uri.UriSchemeHttp || uri.Scheme == Uri.UriSchemeHttps;

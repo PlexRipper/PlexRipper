@@ -5,7 +5,6 @@ public record RadarrApiUpdateIndexerCommand : ICommand<Result<RadarrIndexerResou
     public required Guid IntegrationId { get; init; }
     public required int Id { get; init; }
     public required bool ForceSave { get; init; }
-
     public required RadarrIndexerContractDTO Resource { get; init; }
 }
 
@@ -21,12 +20,10 @@ public class RadarrApiUpdateIndexerCommandValidator : Validator<RadarrApiUpdateI
 public class RadarrApiUpdateIndexerCommandHandler
     : ICommandHandler<RadarrApiUpdateIndexerCommand, Result<RadarrIndexerResourceDTO>>
 {
-    private readonly ILogger _log;
     private readonly IRadarrHttpClientFactory _radarrHttpClientFactory;
 
-    public RadarrApiUpdateIndexerCommandHandler(ILogger logger, IRadarrHttpClientFactory radarrHttpClientFactory)
+    public RadarrApiUpdateIndexerCommandHandler(IRadarrHttpClientFactory radarrHttpClientFactory)
     {
-        _log = logger.ForContext<RadarrApiUpdateIndexerCommandHandler>();
         _radarrHttpClientFactory = radarrHttpClientFactory;
     }
 
@@ -35,44 +32,16 @@ public class RadarrApiUpdateIndexerCommandHandler
         CancellationToken cancellationToken
     )
     {
-        try
-        {
-            var forceSave = command.ForceSave ? "true" : "false";
-            var requestUri = new Uri($"/api/v3/indexer/{command.Id}?forceSave={forceSave}", UriKind.Relative);
-            var json = JsonSerializer.Serialize(command.Resource, DefaultJsonSerializerOptions.ConfigStandard);
+        var clientResult = await _radarrHttpClientFactory.CreateAsync(command.IntegrationId);
+        if (clientResult.IsFailed)
+            return clientResult.ToResult<RadarrIndexerResourceDTO>();
 
-            _log.Here().Debug("Updating Radarr indexer with name {IndexerName}", command.Resource.Name);
-            _log.Here().Debug("Request URI: {RequestUri}, Payload: {Payload}", requestUri, json);
-
-            using var httpRequest = new HttpRequestMessage(HttpMethod.Put, requestUri);
-            httpRequest.Content = json.ToStringContent();
-
-            var clientResult = await _radarrHttpClientFactory.CreateAsync(command.IntegrationId);
-            if (clientResult.IsFailed)
-                return clientResult.ToResult<RadarrIndexerResourceDTO>();
-
-            using var client = clientResult.Value;
-
-            var response = await client.SendAsync(httpRequest, cancellationToken);
-            var body = await response.Content.ReadAsStringAsync(cancellationToken);
-            if (!response.IsSuccessStatusCode)
-            {
-                return Result
-                    .Fail($"Failed to update indexer in Radarr. StatusCode: {response.StatusCode}")
-                    .WithError(body)
-                    .LogError();
-            }
-
-            var updated = JsonSerializer.Deserialize<RadarrIndexerResourceDTO>(
-                body,
-                DefaultJsonSerializerOptions.ConfigStandard
-            );
-
-            return Result.Ok(updated ?? new RadarrIndexerResourceDTO());
-        }
-        catch (Exception e)
-        {
-            return Result.Fail(new ExceptionalError(e)).LogError();
-        }
+        using var client = clientResult.Value;
+        return await client.UpdateRadarrIndexerAsync(
+            command.Id,
+            command.ForceSave,
+            command.Resource,
+            cancellationToken
+        );
     }
 }

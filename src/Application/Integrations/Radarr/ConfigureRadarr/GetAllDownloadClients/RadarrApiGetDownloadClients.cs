@@ -18,38 +18,11 @@ public class RadarrApiGetDownloadClientsCommandHandler
         CancellationToken cancellationToken
     )
     {
-        try
-        {
-            using var httpRequest = new HttpRequestMessage(
-                HttpMethod.Get,
-                new Uri("/api/v3/downloadclient", UriKind.Relative)
-            );
-            var clientResult = await _radarrHttpClientFactory.CreateAsync(command.IntegrationId);
-            if (clientResult.IsFailed)
-                return clientResult.ToResult<List<RadarrDownloadClientResourceDTO>>();
+        var clientResult = await _radarrHttpClientFactory.CreateAsync(command.IntegrationId);
+        if (clientResult.IsFailed)
+            return clientResult.ToResult<List<RadarrDownloadClientResourceDTO>>();
 
-            using var client = clientResult.Value;
-
-            var response = await client.SendAsync(httpRequest, cancellationToken);
-            var body = await response.Content.ReadAsStringAsync(cancellationToken);
-
-            if (!response.IsSuccessStatusCode)
-            {
-                return Result
-                    .Fail($"Failed to get download clients from Radarr. StatusCode: {response.StatusCode}")
-                    .WithError(body)
-                    .LogError();
-            }
-
-            var list = JsonSerializer.Deserialize<List<RadarrDownloadClientResourceDTO>>(
-                body,
-                DefaultJsonSerializerOptions.ConfigStandard
-            );
-            return Result.Ok(list ?? []);
-        }
-        catch (Exception e)
-        {
-            return Result.Fail(new ExceptionalError(e)).LogError();
-        }
+        using var client = clientResult.Value;
+        return await client.GetRadarrDownloadClientsAsync(cancellationToken);
     }
 }

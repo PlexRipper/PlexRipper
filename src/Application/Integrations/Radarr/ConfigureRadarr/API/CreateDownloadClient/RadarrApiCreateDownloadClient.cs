@@ -9,12 +9,10 @@ public record RadarrApiCreateDownloadClientCommand : ICommand<Result<RadarrDownl
 public class RadarrApiCreateDownloadClientCommandHandler
     : ICommandHandler<RadarrApiCreateDownloadClientCommand, Result<RadarrDownloadClientResourceDTO>>
 {
-    private readonly ILogger _log;
     private readonly IRadarrHttpClientFactory _radarrHttpClientFactory;
 
-    public RadarrApiCreateDownloadClientCommandHandler(ILogger logger, IRadarrHttpClientFactory radarrHttpClientFactory)
+    public RadarrApiCreateDownloadClientCommandHandler(IRadarrHttpClientFactory radarrHttpClientFactory)
     {
-        _log = logger.ForContext<RadarrApiCreateDownloadClientCommandHandler>();
         _radarrHttpClientFactory = radarrHttpClientFactory;
     }
 
@@ -23,42 +21,11 @@ public class RadarrApiCreateDownloadClientCommandHandler
         CancellationToken cancellationToken
     )
     {
-        try
-        {
-            var requestUri = new Uri($"/api/v3/downloadclient", UriKind.Relative);
-            var json = JsonSerializer.Serialize(command.Resource, DefaultJsonSerializerOptions.ConfigStandard);
-            _log.Here().Debug("Creating Radarr download client with name {DownloadClientName}", command.Resource.Name);
-            _log.Here().Debug("Request URI: {RequestUri}, Payload: {Payload}", requestUri, json);
+        var clientResult = await _radarrHttpClientFactory.CreateAsync(command.IntegrationId);
+        if (clientResult.IsFailed)
+            return clientResult.ToResult<RadarrDownloadClientResourceDTO>();
 
-            using var httpRequest = new HttpRequestMessage(HttpMethod.Post, requestUri);
-            httpRequest.Content = json.ToStringContent();
-
-            var clientResult = await _radarrHttpClientFactory.CreateAsync(command.IntegrationId);
-            if (clientResult.IsFailed)
-                return clientResult.ToResult<RadarrDownloadClientResourceDTO>();
-
-            using var client = clientResult.Value;
-
-            var response = await client.SendAsync(httpRequest, cancellationToken);
-            var body = await response.Content.ReadAsStringAsync(cancellationToken);
-            if (!response.IsSuccessStatusCode)
-            {
-                return Result
-                    .Fail($"Failed to create download client in Radarr. StatusCode: {response.StatusCode}")
-                    .WithError(body)
-                    .LogError();
-            }
-
-            var created = JsonSerializer.Deserialize<RadarrDownloadClientResourceDTO>(
-                body,
-                DefaultJsonSerializerOptions.ConfigStandard
-            );
-
-            return Result.Ok(created ?? new RadarrDownloadClientResourceDTO());
-        }
-        catch (Exception e)
-        {
-            return Result.Fail(new ExceptionalError(e)).LogError();
-        }
+        using var client = clientResult.Value;
+        return await client.CreateRadarrDownloadClientAsync(command.Resource, cancellationToken);
     }
 }

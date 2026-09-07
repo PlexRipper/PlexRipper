@@ -4,19 +4,16 @@ public record SonarrApiCreateDownloadClientCommand : ICommand<Result<SonarrDownl
 {
     public required Guid IntegrationId { get; init; }
     public required bool ForceSave { get; init; }
-
     public required SonarrDownloadContractDTO Resource { get; init; }
 }
 
 public class SonarApiCreateDownloadClientCommandHandler
     : ICommandHandler<SonarrApiCreateDownloadClientCommand, Result<SonarrDownloadContractDTO>>
 {
-    private readonly ILogger _log;
     private readonly ISonarrHttpClientFactory _sonarrHttpClientFactory;
 
-    public SonarApiCreateDownloadClientCommandHandler(ILogger logger, ISonarrHttpClientFactory sonarrHttpClientFactory)
+    public SonarApiCreateDownloadClientCommandHandler(ISonarrHttpClientFactory sonarrHttpClientFactory)
     {
-        _log = logger.ForContext<SonarApiCreateDownloadClientCommandHandler>();
         _sonarrHttpClientFactory = sonarrHttpClientFactory;
     }
 
@@ -25,43 +22,11 @@ public class SonarApiCreateDownloadClientCommandHandler
         CancellationToken cancellationToken
     )
     {
-        try
-        {
-            var forceSave = command.ForceSave ? "true" : "false";
-            var requestUri = new Uri($"/api/v3/downloadclient?forceSave={forceSave}", UriKind.Relative);
-            var json = JsonSerializer.Serialize(command.Resource, DefaultJsonSerializerOptions.ConfigStandard);
+        var clientResult = await _sonarrHttpClientFactory.CreateAsync(command.IntegrationId);
+        if (clientResult.IsFailed)
+            return clientResult.ToResult<SonarrDownloadContractDTO>();
 
-            _log.Here().Debug("Creating Sonarr download client with name {DownloadClientName}", command.Resource.Name);
-            _log.Here().Debug("Request URI: {RequestUri}", requestUri);
-
-            using var httpRequest = new HttpRequestMessage(HttpMethod.Post, requestUri);
-            httpRequest.Content = json.ToStringContent();
-
-            var clientResult = await _sonarrHttpClientFactory.CreateAsync(command.IntegrationId);
-            if (clientResult.IsFailed)
-                return clientResult.ToResult<SonarrDownloadContractDTO>();
-
-            using var client = clientResult.Value;
-            var response = await client.SendAsync(httpRequest, cancellationToken);
-            var body = await response.Content.ReadAsStringAsync(cancellationToken);
-            if (!response.IsSuccessStatusCode)
-            {
-                return Result
-                    .Fail($"Failed to create download client in Sonarr. StatusCode: {response.StatusCode}")
-                    .WithError(body)
-                    .LogError();
-            }
-
-            var created = JsonSerializer.Deserialize<SonarrDownloadContractDTO>(
-                body,
-                DefaultJsonSerializerOptions.ConfigStandard
-            );
-
-            return Result.Ok(created ?? new SonarrDownloadContractDTO());
-        }
-        catch (Exception e)
-        {
-            return Result.Fail(new ExceptionalError(e)).LogError();
-        }
+        using var client = clientResult.Value;
+        return await client.CreateSonarrDownloadClientAsync(command.ForceSave, command.Resource, cancellationToken);
     }
 }

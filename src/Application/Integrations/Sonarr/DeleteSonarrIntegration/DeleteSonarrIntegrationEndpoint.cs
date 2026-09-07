@@ -1,5 +1,3 @@
-using System.Net;
-
 namespace Reaparr.Application;
 
 public record DeleteSonarrIntegrationRequest
@@ -51,7 +49,11 @@ public class DeleteSonarrIntegrationEndpoint : Endpoint<DeleteSonarrIntegrationR
         if (clientResult.IsSuccess)
         {
             using var client = clientResult.Value;
-            var cleanupResult = await DeleteRemoteResources(client, integration, ct);
+            var cleanupResult = await client.DeleteSonarrResourcesAsync(
+                integration.ExternalIndexerId,
+                integration.ExternalDownloadClientId,
+                ct
+            );
             if (cleanupResult.IsFailed && !req.Force)
             {
                 await Send.FluentResult(cleanupResult, ct);
@@ -62,32 +64,5 @@ public class DeleteSonarrIntegrationEndpoint : Endpoint<DeleteSonarrIntegrationR
         _dbContext.SonarrIntegrations.Remove(integration);
         await _dbContext.SaveChangesAsync(ct);
         await Send.NoContentAsync(ct);
-    }
-
-    private static async Task<Result> DeleteRemoteResources(
-        HttpClient client,
-        SonarrIntegration integration,
-        CancellationToken ct
-    )
-    {
-        foreach (
-            var resource in new[]
-            {
-                (Name: "indexer", Id: integration.ExternalIndexerId),
-                (Name: "downloadclient", Id: integration.ExternalDownloadClientId),
-            }
-        )
-        {
-            if (resource.Id is null)
-                continue;
-
-            using var response = await client.DeleteAsync($"api/v3/{resource.Name}/{resource.Id.Value}", ct);
-            if (!response.IsSuccessStatusCode && response.StatusCode != HttpStatusCode.NotFound)
-                return Result.Fail(
-                    $"Failed to delete Sonarr {resource.Name} {resource.Id.Value}: {response.StatusCode}."
-                );
-        }
-
-        return Result.Ok();
     }
 }

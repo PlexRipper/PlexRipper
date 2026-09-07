@@ -29,17 +29,14 @@ public class TestConnectionToSonarrCommandValidator : AbstractValidator<TestConn
 public class TestConnectionToSonarrCommandHandler
     : ICommandHandler<TestConnectionToSonarrCommand, Result<TestConnectionResult>>
 {
-    private readonly ILogger _log;
     private readonly IReaparrDbContextFactory _dbContextFactory;
     private readonly ISonarrHttpClientFactory _sonarrHttpClientFactory;
 
     public TestConnectionToSonarrCommandHandler(
-        ILogger log,
         IReaparrDbContextFactory dbContextFactory,
         ISonarrHttpClientFactory sonarrHttpClientFactory
     )
     {
-        _log = log.ForContext<TestConnectionToSonarrCommandHandler>();
         _dbContextFactory = dbContextFactory;
         _sonarrHttpClientFactory = sonarrHttpClientFactory;
     }
@@ -87,37 +84,7 @@ public class TestConnectionToSonarrCommandHandler
             return clientResult.ToResult<TestConnectionResult>().LogError();
 
         using var client = clientResult.Value;
-        using var request = new HttpRequestMessage(HttpMethod.Get, "api/v3/system/status");
-        try
-        {
-            using var response = await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, ct);
-            var statusCode = (int)response.StatusCode;
-            if (response.IsSuccessStatusCode)
-                return Result.Ok(CreateResult(TestConnectionStatus.Success, statusCode, null));
-
-            var status = statusCode == StatusCodes.Status401Unauthorized
-                ? TestConnectionStatus.InvalidApiKey
-                : TestConnectionStatus.ConnectionFailed;
-            var error = response.ReasonPhrase ?? $"HTTP {statusCode}";
-            _log.Here().Warning("Sonarr connection test failed: {Reason}", error);
-            return Result.Ok(CreateResult(status, statusCode, error));
-        }
-        catch (OperationCanceledException) when (ct.IsCancellationRequested)
-        {
-            return ResultExtensions.TaskIsCancelled(nameof(TestConnectionToSonarrCommand))
-                .ToResult<TestConnectionResult>()
-                .LogWarning();
-        }
-        catch (TaskCanceledException exception)
-        {
-            _log.Here().Warning(exception, "Sonarr connection test timed out");
-            return Result.Ok(CreateResult(TestConnectionStatus.ConnectionFailed, null, "Connection timed out."));
-        }
-        catch (HttpRequestException exception)
-        {
-            _log.Here().Warning(exception, "Sonarr connection test failed");
-            return Result.Ok(CreateResult(TestConnectionStatus.ConnectionFailed, null, "Connection failed."));
-        }
+        return await client.TestSonarrConnectionAsync(ct);
     }
 
     private static bool IsHttp(Uri uri) => uri.Scheme == Uri.UriSchemeHttp || uri.Scheme == Uri.UriSchemeHttps;

@@ -17,38 +17,12 @@ public class SonarApiGetDownloadClientsCommandHandler
         CancellationToken cancellationToken
     )
     {
-        try
-        {
-            using var httpRequest = new HttpRequestMessage(
-                HttpMethod.Get,
-                new Uri("/api/v3/downloadclient", UriKind.Relative)
-            );
-            var clientResult = await _sonarrHttpClientFactory.CreateAsync(command.IntegrationId);
-            if (clientResult.IsFailed)
-                return clientResult.ToResult<List<DownloadClientResourceDTO>>();
+        var clientResult = await _sonarrHttpClientFactory.CreateAsync(command.IntegrationId);
+        if (clientResult.IsFailed)
+            return clientResult.ToResult<List<DownloadClientResourceDTO>>();
 
-            using var client = clientResult.Value;
-            var response = await client.SendAsync(httpRequest, cancellationToken);
-            var body = await response.Content.ReadAsStringAsync(cancellationToken);
-
-            if (!response.IsSuccessStatusCode)
-            {
-                return Result
-                    .Fail($"Failed to get download clients from Sonarr. StatusCode: {response.StatusCode}")
-                    .WithError(body)
-                    .LogError();
-            }
-
-            var list = JsonSerializer.Deserialize<List<DownloadClientResourceDTO>>(
-                body,
-                DefaultJsonSerializerOptions.ConfigStandard
-            );
-            return Result.Ok(list ?? []);
-        }
-        catch (Exception e)
-        {
-            return Result.Fail(new ExceptionalError(e)).LogError();
-        }
+        using var client = clientResult.Value;
+        return await client.GetSonarrDownloadClientsAsync(cancellationToken);
     }
 }
 

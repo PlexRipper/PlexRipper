@@ -1,5 +1,32 @@
 Reaparr Changelog
 
+# [0.40.0-dev.1](https://github.com/Reaparr/Reaparr/compare/v0.39.0...v0.40.0-dev.1) (2026-09-08)
+
+
+### Bug Fixes
+
+* **WebAPI:** Exclude servers with paused downloads from indexer results ([#653](https://github.com/Reaparr/Reaparr/issues/653)) ([410fec0](https://github.com/Reaparr/Reaparr/commit/410fec098623e0dce06b9fe48efa475322270a32))
+* **WebAPI:** Exclude servers with paused downloads from indexer results ([9b007a5](https://github.com/Reaparr/Reaparr/commit/9b007a537efd5270cc578180150f482f8d9faa5b))
+* **Web-UI:** Fixed missing strikethrough effect on Plex servers whose access has been lost ([fa36cc4](https://github.com/Reaparr/Reaparr/commit/fa36cc47409fba8f84e2ad828e376a26321de7df))
+
+
+### Features
+
+* **WebAPI:** Add auto migration for Sonarr/Radarr new api key system ([02d46ca](https://github.com/Reaparr/Reaparr/commit/02d46cab30bcbdf62b23e6361668a3174cb266f1))
+* **Web-UI:** Add connection status indicators for integrations cards ([b1bd4c2](https://github.com/Reaparr/Reaparr/commit/b1bd4c21011ecddceed62455cf1600e8abc9cfa5))
+* **WebAPI:** Add connection test functionality for Radarr and Sonarr integrations on Reaparr start-up ([1ae10ab](https://github.com/Reaparr/Reaparr/commit/1ae10abb9f97e37aa58d2af2e1ced38e1668a77b))
+* **Web-UI:** Add delete integration confirmation dialog ([5fc05f6](https://github.com/Reaparr/Reaparr/commit/5fc05f62d9a9ab6c4d6a23516aac1384e277ba95))
+* **WebAPI:** Add multi-integration support for Radarr and Sonarr ([4663459](https://github.com/Reaparr/Reaparr/commit/466345962b1ba724129b2f3d0932dfa41c5b4ff1))
+* **Web-UI:** Add validation step to integration setup process ([c66f860](https://github.com/Reaparr/Reaparr/commit/c66f860480dd1a0fe4d6f77bad2b490a30b72018))
+* **Web-UI:** Enhance folder path management with new tab UI elements and allow adding custom download paths ([4c18be7](https://github.com/Reaparr/Reaparr/commit/4c18be78e761e41d1af094064af2156b9280543b))
+* **Web-UI:** Implement integration management UI with overview and setup dialogs ([1f72f65](https://github.com/Reaparr/Reaparr/commit/1f72f65192c1b9c7844903b66d3f2311cf725bab))
+* **WebAPI:** Implement integration setup progress tracking for Radarr and Sonarr ([c3cc659](https://github.com/Reaparr/Reaparr/commit/c3cc659bf5e11b6ff61b347af2f19566dff378a4))
+
+
+### Performance Improvements
+
+* **WebAPI:** Enhance comparison logic for TV shows, seasons, and episodes ([4f5d467](https://github.com/Reaparr/Reaparr/commit/4f5d4671111f1f5f64b09d976eb8ec566afb2f0d))
+
 # [0.39.0](https://github.com/Reaparr/Reaparr/compare/v0.38.3...v0.39.0) (2026-08-26)
 
 

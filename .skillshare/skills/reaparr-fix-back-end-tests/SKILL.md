@@ -29,30 +29,33 @@ Use **dotnet-test-mcp** to discover and run tests. Do not rely on Rider's `rider
 
 Test execution is for obtaining a failure inventory and validating a specific fix; it is **not** a substitute for diagnosis.
 
-- If the user has already supplied failure output, or a prior run in the current conversation returned failing tests, use that inventory directly. **Do not rerun broad test projects just to rediscover it.**
+- Start each unconstrained backend-test task with one complete suite run using `dotnet-test-mcp_run_all_tests` unless the user explicitly confirms that a complete current baseline already ran or narrows the scope. A supplied failure list supplements the baseline; it does not replace it.
+- Treat the complete-suite result as the baseline failure inventory: record every failure, then group and fix a coherent batch rather than chasing symptoms one at a time.
+- After each logical fix batch, run only the tests/classes just fixed. Once that focused scope passes, rerun the complete backend suite before selecting the next failure batch. Repeat until the complete suite is clean.
 - Never run test projects concurrently. .NET builds write shared `bin/` and `obj/` outputs in this repository; parallel runs can cause file-lock errors and missing-artifact failures that are infrastructure noise, not product-test failures.
 - Run at most one test command at a time. Do not launch another until its result has returned or it has timed out.
-- A timed-out run has no pass/fail value. Do not repeatedly rerun the same broad project. Enumerate that project’s test classes with Rider, then run every class sequentially. Record class-level coverage; never translate a timeout into a project pass.
+- A timed-out complete or project run has no pass/fail value. Do not repeatedly rerun the same timed-out scope. Enumerate that project’s test classes with Rider, then run every class sequentially to obtain verifiable coverage; resume the focused-fix/full-suite loop when the broad scope can complete. Never translate a timeout into a pass.
 - Treat dotnet-test-mcp `Outcome`, `TestCount`, and explicit failure details as authoritative. Its `Passed` counter may be inconsistent with `TestCount`; do not invent totals from inconsistent fields.
-- Do not run unrelated projects after a failure is known. First inspect and fix the known failure. Only run the affected class/project as validation after editing.
+- After a failure inventory is known, diagnose and fix the current batch before running ad hoc unrelated scopes. The planned complete-suite rerun is allowed only after the focused fixed tests pass.
 - Do not edit production or shared-test infrastructure while merely trying to expose more exception text. Read the relevant test, implementation, and registrations first. Diagnostic-only edits must be reverted before any fix is proposed.
 
-From `/mnt/PROJECTS/Reaparr`, only when no usable failure inventory already exists:
+From `/mnt/PROJECTS/Reaparr`, for the initial baseline and every planned full-suite rerun unless the user explicitly narrows the scope:
 
 1. Discover the scope:
    - `dotnet-test-mcp_list_test_projects`
    - `dotnet-test-mcp_list_tests_summary`
 2. Run the entire solution once:
    - `dotnet-test-mcp_run_all_tests` with `workingDirectory: "/mnt/PROJECTS/Reaparr"` and `includeStackTrace: true`.
-3. If it times out, run test projects **sequentially**, stopping once a project reports failures and recording all returned failure details before doing any edit.
+3. Record the complete result as the current failure inventory. After focused fixes pass, repeat this same unfiltered run to find regressions and the next batch.
+4. If a complete run times out, treat it as unverified. Run its test projects sequentially, then enumerate and run every class in each timed-out project before claiming coverage; do not use repeated broad retries as diagnosis.
 
-Include integration-test projects in the failure inventory and final verification. A test-project run that times out does **not** establish that its tests passed; narrow the scope to classes or individual failures, or obtain the runner output through supported MCP tooling.
+Include integration-test projects in every baseline and final verification cycle. A test-project run that times out does **not** establish that its tests passed; narrow the scope to classes or individual failures, or obtain the runner output through supported MCP tooling.
 
 ## Workflow
 
 ### 1. Capture the Failure Inventory
 
-- Use the existing failure output if it is available; do not discard it and rerun broad suites.
+- Keep any supplied or previously captured failure output as evidence, but establish a complete current baseline unless the user explicitly confirms one already ran or narrows the scope.
 - Record every failing test with its project, fully qualified name, assertion/exception, and stack trace in the working notes before editing.
 - Group failures by common test fixture, production class, fake-data configuration, shared database utility, or other likely common root cause.
 - Do not modify code until the complete failure inventory is understood, unless a single obvious common root cause prevents all useful execution.
@@ -97,17 +100,17 @@ For each failure group:
 
 ### 4. Validate Iteratively
 
-After each logical fix:
+After each logical fix batch:
 
-1. Run the affected failing test class or test with dotnet-test-mcp where supported.
+1. Run only the affected failing test(s) or class(es) with dotnet-test-mcp where supported.
 2. For asynchronous jobs, prove completion through the contract’s observable terminal signal (for example, a terminal patch/result), then query persistence through a newly resolved DbContext. Scheduler idleness alone does not prove all queued status persistence completed, and a long-lived EF context may return a stale tracked entity.
-3. If the focused scope passes, run the complete affected unit-test or integration-test project — sequentially and only after the focused run completes.
+3. Once the focused scope passes, rerun the complete unfiltered backend suite — sequentially through the supported MCP runner — before selecting the next failure batch. A focused pass is not an overall pass.
 4. Check every edited code file with Rider `get_file_problems`.
 5. Run Rider `build_solution` after compilation-affecting changes. A shell build is not a substitute.
 
-When no failures remain in affected projects:
+When no failures remain:
 
-1. Run every backend unit-test and integration-test project sequentially, or run the entire solution once if it completes within the MCP timeout.
+1. Require a final unfiltered complete backend suite run after the last fix. If it cannot complete, enumerate and pass every class in each timed-out project before claiming coverage.
 2. Report precise outcomes: test/project counts, passed/failed counts, and any test runs not verifiably completed.
 3. Use Rider MCP to inspect local VCS changes and report the exact files changed.
 

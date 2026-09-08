@@ -107,6 +107,46 @@ public class SetupSonarrDownloadClientCommandUnitTests : BaseUnitTest<SetupSonar
     }
 
     [Test]
+    public async Task ShouldCompleteConnecting_WhenGetDownloadClientsThrowsHttpRequestException()
+    {
+        // Arrange
+        var integration = await SetupIntegrationAsync();
+        Mock.SetupCommand(It.IsAny<SonarApiGetDownloadClientsCommand>)
+            .ThrowsAsync(new HttpRequestException("Sonarr unreachable"))
+            .Verifiable(Times.Once);
+
+        var sut = CreateSut(ValidNetworkSettings());
+        Mock.Mock<IProgressHubService>()
+            .Setup(x => x.SendIntegrationSetupProgressAsync(It.IsAny<IntegrationSetupProgressDTO>()))
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.Exactly(2));
+
+        // Act
+        var result = await sut.ExecuteAsync(
+            new SetupSonarrDownloadClientCommand { IntegrationId = integration.Id },
+            CancellationToken
+        );
+
+        // Assert
+        result.IsFailed.ShouldBeTrue();
+        Mock.Mock<IProgressHubService>()
+            .Verify(
+                x =>
+                    x.SendIntegrationSetupProgressAsync(
+                        It.Is<IntegrationSetupProgressDTO>(progress =>
+                            progress.IntegrationId == integration.Id
+                            && progress.Stage == IntegrationSetupProgressStage.Connecting
+                            && !progress.IsRunning
+                            && !progress.IsSuccess
+                        )
+                    ),
+                Times.Once()
+            );
+        Mock.Mock<ICommandExecutor>().Verify();
+        Mock.Mock<IProgressHubService>().Verify();
+    }
+
+    [Test]
     public async Task ShouldCreateDownloadClient_WhenNoneExists()
     {
         // Arrange

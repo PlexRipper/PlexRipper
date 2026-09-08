@@ -16,6 +16,13 @@ public partial class BaseUnitTest
             .ExecuteUpdateAsync(x => x.SetProperty(y => y.UpdatedAt, updatedAt), CancellationToken);
     }
 
+    protected async Task SetLibraryContentChangedAtAsync(int plexLibraryId, long contentChangedAt)
+    {
+        await IDbContext
+            .PlexLibraries.Where(x => x.Id == plexLibraryId)
+            .ExecuteUpdateAsync(x => x.SetProperty(y => y.ContentChangedAt, contentChangedAt), CancellationToken);
+    }
+
     protected async Task<PlexLibrary> GetLibraryAsync(int plexLibraryId) =>
         await IDbContext.PlexLibraries.Where(x => x.Id == plexLibraryId).SingleAsync(CancellationToken);
 
@@ -71,7 +78,9 @@ public partial class BaseUnitTest
             OwnedPlexMediaId = ownedPlexMediaId,
             HitState = hitState,
             RemoteQuality = VideoQuality.FullHD,
-            OwnedQuality = ownedQuality ?? (hitState == PlexMediaComparisonHitState.HigherQuality ? VideoQuality.HD : VideoQuality.FullHD),
+            OwnedQuality =
+                ownedQuality
+                ?? (hitState == PlexMediaComparisonHitState.HigherQuality ? VideoQuality.HD : VideoQuality.FullHD),
             MatchType = PlexMediaComparisonMatchType.TmdbGuid,
             ComparedAt = DateTime.UtcNow,
         };

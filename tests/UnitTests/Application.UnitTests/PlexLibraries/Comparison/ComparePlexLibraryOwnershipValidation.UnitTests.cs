@@ -414,12 +414,12 @@ public class CompareMoviePlexLibraryCommandOwnershipUnitTests : BaseCommandUnitT
         var libraries = await dbContext.PlexLibraries.OrderBy(x => x.Id).ToListAsync(CancellationToken);
         var remoteLibrary = libraries[0];
         var ownedLibrary = libraries[1];
-        var remoteUpdatedAt = new DateTime(2026, 7, 21, 17, 24, 15, DateTimeKind.Utc);
-        var ownedUpdatedAt = new DateTime(2026, 7, 21, 14, 8, 33, DateTimeKind.Utc);
+        const long remoteContentChangedAt = 1721582655L;
+        const long ownedContentChangedAt = 1721570913L;
         await SetOwnedOverrideAsync(remoteLibrary.PlexServerId, false);
         await SetOwnedOverrideAsync(ownedLibrary.PlexServerId, true);
-        await SetLibraryUpdatedAtAsync(remoteLibrary.Id, remoteUpdatedAt);
-        await SetLibraryUpdatedAtAsync(ownedLibrary.Id, ownedUpdatedAt);
+        await SetLibraryContentChangedAtAsync(remoteLibrary.Id, remoteContentChangedAt);
+        await SetLibraryContentChangedAtAsync(ownedLibrary.Id, ownedContentChangedAt);
         dbContext.PlexComparisonScopes.Add(
             new PlexComparisonState
             {
@@ -480,7 +480,6 @@ public class CompareMoviePlexLibraryCommandOwnershipUnitTests : BaseCommandUnitT
                 CancellationToken
             );
     }
-
 }
 
 public class CompareTvShowPlexLibraryCommandOwnershipUnitTests : BaseCommandUnitTest<CompareTvShowPlexLibraryCommand>
@@ -1007,12 +1006,12 @@ public class CompareTvShowPlexLibraryCommandOwnershipUnitTests : BaseCommandUnit
         var libraries = await dbContext.PlexLibraries.OrderBy(x => x.Id).ToListAsync(CancellationToken);
         var remoteLibrary = libraries[0];
         var ownedLibrary = libraries[1];
-        var remoteUpdatedAt = new DateTime(2026, 7, 21, 17, 24, 15, DateTimeKind.Utc);
-        var ownedUpdatedAt = new DateTime(2026, 7, 21, 14, 8, 33, DateTimeKind.Utc);
+        const long remoteContentChangedAt = 1721582655L;
+        const long ownedContentChangedAt = 1721570913L;
         await SetOwnedOverrideAsync(remoteLibrary.PlexServerId, false);
         await SetOwnedOverrideAsync(ownedLibrary.PlexServerId, true);
-        await SetLibraryUpdatedAtAsync(remoteLibrary.Id, remoteUpdatedAt);
-        await SetLibraryUpdatedAtAsync(ownedLibrary.Id, ownedUpdatedAt);
+        await SetLibraryContentChangedAtAsync(remoteLibrary.Id, remoteContentChangedAt);
+        await SetLibraryContentChangedAtAsync(ownedLibrary.Id, ownedContentChangedAt);
         dbContext.PlexComparisonScopes.Add(
             new PlexComparisonState
             {

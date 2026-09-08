@@ -181,11 +181,29 @@ public class SetupSonarrDownloadClientCommandHandler
         catch (TaskCanceledException e)
         {
             _log.Here().Error(e, "Timeout while communicating with Sonarr.");
+            await _progressHubService.SendIntegrationSetupProgressAsync(
+                new IntegrationSetupProgressDTO
+                {
+                    IntegrationId = integration.Id,
+                    Stage = IntegrationSetupProgressStage.Connecting,
+                    IsRunning = false,
+                    IsSuccess = false,
+                }
+            );
             return Result.Fail("Timeout while communicating with Sonarr.").LogError();
         }
         catch (HttpRequestException e)
         {
             _log.Here().Error(e, "HTTP error while communicating with Sonarr.");
+            await _progressHubService.SendIntegrationSetupProgressAsync(
+                new IntegrationSetupProgressDTO
+                {
+                    IntegrationId = integration.Id,
+                    Stage = IntegrationSetupProgressStage.Connecting,
+                    IsRunning = false,
+                    IsSuccess = false,
+                }
+            );
             return Result.Fail("HTTP error while communicating with Sonarr.").LogError();
         }
     }

@@ -200,6 +200,7 @@ public static class SonarrHttpClientExtensions
                 return result.ToResult().LogWarning();
             if (result.IsFailed)
             {
+                errors.AddRange(result.Errors.Select(error => error.Message));
                 result.ToResult().LogError();
                 errors.Add($"Failed to delete Sonarr {resource.Name} {resource.Id.Value}.");
                 continue;

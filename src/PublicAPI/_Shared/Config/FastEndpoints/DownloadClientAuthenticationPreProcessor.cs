@@ -13,7 +13,7 @@ public class DownloadClientAuthenticationPreProcessor<TRequest> : IPreProcessor<
 
     public async Task PreProcessAsync(IPreProcessorContext<TRequest> ctx, CancellationToken ct)
     {
-        var dbContext = await _dbContextFactory.CreateAsync();
+        using var dbContext = await _dbContextFactory.CreateAsync();
         var identity = await ctx.HttpContext.AuthenticateBearerAsync(dbContext, ct);
         if (identity is not null)
             return;

@@ -1,172 +1,172 @@
 ---
 name: reaparr-frontend-integration-tests
-description: Use when creating, debugging, or stabilizing Reaparr frontend Cypress integration tests, especially for flaky CI failures, uncaught app exceptions, route/port issues, and deterministic test hardening under src/AppHost/ClientApp/cypress.
+description: Use when creating, debugging, or stabilizing Reaparr frontend Cypress integration tests under src/AppHost/ClientApp/cypress, especially when tests cover user workflows, API state transitions, SignalR progress, validation, or flaky CI behavior.
 ---
 
 # Reaparr Frontend Integration Tests
 
-## Overview
+Use this skill for Reaparr Cypress E2E/integration tests under:
 
-Use this skill for Cypress E2E/integration tests in Reaparr front-end.
-
-Scope:
 - `src/AppHost/ClientApp/cypress/**`
-- CI workflow behavior related to `cypress:ci`
+- frontend CI behavior related to `cypress:ci`
 
-Primary goal: fix root causes (app crash, bad mocks, timing races), not just make assertions weaker.
+## Core test model
 
-## Test Runtime Model
+Cypress tests are complete user workflows. Prefer a small number of meaningful journeys over a large matrix of tests that repeat the same setup and assert one implementation state each.
 
-Cypress runs against a generated static app:
-- `bun run static-server` (internally runs `nuxi generate` + `serve`)
-- Then Cypress runs Firefox headless against `http://localhost:$PORT`
+A good workflow proves:
 
-If the app crashes in one spec, later specs may fail with `ECONNREFUSED` or wrong port churn.
-Always fix earliest uncaught application error first.
+1. The user starts from a deterministic page state.
+2. The user performs the real UI action.
+3. The browser sends the expected request.
+4. The mocked backend returns a contract-shaped response.
+5. The UI renders the intermediate and final outcome.
+6. A refresh or subsequent read observes the changed state.
 
-## Required Execution Commands
+Keep the user actions visible in the test. Small assertion or fixture helpers are acceptable when they do not hide the workflow; do not hide an entire journey behind a shared helper.
 
-From repo root:
+## Workflow sizing
+
+- Keep fewer total workflows than individual state cases.
+- Combine related states in one ordered workflow when they belong to the same user journey.
+- Do not create one test per enum value, progress stage, or identical error branch.
+- Put failure and recovery variants into the complete workflow when they are part of the feature contract.
+- Split files when independent domains or products have genuinely different journeys; do not duplicate a generic state matrix merely to increase test count.
+- Keep every workflow independently bootstrappable through `beforeEach` setup.
+
+## Arrange deterministic state
+
+1. Start with `cy.basePageSetup(...)`.
+2. Register spec-local intercepts only for the behavior under test.
+3. Use generated DTO/result factories such as `generateResultDTO(...)` so responses match the current contracts.
+4. Use typed/generated route helpers where available.
+5. Model writes and refreshes as stateful intercepts. A successful create, update, or setup request must change the data returned by the next list/detail request.
+6. Assert the initial state before changing it when that state is part of the workflow, such as an unconfigured item, an empty list, or disabled actions.
+
+A static GET response that always returns the original fixture is insufficient for a persistence workflow: it can let a test pass even when the application never updates or refreshes its state.
+
+## UI-first workflow rules
+
+- Trigger create, edit, test-connection, save, setup, and close actions through the UI.
+- Do not call stores directly or mutate application state to advance a workflow.
+- Prefer stable `data-cy` selectors and user-visible text where appropriate.
+- Test validation on the actual controls: make the input invalid through the UI, blur or select as a user would, assert the field message, and assert the relevant action remains disabled.
+- Before a valid save, prove that no persistence request was sent; after the valid action, assert exactly one expected request.
+- Assert request method, important request fields, response status/data, and the resulting visible UI state.
+- For a connection check, assert the request and visible result before continuing to save.
+- For a mutation, assert the refreshed list/card/detail state rather than stopping at the network response.
+
+Avoid assuming that every `data-cy` target is a native `<input>` or that every control supports `.clear()`/`.focus()`. Use the control's real interaction path and assert observable validation state without depending on private component DOM structure.
+
+## SignalR and backend progress
+
+When a workflow depends on backend SignalR updates, use the project's hub-publishing commands—especially `cy.hubPublish(...)`—to simulate those backend messages. Do not mutate the store, component state, or DOM directly.
+
+The workflow must start the real UI action that subscribes to the backend progress first. Then:
+
+1. Publish a typed backend progress payload.
+2. Wait through a retryable visible assertion for the expected UI state.
+3. Assert the relevant status and user-visible text.
+4. Continue with the next backend event.
+
+Do not use arbitrary sleeps as a SignalR synchronization mechanism. A visible state assertion is the synchronization point.
+
+### Ordered progress workflows
+
+Keep progress coverage in one ordered flow when the stages form one user journey:
+
+- Exercise meaningful failure/recovery transitions in sequence instead of creating one test per stage.
+- For a recoverable stage, publish failure, assert its error status/text, assert earlier stages remain successful and later stages remain pending, then publish success and assert recovery.
+- Treat terminal completion as the terminal success milestone unless the product contract explicitly supports terminal failure/retry.
+- Assert intermediate status and meaningful visible text, then assert the final request and final page/card state.
+- Foreign-event or unknown-stage filtering is separate regression coverage, not a default reason to multiply the main workflow. Add it only when explicitly required by the feature or bug.
+
+## Async and synchronization
+
+Use Cypress retryability and named aliases:
+
+```ts
+cy.intercept('POST', endpoint, response).as('saveItem')
+cy.getCy('save-button').should('not.be.disabled').click()
+cy.wait('@saveItem')
+cy.getCy('item-card').should('contain.text', 'Saved')
+```
+
+Prefer:
+
+- network aliases for requests the UI must make;
+- visible state assertions after queued hub messages;
+- `should()` assertions for retryability;
+- explicit readiness assertions before clicks.
+
+Avoid fixed sleeps, promise/`async` control flow mixed into Cypress commands, and assertions that can pass before an asynchronous backend message is processed.
+
+## Reaparr runtime model
+
+The CI flow generates a static app and runs Firefox headless:
+
+- `bun run static-server` runs `nuxi generate` and serves the generated output.
+- Cypress runs against `http://localhost:$PORT`.
+- The frontend package manager is Bun.
+
+Use the configured WebStorm Cypress run configuration first. The equivalent focused command from the repository root is:
+
+```bash
+bun --cwd src/AppHost/ClientApp run cypress:ci --spec cypress/e2e/path/to/spec.cy.ts
+```
+
+For a broader check:
 
 ```bash
 bun --cwd src/AppHost/ClientApp run cypress:ci
 ```
 
-Run one spec through the same CI entrypoint (recommended when debugging):
+## Failure diagnosis
 
-```bash
-bun --cwd src/AppHost/ClientApp run cypress:ci --spec cypress/e2e/pages/authentication/sign-in-process.cy.ts
-```
+Fix the earliest real failure first.
 
-Run a focused folder through the same CI entrypoint:
+### App-side crash
 
-```bash
-bun --cwd src/AppHost/ClientApp run cypress:ci --spec "cypress/e2e/pages/dialogs/**/*.cy.ts"
-```
+For errors such as `can't convert undefined to object`:
 
-## Known Reaparr Failure Patterns
+- inspect the first uncaught application error;
+- verify required `basePageSetup` data exists;
+- verify intercepted DTO shapes match generated contracts;
+- verify required translation keys still exist.
 
-### 1) `can't convert undefined to object` (app-side crash)
-Usually caused by runtime assumptions in page/store setup (often missing required i18n keys or missing expected data shape in mocks).
+Do not suppress application failures with broad `uncaught:exception` handlers.
 
-Checklist:
-- Verify recent i18n key edits in `src/lang/*.json` did not remove runtime-used keys.
-- Verify `basePageSetup` config in spec provides required entities (accounts/servers/libraries/media).
-- Verify mock endpoint payload shape matches DTO contract and app expectations.
+### Port or server cascade
 
-### 2) 404 on `cy.visit('/empty')` in early spec
-`/empty` exists in prerender output but can fail if server startup races.
+For `ECONNREFUSED` or changing-port failures:
 
-Fix approach:
-- Prefer `beforeEach` deterministic setup (not shared mutable setup in `before`).
-- Ensure no prior test leaves app in broken state.
+- check for stale static-server processes;
+- ensure one test server owns the configured port;
+- repair the earliest failing spec before chasing later failures.
 
-### 3) `ECONNREFUSED 127.0.0.1:3035` in later specs
-This is usually a cascade after earlier crash, port conflict, or stale server process still running.
+### Timing failure
 
-Fix approach:
-- Stop stale frontend/static-server processes before re-running tests.
-- Ensure only one test server owns `:$PORT` (default 3035) before starting Cypress.
-- Fix the earliest failing spec/app crash and rerun from start.
-- Do not chase every downstream ECONNREFUSED failure; they are often secondary.
+Replace sleeps with a request alias or visible UI condition. If a hub message is queued, publish it and wait for the UI state it must produce before asserting dependent state.
 
-## Stabilization Patterns for Cypress in Reaparr
+## Required verification
 
-### A. Replace fixed sleeps with condition-based waits
+After editing Cypress files:
 
-Bad:
-```ts
-cy.wait(1000)
-```
+1. Re-read every changed spec.
+2. Run WebStorm `get_file_problems` for every changed spec.
+3. Run WebStorm lint/inspection checks and fix errors.
+4. Run each changed spec independently through the same `cypress:ci` path used by CI.
+5. Run the wider Cypress scope when the change affects shared fixtures, support commands, or multiple neighboring workflows.
+6. Report unrelated pre-existing failures separately from failures caused by the change.
 
-Good:
-```ts
-cy.getCy('background-activity-button-badge', { timeout: 10000 }).should('exist')
-```
+## Completion criteria
 
-### B. Alias and wait for network calls
+A Cypress integration-test change is complete only when:
 
-```ts
-cy.intercept('POST', AuthenticationPaths.appUserLoginEndpoint(), { ... }).as('loginSuccess')
-cy.getCy('login-submit-button').click()
-cy.wait('@loginSuccess')
-```
-
-### C. Guard async UI transitions
-
-```ts
-cy.getCy('setup-page-next-button', { timeout: 10000 }).should('not.be.disabled').click()
-```
-
-### D. Avoid float/text mismatch in progress assertions
-
-```ts
-const received = Math.round(i * (total / steps))
-```
-
-### E. Virtualized list assertions
-
-```ts
-cy.getCy(`media-table-row-${last}`, { timeout: 20000 })
-  .scrollIntoView()
-  .should('be.visible')
-```
-
-## Fake Data + API Intercept Pipeline (How Reaparr Cypress Works)
-
-### High-level flow
-
-1. A spec calls `cy.basePageSetup(config)`
-2. The setup builds deterministic fake domain data (accounts, servers, libraries, media, downloads, settings)
-3. Setup registers API interceptors for app endpoints (under `cypress/fixtures/api-mock/**`)
-4. The app boots and requests `/api/*`
-5. Interceptors return `generateResultDTO(...)` payloads that match generated DTO contracts
-6. Test interacts with UI and optionally publishes SignalR/job progress events
-
-### Core building blocks
-
-- **Spec data bootstrap:** `cy.basePageSetup(...)`
-- **Mock endpoint modules:** `cypress/fixtures/api-mock/*.mock-api.ts`
-- **DTO wrappers/factories:** `@mock` helpers like `generateResultDTO`, factory generators
-- **Route helper:** `route(...)` for page URLs
-- **SignalR simulation:** `cy.hubPublish(...)` and `cy.hubPublishJobStatusUpdate(...)`
-
-### Why this matters for debugging
-
-If generated data shape and intercepted endpoint contracts diverge, app runtime code can throw (e.g., `can't convert undefined to object`) before assertions run.
-Always verify:
-- the endpoint requested by app is intercepted
-- returned DTO shape matches what that page/store expects
-- required translated keys used by components still exist in `src/lang/*.json`
-
-## Mocking Rules
-
-- Use `cy.basePageSetup(...)` as the foundation.
-- Add spec-local intercepts only for behavior under test.
-- For auth flows, always intercept login endpoint and auth status coherently.
-- Keep DTO/result wrappers consistent with app contracts.
-- When overriding one endpoint, do not accidentally remove baseline intercept behavior required by page setup.
-
-## Workflow for Fixing CI Failures
-
-1. Kill stale static-server/serve processes, then confirm `:$PORT` is free.
-2. Run one failing spec locally via `run cypress:ci --spec ...`.
-3. Fix root cause.
-4. Re-run same spec until stable.
-5. Re-run neighboring specs in same folder.
-6. Re-run full `cypress:ci`.
-7. If a new earliest failure appears, repeat from step 1.
-
-## Anti-Patterns
-
-- Ignoring first uncaught application exception and fixing later specs first.
-- Adding broad `uncaught:exception` suppression for app errors instead of fixing root cause.
-- Reliance on `cy.wait(<ms>)` for asynchronous state changes.
-- Weakening assertions to hide genuine regressions.
-
-## Done Criteria
-
-A fix is complete when:
-- Previously failing spec passes in isolation.
-- No uncaught app exception remains at run start.
-- Full `cypress:ci` run passes (or remaining failures are unrelated and documented).
+- the intended user workflows pass in isolation;
+- the workflow count remains focused rather than one-test-per-state;
+- validation, request/response, refresh, and final visible state are asserted where relevant;
+- SignalR updates are simulated through hub-publishing commands;
+- no arbitrary sleeps or broad exception suppression were added;
+- WebStorm diagnostics/lint report no errors for changed specs;
+- duplicate or obsolete specs are removed when the workflow has been consolidated.

@@ -1,5 +1,13 @@
 Reaparr Changelog
 
+# [0.40.0-dev.2](https://github.com/Reaparr/Reaparr/compare/v0.40.0-dev.1...v0.40.0-dev.2) (2026-09-08)
+
+
+### Bug Fixes
+
+* **WebAPI:** Implement the generic Torznab search query type ([#652](https://github.com/Reaparr/Reaparr/issues/652)) ([44879c2](https://github.com/Reaparr/Reaparr/commit/44879c2b593f49fd548aa6c6249a05e26e9c79bd))
+* **WebAPI:** Implement the generic Torznab search query type ([25ba0ab](https://github.com/Reaparr/Reaparr/commit/25ba0ab076ed0a7604aecc626de69b0482bbad46)), closes [#650](https://github.com/Reaparr/Reaparr/issues/650)
+
 # [0.40.0-dev.1](https://github.com/Reaparr/Reaparr/compare/v0.39.0...v0.40.0-dev.1) (2026-09-08)
 
 

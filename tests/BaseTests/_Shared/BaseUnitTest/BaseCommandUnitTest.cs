@@ -15,6 +15,7 @@ public abstract class BaseCommandUnitTest<TCommand> : BaseUnitTest
             commandType.Assembly.GetTypes().FirstOrDefault(t => t.FullName == validatorTypeName)
             ?? AppDomain
                 .CurrentDomain.GetAssemblies()
+                .Where(x => !x.IsDynamic)
                 .SelectMany(x => x.GetTypes())
                 .SingleOrDefault(t => t.Name == validatorTypeShortName)
             ?? throw new InvalidOperationException(
@@ -43,6 +44,7 @@ public abstract class BaseCommandUnitTest<TCommand> : BaseUnitTest
             typeof(TCommand).Assembly.GetType(handlerTypeName)
             ?? AppDomain
                 .CurrentDomain.GetAssemblies()
+                .Where(x => !x.IsDynamic)
                 .SelectMany(x => x.GetTypes())
                 .SingleOrDefault(t => t.Name == handlerTypeShortName)
             ?? throw new InvalidOperationException(
@@ -79,6 +81,7 @@ public abstract class BaseCommandUnitTest<TCommand> : BaseUnitTest
             typeof(TCommand).Assembly.GetType(handlerTypeName)
             ?? AppDomain
                 .CurrentDomain.GetAssemblies()
+                .Where(x => !x.IsDynamic)
                 .SelectMany(x => x.GetTypes())
                 .SingleOrDefault(t => t.Name == handlerTypeShortName)
             ?? throw new InvalidOperationException(

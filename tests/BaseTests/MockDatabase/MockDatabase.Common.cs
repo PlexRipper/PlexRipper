@@ -7,10 +7,10 @@ public static partial class MockDatabase
 {
     private static readonly Serilog.ILogger _log = LogFactory.Create(typeof(MockDatabase));
 
-    // Unit tests run in parallel, but SQLite migrations plus EFCore.BulkExtensions
-    // seed operations are not reliable when many test databases are being created
-    // at the same time. Keep database paths unique per test; only serialize setup.
-    private static readonly SemaphoreSlim _setupLock = new(1, 1);
+    private static readonly SemaphoreSlim _databaseTemplateLock = new(1, 1);
+    private static readonly SemaphoreSlim _seedLock = new(1, 1);
+    private static readonly string _databaseTemplateName = GetMemoryDatabaseName();
+    private static SqliteConnection? _databaseTemplateConnection;
 
     #region Methods
 
@@ -238,10 +238,12 @@ public static partial class MockDatabase
         {
             var integrationId = await context.RadarrIntegrations.Select(x => x.Id).SingleAsync();
             var movieTasks = await context
-                .DownloadTaskMovie.AsTracking().Where(x => x.SonarrIntegrationId == null && x.RadarrIntegrationId == null)
+                .DownloadTaskMovie.AsTracking()
+                .Where(x => x.SonarrIntegrationId == null && x.RadarrIntegrationId == null)
                 .ToListAsync();
             var tvShowTasks = await context
-                .DownloadTaskTvShow.AsTracking().Where(x => x.SonarrIntegrationId == null && x.RadarrIntegrationId == null)
+                .DownloadTaskTvShow.AsTracking()
+                .Where(x => x.SonarrIntegrationId == null && x.RadarrIntegrationId == null)
                 .ToListAsync();
             foreach (var task in movieTasks.Cast<DownloadTaskBase>().Concat(tvShowTasks))
                 task.RadarrIntegrationId = integrationId;
@@ -356,74 +358,149 @@ public static partial class MockDatabase
     )
     {
         var config = FakeDataConfig.FromOptions(options);
-
         var (reaparrContext, authContext) = context;
 
-        // Serialize the setup block only. The resulting in-memory database remains
-        // isolated by its unique name and can be used normally by the test after seeding.
-        await _setupLock.WaitAsync();
+        await PrepareDatabaseSchemaAsync(reaparrContext, authContext, pathProvider, appRuntimeInfo);
+
+        await _seedLock.WaitAsync();
         try
         {
-            var reaparrMigrationResult = reaparrContext.Migrate();
-            var authMigrationResult = authContext.Migrate();
-
-            var migrationResult = Result.Merge(reaparrMigrationResult, authMigrationResult);
-            migrationResult.IsSuccess.ShouldBeTrue(migrationResult.ToString());
-
-            // PlexServers and Libraries added
-            _log.Here()
-                .Debug(
-                    "Setting up {NameOfReaparrDbContext} for {DatabaseName}",
-                    nameof(ReaparrDbContext),
-                    reaparrContext.DatabaseName
-                );
-
-            if (config.ShouldHavePlexServer)
-                reaparrContext = await reaparrContext.AddPlexServers(seed, options);
-
-            if (config.ShouldHavePlexLibrary)
-                reaparrContext = await reaparrContext.AddPlexLibraries(seed, options);
-
-            if (config.PlexAccountCount > 0)
-                reaparrContext = await reaparrContext.AddPlexAccount(seed, options);
-
-            if (config.MovieCount > 0)
-                reaparrContext = await reaparrContext.AddPlexMovies(seed, options);
-
-            if (config.TvShowCount > 0)
-                reaparrContext = await reaparrContext.AddPlexTvShows(seed, options);
-
-            if (config.MovieDownloadTasksCount > 0)
-                reaparrContext = await reaparrContext.AddDownloadTaskMovies(
-                    seed,
-                    pathProvider,
-                    appRuntimeInfo,
-                    options
-                );
-
-            if (config.TvShowDownloadTasksCount > 0)
-                reaparrContext = await reaparrContext.AddDownloadTaskTvShows(
-                    seed,
-                    pathProvider,
-                    appRuntimeInfo,
-                    options
-                );
-
-            if (config.RadarrIntegrationCount > 0)
-                reaparrContext = await reaparrContext.AddRadarrIntegrations(seed, options);
-
-            if (config.SonarrIntegrationCount > 0)
-                reaparrContext = await reaparrContext.AddSonarrIntegrations(seed, options);
-
-            if (config.AccountHasAccessToAllLibraries)
-                reaparrContext = await reaparrContext.AddPlexAccountLibraries();
+            await SeedDatabaseAsync(reaparrContext, seed, pathProvider, appRuntimeInfo, config, options);
         }
         finally
         {
-            _setupLock.Release();
+            _seedLock.Release();
         }
 
         reaparrContext.ShouldNotBeNull();
+    }
+
+    private static async Task PrepareDatabaseSchemaAsync(
+        ReaparrDbContext reaparrContext,
+        AuthDbContext authContext,
+        IPathProvider pathProvider,
+        IAppRuntimeInfo appRuntimeInfo
+    )
+    {
+        if (appRuntimeInfo.IsIntegrationTestMode)
+        {
+            var migrationResult = Result.Merge(reaparrContext.Migrate(), authContext.Migrate());
+            migrationResult.IsSuccess.ShouldBeTrue(migrationResult.ToString());
+            return;
+        }
+
+        await EnsureDatabaseTemplateAsync(pathProvider, appRuntimeInfo);
+        await CloneDatabaseTemplateAsync(reaparrContext, pathProvider);
+    }
+
+    private static async Task EnsureDatabaseTemplateAsync(IPathProvider pathProvider, IAppRuntimeInfo appRuntimeInfo)
+    {
+        if (Volatile.Read(ref _databaseTemplateConnection) is not null)
+            return;
+
+        await _databaseTemplateLock.WaitAsync();
+        try
+        {
+            if (_databaseTemplateConnection is not null)
+                return;
+
+            var templateConnection = new SqliteConnection(
+                DbContextConnections.GetConnectionString(_databaseTemplateName, SqliteOpenMode.Memory)
+            );
+            await templateConnection.OpenAsync();
+
+            await using var templateReaparrContext = GetMemoryReaparrDbContext(
+                _log,
+                pathProvider,
+                appRuntimeInfo,
+                _databaseTemplateName
+            );
+            await using var templateAuthContext = GetMemoryAuthDbContext(
+                _log,
+                pathProvider,
+                appRuntimeInfo,
+                _databaseTemplateName
+            );
+
+            try
+            {
+                var migrationResult = Result.Merge(templateReaparrContext.Migrate(), templateAuthContext.Migrate());
+                migrationResult.IsSuccess.ShouldBeTrue(migrationResult.ToString());
+                Volatile.Write(ref _databaseTemplateConnection, templateConnection);
+            }
+            catch
+            {
+                await templateConnection.DisposeAsync();
+                throw;
+            }
+        }
+        finally
+        {
+            _databaseTemplateLock.Release();
+        }
+    }
+
+    private static async Task CloneDatabaseTemplateAsync(ReaparrDbContext reaparrContext, IPathProvider pathProvider)
+    {
+        await reaparrContext.Database.OpenConnectionAsync();
+        var destinationConnection = (SqliteConnection)reaparrContext.Database.GetDbConnection();
+        DbContextConnections.InitializeDatabase(destinationConnection);
+
+        await using var sourceConnection = new SqliteConnection(
+            DbContextConnections.GetConnectionString(_databaseTemplateName, SqliteOpenMode.Memory)
+        );
+        await sourceConnection.OpenAsync();
+        sourceConnection.BackupDatabase(destinationConnection);
+
+        await reaparrContext.FolderPaths.ExecuteDeleteAsync();
+        ReaparrDBContextSeed.Seed(pathProvider)(reaparrContext, true);
+    }
+
+    private static async Task SeedDatabaseAsync(
+        ReaparrDbContext reaparrContext,
+        Seed seed,
+        IPathProvider pathProvider,
+        IAppRuntimeInfo appRuntimeInfo,
+        FakeDataConfig config,
+        Action<FakeDataConfig>? options
+    )
+    {
+        _log.Here()
+            .Debug(
+                "Setting up {NameOfReaparrDbContext} for {DatabaseName}",
+                nameof(ReaparrDbContext),
+                reaparrContext.DatabaseName
+            );
+
+        if (config.ShouldHavePlexServer)
+            reaparrContext = await reaparrContext.AddPlexServers(seed, options);
+
+        if (config.ShouldHavePlexLibrary)
+            reaparrContext = await reaparrContext.AddPlexLibraries(seed, options);
+
+        if (config.PlexAccountCount > 0)
+            reaparrContext = await reaparrContext.AddPlexAccount(seed, options);
+
+        if (config.MovieCount > 0)
+            reaparrContext = await reaparrContext.AddPlexMovies(seed, options);
+
+        if (config.TvShowCount > 0)
+            reaparrContext = await reaparrContext.AddPlexTvShows(seed, options);
+
+        if (config.MovieDownloadTasksCount > 0)
+            reaparrContext = await reaparrContext.AddDownloadTaskMovies(seed, pathProvider, appRuntimeInfo, options);
+
+        if (config.TvShowDownloadTasksCount > 0)
+            reaparrContext = await reaparrContext.AddDownloadTaskTvShows(seed, pathProvider, appRuntimeInfo, options);
+
+        if (config.RadarrIntegrationCount > 0)
+            reaparrContext = await reaparrContext.AddRadarrIntegrations(seed, options);
+
+        if (config.SonarrIntegrationCount > 0)
+            reaparrContext = await reaparrContext.AddSonarrIntegrations(seed, options);
+
+        if (config.AccountHasAccessToAllLibraries)
+            await reaparrContext.AddPlexAccountLibraries();
     }
 
     #endregion

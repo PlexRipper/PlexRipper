@@ -22,4 +22,9 @@ public interface IProgressHubService
     /// </summary>
     Task SendJobStatusUpdateAsync<T>(JobStatusUpdate<T> jobStatusUpdate)
         where T : class;
+
+    /// <summary>
+    /// Sends an integration setup progress update to the front-end.
+    /// </summary>
+    Task SendIntegrationSetupProgressAsync(IntegrationSetupProgressDTO progress);
 }

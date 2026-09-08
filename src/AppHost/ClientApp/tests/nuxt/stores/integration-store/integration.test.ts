@@ -1,106 +1,213 @@
-import { describe, beforeAll, beforeEach, test, expect, vi } from 'vitest';
+import { beforeAll, beforeEach, describe, expect, test, vi } from 'vitest';
 import { createPinia, setActivePinia } from 'pinia';
-import { throwError } from 'rxjs';
-import { baseSetup, baseVars, getAxiosMock, subscribeSpyTo } from '@services-test-base';
-import { generateFailedResultDTO } from '@mock';
+import { of } from 'rxjs';
+import { baseSetup, subscribeSpyTo } from '@services-test-base';
 import { integrationApi } from '@api';
-import { useIntegrationStore, useSettingsStore } from '@store';
+import { IntegrationProvisioningState, IntegrationType, TestConnectionStatus } from '@dto';
+import { useIntegrationStore } from '@store';
 
-describe('IntegrationStore regressions', () => {
-	let { mock } = baseVars();
+const success = <T>(value: T) => of({ isSuccess: true, value, errors: [], successes: [], statusCode: 200 });
 
-	beforeAll(() => {
-		baseSetup();
-	});
+describe('IntegrationStore', () => {
+	beforeAll(baseSetup);
 
 	beforeEach(() => {
-		mock = getAxiosMock();
 		setActivePinia(createPinia());
+		vi.restoreAllMocks();
 	});
 
-	test('Should clear Sonarr testing state when the test request throws', async () => {
+	test('Should open a typed draft when adding an integration', () => {
 		// Arrange
-		const integrationStore = useIntegrationStore();
-		vi.spyOn(integrationApi, 'testConnectionToSonarrEndpoint').mockReturnValue(throwError(() => new Error('Sonarr failed')) as never);
+		const store = useIntegrationStore();
 
 		// Act
-		const result = subscribeSpyTo(integrationStore.testConnectionToSonarr(), { expectErrors: true });
-		await result.onError();
+		store.openAdd(IntegrationType.Radarr);
 
 		// Assert
-		expect(integrationStore.sonarr.isTesting).toBe(false);
+		expect(store.draft).toMatchObject({ type: IntegrationType.Radarr, name: '', url: '', apiKey: '' });
 	});
 
-	test('Should clear Radarr testing state when the test request throws', async () => {
+	test('Should create a Sonarr integration through the typed endpoint', async () => {
 		// Arrange
-		const integrationStore = useIntegrationStore();
-		vi.spyOn(integrationApi, 'testConnectionToRadarrEndpoint').mockReturnValue(throwError(() => new Error('Radarr failed')) as never);
+		const store = useIntegrationStore();
+		store.openAdd(IntegrationType.Sonarr);
+		Object.assign(store.draft, { name: 'Sonarr', url: 'http://sonarr', apiKey: 'key', category: 'sonarr' });
+		const detail = {
+			id: 'id', name: 'Sonarr', url: 'http://sonarr', apiKey: 'key', category: 'sonarr', downloadFolderId: 1,
+			provisioningState: IntegrationProvisioningState.Unconfigured,
+			lastConnectionTestStatus: TestConnectionStatus.Unknown,
+		};
+		const create = vi.spyOn(integrationApi, 'createSonarrIntegrationEndpoint').mockReturnValue(success(detail));
+		vi.spyOn(integrationApi, 'getIntegrationsEndpoint').mockReturnValue(success([]));
 
 		// Act
-		const result = subscribeSpyTo(integrationStore.testConnectionToRadarr(), { expectErrors: true });
-		await result.onError();
-
-		// Assert
-		expect(integrationStore.radarr.isTesting).toBe(false);
-	});
-
-	test('Should clear Sonarr configuring state when the configure request throws', async () => {
-		// Arrange
-		const integrationStore = useIntegrationStore();
-		vi.spyOn(integrationApi, 'configureSonarrIntegrationEndpoint').mockReturnValue(throwError(() => new Error('Sonarr configure failed')) as never);
-
-		// Act
-		const result = subscribeSpyTo(integrationStore.configureSonarrIntegration(), { expectErrors: true });
-		await result.onError();
-
-		// Assert
-		expect(integrationStore.sonarr.isConfiguring).toBe(false);
-	});
-
-	test('Should clear Radarr configuring state when the configure request throws', async () => {
-		// Arrange
-		const integrationStore = useIntegrationStore();
-		vi.spyOn(integrationApi, 'configureRadarrIntegrationEndpoint').mockReturnValue(throwError(() => new Error('Radarr configure failed')) as never);
-
-		// Act
-		const result = subscribeSpyTo(integrationStore.configureRadarrIntegration(), { expectErrors: true });
-		await result.onError();
-
-		// Assert
-		expect(integrationStore.radarr.isConfiguring).toBe(false);
-	});
-
-	test('Should not refresh settings when clearing Radarr configuration fails', async () => {
-		// Arrange
-		const integrationStore = useIntegrationStore();
-		const settingsStore = useSettingsStore();
-		settingsStore.integrationsSettings.radarr.radarrBaseUrl = 'http://radarr';
-		settingsStore.integrationsSettings.radarr.radarrApiKey = 'A'.repeat(32);
-		mock.onDelete('/api/Integration/Radarr/Configuration').reply(200, generateFailedResultDTO({ statusCode: 500 }));
-
-		// Act
-		const result = subscribeSpyTo(integrationStore.clearRadarrConfiguration());
+		const result = subscribeSpyTo(store.save());
 		await result.onComplete();
 
 		// Assert
-		expect(result.getFirstValue()).toMatchObject({ isSuccess: false });
-		expect(mock.history.get.filter((request) => request.url === '/api/Settings')).toHaveLength(0);
+		expect(result.getLastValue()).toEqual(expect.objectContaining({ isSuccess: true }));
+		expect(create).toHaveBeenCalledWith({
+			name: 'Sonarr',
+			url: 'http://sonarr',
+			apiKey: 'key',
+			category: 'sonarr',
+			downloadFolderId: 1,
+		});
+		expect(store.detail?.type).toBe(IntegrationType.Sonarr);
+		expect(store.requiresSetupPrompt).toBe(true);
 	});
 
-	test('Should not refresh settings when clearing Sonarr configuration fails', async () => {
+	test('Should test a Radarr draft through the typed endpoint', async () => {
 		// Arrange
-		const integrationStore = useIntegrationStore();
-		const settingsStore = useSettingsStore();
-		settingsStore.integrationsSettings.sonarr.sonarrBaseUrl = 'http://sonarr';
-		settingsStore.integrationsSettings.sonarr.sonarrApiKey = 'B'.repeat(32);
-		mock.onDelete('/api/Integration/Sonarr/Configuration').reply(200, generateFailedResultDTO({ statusCode: 500 }));
+		const store = useIntegrationStore();
+		store.openAdd(IntegrationType.Radarr);
+		Object.assign(store.draft, { url: 'http://radarr', apiKey: 'key' });
+		const testResult = {
+			result: TestConnectionStatus.Success,
+			httpStatusCode: 200,
+			errorMessage: null,
+			testedAt: '2026-09-07T12:00:00Z',
+		};
+		const testConnection = vi.spyOn(integrationApi, 'testConnectionToRadarrEndpoint')
+			.mockReturnValue(success(testResult));
 
 		// Act
-		const result = subscribeSpyTo(integrationStore.clearSonarrConfiguration());
-		await result.onComplete();
+		await subscribeSpyTo(store.test()).onComplete();
 
 		// Assert
-		expect(result.getFirstValue()).toMatchObject({ isSuccess: false });
-		expect(mock.history.get.filter((request) => request.url === '/api/Settings')).toHaveLength(0);
+		expect(testConnection).toHaveBeenCalledWith({ url: 'http://radarr', apiKey: 'key' });
+		expect(store.testResult).toEqual(testResult);
+	});
+
+	test('Should update an existing integration summary after a successful connection test', async () => {
+		// Arrange
+		const store = useIntegrationStore();
+		const testResult = {
+			result: TestConnectionStatus.Success,
+			httpStatusCode: 200,
+			errorMessage: null,
+			testedAt: '2026-09-07T12:00:00Z',
+		};
+
+		store.items = [{
+			baseUrl: 'http://radarr',
+			category: 'radarr',
+			downloadFolderId: 1,
+			externalDownloadClientId: null,
+			externalIndexerId: null,
+			id: 'id',
+			lastConnectionTestErrorMessage: null,
+			lastConnectionTestHttpStatusCode: null,
+			lastConnectionTestStatus: TestConnectionStatus.Unknown,
+			lastConnectionTestedAt: null,
+			name: 'Radarr',
+			provisioningState: IntegrationProvisioningState.Unconfigured,
+			type: IntegrationType.Radarr,
+		}];
+		store.detail = {
+			apiKey: 'key',
+			category: 'radarr',
+			downloadFolderId: 1,
+			id: 'id',
+			lastConnectionTestErrorMessage: null,
+			lastConnectionTestHttpStatusCode: null,
+			lastConnectionTestStatus: TestConnectionStatus.Unknown,
+			lastConnectionTestedAt: null,
+			name: 'Radarr',
+			provisioningState: IntegrationProvisioningState.Unconfigured,
+			url: 'http://radarr',
+			type: IntegrationType.Radarr,
+		};
+		Object.assign(store.draft, { type: IntegrationType.Radarr, url: 'http://radarr', apiKey: 'key' });
+		const testConnection = vi.spyOn(integrationApi, 'testConnectionToRadarrEndpoint').mockReturnValue(success(testResult));
+
+		// Act
+		await subscribeSpyTo(store.test()).onComplete();
+
+		// Assert
+		expect(testConnection).toHaveBeenCalledWith({ url: 'http://radarr', apiKey: 'key', integrationId: 'id' });
+		expect(store.items[0]!.lastConnectionTestStatus).toBe(TestConnectionStatus.Success);
+		expect(store.items[0]!.lastConnectionTestedAt).toBe(testResult.testedAt);
+
+		const staleDetail = {
+			...store.detail!,
+			lastConnectionTestErrorMessage: null,
+			lastConnectionTestHttpStatusCode: null,
+			lastConnectionTestStatus: TestConnectionStatus.Unknown,
+			lastConnectionTestedAt: null,
+		};
+		const staleSummary = {
+			...store.items[0]!,
+			lastConnectionTestErrorMessage: null,
+			lastConnectionTestHttpStatusCode: null,
+			lastConnectionTestStatus: TestConnectionStatus.Unknown,
+			lastConnectionTestedAt: null,
+		};
+		vi.spyOn(integrationApi, 'updateRadarrIntegrationEndpoint').mockReturnValue(success(staleDetail));
+		vi.spyOn(integrationApi, 'getIntegrationsEndpoint').mockReturnValue(success([staleSummary]));
+
+		await subscribeSpyTo(store.save()).onComplete();
+
+		expect(store.items[0]!.lastConnectionTestStatus).toBe(TestConnectionStatus.Success);
+	});
+
+	test('Should require a download folder when validating a draft', () => {
+		// Arrange
+		const store = useIntegrationStore();
+		Object.assign(store.draft, {
+			name: 'Radarr',
+			url: 'http://radarr',
+			apiKey: 'key',
+			category: 'radarr',
+		});
+
+		// Act
+		store.draft.downloadFolderId = 0;
+
+		// Assert
+		expect(store.isDraftValid).toBe(false);
+	});
+
+	test('Should delete a persisted Radarr integration even when external cleanup fails', async () => {
+		// Arrange
+		const store = useIntegrationStore();
+		store.detail = {
+			apiKey: 'key',
+			category: 'radarr',
+			downloadFolderId: 1,
+			id: 'id',
+			lastConnectionTestErrorMessage: null,
+			lastConnectionTestHttpStatusCode: null,
+			lastConnectionTestStatus: TestConnectionStatus.Unknown,
+			lastConnectionTestedAt: null,
+			name: 'Radarr',
+			provisioningState: IntegrationProvisioningState.Configured,
+			type: IntegrationType.Radarr,
+			url: 'http://radarr',
+		};
+		const deleteIntegration = vi.spyOn(integrationApi, 'deleteRadarrIntegrationEndpoint').mockReturnValue(success(undefined));
+		vi.spyOn(integrationApi, 'getIntegrationsEndpoint').mockReturnValue(success([]));
+
+		// Act
+		await subscribeSpyTo(store.delete()).onComplete();
+
+		// Assert
+		expect(deleteIntegration).toHaveBeenCalledWith('id', { Force: true });
+		expect(store.detail).toBeNull();
+		expect(store.isDeleting).toBe(false);
+	});
+
+	test('Should reject an unsupported integration type instead of using the Sonarr endpoint', () => {
+		// Arrange
+		const store = useIntegrationStore();
+		const saveSonarr = vi.spyOn(integrationApi, 'createSonarrIntegrationEndpoint');
+		store.openAdd('Lidarr' as IntegrationType);
+
+		// Act
+		const save = () => store.save();
+
+		// Assert
+		expect(save).toThrowError('Unsupported integration type: Lidarr');
+		expect(saveSonarr).not.toHaveBeenCalled();
 	});
 });

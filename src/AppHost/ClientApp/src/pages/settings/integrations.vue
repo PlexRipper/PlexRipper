@@ -1,6 +1,5 @@
 <template>
 	<QPage>
-		<SonarrIntegration />
-		<RadarrIntegration />
+		<IntegrationOverview />
 	</QPage>
 </template>

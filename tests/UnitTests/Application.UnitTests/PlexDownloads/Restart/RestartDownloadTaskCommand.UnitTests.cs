@@ -613,7 +613,7 @@ public class RestartDownloadTaskCommandUnitTests : BaseUnitTest<RestartDownloadT
         after.TimeRemaining.ShouldBe(0);
         after.DownloadClientType.ShouldBe(before.DownloadClientType);
         after.DirectoryMeta.ShouldNotBeNull();
-        after.DirectoryMeta.DownloadRootPath.ShouldBe(string.Empty);
+        after.DirectoryMeta.DownloadRootPath.ShouldBe(before.DirectoryMeta.DownloadRootPath);
         after.DirectoryMeta.DestinationRootPath.ShouldBe(before.DirectoryMeta.DestinationRootPath);
         after.DirectoryMeta.KeepCompletedInDownloadFolder.ShouldBe(before.DirectoryMeta.KeepCompletedInDownloadFolder);
         after.DirectoryMeta.MovieFolder.ShouldNotBeNullOrWhiteSpace();
@@ -706,7 +706,7 @@ public class RestartDownloadTaskCommandUnitTests : BaseUnitTest<RestartDownloadT
         after.TimeRemaining.ShouldBe(0);
         after.DownloadClientType.ShouldBe(before.DownloadClientType);
         after.DirectoryMeta.ShouldNotBeNull();
-        after.DirectoryMeta.DownloadRootPath.ShouldBe(string.Empty);
+        after.DirectoryMeta.DownloadRootPath.ShouldBe(before.DirectoryMeta.DownloadRootPath);
         after.DirectoryMeta.DestinationRootPath.ShouldBe(before.DirectoryMeta.DestinationRootPath);
         after.DirectoryMeta.KeepCompletedInDownloadFolder.ShouldBe(before.DirectoryMeta.KeepCompletedInDownloadFolder);
         after.DirectoryMeta.TvShowFolder.ShouldNotBeNullOrWhiteSpace();

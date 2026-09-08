@@ -20,6 +20,6 @@ public class VersionEndpoint : EndpointWithoutRequest<string>
     {
         _log.Here().DebugApiCall(HttpContext);
 
-        await Send.StringAsync("v5.1.4", cancellation: ct);
+        await Send.StringAsync(QBittorrentCompatibility.ApplicationVersion, cancellation: ct);
     }
 }

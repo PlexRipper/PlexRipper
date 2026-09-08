@@ -131,7 +131,7 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandlerUnitTests
         var expectedEpisodeCount = plexEpisodes.Count;
 
         // Create a download task for the TV-show
-        var createdTvShowDownloadTask = plexTvShows.First().MapToDownloadTask();
+        var createdTvShowDownloadTask = plexTvShows.First().MapToDownloadTask(null);
         dbContext.DownloadTaskTvShow.Add(createdTvShowDownloadTask);
         await dbContext.SaveChangesAsync(CancellationToken);
 

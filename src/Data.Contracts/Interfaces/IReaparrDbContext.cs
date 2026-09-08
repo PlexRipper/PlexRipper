@@ -71,6 +71,10 @@ public interface IReaparrDbContext : IDisposable
 
     #endregion
 
+    DbSet<SonarrIntegration> SonarrIntegrations { get; }
+
+    DbSet<RadarrIntegration> RadarrIntegrations { get; }
+
     #region DownloadTasks
 
     DbSet<DownloadTaskMovie> DownloadTaskMovie { get; }

@@ -72,4 +72,10 @@ public enum MessageTypes
     /// </summary>
     [JsonStringEnumMemberName(nameof(LogEvent))]
     LogEvent = 11,
+
+    /// <summary>
+    ///  Integration setup progress message type.
+    /// </summary>
+    [JsonStringEnumMemberName(nameof(IntegrationSetupProgress))]
+    IntegrationSetupProgress = 12,
 }

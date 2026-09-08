@@ -12,7 +12,15 @@ public class AddTorrentEndpointUnitTests : BaseEndpointUnitTest<AddTorrentEndpoi
     public async Task ShouldReturnOk_WhenValidTorrentFileIsUploaded()
     {
         // Arrange
-        await SetupDatabase(1234, config => config.MovieDownloadTasksCount = 1);
+        await SetupDatabase(
+            1234,
+            config =>
+            {
+                config.MovieDownloadTasksCount = 1;
+                config.RadarrIntegrationCount = 1;
+            }
+        );
+        var integration = await IDbContext.RadarrIntegrations.SingleAsync(CancellationToken);
         var movieFile = await IDbContext.DownloadTaskMovieFile.FirstAsync(CancellationToken);
 
         var validMetadata = CreateValidTorrentMetadata() with { PlexApiPartId = movieFile.PlexApiPartId };
@@ -24,7 +32,10 @@ public class AddTorrentEndpointUnitTests : BaseEndpointUnitTest<AddTorrentEndpoi
             .ReturnsAsync(Result.Ok());
 
         // Act
-        var endpointResult = await TestEndpointHandleAsync(request);
+        var endpointResult = await TestEndpointHandleAsync(
+            request,
+            integrationIdentity: integration.Id.ToRadarrIdentity()
+        );
 
         // Assert
         endpointResult.StatusCode.ShouldBe(200);
@@ -100,6 +111,8 @@ public class AddTorrentEndpointUnitTests : BaseEndpointUnitTest<AddTorrentEndpoi
     public async Task ShouldReturnFail_WhenCreateDownloadTasksCommandFails()
     {
         // Arrange
+        await SetupDatabase(1235, config => config.RadarrIntegrationCount = 1);
+        var integration = await IDbContext.RadarrIntegrations.SingleAsync(CancellationToken);
         var validMetadata = CreateValidTorrentMetadata();
         var (torrentFile, torrentFileMock) = CreateMockTorrentFile(validMetadata, "test.torrent");
         var request = new AddTorrentEndpointRequest { TorrentFile = torrentFile };
@@ -110,7 +123,10 @@ public class AddTorrentEndpointUnitTests : BaseEndpointUnitTest<AddTorrentEndpoi
             .ReturnsAsync(failureResult);
 
         // Act
-        var endpointResult = await TestEndpointHandleAsync(request);
+        var endpointResult = await TestEndpointHandleAsync(
+            request,
+            integrationIdentity: integration.Id.ToRadarrIdentity()
+        );
 
         // Assert
         endpointResult.StatusCode.ShouldBe(200);
@@ -220,13 +236,20 @@ public class AddTorrentEndpointUnitTests : BaseEndpointUnitTest<AddTorrentEndpoi
                 config.PlexServerCount = 1;
                 config.MovieCount = 1;
                 config.MovieDownloadTasksCount = 1;
+                config.RadarrIntegrationCount = 1;
             }
         );
+        var integration = await IDbContext.RadarrIntegrations.SingleAsync(CancellationToken);
 
         // Get the actual server and library IDs from the database
         var server = await IDbContext.PlexServers.FirstAsync(CancellationToken);
         var library = await IDbContext.PlexLibraries.FirstAsync(CancellationToken);
-        var movieFile = await IDbContext.DownloadTaskMovieFile.FirstAsync(CancellationToken);
+        using var movieContext = IDbContext;
+        var movieFile = await movieContext.DownloadTaskMovieFile.AsTracking().FirstAsync(CancellationToken);
+        var movie = await movieContext.DownloadTaskMovie.AsTracking().FirstAsync(CancellationToken);
+        movie.RadarrIntegrationId = integration.Id;
+        movieFile.RadarrIntegrationId = integration.Id;
+        await movieContext.SaveChangesAsync(CancellationToken);
 
         // Create metadata with the actual database IDs
         var actualMetadata = new TorrentMetadataDTO
@@ -254,7 +277,10 @@ public class AddTorrentEndpointUnitTests : BaseEndpointUnitTest<AddTorrentEndpoi
             .ReturnsAsync(Result.Ok());
 
         // Act
-        var endpointResult = await TestEndpointHandleAsync(request);
+        var endpointResult = await TestEndpointHandleAsync(
+            request,
+            integrationIdentity: integration.Id.ToRadarrIdentity()
+        );
 
         // Assert
         endpointResult.StatusCode.ShouldBe(200);
@@ -299,13 +325,20 @@ public class AddTorrentEndpointUnitTests : BaseEndpointUnitTest<AddTorrentEndpoi
                 config.TvShowDownloadTasksCount = 1;
                 config.TvShowSeasonDownloadTasksCount = 1;
                 config.TvShowEpisodeDownloadTasksCount = 1;
+                config.SonarrIntegrationCount = 1;
             }
         );
+        var integration = await IDbContext.SonarrIntegrations.SingleAsync(CancellationToken);
 
         // Get the actual server and library IDs from the database
         var server = await IDbContext.PlexServers.FirstAsync(CancellationToken);
         var library = await IDbContext.PlexLibraries.FirstAsync(CancellationToken);
-        var episodeFile = await IDbContext.DownloadTaskTvShowEpisodeFile.FirstAsync(CancellationToken);
+        using var episodeContext = IDbContext;
+        var episodeFile = await episodeContext.DownloadTaskTvShowEpisodeFile.AsTracking().FirstAsync(CancellationToken);
+        var episode = await episodeContext.DownloadTaskTvShowEpisode.AsTracking().FirstAsync(CancellationToken);
+        episode.SonarrIntegrationId = integration.Id;
+        episodeFile.SonarrIntegrationId = integration.Id;
+        await episodeContext.SaveChangesAsync(CancellationToken);
 
         // Create metadata with the actual database IDs
         var actualMetadata = new TorrentMetadataDTO
@@ -333,7 +366,10 @@ public class AddTorrentEndpointUnitTests : BaseEndpointUnitTest<AddTorrentEndpoi
             .ReturnsAsync(Result.Ok());
 
         // Act
-        var endpointResult = await TestEndpointHandleAsync(request);
+        var endpointResult = await TestEndpointHandleAsync(
+            request,
+            integrationIdentity: integration.Id.ToSonarrIdentity()
+        );
 
         // Assert
         endpointResult.StatusCode.ShouldBe(200);

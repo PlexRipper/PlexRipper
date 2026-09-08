@@ -600,22 +600,6 @@ public static partial class DbContextExtensions
             };
     }
 
-    public static Task<DownloadTaskTvShow?> GetDownloadTaskTvShowByRatingKeyQuery(
-        this IReaparrDbContext dbContext,
-        int plexServerId,
-        int ratingKey,
-        CancellationToken cancellationToken = default
-    )
-    {
-        return dbContext
-            .DownloadTaskTvShow.AsTracking()
-            .IncludeAll()
-            .FirstOrDefaultAsync(
-                x => x.PlexServerId == plexServerId && x.PlexApiRatingKey == ratingKey,
-                cancellationToken
-            );
-    }
-
     public static async Task UpdateDownloadProgress(
         this IReaparrDbContext dbContext,
         DownloadTaskKey key,
@@ -1057,6 +1041,7 @@ public static partial class DbContextExtensions
     public static async Task<DownloadTaskKey?> GetRootDownloadTaskKeyAsync(
         this IReaparrDbContext dbContext,
         DownloadTaskKey key,
+        IntegrationIdentity? integration = null,
         CancellationToken cancellationToken = default
     )
     {
@@ -1068,7 +1053,8 @@ public static partial class DbContextExtensions
             case DownloadTaskType.MovieData:
             case DownloadTaskType.MoviePart:
                 return await dbContext
-                    .DownloadTaskMovieFile.Where(x => x.Id == key.Id)
+                    .DownloadTaskMovieFile.WhereIntegrationIs(integration)
+                    .Where(x => x.Id == key.Id)
                     .Select(x => new DownloadTaskKey
                     {
                         Id = x.ParentId,
@@ -1079,7 +1065,8 @@ public static partial class DbContextExtensions
                     .FirstOrDefaultAsync(cancellationToken);
             case DownloadTaskType.Season:
                 return await dbContext
-                    .DownloadTaskTvShowSeason.Where(x => x.Id == key.Id)
+                    .DownloadTaskTvShowSeason.WhereIntegrationIs(integration)
+                    .Where(x => x.Id == key.Id)
                     .Select(x => new DownloadTaskKey
                     {
                         Id = x.ParentId,
@@ -1091,7 +1078,8 @@ public static partial class DbContextExtensions
             case DownloadTaskType.Episode:
             {
                 var season = await dbContext
-                    .DownloadTaskTvShowEpisode.Where(x => x.Id == key.Id)
+                    .DownloadTaskTvShowEpisode.WhereIntegrationIs(integration)
+                    .Where(x => x.Id == key.Id)
                     .Select(x => new
                     {
                         x.ParentId,
@@ -1104,7 +1092,8 @@ public static partial class DbContextExtensions
                     return null;
 
                 return await dbContext
-                    .DownloadTaskTvShowSeason.Where(x => x.Id == season.ParentId)
+                    .DownloadTaskTvShowSeason.WhereIntegrationIs(integration)
+                    .Where(x => x.Id == season.ParentId)
                     .Select(x => new DownloadTaskKey
                     {
                         Id = x.ParentId,
@@ -1118,7 +1107,8 @@ public static partial class DbContextExtensions
             case DownloadTaskType.EpisodePart:
             {
                 var episode = await dbContext
-                    .DownloadTaskTvShowEpisodeFile.Where(x => x.Id == key.Id)
+                    .DownloadTaskTvShowEpisodeFile.WhereIntegrationIs(integration)
+                    .Where(x => x.Id == key.Id)
                     .Select(x => new
                     {
                         x.ParentId,
@@ -1139,7 +1129,8 @@ public static partial class DbContextExtensions
                     return null;
 
                 return await dbContext
-                    .DownloadTaskTvShowSeason.Where(x => x.Id == season)
+                    .DownloadTaskTvShowSeason.WhereIntegrationIs(integration)
+                    .Where(x => x.Id == season)
                     .Select(x => new DownloadTaskKey
                     {
                         Id = x.ParentId,

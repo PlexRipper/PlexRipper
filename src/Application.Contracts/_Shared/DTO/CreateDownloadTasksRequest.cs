@@ -8,17 +8,19 @@ public record CreateDownloadTasksRequest
     public CreateDownloadTasksRequest(
         List<DownloadMediaDTO> downloadMedias,
         int? destinationFolderPathId = null,
-        string customDestinationFolderPath = ""
+        string customDestinationFolderPath = "",
+        IntegrationIdentity? integration = null
     )
     {
         DownloadMedias = downloadMedias;
         DestinationFolderPathId = destinationFolderPathId;
         CustomDestinationFolderPath = customDestinationFolderPath;
+        Integration = integration;
     }
 
     public required List<DownloadMediaDTO> DownloadMedias { get; init; } = [];
-
     public required int? DestinationFolderPathId { get; init; }
-
     public required string CustomDestinationFolderPath { get; init; }
+
+    public IntegrationIdentity? Integration { get; init; }
 }

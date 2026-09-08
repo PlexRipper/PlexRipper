@@ -2,32 +2,16 @@ namespace Reaparr.Application.UnitTests;
 
 public class SetupRadarrDownloadClientCommandUnitTests : BaseUnitTest<SetupRadarrDownloadClientCommandHandler>
 {
-    // IRadarrSettings inherits IBaseSettingsModule<T> which has a static abstract member, making it
-    // incompatible with Moq. Inject concrete RadarrSettings instances via TypedParameter instead.
+    private async Task<RadarrIntegration> SetupIntegrationAsync()
+    {
+        await SetupDatabase(55300, config => config.RadarrIntegrationCount = 1);
+        return await IDbContext.RadarrIntegrations.SingleAsync(CancellationToken);
+    }
 
-    private SetupRadarrDownloadClientCommandHandler CreateSut(
-        RadarrSettings radarrSettings,
-        IntegrationsSettings integrationsSettings,
-        NetworkSettingsModule networkSettings
-    ) =>
+    private SetupRadarrDownloadClientCommandHandler CreateSut(NetworkSettingsModule networkSettings) =>
         Mock.Create<SetupRadarrDownloadClientCommandHandler>(
-            new TypedParameter(typeof(IRadarrSettings), radarrSettings),
-            new TypedParameter(typeof(IIntegrationsSettings), integrationsSettings),
             new TypedParameter(typeof(INetworkSettings), networkSettings)
         );
-
-    private static RadarrSettings ValidSettings(
-        string baseUrl = "http://localhost:7878",
-        string apiKey = "some-api-key"
-    ) =>
-        new()
-        {
-            IsConfigured = false,
-            RadarrBaseUrl = baseUrl,
-            RadarrApiKey = apiKey,
-        };
-
-    private static IntegrationsSettings ValidIntegrationsSettings() => IntegrationsSettings.Create();
 
     private static NetworkSettingsModule ValidNetworkSettings(string? reverseProxyUrl = null, string? basePath = null)
     {
@@ -46,10 +30,17 @@ public class SetupRadarrDownloadClientCommandUnitTests : BaseUnitTest<SetupRadar
     public async Task ShouldReturnFailedResult_WhenRadarrBaseUrlIsEmpty()
     {
         // Arrange
-        var sut = CreateSut(ValidSettings(baseUrl: string.Empty), ValidIntegrationsSettings(), ValidNetworkSettings());
+        var integration = await SetupIntegrationAsync();
+        await IDbContext
+            .RadarrIntegrations.Where(x => x.Id == integration.Id)
+            .ExecuteUpdateAsync(x => x.SetProperty(p => p.BaseUrl, string.Empty), CancellationToken);
+        var sut = CreateSut(ValidNetworkSettings());
 
         // Act
-        var result = await sut.ExecuteAsync(new SetupRadarrDownloadClientCommand(), CancellationToken);
+        var result = await sut.ExecuteAsync(
+            new SetupRadarrDownloadClientCommand { IntegrationId = integration.Id },
+            CancellationToken
+        );
 
         // Assert
         result.IsFailed.ShouldBeTrue();
@@ -69,10 +60,10 @@ public class SetupRadarrDownloadClientCommandUnitTests : BaseUnitTest<SetupRadar
     }
 
     [Test]
-    public async Task ShouldReturnFailedResult_WhenRadarrApiKeyIsEmpty()
+    public async Task ShouldReturnFailedResult_WhenIntegrationIsMissing()
     {
         // Arrange
-        var sut = CreateSut(ValidSettings(apiKey: string.Empty), ValidIntegrationsSettings(), ValidNetworkSettings());
+        var sut = CreateSut(ValidNetworkSettings());
 
         // Act
         var result = await sut.ExecuteAsync(new SetupRadarrDownloadClientCommand(), CancellationToken);
@@ -98,6 +89,7 @@ public class SetupRadarrDownloadClientCommandUnitTests : BaseUnitTest<SetupRadar
     public async Task ShouldReturnFailedResult_WhenGetDownloadClientsFails()
     {
         // Arrange
+        var integration = await SetupIntegrationAsync();
         Mock.SetupCommand(It.IsAny<RadarrApiGetDownloadClientsCommand>)
             .ReturnsAsync(Result.Fail("Radarr unreachable"))
             .Verifiable(Times.Once);
@@ -105,10 +97,17 @@ public class SetupRadarrDownloadClientCommandUnitTests : BaseUnitTest<SetupRadar
         Mock.SetupCommand(It.IsAny<RadarrApiCreateDownloadClientCommand>).Verifiable(Times.Never);
         Mock.SetupCommand(It.IsAny<RadarrApiUpdateDownloadClientCommand>).Verifiable(Times.Never);
 
-        var sut = CreateSut(ValidSettings(), ValidIntegrationsSettings(), ValidNetworkSettings());
+        var sut = CreateSut(ValidNetworkSettings());
+        Mock.Mock<IProgressHubService>()
+            .Setup(x => x.SendIntegrationSetupProgressAsync(It.IsAny<IntegrationSetupProgressDTO>()))
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.Exactly(2));
 
         // Act
-        var result = await sut.ExecuteAsync(new SetupRadarrDownloadClientCommand(), CancellationToken);
+        var result = await sut.ExecuteAsync(
+            new SetupRadarrDownloadClientCommand { IntegrationId = integration.Id },
+            CancellationToken
+        );
 
         // Assert
         result.IsFailed.ShouldBeTrue();
@@ -119,6 +118,7 @@ public class SetupRadarrDownloadClientCommandUnitTests : BaseUnitTest<SetupRadar
     public async Task ShouldCreateDownloadClient_WhenNoneExists()
     {
         // Arrange
+        var integration = await SetupIntegrationAsync();
         Mock.SetupCommand(It.IsAny<RadarrApiGetDownloadClientsCommand>)
             .ReturnsAsync(Result.Ok(new List<RadarrDownloadClientResourceDTO>()))
             .Verifiable(Times.Once);
@@ -129,10 +129,17 @@ public class SetupRadarrDownloadClientCommandUnitTests : BaseUnitTest<SetupRadar
 
         Mock.SetupCommand(It.IsAny<RadarrApiUpdateDownloadClientCommand>).Verifiable(Times.Never);
 
-        var sut = CreateSut(ValidSettings(), ValidIntegrationsSettings(), ValidNetworkSettings());
+        var sut = CreateSut(ValidNetworkSettings());
+        Mock.Mock<IProgressHubService>()
+            .Setup(x => x.SendIntegrationSetupProgressAsync(It.IsAny<IntegrationSetupProgressDTO>()))
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.Exactly(2));
 
         // Act
-        var result = await sut.ExecuteAsync(new SetupRadarrDownloadClientCommand(), CancellationToken);
+        var result = await sut.ExecuteAsync(
+            new SetupRadarrDownloadClientCommand { IntegrationId = integration.Id },
+            CancellationToken
+        );
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -144,6 +151,7 @@ public class SetupRadarrDownloadClientCommandUnitTests : BaseUnitTest<SetupRadar
     public async Task ShouldUpdateExistingDownloadClient_WhenOneAlreadyExists()
     {
         // Arrange
+        var integration = await SetupIntegrationAsync();
         var existingClient = new RadarrDownloadClientResourceDTO { Id = 7, Name = "Reaparr DownloadClient" };
 
         Mock.SetupCommand(It.IsAny<RadarrApiGetDownloadClientsCommand>)
@@ -156,10 +164,17 @@ public class SetupRadarrDownloadClientCommandUnitTests : BaseUnitTest<SetupRadar
 
         Mock.SetupCommand(It.IsAny<RadarrApiCreateDownloadClientCommand>).Verifiable(Times.Never);
 
-        var sut = CreateSut(ValidSettings(), ValidIntegrationsSettings(), ValidNetworkSettings());
+        var sut = CreateSut(ValidNetworkSettings());
+        Mock.Mock<IProgressHubService>()
+            .Setup(x => x.SendIntegrationSetupProgressAsync(It.IsAny<IntegrationSetupProgressDTO>()))
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.Exactly(2));
 
         // Act
-        var result = await sut.ExecuteAsync(new SetupRadarrDownloadClientCommand(), CancellationToken);
+        var result = await sut.ExecuteAsync(
+            new SetupRadarrDownloadClientCommand { IntegrationId = integration.Id },
+            CancellationToken
+        );
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -171,6 +186,7 @@ public class SetupRadarrDownloadClientCommandUnitTests : BaseUnitTest<SetupRadar
     public async Task ShouldReturnFailedResult_WhenCreateDownloadClientFails()
     {
         // Arrange
+        var integration = await SetupIntegrationAsync();
         Mock.SetupCommand(It.IsAny<RadarrApiGetDownloadClientsCommand>)
             .ReturnsAsync(Result.Ok(new List<RadarrDownloadClientResourceDTO>()))
             .Verifiable(Times.Once);
@@ -181,10 +197,17 @@ public class SetupRadarrDownloadClientCommandUnitTests : BaseUnitTest<SetupRadar
 
         Mock.SetupCommand(It.IsAny<RadarrApiUpdateDownloadClientCommand>).Verifiable(Times.Never);
 
-        var sut = CreateSut(ValidSettings(), ValidIntegrationsSettings(), ValidNetworkSettings());
+        var sut = CreateSut(ValidNetworkSettings());
+        Mock.Mock<IProgressHubService>()
+            .Setup(x => x.SendIntegrationSetupProgressAsync(It.IsAny<IntegrationSetupProgressDTO>()))
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.Exactly(2));
 
         // Act
-        var result = await sut.ExecuteAsync(new SetupRadarrDownloadClientCommand(), CancellationToken);
+        var result = await sut.ExecuteAsync(
+            new SetupRadarrDownloadClientCommand { IntegrationId = integration.Id },
+            CancellationToken
+        );
 
         // Assert
         result.IsFailed.ShouldBeTrue();
@@ -195,6 +218,7 @@ public class SetupRadarrDownloadClientCommandUnitTests : BaseUnitTest<SetupRadar
     public async Task ShouldBuildResourceWithSslEnabledAndPort443_WhenReaparrUriIsHttpsCustomDomain()
     {
         // Arrange
+        var integration = await SetupIntegrationAsync();
         RadarrDownloadContractDTO? capturedResource = null;
 
         Mock.SetupCommand(It.IsAny<RadarrApiGetDownloadClientsCommand>)
@@ -211,14 +235,17 @@ public class SetupRadarrDownloadClientCommandUnitTests : BaseUnitTest<SetupRadar
             )
             .Verifiable(Times.Once);
 
-        var sut = CreateSut(
-            ValidSettings(),
-            ValidIntegrationsSettings(),
-            ValidNetworkSettings("https://reaparr.custom-domain.nl", string.Empty)
-        );
+        var sut = CreateSut(ValidNetworkSettings("https://reaparr.custom-domain.nl", string.Empty));
+        Mock.Mock<IProgressHubService>()
+            .Setup(x => x.SendIntegrationSetupProgressAsync(It.IsAny<IntegrationSetupProgressDTO>()))
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.Exactly(2));
 
         // Act
-        var result = await sut.ExecuteAsync(new SetupRadarrDownloadClientCommand(), CancellationToken);
+        var result = await sut.ExecuteAsync(
+            new SetupRadarrDownloadClientCommand { IntegrationId = integration.Id },
+            CancellationToken
+        );
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -234,7 +261,7 @@ public class SetupRadarrDownloadClientCommandUnitTests : BaseUnitTest<SetupRadar
 
         var urlBaseField = capturedResource.Fields!.FirstOrDefault(f => f.Name == "urlBase");
         urlBaseField.ShouldNotBeNull();
-        urlBaseField.Value.ShouldBe("api/public/download-client");
+        urlBaseField.Value.ShouldBe($"api/public/integrations/{integration.Id}/download-client");
 
         Mock.Mock<ICommandExecutor>().Verify();
     }
@@ -243,6 +270,7 @@ public class SetupRadarrDownloadClientCommandUnitTests : BaseUnitTest<SetupRadar
     public async Task ShouldBuildResourceWithHttpProxyHostPortAndBasePath_WhenReverseProxyIsHttp()
     {
         // Arrange
+        var integration = await SetupIntegrationAsync();
         RadarrDownloadContractDTO? capturedResource = null;
 
         Mock.SetupCommand(It.IsAny<RadarrApiGetDownloadClientsCommand>)
@@ -259,14 +287,17 @@ public class SetupRadarrDownloadClientCommandUnitTests : BaseUnitTest<SetupRadar
             )
             .Verifiable(Times.Once);
 
-        var sut = CreateSut(
-            ValidSettings(),
-            ValidIntegrationsSettings(),
-            ValidNetworkSettings("http://reaparr.example.com:8080", "/reaparr")
-        );
+        var sut = CreateSut(ValidNetworkSettings("http://reaparr.example.com:8080", "/reaparr"));
+        Mock.Mock<IProgressHubService>()
+            .Setup(x => x.SendIntegrationSetupProgressAsync(It.IsAny<IntegrationSetupProgressDTO>()))
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.Exactly(2));
 
         // Act
-        var result = await sut.ExecuteAsync(new SetupRadarrDownloadClientCommand(), CancellationToken);
+        var result = await sut.ExecuteAsync(
+            new SetupRadarrDownloadClientCommand { IntegrationId = integration.Id },
+            CancellationToken
+        );
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -286,7 +317,7 @@ public class SetupRadarrDownloadClientCommandUnitTests : BaseUnitTest<SetupRadar
 
         var urlBaseField = capturedResource.Fields!.FirstOrDefault(f => f.Name == "urlBase");
         urlBaseField.ShouldNotBeNull();
-        urlBaseField.Value.ShouldBe("/reaparr/api/public/download-client");
+        urlBaseField.Value.ShouldBe($"/reaparr/api/public/integrations/{integration.Id}/download-client");
 
         Mock.Mock<ICommandExecutor>().Verify();
     }
@@ -295,6 +326,7 @@ public class SetupRadarrDownloadClientCommandUnitTests : BaseUnitTest<SetupRadar
     public async Task ShouldFallbackToLocalhost_WhenReverseProxyUrlIsInvalid()
     {
         // Arrange
+        var integration = await SetupIntegrationAsync();
         RadarrDownloadContractDTO? capturedResource = null;
 
         Mock.SetupCommand(It.IsAny<RadarrApiGetDownloadClientsCommand>)
@@ -311,10 +343,17 @@ public class SetupRadarrDownloadClientCommandUnitTests : BaseUnitTest<SetupRadar
             )
             .Verifiable(Times.Once);
 
-        var sut = CreateSut(ValidSettings(), ValidIntegrationsSettings(), ValidNetworkSettings("not-a-url"));
+        var sut = CreateSut(ValidNetworkSettings("not-a-url"));
+        Mock.Mock<IProgressHubService>()
+            .Setup(x => x.SendIntegrationSetupProgressAsync(It.IsAny<IntegrationSetupProgressDTO>()))
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.Exactly(2));
 
         // Act
-        var result = await sut.ExecuteAsync(new SetupRadarrDownloadClientCommand(), CancellationToken);
+        var result = await sut.ExecuteAsync(
+            new SetupRadarrDownloadClientCommand { IntegrationId = integration.Id },
+            CancellationToken
+        );
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -334,7 +373,7 @@ public class SetupRadarrDownloadClientCommandUnitTests : BaseUnitTest<SetupRadar
 
         var urlBaseField = capturedResource.Fields!.FirstOrDefault(f => f.Name == "urlBase");
         urlBaseField.ShouldNotBeNull();
-        urlBaseField.Value.ShouldBe("api/public/download-client");
+        urlBaseField.Value.ShouldBe($"api/public/integrations/{integration.Id}/download-client");
 
         Mock.Mock<ICommandExecutor>().Verify();
     }

@@ -19,15 +19,18 @@ public abstract class BaseEndpointUnitTest<TEndpoint, TRequest> : BaseEndpointUn
     /// </summary>
     /// <param name="request">The request DTO passed to the endpoint.</param>
     /// <param name="extraServices">Optional test-specific service registrations.</param>
+    /// <param name="integrationIdentity">Optional database-backed integration identity to authenticate before endpoint execution.</param>
     /// <returns>The endpoint, validation outcome, HTTP status metadata, and captured response body.</returns>
     protected async Task<EndpointUnitTestResult<TEndpoint, object>> TestEndpointHandleAsync(
         TRequest request,
-        Action<IServiceCollection>? extraServices = null
+        Action<IServiceCollection>? extraServices = null,
+        IntegrationIdentity? integrationIdentity = null
     )
     {
         var endpoint = SetupEndpointUnitTest<TEndpoint>(extraServices);
 
         endpoint.HttpContext.Response.Body = new MemoryStream();
+        await AuthenticateEndpointIntegrationAsync(endpoint, integrationIdentity);
 
         var validationResult = await ValidateEndpointRequestAsync(request, CancellationToken);
 
@@ -71,14 +74,17 @@ public abstract class BaseEndpointUnitTest<TEndpoint, TRequest, TResponse>
     /// </summary>
     /// <param name="request">The request DTO passed to the endpoint.</param>
     /// <param name="extraServices">Optional test-specific service registrations.</param>
+    /// <param name="integrationIdentity">Optional database-backed integration identity to authenticate before endpoint execution.</param>
     /// <returns>The endpoint, validation outcome, HTTP status metadata, and captured response DTO.</returns>
     protected async Task<EndpointUnitTestResult<TEndpoint, TResponse>> TestEndpointHandleAsync(
         TRequest request,
-        Action<IServiceCollection>? extraServices = null
+        Action<IServiceCollection>? extraServices = null,
+        IntegrationIdentity? integrationIdentity = null
     )
     {
         var endpoint = SetupEndpointUnitTest<TEndpoint>(extraServices);
         endpoint.HttpContext.Response.Body = new MemoryStream();
+        await AuthenticateEndpointIntegrationAsync(endpoint, integrationIdentity);
         var validationResult = await ValidateEndpointRequestAsync(request, CancellationToken);
 
         if (validationResult is { IsValid: false })
@@ -118,14 +124,17 @@ public abstract class BaseEndpointWithoutRequestUnitTest<TEndpoint, TResponse>
     /// Invokes the endpoint's <c>HandleAsync</c> method using the endpoint test service container.
     /// </summary>
     /// <param name="extraServices">Optional test-specific service registrations.</param>
+    /// <param name="integrationIdentity">Optional database-backed integration identity to authenticate before endpoint execution.</param>
     /// <returns>The endpoint, HTTP status metadata, and captured response DTO.</returns>
     protected async Task<EndpointUnitTestResult<TEndpoint, TResponse>> TestEndpointHandleAsync(
-        Action<IServiceCollection>? extraServices = null
+        Action<IServiceCollection>? extraServices = null,
+        IntegrationIdentity? integrationIdentity = null
     )
     {
         var endpoint = SetupEndpointUnitTest<TEndpoint>(extraServices);
 
         endpoint.HttpContext.Response.Body = new MemoryStream();
+        await AuthenticateEndpointIntegrationAsync(endpoint, integrationIdentity);
 
         await endpoint.HandleAsync(CancellationToken);
 

@@ -206,8 +206,15 @@ public class DownloadJob : IJob
         CancellationToken cancellationToken
     )
     {
-        var downloadFolder = await _dbContext.GetDownloadFolder();
-        downloadTask.DirectoryMeta.DownloadRootPath = downloadFolder.DirectoryPath;
+        if (string.IsNullOrWhiteSpace(downloadTask.DirectoryMeta.DownloadRootPath))
+        {
+            var integration = (
+                downloadTask.SonarrIntegrationId,
+                downloadTask.RadarrIntegrationId
+            ).ToIntegrationIdentity();
+            var downloadFolder = await _dbContext.GetDownloadFolder(integration);
+            downloadTask.DirectoryMeta.DownloadRootPath = downloadFolder.DirectoryPath;
+        }
 
         // A custom destination folder can have been set during creation
         if (string.IsNullOrEmpty(downloadTask.DirectoryMeta.DestinationRootPath))

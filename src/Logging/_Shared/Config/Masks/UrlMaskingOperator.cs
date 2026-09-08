@@ -1,5 +1,4 @@
 using System.Text.RegularExpressions;
-using System.Web;
 using Serilog.Enrichers.Sensitive;
 
 namespace Reaparr.Logging;
@@ -17,8 +16,18 @@ public class UrlMaskingOperator : RegexMaskingOperator
         try
         {
             var url = new Uri(match.Value);
-            var token = HttpUtility.ParseQueryString(url.Query).Get("X-Plex-Token") ?? "None123";
-            return $"{url.Scheme}://{mask}{url.PathAndQuery.Replace(token, mask)}";
+            var query = url.Query;
+            if (query.Length == 0)
+                return $"{url.Scheme}://{mask}{url.AbsolutePath}";
+
+            var queryParts = query[1..].Split('&');
+            for (var i = 0; i < queryParts.Length; i++)
+            {
+                var separatorIndex = queryParts[i].IndexOf('=');
+                queryParts[i] = separatorIndex < 0 ? mask : $"{queryParts[i][..(separatorIndex + 1)]}{mask}";
+            }
+
+            return $"{url.Scheme}://{mask}{url.AbsolutePath}?{string.Join('&', queryParts)}";
         }
         catch (Exception)
         {

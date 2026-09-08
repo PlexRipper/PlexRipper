@@ -1,15 +1,15 @@
 namespace Reaparr.Application;
 
-public record SonarApiGetDownloadClientsCommand : ICommand<Result<List<DownloadClientResourceDTO>>>;
+public record SonarApiGetDownloadClientsCommand(Guid IntegrationId) : ICommand<Result<List<DownloadClientResourceDTO>>>;
 
 public class SonarApiGetDownloadClientsCommandHandler
     : ICommandHandler<SonarApiGetDownloadClientsCommand, Result<List<DownloadClientResourceDTO>>>
 {
-    private readonly HttpClient _client;
+    private readonly ISonarrHttpClientFactory _sonarrHttpClientFactory;
 
-    public SonarApiGetDownloadClientsCommandHandler(IHttpClientFactory httpClientFactory)
+    public SonarApiGetDownloadClientsCommandHandler(ISonarrHttpClientFactory sonarrHttpClientFactory)
     {
-        _client = httpClientFactory.CreateSonarrHttpClient();
+        _sonarrHttpClientFactory = sonarrHttpClientFactory;
     }
 
     public async Task<Result<List<DownloadClientResourceDTO>>> ExecuteAsync(
@@ -17,33 +17,12 @@ public class SonarApiGetDownloadClientsCommandHandler
         CancellationToken cancellationToken
     )
     {
-        try
-        {
-            using var httpRequest = new HttpRequestMessage(
-                HttpMethod.Get,
-                new Uri("/api/v3/downloadclient", UriKind.Relative)
-            );
-            var response = await _client.SendAsync(httpRequest, cancellationToken);
-            var body = await response.Content.ReadAsStringAsync(cancellationToken);
+        var clientResult = await _sonarrHttpClientFactory.CreateAsync(command.IntegrationId);
+        if (clientResult.IsFailed)
+            return clientResult.ToResult<List<DownloadClientResourceDTO>>();
 
-            if (!response.IsSuccessStatusCode)
-            {
-                return Result
-                    .Fail($"Failed to get download clients from Sonarr. StatusCode: {response.StatusCode}")
-                    .WithError(body)
-                    .LogError();
-            }
-
-            var list = JsonSerializer.Deserialize<List<DownloadClientResourceDTO>>(
-                body,
-                DefaultJsonSerializerOptions.ConfigStandard
-            );
-            return Result.Ok(list ?? []);
-        }
-        catch (Exception e)
-        {
-            return Result.Fail(new ExceptionalError(e)).LogError();
-        }
+        using var client = clientResult.Value;
+        return await client.GetSonarrDownloadClientsAsync(cancellationToken);
     }
 }
 

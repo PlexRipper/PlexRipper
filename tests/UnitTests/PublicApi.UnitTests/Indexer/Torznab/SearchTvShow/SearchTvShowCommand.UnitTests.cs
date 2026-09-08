@@ -86,7 +86,7 @@ public class SearchTvShowCommandUnitTests : BaseUnitTest<SearchTvShowCommandHand
             item.Attributes.Any(a => a.Name == "peers" && int.Parse(a.Value) > 0).ShouldBeTrue();
 
             // URL contains expected parameters
-            item.Link.ShouldContain(PublicApiRoutes.DownloadTorrent);
+            item.Link.ShouldContain("/indexer/download");
             item.Link.ShouldContain("Type=Episode");
             item.Link.ShouldContain("MediaId=");
             item.Link.ShouldContain("DataId=");
@@ -165,7 +165,9 @@ public class SearchTvShowCommandUnitTests : BaseUnitTest<SearchTvShowCommandHand
         result.Value.Channel.Items.Select(i => i.Title).Distinct().Single().ShouldBe(expectedTitle);
 
         // URLs should point to the torrent download endpoint
-        result.Value.Channel.Items.All(i => i.Link.Contains(PublicApiRoutes.DownloadTorrent)).ShouldBeTrue();
+        result
+            .Value.Channel.Items.All(i => i.Link.Contains("/indexer/download", StringComparison.Ordinal))
+            .ShouldBeTrue();
 
         // Database state (no mutations expected)
         var episodeExists = await dbContext.PlexTvShowEpisodes.AnyAsync(e => e.Id == episode.Id, CancellationToken);

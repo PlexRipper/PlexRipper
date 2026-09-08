@@ -44,12 +44,17 @@ public sealed class GetTorrentFilesEndpoint : Endpoint<GetTorrentFilesRequest, L
     public override async Task HandleAsync(GetTorrentFilesRequest req, CancellationToken ct)
     {
         _log.Here().DebugApiCall(HttpContext, req);
+        var integration = HttpContext.GetIntegrationIdentity();
 
         var episodeFilesTask = _dbContext
-            .DownloadTaskTvShowEpisodeFile.Where(x => x.HashId == req.Hash)
+            .DownloadTaskTvShowEpisodeFile.WhereIntegrationIs(integration)
+            .Where(x => x.HashId == req.Hash)
             .ToListAsync(ct);
 
-        var movieFilesTask = _dbContext.DownloadTaskMovieFile.Where(x => x.HashId == req.Hash).ToListAsync(ct);
+        var movieFilesTask = _dbContext
+            .DownloadTaskMovieFile.WhereIntegrationIs(integration)
+            .Where(x => x.HashId == req.Hash)
+            .ToListAsync(ct);
 
         await Task.WhenAll(episodeFilesTask, movieFilesTask);
 

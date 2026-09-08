@@ -62,20 +62,6 @@ export interface CheckAllConnectionStatusUpdateDTO {
   plexServersWithConnectionIds: Record<string, number[]>;
 }
 
-export interface ConfigureRadarrIntegrationRequest {
-  /** @minLength 1 */
-  apiKey: string;
-  /** @minLength 1 */
-  url: string;
-}
-
-export interface ConfigureSonarrIntegrationRequest {
-  /** @minLength 1 */
-  apiKey: string;
-  /** @minLength 1 */
-  url: string;
-}
-
 export interface ConfirmationSettingsDTO {
   askDownloadEpisodeConfirmation: boolean;
   askDownloadMovieConfirmation: boolean;
@@ -93,6 +79,7 @@ export interface CreateDownloadTasksRequest {
   /** @format int32 */
   destinationFolderPathId?: number | null;
   downloadMedias: DownloadMediaDTO[];
+  integration?: IntegrationIdentity | null;
 }
 
 export interface CreatePlexAccountEndpointRequest {
@@ -141,6 +128,40 @@ export interface CreatePlexServerConnectionEndpointRequest {
   port: number;
   /** @minLength 1 */
   protocol: string;
+  /** @minLength 1 */
+  url: string;
+}
+
+export interface CreateRadarrIntegrationRequest {
+  /** @minLength 1 */
+  apiKey: string;
+  /** @minLength 1 */
+  category: string;
+  /**
+   * @format int32
+   * @min 0
+   * @exclusiveMin true
+   */
+  downloadFolderId: number;
+  /** @minLength 1 */
+  name: string;
+  /** @minLength 1 */
+  url: string;
+}
+
+export interface CreateSonarrIntegrationRequest {
+  /** @minLength 1 */
+  apiKey: string;
+  /** @minLength 1 */
+  category: string;
+  /**
+   * @format int32
+   * @min 0
+   * @exclusiveMin true
+   */
+  downloadFolderId: number;
+  /** @minLength 1 */
+  name: string;
   /** @minLength 1 */
   url: string;
 }
@@ -522,6 +543,62 @@ export interface InspectPlexServerJobUpdateDTO {
   plexServerIds: number[];
 }
 
+export interface IntegrationIdentity {
+  /** @format guid */
+  id: string;
+  type: IntegrationType;
+}
+
+export enum IntegrationProvisioningState {
+  Unconfigured = "Unconfigured",
+  ChangesPending = "ChangesPending",
+  Configured = "Configured",
+}
+
+export interface IntegrationSetupProgressDTO {
+  error?: string | null;
+  /** @format guid */
+  integrationId: string;
+  isRunning: boolean;
+  isSuccess: boolean;
+  stage: IntegrationSetupProgressStage;
+}
+
+export enum IntegrationSetupProgressStage {
+  Connecting = "Connecting",
+  DownloadClient = "DownloadClient",
+  Indexer = "Indexer",
+  Validation = "Validation",
+  Done = "Done",
+}
+
+export interface IntegrationSummary {
+  baseUrl: string;
+  category: string;
+  /** @format int32 */
+  downloadFolderId: number;
+  /** @format int32 */
+  externalDownloadClientId?: number | null;
+  /** @format int32 */
+  externalIndexerId?: number | null;
+  /** @format guid */
+  id: string;
+  lastConnectionTestErrorMessage?: string | null;
+  /** @format int32 */
+  lastConnectionTestHttpStatusCode?: number | null;
+  lastConnectionTestStatus: TestConnectionStatus;
+  /** @format date-time */
+  lastConnectionTestedAt?: string | null;
+  name: string;
+  provisioningState: IntegrationProvisioningState;
+  type: IntegrationType;
+}
+
+export enum IntegrationType {
+  Sonarr = "Sonarr",
+  Radarr = "Radarr",
+}
+
 export interface IntegrationsSettingsDTO {
   downloadClientPassword: string;
   downloadClientUsername: string;
@@ -696,6 +773,7 @@ export enum MessageTypes {
   RefreshNotification = "RefreshNotification",
   AppUpdateDownloadProgress = "AppUpdateDownloadProgress",
   LogEvent = "LogEvent",
+  IntegrationSetupProgress = "IntegrationSetupProgress",
 }
 
 export interface MoveDownloadFileJobUpdateDTO {
@@ -1199,6 +1277,24 @@ export interface PlexServerStatusDTO {
   statusMessage: string;
 }
 
+export interface RadarrIntegrationDTO {
+  apiKey: string;
+  category: string;
+  /** @format int32 */
+  downloadFolderId: number;
+  /** @format guid */
+  id: string;
+  lastConnectionTestErrorMessage?: string | null;
+  /** @format int32 */
+  lastConnectionTestHttpStatusCode?: number | null;
+  lastConnectionTestStatus: TestConnectionStatus;
+  /** @format date-time */
+  lastConnectionTestedAt?: string | null;
+  name: string;
+  provisioningState: IntegrationProvisioningState;
+  url: string;
+}
+
 export interface RadarrSettingsDTO {
   isConfigured: boolean;
   radarrApiKey: string;
@@ -1351,6 +1447,15 @@ export interface ResultDTOOfListOfFolderPathDTO {
   statusCode: number;
   successes: SuccessDTO[];
   value?: FolderPathDTO[] | null;
+}
+
+export interface ResultDTOOfListOfIntegrationSummary {
+  errors: ErrorDTO[];
+  isSuccess: boolean;
+  /** @format int32 */
+  statusCode: number;
+  successes: SuccessDTO[];
+  value?: IntegrationSummary[] | null;
 }
 
 export interface ResultDTOOfListOfJobStatusUpdateDTO {
@@ -1560,6 +1665,15 @@ export interface ResultDTOOfPlexServerStatusDTO {
   value?: PlexServerStatusDTO | null;
 }
 
+export interface ResultDTOOfRadarrIntegrationDTO {
+  errors: ErrorDTO[];
+  isSuccess: boolean;
+  /** @format int32 */
+  statusCode: number;
+  successes: SuccessDTO[];
+  value?: RadarrIntegrationDTO | null;
+}
+
 export interface ResultDTOOfServerIdentityDTO {
   errors: ErrorDTO[];
   isSuccess: boolean;
@@ -1576,6 +1690,15 @@ export interface ResultDTOOfSettingsModelDTO {
   statusCode: number;
   successes: SuccessDTO[];
   value?: SettingsModelDTO | null;
+}
+
+export interface ResultDTOOfSonarrIntegrationDTO {
+  errors: ErrorDTO[];
+  isSuccess: boolean;
+  /** @format int32 */
+  statusCode: number;
+  successes: SuccessDTO[];
+  value?: SonarrIntegrationDTO | null;
 }
 
 export interface ResultDTOOfString {
@@ -1715,6 +1838,24 @@ export interface SettingsModelDTO {
   serverSettings: ServerSettingsDTO;
 }
 
+export interface SonarrIntegrationDTO {
+  apiKey: string;
+  category: string;
+  /** @format int32 */
+  downloadFolderId: number;
+  /** @format guid */
+  id: string;
+  lastConnectionTestErrorMessage?: string | null;
+  /** @format int32 */
+  lastConnectionTestHttpStatusCode?: number | null;
+  lastConnectionTestStatus: TestConnectionStatus;
+  /** @format date-time */
+  lastConnectionTestedAt?: string | null;
+  name: string;
+  provisioningState: IntegrationProvisioningState;
+  url: string;
+}
+
 export interface SonarrSettingsDTO {
   isConfigured: boolean;
   sonarrApiKey: string;
@@ -1740,11 +1881,21 @@ export enum TestConnectionStatus {
 }
 
 export interface TestConnectionToRadarrEndpointResponse {
+  errorMessage?: string | null;
+  /** @format int32 */
+  httpStatusCode?: number | null;
   result: TestConnectionStatus;
+  /** @format date-time */
+  testedAt: string;
 }
 
 export interface TestConnectionToSonarrEndpointResponse {
+  errorMessage?: string | null;
+  /** @format int32 */
+  httpStatusCode?: number | null;
   result: TestConnectionStatus;
+  /** @format date-time */
+  testedAt: string;
 }
 
 /** @example {"username":"ReaparrRocks","password":"R€Aℙℙ@rr69"} */
@@ -1784,6 +1935,40 @@ export interface UpdatePlexServerConnectionEndpointRequest {
   port: number;
   /** @minLength 1 */
   protocol: string;
+  /** @minLength 1 */
+  url: string;
+}
+
+export interface UpdateRadarrIntegrationRequest {
+  /** @minLength 1 */
+  apiKey: string;
+  /** @minLength 1 */
+  category: string;
+  /**
+   * @format int32
+   * @min 0
+   * @exclusiveMin true
+   */
+  downloadFolderId: number;
+  /** @minLength 1 */
+  name: string;
+  /** @minLength 1 */
+  url: string;
+}
+
+export interface UpdateSonarrIntegrationRequest {
+  /** @minLength 1 */
+  apiKey: string;
+  /** @minLength 1 */
+  category: string;
+  /**
+   * @format int32
+   * @min 0
+   * @exclusiveMin true
+   */
+  downloadFolderId: number;
+  /** @minLength 1 */
+  name: string;
   /** @minLength 1 */
   url: string;
 }

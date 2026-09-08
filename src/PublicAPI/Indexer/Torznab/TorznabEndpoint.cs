@@ -1,3 +1,5 @@
+using Reaparr.Application.Contracts;
+
 namespace Reaparr.PublicAPI;
 
 public class TorznabEndpointRequestValidator : Validator<TorznabEndpointRequest>
@@ -8,6 +10,7 @@ public class TorznabEndpointRequestValidator : Validator<TorznabEndpointRequest>
             .NotEmpty()
             .Must(type => new[] { "caps", "search", "tvsearch", "movie" }.Contains(type))
             .WithMessage("Type must be one of: caps, search, tvsearch, movie");
+        RuleFor(x => x.ApiKey).NotEmpty();
     }
 }
 
@@ -15,6 +18,12 @@ public sealed class TorznabEndpoint : Endpoint<TorznabEndpointRequest>
 {
     private readonly ILogger _log;
     private readonly ICommandExecutor _commandExecutor;
+
+    public TorznabEndpoint(ILogger logger, ICommandExecutor commandExecutor)
+    {
+        _log = logger.ForContext<TorznabEndpoint>();
+        _commandExecutor = commandExecutor;
+    }
 
     public override void Configure()
     {
@@ -31,15 +40,18 @@ public sealed class TorznabEndpoint : Endpoint<TorznabEndpointRequest>
         PreProcessor<IndexerAuthenticationPreProcessor<TorznabEndpointRequest>>();
     }
 
-    public TorznabEndpoint(ILogger logger, ICommandExecutor commandExecutor)
-    {
-        _log = logger.ForContext<TorznabEndpoint>();
-        _commandExecutor = commandExecutor;
-    }
-
     public override async Task HandleAsync(TorznabEndpointRequest req, CancellationToken ct)
     {
         _log.Here().DebugApiCall(HttpContext, req);
+        var integration = HttpContext.GetIntegrationIdentity();
+        if (
+            (req.Type == "movie" && !integration.Supports(PlexMediaType.Movie))
+            || (req.Type == "tvsearch" && !integration.Supports(PlexMediaType.Episode))
+        )
+        {
+            await Send.ForbiddenAsync(ct);
+            return;
+        }
 
         switch (req.Type)
         {
@@ -53,7 +65,62 @@ public sealed class TorznabEndpoint : Endpoint<TorznabEndpointRequest>
                 await Send.XmlAsync(capsResult.Value, cancellationToken: ct);
                 break;
             case "search":
-                throw new NotImplementedException();
+                switch (integration.Type)
+                {
+                    case IntegrationType.Sonarr:
+                    {
+                        var genericTvSearchResult = await _commandExecutor.Send(
+                            new SearchTvShowCommand
+                            {
+                                Query = req.Query ?? string.Empty,
+                                Season = req.Season ?? 0,
+                                Episode = req.Episode ?? 0,
+                                TVDB_ID = req.TvdbId ?? 0,
+                                IMDB_ID = req.ImdbId ?? string.Empty,
+                                TMDB_ID = req.TmdbId ?? 0,
+                                Limit = req.Limit ?? 100,
+                                Offset = req.Offset ?? 0,
+                                Integration = integration,
+                                TorznabApiKey = req.ApiKey,
+                            },
+                            ct
+                        );
+                        if (genericTvSearchResult.IsFailed)
+                        {
+                            await Send.ErrorsAsync(cancellation: ct);
+                            break;
+                        }
+                        await Send.XmlAsync(genericTvSearchResult.Value, cancellationToken: ct);
+                        break;
+                    }
+                    case IntegrationType.Radarr:
+                    {
+                        var genericMovieSearchResult = await _commandExecutor.Send(
+                            new SearchMovieCommand
+                            {
+                                Query = req.Query ?? string.Empty,
+                                IMDB_ID = req.ImdbId ?? string.Empty,
+                                TMDB_ID = req.TmdbId ?? 0,
+                                Limit = req.Limit ?? 100,
+                                Offset = req.Offset ?? 0,
+                                Integration = integration,
+                                TorznabApiKey = req.ApiKey,
+                            },
+                            ct
+                        );
+                        if (genericMovieSearchResult.IsFailed)
+                        {
+                            await Send.ErrorsAsync(cancellation: ct);
+                            break;
+                        }
+                        await Send.XmlAsync(genericMovieSearchResult.Value, cancellationToken: ct);
+                        break;
+                    }
+                    default:
+                        await Send.ForbiddenAsync(ct);
+                        break;
+                }
+                break;
             case "tvsearch":
                 var tvSearchResult = await _commandExecutor.Send(
                     new SearchTvShowCommand
@@ -66,6 +133,8 @@ public sealed class TorznabEndpoint : Endpoint<TorznabEndpointRequest>
                         TMDB_ID = req.TmdbId ?? 0,
                         Limit = req.Limit ?? 100,
                         Offset = req.Offset ?? 0,
+                        Integration = integration,
+                        TorznabApiKey = req.ApiKey,
                     },
                     ct
                 );
@@ -85,6 +154,8 @@ public sealed class TorznabEndpoint : Endpoint<TorznabEndpointRequest>
                         TMDB_ID = req.TmdbId ?? 0,
                         Limit = req.Limit ?? 100,
                         Offset = req.Offset ?? 0,
+                        Integration = integration,
+                        TorznabApiKey = req.ApiKey,
                     },
                     ct
                 );

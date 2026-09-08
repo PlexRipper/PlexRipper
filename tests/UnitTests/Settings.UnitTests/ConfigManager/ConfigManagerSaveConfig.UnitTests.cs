@@ -14,6 +14,7 @@ public class ConfigManagerSaveConfigUnitTests : BaseUnitTest<ConfigManager>
         // Arrange
         Mock.Mock<IUserSettings>().SetupGet(x => x.SettingsUpdated).Returns(new Subject<UserSettings>());
         Mock.Mock<IFile>().Setup(x => x.WriteAllText(It.IsAny<string>(), It.IsAny<string>())).Verifiable(Times.Once);
+        Mock.Mock<IFile>().Setup(x => x.Move(It.IsAny<string>(), It.IsAny<string>(), true)).Verifiable(Times.Once);
 
         // Were mocking other methods from ConfigManager, that's why we need to mock it manually here
         var sut = new Mock<ConfigManager>(

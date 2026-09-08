@@ -57,6 +57,10 @@ public sealed class ReaparrDbContext : DbContext, IReaparrDbContext, IReaparrDbC
 
     public DbSet<LibrarySyncJobQueue> LibrarySyncJobQueues { get; set; }
 
+    public DbSet<SonarrIntegration> SonarrIntegrations { get; set; }
+
+    public DbSet<RadarrIntegration> RadarrIntegrations { get; set; }
+
     public DbSet<DownloadTaskMovie> DownloadTaskMovie { get; set; }
 
     public DbSet<DownloadTaskMovieFile> DownloadTaskMovieFile { get; set; }

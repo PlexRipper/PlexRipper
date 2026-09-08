@@ -58,6 +58,7 @@ public sealed class DeleteTorrentEndpoint : Endpoint<DeleteTorrentRequest>
     public override async Task HandleAsync(DeleteTorrentRequest req, CancellationToken ct)
     {
         _log.Here().DebugApiCall(HttpContext, req);
+        var integration = HttpContext.GetIntegrationIdentity();
 
         var normalizedHashes = ParseHashes(req);
 
@@ -67,7 +68,7 @@ public sealed class DeleteTorrentEndpoint : Endpoint<DeleteTorrentRequest>
             return;
         }
 
-        var (activeKeys, nonActiveKeys, allKeys) = await QueryKeysByStatus(normalizedHashes, ct);
+        var (activeKeys, nonActiveKeys, allKeys) = await QueryKeysByStatus(normalizedHashes, integration, ct);
 
         if (allKeys.Count == 0)
         {
@@ -132,7 +133,7 @@ public sealed class DeleteTorrentEndpoint : Endpoint<DeleteTorrentRequest>
         }
         else
         {
-            var rootKeys = await GetRootKeysAsync(keysToDelete, ct);
+            var rootKeys = await GetRootKeysAsync(keysToDelete, integration, ct);
             if (rootKeys.Count > 0)
             {
                 var clearResult = await _commandExecutor.Send(
@@ -179,6 +180,7 @@ public sealed class DeleteTorrentEndpoint : Endpoint<DeleteTorrentRequest>
     /// </summary>
     private async Task<List<DownloadTaskKey>> GetRootKeysAsync(
         IReadOnlyCollection<DownloadTaskKey> leafKeys,
+        IntegrationIdentity? integration,
         CancellationToken ct
     )
     {
@@ -217,7 +219,7 @@ public sealed class DeleteTorrentEndpoint : Endpoint<DeleteTorrentRequest>
             );
             foreach (var episodeLeafKey in episodeLeafKeys)
             {
-                var rootKey = await _dbContext.GetRootDownloadTaskKeyAsync(episodeLeafKey, ct);
+                var rootKey = await _dbContext.GetRootDownloadTaskKeyAsync(episodeLeafKey, integration, ct);
                 if (rootKey is not null && rootKey.Type == DownloadTaskType.TvShow)
                 {
                     rootKeys.Add(rootKey);
@@ -237,7 +239,7 @@ public sealed class DeleteTorrentEndpoint : Endpoint<DeleteTorrentRequest>
         List<DownloadTaskKey> Active,
         List<DownloadTaskKey> NonActive,
         List<DownloadTaskKey> All
-    )> QueryKeysByStatus(List<string>? normalizedHashes, CancellationToken ct)
+    )> QueryKeysByStatus(List<string>? normalizedHashes, IntegrationIdentity integration, CancellationToken ct)
     {
         static bool IsActive(DownloadStatus status) =>
             status
@@ -250,7 +252,8 @@ public sealed class DeleteTorrentEndpoint : Endpoint<DeleteTorrentRequest>
                     or DownloadStatus.Restarting;
 
         var movieTask = _dbContext
-            .DownloadTaskMovieFile.Where(x =>
+            .DownloadTaskMovieFile.WhereIntegrationIs(integration)
+            .Where(x =>
                 x.HashId != null && (normalizedHashes == null || normalizedHashes.Contains(x.HashId.ToLower()))
             )
             .Select(x => new
@@ -267,7 +270,8 @@ public sealed class DeleteTorrentEndpoint : Endpoint<DeleteTorrentRequest>
             .ToListAsync(ct);
 
         var episodeTask = _dbContext
-            .DownloadTaskTvShowEpisodeFile.Where(x =>
+            .DownloadTaskTvShowEpisodeFile.WhereIntegrationIs(integration)
+            .Where(x =>
                 x.HashId != null && (normalizedHashes == null || normalizedHashes.Contains(x.HashId.ToLower()))
             )
             .Select(x => new

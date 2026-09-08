@@ -50,12 +50,6 @@ public class UserSettingsResetUnitTests : BaseUnitTest
         // IntegrationsSettings contains randomized values for some fields; assert invariants instead
         sut.IntegrationsSettings.Sonarr.ShouldBeEquivalentTo(expected.IntegrationsSettings.Sonarr);
         sut.IntegrationsSettings.Radarr.ShouldBeEquivalentTo(expected.IntegrationsSettings.Radarr);
-        sut.IntegrationsSettings.DownloadClientUsername.ShouldBe(expected.IntegrationsSettings.DownloadClientUsername);
-
-        // ReaparrApiKey should be a valid GUID string
         Guid.TryParse(sut.IntegrationsSettings.ReaparrApiKey, out _).ShouldBeTrue();
-
-        // DownloadClientPassword should be a 32-char hex (GUID without dashes)
-        sut.IntegrationsSettings.DownloadClientPassword.Length.ShouldBe(32);
     }
 }

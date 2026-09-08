@@ -4,12 +4,42 @@ namespace Reaparr.Data.Contracts;
 
 public static partial class DbContextExtensions
 {
-    public static async Task<FolderPath> GetDownloadFolder(this IReaparrDbContext dbContext)
+    public static async Task<FolderPath> GetDownloadFolder(
+        this IReaparrDbContext dbContext,
+        IntegrationIdentity? integration = null
+    )
     {
+        int? downloadFolderId = null;
+        if (integration is not null)
+        {
+            downloadFolderId = integration.Type switch
+            {
+                IntegrationType.Sonarr => await dbContext
+                    .SonarrIntegrations.Where(x => x.Id == integration.Id)
+                    .Select(x => x.DownloadFolderId)
+                    .SingleOrDefaultAsync(CancellationToken.None),
+                IntegrationType.Radarr => await dbContext
+                    .RadarrIntegrations.Where(x => x.Id == integration.Id)
+                    .Select(x => x.DownloadFolderId)
+                    .SingleOrDefaultAsync(CancellationToken.None),
+                _ => null,
+            };
+        }
+
+        if (downloadFolderId is not null)
+        {
+            var downloadFolder = await dbContext.FolderPaths.FirstOrDefaultAsync(
+                x => x.Id == downloadFolderId && x.FolderType == FolderType.DownloadFolder,
+                CancellationToken.None
+            );
+            if (downloadFolder is not null)
+                return downloadFolder;
+        }
+
         // This is the default download folder, which always exists in the database
         return (
-            await dbContext.FolderPaths.FirstOrDefaultAsync(
-                x => x.FolderType == FolderType.DownloadFolder,
+            await dbContext.FolderPaths.GetAsync(
+                PlexMediaType.None.ToDefaultDestinationFolderId(),
                 CancellationToken.None
             )
         )!;

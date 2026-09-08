@@ -8,6 +8,7 @@ import type {
 	DownloadMediaDTO,
 	FolderPathDTO,
 	PlexMediaSlimDTO,
+	IntegrationSummary,
 	RefreshPlexAccountAccessRapportDTO,
 } from '@dto';
 import { cloneDeep } from 'lodash-es';
@@ -41,6 +42,12 @@ export const useDialogStore = defineStore(StoreNames.DialogStore, () => {
 		},
 		openDirectoryBrowserDialog(data: FolderPathDTO): void {
 			state.dialogUpdate.next({ name: DialogType.DirectoryBrowserDialog, state: true, data });
+		},
+		openIntegrationDialog(data: IntegrationSummary | null): void {
+			state.dialogUpdate.next({ name: DialogType.IntegrationDialog, state: true, data });
+		},
+		openIntegrationSetupDialog(): void {
+			state.dialogUpdate.next({ name: DialogType.IntegrationSetupDialog, state: true, data: {} });
 		},
 		openServerSettingsDialog(plexServerId: number): void {
 			state.dialogUpdate.next({ name: DialogType.ServerSettingsDialog, state: true, data: plexServerId });

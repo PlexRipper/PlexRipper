@@ -38,4 +38,14 @@ public interface IProgressHub
         AppUpdateDownloadProgressDTO appUpdateDownloadProgress,
         CancellationToken cancellationToken = default
     );
+
+    /// <summary>
+    /// Sends an integration setup progress update to the front-end.
+    /// </summary>
+    /// <param name="progress"></param>
+    /// <param name="cancellationToken"> The <see cref="CancellationToken"/> to use.</param>
+    Task IntegrationSetupProgress(
+        IntegrationSetupProgressDTO progress,
+        CancellationToken cancellationToken = default
+    );
 }

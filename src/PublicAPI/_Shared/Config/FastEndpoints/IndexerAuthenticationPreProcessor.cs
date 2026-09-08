@@ -2,52 +2,28 @@ namespace Reaparr.PublicAPI;
 
 public class IndexerAuthenticationPreProcessor<TRequest> : IPreProcessor<TRequest>
 {
+    private readonly IReaparrDbContextFactory _dbContextFactory;
     private readonly ILogger _log;
-    private readonly IIntegrationsSettings _integrationsSettings;
-    private const string INDEXER_API_KEY = "apikey";
 
-    public IndexerAuthenticationPreProcessor(ILogger log, IIntegrationsSettings integrationsSettings)
+    public IndexerAuthenticationPreProcessor(ILogger log, IReaparrDbContextFactory dbContextFactory)
     {
         _log = log.ForContext<IndexerAuthenticationPreProcessor<TRequest>>();
-        _integrationsSettings = integrationsSettings;
+        _dbContextFactory = dbContextFactory;
     }
 
-    public Task PreProcessAsync(IPreProcessorContext<TRequest> ctx, CancellationToken ct)
+    public async Task PreProcessAsync(IPreProcessorContext<TRequest> ctx, CancellationToken ct)
     {
-        var apiKey = ctx.HttpContext.Request.Query.TryGetValue(INDEXER_API_KEY, out var queryKey)
-            ? queryKey.ToString()
-            : null;
-        var requestPath = ctx.HttpContext.Request.Path;
-        var userAgent = ctx.HttpContext.Request.Headers["User-Agent"].ToString();
+        using var dbContext = await _dbContextFactory.CreateAsync();
+        var identity = await ctx.HttpContext.AuthenticateQueryKeyAsync(dbContext, ct);
+        if (identity is not null)
+            return;
 
-        if (string.IsNullOrWhiteSpace(apiKey))
-        {
-            _log.Here()
-                .Warning(
-                    "Missing indexer API key from {UserAgent} for request to '{RequestPath}'",
-                    userAgent,
-                    requestPath
-                );
-            ctx.ValidationFailures.Add(
-                new(
-                    $"Missing Query parameter: {INDEXER_API_KEY}",
-                    $"The [{INDEXER_API_KEY}] query param needs to be set!"
-                )
+        _log.Here()
+            .Warning(
+                "Invalid or missing integration indexer API key from {UserAgent} for request to '{RequestPath}'",
+                ctx.HttpContext.Request.Headers.UserAgent.ToString(),
+                ctx.HttpContext.Request.Path
             );
-            return ctx.HttpContext.Response.SendErrorsAsync(ctx.ValidationFailures, cancellation: ct);
-        }
-
-        if (apiKey != _integrationsSettings.ReaparrApiKey)
-        {
-            _log.Here()
-                .Warning(
-                    "Invalid indexer API key from {UserAgent} for request to '{RequestPath}'",
-                    userAgent,
-                    requestPath
-                );
-            return ctx.HttpContext.Response.SendUnauthorizedAsync(cancellation: ct);
-        }
-
-        return Task.CompletedTask;
+        await ctx.HttpContext.Response.SendUnauthorizedAsync(ct);
     }
 }

@@ -1,10 +1,14 @@
 namespace Reaparr.Application;
 
-public record SetupSonarrDownloadClientCommand : ICommand<Result<SetupSonarrDownloadClientCommandResult>>;
+public record SetupSonarrDownloadClientCommand : ICommand<Result<SetupSonarrDownloadClientCommandResult>>
+{
+    public Guid IntegrationId { get; init; }
+}
 
 public record SetupSonarrDownloadClientCommandResult
 {
     public int DownloadClientId { get; init; }
+    public required SonarrDownloadContractDTO Resource { get; init; }
 }
 
 public class SetupSonarrDownloadClientCommandHandler
@@ -12,9 +16,9 @@ public class SetupSonarrDownloadClientCommandHandler
 {
     private readonly ILogger _log;
     private readonly ICommandExecutor _commandExecutor;
-    private readonly IIntegrationsSettings _integrationsSettings;
-    private readonly ISonarrSettings _settings;
+    private readonly IReaparrDbContext _dbContext;
     private readonly INetworkSettings _networkSettings;
+    private readonly IProgressHubService _progressHubService;
 
     private const string DOWNLOAD_CLIENT_NAME = "Reaparr DownloadClient";
 
@@ -24,16 +28,16 @@ public class SetupSonarrDownloadClientCommandHandler
     public SetupSonarrDownloadClientCommandHandler(
         ILogger log,
         ICommandExecutor commandExecutor,
-        IIntegrationsSettings integrationsSettings,
-        ISonarrSettings settings,
-        INetworkSettings networkSettings
+        IReaparrDbContext dbContext,
+        INetworkSettings networkSettings,
+        IProgressHubService progressHubService
     )
     {
         _log = log.ForContext<SetupSonarrDownloadClientCommandHandler>();
         _commandExecutor = commandExecutor;
-        _integrationsSettings = integrationsSettings;
-        _settings = settings;
+        _dbContext = dbContext;
         _networkSettings = networkSettings;
+        _progressHubService = progressHubService;
     }
 
     public async Task<Result<SetupSonarrDownloadClientCommandResult>> ExecuteAsync(
@@ -41,14 +45,30 @@ public class SetupSonarrDownloadClientCommandHandler
         CancellationToken ct
     )
     {
-        if (string.IsNullOrWhiteSpace(_settings.SonarrBaseUrl) || string.IsNullOrWhiteSpace(_settings.SonarrApiKey))
-            return Result.Fail("Sonarr settings are invalid: BaseUrl and ApiKey are required.").LogError();
+        var integration =
+            command.IntegrationId == Guid.Empty
+                ? null
+                : await _dbContext
+                    .SonarrIntegrations.AsNoTracking()
+                    .SingleOrDefaultAsync(x => x.Id == command.IntegrationId, ct);
+        if (integration is null)
+            return Result.Fail("The Sonarr integration was not found.").LogError();
 
         if (
-            !Uri.TryCreate(_settings.SonarrBaseUrl.TrimEnd('/'), UriKind.Absolute, out var sonarrBaseUri)
+            !Uri.TryCreate(integration.BaseUrl.TrimEnd('/'), UriKind.Absolute, out var sonarrBaseUri)
             || (sonarrBaseUri.Scheme != Uri.UriSchemeHttp && sonarrBaseUri.Scheme != Uri.UriSchemeHttps)
         )
             return Result.Fail("Sonarr BaseUrl is invalid.").LogError();
+
+        await _progressHubService.SendIntegrationSetupProgressAsync(
+            new IntegrationSetupProgressDTO
+            {
+                IntegrationId = integration.Id,
+                Stage = IntegrationSetupProgressStage.Connecting,
+                IsRunning = true,
+                IsSuccess = false,
+            }
+        );
 
         _log.Here()
             .Debug(
@@ -59,27 +79,67 @@ public class SetupSonarrDownloadClientCommandHandler
 
         try
         {
-            var result = await _commandExecutor.Send(new SonarApiGetDownloadClientsCommand(), ct);
+            var result = await _commandExecutor.Send(new SonarApiGetDownloadClientsCommand(integration.Id), ct);
+            if (result.IsCancelled)
+            {
+                await _progressHubService.SendIntegrationSetupProgressAsync(
+                    new IntegrationSetupProgressDTO
+                    {
+                        IntegrationId = integration.Id,
+                        Stage = IntegrationSetupProgressStage.Connecting,
+                        IsRunning = false,
+                        IsSuccess = false,
+                    }
+                );
+                return result.ToResult<SetupSonarrDownloadClientCommandResult>().LogWarning();
+            }
+
             if (result.IsFailed)
+            {
+                await _progressHubService.SendIntegrationSetupProgressAsync(
+                    new IntegrationSetupProgressDTO
+                    {
+                        IntegrationId = integration.Id,
+                        Stage = IntegrationSetupProgressStage.Connecting,
+                        IsRunning = false,
+                        IsSuccess = false,
+                    }
+                );
                 return Result
                     .Fail("Failed to retrieve existing download clients from Sonarr.")
                     .WithErrors(result.Errors)
                     .LogError();
+            }
+
+            await _progressHubService.SendIntegrationSetupProgressAsync(
+                new IntegrationSetupProgressDTO
+                {
+                    IntegrationId = integration.Id,
+                    Stage = IntegrationSetupProgressStage.Connecting,
+                    IsRunning = false,
+                    IsSuccess = true,
+                }
+            );
 
             var list = result.Value;
+            var resource = BuildDownloadClientResource(_networkSettings.Uri, integration);
 
-            var currentDownloadClient = list.FirstOrDefault(d =>
-                string.Equals(d.Name, DOWNLOAD_CLIENT_NAME, StringComparison.OrdinalIgnoreCase)
-            );
+            var currentDownloadClient =
+                list.FirstOrDefault(d => d.Id == integration.ExternalDownloadClientId)
+                ?? list.FirstOrDefault(d =>
+                    string.Equals(d.Name, DOWNLOAD_CLIENT_NAME, StringComparison.OrdinalIgnoreCase)
+                );
 
             if (currentDownloadClient != null)
             {
+                resource.Id = currentDownloadClient.Id;
                 var updateResult = await _commandExecutor.Send(
                     new SonarApiUpdateDownloadClientCommand
                     {
+                        IntegrationId = integration.Id,
                         Id = currentDownloadClient.Id,
                         ForceSave = true,
-                        Resource = BuildDownloadClientResource(_networkSettings.Uri),
+                        Resource = resource,
                     },
                     ct
                 );
@@ -88,15 +148,20 @@ public class SetupSonarrDownloadClientCommandHandler
                     return updateResult.WithError(PUBLIC_URL_HINT).LogError();
 
                 return Result.Ok(
-                    new SetupSonarrDownloadClientCommandResult { DownloadClientId = updateResult.Value.Id }
+                    new SetupSonarrDownloadClientCommandResult
+                    {
+                        DownloadClientId = updateResult.Value.Id,
+                        Resource = resource,
+                    }
                 );
             }
 
             var createResult = await _commandExecutor.Send(
                 new SonarrApiCreateDownloadClientCommand
                 {
-                    ForceSave = false,
-                    Resource = BuildDownloadClientResource(_networkSettings.Uri),
+                    IntegrationId = integration.Id,
+                    ForceSave = true,
+                    Resource = resource,
                 },
                 ct
             );
@@ -104,24 +169,51 @@ public class SetupSonarrDownloadClientCommandHandler
             if (createResult.IsFailed)
                 return createResult.WithError(PUBLIC_URL_HINT).LogError();
 
-            return Result.Ok(new SetupSonarrDownloadClientCommandResult { DownloadClientId = createResult.Value.Id });
+            resource.Id = createResult.Value.Id;
+            return Result.Ok(
+                new SetupSonarrDownloadClientCommandResult
+                {
+                    DownloadClientId = createResult.Value.Id,
+                    Resource = resource,
+                }
+            );
         }
         catch (TaskCanceledException e)
         {
             _log.Here().Error(e, "Timeout while communicating with Sonarr.");
+            await _progressHubService.SendIntegrationSetupProgressAsync(
+                new IntegrationSetupProgressDTO
+                {
+                    IntegrationId = integration.Id,
+                    Stage = IntegrationSetupProgressStage.Connecting,
+                    IsRunning = false,
+                    IsSuccess = false,
+                }
+            );
             return Result.Fail("Timeout while communicating with Sonarr.").LogError();
         }
         catch (HttpRequestException e)
         {
             _log.Here().Error(e, "HTTP error while communicating with Sonarr.");
+            await _progressHubService.SendIntegrationSetupProgressAsync(
+                new IntegrationSetupProgressDTO
+                {
+                    IntegrationId = integration.Id,
+                    Stage = IntegrationSetupProgressStage.Connecting,
+                    IsRunning = false,
+                    IsSuccess = false,
+                }
+            );
             return Result.Fail("HTTP error while communicating with Sonarr.").LogError();
         }
     }
 
-    private SonarrDownloadContractDTO BuildDownloadClientResource(Uri reaparrBaseUri)
+    private SonarrDownloadContractDTO BuildDownloadClientResource(Uri reaparrBaseUri, SonarrIntegration integration)
     {
         var useSsl = string.Equals(reaparrBaseUri.Scheme, Uri.UriSchemeHttps, StringComparison.OrdinalIgnoreCase);
-        string urlBase = _networkSettings.BasePath.AppendPathSegment("api/public/download-client");
+        string urlBase = _networkSettings.BasePath.AppendPathSegment(
+            $"api/public/integrations/{integration.Id}/download-client"
+        );
 
         return new SonarrDownloadContractDTO
         {
@@ -137,9 +229,8 @@ public class SetupSonarrDownloadClientCommandHandler
                 new() { Name = "port", Value = reaparrBaseUri.Port },
                 new() { Name = "useSsl", Value = useSsl },
                 new() { Name = "urlBase", Value = urlBase },
-                new() { Name = "username", Value = _integrationsSettings.DownloadClientUsername },
-                new() { Name = "password", Value = _integrationsSettings.DownloadClientPassword },
-                new() { Name = "tvCategory", Value = IntegrationDefinitions.SONARR_DEFAULT_CATEGORY },
+                new() { Name = "apiKey", Value = integration.QBittorrentApiKey },
+                new() { Name = "tvCategory", Value = integration.Category },
                 new() { Name = "tvImportedCategory" },
                 new() { Name = "recentTvPriority", Value = 0 },
                 new() { Name = "olderTvPriority", Value = 0 },

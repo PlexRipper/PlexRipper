@@ -79,6 +79,7 @@ public class GenerateDownloadTaskMoviesCommandHandler
             }
 
             var plexServer = plexLibrary.PlexServer!;
+            var downloadRootPath = (await _dbContext.GetDownloadFolder(request.Integration)).DirectoryPath;
 
             var plexMovies = await _dbContext
                 .PlexMovies.Where(x => downloadMediaDto.MediaIds.Contains(x.Id))
@@ -87,10 +88,14 @@ public class GenerateDownloadTaskMoviesCommandHandler
 
             foreach (var plexMovie in plexMovies)
             {
-                var downloadTaskAlreadyExists = await _dbContext.DownloadTaskMovie.AnyAsync(
-                    x => x.PlexServerId == plexMovie.PlexServerId && x.PlexApiRatingKey == plexMovie.PlexApiRatingKey,
-                    cancellationToken
-                );
+                var downloadTaskAlreadyExists = await _dbContext
+                    .DownloadTaskMovie.WhereIntegrationIs(request.Integration)
+                    .AnyAsync(
+                        x =>
+                            x.PlexServerId == plexMovie.PlexServerId
+                            && x.PlexApiRatingKey == plexMovie.PlexApiRatingKey,
+                        cancellationToken
+                    );
                 if (downloadTaskAlreadyExists)
                 {
                     _log.Here()
@@ -102,7 +107,7 @@ public class GenerateDownloadTaskMoviesCommandHandler
                     continue;
                 }
 
-                var movieDownloadTask = plexMovie.MapToDownloadTask();
+                var movieDownloadTask = plexMovie.MapToDownloadTask(request.Integration);
 
                 var movieData = SelectMovieQuality(plexMovie, downloadMediaDto);
                 if (movieData is null)
@@ -124,12 +129,15 @@ public class GenerateDownloadTaskMoviesCommandHandler
                 // Map all parts to DownloadTaskMovieFile and add to movieDownloadTask
                 movieDownloadTask.Children.AddRange(
                     allPartsForSelectedMedia.Select(x =>
-                        x.MapToDownloadTask(plexMovie, request, downloadMediaDto.KeepCompletedInDownloadFolder)
+                        x.MapToDownloadTask(
+                            plexMovie,
+                            request,
+                            downloadRootPath,
+                            downloadMediaDto.KeepCompletedInDownloadFolder
+                        )
                     )
                 );
-
                 movieDownloadTask.Calculate();
-
                 downloadTasks.Add(movieDownloadTask);
             }
 

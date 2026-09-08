@@ -1,60 +1,35 @@
-using System.Net.Http.Headers;
-
 namespace Reaparr.Application;
 
 public record TestConnectionToSonarrEndpointRequest
 {
+    [QueryParam, BindFrom("integrationId")]
+    public Guid? IntegrationId { get; init; }
+
     [QueryParam, BindFrom("url")]
-    public required string Url { get; init; }
+    public string? Url { get; init; }
 
     [QueryParam, BindFrom("apiKey")]
-    public required string ApiKey { get; init; }
+    public string? ApiKey { get; init; }
 }
 
 public record TestConnectionToSonarrEndpointResponse
 {
-    [SetsRequiredMembers]
-    public TestConnectionToSonarrEndpointResponse(TestConnectionStatus result)
-    {
-        Result = result;
-    }
-
     public required TestConnectionStatus Result { get; init; }
-}
-
-public class TestConnectionToSonarrEndpointRequestValidator : Validator<TestConnectionToSonarrEndpointRequest>
-{
-    public TestConnectionToSonarrEndpointRequestValidator()
-    {
-        RuleFor(x => x.Url).NotEmpty().WithMessage("Provided Sonarr URL cannot be empty.");
-        RuleFor(x => x.Url).Must(BeValidUrl).WithMessage("Provided Sonarr URL must be a valid http/https URL.");
-        RuleFor(x => x.ApiKey).NotEmpty().WithMessage("Provided Sonarr API Key cannot be empty.");
-    }
-
-    private static bool BeValidUrl(string url)
-    {
-        if (string.IsNullOrWhiteSpace(url))
-        {
-            return false;
-        }
-
-        var trimmed = url.TrimEnd('/');
-
-        return Uri.TryCreate(trimmed, UriKind.Absolute, out var uriResult)
-            && (uriResult.Scheme == Uri.UriSchemeHttp || uriResult.Scheme == Uri.UriSchemeHttps);
-    }
+    public int? HttpStatusCode { get; init; }
+    public string? ErrorMessage { get; init; }
+    public required DateTime TestedAt { get; init; }
 }
 
 public class TestConnectionToSonarrEndpoint
-    : Endpoint<TestConnectionToSonarrEndpointRequest, TestConnectionToSonarrEndpointResponse>
+    : Endpoint<TestConnectionToSonarrEndpointRequest, ResultDTO<TestConnectionToSonarrEndpointResponse>>
 {
     private readonly ILogger _log;
-    private readonly HttpClient _client;
+    private readonly ICommandExecutor _commandExecutor;
 
-    public TestConnectionToSonarrEndpoint(ILogger log, IHttpClientFactory httpClientFactory)
+    public TestConnectionToSonarrEndpoint(ILogger log, ICommandExecutor commandExecutor)
     {
         _log = log.ForContext<TestConnectionToSonarrEndpoint>();
-        _client = httpClientFactory.CreateSonarrHttpClient();
+        _commandExecutor = commandExecutor;
     }
 
     public override void Configure()
@@ -63,6 +38,7 @@ public class TestConnectionToSonarrEndpoint
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<TestConnectionToSonarrEndpointResponse>))
                 .Produces(StatusCodes.Status400BadRequest, typeof(BaseResultDTO))
+                .Produces(StatusCodes.Status404NotFound, typeof(BaseResultDTO))
                 .Produces(StatusCodes.Status500InternalServerError, typeof(BaseResultDTO))
         );
     }
@@ -70,52 +46,32 @@ public class TestConnectionToSonarrEndpoint
     public override async Task HandleAsync(TestConnectionToSonarrEndpointRequest req, CancellationToken ct)
     {
         _log.Here().DebugApiCall(HttpContext, req);
-
-        var baseUrl = req.Url.TrimEnd('/');
-
-        var url = new Url(baseUrl).AppendPathSegments("api", "v3", "system", "status");
-
-        using var httpRequest = new HttpRequestMessage(System.Net.Http.HttpMethod.Get, url.ToString());
-        httpRequest.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-        httpRequest.Headers.Add("X-Api-Key", req.ApiKey);
-
-        var result = await Result.Try(async Task () =>
-        {
-            using var httpResponse = await _client.SendAsync(httpRequest, HttpCompletionOption.ResponseHeadersRead, ct);
-            if (httpResponse.IsSuccessStatusCode)
-            {
-                await SendTestResult(TestConnectionStatus.Success, ct);
-                return;
-            }
-
-            var statusCode = (int)httpResponse.StatusCode;
-            if (statusCode == 401)
-            {
-                await SendTestResult(TestConnectionStatus.InvalidApiKey, ct);
-                return;
-            }
-
-            var reason = httpResponse.ReasonPhrase ?? $"HTTP {(int)httpResponse.StatusCode}";
-            _log.Here().Warning("Sonarr connection test failed: {Reason}", reason);
-            await SendTestResult(TestConnectionStatus.ConnectionFailed, ct);
-        });
-
+        var result = await _commandExecutor.Send(
+            new TestConnectionToSonarrCommand(req.IntegrationId, req.Url, req.ApiKey),
+            ct
+        );
         if (result.IsCancelled)
         {
-            _log.Here().Error("HTTP request to Sonarr instance was cancelled.");
-            await SendTestResult(TestConnectionStatus.ConnectionFailed, ct);
+            await Send.FluentResult(result.ToResult<TestConnectionToSonarrEndpointResponse>().LogWarning(), ct);
+            return;
+        }
+        if (result.IsFailed)
+        {
+            await Send.FluentResult(result.ToResult<TestConnectionToSonarrEndpointResponse>().LogError(), ct);
             return;
         }
 
-        if (result.IsFailed)
-        {
-            _log.Here().Error("HTTP request to Sonarr instance failed, could be offline");
-            await SendTestResult(TestConnectionStatus.ConnectionFailed, ct);
-        }
-    }
-
-    private async Task SendTestResult(TestConnectionStatus status, CancellationToken ct)
-    {
-        await Send.FluentResult(Result.Ok(new TestConnectionToSonarrEndpointResponse(status)), ct);
+        await Send.FluentResult(
+            Result.Ok(
+                new TestConnectionToSonarrEndpointResponse
+                {
+                    Result = result.Value.Status,
+                    HttpStatusCode = result.Value.HttpStatusCode,
+                    ErrorMessage = result.Value.ErrorMessage,
+                    TestedAt = result.Value.TestedAt,
+                }
+            ),
+            ct
+        );
     }
 }

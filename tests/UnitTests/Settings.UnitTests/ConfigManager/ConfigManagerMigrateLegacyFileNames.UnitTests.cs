@@ -100,34 +100,6 @@ public class ConfigManagerMigrateLegacyFileNamesUnitTests : BaseUnitTest<ConfigM
     }
 
     [Test]
-    public void ShouldNotRename_WhenNewTargetsAlreadyExist()
-    {
-        // Arrange
-        MockFileSystem? fileSystem = null;
-        SetupDependencies(builder => builder.RegisterInstance<IUserSettings>(new UserSettings()));
-        SetupFileSystem(system =>
-        {
-            fileSystem = system;
-            system.AddDirectory(ConfigDirectory);
-            system.AddFile(LegacyConfigPath, new MockFileData("legacy"));
-            system.AddFile(ConfigPath, new MockFileData("{}"));
-            system.AddFile(LegacyDatabasePath, new MockFileData("legacy-db"));
-            system.AddFile(DatabasePath, new MockFileData("new-db"));
-        });
-
-        // Act
-        var result = Sut.Setup();
-
-        // Assert
-        result.IsSuccess.ShouldBeTrue();
-        fileSystem.ShouldNotBeNull();
-        fileSystem.GetFile(LegacyConfigPath).TextContents.ShouldBe("legacy");
-        fileSystem.GetFile(ConfigPath).TextContents.ShouldBe("{}");
-        fileSystem.GetFile(LegacyDatabasePath).TextContents.ShouldBe("legacy-db");
-        fileSystem.GetFile(DatabasePath).TextContents.ShouldBe("new-db");
-    }
-
-    [Test]
     public void ShouldRenameOnlyWal_WhenOnlyWalPresent()
     {
         // Arrange

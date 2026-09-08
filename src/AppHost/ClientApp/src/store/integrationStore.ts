@@ -1,295 +1,327 @@
+import Log from 'consola';
 import { acceptHMRUpdate, defineStore } from 'pinia';
-import { reactive, toRefs, computed } from 'vue';
-import { switchMap, tap, catchError, finalize } from 'rxjs/operators';
-import { type Observable, of, forkJoin } from 'rxjs';
+import { computed, reactive, toRefs } from 'vue';
+import type { Observable } from 'rxjs';
+import { of } from 'rxjs';
+import { catchError, finalize, map, switchMap, tap } from 'rxjs/operators';
 import { cloneDeep } from 'lodash-es';
-import { type BaseResultDTO, TestConnectionStatus } from '@dto';
 import { integrationApi } from '@api';
-import { useSettingsStore } from '@store';
-import { StoreNames, type ISetupResult } from '@interfaces';
+import {
+	IntegrationProvisioningState,
+	type IntegrationSummary,
+	IntegrationType,
+	type RadarrIntegrationDTO,
+	type SonarrIntegrationDTO,
+	type TestConnectionToRadarrEndpointResponse,
+	type TestConnectionToSonarrEndpointResponse,
+} from '@dto';
+import { type ISetupResult, type ResultDTO, StoreNames } from '@interfaces';
 
-interface IIntegrationStoreState {
-	sonarr: IIntegrationState;
-	radarr: IIntegrationState;
+interface IIntegrationDraft {
+	type: IntegrationType;
+	name: string;
+	url: string;
+	apiKey: string;
+	category: string;
+	downloadFolderId: number;
 }
 
-interface IIntegrationState {
-	step: number;
+type IntegrationDetail = (RadarrIntegrationDTO | SonarrIntegrationDTO) & { type: IntegrationType };
+type TestConnectionResult = TestConnectionToRadarrEndpointResponse | TestConnectionToSonarrEndpointResponse;
+
+interface IIntegrationStoreState {
+	items: IntegrationSummary[];
+	detail: IntegrationDetail | null;
+	draft: IIntegrationDraft;
 	isTesting: boolean;
-	isConfiguring: boolean;
-	testSuccess: boolean | null;
-	testStatus: TestConnectionStatus | null;
-	configuringSuccess: boolean | null;
-	error: BaseResultDTO | null;
+	isSaving: boolean;
+	isSettingUp: boolean;
+	isDeleting: boolean;
+	testResult: TestConnectionResult | null;
+	error: unknown;
+	requiresSetupPrompt: boolean;
+}
+
+function emptyDraft(type = IntegrationType.Sonarr): IIntegrationDraft {
+	return { type, name: '', url: '', apiKey: '', category: `Reaparr ${type}`, downloadFolderId: 1 };
 }
 
 export const useIntegrationStore = defineStore(StoreNames.IntegrationStore, () => {
 	const defaultState: IIntegrationStoreState = {
-		sonarr: {
-			step: 1,
-			isTesting: false,
-			isConfiguring: false,
-			testSuccess: null,
-			testStatus: null,
-			configuringSuccess: null,
-			error: null,
-		},
-		radarr: {
-			step: 1,
-			isTesting: false,
-			isConfiguring: false,
-			testSuccess: null,
-			testStatus: null,
-			configuringSuccess: null,
-			error: null,
-		},
+		items: [],
+		detail: null,
+		draft: emptyDraft(),
+		isTesting: false,
+		isSaving: false,
+		isSettingUp: false,
+		isDeleting: false,
+		testResult: null,
+		error: null,
+		requiresSetupPrompt: false,
 	};
 
 	const state = reactive<IIntegrationStoreState>(cloneDeep(defaultState));
-	const settingsStore = useSettingsStore();
 
-	// Validation helpers
-	const isValidUrl = (url: string | undefined | null): boolean => {
-		if (!url?.trim()) return false;
-		try {
-			new URL(url.trim());
-			return true;
-		} catch {
-			return false;
-		}
-	};
-
-	const isValidApiKey = (apiKey: string | undefined | null): boolean => {
-		if (!apiKey?.trim()) return false;
-		const trimmedKey = apiKey.trim();
-		// API key should be 32 characters and hexadecimal
-		return trimmedKey.length === 32 && /^[a-f0-9]+$/i.test(trimmedKey);
-	};
-
-	// Actions
 	const actions = {
 		setup(): Observable<ISetupResult> {
-			const sonarrSettings = settingsStore.integrationsSettings.sonarr;
-			const radarrSettings = settingsStore.integrationsSettings.radarr;
-
-			const testObservables: Observable<{ integration: string; isSuccess: boolean }>[] = [];
-
-			// Test Sonarr if configured
-			if (sonarrSettings.isConfigured && sonarrSettings.sonarrBaseUrl && sonarrSettings.sonarrApiKey) {
-				testObservables.push(
-					integrationApi.testConnectionToSonarrEndpoint({
-						url: sonarrSettings.sonarrBaseUrl,
-						apiKey: sonarrSettings.sonarrApiKey,
-					}).pipe(
-						tap((response) => {
-							if (!response.isSuccess || response.value?.result !== TestConnectionStatus.Success) {
-								showErrorNotification('Failed to connect to Sonarr. Please check your integration settings.', 5000);
-								state.sonarr.testSuccess = false;
-								state.sonarr.testStatus = response.value?.result ?? TestConnectionStatus.Unknown;
-								state.sonarr.step = 1;
-							} else {
-								// If Sonarr connection is successful, set step to 3 to show as completed
-								state.sonarr.step = 3;
-								state.sonarr.testSuccess = true;
-								state.sonarr.configuringSuccess = settingsStore.integrationsSettings.sonarr.isConfigured;
-							}
-						}),
-						switchMap((response) => of({
-							integration: 'Sonarr',
-							isSuccess: response.isSuccess && response.value?.result === TestConnectionStatus.Success,
-						})),
-						catchError(() => of({ integration: 'Sonarr', isSuccess: false })),
-					),
-				);
+			return actions.refresh().pipe(
+				map(() => ({ name: StoreNames.IntegrationStore, isSuccess: true })),
+				catchError((error) => {
+					Log.error('Failed to setup integration store', error);
+					return of({ name: StoreNames.IntegrationStore, isSuccess: false });
+				}),
+			);
+		},
+		refresh() {
+			return integrationApi.getIntegrationsEndpoint().pipe(
+				tap((result) => {
+					if (result.isSuccess) {
+						state.items = result.value ?? [];
+						if (state.testResult) updateSummaryConnectionStatus(state.testResult);
+					}
+				}),
+			);
+		},
+		openAdd(type = IntegrationType.Sonarr): void {
+			state.detail = null;
+			state.draft = emptyDraft(type);
+			resetOperationState();
+		},
+		openEdit(item: IntegrationSummary) {
+			resetOperationState();
+			let request: Observable<ResultDTO<RadarrIntegrationDTO | SonarrIntegrationDTO>>;
+			switch (item.type) {
+				case IntegrationType.Radarr:
+					request = integrationApi.getRadarrIntegrationEndpoint(item.id);
+					break;
+				case IntegrationType.Sonarr:
+					request = integrationApi.getSonarrIntegrationEndpoint(item.id);
+					break;
+				default:
+					throw new Error(`Unsupported integration type: ${String(item.type)}`);
 			}
-
-			// Test Radarr if configured
-			if (radarrSettings.isConfigured && radarrSettings.radarrBaseUrl && radarrSettings.radarrApiKey) {
-				testObservables.push(
-					integrationApi.testConnectionToRadarrEndpoint({
-						url: radarrSettings.radarrBaseUrl,
-						apiKey: radarrSettings.radarrApiKey,
-					}).pipe(
-						tap((response) => {
-							if (!response.isSuccess || response.value?.result !== TestConnectionStatus.Success) {
-								showErrorNotification('Failed to connect to Radarr. Please check your integration settings.', 5000);
-								state.radarr.testSuccess = false;
-								state.radarr.testStatus = response.value?.result ?? TestConnectionStatus.Unknown;
-								state.radarr.step = 1;
-							} else {
-								// If Radarr connection is successful, set step to 3 to show as completed
-								state.radarr.step = 3;
-								state.radarr.testSuccess = true;
-								state.radarr.configuringSuccess = settingsStore.integrationsSettings.radarr.isConfigured;
-							}
-						}),
-						switchMap((response) => of({
-							integration: 'Radarr',
-							isSuccess: response.isSuccess && response.value?.result === TestConnectionStatus.Success,
-						})),
-						catchError(() => of({ integration: 'Radarr', isSuccess: false })),
-					),
-				);
+			return request.pipe(
+				tap((result) => {
+					if (result.isSuccess && result.value) setDetail(item.type, result.value);
+					else state.error = result;
+				}),
+				catchError(handleError),
+			);
+		},
+		test() {
+			const query = {
+				apiKey: state.draft.apiKey,
+				url: state.draft.url,
+				...(state.detail ? { integrationId: state.detail.id } : {}),
+			};
+			let request: Observable<ResultDTO<TestConnectionResult>>;
+			switch (state.draft.type) {
+				case IntegrationType.Radarr:
+					request = integrationApi.testConnectionToRadarrEndpoint(query);
+					break;
+				case IntegrationType.Sonarr:
+					request = integrationApi.testConnectionToSonarrEndpoint(query);
+					break;
+				default:
+					throw new Error(`Unsupported integration type: ${String(state.draft.type)}`);
 			}
-
-			// If no integrations are configured, return success immediately
-			if (testObservables.length === 0) {
-				return of({ name: StoreNames.IntegrationStore, isSuccess: true });
+			state.isTesting = true;
+			state.testResult = null;
+			state.error = null;
+			return request.pipe(
+				tap((result) => {
+					if (result.value) {
+						state.testResult = result.value;
+						updateSummaryConnectionStatus(result.value);
+					} else state.error = result;
+				}),
+				catchError(handleError),
+				finalize(() => (state.isTesting = false)),
+			);
+		},
+		save() {
+			let request: Observable<ResultDTO<RadarrIntegrationDTO | SonarrIntegrationDTO>>;
+			switch (state.draft.type) {
+				case IntegrationType.Radarr:
+					request = saveRadarr();
+					break;
+				case IntegrationType.Sonarr:
+					request = saveSonarr();
+					break;
+				default:
+					throw new Error(`Unsupported integration type: ${String(state.draft.type)}`);
 			}
-
-			// Test all configured integrations in parallel
-			return forkJoin(testObservables).pipe(
-				switchMap((results) => {
-					const allSuccess = results.every((r) => r.isSuccess);
-					return of({ name: StoreNames.IntegrationStore, isSuccess: allSuccess });
-				}),
+			state.isSaving = true;
+			state.error = null;
+			return request.pipe(
+				switchMap((result) => result.isSuccess ? actions.refresh().pipe(map(() => result)) : of(result)),
+				catchError(handleError),
+				finalize(() => (state.isSaving = false)),
 			);
 		},
-
-		testConnectionToSonarr() {
-			state.sonarr.isTesting = true;
-			state.sonarr.testSuccess = null;
-			state.sonarr.testStatus = null;
-			state.sonarr.error = null;
-
-			return integrationApi.testConnectionToSonarrEndpoint({
-				url: settingsStore.integrationsSettings.sonarr.sonarrBaseUrl,
-				apiKey: settingsStore.integrationsSettings.sonarr.sonarrApiKey,
-			}).pipe(tap((response) => {
-				if (response.isSuccess) {
-					const status = response.value?.result ?? TestConnectionStatus.Unknown;
-					state.sonarr.testStatus = status;
-
-					if (status === TestConnectionStatus.Success) {
-						state.sonarr.testSuccess = true;
-						state.sonarr.step = 2;
-					} else {
-						state.sonarr.testSuccess = false;
+		setupIntegration() {
+			const detail = state.detail;
+			if (!detail) return of(null);
+			let request: Observable<ResultDTO<RadarrIntegrationDTO | SonarrIntegrationDTO>>;
+			switch (detail.type) {
+				case IntegrationType.Radarr:
+					request = integrationApi.setupRadarrIntegrationEndpoint(detail.id);
+					break;
+				case IntegrationType.Sonarr:
+					request = integrationApi.setupSonarrIntegrationEndpoint(detail.id);
+					break;
+				default:
+					throw new Error(`Unsupported integration type: ${String(detail.type)}`);
+			}
+			state.isSettingUp = true;
+			state.error = null;
+			return request.pipe(
+				tap((result) => {
+					if (result.isSuccess && result.value) {
+						setDetail(state.detail!.type, result.value);
+						state.requiresSetupPrompt = false;
+					} else state.error = result;
+				}),
+				switchMap((result) => result.isSuccess ? actions.refresh().pipe(map(() => result)) : of(result)),
+				catchError(handleError),
+				finalize(() => (state.isSettingUp = false)),
+			);
+		},
+		delete() {
+			const detail = state.detail;
+			if (!detail) return of(null);
+			let request: Observable<unknown>;
+			switch (detail.type) {
+				case IntegrationType.Radarr:
+					request = integrationApi.deleteRadarrIntegrationEndpoint(detail.id, { Force: true });
+					break;
+				case IntegrationType.Sonarr:
+					request = integrationApi.deleteSonarrIntegrationEndpoint(detail.id, { Force: true });
+					break;
+				default:
+					throw new Error(`Unsupported integration type: ${String(detail.type)}`);
+			}
+			state.isDeleting = true;
+			state.error = null;
+			return (request as Observable<ResultDTO>).pipe(
+				switchMap((result) => {
+					if (!result.isSuccess) {
+						state.error = result;
+						return of(result);
 					}
-				} else {
-					state.sonarr.testSuccess = false;
-					state.sonarr.testStatus = null;
-					state.sonarr.error = response;
-				}
-			}), finalize(() => {
-				state.sonarr.isTesting = false;
-			}));
-		},
-
-		testConnectionToRadarr() {
-			state.radarr.isTesting = true;
-			state.radarr.testSuccess = null;
-			state.radarr.testStatus = null;
-			state.radarr.error = null;
-
-			return integrationApi.testConnectionToRadarrEndpoint({
-				url: settingsStore.integrationsSettings.radarr.radarrBaseUrl,
-				apiKey: settingsStore.integrationsSettings.radarr.radarrApiKey,
-			}).pipe(tap((response) => {
-				if (response.isSuccess) {
-					const status = response.value?.result ?? TestConnectionStatus.Unknown;
-					state.radarr.testStatus = status;
-
-					if (status === TestConnectionStatus.Success) {
-						state.radarr.testSuccess = true;
-						state.radarr.step = 2;
-					} else {
-						state.radarr.testSuccess = false;
-					}
-				} else {
-					state.radarr.testSuccess = false;
-					state.radarr.testStatus = null;
-					state.radarr.error = response;
-				}
-			}), finalize(() => {
-				state.radarr.isTesting = false;
-			}));
-		},
-
-		configureSonarrIntegration() {
-			state.sonarr.isConfiguring = true;
-			state.sonarr.configuringSuccess = null;
-			state.sonarr.error = null;
-
-			return integrationApi.configureSonarrIntegrationEndpoint({
-				url: settingsStore.integrationsSettings.sonarr.sonarrBaseUrl,
-				apiKey: settingsStore.integrationsSettings.sonarr.sonarrApiKey,
-			}).pipe(
-				tap((response) => {
-					state.sonarr.configuringSuccess = response.isSuccess;
-					if (response.isSuccess) {
-						// This should overshoot to step 3 to show step 2 as done
-						state.sonarr.step = 3;
-					} else {
-						state.sonarr.error = response;
-					}
+					state.detail = null;
+					state.requiresSetupPrompt = false;
+					return actions.refresh().pipe(map(() => result));
 				}),
-				switchMap((response) => response.isSuccess ? settingsStore.refreshSettings() : of(response)),
-				finalize(() => {
-					state.sonarr.isConfiguring = false;
-				}),
+				catchError(handleError),
+				finalize(() => (state.isDeleting = false)),
 			);
 		},
-
-		configureRadarrIntegration() {
-			state.radarr.isConfiguring = true;
-			state.radarr.configuringSuccess = null;
-			state.radarr.error = null;
-
-			return integrationApi.configureRadarrIntegrationEndpoint({
-				url: settingsStore.integrationsSettings.radarr.radarrBaseUrl,
-				apiKey: settingsStore.integrationsSettings.radarr.radarrApiKey,
-			}).pipe(
-				tap((response) => {
-					state.radarr.configuringSuccess = response.isSuccess;
-					if (response.isSuccess) {
-						// This should overshoot to step 3 to show step 2 as done
-						state.radarr.step = 3;
-					} else {
-						state.radarr.error = response;
-					}
-				}),
-				switchMap((response) => response.isSuccess ? settingsStore.refreshSettings() : of(response)),
-				finalize(() => {
-					state.radarr.isConfiguring = false;
-				}),
-			);
+		close(): void {
+			state.detail = null;
+			state.draft = emptyDraft();
+			resetOperationState();
 		},
-
-		clearRadarrConfiguration() {
-			return integrationApi.clearRadarrConfigurationEndpoint().pipe(
-				switchMap((response) => response.isSuccess ? settingsStore.refreshSettings() : of(response)),
-			);
-		},
-
-		clearSonarrConfiguration() {
-			return integrationApi.clearSonarrConfigurationEndpoint().pipe(
-				switchMap((response) => response.isSuccess ? settingsStore.refreshSettings() : of(response)),
-			);
-		},
-
-		$reset() {
+		$reset(): void {
 			Object.assign(state, cloneDeep(defaultState));
 		},
 	};
 
-	// Getters
+	function resetOperationState(): void {
+		state.error = null;
+		state.testResult = null;
+		state.requiresSetupPrompt = false;
+	}
+
+	function updateSummaryConnectionStatus(result: TestConnectionResult): void {
+		if (!state.detail) return;
+
+		const index = state.items.findIndex((item) => item.id === state.detail!.id);
+		state.detail = {
+			...state.detail,
+			lastConnectionTestStatus: result.result,
+			lastConnectionTestHttpStatusCode: result.httpStatusCode,
+			lastConnectionTestErrorMessage: result.errorMessage,
+			lastConnectionTestedAt: result.testedAt,
+		};
+		if (index === -1) return;
+
+		const integration = state.items[index];
+		if (!integration) return;
+		state.items.splice(index, 1, {
+			...integration,
+			lastConnectionTestStatus: result.result,
+			lastConnectionTestHttpStatusCode: result.httpStatusCode,
+			lastConnectionTestErrorMessage: result.errorMessage,
+			lastConnectionTestedAt: result.testedAt,
+		});
+	}
+
+	function setDetail(type: IntegrationType, detail: RadarrIntegrationDTO | SonarrIntegrationDTO): void {
+		state.detail = { ...detail, type };
+		state.draft = {
+			type,
+			name: detail.name,
+			url: detail.url,
+			apiKey: detail.apiKey,
+			category: detail.category,
+			downloadFolderId: detail.downloadFolderId,
+		};
+	}
+
+	function saveRadarr() {
+		const request = toRequest();
+		const observable = state.detail
+			? integrationApi.updateRadarrIntegrationEndpoint(state.detail.id, request)
+			: integrationApi.createRadarrIntegrationEndpoint(request);
+		return observable.pipe(tap((result) => handleSaveResult(IntegrationType.Radarr, result)));
+	}
+
+	function saveSonarr() {
+		const request = toRequest();
+		const observable = state.detail
+			? integrationApi.updateSonarrIntegrationEndpoint(state.detail.id, request)
+			: integrationApi.createSonarrIntegrationEndpoint(request);
+		return observable.pipe(tap((result) => handleSaveResult(IntegrationType.Sonarr, result)));
+	}
+
+	function toRequest() {
+		return {
+			name: state.draft.name,
+			url: state.draft.url,
+			apiKey: state.draft.apiKey,
+			category: state.draft.category,
+			downloadFolderId: state.draft.downloadFolderId,
+		};
+	}
+
+	function handleSaveResult(type: IntegrationType, result: {
+		isSuccess: boolean;
+		value?: RadarrIntegrationDTO | SonarrIntegrationDTO | null;
+	}): void {
+		if (result.isSuccess && result.value) {
+			setDetail(type, result.value);
+			state.requiresSetupPrompt = result.value.provisioningState !== IntegrationProvisioningState.Configured;
+		} else state.error = result;
+	}
+
+	function handleError(error: unknown) {
+		state.error = error;
+		Log.error('Integration request failed', error);
+		return of(null);
+	}
+
 	const getters = {
-		isRadarrConnectionValid: computed(() => {
-			const { radarrBaseUrl, radarrApiKey } = settingsStore.integrationsSettings.radarr;
-			return isValidUrl(radarrBaseUrl) && isValidApiKey(radarrApiKey);
-		}),
-		isSonarrConnectionValid: computed(() => {
-			const { sonarrBaseUrl, sonarrApiKey } = settingsStore.integrationsSettings.sonarr;
-			return isValidUrl(sonarrBaseUrl) && isValidApiKey(sonarrApiKey);
-		}),
+		isDraftValid: computed(() => Boolean(
+			state.draft.name.trim()
+			&& state.draft.url.trim()
+			&& state.draft.apiKey.trim()
+			&& state.draft.category.trim()
+			&& state.draft.downloadFolderId > 0,
+		)),
 	};
 
-	return {
-		...toRefs(state),
-		...actions,
-		...getters,
-	};
+	return { ...toRefs(state), ...actions, ...getters };
 });
 
 if (import.meta.hot) {

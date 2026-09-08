@@ -52,7 +52,7 @@
 					clickable
 					:class="{
 						'active-library-item': isActiveLibrary(library.id),
-						'inaccessible-library-item': !hasLibraryAccess(server.id, library.id),
+						'inaccessible-item-text': !hasLibraryAccess(server.id, library.id),
 					}"
 					:data-cy="`server-drawer-library-${library.id}`"
 					active-class="text-orange"
@@ -228,13 +228,10 @@ function runReSyncAccount(serverId: number): void {
   white-space: nowrap;
 }
 
-.inaccessible-library-item {
+.inaccessible-item-text {
+  text-decoration: line-through;
   color: var(--q-grey-6);
   opacity: 0.62;
-
-  .inaccessible-item-text {
-    text-decoration: line-through;
-  }
 }
 
 .server-sync-icon {

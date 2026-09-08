@@ -1,3 +1,4 @@
+using Reaparr.Application.Contracts;
 using Reaparr.Data.Contracts;
 using Reaparr.PublicAPI.Contracts;
 
@@ -6,6 +7,9 @@ namespace Reaparr.PublicAPI.UnitTests;
 public class TorrentsInfoEndpointUnitTests
     : BaseEndpointUnitTest<TorrentsInfoEndpoint, TorrentsInfoEndpointRequest, List<QBittorrentTorrentInfo>>
 {
+    private async Task<IntegrationIdentity> GetRadarrIdentity() =>
+        (await IDbContext.RadarrIntegrations.SingleAsync(CancellationToken)).Id.ToRadarrIdentity();
+
     [Test]
     public async Task ShouldReturnRatioLimitZero_WhenStatusIsCompleted()
     {
@@ -104,6 +108,8 @@ public class TorrentsInfoEndpointUnitTests
                 config.PlexServerCount = 1;
                 config.MovieCount = 1;
                 config.MovieDownloadTasksCount = 1;
+                config.RadarrIntegrationCount = 1;
+                config.AssignUnownedDownloadTasksToRadarrIntegration = true;
             }
         );
 
@@ -132,7 +138,8 @@ public class TorrentsInfoEndpointUnitTests
             {
                 Hashes = "hash-owned",
                 Category = IntegrationDefinitions.RADARR_DEFAULT_CATEGORY,
-            }
+            },
+            integrationIdentity: await GetRadarrIdentity()
         );
 
         // Assert
@@ -166,6 +173,8 @@ public class TorrentsInfoEndpointUnitTests
                 config.PlexServerCount = 1;
                 config.MovieCount = 1;
                 config.MovieDownloadTasksCount = 1;
+                config.RadarrIntegrationCount = 1;
+                config.AssignUnownedDownloadTasksToRadarrIntegration = true;
             }
         );
 
@@ -188,7 +197,12 @@ public class TorrentsInfoEndpointUnitTests
 
         // Act
         var endpointResult = await TestEndpointHandleAsync(
-            new TorrentsInfoEndpointRequest { Hashes = hash, Category = IntegrationDefinitions.RADARR_DEFAULT_CATEGORY }
+            new TorrentsInfoEndpointRequest
+            {
+                Hashes = hash,
+                Category = IntegrationDefinitions.RADARR_DEFAULT_CATEGORY,
+            },
+            integrationIdentity: await GetRadarrIdentity()
         );
 
         var persistedRow = await dbContext

@@ -45,6 +45,16 @@ public abstract class DownloadTaskBase : BaseEntityGuid
     [Column(Order = 7)]
     public required int PlexLibraryId { get; set; }
 
+    [Column(Order = 8)]
+    public Guid? SonarrIntegrationId { get; set; }
+
+    public SonarrIntegration? SonarrIntegration { get; init; }
+
+    [Column(Order = 9)]
+    public Guid? RadarrIntegrationId { get; set; }
+
+    public RadarrIntegration? RadarrIntegration { get; init; }
+
     #endregion
 
     #region Helpers

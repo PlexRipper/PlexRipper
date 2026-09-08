@@ -131,6 +131,7 @@ public sealed class TorrentsInfoEndpoint : Endpoint<TorrentsInfoEndpointRequest,
 
         var hashesFilter = ParseHashes(req.Hashes);
         var categoryFilter = NormalizeCategory(req.Category);
+        var integration = HttpContext.GetIntegrationIdentity();
 
         // Query all download tasks that have a HashId (Sonarr/Radarr tracking id)
         using var dbContext = await _dbContextFactory.CreateAsync();
@@ -138,12 +139,14 @@ public sealed class TorrentsInfoEndpoint : Endpoint<TorrentsInfoEndpointRequest,
         var nonOwnedServerIds = dbContext.PlexServers.WhereIsNotOwned().Select(x => x.Id);
 
         var episodeFilesTask = dbContext
-            .DownloadTaskTvShowEpisodeFile.Where(x => x.HashId != null && nonOwnedServerIds.Contains(x.PlexServerId))
+            .DownloadTaskTvShowEpisodeFile.WhereIntegrationIsOrUnowned(integration)
+            .Where(x => x.HashId != null && nonOwnedServerIds.Contains(x.PlexServerId))
             .Include(x => x.Parent)
             .ToListAsync(ct);
 
         var movieFilesTask = dbContext
-            .DownloadTaskMovieFile.Where(x => x.HashId != null && nonOwnedServerIds.Contains(x.PlexServerId))
+            .DownloadTaskMovieFile.WhereIntegrationIsOrUnowned(integration)
+            .Where(x => x.HashId != null && nonOwnedServerIds.Contains(x.PlexServerId))
             .Include(x => x.Parent)
             .ToListAsync(ct);
 
@@ -209,12 +212,13 @@ public sealed class TorrentsInfoEndpoint : Endpoint<TorrentsInfoEndpointRequest,
 
     private static string ResolveCategory(DownloadTaskFileBase file)
     {
-        return file.MediaType switch
-        {
-            PlexMediaType.Movie => IntegrationDefinitions.RADARR_DEFAULT_CATEGORY,
-            PlexMediaType.Episode => IntegrationDefinitions.SONARR_DEFAULT_CATEGORY,
-            _ => string.Empty,
-        };
+        return file.SonarrIntegration?.Category
+            ?? file.RadarrIntegration?.Category
+            ?? (
+                file.MediaType == PlexMediaType.Movie ? IntegrationDefinitions.RADARR_DEFAULT_CATEGORY
+                : file.MediaType == PlexMediaType.Episode ? IntegrationDefinitions.SONARR_DEFAULT_CATEGORY
+                : string.Empty
+            );
     }
 
     private static HashSet<string>? ParseHashes(string? hashes)
@@ -245,7 +249,7 @@ public sealed class TorrentsInfoEndpoint : Endpoint<TorrentsInfoEndpointRequest,
         return category;
     }
 
-    private static bool MatchesFilters(DownloadTaskFileBase file, HashSet<string>? hashesFilter, string? categoryFilter)
+    private bool MatchesFilters(DownloadTaskFileBase file, HashSet<string>? hashesFilter, string? categoryFilter)
     {
         if (hashesFilter is not null && !hashesFilter.Contains(file.HashId ?? string.Empty))
             return false;

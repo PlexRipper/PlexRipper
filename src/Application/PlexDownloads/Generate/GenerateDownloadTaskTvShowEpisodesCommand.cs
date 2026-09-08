@@ -51,6 +51,7 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandler
     )
     {
         var request = command.Request;
+        var downloadRootPath = (await _dbContext.GetDownloadFolder(request.Integration)).DirectoryPath;
         var groupedList = command.Request.DownloadMedias.MergeAndGroupList();
         var downloadMediaList = groupedList.FindAll(x => x.Type == PlexMediaType.Episode);
         var episodeIds = downloadMediaList.SelectMany(x => x.MediaIds).Distinct().ToList();
@@ -110,7 +111,7 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandler
                 );
 
             // Get or create Tv-show download tasks
-            var downloadTaskTvShow = await GetOrCreateTvShowDownloadTaskAsync(plexTvShow, ct);
+            var downloadTaskTvShow = await GetOrCreateTvShowDownloadTaskAsync(plexTvShow, request.Integration, ct);
             if (downloadTaskTvShow is null)
             {
                 return Result.Fail($"Failed to create or retrieve TV Show download task for {plexTvShow.Title}");
@@ -120,9 +121,10 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandler
             var downloadTaskTvShowSeason = GetOrCreateSeasonDownloadTask(plexSeason, downloadTaskTvShow);
 
             // Get or create episode download task
-            var episodeDownloadTask = downloadTaskTvShowSeason.Children.FirstOrDefault(x =>
-                x.PlexApiRatingKey == tvShowEpisode.PlexApiRatingKey
-            );
+            var episodeDownloadTask = downloadTaskTvShowSeason
+                .Children.AsQueryable()
+                .WhereIntegrationIs(request.Integration)
+                .FirstOrDefault(x => x.PlexApiRatingKey == tvShowEpisode.PlexApiRatingKey);
             if (episodeDownloadTask is null)
             {
                 _log.Here()
@@ -130,7 +132,7 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandler
                         "Creating new episode download task for episode {EpisodeKey}",
                         tvShowEpisode.PlexApiRatingKey
                     );
-                episodeDownloadTask = tvShowEpisode.MapToDownloadTask();
+                episodeDownloadTask = tvShowEpisode.MapToDownloadTask(request.Integration);
                 episodeDownloadTask.ParentId = downloadTaskTvShowSeason.Id;
                 downloadTaskTvShowSeason.Children.Add(episodeDownloadTask);
                 _dbContext.DownloadTaskTvShowEpisode.Add(episodeDownloadTask);
@@ -155,7 +157,13 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandler
             }
 
             // Process episode media data
-            var processResult = ProcessEpisodeMediaData(tvShowEpisode, episodeDownloadTask, downloadMediaDto, request);
+            var processResult = ProcessEpisodeMediaData(
+                tvShowEpisode,
+                episodeDownloadTask,
+                downloadMediaDto,
+                request,
+                downloadRootPath
+            );
             if (processResult.IsFailed)
             {
                 processResult.LogError();
@@ -196,22 +204,27 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandler
 
     private async Task<DownloadTaskTvShow?> GetOrCreateTvShowDownloadTaskAsync(
         PlexTvShow plexTvShow,
+        IntegrationIdentity? integration,
         CancellationToken ct
     )
     {
         // Check if the tvShowDownloadTask has already been created this run
-        var downloadTaskTvShow = _tvShowDownloads.FirstOrDefault(x =>
-            x.PlexApiRatingKey == plexTvShow.PlexApiRatingKey
-        );
+        var downloadTaskTvShow = _tvShowDownloads
+            .AsQueryable()
+            .WhereIntegrationIs(integration)
+            .FirstOrDefault(x => x.PlexApiRatingKey == plexTvShow.PlexApiRatingKey);
 
         // Check if the tvShowDownloadTask has already been created in the database
         if (downloadTaskTvShow is null)
         {
-            downloadTaskTvShow = await _dbContext.GetDownloadTaskTvShowByRatingKeyQuery(
-                plexTvShow.PlexServerId,
-                plexTvShow.PlexApiRatingKey,
-                ct
-            );
+            downloadTaskTvShow = await _dbContext
+                .DownloadTaskTvShow.AsTracking()
+                .WhereIntegrationIs(integration)
+                .IncludeAll()
+                .SingleOrDefaultAsync(
+                    x => x.PlexServerId == plexTvShow.PlexServerId && x.PlexApiRatingKey == plexTvShow.PlexApiRatingKey,
+                    ct
+                );
             if (downloadTaskTvShow is not null)
                 _tvShowDownloads.Add(downloadTaskTvShow);
         }
@@ -219,7 +232,7 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandler
         // Create a new TV Show download task if none exists
         if (downloadTaskTvShow is null)
         {
-            downloadTaskTvShow = plexTvShow.MapToDownloadTask();
+            downloadTaskTvShow = plexTvShow.MapToDownloadTask(integration);
             _tvShowDownloads.Add(downloadTaskTvShow);
             _dbContext.DownloadTaskTvShow.Add(downloadTaskTvShow);
         }
@@ -233,13 +246,18 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandler
     )
     {
         // Check if the SeasonDownloadTask has already been created
-        var downloadTaskTvShowSeason = downloadTaskTvShow.Children.FirstOrDefault(x =>
-            x.PlexApiRatingKey == plexSeason.PlexApiRatingKey
-        );
+        var integration = (
+            downloadTaskTvShow.SonarrIntegrationId,
+            downloadTaskTvShow.RadarrIntegrationId
+        ).ToIntegrationIdentity();
+        var downloadTaskTvShowSeason = downloadTaskTvShow
+            .Children.AsQueryable()
+            .WhereIntegrationIs(integration)
+            .FirstOrDefault(x => x.PlexApiRatingKey == plexSeason.PlexApiRatingKey);
 
         if (downloadTaskTvShowSeason is null)
         {
-            downloadTaskTvShowSeason = plexSeason.MapToDownloadTask();
+            downloadTaskTvShowSeason = plexSeason.MapToDownloadTask(integration);
             downloadTaskTvShowSeason.ParentId = downloadTaskTvShow.Id;
             downloadTaskTvShow.Children.Add(downloadTaskTvShowSeason);
             _dbContext.DownloadTaskTvShowSeason.Add(downloadTaskTvShowSeason);
@@ -252,7 +270,8 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandler
         PlexTvShowEpisode tvShowEpisode,
         DownloadTaskTvShowEpisode episodeDownloadTask,
         DownloadMediaDTO downloadMediaDto,
-        CreateDownloadTasksRequest request
+        CreateDownloadTasksRequest request,
+        string downloadRootPath
     )
     {
         var episodeData = SelectEpisodeQuality(tvShowEpisode, downloadMediaDto);
@@ -268,6 +287,7 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandler
         var downloadFiles = episodeData.MapToDownloadTask(
             tvShowEpisode,
             request,
+            downloadRootPath,
             downloadMediaDto.KeepCompletedInDownloadFolder
         );
 

@@ -17,7 +17,6 @@ public sealed class AuthDbContext : IdentityDbContext<AppUser>, IAuthDbContext, 
     public string DatabaseName { get; }
 
     public DbSet<DataProtectionKey> DataProtectionKeys { get; set; }
-    public DbSet<DownloadClientSession> DownloadClientSessions { get; set; }
 
     [ActivatorUtilitiesConstructor]
     public AuthDbContext(ILogger log, IPathProvider pathProvider, IAppRuntimeInfo appRuntimeInfo)

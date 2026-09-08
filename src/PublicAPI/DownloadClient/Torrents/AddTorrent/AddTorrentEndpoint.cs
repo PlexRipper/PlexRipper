@@ -177,7 +177,22 @@ public class AddTorrentEndpoint : Endpoint<AddTorrentEndpointRequest>
                 KeepCompletedInDownloadFolder = true,
             },
         ];
-        var createResult = await _commandExecutor.Send(new CreateDownloadTasksCommand(list), ct);
+        var identity = HttpContext.GetIntegrationIdentity();
+        if (!identity.Supports(metadata.Type))
+        {
+            await Send.ForbiddenAsync(ct);
+            return;
+        }
+
+        var createResult = await _commandExecutor.Send(
+            new CreateDownloadTasksCommand(
+                new CreateDownloadTasksRequest(
+                    list,
+                    integration: identity
+                )
+            ),
+            ct
+        );
         if (createResult.IsFailed)
         {
             _log.Here()
@@ -191,19 +206,20 @@ public class AddTorrentEndpoint : Endpoint<AddTorrentEndpointRequest>
         }
 
         // Set the hashId on the created download tasks so Sonarr/Radarr can keep track
-        await SetHashIdOnDownloadTask(metadata, hashId);
+        await SetHashIdOnDownloadTask(metadata, hashId, identity);
 
         await Send.StringAsync("Ok.", cancellation: ct);
     }
 
-    private async Task SetHashIdOnDownloadTask(TorrentMetadataDTO metaData, string hashId)
+    private async Task SetHashIdOnDownloadTask(TorrentMetadataDTO metaData, string hashId, IntegrationIdentity identity)
     {
         var count = 0;
         switch (metaData.Type)
         {
             case PlexMediaType.Episode:
                 count = await _dbContext
-                    .DownloadTaskTvShowEpisodeFile.Where(x =>
+                    .DownloadTaskTvShowEpisodeFile.WhereIntegrationIs(identity)
+                    .Where(x =>
                         x.PlexLibraryId == metaData.LibraryId
                         && x.PlexServerId == metaData.ServerId
                         && x.PlexApiPartId == metaData.PlexApiPartId
@@ -212,7 +228,8 @@ public class AddTorrentEndpoint : Endpoint<AddTorrentEndpointRequest>
                 break;
             case PlexMediaType.Movie:
                 count = await _dbContext
-                    .DownloadTaskMovieFile.Where(x =>
+                    .DownloadTaskMovieFile.WhereIntegrationIs(identity)
+                    .Where(x =>
                         x.PlexLibraryId == metaData.LibraryId
                         && x.PlexServerId == metaData.ServerId
                         && x.PlexApiPartId == metaData.PlexApiPartId

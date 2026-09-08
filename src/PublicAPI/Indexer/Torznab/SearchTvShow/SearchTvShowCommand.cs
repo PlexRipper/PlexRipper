@@ -1,4 +1,6 @@
+using System.Diagnostics.CodeAnalysis;
 using Flurl;
+using Reaparr.Application.Contracts;
 
 // ReSharper disable InconsistentNaming
 
@@ -6,6 +8,14 @@ namespace Reaparr.PublicAPI;
 
 public record SearchTvShowCommand : ICommand<Result<TorznabMediaSearchResponseDTO>>
 {
+    [SetsRequiredMembers]
+    public SearchTvShowCommand()
+    {
+        Query = string.Empty;
+        IMDB_ID = string.Empty;
+        Integration = new IntegrationIdentity(IntegrationType.Sonarr, Guid.Empty);
+    }
+
     public required string Query { get; init; }
 
     public required int Season { get; init; }
@@ -21,6 +31,10 @@ public record SearchTvShowCommand : ICommand<Result<TorznabMediaSearchResponseDT
     public required int TMDB_ID { get; init; }
 
     public required string IMDB_ID { get; init; }
+
+    public required IntegrationIdentity Integration { get; init; }
+
+    public string TorznabApiKey { get; init; } = string.Empty;
 }
 
 public class SearchTvShowCommandValidator : AbstractValidator<SearchTvShowCommand>
@@ -88,7 +102,7 @@ public class SearchTvShowCommandHandler : ICommandHandler<SearchTvShowCommand, R
         var items = new List<TorznabItem>();
         foreach (var episode in episodes)
         {
-            items.AddRange(MapEpisodeToItems(episode));
+            items.AddRange(MapEpisodeToItems(episode, command));
         }
 
         return Result.Ok(
@@ -168,7 +182,7 @@ public class SearchTvShowCommandHandler : ICommandHandler<SearchTvShowCommand, R
         return await baseQuery.OrderBy(e => e.Id).ToListAsync(cancellationToken);
     }
 
-    private IEnumerable<TorznabItem> MapEpisodeToItems(PlexTvShowEpisode episode)
+    private IEnumerable<TorznabItem> MapEpisodeToItems(PlexTvShowEpisode episode, SearchTvShowCommand command)
     {
         var tvShow = episode.TvShow;
         var season = episode.TvShowSeason;
@@ -202,15 +216,11 @@ public class SearchTvShowCommandHandler : ICommandHandler<SearchTvShowCommand, R
             // FORCE this to be a string, and not an implicit URL type by Flurl
             // ReSharper disable once SuggestVarOrType_BuiltInTypes
             string torrentDownloadUrl = _networkSettings
-                .Url.AppendPathSegment(PublicApiRoutes.DownloadTorrent)
-                .SetQueryParams(torrentMetadata.Values);
-
-            _log.Here()
-                .Verbose(
-                    "Generated torrent URL for PlexTvShowEpisodeMediaDataId {PlexTvShowEpisodeMediaDataId}: {Url}",
-                    mediaData.Id,
-                    torrentDownloadUrl
-                );
+                .Url.AppendPathSegment(
+                    PublicApiRoutes.DownloadTorrent.Replace("{integrationId:guid}", command.Integration.Id.ToString())
+                )
+                .SetQueryParams(torrentMetadata.Values)
+                .SetQueryParam(IntegrationDefinitions.INDEXER_API_KEY, command.TorznabApiKey, isEncoded: false);
 
             var item = new TorznabItem
             {

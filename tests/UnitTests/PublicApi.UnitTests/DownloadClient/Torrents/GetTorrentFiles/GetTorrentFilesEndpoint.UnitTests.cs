@@ -1,13 +1,29 @@
 namespace Reaparr.PublicAPI.UnitTests;
 
+using Reaparr.Application.Contracts;
+
 public class GetTorrentFilesEndpointUnitTests
     : BaseEndpointUnitTest<GetTorrentFilesEndpoint, GetTorrentFilesRequest, List<QBittorrentTorrentFile>>
 {
+    private async Task<IntegrationIdentity> SetupIntegrationDatabase(int seed, Action<FakeDataConfig> configure)
+    {
+        await SetupDatabase(
+            seed,
+            config =>
+            {
+                configure(config);
+                config.RadarrIntegrationCount = 1;
+                config.AssignUnownedDownloadTasksToRadarrIntegration = true;
+            }
+        );
+        return (await IDbContext.RadarrIntegrations.SingleAsync(CancellationToken)).Id.ToRadarrIdentity();
+    }
+
     [Test]
     public async Task ShouldReturnEmptyList_WhenHashMatchesNoFiles()
     {
         // Arrange
-        await SetupDatabase(
+        var integrationIdentity = await SetupIntegrationDatabase(
             4412,
             config =>
             {
@@ -24,7 +40,7 @@ public class GetTorrentFilesEndpointUnitTests
         var request = new GetTorrentFilesRequest { Hash = "missing-hash" };
 
         // Act
-        var endpointResult = await TestEndpointHandleAsync(request);
+        var endpointResult = await TestEndpointHandleAsync(request, integrationIdentity: integrationIdentity);
         var response = endpointResult.Response;
 
         // Assert
@@ -48,7 +64,7 @@ public class GetTorrentFilesEndpointUnitTests
     public async Task ShouldReturnFileNameOnly_WhenDownloadRootPathIsEmpty()
     {
         // Arrange
-        await SetupDatabase(
+        var integrationIdentity = await SetupIntegrationDatabase(
             4413,
             config =>
             {
@@ -76,7 +92,7 @@ public class GetTorrentFilesEndpointUnitTests
         var request = new GetTorrentFilesRequest { Hash = hash };
 
         // Act
-        var endpointResult = await TestEndpointHandleAsync(request);
+        var endpointResult = await TestEndpointHandleAsync(request, integrationIdentity: integrationIdentity);
         var response = endpointResult.Response;
 
         // Assert
@@ -100,7 +116,7 @@ public class GetTorrentFilesEndpointUnitTests
     public async Task ShouldReturnFileNameOnly_WhenComputedDirectoryEscapesDownloadRoot()
     {
         // Arrange
-        await SetupDatabase(
+        var integrationIdentity = await SetupIntegrationDatabase(
             4414,
             config =>
             {
@@ -133,7 +149,7 @@ public class GetTorrentFilesEndpointUnitTests
         var request = new GetTorrentFilesRequest { Hash = hash };
 
         // Act
-        var endpointResult = await TestEndpointHandleAsync(request);
+        var endpointResult = await TestEndpointHandleAsync(request, integrationIdentity: integrationIdentity);
         var response = endpointResult.Response;
 
         // Assert

@@ -1,4 +1,6 @@
+using System.Diagnostics.CodeAnalysis;
 using Flurl;
+using Reaparr.Application.Contracts;
 using Reaparr.Environment;
 
 // ReSharper disable InconsistentNaming
@@ -8,6 +10,13 @@ namespace Reaparr.PublicAPI;
 
 public record SearchMovieCommand : ICommand<Result<TorznabMediaSearchResponseDTO>>
 {
+    [SetsRequiredMembers]
+    public SearchMovieCommand()
+    {
+        Query = string.Empty;
+        Integration = new IntegrationIdentity(IntegrationType.Radarr, Guid.Empty);
+    }
+
     public required string Query { get; init; }
 
     public required int Limit { get; init; }
@@ -17,6 +26,10 @@ public record SearchMovieCommand : ICommand<Result<TorznabMediaSearchResponseDTO
     public string? IMDB_ID { get; init; }
 
     public required int TMDB_ID { get; init; }
+
+    public required IntegrationIdentity Integration { get; init; }
+
+    public string TorznabApiKey { get; init; } = string.Empty;
 }
 
 public class SearchMovieCommandValidator : AbstractValidator<SearchMovieCommand>
@@ -62,7 +75,7 @@ public class SearchMovieCommandHandler : ICommandHandler<SearchMovieCommand, Res
         var items = new List<TorznabItem>();
         foreach (var movie in movies)
         {
-            items.AddRange(MapMovieToItems(movie));
+            items.AddRange(MapMovieToItems(movie, command));
         }
 
         return Result.Ok(
@@ -131,7 +144,7 @@ public class SearchMovieCommandHandler : ICommandHandler<SearchMovieCommand, Res
             .ToListAsync(cancellationToken);
     }
 
-    private IEnumerable<TorznabItem> MapMovieToItems(PlexMovie movie)
+    private IEnumerable<TorznabItem> MapMovieToItems(PlexMovie movie, SearchMovieCommand command)
     {
         foreach (var mediaData in movie.MediaDataList.OrderBy(md => md.PlexApiPartId))
         {
@@ -150,15 +163,11 @@ public class SearchMovieCommandHandler : ICommandHandler<SearchMovieCommand, Res
             // FORCE this to be a string, and not an implicit URL type by Flurl
             // ReSharper disable once SuggestVarOrType_BuiltInTypes
             string torrentDownloadUrl = _networkSettings
-                .Url.AppendPathSegment(PublicApiRoutes.DownloadTorrent)
-                .SetQueryParams(torrentMetadata.Values);
-
-            _log.Here()
-                .Debug(
-                    "Generated torrent URL for PlexMovieMediaDataId {PlexMovieMediaDataId}: {Url}",
-                    mediaData.Id,
-                    torrentDownloadUrl
-                );
+                .Url.AppendPathSegment(
+                    PublicApiRoutes.DownloadTorrent.Replace("{integrationId:guid}", command.Integration.Id.ToString())
+                )
+                .SetQueryParams(torrentMetadata.Values)
+                .SetQueryParam(IntegrationDefinitions.INDEXER_API_KEY, command.TorznabApiKey, isEncoded: false);
 
             var item = new TorznabItem
             {

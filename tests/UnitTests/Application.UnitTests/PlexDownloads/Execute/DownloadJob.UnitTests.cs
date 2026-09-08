@@ -124,8 +124,22 @@ public class DownloadJobUnitTests : BaseUnitTest<DownloadJob>
                 config.MovieDownloadTasksCount = 2;
             }
         );
-        var testDownloadTask = IDbContext.DownloadTaskMovieFile.First();
+        var dbContext = IDbContext;
+        var testDownloadTask = dbContext.DownloadTaskMovieFile.First();
         var expectedDestinationRootPath = testDownloadTask.DirectoryMeta.DestinationRootPath;
+        await dbContext
+            .DownloadTaskMovieFile.Where(x => x.Id == testDownloadTask.Id)
+            .ExecuteUpdateAsync(
+                x =>
+                    x.SetProperty(
+                        task => task.DirectoryMeta,
+                        testDownloadTask.DirectoryMeta with
+                        {
+                            DownloadRootPath = string.Empty,
+                        }
+                    ),
+                CancellationToken
+            );
         Mock.Mock<IDownloadManagerSettings>().Setup(x => x.DownloadSegments).Returns(4);
         var context = SetupJobContext(testDownloadTask.ToKey());
         Mock.Mock<ICommandExecutor>()
@@ -150,15 +164,15 @@ public class DownloadJobUnitTests : BaseUnitTest<DownloadJob>
         await sut.Execute(context);
 
         // Assert
-        var downloadTaskResult = await IDbContext.DownloadTaskMovieFile.FirstOrDefaultAsync(
+        var downloadTaskResult = await dbContext.DownloadTaskMovieFile.FirstOrDefaultAsync(
             x => x.Id == testDownloadTask.Id,
             CancellationToken
         );
         downloadTaskResult.ShouldNotBeNull();
 
-        var downloadFolder = await IDbContext.GetDownloadFolder();
+        var downloadFolder = await dbContext.GetDownloadFolder();
         var expectedDownloadRootPath = Mock.Container.Resolve<IPathProvider>().DefaultDownloadsDestinationFolder;
-        await IDbContext.GetDefaultDestinationFolderPath(PlexMediaType.Movie);
+        await dbContext.GetDefaultDestinationFolderPath(PlexMediaType.Movie);
 
         downloadTaskResult.DirectoryMeta.DownloadRootPath.ShouldBe(downloadFolder.DirectoryPath);
         downloadTaskResult.DirectoryMeta.DestinationRootPath.ShouldBe(expectedDestinationRootPath);

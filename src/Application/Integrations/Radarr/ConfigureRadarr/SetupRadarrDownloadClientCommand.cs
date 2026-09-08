@@ -1,10 +1,14 @@
 namespace Reaparr.Application;
 
-public record SetupRadarrDownloadClientCommand : ICommand<Result<SetupRadarrDownloadClientCommandResult>>;
+public record SetupRadarrDownloadClientCommand : ICommand<Result<SetupRadarrDownloadClientCommandResult>>
+{
+    public Guid IntegrationId { get; init; }
+}
 
 public record SetupRadarrDownloadClientCommandResult
 {
     public int DownloadClientId { get; init; }
+    public required RadarrDownloadContractDTO Resource { get; init; }
 }
 
 public class SetupRadarrDownloadClientCommandHandler
@@ -12,9 +16,9 @@ public class SetupRadarrDownloadClientCommandHandler
 {
     private readonly ILogger _log;
     private readonly ICommandExecutor _commandExecutor;
-    private readonly IIntegrationsSettings _integrationsSettings;
-    private readonly IRadarrSettings _settings;
+    private readonly IReaparrDbContext _dbContext;
     private readonly INetworkSettings _networkSettings;
+    private readonly IProgressHubService _progressHubService;
 
     private const string DOWNLOAD_CLIENT_NAME = "Reaparr DownloadClient";
 
@@ -24,16 +28,16 @@ public class SetupRadarrDownloadClientCommandHandler
     public SetupRadarrDownloadClientCommandHandler(
         ILogger log,
         ICommandExecutor commandExecutor,
-        IIntegrationsSettings integrationsSettings,
-        IRadarrSettings settings,
-        INetworkSettings networkSettings
+        IReaparrDbContext dbContext,
+        INetworkSettings networkSettings,
+        IProgressHubService progressHubService
     )
     {
         _log = log.ForContext<SetupRadarrDownloadClientCommandHandler>();
         _commandExecutor = commandExecutor;
-        _integrationsSettings = integrationsSettings;
-        _settings = settings;
+        _dbContext = dbContext;
         _networkSettings = networkSettings;
+        _progressHubService = progressHubService;
     }
 
     public async Task<Result<SetupRadarrDownloadClientCommandResult>> ExecuteAsync(
@@ -41,14 +45,30 @@ public class SetupRadarrDownloadClientCommandHandler
         CancellationToken ct
     )
     {
-        if (string.IsNullOrWhiteSpace(_settings.RadarrBaseUrl) || string.IsNullOrWhiteSpace(_settings.RadarrApiKey))
-            return Result.Fail("Radarr settings are invalid: BaseUrl and ApiKey are required.").LogError();
+        var integration =
+            command.IntegrationId == Guid.Empty
+                ? null
+                : await _dbContext
+                    .RadarrIntegrations.AsNoTracking()
+                    .SingleOrDefaultAsync(x => x.Id == command.IntegrationId, ct);
+        if (integration is null)
+            return Result.Fail("The Radarr integration was not found.").LogError();
 
         if (
-            !Uri.TryCreate(_settings.RadarrBaseUrl.TrimEnd('/'), UriKind.Absolute, out var radarrBaseUri)
+            !Uri.TryCreate(integration.BaseUrl.TrimEnd('/'), UriKind.Absolute, out var radarrBaseUri)
             || (radarrBaseUri.Scheme != Uri.UriSchemeHttp && radarrBaseUri.Scheme != Uri.UriSchemeHttps)
         )
             return Result.Fail("Radarr BaseUrl is invalid.").LogError();
+
+        await _progressHubService.SendIntegrationSetupProgressAsync(
+            new IntegrationSetupProgressDTO
+            {
+                IntegrationId = integration.Id,
+                Stage = IntegrationSetupProgressStage.Connecting,
+                IsRunning = true,
+                IsSuccess = false,
+            }
+        );
 
         _log.Here()
             .Debug(
@@ -59,27 +79,67 @@ public class SetupRadarrDownloadClientCommandHandler
 
         try
         {
-            var result = await _commandExecutor.Send(new RadarrApiGetDownloadClientsCommand(), ct);
+            var result = await _commandExecutor.Send(new RadarrApiGetDownloadClientsCommand(integration.Id), ct);
+            if (result.IsCancelled)
+            {
+                await _progressHubService.SendIntegrationSetupProgressAsync(
+                    new IntegrationSetupProgressDTO
+                    {
+                        IntegrationId = integration.Id,
+                        Stage = IntegrationSetupProgressStage.Connecting,
+                        IsRunning = false,
+                        IsSuccess = false,
+                    }
+                );
+                return result.ToResult<SetupRadarrDownloadClientCommandResult>().LogWarning();
+            }
+
             if (result.IsFailed)
+            {
+                await _progressHubService.SendIntegrationSetupProgressAsync(
+                    new IntegrationSetupProgressDTO
+                    {
+                        IntegrationId = integration.Id,
+                        Stage = IntegrationSetupProgressStage.Connecting,
+                        IsRunning = false,
+                        IsSuccess = false,
+                    }
+                );
                 return Result
                     .Fail("Failed to retrieve existing download clients from Radarr.")
                     .WithErrors(result.Errors)
                     .LogError();
+            }
+
+            await _progressHubService.SendIntegrationSetupProgressAsync(
+                new IntegrationSetupProgressDTO
+                {
+                    IntegrationId = integration.Id,
+                    Stage = IntegrationSetupProgressStage.Connecting,
+                    IsRunning = false,
+                    IsSuccess = true,
+                }
+            );
 
             var list = result.Value;
+            var resource = BuildDownloadClientResource(_networkSettings.Uri, integration);
 
-            var currentDownloadClient = list.FirstOrDefault(d =>
-                string.Equals(d.Name, DOWNLOAD_CLIENT_NAME, StringComparison.OrdinalIgnoreCase)
-            );
+            var currentDownloadClient =
+                list.FirstOrDefault(d => d.Id == integration.ExternalDownloadClientId)
+                ?? list.FirstOrDefault(d =>
+                    string.Equals(d.Name, DOWNLOAD_CLIENT_NAME, StringComparison.OrdinalIgnoreCase)
+                );
 
             if (currentDownloadClient != null)
             {
+                resource.Id = currentDownloadClient.Id;
                 var updateResult = await _commandExecutor.Send(
                     new RadarrApiUpdateDownloadClientCommand
                     {
+                        IntegrationId = integration.Id,
                         Id = currentDownloadClient.Id,
                         ForceSave = true,
-                        Resource = BuildDownloadClientResource(_networkSettings.Uri),
+                        Resource = resource,
                     },
                     ct
                 );
@@ -88,14 +148,20 @@ public class SetupRadarrDownloadClientCommandHandler
                     return updateResult.WithError(PUBLIC_URL_HINT).LogError();
 
                 return Result.Ok(
-                    new SetupRadarrDownloadClientCommandResult { DownloadClientId = updateResult.Value.Id }
+                    new SetupRadarrDownloadClientCommandResult
+                    {
+                        DownloadClientId = updateResult.Value.Id,
+                        Resource = resource,
+                    }
                 );
             }
 
             var createResult = await _commandExecutor.Send(
                 new RadarrApiCreateDownloadClientCommand
                 {
-                    Resource = BuildDownloadClientResource(_networkSettings.Uri),
+                    IntegrationId = integration.Id,
+                    ForceSave = true,
+                    Resource = resource,
                 },
                 ct
             );
@@ -103,7 +169,14 @@ public class SetupRadarrDownloadClientCommandHandler
             if (createResult.IsFailed)
                 return createResult.WithError(PUBLIC_URL_HINT).LogError();
 
-            return Result.Ok(new SetupRadarrDownloadClientCommandResult { DownloadClientId = createResult.Value.Id });
+            resource.Id = createResult.Value.Id;
+            return Result.Ok(
+                new SetupRadarrDownloadClientCommandResult
+                {
+                    DownloadClientId = createResult.Value.Id,
+                    Resource = resource,
+                }
+            );
         }
         catch (TaskCanceledException e)
         {
@@ -117,10 +190,12 @@ public class SetupRadarrDownloadClientCommandHandler
         }
     }
 
-    private RadarrDownloadContractDTO BuildDownloadClientResource(Uri reaparrBaseUri)
+    private RadarrDownloadContractDTO BuildDownloadClientResource(Uri reaparrBaseUri, RadarrIntegration integration)
     {
         var useSsl = string.Equals(reaparrBaseUri.Scheme, Uri.UriSchemeHttps, StringComparison.OrdinalIgnoreCase);
-        string urlBase = _networkSettings.BasePath.AppendPathSegment("api/public/download-client");
+        string urlBase = _networkSettings.BasePath.AppendPathSegment(
+            $"api/public/integrations/{integration.Id}/download-client"
+        );
         return new RadarrDownloadContractDTO
         {
             Enable = true,
@@ -135,9 +210,8 @@ public class SetupRadarrDownloadClientCommandHandler
                 new() { Name = "port", Value = reaparrBaseUri.Port },
                 new() { Name = "useSsl", Value = useSsl },
                 new() { Name = "urlBase", Value = urlBase },
-                new() { Name = "username", Value = _integrationsSettings.DownloadClientUsername },
-                new() { Name = "password", Value = _integrationsSettings.DownloadClientPassword },
-                new() { Name = "movieCategory", Value = IntegrationDefinitions.RADARR_DEFAULT_CATEGORY },
+                new() { Name = "apiKey", Value = integration.QBittorrentApiKey },
+                new() { Name = "movieCategory", Value = integration.Category },
                 new() { Name = "recentMoviePriority", Value = 0 },
                 new() { Name = "olderMoviePriority", Value = 0 },
                 new() { Name = "initialState", Value = 0 },

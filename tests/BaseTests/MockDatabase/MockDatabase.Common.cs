@@ -202,6 +202,97 @@ public static partial class MockDatabase
 
     public static string GetMemoryDatabaseName() => $"memory_database_{Guid.NewGuid():N}";
 
+    public static async Task<ReaparrDbContext> AddRadarrIntegrations(
+        this ReaparrDbContext context,
+        Seed seed,
+        Action<FakeDataConfig>? options = null
+    )
+    {
+        var config = FakeDataConfig.FromOptions(options);
+        if (config.AssignUnownedDownloadTasksToRadarrIntegration && config.RadarrIntegrationCount > 1)
+            throw new InvalidOperationException(
+                "AssignUnownedDownloadTasksToRadarrIntegration allows at most one Radarr integration."
+            );
+
+        for (var i = 0; i < config.RadarrIntegrationCount; i++)
+        {
+            var integrationId = new Guid(seed.Next(), 0, 0, new byte[8]);
+            var id = integrationId.ToString("N");
+            context.RadarrIntegrations.Add(
+                new RadarrIntegration
+                {
+                    Id = integrationId,
+                    DisplayName = $"Radarr {id[..8]}",
+                    BaseUrl = $"https://radarr-{id[..8]}.example.com",
+                    RadarrApiKey = id,
+                    QBittorrentApiKey = IntegrationApiKeyGenerator.GenerateQBittorrentApiKey(integrationId),
+                    TorznabApiKey = IntegrationApiKeyGenerator.GenerateTorznabApiKey(integrationId),
+                    Category = $"radarr-{id[..8]}",
+                    DownloadFolderId = PlexMediaType.None.ToDefaultDestinationFolderId(),
+                    ProvisioningState = IntegrationProvisioningState.Configured,
+                }
+            );
+        }
+        await context.SaveChangesAsync();
+        if (config.AssignUnownedDownloadTasksToRadarrIntegration)
+        {
+            var integrationId = await context.RadarrIntegrations.Select(x => x.Id).SingleAsync();
+            var movieTasks = await context
+                .DownloadTaskMovie.AsTracking().Where(x => x.SonarrIntegrationId == null && x.RadarrIntegrationId == null)
+                .ToListAsync();
+            var tvShowTasks = await context
+                .DownloadTaskTvShow.AsTracking().Where(x => x.SonarrIntegrationId == null && x.RadarrIntegrationId == null)
+                .ToListAsync();
+            foreach (var task in movieTasks.Cast<DownloadTaskBase>().Concat(tvShowTasks))
+                task.RadarrIntegrationId = integrationId;
+            await context.SaveChangesAsync();
+
+            await context
+                .DownloadTaskMovieFile.Where(x => x.RadarrIntegrationId == null)
+                .ExecuteUpdateAsync(x => x.SetProperty(p => p.RadarrIntegrationId, integrationId));
+            await context
+                .DownloadTaskTvShowSeason.Where(x => x.RadarrIntegrationId == null)
+                .ExecuteUpdateAsync(x => x.SetProperty(p => p.RadarrIntegrationId, integrationId));
+            await context
+                .DownloadTaskTvShowEpisode.Where(x => x.RadarrIntegrationId == null)
+                .ExecuteUpdateAsync(x => x.SetProperty(p => p.RadarrIntegrationId, integrationId));
+            await context
+                .DownloadTaskTvShowEpisodeFile.Where(x => x.RadarrIntegrationId == null)
+                .ExecuteUpdateAsync(x => x.SetProperty(p => p.RadarrIntegrationId, integrationId));
+        }
+        return context;
+    }
+
+    public static async Task<ReaparrDbContext> AddSonarrIntegrations(
+        this ReaparrDbContext context,
+        Seed seed,
+        Action<FakeDataConfig>? options = null
+    )
+    {
+        var config = FakeDataConfig.FromOptions(options);
+        for (var i = 0; i < config.SonarrIntegrationCount; i++)
+        {
+            var integrationId = new Guid(seed.Next(), 0, 0, new byte[8]);
+            var id = integrationId.ToString("N");
+            context.SonarrIntegrations.Add(
+                new SonarrIntegration
+                {
+                    Id = integrationId,
+                    DisplayName = $"Sonarr {id[..8]}",
+                    BaseUrl = $"https://sonarr-{id[..8]}.example.com",
+                    SonarrApiKey = id,
+                    QBittorrentApiKey = IntegrationApiKeyGenerator.GenerateQBittorrentApiKey(integrationId),
+                    TorznabApiKey = IntegrationApiKeyGenerator.GenerateTorznabApiKey(integrationId),
+                    Category = $"sonarr-{id[..8]}",
+                    DownloadFolderId = PlexMediaType.None.ToDefaultDestinationFolderId(),
+                    ProvisioningState = IntegrationProvisioningState.Configured,
+                }
+            );
+        }
+        await context.SaveChangesAsync();
+        return context;
+    }
+
     /// <summary>
     /// Creates an in-memory database only to be used for unit and integration testing.
     /// Passing in the same dbName will create a new context for the same database
@@ -317,6 +408,12 @@ public static partial class MockDatabase
                     appRuntimeInfo,
                     options
                 );
+
+            if (config.RadarrIntegrationCount > 0)
+                reaparrContext = await reaparrContext.AddRadarrIntegrations(seed, options);
+
+            if (config.SonarrIntegrationCount > 0)
+                reaparrContext = await reaparrContext.AddSonarrIntegrations(seed, options);
 
             if (config.AccountHasAccessToAllLibraries)
                 reaparrContext = await reaparrContext.AddPlexAccountLibraries();

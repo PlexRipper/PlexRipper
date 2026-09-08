@@ -66,6 +66,8 @@ public class GenerateDownloadTaskTvShowsCommandHandler
 
         var report = new DownloadTaskCreationReport();
 
+        var request = command.Request;
+
         foreach (var downloadMediaDto in plexTvShowList)
         {
             var mediaIds = downloadMediaDto.MediaIds.Distinct().ToList();
@@ -80,15 +82,20 @@ public class GenerateDownloadTaskTvShowsCommandHandler
             foreach (var tvShow in plexTvShows)
             {
                 // Check if the tvShowDownloadTask has already been created
-                var downloadTaskTvShow = await _dbContext.GetDownloadTaskTvShowByRatingKeyQuery(
-                    tvShow.PlexServerId,
-                    tvShow.PlexApiRatingKey,
-                    cancellationToken
-                );
+                var downloadTaskTvShow = await _dbContext
+                    .DownloadTaskTvShow.AsTracking()
+                    .WhereIntegrationIs(request.Integration)
+                    .Include(x => x.Children)
+                    .SingleOrDefaultAsync(
+                        x =>
+                            x.PlexServerId == tvShow.PlexServerId
+                            && x.PlexApiRatingKey == tvShow.PlexApiRatingKey,
+                        cancellationToken
+                    );
 
                 if (downloadTaskTvShow is null)
                 {
-                    downloadTaskTvShow = tvShow.MapToDownloadTask();
+                    downloadTaskTvShow = tvShow.MapToDownloadTask(request.Integration);
 
                     tvShowsToInsert.Add(downloadTaskTvShow);
                     seasonsIds.Add(
@@ -121,8 +128,9 @@ public class GenerateDownloadTaskTvShowsCommandHandler
                 new GenerateDownloadTaskTvShowSeasonsCommand(
                     new CreateDownloadTasksRequest(
                         seasonsIds,
-                        command.Request.DestinationFolderPathId,
-                        command.Request.CustomDestinationFolderPath
+                        request.DestinationFolderPathId,
+                        request.CustomDestinationFolderPath,
+                        request.Integration
                     )
                 ),
                 cancellationToken

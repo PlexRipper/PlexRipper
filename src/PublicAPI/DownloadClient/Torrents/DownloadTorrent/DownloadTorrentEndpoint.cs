@@ -1,5 +1,6 @@
 using BencodeNET.Objects;
 using BencodeNET.Torrents;
+using Reaparr.Application.Contracts;
 
 namespace Reaparr.PublicAPI;
 
@@ -53,12 +54,19 @@ public class DownloadTorrentEndpoint : Endpoint<DownloadTorrentEndpointRequest>
         );
 
         AllowAnonymous();
-        PreProcessor<DownloadClientAuthenticationPreProcessor<DownloadTorrentEndpointRequest>>();
+        PreProcessor<IndexerAuthenticationPreProcessor<DownloadTorrentEndpointRequest>>();
     }
 
     public override async Task HandleAsync(DownloadTorrentEndpointRequest req, CancellationToken ct)
     {
         _log.Here().DebugApiCall(HttpContext, req);
+        HttpContext.Response.Headers.CacheControl = "no-store";
+
+        if (!HttpContext.GetIntegrationIdentity().Supports(req.Type))
+        {
+            await Send.ForbiddenAsync(ct);
+            return;
+        }
 
         // Create minimal torrent
         var fileInfo = await GetFileInfoAsync(req, ct);
@@ -81,7 +89,10 @@ public class DownloadTorrentEndpoint : Endpoint<DownloadTorrentEndpointRequest>
         };
 
         foreach (var reqValue in req.Values)
-            extraFields.Add(reqValue.Key, reqValue.Value);
+            if (
+                !string.Equals(reqValue.Key, IntegrationDefinitions.INDEXER_API_KEY, StringComparison.OrdinalIgnoreCase)
+            )
+                extraFields.Add(reqValue.Key, reqValue.Value);
 
         var torrent = new Torrent
         {

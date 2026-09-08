@@ -12,7 +12,7 @@ public static class PlexMediaTypeExtensions
             PlexMediaType.Photos or PlexMediaType.PhotoAlbum => 5,
             PlexMediaType.OtherVideos => 6,
             PlexMediaType.Games => 7,
-            _ => 1, // Used for Downloads folder
+            _ => FolderTypeDefaults.DefaultDownloadFolderId, // Used for Downloads folder
         };
     }
 }

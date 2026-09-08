@@ -79,6 +79,38 @@ public class SetupRadarrDownloadClientCommandHandler
 
         try
         {
+            var result = await _commandExecutor.Send(new RadarrApiGetDownloadClientsCommand(integration.Id), ct);
+            if (result.IsCancelled)
+            {
+                await _progressHubService.SendIntegrationSetupProgressAsync(
+                    new IntegrationSetupProgressDTO
+                    {
+                        IntegrationId = integration.Id,
+                        Stage = IntegrationSetupProgressStage.Connecting,
+                        IsRunning = false,
+                        IsSuccess = false,
+                    }
+                );
+                return result.ToResult<SetupRadarrDownloadClientCommandResult>().LogWarning();
+            }
+
+            if (result.IsFailed)
+            {
+                await _progressHubService.SendIntegrationSetupProgressAsync(
+                    new IntegrationSetupProgressDTO
+                    {
+                        IntegrationId = integration.Id,
+                        Stage = IntegrationSetupProgressStage.Connecting,
+                        IsRunning = false,
+                        IsSuccess = false,
+                    }
+                );
+                return Result
+                    .Fail("Failed to retrieve existing download clients from Radarr.")
+                    .WithErrors(result.Errors)
+                    .LogError();
+            }
+
             await _progressHubService.SendIntegrationSetupProgressAsync(
                 new IntegrationSetupProgressDTO
                 {
@@ -88,13 +120,6 @@ public class SetupRadarrDownloadClientCommandHandler
                     IsSuccess = true,
                 }
             );
-
-            var result = await _commandExecutor.Send(new RadarrApiGetDownloadClientsCommand(integration.Id), ct);
-            if (result.IsFailed)
-                return Result
-                    .Fail("Failed to retrieve existing download clients from Radarr.")
-                    .WithErrors(result.Errors)
-                    .LogError();
 
             var list = result.Value;
             var resource = BuildDownloadClientResource(_networkSettings.Uri, integration);

@@ -47,7 +47,6 @@ public class SetupSonarrIntegrationCommandHandler
         if (downloadClientResult.IsCancelled)
         {
             var error = string.Join("; ", downloadClientResult.Errors.Select(x => x.Message));
-            await SendProgress(integration.Id, IntegrationSetupProgressStage.Connecting, false, error: error);
             await SendProgress(integration.Id, IntegrationSetupProgressStage.DownloadClient, false, error: error);
             return downloadClientResult.ToResult<SonarrIntegration>().LogWarning();
         }
@@ -55,7 +54,6 @@ public class SetupSonarrIntegrationCommandHandler
         if (downloadClientResult.IsFailed)
         {
             var error = string.Join("; ", downloadClientResult.Errors.Select(x => x.Message));
-            await SendProgress(integration.Id, IntegrationSetupProgressStage.Connecting, false, error: error);
             await SendProgress(integration.Id, IntegrationSetupProgressStage.DownloadClient, false, error: error);
             return downloadClientResult.ToResult<SonarrIntegration>().LogError();
         }

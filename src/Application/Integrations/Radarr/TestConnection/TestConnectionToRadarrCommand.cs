@@ -47,7 +47,7 @@ public class TestConnectionToRadarrCommandHandler
     )
     {
         if (!command.IntegrationId.HasValue)
-            return await TestAsync(command.Url!, command.ApiKey!, ct);
+            return await TestAsync(command.Url, command.ApiKey, ct);
 
         using var dbContext = await _dbContextFactory.CreateAsync();
         var integration = await dbContext
@@ -70,9 +70,9 @@ public class TestConnectionToRadarrCommandHandler
         return result;
     }
 
-    private async Task<Result<TestConnectionResult>> TestAsync(string url, string apiKey, CancellationToken ct)
+    private async Task<Result<TestConnectionResult>> TestAsync(string? url, string? apiKey, CancellationToken ct)
     {
-        if (!Uri.TryCreate(url.TrimEnd('/'), UriKind.Absolute, out var uri) || !IsHttp(uri))
+        if (string.IsNullOrWhiteSpace(url) || !Uri.TryCreate(url.TrimEnd('/'), UriKind.Absolute, out var uri) || !IsHttp(uri))
             return Result.Ok(CreateResult(TestConnectionStatus.UrlIsInvalid, null, "URL is invalid."));
         if (string.IsNullOrWhiteSpace(apiKey))
             return Result.Ok(CreateResult(TestConnectionStatus.InvalidApiKey, null, "API key is invalid."));

@@ -2,18 +2,19 @@ namespace Reaparr.PublicAPI;
 
 public class IndexerAuthenticationPreProcessor<TRequest> : IPreProcessor<TRequest>
 {
+    private readonly IReaparrDbContextFactory _dbContextFactory;
     private readonly ILogger _log;
-    private readonly IReaparrDbContext _dbContext;
 
-    public IndexerAuthenticationPreProcessor(ILogger log, IReaparrDbContext dbContext)
+    public IndexerAuthenticationPreProcessor(ILogger log, IReaparrDbContextFactory dbContextFactory)
     {
         _log = log.ForContext<IndexerAuthenticationPreProcessor<TRequest>>();
-        _dbContext = dbContext;
+        _dbContextFactory = dbContextFactory;
     }
 
     public async Task PreProcessAsync(IPreProcessorContext<TRequest> ctx, CancellationToken ct)
     {
-        var identity = await ctx.HttpContext.AuthenticateQueryKeyAsync(_dbContext, ct);
+        var dbContext = await _dbContextFactory.CreateAsync();
+        var identity = await ctx.HttpContext.AuthenticateQueryKeyAsync(dbContext, ct);
         if (identity is not null)
             return;
 

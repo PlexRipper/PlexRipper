@@ -167,7 +167,7 @@ public abstract class BaseEndpointUnitTestBase<TEndpoint, TResponse> : BaseUnitT
 
     protected async Task AuthenticateIntegrationAsync(TEndpoint endpoint, IntegrationIdentity identity)
     {
-        using var dbContext = IDbContext;
+        var dbContext = IDbContext;
         var apiKey =
             identity.Type == IntegrationType.Sonarr
                 ? await dbContext

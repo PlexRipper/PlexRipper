@@ -133,7 +133,7 @@ public sealed class DeleteTorrentEndpoint : Endpoint<DeleteTorrentRequest>
         }
         else
         {
-            var rootKeys = await GetRootKeysAsync(keysToDelete, ct);
+            var rootKeys = await GetRootKeysAsync(keysToDelete, integration, ct);
             if (rootKeys.Count > 0)
             {
                 var clearResult = await _commandExecutor.Send(
@@ -180,6 +180,7 @@ public sealed class DeleteTorrentEndpoint : Endpoint<DeleteTorrentRequest>
     /// </summary>
     private async Task<List<DownloadTaskKey>> GetRootKeysAsync(
         IReadOnlyCollection<DownloadTaskKey> leafKeys,
+        IntegrationIdentity? integration,
         CancellationToken ct
     )
     {
@@ -218,7 +219,7 @@ public sealed class DeleteTorrentEndpoint : Endpoint<DeleteTorrentRequest>
             );
             foreach (var episodeLeafKey in episodeLeafKeys)
             {
-                var rootKey = await _dbContext.GetRootDownloadTaskKeyAsync(episodeLeafKey, cancellationToken: ct);
+                var rootKey = await _dbContext.GetRootDownloadTaskKeyAsync(episodeLeafKey, integration, ct);
                 if (rootKey is not null && rootKey.Type == DownloadTaskType.TvShow)
                 {
                     rootKeys.Add(rootKey);

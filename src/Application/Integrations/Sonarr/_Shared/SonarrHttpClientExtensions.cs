@@ -180,6 +180,7 @@ public static class SonarrHttpClientExtensions
         CancellationToken ct
     )
     {
+        var errors = new List<string>();
         foreach (
             var resource in new[]
             {
@@ -198,14 +199,16 @@ public static class SonarrHttpClientExtensions
             if (result.IsCancelled)
                 return result.ToResult().LogWarning();
             if (result.IsFailed)
-                return result.ToResult().LogError();
+            {
+                result.ToResult().LogError();
+                errors.Add($"Failed to delete Sonarr {resource.Name} {resource.Id.Value}.");
+                continue;
+            }
             if (!result.Value.IsSuccessStatusCode && result.Value.StatusCode != HttpStatusCode.NotFound)
-                return Result.Fail(
-                    $"Failed to delete Sonarr {resource.Name} {resource.Id.Value}: {result.Value.StatusCode}."
-                );
+                errors.Add($"Failed to delete Sonarr {resource.Name} {resource.Id.Value}: {result.Value.StatusCode}.");
         }
 
-        return Result.Ok();
+        return errors.Count > 0 ? Result.Fail(errors).LogError() : Result.Ok();
     }
 
     public static async Task<Result> TestAllSonarrDownloadClientsAsync(this HttpClient client, CancellationToken ct)
@@ -218,9 +221,13 @@ public static class SonarrHttpClientExtensions
             return result.ToResult().LogWarning();
         if (result.IsFailed)
             return result.ToResult().LogError();
-        return result.Value.IsSuccessStatusCode || result.Value.StatusCode == HttpStatusCode.BadRequest
-            ? Result.Ok()
-            : Result.Fail($"Failed to test Sonarr download clients. StatusCode: {result.Value.StatusCode}");
+        if (result.Value.IsSuccessStatusCode)
+            return Result.Ok();
+
+        return Result
+            .Fail($"Failed to test Sonarr download clients. StatusCode: {result.Value.StatusCode}")
+            .WithError(result.Value.Body)
+            .LogError();
     }
 
     private static async Task<Result> TestSonarrResourceAsync<T>(

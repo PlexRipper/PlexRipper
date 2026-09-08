@@ -2,18 +2,19 @@ namespace Reaparr.PublicAPI;
 
 public class DownloadClientAuthenticationPreProcessor<TRequest> : IPreProcessor<TRequest>
 {
+    private readonly IReaparrDbContextFactory _dbContextFactory;
     private readonly ILogger _log;
-    private readonly IReaparrDbContext _dbContext;
 
-    public DownloadClientAuthenticationPreProcessor(ILogger log, IReaparrDbContext dbContext)
+    public DownloadClientAuthenticationPreProcessor(ILogger log, IReaparrDbContextFactory dbContextFactory)
     {
         _log = log.ForContext<DownloadClientAuthenticationPreProcessor<TRequest>>();
-        _dbContext = dbContext;
+        _dbContextFactory = dbContextFactory;
     }
 
     public async Task PreProcessAsync(IPreProcessorContext<TRequest> ctx, CancellationToken ct)
     {
-        var identity = await ctx.HttpContext.AuthenticateBearerAsync(_dbContext, ct);
+        var dbContext = await _dbContextFactory.CreateAsync();
+        var identity = await ctx.HttpContext.AuthenticateBearerAsync(dbContext, ct);
         if (identity is not null)
             return;
 

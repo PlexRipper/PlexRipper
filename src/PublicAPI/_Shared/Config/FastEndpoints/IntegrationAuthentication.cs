@@ -17,10 +17,7 @@ public static class IntegrationAuthentication
     )
     {
         var integrationId = GetRouteIntegrationId(httpContext);
-        var exactApiKey = httpContext.Request.Query.FirstOrDefault(x =>
-            x.Key == IntegrationDefinitions.INDEXER_API_KEY
-        );
-        var apiKey = exactApiKey.Key is null ? string.Empty : exactApiKey.Value.ToString();
+        var apiKey = httpContext.Request.Query[IntegrationDefinitions.INDEXER_API_KEY].ToString();
 
         return await AuthenticateAsync(
             dbContext,

@@ -88,8 +88,8 @@ public class UpdateRadarrIntegrationEndpoint : Endpoint<UpdateRadarrIntegrationR
         }
 
         if (
-            integration.Category != category
-            && integration.ProvisioningState == IntegrationProvisioningState.Configured
+            integration.ProvisioningState == IntegrationProvisioningState.Configured
+            && (integration.Category != category || integration.BaseUrl != url || integration.RadarrApiKey != apiKey)
         )
             integration.ProvisioningState = IntegrationProvisioningState.ChangesPending;
 

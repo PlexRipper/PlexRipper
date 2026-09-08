@@ -209,6 +209,11 @@ public static partial class MockDatabase
     )
     {
         var config = FakeDataConfig.FromOptions(options);
+        if (config.AssignUnownedDownloadTasksToRadarrIntegration && config.RadarrIntegrationCount > 1)
+            throw new InvalidOperationException(
+                "AssignUnownedDownloadTasksToRadarrIntegration allows at most one Radarr integration."
+            );
+
         for (var i = 0; i < config.RadarrIntegrationCount; i++)
         {
             var integrationId = new Guid(seed.Next(), 0, 0, new byte[8]);
@@ -220,8 +225,8 @@ public static partial class MockDatabase
                     DisplayName = $"Radarr {id[..8]}",
                     BaseUrl = $"https://radarr-{id[..8]}.example.com",
                     RadarrApiKey = id,
-                    QBittorrentApiKey = IntegrationApiKeyGenerator.GenerateQBittorrentApiKey(),
-                    TorznabApiKey = IntegrationApiKeyGenerator.GenerateTorznabApiKey(),
+                    QBittorrentApiKey = IntegrationApiKeyGenerator.GenerateQBittorrentApiKey(integrationId),
+                    TorznabApiKey = IntegrationApiKeyGenerator.GenerateTorznabApiKey(integrationId),
                     Category = $"radarr-{id[..8]}",
                     DownloadFolderId = PlexMediaType.None.ToDefaultDestinationFolderId(),
                     ProvisioningState = IntegrationProvisioningState.Configured,
@@ -233,10 +238,10 @@ public static partial class MockDatabase
         {
             var integrationId = await context.RadarrIntegrations.Select(x => x.Id).SingleAsync();
             var movieTasks = await context
-                .DownloadTaskMovie.Where(x => x.SonarrIntegrationId == null && x.RadarrIntegrationId == null)
+                .DownloadTaskMovie.AsTracking().Where(x => x.SonarrIntegrationId == null && x.RadarrIntegrationId == null)
                 .ToListAsync();
             var tvShowTasks = await context
-                .DownloadTaskTvShow.Where(x => x.SonarrIntegrationId == null && x.RadarrIntegrationId == null)
+                .DownloadTaskTvShow.AsTracking().Where(x => x.SonarrIntegrationId == null && x.RadarrIntegrationId == null)
                 .ToListAsync();
             foreach (var task in movieTasks.Cast<DownloadTaskBase>().Concat(tvShowTasks))
                 task.RadarrIntegrationId = integrationId;
@@ -276,8 +281,8 @@ public static partial class MockDatabase
                     DisplayName = $"Sonarr {id[..8]}",
                     BaseUrl = $"https://sonarr-{id[..8]}.example.com",
                     SonarrApiKey = id,
-                    QBittorrentApiKey = IntegrationApiKeyGenerator.GenerateQBittorrentApiKey(),
-                    TorznabApiKey = IntegrationApiKeyGenerator.GenerateTorznabApiKey(),
+                    QBittorrentApiKey = IntegrationApiKeyGenerator.GenerateQBittorrentApiKey(integrationId),
+                    TorznabApiKey = IntegrationApiKeyGenerator.GenerateTorznabApiKey(integrationId),
                     Category = $"sonarr-{id[..8]}",
                     DownloadFolderId = PlexMediaType.None.ToDefaultDestinationFolderId(),
                     ProvisioningState = IntegrationProvisioningState.Configured,

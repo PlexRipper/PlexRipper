@@ -125,10 +125,13 @@ public class SearchTvShowCommandHandler : ICommandHandler<SearchTvShowCommand, R
         CancellationToken cancellationToken
     )
     {
-        var onlineServerIds = await _dbContext.GetOnlineServerIds();
+        var onlineServerIds = await _dbContext.GetDownloadableServerIds();
         if (!onlineServerIds.Any())
         {
-            _log.Here().Warning("No online Plex servers found, returning empty search results.");
+            _log.Here()
+                .Warning(
+                    "No online Plex servers with downloads enabled were found, returning empty search results."
+                );
             return [];
         }
 

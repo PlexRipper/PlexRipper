@@ -3,21 +3,21 @@ namespace Reaparr.BaseTests;
 public static class GlobalTestHooks
 {
     [Before(TestSession)]
-    public static void SetupTestSession()
+    public static async Task SetupTestSession()
     {
         var appRuntimeInfo = new MockAppRuntimeInfo { IsUnmasked = true };
-        var testLogConfig = new TestLogConfig(
-            appRuntimeInfo,
-            new MockPathProvider(MockDatabase.GetMemoryDatabaseName())
-        );
+        var pathProvider = new MockPathProvider(MockDatabase.GetMemoryDatabaseName());
+        var testLogConfig = new TestLogConfig(appRuntimeInfo, pathProvider);
 
         LogFactory.SetupLogging(testLogConfig, appRuntimeInfo, LogEventLevel.Verbose);
         BogusExtensions.Setup();
+        await MockDatabase.InitializeDatabaseTemplateAsync(pathProvider, appRuntimeInfo);
     }
 
     [After(TestSession)]
-    public static void CleanupTestSession()
+    public static async Task CleanupTestSession()
     {
+        await MockDatabase.DisposeDatabaseTemplateAsync();
         LogFactory.CloseAndFlush();
     }
 }

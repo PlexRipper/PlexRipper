@@ -7,8 +7,6 @@ public static partial class MockDatabase
 {
     private static readonly Serilog.ILogger _log = LogFactory.Create(typeof(MockDatabase));
 
-    private static readonly SemaphoreSlim _databaseTemplateLock = new(1, 1);
-    private static readonly SemaphoreSlim _seedLock = new(1, 1);
     private static readonly string _databaseTemplateName = GetMemoryDatabaseName();
     private static SqliteConnection? _databaseTemplateConnection;
 
@@ -361,16 +359,7 @@ public static partial class MockDatabase
         var (reaparrContext, authContext) = context;
 
         await PrepareDatabaseSchemaAsync(reaparrContext, authContext, pathProvider, appRuntimeInfo);
-
-        await _seedLock.WaitAsync();
-        try
-        {
-            await SeedDatabaseAsync(reaparrContext, seed, pathProvider, appRuntimeInfo, config, options);
-        }
-        finally
-        {
-            _seedLock.Release();
-        }
+        await SeedDatabaseAsync(reaparrContext, seed, pathProvider, appRuntimeInfo, config, options);
 
         reaparrContext.ShouldNotBeNull();
     }
@@ -389,55 +378,56 @@ public static partial class MockDatabase
             return;
         }
 
-        await EnsureDatabaseTemplateAsync(pathProvider, appRuntimeInfo);
+        if (_databaseTemplateConnection is null)
+            throw new InvalidOperationException("The test database template has not been initialized.");
+
         await CloneDatabaseTemplateAsync(reaparrContext, pathProvider);
     }
 
-    private static async Task EnsureDatabaseTemplateAsync(IPathProvider pathProvider, IAppRuntimeInfo appRuntimeInfo)
+    public static async Task InitializeDatabaseTemplateAsync(IPathProvider pathProvider, IAppRuntimeInfo appRuntimeInfo)
     {
-        if (Volatile.Read(ref _databaseTemplateConnection) is not null)
+        if (_databaseTemplateConnection is not null)
             return;
 
-        await _databaseTemplateLock.WaitAsync();
+        var templateConnection = new SqliteConnection(
+            DbContextConnections.GetConnectionString(_databaseTemplateName, SqliteOpenMode.Memory)
+        );
+        await templateConnection.OpenAsync();
+
+        await using var templateReaparrContext = GetMemoryReaparrDbContext(
+            _log,
+            pathProvider,
+            appRuntimeInfo,
+            _databaseTemplateName
+        );
+        await using var templateAuthContext = GetMemoryAuthDbContext(
+            _log,
+            pathProvider,
+            appRuntimeInfo,
+            _databaseTemplateName
+        );
+
         try
         {
-            if (_databaseTemplateConnection is not null)
-                return;
-
-            var templateConnection = new SqliteConnection(
-                DbContextConnections.GetConnectionString(_databaseTemplateName, SqliteOpenMode.Memory)
-            );
-            await templateConnection.OpenAsync();
-
-            await using var templateReaparrContext = GetMemoryReaparrDbContext(
-                _log,
-                pathProvider,
-                appRuntimeInfo,
-                _databaseTemplateName
-            );
-            await using var templateAuthContext = GetMemoryAuthDbContext(
-                _log,
-                pathProvider,
-                appRuntimeInfo,
-                _databaseTemplateName
-            );
-
-            try
-            {
-                var migrationResult = Result.Merge(templateReaparrContext.Migrate(), templateAuthContext.Migrate());
-                migrationResult.IsSuccess.ShouldBeTrue(migrationResult.ToString());
-                Volatile.Write(ref _databaseTemplateConnection, templateConnection);
-            }
-            catch
-            {
-                await templateConnection.DisposeAsync();
-                throw;
-            }
+            var migrationResult = Result.Merge(templateReaparrContext.Migrate(), templateAuthContext.Migrate());
+            migrationResult.IsSuccess.ShouldBeTrue(migrationResult.ToString());
+            _databaseTemplateConnection = templateConnection;
         }
-        finally
+        catch
         {
-            _databaseTemplateLock.Release();
+            await templateConnection.DisposeAsync();
+            throw;
         }
+    }
+
+    public static async Task DisposeDatabaseTemplateAsync()
+    {
+        if (_databaseTemplateConnection is null)
+            return;
+
+        await _databaseTemplateConnection.DisposeAsync();
+        _databaseTemplateConnection = null;
+        SqliteConnection.ClearAllPools();
     }
 
     private static async Task CloneDatabaseTemplateAsync(ReaparrDbContext reaparrContext, IPathProvider pathProvider)

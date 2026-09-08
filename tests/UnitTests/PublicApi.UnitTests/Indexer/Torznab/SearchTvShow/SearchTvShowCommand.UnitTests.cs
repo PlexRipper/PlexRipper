@@ -99,6 +99,198 @@ public class SearchTvShowCommandUnitTests : BaseUnitTest<SearchTvShowCommandHand
     }
 
     [Test]
+    public async Task ShouldReturnAllEpisodes_WhenSeasonProvidedWithoutEpisode()
+    {
+        // Arrange
+        await SetupDatabase(
+            5501,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexTvShowLibraryCount = 1;
+                config.TvShowCount = 1;
+                config.TvShowSeasonCount = 1;
+                config.TvShowEpisodeCount = 3;
+            }
+        );
+
+        var episode = await IDbContext
+            .PlexTvShowEpisodes.Include(e => e.TvShowSeason)
+            .Include(e => e.TvShow)
+            .OrderBy(e => e.Id)
+            .FirstAsync(CancellationToken);
+
+        var seasonNumber = episode.TvShowSeason!.SeasonNumber;
+        var tvdb = episode.TvShow!.Guid_TVDB!.Value;
+        var expectedEpisodeCount = await IDbContext
+            .PlexTvShowEpisodes.Where(e =>
+                e.TvShowSeason!.SeasonNumber == seasonNumber && e.TvShow!.Guid_TVDB == tvdb
+            )
+            .CountAsync(CancellationToken);
+
+        var cmd = new SearchTvShowCommand
+        {
+            Query = string.Empty,
+            Season = seasonNumber,
+            Episode = 0,
+            Limit = 100,
+            Offset = 0,
+            IMDB_ID = string.Empty,
+            TMDB_ID = 0,
+            TVDB_ID = tvdb,
+        };
+
+        // Act
+        var result = await Sut.ExecuteAsync(cmd, CancellationToken);
+
+        // Assert
+        result.ShouldNotBeNull();
+        result.Value.Channel.Items.ShouldNotBeEmpty();
+        result.Value.Channel.Items.Count.ShouldBe(expectedEpisodeCount);
+        result
+            .Value.Channel.Items.All(i =>
+                i.Attributes.Any(a => a.Name == "season" && a.Value == seasonNumber.ToString())
+            )
+            .ShouldBeTrue();
+    }
+
+    [Test]
+    public async Task ShouldReturnOnlyRequestedSeason_WhenSeasonProvidedWithoutEpisode()
+    {
+        // Arrange
+        await SetupDatabase(
+            5511,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexTvShowLibraryCount = 1;
+                config.TvShowCount = 1;
+                config.TvShowSeasonCount = 2;
+                config.TvShowEpisodeCount = 2;
+            }
+        );
+
+        var targetEpisode = await IDbContext
+            .PlexTvShowEpisodes.Include(e => e.TvShowSeason)
+            .Include(e => e.TvShow)
+            .Where(e => e.TvShowSeason!.SeasonNumber == 2)
+            .OrderBy(e => e.Id)
+            .FirstAsync(CancellationToken);
+
+        var targetSeasonNumber = targetEpisode.TvShowSeason!.SeasonNumber;
+        var tvdb = targetEpisode.TvShow!.Guid_TVDB!.Value;
+        var expectedEpisodeCount = await IDbContext
+            .PlexTvShowEpisodes.Where(e =>
+                e.TvShowSeason!.SeasonNumber == targetSeasonNumber && e.TvShow!.Guid_TVDB == tvdb
+            )
+            .CountAsync(CancellationToken);
+
+        var cmd = new SearchTvShowCommand
+        {
+            Query = string.Empty,
+            Season = targetSeasonNumber,
+            Episode = 0,
+            Limit = 100,
+            Offset = 0,
+            IMDB_ID = string.Empty,
+            TMDB_ID = 0,
+            TVDB_ID = tvdb,
+        };
+
+        // Act
+        var result = await Sut.ExecuteAsync(cmd, CancellationToken);
+
+        // Assert
+        result.ShouldNotBeNull();
+        result.Value.Channel.Items.Count.ShouldBe(expectedEpisodeCount);
+        result
+            .Value.Channel.Items.All(i =>
+                i.Attributes.Any(a => a.Name == "season" && a.Value == targetSeasonNumber.ToString())
+            )
+            .ShouldBeTrue();
+        result
+            .Value.Channel.Items.Any(i =>
+                i.Attributes.Any(a => a.Name == "season" && a.Value != targetSeasonNumber.ToString())
+            )
+            .ShouldBeFalse();
+    }
+
+    [Test]
+    public void ShouldFailValidation_WhenEpisodeProvidedWithoutSeason()
+    {
+        // Arrange
+        var validator = new SearchTvShowCommandValidator();
+        var cmd = new SearchTvShowCommand
+        {
+            Query = string.Empty,
+            Season = 0,
+            Episode = 1,
+            Limit = 10,
+            Offset = 0,
+            IMDB_ID = string.Empty,
+            TMDB_ID = 0,
+            TVDB_ID = 12345,
+        };
+
+        // Act
+        var result = validator.Validate(cmd);
+
+        // Assert
+        result.IsValid.ShouldBeFalse();
+        result.Errors.Any(error => error.PropertyName == nameof(SearchTvShowCommand.Season)).ShouldBeTrue();
+    }
+
+    [Test]
+    public void ShouldFailValidation_WhenSeasonProvidedWithoutExternalId()
+    {
+        // Arrange
+        var validator = new SearchTvShowCommandValidator();
+        var cmd = new SearchTvShowCommand
+        {
+            Query = string.Empty,
+            Season = 1,
+            Episode = 0,
+            Limit = 10,
+            Offset = 0,
+            IMDB_ID = string.Empty,
+            TMDB_ID = 0,
+            TVDB_ID = 0,
+        };
+
+        // Act
+        var result = validator.Validate(cmd);
+
+        // Assert
+        result.IsValid.ShouldBeFalse();
+        result.Errors.Any(error => error.ErrorMessage.Contains("Provide at least one of")).ShouldBeTrue();
+    }
+
+    [Test]
+    public void ShouldPassValidation_WhenSeasonProvidedWithoutEpisode()
+    {
+        // Arrange
+        var validator = new SearchTvShowCommandValidator();
+        var cmd = new SearchTvShowCommand
+        {
+            Query = string.Empty,
+            Season = 1,
+            Episode = 0,
+            Limit = 10,
+            Offset = 0,
+            IMDB_ID = string.Empty,
+            TMDB_ID = 0,
+            TVDB_ID = 12345,
+        };
+
+        // Act
+        var result = validator.Validate(cmd);
+
+        // Assert
+        result.IsValid.ShouldBeTrue();
+        result.Errors.ShouldBeEmpty();
+    }
+
+    [Test]
     public async Task ShouldReturnSpecificEpisode_WhenFilteredByImdbSeasonAndEpisode()
     {
         // Arrange

@@ -552,6 +552,10 @@ public class CompareTvShowPlexLibraryCommandOwnershipUnitTests : BaseCommandUnit
         var remoteShows = await GetLibraryTvShowsAsync(remoteLibrary.Id);
         var remoteShow = remoteShows[0];
         var ownedShows = await GetLibraryTvShowsAsync(ownedLibrary.Id);
+        var remoteSeason = (await GetLibrarySeasonsAsync(remoteLibrary.Id)).Single(x => x.TvShowId == remoteShow.Id);
+        var ownedSeasons = await GetLibrarySeasonsAsync(ownedLibrary.Id);
+        var remoteEpisode = (await GetLibraryEpisodesAsync(remoteLibrary.Id)).Single(x => x.TvShowId == remoteShow.Id);
+        var ownedEpisodes = await GetLibraryEpisodesAsync(ownedLibrary.Id);
         await UpdateTvShowMatchFieldsAsync(
             remoteShows[1].Id,
             "remote no match",
@@ -604,6 +608,34 @@ public class CompareTvShowPlexLibraryCommandOwnershipUnitTests : BaseCommandUnit
         hits.ShouldAllBe(x => x.RemotePlexMediaId == remoteShow.Id);
         hits.ShouldAllBe(x => x.MatchType == PlexMediaComparisonMatchType.TmdbGuid);
         hits.ShouldAllBe(x => x.HitState == PlexMediaComparisonHitState.HigherQuality);
+        var seasonHits = await IDbContext
+            .PlexSeasonComparisons.Where(x =>
+                x.RemotePlexLibraryId == remoteLibrary.Id && x.OwnedPlexLibraryId == ownedLibrary.Id
+            )
+            .ToListAsync(CancellationToken);
+        var episodeHits = await IDbContext
+            .PlexEpisodeComparisons.Where(x =>
+                x.RemotePlexLibraryId == remoteLibrary.Id && x.OwnedPlexLibraryId == ownedLibrary.Id
+            )
+            .ToListAsync(CancellationToken);
+        seasonHits.Count.ShouldBe(ownedSeasons.Count);
+        seasonHits.ShouldAllBe(x =>
+            x.RemotePlexMediaId == remoteSeason.Id
+            && x.MatchType == PlexMediaComparisonMatchType.ParentAndChildNumbers
+            && x.HitState == PlexMediaComparisonHitState.Matched
+        );
+        seasonHits.Select(x => x.OwnedPlexMediaId).ToHashSet().SetEquals(ownedSeasons.Select(x => x.Id)).ShouldBeTrue();
+        episodeHits.Count.ShouldBe(ownedEpisodes.Count);
+        episodeHits.ShouldAllBe(x =>
+            x.RemotePlexMediaId == remoteEpisode.Id
+            && x.MatchType == PlexMediaComparisonMatchType.ParentAndChildNumbers
+            && x.HitState == PlexMediaComparisonHitState.Matched
+        );
+        episodeHits
+            .Select(x => x.OwnedPlexMediaId)
+            .ToHashSet()
+            .SetEquals(ownedEpisodes.Select(x => x.Id))
+            .ShouldBeTrue();
     }
 
     [Test]
@@ -1010,6 +1042,150 @@ public class CompareTvShowPlexLibraryCommandOwnershipUnitTests : BaseCommandUnit
         );
     }
 
+    [Test]
+    public async Task ShouldPersistComparisonRowsAcrossBatchBoundary()
+    {
+        // Arrange
+        await SetupDatabase(
+            62701,
+            config =>
+            {
+                config.PlexServerCount = 2;
+                config.PlexTvShowLibraryCount = 1;
+                config.PlexAccountCount = 1;
+                config.TvShowCount = 101;
+                config.TvShowSeasonCount = 1;
+                config.TvShowEpisodeCount = 1;
+            }
+        );
+
+        var dbContext = IDbContext;
+        var libraries = await dbContext.PlexLibraries.OrderBy(x => x.Id).ToListAsync(CancellationToken);
+        var remoteLibrary = libraries[0];
+        var ownedLibrary = libraries[1];
+        await SetOwnedOverrideAsync(remoteLibrary.PlexServerId, false);
+        await SetOwnedOverrideAsync(ownedLibrary.PlexServerId, true);
+
+        var remoteShows = await GetLibraryTvShowsAsync(remoteLibrary.Id);
+        var firstRemoteShow = remoteShows[0];
+        var remoteShow = remoteShows[^1];
+        var ownedShow = (await GetLibraryTvShowsAsync(ownedLibrary.Id))[^1];
+        await UpdateTvShowMatchFieldsAsync(
+            firstRemoteShow.Id,
+            "batch boundary show",
+            2026,
+            120,
+            VideoQuality.UHD_4K,
+            tmdbGuid: 62701
+        );
+        await UpdateTvShowMatchFieldsAsync(
+            remoteShow.Id,
+            "batch boundary show",
+            2026,
+            120,
+            VideoQuality.UHD_4K,
+            tmdbGuid: 62701
+        );
+        await UpdateTvShowMatchFieldsAsync(
+            ownedShow.Id,
+            "batch boundary show",
+            2026,
+            120,
+            VideoQuality.HD,
+            tmdbGuid: 62701
+        );
+
+        var remoteSeasons = await GetLibrarySeasonsAsync(remoteLibrary.Id);
+        var firstRemoteSeason = remoteSeasons.Single(x => x.TvShowId == firstRemoteShow.Id);
+        var remoteSeason = remoteSeasons.Single(x => x.TvShowId == remoteShow.Id);
+        var ownedSeason = (await GetLibrarySeasonsAsync(ownedLibrary.Id)).Single(x => x.TvShowId == ownedShow.Id);
+        var remoteEpisodes = await GetLibraryEpisodesAsync(remoteLibrary.Id);
+        var firstRemoteEpisode = remoteEpisodes.Single(x => x.TvShowId == firstRemoteShow.Id);
+        var remoteEpisode = remoteEpisodes.Single(x => x.TvShowId == remoteShow.Id);
+        var ownedEpisode = (await GetLibraryEpisodesAsync(ownedLibrary.Id)).Single(x => x.TvShowId == ownedShow.Id);
+
+        // Act
+        var result = await TestHandlerExecuteAsync(
+            new CompareTvShowPlexLibraryCommand(ownedLibrary.Id, remoteLibrary.Id)
+        );
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        result.Errors.ShouldBeEmpty();
+        remoteShows.Count.ShouldBe(101);
+        remoteShows[99].Id.ShouldBeLessThan(remoteShow.Id);
+        var showHits = await dbContext
+            .PlexTvShowComparisons.Where(x =>
+                x.RemotePlexLibraryId == remoteLibrary.Id
+                && x.OwnedPlexLibraryId == ownedLibrary.Id
+                && (x.RemotePlexMediaId == firstRemoteShow.Id || x.RemotePlexMediaId == remoteShow.Id)
+                && x.OwnedPlexMediaId == ownedShow.Id
+            )
+            .ToListAsync(CancellationToken);
+        showHits.Count.ShouldBe(2);
+        showHits.ShouldAllBe(x =>
+            x.OwnedPlexMediaId == ownedShow.Id
+            && x.MatchType == PlexMediaComparisonMatchType.TmdbGuid
+            && x.HitState == PlexMediaComparisonHitState.HigherQuality
+            && x.RemoteQuality == VideoQuality.UHD_4K
+            && x.OwnedQuality == VideoQuality.HD
+        );
+        showHits
+            .Select(x => x.RemotePlexMediaId)
+            .ToHashSet()
+            .SetEquals([firstRemoteShow.Id, remoteShow.Id])
+            .ShouldBeTrue();
+
+        var seasonHits = await dbContext
+            .PlexSeasonComparisons.Where(x =>
+                x.RemotePlexLibraryId == remoteLibrary.Id
+                && x.OwnedPlexLibraryId == ownedLibrary.Id
+                && (x.RemotePlexMediaId == firstRemoteSeason.Id || x.RemotePlexMediaId == remoteSeason.Id)
+                && x.OwnedPlexMediaId == ownedSeason.Id
+            )
+            .ToListAsync(CancellationToken);
+        seasonHits.Count.ShouldBe(2);
+        seasonHits.ShouldAllBe(x =>
+            x.OwnedPlexMediaId == ownedSeason.Id
+            && x.MatchType == PlexMediaComparisonMatchType.ParentAndChildNumbers
+            && x.HitState == PlexMediaComparisonHitState.Matched
+        );
+        seasonHits
+            .Select(x => x.RemotePlexMediaId)
+            .ToHashSet()
+            .SetEquals([firstRemoteSeason.Id, remoteSeason.Id])
+            .ShouldBeTrue();
+
+        var episodeHits = await dbContext
+            .PlexEpisodeComparisons.Where(x =>
+                x.RemotePlexLibraryId == remoteLibrary.Id
+                && x.OwnedPlexLibraryId == ownedLibrary.Id
+                && (x.RemotePlexMediaId == firstRemoteEpisode.Id || x.RemotePlexMediaId == remoteEpisode.Id)
+                && x.OwnedPlexMediaId == ownedEpisode.Id
+            )
+            .ToListAsync(CancellationToken);
+        episodeHits.Count.ShouldBe(2);
+        episodeHits.ShouldAllBe(x =>
+            x.OwnedPlexMediaId == ownedEpisode.Id
+            && x.MatchType == PlexMediaComparisonMatchType.ParentAndChildNumbers
+            && x.HitState == PlexMediaComparisonHitState.Matched
+        );
+        episodeHits
+            .Select(x => x.RemotePlexMediaId)
+            .ToHashSet()
+            .SetEquals([firstRemoteEpisode.Id, remoteEpisode.Id])
+            .ShouldBeTrue();
+
+        var scope = await dbContext.PlexComparisonScopes.SingleAsync(
+            x =>
+                x.RemotePlexLibraryId == remoteLibrary.Id
+                && x.OwnedPlexLibraryId == ownedLibrary.Id
+                && x.MediaType == PlexMediaType.TvShow,
+            CancellationToken
+        );
+        scope.CompletedAt.ShouldBeGreaterThan(default);
+    }
+
     private async Task<List<PlexTvShow>> GetLibraryTvShowsAsync(int plexLibraryId) =>
         await IDbContext
             .PlexTvShows.Where(x => x.PlexLibraryId == plexLibraryId)
@@ -1054,5 +1230,4 @@ public class CompareTvShowPlexLibraryCommandOwnershipUnitTests : BaseCommandUnit
             .PlexTvShowSeason.Where(x => x.Id == plexTvShowSeasonId)
             .ExecuteUpdateAsync(x => x.SetProperty(y => y.SeasonNumber, seasonNumber), CancellationToken);
     }
-
 }

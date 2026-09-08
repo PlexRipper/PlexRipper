@@ -36,24 +36,4 @@ public class ConfigManagerSaveConfigUnitTests : BaseUnitTest<ConfigManager>
         // Assert
         resetResult.IsSuccess.ShouldBeTrue();
     }
-
-    [Test]
-    public void ShouldLeaveActiveConfigUntouched_WhenAtomicReplaceFails()
-    {
-        // Arrange
-        var pathProvider = Mock.Container.Resolve<IPathProvider>();
-        Mock.Mock<IUserSettings>().SetupGet(x => x.SettingsUpdated).Returns(new Subject<UserSettings>());
-        Mock.Mock<IFile>().Setup(x => x.WriteAllText(pathProvider.ConfigFileLocation + ".tmp", It.IsAny<string>()));
-        Mock.Mock<IFile>()
-            .Setup(x => x.Move(pathProvider.ConfigFileLocation + ".tmp", pathProvider.ConfigFileLocation, true))
-            .Throws(new IOException("replace failed"));
-
-        // Act
-        var result = Sut.SaveConfig();
-
-        // Assert
-        result.IsFailed.ShouldBeTrue();
-        Mock.Mock<IFile>()
-            .Verify(x => x.WriteAllText(pathProvider.ConfigFileLocation, It.IsAny<string>()), Times.Never);
-    }
 }

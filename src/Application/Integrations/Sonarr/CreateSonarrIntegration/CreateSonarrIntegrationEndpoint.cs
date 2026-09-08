@@ -6,7 +6,7 @@ public record CreateSonarrIntegrationRequest
     public required string Url { get; init; }
     public required string ApiKey { get; init; }
     public required string Category { get; init; }
-    public int? DownloadFolderId { get; init; }
+    public required int DownloadFolderId { get; init; }
 }
 
 public class CreateSonarrIntegrationRequestValidator : Validator<CreateSonarrIntegrationRequest>
@@ -17,6 +17,7 @@ public class CreateSonarrIntegrationRequestValidator : Validator<CreateSonarrInt
         RuleFor(x => x.Url).NotEmpty().WithMessage("URL must be an absolute http/https URL.");
         RuleFor(x => x.ApiKey).NotEmpty();
         RuleFor(x => x.Category).NotEmpty();
+        RuleFor(x => x.DownloadFolderId).GreaterThan(0);
     }
 }
 
@@ -44,8 +45,7 @@ public class CreateSonarrIntegrationEndpoint : Endpoint<CreateSonarrIntegrationR
         var category = req.Category.Trim();
 
         if (
-            req.DownloadFolderId is not null
-            && !await _dbContext.FolderPaths.AnyAsync(
+            !await _dbContext.FolderPaths.AnyAsync(
                 x => x.Id == req.DownloadFolderId && x.FolderType == FolderType.DownloadFolder,
                 ct
             )

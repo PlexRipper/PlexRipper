@@ -1,11 +1,6 @@
 namespace Reaparr.Application.UnitTests;
 
-public class SetupRadarrIntegrationEndpointUnitTests
-    : BaseEndpointUnitTest<
-        SetupRadarrIntegrationEndpoint,
-        SetupRadarrIntegrationRequest,
-        ResultDTO<RadarrIntegrationDTO>
-    >
+public class SetupRadarrIntegrationCommandUnitTests : BaseCommandUnitTest<SetupRadarrIntegrationCommand>
 {
     [Test]
     public async Task ShouldKeepRemoteIdsAndUnconfiguredState_WhenValidationFails()
@@ -17,7 +12,7 @@ public class SetupRadarrIntegrationEndpointUnitTests
             x => x.SetProperty(p => p.ProvisioningState, IntegrationProvisioningState.Unconfigured),
             CancellationToken
         );
-        var request = new SetupRadarrIntegrationRequest { IntegrationId = integration.Id };
+        var command = new SetupRadarrIntegrationCommand(integration.Id);
 
         Mock.Mock<ICommandExecutor>()
             .Setup(x => x.Send(It.IsAny<SetupRadarrDownloadClientCommand>(), It.IsAny<CancellationToken>()))
@@ -49,14 +44,15 @@ public class SetupRadarrIntegrationEndpointUnitTests
             .Verifiable(Times.Exactly(5));
 
         // Act
-        var endpointResult = await TestEndpointHandleAsync(request);
+        var result = await TestHandlerExecuteAsync<RadarrIntegration>(command);
         var updated = await IDbContext.RadarrIntegrations.AsNoTracking().SingleAsync(CancellationToken);
 
         // Assert
-        endpointResult.StatusCode.ShouldBe(StatusCodes.Status500InternalServerError);
+        result.IsFailed.ShouldBeTrue();
         updated.ExternalDownloadClientId.ShouldBe(41);
         updated.ExternalIndexerId.ShouldBe(42);
         updated.ProvisioningState.ShouldBe(IntegrationProvisioningState.Unconfigured);
         Mock.Mock<ICommandExecutor>().Verify();
+        Mock.Mock<IProgressHubService>().Verify();
     }
 }

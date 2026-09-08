@@ -8,6 +8,46 @@ namespace Reaparr.AppHost.UnitTests;
 public class BootUnitTests : BaseUnitTest<Boot>
 {
     [Test]
+    public async Task ShouldMigrateLegacyIntegrationsBeforeNormalStartupChecks()
+    {
+        // Arrange
+        var applicationStarted = new CancellationTokenSource();
+        var completed = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var sequence = new MockSequence();
+
+        Mock.Mock<IHostApplicationLifetime>().SetupGet(x => x.ApplicationStarted).Returns(applicationStarted.Token);
+        Mock.Mock<IHostApplicationLifetime>().SetupGet(x => x.ApplicationStopping).Returns(CancellationToken.None);
+        Mock.Mock<IHostApplicationLifetime>().SetupGet(x => x.ApplicationStopped).Returns(CancellationToken.None);
+        Mock.Mock<ICommandExecutor>()
+            .InSequence(sequence)
+            .Setup(x => x.Send(It.IsAny<MigrateLegacyArrSettingsCommand>(), CancellationToken.None))
+            .ReturnsAsync(Result.Fail("Import failed"))
+            .Verifiable(Times.Once());
+        Mock.Mock<ICommandExecutor>()
+            .InSequence(sequence)
+            .Setup(x => x.Send(It.IsAny<NotifyArrAppsOnStartupCommand>(), CancellationToken.None))
+            .ReturnsAsync(Result.Ok())
+            .Verifiable(Times.Once());
+        Mock.Mock<ICommandExecutor>()
+            .InSequence(sequence)
+            .Setup(x => x.Send(It.IsAny<WarmupMediaQueryCacheCommand>(), CancellationToken.None))
+            .ReturnsAsync(() =>
+            {
+                completed.SetResult();
+                return Result.Ok();
+            })
+            .Verifiable(Times.Once());
+
+        // Act
+        _ = Sut;
+        applicationStarted.Cancel();
+        await completed.Task.WaitAsync(TimeSpan.FromSeconds(2));
+
+        // Assert
+        Mock.Mock<ICommandExecutor>().Verify();
+    }
+
+    [Test]
     public async Task ShouldBuildMediaCacheBeforeStartingBackgroundJobs()
     {
         // Arrange

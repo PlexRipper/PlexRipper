@@ -1,11 +1,6 @@
 namespace Reaparr.Application.UnitTests;
 
-public class SetupSonarrIntegrationEndpointUnitTests
-    : BaseEndpointUnitTest<
-        SetupSonarrIntegrationEndpoint,
-        SetupSonarrIntegrationRequest,
-        ResultDTO<SonarrIntegrationDTO>
-    >
+public class SetupSonarrIntegrationCommandUnitTests : BaseCommandUnitTest<SetupSonarrIntegrationCommand>
 {
     [Test]
     public async Task ShouldMarkConfigured_WhenScopedValidationSucceeds()
@@ -17,7 +12,7 @@ public class SetupSonarrIntegrationEndpointUnitTests
             x => x.SetProperty(p => p.ProvisioningState, IntegrationProvisioningState.Unconfigured),
             CancellationToken
         );
-        var request = new SetupSonarrIntegrationRequest { IntegrationId = integration.Id };
+        var command = new SetupSonarrIntegrationCommand(integration.Id);
 
         Mock.Mock<ICommandExecutor>()
             .Setup(x => x.Send(It.IsAny<SetupSonarrDownloadClientCommand>(), It.IsAny<CancellationToken>()))
@@ -49,14 +44,15 @@ public class SetupSonarrIntegrationEndpointUnitTests
             .Verifiable(Times.Exactly(6));
 
         // Act
-        var endpointResult = await TestEndpointHandleAsync(request);
+        var result = await TestHandlerExecuteAsync<SonarrIntegration>(command);
         var updated = await IDbContext.SonarrIntegrations.AsNoTracking().SingleAsync(CancellationToken);
 
         // Assert
-        endpointResult.StatusCode.ShouldBe(StatusCodes.Status200OK);
+        result.IsSuccess.ShouldBeTrue();
         updated.ExternalDownloadClientId.ShouldBe(51);
         updated.ExternalIndexerId.ShouldBe(52);
         updated.ProvisioningState.ShouldBe(IntegrationProvisioningState.Configured);
         Mock.Mock<ICommandExecutor>().Verify();
+        Mock.Mock<IProgressHubService>().Verify();
     }
 }

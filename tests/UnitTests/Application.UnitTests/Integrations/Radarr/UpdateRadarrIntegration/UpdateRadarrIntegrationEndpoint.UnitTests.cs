@@ -12,6 +12,7 @@ public class UpdateRadarrIntegrationEndpointUnitTests
     {
         // Arrange
         await SetupDatabase(55303);
+        var dbContext = IDbContext;
         var integration = new RadarrIntegration
         {
             Id = Guid.Parse("00000000-0000-0000-0000-000000055303"),
@@ -21,10 +22,11 @@ public class UpdateRadarrIntegrationEndpointUnitTests
             QBittorrentApiKey = "qbt_23456789ABCDEFGHIJKLMNPQ",
             TorznabApiKey = "0123456789abcdef0123456789abcdef",
             Category = "old-category",
+            DownloadFolderId = PlexMediaType.None.ToDefaultDestinationFolderId(),
             ProvisioningState = IntegrationProvisioningState.Configured,
         };
-        IDbContext.RadarrIntegrations.Add(integration);
-        await IDbContext.SaveChangesAsync(CancellationToken);
+        dbContext.RadarrIntegrations.Add(integration);
+        await dbContext.SaveChangesAsync(CancellationToken);
         var request = new UpdateRadarrIntegrationRequest
         {
             IntegrationId = integration.Id,
@@ -32,12 +34,13 @@ public class UpdateRadarrIntegrationEndpointUnitTests
             Url = " https://updated-radarr.example.com/ ",
             ApiKey = " new-key ",
             Category = " new-category ",
+            DownloadFolderId = PlexMediaType.None.ToDefaultDestinationFolderId(),
         };
 
         // Act
         var endpointResult = await TestEndpointHandleAsync(request);
         var result = endpointResult.Response!;
-        var updated = await IDbContext.RadarrIntegrations.SingleAsync(CancellationToken);
+        var updated = await dbContext.RadarrIntegrations.SingleAsync(CancellationToken);
 
         // Assert
         endpointResult.IsValid.ShouldBeTrue();
@@ -48,7 +51,7 @@ public class UpdateRadarrIntegrationEndpointUnitTests
         updated.DisplayName.ShouldBe("Updated Radarr");
         updated.BaseUrl.ShouldBe("https://updated-radarr.example.com");
         updated.Category.ShouldBe("new-category");
-        updated.DownloadFolderId.ShouldBeNull();
+        updated.DownloadFolderId.ShouldBe(PlexMediaType.None.ToDefaultDestinationFolderId());
         updated.ProvisioningState.ShouldBe(IntegrationProvisioningState.ChangesPending);
         updated.QBittorrentApiKey.ShouldBe("qbt_23456789ABCDEFGHIJKLMNPQ");
         updated.TorznabApiKey.ShouldBe("0123456789abcdef0123456789abcdef");
@@ -66,6 +69,7 @@ public class UpdateRadarrIntegrationEndpointUnitTests
             Url = "https://missing-radarr.example.com",
             ApiKey = "missing-key",
             Category = "missing-category",
+            DownloadFolderId = PlexMediaType.None.ToDefaultDestinationFolderId(),
         };
 
         // Act

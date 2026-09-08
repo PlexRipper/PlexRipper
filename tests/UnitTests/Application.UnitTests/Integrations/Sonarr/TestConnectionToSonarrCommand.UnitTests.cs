@@ -45,6 +45,7 @@ public class TestConnectionToSonarrCommandUnitTests : BaseCommandUnitTest<TestCo
             QBittorrentApiKey = "qbt_23456789ABCDEFGHIJKLMNPQ",
             TorznabApiKey = "0123456789abcdef0123456789abcdef",
             Category = "series",
+            DownloadFolderId = PlexMediaType.None.ToDefaultDestinationFolderId(),
             ProvisioningState = IntegrationProvisioningState.Configured,
             LastConnectionTestStatus = TestConnectionStatus.Success,
             LastConnectionTestHttpStatusCode = StatusCodes.Status200OK,

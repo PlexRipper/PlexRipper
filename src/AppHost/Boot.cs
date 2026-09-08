@@ -170,8 +170,32 @@ public class Boot : IHostedService
         var result = await Result.Try(
             async Task () =>
             {
-                await _commandExecutor.Send(new NotifyArrAppsOnStartupCommand(), _appLifetime.ApplicationStopping);
-                await _commandExecutor.Send(new WarmupMediaQueryCacheCommand(), _appLifetime.ApplicationStopping);
+                var migrationResult = await _commandExecutor.Send(
+                    new MigrateLegacyArrSettingsCommand(),
+                    _appLifetime.ApplicationStopping
+                );
+                if (migrationResult.IsCancelled)
+                    migrationResult.LogWarning();
+                else if (migrationResult.IsFailed)
+                    migrationResult.LogError();
+
+                var integrationCheckResult = await _commandExecutor.Send(
+                    new NotifyArrAppsOnStartupCommand(),
+                    _appLifetime.ApplicationStopping
+                );
+                if (integrationCheckResult.IsCancelled)
+                    integrationCheckResult.LogWarning();
+                else if (integrationCheckResult.IsFailed)
+                    integrationCheckResult.LogError();
+
+                var cacheWarmupResult = await _commandExecutor.Send(
+                    new WarmupMediaQueryCacheCommand(),
+                    _appLifetime.ApplicationStopping
+                );
+                if (cacheWarmupResult.IsCancelled)
+                    cacheWarmupResult.LogWarning();
+                else if (cacheWarmupResult.IsFailed)
+                    cacheWarmupResult.LogError();
             },
             exception =>
             {

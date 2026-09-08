@@ -7,7 +7,7 @@ public record IntegrationSummary
     public required string Name { get; init; }
     public required string BaseUrl { get; init; }
     public required string Category { get; init; }
-    public int? DownloadFolderId { get; init; }
+    public required int DownloadFolderId { get; init; }
     public int? ExternalDownloadClientId { get; init; }
     public int? ExternalIndexerId { get; init; }
     public required IntegrationProvisioningState ProvisioningState { get; init; }

@@ -45,6 +45,7 @@ public class TestConnectionToRadarrCommandUnitTests : BaseCommandUnitTest<TestCo
             QBittorrentApiKey = "qbt_23456789ABCDEFGHIJKLMNPQ",
             TorznabApiKey = "0123456789abcdef0123456789abcdef",
             Category = "movies",
+            DownloadFolderId = PlexMediaType.None.ToDefaultDestinationFolderId(),
             ProvisioningState = IntegrationProvisioningState.Configured,
             LastConnectionTestStatus = TestConnectionStatus.ConnectionFailed,
             LastConnectionTestHttpStatusCode = StatusCodes.Status503ServiceUnavailable,

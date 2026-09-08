@@ -26,7 +26,7 @@ public class RadarrIntegrationConfiguration : IEntityTypeConfiguration<RadarrInt
             .HasOne(x => x.DownloadFolder)
             .WithMany()
             .HasForeignKey(x => x.DownloadFolderId)
-            .OnDelete(DeleteBehavior.SetNull);
+            .OnDelete(DeleteBehavior.Restrict);
         builder
             .HasMany(x => x.DownloadTasks)
             .WithOne(x => x.RadarrIntegration)

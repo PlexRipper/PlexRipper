@@ -12,6 +12,7 @@ public class UpdateSonarrIntegrationEndpointUnitTests
     {
         // Arrange
         await SetupDatabase(62603);
+        var dbContext = IDbContext;
         var integration = new SonarrIntegration
         {
             Id = Guid.Parse("00000000-0000-0000-0000-000000062603"),
@@ -21,10 +22,11 @@ public class UpdateSonarrIntegrationEndpointUnitTests
             QBittorrentApiKey = "qbt_23456789ABCDEFGHIJKLMNPQ",
             TorznabApiKey = "0123456789abcdef0123456789abcdef",
             Category = "old-category",
+            DownloadFolderId = PlexMediaType.None.ToDefaultDestinationFolderId(),
             ProvisioningState = IntegrationProvisioningState.Configured,
         };
-        IDbContext.SonarrIntegrations.Add(integration);
-        await IDbContext.SaveChangesAsync(CancellationToken);
+        dbContext.SonarrIntegrations.Add(integration);
+        await dbContext.SaveChangesAsync(CancellationToken);
         var request = new UpdateSonarrIntegrationRequest
         {
             IntegrationId = integration.Id,
@@ -32,12 +34,13 @@ public class UpdateSonarrIntegrationEndpointUnitTests
             Url = " https://updated-sonarr.example.com/ ",
             ApiKey = " new-key ",
             Category = " new-category ",
+            DownloadFolderId = PlexMediaType.None.ToDefaultDestinationFolderId(),
         };
 
         // Act
         var endpointResult = await TestEndpointHandleAsync(request);
         var result = endpointResult.Response!;
-        var updated = await IDbContext.SonarrIntegrations.SingleAsync(CancellationToken);
+        var updated = await dbContext.SonarrIntegrations.SingleAsync(CancellationToken);
 
         // Assert
         endpointResult.IsValid.ShouldBeTrue();
@@ -48,7 +51,7 @@ public class UpdateSonarrIntegrationEndpointUnitTests
         updated.DisplayName.ShouldBe("Updated Sonarr");
         updated.BaseUrl.ShouldBe("https://updated-sonarr.example.com");
         updated.Category.ShouldBe("new-category");
-        updated.DownloadFolderId.ShouldBeNull();
+        updated.DownloadFolderId.ShouldBe(PlexMediaType.None.ToDefaultDestinationFolderId());
         updated.ProvisioningState.ShouldBe(IntegrationProvisioningState.ChangesPending);
         updated.QBittorrentApiKey.ShouldBe("qbt_23456789ABCDEFGHIJKLMNPQ");
         updated.TorznabApiKey.ShouldBe("0123456789abcdef0123456789abcdef");
@@ -66,6 +69,7 @@ public class UpdateSonarrIntegrationEndpointUnitTests
             Url = "https://missing-sonarr.example.com",
             ApiKey = "missing-key",
             Category = "missing-category",
+            DownloadFolderId = PlexMediaType.None.ToDefaultDestinationFolderId(),
         };
 
         // Act

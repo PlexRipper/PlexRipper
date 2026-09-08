@@ -18,6 +18,7 @@ public class CreateRadarrIntegrationEndpointUnitTests
             Url = " https://radarr.example.com/ ",
             ApiKey = " radarr-key ",
             Category = " reaparr-movies ",
+            DownloadFolderId = PlexMediaType.None.ToDefaultDestinationFolderId(),
         };
 
         // Act
@@ -35,7 +36,7 @@ public class CreateRadarrIntegrationEndpointUnitTests
         integration.DisplayName.ShouldBe("Radarr Main");
         integration.BaseUrl.ShouldBe("https://radarr.example.com");
         integration.Category.ShouldBe("reaparr-movies");
-        integration.DownloadFolderId.ShouldBeNull();
+        integration.DownloadFolderId.ShouldBe(PlexMediaType.None.ToDefaultDestinationFolderId());
         integration.ProvisioningState.ShouldBe(IntegrationProvisioningState.Unconfigured);
         integration.QBittorrentApiKey.ShouldStartWith("qbt_");
         integration.QBittorrentApiKey.Length.ShouldBe(32);
@@ -48,7 +49,8 @@ public class CreateRadarrIntegrationEndpointUnitTests
     {
         // Arrange
         await SetupDatabase(55302);
-        IDbContext.RadarrIntegrations.Add(
+        var dbContext = IDbContext;
+        dbContext.RadarrIntegrations.Add(
             new RadarrIntegration
             {
                 Id = Guid.Parse("00000000-0000-0000-0000-000000055302"),
@@ -58,16 +60,18 @@ public class CreateRadarrIntegrationEndpointUnitTests
                 QBittorrentApiKey = IntegrationApiKeyGenerator.GenerateQBittorrentApiKey(),
                 TorznabApiKey = IntegrationApiKeyGenerator.GenerateTorznabApiKey(),
                 Category = "reaparr-movies",
+                DownloadFolderId = PlexMediaType.None.ToDefaultDestinationFolderId(),
                 ProvisioningState = IntegrationProvisioningState.Unconfigured,
             }
         );
-        await IDbContext.SaveChangesAsync(CancellationToken);
+        await dbContext.SaveChangesAsync(CancellationToken);
         var request = new CreateRadarrIntegrationRequest
         {
             Name = "New Radarr",
             Url = "https://new-radarr.example.com",
             ApiKey = "new-key",
             Category = " reaparr-movies ",
+            DownloadFolderId = PlexMediaType.None.ToDefaultDestinationFolderId(),
         };
 
         // Act
@@ -79,6 +83,6 @@ public class CreateRadarrIntegrationEndpointUnitTests
         endpointResult.StatusCode.ShouldBe(StatusCodes.Status400BadRequest);
         result.IsSuccess.ShouldBeFalse();
         result.Errors.ShouldNotBeEmpty();
-        (await IDbContext.RadarrIntegrations.CountAsync(CancellationToken)).ShouldBe(1);
+        (await dbContext.RadarrIntegrations.CountAsync(CancellationToken)).ShouldBe(1);
     }
 }

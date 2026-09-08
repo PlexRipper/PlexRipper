@@ -223,6 +223,7 @@ public static partial class MockDatabase
                     QBittorrentApiKey = IntegrationApiKeyGenerator.GenerateQBittorrentApiKey(),
                     TorznabApiKey = IntegrationApiKeyGenerator.GenerateTorznabApiKey(),
                     Category = $"radarr-{id[..8]}",
+                    DownloadFolderId = PlexMediaType.None.ToDefaultDestinationFolderId(),
                     ProvisioningState = IntegrationProvisioningState.Configured,
                 }
             );
@@ -278,6 +279,7 @@ public static partial class MockDatabase
                     QBittorrentApiKey = IntegrationApiKeyGenerator.GenerateQBittorrentApiKey(),
                     TorznabApiKey = IntegrationApiKeyGenerator.GenerateTorznabApiKey(),
                     Category = $"sonarr-{id[..8]}",
+                    DownloadFolderId = PlexMediaType.None.ToDefaultDestinationFolderId(),
                     ProvisioningState = IntegrationProvisioningState.Configured,
                 }
             );

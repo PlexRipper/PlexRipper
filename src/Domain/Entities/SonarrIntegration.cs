@@ -81,10 +81,10 @@ public class SonarrIntegration : BaseEntityGuid
     public DateTime? LastConnectionTestedAt { get; set; }
 
     /// <summary>
-    /// Gets or sets the optional Reaparr download folder used by this integration.
+    /// Gets or sets the required Reaparr download folder used by this integration.
     /// </summary>
     [Column(Order = 14)]
-    public int? DownloadFolderId { get; set; }
+    public required int DownloadFolderId { get; set; }
 
     /// <summary>
     /// Gets or sets the download folder used by this integration.

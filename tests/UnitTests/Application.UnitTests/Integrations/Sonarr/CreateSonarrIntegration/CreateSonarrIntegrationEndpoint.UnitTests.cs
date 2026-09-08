@@ -18,6 +18,7 @@ public class CreateSonarrIntegrationEndpointUnitTests
             Url = " https://sonarr.example.com/ ",
             ApiKey = " sonarr-key ",
             Category = " reaparr-tv ",
+            DownloadFolderId = PlexMediaType.None.ToDefaultDestinationFolderId(),
         };
 
         // Act
@@ -35,7 +36,7 @@ public class CreateSonarrIntegrationEndpointUnitTests
         integration.DisplayName.ShouldBe("Sonarr Main");
         integration.BaseUrl.ShouldBe("https://sonarr.example.com");
         integration.Category.ShouldBe("reaparr-tv");
-        integration.DownloadFolderId.ShouldBeNull();
+        integration.DownloadFolderId.ShouldBe(PlexMediaType.None.ToDefaultDestinationFolderId());
         integration.ProvisioningState.ShouldBe(IntegrationProvisioningState.Unconfigured);
         integration.QBittorrentApiKey.ShouldStartWith("qbt_");
         integration.QBittorrentApiKey.Length.ShouldBe(32);
@@ -48,7 +49,8 @@ public class CreateSonarrIntegrationEndpointUnitTests
     {
         // Arrange
         await SetupDatabase(62602);
-        IDbContext.SonarrIntegrations.Add(
+        var dbContext = IDbContext;
+        dbContext.SonarrIntegrations.Add(
             new SonarrIntegration
             {
                 Id = Guid.Parse("00000000-0000-0000-0000-000000062602"),
@@ -58,16 +60,18 @@ public class CreateSonarrIntegrationEndpointUnitTests
                 QBittorrentApiKey = IntegrationApiKeyGenerator.GenerateQBittorrentApiKey(),
                 TorznabApiKey = IntegrationApiKeyGenerator.GenerateTorznabApiKey(),
                 Category = "reaparr-tv",
+                DownloadFolderId = PlexMediaType.None.ToDefaultDestinationFolderId(),
                 ProvisioningState = IntegrationProvisioningState.Unconfigured,
             }
         );
-        await IDbContext.SaveChangesAsync(CancellationToken);
+        await dbContext.SaveChangesAsync(CancellationToken);
         var request = new CreateSonarrIntegrationRequest
         {
             Name = "New Sonarr",
             Url = "https://new-sonarr.example.com",
             ApiKey = "new-key",
             Category = " reaparr-tv ",
+            DownloadFolderId = PlexMediaType.None.ToDefaultDestinationFolderId(),
         };
 
         // Act
@@ -79,6 +83,6 @@ public class CreateSonarrIntegrationEndpointUnitTests
         endpointResult.StatusCode.ShouldBe(StatusCodes.Status400BadRequest);
         result.IsSuccess.ShouldBeFalse();
         result.Errors.ShouldNotBeEmpty();
-        (await IDbContext.SonarrIntegrations.CountAsync(CancellationToken)).ShouldBe(1);
+        (await dbContext.SonarrIntegrations.CountAsync(CancellationToken)).ShouldBe(1);
     }
 }

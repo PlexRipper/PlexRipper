@@ -16,28 +16,35 @@ describe('IntegrationStore', () => {
 		vi.restoreAllMocks();
 	});
 
-	test('opens a new typed draft', () => {
+	test('Should open a typed draft when adding an integration', () => {
+		// Arrange
 		const store = useIntegrationStore();
 
+		// Act
 		store.openAdd(IntegrationType.Radarr);
 
+		// Assert
 		expect(store.draft).toMatchObject({ type: IntegrationType.Radarr, name: '', url: '', apiKey: '' });
 	});
 
-	test('creates a Sonarr integration through the typed endpoint', () => {
+	test('Should create a Sonarr integration through the typed endpoint', async () => {
+		// Arrange
 		const store = useIntegrationStore();
 		store.openAdd(IntegrationType.Sonarr);
 		Object.assign(store.draft, { name: 'Sonarr', url: 'http://sonarr', apiKey: 'key', category: 'sonarr' });
 		const detail = {
-			id: 'id', name: 'Sonarr', url: 'http://sonarr', apiKey: 'key', category: 'sonarr', downloadFolderId: null,
+			id: 'id', name: 'Sonarr', url: 'http://sonarr', apiKey: 'key', category: 'sonarr', downloadFolderId: 1,
 			provisioningState: IntegrationProvisioningState.Unconfigured,
 			lastConnectionTestStatus: TestConnectionStatus.Unknown,
 		};
 		const create = vi.spyOn(integrationApi, 'createSonarrIntegrationEndpoint').mockReturnValue(success(detail));
 		vi.spyOn(integrationApi, 'getIntegrationsEndpoint').mockReturnValue(success([]));
 
+		// Act
 		const result = subscribeSpyTo(store.save());
+		await result.onComplete();
 
+		// Assert
 		expect(result.getLastValue()?.isSuccess).toBe(true);
 		expect(create).toHaveBeenCalledWith({
 			name: 'Sonarr',
@@ -50,7 +57,8 @@ describe('IntegrationStore', () => {
 		expect(store.requiresSetupPrompt).toBe(true);
 	});
 
-	test('tests a Radarr draft through the typed endpoint', () => {
+	test('Should test a Radarr draft through the typed endpoint', async () => {
+		// Arrange
 		const store = useIntegrationStore();
 		store.openAdd(IntegrationType.Radarr);
 		Object.assign(store.draft, { url: 'http://radarr', apiKey: 'key' });
@@ -63,13 +71,16 @@ describe('IntegrationStore', () => {
 		const testConnection = vi.spyOn(integrationApi, 'testConnectionToRadarrEndpoint')
 			.mockReturnValue(success(testResult));
 
-		subscribeSpyTo(store.test());
+		// Act
+		await subscribeSpyTo(store.test()).onComplete();
 
+		// Assert
 		expect(testConnection).toHaveBeenCalledWith({ url: 'http://radarr', apiKey: 'key' });
 		expect(store.testResult).toEqual(testResult);
 	});
 
-	test('updates an existing integration summary after a successful connection test', () => {
+	test('Should update an existing integration summary after a successful connection test', async () => {
+		// Arrange
 		const store = useIntegrationStore();
 		const testResult = {
 			result: TestConnectionStatus.Success,
@@ -81,7 +92,7 @@ describe('IntegrationStore', () => {
 		store.items = [{
 			baseUrl: 'http://radarr',
 			category: 'radarr',
-			downloadFolderId: null,
+			downloadFolderId: 1,
 			externalDownloadClientId: null,
 			externalIndexerId: null,
 			id: 'id',
@@ -96,7 +107,7 @@ describe('IntegrationStore', () => {
 		store.detail = {
 			apiKey: 'key',
 			category: 'radarr',
-			downloadFolderId: null,
+			downloadFolderId: 1,
 			id: 'id',
 			lastConnectionTestErrorMessage: null,
 			lastConnectionTestHttpStatusCode: null,
@@ -110,8 +121,10 @@ describe('IntegrationStore', () => {
 		Object.assign(store.draft, { type: IntegrationType.Radarr, url: 'http://radarr', apiKey: 'key' });
 		const testConnection = vi.spyOn(integrationApi, 'testConnectionToRadarrEndpoint').mockReturnValue(success(testResult));
 
-		subscribeSpyTo(store.test());
+		// Act
+		await subscribeSpyTo(store.test()).onComplete();
 
+		// Assert
 		expect(testConnection).toHaveBeenCalledWith({ url: 'http://radarr', apiKey: 'key', integrationId: 'id' });
 		expect(store.items[0]!.lastConnectionTestStatus).toBe(TestConnectionStatus.Success);
 		expect(store.items[0]!.lastConnectionTestedAt).toBe(testResult.testedAt);
@@ -133,8 +146,25 @@ describe('IntegrationStore', () => {
 		vi.spyOn(integrationApi, 'updateRadarrIntegrationEndpoint').mockReturnValue(success(staleDetail));
 		vi.spyOn(integrationApi, 'getIntegrationsEndpoint').mockReturnValue(success([staleSummary]));
 
-		subscribeSpyTo(store.save());
+		await subscribeSpyTo(store.save()).onComplete();
 
 		expect(store.items[0]!.lastConnectionTestStatus).toBe(TestConnectionStatus.Success);
+	});
+
+	test('Should require a download folder when validating a draft', () => {
+		// Arrange
+		const store = useIntegrationStore();
+		Object.assign(store.draft, {
+			name: 'Radarr',
+			url: 'http://radarr',
+			apiKey: 'key',
+			category: 'radarr',
+		});
+
+		// Act
+		store.draft.downloadFolderId = 0;
+
+		// Assert
+		expect(store.isDraftValid).toBe(false);
 	});
 });

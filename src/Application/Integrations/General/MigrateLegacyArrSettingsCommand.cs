@@ -48,7 +48,7 @@ public class MigrateLegacyArrSettingsCommandHandler : ICommandHandler<MigrateLeg
                 if (hasLegacyRadarr)
                 {
                     var url = radarrSettings.RadarrBaseUrl.Trim().TrimEnd('/');
-                    if (IsValidUrl(url))
+                    if (url.IsValidHttpUrl())
                     {
                         var integration = new RadarrIntegration
                         {
@@ -78,7 +78,7 @@ public class MigrateLegacyArrSettingsCommandHandler : ICommandHandler<MigrateLeg
                 if (hasLegacySonarr)
                 {
                     var url = sonarrSettings.SonarrBaseUrl.Trim().TrimEnd('/');
-                    if (IsValidUrl(url))
+                    if (url.IsValidHttpUrl())
                     {
                         var integration = new SonarrIntegration
                         {
@@ -169,8 +169,4 @@ public class MigrateLegacyArrSettingsCommandHandler : ICommandHandler<MigrateLeg
 
         return saveConfigResult.IsFailed ? saveConfigResult : Result.Ok();
     }
-
-    private static bool IsValidUrl(string url) =>
-        Uri.TryCreate(url, UriKind.Absolute, out var uri)
-        && (uri.Scheme == Uri.UriSchemeHttp || uri.Scheme == Uri.UriSchemeHttps);
 }

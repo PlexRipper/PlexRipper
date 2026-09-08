@@ -54,11 +54,10 @@ public class SetupRadarrDownloadClientCommandHandler
         if (integration is null)
             return Result.Fail("The Radarr integration was not found.").LogError();
 
-        if (
-            !Uri.TryCreate(integration.BaseUrl.TrimEnd('/'), UriKind.Absolute, out var radarrBaseUri)
-            || (radarrBaseUri.Scheme != Uri.UriSchemeHttp && radarrBaseUri.Scheme != Uri.UriSchemeHttps)
-        )
+        var normalizedBaseUrl = integration.BaseUrl.TrimEnd('/');
+        if (!normalizedBaseUrl.IsValidHttpUrl())
             return Result.Fail("Radarr BaseUrl is invalid.").LogError();
+        var radarrBaseUri = new Uri(normalizedBaseUrl, UriKind.Absolute);
 
         await _progressHubService.SendIntegrationSetupProgressAsync(
             new IntegrationSetupProgressDTO

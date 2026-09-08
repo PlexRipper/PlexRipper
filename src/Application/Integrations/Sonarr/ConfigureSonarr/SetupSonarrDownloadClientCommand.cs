@@ -54,11 +54,10 @@ public class SetupSonarrDownloadClientCommandHandler
         if (integration is null)
             return Result.Fail("The Sonarr integration was not found.").LogError();
 
-        if (
-            !Uri.TryCreate(integration.BaseUrl.TrimEnd('/'), UriKind.Absolute, out var sonarrBaseUri)
-            || (sonarrBaseUri.Scheme != Uri.UriSchemeHttp && sonarrBaseUri.Scheme != Uri.UriSchemeHttps)
-        )
+        var normalizedBaseUrl = integration.BaseUrl.TrimEnd('/');
+        if (!normalizedBaseUrl.IsValidHttpUrl())
             return Result.Fail("Sonarr BaseUrl is invalid.").LogError();
+        var sonarrBaseUri = new Uri(normalizedBaseUrl, UriKind.Absolute);
 
         await _progressHubService.SendIntegrationSetupProgressAsync(
             new IntegrationSetupProgressDTO

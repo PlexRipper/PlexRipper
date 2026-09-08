@@ -19,11 +19,6 @@ public interface IRadarrSettings : IBaseSettingsModule<RadarrSettings>
     bool IsConfigured { get; set; }
 
     /// <summary>
-    /// Returns true if <see cref="RadarrBaseUrl"/> is a valid absolute HTTP/HTTPS URL.
-    /// </summary>
-    bool IsValidUrl();
-
-    /// <summary>
     /// Returns true if <see cref="RadarrApiKey"/> is non-empty.
     /// </summary>
     bool IsValidApiKey();

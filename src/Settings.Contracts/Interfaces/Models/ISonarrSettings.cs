@@ -18,7 +18,5 @@ public interface ISonarrSettings : IBaseSettingsModule<SonarrSettings>
     /// </summary>
     bool IsConfigured { get; set; }
 
-    bool IsValidUrl();
-
     bool IsValidApiKey();
 }

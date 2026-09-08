@@ -16,14 +16,10 @@ public class TestConnectionToSonarrCommandValidator : AbstractValidator<TestConn
             .WithMessage("Provide either an integration ID or a URL and API key.");
         RuleFor(x => x.IntegrationId).NotEmpty().When(x => x.IntegrationId.HasValue);
         RuleFor(x => x.Url)
-            .Must(BeValidUrl)
+            .Must(url => url is not null && url.TrimEnd('/').IsValidHttpUrl())
             .WithMessage("Provided Sonarr URL must be a valid http/https URL.")
             .When(x => !x.IntegrationId.HasValue && !string.IsNullOrWhiteSpace(x.Url));
     }
-
-    private static bool BeValidUrl(string? url) =>
-        Uri.TryCreate(url?.TrimEnd('/'), UriKind.Absolute, out var uri)
-        && (uri.Scheme == Uri.UriSchemeHttp || uri.Scheme == Uri.UriSchemeHttps);
 }
 
 public class TestConnectionToSonarrCommandHandler
@@ -72,7 +68,7 @@ public class TestConnectionToSonarrCommandHandler
 
     private async Task<Result<TestConnectionResult>> TestAsync(string? url, string? apiKey, CancellationToken ct)
     {
-        if (string.IsNullOrWhiteSpace(url) || !Uri.TryCreate(url.TrimEnd('/'), UriKind.Absolute, out var uri) || !IsHttp(uri))
+        if (string.IsNullOrWhiteSpace(url) || !url.TrimEnd('/').IsValidHttpUrl())
             return Result.Ok(CreateResult(TestConnectionStatus.UrlIsInvalid, null, "URL is invalid."));
         if (string.IsNullOrWhiteSpace(apiKey))
             return Result.Ok(CreateResult(TestConnectionStatus.InvalidApiKey, null, "API key is invalid."));
@@ -86,8 +82,6 @@ public class TestConnectionToSonarrCommandHandler
         using var client = clientResult.Value;
         return await client.TestSonarrConnectionAsync(ct);
     }
-
-    private static bool IsHttp(Uri uri) => uri.Scheme == Uri.UriSchemeHttp || uri.Scheme == Uri.UriSchemeHttps;
 
     private static TestConnectionResult CreateResult(
         TestConnectionStatus status,

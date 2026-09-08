@@ -65,7 +65,7 @@ public sealed class TorznabEndpoint : Endpoint<TorznabEndpointRequest>
                 await Send.XmlAsync(capsResult.Value, cancellationToken: ct);
                 break;
             case "search":
-                var searchResult = await GenericSearchAsync(req, ct);
+                var searchResult = await GenericSearchAsync(req, integration, ct);
                 if (searchResult.IsFailed)
                 {
                     await Send.ErrorsAsync(cancellation: ct);
@@ -136,6 +136,7 @@ public sealed class TorznabEndpoint : Endpoint<TorznabEndpointRequest>
     /// </summary>
     private async Task<Result<TorznabMediaSearchResponseDTO>> GenericSearchAsync(
         TorznabEndpointRequest req,
+        IntegrationIdentity integration,
         CancellationToken ct
     )
     {
@@ -149,6 +150,7 @@ public sealed class TorznabEndpoint : Endpoint<TorznabEndpointRequest>
 
         var items = new List<TorznabItem>();
         var failures = new List<IError>();
+        var successfulSearches = 0;
 
         if (wantsTvShows)
         {
@@ -163,6 +165,8 @@ public sealed class TorznabEndpoint : Endpoint<TorznabEndpointRequest>
                     TMDB_ID = req.TmdbId ?? 0,
                     Limit = limit,
                     Offset = offset,
+                    Integration = integration,
+                    TorznabApiKey = req.ApiKey,
                 },
                 ct
             );
@@ -170,7 +174,10 @@ public sealed class TorznabEndpoint : Endpoint<TorznabEndpointRequest>
             if (tvResult.IsFailed)
                 failures.AddRange(tvResult.Errors);
             else
+            {
+                successfulSearches++;
                 items.AddRange(tvResult.Value.Channel.Items);
+            }
         }
 
         if (wantsMovies)
@@ -183,6 +190,8 @@ public sealed class TorznabEndpoint : Endpoint<TorznabEndpointRequest>
                     TMDB_ID = req.TmdbId ?? 0,
                     Limit = limit,
                     Offset = offset,
+                    Integration = integration,
+                    TorznabApiKey = req.ApiKey,
                 },
                 ct
             );
@@ -190,12 +199,15 @@ public sealed class TorznabEndpoint : Endpoint<TorznabEndpointRequest>
             if (movieResult.IsFailed)
                 failures.AddRange(movieResult.Errors);
             else
+            {
+                successfulSearches++;
                 items.AddRange(movieResult.Value.Channel.Items);
+            }
         }
 
         // Only fail when nothing could be searched at all - a partial result is still far
         // better than an error the *arr will hold against the indexer.
-        if (failures.Count > 0 && items.Count == 0)
+        if (failures.Count > 0 && successfulSearches == 0)
             return Result.Fail(failures);
 
         if (failures.Count > 0)

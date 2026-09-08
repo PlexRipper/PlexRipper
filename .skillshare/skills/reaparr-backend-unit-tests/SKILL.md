@@ -464,12 +464,12 @@ For unit test work:
 ### Verification fallback when execution environment is constrained
 
 If test execution is blocked by environment constraints (for example, read-only obj writes), do not claim runtime pass. Instead:
-- run Rider file problem checks and ensure zero errors in changed test files,
+- run native diagnostics and ensure zero errors in changed test files,
 - state the exact execution blocker and raw error message,
 - keep assertions strict and deterministic so rerun is straightforward once the environment is fixed.
 
 Evidence-before-assertion rule:
-- fixed compile or symbol issues may be claimed only with zero Rider file problems,
+- fixed compile or symbol issues may be claimed only with zero native diagnostics,
 - tests pass may be claimed only with completed test execution output.
 
 ## Test Quality Gate

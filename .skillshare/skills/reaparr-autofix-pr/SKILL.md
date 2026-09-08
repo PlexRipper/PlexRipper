@@ -20,9 +20,9 @@ This skill assumes:
 The operating loop is evidence-driven and batch-oriented:
 
 1. find the existing PR for the current branch;
-2. wait for `.github/workflows/dev-test.yml` to complete for the current remote HEAD;
-3. inspect every failed job, complete logs, annotations, and relevant artifacts;
-4. diagnose all independent proven root causes from that run;
+2. watch `.github/workflows/dev-test.yml` for the current remote HEAD and begin triage as soon as any job reaches a terminal failure;
+3. inspect each terminally failed job's complete logs, annotations, and relevant artifacts while unrelated jobs continue;
+4. diagnose all independent proven root causes from the current run before pushing; do not wait for unrelated jobs to finish before starting an evidenced repair;
 5. perform a bounded failure-family sweep for equivalent occurrences;
 6. fix the complete proven repair batch, using separate focused commits when appropriate;
 7. run focused checks and the complete affected gates locally when practical;
@@ -93,7 +93,7 @@ Load and follow the matching Reaparr skills before inspecting or changing an aff
 - Commits: `reaparr-git-commit`.
 - Desktop builds: `reaparr-desktop-build`.
 
-Use Rider MCP for backend work and WebStorm MCP for frontend work as required by those skills. Use GitHub MCP for PR lookup, workflow runs, job logs, annotations, and artifacts. Follow `AGENTS.md` throughout.
+Use native repository tooling for backend and frontend work, the documented GitHub tooling for PR lookup and CI evidence, and follow `AGENTS.md` throughout.
 
 ## Canonical Pipeline
 
@@ -132,7 +132,7 @@ Trust the workflow conditions when deciding whether a skipped job is legitimatel
 - Preserve user-authored and unrelated local changes.
 - Never commit logs, coverage output, test results, screenshots, videos, build artifacts, secrets, or unrelated generated files.
 - Do not make speculative edits before examining the failed job's complete logs and relevant artifacts.
-- Diagnose every failure in the completed current-SHA run before editing or pushing.
+- Diagnose each terminal failure completely before editing it. Before pushing, diagnose every failure in the completed current-SHA run.
 - Keep unrelated repairs in separate focused commits, but batch their push after all are locally verified.
 - Before pushing, perform a bounded failure-family sweep across sibling tests, mirrored implementations, direct usages, and workflow matrices. Fix only equivalent occurrences proven by source evidence.
 - Do not keep pushing after CI is fully green.
@@ -169,7 +169,7 @@ Do not search for an arbitrary PR to repair. Do not switch to another PR branch 
 
 If the PR is draft and `Check-PR-Status` prevents the pipeline from running, report that as a blocker. Do not mark it ready.
 
-## Phase 2 — Wait for the Current-SHA Workflow
+## Phase 2 — Observe the Current-SHA Workflow
 
 Do not begin by running every local suite speculatively. First wait for GitHub CI to identify actual pipeline failures.
 
@@ -177,7 +177,7 @@ For the current remote PR head SHA:
 
 1. locate the `dev-test.yml` / `Execute Tests` workflow run triggered for that exact SHA;
 2. if it has not appeared yet, poll until it appears;
-3. if it is queued or in progress, wait until jobs fail or the run completes;
+3. if it is queued or in progress, poll continuously; when an individual job reaches a terminal failure, collect its evidence immediately while the remaining jobs continue;
 4. ignore runs belonging to older SHAs;
 5. record every failed, cancelled, timed-out, action-required, or unexpectedly missing job;
 6. distinguish legitimate conditional skips from pipeline problems.
@@ -228,9 +228,9 @@ Do not change repository code for transient or unknown failures. Re-run locally 
 
 ## Phase 4 — Batched Repair Loop
 
-Process one completed current-SHA run as a repair batch:
+Process terminal failures from the current-SHA run as one repair batch. A completed failed job may be diagnosed and repaired before unrelated jobs finish, but the batch must remain open until every applicable job in that run is terminal.
 
-1. retrieve evidence for every failing job before editing;
+1. retrieve complete evidence for each terminal failed job before editing that job's failure;
 2. reproduce each deterministic or likely repository failure locally when practical;
 3. trace each failing path and establish intended behavior from source and contracts;
 4. perform a bounded failure-family sweep:
@@ -265,13 +265,14 @@ bun --cwd src/AppHost/ClientApp run cypress:ci
 
 Focused Vitest/Cypress runs are diagnostic only. Run the complete affected gate before pushing whenever the gate is locally available. If it cannot be completed, record the exact blocker or tool timeout and rely on the replacement GitHub run; do not silently treat incomplete execution as verification. Do not substitute `lint:fix` for the final `lint` verification.
 
-For backend solution compilation, use Rider MCP's exact solution-build tool:
+For backend solution compilation, use the repository's native .NET commands:
 
-```text
-rider_build_solution
+```bash
+dotnet restore Reaparr.sln
+dotnet build Reaparr.sln --no-restore
 ```
 
-Invoke it with `projectPath` pointing to this repository and no `filesToRebuild` so Rider builds the currently opened full solution. Use `rebuild: true` only when a clean rebuild is needed to reproduce or disprove stale-output behavior. Inspect and resolve every returned build problem before pushing. Do not substitute shell `dotnet restore` or `dotnet build` commands for this skill's local solution-build verification.
+Inspect and resolve every returned build problem before pushing. Use the narrowest command that reproduces the CI failure, and preserve the complete command output as evidence.
 
 For tests, match the TUnit/Microsoft.Testing.Platform behavior in the current workflow through the applicable test MCP tooling. Use focused filters during diagnosis, then run the complete affected project before pushing when practical. Follow the backend test skills and `dotnet-test-mcp` requirements.
 

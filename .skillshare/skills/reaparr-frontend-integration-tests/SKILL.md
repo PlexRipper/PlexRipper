@@ -109,7 +109,7 @@ The CI flow generates a static app and runs Firefox headless:
 - Cypress runs against `http://localhost:$PORT`.
 - The frontend package manager is Bun.
 
-Use the configured WebStorm Cypress run configuration first. The equivalent focused command from the repository root is:
+Use the repository's native Cypress command from the project root:
 
 ```bash
 bun --cwd src/AppHost/ClientApp run cypress:ci --spec cypress/e2e/path/to/spec.cy.ts
@@ -153,8 +153,8 @@ Replace sleeps with a request alias or visible UI condition. If a hub message is
 After editing Cypress files:
 
 1. Re-read every changed spec.
-2. Run WebStorm `get_file_problems` for every changed spec.
-3. Run WebStorm lint/inspection checks and fix errors.
+2. Run native diagnostics for every changed spec.
+3. Run native lint/inspection checks and fix errors.
 4. Run each changed spec independently through the same `cypress:ci` path used by CI.
 5. Run the wider Cypress scope when the change affects shared fixtures, support commands, or multiple neighboring workflows.
 6. Report unrelated pre-existing failures separately from failures caused by the change.
@@ -168,5 +168,5 @@ A Cypress integration-test change is complete only when:
 - validation, request/response, refresh, and final visible state are asserted where relevant;
 - SignalR updates are simulated through hub-publishing commands;
 - no arbitrary sleeps or broad exception suppression were added;
-- WebStorm diagnostics/lint report no errors for changed specs;
+- native diagnostics and lint report no errors for changed specs;
 - duplicate or obsolete specs are removed when the workflow has been consolidated.

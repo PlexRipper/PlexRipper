@@ -48,18 +48,17 @@ Use `trash` instead:
 
 On Linux, `trash` resolves to `gio trash` or `trash-cli`.
 
-> **Code file deletions:** When deleting a code file, always use the appropriate IDE MCP instead of `trash`:
-> - Backend files (`src/` excluding `ClientApp/`, `tests/`): use **Rider MCP** (`rider-official:delete_file` or equivalent).
-> - Frontend files (`src/AppHost/ClientApp/`): use **WebStorm MCP** (`webstorm-official:delete_file` or equivalent).
-> - Only fall back to `trash` when the IDE MCP tool is unavailable after retries, and state the fallback reason.
-> This ensures project references, `.csproj` entries, imports, and IDE indexes stay consistent.
+> **Code file deletions:** Use native filesystem tooling for source files:
+> - Use `trash` for deletion; never use `rm`, `rmdir`, or `rm -rf`.
+> - After deletion, update project references/imports and verify the repository state.
+
 
 ---
 ### Backend (`src/`)
 
-If working on the backend, then load `reaparr-backend` skill for project-specific backend conventions and `dotnet-devtools` for .NET development best practices. Backend file reads, edits, searches, refactors, and diagnostics must default to Rider MCP (`rider-official:*`). Do not use WebStorm MCP for backend files.
+If working on the backend, then load `reaparr-backend` skill for project-specific backend conventions and `dotnet-devtools` for .NET development best practices. Use native repository tools (`read`, `edit`, `write`, `glob`, `lsp`, and short `bash` commands) for backend file reads, edits, searches, refactors, and diagnostics.
 
-Backend tests must always use `dotnet-test-mcp`. Never use terminal-style `dotnet test`, `dotnet run --project`, or Rider run configurations for test execution:
+Backend tests should use the repository's native test tooling, preferably `dotnet-test-mcp` when available. Do not use IDE run configurations for test execution:
 
 - `dotnet-test-mcp:list_test_projects`
 - `dotnet-test-mcp:list_tests_summary`
@@ -70,12 +69,11 @@ Backend tests must always use `dotnet-test-mcp`. Never use terminal-style `dotne
 
 ### Frontend (`src/AppHost/ClientApp/`)
 
-If working on the frontend, then load `reaparr-frontend` skill first for project-specific frontend conventions. This umbrella skill must be loaded before narrower frontend skills such as `reaparr-frontend-components`, `reaparr-pinia-store`, or `reaparr-frontend-unit-tests`. Frontend file reads, edits, searches, refactors, and diagnostics must default to WebStorm MCP (`webstorm-official:*`). Do not use Rider MCP for frontend files unless WebStorm is unavailable and the user approves the fallback.
+If working on the frontend, then load `reaparr-frontend` skill first for project-specific frontend conventions. Use native repository tools (`read`, `edit`, `write`, `glob`, `lsp`, and short `bash` commands) for frontend file reads, edits, searches, refactors, and diagnostics.
 
 > **Package manager:** The frontend uses **Bun exclusively** — never use npm, yarn, or pnpm.
 
-> **`generate-ts` prerequisite:** The backend must be running in dev mode before executing `bun run generate-ts`. Use
-> the Rider run configuration at `.run/Reaparr Back-End Development.run.xml`.
+> **`generate-ts` prerequisite:** Start the backend in development mode with `dotnet run --project src/AppHost` before executing `bun run generate-ts`.
 
 
 ---

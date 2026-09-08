@@ -22,24 +22,13 @@ Do not use this skill for backend-only work under `src/` outside `src/AppHost/Cl
 
 ## Required Tooling
 
-WebStorm MCP is mandatory for frontend work. All frontend file operations, searches, symbol inspection, refactors, and diagnostics must use WebStorm MCP tools first:
-- `webstorm_*`
-- `webstorm-official-mcp_*`
-- `webstorm-index-mcp_*`
-- `webstorm-index_ide_*`
+Native repository tooling is mandatory for frontend work. Use these tools directly:
+- `read`, `edit`, and `write` for file operations;
+- `glob` and repository search tools for discovery;
+- `lsp` for symbol inspection, references, refactors, and diagnostics;
+- short `bash` commands for Bun, Vitest, Cypress, and factual checks.
 
-Never use Rider MCP tools for frontend work under `src/AppHost/ClientApp/` unless WebStorm MCP is unavailable after retry, health, and quarantine checks.
-
-### WebStorm MCP retry rule
-
-WebStorm MCP can briefly hiccup. Do not give up after one failed call.
-
-If a WebStorm MCP call fails, retry with the same tool once. If it still fails, try a narrower or adjacent WebStorm MCP tool before falling back:
-- File read fails -> try `webstorm_read_file` or `webstorm_get_file_text_by_path` with fewer lines.
-- Search fails -> try a narrower directory, exact text search, regex search, file-name search, or symbol search.
-- Diagnostics fail -> retry the same file, then use WebStorm indexed file problems, inspections, symbol info, or alternate WebStorm MCP namespaces. Do not run a package build just to discover errors.
-
-Fallback to filesystem tools only after repeated WebStorm MCP attempts cannot provide the needed result. State the attempted WebStorm MCP tools and the fallback reason before using filesystem tools.
+Retry a failed native tool once with a narrower request before changing approach. Do not treat an external editor integration as a prerequisite for frontend work.
 
 ## Secondary Skill Routing
 
@@ -154,13 +143,13 @@ Do not introduce hand-rolled handlers for common patterns unless the existing li
 
 1. Load `reaparr-frontend`; this is not optional for frontend work.
 2. Confirm the task is frontend-scoped and load any narrower matching skills.
-3. Use WebStorm MCP indexed search/symbol tools to find existing precedent.
+3. Use native search and symbol tools to find existing precedent.
 4. Identify whether the change belongs in a component, composable, store, page, plugin, config file, unit test, or Cypress test.
 5. Make the smallest maintainable change that fixes the root cause.
 6. Preserve frontend architecture boundaries; prefer stores for orchestration and components for rendering.
 7. Keep behavior deterministic, especially in tests and RxJS flows.
 8. Re-read changed files after edits to confirm the intended changes landed.
-9. Use WebStorm MCP intelligence/indexing to find errors that need fixing before claiming completion. Do not run a package build as the first error-discovery mechanism.
+9. Use native diagnostics and language-server analysis to find errors that need fixing before claiming completion. Do not run a package build as the first error-discovery mechanism.
 10. For user-visible frontend implementation changes, verify the behavior in a browser with Chrome DevTools MCP or Playwright MCP before claiming completion.
 
 ## Browser Verification
@@ -181,27 +170,27 @@ Pure skill/documentation-only changes do not require browser verification.
 ## Verification Gates
 
 Required error-checking flow:
-1. Run WebStorm MCP diagnostics/file problems/inspections for each changed frontend file when available.
-2. If diagnostics are incomplete or fail, retry WebStorm MCP and use narrower or adjacent indexed tools.
-3. Fix all relevant WebStorm-reported errors.
+1. Run native `lsp` diagnostics for each changed frontend file when a language server is available.
+2. If diagnostics are incomplete or fail, retry with narrower file ranges and repository-native checks.
+3. Fix all relevant reported errors.
 4. For user-visible frontend implementation changes, perform targeted browser verification with Chrome DevTools MCP or Playwright MCP and report the evidence.
 
 Test routing:
-- Component/page/composable changes: WebStorm MCP diagnostics first, then targeted Vitest tests when available; otherwise lint/typecheck or explain the missing targeted verifier.
+- Component/page/composable changes: native diagnostics first, then targeted Vitest tests when available; otherwise lint/typecheck or explain the missing targeted verifier.
 - Store changes: load `reaparr-pinia-store`; diagnostics first, then relevant store unit tests from `reaparr-frontend-unit-tests`.
 - Unit test changes: load `reaparr-frontend-unit-tests`; run the relevant Vitest target.
 - Cypress test changes: run targeted Cypress spec when possible; otherwise explain why it could not be run.
 - Config/package changes: inspect `package.json` scripts, then run the smallest relevant config validation, lint, typecheck, or test command.
 - Pure skill/documentation-only changes: re-read the changed skill file; no frontend runtime or browser test is required unless the skill content changes executable project behavior.
 
-Do not claim success unless WebStorm MCP diagnostics/indexing was used when applicable and required tests passed. If WebStorm MCP cannot run in the current environment after retries, state that explicitly instead of running a build to infer errors.
+Do not claim success unless native diagnostics and required tests passed. If a language server is unavailable, state that explicitly and use the strongest available native checks.
 
 ## Common Mistakes
 
 - Skipping this umbrella skill and loading only a narrow frontend skill.
-- Using Rider MCP tools for frontend files when WebStorm MCP is available.
-- Falling back to filesystem tools after one WebStorm MCP hiccup instead of retrying WebStorm MCP and trying narrower WebStorm tools.
-- Running package builds as the first way to discover errors instead of using WebStorm MCP intelligence/indexing.
+- Using external editor integrations for frontend files.
+- Switching to broad filesystem commands after one native-tool hiccup instead of retrying with a narrower request.
+- Running package builds as the first way to discover errors instead of using native diagnostics.
 - Importing Vue, Nuxt, Quasar, PrimeVue, VueUse, components, or composables that Nuxt already auto-imports.
 - Importing Reaparr stores from `#imports` instead of `@store`.
 - Accessing refs with `.value` in script blocks instead of `get()`/`set()`.

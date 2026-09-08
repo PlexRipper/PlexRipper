@@ -132,8 +132,8 @@
 						option-value="id"
 						emit-value
 						map-options
-						clearable
-						data-cy="integration-download-folder">
+						data-cy="integration-download-folder"
+						:rules="requiredRules">
 						<template #option="scope">
 							<QItem v-bind="scope.itemProps">
 								<QItemSection>
@@ -196,7 +196,7 @@ const integrationTypes = [
 	{ type: IntegrationType.Radarr, icon: '/img/logo/radarr.svg' },
 ] as const;
 const stage = ref(1);
-const requiredRules = [(value: string) => Boolean(value?.trim()) || 'Required'];
+const requiredRules = [(value: string | number) => (typeof value === 'number' ? value > 0 : Boolean(value?.trim())) || 'Required'];
 const downloadFolders = computed(() => folderPathStore.folderPaths.filter((folderPath) => folderPath.folderType === FolderType.DownloadFolder));
 const integrationLogo = computed(() => integrationTypes.find(({ type }) => type === store.draft.type)?.icon ?? '');
 

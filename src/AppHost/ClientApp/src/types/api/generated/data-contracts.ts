@@ -137,8 +137,12 @@ export interface CreateRadarrIntegrationRequest {
   apiKey: string;
   /** @minLength 1 */
   category: string;
-  /** @format int32 */
-  downloadFolderId?: number | null;
+  /**
+   * @format int32
+   * @min 0
+   * @exclusiveMin true
+   */
+  downloadFolderId: number;
   /** @minLength 1 */
   name: string;
   /** @minLength 1 */
@@ -150,8 +154,12 @@ export interface CreateSonarrIntegrationRequest {
   apiKey: string;
   /** @minLength 1 */
   category: string;
-  /** @format int32 */
-  downloadFolderId?: number | null;
+  /**
+   * @format int32
+   * @min 0
+   * @exclusiveMin true
+   */
+  downloadFolderId: number;
   /** @minLength 1 */
   name: string;
   /** @minLength 1 */
@@ -568,7 +576,7 @@ export interface IntegrationSummary {
   baseUrl: string;
   category: string;
   /** @format int32 */
-  downloadFolderId?: number | null;
+  downloadFolderId: number;
   /** @format int32 */
   externalDownloadClientId?: number | null;
   /** @format int32 */
@@ -1273,7 +1281,7 @@ export interface RadarrIntegrationDTO {
   apiKey: string;
   category: string;
   /** @format int32 */
-  downloadFolderId?: number | null;
+  downloadFolderId: number;
   /** @format guid */
   id: string;
   lastConnectionTestErrorMessage?: string | null;
@@ -1834,7 +1842,7 @@ export interface SonarrIntegrationDTO {
   apiKey: string;
   category: string;
   /** @format int32 */
-  downloadFolderId?: number | null;
+  downloadFolderId: number;
   /** @format guid */
   id: string;
   lastConnectionTestErrorMessage?: string | null;
@@ -1936,8 +1944,12 @@ export interface UpdateRadarrIntegrationRequest {
   apiKey: string;
   /** @minLength 1 */
   category: string;
-  /** @format int32 */
-  downloadFolderId?: number | null;
+  /**
+   * @format int32
+   * @min 0
+   * @exclusiveMin true
+   */
+  downloadFolderId: number;
   /** @minLength 1 */
   name: string;
   /** @minLength 1 */
@@ -1949,8 +1961,12 @@ export interface UpdateSonarrIntegrationRequest {
   apiKey: string;
   /** @minLength 1 */
   category: string;
-  /** @format int32 */
-  downloadFolderId?: number | null;
+  /**
+   * @format int32
+   * @min 0
+   * @exclusiveMin true
+   */
+  downloadFolderId: number;
   /** @minLength 1 */
   name: string;
   /** @minLength 1 */

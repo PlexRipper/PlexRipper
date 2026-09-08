@@ -12,7 +12,7 @@ describe('Manage integrations', () => {
 		category: 'sonarr',
 		provisioningState: IntegrationProvisioningState.Configured,
 		lastConnectionTestStatus: TestConnectionStatus.Unknown,
-		downloadFolderId: null,
+		downloadFolderId: 1,
 		externalDownloadClientId: 1,
 		externalIndexerId: 2,
 	};

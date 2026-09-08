@@ -23,7 +23,7 @@ interface IIntegrationDraft {
 	url: string;
 	apiKey: string;
 	category: string;
-	downloadFolderId: number | null;
+	downloadFolderId: number;
 }
 
 type IntegrationDetail = (RadarrIntegrationDTO | SonarrIntegrationDTO) & { type: IntegrationType };
@@ -222,7 +222,7 @@ export const useIntegrationStore = defineStore(StoreNames.IntegrationStore, () =
 			url: detail.url,
 			apiKey: detail.apiKey,
 			category: detail.category,
-			downloadFolderId: detail.downloadFolderId ?? null,
+			downloadFolderId: detail.downloadFolderId,
 		};
 	}
 
@@ -269,7 +269,13 @@ export const useIntegrationStore = defineStore(StoreNames.IntegrationStore, () =
 	}
 
 	const getters = {
-		isDraftValid: computed(() => Boolean(state.draft.name.trim() && state.draft.url.trim() && state.draft.apiKey.trim() && state.draft.category.trim())),
+		isDraftValid: computed(() => Boolean(
+			state.draft.name.trim()
+			&& state.draft.url.trim()
+			&& state.draft.apiKey.trim()
+			&& state.draft.category.trim()
+			&& state.draft.downloadFolderId > 0,
+		)),
 	};
 
 	return { ...toRefs(state), ...actions, ...getters };

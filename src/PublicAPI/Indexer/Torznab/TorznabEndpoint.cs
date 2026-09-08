@@ -45,7 +45,7 @@ public sealed class TorznabEndpoint : Endpoint<TorznabEndpointRequest>
         _log.Here().DebugApiCall(HttpContext, req);
         var integration = HttpContext.GetIntegrationIdentity();
         if (
-            (req.Type is "search" or "movie" && !integration.Supports(PlexMediaType.Movie))
+            (req.Type == "movie" && !integration.Supports(PlexMediaType.Movie))
             || (req.Type == "tvsearch" && !integration.Supports(PlexMediaType.Episode))
         )
         {
@@ -65,25 +65,61 @@ public sealed class TorznabEndpoint : Endpoint<TorznabEndpointRequest>
                 await Send.XmlAsync(capsResult.Value, cancellationToken: ct);
                 break;
             case "search":
-                var searchResult = await _commandExecutor.Send(
-                    new SearchMovieCommand
-                    {
-                        Query = req.Query ?? string.Empty,
-                        IMDB_ID = req.ImdbId ?? string.Empty,
-                        TMDB_ID = req.TmdbId ?? 0,
-                        Limit = req.Limit ?? 100,
-                        Offset = req.Offset ?? 0,
-                        Integration = integration,
-                        TorznabApiKey = req.ApiKey,
-                    },
-                    ct
-                );
-                if (searchResult.IsFailed)
+                switch (integration.Type)
                 {
-                    await Send.ErrorsAsync(cancellation: ct);
-                    break;
+                    case IntegrationType.Sonarr:
+                    {
+                        var genericTvSearchResult = await _commandExecutor.Send(
+                            new SearchTvShowCommand
+                            {
+                                Query = req.Query ?? string.Empty,
+                                Season = req.Season ?? 0,
+                                Episode = req.Episode ?? 0,
+                                TVDB_ID = req.TvdbId ?? 0,
+                                IMDB_ID = req.ImdbId ?? string.Empty,
+                                TMDB_ID = req.TmdbId ?? 0,
+                                Limit = req.Limit ?? 100,
+                                Offset = req.Offset ?? 0,
+                                Integration = integration,
+                                TorznabApiKey = req.ApiKey,
+                            },
+                            ct
+                        );
+                        if (genericTvSearchResult.IsFailed)
+                        {
+                            await Send.ErrorsAsync(cancellation: ct);
+                            break;
+                        }
+                        await Send.XmlAsync(genericTvSearchResult.Value, cancellationToken: ct);
+                        break;
+                    }
+                    case IntegrationType.Radarr:
+                    {
+                        var genericMovieSearchResult = await _commandExecutor.Send(
+                            new SearchMovieCommand
+                            {
+                                Query = req.Query ?? string.Empty,
+                                IMDB_ID = req.ImdbId ?? string.Empty,
+                                TMDB_ID = req.TmdbId ?? 0,
+                                Limit = req.Limit ?? 100,
+                                Offset = req.Offset ?? 0,
+                                Integration = integration,
+                                TorznabApiKey = req.ApiKey,
+                            },
+                            ct
+                        );
+                        if (genericMovieSearchResult.IsFailed)
+                        {
+                            await Send.ErrorsAsync(cancellation: ct);
+                            break;
+                        }
+                        await Send.XmlAsync(genericMovieSearchResult.Value, cancellationToken: ct);
+                        break;
+                    }
+                    default:
+                        await Send.ForbiddenAsync(ct);
+                        break;
                 }
-                await Send.XmlAsync(searchResult.Value, cancellationToken: ct);
                 break;
             case "tvsearch":
                 var tvSearchResult = await _commandExecutor.Send(

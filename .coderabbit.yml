@@ -78,6 +78,7 @@ reviews:
         - path: "**/*.cs"
           instructions: |
             Check async code for cancellation, exception handling, and correct Result/error propagation.
+            Respect CancelationToken.None as a signal to avoid cancellation, and ensure that exceptions are not swallowed or logged without context.
             For EF Core, review query translation, tracking, N+1 queries, and transaction boundaries.
             For FastEndpoints, verify validation and authorization remain at trust boundaries.
             Prefer focused fixes and existing project patterns over speculative refactors; keep tests deterministic.

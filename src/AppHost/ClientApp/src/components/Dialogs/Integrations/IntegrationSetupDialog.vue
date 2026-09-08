@@ -13,7 +13,7 @@
 					fit="contain"
 					width="28px"
 					height="28px" />
-				<span>{{ `Setting up ${store.draft.type}` }}</span>
+				<span>{{ setupTexts.title }}</span>
 			</div>
 		</template>
 		<template #default>
@@ -25,7 +25,7 @@
 				class="integration-setup-stepper">
 				<QStep
 					:name="1"
-					title="Connect"
+					:title="setupTexts.steps.connect"
 					icon="mdi-lan-connect"
 					done-icon="mdi-check-circle"
 					active-icon="mdi-loading"
@@ -43,17 +43,17 @@
 						{{ steps.connect.error }}
 					</div>
 					<div v-else-if="steps.connect.status === 'running'">
-						{{ `Connecting to ${store.draft.type}...` }}
+						{{ setupTexts.progress.connecting }}
 					</div>
 					<div
 						v-else-if="steps.connect.status === 'success'"
 						class="text-positive">
-						{{ connectedText }}
+						{{ setupTexts.progress.connected }}
 					</div>
 				</QStep>
 				<QStep
 					:name="2"
-					title="Download client"
+					:title="setupTexts.steps.downloadClient"
 					icon="mdi-download"
 					done-icon="mdi-check-circle"
 					active-icon="mdi-loading"
@@ -71,17 +71,17 @@
 						{{ steps.downloadClient.error }}
 					</div>
 					<div v-else-if="steps.downloadClient.status === 'running'">
-						{{ downloadClientText }}
+						{{ setupTexts.progress.downloadClient }}
 					</div>
 					<div
 						v-else-if="steps.downloadClient.status === 'success'"
 						class="text-positive">
-						{{ downloadClientReadyText }}
+						{{ setupTexts.progress.downloadClientReady }}
 					</div>
 				</QStep>
 				<QStep
 					:name="3"
-					title="Indexer"
+					:title="setupTexts.steps.indexer"
 					icon="mdi-database-search"
 					done-icon="mdi-check-circle"
 					active-icon="mdi-loading"
@@ -99,17 +99,17 @@
 						{{ steps.indexer.error }}
 					</div>
 					<div v-else-if="steps.indexer.status === 'running'">
-						{{ indexerText }}
+						{{ setupTexts.progress.indexer }}
 					</div>
 					<div
 						v-else-if="steps.indexer.status === 'success'"
 						class="text-positive">
-						{{ indexerReadyText }}
+						{{ setupTexts.progress.indexerReady }}
 					</div>
 				</QStep>
 				<QStep
 					:name="4"
-					title="Validate setup"
+					:title="setupTexts.steps.validation"
 					icon="mdi-connection"
 					done-icon="mdi-check-circle"
 					:active-icon="steps.validation.status === 'success' ? 'mdi-check-circle' : 'mdi-loading'"
@@ -128,38 +128,29 @@
 						{{ steps.validation.error }}
 					</div>
 					<div v-else-if="steps.validation.status === 'running'">
-						{{ validationText }}
+						{{ setupTexts.progress.validation }}
 					</div>
 					<div
 						v-else-if="steps.validation.status === 'success'"
 						class="text-positive">
-						{{ validationReadyText }}
+						{{ setupTexts.progress.validationReady }}
 					</div>
 				</QStep>
 				<QStep
 					:name="5"
-					title="Done"
+					:title="setupTexts.steps.done"
 					icon="mdi-check-circle-outline"
 					done-icon="mdi-check-circle"
-					:active-icon="steps.done.status === 'success' ? 'mdi-check-circle' : 'mdi-loading'"
-					error-icon="mdi-alert-circle"
+					active-icon="mdi-check-circle"
 					done-color="positive"
-					:active-color="steps.done.status === 'success' ? 'positive' : 'primary'"
-					error-color="negative"
 					:done="steps.done.status === 'success'"
 					:header-nav="false"
-					:error="steps.done.status === 'error'"
 					:data-status="steps.done.status"
 					data-cy="integration-setup-step-done">
 					<div
-						v-if="steps.done.error"
-						class="text-negative">
-						{{ steps.done.error }}
-					</div>
-					<div
-						v-else-if="steps.done.status === 'success'"
+						v-if="steps.done.status === 'success'"
 						class="text-positive">
-						{{ completeText }}
+						{{ setupTexts.progress.complete }}
 					</div>
 				</QStep>
 			</QStepper>
@@ -171,7 +162,7 @@
 import Log from 'consola';
 import { set } from '@vueuse/core';
 import { DialogType } from '@enums';
-import { IntegrationType, type IntegrationSetupProgressDTO } from '@dto';
+import { IntegrationSetupProgressStage, IntegrationType, type IntegrationSetupProgressDTO } from '@dto';
 import { useIntegrationStore, useSignalrStore } from '@store';
 import { useSubscription } from '@vueuse/rxjs';
 
@@ -179,14 +170,30 @@ const store = useIntegrationStore();
 const signalrStore = useSignalrStore();
 const activeStep = ref(1);
 const integrationLogo = computed(() => store.draft.type === IntegrationType.Radarr ? '/img/logo/radarr.png' : '/img/logo/sonarr.png');
-const connectedText = 'Connected.';
-const downloadClientText = 'Setting up the Reaparr download client...';
-const downloadClientReadyText = 'Download client ready.';
-const indexerText = 'Setting up the Reaparr indexer...';
-const indexerReadyText = 'Indexer ready.';
-const validationText = `Validating the ${store.draft.type} setup...`;
-const validationReadyText = `${store.draft.type} setup validated.`;
-const completeText = 'Integration setup complete.';
+const setupTexts = computed(() => {
+	const values = { type: store.draft.type };
+	return {
+		title: $t('components.integration-setup-dialog.setup.title', values),
+		steps: {
+			connect: $t('components.integration-setup-dialog.setup.steps.connect', values),
+			downloadClient: $t('components.integration-setup-dialog.setup.steps.download-client', values),
+			indexer: $t('components.integration-setup-dialog.setup.steps.indexer', values),
+			validation: $t('components.integration-setup-dialog.setup.steps.validation', values),
+			done: $t('components.integration-setup-dialog.setup.steps.done', values),
+		},
+		progress: {
+			connecting: $t('components.integration-setup-dialog.setup.progress.connecting', values),
+			connected: $t('components.integration-setup-dialog.setup.progress.connected', values),
+			downloadClient: $t('components.integration-setup-dialog.setup.progress.download-client', values),
+			downloadClientReady: $t('components.integration-setup-dialog.setup.progress.download-client-ready', values),
+			indexer: $t('components.integration-setup-dialog.setup.progress.indexer', values),
+			indexerReady: $t('components.integration-setup-dialog.setup.progress.indexer-ready', values),
+			validation: $t('components.integration-setup-dialog.setup.progress.validation', values),
+			validationReady: $t('components.integration-setup-dialog.setup.progress.validation-ready', values),
+			complete: $t('components.integration-setup-dialog.setup.progress.complete', values),
+		},
+	};
+});
 type StepStatus = 'pending' | 'running' | 'success' | 'error';
 type Step = { status: StepStatus; error: string };
 const steps = reactive<{ connect: Step; downloadClient: Step; indexer: Step; validation: Step; done: Step }>({
@@ -207,19 +214,20 @@ function reset(): void {
 
 function updateStep(progress: IntegrationSetupProgressDTO): void {
 	const setupStage = {
-		Connecting: { step: steps.connect, number: 1 },
-		DownloadClient: { step: steps.downloadClient, number: 2 },
-		Indexer: { step: steps.indexer, number: 3 },
-		Validation: { step: steps.validation, number: 4 },
-		Done: { step: steps.done, number: 5 },
+		[IntegrationSetupProgressStage.Connecting]: { step: steps.connect, number: 1 },
+		[IntegrationSetupProgressStage.DownloadClient]: { step: steps.downloadClient, number: 2 },
+		[IntegrationSetupProgressStage.Indexer]: { step: steps.indexer, number: 3 },
+		[IntegrationSetupProgressStage.Validation]: { step: steps.validation, number: 4 },
+		[IntegrationSetupProgressStage.Done]: { step: steps.done, number: 5 },
 	}[progress.stage];
 	if (!setupStage) {
 		Log.warn('Unknown integration setup progress stage', progress.stage);
 		return;
 	}
 
-	setupStage.step.status = progress.isRunning ? 'running' : progress.isSuccess ? 'success' : 'error';
-	setupStage.step.error = progress.error ?? '';
+	const isDone = progress.stage === IntegrationSetupProgressStage.Done;
+	setupStage.step.status = isDone ? 'success' : progress.isRunning ? 'running' : progress.isSuccess ? 'success' : 'error';
+	setupStage.step.error = isDone ? '' : progress.error ?? '';
 	set(activeStep, setupStage.number);
 }
 

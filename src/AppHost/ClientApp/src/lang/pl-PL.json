@@ -1,1276 +1,1300 @@
 {
-  "components": {
-    "account-card": {
-      "invalid-account": "Obiekt konta był nieprawidłowy"
-    },
-    "account-dialog": {
-      "add-account-title": "Dodaj konto Plex: {name}",
-      "edit-account-title": "Edytuj konto Plex: {name}",
-      "generate-token-button": "Generuj token"
-    },
-    "connection-progress-text": {
-      "retry-connection": "Próba ponownego połączenia, { attemptIndex } z { attemptCount } prób.",
-      "connection-connectable": "Połączenie jest dobre!",
-      "connection-un-connectable": "Połączenie nie powiodło się!"
-    },
-    "check-server-connections-dialog": {
-      "server-connectable": "Serwer jest dostępny!",
-      "server-un-connectable": "Nie można połączyć się z serwerem, najprawdopodobniej jest offline.",
-      "checking-progress": "Sprawdzanie {count} z {total} połączeń serwerów Plex",
-      "completed": "Zakończono inspekcję {length} serwerów Plex!",
-      "fetching-servers": "Pobieranie dostępnych serwerów dla konta Plex {displayName}",
-      "no-connections": "Nie znaleziono połączeń dla tego serwera Plex!",
-      "no-progress-yet": "Brak postępu"
-    },
-    "account-verification-code-dialog": {
-      "error": "Kod weryfikacyjny był nieprawidłowy, spróbuj ponownie.",
-      "sub-title": "Konto ma włączoną weryfikację dwuetapową.",
-      "title": "Wprowadź kod weryfikacyjny"
-    },
-    "app-bar": {
-      "no-accounts": "Brak dostępnych kont",
-      "copy-version": "Kopiuj wersję Reaparr - { version }",
-      "update-available": ""
-    },
-    "update-available-dialog": {
-      "title": "Nowa wersja dostępna",
-      "current-version": "Aktualny: {version}",
-      "latest-version": "Najnowsze: {version}",
-      "download-update": "Pobierz aktualizację",
-      "downloading": "Pobieranie aktualizacji… {percentage}%",
-      "restarting": "Ponowne uruchamianie w celu zastosowania aktualizacji…",
-      "docker-action": "Wyświetl wydania Dockera",
-      "no-releases": "W tej chwili nie ma dostępnych żadnych wydań."
-    },
-    "details-overview": {
-      "total-duration": "Całkowity czas trwania:",
-      "media-count": "{seasonCount} Sezon - {episodeCount} Odcinków",
-      "media-count-label": "Liczba mediów:",
-      "summary": "Podsumowanie:",
-      "one-movie-count": "1 Film",
-      "movie-file-count": "{movieFileCount} pliki filmowe"
-    },
-    "directory-browser": {
-      "add-download-path": "Dodaj nową niestandardową ścieżkę pobierania",
-      "add-movie-path": "Dodaj nową ścieżkę folderu filmów",
-      "add-tv-show-path": "Dodaj nową ścieżkę folderu programów telewizyjnych",
-      "path": "Ścieżka:",
-      "select-path": "Wybierz {pathName}",
-      "type": "Typ: ",
-      "no-path": "Zacznij pisać lub wybierz ścieżkę poniżej.",
-      "has-no-read-permission": "Nie ma uprawnień do odczytu tego folderu!",
-      "has-no-write-permission": "Nie ma uprawnień do zapisu w tym folderze!",
-      "current-folder-has-no-write-permission": "Bieżący folder nie ma uprawnień do zapisu! Wybierz taki, który je ma."
-    },
-    "download-confirmation": {
-      "description": "Reaparr rozpocznie pobieranie następujących plików",
-      "total-size": "Całkowity rozmiar:",
-      "columns": {
-        "file-size": "Rozmiar pliku",
-        "title": "Tytuł"
-      },
-      "destination": {
-        "custom-destination-option": "Zwyczaj",
-        "header": "Miejsce docelowe pobierania:",
-        "not-set": "Nie ustawiono",
-        "selected": "Pobieranie do:"
-      }
-    },
-    "download-details-dialog": {
-      "overview": {
-        "destination-path": "Ścieżka docelowa:",
-        "download-path": "Ścieżka pobierania:",
-        "download-url": "Adres URL pobierania:",
-        "file-name": "Nazwa pliku:",
-        "status": "Status:"
-      },
-      "invalid-download-task": {
-        "body": "Błąd podczas pobierania szczegółów dla tego zadania pobierania:",
-        "title": "Nie można pobrać zadania pobierania"
-      },
-      "logs": {
-        "copy-all": "Kopiuj wszystkie logi",
-        "delete-all": "Usuń wszystkie logi",
-        "sort-oldest-first": "Najstarsze najpierw",
-        "sort-newest-first": "Najnowsze najpierw",
-        "filter-by-level": "Filtruj według poziomu logów",
-        "copied-to-clipboard": "Logi skopiowano do schowka",
-        "entry-copied-to-clipboard": "Wpis logu skopiowano do schowka",
-        "deleted": "Logi usunięto",
-        "no-logs": "Nie znaleziono logów dla tego zadania pobierania.",
-        "delete-confirmation": {
-          "title": "Usuń wszystkie logi",
-          "text": "Czy na pewno chcesz usunąć wszystkie logi dla tego zadania pobierania?"
+    "components": {
+        "account-card": {
+            "invalid-account": "Obiekt konta był nieprawidłowy"
+        },
+        "account-dialog": {
+            "add-account-title": "Dodaj konto Plex: {name}",
+            "edit-account-title": "Edytuj konto Plex: {name}",
+            "generate-token-button": "Generuj token"
+        },
+        "connection-progress-text": {
+            "retry-connection": "Próba ponownego połączenia, { attemptIndex } z { attemptCount } prób.",
+            "connection-connectable": "Połączenie jest dobre!",
+            "connection-un-connectable": "Połączenie nie powiodło się!"
+        },
+        "check-server-connections-dialog": {
+            "server-connectable": "Serwer jest dostępny!",
+            "server-un-connectable": "Nie można połączyć się z serwerem, najprawdopodobniej jest offline.",
+            "checking-progress": "Sprawdzanie {count} z {total} połączeń serwerów Plex",
+            "completed": "Zakończono inspekcję {length} serwerów Plex!",
+            "fetching-servers": "Pobieranie dostępnych serwerów dla konta Plex {displayName}",
+            "no-connections": "Nie znaleziono połączeń dla tego serwera Plex!",
+            "no-progress-yet": "Brak postępu"
+        },
+        "account-verification-code-dialog": {
+            "error": "Kod weryfikacyjny był nieprawidłowy, spróbuj ponownie.",
+            "sub-title": "Konto ma włączoną weryfikację dwuetapową.",
+            "title": "Wprowadź kod weryfikacyjny"
+        },
+        "app-bar": {
+            "no-accounts": "Brak dostępnych kont",
+            "copy-version": "Kopiuj wersję Reaparr - { version }",
+            "update-available": ""
+        },
+        "update-available-dialog": {
+            "title": "Nowa wersja dostępna",
+            "current-version": "Aktualny: {version}",
+            "latest-version": "Najnowsze: {version}",
+            "download-update": "Pobierz aktualizację",
+            "downloading": "Pobieranie aktualizacji… {percentage}%",
+            "restarting": "Ponowne uruchamianie w celu zastosowania aktualizacji…",
+            "docker-action": "Wyświetl wydania Dockera",
+            "no-releases": "W tej chwili nie ma dostępnych żadnych wydań."
+        },
+        "details-overview": {
+            "total-duration": "Całkowity czas trwania:",
+            "media-count": "{seasonCount} Sezon - {episodeCount} Odcinków",
+            "media-count-label": "Liczba mediów:",
+            "summary": "Podsumowanie:",
+            "one-movie-count": "1 Film",
+            "movie-file-count": "{movieFileCount} pliki filmowe"
+        },
+        "directory-browser": {
+            "add-download-path": "Dodaj nową niestandardową ścieżkę pobierania",
+            "add-movie-path": "Dodaj nową ścieżkę folderu filmów",
+            "add-tv-show-path": "Dodaj nową ścieżkę folderu programów telewizyjnych",
+            "path": "Ścieżka:",
+            "select-path": "Wybierz {pathName}",
+            "type": "Typ: ",
+            "no-path": "Zacznij pisać lub wybierz ścieżkę poniżej.",
+            "has-no-read-permission": "Nie ma uprawnień do odczytu tego folderu!",
+            "has-no-write-permission": "Nie ma uprawnień do zapisu w tym folderze!",
+            "current-folder-has-no-write-permission": "Bieżący folder nie ma uprawnień do zapisu! Wybierz taki, który je ma."
+        },
+        "download-confirmation": {
+            "description": "Reaparr rozpocznie pobieranie następujących plików",
+            "total-size": "Całkowity rozmiar:",
+            "columns": {
+                "file-size": "Rozmiar pliku",
+                "title": "Tytuł"
+            },
+            "destination": {
+                "custom-destination-option": "Zwyczaj",
+                "header": "Miejsce docelowe pobierania:",
+                "not-set": "Nie ustawiono",
+                "selected": "Pobieranie do:"
+            }
+        },
+        "download-details-dialog": {
+            "overview": {
+                "destination-path": "Ścieżka docelowa:",
+                "download-path": "Ścieżka pobierania:",
+                "download-url": "Adres URL pobierania:",
+                "file-name": "Nazwa pliku:",
+                "status": "Status:"
+            },
+            "invalid-download-task": {
+                "body": "Błąd podczas pobierania szczegółów dla tego zadania pobierania:",
+                "title": "Nie można pobrać zadania pobierania"
+            },
+            "logs": {
+                "copy-all": "Kopiuj wszystkie logi",
+                "delete-all": "Usuń wszystkie logi",
+                "sort-oldest-first": "Najstarsze najpierw",
+                "sort-newest-first": "Najnowsze najpierw",
+                "filter-by-level": "Filtruj według poziomu logów",
+                "copied-to-clipboard": "Logi skopiowano do schowka",
+                "entry-copied-to-clipboard": "Wpis logu skopiowano do schowka",
+                "deleted": "Logi usunięto",
+                "no-logs": "Nie znaleziono logów dla tego zadania pobierania.",
+                "delete-confirmation": {
+                    "title": "Usuń wszystkie logi",
+                    "text": "Czy na pewno chcesz usunąć wszystkie logi dla tego zadania pobierania?"
+                }
+            }
+        },
+        "media-overview": {
+            "library-inaccessible-title": "Biblioteka niedostępna.",
+            "library-inaccessible": "Żadne włączone konto Plex nie ma już dostępu do tej biblioteki.",
+            "is-refreshing": "Odświeżanie danych biblioteki \"{library}\" z {server}",
+            "could-not-display": "Nie można wyświetlić tej biblioteki.",
+            "no-data": "Biblioteka została zsynchronizowana, ale nie zawiera żadnych multimediów.",
+            "library-not-yet-synced": "Dane multimediów bibliotecznych nie zostały jeszcze zsynchronizowane. Proszę czekać lub odświeżyć teraz.",
+            "no-search-results": "Nie znaleziono nośników zawierających „{query}”",
+            "no-media-items-available": "Nie znaleziono żadnych elementów multimedialnych!",
+            "failed-to-load-media": "Nie udało się załadować multimediów. Serwer może być zajęty. Spróbuj ponownie lub poczekaj na rozgrzanie pamięci podręcznej.",
+            "retrying-in-seconds": "Ponowna próba za {seconds}s...",
+            "no-filter-results": "Brak wyników wyszukiwania multimediów zgodnych z aktualnymi ustawieniami filtra. Dostosuj lub zresetuj filtry, aby wyświetlić dostępne wyniki.",
+            "library-disabled": "Biblioteka \"{library}\" jest wyłączona. Włącz ją i zsynchronizuj ponownie, zanim wyświetlisz jej multimedia.",
+            "enable-library-button": "Włącz bibliotekę",
+            "comparison": {
+                "details-column-title": "Title",
+                "details-column-location": "Location",
+                "details-column-remote-quality": "Available quality",
+                "details-column-owned-quality": "Current quality",
+                "details-no-actionable-rows": "No actionable comparison rows were returned for this media item.",
+                "download-selected": "Download selected"
+            }
+        },
+        "navigation-drawer": {
+            "accounts": "Konta",
+            "advanced": "Zaawansowane",
+            "debug": "Debugowanie",
+            "dialogs": "Dialogi",
+            "downloads": "Pobrania",
+            "logs": "Logi",
+            "paths": "Ścieżki",
+            "settings": "Ustawienia",
+            "ui": "UI",
+            "buttons": "Przyciski",
+            "scratchpad": "Notatnik",
+            "integrations": "Integracje"
+        },
+        "notifications-drawer": {
+            "clear-notifications": "Wyczyść wszystkie powiadomienia",
+            "no-notifications": "Brak dostępnych powiadomień"
+        },
+        "folder-paths-overview": {
+            "main": {
+                "header": "Ścieżki folderów"
+            },
+            "download": {
+                "header": "Ścieżki pobierania",
+                "default-name": "Ścieżka pobierania integracji"
+            },
+            "movie": {
+                "header": "Ścieżki Filmowe",
+                "default-name": "Ścieżka folderu filmu"
+            },
+            "tv-show": {
+                "header": "Ścieżki seriali",
+                "default-name": "Ścieżka folderu serialu"
+            }
+        },
+        "server-dialog": {
+            "header": "Konfiguracja {serverName}",
+            "tabs": {
+                "server-commands": {
+                    "header": "Komendy serwera"
+                },
+                "server-config": {
+                    "header": "Konfiguracja serwera",
+                    "plex-server-was-null": "Serwer Plex był pusty"
+                },
+                "server-connections": {
+                    "header": "Połączenia serwera",
+                    "section-header": "Wybierz preferowane połączenie z serwerem:",
+                    "add-connection-button": "Dodaj połączenie",
+                    "check-all-connections": "Sprawdź wszystkie połączenia"
+                },
+                "server-libraries": {
+                    "header": "Biblioteki serwera",
+                    "sync-alert": "Wyłączenie biblioteki Plex spowoduje jej całkowite ukrycie w wynikach wyszukiwania i usunięcie danych multimedialnych. Włączenie spowoduje ponowną automatyczną synchronizację."
+                },
+                "server-data": {
+                    "headers": {
+                        "created-on": "Utworzono:",
+                        "current-status": "Aktualny status:",
+                        "last-seen-at": "Ostatnio widziany w:",
+                        "machine-id": "Identyfikator maszyny:",
+                        "plex-version": "Wersja Plex:",
+                        "device": "Urządzenie:",
+                        "platform": "Platforma:"
+                    },
+                    "header": "Dane serwera",
+                    "values": {
+                        "platform-version": "{platform} ({platformVersion})",
+                        "product-version": "{product} ({productVersion})"
+                    }
+                }
+            }
+        },
+        "server-drawer": {
+            "no-libraries": "Nie znaleziono bibliotek. Kliknij, aby odświeżyć dostęp.",
+            "no-servers": {
+                "description": "Upewnij się, że masz zarejestrowane konto Plex w ustawieniach i wybrałeś konto z dostępnymi serwerami Plex w prawym górnym rogu selektora kont.",
+                "header": "Nie ma dostępnych serwerów!"
+            }
+        },
+        "media-list": {
+            "no-media-found": "Nie znaleziono mediów.",
+            "selected-count": "{selectedCount} wybranych",
+            "episode-count": "{episodeCount} Odcinków",
+            "columns": {
+                "title": "Tytuł",
+                "year": "Rok",
+                "duration": "Czas trwania",
+                "media-size": "Rozmiar",
+                "added-at": "Dodano w",
+                "updated-at": "Zaktualizowano w",
+                "actions": "Działania",
+                "quality": "Jakość",
+                "comparison-state": "Stan porównania"
+            }
+        },
+        "server-download-status": {
+            "pause": "Pauza",
+            "start": "Rozpocznij"
+        },
+        "q-tree-view-table-row": {
+            "invalid-node": "Węzeł był niezdefiniowany lub null"
+        },
+        "server-library-destinations-tab-content": {
+            "no-libraries": "Ten serwer Plex nie ma bibliotek, dla których można ustawić domyślną lokalizację docelową"
+        },
+        "account-selector": {
+            "all-accounts": "Wszystkie konta Plex",
+            "title": "Aktywne konta",
+            "log-out-button": "Wyloguj"
+        },
+        "media-selection-dialog": {
+            "title": "Ustaw zakres indeksu, aby wybrać media (#{min} - #{max})"
+        },
+        "q-status": {
+            "server-connectable": "Serwer jest online i można się z nim połączyć!",
+            "server-unconnectable": "Nie można połączyć się z serwerem, może być offline."
+        },
+        "alert-dialog": {
+            "request-data-sent": "Wysłano dane żądania:"
+        },
+        "account-token-validate-dialog": {
+            "column": {
+                "email": "E-mail",
+                "title": "Tytuł",
+                "username": "Nazwa użytkownika"
+            },
+            "invalid-token": "Dane logowania lub token były nieprawidłowe i/lub wygasły.",
+            "invalid-credentials": "Nazwa użytkownika lub hasło są nieprawidłowe. Sprawdź dane logowania i spróbuj ponownie.",
+            "sub-header": "Token: {authToken} należy do konta Plex:",
+            "title": "Walidacja tokena uwierzytelniającego Plex.tv"
+        },
+        "downloads-table": {
+            "clear-completed": {
+                "button": "Wyczyść ukończone",
+                "confirmation": {
+                    "title": "Wyczyścić ukończone pobrania?",
+                    "text": "Spowoduje to rekursywne usunięcie ukończonych zadań pobierania tylko dla tego serwera. Pobrane pliki nie zostaną usunięte z systemu plików."
+                }
+            },
+            "columns": {
+                "actions": "Działania",
+                "data-received": "Otrzymane",
+                "data-total": "Rozmiar",
+                "percentage": "Procent",
+                "speed": "Prędkość",
+                "status": "Status",
+                "time-remaining": "Szacowany czas przybycia",
+                "title": "Tytuł"
+            }
+        },
+        "q-countdown": {
+            "hours-minute-seconds": "Pozostało{hours} godzin, {minutes} minut i {seconds} sekund",
+            "minutes-seconds": "Pozostało{minutes} minut i {seconds} sekund",
+            "seconds": "Pozostało{seconds} sekund"
+        },
+        "add-connection-dialog": {
+            "header": "Dodaj połączenie do {serverName}",
+            "add-connection-button": "Utwórz połączenie",
+            "input": {
+                "connection-url": "Adres URL połączenia",
+                "host-name": "Nazwa hosta",
+                "port": "Port",
+                "protocol": "Protokół"
+            },
+            "test-connection-button": "Test połączenia",
+            "url-has-invalid-format": "Adres URL ma nieprawidłowy format!",
+            "url-has-valid-format": "Adres URL ma prawidłowy format!",
+            "update-connection": "Aktualizuj połączenie",
+            "url-already-exists": "Ten adres URL jest już używany dla serwera: {serverName}"
+        },
+        "account-form": {
+            "credentials-tab": "Nazwa użytkownika i hasło",
+            "token-tab": "Token uwierzytelniający",
+            "validation": {
+                "display-name-length": "Nazwa wyświetlana musi mieć co najmniej {count} znaków",
+                "display-name-required": "Nazwa wyświetlana jest wymagana",
+                "username-is-required": "Nazwa użytkownika jest wymagana",
+                "auth-token-format": "Token uwierzytelniający może zawierać tylko litery, cyfry, podkreślenia i myślniki.",
+                "auth-token-length": "Token uwierzytelniający musi mieć co najmniej {count} znaków.",
+                "auth-token-required": "Wymagany jest token uwierzytelniający."
+            }
+        },
+        "media-overview-bar": {
+            "all-media-mode": {
+                "movies": "Wszystkie filmy",
+                "tv-shows": "Wszystkie programy telewizyjne"
+            }
+        },
+        "media-options-dialog": {
+            "title": "Opcje przeglądu mediów"
+        },
+        "background-activity-toggle-button": {
+            "checking-plex-server-connections": "Sprawdzanie połączeń z serwerem Plex",
+            "no-active-background-activity": "Brak aktywnych działań w tle.",
+            "syncing-media": "Synchronizacja danych multimedialnych z serwera Plex"
+        },
+        "media-overview-bar-header": {
+            "movies-metadata": "{movieCount} Filmy - {fileSize} ",
+            "tv-shows-metadata": "{tvShowCount} Programy telewizyjne - {seasonCount} Sezony - {episodeCount} Odcinki - {fileSize} "
+        },
+        "discord-invite-dialog": {
+            "discord-invite-button-text": "Dołącz do Reaparr Discord!",
+            "header": "Dołącz do nowego Reaparr Discord!",
+            "reasons": {
+                "reason-1": "Udostępniaj i wymieniaj się dostępem do serwera Plex!",
+                "reason-2": "Uzyskaj pomoc w czasie rzeczywistym dotyczącą konfiguracji i rozwiązywania problemów z Reaparrem!",
+                "reason-3": "Dołącz do społeczności podobnie myślących użytkowników PlexRip i entuzjastów Plex!",
+                "reason-4": "Weź udział w dyskusjach na temat nowych funkcji i wydań!",
+                "reason-5": "Uzyskaj dostęp do ekskluzywnych aktualizacji i ogłoszeń dotyczących Reaparr!"
+            }
+        },
+        "sync-server-media-dialog": {
+            "checking-progress": "Ukończono {count} z {total} synchronizacji bibliotek Plex",
+            "fetching-servers": "Pobieranie dostępnych serwerów do synchronizacji multimediów",
+            "finished": "Synchronizacja zakończona: {completed} ukończonych, {failed} nieudanych, {cancelled} anulowanych",
+            "no-active-syncs": "Brak aktywnych synchronizacji bibliotek",
+            "status": {
+                "unknown": "Nieznany",
+                "queued": "W kolejce",
+                "processing": "W toku",
+                "completed": "Ukończona",
+                "failed": "Nieudana",
+                "cancelled": "Anulowana"
+            }
+        },
+        "authentication-overview": {
+            "validation": {
+                "username-is-required": "Nazwa użytkownika jest wymagana",
+                "username-length": "Nazwa użytkownika musi mieć co najmniej {count} znaków",
+                "passwords-are-not-equal": "Hasła nie są takie same. Upewnij się, że oba są takie same."
+            }
+        },
+        "password-input-field": {
+            "validation": {
+                "password-is-required": "Hasło jest wymagane",
+                "password-length": "Hasło musi mieć co najmniej {count} znaków",
+                "password-is-missing-capital-letter": "Brakuje dużej litery!",
+                "password-is-missing-lowercase-letter": "Brakuje małej litery!",
+                "password-is-missing-number": "Brakuje numeru!",
+                "password-is-missing-special-symbol": "Brakuje znaku specjalnego!"
+            }
+        },
+        "password-strength": {
+            "validation": {
+                "uppercase": "Zawiera wielką literę",
+                "lowercase": "Zawiera małą literę",
+                "number": "Zawiera cyfrę",
+                "symbol": "Zawiera znak specjalny",
+                "length": "Dłuższy niż {count} znaków"
+            }
+        },
+        "q-connection-icon": {
+            "tooltip": {
+                "local-connection": "Połączenie lokalne",
+                "public-connection": "Połączenie publiczne",
+                "plex-connection": "Połączenie przekaźnika Plex"
+            }
+        },
+        "refresh-account-access-dialog": {
+            "access": {
+                "granted": "Dostęp został niedawno przyznany!",
+                "revoked": "Dostęp został utracony!",
+                "updated": "Dostęp został zaktualizowany!",
+                "unknown": "Stan dostępu jest nieznany, ponieważ nie można nawiązać połączenia z serwerem Plex"
+            },
+            "offline-server-message": "Nie można pobrać listy dostępu do biblioteki z tego serwera, ponieważ jest on offline. Spróbuj ponownie, gdy serwer będzie online."
+        },
+        "library-access-timeline": {
+            "filters": {
+                "server": "Serwer",
+                "library": "Biblioteka"
+            },
+            "chart": {
+                "title": "Oś czasu dostępu do biblioteki",
+                "empty": "Nie znaleziono historii dostępu do biblioteki dla wybranych filtrów."
+            }
+        },
+        "media-poster-image-content": {
+            "episode-count": "Brak odcinków | 1 odcinek | {count} odcinków",
+            "seasons-count": "Brak sezonów | 1 sezon | {count} sezonów"
+        },
+        "media-filter-menu": {
+            "all": "Wszystko",
+            "meta-data": {
+                "country": "Kraj",
+                "genre": "Genre",
+                "roles": "Role",
+                "quality": "Jakość",
+                "comparison-state": "Porównanie mediów"
+            }
+        },
+        "alert-display-debug": {
+            "error-example": "Wystąpił nieoczekiwany błąd podczas ładowania opcji jakości multimediów. Spróbuj ponownie później.",
+            "info-example": "To jest losowa wiadomość informacyjna na temat ustawień jakości multimediów. Lorem ipsum dolor sit amet.",
+            "success-example": "To jest losowy komunikat o powodzeniu dotyczący ustawień jakości multimediów. Lorem ipsum dolor sit amet.",
+            "warning-example": "Uwaga! Coś może być niepoprawnie skonfigurowane. Losowe sprawdzenie: 42XY-LMN."
+        },
+        "api-key-input-field": {
+            "validation": {
+                "api-key-format": "Klucz API może zawierać wyłącznie znaki szesnastkowe (0-9, A-F).",
+                "api-key-invalid-placeholder": "Nieprawidłowa lub tymczasowa wartość klucza API.",
+                "api-key-is-required": "Klucz API jest wymagany",
+                "api-key-length": "Klucz API musi mieć dokładnie 32 znaki."
+            }
+        },
+        "sonarr-integration": {
+            "callback-url-warning": "Reaparr zarejestruje się w Sonarr używając localhost jako adresu zwrotnego. W środowisku Docker skonfiguruj publiczny adres URL Reaparr w ustawieniach sieci.",
+            "callback-url-configured": "Reaparr zarejestruje się w Sonarr używając {url} jako adresu zwrotnego.",
+            "connection-status": {
+                "connection-failed": "Nie udało się połączyć z Sonarr. Upewnij się, że Sonarr jest online i można się z nim połączyć!",
+                "invalid-api-key": "Udało się połączyć z Sonarr, ale klucz API był nieprawidłowy",
+                "success": "Reaparr pomyślnie nawiązał połączenie z Sonarr!",
+                "unknown-connection-status": "Nie udało się ustalić, co poszło nie tak podczas testowania połączenia z Sonarr",
+                "url-is-invalid": "Bazowy adres URL Sonarr jest nieprawidłowy, sprawdź ponownie."
+            },
+            "configuration-status": {
+                "success": "Sonarr został pomyślnie skonfigurowany do współpracy z Reaparr"
+            },
+            "nav-bar": {
+                "configure": {
+                    "button": "Konfiguracja integracji Sonarr",
+                    "title": "Konfiguruj integrację Sonarr"
+                },
+                "connection": {
+                    "title": "Konfiguracja połączenia Sonarr"
+                }
+            },
+            "title": "Integracja Sonarr"
+        },
+        "radarr-integration": {
+            "callback-url-warning": "Reaparr zarejestruje się w Radarr używając localhost jako adresu zwrotnego. W środowisku Docker skonfiguruj publiczny adres URL Reaparr w ustawieniach sieci.",
+            "callback-url-configured": "Reaparr zarejestruje się w Radarr używając {url} jako adresu zwrotnego.",
+            "connection-status": {
+                "connection-failed": "Nie udało się połączyć z Radarr. Upewnij się, że Radarr jest online i można się z nim połączyć!",
+                "invalid-api-key": "Udało się połączyć z Radarr, ale klucz API był nieprawidłowy",
+                "success": "Reaparr pomyślnie nawiązał połączenie z Radarr!",
+                "unknown-connection-status": "Nie udało się ustalić, co poszło nie tak podczas testowania połączenia z Radarr",
+                "url-is-invalid": "Bazowy adres URL Radarr jest nieprawidłowy, sprawdź ponownie."
+            },
+            "configuration-status": {
+                "success": "Radarr został pomyślnie skonfigurowany do współpracy z Reaparr"
+            },
+            "nav-bar": {
+                "configure": {
+                    "button": "Konfiguracja integracji Radarr",
+                    "title": "Konfiguruj integrację Radarr"
+                },
+                "connection": {
+                    "title": "Konfiguracja połączenia Radarr"
+                }
+            },
+            "title": "Integracja Radar"
+        },
+        "refresh-mode-dialog": {
+            "incremental": "Odświeżanie przyrostowe",
+            "full-reset": "Pełny reset",
+            "library": {
+                "title": "Odśwież bibliotekę Plex {libraryName} ",
+                "text": "Wybierz sposób odświeżenia tej biblioteki przez Reaparr. Odświeżanie przyrostowe aktualizuje tylko zmienione multimedia i zwykle jest szybsze.",
+                "full-reset-warning": "Pełny reset usuwa z Reaparr wszystkie rekordy multimediów tej biblioteki, a następnie odbudowuje je na podstawie danych z Plex. Pobrane pliki nie zostaną usunięte."
+            },
+            "server": {
+                "title": "Odśwież wszystkie biblioteki Plex w {serverName}",
+                "text": "Wybierz sposób odświeżenia wszystkich bibliotek na tym serwerze przez Reaparr. Odświeżanie przyrostowe aktualizuje tylko zmienione multimedia i zwykle jest szybsze.",
+                "full-reset-warning": "Pełny reset usuwa z Reaparr wszystkie rekordy multimediów każdej biblioteki na tym serwerze, a następnie odbudowuje je na podstawie danych z Plex. Pobrane pliki nie zostaną usunięte."
+            }
+        },
+        "integration-setup-dialog": {
+            "setup": {
+                "title": "Konfigurowanie {type}",
+                "steps": {
+                    "connect": "Połącz z {type}",
+                    "download-client": "Skonfiguruj klienta pobierania w {type}",
+                    "indexer": "Skonfiguruj klienta indeksowania w {type}",
+                    "validation": "Zweryfikuj konfigurację integracji {type}",
+                    "done": "Gotowe"
+                },
+                "progress": {
+                    "connecting": "Łączenie z {type}...",
+                    "connected": "Połączono.",
+                    "download-client": "Konfigurowanie klienta pobierania Reaparr w {type}...",
+                    "download-client-ready": "Klient pobierania w {type} jest gotowy.",
+                    "indexer": "Konfigurowanie klienta indeksowania Reaparr w {type}...",
+                    "indexer-ready": "Klient indeksowania w {type} jest gotowy.",
+                    "validation": "Weryfikowanie konfiguracji integracji {type}...",
+                    "validation-ready": "Konfiguracja integracji {type} została zweryfikowana.",
+                    "complete": "Konfiguracja integracji zakończona."
+                }
+            },
+            "test": ""
         }
-      }
     },
-    "media-overview": {
-      "library-inaccessible-title": "Biblioteka niedostępna.",
-      "library-inaccessible": "Żadne włączone konto Plex nie ma już dostępu do tej biblioteki.",
-      "is-refreshing": "Odświeżanie danych biblioteki \"{library}\" z {server}",
-      "could-not-display": "Nie można wyświetlić tej biblioteki.",
-      "no-data": "Biblioteka została zsynchronizowana, ale nie zawiera żadnych multimediów.",
-      "library-not-yet-synced": "Dane multimediów bibliotecznych nie zostały jeszcze zsynchronizowane. Proszę czekać lub odświeżyć teraz.",
-      "no-search-results": "Nie znaleziono nośników zawierających „{query}”",
-      "no-media-items-available": "Nie znaleziono żadnych elementów multimedialnych!",
-      "failed-to-load-media": "Nie udało się załadować multimediów. Serwer może być zajęty. Spróbuj ponownie lub poczekaj na rozgrzanie pamięci podręcznej.",
-      "retrying-in-seconds": "Ponowna próba za {seconds}s...",
-      "no-filter-results": "Brak wyników wyszukiwania multimediów zgodnych z aktualnymi ustawieniami filtra. Dostosuj lub zresetuj filtry, aby wyświetlić dostępne wyniki.",
-      "library-disabled": "Biblioteka \"{library}\" jest wyłączona. Włącz ją i zsynchronizuj ponownie, zanim wyświetlisz jej multimedia.",
-      "enable-library-button": "Włącz bibliotekę",
-      "comparison": {
-        "details-column-title": "Title",
-        "details-column-location": "Location",
-        "details-column-remote-quality": "Available quality",
-        "details-column-owned-quality": "Current quality",
-        "details-no-actionable-rows": "No actionable comparison rows were returned for this media item.",
-        "download-selected": "Download selected"
-      }
-    },
-    "navigation-drawer": {
-      "accounts": "Konta",
-      "advanced": "Zaawansowane",
-      "debug": "Debugowanie",
-      "dialogs": "Dialogi",
-      "downloads": "Pobrania",
-      "logs": "Logi",
-      "paths": "Ścieżki",
-      "settings": "Ustawienia",
-      "ui": "UI",
-      "buttons": "Przyciski",
-      "scratchpad": "Notatnik",
-      "integrations": "Integracje"
-    },
-    "notifications-drawer": {
-      "clear-notifications": "Wyczyść wszystkie powiadomienia",
-      "no-notifications": "Brak dostępnych powiadomień"
-    },
-    "folder-paths-overview": {
-      "main": {
-        "header": "Ścieżki folderów"
-      },
-      "download": {
-        "header": "Ścieżki pobierania",
-        "default-name": "Ścieżka pobierania integracji"
-      },
-      "movie": {
-        "header": "Ścieżki Filmowe",
-        "default-name": "Ścieżka folderu filmu"
-      },
-      "tv-show": {
-        "header": "Ścieżki seriali",
-        "default-name": "Ścieżka folderu serialu"
-      }
-    },
-    "server-dialog": {
-      "header": "Konfiguracja {serverName}",
-      "tabs": {
-        "server-commands": {
-          "header": "Komendy serwera"
+    "general": {
+        "comparison": {
+            "comparison-missing": "Zaginiony",
+            "comparison-higher-quality": "Dostępna wyższa jakość",
+            "comparison-owned": "Już posiadane",
+            "comparison-not-compared": "Nie porównano",
+            "comparison-pending": "Porównywanie w toku",
+            "comparison-partial": "Częściowo",
+            "comparison-partial-and-higher-quality": "Częściowo + jakość",
+            "unknown": "Nieznany stan porównania"
         },
-        "server-config": {
-          "header": "Konfiguracja serwera",
-          "plex-server-was-null": "Serwer Plex był pusty"
+        "logs": {
+            "level": {
+                "debug": "Debugowanie",
+                "information": "Informacja",
+                "success": "Sukces",
+                "warning": "Ostrzeżenie",
+                "error": "Błąd",
+                "fatal": "Krytyczny",
+                "verbose": "Gadatliwy"
+            }
         },
-        "server-connections": {
-          "header": "Połączenia serwera",
-          "section-header": "Wybierz preferowane połączenie z serwerem:",
-          "add-connection-button": "Dodaj połączenie",
-          "check-all-connections": "Sprawdź wszystkie połączenia"
+        "alerts": {
+            "disabled-paths": "Edycja ścieżek jest wyłączona, gdy są aktywne pobierania. Upewnij się, że wszystkie pobierania są zatrzymane lub wyczyszczone!",
+            "invalid-directory": "Katalog nie jest prawidłową ścieżką!",
+            "valid-directory": "Katalog jest prawidłową ścieżką!"
         },
-        "server-libraries": {
-          "header": "Biblioteki serwera",
-          "sync-alert": "Wyłączenie biblioteki Plex spowoduje jej całkowite ukrycie w wynikach wyszukiwania i usunięcie danych multimedialnych. Włączenie spowoduje ponowną automatyczną synchronizację."
+        "commands": {
+            "add-alert": "Dodaj alert",
+            "back": "Wróć",
+            "cancel": "Anuluj",
+            "close": "Zamknij",
+            "confirm": "Potwierdź",
+            "delete": "Usuń",
+            "disabled": "Wyłączone",
+            "enabled": "Włączone",
+            "finish-setup": "Zakończ konfigurację",
+            "go-to-setup-page": "Przejdź do strony konfiguracji",
+            "hide": "Ukryj",
+            "check-connection": "Sprawdź połączenie",
+            "save-and-setup": "Zapisz i skonfiguruj",
+            "next": "Następne",
+            "not-validated": "Nie zweryfikowane",
+            "reset": "Zresetuj",
+            "reset-db": "Zresetuj bazę danych",
+            "save": "Zapisz",
+            "skip-setup": "Pomiń konfigurację",
+            "sync-server-libraries": "Synchronizuj biblioteki serwera",
+            "delete-server": "Usuń serwer",
+            "unknown": "Nieznane",
+            "update": "Aktualizuj",
+            "validate": "Sprawdź poprawność",
+            "validated": "Zatwierdzone",
+            "inspect-server": "Sprawdź serwer",
+            "selection": "Wybierz",
+            "set-selection": "Ustaw wybór",
+            "download": "Pobierz",
+            "refresh": "Odśwież",
+            "view": "Widok",
+            "media-options": "Opcje",
+            "sort": "Sortuj"
         },
-        "server-data": {
-          "headers": {
-            "created-on": "Utworzono:",
-            "current-status": "Aktualny status:",
-            "last-seen-at": "Ostatnio widziany w:",
-            "machine-id": "Identyfikator maszyny:",
-            "plex-version": "Wersja Plex:",
-            "device": "Urządzenie:",
-            "platform": "Platforma:"
-          },
-          "header": "Dane serwera",
-          "values": {
-            "platform-version": "{platform} ({platformVersion})",
-            "product-version": "{product} ({productVersion})"
-          }
+        "sort": {
+            "clear": "Wyczyść sortowanie",
+            "title": "Tytuł",
+            "year": "Rok",
+            "added-at": "Dodano",
+            "updated-at": "Zaktualizowano",
+            "duration": "Czas trwania",
+            "size": "Rozmiar",
+            "quality": "Jakość"
+        },
+        "units": {
+            "per-second": "/s"
+        },
+        "error": {
+            "unknown": "\"Nieznane\"",
+            "invalid-server": "Obiekt serwera jest nieprawidłowy"
+        },
+        "delimiter": {
+            "dash": " -"
+        },
+        "download-status": {
+            "error": "Błąd",
+            "auth-error": "Auth Error",
+            "storage-error": "Storage Error",
+            "source-unavailable": "Source Unavailable",
+            "download-client-error": "Download Client Error",
+            "integrity-error": "Integrity Error",
+            "server-unreachable": "Serwer niedostępny",
+            "unknown": "Nieznany",
+            "queued": "W kolejce",
+            "downloading": "Ściąganie",
+            "download-finished": "Pobierz ukończone",
+            "paused": "Wstrzymano",
+            "stopped": "Zatrzymany",
+            "deleted": "Usunięto",
+            "moving": "Poruszający",
+            "completed": "Zakończony",
+            "move-error": "Błąd przenoszenia",
+            "move-finished": "Przenoszenie zakończone",
+            "auto-move-paused": "Automatyczne poruszanie się wstrzymane",
+            "move-paused": "Przenoszenie wstrzymane",
+            "restarting": "Ponowne uruchamianie",
+            "auto-paused": "Automatyczne wstrzymanie"
+        },
+        "download-notification": {
+            "movie": "Pobieranie {count} filmu | Pobieranie {count} filmów | Pobieranie {count} filmów",
+            "tv-show": "Pobieranie {count} serialu | Pobieranie {count} seriali | Pobieranie {count} seriali",
+            "season": "Pobieranie {count} sezonu | Pobieranie {count} sezonów | Pobieranie {count} sezonów",
+            "episode": "Pobieranie {count} odcinka | Pobieranie {count} odcinków | Pobieranie {count} odcinków",
+            "tv-show-detail-v0": "Pobieranie 1 serialu z 1 sezonem i 1 odcinkiem",
+            "tv-show-detail-v1": "Pobieranie 1 serialu z 1 sezonem i {episodes} odcinkami",
+            "tv-show-detail-v2": "Pobieranie 1 serialu z {seasons} sezonami i 1 odcinkiem",
+            "tv-show-detail-v3": "Pobieranie 1 serialu z {seasons} sezonami i {episodes} odcinkami",
+            "tv-show-detail-v4": "Pobieranie {shows} seriali z 1 sezonem i 1 odcinkiem",
+            "tv-show-detail-v5": "Pobieranie {shows} seriali z 1 sezonem i {episodes} odcinkami",
+            "tv-show-detail-v6": "Pobieranie {shows} seriali z {seasons} sezonami i 1 odcinkiem",
+            "tv-show-detail-v7": "Pobieranie {shows} seriali z {seasons} sezonami i {episodes} odcinkami",
+            "movie-and-tv-show-v0": "Pobieranie 1 filmu i 1 serialu z 1 sezonem i 1 odcinkiem",
+            "movie-and-tv-show-v1": "Pobieranie 1 filmu i 1 serialu z 1 sezonem i {episodes} odcinkami",
+            "movie-and-tv-show-v2": "Pobieranie 1 filmu i 1 serialu z {seasons} sezonami i 1 odcinkiem",
+            "movie-and-tv-show-v3": "Pobieranie 1 filmu i 1 serialu z {seasons} sezonami i {episodes} odcinkami",
+            "movie-and-tv-show-v4": "Pobieranie 1 filmu i {shows} seriali z 1 sezonem i 1 odcinkiem",
+            "movie-and-tv-show-v5": "Pobieranie 1 filmu i {shows} seriali z 1 sezonem i {episodes} odcinkami",
+            "movie-and-tv-show-v6": "Pobieranie 1 filmu i {shows} seriali z {seasons} sezonami i 1 odcinkiem",
+            "movie-and-tv-show-v7": "Pobieranie 1 filmu i {shows} seriali z {seasons} sezonami i {episodes} odcinkami",
+            "movie-and-tv-show-v8": "Pobieranie {movies} filmów i 1 serialu z 1 sezonem i 1 odcinkiem",
+            "movie-and-tv-show-v9": "Pobieranie {movies} filmów i 1 serialu z 1 sezonem i {episodes} odcinkami",
+            "movie-and-tv-show-v10": "Pobieranie {movies} filmów i 1 serialu z {seasons} sezonami i 1 odcinkiem",
+            "movie-and-tv-show-v11": "Pobieranie {movies} filmów i 1 serialu z {seasons} sezonami i {episodes} odcinkami",
+            "movie-and-tv-show-v12": "Pobieranie {movies} filmów i {shows} seriali z 1 sezonem i 1 odcinkiem",
+            "movie-and-tv-show-v13": "Pobieranie {movies} filmów i {shows} seriali z 1 sezonem i {episodes} odcinkami",
+            "movie-and-tv-show-v14": "Pobieranie {movies} filmów i {shows} seriali z {seasons} sezonami i 1 odcinkiem",
+            "movie-and-tv-show-v15": "Pobieranie {movies} filmów i {shows} seriali z {seasons} sezonami i {episodes} odcinkami",
+            "unknown": "Brak tłumaczenia liczby"
+        },
+        "video-quality": {
+            "quality-1-unknown": "Unknown",
+            "quality-0-none": "Nic",
+            "quality-144-subsd-144p": "144p",
+            "quality-240-subsd-cif": "240p",
+            "quality-360-nhd": "360p",
+            "quality-480-sd": "SD (480p)",
+            "quality-576-dvd": "DVD (576p)",
+            "quality-720-hd": "HD (720p)",
+            "quality-1080-fullhd": "Full HD (1080p)",
+            "quality-1440-qhd": "QHD (1440p)",
+            "quality-2160-uhd-4k": "4K (2160p)",
+            "quality-4320-uhd-8k": "8K (4320p)"
         }
-      }
     },
-    "server-drawer": {
-      "no-libraries": "Nie znaleziono bibliotek. Kliknij, aby odświeżyć dostęp.",
-      "no-servers": {
-        "description": "Upewnij się, że masz zarejestrowane konto Plex w ustawieniach i wybrałeś konto z dostępnymi serwerami Plex w prawym górnym rogu selektora kont.",
-        "header": "Nie ma dostępnych serwerów!"
-      }
-    },
-    "media-list": {
-      "no-media-found": "Nie znaleziono mediów.",
-      "selected-count": "{selectedCount} wybranych",
-      "episode-count": "{episodeCount} Odcinków",
-      "columns": {
-        "title": "Tytuł",
-        "year": "Rok",
-        "duration": "Czas trwania",
-        "media-size": "Rozmiar",
-        "added-at": "Dodano w",
-        "updated-at": "Zaktualizowano w",
-        "actions": "Działania",
-        "quality": "Jakość",
-        "comparison-state": "Stan porównania"
-      }
-    },
-    "server-download-status": {
-      "pause": "Pauza",
-      "start": "Rozpocznij"
-    },
-    "q-tree-view-table-row": {
-      "invalid-node": "Węzeł był niezdefiniowany lub null"
-    },
-    "server-library-destinations-tab-content": {
-      "no-libraries": "Ten serwer Plex nie ma bibliotek, dla których można ustawić domyślną lokalizację docelową"
-    },
-    "account-selector": {
-      "all-accounts": "Wszystkie konta Plex",
-      "title": "Aktywne konta",
-      "log-out-button": "Wyloguj"
-    },
-    "media-selection-dialog": {
-      "title": "Ustaw zakres indeksu, aby wybrać media (#{min} - #{max})"
-    },
-    "q-status": {
-      "server-connectable": "Serwer jest online i można się z nim połączyć!",
-      "server-unconnectable": "Nie można połączyć się z serwerem, może być offline."
-    },
-    "alert-dialog": {
-      "request-data-sent": "Wysłano dane żądania:"
-    },
-    "account-token-validate-dialog": {
-      "column": {
-        "email": "E-mail",
-        "title": "Tytuł",
-        "username": "Nazwa użytkownika"
-      },
-      "invalid-token": "Dane logowania lub token były nieprawidłowe i/lub wygasły.",
-      "invalid-credentials": "Nazwa użytkownika lub hasło są nieprawidłowe. Sprawdź dane logowania i spróbuj ponownie.",
-      "sub-header": "Token: {authToken} należy do konta Plex:",
-      "title": "Walidacja tokena uwierzytelniającego Plex.tv"
-    },
-    "downloads-table": {
-      "clear-completed": {
-        "button": "Wyczyść ukończone",
-        "confirmation": {
-          "title": "Wyczyścić ukończone pobrania?",
-          "text": "Spowoduje to rekursywne usunięcie ukończonych zadań pobierania tylko dla tego serwera. Pobrane pliki nie zostaną usunięte z systemu plików."
-        }
-      },
-      "columns": {
-        "actions": "Działania",
-        "data-received": "Otrzymane",
-        "data-total": "Rozmiar",
-        "percentage": "Procent",
-        "speed": "Prędkość",
-        "status": "Status",
-        "time-remaining": "Szacowany czas przybycia",
-        "title": "Tytuł"
-      }
-    },
-    "q-countdown": {
-      "hours-minute-seconds": "Pozostało{hours} godzin, {minutes} minut i {seconds} sekund",
-      "minutes-seconds": "Pozostało{minutes} minut i {seconds} sekund",
-      "seconds": "Pozostało{seconds} sekund"
-    },
-    "add-connection-dialog": {
-      "header": "Dodaj połączenie do {serverName}",
-      "add-connection-button": "Utwórz połączenie",
-      "input": {
-        "connection-url": "Adres URL połączenia",
-        "host-name": "Nazwa hosta",
-        "port": "Port",
-        "protocol": "Protokół"
-      },
-      "test-connection-button": "Test połączenia",
-      "url-has-invalid-format": "Adres URL ma nieprawidłowy format!",
-      "url-has-valid-format": "Adres URL ma prawidłowy format!",
-      "update-connection": "Aktualizuj połączenie",
-      "url-already-exists": "Ten adres URL jest już używany dla serwera: {serverName}"
-    },
-    "account-form": {
-      "credentials-tab": "Nazwa użytkownika i hasło",
-      "token-tab": "Token uwierzytelniający",
-      "validation": {
-        "display-name-length": "Nazwa wyświetlana musi mieć co najmniej {count} znaków",
-        "display-name-required": "Nazwa wyświetlana jest wymagana",
-        "username-is-required": "Nazwa użytkownika jest wymagana",
-        "auth-token-format": "Token uwierzytelniający może zawierać tylko litery, cyfry, podkreślenia i myślniki.",
-        "auth-token-length": "Token uwierzytelniający musi mieć co najmniej {count} znaków.",
-        "auth-token-required": "Wymagany jest token uwierzytelniający."
-      }
-    },
-    "media-overview-bar": {
-      "all-media-mode": {
-        "movies": "Wszystkie filmy",
-        "tv-shows": "Wszystkie programy telewizyjne"
-      }
-    },
-    "media-options-dialog": {
-      "title": "Opcje przeglądu mediów"
-    },
-    "background-activity-toggle-button": {
-      "checking-plex-server-connections": "Sprawdzanie połączeń z serwerem Plex",
-      "no-active-background-activity": "Brak aktywnych działań w tle.",
-      "syncing-media": "Synchronizacja danych multimedialnych z serwera Plex"
-    },
-    "media-overview-bar-header": {
-      "movies-metadata": "{movieCount} Filmy - {fileSize} ",
-      "tv-shows-metadata": "{tvShowCount} Programy telewizyjne - {seasonCount} Sezony - {episodeCount} Odcinki - {fileSize} "
-    },
-    "discord-invite-dialog": {
-      "discord-invite-button-text": "Dołącz do Reaparr Discord!",
-      "header": "Dołącz do nowego Reaparr Discord!",
-      "reasons": {
-        "reason-1": "Udostępniaj i wymieniaj się dostępem do serwera Plex!",
-        "reason-2": "Uzyskaj pomoc w czasie rzeczywistym dotyczącą konfiguracji i rozwiązywania problemów z Reaparrem!",
-        "reason-3": "Dołącz do społeczności podobnie myślących użytkowników PlexRip i entuzjastów Plex!",
-        "reason-4": "Weź udział w dyskusjach na temat nowych funkcji i wydań!",
-        "reason-5": "Uzyskaj dostęp do ekskluzywnych aktualizacji i ogłoszeń dotyczących Reaparr!"
-      }
-    },
-    "sync-server-media-dialog": {
-      "checking-progress": "Ukończono {count} z {total} synchronizacji bibliotek Plex",
-      "fetching-servers": "Pobieranie dostępnych serwerów do synchronizacji multimediów",
-      "finished": "Synchronizacja zakończona: {completed} ukończonych, {failed} nieudanych, {cancelled} anulowanych",
-      "no-active-syncs": "Brak aktywnych synchronizacji bibliotek",
-      "status": {
-        "unknown": "Nieznany",
-        "queued": "W kolejce",
-        "processing": "W toku",
-        "completed": "Ukończona",
-        "failed": "Nieudana",
-        "cancelled": "Anulowana"
-      }
-    },
-    "authentication-overview": {
-      "validation": {
-        "username-is-required": "Nazwa użytkownika jest wymagana",
-        "username-length": "Nazwa użytkownika musi mieć co najmniej {count} znaków",
-        "passwords-are-not-equal": "Hasła nie są takie same. Upewnij się, że oba są takie same."
-      }
-    },
-    "password-input-field": {
-      "validation": {
-        "password-is-required": "Hasło jest wymagane",
-        "password-length": "Hasło musi mieć co najmniej {count} znaków",
-        "password-is-missing-capital-letter": "Brakuje dużej litery!",
-        "password-is-missing-lowercase-letter": "Brakuje małej litery!",
-        "password-is-missing-number": "Brakuje numeru!",
-        "password-is-missing-special-symbol": "Brakuje znaku specjalnego!"
-      }
-    },
-    "password-strength": {
-      "validation": {
-        "uppercase": "Zawiera wielką literę",
-        "lowercase": "Zawiera małą literę",
-        "number": "Zawiera cyfrę",
-        "symbol": "Zawiera znak specjalny",
-        "length": "Dłuższy niż {count} znaków"
-      }
-    },
-    "q-connection-icon": {
-      "tooltip": {
-        "local-connection": "Połączenie lokalne",
-        "public-connection": "Połączenie publiczne",
-        "plex-connection": "Połączenie przekaźnika Plex"
-      }
-    },
-    "refresh-account-access-dialog": {
-      "access": {
-        "granted": "Dostęp został niedawno przyznany!",
-        "revoked": "Dostęp został utracony!",
-        "updated": "Dostęp został zaktualizowany!",
-        "unknown": "Stan dostępu jest nieznany, ponieważ nie można nawiązać połączenia z serwerem Plex"
-      },
-      "offline-server-message": "Nie można pobrać listy dostępu do biblioteki z tego serwera, ponieważ jest on offline. Spróbuj ponownie, gdy serwer będzie online."
-    },
-    "library-access-timeline": {
-      "filters": {
-        "server": "Serwer",
-        "library": "Biblioteka"
-      },
-      "chart": {
-        "title": "Oś czasu dostępu do biblioteki",
-        "empty": "Nie znaleziono historii dostępu do biblioteki dla wybranych filtrów."
-      }
-    },
-    "media-poster-image-content": {
-      "episode-count": "Brak odcinków | 1 odcinek | {count} odcinków",
-      "seasons-count": "Brak sezonów | 1 sezon | {count} sezonów"
-    },
-    "media-filter-menu": {
-      "all": "Wszystko",
-      "meta-data": {
-        "country": "Kraj",
-        "genre": "Genre",
-        "roles": "Role",
-        "quality": "Jakość",
-        "comparison-state": "Porównanie mediów"
-      }
-    },
-    "alert-display-debug": {
-      "error-example": "Wystąpił nieoczekiwany błąd podczas ładowania opcji jakości multimediów. Spróbuj ponownie później.",
-      "info-example": "To jest losowa wiadomość informacyjna na temat ustawień jakości multimediów. Lorem ipsum dolor sit amet.",
-      "success-example": "To jest losowy komunikat o powodzeniu dotyczący ustawień jakości multimediów. Lorem ipsum dolor sit amet.",
-      "warning-example": "Uwaga! Coś może być niepoprawnie skonfigurowane. Losowe sprawdzenie: 42XY-LMN."
-    },
-    "api-key-input-field": {
-      "validation": {
-        "api-key-format": "Klucz API może zawierać wyłącznie znaki szesnastkowe (0-9, A-F).",
-        "api-key-invalid-placeholder": "Nieprawidłowa lub tymczasowa wartość klucza API.",
-        "api-key-is-required": "Klucz API jest wymagany",
-        "api-key-length": "Klucz API musi mieć dokładnie 32 znaki."
-      }
-    },
-    "sonarr-integration": {
-      "callback-url-warning": "Reaparr zarejestruje się w Sonarr używając localhost jako adresu zwrotnego. W środowisku Docker skonfiguruj publiczny adres URL Reaparr w ustawieniach sieci.",
-      "callback-url-configured": "Reaparr zarejestruje się w Sonarr używając {url} jako adresu zwrotnego.",
-      "connection-status": {
-        "connection-failed": "Nie udało się połączyć z Sonarr. Upewnij się, że Sonarr jest online i można się z nim połączyć!",
-        "invalid-api-key": "Udało się połączyć z Sonarr, ale klucz API był nieprawidłowy",
-        "success": "Reaparr pomyślnie nawiązał połączenie z Sonarr!",
-        "unknown-connection-status": "Nie udało się ustalić, co poszło nie tak podczas testowania połączenia z Sonarr",
-        "url-is-invalid": "Bazowy adres URL Sonarr jest nieprawidłowy, sprawdź ponownie."
-      },
-      "configuration-status": {
-        "success": "Sonarr został pomyślnie skonfigurowany do współpracy z Reaparr"
-      },
-      "nav-bar": {
-        "configure": {
-          "button": "Konfiguracja integracji Sonarr",
-          "title": "Konfiguruj integrację Sonarr"
+    "confirmation": {
+        "delete-account": {
+            "text": "Spowoduje to usunięcie tego konta Plex z Reaparr!\n\nSpowoduje to również usunięcie wszystkich niedostępnych serwerów współdzielonych Plex, bibliotek Plex i wszystkich zawartych w nich multimediów. Wszelkie aktywne pliki do pobrania, które zostały rozpoczęte lub ustawione w kolejce na tym koncie, zostaną anulowane i usunięte. Zakończone pobieranie pozostanie nietknięte.",
+            "title": "Jesteś pewny?",
+            "warning": "Może to potrwać około 5 minut lub dłużej, po czym okno zamknie się automatycznie!"
         },
-        "connection": {
-          "title": "Konfiguracja połączenia Sonarr"
-        }
-      },
-      "title": "Integracja Sonarr"
-    },
-    "radarr-integration": {
-      "callback-url-warning": "Reaparr zarejestruje się w Radarr używając localhost jako adresu zwrotnego. W środowisku Docker skonfiguruj publiczny adres URL Reaparr w ustawieniach sieci.",
-      "callback-url-configured": "Reaparr zarejestruje się w Radarr używając {url} jako adresu zwrotnego.",
-      "connection-status": {
-        "connection-failed": "Nie udało się połączyć z Radarr. Upewnij się, że Radarr jest online i można się z nim połączyć!",
-        "invalid-api-key": "Udało się połączyć z Radarr, ale klucz API był nieprawidłowy",
-        "success": "Reaparr pomyślnie nawiązał połączenie z Radarr!",
-        "unknown-connection-status": "Nie udało się ustalić, co poszło nie tak podczas testowania połączenia z Radarr",
-        "url-is-invalid": "Bazowy adres URL Radarr jest nieprawidłowy, sprawdź ponownie."
-      },
-      "configuration-status": {
-        "success": "Radarr został pomyślnie skonfigurowany do współpracy z Reaparr"
-      },
-      "nav-bar": {
-        "configure": {
-          "button": "Konfiguracja integracji Radarr",
-          "title": "Konfiguruj integrację Radarr"
+        "disable-server": {
+            "text": "Spowoduje to wyłączenie i ukrycie serwera w wynikach wyszukiwania oraz uniemożliwi jego synchronizację. Możesz ponownie włączyć ten serwer, przechodząc do Ustawień -> Interfejs użytkownika -> Włącz serwery Plex.",
+            "title": "Jesteś pewny?"
         },
-        "connection": {
-          "title": "Konfiguracja połączenia Radarr"
-        }
-      },
-      "title": "Integracja Radar"
-    },
-    "refresh-mode-dialog": {
-      "incremental": "Odświeżanie przyrostowe",
-      "full-reset": "Pełny reset",
-      "library": {
-        "title": "Odśwież bibliotekę Plex {libraryName} ",
-        "text": "Wybierz sposób odświeżenia tej biblioteki przez Reaparr. Odświeżanie przyrostowe aktualizuje tylko zmienione multimedia i zwykle jest szybsze.",
-        "full-reset-warning": "Pełny reset usuwa z Reaparr wszystkie rekordy multimediów tej biblioteki, a następnie odbudowuje je na podstawie danych z Plex. Pobrane pliki nie zostaną usunięte."
-      },
-      "server": {
-        "title": "Odśwież wszystkie biblioteki Plex w {serverName}",
-        "text": "Wybierz sposób odświeżenia wszystkich bibliotek na tym serwerze przez Reaparr. Odświeżanie przyrostowe aktualizuje tylko zmienione multimedia i zwykle jest szybsze.",
-        "full-reset-warning": "Pełny reset usuwa z Reaparr wszystkie rekordy multimediów każdej biblioteki na tym serwerze, a następnie odbudowuje je na podstawie danych z Plex. Pobrane pliki nie zostaną usunięte."
-      }
-    }
-  },
-  "general": {
-    "comparison": {
-      "comparison-missing": "Zaginiony",
-      "comparison-higher-quality": "Dostępna wyższa jakość",
-      "comparison-owned": "Już posiadane",
-      "comparison-not-compared": "Nie porównano",
-      "comparison-pending": "Porównywanie w toku",
-      "comparison-partial": "Częściowo",
-      "comparison-partial-and-higher-quality": "Częściowo + jakość",
-      "unknown": "Nieznany stan porównania"
-    },
-    "logs": {
-      "level": {
-        "debug": "Debugowanie",
-        "information": "Informacja",
-        "success": "Sukces",
-        "warning": "Ostrzeżenie",
-        "error": "Błąd",
-        "fatal": "Krytyczny",
-        "verbose": "Gadatliwy"
-      }
-    },
-    "alerts": {
-      "disabled-paths": "Edycja ścieżek jest wyłączona, gdy są aktywne pobierania. Upewnij się, że wszystkie pobierania są zatrzymane lub wyczyszczone!",
-      "invalid-directory": "Katalog nie jest prawidłową ścieżką!",
-      "valid-directory": "Katalog jest prawidłową ścieżką!"
-    },
-    "commands": {
-      "add-alert": "Dodaj alert",
-      "back": "Wróć",
-      "cancel": "Anuluj",
-      "close": "Zamknij",
-      "confirm": "Potwierdź",
-      "delete": "Usuń",
-      "disabled": "Wyłączone",
-      "enabled": "Włączone",
-      "finish-setup": "Zakończ konfigurację",
-      "go-to-setup-page": "Przejdź do strony konfiguracji",
-      "hide": "Ukryj",
-      "check-connection": "Sprawdź połączenie",
-      "save-and-setup": "Zapisz i skonfiguruj",
-      "next": "Następne",
-      "not-validated": "Nie zweryfikowane",
-      "reset": "Zresetuj",
-      "reset-db": "Zresetuj bazę danych",
-      "save": "Zapisz",
-      "skip-setup": "Pomiń konfigurację",
-      "sync-server-libraries": "Synchronizuj biblioteki serwera",
-      "delete-server": "Usuń serwer",
-      "unknown": "Nieznane",
-      "update": "Aktualizuj",
-      "validate": "Sprawdź poprawność",
-      "validated": "Zatwierdzone",
-      "inspect-server": "Sprawdź serwer",
-      "selection": "Wybierz",
-      "set-selection": "Ustaw wybór",
-      "download": "Pobierz",
-      "refresh": "Odśwież",
-      "view": "Widok",
-      "media-options": "Opcje",
-      "sort": "Sortuj"
-    },
-    "sort": {
-      "clear": "Wyczyść sortowanie",
-      "title": "Tytuł",
-      "year": "Rok",
-      "added-at": "Dodano",
-      "updated-at": "Zaktualizowano",
-      "duration": "Czas trwania",
-      "size": "Rozmiar",
-      "quality": "Jakość"
-    },
-    "units": {
-      "per-second": "/s"
-    },
-    "error": {
-      "unknown": "\"Nieznane\"",
-      "invalid-server": "Obiekt serwera jest nieprawidłowy"
-    },
-    "delimiter": {
-      "dash": " -"
-    },
-    "download-status": {
-      "error": "Błąd",
-      "auth-error": "Auth Error",
-      "storage-error": "Storage Error",
-      "source-unavailable": "Source Unavailable",
-      "download-client-error": "Download Client Error",
-      "integrity-error": "Integrity Error",
-      "server-unreachable": "Serwer niedostępny",
-      "unknown": "Nieznany",
-      "queued": "W kolejce",
-      "downloading": "Ściąganie",
-      "download-finished": "Pobierz ukończone",
-      "paused": "Wstrzymano",
-      "stopped": "Zatrzymany",
-      "deleted": "Usunięto",
-      "moving": "Poruszający",
-      "completed": "Zakończony",
-      "move-error": "Błąd przenoszenia",
-      "move-finished": "Przenoszenie zakończone",
-      "auto-move-paused": "Automatyczne poruszanie się wstrzymane",
-      "move-paused": "Przenoszenie wstrzymane",
-      "restarting": "Ponowne uruchamianie",
-      "auto-paused": "Automatyczne wstrzymanie"
-    },
-    "download-notification": {
-      "movie": "Pobieranie {count} filmu | Pobieranie {count} filmów | Pobieranie {count} filmów",
-      "tv-show": "Pobieranie {count} serialu | Pobieranie {count} seriali | Pobieranie {count} seriali",
-      "season": "Pobieranie {count} sezonu | Pobieranie {count} sezonów | Pobieranie {count} sezonów",
-      "episode": "Pobieranie {count} odcinka | Pobieranie {count} odcinków | Pobieranie {count} odcinków",
-      "tv-show-detail-v0": "Pobieranie 1 serialu z 1 sezonem i 1 odcinkiem",
-      "tv-show-detail-v1": "Pobieranie 1 serialu z 1 sezonem i {episodes} odcinkami",
-      "tv-show-detail-v2": "Pobieranie 1 serialu z {seasons} sezonami i 1 odcinkiem",
-      "tv-show-detail-v3": "Pobieranie 1 serialu z {seasons} sezonami i {episodes} odcinkami",
-      "tv-show-detail-v4": "Pobieranie {shows} seriali z 1 sezonem i 1 odcinkiem",
-      "tv-show-detail-v5": "Pobieranie {shows} seriali z 1 sezonem i {episodes} odcinkami",
-      "tv-show-detail-v6": "Pobieranie {shows} seriali z {seasons} sezonami i 1 odcinkiem",
-      "tv-show-detail-v7": "Pobieranie {shows} seriali z {seasons} sezonami i {episodes} odcinkami",
-      "movie-and-tv-show-v0": "Pobieranie 1 filmu i 1 serialu z 1 sezonem i 1 odcinkiem",
-      "movie-and-tv-show-v1": "Pobieranie 1 filmu i 1 serialu z 1 sezonem i {episodes} odcinkami",
-      "movie-and-tv-show-v2": "Pobieranie 1 filmu i 1 serialu z {seasons} sezonami i 1 odcinkiem",
-      "movie-and-tv-show-v3": "Pobieranie 1 filmu i 1 serialu z {seasons} sezonami i {episodes} odcinkami",
-      "movie-and-tv-show-v4": "Pobieranie 1 filmu i {shows} seriali z 1 sezonem i 1 odcinkiem",
-      "movie-and-tv-show-v5": "Pobieranie 1 filmu i {shows} seriali z 1 sezonem i {episodes} odcinkami",
-      "movie-and-tv-show-v6": "Pobieranie 1 filmu i {shows} seriali z {seasons} sezonami i 1 odcinkiem",
-      "movie-and-tv-show-v7": "Pobieranie 1 filmu i {shows} seriali z {seasons} sezonami i {episodes} odcinkami",
-      "movie-and-tv-show-v8": "Pobieranie {movies} filmów i 1 serialu z 1 sezonem i 1 odcinkiem",
-      "movie-and-tv-show-v9": "Pobieranie {movies} filmów i 1 serialu z 1 sezonem i {episodes} odcinkami",
-      "movie-and-tv-show-v10": "Pobieranie {movies} filmów i 1 serialu z {seasons} sezonami i 1 odcinkiem",
-      "movie-and-tv-show-v11": "Pobieranie {movies} filmów i 1 serialu z {seasons} sezonami i {episodes} odcinkami",
-      "movie-and-tv-show-v12": "Pobieranie {movies} filmów i {shows} seriali z 1 sezonem i 1 odcinkiem",
-      "movie-and-tv-show-v13": "Pobieranie {movies} filmów i {shows} seriali z 1 sezonem i {episodes} odcinkami",
-      "movie-and-tv-show-v14": "Pobieranie {movies} filmów i {shows} seriali z {seasons} sezonami i 1 odcinkiem",
-      "movie-and-tv-show-v15": "Pobieranie {movies} filmów i {shows} seriali z {seasons} sezonami i {episodes} odcinkami",
-      "unknown": "Brak tłumaczenia liczby"
-    },
-    "video-quality": {
-      "quality-1-unknown": "Unknown",
-      "quality-0-none": "Nic",
-      "quality-144-subsd-144p": "144p",
-      "quality-240-subsd-cif": "240p",
-      "quality-360-nhd": "360p",
-      "quality-480-sd": "SD (480p)",
-      "quality-576-dvd": "DVD (576p)",
-      "quality-720-hd": "HD (720p)",
-      "quality-1080-fullhd": "Full HD (1080p)",
-      "quality-1440-qhd": "QHD (1440p)",
-      "quality-2160-uhd-4k": "4K (2160p)",
-      "quality-4320-uhd-8k": "8K (4320p)"
-    }
-  },
-  "confirmation": {
-    "delete-account": {
-      "text": "Spowoduje to usunięcie tego konta Plex z Reaparr!\n\nSpowoduje to również usunięcie wszystkich niedostępnych serwerów współdzielonych Plex, bibliotek Plex i wszystkich zawartych w nich multimediów. Wszelkie aktywne pliki do pobrania, które zostały rozpoczęte lub ustawione w kolejce na tym koncie, zostaną anulowane i usunięte. Zakończone pobieranie pozostanie nietknięte.",
-      "title": "Jesteś pewny?",
-      "warning": "Może to potrwać około 5 minut lub dłużej, po czym okno zamknie się automatycznie!"
-    },
-    "disable-server": {
-      "text": "Spowoduje to wyłączenie i ukrycie serwera w wynikach wyszukiwania oraz uniemożliwi jego synchronizację. Możesz ponownie włączyć ten serwer, przechodząc do Ustawień -> Interfejs użytkownika -> Włącz serwery Plex.",
-      "title": "Jesteś pewny?"
-    },
-    "delete-folder-path": {
-      "text": "Usunąć ścieżkę folderu \"{displayName}\"?",
-      "title": "Usunąć ścieżkę folderu?"
-    },
-    "delete-server": {
-      "text": "Zamierzasz usunąć ten serwer. Usuń ten serwer tylko wtedy, gdy nie masz już do niego dostępu. Jeśli nadal masz dostęp do tego serwera Plex, pojawi się ponownie przy następnym odświeżeniu konta Plex. W takim przypadku wyłącz serwer, aby pozostał ukryty.",
-      "title": "Usunąć serwer?",
-      "warning": "Czy na pewno chcesz usunąć ten serwer?"
-    },
-    "reset-db": {
-      "text": "Spowoduje to utworzenie kopii zapasowej bieżącej bazy danych w \"config/Database Backup/\" i utworzenie nowej, po czym nastąpi przekierowanie do strony konfiguracji. Nie spowoduje to zresetowania ustawień, ponieważ są one przechowywane w pliku \"config/ReaparrSettings.json\".",
-      "title": "Jesteś pewny?"
-    },
-    "not-found": {
-      "text": "Nie można znaleźć prawidłowego tekstu potwierdzenia.",
-      "title": "Nie można znaleźć prawidłowego tekstu potwierdzenia."
-    }
-  },
-  "help": {
-    "account-form": {
-      "auth-token": {
-        "label": "Token uwierzytelniający",
-        "text": "Sposób na uniknięcie używania swojej nazwy użytkownika i hasła oraz zamiast tego wprowadzenie tokena uwierzytelniającego Plex.tv",
-        "title": "Token uwierzytelniający Plex.tv"
-      },
-      "display-name": {
-        "label": "Nazwa wyświetlana",
-        "text": "Nazwa używana do wyświetlania tego konta w interfejsie użytkownika.",
-        "title": "Nazwa wyświetlana"
-      },
-      "is-enabled": {
-        "label": "Jest włączone",
-        "text": "Czy to konto powinno być używane do pobierania i odzyskiwania danych z serwerów Plex.",
-        "title": "Jest włączone"
-      },
-      "is-main": {
-        "label": "Jest Główny",
-        "text": "Konto główne to konto, które jest właścicielem bibliotek Plex. Jeśli istnieje konto inne niż główne, które ma dostęp do tej samej biblioteki Plex współdzielonego serwera Plex co konto główne, zostanie ono użyte w pierwszej kolejności w celu ochrony konta głównego.",
-        "title": "Jest Główny"
-      },
-      "password": {
-        "label": "Hasło",
-        "text": "Hasło do twojego konta Plex.",
-        "title": "Hasło"
-      },
-      "username": {
-        "label": "Nazwa użytkownika",
-        "text": "Nazwa użytkownika twojego konta Plex.\n\n**Uwaga:** Plex używa **adresu e-mail** jako nazwy użytkownika. Jeśli nazwa użytkownika nie działa, zajrzyj do [FAQ](https://www.reaparr.rocks/docs/faq#username-setup) po pomoc.",
-        "title": "Nazwa użytkownika"
-      }
-    },
-    "default": {
-      "label": "Brakująca etykieta",
-      "text": "Ścieżka językowa, w której przechowywany jest ten tekst, jest nieprawidłowa",
-      "title": "Nieznana pomoc"
-    },
-    "server-dialog": {
-      "server-config": {
-        "download-speed-limit": {
-          "label": "Limit prędkości pobierania",
-          "text": "To ograniczy prędkość pobierania dla tego serwera Plex w kilobajtach na sekundę. Ustawienie tej wartości na 0 wyłączy limit.",
-          "title": "Limit prędkości pobierania"
-        },
-        "allow-stream-downloader": {
-          "label": "Zezwól na pobieranie strumieniowe",
-          "text": "Po włączeniu Reaparr będzie używać pobierania strumieniowego dla tego serwera Plex.\n\n **Ostrzeżenie:** Przed włączeniem tej funkcji przeczytaj [dokumentację pobierania strumieniowego](https://www.reaparr.rocks/docs/configuration/stream-downloader).",
-          "title": "Zezwól na pobieranie strumieniowe"
-        }
-      },
-      "server-commands": {
-        "inspect-server": {
-          "text": "Inspekcja serwera sprawdzi wszystkie połączenia i upewni się, że wszystkie biblioteki są nadal dostępne.",
-          "title": "Sprawdzanie serwera Plex",
-          "label": "Sprawdź serwer"
-        },
-        "sync-server-libraries": {
-          "text": "Spowoduje to ponowną synchronizację wszystkich danych multimedialnych dla każdej biblioteki na tym serwerze Plex.",
-          "title": "Ponowna synchronizacja multimediów bibliotecznych",
-          "label": "Ponownie zsynchronizuj media biblioteki"
+        "delete-folder-path": {
+            "text": "Usunąć ścieżkę folderu \"{displayName}\"?",
+            "title": "Usunąć ścieżkę folderu?"
         },
         "delete-server": {
-          "text": "Usuń ten serwer tylko wtedy, gdy nie masz już do niego dostępu. Jeśli nadal masz dostęp, wyłącz go, aby pozostał ukryty.",
-          "title": "Usuń ten serwer Plex",
-          "label": "Usuń serwer"
-        }
-      }
-    },
-    "settings": {
-      "advanced": {
-        "download-manager-section": {
-          "download-segments": {
-            "label": "Pobierz segmenty",
-            "text": "Reaparr obsługuje pobieranie wielowątkowe i może dzielić pobierane multimedia na różne części i pobierać każdą z nich osobno. Ma to tendencję do zwiększania ogólnej prędkości pobierania, ale wadą jest to, że będzie to wymagało dodatkowego czasu na połączenie różnych części w jeden kompletny plik multimedialny.\n\nUstawienie tej wartości na 1 spowoduje wyłączenie pobierania wielowątkowego i pobranie pliku multimedialnego jako jednego kompletnego pliku. Liczba segmentów pobierania nie ma wpływu na szybkość scalanego pliku multimedialnego.",
-            "title": "Pobierz segmenty"
-          },
-          "keep-in-downloads": {
-            "label": "Nie przenoś ukończonych pobrań do folderów docelowych",
-            "title": "Nie przenoś ukończonych pobrań do folderów docelowych",
-            "text": "Jeżeli ta opcja jest włączona, ukończone pobieranie pozostanie w folderze pobierania i nie zostanie przeniesione do folderu docelowego."
-          }
-        },
-        "debug-section": {
-          "debug-mode": {
-            "text": "Włączenie trybu debugowania spowoduje wyświetlenie większej ilości informacji niż zwykle w różnych obszarach interfejsu użytkownika.",
-            "title": "Tryb debugowania",
-            "label": "Tryb debugowania"
-          }
+            "text": "Zamierzasz usunąć ten serwer. Usuń ten serwer tylko wtedy, gdy nie masz już do niego dostępu. Jeśli nadal masz dostęp do tego serwera Plex, pojawi się ponownie przy następnym odświeżeniu konta Plex. W takim przypadku wyłącz serwer, aby pozostał ukryty.",
+            "title": "Usunąć serwer?",
+            "warning": "Czy na pewno chcesz usunąć ten serwer?"
         },
         "reset-db": {
-          "label": "Zresetuj bazę danych",
-          "text": "Resetuje bazę danych i tworzy kopię zapasową starej bazy.",
-          "title": "Zresetuj bazę danych"
+            "text": "Spowoduje to utworzenie kopii zapasowej bieżącej bazy danych w \"config/Database Backup/\" i utworzenie nowej, po czym nastąpi przekierowanie do strony konfiguracji. Nie spowoduje to zresetowania ustawień, ponieważ są one przechowywane w pliku \"config/ReaparrSettings.json\".",
+            "title": "Jesteś pewny?"
         },
-        "setup-section": {
-          "go-to-setup-page": {
-            "label": "Przejdź do strony konfiguracji",
-            "text": "Przejdziesz do strony konfiguracji Reaparr.",
-            "title": "Przejdź do strony konfiguracji"
-          }
-        },
-        "network-section": {
-          "reverse-proxy-url": {
-            "label": "Reverse Proxy URL",
-            "text": "Opcjonalne. Publiczny bazowy adres URL, gdy Reaparr jest dostępny przez reverse proxy (np. https://reaparr.example.com). Pozostaw puste, aby użyć localhost.",
-            "title": "Publiczny URL dla reverse proxy"
-          },
-          "base-path": {
-            "label": "Base Path",
-            "text": "Opcjonalne. Prefiks ścieżki skonfigurowany w proxy (np. /reaparr). Pozostaw puste, jeśli proxy kieruje z katalogu głównego.",
-            "title": "Prefiks ścieżki proxy"
-          },
-          "trust-proxy-headers": {
-            "label": "Trust Proxy Headers",
-            "text": "Wymagane, gdy TLS kończy się na proxy. Umożliwia zaufanie nagłówkom X-Forwarded-*, aby Reaparr tworzył poprawne adresy URL. Wymaga restartu.",
-            "title": "Użyj nagłówków przekazywanych"
-          },
-          "allowed-proxy-ips": {
-            "label": "Allowed Proxy IPs",
-            "text": "Opcjonalne, ale zalecane gdy Trust Proxy Headers jest włączone. IP/zakresy CIDR oddzielone przecinkiem lub nową linią. Wymaga restartu.",
-            "title": "Lista dozwolonych IP proxy"
-          },
-          "forwarded-host-header": {
-            "label": "Forwarded Host Header",
-            "text": "Opcjonalne. Niestandardowa nazwa nagłówka zawierająca oryginalny host (domyślnie: X-Forwarded-Host). Wymaga restartu.",
-            "title": "Nazwa nagłówka Forwarded-Host"
-          },
-          "forwarded-path-header": {
-            "label": "Forwarded Path Header",
-            "text": "Opcjonalne. Niestandardowa nazwa nagłówka zawierająca oryginalny prefiks ścieżki (domyślnie: X-Forwarded-Prefix). Wymaga restartu.",
-            "title": "Nazwa nagłówka Forwarded-Path"
-          }
+        "not-found": {
+            "text": "Nie można znaleźć prawidłowego tekstu potwierdzenia.",
+            "title": "Nie można znaleźć prawidłowego tekstu potwierdzenia."
         }
-      },
-      "ui": {
-        "general-settings": {
-          "mask-plex-libraries": {
-            "label": "Ukryj nazwy bibliotek Plex",
-            "text": "To ukryje nazwy bibliotek Plex w interfejsie użytkownika. Jest to przydatne podczas robienia anonimowych zrzutów ekranu.",
-            "title": "Ukryj nazwy bibliotek Plex"
-          },
-          "mask-plex-accounts": {
-            "label": "Ukryj nazwy serwerów Plex",
-            "text": "Spowoduje to zamaskowanie nazw kont Plex w interfejsie użytkownika. Jest to przydatne podczas robienia anonimowych zrzutów ekranu.",
-            "title": "Maskuj nazwy kont Plex"
-          },
-          "mask-plex-servers": {
-            "label": "Ukryj nazwy serwerów Plex",
-            "text": "To ukryje nazwy serwerów Plex w interfejsie użytkownika. Jest to przydatne podczas robienia anonimowych zrzutów ekranu.",
-            "title": "Ukryj nazwy serwerów Plex"
-          },
-          "toggle-animated-background": {
-            "label": "Wyłącz animowane tło",
-            "text": "Animowane tło może powodować problemy z wydajnością w przeglądarce. Ten przełącznik może wyłączyć animację i pokazać tylko statyczne tło.",
-            "title": "Wyłącz animację tła"
-          }
-        },
-        "confirmation-settings": {
-          "download-episode-confirmation": {
-            "label": "Potwierdzenie pobrania odcinka",
-            "text": "Czy powinno być wyświetlane okno potwierdzenia, gdy odcinek ma zostać pobrany?",
-            "title": "Potwierdzenie pobrania odcinka"
-          },
-          "download-movie-confirmation": {
-            "label": "Potwierdzenie pobrania filmu",
-            "text": "Czy powinno być wyświetlane okno potwierdzenia, gdy film ma być pobrany?",
-            "title": "Potwierdzenie pobrania filmu"
-          },
-          "download-season-confirmation": {
-            "label": "Zapytaj o potwierdzenie pobrania sezonu",
-            "text": "Czy powinno być wyświetlane okno potwierdzenia, gdy sezon ma być pobrany?",
-            "title": "Zapytaj o potwierdzenie pobrania sezonu"
-          },
-          "download-tvshow-confirmation": {
-            "label": "Potwierdzenie pobrania serialu",
-            "text": "Czy powinno być wyświetlane okno potwierdzenia, gdy serial ma być pobrany?",
-            "title": "Potwierdzenie pobrania serialu"
-          }
-        },
-        "date-and-time": {
-          "long-date-format": {
-            "label": "Długi format daty",
-            "text": "",
-            "title": ""
-          },
-          "short-date-format": {
-            "label": "Krótki format daty",
-            "text": "",
-            "title": ""
-          },
-          "show-relative-dates": {
-            "label": "Pokaż daty względne",
-            "text": "",
-            "title": ""
-          },
-          "time-format": {
-            "label": "Format czasu",
-            "text": "",
-            "title": ""
-          }
-        },
-        "language": {
-          "language-selection": {
-            "label": "Język",
-            "text": "Spowoduje to zmianę języka na prawie wszystko. Tekst taki jak błędy raczej nie zostanie przetłumaczony. Wszelkie poprawki tłumaczeń lub nowe języki są bardzo mile widziane, sprawdź www.reaparr.rocks, aby uzyskać informacje na temat dodawania nowych języków.",
-            "title": "Wybierz preferowany język"
-          }
-        }
-      },
-      "accounts": {
-        "app-username": {
-          "text": "Wprowadź nazwę użytkownika, której będziesz używać do logowania się do Reaparr.",
-          "title": "Nazwa użytkownika Reaparr",
-          "label": "Nazwa użytkownika"
-        },
-        "app-confirm-password": {
-          "label": "Potwierdź hasło"
-        },
-        "app-password": {
-          "label": "Hasło",
-          "text": "Wprowadź hasło, którego będziesz używać do bezpiecznego logowania się do Reaparr.",
-          "title": "Hasło Reaparr"
-        }
-      },
-      "paths": {
-        "download-folder": {
-          "label": "Domyślna ścieżka pobierania",
-          "text": "Ścieżka, do której zostaną pobrane wszystkie pliki w kilku częściach, a następnie połączone w jedną całość w folderze docelowym.",
-          "title": "Ścieżka pobierania"
-        },
-        "movie-folder": {
-          "label": "Domyślna ścieżka filmów",
-          "text": "Domyślna ścieżka filmów w przypadku, gdy nie wybrano niestandardowego miejsca docelowego.",
-          "title": "Ścieżka Filmów"
-        },
-        "tv-show-folder": {
-          "label": "Domyślna ścieżka programów telewizyjnych",
-          "text": "Domyślna ścieżka seriali w przypadku, gdy nie wybrano żadnego niestandardowego miejsca docelowego.",
-          "title": "Ścieżka Seriali"
-        }
-      },
-      "integrations": {
-        "choose-title": "Dodaj integrację",
-        "test-failed-title": "Test integracji nie powiódł się",
-        "test-success": "Połączenie udane",
-        "test-failed": "Połączenie nie powiodło się",
-        "connection-status": {
-          "connected": "Połączono",
-          "unconnected": "Nie połączono"
-        },
-        "sonarr": {
-          "add-title": "Dodaj integrację Sonarr",
-          "edit-title": "Edytuj integrację Sonarr",
-          "display-name": {
-            "label": "Nazwa wyświetlana Sonarr",
-            "text": "Nazwa używana do identyfikowania tej integracji Sonarr w Reaparr.",
-            "title": "Nazwa wyświetlana integracji Sonarr"
-          },
-          "category": {
-            "label": "Kategoria qBittorrent Sonarr",
-            "text": "Kategoria qBittorrent używana przez tę integrację Sonarr do oddzielenia jej pobrań.",
-            "title": "Kategoria qBittorrent integracji Sonarr"
-          },
-          "download-folder": {
-            "label": "Folder pobierania Sonarr",
-            "text": "Wybierz folder, w którym będą przechowywane pobrane pliki tej integracji Sonarr. Dostępne są tylko foldery skonfigurowane jako foldery pobierania.",
-            "title": "Folder pobierania integracji Sonarr"
-          },
-          "api-key-input": {
-            "label": "Klucz API Sonarr",
-            "text": "Przejdź do Sonarr: Ustawienia → Ogólne → Bezpieczeństwo → Klucz API i skopiuj klucz API z tego miejsca i wklej go w tym polu",
-            "title": "Klucz API z Sonarr"
-          },
-          "base-url-input": {
-            "label": "Podstawowy adres URL Sonarr",
-            "text": "Adres bazowy, pod którym można uzyskać dostęp do swojej instancji Sonarr. Przykład: http://localhost:8989 lub http://sonarr:8989",
-            "title": "Podstawowy adres URL do Sonarr"
-          },
-          "clear-configuration": {
-            "text": "Usuwa konfigurację Sonarr z Reaparr i resetuje podstawowe dane adresowe URL i klucze API.",
-            "title": "Wyczyść konfigurację Sonarr"
-          },
-          "setup-configuration": {
-            "text": "Reaparr skonfiguruje w Sonarr klienta indeksowania i pobierania, który następnie umożliwi Sonarrowi inicjowanie pobierania.\n\nWięcej informacji można znaleźć w [Przewodniku integracji Sonarr/Radarr](https://www.reaparr.rocks/docs/integration/sonarr-radarr).",
-            "title": "Konfiguracja Sonarr"
-          },
-          "test-connection": {
-            "text": "Reaparr spróbuje nawiązać połączenie z instancją Sonarr przy użyciu podanego adresu URL bazowego i klucza API.",
-            "title": "Przetestuj połączenie z Sonarr"
-          }
-        },
-        "radarr": {
-          "add-title": "Dodaj integrację Radarr",
-          "edit-title": "Edytuj integrację Radarr",
-          "display-name": {
-            "label": "Nazwa wyświetlana Radarr",
-            "text": "Nazwa używana do identyfikowania tej integracji Radarr w Reaparr.",
-            "title": "Nazwa wyświetlana integracji Radarr"
-          },
-          "category": {
-            "label": "Kategoria qBittorrent Radarr",
-            "text": "Kategoria qBittorrent używana przez tę integrację Radarr do oddzielenia jej pobrań.",
-            "title": "Kategoria qBittorrent integracji Radarr"
-          },
-          "download-folder": {
-            "label": "Folder pobierania Radarr",
-            "text": "Wybierz folder, w którym będą przechowywane pobrane pliki tej integracji Radarr. Dostępne są tylko foldery skonfigurowane jako foldery pobierania.",
-            "title": "Folder pobierania integracji Radarr"
-          },
-          "api-key-input": {
-            "label": "Klucz API Radarr",
-            "text": "Przejdź do Radarr: Ustawienia → Ogólne → Bezpieczeństwo → Klucz API i skopiuj klucz API z tego miejsca i wklej go w tym polu",
-            "title": "Klucz API z Radarr"
-          },
-          "base-url-input": {
-            "label": "Podstawowy adres URL Radarr",
-            "text": "Adres bazowy, pod którym można uzyskać dostęp do swojej instancji Radarr. Przykład: http://localhost:7878 lub http://radarr:7878",
-            "title": "Podstawowy adres URL do Radarr"
-          },
-          "clear-configuration": {
-            "text": "Usuwa konfigurację Radarr z Reaparr i resetuje podstawowe dane adresowe URL i klucze API.",
-            "title": "Wyczyść konfigurację Radar"
-          },
-          "setup-configuration": {
-            "text": "Reaparr skonfiguruje w Radarr klienta indeksowania i pobierania, który następnie umożliwi Radarrowi inicjowanie pobierania.\n\nWięcej informacji można znaleźć w [Przewodniku integracji Sonarr/Radarr](https://www.reaparr.rocks/docs/integration/sonarr-radarr).",
-            "title": "Konfiguracja Radarr"
-          },
-          "test-connection": {
-            "text": "Reaparr spróbuje nawiązać połączenie z instancją Radarr przy użyciu podanego adresu URL bazowego i klucza API.",
-            "title": "Przetestuj połączenie z Radarr"
-          }
-        }
-      },
-      "logs": {
-        "title": {
-          "title": "Dzienniki na żywo",
-          "text": "Tutaj wyświetlane są tylko logi z bieżącego uruchomienia aplikacji. Starsze logi można znaleźć w katalogu /config.",
-          "label": "Dzienniki aplikacji Reaparr"
-        }
-      }
     },
-    "media-options": {
-      "hide-offline-servers": {
-        "label": "Nie pokazuj multimediów z serwerów Plex znajdujących się w trybie offline:",
-        "text": "Po włączeniu tej opcji media z serwerów Plex, które są obecnie offline, zostaną wykluczone z tego przeglądu multimediów.",
-        "title": "Nie pokazuj multimediów z serwerów Plex w trybie offline"
-      },
-      "hide-owned-media": {
-        "label": "Nie pokazuj multimediów z własnych serwerów Plex:",
-        "text": "Ukryj wszystkie media w tym przeglądzie, jeśli pochodzą z serwerów Plex należących do konta Plex.",
-        "title": "Nie pokazuj multimediów z własnych serwerów Plex"
-      },
-      "use-low-quality-poster-images": {
-        "label": "Użyj plakatów o niskiej jakości:",
-        "text": "Po włączeniu tej opcji miniatury plakatów będą wyświetlane w niższej rozdzielczości, co znacznie skróci czas ładowania podczas przeglądania bibliotek Plex.",
-        "title": "Używaj plakatów o niskiej jakości"
-      }
-    }
-  },
-  "pages": {
-    "downloads": {
-      "no-downloads": "Obecnie nie ma żadnych trwających procesów pobierania"
-    },
-    "error": {
-      "header": "Błąd!",
-      "return-link": "Wróć do strony głównej"
-    },
-    "music": {
-      "music-id": {
-        "header": "Biblioteki muzyczne niestety nie są jeszcze obsługiwane :("
-      },
-      "index": {
-        "header": "Biblioteki muzyczne niestety nie są jeszcze obsługiwane :("
-      }
-    },
-    "photos": {
-      "photo-id": {
-        "header": "Biblioteki zdjęć niestety nie są jeszcze obsługiwane :("
-      },
-      "index": {
-        "header": "Biblioteki zdjęć niestety nie są jeszcze obsługiwane :("
-      }
-    },
-    "settings": {
-      "accounts": {
-        "plex-accounts-header": "Konta Plex",
-        "app-accounts-header": "Uwierzytelnianie",
-        "library-access-history": "Historia dostępu do biblioteki Plex",
-        "library-access-history-link-text": "Przejdź do strony historii dostępu do biblioteki Plex"
-      },
-      "advanced": {
-        "database": {
-          "header": "Baza danych"
+    "help": {
+        "account-form": {
+            "auth-token": {
+                "label": "Token uwierzytelniający",
+                "text": "Sposób na uniknięcie używania swojej nazwy użytkownika i hasła oraz zamiast tego wprowadzenie tokena uwierzytelniającego Plex.tv",
+                "title": "Token uwierzytelniający Plex.tv"
+            },
+            "display-name": {
+                "label": "Nazwa wyświetlana",
+                "text": "Nazwa używana do wyświetlania tego konta w interfejsie użytkownika.",
+                "title": "Nazwa wyświetlana"
+            },
+            "is-enabled": {
+                "label": "Jest włączone",
+                "text": "Czy to konto powinno być używane do pobierania i odzyskiwania danych z serwerów Plex.",
+                "title": "Jest włączone"
+            },
+            "is-main": {
+                "label": "Jest Główny",
+                "text": "Konto główne to konto, które jest właścicielem bibliotek Plex. Jeśli istnieje konto inne niż główne, które ma dostęp do tej samej biblioteki Plex współdzielonego serwera Plex co konto główne, zostanie ono użyte w pierwszej kolejności w celu ochrony konta głównego.",
+                "title": "Jest Główny"
+            },
+            "password": {
+                "label": "Hasło",
+                "text": "Hasło do twojego konta Plex.",
+                "title": "Hasło"
+            },
+            "username": {
+                "label": "Nazwa użytkownika",
+                "text": "Nazwa użytkownika twojego konta Plex.\n\n**Uwaga:** Plex używa **adresu e-mail** jako nazwy użytkownika. Jeśli nazwa użytkownika nie działa, zajrzyj do [FAQ](https://www.reaparr.rocks/docs/faq#username-setup) po pomoc.",
+                "title": "Nazwa użytkownika"
+            }
         },
-        "download-manager": {
-          "header": "Menedżer pobierania"
+        "default": {
+            "label": "Brakująca etykieta",
+            "text": "Ścieżka językowa, w której przechowywany jest ten tekst, jest nieprawidłowa",
+            "title": "Nieznana pomoc"
         },
-        "debug": {
-          "header": "Ustawienia debugowania"
+        "server-dialog": {
+            "server-config": {
+                "download-speed-limit": {
+                    "label": "Limit prędkości pobierania",
+                    "text": "To ograniczy prędkość pobierania dla tego serwera Plex w kilobajtach na sekundę. Ustawienie tej wartości na 0 wyłączy limit.",
+                    "title": "Limit prędkości pobierania"
+                },
+                "allow-stream-downloader": {
+                    "label": "Zezwól na pobieranie strumieniowe",
+                    "text": "Po włączeniu Reaparr będzie używać pobierania strumieniowego dla tego serwera Plex.\n\n **Ostrzeżenie:** Przed włączeniem tej funkcji przeczytaj [dokumentację pobierania strumieniowego](https://www.reaparr.rocks/docs/configuration/stream-downloader).",
+                    "title": "Zezwól na pobieranie strumieniowe"
+                }
+            },
+            "server-commands": {
+                "inspect-server": {
+                    "text": "Inspekcja serwera sprawdzi wszystkie połączenia i upewni się, że wszystkie biblioteki są nadal dostępne.",
+                    "title": "Sprawdzanie serwera Plex",
+                    "label": "Sprawdź serwer"
+                },
+                "sync-server-libraries": {
+                    "text": "Spowoduje to ponowną synchronizację wszystkich danych multimedialnych dla każdej biblioteki na tym serwerze Plex.",
+                    "title": "Ponowna synchronizacja multimediów bibliotecznych",
+                    "label": "Ponownie zsynchronizuj media biblioteki"
+                },
+                "delete-server": {
+                    "text": "Usuń ten serwer tylko wtedy, gdy nie masz już do niego dostępu. Jeśli nadal masz dostęp, wyłącz go, aby pozostał ukryty.",
+                    "title": "Usuń ten serwer Plex",
+                    "label": "Usuń serwer"
+                }
+            }
         },
-        "network": {
-          "header": "Network & Reverse Proxy",
-          "hints": {
-            "reverse-proxy-url": "Przykład: https://reaparr.example.com (opcjonalne)",
-            "base-path": "Przykład: /reaparr (opcjonalne)",
-            "trust-proxy-headers": "Wymaga restartu",
-            "allowed-proxy-ips": "Przykład: 192.168.1.10, 10.0.0.0/24 (wymaga restartu)",
-            "forwarded-host-header": "Domyślnie: X-Forwarded-Host (wymaga restartu)",
-            "forwarded-path-header": "Domyślnie: X-Forwarded-Prefix (wymaga restartu)"
-          }
+        "settings": {
+            "advanced": {
+                "download-manager-section": {
+                    "download-segments": {
+                        "label": "Pobierz segmenty",
+                        "text": "Reaparr obsługuje pobieranie wielowątkowe i może dzielić pobierane multimedia na różne części i pobierać każdą z nich osobno. Ma to tendencję do zwiększania ogólnej prędkości pobierania, ale wadą jest to, że będzie to wymagało dodatkowego czasu na połączenie różnych części w jeden kompletny plik multimedialny.\n\nUstawienie tej wartości na 1 spowoduje wyłączenie pobierania wielowątkowego i pobranie pliku multimedialnego jako jednego kompletnego pliku. Liczba segmentów pobierania nie ma wpływu na szybkość scalanego pliku multimedialnego.",
+                        "title": "Pobierz segmenty"
+                    },
+                    "keep-in-downloads": {
+                        "label": "Nie przenoś ukończonych pobrań do folderów docelowych",
+                        "title": "Nie przenoś ukończonych pobrań do folderów docelowych",
+                        "text": "Jeżeli ta opcja jest włączona, ukończone pobieranie pozostanie w folderze pobierania i nie zostanie przeniesione do folderu docelowego."
+                    }
+                },
+                "debug-section": {
+                    "debug-mode": {
+                        "text": "Włączenie trybu debugowania spowoduje wyświetlenie większej ilości informacji niż zwykle w różnych obszarach interfejsu użytkownika.",
+                        "title": "Tryb debugowania",
+                        "label": "Tryb debugowania"
+                    }
+                },
+                "reset-db": {
+                    "label": "Zresetuj bazę danych",
+                    "text": "Resetuje bazę danych i tworzy kopię zapasową starej bazy.",
+                    "title": "Zresetuj bazę danych"
+                },
+                "setup-section": {
+                    "go-to-setup-page": {
+                        "label": "Przejdź do strony konfiguracji",
+                        "text": "Przejdziesz do strony konfiguracji Reaparr.",
+                        "title": "Przejdź do strony konfiguracji"
+                    }
+                },
+                "network-section": {
+                    "reverse-proxy-url": {
+                        "label": "Reverse Proxy URL",
+                        "text": "Opcjonalne. Publiczny bazowy adres URL, gdy Reaparr jest dostępny przez reverse proxy (np. https://reaparr.example.com). Pozostaw puste, aby użyć localhost.",
+                        "title": "Publiczny URL dla reverse proxy"
+                    },
+                    "base-path": {
+                        "label": "Base Path",
+                        "text": "Opcjonalne. Prefiks ścieżki skonfigurowany w proxy (np. /reaparr). Pozostaw puste, jeśli proxy kieruje z katalogu głównego.",
+                        "title": "Prefiks ścieżki proxy"
+                    },
+                    "trust-proxy-headers": {
+                        "label": "Trust Proxy Headers",
+                        "text": "Wymagane, gdy TLS kończy się na proxy. Umożliwia zaufanie nagłówkom X-Forwarded-*, aby Reaparr tworzył poprawne adresy URL. Wymaga restartu.",
+                        "title": "Użyj nagłówków przekazywanych"
+                    },
+                    "allowed-proxy-ips": {
+                        "label": "Allowed Proxy IPs",
+                        "text": "Opcjonalne, ale zalecane gdy Trust Proxy Headers jest włączone. IP/zakresy CIDR oddzielone przecinkiem lub nową linią. Wymaga restartu.",
+                        "title": "Lista dozwolonych IP proxy"
+                    },
+                    "forwarded-host-header": {
+                        "label": "Forwarded Host Header",
+                        "text": "Opcjonalne. Niestandardowa nazwa nagłówka zawierająca oryginalny host (domyślnie: X-Forwarded-Host). Wymaga restartu.",
+                        "title": "Nazwa nagłówka Forwarded-Host"
+                    },
+                    "forwarded-path-header": {
+                        "label": "Forwarded Path Header",
+                        "text": "Opcjonalne. Niestandardowa nazwa nagłówka zawierająca oryginalny prefiks ścieżki (domyślnie: X-Forwarded-Prefix). Wymaga restartu.",
+                        "title": "Nazwa nagłówka Forwarded-Path"
+                    }
+                }
+            },
+            "ui": {
+                "general-settings": {
+                    "mask-plex-libraries": {
+                        "label": "Ukryj nazwy bibliotek Plex",
+                        "text": "To ukryje nazwy bibliotek Plex w interfejsie użytkownika. Jest to przydatne podczas robienia anonimowych zrzutów ekranu.",
+                        "title": "Ukryj nazwy bibliotek Plex"
+                    },
+                    "mask-plex-accounts": {
+                        "label": "Ukryj nazwy serwerów Plex",
+                        "text": "Spowoduje to zamaskowanie nazw kont Plex w interfejsie użytkownika. Jest to przydatne podczas robienia anonimowych zrzutów ekranu.",
+                        "title": "Maskuj nazwy kont Plex"
+                    },
+                    "mask-plex-servers": {
+                        "label": "Ukryj nazwy serwerów Plex",
+                        "text": "To ukryje nazwy serwerów Plex w interfejsie użytkownika. Jest to przydatne podczas robienia anonimowych zrzutów ekranu.",
+                        "title": "Ukryj nazwy serwerów Plex"
+                    },
+                    "toggle-animated-background": {
+                        "label": "Wyłącz animowane tło",
+                        "text": "Animowane tło może powodować problemy z wydajnością w przeglądarce. Ten przełącznik może wyłączyć animację i pokazać tylko statyczne tło.",
+                        "title": "Wyłącz animację tła"
+                    }
+                },
+                "confirmation-settings": {
+                    "download-episode-confirmation": {
+                        "label": "Potwierdzenie pobrania odcinka",
+                        "text": "Czy powinno być wyświetlane okno potwierdzenia, gdy odcinek ma zostać pobrany?",
+                        "title": "Potwierdzenie pobrania odcinka"
+                    },
+                    "download-movie-confirmation": {
+                        "label": "Potwierdzenie pobrania filmu",
+                        "text": "Czy powinno być wyświetlane okno potwierdzenia, gdy film ma być pobrany?",
+                        "title": "Potwierdzenie pobrania filmu"
+                    },
+                    "download-season-confirmation": {
+                        "label": "Zapytaj o potwierdzenie pobrania sezonu",
+                        "text": "Czy powinno być wyświetlane okno potwierdzenia, gdy sezon ma być pobrany?",
+                        "title": "Zapytaj o potwierdzenie pobrania sezonu"
+                    },
+                    "download-tvshow-confirmation": {
+                        "label": "Potwierdzenie pobrania serialu",
+                        "text": "Czy powinno być wyświetlane okno potwierdzenia, gdy serial ma być pobrany?",
+                        "title": "Potwierdzenie pobrania serialu"
+                    }
+                },
+                "date-and-time": {
+                    "long-date-format": {
+                        "label": "Długi format daty",
+                        "text": "",
+                        "title": ""
+                    },
+                    "short-date-format": {
+                        "label": "Krótki format daty",
+                        "text": "",
+                        "title": ""
+                    },
+                    "show-relative-dates": {
+                        "label": "Pokaż daty względne",
+                        "text": "",
+                        "title": ""
+                    },
+                    "time-format": {
+                        "label": "Format czasu",
+                        "text": "",
+                        "title": ""
+                    }
+                },
+                "language": {
+                    "language-selection": {
+                        "label": "Język",
+                        "text": "Spowoduje to zmianę języka na prawie wszystko. Tekst taki jak błędy raczej nie zostanie przetłumaczony. Wszelkie poprawki tłumaczeń lub nowe języki są bardzo mile widziane, sprawdź www.reaparr.rocks, aby uzyskać informacje na temat dodawania nowych języków.",
+                        "title": "Wybierz preferowany język"
+                    }
+                }
+            },
+            "accounts": {
+                "app-username": {
+                    "text": "Wprowadź nazwę użytkownika, której będziesz używać do logowania się do Reaparr.",
+                    "title": "Nazwa użytkownika Reaparr",
+                    "label": "Nazwa użytkownika"
+                },
+                "app-confirm-password": {
+                    "label": "Potwierdź hasło"
+                },
+                "app-password": {
+                    "label": "Hasło",
+                    "text": "Wprowadź hasło, którego będziesz używać do bezpiecznego logowania się do Reaparr.",
+                    "title": "Hasło Reaparr"
+                }
+            },
+            "paths": {
+                "download-folder": {
+                    "label": "Domyślna ścieżka pobierania",
+                    "text": "Ścieżka, do której zostaną pobrane wszystkie pliki w kilku częściach, a następnie połączone w jedną całość w folderze docelowym.",
+                    "title": "Ścieżka pobierania"
+                },
+                "movie-folder": {
+                    "label": "Domyślna ścieżka filmów",
+                    "text": "Domyślna ścieżka filmów w przypadku, gdy nie wybrano niestandardowego miejsca docelowego.",
+                    "title": "Ścieżka Filmów"
+                },
+                "tv-show-folder": {
+                    "label": "Domyślna ścieżka programów telewizyjnych",
+                    "text": "Domyślna ścieżka seriali w przypadku, gdy nie wybrano żadnego niestandardowego miejsca docelowego.",
+                    "title": "Ścieżka Seriali"
+                }
+            },
+            "integrations": {
+                "choose-title": "Dodaj integrację",
+                "test-failed-title": "Test integracji nie powiódł się",
+                "test-success": "Połączenie udane",
+                "test-failed": "Połączenie nie powiodło się",
+                "connection-status": {
+                    "connected": "Połączono",
+                    "unconnected": "Nie połączono"
+                },
+                "sonarr": {
+                    "add-title": "Dodaj integrację Sonarr",
+                    "edit-title": "Edytuj integrację Sonarr",
+                    "display-name": {
+                        "label": "Nazwa wyświetlana Sonarr",
+                        "text": "Nazwa używana do identyfikowania tej integracji Sonarr w Reaparr.",
+                        "title": "Nazwa wyświetlana integracji Sonarr"
+                    },
+                    "download-folder": {
+                        "label": "Folder pobierania Sonarr",
+                        "text": "Wybierz folder, w którym będą przechowywane pobrane pliki tej integracji Sonarr. Dostępne są tylko foldery skonfigurowane jako foldery pobierania.",
+                        "title": "Folder pobierania integracji Sonarr"
+                    },
+                    "category": {
+                        "label": "Kategoria qBittorrent Sonarr",
+                        "text": "Kategoria qBittorrent używana przez tę integrację Sonarr do oddzielenia jej pobrań.",
+                        "title": "Kategoria qBittorrent integracji Sonarr"
+                    },
+                    "api-key-input": {
+                        "label": "Klucz API Sonarr",
+                        "text": "Przejdź do Sonarr: Ustawienia → Ogólne → Bezpieczeństwo → Klucz API i skopiuj klucz API z tego miejsca i wklej go w tym polu",
+                        "title": "Klucz API z Sonarr"
+                    },
+                    "base-url-input": {
+                        "label": "Podstawowy adres URL Sonarr",
+                        "text": "Adres bazowy, pod którym można uzyskać dostęp do swojej instancji Sonarr. Przykład: http://localhost:8989 lub http://sonarr:8989",
+                        "title": "Podstawowy adres URL do Sonarr"
+                    },
+                    "clear-configuration": {
+                        "text": "Usuwa konfigurację Sonarr z Reaparr i resetuje podstawowe dane adresowe URL i klucze API.",
+                        "title": "Wyczyść konfigurację Sonarr"
+                    },
+                    "setup-configuration": {
+                        "text": "Reaparr skonfiguruje w Sonarr klienta indeksowania i pobierania, który następnie umożliwi Sonarrowi inicjowanie pobierania.\n\nWięcej informacji można znaleźć w [Przewodniku integracji Sonarr/Radarr](https://www.reaparr.rocks/docs/integration/sonarr-radarr).",
+                        "title": "Konfiguracja Sonarr"
+                    },
+                    "test-connection": {
+                        "text": "Reaparr spróbuje nawiązać połączenie z instancją Sonarr przy użyciu podanego adresu URL bazowego i klucza API.",
+                        "title": "Przetestuj połączenie z Sonarr"
+                    }
+                },
+                "radarr": {
+                    "add-title": "Dodaj integrację Radarr",
+                    "edit-title": "Edytuj integrację Radarr",
+                    "display-name": {
+                        "label": "Nazwa wyświetlana Radarr",
+                        "text": "Nazwa używana do identyfikowania tej integracji Radarr w Reaparr.",
+                        "title": "Nazwa wyświetlana integracji Radarr"
+                    },
+                    "download-folder": {
+                        "label": "Folder pobierania Radarr",
+                        "text": "Wybierz folder, w którym będą przechowywane pobrane pliki tej integracji Radarr. Dostępne są tylko foldery skonfigurowane jako foldery pobierania.",
+                        "title": "Folder pobierania integracji Radarr"
+                    },
+                    "category": {
+                        "label": "Kategoria qBittorrent Radarr",
+                        "text": "Kategoria qBittorrent używana przez tę integrację Radarr do oddzielenia jej pobrań.",
+                        "title": "Kategoria qBittorrent integracji Radarr"
+                    },
+                    "api-key-input": {
+                        "label": "Klucz API Radarr",
+                        "text": "Przejdź do Radarr: Ustawienia → Ogólne → Bezpieczeństwo → Klucz API i skopiuj klucz API z tego miejsca i wklej go w tym polu",
+                        "title": "Klucz API z Radarr"
+                    },
+                    "base-url-input": {
+                        "label": "Podstawowy adres URL Radarr",
+                        "text": "Adres bazowy, pod którym można uzyskać dostęp do swojej instancji Radarr. Przykład: http://localhost:7878 lub http://radarr:7878",
+                        "title": "Podstawowy adres URL do Radarr"
+                    },
+                    "clear-configuration": {
+                        "text": "Usuwa konfigurację Radarr z Reaparr i resetuje podstawowe dane adresowe URL i klucze API.",
+                        "title": "Wyczyść konfigurację Radar"
+                    },
+                    "setup-configuration": {
+                        "text": "Reaparr skonfiguruje w Radarr klienta indeksowania i pobierania, który następnie umożliwi Radarrowi inicjowanie pobierania.\n\nWięcej informacji można znaleźć w [Przewodniku integracji Sonarr/Radarr](https://www.reaparr.rocks/docs/integration/sonarr-radarr).",
+                        "title": "Konfiguracja Radarr"
+                    },
+                    "test-connection": {
+                        "text": "Reaparr spróbuje nawiązać połączenie z instancją Radarr przy użyciu podanego adresu URL bazowego i klucza API.",
+                        "title": "Przetestuj połączenie z Radarr"
+                    }
+                }
+            },
+            "logs": {
+                "title": {
+                    "title": "Dzienniki na żywo",
+                    "text": "Tutaj wyświetlane są tylko logi z bieżącego uruchomienia aplikacji. Starsze logi można znaleźć w katalogu /config.",
+                    "label": "Dzienniki aplikacji Reaparr"
+                }
+            }
+        },
+        "media-options": {
+            "hide-offline-servers": {
+                "label": "Nie pokazuj multimediów z serwerów Plex znajdujących się w trybie offline:",
+                "text": "Po włączeniu tej opcji media z serwerów Plex, które są obecnie offline, zostaną wykluczone z tego przeglądu multimediów.",
+                "title": "Nie pokazuj multimediów z serwerów Plex w trybie offline"
+            },
+            "hide-owned-media": {
+                "label": "Nie pokazuj multimediów z własnych serwerów Plex:",
+                "text": "Ukryj wszystkie media w tym przeglądzie, jeśli pochodzą z serwerów Plex należących do konta Plex.",
+                "title": "Nie pokazuj multimediów z własnych serwerów Plex"
+            },
+            "use-low-quality-poster-images": {
+                "label": "Użyj plakatów o niskiej jakości:",
+                "text": "Po włączeniu tej opcji miniatury plakatów będą wyświetlane w niższej rozdzielczości, co znacznie skróci czas ładowania podczas przeglądania bibliotek Plex.",
+                "title": "Używaj plakatów o niskiej jakości"
+            }
+        }
+    },
+    "pages": {
+        "downloads": {
+            "no-downloads": "Obecnie nie ma żadnych trwających procesów pobierania"
+        },
+        "error": {
+            "header": "Błąd!",
+            "return-link": "Wróć do strony głównej"
+        },
+        "music": {
+            "music-id": {
+                "header": "Biblioteki muzyczne niestety nie są jeszcze obsługiwane :("
+            },
+            "index": {
+                "header": "Biblioteki muzyczne niestety nie są jeszcze obsługiwane :("
+            }
+        },
+        "photos": {
+            "photo-id": {
+                "header": "Biblioteki zdjęć niestety nie są jeszcze obsługiwane :("
+            },
+            "index": {
+                "header": "Biblioteki zdjęć niestety nie są jeszcze obsługiwane :("
+            }
+        },
+        "settings": {
+            "accounts": {
+                "plex-accounts-header": "Konta Plex",
+                "app-accounts-header": "Uwierzytelnianie",
+                "library-access-history": "Historia dostępu do biblioteki Plex",
+                "library-access-history-link-text": "Przejdź do strony historii dostępu do biblioteki Plex"
+            },
+            "advanced": {
+                "database": {
+                    "header": "Baza danych"
+                },
+                "download-manager": {
+                    "header": "Menedżer pobierania"
+                },
+                "debug": {
+                    "header": "Ustawienia debugowania"
+                },
+                "network": {
+                    "header": "Network & Reverse Proxy",
+                    "hints": {
+                        "reverse-proxy-url": "Przykład: https://reaparr.example.com (opcjonalne)",
+                        "base-path": "Przykład: /reaparr (opcjonalne)",
+                        "trust-proxy-headers": "Wymaga restartu",
+                        "allowed-proxy-ips": "Przykład: 192.168.1.10, 10.0.0.0/24 (wymaga restartu)",
+                        "forwarded-host-header": "Domyślnie: X-Forwarded-Host (wymaga restartu)",
+                        "forwarded-path-header": "Domyślnie: X-Forwarded-Prefix (wymaga restartu)"
+                    }
+                },
+                "setup": {
+                    "header": "Konfiguracja Reaparr"
+                }
+            },
+            "logs": {
+                "title": "Dzienniki aplikacji Reaparr",
+                "clear": "Wyczyść",
+                "search": "Szukaj w logach",
+                "level-filter": "Poziomy",
+                "visible-count": "Wyświetlanie {count} z {total} logów w pamięci podręcznej",
+                "empty": "Żadne logi na żywo nie pasują do bieżących filtrów.",
+                "sort": {
+                    "oldest-first": "Najstarsze najpierw",
+                    "newest-first": "Najnowsze najpierw"
+                },
+                "refresh": "",
+                "copy": "",
+                "copy-selected": "Kopiuj zaznaczone ({count})",
+                "copy-all": "Kopiuj wszystkie logi",
+                "pause-scroll": "",
+                "copied-to-clipboard": ""
+            },
+            "ui": {
+                "confirmation-settings": {
+                    "header": "Ustawienia potwierdzenia"
+                },
+                "date-and-time": {
+                    "header": "Data i godzina"
+                },
+                "language": {
+                    "header": "Język"
+                },
+                "general-settings": {
+                    "header": "Ogólne"
+                },
+                "enable-servers-section": {
+                    "header": "Włącz serwery Plex",
+                    "no-servers-disabled": "Obecnie żaden serwer Plex nie jest wyłączony. Aby wyłączyć serwer, przejdź do Ustawień serwera => Konfiguracja serwera i przełącz opcję na Włączony. Wszystkie wyłączone serwery pojawią się tutaj, gdzie możesz je ponownie włączyć."
+                }
+            }
         },
         "setup": {
-          "header": "Konfiguracja Reaparr"
+            "accounts": {
+                "header": "Konta Plex",
+                "title": "Dodaj swoje konta Plex!"
+            },
+            "authorization": {
+                "header": "Upoważnienie",
+                "title": "Zmień domyślne dane logowania!"
+            },
+            "disclaimer": {
+                "header": "Zastrzeżenie",
+                "i-agree-disclaimer-button": "Rozumiem i zgadzam się",
+                "text": {
+                    "heading": "Proszę przeczytać i zgodzić się na poniższe warunki przed kontynuowaniem:",
+                    "section1": {
+                        "title": "Użycie prawne i etyczne",
+                        "content": "Jesteś odpowiedzialny za zapewnienie, że korzystanie z Reaparr jest zgodne ze wszystkimi obowiązującymi przepisami prawa, w tym przepisami o prawie autorskim, oraz z Warunkami korzystania z usług wszelkich platform, z którymi się kontaktujesz. Reaparr jest zaprojektowany wyłącznie do osobistego zarządzania mediami i tworzenia kopii zapasowych. Nie może być używany do nieautoryzowanego pobierania, naruszenia praw autorskich ani żadnej innej nielegalnej działalności."
+                    },
+                    "section2": {
+                        "title": "Własność i pozwolenia",
+                        "content": "Musisz mieć wyraźne prawo własności lub pozwolenie na dostęp do treści multimedialnych i serwerów, z którymi się kontaktujesz, korzystając z Reaparr. Nieautoryzowany dostęp lub użycie serwerów lub mediów osób trzecich jest surowo zabronione."
+                    },
+                    "section3": {
+                        "title": "Brak powiązań",
+                        "content": "Reaparr jest niezależnym narzędziem i nie jest powiązany, popierany ani związany z Plex Inc. ani żadną inną platformą."
+                    },
+                    "section4": {
+                        "title": "Ograniczenie odpowiedzialności",
+                        "content": "Twórcy Reaparr nie ponoszą odpowiedzialności za jakiekolwiek niewłaściwe użycie narzędzia ani za konsekwencje wynikające z nieautoryzowanego lub nielegalnego użycia."
+                    },
+                    "confirmation": "Przechodząc dalej, potwierdzasz, że rozumiesz i akceptujesz te warunki oraz że będziesz korzystać z Reaparr w sposób odpowiedzialny i etyczny."
+                }
+            },
+            "finished": {
+                "header": "Ukończono!",
+                "list": {
+                    "item-1": "Daj gwiazdkę na Githubie!",
+                    "item-5": "Daj gwiazdkę na stronie DockerHub!",
+                    "item-2": "Poproś o nowe funkcje i zgłaszaj błędy!",
+                    "item-3": "Przetłumacz Reaparr na swój język!",
+                    "item-4": "Przejrzyj kod i przekaż nam swoją opinię lub zasugeruj ulepszenia!"
+                },
+                "text": {
+                    "p-1": "Jeśli podoba Ci się ten projekt i chcesz okazać swoje uznanie, rozważ poniższe możliwości:"
+                },
+                "title": "Możesz teraz rozpocząć korzystanie z Reaparra!"
+            },
+            "intro": {
+                "header": "Rozpoczęcie",
+                "list": {
+                    "item-1": "Reaparr ma discorda! Dołącz do nas, aby uzyskać wsparcie i dyskusje na temat nowych funkcji i wydań!",
+                    "item-2": "Reaparr ma stronę internetową z często zadawanymi pytaniami! Upewnij się, że je przeczytałeś, zanim zaczniesz szukać pomocy!",
+                    "item-3": "Reaparr jest obecnie w fazie aktywnego rozwoju, więc mogą występować tu i ówdzie pewne błędy. Upewnij się, że zgłosisz wszystkie, które znajdziesz na stronie Github issues."
+                },
+                "text": {
+                    "p-1": "Oto kilka przydatnych informacji:"
+                },
+                "title": "Witamy w instalatorze Reaparr!"
+            },
+            "paths": {
+                "header": "Sprawdzanie ścieżek",
+                "title": "Upewnij się, że wszystkie ścieżki są prawidłowe!"
+            }
+        },
+        "tvshows": {
+            "index": {
+                "header": "Przegląd Seriali",
+                "sub-header": "Wybierz bibliotekę z lewej strony"
+            }
+        },
+        "debug": {
+            "dialogs": {
+                "buttons": {
+                    "download-confirmation": "Potwierdzenie pobrania",
+                    "help-dialog": "Dialog Pomocy",
+                    "server-dialog": "Dialog serwera",
+                    "check-server-connections-dialog": "Sprawdź połączenia serwera",
+                    "directory-browser": "Okno przeglądarki katalogów",
+                    "verification-dialog": "Dialog weryfikacji 2FA",
+                    "discord-invite": "Zaproszenie na Discord",
+                    "sync-server-media-dialog": "Okno dialogowe Synchronizuj serwer multimediów",
+                    "refresh-plex-account-access-dialog": "Odśwież okno dialogowe dostępu do konta Plex"
+                },
+                "header": "Moduły dialogowe debugowania",
+                "account-dialog-header": "Okno dialogowe konta",
+                "connection-dialog-header": "Dialog połączenia"
+            },
+            "buttons": {
+                "main-header": "Przyciski Debugowania",
+                "media-quality-header": "Wyświetlacz jakości multimediów",
+                "alert-display-header": "Nagłówek wyświetlacza alertów",
+                "media-comparison-state-header": "Porównanie stanów mediów"
+            }
+        },
+        "empty": {
+            "title": "Pusta Strona"
+        },
+        "unknown": {
+            "index": {
+                "header": "Biblioteka {libraryName} jest nieznanego typu"
+            }
+        },
+        "login": {
+            "header": "ZALOGUJ SIĘ, ABY KONTYNUOWAĆ",
+            "invalid-credentials": "Nieprawidłowa nazwa użytkownika lub hasło",
+            "locked-out": "Nie udało Ci się zhakować Reaparra, teraz masz 5 minut przerwy!",
+            "remember-me": "Pamiętaj mnie",
+            "forgot-your-password": "Zapomniałeś hasła?"
         }
-      },
-      "logs": {
-        "title": "Dzienniki aplikacji Reaparr",
-        "clear": "Wyczyść",
-        "search": "Szukaj w logach",
-        "level-filter": "Poziomy",
-        "visible-count": "Wyświetlanie {count} z {total} logów w pamięci podręcznej",
-        "empty": "Żadne logi na żywo nie pasują do bieżących filtrów.",
-        "sort": {
-          "oldest-first": "Najstarsze najpierw",
-          "newest-first": "Najnowsze najpierw"
-        },
-        "refresh": "",
-        "copy": "",
-        "copy-selected": "Kopiuj zaznaczone ({count})",
-        "copy-all": "Kopiuj wszystkie logi",
-        "pause-scroll": "",
-        "copied-to-clipboard": ""
-      },
-      "ui": {
-        "confirmation-settings": {
-          "header": "Ustawienia potwierdzenia"
-        },
-        "date-and-time": {
-          "header": "Data i godzina"
-        },
-        "language": {
-          "header": "Język"
-        },
-        "general-settings": {
-          "header": "Ogólne"
-        },
-        "enable-servers-section": {
-          "header": "Włącz serwery Plex",
-          "no-servers-disabled": "Obecnie żaden serwer Plex nie jest wyłączony. Aby wyłączyć serwer, przejdź do Ustawień serwera => Konfiguracja serwera i przełącz opcję na Włączony. Wszystkie wyłączone serwery pojawią się tutaj, gdzie możesz je ponownie włączyć."
-        }
-      }
-    },
-    "setup": {
-      "accounts": {
-        "header": "Konta Plex",
-        "title": "Dodaj swoje konta Plex!"
-      },
-      "authorization": {
-        "header": "Upoważnienie",
-        "title": "Zmień domyślne dane logowania!"
-      },
-      "disclaimer": {
-        "header": "Zastrzeżenie",
-        "i-agree-disclaimer-button": "Rozumiem i zgadzam się",
-        "text": {
-          "heading": "Proszę przeczytać i zgodzić się na poniższe warunki przed kontynuowaniem:",
-          "section1": {
-            "title": "Użycie prawne i etyczne",
-            "content": "Jesteś odpowiedzialny za zapewnienie, że korzystanie z Reaparr jest zgodne ze wszystkimi obowiązującymi przepisami prawa, w tym przepisami o prawie autorskim, oraz z Warunkami korzystania z usług wszelkich platform, z którymi się kontaktujesz. Reaparr jest zaprojektowany wyłącznie do osobistego zarządzania mediami i tworzenia kopii zapasowych. Nie może być używany do nieautoryzowanego pobierania, naruszenia praw autorskich ani żadnej innej nielegalnej działalności."
-          },
-          "section2": {
-            "title": "Własność i pozwolenia",
-            "content": "Musisz mieć wyraźne prawo własności lub pozwolenie na dostęp do treści multimedialnych i serwerów, z którymi się kontaktujesz, korzystając z Reaparr. Nieautoryzowany dostęp lub użycie serwerów lub mediów osób trzecich jest surowo zabronione."
-          },
-          "section3": {
-            "title": "Brak powiązań",
-            "content": "Reaparr jest niezależnym narzędziem i nie jest powiązany, popierany ani związany z Plex Inc. ani żadną inną platformą."
-          },
-          "section4": {
-            "title": "Ograniczenie odpowiedzialności",
-            "content": "Twórcy Reaparr nie ponoszą odpowiedzialności za jakiekolwiek niewłaściwe użycie narzędzia ani za konsekwencje wynikające z nieautoryzowanego lub nielegalnego użycia."
-          },
-          "confirmation": "Przechodząc dalej, potwierdzasz, że rozumiesz i akceptujesz te warunki oraz że będziesz korzystać z Reaparr w sposób odpowiedzialny i etyczny."
-        }
-      },
-      "finished": {
-        "header": "Ukończono!",
-        "list": {
-          "item-1": "Daj gwiazdkę na Githubie!",
-          "item-5": "Daj gwiazdkę na stronie DockerHub!",
-          "item-2": "Poproś o nowe funkcje i zgłaszaj błędy!",
-          "item-3": "Przetłumacz Reaparr na swój język!",
-          "item-4": "Przejrzyj kod i przekaż nam swoją opinię lub zasugeruj ulepszenia!"
-        },
-        "text": {
-          "p-1": "Jeśli podoba Ci się ten projekt i chcesz okazać swoje uznanie, rozważ poniższe możliwości:"
-        },
-        "title": "Możesz teraz rozpocząć korzystanie z Reaparra!"
-      },
-      "intro": {
-        "header": "Rozpoczęcie",
-        "list": {
-          "item-1": "Reaparr ma discorda! Dołącz do nas, aby uzyskać wsparcie i dyskusje na temat nowych funkcji i wydań!",
-          "item-2": "Reaparr ma stronę internetową z często zadawanymi pytaniami! Upewnij się, że je przeczytałeś, zanim zaczniesz szukać pomocy!",
-          "item-3": "Reaparr jest obecnie w fazie aktywnego rozwoju, więc mogą występować tu i ówdzie pewne błędy. Upewnij się, że zgłosisz wszystkie, które znajdziesz na stronie Github issues."
-        },
-        "text": {
-          "p-1": "Oto kilka przydatnych informacji:"
-        },
-        "title": "Witamy w instalatorze Reaparr!"
-      },
-      "paths": {
-        "header": "Sprawdzanie ścieżek",
-        "title": "Upewnij się, że wszystkie ścieżki są prawidłowe!"
-      }
-    },
-    "tvshows": {
-      "index": {
-        "header": "Przegląd Seriali",
-        "sub-header": "Wybierz bibliotekę z lewej strony"
-      }
     },
     "debug": {
-      "dialogs": {
-        "buttons": {
-          "download-confirmation": "Potwierdzenie pobrania",
-          "help-dialog": "Dialog Pomocy",
-          "server-dialog": "Dialog serwera",
-          "check-server-connections-dialog": "Sprawdź połączenia serwera",
-          "directory-browser": "Okno przeglądarki katalogów",
-          "verification-dialog": "Dialog weryfikacji 2FA",
-          "discord-invite": "Zaproszenie na Discord",
-          "sync-server-media-dialog": "Okno dialogowe Synchronizuj serwer multimediów",
-          "refresh-plex-account-access-dialog": "Odśwież okno dialogowe dostępu do konta Plex"
+        "button-labels": {
+            "amber": "Amber",
+            "black": "Black",
+            "brown5": "Brown 5",
+            "deep-orange": "Deep Orange",
+            "primary": "Primary",
+            "purple": "Purple",
+            "secondary": "Secondary",
+            "standard": "Standard"
         },
-        "header": "Moduły dialogowe debugowania",
-        "account-dialog-header": "Okno dialogowe konta",
-        "connection-dialog-header": "Dialog połączenia"
-      },
-      "buttons": {
-        "main-header": "Przyciski Debugowania",
-        "media-quality-header": "Wyświetlacz jakości multimediów",
-        "alert-display-header": "Nagłówek wyświetlacza alertów",
-        "media-comparison-state-header": "Porównanie stanów mediów"
-      }
-    },
-    "empty": {
-      "title": "Pusta Strona"
-    },
-    "unknown": {
-      "index": {
-        "header": "Biblioteka {libraryName} jest nieznanego typu"
-      }
-    },
-    "login": {
-      "header": "ZALOGUJ SIĘ, ABY KONTYNUOWAĆ",
-      "invalid-credentials": "Nieprawidłowa nazwa użytkownika lub hasło",
-      "locked-out": "Nie udało Ci się zhakować Reaparra, teraz masz 5 minut przerwy!",
-      "remember-me": "Pamiętaj mnie",
-      "forgot-your-password": "Zapomniałeś hasła?"
+        "buttons": {
+            "account-validation-button": "AccountValidationButton",
+            "add-icon-button": "AddIconButton",
+            "base-button": "BaseButton",
+            "cancel-button": "CancelButton",
+            "check-connection-button": "CheckConnectionButton",
+            "confirm-button": "ConfirmButton",
+            "debug-button": "DebugButton",
+            "delete-button": "DeleteButton",
+            "delete-icon-button": "DeleteIconButton",
+            "external-link-button": "ExternalLinkButton",
+            "go-to-button": "GoToButton",
+            "help-button": "HelpButton",
+            "hide-button": "HideButton",
+            "navigation-finish-setup-button": "NavigationFinishSetupButton",
+            "navigation-next-button": "NavigationNextButton",
+            "navigation-previous-button": "NavigationPreviousButton",
+            "navigation-skip-setup-button": "NavigationSkipSetupButton",
+            "reset-button": "ResetButton",
+            "save-button": "SaveButton",
+            "warning-button": "WarningButton"
+        }
     }
-  },
-  "debug": {
-    "button-labels": {
-      "amber": "Amber",
-      "black": "Black",
-      "brown5": "Brown 5",
-      "deep-orange": "Deep Orange",
-      "primary": "Primary",
-      "purple": "Purple",
-      "secondary": "Secondary",
-      "standard": "Standard"
-    },
-    "buttons": {
-      "account-validation-button": "AccountValidationButton",
-      "add-icon-button": "AddIconButton",
-      "base-button": "BaseButton",
-      "cancel-button": "CancelButton",
-      "check-connection-button": "CheckConnectionButton",
-      "confirm-button": "ConfirmButton",
-      "debug-button": "DebugButton",
-      "delete-button": "DeleteButton",
-      "delete-icon-button": "DeleteIconButton",
-      "external-link-button": "ExternalLinkButton",
-      "go-to-button": "GoToButton",
-      "help-button": "HelpButton",
-      "hide-button": "HideButton",
-      "navigation-finish-setup-button": "NavigationFinishSetupButton",
-      "navigation-next-button": "NavigationNextButton",
-      "navigation-previous-button": "NavigationPreviousButton",
-      "navigation-skip-setup-button": "NavigationSkipSetupButton",
-      "reset-button": "ResetButton",
-      "save-button": "SaveButton",
-      "warning-button": "WarningButton"
-    }
-  }
 }

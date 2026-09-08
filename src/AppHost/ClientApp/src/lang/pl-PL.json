@@ -673,6 +673,11 @@
         }
     },
     "confirmation": {
+        "delete-integration": {
+            "text": "Usunąć tę integrację z Reaparr?",
+            "title": "Usunąć {name}?",
+            "warning": "Reaparr spróbuje usunąć z {type} zarządzane przez siebie zasoby indeksatora i klienta pobierania. Jeśli {type} jest offline lub czyszczenie się nie powiedzie, lokalna integracja i tak zostanie usunięta. Pozostałe zasoby musisz usunąć samodzielnie."
+        },
         "delete-account": {
             "text": "Spowoduje to usunięcie tego konta Plex z Reaparr!\n\nSpowoduje to również usunięcie wszystkich niedostępnych serwerów współdzielonych Plex, bibliotek Plex i wszystkich zawartych w nich multimediów. Wszelkie aktywne pliki do pobrania, które zostały rozpoczęte lub ustawione w kolejce na tym koncie, zostaną anulowane i usunięte. Zakończone pobieranie pozostanie nietknięte.",
             "title": "Jesteś pewny?",

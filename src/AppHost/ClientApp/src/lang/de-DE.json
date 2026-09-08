@@ -673,6 +673,11 @@
         }
     },
     "confirmation": {
+        "delete-integration": {
+            "text": "Diese Integration aus Reaparr löschen?",
+            "title": "{name} löschen?",
+            "warning": "Reaparr versucht, seine Indexer- und Download-Client-Ressourcen aus {type} zu entfernen. Wenn {type} offline ist oder die Bereinigung fehlschlägt, wird die lokale Integration trotzdem gelöscht. Verbleibende Ressourcen müssen Sie selbst entfernen."
+        },
         "delete-account": {
             "text": "Dadurch wird dieses Plex-Konto aus Reaparr gelöscht!\n\nDadurch werden auch alle unzugänglichen Plex-Shared-Server, Plex-Bibliotheken und alle darin enthaltenen Medien gelöscht. Alle aktiven Downloads, die mit diesem Konto gestartet oder in die Warteschlange gestellt werden, werden abgebrochen und gelöscht. Abgeschlossene Downloads bleiben unberührt.",
             "title": "Sind Sie sicher?",

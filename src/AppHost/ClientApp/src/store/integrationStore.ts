@@ -8,14 +8,14 @@ import { cloneDeep } from 'lodash-es';
 import { integrationApi } from '@api';
 import {
 	IntegrationProvisioningState,
-	IntegrationType,
-	type TestConnectionToRadarrEndpointResponse,
-	type TestConnectionToSonarrEndpointResponse,
 	type IntegrationSummary,
+	IntegrationType,
 	type RadarrIntegrationDTO,
 	type SonarrIntegrationDTO,
+	type TestConnectionToRadarrEndpointResponse,
+	type TestConnectionToSonarrEndpointResponse,
 } from '@dto';
-import { StoreNames, type ISetupResult } from '@interfaces';
+import { type ISetupResult, type ResultDTO, StoreNames } from '@interfaces';
 
 interface IIntegrationDraft {
 	type: IntegrationType;
@@ -89,9 +89,17 @@ export const useIntegrationStore = defineStore(StoreNames.IntegrationStore, () =
 		},
 		openEdit(item: IntegrationSummary) {
 			resetOperationState();
-			const request = item.type === IntegrationType.Radarr
-				? integrationApi.getRadarrIntegrationEndpoint(item.id)
-				: integrationApi.getSonarrIntegrationEndpoint(item.id);
+			let request: Observable<ResultDTO<RadarrIntegrationDTO | SonarrIntegrationDTO>>;
+			switch (item.type) {
+				case IntegrationType.Radarr:
+					request = integrationApi.getRadarrIntegrationEndpoint(item.id);
+					break;
+				case IntegrationType.Sonarr:
+					request = integrationApi.getSonarrIntegrationEndpoint(item.id);
+					break;
+				default:
+					throw new Error(`Unsupported integration type: ${String(item.type)}`);
+			}
 			return request.pipe(
 				tap((result) => {
 					if (result.isSuccess && result.value) setDetail(item.type, result.value);
@@ -101,17 +109,25 @@ export const useIntegrationStore = defineStore(StoreNames.IntegrationStore, () =
 			);
 		},
 		test() {
-			state.isTesting = true;
-			state.testResult = null;
-			state.error = null;
 			const query = {
 				apiKey: state.draft.apiKey,
 				url: state.draft.url,
 				...(state.detail ? { integrationId: state.detail.id } : {}),
 			};
-			const request = state.draft.type === IntegrationType.Radarr
-				? integrationApi.testConnectionToRadarrEndpoint(query)
-				: integrationApi.testConnectionToSonarrEndpoint(query);
+			let request: Observable<ResultDTO<TestConnectionResult>>;
+			switch (state.draft.type) {
+				case IntegrationType.Radarr:
+					request = integrationApi.testConnectionToRadarrEndpoint(query);
+					break;
+				case IntegrationType.Sonarr:
+					request = integrationApi.testConnectionToSonarrEndpoint(query);
+					break;
+				default:
+					throw new Error(`Unsupported integration type: ${String(state.draft.type)}`);
+			}
+			state.isTesting = true;
+			state.testResult = null;
+			state.error = null;
 			return request.pipe(
 				tap((result) => {
 					if (result.value) {
@@ -124,21 +140,41 @@ export const useIntegrationStore = defineStore(StoreNames.IntegrationStore, () =
 			);
 		},
 		save() {
+			let request: Observable<ResultDTO<RadarrIntegrationDTO | SonarrIntegrationDTO>>;
+			switch (state.draft.type) {
+				case IntegrationType.Radarr:
+					request = saveRadarr();
+					break;
+				case IntegrationType.Sonarr:
+					request = saveSonarr();
+					break;
+				default:
+					throw new Error(`Unsupported integration type: ${String(state.draft.type)}`);
+			}
 			state.isSaving = true;
 			state.error = null;
-			return (state.draft.type === IntegrationType.Radarr ? saveRadarr() : saveSonarr()).pipe(
+			return request.pipe(
 				switchMap((result) => result.isSuccess ? actions.refresh().pipe(map(() => result)) : of(result)),
 				catchError(handleError),
 				finalize(() => (state.isSaving = false)),
 			);
 		},
 		setupIntegration() {
-			if (!state.detail) return of(null);
+			const detail = state.detail;
+			if (!detail) return of(null);
+			let request: Observable<ResultDTO<RadarrIntegrationDTO | SonarrIntegrationDTO>>;
+			switch (detail.type) {
+				case IntegrationType.Radarr:
+					request = integrationApi.setupRadarrIntegrationEndpoint(detail.id);
+					break;
+				case IntegrationType.Sonarr:
+					request = integrationApi.setupSonarrIntegrationEndpoint(detail.id);
+					break;
+				default:
+					throw new Error(`Unsupported integration type: ${String(detail.type)}`);
+			}
 			state.isSettingUp = true;
 			state.error = null;
-			const request = state.detail.type === IntegrationType.Radarr
-				? integrationApi.setupRadarrIntegrationEndpoint(state.detail.id)
-				: integrationApi.setupSonarrIntegrationEndpoint(state.detail.id);
 			return request.pipe(
 				tap((result) => {
 					if (result.isSuccess && result.value) {
@@ -151,16 +187,23 @@ export const useIntegrationStore = defineStore(StoreNames.IntegrationStore, () =
 				finalize(() => (state.isSettingUp = false)),
 			);
 		},
-		delete(force = false) {
-			if (!state.detail) return of(null);
+		delete() {
+			const detail = state.detail;
+			if (!detail) return of(null);
+			let request: Observable<unknown>;
+			switch (detail.type) {
+				case IntegrationType.Radarr:
+					request = integrationApi.deleteRadarrIntegrationEndpoint(detail.id, { Force: true });
+					break;
+				case IntegrationType.Sonarr:
+					request = integrationApi.deleteSonarrIntegrationEndpoint(detail.id, { Force: true });
+					break;
+				default:
+					throw new Error(`Unsupported integration type: ${String(detail.type)}`);
+			}
 			state.isDeleting = true;
 			state.error = null;
-			const request: Observable<{ isSuccess: boolean }> = (state.detail.type === IntegrationType.Radarr
-				? integrationApi.deleteRadarrIntegrationEndpoint(state.detail.id, { Force: force })
-				: integrationApi.deleteSonarrIntegrationEndpoint(state.detail.id, { Force: force })) as Observable<{
-				isSuccess: boolean;
-			}>;
-			return request.pipe(
+			return (request as Observable<ResultDTO>).pipe(
 				switchMap((result) => {
 					if (!result.isSuccess) {
 						state.error = result;

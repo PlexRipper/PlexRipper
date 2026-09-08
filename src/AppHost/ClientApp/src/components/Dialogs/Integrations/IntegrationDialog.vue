@@ -151,33 +151,55 @@
 			</QForm>
 		</template>
 		<template #actions>
-			<div class="row full-width items-center justify-between q-gutter-sm">
-				<template v-if="store.detail || stage === 2">
-					<QBtn
-						flat
+			<QRow
+				v-if="store.detail || stage === 2"
+				gutter="md">
+				<QCol v-if="store.detail">
+					<DeleteButton
+						block
+						cy="integration-delete"
+						@click="dialogStore.openDialog(DialogType.IntegrationDeleteConfirmationDialog)" />
+				</QCol>
+				<QCol>
+					<BaseButton
+						block
+						icon="mdi-cloud-search-outline"
 						:label="$t('general.commands.check-connection')"
 						:loading="store.isTesting"
 						:disable="!store.isDraftValid"
 						data-cy="integration-test"
 						@click="test" />
-					<QBtn
-						flat
+				</QCol>
+				<QCol>
+					<BaseButton
+						label="Setup"
+						block
+						icon="mdi-cog-sync"
+						:loading="store.isSettingUp"
+						data-cy="integration-setup"
+						@click="setup" />
+				</QCol>
+				<QCol>
+					<SaveButton
+						block
 						label="Save"
 						:loading="store.isSaving"
 						:disable="!store.isDraftValid"
 						data-cy="integration-save"
 						@click="save" />
-					<QBtn
-						v-if="store.detail"
-						color="primary"
-						label="Setup"
-						:loading="store.isSettingUp"
-						data-cy="integration-setup"
-						@click="setup" />
-				</template>
-			</div>
+				</QCol>
+			</QRow>
 		</template>
 	</QCardDialog>
+
+	<ConfirmationDialog
+		:name="DialogType.IntegrationDeleteConfirmationDialog"
+		:title="$t('confirmation.delete-integration.title', { name: store.detail?.name ?? '' })"
+		:text="$t('confirmation.delete-integration.text')"
+		:warning="$t('confirmation.delete-integration.warning', { type: store.detail?.type ?? '' })"
+		:confirm-label="$t('general.commands.delete')"
+		:confirm-loading="store.isDeleting"
+		@confirm="deleteIntegration" />
 </template>
 
 <script setup lang="ts">
@@ -281,6 +303,13 @@ function open(event: unknown): void {
 	else {
 		store.openAdd();
 	}
+}
+
+function deleteIntegration() {
+	useSubscription(store.delete().subscribe(() => {
+		dialogStore.closeDialog(DialogType.IntegrationDeleteConfirmationDialog);
+		if (!store.detail) dialogStore.closeDialog(DialogType.IntegrationDialog);
+	}));
 }
 
 function selectType(type: IntegrationType): void {

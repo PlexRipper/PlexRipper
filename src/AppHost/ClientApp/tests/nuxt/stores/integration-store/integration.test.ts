@@ -45,7 +45,7 @@ describe('IntegrationStore', () => {
 		await result.onComplete();
 
 		// Assert
-		expect(result.getLastValue()?.isSuccess).toBe(true);
+		expect(result.getLastValue()).toEqual(expect.objectContaining({ isSuccess: true }));
 		expect(create).toHaveBeenCalledWith({
 			name: 'Sonarr',
 			url: 'http://sonarr',
@@ -166,5 +166,48 @@ describe('IntegrationStore', () => {
 
 		// Assert
 		expect(store.isDraftValid).toBe(false);
+	});
+
+	test('Should delete a persisted Radarr integration even when external cleanup fails', async () => {
+		// Arrange
+		const store = useIntegrationStore();
+		store.detail = {
+			apiKey: 'key',
+			category: 'radarr',
+			downloadFolderId: 1,
+			id: 'id',
+			lastConnectionTestErrorMessage: null,
+			lastConnectionTestHttpStatusCode: null,
+			lastConnectionTestStatus: TestConnectionStatus.Unknown,
+			lastConnectionTestedAt: null,
+			name: 'Radarr',
+			provisioningState: IntegrationProvisioningState.Configured,
+			type: IntegrationType.Radarr,
+			url: 'http://radarr',
+		};
+		const deleteIntegration = vi.spyOn(integrationApi, 'deleteRadarrIntegrationEndpoint').mockReturnValue(success(undefined));
+		vi.spyOn(integrationApi, 'getIntegrationsEndpoint').mockReturnValue(success([]));
+
+		// Act
+		await subscribeSpyTo(store.delete()).onComplete();
+
+		// Assert
+		expect(deleteIntegration).toHaveBeenCalledWith('id', { Force: true });
+		expect(store.detail).toBeNull();
+		expect(store.isDeleting).toBe(false);
+	});
+
+	test('Should reject an unsupported integration type instead of using the Sonarr endpoint', () => {
+		// Arrange
+		const store = useIntegrationStore();
+		const saveSonarr = vi.spyOn(integrationApi, 'createSonarrIntegrationEndpoint');
+		store.openAdd('Lidarr' as IntegrationType);
+
+		// Act
+		const save = () => store.save();
+
+		// Assert
+		expect(save).toThrowError('Unsupported integration type: Lidarr');
+		expect(saveSonarr).not.toHaveBeenCalled();
 	});
 });

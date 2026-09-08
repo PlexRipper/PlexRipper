@@ -43,15 +43,6 @@
         "resolved": "9.1.0",
         "contentHash": "onT/BcnnfWcQNXiuC7R/0h8ALQzRdsAI20gpB7nfrudXpFMXdVZKz1umdtHXDwjc/bmWEsrCBAxck3+Arnk15g=="
       },
-      "Autofac.Extensions.DependencyInjection": {
-        "type": "Transitive",
-        "resolved": "11.0.0",
-        "contentHash": "/FSrJyYEsptkV9O3L95dTAoGO6XGSQFDENWHFcHxW0oQIEvW56Mgr01qO53EIEIDDvMFqszBU+uIm9fzGARLPQ==",
-        "dependencies": {
-          "Autofac": "9.1.0",
-          "Microsoft.Extensions.DependencyInjection.Abstractions": "10.0.4"
-        }
-      },
       "Autofac.Extras.Moq": {
         "type": "Transitive",
         "resolved": "7.0.0",
@@ -332,14 +323,6 @@
           "Microsoft.IdentityModel.Protocols.OpenIdConnect": "8.0.1"
         }
       },
-      "Microsoft.AspNetCore.Connections.Abstractions": {
-        "type": "Transitive",
-        "resolved": "10.0.10",
-        "contentHash": "oXFVxDMZeUSCVGRyZsZAIJIrKVNayMstMfBrNOkPWJvxePziwmTGfx3+HPlf5bnwYxt6oq/FKduCoTIXXMNf1A==",
-        "dependencies": {
-          "Microsoft.Extensions.Features": "10.0.10"
-        }
-      },
       "Microsoft.AspNetCore.Cryptography.Internal": {
         "type": "Transitive",
         "resolved": "10.0.10",
@@ -414,32 +397,6 @@
           "Microsoft.AspNetCore.TestHost": "10.0.10",
           "Microsoft.Extensions.DependencyModel": "10.0.10",
           "Microsoft.Extensions.Hosting": "10.0.10"
-        }
-      },
-      "Microsoft.AspNetCore.SignalR.Common": {
-        "type": "Transitive",
-        "resolved": "10.0.10",
-        "contentHash": "X0bTYSNXyLeOHbS4HbF1x4aXFUxgu35CyUgAuCJGpZcRz2wwftRbeJ6v17wlUm7Dzvbbo5Dvff5arwY2tDHYBg==",
-        "dependencies": {
-          "Microsoft.AspNetCore.Connections.Abstractions": "10.0.10",
-          "Microsoft.Extensions.Options": "10.0.10"
-        }
-      },
-      "Microsoft.AspNetCore.SignalR.Protocols.MessagePack": {
-        "type": "Transitive",
-        "resolved": "10.0.10",
-        "contentHash": "45zHBTO1MdNZbgxuVSukryXkAl/u0+X+0rjAwuGzVK2adFmM8gprw+0D8p0WWhlAnXZFUjUtXSkdF5up1ekf6w==",
-        "dependencies": {
-          "MessagePack": "2.5.302",
-          "Microsoft.AspNetCore.SignalR.Common": "10.0.10"
-        }
-      },
-      "Microsoft.AspNetCore.SpaServices.Extensions": {
-        "type": "Transitive",
-        "resolved": "10.0.10",
-        "contentHash": "okfr9qN6PVpeABjN6cHcuhWSaIZSSmnVrdvZIlJZM2jdhFSbIOmuChJ+oySBMqbAyzBKsHxaqZcZhhWieXJAoA==",
-        "dependencies": {
-          "Microsoft.Extensions.FileProviders.Physical": "10.0.10"
         }
       },
       "Microsoft.AspNetCore.TestHost": {
@@ -680,11 +637,6 @@
           "Microsoft.Extensions.Options": "10.0.10"
         }
       },
-      "Microsoft.Extensions.Features": {
-        "type": "Transitive",
-        "resolved": "10.0.10",
-        "contentHash": "4Zdm7n1vxXAXpHOhGQVpGd5KCdcI1EWk66ilgdrDt2I+928ND+u/F+EVrzYi9pmRR+XeAE47kjuVEmkP0b0mBw=="
-      },
       "Microsoft.Extensions.FileProviders.Abstractions": {
         "type": "Transitive",
         "resolved": "10.0.10",
@@ -751,25 +703,15 @@
       },
       "Microsoft.Extensions.Http": {
         "type": "Transitive",
-        "resolved": "10.0.10",
-        "contentHash": "DuEBLw2y7ZBfilnaJtlge8f2M49932v43t7j1InceXVjcZzxNrSEkobYXdgZkXuPFnFbKcbWpAS+fZgYEW1BhA==",
+        "resolved": "9.0.10",
+        "contentHash": "Xg+P2o+fUyI38up8lpT2M/xNnSMc1M49nN42NcfJHGn5gUrpEHOg9XopcYMM6BOgglCcnYtT6PAb1aASPNA/4A==",
         "dependencies": {
-          "Microsoft.Extensions.Configuration.Abstractions": "10.0.10",
-          "Microsoft.Extensions.DependencyInjection.Abstractions": "10.0.10",
-          "Microsoft.Extensions.Diagnostics": "10.0.10",
-          "Microsoft.Extensions.Logging": "10.0.10",
-          "Microsoft.Extensions.Logging.Abstractions": "10.0.10",
-          "Microsoft.Extensions.Options": "10.0.10"
-        }
-      },
-      "Microsoft.Extensions.Http.Polly": {
-        "type": "Transitive",
-        "resolved": "10.0.10",
-        "contentHash": "ceKyX9V/C+mtapMfXQ0ClKRkxDHAW2AAJoDgTcsh7UdOteCQKB5wRTFgHJ82Lh/3O+UlPA47LRGEZkRxtz/lCA==",
-        "dependencies": {
-          "Microsoft.Extensions.Http": "10.0.10",
-          "Polly": "7.2.4",
-          "Polly.Extensions.Http": "3.0.0"
+          "Microsoft.Extensions.Configuration.Abstractions": "9.0.10",
+          "Microsoft.Extensions.DependencyInjection.Abstractions": "9.0.10",
+          "Microsoft.Extensions.Diagnostics": "9.0.10",
+          "Microsoft.Extensions.Logging": "9.0.10",
+          "Microsoft.Extensions.Logging.Abstractions": "9.0.10",
+          "Microsoft.Extensions.Options": "9.0.10"
         }
       },
       "Microsoft.Extensions.Identity.Core": {
@@ -1157,19 +1099,6 @@
         "resolved": "2.1.0",
         "contentHash": "G70cCeAOYCk/uTuFw5PBGpYY9kmBZyzld7tphachvyU514PowMRDYyKwTefxIHNGWrhXY2d1DV5B1tDEnTtY3A=="
       },
-      "Photino.Native": {
-        "type": "Transitive",
-        "resolved": "4.0.22",
-        "contentHash": "VIHipEOe4CZ7HElZE8zTwcvANOsCZ2yak/4nQ4LXzjdlwIjdbY8htmHfNR6rRPgWlCfTfT349GCa6V6Id2/Xyg=="
-      },
-      "Photino.NET": {
-        "type": "Transitive",
-        "resolved": "4.0.16",
-        "contentHash": "2oTFsxt8XpLlVvtChlBD8HzLw6MgfHF+DQ4aLEDfgc4GbYjumEywB1JMfWDChm2Whfkr4ZF7DV2deRrpitiBcw==",
-        "dependencies": {
-          "Photino.Native": "4.0.22"
-        }
-      },
       "Polly": {
         "type": "Transitive",
         "resolved": "8.6.6",
@@ -1183,39 +1112,12 @@
         "resolved": "8.6.6",
         "contentHash": "lCBL9mmhF9TZxHG3beVRkyjlLohkIC464xIAq7J7Y59C+z42hmsdUaeCKl2SIAYertOUU5TeBXyQDLDQGIKePQ=="
       },
-      "Polly.Extensions.Http": {
-        "type": "Transitive",
-        "resolved": "3.0.0",
-        "contentHash": "drrG+hB3pYFY7w1c3BD+lSGYvH2oIclH8GRSehgfyP5kjnFnHKQuuBhuHLv+PWyFuaTDyk/vfRpnxOzd11+J8g==",
-        "dependencies": {
-          "Polly": "7.1.0"
-        }
-      },
       "Quartz": {
         "type": "Transitive",
         "resolved": "3.19.1",
         "contentHash": "u+kAlmReZLLpKRG9TcPt8gP0H5e8Nff11fh9tz52e4B+GtXm9cLBOe/bfGcDs4IQftmEcxakpfTzOlsZdv9ekg==",
         "dependencies": {
           "Microsoft.Extensions.Logging.Abstractions": "2.1.1"
-        }
-      },
-      "Quartz.Extensions.DependencyInjection": {
-        "type": "Transitive",
-        "resolved": "3.19.1",
-        "contentHash": "6UKrPvWQBgOslVnhD6OgFBjBA3kO7kUc4bM2EXG8b+vSgB/EHqVP8cLOb9RePZQJb5OJeNunN9dNEmGLpg5wuw==",
-        "dependencies": {
-          "Microsoft.Extensions.Configuration.Abstractions": "10.0.0",
-          "Microsoft.Extensions.Options": "10.0.0",
-          "Quartz": "3.19.1"
-        }
-      },
-      "Quartz.Extensions.Hosting": {
-        "type": "Transitive",
-        "resolved": "3.19.1",
-        "contentHash": "gp6EUrreKcU/Az6b2bZNeebxJWMrmlLItXRmR9nX9zUSmMzQTIDWR7NTm3SsdmsoDBbrIU9vhkLD3uv1y5mMzA==",
-        "dependencies": {
-          "Microsoft.Extensions.Hosting.Abstractions": "10.0.0",
-          "Quartz.Extensions.DependencyInjection": "3.19.1"
         }
       },
       "Quartz.Serialization.SystemTextJson": {
@@ -1239,20 +1141,6 @@
         "resolved": "4.3.1",
         "contentHash": "savYe7h5yRlkqBVOwP8cIRDOdqKiPmYCU4W87JH38sBmcKD5EBoXvQIw6bNEvZ/pTe1gsiye3VFCzBsoppGkXQ=="
       },
-      "Serilog.AspNetCore": {
-        "type": "Transitive",
-        "resolved": "10.0.0",
-        "contentHash": "a/cNa1mY4On1oJlfGG1wAvxjp5g7OEzk/Jf/nm7NF9cWoE7KlZw1GldrifUBWm9oKibHkR7Lg/l5jy3y7ACR8w==",
-        "dependencies": {
-          "Serilog": "4.3.0",
-          "Serilog.Extensions.Hosting": "10.0.0",
-          "Serilog.Formatting.Compact": "3.0.0",
-          "Serilog.Settings.Configuration": "10.0.0",
-          "Serilog.Sinks.Console": "6.1.1",
-          "Serilog.Sinks.Debug": "3.0.0",
-          "Serilog.Sinks.File": "7.0.0"
-        }
-      },
       "Serilog.Enrichers.Sensitive": {
         "type": "Transitive",
         "resolved": "2.1.0",
@@ -1264,53 +1152,6 @@
         "contentHash": "QhZjXtUcA2QfQRA60m+DfyIfidKsQV7HBstbYEDqzJKMbJH/KnKthkkjciRuYrmFE+scWv1JibC5LlXrdtOUmw==",
         "dependencies": {
           "Serilog": "4.0.0"
-        }
-      },
-      "Serilog.Extensions.Hosting": {
-        "type": "Transitive",
-        "resolved": "10.0.0",
-        "contentHash": "E7juuIc+gzoGxgzFooFgAV8g9BfiSXNKsUok9NmEpyAXg2odkcPsMa/Yo4axkJRlh0se7mkYQ1GXDaBemR+b6w==",
-        "dependencies": {
-          "Microsoft.Extensions.DependencyInjection.Abstractions": "10.0.0",
-          "Microsoft.Extensions.Hosting.Abstractions": "10.0.0",
-          "Microsoft.Extensions.Logging.Abstractions": "10.0.0",
-          "Serilog": "4.3.0",
-          "Serilog.Extensions.Logging": "10.0.0"
-        }
-      },
-      "Serilog.Extensions.Logging": {
-        "type": "Transitive",
-        "resolved": "10.0.0",
-        "contentHash": "vx0kABKl2dWbBhhqAfTOk53/i8aV/5VaT3a6il9gn72Wqs2pM7EK2OB6No6xdqK2IaY6Zf9gdjLuK9BVa2rT+Q==",
-        "dependencies": {
-          "Microsoft.Extensions.Logging": "10.0.0",
-          "Serilog": "4.2.0"
-        }
-      },
-      "Serilog.Formatting.Compact": {
-        "type": "Transitive",
-        "resolved": "3.0.0",
-        "contentHash": "wQsv14w9cqlfB5FX2MZpNsTawckN4a8dryuNGbebB/3Nh1pXnROHZov3swtu3Nj5oNG7Ba+xdu7Et/ulAUPanQ==",
-        "dependencies": {
-          "Serilog": "4.0.0"
-        }
-      },
-      "Serilog.Settings.Configuration": {
-        "type": "Transitive",
-        "resolved": "10.0.0",
-        "contentHash": "LNq+ibS1sbhTqPV1FIE69/9AJJbfaOhnaqkzcjFy95o+4U+STsta9mi97f1smgXsWYKICDeGUf8xUGzd/52/uA==",
-        "dependencies": {
-          "Microsoft.Extensions.Configuration.Binder": "10.0.0",
-          "Microsoft.Extensions.DependencyModel": "10.0.0",
-          "Serilog": "4.3.0"
-        }
-      },
-      "Serilog.Sinks.AspNetCore.App.SignalR": {
-        "type": "Transitive",
-        "resolved": "1.2.2",
-        "contentHash": "iXbJ3+HmQLZuOkRgmm1dAOFUX3AQx04AMh8CvJnmCtXnX7X9lPO+if0zxsOSomN0hUv3BIPMkZzk4/7W4jPGrA==",
-        "dependencies": {
-          "Serilog": "3.1.1"
         }
       },
       "Serilog.Sinks.Console": {
@@ -1544,31 +1385,6 @@
         "resolved": "16.3.0",
         "contentHash": "SgMOdxbz8X65z8hraIs6hOEdnkH6hESTAIUa7viEngHOYaH+6q5XJmwr1+yb9vJpNQ19hCQY69xbFsLtXpobQA=="
       },
-      "Reaparr.AppHost": {
-        "type": "Project",
-        "dependencies": {
-          "Autofac.Extensions.DependencyInjection": "[11.0.0, )",
-          "FastEndpoints.Security": "[8.1.0, )",
-          "FastEndpoints.Swagger": "[8.1.0, )",
-          "Microsoft.AspNetCore.SignalR.Protocols.MessagePack": "[10.0.10, )",
-          "Microsoft.AspNetCore.SpaServices.Extensions": "[10.0.10, )",
-          "Microsoft.Extensions.Http.Polly": "[10.0.10, )",
-          "Photino.NET": "[4.0.16, )",
-          "Quartz.Extensions.Hosting": "[3.19.1, )",
-          "Reaparr.Application": "[1.0.0, )",
-          "Reaparr.Data": "[1.0.0, )",
-          "Reaparr.External": "[1.0.0, )",
-          "Reaparr.FileSystem": "[1.0.0, )",
-          "Reaparr.Identity": "[1.0.0, )",
-          "Reaparr.PlexApi": "[1.0.0, )",
-          "Reaparr.PublicAPI": "[1.0.0, )",
-          "Reaparr.Settings": "[1.0.0, )",
-          "Reaparr.SignalR": "[1.0.0, )",
-          "Serilog.AspNetCore": "[10.0.0, )",
-          "Serilog.Sinks.AspNetCore.App.SignalR": "[1.2.2, )",
-          "Velopack": "[0.0.1298, )"
-        }
-      },
       "Reaparr.Application": {
         "type": "Project",
         "dependencies": {
@@ -1613,7 +1429,16 @@
           "Microsoft.AspNetCore.Mvc.Testing": "[10.0.10, )",
           "Moq": "[4.20.72, )",
           "Moq.Contrib.HttpClient": "[1.4.0, )",
-          "Reaparr.AppHost": "[1.0.0, )",
+          "Reaparr.Application": "[1.0.0, )",
+          "Reaparr.Data": "[1.0.0, )",
+          "Reaparr.Environment": "[1.0.0, )",
+          "Reaparr.External": "[1.0.0, )",
+          "Reaparr.FileSystem": "[1.0.0, )",
+          "Reaparr.Identity": "[1.0.0, )",
+          "Reaparr.PlexApi": "[1.0.0, )",
+          "Reaparr.PublicAPI": "[1.0.0, )",
+          "Reaparr.Settings": "[1.0.0, )",
+          "Reaparr.SignalR": "[1.0.0, )",
           "Shouldly": "[4.3.0, )",
           "TUnit": "[1.45.29, )",
           "TestableIO.System.IO.Abstractions.TestingHelpers": "[22.1.1, )"

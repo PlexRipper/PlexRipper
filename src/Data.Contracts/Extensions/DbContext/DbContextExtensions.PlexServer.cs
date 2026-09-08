@@ -76,15 +76,13 @@ public static partial class DbContextExtensions
     /// </summary>
     public static async Task<List<int>> GetDownloadableServerIds(this IReaparrDbContext dbContext)
     {
-        var pausedServerIds = await dbContext
-            .PlexServers.AsNoTracking()
-            .Where(x => x.IsDownloadsPausedByUser)
-            .Select(x => x.Id)
-            .ToListAsync(CancellationToken.None);
-
         return await dbContext
             .PlexServerStatuses.AsNoTracking()
-            .Where(x => x.IsSuccessful && !pausedServerIds.Contains(x.PlexServerId))
+            .Where(x =>
+                x.IsSuccessful
+                && x.PlexServer!.IsEnabled
+                && !x.PlexServer.IsDownloadsPausedByUser
+            )
             .Select(x => x.PlexServerId)
             .Distinct()
             .ToListAsync(CancellationToken.None);

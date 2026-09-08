@@ -117,6 +117,49 @@ public class DbContextExtensionsPlexServerUnitTests : BaseUnitTest
     }
 
     [Test]
+    public async Task ShouldReturnOnlyEnabledUnpausedServersWithSuccessfulStatuses_WhenGettingDownloadableServerIds()
+    {
+        // Arrange
+        await SetupDatabase(
+            12010,
+            cfg =>
+            {
+                cfg.PlexServerCount = 4;
+            }
+        );
+
+        var dbContext = IDbContext;
+        var servers = await dbContext
+            .PlexServers.IgnoreIsEnabledFilter()
+            .OrderBy(x => x.Id)
+            .ToListAsync(CancellationToken);
+        var activeServer = servers[0];
+        var pausedServer = servers[1];
+        var disabledServer = servers[2];
+        var offlineServer = servers[3];
+
+        await dbContext
+            .PlexServers.Where(x => x.Id == pausedServer.Id)
+            .ExecuteUpdateAsync(
+                x => x.SetProperty(y => y.IsDownloadsPausedByUser, true),
+                CancellationToken
+            );
+        await dbContext
+            .PlexServers.IgnoreIsEnabledFilter()
+            .Where(x => x.Id == disabledServer.Id)
+            .ExecuteUpdateAsync(x => x.SetProperty(y => y.IsEnabled, false), CancellationToken);
+        await dbContext
+            .PlexServerStatuses.Where(x => x.PlexServerId == offlineServer.Id)
+            .ExecuteUpdateAsync(x => x.SetProperty(y => y.IsSuccessful, false), CancellationToken);
+
+        // Act
+        var result = await dbContext.GetDownloadableServerIds();
+
+        // Assert
+        result.ShouldBe([activeServer.Id]);
+    }
+
+    [Test]
     public async Task ShouldReturnTrueForIsServerDisabled_WhenServerExistsAndIsDisabled()
     {
         // Arrange

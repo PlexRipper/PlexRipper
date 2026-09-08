@@ -105,7 +105,7 @@ import { get, set } from '@vueuse/core';
 import { type FolderPathDTO, FolderType } from '@dto';
 import type { IFolderPathGroup, IHelp } from '@interfaces';
 import { DialogType, ValidationLevel } from '@enums';
-import { kebabCase } from 'lodash-es';
+import { kebabCase, orderBy } from 'lodash-es';
 import { showErrorNotification, useDialogStore, useFolderPathStore, useI18n, useSubscription } from '#imports';
 
 const { t } = useI18n();
@@ -127,10 +127,14 @@ const activeFolderPathGroup = computed<IFolderPathGroup | undefined>(() =>
 
 const visibleFolderPaths = computed(() => {
 	if (props.onlyDefaults) {
-		return folderPathStore.getFolderPathsGroups(true)[0]?.paths ?? [];
+		return folderPathStore.getDefaultFolderPaths;
 	}
 
-	return get(activeFolderPathGroup)?.paths ?? [];
+	return orderBy(
+		folderPathStore.folderPaths.filter((folderPath) => folderPath.folderType === get(activeFolderType)),
+		['isDefault'],
+		['desc'],
+	);
 });
 
 const confirmDirectoryBrowser = (path: FolderPathDTO): void => {

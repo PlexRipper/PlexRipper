@@ -175,6 +175,7 @@
 						label="Setup"
 						block
 						icon="mdi-cog-sync"
+						:disable="!store.detail"
 						:loading="store.isSettingUp"
 						data-cy="integration-setup"
 						@click="setup" />

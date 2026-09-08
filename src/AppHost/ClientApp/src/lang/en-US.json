@@ -433,54 +433,6 @@
                 "api-key-length": "API key must be exactly 32 characters long."
             }
         },
-        "sonarr-integration": {
-            "callback-url-warning": "Reaparr will register with Sonarr using localhost as its callback URL. If running in Docker, configure the public Reaparr URL in Network settings.",
-            "callback-url-configured": "Reaparr will register with Sonarr using {url} as its callback URL.",
-            "connection-status": {
-                "connection-failed": "Could not connect to Sonarr. Ensure Sonarr is online and connectable!",
-                "invalid-api-key": "Could connect to Sonarr, but the API key was invalid",
-                "success": "Reaparr can connect successfully to Sonarr!",
-                "unknown-connection-status": "Could not determine what went wrong when testing the connection with Sonarr",
-                "url-is-invalid": "The Sonarr base URL is invalid, check again."
-            },
-            "configuration-status": {
-                "success": "Sonarr has been successfully configured to work with Reaparr"
-            },
-            "nav-bar": {
-                "configure": {
-                    "button": "Setup Sonarr Integration",
-                    "title": "Configure Sonarr Integration"
-                },
-                "connection": {
-                    "title": "Setup Sonarr Connection"
-                }
-            },
-            "title": "Sonarr Integration"
-        },
-        "radarr-integration": {
-            "callback-url-warning": "Reaparr will register with Radarr using localhost as its callback URL. If running in Docker, configure the public Reaparr URL in Network settings.",
-            "callback-url-configured": "Reaparr will register with Radarr using {url} as its callback URL.",
-            "connection-status": {
-                "connection-failed": "Could not connect to Radarr. Ensure Radarr is online and connectable!",
-                "invalid-api-key": "Could connect to Radarr, but the API key was invalid",
-                "success": "Reaparr can connect successfully to Radarr!",
-                "unknown-connection-status": "Could not determine what went wrong when testing the connection with Radarr",
-                "url-is-invalid": "The Radarr base URL is invalid, check again."
-            },
-            "configuration-status": {
-                "success": "Radarr has been successfully configured to work with Reaparr"
-            },
-            "nav-bar": {
-                "configure": {
-                    "button": "Setup Radarr Integration",
-                    "title": "Configure Radarr Integration"
-                },
-                "connection": {
-                    "title": "Setup Radarr Connection"
-                }
-            },
-            "title": "Radarr Integration"
-        },
         "refresh-mode-dialog": {
             "incremental": "Incremental refresh",
             "full-reset": "Full reset",
@@ -516,8 +468,7 @@
                     "validation-ready": "{type} integration setup validated.",
                     "complete": "Integration setup complete."
                 }
-            },
-            "test": ""
+            }
         }
     },
     "general": {
@@ -543,7 +494,6 @@
             }
         },
         "alerts": {
-            "disabled-paths": "Editing the paths is disabled when there are active downloads. Make sure all downloads are stopped or cleared!",
             "invalid-directory": "Directory is not a valid path!",
             "valid-directory": "Directory is a valid path!"
         },
@@ -560,7 +510,6 @@
             "go-to-setup-page": "Go To Setup Page",
             "hide": "Hide",
             "check-connection": "Check Connection",
-            "save-and-setup": "Save and Setup",
             "next": "Next",
             "not-validated": "Not validated",
             "reset": "Reset",
@@ -983,18 +932,6 @@
                         "label": "Sonarr base URL",
                         "text": "Base address where your Sonarr instance is reachable. Example: http://localhost:8989 or http://sonarr:8989",
                         "title": "Base URL to Sonarr"
-                    },
-                    "clear-configuration": {
-                        "text": "Clears the Sonarr configuration from Reaparr and resets the base URL and API key inputs.",
-                        "title": "Clear Sonarr configuration"
-                    },
-                    "setup-configuration": {
-                        "text": "Reaparr will set up an Indexer and Download client in Sonarr, which is then used to allow Sonarr to trigger downloads.\n\nSee [Sonarr/Radarr Integration Guide](https://www.reaparr.rocks/docs/integration/sonarr-radarr) for more info.",
-                        "title": "Setup Sonarr configuration"
-                    },
-                    "test-connection": {
-                        "text": "Reaparr will attempt to connect to the Sonarr instance with the provided base URL and API key.",
-                        "title": "Test the connection to Sonarr"
                     }
                 },
                 "radarr": {
@@ -1024,18 +961,6 @@
                         "label": "Radarr base URL",
                         "text": "Base address where your Radarr instance is reachable. Example: http://localhost:7878 or http://radarr:7878",
                         "title": "Base URL to Radarr"
-                    },
-                    "clear-configuration": {
-                        "text": "Clears the Radarr configuration from Reaparr and resets the base URL and API key inputs.",
-                        "title": "Clear Radarr configuration"
-                    },
-                    "setup-configuration": {
-                        "text": "Reaparr will set up an Indexer and Download client in Radarr, which is then used to allow Radarr to trigger downloads.\n\nSee [Sonarr/Radarr Integration Guide](https://www.reaparr.rocks/docs/integration/sonarr-radarr) for more info.",
-                        "title": "Setup Radarr configuration"
-                    },
-                    "test-connection": {
-                        "text": "Reaparr will attempt to connect to the Radarr instance with the provided base URL and API key.",
-                        "title": "Test the connection to Radarr"
                     }
                 }
             },

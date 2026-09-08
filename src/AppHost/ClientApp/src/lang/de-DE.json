@@ -433,54 +433,6 @@
                 "api-key-length": "Der API-Schlüssel muss genau 32 Zeichen lang sein."
             }
         },
-        "sonarr-integration": {
-            "callback-url-warning": "Reaparr registriert sich bei Sonarr mit localhost als Callback-URL. In Docker-Umgebungen bitte die öffentliche Reaparr-URL in den Netzwerkeinstellungen konfigurieren.",
-            "callback-url-configured": "Reaparr registriert sich bei Sonarr mit {url} als Callback-URL.",
-            "connection-status": {
-                "connection-failed": "Es konnte keine Verbindung zu Sonarr hergestellt werden. Bitte stellen Sie sicher, dass Sonarr online und erreichbar ist!",
-                "invalid-api-key": "Die Verbindung zu Sonarr konnte hergestellt werden, aber der API-Schlüssel war ungültig.",
-                "success": "Reaparr konnte erfolgreich eine Verbindung zu Sonarr herstellen!",
-                "unknown-connection-status": "Es konnte nicht festgestellt werden, was beim Testen der Verbindung mit Sonarr schiefgelaufen ist.",
-                "url-is-invalid": "Die Sonarr-Basis-URL ist ungültig, bitte überprüfen Sie sie erneut."
-            },
-            "configuration-status": {
-                "success": "Sonarr wurde erfolgreich für die Zusammenarbeit mit Reaparr konfiguriert."
-            },
-            "nav-bar": {
-                "configure": {
-                    "button": "Sonarr-Integration einrichten",
-                    "title": "Sonarr-Integration konfigurieren"
-                },
-                "connection": {
-                    "title": "Sonarr-Verbindung einrichten"
-                }
-            },
-            "title": "Sonarr-Integration"
-        },
-        "radarr-integration": {
-            "callback-url-warning": "Reaparr registriert sich bei Radarr mit localhost als Callback-URL. In Docker-Umgebungen bitte die öffentliche Reaparr-URL in den Netzwerkeinstellungen konfigurieren.",
-            "callback-url-configured": "Reaparr registriert sich bei Radarr mit {url} als Callback-URL.",
-            "connection-status": {
-                "connection-failed": "Es konnte keine Verbindung zu Radarr hergestellt werden. Bitte stellen Sie sicher, dass Radarr online und erreichbar ist!",
-                "invalid-api-key": "Die Verbindung zu Radarr konnte hergestellt werden, aber der API-Schlüssel war ungültig.",
-                "success": "Reaparr konnte erfolgreich eine Verbindung zu Radarr herstellen!",
-                "unknown-connection-status": "Es konnte nicht festgestellt werden, was beim Testen der Verbindung mit Radarr schiefgelaufen ist.",
-                "url-is-invalid": "Die Radarr-Basis-URL ist ungültig, bitte überprüfen Sie sie erneut."
-            },
-            "configuration-status": {
-                "success": "Radarr wurde erfolgreich für die Zusammenarbeit mit Reaparr konfiguriert."
-            },
-            "nav-bar": {
-                "configure": {
-                    "button": "Radarr-Integration einrichten",
-                    "title": "Radarr-Integration konfigurieren"
-                },
-                "connection": {
-                    "title": "Radarr-Verbindung einrichten"
-                }
-            },
-            "title": "Radarr-Integration"
-        },
         "refresh-mode-dialog": {
             "incremental": "Inkrementell aktualisieren",
             "full-reset": "Vollständig zurücksetzen",
@@ -516,8 +468,7 @@
                     "validation-ready": "{type}-Integration wurde überprüft.",
                     "complete": "Integrationseinrichtung abgeschlossen."
                 }
-            },
-            "test": ""
+            }
         }
     },
     "general": {
@@ -543,7 +494,6 @@
             }
         },
         "alerts": {
-            "disabled-paths": "Das Editieren der Pfade ist gesperrt wenn Downloads aktiv sind. Stelle sicher, dass alle Downloads gestoppt oder gelöscht sind!",
             "invalid-directory": "ungültiger Pfad angegeben!",
             "valid-directory": "Verzeichnis ist ein gültiger Pfad!"
         },
@@ -560,7 +510,6 @@
             "go-to-setup-page": "springe zur Einrichtungsseite",
             "hide": "verstecken",
             "check-connection": "Verbindung prüfen",
-            "save-and-setup": "Speichern und einrichten",
             "next": "weiter",
             "not-validated": "nicht überprüft",
             "reset": "zurück setzen",
@@ -983,18 +932,6 @@
                         "label": "Sonarr-Basis-URL",
                         "text": "Basisadresse, unter der Ihre Sonarr-Instanz erreichbar ist. Beispiel: http://localhost:8989 oder http://sonarr:8989",
                         "title": "Basis-URL zu Sonarr"
-                    },
-                    "clear-configuration": {
-                        "text": "Reaparr wird versuchen, mit der angegebenen Basis-URL und dem API-Schlüssel eine Verbindung zur Radarr-Instanz herzustellen.",
-                        "title": "Clear Sonarr-Konfiguration"
-                    },
-                    "setup-configuration": {
-                        "text": "Reaparr richtet in Sonarr einen Indexer und einen Download-Client ein, der es Sonarr ermöglicht, Downloads auszulösen.\n\nWeitere Informationen finden Sie im [Sonarr/Radarr-Integrationsleitfaden](https://www.reaparr.rocks/docs/integration/sonarr-radarr).",
-                        "title": "Sonarr-Konfiguration einrichten"
-                    },
-                    "test-connection": {
-                        "text": "Reaparr wird versuchen, mit der angegebenen Basis-URL und dem API-Schlüssel eine Verbindung zur Sonarr-Instanz herzustellen.",
-                        "title": "Testen Sie die Verbindung zu Sonarr."
                     }
                 },
                 "radarr": {
@@ -1024,18 +961,6 @@
                         "label": "Radarr-Basis-URL",
                         "text": "Basisadresse, unter der Ihre Radarr-Instanz erreichbar ist. Beispiel: http://localhost:7878 oder http://radarr:7878",
                         "title": "Basis-URL zu Radarr"
-                    },
-                    "clear-configuration": {
-                        "text": "Löscht die Radarr-Konfiguration aus Reaparr und setzt die Eingaben für Basis-URL und API-Schlüssel zurück.",
-                        "title": "Clear Radarr-Konfiguration"
-                    },
-                    "setup-configuration": {
-                        "text": "Reaparr richtet in Radarr einen Indexer und einen Download-Client ein, der es Radarr ermöglicht, Downloads auszulösen.\n\nWeitere Informationen finden Sie im [Sonarr/Radarr-Integrationsleitfaden](https://www.reaparr.rocks/docs/integration/sonarr-radarr).",
-                        "title": "Radarr-Konfiguration einrichten"
-                    },
-                    "test-connection": {
-                        "text": "Reaparr wird versuchen, mit der angegebenen Basis-URL und dem API-Schlüssel eine Verbindung zur Radarr-Instanz herzustellen.",
-                        "title": "Testen Sie die Verbindung zu Radarr."
                     }
                 }
             },

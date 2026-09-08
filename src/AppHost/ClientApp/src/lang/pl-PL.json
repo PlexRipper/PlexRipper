@@ -433,54 +433,6 @@
                 "api-key-length": "Klucz API musi mieć dokładnie 32 znaki."
             }
         },
-        "sonarr-integration": {
-            "callback-url-warning": "Reaparr zarejestruje się w Sonarr używając localhost jako adresu zwrotnego. W środowisku Docker skonfiguruj publiczny adres URL Reaparr w ustawieniach sieci.",
-            "callback-url-configured": "Reaparr zarejestruje się w Sonarr używając {url} jako adresu zwrotnego.",
-            "connection-status": {
-                "connection-failed": "Nie udało się połączyć z Sonarr. Upewnij się, że Sonarr jest online i można się z nim połączyć!",
-                "invalid-api-key": "Udało się połączyć z Sonarr, ale klucz API był nieprawidłowy",
-                "success": "Reaparr pomyślnie nawiązał połączenie z Sonarr!",
-                "unknown-connection-status": "Nie udało się ustalić, co poszło nie tak podczas testowania połączenia z Sonarr",
-                "url-is-invalid": "Bazowy adres URL Sonarr jest nieprawidłowy, sprawdź ponownie."
-            },
-            "configuration-status": {
-                "success": "Sonarr został pomyślnie skonfigurowany do współpracy z Reaparr"
-            },
-            "nav-bar": {
-                "configure": {
-                    "button": "Konfiguracja integracji Sonarr",
-                    "title": "Konfiguruj integrację Sonarr"
-                },
-                "connection": {
-                    "title": "Konfiguracja połączenia Sonarr"
-                }
-            },
-            "title": "Integracja Sonarr"
-        },
-        "radarr-integration": {
-            "callback-url-warning": "Reaparr zarejestruje się w Radarr używając localhost jako adresu zwrotnego. W środowisku Docker skonfiguruj publiczny adres URL Reaparr w ustawieniach sieci.",
-            "callback-url-configured": "Reaparr zarejestruje się w Radarr używając {url} jako adresu zwrotnego.",
-            "connection-status": {
-                "connection-failed": "Nie udało się połączyć z Radarr. Upewnij się, że Radarr jest online i można się z nim połączyć!",
-                "invalid-api-key": "Udało się połączyć z Radarr, ale klucz API był nieprawidłowy",
-                "success": "Reaparr pomyślnie nawiązał połączenie z Radarr!",
-                "unknown-connection-status": "Nie udało się ustalić, co poszło nie tak podczas testowania połączenia z Radarr",
-                "url-is-invalid": "Bazowy adres URL Radarr jest nieprawidłowy, sprawdź ponownie."
-            },
-            "configuration-status": {
-                "success": "Radarr został pomyślnie skonfigurowany do współpracy z Reaparr"
-            },
-            "nav-bar": {
-                "configure": {
-                    "button": "Konfiguracja integracji Radarr",
-                    "title": "Konfiguruj integrację Radarr"
-                },
-                "connection": {
-                    "title": "Konfiguracja połączenia Radarr"
-                }
-            },
-            "title": "Integracja Radar"
-        },
         "refresh-mode-dialog": {
             "incremental": "Odświeżanie przyrostowe",
             "full-reset": "Pełny reset",
@@ -516,8 +468,7 @@
                     "validation-ready": "Konfiguracja integracji {type} została zweryfikowana.",
                     "complete": "Konfiguracja integracji zakończona."
                 }
-            },
-            "test": ""
+            }
         }
     },
     "general": {
@@ -543,7 +494,6 @@
             }
         },
         "alerts": {
-            "disabled-paths": "Edycja ścieżek jest wyłączona, gdy są aktywne pobierania. Upewnij się, że wszystkie pobierania są zatrzymane lub wyczyszczone!",
             "invalid-directory": "Katalog nie jest prawidłową ścieżką!",
             "valid-directory": "Katalog jest prawidłową ścieżką!"
         },
@@ -560,7 +510,6 @@
             "go-to-setup-page": "Przejdź do strony konfiguracji",
             "hide": "Ukryj",
             "check-connection": "Sprawdź połączenie",
-            "save-and-setup": "Zapisz i skonfiguruj",
             "next": "Następne",
             "not-validated": "Nie zweryfikowane",
             "reset": "Zresetuj",
@@ -983,18 +932,6 @@
                         "label": "Podstawowy adres URL Sonarr",
                         "text": "Adres bazowy, pod którym można uzyskać dostęp do swojej instancji Sonarr. Przykład: http://localhost:8989 lub http://sonarr:8989",
                         "title": "Podstawowy adres URL do Sonarr"
-                    },
-                    "clear-configuration": {
-                        "text": "Usuwa konfigurację Sonarr z Reaparr i resetuje podstawowe dane adresowe URL i klucze API.",
-                        "title": "Wyczyść konfigurację Sonarr"
-                    },
-                    "setup-configuration": {
-                        "text": "Reaparr skonfiguruje w Sonarr klienta indeksowania i pobierania, który następnie umożliwi Sonarrowi inicjowanie pobierania.\n\nWięcej informacji można znaleźć w [Przewodniku integracji Sonarr/Radarr](https://www.reaparr.rocks/docs/integration/sonarr-radarr).",
-                        "title": "Konfiguracja Sonarr"
-                    },
-                    "test-connection": {
-                        "text": "Reaparr spróbuje nawiązać połączenie z instancją Sonarr przy użyciu podanego adresu URL bazowego i klucza API.",
-                        "title": "Przetestuj połączenie z Sonarr"
                     }
                 },
                 "radarr": {
@@ -1024,18 +961,6 @@
                         "label": "Podstawowy adres URL Radarr",
                         "text": "Adres bazowy, pod którym można uzyskać dostęp do swojej instancji Radarr. Przykład: http://localhost:7878 lub http://radarr:7878",
                         "title": "Podstawowy adres URL do Radarr"
-                    },
-                    "clear-configuration": {
-                        "text": "Usuwa konfigurację Radarr z Reaparr i resetuje podstawowe dane adresowe URL i klucze API.",
-                        "title": "Wyczyść konfigurację Radar"
-                    },
-                    "setup-configuration": {
-                        "text": "Reaparr skonfiguruje w Radarr klienta indeksowania i pobierania, który następnie umożliwi Radarrowi inicjowanie pobierania.\n\nWięcej informacji można znaleźć w [Przewodniku integracji Sonarr/Radarr](https://www.reaparr.rocks/docs/integration/sonarr-radarr).",
-                        "title": "Konfiguracja Radarr"
-                    },
-                    "test-connection": {
-                        "text": "Reaparr spróbuje nawiązać połączenie z instancją Radarr przy użyciu podanego adresu URL bazowego i klucza API.",
-                        "title": "Przetestuj połączenie z Radarr"
                     }
                 }
             },

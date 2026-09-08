@@ -2,32 +2,16 @@ namespace Reaparr.Application.UnitTests;
 
 public class SetupSonarrDownloadClientCommandUnitTests : BaseUnitTest<SetupSonarrDownloadClientCommandHandler>
 {
-    // ISonarrSettings inherits IBaseSettingsModule<T> which has a static abstract member, making it
-    // incompatible with Moq. Inject concrete SonarrSettings instances via TypedParameter instead.
+    private async Task<SonarrIntegration> SetupIntegrationAsync()
+    {
+        await SetupDatabase(62600, config => config.SonarrIntegrationCount = 1);
+        return await IDbContext.SonarrIntegrations.SingleAsync(CancellationToken);
+    }
 
-    private SetupSonarrDownloadClientCommandHandler CreateSut(
-        SonarrSettings sonarrSettings,
-        IntegrationsSettings integrationsSettings,
-        NetworkSettingsModule networkSettings
-    ) =>
+    private SetupSonarrDownloadClientCommandHandler CreateSut(NetworkSettingsModule networkSettings) =>
         Mock.Create<SetupSonarrDownloadClientCommandHandler>(
-            new TypedParameter(typeof(ISonarrSettings), sonarrSettings),
-            new TypedParameter(typeof(IIntegrationsSettings), integrationsSettings),
             new TypedParameter(typeof(INetworkSettings), networkSettings)
         );
-
-    private static SonarrSettings ValidSettings(
-        string baseUrl = "http://localhost:8989",
-        string apiKey = "some-api-key"
-    ) =>
-        new()
-        {
-            IsConfigured = false,
-            SonarrBaseUrl = baseUrl,
-            SonarrApiKey = apiKey,
-        };
-
-    private static IntegrationsSettings ValidIntegrationsSettings() => IntegrationsSettings.Create();
 
     private static NetworkSettingsModule ValidNetworkSettings(string? reverseProxyUrl = null, string? basePath = null)
     {
@@ -46,10 +30,17 @@ public class SetupSonarrDownloadClientCommandUnitTests : BaseUnitTest<SetupSonar
     public async Task ShouldReturnFailedResult_WhenSonarrBaseUrlIsEmpty()
     {
         // Arrange
-        var sut = CreateSut(ValidSettings(baseUrl: string.Empty), ValidIntegrationsSettings(), ValidNetworkSettings());
+        var integration = await SetupIntegrationAsync();
+        await IDbContext
+            .SonarrIntegrations.Where(x => x.Id == integration.Id)
+            .ExecuteUpdateAsync(x => x.SetProperty(p => p.BaseUrl, string.Empty), CancellationToken);
+        var sut = CreateSut(ValidNetworkSettings());
 
         // Act
-        var result = await sut.ExecuteAsync(new SetupSonarrDownloadClientCommand(), CancellationToken);
+        var result = await sut.ExecuteAsync(
+            new SetupSonarrDownloadClientCommand { IntegrationId = integration.Id },
+            CancellationToken
+        );
 
         // Assert
         result.IsFailed.ShouldBeTrue();
@@ -65,10 +56,10 @@ public class SetupSonarrDownloadClientCommandUnitTests : BaseUnitTest<SetupSonar
     }
 
     [Test]
-    public async Task ShouldReturnFailedResult_WhenSonarrApiKeyIsEmpty()
+    public async Task ShouldReturnFailedResult_WhenIntegrationIsMissing()
     {
         // Arrange
-        var sut = CreateSut(ValidSettings(apiKey: string.Empty), ValidIntegrationsSettings(), ValidNetworkSettings());
+        var sut = CreateSut(ValidNetworkSettings());
 
         // Act
         var result = await sut.ExecuteAsync(new SetupSonarrDownloadClientCommand(), CancellationToken);
@@ -90,6 +81,7 @@ public class SetupSonarrDownloadClientCommandUnitTests : BaseUnitTest<SetupSonar
     public async Task ShouldReturnFailedResult_WhenGetDownloadClientsFails()
     {
         // Arrange
+        var integration = await SetupIntegrationAsync();
         Mock.SetupCommand(It.IsAny<SonarApiGetDownloadClientsCommand>)
             .ReturnsAsync(Result.Fail("Sonarr unreachable"))
             .Verifiable(Times.Once);
@@ -97,10 +89,17 @@ public class SetupSonarrDownloadClientCommandUnitTests : BaseUnitTest<SetupSonar
         Mock.SetupCommand(It.IsAny<SonarrApiCreateDownloadClientCommand>).Verifiable(Times.Never);
         Mock.SetupCommand(It.IsAny<SonarApiUpdateDownloadClientCommand>).Verifiable(Times.Never);
 
-        var sut = CreateSut(ValidSettings(), ValidIntegrationsSettings(), ValidNetworkSettings());
+        var sut = CreateSut(ValidNetworkSettings());
+        Mock.Mock<IProgressHubService>()
+            .Setup(x => x.SendIntegrationSetupProgressAsync(It.IsAny<IntegrationSetupProgressDTO>()))
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.Exactly(2));
 
         // Act
-        var result = await sut.ExecuteAsync(new SetupSonarrDownloadClientCommand(), CancellationToken);
+        var result = await sut.ExecuteAsync(
+            new SetupSonarrDownloadClientCommand { IntegrationId = integration.Id },
+            CancellationToken
+        );
 
         // Assert
         result.IsFailed.ShouldBeTrue();
@@ -111,6 +110,7 @@ public class SetupSonarrDownloadClientCommandUnitTests : BaseUnitTest<SetupSonar
     public async Task ShouldCreateDownloadClient_WhenNoneExists()
     {
         // Arrange
+        var integration = await SetupIntegrationAsync();
         Mock.SetupCommand(It.IsAny<SonarApiGetDownloadClientsCommand>)
             .ReturnsAsync(Result.Ok(new List<DownloadClientResourceDTO>()))
             .Verifiable(Times.Once);
@@ -121,10 +121,17 @@ public class SetupSonarrDownloadClientCommandUnitTests : BaseUnitTest<SetupSonar
 
         Mock.SetupCommand(It.IsAny<SonarApiUpdateDownloadClientCommand>).Verifiable(Times.Never);
 
-        var sut = CreateSut(ValidSettings(), ValidIntegrationsSettings(), ValidNetworkSettings());
+        var sut = CreateSut(ValidNetworkSettings());
+        Mock.Mock<IProgressHubService>()
+            .Setup(x => x.SendIntegrationSetupProgressAsync(It.IsAny<IntegrationSetupProgressDTO>()))
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.Exactly(2));
 
         // Act
-        var result = await sut.ExecuteAsync(new SetupSonarrDownloadClientCommand(), CancellationToken);
+        var result = await sut.ExecuteAsync(
+            new SetupSonarrDownloadClientCommand { IntegrationId = integration.Id },
+            CancellationToken
+        );
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -136,6 +143,7 @@ public class SetupSonarrDownloadClientCommandUnitTests : BaseUnitTest<SetupSonar
     public async Task ShouldUpdateExistingDownloadClient_WhenOneAlreadyExists()
     {
         // Arrange
+        var integration = await SetupIntegrationAsync();
         var existingClient = new DownloadClientResourceDTO { Id = 5, Name = "Reaparr DownloadClient" };
 
         Mock.SetupCommand(It.IsAny<SonarApiGetDownloadClientsCommand>)
@@ -148,10 +156,17 @@ public class SetupSonarrDownloadClientCommandUnitTests : BaseUnitTest<SetupSonar
 
         Mock.SetupCommand(It.IsAny<SonarrApiCreateDownloadClientCommand>).Verifiable(Times.Never);
 
-        var sut = CreateSut(ValidSettings(), ValidIntegrationsSettings(), ValidNetworkSettings());
+        var sut = CreateSut(ValidNetworkSettings());
+        Mock.Mock<IProgressHubService>()
+            .Setup(x => x.SendIntegrationSetupProgressAsync(It.IsAny<IntegrationSetupProgressDTO>()))
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.Exactly(2));
 
         // Act
-        var result = await sut.ExecuteAsync(new SetupSonarrDownloadClientCommand(), CancellationToken);
+        var result = await sut.ExecuteAsync(
+            new SetupSonarrDownloadClientCommand { IntegrationId = integration.Id },
+            CancellationToken
+        );
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -163,6 +178,7 @@ public class SetupSonarrDownloadClientCommandUnitTests : BaseUnitTest<SetupSonar
     public async Task ShouldReturnFailedResult_WhenCreateDownloadClientFails()
     {
         // Arrange
+        var integration = await SetupIntegrationAsync();
         Mock.SetupCommand(It.IsAny<SonarApiGetDownloadClientsCommand>)
             .ReturnsAsync(Result.Ok(new List<DownloadClientResourceDTO>()))
             .Verifiable(Times.Once);
@@ -173,10 +189,17 @@ public class SetupSonarrDownloadClientCommandUnitTests : BaseUnitTest<SetupSonar
 
         Mock.SetupCommand(It.IsAny<SonarApiUpdateDownloadClientCommand>).Verifiable(Times.Never);
 
-        var sut = CreateSut(ValidSettings(), ValidIntegrationsSettings(), ValidNetworkSettings());
+        var sut = CreateSut(ValidNetworkSettings());
+        Mock.Mock<IProgressHubService>()
+            .Setup(x => x.SendIntegrationSetupProgressAsync(It.IsAny<IntegrationSetupProgressDTO>()))
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.Exactly(2));
 
         // Act
-        var result = await sut.ExecuteAsync(new SetupSonarrDownloadClientCommand(), CancellationToken);
+        var result = await sut.ExecuteAsync(
+            new SetupSonarrDownloadClientCommand { IntegrationId = integration.Id },
+            CancellationToken
+        );
 
         // Assert
         result.IsFailed.ShouldBeTrue();
@@ -187,6 +210,7 @@ public class SetupSonarrDownloadClientCommandUnitTests : BaseUnitTest<SetupSonar
     public async Task ShouldBuildResourceWithSslEnabledAndPort443_WhenReaparrUriIsHttpsCustomDomain()
     {
         // Arrange
+        var integration = await SetupIntegrationAsync();
         SonarrDownloadContractDTO? capturedResource = null;
 
         Mock.SetupCommand(It.IsAny<SonarApiGetDownloadClientsCommand>)
@@ -203,14 +227,17 @@ public class SetupSonarrDownloadClientCommandUnitTests : BaseUnitTest<SetupSonar
             )
             .Verifiable(Times.Once);
 
-        var sut = CreateSut(
-            ValidSettings(),
-            ValidIntegrationsSettings(),
-            ValidNetworkSettings("https://reaparr.custom-domain.nl", string.Empty)
-        );
+        var sut = CreateSut(ValidNetworkSettings("https://reaparr.custom-domain.nl", string.Empty));
+        Mock.Mock<IProgressHubService>()
+            .Setup(x => x.SendIntegrationSetupProgressAsync(It.IsAny<IntegrationSetupProgressDTO>()))
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.Exactly(2));
 
         // Act
-        var result = await sut.ExecuteAsync(new SetupSonarrDownloadClientCommand(), CancellationToken);
+        var result = await sut.ExecuteAsync(
+            new SetupSonarrDownloadClientCommand { IntegrationId = integration.Id },
+            CancellationToken
+        );
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -226,7 +253,7 @@ public class SetupSonarrDownloadClientCommandUnitTests : BaseUnitTest<SetupSonar
 
         var urlBaseField = capturedResource.Fields!.FirstOrDefault(f => f.Name == "urlBase");
         urlBaseField.ShouldNotBeNull();
-        urlBaseField.Value.ShouldBe("api/public/download-client");
+        urlBaseField.Value.ShouldBe($"api/public/integrations/{integration.Id}/download-client");
 
         Mock.Mock<ICommandExecutor>().Verify();
     }
@@ -235,6 +262,7 @@ public class SetupSonarrDownloadClientCommandUnitTests : BaseUnitTest<SetupSonar
     public async Task ShouldBuildResourceWithHttpProxyHostPortAndBasePath_WhenReverseProxyIsHttp()
     {
         // Arrange
+        var integration = await SetupIntegrationAsync();
         SonarrDownloadContractDTO? capturedResource = null;
 
         Mock.SetupCommand(It.IsAny<SonarApiGetDownloadClientsCommand>)
@@ -251,14 +279,17 @@ public class SetupSonarrDownloadClientCommandUnitTests : BaseUnitTest<SetupSonar
             )
             .Verifiable(Times.Once);
 
-        var sut = CreateSut(
-            ValidSettings(),
-            ValidIntegrationsSettings(),
-            ValidNetworkSettings("http://reaparr.example.com:8080", "/reaparr")
-        );
+        var sut = CreateSut(ValidNetworkSettings("http://reaparr.example.com:8080", "/reaparr"));
+        Mock.Mock<IProgressHubService>()
+            .Setup(x => x.SendIntegrationSetupProgressAsync(It.IsAny<IntegrationSetupProgressDTO>()))
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.Exactly(2));
 
         // Act
-        var result = await sut.ExecuteAsync(new SetupSonarrDownloadClientCommand(), CancellationToken);
+        var result = await sut.ExecuteAsync(
+            new SetupSonarrDownloadClientCommand { IntegrationId = integration.Id },
+            CancellationToken
+        );
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -278,7 +309,7 @@ public class SetupSonarrDownloadClientCommandUnitTests : BaseUnitTest<SetupSonar
 
         var urlBaseField = capturedResource.Fields!.FirstOrDefault(f => f.Name == "urlBase");
         urlBaseField.ShouldNotBeNull();
-        urlBaseField.Value.ShouldBe("/reaparr/api/public/download-client");
+        urlBaseField.Value.ShouldBe($"/reaparr/api/public/integrations/{integration.Id}/download-client");
 
         Mock.Mock<ICommandExecutor>().Verify();
     }
@@ -287,6 +318,7 @@ public class SetupSonarrDownloadClientCommandUnitTests : BaseUnitTest<SetupSonar
     public async Task ShouldFallbackToLocalhost_WhenReverseProxyUrlIsInvalid()
     {
         // Arrange
+        var integration = await SetupIntegrationAsync();
         SonarrDownloadContractDTO? capturedResource = null;
 
         Mock.SetupCommand(It.IsAny<SonarApiGetDownloadClientsCommand>)
@@ -303,10 +335,17 @@ public class SetupSonarrDownloadClientCommandUnitTests : BaseUnitTest<SetupSonar
             )
             .Verifiable(Times.Once);
 
-        var sut = CreateSut(ValidSettings(), ValidIntegrationsSettings(), ValidNetworkSettings("not-a-url"));
+        var sut = CreateSut(ValidNetworkSettings("not-a-url"));
+        Mock.Mock<IProgressHubService>()
+            .Setup(x => x.SendIntegrationSetupProgressAsync(It.IsAny<IntegrationSetupProgressDTO>()))
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.Exactly(2));
 
         // Act
-        var result = await sut.ExecuteAsync(new SetupSonarrDownloadClientCommand(), CancellationToken);
+        var result = await sut.ExecuteAsync(
+            new SetupSonarrDownloadClientCommand { IntegrationId = integration.Id },
+            CancellationToken
+        );
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -326,7 +365,7 @@ public class SetupSonarrDownloadClientCommandUnitTests : BaseUnitTest<SetupSonar
 
         var urlBaseField = capturedResource.Fields!.FirstOrDefault(f => f.Name == "urlBase");
         urlBaseField.ShouldNotBeNull();
-        urlBaseField.Value.ShouldBe("api/public/download-client");
+        urlBaseField.Value.ShouldBe($"api/public/integrations/{integration.Id}/download-client");
 
         Mock.Mock<ICommandExecutor>().Verify();
     }

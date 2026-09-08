@@ -138,7 +138,7 @@ public class GenerateDownloadTaskMoviesCommandHandler
                     )
                 );
                 movieDownloadTask.Calculate();
-                _dbContext.DownloadTaskMovie.Add(movieDownloadTask);
+                downloadTasks.Add(movieDownloadTask);
             }
 
             if (downloadTasks.Count == 0)

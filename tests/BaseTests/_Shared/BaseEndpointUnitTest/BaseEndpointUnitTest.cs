@@ -11,9 +11,6 @@ public abstract class BaseEndpointUnitTest<TEndpoint, TRequest> : BaseEndpointUn
     where TEndpoint : Endpoint<TRequest>
     where TRequest : class
 {
-    protected BaseEndpointUnitTest(LogEventLevel logEventLevel = LogEventLevel.Verbose)
-        : base(logEventLevel) { }
-
     /// <summary>
     /// Validates the request and invokes the endpoint's <c>HandleAsync</c> method only when validation succeeds.
     /// </summary>
@@ -66,9 +63,6 @@ public abstract class BaseEndpointUnitTest<TEndpoint, TRequest, TResponse>
     where TRequest : class
     where TResponse : class
 {
-    protected BaseEndpointUnitTest(LogEventLevel logEventLevel = LogEventLevel.Verbose)
-        : base(logEventLevel) { }
-
     /// <summary>
     /// Validates the request and invokes the endpoint's <c>HandleAsync</c> method only when validation succeeds.
     /// </summary>
@@ -117,9 +111,6 @@ public abstract class BaseEndpointWithoutRequestUnitTest<TEndpoint, TResponse>
     where TEndpoint : EndpointWithoutRequest<TResponse>
     where TResponse : class
 {
-    protected BaseEndpointWithoutRequestUnitTest(LogEventLevel logEventLevel = LogEventLevel.Verbose)
-        : base(logEventLevel) { }
-
     /// <summary>
     /// Invokes the endpoint's <c>HandleAsync</c> method using the endpoint test service container.
     /// </summary>

@@ -21,9 +21,6 @@ public abstract class BaseEndpointUnitTestBase<TEndpoint, TResponse> : BaseUnitT
     where TEndpoint : class, IEndpoint
     where TResponse : class
 {
-    protected BaseEndpointUnitTestBase(LogEventLevel logEventLevel = LogEventLevel.Verbose)
-        : base(logEventLevel) { }
-
     /// <summary>
     /// Runs the endpoint request validator, when one exists, before invoking the endpoint handler.
     /// </summary>

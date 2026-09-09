@@ -27,6 +27,7 @@
         <Using Include="Reaparr.Data.Contracts" />
         <Using Include="Reaparr.Environment" />
         <Using Include="Reaparr.FileSystem.Contracts" />
+        <Using Include="Reaparr.FluentResults" />
         <Using Include="Reaparr.FluentResultExtensions" />
         <Using Include="Reaparr.PlexApi.Contracts" />
         <Using Include="Reaparr.Settings.Contracts" />

@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
-        <RootNamespace>FluentResults</RootNamespace>
-        <AssemblyName>FluentResults</AssemblyName>
+        <RootNamespace>Reaparr.FluentResults</RootNamespace>
+        <AssemblyName>Reaparr.FluentResults</AssemblyName>
     </PropertyGroup>
     <ItemGroup>
         <PackageReference Include="CSharpier.MsBuild" Version="1.3.0">

@@ -49,7 +49,7 @@
         <Using Include="System.Text.Json" />
         <Using Include="System.Text.Json.Serialization" />
         <Using Include="FastEndpoints" />
-        <Using Include="FluentResults" />
+        <Using Include="Reaparr.FluentResults" />
         <Using Include="FluentValidation" />
         <Using Include="Flurl" />
         <Using Include="Microsoft.AspNetCore.Http" />

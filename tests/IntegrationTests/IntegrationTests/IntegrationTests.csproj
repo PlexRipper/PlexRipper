@@ -23,12 +23,6 @@
         <ProjectReference Include="..\..\BaseTests\BaseTests.csproj" />
     </ItemGroup>
     <ItemGroup>
-        <Compile Include="..\..\BaseTests\BaseContainer\**\*.cs" Link="BaseTests\BaseContainer\%(RecursiveDir)%(Filename)%(Extension)" />
-        <Compile Include="..\..\BaseTests\_Shared\BaseIntegrationTest\**\*.cs" Link="BaseTests\BaseIntegrationTest\%(RecursiveDir)%(Filename)%(Extension)" />
-        <Compile Include="..\..\BaseTests\_Shared\Config\Autofac\TestModule.cs" Link="BaseTests\TestModule.cs" />
-        <Compile Include="..\..\BaseTests\_Shared\ReaparrWebApplicationFactory.cs" Link="BaseTests\ReaparrWebApplicationFactory.cs" />
-    </ItemGroup>
-    <ItemGroup>
         <Folder Include="Application\PlexAccounts\Create\" />
         <Folder Include="FileSystem" />
     </ItemGroup>
@@ -42,6 +36,7 @@
         <Using Include="Reaparr.Data" />
         <Using Include="Reaparr.Data.Contracts" />
         <Using Include="Reaparr.Environment" />
+        <Using Include="Reaparr.FluentResults" />
         <Using Include="Reaparr.FluentResultExtensions" />
         <Using Include="Reaparr.Identity" />
         <Using Include="Reaparr.Identity.Contracts" />

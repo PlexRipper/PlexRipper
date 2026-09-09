@@ -27,7 +27,7 @@
         <Using Include="System.Runtime.Serialization" />
         <Using Include="System.Text.Json.Serialization" />
         <Using Include="FastEndpoints" />
-        <Using Include="FluentResults" />
+        <Using Include="Reaparr.FluentResults" />
         <Using Include="FluentValidation" />
         <Using Include="Microsoft.AspNetCore.Http" />
         <Using Include="Reaparr.Domain" />

@@ -715,7 +715,7 @@ public static partial class DbContextExtensions
                     );
             case DownloadTaskType.None:
             default:
-                return Result.Fail($"Unsupported DownloadTaskType {key.Type}").LogError();
+                return Result.Fail("Unsupported DownloadTaskType {DownloadTaskType}", key.Type).LogError();
         }
 
         return Result.Ok();

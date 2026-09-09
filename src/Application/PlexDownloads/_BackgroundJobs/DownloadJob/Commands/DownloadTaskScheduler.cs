@@ -59,7 +59,11 @@ public class DownloadTaskScheduler : IDownloadTaskScheduler
                 if (!isRunning && !isQueued)
                 {
                     return Result
-                        .Fail($"{nameof(DownloadJob)} with {jobKey} cannot be stopped because it is not scheduled")
+                        .Fail(
+                            "{DownloadJobName} with {JobKey} cannot be stopped because it is not scheduled",
+                            nameof(DownloadJob),
+                            jobKey
+                        )
                         .LogWarning();
                 }
 
@@ -69,7 +73,11 @@ public class DownloadTaskScheduler : IDownloadTaskScheduler
                 var stopResult = await _scheduler.Interrupt(jobKey, cancellationToken);
                 if (!stopResult && await _scheduler.IsJobRunning(jobKey, cancellationToken))
                     return Result
-                        .Fail($"Failed to stop {nameof(DownloadTaskGeneric)} with id {downloadTaskKey}")
+                        .Fail(
+                            "Failed to stop {DownloadTaskGenericName} with id {DownloadTaskKey}",
+                            nameof(DownloadTaskGeneric),
+                            downloadTaskKey
+                        )
                         .LogError();
 
                 if (stopResult && waitForCompletion)

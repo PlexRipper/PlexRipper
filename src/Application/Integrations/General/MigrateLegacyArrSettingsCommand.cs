@@ -152,7 +152,7 @@ public class MigrateLegacyArrSettingsCommandHandler : ICommandHandler<MigrateLeg
                         CancellationToken.None
                     )
                 ).ToResult(),
-                _ => Result.Fail($"Unsupported integration type: {integration.Type}"),
+                _ => Result.Fail("Unsupported integration type: {IntegrationType}", integration.Type),
             };
             if (setupResult.IsFailed)
             {

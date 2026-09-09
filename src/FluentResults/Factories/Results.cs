@@ -1,3 +1,5 @@
+using Serilog.Core;
+
 namespace Reaparr.FluentResults
 {
     public partial class Result
@@ -41,10 +43,11 @@ namespace Reaparr.FluentResults
         /// <summary>
         ///     Creates a failed result with the given error message. Internally an error object from the error factory is created.
         /// </summary>
-        public static Result Fail(string errorMessage)
+        [MessageTemplateFormatMethod("errorMessage")]
+        public static Result Fail(string errorMessage, params object[] args)
         {
             var result = new Result();
-            result.WithError(Settings.ErrorFactory(errorMessage));
+            result.WithError(Settings.ErrorFactory(string.Format(errorMessage, args)));
             return result;
         }
 

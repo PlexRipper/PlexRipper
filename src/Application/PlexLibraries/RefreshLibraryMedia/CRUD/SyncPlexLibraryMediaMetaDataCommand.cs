@@ -114,7 +114,7 @@ public class SyncPlexLibraryMediaMetaDataCommandHandler : ICommandHandler<SyncPl
         {
             _log.Here()
                 .Warning(
-                    "No {NameOfPlexActor} relations were given to be inserted for library {LibraryName} with {libraryId}, all current {NameOfPlexActor2} relations will be dropped",
+                    "No {NameOfPlexActor} relations were given to be inserted for library {LibraryName} with {LibraryId}, all current {NameOfPlexActor2} relations will be dropped",
                     nameof(PlexActor),
                     libraryName,
                     libraryId,

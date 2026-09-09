@@ -25,7 +25,7 @@ public class DownloadJobUnitTests : BaseUnitTest<DownloadJob>
         await SetupDatabase(39393, config => config.MovieDownloadTasksCount = 1);
         var downloadTask = IDbContext.DownloadTaskMovieFile.First();
         var context = SetupJobContext(downloadTask.ToKey());
-        var startResult = Result.Fail("Download failed.").Add503ServiceUnavailableError();
+        var startResult = Result.Fail("Download failed").Add503ServiceUnavailableError();
         Mock.Mock<IDownloadManagerSettings>().Setup(x => x.DownloadSegments).Returns(4);
         Mock.Mock<ICommandExecutor>()
             .Setup(x => x.Send(It.IsAny<DeterminePlexDownloadClientCommand>(), It.IsAny<CancellationToken>()))
@@ -76,7 +76,7 @@ public class DownloadJobUnitTests : BaseUnitTest<DownloadJob>
                 CancellationToken
             );
         var context = SetupJobContext(downloadTask.ToKey());
-        var startResult = Result.Fail("Download failed.").Add503ServiceUnavailableError();
+        var startResult = Result.Fail("Download failed").Add503ServiceUnavailableError();
         Mock.Mock<IDownloadManagerSettings>().Setup(x => x.DownloadSegments).Returns(4);
         Mock.Mock<ICommandExecutor>()
             .Setup(x => x.Send(It.IsAny<DeterminePlexDownloadClientCommand>(), It.IsAny<CancellationToken>()))

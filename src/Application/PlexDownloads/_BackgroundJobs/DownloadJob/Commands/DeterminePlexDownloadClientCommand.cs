@@ -46,7 +46,10 @@ public class DeterminePlexDownloadClientCommandHandler
         if (string.IsNullOrWhiteSpace(machineId))
         {
             return Result
-                .Fail($"Unable to resolve machine identifier for Plex server {command.PlexServerId}")
+                .Fail(
+                    "Unable to resolve machine identifier for Plex server {CommandPlexServerId}",
+                    command.PlexServerId
+                )
                 .LogError();
         }
 

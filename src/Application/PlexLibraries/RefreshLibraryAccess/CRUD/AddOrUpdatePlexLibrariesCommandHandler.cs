@@ -220,7 +220,8 @@ public class AddOrUpdatePlexLibrariesCommandHandler
         await _dbContext.SaveChangesAsync(cancellationToken);
 
         foreach (var rapport in rapportList)
-            _log.Here().Information(rapport.ToString());
+            // ReSharper disable once TemplateIsNotCompileTimeConstantProblem
+            _log.Here().InformationMsg(rapport.ToString());
 
         var libraryIdsToSync = newPlexLibraries.Select(x => x.Id).Concat(changedPlexLibraryIds).Distinct().ToList();
 

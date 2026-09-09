@@ -50,7 +50,7 @@ public class CleanupLibrarySyncJobQueueCommandHandler : ICommandHandler<CleanupL
 
         await _notificationHubService.SendRefreshNotificationAsync([RefreshDataType.PlexLibrarySyncStatus]);
 
-        _log.Here().Debug("Cleaned up library sync job queue.");
+        _log.Here().Debug("Cleaned up library sync job queue");
 
         return Result.Ok();
     }

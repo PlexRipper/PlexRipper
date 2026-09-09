@@ -67,7 +67,9 @@ public static partial class DbContextExtensions
                         .ApplyTake(take ?? 0)
                         .ToListAsync(ct)
             ),
-            _ => Result.Fail($"DownloadTaskLog of type {downloadTaskKey.Type} not implemented").LogError(),
+            _ => Result
+                .Fail("DownloadTaskLog of type {DownloadTaskType} not implemented", downloadTaskKey.Type)
+                .LogError(),
         };
 
     public static async Task<Result<int>> DeleteDownloadTaskLogsAsync(
@@ -107,7 +109,9 @@ public static partial class DbContextExtensions
                     .DownloadTaskTvShowEpisodeFileLogs.Where(x => x.DownloadTaskFileId == downloadTaskKey.Id)
                     .ExecuteDeleteAsync(ct)
             ),
-            _ => Result.Fail($"DownloadTaskLog of type {downloadTaskKey.Type} not implemented").LogError(),
+            _ => Result
+                .Fail("DownloadTaskLog of type {DownloadTaskType} not implemented", downloadTaskKey.Type)
+                .LogError(),
         };
 
     public static async Task CreateDownloadClientLog(

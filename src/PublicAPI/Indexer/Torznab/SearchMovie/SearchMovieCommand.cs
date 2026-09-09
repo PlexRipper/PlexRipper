@@ -99,9 +99,7 @@ public class SearchMovieCommandHandler : ICommandHandler<SearchMovieCommand, Res
         if (!onlineServerIds.Any())
         {
             _log.Here()
-                .Warning(
-                    "No online Plex servers with downloads enabled were found, returning empty search results."
-                );
+                .Warning("No online Plex servers with downloads enabled were found, returning empty search results");
             return [];
         }
 

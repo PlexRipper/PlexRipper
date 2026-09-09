@@ -152,7 +152,7 @@ public class RefreshLibraryAccessHandler
             {
                 return _log.Here()
                     .WarningResult(
-                        "PlexServer with name {PlexServerName} returned no Plex libraries for Plex account {plexAccountName}",
+                        "PlexServer with name {PlexServerName} returned no Plex libraries for Plex account {PlexAccountName}",
                         plexServerName,
                         plexAccountName
                     );

@@ -47,14 +47,14 @@ public class SetupSonarrIndexerCommandHandler
                     .SonarrIntegrations.AsNoTracking()
                     .SingleOrDefaultAsync(x => x.Id == command.IntegrationId, ct);
         if (integration is null)
-            return Result.Fail("The Sonarr integration was not found.").LogError();
+            return Result.Fail("The Sonarr integration was not found").LogError();
 
         _log.Here().Information("Setting up Sonarr indexer '{IndexerName}'...", _indexerName);
 
         var getResult = await _commandExecutor.Send(new SonarrApiGetIndexersCommand(integration.Id), ct);
         if (getResult.IsFailed)
             return Result
-                .Fail("Failed to retrieve existing indexers from Sonarr.")
+                .Fail("Failed to retrieve existing indexers from Sonarr")
                 .WithErrors(getResult.Errors)
                 .LogError();
 
@@ -82,7 +82,7 @@ public class SetupSonarrIndexerCommandHandler
             if (updateResult.IsFailed)
                 return updateResult.LogError();
 
-            _log.Here().Information("Successfully updated indexer '{IndexerName}' in Sonarr.", _indexerName);
+            _log.Here().Information("Successfully updated indexer '{IndexerName}' in Sonarr", _indexerName);
             return Result.Ok(
                 new SetupSonarrIndexerCommandResult { IndexerId = updateResult.Value.Id, Resource = resource }
             );
@@ -104,7 +104,7 @@ public class SetupSonarrIndexerCommandHandler
             return createResult.LogError();
 
         createResource.Id = createResult.Value.Id;
-        _log.Here().Information("Successfully created indexer '{IndexerName}' in Sonarr.", _indexerName);
+        _log.Here().Information("Successfully created indexer '{IndexerName}' in Sonarr", _indexerName);
         return Result.Ok(
             new SetupSonarrIndexerCommandResult { IndexerId = createResult.Value.Id, Resource = createResource }
         );

@@ -14,7 +14,11 @@ public static partial class QuartzExtensions
         where TJob : IJob
     {
         if (!Enum.TryParse<JobTypes>(jobKey.Group, out _))
-            return Result.Fail($"Quartz job group '{jobKey.Group}' is not a valid {nameof(JobTypes)} value");
+            return Result.Fail(
+                "Quartz job group '{JobKeyGroup}' is not a valid {JobTypesName} value",
+                jobKey.Group,
+                nameof(JobTypes)
+            );
 
         if (await scheduler.CheckExists(jobKey, cancellationToken))
             return Result.Ok(DateTimeOffset.MinValue);

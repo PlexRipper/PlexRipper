@@ -52,7 +52,13 @@ public class DeletePlexAccountByIdEndpoint : Endpoint<DeletePlexAccountByIdReque
         if (deletedPlexAccountsCount == 0)
         {
             await Send.FluentResult(
-                Result.Fail($"Could not find {nameof(PlexAccount)} with id {req.PlexAccountId} to delete.").LogError(),
+                Result
+                    .Fail(
+                        "Could not find {PlexAccountName} with id {ReqPlexAccountId} to delete",
+                        nameof(PlexAccount),
+                        req.PlexAccountId
+                    )
+                    .LogError(),
                 ct
             );
             return;

@@ -126,9 +126,7 @@ public class SearchTvShowCommandHandler : ICommandHandler<SearchTvShowCommand, R
         if (!onlineServerIds.Any())
         {
             _log.Here()
-                .Warning(
-                    "No online Plex servers with downloads enabled were found, returning empty search results."
-                );
+                .Warning("No online Plex servers with downloads enabled were found, returning empty search results");
             return [];
         }
 

@@ -52,11 +52,11 @@ public class SetupRadarrDownloadClientCommandHandler
                     .RadarrIntegrations.AsNoTracking()
                     .SingleOrDefaultAsync(x => x.Id == command.IntegrationId, ct);
         if (integration is null)
-            return Result.Fail("The Radarr integration was not found.").LogError();
+            return Result.Fail("The Radarr integration was not found").LogError();
 
         var normalizedBaseUrl = integration.BaseUrl.TrimEnd('/');
         if (!normalizedBaseUrl.IsValidHttpUrl())
-            return Result.Fail("Radarr BaseUrl is invalid.").LogError();
+            return Result.Fail("Radarr BaseUrl is invalid").LogError();
         var radarrBaseUri = new Uri(normalizedBaseUrl, UriKind.Absolute);
 
         await _progressHubService.SendIntegrationSetupProgressAsync(
@@ -105,7 +105,7 @@ public class SetupRadarrDownloadClientCommandHandler
                     }
                 );
                 return Result
-                    .Fail("Failed to retrieve existing download clients from Radarr.")
+                    .Fail("Failed to retrieve existing download clients from Radarr")
                     .WithErrors(result.Errors)
                     .LogError();
             }
@@ -180,12 +180,12 @@ public class SetupRadarrDownloadClientCommandHandler
         catch (TaskCanceledException e)
         {
             _log.Here().Error(e, "Timeout while communicating with Radarr");
-            return Result.Fail("Timeout while communicating with Radarr.").LogError();
+            return Result.Fail("Timeout while communicating with Radarr").LogError();
         }
         catch (HttpRequestException e)
         {
             _log.Here().Error(e, "HTTP error while communicating with Radarr");
-            return Result.Fail("HTTP error while communicating with Radarr.").LogError();
+            return Result.Fail("HTTP error while communicating with Radarr").LogError();
         }
     }
 

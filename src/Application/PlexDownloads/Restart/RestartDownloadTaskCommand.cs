@@ -210,7 +210,9 @@ public class RestartDownloadTaskCommandHandler : ICommandHandler<RestartDownload
             );
 
             return Result.Fail(
-                $"Could not find the original source media for download task \"{downloadTaskKey}\" with title \"{downloadTask.FullTitle}\""
+                "Could not find the original source media for download task \"{DownloadTaskKey}\" with title \"{DownloadTaskFullTitle}\"",
+                downloadTaskKey,
+                downloadTask.FullTitle
             );
         }
 
@@ -297,7 +299,9 @@ public class RestartDownloadTaskCommandHandler : ICommandHandler<RestartDownload
             );
 
             return Result.Fail(
-                $"Could not find the original source media for download task \"{downloadTaskKey}\" with title \"{downloadTask.FullTitle}\""
+                "Could not find the original source media for download task \"{DownloadTaskKey}\" with title \"{DownloadTaskFullTitle}\"",
+                downloadTaskKey,
+                downloadTask.FullTitle
             );
         }
 

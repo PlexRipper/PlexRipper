@@ -129,7 +129,7 @@ public class DownloadQueue : IDownloadQueue
         {
             _log.Here()
                 .Information(
-                    "Skipping download queue check because PlexServer {PlexServerName} is paused by user.",
+                    "Skipping download queue check because PlexServer {PlexServerName} is paused by user",
                     plexServerName
                 );
             return Result.Ok();
@@ -139,7 +139,7 @@ public class DownloadQueue : IDownloadQueue
         {
             _log.Here()
                 .Information(
-                    "Skipping download queue check because PlexServer {PlexServerName} is disabled.",
+                    "Skipping download queue check because PlexServer {PlexServerName} is disabled",
                     plexServerName
                 );
             return Result.Ok();
@@ -166,7 +166,7 @@ public class DownloadQueue : IDownloadQueue
         if (hasDownloadingTask && await _downloadTaskScheduler.IsServerDownloading(plexServerId))
         {
             return Result
-                .Fail("Cannot select the next download task because server is already downloading one.")
+                .Fail("Cannot select the next download task because server is already downloading one")
                 .LogWarning();
         }
 
@@ -222,7 +222,7 @@ public class DownloadQueue : IDownloadQueue
     {
         var downloadingTask = FindFirstLeafByStatus(downloadTasks, DownloadStatus.Downloading);
         if (downloadingTask is not null)
-            return Result.Fail("There is already a downloadTask downloading.").LogDebug();
+            return Result.Fail("There is already a downloadTask downloading").LogDebug();
 
         var autoPausedTask = FindFirstLeafByStatus(downloadTasks, DownloadStatus.AutoPaused, IsInRetryCooldown);
         if (autoPausedTask is not null)
@@ -252,7 +252,7 @@ public class DownloadQueue : IDownloadQueue
         if (queuedTask is not null)
             return Result.Ok(queuedTask);
 
-        return Result.Fail("There were no downloadTasks left to download.").LogDebug();
+        return Result.Fail("There were no downloadTasks left to download").LogDebug();
     }
 
     private static DownloadTaskGeneric? FindFirstLeafByStatus(

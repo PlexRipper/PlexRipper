@@ -97,7 +97,6 @@ public class CheckAllConnectionsStatusByPlexServerJob : IJob
         {
             context.SetCronJobPayload(JobStatus.Failed, payload);
             result.LogError();
-            return;
         }
     }
 }

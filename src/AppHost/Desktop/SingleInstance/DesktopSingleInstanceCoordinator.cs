@@ -161,7 +161,7 @@ public sealed class DesktopSingleInstanceCoordinator : IDesktopSingleInstanceCoo
         if (cancellationToken.IsCancellationRequested)
             return ResultExtensions.TaskIsCancelled(nameof(ConnectToPrimaryInstanceAsync));
 
-        return Result.Fail("Timed out while connecting to the primary desktop instance.");
+        return Result.Fail("Timed out while connecting to the primary desktop instance");
     }
 
     private async Task ListenAsync(Func<CancellationToken, Task<Result>> onSignal, CancellationToken cancellationToken)

@@ -1,3 +1,5 @@
+using Reaparr.IntegrationTests;
+
 namespace Reaparr.BaseTests;
 
 [NotInParallel("IntegrationTests")]

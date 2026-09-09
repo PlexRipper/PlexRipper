@@ -47,7 +47,7 @@ public class SetupRadarrIndexerCommandHandler
                     .RadarrIntegrations.AsNoTracking()
                     .SingleOrDefaultAsync(x => x.Id == command.IntegrationId, ct);
         if (integration is null)
-            return Result.Fail("The Radarr integration was not found.").LogError();
+            return Result.Fail("The Radarr integration was not found").LogError();
 
         _log.Here().Information("Setting up Radarr indexer '{IndexerName}'...", _indexerName);
 
@@ -55,7 +55,7 @@ public class SetupRadarrIndexerCommandHandler
         var getResult = await _commandExecutor.Send(new RadarrApiGetIndexersCommand(integration.Id), ct);
         if (getResult.IsFailed)
             return Result
-                .Fail("Failed to retrieve existing indexers from Radarr.")
+                .Fail("Failed to retrieve existing indexers from Radarr")
                 .WithErrors(getResult.Errors)
                 .LogError();
 

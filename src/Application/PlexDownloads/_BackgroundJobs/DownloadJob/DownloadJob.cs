@@ -255,7 +255,10 @@ public class DownloadJob : IJob
                     );
                 break;
             default:
-                return Result.Fail($"DownloadTaskType {downloadTask.DownloadTaskType} is not supported");
+                return Result.Fail(
+                    "DownloadTaskType {DownloadTaskType} is not supported",
+                    downloadTask.DownloadTaskType
+                );
         }
 
         return Result.Ok(downloadTask);

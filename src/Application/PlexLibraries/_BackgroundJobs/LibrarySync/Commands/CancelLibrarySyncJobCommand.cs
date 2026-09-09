@@ -97,7 +97,10 @@ public class CancelLibrarySyncJobCommandHandler : ICommandHandler<CancelLibraryS
                     cancellationToken: cancellationToken
                 );
             if (cancelled != 1)
-                return Result.Fail($"Library sync job for library {plexLibraryId} changed state while cancelling");
+                return Result.Fail(
+                    "Library sync job for library {PlexLibraryId} changed state while cancelling",
+                    plexLibraryId
+                );
 
             _log.Here()
                 .Information(

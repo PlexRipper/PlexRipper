@@ -237,7 +237,7 @@ public sealed class MediaQueryCache : IMediaQueryCache
         _log.Here()
             .Information(
                 "Invalidated media query cache for libraries {PlexLibraryIds}: {Reason}. "
-                    + "Marked {MetadataCount} metadata, {SortedListCount} sorted-lists as dirty, {InFlightCount} in-flight builds.",
+                    + "Marked {MetadataCount} metadata, {SortedListCount} sorted-lists as dirty, {InFlightCount} in-flight builds",
                 affectedLibraryIds,
                 reason,
                 dirtyMetadataCount,

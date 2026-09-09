@@ -184,7 +184,7 @@ public class GetAllMediaByTypeFromPlexApiCommandHandler
         if (response.IsFailed)
             return response.ToResult();
 
-        var rawValue = response.Value?.MediaContainerWithMetadata?.MediaContainer?.TotalSize ?? 0;
+        var rawValue = response.Value.MediaContainerWithMetadata?.MediaContainer?.TotalSize ?? 0;
         var safeValue = (int)Math.Max(0, Math.Min(rawValue, int.MaxValue));
         return Result.Ok(safeValue);
     }
@@ -222,7 +222,7 @@ public class GetAllMediaByTypeFromPlexApiCommandHandler
         if (response.IsFailed)
             return response.ToResult();
 
-        var mediaDataList = response.Value?.MediaContainerWithMetadata?.MediaContainer?.Metadata ?? [];
+        var mediaDataList = response.Value.MediaContainerWithMetadata?.MediaContainer?.Metadata ?? [];
         if (!mediaDataList.Any())
             return ResultExtensions.IsNull("MediaContainerWithMetadata.MediaContainer.Metadata").LogError();
 

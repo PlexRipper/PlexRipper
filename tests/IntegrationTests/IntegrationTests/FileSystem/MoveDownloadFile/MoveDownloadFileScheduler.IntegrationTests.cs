@@ -138,7 +138,8 @@ public class MoveDownloadFileSchedulerIntegrationTests : BaseIntegrationTests
                                     await readStream.CopyToAsync(writeStream, ct);
 
                                     return Result.Fail(
-                                        $"Failed to delete source file after move: {moveCmd.SourcePath}"
+                                        "Failed to delete source file after move: {MoveCmdSourcePath}",
+                                        moveCmd.SourcePath
                                     );
                                 }
                             );

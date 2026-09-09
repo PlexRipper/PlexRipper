@@ -57,11 +57,17 @@ public static partial class DbContextExtensions
                 break;
             }
             default:
-                return Result.Fail($"Type {mediaType} is not supported for retrieving the plexMediaId by key");
+                return Result.Fail(
+                    "Type {PlexMediaType} is not supported for retrieving the plexMediaId by key",
+                    mediaType
+                );
         }
 
         return Result.Fail(
-            $"Couldn't find a plexMediaId with key {plexApiRatingKey}, plexServerId {plexServerId} with type {mediaType}"
+            "Couldn't find a plexMediaId with key {PlexApiRatingKey}, plexServerId {PlexServerId} with type {PlexMediaType}",
+            plexApiRatingKey,
+            plexServerId,
+            mediaType
         );
     }
 

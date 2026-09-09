@@ -50,7 +50,8 @@ public class SetPlexLibraryDefaultDestinationByIdEndpoint
         {
             await Send.FluentResult(
                 Result.Fail(
-                    $"No library found with id {req.PlexLibraryId} that could have its default folder destination updated"
+                    "No library found with id {ReqPlexLibraryId} that could have its default folder destination updated",
+                    req.PlexLibraryId
                 ),
                 ct
             );

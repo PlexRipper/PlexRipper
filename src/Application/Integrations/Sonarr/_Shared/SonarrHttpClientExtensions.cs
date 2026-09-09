@@ -224,7 +224,7 @@ public static class SonarrHttpClientExtensions
             return Result.Ok();
 
         return Result
-            .Fail($"Failed to test Sonarr download clients. StatusCode: {result.Value.StatusCode}")
+            .Fail("Failed to test Sonarr download clients. StatusCode: {ValueStatusCode}", result.Value.StatusCode)
             .WithError(result.Value.Body)
             .LogError();
     }
@@ -243,7 +243,11 @@ public static class SonarrHttpClientExtensions
         return result.Value.IsSuccessStatusCode
             ? Result.Ok()
             : Result
-                .Fail($"Failed to validate Reaparr {resourceName} in Sonarr. StatusCode: {result.Value.StatusCode}")
+                .Fail(
+                    "Failed to validate Reaparr {ResourceName} in Sonarr. StatusCode: {ValueStatusCode}",
+                    resourceName,
+                    result.Value.StatusCode
+                )
                 .WithError(result.Value.Body)
                 .LogError();
     }
@@ -261,7 +265,7 @@ public static class SonarrHttpClientExtensions
             return result.ToResult<T>().LogIfFailed();
         if (!result.Value.IsSuccessStatusCode)
             return Result
-                .Fail($"{failureMessage}. StatusCode: {result.Value.StatusCode}")
+                .Fail("{FailureMessage}. StatusCode: {ValueStatusCode}", failureMessage, result.Value.StatusCode)
                 .WithError(result.Value.Body)
                 .LogError();
 

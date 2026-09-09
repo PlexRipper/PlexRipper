@@ -52,11 +52,11 @@ public class SetupSonarrDownloadClientCommandHandler
                     .SonarrIntegrations.AsNoTracking()
                     .SingleOrDefaultAsync(x => x.Id == command.IntegrationId, ct);
         if (integration is null)
-            return Result.Fail("The Sonarr integration was not found.").LogError();
+            return Result.Fail("The Sonarr integration was not found").LogError();
 
         var normalizedBaseUrl = integration.BaseUrl.TrimEnd('/');
         if (!normalizedBaseUrl.IsValidHttpUrl())
-            return Result.Fail("Sonarr BaseUrl is invalid.").LogError();
+            return Result.Fail("Sonarr BaseUrl is invalid").LogError();
         var sonarrBaseUri = new Uri(normalizedBaseUrl, UriKind.Absolute);
 
         await _progressHubService.SendIntegrationSetupProgressAsync(
@@ -105,7 +105,7 @@ public class SetupSonarrDownloadClientCommandHandler
                     }
                 );
                 return Result
-                    .Fail("Failed to retrieve existing download clients from Sonarr.")
+                    .Fail("Failed to retrieve existing download clients from Sonarr")
                     .WithErrors(result.Errors)
                     .LogError();
             }
@@ -189,7 +189,7 @@ public class SetupSonarrDownloadClientCommandHandler
                     IsSuccess = false,
                 }
             );
-            return Result.Fail("Timeout while communicating with Sonarr.").LogError();
+            return Result.Fail("Timeout while communicating with Sonarr").LogError();
         }
         catch (HttpRequestException e)
         {
@@ -203,7 +203,7 @@ public class SetupSonarrDownloadClientCommandHandler
                     IsSuccess = false,
                 }
             );
-            return Result.Fail("HTTP error while communicating with Sonarr.").LogError();
+            return Result.Fail("HTTP error while communicating with Sonarr").LogError();
         }
     }
 

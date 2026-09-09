@@ -48,7 +48,7 @@ public class QueueLibrarySyncJobCommandHandler : ICommandHandler<QueueLibrarySyn
 
         if (!libraries.Any())
         {
-            _log.Here().Warning("No libraries found for the provided library IDs. Nothing to queue.");
+            _log.Here().Warning("No libraries found for the provided library IDs. Nothing to queue");
             return Result.Ok();
         }
 
@@ -109,7 +109,7 @@ public class QueueLibrarySyncJobCommandHandler : ICommandHandler<QueueLibrarySyn
         {
             _log.Here()
                 .Warning(
-                    "{Count} libraries are already queued or processing. They will be skipped.",
+                    "{Count} libraries are already queued or processing. They will be skipped",
                     queuedOrProcessingIds.Count
                 );
         }
@@ -139,7 +139,7 @@ public class QueueLibrarySyncJobCommandHandler : ICommandHandler<QueueLibrarySyn
         {
             _log.Here()
                 .Debug(
-                    "Queued {Count} libraries for sync. Reset {ResetCount} completed/failed items. Skipped {SkippedCount} already queued/processing.",
+                    "Queued {Count} libraries for sync. Reset {ResetCount} completed/failed items. Skipped {SkippedCount} already queued/processing",
                     itemsToAdd.Count,
                     itemsToReset.Count,
                     queuedOrProcessingIds.Count

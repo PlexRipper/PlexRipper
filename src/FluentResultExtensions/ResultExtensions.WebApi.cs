@@ -30,7 +30,7 @@ public static partial class ResultExtensions
     }
 
     public static bool HasStatusCode<T>(this Result<T> result, int statusCode) =>
-        result.ToResult()?.HasStatusCode(statusCode) ?? false;
+        result.ToResult().HasStatusCode(statusCode);
 
     #endregion
 
@@ -204,12 +204,6 @@ public static partial class ResultExtensions
     #endregion
 
     #region Result Signatures
-
-    #region General
-
-    public static Result AddErrorMessage(this Result result, string message) => result.AddErrorMessageToResult(message);
-
-    #endregion
 
     #region 200
 

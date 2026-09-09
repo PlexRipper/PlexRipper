@@ -57,16 +57,22 @@ public class CompareMoviePlexLibraryCommandHandler : ICommandHandler<CompareMovi
             .ToDictionaryAsync(x => x.Id, cancellationToken);
 
         if (!libraries.TryGetValue(remoteLibraryId, out var remoteLibrary))
-            return Result.Fail($"Remote library {remoteLibraryId} was not found");
+            return Result.Fail("Remote library {RemoteLibraryId} was not found", remoteLibraryId);
 
         if (!libraries.TryGetValue(ownedLibraryId, out var ownedLibrary))
-            return Result.Fail($"Owned library {ownedLibraryId} was not found");
+            return Result.Fail("Owned library {OwnedLibraryId} was not found", ownedLibraryId);
 
         if (remoteLibrary.IsOwned)
-            return Result.Fail($"Library {remoteLibraryId} is owned and cannot be compared as a remote library");
+            return Result.Fail(
+                "Library {RemoteLibraryId} is owned and cannot be compared as a remote library",
+                remoteLibraryId
+            );
 
         if (!ownedLibrary.IsOwned)
-            return Result.Fail($"Library {ownedLibraryId} is not owned and cannot be compared as an owned library");
+            return Result.Fail(
+                "Library {OwnedLibraryId} is not owned and cannot be compared as an owned library",
+                ownedLibraryId
+            );
 
         if (remoteLibrary.Type != PlexMediaType.Movie || ownedLibrary.Type != PlexMediaType.Movie)
             return Result.Fail("Both libraries must be movie libraries");

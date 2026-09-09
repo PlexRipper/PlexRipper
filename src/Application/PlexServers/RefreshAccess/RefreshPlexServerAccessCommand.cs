@@ -75,7 +75,7 @@ public class RefreshPlexServerAccessCommandHandler
 
         if (!result.Value.Any())
         {
-            _log.Here().Warning("No Plex servers found for PlexAccount: {plexAccountName}", plexAccountName);
+            _log.Here().Warning("No Plex servers found for PlexAccount: {PlexAccountName}", plexAccountName);
             return await RemovePlexAccess(plexAccountId);
         }
 

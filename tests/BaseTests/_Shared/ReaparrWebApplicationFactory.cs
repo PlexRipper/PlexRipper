@@ -54,7 +54,7 @@ public class ReaparrWebApplicationFactory : WebApplicationFactory<Program>
         }
         catch (Exception e)
         {
-            _log.Here().Fatal(e.Message);
+            _log.Here().Fatal(e);
             throw;
         }
     }

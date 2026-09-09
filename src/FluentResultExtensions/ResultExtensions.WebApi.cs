@@ -1,9 +1,6 @@
 ﻿using System.Net;
-using Reaparr.FluentResultExtensions;
 
-// ReSharper disable once CheckNamespace
-// Needs to be in the same namespace as the FluentResults package
-namespace FluentResults;
+namespace Reaparr.FluentResultExtensions;
 
 public static partial class ResultExtensions
 {

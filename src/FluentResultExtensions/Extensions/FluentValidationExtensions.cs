@@ -1,7 +1,6 @@
 using FluentValidation.Results;
 
-// ReSharper disable once CheckNamespace
-namespace FluentResults;
+namespace Reaparr.FluentResultExtensions;
 
 public static class FluentValidationExtensions
 {

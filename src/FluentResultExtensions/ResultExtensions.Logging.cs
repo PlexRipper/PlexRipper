@@ -1,12 +1,8 @@
-﻿using System.Runtime.CompilerServices;
-// ReSharper disable All
+﻿// ReSharper disable All
 // ReSharper disable TemplateIsNotCompileTimeConstant
 using Serilog.Core;
-using Serilog.Events;
 
-// ReSharper disable once CheckNamespace
-// Needs to be in the same namespace as the FluentResults package
-namespace FluentResults;
+namespace Reaparr.FluentResultExtensions;
 
 /// <summary>
 /// Part of the <see cref="ResultExtensions"/> class - Logging related functionality.

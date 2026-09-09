@@ -1,10 +1,6 @@
-﻿// ReSharper disable once CheckNamespace
+﻿using Microsoft.AspNetCore.Http;
 
-using Microsoft.AspNetCore.Http;
-
-// ReSharper disable once CheckNamespace
-// Needs to be in the same namespace as the FluentResults package
-namespace FluentResults;
+namespace Reaparr.FluentResultExtensions;
 
 public static partial class ResultExtensions
 {

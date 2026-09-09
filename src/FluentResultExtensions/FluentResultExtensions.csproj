@@ -17,5 +17,6 @@
     </ItemGroup>
     <ItemGroup>
         <Using Include="Reaparr.Logging" />
+        <Using Include="Reaparr.FluentResults" />
     </ItemGroup>
 </Project>

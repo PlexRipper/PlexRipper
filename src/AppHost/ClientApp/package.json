@@ -4,6 +4,7 @@
   "description": "The best cross-platform Plex media downloader there is! In active development and feedback is very welcome!",
   "author": "JasonLandbridge",
   "private": true,
+  "packageManager": "bun@1.4.0",
   "type": "module",
   "bugs": {
     "url": "https://github.com/Reaparr/Reaparr/issues"
@@ -18,6 +19,7 @@
     "build": "nuxi build",
     "generate": "nuxi generate",
     "preview": "nuxi preview",
+    "release": "semantic-release",
     "dev:analyze": "nuxi analyze",
     "postinstall": "nuxi prepare",
     "generate-ts": "swagger-typescript-api generate --path http://localhost:5000/swagger/internal/swagger.json --sort-types --modular --clean-output --module-name-index 1 --axios --api-class-name GeneratedApiClient --templates ./src/types/api/templates/modular -o ./src/types/api/generated",

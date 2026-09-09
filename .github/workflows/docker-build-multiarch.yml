@@ -78,9 +78,12 @@ jobs:
                       BUILDPLATFORM=linux/${{ matrix.arch }}
                       TARGETPLATFORM=linux/${{ matrix.arch }}
                   cache-from: |
+                      type=gha,scope=reaparr-${{ matrix.arch }}
                       type=registry,ref=reaparr/reaparr:buildcache-${{ matrix.arch }}
                       type=registry,ref=reaparr/reaparr:${{ inputs.version }}-${{ matrix.arch }}
-                  cache-to: ${{ inputs.push && format('type=registry,ref=reaparr/reaparr:buildcache-{0},mode=max', matrix.arch) || '' }}
+                  cache-to: |
+                      type=gha,scope=reaparr-${{ matrix.arch }},mode=max
+                      ${{ inputs.push && format('type=registry,ref=reaparr/reaparr:buildcache-{0},mode=max', matrix.arch) || '' }}
                   load: ${{ !inputs.push }}
 
     # Create multi-arch manifests (only if push=true)

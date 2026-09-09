@@ -33,36 +33,12 @@ jobs:
                     fetch-depth: 0
                     ref: dev
 
-            -   name: Verify Git State
-                run: |
-                    echo "Current branch: $(git branch --show-current)"
-                    echo "Remote branches:"
-                    git branch -r
-                    echo "Git remote:"
-                    git remote -v
-
-            -   name: Setup Node.js
-                uses: actions/setup-node@v4
-                with:
-                    node-version: 22
-
             -   name: Client App Install
                 uses: ./.github/actions/client-app-install/
 
-            -   name: Debug Config
-                run: |
-                    echo "Working directory: $(pwd)"
-                    echo "Config file exists:"
-                    ls -la release.config.mjs || echo "NOT FOUND in root"
-                    echo "---"
-                    echo "Config content:"
-                    cat release.config.mjs || echo "Could not read config"
-                    echo "---"
-                    echo "STABLE_RELEASE env: '$STABLE_RELEASE'"
-
             -   name: Run Semantic Release (DEV Release)
                 id: semantic-release
-                run: npx --prefix src/AppHost/ClientApp/ semantic-release --debug
+                run: bun run --cwd src/AppHost/ClientApp release -- --debug
                 env:
                     # STABLE_RELEASE not set = appends -dev.N suffix to computed version
                     GH_TOKEN: ${{ secrets.GH_TOKEN }}

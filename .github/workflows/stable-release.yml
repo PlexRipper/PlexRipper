@@ -24,22 +24,13 @@ jobs:
                     fetch-depth: 0
                     ref: dev
 
-            -   name: Verify Git State
-                run: |
-                    echo "Current branch: $(git branch --show-current)"
-                    echo "Remote branches:"
-                    git branch -r
-
-            -   name: Setup Node.js
-                uses: actions/setup-node@v4
-                with:
-                    node-version: 22
             # This is required to be able to run semantic-release plugins
             -   name: Client App Install
                 uses: ./.github/actions/client-app-install/
+
             -   name: GitHub Release (Stable)
                 id: get-next-version
-                run: npx --prefix src/AppHost/ClientApp/ semantic-release
+                run: bun run --cwd src/AppHost/ClientApp release
                 env:
                     STABLE_RELEASE: 'true'
                     GH_TOKEN: ${{ secrets.GH_TOKEN }}

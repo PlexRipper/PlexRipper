@@ -39,6 +39,8 @@
         <Using Include="Reaparr.Environment" />
         <Using Include="Reaparr.Identity.Contracts" />
         <Using Include="Reaparr.Logging" />
+        <Using Include="Reaparr.FluentResults" />
+        <Using Include="Reaparr.FluentResultExtensions" />
         <Using Include="Serilog" />
     </ItemGroup>
 </Project>

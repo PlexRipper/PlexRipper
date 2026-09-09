@@ -14,12 +14,12 @@
         <ProjectReference Include="..\FileSystem.Contracts\FileSystem.Contracts.csproj" />
         <ProjectReference Include="..\Settings.Contracts\Settings.Contracts.csproj" />
     </ItemGroup>
-    <ItemGroup></ItemGroup>
     <ItemGroup>
         <Using Include="System.ComponentModel.DataAnnotations" />
         <Using Include="System.ComponentModel.DataAnnotations.Schema" />
         <Using Include="FastEndpoints" />
         <Using Include="Reaparr.FluentResults" />
+        <Using Include="Reaparr.FluentResultExtensions" />
         <Using Include="FluentValidation" />
         <Using Include="Microsoft.AspNetCore.Http" />
         <Using Include="Reaparr.Domain" />

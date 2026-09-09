@@ -12,6 +12,5 @@ namespace FluentResults
         /// The exception
         /// </summary>
         Exception Exception { get; }
-
     }
 }

@@ -11,26 +11,26 @@ namespace FluentResults
         /// <summary>
         /// Set the ResultLogger
         /// </summary>
-        public IResultLogger Logger { get; set; }
+        public IResultLogger Logger { get; set; } = null!;
 
         /// <summary>
         /// Factory to create an IError object.  Used in all scenarios where an error is created within Try methods
         /// </summary>
-        public Func<Exception, IError> DefaultTryCatchHandler { get; set; }
+        public Func<Exception, IError> DefaultTryCatchHandler { get; set; } = null!;
 
         /// <summary>
         /// Factory to create an ISuccess object. Used in all scenarios where a success is created within FluentResults. 
         /// </summary>
-        public Func<string, ISuccess> SuccessFactory { get; set; }
+        public Func<string, ISuccess> SuccessFactory { get; set; } = null!;
 
         /// <summary>
         /// Factory to create an IError object. Used in all scenarios where an error is created within FluentResults. 
         /// </summary>
-        public Func<string, IError> ErrorFactory { get; set; }
+        public Func<string, IError> ErrorFactory { get; set; } = null!;
 
         /// <summary>
         /// Factory to create an IExceptionalError object. Used in all scenarios where an exceptional error is created within FluentResults. 
         /// </summary>
-        public Func<string, Exception, IExceptionalError> ExceptionalErrorFactory { get; set; }
+        public Func<string?, Exception, IExceptionalError> ExceptionalErrorFactory { get; set; } = null!;
     }
 }

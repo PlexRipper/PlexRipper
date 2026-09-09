@@ -13,7 +13,7 @@ namespace FluentResults
         /// <summary>
         /// Message of the error
         /// </summary>
-        public string Message { get; protected set; }
+        public string Message { get; protected set; } = string.Empty;
 
         /// <summary>
         /// Metadata of the error

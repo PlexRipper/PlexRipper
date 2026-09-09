@@ -10,15 +10,9 @@ namespace FluentResults
     public class DefaultLogger : IResultLogger
     {
         /// <inheritdoc/>
-        public void Log(string context, string content, ResultBase result, LogLevel logLevel)
-        {
-
-        }
+        public void Log(string context, string? content, ResultBase result, LogLevel logLevel) { }
 
         /// <inheritdoc/>
-        public void Log<TContext>(string content, ResultBase result, LogLevel logLevel)
-        {
-
-        }
+        public void Log<TContext>(string? content, ResultBase result, LogLevel logLevel) { }
     }
 }

@@ -12,15 +12,13 @@ namespace FluentResults
         /// Exception of the error
         /// </summary>
         public Exception Exception { get; }
-        
 
         /// <summary>
         /// Initialize a new instance with an exception
         /// </summary>
         /// <param name="exception">The exception</param>
         public ExceptionalError(Exception exception)
-            : this(exception.Message, exception)
-        { }
+            : this(exception.Message, exception) { }
 
         /// <summary>
         /// Initialize a new instance with a custom message and an exception

@@ -11,7 +11,7 @@ namespace FluentResults
         /// <summary>
         /// Message of the success
         /// </summary>
-        public string Message { get; protected set; }
+        public string Message { get; protected set; } = string.Empty;
 
         /// <summary>
         /// Metadata of the success
@@ -30,7 +30,8 @@ namespace FluentResults
         /// Creates a new instance of <see cref="Success"/> and initializes the <see cref="Message"/> property
         /// </summary>
         /// <param name="message">The message</param>
-        public Success(string message) : this()
+        public Success(string message)
+            : this()
         {
             Message = message;
         }
@@ -53,7 +54,7 @@ namespace FluentResults
             {
                 Metadata.Add(metadataItem.Key, metadataItem.Value);
             }
-            
+
             return this;
         }
 

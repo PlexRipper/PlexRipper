@@ -17,7 +17,7 @@ namespace FluentResults
         /// <exception cref="ArgumentNullException"></exception>
         public static bool HasMetadataKey(this IReason reason, string key)
         {
-            if(string.IsNullOrEmpty(key))
+            if (string.IsNullOrEmpty(key))
                 throw new ArgumentNullException(nameof(key));
 
             return reason.Metadata.ContainsKey(key);
@@ -39,7 +39,7 @@ namespace FluentResults
             if (predicate == null)
                 throw new ArgumentNullException(nameof(predicate));
 
-            if (reason.Metadata.TryGetValue(key, out object actualValue))
+            if (reason.Metadata.TryGetValue(key, out object? actualValue) && actualValue is not null)
                 return predicate(actualValue);
 
             return false;

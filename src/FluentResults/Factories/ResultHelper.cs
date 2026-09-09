@@ -14,11 +14,13 @@ namespace FluentResults
 
         private static Result<IEnumerable<TValue>> MergeWithValue<TValue, TInValue>(
             IEnumerable<Result<TInValue>> results,
-            Func<List<Result<TInValue>>, IEnumerable<TValue>> createValue)
+            Func<List<Result<TInValue>>, IEnumerable<TValue>> createValue
+        )
         {
             var resultList = results.ToList();
 
-            var finalResult = Result.Ok<IEnumerable<TValue>>(new List<TValue>())
+            var finalResult = Result
+                .Ok<IEnumerable<TValue>>(new List<TValue>())
                 .WithReasons(resultList.SelectMany(result => result.Reasons));
 
             if (finalResult.IsSuccess)
@@ -27,26 +29,22 @@ namespace FluentResults
             return finalResult;
         }
 
-        public static Result<IEnumerable<TValue>> MergeWithValue<TValue>(
-            IEnumerable<Result<TValue>> results)
+        public static Result<IEnumerable<TValue>> MergeWithValue<TValue>(IEnumerable<Result<TValue>> results)
         {
-            return MergeWithValue(
-                results,
-                resultList => resultList.Select(r => r.Value).ToList());
+            return MergeWithValue(results, resultList => resultList.Select(r => r.Value!).ToList());
         }
 
-        public static Result<IEnumerable<TValue>> MergeWithValue<TValue, TArray>(
-            IEnumerable<Result<TArray>> results) where TArray : IEnumerable<TValue>
+        public static Result<IEnumerable<TValue>> MergeWithValue<TValue, TArray>(IEnumerable<Result<TArray>> results)
+            where TArray : IEnumerable<TValue>
         {
-            return MergeWithValue(
-                results,
-                resultList => resultList.SelectMany(r => r.Value).ToList());
+            return MergeWithValue(results, resultList => resultList.SelectMany(r => r.Value!).ToList());
         }
 
         public static bool HasError<TError>(
             IEnumerable<IError> errors,
             Func<TError, bool> predicate,
-            out IEnumerable<TError> result)
+            out IEnumerable<TError> result
+        )
             where TError : IError
         {
             var foundErrors = errors.OfType<TError>().Where(predicate).ToList();
@@ -70,12 +68,13 @@ namespace FluentResults
         public static bool HasException<TException>(
             IEnumerable<IError> errors,
             Func<TException, bool> predicate,
-            out IEnumerable<IError> result)
+            out IEnumerable<IError> result
+        )
             where TException : Exception
         {
-            var foundErrors = errors.OfType<ExceptionalError>()
-                .Where(e => e.Exception is TException rootExceptionOfTException
-                            && predicate(rootExceptionOfTException))
+            var foundErrors = errors
+                .OfType<ExceptionalError>()
+                .Where(e => e.Exception is TException rootExceptionOfTException && predicate(rootExceptionOfTException))
                 .ToList();
 
             if (foundErrors.Any())
@@ -96,13 +95,13 @@ namespace FluentResults
         }
 
         public static bool HasSuccess<TSuccess>(
-            IEnumerable<ISuccess> successes, 
+            IEnumerable<ISuccess> successes,
             Func<TSuccess, bool> predicate,
-            out IEnumerable<TSuccess> result) where TSuccess : ISuccess
+            out IEnumerable<TSuccess> result
+        )
+            where TSuccess : ISuccess
         {
-            var foundSuccesses = successes.OfType<TSuccess>()
-                .Where(predicate)
-                .ToList();
+            var foundSuccesses = successes.OfType<TSuccess>().Where(predicate).ToList();
             if (foundSuccesses.Any())
             {
                 result = foundSuccesses;

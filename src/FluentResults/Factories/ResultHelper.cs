@@ -26,13 +26,13 @@
 
         public static Result<IEnumerable<TValue>> MergeWithValue<TValue>(IEnumerable<Result<TValue>> results)
         {
-            return MergeWithValue(results, resultList => resultList.Select(r => r.Value!).ToList());
+            return MergeWithValue(results, resultList => resultList.Select(r => r.Value).ToList());
         }
 
         public static Result<IEnumerable<TValue>> MergeWithValue<TValue, TArray>(IEnumerable<Result<TArray>> results)
             where TArray : IEnumerable<TValue>
         {
-            return MergeWithValue(results, resultList => resultList.SelectMany(r => r.Value!).ToList());
+            return MergeWithValue(results, resultList => resultList.SelectMany(r => r.Value).ToList());
         }
 
         public static bool HasError<TError>(
@@ -42,15 +42,16 @@
         )
             where TError : IError
         {
-            var foundErrors = errors.OfType<TError>().Where(predicate).ToList();
-            if (foundErrors.Any())
+            var errorList = errors.ToList();
+            var foundErrors = errorList.OfType<TError>().Where(predicate).ToList();
+            if (foundErrors.Count > 0)
             {
                 result = foundErrors;
                 return true;
             }
 
-            foreach (var error in errors)
-                if (HasError(error.Reasons ?? new List<IError>(), predicate, out var fErrors))
+            foreach (var error in errorList)
+                if (HasError(error.Reasons, predicate, out var fErrors))
                 {
                     result = fErrors;
                     return true;
@@ -67,7 +68,8 @@
         )
             where TException : Exception
         {
-            var foundErrors = errors
+            var errorList = errors.ToList();
+            var foundErrors = errorList
                 .OfType<ExceptionalError>()
                 .Where(e => e.Exception is TException rootExceptionOfTException && predicate(rootExceptionOfTException))
                 .ToList();
@@ -78,7 +80,7 @@
                 return true;
             }
 
-            foreach (var error in errors)
+            foreach (var error in errorList)
                 if (HasException(error.Reasons, predicate, out var fErrors))
                 {
                     result = fErrors;

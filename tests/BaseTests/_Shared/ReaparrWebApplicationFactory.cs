@@ -54,7 +54,7 @@ public class ReaparrWebApplicationFactory : WebApplicationFactory<Program>
         }
         catch (Exception e)
         {
-            _log.Here().Fatal(e);
+            _log.Here().Fatal(e, "Failed to create the test host");
             throw;
         }
     }

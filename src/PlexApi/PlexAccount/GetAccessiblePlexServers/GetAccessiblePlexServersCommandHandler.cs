@@ -147,8 +147,8 @@ public class GetAccessiblePlexServersCommandHandler
         if (result[0].IsSuccess && result[1].IsFailed)
             return result[0].ToApiResult(x => x.PlexDevices ?? []);
 
-        var deviceList1 = result[0].Value?.PlexDevices?.FindAll(x => x.Provides.Contains("server")) ?? [];
-        var deviceList2 = result[1].Value?.PlexDevices?.FindAll(x => x.Provides.Contains("server")) ?? [];
+        var deviceList1 = result[0].Value.PlexDevices?.FindAll(x => x.Provides.Contains("server")) ?? [];
+        var deviceList2 = result[1].Value.PlexDevices?.FindAll(x => x.Provides.Contains("server")) ?? [];
 
         var uniqueConnections = new HashSet<string>();
 

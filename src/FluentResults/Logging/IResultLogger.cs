@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using System.Runtime.CompilerServices;
+using Microsoft.Extensions.Logging;
 
 namespace Reaparr.FluentResults
 {
@@ -14,7 +15,18 @@ namespace Reaparr.FluentResults
         /// <param name="content">Content to log</param>
         /// <param name="result">The result to log</param>
         /// <param name="logLevel">The <see cref="Microsoft.Extensions.Logging.LogLevel"/></param>
-        void Log(string context, string? content, ResultBase result, LogLevel logLevel);
+        /// <param name="memberName">The caller member name.</param>
+        /// <param name="sourceFilePath">The caller source file path.</param>
+        /// <param name="sourceLineNumber">The caller source line number.</param>
+        void Log(
+            string context,
+            string? content,
+            ResultBase result,
+            LogLevel logLevel,
+            [CallerMemberName] string memberName = "",
+            [CallerFilePath] string sourceFilePath = "",
+            [CallerLineNumber] int sourceLineNumber = 0
+        );
 
         /// <summary>
         /// Log result information
@@ -23,6 +35,16 @@ namespace Reaparr.FluentResults
         /// <param name="content">Content to log</param>
         /// <param name="result">The result to log</param>
         /// <param name="logLevel">The <see cref="Microsoft.Extensions.Logging.LogLevel"/></param>
-        void Log<TContext>(string? content, ResultBase result, LogLevel logLevel);
+        /// <param name="memberName">The caller member name.</param>
+        /// <param name="sourceFilePath">The caller source file path.</param>
+        /// <param name="sourceLineNumber">The caller source line number.</param>
+        void Log<TContext>(
+            string? content,
+            ResultBase result,
+            LogLevel logLevel,
+            [CallerMemberName] string memberName = "",
+            [CallerFilePath] string sourceFilePath = "",
+            [CallerLineNumber] int sourceLineNumber = 0
+        );
     }
 }

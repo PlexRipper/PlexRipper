@@ -14,8 +14,9 @@ public static partial class ResultExtensions
     /// <returns></returns>
     public static Result AddNestedErrors(this Result result, List<IError> errors)
     {
-        if (result.Errors.Any())
-            result.Errors.First().Reasons.AddRange(errors);
+        var resultErrors = result.Errors;
+        if (resultErrors.Count > 0)
+            resultErrors[0].Reasons.AddRange(errors);
 
         return result;
     }

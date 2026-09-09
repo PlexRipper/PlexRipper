@@ -91,15 +91,8 @@ public class GetAllMediaByTypeFromPlexApiCommandHandler
                 mediaType,
                 ct
             );
-            if (mediaListResult.IsCancelled)
-                return mediaListResult.ToResult().LogWarning();
-
             if (mediaListResult.IsFailed)
-            {
-                var result = mediaListResult.ToResult();
-                result.LogError();
-                return result;
-            }
+                return mediaListResult.ToResult().LogIfFailed();
 
             var rawMediaList = mediaListResult.Value;
             progressIndex += rawMediaList.Count;
@@ -159,7 +152,7 @@ public class GetAllMediaByTypeFromPlexApiCommandHandler
     /// <summary>
     /// Gets the total count of the media in the library.
     /// </summary>
-    private async Task<Result<int>> GetLibraryMediaTotalCount(
+    private static async Task<Result<int>> GetLibraryMediaTotalCount(
         IPlexAPI client,
         string libraryKey,
         PlexMediaType type,
@@ -193,7 +186,7 @@ public class GetAllMediaByTypeFromPlexApiCommandHandler
     /// Gets all the root level media metadata contained in this Plex library. For movies, it's all movies, and for TV shows it's all the shows without seasons and episodes.
     /// <remarks>URL: {{SERVER_URL}}/library/sections/{{LIBRARY_KEY}}/all?X-Plex-Token={{SERVER_TOKEN}}</remarks>
     /// </summary>
-    public async Task<Result<List<LibraryMediaItemDTO>>> GetMetadataForLibraryAsync(
+    public static async Task<Result<List<LibraryMediaItemDTO>>> GetMetadataForLibraryAsync(
         IPlexAPI client,
         string libraryKey,
         int startIndex,

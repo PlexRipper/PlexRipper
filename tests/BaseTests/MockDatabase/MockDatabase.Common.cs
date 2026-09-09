@@ -359,7 +359,7 @@ public static partial class MockDatabase
         var (reaparrContext, authContext) = context;
 
         await PrepareDatabaseSchemaAsync(reaparrContext, authContext, pathProvider, appRuntimeInfo);
-        await SeedDatabaseAsync(reaparrContext, seed, pathProvider, appRuntimeInfo, config, options);
+        reaparrContext = await SeedDatabaseAsync(reaparrContext, seed, pathProvider, appRuntimeInfo, config, options);
 
         reaparrContext.ShouldNotBeNull();
     }
@@ -446,7 +446,7 @@ public static partial class MockDatabase
         ReaparrDBContextSeed.Seed(pathProvider)(reaparrContext, true);
     }
 
-    private static async Task SeedDatabaseAsync(
+    private static async Task<ReaparrDbContext> SeedDatabaseAsync(
         ReaparrDbContext reaparrContext,
         Seed seed,
         IPathProvider pathProvider,
@@ -490,7 +490,9 @@ public static partial class MockDatabase
             reaparrContext = await reaparrContext.AddSonarrIntegrations(seed, options);
 
         if (config.AccountHasAccessToAllLibraries)
-            await reaparrContext.AddPlexAccountLibraries();
+            reaparrContext = await reaparrContext.AddPlexAccountLibraries();
+
+        return reaparrContext;
     }
 
     #endregion
@@ -509,6 +511,7 @@ public static partial class MockDatabase
         optionsBuilder.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
         optionsBuilder.EnableSensitiveDataLogging();
         optionsBuilder.EnableDetailedErrors();
+        // ReSharper disable once TemplateIsNotCompileTimeConstantProblem
         optionsBuilder.LogTo(text => LogFactory.DbContextLogger(text), LogLevel.Warning);
         return optionsBuilder;
     }

@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using System.Runtime.CompilerServices;
+using Microsoft.Extensions.Logging;
 
 namespace Reaparr.FluentResults
 {
@@ -8,9 +9,24 @@ namespace Reaparr.FluentResults
     public class DefaultLogger : IResultLogger
     {
         /// <inheritdoc/>
-        public void Log(string context, string? content, ResultBase result, LogLevel logLevel) { }
+        public void Log(
+            string context,
+            string? content,
+            ResultBase result,
+            LogLevel logLevel,
+            [CallerMemberName] string memberName = "",
+            [CallerFilePath] string sourceFilePath = "",
+            [CallerLineNumber] int sourceLineNumber = 0
+        ) { }
 
         /// <inheritdoc/>
-        public void Log<TContext>(string? content, ResultBase result, LogLevel logLevel) { }
+        public void Log<TContext>(
+            string? content,
+            ResultBase result,
+            LogLevel logLevel,
+            [CallerMemberName] string memberName = "",
+            [CallerFilePath] string sourceFilePath = "",
+            [CallerLineNumber] int sourceLineNumber = 0
+        ) { }
     }
 }

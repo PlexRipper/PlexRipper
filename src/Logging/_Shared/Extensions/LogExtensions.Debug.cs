@@ -98,10 +98,7 @@ public static partial class LogExtensions
                 if (t.Namespace?.StartsWith("Castle.Proxies", StringComparison.Ordinal) == true)
                     return false;
 
-                if (IsPotentiallyUnsafeForDestructuring(t, new HashSet<Type>()))
-                    return false;
-
-                return true;
+                return !IsPotentiallyUnsafeForDestructuring(t, []);
             }
         );
     }

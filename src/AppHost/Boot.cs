@@ -85,23 +85,16 @@ public class Boot : IHostedService
         }
 
         var recoverResult = await _commandExecutor.Send(new RecoverInterruptedDownloadsCommand(), cancellationToken);
-        if (recoverResult.IsFailed)
-            recoverResult.LogError();
+        recoverResult.LogIfFailed();
 
         _mediaQueryCache.SuppressInvalidation = true;
         var cacheWarmupResult = await _mediaQueryCache.BuildCache(cancellationToken);
-        if (cacheWarmupResult.IsCancelled)
-        {
-            _mediaQueryCache.SuppressInvalidation = false;
-            cacheWarmupResult.LogWarning();
-            return;
-        }
-
         if (cacheWarmupResult.IsFailed)
         {
             _mediaQueryCache.SuppressInvalidation = false;
-            cacheWarmupResult.LogError();
-            TerminateApplication();
+            cacheWarmupResult.LogIfFailed();
+            if (!cacheWarmupResult.IsCancelled)
+                TerminateApplication();
             return;
         }
 
@@ -110,7 +103,7 @@ public class Boot : IHostedService
         if (setupResult.IsFailed)
         {
             _mediaQueryCache.SuppressInvalidation = false;
-            setupResult.LogError();
+            setupResult.LogIfFailed();
             TerminateApplication();
             return;
         }
@@ -118,8 +111,7 @@ public class Boot : IHostedService
         if (!_appRuntimeInfo.IsIntegrationTestMode)
         {
             var bootQueueKickResult = await _downloadQueue.CheckDownloadQueueForAllServers(cancellationToken);
-            if (bootQueueKickResult.IsFailed)
-                bootQueueKickResult.LogError();
+            bootQueueKickResult.LogIfFailed();
         }
 
         _log.Here().Information("Finished Initiating boot process");
@@ -149,11 +141,11 @@ public class Boot : IHostedService
             cancellationToken
         );
         if (moveJobsResult.IsFailed)
-            moveJobsResult.LogError();
+            moveJobsResult.LogIfFailed();
 
         var autoPauseResult = await _commandExecutor.Send(new AutoPauseActiveDownloadsCommand(), cancellationToken);
         if (autoPauseResult.IsFailed)
-            autoPauseResult.LogError();
+            autoPauseResult.LogIfFailed();
 
         var stopResult = await _backgroundJobsSetup.StopAsync(cancellationToken);
         stopResult.LogIfFailed();
@@ -163,6 +155,7 @@ public class Boot : IHostedService
 
     #region Private Methods
 
+    // ReSharper disable once AsyncVoidMethod
     private async void OnStarted()
     {
         _log.Here().Debug("Boot.OnStarted has been called");
@@ -174,28 +167,19 @@ public class Boot : IHostedService
                     new MigrateLegacyArrSettingsCommand(),
                     _appLifetime.ApplicationStopping
                 );
-                if (migrationResult.IsCancelled)
-                    migrationResult.LogWarning();
-                else if (migrationResult.IsFailed)
-                    migrationResult.LogError();
+                migrationResult.LogIfFailed();
 
                 var integrationCheckResult = await _commandExecutor.Send(
                     new NotifyArrAppsOnStartupCommand(),
                     _appLifetime.ApplicationStopping
                 );
-                if (integrationCheckResult.IsCancelled)
-                    integrationCheckResult.LogWarning();
-                else if (integrationCheckResult.IsFailed)
-                    integrationCheckResult.LogError();
+                integrationCheckResult.LogIfFailed();
 
                 var cacheWarmupResult = await _commandExecutor.Send(
                     new WarmupMediaQueryCacheCommand(),
                     _appLifetime.ApplicationStopping
                 );
-                if (cacheWarmupResult.IsCancelled)
-                    cacheWarmupResult.LogWarning();
-                else if (cacheWarmupResult.IsFailed)
-                    cacheWarmupResult.LogError();
+                cacheWarmupResult.LogIfFailed();
             },
             exception =>
             {

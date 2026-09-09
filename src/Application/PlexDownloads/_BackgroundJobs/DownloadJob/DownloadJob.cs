@@ -58,11 +58,6 @@ public class DownloadJob : IJob
                     nameof(downloadTaskKey),
                     downloadTaskKey
                 );
-            if (downloadTaskKey is null)
-            {
-                ResultExtensions.IsNull(nameof(DownloadTaskKey)).LogError();
-                return;
-            }
 
             // Create the multiple download worker tasks which will split up the work
             var downloadTask = await _dbContext.GetDownloadTaskFileAsync(downloadTaskKey, token);

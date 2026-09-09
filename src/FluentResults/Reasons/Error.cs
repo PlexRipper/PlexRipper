@@ -47,8 +47,7 @@
         public Error(string message, IError causedBy)
             : this(message)
         {
-            if (causedBy == null)
-                throw new ArgumentNullException(nameof(causedBy));
+            ArgumentNullException.ThrowIfNull(causedBy);
 
             Reasons.Add(causedBy);
         }
@@ -58,8 +57,7 @@
         /// </summary>
         public Error CausedBy(IError error)
         {
-            if (error == null)
-                throw new ArgumentNullException(nameof(error));
+            ArgumentNullException.ThrowIfNull(error);
 
             Reasons.Add(error);
             return this;
@@ -70,8 +68,7 @@
         /// </summary>
         public Error CausedBy(Exception exception)
         {
-            if (exception == null)
-                throw new ArgumentNullException(nameof(exception));
+            ArgumentNullException.ThrowIfNull(exception);
 
             Reasons.Add(Result.Settings.ExceptionalErrorFactory(null, exception));
             return this;
@@ -82,8 +79,7 @@
         /// </summary>
         public Error CausedBy(string message, Exception exception)
         {
-            if (exception == null)
-                throw new ArgumentNullException(nameof(exception));
+            ArgumentNullException.ThrowIfNull(exception);
 
             Reasons.Add(Result.Settings.ExceptionalErrorFactory(message, exception));
             return this;
@@ -103,8 +99,7 @@
         /// </summary>
         public Error CausedBy(IEnumerable<IError> errors)
         {
-            if (errors == null)
-                throw new ArgumentNullException(nameof(errors));
+            ArgumentNullException.ThrowIfNull(errors);
 
             Reasons.AddRange(errors);
             return this;
@@ -115,8 +110,7 @@
         /// </summary>
         public Error CausedBy(IEnumerable<string> errors)
         {
-            if (errors == null)
-                throw new ArgumentNullException(nameof(errors));
+            ArgumentNullException.ThrowIfNull(errors);
 
             Reasons.AddRange(errors.Select(errorMessage => Result.Settings.ErrorFactory(errorMessage)));
             return this;

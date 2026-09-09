@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using System.Runtime.CompilerServices;
+using Microsoft.Extensions.Logging;
 
 namespace Reaparr.FluentResults
 {
@@ -95,7 +96,7 @@ namespace Reaparr.FluentResults
         public bool HasError<TError>(Func<TError, bool> predicate)
             where TError : IError
         {
-            return HasError<TError>(predicate, out _);
+            return HasError(predicate, out _);
         }
 
         /// <summary>
@@ -104,8 +105,7 @@ namespace Reaparr.FluentResults
         public bool HasError<TError>(Func<TError, bool> predicate, out IEnumerable<TError> result)
             where TError : IError
         {
-            if (predicate == null)
-                throw new ArgumentNullException(nameof(predicate));
+            ArgumentNullException.ThrowIfNull(predicate);
 
             return ResultHelper.HasError(Errors, predicate, out result);
         }
@@ -123,8 +123,7 @@ namespace Reaparr.FluentResults
         /// </summary>
         public bool HasError(Func<IError, bool> predicate, out IEnumerable<IError> result)
         {
-            if (predicate == null)
-                throw new ArgumentNullException(nameof(predicate));
+            ArgumentNullException.ThrowIfNull(predicate);
 
             return ResultHelper.HasError(Errors, predicate, out result);
         }
@@ -162,8 +161,7 @@ namespace Reaparr.FluentResults
         public bool HasException<TException>(Func<TException, bool> predicate, out IEnumerable<IError> result)
             where TException : Exception
         {
-            if (predicate == null)
-                throw new ArgumentNullException(nameof(predicate));
+            ArgumentNullException.ThrowIfNull(predicate);
 
             return ResultHelper.HasException(Errors, predicate, out result);
         }
@@ -327,48 +325,73 @@ namespace Reaparr.FluentResults
         /// <summary>
         /// Log the result. Configure the logger via Result.Setup(..)
         /// </summary>
-        public TResult Log(LogLevel logLevel = LogLevel.Information)
-        {
-            return Log(string.Empty, null, logLevel);
-        }
+        public TResult Log(
+            LogLevel logLevel = LogLevel.Information,
+            [CallerMemberName] string memberName = "",
+            [CallerFilePath] string sourceFilePath = "",
+            [CallerLineNumber] int sourceLineNumber = 0
+        ) => Log(string.Empty, null, logLevel, memberName, sourceFilePath, sourceLineNumber);
+
+        /// <summary>
+        /// Log the result only when it contains an error. Configure the logger via Result.Setup(..)
+        /// </summary>
+        public TResult LogIfFailed(
+            [CallerMemberName] string memberName = "",
+            [CallerFilePath] string sourceFilePath = "",
+            [CallerLineNumber] int sourceLineNumber = 0
+        ) => IsFailed ? Log(LogLevel.Error, memberName, sourceFilePath, sourceLineNumber) : (TResult)this;
 
         /// <summary>
         /// Log the result. Configure the logger via Result.Setup(..)
         /// </summary>
-        public TResult Log(string context, LogLevel logLevel = LogLevel.Information)
-        {
-            return Log(context, null, logLevel);
-        }
+        public TResult Log(
+            string context,
+            LogLevel logLevel = LogLevel.Information,
+            [CallerMemberName] string memberName = "",
+            [CallerFilePath] string sourceFilePath = "",
+            [CallerLineNumber] int sourceLineNumber = 0
+        ) => Log(context, null, logLevel, memberName, sourceFilePath, sourceLineNumber);
 
         /// <summary>
         /// Log the result with a specific logger context. Configure the logger via Result.Setup(..)
         /// </summary>
-        public TResult Log(string context, string? content, LogLevel logLevel = LogLevel.Information)
+        public TResult Log(
+            string context,
+            string? content,
+            LogLevel logLevel = LogLevel.Information,
+            [CallerMemberName] string memberName = "",
+            [CallerFilePath] string sourceFilePath = "",
+            [CallerLineNumber] int sourceLineNumber = 0
+        )
         {
             var logger = Result.Settings.Logger;
-
-            logger.Log(context, content, this, logLevel);
-
+            logger.Log(context, content, this, logLevel, memberName, sourceFilePath, sourceLineNumber);
             return (TResult)this;
         }
 
         /// <summary>
         /// Log the result with a typed context. Configure the logger via Result.Setup(..)
         /// </summary>
-        public TResult Log<TContext>(LogLevel logLevel = LogLevel.Information)
-        {
-            return Log<TContext>(null, logLevel);
-        }
+        public TResult Log<TContext>(
+            LogLevel logLevel = LogLevel.Information,
+            [CallerMemberName] string memberName = "",
+            [CallerFilePath] string sourceFilePath = "",
+            [CallerLineNumber] int sourceLineNumber = 0
+        ) => Log<TContext>(null, logLevel, memberName, sourceFilePath, sourceLineNumber);
 
         /// <summary>
         /// Log the result with a typed context. Configure the logger via Result.Setup(..)
         /// </summary>
-        public TResult Log<TContext>(string? content, LogLevel logLevel = LogLevel.Information)
+        public TResult Log<TContext>(
+            string? content,
+            LogLevel logLevel = LogLevel.Information,
+            [CallerMemberName] string memberName = "",
+            [CallerFilePath] string sourceFilePath = "",
+            [CallerLineNumber] int sourceLineNumber = 0
+        )
         {
             var logger = Result.Settings.Logger;
-
-            logger.Log<TContext>(content, this, logLevel);
-
+            logger.Log<TContext>(content, this, logLevel, memberName, sourceFilePath, sourceLineNumber);
             return (TResult)this;
         }
 

@@ -30,13 +30,28 @@ public static class FluentResultConfiguration
 
 public class FluentResultLogger : IResultLogger
 {
-    public void Log(string context, string? content, ResultBase result, LogLevel logLevel)
+    public void Log(
+        string context,
+        string? content,
+        ResultBase result,
+        LogLevel logLevel,
+        string memberName = "",
+        string sourceFilePath = "",
+        int sourceLineNumber = 0
+    )
     {
-        result.LogResultBase(logLevel.ToSerilogLevel());
+        result.LogResultBase(logLevel.ToSerilogLevel(), memberName, sourceFilePath, sourceLineNumber);
     }
 
-    public void Log<TContext>(string? content, ResultBase result, LogLevel logLevel)
+    public void Log<TContext>(
+        string? content,
+        ResultBase result,
+        LogLevel logLevel,
+        string memberName = "",
+        string sourceFilePath = "",
+        int sourceLineNumber = 0
+    )
     {
-        result.LogResultBase(logLevel.ToSerilogLevel(), typeof(TContext).FullName!);
+        result.LogResultBase(logLevel.ToSerilogLevel(), memberName, sourceFilePath, sourceLineNumber);
     }
 }

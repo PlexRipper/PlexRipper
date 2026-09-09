@@ -110,9 +110,6 @@ public static partial class ResultExtensions
         return 0;
     }
 
-    public static bool FindStatusCode<T>(this Result<T> result, int statusCode) =>
-        result.ToResult()?.HasStatusCode(statusCode) ?? false;
-
     public static bool IsServerUnreachable(this Result result) =>
         result.Has408RequestTimeout()
         || result.Has500InternalServerError()
@@ -135,14 +132,6 @@ public static partial class ResultExtensions
     public static bool IsServerUnreachable<T>(this Result<T> result) => result.ToResult().IsServerUnreachable();
 
     #endregion
-
-    private static Result AddErrorMessageToResult(this Result result, string errorMessage)
-    {
-        if (result.Errors.Any())
-            result.Errors[0].Metadata.Add(ErrorMessageName, errorMessage);
-
-        return result;
-    }
 
     private static Result CreateErrorStatusCodeResult(int statusCode, string message = "") =>
         Result.Fail(GetStatusCodeReason(statusCode, message));

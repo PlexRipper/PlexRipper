@@ -73,11 +73,12 @@ export const useIntegrationStore = defineStore(StoreNames.IntegrationStore, () =
 			);
 		},
 		refresh() {
+			const testResult = state.testResult;
 			return integrationApi.getIntegrationsEndpoint().pipe(
 				tap((result) => {
 					if (result.isSuccess) {
 						state.items = result.value ?? [];
-						if (state.testResult) updateSummaryConnectionStatus(state.testResult);
+						if (testResult) updateSummaryConnectionStatus(testResult);
 					}
 				}),
 			);

@@ -465,8 +465,7 @@
                     "indexer": "Konfigurowanie klienta indeksowania Reaparr w {type}...",
                     "indexer-ready": "Klient indeksowania w {type} jest gotowy.",
                     "validation": "Weryfikowanie konfiguracji integracji {type}...",
-                    "validation-ready": "Konfiguracja integracji {type} została zweryfikowana.",
-                    "complete": "Konfiguracja integracji zakończona."
+                    "validation-ready": "Konfiguracja integracji {type} została zweryfikowana."
                 }
             }
         }
@@ -898,9 +897,9 @@
             },
             "integrations": {
                 "choose-title": "Dodaj integrację",
-                "test-failed-title": "Test integracji nie powiódł się",
                 "test-success": "Połączenie udane",
                 "test-failed": "Połączenie nie powiodło się",
+                "test-url": "Próbowany adres URL: {url}",
                 "connection-status": {
                     "connected": "Połączono",
                     "unconnected": "Nie połączono"

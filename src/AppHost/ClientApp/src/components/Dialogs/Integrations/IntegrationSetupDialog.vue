@@ -4,7 +4,8 @@
 		width="520px"
 		persistent
 		close-button
-		cy="integration-setup-dialog">
+		cy="integration-setup-dialog"
+		@closed="refresh">
 		<template #title>
 			<div class="row items-center q-gutter-sm">
 				<QImg
@@ -143,16 +144,11 @@
 					done-icon="mdi-check-circle"
 					active-icon="mdi-check-circle"
 					done-color="positive"
+					active-color="positive"
 					:done="steps.done.status === 'success'"
 					:header-nav="false"
 					:data-status="steps.done.status"
-					data-cy="integration-setup-step-done">
-					<div
-						v-if="steps.done.status === 'success'"
-						class="text-positive">
-						{{ setupTexts.progress.complete }}
-					</div>
-				</QStep>
+					data-cy="integration-setup-step-done" />
 			</QStepper>
 		</template>
 	</QCardDialog>
@@ -190,7 +186,6 @@ const setupTexts = computed(() => {
 			indexerReady: $t('components.integration-setup-dialog.setup.progress.indexer-ready', values),
 			validation: $t('components.integration-setup-dialog.setup.progress.validation', values),
 			validationReady: $t('components.integration-setup-dialog.setup.progress.validation-ready', values),
-			complete: $t('components.integration-setup-dialog.setup.progress.complete', values),
 		},
 	};
 });
@@ -239,6 +234,10 @@ onMounted(reset);
 watch(() => store.isSettingUp, (isSettingUp) => {
 	if (isSettingUp) reset();
 });
+
+function refresh(): void {
+	useSubscription(store.refresh().subscribe());
+}
 </script>
 
 <style lang="scss">

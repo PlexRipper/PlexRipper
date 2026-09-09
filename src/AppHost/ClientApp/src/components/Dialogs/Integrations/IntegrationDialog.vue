@@ -55,16 +55,14 @@
 				v-else
 				class="q-gutter-md"
 				@submit="save">
-				<QBanner
+				<QAlert
 					v-if="store.error"
-					rounded
-					class="bg-negative text-white">
+					type="error">
 					{{ formatError(store.error) }}
-				</QBanner>
-				<QBanner
+				</QAlert>
+				<QAlert
 					v-if="store.testResult"
-					rounded
-					:class="store.testResult.result === TestConnectionStatus.Success ? 'bg-positive text-white' : 'bg-negative text-white'">
+					:type="store.testResult.result === TestConnectionStatus.Success ? 'success' : 'error'">
 					<div>
 						{{
 							store.testResult.result === TestConnectionStatus.Success ? $t('help.settings.integrations.test-success') : $t('help.settings.integrations.test-failed')
@@ -73,7 +71,7 @@
 					<div class="text-caption">
 						{{ formatTestDetails() }}
 					</div>
-				</QBanner>
+				</QAlert>
 				<HelpRow
 					:label="integrationHelp.displayName.label"
 					:title="integrationHelp.displayName.title"
@@ -208,10 +206,9 @@ import { set } from '@vueuse/core';
 import { useSubscription } from '@vueuse/rxjs';
 import { FolderType, IntegrationType, TestConnectionStatus, type IntegrationSummary } from '@dto';
 import { DialogType } from '@enums';
-import { useAlertStore, useDialogStore, useFolderPathStore, useIntegrationStore } from '@store';
+import { useDialogStore, useFolderPathStore, useIntegrationStore } from '@store';
 
 const store = useIntegrationStore();
-const alertStore = useAlertStore();
 const dialogStore = useDialogStore();
 const folderPathStore = useFolderPathStore();
 const integrationTypes = [
@@ -326,6 +323,7 @@ function formatTestDetails(): string {
 	if (!store.testResult) return '';
 
 	return [
+		store.testResult.result !== TestConnectionStatus.Success ? $t('help.settings.integrations.test-url', { url: store.draft.url }) : null,
 		store.testResult.httpStatusCode ? `HTTP ${store.testResult.httpStatusCode}` : null,
 		store.testResult.errorMessage,
 		new Date(store.testResult.testedAt).toLocaleString(),
@@ -334,18 +332,18 @@ function formatTestDetails(): string {
 
 function test(): void {
 	useSubscription(store.test().subscribe((result) => {
-		if (!result || !result.isSuccess || result.value?.result !== TestConnectionStatus.Success) {
-			alertStore.showAlert({
-				id: 0,
-				title: $t('help.settings.integrations.test-failed-title'),
-				text: result?.errors?.map((error) => error.message).join('\n') || result?.value?.errorMessage || result?.value?.result || formatError(store.error),
-			});
-		}
+		const isSuccessful = result?.isSuccess && result.value?.result === TestConnectionStatus.Success;
+		if (!isSuccessful) return;
+
+		if (!store.detail) save();
 	}));
 }
 
 function save(): void {
-	useSubscription(store.save().subscribe());
+	const isEditing = Boolean(store.detail);
+	useSubscription(store.save().subscribe((result) => {
+		if (isEditing && result?.isSuccess && result.value) dialogStore.closeDialog(DialogType.IntegrationDialog);
+	}));
 }
 
 function setup(): void {

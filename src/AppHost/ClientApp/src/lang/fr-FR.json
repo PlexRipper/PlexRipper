@@ -465,8 +465,7 @@
                     "indexer": "Configuration du client d'indexation Reaparr dans {type}...",
                     "indexer-ready": "Client d'indexation dans {type} prêt.",
                     "validation": "Validation de la configuration de l'intégration {type}...",
-                    "validation-ready": "Configuration de l'intégration {type} validée.",
-                    "complete": "Configuration de l'intégration terminée."
+                    "validation-ready": "Configuration de l'intégration {type} validée."
                 }
             }
         }
@@ -898,9 +897,9 @@
             },
             "integrations": {
                 "choose-title": "Ajouter une intégration",
-                "test-failed-title": "Échec du test de l'intégration",
                 "test-success": "Connexion réussie",
                 "test-failed": "Échec de la connexion",
+                "test-url": "URL tentée : {url}",
                 "connection-status": {
                     "connected": "Connecté",
                     "unconnected": "Non connecté"

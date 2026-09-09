@@ -465,8 +465,7 @@
                     "indexer": "Setting up the Reaparr indexer client in {type}...",
                     "indexer-ready": "Indexer client in {type} ready.",
                     "validation": "Validating the {type} integration setup...",
-                    "validation-ready": "{type} integration setup validated.",
-                    "complete": "Integration setup complete."
+                    "validation-ready": "{type} integration setup validated."
                 }
             }
         }
@@ -898,9 +897,9 @@
             },
             "integrations": {
                 "choose-title": "Add integration",
-                "test-failed-title": "Integration test failed",
                 "test-success": "Connection successful",
                 "test-failed": "Connection failed",
+                "test-url": "URL attempted: {url}",
                 "connection-status": {
                     "connected": "Connected",
                     "unconnected": "Unconnected"

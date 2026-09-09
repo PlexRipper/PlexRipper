@@ -119,14 +119,6 @@
           "Microsoft.EntityFrameworkCore": "8.0.0"
         }
       },
-      "FluentResults": {
-        "type": "Transitive",
-        "resolved": "4.0.0",
-        "contentHash": "wKfdLvDnDVhXlSreU7u/NFNHH6EfoOhAloEID4ePAyk+ZliowKZJvX+aCL4hxhFc9Jj74t62amS4LyOYTjXGCg==",
-        "dependencies": {
-          "Microsoft.Extensions.Logging.Abstractions": "2.1.1"
-        }
-      },
       "FluentValidation": {
         "type": "Transitive",
         "resolved": "12.1.1",
@@ -500,6 +492,12 @@
         "resolved": "0.1.2",
         "contentHash": "Zhw6wmXwdLkhCvgBfVd9D8UL62IF2xnmbWDckQVoZMT9lBKCuVLwaVrkXhhJtP6pxcRaf7caauNCWOUngoPNsQ=="
       },
+      "fluentresults": {
+        "type": "Project",
+        "dependencies": {
+          "Microsoft.Extensions.Logging.Abstractions": "[10.0.5, )"
+        }
+      },
       "Reaparr.Application.Contracts": {
         "type": "Project",
         "dependencies": {
@@ -551,8 +549,9 @@
       "Reaparr.FluentResultExtensions": {
         "type": "Project",
         "dependencies": {
-          "FluentResults": "[4.0.0, )",
+          "FluentResults": "[1.0.0, )",
           "FluentValidation": "[12.1.1, )",
+          "Microsoft.Extensions.Logging.Abstractions": "[10.0.5, )",
           "Reaparr.Logging": "[1.0.0, )"
         }
       },
@@ -560,8 +559,9 @@
         "type": "Project",
         "dependencies": {
           "Autofac": "[9.1.0, )",
-          "FluentResults": "[4.0.0, )",
+          "FluentResults": "[1.0.0, )",
           "Microsoft.AspNetCore.Http.Abstractions": "[2.3.9, )",
+          "Microsoft.Extensions.Logging.Abstractions": "[10.0.5, )",
           "Reaparr.Environment": "[1.0.0, )",
           "Serilog": "[4.3.1, )",
           "Serilog.Enrichers.Sensitive": "[2.1.0, )",

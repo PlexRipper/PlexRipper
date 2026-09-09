@@ -152,6 +152,46 @@ public class TestConnectionToSonarrCommandUnitTests : BaseCommandUnitTest<TestCo
         Mock.Mock<ISonarrHttpClientFactory>().Verify();
     }
 
+
+    [Test]
+    public async Task ShouldRejectInvalidUrl_WhenDraftConnectionHasNoIntegrationId()
+    {
+        // Arrange
+        var command = new TestConnectionToSonarrCommand(null, "not-a-url", "draft-key");
+
+        Mock.Mock<ISonarrHttpClientFactory>()
+            .Setup(x => x.Create(It.IsAny<string>(), It.IsAny<string>()))
+            .Returns(Result.Ok(new HttpClient()))
+            .Verifiable(Times.Never());
+
+        // Act
+        var result = await TestHandlerExecuteAsync<TestConnectionResult>(command);
+
+        // Assert
+        result.IsFailed.ShouldBeTrue();
+        result.Errors.ShouldContain(x => x.Message == "Provided Sonarr URL must be a valid http/https URL.");
+        Mock.Mock<ISonarrHttpClientFactory>().Verify();
+    }
+
+    [Test]
+    public async Task ShouldRejectIncompleteDraftCredentials_WhenNoIntegrationIdIsProvided()
+    {
+        // Arrange
+        var command = new TestConnectionToSonarrCommand(null, "http://sonarr.test", null);
+
+        Mock.Mock<ISonarrHttpClientFactory>()
+            .Setup(x => x.Create(It.IsAny<string>(), It.IsAny<string>()))
+            .Returns(Result.Ok(new HttpClient()))
+            .Verifiable(Times.Never());
+
+        // Act
+        var result = await TestHandlerExecuteAsync<TestConnectionResult>(command);
+
+        // Assert
+        result.IsFailed.ShouldBeTrue();
+        result.Errors.ShouldContain(x => x.Message == "Provide either an integration ID or a URL and API key.");
+        Mock.Mock<ISonarrHttpClientFactory>().Verify();
+    }
     private sealed class StatusCodeHandler(HttpStatusCode statusCode, string reasonPhrase) : HttpMessageHandler
     {
         protected override Task<HttpResponseMessage> SendAsync(

@@ -151,6 +151,68 @@ public class TestConnectionToRadarrCommandUnitTests : BaseCommandUnitTest<TestCo
         Mock.Mock<IRadarrHttpClientFactory>().Verify();
     }
 
+
+    [Test]
+    public async Task ShouldRejectInvalidUrl_WhenDraftConnectionHasNoIntegrationId()
+    {
+        // Arrange
+        var command = new TestConnectionToRadarrCommand(null, "not-a-url", "draft-key");
+
+        Mock.Mock<IRadarrHttpClientFactory>()
+            .Setup(x => x.Create(It.IsAny<string>(), It.IsAny<string>()))
+            .Returns(Result.Ok(new HttpClient()))
+            .Verifiable(Times.Never());
+
+        // Act
+        var result = await TestHandlerExecuteAsync<TestConnectionResult>(command);
+
+        // Assert
+        result.IsFailed.ShouldBeTrue();
+        result.Errors.ShouldContain(x => x.Message == "Provided Radarr URL must be a valid http/https URL.");
+        Mock.Mock<IRadarrHttpClientFactory>().Verify();
+    }
+
+    [Test]
+    public async Task ShouldRejectIncompleteDraftCredentials_WhenNoIntegrationIdIsProvided()
+    {
+        // Arrange
+        var command = new TestConnectionToRadarrCommand(null, "http://radarr.test", null);
+
+        Mock.Mock<IRadarrHttpClientFactory>()
+            .Setup(x => x.Create(It.IsAny<string>(), It.IsAny<string>()))
+            .Returns(Result.Ok(new HttpClient()))
+            .Verifiable(Times.Never());
+
+        // Act
+        var result = await TestHandlerExecuteAsync<TestConnectionResult>(command);
+
+        // Assert
+        result.IsFailed.ShouldBeTrue();
+        result.Errors.ShouldContain(x => x.Message == "Provide either an integration ID or a URL and API key.");
+        Mock.Mock<IRadarrHttpClientFactory>().Verify();
+    }
+
+    [Test]
+    public async Task ShouldReturnNotFound_WhenPersistedIntegrationDoesNotExist()
+    {
+        // Arrange
+        await SetupDatabase(55333);
+        var command = new TestConnectionToRadarrCommand(Guid.Parse("00000000-0000-0000-0000-000000055333"), null, null);
+
+        Mock.Mock<IRadarrHttpClientFactory>()
+            .Setup(x => x.Create(It.IsAny<string>(), It.IsAny<string>()))
+            .Returns(Result.Ok(new HttpClient()))
+            .Verifiable(Times.Never());
+
+        // Act
+        var result = await TestHandlerExecuteAsync<TestConnectionResult>(command);
+
+        // Assert
+        result.IsFailed.ShouldBeTrue();
+        result.Has404NotFoundError().ShouldBeTrue();
+        Mock.Mock<IRadarrHttpClientFactory>().Verify();
+    }
+ 
     private sealed class StatusCodeHandler(HttpStatusCode statusCode, string reasonPhrase) : HttpMessageHandler
     {
         protected override Task<HttpResponseMessage> SendAsync(

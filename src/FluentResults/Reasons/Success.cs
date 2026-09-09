@@ -1,5 +1,4 @@
-﻿// ReSharper disable once CheckNamespace
-namespace FluentResults
+﻿namespace Reaparr.FluentResults
 {
     /// <summary>
     /// Objects from Success class cause no failed result

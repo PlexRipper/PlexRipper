@@ -1,5 +1,4 @@
-// ReSharper disable once CheckNamespace
-namespace FluentResults
+namespace Reaparr.FluentResults
 {
     /// <summary>
     /// Definition of a reason.  This is also the base of ISuccess and IError

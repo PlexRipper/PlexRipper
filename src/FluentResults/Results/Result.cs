@@ -1,7 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 
-// ReSharper disable once CheckNamespace
-namespace FluentResults
+namespace Reaparr.FluentResults
 {
     /// <summary>
     ///     Implementation of a Result

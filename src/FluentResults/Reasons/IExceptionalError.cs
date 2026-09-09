@@ -1,5 +1,4 @@
-﻿// ReSharper disable once CheckNamespace
-namespace FluentResults
+﻿namespace Reaparr.FluentResults
 {
     /// <summary>
     /// Definition of an error containing an exception

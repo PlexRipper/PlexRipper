@@ -1,5 +1,4 @@
-// ReSharper disable once CheckNamespace
-namespace FluentResults
+namespace Reaparr.FluentResults
 {
     public partial class Result
     {

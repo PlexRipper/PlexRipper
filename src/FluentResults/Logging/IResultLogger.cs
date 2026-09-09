@@ -1,8 +1,6 @@
-﻿// ReSharper disable once CheckNamespace
+﻿using Microsoft.Extensions.Logging;
 
-using Microsoft.Extensions.Logging;
-
-namespace FluentResults
+namespace Reaparr.FluentResults
 {
     /// <summary>
     /// Logging interface.  Implement this if you want to have custom logging of results

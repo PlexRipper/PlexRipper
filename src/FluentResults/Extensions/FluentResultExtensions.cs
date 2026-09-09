@@ -1,9 +1,9 @@
-﻿namespace FluentResults.Extensions
+﻿namespace Reaparr.FluentResults
 {
     /// <summary>
     /// Extension methods for Result
     /// </summary>
-    public static class ResultExtensions
+    public static class FluentResultExtensions
     {
         /// <summary>
         /// Map all errors of the result via errorMapper

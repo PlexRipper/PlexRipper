@@ -1,5 +1,4 @@
-﻿// ReSharper disable once CheckNamespace
-namespace FluentResults
+﻿namespace Reaparr.FluentResults
 {
     /// <summary>
     /// Extension methods for object base type
@@ -13,8 +12,7 @@ namespace FluentResults
         /// <param name="value">The value of the result</param>
         public static Result<TValue> ToResult<TValue>(this TValue value)
         {
-            return new Result<TValue>()
-                .WithValue(value);
+            return new Result<TValue>().WithValue(value);
         }
 
         internal static string ToLabelValueStringOrEmpty(this object value, string label)

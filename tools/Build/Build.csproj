@@ -23,6 +23,11 @@
         <PackageReference Include="System.IO.Abstractions" Version="22.1.1" />
     </ItemGroup>
     <ItemGroup>
+        <Using Include="Serilog" />
+        <Using Include="Reaparr.FluentResults" />
+        <Using Include="Reaparr.FluentResultExtensions" />
+    </ItemGroup>
+    <ItemGroup>
         <ProjectReference Include="..\..\src\Domain\Domain.csproj" />
     </ItemGroup>
 </Project>

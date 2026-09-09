@@ -30,5 +30,6 @@
         <Using Include="Serilog" />
         <Using Include="Serilog.Core" />
         <Using Include="Serilog.Events" />
+        <Using Include="Reaparr.FluentResults" />
     </ItemGroup>
 </Project>

@@ -20,6 +20,7 @@
     </ItemGroup>
     <ItemGroup>
         <Using Include="Reaparr.FluentResults" />
+        <Using Include="Reaparr.FluentResultExtensions" />
         <Using Include="Microsoft.EntityFrameworkCore" />
         <Using Include="Reaparr.Application.Contracts" />
         <Using Include="Reaparr.Domain" />

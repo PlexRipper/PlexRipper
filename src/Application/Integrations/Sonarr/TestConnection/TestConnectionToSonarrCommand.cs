@@ -53,10 +53,8 @@ public class TestConnectionToSonarrCommandHandler
             return ResultExtensions.EntityNotFound(nameof(SonarrIntegration), command.IntegrationId.Value);
 
         var result = await TestAsync(integration.BaseUrl, integration.SonarrApiKey, ct);
-        if (result.IsCancelled)
-            return result.LogWarning();
         if (result.IsFailed)
-            return result.LogError();
+            return result.LogIfFailed();
 
         integration.LastConnectionTestStatus = result.Value.Status;
         integration.LastConnectionTestHttpStatusCode = result.Value.HttpStatusCode;
@@ -74,10 +72,8 @@ public class TestConnectionToSonarrCommandHandler
             return Result.Ok(CreateResult(TestConnectionStatus.InvalidApiKey, null, "API key is invalid."));
 
         var clientResult = _sonarrHttpClientFactory.Create(url, apiKey);
-        if (clientResult.IsCancelled)
-            return clientResult.ToResult<TestConnectionResult>().LogWarning();
         if (clientResult.IsFailed)
-            return clientResult.ToResult<TestConnectionResult>().LogError();
+            return clientResult.ToResult<TestConnectionResult>().LogIfFailed();
 
         using var client = clientResult.Value;
         return await client.TestSonarrConnectionAsync(ct);

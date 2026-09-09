@@ -67,11 +67,8 @@ public class RestartDownloadTaskCommandHandler : ICommandHandler<RestartDownload
 
             var stopResult = await _commandExecutor.Send(new StopDownloadTaskCommand(childKey.Id), cancellationToken);
 
-            if (stopResult.IsCancelled)
-                return stopResult.LogWarning();
-
             if (stopResult.IsFailed)
-                return stopResult.LogError();
+                return stopResult.LogIfFailed();
 
             await _downloadTaskUpdateDispatcher.OnStatusChangedAsync(
                 childKey,

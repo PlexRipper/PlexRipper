@@ -75,14 +75,11 @@ public class StopDownloadTaskCommandHandler : ICommandHandler<StopDownloadTaskCo
             if (isDownloading)
             {
                 var stopResult = await _downloadTaskScheduler.StopDownloadTaskJob(downloadTaskKey, cancellationToken);
-                if (stopResult.IsCancelled)
-                    return stopResult.LogWarning();
-
                 if (stopResult.IsFailed)
                 {
                     // At most one download task runs per server; if stopping it fails there is
                     // nothing left to stop safely, so abort.
-                    return stopResult.LogError();
+                    return stopResult.LogIfFailed();
                 }
             }
 
@@ -92,11 +89,8 @@ public class StopDownloadTaskCommandHandler : ICommandHandler<StopDownloadTaskCo
                     downloadTaskKey,
                     cancellationToken
                 );
-                if (stopMoveResult.IsCancelled)
-                    return stopMoveResult.LogWarning();
-
                 if (stopMoveResult.IsFailed)
-                    return stopMoveResult.LogError();
+                    return stopMoveResult.LogIfFailed();
             }
 
             // Only delete the download file when NOT in the completed phase (file is already
@@ -110,11 +104,8 @@ public class StopDownloadTaskCommandHandler : ICommandHandler<StopDownloadTaskCo
                     new DeleteDownloadTaskFilesCommand([downloadTaskKey]),
                     cancellationToken
                 );
-                if (deleteFilesResult.IsCancelled)
-                    return deleteFilesResult.LogWarning();
-
                 if (deleteFilesResult.IsFailed)
-                    return deleteFilesResult.LogError();
+                    return deleteFilesResult.LogIfFailed();
             }
 
             _log.Here().Debug($"Resetting download progress for {downloadTaskKey.Id} ({downloadTask.FileName})");

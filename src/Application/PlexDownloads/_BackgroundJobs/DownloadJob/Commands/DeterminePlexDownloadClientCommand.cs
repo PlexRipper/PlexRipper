@@ -60,11 +60,8 @@ public class DeterminePlexDownloadClientCommandHandler
             cancellationToken
         );
 
-        if (decisionResult.IsCancelled)
-            return decisionResult.ToResult().LogWarning();
-
         if (decisionResult.IsFailed)
-            return decisionResult.ToResult().LogError();
+            return decisionResult.ToResult().LogIfFailed();
 
         var clientType = decisionResult.Value.SuggestedClientType;
         _log.Here()

@@ -130,8 +130,7 @@ public static partial class QuartzExtensions
         if (!keys.Any())
             return Result.Ok();
 
-        await scheduler.DeleteJobs(keys.ToList(), cancellationToken);
-        return Result.Ok();
+        return await Result.Try(async Task () => await scheduler.DeleteJobs(keys.ToList(), cancellationToken));
     }
 
     public static async Task<Result> AwaitJobCompletion(
@@ -143,17 +142,13 @@ public static partial class QuartzExtensions
     {
         using var timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         timeout.CancelAfter(TimeSpan.FromSeconds(timeoutSeconds));
-        try
+        return await Result.Try(async Task<Result> () =>
         {
             while (await scheduler.IsJobExecuting(key, timeout.Token))
                 await Task.Delay(200, timeout.Token);
 
             return Result.Ok();
-        }
-        catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested)
-        {
-            return Result.Fail($"Timed out waiting for Quartz job {key} to complete");
-        }
+        });
     }
 
     public static async Task<IReadOnlyCollection<IJobExecutionContext>> GetActiveJobs(
@@ -186,19 +181,19 @@ public static partial class QuartzExtensions
     public static async Task<Result> AwaitScheduler(
         this IScheduler scheduler,
         CancellationToken cancellationToken = default
-    )
-    {
-        var timeoutAt = DateTime.UtcNow.AddSeconds(30);
-        while (DateTime.UtcNow < timeoutAt)
+    ) =>
+        await Result.Try(async Task<Result> () =>
         {
-            if ((await scheduler.GetCurrentlyExecutingJobs(cancellationToken)).Count == 0)
-                return Result.Ok();
+            var timeoutAt = DateTime.UtcNow.AddSeconds(30);
+            while (DateTime.UtcNow < timeoutAt)
+            {
+                if ((await scheduler.GetCurrentlyExecutingJobs(cancellationToken)).Count == 0)
+                    return Result.Ok();
 
-            await Task.Delay(100, cancellationToken);
-        }
-
-        return Result.Fail("Timed out waiting for Quartz scheduler jobs to complete");
-    }
+                await Task.Delay(100, cancellationToken);
+            }
+            return Result.Fail("Timed out waiting for Quartz scheduler jobs to complete");
+        });
 
     public static async Task<IReadOnlyCollection<JobKey>> GetJobKeys(
         this IScheduler scheduler,

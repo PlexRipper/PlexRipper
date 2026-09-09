@@ -77,10 +77,8 @@ public class NotifyArrAppsOnStartupCommandHandler : ICommandHandler<NotifyArrApp
             return connectionResult.ToResult();
 
         var clientResult = await _radarrHttpClientFactory.CreateAsync(integrationId);
-        if (clientResult.IsCancelled)
-            return clientResult.ToResult();
         if (clientResult.IsFailed)
-            return clientResult.ToResult();
+            return clientResult.ToResult().LogIfFailed();
 
         using var client = clientResult.Value;
         return await client.TestAllRadarrDownloadClientsAsync(ct);
@@ -98,10 +96,8 @@ public class NotifyArrAppsOnStartupCommandHandler : ICommandHandler<NotifyArrApp
             return connectionResult.ToResult();
 
         var clientResult = await _sonarrHttpClientFactory.CreateAsync(integrationId);
-        if (clientResult.IsCancelled)
-            return clientResult.ToResult();
         if (clientResult.IsFailed)
-            return clientResult.ToResult();
+            return clientResult.ToResult().LogIfFailed();
 
         using var client = clientResult.Value;
         return await client.TestAllSonarrDownloadClientsAsync(ct);

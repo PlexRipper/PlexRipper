@@ -41,19 +41,13 @@ public class GetAllMediaByTypeFromPlexApiCommandHandler
         var batchSize = command.BatchSize;
 
         var tokenResult = await _dbContext.GetPlexServerTokenAsync(plexLibrary.PlexServerId, ct);
-        if (tokenResult.IsCancelled)
-            return tokenResult.ToResult().LogWarning();
-
         if (tokenResult.IsFailed)
-            return tokenResult.ToResult().LogError();
+            return tokenResult.ToResult().LogIfFailed();
 
         var plexServerConnectionResult = await _dbContext.ChoosePlexServerConnection(plexLibrary.PlexServerId, ct);
 
-        if (plexServerConnectionResult.IsCancelled)
-            return plexServerConnectionResult.ToResult().LogWarning();
-
         if (plexServerConnectionResult.IsFailed)
-            return plexServerConnectionResult.ToResult().LogError();
+            return plexServerConnectionResult.ToResult().LogIfFailed();
 
         var plexServerConnection = plexServerConnectionResult.Value;
 
@@ -72,11 +66,8 @@ public class GetAllMediaByTypeFromPlexApiCommandHandler
         // Get the total size of the library
         var totalSizeResult = await GetLibraryMediaTotalCount(client, plexLibrary.Key, mediaType, ct);
 
-        if (totalSizeResult.IsCancelled)
-            return totalSizeResult.ToResult().LogWarning();
-
         if (totalSizeResult.IsFailed)
-            return totalSizeResult.ToResult().LogError();
+            return totalSizeResult.ToResult().LogIfFailed();
 
         var totalSize = totalSizeResult.Value;
         if (totalSize == 0)

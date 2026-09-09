@@ -218,10 +218,8 @@ public static class SonarrHttpClientExtensions
             new HttpRequestMessage(HttpMethod.Post, "api/v3/downloadclient/testall"),
             ct
         );
-        if (result.IsCancelled)
-            return result.ToResult().LogWarning();
         if (result.IsFailed)
-            return result.ToResult().LogError();
+            return result.ToResult().LogIfFailed();
         if (result.Value.IsSuccessStatusCode)
             return Result.Ok();
 
@@ -240,10 +238,8 @@ public static class SonarrHttpClientExtensions
     )
     {
         var result = await client.SendSonarrAsync(CreateJsonRequest(HttpMethod.Post, path, resource), ct);
-        if (result.IsCancelled)
-            return result.ToResult().LogWarning();
         if (result.IsFailed)
-            return result.ToResult().LogError();
+            return result.ToResult().LogIfFailed();
         return result.Value.IsSuccessStatusCode
             ? Result.Ok()
             : Result
@@ -261,10 +257,8 @@ public static class SonarrHttpClientExtensions
     )
     {
         var result = await client.SendSonarrAsync(request, ct);
-        if (result.IsCancelled)
-            return result.ToResult<T>().LogWarning();
         if (result.IsFailed)
-            return result.ToResult<T>().LogError();
+            return result.ToResult<T>().LogIfFailed();
         if (!result.Value.IsSuccessStatusCode)
             return Result
                 .Fail($"{failureMessage}. StatusCode: {result.Value.StatusCode}")

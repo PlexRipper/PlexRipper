@@ -75,11 +75,8 @@ public class MoveFileWithResumeCommandHandler : ICommandHandler<MoveFileWithResu
         var inputStreamResult = Result.Try(
             (() => _file.Open(sourcePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
         );
-        if (inputStreamResult.IsCancelled)
-            return inputStreamResult.ToResult().LogWarning();
-
         if (inputStreamResult.IsFailed)
-            return inputStreamResult.ToResult().LogError();
+            return inputStreamResult.ToResult().LogIfFailed();
 
         await using (Stream? readStream = inputStreamResult.Value)
         {
@@ -88,11 +85,8 @@ public class MoveFileWithResumeCommandHandler : ICommandHandler<MoveFileWithResu
             var writeStreamResult = Result.Try(() =>
                 _file.Open(targetPath, writeMode, FileAccess.Write, FileShare.ReadWrite)
             );
-            if (writeStreamResult.IsCancelled)
-                return writeStreamResult.ToResult().LogWarning();
-
             if (writeStreamResult.IsFailed)
-                return writeStreamResult.ToResult().LogError();
+                return writeStreamResult.ToResult().LogIfFailed();
 
             await using Stream? writeStream = writeStreamResult.Value;
 

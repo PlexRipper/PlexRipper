@@ -35,11 +35,8 @@ public class GetLibraryMediaFromPlexApiCommandHandler
             _commandExecutor.Send(new GetLibrarySectionsCommand(plexLibrary.PlexServerId), ct)
         );
 
-        if (plexLibraries.IsCancelled)
-            return plexLibraries.ToResult();
-
         if (plexLibraries.IsFailed)
-            return plexLibraries.ToResult();
+            return plexLibraries.ToResult().LogIfFailed();
 
         var updatedPlexLibrary = plexLibraries.Value.Find(x => x.Key == plexLibrary.Key);
         if (updatedPlexLibrary is null)
@@ -72,11 +69,8 @@ public class GetLibraryMediaFromPlexApiCommandHandler
             )
         );
 
-        if (mediaListResult.IsCancelled)
-            return mediaListResult.ToResult();
-
         if (mediaListResult.IsFailed)
-            return mediaListResult.ToResult();
+            return mediaListResult.ToResult().LogIfFailed();
 
         // Pre-sort the media list
         var mediaList = mediaListResult.Value.OrderByNatural(x => x.SortTitle).ToList();

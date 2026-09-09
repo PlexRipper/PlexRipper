@@ -152,11 +152,8 @@ public class QueueLibrarySyncJobCommandHandler : ICommandHandler<QueueLibrarySyn
                 new CheckQueuedPlexLibraryToSyncCommand(),
                 cancellationToken
             );
-            if (checkQueuedResult.IsCancelled)
-                return checkQueuedResult.LogWarning();
-
             if (checkQueuedResult.IsFailed)
-                return checkQueuedResult.LogError();
+                return checkQueuedResult.LogIfFailed();
         }
 
         return Result.Ok();

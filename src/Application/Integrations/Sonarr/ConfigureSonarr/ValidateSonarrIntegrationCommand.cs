@@ -28,10 +28,8 @@ public class ValidateSonarrIntegrationCommandHandler : ICommandHandler<ValidateS
     public async Task<Result> ExecuteAsync(ValidateSonarrIntegrationCommand command, CancellationToken ct)
     {
         var clientResult = await _sonarrHttpClientFactory.CreateAsync(command.IntegrationId);
-        if (clientResult.IsCancelled)
-            return clientResult.ToResult().LogWarning();
         if (clientResult.IsFailed)
-            return clientResult.ToResult().LogError();
+            return clientResult.ToResult().LogIfFailed();
 
         using var client = clientResult.Value;
         var results = await Task.WhenAll(
@@ -39,8 +37,6 @@ public class ValidateSonarrIntegrationCommandHandler : ICommandHandler<ValidateS
             client.TestSonarrIndexerAsync(command.Indexer, ct)
         );
         var result = Result.Merge(results);
-        if (result.IsCancelled)
-            return result.LogWarning();
-        return result.IsFailed ? result.LogError() : result;
+        return result.IsFailed ? result.LogIfFailed() : result;
     }
 }

@@ -67,11 +67,8 @@ public class DashPlexDownloadClient : IPlexDownloadClient
         if (downloadUrlResult.IsCancelled)
         {
             var stoppedResult = await SetDownloadStatusAsync(DownloadStatus.Stopped, downloadUrlResult.ToResult());
-            if (stoppedResult.IsCancelled)
-                return stoppedResult;
-
             if (stoppedResult.IsFailed)
-                return stoppedResult.LogError();
+                return stoppedResult.LogIfFailed();
 
             return downloadUrlResult.ToResult();
         }
@@ -82,13 +79,10 @@ public class DashPlexDownloadClient : IPlexDownloadClient
                 ? DownloadStatus.ServerUnreachable
                 : DownloadStatus.SourceUnavailable;
             var statusResult = await SetDownloadStatusAsync(status, downloadUrlResult.ToResult());
-            if (statusResult.IsCancelled)
-                return statusResult;
-
             if (statusResult.IsFailed)
-                return statusResult.LogError();
+                return statusResult.LogIfFailed();
 
-            return downloadUrlResult.ToResult().LogError();
+            return downloadUrlResult.LogError();
         }
 
         // Ensure the download directory exists and has enough disk space
@@ -102,11 +96,8 @@ public class DashPlexDownloadClient : IPlexDownloadClient
         if (ensureDirectoryResult.IsFailed)
         {
             var storageErrorResult = await SetDownloadStatusAsync(DownloadStatus.StorageError, ensureDirectoryResult);
-            if (storageErrorResult.IsCancelled)
-                return storageErrorResult;
-
             if (storageErrorResult.IsFailed)
-                return storageErrorResult.LogError();
+                return storageErrorResult.LogIfFailed();
 
             return ensureDirectoryResult;
         }
@@ -126,11 +117,8 @@ public class DashPlexDownloadClient : IPlexDownloadClient
 
         // Execute dash stream download
         var downloadingResult = await SetDownloadStatusAsync(DownloadStatus.Downloading);
-        if (downloadingResult.IsCancelled)
-            return downloadingResult;
-
         if (downloadingResult.IsFailed)
-            return downloadingResult.LogError();
+            return downloadingResult.LogIfFailed();
 
         var options = await CreateDashOptions(downloadTask, downloadUrlResult.Value.DownloadUrl);
         var dashStartTask = _dashWrapper.StartAsync(options);
@@ -156,21 +144,15 @@ public class DashPlexDownloadClient : IPlexDownloadClient
     public async Task<Result> StopAsync()
     {
         var stopResult = await _dashWrapper.StopAsync();
-        if (stopResult.IsCancelled)
-            return stopResult;
-
         if (stopResult.IsFailed)
-            return stopResult;
+            return stopResult.LogIfFailed();
 
         if (_downloadTaskKey is null)
             return Result.Ok();
 
         var stoppedResult = await SetDownloadStatusAsync(DownloadStatus.Stopped);
-        if (stoppedResult.IsCancelled)
-            return stoppedResult;
-
         if (stoppedResult.IsFailed)
-            return stoppedResult.LogError();
+            return stoppedResult.LogIfFailed();
 
         return Result.Ok();
     }

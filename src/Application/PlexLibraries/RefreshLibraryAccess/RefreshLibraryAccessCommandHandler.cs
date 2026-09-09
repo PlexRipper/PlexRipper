@@ -44,11 +44,8 @@ public class RefreshLibraryAccessHandler
         if (plexServerId == 0)
         {
             var result = await _dbContext.GetAccessiblePlexServers(plexAccountId, cancellationToken);
-            if (result.IsCancelled)
-                return result.ToResult();
-
             if (result.IsFailed)
-                return result.ToResult();
+                return result.ToResult().LogIfFailed();
 
             plexServers = result.Value;
         }
@@ -107,17 +104,11 @@ public class RefreshLibraryAccessHandler
             cancellationToken
         );
 
-        if (updateResult.IsCancelled)
-            return updateResult.ToResult();
-
-        if (updateResult.IsFailed)
-        {
-            return updateResult.ToResult();
-        }
-
-        return Result.Ok(
-            new PlexLibraryAccessRefreshResponse { Reports = updateResult.Value, OfflineServers = failedServers }
-        );
+        return updateResult.IsFailed
+            ? updateResult.ToResult<PlexLibraryAccessRefreshResponse>().LogIfFailed()
+            : Result.Ok(
+                new PlexLibraryAccessRefreshResponse { Reports = updateResult.Value, OfflineServers = failedServers }
+            );
     }
 
     private async Task<Result<List<PlexLibrary>>> RefreshLibrary(

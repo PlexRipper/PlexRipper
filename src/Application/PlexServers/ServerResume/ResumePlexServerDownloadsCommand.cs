@@ -43,22 +43,16 @@ public class ResumePlexServerDownloadsCommandHandler : ICommandHandler<ResumePle
                 .PlexServers.Where(x => x.Id == command.PlexServerId)
                 .ExecuteUpdateAsync(p => p.SetProperty(x => x.IsDownloadsPausedByUser, false), cancellationToken)
         );
-        if (updateResult.IsCancelled)
-            return updateResult.ToResult();
-
         if (updateResult.IsFailed)
-            return updateResult.ToResult().LogError();
+            return updateResult.ToResult().LogIfFailed();
 
         // The resume has committed, so its queue wake-up must no longer be tied to the request token.
         // The boot-time all-server queue check provides reconciliation if the process stops before this is queued.
         var queueResult = await Result.Try(() =>
             _downloadQueue.CheckDownloadQueue([command.PlexServerId], CancellationToken.None)
         );
-        if (queueResult.IsCancelled)
-            return queueResult.LogWarning();
-
         if (queueResult.IsFailed)
-            return queueResult.LogError();
+            return queueResult.LogIfFailed();
 
         if (cancellationToken.IsCancellationRequested)
             return ResultExtensions.TaskIsCancelled(nameof(ResumePlexServerDownloadsCommand));

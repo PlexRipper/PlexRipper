@@ -1,3 +1,5 @@
+using Reaparr.Application.Contracts;
+
 namespace Reaparr.Data.UnitTests;
 
 public class DbContextExtensionsDownloadTasksUnitTests : BaseUnitTest
@@ -427,5 +429,316 @@ public class DbContextExtensionsDownloadTasksUnitTests : BaseUnitTest
         generic.DownloadTaskType.ShouldBe(DownloadTaskType.MovieData);
         generic.PlexServer.ShouldNotBeNull();
         generic.PlexLibrary.ShouldNotBeNull();
+    }
+
+    [Test]
+    public async Task ShouldReturnMovieRoot_WhenRadarrOwnedMovieFileHasNoIntegrationFilter()
+    {
+        // Arrange
+        await SetupDatabase(
+            226678,
+            config =>
+            {
+                config.MovieDownloadTasksCount = 1;
+                config.RadarrIntegrationCount = 1;
+                config.AssignUnownedDownloadTasksToRadarrIntegration = true;
+            }
+        );
+        var dbContext = IDbContext;
+        var movie = await dbContext.DownloadTaskMovie.SingleAsync(CancellationToken);
+        var movieFile = await dbContext.DownloadTaskMovieFile.SingleAsync(CancellationToken);
+
+        // Act
+        var rootKey = await dbContext.GetRootDownloadTaskKeyAsync(
+            movieFile.ToKey(),
+            cancellationToken: CancellationToken
+        );
+
+        // Assert
+        movieFile.RadarrIntegrationId.ShouldNotBeNull();
+        rootKey.ShouldNotBeNull();
+        rootKey.Id.ShouldBe(movie.Id);
+        rootKey.Type.ShouldBe(DownloadTaskType.Movie);
+        rootKey.PlexServerId.ShouldBe(movieFile.PlexServerId);
+        rootKey.PlexLibraryId.ShouldBe(movieFile.PlexLibraryId);
+    }
+
+    [Test]
+    public async Task ShouldReturnTvShowRoot_WhenRadarrOwnedEpisodeFileHasNoIntegrationFilter()
+    {
+        // Arrange
+        await SetupDatabase(
+            226679,
+            config =>
+            {
+                config.TvShowDownloadTasksCount = 1;
+                config.TvShowSeasonDownloadTasksCount = 1;
+                config.TvShowEpisodeDownloadTasksCount = 1;
+                config.RadarrIntegrationCount = 1;
+                config.AssignUnownedDownloadTasksToRadarrIntegration = true;
+            }
+        );
+        var dbContext = IDbContext;
+        var tvShow = await dbContext.DownloadTaskTvShow.SingleAsync(CancellationToken);
+        var episodeFile = await dbContext.DownloadTaskTvShowEpisodeFile.SingleAsync(CancellationToken);
+
+        // Act
+        var rootKey = await dbContext.GetRootDownloadTaskKeyAsync(
+            episodeFile.ToKey(),
+            cancellationToken: CancellationToken
+        );
+
+        // Assert
+        episodeFile.RadarrIntegrationId.ShouldNotBeNull();
+        rootKey.ShouldNotBeNull();
+        rootKey.Id.ShouldBe(tvShow.Id);
+        rootKey.Type.ShouldBe(DownloadTaskType.TvShow);
+        rootKey.PlexServerId.ShouldBe(episodeFile.PlexServerId);
+        rootKey.PlexLibraryId.ShouldBe(episodeFile.PlexLibraryId);
+    }
+
+    [Test]
+    public async Task ShouldReturnNull_WhenRadarrOwnedMovieFileHasDifferentIntegrationFilter()
+    {
+        // Arrange
+        await SetupDatabase(
+            226680,
+            config =>
+            {
+                config.MovieDownloadTasksCount = 1;
+                config.RadarrIntegrationCount = 1;
+                config.AssignUnownedDownloadTasksToRadarrIntegration = true;
+            }
+        );
+        var dbContext = IDbContext;
+        var movieFile = await dbContext.DownloadTaskMovieFile.SingleAsync(CancellationToken);
+        var differentIntegration = new IntegrationIdentity(
+            IntegrationType.Radarr,
+            Guid.Parse("3ad7b0be-b78e-43f2-ab07-5a24649667f3")
+        );
+
+        // Act
+        var rootKey = await dbContext.GetRootDownloadTaskKeyAsync(
+            movieFile.ToKey(),
+            differentIntegration,
+            CancellationToken
+        );
+
+        // Assert
+        movieFile.RadarrIntegrationId.ShouldNotBeNull();
+        movieFile.RadarrIntegrationId.ShouldNotBe(differentIntegration.Id);
+        rootKey.ShouldBeNull();
+    }
+
+    [Test]
+    public async Task ShouldReturnOwnedAndUnownedTasks_WhenIntegrationFilterIsNull()
+    {
+        // Arrange
+        await SetupDatabase(
+            226681,
+            config =>
+            {
+                config.MovieDownloadTasksCount = 2;
+                config.RadarrIntegrationCount = 1;
+            }
+        );
+        var dbContext = IDbContext;
+        var integrationId = await dbContext.RadarrIntegrations.Select(x => x.Id).SingleAsync(CancellationToken);
+        var movieFiles = await dbContext.DownloadTaskMovieFile.AsTracking().OrderBy(x => x.Id).ToListAsync(CancellationToken);
+        movieFiles[0].RadarrIntegrationId = integrationId;
+        await dbContext.SaveChangesAsync(CancellationToken);
+
+        // Act
+        var result = await dbContext.DownloadTaskMovieFile.WhereIntegrationIs(null).Select(x => x.Id).ToListAsync(CancellationToken);
+
+        // Assert
+        result.Count.ShouldBe(2);
+        result.ShouldContain(movieFiles[0].Id);
+        result.ShouldContain(movieFiles[1].Id);
+    }
+
+    [Test]
+    public async Task ShouldReturnOnlyUnownedTasks_WhenOwnershipMatchIsNull()
+    {
+        // Arrange
+        await SetupDatabase(
+            226682,
+            config =>
+            {
+                config.MovieDownloadTasksCount = 2;
+                config.RadarrIntegrationCount = 1;
+            }
+        );
+        var dbContext = IDbContext;
+        var integrationId = await dbContext.RadarrIntegrations.Select(x => x.Id).SingleAsync(CancellationToken);
+        var movieFiles = await dbContext.DownloadTaskMovieFile.AsTracking().OrderBy(x => x.Id).ToListAsync(CancellationToken);
+        movieFiles[0].RadarrIntegrationId = integrationId;
+        await dbContext.SaveChangesAsync(CancellationToken);
+
+        // Act
+        var result = await dbContext.DownloadTaskMovieFile.WhereIntegrationOwnershipMatches(null).SingleAsync(CancellationToken);
+
+        // Assert
+        result.Id.ShouldBe(movieFiles[1].Id);
+        result.SonarrIntegrationId.ShouldBeNull();
+        result.RadarrIntegrationId.ShouldBeNull();
+    }
+
+    [Test]
+    public async Task ShouldReturnOnlyMatchingRadarrTasks_WhenIntegrationIsSpecified()
+    {
+        // Arrange
+        await SetupDatabase(
+            226683,
+            config =>
+            {
+                config.MovieDownloadTasksCount = 4;
+                config.RadarrIntegrationCount = 2;
+                config.SonarrIntegrationCount = 1;
+            }
+        );
+        var dbContext = IDbContext;
+        var radarrIds = await dbContext
+            .RadarrIntegrations.OrderBy(x => x.Id)
+            .Select(x => x.Id)
+            .ToListAsync(CancellationToken);
+        var sonarrId = await dbContext
+            .SonarrIntegrations.Select(x => x.Id)
+            .SingleAsync(CancellationToken);
+        var movieFiles = await dbContext
+            .DownloadTaskMovieFile.AsTracking()
+            .OrderBy(x => x.Id)
+            .ToListAsync(CancellationToken);
+        movieFiles[0].RadarrIntegrationId = radarrIds[0];
+        movieFiles[1].RadarrIntegrationId = radarrIds[1];
+        movieFiles[2].SonarrIntegrationId = sonarrId;
+        await dbContext.SaveChangesAsync(CancellationToken);
+        var identity = new IntegrationIdentity(IntegrationType.Radarr, radarrIds[0]);
+
+        // Act
+        var result = await dbContext
+            .DownloadTaskMovieFile.WhereIntegrationIs(identity)
+            .SingleAsync(CancellationToken);
+
+        // Assert
+        result.Id.ShouldBe(movieFiles[0].Id);
+        result.RadarrIntegrationId.ShouldBe(radarrIds[0]);
+        result.SonarrIntegrationId.ShouldBeNull();
+    }
+
+    [Test]
+    public async Task ShouldReturnOnlyMatchingSonarrTasks_WhenIntegrationIsSpecified()
+    {
+        // Arrange
+        await SetupDatabase(
+            226684,
+            config =>
+            {
+                config.MovieDownloadTasksCount = 3;
+                config.RadarrIntegrationCount = 1;
+                config.SonarrIntegrationCount = 1;
+            }
+        );
+        var dbContext = IDbContext;
+        var radarrId = await dbContext
+            .RadarrIntegrations.Select(x => x.Id)
+            .SingleAsync(CancellationToken);
+        var sonarrId = await dbContext
+            .SonarrIntegrations.Select(x => x.Id)
+            .SingleAsync(CancellationToken);
+        var movieFiles = await dbContext
+            .DownloadTaskMovieFile.AsTracking()
+            .OrderBy(x => x.Id)
+            .ToListAsync(CancellationToken);
+        movieFiles[0].RadarrIntegrationId = radarrId;
+        movieFiles[1].SonarrIntegrationId = sonarrId;
+        await dbContext.SaveChangesAsync(CancellationToken);
+        var identity = new IntegrationIdentity(IntegrationType.Sonarr, sonarrId);
+
+        // Act
+        var result = await dbContext
+            .DownloadTaskMovieFile.WhereIntegrationIs(identity)
+            .SingleAsync(CancellationToken);
+
+        // Assert
+        result.Id.ShouldBe(movieFiles[1].Id);
+        result.SonarrIntegrationId.ShouldBe(sonarrId);
+        result.RadarrIntegrationId.ShouldBeNull();
+    }
+
+    [Test]
+    public async Task ShouldReturnMatchingAndUnownedTasks_WhenIntegrationOrUnownedIsRequested()
+    {
+        // Arrange
+        await SetupDatabase(
+            226685,
+            config =>
+            {
+                config.MovieDownloadTasksCount = 4;
+                config.RadarrIntegrationCount = 2;
+                config.SonarrIntegrationCount = 1;
+            }
+        );
+        var dbContext = IDbContext;
+        var radarrIds = await dbContext
+            .RadarrIntegrations.OrderBy(x => x.Id)
+            .Select(x => x.Id)
+            .ToListAsync(CancellationToken);
+        var sonarrId = await dbContext
+            .SonarrIntegrations.Select(x => x.Id)
+            .SingleAsync(CancellationToken);
+        var movieFiles = await dbContext
+            .DownloadTaskMovieFile.AsTracking()
+            .OrderBy(x => x.Id)
+            .ToListAsync(CancellationToken);
+        movieFiles[0].RadarrIntegrationId = radarrIds[0];
+        movieFiles[1].RadarrIntegrationId = radarrIds[1];
+        movieFiles[2].SonarrIntegrationId = sonarrId;
+        await dbContext.SaveChangesAsync(CancellationToken);
+        var identity = new IntegrationIdentity(IntegrationType.Radarr, radarrIds[0]);
+
+        // Act
+        var result = await dbContext
+            .DownloadTaskMovieFile.WhereIntegrationIsOrUnowned(identity)
+            .Select(x => x.Id)
+            .ToListAsync(CancellationToken);
+
+        // Assert
+        result.Count.ShouldBe(2);
+        result.ShouldContain(movieFiles[0].Id);
+        result.ShouldContain(movieFiles[3].Id);
+        result.ShouldNotContain(movieFiles[1].Id);
+        result.ShouldNotContain(movieFiles[2].Id);
+    }
+
+    [Test]
+    public async Task ShouldNotMatchRadarrTask_WhenSonarrIdentityUsesSameId()
+    {
+        // Arrange
+        await SetupDatabase(
+            226686,
+            config =>
+            {
+                config.MovieDownloadTasksCount = 1;
+                config.RadarrIntegrationCount = 1;
+                config.AssignUnownedDownloadTasksToRadarrIntegration = true;
+            }
+        );
+        var dbContext = IDbContext;
+        var movieFile = await dbContext.DownloadTaskMovieFile.SingleAsync(CancellationToken);
+        var radarrId = movieFile.RadarrIntegrationId.ShouldNotBeNull();
+        var wrongTypeIdentity = new IntegrationIdentity(IntegrationType.Sonarr, radarrId);
+
+        // Act
+        var rootKey = await dbContext.GetRootDownloadTaskKeyAsync(
+            movieFile.ToKey(),
+            wrongTypeIdentity,
+            CancellationToken
+        );
+
+        // Assert
+        movieFile.SonarrIntegrationId.ShouldBeNull();
+        movieFile.RadarrIntegrationId.ShouldBe(radarrId);
+        rootKey.ShouldBeNull();
     }
 }

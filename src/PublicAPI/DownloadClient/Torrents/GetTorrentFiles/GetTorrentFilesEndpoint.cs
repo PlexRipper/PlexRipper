@@ -47,12 +47,12 @@ public sealed class GetTorrentFilesEndpoint : Endpoint<GetTorrentFilesRequest, L
         var integration = HttpContext.GetIntegrationIdentity();
 
         var episodeFilesTask = _dbContext
-            .DownloadTaskTvShowEpisodeFile.WhereIntegrationIs(integration)
+            .DownloadTaskTvShowEpisodeFile.WhereIntegrationOwnershipMatches(integration)
             .Where(x => x.HashId == req.Hash)
             .ToListAsync(ct);
 
         var movieFilesTask = _dbContext
-            .DownloadTaskMovieFile.WhereIntegrationIs(integration)
+            .DownloadTaskMovieFile.WhereIntegrationOwnershipMatches(integration)
             .Where(x => x.HashId == req.Hash)
             .ToListAsync(ct);
 

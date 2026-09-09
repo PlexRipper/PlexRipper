@@ -50,7 +50,7 @@ public sealed class GetTorrentPropertiesEndpoint : Endpoint<GetTorrentProperties
         var integration = HttpContext.GetIntegrationIdentity();
 
         var file = await _dbContext
-            .DownloadTaskTvShowEpisodeFile.WhereIntegrationIs(integration)
+            .DownloadTaskTvShowEpisodeFile.WhereIntegrationOwnershipMatches(integration)
             .Where(x => x.HashId == req.Hash)
             .Select(x => (DownloadTaskFileBase)x)
             .FirstOrDefaultAsync(ct);
@@ -58,7 +58,7 @@ public sealed class GetTorrentPropertiesEndpoint : Endpoint<GetTorrentProperties
         if (file is null)
         {
             file = await _dbContext
-                .DownloadTaskMovieFile.WhereIntegrationIs(integration)
+                .DownloadTaskMovieFile.WhereIntegrationOwnershipMatches(integration)
                 .Where(x => x.HashId == req.Hash)
                 .Select(x => (DownloadTaskFileBase)x)
                 .FirstOrDefaultAsync(ct);

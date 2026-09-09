@@ -218,7 +218,7 @@ public class AddTorrentEndpoint : Endpoint<AddTorrentEndpointRequest>
         {
             case PlexMediaType.Episode:
                 count = await _dbContext
-                    .DownloadTaskTvShowEpisodeFile.WhereIntegrationIs(identity)
+                    .DownloadTaskTvShowEpisodeFile.WhereIntegrationOwnershipMatches(identity)
                     .Where(x =>
                         x.PlexLibraryId == metaData.LibraryId
                         && x.PlexServerId == metaData.ServerId
@@ -228,7 +228,7 @@ public class AddTorrentEndpoint : Endpoint<AddTorrentEndpointRequest>
                 break;
             case PlexMediaType.Movie:
                 count = await _dbContext
-                    .DownloadTaskMovieFile.WhereIntegrationIs(identity)
+                    .DownloadTaskMovieFile.WhereIntegrationOwnershipMatches(identity)
                     .Where(x =>
                         x.PlexLibraryId == metaData.LibraryId
                         && x.PlexServerId == metaData.ServerId

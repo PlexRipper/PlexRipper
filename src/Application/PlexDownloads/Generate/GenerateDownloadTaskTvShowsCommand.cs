@@ -84,7 +84,7 @@ public class GenerateDownloadTaskTvShowsCommandHandler
                 // Check if the tvShowDownloadTask has already been created
                 var downloadTaskTvShow = await _dbContext
                     .DownloadTaskTvShow.AsTracking()
-                    .WhereIntegrationIs(request.Integration)
+                    .WhereIntegrationOwnershipMatches(request.Integration)
                     .Include(x => x.Children)
                     .SingleOrDefaultAsync(
                         x =>

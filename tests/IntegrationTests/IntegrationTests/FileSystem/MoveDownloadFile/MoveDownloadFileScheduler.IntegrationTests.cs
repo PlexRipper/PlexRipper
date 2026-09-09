@@ -1,6 +1,3 @@
-using System.IO.Abstractions;
-using Autofac;
-
 namespace Reaparr.IntegrationTests;
 
 public class MoveDownloadFileSchedulerIntegrationTests : BaseIntegrationTests

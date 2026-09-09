@@ -1,5 +1,4 @@
 using ByteSizeLib;
-using Serilog.Events;
 
 namespace Reaparr.BaseTests.UnitTests;
 

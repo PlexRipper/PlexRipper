@@ -1,7 +1,4 @@
-﻿using System;
-using System.Threading.Tasks;
-
-namespace FluentResults.Extensions
+﻿namespace FluentResults.Extensions
 {
     /// <summary>
     /// Extension methods for Result
@@ -24,7 +21,10 @@ namespace FluentResults.Extensions
         /// </summary>
         /// <param name="resultTask">The current result</param>
         /// <param name="errorMapper">Function to transform the errors</param>
-        public static async ValueTask<Result> MapErrors(this ValueTask<Result> resultTask, Func<IError, IError> errorMapper)
+        public static async ValueTask<Result> MapErrors(
+            this ValueTask<Result> resultTask,
+            Func<IError, IError> errorMapper
+        )
         {
             var result = await resultTask;
             return result.MapErrors(errorMapper);
@@ -35,7 +35,10 @@ namespace FluentResults.Extensions
         /// </summary>
         /// <param name="resultTask">The current result</param>
         /// <param name="errorMapper">Function to transform the errors</param>
-        public static async Task<Result<T>> MapErrors<T>(this Task<Result<T>> resultTask, Func<IError, IError> errorMapper)
+        public static async Task<Result<T>> MapErrors<T>(
+            this Task<Result<T>> resultTask,
+            Func<IError, IError> errorMapper
+        )
         {
             var result = await resultTask;
             return result.MapErrors(errorMapper);
@@ -46,7 +49,10 @@ namespace FluentResults.Extensions
         /// </summary>
         /// <param name="resultTask">The current result</param>
         /// <param name="errorMapper">Function to transform the errors</param>
-        public static async ValueTask<Result<T>> MapErrors<T>(this ValueTask<Result<T>> resultTask, Func<IError, IError> errorMapper)
+        public static async ValueTask<Result<T>> MapErrors<T>(
+            this ValueTask<Result<T>> resultTask,
+            Func<IError, IError> errorMapper
+        )
         {
             var result = await resultTask;
             return result.MapErrors(errorMapper);
@@ -57,7 +63,10 @@ namespace FluentResults.Extensions
         /// </summary>
         /// <param name="resultTask">The current result</param>
         /// <param name="errorMapper">Function to transform the successes</param>
-        public static async Task<Result> MapSuccesses(this Task<Result> resultTask, Func<ISuccess, ISuccess> errorMapper)
+        public static async Task<Result> MapSuccesses(
+            this Task<Result> resultTask,
+            Func<ISuccess, ISuccess> errorMapper
+        )
         {
             var result = await resultTask;
             return result.MapSuccesses(errorMapper);
@@ -68,7 +77,10 @@ namespace FluentResults.Extensions
         /// </summary>
         /// <param name="resultTask">The current result</param>
         /// <param name="errorMapper">Function to transform the successes</param>
-        public static async ValueTask<Result> MapSuccesses(this ValueTask<Result> resultTask, Func<ISuccess, ISuccess> errorMapper)
+        public static async ValueTask<Result> MapSuccesses(
+            this ValueTask<Result> resultTask,
+            Func<ISuccess, ISuccess> errorMapper
+        )
         {
             var result = await resultTask;
             return result.MapSuccesses(errorMapper);
@@ -79,7 +91,10 @@ namespace FluentResults.Extensions
         /// <param name="resultTask">The current result</param>
         /// <param name="errorMapper">Function to transform the successes</param>
         /// </summary>
-        public static async Task<Result<T>> MapSuccesses<T>(this Task<Result<T>> resultTask, Func<ISuccess, ISuccess> errorMapper)
+        public static async Task<Result<T>> MapSuccesses<T>(
+            this Task<Result<T>> resultTask,
+            Func<ISuccess, ISuccess> errorMapper
+        )
         {
             var result = await resultTask;
             return result.MapSuccesses(errorMapper);
@@ -90,7 +105,10 @@ namespace FluentResults.Extensions
         /// </summary>
         /// <param name="resultTask">The current result</param>
         /// <param name="errorMapper">Function to transform the successes</param>
-        public static async ValueTask<Result<T>> MapSuccesses<T>(this ValueTask<Result<T>> resultTask, Func<ISuccess, ISuccess> errorMapper)
+        public static async ValueTask<Result<T>> MapSuccesses<T>(
+            this ValueTask<Result<T>> resultTask,
+            Func<ISuccess, ISuccess> errorMapper
+        )
         {
             var result = await resultTask;
             return result.MapSuccesses(errorMapper);
@@ -106,7 +124,10 @@ namespace FluentResults.Extensions
         /// </example>
         /// <param name="resultTask">The current result</param>
         /// <param name="bind">Transformation that may fail.</param>
-        public static async Task<Result<TNew>> Bind<TOld, TNew>(this Task<Result<TOld>> resultTask, Func<TOld, Task<Result<TNew>>> bind)
+        public static async Task<Result<TNew>> Bind<TOld, TNew>(
+            this Task<Result<TOld>> resultTask,
+            Func<TOld, Task<Result<TNew>>> bind
+        )
         {
             var result = await resultTask;
             return await result.Bind(bind);
@@ -122,7 +143,10 @@ namespace FluentResults.Extensions
         /// </example>
         /// <param name="resultTask">The current result</param>
         /// <param name="bind">Transformation that may fail.</param>
-        public static async ValueTask<Result<TNew>> Bind<TOld, TNew>(this ValueTask<Result<TOld>> resultTask, Func<TOld, ValueTask<Result<TNew>>> bind)
+        public static async ValueTask<Result<TNew>> Bind<TOld, TNew>(
+            this ValueTask<Result<TOld>> resultTask,
+            Func<TOld, ValueTask<Result<TNew>>> bind
+        )
         {
             var result = await resultTask;
             return await result.Bind(bind);
@@ -138,11 +162,15 @@ namespace FluentResults.Extensions
         /// </example>
         /// <param name="resultTask">The current result</param>
         /// <param name="bind">Transformation that may fail.</param>
-        public static async Task<Result<TNew>> Bind<TOld, TNew>(this Task<Result<TOld>> resultTask, Func<TOld, Result<TNew>> bind)
+        public static async Task<Result<TNew>> Bind<TOld, TNew>(
+            this Task<Result<TOld>> resultTask,
+            Func<TOld, Result<TNew>> bind
+        )
         {
             var result = await resultTask;
             return result.Bind(bind);
         }
+
         /// <summary>
         /// Convert result with value to result with another value that may fail asynchronously.
         /// </summary>
@@ -153,8 +181,10 @@ namespace FluentResults.Extensions
         /// </example>
         /// <param name="resultTask">The current result</param>
         /// <param name="bind">Transformation that may fail.</param>
-
-        public static async ValueTask<Result<TNew>> Bind<TOld, TNew>(this ValueTask<Result<TOld>> resultTask, Func<TOld, Result<TNew>> bind)
+        public static async ValueTask<Result<TNew>> Bind<TOld, TNew>(
+            this ValueTask<Result<TOld>> resultTask,
+            Func<TOld, Result<TNew>> bind
+        )
         {
             var result = await resultTask;
             return result.Bind(bind);
@@ -202,7 +232,10 @@ namespace FluentResults.Extensions
         /// </example>
         /// <param name="resultTask">The current result</param>
         /// <param name="bind">Transformation that may fail.</param>
-        public static async ValueTask<Result> Bind<TOld>(this ValueTask<Result<TOld>> resultTask, Func<TOld, Result> bind)
+        public static async ValueTask<Result> Bind<TOld>(
+            this ValueTask<Result<TOld>> resultTask,
+            Func<TOld, Result> bind
+        )
         {
             var result = await resultTask;
             return result.Bind(bind);
@@ -218,7 +251,10 @@ namespace FluentResults.Extensions
         /// </example>
         /// <param name="resultTask">The current result</param>
         /// <param name="bind">Transformation that may fail.</param>
-        public static async ValueTask<Result> Bind<TOld>(this ValueTask<Result<TOld>> resultTask, Func<TOld, ValueTask<Result>> bind)
+        public static async ValueTask<Result> Bind<TOld>(
+            this ValueTask<Result<TOld>> resultTask,
+            Func<TOld, ValueTask<Result>> bind
+        )
         {
             var result = await resultTask;
             return await result.Bind(bind);
@@ -250,7 +286,10 @@ namespace FluentResults.Extensions
         /// </example>
         /// <param name="resultTask">The current result</param>
         /// <param name="bind">Transformation that may fail.</param>
-        public static async ValueTask<Result<TNew>> Bind<TNew>(this ValueTask<Result> resultTask, Func<ValueTask<Result<TNew>>> bind)
+        public static async ValueTask<Result<TNew>> Bind<TNew>(
+            this ValueTask<Result> resultTask,
+            Func<ValueTask<Result<TNew>>> bind
+        )
         {
             var result = await resultTask;
             return await result.Bind(bind);
@@ -291,7 +330,10 @@ namespace FluentResults.Extensions
         /// <summary>
         /// Convert result with value to result with another value. Use valueConverter parameter to specify the value transformation logic.
         /// </summary>
-        public static async Task<Result<TNewValue>> Map<TOldValue, TNewValue>(this Task<Result<TOldValue>> resultTask, Func<TOldValue, TNewValue> valueConverter)
+        public static async Task<Result<TNewValue>> Map<TOldValue, TNewValue>(
+            this Task<Result<TOldValue>> resultTask,
+            Func<TOldValue, TNewValue> valueConverter
+        )
         {
             var result = await resultTask;
             return result.Map(valueConverter);
@@ -300,7 +342,10 @@ namespace FluentResults.Extensions
         /// <summary>
         /// Convert result with value to result with another value. Use valueConverter parameter to specify the value transformation logic.
         /// </summary>
-        public static async Task<Result<TNewValue>> Map<TOldValue, TNewValue>(this ValueTask<Result<TOldValue>> resultTask, Func<TOldValue, TNewValue> valueConverter)
+        public static async Task<Result<TNewValue>> Map<TOldValue, TNewValue>(
+            this ValueTask<Result<TOldValue>> resultTask,
+            Func<TOldValue, TNewValue> valueConverter
+        )
         {
             var result = await resultTask;
             return result.Map(valueConverter);
@@ -329,7 +374,7 @@ namespace FluentResults.Extensions
             var result = await resultTask;
             return result.ToResult(value);
         }
-        
+
         /// <summary>
         /// Create a success/failed result depending on the parameter isFailure
         /// </summary>
@@ -343,7 +388,7 @@ namespace FluentResults.Extensions
             {
                 return source;
             }
-            
+
             return isFailure ? Result.Fail(error) : source;
         }
     }

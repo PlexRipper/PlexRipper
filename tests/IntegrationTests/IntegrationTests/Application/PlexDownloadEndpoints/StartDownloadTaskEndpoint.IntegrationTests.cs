@@ -1,5 +1,4 @@
 ﻿using System.ComponentModel;
-using Autofac;
 using DownloadConfiguration = Downloader.DownloadConfiguration;
 using DownloadPackage = Downloader.DownloadPackage;
 using DownloadProgressChangedEventArgs = Downloader.DownloadProgressChangedEventArgs;

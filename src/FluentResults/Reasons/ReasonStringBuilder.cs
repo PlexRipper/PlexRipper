@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-
-// ReSharper disable once CheckNamespace
+﻿// ReSharper disable once CheckNamespace
 namespace FluentResults
 {
     /// <summary>
@@ -12,7 +8,7 @@ namespace FluentResults
     {
         private string _reasonType = string.Empty;
         private readonly List<string> _infos = new List<string>();
-         
+
         /// <summary>
         /// Specify the type of reason
         /// </summary>
@@ -34,7 +30,7 @@ namespace FluentResults
         {
             var infoString = value.ToLabelValueStringOrEmpty(label);
 
-            if(!string.IsNullOrEmpty(infoString))
+            if (!string.IsNullOrEmpty(infoString))
             {
                 _infos.Add(infoString);
             }
@@ -48,9 +44,7 @@ namespace FluentResults
         /// <returns>The reason string</returns>
         public string Build()
         {
-            var reasonInfoText = _infos.Any()
-                ? " with " + ReasonInfosToString(_infos)
-                : string.Empty;
+            var reasonInfoText = _infos.Any() ? " with " + ReasonInfosToString(_infos) : string.Empty;
 
             return $"{_reasonType}{reasonInfoText}";
         }

@@ -1,6 +1,4 @@
-﻿using System;
-
-// ReSharper disable once CheckNamespace
+﻿// ReSharper disable once CheckNamespace
 namespace FluentResults
 {
     /// <summary>
@@ -19,17 +17,17 @@ namespace FluentResults
         public Func<Exception, IError> DefaultTryCatchHandler { get; set; } = null!;
 
         /// <summary>
-        /// Factory to create an ISuccess object. Used in all scenarios where a success is created within FluentResults. 
+        /// Factory to create an ISuccess object. Used in all scenarios where a success is created within FluentResults.
         /// </summary>
         public Func<string, ISuccess> SuccessFactory { get; set; } = null!;
 
         /// <summary>
-        /// Factory to create an IError object. Used in all scenarios where an error is created within FluentResults. 
+        /// Factory to create an IError object. Used in all scenarios where an error is created within FluentResults.
         /// </summary>
         public Func<string, IError> ErrorFactory { get; set; } = null!;
 
         /// <summary>
-        /// Factory to create an IExceptionalError object. Used in all scenarios where an exceptional error is created within FluentResults. 
+        /// Factory to create an IExceptionalError object. Used in all scenarios where an exceptional error is created within FluentResults.
         /// </summary>
         public Func<string?, Exception, IExceptionalError> ExceptionalErrorFactory { get; set; } = null!;
     }

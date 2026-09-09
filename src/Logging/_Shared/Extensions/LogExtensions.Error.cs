@@ -9,6 +9,8 @@ public static partial class LogExtensions
         return ex is null ? Result.Fail(new Error(string.Empty)) : Result.Fail(new ExceptionalError(ex));
     }
 
+    // These adapters intentionally forward and render caller-supplied Serilog templates.
+    // ReSharper disable TemplateIsNotCompileTimeConstantProblem
     [MessageTemplateFormatMethod("messageTemplate")]
     public static Result ErrorResult(this ILogger log, Exception? ex, string messageTemplate, params object[] args)
     {

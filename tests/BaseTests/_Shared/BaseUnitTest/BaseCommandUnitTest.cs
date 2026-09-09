@@ -3,6 +3,8 @@ namespace Reaparr.BaseTests;
 public abstract class BaseCommandUnitTest<TCommand> : BaseUnitTest
     where TCommand : class
 {
+    // Each closed TCommand type requires its own validator and handler cache entries.
+    // ReSharper disable StaticMemberInGenericType
     private static readonly Lazy<Type> _validatorType = new(() => ResolveRelatedType("CommandValidator"));
     private static readonly Lazy<Type> _handlerType = new(() => ResolveRelatedType("CommandHandler"));
 

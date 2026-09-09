@@ -40,7 +40,9 @@ public class GetAllBackgroundJobsEndpointUnitTests
         return update.JobType switch
         {
             JobTypes.DownloadJob => new DownloadJobPayload(
-                TryDeserialize<DownloadJobUpdateDTO>(update.Data)?.Id
+                JsonSerializer
+                    .Deserialize<DownloadJobUpdateDTO>(update.Data, DefaultJsonSerializerOptions.ConfigStandard)
+                    ?.Id
                     ?? new DownloadTaskKey
                     {
                         Type = DownloadTaskType.TvShow,
@@ -50,29 +52,23 @@ public class GetAllBackgroundJobsEndpointUnitTests
                     }
             ).ToJobDataMap(),
             JobTypes.MoveDownloadFileJob => new MoveDownloadFileJobPayload(
-                Deserialize<MoveDownloadFileJobUpdateDTO>(update.Data).DownloadTaskId
+                JsonSerializer
+                    .Deserialize<MoveDownloadFileJobUpdateDTO>(
+                        update.Data,
+                        DefaultJsonSerializerOptions.ConfigStandard
+                    )!
+                    .DownloadTaskId
             ).ToJobDataMap(),
             JobTypes.InspectPlexServerJob => new InspectPlexServerJobPayload(
-                Deserialize<InspectPlexServerJobUpdateDTO>(update.Data).PlexServerIds
+                JsonSerializer
+                    .Deserialize<InspectPlexServerJobUpdateDTO>(
+                        update.Data,
+                        DefaultJsonSerializerOptions.ConfigStandard
+                    )!
+                    .PlexServerIds
             ).ToJobDataMap(),
             _ => new JobDataMap(),
         };
-
-        static T? TryDeserialize<T>(string json)
-            where T : class
-        {
-            try
-            {
-                return Deserialize<T>(json);
-            }
-            catch (JsonException)
-            {
-                return null;
-            }
-        }
-
-        static T Deserialize<T>(string json) =>
-            JsonSerializer.Deserialize<T>(json, DefaultJsonSerializerOptions.ConfigStandard)!;
     }
 
     private static string ExpectedPayloadJson(JobStatusUpdate<string> update) =>

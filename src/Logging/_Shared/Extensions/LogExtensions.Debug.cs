@@ -158,6 +158,8 @@ public static partial class LogExtensions
         return false;
     }
 
+    // This adapter intentionally forwards and renders caller-supplied Serilog templates.
+    // ReSharper disable TemplateIsNotCompileTimeConstantProblem
     [MessageTemplateFormatMethod("messageTemplate")]
     public static string DebugMsg(this ILogger log, string messageTemplate, params object[] args)
     {

@@ -87,7 +87,7 @@ namespace Reaparr.FluentResults
         public bool HasError<TError>(out IEnumerable<TError> result)
             where TError : IError
         {
-            return HasError<TError>(e => true, out result);
+            return HasError(static _ => true, out result);
         }
 
         /// <summary>
@@ -143,7 +143,7 @@ namespace Reaparr.FluentResults
         public bool HasException<TException>(out IEnumerable<IError> result)
             where TException : Exception
         {
-            return HasException<TException>(error => true, out result);
+            return HasException<TException>(static _ => true, out result);
         }
 
         /// <summary>
@@ -172,7 +172,7 @@ namespace Reaparr.FluentResults
         public bool HasSuccess<TSuccess>()
             where TSuccess : ISuccess
         {
-            return HasSuccess<TSuccess>(success => true, out _);
+            return HasSuccess<TSuccess>(static _ => true, out _);
         }
 
         /// <summary>
@@ -181,7 +181,7 @@ namespace Reaparr.FluentResults
         public bool HasSuccess<TSuccess>(out IEnumerable<TSuccess> result)
             where TSuccess : ISuccess
         {
-            return HasSuccess<TSuccess>(success => true, out result);
+            return HasSuccess(static _ => true, out result);
         }
 
         /// <summary>

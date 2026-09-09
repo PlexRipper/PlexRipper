@@ -48,10 +48,10 @@ reviews:
         - "!**/*.DotSettings.*"
 
         # Temporary PR-size reduction rules; remove after this PR is reviewed
-        - "!**/*.UnitTests.cs"
-        - "!**/*Module.cs"
-        - "!**/*DTOMapper.cs"
-        - "!**/*DTO.cs"
+        # - "!**/*.UnitTests.cs"
+        # - "!**/*Module.cs"
+        # - "!**/*DTOMapper.cs"
+        # - "!**/*DTO.cs"
 
         # Dependency lockfiles
         - "!**/bun.lock"

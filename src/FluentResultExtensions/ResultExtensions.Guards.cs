@@ -1,4 +1,5 @@
 ﻿// ReSharper disable once CheckNamespace
+
 using Microsoft.AspNetCore.Http;
 
 // ReSharper disable once CheckNamespace
@@ -78,7 +79,6 @@ public static partial class ResultExtensions
     #endregion
 
     #region Check
-
 
     extension(Result result)
     {

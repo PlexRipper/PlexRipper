@@ -1,4 +1,6 @@
 ﻿using System.Runtime.CompilerServices;
+// ReSharper disable All
+// ReSharper disable TemplateIsNotCompileTimeConstant
 using Serilog.Core;
 using Serilog.Events;
 
@@ -62,7 +64,7 @@ public static partial class ResultExtensions
         int sourceLineNumber = 0
     )
     {
-        LogReasons(result.ToResult(), logLevel, memberName, sourceFilePath, sourceLineNumber);
+        result.ToResult().LogReasons(logLevel, memberName, sourceFilePath, sourceLineNumber);
 
         return result;
     }
@@ -75,7 +77,7 @@ public static partial class ResultExtensions
         int sourceLineNumber = 0
     )
     {
-        LogReasons(result, logLevel, memberName, sourceFilePath, sourceLineNumber);
+        result.LogReasons(logLevel, memberName, sourceFilePath, sourceLineNumber);
 
         return result;
     }
@@ -88,7 +90,7 @@ public static partial class ResultExtensions
         int sourceLineNumber = 0
     )
     {
-        LogReasons(result, logLevel, memberName, sourceFilePath, sourceLineNumber);
+        result.LogReasons(logLevel, memberName, sourceFilePath, sourceLineNumber);
     }
 
     private static void LogReasons(
@@ -164,7 +166,7 @@ public static partial class ResultExtensions
         [CallerMemberName] string memberName = "",
         [CallerFilePath] string sourceFilePath = "",
         [CallerLineNumber] int sourceLineNumber = 0
-    ) => LogResult(result, LogEventLevel.Verbose, memberName, sourceFilePath, sourceLineNumber);
+    ) => result.LogResult(LogEventLevel.Verbose, memberName, sourceFilePath, sourceLineNumber);
 
     /// <summary>
     /// Logs all nested reasons and metadata on Log.Debug().
@@ -179,7 +181,7 @@ public static partial class ResultExtensions
         [CallerMemberName] string memberName = "",
         [CallerFilePath] string sourceFilePath = "",
         [CallerLineNumber] int sourceLineNumber = 0
-    ) => LogResult(result, LogEventLevel.Debug, memberName, sourceFilePath, sourceLineNumber);
+    ) => result.LogResult(LogEventLevel.Debug, memberName, sourceFilePath, sourceLineNumber);
 
     /// <summary>
     /// Logs all nested reasons and metadata on Log.Information().
@@ -194,7 +196,7 @@ public static partial class ResultExtensions
         [CallerMemberName] string memberName = "",
         [CallerFilePath] string sourceFilePath = "",
         [CallerLineNumber] int sourceLineNumber = 0
-    ) => LogResult(result, LogEventLevel.Information, memberName, sourceFilePath, sourceLineNumber);
+    ) => result.LogResult(LogEventLevel.Information, memberName, sourceFilePath, sourceLineNumber);
 
     /// <summary>
     /// Logs all nested reasons and metadata on Log.Warning().
@@ -209,7 +211,7 @@ public static partial class ResultExtensions
         [CallerMemberName] string memberName = "",
         [CallerFilePath] string sourceFilePath = "",
         [CallerLineNumber] int sourceLineNumber = 0
-    ) => LogResult(result, LogEventLevel.Warning, memberName, sourceFilePath, sourceLineNumber);
+    ) => result.LogResult(LogEventLevel.Warning, memberName, sourceFilePath, sourceLineNumber);
 
     /// <summary>
     /// Logs all nested reasons and metadata on Log.Error().
@@ -224,7 +226,7 @@ public static partial class ResultExtensions
         [CallerMemberName] string memberName = "",
         [CallerFilePath] string sourceFilePath = "",
         [CallerLineNumber] int sourceLineNumber = 0
-    ) => LogResult(result, LogEventLevel.Error, memberName, sourceFilePath, sourceLineNumber);
+    ) => result.LogResult(LogEventLevel.Error, memberName, sourceFilePath, sourceLineNumber);
 
     /// <summary>
     /// Logs all nested reasons and metadata on Log.Fatal().
@@ -239,7 +241,7 @@ public static partial class ResultExtensions
         [CallerMemberName] string memberName = "",
         [CallerFilePath] string sourceFilePath = "",
         [CallerLineNumber] int sourceLineNumber = 0
-    ) => LogResult(result, LogEventLevel.Fatal, memberName, sourceFilePath, sourceLineNumber);
+    ) => result.LogResult(LogEventLevel.Fatal, memberName, sourceFilePath, sourceLineNumber);
 
     #endregion
 
@@ -259,7 +261,7 @@ public static partial class ResultExtensions
         [CallerMemberName] string memberName = "",
         [CallerFilePath] string sourceFilePath = "",
         [CallerLineNumber] int sourceLineNumber = 0
-    ) => LogResult(result, LogEventLevel.Verbose, memberName, sourceFilePath, sourceLineNumber);
+    ) => result.LogResult(LogEventLevel.Verbose, memberName, sourceFilePath, sourceLineNumber);
 
     /// <summary>
     /// Logs all nested reasons and metadata on Log.Debug().
@@ -275,7 +277,7 @@ public static partial class ResultExtensions
         [CallerMemberName] string memberName = "",
         [CallerFilePath] string sourceFilePath = "",
         [CallerLineNumber] int sourceLineNumber = 0
-    ) => LogResult(result, LogEventLevel.Debug, memberName, sourceFilePath, sourceLineNumber);
+    ) => result.LogResult(LogEventLevel.Debug, memberName, sourceFilePath, sourceLineNumber);
 
     /// <summary>
     /// Logs all nested reasons and metadata on Log.Information().
@@ -291,7 +293,7 @@ public static partial class ResultExtensions
         [CallerMemberName] string memberName = "",
         [CallerFilePath] string sourceFilePath = "",
         [CallerLineNumber] int sourceLineNumber = 0
-    ) => LogResult(result, LogEventLevel.Information, memberName, sourceFilePath, sourceLineNumber);
+    ) => result.LogResult(LogEventLevel.Information, memberName, sourceFilePath, sourceLineNumber);
 
     /// <summary>
     /// Logs all nested reasons and metadata on Log.Warning().
@@ -307,7 +309,7 @@ public static partial class ResultExtensions
         [CallerMemberName] string memberName = "",
         [CallerFilePath] string sourceFilePath = "",
         [CallerLineNumber] int sourceLineNumber = 0
-    ) => LogResult(result, LogEventLevel.Warning, memberName, sourceFilePath, sourceLineNumber);
+    ) => result.LogResult(LogEventLevel.Warning, memberName, sourceFilePath, sourceLineNumber);
 
     /// <summary>
     /// Logs all nested reasons and metadata on Log.Error().
@@ -323,7 +325,7 @@ public static partial class ResultExtensions
         [CallerMemberName] string memberName = "",
         [CallerFilePath] string sourceFilePath = "",
         [CallerLineNumber] int sourceLineNumber = 0
-    ) => LogResult(result, LogEventLevel.Error, memberName, sourceFilePath, sourceLineNumber).ToResult();
+    ) => result.LogResult(LogEventLevel.Error, memberName, sourceFilePath, sourceLineNumber).ToResult();
 
     /// <summary>
     /// Logs all nested reasons and metadata on Log.Fatal().
@@ -339,7 +341,7 @@ public static partial class ResultExtensions
         [CallerMemberName] string memberName = "",
         [CallerFilePath] string sourceFilePath = "",
         [CallerLineNumber] int sourceLineNumber = 0
-    ) => LogResult(result, LogEventLevel.Fatal, memberName, sourceFilePath, sourceLineNumber).ToResult();
+    ) => result.LogResult(LogEventLevel.Fatal, memberName, sourceFilePath, sourceLineNumber).ToResult();
 
     #endregion
 }

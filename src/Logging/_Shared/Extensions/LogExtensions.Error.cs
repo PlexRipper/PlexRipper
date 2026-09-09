@@ -8,7 +8,7 @@ public static partial class LogExtensions
     {
         log.ErrorResult(ex, "");
 
-        return Result.Fail(new ExceptionalError(ex));
+        return ex is null ? Result.Fail(new Error(string.Empty)) : Result.Fail(new ExceptionalError(ex));
     }
 
     [MessageTemplateFormatMethod("messageTemplate")]
@@ -18,7 +18,9 @@ public static partial class LogExtensions
 
         var renderedMessage = log.RenderMessage(messageTemplate, args);
 
-        return Result.Fail(new ExceptionalError(renderedMessage, ex));
+        return ex is null
+            ? Result.Fail(new Error(renderedMessage))
+            : Result.Fail(new ExceptionalError(renderedMessage, ex));
     }
 
     [MessageTemplateFormatMethod("messageTemplate")]

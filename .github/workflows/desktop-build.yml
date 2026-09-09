@@ -35,7 +35,7 @@ jobs:
         runs-on: ubuntu-latest
         steps:
             -   name: Checkout source code
-                uses: actions/checkout@v4
+                uses: actions/checkout@v7
 
             -   name: Client App Install
                 uses: ./.github/actions/client-app-install/
@@ -46,7 +46,7 @@ jobs:
                 run: bun run generate --fail-on-error
 
             -   name: Upload generated frontend artifact
-                uses: actions/upload-artifact@v4
+                uses: actions/upload-artifact@v7
                 with:
                     name: frontend-public
                     path: src/AppHost/ClientApp/.output/public
@@ -78,10 +78,10 @@ jobs:
 
         steps:
             -   name: Checkout source code
-                uses: actions/checkout@v4
+                uses: actions/checkout@v7
 
             -   name: Download generated frontend artifact
-                uses: actions/download-artifact@v4
+                uses: actions/download-artifact@v8
                 with:
                     name: frontend-public
                     path: .tmp/frontend-public
@@ -98,7 +98,7 @@ jobs:
                     runtime: ${{ matrix.rid }}
 
             -   name: Setup .NET 9 runtime for vpk
-                uses: actions/setup-dotnet@v4
+                uses: actions/setup-dotnet@v6
                 with:
                     dotnet-version: 9.0.x
 
@@ -139,7 +139,7 @@ jobs:
 
             -   name: Upload packed installer artifact
                 if: inputs.push
-                uses: actions/upload-artifact@v4
+                uses: actions/upload-artifact@v7
                 with:
                     name: desktop-${{ matrix.rid }}
                     path: Releases/
@@ -167,10 +167,10 @@ jobs:
 
         steps:
             -   name: Checkout source code
-                uses: actions/checkout@v4
+                uses: actions/checkout@v7
 
             -   name: Setup .NET 9 runtime for vpk
-                uses: actions/setup-dotnet@v4
+                uses: actions/setup-dotnet@v6
                 with:
                     dotnet-version: 9.0.x
 
@@ -187,7 +187,7 @@ jobs:
                     fi
 
             -   name: Download packed installer
-                uses: actions/download-artifact@v4
+                uses: actions/download-artifact@v8
                 with:
                     name: desktop-${{ matrix.rid }}
                     path: Releases/${{ matrix.rid }}

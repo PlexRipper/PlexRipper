@@ -9,14 +9,14 @@ runs:
                 bun-version-file: src/AppHost/ClientApp/package.json
 
         -   name: Cache Bun dependencies
-            uses: actions/cache@v4
+            uses: actions/cache@v6
             with:
                 path: ~/.bun/install/cache
                 key: ${{ runner.os }}-bun-${{ hashFiles('src/AppHost/ClientApp/bun.lock') }}
                 restore-keys: ${{ runner.os }}-bun-
 
         -   name: Setup Node.js
-            uses: actions/setup-node@v4
+            uses: actions/setup-node@v7
             with:
                 node-version: '24'
 

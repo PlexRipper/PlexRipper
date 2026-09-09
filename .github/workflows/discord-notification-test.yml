@@ -9,7 +9,7 @@ jobs:
         runs-on: ubuntu-latest
         steps:
             -   name: Checkout source code
-                uses: actions/checkout@v4
+                uses: actions/checkout@v7
 
             -   name: Notify Discord of Dev Release
                 uses: ./.github/actions/discord-dev-release-notification/

@@ -36,9 +36,9 @@ jobs:
         if: needs.Check-Github-Changes.outputs.should_run == 'true' && (needs.Check-PR-Status.result == 'success' || github.event_name == 'workflow_dispatch')
         runs-on: ubuntu-latest
         steps:
-            -   uses: actions/checkout@v4
+            -   uses: actions/checkout@v7
             -   name: Run actionlint
-                uses: raven-actions/actionlint@v2.1.2
+                uses: raven-actions/actionlint@v2.2.0
                 with:
                     fail-on-error: true
                     matcher: true
@@ -53,10 +53,10 @@ jobs:
         outputs:
             should_run: ${{ steps.check_changes.outputs.github }}
         steps:
-            -   uses: actions/checkout@v4
+            -   uses: actions/checkout@v7
             -   name: Check if .github has changed
                 id: check_changes
-                uses: dorny/paths-filter@v3
+                uses: dorny/paths-filter@v4
                 with:
                     filters: |
                         github:
@@ -70,10 +70,10 @@ jobs:
         outputs:
             should_run: ${{ steps.check_changes.outputs.frontend }}
         steps:
-            -   uses: actions/checkout@v4
+            -   uses: actions/checkout@v7
             -   name: Check if front-end has changed
                 id: check_changes
-                uses: dorny/paths-filter@v3
+                uses: dorny/paths-filter@v4
                 with:
                     filters: |
                         frontend:
@@ -90,10 +90,10 @@ jobs:
             integration_projects: ${{ steps.discover_tests.outputs.integration_projects }}
             target_framework: ${{ steps.discover_tests.outputs.target_framework }}
         steps:
-            -   uses: actions/checkout@v4
+            -   uses: actions/checkout@v7
             -   name: Check if back-end has changed
                 id: check_changes
-                uses: dorny/paths-filter@v3
+                uses: dorny/paths-filter@v4
                 with:
                     predicate-quantifier: 'every'
                     filters: |
@@ -106,8 +106,8 @@ jobs:
                 shell: bash
                 run: |
                     set -euo pipefail
-                    unit_projects=$(find tests/UnitTests -type f -name '*.csproj' -print | sort | jq -Rsc 'split("\n") | map(select(length > 0))')
-                    integration_projects=$(find tests/IntegrationTests -type f -name '*.csproj' -print | sort | jq -Rsc 'split("\n") | map(select(length > 0))')
+                    unit_projects=$(find tests/UnitTests -type f -name '*.csproj' -print | sort | jq -Rsc 'split("\n") | map(select(length > 0) | {project: ., project_name: (split("/")[-1] | sub("\\.csproj$"; ""))})')
+                    integration_projects=$(find tests/IntegrationTests -type f -name '*.csproj' -print | sort | jq -Rsc 'split("\n") | map(select(length > 0) | {project: ., project_name: (split("/")[-1] | sub("\\.csproj$"; ""))})')
                     target_framework=$(sed -nE 's|.*<TargetFramework>([^<]+)</TargetFramework>.*|\1|p' Directory.Build.props | sed -n '1p')
 
                     if [[ "$unit_projects" == '[]' || "$integration_projects" == '[]' || -z "$target_framework" ]]; then
@@ -127,7 +127,7 @@ jobs:
         if: needs.Check-Frontend-Changes.outputs.should_run == 'true' && (needs.Check-PR-Status.result == 'success' || github.event_name == 'workflow_dispatch')
         runs-on: ubuntu-latest
         steps:
-            -   uses: actions/checkout@v4
+            -   uses: actions/checkout@v7
             -   name: Client App Install
                 uses: ./.github/actions/client-app-install/
             -   name: Run Typescript type check
@@ -140,7 +140,7 @@ jobs:
         if: needs.Check-Frontend-Changes.outputs.should_run == 'true' && (needs.Check-PR-Status.result == 'success' || github.event_name == 'workflow_dispatch')
         runs-on: ubuntu-latest
         steps:
-            -   uses: actions/checkout@v4
+            -   uses: actions/checkout@v7
             -   name: Client App Install
                 uses: ./.github/actions/client-app-install/
             -   name: Run Vitest tests
@@ -148,7 +148,7 @@ jobs:
                 working-directory: src/AppHost/ClientApp/
             -   name: Upload test results
                 if: always()
-                uses: actions/upload-artifact@v4
+                uses: actions/upload-artifact@v7
                 with:
                     name: frontend-test-results
                     path: src/AppHost/ClientApp/test-results
@@ -159,7 +159,7 @@ jobs:
         if: needs.Check-Frontend-Changes.outputs.should_run == 'true' && (needs.Check-PR-Status.result == 'success' || github.event_name == 'workflow_dispatch')
         runs-on: ubuntu-latest
         steps:
-            -   uses: actions/checkout@v4
+            -   uses: actions/checkout@v7
             -   name: Client App Install
                 uses: ./.github/actions/client-app-install/
             -   name: Run eslint check
@@ -176,17 +176,17 @@ jobs:
             matrix:
                 containers: [ 1, 2 ] # Uses 2 parallel instances
         steps:
-            -   uses: actions/checkout@v4
+            -   uses: actions/checkout@v7
             -   name: Client App Install
                 uses: ./.github/actions/client-app-install/
             -   name: Cache Cypress binary
-                uses: actions/cache@v4
+                uses: actions/cache@v6
                 with:
                     path: ~/.cache/Cypress
                     key: ${{ runner.os }}-cypress-${{ hashFiles('**/package.json') }}
                     restore-keys: ${{ runner.os }}-cypress-
             -   name: Run Cypress tests
-                uses: cypress-io/github-action@v6
+                uses: cypress-io/github-action@v7
                 with:
                     install: false
                     record: true
@@ -211,7 +211,7 @@ jobs:
         runs-on: ubuntu-latest
         steps:
             -   name: Checkout Source Code
-                uses: actions/checkout@v4
+                uses: actions/checkout@v7
 
             -   name: Dotnet Setup (Restore only)
                 uses: ./.github/actions/dotnet-setup/
@@ -227,15 +227,15 @@ jobs:
         needs: [ Check-Backend-Changes, Check-PR-Status ]
         if: needs.Check-Backend-Changes.outputs.should_run == 'true' && (needs.Check-PR-Status.result == 'success' || github.event_name == 'workflow_dispatch')
         runs-on: ubuntu-latest
-        name: Back-End-Unit-Tests (${{ matrix.project }})
+        name: Back-End-Unit-Tests (${{ matrix.project_name }})
         strategy:
             fail-fast: false
             matrix:
-                project: ${{ fromJSON(needs.Check-Backend-Changes.outputs.unit_projects) }}
+                include: ${{ fromJSON(needs.Check-Backend-Changes.outputs.unit_projects) }}
 
         steps:
             -   name: Checkout Source Code
-                uses: actions/checkout@v4
+                uses: actions/checkout@v7
 
             -   name: Resolve test project metadata
                 id: test_project
@@ -275,7 +275,7 @@ jobs:
 
             -   name: Upload Test Outputs
                 if: always()
-                uses: actions/upload-artifact@v4
+                uses: actions/upload-artifact@v7
                 with:
                     name: backend-test-output-${{ steps.test_project.outputs.name }}
                     path: TestResults/${{ steps.test_project.outputs.name }}
@@ -286,15 +286,15 @@ jobs:
         needs: [ Check-Backend-Changes, Check-PR-Status ]
         if: needs.Check-Backend-Changes.outputs.should_run == 'true' && (needs.Check-PR-Status.result == 'success' || github.event_name == 'workflow_dispatch')
         runs-on: ubuntu-latest
-        name: Back-End-Integration-Tests (${{ matrix.project }})
+        name: Back-End-Integration-Tests (${{ matrix.project_name }})
         strategy:
             fail-fast: false
             matrix:
-                project: ${{ fromJSON(needs.Check-Backend-Changes.outputs.integration_projects) }}
+                include: ${{ fromJSON(needs.Check-Backend-Changes.outputs.integration_projects) }}
 
         steps:
             -   name: Checkout Source Code
-                uses: actions/checkout@v4
+                uses: actions/checkout@v7
 
             -   name: Resolve test project metadata
                 id: test_project
@@ -334,7 +334,7 @@ jobs:
 
             -   name: Upload Integration Test Outputs
                 if: always()
-                uses: actions/upload-artifact@v4
+                uses: actions/upload-artifact@v7
                 with:
                     name: backend-test-output-${{ steps.test_project.outputs.name }}
                     path: TestResults/${{ steps.test_project.outputs.name }}
@@ -347,20 +347,20 @@ jobs:
         runs-on: ubuntu-latest
         steps:
             -   name: Download Coverage Reports
-                uses: actions/download-artifact@v4
+                uses: actions/download-artifact@v8
                 with:
                     pattern: backend-test-output-*
                     path: coverage-reports
 
             -   name: Generate Code Coverage Report
-                uses: danielpalme/ReportGenerator-GitHub-Action@5.2.0
+                uses: danielpalme/ReportGenerator-GitHub-Action@5.5.11
                 with:
                     reports: 'coverage-reports/**/coverage.cobertura.xml'
                     targetdir: 'coveragereport'
                     reporttypes: 'HtmlInline;Cobertura;Badges'
 
             -   name: Upload Coverage Report
-                uses: actions/upload-artifact@v4
+                uses: actions/upload-artifact@v7
                 with:
                     name: code-coverage-report
                     path: coveragereport

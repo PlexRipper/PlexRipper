@@ -153,6 +153,40 @@ public static partial class ResultExtensions
     #region Result Signatures
 
     /// <summary>
+    /// Log the result only when it is failed. It will log on warning level when cancelled and on error level when failed.
+    /// </summary>
+    public static Result LogIfFailed(
+        this Result result,
+        [CallerMemberName] string memberName = "",
+        [CallerFilePath] string sourceFilePath = "",
+        [CallerLineNumber] int sourceLineNumber = 0
+    )
+    {
+        if (result.IsCancelled)
+            result.LogWarning(memberName, sourceFilePath, sourceLineNumber);
+        else if (result.IsFailed)
+            result.LogError(memberName, sourceFilePath, sourceLineNumber);
+
+        return result;
+    }
+
+    /// <summary>
+    /// Log the result only when it is successful. It will log on information level if successful.
+    /// </summary>
+    public static Result LogIfSuccess(
+        this Result result,
+        [CallerMemberName] string memberName = "",
+        [CallerFilePath] string sourceFilePath = "",
+        [CallerLineNumber] int sourceLineNumber = 0
+    )
+    {
+        if (result.IsSuccess)
+            result.LogInformation(memberName, sourceFilePath, sourceLineNumber);
+
+        return result;
+    }
+
+    /// <summary>
     /// Logs all nested reasons and metadata on Log.Verbose().
     /// </summary>
     /// <param name="result">The result to use for logging.</param>
@@ -245,6 +279,40 @@ public static partial class ResultExtensions
     #endregion
 
     #region Result<T> Signatures
+
+    /// <summary>
+    /// Log the result only when it is failed. It will log on warning level when cancelled and on error level when failed.
+    /// </summary>
+    public static Result<T> LogIfFailed<T>(
+        this Result<T> result,
+        [CallerMemberName] string memberName = "",
+        [CallerFilePath] string sourceFilePath = "",
+        [CallerLineNumber] int sourceLineNumber = 0
+    )
+    {
+        if (result.IsCancelled)
+            result.LogWarning(memberName, sourceFilePath, sourceLineNumber);
+        else if (result.IsFailed)
+            result.LogError(memberName, sourceFilePath, sourceLineNumber);
+
+        return result;
+    }
+
+    /// <summary>
+    /// Log the result only when it is successful. It will log on information level if successful.
+    /// </summary>
+    public static Result<T> LogIfSuccess<T>(
+        this Result<T> result,
+        [CallerMemberName] string memberName = "",
+        [CallerFilePath] string sourceFilePath = "",
+        [CallerLineNumber] int sourceLineNumber = 0
+    )
+    {
+        if (result.IsSuccess)
+            result.LogInformation(memberName, sourceFilePath, sourceLineNumber);
+
+        return result;
+    }
 
     /// <summary>
     /// Logs all nested reasons and metadata on Log.Verbose().

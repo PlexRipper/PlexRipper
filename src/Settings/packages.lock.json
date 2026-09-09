@@ -331,7 +331,8 @@
       "Reaparr.FluentResults": {
         "type": "Project",
         "dependencies": {
-          "Microsoft.Extensions.Logging.Abstractions": "[10.0.5, )"
+          "Microsoft.Extensions.Logging.Abstractions": "[10.0.5, )",
+          "Serilog": "[4.3.1, )"
         }
       },
       "Reaparr.Logging": {

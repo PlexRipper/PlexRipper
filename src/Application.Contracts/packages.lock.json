@@ -206,7 +206,10 @@
         }
       },
       "Reaparr.FluentResults": {
-        "type": "Project"
+        "type": "Project",
+        "dependencies": {
+          "Serilog": "[4.3.1, )"
+        }
       },
       "Reaparr.Logging": {
         "type": "Project",

@@ -108,7 +108,12 @@ public class StopDownloadTaskCommandHandler : ICommandHandler<StopDownloadTaskCo
                     return deleteFilesResult.LogIfFailed();
             }
 
-            _log.Here().Debug($"Resetting download progress for {downloadTaskKey.Id} ({downloadTask.FileName})");
+            _log.Here()
+                .Debug(
+                    "Resetting download progress for {Guid} ({DownloadTaskFileName})",
+                    downloadTaskKey.Id,
+                    downloadTask.FileName
+                );
 
             await _dbContext.ResetDownloadTaskProgress(downloadTaskKey, DownloadStatus.Stopped, cancellationToken);
             await _downloadTaskUpdateDispatcher.OnStatusChangedAsync(

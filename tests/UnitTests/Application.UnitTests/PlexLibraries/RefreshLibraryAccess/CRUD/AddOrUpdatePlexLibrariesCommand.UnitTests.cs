@@ -46,7 +46,7 @@ public class AddOrUpdatePlexLibrariesCommandUnitTests : BaseUnitTest<AddOrUpdate
             plexLibraries.AddRange(list);
         }
 
-        Mock.SetupCommand<Result>(() => It.IsAny<QueueLibrarySyncJobCommand>()).ReturnsAsync(Result.Ok());
+        Mock.SetupCommand(() => It.IsAny<QueueLibrarySyncJobCommand>()).ReturnsAsync(Result.Ok());
 
         // Act
         var request = new AddOrUpdatePlexLibrariesCommand
@@ -413,7 +413,7 @@ public class AddOrUpdatePlexLibrariesCommandUnitTests : BaseUnitTest<AddOrUpdate
             PlexLibraries = [incomingLibrary],
         };
 
-        Mock.SetupCommand<Result>(() => It.IsAny<QueueLibrarySyncJobCommand>()).ReturnsAsync(Result.Ok());
+        Mock.SetupCommand(() => It.IsAny<QueueLibrarySyncJobCommand>()).ReturnsAsync(Result.Ok());
 
         // Act
         var result = await Sut.ExecuteAsync(request, CancellationToken);

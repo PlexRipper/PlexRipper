@@ -45,15 +45,15 @@ public class AppExtensions
         if (appBuildInfo.IsLinux || appBuildInfo.IsMacOS)
         {
             _log.Here(sourceFilePath, memberName, sourceLineNumber)
-                .Information("PUID from env: {EnvPUID} and from the system: {PUID}", appRuntimeInfo.PUID, getuid());
+                .Information("PUID from env: {EnvPuid} and from the system: {Puid}", appRuntimeInfo.PUID, getuid());
             _log.Here(sourceFilePath, memberName, sourceLineNumber)
-                .Information("PGID from env: {EnvPGID} and from the system: {PGID}", appRuntimeInfo.PGID, getgid());
+                .Information("PGID from env: {EnvPgid} and from the system: {Pgid}", appRuntimeInfo.PGID, getgid());
         }
         else
         {
             _log.Here(sourceFilePath, memberName, sourceLineNumber)
                 .Information(
-                    "Non-Unix OS ({OS}); only env values available. PUID: {EnvPUID}, PGID: {EnvPGID}",
+                    "Non-Unix OS ({OS}); only env values available. PUID: {EnvPuid}, PGID: {EnvPgid}",
                     RuntimeInformation.OSDescription,
                     appRuntimeInfo.PUID,
                     appRuntimeInfo.PGID
@@ -61,6 +61,6 @@ public class AppExtensions
         }
 
         _log.Here(sourceFilePath, memberName, sourceLineNumber)
-            .Information("Current system Username: {SystemPUIDName}", System.Environment.UserName);
+            .Information("Current system Username: {SystemPuidName}", System.Environment.UserName);
     }
 }

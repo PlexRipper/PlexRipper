@@ -5,7 +5,6 @@ using FluentValidation;
 using FluentValidation.Results;
 using Reaparr.Domain;
 using Reaparr.Logging;
-using Serilog;
 
 namespace Reaparr.Build;
 

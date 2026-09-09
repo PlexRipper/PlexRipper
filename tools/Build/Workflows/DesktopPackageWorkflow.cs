@@ -3,7 +3,6 @@ using FastEndpoints;
 using FluentValidation;
 using Reaparr.Domain;
 using Reaparr.Logging;
-using Serilog;
 
 namespace Reaparr.Build;
 

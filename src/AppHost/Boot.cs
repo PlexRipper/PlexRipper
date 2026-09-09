@@ -225,7 +225,7 @@ public class Boot : IHostedService
         _log.Here().Debug("Boot.OnStopped has been called");
 
         // Perform post-stopped activities here
-        _log.Here().Information("Reaparr has been shutdown! R.I.P.");
+        _log.Here().Information("Reaparr has been shutdown! R.I.P. ");
     }
 
     #endregion

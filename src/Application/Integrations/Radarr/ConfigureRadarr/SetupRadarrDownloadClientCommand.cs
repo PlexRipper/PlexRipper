@@ -179,12 +179,12 @@ public class SetupRadarrDownloadClientCommandHandler
         }
         catch (TaskCanceledException e)
         {
-            _log.Here().Error(e, "Timeout while communicating with Radarr.");
+            _log.Here().Error(e, "Timeout while communicating with Radarr");
             return Result.Fail("Timeout while communicating with Radarr.").LogError();
         }
         catch (HttpRequestException e)
         {
-            _log.Here().Error(e, "HTTP error while communicating with Radarr.");
+            _log.Here().Error(e, "HTTP error while communicating with Radarr");
             return Result.Fail("HTTP error while communicating with Radarr.").LogError();
         }
     }

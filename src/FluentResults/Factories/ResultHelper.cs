@@ -79,7 +79,7 @@
             }
 
             foreach (var error in errors)
-                if (HasException(error.Reasons ?? new List<IError>(), predicate, out var fErrors))
+                if (HasException(error.Reasons, predicate, out var fErrors))
                 {
                     result = fErrors;
                     return true;

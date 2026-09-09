@@ -78,7 +78,7 @@ public class MoveFileWithResumeCommandHandler : ICommandHandler<MoveFileWithResu
         if (inputStreamResult.IsFailed)
             return inputStreamResult.ToResult().LogIfFailed();
 
-        await using (Stream? readStream = inputStreamResult.Value)
+        await using (Stream readStream = inputStreamResult.Value)
         {
             // Fresh start: truncate any stale destination content. Resume: open existing file.
             var writeMode = currentOffset > 0 ? FileMode.Open : FileMode.Create;
@@ -88,7 +88,7 @@ public class MoveFileWithResumeCommandHandler : ICommandHandler<MoveFileWithResu
             if (writeStreamResult.IsFailed)
                 return writeStreamResult.ToResult().LogIfFailed();
 
-            await using Stream? writeStream = writeStreamResult.Value;
+            await using Stream writeStream = writeStreamResult.Value;
 
             // Resume if needed
             if (currentOffset > 0)

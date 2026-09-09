@@ -136,7 +136,7 @@ public class DirectPlexDownloadClient : IPlexDownloadClient
             return ensureDirectoryResult;
         }
 
-        await SetupDownloadListeners(downloadTaskKey, downloadTask.DownloadFilePath, downloadTask.DataTotal);
+        await SetupDownloadListeners(downloadTaskKey);
         await SetDownloadStatusAsync(Domain.DownloadStatus.Downloading);
 
         var downloaderStartStopwatch = Stopwatch.StartNew();
@@ -340,7 +340,7 @@ public class DirectPlexDownloadClient : IPlexDownloadClient
         return Result.Ok();
     }
 
-    private async Task SetupDownloadListeners(DownloadTaskKey key, string downloadFilePath, long expectedFileSize)
+    private async Task SetupDownloadListeners(DownloadTaskKey key)
     {
         // Setup DownloadLimit Subscription
         var serverMachineIdentifier = await _dbContext.GetPlexServerMachineIdentifierById(key.PlexServerId);

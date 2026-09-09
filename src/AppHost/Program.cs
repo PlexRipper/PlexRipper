@@ -1,5 +1,4 @@
 using System.Diagnostics;
-using Reaparr.FluentResultExtensions;
 using Velopack;
 
 namespace Reaparr.AppHost;
@@ -131,7 +130,7 @@ public class Program
                 var browserUri = ResolveBrowserUri(app);
                 _log.Here()
                     .Warning(
-                        "Embedded desktop window mode disabled via {EnvVar}. Launching browser-only mode at {Uri}.",
+                        "Embedded desktop window mode disabled via {EnvVar}. Launching browser-only mode at {Uri}",
                         EnvKeys.DesktopEmbeddedDisabled,
                         browserUri
                     );
@@ -200,6 +199,7 @@ public class Program
             }
         }
 
+        // ReSharper disable once LogMessageIsSentenceProblem
         _log.Here().Fatal("Reaparr has been shutdown! R.I.P.");
 
         if (!_appRuntimeInfo.IsIntegrationTestMode)

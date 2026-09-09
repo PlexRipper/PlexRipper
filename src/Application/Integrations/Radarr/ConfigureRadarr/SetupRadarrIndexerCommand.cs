@@ -83,14 +83,14 @@ public class SetupRadarrIndexerCommandHandler
             if (updateResult.IsFailed)
                 return updateResult.LogError();
 
-            _log.Here().Information("Successfully updated indexer '{IndexerName}' in Radarr.", _indexerName);
+            _log.Here().Information("Successfully updated indexer '{IndexerName}' in Radarr", _indexerName);
             return Result.Ok(
                 new SetupRadarrIndexerCommandResult { IndexerId = updateResult.Value.Id, Resource = updateResource }
             );
         }
 
         // Create a new indexer
-        _log.Here().Information("Creating new indexer '{IndexerName}' in Radarr...", _indexerName);
+        _log.Here().Information("Creating new indexer '{IndexerName}' in Radarr", _indexerName);
         var resource = BuildIndexerResource(command.DownloadClientId, 0, integration);
         var createResult = await _commandExecutor.Send(
             new RadarrApiCreateIndexerCommand

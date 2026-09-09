@@ -1,4 +1,4 @@
-namespace Reaparr.Application.UnitTests.Integrations;
+namespace Reaparr.Application.UnitTests;
 
 public class IntegrationApiKeyGeneratorUnitTests
 {

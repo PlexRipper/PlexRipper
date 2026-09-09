@@ -44,7 +44,7 @@ public class CreateDefaultAppUserCommandHandler : ICommandHandler<CreateDefaultA
             var toBeDeletedUser = await _userService.GetFirstUserAsync(cancellationToken);
             if (toBeDeletedUser != null)
             {
-                _log.Here().Information("Reaparr app user was found, deleting now and creating the default one.");
+                _log.Here().Information("Reaparr app user was found, deleting now and creating the default one");
                 await _userService.DeleteAsync(toBeDeletedUser);
             }
         }

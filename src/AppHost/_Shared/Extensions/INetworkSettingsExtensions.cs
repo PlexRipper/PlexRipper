@@ -23,8 +23,7 @@ public static class INetworkSettingsExtensions
         // Warn in production if forwarded headers are enabled without an allowlist.
         if (networkSettings is { TrustProxyHeaders: true, AllowedProxyIps.Count: 0 } && app.Environment.IsProduction())
         {
-            _log.Here()
-                .Warning("Production environment with TrustProxyHeaders enabled but no AllowedProxyIps defined.");
+            _log.Here().Warning("Production environment with TrustProxyHeaders enabled but no AllowedProxyIps defined");
         }
 
         // Build forwarding options from settings and register early in the pipeline.

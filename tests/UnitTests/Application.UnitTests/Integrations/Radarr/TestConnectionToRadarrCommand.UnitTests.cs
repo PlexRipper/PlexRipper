@@ -82,10 +82,60 @@ public class TestConnectionToRadarrCommandUnitTests : BaseCommandUnitTest<TestCo
     }
 
     [Test]
-    public async Task ShouldRejectMixedCredentialModes()
+    public async Task ShouldUseDraftCredentialsWithoutPersisting_WhenPersistedIntegrationHasDraftValues()
     {
         // Arrange
-        var command = new TestConnectionToRadarrCommand(Guid.NewGuid(), "http://radarr.test", "draft-key");
+        await SetupDatabase(55332);
+        var dbContext = IDbContext;
+        var lastTestedAt = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+        var integration = new RadarrIntegration
+        {
+            Id = Guid.Parse("00000000-0000-0000-0000-000000055332"),
+            DisplayName = "Radarr",
+            BaseUrl = "http://stored-radarr.test",
+            RadarrApiKey = "stored-key",
+            QBittorrentApiKey = "qbt_23456789ABCDEFGHIJKLMNPQ",
+            TorznabApiKey = "0123456789abcdef0123456789abcdef",
+            Category = "movies",
+            DownloadFolderId = FolderTypeDefaults.DefaultDownloadFolderId,
+            ProvisioningState = IntegrationProvisioningState.Configured,
+            LastConnectionTestStatus = TestConnectionStatus.ConnectionFailed,
+            LastConnectionTestHttpStatusCode = StatusCodes.Status503ServiceUnavailable,
+            LastConnectionTestErrorMessage = "Service Unavailable",
+            LastConnectionTestedAt = lastTestedAt,
+        };
+        dbContext.RadarrIntegrations.Add(integration);
+        await dbContext.SaveChangesAsync(CancellationToken);
+        var command = new TestConnectionToRadarrCommand(integration.Id, "http://draft-radarr.test", "draft-key");
+        var client = new HttpClient(new StatusCodeHandler(HttpStatusCode.OK, "OK"))
+        {
+            BaseAddress = new Uri("http://draft-radarr.test"),
+        };
+
+        Mock.Mock<IRadarrHttpClientFactory>()
+            .Setup(x => x.Create("http://draft-radarr.test", "draft-key"))
+            .Returns(Result.Ok(client))
+            .Verifiable(Times.Once());
+
+        // Act
+        var result = await TestHandlerExecuteAsync<TestConnectionResult>(command);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.Status.ShouldBe(TestConnectionStatus.Success);
+        var unchanged = await dbContext.RadarrIntegrations.AsNoTracking().SingleAsync(CancellationToken);
+        unchanged.LastConnectionTestStatus.ShouldBe(TestConnectionStatus.ConnectionFailed);
+        unchanged.LastConnectionTestHttpStatusCode.ShouldBe(StatusCodes.Status503ServiceUnavailable);
+        unchanged.LastConnectionTestErrorMessage.ShouldBe("Service Unavailable");
+        unchanged.LastConnectionTestedAt.ShouldBe(lastTestedAt);
+        Mock.Mock<IRadarrHttpClientFactory>().Verify();
+    }
+
+    [Test]
+    public async Task ShouldRejectIncompleteDraftCredentials_WhenPersistedIntegrationIdIsProvided()
+    {
+        // Arrange
+        var command = new TestConnectionToRadarrCommand(Guid.NewGuid(), "http://radarr.test", null);
 
         Mock.Mock<IRadarrHttpClientFactory>()
             .Setup(x => x.Create(It.IsAny<string>(), It.IsAny<string>()))

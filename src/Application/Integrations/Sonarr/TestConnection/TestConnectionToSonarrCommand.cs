@@ -9,16 +9,17 @@ public class TestConnectionToSonarrCommandValidator : AbstractValidator<TestConn
     {
         RuleFor(x => x)
             .Must(x =>
-                x.IntegrationId.HasValue
-                    ? string.IsNullOrWhiteSpace(x.Url) && string.IsNullOrWhiteSpace(x.ApiKey)
-                    : !string.IsNullOrWhiteSpace(x.Url) && !string.IsNullOrWhiteSpace(x.ApiKey)
-            )
+            {
+                var hasUrl = !string.IsNullOrWhiteSpace(x.Url);
+                var hasApiKey = !string.IsNullOrWhiteSpace(x.ApiKey);
+                return x.IntegrationId.HasValue ? hasUrl == hasApiKey : hasUrl && hasApiKey;
+            })
             .WithMessage("Provide either an integration ID or a URL and API key.");
         RuleFor(x => x.IntegrationId).NotEmpty().When(x => x.IntegrationId.HasValue);
         RuleFor(x => x.Url)
             .Must(url => url is not null && url.TrimEnd('/').IsValidHttpUrl())
             .WithMessage("Provided Sonarr URL must be a valid http/https URL.")
-            .When(x => !x.IntegrationId.HasValue && !string.IsNullOrWhiteSpace(x.Url));
+            .When(x => !string.IsNullOrWhiteSpace(x.Url));
     }
 }
 
@@ -52,9 +53,15 @@ public class TestConnectionToSonarrCommandHandler
         if (integration is null)
             return ResultExtensions.EntityNotFound(nameof(SonarrIntegration), command.IntegrationId.Value);
 
-        var result = await TestAsync(integration.BaseUrl, integration.SonarrApiKey, ct);
+        var useStoredCredentials = string.IsNullOrWhiteSpace(command.Url) && string.IsNullOrWhiteSpace(command.ApiKey);
+        var result = useStoredCredentials
+            ? await TestAsync(integration.BaseUrl, integration.SonarrApiKey, ct)
+            : await TestAsync(command.Url, command.ApiKey, ct);
         if (result.IsFailed)
             return result.LogIfFailed();
+
+        if (!useStoredCredentials)
+            return result;
 
         integration.LastConnectionTestStatus = result.Value.Status;
         integration.LastConnectionTestHttpStatusCode = result.Value.HttpStatusCode;

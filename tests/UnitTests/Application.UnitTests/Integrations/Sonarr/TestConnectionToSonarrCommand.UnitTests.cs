@@ -81,6 +81,57 @@ public class TestConnectionToSonarrCommandUnitTests : BaseCommandUnitTest<TestCo
     }
 
     [Test]
+    public async Task ShouldUseDraftCredentialsWithoutPersisting_WhenPersistedIntegrationHasDraftValues()
+    {
+        // Arrange
+        await SetupDatabase(62633);
+        var dbContext = IDbContext;
+        var lastTestedAt = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+        var integration = new SonarrIntegration
+        {
+            Id = Guid.Parse("00000000-0000-0000-0000-000000062633"),
+            DisplayName = "Sonarr",
+            BaseUrl = "http://stored-sonarr.test",
+            SonarrApiKey = "stored-key",
+            QBittorrentApiKey = "qbt_23456789ABCDEFGHIJKLMNPQ",
+            TorznabApiKey = "0123456789abcdef0123456789abcdef",
+            Category = "series",
+            DownloadFolderId = FolderTypeDefaults.DefaultDownloadFolderId,
+            ProvisioningState = IntegrationProvisioningState.Configured,
+            LastConnectionTestStatus = TestConnectionStatus.Success,
+            LastConnectionTestHttpStatusCode = StatusCodes.Status200OK,
+            LastConnectionTestedAt = lastTestedAt,
+        };
+        dbContext.SonarrIntegrations.Add(integration);
+        await dbContext.SaveChangesAsync(CancellationToken);
+        var command = new TestConnectionToSonarrCommand(integration.Id, "http://draft-sonarr.test", "draft-key");
+        var client = new HttpClient(new StatusCodeHandler(HttpStatusCode.BadGateway, "Bad Gateway"))
+        {
+            BaseAddress = new Uri("http://draft-sonarr.test"),
+        };
+
+        Mock.Mock<ISonarrHttpClientFactory>()
+            .Setup(x => x.Create("http://draft-sonarr.test", "draft-key"))
+            .Returns(Result.Ok(client))
+            .Verifiable(Times.Once());
+
+        // Act
+        var result = await TestHandlerExecuteAsync<TestConnectionResult>(command);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.Status.ShouldBe(TestConnectionStatus.ConnectionFailed);
+        result.Value.HttpStatusCode.ShouldBe(StatusCodes.Status502BadGateway);
+        result.Value.ErrorMessage.ShouldBe("Bad Gateway");
+        var unchanged = await dbContext.SonarrIntegrations.AsNoTracking().SingleAsync(CancellationToken);
+        unchanged.LastConnectionTestStatus.ShouldBe(TestConnectionStatus.Success);
+        unchanged.LastConnectionTestHttpStatusCode.ShouldBe(StatusCodes.Status200OK);
+        unchanged.LastConnectionTestErrorMessage.ShouldBeNull();
+        unchanged.LastConnectionTestedAt.ShouldBe(lastTestedAt);
+        Mock.Mock<ISonarrHttpClientFactory>().Verify();
+    }
+
+    [Test]
     public async Task ShouldReturnNotFound_WhenPersistedIntegrationDoesNotExist()
     {
         // Arrange

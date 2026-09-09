@@ -89,7 +89,7 @@ public class GetLibraryMediaFromPlexApiCommandHandler
                 updatedPlexLibrary.TvShows.AddRange(mediaList.ToPlexTvShows());
                 break;
             default:
-                return Result.Fail($"Unknown PlexLibrary type: {updatedPlexLibrary.Type}").LogError();
+                return Result.Fail("Unknown PlexLibrary type: {PlexMediaType}", updatedPlexLibrary.Type).LogError();
         }
 
         return Result.Ok(

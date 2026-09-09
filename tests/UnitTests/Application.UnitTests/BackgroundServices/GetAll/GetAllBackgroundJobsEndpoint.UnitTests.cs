@@ -35,22 +35,28 @@ public class GetAllBackgroundJobsEndpointUnitTests
         return context.Object;
     }
 
+    private static DownloadTaskKey GetDownloadTaskKey(string data)
+    {
+        if (Guid.TryParse(data, out var id))
+        {
+            return new DownloadTaskKey
+            {
+                Type = DownloadTaskType.TvShow,
+                Id = id,
+                PlexServerId = 1,
+                PlexLibraryId = 1,
+            };
+        }
+
+        return JsonSerializer.Deserialize<DownloadJobUpdateDTO>(data, DefaultJsonSerializerOptions.ConfigStandard)?.Id
+            ?? throw new JsonException("Download job data did not contain a task key.");
+    }
+
     private static JobDataMap CreateJobDataMap(JobStatusUpdate<string> update)
     {
         return update.JobType switch
         {
-            JobTypes.DownloadJob => new DownloadJobPayload(
-                JsonSerializer
-                    .Deserialize<DownloadJobUpdateDTO>(update.Data, DefaultJsonSerializerOptions.ConfigStandard)
-                    ?.Id
-                    ?? new DownloadTaskKey
-                    {
-                        Type = DownloadTaskType.TvShow,
-                        Id = Guid.Parse(update.Data),
-                        PlexServerId = 1,
-                        PlexLibraryId = 1,
-                    }
-            ).ToJobDataMap(),
+            JobTypes.DownloadJob => new DownloadJobPayload(GetDownloadTaskKey(update.Data)).ToJobDataMap(),
             JobTypes.MoveDownloadFileJob => new MoveDownloadFileJobPayload(
                 JsonSerializer
                     .Deserialize<MoveDownloadFileJobUpdateDTO>(

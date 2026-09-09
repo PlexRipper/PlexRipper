@@ -36,7 +36,7 @@ public class ValidateRadarrIntegrationCommandHandler : ICommandHandler<ValidateR
             client.TestRadarrDownloadClientAsync(command.DownloadClient, ct),
             client.TestRadarrIndexerAsync(command.Indexer, ct)
         );
-        var result = Result.Merge(results);
-        return result.IsFailed ? result.LogIfFailed() : result;
+        var result = results.Merge();
+        return result.LogIfFailed();
     }
 }

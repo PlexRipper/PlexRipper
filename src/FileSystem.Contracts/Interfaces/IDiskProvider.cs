@@ -1,6 +1,4 @@
-﻿using FluentResults;
-
-namespace Reaparr.FileSystem.Contracts;
+﻿namespace Reaparr.FileSystem.Contracts;
 
 public interface IDiskProvider
 {

@@ -1,7 +1,6 @@
 using System.Collections;
 using Autofac;
 using FastEndpoints;
-using FluentResults;
 using FluentValidation;
 using FluentValidation.Results;
 using Reaparr.Domain;

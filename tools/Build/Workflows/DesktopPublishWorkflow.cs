@@ -1,6 +1,5 @@
 using System.IO.Abstractions;
 using FastEndpoints;
-using FluentResults;
 using FluentValidation;
 using Reaparr.Logging;
 using Serilog;

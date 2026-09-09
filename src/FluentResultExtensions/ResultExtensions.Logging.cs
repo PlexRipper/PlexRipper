@@ -1,6 +1,9 @@
 ﻿// ReSharper disable All
 // ReSharper disable TemplateIsNotCompileTimeConstant
+
+using System.Runtime.CompilerServices;
 using Serilog.Core;
+using Serilog.Events;
 
 namespace Reaparr.FluentResultExtensions;
 
@@ -117,7 +120,7 @@ public static partial class ResultExtensions
     {
         var msg = ((IReason)error).ToLogString();
         foreach (var reason in error.Reasons)
-            msg += $"{Environment.NewLine} {Delimiter(1)} {reason.ToLogString(2)}";
+            msg += $"{System.Environment.NewLine} {Delimiter(1)} {reason.ToLogString(2)}";
 
         return msg;
     }
@@ -128,9 +131,9 @@ public static partial class ResultExtensions
 
         if (reason.Metadata.Any())
         {
-            msg += $"{Environment.NewLine} {Delimiter(level)} Metadata:";
+            msg += $"{System.Environment.NewLine} {Delimiter(level)} Metadata:";
             foreach (var entry in reason.Metadata)
-                msg += $"{Environment.NewLine} {Delimiter(level + 1)} {entry.Key} - {entry.Value}";
+                msg += $"{System.Environment.NewLine} {Delimiter(level + 1)} {entry.Key} - {entry.Value}";
         }
 
         return msg;

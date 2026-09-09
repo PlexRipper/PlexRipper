@@ -196,9 +196,12 @@ public class StartDownloadTaskEndpointIntegrationTests : BaseIntegrationTests
         // Assert
         var result = testResult.Result;
         result.IsSuccess.ShouldBeTrue();
-        finalDownload.ShouldNotBeNull(
-            $"WaitForDownloadStatusAsync timed out waiting for download '{downloadTask.Id}' to reach status '{DownloadStatus.Completed}'."
+        var finalDownloadFailureMessage = string.Format(
+            "WaitForDownloadStatusAsync timed out waiting for download '{0}' to reach status '{1}'.",
+            downloadTask.Id,
+            DownloadStatus.Completed
         );
+        finalDownload.ShouldNotBeNull(finalDownloadFailureMessage);
 
         var downloadTaskDb = await container.DbContext.GetDownloadTaskAsync(
             downloadTask.Id,

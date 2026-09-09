@@ -42,7 +42,8 @@ public class SettingsControllerGetSettingsIntegrationTests : BaseIntegrationTest
         settingsModel.IntegrationsSettings.DownloadClientUsername.ShouldBe(
             expected.IntegrationsSettings.DownloadClientUsername
         );
-        Guid.TryParse(settingsModel.IntegrationsSettings.ReaparrApiKey, out _).ShouldBeTrue();
+        var parsedApiKey = Guid.Parse(settingsModel.IntegrationsSettings.ReaparrApiKey);
+        parsedApiKey.ShouldNotBe(Guid.Empty);
         settingsModel.IntegrationsSettings.DownloadClientPassword.Length.ShouldBe(32);
     }
 }

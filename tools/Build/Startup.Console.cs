@@ -1,5 +1,4 @@
 using Reaparr.Logging;
-using Serilog;
 using Spectre.Console.Cli;
 
 namespace Reaparr.Build;

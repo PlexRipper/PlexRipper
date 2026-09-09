@@ -15,5 +15,7 @@
     </ItemGroup>
     <ItemGroup>
         <Using Include="Reaparr.Domain" />
+        <Using Include="Reaparr.FluentResults" />
+        <Using Include="Reaparr.FluentResultExtensions" />
     </ItemGroup>
 </Project>

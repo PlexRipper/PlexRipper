@@ -21,4 +21,7 @@
         <ProjectReference Include="..\..\..\tools\Build\Build.csproj" />
         <ProjectReference Include="..\BaseTests.UnitTests\BaseTests.UnitTests.csproj" />
     </ItemGroup>
+    <ItemGroup>
+        <Compile Include="..\..\BaseTests\MockClasses\MockDesktopWindow.cs" Link="BaseTests\MockDesktopWindow.cs" />
+    </ItemGroup>
 </Project>

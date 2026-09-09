@@ -136,7 +136,7 @@ public class DirectPlexDownloadClient : IPlexDownloadClient
             return ensureDirectoryResult;
         }
 
-        await SetupDownloadListeners(downloadTaskKey, downloadTask.DownloadFilePath, downloadTask.DataTotal);
+        await SetupDownloadListeners(downloadTaskKey);
         await SetDownloadStatusAsync(Domain.DownloadStatus.Downloading);
 
         var downloaderStartStopwatch = Stopwatch.StartNew();
@@ -322,7 +322,7 @@ public class DirectPlexDownloadClient : IPlexDownloadClient
 
         _log.Here()
             .Debug(
-                "DownloadTask {DownloadTaskId} ({MediaFileName}) has been requested to stop.",
+                "DownloadTask {DownloadTaskId} ({MediaFileName}) has been requested to stop",
                 _downloadTaskKey.Id,
                 _filename
             );
@@ -331,7 +331,7 @@ public class DirectPlexDownloadClient : IPlexDownloadClient
 
         var stopMsg = _log.Here()
             .InformationMsg(
-                "DownloadTask {DownloadTaskId} ({MediaFileName}) was stopped.",
+                "DownloadTask {DownloadTaskId} ({MediaFileName}) was stopped",
                 _downloadTaskKey.Id,
                 _filename
             );
@@ -340,7 +340,7 @@ public class DirectPlexDownloadClient : IPlexDownloadClient
         return Result.Ok();
     }
 
-    private async Task SetupDownloadListeners(DownloadTaskKey key, string downloadFilePath, long expectedFileSize)
+    private async Task SetupDownloadListeners(DownloadTaskKey key)
     {
         // Setup DownloadLimit Subscription
         var serverMachineIdentifier = await _dbContext.GetPlexServerMachineIdentifierById(key.PlexServerId);
@@ -399,7 +399,7 @@ public class DirectPlexDownloadClient : IPlexDownloadClient
 
             _log.Here()
                 .Error(
-                    "Download finished execution without completion callback and verification failed for {MediaFileName}.",
+                    "Download finished execution without completion callback and verification failed for {MediaFileName}",
                     _filename
                 );
 
@@ -411,7 +411,7 @@ public class DirectPlexDownloadClient : IPlexDownloadClient
 
         _log.Here()
             .Warning(
-                "Download completion callback was not received for {MediaFileName}; applying verified completion reconciliation.",
+                "Download completion callback was not received for {MediaFileName}; applying verified completion reconciliation",
                 _filename
             );
 

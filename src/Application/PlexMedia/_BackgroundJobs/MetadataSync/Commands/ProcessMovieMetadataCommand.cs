@@ -102,7 +102,7 @@ public class ProcessMovieMetadataCommandHandler : ICommandHandler<ProcessMovieMe
             {
                 _log.Here()
                     .Warning(
-                        "Rating keys {RatingKeys} were requested but not returned for server {ServerName} ({ServerId}). Parts will be skipped.",
+                        "Rating keys {RatingKeys} were requested but not returned for server {ServerName} ({ServerId}). Parts will be skipped",
                         string.Join(", ", missingRatingKeys),
                         command.ServerName,
                         command.ServerId

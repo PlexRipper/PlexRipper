@@ -237,7 +237,7 @@ public sealed class MediaQueryCache : IMediaQueryCache
         _log.Here()
             .Information(
                 "Invalidated media query cache for libraries {PlexLibraryIds}: {Reason}. "
-                    + "Marked {MetadataCount} metadata, {SortedListCount} sorted-lists as dirty, {InFlightCount} in-flight builds.",
+                    + "Marked {MetadataCount} metadata, {SortedListCount} sorted-lists as dirty, {InFlightCount} in-flight builds",
                 affectedLibraryIds,
                 reason,
                 dirtyMetadataCount,
@@ -274,8 +274,8 @@ public sealed class MediaQueryCache : IMediaQueryCache
                         _dirtyKeys.TryAdd(sortedListKey, true);
                         _log.Here()
                             .Debug(
-                                "Snapshot build for {SortedListKey} was stale (version {StartVersion} → {CurrentVersion}), re-marking dirty",
-                                sortedListKey,
+                                "Snapshot build for LibraryIds: {LibraryIds} was stale (version {StartVersion} → {CurrentVersion}), re-marking dirty",
+                                string.Join(", ", sortedListKey.LibraryIds),
                                 startVersion,
                                 currentVersion
                             );
@@ -304,8 +304,8 @@ public sealed class MediaQueryCache : IMediaQueryCache
             _log.Here()
                 .Error(
                     ex,
-                    "Unhandled error in snapshot refresh background observer for {SortedListKey}",
-                    sortedListKey
+                    "Unhandled error in snapshot refresh background observer for LibraryIds: {LibraryIds}",
+                    string.Join(", ", sortedListKey.LibraryIds)
                 );
         }
         finally

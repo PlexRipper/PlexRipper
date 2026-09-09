@@ -50,7 +50,7 @@ public static partial class DbContextExtensions
         {
             return _log.Here()
                 .WarningResult(
-                    "PlexServer with id {plexServerId} and name {PlexServerName} has no online connections available!",
+                    "PlexServer with id {PlexServerId} and name {PlexServerName} has no online connections available!",
                     plexServer.Id,
                     plexServer.Name
                 )
@@ -175,7 +175,7 @@ public static partial class DbContextExtensions
                 return Result.Ok(mainServerToken.AuthToken);
 
             return Result
-                .Fail($"Could not find any authenticationToken for PlexServer with id: {plexServerId}")
+                .Fail("Could not find any authenticationToken for PlexServer with id: {PlexServerId}", plexServerId)
                 .AddPlex401UnauthorizedError()
                 .LogError();
         }
@@ -186,7 +186,7 @@ public static partial class DbContextExtensions
         );
 
         if (!isAccountValidated)
-            return Result.Fail($"PlexAccount with id: {plexAccountId} is not validated").LogError();
+            return Result.Fail("PlexAccount with id: {PlexAccountId} is not validated", plexAccountId).LogError();
 
         var authToken = await dbContext.PlexAccountServers.FirstOrDefaultAsync(
             x => x.PlexAccountId == plexAccountId && x.PlexServerId == plexServerId,

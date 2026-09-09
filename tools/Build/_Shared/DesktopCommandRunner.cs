@@ -3,7 +3,6 @@ using CliWrap;
 using CliWrap.EventStream;
 using CliWrap.Exceptions;
 using Reaparr.Logging;
-using Serilog;
 
 namespace Reaparr.Build;
 

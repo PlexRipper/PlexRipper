@@ -28,19 +28,15 @@ public class ValidateRadarrIntegrationCommandHandler : ICommandHandler<ValidateR
     public async Task<Result> ExecuteAsync(ValidateRadarrIntegrationCommand command, CancellationToken ct)
     {
         var clientResult = await _radarrHttpClientFactory.CreateAsync(command.IntegrationId);
-        if (clientResult.IsCancelled)
-            return clientResult.ToResult().LogWarning();
         if (clientResult.IsFailed)
-            return clientResult.ToResult().LogError();
+            return clientResult.ToResult().LogIfFailed();
 
         using var client = clientResult.Value;
         var results = await Task.WhenAll(
             client.TestRadarrDownloadClientAsync(command.DownloadClient, ct),
             client.TestRadarrIndexerAsync(command.Indexer, ct)
         );
-        var result = Result.Merge(results);
-        if (result.IsCancelled)
-            return result.LogWarning();
-        return result.IsFailed ? result.LogError() : result;
+        var result = results.Merge();
+        return result.LogIfFailed();
     }
 }

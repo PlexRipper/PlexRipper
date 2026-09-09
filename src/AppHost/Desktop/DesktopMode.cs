@@ -41,9 +41,7 @@ public class DesktopMode : IDesktopMode
         if (_appRuntimeInfo.IsIntegrationTestMode)
         {
             _log.Here()
-                .Warning(
-                    "DesktopMode startup skipped in integration test mode to avoid launching the embedded window."
-                );
+                .Warning("DesktopMode startup skipped in integration test mode to avoid launching the embedded window");
             return Result.Ok();
         }
 
@@ -186,7 +184,7 @@ public class DesktopMode : IDesktopMode
         var serverAddressesFeature = _server.Features.Get<IServerAddressesFeature>();
         var serverAddress = serverAddressesFeature?.Addresses.FirstOrDefault();
         if (string.IsNullOrWhiteSpace(serverAddress))
-            return Result.Fail("Desktop mode could not determine the server address for the embedded window.");
+            return Result.Fail("Desktop mode could not determine the server address for the embedded window");
 
         var uri = new Uri(serverAddress);
         return Result.Ok(NormalizeWildcardHost(uri));
@@ -210,7 +208,7 @@ public class DesktopMode : IDesktopMode
         {
             _log.Here()
                 .Warning(
-                    "Desktop UI did not report ready within {TimeoutSeconds}s after loading {Uri}. Embedded WebView may have failed to render. Launching external browser fallback now.",
+                    "Desktop UI did not report ready within {TimeoutSeconds}s after loading {Uri}. Embedded WebView may have failed to render. Launching external browser fallback now",
                     DESKTOP_READY_TIMEOUT_SECONDS,
                     uri
                 );

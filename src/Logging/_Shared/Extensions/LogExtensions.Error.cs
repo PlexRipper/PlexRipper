@@ -1,5 +1,3 @@
-using FluentResults;
-
 namespace Reaparr.Logging;
 
 public static partial class LogExtensions
@@ -8,9 +6,11 @@ public static partial class LogExtensions
     {
         log.ErrorResult(ex, "");
 
-        return Result.Fail(new ExceptionalError(ex));
+        return ex is null ? Result.Fail(new Error(string.Empty)) : Result.Fail(new ExceptionalError(ex));
     }
 
+    // These adapters intentionally forward and render caller-supplied Serilog templates.
+    // ReSharper disable TemplateIsNotCompileTimeConstantProblem
     [MessageTemplateFormatMethod("messageTemplate")]
     public static Result ErrorResult(this ILogger log, Exception? ex, string messageTemplate, params object[] args)
     {
@@ -18,7 +18,9 @@ public static partial class LogExtensions
 
         var renderedMessage = log.RenderMessage(messageTemplate, args);
 
-        return Result.Fail(new ExceptionalError(renderedMessage, ex));
+        return ex is null
+            ? Result.Fail(new Error(renderedMessage))
+            : Result.Fail(new ExceptionalError(renderedMessage, ex));
     }
 
     [MessageTemplateFormatMethod("messageTemplate")]

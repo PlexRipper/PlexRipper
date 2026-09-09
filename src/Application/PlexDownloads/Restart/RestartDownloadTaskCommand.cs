@@ -67,11 +67,8 @@ public class RestartDownloadTaskCommandHandler : ICommandHandler<RestartDownload
 
             var stopResult = await _commandExecutor.Send(new StopDownloadTaskCommand(childKey.Id), cancellationToken);
 
-            if (stopResult.IsCancelled)
-                return stopResult.LogWarning();
-
             if (stopResult.IsFailed)
-                return stopResult.LogError();
+                return stopResult.LogIfFailed();
 
             await _downloadTaskUpdateDispatcher.OnStatusChangedAsync(
                 childKey,
@@ -213,7 +210,9 @@ public class RestartDownloadTaskCommandHandler : ICommandHandler<RestartDownload
             );
 
             return Result.Fail(
-                $"Could not find the original source media for download task \"{downloadTaskKey}\" with title \"{downloadTask.FullTitle}\""
+                "Could not find the original source media for download task \"{DownloadTaskKey}\" with title \"{DownloadTaskFullTitle}\"",
+                downloadTaskKey,
+                downloadTask.FullTitle
             );
         }
 
@@ -300,7 +299,9 @@ public class RestartDownloadTaskCommandHandler : ICommandHandler<RestartDownload
             );
 
             return Result.Fail(
-                $"Could not find the original source media for download task \"{downloadTaskKey}\" with title \"{downloadTask.FullTitle}\""
+                "Could not find the original source media for download task \"{DownloadTaskKey}\" with title \"{DownloadTaskFullTitle}\"",
+                downloadTaskKey,
+                downloadTask.FullTitle
             );
         }
 

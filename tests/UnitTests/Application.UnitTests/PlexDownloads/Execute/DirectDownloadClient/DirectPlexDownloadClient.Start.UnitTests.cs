@@ -31,10 +31,6 @@ public class DirectPlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDow
     // Shared helpers
     // -------------------------------------------------------------------------
 
-    private static bool ContainsExceptionType(Exception exception, Type expectedType) =>
-        exception.GetType() == expectedType
-        || (exception.InnerException is not null && ContainsExceptionType(exception.InnerException, expectedType));
-
     private static DownloadPackage MakeDownloadPackage(long totalBytes = 10 * 1024) =>
         new()
         {

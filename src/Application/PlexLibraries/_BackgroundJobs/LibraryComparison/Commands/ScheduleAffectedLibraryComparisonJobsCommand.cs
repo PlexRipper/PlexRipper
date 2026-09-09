@@ -55,7 +55,7 @@ public class ScheduleAffectedLibraryComparisonJobsCommandHandler
             .SingleOrDefaultAsync(cancellationToken);
 
         if (sourceLibrary is null)
-            return Result.Fail($"Library {command.PlexLibraryId} was not found or was disabled");
+            return Result.Fail("Library {PlexLibraryId} was not found or was disabled", command.PlexLibraryId);
 
         if (sourceLibrary.Type is not PlexMediaType.Movie and not PlexMediaType.TvShow)
             return Result.Ok();

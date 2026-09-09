@@ -1,7 +1,4 @@
-// ReSharper disable once CheckNamespace
-// Needs to be in the same namespace as the FluentResults package
-
-namespace FluentResults;
+namespace Reaparr.FluentResultExtensions;
 
 public class PlexError : Error
 {

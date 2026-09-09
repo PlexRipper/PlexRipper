@@ -38,10 +38,7 @@ public static partial class DbContextExtensions
 
         // This is the default download folder, which always exists in the database
         return (
-            await dbContext.FolderPaths.GetAsync(
-                PlexMediaType.None.ToDefaultDestinationFolderId(),
-                CancellationToken.None
-            )
+            await dbContext.FolderPaths.GetAsync(FolderTypeDefaults.DefaultDownloadFolderId, CancellationToken.None)
         )!;
     }
 

@@ -73,7 +73,9 @@ public class SetPreferredPlexServerConnectionEndpoint
             await Send.FluentResult(
                 Result
                     .Fail(
-                        $"PlexServer with id {plexServerId} has no connections with id {plexServerConnectionId} and can not set that as preferred"
+                        "PlexServer with id {PlexServerId} has no connections with id {PlexServerConnectionId} and can not set that as preferred",
+                        plexServerId,
+                        plexServerConnectionId
                     )
                     .LogError(),
                 ct

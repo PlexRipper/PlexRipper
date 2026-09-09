@@ -1,3 +1,5 @@
+using Reaparr.IntegrationTests;
+
 namespace Reaparr.BaseTests;
 
 [NotInParallel("IntegrationTests")]
@@ -7,11 +9,6 @@ public abstract class BaseIntegrationTests
 
     protected CancellationToken CancellationToken =>
         TestContext.Current?.Execution.CancellationToken ?? CancellationToken.None;
-
-    protected BaseIntegrationTests()
-    {
-        BogusExtensions.Setup();
-    }
 
     protected static async Task WaitForDatabaseConditionAsync(
         Func<bool> condition,

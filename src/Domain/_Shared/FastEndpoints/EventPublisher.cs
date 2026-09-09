@@ -22,7 +22,7 @@ public class EventPublisher : IEventPublisher
         }
         catch (OperationCanceledException) when (ct.IsCancellationRequested)
         {
-            _log.Here().Warning("Publish of {EventType} canceled.", @event.GetType().Name);
+            _log.Here().Warning("Publish of {EventType} canceled", @event.GetType().Name);
         }
         catch (Exception e)
         {

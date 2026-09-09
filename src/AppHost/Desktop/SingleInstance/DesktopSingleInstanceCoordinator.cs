@@ -65,11 +65,8 @@ public sealed class DesktopSingleInstanceCoordinator : IDesktopSingleInstanceCoo
                 PipeOptions.Asynchronous
             );
             var connectResult = await ConnectToPrimaryInstanceAsync(client, cancellationToken);
-            if (connectResult.IsCancelled)
-                return connectResult.LogWarning();
-
             if (connectResult.IsFailed)
-                return connectResult.LogError();
+                return connectResult.LogIfFailed();
 
             await client.WriteAsync(Encoding.UTF8.GetBytes(SIGNAL_MESSAGE), cancellationToken);
             await client.FlushAsync(cancellationToken);
@@ -164,7 +161,7 @@ public sealed class DesktopSingleInstanceCoordinator : IDesktopSingleInstanceCoo
         if (cancellationToken.IsCancellationRequested)
             return ResultExtensions.TaskIsCancelled(nameof(ConnectToPrimaryInstanceAsync));
 
-        return Result.Fail("Timed out while connecting to the primary desktop instance.");
+        return Result.Fail("Timed out while connecting to the primary desktop instance");
     }
 
     private async Task ListenAsync(Func<CancellationToken, Task<Result>> onSignal, CancellationToken cancellationToken)

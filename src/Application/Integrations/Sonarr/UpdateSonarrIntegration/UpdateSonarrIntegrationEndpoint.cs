@@ -23,11 +23,14 @@ public class UpdateSonarrIntegrationRequestValidator : Validator<UpdateSonarrInt
         RuleFor(x => x.DownloadFolderId).GreaterThan(0);
     }
 
-    private static bool IsHttpUrl(string value) =>
-        Uri.TryCreate(value.TrimEnd('/'), UriKind.Absolute, out var uri)
-        && (uri.Scheme == Uri.UriSchemeHttp || uri.Scheme == Uri.UriSchemeHttps)
-        && string.IsNullOrEmpty(uri.Query)
-        && string.IsNullOrEmpty(uri.Fragment);
+    private static bool IsHttpUrl(string value)
+    {
+        var normalizedUrl = value.TrimEnd('/');
+        return normalizedUrl.IsValidHttpUrl()
+            && Uri.TryCreate(normalizedUrl, UriKind.Absolute, out var uri)
+            && string.IsNullOrEmpty(uri.Query)
+            && string.IsNullOrEmpty(uri.Fragment);
+    }
 }
 
 public class UpdateSonarrIntegrationEndpoint : Endpoint<UpdateSonarrIntegrationRequest, ResultDTO<SonarrIntegrationDTO>>

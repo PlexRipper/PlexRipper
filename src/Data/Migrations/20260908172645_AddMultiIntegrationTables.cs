@@ -113,7 +113,7 @@ namespace Reaparr.Data.Migrations
                     LastConnectionTestHttpStatusCode = table.Column<int>(type: "INTEGER", nullable: true),
                     LastConnectionTestErrorMessage = table.Column<string>(type: "TEXT", maxLength: 200, nullable: true),
                     LastConnectionTestedAt = table.Column<DateTime>(type: "TEXT", nullable: true),
-                    DownloadFolderId = table.Column<int>(type: "INTEGER", nullable: true)
+                    DownloadFolderId = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -123,7 +123,7 @@ namespace Reaparr.Data.Migrations
                         column: x => x.DownloadFolderId,
                         principalTable: "FolderPaths",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.SetNull);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -144,7 +144,7 @@ namespace Reaparr.Data.Migrations
                     LastConnectionTestHttpStatusCode = table.Column<int>(type: "INTEGER", nullable: true),
                     LastConnectionTestErrorMessage = table.Column<string>(type: "TEXT", maxLength: 200, nullable: true),
                     LastConnectionTestedAt = table.Column<DateTime>(type: "TEXT", nullable: true),
-                    DownloadFolderId = table.Column<int>(type: "INTEGER", nullable: true)
+                    DownloadFolderId = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -154,7 +154,7 @@ namespace Reaparr.Data.Migrations
                         column: x => x.DownloadFolderId,
                         principalTable: "FolderPaths",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.SetNull);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateIndex(

@@ -40,7 +40,9 @@ public class EnsureDownloadDirectoryCommandHandler : ICommandHandler<EnsureDownl
                 return availableSpace.ToResult();
 
             if (availableSpace.Value < fileSize)
-                return Result.Fail($"There is not enough space available in root directory {directory}").LogError();
+                return Result
+                    .Fail("There is not enough space available in root directory {Directory}", directory)
+                    .LogError();
 
             return Result.Ok();
         }

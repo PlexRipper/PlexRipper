@@ -45,7 +45,7 @@ public class TestConnectionToSonarrCommandUnitTests : BaseCommandUnitTest<TestCo
             QBittorrentApiKey = "qbt_23456789ABCDEFGHIJKLMNPQ",
             TorznabApiKey = "0123456789abcdef0123456789abcdef",
             Category = "series",
-            DownloadFolderId = PlexMediaType.None.ToDefaultDestinationFolderId(),
+            DownloadFolderId = FolderTypeDefaults.DefaultDownloadFolderId,
             ProvisioningState = IntegrationProvisioningState.Configured,
             LastConnectionTestStatus = TestConnectionStatus.Success,
             LastConnectionTestHttpStatusCode = StatusCodes.Status200OK,
@@ -85,11 +85,7 @@ public class TestConnectionToSonarrCommandUnitTests : BaseCommandUnitTest<TestCo
     {
         // Arrange
         await SetupDatabase(62632);
-        var command = new TestConnectionToSonarrCommand(
-            Guid.Parse("00000000-0000-0000-0000-000000062632"),
-            null,
-            null
-        );
+        var command = new TestConnectionToSonarrCommand(Guid.Parse("00000000-0000-0000-0000-000000062632"), null, null);
 
         Mock.Mock<ISonarrHttpClientFactory>()
             .Setup(x => x.Create(It.IsAny<string>(), It.IsAny<string>()))

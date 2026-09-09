@@ -1,14 +1,10 @@
 using ByteSizeLib;
-using Serilog.Events;
 
 namespace Reaparr.BaseTests.UnitTests;
 
 [NotInParallel]
 public class FakeDataDownloadTasksUnitTests : BaseUnitTest
 {
-    public FakeDataDownloadTasksUnitTests()
-        : base(LogEventLevel.Information) { }
-
     [Test]
     public void MovieDownloadTask_ShouldGenerateAllRequiredProperties()
     {

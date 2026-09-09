@@ -98,10 +98,7 @@ public static partial class LogExtensions
                 if (t.Namespace?.StartsWith("Castle.Proxies", StringComparison.Ordinal) == true)
                     return false;
 
-                if (IsPotentiallyUnsafeForDestructuring(t, new HashSet<Type>()))
-                    return false;
-
-                return true;
+                return !IsPotentiallyUnsafeForDestructuring(t, []);
             }
         );
     }
@@ -161,6 +158,8 @@ public static partial class LogExtensions
         return false;
     }
 
+    // This adapter intentionally forwards and renders caller-supplied Serilog templates.
+    // ReSharper disable TemplateIsNotCompileTimeConstantProblem
     [MessageTemplateFormatMethod("messageTemplate")]
     public static string DebugMsg(this ILogger log, string messageTemplate, params object[] args)
     {

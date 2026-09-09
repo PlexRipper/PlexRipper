@@ -440,7 +440,7 @@ public class CompareMoviePlexLibraryCommandOwnershipUnitTests : BaseCommandUnitT
         // Assert
         result.IsSuccess.ShouldBeTrue();
         result.Errors.ShouldBeEmpty();
-        var scope = await IDbContext.PlexComparisonScopes.SingleAsync(
+        await IDbContext.PlexComparisonScopes.SingleAsync(
             x =>
                 x.RemotePlexLibraryId == remoteLibrary.Id
                 && x.OwnedPlexLibraryId == ownedLibrary.Id
@@ -1032,7 +1032,7 @@ public class CompareTvShowPlexLibraryCommandOwnershipUnitTests : BaseCommandUnit
         // Assert
         result.IsSuccess.ShouldBeTrue();
         result.Errors.ShouldBeEmpty();
-        var scope = await IDbContext.PlexComparisonScopes.SingleAsync(
+        await IDbContext.PlexComparisonScopes.SingleAsync(
             x =>
                 x.RemotePlexLibraryId == remoteLibrary.Id
                 && x.OwnedPlexLibraryId == ownedLibrary.Id

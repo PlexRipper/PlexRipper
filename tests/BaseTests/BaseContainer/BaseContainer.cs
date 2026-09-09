@@ -2,10 +2,9 @@ using System.Net.Http.Headers;
 using Autofac.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Reaparr.FileSystem.Contracts;
-using Reaparr.PublicAPI;
 using Reaparr.Settings.Contracts;
 
-namespace Reaparr.BaseTests;
+namespace Reaparr.IntegrationTests;
 
 public class BaseContainer : IDisposable
 {

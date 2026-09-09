@@ -321,7 +321,7 @@ public class DownloadTaskUpdateDispatcher : BackgroundService, IDownloadTaskUpda
             {
                 _log.Here()
                     .Error(
-                        "Failed to flush buffered progress for {DownloadTaskKey}. Requeuing latest value.",
+                        "Failed to flush buffered progress for {DownloadTaskKey}. Requeuing latest value",
                         latestBufferedProgress.Key
                     );
                 flushResult.LogError();

@@ -24,7 +24,9 @@ public class MoveDownloadFileJobScheduler : IMoveDownloadFileScheduler
 
         var jobKey = MoveDownloadFileJob.GetJobKey(downloadTaskKey.Id);
         if (await _scheduler.IsJobRunning(jobKey, cancellationToken))
-            return Result.Fail($"{nameof(MoveDownloadFileJob)} with {jobKey} already exists").LogWarning();
+            return Result
+                .Fail("{MoveDownloadFileJobName} with {JobKey} already exists", nameof(MoveDownloadFileJob), jobKey)
+                .LogWarning();
 
         var schedulingResult = await _scheduler.ExecuteJob<MoveDownloadFileJob, MoveDownloadFileJobPayload>(
             jobKey,
@@ -54,13 +56,23 @@ public class MoveDownloadFileJobScheduler : IMoveDownloadFileScheduler
         if (!await _scheduler.IsJobRunning(jobKey, cancellationToken))
         {
             return Result
-                .Fail($"{nameof(MoveDownloadFileJob)} with {jobKey} cannot be stopped because it is not running")
+                .Fail(
+                    "{MoveDownloadFileJobName} with {JobKey} cannot be stopped because it is not running",
+                    nameof(MoveDownloadFileJob),
+                    jobKey
+                )
                 .LogWarning();
         }
 
         var wasStopped = await _scheduler.Interrupt(jobKey, cancellationToken);
         if (!wasStopped && await _scheduler.IsJobRunning(jobKey, cancellationToken))
-            return Result.Fail($"Failed to stop {nameof(DownloadTaskKey)} with id {downloadTaskKey.Id}").LogError();
+            return Result
+                .Fail(
+                    "Failed to stop {DownloadTaskKeyName} with id {Guid}",
+                    nameof(DownloadTaskKey),
+                    downloadTaskKey.Id
+                )
+                .LogError();
 
         return Result.Ok();
     }

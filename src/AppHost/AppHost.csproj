@@ -52,7 +52,8 @@
         <Using Include="System.ComponentModel.DataAnnotations" />
         <Using Include="System.ComponentModel.DataAnnotations.Schema" />
         <Using Include="FastEndpoints" />
-        <Using Include="FluentResults" />
+        <Using Include="Reaparr.FluentResults" />
+        <Using Include="Reaparr.FluentResultExtensions" />
         <Using Include="FluentValidation" />
         <Using Include="Microsoft.AspNetCore.Http" />
         <Using Include="Microsoft.AspNetCore.Builder" />

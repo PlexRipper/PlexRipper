@@ -179,7 +179,7 @@ public class ScheduleAffectedLibraryComparisonJobsCommandUnitTests
                                 && job.JobDataMap.GetPayload<PlexLibraryComparisonJobPayload>()!.OwnedPlexLibraryId
                                     == ownedLibrary.Id
                                 && remoteLibraries
-                                    .Select(x => x.Id)
+                                    .Select(y => y.Id)
                                     .Contains(
                                         job.JobDataMap.GetPayload<PlexLibraryComparisonJobPayload>()!.RemotePlexLibraryId
                                     )
@@ -228,5 +228,4 @@ public class ScheduleAffectedLibraryComparisonJobsCommandUnitTests
                 Times.Never
             );
     }
-
 }

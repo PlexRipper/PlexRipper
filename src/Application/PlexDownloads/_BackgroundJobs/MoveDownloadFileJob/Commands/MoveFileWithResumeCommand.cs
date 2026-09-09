@@ -75,26 +75,20 @@ public class MoveFileWithResumeCommandHandler : ICommandHandler<MoveFileWithResu
         var inputStreamResult = Result.Try(
             (() => _file.Open(sourcePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
         );
-        if (inputStreamResult.IsCancelled)
-            return inputStreamResult.ToResult().LogWarning();
-
         if (inputStreamResult.IsFailed)
-            return inputStreamResult.ToResult().LogError();
+            return inputStreamResult.ToResult().LogIfFailed();
 
-        await using (Stream? readStream = inputStreamResult.Value)
+        await using (Stream readStream = inputStreamResult.Value)
         {
             // Fresh start: truncate any stale destination content. Resume: open existing file.
             var writeMode = currentOffset > 0 ? FileMode.Open : FileMode.Create;
             var writeStreamResult = Result.Try(() =>
                 _file.Open(targetPath, writeMode, FileAccess.Write, FileShare.ReadWrite)
             );
-            if (writeStreamResult.IsCancelled)
-                return writeStreamResult.ToResult().LogWarning();
-
             if (writeStreamResult.IsFailed)
-                return writeStreamResult.ToResult().LogError();
+                return writeStreamResult.ToResult().LogIfFailed();
 
-            await using Stream? writeStream = writeStreamResult.Value;
+            await using Stream writeStream = writeStreamResult.Value;
 
             // Resume if needed
             if (currentOffset > 0)
@@ -103,7 +97,10 @@ public class MoveFileWithResumeCommandHandler : ICommandHandler<MoveFileWithResu
                     writeStream.SetLength(currentOffset);
                 else if (writeStream.Length < currentOffset)
                     return Result.Fail(
-                        $"Resume offset {currentOffset} exceeds on-disk file length {writeStream.Length} for '{targetPath}'; cannot resume safely"
+                        "Resume offset {CurrentOffset} exceeds on-disk file length {WriteStreamLength} for '{TargetPath}'; cannot resume safely",
+                        currentOffset,
+                        writeStream.Length,
+                        targetPath
                     );
 
                 readStream.Seek(currentOffset, SeekOrigin.Begin);
@@ -201,7 +198,11 @@ public class MoveFileWithResumeCommandHandler : ICommandHandler<MoveFileWithResu
     ) =>
         Result
             .Fail(
-                $"Move ended with a byte count mismatch. Expected {expectedBytes} bytes but transferred {transferredBytes} bytes from '{sourcePath}' to '{targetPath}'."
+                "Move ended with a byte count mismatch. Expected {ExpectedBytes} bytes but transferred {TransferredBytes} bytes from '{SourcePath}' to '{TargetPath}'",
+                expectedBytes,
+                transferredBytes,
+                sourcePath,
+                targetPath
             )
             .LogError();
 }

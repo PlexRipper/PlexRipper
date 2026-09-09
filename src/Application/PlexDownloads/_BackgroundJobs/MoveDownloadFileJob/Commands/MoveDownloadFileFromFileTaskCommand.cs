@@ -95,7 +95,7 @@ public class MoveDownloadFileFromFileTaskCommandHandler : ICommandHandler<MoveDo
                 {
                     _log.Here()
                         .Warning(
-                            "Source file was missing for {DownloadTaskId}, but renamed file exists in downloads and keep-in-downloads is set. Treating move as finished.",
+                            "Source file was missing for {DownloadTaskId}, but renamed file exists in downloads and keep-in-downloads is set. Treating move as finished",
                             key.Id
                         );
 
@@ -126,7 +126,7 @@ public class MoveDownloadFileFromFileTaskCommandHandler : ICommandHandler<MoveDo
                 // Resume the move using the renamed file as the source.
                 _log.Here()
                     .Warning(
-                        "Source .reaptemp file was missing for {DownloadTaskId} but renamed file exists in downloads. Resuming move to destination.",
+                        "Source .reaptemp file was missing for {DownloadTaskId} but renamed file exists in downloads. Resuming move to destination",
                         key.Id
                     );
                 downloadFilePath = movedInDownloadsPath!;
@@ -135,7 +135,7 @@ public class MoveDownloadFileFromFileTaskCommandHandler : ICommandHandler<MoveDo
             {
                 _log.Here()
                     .Warning(
-                        "Source file was missing for {DownloadTaskId}, but a completed file already exists at destination. Treating move as finished.",
+                        "Source file was missing for {DownloadTaskId}, but a completed file already exists at destination. Treating move as finished",
                         key.Id
                     );
 
@@ -160,7 +160,7 @@ public class MoveDownloadFileFromFileTaskCommandHandler : ICommandHandler<MoveDo
             else
             {
                 var result = Result
-                    .Fail($"Source file does not exist and cannot be moved: {downloadFilePath}")
+                    .Fail("Source file does not exist and cannot be moved: {DownloadFilePath}", downloadFilePath)
                     .LogError();
                 return await ErrorDownloadTask(key, result);
             }
@@ -270,10 +270,7 @@ public class MoveDownloadFileFromFileTaskCommandHandler : ICommandHandler<MoveDo
                 return await ErrorDownloadTask(key, directoryPathResult.ToResult());
 
             if (string.IsNullOrEmpty(directoryPathResult.Value))
-                return await ErrorDownloadTask(
-                    key,
-                    Result.Fail($"Could not determine the directory name of path: {directoryPathResult.Value}")
-                );
+                return await ErrorDownloadTask(key, Result.Fail("Could not determine the directory name of path"));
 
             // Ensure the destination directory exists only when we are actually moving
             _log.Here()
@@ -472,6 +469,7 @@ public class MoveDownloadFileFromFileTaskCommandHandler : ICommandHandler<MoveDo
 
             if (stopwatch.ElapsedMilliseconds > 1000)
             {
+                // ReSharper disable once TemplateIsNotCompileTimeConstantProblem
                 _log.Here().Debug(downloadTask.ToString());
                 var fileTransferProgress = downloadTask.ToFileTransferProgress();
                 progressChannel.Writer.TryWrite(fileTransferProgress);

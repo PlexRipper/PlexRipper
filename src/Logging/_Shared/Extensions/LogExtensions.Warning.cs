@@ -1,9 +1,9 @@
-using FluentResults;
-
 namespace Reaparr.Logging;
 
 public static partial class LogExtensions
 {
+    // These adapters intentionally forward and render caller-supplied Serilog templates.
+    // ReSharper disable TemplateIsNotCompileTimeConstantProblem
     [MessageTemplateFormatMethod("messageTemplate")]
     public static Result WarningResult(this ILogger log, string messageTemplate, params object[] args)
     {

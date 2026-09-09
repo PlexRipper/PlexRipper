@@ -73,7 +73,11 @@ public class GetDownloadTaskByGuidEndpoint : Endpoint<GetDownloadTaskByGuidReque
             if (downloadUrl.IsFailed)
                 downloadUrl.LogError();
 
-            await Send.FluentResult(Result.Ok(downloadTask), x => x.ToDTO(downloadUrl.ValueOrDefault), ct);
+            await Send.FluentResult(
+                Result.Ok(downloadTask),
+                x => x.ToDTO(downloadUrl.ValueOrDefault ?? string.Empty),
+                ct
+            );
             return;
         }
 

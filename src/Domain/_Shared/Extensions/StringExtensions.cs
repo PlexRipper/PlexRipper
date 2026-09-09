@@ -75,6 +75,10 @@ public static partial class StringExtensions
 
     public static bool IsIpAddress(this string ipAddress) => IPAddress.TryParse(ipAddress, out var _);
 
+    public static bool IsValidHttpUrl(this string? url) =>
+        Uri.TryCreate(url, UriKind.Absolute, out var uri)
+        && (uri.Scheme == Uri.UriSchemeHttp || uri.Scheme == Uri.UriSchemeHttps);
+
     private static string GetProperCapitalization(DirectoryInfo? dirInfo)
     {
         if (dirInfo == null)

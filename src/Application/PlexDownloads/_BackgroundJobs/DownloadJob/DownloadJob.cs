@@ -58,11 +58,6 @@ public class DownloadJob : IJob
                     nameof(downloadTaskKey),
                     downloadTaskKey
                 );
-            if (downloadTaskKey is null)
-            {
-                ResultExtensions.IsNull(nameof(DownloadTaskKey)).LogError();
-                return;
-            }
 
             // Create the multiple download worker tasks which will split up the work
             var downloadTask = await _dbContext.GetDownloadTaskFileAsync(downloadTaskKey, token);
@@ -255,7 +250,10 @@ public class DownloadJob : IJob
                     );
                 break;
             default:
-                return Result.Fail($"DownloadTaskType {downloadTask.DownloadTaskType} is not supported");
+                return Result.Fail(
+                    "DownloadTaskType {DownloadTaskType} is not supported",
+                    downloadTask.DownloadTaskType
+                );
         }
 
         return Result.Ok(downloadTask);

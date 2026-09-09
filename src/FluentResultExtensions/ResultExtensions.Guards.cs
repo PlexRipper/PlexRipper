@@ -1,9 +1,6 @@
-﻿// ReSharper disable once CheckNamespace
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
 
-// ReSharper disable once CheckNamespace
-// Needs to be in the same namespace as the FluentResults package
-namespace FluentResults;
+namespace Reaparr.FluentResultExtensions;
 
 public static partial class ResultExtensions
 {
@@ -17,8 +14,9 @@ public static partial class ResultExtensions
     /// <returns></returns>
     public static Result AddNestedErrors(this Result result, List<IError> errors)
     {
-        if (result.Errors.Any())
-            result.Errors.First().Reasons.AddRange(errors);
+        var resultErrors = result.Errors;
+        if (resultErrors.Count > 0)
+            resultErrors[0].Reasons.AddRange(errors);
 
         return result;
     }
@@ -78,7 +76,6 @@ public static partial class ResultExtensions
     #endregion
 
     #region Check
-
 
     extension(Result result)
     {

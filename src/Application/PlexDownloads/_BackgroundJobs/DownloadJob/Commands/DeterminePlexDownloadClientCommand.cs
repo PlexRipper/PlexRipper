@@ -46,7 +46,10 @@ public class DeterminePlexDownloadClientCommandHandler
         if (string.IsNullOrWhiteSpace(machineId))
         {
             return Result
-                .Fail($"Unable to resolve machine identifier for Plex server {command.PlexServerId}")
+                .Fail(
+                    "Unable to resolve machine identifier for Plex server {CommandPlexServerId}",
+                    command.PlexServerId
+                )
                 .LogError();
         }
 
@@ -60,11 +63,8 @@ public class DeterminePlexDownloadClientCommandHandler
             cancellationToken
         );
 
-        if (decisionResult.IsCancelled)
-            return decisionResult.ToResult().LogWarning();
-
         if (decisionResult.IsFailed)
-            return decisionResult.ToResult().LogError();
+            return decisionResult.ToResult().LogIfFailed();
 
         var clientType = decisionResult.Value.SuggestedClientType;
         _log.Here()

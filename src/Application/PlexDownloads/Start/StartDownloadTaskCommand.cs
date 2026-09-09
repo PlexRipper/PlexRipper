@@ -112,11 +112,8 @@ public class StartDownloadTaskCommandHandler : ICommandHandler<StartDownloadTask
                         nextDownloadTaskKey,
                         cancellationToken
                     );
-                    if (startResult.IsCancelled)
-                        return startResult.LogWarning();
-
                     if (startResult.IsFailed)
-                        return startResult.LogError();
+                        return startResult.LogIfFailed();
 
                     var activeDownloadKeys = await _downloadTaskScheduler.GetCurrentlyDownloadingKeysByServer(
                         key.PlexServerId
@@ -129,11 +126,8 @@ public class StartDownloadTaskCommandHandler : ICommandHandler<StartDownloadTask
                             new PauseDownloadTaskCommand(downloadKey.Id),
                             cancellationToken
                         );
-                        if (pauseResult.IsCancelled)
-                            return pauseResult.LogWarning();
-
                         if (pauseResult.IsFailed)
-                            return pauseResult.LogError();
+                            return pauseResult.LogIfFailed();
                     }
                 }
 
@@ -147,11 +141,8 @@ public class StartDownloadTaskCommandHandler : ICommandHandler<StartDownloadTask
                         nextDownloadTaskKey,
                         cancellationToken
                     );
-                    if (moveResult.IsCancelled)
-                        return moveResult.LogWarning();
-
                     if (moveResult.IsFailed)
-                        return moveResult.LogError();
+                        return moveResult.LogIfFailed();
                 }
 
                 break;

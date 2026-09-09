@@ -14,6 +14,17 @@
         "resolved": "1.3.0",
         "contentHash": "jzzLpmz7F6LyBh5FTZy8/4dEYVcAG9VjBPKryZ82LIoUuupcBkCSXzaeS/4oYcp/rBC8yVLcDstJ8CIv9n2IFw=="
       },
+      "Microsoft.AspNetCore.Mvc.Testing": {
+        "type": "Direct",
+        "requested": "[10.0.10, )",
+        "resolved": "10.0.10",
+        "contentHash": "pTWE4RtRbb9sl/U9QjZA5oapEZ01ZEMfRilZvvh55ZW97caTQ2XuAF6sgc+7ojKWBbR2qrcWVo5P80gMPuW/tQ==",
+        "dependencies": {
+          "Microsoft.AspNetCore.TestHost": "10.0.10",
+          "Microsoft.Extensions.DependencyModel": "10.0.10",
+          "Microsoft.Extensions.Hosting": "10.0.10"
+        }
+      },
       "TUnit": {
         "type": "Direct",
         "requested": "[1.45.29, )",
@@ -258,14 +269,6 @@
           "Microsoft.EntityFrameworkCore": "8.0.0"
         }
       },
-      "FluentResults": {
-        "type": "Transitive",
-        "resolved": "4.0.0",
-        "contentHash": "wKfdLvDnDVhXlSreU7u/NFNHH6EfoOhAloEID4ePAyk+ZliowKZJvX+aCL4hxhFc9Jj74t62amS4LyOYTjXGCg==",
-        "dependencies": {
-          "Microsoft.Extensions.Logging.Abstractions": "2.1.1"
-        }
-      },
       "FluentValidation": {
         "type": "Transitive",
         "resolved": "12.1.1",
@@ -410,16 +413,6 @@
         "dependencies": {
           "Microsoft.EntityFrameworkCore.Relational": "10.0.10",
           "Microsoft.Extensions.Identity.Stores": "10.0.10"
-        }
-      },
-      "Microsoft.AspNetCore.Mvc.Testing": {
-        "type": "Transitive",
-        "resolved": "10.0.10",
-        "contentHash": "pTWE4RtRbb9sl/U9QjZA5oapEZ01ZEMfRilZvvh55ZW97caTQ2XuAF6sgc+7ojKWBbR2qrcWVo5P80gMPuW/tQ==",
-        "dependencies": {
-          "Microsoft.AspNetCore.TestHost": "10.0.10",
-          "Microsoft.Extensions.DependencyModel": "10.0.10",
-          "Microsoft.Extensions.Hosting": "10.0.10"
         }
       },
       "Microsoft.AspNetCore.SignalR.Common": {
@@ -1616,10 +1609,18 @@
           "Bogus": "[35.6.5, )",
           "Bogus.Hollywood": "[35.6.5, )",
           "FastEndpoints.Testing": "[8.1.0, )",
-          "Microsoft.AspNetCore.Mvc.Testing": "[10.0.10, )",
           "Moq": "[4.20.72, )",
           "Moq.Contrib.HttpClient": "[1.4.0, )",
-          "Reaparr.AppHost": "[1.0.0, )",
+          "Reaparr.Application": "[1.0.0, )",
+          "Reaparr.Data": "[1.0.0, )",
+          "Reaparr.Environment": "[1.0.0, )",
+          "Reaparr.External": "[1.0.0, )",
+          "Reaparr.FileSystem": "[1.0.0, )",
+          "Reaparr.Identity": "[1.0.0, )",
+          "Reaparr.PlexApi": "[1.0.0, )",
+          "Reaparr.PublicAPI": "[1.0.0, )",
+          "Reaparr.Settings": "[1.0.0, )",
+          "Reaparr.SignalR": "[1.0.0, )",
           "Shouldly": "[4.3.0, )",
           "TUnit": "[1.45.29, )",
           "TestableIO.System.IO.Abstractions.TestingHelpers": "[22.1.1, )"
@@ -1714,9 +1715,17 @@
       "Reaparr.FluentResultExtensions": {
         "type": "Project",
         "dependencies": {
-          "FluentResults": "[4.0.0, )",
           "FluentValidation": "[12.1.1, )",
+          "Microsoft.Extensions.Logging.Abstractions": "[10.0.5, )",
+          "Reaparr.FluentResults": "[1.0.0, )",
           "Reaparr.Logging": "[1.0.0, )"
+        }
+      },
+      "Reaparr.FluentResults": {
+        "type": "Project",
+        "dependencies": {
+          "Microsoft.Extensions.Logging.Abstractions": "[10.0.5, )",
+          "Serilog": "[4.3.1, )"
         }
       },
       "Reaparr.Identity": {
@@ -1744,9 +1753,10 @@
         "type": "Project",
         "dependencies": {
           "Autofac": "[9.1.0, )",
-          "FluentResults": "[4.0.0, )",
           "Microsoft.AspNetCore.Http.Abstractions": "[2.3.9, )",
+          "Microsoft.Extensions.Logging.Abstractions": "[10.0.5, )",
           "Reaparr.Environment": "[1.0.0, )",
+          "Reaparr.FluentResults": "[1.0.0, )",
           "Serilog": "[4.3.1, )",
           "Serilog.Enrichers.Sensitive": "[2.1.0, )",
           "Serilog.Expressions": "[5.0.0, )",

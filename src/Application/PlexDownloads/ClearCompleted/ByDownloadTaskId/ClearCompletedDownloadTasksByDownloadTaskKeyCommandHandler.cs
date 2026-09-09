@@ -69,13 +69,8 @@ public class ClearCompletedDownloadTasksByDownloadTaskKeyCommandHandler
             return Result.Ok(0);
 
         var deleteResult = await _commandExecutor.Send(new DeleteDownloadTasksByKeyCommand(completedKeys), ct);
-        if (deleteResult.IsCancelled)
-            return deleteResult.ToResult<int>();
 
-        if (deleteResult.IsFailed)
-            return deleteResult.ToResult<int>();
-
-        return Result.Ok(completedKeys.Count);
+        return deleteResult.IsFailed ? deleteResult.LogIfFailed() : Result.Ok(completedKeys.Count);
     }
 
     private static async Task<List<DownloadTaskKey>> ConfirmCompleted<T>(

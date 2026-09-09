@@ -14,7 +14,6 @@
         <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="11.0.0" />
         <PackageReference Include="CliWrap" Version="3.10.1" />
         <PackageReference Include="FastEndpoints" Version="8.1.0" />
-        <PackageReference Include="FluentResults" Version="4.0.0" />
         <PackageReference Include="FluentValidation" Version="12.1.1" />
         <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.10" />
         <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="10.0.10" />
@@ -22,6 +21,11 @@
         <PackageReference Include="Spectre.Console.Cli" Version="0.55.0" />
         <PackageReference Include="Spectre.Console.Cli.Extensions.DependencyInjection" Version="0.7.0" />
         <PackageReference Include="System.IO.Abstractions" Version="22.1.1" />
+    </ItemGroup>
+    <ItemGroup>
+        <Using Include="Serilog" />
+        <Using Include="Reaparr.FluentResults" />
+        <Using Include="Reaparr.FluentResultExtensions" />
     </ItemGroup>
     <ItemGroup>
         <ProjectReference Include="..\..\src\Domain\Domain.csproj" />

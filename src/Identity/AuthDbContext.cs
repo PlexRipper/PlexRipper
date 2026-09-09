@@ -1,9 +1,6 @@
-using FluentResults;
 using Microsoft.AspNetCore.DataProtection.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using Reaparr.Environment;
-using Serilog;
 
 namespace Reaparr.Identity;
 

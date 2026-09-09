@@ -26,10 +26,6 @@ public static partial class Startup
                 Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)
             );
 
-        // Swallows OperationCanceledException caused by client-aborted requests (AbortController).
-        // Must be outermost so it wraps all downstream middleware including CORS and FastEndpoints.
-        app.UseMiddleware<RequestCancellationMiddleware>();
-
         // This has to always be first
         app.UseCors(CorsConfiguration);
 
@@ -119,6 +115,5 @@ public static partial class Startup
                 return result.LogError();
             };
         });
-
     }
 }

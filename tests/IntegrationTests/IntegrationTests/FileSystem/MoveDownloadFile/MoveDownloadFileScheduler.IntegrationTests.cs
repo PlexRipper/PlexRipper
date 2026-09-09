@@ -1,6 +1,3 @@
-using System.IO.Abstractions;
-using Autofac;
-
 namespace Reaparr.IntegrationTests;
 
 public class MoveDownloadFileSchedulerIntegrationTests : BaseIntegrationTests
@@ -141,7 +138,8 @@ public class MoveDownloadFileSchedulerIntegrationTests : BaseIntegrationTests
                                     await readStream.CopyToAsync(writeStream, ct);
 
                                     return Result.Fail(
-                                        $"Failed to delete source file after move: {moveCmd.SourcePath}"
+                                        "Failed to delete source file after move: {MoveCmdSourcePath}",
+                                        moveCmd.SourcePath
                                     );
                                 }
                             );

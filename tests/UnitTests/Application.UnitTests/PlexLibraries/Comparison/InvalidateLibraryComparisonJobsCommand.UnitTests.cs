@@ -44,7 +44,7 @@ public class InvalidateLibraryComparisonJobsCommandUnitTests
             .Setup(x =>
                 x.DeleteJobs(
                     It.Is<IReadOnlyCollection<JobKey>>(keys =>
-                        keys.Count == 2 && keys.Any(x => x == ownedJobKey) && keys.Any(x => x == remoteJobKey)
+                        keys.Count == 2 && keys.Any(y => y == ownedJobKey) && keys.Any(y => y == remoteJobKey)
                     ),
                     CancellationToken
                 )

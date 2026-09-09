@@ -9,7 +9,7 @@ public static class ReaparrDBContextSeed
         [
             new()
             {
-                Id = PlexMediaType.None.ToDefaultDestinationFolderId(),
+                Id = FolderTypeDefaults.DefaultDownloadFolderId,
                 DisplayName = "Download Path",
                 DirectoryPath = pathProvider.DefaultDownloadsDestinationFolder,
                 FolderType = FolderType.DownloadFolder,

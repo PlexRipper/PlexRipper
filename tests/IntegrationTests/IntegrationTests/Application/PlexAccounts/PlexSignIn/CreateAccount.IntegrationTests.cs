@@ -1,5 +1,3 @@
-using Autofac;
-
 namespace Reaparr.IntegrationTests;
 
 public class CreateAccountIntegrationTests : BaseIntegrationTests

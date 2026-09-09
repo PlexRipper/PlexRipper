@@ -11,7 +11,7 @@ using Reaparr.Data;
 namespace Reaparr.Data.Migrations
 {
     [DbContext(typeof(ReaparrDbContext))]
-    [Migration("20260907182755_AddMultiIntegrationTables")]
+    [Migration("20260908172645_AddMultiIntegrationTables")]
     partial class AddMultiIntegrationTables
     {
         /// <inheritdoc />
@@ -2544,7 +2544,7 @@ namespace Reaparr.Data.Migrations
                         .HasColumnType("TEXT")
                         .HasColumnOrder(1);
 
-                    b.Property<int?>("DownloadFolderId")
+                    b.Property<int>("DownloadFolderId")
                         .HasColumnType("INTEGER")
                         .HasColumnOrder(14);
 
@@ -2642,7 +2642,7 @@ namespace Reaparr.Data.Migrations
                         .HasColumnType("TEXT")
                         .HasColumnOrder(1);
 
-                    b.Property<int?>("DownloadFolderId")
+                    b.Property<int>("DownloadFolderId")
                         .HasColumnType("INTEGER")
                         .HasColumnOrder(14);
 
@@ -3615,7 +3615,8 @@ namespace Reaparr.Data.Migrations
                     b.HasOne("Reaparr.Domain.FolderPath", "DownloadFolder")
                         .WithMany()
                         .HasForeignKey("DownloadFolderId")
-                        .OnDelete(DeleteBehavior.SetNull);
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
                     b.Navigation("DownloadFolder");
                 });
@@ -3625,7 +3626,8 @@ namespace Reaparr.Data.Migrations
                     b.HasOne("Reaparr.Domain.FolderPath", "DownloadFolder")
                         .WithMany()
                         .HasForeignKey("DownloadFolderId")
-                        .OnDelete(DeleteBehavior.SetNull);
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
                     b.Navigation("DownloadFolder");
                 });

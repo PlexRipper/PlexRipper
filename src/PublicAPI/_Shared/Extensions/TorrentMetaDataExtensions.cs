@@ -22,7 +22,7 @@ public static class TorrentMetaDataExtensions
         if (dictionary.TryGetValue(key, out var value) && int.TryParse(value.ToString(), out var intValue))
             return intValue;
 
-        _log.Here().Warning("Failed to parse integer value for key '{Key}' from BDictionary.", key);
+        _log.Here().Warning("Failed to parse integer value for key '{Key}' from BDictionary", key);
         return -1;
     }
 
@@ -32,7 +32,7 @@ public static class TorrentMetaDataExtensions
         if (dictionary.TryGetValue(key, out var value) && Enum.TryParse<TEnum>(value.ToString(), out var enumValue))
             return enumValue;
 
-        _log.Here().Warning("Failed to parse enum value for key '{Key}' from BDictionary.", key);
+        _log.Here().Warning("Failed to parse enum value for key '{Key}' from BDictionary", key);
         return default;
     }
 }

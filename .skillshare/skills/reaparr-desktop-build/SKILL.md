@@ -97,7 +97,7 @@ Preserve these unless the user explicitly asks to change behavior and the relate
 
 1. Load `reaparr-mcp-tools`, then this skill.
 2. Inspect `tools/Build/README.md` before behavior changes.
-3. Use Rider MCP reads/search/diagnostics first.
+3. Use native repository reads, searches, diagnostics, and project commands first.
 4. Keep command classes thin; put behavior in workflows or shared helpers.
 5. If adding an option, update `DesktopCommandSettings`, workflow behavior, README, and unit tests.
 6. If adding a RID, update runtime catalog, AppHost publish profiles, README, and packaging/launch tests.

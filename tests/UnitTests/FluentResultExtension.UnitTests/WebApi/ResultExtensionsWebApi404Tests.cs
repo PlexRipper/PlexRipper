@@ -1,5 +1,3 @@
-using Reaparr.FluentResultExtensions;
-
 namespace Reaparr.FluentResultExtension.UnitTests;
 
 public class ResultExtensionsWebApi404Tests

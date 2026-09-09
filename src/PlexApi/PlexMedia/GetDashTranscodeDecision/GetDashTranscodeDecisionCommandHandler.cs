@@ -179,7 +179,7 @@ public class GetDashTranscodeDecisionCommandHandler
         {
             _log.Here()
                 .Information(
-                    "Plex decided direct play for this item. Suggesting direct download client instead of DASH."
+                    "Plex decided direct play for this item. Suggesting direct download client instead of DASH"
                 );
 
             summary = summary with { SuggestedClientType = PlexDownloadClientType.Direct };

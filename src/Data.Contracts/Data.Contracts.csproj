@@ -19,7 +19,8 @@
         <PackageReference Include="SQLitePCLRaw.lib.e_sqlite3" Version="2.1.12" />
     </ItemGroup>
     <ItemGroup>
-        <Using Include="FluentResults" />
+        <Using Include="Reaparr.FluentResults" />
+        <Using Include="Reaparr.FluentResultExtensions" />
         <Using Include="Microsoft.EntityFrameworkCore" />
         <Using Include="Reaparr.Application.Contracts" />
         <Using Include="Reaparr.Domain" />

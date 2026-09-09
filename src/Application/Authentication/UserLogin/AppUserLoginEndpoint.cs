@@ -78,7 +78,7 @@ public class AppUserLoginEndpoint : Endpoint<AppUserLoginEndpointRequest>
         var username = req.Username;
         var password = req.Password;
 
-        _log.Here().Information("Attempting to sign in user {Username}.", username);
+        _log.Here().Information("Attempting to sign in user {Username}", username);
 
         // Attempt to sign in the user
         var signInResult = await _identitySignInService.PasswordSignInAsync(
@@ -92,20 +92,20 @@ public class AppUserLoginEndpoint : Endpoint<AppUserLoginEndpointRequest>
         {
             await _identitySignInService.SignInAsync([], [DefaultUserAppCredentials.DefaultAdminRole]);
 
-            _log.Here().Information("User {Username} signed in successfully.", username);
+            _log.Here().Information("User {Username} signed in successfully", username);
 
             await Send.FluentResult(Result.Ok(), ct);
         }
         else if (signInResult.IsLockedOut)
         {
-            var result = _log.Here().WarningResult("User {Username} is locked out.", username);
+            var result = _log.Here().WarningResult("User {Username} is locked out", username);
             result.Add403ForbiddenError();
 
             await Send.FluentResult(result, ct);
         }
         else
         {
-            var result = _log.Here().WarningResult("Failed to sign in user {Username}.", username);
+            var result = _log.Here().WarningResult("Failed to sign in user {Username}", username);
             result.Add401UnauthorizedError();
 
             await Send.FluentResult(result, ct);

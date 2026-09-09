@@ -128,6 +128,7 @@ public class AddOrUpdatePlexServersCommandHandler
 
         await _dbContext.SaveChangesAsync(cancellationToken);
 
+        // ReSharper disable once TemplateIsNotCompileTimeConstantProblem
         _log.Here().Information(rapport.ToString());
 
         return Result.Ok(rapport);

@@ -51,7 +51,7 @@ public class MigrateLegacyArrSettingsCommandUnitTests : BaseCommandUnitTest<Migr
         radarr.BaseUrl.ShouldBe("https://radarr.example.com");
         radarr.RadarrApiKey.ShouldBe("radarr-key");
         radarr.Category.ShouldBe("reaparr-radarr");
-        radarr.DownloadFolderId.ShouldBe(PlexMediaType.None.ToDefaultDestinationFolderId());
+        radarr.DownloadFolderId.ShouldBe(FolderTypeDefaults.DefaultDownloadFolderId);
         radarr.ProvisioningState.ShouldBe(IntegrationProvisioningState.Unconfigured);
         radarr.QBittorrentApiKey.ShouldStartWith("qbt_");
         radarr.QBittorrentApiKey.Length.ShouldBe(32);
@@ -60,7 +60,7 @@ public class MigrateLegacyArrSettingsCommandUnitTests : BaseCommandUnitTest<Migr
         sonarr.BaseUrl.ShouldBe("https://sonarr.example.com");
         sonarr.SonarrApiKey.ShouldBe("sonarr-key");
         sonarr.Category.ShouldBe("reaparr-sonarr");
-        sonarr.DownloadFolderId.ShouldBe(PlexMediaType.None.ToDefaultDestinationFolderId());
+        sonarr.DownloadFolderId.ShouldBe(FolderTypeDefaults.DefaultDownloadFolderId);
         sonarr.ProvisioningState.ShouldBe(IntegrationProvisioningState.Unconfigured);
         sonarr.QBittorrentApiKey.ShouldStartWith("qbt_");
         sonarr.QBittorrentApiKey.Length.ShouldBe(32);
@@ -201,7 +201,7 @@ public class MigrateLegacyArrSettingsCommandUnitTests : BaseCommandUnitTest<Migr
             QBittorrentApiKey = "qbt_23456789ABCDEFGHIJKLMNPQ",
             TorznabApiKey = "0123456789abcdef0123456789abcdef",
             Category = "reaparr-radarr",
-            DownloadFolderId = PlexMediaType.None.ToDefaultDestinationFolderId(),
+            DownloadFolderId = FolderTypeDefaults.DefaultDownloadFolderId,
             ProvisioningState = IntegrationProvisioningState.Unconfigured,
         };
 
@@ -215,7 +215,7 @@ public class MigrateLegacyArrSettingsCommandUnitTests : BaseCommandUnitTest<Migr
             QBittorrentApiKey = "qbt_23456789ABCDEFGHIJKLMNPQ",
             TorznabApiKey = "0123456789abcdef0123456789abcdef",
             Category = "reaparr-sonarr",
-            DownloadFolderId = PlexMediaType.None.ToDefaultDestinationFolderId(),
+            DownloadFolderId = FolderTypeDefaults.DefaultDownloadFolderId,
             ProvisioningState = IntegrationProvisioningState.Unconfigured,
         };
 }

@@ -3,26 +3,29 @@ namespace Reaparr.BaseTests;
 public abstract class BaseCommandUnitTest<TCommand> : BaseUnitTest
     where TCommand : class
 {
-    protected BaseCommandUnitTest(LogEventLevel logEventLevel = LogEventLevel.Verbose)
-        : base(logEventLevel) { }
+    // Each closed TCommand type requires its own validator and handler cache entries.
+    // ReSharper disable StaticMemberInGenericType
+    private static readonly Lazy<Type> _validatorType = new(() => ResolveRelatedType("CommandValidator"));
+    private static readonly Lazy<Type> _handlerType = new(() => ResolveRelatedType("CommandHandler"));
 
-    private IValidator<TCommand> GetValidator()
+    private static Type ResolveRelatedType(string replacement)
     {
         var commandType = typeof(TCommand);
-        var validatorTypeName = commandType.FullName!.Replace("Command", "CommandValidator");
-        var validatorTypeShortName = commandType.Name.Replace("Command", "CommandValidator");
-        var validatorType =
-            commandType.Assembly.GetTypes().FirstOrDefault(t => t.FullName == validatorTypeName)
+        var fullName = commandType.FullName!.Replace("Command", replacement);
+        var shortName = commandType.Name.Replace("Command", replacement);
+        return commandType.Assembly.GetType(fullName)
             ?? AppDomain
                 .CurrentDomain.GetAssemblies()
+                .Where(x => !x.IsDynamic)
                 .SelectMany(x => x.GetTypes())
-                .SingleOrDefault(t => t.Name == validatorTypeShortName)
+                .SingleOrDefault(t => t.Name == shortName)
             ?? throw new InvalidOperationException(
-                $"Validator type '{validatorTypeName}' not found for command: {commandType.FullName}."
+                $"Related type '{fullName}' not found for command: {commandType.FullName}."
             );
-
-        return (IValidator<TCommand>)Activator.CreateInstance(validatorType)!;
     }
+
+    private static IValidator<TCommand> GetValidator() =>
+        (IValidator<TCommand>)Activator.CreateInstance(_validatorType.Value)!;
 
     /// <summary>
     /// Use this method to test the execution of a command handler, including the corresponding validator.
@@ -35,21 +38,7 @@ public abstract class BaseCommandUnitTest<TCommand> : BaseUnitTest
         if (!validationResult.IsValid)
             return validationResult.ToResult();
 
-        // Infer the handler type by name
-        var commandType = typeof(TCommand);
-        var handlerTypeName = commandType.FullName!.Replace("Command", "CommandHandler");
-        var handlerTypeShortName = commandType.Name.Replace("Command", "CommandHandler");
-        var handlerType =
-            typeof(TCommand).Assembly.GetType(handlerTypeName)
-            ?? AppDomain
-                .CurrentDomain.GetAssemblies()
-                .SelectMany(x => x.GetTypes())
-                .SingleOrDefault(t => t.Name == handlerTypeShortName)
-            ?? throw new InvalidOperationException(
-                $"Handler type '{handlerTypeName}' not found for command: {commandType.FullName}."
-            );
-
-        var handler = Mock.Create(handlerType);
+        var handler = Mock.Create(_handlerType.Value);
 
         // dynamically cast the handler to ICommandHandler<TCommand, TResponse>
         // to avoid needing to know the exact response type at compile time
@@ -71,21 +60,7 @@ public abstract class BaseCommandUnitTest<TCommand> : BaseUnitTest
         if (!validationResult.IsValid)
             return validationResult.ToResult();
 
-        // Infer the handler type by name
-        var commandType = typeof(TCommand);
-        var handlerTypeName = commandType.FullName!.Replace("Command", "CommandHandler");
-        var handlerTypeShortName = commandType.Name.Replace("Command", "CommandHandler");
-        var handlerType =
-            typeof(TCommand).Assembly.GetType(handlerTypeName)
-            ?? AppDomain
-                .CurrentDomain.GetAssemblies()
-                .SelectMany(x => x.GetTypes())
-                .SingleOrDefault(t => t.Name == handlerTypeShortName)
-            ?? throw new InvalidOperationException(
-                $"Handler type '{handlerTypeName}' not found for command: {commandType.FullName}."
-            );
-
-        var handler = Mock.Create(handlerType);
+        var handler = Mock.Create(_handlerType.Value);
 
         // dynamically cast the handler to ICommandHandler<TCommand, TResponse>
         // to avoid needing to know the exact response type at compile time

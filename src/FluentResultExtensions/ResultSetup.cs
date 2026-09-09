@@ -1,4 +1,3 @@
-using FluentResults;
 using FluentValidation;
 using Microsoft.Extensions.Logging;
 
@@ -13,28 +12,46 @@ public static class FluentResultConfiguration
             cfg.Logger = new FluentResultLogger();
 
             cfg.DefaultTryCatchHandler = exception =>
-            {
-                if (exception is OperationCanceledException canceledException)
-                    return new ExceptionalError("Operation was cancelled", canceledException);
-
-                if (exception is ValidationException validationException)
-                    return new ExceptionalError("Validation failed", validationException);
-
-                return new ExceptionalError(exception);
-            };
+                exception switch
+                {
+                    OperationCanceledException canceledException => new ExceptionalError(
+                        "Operation was cancelled",
+                        canceledException
+                    ),
+                    ValidationException validationException => new ExceptionalError(
+                        "Validation failed",
+                        validationException
+                    ),
+                    _ => new ExceptionalError(exception),
+                };
         });
     }
 }
 
 public class FluentResultLogger : IResultLogger
 {
-    public void Log(string context, string content, ResultBase result, LogLevel logLevel)
+    public void Log(
+        string context,
+        string? content,
+        ResultBase result,
+        LogLevel logLevel,
+        string memberName = "",
+        string sourceFilePath = "",
+        int sourceLineNumber = 0
+    )
     {
-        result.LogResultBase(logLevel.ToSerilogLevel());
+        result.LogResultBase(logLevel.ToSerilogLevel(), memberName, sourceFilePath, sourceLineNumber);
     }
 
-    public void Log<TContext>(string content, ResultBase result, LogLevel logLevel)
+    public void Log<TContext>(
+        string? content,
+        ResultBase result,
+        LogLevel logLevel,
+        string memberName = "",
+        string sourceFilePath = "",
+        int sourceLineNumber = 0
+    )
     {
-        result.LogResultBase(logLevel.ToSerilogLevel(), typeof(TContext).FullName!);
+        result.LogResultBase(logLevel.ToSerilogLevel(), memberName, sourceFilePath, sourceLineNumber);
     }
 }

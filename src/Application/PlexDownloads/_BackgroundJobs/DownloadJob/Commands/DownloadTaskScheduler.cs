@@ -48,36 +48,46 @@ public class DownloadTaskScheduler : IDownloadTaskScheduler
         if (!downloadTaskKey.IsValid)
             return ResultExtensions.IsInvalidId(nameof(DownloadTaskKey), downloadTaskKey.Id).LogWarning();
 
-        return await Result.Try(async Task<Result> () =>
-        {
-            _log.Here().Information("Stopping DownloadClient for DownloadTaskId {DownloadTaskId}", downloadTaskKey);
-
-            var jobKey = DownloadJob.GetJobKey(downloadTaskKey.Id);
-            var isRunning = await _scheduler.IsJobRunning(jobKey, cancellationToken);
-            var isQueued = await _scheduler.IsQueued(jobKey);
-            if (!isRunning && !isQueued)
+        return (
+            await Result.Try(async Task<Result> () =>
             {
-                return Result
-                    .Fail($"{nameof(DownloadJob)} with {jobKey} cannot be stopped because it is not scheduled")
-                    .LogWarning();
-            }
+                _log.Here().Information("Stopping DownloadClient for DownloadTaskId {DownloadTaskId}", downloadTaskKey);
 
-            if (isQueued && !isRunning)
-                return await _scheduler.DeleteBatchJobs([jobKey], cancellationToken);
+                var jobKey = DownloadJob.GetJobKey(downloadTaskKey.Id);
+                var isRunning = await _scheduler.IsJobRunning(jobKey, cancellationToken);
+                var isQueued = await _scheduler.IsQueued(jobKey);
+                if (!isRunning && !isQueued)
+                {
+                    return Result
+                        .Fail(
+                            "{DownloadJobName} with {JobKey} cannot be stopped because it is not scheduled",
+                            nameof(DownloadJob),
+                            jobKey
+                        )
+                        .LogWarning();
+                }
 
-            var stopResult = await _scheduler.Interrupt(jobKey, cancellationToken);
-            if (!stopResult && await _scheduler.IsJobRunning(jobKey, cancellationToken))
-                return Result
-                    .Fail($"Failed to stop {nameof(DownloadTaskGeneric)} with id {downloadTaskKey}")
-                    .LogError();
+                if (isQueued && !isRunning)
+                    return await _scheduler.DeleteBatchJobs([jobKey], cancellationToken);
 
-            if (stopResult && waitForCompletion)
-            {
-                await AwaitDownloadTaskJob(downloadTaskKey.Id, cancellationToken);
-            }
+                var stopResult = await _scheduler.Interrupt(jobKey, cancellationToken);
+                if (!stopResult && await _scheduler.IsJobRunning(jobKey, cancellationToken))
+                    return Result
+                        .Fail(
+                            "Failed to stop {DownloadTaskGenericName} with id {DownloadTaskKey}",
+                            nameof(DownloadTaskGeneric),
+                            downloadTaskKey
+                        )
+                        .LogError();
 
-            return Result.Ok();
-        });
+                if (stopResult && waitForCompletion)
+                {
+                    await AwaitDownloadTaskJob(downloadTaskKey.Id, cancellationToken);
+                }
+
+                return Result.Ok();
+            })
+        ).LogIfFailed();
     }
 
     public async Task AwaitDownloadTaskJob(Guid downloadTaskId, CancellationToken cancellationToken = default)

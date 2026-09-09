@@ -22,7 +22,10 @@ public static partial class LogExtensions
             .ForContext(nameof(SlimLogConfig.MethodName), memberName)
             .ForContext(nameof(SlimLogConfig.LineNumber), sourceLineNumber);
 
-    public static string RenderMessage(this ILogger log, string messageTemplate, params object[] args)
+    // This adapter intentionally binds caller-supplied Serilog templates before rendering them.
+    // ReSharper disable TemplateIsNotCompileTimeConstantProblem
+    [MessageTemplateFormatMethod("messageTemplate")]
+    public static string RenderMessage(this ILogger log, string messageTemplate, params object?[] args)
     {
         log.BindMessageTemplate(messageTemplate, args, out var parsedTemplate, out var boundProperties);
 

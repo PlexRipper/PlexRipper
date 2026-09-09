@@ -1,6 +1,5 @@
 using Autofac;
 using Microsoft.Extensions.DependencyInjection;
-using Serilog;
 
 namespace Reaparr.Build;
 

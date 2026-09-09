@@ -41,19 +41,13 @@ public class GetAllMediaByTypeFromPlexApiCommandHandler
         var batchSize = command.BatchSize;
 
         var tokenResult = await _dbContext.GetPlexServerTokenAsync(plexLibrary.PlexServerId, ct);
-        if (tokenResult.IsCancelled)
-            return tokenResult.ToResult().LogWarning();
-
         if (tokenResult.IsFailed)
-            return tokenResult.ToResult().LogError();
+            return tokenResult.ToResult().LogIfFailed();
 
         var plexServerConnectionResult = await _dbContext.ChoosePlexServerConnection(plexLibrary.PlexServerId, ct);
 
-        if (plexServerConnectionResult.IsCancelled)
-            return plexServerConnectionResult.ToResult().LogWarning();
-
         if (plexServerConnectionResult.IsFailed)
-            return plexServerConnectionResult.ToResult().LogError();
+            return plexServerConnectionResult.ToResult().LogIfFailed();
 
         var plexServerConnection = plexServerConnectionResult.Value;
 
@@ -72,11 +66,8 @@ public class GetAllMediaByTypeFromPlexApiCommandHandler
         // Get the total size of the library
         var totalSizeResult = await GetLibraryMediaTotalCount(client, plexLibrary.Key, mediaType, ct);
 
-        if (totalSizeResult.IsCancelled)
-            return totalSizeResult.ToResult().LogWarning();
-
         if (totalSizeResult.IsFailed)
-            return totalSizeResult.ToResult().LogError();
+            return totalSizeResult.ToResult().LogIfFailed();
 
         var totalSize = totalSizeResult.Value;
         if (totalSize == 0)
@@ -100,15 +91,8 @@ public class GetAllMediaByTypeFromPlexApiCommandHandler
                 mediaType,
                 ct
             );
-            if (mediaListResult.IsCancelled)
-                return mediaListResult.ToResult().LogWarning();
-
             if (mediaListResult.IsFailed)
-            {
-                var result = mediaListResult.ToResult();
-                result.LogError();
-                return result;
-            }
+                return mediaListResult.ToResult().LogIfFailed();
 
             var rawMediaList = mediaListResult.Value;
             progressIndex += rawMediaList.Count;
@@ -168,7 +152,7 @@ public class GetAllMediaByTypeFromPlexApiCommandHandler
     /// <summary>
     /// Gets the total count of the media in the library.
     /// </summary>
-    private async Task<Result<int>> GetLibraryMediaTotalCount(
+    private static async Task<Result<int>> GetLibraryMediaTotalCount(
         IPlexAPI client,
         string libraryKey,
         PlexMediaType type,
@@ -193,7 +177,7 @@ public class GetAllMediaByTypeFromPlexApiCommandHandler
         if (response.IsFailed)
             return response.ToResult();
 
-        var rawValue = response.Value?.MediaContainerWithMetadata?.MediaContainer?.TotalSize ?? 0;
+        var rawValue = response.Value.MediaContainerWithMetadata?.MediaContainer?.TotalSize ?? 0;
         var safeValue = (int)Math.Max(0, Math.Min(rawValue, int.MaxValue));
         return Result.Ok(safeValue);
     }
@@ -202,7 +186,7 @@ public class GetAllMediaByTypeFromPlexApiCommandHandler
     /// Gets all the root level media metadata contained in this Plex library. For movies, it's all movies, and for TV shows it's all the shows without seasons and episodes.
     /// <remarks>URL: {{SERVER_URL}}/library/sections/{{LIBRARY_KEY}}/all?X-Plex-Token={{SERVER_TOKEN}}</remarks>
     /// </summary>
-    public async Task<Result<List<LibraryMediaItemDTO>>> GetMetadataForLibraryAsync(
+    public static async Task<Result<List<LibraryMediaItemDTO>>> GetMetadataForLibraryAsync(
         IPlexAPI client,
         string libraryKey,
         int startIndex,
@@ -231,7 +215,7 @@ public class GetAllMediaByTypeFromPlexApiCommandHandler
         if (response.IsFailed)
             return response.ToResult();
 
-        var mediaDataList = response.Value?.MediaContainerWithMetadata?.MediaContainer?.Metadata ?? [];
+        var mediaDataList = response.Value.MediaContainerWithMetadata?.MediaContainer?.Metadata ?? [];
         if (!mediaDataList.Any())
             return ResultExtensions.IsNull("MediaContainerWithMetadata.MediaContainer.Metadata").LogError();
 

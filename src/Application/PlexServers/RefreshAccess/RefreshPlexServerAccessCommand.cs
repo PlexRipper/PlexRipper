@@ -70,15 +70,12 @@ public class RefreshPlexServerAccessCommandHandler
             return await RemovePlexAccess(plexAccountId);
         }
 
-        if (result.IsCancelled)
-            return result.ToResult();
-
         if (result.IsFailed)
-            return result.LogError();
+            return result.ToResult().LogIfFailed();
 
         if (!result.Value.Any())
         {
-            _log.Here().Warning("No Plex servers found for PlexAccount: {plexAccountName}", plexAccountName);
+            _log.Here().Warning("No Plex servers found for PlexAccount: {PlexAccountName}", plexAccountName);
             return await RemovePlexAccess(plexAccountId);
         }
 
@@ -90,11 +87,8 @@ public class RefreshPlexServerAccessCommandHandler
             new AddOrUpdatePlexServersCommand(serverList),
             cancellationToken
         );
-        if (updateResult.IsCancelled)
-            return updateResult.ToResult();
-
         if (updateResult.IsFailed)
-            return updateResult.LogError();
+            return updateResult.ToResult().LogIfFailed();
 
         // Add or update the PlexAccount and PlexServer relationships
         var plexServerAccountAccessRapport = await _commandExecutor.Send(
@@ -102,11 +96,8 @@ public class RefreshPlexServerAccessCommandHandler
             cancellationToken
         );
 
-        if (plexServerAccountAccessRapport.IsCancelled)
-            return plexServerAccountAccessRapport;
-
         if (plexServerAccountAccessRapport.IsFailed)
-            return plexServerAccountAccessRapport.LogError();
+            return plexServerAccountAccessRapport.LogIfFailed();
 
         _log.Here()
             .Information(

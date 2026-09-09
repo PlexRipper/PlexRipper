@@ -20,5 +20,7 @@
     </ItemGroup>
     <ItemGroup>
         <Using Include="Microsoft.EntityFrameworkCore" />
+        <Using Include="Reaparr.FluentResults" />
+        <Using Include="Reaparr.FluentResultExtensions" />
     </ItemGroup>
 </Project>

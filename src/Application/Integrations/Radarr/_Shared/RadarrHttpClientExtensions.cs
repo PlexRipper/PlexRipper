@@ -201,13 +201,14 @@ public static class RadarrHttpClientExtensions
                 new HttpRequestMessage(HttpMethod.Delete, $"api/v3/{resource.Name}/{resource.Id.Value}"),
                 ct
             );
-            if (result.IsCancelled)
-                return result.ToResult().LogWarning();
             if (result.IsFailed)
-                return result.ToResult().LogError();
+                return result.ToResult().LogIfFailed();
             if (!result.Value.IsSuccessStatusCode && result.Value.StatusCode != HttpStatusCode.NotFound)
                 return Result.Fail(
-                    $"Failed to delete Radarr {resource.Name} {resource.Id.Value}: {result.Value.StatusCode}."
+                    "Failed to delete Radarr {ResourceName} {ResourceId}: {ValueStatusCode}",
+                    resource.Name,
+                    resource.Id.Value,
+                    result.Value.StatusCode
                 );
         }
 
@@ -220,13 +221,11 @@ public static class RadarrHttpClientExtensions
             new HttpRequestMessage(HttpMethod.Post, "api/v3/downloadclient/testall"),
             ct
         );
-        if (result.IsCancelled)
-            return result.ToResult().LogWarning();
         if (result.IsFailed)
-            return result.ToResult().LogError();
+            return result.ToResult().LogIfFailed();
         return result.Value.IsSuccessStatusCode || result.Value.StatusCode == HttpStatusCode.BadRequest
             ? Result.Ok()
-            : Result.Fail($"Failed to test Radarr download clients. StatusCode: {result.Value.StatusCode}");
+            : Result.Fail("Failed to test Radarr download clients. StatusCode: {StatusCode}", result.Value.StatusCode);
     }
 
     private static async Task<Result> TestRadarrResourceAsync<T>(
@@ -238,14 +237,16 @@ public static class RadarrHttpClientExtensions
     )
     {
         var result = await client.SendRadarrAsync(CreateJsonRequest(HttpMethod.Post, path, resource), ct);
-        if (result.IsCancelled)
-            return result.ToResult().LogWarning();
         if (result.IsFailed)
-            return result.ToResult().LogError();
+            return result.ToResult().LogIfFailed();
         return result.Value.IsSuccessStatusCode
             ? Result.Ok()
             : Result
-                .Fail($"Failed to validate Reaparr {resourceName} in Radarr. StatusCode: {result.Value.StatusCode}")
+                .Fail(
+                    "Failed to validate Reaparr {ResourceName} in Radarr. StatusCode: {ValueStatusCode}",
+                    resourceName,
+                    result.Value.StatusCode
+                )
                 .WithError(result.Value.Body)
                 .LogError();
     }
@@ -259,13 +260,11 @@ public static class RadarrHttpClientExtensions
     )
     {
         var result = await client.SendRadarrAsync(request, ct);
-        if (result.IsCancelled)
-            return result.ToResult<T>().LogWarning();
         if (result.IsFailed)
-            return result.ToResult<T>().LogError();
+            return result.ToResult<T>().LogIfFailed();
         if (!result.Value.IsSuccessStatusCode)
             return Result
-                .Fail($"{failureMessage}. StatusCode: {result.Value.StatusCode}")
+                .Fail("{FailureMessage}. StatusCode: {ValueStatusCode}", failureMessage, result.Value.StatusCode)
                 .WithError(result.Value.Body)
                 .LogError();
 

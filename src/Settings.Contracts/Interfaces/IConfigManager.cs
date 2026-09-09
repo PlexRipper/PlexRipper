@@ -1,6 +1,4 @@
-﻿using FluentResults;
-
-namespace Reaparr.Settings.Contracts;
+﻿namespace Reaparr.Settings.Contracts;
 
 public interface IConfigManager : ISetup
 {

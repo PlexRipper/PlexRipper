@@ -33,7 +33,7 @@ public class DownloadHubService : IDownloadHubService
         foreach (var dto in update)
         {
             var messagePack = dto.ToMessagePack();
-            _log.Here().Verbose("{ClassName} => {@ServerDownloadProgressDTO}", nameof(DownloadHubService), dto);
+            _log.Here().Verbose("{ClassName} => {@ServerDownloadProgressDto}", nameof(DownloadHubService), dto);
             await _hub.Clients.All.ServerDownloadProgress(messagePack, cancellationToken);
         }
     }
@@ -48,7 +48,7 @@ public class DownloadHubService : IDownloadHubService
     )
     {
         var messagePack = DownloadPatchMessagePackMapper.ToMessagePack(plexServerId, sequence, upserts, deletedIds);
-        _log.Here().Verbose("{ClassName} => {@DownloadPatchMessagePackDTO}", nameof(DownloadHubService), messagePack);
+        _log.Here().Verbose("{ClassName} => {@DownloadPatchMessagePackDto}", nameof(DownloadHubService), messagePack);
         await _hub.Clients.All.DownloadPatch(messagePack, cancellationToken);
     }
 }

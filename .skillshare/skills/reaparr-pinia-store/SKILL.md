@@ -5,12 +5,11 @@ description: Use when creating or updating Pinia stores in the Reaparr frontend 
 
 # Reaparr Pinia Store
 
-## IDE Tool Requirement
+## Native Tool Requirement
 
-**All frontend file operations and diagnostics MUST use WebStorm MCP tools** (`webstorm-official-mcp_*`, `webstorm-index-mcp_*`, `webstorm-index_ide_*`).
+Use native repository tools (`read`, `edit`, `write`, `glob`, `lsp`, and short `bash` commands) for all frontend file operations, searches, symbol inspection, refactors, and diagnostics.
 
-Never use Rider MCP tools for any work under `src/AppHost/ClientApp/`.
-
+Retry a failed native tool once with a narrower request before changing approach.
 ---
 
 > **This skill overrides generic Pinia skills for this project.**  

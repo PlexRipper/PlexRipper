@@ -1,7 +1,6 @@
 using System.Net;
 using Moq.Contrib.HttpClient;
 using Moq.Protected;
-using Reaparr.FluentResultExtensions;
 
 namespace Reaparr.PlexApi.UnitTests;
 

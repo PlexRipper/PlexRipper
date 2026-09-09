@@ -31,10 +31,5 @@ public record SonarrSettings : BaseSettingsModule<SonarrSettings>, ISonarrSettin
         set => SetProperty(ref field, value);
     } = string.Empty;
 
-    public bool IsValidUrl() =>
-        !string.IsNullOrWhiteSpace(SonarrBaseUrl)
-        && Uri.TryCreate(SonarrBaseUrl, UriKind.Absolute, out var uriResult)
-        && (uriResult.Scheme == Uri.UriSchemeHttp || uriResult.Scheme == Uri.UriSchemeHttps);
-
     public bool IsValidApiKey() => !string.IsNullOrWhiteSpace(SonarrApiKey);
 }

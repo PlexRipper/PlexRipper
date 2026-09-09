@@ -56,16 +56,13 @@ public class SearchTvShowCommandValidator : AbstractValidator<SearchTvShowComman
 
         RuleFor(x => x.IMDB_ID).NotNull();
 
-        // When targeting a specific episode, season and episode must both be provided
+        // When targeting a season or episode, a season and an external ID must identify the show.
         When(
             x => x.Season > 0 || x.Episode > 0,
             () =>
             {
                 RuleFor(x => x.Season).GreaterThan(0);
 
-                RuleFor(x => x.Episode).GreaterThan(0);
-
-                // And at least one external ID must be provided to identify the show
                 RuleFor(x => x)
                     .Must(HasAnyExternalId)
                     .WithMessage(
@@ -129,9 +126,7 @@ public class SearchTvShowCommandHandler : ICommandHandler<SearchTvShowCommand, R
         if (!onlineServerIds.Any())
         {
             _log.Here()
-                .Warning(
-                    "No online Plex servers with downloads enabled were found, returning empty search results."
-                );
+                .Warning("No online Plex servers with downloads enabled were found, returning empty search results");
             return [];
         }
 
@@ -144,7 +139,9 @@ public class SearchTvShowCommandHandler : ICommandHandler<SearchTvShowCommand, R
             .Where(x => onlineServerIds.Contains(x.PlexServerId))
             .AsQueryable();
 
-        var hasSeasonOrEpisode = command.Season > 0 || command.Episode > 0;
+        var hasSeason = command.Season > 0;
+        var hasEpisode = command.Episode > 0;
+        var hasSeasonOrEpisode = hasSeason || hasEpisode;
 
         if (!string.IsNullOrWhiteSpace(command.Query))
         {
@@ -156,7 +153,7 @@ public class SearchTvShowCommandHandler : ICommandHandler<SearchTvShowCommand, R
             baseQuery = baseQuery.Where(e => EF.Functions.Like(e.TvShow!.SearchTitle, likeQuery));
         }
 
-        // Otherwise apply filters for a specific episode, adding external ID predicates only when provided
+        // Apply external ID predicates only when provided.
         if (!string.IsNullOrWhiteSpace(command.IMDB_ID))
             baseQuery = baseQuery.Where(e => e.TvShow!.Guid_IMDB == "tt" + command.IMDB_ID);
 
@@ -166,12 +163,11 @@ public class SearchTvShowCommandHandler : ICommandHandler<SearchTvShowCommand, R
         if (command.TVDB_ID > 0)
             baseQuery = baseQuery.Where(e => e.TvShow!.Guid_TVDB == command.TVDB_ID);
 
-        if (hasSeasonOrEpisode)
-        {
-            baseQuery = baseQuery
-                .Where(e => e.TvShowSeason!.SeasonNumber == command.Season)
-                .Where(e => e.EpisodeNumber == command.Episode);
-        }
+        if (hasSeason)
+            baseQuery = baseQuery.Where(e => e.TvShowSeason!.SeasonNumber == command.Season);
+
+        if (hasEpisode)
+            baseQuery = baseQuery.Where(e => e.EpisodeNumber == command.Episode);
 
         if (!hasSeasonOrEpisode)
         {

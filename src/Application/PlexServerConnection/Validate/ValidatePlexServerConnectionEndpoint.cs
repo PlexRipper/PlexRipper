@@ -13,13 +13,9 @@ public class ValidatePlexServerConnectionEndpointRequestValidator
         RuleFor(x => x.Url)
             .NotEmpty()
             .WithMessage("URL cannot be empty.")
-            .Must(BeAValidUrl)
+            .Must(url => url.IsValidHttpUrl())
             .WithMessage("string is not a valid URL");
     }
-
-    private bool BeAValidUrl(string url) =>
-        Uri.TryCreate(url, UriKind.Absolute, out var uriResult)
-        && (uriResult.Scheme == Uri.UriSchemeHttp || uriResult.Scheme == Uri.UriSchemeHttps);
 }
 
 public class ValidatePlexServerConnectionEndpoint

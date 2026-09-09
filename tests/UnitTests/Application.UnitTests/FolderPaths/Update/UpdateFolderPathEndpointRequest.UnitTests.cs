@@ -60,7 +60,7 @@ public class UpdateFolderPathEndpointRequestUnitTests
         {
             FolderPathDTO = new FolderPathDTO
             {
-                Id = PlexMediaType.None.ToDefaultDestinationFolderId(),
+                Id = FolderTypeDefaults.DefaultDownloadFolderId,
                 DisplayName = "Download path",
                 Directory = @"G:\Reaparr\WIN\Downloads\",
                 FolderType = FolderType.DownloadFolder,

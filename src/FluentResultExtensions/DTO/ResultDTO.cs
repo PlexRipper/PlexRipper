@@ -1,6 +1,4 @@
-﻿using FluentResults;
-
-namespace Reaparr.FluentResultExtensions;
+﻿namespace Reaparr.FluentResultExtensions;
 
 /// <summary>
 /// The <see cref="ResultDTO{T}"/> without the value.

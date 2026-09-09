@@ -1,9 +1,6 @@
 ﻿using System.Net;
-using Reaparr.FluentResultExtensions;
 
-// ReSharper disable once CheckNamespace
-// Needs to be in the same namespace as the FluentResults package
-namespace FluentResults;
+namespace Reaparr.FluentResultExtensions;
 
 public static partial class ResultExtensions
 {
@@ -33,7 +30,7 @@ public static partial class ResultExtensions
     }
 
     public static bool HasStatusCode<T>(this Result<T> result, int statusCode) =>
-        result.ToResult()?.HasStatusCode(statusCode) ?? false;
+        result.ToResult().HasStatusCode(statusCode);
 
     #endregion
 
@@ -113,9 +110,6 @@ public static partial class ResultExtensions
         return 0;
     }
 
-    public static bool FindStatusCode<T>(this Result<T> result, int statusCode) =>
-        result.ToResult()?.HasStatusCode(statusCode) ?? false;
-
     public static bool IsServerUnreachable(this Result result) =>
         result.Has408RequestTimeout()
         || result.Has500InternalServerError()
@@ -138,14 +132,6 @@ public static partial class ResultExtensions
     public static bool IsServerUnreachable<T>(this Result<T> result) => result.ToResult().IsServerUnreachable();
 
     #endregion
-
-    private static Result AddErrorMessageToResult(this Result result, string errorMessage)
-    {
-        if (result.Errors.Any())
-            result.Errors[0].Metadata.Add(ErrorMessageName, errorMessage);
-
-        return result;
-    }
 
     private static Result CreateErrorStatusCodeResult(int statusCode, string message = "") =>
         Result.Fail(GetStatusCodeReason(statusCode, message));
@@ -207,12 +193,6 @@ public static partial class ResultExtensions
     #endregion
 
     #region Result Signatures
-
-    #region General
-
-    public static Result AddErrorMessage(this Result result, string message) => result.AddErrorMessageToResult(message);
-
-    #endregion
 
     #region 200
 

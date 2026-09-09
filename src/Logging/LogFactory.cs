@@ -16,14 +16,16 @@ public static class LogFactory
     {
         switch (messageTemplate)
         {
-            // ReSharper disable once StringLiteralTypo
             case { } s when s.StartsWith("dbug:"):
+                // ReSharper disable once TemplateIsNotCompileTimeConstantProblem
                 Create().Here(sourceFilePath, memberName, sourceLineNumber).Debug(messageTemplate);
                 break;
             case { } s when s.StartsWith("info:"):
+                // ReSharper disable once TemplateIsNotCompileTimeConstantProblem
                 Create().Here(sourceFilePath, memberName, sourceLineNumber).Information(messageTemplate);
                 break;
             case { } s when s.StartsWith("fail:"):
+                // ReSharper disable once TemplateIsNotCompileTimeConstantProblem
                 Create().Here(sourceFilePath, memberName, sourceLineNumber).Error(messageTemplate);
                 break;
         }

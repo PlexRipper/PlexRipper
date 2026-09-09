@@ -77,7 +77,7 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandler
         {
             _log.Here()
                 .Warning("Missing libraries with IDs: {MissingLibraryIds}", string.Join(", ", missingLibraryIds));
-            return Result.Fail($"Missing libraries with IDs: {string.Join(", ", missingLibraryIds)}").LogError();
+            return Result.Fail("Missing libraries with IDs: {Join}", string.Join(", ", missingLibraryIds)).LogError();
         }
 
         var plexEpisodes = await _dbContext
@@ -114,7 +114,7 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandler
             var downloadTaskTvShow = await GetOrCreateTvShowDownloadTaskAsync(plexTvShow, request.Integration, ct);
             if (downloadTaskTvShow is null)
             {
-                return Result.Fail($"Failed to create or retrieve TV Show download task for {plexTvShow.Title}");
+                return Result.Fail("Failed to create or retrieve TV Show download task for {Title}", plexTvShow.Title);
             }
 
             // Get or create season download task
@@ -279,7 +279,9 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandler
         {
             _log.Here().Error("Failed to select quality for episode {EpisodeKey}", tvShowEpisode.PlexApiRatingKey);
             return Result.Fail(
-                $"No suitable quality found for episode {tvShowEpisode.PlexApiRatingKey} ({tvShowEpisode.Title})"
+                "No suitable quality found for episode {PlexApiRatingKey} ({Title})",
+                tvShowEpisode.PlexApiRatingKey,
+                tvShowEpisode.Title
             );
         }
 

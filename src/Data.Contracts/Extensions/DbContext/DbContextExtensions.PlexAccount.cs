@@ -23,7 +23,10 @@ public static partial class DbContextExtensions
             var plexServerName = await dbContext.GetPlexServerNameById(plexServerId);
 
             return Result
-                .Fail($"There were no PlexAccounts that have access to PlexServer with id: {plexServerName}")
+                .Fail(
+                    "There were no PlexAccounts that have access to PlexServer with id: {PlexServerName}",
+                    plexServerName
+                )
                 .LogError();
         }
 
@@ -47,7 +50,7 @@ public static partial class DbContextExtensions
         if (!plexAccounts.Any())
         {
             return Result
-                .Fail($"There are no enabled accounts that can access PlexServer with id: {plexServerId}")
+                .Fail("There are no enabled accounts that can access PlexServer with id: {PlexServerId}", plexServerId)
                 .LogError();
         }
 
@@ -66,7 +69,9 @@ public static partial class DbContextExtensions
         _log.Here()
             .Warning("No account could be chosen to connect to PlexServer with id: {PlexServerId}", plexServerId);
 
-        return Result.Fail($"No account could be chosen to connect to PlexServer with id: {plexServerId}").LogError();
+        return Result
+            .Fail("No account could be chosen to connect to PlexServer with id: {PlexServerId}", plexServerId)
+            .LogError();
     }
 
     public static async Task<Result<List<PlexServer>>> GetAccessiblePlexServers(

@@ -114,22 +114,16 @@ public class InspectPlexServerJob : IJob
     {
         // Refresh accessible libraries
         var accountsResult = await dbContext.GetPlexAccountsWithAccessAsync(plexServerId, cancellationToken);
-        if (accountsResult.IsCancelled)
-            return accountsResult.ToResult();
-
         if (accountsResult.IsFailed)
-            return accountsResult.LogError();
+            return accountsResult.ToResult().LogIfFailed();
 
         var plexAccountId = accountsResult.Value.First().Id;
         var refreshResult = await _commandExecutor.Send(
             new RefreshLibraryAccessCommand(plexAccountId, plexServerId),
             cancellationToken
         );
-        if (refreshResult.IsCancelled)
-            return refreshResult.ToResult();
-
         if (refreshResult.IsFailed)
-            return refreshResult.LogError();
+            return refreshResult.ToResult().LogIfFailed();
 
         // Notify front-end
         await _notificationHubService.SendRefreshNotificationAsync([

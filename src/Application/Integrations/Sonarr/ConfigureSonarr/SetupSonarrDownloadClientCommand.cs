@@ -52,13 +52,12 @@ public class SetupSonarrDownloadClientCommandHandler
                     .SonarrIntegrations.AsNoTracking()
                     .SingleOrDefaultAsync(x => x.Id == command.IntegrationId, ct);
         if (integration is null)
-            return Result.Fail("The Sonarr integration was not found.").LogError();
+            return Result.Fail("The Sonarr integration was not found").LogError();
 
-        if (
-            !Uri.TryCreate(integration.BaseUrl.TrimEnd('/'), UriKind.Absolute, out var sonarrBaseUri)
-            || (sonarrBaseUri.Scheme != Uri.UriSchemeHttp && sonarrBaseUri.Scheme != Uri.UriSchemeHttps)
-        )
-            return Result.Fail("Sonarr BaseUrl is invalid.").LogError();
+        var normalizedBaseUrl = integration.BaseUrl.TrimEnd('/');
+        if (!normalizedBaseUrl.IsValidHttpUrl())
+            return Result.Fail("Sonarr BaseUrl is invalid").LogError();
+        var sonarrBaseUri = new Uri(normalizedBaseUrl, UriKind.Absolute);
 
         await _progressHubService.SendIntegrationSetupProgressAsync(
             new IntegrationSetupProgressDTO
@@ -106,7 +105,7 @@ public class SetupSonarrDownloadClientCommandHandler
                     }
                 );
                 return Result
-                    .Fail("Failed to retrieve existing download clients from Sonarr.")
+                    .Fail("Failed to retrieve existing download clients from Sonarr")
                     .WithErrors(result.Errors)
                     .LogError();
             }
@@ -180,7 +179,7 @@ public class SetupSonarrDownloadClientCommandHandler
         }
         catch (TaskCanceledException e)
         {
-            _log.Here().Error(e, "Timeout while communicating with Sonarr.");
+            _log.Here().Error(e, "Timeout while communicating with Sonarr");
             await _progressHubService.SendIntegrationSetupProgressAsync(
                 new IntegrationSetupProgressDTO
                 {
@@ -190,11 +189,11 @@ public class SetupSonarrDownloadClientCommandHandler
                     IsSuccess = false,
                 }
             );
-            return Result.Fail("Timeout while communicating with Sonarr.").LogError();
+            return Result.Fail("Timeout while communicating with Sonarr").LogError();
         }
         catch (HttpRequestException e)
         {
-            _log.Here().Error(e, "HTTP error while communicating with Sonarr.");
+            _log.Here().Error(e, "HTTP error while communicating with Sonarr");
             await _progressHubService.SendIntegrationSetupProgressAsync(
                 new IntegrationSetupProgressDTO
                 {
@@ -204,7 +203,7 @@ public class SetupSonarrDownloadClientCommandHandler
                     IsSuccess = false,
                 }
             );
-            return Result.Fail("HTTP error while communicating with Sonarr.").LogError();
+            return Result.Fail("HTTP error while communicating with Sonarr").LogError();
         }
     }
 

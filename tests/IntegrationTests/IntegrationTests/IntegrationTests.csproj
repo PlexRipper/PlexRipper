@@ -11,6 +11,7 @@
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
+        <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="10.0.10" />
         <PackageReference Include="TUnit" Version="1.45.29" />
         <PackageReference Include="coverlet.collector" Version="8.0.1">
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -18,19 +19,36 @@
         </PackageReference>
     </ItemGroup>
     <ItemGroup>
+        <ProjectReference Include="..\..\..\src\AppHost\AppHost.csproj" />
         <ProjectReference Include="..\..\BaseTests\BaseTests.csproj" />
+    </ItemGroup>
+    <ItemGroup>
+        <Compile Include="..\..\BaseTests\BaseContainer\**\*.cs" Link="_Shared\BaseContainer\%(RecursiveDir)%(Filename)%(Extension)" />
+        <Compile Include="..\..\BaseTests\_Shared\BaseIntegrationTest\BaseIntegrationTests.cs" Link="_Shared\BaseIntegrationTest\BaseIntegrationTests.cs" />
+        <Compile Include="..\..\BaseTests\_Shared\Config\Autofac\TestModule.cs" Link="_Shared\Config\Autofac\TestModule.cs" />
+        <Compile Include="..\..\BaseTests\_Shared\ReaparrWebApplicationFactory.cs" Link="_Shared\ReaparrWebApplicationFactory.cs" />
     </ItemGroup>
     <ItemGroup>
         <Folder Include="Application\PlexAccounts\Create\" />
         <Folder Include="FileSystem" />
     </ItemGroup>
     <ItemGroup>
+        <Using Include="Autofac" />
+        <Using Include="ByteSizeLib" />
         <Using Include="Microsoft.EntityFrameworkCore" />
+        <Using Include="Quartz" />
         <Using Include="Reaparr.Application" />
         <Using Include="Reaparr.Application.Contracts" />
+        <Using Include="Reaparr.BaseTests" />
+        <Using Include="Reaparr.Data" />
         <Using Include="Reaparr.Data.Contracts" />
         <Using Include="Reaparr.Environment" />
+        <Using Include="Reaparr.FluentResults" />
         <Using Include="Reaparr.FluentResultExtensions" />
+        <Using Include="Reaparr.Identity" />
+        <Using Include="Reaparr.Identity.Contracts" />
+        <Using Include="Reaparr.SignalR.Contracts" />
+        <Using Include="System.IO.Abstractions" />
         <Using Include="System.Net" />
     </ItemGroup>
 </Project>

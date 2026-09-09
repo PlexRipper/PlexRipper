@@ -95,11 +95,8 @@ public class CheckConnectionStatusByIdCommandHandler
             cancellationToken
         );
 
-        if (serverStatusResult.IsCancelled)
-            return serverStatusResult;
-
         if (serverStatusResult.IsFailed)
-            return serverStatusResult.LogError();
+            return serverStatusResult.LogIfFailed();
 
         // Store the latest Plex server status for this connection.
         var plexServerStatus = serverStatusResult.Value;

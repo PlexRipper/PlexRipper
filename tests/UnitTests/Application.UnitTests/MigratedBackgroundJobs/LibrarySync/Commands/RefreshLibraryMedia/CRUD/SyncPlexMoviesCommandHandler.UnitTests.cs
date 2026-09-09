@@ -1,5 +1,6 @@
 namespace Reaparr.Application.UnitTests;
 
+[NotInParallel]
 public class SyncPlexMoviesCommandHandlerUnitTests : BaseUnitTest<SyncPlexMoviesCommandHandler>
 {
     private SyncPlexMoviesCommandValidator _validator = new();

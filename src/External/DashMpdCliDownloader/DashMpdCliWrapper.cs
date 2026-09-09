@@ -63,7 +63,8 @@ public class DashMpdCliWrapper : IDashMpdCliWrapper
         if (!_file.Exists(_binaryPath))
             return _log.Here()
                 .ErrorResult(
-                    $"dash-mpd-cli binary not found at: {_binaryPath}. Ensure the binary is included in the build output."
+                    "dash-mpd-cli binary not found at: {BinaryPath}. Ensure the binary is included in the build output",
+                    _binaryPath
                 );
 
         if (string.IsNullOrWhiteSpace(options.MpdUrl))
@@ -222,10 +223,11 @@ public class DashMpdCliWrapper : IDashMpdCliWrapper
     private Result CreateFailureResult(int exitCode)
     {
         if (!_hasNetworkError)
-            return Result.Fail($"dash-mpd-cli exited with code {exitCode}");
+            return Result.Fail("dash-mpd-cli exited with code {ExitCode}", exitCode);
 
-        var message = $"dash-mpd-cli failed with network error: {_networkErrorLine}";
-        return Result.Fail(message).Add504GatewayTimeoutError(message);
+        return Result
+            .Fail("dash-mpd-cli failed with network error: {NetworkErrorLine}", _networkErrorLine ?? string.Empty)
+            .Add504GatewayTimeoutError();
     }
 
     private static bool IsNetworkErrorLine(string line) =>

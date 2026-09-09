@@ -10,5 +10,6 @@ public static class IntegrationDefinitions
 
     public const string IntegrationIdentityItemKey = "IntegrationIdentity";
 
+    // ReSharper disable once InconsistentNaming
     public const string INDEXER_API_KEY = "apikey";
 }

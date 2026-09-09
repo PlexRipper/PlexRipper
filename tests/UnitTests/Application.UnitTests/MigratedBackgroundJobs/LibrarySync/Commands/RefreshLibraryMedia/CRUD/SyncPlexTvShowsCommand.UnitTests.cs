@@ -1,5 +1,6 @@
 namespace Reaparr.Application.UnitTests;
 
+[NotInParallel]
 public class SyncPlexTvShowsCommandUnitTests : BaseUnitTest<SyncPlexTvShowsCommandHandler>
 {
     private readonly SyncPlexTvShowsCommandValidator _validator;

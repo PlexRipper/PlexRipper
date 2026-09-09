@@ -125,6 +125,7 @@ public class SyncPlexMoviesCommandHandler : ICommandHandler<SyncPlexMoviesComman
 
         stopWatch.StopAndLog($"Finished media syncing plexLibrary: {libraryName} with id: {plexLibraryId}");
 
+        // ReSharper disable once TemplateIsNotCompileTimeConstantProblem
         _log.Here().Information(report.ToString());
 
         return Result.Ok(report);

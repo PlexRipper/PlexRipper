@@ -180,6 +180,7 @@ public class SyncPlexTvShowsCommandHandler : ICommandHandler<SyncPlexTvShowsComm
 
         stopWatch.StopAndLog($"Finished media syncing plexLibrary: {plexLibraryName} with id: {plexLibraryId}");
 
+        // ReSharper disable once TemplateIsNotCompileTimeConstantProblem
         _log.Here().Debug(bulkInsertRapport.ToString());
 
         return Result.Ok(bulkInsertRapport);

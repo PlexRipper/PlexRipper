@@ -28,64 +28,53 @@ Application endpoints are organized by operation, not grouped into product-level
 - A C# endpoint file must declare only one FastEndpoints endpoint class.
 - Never create aggregate files such as `SonarrIntegrationEndpoints.cs`, `RadarrIntegrationEndpoints.cs`, `ManagementEndpoints.cs`, or any other `*Endpoints.cs` file containing multiple endpoint operations.
 - When adding related detail, setup, and delete operations, create sibling slices such as `GetSonarrIntegration/`, `SetupSonarrIntegration/`, and `DeleteSonarrIntegration/` rather than grouping them by product in one file.
-- Before creating files, inspect the nearest existing endpoint siblings through Rider and match their folder/file organization.
+- Before creating files, inspect the nearest existing endpoint siblings through native repository tools and match their folder/file organization.
 
 Generic minimal-file or DRY guidance must not override this structure. In Reaparr, the operation is the vertical slice.
 
 ## Required Tooling
 
-Rider MCP is mandatory for backend work. All backend file operations, searches, symbol inspection, refactors, and diagnostics must use Rider MCP tools first:
-- `rider_*`
-- `rider-official-mcp_*`
-- `rider-index-mcp_*`
-- `rider-debugger*` when debugging runtime behavior
-
-Never use WebStorm MCP tools for backend work under `src/` excluding `ClientApp/`, `tests/UnitTests/`, or `tests/IntegrationTests/`. WebStorm MCP is reserved for frontend work under `src/AppHost/ClientApp/`.
+Native repository tooling is mandatory for backend work. Use these tools directly:
+- `read`, `edit`, and `write` for file operations;
+- `glob` and repository search tools for discovery;
+- `lsp` for symbol inspection, references, refactors, and diagnostics;
+- short `bash` commands for native project tooling and factual checks;
+- `dotnet-test-mcp` or the repository's native test command for backend tests.
 
 ### Uncommitted-change reviews
 
-When asked to review, audit, or correct uncommitted backend changes, always perform the review through Rider MCP:
+When asked to review, audit, or correct uncommitted backend changes:
 
-- Use Rider MCP to enumerate and inspect the current uncommitted changes.
-- Use Rider MCP to read each changed file and its surrounding code, inspect symbols and usages, and apply corrections.
-- Use Rider MCP diagnostics, build, and test tools to validate the corrected change set.
-- Do not substitute raw `git diff`, shell search commands, codebase-memory, or autonomous subagents for the Rider MCP review.
-- Git may only be used for an explicitly requested Git operation; it is not the code-review interface.
-- Review every uncommitted backend change, including staged and unstaged changes, before claiming the audit is complete.
+- Use native repository tools to enumerate and inspect changed files, surrounding code, symbols, and usages.
+- Apply corrections with native file-editing tools.
+- Use native diagnostics and test tooling to validate the corrected change set.
+- Preserve unrelated user changes and review every staged and unstaged backend change before claiming the audit is complete.
 
-### Backend MCP fast path
+### Native tooling fast path
 
-After one successful MCP discovery or server health check in a session, reuse these known-good exact tool names instead of repeatedly rediscovering them:
+After one successful native tool call, reuse the same tool family for the task:
 
-| Action | Tool |
+| Action | Native tool |
 | --- | --- |
-| Read file/range | `rider-official:read_file` |
-| Read full file | `rider-official:get_file_text_by_path` |
-| Create file | `rider-official:create_new_file` |
-| Replace text | `rider-official:replace_text_in_file` |
-| Delete file | `rider-official:delete_file` |
-| Search text | `rider-official:search_in_files_by_text` |
-| Search regex | `rider-official:search_in_files_by_regex` |
-| File diagnostics | `rider-official:get_file_problems` |
-| Run configurations | `rider-official:get_run_configurations` |
-| List run configs + status | `rider-official:list_run_configurations` |
-| Launch run config | `rider-official:start_run_configuration` |
-| Build solution | `rider-official:build_solution` |
-| Trigger IDE action | `rider-official:execute_ide_action` |
-| Console output | `rider-official:get_console_output` |
+| Read file/range | `read` |
+| Create or overwrite file | `write` |
+| Surgical edit | `edit` |
+| Find paths | `glob` |
+| Symbol-aware lookup/refactor | `lsp` |
+| Short project command | `bash` |
+| Backend tests | `dotnet-test-mcp` or the repository's native test command |
 
-Only rediscover tools when a needed capability is not in this table, a cached tool fails, or the target MCP server changes.
+Only switch tool families when a needed capability is unavailable or a native call fails.
 
-### Rider MCP retry rule
+### Native tooling retry rule
 
-Rider MCP can briefly hiccup. Do not give up after one failed call.
+If a native tool fails, retry the same tool once with a narrower request before changing approach:
+- File read fails -> read a smaller range.
+- Search fails -> narrow the path or search term.
+- Diagnostics fail -> retry the same file, then use narrower `lsp` diagnostics.
+- Test execution fails -> preserve the failure evidence and retry through the repository's documented test route.
 
-If a Rider MCP call fails, retry with the same tool once. If it still fails, try a narrower or adjacent Rider MCP tool before falling back:
-- File read fails -> try `rider_read_file` or `rider_get_file_text_by_path` with fewer lines.
-- Search fails -> try a narrower directory, exact text search, regex search, file-name search, or symbol search.
-- Diagnostics fail -> retry the same file, then use Rider indexed file problems, diagnostics, symbol info, or alternate Rider MCP namespaces. Do not run a build to discover errors.
-
-Fallback to filesystem tools only after repeated Rider MCP attempts cannot provide the needed result. State the attempted Rider MCP tools and the fallback reason before using filesystem tools.
+Do not treat an external editor integration as a prerequisite for backend work.
 
 ## Secondary Skill Routing
 
@@ -152,7 +141,7 @@ Prefer Reaparr-specific skills over generic skills when both apply.
 - Never hand-author, manually create, or manually edit EF Core migration files or `*ModelSnapshot.cs` files.
 - Always generate migrations through MCP tooling with `dotnet-mcp:dotnet_ef` and `action: MigrationsAdd`.
 - If a migration needs to be removed or regenerated, use `dotnet-mcp:dotnet_ef` with the appropriate migration action instead of deleting or rewriting files by hand.
-- After MCP migration generation, inspect generated files and run Rider MCP diagnostics on the changed model/configuration files before claiming completion.
+- After MCP migration generation, inspect generated files and run native diagnostics on the changed model/configuration files before claiming completion.
 
 ### Background Jobs
 
@@ -163,7 +152,7 @@ Prefer Reaparr-specific skills over generic skills when both apply.
 
 ### Realtime
 
-- SignalR uses typed hubs and MessagePack serialization.
+- After MCP migration generation, inspect generated files and run native diagnostics on the changed model/configuration files before claiming completion.
 - Broadcast through `IHubContext<THub, TClientInterface>.Clients.All` or the narrowest appropriate client target.
 
 ### Logging
@@ -342,33 +331,32 @@ Rules:
 
 1. Load `reaparr-backend`; this is not optional for backend work.
 2. Confirm the task is backend-scoped and load any narrower matching skills.
-3. Use Rider MCP indexed search/symbol tools to find existing precedent.
+3. Use native search and symbol tools to find existing precedent.
 4. Identify the owning project and, for tests, the matching test project.
 5. Make the smallest maintainable change that fixes the root cause.
 6. Preserve project boundaries; place shared contracts in `*.Contracts` projects only when cross-project consumption requires it.
 7. Keep behavior deterministic, especially in tests and background jobs.
 8. Before finishing any backend code file creation, check whether a new folder was introduced. If yes, use the root project namespace in the code file and update the owning `.csproj.DotSettings` `NamespaceFoldersToSkip` entry.
 9. Re-read changed files after edits to confirm the intended changes landed.
-10. Use Rider MCP intelligence/indexing to find errors that need fixing before claiming completion. Do not run a build as an error-discovery mechanism.
+10. Use native diagnostics and language-server analysis to find errors that need fixing before claiming completion. Do not run a build as an error-discovery mechanism.
 
-## Apply Backend Changes (Restart in Debug Mode)
+## Apply Backend Changes (Native Development)
 
-Use Rider MCP to stop and relaunch the backend in debug mode. Rider auto-builds on launch, and Hot Reload is not supported on Linux.
+Run the backend with the repository's native command:
 
-1. `list_run_configurations`
-2. If `Reaparr Docker Development` is `running: true`, `execute_ide_action` with `actionId: "Stop"`, then `list_run_configurations` again to confirm it stopped.
-3. `start_run_configuration` with `configurationName: "Reaparr Docker Development"`, `mode: "debug"`
-4. `list_run_configurations` — confirm `running: true`
+```bash
+dotnet run --project src/AppHost
+```
 
-All calls use `projectPath: {WorkingDirectory}`.
+Use the process tool for long-running services, observe readiness before exercising the service, and stop the process after verification.
 
 ## Run and Test Commands
 
-Do not run `dotnet build` or project build commands for backend error discovery. Use Rider MCP diagnostics/indexing instead. Build-related execution is only allowed as part of running unit or integration tests.
+Do not run `dotnet build` or project build commands solely to discover errors. Use `lsp` diagnostics and targeted native checks first. Build-related execution is allowed when it is part of running tests or the requested application workflow.
 
 ### Preferred test execution: dotnet-test-mcp
 
-When `dotnet-test-mcp` is available, always use it for backend test execution instead of terminal-style `dotnet run` commands or Rider run configurations. Exact known tools are:
+When `dotnet-test-mcp` is available, prefer it for backend test execution. Otherwise use the repository's native test command from the project configuration.
 
 | Action | Tool |
 | --- | --- |
@@ -379,9 +367,9 @@ When `dotnet-test-mcp` is available, always use it for backend test execution in
 | Run test project | `dotnet-test-mcp:run_all_tests_for_project` |
 | Run all tests | `dotnet-test-mcp:run_all_tests` |
 
-Use direct calls to these exact tools after one successful MCP discovery/health check; retrieval can miss them. Do not fall back to Rider run configurations or terminal commands for test execution.
+Use direct calls to the documented test tool after one successful health check. If it is unavailable, use the repository's native test command and preserve the failure evidence.
 
-All backend test execution goes exclusively through `dotnet-test-mcp` tools. Never use terminal-style `dotnet run --project` or `dotnet test` for test execution.
+All backend test execution should use the documented test route. Never use an external editor run configuration for test execution.
 
 ### Running the backend AppHost (not test-related)
 
@@ -391,15 +379,15 @@ dotnet run --project src/AppHost
 
 ## Verification Gates
 
-Never rely on `dotnet build`, project builds, or solution builds to determine whether backend code has errors. Error discovery must come from Rider MCP intelligence/indexing.
+Never rely on a build alone to determine whether backend code has errors. Use native language-server diagnostics, project diagnostics, and targeted tests.
 
 Required error-checking flow:
-1. Run Rider MCP diagnostics/file problems for each changed backend file.
-2. If diagnostics are incomplete or fail, retry Rider MCP and use narrower or adjacent Rider indexed tools (`get_file_problems`, diagnostics, symbol info, indexed search, alternate Rider MCP namespace).
-3. Fix all relevant Rider-reported errors.
-4. Only after Rider MCP reports the changed files are clean, run tests when the change requires behavioral verification.
+1. Run `lsp` diagnostics for each changed backend file when a language server is available.
+2. If diagnostics are incomplete or fail, retry with narrower file ranges and repository-native checks.
+3. Fix all relevant reported errors.
+4. Only after diagnostics are clean, run tests when the change requires behavioral verification.
 
-Build commands are not verification for compile errors in this workflow. Do not run `dotnet build Reaparr.sln` or project builds as a substitute for Rider MCP diagnostics.
+Build commands are not a substitute for diagnostics. Use them only when required by the requested workflow or as part of test execution.
 
 Allowed build-related execution:
 - Running backend unit tests.
@@ -407,29 +395,30 @@ Allowed build-related execution:
 - Running a test project may compile as part of test execution; that is acceptable because the purpose is executing tests, not discovering compile errors.
 
 Test routing:
-- Command/handler or service changes: Rider MCP diagnostics first, then relevant unit tests when behavior changed.
-- Unit test changes: Rider MCP diagnostics first, then the relevant unit test project, preferably filtered first and broader if risk warrants.
-- Integration test changes or integration failures: Rider MCP diagnostics first, then targeted integration tests, then the full integration suite before claiming done.
-- Cross-project or public contract changes: Rider MCP diagnostics/indexing across affected files and symbols first, then affected tests. Do not use solution build as the error detector.
-- Job, SignalR, EF Core, or endpoint changes: Rider MCP diagnostics first, then tests covering the runtime path when available; otherwise explain the missing behavioral verifier.
+- Command/handler or service changes: diagnostics first, then relevant unit tests when behavior changed.
+- Unit test changes: diagnostics first, then the relevant unit test project, preferably filtered first and broader if risk warrants.
+- Integration test changes or integration failures: diagnostics first, then targeted integration tests, then the full integration suite before claiming done.
+- Cross-project or public contract changes: diagnostics across affected files and symbols first, then affected tests.
+- Job, SignalR, EF Core, or endpoint changes: diagnostics first, then tests covering the runtime path when available; otherwise explain the missing behavioral verifier.
 
-Do not claim success unless Rider MCP diagnostics/indexing was used and required tests passed. If Rider MCP cannot run in the current environment after retries, state that explicitly instead of running a build to infer errors.
+Do not claim success unless native diagnostics and required tests passed. If the language server is unavailable, state that explicitly and use the strongest available native checks.
 
 ## Common Mistakes
 
 - Skipping this umbrella skill and loading only a narrow backend skill.
 - Editing backend unit tests without also loading `reaparr-backend-unit-tests`.
 - Testing filesystem behavior with real `File`, `Directory`, temp directories, or host filesystem state instead of `BaseUnitTest.SetupFileSystem(...)` and `MockFileSystem`.
-- Treating this skill as optional for small backend changes.
-- Using WebStorm MCP tools for backend files.
-- Falling back to filesystem tools after one Rider MCP hiccup instead of retrying Rider MCP and trying narrower Rider tools.
-- Running `dotnet build` or a project build to discover compile errors instead of using Rider MCP intelligence/indexing.
+- Treating this skill as optional for small changes.
+- Using external editor integrations instead of native repository tools.
+- Switching to broad filesystem commands after one native-tool hiccup instead of retrying with a narrower request.
+- Running `dotnet build` or a project build to discover compile errors instead of using native diagnostics.
 - Creating backend code files in new folders without keeping the namespace at the project root and updating the owning `.csproj.DotSettings` `NamespaceFoldersToSkip` entry.
 - Creating new abstractions before checking existing Reaparr patterns.
 - Putting shared command records in implementation projects when they belong in `*.Contracts`.
 - Returning raw values or `null` from Result-based command handlers.
 - Letting Quartz job exceptions escape.
 - Weakening tests or assertions to force green.
-- Using `--filter` or `--treenode-filter` shell arguments for test discovery — use `dotnet-test-mcp` tools instead.
+- Using `--filter` or `--treenode-filter` shell arguments for test discovery — use the documented test tooling instead.
 - Running frontend package managers for backend-only work.
-- Blocking test execution on unavailable `dotnet-test-mcp`; first check server health/quarantine and direct-call known `dotnet-test-mcp:*` tools. Do not fall back to terminal commands or Rider run configurations for tests.
+- Blocking test execution on unavailable `dotnet-test-mcp`; use the repository's native test command when the MCP test route is unavailable.
+

@@ -11,7 +11,6 @@ using Microsoft.Extensions.Http;
 using NSwag;
 using NSwag.Generation.Processors.Security;
 using Reaparr.Application.Contracts;
-using Reaparr.Data.Contracts;
 using Reaparr.Identity.Contracts;
 using Serilog.Sinks.AspNetCore.App.SignalR.Extensions;
 

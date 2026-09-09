@@ -170,7 +170,7 @@ public sealed class GetPlexMediaThumbnailImageEndpoint : Endpoint<GetPlexMediaTh
             {
                 _log.Here()
                     .Warning(
-                        "Plex rejected the access token while fetching a thumbnail for server {PlexServerId}. Refresh the Plex account's server access.",
+                        "Plex rejected the access token while fetching a thumbnail for server {PlexServerId}. Refresh the Plex account's server access",
                         plexServerId
                     );
                 HttpContext.Response.Headers.CacheControl = "no-store";
@@ -232,7 +232,7 @@ public sealed class GetPlexMediaThumbnailImageEndpoint : Endpoint<GetPlexMediaTh
             {
                 _log.Here()
                     .Warning(
-                        "Connection refused while fetching Plex thumbnail for server {PlexServerId} (key {PlexKey}). Server appears to be offline.",
+                        "Connection refused while fetching Plex thumbnail for server {PlexServerId} (key {PlexKey}). Server appears to be offline",
                         plexServerId,
                         req.PlexKey
                     );

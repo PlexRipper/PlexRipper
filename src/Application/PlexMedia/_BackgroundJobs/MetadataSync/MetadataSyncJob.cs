@@ -94,15 +94,26 @@ public class MetadataSyncJob : IJob
             return;
         }
 
-        _log.Here()
-            .Information(
-                processedCount == 0
-                    ? "No media items need metadata enrichment for server {ServerName} ({ServerId})"
-                    : "Completed metadata sync for server {ServerName} ({ServerId}). Processed {ProcessedCount} items",
-                serverName,
-                serverId,
-                processedCount
-            );
+        if (processedCount == 0)
+        {
+            _log.Here()
+                .Information(
+                    "No media items need metadata enrichment for server {ServerName} ({ServerId})",
+                    serverName,
+                    serverId
+                );
+        }
+        else
+        {
+            _log.Here()
+                .Information(
+                    "Completed metadata sync for server {ServerName} ({ServerId}). Processed {ProcessedCount} items",
+                    serverName,
+                    serverId,
+                    processedCount
+                );
+        }
+
         context.SetResult(JobStatus.Completed);
     }
 }

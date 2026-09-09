@@ -42,7 +42,7 @@ public class DbContextConnectionsUnitTests : BaseUnitTest
         );
 
         // Assert
-        configurations.ShouldAllBe(x => x == ExpectedConfiguration);
+        configurations.ShouldAllBe(x => x == _expectedConfiguration);
     }
 
     [Test]
@@ -90,7 +90,7 @@ public class DbContextConnectionsUnitTests : BaseUnitTest
         new SqliteConnectionStringBuilder(connectionString).Cache.ShouldBe(SqliteCacheMode.Shared);
     }
 
-    private static readonly SqliteConfiguration ExpectedConfiguration = new(120, "wal");
+    private static readonly SqliteConfiguration _expectedConfiguration = new(120, "wal");
 
     private static async Task<SqliteConfiguration> ReadConfiguration(DbContext context)
     {

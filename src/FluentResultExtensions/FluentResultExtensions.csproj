@@ -8,13 +8,15 @@
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="FluentResults" Version="4.0.0" />
         <PackageReference Include="FluentValidation" Version="12.1.1" />
+        <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.5" />
     </ItemGroup>
     <ItemGroup>
         <ProjectReference Include="..\Logging\Logging.csproj" />
+        <ProjectReference Include="..\FluentResults\FluentResults.csproj" />
     </ItemGroup>
     <ItemGroup>
         <Using Include="Reaparr.Logging" />
+        <Using Include="Reaparr.FluentResults" />
     </ItemGroup>
 </Project>

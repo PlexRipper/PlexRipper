@@ -1,4 +1,3 @@
-using FluentResults;
 using Microsoft.AspNetCore.Http;
 
 namespace Reaparr.FluentResultExtensions;

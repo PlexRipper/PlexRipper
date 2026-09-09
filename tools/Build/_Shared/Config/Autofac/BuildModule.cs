@@ -5,7 +5,6 @@ using Autofac.Features.Variance;
 using FastEndpoints;
 using FluentValidation;
 using Reaparr.Domain;
-using Serilog;
 using Module = Autofac.Module;
 
 namespace Reaparr.Build;

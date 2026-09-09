@@ -1,9 +1,7 @@
 using System.IO.Abstractions;
 using FastEndpoints;
-using FluentResults;
 using FluentValidation;
 using Reaparr.Logging;
-using Serilog;
 
 namespace Reaparr.Build;
 
@@ -77,7 +75,7 @@ internal sealed class DesktopLaunchBuildCommandHandler : ICommandHandler<Desktop
                 return Result.Ok(wineExitCode);
             }
 
-            _log.Here().Warning("Wine is not available on this host, so the Windows build was not launched.");
+            _log.Here().Warning("Wine is not available on this host, so the Windows build was not launched");
             return Result.Ok(0);
         }
 

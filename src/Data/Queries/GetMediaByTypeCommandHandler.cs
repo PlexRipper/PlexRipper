@@ -359,7 +359,8 @@ public class GetMediaByTypeCommandHandler : ICommandHandler<GetMediaByTypeComman
             }
             default:
                 return Result.Fail(
-                    $"Type {filter.MediaType} is not supported for retrieving the PlexMedia data by library id"
+                    "Type {FilterMediaType} is not supported for retrieving the PlexMedia data by library id",
+                    filter.MediaType
                 );
         }
 

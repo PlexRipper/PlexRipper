@@ -1,4 +1,7 @@
+using System.Globalization;
+using System.Text;
 using Serilog.Core;
+using Serilog.Parsing;
 
 // ReSharper disable PossibleMultipleEnumeration
 
@@ -49,8 +52,66 @@ namespace Reaparr.FluentResults
         public static Result Fail(string errorMessage, params object[] args)
         {
             var result = new Result();
-            result.WithError(Settings.ErrorFactory(string.Format(errorMessage, args)));
+            result.WithError(Settings.ErrorFactory(FormatErrorMessage(errorMessage, args)));
             return result;
+        }
+
+        private static string FormatErrorMessage(string messageTemplate, object[] args)
+        {
+            if (args.Length == 0)
+                return messageTemplate;
+
+            var parsedTemplate = new MessageTemplateParser().Parse(messageTemplate);
+            var result = new StringBuilder(messageTemplate.Length);
+            var nextArgument = 0;
+
+            foreach (var token in parsedTemplate.Tokens)
+            {
+                if (token is TextToken textToken)
+                {
+                    result.Append(textToken.Text);
+                    continue;
+                }
+
+                var propertyToken = (PropertyToken)token;
+                object? value;
+                if (propertyToken.TryGetPositionalValue(out var position))
+                {
+                    if (position < 0 || position >= args.Length)
+                    {
+                        result.Append(propertyToken);
+                        continue;
+                    }
+
+                    value = args[position];
+                }
+                else
+                {
+                    if (nextArgument >= args.Length)
+                    {
+                        result.Append(propertyToken);
+                        continue;
+                    }
+
+                    value = args[nextArgument++];
+                }
+
+                var valueText = value is IFormattable formattable
+                    ? formattable.ToString(propertyToken.Format, CultureInfo.InvariantCulture) ?? string.Empty
+                    : value?.ToString() ?? string.Empty;
+
+                if (propertyToken.Alignment is { } alignment && valueText.Length < alignment.Width)
+                {
+                    valueText =
+                        alignment.Direction == AlignmentDirection.Left
+                            ? valueText.PadRight(alignment.Width)
+                            : valueText.PadLeft(alignment.Width);
+                }
+
+                result.Append(valueText);
+            }
+
+            return result.ToString();
         }
 
         /// <summary>

@@ -10,6 +10,9 @@ public static partial class MockDatabase
     private static readonly string _databaseTemplateName = GetMemoryDatabaseName();
     private static SqliteConnection? _databaseTemplateConnection;
 
+    // SQLite migrations and EFCore.BulkExtensions seeding are not reliable when multiple test databases initialize concurrently.
+    private static readonly SemaphoreSlim _setupLock = new(1, 1);
+
     #region Methods
 
     #region Private
@@ -358,8 +361,23 @@ public static partial class MockDatabase
         var config = FakeDataConfig.FromOptions(options);
         var (reaparrContext, authContext) = context;
 
-        await PrepareDatabaseSchemaAsync(reaparrContext, authContext, pathProvider, appRuntimeInfo);
-        reaparrContext = await SeedDatabaseAsync(reaparrContext, seed, pathProvider, appRuntimeInfo, config, options);
+        await _setupLock.WaitAsync();
+        try
+        {
+            await PrepareDatabaseSchemaAsync(reaparrContext, authContext, pathProvider, appRuntimeInfo);
+            reaparrContext = await SeedDatabaseAsync(
+                reaparrContext,
+                seed,
+                pathProvider,
+                appRuntimeInfo,
+                config,
+                options
+            );
+        }
+        finally
+        {
+            _setupLock.Release();
+        }
 
         reaparrContext.ShouldNotBeNull();
     }

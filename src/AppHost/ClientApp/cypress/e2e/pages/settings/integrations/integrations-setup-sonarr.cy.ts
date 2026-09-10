@@ -348,6 +348,20 @@ describe('Sonarr integrations', () => {
 				step.and('contain.text', error);
 			}
 			step.find('.q-stepper__tab').should('have.class', 'text-negative');
+			if (stage === IntegrationSetupProgressStage.Connecting) {
+				cy.hubPublish('progress', MessageTypes.IntegrationSetupProgress, {
+					integrationId,
+					stage: IntegrationSetupProgressStage.DownloadClient,
+					isRunning: false,
+					isSuccess: false,
+					error: 'Ignored after connection failure',
+				} satisfies IntegrationSetupProgressDTO);
+				cy.getCy('integration-setup-step-connect')
+					.should('have.attr', 'data-status', 'error')
+					.find('.q-stepper__tab')
+					.should('have.class', 'text-negative');
+				cy.getCy('integration-setup-step-download-client').should('have.attr', 'data-status', 'pending');
+			}
 			for (const { selector: previousSelector } of setupStages.slice(0, index)) {
 				cy.getCy(`integration-setup-step-${previousSelector}`).should('have.attr', 'data-status', 'success');
 			}

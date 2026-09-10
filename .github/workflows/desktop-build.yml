@@ -79,7 +79,7 @@ jobs:
 
         runs-on: ${{ matrix.runner }}
         permissions:
-            contents: write
+            contents: read
 
         steps:
             -   name: Checkout source code
@@ -166,7 +166,7 @@ jobs:
         runs-on: ubuntu-latest
         timeout-minutes: 30
         permissions:
-            contents: write
+            contents: read
         strategy:
             fail-fast: false
             max-parallel: 1

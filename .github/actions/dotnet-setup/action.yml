@@ -41,12 +41,23 @@ runs:
         -   name: Restore dependencies
             if: inputs.restore == 'true'
             shell: bash
-            run: >
-                dotnet restore ${{ inputs.project-path }}
-                ${{ inputs.runtime != '' && format('-r {0}', inputs.runtime) || '' }}
-                ${{ inputs.locked-mode == 'true' && '--locked-mode' || '' }}
+            env:
+                LOCKED_MODE: ${{ inputs.locked-mode }}
+                PROJECT_PATH: ${{ inputs.project-path }}
+                RUNTIME: ${{ inputs.runtime }}
+            run: |
+                restore_args=(dotnet restore "$PROJECT_PATH")
+                if [[ -n "$RUNTIME" ]]; then
+                    restore_args+=(-r "$RUNTIME")
+                fi
+                if [[ "$LOCKED_MODE" == 'true' ]]; then
+                    restore_args+=(--locked-mode)
+                fi
+                "${restore_args[@]}"
 
         -   name: Build
             if: inputs.build == 'true'
             shell: bash
-            run: dotnet build ${{ inputs.project-path }} --no-restore
+            env:
+                PROJECT_PATH: ${{ inputs.project-path }}
+            run: dotnet build "$PROJECT_PATH" --no-restore

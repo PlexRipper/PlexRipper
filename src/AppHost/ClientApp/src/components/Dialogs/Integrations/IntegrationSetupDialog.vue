@@ -5,7 +5,7 @@
 		persistent
 		close-button
 		cy="integration-setup-dialog"
-		@opened="reset"
+		@opened="open"
 		@closed="close">
 		<template #title>
 			<div class="row items-center q-gutter-sm">
@@ -190,15 +190,17 @@
 
 <script setup lang="ts">
 import Log from 'consola';
-import { set } from '@vueuse/core';
+import { get, set } from '@vueuse/core';
 import { DialogType } from '@enums';
 import { IntegrationSetupProgressStage, IntegrationType, type IntegrationSetupProgressDTO } from '@dto';
-import { useIntegrationStore, useSignalrStore } from '@store';
+import { useDialogStore, useIntegrationStore, useSignalrStore } from '@store';
 import { useSubscription } from '@vueuse/rxjs';
 
 const store = useIntegrationStore();
 const signalrStore = useSignalrStore();
+const dialogStore = useDialogStore();
 const activeStep = ref(1);
+const closeIntegrationDialogOnClose = ref(false);
 const integrationLogo = computed(() => store.draft.type === IntegrationType.Radarr ? '/img/logo/radarr.png' : '/img/logo/sonarr.png');
 const setupTexts = computed(() => {
 	const values = { type: store.draft.type };
@@ -247,6 +249,11 @@ const steps = reactive<{ connect: Step; downloadClient: Step; indexer: Step; val
 	validation: { status: 'pending', error: '' },
 	done: { status: 'pending', error: '' },
 });
+
+function open(closeParent: unknown): void {
+	set(closeIntegrationDialogOnClose, closeParent === true);
+	reset();
+}
 
 function reset(): void {
 	activeStep.value = 1;
@@ -317,8 +324,12 @@ function refresh(): void {
 }
 
 function close(): void {
+	const closeParent = get(closeIntegrationDialogOnClose);
+	set(closeIntegrationDialogOnClose, false);
 	reset();
 	refresh();
+	if (closeParent)
+		dialogStore.closeDialog(DialogType.IntegrationDialog);
 }
 </script>
 

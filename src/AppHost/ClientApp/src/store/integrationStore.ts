@@ -10,6 +10,7 @@ import {
 	IntegrationProvisioningState,
 	type IntegrationSummary,
 	IntegrationType,
+	TestConnectionStatus,
 	type RadarrIntegrationDTO,
 	type SonarrIntegrationDTO,
 	type TestConnectionToRadarrEndpointResponse,
@@ -364,10 +365,17 @@ export const useIntegrationStore = defineStore(StoreNames.IntegrationStore, () =
 		);
 	}
 
-	const getters = {
-		isCategoryUnique,
-		isUrlUnique,
-		isDraftValid: computed(() => Boolean(
+	function isDraftDirty(): boolean {
+		return !state.detail
+			|| state.draft.name !== state.detail.name
+			|| state.draft.url !== state.detail.url
+			|| state.draft.apiKey !== state.detail.apiKey
+			|| state.draft.category !== state.detail.category
+			|| state.draft.downloadFolderId !== state.detail.downloadFolderId;
+	}
+
+	function isDraftValid(): boolean {
+		return Boolean(
 			state.draft.name.trim()
 			&& state.draft.url.trim()
 			&& state.draft.apiKey.trim()
@@ -375,7 +383,21 @@ export const useIntegrationStore = defineStore(StoreNames.IntegrationStore, () =
 			&& state.draft.downloadFolderId > 0
 			&& isCategoryUnique(state.draft.category)
 			&& isUrlUnique(state.draft.url),
-		)),
+		);
+	}
+
+	const getters = {
+		isCategoryUnique,
+		isUrlUnique,
+		isDraftDirty: computed(isDraftDirty),
+		shouldSaveBeforeSetup: computed(isDraftDirty),
+		isSetupDisabled: computed(() => state.isSaving
+			|| state.isSettingUp
+			|| (isDraftDirty() && (
+				!isDraftValid()
+				|| (!state.detail && state.testResult?.result !== TestConnectionStatus.Success)
+			))),
+		isDraftValid: computed(isDraftValid),
 	};
 
 	return { ...toRefs(state), ...actions, ...getters };

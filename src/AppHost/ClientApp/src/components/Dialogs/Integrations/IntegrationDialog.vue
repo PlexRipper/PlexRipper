@@ -172,18 +172,18 @@
 						block
 						icon="mdi-cloud-search-outline"
 						:label="$t('general.commands.check-connection')"
-						:loading="store.isTesting || isAutoSaving"
+						:loading="store.isTesting"
 						:disable="!store.isDraftValid"
 						data-cy="integration-test"
 						@click="test" />
 				</QCol>
 				<QCol>
 					<BaseButton
-						label="Setup"
+						:label="setupLabel"
 						block
 						icon="mdi-cog-sync"
-						:disable="store.isSaving || !store.detail"
-						:loading="store.isSettingUp"
+						:disable="store.isSetupDisabled"
+						:loading="isSavingForSetup || store.isSettingUp"
 						data-cy="integration-setup"
 						@click="setup" />
 				</QCol>
@@ -191,7 +191,7 @@
 					<SaveButton
 						block
 						label="Save"
-						:loading="store.isSaving && !isAutoSaving"
+						:loading="store.isSaving && !isSavingForSetup"
 						:disable="!store.isDraftValid"
 						data-cy="integration-save"
 						@click="save" />
@@ -227,7 +227,7 @@ const integrationTypes = [
 ] as const;
 const stage = ref(1);
 const isEditMode = ref(false);
-const isAutoSaving = ref(false);
+const isSavingForSetup = ref(false);
 const requiredRules = [(value: string | number) => (typeof value === 'number' ? value > 0 : Boolean(value?.trim())) || 'Required'];
 const baseUrlRules = [
 	...requiredRules,
@@ -241,6 +241,7 @@ const categoryRules = [
 ];
 const downloadFolders = computed(() => folderPathStore.folderPaths.filter((folderPath) => folderPath.folderType === FolderType.DownloadFolder));
 const integrationLogo = computed(() => integrationTypes.find(({ type }) => type === store.draft.type)?.icon ?? '');
+const setupLabel = computed(() => store.shouldSaveBeforeSetup ? $t('help.settings.integrations.save-and-setup') : 'Setup');
 
 const integrationTitle = computed(() => {
 	if (store.draft.type === IntegrationType.Radarr) {
@@ -361,15 +362,7 @@ function formatTestDetails(): string {
 }
 
 function test(): void {
-	useSubscription(store.test().subscribe((result) => {
-		const isSuccessful = result?.isSuccess && result.value?.result === TestConnectionStatus.Success;
-		if (!isSuccessful || store.detail) return;
-
-		set(isAutoSaving, true);
-		useSubscription(store.save().subscribe({
-			complete: () => set(isAutoSaving, false),
-		}));
-	}));
+	useSubscription(store.test().subscribe());
 }
 
 function save(): void {
@@ -379,14 +372,24 @@ function save(): void {
 }
 
 function setup(): void {
-	if (!store.detail) return;
+	if (store.shouldSaveBeforeSetup) {
+		set(isSavingForSetup, true);
+		useSubscription(store.save().subscribe((result) => {
+			set(isSavingForSetup, false);
+			if (!result?.isSuccess || !result.value) return;
+			dialogStore.openIntegrationSetupDialog(true);
+			useSubscription(store.setupIntegration().subscribe());
+		}));
+		return;
+	}
+
 	dialogStore.openIntegrationSetupDialog();
 	useSubscription(store.setupIntegration().subscribe());
 }
 
 function close(): void {
 	set(isEditMode, false);
-	set(isAutoSaving, false);
+	set(isSavingForSetup, false);
 	store.close();
 	dialogStore.closeDialog(DialogType.IntegrationDialog);
 }

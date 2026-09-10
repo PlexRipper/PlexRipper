@@ -83,7 +83,7 @@ const setupStages = [
 ] as const;
 
 describe('Radarr integrations', () => {
-	it('creates a Radarr integration through validation, connection testing, and automatic save', () => {
+	it('checks and saves a new Radarr integration as explicit separate actions', () => {
 		let integrations: IntegrationSummary[] = [];
 		let saveCallCount = 0;
 		const createdDetail: RadarrIntegrationDTO = {
@@ -114,6 +114,7 @@ describe('Radarr integrations', () => {
 			request.reply({ statusCode: 200, body: generateResultDTO(integrations) });
 		}).as('getIntegrations');
 		cy.intercept({ method: 'GET', pathname: IntegrationPaths.testConnectionToRadarrEndpoint() }, {
+			delay: 1000,
 			statusCode: 200,
 			body: generateResultDTO({
 				result: TestConnectionStatus.Success,
@@ -127,10 +128,6 @@ describe('Radarr integrations', () => {
 			integrations = [createdSummary];
 			request.reply({ delay: 1000, statusCode: 200, body: generateResultDTO(createdDetail) });
 		}).as('createRadarr');
-		cy.intercept('PUT', IntegrationPaths.updateRadarrIntegrationEndpoint(createdIntegrationId), {
-			statusCode: 200,
-			body: generateResultDTO(createdDetail),
-		}).as('updateCreatedRadarr');
 		cy.visit(route('/settings/integrations'));
 		cy.wait('@getIntegrations');
 
@@ -160,17 +157,29 @@ describe('Radarr integrations', () => {
 		cy.getCy('integration-test').should('not.be.disabled');
 
 		cy.getCy('integration-test').click();
+		cy.getCy('integration-test').find('.q-spinner').should('exist');
+		cy.getCy('integration-save').find('.q-spinner').should('not.exist');
+		cy.then(() => expect(saveCallCount).to.equal(0));
 		cy.wait('@testRadarrConnection').then(({ request, response }) => {
 			expect(request.method).to.equal('GET');
 			expect(request.query).to.deep.include({ apiKey: createRequest.apiKey, url: createRequest.url });
 			expect(response?.statusCode).to.equal(200);
 		});
-		cy.getCy('integration-test').find('.q-spinner').should('exist');
-		cy.getCy('integration-save').find('.q-spinner').should('not.exist');
+		cy.then(() => expect(saveCallCount).to.equal(0));
 		cy.getCy('integration-dialog')
 			.should('contain.text', 'Connection successful')
 			.and('contain.text', 'HTTP 200');
 
+		cy.getCy('integration-dialog')
+			.should('be.visible')
+			.and('contain.text', 'Add Radarr integration');
+		cy.getCy('integration-delete').should('not.exist');
+		cy.getCy('integration-setup')
+			.should('not.be.disabled')
+			.and('contain.text', 'Save & Setup');
+		cy.getCy('integration-save').click();
+		cy.getCy('integration-save').find('.q-spinner').should('exist');
+		cy.getCy('integration-test').find('.q-spinner').should('not.exist');
 		cy.wait('@createRadarr').then(({ request, response }) => {
 			expect(request.method).to.equal('POST');
 			expect(request.body).to.deep.equal(createRequest);
@@ -179,13 +188,6 @@ describe('Radarr integrations', () => {
 		});
 		cy.wait('@getIntegrations');
 		cy.then(() => expect(saveCallCount).to.equal(1));
-		cy.getCy('integration-dialog')
-			.should('be.visible')
-			.and('contain.text', 'Add Radarr integration');
-		cy.getCy('integration-delete').should('not.exist');
-		cy.getCy('integration-setup').should('not.be.disabled');
-		cy.getCy('integration-save').click();
-		cy.wait('@updateCreatedRadarr');
 		cy.getCy('integration-dialog').should('not.exist');
 		cy.getCy('integration-card')
 			.should('have.length', 1)
@@ -195,6 +197,100 @@ describe('Radarr integrations', () => {
 			.and('contain.text', createRequest.url)
 			.and('contain.text', IntegrationProvisioningState.Unconfigured);
 		cy.getCy('integration-card').find('[alt="radarr"]').should('exist');
+	});
+
+	it('saves and sets up a new Radarr integration before closing both dialogs', () => {
+		let integrations: IntegrationSummary[] = [];
+		let createCallCount = 0;
+		let setupCallCount = 0;
+		const createdDetail: RadarrIntegrationDTO = {
+			id: createdIntegrationId,
+			name: createRequest.name,
+			url: createRequest.url,
+			apiKey: createRequest.apiKey,
+			category: createRequest.category,
+			downloadFolderId: createRequest.downloadFolderId,
+			provisioningState: IntegrationProvisioningState.Unconfigured,
+			lastConnectionTestStatus: TestConnectionStatus.Success,
+		};
+		const createdSummary: IntegrationSummary = {
+			id: createdIntegrationId,
+			type: IntegrationType.Radarr,
+			name: createRequest.name,
+			baseUrl: createRequest.url,
+			category: createRequest.category,
+			provisioningState: IntegrationProvisioningState.Unconfigured,
+			lastConnectionTestStatus: TestConnectionStatus.Success,
+			downloadFolderId: createRequest.downloadFolderId,
+			externalDownloadClientId: null,
+			externalIndexerId: null,
+		};
+		const configuredDetail = { ...createdDetail, provisioningState: IntegrationProvisioningState.Configured };
+
+		cy.basePageSetup({ plexAccountCount: 0, plexServerCount: 0 });
+		cy.intercept('GET', IntegrationPaths.getIntegrationsEndpoint(), (request) => {
+			request.reply({ statusCode: 200, body: generateResultDTO(integrations) });
+		}).as('getIntegrations');
+		cy.intercept({ method: 'GET', pathname: IntegrationPaths.testConnectionToRadarrEndpoint() }, {
+			statusCode: 200,
+			body: generateResultDTO({
+				result: TestConnectionStatus.Success,
+				errorMessage: null,
+				httpStatusCode: 200,
+				testedAt,
+			}),
+		}).as('testRadarrConnection');
+		cy.intercept('POST', IntegrationPaths.createRadarrIntegrationEndpoint(), (request) => {
+			createCallCount++;
+			integrations = [createdSummary];
+			request.reply({ delay: 1000, statusCode: 200, body: generateResultDTO(createdDetail) });
+		}).as('createRadarr');
+		cy.intercept('POST', IntegrationPaths.setupRadarrIntegrationEndpoint(createdIntegrationId), (request) => {
+			setupCallCount++;
+			request.reply({ statusCode: 200, body: generateResultDTO(configuredDetail) });
+		}).as('setupRadarr');
+		cy.visit(route('/settings/integrations'));
+		cy.wait('@getIntegrations');
+
+		cy.getCy('add-integration').click();
+		cy.getCy('integration-type-radarr').click();
+		cy.getCy('integration-name').type(createRequest.name);
+		cy.getCy('integration-base-url').type(createRequest.url);
+		cy.getCy('integration-arr-key').type(createRequest.apiKey);
+		cy.getCy('integration-category').clear().type(createRequest.category);
+		cy.getCy('integration-download-folder').click();
+		cy.get('.q-menu').contains('.q-item', '/Downloads').click();
+		cy.getCy('integration-test').click();
+		cy.wait('@testRadarrConnection');
+		cy.then(() => {
+			expect(createCallCount).to.equal(0);
+			expect(setupCallCount).to.equal(0);
+		});
+
+		cy.getCy('integration-setup')
+			.should('contain.text', 'Save & Setup')
+			.and('not.be.disabled')
+			.click();
+		cy.getCy('integration-setup').find('.q-spinner').should('exist');
+		cy.getCy('integration-save').find('.q-spinner').should('not.exist');
+		cy.wait('@createRadarr').then(({ request }) => {
+			expect(request.body).to.deep.equal(createRequest);
+		});
+		cy.wait('@getIntegrations');
+		cy.wait('@setupRadarr').then(({ request }) => {
+			expect(request.url).to.contain(createdIntegrationId);
+		});
+		cy.then(() => {
+			expect(createCallCount).to.equal(1);
+			expect(setupCallCount).to.equal(1);
+		});
+		cy.getCy('integration-setup-dialog').should('be.visible');
+		cy.getCy('integration-dialog')
+			.should('exist')
+			.and('contain.text', 'Add Radarr integration');
+		cy.getCy('integration-setup-dialog').find('[data-cy="dialog-close-button"]').click();
+		cy.getCy('integration-setup-dialog').should('not.exist');
+		cy.getCy('integration-dialog').should('not.exist');
 	});
 
 	it('edits and sets up an existing unconfigured Radarr integration', () => {
@@ -304,6 +400,7 @@ describe('Radarr integrations', () => {
 		cy.getCy('integration-dialog').should('contain.text', 'Connection successful');
 		cy.getCy('integration-name').invoke('val', updatedName).trigger('input').trigger('change');
 		cy.getCy('integration-name').should('have.value', updatedName);
+		cy.getCy('integration-setup').should('contain.text', 'Save & Setup');
 		cy.getCy('integration-save').click();
 		cy.wait('@updateRadarr').then(({ request, response }) => {
 			expect(request.method).to.equal('PUT');
@@ -320,7 +417,7 @@ describe('Radarr integrations', () => {
 
 		cy.getCy('integration-card').click();
 		cy.wait('@getRadarr');
-		cy.getCy('integration-setup').click();
+		cy.getCy('integration-setup').should('contain.text', 'Setup').and('not.contain.text', 'Save & Setup').click();
 		for (const { selector } of setupStages) {
 			cy.getCy(`integration-setup-step-${selector}`).should('have.attr', 'data-status', 'pending');
 		}

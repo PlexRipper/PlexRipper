@@ -85,7 +85,7 @@ const setupStages = [
 ] as const;
 
 describe('Sonarr integrations', () => {
-	it('creates a Sonarr integration through validation, connection testing, and automatic save', () => {
+	it('checks and saves a new Sonarr integration as explicit separate actions', () => {
 		let integrations: IntegrationSummary[] = [];
 		let saveCallCount = 0;
 		const createdDetail: SonarrIntegrationDTO = {
@@ -116,6 +116,7 @@ describe('Sonarr integrations', () => {
 			request.reply({ statusCode: 200, body: generateResultDTO(integrations) });
 		}).as('getIntegrations');
 		cy.intercept({ method: 'GET', pathname: IntegrationPaths.testConnectionToSonarrEndpoint() }, {
+			delay: 1000,
 			statusCode: 200,
 			body: generateResultDTO({
 				result: TestConnectionStatus.Success,
@@ -129,10 +130,6 @@ describe('Sonarr integrations', () => {
 			integrations = [createdSummary];
 			request.reply({ delay: 1000, statusCode: 200, body: generateResultDTO(createdDetail) });
 		}).as('createSonarr');
-		cy.intercept('PUT', IntegrationPaths.updateSonarrIntegrationEndpoint(createdIntegrationId), {
-			statusCode: 200,
-			body: generateResultDTO(createdDetail),
-		}).as('updateCreatedSonarr');
 		cy.visit(route('/settings/integrations'));
 		cy.wait('@getIntegrations');
 
@@ -162,17 +159,29 @@ describe('Sonarr integrations', () => {
 		cy.getCy('integration-test').should('not.be.disabled');
 
 		cy.getCy('integration-test').click();
+		cy.getCy('integration-test').find('.q-spinner').should('exist');
+		cy.getCy('integration-save').find('.q-spinner').should('not.exist');
+		cy.then(() => expect(saveCallCount).to.equal(0));
 		cy.wait('@testSonarrConnection').then(({ request, response }) => {
 			expect(request.method).to.equal('GET');
 			expect(request.query).to.deep.include({ apiKey: createRequest.apiKey, url: createRequest.url });
 			expect(response?.statusCode).to.equal(200);
 		});
-		cy.getCy('integration-test').find('.q-spinner').should('exist');
-		cy.getCy('integration-save').find('.q-spinner').should('not.exist');
+		cy.then(() => expect(saveCallCount).to.equal(0));
 		cy.getCy('integration-dialog')
 			.should('contain.text', 'Connection successful')
 			.and('contain.text', 'HTTP 200');
 
+		cy.getCy('integration-dialog')
+			.should('be.visible')
+			.and('contain.text', 'Add Sonarr integration');
+		cy.getCy('integration-delete').should('not.exist');
+		cy.getCy('integration-setup')
+			.should('not.be.disabled')
+			.and('contain.text', 'Save & Setup');
+		cy.getCy('integration-save').click();
+		cy.getCy('integration-save').find('.q-spinner').should('exist');
+		cy.getCy('integration-test').find('.q-spinner').should('not.exist');
 		cy.wait('@createSonarr').then(({ request, response }) => {
 			expect(request.method).to.equal('POST');
 			expect(request.body).to.deep.equal(createRequest);
@@ -181,13 +190,6 @@ describe('Sonarr integrations', () => {
 		});
 		cy.wait('@getIntegrations');
 		cy.then(() => expect(saveCallCount).to.equal(1));
-		cy.getCy('integration-dialog')
-			.should('be.visible')
-			.and('contain.text', 'Add Sonarr integration');
-		cy.getCy('integration-delete').should('not.exist');
-		cy.getCy('integration-setup').should('not.be.disabled');
-		cy.getCy('integration-save').click();
-		cy.wait('@updateCreatedSonarr');
 		cy.getCy('integration-dialog').should('not.exist');
 		cy.getCy('integration-card')
 			.should('have.length', 1)
@@ -197,6 +199,100 @@ describe('Sonarr integrations', () => {
 			.and('contain.text', createRequest.url)
 			.and('contain.text', IntegrationProvisioningState.Unconfigured);
 		cy.getCy('integration-card').find('[alt="sonarr"]').should('exist');
+	});
+
+	it('saves and sets up a new Sonarr integration before closing both dialogs', () => {
+		let integrations: IntegrationSummary[] = [];
+		let createCallCount = 0;
+		let setupCallCount = 0;
+		const createdDetail: SonarrIntegrationDTO = {
+			id: createdIntegrationId,
+			name: createRequest.name,
+			url: createRequest.url,
+			apiKey: createRequest.apiKey,
+			category: createRequest.category,
+			downloadFolderId: createRequest.downloadFolderId,
+			provisioningState: IntegrationProvisioningState.Unconfigured,
+			lastConnectionTestStatus: TestConnectionStatus.Success,
+		};
+		const createdSummary: IntegrationSummary = {
+			id: createdIntegrationId,
+			type: IntegrationType.Sonarr,
+			name: createRequest.name,
+			baseUrl: createRequest.url,
+			category: createRequest.category,
+			provisioningState: IntegrationProvisioningState.Unconfigured,
+			lastConnectionTestStatus: TestConnectionStatus.Success,
+			downloadFolderId: createRequest.downloadFolderId,
+			externalDownloadClientId: null,
+			externalIndexerId: null,
+		};
+		const configuredDetail = { ...createdDetail, provisioningState: IntegrationProvisioningState.Configured };
+
+		cy.basePageSetup({ plexAccountCount: 0, plexServerCount: 0 });
+		cy.intercept('GET', IntegrationPaths.getIntegrationsEndpoint(), (request) => {
+			request.reply({ statusCode: 200, body: generateResultDTO(integrations) });
+		}).as('getIntegrations');
+		cy.intercept({ method: 'GET', pathname: IntegrationPaths.testConnectionToSonarrEndpoint() }, {
+			statusCode: 200,
+			body: generateResultDTO({
+				result: TestConnectionStatus.Success,
+				errorMessage: null,
+				httpStatusCode: 200,
+				testedAt,
+			}),
+		}).as('testSonarrConnection');
+		cy.intercept('POST', IntegrationPaths.createSonarrIntegrationEndpoint(), (request) => {
+			createCallCount++;
+			integrations = [createdSummary];
+			request.reply({ delay: 1000, statusCode: 200, body: generateResultDTO(createdDetail) });
+		}).as('createSonarr');
+		cy.intercept('POST', IntegrationPaths.setupSonarrIntegrationEndpoint(createdIntegrationId), (request) => {
+			setupCallCount++;
+			request.reply({ statusCode: 200, body: generateResultDTO(configuredDetail) });
+		}).as('setupSonarr');
+		cy.visit(route('/settings/integrations'));
+		cy.wait('@getIntegrations');
+
+		cy.getCy('add-integration').click();
+		cy.getCy('integration-type-sonarr').click();
+		cy.getCy('integration-name').type(createRequest.name);
+		cy.getCy('integration-base-url').type(createRequest.url);
+		cy.getCy('integration-arr-key').type(createRequest.apiKey);
+		cy.getCy('integration-category').clear().type(createRequest.category);
+		cy.getCy('integration-download-folder').click();
+		cy.get('.q-menu').contains('.q-item', '/Downloads').click();
+		cy.getCy('integration-test').click();
+		cy.wait('@testSonarrConnection');
+		cy.then(() => {
+			expect(createCallCount).to.equal(0);
+			expect(setupCallCount).to.equal(0);
+		});
+
+		cy.getCy('integration-setup')
+			.should('contain.text', 'Save & Setup')
+			.and('not.be.disabled')
+			.click();
+		cy.getCy('integration-setup').find('.q-spinner').should('exist');
+		cy.getCy('integration-save').find('.q-spinner').should('not.exist');
+		cy.wait('@createSonarr').then(({ request }) => {
+			expect(request.body).to.deep.equal(createRequest);
+		});
+		cy.wait('@getIntegrations');
+		cy.wait('@setupSonarr').then(({ request }) => {
+			expect(request.url).to.contain(createdIntegrationId);
+		});
+		cy.then(() => {
+			expect(createCallCount).to.equal(1);
+			expect(setupCallCount).to.equal(1);
+		});
+		cy.getCy('integration-setup-dialog').should('be.visible');
+		cy.getCy('integration-dialog')
+			.should('exist')
+			.and('contain.text', 'Add Sonarr integration');
+		cy.getCy('integration-setup-dialog').find('[data-cy="dialog-close-button"]').click();
+		cy.getCy('integration-setup-dialog').should('not.exist');
+		cy.getCy('integration-dialog').should('not.exist');
 	});
 
 	it('edits and sets up an existing unconfigured Sonarr integration', () => {
@@ -306,6 +402,7 @@ describe('Sonarr integrations', () => {
 		cy.getCy('integration-dialog').should('contain.text', 'Connection successful');
 		cy.getCy('integration-name').invoke('val', updatedName).trigger('input').trigger('change');
 		cy.getCy('integration-name').should('have.value', updatedName);
+		cy.getCy('integration-setup').should('contain.text', 'Save & Setup');
 		cy.getCy('integration-save').click();
 		cy.wait('@updateSonarr').then(({ request, response }) => {
 			expect(request.method).to.equal('PUT');
@@ -322,7 +419,7 @@ describe('Sonarr integrations', () => {
 
 		cy.getCy('integration-card').click();
 		cy.wait('@getSonarr');
-		cy.getCy('integration-setup').click();
+		cy.getCy('integration-setup').should('contain.text', 'Setup').and('not.contain.text', 'Save & Setup').click();
 		for (const { selector } of setupStages) {
 			cy.getCy(`integration-setup-step-${selector}`).should('have.attr', 'data-status', 'pending');
 		}

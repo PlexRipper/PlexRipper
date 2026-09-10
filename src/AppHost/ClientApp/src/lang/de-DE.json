@@ -898,6 +898,7 @@
             },
             "integrations": {
                 "choose-title": "Integration hinzufügen",
+                "save-and-setup": "Speichern & Einrichten",
                 "test-success": "Verbindung erfolgreich",
                 "test-failed": "Verbindung fehlgeschlagen",
                 "test-url": "Versuchte URL: {url}",

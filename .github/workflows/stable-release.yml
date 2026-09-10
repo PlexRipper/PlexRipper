@@ -65,7 +65,7 @@ jobs:
         if: needs.semantic-release.outputs.new-release-published == 'true'
         uses: ./.github/workflows/desktop-build.yml
         secrets:
-            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            RELEASE_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
             push: true
             publish_release: false

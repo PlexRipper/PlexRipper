@@ -29,7 +29,7 @@ on:
                 required: true
                 type: string
         secrets:
-            GITHUB_TOKEN:
+            RELEASE_GITHUB_TOKEN:
                 required: false
 
 jobs:
@@ -133,7 +133,7 @@ jobs:
                     vpk download github \
                         --repoUrl https://github.com/${{ github.repository }} \
                         --channel "$VELOPACK_CHANNEL" \
-                        --token ${{ secrets.GITHUB_TOKEN }}
+                        --token ${{ secrets.RELEASE_GITHUB_TOKEN }}
 
             -   name: Package installer via shared CLI
                 shell: bash
@@ -215,7 +215,7 @@ jobs:
                 shell: bash
                 env:
                     PUBLISH_RELEASE: ${{ inputs.publish_release }}
-                    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+                    GITHUB_TOKEN: ${{ secrets.RELEASE_GITHUB_TOKEN }}
                     RID: ${{ matrix.rid }}
                     VERSION: ${{ inputs.version }}
                 run: |

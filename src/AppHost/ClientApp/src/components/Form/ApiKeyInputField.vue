@@ -9,6 +9,7 @@
 		outlined
 		required
 		hide-bottom-space
+		:hint="hint"
 		name="password"
 		:data-cy="cy"
 		:append-icon="showApiKey ? 'mdi-eye' : 'mdi-eye-off'"
@@ -45,12 +46,14 @@ withDefaults(defineProps<{
 	showStrength?: boolean;
 	minPasswordLength?: number;
 	disableValidation?: boolean;
+	hint?: string;
 }>(), {
 	hideMaskButton: false,
 	cy: 'api-key-input-field',
 	showStrength: false,
 	minPasswordLength: 8,
 	disableValidation: false,
+	hint: undefined,
 });
 
 const emits = defineEmits<{

@@ -911,6 +911,7 @@
                     "display-name": {
                         "label": "Sonarr Display Name",
                         "text": "The name used to identify this Sonarr integration in Reaparr.",
+                        "hint": "Sonarr",
                         "title": "Sonarr Integration Display Name"
                     },
                     "download-folder": {
@@ -921,16 +922,19 @@
                     "category": {
                         "label": "Sonarr qBittorrent Category",
                         "text": "The qBittorrent category used by this Sonarr integration to keep its downloads separate.",
+                        "hint": "reaparr-sonarr",
                         "title": "Sonarr Integration qBittorrent Category"
                     },
                     "api-key-input": {
                         "label": "Sonarr API Key",
                         "text": "Go to Sonarr: Settings → General → Security → API Key and copy the API key from there and paste in this field",
+                        "hint": "32-character hexadecimal API key",
                         "title": "API key from Sonarr"
                     },
                     "base-url-input": {
                         "label": "Sonarr base URL",
                         "text": "Base address where your Sonarr instance is reachable. Example: http://localhost:8989 or http://sonarr:8989",
+                        "hint": "http://localhost:8989",
                         "title": "Base URL to Sonarr"
                     }
                 },
@@ -940,6 +944,7 @@
                     "display-name": {
                         "label": "Radarr Display Name",
                         "text": "The name used to identify this Radarr integration in Reaparr.",
+                        "hint": "Radarr",
                         "title": "Radarr Integration Display Name"
                     },
                     "download-folder": {
@@ -950,16 +955,19 @@
                     "category": {
                         "label": "Radarr qBittorrent Category",
                         "text": "The qBittorrent category used by this Radarr integration to keep its downloads separate.",
+                        "hint": "reaparr-radarr",
                         "title": "Radarr Integration qBittorrent Category"
                     },
                     "api-key-input": {
                         "label": "Radarr API Key",
                         "text": "Go to Radarr: Settings → General → Security → API Key and copy the API key from there and paste in this field",
+                        "hint": "32-character hexadecimal API key",
                         "title": "API key from Radarr"
                     },
                     "base-url-input": {
                         "label": "Radarr base URL",
                         "text": "Base address where your Radarr instance is reachable. Example: http://localhost:7878 or http://radarr:7878",
+                        "hint": "http://localhost:7878",
                         "title": "Base URL to Radarr"
                     }
                 }

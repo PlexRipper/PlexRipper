@@ -82,6 +82,7 @@
 					<QInput
 						v-model="store.draft.name"
 						data-cy="integration-name"
+						:hint="integrationHelp.displayName.hint"
 						hide-bottom-space
 						:rules="requiredRules" />
 				</HelpRow>
@@ -94,7 +95,7 @@
 					disable-responsive>
 					<QInput
 						v-model="store.draft.url"
-						hint="http://localhost:8989"
+						:hint="integrationHelp.baseUrl.hint"
 						data-cy="integration-base-url"
 						hide-bottom-space
 						:rules="requiredRules" />
@@ -109,6 +110,7 @@
 					<ApiKeyInputField
 						v-model="store.draft.apiKey"
 						cy="integration-arr-key"
+						:hint="integrationHelp.apiKey.hint"
 						:rules="requiredRules" />
 				</HelpRow>
 				<!-- Category -->
@@ -121,6 +123,7 @@
 					<QInput
 						v-model="store.draft.category"
 						data-cy="integration-category"
+						:hint="integrationHelp.category.hint"
 						hide-bottom-space
 						:rules="requiredRules" />
 				</HelpRow>
@@ -244,21 +247,25 @@ const integrationHelp = computed(() => {
 				label: $t('help.settings.integrations.radarr.display-name.label'),
 				title: $t('help.settings.integrations.radarr.display-name.title'),
 				text: $t('help.settings.integrations.radarr.display-name.text'),
+				hint: $t('help.settings.integrations.radarr.display-name.hint'),
 			},
 			baseUrl: {
 				label: $t('help.settings.integrations.radarr.base-url-input.label'),
 				title: $t('help.settings.integrations.radarr.base-url-input.title'),
 				text: $t('help.settings.integrations.radarr.base-url-input.text'),
+				hint: $t('help.settings.integrations.radarr.base-url-input.hint'),
 			},
 			apiKey: {
 				label: $t('help.settings.integrations.radarr.api-key-input.label'),
 				title: $t('help.settings.integrations.radarr.api-key-input.title'),
 				text: $t('help.settings.integrations.radarr.api-key-input.text'),
+				hint: $t('help.settings.integrations.radarr.api-key-input.hint'),
 			},
 			category: {
 				label: $t('help.settings.integrations.radarr.category.label'),
 				title: $t('help.settings.integrations.radarr.category.title'),
 				text: $t('help.settings.integrations.radarr.category.text'),
+				hint: $t('help.settings.integrations.radarr.category.hint'),
 			},
 			downloadFolder: {
 				label: $t('help.settings.integrations.radarr.download-folder.label'),
@@ -273,21 +280,25 @@ const integrationHelp = computed(() => {
 			label: $t('help.settings.integrations.sonarr.display-name.label'),
 			title: $t('help.settings.integrations.sonarr.display-name.title'),
 			text: $t('help.settings.integrations.sonarr.display-name.text'),
+			hint: $t('help.settings.integrations.sonarr.display-name.hint'),
 		},
 		baseUrl: {
 			label: $t('help.settings.integrations.sonarr.base-url-input.label'),
 			title: $t('help.settings.integrations.sonarr.base-url-input.title'),
 			text: $t('help.settings.integrations.sonarr.base-url-input.text'),
+			hint: $t('help.settings.integrations.sonarr.base-url-input.hint'),
 		},
 		apiKey: {
 			label: $t('help.settings.integrations.sonarr.api-key-input.label'),
 			title: $t('help.settings.integrations.sonarr.api-key-input.title'),
 			text: $t('help.settings.integrations.sonarr.api-key-input.text'),
+			hint: $t('help.settings.integrations.sonarr.api-key-input.hint'),
 		},
 		category: {
 			label: $t('help.settings.integrations.sonarr.category.label'),
 			title: $t('help.settings.integrations.sonarr.category.title'),
 			text: $t('help.settings.integrations.sonarr.category.text'),
+			hint: $t('help.settings.integrations.sonarr.category.hint'),
 		},
 		downloadFolder: {
 			label: $t('help.settings.integrations.sonarr.download-folder.label'),

@@ -911,6 +911,7 @@
                     "display-name": {
                         "label": "Nom affiché Sonarr",
                         "text": "Le nom utilisé pour identifier cette intégration Sonarr dans Reaparr.",
+                        "hint": "Sonarr",
                         "title": "Nom affiché de l'intégration Sonarr"
                     },
                     "download-folder": {
@@ -921,16 +922,19 @@
                     "category": {
                         "label": "Catégorie qBittorrent Sonarr",
                         "text": "La catégorie qBittorrent utilisée par cette intégration Sonarr pour séparer ses téléchargements.",
+                        "hint": "reaparr-sonarr",
                         "title": "Catégorie qBittorrent de l'intégration Sonarr"
                     },
                     "api-key-input": {
                         "label": "Clé API Sonarr",
                         "text": "Accédez à Sonarr: Paramètres → Général → Sécurité → Clé API, copiez la clé API et collez-la dans ce champ.",
+                        "hint": "Clé API hexadécimale de 32 caractères",
                         "title": "Clé API de Sonarr"
                     },
                     "base-url-input": {
                         "label": "URL de base de Sonarr",
                         "text": "Adresse de base où votre instance Sonarr est accessible. Exemple: http://localhost:8989 ou http://sonarr:8989",
+                        "hint": "http://localhost:8989",
                         "title": "URL de base vers Sonarr"
                     }
                 },
@@ -940,6 +944,7 @@
                     "display-name": {
                         "label": "",
                         "text": "",
+                        "hint": "Radarr",
                         "title": ""
                     },
                     "download-folder": {
@@ -950,16 +955,19 @@
                     "category": {
                         "label": "",
                         "text": "",
+                        "hint": "reaparr-radarr",
                         "title": ""
                     },
                     "api-key-input": {
                         "label": "Clé API Radarr",
                         "text": "Accédez à Radarr: Paramètres → Général → Sécurité → Clé API, copiez la clé API et collez-la dans ce champ.",
+                        "hint": "Clé API hexadécimale de 32 caractères",
                         "title": "Clé API de Radarr"
                     },
                     "base-url-input": {
                         "label": "URL de base de Radarr",
                         "text": "Adresse de base où votre instance Radarr est accessible. Exemple: http://localhost:7878 ou http://radarr:7878",
+                        "hint": "http://localhost:7878",
                         "title": "URL de base vers Radarr"
                     }
                 }

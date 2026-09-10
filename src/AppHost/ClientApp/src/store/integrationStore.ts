@@ -43,7 +43,7 @@ interface IIntegrationStoreState {
 }
 
 function emptyDraft(type = IntegrationType.Sonarr): IIntegrationDraft {
-	return { type, name: '', url: '', apiKey: '', category: `Reaparr ${type}`, downloadFolderId: 1 };
+	return { type, name: '', url: '', apiKey: '', category: type === IntegrationType.Sonarr ? 'reaparr-sonarr' : 'reaparr-radarr', downloadFolderId: 1 };
 }
 
 export const useIntegrationStore = defineStore(StoreNames.IntegrationStore, () => {

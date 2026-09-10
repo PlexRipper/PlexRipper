@@ -216,14 +216,13 @@ export const useIntegrationStore = defineStore(StoreNames.IntegrationStore, () =
 			state.isDeleting = true;
 			state.error = null;
 			return (request as Observable<ResultDTO>).pipe(
-				switchMap((result) => {
+				tap((result) => {
 					if (!result.isSuccess) {
 						state.error = result;
-						return of(result);
+						return;
 					}
 					state.detail = null;
 					state.requiresSetupPrompt = false;
-					return actions.refresh().pipe(map(() => result));
 				}),
 				catchError(handleError),
 				finalize(() => (state.isDeleting = false)),

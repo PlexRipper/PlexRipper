@@ -127,8 +127,12 @@ describe('Sonarr integrations', () => {
 		cy.intercept('POST', IntegrationPaths.createSonarrIntegrationEndpoint(), (request) => {
 			saveCallCount++;
 			integrations = [createdSummary];
-			request.reply({ statusCode: 200, body: generateResultDTO(createdDetail) });
+			request.reply({ delay: 1000, statusCode: 200, body: generateResultDTO(createdDetail) });
 		}).as('createSonarr');
+		cy.intercept('PUT', IntegrationPaths.updateSonarrIntegrationEndpoint(createdIntegrationId), {
+			statusCode: 200,
+			body: generateResultDTO(createdDetail),
+		}).as('updateCreatedSonarr');
 		cy.visit(route('/settings/integrations'));
 		cy.wait('@getIntegrations');
 
@@ -163,6 +167,8 @@ describe('Sonarr integrations', () => {
 			expect(request.query).to.deep.include({ apiKey: createRequest.apiKey, url: createRequest.url });
 			expect(response?.statusCode).to.equal(200);
 		});
+		cy.getCy('integration-test').find('.q-spinner').should('exist');
+		cy.getCy('integration-save').find('.q-spinner').should('not.exist');
 		cy.getCy('integration-dialog')
 			.should('contain.text', 'Connection successful')
 			.and('contain.text', 'HTTP 200');
@@ -175,10 +181,13 @@ describe('Sonarr integrations', () => {
 		});
 		cy.wait('@getIntegrations');
 		cy.then(() => expect(saveCallCount).to.equal(1));
-		cy.getCy('integration-dialog').should('be.visible');
+		cy.getCy('integration-dialog')
+			.should('be.visible')
+			.and('contain.text', 'Add Sonarr integration');
+		cy.getCy('integration-delete').should('not.exist');
 		cy.getCy('integration-setup').should('not.be.disabled');
-
-		cy.getCy('integration-dialog').find('[data-cy="dialog-close-button"]').click();
+		cy.getCy('integration-save').click();
+		cy.wait('@updateCreatedSonarr');
 		cy.getCy('integration-dialog').should('not.exist');
 		cy.getCy('integration-card')
 			.should('have.length', 1)
@@ -196,6 +205,7 @@ describe('Sonarr integrations', () => {
 		let updateCallCount = 0;
 		let setupCallCount = 0;
 		let testConnectionCallCount = 0;
+		let isDeleted = false;
 		const updateRequest = {
 			name: updatedName,
 			url: updatedUrl,
@@ -228,7 +238,7 @@ describe('Sonarr integrations', () => {
 
 		cy.basePageSetup({ plexAccountCount: 0, plexServerCount: 0 });
 		cy.intercept('GET', IntegrationPaths.getIntegrationsEndpoint(), (request) => {
-			request.reply({ statusCode: 200, body: generateResultDTO([currentSummary]) });
+			request.reply({ statusCode: 200, body: generateResultDTO(isDeleted ? [] : [currentSummary]) });
 		}).as('getIntegrations');
 		cy.intercept('GET', IntegrationPaths.getSonarrIntegrationEndpoint(integrationId), {
 			statusCode: 200,
@@ -263,6 +273,10 @@ describe('Sonarr integrations', () => {
 			currentDetail = configuredDetail;
 			request.reply({ statusCode: 200, body: generateResultDTO(configuredDetail) });
 		}).as('setupSonarr');
+		cy.intercept('DELETE', IntegrationPaths.deleteSonarrIntegrationEndpoint(integrationId, { Force: true }), (request) => {
+			isDeleted = true;
+			request.reply({ delay: 1000, statusCode: 204 });
+		}).as('deleteSonarr');
 		cy.visit(route('/settings/integrations'));
 		cy.wait('@getIntegrations');
 
@@ -326,9 +340,23 @@ describe('Sonarr integrations', () => {
 					.should('have.attr', 'data-status', 'success')
 					.and('not.contain.text', 'Integration setup complete.')
 					.find('.q-stepper__tab')
-					.should('have.class', 'text-positive');
+					.should('have.class', 'text-positive')
+					.and('not.have.class', 'text-negative');
 				continue;
 			}
+
+			cy.hubPublish('progress', MessageTypes.IntegrationSetupProgress, {
+				integrationId,
+				stage,
+				isRunning: true,
+				isSuccess: false,
+			} satisfies IntegrationSetupProgressDTO);
+			cy.getCy(`integration-setup-step-${selector}`)
+				.should('have.attr', 'data-status', 'running')
+				.find('.q-stepper__tab')
+				.should('have.class', 'text-info')
+				.and('not.have.class', 'text-positive')
+				.and('not.have.class', 'text-negative');
 
 			cy.hubPublish('progress', MessageTypes.IntegrationSetupProgress, {
 				integrationId,
@@ -347,7 +375,9 @@ describe('Sonarr integrations', () => {
 			} else {
 				step.and('contain.text', error);
 			}
-			step.find('.q-stepper__tab').should('have.class', 'text-negative');
+			step.find('.q-stepper__tab')
+				.should('have.class', 'text-negative')
+				.and('not.have.class', 'text-positive');
 			if (stage === IntegrationSetupProgressStage.Connecting) {
 				cy.hubPublish('progress', MessageTypes.IntegrationSetupProgress, {
 					integrationId,
@@ -363,7 +393,11 @@ describe('Sonarr integrations', () => {
 				cy.getCy('integration-setup-step-download-client').should('have.attr', 'data-status', 'pending');
 			}
 			for (const { selector: previousSelector } of setupStages.slice(0, index)) {
-				cy.getCy(`integration-setup-step-${previousSelector}`).should('have.attr', 'data-status', 'success');
+				cy.getCy(`integration-setup-step-${previousSelector}`)
+					.should('have.attr', 'data-status', 'success')
+					.find('.q-stepper__tab')
+					.should('have.class', 'text-positive')
+					.and('not.have.class', 'text-negative');
 			}
 			for (const { selector: nextSelector } of setupStages.slice(index + 1)) {
 				cy.getCy(`integration-setup-step-${nextSelector}`).should('have.attr', 'data-status', 'pending');
@@ -377,7 +411,10 @@ describe('Sonarr integrations', () => {
 			} satisfies IntegrationSetupProgressDTO);
 			cy.getCy(`integration-setup-step-${selector}`)
 				.should('have.attr', 'data-status', 'success')
-				.and('contain.text', stageDefinition.successText);
+				.and('contain.text', stageDefinition.successText)
+				.find('.q-stepper__tab')
+				.should('have.class', 'text-positive')
+				.and('not.have.class', 'text-negative');
 		}
 
 		cy.wait('@setupSonarr').then(({ request, response }) => {
@@ -399,14 +436,19 @@ describe('Sonarr integrations', () => {
 		cy.getCy('integration-setup-dialog').should('not.exist');
 		cy.wait('@getIntegrations');
 		cy.then(() => expect(setupCallCount).to.equal(2));
-		cy.getCy('integration-dialog').find('[data-cy="dialog-close-button"]').click();
+		cy.getCy('integration-delete').click();
+		cy.getCy('confirmation-dialog').should('be.visible');
+		cy.getCy('confirmation-dialog-confirmation-button').click();
+		cy.getCy('confirmation-dialog').find('.q-spinner').should('exist');
+		cy.getCy('confirmation-dialog-cancel-button').should('be.disabled');
+		cy.wait('@deleteSonarr').then(({ request, response }) => {
+			expect(request.method).to.equal('DELETE');
+			expect(request.query).to.deep.include({ Force: 'true' });
+			expect(response?.statusCode).to.equal(204);
+		});
+		cy.getCy('confirmation-dialog').should('not.exist');
 		cy.getCy('integration-dialog').should('not.exist');
-		cy.getCy('integration-card')
-			.should('be.visible')
-			.and('have.attr', 'aria-label', updatedName)
-			.and('contain.text', updatedName)
-			.and('contain.text', IntegrationProvisioningState.Configured)
-			.and('contain.text', 'Connected');
-		cy.getCy('integration-card').find('[alt="sonarr"]').should('exist');
+		cy.wait('@getIntegrations');
+		cy.getCy('integration-card').should('not.exist');
 	});
 });

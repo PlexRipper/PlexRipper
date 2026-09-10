@@ -9,7 +9,7 @@
 		@closed="close">
 		<template #title>
 			<div
-				v-if="store.detail || stage === 2"
+				v-if="isEditMode || stage === 2"
 				class="row items-center q-gutter-sm">
 				<QImg
 					no-spinner
@@ -160,10 +160,11 @@
 			<QRow
 				v-if="store.detail || stage === 2"
 				gutter="md">
-				<QCol v-if="store.detail">
+				<QCol v-if="isEditMode">
 					<DeleteButton
 						block
 						cy="integration-delete"
+						:loading="store.isDeleting"
 						@click="dialogStore.openDialog(DialogType.IntegrationDeleteConfirmationDialog)" />
 				</QCol>
 				<QCol>
@@ -171,7 +172,7 @@
 						block
 						icon="mdi-cloud-search-outline"
 						:label="$t('general.commands.check-connection')"
-						:loading="store.isTesting"
+						:loading="store.isTesting || isAutoSaving"
 						:disable="!store.isDraftValid"
 						data-cy="integration-test"
 						@click="test" />
@@ -190,7 +191,7 @@
 					<SaveButton
 						block
 						label="Save"
-						:loading="store.isSaving"
+						:loading="store.isSaving && !isAutoSaving"
 						:disable="!store.isDraftValid"
 						data-cy="integration-save"
 						@click="save" />
@@ -206,11 +207,12 @@
 		:warning="$t('confirmation.delete-integration.warning', { type: store.detail?.type ?? '' })"
 		:confirm-label="$t('general.commands.delete')"
 		:confirm-loading="store.isDeleting"
+		:disable-cancel="store.isDeleting"
 		@confirm="deleteIntegration" />
 </template>
 
 <script setup lang="ts">
-import { set } from '@vueuse/core';
+import { get, set } from '@vueuse/core';
 import { useSubscription } from '@vueuse/rxjs';
 import { FolderType, IntegrationType, TestConnectionStatus, type IntegrationSummary } from '@dto';
 import { DialogType } from '@enums';
@@ -224,6 +226,8 @@ const integrationTypes = [
 	{ type: IntegrationType.Radarr, icon: '/img/logo/radarr.svg' },
 ] as const;
 const stage = ref(1);
+const isEditMode = ref(false);
+const isAutoSaving = ref(false);
 const requiredRules = [(value: string | number) => (typeof value === 'number' ? value > 0 : Boolean(value?.trim())) || 'Required'];
 const baseUrlRules = [
 	...requiredRules,
@@ -240,10 +244,10 @@ const integrationLogo = computed(() => integrationTypes.find(({ type }) => type 
 
 const integrationTitle = computed(() => {
 	if (store.draft.type === IntegrationType.Radarr) {
-		return store.detail ? $t('help.settings.integrations.radarr.edit-title') : $t('help.settings.integrations.radarr.add-title');
+		return get(isEditMode) ? $t('help.settings.integrations.radarr.edit-title') : $t('help.settings.integrations.radarr.add-title');
 	}
 
-	return store.detail ? $t('help.settings.integrations.sonarr.edit-title') : $t('help.settings.integrations.sonarr.add-title');
+	return get(isEditMode) ? $t('help.settings.integrations.sonarr.edit-title') : $t('help.settings.integrations.sonarr.add-title');
 });
 const integrationHelp = computed(() => {
 	if (store.draft.type === IntegrationType.Radarr) {
@@ -322,6 +326,7 @@ watch(
 
 function open(event: unknown): void {
 	const integration = event as IntegrationSummary | null;
+	set(isEditMode, Boolean(integration));
 	set(stage, integration ? 2 : 1);
 	if (integration) useSubscription(store.openEdit(integration).subscribe());
 	else {
@@ -330,9 +335,12 @@ function open(event: unknown): void {
 }
 
 function deleteIntegration() {
-	useSubscription(store.delete().subscribe(() => {
+	useSubscription(store.delete().subscribe((result) => {
+		if (!result?.isSuccess)
+			return;
 		dialogStore.closeDialog(DialogType.IntegrationDeleteConfirmationDialog);
-		if (!store.detail) dialogStore.closeDialog(DialogType.IntegrationDialog);
+		dialogStore.closeDialog(DialogType.IntegrationDialog);
+		useSubscription(store.refresh().subscribe());
 	}));
 }
 
@@ -355,16 +363,18 @@ function formatTestDetails(): string {
 function test(): void {
 	useSubscription(store.test().subscribe((result) => {
 		const isSuccessful = result?.isSuccess && result.value?.result === TestConnectionStatus.Success;
-		if (!isSuccessful) return;
+		if (!isSuccessful || store.detail) return;
 
-		if (!store.detail) save();
+		set(isAutoSaving, true);
+		useSubscription(store.save().subscribe({
+			complete: () => set(isAutoSaving, false),
+		}));
 	}));
 }
 
 function save(): void {
-	const isEditing = Boolean(store.detail);
 	useSubscription(store.save().subscribe((result) => {
-		if (isEditing && result?.isSuccess && result.value) dialogStore.closeDialog(DialogType.IntegrationDialog);
+		if (result?.isSuccess && result.value) dialogStore.closeDialog(DialogType.IntegrationDialog);
 	}));
 }
 
@@ -375,6 +385,8 @@ function setup(): void {
 }
 
 function close(): void {
+	set(isEditMode, false);
+	set(isAutoSaving, false);
 	store.close();
 	dialogStore.closeDialog(DialogType.IntegrationDialog);
 }

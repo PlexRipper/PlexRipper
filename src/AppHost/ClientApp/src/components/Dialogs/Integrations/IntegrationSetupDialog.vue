@@ -29,10 +29,11 @@
 					:name="1"
 					:title="setupTexts.steps.connect"
 					icon="mdi-lan-connect"
-					done-icon="mdi-check-circle"
+					done-icon="mdi-check"
 					:active-icon="getStepActiveIcon(steps.connect.status)"
-					error-icon="mdi-alert-circle"
+					error-icon="mdi-alert"
 					:active-color="getStepActiveColor(steps.connect.status)"
+					done-color="positive"
 					error-color="negative"
 					:done="steps.connect.status === 'success'"
 					:header-nav="false"
@@ -63,10 +64,11 @@
 					:name="2"
 					:title="setupTexts.steps.downloadClient"
 					icon="mdi-download"
-					done-icon="mdi-check-circle"
+					done-icon="mdi-check"
 					:active-icon="getStepActiveIcon(steps.downloadClient.status)"
-					error-icon="mdi-alert-circle"
+					error-icon="mdi-alert"
 					:active-color="getStepActiveColor(steps.downloadClient.status)"
+					done-color="positive"
 					error-color="negative"
 					:done="steps.downloadClient.status === 'success'"
 					:header-nav="false"
@@ -97,10 +99,11 @@
 					:name="3"
 					:title="setupTexts.steps.indexer"
 					icon="mdi-database-search"
-					done-icon="mdi-check-circle"
+					done-icon="mdi-check"
 					:active-icon="getStepActiveIcon(steps.indexer.status)"
-					error-icon="mdi-alert-circle"
+					error-icon="mdi-alert"
 					:active-color="getStepActiveColor(steps.indexer.status)"
+					done-color="positive"
 					error-color="negative"
 					:done="steps.indexer.status === 'success'"
 					:header-nav="false"
@@ -131,10 +134,11 @@
 					:name="4"
 					:title="setupTexts.steps.validation"
 					icon="mdi-connection"
-					done-icon="mdi-check-circle"
+					done-icon="mdi-check"
 					:active-icon="getStepActiveIcon(steps.validation.status)"
-					error-icon="mdi-alert-circle"
+					error-icon="mdi-alert"
 					:active-color="getStepActiveColor(steps.validation.status)"
+					done-color="positive"
 					error-color="negative"
 					:done="steps.validation.status === 'success'"
 					:header-nav="false"
@@ -170,9 +174,9 @@
 				<QStep
 					:name="5"
 					:title="setupTexts.steps.done"
-					icon="mdi-check-circle-outline"
-					done-icon="mdi-check-circle"
-					active-icon="mdi-check-circle"
+					icon="mdi-flag-checkered"
+					done-icon="mdi-check"
+					:active-icon="getStepActiveIcon(steps.validation.status)"
 					done-color="positive"
 					active-color="positive"
 					:done="steps.done.status === 'success'"
@@ -223,16 +227,18 @@ const setupTexts = computed(() => {
 type StepStatus = 'pending' | 'running' | 'success' | 'error';
 
 function getStepActiveIcon(status: StepStatus): string {
-	if (status === 'error') return 'mdi-alert-circle';
-	if (status === 'success') return 'mdi-check-circle';
+	if (status === 'error') return 'mdi-alert';
+	if (status === 'success') return 'mdi-check';
 	return 'mdi-loading';
 }
 
-function getStepActiveColor(status: StepStatus): 'positive' | 'negative' | 'primary' {
+function getStepActiveColor(status: StepStatus): 'positive' | 'negative' | 'info' | 'primary' {
 	if (status === 'error') return 'negative';
 	if (status === 'success') return 'positive';
+	if (status === 'running') return 'info';
 	return 'primary';
 }
+
 type Step = { status: StepStatus; error: string };
 const steps = reactive<{ connect: Step; downloadClient: Step; indexer: Step; validation: Step; done: Step }>({
 	connect: { status: 'pending', error: '' },

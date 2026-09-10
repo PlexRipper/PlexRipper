@@ -12,11 +12,16 @@ concurrency:
     group: dockerhub-description
     cancel-in-progress: true
 
+permissions:
+    contents: read
+
 jobs:
     dockerHubDescription:
         runs-on: ubuntu-latest
         steps:
             -   uses: actions/checkout@v7
+                with:
+                    persist-credentials: false
 
             -   name: Update Docker Hub Description
                 uses: peter-evans/dockerhub-description@v5

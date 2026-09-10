@@ -28,6 +28,9 @@ on:
                 description: 'Velopack update channel (dev or stable)'
                 required: true
                 type: string
+        secrets:
+            GITHUB_TOKEN:
+                required: false
 
 jobs:
     prepare-frontend:
@@ -36,6 +39,8 @@ jobs:
         steps:
             -   name: Checkout source code
                 uses: actions/checkout@v7
+                with:
+                    persist-credentials: false
 
             -   name: Client App Install
                 uses: ./.github/actions/client-app-install/
@@ -79,6 +84,8 @@ jobs:
         steps:
             -   name: Checkout source code
                 uses: actions/checkout@v7
+                with:
+                    persist-credentials: false
 
             -   name: Download generated frontend artifact
                 uses: actions/download-artifact@v8
@@ -108,11 +115,14 @@ jobs:
 
             -   name: Derive Velopack channel
                 shell: bash
+                env:
+                    RID: ${{ matrix.rid }}
+                    VELOPACK_CHANNEL_INPUT: ${{ inputs.velopack_channel }}
                 run: |
-                    if [ "${{ inputs.velopack_channel }}" = "stable" ]; then
-                        echo "VELOPACK_CHANNEL=${{ matrix.rid }}-stable" >> "$GITHUB_ENV"
+                    if [[ "$VELOPACK_CHANNEL_INPUT" == 'stable' ]]; then
+                        echo "VELOPACK_CHANNEL=$RID-stable" >> "$GITHUB_ENV"
                     else
-                        echo "VELOPACK_CHANNEL=${{ matrix.rid }}-dev" >> "$GITHUB_ENV"
+                        echo "VELOPACK_CHANNEL=$RID-dev" >> "$GITHUB_ENV"
                     fi
 
             -   name: Download previous release (for delta packages)
@@ -127,11 +137,15 @@ jobs:
 
             -   name: Package installer via shared CLI
                 shell: bash
+                env:
+                    INFORMATIONAL_VERSION: ${{ inputs.informational_version }}
+                    RID: ${{ matrix.rid }}
+                    VERSION: ${{ inputs.version }}
                 run: |
                     dotnet run --project tools/Build -- desktop ci-package \
-                        --rid ${{ matrix.rid }} \
-                        --version ${{ inputs.version }} \
-                        --informational-version ${{ inputs.informational_version }} \
+                        --rid "$RID" \
+                        --version "$VERSION" \
+                        --informational-version "$INFORMATIONAL_VERSION" \
                         --channel "$VELOPACK_CHANNEL" \
                         --frontend-public-dir .tmp/frontend-public \
                         --artifact-dir Releases \
@@ -168,6 +182,8 @@ jobs:
         steps:
             -   name: Checkout source code
                 uses: actions/checkout@v7
+                with:
+                    persist-credentials: false
 
             -   name: Setup .NET 9 runtime for vpk
                 uses: actions/setup-dotnet@v6
@@ -179,11 +195,14 @@ jobs:
 
             -   name: Derive Velopack channel
                 shell: bash
+                env:
+                    RID: ${{ matrix.rid }}
+                    VELOPACK_CHANNEL_INPUT: ${{ inputs.velopack_channel }}
                 run: |
-                    if [ "${{ inputs.velopack_channel }}" = "stable" ]; then
-                        echo "VELOPACK_CHANNEL=${{ matrix.rid }}-stable" >> "$GITHUB_ENV"
+                    if [[ "$VELOPACK_CHANNEL_INPUT" == 'stable' ]]; then
+                        echo "VELOPACK_CHANNEL=$RID-stable" >> "$GITHUB_ENV"
                     else
-                        echo "VELOPACK_CHANNEL=${{ matrix.rid }}-dev" >> "$GITHUB_ENV"
+                        echo "VELOPACK_CHANNEL=$RID-dev" >> "$GITHUB_ENV"
                     fi
 
             -   name: Download packed installer
@@ -194,13 +213,23 @@ jobs:
 
             -   name: Upload installer to GitHub Release
                 shell: bash
+                env:
+                    PUBLISH_RELEASE: ${{ inputs.publish_release }}
+                    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+                    RID: ${{ matrix.rid }}
+                    VERSION: ${{ inputs.version }}
                 run: |
-                    vpk upload github \
-                        --repoUrl https://github.com/${{ github.repository }} \
-                        ${{ inputs.publish_release && '--publish' || '' }} \
-                        --merge \
-                        --channel "$VELOPACK_CHANNEL" \
-                        --outputDir Releases/${{ matrix.rid }} \
-                        --releaseName "Reaparr ${{ inputs.version }}" \
-                        --tag v${{ inputs.version }} \
-                        --token ${{ secrets.GITHUB_TOKEN }}
+                    upload_args=(
+                        vpk upload github
+                        --repoUrl "https://github.com/$GITHUB_REPOSITORY"
+                        --merge
+                        --channel "$VELOPACK_CHANNEL"
+                        --outputDir "Releases/$RID"
+                        --releaseName "Reaparr $VERSION"
+                        --tag "v$VERSION"
+                        --token "$GITHUB_TOKEN"
+                    )
+                    if [[ "$PUBLISH_RELEASE" == 'true' ]]; then
+                        upload_args+=(--publish)
+                    fi
+                    "${upload_args[@]}"

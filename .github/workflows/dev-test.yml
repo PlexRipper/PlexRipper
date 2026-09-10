@@ -19,6 +19,9 @@ on:
             - '.vscode/**'
             - 'README.md'
 
+permissions:
+    contents: read
+
 concurrency:
     group: dev-test-${{ github.event.pull_request.number || github.ref }}
     cancel-in-progress: true
@@ -37,8 +40,10 @@ jobs:
         runs-on: ubuntu-latest
         steps:
             -   uses: actions/checkout@v7
+                with:
+                    persist-credentials: false
             -   name: Run actionlint
-                uses: raven-actions/actionlint@v2.2.0
+                uses: raven-actions/actionlint@v2
                 with:
                     fail-on-error: true
                     matcher: true
@@ -54,6 +59,8 @@ jobs:
             should_run: ${{ steps.check_changes.outputs.github }}
         steps:
             -   uses: actions/checkout@v7
+                with:
+                    persist-credentials: false
             -   name: Check if .github has changed
                 id: check_changes
                 uses: dorny/paths-filter@v4
@@ -71,6 +78,8 @@ jobs:
             should_run: ${{ steps.check_changes.outputs.frontend }}
         steps:
             -   uses: actions/checkout@v7
+                with:
+                    persist-credentials: false
             -   name: Check if front-end has changed
                 id: check_changes
                 uses: dorny/paths-filter@v4
@@ -91,6 +100,8 @@ jobs:
             target_framework: ${{ steps.discover_tests.outputs.target_framework }}
         steps:
             -   uses: actions/checkout@v7
+                with:
+                    persist-credentials: false
             -   name: Check if back-end has changed
                 id: check_changes
                 uses: dorny/paths-filter@v4
@@ -128,6 +139,8 @@ jobs:
         runs-on: ubuntu-latest
         steps:
             -   uses: actions/checkout@v7
+                with:
+                    persist-credentials: false
             -   name: Client App Install
                 uses: ./.github/actions/client-app-install/
             -   name: Run Typescript type check
@@ -141,6 +154,8 @@ jobs:
         runs-on: ubuntu-latest
         steps:
             -   uses: actions/checkout@v7
+                with:
+                    persist-credentials: false
             -   name: Client App Install
                 uses: ./.github/actions/client-app-install/
             -   name: Run Vitest tests
@@ -160,6 +175,8 @@ jobs:
         runs-on: ubuntu-latest
         steps:
             -   uses: actions/checkout@v7
+                with:
+                    persist-credentials: false
             -   name: Client App Install
                 uses: ./.github/actions/client-app-install/
             -   name: Run eslint check
@@ -177,6 +194,8 @@ jobs:
                 containers: [ 1, 2 ] # Uses 2 parallel instances
         steps:
             -   uses: actions/checkout@v7
+                with:
+                    persist-credentials: false
             -   name: Client App Install
                 uses: ./.github/actions/client-app-install/
             -   name: Cache Cypress binary
@@ -212,6 +231,8 @@ jobs:
         steps:
             -   name: Checkout Source Code
                 uses: actions/checkout@v7
+                with:
+                    persist-credentials: false
 
             -   name: Dotnet Setup (Restore only)
                 uses: ./.github/actions/dotnet-setup/
@@ -236,22 +257,9 @@ jobs:
         steps:
             -   name: Checkout Source Code
                 uses: actions/checkout@v7
+                with:
+                    persist-credentials: false
 
-            -   name: Resolve test project metadata
-                id: test_project
-                shell: bash
-                env:
-                    TEST_PROJECT: ${{ matrix.project }}
-                run: |
-                    project_name=${TEST_PROJECT##*/}
-                    project_name=${project_name%.csproj}
-                    project_directory=${TEST_PROJECT%/*}
-                    assembly_name=$(sed -nE 's|.*<AssemblyName>([^<]+)</AssemblyName>.*|\1|p' "$TEST_PROJECT" | sed -n '1p')
-                    assembly_name=${assembly_name:-$project_name}
-                    {
-                        echo "name=$project_name"
-                        echo "executable=$project_directory/bin/Debug/${{ needs.Check-Backend-Changes.outputs.target_framework }}/$assembly_name"
-                    } >> "$GITHUB_OUTPUT"
 
             -   name: Dotnet Setup
                 uses: ./.github/actions/dotnet-setup/
@@ -262,23 +270,31 @@ jobs:
 
             -   name: Run Unit Tests
                 env:
+                    TEST_PROJECT: ${{ matrix.project }}
+                    TARGET_FRAMEWORK: ${{ needs.Check-Backend-Changes.outputs.target_framework }}
+                    TEST_RESULTS_DIRECTORY: TestResults/${{ matrix.project_name }}
                     TUNIT_GITHUB_REPORTER_STYLE: collapsible
-                run: >-
-                    ./${{ steps.test_project.outputs.executable }}
-                    --output Normal
-                    --results-directory TestResults/${{ steps.test_project.outputs.name }}
-                    --report-trx
-                    --report-trx-filename test_results.trx
-                    --coverage
-                    --coverage-output-format cobertura
-                    --coverage-output coverage.cobertura.xml
+                run: |
+                    project_directory=${TEST_PROJECT%/*}
+                    assembly_name=$(sed -nE 's|.*<AssemblyName>([^<]+)</AssemblyName>.*|\1|p' "$TEST_PROJECT" | sed -n '1p')
+                    assembly_name=${assembly_name:-${TEST_PROJECT##*/}}
+                    assembly_name=${assembly_name%.csproj}
+                    test_executable="$project_directory/bin/Debug/$TARGET_FRAMEWORK/$assembly_name"
 
+                    "$test_executable" \
+                        --output Normal \
+                        --results-directory "$TEST_RESULTS_DIRECTORY" \
+                        --report-trx \
+                        --report-trx-filename test_results.trx \
+                        --coverage \
+                        --coverage-output-format cobertura \
+                        --coverage-output "$TEST_RESULTS_DIRECTORY/coverage.cobertura.xml"
             -   name: Upload Test Outputs
                 if: always()
                 uses: actions/upload-artifact@v7
                 with:
-                    name: backend-test-output-${{ steps.test_project.outputs.name }}
-                    path: TestResults/${{ steps.test_project.outputs.name }}
+                    name: backend-test-output-${{ matrix.project_name }}
+                    path: TestResults/${{ matrix.project_name }}
                     retention-days: 7
 
     # Back-End Integration Tests
@@ -295,22 +311,9 @@ jobs:
         steps:
             -   name: Checkout Source Code
                 uses: actions/checkout@v7
+                with:
+                    persist-credentials: false
 
-            -   name: Resolve test project metadata
-                id: test_project
-                shell: bash
-                env:
-                    TEST_PROJECT: ${{ matrix.project }}
-                run: |
-                    project_name=${TEST_PROJECT##*/}
-                    project_name=${project_name%.csproj}
-                    project_directory=${TEST_PROJECT%/*}
-                    assembly_name=$(sed -nE 's|.*<AssemblyName>([^<]+)</AssemblyName>.*|\1|p' "$TEST_PROJECT" | sed -n '1p')
-                    assembly_name=${assembly_name:-$project_name}
-                    {
-                        echo "name=$project_name"
-                        echo "executable=$project_directory/bin/Debug/${{ needs.Check-Backend-Changes.outputs.target_framework }}/$assembly_name"
-                    } >> "$GITHUB_OUTPUT"
 
             -   name: Dotnet Setup
                 uses: ./.github/actions/dotnet-setup/
@@ -321,23 +324,32 @@ jobs:
 
             -   name: Run Integration Tests
                 env:
+                    TEST_PROJECT: ${{ matrix.project }}
+                    TARGET_FRAMEWORK: ${{ needs.Check-Backend-Changes.outputs.target_framework }}
+                    TEST_RESULTS_DIRECTORY: TestResults/${{ matrix.project_name }}
                     TUNIT_GITHUB_REPORTER_STYLE: collapsible
-                run: >-
-                    ./${{ steps.test_project.outputs.executable }}
-                    --output Normal
-                    --results-directory TestResults/${{ steps.test_project.outputs.name }}
-                    --report-trx
-                    --report-trx-filename test_results.trx
-                    --coverage
-                    --coverage-output-format cobertura
-                    --coverage-output coverage.cobertura.xml
+                run: |
+                    project_directory=${TEST_PROJECT%/*}
+                    assembly_name=$(sed -nE 's|.*<AssemblyName>([^<]+)</AssemblyName>.*|\1|p' "$TEST_PROJECT" | sed -n '1p')
+                    assembly_name=${assembly_name:-${TEST_PROJECT##*/}}
+                    assembly_name=${assembly_name%.csproj}
+                    test_executable="$project_directory/bin/Debug/$TARGET_FRAMEWORK/$assembly_name"
+
+                    "$test_executable" \
+                        --output Normal \
+                        --results-directory "$TEST_RESULTS_DIRECTORY" \
+                        --report-trx \
+                        --report-trx-filename test_results.trx \
+                        --coverage \
+                        --coverage-output-format cobertura \
+                        --coverage-output "$TEST_RESULTS_DIRECTORY/coverage.cobertura.xml"
 
             -   name: Upload Integration Test Outputs
                 if: always()
                 uses: actions/upload-artifact@v7
                 with:
-                    name: backend-test-output-${{ steps.test_project.outputs.name }}
-                    path: TestResults/${{ steps.test_project.outputs.name }}
+                    name: backend-test-output-${{ matrix.project_name }}
+                    path: TestResults/${{ matrix.project_name }}
                     retention-days: 7
 
     # Code Coverage Report
@@ -353,7 +365,7 @@ jobs:
                     path: coverage-reports
 
             -   name: Generate Code Coverage Report
-                uses: danielpalme/ReportGenerator-GitHub-Action@5.5.11
+                uses: danielpalme/ReportGenerator-GitHub-Action@v5
                 with:
                     reports: 'coverage-reports/**/coverage.cobertura.xml'
                     targetdir: 'coveragereport'

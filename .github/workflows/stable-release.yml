@@ -6,6 +6,9 @@ concurrency:
     group: stable-release
     cancel-in-progress: false
 
+permissions:
+    contents: read
+
 jobs:
     semantic-release:
         # Only allow stable releases from the dev branch
@@ -61,7 +64,8 @@ jobs:
         needs: [ semantic-release ]
         if: needs.semantic-release.outputs.new-release-published == 'true'
         uses: ./.github/workflows/desktop-build.yml
-        secrets: inherit
+        secrets:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
             push: true
             publish_release: false
@@ -75,7 +79,9 @@ jobs:
         if: needs.semantic-release.outputs.new-release-published == 'true'
         needs: [ semantic-release ]
         uses: ./.github/workflows/docker-build-multiarch.yml
-        secrets: inherit
+        secrets:
+            DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+            DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
         with:
             push: true
             version: ${{ needs.semantic-release.outputs.new-release-version }}
@@ -91,6 +97,8 @@ jobs:
         steps:
             -   name: Checkout source code
                 uses: actions/checkout@v7
+                with:
+                    persist-credentials: false
 
             -   name: Notify Discord of Stable Release
                 uses: ./.github/actions/discord-dev-release-notification/

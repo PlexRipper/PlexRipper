@@ -24,6 +24,11 @@ on:
                 required: false
                 type: string
                 default: 'dev'
+        secrets:
+            DOCKER_PASSWORD:
+                required: false
+            DOCKER_USERNAME:
+                required: false
 
 jobs:
     # Build both architectures natively in parallel
@@ -42,6 +47,8 @@ jobs:
         steps:
             - name: Checkout source code
               uses: actions/checkout@v7
+              with:
+                  persist-credentials: false
 
             - name: Set up Docker Buildx
               uses: docker/setup-buildx-action@v4
@@ -82,7 +89,7 @@ jobs:
                       type=registry,ref=reaparr/reaparr:buildcache-${{ matrix.arch }}
                       type=registry,ref=reaparr/reaparr:${{ inputs.version }}-${{ matrix.arch }}
                   cache-to: |
-                      type=gha,scope=reaparr-${{ matrix.arch }},mode=max
+                      type=gha,scope=reaparr-${{ matrix.arch }},mode=max,ignore-error=true
                       ${{ inputs.push && format('type=registry,ref=reaparr/reaparr:buildcache-{0},mode=max', matrix.arch) || '' }}
                   load: ${{ !inputs.push }}
 
@@ -98,6 +105,8 @@ jobs:
         steps:
             - name: Checkout source code
               uses: actions/checkout@v7
+              with:
+                  persist-credentials: false
 
             - name: Set up Docker Buildx
               uses: docker/setup-buildx-action@v4

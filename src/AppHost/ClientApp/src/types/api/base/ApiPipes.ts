@@ -35,6 +35,15 @@ export function apiCheckPipe<T extends object = BaseResultDTO>(
 ): Observable<T extends BaseResultDTO ? BaseResultDTO : ResultDTO<T>> {
 	return source$.pipe(
 		map((res) => {
+			if (res.status === 204 || res.data == null) {
+				return {
+					isSuccess: true,
+					statusCode: res.status,
+					errors: [],
+					successes: [],
+				} as unknown as T extends BaseResultDTO ? BaseResultDTO : ResultDTO<T>;
+			}
+
 			// Handle generic ResultDTO<T> case
 			if (Object.hasOwn(res.data, 'value')) {
 				return toResultDTO<T>(res) as unknown as T extends BaseResultDTO ? BaseResultDTO : ResultDTO<T>;

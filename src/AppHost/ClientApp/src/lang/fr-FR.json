@@ -454,7 +454,7 @@
                     "connect": "Se connecter à {type}",
                     "download-client": "Configurer le client de téléchargement dans {type}",
                     "indexer": "Configurer le client d'indexation dans {type}",
-                    "validation": "Valider la configuration de l'intégration {type}",
+                    "validation": "Tester si {type} peut communiquer avec Reaparr",
                     "done": "Terminé"
                 },
                 "progress": {
@@ -464,8 +464,9 @@
                     "download-client-ready": "Client de téléchargement dans {type} prêt.",
                     "indexer": "Configuration du client d'indexation Reaparr dans {type}...",
                     "indexer-ready": "Client d'indexation dans {type} prêt.",
-                    "validation": "Validation de la configuration de l'intégration {type}...",
-                    "validation-ready": "Configuration de l'intégration {type} validée."
+                    "validation": "Test de la communication de {type} vers Reaparr...",
+                    "validation-ready": "{type} peut communiquer avec Reaparr.",
+                    "reverse-proxy-warning": "Vérifiez l'URL du reverse proxy dans les paramètres de Reaparr. {type} l'utilise pour communiquer avec Reaparr."
                 }
             }
         }

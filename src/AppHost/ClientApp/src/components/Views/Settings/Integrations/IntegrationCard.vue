@@ -35,14 +35,14 @@ const integrationChips = computed(() => {
 
 	return [
 		{
-			color: provisioningColor,
-			value: props.integration.provisioningState,
-		},
-		{
 			color: isConnected ? 'positive' as const : 'negative' as const,
 			value: isConnected
 				? t('help.settings.integrations.connection-status.connected')
 				: t('help.settings.integrations.connection-status.unconnected'),
+		},
+		{
+			color: provisioningColor,
+			value: props.integration.provisioningState,
 		},
 	];
 });

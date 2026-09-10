@@ -454,7 +454,7 @@
                     "connect": "Connect to {type}",
                     "download-client": "Set up download client in {type}",
                     "indexer": "Set up indexer client in {type}",
-                    "validation": "Validate {type} integration setup",
+                    "validation": "Test whether {type} can communicate back to Reaparr",
                     "done": "Done"
                 },
                 "progress": {
@@ -464,8 +464,9 @@
                     "download-client-ready": "Download client in {type} ready.",
                     "indexer": "Setting up the Reaparr indexer client in {type}...",
                     "indexer-ready": "Indexer client in {type} ready.",
-                    "validation": "Validating the {type} integration setup...",
-                    "validation-ready": "{type} integration setup validated."
+                    "validation": "Testing whether {type} can communicate back to Reaparr...",
+                    "validation-ready": "{type} can communicate back to Reaparr.",
+                    "reverse-proxy-warning": "Check the Reverse Proxy URL in Reaparr settings. {type} uses it to connect back to Reaparr."
                 }
             }
         }

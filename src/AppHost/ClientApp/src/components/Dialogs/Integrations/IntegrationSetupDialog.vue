@@ -5,7 +5,8 @@
 		persistent
 		close-button
 		cy="integration-setup-dialog"
-		@closed="refresh">
+		@opened="reset"
+		@closed="close">
 		<template #title>
 			<div class="row items-center q-gutter-sm">
 				<QImg
@@ -29,20 +30,26 @@
 					:title="setupTexts.steps.connect"
 					icon="mdi-lan-connect"
 					done-icon="mdi-check-circle"
-					active-icon="mdi-loading"
+					:active-icon="getStepActiveIcon(steps.connect.status)"
 					error-icon="mdi-alert-circle"
-					done-color="positive"
+					:active-color="getStepActiveColor(steps.connect.status)"
 					error-color="negative"
 					:done="steps.connect.status === 'success'"
 					:header-nav="false"
 					:error="steps.connect.status === 'error'"
 					:data-status="steps.connect.status"
 					data-cy="integration-setup-step-connect">
-					<div
+					<QAlert
 						v-if="steps.connect.error"
-						class="text-negative">
-						{{ steps.connect.error }}
-					</div>
+						type="error"
+						class="integration-setup-error">
+						<div
+							v-for="(error, index) in formatStepErrors(steps.connect.error)"
+							:key="index"
+							class="integration-setup-error__line">
+							{{ error }}
+						</div>
+					</QAlert>
 					<div v-else-if="steps.connect.status === 'running'">
 						{{ setupTexts.progress.connecting }}
 					</div>
@@ -57,20 +64,26 @@
 					:title="setupTexts.steps.downloadClient"
 					icon="mdi-download"
 					done-icon="mdi-check-circle"
-					active-icon="mdi-loading"
+					:active-icon="getStepActiveIcon(steps.downloadClient.status)"
 					error-icon="mdi-alert-circle"
-					done-color="positive"
+					:active-color="getStepActiveColor(steps.downloadClient.status)"
 					error-color="negative"
 					:done="steps.downloadClient.status === 'success'"
 					:header-nav="false"
 					:error="steps.downloadClient.status === 'error'"
 					:data-status="steps.downloadClient.status"
 					data-cy="integration-setup-step-download-client">
-					<div
+					<QAlert
 						v-if="steps.downloadClient.error"
-						class="text-negative">
-						{{ steps.downloadClient.error }}
-					</div>
+						type="error"
+						class="integration-setup-error">
+						<div
+							v-for="(error, index) in formatStepErrors(steps.downloadClient.error)"
+							:key="index"
+							class="integration-setup-error__line">
+							{{ error }}
+						</div>
+					</QAlert>
 					<div v-else-if="steps.downloadClient.status === 'running'">
 						{{ setupTexts.progress.downloadClient }}
 					</div>
@@ -85,20 +98,26 @@
 					:title="setupTexts.steps.indexer"
 					icon="mdi-database-search"
 					done-icon="mdi-check-circle"
-					active-icon="mdi-loading"
+					:active-icon="getStepActiveIcon(steps.indexer.status)"
 					error-icon="mdi-alert-circle"
-					done-color="positive"
+					:active-color="getStepActiveColor(steps.indexer.status)"
 					error-color="negative"
 					:done="steps.indexer.status === 'success'"
 					:header-nav="false"
 					:error="steps.indexer.status === 'error'"
 					:data-status="steps.indexer.status"
 					data-cy="integration-setup-step-indexer">
-					<div
+					<QAlert
 						v-if="steps.indexer.error"
-						class="text-negative">
-						{{ steps.indexer.error }}
-					</div>
+						type="error"
+						class="integration-setup-error">
+						<div
+							v-for="(error, index) in formatStepErrors(steps.indexer.error)"
+							:key="index"
+							class="integration-setup-error__line">
+							{{ error }}
+						</div>
+					</QAlert>
 					<div v-else-if="steps.indexer.status === 'running'">
 						{{ setupTexts.progress.indexer }}
 					</div>
@@ -113,21 +132,32 @@
 					:title="setupTexts.steps.validation"
 					icon="mdi-connection"
 					done-icon="mdi-check-circle"
-					:active-icon="steps.validation.status === 'success' ? 'mdi-check-circle' : 'mdi-loading'"
+					:active-icon="getStepActiveIcon(steps.validation.status)"
 					error-icon="mdi-alert-circle"
-					done-color="positive"
-					:active-color="steps.validation.status === 'success' ? 'positive' : 'primary'"
+					:active-color="getStepActiveColor(steps.validation.status)"
 					error-color="negative"
 					:done="steps.validation.status === 'success'"
 					:header-nav="false"
 					:error="steps.validation.status === 'error'"
 					:data-status="steps.validation.status"
 					data-cy="integration-setup-step-validation">
-					<div
+					<QAlert
 						v-if="steps.validation.error"
-						class="text-negative">
-						{{ steps.validation.error }}
-					</div>
+						type="error"
+						class="integration-setup-error">
+						<div
+							v-for="(error, index) in formatStepErrors(steps.validation.error)"
+							:key="index"
+							class="integration-setup-error__line">
+							{{ error }}
+						</div>
+					</QAlert>
+					<QAlert
+						v-if="steps.validation.error"
+						type="warning"
+						class="integration-setup-error">
+						{{ setupTexts.progress.reverseProxyWarning }}
+					</QAlert>
 					<div v-else-if="steps.validation.status === 'running'">
 						{{ setupTexts.progress.validation }}
 					</div>
@@ -186,10 +216,23 @@ const setupTexts = computed(() => {
 			indexerReady: $t('components.integration-setup-dialog.setup.progress.indexer-ready', values),
 			validation: $t('components.integration-setup-dialog.setup.progress.validation', values),
 			validationReady: $t('components.integration-setup-dialog.setup.progress.validation-ready', values),
+			reverseProxyWarning: $t('components.integration-setup-dialog.setup.progress.reverse-proxy-warning', values),
 		},
 	};
 });
 type StepStatus = 'pending' | 'running' | 'success' | 'error';
+
+function getStepActiveIcon(status: StepStatus): string {
+	if (status === 'error') return 'mdi-alert-circle';
+	if (status === 'success') return 'mdi-check-circle';
+	return 'mdi-loading';
+}
+
+function getStepActiveColor(status: StepStatus): 'positive' | 'negative' | 'primary' {
+	if (status === 'error') return 'negative';
+	if (status === 'success') return 'positive';
+	return 'primary';
+}
 type Step = { status: StepStatus; error: string };
 const steps = reactive<{ connect: Step; downloadClient: Step; indexer: Step; validation: Step; done: Step }>({
 	connect: { status: 'pending', error: '' },
@@ -205,6 +248,23 @@ function reset(): void {
 		step.status = 'pending';
 		step.error = '';
 	}
+}
+
+function formatStepErrors(error: string): string[] {
+	const sections = error
+		.split(/;\s+(?=Failed to validate)/)
+		.map((section) => section.trim())
+		.filter(Boolean);
+
+	return sections.map((section) => {
+		const summary = section.replace(/\s*;\s*\[.*$/s, '').trim();
+		const messages = [
+			...section.matchAll(/"errorMessage"\s*:\s*"([^"]+)"/g),
+			...section.matchAll(/"detailedDescription"\s*:\s*"([^"]+)"/g),
+		].map(([, message]) => message).filter((message): message is string => Boolean(message));
+		const details = [...new Set(messages)].join(' · ');
+		return details ? `${summary}: ${details}` : section.replace(/\s+/g, ' ');
+	});
 }
 
 function updateStep(progress: IntegrationSetupProgressDTO): void {
@@ -238,6 +298,11 @@ watch(() => store.isSettingUp, (isSettingUp) => {
 function refresh(): void {
 	useSubscription(store.refresh().subscribe());
 }
+
+function close(): void {
+	reset();
+	refresh();
+}
 </script>
 
 <style lang="scss">
@@ -246,6 +311,16 @@ function refresh(): void {
 
   .mdi-loading {
     animation: integration-setup-loading 1s linear infinite;
+  }
+}
+
+.integration-setup-error {
+  margin: 0.5rem 0;
+  overflow-wrap: anywhere;
+  text-align: left;
+
+  &__line + &__line {
+    margin-top: 0.5rem;
   }
 }
 

@@ -176,15 +176,19 @@ export const useIntegrationStore = defineStore(StoreNames.IntegrationStore, () =
 			}
 			state.isSettingUp = true;
 			state.error = null;
+			state.testResult = null;
 			return request.pipe(
 				tap((result) => {
 					if (result.isSuccess && result.value) {
 						setDetail(state.detail!.type, result.value);
 						state.requiresSetupPrompt = false;
-					} else state.error = result;
+					}
 				}),
 				switchMap((result) => result.isSuccess ? actions.refresh().pipe(map(() => result)) : of(result)),
-				catchError(handleError),
+				catchError((error) => {
+					Log.error('Integration setup request failed', error);
+					return of(null);
+				}),
 				finalize(() => (state.isSettingUp = false)),
 			);
 		},

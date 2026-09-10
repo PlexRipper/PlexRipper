@@ -167,6 +167,87 @@ describe('IntegrationStore', () => {
 		expect(store.isTesting).toBe(false);
 	});
 
+	test('Should clear connection alerts when setup starts', async () => {
+		// Arrange
+		const store = useIntegrationStore();
+		store.detail = {
+			apiKey: 'key',
+			category: 'radarr',
+			downloadFolderId: 1,
+			id: 'id',
+			lastConnectionTestErrorMessage: 'Connection refused',
+			lastConnectionTestHttpStatusCode: null,
+			lastConnectionTestStatus: TestConnectionStatus.ConnectionFailed,
+			lastConnectionTestedAt: '2026-09-07T12:00:00Z',
+			name: 'Radarr',
+			provisioningState: IntegrationProvisioningState.Unconfigured,
+			url: 'http://radarr',
+			type: IntegrationType.Radarr,
+		};
+		store.testResult = {
+			result: TestConnectionStatus.ConnectionFailed,
+			httpStatusCode: null,
+			errorMessage: 'Connection refused',
+			testedAt: '2026-09-07T12:00:00Z',
+		};
+		store.error = 'Connection failed';
+		const detail = {
+			id: 'id', name: 'Radarr', url: 'http://radarr', apiKey: 'key', category: 'radarr', downloadFolderId: 1,
+			provisioningState: IntegrationProvisioningState.Configured,
+			lastConnectionTestStatus: TestConnectionStatus.Success,
+		};
+		const setup = vi.spyOn(integrationApi, 'setupRadarrIntegrationEndpoint').mockReturnValue(success(detail));
+		vi.spyOn(integrationApi, 'getIntegrationsEndpoint').mockReturnValue(success([]));
+
+		// Act
+		await subscribeSpyTo(store.setupIntegration()).onComplete();
+
+		// Assert
+		expect(setup).toHaveBeenCalledWith('id');
+		expect(store.testResult).toBeNull();
+		expect(store.error).toBeNull();
+		expect(store.isSettingUp).toBe(false);
+	});
+
+	test('Should not expose setup failure as a connection alert', async () => {
+		// Arrange
+		const store = useIntegrationStore();
+		store.detail = {
+			apiKey: 'key',
+			category: 'radarr',
+			downloadFolderId: 1,
+			id: 'id',
+			lastConnectionTestErrorMessage: 'Connection refused',
+			lastConnectionTestHttpStatusCode: null,
+			lastConnectionTestStatus: TestConnectionStatus.ConnectionFailed,
+			lastConnectionTestedAt: '2026-09-07T12:00:00Z',
+			name: 'Radarr',
+			provisioningState: IntegrationProvisioningState.Unconfigured,
+			url: 'http://radarr',
+			type: IntegrationType.Radarr,
+		};
+		store.testResult = {
+			result: TestConnectionStatus.ConnectionFailed,
+			httpStatusCode: null,
+			errorMessage: 'Connection refused',
+			testedAt: '2026-09-07T12:00:00Z',
+		};
+		store.error = 'Connection failed';
+		const failedSetup = { isSuccess: false, errors: [], successes: [], statusCode: 500 };
+		const setup = vi.spyOn(integrationApi, 'setupRadarrIntegrationEndpoint').mockReturnValue(of(failedSetup));
+
+		// Act
+		const result = subscribeSpyTo(store.setupIntegration());
+		await result.onComplete();
+
+		// Assert
+		expect(setup).toHaveBeenCalledWith('id');
+		expect(result.getLastValue()).toEqual(failedSetup);
+		expect(store.error).toBeNull();
+		expect(store.testResult).toBeNull();
+		expect(store.isSettingUp).toBe(false);
+	});
+
 	test('Should update an existing integration summary after a successful connection test', async () => {
 		// Arrange
 		const store = useIntegrationStore();

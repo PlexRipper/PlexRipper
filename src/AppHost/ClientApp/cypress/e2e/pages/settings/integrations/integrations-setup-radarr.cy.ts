@@ -73,7 +73,7 @@ const setupStages = [
 		stage: IntegrationSetupProgressStage.Validation,
 		selector: 'validation',
 		error: 'Radarr validation failed',
-		successText: 'Radarr integration setup validated.',
+		successText: 'Radarr can communicate back to Reaparr.',
 	},
 	{
 		stage: IntegrationSetupProgressStage.Done,
@@ -337,7 +337,9 @@ describe('Radarr integrations', () => {
 			} satisfies IntegrationSetupProgressDTO);
 			cy.getCy(`integration-setup-step-${selector}`)
 				.should('have.attr', 'data-status', 'error')
-				.and('contain.text', error);
+				.and('contain.text', error)
+				.find('.q-stepper__tab')
+				.should('have.class', 'text-negative');
 			for (const { selector: previousSelector } of setupStages.slice(0, index)) {
 				cy.getCy(`integration-setup-step-${previousSelector}`).should('have.attr', 'data-status', 'success');
 			}
@@ -366,13 +368,23 @@ describe('Radarr integrations', () => {
 		cy.getCy('integration-setup-dialog').find('[data-cy="dialog-close-button"]').click();
 		cy.getCy('integration-setup-dialog').should('not.exist');
 		cy.wait('@getIntegrations');
+		cy.getCy('integration-setup').click();
+		cy.wait('@setupRadarr');
+		for (const { selector } of setupStages) {
+			cy.getCy(`integration-setup-step-${selector}`).should('have.attr', 'data-status', 'pending');
+		}
+		cy.getCy('integration-setup-dialog').find('[data-cy="dialog-close-button"]').click();
+		cy.getCy('integration-setup-dialog').should('not.exist');
+		cy.wait('@getIntegrations');
+		cy.then(() => expect(setupCallCount).to.equal(2));
 		cy.getCy('integration-dialog').find('[data-cy="dialog-close-button"]').click();
 		cy.getCy('integration-dialog').should('not.exist');
 		cy.getCy('integration-card')
 			.should('be.visible')
 			.and('have.attr', 'aria-label', updatedName)
 			.and('contain.text', updatedName)
-			.and('contain.text', IntegrationProvisioningState.Configured);
+			.and('contain.text', IntegrationProvisioningState.Configured)
+			.and('contain.text', 'Connected');
 		cy.getCy('integration-card').find('[alt="radarr"]').should('exist');
 	});
 });

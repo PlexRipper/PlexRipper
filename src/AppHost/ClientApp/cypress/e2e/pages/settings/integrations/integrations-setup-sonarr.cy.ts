@@ -12,6 +12,8 @@ import {
 } from '@dto';
 import { generateResultDTO } from '@mock';
 
+const validationError = 'Failed to validate download client; [ { "errorMessage": "Unable to connect to qBittorrent" } ]; Failed to validate indexer; [ { "errorMessage": "Unable to connect to indexer" } ]';
+
 const integrationId = '00000000-0000-0000-0000-000000000001';
 const createdIntegrationId = '00000000-0000-0000-0000-000000000002';
 const integrationName = 'Sonarr';
@@ -72,8 +74,8 @@ const setupStages = [
 	{
 		stage: IntegrationSetupProgressStage.Validation,
 		selector: 'validation',
-		error: 'Sonarr validation failed',
-		successText: 'Sonarr integration setup validated.',
+		error: validationError,
+		successText: 'Sonarr can communicate back to Reaparr.',
 	},
 	{
 		stage: IntegrationSetupProgressStage.Done,
@@ -335,9 +337,17 @@ describe('Sonarr integrations', () => {
 				isSuccess: false,
 				error,
 			} satisfies IntegrationSetupProgressDTO);
-			cy.getCy(`integration-setup-step-${selector}`)
-				.should('have.attr', 'data-status', 'error')
-				.and('contain.text', error);
+			const step = cy.getCy(`integration-setup-step-${selector}`)
+				.should('have.attr', 'data-status', 'error');
+			if (stage === IntegrationSetupProgressStage.Validation) {
+				step
+					.and('contain.text', 'Failed to validate download client: Unable to connect to qBittorrent')
+					.and('contain.text', 'Failed to validate indexer: Unable to connect to indexer')
+					.and('not.contain.text', '"errorMessage"');
+			} else {
+				step.and('contain.text', error);
+			}
+			step.find('.q-stepper__tab').should('have.class', 'text-negative');
 			for (const { selector: previousSelector } of setupStages.slice(0, index)) {
 				cy.getCy(`integration-setup-step-${previousSelector}`).should('have.attr', 'data-status', 'success');
 			}
@@ -366,13 +376,23 @@ describe('Sonarr integrations', () => {
 		cy.getCy('integration-setup-dialog').find('[data-cy="dialog-close-button"]').click();
 		cy.getCy('integration-setup-dialog').should('not.exist');
 		cy.wait('@getIntegrations');
+		cy.getCy('integration-setup').click();
+		cy.wait('@setupSonarr');
+		for (const { selector } of setupStages) {
+			cy.getCy(`integration-setup-step-${selector}`).should('have.attr', 'data-status', 'pending');
+		}
+		cy.getCy('integration-setup-dialog').find('[data-cy="dialog-close-button"]').click();
+		cy.getCy('integration-setup-dialog').should('not.exist');
+		cy.wait('@getIntegrations');
+		cy.then(() => expect(setupCallCount).to.equal(2));
 		cy.getCy('integration-dialog').find('[data-cy="dialog-close-button"]').click();
 		cy.getCy('integration-dialog').should('not.exist');
 		cy.getCy('integration-card')
 			.should('be.visible')
 			.and('have.attr', 'aria-label', updatedName)
 			.and('contain.text', updatedName)
-			.and('contain.text', IntegrationProvisioningState.Configured);
+			.and('contain.text', IntegrationProvisioningState.Configured)
+			.and('contain.text', 'Connected');
 		cy.getCy('integration-card').find('[alt="sonarr"]').should('exist');
 	});
 });

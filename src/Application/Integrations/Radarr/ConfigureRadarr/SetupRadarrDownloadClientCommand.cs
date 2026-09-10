@@ -191,7 +191,9 @@ public class SetupRadarrDownloadClientCommandHandler
 
     private RadarrDownloadContractDTO BuildDownloadClientResource(Uri reaparrBaseUri, RadarrIntegration integration)
     {
-        var useSsl = string.Equals(reaparrBaseUri.Scheme, Uri.UriSchemeHttps, StringComparison.OrdinalIgnoreCase);
+        var useSsl =
+            Uri.TryCreate(_networkSettings.ReverseProxyUrl, UriKind.Absolute, out var reverseProxyUri)
+            && string.Equals(reverseProxyUri.Scheme, Uri.UriSchemeHttps, StringComparison.OrdinalIgnoreCase);
         string urlBase = _networkSettings.BasePath.AppendPathSegment(
             $"api/public/integrations/{integration.Id}/download-client"
         );

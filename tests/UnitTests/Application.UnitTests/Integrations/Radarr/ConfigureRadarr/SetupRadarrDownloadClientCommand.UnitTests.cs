@@ -215,7 +215,7 @@ public class SetupRadarrDownloadClientCommandUnitTests : BaseUnitTest<SetupRadar
     }
 
     [Test]
-    public async Task ShouldBuildResourceWithSslEnabledAndPort443_WhenReaparrUriIsHttpsCustomDomain()
+    public async Task ShouldBuildResourceWithSslEnabled_WhenReverseProxyUrlIsHttps()
     {
         // Arrange
         var integration = await SetupIntegrationAsync();

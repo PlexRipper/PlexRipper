@@ -905,6 +905,10 @@
                     "connected": "Connecté",
                     "unconnected": "Non connecté"
                 },
+                "validation": {
+                    "category-unique": "Cette catégorie est déjà utilisée par une autre intégration {type}.",
+                    "base-url-unique": "Cette URL de base est déjà utilisée par une autre intégration {type}."
+                },
                 "sonarr": {
                     "add-title": "Ajouter l'intégration Sonarr",
                     "edit-title": "Modifier l'intégration Sonarr",
@@ -921,7 +925,7 @@
                     },
                     "category": {
                         "label": "Catégorie qBittorrent Sonarr",
-                        "text": "La catégorie qBittorrent utilisée par cette intégration Sonarr pour séparer ses téléchargements.",
+                        "text": "La catégorie qBittorrent utilisée par cette intégration Sonarr pour séparer ses téléchargements. Elle doit être unique parmi les intégrations Sonarr afin que Reaparr puisse acheminer les téléchargements vers la bonne intégration.",
                         "hint": "reaparr-sonarr",
                         "title": "Catégorie qBittorrent de l'intégration Sonarr"
                     },
@@ -954,7 +958,7 @@
                     },
                     "category": {
                         "label": "",
-                        "text": "",
+                        "text": "La catégorie qBittorrent utilisée par cette intégration Radarr pour séparer ses téléchargements. Elle doit être unique parmi les intégrations Radarr afin que Reaparr puisse acheminer les téléchargements vers la bonne intégration.",
                         "hint": "reaparr-radarr",
                         "title": ""
                     },

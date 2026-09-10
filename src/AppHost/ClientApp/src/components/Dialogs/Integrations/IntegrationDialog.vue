@@ -56,11 +56,6 @@
 				class="q-gutter-md"
 				@submit="save">
 				<QAlert
-					v-if="store.error"
-					type="error">
-					{{ formatError(store.error) }}
-				</QAlert>
-				<QAlert
 					v-if="store.testResult"
 					:type="store.testResult.result === TestConnectionStatus.Success ? 'success' : 'error'">
 					<div>
@@ -98,7 +93,7 @@
 						:hint="integrationHelp.baseUrl.hint"
 						data-cy="integration-base-url"
 						hide-bottom-space
-						:rules="requiredRules" />
+						:rules="baseUrlRules" />
 				</HelpRow>
 				<!-- API Key -->
 				<HelpRow
@@ -125,7 +120,7 @@
 						data-cy="integration-category"
 						:hint="integrationHelp.category.hint"
 						hide-bottom-space
-						:rules="requiredRules" />
+						:rules="categoryRules" />
 				</HelpRow>
 				<!-- Download Folder -->
 				<HelpRow
@@ -186,7 +181,7 @@
 						label="Setup"
 						block
 						icon="mdi-cog-sync"
-						:disable="!store.detail"
+						:disable="store.isSaving || !store.detail"
 						:loading="store.isSettingUp"
 						data-cy="integration-setup"
 						@click="setup" />
@@ -230,6 +225,16 @@ const integrationTypes = [
 ] as const;
 const stage = ref(1);
 const requiredRules = [(value: string | number) => (typeof value === 'number' ? value > 0 : Boolean(value?.trim())) || 'Required'];
+const baseUrlRules = [
+	...requiredRules,
+	(value: string) => store.isUrlUnique(value)
+		|| $t('help.settings.integrations.validation.base-url-unique', { type: store.draft.type }),
+];
+const categoryRules = [
+	...requiredRules,
+	(value: string) => store.isCategoryUnique(value)
+		|| $t('help.settings.integrations.validation.category-unique', { type: store.draft.type }),
+];
 const downloadFolders = computed(() => folderPathStore.folderPaths.filter((folderPath) => folderPath.folderType === FolderType.DownloadFolder));
 const integrationLogo = computed(() => integrationTypes.find(({ type }) => type === store.draft.type)?.icon ?? '');
 
@@ -334,10 +339,6 @@ function deleteIntegration() {
 function selectType(type: IntegrationType): void {
 	store.openAdd(type);
 	set(stage, 2);
-}
-
-function formatError(error: unknown): string {
-	return typeof error === 'string' ? error : $t('help.settings.integrations.test-failed');
 }
 
 function formatTestDetails(): string {

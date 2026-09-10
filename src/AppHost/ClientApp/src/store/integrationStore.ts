@@ -43,7 +43,14 @@ interface IIntegrationStoreState {
 }
 
 function emptyDraft(type = IntegrationType.Sonarr): IIntegrationDraft {
-	return { type, name: '', url: '', apiKey: '', category: type === IntegrationType.Sonarr ? 'reaparr-sonarr' : 'reaparr-radarr', downloadFolderId: 1 };
+	return {
+		type,
+		name: '',
+		url: '',
+		apiKey: '',
+		category: '',
+		downloadFolderId: 1,
+	};
 }
 
 export const useIntegrationStore = defineStore(StoreNames.IntegrationStore, () => {
@@ -85,7 +92,7 @@ export const useIntegrationStore = defineStore(StoreNames.IntegrationStore, () =
 		},
 		openAdd(type = IntegrationType.Sonarr): void {
 			state.detail = null;
-			state.draft = emptyDraft(type);
+			state.draft = { ...emptyDraft(type), category: getUniqueCategory(type) };
 			resetOperationState();
 		},
 		openEdit(item: IntegrationSummary) {
@@ -232,6 +239,28 @@ export const useIntegrationStore = defineStore(StoreNames.IntegrationStore, () =
 		},
 	};
 
+	function getUniqueCategory(type: IntegrationType): string {
+		let baseCategory: string;
+		switch (type) {
+			case IntegrationType.Sonarr:
+				baseCategory = 'reaparr-sonarr';
+				break;
+			case IntegrationType.Radarr:
+				baseCategory = 'reaparr-radarr';
+				break;
+		}
+		const categories = new Set(
+			state.items
+				.filter((item) => item.type === type)
+				.map((item) => item.category),
+		);
+		if (!categories.has(baseCategory)) return baseCategory;
+
+		let suffix = 2;
+		while (categories.has(`${baseCategory}-${suffix}`)) suffix++;
+		return `${baseCategory}-${suffix}`;
+	}
+
 	function resetOperationState(): void {
 		state.error = null;
 		state.testResult = null;
@@ -316,13 +345,37 @@ export const useIntegrationStore = defineStore(StoreNames.IntegrationStore, () =
 		return of(null);
 	}
 
+	function isCategoryUnique(category: string): boolean {
+		const normalizedCategory = category.trim();
+		if (!normalizedCategory) return true;
+		return !state.items.some((item) =>
+			item.type === state.draft.type
+			&& item.id !== state.detail?.id
+			&& item.category === normalizedCategory,
+		);
+	}
+
+	function isUrlUnique(url: string): boolean {
+		const normalizedUrl = url.trim().replace(/\/+$/, '');
+		if (!normalizedUrl) return true;
+		return !state.items.some((item) =>
+			item.type === state.draft.type
+			&& item.id !== state.detail?.id
+			&& item.baseUrl === normalizedUrl,
+		);
+	}
+
 	const getters = {
+		isCategoryUnique,
+		isUrlUnique,
 		isDraftValid: computed(() => Boolean(
 			state.draft.name.trim()
 			&& state.draft.url.trim()
 			&& state.draft.apiKey.trim()
 			&& state.draft.category.trim()
-			&& state.draft.downloadFolderId > 0,
+			&& state.draft.downloadFolderId > 0
+			&& isCategoryUnique(state.draft.category)
+			&& isUrlUnique(state.draft.url),
 		)),
 	};
 

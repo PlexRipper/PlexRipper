@@ -28,6 +28,63 @@ describe('IntegrationStore', () => {
 		expect(store.draft).toMatchObject({ type: IntegrationType.Radarr, name: '', url: '', apiKey: '' });
 	});
 
+	test('Should choose an unused default category when adding another integration', () => {
+		// Arrange
+		const store = useIntegrationStore();
+		store.items = [{
+			baseUrl: 'http://sonarr',
+			category: 'reaparr-sonarr',
+			downloadFolderId: 1,
+			externalDownloadClientId: null,
+			externalIndexerId: null,
+			id: 'id',
+			lastConnectionTestErrorMessage: null,
+			lastConnectionTestHttpStatusCode: null,
+			lastConnectionTestStatus: TestConnectionStatus.Unknown,
+			lastConnectionTestedAt: null,
+			name: 'Sonarr',
+			provisioningState: IntegrationProvisioningState.Unconfigured,
+			type: IntegrationType.Sonarr,
+		}];
+
+		// Act
+		store.openAdd(IntegrationType.Sonarr);
+
+		// Assert
+		expect(store.draft.category).toBe('reaparr-sonarr-2');
+	});
+
+	test('Should reject a duplicate category or base URL from the same integration type', () => {
+		// Arrange
+		const store = useIntegrationStore();
+		store.items = [{
+			baseUrl: 'http://sonarr',
+			category: 'reaparr-sonarr',
+			downloadFolderId: 1,
+			externalDownloadClientId: null,
+			externalIndexerId: null,
+			id: 'id',
+			lastConnectionTestErrorMessage: null,
+			lastConnectionTestHttpStatusCode: null,
+			lastConnectionTestStatus: TestConnectionStatus.Unknown,
+			lastConnectionTestedAt: null,
+			name: 'Sonarr',
+			provisioningState: IntegrationProvisioningState.Unconfigured,
+			type: IntegrationType.Sonarr,
+		}];
+		store.openAdd(IntegrationType.Sonarr);
+		Object.assign(store.draft, { name: 'New Sonarr', apiKey: 'key', category: 'new-category' });
+
+		// Act
+		store.draft.url = 'http://sonarr';
+
+		// Assert
+		expect(store.isDraftValid).toBe(false);
+		store.draft.url = 'http://new-sonarr';
+		store.draft.category = 'reaparr-sonarr';
+		expect(store.isDraftValid).toBe(false);
+	});
+
 	test('Should create a Sonarr integration through the typed endpoint', async () => {
 		// Arrange
 		const store = useIntegrationStore();

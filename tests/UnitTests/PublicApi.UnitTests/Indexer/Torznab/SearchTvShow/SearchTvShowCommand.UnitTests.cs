@@ -18,6 +18,7 @@ public class SearchTvShowCommandUnitTests : BaseUnitTest<SearchTvShowCommandHand
             config =>
             {
                 config.PlexServerCount = 1;
+                config.PlexAccountCount = 1;
                 config.PlexTvShowLibraryCount = 1;
                 config.TvShowCount = 1;
                 config.TvShowSeasonCount = 1;
@@ -99,6 +100,156 @@ public class SearchTvShowCommandUnitTests : BaseUnitTest<SearchTvShowCommandHand
     }
 
     [Test]
+    public async Task ShouldNotReturnEpisodes_WhenPlexServerAccessWasRevoked()
+    {
+        // Arrange
+        await SetupDatabase(
+            4612,
+            config =>
+            {
+                config.PlexAccountCount = 1;
+                config.PlexServerCount = 2;
+                config.PlexTvShowLibraryCount = 1;
+                config.TvShowCount = 1;
+                config.TvShowSeasonCount = 1;
+                config.TvShowEpisodeCount = 2;
+            }
+        );
+
+        var dbContext = IDbContext;
+        var revokedServerId = await dbContext
+            .PlexServers.OrderBy(x => x.Id)
+            .Select(x => x.Id)
+            .LastAsync(CancellationToken);
+
+        await dbContext
+            .PlexAccountServers.Where(x => x.PlexServerId == revokedServerId)
+            .ExecuteDeleteAsync(CancellationToken);
+
+        var expectedEpisodes = await dbContext
+            .PlexTvShowEpisodes.Where(x => x.PlexServerId != revokedServerId)
+            .Include(x => x.MediaDataList)
+            .OrderBy(x => x.Id)
+            .ToListAsync(CancellationToken);
+        var expectedTitles = expectedEpisodes
+            .SelectMany(x => x.MediaDataList.OrderBy(y => y.PlexApiPartId).Select(y => y.GetFileName))
+            .ToList();
+        expectedTitles.ShouldNotBeEmpty();
+
+        var command = new SearchTvShowCommand
+        {
+            Query = string.Empty,
+            Season = 0,
+            Episode = 0,
+            Limit = 100,
+            Offset = 0,
+            IMDB_ID = string.Empty,
+            TMDB_ID = 0,
+            TVDB_ID = 0,
+        };
+
+        // Act
+        var result = await Sut.ExecuteAsync(command, CancellationToken);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.Channel.Items.Select(x => x.Title).ToList().ShouldBe(expectedTitles);
+    }
+
+    [Test]
+    public async Task ShouldNotReturnEpisodes_WhenPlexLibraryAccessWasRevoked()
+    {
+        // Arrange
+        await SetupDatabase(
+            4613,
+            config =>
+            {
+                config.PlexAccountCount = 1;
+                config.PlexServerCount = 1;
+                config.PlexTvShowLibraryCount = 2;
+                config.TvShowCount = 1;
+                config.TvShowSeasonCount = 1;
+                config.TvShowEpisodeCount = 2;
+            }
+        );
+
+        var dbContext = IDbContext;
+        var revokedLibraryId = await dbContext
+            .PlexLibraries.Where(x => x.Type == PlexMediaType.TvShow)
+            .OrderBy(x => x.Id)
+            .Select(x => x.Id)
+            .LastAsync(CancellationToken);
+        await dbContext
+            .PlexAccountLibraries.Where(x => x.PlexLibraryId == revokedLibraryId)
+            .ExecuteDeleteAsync(CancellationToken);
+
+        var expectedEpisodes = await dbContext
+            .PlexTvShowEpisodes.Where(x => x.PlexLibraryId != revokedLibraryId)
+            .Include(x => x.MediaDataList)
+            .OrderBy(x => x.Id)
+            .ToListAsync(CancellationToken);
+        var expectedTitles = expectedEpisodes
+            .SelectMany(x => x.MediaDataList.OrderBy(y => y.PlexApiPartId).Select(y => y.GetFileName))
+            .ToList();
+        expectedTitles.ShouldNotBeEmpty();
+
+        var command = new SearchTvShowCommand
+        {
+            Query = string.Empty,
+            Season = 0,
+            Episode = 0,
+            Limit = 100,
+            Offset = 0,
+            IMDB_ID = string.Empty,
+            TMDB_ID = 0,
+            TVDB_ID = 0,
+        };
+
+        // Act
+        var result = await Sut.ExecuteAsync(command, CancellationToken);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.Channel.Items.Select(x => x.Title).ToList().ShouldBe(expectedTitles);
+    }
+
+    [Test]
+    public async Task ShouldReturnEmpty_WhenNoPlexAccountsExist()
+    {
+        // Arrange
+        await SetupDatabase(
+            4615,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexTvShowLibraryCount = 1;
+                config.TvShowCount = 1;
+                config.TvShowSeasonCount = 1;
+                config.TvShowEpisodeCount = 2;
+            }
+        );
+
+        var command = new SearchTvShowCommand
+        {
+            Query = string.Empty,
+            Season = 0,
+            Episode = 0,
+            Limit = 100,
+            Offset = 0,
+            IMDB_ID = string.Empty,
+            TMDB_ID = 0,
+            TVDB_ID = 0,
+        };
+
+        // Act
+        var result = await Sut.ExecuteAsync(command, CancellationToken);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.Channel.Items.ShouldBeEmpty();
+    }
+
+    [Test]
     public async Task ShouldReturnAllEpisodes_WhenSeasonProvidedWithoutEpisode()
     {
         // Arrange
@@ -107,6 +258,7 @@ public class SearchTvShowCommandUnitTests : BaseUnitTest<SearchTvShowCommandHand
             config =>
             {
                 config.PlexServerCount = 1;
+                config.PlexAccountCount = 1;
                 config.PlexTvShowLibraryCount = 1;
                 config.TvShowCount = 1;
                 config.TvShowSeasonCount = 1;
@@ -163,6 +315,7 @@ public class SearchTvShowCommandUnitTests : BaseUnitTest<SearchTvShowCommandHand
             config =>
             {
                 config.PlexServerCount = 1;
+                config.PlexAccountCount = 1;
                 config.PlexTvShowLibraryCount = 1;
                 config.TvShowCount = 1;
                 config.TvShowSeasonCount = 2;
@@ -299,6 +452,7 @@ public class SearchTvShowCommandUnitTests : BaseUnitTest<SearchTvShowCommandHand
             config =>
             {
                 config.PlexServerCount = 1;
+                config.PlexAccountCount = 1;
                 config.PlexTvShowLibraryCount = 1;
                 config.TvShowCount = 1;
                 config.TvShowSeasonCount = 1;
@@ -375,6 +529,7 @@ public class SearchTvShowCommandUnitTests : BaseUnitTest<SearchTvShowCommandHand
             config =>
             {
                 config.PlexServerCount = 1;
+                config.PlexAccountCount = 1;
                 config.PlexTvShowLibraryCount = 1;
                 config.TvShowCount = 1;
                 config.TvShowSeasonCount = 1;
@@ -434,6 +589,7 @@ public class SearchTvShowCommandUnitTests : BaseUnitTest<SearchTvShowCommandHand
             config =>
             {
                 config.PlexServerCount = 1;
+                config.PlexAccountCount = 1;
                 config.PlexTvShowLibraryCount = 1;
                 config.TvShowCount = 10;
                 config.TvShowSeasonCount = 3;
@@ -493,6 +649,7 @@ public class SearchTvShowCommandUnitTests : BaseUnitTest<SearchTvShowCommandHand
             config =>
             {
                 config.PlexServerCount = 1;
+                config.PlexAccountCount = 1;
                 config.PlexTvShowLibraryCount = 1;
                 config.TvShowCount = 0;
                 config.TvShowSeasonCount = 0;
@@ -531,6 +688,7 @@ public class SearchTvShowCommandUnitTests : BaseUnitTest<SearchTvShowCommandHand
                 config.PlexServerCount = 1;
                 config.PlexTvShowLibraryCount = 1;
                 config.TvShowCount = 1;
+                config.PlexAccountCount = 1;
                 config.TvShowSeasonCount = 1;
                 config.TvShowEpisodeCount = 3;
                 config.IncludeMultiPartEpisodes = true;
@@ -579,6 +737,7 @@ public class SearchTvShowCommandUnitTests : BaseUnitTest<SearchTvShowCommandHand
                 config.PlexServerCount = 1;
                 config.PlexTvShowLibraryCount = 1;
                 config.TvShowCount = 1;
+                config.PlexAccountCount = 1;
                 config.TvShowSeasonCount = 1;
                 config.TvShowEpisodeCount = 2;
             }
@@ -864,6 +1023,7 @@ public class SearchTvShowCommandUnitTests : BaseUnitTest<SearchTvShowCommandHand
                 config.PlexServerCount = 1;
                 config.PlexTvShowLibraryCount = 1;
                 config.TvShowCount = 1;
+                config.PlexAccountCount = 1;
                 config.TvShowSeasonCount = 1;
                 config.TvShowEpisodeCount = 2;
             }

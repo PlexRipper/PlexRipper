@@ -137,6 +137,7 @@ public class SearchTvShowCommandHandler : ICommandHandler<SearchTvShowCommand, R
             .Include(x => x.TvShow)
             .Include(e => e.MediaDataList)
             .Where(x => onlineServerIds.Contains(x.PlexServerId))
+            .WhereHasPlexAccountAccess()
             .AsQueryable();
 
         var hasSeason = command.Season > 0;

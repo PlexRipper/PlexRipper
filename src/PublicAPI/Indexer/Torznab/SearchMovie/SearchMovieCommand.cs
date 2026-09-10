@@ -107,6 +107,7 @@ public class SearchMovieCommandHandler : ICommandHandler<SearchMovieCommand, Res
         var baseQuery = _dbContext
             .PlexMovies.Include(x => x.MediaDataList)
             .Where(x => onlineServerIds.Contains(x.PlexServerId))
+            .WhereHasPlexAccountAccess()
             .AsQueryable();
 
         // If no specific query or external IDs are provided, return a paged list

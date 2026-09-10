@@ -7,6 +7,7 @@
 			:cols="colLabel"
 			:lg="!disableResponsive ? 4 : colLabel"
 			:xl="!disableResponsive ? 3 : colLabel"
+			align-self="center"
 			align-items="end">
 			<!-- Help Label -->
 			<QText
@@ -46,6 +47,7 @@
 			:cols="colContent"
 			:lg="!disableResponsive ? 5 : colContent"
 			:xl="!disableResponsive ? 4 : colContent"
+			align-self="center"
 			class="help-row-default-slot q-pa-sm">
 			<slot />
 		</QCol>

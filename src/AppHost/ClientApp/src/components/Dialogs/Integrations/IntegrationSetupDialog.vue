@@ -280,10 +280,21 @@ function updateStep(progress: IntegrationSetupProgressDTO): void {
 		return;
 	}
 
+	if (hasPreviousError(progress.stage)) return;
 	const isDone = progress.stage === IntegrationSetupProgressStage.Done;
 	setupStage.step.status = isDone ? 'success' : progress.isRunning ? 'running' : progress.isSuccess ? 'success' : 'error';
 	setupStage.step.error = isDone ? '' : progress.error ?? '';
 	set(activeStep, setupStage.number);
+}
+
+function hasPreviousError(stage: IntegrationSetupProgressStage): boolean {
+	if (stage === IntegrationSetupProgressStage.Connecting) return false;
+	if (steps.connect.status === 'error') return true;
+	if (stage === IntegrationSetupProgressStage.DownloadClient) return false;
+	if (steps.downloadClient.status === 'error') return true;
+	if (stage === IntegrationSetupProgressStage.Indexer) return false;
+	if (steps.indexer.status === 'error') return true;
+	return stage === IntegrationSetupProgressStage.Done && steps.validation.status === 'error';
 }
 
 useSubscription(signalrStore.integrationSetupProgressSubject.subscribe((progress) => {

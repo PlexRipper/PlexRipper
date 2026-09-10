@@ -72,6 +72,7 @@
 						{{ formatTestDetails() }}
 					</div>
 				</QAlert>
+				<!-- Display Name -->
 				<HelpRow
 					:label="integrationHelp.displayName.label"
 					:title="integrationHelp.displayName.title"
@@ -81,8 +82,10 @@
 					<QInput
 						v-model="store.draft.name"
 						data-cy="integration-name"
+						hide-bottom-space
 						:rules="requiredRules" />
 				</HelpRow>
+				<!-- Base URL -->
 				<HelpRow
 					:label="integrationHelp.baseUrl.label"
 					:title="integrationHelp.baseUrl.title"
@@ -93,8 +96,10 @@
 						v-model="store.draft.url"
 						hint="http://localhost:8989"
 						data-cy="integration-base-url"
+						hide-bottom-space
 						:rules="requiredRules" />
 				</HelpRow>
+				<!-- API Key -->
 				<HelpRow
 					:label="integrationHelp.apiKey.label"
 					:title="integrationHelp.apiKey.title"
@@ -106,6 +111,7 @@
 						cy="integration-arr-key"
 						:rules="requiredRules" />
 				</HelpRow>
+				<!-- Category -->
 				<HelpRow
 					:label="integrationHelp.category.label"
 					:title="integrationHelp.category.title"
@@ -115,8 +121,10 @@
 					<QInput
 						v-model="store.draft.category"
 						data-cy="integration-category"
+						hide-bottom-space
 						:rules="requiredRules" />
 				</HelpRow>
+				<!-- Download Folder -->
 				<HelpRow
 					:label="integrationHelp.downloadFolder.label"
 					:title="integrationHelp.downloadFolder.title"
@@ -130,6 +138,7 @@
 						option-value="id"
 						emit-value
 						map-options
+						:dense="false"
 						data-cy="integration-download-folder"
 						:rules="requiredRules">
 						<template #option="scope">
@@ -148,6 +157,7 @@
 				</HelpRow>
 			</QForm>
 		</template>
+		<!-- Actions -->
 		<template #actions>
 			<QRow
 				v-if="store.detail || stage === 2"

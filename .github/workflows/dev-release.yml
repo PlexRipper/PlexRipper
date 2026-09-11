@@ -64,6 +64,8 @@ jobs:
         name: Build Desktop Apps (DEV)
         needs: [ semantic-release ]
         if: needs.semantic-release.outputs.new-release-published == 'true'
+        permissions:
+            contents: write
         uses: ./.github/workflows/desktop-build.yml
         secrets:
             RELEASE_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -93,7 +95,6 @@ jobs:
     notify-discord:
         name: Notify Discord
         needs: [ semantic-release, build-and-publish, build-desktop ]
-        if: needs.semantic-release.outputs.new-release-published == 'true'
         runs-on: ubuntu-latest
         steps:
             -   name: Checkout source code

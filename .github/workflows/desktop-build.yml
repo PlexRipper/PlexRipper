@@ -119,11 +119,15 @@ jobs:
                     RID: ${{ matrix.rid }}
                     VELOPACK_CHANNEL_INPUT: ${{ inputs.velopack_channel }}
                 run: |
-                    if [[ "$VELOPACK_CHANNEL_INPUT" == 'stable' ]]; then
-                        echo "VELOPACK_CHANNEL=$RID-stable" >> "$GITHUB_ENV"
-                    else
-                        echo "VELOPACK_CHANNEL=$RID-dev" >> "$GITHUB_ENV"
-                    fi
+                    case "$VELOPACK_CHANNEL_INPUT" in
+                        stable|dev)
+                            echo "VELOPACK_CHANNEL=$RID-$VELOPACK_CHANNEL_INPUT" >> "$GITHUB_ENV"
+                            ;;
+                        *)
+                            echo "Unsupported Velopack channel: $VELOPACK_CHANNEL_INPUT" >&2
+                            exit 1
+                            ;;
+                    esac
 
             -   name: Download previous release (for delta packages)
                 if: inputs.push
@@ -166,7 +170,7 @@ jobs:
         runs-on: ubuntu-latest
         timeout-minutes: 30
         permissions:
-            contents: read
+            contents: write
         strategy:
             fail-fast: false
             max-parallel: 1
@@ -199,11 +203,15 @@ jobs:
                     RID: ${{ matrix.rid }}
                     VELOPACK_CHANNEL_INPUT: ${{ inputs.velopack_channel }}
                 run: |
-                    if [[ "$VELOPACK_CHANNEL_INPUT" == 'stable' ]]; then
-                        echo "VELOPACK_CHANNEL=$RID-stable" >> "$GITHUB_ENV"
-                    else
-                        echo "VELOPACK_CHANNEL=$RID-dev" >> "$GITHUB_ENV"
-                    fi
+                    case "$VELOPACK_CHANNEL_INPUT" in
+                        stable|dev)
+                            echo "VELOPACK_CHANNEL=$RID-$VELOPACK_CHANNEL_INPUT" >> "$GITHUB_ENV"
+                            ;;
+                        *)
+                            echo "Unsupported Velopack channel: $VELOPACK_CHANNEL_INPUT" >&2
+                            exit 1
+                            ;;
+                    esac
 
             -   name: Download packed installer
                 uses: actions/download-artifact@v8

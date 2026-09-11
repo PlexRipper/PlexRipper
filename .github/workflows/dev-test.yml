@@ -205,7 +205,7 @@ jobs:
                     key: ${{ runner.os }}-cypress-${{ hashFiles('**/package.json') }}
                     restore-keys: ${{ runner.os }}-cypress-
             -   name: Run Cypress tests
-                uses: cypress-io/github-action@v7
+                uses: cypress-io/github-action@v7.4.3
                 with:
                     install: false
                     record: true

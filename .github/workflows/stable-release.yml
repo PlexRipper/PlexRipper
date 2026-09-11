@@ -33,7 +33,8 @@ jobs:
 
             -   name: GitHub Release (Stable)
                 id: get-next-version
-                run: bun run --cwd src/AppHost/ClientApp release
+                working-directory: src/AppHost/ClientApp
+                run: bunx --no-install semantic-release --extends ../../../release.config.mjs --cwd ../../..
                 env:
                     STABLE_RELEASE: 'true'
                     GH_TOKEN: ${{ secrets.GH_TOKEN }}

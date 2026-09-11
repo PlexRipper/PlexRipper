@@ -19,7 +19,6 @@
     "build": "nuxi build",
     "generate": "nuxi generate",
     "preview": "nuxi preview",
-    "release": "semantic-release",
     "dev:analyze": "nuxi analyze",
     "postinstall": "nuxi prepare",
     "generate-ts": "swagger-typescript-api generate --path http://localhost:5000/swagger/internal/swagger.json --sort-types --modular --clean-output --module-name-index 1 --axios --api-class-name GeneratedApiClient --templates ./src/types/api/templates/modular -o ./src/types/api/generated",

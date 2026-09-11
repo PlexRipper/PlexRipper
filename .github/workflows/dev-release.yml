@@ -41,8 +41,7 @@ jobs:
 
             -   name: Run Semantic Release (DEV Release)
                 id: semantic-release
-                working-directory: src/AppHost/ClientApp
-                run: bunx --no-install semantic-release --extends ../../../release.config.mjs --cwd ../../.. --debug
+                run: bun src/AppHost/ClientApp/node_modules/semantic-release/bin/semantic-release.js --debug
                 env:
                     # STABLE_RELEASE not set = appends -dev.N suffix to computed version
                     GH_TOKEN: ${{ secrets.GH_TOKEN }}

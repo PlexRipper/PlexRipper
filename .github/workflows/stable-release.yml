@@ -33,8 +33,7 @@ jobs:
 
             -   name: GitHub Release (Stable)
                 id: get-next-version
-                working-directory: src/AppHost/ClientApp
-                run: bunx --no-install semantic-release --extends ../../../release.config.mjs --cwd ../../..
+                run: bun src/AppHost/ClientApp/node_modules/semantic-release/bin/semantic-release.js
                 env:
                     STABLE_RELEASE: 'true'
                     GH_TOKEN: ${{ secrets.GH_TOKEN }}

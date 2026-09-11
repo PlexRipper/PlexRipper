@@ -113,6 +113,55 @@ public class TorrentsInfoEndpointUnitTests
     }
 
     [Test]
+    public async Task ShouldUseOwningIntegrationCategory_WhenMediaTypeAndIntegrationTypeDiffer()
+    {
+        // Arrange
+        const string category = "custom-radarr-episode";
+        const string hash = "hash-radarr-episode";
+        await SetupDatabase(
+            5109,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.TvShowCount = 1;
+                config.TvShowDownloadTasksCount = 1;
+                config.TvShowSeasonDownloadTasksCount = 1;
+                config.TvShowEpisodeDownloadTasksCount = 1;
+                config.RadarrIntegrationCount = 1;
+                config.AssignUnownedDownloadTasksToRadarrIntegration = true;
+            }
+        );
+
+        var dbContext = IDbContext;
+        var episodeFile = await dbContext.DownloadTaskTvShowEpisodeFile.FirstAsync(CancellationToken);
+        var integration = await dbContext.RadarrIntegrations.SingleAsync(CancellationToken);
+        await dbContext
+            .RadarrIntegrations.Where(x => x.Id == integration.Id)
+            .ExecuteUpdateAsync(x => x.SetProperty(p => p.Category, category), CancellationToken);
+        await dbContext
+            .PlexServers.Where(x => x.Id == episodeFile.PlexServerId)
+            .ExecuteUpdateAsync(x => x.SetProperty(p => p.OwnedOverride, false), CancellationToken);
+        await dbContext
+            .DownloadTaskTvShowEpisodeFile.Where(x => x.Id == episodeFile.Id)
+            .ExecuteUpdateAsync(
+                x => x.SetProperty(p => p.HashId, hash).SetProperty(p => p.DownloadStatus, DownloadStatus.Completed),
+                CancellationToken
+            );
+
+        // Act
+        var endpointResult = await TestEndpointHandleAsync(
+            new TorrentsInfoEndpointRequest { Hashes = hash, Category = category },
+            integrationIdentity: integration.Id.ToRadarrIdentity()
+        );
+
+        // Assert
+        endpointResult.Response.ShouldNotBeNull();
+        endpointResult.Response.Count.ShouldBe(1);
+        endpointResult.Response[0].Hash.ShouldBe(hash);
+        endpointResult.Response[0].Category.ShouldBe(category);
+    }
+
+    [Test]
     public async Task ShouldReturnRatioLimitZero_WhenStatusIsCompleted()
     {
         // Arrange — Radarr only sets CanBeRemoved when HasReachedSeedLimit() is true.

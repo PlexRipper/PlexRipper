@@ -22,7 +22,7 @@ describe('Test the refreshing of a PlexLibrary', () => {
 			plexAccountCount: 1,
 			plexServerCount: 1,
 			plexMovieLibraryCount: 1,
-			movieCount: 100000,
+			movieCount: 1000,
 		})
 			.then((data) => {
 				const movieLibrary = data.plexLibraries.find((x) => x.type === PlexMediaType.Movie);

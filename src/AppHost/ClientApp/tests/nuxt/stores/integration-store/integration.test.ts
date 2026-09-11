@@ -115,6 +115,24 @@ describe('IntegrationStore', () => {
 		expect(store.requiresSetupPrompt).toBe(true);
 	});
 
+	test('Should preserve save failures separately from connection results', async () => {
+		// Arrange
+		const store = useIntegrationStore();
+		store.openAdd(IntegrationType.Sonarr);
+		Object.assign(store.draft, { name: 'Sonarr', url: 'http://sonarr', apiKey: 'key', category: 'sonarr' });
+		const failedSave = { isSuccess: false, errors: [{ message: 'Save failed', reasons: [], metadata: {} }], successes: [], statusCode: 500 };
+		vi.spyOn(integrationApi, 'createSonarrIntegrationEndpoint').mockReturnValue(of(failedSave));
+
+		// Act
+		const result = subscribeSpyTo(store.save());
+		await result.onComplete();
+
+		// Assert
+		expect(result.getLastValue()).toEqual(failedSave);
+		expect(store.saveError).toEqual(failedSave);
+		expect(store.error).toEqual(failedSave);
+	});
+
 	test('Should test a Radarr draft through the typed endpoint', async () => {
 		// Arrange
 		const store = useIntegrationStore();
@@ -290,7 +308,7 @@ describe('IntegrationStore', () => {
 			testedAt: '2026-09-07T12:00:00Z',
 		};
 		store.error = 'Connection failed';
-		const failedSetup = { isSuccess: false, errors: [], successes: [], statusCode: 500 };
+		const failedSetup = { isSuccess: false, errors: [{ message: 'Setup failed', reasons: [], metadata: {} }], successes: [], statusCode: 500 };
 		const setup = vi.spyOn(integrationApi, 'setupRadarrIntegrationEndpoint').mockReturnValue(of(failedSetup));
 
 		// Act
@@ -301,8 +319,65 @@ describe('IntegrationStore', () => {
 		expect(setup).toHaveBeenCalledWith('id');
 		expect(result.getLastValue()).toEqual(failedSetup);
 		expect(store.error).toBeNull();
+		expect(store.setupError).toEqual(failedSetup);
 		expect(store.testResult).toBeNull();
+	});
+
+	test('Should preserve setup failures for the setup dialog', async () => {
+		// Arrange
+		const store = useIntegrationStore();
+		store.detail = {
+			apiKey: 'key',
+			category: 'radarr',
+			downloadFolderId: 1,
+			id: 'id',
+			lastConnectionTestErrorMessage: null,
+			lastConnectionTestHttpStatusCode: null,
+			lastConnectionTestStatus: TestConnectionStatus.Unknown,
+			lastConnectionTestedAt: null,
+			name: 'Radarr',
+			provisioningState: IntegrationProvisioningState.Unconfigured,
+			url: 'http://radarr',
+			type: IntegrationType.Radarr,
+		};
+		const failedSetup = { isSuccess: false, errors: [{ message: 'Setup failed', reasons: [], metadata: {} }], successes: [], statusCode: 500 };
+		vi.spyOn(integrationApi, 'setupRadarrIntegrationEndpoint').mockReturnValue(of(failedSetup));
+
+		// Act
+		const result = subscribeSpyTo(store.setupIntegration());
+		await result.onComplete();
+
+		// Assert
+		expect(result.getLastValue()).toEqual(failedSetup);
+		expect(store.setupError).toEqual(failedSetup);
+		expect(store.error).toBeNull();
 		expect(store.isSettingUp).toBe(false);
+	});
+
+	test('Should not report a stale connection test as current after credentials change', async () => {
+		// Arrange
+		const store = useIntegrationStore();
+		store.openAdd(IntegrationType.Radarr);
+		Object.assign(store.draft, { url: 'http://radarr', apiKey: 'old-key' });
+		const testResult = {
+			result: TestConnectionStatus.Success,
+			httpStatusCode: 200,
+			errorMessage: null,
+			testedAt: '2026-09-07T12:00:00Z',
+		};
+		const pending = new Subject<ResultDTO<typeof testResult>>();
+		vi.spyOn(integrationApi, 'testConnectionToRadarrEndpoint').mockReturnValue(pending.asObservable());
+
+		// Act
+		const result = subscribeSpyTo(store.test());
+		store.draft.apiKey = 'new-key';
+		pending.next({ isSuccess: true, value: testResult, errors: [], successes: [], statusCode: 200 });
+		pending.complete();
+		await result.onComplete();
+
+		// Assert
+		expect(store.testResult).toBeNull();
+		expect(store.isSetupDisabled).toBe(true);
 	});
 
 	test('Should update an existing integration summary after a successful connection test', async () => {

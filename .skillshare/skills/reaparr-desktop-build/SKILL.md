@@ -9,8 +9,6 @@ description: Use when deploying Reaparr to desktop, changing tools/Build, modify
 
 This skill is mandatory for any Reaparr task that touches desktop deployment or the Build project. Load it before reading, searching, editing, planning, testing, reviewing, or documenting anything under `tools/Build/`, and before changing desktop publish/package/run behavior elsewhere in the repo.
 
-Always load `reaparr-mcp-tools` first. This skill adds the desktop-build-specific rules on top of the Reaparr MCP workflow.
-
 Use this skill for:
 - `tools/Build/**` code, tests, README, or project configuration.
 - Desktop release, deploy, publish, package, run, CI package, or Velopack work.
@@ -95,14 +93,13 @@ Preserve these unless the user explicitly asks to change behavior and the relate
 
 ## Change Workflow
 
-1. Load `reaparr-mcp-tools`, then this skill.
-2. Inspect `tools/Build/README.md` before behavior changes.
-3. Use native repository reads, searches, diagnostics, and project commands first.
-4. Keep command classes thin; put behavior in workflows or shared helpers.
-5. If adding an option, update `DesktopCommandSettings`, workflow behavior, README, and unit tests.
-6. If adding a RID, update runtime catalog, AppHost publish profiles, README, and packaging/launch tests.
-7. Re-read changed files after edits.
-8. Run the relevant Build unit tests through the Reaparr MCP test routing before claiming completion.
+1. Inspect `tools/Build/README.md` before behavior changes.
+2. Use native repository reads, searches, diagnostics, and project commands first.
+3. Keep command classes thin; put behavior in workflows or shared helpers.
+4. If adding an option, update `DesktopCommandSettings`, workflow behavior, README, and unit tests.
+5. If adding a RID, update runtime catalog, AppHost publish profiles, README, and packaging/launch tests.
+6. Re-read changed files after edits.
+7. Run the relevant Build unit tests through the Reaparr MCP test routing before claiming completion.
 
 ## Common Mistakes
 

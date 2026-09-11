@@ -39,7 +39,7 @@
 			</div>
 			<div
 				v-if="chips.length"
-				class="overview-card__chips row q-gutter-sm q-mt-sm">
+				class="overview-card__chips row q-gutter-sm q-mt-md">
 				<QGlowChip
 					v-for="chip in chips"
 					:key="`${chip.color}-${chip.value}`"

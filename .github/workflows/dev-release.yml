@@ -16,6 +16,9 @@ concurrency:
     group: dev-release
     cancel-in-progress: false
 
+permissions:
+    contents: read
+
 jobs:
     # Semantic Release for Dev Prereleases
     semantic-release:
@@ -27,42 +30,18 @@ jobs:
             pull-requests: write
         steps:
             -   name: Checkout source code
-                uses: actions/checkout@v4
+                uses: actions/checkout@v7
                 with:
                     token: ${{ secrets.GH_TOKEN }}
                     fetch-depth: 0
                     ref: dev
 
-            -   name: Verify Git State
-                run: |
-                    echo "Current branch: $(git branch --show-current)"
-                    echo "Remote branches:"
-                    git branch -r
-                    echo "Git remote:"
-                    git remote -v
-
-            -   name: Setup Node.js
-                uses: actions/setup-node@v4
-                with:
-                    node-version: 22
-
             -   name: Client App Install
                 uses: ./.github/actions/client-app-install/
 
-            -   name: Debug Config
-                run: |
-                    echo "Working directory: $(pwd)"
-                    echo "Config file exists:"
-                    ls -la release.config.mjs || echo "NOT FOUND in root"
-                    echo "---"
-                    echo "Config content:"
-                    cat release.config.mjs || echo "Could not read config"
-                    echo "---"
-                    echo "STABLE_RELEASE env: '$STABLE_RELEASE'"
-
             -   name: Run Semantic Release (DEV Release)
                 id: semantic-release
-                run: npx --prefix src/AppHost/ClientApp/ semantic-release --debug
+                run: bun run --cwd src/AppHost/ClientApp release -- --debug
                 env:
                     # STABLE_RELEASE not set = appends -dev.N suffix to computed version
                     GH_TOKEN: ${{ secrets.GH_TOKEN }}
@@ -85,8 +64,11 @@ jobs:
         name: Build Desktop Apps (DEV)
         needs: [ semantic-release ]
         if: needs.semantic-release.outputs.new-release-published == 'true'
+        permissions:
+            contents: write
         uses: ./.github/workflows/desktop-build.yml
-        secrets: inherit
+        secrets:
+            RELEASE_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
             push: true
             publish_release: false
@@ -100,7 +82,9 @@ jobs:
         needs: [ semantic-release ]
         if: needs.semantic-release.outputs.new-release-published == 'true'
         uses: ./.github/workflows/docker-build-multiarch.yml
-        secrets: inherit
+        secrets:
+            DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+            DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
         with:
             push: true
             version: ${{ needs.semantic-release.outputs.new-release-version }}
@@ -111,11 +95,12 @@ jobs:
     notify-discord:
         name: Notify Discord
         needs: [ semantic-release, build-and-publish, build-desktop ]
-        if: needs.semantic-release.outputs.new-release-published == 'true'
         runs-on: ubuntu-latest
         steps:
             -   name: Checkout source code
-                uses: actions/checkout@v4
+                uses: actions/checkout@v7
+                with:
+                    persist-credentials: false
 
             -   name: Notify Discord of Dev Release
                 uses: ./.github/actions/discord-dev-release-notification/

@@ -28,6 +28,9 @@ on:
                 description: 'Velopack update channel (dev or stable)'
                 required: true
                 type: string
+        secrets:
+            RELEASE_GITHUB_TOKEN:
+                required: false
 
 jobs:
     prepare-frontend:
@@ -35,7 +38,9 @@ jobs:
         runs-on: ubuntu-latest
         steps:
             -   name: Checkout source code
-                uses: actions/checkout@v4
+                uses: actions/checkout@v7
+                with:
+                    persist-credentials: false
 
             -   name: Client App Install
                 uses: ./.github/actions/client-app-install/
@@ -46,7 +51,7 @@ jobs:
                 run: bun run generate --fail-on-error
 
             -   name: Upload generated frontend artifact
-                uses: actions/upload-artifact@v4
+                uses: actions/upload-artifact@v7
                 with:
                     name: frontend-public
                     path: src/AppHost/ClientApp/.output/public
@@ -74,14 +79,16 @@ jobs:
 
         runs-on: ${{ matrix.runner }}
         permissions:
-            contents: write
+            contents: read
 
         steps:
             -   name: Checkout source code
-                uses: actions/checkout@v4
+                uses: actions/checkout@v7
+                with:
+                    persist-credentials: false
 
             -   name: Download generated frontend artifact
-                uses: actions/download-artifact@v4
+                uses: actions/download-artifact@v8
                 with:
                     name: frontend-public
                     path: .tmp/frontend-public
@@ -98,7 +105,7 @@ jobs:
                     runtime: ${{ matrix.rid }}
 
             -   name: Setup .NET 9 runtime for vpk
-                uses: actions/setup-dotnet@v4
+                uses: actions/setup-dotnet@v6
                 with:
                     dotnet-version: 9.0.x
 
@@ -108,12 +115,19 @@ jobs:
 
             -   name: Derive Velopack channel
                 shell: bash
+                env:
+                    RID: ${{ matrix.rid }}
+                    VELOPACK_CHANNEL_INPUT: ${{ inputs.velopack_channel }}
                 run: |
-                    if [ "${{ inputs.velopack_channel }}" = "stable" ]; then
-                        echo "VELOPACK_CHANNEL=${{ matrix.rid }}-stable" >> "$GITHUB_ENV"
-                    else
-                        echo "VELOPACK_CHANNEL=${{ matrix.rid }}-dev" >> "$GITHUB_ENV"
-                    fi
+                    case "$VELOPACK_CHANNEL_INPUT" in
+                        stable|dev)
+                            echo "VELOPACK_CHANNEL=$RID-$VELOPACK_CHANNEL_INPUT" >> "$GITHUB_ENV"
+                            ;;
+                        *)
+                            echo "Unsupported Velopack channel: $VELOPACK_CHANNEL_INPUT" >&2
+                            exit 1
+                            ;;
+                    esac
 
             -   name: Download previous release (for delta packages)
                 if: inputs.push
@@ -123,15 +137,19 @@ jobs:
                     vpk download github \
                         --repoUrl https://github.com/${{ github.repository }} \
                         --channel "$VELOPACK_CHANNEL" \
-                        --token ${{ secrets.GITHUB_TOKEN }}
+                        --token ${{ secrets.RELEASE_GITHUB_TOKEN }}
 
             -   name: Package installer via shared CLI
                 shell: bash
+                env:
+                    INFORMATIONAL_VERSION: ${{ inputs.informational_version }}
+                    RID: ${{ matrix.rid }}
+                    VERSION: ${{ inputs.version }}
                 run: |
                     dotnet run --project tools/Build -- desktop ci-package \
-                        --rid ${{ matrix.rid }} \
-                        --version ${{ inputs.version }} \
-                        --informational-version ${{ inputs.informational_version }} \
+                        --rid "$RID" \
+                        --version "$VERSION" \
+                        --informational-version "$INFORMATIONAL_VERSION" \
                         --channel "$VELOPACK_CHANNEL" \
                         --frontend-public-dir .tmp/frontend-public \
                         --artifact-dir Releases \
@@ -139,7 +157,7 @@ jobs:
 
             -   name: Upload packed installer artifact
                 if: inputs.push
-                uses: actions/upload-artifact@v4
+                uses: actions/upload-artifact@v7
                 with:
                     name: desktop-${{ matrix.rid }}
                     path: Releases/
@@ -151,8 +169,6 @@ jobs:
         if: inputs.push
         runs-on: ubuntu-latest
         timeout-minutes: 30
-        permissions:
-            contents: write
         strategy:
             fail-fast: false
             max-parallel: 1
@@ -167,10 +183,12 @@ jobs:
 
         steps:
             -   name: Checkout source code
-                uses: actions/checkout@v4
+                uses: actions/checkout@v7
+                with:
+                    persist-credentials: false
 
             -   name: Setup .NET 9 runtime for vpk
-                uses: actions/setup-dotnet@v4
+                uses: actions/setup-dotnet@v6
                 with:
                     dotnet-version: 9.0.x
 
@@ -179,28 +197,45 @@ jobs:
 
             -   name: Derive Velopack channel
                 shell: bash
+                env:
+                    RID: ${{ matrix.rid }}
+                    VELOPACK_CHANNEL_INPUT: ${{ inputs.velopack_channel }}
                 run: |
-                    if [ "${{ inputs.velopack_channel }}" = "stable" ]; then
-                        echo "VELOPACK_CHANNEL=${{ matrix.rid }}-stable" >> "$GITHUB_ENV"
-                    else
-                        echo "VELOPACK_CHANNEL=${{ matrix.rid }}-dev" >> "$GITHUB_ENV"
-                    fi
+                    case "$VELOPACK_CHANNEL_INPUT" in
+                        stable|dev)
+                            echo "VELOPACK_CHANNEL=$RID-$VELOPACK_CHANNEL_INPUT" >> "$GITHUB_ENV"
+                            ;;
+                        *)
+                            echo "Unsupported Velopack channel: $VELOPACK_CHANNEL_INPUT" >&2
+                            exit 1
+                            ;;
+                    esac
 
             -   name: Download packed installer
-                uses: actions/download-artifact@v4
+                uses: actions/download-artifact@v8
                 with:
                     name: desktop-${{ matrix.rid }}
                     path: Releases/${{ matrix.rid }}
 
             -   name: Upload installer to GitHub Release
                 shell: bash
+                env:
+                    PUBLISH_RELEASE: ${{ inputs.publish_release }}
+                    GITHUB_TOKEN: ${{ secrets.RELEASE_GITHUB_TOKEN }}
+                    RID: ${{ matrix.rid }}
+                    VERSION: ${{ inputs.version }}
                 run: |
-                    vpk upload github \
-                        --repoUrl https://github.com/${{ github.repository }} \
-                        ${{ inputs.publish_release && '--publish' || '' }} \
-                        --merge \
-                        --channel "$VELOPACK_CHANNEL" \
-                        --outputDir Releases/${{ matrix.rid }} \
-                        --releaseName "Reaparr ${{ inputs.version }}" \
-                        --tag v${{ inputs.version }} \
-                        --token ${{ secrets.GITHUB_TOKEN }}
+                    upload_args=(
+                        vpk upload github
+                        --repoUrl "https://github.com/$GITHUB_REPOSITORY"
+                        --merge
+                        --channel "$VELOPACK_CHANNEL"
+                        --outputDir "Releases/$RID"
+                        --releaseName "Reaparr $VERSION"
+                        --tag "v$VERSION"
+                        --token "$GITHUB_TOKEN"
+                    )
+                    if [[ "$PUBLISH_RELEASE" == 'true' ]]; then
+                        upload_args+=(--publish)
+                    fi
+                    "${upload_args[@]}"

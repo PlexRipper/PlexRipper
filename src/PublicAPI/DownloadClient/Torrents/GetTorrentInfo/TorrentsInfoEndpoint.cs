@@ -142,12 +142,16 @@ public sealed class TorrentsInfoEndpoint : Endpoint<TorrentsInfoEndpointRequest,
             .DownloadTaskTvShowEpisodeFile.WhereIntegrationIsOrUnowned(integration)
             .Where(x => x.HashId != null && nonOwnedServerIds.Contains(x.PlexServerId))
             .Include(x => x.Parent)
+            .Include(x => x.SonarrIntegration)
+            .Include(x => x.RadarrIntegration)
             .ToListAsync(ct);
 
         var movieFilesTask = dbContext
             .DownloadTaskMovieFile.WhereIntegrationIsOrUnowned(integration)
             .Where(x => x.HashId != null && nonOwnedServerIds.Contains(x.PlexServerId))
             .Include(x => x.Parent)
+            .Include(x => x.RadarrIntegration)
+            .Include(x => x.SonarrIntegration)
             .ToListAsync(ct);
 
         await Task.WhenAll(episodeFilesTask, movieFilesTask);

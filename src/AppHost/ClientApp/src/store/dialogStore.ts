@@ -46,8 +46,8 @@ export const useDialogStore = defineStore(StoreNames.DialogStore, () => {
 		openIntegrationDialog(data: IntegrationSummary | null): void {
 			state.dialogUpdate.next({ name: DialogType.IntegrationDialog, state: true, data });
 		},
-		openIntegrationSetupDialog(): void {
-			state.dialogUpdate.next({ name: DialogType.IntegrationSetupDialog, state: true, data: {} });
+		openIntegrationSetupDialog(closeIntegrationDialogOnClose = false): void {
+			state.dialogUpdate.next({ name: DialogType.IntegrationSetupDialog, state: true, data: closeIntegrationDialogOnClose });
 		},
 		openServerSettingsDialog(plexServerId: number): void {
 			state.dialogUpdate.next({ name: DialogType.ServerSettingsDialog, state: true, data: plexServerId });

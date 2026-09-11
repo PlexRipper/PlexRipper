@@ -1,5 +1,8 @@
 namespace Reaparr.Settings.Contracts;
 
+/// <summary>
+/// Legacy integration settings retained only for one-time migration to database-backed integrations.
+/// </summary>
 public record IntegrationsSettings
     : BaseSettingsModule<IntegrationsSettings>,
         IBaseSettingsModule<IntegrationsSettings>,

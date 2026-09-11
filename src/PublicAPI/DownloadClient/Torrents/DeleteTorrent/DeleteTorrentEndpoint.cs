@@ -252,7 +252,7 @@ public sealed class DeleteTorrentEndpoint : Endpoint<DeleteTorrentRequest>
                     or DownloadStatus.Restarting;
 
         var movieTask = _dbContext
-            .DownloadTaskMovieFile.WhereIntegrationIs(integration)
+            .DownloadTaskMovieFile.WhereIntegrationOwnershipMatches(integration)
             .Where(x =>
                 x.HashId != null && (normalizedHashes == null || normalizedHashes.Contains(x.HashId.ToLower()))
             )
@@ -270,7 +270,7 @@ public sealed class DeleteTorrentEndpoint : Endpoint<DeleteTorrentRequest>
             .ToListAsync(ct);
 
         var episodeTask = _dbContext
-            .DownloadTaskTvShowEpisodeFile.WhereIntegrationIs(integration)
+            .DownloadTaskTvShowEpisodeFile.WhereIntegrationOwnershipMatches(integration)
             .Where(x =>
                 x.HashId != null && (normalizedHashes == null || normalizedHashes.Contains(x.HashId.ToLower()))
             )

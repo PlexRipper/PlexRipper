@@ -123,7 +123,7 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandler
             // Get or create episode download task
             var episodeDownloadTask = downloadTaskTvShowSeason
                 .Children.AsQueryable()
-                .WhereIntegrationIs(request.Integration)
+                .WhereIntegrationOwnershipMatches(request.Integration)
                 .FirstOrDefault(x => x.PlexApiRatingKey == tvShowEpisode.PlexApiRatingKey);
             if (episodeDownloadTask is null)
             {
@@ -211,7 +211,7 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandler
         // Check if the tvShowDownloadTask has already been created this run
         var downloadTaskTvShow = _tvShowDownloads
             .AsQueryable()
-            .WhereIntegrationIs(integration)
+            .WhereIntegrationOwnershipMatches(integration)
             .FirstOrDefault(x => x.PlexApiRatingKey == plexTvShow.PlexApiRatingKey);
 
         // Check if the tvShowDownloadTask has already been created in the database
@@ -219,7 +219,7 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandler
         {
             downloadTaskTvShow = await _dbContext
                 .DownloadTaskTvShow.AsTracking()
-                .WhereIntegrationIs(integration)
+                .WhereIntegrationOwnershipMatches(integration)
                 .IncludeAll()
                 .SingleOrDefaultAsync(
                     x => x.PlexServerId == plexTvShow.PlexServerId && x.PlexApiRatingKey == plexTvShow.PlexApiRatingKey,
@@ -252,7 +252,7 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandler
         ).ToIntegrationIdentity();
         var downloadTaskTvShowSeason = downloadTaskTvShow
             .Children.AsQueryable()
-            .WhereIntegrationIs(integration)
+            .WhereIntegrationOwnershipMatches(integration)
             .FirstOrDefault(x => x.PlexApiRatingKey == plexSeason.PlexApiRatingKey);
 
         if (downloadTaskTvShowSeason is null)

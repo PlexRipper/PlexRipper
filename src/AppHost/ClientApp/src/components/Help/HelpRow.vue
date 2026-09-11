@@ -7,6 +7,7 @@
 			:cols="colLabel"
 			:lg="!disableResponsive ? 4 : colLabel"
 			:xl="!disableResponsive ? 3 : colLabel"
+			align-self="center"
 			align-items="end">
 			<!-- Help Label -->
 			<QText
@@ -46,6 +47,7 @@
 			:cols="colContent"
 			:lg="!disableResponsive ? 5 : colContent"
 			:xl="!disableResponsive ? 4 : colContent"
+			align-self="center"
 			class="help-row-default-slot q-pa-sm">
 			<slot />
 		</QCol>
@@ -109,6 +111,24 @@ const hasHelpPage = computed(() => {
 
   &-default-slot {
     white-space: break-spaces;
+  }
+
+  &-label:has(+ .help-row-default-slot .q-field__bottom) {
+    --help-row-control-height: 56px;
+    --help-row-content-padding: 8px;
+
+    align-self: flex-start;
+    position: relative;
+    top: calc(var(--help-row-content-padding) + var(--help-row-control-height) / 2);
+    transform: translateY(-50%);
+  }
+
+  &-label:has(+ .help-row-default-slot .q-field--dense .q-field__bottom) {
+    --help-row-control-height: 40px;
+  }
+
+  &-default-slot:has(.q-field__bottom) {
+    align-self: flex-start;
   }
 }
 </style>

@@ -19,6 +19,13 @@ on:
             - '.vscode/**'
             - 'README.md'
 
+permissions:
+    contents: read
+
+concurrency:
+    group: dev-test-${{ github.event.pull_request.number || github.ref }}
+    cancel-in-progress: true
+
 jobs:
     # Check if PR is in draft
     Check-PR-Status:
@@ -32,9 +39,11 @@ jobs:
         if: needs.Check-Github-Changes.outputs.should_run == 'true' && (needs.Check-PR-Status.result == 'success' || github.event_name == 'workflow_dispatch')
         runs-on: ubuntu-latest
         steps:
-            -   uses: actions/checkout@v4
+            -   uses: actions/checkout@v7
+                with:
+                    persist-credentials: false
             -   name: Run actionlint
-                uses: raven-actions/actionlint@v2.1.2
+                uses: raven-actions/actionlint@v2
                 with:
                     fail-on-error: true
                     matcher: true
@@ -49,10 +58,12 @@ jobs:
         outputs:
             should_run: ${{ steps.check_changes.outputs.github }}
         steps:
-            -   uses: actions/checkout@v4
+            -   uses: actions/checkout@v7
+                with:
+                    persist-credentials: false
             -   name: Check if .github has changed
                 id: check_changes
-                uses: dorny/paths-filter@v3
+                uses: dorny/paths-filter@v4
                 with:
                     filters: |
                         github:
@@ -66,10 +77,12 @@ jobs:
         outputs:
             should_run: ${{ steps.check_changes.outputs.frontend }}
         steps:
-            -   uses: actions/checkout@v4
+            -   uses: actions/checkout@v7
+                with:
+                    persist-credentials: false
             -   name: Check if front-end has changed
                 id: check_changes
-                uses: dorny/paths-filter@v3
+                uses: dorny/paths-filter@v4
                 with:
                     filters: |
                         frontend:
@@ -82,11 +95,16 @@ jobs:
         runs-on: ubuntu-latest
         outputs:
             should_run: ${{ steps.check_changes.outputs.backend }}
+            unit_projects: ${{ steps.discover_tests.outputs.unit_projects }}
+            integration_projects: ${{ steps.discover_tests.outputs.integration_projects }}
+            target_framework: ${{ steps.discover_tests.outputs.target_framework }}
         steps:
-            -   uses: actions/checkout@v4
+            -   uses: actions/checkout@v7
+                with:
+                    persist-credentials: false
             -   name: Check if back-end has changed
                 id: check_changes
-                uses: dorny/paths-filter@v3
+                uses: dorny/paths-filter@v4
                 with:
                     predicate-quantifier: 'every'
                     filters: |
@@ -94,13 +112,35 @@ jobs:
                             - '{src/**,tests/**}'
                             - '!src/AppHost/ClientApp/**'
 
+            -   name: Discover backend test projects
+                id: discover_tests
+                shell: bash
+                run: |
+                    set -euo pipefail
+                    unit_projects=$(find tests/UnitTests -type f -name '*.csproj' -print | sort | jq -Rsc 'split("\n") | map(select(length > 0) | {project: ., project_name: (split("/")[-1] | sub("\\.csproj$"; ""))})')
+                    integration_projects=$(find tests/IntegrationTests -type f -name '*.csproj' -print | sort | jq -Rsc 'split("\n") | map(select(length > 0) | {project: ., project_name: (split("/")[-1] | sub("\\.csproj$"; ""))})')
+                    target_framework=$(sed -nE 's|.*<TargetFramework>([^<]+)</TargetFramework>.*|\1|p' Directory.Build.props | sed -n '1p')
+
+                    if [[ "$unit_projects" == '[]' || "$integration_projects" == '[]' || -z "$target_framework" ]]; then
+                        echo "Backend test project discovery returned incomplete results" >&2
+                        exit 1
+                    fi
+
+                    {
+                        echo "unit_projects=$unit_projects"
+                        echo "integration_projects=$integration_projects"
+                        echo "target_framework=$target_framework"
+                    } >> "$GITHUB_OUTPUT"
+
     # Front-End-Type-Check:
     Front-End-Type-Check:
         needs: [ Check-Frontend-Changes, Check-PR-Status ]
         if: needs.Check-Frontend-Changes.outputs.should_run == 'true' && (needs.Check-PR-Status.result == 'success' || github.event_name == 'workflow_dispatch')
         runs-on: ubuntu-latest
         steps:
-            -   uses: actions/checkout@v4
+            -   uses: actions/checkout@v7
+                with:
+                    persist-credentials: false
             -   name: Client App Install
                 uses: ./.github/actions/client-app-install/
             -   name: Run Typescript type check
@@ -113,7 +153,9 @@ jobs:
         if: needs.Check-Frontend-Changes.outputs.should_run == 'true' && (needs.Check-PR-Status.result == 'success' || github.event_name == 'workflow_dispatch')
         runs-on: ubuntu-latest
         steps:
-            -   uses: actions/checkout@v4
+            -   uses: actions/checkout@v7
+                with:
+                    persist-credentials: false
             -   name: Client App Install
                 uses: ./.github/actions/client-app-install/
             -   name: Run Vitest tests
@@ -121,7 +163,7 @@ jobs:
                 working-directory: src/AppHost/ClientApp/
             -   name: Upload test results
                 if: always()
-                uses: actions/upload-artifact@v4
+                uses: actions/upload-artifact@v7
                 with:
                     name: frontend-test-results
                     path: src/AppHost/ClientApp/test-results
@@ -132,7 +174,9 @@ jobs:
         if: needs.Check-Frontend-Changes.outputs.should_run == 'true' && (needs.Check-PR-Status.result == 'success' || github.event_name == 'workflow_dispatch')
         runs-on: ubuntu-latest
         steps:
-            -   uses: actions/checkout@v4
+            -   uses: actions/checkout@v7
+                with:
+                    persist-credentials: false
             -   name: Client App Install
                 uses: ./.github/actions/client-app-install/
             -   name: Run eslint check
@@ -149,17 +193,19 @@ jobs:
             matrix:
                 containers: [ 1, 2 ] # Uses 2 parallel instances
         steps:
-            -   uses: actions/checkout@v4
+            -   uses: actions/checkout@v7
+                with:
+                    persist-credentials: false
             -   name: Client App Install
                 uses: ./.github/actions/client-app-install/
             -   name: Cache Cypress binary
-                uses: actions/cache@v4
+                uses: actions/cache@v6
                 with:
                     path: ~/.cache/Cypress
                     key: ${{ runner.os }}-cypress-${{ hashFiles('**/package.json') }}
                     restore-keys: ${{ runner.os }}-cypress-
             -   name: Run Cypress tests
-                uses: cypress-io/github-action@v6
+                uses: cypress-io/github-action@v7.4.3
                 with:
                     install: false
                     record: true
@@ -184,7 +230,9 @@ jobs:
         runs-on: ubuntu-latest
         steps:
             -   name: Checkout Source Code
-                uses: actions/checkout@v4
+                uses: actions/checkout@v7
+                with:
+                    persist-credentials: false
 
             -   name: Dotnet Setup (Restore only)
                 uses: ./.github/actions/dotnet-setup/
@@ -196,169 +244,112 @@ jobs:
             -   name: Build Backend Solution
                 run: dotnet build Reaparr.sln --no-restore
 
-            -   name: Package Build Outputs
-                shell: bash
-                run: >-
-                    find src tests -type d -path '*/bin/Debug/net10.0' -print0 |
-                    tar --create --file backend-build.tar --null --files-from -
-
-            -   name: Upload Build Outputs
-                uses: actions/upload-artifact@v4
-                with:
-                    name: backend-build
-                    path: backend-build.tar
-                    retention-days: 1
-
     Back-End-Unit-Tests:
-        needs: [ Check-Backend-Changes, Check-PR-Status, Back-End-Build ]
+        needs: [ Check-Backend-Changes, Check-PR-Status ]
         if: needs.Check-Backend-Changes.outputs.should_run == 'true' && (needs.Check-PR-Status.result == 'success' || github.event_name == 'workflow_dispatch')
         runs-on: ubuntu-latest
         name: Back-End-Unit-Tests (${{ matrix.project_name }})
         strategy:
             fail-fast: false
             matrix:
-                include:
-                    -   test_project: tests/UnitTests/AppHost.UnitTests/AppHost.UnitTests.csproj
-                        project_name: AppHost.UnitTests
-                    -   test_project: tests/UnitTests/Application.UnitTests/Application.UnitTests.csproj
-                        project_name: Application.UnitTests
-                    -   test_project: tests/UnitTests/BaseTests.UnitTests/BaseTests.UnitTests.csproj
-                        project_name: BaseTests.UnitTests
-                    -   test_project: tests/UnitTests/Build.UnitTests/Build.UnitTests.csproj
-                        project_name: Build.UnitTests
-                    -   test_project: tests/UnitTests/Data.UnitTests/Data.UnitTests.csproj
-                        project_name: Data.UnitTests
-                    -   test_project: tests/UnitTests/Domain.UnitTests/Domain.UnitTests.csproj
-                        project_name: Domain.UnitTests
-                    -   test_project: tests/UnitTests/External.UnitTests/External.UnitTests.csproj
-                        project_name: External.UnitTests
-                    -   test_project: tests/UnitTests/FileSystem.UnitTests/FileSystem.UnitTests.csproj
-                        project_name: FileSystem.UnitTests
-                    -   test_project: tests/UnitTests/Environment.UnitTests/Environment.UnitTests.csproj
-                        project_name: Environment.UnitTests
-                    -   test_project: tests/UnitTests/FluentResultExtension.UnitTests/FluentResultExtension.UnitTests.csproj
-                        project_name: FluentResultExtension.UnitTests
-                    -   test_project: tests/UnitTests/Logging.UnitTests/Logging.UnitTests.csproj
-                        project_name: Logging.UnitTests
-                    -   test_project: tests/UnitTests/PlexApi.UnitTests/PlexApi.UnitTests.csproj
-                        project_name: PlexApi.UnitTests
-                    -   test_project: tests/UnitTests/PublicApi.UnitTests/PublicApi.UnitTests.csproj
-                        project_name: PublicApi.UnitTests
-                    -   test_project: tests/UnitTests/Settings.UnitTests/Settings.UnitTests.csproj
-                        project_name: Settings.UnitTests   
+                include: ${{ fromJSON(needs.Check-Backend-Changes.outputs.unit_projects) }}
 
         steps:
             -   name: Checkout Source Code
-                uses: actions/checkout@v4
+                uses: actions/checkout@v7
+                with:
+                    persist-credentials: false
+
 
             -   name: Dotnet Setup
                 uses: ./.github/actions/dotnet-setup/
                 with:
-                    project-path: ${{ matrix.test_project }}
-                    restore: false
-                    build: false
-
-            -   name: Download Build Outputs
-                uses: actions/download-artifact@v4
-                with:
-                    name: backend-build
-                    path: .
-
-            -   name: Extract Build Outputs
-                run: tar -xf backend-build.tar
+                    project-path: ${{ matrix.project }}
+                    restore: true
+                    build: true
 
             -   name: Run Unit Tests
                 env:
+                    TEST_PROJECT: ${{ matrix.project }}
+                    TARGET_FRAMEWORK: ${{ needs.Check-Backend-Changes.outputs.target_framework }}
+                    TEST_RESULTS_DIRECTORY: TestResults/${{ matrix.project_name }}
                     TUNIT_GITHUB_REPORTER_STYLE: collapsible
-                run: >-
-                    dotnet run --project ${{ matrix.test_project }} --no-build --no-restore --
-                    --output Normal
-                    --results-directory TestResults/${{ matrix.project_name }}
-                    --report-trx
-                    --report-trx-filename test_results.trx
-                    --coverage
-                    --coverage-output-format cobertura
-                    --coverage-output coverage.cobertura.xml
-
-            -   name: Sanitize Artifact Name
-                id: sanitize
                 run: |
-                    FILENAME=$(basename "${{ matrix.test_project }}" .csproj)
-                    echo "safe_name=$FILENAME" >> "$GITHUB_OUTPUT"
+                    project_directory=${TEST_PROJECT%/*}
+                    assembly_name=$(sed -nE 's|.*<AssemblyName>([^<]+)</AssemblyName>.*|\1|p' "$TEST_PROJECT" | sed -n '1p')
+                    assembly_name=${assembly_name:-${TEST_PROJECT##*/}}
+                    assembly_name=${assembly_name%.csproj}
+                    test_executable="$project_directory/bin/Debug/$TARGET_FRAMEWORK/$assembly_name"
 
-            -   name: Upload Test Results
+                    "$test_executable" \
+                        --output Normal \
+                        --results-directory "$TEST_RESULTS_DIRECTORY" \
+                        --report-trx \
+                        --report-trx-filename test_results.trx \
+                        --coverage \
+                        --coverage-output-format cobertura \
+                        --coverage-output "$TEST_RESULTS_DIRECTORY/coverage.cobertura.xml"
+            -   name: Upload Test Outputs
                 if: always()
-                uses: actions/upload-artifact@v4
+                uses: actions/upload-artifact@v7
                 with:
-                    name: test-results-${{ steps.sanitize.outputs.safe_name }}
-                    path: TestResults/${{ matrix.project_name }}/test_results.trx
-                    retention-days: 7
-
-            -   name: Upload Code Coverage
-                if: always()
-                uses: actions/upload-artifact@v4
-                with:
-                    name: code-coverage-${{ steps.sanitize.outputs.safe_name }}
-                    path: TestResults/${{ matrix.project_name }}/coverage.cobertura.xml
+                    name: backend-test-output-${{ matrix.project_name }}
+                    path: TestResults/${{ matrix.project_name }}
                     retention-days: 7
 
     # Back-End Integration Tests
     Back-End-Integration-Tests:
-        needs: [ Check-Backend-Changes, Check-PR-Status, Back-End-Build ]
+        needs: [ Check-Backend-Changes, Check-PR-Status ]
         if: needs.Check-Backend-Changes.outputs.should_run == 'true' && (needs.Check-PR-Status.result == 'success' || github.event_name == 'workflow_dispatch')
         runs-on: ubuntu-latest
+        name: Back-End-Integration-Tests (${{ matrix.project_name }})
         strategy:
             fail-fast: false
             matrix:
-                integration_test_project:
-                    - tests/IntegrationTests/IntegrationTests/IntegrationTests.csproj
+                include: ${{ fromJSON(needs.Check-Backend-Changes.outputs.integration_projects) }}
+
         steps:
             -   name: Checkout Source Code
-                uses: actions/checkout@v4
+                uses: actions/checkout@v7
+                with:
+                    persist-credentials: false
+
 
             -   name: Dotnet Setup
                 uses: ./.github/actions/dotnet-setup/
                 with:
-                    project-path: ${{ matrix.integration_test_project }}
-                    restore: false
-                    build: false
-
-            -   name: Download Build Outputs
-                uses: actions/download-artifact@v4
-                with:
-                    name: backend-build
-                    path: .
-
-            -   name: Extract Build Outputs
-                run: tar -xf backend-build.tar
+                    project-path: ${{ matrix.project }}
+                    restore: true
+                    build: true
 
             -   name: Run Integration Tests
                 env:
+                    TEST_PROJECT: ${{ matrix.project }}
+                    TARGET_FRAMEWORK: ${{ needs.Check-Backend-Changes.outputs.target_framework }}
+                    TEST_RESULTS_DIRECTORY: TestResults/${{ matrix.project_name }}
                     TUNIT_GITHUB_REPORTER_STYLE: collapsible
-                run: >-
-                    dotnet run --project ${{ matrix.integration_test_project }} --no-build --no-restore --
-                    --output Normal
-                    --results-directory TestResults/IntegrationTests
-                    --report-trx
-                    --report-trx-filename integration_test_results.trx
-                    --coverage
-                    --coverage-output-format cobertura
-                    --coverage-output coverage.cobertura.xml
+                run: |
+                    project_directory=${TEST_PROJECT%/*}
+                    assembly_name=$(sed -nE 's|.*<AssemblyName>([^<]+)</AssemblyName>.*|\1|p' "$TEST_PROJECT" | sed -n '1p')
+                    assembly_name=${assembly_name:-${TEST_PROJECT##*/}}
+                    assembly_name=${assembly_name%.csproj}
+                    test_executable="$project_directory/bin/Debug/$TARGET_FRAMEWORK/$assembly_name"
 
-            -   name: Upload Integration Test Results
-                if: always()
-                uses: actions/upload-artifact@v4
-                with:
-                    name: integration-test-results
-                    path: TestResults/IntegrationTests/integration_test_results.trx
-                    retention-days: 7
+                    "$test_executable" \
+                        --output Normal \
+                        --results-directory "$TEST_RESULTS_DIRECTORY" \
+                        --report-trx \
+                        --report-trx-filename test_results.trx \
+                        --coverage \
+                        --coverage-output-format cobertura \
+                        --coverage-output "$TEST_RESULTS_DIRECTORY/coverage.cobertura.xml"
 
-            -   name: Upload Integration Code Coverage
+            -   name: Upload Integration Test Outputs
                 if: always()
-                uses: actions/upload-artifact@v4
+                uses: actions/upload-artifact@v7
                 with:
-                    name: code-coverage-IntegrationTests
-                    path: TestResults/IntegrationTests/coverage.cobertura.xml
+                    name: backend-test-output-${{ matrix.project_name }}
+                    path: TestResults/${{ matrix.project_name }}
                     retention-days: 7
 
     # Code Coverage Report
@@ -367,25 +358,21 @@ jobs:
         if: always() && (needs.Back-End-Unit-Tests.result != 'skipped' || needs.Back-End-Integration-Tests.result != 'skipped') && (needs.Check-PR-Status.result == 'success' || github.event_name == 'workflow_dispatch')
         runs-on: ubuntu-latest
         steps:
-            -   name: Checkout Source Code
-                uses: actions/checkout@v4
-
             -   name: Download Coverage Reports
-                uses: actions/download-artifact@v4
+                uses: actions/download-artifact@v8
                 with:
-                    pattern: code-coverage-*
-                    merge-multiple: true
+                    pattern: backend-test-output-*
                     path: coverage-reports
 
             -   name: Generate Code Coverage Report
-                uses: danielpalme/ReportGenerator-GitHub-Action@5.2.0
+                uses: danielpalme/ReportGenerator-GitHub-Action@v5
                 with:
                     reports: 'coverage-reports/**/coverage.cobertura.xml'
                     targetdir: 'coveragereport'
                     reporttypes: 'HtmlInline;Cobertura;Badges'
 
             -   name: Upload Coverage Report
-                uses: actions/upload-artifact@v4
+                uses: actions/upload-artifact@v7
                 with:
                     name: code-coverage-report
                     path: coveragereport
@@ -393,7 +380,7 @@ jobs:
 
     # Ensure Docker images can be built without errors (both amd64 and arm64)
     Test-Docker-Build:
-        needs: [ Check-Frontend-Changes, Check-Backend-Changes, Back-End-Unit-Tests, Back-End-Integration-Tests, Front-End-Type-Check, Front-End-Unit-Tests, Front-End-Eslint-Check, Front-End-Integration-Tests, Actionlint, Check-PR-Status ]
+        needs: [ Check-Frontend-Changes, Check-Backend-Changes, Back-End-Build, Back-End-Unit-Tests, Back-End-Integration-Tests, Front-End-Type-Check, Front-End-Unit-Tests, Front-End-Eslint-Check, Front-End-Integration-Tests, Actionlint, Check-PR-Status ]
         if: |
             always() &&
             (needs.Check-PR-Status.result == 'success' || github.event_name == 'workflow_dispatch') &&
@@ -407,7 +394,7 @@ jobs:
 
     # Ensure desktop installers can be built without errors (Windows/Linux/macOS)
     Test-Desktop-Build:
-        needs: [ Check-Frontend-Changes, Check-Backend-Changes, Back-End-Unit-Tests, Back-End-Integration-Tests, Front-End-Type-Check, Front-End-Unit-Tests, Front-End-Eslint-Check, Front-End-Integration-Tests, Actionlint, Check-PR-Status ]
+        needs: [ Check-Frontend-Changes, Check-Backend-Changes, Back-End-Build, Back-End-Unit-Tests, Back-End-Integration-Tests, Front-End-Type-Check, Front-End-Unit-Tests, Front-End-Eslint-Check, Front-End-Integration-Tests, Actionlint, Check-PR-Status ]
         if: |
             always() &&
             (needs.Check-PR-Status.result == 'success' || github.event_name == 'workflow_dispatch') &&

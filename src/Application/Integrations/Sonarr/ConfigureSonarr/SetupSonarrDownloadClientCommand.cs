@@ -209,7 +209,9 @@ public class SetupSonarrDownloadClientCommandHandler
 
     private SonarrDownloadContractDTO BuildDownloadClientResource(Uri reaparrBaseUri, SonarrIntegration integration)
     {
-        var useSsl = string.Equals(reaparrBaseUri.Scheme, Uri.UriSchemeHttps, StringComparison.OrdinalIgnoreCase);
+        var useSsl =
+            Uri.TryCreate(_networkSettings.ReverseProxyUrl, UriKind.Absolute, out var reverseProxyUri)
+            && string.Equals(reverseProxyUri.Scheme, Uri.UriSchemeHttps, StringComparison.OrdinalIgnoreCase);
         string urlBase = _networkSettings.BasePath.AppendPathSegment(
             $"api/public/integrations/{integration.Id}/download-client"
         );

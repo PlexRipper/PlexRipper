@@ -3,13 +3,18 @@ name: Test discord notification
 on:
     workflow_dispatch:
 
+permissions:
+    contents: read
+
 jobs:
     test-notification:
         name: Test discord notification
         runs-on: ubuntu-latest
         steps:
             -   name: Checkout source code
-                uses: actions/checkout@v4
+                uses: actions/checkout@v7
+                with:
+                    persist-credentials: false
 
             -   name: Notify Discord of Dev Release
                 uses: ./.github/actions/discord-dev-release-notification/

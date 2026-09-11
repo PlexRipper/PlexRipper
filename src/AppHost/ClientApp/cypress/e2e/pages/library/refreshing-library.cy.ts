@@ -7,17 +7,22 @@ import {
 	MessageTypes,
 	PlexMediaType,
 } from '@dto';
-import { generateLibrarySyncProgress, generateLibrarySyncJobQueue, generateLibrarySyncProgressItem, generateTimeRemaining } from '@factories';
+import {
+	generateLibrarySyncProgress,
+	generateLibrarySyncJobQueue,
+	generateLibrarySyncProgressItem,
+	generateTimeRemaining,
+} from '@factories';
 import { generateResultDTO } from '@mock';
 import { PlexLibraryPaths } from '@api/api-paths';
 
 describe('Test the refreshing of a PlexLibrary', () => {
-	xit('Should display refreshing of the PlexLibrary when sending the refreshing command', () => {
+	it('Should display refreshing of the PlexLibrary when sending the refreshing command', () => {
 		cy.basePageSetup({
 			plexAccountCount: 1,
 			plexServerCount: 1,
 			plexMovieLibraryCount: 1,
-			movieCount: 100000,
+			movieCount: 1000,
 		})
 			.then((data) => {
 				const movieLibrary = data.plexLibraries.find((x) => x.type === PlexMediaType.Movie);

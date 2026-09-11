@@ -10,6 +10,7 @@ import {
 	IntegrationProvisioningState,
 	type IntegrationSummary,
 	IntegrationType,
+	TestConnectionStatus,
 	type RadarrIntegrationDTO,
 	type SonarrIntegrationDTO,
 	type TestConnectionToRadarrEndpointResponse,
@@ -39,11 +40,20 @@ interface IIntegrationStoreState {
 	isDeleting: boolean;
 	testResult: TestConnectionResult | null;
 	error: unknown;
+	saveError: unknown;
+	setupError: unknown;
 	requiresSetupPrompt: boolean;
 }
 
 function emptyDraft(type = IntegrationType.Sonarr): IIntegrationDraft {
-	return { type, name: '', url: '', apiKey: '', category: `Reaparr ${type}`, downloadFolderId: 1 };
+	return {
+		type,
+		name: '',
+		url: '',
+		apiKey: '',
+		category: '',
+		downloadFolderId: 1,
+	};
 }
 
 export const useIntegrationStore = defineStore(StoreNames.IntegrationStore, () => {
@@ -57,6 +67,8 @@ export const useIntegrationStore = defineStore(StoreNames.IntegrationStore, () =
 		isDeleting: false,
 		testResult: null,
 		error: null,
+		saveError: null,
+		setupError: null,
 		requiresSetupPrompt: false,
 	};
 
@@ -73,18 +85,19 @@ export const useIntegrationStore = defineStore(StoreNames.IntegrationStore, () =
 			);
 		},
 		refresh() {
+			const testResult = state.testResult;
 			return integrationApi.getIntegrationsEndpoint().pipe(
 				tap((result) => {
 					if (result.isSuccess) {
 						state.items = result.value ?? [];
-						if (state.testResult) updateSummaryConnectionStatus(state.testResult);
+						if (testResult) updateSummaryConnectionStatus(testResult);
 					}
 				}),
 			);
 		},
 		openAdd(type = IntegrationType.Sonarr): void {
 			state.detail = null;
-			state.draft = emptyDraft(type);
+			state.draft = { ...emptyDraft(type), category: getUniqueCategory(type) };
 			resetOperationState();
 		},
 		openEdit(item: IntegrationSummary) {
@@ -109,13 +122,15 @@ export const useIntegrationStore = defineStore(StoreNames.IntegrationStore, () =
 			);
 		},
 		test() {
+			const testedDraft = { ...state.draft };
+			const testedIntegrationId = state.detail?.id;
 			const query = {
-				apiKey: state.draft.apiKey,
-				url: state.draft.url,
-				...(state.detail ? { integrationId: state.detail.id } : {}),
+				apiKey: testedDraft.apiKey,
+				url: testedDraft.url,
+				...(testedIntegrationId ? { integrationId: testedIntegrationId } : {}),
 			};
 			let request: Observable<ResultDTO<TestConnectionResult>>;
-			switch (state.draft.type) {
+			switch (testedDraft.type) {
 				case IntegrationType.Radarr:
 					request = integrationApi.testConnectionToRadarrEndpoint(query);
 					break;
@@ -123,17 +138,21 @@ export const useIntegrationStore = defineStore(StoreNames.IntegrationStore, () =
 					request = integrationApi.testConnectionToSonarrEndpoint(query);
 					break;
 				default:
-					throw new Error(`Unsupported integration type: ${String(state.draft.type)}`);
+					throw new Error(`Unsupported integration type: ${String(testedDraft.type)}`);
 			}
 			state.isTesting = true;
 			state.testResult = null;
 			state.error = null;
+			state.saveError = null;
 			return request.pipe(
 				tap((result) => {
-					if (result.value) {
-						state.testResult = result.value;
-						updateSummaryConnectionStatus(result.value);
-					} else state.error = result;
+					if (!result.value) {
+						state.error = result;
+						return;
+					}
+					if (!isTestTargetCurrent(testedDraft, testedIntegrationId)) return;
+					state.testResult = result.value;
+					updateSummaryConnectionStatus(result.value);
 				}),
 				catchError(handleError),
 				finalize(() => (state.isTesting = false)),
@@ -153,9 +172,10 @@ export const useIntegrationStore = defineStore(StoreNames.IntegrationStore, () =
 			}
 			state.isSaving = true;
 			state.error = null;
+			state.saveError = null;
 			return request.pipe(
 				switchMap((result) => result.isSuccess ? actions.refresh().pipe(map(() => result)) : of(result)),
-				catchError(handleError),
+				catchError(handleSaveError),
 				finalize(() => (state.isSaving = false)),
 			);
 		},
@@ -175,15 +195,21 @@ export const useIntegrationStore = defineStore(StoreNames.IntegrationStore, () =
 			}
 			state.isSettingUp = true;
 			state.error = null;
+			state.setupError = null;
+			state.testResult = null;
 			return request.pipe(
 				tap((result) => {
 					if (result.isSuccess && result.value) {
 						setDetail(state.detail!.type, result.value);
 						state.requiresSetupPrompt = false;
-					} else state.error = result;
+					} else state.setupError = result;
 				}),
 				switchMap((result) => result.isSuccess ? actions.refresh().pipe(map(() => result)) : of(result)),
-				catchError(handleError),
+				catchError((error) => {
+					state.setupError = error;
+					Log.error('Integration setup request failed', error);
+					return of(null);
+				}),
 				finalize(() => (state.isSettingUp = false)),
 			);
 		},
@@ -204,14 +230,13 @@ export const useIntegrationStore = defineStore(StoreNames.IntegrationStore, () =
 			state.isDeleting = true;
 			state.error = null;
 			return (request as Observable<ResultDTO>).pipe(
-				switchMap((result) => {
+				tap((result) => {
 					if (!result.isSuccess) {
 						state.error = result;
-						return of(result);
+						return;
 					}
 					state.detail = null;
 					state.requiresSetupPrompt = false;
-					return actions.refresh().pipe(map(() => result));
 				}),
 				catchError(handleError),
 				finalize(() => (state.isDeleting = false)),
@@ -227,10 +252,41 @@ export const useIntegrationStore = defineStore(StoreNames.IntegrationStore, () =
 		},
 	};
 
+	function getUniqueCategory(type: IntegrationType): string {
+		let baseCategory: string;
+		switch (type) {
+			case IntegrationType.Sonarr:
+				baseCategory = 'reaparr-sonarr';
+				break;
+			case IntegrationType.Radarr:
+				baseCategory = 'reaparr-radarr';
+				break;
+		}
+		const categories = new Set(
+			state.items
+				.filter((item) => item.type === type)
+				.map((item) => item.category),
+		);
+		if (!categories.has(baseCategory)) return baseCategory;
+
+		let suffix = 2;
+		while (categories.has(`${baseCategory}-${suffix}`)) suffix++;
+		return `${baseCategory}-${suffix}`;
+	}
+
 	function resetOperationState(): void {
 		state.error = null;
+		state.saveError = null;
+		state.setupError = null;
 		state.testResult = null;
 		state.requiresSetupPrompt = false;
+	}
+
+	function isTestTargetCurrent(testedDraft: IIntegrationDraft, testedIntegrationId?: string): boolean {
+		return state.detail?.id === testedIntegrationId
+			&& state.draft.type === testedDraft.type
+			&& state.draft.url === testedDraft.url
+			&& state.draft.apiKey === testedDraft.apiKey;
 	}
 
 	function updateSummaryConnectionStatus(result: TestConnectionResult): void {
@@ -302,7 +358,10 @@ export const useIntegrationStore = defineStore(StoreNames.IntegrationStore, () =
 		if (result.isSuccess && result.value) {
 			setDetail(type, result.value);
 			state.requiresSetupPrompt = result.value.provisioningState !== IntegrationProvisioningState.Configured;
-		} else state.error = result;
+		} else {
+			state.error = result;
+			state.saveError = result;
+		}
 	}
 
 	function handleError(error: unknown) {
@@ -311,14 +370,67 @@ export const useIntegrationStore = defineStore(StoreNames.IntegrationStore, () =
 		return of(null);
 	}
 
-	const getters = {
-		isDraftValid: computed(() => Boolean(
+	function handleSaveError(error: unknown) {
+		state.error = error;
+		state.saveError = error;
+		Log.error('Integration save request failed', error);
+		return of(null);
+	}
+
+	function isCategoryUnique(category: string): boolean {
+		const normalizedCategory = category.trim();
+		if (!normalizedCategory) return true;
+		return !state.items.some((item) =>
+			item.type === state.draft.type
+			&& item.id !== state.detail?.id
+			&& item.category === normalizedCategory,
+		);
+	}
+
+	function isUrlUnique(url: string): boolean {
+		const normalizedUrl = url.trim().replace(/\/+$/, '');
+		if (!normalizedUrl) return true;
+		return !state.items.some((item) =>
+			item.type === state.draft.type
+			&& item.id !== state.detail?.id
+			&& item.baseUrl === normalizedUrl,
+		);
+	}
+
+	function isDraftDirty(): boolean {
+		return !state.detail
+			|| state.draft.name !== state.detail.name
+			|| state.draft.url !== state.detail.url
+			|| state.draft.apiKey !== state.detail.apiKey
+			|| state.draft.category !== state.detail.category
+			|| state.draft.downloadFolderId !== state.detail.downloadFolderId;
+	}
+
+	function isDraftValid(): boolean {
+		return Boolean(
 			state.draft.name.trim()
 			&& state.draft.url.trim()
 			&& state.draft.apiKey.trim()
 			&& state.draft.category.trim()
-			&& state.draft.downloadFolderId > 0,
-		)),
+			&& state.draft.downloadFolderId > 0
+			&& isCategoryUnique(state.draft.category)
+			&& isUrlUnique(state.draft.url),
+		);
+	}
+
+	const getters = {
+		isCategoryUnique,
+		isUrlUnique,
+		isDraftDirty: computed(isDraftDirty),
+		shouldSaveBeforeSetup: computed(isDraftDirty),
+		isSetupDisabled: computed(() => state.isTesting
+			|| state.isSaving
+			|| state.isSettingUp
+			|| (isDraftDirty() && (
+				!isDraftValid()
+				|| state.testResult?.result !== TestConnectionStatus.Success
+			))),
+		isDraftValid: computed(isDraftValid),
 	};
 
 	return { ...toRefs(state), ...actions, ...getters };

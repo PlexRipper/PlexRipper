@@ -454,7 +454,7 @@
                     "connect": "Connect to {type}",
                     "download-client": "Set up download client in {type}",
                     "indexer": "Set up indexer client in {type}",
-                    "validation": "Validate {type} integration setup",
+                    "validation": "Test whether {type} can communicate back to Reaparr",
                     "done": "Done"
                 },
                 "progress": {
@@ -464,9 +464,9 @@
                     "download-client-ready": "Download client in {type} ready.",
                     "indexer": "Setting up the Reaparr indexer client in {type}...",
                     "indexer-ready": "Indexer client in {type} ready.",
-                    "validation": "Validating the {type} integration setup...",
-                    "validation-ready": "{type} integration setup validated.",
-                    "complete": "Integration setup complete."
+                    "validation": "Testing whether {type} can communicate back to Reaparr...",
+                    "validation-ready": "{type} can communicate back to Reaparr.",
+                    "reverse-proxy-warning": "Check the Reverse Proxy URL in Reaparr settings. {type} uses it to connect back to Reaparr."
                 }
             }
         }
@@ -898,12 +898,17 @@
             },
             "integrations": {
                 "choose-title": "Add integration",
-                "test-failed-title": "Integration test failed",
+                "save-and-setup": "Save & Setup",
                 "test-success": "Connection successful",
                 "test-failed": "Connection failed",
+                "test-url": "URL attempted: {url}",
                 "connection-status": {
                     "connected": "Connected",
                     "unconnected": "Unconnected"
+                },
+                "validation": {
+                    "category-unique": "This category is already used by another {type} integration.",
+                    "base-url-unique": "This base URL is already used by another {type} integration."
                 },
                 "sonarr": {
                     "add-title": "Add Sonarr integration",
@@ -911,6 +916,7 @@
                     "display-name": {
                         "label": "Sonarr Display Name",
                         "text": "The name used to identify this Sonarr integration in Reaparr.",
+                        "hint": "Sonarr",
                         "title": "Sonarr Integration Display Name"
                     },
                     "download-folder": {
@@ -920,17 +926,20 @@
                     },
                     "category": {
                         "label": "Sonarr qBittorrent Category",
-                        "text": "The qBittorrent category used by this Sonarr integration to keep its downloads separate.",
+                        "text": "The qBittorrent category used by this Sonarr integration to keep its downloads separate. It must be unique among Sonarr integrations so Reaparr can route downloads to the correct integration.",
+                        "hint": "reaparr-sonarr",
                         "title": "Sonarr Integration qBittorrent Category"
                     },
                     "api-key-input": {
                         "label": "Sonarr API Key",
                         "text": "Go to Sonarr: Settings → General → Security → API Key and copy the API key from there and paste in this field",
+                        "hint": "32-character hexadecimal API key",
                         "title": "API key from Sonarr"
                     },
                     "base-url-input": {
                         "label": "Sonarr base URL",
                         "text": "Base address where your Sonarr instance is reachable. Example: http://localhost:8989 or http://sonarr:8989",
+                        "hint": "http://localhost:8989",
                         "title": "Base URL to Sonarr"
                     }
                 },
@@ -940,6 +949,7 @@
                     "display-name": {
                         "label": "Radarr Display Name",
                         "text": "The name used to identify this Radarr integration in Reaparr.",
+                        "hint": "Radarr",
                         "title": "Radarr Integration Display Name"
                     },
                     "download-folder": {
@@ -949,17 +959,20 @@
                     },
                     "category": {
                         "label": "Radarr qBittorrent Category",
-                        "text": "The qBittorrent category used by this Radarr integration to keep its downloads separate.",
+                        "text": "The qBittorrent category used by this Radarr integration to keep its downloads separate. It must be unique among Radarr integrations so Reaparr can route downloads to the correct integration.",
+                        "hint": "reaparr-radarr",
                         "title": "Radarr Integration qBittorrent Category"
                     },
                     "api-key-input": {
                         "label": "Radarr API Key",
                         "text": "Go to Radarr: Settings → General → Security → API Key and copy the API key from there and paste in this field",
+                        "hint": "32-character hexadecimal API key",
                         "title": "API key from Radarr"
                     },
                     "base-url-input": {
                         "label": "Radarr base URL",
                         "text": "Base address where your Radarr instance is reachable. Example: http://localhost:7878 or http://radarr:7878",
+                        "hint": "http://localhost:7878",
                         "title": "Base URL to Radarr"
                     }
                 }

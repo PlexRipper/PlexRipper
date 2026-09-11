@@ -454,7 +454,7 @@
                     "connect": "Mit {type} verbinden",
                     "download-client": "Download-Client in {type} einrichten",
                     "indexer": "Indexer-Client in {type} einrichten",
-                    "validation": "{type}-Integrationseinrichtung überprüfen",
+                    "validation": "Prüfen, ob {type} mit Reaparr kommunizieren kann",
                     "done": "Fertig"
                 },
                 "progress": {
@@ -464,9 +464,9 @@
                     "download-client-ready": "Download-Client in {type} bereit.",
                     "indexer": "Reaparr-Indexer-Client in {type} wird eingerichtet...",
                     "indexer-ready": "Indexer-Client in {type} bereit.",
-                    "validation": "{type}-Integrationseinrichtung wird überprüft...",
-                    "validation-ready": "{type}-Integration wurde überprüft.",
-                    "complete": "Integrationseinrichtung abgeschlossen."
+                    "validation": "Es wird geprüft, ob {type} mit Reaparr kommunizieren kann...",
+                    "validation-ready": "{type} kann mit Reaparr kommunizieren.",
+                    "reverse-proxy-warning": "Prüfen Sie die Reverse-Proxy-URL in den Reaparr-Einstellungen. {type} verwendet sie, um sich mit Reaparr zu verbinden."
                 }
             }
         }
@@ -898,12 +898,17 @@
             },
             "integrations": {
                 "choose-title": "Integration hinzufügen",
-                "test-failed-title": "Integrationstest fehlgeschlagen",
+                "save-and-setup": "Speichern & Einrichten",
                 "test-success": "Verbindung erfolgreich",
                 "test-failed": "Verbindung fehlgeschlagen",
+                "test-url": "Versuchte URL: {url}",
                 "connection-status": {
                     "connected": "Verbunden",
                     "unconnected": "Nicht verbunden"
+                },
+                "validation": {
+                    "category-unique": "Diese Kategorie wird bereits von einer anderen {type}-Integration verwendet.",
+                    "base-url-unique": "Diese Basis-URL wird bereits von einer anderen {type}-Integration verwendet."
                 },
                 "sonarr": {
                     "add-title": "Sonarr-Integration hinzufügen",
@@ -911,6 +916,7 @@
                     "display-name": {
                         "label": "Sonarr-Anzeigename",
                         "text": "Der Name, mit dem diese Sonarr-Integration in Reaparr identifiziert wird.",
+                        "hint": "Sonarr",
                         "title": "Anzeigename der Sonarr-Integration"
                     },
                     "download-folder": {
@@ -920,17 +926,20 @@
                     },
                     "category": {
                         "label": "Sonarr-qBittorrent-Kategorie",
-                        "text": "Die qBittorrent-Kategorie, die diese Sonarr-Integration verwendet, um ihre Downloads getrennt zu halten.",
+                        "text": "Die qBittorrent-Kategorie, die diese Sonarr-Integration verwendet, um ihre Downloads getrennt zu halten. Sie muss unter allen Sonarr-Integrationen eindeutig sein, damit Reaparr Downloads der richtigen Integration zuordnen kann.",
+                        "hint": "reaparr-sonarr",
                         "title": "qBittorrent-Kategorie der Sonarr-Integration"
                     },
                     "api-key-input": {
                         "label": "Sonarr API-Schlüssel",
                         "text": "Gehen Sie in Sonarr zu: Einstellungen → Allgemein → Sicherheit → API-Schlüssel, kopieren Sie den API-Schlüssel und fügen Sie ihn in dieses Feld ein.",
+                        "hint": "32-stelliger hexadezimaler API-Schlüssel",
                         "title": "API-Schlüssel von Sonarr"
                     },
                     "base-url-input": {
                         "label": "Sonarr-Basis-URL",
                         "text": "Basisadresse, unter der Ihre Sonarr-Instanz erreichbar ist. Beispiel: http://localhost:8989 oder http://sonarr:8989",
+                        "hint": "http://localhost:8989",
                         "title": "Basis-URL zu Sonarr"
                     }
                 },
@@ -940,6 +949,7 @@
                     "display-name": {
                         "label": "Radarr-Anzeigename",
                         "text": "Der Name, mit dem diese Radarr-Integration in Reaparr identifiziert wird.",
+                        "hint": "Radarr",
                         "title": "Anzeigename der Radarr-Integration"
                     },
                     "download-folder": {
@@ -949,17 +959,20 @@
                     },
                     "category": {
                         "label": "Radarr-qBittorrent-Kategorie",
-                        "text": "Die qBittorrent-Kategorie, die diese Radarr-Integration verwendet, um ihre Downloads getrennt zu halten.",
+                        "text": "Die qBittorrent-Kategorie, die diese Radarr-Integration verwendet, um ihre Downloads getrennt zu halten. Sie muss unter allen Radarr-Integrationen eindeutig sein, damit Reaparr Downloads der richtigen Integration zuordnen kann.",
+                        "hint": "reaparr-radarr",
                         "title": "qBittorrent-Kategorie der Radarr-Integration"
                     },
                     "api-key-input": {
                         "label": "Radarr API-Schlüssel",
                         "text": "Gehen Sie in Radarr zu: Einstellungen → Allgemein → Sicherheit → API-Schlüssel, kopieren Sie den API-Schlüssel und fügen Sie ihn in dieses Feld ein.",
+                        "hint": "32-stelliger hexadezimaler API-Schlüssel",
                         "title": "API-Schlüssel von Radarr"
                     },
                     "base-url-input": {
                         "label": "Radarr-Basis-URL",
                         "text": "Basisadresse, unter der Ihre Radarr-Instanz erreichbar ist. Beispiel: http://localhost:7878 oder http://radarr:7878",
+                        "hint": "http://localhost:7878",
                         "title": "Basis-URL zu Radarr"
                     }
                 }

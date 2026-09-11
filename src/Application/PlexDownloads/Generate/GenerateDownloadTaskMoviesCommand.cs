@@ -89,7 +89,7 @@ public class GenerateDownloadTaskMoviesCommandHandler
             foreach (var plexMovie in plexMovies)
             {
                 var downloadTaskAlreadyExists = await _dbContext
-                    .DownloadTaskMovie.WhereIntegrationIs(request.Integration)
+                    .DownloadTaskMovie.WhereIntegrationOwnershipMatches(request.Integration)
                     .AnyAsync(
                         x =>
                             x.PlexServerId == plexMovie.PlexServerId

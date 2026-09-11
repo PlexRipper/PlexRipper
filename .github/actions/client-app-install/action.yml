@@ -6,21 +6,21 @@ runs:
         -   name: Setup Bun
             uses: oven-sh/setup-bun@v2
             with:
-                bun-version: latest
+                bun-version-file: src/AppHost/ClientApp/package.json
 
         -   name: Cache Bun dependencies
-            uses: actions/cache@v4
+            uses: actions/cache@v6
             with:
                 path: ~/.bun/install/cache
-                key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lockb') }}
+                key: ${{ runner.os }}-bun-${{ hashFiles('src/AppHost/ClientApp/bun.lock') }}
                 restore-keys: ${{ runner.os }}-bun-
 
         -   name: Setup Node.js
-            uses: actions/setup-node@v4
+            uses: actions/setup-node@v7
             with:
                 node-version: '24'
 
         -   name: Clean install node_modules
             shell: bash
-            run: bun install
+            run: bun install --frozen-lockfile
             working-directory: src/AppHost/ClientApp/

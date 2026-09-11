@@ -1,7 +1,7 @@
 <template>
 	<q-item
 		v-ripple
-		:clickable="to !== ''"
+		:clickable="dismissible || to !== ''"
 		:class="classConfig"
 		:data-cy="cy"
 		:to="to"

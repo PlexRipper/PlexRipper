@@ -19,6 +19,7 @@ public class SearchMovieCommandUnitTests : BaseUnitTest<SearchMovieCommandHandle
             config =>
             {
                 config.PlexServerCount = 1;
+                config.PlexAccountCount = 1;
                 config.PlexMovieLibraryCount = 1;
                 config.MovieCount = 5;
                 config.IncludeMultiPartMovies = false;
@@ -104,6 +105,142 @@ public class SearchMovieCommandUnitTests : BaseUnitTest<SearchMovieCommandHandle
     }
 
     [Test]
+    public async Task ShouldNotReturnMovies_WhenPlexServerAccessWasRevoked()
+    {
+        // Arrange
+        await SetupDatabase(
+            4610,
+            config =>
+            {
+                config.PlexAccountCount = 1;
+                config.PlexServerCount = 2;
+                config.PlexMovieLibraryCount = 1;
+                config.MovieCount = 2;
+            }
+        );
+
+        var dbContext = IDbContext;
+        var revokedServerId = await dbContext
+            .PlexServers.OrderBy(x => x.Id)
+            .Select(x => x.Id)
+            .LastAsync(CancellationToken);
+
+        await dbContext
+            .PlexAccountServers.Where(x => x.PlexServerId == revokedServerId)
+            .ExecuteDeleteAsync(CancellationToken);
+
+        var expectedMovies = await dbContext
+            .PlexMovies.Where(x => x.PlexServerId != revokedServerId)
+            .Include(x => x.MediaDataList)
+            .OrderBy(x => x.Id)
+            .ToListAsync(CancellationToken);
+        var expectedTitles = expectedMovies
+            .SelectMany(x => x.MediaDataList.OrderBy(y => y.PlexApiPartId).Select(y => y.GetFileName))
+            .ToList();
+        expectedTitles.ShouldNotBeEmpty();
+
+        var command = new SearchMovieCommand
+        {
+            Query = string.Empty,
+            Limit = 100,
+            Offset = 0,
+            IMDB_ID = string.Empty,
+            TMDB_ID = 0,
+        };
+
+        // Act
+        var result = await Sut.ExecuteAsync(command, CancellationToken);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.Channel.Items.Select(x => x.Title).ToList().ShouldBe(expectedTitles);
+    }
+
+    [Test]
+    public async Task ShouldNotReturnMovies_WhenPlexLibraryAccessWasRevoked()
+    {
+        // Arrange
+        await SetupDatabase(
+            4611,
+            config =>
+            {
+                config.PlexAccountCount = 1;
+                config.PlexServerCount = 1;
+                config.PlexMovieLibraryCount = 2;
+                config.MovieCount = 2;
+            }
+        );
+
+        var dbContext = IDbContext;
+        var revokedLibraryId = await dbContext
+            .PlexLibraries.Where(x => x.Type == PlexMediaType.Movie)
+            .OrderBy(x => x.Id)
+            .Select(x => x.Id)
+            .LastAsync(CancellationToken);
+
+        await dbContext
+            .PlexAccountLibraries.Where(x => x.PlexLibraryId == revokedLibraryId)
+            .ExecuteDeleteAsync(CancellationToken);
+
+        var expectedMovies = await dbContext
+            .PlexMovies.Where(x => x.PlexLibraryId != revokedLibraryId)
+            .Include(x => x.MediaDataList)
+            .OrderBy(x => x.Id)
+            .ToListAsync(CancellationToken);
+        var expectedTitles = expectedMovies
+            .SelectMany(x => x.MediaDataList.OrderBy(y => y.PlexApiPartId).Select(y => y.GetFileName))
+            .ToList();
+        expectedTitles.ShouldNotBeEmpty();
+
+        var command = new SearchMovieCommand
+        {
+            Query = string.Empty,
+            Limit = 100,
+            Offset = 0,
+            IMDB_ID = string.Empty,
+            TMDB_ID = 0,
+        };
+
+        // Act
+        var result = await Sut.ExecuteAsync(command, CancellationToken);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.Channel.Items.Select(x => x.Title).ToList().ShouldBe(expectedTitles);
+    }
+
+    [Test]
+    public async Task ShouldReturnEmpty_WhenNoPlexAccountsExist()
+    {
+        // Arrange
+        await SetupDatabase(
+            4614,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexMovieLibraryCount = 1;
+                config.MovieCount = 2;
+            }
+        );
+
+        var command = new SearchMovieCommand
+        {
+            Query = string.Empty,
+            Limit = 100,
+            Offset = 0,
+            IMDB_ID = string.Empty,
+            TMDB_ID = 0,
+        };
+
+        // Act
+        var result = await Sut.ExecuteAsync(command, CancellationToken);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.Channel.Items.ShouldBeEmpty();
+    }
+
+    [Test]
     public async Task ShouldReturnSpecificMovie_WhenFilteredByImdbId()
     {
         // Arrange
@@ -112,6 +249,7 @@ public class SearchMovieCommandUnitTests : BaseUnitTest<SearchMovieCommandHandle
             config =>
             {
                 config.PlexServerCount = 1;
+                config.PlexAccountCount = 1;
                 config.PlexMovieLibraryCount = 1;
                 config.MovieCount = 2;
             }
@@ -161,6 +299,7 @@ public class SearchMovieCommandUnitTests : BaseUnitTest<SearchMovieCommandHandle
             config =>
             {
                 config.PlexServerCount = 1;
+                config.PlexAccountCount = 1;
                 config.PlexMovieLibraryCount = 1;
                 config.MovieCount = 2;
             }
@@ -202,6 +341,7 @@ public class SearchMovieCommandUnitTests : BaseUnitTest<SearchMovieCommandHandle
             config =>
             {
                 config.PlexServerCount = 1;
+                config.PlexAccountCount = 1;
                 config.PlexMovieLibraryCount = 1;
                 config.MovieCount = 0;
             }
@@ -233,6 +373,7 @@ public class SearchMovieCommandUnitTests : BaseUnitTest<SearchMovieCommandHandle
             config =>
             {
                 config.PlexServerCount = 1;
+                config.PlexAccountCount = 1;
                 config.PlexMovieLibraryCount = 1;
                 config.MovieCount = 3;
                 config.IncludeMultiPartMovies = true;
@@ -275,6 +416,7 @@ public class SearchMovieCommandUnitTests : BaseUnitTest<SearchMovieCommandHandle
             config =>
             {
                 config.PlexServerCount = 1;
+                config.PlexAccountCount = 1;
                 config.PlexMovieLibraryCount = 1;
                 config.MovieCount = 2;
             }

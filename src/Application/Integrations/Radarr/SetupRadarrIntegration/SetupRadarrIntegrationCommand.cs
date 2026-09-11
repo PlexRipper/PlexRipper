@@ -132,6 +132,10 @@ public class SetupRadarrIntegrationCommandHandler
 
         await SendProgress(integration.Id, IntegrationSetupProgressStage.Validation, true);
         integration.ProvisioningState = IntegrationProvisioningState.Configured;
+        integration.LastConnectionTestStatus = TestConnectionStatus.Success;
+        integration.LastConnectionTestHttpStatusCode = StatusCodes.Status200OK;
+        integration.LastConnectionTestErrorMessage = null;
+        integration.LastConnectionTestedAt = DateTime.UtcNow;
         await _dbContext.SaveChangesAsync(ct);
         await SendProgress(integration.Id, IntegrationSetupProgressStage.Done, true);
         return Result.Ok(integration);

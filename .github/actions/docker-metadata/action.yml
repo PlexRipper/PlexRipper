@@ -16,7 +16,7 @@ runs:
     steps:
         - name: Generate Docker metadata
           id: metadata
-          uses: docker/metadata-action@v5
+          uses: docker/metadata-action@v6
           with:
               images: reaparr/reaparr
               tags: ${{ inputs.tags }}

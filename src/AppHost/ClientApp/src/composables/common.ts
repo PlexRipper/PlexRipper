@@ -28,13 +28,15 @@ export function discordInviteLink() {
 	return 'https://discord.com/invite/k2KvDJbnNm';
 }
 
-export function formatErrorResponse(res: BaseResultDTO | null): string {
-	if (!res) {
-		return '❌ An unknown error occurred.';
-	}
+export function formatErrorResponse(res: unknown): string {
+	if (!res) return '❌ An unknown error occurred.';
+	if (typeof res === 'string') return res;
+	if (res instanceof Error) return res.message;
+	if (typeof res !== 'object' || !('errors' in res)) return '❌ An unknown error occurred.';
 
-	const header = `❌ Error ${res.statusCode}`;
-	const messages = res.errors.map((err) => {
+	const result = res as BaseResultDTO;
+	const header = `❌ Error ${result.statusCode}`;
+	const messages = result.errors.map((err) => {
 		const reasons
 			= err.reasons && err.reasons.length
 				? `\n   ↳ Reasons: ${err.reasons.map((r) => r?.message ?? String(r)).join(', ')}`

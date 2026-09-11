@@ -40,6 +40,8 @@ interface IIntegrationStoreState {
 	isDeleting: boolean;
 	testResult: TestConnectionResult | null;
 	error: unknown;
+	saveError: unknown;
+	setupError: unknown;
 	requiresSetupPrompt: boolean;
 }
 
@@ -65,6 +67,8 @@ export const useIntegrationStore = defineStore(StoreNames.IntegrationStore, () =
 		isDeleting: false,
 		testResult: null,
 		error: null,
+		saveError: null,
+		setupError: null,
 		requiresSetupPrompt: false,
 	};
 
@@ -118,13 +122,15 @@ export const useIntegrationStore = defineStore(StoreNames.IntegrationStore, () =
 			);
 		},
 		test() {
+			const testedDraft = { ...state.draft };
+			const testedIntegrationId = state.detail?.id;
 			const query = {
-				apiKey: state.draft.apiKey,
-				url: state.draft.url,
-				...(state.detail ? { integrationId: state.detail.id } : {}),
+				apiKey: testedDraft.apiKey,
+				url: testedDraft.url,
+				...(testedIntegrationId ? { integrationId: testedIntegrationId } : {}),
 			};
 			let request: Observable<ResultDTO<TestConnectionResult>>;
-			switch (state.draft.type) {
+			switch (testedDraft.type) {
 				case IntegrationType.Radarr:
 					request = integrationApi.testConnectionToRadarrEndpoint(query);
 					break;
@@ -132,17 +138,21 @@ export const useIntegrationStore = defineStore(StoreNames.IntegrationStore, () =
 					request = integrationApi.testConnectionToSonarrEndpoint(query);
 					break;
 				default:
-					throw new Error(`Unsupported integration type: ${String(state.draft.type)}`);
+					throw new Error(`Unsupported integration type: ${String(testedDraft.type)}`);
 			}
 			state.isTesting = true;
 			state.testResult = null;
 			state.error = null;
+			state.saveError = null;
 			return request.pipe(
 				tap((result) => {
-					if (result.value) {
-						state.testResult = result.value;
-						updateSummaryConnectionStatus(result.value);
-					} else state.error = result;
+					if (!result.value) {
+						state.error = result;
+						return;
+					}
+					if (!isTestTargetCurrent(testedDraft, testedIntegrationId)) return;
+					state.testResult = result.value;
+					updateSummaryConnectionStatus(result.value);
 				}),
 				catchError(handleError),
 				finalize(() => (state.isTesting = false)),
@@ -162,9 +172,10 @@ export const useIntegrationStore = defineStore(StoreNames.IntegrationStore, () =
 			}
 			state.isSaving = true;
 			state.error = null;
+			state.saveError = null;
 			return request.pipe(
 				switchMap((result) => result.isSuccess ? actions.refresh().pipe(map(() => result)) : of(result)),
-				catchError(handleError),
+				catchError(handleSaveError),
 				finalize(() => (state.isSaving = false)),
 			);
 		},
@@ -184,16 +195,18 @@ export const useIntegrationStore = defineStore(StoreNames.IntegrationStore, () =
 			}
 			state.isSettingUp = true;
 			state.error = null;
+			state.setupError = null;
 			state.testResult = null;
 			return request.pipe(
 				tap((result) => {
 					if (result.isSuccess && result.value) {
 						setDetail(state.detail!.type, result.value);
 						state.requiresSetupPrompt = false;
-					}
+					} else state.setupError = result;
 				}),
 				switchMap((result) => result.isSuccess ? actions.refresh().pipe(map(() => result)) : of(result)),
 				catchError((error) => {
+					state.setupError = error;
 					Log.error('Integration setup request failed', error);
 					return of(null);
 				}),
@@ -263,8 +276,17 @@ export const useIntegrationStore = defineStore(StoreNames.IntegrationStore, () =
 
 	function resetOperationState(): void {
 		state.error = null;
+		state.saveError = null;
+		state.setupError = null;
 		state.testResult = null;
 		state.requiresSetupPrompt = false;
+	}
+
+	function isTestTargetCurrent(testedDraft: IIntegrationDraft, testedIntegrationId?: string): boolean {
+		return state.detail?.id === testedIntegrationId
+			&& state.draft.type === testedDraft.type
+			&& state.draft.url === testedDraft.url
+			&& state.draft.apiKey === testedDraft.apiKey;
 	}
 
 	function updateSummaryConnectionStatus(result: TestConnectionResult): void {
@@ -336,12 +358,22 @@ export const useIntegrationStore = defineStore(StoreNames.IntegrationStore, () =
 		if (result.isSuccess && result.value) {
 			setDetail(type, result.value);
 			state.requiresSetupPrompt = result.value.provisioningState !== IntegrationProvisioningState.Configured;
-		} else state.error = result;
+		} else {
+			state.error = result;
+			state.saveError = result;
+		}
 	}
 
 	function handleError(error: unknown) {
 		state.error = error;
 		Log.error('Integration request failed', error);
+		return of(null);
+	}
+
+	function handleSaveError(error: unknown) {
+		state.error = error;
+		state.saveError = error;
+		Log.error('Integration save request failed', error);
 		return of(null);
 	}
 
@@ -391,11 +423,12 @@ export const useIntegrationStore = defineStore(StoreNames.IntegrationStore, () =
 		isUrlUnique,
 		isDraftDirty: computed(isDraftDirty),
 		shouldSaveBeforeSetup: computed(isDraftDirty),
-		isSetupDisabled: computed(() => state.isSaving
+		isSetupDisabled: computed(() => state.isTesting
+			|| state.isSaving
 			|| state.isSettingUp
 			|| (isDraftDirty() && (
 				!isDraftValid()
-				|| (!state.detail && state.testResult?.result !== TestConnectionStatus.Success)
+				|| state.testResult?.result !== TestConnectionStatus.Success
 			))),
 		isDraftValid: computed(isDraftValid),
 	};

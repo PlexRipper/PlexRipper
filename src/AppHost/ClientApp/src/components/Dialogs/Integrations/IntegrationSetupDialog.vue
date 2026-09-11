@@ -19,6 +19,12 @@
 			</div>
 		</template>
 		<template #default>
+			<QAlert
+				v-if="store.setupError"
+				type="error"
+				data-cy="integration-setup-request-error">
+				{{ formatErrorResponse(store.setupError) }}
+			</QAlert>
 			<QStepper
 				v-model="activeStep"
 				vertical
@@ -194,6 +200,7 @@ import { get, set } from '@vueuse/core';
 import { DialogType } from '@enums';
 import { IntegrationSetupProgressStage, IntegrationType, type IntegrationSetupProgressDTO } from '@dto';
 import { useDialogStore, useIntegrationStore, useSignalrStore } from '@store';
+import { formatErrorResponse } from '@composables/common';
 import { useSubscription } from '@vueuse/rxjs';
 
 const store = useIntegrationStore();

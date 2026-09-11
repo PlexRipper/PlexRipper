@@ -67,6 +67,12 @@
 						{{ formatTestDetails() }}
 					</div>
 				</QAlert>
+				<QAlert
+					v-if="store.saveError"
+					type="error"
+					data-cy="integration-save-error">
+					{{ formatErrorResponse(store.saveError) }}
+				</QAlert>
 				<!-- Display Name -->
 				<HelpRow
 					:label="integrationHelp.displayName.label"
@@ -217,6 +223,7 @@ import { useSubscription } from '@vueuse/rxjs';
 import { FolderType, IntegrationType, TestConnectionStatus, type IntegrationSummary } from '@dto';
 import { DialogType } from '@enums';
 import { useDialogStore, useFolderPathStore, useIntegrationStore } from '@store';
+import { formatErrorResponse } from '@composables/common';
 
 const store = useIntegrationStore();
 const dialogStore = useDialogStore();
@@ -329,16 +336,15 @@ function open(event: unknown): void {
 	const integration = event as IntegrationSummary | null;
 	set(isEditMode, Boolean(integration));
 	set(stage, integration ? 2 : 1);
-	if (integration) useSubscription(store.openEdit(integration).subscribe());
-	else {
+	if (integration)
+		useSubscription(store.openEdit(integration).subscribe());
+	else
 		store.openAdd();
-	}
 }
 
 function deleteIntegration() {
 	useSubscription(store.delete().subscribe((result) => {
-		if (!result?.isSuccess)
-			return;
+		if (!result?.isSuccess) return;
 		dialogStore.closeDialog(DialogType.IntegrationDeleteConfirmationDialog);
 		dialogStore.closeDialog(DialogType.IntegrationDialog);
 		useSubscription(store.refresh().subscribe());

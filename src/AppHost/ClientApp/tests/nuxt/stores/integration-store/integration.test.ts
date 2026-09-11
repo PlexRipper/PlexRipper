@@ -284,7 +284,7 @@ describe('IntegrationStore', () => {
 		expect(store.isSettingUp).toBe(false);
 	});
 
-	test('Should not expose setup failure as a connection alert', async () => {
+	test('Should preserve setup failures separately from connection errors', async () => {
 		// Arrange
 		const store = useIntegrationStore();
 		store.detail = {
@@ -321,37 +321,6 @@ describe('IntegrationStore', () => {
 		expect(store.error).toBeNull();
 		expect(store.setupError).toEqual(failedSetup);
 		expect(store.testResult).toBeNull();
-	});
-
-	test('Should preserve setup failures for the setup dialog', async () => {
-		// Arrange
-		const store = useIntegrationStore();
-		store.detail = {
-			apiKey: 'key',
-			category: 'radarr',
-			downloadFolderId: 1,
-			id: 'id',
-			lastConnectionTestErrorMessage: null,
-			lastConnectionTestHttpStatusCode: null,
-			lastConnectionTestStatus: TestConnectionStatus.Unknown,
-			lastConnectionTestedAt: null,
-			name: 'Radarr',
-			provisioningState: IntegrationProvisioningState.Unconfigured,
-			url: 'http://radarr',
-			type: IntegrationType.Radarr,
-		};
-		const failedSetup = { isSuccess: false, errors: [{ message: 'Setup failed', reasons: [], metadata: {} }], successes: [], statusCode: 500 };
-		vi.spyOn(integrationApi, 'setupRadarrIntegrationEndpoint').mockReturnValue(of(failedSetup));
-
-		// Act
-		const result = subscribeSpyTo(store.setupIntegration());
-		await result.onComplete();
-
-		// Assert
-		expect(result.getLastValue()).toEqual(failedSetup);
-		expect(store.setupError).toEqual(failedSetup);
-		expect(store.error).toBeNull();
-		expect(store.isSettingUp).toBe(false);
 	});
 
 	test('Should not report a stale connection test as current after credentials change', async () => {

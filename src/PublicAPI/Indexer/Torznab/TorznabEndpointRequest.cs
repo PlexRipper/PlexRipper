@@ -75,6 +75,12 @@ public record TorznabEndpointRequest
     public int[]? Categories { get; init; }
 
     /// <summary>
+    /// Comma-separated Torznab attribute names to include when extended output is disabled.
+    /// </summary>
+    [QueryParam, BindFrom("attrs")]
+    public string? Attributes { get; init; }
+
+    /// <summary>
     /// Extended flag (0 = basic, 1 = include extended attributes).
     /// </summary>
     [QueryParam, BindFrom("extended")]

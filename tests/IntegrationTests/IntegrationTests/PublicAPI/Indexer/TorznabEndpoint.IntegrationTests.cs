@@ -37,14 +37,50 @@ public class TorznabEndpointIntegrationTests : BaseIntegrationTests
         // Assert
         firstResponse.IsSuccessStatusCode.ShouldBeTrue();
         secondResponse.IsSuccessStatusCode.ShouldBeTrue();
+        firstResponse.Content.Headers.ContentType!.MediaType.ShouldBe("application/xml");
         firstXml.ShouldBe(secondXml);
-        firstXml.ShouldContain("xmlns:torznab=\"http://torznab.com/schemas/2015/feed\"");
-        firstXml.ShouldContain("xmlns:newznab=\"http://www.newznab.com/DTD/2010/feeds/attributes/\"");
-        firstXml.ShouldContain("newznab:response offset=\"1\"");
-        firstXml.ShouldContain("torznab:attr name=\"category\"");
-        firstXml.ShouldContain("<guid isPermaLink=\"false\">");
-        firstXml.ShouldContain("<enclosure url=");
-        firstXml.ShouldContain("apikey=");
+
+        var document = XDocument.Parse(firstXml);
+        var root = document.Root;
+        root.ShouldNotBeNull();
+        root.Name.LocalName.ShouldBe("rss");
+        root.Attribute("version")!.Value.ShouldBe("2.0");
+        root.GetNamespaceOfPrefix("torznab")!.NamespaceName.ShouldBe("http://torznab.com/schemas/2015/feed");
+        root.GetNamespaceOfPrefix("newznab")!.NamespaceName.ShouldBe("http://www.newznab.com/DTD/2010/feeds/attributes/");
+
+        var channel = root.Element("channel");
+        channel.ShouldNotBeNull();
+        channel.Element("title")!.Value.ShouldBe("Reaparr Indexer");
+        channel.Element("description")!.Value.ShouldBe("Reaparr RSS feed");
+        channel.Element("language")!.Value.ShouldBe("en-us");
+        var response = channel.Elements().Single(x => x.Name.LocalName == "response");
+        response.Attribute("offset")!.Value.ShouldBe("1");
+        response.Attribute("total")!.Value.ShouldBe("8");
+
+        var items = channel.Elements("item").ToList();
+        items.Count.ShouldBe(3);
+        var publicationDates = items.Select(x => DateTimeOffset.ParseExact(x.Element("pubDate")!.Value, "R", null)).ToList();
+        publicationDates.ShouldBe(publicationDates.OrderByDescending(x => x));
+        foreach (var item in items)
+        {
+            var guid = item.Element("guid");
+            var link = item.Element("link")!.Value;
+            var size = long.Parse(item.Element("size")!.Value);
+            var enclosure = item.Element("enclosure");
+            var attributes = item.Elements().Where(x => x.Name.LocalName == "attr").ToList();
+
+            guid.ShouldNotBeNull();
+            guid.Attribute("isPermaLink")!.Value.ShouldBe("false");
+            guid.Value.ShouldStartWith("reaparr-");
+            guid.Value.ShouldNotBe(link);
+            attributes.Single(x => x.Attribute("name")!.Value == "size").Attribute("value")!.Value.ShouldBe(size.ToString());
+            attributes.Single(x => x.Attribute("name")!.Value == "category").Attribute("value")!.Value.ShouldNotBeEmpty();
+            enclosure.ShouldNotBeNull();
+            enclosure.Attribute("url")!.Value.ShouldBe(link);
+            enclosure.Attribute("length")!.Value.ShouldBe(size.ToString());
+            enclosure.Attribute("type")!.Value.ShouldBe("application/x-bittorrent");
+            link.ShouldContain("apikey=");
+        }
     }
 
     [Test]
@@ -58,6 +94,14 @@ public class TorznabEndpointIntegrationTests : BaseIntegrationTests
     [Test]
     public async Task ShouldReturnTorznabErrorXml_WhenTypeIsUnknown() =>
         await AssertInvalidRequest("t=book", 8666);
+
+    [Test]
+    public async Task ShouldReturnTorznabErrorXml_WhenExtendedValueIsInvalid() =>
+        await AssertInvalidRequest("extended=2", 8667);
+
+    [Test]
+    public async Task ShouldReturnTorznabErrorXml_WhenAttributesAreMalformed() =>
+        await AssertInvalidRequest("attrs=size%2Ccategory%21", 8668);
 
     private async Task AssertInvalidRequest(string invalidQuery, int seedValue)
     {

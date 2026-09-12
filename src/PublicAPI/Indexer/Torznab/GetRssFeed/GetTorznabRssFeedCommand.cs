@@ -11,6 +11,8 @@ public record GetTorznabRssFeedCommand : ICommand<Result<TorznabMediaSearchRespo
     public required int Limit { get; init; }
     public required int Offset { get; init; }
     public required string TorznabApiKey { get; init; }
+    public required string[] Attributes { get; init; }
+    public required bool IncludeAllAttributes { get; init; }
 }
 
 public class GetTorznabRssFeedCommandValidator : AbstractValidator<GetTorznabRssFeedCommand>
@@ -21,6 +23,7 @@ public class GetTorznabRssFeedCommandValidator : AbstractValidator<GetTorznabRss
         RuleFor(x => x.Categories).NotNull();
         RuleFor(x => x.Limit).GreaterThanOrEqualTo(0);
         RuleFor(x => x.Offset).GreaterThanOrEqualTo(0);
+        RuleFor(x => x.Attributes).NotNull();
     }
 }
 
@@ -78,7 +81,12 @@ public class GetTorznabRssFeedCommandHandler
             .Skip(command.Offset)
             .Take(command.Limit)
             .ToListAsync(cancellationToken);
-        var items = rows.Select(x => x.ToTorznabItem(command.Integration, command.TorznabApiKey, _networkSettings.Url))
+        var requestedAttributes = command.IncludeAllAttributes
+            ? null
+            : command.Attributes.ToHashSet(StringComparer.OrdinalIgnoreCase);
+        var items = rows.Select(x =>
+                x.ToTorznabItem(command.Integration, command.TorznabApiKey, _networkSettings.Url, requestedAttributes)
+            )
             .ToList();
         return Result.Ok(CreateResponse(command.Offset, total, items));
     }

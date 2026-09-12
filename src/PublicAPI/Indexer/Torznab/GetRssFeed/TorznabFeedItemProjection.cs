@@ -43,6 +43,7 @@ public sealed record TorznabFeedItemProjection
         IntegrationIdentity integration,
         string torznabApiKey,
         string baseUrl,
+        IReadOnlySet<string>? requestedAttributes = null,
         bool includeDebugAttributes = false
     )
     {
@@ -107,6 +108,9 @@ public sealed record TorznabFeedItemProjection
             item.Attributes.Add(new TorznabAttr("debug-plexApiMediaId", PlexApiMediaId.ToString()));
             item.Attributes.Add(new TorznabAttr("debug-ratingKey", PlexApiRatingKey.ToString()));
         }
+
+        if (requestedAttributes is not null)
+            item.Attributes = item.Attributes.Where(x => requestedAttributes.Contains(x.Name)).ToList();
 
         return item;
     }

@@ -14,6 +14,9 @@ public sealed record TorznabRequest
     public required int Offset { get; init; }
     public required int[] Categories { get; init; }
     public int? Extended { get; init; }
+    public required string[] Attributes { get; init; }
+
+    public bool IncludeAllAttributes => Extended == 1 || Attributes.Length == 0;
 
     public TorznabRequestMode Mode =>
         Type switch

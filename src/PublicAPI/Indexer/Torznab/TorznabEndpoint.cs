@@ -10,6 +10,10 @@ public class TorznabEndpointRequestValidator : Validator<TorznabEndpointRequest>
         RuleFor(x => x.ApiKey).NotEmpty();
         RuleFor(x => x.Offset).GreaterThanOrEqualTo(0).When(x => x.Offset.HasValue);
         RuleFor(x => x.Limit).GreaterThanOrEqualTo(0).When(x => x.Limit.HasValue);
+        RuleFor(x => x.Extended).Must(x => x is null or 0 or 1);
+        RuleFor(x => x.Attributes)
+            .Matches("^[a-zA-Z]+(,[a-zA-Z]+)*$")
+            .When(x => !string.IsNullOrEmpty(x.Attributes));
     }
 }
 
@@ -123,6 +127,8 @@ public sealed class TorznabEndpoint : Endpoint<TorznabEndpointRequest>
                 Limit = request.Limit,
                 Offset = request.Offset,
                 TorznabApiKey = request.ApiKey,
+                Attributes = request.Attributes,
+                IncludeAllAttributes = request.IncludeAllAttributes,
             },
             ct
         );

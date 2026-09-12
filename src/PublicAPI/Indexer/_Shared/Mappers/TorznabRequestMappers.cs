@@ -19,6 +19,7 @@ public static class TorznabRequestMappers
             Offset = request.Offset ?? 0,
             Categories = request.Categories ?? Array.Empty<int>(),
             Extended = request.Extended,
+            Attributes = request.Attributes?.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries) ?? [],
         };
 
     public static TorznabQueryType ParseType(string? value)

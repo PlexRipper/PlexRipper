@@ -178,7 +178,7 @@ public class SearchMovieCommandHandler : ICommandHandler<SearchMovieCommand, Res
                 command.Integration,
                 command.TorznabApiKey,
                 _networkSettings.Url,
-                _appRuntimeInfo.IsDevelopmentEnvironment
+                includeDebugAttributes: _appRuntimeInfo.IsDevelopmentEnvironment
             );
         }
     }

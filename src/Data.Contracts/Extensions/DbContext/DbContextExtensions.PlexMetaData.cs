@@ -1,3 +1,4 @@
+using System.Text.Json;
 using System.Runtime.CompilerServices;
 
 namespace Reaparr.Data.Contracts;
@@ -54,17 +55,18 @@ public static partial class DbContextExtensions
 
         foreach (var chunk in entities.Chunk(CHUNK_SIZE))
         {
-            var arguments = new List<object>(chunk.Length * 2);
+            var arguments = new List<object>(chunk.Length * 3);
             var values = new List<string>(chunk.Length);
             foreach (var genre in chunk)
             {
-                values.Add($"({{{arguments.Count}}}, {{{arguments.Count + 1}}})");
+                values.Add($"({{{arguments.Count}}}, {{{arguments.Count + 1}}}, {{{arguments.Count + 2}}})");
                 arguments.Add(genre.Name);
                 arguments.Add(genre.Key);
+                arguments.Add(JsonSerializer.Serialize(genre.Type, DefaultJsonSerializerOptions.ConfigStandard));
             }
 
             var sql = FormattableStringFactory.Create(
-                $"INSERT OR IGNORE INTO PlexGenres (Name, Key) VALUES {string.Join(", ", values)}",
+                $"INSERT OR IGNORE INTO PlexGenres (Name, Key, Type) VALUES {string.Join(", ", values)}",
                 arguments.ToArray()
             );
             await dbContext.ExecuteSqlInterpolatedAsync(sql, ct);

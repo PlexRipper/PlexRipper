@@ -233,7 +233,7 @@ public class GetTorznabRssFeedCommandUnitTests : BaseCommandUnitTest<GetTorznabR
             }
         );
         var integration = (await IDbContext.RadarrIntegrations.SingleAsync(CancellationToken)).Id.ToRadarrIdentity();
-        var category = (await IDbContext.PlexMovieData.FirstAsync(CancellationToken)).ToTorznabMovieCategory();
+        var category = GetMovieQualityCategory(await IDbContext.PlexMovieData.FirstAsync(CancellationToken));
         var command = new GetTorznabRssFeedCommand
         {
             Integration = integration,
@@ -351,9 +351,9 @@ public class GetTorznabRssFeedCommandUnitTests : BaseCommandUnitTest<GetTorznabR
             }
         );
         var integration = (await IDbContext.RadarrIntegrations.SingleAsync(CancellationToken)).Id.ToRadarrIdentity();
-        var category = (await IDbContext.PlexMovieData.FirstAsync(CancellationToken)).ToTorznabMovieCategory();
+        var category = GetMovieQualityCategory(await IDbContext.PlexMovieData.FirstAsync(CancellationToken));
         var expectedTotal = (await IDbContext.PlexMovieData.ToListAsync(CancellationToken)).Count(x =>
-            x.ToTorznabMovieCategory() == category
+            GetMovieQualityCategory(x) == category
         );
         var command = new GetTorznabRssFeedCommand
         {
@@ -595,6 +595,170 @@ public class GetTorznabRssFeedCommandUnitTests : BaseCommandUnitTest<GetTorznabR
         result.IsSuccess.ShouldBeTrue();
         (await dbContext.SaveChangesAsync(CancellationToken)).ShouldBe(0);
         (await dbContext.PlexMovieData.Select(x => x.Id).ToListAsync(CancellationToken)).ShouldBe(mediaIdsBefore);
+    }
+
+    [Test]
+    [Arguments(PlexGenreType.Anime, TorznabCategoryId.TV_Anime)]
+    [Arguments(PlexGenreType.Documentary, TorznabCategoryId.TV_Documentary)]
+    [Arguments(PlexGenreType.Sport, TorznabCategoryId.TV_Sport)]
+    public async Task ShouldFilterAndEmitTvGenreCategory_WhenGenreTypeMatches(
+        PlexGenreType genreType,
+        TorznabCategoryId category
+    )
+    {
+        // Arrange
+        await SetupDatabase(7647, config =>
+        {
+            config.PlexServerCount = 1;
+            config.PlexAccountCount = 1;
+            config.PlexTvShowLibraryCount = 1;
+            config.TvShowCount = 1;
+            config.TvShowSeasonCount = 1;
+            config.TvShowEpisodeCount = 1;
+            config.SonarrIntegrationCount = 1;
+        });
+        using (var dbContext = IDbContext)
+        {
+            var tvShow = await dbContext.PlexTvShows.SingleAsync(CancellationToken);
+            var genre = new PlexGenre { Name = genreType.ToString(), Key = $"torznab-{genreType}", Type = genreType };
+            dbContext.PlexGenres.Add(genre);
+            await dbContext.SaveChangesAsync(CancellationToken);
+            dbContext.PlexTvShowGenres.Add(new PlexTvShowGenres(genre.Id, tvShow.PlexLibraryId, tvShow.Id));
+            await dbContext.SaveChangesAsync(CancellationToken);
+        }
+        var integration = (await IDbContext.SonarrIntegrations.SingleAsync(CancellationToken)).Id.ToSonarrIdentity();
+        var command = new GetTorznabRssFeedCommand
+        {
+            Integration = integration,
+            Categories = [(int)category],
+            IncludeMovies = false,
+            IncludeEpisodes = true,
+            Limit = 50,
+            Offset = 0,
+            TorznabApiKey = "rss-key",
+            Attributes = [],
+            IncludeAllAttributes = true,
+        };
+
+        // Act
+        var result = await TestHandlerExecuteAsync<TorznabMediaSearchResponseDTO>(command);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.Channel.Items.ShouldHaveSingleItem();
+        result.Value.Channel.Items.Single().Attributes.ShouldContain(x =>
+            x.Name == "category" && x.Value == ((int)category).ToString()
+        );
+    }
+
+    [Test]
+    public async Task ShouldNotEmitSpecificTvGenreCategory_WhenGenreTypeIsGroup()
+    {
+        // Arrange
+        await SetupDatabase(7648, config =>
+        {
+            config.PlexServerCount = 1;
+            config.PlexAccountCount = 1;
+            config.PlexTvShowLibraryCount = 1;
+            config.TvShowCount = 1;
+            config.TvShowSeasonCount = 1;
+            config.TvShowEpisodeCount = 1;
+            config.SonarrIntegrationCount = 1;
+        });
+        using (var dbContext = IDbContext)
+        {
+            var tvShow = await dbContext.PlexTvShows.SingleAsync(CancellationToken);
+            var genre = new PlexGenre { Name = "Sport / Documentary", Key = "torznab-group", Type = PlexGenreType.Group };
+            dbContext.PlexGenres.Add(genre);
+            await dbContext.SaveChangesAsync(CancellationToken);
+            dbContext.PlexTvShowGenres.Add(new PlexTvShowGenres(genre.Id, tvShow.PlexLibraryId, tvShow.Id));
+            await dbContext.SaveChangesAsync(CancellationToken);
+        }
+        var integration = (await IDbContext.SonarrIntegrations.SingleAsync(CancellationToken)).Id.ToSonarrIdentity();
+        var command = new GetTorznabRssFeedCommand
+        {
+            Integration = integration,
+            Categories = [(int)TorznabCategoryId.TV_Sport],
+            IncludeMovies = false,
+            IncludeEpisodes = true,
+            Limit = 50,
+            Offset = 0,
+            TorznabApiKey = "rss-key",
+            Attributes = [],
+            IncludeAllAttributes = true,
+        };
+
+        // Act
+        var result = await TestHandlerExecuteAsync<TorznabMediaSearchResponseDTO>(command);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.Channel.Items.ShouldBeEmpty();
+    }
+
+    [Test]
+    public async Task ShouldKeepMovieAndEpisodeGenresSeparate_WhenMediaIdsOverlap()
+    {
+        // Arrange
+        await SetupDatabase(7649, config =>
+        {
+            config.PlexServerCount = 1;
+            config.PlexAccountCount = 1;
+            config.PlexMovieLibraryCount = 1;
+            config.MovieCount = 1;
+            config.PlexTvShowLibraryCount = 1;
+            config.TvShowCount = 1;
+            config.TvShowSeasonCount = 1;
+            config.TvShowEpisodeCount = 1;
+            config.RadarrIntegrationCount = 1;
+        });
+        using (var dbContext = IDbContext)
+        {
+            var movie = await dbContext.PlexMovies.SingleAsync(CancellationToken);
+            var tvShow = await dbContext.PlexTvShows.SingleAsync(CancellationToken);
+            var foreign = new PlexGenre { Name = "Foreign", Key = "mixed-foreign", Type = PlexGenreType.Foreign };
+            var anime = new PlexGenre { Name = "Anime", Key = "mixed-anime", Type = PlexGenreType.Anime };
+            dbContext.PlexGenres.AddRange(foreign, anime);
+            await dbContext.SaveChangesAsync(CancellationToken);
+            dbContext.PlexMovieGenres.Add(new PlexMovieGenres(foreign.Id, movie.PlexLibraryId, movie.Id));
+            dbContext.PlexTvShowGenres.Add(new PlexTvShowGenres(anime.Id, tvShow.PlexLibraryId, tvShow.Id));
+            await dbContext.SaveChangesAsync(CancellationToken);
+        }
+        var integration = (await IDbContext.RadarrIntegrations.SingleAsync(CancellationToken)).Id.ToRadarrIdentity();
+        var command = new GetTorznabRssFeedCommand
+        {
+            Integration = integration,
+            Categories = [],
+            IncludeMovies = true,
+            IncludeEpisodes = true,
+            Limit = 50,
+            Offset = 0,
+            TorznabApiKey = "rss-key",
+            Attributes = [],
+            IncludeAllAttributes = true,
+        };
+
+        // Act
+        var result = await TestHandlerExecuteAsync<TorznabMediaSearchResponseDTO>(command);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        var movieItem = result.Value.Channel.Items.Single(x => x.Attributes.Any(a => a.Name == "type" && a.Value == "movie"));
+        var episodeItem = result.Value.Channel.Items.Single(x => x.Attributes.Any(a => a.Name == "type" && a.Value == "series"));
+        movieItem.Attributes.ShouldContain(x => x.Name == "category" && x.Value == ((int)TorznabCategoryId.Movies_Foreign).ToString());
+        movieItem.Attributes.ShouldNotContain(x => x.Name == "category" && x.Value == ((int)TorznabCategoryId.TV_Anime).ToString());
+        episodeItem.Attributes.ShouldContain(x => x.Name == "category" && x.Value == ((int)TorznabCategoryId.TV_Anime).ToString());
+        episodeItem.Attributes.ShouldNotContain(x => x.Name == "category" && x.Value == ((int)TorznabCategoryId.Movies_Foreign).ToString());
+    }
+
+    private static int GetMovieQualityCategory(PlexMovieMediaData mediaData)
+    {
+        if (mediaData.Source == ReleaseSource.DVD || mediaData.VideoResolution is VideoQuality.SD or VideoQuality.DVD)
+            return (int)TorznabCategoryId.Movies_SD;
+
+        return mediaData.VideoResolution is VideoQuality.UHD_4K or VideoQuality.UHD_8K
+            ? (int)TorznabCategoryId.Movies_UHD
+            : (int)TorznabCategoryId.Movies_HD;
     }
 
     private static void ConfigureMovieFeed(FakeDataConfig config)

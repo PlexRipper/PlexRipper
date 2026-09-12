@@ -33,6 +33,7 @@ public class GetTorznabRssFeedCommandHandler
     private static readonly int[] _movieCategories =
     [
         (int)TorznabCategoryId.Movies,
+        (int)TorznabCategoryId.Movies_Foreign,
         (int)TorznabCategoryId.Movies_SD,
         (int)TorznabCategoryId.Movies_HD,
         (int)TorznabCategoryId.Movies_UHD,
@@ -43,9 +44,13 @@ public class GetTorznabRssFeedCommandHandler
     private static readonly int[] _tvCategories =
     [
         (int)TorznabCategoryId.TV,
+        (int)TorznabCategoryId.TV_Foreign,
         (int)TorznabCategoryId.TV_SD,
         (int)TorznabCategoryId.TV_HD,
         (int)TorznabCategoryId.TV_UHD,
+        (int)TorznabCategoryId.TV_Sport,
+        (int)TorznabCategoryId.TV_Anime,
+        (int)TorznabCategoryId.TV_Documentary,
     ];
 
     private readonly IReaparrDbContext _dbContext;
@@ -62,36 +67,45 @@ public class GetTorznabRssFeedCommandHandler
         CancellationToken cancellationToken
     )
     {
-        IQueryable<TorznabFeedItemProjection>? query = null;
+        var queries = new List<IQueryable<TorznabFeedItemProjection>>(2);
         if (command.IncludeMovies)
-            query = CreateMovieQuery(command.Categories);
+            queries.Add(CreateMovieQuery(command.Categories));
         if (command.IncludeEpisodes)
+            queries.Add(CreateEpisodeQuery(command.Categories));
+
+        var total = 0;
+        var rows = new List<TorznabFeedItemProjection>();
+        foreach (var query in queries)
         {
-            var episodeQuery = CreateEpisodeQuery(command.Categories);
-            query = query is null ? episodeQuery : query.Concat(episodeQuery);
+            total += await query.CountAsync(cancellationToken);
+            rows.AddRange(
+                await query
+                    .OrderByDescending(x => x.AddedAt)
+                    .ThenByDescending(x => x.PlexServerMachineIdentifier)
+                    .ThenByDescending(x => x.PlexApiMediaId)
+                    .ThenByDescending(x => x.PlexApiPartId)
+                    .Take(command.Offset + command.Limit)
+                    .ToListAsync(cancellationToken)
+            );
         }
 
-        if (query is null)
-            return Result.Ok(CreateResponse(command.Offset, 0, []));
-
-        var total = await query.CountAsync(cancellationToken);
-        var rows = await query
+        var requestedAttributes = command.IncludeAllAttributes
+            ? null
+            : command.Attributes.ToHashSet(StringComparer.OrdinalIgnoreCase);
+        var items = rows
             .OrderByDescending(x => x.AddedAt)
             .ThenByDescending(x => x.PlexServerMachineIdentifier)
             .ThenByDescending(x => x.PlexApiMediaId)
             .ThenByDescending(x => x.PlexApiPartId)
             .Skip(command.Offset)
             .Take(command.Limit)
-            .ToListAsync(cancellationToken);
-        var requestedAttributes = command.IncludeAllAttributes
-            ? null
-            : command.Attributes.ToHashSet(StringComparer.OrdinalIgnoreCase);
-        var items = rows.Select(x =>
+            .Select(x =>
                 x.ToTorznabItem(command.Integration, command.TorznabApiKey, _networkSettings.Url, requestedAttributes)
             )
             .ToList();
         return Result.Ok(CreateResponse(command.Offset, total, items));
     }
+
 
     private IQueryable<TorznabFeedItemProjection> CreateMovieQuery(int[] categories)
     {
@@ -130,6 +144,7 @@ public class GetTorznabRssFeedCommandHandler
             TvdbId = null,
             TmdbId = x.PlexMovie.Guid_TMDB,
             ImdbId = x.PlexMovie.Guid_IMDB,
+            GenreTypes = x.PlexMovie.Genres.Select(genre => genre.Type).ToList(),
         });
     }
 
@@ -170,6 +185,7 @@ public class GetTorznabRssFeedCommandHandler
             TvdbId = x.PlexTvShowEpisode.TvShow!.Guid_TVDB,
             TmdbId = x.PlexTvShowEpisode.TvShow.Guid_TMDB,
             ImdbId = x.PlexTvShowEpisode.TvShow.Guid_IMDB,
+            GenreTypes = x.PlexTvShowEpisode.TvShow.Genres.Select(genre => genre.Type).ToList(),
         });
     }
 
@@ -201,6 +217,10 @@ public class GetTorznabRssFeedCommandHandler
 
         return query.Where(x =>
             (
+                known.AsEnumerable().Contains((int)TorznabCategoryId.Movies_Foreign)
+                && x.PlexMovie!.Genres.Any(genre => genre.Type == PlexGenreType.Foreign)
+            )
+            || (
                 known.AsEnumerable().Contains((int)TorznabCategoryId.Movies_SD)
                 && (
                     x.Source == ReleaseSource.DVD
@@ -246,6 +266,22 @@ public class GetTorznabRssFeedCommandHandler
 
         return query.Where(x =>
             (
+                known.AsEnumerable().Contains((int)TorznabCategoryId.TV_Foreign)
+                && x.PlexTvShowEpisode!.TvShow!.Genres.Any(genre => genre.Type == PlexGenreType.Foreign)
+            )
+            || (
+                known.AsEnumerable().Contains((int)TorznabCategoryId.TV_Anime)
+                && x.PlexTvShowEpisode!.TvShow!.Genres.Any(genre => genre.Type == PlexGenreType.Anime)
+            )
+            || (
+                known.AsEnumerable().Contains((int)TorznabCategoryId.TV_Documentary)
+                && x.PlexTvShowEpisode!.TvShow!.Genres.Any(genre => genre.Type == PlexGenreType.Documentary)
+            )
+            || (
+                known.AsEnumerable().Contains((int)TorznabCategoryId.TV_Sport)
+                && x.PlexTvShowEpisode!.TvShow!.Genres.Any(genre => genre.Type == PlexGenreType.Sport)
+            )
+            || (
                 known.AsEnumerable().Contains((int)TorznabCategoryId.TV_SD)
                 && (
                     x.Source == ReleaseSource.DVD

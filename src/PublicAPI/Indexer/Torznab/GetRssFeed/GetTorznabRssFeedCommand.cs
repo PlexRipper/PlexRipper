@@ -66,9 +66,10 @@ public class GetTorznabRssFeedCommandHandler
             );
         }
 
-        var requestedAttributes = command.IncludeAllAttributes
-            ? null
-            : command.Attributes.ToHashSet(StringComparer.OrdinalIgnoreCase);
+        var requestedAttributes = TorznabSearchHelpers.GetRequestedAttributes(
+            command.IncludeAllAttributes,
+            command.Attributes
+        );
         var items = rows.OrderByDescending(x => x.AddedAt)
             .ThenByDescending(x => x.PlexServerMachineIdentifier)
             .ThenByDescending(x => x.PlexApiMediaId)
@@ -96,33 +97,7 @@ public class GetTorznabRssFeedCommandHandler
                 )
             )
             .SelectMany(movie => movie.MediaDataList);
-        query = ApplyMovieCategories(query, categories);
-        return query.Select(x => new TorznabFeedItemProjection
-        {
-            MediaType = PlexMediaType.Movie,
-            MediaId = x.PlexMovieId,
-            DataId = x.Id,
-            PlexServerId = x.PlexServerId,
-            PlexServerMachineIdentifier = x.PlexServer!.MachineIdentifier,
-            PlexLibraryId = x.PlexLibraryId,
-            PlexApiRatingKey = x.PlexApiRatingKey,
-            PlexApiMediaId = x.PlexApiMediaId,
-            PlexApiPartId = x.PlexApiPartId,
-            Title = !string.IsNullOrEmpty(x.GeneratedFilename) ? x.GeneratedFilename : x.OriginalFilename,
-            AddedAt = x.PlexMovie!.AddedAt,
-            Size = x.Size,
-            Quality = x.Quality,
-            VideoResolution = x.VideoResolution,
-            Source = x.Source,
-            VideoCodec = x.VideoCodec,
-            AudioCodec = x.AudioCodec,
-            SeasonNumber = null,
-            EpisodeNumber = null,
-            TvdbId = null,
-            TmdbId = x.PlexMovie.Guid_TMDB,
-            ImdbId = x.PlexMovie.Guid_IMDB,
-            GenreTypes = x.PlexMovie.Genres.Select(genre => genre.Type).ToList(),
-        });
+        return query.ApplyTorznabCategories(categories).ProjectToTorznabFeedItems();
     }
 
     private IQueryable<TorznabFeedItemProjection> CreateEpisodeQuery(int[] categories)
@@ -139,33 +114,7 @@ public class GetTorznabRssFeedCommandHandler
                 )
             )
             .SelectMany(episode => episode.MediaDataList);
-        query = ApplyEpisodeCategories(query, categories);
-        return query.Select(x => new TorznabFeedItemProjection
-        {
-            MediaType = PlexMediaType.Episode,
-            MediaId = x.PlexTvShowEpisodeId,
-            DataId = x.Id,
-            PlexServerId = x.PlexServerId,
-            PlexServerMachineIdentifier = x.PlexServer!.MachineIdentifier,
-            PlexLibraryId = x.PlexLibraryId,
-            PlexApiRatingKey = x.PlexApiRatingKey,
-            PlexApiMediaId = x.PlexApiMediaId,
-            PlexApiPartId = x.PlexApiPartId,
-            Title = !string.IsNullOrEmpty(x.GeneratedFilename) ? x.GeneratedFilename : x.OriginalFilename,
-            AddedAt = x.PlexTvShowEpisode!.AddedAt,
-            Size = x.Size,
-            Quality = x.Quality,
-            VideoResolution = x.VideoResolution,
-            Source = x.Source,
-            VideoCodec = x.VideoCodec,
-            AudioCodec = x.AudioCodec,
-            SeasonNumber = x.PlexTvShowEpisode.TvShowSeason!.SeasonNumber,
-            EpisodeNumber = x.PlexTvShowEpisode.EpisodeNumber,
-            TvdbId = x.PlexTvShowEpisode.TvShow!.Guid_TVDB,
-            TmdbId = x.PlexTvShowEpisode.TvShow.Guid_TMDB,
-            ImdbId = x.PlexTvShowEpisode.TvShow.Guid_IMDB,
-            GenreTypes = x.PlexTvShowEpisode.TvShow.Genres.Select(genre => genre.Type).ToList(),
-        });
+        return query.ApplyTorznabCategories(categories).ProjectToTorznabFeedItems();
     }
 
     private static TorznabMediaSearchResponseDTO CreateResponse(int offset, int total, List<TorznabItem> items) =>
@@ -182,105 +131,4 @@ public class GetTorznabRssFeedCommandHandler
             },
         };
 
-    internal static IQueryable<PlexMovieMediaData> ApplyMovieCategories(
-        IQueryable<PlexMovieMediaData> query,
-        int[] categories
-    )
-    {
-        if (categories.Length == 0 || categories.Contains((int)TorznabCategoryId.Movies))
-            return query;
-
-        var known = categories.Intersect(IntegrationDefinitions.MovieCategories.Select(x => (int)x.Id)).ToArray();
-        if (known.Length == 0)
-            return query.Where(_ => false);
-
-        return query.Where(x =>
-            (
-                known.AsEnumerable().Contains((int)TorznabCategoryId.Movies_Foreign)
-                && x.PlexMovie!.Genres.Any(genre => genre.Type == PlexGenreType.Foreign)
-            )
-            || (
-                known.AsEnumerable().Contains((int)TorznabCategoryId.Movies_SD)
-                && (
-                    x.Source == ReleaseSource.DVD
-                    || x.VideoResolution == VideoQuality.SD
-                    || x.VideoResolution == VideoQuality.DVD
-                )
-            )
-            || (
-                known.AsEnumerable().Contains((int)TorznabCategoryId.Movies_UHD)
-                && x.Source != ReleaseSource.DVD
-                && (x.VideoResolution == VideoQuality.UHD_4K || x.VideoResolution == VideoQuality.UHD_8K)
-            )
-            || (
-                known.AsEnumerable().Contains((int)TorznabCategoryId.Movies_HD)
-                && x.Source != ReleaseSource.DVD
-                && x.VideoResolution != VideoQuality.SD
-                && x.VideoResolution != VideoQuality.DVD
-                && x.VideoResolution != VideoQuality.UHD_4K
-                && x.VideoResolution != VideoQuality.UHD_8K
-            )
-            || (
-                known.AsEnumerable().Contains((int)TorznabCategoryId.Movies_BluRay)
-                && (x.Source == ReleaseSource.BluRay || x.Source == ReleaseSource.BluRayRemux)
-            )
-            || (
-                known.AsEnumerable().Contains((int)TorznabCategoryId.Movies_WEBDL)
-                && (x.Source == ReleaseSource.WebDl || x.Source == ReleaseSource.WebRip)
-            )
-        );
-    }
-
-    internal static IQueryable<PlexTvShowEpisodeMediaData> ApplyEpisodeCategories(
-        IQueryable<PlexTvShowEpisodeMediaData> query,
-        int[] categories
-    )
-    {
-        if (categories.Length == 0 || categories.Contains((int)TorznabCategoryId.TV))
-            return query;
-
-        var known = categories.Intersect(IntegrationDefinitions.TvCategories.Select(x => (int)x.Id)).ToArray();
-        if (known.Length == 0)
-            return query.Where(_ => false);
-
-        return query.Where(x =>
-            (
-                known.AsEnumerable().Contains((int)TorznabCategoryId.TV_Foreign)
-                && x.PlexTvShowEpisode!.TvShow!.Genres.Any(genre => genre.Type == PlexGenreType.Foreign)
-            )
-            || (
-                known.AsEnumerable().Contains((int)TorznabCategoryId.TV_Anime)
-                && x.PlexTvShowEpisode!.TvShow!.Genres.Any(genre => genre.Type == PlexGenreType.Anime)
-            )
-            || (
-                known.AsEnumerable().Contains((int)TorznabCategoryId.TV_Documentary)
-                && x.PlexTvShowEpisode!.TvShow!.Genres.Any(genre => genre.Type == PlexGenreType.Documentary)
-            )
-            || (
-                known.AsEnumerable().Contains((int)TorznabCategoryId.TV_Sport)
-                && x.PlexTvShowEpisode!.TvShow!.Genres.Any(genre => genre.Type == PlexGenreType.Sport)
-            )
-            || (
-                known.AsEnumerable().Contains((int)TorznabCategoryId.TV_SD)
-                && (
-                    x.Source == ReleaseSource.DVD
-                    || x.VideoResolution == VideoQuality.SD
-                    || x.VideoResolution == VideoQuality.DVD
-                )
-            )
-            || (
-                known.AsEnumerable().Contains((int)TorznabCategoryId.TV_UHD)
-                && x.Source != ReleaseSource.DVD
-                && (x.VideoResolution == VideoQuality.UHD_4K || x.VideoResolution == VideoQuality.UHD_8K)
-            )
-            || (
-                known.AsEnumerable().Contains((int)TorznabCategoryId.TV_HD)
-                && x.Source != ReleaseSource.DVD
-                && x.VideoResolution != VideoQuality.SD
-                && x.VideoResolution != VideoQuality.DVD
-                && x.VideoResolution != VideoQuality.UHD_4K
-                && x.VideoResolution != VideoQuality.UHD_8K
-            )
-        );
-    }
 }

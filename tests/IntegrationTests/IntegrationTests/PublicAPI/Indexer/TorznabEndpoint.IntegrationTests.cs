@@ -1,3 +1,4 @@
+using System.Net.Http.Headers;
 using System.Xml.Linq;
 
 namespace Reaparr.IntegrationTests;
@@ -119,6 +120,56 @@ public class TorznabEndpointIntegrationTests : BaseIntegrationTests
         syncResult.IsSuccess.ShouldBeTrue();
         syncResult.Value.DeletedMovies.ShouldBe(2);
         (await GetRssItems(client, url)).ShouldBeEmpty();
+    }
+
+    [Test]
+    public async Task ShouldCreateIntegrationOwnedDownloadTask_WhenRssTorrentIsSubmitted()
+    {
+        // Arrange
+        using var container = await CreateContainer(
+            new Seed(8674),
+            config =>
+            {
+                config.DatabaseOptions = x =>
+                {
+                    x.PlexServerCount = 1;
+                    x.PlexAccountCount = 1;
+                    x.PlexMovieLibraryCount = 1;
+                    x.MovieCount = 1;
+                    x.RadarrIntegrationCount = 1;
+                };
+            }
+        );
+        var integration = await container.DbContext.RadarrIntegrations.SingleAsync(CancellationToken);
+        var route = $"/api/public/integrations/{integration.Id}";
+        var rssUrl = $"{route}/indexer/api?t=search&cat=2000&limit=1&offset=0&apikey={integration.TorznabApiKey}";
+        var client = container.GetApiClient();
+
+        // Act
+        var rssResponse = await client.GetAsync(rssUrl, CancellationToken);
+        var rssXml = await rssResponse.Content.ReadAsStringAsync(CancellationToken);
+        var item = XDocument.Parse(rssXml).Root!.Element("channel")!.Elements("item").Single();
+        var torrentResponse = await client.GetAsync(item.Element("link")!.Value, CancellationToken);
+        var torrentBytes = await torrentResponse.Content.ReadAsByteArrayAsync(CancellationToken);
+        using var upload = new MultipartFormDataContent
+        {
+            { new ByteArrayContent(torrentBytes), "torrents", "rss-release.torrent" },
+        };
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", integration.QBittorrentApiKey);
+        var addResponse = await client.PostAsync($"{route}/download-client/api/v2/torrents/add", upload, CancellationToken);
+
+        // Assert
+        rssResponse.IsSuccessStatusCode.ShouldBeTrue();
+        torrentResponse.IsSuccessStatusCode.ShouldBeTrue();
+        torrentResponse.Content.Headers.ContentType!.MediaType.ShouldBe("application/x-bittorrent");
+        addResponse.IsSuccessStatusCode.ShouldBeTrue();
+        (await addResponse.Content.ReadAsStringAsync(CancellationToken)).ShouldBe("Ok.");
+        var task = await container.DbContext
+            .DownloadTaskMovie.Include(x => x.Children)
+            .SingleAsync(CancellationToken);
+        task.RadarrIntegrationId.ShouldBe(integration.Id);
+        task.SonarrIntegrationId.ShouldBeNull();
+        task.Children.ShouldHaveSingleItem();
     }
 
     [Test]

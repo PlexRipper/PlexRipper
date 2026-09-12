@@ -119,7 +119,7 @@ public class SearchTvShowCommandHandler : ICommandHandler<SearchTvShowCommand, R
         if (command.Episode > 0)
             query = query.Where(x => x.PlexTvShowEpisode!.EpisodeNumber == command.Episode);
 
-        query = GetTorznabRssFeedCommandHandler.ApplyEpisodeCategories(query, command.Categories);
+        query = query.ApplyTorznabCategories(command.Categories);
         var total = await query.CountAsync(cancellationToken);
         var rows = await query
             .OrderBy(x => x.PlexTvShowEpisodeId)

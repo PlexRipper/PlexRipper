@@ -107,7 +107,7 @@ public class SearchMovieCommandHandler : ICommandHandler<SearchMovieCommand, Res
         if (command.TMDB_ID > 0)
             query = query.Where(x => x.PlexMovie!.Guid_TMDB == command.TMDB_ID);
 
-        query = GetTorznabRssFeedCommandHandler.ApplyMovieCategories(query, command.Categories);
+        query = query.ApplyTorznabCategories(command.Categories);
         var total = await query.CountAsync(cancellationToken);
         var rows = await query
             .OrderBy(x => x.PlexMovieId)

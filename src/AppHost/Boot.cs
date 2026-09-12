@@ -169,6 +169,12 @@ public class Boot : IHostedService
                 );
                 migrationResult.LogIfFailed();
 
+                var genreTypeRecalculationResult = await _commandExecutor.Send(
+                    new RecalculatePlexGenreTypesCommand(),
+                    _appLifetime.ApplicationStopping
+                );
+                genreTypeRecalculationResult.LogIfFailed();
+
                 var integrationCheckResult = await _commandExecutor.Send(
                     new NotifyArrAppsOnStartupCommand(),
                     _appLifetime.ApplicationStopping

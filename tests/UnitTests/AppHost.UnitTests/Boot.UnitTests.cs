@@ -8,7 +8,7 @@ namespace Reaparr.AppHost.UnitTests;
 public class BootUnitTests : BaseUnitTest<Boot>
 {
     [Test]
-    public async Task ShouldMigrateLegacyIntegrationsBeforeNormalStartupChecks()
+    public async Task ShouldRunGenreTypeRecalculationAfterLegacyIntegrationMigration()
     {
         // Arrange
         var applicationStarted = new CancellationTokenSource();
@@ -22,6 +22,16 @@ public class BootUnitTests : BaseUnitTest<Boot>
             .InSequence(sequence)
             .Setup(x => x.Send(It.IsAny<MigrateLegacyArrSettingsCommand>(), CancellationToken.None))
             .ReturnsAsync(Result.Fail("Import failed"))
+            .Verifiable(Times.Once());
+        Mock.Mock<ICommandExecutor>()
+            .InSequence(sequence)
+            .Setup(x =>
+                x.Send(
+                    It.IsAny<RecalculatePlexGenreTypesCommand>(),
+                    CancellationToken.None
+                )
+            )
+            .ReturnsAsync(Result.Ok(new PlexGenreTypeRecalculationResult(0, 0)))
             .Verifiable(Times.Once());
         Mock.Mock<ICommandExecutor>()
             .InSequence(sequence)

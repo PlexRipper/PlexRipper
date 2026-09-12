@@ -109,16 +109,18 @@ public class GetTorznabRssFeedCommandHandler
 
     private IQueryable<TorznabFeedItemProjection> CreateMovieQuery(int[] categories)
     {
-        var query = _dbContext.PlexMovieData.Where(x =>
-            x.PlexServer!.ServerStatus.Any(status => status.IsSuccessful)
-            && x.PlexServer.IsEnabled
-            && !x.PlexServer.IsDownloadsPausedByUser
-            && x.PlexMovie!.PlexLibrary!.PlexAccountLibraries.Any(libraryAccess =>
-                x.PlexMovie.PlexServer!.PlexAccountServers.Any(serverAccess =>
-                    serverAccess.PlexAccountId == libraryAccess.PlexAccountId
+        var query = _dbContext
+            .PlexMovies.Where(movie =>
+                movie.PlexServer!.ServerStatus.Any(status => status.IsSuccessful)
+                && movie.PlexServer.IsEnabled
+                && !movie.PlexServer.IsDownloadsPausedByUser
+                && movie.PlexLibrary!.PlexAccountLibraries.Any(libraryAccess =>
+                    movie.PlexServer.PlexAccountServers.Any(serverAccess =>
+                        serverAccess.PlexAccountId == libraryAccess.PlexAccountId
+                    )
                 )
             )
-        );
+            .SelectMany(movie => movie.MediaDataList);
         query = ApplyMovieCategories(query, categories);
         return query.Select(x => new TorznabFeedItemProjection
         {
@@ -150,16 +152,18 @@ public class GetTorznabRssFeedCommandHandler
 
     private IQueryable<TorznabFeedItemProjection> CreateEpisodeQuery(int[] categories)
     {
-        var query = _dbContext.PlexTvShowEpisodeData.Where(x =>
-            x.PlexServer!.ServerStatus.Any(status => status.IsSuccessful)
-            && x.PlexServer.IsEnabled
-            && !x.PlexServer.IsDownloadsPausedByUser
-            && x.PlexTvShowEpisode!.TvShow!.PlexLibrary!.PlexAccountLibraries.Any(libraryAccess =>
-                x.PlexTvShowEpisode.TvShow.PlexServer!.PlexAccountServers.Any(serverAccess =>
-                    serverAccess.PlexAccountId == libraryAccess.PlexAccountId
+        var query = _dbContext
+            .PlexTvShowEpisodes.Where(episode =>
+                episode.PlexServer!.ServerStatus.Any(status => status.IsSuccessful)
+                && episode.PlexServer.IsEnabled
+                && !episode.PlexServer.IsDownloadsPausedByUser
+                && episode.TvShow!.PlexLibrary!.PlexAccountLibraries.Any(libraryAccess =>
+                    episode.PlexServer.PlexAccountServers.Any(serverAccess =>
+                        serverAccess.PlexAccountId == libraryAccess.PlexAccountId
+                    )
                 )
             )
-        );
+            .SelectMany(episode => episode.MediaDataList);
         query = ApplyEpisodeCategories(query, categories);
         return query.Select(x => new TorznabFeedItemProjection
         {

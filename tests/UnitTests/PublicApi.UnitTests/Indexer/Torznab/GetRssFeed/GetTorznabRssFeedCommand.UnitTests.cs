@@ -181,4 +181,28 @@ public class GetTorznabRssFeedCommandUnitTests : BaseCommandUnitTest<GetTorznabR
             .Value.Channel.Items.Select(x => x.Attributes.Single(a => a.Name == "type").Value)
             .ShouldContain("series");
     }
+
+    [Test]
+    public void ShouldValidate_WhenLimitExceedsPreviousMaximum()
+    {
+        // Arrange
+        var validator = new GetTorznabRssFeedCommandValidator();
+        var command = new GetTorznabRssFeedCommand
+        {
+            Integration = new IntegrationIdentity(IntegrationType.Radarr, Guid.NewGuid()),
+            Categories = [],
+            IncludeMovies = true,
+            IncludeEpisodes = false,
+            Limit = 1000,
+            Offset = 0,
+            TorznabApiKey = "rss-key",
+        };
+
+        // Act
+        var result = validator.Validate(command);
+
+        // Assert
+        result.IsValid.ShouldBeTrue();
+        result.Errors.ShouldBeEmpty();
+    }
 }

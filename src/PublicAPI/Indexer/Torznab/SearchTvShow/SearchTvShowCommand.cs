@@ -41,7 +41,7 @@ public class SearchTvShowCommandValidator : AbstractValidator<SearchTvShowComman
     public SearchTvShowCommandValidator()
     {
         // Basic argument validation
-        RuleFor(x => x.Limit).GreaterThan(0).LessThanOrEqualTo(500);
+        RuleFor(x => x.Limit).GreaterThanOrEqualTo(0);
 
         RuleFor(x => x.Offset).GreaterThanOrEqualTo(0);
 

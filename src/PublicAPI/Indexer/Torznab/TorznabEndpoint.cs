@@ -120,7 +120,7 @@ public sealed class TorznabEndpoint : Endpoint<TorznabEndpointRequest>
                 Categories = request.Categories,
                 IncludeMovies = request.IncludesMovies,
                 IncludeEpisodes = request.IncludesEpisodes,
-                Limit = Math.Clamp(request.Limit, 0, 100),
+                Limit = request.Limit,
                 Offset = request.Offset,
                 TorznabApiKey = request.ApiKey,
             },

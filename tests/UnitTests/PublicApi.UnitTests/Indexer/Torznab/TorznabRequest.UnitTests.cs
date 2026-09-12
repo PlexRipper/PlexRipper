@@ -26,7 +26,7 @@ public class TorznabRequestUnitTests
         request.Season.ShouldBe(2);
         request.Episode.ShouldBe(3);
         request.TvdbId.ShouldBe(123);
-        request.Limit.ShouldBe(100);
+        request.Limit.ShouldBe(50);
         request.Offset.ShouldBe(0);
         request.Categories.ShouldBe([5030]);
         request.Mode.ShouldBe(TorznabRequestMode.ActiveSearch);

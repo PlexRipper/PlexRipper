@@ -15,7 +15,7 @@ public static class TorznabRequestMappers
             ImdbId = request.ImdbId ?? string.Empty,
             TmdbId = request.TmdbId ?? 0,
             ApiKey = request.ApiKey,
-            Limit = request.Limit ?? 100,
+            Limit = request.Limit ?? 50,
             Offset = request.Offset ?? 0,
             Categories = request.Categories ?? Array.Empty<int>(),
             Extended = request.Extended,

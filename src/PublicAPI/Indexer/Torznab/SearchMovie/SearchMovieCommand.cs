@@ -36,7 +36,7 @@ public class SearchMovieCommandValidator : AbstractValidator<SearchMovieCommand>
     public SearchMovieCommandValidator()
     {
         // Basic argument validation
-        RuleFor(x => x.Limit).GreaterThan(0).LessThanOrEqualTo(500);
+        RuleFor(x => x.Limit).GreaterThanOrEqualTo(0);
 
         RuleFor(x => x.Offset).GreaterThanOrEqualTo(0);
 

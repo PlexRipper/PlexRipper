@@ -838,7 +838,7 @@ public class SearchTvShowCommandUnitTests : BaseUnitTest<SearchTvShowCommandHand
     }
 
     [Test]
-    public void ShouldFailValidation_WhenLimitIsZero()
+    public void ShouldPassValidation_WhenLimitIsZero()
     {
         // Arrange
         var validator = new SearchTvShowCommandValidator();
@@ -858,12 +858,12 @@ public class SearchTvShowCommandUnitTests : BaseUnitTest<SearchTvShowCommandHand
         var result = validator.Validate(cmd);
 
         // Assert
-        result.IsValid.ShouldBeFalse();
-        result.Errors.ShouldNotBeEmpty();
+        result.IsValid.ShouldBeTrue();
+        result.Errors.ShouldBeEmpty();
     }
 
     [Test]
-    public void ShouldFailValidation_WhenLimitExceedsMax()
+    public void ShouldPassValidation_WhenLimitExceedsPreviousMax()
     {
         // Arrange
         var validator = new SearchTvShowCommandValidator();
@@ -883,8 +883,8 @@ public class SearchTvShowCommandUnitTests : BaseUnitTest<SearchTvShowCommandHand
         var result = validator.Validate(cmd);
 
         // Assert
-        result.IsValid.ShouldBeFalse();
-        result.Errors.ShouldNotBeEmpty();
+        result.IsValid.ShouldBeTrue();
+        result.Errors.ShouldBeEmpty();
     }
 
     [Test]

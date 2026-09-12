@@ -19,7 +19,7 @@ public class GetTorznabRssFeedCommandValidator : AbstractValidator<GetTorznabRss
     {
         RuleFor(x => x.Integration).NotNull();
         RuleFor(x => x.Categories).NotNull();
-        RuleFor(x => x.Limit).InclusiveBetween(0, 100);
+        RuleFor(x => x.Limit).GreaterThanOrEqualTo(0);
         RuleFor(x => x.Offset).GreaterThanOrEqualTo(0);
     }
 }

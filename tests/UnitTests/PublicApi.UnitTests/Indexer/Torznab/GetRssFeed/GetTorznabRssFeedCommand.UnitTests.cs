@@ -487,5 +487,8 @@ public class GetTorznabRssFeedCommandUnitTests : BaseCommandUnitTest<GetTorznabR
         names.ShouldContain("size");
         names.ShouldContain("seeders");
         names.ShouldContain("resolution");
+        names.ShouldContain("uploadvolumefactor");
+        names.ShouldContain("tag");
+        result.Value.Channel.Items.Single().Attributes.Single(x => x.Name == "tag").Value.ShouldNotBeEmpty();
     }
 }

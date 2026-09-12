@@ -86,8 +86,10 @@ public sealed record TorznabFeedItemProjection
         item.Attributes.Add(new TorznabAttr("seeders", "1"));
         item.Attributes.Add(new TorznabAttr("peers", "1"));
         item.Attributes.Add(new TorznabAttr("type", MediaType == PlexMediaType.Movie ? "movie" : "series"));
+        // TODO: Derive language from Plex media stream metadata when language-specific stream data is available.
         item.Attributes.Add(new TorznabAttr("language", "English"));
         item.Attributes.Add(new TorznabAttr("downloadvolumefactor", "0.0"));
+        item.Attributes.Add(new TorznabAttr("uploadvolumefactor", "1.0"));
         item.Attributes.Add(new TorznabAttr("resolution", VideoResolution.ToResolutionLabel()));
         item.Attributes.Add(new TorznabAttr("source", Source.ToEnumMemberValue()));
         item.Attributes.Add(new TorznabAttr("videoCodec", VideoCodec));

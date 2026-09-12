@@ -38,15 +38,6 @@ public class GetCapabilitiesCommandHandler : ICommandHandler<GetCapabilitiesComm
                     SupportedParams = "q,imdbid,tmdbid,extended,attrs,cat,limit,offset",
                 },
             },
-            Attributes =
-            [
-                new TorznabCapsAttr { Name = "seeders", Value = "yes" },
-                new TorznabCapsAttr { Name = "peers", Value = "yes" },
-                new TorznabCapsAttr { Name = "language", Value = "en" },
-                new TorznabCapsAttr { Name = "downloadvolumefactor", Value = "1.0" },
-                new TorznabCapsAttr { Name = "uploadvolumefactor", Value = "1.0" },
-                new TorznabCapsAttr { Name = "tags", Value = "yes" },
-            ],
             Categories =
             [
                 // Movies

@@ -755,21 +755,16 @@ public class SearchTvShowCommandUnitTests : BaseUnitTest<SearchTvShowCommandHand
             TVDB_ID = 0,
         };
 
-        // Expected total parts across the paged episodes
-        var expectedPartCount = await IDbContext
-            .PlexTvShowEpisodes.Include(e => e.MediaDataList)
-            .OrderBy(e => e.Id)
-            .Skip(offset)
-            .Take(limit)
-            .Select(e => e.MediaDataList.Count)
-            .SumAsync(CancellationToken);
+        var expectedTotal = await IDbContext.PlexTvShowEpisodeData.CountAsync(CancellationToken);
 
         // Act
         var result = await Sut.ExecuteAsync(cmd, CancellationToken);
 
         // Assert
-        result.ShouldNotBeNull();
-        result.Value.Channel.Items.Count.ShouldBe(expectedPartCount);
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.Channel.Items.Count.ShouldBe(limit);
+        result.Value.Channel.Response.Offset.ShouldBe(offset);
+        result.Value.Channel.Response.Total.ShouldBe(expectedTotal);
     }
 
     [Test]

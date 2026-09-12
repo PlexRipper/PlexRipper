@@ -163,9 +163,9 @@ public class TorznabEndpointUnitTests : BaseEndpointUnitTest<TorznabEndpoint, To
         using var reader = new StreamReader(responseBody, leaveOpen: true);
         var xml = await reader.ReadToEndAsync();
         xml.ShouldContain("tv-result-2");
-        xml.ShouldContain("movie-result-1");
+        xml.ShouldContain("tv-result-3");
         xml.ShouldNotContain("tv-result-1");
-        xml.ShouldNotContain("movie-result-2");
+        xml.ShouldNotContain("movie-result-1");
         Mock.Mock<ICommandExecutor>().Verify();
     }
 

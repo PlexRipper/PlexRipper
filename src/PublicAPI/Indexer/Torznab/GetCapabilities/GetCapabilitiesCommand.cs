@@ -41,23 +41,20 @@ public class GetCapabilitiesCommandHandler : ICommandHandler<GetCapabilitiesComm
             Categories =
             [
                 // Movies
-                new TorznabCategory(2000, "Movies"),
-                new TorznabCategory(2010, "Movies/Foreign"),
-                new TorznabCategory(2020, "Movies/Other"),
-                new TorznabCategory(2030, "Movies/SD"),
-                new TorznabCategory(2040, "Movies/HD"),
-                new TorznabCategory(2045, "Movies/UHD"),
-                new TorznabCategory(2050, "Movies/BluRay"),
-                new TorznabCategory(2060, "Movies/3D"),
-                new TorznabCategory(2070, "Movies/WEBDL"),
+                new TorznabCategory((int)TorznabCategoryId.Movies, "Movies"),
+                new TorznabCategory((int)TorznabCategoryId.Movies_SD, "Movies/SD"),
+                new TorznabCategory((int)TorznabCategoryId.Movies_HD, "Movies/HD"),
+                new TorznabCategory((int)TorznabCategoryId.Movies_UHD, "Movies/UHD"),
+                new TorznabCategory((int)TorznabCategoryId.Movies_BluRay, "Movies/BluRay"),
+                new TorznabCategory((int)TorznabCategoryId.Movies_WEBDL, "Movies/WEBDL"),
                 // TV
-                new TorznabCategory(5000, "TV"),
-                new TorznabCategory(5030, "TV/HD"),
-                new TorznabCategory(5040, "TV/SD"),
-                new TorznabCategory(5050, "TV/UHD"),
-                new TorznabCategory(5070, "TV/Anime"),
-                new TorznabCategory(5080, "TV/Documentary"),
-                new TorznabCategory(5090, "TV/Foreign"),
+                new TorznabCategory((int)TorznabCategoryId.TV, "TV"),
+                new TorznabCategory((int)TorznabCategoryId.TV_SD, "TV/SD"),
+                new TorznabCategory((int)TorznabCategoryId.TV_HD, "TV/HD"),
+                new TorznabCategory((int)TorznabCategoryId.TV_UHD, "TV/UHD"),
+                new TorznabCategory((int)TorznabCategoryId.TV_Anime, "TV/Anime"),
+                new TorznabCategory((int)TorznabCategoryId.TV_Documentary, "TV/Documentary"),
+                new TorznabCategory((int)TorznabCategoryId.TV_Foreign, "TV/Foreign"),
             ],
         };
 

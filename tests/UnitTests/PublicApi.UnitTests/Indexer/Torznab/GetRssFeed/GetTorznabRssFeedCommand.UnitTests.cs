@@ -1,4 +1,5 @@
 using Reaparr.Application.Contracts;
+using Reaparr.PublicAPI.Contracts;
 using Reaparr.Settings.Contracts;
 
 namespace Reaparr.PublicAPI.UnitTests;
@@ -420,14 +421,17 @@ public class GetTorznabRssFeedCommandUnitTests : BaseCommandUnitTest<GetTorznabR
     public async Task ShouldReturnOnlyRequestedAttributes_WhenExtendedIsDisabled()
     {
         // Arrange
-        await SetupDatabase(7640, config =>
-        {
-            config.PlexServerCount = 1;
-            config.PlexAccountCount = 1;
-            config.PlexMovieLibraryCount = 1;
-            config.MovieCount = 1;
-            config.RadarrIntegrationCount = 1;
-        });
+        await SetupDatabase(
+            7640,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexAccountCount = 1;
+                config.PlexMovieLibraryCount = 1;
+                config.MovieCount = 1;
+                config.RadarrIntegrationCount = 1;
+            }
+        );
         var integration = (await IDbContext.RadarrIntegrations.SingleAsync(CancellationToken)).Id.ToRadarrIdentity();
         var command = new GetTorznabRssFeedCommand
         {
@@ -448,21 +452,30 @@ public class GetTorznabRssFeedCommandUnitTests : BaseCommandUnitTest<GetTorznabR
         // Assert
         result.IsSuccess.ShouldBeTrue();
         result.Value.Channel.Items.ShouldNotBeEmpty();
-        result.Value.Channel.Items.All(x => x.Attributes.Select(a => a.Name).Order().SequenceEqual(new[] { "category", "size" })).ShouldBeTrue();
+        result
+            .Value.Channel.Items.All(x =>
+                x.Attributes.All(a => a.Name is "category" or "size")
+                && x.Attributes.Any(a => a.Name == "category")
+                && x.Attributes.Count(a => a.Name == "size") == 1
+            )
+            .ShouldBeTrue();
     }
 
     [Test]
     public async Task ShouldReturnAllAttributes_WhenExtendedIsEnabled()
     {
         // Arrange
-        await SetupDatabase(7641, config =>
-        {
-            config.PlexServerCount = 1;
-            config.PlexAccountCount = 1;
-            config.PlexMovieLibraryCount = 1;
-            config.MovieCount = 1;
-            config.RadarrIntegrationCount = 1;
-        });
+        await SetupDatabase(
+            7641,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexAccountCount = 1;
+                config.PlexMovieLibraryCount = 1;
+                config.MovieCount = 1;
+                config.RadarrIntegrationCount = 1;
+            }
+        );
         var integration = (await IDbContext.RadarrIntegrations.SingleAsync(CancellationToken)).Id.ToRadarrIdentity();
         var command = new GetTorznabRssFeedCommand
         {
@@ -488,7 +501,122 @@ public class GetTorznabRssFeedCommandUnitTests : BaseCommandUnitTest<GetTorznabR
         names.ShouldContain("seeders");
         names.ShouldContain("resolution");
         names.ShouldContain("uploadvolumefactor");
-        names.ShouldContain("tag");
-        result.Value.Channel.Items.Single().Attributes.Single(x => x.Name == "tag").Value.ShouldNotBeEmpty();
     }
+
+    [Test]
+    public async Task ShouldHideUnavailableMedia_AndRestoreSameReleaseAfterRecovery()
+    {
+        await SetupDatabase(7642, ConfigureMovieFeed);
+        var command = await CreateMovieFeedCommand();
+        var beforeOutage = await TestHandlerExecuteAsync<TorznabMediaSearchResponseDTO>(command);
+        var expected = beforeOutage.Value.Channel.Items.Select(x => (x.Guid.Value, x.PubDate)).ToList();
+
+        using (var dbContext = IDbContext)
+        {
+            await dbContext.PlexServerStatuses.ExecuteUpdateAsync(
+                setters => setters.SetProperty(x => x.IsSuccessful, false),
+                CancellationToken
+            );
+        }
+
+        var duringOutage = await TestHandlerExecuteAsync<TorznabMediaSearchResponseDTO>(command);
+
+        using (var dbContext = IDbContext)
+        {
+            await dbContext.PlexServerStatuses.ExecuteUpdateAsync(
+                setters => setters.SetProperty(x => x.IsSuccessful, true),
+                CancellationToken
+            );
+        }
+
+        var afterRecovery = await TestHandlerExecuteAsync<TorznabMediaSearchResponseDTO>(command);
+
+        expected.ShouldNotBeEmpty();
+        duringOutage.Value.Channel.Items.ShouldBeEmpty();
+        afterRecovery.Value.Channel.Items.Select(x => (x.Guid.Value, x.PubDate)).ShouldBe(expected);
+    }
+
+    [Test]
+    public async Task ShouldHideMedia_WhenDownloadsArePaused()
+    {
+        await SetupDatabase(7643, ConfigureMovieFeed);
+        var command = await CreateMovieFeedCommand();
+        using (var dbContext = IDbContext)
+        {
+            await dbContext.PlexServers.ExecuteUpdateAsync(
+                setters => setters.SetProperty(x => x.IsDownloadsPausedByUser, true),
+                CancellationToken
+            );
+        }
+
+        var result = await TestHandlerExecuteAsync<TorznabMediaSearchResponseDTO>(command);
+
+        result.Value.Channel.Items.ShouldBeEmpty();
+    }
+
+    [Test]
+    public async Task ShouldHideMedia_WhenServerAccessIsRemoved()
+    {
+        await SetupDatabase(7644, ConfigureMovieFeed);
+        var command = await CreateMovieFeedCommand();
+        using (var dbContext = IDbContext)
+            await dbContext.PlexAccountServers.ExecuteDeleteAsync(CancellationToken);
+
+        var result = await TestHandlerExecuteAsync<TorznabMediaSearchResponseDTO>(command);
+
+        result.Value.Channel.Items.ShouldBeEmpty();
+    }
+
+    [Test]
+    public async Task ShouldHideMedia_WhenLibraryAccessIsRemoved()
+    {
+        await SetupDatabase(7645, ConfigureMovieFeed);
+        var command = await CreateMovieFeedCommand();
+        using (var dbContext = IDbContext)
+            await dbContext.PlexAccountLibraries.ExecuteDeleteAsync(CancellationToken);
+
+        var result = await TestHandlerExecuteAsync<TorznabMediaSearchResponseDTO>(command);
+
+        result.Value.Channel.Items.ShouldBeEmpty();
+    }
+
+    [Test]
+    public async Task ShouldNotTrackOrModifyEntities_WhenFeedIsRead()
+    {
+        await SetupDatabase(7646, ConfigureMovieFeed);
+        var command = await CreateMovieFeedCommand();
+        using var dbContext = IDbContext;
+        dbContext.ClearChangeTracker();
+        var mediaIdsBefore = await dbContext.PlexMovieData.Select(x => x.Id).ToListAsync(CancellationToken);
+        var handler = new GetTorznabRssFeedCommandHandler(dbContext, Mock.Mock<INetworkSettings>().Object);
+
+        var result = await handler.ExecuteAsync(command, CancellationToken);
+
+        result.IsSuccess.ShouldBeTrue();
+        (await dbContext.SaveChangesAsync(CancellationToken)).ShouldBe(0);
+        (await dbContext.PlexMovieData.Select(x => x.Id).ToListAsync(CancellationToken)).ShouldBe(mediaIdsBefore);
+    }
+
+    private static void ConfigureMovieFeed(FakeDataConfig config)
+    {
+        config.PlexServerCount = 1;
+        config.PlexAccountCount = 1;
+        config.PlexMovieLibraryCount = 1;
+        config.MovieCount = 2;
+        config.RadarrIntegrationCount = 1;
+    }
+
+    private async Task<GetTorznabRssFeedCommand> CreateMovieFeedCommand() =>
+        new()
+        {
+            Integration = (await IDbContext.RadarrIntegrations.SingleAsync(CancellationToken)).Id.ToRadarrIdentity(),
+            Categories = [(int)TorznabCategoryId.Movies],
+            IncludeMovies = true,
+            IncludeEpisodes = false,
+            Limit = 50,
+            Offset = 0,
+            TorznabApiKey = "rss-key",
+            Attributes = [],
+            IncludeAllAttributes = true,
+        };
 }

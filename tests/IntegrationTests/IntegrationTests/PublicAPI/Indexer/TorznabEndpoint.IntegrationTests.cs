@@ -84,6 +84,42 @@ public class TorznabEndpointIntegrationTests : BaseIntegrationTests
     }
 
     [Test]
+    public async Task ShouldRemoveMovieFromRss_WhenSynchronizationDeletesIt()
+    {
+        // Arrange
+        using var container = await CreateContainer(
+            new Seed(8669),
+            config =>
+            {
+                config.DatabaseOptions = x =>
+                {
+                    x.PlexServerCount = 1;
+                    x.PlexAccountCount = 1;
+                    x.PlexMovieLibraryCount = 1;
+                    x.MovieCount = 2;
+                    x.RadarrIntegrationCount = 1;
+                };
+            }
+        );
+        var integration = await container.DbContext.RadarrIntegrations.SingleAsync(CancellationToken);
+        var route = $"/api/public/integrations/{integration.Id}/indexer/api";
+        var url = $"{route}?t=search&cat=2000&limit=50&offset=0&apikey={integration.TorznabApiKey}";
+        var client = container.GetApiClient();
+        (await GetRssItems(client, url)).Count.ShouldBeGreaterThan(0);
+        var library = await container.DbContext.PlexLibraries.SingleAsync(CancellationToken);
+
+        // Act
+        var syncResult = await container
+            .Resolve<ICommandExecutor>()
+            .Send(new SyncPlexMoviesCommand(new InsertMediaMetaDataCommandResponse(library)), CancellationToken);
+
+        // Assert
+        syncResult.IsSuccess.ShouldBeTrue();
+        syncResult.Value.DeletedMovies.ShouldBe(2);
+        (await GetRssItems(client, url)).ShouldBeEmpty();
+    }
+
+    [Test]
     public async Task ShouldReturnTorznabErrorXml_WhenOffsetIsNegative() =>
         await AssertInvalidRequest("offset=-1", 8664);
 
@@ -102,6 +138,14 @@ public class TorznabEndpointIntegrationTests : BaseIntegrationTests
     [Test]
     public async Task ShouldReturnTorznabErrorXml_WhenAttributesAreMalformed() =>
         await AssertInvalidRequest("attrs=size%2Ccategory%21", 8668);
+
+    private async Task<List<XElement>> GetRssItems(HttpClient client, string url)
+    {
+        var response = await client.GetAsync(url, CancellationToken);
+        response.IsSuccessStatusCode.ShouldBeTrue();
+        var xml = await response.Content.ReadAsStringAsync(CancellationToken);
+        return XDocument.Parse(xml).Root!.Element("channel")!.Elements("item").ToList();
+    }
 
     private async Task AssertInvalidRequest(string invalidQuery, int seedValue)
     {

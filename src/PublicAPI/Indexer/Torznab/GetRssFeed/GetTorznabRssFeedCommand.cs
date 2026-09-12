@@ -36,6 +36,8 @@ public class GetTorznabRssFeedCommandHandler
         (int)TorznabCategoryId.Movies_SD,
         (int)TorznabCategoryId.Movies_HD,
         (int)TorznabCategoryId.Movies_UHD,
+        (int)TorznabCategoryId.Movies_BluRay,
+        (int)TorznabCategoryId.Movies_WEBDL,
     ];
 
     private static readonly int[] _tvCategories =
@@ -218,6 +220,14 @@ public class GetTorznabRssFeedCommandHandler
                 && x.VideoResolution != VideoQuality.DVD
                 && x.VideoResolution != VideoQuality.UHD_4K
                 && x.VideoResolution != VideoQuality.UHD_8K
+            )
+            || (
+                known.AsEnumerable().Contains((int)TorznabCategoryId.Movies_BluRay)
+                && (x.Source == ReleaseSource.BluRay || x.Source == ReleaseSource.BluRayRemux)
+            )
+            || (
+                known.AsEnumerable().Contains((int)TorznabCategoryId.Movies_WEBDL)
+                && (x.Source == ReleaseSource.WebDl || x.Source == ReleaseSource.WebRip)
             )
         );
     }

@@ -1,5 +1,5 @@
 // ReSharper disable InconsistentNaming
-namespace Reaparr.PublicAPI;
+namespace Reaparr.PublicAPI.Contracts;
 
 public enum TorznabCategoryId
 {
@@ -25,6 +25,7 @@ public enum TorznabCategoryId
     Movies_UHD = 2045,
     Movies_BluRay = 2050,
     Movies_3D = 2060,
+    Movies_WEBDL = 2070,
 
     // Audio
     Audio = 3000,
@@ -51,6 +52,8 @@ public enum TorznabCategoryId
     TV_UHD = 5045,
     TV_Other = 5050,
     TV_Sport = 5060,
+    TV_Anime = 5070,
+    TV_Documentary = 5080,
 
     // XXX
     XXX = 6000,

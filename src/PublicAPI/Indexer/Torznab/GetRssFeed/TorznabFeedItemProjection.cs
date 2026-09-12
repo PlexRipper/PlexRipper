@@ -82,7 +82,7 @@ public sealed record TorznabFeedItemProjection
         };
 
         item.Attributes.Add(new TorznabAttr("size", Size.ToString()));
-        foreach (var category in categories)
+        foreach (var category in categories.Distinct())
             item.Attributes.Add(new TorznabAttr("category", ((int)category).ToString()));
         item.Attributes.Add(new TorznabAttr("seeders", "1"));
         item.Attributes.Add(new TorznabAttr("peers", "1"));
@@ -113,7 +113,9 @@ public sealed record TorznabFeedItemProjection
         }
 
         if (requestedAttributes is not null)
-            item.Attributes = item.Attributes.Where(x => requestedAttributes.Contains(x.Name)).ToList();
+            item.Attributes = item.Attributes
+                .Where(x => x.Name is "size" or "category" || requestedAttributes.Contains(x.Name))
+                .ToList();
 
         return item;
     }

@@ -5,12 +5,20 @@ public class PlexGenreTypeExtensionsUnitTests
     [Test]
     [Arguments("Anime", PlexGenreType.Anime)]
     [Arguments(" anime ", PlexGenreType.Anime)]
+    [Arguments("Animation", PlexGenreType.Animation)]
+    [Arguments("Animatie", PlexGenreType.Animation)]
+    [Arguments("Manga", PlexGenreType.Manga)]
     [Arguments("Documentary", PlexGenreType.Documentary)]
     [Arguments("DOCUMENTAIRE", PlexGenreType.Documentary)]
+    [Arguments("Biography", PlexGenreType.Biography)]
+    [Arguments("Musical", PlexGenreType.Musical)]
+    [Arguments("Suspense", PlexGenreType.Suspense)]
+    [Arguments("Soap", PlexGenreType.Soap)]
     [Arguments("Sport", PlexGenreType.Sport)]
     [Arguments("sports", PlexGenreType.Sport)]
-    [Arguments("Animation", PlexGenreType.Unknown)]
-    [Arguments("Sportcommentaar", PlexGenreType.Unknown)]
+    [Arguments("Sportcommentaar", PlexGenreType.Sport)]
+    [Arguments("Asia", PlexGenreType.Unknown)]
+    [Arguments("Indie", PlexGenreType.Unknown)]
     public void ShouldMapExactNormalizedAlias_WhenGenreIsClassified(string genre, PlexGenreType expected)
     {
         // Arrange
@@ -39,7 +47,7 @@ public class PlexGenreTypeExtensionsUnitTests
     [Test]
     [Arguments("Sport / Sports", PlexGenreType.Sport)]
     [Arguments("Sport / Ambiguous", PlexGenreType.Sport)]
-    [Arguments("Action / Adventure", PlexGenreType.Unknown)]
+    [Arguments("Action / Adventure", PlexGenreType.Group)]
     public void ShouldIgnoreDuplicateAndUnknownTokens_WhenAtMostOneKnownTypeRemains(
         string genre,
         PlexGenreType expected

@@ -30,29 +30,6 @@ public class GetTorznabRssFeedCommandValidator : AbstractValidator<GetTorznabRss
 public class GetTorznabRssFeedCommandHandler
     : ICommandHandler<GetTorznabRssFeedCommand, Result<TorznabMediaSearchResponseDTO>>
 {
-    private static readonly int[] _movieCategories =
-    [
-        (int)TorznabCategoryId.Movies,
-        (int)TorznabCategoryId.Movies_Foreign,
-        (int)TorznabCategoryId.Movies_SD,
-        (int)TorznabCategoryId.Movies_HD,
-        (int)TorznabCategoryId.Movies_UHD,
-        (int)TorznabCategoryId.Movies_BluRay,
-        (int)TorznabCategoryId.Movies_WEBDL,
-    ];
-
-    private static readonly int[] _tvCategories =
-    [
-        (int)TorznabCategoryId.TV,
-        (int)TorznabCategoryId.TV_Foreign,
-        (int)TorznabCategoryId.TV_SD,
-        (int)TorznabCategoryId.TV_HD,
-        (int)TorznabCategoryId.TV_UHD,
-        (int)TorznabCategoryId.TV_Sport,
-        (int)TorznabCategoryId.TV_Anime,
-        (int)TorznabCategoryId.TV_Documentary,
-    ];
-
     private readonly IReaparrDbContext _dbContext;
     private readonly INetworkSettings _networkSettings;
 
@@ -92,8 +69,7 @@ public class GetTorznabRssFeedCommandHandler
         var requestedAttributes = command.IncludeAllAttributes
             ? null
             : command.Attributes.ToHashSet(StringComparer.OrdinalIgnoreCase);
-        var items = rows
-            .OrderByDescending(x => x.AddedAt)
+        var items = rows.OrderByDescending(x => x.AddedAt)
             .ThenByDescending(x => x.PlexServerMachineIdentifier)
             .ThenByDescending(x => x.PlexApiMediaId)
             .ThenByDescending(x => x.PlexApiPartId)
@@ -105,7 +81,6 @@ public class GetTorznabRssFeedCommandHandler
             .ToList();
         return Result.Ok(CreateResponse(command.Offset, total, items));
     }
-
 
     private IQueryable<TorznabFeedItemProjection> CreateMovieQuery(int[] categories)
     {
@@ -207,7 +182,7 @@ public class GetTorznabRssFeedCommandHandler
             },
         };
 
-    private static IQueryable<PlexMovieMediaData> ApplyMovieCategories(
+    internal static IQueryable<PlexMovieMediaData> ApplyMovieCategories(
         IQueryable<PlexMovieMediaData> query,
         int[] categories
     )
@@ -215,7 +190,7 @@ public class GetTorznabRssFeedCommandHandler
         if (categories.Length == 0 || categories.Contains((int)TorznabCategoryId.Movies))
             return query;
 
-        var known = categories.Intersect(_movieCategories).ToArray();
+        var known = categories.Intersect(IntegrationDefinitions.MovieCategories.Select(x => (int)x.Id)).ToArray();
         if (known.Length == 0)
             return query.Where(_ => false);
 
@@ -256,7 +231,7 @@ public class GetTorznabRssFeedCommandHandler
         );
     }
 
-    private static IQueryable<PlexTvShowEpisodeMediaData> ApplyEpisodeCategories(
+    internal static IQueryable<PlexTvShowEpisodeMediaData> ApplyEpisodeCategories(
         IQueryable<PlexTvShowEpisodeMediaData> query,
         int[] categories
     )
@@ -264,7 +239,7 @@ public class GetTorznabRssFeedCommandHandler
         if (categories.Length == 0 || categories.Contains((int)TorznabCategoryId.TV))
             return query;
 
-        var known = categories.Intersect(_tvCategories).ToArray();
+        var known = categories.Intersect(IntegrationDefinitions.TvCategories.Select(x => (int)x.Id)).ToArray();
         if (known.Length == 0)
             return query.Where(_ => false);
 

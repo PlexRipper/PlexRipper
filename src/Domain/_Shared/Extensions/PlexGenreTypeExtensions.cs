@@ -14,17 +14,18 @@ public static class PlexGenreTypeExtensions
 
         // Adventure
         ["Adventure"] = PlexGenreType.Adventure,
-        ["Action & Adventure"] = PlexGenreType.Adventure,
-        ["Action &Adventure"] = PlexGenreType.Adventure,
-        ["Action/Adventure"] = PlexGenreType.Adventure,
 
         // Anime
         ["Anime"] = PlexGenreType.Anime,
-        ["Manga"] = PlexGenreType.Anime,
-        ["Animated"] = PlexGenreType.Anime,
-        ["Animatie"] = PlexGenreType.Anime,
-        ["Animation"] = PlexGenreType.Anime,
-        ["Bishounen"] = PlexGenreType.Anime,
+
+        // Animation
+        ["Animated"] = PlexGenreType.Animation,
+        ["Animatie"] = PlexGenreType.Animation,
+        ["Animation"] = PlexGenreType.Animation,
+
+        // Manga
+        ["Manga"] = PlexGenreType.Manga,
+        ["Bishounen"] = PlexGenreType.Manga,
 
         // Comedy
         ["Comedy"] = PlexGenreType.Comedy,
@@ -39,13 +40,17 @@ public static class PlexGenreTypeExtensions
         // Documentary
         ["Documentary"] = PlexGenreType.Documentary,
         ["Documentaire"] = PlexGenreType.Documentary,
-        ["Biography"] = PlexGenreType.Documentary,
-        ["Biographical"] = PlexGenreType.Documentary,
+
+        // Biography
+        ["Biography"] = PlexGenreType.Biography,
+        ["Biographical"] = PlexGenreType.Biography,
 
         // Drama
         ["Drama"] = PlexGenreType.Drama,
-        ["Soap"] = PlexGenreType.Drama,
         ["Angst"] = PlexGenreType.Drama,
+
+        // Soap
+        ["Soap"] = PlexGenreType.Soap,
 
         // Family
         ["Family"] = PlexGenreType.Family,
@@ -75,14 +80,18 @@ public static class PlexGenreTypeExtensions
 
         // Horror
         ["Horror"] = PlexGenreType.Horror,
-        ["Suspense"] = PlexGenreType.Horror,
+
+        // Suspense
+        ["Suspense"] = PlexGenreType.Suspense,
 
         // Music
         ["Music"] = PlexGenreType.Music,
-        ["Musical"] = PlexGenreType.Music,
         ["Muziek"] = PlexGenreType.Music,
         ["Performances & Events"] = PlexGenreType.Music,
         ["Books & Spoken"] = PlexGenreType.Music,
+
+        // Musical
+        ["Musical"] = PlexGenreType.Musical,
 
         // Mystery
         ["Mystery"] = PlexGenreType.Mystery,
@@ -128,7 +137,6 @@ public static class PlexGenreTypeExtensions
 
         // Western
         ["Western"] = PlexGenreType.Western,
-        ["Western<br><br><br>"] = PlexGenreType.Western,
 
         // Adult
         ["18 restricted"] = PlexGenreType.Adult,
@@ -161,7 +169,6 @@ public static class PlexGenreTypeExtensions
         // Entertainment
         ["Entertainment"] = PlexGenreType.Entertainment,
         ["Awards Show"] = PlexGenreType.Entertainment,
-        ["Indie"] = PlexGenreType.Entertainment,
 
         // Game shows
         ["Game Show"] = PlexGenreType.GameShow,
@@ -170,29 +177,37 @@ public static class PlexGenreTypeExtensions
         ["Talk"] = PlexGenreType.TalkShow,
         ["Talk Show"] = PlexGenreType.TalkShow,
 
-        // TV movies
-        ["TV Film"] = PlexGenreType.TVMovie,
-        ["TV Movie"] = PlexGenreType.TVMovie,
+        // Independent / Indie
+        ["Indie"] = PlexGenreType.Independent,
+
+        // Religion
+        ["Religion"] = PlexGenreType.Religion,
+        ["Mormon channel"] = PlexGenreType.Religion,
+
+        // Podcasts
+        ["Podcast"] = PlexGenreType.Podcast,
+
+        // Foreign
+        ["Foreign"] = PlexGenreType.Foreign,
+        ["Foreign Language"] = PlexGenreType.Foreign,
+        ["Foreign Film"] = PlexGenreType.Foreign,
+        ["Foreign Language Film"] = PlexGenreType.Foreign,
+        ["asia"] = PlexGenreType.Foreign,
 
         // Special interest / formats that are not really genres.
-        ["Food"] = PlexGenreType.SpecialInterest,
-        ["Holiday"] = PlexGenreType.SpecialInterest,
-        ["Home and Garden"] = PlexGenreType.SpecialInterest,
-        ["Mini-Series"] = PlexGenreType.SpecialInterest,
-        ["Mormon channel"] = PlexGenreType.SpecialInterest,
-        ["MyDVD"] = PlexGenreType.SpecialInterest,
-        ["Podcast"] = PlexGenreType.SpecialInterest,
-        ["Short"] = PlexGenreType.SpecialInterest,
-        ["Special Interest"] = PlexGenreType.SpecialInterest,
-        ["Travel"] = PlexGenreType.SpecialInterest,
-        ["Tv"] = PlexGenreType.SpecialInterest,
-        ["Video"] = PlexGenreType.SpecialInterest,
-        ["Half-Length episodes"] = PlexGenreType.SpecialInterest,
-
-        // Regional labels.
-        ["Asia"] = PlexGenreType.Foreign,
-        ["Americas"] = PlexGenreType.Foreign,
-        ["Barat"] = PlexGenreType.Foreign,
+        ["Food"] = PlexGenreType.Other,
+        ["Holiday"] = PlexGenreType.Other,
+        ["Home and Garden"] = PlexGenreType.Other,
+        ["Mini-Series"] = PlexGenreType.Other,
+        ["MyDVD"] = PlexGenreType.Other,
+        ["Short"] = PlexGenreType.Other,
+        ["Special Interest"] = PlexGenreType.Other,
+        ["Travel"] = PlexGenreType.Other,
+        ["Tv"] = PlexGenreType.Other,
+        ["Video"] = PlexGenreType.Other,
+        ["Half-Length episodes"] = PlexGenreType.Other,
+        ["TV Film"] = PlexGenreType.Other,
+        ["TV Movie"] = PlexGenreType.Other,
     };
 
     public static PlexGenreType ToPlexGenreType(this string genre)
@@ -202,7 +217,7 @@ public static class PlexGenreTypeExtensions
             return type;
 
         var types = normalizedGenre
-            .Split([',', '/', '&', ';'], StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries)
+            .Split([',', '/', ';'], StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries)
             .Select(Map)
             .Where(x => x != PlexGenreType.Unknown)
             .Distinct()

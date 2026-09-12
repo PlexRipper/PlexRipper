@@ -138,7 +138,7 @@ public class SetupRadarrIndexerCommandHandler
                 new RadarrIndexerContractFieldDTO
                 {
                     Name = "categories",
-                    Value = IntegrationDefinitions.SupportedTorznabCategories.Select(x => (int)x).ToList(),
+                    Value = IntegrationDefinitions.SupportedTorznabCategories.Select(x => (int)x.Id).ToList(),
                 },
                 new RadarrIndexerContractFieldDTO { Name = "minimumSeeders", Value = 1 },
                 new RadarrIndexerContractFieldDTO { Name = "seedCriteria.seedRatio", Value = null },

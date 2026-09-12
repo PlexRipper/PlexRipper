@@ -23,84 +23,108 @@ public enum PlexGenreType
     [JsonStringEnumMemberName(nameof(Anime))]
     Anime = 4,
 
+    [JsonStringEnumMemberName(nameof(Animation))]
+    Animation = 5,
+
+    [JsonStringEnumMemberName(nameof(Manga))]
+    Manga = 6,
+
     [JsonStringEnumMemberName(nameof(Comedy))]
-    Comedy = 5,
+    Comedy = 7,
 
     [JsonStringEnumMemberName(nameof(Crime))]
-    Crime = 6,
+    Crime = 8,
 
     [JsonStringEnumMemberName(nameof(Documentary))]
-    Documentary = 7,
+    Documentary = 9,
+
+    [JsonStringEnumMemberName(nameof(Biography))]
+    Biography = 10,
 
     [JsonStringEnumMemberName(nameof(Drama))]
-    Drama = 8,
+    Drama = 11,
+
+    [JsonStringEnumMemberName(nameof(Soap))]
+    Soap = 12,
 
     [JsonStringEnumMemberName(nameof(Family))]
-    Family = 9,
+    Family = 13,
 
     [JsonStringEnumMemberName(nameof(Fantasy))]
-    Fantasy = 10,
+    Fantasy = 14,
 
     [JsonStringEnumMemberName(nameof(History))]
-    History = 11,
+    History = 15,
 
     [JsonStringEnumMemberName(nameof(Horror))]
-    Horror = 12,
+    Horror = 16,
+
+    [JsonStringEnumMemberName(nameof(Suspense))]
+    Suspense = 17,
 
     [JsonStringEnumMemberName(nameof(Music))]
-    Music = 13,
+    Music = 18,
+
+    [JsonStringEnumMemberName(nameof(Musical))]
+    Musical = 19,
 
     [JsonStringEnumMemberName(nameof(Mystery))]
-    Mystery = 14,
+    Mystery = 20,
 
     [JsonStringEnumMemberName(nameof(News))]
-    News = 15,
+    News = 21,
 
     [JsonStringEnumMemberName(nameof(Reality))]
-    Reality = 16,
+    Reality = 22,
 
     [JsonStringEnumMemberName(nameof(Romance))]
-    Romance = 17,
+    Romance = 23,
 
     [JsonStringEnumMemberName(nameof(ScienceFiction))]
-    ScienceFiction = 18,
+    ScienceFiction = 24,
 
     [JsonStringEnumMemberName(nameof(Sport))]
-    Sport = 19,
+    Sport = 25,
 
     [JsonStringEnumMemberName(nameof(Thriller))]
-    Thriller = 20,
+    Thriller = 26,
 
     [JsonStringEnumMemberName(nameof(War))]
-    War = 21,
+    War = 27,
 
     [JsonStringEnumMemberName(nameof(Western))]
-    Western = 22,
+    Western = 28,
 
     [JsonStringEnumMemberName(nameof(Adult))]
-    Adult = 23,
+    Adult = 29,
 
     [JsonStringEnumMemberName(nameof(Children))]
-    Children = 24,
+    Children = 30,
 
     [JsonStringEnumMemberName(nameof(Educational))]
-    Educational = 25,
+    Educational = 31,
 
     [JsonStringEnumMemberName(nameof(Entertainment))]
-    Entertainment = 26,
+    Entertainment = 32,
 
     [JsonStringEnumMemberName(nameof(GameShow))]
-    GameShow = 27,
+    GameShow = 33,
 
     [JsonStringEnumMemberName(nameof(TalkShow))]
-    TalkShow = 28,
+    TalkShow = 34,
 
-    [JsonStringEnumMemberName(nameof(TVMovie))]
-    TVMovie = 29,
+    [JsonStringEnumMemberName(nameof(Religion))]
+    Religion = 35,
 
-    [JsonStringEnumMemberName(nameof(SpecialInterest))]
-    SpecialInterest = 30,
+    [JsonStringEnumMemberName(nameof(Other))]
+    Other = 36,
 
     [JsonStringEnumMemberName(nameof(Foreign))]
-    Foreign = 31,
+    Foreign = 37,
+
+    [JsonStringEnumMemberName(nameof(Independent))]
+    Independent = 38,
+
+    [JsonStringEnumMemberName(nameof(Podcast))]
+    Podcast = 39,
 }

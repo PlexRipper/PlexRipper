@@ -137,7 +137,7 @@ public class SetupSonarrIndexerCommandHandler
                 new SonarrIndexerContractFieldDTO
                 {
                     Name = "categories",
-                    Value = IntegrationDefinitions.SupportedTorznabCategories.Select(x => (int)x).ToList(),
+                    Value = IntegrationDefinitions.SupportedTorznabCategories.Select(x => (int)x.Id).ToList(),
                 },
                 new SonarrIndexerContractFieldDTO { Name = "animeStandardFormatSearch", Value = false },
                 new SonarrIndexerContractFieldDTO { Name = "additionalParameters", Value = null },

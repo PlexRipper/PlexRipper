@@ -8,8 +8,18 @@ public class RecalculatePlexGenreTypesCommandUnitTests : BaseCommandUnitTest<Rec
         // Arrange
         await SetupDatabase(7101);
         await SeedGenres(
-            new PlexGenre { Name = "Sport", Key = "sport", Type = PlexGenreType.Sport },
-            new PlexGenre { Name = "Documentaire", Key = "documentaire", Type = PlexGenreType.Documentary }
+            new PlexGenre
+            {
+                Name = "Sport",
+                Key = "sport",
+                Type = PlexGenreType.Sport,
+            },
+            new PlexGenre
+            {
+                Name = "Documentaire",
+                Key = "documentaire",
+                Type = PlexGenreType.Documentary,
+            }
         );
 
         // Act
@@ -33,8 +43,18 @@ public class RecalculatePlexGenreTypesCommandUnitTests : BaseCommandUnitTest<Rec
         // Arrange
         await SetupDatabase(7102);
         await SeedGenres(
-            new PlexGenre { Name = "Sport", Key = "sport", Type = PlexGenreType.Unknown },
-            new PlexGenre { Name = "Documentaire", Key = "documentaire", Type = PlexGenreType.Unknown }
+            new PlexGenre
+            {
+                Name = "Sport",
+                Key = "sport",
+                Type = PlexGenreType.Unknown,
+            },
+            new PlexGenre
+            {
+                Name = "Documentaire",
+                Key = "documentaire",
+                Type = PlexGenreType.Unknown,
+            }
         );
 
         // Act
@@ -58,11 +78,36 @@ public class RecalculatePlexGenreTypesCommandUnitTests : BaseCommandUnitTest<Rec
         // Arrange
         await SetupDatabase(7103);
         await SeedGenres(
-            new PlexGenre { Name = "Sport", Key = "sport", Type = PlexGenreType.Unknown },
-            new PlexGenre { Name = "Comedy", Key = "comedy", Type = PlexGenreType.Comedy },
-            new PlexGenre { Name = "Sport / Documentary", Key = "sport-documentary", Type = PlexGenreType.Unknown },
-            new PlexGenre { Name = "Unclassified", Key = "unclassified", Type = PlexGenreType.Unknown },
-            new PlexGenre { Name = "Asia", Key = "asia", Type = PlexGenreType.Unknown }
+            new PlexGenre
+            {
+                Name = "Sport",
+                Key = "sport",
+                Type = PlexGenreType.Unknown,
+            },
+            new PlexGenre
+            {
+                Name = "Comedy",
+                Key = "comedy",
+                Type = PlexGenreType.Comedy,
+            },
+            new PlexGenre
+            {
+                Name = "Sport / Documentary",
+                Key = "sport-documentary",
+                Type = PlexGenreType.Unknown,
+            },
+            new PlexGenre
+            {
+                Name = "Unclassified",
+                Key = "unclassified",
+                Type = PlexGenreType.Unknown,
+            },
+            new PlexGenre
+            {
+                Name = "Asia",
+                Key = "asia",
+                Type = PlexGenreType.Unknown,
+            }
         );
 
         // Act
@@ -74,7 +119,7 @@ public class RecalculatePlexGenreTypesCommandUnitTests : BaseCommandUnitTest<Rec
         result.IsSuccess.ShouldBeTrue();
         result.Errors.Count.ShouldBe(0);
         result.Value.ScannedCount.ShouldBe(5);
-        result.Value.UpdatedCount.ShouldBe(3);
+        result.Value.UpdatedCount.ShouldBe(2);
         var genreTypes = await GetGenreTypes();
         genreTypes["sport"].ShouldBe(PlexGenreType.Sport);
         genreTypes["comedy"].ShouldBe(PlexGenreType.Comedy);

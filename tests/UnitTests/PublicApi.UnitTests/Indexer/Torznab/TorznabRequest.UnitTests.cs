@@ -62,6 +62,24 @@ public class TorznabRequestUnitTests
     }
 
     [Test]
+    [Arguments("0")]
+    [Arguments("1")]
+    [Arguments("-1")]
+    [Arguments("")]
+    [Arguments(" ")]
+    public void ShouldRejectNumericAndBlankQueryTypes(string value)
+    {
+        // Arrange
+        var endpointRequest = new TorznabEndpointRequest { Type = value, ApiKey = "key" };
+
+        // Act
+        var result = endpointRequest.ParsedType;
+
+        // Assert
+        result.ShouldBe(TorznabQueryType.Unknown);
+    }
+
+    [Test]
     public void ShouldDeriveRssMediaTypesFromQueryTypeAndCategories()
     {
         // Arrange

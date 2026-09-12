@@ -146,6 +146,94 @@ public class TorznabFeedItemProjectionUnitTests
         item.Attributes.Where(x => x.Name == "category").Select(x => x.Value).ShouldBe(["5000", "5040"]);
     }
 
+    [Test]
+    public void ShouldKeepMandatoryAttributes_WhenOptionalAttributesAreFiltered()
+    {
+        // Arrange
+        var projection = CreateProjection();
+
+        // Act
+        var item = projection.ToTorznabItem(
+            new IntegrationIdentity(IntegrationType.Radarr, Guid.NewGuid()),
+            "key",
+            "http://localhost",
+            new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "seeders" }
+        );
+
+        // Assert
+        item.Attributes.ShouldContain(x => x.Name == "size");
+        item.Attributes.ShouldContain(x => x.Name == "category");
+        item.Attributes.ShouldContain(x => x.Name == "seeders");
+        item.Attributes.ShouldNotContain(x => x.Name == "language");
+    }
+
+    [Test]
+    [Arguments(VideoQuality.UHD_4K, ReleaseSource.DVD, "2000", "2030")]
+    [Arguments(VideoQuality.SD, ReleaseSource.BluRay, "2000", "2030", "2050")]
+    [Arguments(VideoQuality.UHD_4K, ReleaseSource.WebDl, "2000", "2045", "2070")]
+    [Arguments(VideoQuality.FullHD, ReleaseSource.WebRip, "2000", "2040", "2070")]
+    [Arguments(VideoQuality.FullHD, ReleaseSource.BluRayRemux, "2000", "2040", "2050")]
+    public void ShouldApplyMovieQualityAndSourceCategoryPrecedence(
+        VideoQuality resolution,
+        ReleaseSource source,
+        params string[] expectedCategories
+    )
+    {
+        // Arrange
+        var projection = CreateProjection() with { VideoResolution = resolution, Source = source };
+
+        // Act
+        var item = projection.ToTorznabItem(
+            new IntegrationIdentity(IntegrationType.Radarr, Guid.NewGuid()),
+            "key",
+            "http://localhost"
+        );
+
+        // Assert
+        item.Attributes.Where(x => x.Name == "category").Select(x => x.Value).ShouldBe(expectedCategories);
+    }
+
+    [Test]
+    public void ShouldKeepStableId_WhenMutableReleaseMetadataChanges()
+    {
+        // Arrange
+        var projection = CreateProjection();
+
+        // Act
+        var ids = new[]
+        {
+            projection.CreateStableId(),
+            (projection with { DataId = 999 }).CreateStableId(),
+            (projection with { Quality = VideoQuality.UHD_4K, Source = ReleaseSource.BluRay }).CreateStableId(),
+            (projection with { Title = "Renamed.mkv", GenreTypes = [PlexGenreType.Anime] }).CreateStableId(),
+        };
+
+        // Assert
+        ids.Distinct().ShouldHaveSingleItem();
+    }
+
+    [Test]
+    public void ShouldKeepPublicationDate_WhenMutableReleaseMetadataChanges()
+    {
+        // Arrange
+        var projection = CreateProjection();
+        var changed = projection with
+        {
+            Quality = VideoQuality.UHD_4K,
+            Source = ReleaseSource.BluRay,
+            Title = "Renamed.mkv",
+            GenreTypes = [PlexGenreType.Documentary],
+        };
+
+        // Act
+        var first = projection.ToTorznabItem(new IntegrationIdentity(IntegrationType.Radarr, Guid.NewGuid()), "key", "http://localhost");
+        var second = changed.ToTorznabItem(new IntegrationIdentity(IntegrationType.Radarr, Guid.NewGuid()), "key", "http://localhost");
+
+        // Assert
+        second.PubDate.ShouldBe(first.PubDate);
+        second.PubDate.ShouldBe(projection.AddedAt.ToString("R"));
+    }
+
     private static TorznabFeedItemProjection CreateProjection() =>
         new()
         {

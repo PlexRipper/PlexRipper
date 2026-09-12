@@ -141,6 +141,23 @@ public class TorznabEndpointIntegrationTests : BaseIntegrationTests
     public async Task ShouldReturnTorznabErrorXml_WhenAttributesAreMalformed() =>
         await AssertInvalidRequest("attrs=size%2Ccategory%21", 8668);
 
+    [Test]
+    public async Task ShouldReturnTorznabErrorXml_WhenSeasonIsNegative() =>
+        await AssertInvalidRequest("t=tvsearch&season=-1", 8670);
+
+    [Test]
+    public async Task ShouldReturnTorznabErrorXml_WhenEpisodeIsNegative() =>
+        await AssertInvalidRequest("t=tvsearch&ep=-1", 8671);
+
+    [Test]
+    public async Task ShouldReturnTorznabErrorXml_WhenTvdbIdIsNegative() =>
+        await AssertInvalidRequest("t=tvsearch&tvdbid=-1", 8672);
+
+    [Test]
+    public async Task ShouldReturnTorznabErrorXml_WhenTmdbIdIsNegative() =>
+        await AssertInvalidRequest("t=movie&tmdbid=-1", 8673);
+
+
     private async Task<List<XElement>> GetRssItems(HttpClient client, string url)
     {
         var response = await client.GetAsync(url, CancellationToken);

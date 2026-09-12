@@ -24,7 +24,12 @@ public static class TorznabRequestMappers
 
     public static TorznabQueryType ParseType(string? value)
     {
-        if (Enum.TryParse<TorznabQueryType>(value, true, out var type) && Enum.IsDefined(type))
+        if (
+            !string.IsNullOrWhiteSpace(value)
+            && !int.TryParse(value, out _)
+            && Enum.TryParse<TorznabQueryType>(value, true, out var type)
+            && Enum.IsDefined(type)
+        )
             return type;
 
         _log.Here().Error("Received unknown Torznab request type: {Type}", value);

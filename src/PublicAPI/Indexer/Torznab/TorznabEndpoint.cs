@@ -10,10 +10,12 @@ public class TorznabEndpointRequestValidator : Validator<TorznabEndpointRequest>
         RuleFor(x => x.ApiKey).NotEmpty();
         RuleFor(x => x.Offset).GreaterThanOrEqualTo(0).When(x => x.Offset.HasValue);
         RuleFor(x => x.Limit).GreaterThanOrEqualTo(0).When(x => x.Limit.HasValue);
+        RuleFor(x => x.Season).GreaterThanOrEqualTo(0).When(x => x.Season.HasValue);
+        RuleFor(x => x.Episode).GreaterThanOrEqualTo(0).When(x => x.Episode.HasValue);
+        RuleFor(x => x.TvdbId).GreaterThanOrEqualTo(0).When(x => x.TvdbId.HasValue);
+        RuleFor(x => x.TmdbId).GreaterThanOrEqualTo(0).When(x => x.TmdbId.HasValue);
         RuleFor(x => x.Extended).Must(x => x is null or 0 or 1);
-        RuleFor(x => x.Attributes)
-            .Matches("^[a-zA-Z]+(,[a-zA-Z]+)*$")
-            .When(x => !string.IsNullOrEmpty(x.Attributes));
+        RuleFor(x => x.Attributes).Matches("^[a-zA-Z]+(,[a-zA-Z]+)*$").When(x => !string.IsNullOrEmpty(x.Attributes));
     }
 }
 
@@ -164,6 +166,9 @@ public sealed class TorznabEndpoint : Endpoint<TorznabEndpointRequest>
                 Offset = request.Offset,
                 Integration = integration,
                 TorznabApiKey = request.ApiKey,
+                Categories = request.Categories,
+                Attributes = request.Attributes,
+                IncludeAllAttributes = request.IncludeAllAttributes,
             },
             ct
         );
@@ -183,6 +188,9 @@ public sealed class TorznabEndpoint : Endpoint<TorznabEndpointRequest>
                 Offset = request.Offset,
                 Integration = integration,
                 TorznabApiKey = request.ApiKey,
+                Categories = request.Categories,
+                Attributes = request.Attributes,
+                IncludeAllAttributes = request.IncludeAllAttributes,
             },
             ct
         );
@@ -199,27 +207,31 @@ public sealed class TorznabEndpoint : Endpoint<TorznabEndpointRequest>
         var items = new List<TorznabItem>();
         var failures = new List<IError>();
         var successfulSearches = 0;
+        var total = 0;
+        var branchRequest = request with { Offset = 0, Limit = request.Offset + request.Limit };
 
         if (request.IncludesEpisodes)
         {
-            var tvResult = await SearchTvAsync(request with { Season = 0, Episode = 0 }, integration, ct);
+            var tvResult = await SearchTvAsync(branchRequest with { Season = 0, Episode = 0 }, integration, ct);
             if (tvResult.IsFailed)
                 failures.AddRange(tvResult.Errors);
             else
             {
                 successfulSearches++;
+                total += tvResult.Value.Channel.Response.Total;
                 items.AddRange(tvResult.Value.Channel.Items);
             }
         }
 
         if (request.IncludesMovies)
         {
-            var movieResult = await SearchMovieAsync(request, integration, ct);
+            var movieResult = await SearchMovieAsync(branchRequest, integration, ct);
             if (movieResult.IsFailed)
                 failures.AddRange(movieResult.Errors);
             else
             {
                 successfulSearches++;
+                total += movieResult.Value.Channel.Response.Total;
                 items.AddRange(movieResult.Value.Channel.Items);
             }
         }
@@ -237,7 +249,8 @@ public sealed class TorznabEndpoint : Endpoint<TorznabEndpointRequest>
                 {
                     Title = "Reaparr Indexer",
                     Description = $"Search results for {request.Query}",
-                    Items = items.Take(request.Limit).ToList(),
+                    Items = items.Skip(request.Offset).Take(request.Limit).ToList(),
+                    Response = new TorznabResponseMetadata { Offset = request.Offset, Total = total },
                 },
             }
         );

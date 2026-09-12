@@ -29,7 +29,7 @@ public class TorznabRequestUnitTests
         request.Limit.ShouldBe(100);
         request.Offset.ShouldBe(0);
         request.Categories.ShouldBe([5030]);
-        request.IsRssSync.ShouldBeFalse();
+        request.Mode.ShouldBe(TorznabRequestMode.ActiveSearch);
     }
 
     [Test]
@@ -59,5 +59,28 @@ public class TorznabRequestUnitTests
 
         // Assert
         endpointRequest.ParsedType.ShouldBe(TorznabQueryType.Unknown);
+    }
+
+    [Test]
+    public void ShouldDeriveRssMediaTypesFromQueryTypeAndCategories()
+    {
+        // Arrange
+        var movieEndpointRequest = new TorznabEndpointRequest { Type = "movie", ApiKey = "key" };
+        var tvEndpointRequest = new TorznabEndpointRequest { Type = "tvsearch", ApiKey = "key" };
+        var mixedEndpointRequest = new TorznabEndpointRequest { Type = "search", ApiKey = "key" };
+
+        // Act
+        var movie = movieEndpointRequest.ToTorznabRequest();
+        var tv = tvEndpointRequest.ToTorznabRequest();
+        var mixed = mixedEndpointRequest.ToTorznabRequest();
+
+        // Assert
+        movie.Mode.ShouldBe(TorznabRequestMode.Rss);
+        movie.IncludesMovies.ShouldBeTrue();
+        movie.IncludesEpisodes.ShouldBeFalse();
+        tv.IncludesMovies.ShouldBeFalse();
+        tv.IncludesEpisodes.ShouldBeTrue();
+        mixed.IncludesMovies.ShouldBeTrue();
+        mixed.IncludesEpisodes.ShouldBeTrue();
     }
 }

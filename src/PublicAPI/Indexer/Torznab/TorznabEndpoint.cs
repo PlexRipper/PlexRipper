@@ -8,6 +8,8 @@ public class TorznabEndpointRequestValidator : Validator<TorznabEndpointRequest>
     {
         RuleFor(x => x.ParsedType).NotEqual(TorznabQueryType.Unknown);
         RuleFor(x => x.ApiKey).NotEmpty();
+        RuleFor(x => x.Offset).GreaterThanOrEqualTo(0).When(x => x.Offset.HasValue);
+        RuleFor(x => x.Limit).GreaterThanOrEqualTo(0).When(x => x.Limit.HasValue);
     }
 }
 
@@ -35,6 +37,7 @@ public sealed class TorznabEndpoint : Endpoint<TorznabEndpointRequest>
         });
         AllowAnonymous();
         PreProcessor<IndexerAuthenticationPreProcessor<TorznabEndpointRequest>>();
+        DontThrowIfValidationFails();
     }
 
     public override async Task HandleAsync(TorznabEndpointRequest endpointRequest, CancellationToken ct)
@@ -42,6 +45,12 @@ public sealed class TorznabEndpoint : Endpoint<TorznabEndpointRequest>
         _log.Here().DebugApiCall(HttpContext, endpointRequest);
         var integration = HttpContext.GetIntegrationIdentity();
         var request = endpointRequest.ToTorznabRequest();
+
+        if (ValidationFailed)
+        {
+            await Send.TorznabError(201, "Incorrect parameter", ct);
+            return;
+        }
 
         switch (request.Mode)
         {
@@ -55,7 +64,7 @@ public sealed class TorznabEndpoint : Endpoint<TorznabEndpointRequest>
                 await SendMediaResultAsync(await SearchAsync(request, integration, ct), ct);
                 break;
             default:
-                await Send.ErrorsAsync(cancellation: ct);
+                await Send.TorznabError(201, "Incorrect parameter", ct);
                 break;
         }
     }
@@ -63,9 +72,17 @@ public sealed class TorznabEndpoint : Endpoint<TorznabEndpointRequest>
     private async Task SendCapabilitiesAsync(CancellationToken ct)
     {
         var result = await _commandExecutor.Send(new GetCapabilitiesCommand(), ct);
+        result.LogIfFailed();
+
+        if (result.IsCancelled)
+        {
+            await Send.TorznabError(900, "Indexer request cancelled", ct);
+            return;
+        }
+
         if (result.IsFailed)
         {
-            await Send.ErrorsAsync(cancellation: ct);
+            await Send.TorznabError(900, "Indexer request failed", ct);
             return;
         }
 
@@ -74,9 +91,17 @@ public sealed class TorznabEndpoint : Endpoint<TorznabEndpointRequest>
 
     private async Task SendMediaResultAsync(Result<TorznabMediaSearchResponseDTO> result, CancellationToken ct)
     {
+        result.LogIfFailed();
+
+        if (result.IsCancelled)
+        {
+            await Send.TorznabError(900, "Indexer request cancelled", ct);
+            return;
+        }
+
         if (result.IsFailed)
         {
-            await Send.ErrorsAsync(cancellation: ct);
+            await Send.TorznabError(900, "Indexer request failed", ct);
             return;
         }
 

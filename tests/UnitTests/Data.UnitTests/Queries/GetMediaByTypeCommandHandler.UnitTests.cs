@@ -2469,7 +2469,7 @@ public class GetMediaByTypeCommandHandlerUnitTests : BaseUnitTest<GetMediaByType
         var countryOnlyMovie = movies[2];
         var actorOnlyMovie = movies[3];
 
-        var genre = new PlexGenre { Name = "Regression Genre", Key = "regression-genre" };
+        var genre = new PlexGenre { Name = "Regression Genre", Key = "regression-genre", Type = PlexGenreType.Unknown };
         var country = new PlexCountry { Name = "Regression Country", Key = "regression-country" };
         var actor = new PlexActor { Name = "Regression Actor", Key = "regression-actor" };
 

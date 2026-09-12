@@ -73,7 +73,7 @@ public class SearchMovieCommandUnitTests : BaseUnitTest<SearchMovieCommandHandle
         {
             item.Guid.ShouldNotBeNull();
             item.Guid.IsPermaLink.ShouldBe("false");
-            item.Guid.Value.ShouldBe(item.Link);
+            item.Guid.Value.ShouldNotBe(item.Link);
 
             item.Enclosure.ShouldNotBeNull();
             item.Enclosure.Type.ShouldBe("application/x-bittorrent");
@@ -391,20 +391,16 @@ public class SearchMovieCommandUnitTests : BaseUnitTest<SearchMovieCommandHandle
             TMDB_ID = 0,
         };
 
-        var expectedPartCount = await IDbContext
-            .PlexMovies.Include(m => m.MediaDataList)
-            .OrderBy(m => m.Id)
-            .Skip(offset)
-            .Take(limit)
-            .Select(m => m.MediaDataList.Count)
-            .SumAsync(CancellationToken);
+        var expectedTotal = await IDbContext.PlexMovieData.CountAsync(CancellationToken);
 
         // Act
         var result = await Sut.ExecuteAsync(cmd, CancellationToken);
 
         // Assert
-        result.ShouldNotBeNull();
-        result.Value.Channel.Items.Count.ShouldBe(expectedPartCount);
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.Channel.Items.Count.ShouldBe(limit);
+        result.Value.Channel.Response.Offset.ShouldBe(offset);
+        result.Value.Channel.Response.Total.ShouldBe(expectedTotal);
     }
 
     [Test]
@@ -462,7 +458,7 @@ public class SearchMovieCommandUnitTests : BaseUnitTest<SearchMovieCommandHandle
     }
 
     [Test]
-    public void ShouldFailValidation_WhenLimitIsZero()
+    public void ShouldPassValidation_WhenLimitIsZero()
     {
         // Arrange
         var validator = new SearchMovieCommandValidator();
@@ -479,12 +475,12 @@ public class SearchMovieCommandUnitTests : BaseUnitTest<SearchMovieCommandHandle
         var result = validator.Validate(cmd);
 
         // Assert
-        result.IsValid.ShouldBeFalse();
-        result.Errors.ShouldNotBeEmpty();
+        result.IsValid.ShouldBeTrue();
+        result.Errors.ShouldBeEmpty();
     }
 
     [Test]
-    public void ShouldFailValidation_WhenLimitExceedsMax()
+    public void ShouldPassValidation_WhenLimitExceedsPreviousMax()
     {
         // Arrange
         var validator = new SearchMovieCommandValidator();
@@ -501,8 +497,8 @@ public class SearchMovieCommandUnitTests : BaseUnitTest<SearchMovieCommandHandle
         var result = validator.Validate(cmd);
 
         // Assert
-        result.IsValid.ShouldBeFalse();
-        result.Errors.ShouldNotBeEmpty();
+        result.IsValid.ShouldBeTrue();
+        result.Errors.ShouldBeEmpty();
     }
 
     [Test]

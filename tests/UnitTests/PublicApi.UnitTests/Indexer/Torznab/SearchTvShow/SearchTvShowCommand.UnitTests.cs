@@ -71,7 +71,7 @@ public class SearchTvShowCommandUnitTests : BaseUnitTest<SearchTvShowCommandHand
         {
             item.Guid.ShouldNotBeNull();
             item.Guid.IsPermaLink.ShouldBe("false");
-            item.Guid.Value.ShouldBe(item.Link);
+            item.Guid.Value.ShouldNotBe(item.Link);
 
             item.Enclosure.ShouldNotBeNull();
             item.Enclosure.Type.ShouldBe("application/x-bittorrent");

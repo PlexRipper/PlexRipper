@@ -1,5 +1,4 @@
 using System.Diagnostics.CodeAnalysis;
-using Flurl;
 using Reaparr.Application.Contracts;
 using Reaparr.Environment;
 
@@ -105,7 +104,8 @@ public class SearchMovieCommandHandler : ICommandHandler<SearchMovieCommand, Res
 
         // Base query with required navigation properties for mapping
         var baseQuery = _dbContext
-            .PlexMovies.Include(x => x.MediaDataList)
+            .PlexMovies.Include(x => x.PlexServer)
+            .Include(x => x.MediaDataList)
             .Where(x => onlineServerIds.Contains(x.PlexServerId))
             .WhereHasPlexAccountAccess()
             .AsQueryable();
@@ -148,72 +148,38 @@ public class SearchMovieCommandHandler : ICommandHandler<SearchMovieCommand, Res
 
     private IEnumerable<TorznabItem> MapMovieToItems(PlexMovie movie, SearchMovieCommand command)
     {
-        foreach (var mediaData in movie.MediaDataList.OrderBy(md => md.PlexApiPartId))
+        foreach (var mediaData in movie.MediaDataList.OrderBy(x => x.PlexApiPartId))
         {
-            var torrentMetadata = new TorrentMetadataDTO
+            yield return new TorznabFeedItemProjection
             {
-                Type = PlexMediaType.Movie,
+                MediaType = PlexMediaType.Movie,
                 MediaId = movie.Id,
                 DataId = mediaData.Id,
-                PartId = mediaData.Id, // TODO: Media and Parts are merged in the same DB table, PartId can be removed
+                PlexServerId = mediaData.PlexServerId,
+                PlexServerMachineIdentifier = movie.PlexServer!.MachineIdentifier,
+                PlexLibraryId = mediaData.PlexLibraryId,
+                PlexApiRatingKey = mediaData.PlexApiRatingKey,
+                PlexApiMediaId = mediaData.PlexApiMediaId,
                 PlexApiPartId = mediaData.PlexApiPartId,
-                Quality = mediaData.Quality,
-                LibraryId = mediaData.PlexLibraryId,
-                ServerId = mediaData.PlexServerId,
-            };
-
-            // FORCE this to be a string, and not an implicit URL type by Flurl
-            // ReSharper disable once SuggestVarOrType_BuiltInTypes
-            string torrentDownloadUrl = _networkSettings
-                .Url.AppendPathSegment(
-                    PublicApiRoutes.DownloadTorrent.Replace("{integrationId:guid}", command.Integration.Id.ToString())
-                )
-                .SetQueryParams(torrentMetadata.Values)
-                .SetQueryParam(IntegrationDefinitions.INDEXER_API_KEY, command.TorznabApiKey, isEncoded: false);
-
-            var item = new TorznabItem
-            {
                 Title = mediaData.GetFileName,
-                PubDate = movie.AddedAt.ToString("R"),
-                Guid = new TorznabGuid { Value = torrentDownloadUrl },
-                Link = torrentDownloadUrl,
+                AddedAt = movie.AddedAt,
                 Size = mediaData.Size,
-                Enclosure = new TorznabEnclosure
-                {
-                    Url = torrentDownloadUrl,
-                    Length = mediaData.Size,
-                    Type = "application/x-bittorrent",
-                },
-            };
-
-            var count = MemeNumberGenerator.GetRandomMemeNumber().ToString();
-            item.Attributes.Add(new TorznabAttr("seeders", count));
-            item.Attributes.Add(new TorznabAttr("peers", count));
-            item.Attributes.Add(new TorznabAttr("type", "movie"));
-            item.Attributes.Add(new TorznabAttr("language", "English"));
-            item.Attributes.Add(new TorznabAttr("downloadvolumefactor", "0.0"));
-
-            item.Attributes.Add(new TorznabAttr("category", mediaData.ToTorznabMovieCategory().ToString()));
-            item.Attributes.Add(new TorznabAttr("resolution", mediaData.VideoResolution.ToResolutionLabel()));
-            item.Attributes.Add(new TorznabAttr("source", mediaData.Source.ToEnumMemberValue()));
-            item.Attributes.Add(new TorznabAttr("videoCodec", mediaData.VideoCodec));
-            item.Attributes.Add(new TorznabAttr("audioCodec", mediaData.AudioCodec));
-
-            if (_appRuntimeInfo.IsDevelopmentEnvironment)
-            {
-                item.Attributes.Add(new TorznabAttr("debug-plexServerId", mediaData.PlexServerId.ToString()));
-                item.Attributes.Add(new TorznabAttr("debug-plexLibraryId", mediaData.PlexLibraryId.ToString()));
-                item.Attributes.Add(new TorznabAttr("debug-plexApiMediaId", mediaData.PlexApiMediaId.ToString()));
-                item.Attributes.Add(new TorznabAttr("debug-ratingKey", mediaData.PlexApiRatingKey.ToString()));
-            }
-
-            if (movie.Guid_TMDB is not null)
-                item.Attributes.Add(new TorznabAttr("tmdbid", movie.Guid_TMDB.Value.ToString()));
-
-            if (!string.IsNullOrEmpty(movie.Guid_IMDB))
-                item.Attributes.Add(new TorznabAttr("imdb", movie.Guid_IMDB));
-
-            yield return item;
+                Quality = mediaData.Quality,
+                VideoResolution = mediaData.VideoResolution,
+                Source = mediaData.Source,
+                VideoCodec = mediaData.VideoCodec,
+                AudioCodec = mediaData.AudioCodec,
+                TmdbId = movie.Guid_TMDB,
+                ImdbId = movie.Guid_IMDB,
+                SeasonNumber = 0,
+                EpisodeNumber = 0,
+                TvdbId = 0,
+            }.ToTorznabItem(
+                command.Integration,
+                command.TorznabApiKey,
+                _networkSettings.Url,
+                _appRuntimeInfo.IsDevelopmentEnvironment
+            );
         }
     }
 }

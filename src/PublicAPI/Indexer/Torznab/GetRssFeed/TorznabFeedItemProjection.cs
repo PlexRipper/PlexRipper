@@ -24,11 +24,11 @@ public sealed record TorznabFeedItemProjection
     public required ReleaseSource Source { get; init; }
     public required string VideoCodec { get; init; }
     public required string AudioCodec { get; init; }
-    public int? SeasonNumber { get; init; }
-    public int? EpisodeNumber { get; init; }
-    public int? TvdbId { get; init; }
-    public int? TmdbId { get; init; }
-    public string? ImdbId { get; init; }
+    public required int? SeasonNumber { get; init; }
+    public required int? EpisodeNumber { get; init; }
+    public required int? TvdbId { get; init; }
+    public required int? TmdbId { get; init; }
+    public required string? ImdbId { get; init; }
 
     public string CreateStableId()
     {
@@ -39,7 +39,12 @@ public sealed record TorznabFeedItemProjection
         return "reaparr-" + Convert.ToHexStringLower(SHA256.HashData(Encoding.UTF8.GetBytes(identity)));
     }
 
-    public TorznabItem ToTorznabItem(IntegrationIdentity integration, string torznabApiKey, string baseUrl)
+    public TorznabItem ToTorznabItem(
+        IntegrationIdentity integration,
+        string torznabApiKey,
+        string baseUrl,
+        bool includeDebugAttributes = false
+    )
     {
         var torrentMetadata = new TorrentMetadataDTO
         {
@@ -94,6 +99,14 @@ public sealed record TorznabFeedItemProjection
 
         if (!string.IsNullOrEmpty(ImdbId))
             item.Attributes.Add(new TorznabAttr("imdb", ImdbId));
+
+        if (includeDebugAttributes)
+        {
+            item.Attributes.Add(new TorznabAttr("debug-plexServerId", PlexServerId.ToString()));
+            item.Attributes.Add(new TorznabAttr("debug-plexLibraryId", PlexLibraryId.ToString()));
+            item.Attributes.Add(new TorznabAttr("debug-plexApiMediaId", PlexApiMediaId.ToString()));
+            item.Attributes.Add(new TorznabAttr("debug-ratingKey", PlexApiRatingKey.ToString()));
+        }
 
         return item;
     }

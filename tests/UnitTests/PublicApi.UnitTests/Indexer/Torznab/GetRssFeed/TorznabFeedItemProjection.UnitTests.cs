@@ -37,7 +37,12 @@ public class TorznabFeedItemProjectionUnitTests
         var ids = new[]
         {
             projection.CreateStableId(),
-            (projection with { PlexServerMachineIdentifier = "444f1d4d82d020fa33821f80578c574f155cf14a" }).CreateStableId(),
+            (
+                projection with
+                {
+                    PlexServerMachineIdentifier = "444f1d4d82d020fa33821f80578c574f155cf14a",
+                }
+            ).CreateStableId(),
             (projection with { MediaType = PlexMediaType.Episode }).CreateStableId(),
             (projection with { PlexApiRatingKey = projection.PlexApiRatingKey + 1 }).CreateStableId(),
             (projection with { PlexApiMediaId = projection.PlexApiMediaId + 1 }).CreateStableId(),
@@ -94,5 +99,10 @@ public class TorznabFeedItemProjectionUnitTests
             Source = ReleaseSource.WebDl,
             VideoCodec = "h264",
             AudioCodec = "aac",
+            SeasonNumber = 0,
+            EpisodeNumber = 0,
+            TvdbId = 0,
+            TmdbId = 0,
+            ImdbId = string.Empty,
         };
 }

@@ -1,5 +1,4 @@
 using System.Diagnostics.CodeAnalysis;
-using Flurl;
 using Reaparr.Application.Contracts;
 
 // ReSharper disable InconsistentNaming
@@ -135,6 +134,7 @@ public class SearchTvShowCommandHandler : ICommandHandler<SearchTvShowCommand, R
             .PlexTvShowEpisodes.AsNoTracking()
             .Include(x => x.TvShowSeason)
             .Include(x => x.TvShow)
+                .ThenInclude(x => x!.PlexServer)
             .Include(e => e.MediaDataList)
             .Where(x => onlineServerIds.Contains(x.PlexServerId))
             .WhereHasPlexAccountAccess()
@@ -199,62 +199,33 @@ public class SearchTvShowCommandHandler : ICommandHandler<SearchTvShowCommand, R
             yield break;
         }
 
-        foreach (var mediaData in episode.MediaDataList)
+        foreach (var mediaData in episode.MediaDataList.OrderBy(x => x.PlexApiPartId))
         {
-            var torrentMetadata = new TorrentMetadataDTO
+            yield return new TorznabFeedItemProjection
             {
-                Type = PlexMediaType.Episode,
+                MediaType = PlexMediaType.Episode,
                 MediaId = episode.Id,
                 DataId = mediaData.Id,
-                PartId = mediaData.Id, // TODO: Media and Parts are merged in the same DB table, PartId can be removed
+                PlexServerId = mediaData.PlexServerId,
+                PlexServerMachineIdentifier = tvShow.PlexServer!.MachineIdentifier,
+                PlexLibraryId = mediaData.PlexLibraryId,
+                PlexApiRatingKey = mediaData.PlexApiRatingKey,
+                PlexApiMediaId = mediaData.PlexApiMediaId,
                 PlexApiPartId = mediaData.PlexApiPartId,
-                Quality = mediaData.Quality,
-                LibraryId = mediaData.PlexLibraryId,
-                ServerId = mediaData.PlexServerId,
-            };
-
-            // FORCE this to be a string, and not an implicit URL type by Flurl
-            // ReSharper disable once SuggestVarOrType_BuiltInTypes
-            string torrentDownloadUrl = _networkSettings
-                .Url.AppendPathSegment(
-                    PublicApiRoutes.DownloadTorrent.Replace("{integrationId:guid}", command.Integration.Id.ToString())
-                )
-                .SetQueryParams(torrentMetadata.Values)
-                .SetQueryParam(IntegrationDefinitions.INDEXER_API_KEY, command.TorznabApiKey, isEncoded: false);
-
-            var item = new TorznabItem
-            {
                 Title = mediaData.GetFileName,
-                PubDate = episode.AddedAt.ToString("R"),
-                Guid = new TorznabGuid { Value = torrentDownloadUrl },
-                Link = torrentDownloadUrl,
+                AddedAt = episode.AddedAt,
                 Size = mediaData.Size,
-                Enclosure = new TorznabEnclosure
-                {
-                    Url = torrentDownloadUrl,
-                    Length = mediaData.Size,
-                    Type = "application/x-bittorrent",
-                },
-            };
-            var count = MemeNumberGenerator.GetRandomMemeNumber().ToString();
-            item.Attributes.Add(new TorznabAttr("seeders", count));
-            item.Attributes.Add(new TorznabAttr("peers", count));
-            item.Attributes.Add(new TorznabAttr("season", season.SeasonNumber.ToString()));
-            item.Attributes.Add(new TorznabAttr("episode", episode.EpisodeNumber.ToString()));
-            item.Attributes.Add(new TorznabAttr("type", "series"));
-            item.Attributes.Add(new TorznabAttr("language", "English"));
-            item.Attributes.Add(new TorznabAttr("downloadvolumefactor", "0.0"));
-
-            if (tvShow.Guid_TVDB is not null)
-                item.Attributes.Add(new TorznabAttr("tvdbid", tvShow.Guid_TVDB.Value.ToString()));
-
-            if (tvShow.Guid_TMDB is not null)
-                item.Attributes.Add(new TorznabAttr("tmdbid", tvShow.Guid_TMDB.Value.ToString()));
-
-            if (!string.IsNullOrEmpty(tvShow.Guid_IMDB))
-                item.Attributes.Add(new TorznabAttr("imdb", tvShow.Guid_IMDB));
-
-            yield return item;
+                Quality = mediaData.Quality,
+                VideoResolution = mediaData.VideoResolution,
+                Source = mediaData.Source,
+                VideoCodec = mediaData.VideoCodec,
+                AudioCodec = mediaData.AudioCodec,
+                SeasonNumber = season.SeasonNumber,
+                EpisodeNumber = episode.EpisodeNumber,
+                TvdbId = tvShow.Guid_TVDB,
+                TmdbId = tvShow.Guid_TMDB,
+                ImdbId = tvShow.Guid_IMDB,
+            }.ToTorznabItem(command.Integration, command.TorznabApiKey, _networkSettings.Url);
         }
     }
 }

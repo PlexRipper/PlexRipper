@@ -136,6 +136,8 @@ public class SearchTvShowCommandHandler : ICommandHandler<SearchTvShowCommand, R
             .Include(x => x.TvShow)
                 .ThenInclude(x => x!.PlexServer)
             .Include(e => e.MediaDataList)
+            .Include(e => e.TvShow!)
+                .ThenInclude(x => x.Genres)
             .Where(x => onlineServerIds.Contains(x.PlexServerId))
             .WhereHasPlexAccountAccess()
             .AsQueryable();
@@ -225,6 +227,7 @@ public class SearchTvShowCommandHandler : ICommandHandler<SearchTvShowCommand, R
                 TvdbId = tvShow.Guid_TVDB,
                 TmdbId = tvShow.Guid_TMDB,
                 ImdbId = tvShow.Guid_IMDB,
+                GenreTypes = tvShow.Genres.Select(genre => genre.Type).ToHashSet(),
             }.ToTorznabItem(command.Integration, command.TorznabApiKey, _networkSettings.Url);
         }
     }

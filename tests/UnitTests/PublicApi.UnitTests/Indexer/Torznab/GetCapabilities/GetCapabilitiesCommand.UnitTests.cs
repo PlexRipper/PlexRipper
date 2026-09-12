@@ -25,20 +25,25 @@ public class GetCapabilitiesCommandUnitTests : BaseCommandUnitTest<GetCapabiliti
         xml.ShouldContain("<searching>");
         xml.ShouldContain("<categories>");
         result.Value.Categories.Select(x => x.Id).ShouldBe([
-            2000, 2030, 2040, 2045, 2050, 2070,
-            5000, 5030, 5040, 5045,
+            2000, 2010, 2030, 2040, 2045, 2050, 2070,
+            5000, 5020, 5030, 5040, 5045, 5060, 5070, 5080,
         ]);
         result.Value.Categories.Select(x => x.Name).ShouldBe([
             "Movies",
+            "Movies/Foreign",
             "Movies/SD",
             "Movies/HD",
             "Movies/UHD",
             "Movies/BluRay",
             "Movies/WEBDL",
             "TV",
+            "TV/Foreign",
             "TV/SD",
             "TV/HD",
             "TV/UHD",
+            "TV/Sport",
+            "TV/Anime",
+            "TV/Documentary",
         ]);
         xml.ShouldNotContain("<torznab:attributes");
         xml.ShouldNotContain("<attributes");

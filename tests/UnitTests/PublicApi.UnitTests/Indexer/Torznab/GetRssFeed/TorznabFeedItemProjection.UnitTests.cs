@@ -79,6 +79,73 @@ public class TorznabFeedItemProjectionUnitTests
         alternateCultureId.ShouldBe(invariantId);
     }
 
+    [Test]
+    public void ShouldEmitNumericParentAndSubcategoryAttributes()
+    {
+        // Arrange
+        var projection = CreateProjection() with { GenreTypes = [PlexGenreType.Foreign] };
+
+        // Act
+        var item = projection.ToTorznabItem(
+            new IntegrationIdentity(IntegrationType.Radarr, Guid.NewGuid()),
+            "key",
+            "http://localhost"
+        );
+
+        // Assert
+        item.Attributes.Where(x => x.Name == "category").Select(x => x.Value).ShouldBe(["2000", "2040", "2010", "2070"]);
+    }
+
+    [Test]
+    public void ShouldEmitAllMatchingTvGenreCategories()
+    {
+        // Arrange
+        var projection = CreateProjection() with
+        {
+            MediaType = PlexMediaType.Episode,
+            GenreTypes =
+            [
+                PlexGenreType.Foreign,
+                PlexGenreType.Anime,
+                PlexGenreType.Documentary,
+                PlexGenreType.Sport,
+            ],
+        };
+
+        // Act
+        var item = projection.ToTorznabItem(
+            new IntegrationIdentity(IntegrationType.Sonarr, Guid.NewGuid()),
+            "key",
+            "http://localhost"
+        );
+
+        // Assert
+        item.Attributes.Where(x => x.Name == "category").Select(x => x.Value).ShouldBe([
+            "5000", "5040", "5020", "5060", "5070", "5080",
+        ]);
+    }
+
+    [Test]
+    public void ShouldIgnoreUnknownAndGroupGenreTypes()
+    {
+        // Arrange
+        var projection = CreateProjection() with
+        {
+            MediaType = PlexMediaType.Episode,
+            GenreTypes = [PlexGenreType.Unknown, PlexGenreType.Group],
+        };
+
+        // Act
+        var item = projection.ToTorznabItem(
+            new IntegrationIdentity(IntegrationType.Sonarr, Guid.NewGuid()),
+            "key",
+            "http://localhost"
+        );
+
+        // Assert
+        item.Attributes.Where(x => x.Name == "category").Select(x => x.Value).ShouldBe(["5000", "5040"]);
+    }
+
     private static TorznabFeedItemProjection CreateProjection() =>
         new()
         {
@@ -104,5 +171,6 @@ public class TorznabFeedItemProjectionUnitTests
             TvdbId = 0,
             TmdbId = 0,
             ImdbId = string.Empty,
+            GenreTypes = [],
         };
 }

@@ -29,6 +29,7 @@ public sealed record TorznabFeedItemProjection
     public required int? TvdbId { get; init; }
     public required int? TmdbId { get; init; }
     public required string? ImdbId { get; init; }
+    public required IReadOnlyCollection<PlexGenreType> GenreTypes { get; init; }
 
     public string CreateStableId()
     {
@@ -64,8 +65,7 @@ public sealed record TorznabFeedItemProjection
             )
             .SetQueryParams(torrentMetadata.Values)
             .SetQueryParam(IntegrationDefinitions.INDEXER_API_KEY, torznabApiKey, isEncoded: false);
-        var category =
-            MediaType == PlexMediaType.Movie ? this.ToTorznabMovieCategory() : this.ToTorznabEpisodeCategory();
+        var categories = this.ToTorznabCategories();
         var item = new TorznabItem
         {
             Title = Title,
@@ -82,7 +82,8 @@ public sealed record TorznabFeedItemProjection
         };
 
         item.Attributes.Add(new TorznabAttr("size", Size.ToString()));
-        item.Attributes.Add(new TorznabAttr("category", category.ToString()));
+        foreach (var category in categories)
+            item.Attributes.Add(new TorznabAttr("category", ((int)category).ToString()));
         item.Attributes.Add(new TorznabAttr("seeders", "1"));
         item.Attributes.Add(new TorznabAttr("peers", "1"));
         item.Attributes.Add(new TorznabAttr("type", MediaType == PlexMediaType.Movie ? "movie" : "series"));

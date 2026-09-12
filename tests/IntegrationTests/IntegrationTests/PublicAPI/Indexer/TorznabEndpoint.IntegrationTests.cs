@@ -74,7 +74,9 @@ public class TorznabEndpointIntegrationTests : BaseIntegrationTests
             guid.Value.ShouldStartWith("reaparr-");
             guid.Value.ShouldNotBe(link);
             attributes.Single(x => x.Attribute("name")!.Value == "size").Attribute("value")!.Value.ShouldBe(size.ToString());
-            attributes.Single(x => x.Attribute("name")!.Value == "category").Attribute("value")!.Value.ShouldNotBeEmpty();
+            var categories = attributes.Where(x => x.Attribute("name")!.Value == "category").ToList();
+            categories.Count.ShouldBeGreaterThanOrEqualTo(2);
+            categories.All(x => int.TryParse(x.Attribute("value")!.Value, out _)).ShouldBeTrue();
             enclosure.ShouldNotBeNull();
             enclosure.Attribute("url")!.Value.ShouldBe(link);
             enclosure.Attribute("length")!.Value.ShouldBe(size.ToString());

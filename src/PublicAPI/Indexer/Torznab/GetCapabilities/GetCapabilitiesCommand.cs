@@ -42,6 +42,7 @@ public class GetCapabilitiesCommandHandler : ICommandHandler<GetCapabilitiesComm
             [
                 // Movies
                 new TorznabCategory((int)TorznabCategoryId.Movies, "Movies"),
+                new TorznabCategory((int)TorznabCategoryId.Movies_Foreign, "Movies/Foreign"),
                 new TorznabCategory((int)TorznabCategoryId.Movies_SD, "Movies/SD"),
                 new TorznabCategory((int)TorznabCategoryId.Movies_HD, "Movies/HD"),
                 new TorznabCategory((int)TorznabCategoryId.Movies_UHD, "Movies/UHD"),
@@ -49,12 +50,13 @@ public class GetCapabilitiesCommandHandler : ICommandHandler<GetCapabilitiesComm
                 new TorznabCategory((int)TorznabCategoryId.Movies_WEBDL, "Movies/WEBDL"),
                 // TV
                 new TorznabCategory((int)TorznabCategoryId.TV, "TV"),
+                new TorznabCategory((int)TorznabCategoryId.TV_Foreign, "TV/Foreign"),
                 new TorznabCategory((int)TorznabCategoryId.TV_SD, "TV/SD"),
                 new TorznabCategory((int)TorznabCategoryId.TV_HD, "TV/HD"),
                 new TorznabCategory((int)TorznabCategoryId.TV_UHD, "TV/UHD"),
+                new TorznabCategory((int)TorznabCategoryId.TV_Sport, "TV/Sport"),
                 new TorznabCategory((int)TorznabCategoryId.TV_Anime, "TV/Anime"),
                 new TorznabCategory((int)TorznabCategoryId.TV_Documentary, "TV/Documentary"),
-                new TorznabCategory((int)TorznabCategoryId.TV_Foreign, "TV/Foreign"),
             ],
         };
 

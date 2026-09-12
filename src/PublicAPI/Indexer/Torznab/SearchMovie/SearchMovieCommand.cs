@@ -106,6 +106,7 @@ public class SearchMovieCommandHandler : ICommandHandler<SearchMovieCommand, Res
         var baseQuery = _dbContext
             .PlexMovies.Include(x => x.PlexServer)
             .Include(x => x.MediaDataList)
+            .Include(x => x.Genres)
             .Where(x => onlineServerIds.Contains(x.PlexServerId))
             .WhereHasPlexAccountAccess()
             .AsQueryable();
@@ -174,6 +175,7 @@ public class SearchMovieCommandHandler : ICommandHandler<SearchMovieCommand, Res
                 SeasonNumber = 0,
                 EpisodeNumber = 0,
                 TvdbId = 0,
+                GenreTypes = movie.Genres.Select(genre => genre.Type).ToHashSet(),
             }.ToTorznabItem(
                 command.Integration,
                 command.TorznabApiKey,

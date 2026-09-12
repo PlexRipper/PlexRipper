@@ -15,15 +15,23 @@ public static class IntegrationDefinitions
 
     public static IReadOnlyList<TorznabCategoryId> SupportedTorznabCategories { get; } =
     [
+        // Movies
         TorznabCategoryId.Movies,
+        TorznabCategoryId.Movies_Foreign,
         TorznabCategoryId.Movies_SD,
         TorznabCategoryId.Movies_HD,
         TorznabCategoryId.Movies_UHD,
         TorznabCategoryId.Movies_BluRay,
         TorznabCategoryId.Movies_WEBDL,
+
+        // TV
         TorznabCategoryId.TV,
+        TorznabCategoryId.TV_Foreign,
         TorznabCategoryId.TV_SD,
         TorznabCategoryId.TV_HD,
         TorznabCategoryId.TV_UHD,
+        TorznabCategoryId.TV_Sport,
+        TorznabCategoryId.TV_Anime,
+        TorznabCategoryId.TV_Documentary,
     ];
 }

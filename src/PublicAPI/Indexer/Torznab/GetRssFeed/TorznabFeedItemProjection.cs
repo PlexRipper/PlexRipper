@@ -32,13 +32,9 @@ public sealed record TorznabFeedItemProjection
 
     public string CreateStableId()
     {
-        var identity = string.Join(
-            ':',
-            PlexServerMachineIdentifier,
-            MediaType,
-            PlexApiRatingKey,
-            PlexApiMediaId,
-            PlexApiPartId
+        const string identityVersion = "v1";
+        var identity = FormattableString.Invariant(
+            $"{identityVersion}:{PlexServerMachineIdentifier}:{(int)MediaType}:{PlexApiRatingKey}:{PlexApiMediaId}:{PlexApiPartId}"
         );
         return "reaparr-" + Convert.ToHexStringLower(SHA256.HashData(Encoding.UTF8.GetBytes(identity)));
     }

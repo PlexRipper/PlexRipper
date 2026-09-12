@@ -9,6 +9,8 @@ public record TorznabEndpointRequest
     [QueryParam, BindFrom("t")]
     public string? Type { get; init; }
 
+    public TorznabQueryType ParsedType => TorznabRequestMappers.ParseType(Type);
+
     /// <summary>
     /// Free text search query.
     /// Used in search, tvsearch, and movie queries.

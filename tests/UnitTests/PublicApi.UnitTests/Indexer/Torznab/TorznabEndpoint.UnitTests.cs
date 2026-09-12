@@ -5,6 +5,48 @@ namespace Reaparr.PublicAPI.UnitTests;
 public class TorznabEndpointUnitTests : BaseEndpointUnitTest<TorznabEndpoint, TorznabEndpointRequest>
 {
     [Test]
+    public async Task ShouldDispatchQuerylessGenericRssByRequestedCategories()
+    {
+        // Arrange
+        await SetupDatabase(6520, config => config.RadarrIntegrationCount = 1);
+        var integration = (await IDbContext.RadarrIntegrations.SingleAsync(CancellationToken)).Id.ToRadarrIdentity();
+        var request = new TorznabEndpointRequest
+        {
+            Type = "search",
+            Categories = [5030],
+            Limit = 10,
+            Offset = 2,
+            ApiKey = "generic-key",
+        };
+        Mock.Mock<ICommandExecutor>()
+            .Setup(x =>
+                x.Send(
+                    It.Is<GetTorznabRssFeedCommand>(command =>
+                        !command.IncludeMovies
+                        && command.IncludeEpisodes
+                        && command.Categories.SequenceEqual(request.Categories)
+                        && command.Integration == integration
+                    ),
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .ReturnsAsync(SearchResult("tv-rss-result"))
+            .Verifiable(Times.Once());
+
+        // Act
+        var endpointResult = await TestEndpointHandleAsync(request, integrationIdentity: integration);
+
+        // Assert
+        endpointResult.StatusCode.ShouldBe(StatusCodes.Status200OK);
+        var responseBody = endpointResult.Endpoint.HttpContext.Response.Body;
+        responseBody.Position = 0;
+        using var reader = new StreamReader(responseBody, leaveOpen: true);
+        var xml = await reader.ReadToEndAsync();
+        xml.ShouldContain("tv-rss-result");
+        Mock.Mock<ICommandExecutor>().Verify();
+    }
+
+    [Test]
     public async Task ShouldRunOnlyRequestedTvSearch_WhenGenericSearchCategoryIsTv()
     {
         // Arrange

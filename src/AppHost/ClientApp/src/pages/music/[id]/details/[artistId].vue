@@ -1,71 +1,67 @@
 <template>
 	<QPage>
 		<template v-if="!loading && mediaItemDetail">
-			<MediaOverviewBar
-				:media-type="mediaItemDetail.type"
+			<MediaDetailsLayout
 				:library-id="libraryId"
-				:media-detail-item="mediaItemDetail"
-				detail-mode
-				@action="onAction" />
-			<QScroll class="page-content-minus-media-overview-bar">
-				<QRow class="music-detail-header">
-					<QCol cols="auto">
-						<MediaPosterImage
-							class="q-ma-md"
-							:thumb-width="200"
-							:thumb-height="300"
-							:actions="false"
-							:media-item="mediaItemDetail" />
-					</QCol>
-					<QCol>
-						<q-card class="music-detail-info">
-							<q-card-section>
-								<h1 class="text-h4 text-weight-bold q-mt-none q-mb-md">
-									{{ mediaItemDetail.title }}
-								</h1>
-								<dl class="music-detail-metadata">
-									<div>
-										<dt>{{ t('components.music-details.album-count') }}</dt>
-										<dd>{{ albumCount }}</dd>
-									</div>
-									<div>
-										<dt>{{ t('components.music-details.track-count') }}</dt>
-										<dd>{{ trackCount }}</dd>
-									</div>
-									<div>
-										<dt>{{ t('components.music-details.duration') }}</dt>
-										<dd><QDuration :value="mediaItemDetail.duration" /></dd>
-									</div>
-									<div>
-										<dt>{{ t('components.music-details.size') }}</dt>
-										<dd><QFileSize :size="mediaItemDetail.mediaSize" /></dd>
-									</div>
-									<div v-if="mediaItemDetail.year > 0">
-										<dt>{{ t('components.music-details.year') }}</dt>
-										<dd>{{ mediaItemDetail.year }}</dd>
-									</div>
-									<div
-										v-for="date in dates"
-										:key="date.key">
-										<dt>{{ date.label }}</dt>
-										<dd>
-											<QDateTime
-												:text="date.value"
-												long-date />
-										</dd>
-									</div>
-								</dl>
-								<p
-									v-if="mediaItemDetail.summary"
-									class="q-mt-md music-detail-summary">
-									{{ mediaItemDetail.summary }}
-								</p>
-							</q-card-section>
-						</q-card>
-					</QCol>
-				</QRow>
+				:media-item="mediaItemDetail"
+				:summary-label="t('components.details-overview.summary')"
+				@action="onAction">
+				<template #details>
+					<tr>
+						<td class="media-info-column">
+							{{ t('components.music-details.album-count') }}
+						</td>
+						<td class="media-info-column">
+							{{ albumCount }}
+						</td>
+					</tr>
+					<tr>
+						<td class="media-info-column">
+							{{ t('components.music-details.track-count') }}
+						</td>
+						<td class="media-info-column">
+							{{ trackCount }}
+						</td>
+					</tr>
+					<tr>
+						<td class="media-info-column">
+							{{ t('components.music-details.duration') }}
+						</td>
+						<td class="media-info-column">
+							<QDuration :value="mediaItemDetail.duration" />
+						</td>
+					</tr>
+					<tr>
+						<td class="media-info-column">
+							{{ t('components.music-details.size') }}
+						</td>
+						<td class="media-info-column">
+							<QFileSize :size="mediaItemDetail.mediaSize" />
+						</td>
+					</tr>
+					<tr v-if="mediaItemDetail.year > 0">
+						<td class="media-info-column">
+							{{ t('components.music-details.year') }}
+						</td>
+						<td class="media-info-column">
+							{{ mediaItemDetail.year }}
+						</td>
+					</tr>
+					<tr
+						v-for="date in dates"
+						:key="date.key">
+						<td class="media-info-column">
+							{{ date.label }}
+						</td>
+						<td class="media-info-column">
+							<QDateTime
+								:text="date.value"
+								long-date />
+						</td>
+					</tr>
+				</template>
 				<MusicMediaList :media-item="mediaItemDetail" />
-			</QScroll>
+			</MediaDetailsLayout>
 		</template>
 
 		<div
@@ -193,46 +189,3 @@ onBeforeUnmount(() => {
 
 definePageMeta({ scrollToTop: false });
 </script>
-
-<style lang="scss">
-@use '@/assets/scss/_mixins.scss';
-
-.music-detail-info {
-	@extend .background-sm;
-	min-height: 300px;
-	margin: 1rem 1rem 1rem 0;
-}
-
-.music-detail-metadata {
-	display: grid;
-	grid-template-columns: repeat(2, minmax(0, 1fr));
-	gap: 0.75rem 1.5rem;
-	margin: 0;
-
-	div { display: grid; grid-template-columns: minmax(8rem, auto) 1fr; gap: 1rem; }
-	dt { font-weight: 600; }
-	dd { margin: 0; }
-}
-
-.music-detail-summary { white-space: pre-wrap; }
-
-@media (max-width: $breakpoint-xs-max) {
-	.music-detail-header {
-		flex-direction: column;
-		align-items: center;
-		> .col, > .col-auto { flex: 0 0 100%; width: 100%; max-width: 100%; }
-		> .col-auto { display: flex; justify-content: center; }
-	}
-	.music-detail-info { margin: 0 0.5rem 1rem; }
-	.music-detail-metadata {
-		grid-template-columns: 1fr;
-		div { grid-template-columns: minmax(7rem, auto) 1fr; }
-	}
-	.page-content-minus-media-overview-bar,
-	.page-content-minus-media-overview-bar .q-scrollarea__content {
-		width: 100% !important;
-		min-width: 0 !important;
-		max-width: 100% !important;
-	}
-}
-</style>

@@ -75,15 +75,15 @@ describe('Photos album detail - request lifetime', () => {
 		await nextTick();
 
 		// Assert
-		expect(wrapper.find('h1').exists()).toBe(false);
+		expect(wrapper.find('.media-title').exists()).toBe(false);
 		expect(wrapper.find('[data-cy="photo-details-loading"]').exists()).toBe(true);
 
 		// Act
 		second.next(album(30));
 		await nextTick();
 
-		// Assert
-		expect(wrapper.get('h1').text()).toBe('Photo album 30');
+		expect(wrapper.get('.media-title').text()).toBe('Photo album 30');
+		expect(wrapper.find('.media-detail-header').exists()).toBe(true);
 		expect(wrapper.text()).toContain('A real album summary');
 		expect(wrapper.get('[data-cy="photo-assets-empty"]').text()).toBe('No images or clips found in this album.');
 		expect(wrapper.text()).not.toContain('Photo album 20');
@@ -111,7 +111,7 @@ describe('Photos album detail - request lifetime', () => {
 
 		// Assert
 		expect(wrapper.find('[data-cy="photo-details-error"]').exists()).toBe(false);
-		expect(wrapper.get('h1').text()).toBe('Photo album 20');
+		expect(wrapper.get('.media-title').text()).toBe('Photo album 20');
 	});
 
 	test('Should reject invalid route ids before fetching and display an actionable error', async () => {

@@ -166,6 +166,7 @@ const hasLibraryAccess = computed(() => {
 const { t } = useI18n();
 
 const mediaMetaData = computed(() => {
+	const currentLibrary = get(library);
 	if (props.mediaDetailItem) {
 		const movieFileCount = props.mediaDetailItem.mediaData.length || props.mediaDetailItem.qualities.length || 1;
 		return {
@@ -173,6 +174,13 @@ const mediaMetaData = computed(() => {
 			tvShowCount: props.mediaDetailItem.type === PlexMediaType.TvShow ? 1 : 0,
 			seasonCount: props.mediaDetailItem.childCount,
 			episodeCount: props.mediaDetailItem.grandChildCount,
+			artistCount: 0,
+			albumCount: 0,
+			trackCount: 0,
+			photoCount: 0,
+			photoAlbumCount: 0,
+			clipCount: 0,
+			videoCount: props.mediaDetailItem.type === PlexMediaType.OtherVideos ? 1 : 0,
 			fileSize: props.mediaDetailItem.mediaSize,
 		};
 	}
@@ -182,19 +190,34 @@ const mediaMetaData = computed(() => {
 		tvShowCount: mediaOverviewStore.allTvShowCount,
 		seasonCount: mediaOverviewStore.allSeasonCount,
 		episodeCount: mediaOverviewStore.allEpisodeCount,
+		artistCount: currentLibrary?.musicArtistCount ?? 0,
+		albumCount: currentLibrary?.musicAlbumCount ?? 0,
+		trackCount: currentLibrary?.musicTrackCount ?? 0,
+		photoCount: currentLibrary?.photoImageCount ?? 0,
+		photoAlbumCount: currentLibrary?.photoAlbumCount ?? 0,
+		clipCount: currentLibrary?.photoClipCount ?? 0,
+		videoCount: currentLibrary?.otherVideoCount ?? 0,
 		fileSize: mediaOverviewStore.allFileSize,
 	};
 });
 
 const hasMedia = computed(() => !!props.mediaDetailItem || mediaOverviewStore.totalCount > 0);
 
-function formatted({ movieCount, tvShowCount, seasonCount, episodeCount, fileSize }: {
+function formatted({ movieCount, tvShowCount, seasonCount, episodeCount, artistCount, albumCount, trackCount, photoAlbumCount, photoCount, clipCount, videoCount, fileSize }: {
 	movieCount: number;
 	tvShowCount: number;
 	seasonCount: number;
 	episodeCount: number;
+	artistCount: number;
+	albumCount: number;
+	trackCount: number;
+	photoAlbumCount: number;
+	photoCount: number;
+	clipCount: number;
+	videoCount: number;
 	fileSize: number;
 }): string {
+	const currentLibrary = get(library);
 	switch (get(mediaType)) {
 		case PlexMediaType.Movie:
 			return t('components.media-overview-bar-header.movies-metadata', {
@@ -209,29 +232,47 @@ function formatted({ movieCount, tvShowCount, seasonCount, episodeCount, fileSiz
 				fileSize: toFileSize(fileSize),
 			});
 		case PlexMediaType.MusicArtist:
-			return props.mediaDetailItem
-				? t('components.media-overview-bar-header.music-detail-metadata', {
-						albumCount: props.mediaDetailItem.childCount,
-						trackCount: props.mediaDetailItem.grandChildCount,
-						fileSize: toFileSize(fileSize),
-					})
-				: t('components.media-overview-bar-header.music-metadata', {
-						artistCount: mediaOverviewStore.totalCount,
-						fileSize: toFileSize(fileSize),
-					});
+			if (props.mediaDetailItem) {
+				return t('components.media-overview-bar-header.music-detail-metadata', {
+					albumCount: props.mediaDetailItem.childCount,
+					trackCount: props.mediaDetailItem.grandChildCount,
+					fileSize: toFileSize(fileSize),
+				});
+			}
+			if (currentLibrary) {
+				return t('components.media-overview-bar-header.music-library-metadata', {
+					artistCount,
+					albumCount,
+					trackCount,
+					fileSize: toFileSize(fileSize),
+				});
+			}
+			return t('components.media-overview-bar-header.music-metadata', {
+				artistCount: mediaOverviewStore.totalCount,
+				fileSize: toFileSize(fileSize),
+			});
 		case PlexMediaType.PhotoAlbum:
-			return props.mediaDetailItem
-				? t('components.media-overview-bar-header.photo-detail-metadata', {
-						assetCount: props.mediaDetailItem.childCount,
-						fileSize: toFileSize(fileSize),
-					})
-				: t('components.media-overview-bar-header.photos-metadata', {
-						albumCount: mediaOverviewStore.totalCount,
-						fileSize: toFileSize(fileSize),
-					});
+			if (props.mediaDetailItem) {
+				return t('components.media-overview-bar-header.photo-detail-metadata', {
+					assetCount: props.mediaDetailItem.childCount,
+					fileSize: toFileSize(fileSize),
+				});
+			}
+			if (currentLibrary) {
+				return t('components.media-overview-bar-header.photos-library-metadata', {
+					albumCount: photoAlbumCount,
+					photoCount,
+					clipCount,
+					fileSize: toFileSize(fileSize),
+				});
+			}
+			return t('components.media-overview-bar-header.photos-metadata', {
+				albumCount: mediaOverviewStore.totalCount,
+				fileSize: toFileSize(fileSize),
+			});
 		case PlexMediaType.OtherVideos:
 			return t('components.media-overview-bar-header.other-videos-metadata', {
-				videoCount: props.mediaDetailItem ? 1 : mediaOverviewStore.totalCount,
+				videoCount: currentLibrary ? videoCount : mediaOverviewStore.totalCount,
 				fileSize: toFileSize(fileSize),
 			});
 		default:

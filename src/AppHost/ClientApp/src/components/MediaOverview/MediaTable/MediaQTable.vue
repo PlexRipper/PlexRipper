@@ -203,7 +203,7 @@ function supportsVideoQuality(type: PlexMediaType): boolean {
 }
 
 function supportsComparison(type: PlexMediaType): boolean {
-	return [PlexMediaType.Movie, PlexMediaType.TvShow, PlexMediaType.Season, PlexMediaType.Episode, PlexMediaType.MusicArtist].includes(type);
+	return [PlexMediaType.Movie, PlexMediaType.TvShow, PlexMediaType.Season, PlexMediaType.Episode, PlexMediaType.MusicArtist, PlexMediaType.MusicTrack].includes(type);
 }
 
 function isRowSelected(rowId: number): boolean {

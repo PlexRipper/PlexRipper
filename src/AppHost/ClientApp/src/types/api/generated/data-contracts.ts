@@ -966,7 +966,21 @@ export interface PlexLibraryDTO {
   key: string;
   /** @format int64 */
   mediaSize: number;
+  /** @format int32 */
+  musicAlbumCount: number;
+  /** @format int32 */
+  musicArtistCount: number;
+  /** @format int32 */
+  musicTrackCount: number;
+  /** @format int32 */
+  otherVideoCount: number;
   outdated: boolean;
+  /** @format int32 */
+  photoAlbumCount: number;
+  /** @format int32 */
+  photoClipCount: number;
+  /** @format int32 */
+  photoImageCount: number;
   /** @format int32 */
   plexServerId: number;
   /** @format date-time */

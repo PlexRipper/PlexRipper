@@ -486,8 +486,10 @@
             "movies-metadata": "{movieCount} Filmy - {fileSize} ",
             "tv-shows-metadata": "{tvShowCount} Programy telewizyjne - {seasonCount} Sezony - {episodeCount} Odcinki - {fileSize} ",
             "music-metadata": "Wykonawcy: {artistCount} - {fileSize}",
+            "music-library-metadata": "Wykonawcy: {artistCount} - Albumy: {albumCount} - Utwory: {trackCount} - {fileSize}",
             "music-detail-metadata": "Albumy: {albumCount} - Utwory: {trackCount} - {fileSize}",
             "photos-metadata": "Albumy: {albumCount} - {fileSize}",
+            "photos-library-metadata": "Albumy: {albumCount} - Zdjęcia: {photoCount} - Klipy: {clipCount} - {fileSize}",
             "photo-detail-metadata": "Elementy: {assetCount} - {fileSize}",
             "other-videos-metadata": "Filmy: {videoCount} - {fileSize}"
         },

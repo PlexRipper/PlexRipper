@@ -1,53 +1,45 @@
 <template>
 	<QPage data-cy="photo-album-details">
 		<template v-if="mediaItem && !loading && !error">
-			<MediaOverviewBar
-				:media-type="PlexMediaType.PhotoAlbum"
+			<MediaDetailsLayout
 				:library-id="libraryId"
-				:media-detail-item="mediaItem"
-				detail-mode
-				@action="onAction" />
-			<QScroll class="page-content-minus-media-overview-bar">
-				<div class="photo-details__content q-pa-md">
-					<header class="photo-details__header">
-						<MediaPosterImage
-							:key="mediaItem.id"
-							:media-item="mediaItem"
-							:thumb-width="200"
-							:thumb-height="200"
-							:actions="false" />
-						<div class="photo-details__info">
-							<h1 class="text-h4 q-mt-none">
-								{{ mediaItem.title }}
-							</h1>
-							<p
-								v-if="mediaItem.summary"
-								class="photo-details__summary">
-								{{ mediaItem.summary }}
-							</p>
-							<dl class="photo-details__metadata">
-								<dt>{{ t('components.photo-details.asset-count') }}</dt>
-								<dd>{{ mediaItem.childCount }}</dd>
-								<dt>{{ t('components.photo-details.size') }}</dt>
-								<dd><QFileSize :size="mediaItem.mediaSize" /></dd>
-								<template
-									v-for="date in dates"
-									:key="date.key">
-									<dt>{{ date.label }}</dt>
-									<dd>
-										<QDateTime
-											:text="date.value"
-											short-date />
-									</dd>
-								</template>
-							</dl>
-						</div>
-					</header>
-					<PhotoMediaList
-						:key="`${libraryId}-${mediaItem.id}`"
-						:media-item="mediaItem" />
-				</div>
-			</QScroll>
+				:media-item="mediaItem"
+				:summary-label="t('components.details-overview.summary')"
+				@action="onAction">
+				<template #details>
+					<tr>
+						<td class="media-info-column">
+							{{ t('components.photo-details.asset-count') }}
+						</td>
+						<td class="media-info-column">
+							{{ mediaItem.childCount }}
+						</td>
+					</tr>
+					<tr>
+						<td class="media-info-column">
+							{{ t('components.photo-details.size') }}
+						</td>
+						<td class="media-info-column">
+							<QFileSize :size="mediaItem.mediaSize" />
+						</td>
+					</tr>
+					<tr
+						v-for="date in dates"
+						:key="date.key">
+						<td class="media-info-column">
+							{{ date.label }}
+						</td>
+						<td class="media-info-column">
+							<QDateTime
+								:text="date.value"
+								short-date />
+						</td>
+					</tr>
+				</template>
+				<PhotoMediaList
+					:key="`${libraryId}-${mediaItem.id}`"
+					:media-item="mediaItem" />
+			</MediaDetailsLayout>
 		</template>
 		<p
 			v-else-if="loading"
@@ -167,38 +159,8 @@ onBeforeUnmount(() => {
 </script>
 
 <style scoped lang="scss">
-.photo-details__header {
-  display: flex;
-  gap: 1.5rem;
-  margin-bottom: 1rem;
-}
-.photo-details__info {
-  flex: 1;
-  min-width: 0;
-  overflow-wrap: anywhere;
-}
-.photo-details__summary {
-  white-space: pre-wrap;
-}
-.photo-details__metadata {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  gap: 0.5rem 1rem;
-}
-.photo-details__metadata dd {
-  margin: 0;
-}
 .photo-details__button {
-  min-width: 44px;
-  min-height: 44px;
-}
-@media (max-width: 599px) {
-  .photo-details__header {
-    flex-direction: column;
-    align-items: center;
-  }
-  .photo-details__info {
-    width: 100%;
-  }
+	min-width: 44px;
+	min-height: 44px;
 }
 </style>

@@ -2,6 +2,7 @@ import { afterEach, beforeAll, beforeEach, describe, expect, test, vi } from 'vi
 import { mountSuspended } from '@nuxt/test-utils/runtime';
 import { createPinia, setActivePinia } from 'pinia';
 import type { Pinia } from 'pinia';
+import type { VueWrapper } from '@vue/test-utils';
 import type { DownloadMediaDTO, PlexMediaDTO, PlexMediaDataDTO } from '@dto';
 import { PlexMediaComparisonState, PlexMediaType, VideoQuality } from '@dto';
 import { baseSetup } from '@services-test-base';
@@ -126,6 +127,32 @@ function multiDiscArtistFixture(): PlexMediaDTO {
 	return artist;
 }
 
+const trackTitles: Record<number, string> = {
+	7: 'Overlapping Track',
+	8: 'Track Two',
+	10: 'Disc One Track Two',
+	11: 'Unnumbered Track',
+	12: 'Missing Metadata Track',
+	21: 'Another Disc One',
+	22: 'Another Disc Two',
+};
+
+function trackRow(wrapper: VueWrapper, trackId: number) {
+	const title = trackTitles[trackId];
+	const row = wrapper.findAll('tbody tr').find((candidate) => candidate.find('.row-title').text() === title);
+	if (!row)
+		throw new Error(`Track ${trackId} is not rendered`);
+	return row;
+}
+
+function trackCheckbox(wrapper: VueWrapper, trackId: number) {
+	return trackRow(wrapper, trackId).get('.q-checkbox');
+}
+
+function trackComparison(wrapper: VueWrapper, trackId: number) {
+	return trackRow(wrapper, trackId).get('.media-comparison-state-button');
+}
+
 describe('MusicMediaList hierarchy selection', () => {
 	let pinia: Pinia;
 	const mounted: Array<{ unmount: () => void }> = [];
@@ -165,7 +192,7 @@ describe('MusicMediaList hierarchy selection', () => {
 		await wrapper.get('[data-cy="music-album-7"] .q-item').trigger('click');
 
 		// Act
-		await wrapper.get('[data-cy="music-track-checkbox-7-7"]').trigger('click');
+		await trackCheckbox(wrapper, 7).trigger('click');
 		useMediaOverviewBarDownloadCommandBus().emit('download');
 		await wrapper.get('[data-cy="music-album-checkbox-7"]').trigger('click');
 		useMediaOverviewBarDownloadCommandBus().emit('download');
@@ -190,14 +217,14 @@ describe('MusicMediaList hierarchy selection', () => {
 		await wrapper.get('[data-cy="music-artist-checkbox"]').trigger('click');
 
 		// Act
-		await wrapper.get('[data-cy="music-track-checkbox-7-7"]').trigger('click');
+		await trackCheckbox(wrapper, 7).trigger('click');
 		useMediaOverviewBarDownloadCommandBus().emit('download');
 
 		// Assert
 		expect(commands[0]).toMatchObject([{ type: PlexMediaType.MusicTrack, mediaIds: [8] }]);
 		expect(commands[0]).toHaveLength(1);
 		expect(wrapper.get('[data-cy="music-album-checkbox-7"]').attributes('aria-checked')).toBe('mixed');
-		expect(wrapper.get('[data-cy="music-track-checkbox-7-8"]').attributes('aria-checked')).toBe('true');
+		expect(trackCheckbox(wrapper, 8).attributes('aria-checked')).toBe('true');
 	});
 
 	test('Should keep equal album and track IDs independent and promote all tracks to their album', async () => {
@@ -207,14 +234,14 @@ describe('MusicMediaList hierarchy selection', () => {
 		await wrapper.get('[data-cy="music-album-7"] .q-item').trigger('click');
 
 		// Act
-		await wrapper.get('[data-cy="music-track-checkbox-7-7"]').trigger('click');
+		await trackCheckbox(wrapper, 7).trigger('click');
 
 		// Assert
 		expect(wrapper.get('[data-cy="music-album-checkbox-7"]').attributes('aria-checked')).toBe('mixed');
-		expect(wrapper.get('[data-cy="music-track-checkbox-7-8"]').attributes('aria-checked')).toBe('false');
+		expect(trackCheckbox(wrapper, 8).attributes('aria-checked')).toBe('false');
 
 		// Act
-		await wrapper.get('[data-cy="music-track-checkbox-7-8"]').trigger('click');
+		await trackCheckbox(wrapper, 8).trigger('click');
 		useMediaOverviewBarDownloadCommandBus().emit('download');
 
 		// Assert
@@ -223,31 +250,33 @@ describe('MusicMediaList hierarchy selection', () => {
 		expect(commands[0]).toHaveLength(1);
 	});
 
-	test('Should group multipart originals and send the representative part for a track choice', async () => {
+	test('Should render multipart tracks as standard table rows with automatic download selection', async () => {
 		// Arrange
 		const wrapper = await render();
 		const commands = captureDownloads();
 		await wrapper.get('[data-cy="music-album-7"] .q-item').trigger('click');
-		expect(wrapper.text()).toContain('disc-a.flac');
-		expect(wrapper.text()).toContain('disc-b.flac');
-		expect(wrapper.text()).toContain('alternate.mp3');
-		expect(wrapper.text()).toContain('flac');
-		expect(wrapper.text()).toContain('mp3');
 
 		// Act
-		await wrapper.get('[data-cy="music-track-original-7-7-70"]').trigger('click');
-		await wrapper.get('[data-cy="music-track-checkbox-7-7"]').trigger('click');
+		await trackCheckbox(wrapper, 7).trigger('click');
 		useMediaOverviewBarDownloadCommandBus().emit('download');
 
 		// Assert
+		const row = trackRow(wrapper, 7);
+		expect(row.text()).toContain('Overlapping Track');
+		expect(row.findAll('td')).toHaveLength(9);
+		expect(row.find('.q-checkbox').exists()).toBe(true);
+		expect(row.find('.media-comparison-state-button').exists()).toBe(true);
+		expect(row.find('button .mdi-download').exists()).toBe(true);
+		expect(row.text()).not.toContain('disc-a.flac');
+		expect(row.text()).not.toContain('alternate.mp3');
 		expect(commands[0]).toMatchObject([{
 			type: PlexMediaType.MusicTrack,
 			mediaIds: [7],
-			qualities: [{ mediaId: 7, dataId: 701, mediaDataType: PlexMediaType.MusicTrack, quality: VideoQuality.Unknown }],
+			qualities: [],
 		}]);
 	});
 
-	test('Should propagate only selected descendant originals through album and artist requests', async () => {
+	test('Should exclude foreign media from the table and use automatic descendant payloads', async () => {
 		// Arrange
 		const item = artistFixture();
 		item.children[0]!.children.push(media({
@@ -268,11 +297,9 @@ describe('MusicMediaList hierarchy selection', () => {
 		const wrapper = await render(item);
 		const commands = captureDownloads();
 		await wrapper.get('[data-cy="music-album-7"] .q-item').trigger('click');
-		await wrapper.get('[data-cy="music-track-original-7-7-71"]').trigger('click');
-		await wrapper.get('[data-cy="music-track-original-7-8-80"]').trigger('click');
 
 		// Act
-		await wrapper.get('[data-cy="music-track-checkbox-7-7"]').trigger('click');
+		await trackCheckbox(wrapper, 7).trigger('click');
 		useMediaOverviewBarDownloadCommandBus().emit('download');
 		await wrapper.get('[data-cy="music-album-checkbox-7"]').trigger('click');
 		useMediaOverviewBarDownloadCommandBus().emit('download');
@@ -280,41 +307,36 @@ describe('MusicMediaList hierarchy selection', () => {
 		useMediaOverviewBarDownloadCommandBus().emit('download');
 
 		// Assert
-		expect(wrapper.find('[data-cy="music-track-7-90"]').exists()).toBe(false);
+		expect(wrapper.text()).not.toContain('Foreign Track');
 		expect(wrapper.find('[data-cy="music-album-91"]').exists()).toBe(false);
-		expect(commands[0]).toMatchObject([{ type: PlexMediaType.MusicTrack, qualities: [{ mediaId: 7, dataId: 703 }] }]);
-		expect(commands[1]).toMatchObject([{
-			type: PlexMediaType.MusicAlbum,
-			qualities: [{ mediaId: 7, dataId: 703 }, { mediaId: 8, dataId: 801 }],
-		}]);
-		expect(commands[2]).toMatchObject([{
-			type: PlexMediaType.MusicArtist,
-			qualities: [{ mediaId: 7, dataId: 703 }, { mediaId: 8, dataId: 801 }],
-		}]);
+		expect(commands).toEqual([
+			[expect.objectContaining({ type: PlexMediaType.MusicTrack, mediaIds: [7], qualities: [] })],
+			[expect.objectContaining({ type: PlexMediaType.MusicAlbum, mediaIds: [7], qualities: [] })],
+			[expect.objectContaining({ type: PlexMediaType.MusicArtist, mediaIds: [100], qualities: [] })],
+		]);
 	});
 
-	test('Should use automatic originals and clear an explicit choice for a replacement root', async () => {
+	test('Should reset automatic track selection for a replacement root', async () => {
 		// Arrange
 		const wrapper = await render();
 		const commands = captureDownloads();
 		await wrapper.get('[data-cy="music-album-7"] .q-item').trigger('click');
-		await wrapper.get('[data-cy="music-track-original-7-7-70"]').trigger('click');
-		await wrapper.get('[data-cy="music-track-original-7-7-automatic"]').trigger('click');
-		await wrapper.get('[data-cy="music-track-checkbox-7-7"]').trigger('click');
+		await trackCheckbox(wrapper, 7).trigger('click');
 		useMediaOverviewBarDownloadCommandBus().emit('download');
-		await wrapper.get('[data-cy="music-track-original-7-7-70"]').trigger('click');
 		const replacement = artistFixture();
 		replacement.id = 200;
 		replacement.children[0]!.parentId = 200;
 		await wrapper.setProps({ mediaItem: replacement });
-		await wrapper.get('[data-cy="music-album-7"] .q-item').trigger('click');
 
 		// Act
-		await wrapper.get('[data-cy="music-track-checkbox-7-7"]').trigger('click');
+		await trackCheckbox(wrapper, 7).trigger('click');
 		useMediaOverviewBarDownloadCommandBus().emit('download');
 
 		// Assert
-		expect(commands).toMatchObject([[{ qualities: [] }], [{ qualities: [] }]]);
+		expect(commands).toEqual([
+			[expect.objectContaining({ type: PlexMediaType.MusicTrack, mediaIds: [7], qualities: [] })],
+			[expect.objectContaining({ type: PlexMediaType.MusicTrack, mediaIds: [7], qualities: [] })],
+		]);
 	});
 
 	test('Should clear selection when the artist changes and expose an empty hierarchy', async () => {
@@ -363,8 +385,8 @@ describe('MusicMediaList hierarchy selection', () => {
 
 		// Act
 		await wrapper.get('[data-cy="music-comparison-album-7"]').trigger('click');
-		await wrapper.get('[data-cy="music-comparison-track-7-7"]').trigger('click');
-		await wrapper.get('[data-cy="music-comparison-track-7-8"]').trigger('click');
+		await trackComparison(wrapper, 7).get('button').trigger('click');
+		await trackComparison(wrapper, 8).get('button').trigger('click');
 
 		// Assert
 		expect(open).not.toHaveBeenCalled();
@@ -376,8 +398,8 @@ describe('MusicMediaList hierarchy selection', () => {
 			{ type: PlexMediaType.MusicTrack, state: PlexMediaComparisonState.Missing },
 			{ type: PlexMediaType.MusicTrack, state: PlexMediaComparisonState.Owned },
 		]));
-		expect(wrapper.get('[data-cy="music-comparison-track-7-7"] .q-icon').classes()).toContain('mdi-music-note-off-outline');
-		expect(wrapper.get('[data-cy="music-track-checkbox-7-7"]').attributes('aria-checked')).toBe('false');
+		expect(trackComparison(wrapper, 7).get('button .q-icon').classes()).toContain('mdi-music-note-off-outline');
+		expect(trackCheckbox(wrapper, 7).attributes('aria-checked')).toBe('false');
 
 		// Act
 		await wrapper.get('[data-cy="music-comparison-artist-100"]').trigger('click');
@@ -426,18 +448,14 @@ describe('MusicMediaList hierarchy selection', () => {
 		expect(wrapper.findAll('[data-cy^="music-disc-"]').map((disc) => disc.attributes('data-cy'))).toEqual([
 			'music-disc-7-1', 'music-disc-7-2', 'music-disc-7-unknown', 'music-disc-20-1', 'music-disc-20-2',
 		]);
-		expect(wrapper.get('[data-cy="music-disc-7-1"]').findAll('.music-track-row').map((track) => track.attributes('data-cy'))).toEqual([
-			'music-track-7-8', 'music-track-7-10',
+		expect(wrapper.get('[data-cy="music-disc-7-1"]').findAll('tbody tr')).toHaveLength(2);
+		expect(wrapper.get('[data-cy="music-disc-7-2"]').findAll('tbody tr')).toHaveLength(1);
+		expect(wrapper.get('[data-cy="music-disc-7-unknown"]').findAll('tbody tr')).toHaveLength(2);
+		expect(wrapper.get('[data-cy="music-disc-7-1"]').findAll('tbody tr').map((row) => row.find('.row-title').text())).toEqual([
+			'Track Two', 'Disc One Track Two',
 		]);
-		expect(wrapper.get('[data-cy="music-disc-7-2"]').findAll('.music-track-row').map((track) => track.attributes('data-cy'))).toEqual(['music-track-7-7']);
-		expect(wrapper.get('[data-cy="music-disc-7-unknown"]').findAll('.music-track-row')).toHaveLength(2);
-		expect(wrapper.get('[data-cy="music-track-number-7-7"]').text()).toBe('1');
-		expect(wrapper.get('[data-cy="music-track-number-7-8"]').text()).toBe('1');
-		expect(wrapper.get('[data-cy="music-track-number-7-10"]').text()).toBe('2');
-		expect(wrapper.get('[data-cy="music-track-number-20-21"]').text()).toBe('1');
-		expect(wrapper.find('[data-cy="music-track-number-7-11"]').exists()).toBe(false);
-		expect(wrapper.find('[data-cy="music-track-number-7-12"]').exists()).toBe(false);
-		expect(wrapper.findAll('.music-track-row')).toHaveLength(7);
+		expect(wrapper.get('[data-cy="music-disc-7-2"]').findAll('tbody tr').map((row) => row.find('.row-title').text())).toEqual(['Overlapping Track']);
+		expect(wrapper.findAll('tbody tr')).toHaveLength(7);
 
 		// Act
 		const header = wrapper.get('[data-cy="music-disc-7-2"] .q-item');
@@ -448,35 +466,54 @@ describe('MusicMediaList hierarchy selection', () => {
 		expect(header.attributes('aria-expanded')).toBe('false');
 		await header.trigger('click');
 		expect(header.attributes('aria-expanded')).toBe('true');
-		expect(wrapper.find('[data-cy="music-track-7-7"]').exists()).toBe(true);
+		expect(wrapper.get('[data-cy="music-disc-7-2"]').findAll('tbody tr')).toHaveLength(1);
 	});
 
-	test('Should keep canonical selection and original payloads across repeated disc and track numbers', async () => {
+	test('Should render the same table columns as movie and TV detail lists', async () => {
 		// Arrange
-		const item = multiDiscArtistFixture();
-		const wrapper = await render(item);
+		const wrapper = await render(multiDiscArtistFixture());
+
+		// Act
+		await wrapper.get('[data-cy="music-album-7"] .q-item').trigger('click');
+
+		// Assert
+		const table = wrapper.get('[data-cy="music-disc-7-1"] .media-q-table-scroll');
+		const header = table.get('thead');
+		expect(header.text()).toContain('Title');
+		expect(header.text()).toContain('Comparison state');
+		expect(header.text()).toContain('Year');
+		expect(header.text()).toContain('Duration');
+		expect(header.text()).toContain('Size');
+		expect(header.text()).toContain('Added At');
+		expect(header.text()).toContain('Updated At');
+		expect(header.text()).toContain('Actions');
+		expect(header.text()).not.toContain('Original');
+		expect(header.findAll('th')).toHaveLength(9);
+		expect(table.find('.music-track-originals').exists()).toBe(false);
+		expect(table.find('.music-track-table__header').exists()).toBe(false);
+	});
+
+	test('Should keep canonical selection across repeated disc and track numbers', async () => {
+		// Arrange
+		const wrapper = await render(multiDiscArtistFixture());
 		const commands = captureDownloads();
 		await wrapper.get('[data-cy="music-album-7"] .q-item').trigger('click');
 		await wrapper.get('[data-cy="music-album-20"] .q-item').trigger('click');
 
 		// Act
-		await wrapper.get('[data-cy="music-track-original-7-7-71"]').trigger('click');
-		await wrapper.get('[data-cy="music-track-original-7-8-80"]').trigger('click');
-		await wrapper.get('[data-cy="music-track-checkbox-7-7"]').trigger('click');
-		await wrapper.get('[data-cy="music-track-checkbox-7-8"]').trigger('click');
-		await wrapper.get('[data-cy="music-track-checkbox-20-21"]').trigger('click');
+		await trackCheckbox(wrapper, 7).trigger('click');
+		await trackCheckbox(wrapper, 8).trigger('click');
+		await trackCheckbox(wrapper, 21).trigger('click');
 		useMediaOverviewBarDownloadCommandBus().emit('download');
 
 		// Assert
 		expect(commands[0]).toEqual([
-			expect.objectContaining({ type: PlexMediaType.MusicTrack, mediaIds: [7], plexServerId: 2, plexLibraryId: 4,
-				qualities: [expect.objectContaining({ mediaId: 7, dataId: 703 })] }),
-			expect.objectContaining({ type: PlexMediaType.MusicTrack, mediaIds: [8], plexServerId: 2, plexLibraryId: 4,
-				qualities: [expect.objectContaining({ mediaId: 8, dataId: 801 })] }),
+			expect.objectContaining({ type: PlexMediaType.MusicTrack, mediaIds: [7], plexServerId: 2, plexLibraryId: 4, qualities: [] }),
+			expect.objectContaining({ type: PlexMediaType.MusicTrack, mediaIds: [8], plexServerId: 2, plexLibraryId: 4, qualities: [] }),
 			expect.objectContaining({ type: PlexMediaType.MusicTrack, mediaIds: [21], plexServerId: 2, plexLibraryId: 4, qualities: [] }),
 		]);
 		expect(wrapper.get('[data-cy="music-album-checkbox-7"]').attributes('aria-checked')).toBe('mixed');
-		expect(wrapper.get('[data-cy="music-track-checkbox-20-22"]').attributes('aria-checked')).toBe('false');
+		expect(trackCheckbox(wrapper, 22).attributes('aria-checked')).toBe('false');
 		expect(wrapper.get('.music-media-list__root').text()).toContain('3');
 
 		// Act
@@ -487,24 +524,22 @@ describe('MusicMediaList hierarchy selection', () => {
 
 		// Assert
 		expect(commands[1]).toEqual([
-			expect.objectContaining({ type: PlexMediaType.MusicAlbum, mediaIds: [7],
-				qualities: [expect.objectContaining({ mediaId: 7, dataId: 703 }), expect.objectContaining({ mediaId: 8, dataId: 801 })] }),
+			expect.objectContaining({ type: PlexMediaType.MusicAlbum, mediaIds: [7], qualities: [] }),
 			expect.objectContaining({ type: PlexMediaType.MusicTrack, mediaIds: [21], qualities: [] }),
 		]);
-		expect(commands[2]).toEqual([expect.objectContaining({ type: PlexMediaType.MusicArtist, mediaIds: [100],
-			qualities: [expect.objectContaining({ mediaId: 7, dataId: 703 }), expect.objectContaining({ mediaId: 8, dataId: 801 })] })]);
+		expect(commands[2]).toEqual([expect.objectContaining({
+			type: PlexMediaType.MusicArtist, mediaIds: [100], qualities: [],
+		})]);
 
 		// Act
 		await wrapper.get('[data-cy="music-disc-7-2"] .q-item').trigger('click');
 		await wrapper.get('[data-cy="music-disc-7-2"] .q-item').trigger('click');
-		expect(wrapper.get('[data-cy="music-track-original-7-7-71"]').attributes('aria-checked')).toBe('true');
-		await wrapper.get('[data-cy="music-track-checkbox-7-7"]').trigger('click');
+		await trackCheckbox(wrapper, 7).trigger('click');
 		useMediaOverviewBarDownloadCommandBus().emit('download');
 
 		// Assert
 		expect(commands[3]).toEqual([
-			expect.objectContaining({ type: PlexMediaType.MusicTrack, mediaIds: [8],
-				qualities: [expect.objectContaining({ mediaId: 8, dataId: 801 })] }),
+			expect.objectContaining({ type: PlexMediaType.MusicTrack, mediaIds: [8], qualities: [] }),
 			expect.objectContaining({ type: PlexMediaType.MusicTrack, mediaIds: [10], qualities: [] }),
 			expect.objectContaining({ type: PlexMediaType.MusicTrack, mediaIds: [11], qualities: [] }),
 			expect.objectContaining({ type: PlexMediaType.MusicTrack, mediaIds: [12], qualities: [] }),
@@ -514,13 +549,12 @@ describe('MusicMediaList hierarchy selection', () => {
 		expect(wrapper.get('[data-cy="music-album-checkbox-20"]').attributes('aria-checked')).toBe('true');
 	});
 
-	test('Should derive refreshed discs and reset selection and original choices for a replacement artist object', async () => {
+	test('Should derive refreshed discs and reset selection for a replacement artist object', async () => {
 		// Arrange
 		const wrapper = await render(multiDiscArtistFixture());
 		const commands = captureDownloads();
 		await wrapper.get('[data-cy="music-album-7"] .q-item').trigger('click');
-		await wrapper.get('[data-cy="music-track-original-7-7-71"]').trigger('click');
-		await wrapper.get('[data-cy="music-track-checkbox-7-7"]').trigger('click');
+		await trackCheckbox(wrapper, 7).trigger('click');
 		const replacement = multiDiscArtistFixture();
 		replacement.children[0]!.children[0]!.discNumber = 3;
 		replacement.children[0]!.children[0]!.trackNumber = 9;
@@ -533,12 +567,11 @@ describe('MusicMediaList hierarchy selection', () => {
 		expect(commands).toEqual([]);
 		expect(useMediaOverviewStore().downloadButtonVisible).toBe(false);
 		expect(wrapper.find('[data-cy="music-disc-7-2"]').exists()).toBe(false);
-		expect(wrapper.get('[data-cy="music-disc-7-3"]').find('[data-cy="music-track-7-7"]').exists()).toBe(true);
-		expect(wrapper.get('[data-cy="music-track-number-7-7"]').text()).toBe('9');
-		expect(wrapper.get('[data-cy="music-track-original-7-7-automatic"]').attributes('aria-checked')).toBe('true');
+		expect(wrapper.get('[data-cy="music-disc-7-3"]').find('tbody tr').text()).toContain('Overlapping Track');
+		expect(wrapper.find('[data-cy="music-disc-7-3"] .media-q-table-scroll').exists()).toBe(true);
 
 		// Act
-		await wrapper.get('[data-cy="music-track-checkbox-7-7"]').trigger('click');
+		await trackCheckbox(wrapper, 7).trigger('click');
 		useMediaOverviewBarDownloadCommandBus().emit('download');
 
 		// Assert

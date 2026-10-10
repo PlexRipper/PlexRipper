@@ -220,8 +220,8 @@ for (const family of families) {
 				cy.contains('.media-poster-card', root.title).find('[data-cy="media-poster-menu-trigger"]').click();
 				cy.getCy('media-poster-menu-details').should('be.visible').click({ scrollBehavior: false });
 				cy.location('pathname').should('eq', `/${family.path}/${library.id}/details/${root.id}`);
-				cy.get('h1').should('have.text', root.title);
-				cy.get('dl').should('contain.text', '1960').find('dt').should('not.contain.text', 'Updated');
+				cy.get('.media-title').should('have.text', root.title);
+				cy.get('.media-info-container table').should('contain.text', '1960').find('td').should('not.contain.text', 'Updated');
 				if (family.type === PlexMediaType.MusicArtist) {
 					assertTouchControl('music-artist-checkbox');
 					const album = root.children[0]!;

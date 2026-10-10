@@ -5,7 +5,7 @@ import { mountSuspended, mockNuxtImport } from '@nuxt/test-utils/runtime';
 import { of, Subject } from 'rxjs';
 import { baseSetup } from '@services-test-base';
 import { generatePlexMedia } from '@mock';
-import { PlexMediaType, type PlexMediaDTO } from '@dto';
+import { PlexMediaType, VideoQuality, type PlexMediaDTO } from '@dto';
 import { useDialogStore, useDownloadStore, useMediaStore, useSettingsStore } from '@store';
 import { resetMediaOverviewCommandsBus, sendMediaOverviewDownloadCommand } from '@/composables/event-bus';
 import ConfirmationSection from '@/components/Views/Settings/ConfirmationSection.vue';
@@ -72,7 +72,7 @@ describe('Other Videos root detail - request lifetime', () => {
 		await nextTick();
 
 		// Assert
-		expect(wrapper.find('h1').exists()).toBe(false);
+		expect(wrapper.find('.media-title').exists()).toBe(false);
 		expect(wrapper.find('[data-cy="other-video-details-loading"]').exists()).toBe(true);
 
 		// Act
@@ -80,11 +80,47 @@ describe('Other Videos root detail - request lifetime', () => {
 		await nextTick();
 
 		// Assert
-		expect(wrapper.get('h1').text()).toBe('Video 30');
+		expect(wrapper.get('.media-title').text()).toBe('Video 30');
+		expect(wrapper.find('.media-detail-header').exists()).toBe(true);
+		expect(wrapper.get('media-overview-bar-stub').attributes('media-type')).toBe(String(PlexMediaType.OtherVideos));
 		expect(wrapper.text()).toContain('Independent video summary');
 		expect(wrapper.text()).toContain('Originally available');
-		expect(wrapper.findAll('dt').map((label) => label.text())).not.toContain('Updated');
+		expect(wrapper.findAll('td').map((label) => label.text())).not.toContain('Updated');
 		expect(wrapper.find('[data-cy="other-video-files-empty"]').exists()).toBe(true);
+	});
+	test('Should render video files through the shared table columns', async () => {
+		// Arrange
+		const item = video();
+		item.mediaData = [{
+			audioCodec: 'aac',
+			duration: 7200,
+			fileName: 'video-file.mkv',
+			id: 101,
+			plexApiMediaId: 201,
+			plexApiPartId: 301,
+			size: 1024,
+			videoCodec: 'h264',
+			videoResolution: VideoQuality.HD,
+		}];
+		vi.spyOn(useMediaStore(), 'getMediaDataDetailById').mockReturnValue(of(item));
+
+		// Act
+		const wrapper = await render();
+
+		// Assert
+		expect(wrapper.find('[data-cy="other-video-files-empty"]').exists()).toBe(false);
+		expect(wrapper.findAll('th').map((cell) => cell.text())).toEqual(expect.arrayContaining([
+			'Title',
+			'Quality',
+			'Year',
+			'Duration',
+			'Size',
+			'Added At',
+			'Updated At',
+			'Actions',
+		]));
+		expect(wrapper.find('[data-cy="other-video-original-automatic"]').exists()).toBe(false);
+		expect(wrapper.find('[data-cy="other-video-original-files-101"]').exists()).toBe(false);
 	});
 
 	test('Should reject Movie data rather than render a coerced Other Video', async () => {
@@ -96,7 +132,7 @@ describe('Other Videos root detail - request lifetime', () => {
 
 		// Assert
 		expect(wrapper.get('[data-cy="other-video-details-error"]').text()).toBe('Unable to load this video.');
-		expect(wrapper.find('h1').exists()).toBe(false);
+		expect(wrapper.find('.media-title').exists()).toBe(false);
 		expect(wrapper.find('[data-cy="other-video-root-checkbox"]').exists()).toBe(false);
 	});
 
@@ -105,7 +141,7 @@ describe('Other Videos root detail - request lifetime', () => {
 		const second = new Subject<PlexMediaDTO>();
 		vi.spyOn(useMediaStore(), 'getMediaDataDetailById').mockReturnValueOnce(of(video())).mockReturnValueOnce(second);
 		const wrapper = await render();
-		expect(wrapper.get('h1').text()).toBe('Video 20');
+		expect(wrapper.get('.media-title').text()).toBe('Video 20');
 
 		// Act
 		routeState.params.libraryId = '6';
@@ -114,7 +150,7 @@ describe('Other Videos root detail - request lifetime', () => {
 		await nextTick();
 
 		// Assert
-		expect(wrapper.find('h1').exists()).toBe(false);
+		expect(wrapper.find('.media-title').exists()).toBe(false);
 		expect(wrapper.get('[data-cy="other-video-details-error"]').text()).toBe('Unable to load this video.');
 	});
 
@@ -140,7 +176,7 @@ describe('Other Videos root detail - request lifetime', () => {
 
 		// Assert
 		expect(wrapper.find('[data-cy="other-video-details-error"]').exists()).toBe(false);
-		expect(wrapper.get('h1').text()).toBe('Video 20');
+		expect(wrapper.get('.media-title').text()).toBe('Video 20');
 	});
 
 	test('Should reject an invalid library before any request and offer a back action', async () => {

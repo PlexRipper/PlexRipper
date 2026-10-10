@@ -85,7 +85,6 @@ public class GetAllMediaByTypeFromPlexApiCommandHandler
 
         // Retrieve the media for this library
         var startTime = DateTime.UtcNow; // Start time for estimation
-
         for (var index = 0; index < totalSize; index += batchSize)
         {
             var mediaListResult = await GetMetadataForLibraryAsync(
@@ -170,6 +169,8 @@ public class GetAllMediaByTypeFromPlexApiCommandHandler
                     XPlexContainerStart = 0,
                     XPlexContainerSize = 0,
                     SectionId = libraryKey,
+                    // The SDK's default False adds a watched-state filter; null includes all media.
+                    Unwatched = null,
                     Sort = "titleSort:asc",
                 }
             )
@@ -203,6 +204,7 @@ public class GetAllMediaByTypeFromPlexApiCommandHandler
                     XPlexContainerStart = startIndex,
                     XPlexContainerSize = pageSize,
                     SectionId = libraryKey,
+                    Unwatched = null,
                     IncludeGuids = BoolInt.True,
                     IncludeMeta = BoolInt.True,
                     Sort = "titleSort:asc",

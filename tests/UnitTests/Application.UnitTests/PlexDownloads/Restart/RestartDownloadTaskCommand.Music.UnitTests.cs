@@ -32,8 +32,8 @@ public class RestartDownloadTaskCommandMusicUnitTests : BaseCommandUnitTest<Rest
             }
         );
         var dbContext = IDbContext;
-        var musicFiles = await dbContext.DownloadTaskMusicTrackFiles
-            .Include(x => x.Parent)
+        var musicFiles = await dbContext
+            .DownloadTaskMusicTrackFiles.Include(x => x.Parent)
                 .ThenInclude(x => x!.Parent)
                     .ThenInclude(x => x!.Parent)
             .OrderBy(x => x.PlexApiRatingKey)
@@ -41,7 +41,7 @@ public class RestartDownloadTaskCommandMusicUnitTests : BaseCommandUnitTest<Rest
         DownloadTaskFileBase target = musicFiles[0];
         DownloadTaskFileBase retained = musicFiles[1];
         BasePlexMediaData source = await dbContext
-            .PlexTrackData.Include(x => x.PlexTrack)
+            .PlexMusicTrackData.Include(x => x.PlexTrack)
                 .ThenInclude(x => x!.PlexAlbum)
                     .ThenInclude(x => x!.PlexArtist)
             .SingleAsync(CancellationToken);
@@ -83,7 +83,7 @@ public class RestartDownloadTaskCommandMusicUnitTests : BaseCommandUnitTest<Rest
             ((DownloadTaskMusicTrackFile)target).Parent!.Parent!.Parent!.ToKey(),
         };
         if (sourceMissing)
-            await dbContext.PlexTrackData.Where(x => x.Id == source.Id).ExecuteDeleteAsync(CancellationToken);
+            await dbContext.PlexMusicTrackData.Where(x => x.Id == source.Id).ExecuteDeleteAsync(CancellationToken);
         dbContext.ClearChangeTracker();
         SetupDependencies(b => b.RegisterType<DownloadTaskUpdateDispatcher>().As<IDownloadTaskUpdateDispatcher>());
         Mock.Mock<ICommandExecutor>()

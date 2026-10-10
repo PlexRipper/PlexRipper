@@ -56,15 +56,15 @@ public class SyncPlexMusicCommandHandler : ICommandHandler<SyncPlexMusicCommand,
         var albums = artists.SelectMany(x => x.Albums).ToList();
         var tracks = albums.SelectMany(x => x.Tracks).ToList();
         var currentArtists = await _dbContext
-            .PlexArtists.Where(x => x.PlexLibraryId == library.Id)
+            .PlexMusicArtists.Where(x => x.PlexLibraryId == library.Id)
             .Select(x => new CurrentArtist(x.Id, x.PlexApiRatingKey, x.UpdatedAt))
             .ToListAsync(ct);
         var currentAlbums = await _dbContext
-            .PlexAlbums.Where(x => x.PlexLibraryId == library.Id)
+            .PlexMusicAlbums.Where(x => x.PlexLibraryId == library.Id)
             .Select(x => new CurrentAlbum(x.Id, x.PlexApiRatingKey, x.UpdatedAt, x.PlexArtist!.PlexApiRatingKey))
             .ToListAsync(ct);
         var currentTracks = await _dbContext
-            .PlexTracks.Where(x => x.PlexLibraryId == library.Id)
+            .PlexMusicTracks.Where(x => x.PlexLibraryId == library.Id)
             .Select(x => new CurrentTrack(
                 x.Id,
                 x.PlexApiRatingKey,
@@ -165,7 +165,7 @@ public class SyncPlexMusicCommandHandler : ICommandHandler<SyncPlexMusicCommand,
             {
                 if (command.ForceMediaRefresh)
                 {
-                    await ctx.PlexArtists.Where(x => x.PlexLibraryId == library.Id).ExecuteDeleteAsync(txCt);
+                    await ctx.PlexMusicArtists.Where(x => x.PlexLibraryId == library.Id).ExecuteDeleteAsync(txCt);
                     createdArtists = artists;
                     createdAlbums = albums;
                     createdTracks = tracks;
@@ -196,12 +196,12 @@ public class SyncPlexMusicCommandHandler : ICommandHandler<SyncPlexMusicCommand,
                 }
                 await ctx.BulkDeleteByIdsAsync(
                     updatedTracks.Select(x => x.Id).ToList(),
-                    (db, ids) => db.PlexTrackData.Where(x => ids.Contains(x.PlexTrackId)),
+                    (db, ids) => db.PlexMusicTrackData.Where(x => ids.Contains(x.PlexTrackId)),
                     txCt
                 );
                 await ctx.BulkDeleteByIdsAsync(
                     deletedTracks.Select(x => x.Id).ToList(),
-                    (db, ids) => db.PlexTracks.Where(x => ids.Contains(x.Id)),
+                    (db, ids) => db.PlexMusicTracks.Where(x => ids.Contains(x.Id)),
                     txCt
                 );
                 if (updatedArtists.Count > 0)
@@ -239,12 +239,12 @@ public class SyncPlexMusicCommandHandler : ICommandHandler<SyncPlexMusicCommand,
                 // Reparent surviving children before deleting obsolete parents with cascading foreign keys.
                 await ctx.BulkDeleteByIdsAsync(
                     deletedAlbums.Select(x => x.Id).ToList(),
-                    (db, ids) => db.PlexAlbums.Where(x => ids.Contains(x.Id)),
+                    (db, ids) => db.PlexMusicAlbums.Where(x => ids.Contains(x.Id)),
                     txCt
                 );
                 await ctx.BulkDeleteByIdsAsync(
                     deletedArtists.Select(x => x.Id).ToList(),
-                    (db, ids) => db.PlexArtists.Where(x => ids.Contains(x.Id)),
+                    (db, ids) => db.PlexMusicArtists.Where(x => ids.Contains(x.Id)),
                     txCt
                 );
                 await ctx.SetMusicMediaMetrics(library.Id, artists.Count, albums.Count, tracks.Count, mediaSize, txCt);

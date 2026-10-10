@@ -27,7 +27,7 @@ public class SyncPlexMusicCommandUnitTests : BaseCommandUnitTest<SyncPlexMusicCo
         var db = IDbContext;
         var library = await db.PlexLibraries.OrderBy(x => x.Id).FirstAsync(CancellationToken);
         var artists = await db
-            .PlexArtists.Where(x => x.PlexLibraryId == library.Id)
+            .PlexMusicArtists.Where(x => x.PlexLibraryId == library.Id)
             .Include(x => x.Albums)
                 .ThenInclude(x => x.Tracks)
                     .ThenInclude(x => x.MediaDataList)
@@ -39,7 +39,7 @@ public class SyncPlexMusicCommandUnitTests : BaseCommandUnitTest<SyncPlexMusicCo
         var originalAlbumIds = originalAlbums.Select(x => x.Id).ToArray();
         var originalTrackIds = originalTracks.Select(x => x.Id).ToArray();
         var beforeData = await db
-            .PlexTrackData.Where(x => x.PlexLibraryId == library.Id)
+            .PlexMusicTrackData.Where(x => x.PlexLibraryId == library.Id)
             .OrderBy(x => x.Id)
             .Select(x => new
             {
@@ -51,7 +51,7 @@ public class SyncPlexMusicCommandUnitTests : BaseCommandUnitTest<SyncPlexMusicCo
             })
             .ToListAsync(CancellationToken);
         var control = await db
-            .PlexTracks.Where(x => x.PlexLibraryId != library.Id)
+            .PlexMusicTracks.Where(x => x.PlexLibraryId != library.Id)
             .OrderBy(x => x.Id)
             .Select(x => new
             {
@@ -64,7 +64,7 @@ public class SyncPlexMusicCommandUnitTests : BaseCommandUnitTest<SyncPlexMusicCo
             })
             .ToListAsync(CancellationToken);
         var controlData = await db
-            .PlexTrackData.Where(x => x.PlexLibraryId != library.Id)
+            .PlexMusicTrackData.Where(x => x.PlexLibraryId != library.Id)
             .OrderBy(x => x.Id)
             .Select(x => new
             {
@@ -93,7 +93,7 @@ public class SyncPlexMusicCommandUnitTests : BaseCommandUnitTest<SyncPlexMusicCo
             originalTracks[0].MediaSize += addedSize;
         }
         if (scenario == "initial")
-            await db.PlexArtists.Where(x => x.PlexLibraryId == library.Id).ExecuteDeleteAsync(CancellationToken);
+            await db.PlexMusicArtists.Where(x => x.PlexLibraryId == library.Id).ExecuteDeleteAsync(CancellationToken);
         if (scenario == "unchanged")
         {
             originalTracks[0].MediaSize = 1;
@@ -191,15 +191,15 @@ public class SyncPlexMusicCommandUnitTests : BaseCommandUnitTest<SyncPlexMusicCo
         var albums = artists.SelectMany(x => x.Albums).ToList();
         var tracks = albums.SelectMany(x => x.Tracks).ToList();
         var afterArtists = await db
-            .PlexArtists.Where(x => x.PlexLibraryId == library.Id)
+            .PlexMusicArtists.Where(x => x.PlexLibraryId == library.Id)
             .OrderBy(x => x.PlexApiRatingKey)
             .ToListAsync(CancellationToken);
         var afterAlbums = await db
-            .PlexAlbums.Where(x => x.PlexLibraryId == library.Id)
+            .PlexMusicAlbums.Where(x => x.PlexLibraryId == library.Id)
             .OrderBy(x => x.PlexApiRatingKey)
             .ToListAsync(CancellationToken);
         var afterTracks = await db
-            .PlexTracks.Where(x => x.PlexLibraryId == library.Id)
+            .PlexMusicTracks.Where(x => x.PlexLibraryId == library.Id)
             .OrderBy(x => x.PlexApiRatingKey)
             .ToListAsync(CancellationToken);
         afterArtists.Select(x => x.PlexApiRatingKey).ShouldBe(artists.Select(x => x.PlexApiRatingKey).Order());
@@ -230,7 +230,7 @@ public class SyncPlexMusicCommandUnitTests : BaseCommandUnitTest<SyncPlexMusicCo
             afterTracks.Single().Title.ShouldBe("Updated track");
         }
         var afterData = await db
-            .PlexTrackData.Where(x => x.PlexLibraryId == library.Id)
+            .PlexMusicTrackData.Where(x => x.PlexLibraryId == library.Id)
             .OrderBy(x => x.Id)
             .Select(x => new
             {
@@ -268,7 +268,7 @@ public class SyncPlexMusicCommandUnitTests : BaseCommandUnitTest<SyncPlexMusicCo
         );
         (
             await db
-                .PlexTracks.Where(x => x.PlexLibraryId != library.Id)
+                .PlexMusicTracks.Where(x => x.PlexLibraryId != library.Id)
                 .OrderBy(x => x.Id)
                 .Select(x => new
                 {
@@ -283,7 +283,7 @@ public class SyncPlexMusicCommandUnitTests : BaseCommandUnitTest<SyncPlexMusicCo
         ).ShouldBe(control);
         (
             await db
-                .PlexTrackData.Where(x => x.PlexLibraryId != library.Id)
+                .PlexMusicTrackData.Where(x => x.PlexLibraryId != library.Id)
                 .OrderBy(x => x.Id)
                 .Select(x => new
                 {
@@ -317,7 +317,7 @@ public class SyncPlexMusicCommandUnitTests : BaseCommandUnitTest<SyncPlexMusicCo
         );
         var db = IDbContext;
         var library = await db.PlexLibraries.OrderBy(x => x.Id).FirstAsync(CancellationToken);
-        var artists = await db.PlexArtists.OrderBy(x => x.Id).ToListAsync(CancellationToken);
+        var artists = await db.PlexMusicArtists.OrderBy(x => x.Id).ToListAsync(CancellationToken);
         artists.Count.ShouldBe(4);
         var actors = FakeData.GetPlexActors(seed).Generate(2);
         var countries = FakeData.GetPlexCountries(seed).Generate(2);

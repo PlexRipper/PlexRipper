@@ -58,7 +58,8 @@ public class GenerateDownloadTaskMusicArtistsCommandHandler
                 .Create400BadRequestResult("Music downloads do not support Sonarr or Radarr integrations.")
                 .LogError();
 
-        _log.Here().Debug("Creating {ArtistCount} Music artist download tasks", artistSelections.Sum(x => x.MediaIds.Count));
+        _log.Here()
+            .Debug("Creating {ArtistCount} Music artist download tasks", artistSelections.Sum(x => x.MediaIds.Count));
         var createdArtists = 0;
         var albumSelections = new List<DownloadMediaDTO>();
         foreach (var selection in artistSelections)
@@ -77,7 +78,7 @@ public class GenerateDownloadTaskMusicArtistsCommandHandler
 
             var artistIds = selection.MediaIds.Distinct().ToList();
             var artists = await _dbContext
-                .PlexArtists.Include(x => x.Albums)
+                .PlexMusicArtists.Include(x => x.Albums)
                     .ThenInclude(x => x.Tracks)
                 .Where(x =>
                     artistIds.Contains(x.Id)
@@ -127,8 +128,7 @@ public class GenerateDownloadTaskMusicArtistsCommandHandler
                             MediaIds = [album.Id],
                             Qualities = directAlbum?.Qualities.Count > 0 ? directAlbum.Qualities : selection.Qualities,
                             KeepCompletedInDownloadFolder =
-                                directAlbum?.KeepCompletedInDownloadFolder
-                                ?? selection.KeepCompletedInDownloadFolder,
+                                directAlbum?.KeepCompletedInDownloadFolder ?? selection.KeepCompletedInDownloadFolder,
                         }
                     );
                 }
@@ -141,10 +141,7 @@ public class GenerateDownloadTaskMusicArtistsCommandHandler
                             && x.PlexLibraryId == artist.PlexLibraryId
                             && x.MediaIds.Any(trackIds.Contains)
                         )
-                        .Select(x => x with
-                        {
-                            MediaIds = x.MediaIds.Where(trackIds.Contains).ToList(),
-                        })
+                        .Select(x => x with { MediaIds = x.MediaIds.Where(trackIds.Contains).ToList() })
                 );
             }
         }

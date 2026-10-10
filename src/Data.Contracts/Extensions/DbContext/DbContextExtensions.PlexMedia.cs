@@ -57,7 +57,9 @@ public static partial class DbContextExtensions
             case PlexMediaType.MusicArtist:
             {
                 var id = await dbContext
-                    .PlexArtists.Where(x => x.PlexApiRatingKey == plexApiRatingKey && x.PlexServerId == plexServerId)
+                    .PlexMusicArtists.Where(x =>
+                        x.PlexApiRatingKey == plexApiRatingKey && x.PlexServerId == plexServerId
+                    )
                     .Select(x => x.Id)
                     .FirstOrDefaultAsync(CancellationToken.None);
                 return ToLookupResult(id);
@@ -65,7 +67,9 @@ public static partial class DbContextExtensions
             case PlexMediaType.MusicAlbum:
             {
                 var id = await dbContext
-                    .PlexAlbums.Where(x => x.PlexApiRatingKey == plexApiRatingKey && x.PlexServerId == plexServerId)
+                    .PlexMusicAlbums.Where(x =>
+                        x.PlexApiRatingKey == plexApiRatingKey && x.PlexServerId == plexServerId
+                    )
                     .Select(x => x.Id)
                     .FirstOrDefaultAsync(CancellationToken.None);
                 return ToLookupResult(id);
@@ -73,7 +77,9 @@ public static partial class DbContextExtensions
             case PlexMediaType.MusicTrack:
             {
                 var id = await dbContext
-                    .PlexTracks.Where(x => x.PlexApiRatingKey == plexApiRatingKey && x.PlexServerId == plexServerId)
+                    .PlexMusicTracks.Where(x =>
+                        x.PlexApiRatingKey == plexApiRatingKey && x.PlexServerId == plexServerId
+                    )
                     .Select(x => x.Id)
                     .FirstOrDefaultAsync(CancellationToken.None);
                 return ToLookupResult(id);

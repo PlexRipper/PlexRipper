@@ -700,7 +700,7 @@ public static partial class MockDatabase
                 }
             }
 
-            context.PlexArtists.AddRange(artists);
+            context.PlexMusicArtists.AddRange(artists);
             await context.SaveChangesAsync();
             await context.SetMusicMediaMetrics(library.Id, artists.Count, albumCount, trackCount, mediaSize);
         }

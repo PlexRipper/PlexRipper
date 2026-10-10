@@ -3,8 +3,7 @@ namespace Reaparr.Application;
 public record GenerateDownloadTaskMusicAlbumsCommand(CreateDownloadTasksRequest Request)
     : ICommand<Result<DownloadTaskCreationReport>>;
 
-public class GenerateDownloadTaskMusicAlbumsCommandValidator
-    : AbstractValidator<GenerateDownloadTaskMusicAlbumsCommand>
+public class GenerateDownloadTaskMusicAlbumsCommandValidator : AbstractValidator<GenerateDownloadTaskMusicAlbumsCommand>
 {
     public GenerateDownloadTaskMusicAlbumsCommandValidator()
     {
@@ -50,7 +49,8 @@ public class GenerateDownloadTaskMusicAlbumsCommandHandler
             return ResultExtensions
                 .Create400BadRequestResult("Music downloads do not support Sonarr or Radarr integrations.")
                 .LogError();
-        _log.Here().Debug("Creating {AlbumCount} Music album download tasks", albumSelections.Sum(x => x.MediaIds.Count));
+        _log.Here()
+            .Debug("Creating {AlbumCount} Music album download tasks", albumSelections.Sum(x => x.MediaIds.Count));
         var artistTasks = new Dictionary<(int ServerId, int LibraryId, int RatingKey), DownloadTaskMusicArtist>();
 
         var createdAlbums = 0;
@@ -71,7 +71,7 @@ public class GenerateDownloadTaskMusicAlbumsCommandHandler
 
             var albumIds = selection.MediaIds.Distinct().ToList();
             var albums = await _dbContext
-                .PlexAlbums.Include(x => x.PlexArtist)
+                .PlexMusicAlbums.Include(x => x.PlexArtist)
                 .Include(x => x.Tracks)
                 .Where(x =>
                     albumIds.Contains(x.Id)
@@ -110,9 +110,7 @@ public class GenerateDownloadTaskMusicAlbumsCommandHandler
                     }
                     artistTasks.Add(artistKey, artistTask);
                 }
-                var albumTask = artistTask.Children.SingleOrDefault(x =>
-                    x.PlexApiRatingKey == album.PlexApiRatingKey
-                );
+                var albumTask = artistTask.Children.SingleOrDefault(x => x.PlexApiRatingKey == album.PlexApiRatingKey);
                 if (albumTask is null)
                 {
                     albumTask = album.MapToDownloadTask(artistTask, null);
@@ -138,8 +136,7 @@ public class GenerateDownloadTaskMusicAlbumsCommandHandler
                             MediaIds = [track.Id],
                             Qualities = directTrack?.Qualities.Count > 0 ? directTrack.Qualities : selection.Qualities,
                             KeepCompletedInDownloadFolder =
-                                directTrack?.KeepCompletedInDownloadFolder
-                                ?? selection.KeepCompletedInDownloadFolder,
+                                directTrack?.KeepCompletedInDownloadFolder ?? selection.KeepCompletedInDownloadFolder,
                         }
                     );
                 }

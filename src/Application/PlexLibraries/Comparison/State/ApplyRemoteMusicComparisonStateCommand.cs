@@ -38,13 +38,7 @@ public class ApplyRemoteMusicComparisonStateCommandHandler
 
         var remoteLibraryExists = await _dbContext
             .PlexLibraries.WhereIsNotOwned()
-            .AnyAsync(
-                x =>
-                    x.Id == command.RemoteLibraryId
-                    && x.Type == PlexMediaType.MusicArtist
-                    && !x.Outdated,
-                ct
-            );
+            .AnyAsync(x => x.Id == command.RemoteLibraryId && x.Type == PlexMediaType.MusicArtist && !x.Outdated, ct);
 
         if (!remoteLibraryExists)
             return Result.Ok();
@@ -93,16 +87,12 @@ public class ApplyRemoteMusicComparisonStateCommandHandler
 
         var albumHits = await (
             from comparison in _dbContext.PlexMusicAlbumComparisons
-            join album in _dbContext.PlexAlbums on comparison.RemotePlexMediaId equals album.Id
+            join album in _dbContext.PlexMusicAlbums on comparison.RemotePlexMediaId equals album.Id
             where
                 comparison.RemotePlexLibraryId == command.RemoteLibraryId
                 && currentOwnedLibraryIds.Contains(comparison.OwnedPlexLibraryId)
                 && (artistIds.Contains(album.PlexArtistId) || albumIds.Contains(album.Id))
-            select new
-            {
-                album.PlexArtistId,
-                comparison.RemotePlexMediaId,
-            }
+            select new { album.PlexArtistId, comparison.RemotePlexMediaId }
         ).ToListAsync(ct);
 
         var albumHitIdSet = albumHits.Select(x => x.RemotePlexMediaId).ToHashSet();
@@ -112,8 +102,8 @@ public class ApplyRemoteMusicComparisonStateCommandHandler
 
         var trackHits = await (
             from comparison in _dbContext.PlexMusicTrackComparisons
-            join track in _dbContext.PlexTracks on comparison.RemotePlexMediaId equals track.Id
-            join album in _dbContext.PlexAlbums on track.PlexAlbumId equals album.Id
+            join track in _dbContext.PlexMusicTracks on comparison.RemotePlexMediaId equals track.Id
+            join album in _dbContext.PlexMusicAlbums on track.PlexAlbumId equals album.Id
             where
                 comparison.RemotePlexLibraryId == command.RemoteLibraryId
                 && currentOwnedLibraryIds.Contains(comparison.OwnedPlexLibraryId)
@@ -139,10 +129,7 @@ public class ApplyRemoteMusicComparisonStateCommandHandler
             .ToDictionary(g => g.Key, g => g.Select(x => x.RemotePlexMediaId).Distinct().Count());
 
         var artistChildCountLookup = await _dbContext
-            .PlexArtists.Where(x =>
-                x.PlexLibraryId == command.RemoteLibraryId
-                && artistIds.Contains(x.Id)
-            )
+            .PlexMusicArtists.Where(x => x.PlexLibraryId == command.RemoteLibraryId && artistIds.Contains(x.Id))
             .Select(x => new
             {
                 x.Id,
@@ -152,15 +139,8 @@ public class ApplyRemoteMusicComparisonStateCommandHandler
             .ToDictionaryAsync(x => x.Id, ct);
 
         var albumTrackCountLookup = await _dbContext
-            .PlexAlbums.Where(x =>
-                x.PlexLibraryId == command.RemoteLibraryId
-                && albumIds.Contains(x.Id)
-            )
-            .Select(x => new
-            {
-                x.Id,
-                TrackCount = x.Tracks.Count,
-            })
+            .PlexMusicAlbums.Where(x => x.PlexLibraryId == command.RemoteLibraryId && albumIds.Contains(x.Id))
+            .Select(x => new { x.Id, TrackCount = x.Tracks.Count })
             .ToDictionaryAsync(x => x.Id, x => x.TrackCount, ct);
 
         foreach (var item in items)
@@ -185,7 +165,10 @@ public class ApplyRemoteMusicComparisonStateCommandHandler
                     break;
 
                 case PlexMediaType.MusicAlbum:
-                    if (!albumHitIdSet.Contains(item.Id) || !albumTrackCountLookup.TryGetValue(item.Id, out var trackCount))
+                    if (
+                        !albumHitIdSet.Contains(item.Id)
+                        || !albumTrackCountLookup.TryGetValue(item.Id, out var trackCount)
+                    )
                     {
                         item.SetComparisonState(PlexMediaComparisonState.Missing);
                         break;

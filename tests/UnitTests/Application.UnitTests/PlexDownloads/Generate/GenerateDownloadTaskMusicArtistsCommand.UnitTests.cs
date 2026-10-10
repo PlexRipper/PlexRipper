@@ -7,14 +7,20 @@ public class GenerateDownloadTaskMusicArtistsCommandUnitTests
     public async Task ShouldCreateArtistAndForwardAlbumsWithDescendantChoices_WhenArtistIsSelected()
     {
         // Arrange
-        await SetupDatabase(62601, config =>
-        {
-            config.PlexMusicLibraryCount = 1;
-            config.MusicArtistCount = 1;
-            config.MusicAlbumCount = 1;
-            config.MusicTrackCount = 1;
-        });
-        var artist = await IDbContext.PlexArtists.Include(x => x.Albums).ThenInclude(x => x.Tracks).SingleAsync(CancellationToken);
+        await SetupDatabase(
+            62601,
+            config =>
+            {
+                config.PlexMusicLibraryCount = 1;
+                config.MusicArtistCount = 1;
+                config.MusicAlbumCount = 1;
+                config.MusicTrackCount = 1;
+            }
+        );
+        var artist = await IDbContext
+            .PlexMusicArtists.Include(x => x.Albums)
+                .ThenInclude(x => x.Tracks)
+            .SingleAsync(CancellationToken);
         var album = artist.Albums.Single();
         var track = album.Tracks.Single();
         var inherited = new PlexMediaQualityDTO
@@ -29,7 +35,8 @@ public class GenerateDownloadTaskMusicArtistsCommandUnitTests
         Mock.Mock<ICommandExecutor>()
             .Setup(x => x.Send(It.IsAny<GenerateDownloadTaskMusicAlbumsCommand>(), It.IsAny<CancellationToken>()))
             .Callback<ICommand<Result<DownloadTaskCreationReport>>, CancellationToken>(
-                (value, _) => forwarded = (GenerateDownloadTaskMusicAlbumsCommand)value)
+                (value, _) => forwarded = (GenerateDownloadTaskMusicAlbumsCommand)value
+            )
             .ReturnsAsync(Result.Ok(new DownloadTaskCreationReport { MusicAlbums = 1, MusicTracks = 1 }))
             .Verifiable(Times.Once());
         var request = new CreateDownloadTasksRequest(
@@ -64,7 +71,14 @@ public class GenerateDownloadTaskMusicArtistsCommandUnitTests
         // Assert
         result.IsSuccess.ShouldBeTrue();
         result.Errors.Count.ShouldBe(0);
-        result.Value.ShouldBe(new DownloadTaskCreationReport { MusicArtists = 1, MusicAlbums = 1, MusicTracks = 1 });
+        result.Value.ShouldBe(
+            new DownloadTaskCreationReport
+            {
+                MusicArtists = 1,
+                MusicAlbums = 1,
+                MusicTracks = 1,
+            }
+        );
         var task = await IDbContext.DownloadTaskMusicArtists.SingleAsync(CancellationToken);
         (task.PlexApiRatingKey, task.PlexServerId, task.PlexLibraryId).ShouldBe(
             (artist.PlexApiRatingKey, artist.PlexServerId, artist.PlexLibraryId)
@@ -81,12 +95,15 @@ public class GenerateDownloadTaskMusicArtistsCommandUnitTests
     public async Task ShouldRejectArtistFromAnotherLibraryWithoutDispatching_WhenOwnershipMismatches()
     {
         // Arrange
-        await SetupDatabase(62602, config =>
-        {
-            config.PlexMusicLibraryCount = 2;
-            config.MusicArtistCount = 1;
-        });
-        var artists = await IDbContext.PlexArtists.OrderBy(x => x.Id).ToListAsync(CancellationToken);
+        await SetupDatabase(
+            62602,
+            config =>
+            {
+                config.PlexMusicLibraryCount = 2;
+                config.MusicArtistCount = 1;
+            }
+        );
+        var artists = await IDbContext.PlexMusicArtists.OrderBy(x => x.Id).ToListAsync(CancellationToken);
         var selection = new DownloadMediaDTO
         {
             Type = PlexMediaType.MusicArtist,
@@ -105,9 +122,10 @@ public class GenerateDownloadTaskMusicArtistsCommandUnitTests
         result.IsFailed.ShouldBeTrue();
         result.Errors.Count.ShouldBe(1);
         (await IDbContext.DownloadTaskMusicArtists.CountAsync(CancellationToken)).ShouldBe(0);
-        Mock.Mock<ICommandExecutor>().Verify(
-            x => x.Send(It.IsAny<GenerateDownloadTaskMusicAlbumsCommand>(), It.IsAny<CancellationToken>()),
-            Times.Never()
-        );
+        Mock.Mock<ICommandExecutor>()
+            .Verify(
+                x => x.Send(It.IsAny<GenerateDownloadTaskMusicAlbumsCommand>(), It.IsAny<CancellationToken>()),
+                Times.Never()
+            );
     }
 }

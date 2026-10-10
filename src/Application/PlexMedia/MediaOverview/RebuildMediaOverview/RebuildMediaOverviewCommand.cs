@@ -132,7 +132,7 @@ public sealed class RebuildMediaOverviewCommandHandler : ICommandHandler<Rebuild
             case PlexMediaType.MusicArtist:
             {
                 var source = await context
-                    .PlexArtists.Select(x => new
+                    .PlexMusicArtists.Select(x => new
                     {
                         x.Id,
                         x.PlexLibraryId,

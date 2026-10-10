@@ -28,7 +28,7 @@ public class DbContextExtensionsPlexMediaUnitTests : BaseUnitTest
         var source = type switch
         {
             PlexMediaType.MusicArtist => await dbContext
-                .PlexArtists.Select(x => new
+                .PlexMusicArtists.Select(x => new
                 {
                     x.Id,
                     x.PlexApiRatingKey,
@@ -36,7 +36,7 @@ public class DbContextExtensionsPlexMediaUnitTests : BaseUnitTest
                 })
                 .SingleAsync(CancellationToken),
             PlexMediaType.MusicAlbum => await dbContext
-                .PlexAlbums.Select(x => new
+                .PlexMusicAlbums.Select(x => new
                 {
                     x.Id,
                     x.PlexApiRatingKey,
@@ -44,7 +44,7 @@ public class DbContextExtensionsPlexMediaUnitTests : BaseUnitTest
                 })
                 .SingleAsync(CancellationToken),
             PlexMediaType.MusicTrack => await dbContext
-                .PlexTracks.Select(x => new
+                .PlexMusicTracks.Select(x => new
                 {
                     x.Id,
                     x.PlexApiRatingKey,

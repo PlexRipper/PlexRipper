@@ -373,7 +373,7 @@ public class GetMediaByTypeCommandHandler : ICommandHandler<GetMediaByTypeComman
             case PlexMediaType.MusicArtist:
             {
                 var artistQuery = _dbContext
-                    .PlexArtists.Include(x => x.Albums)
+                    .PlexMusicArtists.Include(x => x.Albums)
                     .Include(x => x.Actors)
                     .Include(x => x.Countries)
                     .Include(x => x.Genres)

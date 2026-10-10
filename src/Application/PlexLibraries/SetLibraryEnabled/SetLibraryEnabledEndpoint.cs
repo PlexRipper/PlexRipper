@@ -126,7 +126,8 @@ public class SetLibraryEnabledEndpoint : Endpoint<SetLibraryEnabledRequest, Resu
         if (plexLibrary.Type == PlexMediaType.MusicArtist)
         {
             var comparisonResult = await _commandExecutor.Send(
-                new InvalidateLibraryComparisonJobsCommand([plexLibrary.Id]), ct
+                new InvalidateLibraryComparisonJobsCommand([plexLibrary.Id]),
+                ct
             );
             if (comparisonResult.IsFailed)
                 return comparisonResult.LogIfFailed();
@@ -145,7 +146,7 @@ public class SetLibraryEnabledEndpoint : Endpoint<SetLibraryEnabledRequest, Resu
                         .PlexTvShows.Where(x => x.PlexLibraryId == plexLibrary.Id)
                         .ExecuteDeleteAsync(txCt),
                     PlexMediaType.MusicArtist => await dbContext
-                        .PlexArtists.Where(x => x.PlexLibraryId == plexLibrary.Id)
+                        .PlexMusicArtists.Where(x => x.PlexLibraryId == plexLibrary.Id)
                         .ExecuteDeleteAsync(txCt),
                     PlexMediaType.PhotoAlbum => await dbContext
                         .PlexPhotoAlbums.Where(x => x.PlexLibraryId == plexLibrary.Id)

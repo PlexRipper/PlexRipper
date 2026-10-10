@@ -457,7 +457,7 @@ public class RestartDownloadTaskCommandHandler : ICommandHandler<RestartDownload
             return ResultExtensions.EntityNotFound(nameof(DownloadTaskMusicTrackFile), downloadTaskKey.Id).LogError();
 
         var source = await _dbContext
-            .PlexTrackData.Where(x =>
+            .PlexMusicTrackData.Where(x =>
                 x.PlexApiMediaId == downloadTask.PlexApiMediaId
                 && x.PlexApiPartId == downloadTask.PlexApiPartId
                 && x.PlexTrack!.PlexServerId == downloadTask.PlexServerId

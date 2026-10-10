@@ -11,7 +11,10 @@ public class GetMediaOverviewMusicCommandUnitTests : BaseCommandUnitTest<GetMedi
     [Arguments("sortIndex:desc", "Countries")]
     [Arguments("sortIndex:asc", "Genres")]
     [Arguments("sortIndex:desc", "Genres")]
-    public async Task ShouldReturnFilteredArtistPageInSnapshotOrder_WithFullNavigationAndHierarchy(string sort, string metadataField)
+    public async Task ShouldReturnFilteredArtistPageInSnapshotOrder_WithFullNavigationAndHierarchy(
+        string sort,
+        string metadataField
+    )
     {
         // Arrange
         await SetupDatabase(
@@ -31,7 +34,7 @@ public class GetMediaOverviewMusicCommandUnitTests : BaseCommandUnitTest<GetMedi
             .ToListAsync(CancellationToken);
         libraryIds.Count.ShouldBe(2);
         var artists = await dbContext
-            .PlexArtists.Include(x => x.Albums)
+            .PlexMusicArtists.Include(x => x.Albums)
                 .ThenInclude(x => x.Tracks)
             .OrderBy(x => x.PlexLibraryId)
             .ThenBy(x => x.Id)
@@ -68,7 +71,7 @@ public class GetMediaOverviewMusicCommandUnitTests : BaseCommandUnitTest<GetMedi
                 _ => "control",
             };
             await dbContext
-                .PlexArtists.Where(x => x.Id == artist.Id)
+                .PlexMusicArtists.Where(x => x.Id == artist.Id)
                 .ExecuteUpdateAsync(
                     x =>
                         x.SetProperty(y => y.SearchTitle, title)
@@ -92,13 +95,24 @@ public class GetMediaOverviewMusicCommandUnitTests : BaseCommandUnitTest<GetMedi
             );
             if (targetIndex != 3)
             {
-                dbContext.PlexMusicArtistActors.Add(new PlexMusicArtistActors(actor.Id, artist.PlexLibraryId, artist.Id));
-                dbContext.PlexMusicArtistCountries.Add(new PlexMusicArtistCountries(country.Id, artist.PlexLibraryId, artist.Id));
-                dbContext.PlexMusicArtistGenres.Add(new PlexMusicArtistGenres(genre.Id, artist.PlexLibraryId, artist.Id));
+                dbContext.PlexMusicArtistActors.Add(
+                    new PlexMusicArtistActors(actor.Id, artist.PlexLibraryId, artist.Id)
+                );
+                dbContext.PlexMusicArtistCountries.Add(
+                    new PlexMusicArtistCountries(country.Id, artist.PlexLibraryId, artist.Id)
+                );
+                dbContext.PlexMusicArtistGenres.Add(
+                    new PlexMusicArtistGenres(genre.Id, artist.PlexLibraryId, artist.Id)
+                );
             }
         }
         await dbContext.SaveChangesAsync(CancellationToken);
-        var metadataId = metadataField switch { "Actors" => actor.Id, "Countries" => country.Id, _ => genre.Id };
+        var metadataId = metadataField switch
+        {
+            "Actors" => actor.Id,
+            "Countries" => country.Id,
+            _ => genre.Id,
+        };
         var filter = new MediaQueryFilter
         {
             MediaType = PlexMediaType.MusicArtist,
@@ -114,12 +128,23 @@ public class GetMediaOverviewMusicCommandUnitTests : BaseCommandUnitTest<GetMedi
             },
         };
         Mock.Mock<ICommandExecutor>()
-            .Setup(x => x.Send(It.Is<ApplyComparisonStateCommand>(c =>
-                c.MediaType == PlexMediaType.MusicArtist && c.PlexLibraryId == libraryIds[0]
-                && c.Items.Count == 1 && c.Items[0].Id == target[2].Id), CancellationToken))
-            .Callback<ICommand<Result>, CancellationToken>((command, _) =>
-                ((ApplyComparisonStateCommand)command).Items[0].SetComparisonState(PlexMediaComparisonState.Partial))
-            .ReturnsAsync(Result.Ok()).Verifiable(Times.Once());
+            .Setup(x =>
+                x.Send(
+                    It.Is<ApplyComparisonStateCommand>(c =>
+                        c.MediaType == PlexMediaType.MusicArtist
+                        && c.PlexLibraryId == libraryIds[0]
+                        && c.Items.Count == 1
+                        && c.Items[0].Id == target[2].Id
+                    ),
+                    CancellationToken
+                )
+            )
+            .Callback<ICommand<Result>, CancellationToken>(
+                (command, _) =>
+                    ((ApplyComparisonStateCommand)command).Items[0].SetComparisonState(PlexMediaComparisonState.Partial)
+            )
+            .ReturnsAsync(Result.Ok())
+            .Verifiable(Times.Once());
 
         // Act
         var result = await TestHandlerExecuteAsync<PagedMediaQueryResult>(new GetMediaOverviewMusicCommand(filter));
@@ -154,6 +179,7 @@ public class GetMediaOverviewMusicCommandUnitTests : BaseCommandUnitTest<GetMedi
             .Verify(x => x.Send(It.IsAny<GetMediaByTypeCommand>(), It.IsAny<CancellationToken>()), Times.Never());
         Mock.Mock<ICommandExecutor>().Verify();
     }
+
     [Test]
     [Arguments(PlexMediaComparisonState.NotCompared)]
     [Arguments(PlexMediaComparisonState.Pending)]
@@ -165,17 +191,33 @@ public class GetMediaOverviewMusicCommandUnitTests : BaseCommandUnitTest<GetMedi
         // Arrange
         var filter = new MediaQueryFilter
         {
-            MediaType = PlexMediaType.MusicArtist, PlexLibraryId = 17,
-            FilterOfflineMedia = false, FilterOwnedMedia = false, ComparisonState = state,
-            Parameters = new FlexQueryParameters { Page = 2, PageSize = 3, Sort = "Year:desc", Filter = "Year:gte:2000" },
+            MediaType = PlexMediaType.MusicArtist,
+            PlexLibraryId = 17,
+            FilterOfflineMedia = false,
+            FilterOwnedMedia = false,
+            ComparisonState = state,
+            Parameters = new FlexQueryParameters
+            {
+                Page = 2,
+                PageSize = 3,
+                Sort = "Year:desc",
+                Filter = "Year:gte:2000",
+            },
         };
         var page = new PagedMediaQueryResult
         {
-            QueryHash = filter.QueryHash, Page = 2, PageSize = 3,
-            TotalCount = 4, MediaCount = 4, MediaSize = 1234, TotalMediaSize = 1234,
+            QueryHash = filter.QueryHash,
+            Page = 2,
+            PageSize = 3,
+            TotalCount = 4,
+            MediaCount = 4,
+            MediaSize = 1234,
+            TotalMediaSize = 1234,
         };
-        Mock.Mock<ICommandExecutor>().Setup(x => x.Send(It.Is<GetMediaByTypeCommand>(c => c.Filter == filter), CancellationToken))
-            .ReturnsAsync(Result.Ok(page)).Verifiable(Times.Once());
+        Mock.Mock<ICommandExecutor>()
+            .Setup(x => x.Send(It.Is<GetMediaByTypeCommand>(c => c.Filter == filter), CancellationToken))
+            .ReturnsAsync(Result.Ok(page))
+            .Verifiable(Times.Once());
 
         // Act
         var result = await TestHandlerExecuteAsync<PagedMediaQueryResult>(new GetMediaOverviewMusicCommand(filter));
@@ -185,6 +227,7 @@ public class GetMediaOverviewMusicCommandUnitTests : BaseCommandUnitTest<GetMedi
         result.Errors.Count.ShouldBe(0);
         result.Value.ShouldBeSameAs(page);
         Mock.Mock<ICommandExecutor>().Verify();
-        Mock.Mock<ICommandExecutor>().Verify(x => x.Send(It.IsAny<ApplyComparisonStateCommand>(), It.IsAny<CancellationToken>()), Times.Never());
+        Mock.Mock<ICommandExecutor>()
+            .Verify(x => x.Send(It.IsAny<ApplyComparisonStateCommand>(), It.IsAny<CancellationToken>()), Times.Never());
     }
 }

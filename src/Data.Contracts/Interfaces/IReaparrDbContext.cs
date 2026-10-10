@@ -85,15 +85,15 @@ public interface IReaparrDbContext : IDisposable
 
     #region PlexMusic
 
-    DbSet<PlexMusicArtist> PlexArtists { get; }
+    DbSet<PlexMusicArtist> PlexMusicArtists { get; }
 
     DbSet<MediaOverviewMusicArtistSnapshot> MediaOverviewMusicArtistSnapshots { get; }
 
-    DbSet<PlexMusicAlbum> PlexAlbums { get; }
+    DbSet<PlexMusicAlbum> PlexMusicAlbums { get; }
 
-    DbSet<PlexMusicTrack> PlexTracks { get; }
+    DbSet<PlexMusicTrack> PlexMusicTracks { get; }
 
-    DbSet<PlexMusicTrackMediaData> PlexTrackData { get; }
+    DbSet<PlexMusicTrackMediaData> PlexMusicTrackData { get; }
 
     #endregion
 

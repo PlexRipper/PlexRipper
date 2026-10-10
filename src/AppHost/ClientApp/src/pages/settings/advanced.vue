@@ -1,9 +1,9 @@
 <template>
 	<QPage class="settings-page">
-		<DebugSection />
 		<DownloadManagerSection />
 		<DownloadScheduleSection />
 		<NetworkSection />
 		<SetupSection />
+		<DebugSection />
 	</QPage>
 </template>

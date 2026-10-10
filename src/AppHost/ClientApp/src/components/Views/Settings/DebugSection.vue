@@ -1,5 +1,6 @@
 <template>
-	<QSection>
+	<QSection
+		data-cy="settings-debug-section">
 		<template #header>
 			{{ t('pages.settings.advanced.debug.header') }}
 		</template>

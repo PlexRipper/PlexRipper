@@ -1,7 +1,7 @@
 <template>
 	<QPage>
-		<NotificationDebug />
 		<ButtonsDebug />
+		<MediaTypeIconsDebug />
 		<MediaQualityDebug />
 		<MediaComparisionDebug />
 		<AlertDisplayDebug />

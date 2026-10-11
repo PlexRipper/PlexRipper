@@ -344,8 +344,7 @@ public class CompareMusicPlexLibraryCommandHandler : ICommandHandler<CompareMusi
     )
     {
         if (
-            Conflict(remote.MusicBrainzReleaseGroupId, owned.MusicBrainzReleaseGroupId)
-            || Conflict(remote.RecordLabel, owned.RecordLabel)
+            Conflict(remote.RecordLabel, owned.RecordLabel)
             || Conflict(remote.Country, owned.Country)
             || (
                 remote.ReleaseDate.HasValue
@@ -381,10 +380,8 @@ public class CompareMusicPlexLibraryCommandHandler : ICommandHandler<CompareMusi
 
     private static bool SameTrackAtPosition(PlexMusicTrack remote, PlexMusicTrack owned) =>
         !Conflict(remote.MusicBrainzReleaseTrackId, owned.MusicBrainzReleaseTrackId)
-        && !Conflict(remote.MusicBrainzRecordingId, owned.MusicBrainzRecordingId)
         && (
             Equal(remote.MusicBrainzReleaseTrackId, owned.MusicBrainzReleaseTrackId)
-            || Equal(remote.MusicBrainzRecordingId, owned.MusicBrainzRecordingId)
             || Equal(remote.SearchTitle, owned.SearchTitle)
         );
 
@@ -402,9 +399,6 @@ public class CompareMusicPlexLibraryCommandHandler : ICommandHandler<CompareMusi
         var releases = ownedTracks
             .Where(x => HasId(x.MusicBrainzReleaseTrackId))
             .ToLookup(x => x.MusicBrainzReleaseTrackId!, StringComparer.OrdinalIgnoreCase);
-        var recordings = ownedTracks
-            .Where(x => HasId(x.MusicBrainzRecordingId))
-            .ToLookup(x => x.MusicBrainzRecordingId!, StringComparer.OrdinalIgnoreCase);
         var positions = ownedTracks
             .Where(x => Position(x, singleDisc) != null)
             .ToLookup(x => Position(x, singleDisc)!.Value);
@@ -416,17 +410,6 @@ public class CompareMusicPlexLibraryCommandHandler : ICommandHandler<CompareMusi
                     .Where(x => CompatibleTrack(remote, x, singleDisc))
                     .ToList()
                 : [];
-            if (matches.Count == 0)
-            {
-                matchType = PlexMediaComparisonMatchType.MusicBrainzRecordingId;
-                matches = HasId(remote.MusicBrainzRecordingId)
-                    ? recordings[remote.MusicBrainzRecordingId!]
-                        .Where(x => CompatibleTrack(remote, x, singleDisc))
-                        .ToList()
-                    : [];
-                if (matches.Count > 1 && matches.Select(x => Position(x, singleDisc)).Distinct().Count() > 1)
-                    continue;
-            }
             if (matches.Count == 0)
             {
                 matchType = PlexMediaComparisonMatchType.ParentAndChildNumbers;
@@ -456,7 +439,6 @@ public class CompareMusicPlexLibraryCommandHandler : ICommandHandler<CompareMusi
 
     private static bool CompatibleTrack(PlexMusicTrack remote, PlexMusicTrack owned, bool singleDisc) =>
         !Conflict(remote.MusicBrainzReleaseTrackId, owned.MusicBrainzReleaseTrackId)
-        && !Conflict(remote.MusicBrainzRecordingId, owned.MusicBrainzRecordingId)
         && !(remote.DiscNumber > 0 && owned.DiscNumber > 0 && remote.DiscNumber != owned.DiscNumber)
         && !(remote.TrackNumber > 0 && owned.TrackNumber > 0 && remote.TrackNumber != owned.TrackNumber)
         && (singleDisc || (remote.DiscNumber > 0 && owned.DiscNumber > 0));

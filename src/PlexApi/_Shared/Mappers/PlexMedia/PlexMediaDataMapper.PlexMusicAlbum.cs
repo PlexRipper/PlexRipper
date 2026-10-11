@@ -42,7 +42,6 @@ public static partial class PlexMediaDataMapper
             DiscCount = null,
             TrackCount = null,
             MusicBrainzReleaseId = null,
-            MusicBrainzReleaseGroupId = null,
             RecordLabel = null,
             Country = null,
         };

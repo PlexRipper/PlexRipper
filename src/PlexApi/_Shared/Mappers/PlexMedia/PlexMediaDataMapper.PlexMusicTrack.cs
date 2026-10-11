@@ -87,7 +87,6 @@ public static partial class PlexMediaDataMapper
             PlexServerId = 0,
             DiscNumber = source.ParentIndex >= 0 ? source.ParentIndex : null,
             TrackNumber = source.Index >= 0 ? source.Index : null,
-            MusicBrainzRecordingId = null,
             MusicBrainzReleaseTrackId = null,
         };
 

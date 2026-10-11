@@ -13,8 +13,6 @@ public class PlexMusicTrack : BasePlexMedia
 
     public PlexMusicAlbum? PlexAlbum { get; set; }
 
-    public string? MusicBrainzRecordingId { get; set; }
-
     public string? MusicBrainzReleaseTrackId { get; set; }
 
     public int? DiscNumber { get; set; }

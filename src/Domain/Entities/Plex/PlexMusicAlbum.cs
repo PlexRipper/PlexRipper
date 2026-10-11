@@ -15,8 +15,6 @@ public class PlexMusicAlbum : BasePlexMedia
 
     public string? MusicBrainzReleaseId { get; set; }
 
-    public string? MusicBrainzReleaseGroupId { get; set; }
-
     public DateTime? ReleaseDate { get; set; }
 
     public string? RecordLabel { get; set; }

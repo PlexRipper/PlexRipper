@@ -57,7 +57,6 @@ public class CompareMusicPlexLibraryCommandHandlerUnitTests : BaseCommandUnitTes
     [Test]
     [Arguments("artist")]
     [Arguments("release")]
-    [Arguments("release-group")]
     [Arguments("label")]
     [Arguments("country")]
     [Arguments("date")]
@@ -91,10 +90,6 @@ public class CompareMusicPlexLibraryCommandHandlerUnitTests : BaseCommandUnitTes
                 case "release":
                     albums[0].MusicBrainzReleaseId = "a";
                     albums[1].MusicBrainzReleaseId = "b";
-                    break;
-                case "release-group":
-                    albums[0].MusicBrainzReleaseGroupId = "a";
-                    albums[1].MusicBrainzReleaseGroupId = "b";
                     break;
                 case "label":
                     albums[1].RecordLabel = "different label";
@@ -183,7 +178,6 @@ public class CompareMusicPlexLibraryCommandHandlerUnitTests : BaseCommandUnitTes
 
     [Test]
     [Arguments("release-track")]
-    [Arguments("recording")]
     [Arguments("title")]
     [Arguments("duplicate-position")]
     public async Task ShouldRejectConflictingLayout_WhenTracksOccupyTheSamePosition(string conflict)
@@ -201,10 +195,6 @@ public class CompareMusicPlexLibraryCommandHandlerUnitTests : BaseCommandUnitTes
             case "release-track":
                 tracks[0].MusicBrainzReleaseTrackId = "a";
                 tracks[2].MusicBrainzReleaseTrackId = "b";
-                break;
-            case "recording":
-                tracks[0].MusicBrainzRecordingId = "a";
-                tracks[2].MusicBrainzRecordingId = "b";
                 break;
             case "title":
                 tracks[2].UpdateInitProperty(nameof(PlexMusicTrack.SearchTitle), "different recording");
@@ -227,7 +217,7 @@ public class CompareMusicPlexLibraryCommandHandlerUnitTests : BaseCommandUnitTes
     }
 
     [Test]
-    public async Task ShouldMatchRecordingOnlyInsideEdition_WhenReleaseTrackIdIsMissing()
+    public async Task ShouldMatchTracksByPositionAndTitle_WhenReleaseTrackIdIsMissing()
     {
         // Arrange
         var (remote, owned) = await SetupPairAsync();
@@ -256,8 +246,8 @@ public class CompareMusicPlexLibraryCommandHandlerUnitTests : BaseCommandUnitTes
             .ToListAsync(CancellationToken);
         hits.Select(x => (x.RemotePlexMediaId, x.OwnedPlexMediaId, x.MatchType))
             .ShouldBe([
-                (remoteTracks[0].Id, ownedTracks[0].Id, PlexMediaComparisonMatchType.MusicBrainzRecordingId),
-                (remoteTracks[1].Id, ownedTracks[1].Id, PlexMediaComparisonMatchType.MusicBrainzRecordingId),
+                (remoteTracks[0].Id, ownedTracks[0].Id, PlexMediaComparisonMatchType.ParentAndChildNumbers),
+                (remoteTracks[1].Id, ownedTracks[1].Id, PlexMediaComparisonMatchType.ParentAndChildNumbers),
             ]);
     }
 
@@ -574,9 +564,7 @@ public class CompareMusicPlexLibraryCommandHandlerUnitTests : BaseCommandUnitTes
         await dbContext
             .PlexMusicTracks.Where(x => x.PlexLibraryId == missingLibraryId)
             .ExecuteUpdateAsync(
-                x =>
-                    x.SetProperty(y => y.MusicBrainzReleaseTrackId, (string?)null)
-                        .SetProperty(y => y.MusicBrainzRecordingId, (string?)null),
+                x => x.SetProperty(y => y.MusicBrainzReleaseTrackId, (string?)null),
                 CancellationToken
             );
         var remoteTracks = await dbContext
@@ -611,7 +599,7 @@ public class CompareMusicPlexLibraryCommandHandlerUnitTests : BaseCommandUnitTes
     }
 
     [Test]
-    public async Task ShouldNotMatchRecordingAcrossEditions_WhenReleaseIdsConflict()
+    public async Task ShouldNotMatchTracksAcrossEditions_WhenReleaseIdsConflict()
     {
         // Arrange
         var (remote, owned) = await SetupPairAsync();
@@ -619,16 +607,12 @@ public class CompareMusicPlexLibraryCommandHandlerUnitTests : BaseCommandUnitTes
         await dbContext
             .PlexMusicAlbums.Where(x => x.PlexLibraryId == owned.Id)
             .ExecuteUpdateAsync(x => x.SetProperty(y => y.MusicBrainzReleaseId, "another edition"), CancellationToken);
-        await dbContext.PlexMusicTracks.ExecuteUpdateAsync(
-            x => x.SetProperty(y => y.MusicBrainzReleaseTrackId, (string?)null),
-            CancellationToken
-        );
-        var recordings = await dbContext
+        var releaseTrackIds = await dbContext
             .PlexMusicTracks.OrderBy(x => x.PlexLibraryId)
             .ThenBy(x => x.TrackNumber)
-            .Select(x => x.MusicBrainzRecordingId)
+            .Select(x => x.MusicBrainzReleaseTrackId)
             .ToListAsync(CancellationToken);
-        recordings.ShouldBe(["recording-0-0", "recording-0-1", "recording-0-0", "recording-0-1"]);
+        releaseTrackIds.ShouldBe(["release-track-0-0", "release-track-0-1", "release-track-0-0", "release-track-0-1"]);
 
         // Act
         var result = await TestHandlerExecuteAsync(new CompareMusicPlexLibraryCommand(owned.Id, remote.Id));
@@ -870,7 +854,6 @@ public class CompareMusicPlexLibraryCommandHandlerUnitTests : BaseCommandUnitTes
                 album.UpdateInitProperty(nameof(PlexMusicAlbum.SearchTitle), $"album {i}");
                 album.Year = 2000;
                 album.MusicBrainzReleaseId = fallback ? null : $"release-{i}";
-                album.MusicBrainzReleaseGroupId = fallback ? null : $"group-{i}";
                 album.ReleaseDate = new DateTime(2000, 1, 1);
                 album.RecordLabel = "Label";
                 album.Country = "US";
@@ -882,7 +865,6 @@ public class CompareMusicPlexLibraryCommandHandlerUnitTests : BaseCommandUnitTes
                     var track = tracks[j];
                     track.Title = $"Track {j}";
                     track.UpdateInitProperty(nameof(PlexMusicTrack.SearchTitle), $"track {j}");
-                    track.MusicBrainzRecordingId = fallback ? null : $"recording-{i}-{j}";
                     track.MusicBrainzReleaseTrackId = fallback ? null : $"release-track-{i}-{j}";
                     track.DiscNumber = 1;
                     track.TrackNumber = j + 1;

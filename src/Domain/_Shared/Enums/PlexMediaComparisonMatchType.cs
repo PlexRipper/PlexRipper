@@ -47,6 +47,4 @@ public enum PlexMediaComparisonMatchType
     MusicBrainzReleaseId = 8,
 
     MusicBrainzReleaseTrackId = 9,
-
-    MusicBrainzRecordingId = 10,
 }

@@ -328,12 +328,12 @@ public class MusicComparisonIntegrationTests : BaseIntegrationTests
             .Distinct()
             .ShouldBe([("Studio edition", 2001, (string?)null)]);
         tracks
-            .Select(x => (x.DiscNumber, x.TrackNumber, x.Title, x.MusicBrainzReleaseTrackId, x.MusicBrainzRecordingId))
+            .Select(x => (x.DiscNumber, x.TrackNumber, x.Title, x.MusicBrainzReleaseTrackId))
             .Distinct()
             .OrderBy(x => x.TrackNumber)
             .ShouldBe([
-                ((int?)1, (int?)1, "Track 1", (string?)null, (string?)null),
-                ((int?)1, (int?)2, "Track 2", (string?)null, (string?)null),
+                ((int?)1, (int?)1, "Track 1", (string?)null),
+                ((int?)1, (int?)2, "Track 2", (string?)null),
             ]);
         var remoteArtists = artists.Where(x => x.PlexLibraryId == remote.Id).ToDictionary(x => x.Title);
         var ownedArtists = artists.Where(x => x.PlexLibraryId == owned.Id).ToDictionary(x => x.Title);

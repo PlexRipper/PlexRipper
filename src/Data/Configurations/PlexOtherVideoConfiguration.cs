@@ -23,7 +23,7 @@ public class PlexOtherVideoConfiguration : IEntityTypeConfiguration<PlexOtherVid
             .HasMany(x => x.Genres)
             .WithMany(x => x.PlexOtherVideoGenres)
             .UsingEntity<PlexOtherVideoGenres>(
-                l => l.HasOne<PlexGenre>().WithMany().HasForeignKey(e => e.GenresId),
+                l => l.HasOne<PlexGenreVideo>().WithMany().HasForeignKey(e => e.GenresId),
                 r => r.HasOne<PlexOtherVideo>().WithMany().HasForeignKey(e => e.PlexOtherVideoId)
             );
 

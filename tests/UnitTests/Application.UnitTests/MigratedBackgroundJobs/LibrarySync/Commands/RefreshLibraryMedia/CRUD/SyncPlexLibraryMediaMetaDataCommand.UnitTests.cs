@@ -127,9 +127,9 @@ public class SyncPlexLibraryMediaMetaDataCommandUnitTests : BaseCommandUnitTest<
         await dbContext.SaveChangesAsync(CancellationToken);
 
         // Create genres data
-        var genreItems = FakeData.GetPlexGenres(seed).GenerateUnique(8, x => x.Key);
+        var genreItems = FakeData.GetPlexGenresVideo(seed).GenerateUnique(8, x => x.Key);
         var plexGenres = genreItems;
-        await dbContext.PlexGenres.AddRangeAsync(plexGenres, CancellationToken);
+        await dbContext.PlexGenresVideo.AddRangeAsync(plexGenres, CancellationToken);
         await dbContext.SaveChangesAsync(CancellationToken);
 
         // Create countries data
@@ -148,7 +148,7 @@ public class SyncPlexLibraryMediaMetaDataCommandUnitTests : BaseCommandUnitTest<
             LibraryMetadata: new InsertMediaMetaDataCommandResponse(plexLibrary)
             {
                 PlexActors = plexActors.ToDictionary(x => x.Key),
-                PlexGenres = plexGenres.ToDictionary(x => x.Key),
+                PlexGenresVideo = plexGenres.ToDictionary(x => x.Key),
                 PlexCountries = plexCountries.ToDictionary(x => x.Key),
             }
         );
@@ -175,7 +175,7 @@ public class SyncPlexLibraryMediaMetaDataCommandUnitTests : BaseCommandUnitTest<
             x => x.PlexLibraryId == plexLibrary.Id,
             CancellationToken
         );
-        var libraryGenresCount = await dbContext.PlexLibraryGenres.CountAsync(
+        var libraryGenresCount = await dbContext.PlexLibraryGenresVideo.CountAsync(
             x => x.PlexLibraryId == plexLibrary.Id,
             CancellationToken
         );
@@ -258,7 +258,7 @@ public class SyncPlexLibraryMediaMetaDataCommandUnitTests : BaseCommandUnitTest<
             x => x.PlexLibraryId == plexLibrary.Id,
             CancellationToken
         );
-        var libraryGenresCount = await dbContext.PlexLibraryGenres.CountAsync(
+        var libraryGenresCount = await dbContext.PlexLibraryGenresVideo.CountAsync(
             x => x.PlexLibraryId == plexLibrary.Id,
             CancellationToken
         );

@@ -30,7 +30,7 @@ public static class TorznabFeedItemEnrichment
         {
             var movieGenres = await (
                 from movieGenre in dbContext.PlexMovieGenres
-                join genre in dbContext.PlexGenres on movieGenre.GenresId equals genre.Id
+                join genre in dbContext.PlexGenresVideo on movieGenre.GenresId equals genre.Id
                 where movieIds.Contains(movieGenre.PlexMovieId)
                 select new { movieGenre.PlexMovieId, genre.Type }
             ).ToListAsync(cancellationToken);
@@ -43,7 +43,7 @@ public static class TorznabFeedItemEnrichment
         {
             var tvShowGenres = await (
                 from tvShowGenre in dbContext.PlexTvShowGenres
-                join genre in dbContext.PlexGenres on tvShowGenre.GenresId equals genre.Id
+                join genre in dbContext.PlexGenresVideo on tvShowGenre.GenresId equals genre.Id
                 where tvShowIds.Contains(tvShowGenre.PlexTvShowId)
                 select new { tvShowGenre.PlexTvShowId, genre.Type }
             ).ToListAsync(cancellationToken);

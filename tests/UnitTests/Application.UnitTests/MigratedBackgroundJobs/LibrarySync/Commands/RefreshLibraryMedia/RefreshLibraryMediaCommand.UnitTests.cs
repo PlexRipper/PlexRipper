@@ -107,7 +107,8 @@ public class RefreshLibraryMediaCommandUnitTests : BaseCommandUnitTest<RefreshLi
                         new LibraryMetadata(updatedLibrary)
                         {
                             Countries = [],
-                            Genres = [],
+                            GenresVideo = [],
+                            GenresAudio = [],
                             Actors = [],
                         }
                     )

@@ -8,7 +8,7 @@ public class PlexOtherVideo : BasePlexMedia
 
     public ICollection<PlexActor> Actors { get; init; } = [];
 
-    public ICollection<PlexGenre> Genres { get; init; } = [];
+    public ICollection<PlexGenreVideo> Genres { get; init; } = [];
 
     public ICollection<PlexCountry> Countries { get; init; } = [];
 }

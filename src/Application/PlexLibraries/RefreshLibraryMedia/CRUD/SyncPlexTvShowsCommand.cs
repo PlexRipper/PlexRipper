@@ -138,7 +138,7 @@ public class SyncPlexTvShowsCommandHandler : ICommandHandler<SyncPlexTvShowsComm
 
         // Sync metadata such as Countries, Roles and Genre using separate DbContext instances
         // to avoid EF Core DbContext thread-safety issues when running in parallel.
-        var genreDict = command.LibraryMetadata.PlexGenres;
+        var genreDict = command.LibraryMetadata.PlexGenresVideo;
         var countryDict = command.LibraryMetadata.PlexCountries;
         var actorDict = command.LibraryMetadata.PlexActors;
 
@@ -461,7 +461,7 @@ public class SyncPlexTvShowsCommandHandler : ICommandHandler<SyncPlexTvShowsComm
 
     private async Task<Result> SyncTvShowGenres(
         List<PlexTvShow> plexTvShows,
-        Dictionary<string, PlexGenre> genreDict,
+        Dictionary<string, PlexGenreVideo> genreDict,
         int plexLibraryId,
         string libraryName,
         CancellationToken cancellationToken

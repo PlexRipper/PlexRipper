@@ -119,10 +119,10 @@ public class SyncPlexOtherVideosCommandUnitTests : BaseCommandUnitTest<SyncPlexO
         videos.Count.ShouldBe(4);
         var actors = FakeData.GetPlexActors(seed).Generate(2);
         var countries = FakeData.GetPlexCountries(seed).Generate(2);
-        var genres = FakeData.GetPlexGenres(seed).Generate(2);
+        var genres = FakeData.GetPlexGenresVideo(seed).Generate(2);
         db.PlexActors.AddRange(actors);
         db.PlexCountries.AddRange(countries);
-        db.PlexGenres.AddRange(genres);
+        db.PlexGenresVideo.AddRange(genres);
         await db.SaveChangesAsync(CancellationToken);
         foreach (var video in videos)
         {
@@ -145,7 +145,7 @@ public class SyncPlexOtherVideosCommandUnitTests : BaseCommandUnitTest<SyncPlexO
         {
             PlexActors = actors.ToDictionary(x => x.Key),
             PlexCountries = countries.ToDictionary(x => x.Key),
-            PlexGenres = genres.ToDictionary(x => x.Key),
+            PlexGenresVideo = genres.ToDictionary(x => x.Key),
         };
 
         // Act

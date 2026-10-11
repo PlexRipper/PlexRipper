@@ -43,7 +43,7 @@ public class PlexTvShowConfiguration : IEntityTypeConfiguration<PlexTvShow>
             .HasMany(x => x.Genres)
             .WithMany(x => x.PlexTvShowGenres)
             .UsingEntity<PlexTvShowGenres>(
-                l => l.HasOne<PlexGenre>().WithMany().HasForeignKey(e => e.GenresId),
+                l => l.HasOne<PlexGenreVideo>().WithMany().HasForeignKey(e => e.GenresId),
                 r => r.HasOne<PlexTvShow>().WithMany().HasForeignKey(e => e.PlexTvShowId)
             );
 

@@ -12,7 +12,7 @@ public class PlexTvShow : BasePlexMedia
 
     public required ICollection<PlexActor> Actors { get; init; } = [];
 
-    public required ICollection<PlexGenre> Genres { get; init; } = [];
+    public required ICollection<PlexGenreVideo> Genres { get; init; } = [];
 
     public required ICollection<PlexCountry> Countries { get; init; } = [];
 

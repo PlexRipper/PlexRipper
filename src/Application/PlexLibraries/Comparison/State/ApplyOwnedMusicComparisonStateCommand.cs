@@ -29,9 +29,7 @@ public class ApplyOwnedMusicComparisonStateCommandHandler
     {
         var items = command.Items;
         foreach (var item in items)
-        {
             item.SetComparisonState(PlexMediaComparisonState.NotCompared);
-        }
 
         if (items.Count == 0)
             return Result.Ok();
@@ -64,9 +62,7 @@ public class ApplyOwnedMusicComparisonStateCommandHandler
             if (hasActiveJobs)
             {
                 foreach (var item in items)
-                {
                     item.SetComparisonState(PlexMediaComparisonState.Pending);
-                }
             }
 
             return Result.Ok();
@@ -74,6 +70,7 @@ public class ApplyOwnedMusicComparisonStateCommandHandler
 
         var artistIds = items.Where(x => x.Type == PlexMediaType.MusicArtist).Select(x => x.Id).ToHashSet();
         var albumIds = items.Where(x => x.Type == PlexMediaType.MusicAlbum).Select(x => x.Id).ToHashSet();
+        var trackIds = items.Where(x => x.Type == PlexMediaType.MusicTrack).Select(x => x.Id).ToHashSet();
 
         var artistHits = await (
             from comparison in _dbContext.PlexMusicArtistComparisons
@@ -143,14 +140,17 @@ public class ApplyOwnedMusicComparisonStateCommandHandler
                 && (
                     (artistIds.Contains(ownedArtist.Id) && ownedArtist.PlexLibraryId == command.OwnedLibraryId)
                     || (albumIds.Contains(ownedAlbum.Id) && ownedAlbum.PlexLibraryId == command.OwnedLibraryId)
+                    || (trackIds.Contains(ownedTrack.Id) && ownedTrack.PlexLibraryId == command.OwnedLibraryId)
                 )
             select new
             {
                 OwnedArtistId = ownedArtist.Id,
                 OwnedAlbumId = ownedAlbum.Id,
+                OwnedTrackId = ownedTrack.Id,
                 comparison.RemotePlexLibraryId,
                 RemoteAlbumId = remoteTrack.PlexAlbumId,
                 RemoteTrackId = remoteTrack.Id,
+                comparison.HitState,
             }
         ).ToListAsync(ct);
 
@@ -183,6 +183,19 @@ public class ApplyOwnedMusicComparisonStateCommandHandler
             .Select(x => x.OwnedAlbumId)
             .ToHashSet();
 
+        var higherArtistIds = trackHits
+            .Where(x => x.HitState == PlexMediaComparisonHitState.HigherQuality)
+            .Select(x => x.OwnedArtistId)
+            .ToHashSet();
+        var higherAlbumIds = trackHits
+            .Where(x => x.HitState == PlexMediaComparisonHitState.HigherQuality)
+            .Select(x => x.OwnedAlbumId)
+            .ToHashSet();
+        var higherTrackIds = trackHits
+            .Where(x => x.HitState == PlexMediaComparisonHitState.HigherQuality)
+            .Select(x => x.OwnedTrackId)
+            .ToHashSet();
+
         foreach (var item in items)
         {
             var hasPartialMissingChildren = item.Type switch
@@ -191,12 +204,26 @@ public class ApplyOwnedMusicComparisonStateCommandHandler
                 PlexMediaType.MusicAlbum => partialAlbumIds.Contains(item.Id),
                 _ => false,
             };
+            var hasHigherQuality = item.Type switch
+            {
+                PlexMediaType.MusicArtist => higherArtistIds.Contains(item.Id),
+                PlexMediaType.MusicAlbum => higherAlbumIds.Contains(item.Id),
+                PlexMediaType.MusicTrack => higherTrackIds.Contains(item.Id),
+                _ => false,
+            };
 
-            item.SetComparisonState(
-                hasPartialMissingChildren ? PlexMediaComparisonState.Partial : PlexMediaComparisonState.Owned
-            );
+            item.SetComparisonState(GetState(hasPartialMissingChildren, hasHigherQuality));
         }
 
         return Result.Ok();
     }
+
+    private static PlexMediaComparisonState GetState(bool hasPartialChildren, bool hasHigherQuality) =>
+        (hasPartialChildren, hasHigherQuality) switch
+        {
+            (true, true) => PlexMediaComparisonState.PartialAndHigherQuality,
+            (true, false) => PlexMediaComparisonState.Partial,
+            (false, true) => PlexMediaComparisonState.HigherQuality,
+            _ => PlexMediaComparisonState.Owned,
+        };
 }

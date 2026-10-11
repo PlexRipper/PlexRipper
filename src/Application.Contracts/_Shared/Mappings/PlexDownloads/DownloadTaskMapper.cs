@@ -14,6 +14,7 @@ public static class DownloadTaskGenericToDTOMapper
             MediaType = downloadTask.MediaType,
             DownloadTaskType = downloadTask.DownloadTaskType,
             Status = downloadTask.DownloadStatus,
+            AudioQuality = downloadTask.AudioQuality,
             Percentage = downloadTask.Percentage,
             DataReceived = downloadTask.DataReceived,
             DataTotal = downloadTask.DataTotal,

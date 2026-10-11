@@ -11,6 +11,7 @@ public static partial class FakeData
         .RuleFor(x => x.Guid_TMDB, _ => null)
         .RuleFor(x => x.Guid_TVDB, _ => null)
         .Ignore(x => x.Albums)
+        .Ignore(x => x.Qualities)
         .Ignore(x => x.Actors)
         .Ignore(x => x.Genres)
         .Ignore(x => x.Countries)
@@ -31,7 +32,7 @@ public static partial class FakeData
                 artist.ChildCount = artist.Albums.Count;
                 artist.Duration = artist.Albums.Sum(x => x.Duration);
                 artist.MediaSize = artist.Albums.Sum(x => x.MediaSize);
-                artist.Quality = VideoQuality.Unknown;
+                artist.Quality = VideoQuality.None;
                 artist.FullTitle = artist.Title;
             }
         );
@@ -64,6 +65,7 @@ public static partial class FakeData
         .Ignore(x => x.DiscCount)
         .Ignore(x => x.TrackCount)
         .Ignore(x => x.Tracks)
+        .Ignore(x => x.Qualities)
         .FinishWith(
             (_, album) =>
             {
@@ -81,7 +83,7 @@ public static partial class FakeData
                 album.DiscCount = album.Tracks.Count == 0 ? 0 : 1;
                 album.Duration = album.Tracks.Sum(x => x.Duration);
                 album.MediaSize = album.Tracks.Sum(x => x.MediaSize);
-                album.Quality = VideoQuality.Unknown;
+                album.Quality = VideoQuality.None;
                 album.FullTitle = album.Title;
             }
         );
@@ -122,7 +124,7 @@ public static partial class FakeData
                 track.ChildCount = 0;
                 track.Duration = original.Duration / 1000;
                 track.MediaSize = original.Size;
-                track.Quality = VideoQuality.Unknown;
+                track.Quality = VideoQuality.None;
                 track.FullTitle = track.Title;
             }
         );
@@ -145,8 +147,15 @@ public static partial class FakeData
             .RuleFor(x => x.PartIndex, _ => 0)
             .RuleFor(x => x.VideoCodec, _ => string.Empty)
             .RuleFor(x => x.AudioCodec, _ => "flac")
-            .RuleFor(x => x.VideoResolution, _ => VideoQuality.Unknown)
-            .RuleFor(x => x.Quality, _ => VideoQuality.Unknown)
+            .RuleFor(x => x.AudioBitrateKbps, _ => 737)
+            .RuleFor(x => x.AudioBitDepth, _ => 16)
+            .RuleFor(x => x.AudioSampleRateHz, _ => 44_100)
+            .RuleFor(x => x.AudioChannels, _ => 2)
+            .RuleFor(x => x.AudioChannelLayout, _ => "stereo")
+            .RuleFor(x => x.AudioProfile, _ => null)
+            .RuleFor(x => x.AudioQuality, _ => AudioQuality.FLAC_16Bit_44_1kHz)
+            .RuleFor(x => x.VideoResolution, _ => VideoQuality.None)
+            .RuleFor(x => x.Quality, _ => VideoQuality.None)
             .RuleFor(x => x.Duration, f => f.Random.Int(90_000, 600_000))
             .RuleFor(x => x.Container, _ => "flac")
             .RuleFor(x => x.Source, _ => ReleaseSource.None)
@@ -154,10 +163,6 @@ public static partial class FakeData
             .RuleFor(x => x.Key, (_, x) => $"/library/parts/{x.PlexApiPartId}/file.flac")
             .RuleFor(x => x.OriginalFilePath, (_, x) => $"/music/{x.OriginalFilename}")
             .RuleFor(x => x.SourceRelativePath, (_, x) => x.OriginalFilename)
-            .RuleFor(x => x.Width, _ => null)
-            .RuleFor(x => x.Height, _ => null)
-            .RuleFor(x => x.VideoProfile, _ => null)
-            .RuleFor(x => x.VideoFrameRate, _ => null)
             .RuleFor(x => x.GeneratedNameSyncedAt, _ => null);
 
     public static Faker<PlexMusicTrackMediaData> GetPlexMusicTrackMediaData(

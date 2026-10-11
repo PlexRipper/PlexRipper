@@ -28,6 +28,11 @@ public record DownloadTaskDTO : IDownloadTaskProgress
 
     public required DownloadStatus Status { get; set; }
 
+    /// <summary>
+    /// The selected music encoding quality. Non-music tasks use <see cref="AudioQuality.None"/>.
+    /// </summary>
+    public required AudioQuality AudioQuality { get; set; } = AudioQuality.None;
+
     public required decimal Percentage { get; set; }
 
     public required long DataReceived { get; set; }

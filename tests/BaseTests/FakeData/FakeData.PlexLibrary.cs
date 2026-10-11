@@ -52,7 +52,8 @@ public static partial class FakeData
             .Ignore(x => x.PhotoImages)
             .Ignore(x => x.OtherVideos)
             .Ignore(x => x.Actors)
-            .Ignore(x => x.Genres)
+            .Ignore(x => x.GenresVideo)
+            .Ignore(x => x.GenresAudio)
             .Ignore(x => x.Countries)
             .Ignore(x => x.PlexAccountLibraries);
     }

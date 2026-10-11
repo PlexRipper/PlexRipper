@@ -9,6 +9,7 @@ public static partial class FakeData
             .Ignore(x => x.ParentId)
             .Ignore(x => x.Logs)
             .RuleFor(x => x.Quality, _ => VideoQuality.None)
+            .RuleFor(x => x.AudioQuality, _ => AudioQuality.FLAC_16Bit_44_1kHz)
             .RuleFor(x => x.FileName, (_, x) => $"track-{x.PlexApiPartId}.flac");
 
     public static Faker<DownloadTaskMusicTrackFile> GetDownloadTaskMusicTrackFile(

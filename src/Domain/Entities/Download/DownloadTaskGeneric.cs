@@ -39,7 +39,12 @@ public record DownloadTaskGeneric : IDownloadTaskProgress, IDownloadFileTransfer
     /// </summary>
     public required string DownloadDirectory { get; init; }
 
-    public required VideoQuality Quality { get; init; }
+    public required VideoQuality VideoQuality { get; init; }
+
+    /// <summary>
+    /// The selected music encoding quality. Non-music tasks use <see cref="AudioQuality.None"/>.
+    /// </summary>
+    public required AudioQuality AudioQuality { get; init; } = AudioQuality.None;
 
     /// <summary>
     /// Gets or sets the destination directory appended to the MediaPath e.g: [DestinationPath]/[TvShow]/[Season]/ or  [DestinationPath]/[Movie]/.

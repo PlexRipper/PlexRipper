@@ -97,8 +97,13 @@ describe('Music artist details page', () => {
 		// Assert
 		expect(wrapper.get('.media-title').text()).toBe('Artist');
 		expect(wrapper.get('[data-cy="music-media-list-empty"]').text()).toBe('No albums found');
-		expect(wrapper.findAll('td').map((cell) => cell.text())).toContain('Originally available');
-		expect(wrapper.findAll('td').map((cell) => cell.text())).not.toContain('Updated');
+		const info = wrapper.get('.media-info-container');
+		expect(info.find('.media-info-detail-grid').exists()).toBe(true);
+		expect(info.findAll('.media-info-detail-column')).toHaveLength(2);
+		expect(info.text()).not.toContain('Albums');
+		expect(info.text()).not.toContain('Tracks');
+		expect(info.text()).toContain('Originally available');
+		expect(info.text()).not.toContain('Updated');
 	});
 
 	test('Should render the summary in the shared detail info table', async () => {

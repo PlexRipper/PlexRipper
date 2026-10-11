@@ -39,8 +39,6 @@
             "select-track": "Select track {title}",
             "selected-count": "{count} selected",
             "track-count": "{count} tracks",
-            "disc-label": "Disc {number}",
-            "unknown-disc": "Unspecified disc",
             "no-tracks": "No tracks found",
             "no-albums": "No albums found"
         },
@@ -146,7 +144,9 @@
             "media-count-label": "Media count:",
             "summary": "Summary:",
             "one-movie-count": "1 Movie",
-            "movie-file-count": "{movieFileCount} Movie files"
+            "movie-file-count": "{movieFileCount} Movie files",
+            "read-more": "Read more",
+            "full-summary": "Full summary"
         },
         "directory-browser": {
             "add-download-path": "Add New Custom Download Path",

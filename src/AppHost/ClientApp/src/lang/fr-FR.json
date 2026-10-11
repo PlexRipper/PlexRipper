@@ -39,8 +39,6 @@
             "select-track": "Sélectionner la piste {title}",
             "selected-count": "{count} sélectionnés",
             "track-count": "{count} pistes",
-            "disc-label": "Disque {number}",
-            "unknown-disc": "Disque non précisé",
             "no-tracks": "Aucune piste trouvée",
             "no-albums": "Aucun album trouvé"
         },
@@ -146,7 +144,9 @@
             "media-count-label": "Nombre de médias :",
             "summary": "Sommaire:",
             "one-movie-count": "1 film",
-            "movie-file-count": "{movieFileCount} fichiers de film"
+            "movie-file-count": "{movieFileCount} fichiers de film",
+            "read-more": "Lire plus",
+            "full-summary": "Résumé complet"
         },
         "directory-browser": {
             "add-download-path": "Ajouter un nouveau chemin de téléchargement personnalisé",

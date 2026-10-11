@@ -39,8 +39,6 @@
             "select-track": "Wybierz utwór {title}",
             "selected-count": "Wybrano: {count}",
             "track-count": "Utwory: {count}",
-            "disc-label": "Płyta {number}",
-            "unknown-disc": "Nieokreślona płyta",
             "no-tracks": "Nie znaleziono utworów",
             "no-albums": "Nie znaleziono albumów"
         },
@@ -146,7 +144,9 @@
             "media-count-label": "Liczba mediów:",
             "summary": "Podsumowanie:",
             "one-movie-count": "1 Film",
-            "movie-file-count": "{movieFileCount} pliki filmowe"
+            "movie-file-count": "{movieFileCount} pliki filmowe",
+            "read-more": "Czytaj więcej",
+            "full-summary": "Pełne podsumowanie"
         },
         "directory-browser": {
             "add-download-path": "Dodaj nową niestandardową ścieżkę pobierania",

@@ -82,19 +82,11 @@
 			<div
 				v-if="album.children.length > 0"
 				class="music-media-list__tracks">
-				<q-expansion-item
-					v-for="disc in album.discs"
-					:key="disc.number ?? 'unknown'"
-					default-opened
-					expand-separator
-					:label="disc.number === null ? t('components.music-media-list.unknown-disc') : t('components.music-media-list.disc-label', { number: disc.number })"
-					:data-cy="`music-disc-${album.id}-${disc.number ?? 'unknown'}`">
-					<MediaQTable
-						:rows="disc.tracks"
-						:selection="trackSelection(album, disc.tracks)"
-						:download-media-factory="downloadTrackMedia"
-						@selection="setDiscSelection(album, disc.tracks, $event)" />
-				</q-expansion-item>
+				<MediaQTable
+					:rows="album.children"
+					:selection="trackSelection(album, album.children)"
+					:download-media-factory="downloadTrackMedia"
+					@selection="setAlbumTrackSelection(album, album.children, $event)" />
 			</div>
 			<div
 				v-else
@@ -114,7 +106,7 @@
 
 <script setup lang="ts">
 import { get, set } from '@vueuse/core';
-import { groupBy, orderBy } from 'lodash-es';
+import { orderBy } from 'lodash-es';
 import { PlexMediaComparisonState, PlexMediaType, type DownloadMediaDTO, type PlexMediaDTO, type PlexMediaQualityDTO, type PlexMediaSlimDTO } from '@dto';
 import type { ISelection } from '@interfaces';
 import { useDialogStore, useMediaOverviewStore } from '@store';
@@ -151,14 +143,16 @@ const albums = computed(() => props.mediaItem.children.filter((album) =>
 			&& track.parentId === album.id
 			&& track.plexLibraryId === album.plexLibraryId
 			&& track.plexServerId === album.plexServerId);
-		const discs = orderBy(
-			Object.values(groupBy(children, (track) => track.discNumber ?? 'unknown'))
-				.map((tracks) => ({
-					number: tracks[0]!.discNumber ?? null,
-					tracks: orderBy(tracks, [(track) => track.trackNumber ?? Number.POSITIVE_INFINITY, 'sortIndex', 'id']),
-				})),
-			[(disc) => disc.number ?? Number.POSITIVE_INFINITY]);
-		return { ...album, children, discs };
+		const tracks = orderBy(
+			children,
+			[
+				(track) => track.discNumber ?? Number.POSITIVE_INFINITY,
+				(track) => track.trackNumber ?? Number.POSITIVE_INFINITY,
+				'sortIndex',
+				'id',
+			],
+		);
+		return { ...album, children: tracks };
 	}));
 
 const selectedCount = computed(() => {
@@ -203,7 +197,7 @@ function trackSelection(album: PlexMediaDTO, tracks: PlexMediaDTO[]): ISelection
 	};
 }
 
-function setDiscSelection(album: PlexMediaDTO, tracks: PlexMediaDTO[], selection: ISelection): void {
+function setAlbumTrackSelection(album: PlexMediaDTO, tracks: PlexMediaDTO[], selection: ISelection): void {
 	const albumsSelection = selectedAlbumsAfterArtistDemotion();
 	const inheritedWholeAlbum = get(artistSelected) || get(selectedAlbumIds).has(album.id);
 	const tracksSelection = new Map(get(selectedTrackIds));

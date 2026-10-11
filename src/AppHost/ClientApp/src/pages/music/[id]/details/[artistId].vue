@@ -8,55 +8,54 @@
 				@action="onAction">
 				<template #details>
 					<tr>
-						<td class="media-info-column">
-							{{ t('components.music-details.album-count') }}
-						</td>
-						<td class="media-info-column">
-							{{ albumCount }}
-						</td>
-					</tr>
-					<tr>
-						<td class="media-info-column">
-							{{ t('components.music-details.track-count') }}
-						</td>
-						<td class="media-info-column">
-							{{ trackCount }}
-						</td>
-					</tr>
-					<tr>
-						<td class="media-info-column">
-							{{ t('components.music-details.duration') }}
-						</td>
-						<td class="media-info-column">
-							<QDuration :value="mediaItemDetail.duration" />
-						</td>
-					</tr>
-					<tr>
-						<td class="media-info-column">
-							{{ t('components.music-details.size') }}
-						</td>
-						<td class="media-info-column">
-							<QFileSize :size="mediaItemDetail.mediaSize" />
-						</td>
-					</tr>
-					<tr v-if="mediaItemDetail.year > 0">
-						<td class="media-info-column">
-							{{ t('components.music-details.year') }}
-						</td>
-						<td class="media-info-column">
-							{{ mediaItemDetail.year }}
-						</td>
-					</tr>
-					<tr
-						v-for="date in dates"
-						:key="date.key">
-						<td class="media-info-column">
-							{{ date.label }}
-						</td>
-						<td class="media-info-column">
-							<QDateTime
-								:text="date.value"
-								long-date />
+						<td
+							colspan="2"
+							class="media-info-column">
+							<div class="media-info-detail-grid">
+								<div class="media-info-detail-column">
+									<div class="media-info-detail-field">
+										<div class="media-info-detail-label">
+											{{ t('components.music-details.duration') }}
+										</div>
+										<div class="media-info-detail-value">
+											<QDuration :value="mediaItemDetail.duration" />
+										</div>
+									</div>
+									<div class="media-info-detail-field">
+										<div class="media-info-detail-label">
+											{{ t('components.music-details.size') }}
+										</div>
+										<div class="media-info-detail-value">
+											<QFileSize :size="mediaItemDetail.mediaSize" />
+										</div>
+									</div>
+									<div
+										v-if="mediaItemDetail.year > 0"
+										class="media-info-detail-field">
+										<div class="media-info-detail-label">
+											{{ t('components.music-details.year') }}
+										</div>
+										<div class="media-info-detail-value">
+											{{ mediaItemDetail.year }}
+										</div>
+									</div>
+								</div>
+								<div class="media-info-detail-column">
+									<div
+										v-for="date in dates"
+										:key="date.key"
+										class="media-info-detail-field">
+										<div class="media-info-detail-label">
+											{{ date.label }}
+										</div>
+										<div class="media-info-detail-value">
+											<QDateTime
+												:text="date.value"
+												long-date />
+										</div>
+									</div>
+								</div>
+							</div>
 						</td>
 					</tr>
 				</template>
@@ -114,8 +113,6 @@ const requests = new Subject<void>();
 const libraryId = computed(() => +(route.params.id as string));
 const artistId = computed(() => +(route.params.artistId as string));
 const validRoute = computed(() => [get(libraryId), get(artistId)].every((id) => Number.isSafeInteger(id) && id > 0));
-const albumCount = computed(() => get(mediaItemDetail)?.children.length ?? 0);
-const trackCount = computed(() => get(mediaItemDetail)?.children.reduce((count, album) => count + album.children.length, 0) ?? 0);
 const dates = computed(() => [
 	{ key: 'originallyAvailableAt', label: t('components.music-details.originally-available'), value: get(mediaItemDetail)?.originallyAvailableAt },
 	{ key: 'addedAt', label: t('components.music-details.added-at'), value: get(mediaItemDetail)?.addedAt },

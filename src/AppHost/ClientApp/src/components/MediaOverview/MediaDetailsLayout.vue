@@ -19,7 +19,6 @@
 			</QCol>
 			<QCol>
 				<MediaDetailsInfoTable
-					:style="{ height: '300px' }"
 					:title="props.mediaItem.title"
 					:summary="props.mediaItem.summary"
 					:summary-label="props.summaryLabel">

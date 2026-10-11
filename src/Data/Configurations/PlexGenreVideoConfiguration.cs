@@ -1,8 +1,8 @@
 ﻿namespace Reaparr.Data.Configurations;
 
-public class PlexGenreConfiguration : IEntityTypeConfiguration<PlexGenre>
+public class PlexGenreVideoConfiguration : IEntityTypeConfiguration<PlexGenreVideo>
 {
-    public void Configure(EntityTypeBuilder<PlexGenre> builder)
+    public void Configure(EntityTypeBuilder<PlexGenreVideo> builder)
     {
         builder.HasIndex(x => x.Key).IsUnique();
         builder

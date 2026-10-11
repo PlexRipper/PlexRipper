@@ -1,11 +1,11 @@
 namespace Reaparr.Domain;
 
-public class PlexLibraryGenres
+public class PlexLibraryGenresAudio
 {
-    public PlexLibraryGenres() { }
+    public PlexLibraryGenresAudio() { }
 
     [SetsRequiredMembers]
-    public PlexLibraryGenres(int plexLibraryId, int plexGenreId)
+    public PlexLibraryGenresAudio(int plexLibraryId, int plexGenreId)
     {
         PlexLibraryId = plexLibraryId;
         PlexGenreId = plexGenreId;

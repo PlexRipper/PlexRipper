@@ -206,7 +206,9 @@ public class PlexLibrary : BaseEntity
 
     public ICollection<PlexActor> Actors { get; init; } = [];
 
-    public ICollection<PlexGenre> Genres { get; init; } = [];
+    public ICollection<PlexGenreVideo> GenresVideo { get; init; } = [];
+
+    public ICollection<PlexGenreAudio> GenresAudio { get; init; } = [];
 
     public ICollection<PlexCountry> Countries { get; init; } = [];
 

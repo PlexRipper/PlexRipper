@@ -74,7 +74,7 @@ public static partial class PlexMediaDataMapper
             HasArt = !string.IsNullOrEmpty(source.Art),
             HasTheme = !string.IsNullOrEmpty(source.Theme),
             Actors = source.Role.ToPlexActor(),
-            Genres = source.Genre.ToPlexGenre(),
+            Genres = source.Genre.ToPlexGenreVideo(),
             Countries = source.Country.ToPlexCountry(),
             PlexLibraryId = 0,
             PlexServerId = 0,

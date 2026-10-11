@@ -127,10 +127,10 @@ public static class PlexMediaSlimDTOMapper
     #endregion
 
     public static PlexMediaSlimDTO ToSlimDTOMapper(this PlexMusicArtist source) =>
-        Map(source, null, source.Albums.Sum(x => x.ChildCount), []);
+        Map(source, null, source.Albums.Sum(x => x.ChildCount), source.Qualities.ToDTO());
 
     public static PlexMediaSlimDTO ToSlimDTOMapper(this PlexMusicAlbum source) =>
-        Map(source, source.PlexArtistId, 0, []);
+        Map(source, source.PlexArtistId, 0, source.Qualities.ToDTO());
 
     public static PlexMediaSlimDTO ToSlimDTOMapper(this PlexMusicTrack source) =>
         Map(source, source.PlexAlbumId, 0, []);

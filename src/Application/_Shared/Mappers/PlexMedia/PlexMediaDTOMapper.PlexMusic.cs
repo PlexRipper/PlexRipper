@@ -24,17 +24,20 @@ public static partial class PlexMediaDTOMapper
             PlexServerId = source.PlexServerId,
             Type = source.Type,
             HasThumb = source.HasThumb,
-            Qualities = [],
+            Qualities = source.Qualities.ToDTO(),
             ComparisonId = source.ComparisonState.ToComparisonId(),
             PlexApiRatingKey = source.PlexApiRatingKey,
             PlexApiMetaDataKey = source.PlexApiMetaDataKey,
             HasArt = source.HasArt,
             HasTheme = source.HasTheme,
-            Studio = source.Studio,
+            Studio = string.Empty,
             Summary = source.Summary,
             ContentRating = source.ContentRating,
             Rating = source.Rating,
             OriginallyAvailableAt = source.OriginallyAvailableAt,
+            RecordLabel = null,
+            ReleaseDate = null,
+            Genres = source.Genres.ToDTO(),
             Children = source.Albums.OrderBy(x => x.SortIndex).ThenBy(x => x.Id).Select(x => x.ToDTO()).ToList(),
             DiscNumber = null,
             TrackNumber = null,
@@ -62,17 +65,20 @@ public static partial class PlexMediaDTOMapper
             PlexServerId = source.PlexServerId,
             Type = source.Type,
             HasThumb = source.HasThumb,
-            Qualities = [],
+            Qualities = source.Qualities.ToDTO(),
             ComparisonId = source.ComparisonState.ToComparisonId(),
             PlexApiRatingKey = source.PlexApiRatingKey,
             PlexApiMetaDataKey = source.PlexApiMetaDataKey,
             HasArt = source.HasArt,
             HasTheme = source.HasTheme,
-            Studio = source.Studio,
+            Studio = string.Empty,
             Summary = source.Summary,
             ContentRating = source.ContentRating,
             Rating = source.Rating,
             OriginallyAvailableAt = source.OriginallyAvailableAt,
+            RecordLabel = source.RecordLabel,
+            ReleaseDate = source.ReleaseDate,
+            Genres = [],
             Children = source.Tracks.OrderBy(x => x.SortIndex).ThenBy(x => x.Id).Select(x => x.ToDTO()).ToList(),
             DiscNumber = null,
             TrackNumber = null,
@@ -100,27 +106,24 @@ public static partial class PlexMediaDTOMapper
             PlexServerId = source.PlexServerId,
             Type = source.Type,
             HasThumb = source.HasThumb,
-            Qualities = source
-                .MediaDataList.GroupBy(x => x.PlexApiMediaId)
+            Qualities = source.MediaDataList
+                .GroupBy(x => x.PlexApiMediaId)
                 .OrderBy(x => x.Key)
-                .Select(group => new PlexMediaQualityDTO
-                {
-                    Quality = VideoQuality.Unknown,
-                    MediaDataType = PlexMediaType.MusicTrack,
-                    DataId = group.OrderBy(x => x.PartIndex).ThenBy(x => x.Id).First().Id,
-                    MediaId = source.Id,
-                })
+                .Select(group => ToMusicQuality(source.Id, group))
                 .ToList(),
             ComparisonId = source.ComparisonState.ToComparisonId(),
             PlexApiRatingKey = source.PlexApiRatingKey,
             PlexApiMetaDataKey = source.PlexApiMetaDataKey,
             HasArt = source.HasArt,
             HasTheme = source.HasTheme,
-            Studio = source.Studio,
+            Studio = string.Empty,
             Summary = source.Summary,
             ContentRating = source.ContentRating,
             Rating = source.Rating,
             OriginallyAvailableAt = source.OriginallyAvailableAt,
+            RecordLabel = null,
+            ReleaseDate = null,
+            Genres = [],
             DiscNumber = source.DiscNumber,
             TrackNumber = source.TrackNumber,
             Children = [],
@@ -138,8 +141,46 @@ public static partial class PlexMediaDTOMapper
             FileName = source.GetFileName,
             Duration = source.Duration,
             Size = source.Size,
-            VideoResolution = source.VideoResolution,
-            VideoCodec = source.VideoCodec,
+            VideoResolution = VideoQuality.None,
+            VideoCodec = string.Empty,
             AudioCodec = source.AudioCodec,
+            AudioQuality = source.AudioQuality,
+            AudioBitrateKbps = source.AudioBitrateKbps,
+            AudioBitDepth = source.AudioBitDepth,
+            AudioSampleRateHz = source.AudioSampleRateHz,
+            AudioChannels = source.AudioChannels,
+            AudioChannelLayout = source.AudioChannelLayout,
+            AudioProfile = source.AudioProfile,
         };
+
+    private static PlexMediaQualityDTO ToMusicQuality(
+        int trackId,
+        IEnumerable<PlexMusicTrackMediaData> files
+    )
+    {
+        var best = files.GetBestAudioFile();
+        var representative = best ?? files
+            .OrderBy(x => x.Source)
+            .ThenBy(x => x.PlexApiMediaId)
+            .ThenBy(x => x.PlexApiPartId)
+            .ThenBy(x => x.PartIndex)
+            .ThenBy(x => x.Id)
+            .First();
+
+        return new PlexMediaQualityDTO
+        {
+            Quality = VideoQuality.None,
+            AudioQuality = best is null ? AudioQuality.Unknown : representative.AudioQuality,
+            AudioCodec = representative.AudioCodec,
+            AudioBitrateKbps = representative.AudioBitrateKbps,
+            AudioBitDepth = representative.AudioBitDepth,
+            AudioSampleRateHz = representative.AudioSampleRateHz,
+            AudioChannels = representative.AudioChannels,
+            AudioChannelLayout = representative.AudioChannelLayout,
+            AudioProfile = representative.AudioProfile,
+            MediaDataType = PlexMediaType.MusicTrack,
+            DataId = representative.Id,
+            MediaId = trackId,
+        };
+    }
 }

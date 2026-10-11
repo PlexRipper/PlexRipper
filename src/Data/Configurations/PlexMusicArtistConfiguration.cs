@@ -4,6 +4,12 @@ public class PlexMusicArtistConfiguration : IEntityTypeConfiguration<PlexMusicAr
 {
     public void Configure(EntityTypeBuilder<PlexMusicArtist> builder)
     {
+        builder.Ignore(x => x.Quality);
+        builder.Ignore(x => x.Studio);
+        builder.Ignore(x => x.Guid_IMDB);
+        builder.Ignore(x => x.Guid_TMDB);
+        builder.Ignore(x => x.Guid_TVDB);
+
         builder.HasIndex(x => new { x.PlexLibraryId, x.PlexApiRatingKey }).IsUnique();
         builder.Property(x => x.SearchTitle).UseCollation("NOCASE");
         builder.HasIndex(x => new { x.PlexLibraryId, x.SearchTitle });
@@ -33,7 +39,7 @@ public class PlexMusicArtistConfiguration : IEntityTypeConfiguration<PlexMusicAr
             .HasMany(x => x.Genres)
             .WithMany(x => x.PlexMusicArtistGenres)
             .UsingEntity<PlexMusicArtistGenres>(
-                l => l.HasOne<PlexGenre>().WithMany().HasForeignKey(e => e.GenresId),
+                l => l.HasOne<PlexGenreAudio>().WithMany().HasForeignKey(e => e.GenresId),
                 r => r.HasOne<PlexMusicArtist>().WithMany().HasForeignKey(e => e.PlexMusicArtistId)
             );
 

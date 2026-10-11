@@ -19,4 +19,18 @@ public record PlexMediaDataDTO
     public required string VideoCodec { get; init; }
 
     public required string AudioCodec { get; init; }
+
+    public required AudioQuality AudioQuality { get; init; } = AudioQuality.None;
+
+    public required int? AudioBitrateKbps { get; init; }
+
+    public required int? AudioBitDepth { get; init; }
+
+    public required int? AudioSampleRateHz { get; init; }
+
+    public required int? AudioChannels { get; init; }
+
+    public required string? AudioChannelLayout { get; init; }
+
+    public required string? AudioProfile { get; init; }
 }

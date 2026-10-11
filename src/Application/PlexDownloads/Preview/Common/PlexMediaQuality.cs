@@ -13,6 +13,25 @@ public record PlexMediaQuality
     public required VideoQuality Quality { get; init; }
 
     /// <summary>
+    /// The audio quality for music media. Non-music media uses <see cref="AudioQuality.None"/>.
+    /// </summary>
+    public AudioQuality AudioQuality { get; init; } = AudioQuality.None;
+
+    public string? AudioCodec { get; init; }
+
+    public int? AudioBitrateKbps { get; init; }
+
+    public int? AudioBitDepth { get; init; }
+
+    public int? AudioSampleRateHz { get; init; }
+
+    public int? AudioChannels { get; init; }
+
+    public string? AudioChannelLayout { get; init; }
+
+    public string? AudioProfile { get; init; }
+
+    /// <summary>
     /// The media id such as <see cref="PlexMovie"/> or <see cref="PlexTvShowEpisode"/>.
     /// </summary>
     public int MediaId { get; init; }

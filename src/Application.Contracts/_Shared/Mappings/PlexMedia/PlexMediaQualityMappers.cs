@@ -4,6 +4,40 @@ public static class PlexMediaQualityMappers
 {
     private const int NO_MEDIA_DATA_ID = -1;
 
+    #region PlexMusicArtistMediaQuality
+
+    public static PlexMediaQualityDTO ToDTO(this PlexMusicArtistMediaQuality source) =>
+        new()
+        {
+            Quality = VideoQuality.None,
+            AudioQuality = source.Quality,
+            MediaId = source.PlexMusicArtistId,
+            DataId = NO_MEDIA_DATA_ID,
+            MediaDataType = source.Type,
+        };
+
+    public static List<PlexMediaQualityDTO> ToDTO(this IEnumerable<PlexMusicArtistMediaQuality> source) =>
+        source.OrderBy(x => x.Id).Select(x => x.ToDTO()).ToList();
+
+    #endregion
+
+    #region PlexMusicAlbumMediaQuality
+
+    public static PlexMediaQualityDTO ToDTO(this PlexMusicAlbumMediaQuality source) =>
+        new()
+        {
+            Quality = VideoQuality.None,
+            AudioQuality = source.Quality,
+            MediaId = source.PlexMusicAlbumId,
+            DataId = NO_MEDIA_DATA_ID,
+            MediaDataType = source.Type,
+        };
+
+    public static List<PlexMediaQualityDTO> ToDTO(this IEnumerable<PlexMusicAlbumMediaQuality> source) =>
+        source.OrderBy(x => x.Id).Select(x => x.ToDTO()).ToList();
+
+    #endregion
+
     #region PlexTvShowMediaQuality
 
     public static PlexMediaQualityDTO ToDTO(this PlexTvShowMediaQuality source) =>

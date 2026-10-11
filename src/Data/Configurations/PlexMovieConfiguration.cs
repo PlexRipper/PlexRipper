@@ -55,7 +55,7 @@ public class PlexMovieConfiguration : IEntityTypeConfiguration<PlexMovie>
             .HasMany(x => x.Genres)
             .WithMany(x => x.PlexMovieGenres)
             .UsingEntity<PlexMovieGenres>(
-                l => l.HasOne<PlexGenre>().WithMany().HasForeignKey(e => e.GenresId),
+                l => l.HasOne<PlexGenreVideo>().WithMany().HasForeignKey(e => e.GenresId),
                 r => r.HasOne<PlexMovie>().WithMany().HasForeignKey(e => e.PlexMovieId)
             );
 

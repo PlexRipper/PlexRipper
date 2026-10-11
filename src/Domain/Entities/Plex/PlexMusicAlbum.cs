@@ -26,4 +26,6 @@ public class PlexMusicAlbum : BasePlexMedia
     public int? TrackCount { get; set; }
 
     public ICollection<PlexMusicTrack> Tracks { get; set; } = [];
+
+    public ICollection<PlexMusicAlbumMediaQuality> Qualities { get; set; } = [];
 }

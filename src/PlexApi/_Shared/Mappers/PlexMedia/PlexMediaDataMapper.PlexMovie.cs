@@ -44,7 +44,7 @@ public static partial class PlexMediaDataMapper
 
             Countries = source.Country.ToPlexCountry(),
             Actors = source.Role.ToPlexActor(),
-            Genres = source.Genre.ToPlexGenre(),
+            Genres = source.Genre.ToPlexGenreVideo(),
             MediaDataList = mediaDataList,
 
             FullTitle = $"{source.Title} ({source.Year})",

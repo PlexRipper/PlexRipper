@@ -102,10 +102,7 @@ public class GenerateDownloadTaskMusicTracksCommandHandler
             foreach (var track in tracks)
             {
                 var selectedQuality = selection.Qualities.FirstOrDefault(x => x.MediaId == track.Id);
-                var selectedMedia = selectedQuality is null
-                    ? null
-                    : track.MediaDataList.FirstOrDefault(x => x.Id == selectedQuality.DataId);
-                selectedMedia ??= track.MediaDataList.GetBestAudioFile();
+                var (selectedMedia, _) = track.MediaDataList.PickAudioQuality(selectedQuality?.DataId);
                 if (selectedMedia is null)
                 {
                     _log.Here().Warning("Music track {TrackId} has no media data available", track.Id);

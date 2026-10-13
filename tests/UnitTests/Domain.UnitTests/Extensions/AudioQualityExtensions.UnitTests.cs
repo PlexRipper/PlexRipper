@@ -415,6 +415,78 @@ public class AudioQualityExtensionsUnitTests : BaseUnitTest
         best.ShouldBe(earlier);
     }
 
+    [Test]
+    [Arguments(false)]
+    [Arguments(true)]
+    public void ShouldHonorExplicitAudioSelectionBeforeAutomaticQuality(bool reverse)
+    {
+        var selected = CreateFile("mp3", bitrateKbps: 128, id: 10);
+        var higher = CreateFile("mp3", bitrateKbps: 320, id: 20);
+        selected.AudioQuality = AudioQuality.MP3_128Kbps;
+        higher.AudioQuality = AudioQuality.MP3_320KbpsPlus;
+        var files = reverse ? new[] { higher, selected } : new[] { selected, higher };
+
+        var result = files.PickAudioQuality(selected.Id);
+
+        result.File.ShouldBeSameAs(selected);
+        result.Quality.ShouldBe(AudioQuality.MP3_128Kbps);
+    }
+
+    [Test]
+    [Arguments(null)]
+    [Arguments(999)]
+    public void ShouldSelectBestComparableAudioWhenExplicitSelectionIsAbsentOrStale(int? selectedId)
+    {
+        var lower = CreateFile("mp3", bitrateKbps: 128, id: 10);
+        var higher = CreateFile("mp3", bitrateKbps: 320, id: 20);
+        lower.AudioQuality = AudioQuality.MP3_128Kbps;
+        higher.AudioQuality = AudioQuality.MP3_320KbpsPlus;
+
+        var result = new[] { lower, higher }.PickAudioQuality(selectedId);
+
+        result.File.ShouldBeSameAs(higher);
+        result.Quality.ShouldBe(AudioQuality.MP3_320KbpsPlus);
+    }
+
+    [Test]
+    [Arguments(false)]
+    [Arguments(true)]
+    public void ShouldPreserveUnknownAndDeterministicFileIdentityWhenAudioIsIncomparable(bool reverse)
+    {
+        var earlier = CreateFile("flac", bitDepth: 16, sampleRateHz: 192000, mediaId: 10, id: 20);
+        var later = CreateFile("flac", bitDepth: 24, sampleRateHz: 96000, mediaId: 20, id: 10);
+        earlier.AudioQuality = AudioQuality.FLAC_16Bit_192kHz;
+        later.AudioQuality = AudioQuality.FLAC_24Bit_96kHz;
+        var files = reverse ? new[] { later, earlier } : new[] { earlier, later };
+
+        var result = files.PickAudioQuality();
+
+        result.File.ShouldBeSameAs(earlier);
+        result.Quality.ShouldBe(AudioQuality.Unknown);
+    }
+
+    [Test]
+    public void ShouldAllowExplicitAudioSelectionWhenAutomaticCandidatesAreIncomparable()
+    {
+        var selected = CreateFile("flac", bitDepth: 24, sampleRateHz: 96000, id: 10);
+        var other = CreateFile("flac", bitDepth: 16, sampleRateHz: 192000, id: 20);
+        selected.AudioQuality = AudioQuality.FLAC_24Bit_96kHz;
+
+        var result = new[] { other, selected }.PickAudioQuality(selected.Id);
+
+        result.File.ShouldBeSameAs(selected);
+        result.Quality.ShouldBe(AudioQuality.FLAC_24Bit_96kHz);
+    }
+
+    [Test]
+    public void ShouldHaveNoAudioRepresentativeForAnEmptyInventory()
+    {
+        var result = Array.Empty<PlexMusicTrackMediaData>().PickAudioQuality();
+
+        result.File.ShouldBeNull();
+        result.Quality.ShouldBe(AudioQuality.Unknown);
+    }
+
     private static PlexMusicTrackMediaData CreateFile(
         string codec,
         int? bitrateKbps = 128,

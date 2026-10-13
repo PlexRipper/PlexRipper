@@ -45,12 +45,6 @@ public class RefreshPlexMusicLibraryCommandHandler
         var plexLibrary = command.LibraryMetadata.PlexLibrary;
         var plexLibraryId = command.LibraryMetadata.PlexLibraryId;
 
-        var comparisonResult = await Result.Try(() =>
-            _commandExecutor.Send(new InvalidateLibraryComparisonJobsCommand([plexLibraryId]), cancellationToken)
-        );
-        if (comparisonResult.IsFailed)
-            return comparisonResult.LogIfFailed();
-
         var albumsResult = await Result.Try(() =>
             _commandExecutor.Send(
                 new GetLibraryMediaFromPlexApiCommand(plexLibrary, PlexMediaType.MusicAlbum),
@@ -106,6 +100,30 @@ public class RefreshPlexMusicLibraryCommandHandler
         {
             await _librarySyncProgressStore.UpdateErrorAsync(plexLibraryId, syncResult.ToResult(), cancellationToken);
             return syncResult.ToResult().LogError();
+        }
+        var comparisonResult = await Result.Try(() =>
+            _commandExecutor.Send(new InvalidateLibraryComparisonJobsCommand([plexLibraryId]), cancellationToken)
+        );
+        if (comparisonResult.IsCancelled || comparisonResult.IsFailed)
+        {
+            using var finalizationCancellation = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+            var finalizationToken = finalizationCancellation.Token;
+            var optimizationAfterFailure = await Result.Try(() =>
+                _commandExecutor.Send(
+                    new ScheduleOptimizeDatabaseJobCommand { ChangedItemCount = syncResult.Value.ChangedItemCount },
+                    finalizationToken
+                )
+            );
+            optimizationAfterFailure.LogIfFailed();
+            var rebuildAfterFailure = await Result.Try(() =>
+                _commandExecutor.Send(new QueueMediaOverviewRebuildCommand(), finalizationToken)
+            );
+            rebuildAfterFailure.LogIfFailed();
+            var progressAfterFailure = await Result.Try(async Task () =>
+                await _librarySyncProgressStore.UpdateErrorAsync(plexLibraryId, comparisonResult, finalizationToken)
+            );
+            progressAfterFailure.LogIfFailed();
+            return comparisonResult.LogIfFailed();
         }
         var optimizationResult = await _commandExecutor.Send(
             new ScheduleOptimizeDatabaseJobCommand { ChangedItemCount = syncResult.Value.ChangedItemCount },

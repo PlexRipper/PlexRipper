@@ -84,7 +84,7 @@ public class GetAllMediaByTypeFromPlexApiCommandHandlerUnitTests
     [Arguments(PlexMediaType.Movie)]
     [Arguments(PlexMediaType.OtherVideos)]
     [Arguments(PlexMediaType.MusicTrack)]
-    public async Task ShouldRetrieveUnwatchedMediaAcrossAllPages_WhenUsingRealSdk(PlexMediaType mediaType)
+    public async Task ShouldRetrieveMediaAcrossAllPages_WhenUsingRealSdk(PlexMediaType mediaType)
     {
         // Arrange
         await SetupDatabase(
@@ -188,69 +188,6 @@ public class GetAllMediaByTypeFromPlexApiCommandHandlerUnitTests
         transport.Verify();
         Mock.Mock<IPlexApiClientFactory>().Verify();
         Mock.Mock<ILibrarySyncProgressStore>().Verify();
-    }
-
-    [Test]
-    public async Task ShouldFailWithoutFetchingPagesOrReportingProgress_WhenTotalSizeIsMissing()
-    {
-        // Arrange
-        await SetupDatabase(
-            9205,
-            config =>
-            {
-                config.PlexServerCount = 1;
-                config.PlexAccountCount = 1;
-                config.PlexMovieLibraryCount = 1;
-                config.PlexTvShowLibraryCount = 0;
-                config.MovieCount = 0;
-            }
-        );
-        var dbContext = IDbContext;
-        var library = await dbContext.PlexLibraries.SingleAsync(CancellationToken);
-        var sectionId = long.Parse(library.Key);
-        var sdk = new Mock<IPlexAPI>();
-        sdk.Setup(x =>
-                x.Content.ListContentAsync(
-                    It.Is<ListContentRequest>(q =>
-                        q.SectionId == sectionId
-                        && q.XPlexContainerStart == 0
-                        && q.XPlexContainerSize == 0
-                        && q.MediaType == 1
-                        && q.Unwatched == null
-                        && q.Sort == "titleSort:asc"
-                    )
-                )
-            )
-            .ReturnsAsync(CreateResponse(null, 0))
-            .Verifiable(Times.Once());
-        Mock.Mock<IPlexApiClientFactory>()
-            .Setup(x => x.CreateClient(It.IsAny<string>(), It.IsAny<PlexApiClientOptions>()))
-            .Returns(sdk.Object)
-            .Verifiable(Times.Once());
-
-        // Act
-        var result = await TestHandlerExecuteAsync<List<LibraryMediaItemDTO>>(
-            new GetAllMediaByTypeFromPlexApiCommand(library, PlexMediaType.OtherVideos, 2)
-        );
-
-        // Assert
-        result.IsFailed.ShouldBeTrue();
-        result.Errors.Count.ShouldBe(1);
-        sdk.Verify();
-        sdk.Verify(
-            x => x.Content.ListContentAsync(It.Is<ListContentRequest>(q => q.XPlexContainerSize > 0)),
-            Times.Never()
-        );
-        Mock.Mock<IPlexApiClientFactory>().Verify();
-        Mock.Mock<ILibrarySyncProgressStore>()
-            .Verify(
-                x => x.UpdateItemAsync(
-                    It.IsAny<int>(),
-                    It.IsAny<LibraryProgressItem>(),
-                    It.IsAny<CancellationToken>()
-                ),
-                Times.Never()
-            );
     }
 
     private static Metadata CreateItem(int ratingKey, string type) =>

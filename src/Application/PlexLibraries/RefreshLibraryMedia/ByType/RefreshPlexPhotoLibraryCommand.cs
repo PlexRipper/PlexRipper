@@ -69,7 +69,6 @@ public class RefreshPlexPhotoLibraryCommandHandler
             await _librarySyncProgressStore.UpdateErrorAsync(plexLibraryId, treeResult, cancellationToken);
             return treeResult.LogError();
         }
-        command.LibraryMetadata.PhotoClipCount = retrievalResult.Value.PhotoClipCount;
 
         var syncResult = await Result.Try(() =>
             _commandExecutor.Send(

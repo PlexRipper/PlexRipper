@@ -2,7 +2,7 @@ namespace Reaparr.PlexApi;
 
 public static partial class PlexMediaDataMapper
 {
-    public static List<PlexTvShowSeason> ToPlexTvShowSeasons(this IEnumerable<LibraryMediaItemDTO> source) =>
+    public static List<PlexTvShowSeason> ToPlexTvShowSeasons(this List<LibraryMediaItemDTO> source) =>
         source.Select(value => value.ToPlexTvShowSeason()).ToList();
 
     public static PlexTvShowSeason ToPlexTvShowSeason(this LibraryMediaItemDTO source) =>

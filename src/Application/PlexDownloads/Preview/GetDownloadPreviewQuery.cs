@@ -190,7 +190,7 @@ public class GetDownloadPreviewQueryHandler : ICommandHandler<GetDownloadPreview
         foreach (var track in tracksById.Values)
         {
             var data = track.MediaDataList;
-            var groups = data.GroupBy(x => x.PlexApiMediaId).OrderBy(x => x.Key).ToList();
+            var groups = data.GroupBy(x => x.PlexApiMediaId).ToList();
             var selector = sourceSelections[track.Id].Qualities.FirstOrDefault(x => x.MediaId == track.Id);
             var selectedData = data.FirstOrDefault(x => x.Id == selector?.DataId);
             if (selectedData is not null)

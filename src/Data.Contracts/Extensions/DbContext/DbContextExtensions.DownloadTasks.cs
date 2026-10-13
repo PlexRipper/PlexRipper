@@ -1356,6 +1356,7 @@ public static partial class DbContextExtensions
                 FileName = string.Empty,
                 IsDownloadable = row.ParentId.HasValue && row.DownloadTaskType.IsDataOrPart(),
                 DownloadDirectory = string.Empty,
+                AudioQuality = AudioQuality.None,
                 VideoQuality = VideoQuality.None,
                 DestinationDirectory = string.Empty,
                 FileLocationUrl = string.Empty,

@@ -23,7 +23,7 @@ public class GetAllMediaEpisodesCommandHandler
         );
 
         if (mediaListResult.IsFailed)
-            return mediaListResult.ToResult();
+            return mediaListResult.ToResult().LogIfFailed();
 
         var mediaList = mediaListResult.Value.ToPlexTvShowEpisodes();
         return Result.Ok(mediaList);

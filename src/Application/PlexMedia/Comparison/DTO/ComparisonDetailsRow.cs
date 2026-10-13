@@ -22,6 +22,14 @@ internal record ComparisonDetailsRow
 
     public VideoQuality OwnedQuality { get; init; }
 
+    public AudioQuality RemoteAudioQuality { get; init; } = AudioQuality.None;
+
+    public AudioQuality OwnedAudioQuality { get; init; } = AudioQuality.None;
+
+    public int? RemotePlexMediaDataId { get; init; }
+
+    public int? OwnedPlexMediaDataId { get; init; }
+
     public string RemoteLocation { get; init; } = string.Empty;
 
     public string OwnedLocation { get; init; } = string.Empty;

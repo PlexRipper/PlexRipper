@@ -1,5 +1,5 @@
 import { route } from '@fixtures';
-import { PlexMediaType, VideoQuality } from '@dto';
+import { AudioQuality, PlexMediaType, VideoQuality } from '@dto';
 
 const viewports = [
 	{ name: 'small phone portrait', width: 320, height: 568 },
@@ -112,12 +112,14 @@ describe('Responsive layout', () => {
 						{
 							mediaDataType: mediaItem.type,
 							quality: VideoQuality.FullHD,
+							audioQuality: AudioQuality.None,
 							mediaId: mediaItem.id,
 							dataId: mediaItem.id,
 						},
 						{
 							mediaDataType: mediaItem.type,
 							quality: VideoQuality.HD,
+							audioQuality: AudioQuality.None,
 							mediaId: mediaItem.id,
 							dataId: mediaItem.id + 1,
 						},

@@ -3,7 +3,7 @@ import { createPinia, setActivePinia, type Pinia } from 'pinia';
 import { mountSuspended } from '@nuxt/test-utils/runtime';
 import { baseSetup, baseVars, getAxiosMock } from '@services-test-base';
 import { generatePlexMedia } from '@mock';
-import { PlexMediaType, VideoQuality, type DownloadMediaDTO, type PlexMediaDTO } from '@dto';
+import { AudioQuality, PlexMediaType, VideoQuality, type DownloadMediaDTO, type PlexMediaDTO } from '@dto';
 import { useMediaOverviewStore } from '@store';
 import { listenMediaOverviewDownloadCommand, useMediaOverviewBarDownloadCommandBus, useMediaOverviewCommandsBus } from '@composables/event-bus';
 import OtherVideoMediaList from '@/components/MediaOverview/OtherVideoMediaList.vue';
@@ -36,13 +36,13 @@ describe('OtherVideoMediaList - individual video selection', () => {
 				id: 20, type: PlexMediaType.OtherVideos, plexServerId: 3, plexLibraryId: 5,
 				title: 'Individual video', hasThumb: false, children: [],
 				mediaData: [
-					{ id: 10, plexApiMediaId: 100, plexApiPartId: 101, fileName: 'part-1.mp4', duration: 6000, size: 1024, videoResolution: VideoQuality.FullHD, videoCodec: 'h264', audioCodec: 'aac' },
-					{ id: 11, plexApiMediaId: 100, plexApiPartId: 102, fileName: 'part-2.mp4', duration: 6000, size: 1024, videoResolution: VideoQuality.FullHD, videoCodec: 'h264', audioCodec: 'aac' },
-					{ id: 30, plexApiMediaId: 200, plexApiPartId: 201, fileName: 'alternative.mkv', duration: 12000, size: 4096, videoResolution: VideoQuality.UHD_4K, videoCodec: 'hevc', audioCodec: 'flac' },
+					{ id: 10, plexApiMediaId: 100, plexApiPartId: 101, fileName: 'part-1.mp4', duration: 6000, size: 1024, videoResolution: VideoQuality.FullHD, videoCodec: 'h264', audioCodec: 'aac', audioQuality: AudioQuality.None },
+					{ id: 11, plexApiMediaId: 100, plexApiPartId: 102, fileName: 'part-2.mp4', duration: 6000, size: 1024, videoResolution: VideoQuality.FullHD, videoCodec: 'h264', audioCodec: 'aac', audioQuality: AudioQuality.None },
+					{ id: 30, plexApiMediaId: 200, plexApiPartId: 201, fileName: 'alternative.mkv', duration: 12000, size: 4096, videoResolution: VideoQuality.UHD_4K, videoCodec: 'hevc', audioCodec: 'flac', audioQuality: AudioQuality.None },
 				],
 				qualities: [
-					{ mediaId: 20, dataId: 10, mediaDataType: PlexMediaType.OtherVideos, quality: VideoQuality.FullHD },
-					{ mediaId: 20, dataId: 30, mediaDataType: PlexMediaType.OtherVideos, quality: VideoQuality.UHD_4K },
+					{ mediaId: 20, dataId: 10, mediaDataType: PlexMediaType.OtherVideos, quality: VideoQuality.FullHD, audioQuality: AudioQuality.None },
+					{ mediaId: 20, dataId: 30, mediaDataType: PlexMediaType.OtherVideos, quality: VideoQuality.UHD_4K, audioQuality: AudioQuality.None },
 				],
 			},
 		});

@@ -2,7 +2,7 @@ import { headers, route } from '@fixtures';
 import { generatePlexMedia, generateResultDTO, type MockConfig } from '@mock';
 import { PlexLibraryPaths, PlexMediaPaths, SettingsPaths } from '@api/api-paths';
 import { MediaMetaDataTypes, MediaSortField } from '@enums';
-import { PlexMediaType, VideoQuality, ViewMode, type PlexMediaDTO, type PlexMediaMetadataDTO, type PlexMediaStatisticsDTO, type SettingsModelDTO } from '@dto';
+import { AudioQuality, PlexMediaType, VideoQuality, ViewMode, type PlexMediaDTO, type PlexMediaMetadataDTO, type PlexMediaStatisticsDTO, type SettingsModelDTO } from '@dto';
 
 const families = [
 	{ type: PlexMediaType.MusicArtist, path: 'music', name: 'Music', viewField: 'musicArtistViewMode' },
@@ -33,7 +33,7 @@ function createRoots(type: PlexMediaType, config: MockConfig, libraryId: number,
 					const track = create(album.id + trackIndex + 1, PlexMediaType.MusicTrack, `Track ${trackIndex + 1}`, album.id);
 					track.discNumber = albumIndex === 0 ? [1, 2, 1, null][trackIndex] : 1;
 					track.trackNumber = albumIndex === 0 ? [1, 1, 2, null][trackIndex] : 1;
-					track.mediaData = [{ id: track.id, plexApiMediaId: track.id, plexApiPartId: track.id, fileName: `original-${track.id}.flac`, audioCodec: 'flac', videoCodec: '', videoResolution: VideoQuality.Unknown, duration: 6000, size: 1024 }];
+					track.mediaData = [{ id: track.id, plexApiMediaId: track.id, plexApiPartId: track.id, fileName: `original-${track.id}.flac`, audioCodec: 'flac', audioQuality: AudioQuality.Unknown, videoCodec: '', videoResolution: VideoQuality.None, duration: 6000, size: 1024 }];
 					return track;
 				});
 				album.childCount = album.children.length;
@@ -46,17 +46,17 @@ function createRoots(type: PlexMediaType, config: MockConfig, libraryId: number,
 			root.children = Array.from({ length: 20 }, (_, index) => {
 				const asset = create(root.id + 10 + index, PlexMediaType.PhotoImage, `Holiday asset ${index + 1}`, root.id);
 				const isClip = index === 19;
-				asset.mediaData = [{ id: asset.id, plexApiMediaId: asset.id, plexApiPartId: asset.id, fileName: isClip ? `${'holiday-original-recording-'.repeat(8)}.mp4` : `holiday-${index + 1}.jpg`, audioCodec: isClip ? 'aac' : '', videoCodec: isClip ? 'h264' : '', videoResolution: VideoQuality.Unknown, duration: isClip ? 6000 : 0, size: 1024 }];
+				asset.mediaData = [{ id: asset.id, plexApiMediaId: asset.id, plexApiPartId: asset.id, fileName: isClip ? `${'holiday-original-recording-'.repeat(8)}.mp4` : `holiday-${index + 1}.jpg`, audioCodec: isClip ? 'aac' : '', audioQuality: AudioQuality.None, videoCodec: isClip ? 'h264' : '', videoResolution: VideoQuality.Unknown, duration: isClip ? 6000 : 0, size: 1024 }];
 				return asset;
 			});
 			root.childCount = root.children.length;
 		} else {
 			const resolution = root.id === 100 ? VideoQuality.FullHD : VideoQuality.HD;
 			root.mediaData = [
-				...Array.from({ length: 18 }, (_, index) => ({ id: root.id * 100 + index, plexApiMediaId: root.id, plexApiPartId: root.id * 100 + index, fileName: `multipart-original-part-${index + 1}.mp4`, audioCodec: 'aac', videoCodec: 'h264', videoResolution: resolution, duration: 6000, size: 1024 })),
-				{ id: root.id * 100 + 20, plexApiMediaId: root.id + 1, plexApiPartId: root.id * 100 + 20, fileName: `${'alternative-original-'.repeat(8)}.mkv`, audioCodec: 'flac', videoCodec: 'hevc', videoResolution: resolution, duration: 12000, size: 2048 },
+				...Array.from({ length: 18 }, (_, index) => ({ id: root.id * 100 + index, plexApiMediaId: root.id, plexApiPartId: root.id * 100 + index, fileName: `multipart-original-part-${index + 1}.mp4`, audioCodec: 'aac', audioQuality: AudioQuality.None, videoCodec: 'h264', videoResolution: resolution, duration: 6000, size: 1024 })),
+				{ id: root.id * 100 + 20, plexApiMediaId: root.id + 1, plexApiPartId: root.id * 100 + 20, fileName: `${'alternative-original-'.repeat(8)}.mkv`, audioCodec: 'flac', audioQuality: AudioQuality.None, videoCodec: 'hevc', videoResolution: resolution, duration: 12000, size: 2048 },
 			];
-			root.qualities = [{ dataId: root.mediaData[0]!.id, mediaId: root.id, mediaDataType: type, quality: resolution }];
+			root.qualities = [{ dataId: root.mediaData[0]!.id, mediaId: root.id, mediaDataType: type, audioQuality: AudioQuality.None, quality: resolution }];
 		}
 	}
 	return roots;

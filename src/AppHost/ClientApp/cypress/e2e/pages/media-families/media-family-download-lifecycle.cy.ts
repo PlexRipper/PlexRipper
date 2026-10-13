@@ -4,7 +4,7 @@ import { generateDownloadTask, generatePlexMedia, generateResultDTO, type MockCo
 import { PlexLibraryPaths, PlexMediaPaths, SettingsPaths } from '@api/api-paths';
 import { MediaMetaDataTypes } from '@enums';
 import {
-	DownloadStatus, DownloadTaskType, FileSystemEntityType, FolderType, MessageTypes, PlexMediaType, VideoQuality,
+	DownloadStatus, DownloadTaskType, FileSystemEntityType, FolderType, MessageTypes, PlexMediaType, VideoQuality, AudioQuality,
 	type DownloadMediaDTO, type DownloadPreviewContainerDTO, type DownloadPreviewDTO, type DownloadProgressDTO,
 	type DownloadTaskCreationReportDTO, type FolderPathDTO, type PlexMediaDTO, type PlexMediaStatisticsDTO,
 	type ServerDownloadProgressDTO,
@@ -49,7 +49,7 @@ function createRoot(family: Family, config: MockConfig, libraryId: number, serve
 	const file = (id: number, version: number, name: string, clip = false) => ({
 		id, plexApiMediaId: version, plexApiPartId: id + 50000, fileName: name,
 		audioCodec: clip ? 'aac' : '', videoCodec: clip ? 'h264' : '',
-		videoResolution: clip ? VideoQuality.FullHD : VideoQuality.Unknown, duration: clip ? 6000 : 0, size: 1024,
+		audioQuality: AudioQuality.None, videoResolution: clip ? VideoQuality.FullHD : VideoQuality.Unknown, duration: clip ? 6000 : 0, size: 1024,
 	});
 	const root = media(100, families[family].type, family === 'photos' ? 'Holiday album' : family === 'music' ? 'Synth artist' : 'Owned recording');
 	if (family === 'photos') {
@@ -71,9 +71,9 @@ function createRoot(family: Family, config: MockConfig, libraryId: number, serve
 				track.discNumber = trackIndex;
 				track.trackNumber = 1;
 				track.mediaData = [
-					{ ...file(track.id * 100, track.id * 10, `track-${track.id}-part-1.flac`), audioCodec: 'flac', duration: 6000 },
-					{ ...file(track.id * 100 + 1, track.id * 10, `track-${track.id}-part-2.flac`), audioCodec: 'flac', duration: 6000 },
-					{ ...file(track.id * 100 + 2, track.id * 10 + 1, `track-${track.id}-alternative.mp3`), audioCodec: 'mp3', duration: 6000 },
+					{ ...file(track.id * 100, track.id * 10, `track-${track.id}-part-1.flac`), audioCodec: 'flac', audioQuality: AudioQuality.Unknown, videoResolution: VideoQuality.None, duration: 6000 },
+					{ ...file(track.id * 100 + 1, track.id * 10, `track-${track.id}-part-2.flac`), audioCodec: 'flac', audioQuality: AudioQuality.Unknown, videoResolution: VideoQuality.None, duration: 6000 },
+					{ ...file(track.id * 100 + 2, track.id * 10 + 1, `track-${track.id}-alternative.mp3`), audioCodec: 'mp3', audioQuality: AudioQuality.Unknown, videoResolution: VideoQuality.None, duration: 6000 },
 				];
 				return track;
 			});
@@ -84,7 +84,7 @@ function createRoot(family: Family, config: MockConfig, libraryId: number, serve
 	} else {
 		root.mediaData = [file(10001, 7001, 'recording-part-1.mp4', true), file(10002, 7001, 'recording-part-2.mp4', true), file(10003, 7002, 'recording-alternative.mkv', true)];
 		// Both originals have the same resolution: the selector must identify the version, not rank quality.
-		root.qualities = root.mediaData.map((part) => ({ mediaId: root.id, dataId: part.id, mediaDataType: root.type, quality: part.videoResolution }));
+		root.qualities = root.mediaData.map((part) => ({ mediaId: root.id, dataId: part.id, mediaDataType: root.type, audioQuality: AudioQuality.None, quality: part.videoResolution }));
 	}
 	root.childCount = root.children.length;
 	root.mediaSize = root.children.length ? root.children.reduce((size, child) => size + child.mediaSize, 0) : 3072;
@@ -384,7 +384,7 @@ describe('Photos download and lifecycle parity', () => {
 			cy.getCy(`photo-asset-${clip.id}`).should('contain.text', 'holiday-clip-part-1.mp4').and('contain.text', 'holiday-clip-part-2.mp4');
 			cy.getCy(`photo-asset-checkbox-${clip.id}`).click();
 			openConfirmation(true);
-			const clipCommand = assertCommand(state, PlexMediaType.PhotoImage, clip.id, [{ mediaId: clip.id, dataId: 11901, mediaDataType: PlexMediaType.PhotoImage, quality: VideoQuality.FullHD }]);
+			const clipCommand = assertCommand(state, PlexMediaType.PhotoImage, clip.id, [{ mediaId: clip.id, dataId: 11901, mediaDataType: PlexMediaType.PhotoImage, audioQuality: AudioQuality.None, quality: VideoQuality.FullHD }]);
 			assertPreview(clipCommand, clip);
 			createAndOpenQueue(state, clipCommand, clip);
 			visitDetail('photos', state);
@@ -395,7 +395,7 @@ describe('Photos download and lifecycle parity', () => {
 			cy.getCy('photo-album-checkbox').scrollIntoView().click();
 			cy.getCy('photo-album-checkbox').should('have.attr', 'aria-checked', 'true');
 			openConfirmation(true);
-			const command = assertCommand(state, PlexMediaType.PhotoAlbum, state.root.id, [{ mediaId: clip.id, dataId: 11901, mediaDataType: PlexMediaType.PhotoImage, quality: VideoQuality.FullHD }]);
+			const command = assertCommand(state, PlexMediaType.PhotoAlbum, state.root.id, [{ mediaId: clip.id, dataId: 11901, mediaDataType: PlexMediaType.PhotoImage, audioQuality: AudioQuality.None, quality: VideoQuality.FullHD }]);
 			assertPreview(command, state.root);
 			cy.getCy(`column-title-preview-${clip.id}`).scrollIntoView().should('have.text', clip.title);
 			createAndOpenQueue(state, command, state.root);
@@ -533,7 +533,7 @@ for (const scope of ['artist', 'album', 'track'] as const) {
 			if (scope !== 'track') cy.getCy(`music-album-checkbox-${album.id}`).click();
 			if (scope === 'artist') cy.getCy('music-artist-checkbox').click();
 			openConfirmation(scope === 'track');
-			const command = assertCommand(state, target.type, target.id, [{ mediaId: track.id, dataId: track.id * 100, mediaDataType: PlexMediaType.MusicTrack, quality: VideoQuality.Unknown }]);
+			const command = assertCommand(state, target.type, target.id, [{ mediaId: track.id, dataId: track.id * 100, mediaDataType: PlexMediaType.MusicTrack, audioQuality: AudioQuality.Unknown, quality: VideoQuality.None }]);
 			assertPreview(command, target);
 			cy.getCy('download-confirmation-dialog').should('contain.text', state.defaultFolder.directory);
 			if (scope === 'album') chooseDestination(state);
@@ -563,7 +563,7 @@ for (const destination of ['default', 'override', 'custom'] as const) {
 			if (destination !== 'default') cy.getCy(`other-video-original-${destination === 'custom' ? 10003 : 10001}`).scrollIntoView().click();
 			if (destination === 'custom') assertPhoneOriginal('other-video-original-10003');
 			openConfirmation(destination === 'custom');
-			const command = assertCommand(state, PlexMediaType.OtherVideos, state.root.id, destination === 'default' ? [] : [{ mediaId: state.root.id, dataId: destination === 'custom' ? 10003 : 10001, mediaDataType: PlexMediaType.OtherVideos, quality: VideoQuality.FullHD }]);
+			const command = assertCommand(state, PlexMediaType.OtherVideos, state.root.id, destination === 'default' ? [] : [{ mediaId: state.root.id, dataId: destination === 'custom' ? 10003 : 10001, mediaDataType: PlexMediaType.OtherVideos, audioQuality: AudioQuality.None, quality: VideoQuality.FullHD }]);
 			assertPreview(command, state.root, false);
 			cy.getCy('download-confirmation-dialog').should('contain.text', state.defaultFolder.directory);
 			if (destination === 'override') chooseDestination(state);

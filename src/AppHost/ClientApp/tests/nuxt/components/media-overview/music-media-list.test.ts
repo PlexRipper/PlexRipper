@@ -4,7 +4,7 @@ import { createPinia, setActivePinia } from 'pinia';
 import type { Pinia } from 'pinia';
 import type { VueWrapper } from '@vue/test-utils';
 import type { DownloadMediaDTO, PlexMediaDTO, PlexMediaDataDTO } from '@dto';
-import { PlexMediaComparisonState, PlexMediaType, VideoQuality } from '@dto';
+import { AudioQuality, PlexMediaComparisonState, PlexMediaType, VideoQuality } from '@dto';
 import { baseSetup } from '@services-test-base';
 import MusicMediaList from '@/components/MediaOverview/MusicMediaList.vue';
 import { useDialogStore, useMediaOverviewStore } from '@store';
@@ -24,6 +24,7 @@ function media(overrides: Partial<PlexMediaDTO>): PlexMediaDTO {
 		hasArt: false,
 		hasTheme: false,
 		hasThumb: false,
+		genres: [],
 		id: 0,
 		mediaData: [],
 		mediaSize: 0,
@@ -47,8 +48,10 @@ function media(overrides: Partial<PlexMediaDTO>): PlexMediaDTO {
 }
 
 function original(overrides: Partial<PlexMediaDataDTO>): PlexMediaDataDTO {
+	const { audioQuality: overrideAudioQuality, ...originalOverrides } = overrides;
 	return {
 		audioCodec: 'flac',
+		audioQuality: overrideAudioQuality ?? AudioQuality.Unknown,
 		duration: 180000,
 		fileName: 'track.flac',
 		id: 0,
@@ -56,8 +59,8 @@ function original(overrides: Partial<PlexMediaDataDTO>): PlexMediaDataDTO {
 		plexApiPartId: 0,
 		size: 1000,
 		videoCodec: '',
-		videoResolution: VideoQuality.Unknown,
-		...overrides,
+		videoResolution: VideoQuality.None,
+		...originalOverrides,
 	};
 }
 
@@ -185,6 +188,25 @@ describe('MusicMediaList hierarchy selection', () => {
 		return commands;
 	}
 
+	test('Should render supplied album record label and release date metadata', async () => {
+		// Arrange
+		const item = artistFixture();
+		Object.assign(item.children[0]!, {
+			recordLabel: 'Example Records',
+			releaseDate: '2020-04-12T00:00:00Z',
+		});
+
+		// Act
+		const wrapper = await render(item);
+
+		// Assert
+		const metadata = wrapper.get('[data-cy="music-album-7"] .music-album-row__metadata');
+		expect(metadata.text()).toContain('Record label');
+		expect(metadata.text()).toContain('Example Records');
+		expect(metadata.text()).toContain('Release date');
+		expect(metadata.text()).toContain('2020');
+	});
+
 	test('Should prefer artist then album then tracks without duplicate descendants', async () => {
 		// Arrange
 		const wrapper = await render();
@@ -263,7 +285,7 @@ describe('MusicMediaList hierarchy selection', () => {
 		// Assert
 		const row = trackRow(wrapper, 7);
 		expect(row.text()).toContain('Overlapping Track');
-		expect(row.findAll('td')).toHaveLength(9);
+		expect(row.findAll('td')).toHaveLength(10);
 		expect(row.find('.q-checkbox').exists()).toBe(true);
 		expect(row.find('.media-comparison-state-button').exists()).toBe(true);
 		expect(row.find('button .mdi-download').exists()).toBe(true);
@@ -468,6 +490,7 @@ describe('MusicMediaList hierarchy selection', () => {
 		const header = table.get('thead');
 		expect(header.text()).toContain('Title');
 		expect(header.text()).toContain('Comparison state');
+		expect(header.text()).toContain('Quality');
 		expect(header.text()).toContain('Year');
 		expect(header.text()).toContain('Duration');
 		expect(header.text()).toContain('Size');
@@ -475,7 +498,7 @@ describe('MusicMediaList hierarchy selection', () => {
 		expect(header.text()).toContain('Updated At');
 		expect(header.text()).toContain('Actions');
 		expect(header.text()).not.toContain('Original');
-		expect(header.findAll('th')).toHaveLength(9);
+		expect(header.findAll('th')).toHaveLength(10);
 		expect(table.find('.music-track-originals').exists()).toBe(false);
 		expect(table.find('.music-track-table__header').exists()).toBe(false);
 	});

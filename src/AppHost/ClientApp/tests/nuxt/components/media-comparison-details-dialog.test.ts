@@ -8,11 +8,12 @@ import { createI18n } from 'vue-i18n';
 import { baseSetup } from '@services-test-base';
 import { useDialogStore, useLibraryStore, useMediaStore, useServerStore } from '@store';
 import {
-	PlexMediaComparisonState, PlexMediaType, VideoQuality,
+	AudioQuality, PlexMediaComparisonState, PlexMediaType, VideoQuality,
 	type PlexMediaComparisonDetailsDTO, type PlexMediaComparisonDetailsRowDTO, type PlexMediaSlimDTO,
 } from '@dto';
 import MediaComparisonDetailsDialog from '@/components/Dialogs/MediaComparisonDetailsDialog.vue';
 import MediaVideoQuality from '@/components/MediaOverview/MediaVideoQuality.vue';
+import MediaAudioQuality from '@/components/MediaOverview/MediaAudioQuality.vue';
 import messages from '@/lang/en-US.json';
 
 const CardDialog = defineComponent({
@@ -37,11 +38,16 @@ function artist(type = PlexMediaType.MusicArtist, comparisonId = 5): PlexMediaSl
 }
 
 function row(overrides: Partial<PlexMediaComparisonDetailsRowDTO>): PlexMediaComparisonDetailsRowDTO {
+	const { ownedAudioQuality, remoteAudioQuality, ...rowOverrides } = overrides;
+	const type = rowOverrides.type ?? PlexMediaType.MusicAlbum;
+	const audioQuality = type === PlexMediaType.MusicTrack ? AudioQuality.Unknown : AudioQuality.None;
 	return {
-		plexMediaId: 7, title: '', type: PlexMediaType.MusicAlbum,
+		plexMediaId: 7, title: '', type,
 		plexServerId: 3, plexLibraryId: 4, state: PlexMediaComparisonState.Missing,
 		ownedQuality: VideoQuality.None, remoteQuality: VideoQuality.None, children: [],
-		...overrides,
+		...rowOverrides,
+		ownedAudioQuality: ownedAudioQuality ?? audioQuality,
+		remoteAudioQuality: remoteAudioQuality ?? audioQuality,
 	};
 }
 
@@ -166,9 +172,12 @@ describe('MediaComparisonDetailsDialog - missing Music leaves and request lifeti
 		expect(checkbox(wrapper, 'Empty missing album').attributes('aria-disabled')).toBe('true');
 		expect(wrapper.find(`[data-cy="media-comparison-details-download-${keyFor(wrapper, 'Owned track')}"]`).exists()).toBe(false);
 		expect(wrapper.findAllComponents(MediaVideoQuality)).toHaveLength(0);
-		expect(wrapper.text()).not.toContain('Current quality');
-		expect(wrapper.text()).not.toContain('Available quality');
-		expect(wrapper.findAll('thead th')).toHaveLength(3);
+		expect(wrapper.text()).toContain('Current quality');
+		expect(wrapper.text()).toContain('Available quality');
+		expect(wrapper.findAllComponents(MediaAudioQuality).map((chip) => chip.props('quality')).filter((quality) => quality !== AudioQuality.None)).toEqual(
+			Array.from({ length: 8 }, () => AudioQuality.Unknown),
+		);
+		expect(wrapper.findAll('thead th')).toHaveLength(5);
 		expect(wrapper.findAll('.mdi-music-note-off-outline')).toHaveLength(4);
 		expect(wrapper.find('.mdi-video-off-outline').exists()).toBe(false);
 	});
@@ -213,8 +222,50 @@ describe('MediaComparisonDetailsDialog - missing Music leaves and request lifeti
 		expect(wrapper.text()).toContain('Server 3');
 		expect(wrapper.text()).toContain('Library 4');
 		expect(wrapper.findAllComponents(MediaVideoQuality)).toHaveLength(0);
-		expect(wrapper.text()).not.toContain('quality');
+		expect(wrapper.text()).toContain('Current quality');
+		expect(wrapper.text()).toContain('Available quality');
+		expect(wrapper.findAllComponents(MediaAudioQuality).map((chip) => chip.props('quality')).filter((quality) => quality !== AudioQuality.None)).toEqual(
+			Array.from({ length: 8 }, () => AudioQuality.Unknown),
+		);
 		expect(wrapper.findAll('thead th')).toHaveLength(1);
+	});
+
+	test.each([false, true])('Should download the explaining audio upgrade file, not an automatic version (phone: %s)', async (phone) => {
+		// Arrange
+		const response = new Subject<PlexMediaComparisonDetailsDTO>();
+		const { wrapper, dialog, download } = await render([response], phone);
+		dialog.vm.$emit('opened', artist());
+		response.next(details([row({
+			title: 'Upgrade album', state: PlexMediaComparisonState.HigherQuality,
+			children: [row({
+				title: 'Upgrade track', type: PlexMediaType.MusicTrack, plexMediaId: 81,
+				state: PlexMediaComparisonState.HigherQuality, remotePlexMediaDataId: 812, ownedPlexMediaDataId: 411,
+				ownedAudioQuality: AudioQuality.FLAC16Bit441KHz,
+				remoteAudioQuality: AudioQuality.FLAC24Bit96KHz,
+			})],
+		})]));
+		await flushPromises();
+		await expandAll(wrapper);
+
+		// Act
+		await action(wrapper, 'Upgrade album').trigger('click');
+		await checkbox(wrapper, 'Upgrade track').trigger('click');
+		await submit(wrapper).trigger('click');
+
+		// Assert
+		const expected = [{
+			type: PlexMediaType.MusicTrack, mediaIds: [81], plexServerId: 3, plexLibraryId: 4,
+			keepCompletedInDownloadFolder: false,
+			qualities: [{
+				mediaId: 81, dataId: 812, mediaDataType: PlexMediaType.MusicTrack,
+				quality: VideoQuality.None, audioQuality: AudioQuality.FLAC24Bit96KHz,
+			}],
+		}];
+		expect(download.mock.calls.map(([commands]) => commands)).toEqual([expected, expected]);
+		expect(wrapper.findAllComponents(MediaAudioQuality).map((chip) => chip.props('quality')).filter((quality) => quality !== AudioQuality.None)).toEqual([
+			AudioQuality.FLAC16Bit441KHz, AudioQuality.FLAC24Bit96KHz,
+		]);
+		expect(wrapper.findAllComponents(MediaVideoQuality)).toHaveLength(0);
 	});
 
 	test('Should reject Owned-only and empty Music rows even when a selected event is injected', async () => {

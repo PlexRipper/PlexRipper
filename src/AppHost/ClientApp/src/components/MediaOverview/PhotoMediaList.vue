@@ -102,7 +102,7 @@
 <script setup lang="ts">
 import { groupBy, sortBy } from 'lodash-es';
 import { get, set } from '@vueuse/core';
-import { PlexMediaType, type PlexMediaDTO, type PlexMediaQualityDTO } from '@dto';
+import { AudioQuality, PlexMediaType, type PlexMediaDTO, type PlexMediaQualityDTO } from '@dto';
 import { useMediaOverviewStore } from '@store';
 import { toDownloadMedia } from '@composables/conversion/download-actions.conversion';
 import { sendMediaOverviewDownloadCommand, useMediaOverviewBarDownloadCommandBus } from '@composables/event-bus';
@@ -165,6 +165,7 @@ function originalSelectors(assetIds: number[]): PlexMediaQualityDTO[] {
 		return file
 			? [{
 					mediaId: asset.id, dataId: file.id, mediaDataType: PlexMediaType.PhotoImage, quality: file.videoResolution,
+					audioQuality: AudioQuality.None,
 				}]
 			: [];
 	});

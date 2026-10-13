@@ -39,6 +39,8 @@
             "select-track": "Wybierz utwór {title}",
             "selected-count": "Wybrano: {count}",
             "track-count": "Utwory: {count}",
+            "record-label": "Wytwórnia",
+            "release-date": "Data wydania",
             "no-tracks": "Nie znaleziono utworów",
             "no-albums": "Nie znaleziono albumów"
         },
@@ -48,6 +50,7 @@
             "duration": "Czas trwania",
             "size": "Rozmiar",
             "year": "Rok",
+            "genres": "Gatunki",
             "originally-available": "Pierwsza dostępność",
             "added-at": "Dodano",
             "updated-at": "Zaktualizowano",

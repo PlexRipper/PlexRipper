@@ -5,7 +5,7 @@ import { mountSuspended, mockNuxtImport } from '@nuxt/test-utils/runtime';
 import { of, Subject } from 'rxjs';
 import { baseSetup } from '@services-test-base';
 import { generatePlexMedia } from '@mock';
-import { PlexMediaType, VideoQuality, type PlexMediaDTO } from '@dto';
+import { AudioQuality, PlexMediaType, VideoQuality, type PlexMediaDTO } from '@dto';
 import { useDialogStore, useDownloadStore, useMediaStore, useSettingsStore } from '@store';
 import { resetMediaOverviewCommandsBus, sendMediaOverviewDownloadCommand } from '@/composables/event-bus';
 import ConfirmationSection from '@/components/Views/Settings/ConfirmationSection.vue';
@@ -93,6 +93,7 @@ describe('Other Videos root detail - request lifetime', () => {
 		const item = video();
 		item.mediaData = [{
 			audioCodec: 'aac',
+			audioQuality: AudioQuality.None,
 			duration: 7200,
 			fileName: 'video-file.mkv',
 			id: 101,

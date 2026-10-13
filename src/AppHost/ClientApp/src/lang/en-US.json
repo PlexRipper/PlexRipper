@@ -39,6 +39,8 @@
             "select-track": "Select track {title}",
             "selected-count": "{count} selected",
             "track-count": "{count} tracks",
+            "record-label": "Record label",
+            "release-date": "Release date",
             "no-tracks": "No tracks found",
             "no-albums": "No albums found"
         },
@@ -48,6 +50,7 @@
             "duration": "Duration",
             "size": "Size",
             "year": "Year",
+            "genres": "Genres",
             "originally-available": "Originally available",
             "added-at": "Added",
             "updated-at": "Updated",

@@ -51,12 +51,23 @@
 						:model-value="albumSelectionState(album)"
 						@click.stop
 						@update:model-value="setAlbumSelected(album, Boolean($event))" />
-					<div class="music-album-row__details">
-						<div class="text-weight-bold">
-							{{ album.title }}
+					<div class="text-weight-bold">
+						{{ album.title }}
+					</div>
+					<div class="text-caption">
+						{{ t('components.music-media-list.track-count', { count: album.children.length }) }}
+					</div>
+					<div
+						v-if="album.recordLabel || album.releaseDate"
+						class="music-album-row__metadata text-caption">
+						<div v-if="album.recordLabel">
+							{{ t('components.music-media-list.record-label') }}: {{ album.recordLabel }}
 						</div>
-						<div class="text-caption">
-							{{ t('components.music-media-list.track-count', { count: album.children.length }) }}
+						<div v-if="album.releaseDate">
+							{{ t('components.music-media-list.release-date') }}:
+							<QDateTime
+								:text="album.releaseDate"
+								short-date />
 						</div>
 					</div>
 					<div
@@ -121,7 +132,7 @@ const { t } = useI18n();
 const mediaOverviewStore = useMediaOverviewStore();
 const dialogStore = useDialogStore();
 const artistComparisonClickable = computed(() =>
-	[PlexMediaComparisonState.Missing, PlexMediaComparisonState.Partial].includes(getPlexMediaComparisonState(props.mediaItem)));
+	[PlexMediaComparisonState.Missing, PlexMediaComparisonState.Partial, PlexMediaComparisonState.HigherQuality, PlexMediaComparisonState.PartialAndHigherQuality].includes(getPlexMediaComparisonState(props.mediaItem)));
 
 function openArtistComparison(): void {
 	if (get(artistComparisonClickable))
@@ -336,6 +347,15 @@ onBeforeUnmount(() => {
 
 	&__details {
 		min-width: 0;
+	}
+
+	&__metadata {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 0.5rem;
+		min-width: 0;
+		overflow-wrap: anywhere;
 	}
 
 	&__comparison,

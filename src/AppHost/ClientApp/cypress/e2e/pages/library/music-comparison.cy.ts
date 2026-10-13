@@ -3,7 +3,7 @@ import { generatePlexMedia, generateResultDTO } from '@mock';
 import { PlexLibraryPaths, PlexMediaPaths } from '@api/api-paths';
 import { getPlexMediaComparisonState, getPlexMediaComparisonStateId } from '@composables';
 import {
-	FolderType, JobStatus, JobTypes, PlexMediaComparisonState, PlexMediaType, VideoQuality,
+	AudioQuality, FolderType, JobStatus, JobTypes, PlexMediaComparisonState, PlexMediaType, VideoQuality,
 	type DownloadMediaDTO, type LibraryComparisonCompletedDTO, type PlexMediaComparisonDetailsDTO,
 	type PlexMediaComparisonDetailsRowDTO, type PlexMediaDTO, type PlexMediaStatisticsDTO,
 } from '@dto';
@@ -59,7 +59,10 @@ function setupMusic(owned = false) {
 		const toRow = (item: PlexMediaDTO): PlexMediaComparisonDetailsRowDTO => ({
 			plexMediaId: item.id, plexLibraryId: source.id, plexServerId: source.plexServerId,
 			type: item.type, title: item.title, state: getPlexMediaComparisonState(item),
-			ownedQuality: VideoQuality.None, remoteQuality: VideoQuality.None, children: item.children.map(toRow),
+			ownedQuality: VideoQuality.None, remoteQuality: VideoQuality.None,
+			ownedAudioQuality: item.type === PlexMediaType.MusicTrack ? AudioQuality.Unknown : AudioQuality.None,
+			remoteAudioQuality: item.type === PlexMediaType.MusicTrack ? AudioQuality.Unknown : AudioQuality.None,
+			children: item.children.map(toRow),
 		});
 		const details: PlexMediaComparisonDetailsDTO = {
 			plexMediaId: artist.id, type: PlexMediaType.MusicArtist, state: PlexMediaComparisonState.Partial,

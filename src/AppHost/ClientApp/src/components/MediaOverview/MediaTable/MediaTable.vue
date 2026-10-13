@@ -60,7 +60,7 @@ import Log from 'consola';
 import { useVirtualizer } from '@tanstack/vue-virtual';
 import { get, set } from '@vueuse/core';
 import { useSubscription } from '@vueuse/rxjs';
-import type { PlexMediaSlimDTO } from '@dto';
+import { PlexMediaType, type PlexMediaSlimDTO } from '@dto';
 import type { ISelection } from '@interfaces';
 import {
 	triggerBoxHighlight,
@@ -72,7 +72,7 @@ import { getMediaTableColumns } from '~/composables/mediaTableColumns';
 const mediaOverviewStore = useMediaOverviewStore();
 const mediaTableColumns = computed(() => getMediaTableColumns().filter((column) => {
 	if (column.field === 'quality')
-		return mediaOverviewStore.getSupportsVideoQuality;
+		return mediaOverviewStore.getSupportsVideoQuality || mediaOverviewStore.getMediaType === PlexMediaType.MusicArtist;
 	if (column.field === 'comparisonState')
 		return mediaOverviewStore.getSupportsComparison;
 	return true;

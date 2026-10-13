@@ -39,6 +39,17 @@
 											{{ mediaItemDetail.year }}
 										</div>
 									</div>
+									<div
+										v-if="mediaItemDetail.genres?.length"
+										class="media-info-detail-field"
+										data-cy="music-detail-genres">
+										<div class="media-info-detail-label">
+											{{ t('components.music-details.genres') }}
+										</div>
+										<div class="media-info-detail-value">
+											{{ mediaItemDetail.genres?.map((genre) => genre.name).join(', ') }}
+										</div>
+									</div>
 								</div>
 								<div class="media-info-detail-column">
 									<div

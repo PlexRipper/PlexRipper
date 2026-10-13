@@ -40,6 +40,15 @@
 						<QText :value="row[column.field]" />
 					</QCol>
 				</template>
+				<!-- Quality -->
+				<template v-else-if="column.field === 'quality'">
+					<QCol
+						class="media-table-row--column"
+						:data-label="column.label"
+						cols="2">
+						<MediaQuality :qualities="row.qualities" />
+					</QCol>
+				</template>
 				<!-- Duration format -->
 				<template v-else-if="column['type'] === 'duration'">
 					<QCol

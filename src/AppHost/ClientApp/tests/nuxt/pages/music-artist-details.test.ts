@@ -31,9 +31,10 @@ function artist(children: PlexMediaDTO[] = []): PlexMediaDTO {
 		hasArt: false,
 		hasTheme: false,
 		hasThumb: false,
+		genres: [],
 		id: 12,
-		mediaData: [],
 		mediaSize: 0,
+		mediaData: [],
 		plexApiMetaDataKey: 12,
 		plexApiRatingKey: 12,
 		plexLibraryId: 4,
@@ -119,6 +120,24 @@ describe('Music artist details page', () => {
 		expect(wrapper.find('.media-detail-header').exists()).toBe(true);
 		expect(wrapper.get('.media-info-container').text()).toContain(item.summary);
 		expect(wrapper.find('[data-cy="music-detail-summary"]').exists()).toBe(false);
+	});
+
+	test('Should render supplied artist genres in the shared metadata table', async () => {
+		// Arrange
+		const item = artist();
+		item.genres = [
+			{ id: 1, name: 'Soul' },
+			{ id: 2, name: 'Pop' },
+		];
+		vi.spyOn(useMediaStore(), 'getMediaDataDetailById').mockReturnValue(of(item));
+
+		// Act
+		const wrapper = await render();
+
+		// Assert
+		const genres = wrapper.get('[data-cy="music-detail-genres"]');
+		expect(genres.text()).toContain('Genres');
+		expect(genres.text()).toContain('Soul, Pop');
 	});
 
 	test('Should discard an old response after direct navigation to another artist', async () => {

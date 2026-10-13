@@ -60,7 +60,7 @@
 						#header-title>
 						<QCheckbox
 							:model-value="getMusicSelectionValue(comparisonRows)"
-							:disable="!canDownload || getMissingMusicTracks(comparisonRows).length === 0"
+							:disable="!canDownload || getActionableMusicTracks(comparisonRows).length === 0"
 							:aria-label="t('components.media-overview.comparison.download-selected')"
 							data-cy="media-comparison-details-select-all"
 							@update:model-value="toggleMusicSelection(comparisonRows, $event === true)" />
@@ -72,7 +72,7 @@
 								<QCheckbox
 									v-if="isMusic"
 									:model-value="getMusicSelectionValue([data])"
-									:disable="!canDownload || getMissingMusicTracks([data]).length === 0"
+									:disable="!canDownload || getActionableMusicTracks([data]).length === 0"
 									:aria-label="data.title"
 									:data-cy="`media-comparison-details-select-${node.key}`"
 									@update:model-value="toggleMusicSelection([data], $event === true)"
@@ -86,7 +86,7 @@
 									:cy="`media-comparison-details-title-${node.key}`"
 									:value="data.title" />
 								<IconSquareButton
-									v-if="isMusic && $q.screen.lt.md && getMissingMusicTracks([data]).length > 0"
+									v-if="isMusic && $q.screen.lt.md && getActionableMusicTracks([data]).length > 0"
 									:cy="`media-comparison-details-download-${node.key}`"
 									icon="mdi-download"
 									:tooltip-text="t('components.media-overview.comparison.download-selected')"
@@ -98,22 +98,30 @@
 								v-if="$q.screen.lt.md"
 								class="media-comparison-details__metadata">
 								<div
-									v-if="!isMusic"
 									class="media-comparison-details__metadata-item">
 									<QText
 										class="media-comparison-details__metadata-label"
 										size="caption"
 										:value="t('components.media-overview.comparison.details-column-owned-quality')" />
-									<MediaVideoQuality :quality="data.ownedQuality ?? VideoQuality.None" />
+									<MediaAudioQuality
+										v-if="isMusic"
+										:quality="data.ownedAudioQuality ?? AudioQuality.None" />
+									<MediaVideoQuality
+										v-else
+										:quality="data.ownedQuality ?? VideoQuality.None" />
 								</div>
 								<div
-									v-if="!isMusic"
 									class="media-comparison-details__metadata-item">
 									<QText
 										class="media-comparison-details__metadata-label"
 										size="caption"
 										:value="t('components.media-overview.comparison.details-column-remote-quality')" />
-									<MediaVideoQuality :quality="data.remoteQuality ?? VideoQuality.None" />
+									<MediaAudioQuality
+										v-if="isMusic"
+										:quality="data.remoteAudioQuality ?? AudioQuality.None" />
+									<MediaVideoQuality
+										v-else
+										:quality="data.remoteQuality ?? VideoQuality.None" />
 								</div>
 								<div class="media-comparison-details__metadata-item media-comparison-details__metadata-location">
 									<QText
@@ -130,10 +138,20 @@
 						</div>
 					</template>
 					<template #cell-ownedQuality="{ data }: { data: IComparisonDetailsRow }">
-						<MediaVideoQuality :quality="data.ownedQuality ?? VideoQuality.None" />
+						<MediaAudioQuality
+							v-if="isMusic"
+							:quality="data.ownedAudioQuality ?? AudioQuality.None" />
+						<MediaVideoQuality
+							v-else
+							:quality="data.ownedQuality ?? VideoQuality.None" />
 					</template>
 					<template #cell-remoteQuality="{ data }: { data: IComparisonDetailsRow }">
-						<MediaVideoQuality :quality="data.remoteQuality ?? VideoQuality.None" />
+						<MediaAudioQuality
+							v-if="isMusic"
+							:quality="data.remoteAudioQuality ?? AudioQuality.None" />
+						<MediaVideoQuality
+							v-else
+							:quality="data.remoteQuality ?? VideoQuality.None" />
 					</template>
 					<template #cell-location="{ data }: { data: IComparisonDetailsRow }">
 						<QRow
@@ -156,7 +174,7 @@
 						<QRow justify="end">
 							<QCol cols="auto">
 								<IconSquareButton
-									v-if="!isMusic || getMissingMusicTracks([data]).length > 0"
+									v-if="!isMusic || getActionableMusicTracks([data]).length > 0"
 									:cy="`media-comparison-details-download-${node.key}`"
 									:disabled="!canDownload"
 									icon="mdi-download"
@@ -194,7 +212,7 @@
 <script setup lang="ts">
 import { useSubscription } from '@vueuse/rxjs';
 import { get, set } from '@vueuse/core';
-import { PlexMediaComparisonState, PlexMediaType, VideoQuality } from '@dto';
+import { AudioQuality, PlexMediaComparisonState, PlexMediaType, VideoQuality } from '@dto';
 import type {
 	DownloadMediaDTO,
 	PlexMediaComparisonDetailsRowDTO,
@@ -279,7 +297,6 @@ const comparisonColumns: QTreeTableColumn[] = [
 
 const responsiveComparisonColumns = computed<QTreeTableColumn[]>(() => {
 	const columns = comparisonColumns
-		.filter((column) => !get(isMusic) || !['ownedQuality', 'remoteQuality'].includes(column.field))
 		.map((column) => column.field === 'title' ? { ...column, selection: !get(isMusic) } : column);
 	return $q.screen.lt.md ? columns.filter((column) => column.field === 'title') : columns;
 });
@@ -350,24 +367,25 @@ function onSelectionChange(keys: TreeTableSelectionKeys) {
 		Object.entries(keys).filter(([, value]) => value.checked || value.partialChecked),
 	));
 	if (get(isMusic)) {
-		const tracks = getMissingMusicTracks(getSelectedDownloadRows(get(comparisonRows)));
+		const tracks = getActionableMusicTracks(getSelectedDownloadRows(get(comparisonRows)));
 		set(selectedRows, Object.fromEntries(tracks.map((track) => [track.key, { checked: true, partialChecked: false }])));
 	}
 }
 
-function getMissingMusicTracks(rows: IComparisonDetailsRow[]): IComparisonDetailsRow[] {
+function getActionableMusicTracks(rows: IComparisonDetailsRow[]): IComparisonDetailsRow[] {
 	return rows.flatMap((row) => {
 		if (getComparisonState(row) === PlexMediaComparisonState.Owned)
 			return [];
 		if (row.type === PlexMediaType.MusicTrack) {
-			return row.children.length === 0 && getComparisonState(row) === PlexMediaComparisonState.Missing ? [row] : [];
+			return row.children.length === 0
+				&& [PlexMediaComparisonState.Missing, PlexMediaComparisonState.HigherQuality].includes(getComparisonState(row)) ? [row] : [];
 		}
-		return getMissingMusicTracks(row.children);
+		return getActionableMusicTracks(row.children);
 	});
 }
 
 function getMusicSelectionValue(rows: IComparisonDetailsRow[]): boolean | null {
-	const tracks = getMissingMusicTracks(rows);
+	const tracks = getActionableMusicTracks(rows);
 	const selectedCount = tracks.filter((track) => get(selectedRows)[track.key]?.checked).length;
 	return tracks.length > 0 && selectedCount === tracks.length ? true : selectedCount > 0 ? null : false;
 }
@@ -375,7 +393,7 @@ function getMusicSelectionValue(rows: IComparisonDetailsRow[]): boolean | null {
 function toggleMusicSelection(rows: IComparisonDetailsRow[], checked: boolean) {
 	if (!get(canDownload))
 		return;
-	const tracks = getMissingMusicTracks(rows);
+	const tracks = getActionableMusicTracks(rows);
 	const keys = checked ? { ...get(selectedRows) } : omit(get(selectedRows), tracks.map((track) => track.key));
 	if (checked) {
 		for (const track of tracks)
@@ -398,7 +416,7 @@ function downloadRows(rows: IComparisonDetailsRow[]) {
 	if (!get(canDownload))
 		return;
 	const downloadRows = get(isMusic)
-		? uniqBy(getMissingMusicTracks(rows), (row) => `${row.type}-${row.plexServerId}-${row.plexLibraryId}-${row.plexMediaId}`)
+		? uniqBy(getActionableMusicTracks(rows), (row) => `${row.type}-${row.plexServerId}-${row.plexLibraryId}-${row.plexMediaId}`)
 		: rows;
 	const downloadCommands = downloadRows.map(toDownloadMediaCommand);
 
@@ -414,7 +432,13 @@ function toDownloadMediaCommand(row: IComparisonDetailsRow): DownloadMediaDTO {
 		mediaIds: [row.plexMediaId],
 		plexLibraryId: row.plexLibraryId,
 		plexServerId: row.plexServerId,
-		qualities: [],
+		qualities: row.type === PlexMediaType.MusicTrack && row.remotePlexMediaDataId != null ? [{
+			mediaId: row.plexMediaId,
+			dataId: row.remotePlexMediaDataId,
+			mediaDataType: PlexMediaType.MusicTrack,
+			quality: VideoQuality.None,
+			audioQuality: row.remoteAudioQuality ?? AudioQuality.Unknown,
+		}] : [],
 		keepCompletedInDownloadFolder: settingsStore.downloadManagerSettings.keepCompletedInDownloadFolder,
 	};
 }

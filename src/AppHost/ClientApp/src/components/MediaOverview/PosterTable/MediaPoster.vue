@@ -264,9 +264,6 @@ const supportsComparison = computed(() => [PlexMediaType.Movie, PlexMediaType.Tv
 const supportsVideoQuality = computed(() => [PlexMediaType.Movie, PlexMediaType.TvShow, PlexMediaType.OtherVideos].includes(get(mediaType)));
 
 const comparisonBadgeClickable = computed(() => {
-	if (get(mediaType) === PlexMediaType.MusicArtist)
-		return [PlexMediaComparisonState.Missing, PlexMediaComparisonState.Partial].includes(getPlexMediaComparisonState(props.mediaItem));
-
 	return [
 		PlexMediaComparisonState.Missing,
 		PlexMediaComparisonState.HigherQuality,

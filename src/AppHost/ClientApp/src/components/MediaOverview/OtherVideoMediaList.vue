@@ -50,7 +50,7 @@
 
 <script setup lang="ts">
 import { get, set } from '@vueuse/core';
-import { PlexMediaType, type DownloadMediaDTO, type PlexMediaDTO, type PlexMediaQualityDTO, type PlexMediaSlimDTO } from '@dto';
+import { AudioQuality, PlexMediaType, type DownloadMediaDTO, type PlexMediaDTO, type PlexMediaQualityDTO, type PlexMediaSlimDTO } from '@dto';
 import type { ISelection } from '@interfaces';
 import { useMediaOverviewStore, useSettingsStore } from '@store';
 import { sendMediaOverviewDownloadCommand, useMediaOverviewBarDownloadCommandBus } from '@composables/event-bus';
@@ -89,6 +89,7 @@ const mediaRows = computed((): PlexMediaSlimDTO[] => props.mediaItem.mediaData.m
 		mediaDataType: PlexMediaType.OtherVideos,
 		mediaId: props.mediaItem.id,
 		quality: mediaData.videoResolution,
+		audioQuality: AudioQuality.None,
 	} satisfies PlexMediaQualityDTO],
 })));
 

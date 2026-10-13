@@ -96,7 +96,9 @@ describe('Music comparison overview surfaces', () => {
 	});
 
 	test.each([
-		[PlexMediaType.MusicArtist, false, true],
+		[PlexMediaType.MusicArtist, true, true],
+		[PlexMediaType.MusicAlbum, true, false],
+		[PlexMediaType.MusicTrack, true, true],
 		[PlexMediaType.PhotoImage, false, false],
 		[PlexMediaType.OtherVideos, true, false],
 		[PlexMediaType.Movie, true, true],
@@ -113,7 +115,7 @@ describe('Music comparison overview surfaces', () => {
 		expect(headers.includes('Quality')).toBe(quality);
 		expect(headers.includes('Comparison state')).toBe(comparison);
 		expect(wrapper.findComponent(MediaComparisonStateButton).exists()).toBe(comparison);
-		expect(wrapper.find('.mdi-music-note-off-outline').exists()).toBe(type === PlexMediaType.MusicArtist);
+		expect(wrapper.find('.mdi-music-note-off-outline').exists()).toBe(type === PlexMediaType.MusicArtist || type === PlexMediaType.MusicTrack);
 	});
 
 	test.each([false, true])('Should offer Music states without upgrades for owned=%s', async (owned) => {

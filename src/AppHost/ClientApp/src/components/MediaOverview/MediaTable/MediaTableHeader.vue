@@ -31,6 +31,14 @@
 					<MediaTableHeaderColumn :column="column" />
 				</QCol>
 			</template>
+			<!-- Quality -->
+			<template v-else-if="column.field === 'quality'">
+				<QCol
+					cols="2"
+					class="media-table-header--column">
+					<MediaTableHeaderColumn :column="column" />
+				</QCol>
+			</template>
 			<!-- Duration format -->
 			<template v-else-if="column['type'] === 'duration'">
 				<QCol

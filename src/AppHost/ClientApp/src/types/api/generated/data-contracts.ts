@@ -50,6 +50,75 @@ export interface AppUserLoginEndpointRequest {
   username: string;
 }
 
+export enum AudioQuality {
+  Unknown = "Unknown",
+  MP3Below96Kbps = "MP3_Below96Kbps",
+  MP396Kbps = "MP3_96Kbps",
+  MP3128Kbps = "MP3_128Kbps",
+  MP3160Kbps = "MP3_160Kbps",
+  MP3192Kbps = "MP3_192Kbps",
+  MP3256Kbps = "MP3_256Kbps",
+  MP3320KbpsPlus = "MP3_320KbpsPlus",
+  AACBelow96Kbps = "AAC_Below96Kbps",
+  AAC96Kbps = "AAC_96Kbps",
+  AAC128Kbps = "AAC_128Kbps",
+  AAC160Kbps = "AAC_160Kbps",
+  AAC192Kbps = "AAC_192Kbps",
+  AAC256Kbps = "AAC_256Kbps",
+  AAC320KbpsPlus = "AAC_320KbpsPlus",
+  VorbisBelow96Kbps = "Vorbis_Below96Kbps",
+  Vorbis96Kbps = "Vorbis_96Kbps",
+  Vorbis128Kbps = "Vorbis_128Kbps",
+  Vorbis160Kbps = "Vorbis_160Kbps",
+  Vorbis192Kbps = "Vorbis_192Kbps",
+  Vorbis256Kbps = "Vorbis_256Kbps",
+  Vorbis320KbpsPlus = "Vorbis_320KbpsPlus",
+  OpusBelow96Kbps = "Opus_Below96Kbps",
+  Opus96Kbps = "Opus_96Kbps",
+  Opus128Kbps = "Opus_128Kbps",
+  Opus160Kbps = "Opus_160Kbps",
+  Opus192Kbps = "Opus_192Kbps",
+  Opus256Kbps = "Opus_256Kbps",
+  Opus320KbpsPlus = "Opus_320KbpsPlus",
+  FLAC16Bit441KHz = "FLAC_16Bit_44_1kHz",
+  FLAC16Bit48KHz = "FLAC_16Bit_48kHz",
+  FLAC16Bit882KHz = "FLAC_16Bit_88_2kHz",
+  FLAC16Bit96KHz = "FLAC_16Bit_96kHz",
+  FLAC16Bit1764KHz = "FLAC_16Bit_176_4kHz",
+  FLAC16Bit192KHz = "FLAC_16Bit_192kHz",
+  FLAC24Bit441KHz = "FLAC_24Bit_44_1kHz",
+  FLAC24Bit48KHz = "FLAC_24Bit_48kHz",
+  FLAC24Bit882KHz = "FLAC_24Bit_88_2kHz",
+  FLAC24Bit96KHz = "FLAC_24Bit_96kHz",
+  FLAC24Bit1764KHz = "FLAC_24Bit_176_4kHz",
+  FLAC24Bit192KHz = "FLAC_24Bit_192kHz",
+  ALAC16Bit441KHz = "ALAC_16Bit_44_1kHz",
+  ALAC16Bit48KHz = "ALAC_16Bit_48kHz",
+  ALAC16Bit882KHz = "ALAC_16Bit_88_2kHz",
+  ALAC16Bit96KHz = "ALAC_16Bit_96kHz",
+  ALAC16Bit1764KHz = "ALAC_16Bit_176_4kHz",
+  ALAC16Bit192KHz = "ALAC_16Bit_192kHz",
+  ALAC24Bit441KHz = "ALAC_24Bit_44_1kHz",
+  ALAC24Bit48KHz = "ALAC_24Bit_48kHz",
+  ALAC24Bit882KHz = "ALAC_24Bit_88_2kHz",
+  ALAC24Bit96KHz = "ALAC_24Bit_96kHz",
+  ALAC24Bit1764KHz = "ALAC_24Bit_176_4kHz",
+  ALAC24Bit192KHz = "ALAC_24Bit_192kHz",
+  PCM16Bit441KHz = "PCM_16Bit_44_1kHz",
+  PCM16Bit48KHz = "PCM_16Bit_48kHz",
+  PCM16Bit882KHz = "PCM_16Bit_88_2kHz",
+  PCM16Bit96KHz = "PCM_16Bit_96kHz",
+  PCM16Bit1764KHz = "PCM_16Bit_176_4kHz",
+  PCM16Bit192KHz = "PCM_16Bit_192kHz",
+  PCM24Bit441KHz = "PCM_24Bit_44_1kHz",
+  PCM24Bit48KHz = "PCM_24Bit_48kHz",
+  PCM24Bit882KHz = "PCM_24Bit_88_2kHz",
+  PCM24Bit96KHz = "PCM_24Bit_96kHz",
+  PCM24Bit1764KHz = "PCM_24Bit_176_4kHz",
+  PCM24Bit192KHz = "PCM_24Bit_192kHz",
+  None = "None",
+}
+
 export interface BaseResultDTO {
   errors: ErrorDTO[];
   isSuccess: boolean;
@@ -399,6 +468,7 @@ export interface DownloadTaskCreationReportDTO {
 }
 
 export interface DownloadTaskDTO {
+  audioQuality: AudioQuality;
   children: DownloadTaskDTO[];
   /** @format date-time */
   createdAt: string;
@@ -1006,6 +1076,9 @@ export interface PlexMediaComparisonDetailsDTO {
 
 export interface PlexMediaComparisonDetailsRowDTO {
   children: PlexMediaComparisonDetailsRowDTO[];
+  ownedAudioQuality: AudioQuality;
+  /** @format int32 */
+  ownedPlexMediaDataId?: number | null;
   ownedQuality: VideoQuality;
   /** @format int32 */
   plexLibraryId: number;
@@ -1013,6 +1086,9 @@ export interface PlexMediaComparisonDetailsRowDTO {
   plexMediaId: number;
   /** @format int32 */
   plexServerId: number;
+  remoteAudioQuality: AudioQuality;
+  /** @format int32 */
+  remotePlexMediaDataId?: number | null;
   remoteQuality: VideoQuality;
   state: PlexMediaComparisonState;
   title: string;
@@ -1043,6 +1119,7 @@ export interface PlexMediaDTO {
   discNumber?: number | null;
   /** @format int32 */
   duration: number;
+  genres: PlexGenreDTO[];
   /** @format int32 */
   grandChildCount: number;
   hasArt: boolean;
@@ -1068,6 +1145,9 @@ export interface PlexMediaDTO {
   qualities: PlexMediaQualityDTO[];
   /** @format double */
   rating: number;
+  recordLabel?: string | null;
+  /** @format date-time */
+  releaseDate?: string | null;
   searchTitle: string;
   /** @format int32 */
   sortIndex: number;
@@ -1088,7 +1168,18 @@ export interface PlexMediaDTO {
 }
 
 export interface PlexMediaDataDTO {
+  /** @format int32 */
+  audioBitDepth?: number | null;
+  /** @format int32 */
+  audioBitrateKbps?: number | null;
+  audioChannelLayout?: string | null;
+  /** @format int32 */
+  audioChannels?: number | null;
   audioCodec: string;
+  audioProfile?: string | null;
+  audioQuality: AudioQuality;
+  /** @format int32 */
+  audioSampleRateHz?: number | null;
   /** @format int64 */
   duration: number;
   fileName: string;
@@ -1129,6 +1220,18 @@ export interface PlexMediaMetadataDTO {
 }
 
 export interface PlexMediaQualityDTO {
+  /** @format int32 */
+  audioBitDepth?: number | null;
+  /** @format int32 */
+  audioBitrateKbps?: number | null;
+  audioChannelLayout?: string | null;
+  /** @format int32 */
+  audioChannels?: number | null;
+  audioCodec?: string | null;
+  audioProfile?: string | null;
+  audioQuality: AudioQuality;
+  /** @format int32 */
+  audioSampleRateHz?: number | null;
   /** @format int32 */
   dataId: number;
   mediaDataType: PlexMediaType;

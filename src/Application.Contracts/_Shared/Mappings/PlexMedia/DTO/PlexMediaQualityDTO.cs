@@ -17,20 +17,6 @@ public record PlexMediaQualityDTO
     /// </summary>
     public AudioQuality AudioQuality { get; init; } = AudioQuality.None;
 
-    public string? AudioCodec { get; init; }
-
-    public int? AudioBitrateKbps { get; init; }
-
-    public int? AudioBitDepth { get; init; }
-
-    public int? AudioSampleRateHz { get; init; }
-
-    public int? AudioChannels { get; init; }
-
-    public string? AudioChannelLayout { get; init; }
-
-    public string? AudioProfile { get; init; }
-
     /// <summary>
     /// The media id such as <see cref="PlexMovie"/> or <see cref="PlexTvShowEpisode"/>.
     /// </summary>

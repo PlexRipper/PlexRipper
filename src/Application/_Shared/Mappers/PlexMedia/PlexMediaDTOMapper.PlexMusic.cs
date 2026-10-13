@@ -143,14 +143,8 @@ public static partial class PlexMediaDTOMapper
             Size = source.Size,
             VideoResolution = VideoQuality.None,
             VideoCodec = string.Empty,
-            AudioCodec = source.AudioCodec,
+            AudioCodec = string.Empty,
             AudioQuality = source.AudioQuality,
-            AudioBitrateKbps = source.AudioBitrateKbps,
-            AudioBitDepth = source.AudioBitDepth,
-            AudioSampleRateHz = source.AudioSampleRateHz,
-            AudioChannels = source.AudioChannels,
-            AudioChannelLayout = source.AudioChannelLayout,
-            AudioProfile = source.AudioProfile,
         };
 
     private static PlexMediaQualityDTO ToMusicQuality(
@@ -158,28 +152,14 @@ public static partial class PlexMediaDTOMapper
         IEnumerable<PlexMusicTrackMediaData> files
     )
     {
-        var best = files.GetBestAudioFile();
-        var representative = best ?? files
-            .OrderBy(x => x.Source)
-            .ThenBy(x => x.PlexApiMediaId)
-            .ThenBy(x => x.PlexApiPartId)
-            .ThenBy(x => x.PartIndex)
-            .ThenBy(x => x.Id)
-            .First();
+        var (representative, quality) = files.PickAudioQuality();
 
         return new PlexMediaQualityDTO
         {
             Quality = VideoQuality.None,
-            AudioQuality = best is null ? AudioQuality.Unknown : representative.AudioQuality,
-            AudioCodec = representative.AudioCodec,
-            AudioBitrateKbps = representative.AudioBitrateKbps,
-            AudioBitDepth = representative.AudioBitDepth,
-            AudioSampleRateHz = representative.AudioSampleRateHz,
-            AudioChannels = representative.AudioChannels,
-            AudioChannelLayout = representative.AudioChannelLayout,
-            AudioProfile = representative.AudioProfile,
+            AudioQuality = quality,
             MediaDataType = PlexMediaType.MusicTrack,
-            DataId = representative.Id,
+            DataId = representative!.Id,
             MediaId = trackId,
         };
     }

@@ -13,6 +13,22 @@ public static class PlexMediaQualityExtensions
         return nonUnknown.Last();
     }
 
+    public static (PlexMusicTrackMediaData? File, AudioQuality Quality) PickAudioQuality(
+        this IEnumerable<PlexMusicTrackMediaData> files,
+        int? selectedDataId = null
+    )
+    {
+        var selected = selectedDataId is int id ? files.FirstOrDefault(x => x.Id == id) : null;
+        var best = selected ?? files.GetBestAudioFile();
+        if (best is not null)
+            return (best, best.AudioQuality);
+
+        var representative = files.MinBy(x =>
+            ((int)x.Source, x.PlexApiMediaId, x.PlexApiPartId, x.PartIndex, x.Id)
+        );
+        return (representative, AudioQuality.Unknown);
+    }
+
     /// <summary>
     /// Sorts a collection of BasePlexMediaQuality objects from lowest to highest resolution.
     /// </summary>

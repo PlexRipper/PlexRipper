@@ -47,4 +47,19 @@ public enum PlexMediaComparisonMatchType
     MusicBrainzReleaseId = 8,
 
     MusicBrainzReleaseTrackId = 9,
+
+    /// <summary>
+    /// Matched by the entity-validated native Plex artist GUID.
+    /// </summary>
+    PlexArtistGuid = 11,
+
+    /// <summary>
+    /// Matched by the entity-validated native Plex album GUID.
+    /// </summary>
+    PlexAlbumGuid = 12,
+
+    /// <summary>
+    /// Matched by the entity-validated native Plex track GUID.
+    /// </summary>
+    PlexTrackGuid = 13,
 }

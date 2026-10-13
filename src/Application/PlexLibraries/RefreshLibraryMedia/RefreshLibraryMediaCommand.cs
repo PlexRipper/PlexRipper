@@ -113,22 +113,25 @@ public class RefreshLibraryMediaCommandHandler : ICommandHandler<RefreshLibraryM
                 ),
                 ct
             ),
-            _ => Result.Fail($"Unsupported Plex library family: {newPlexLibrary.Type}"),
+            _ => Result.Fail("Unsupported Plex library family: {PlexMediaType}", newPlexLibrary.Type),
         };
 
         if (refreshLibraryResult.IsFailed)
             return refreshLibraryResult.LogIfFailed();
 
-        var syncedAt = DateTime.UtcNow;
-        await _dbContext
-            .PlexLibraries.Where(x => x.Id == command.PlexLibraryId)
-            .ExecuteUpdateAsync(
-                s =>
-                    s.SetProperty(x => x.SyncedAt, syncedAt)
-                        .SetProperty(x => x.SyncedContentChangedAt, newPlexLibrary.ContentChangedAt)
-                        .SetProperty(x => x.Outdated, false),
-                ct
-            );
+        if (insertPlexLibraryMediaMetaDataResult.Value.IsComplete)
+        {
+            var syncedAt = DateTime.UtcNow;
+            await _dbContext
+                .PlexLibraries.Where(x => x.Id == command.PlexLibraryId)
+                .ExecuteUpdateAsync(
+                    s =>
+                        s.SetProperty(x => x.SyncedAt, syncedAt)
+                            .SetProperty(x => x.SyncedContentChangedAt, newPlexLibrary.ContentChangedAt)
+                            .SetProperty(x => x.Outdated, false),
+                    ct
+                );
+        }
 
         var syncedLibrary = await _dbContext.PlexLibraries.GetAsync(command.PlexLibraryId, ct);
         if (syncedLibrary is null)

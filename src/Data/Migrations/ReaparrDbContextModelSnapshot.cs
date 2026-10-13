@@ -813,8 +813,6 @@ namespace Reaparr.Data.Migrations
 
                     b.HasIndex("PlexLibraryId", "MediaSizeRank");
 
-                    b.HasIndex("PlexLibraryId", "QualityRank");
-
                     b.HasIndex("PlexLibraryId", "TitleRank");
 
                     b.HasIndex("PlexLibraryId", "UpdatedAtRank");

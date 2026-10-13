@@ -31,7 +31,7 @@ describe('Music audio quality and explicit version selection', () => {
 		[AudioQuality.MP3320KbpsPlus, 'MP3 320 kbps+'],
 		[AudioQuality.AACBelow96Kbps, 'AAC <96 kbps'],
 		[AudioQuality.Unknown, '"Unknown"'],
-	])('Should show audio measurements rather than video labels for %s', async (quality, label) => {
+	])('Should show enum-derived audio labels for %s', async (quality, label) => {
 		// Arrange / Act
 		const wrapper = await mountSuspended(MediaAudioQuality, {
 			props: { quality },
@@ -93,42 +93,6 @@ describe('Music audio quality and explicit version selection', () => {
 		expect(wrapper.findAll('button').map((button) => button.text())).toEqual([
 			'FLAC 16-bit 44.1 kHz', 'MP3 320 kbps+',
 		]);
-		wrapper.unmount();
-	});
-
-	test.each([
-		{ sampleRateHz: 44100, label: '44.1' },
-		{ sampleRateHz: 22050, label: '22.05' },
-	])('Should show supplied file measurements at $sampleRateHz Hz and omit missing values', async ({ sampleRateHz, label }) => {
-		// Arrange
-		const file: PlexMediaQualityDTO = {
-			mediaId: 41,
-			dataId: 401,
-			mediaDataType: PlexMediaType.MusicTrack,
-			quality: VideoQuality.None,
-			audioQuality: AudioQuality.Unknown,
-			audioCodec: 'mp3',
-			audioBitrateKbps: 128,
-			audioBitDepth: null,
-			audioSampleRateHz: sampleRateHz,
-			audioChannels: 2,
-			audioChannelLayout: 'stereo',
-			audioProfile: null,
-		};
-
-		// Act
-		const wrapper = await mountSuspended(MediaQuality, {
-			props: { qualities: [file] },
-			global: {
-				plugins: [createI18n({ legacy: false, locale: 'en-US', messages: { 'en-US': messages } })],
-				stubs: { QGlowChip: chip },
-			},
-		});
-
-		// Assert
-		expect(wrapper.text()).toContain(`"Unknown" · mp3 · 128 kbps · ${label} kHz · 2 channels · stereo`);
-		expect(wrapper.text()).not.toContain('16-bit');
-		expect(wrapper.text()).not.toContain('profile');
 		wrapper.unmount();
 	});
 

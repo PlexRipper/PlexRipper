@@ -1168,18 +1168,8 @@ export interface PlexMediaDTO {
 }
 
 export interface PlexMediaDataDTO {
-  /** @format int32 */
-  audioBitDepth?: number | null;
-  /** @format int32 */
-  audioBitrateKbps?: number | null;
-  audioChannelLayout?: string | null;
-  /** @format int32 */
-  audioChannels?: number | null;
   audioCodec: string;
-  audioProfile?: string | null;
   audioQuality: AudioQuality;
-  /** @format int32 */
-  audioSampleRateHz?: number | null;
   /** @format int64 */
   duration: number;
   fileName: string;
@@ -1220,18 +1210,7 @@ export interface PlexMediaMetadataDTO {
 }
 
 export interface PlexMediaQualityDTO {
-  /** @format int32 */
-  audioBitDepth?: number | null;
-  /** @format int32 */
-  audioBitrateKbps?: number | null;
-  audioChannelLayout?: string | null;
-  /** @format int32 */
-  audioChannels?: number | null;
-  audioCodec?: string | null;
-  audioProfile?: string | null;
   audioQuality: AudioQuality;
-  /** @format int32 */
-  audioSampleRateHz?: number | null;
   /** @format int32 */
   dataId: number;
   mediaDataType: PlexMediaType;

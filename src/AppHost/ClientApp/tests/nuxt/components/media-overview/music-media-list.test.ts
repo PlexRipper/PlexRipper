@@ -50,7 +50,7 @@ function media(overrides: Partial<PlexMediaDTO>): PlexMediaDTO {
 function original(overrides: Partial<PlexMediaDataDTO>): PlexMediaDataDTO {
 	const { audioQuality: overrideAudioQuality, ...originalOverrides } = overrides;
 	return {
-		audioCodec: 'flac',
+		audioCodec: '',
 		audioQuality: overrideAudioQuality ?? AudioQuality.Unknown,
 		duration: 180000,
 		fileName: 'track.flac',
@@ -84,7 +84,7 @@ function artistFixture(): PlexMediaDTO {
 						mediaData: [
 							original({ id: 701, plexApiMediaId: 70, plexApiPartId: 1, fileName: 'disc-a.flac', size: 1000 }),
 							original({ id: 702, plexApiMediaId: 70, plexApiPartId: 2, fileName: 'disc-b.flac', size: 2000 }),
-							original({ id: 703, plexApiMediaId: 71, plexApiPartId: 3, fileName: 'alternate.mp3', audioCodec: 'mp3', size: 700 }),
+							original({ id: 703, plexApiMediaId: 71, plexApiPartId: 3, fileName: 'alternate.mp3', size: 700 }),
 						],
 					}),
 					media({

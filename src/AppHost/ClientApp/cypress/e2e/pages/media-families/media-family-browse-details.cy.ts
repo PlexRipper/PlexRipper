@@ -33,7 +33,7 @@ function createRoots(type: PlexMediaType, config: MockConfig, libraryId: number,
 					const track = create(album.id + trackIndex + 1, PlexMediaType.MusicTrack, `Track ${trackIndex + 1}`, album.id);
 					track.discNumber = albumIndex === 0 ? [1, 2, 1, null][trackIndex] : 1;
 					track.trackNumber = albumIndex === 0 ? [1, 1, 2, null][trackIndex] : 1;
-					track.mediaData = [{ id: track.id, plexApiMediaId: track.id, plexApiPartId: track.id, fileName: `original-${track.id}.flac`, audioCodec: 'flac', audioQuality: AudioQuality.Unknown, videoCodec: '', videoResolution: VideoQuality.None, duration: 6000, size: 1024 }];
+					track.mediaData = [{ id: track.id, plexApiMediaId: track.id, plexApiPartId: track.id, fileName: `original-${track.id}.flac`, audioCodec: '', audioQuality: AudioQuality.Unknown, videoCodec: '', videoResolution: VideoQuality.None, duration: 6000, size: 1024 }];
 					return track;
 				});
 				album.childCount = album.children.length;

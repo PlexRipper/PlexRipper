@@ -71,9 +71,9 @@ function createRoot(family: Family, config: MockConfig, libraryId: number, serve
 				track.discNumber = trackIndex;
 				track.trackNumber = 1;
 				track.mediaData = [
-					{ ...file(track.id * 100, track.id * 10, `track-${track.id}-part-1.flac`), audioCodec: 'flac', audioQuality: AudioQuality.Unknown, videoResolution: VideoQuality.None, duration: 6000 },
-					{ ...file(track.id * 100 + 1, track.id * 10, `track-${track.id}-part-2.flac`), audioCodec: 'flac', audioQuality: AudioQuality.Unknown, videoResolution: VideoQuality.None, duration: 6000 },
-					{ ...file(track.id * 100 + 2, track.id * 10 + 1, `track-${track.id}-alternative.mp3`), audioCodec: 'mp3', audioQuality: AudioQuality.Unknown, videoResolution: VideoQuality.None, duration: 6000 },
+					{ ...file(track.id * 100, track.id * 10, `track-${track.id}-part-1.flac`), audioQuality: AudioQuality.Unknown, videoResolution: VideoQuality.None, duration: 6000 },
+					{ ...file(track.id * 100 + 1, track.id * 10, `track-${track.id}-part-2.flac`), audioQuality: AudioQuality.Unknown, videoResolution: VideoQuality.None, duration: 6000 },
+					{ ...file(track.id * 100 + 2, track.id * 10 + 1, `track-${track.id}-alternative.mp3`), audioQuality: AudioQuality.Unknown, videoResolution: VideoQuality.None, duration: 6000 },
 				];
 				return track;
 			});

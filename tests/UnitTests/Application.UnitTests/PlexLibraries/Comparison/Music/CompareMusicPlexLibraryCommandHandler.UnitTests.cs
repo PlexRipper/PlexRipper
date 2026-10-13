@@ -63,7 +63,6 @@ public class CompareMusicPlexLibraryCommandHandlerUnitTests : BaseCommandUnitTes
     [Arguments("artist")]
     [Arguments("release")]
     [Arguments("label")]
-    [Arguments("country")]
     [Arguments("date")]
     [Arguments("disc-count")]
     [Arguments("disc-layout")]
@@ -98,9 +97,6 @@ public class CompareMusicPlexLibraryCommandHandlerUnitTests : BaseCommandUnitTes
                     break;
                 case "label":
                     albums[1].RecordLabel = "different label";
-                    break;
-                case "country":
-                    albums[1].Country = "GB";
                     break;
                 case "date":
                     albums[1].ReleaseDate = new DateTime(2000, 2, 1);
@@ -793,7 +789,6 @@ public class CompareMusicPlexLibraryCommandHandlerUnitTests : BaseCommandUnitTes
         ownedAlbum.MusicBrainzReleaseId = MbId(415);
         ownedAlbum.ReleaseDate = new DateTime(2001, 2, 3);
         ownedAlbum.RecordLabel = "Different label";
-        ownedAlbum.Country = "GB";
         ownedAlbum.DiscCount = 2;
         var remoteTracks = await dbContext
             .PlexMusicTracks.AsTracking()
@@ -1050,7 +1045,6 @@ public class CompareMusicPlexLibraryCommandHandlerUnitTests : BaseCommandUnitTes
                 ownedAlbums[i].MusicBrainzReleaseId = MbId(500000 + i);
                 ownedAlbums[i].ReleaseDate = new DateTime(2010 + i, 2, 3);
                 ownedAlbums[i].RecordLabel = $"Different label {i}";
-                ownedAlbums[i].Country = "GB";
                 ownedAlbums[i].DiscCount = 2;
                 ownedTracks[i].MusicBrainzReleaseTrackId = MbId(510000 + i);
                 ownedTracks[i].DiscNumber = 2;
@@ -1221,7 +1215,6 @@ public class CompareMusicPlexLibraryCommandHandlerUnitTests : BaseCommandUnitTes
                     album.MusicBrainzReleaseId = fallback ? null : MbId(200000 + i * 100 + albumIndex);
                     album.ReleaseDate = new DateTime(2000, 1, 1);
                     album.RecordLabel = "Label";
-                    album.Country = "US";
                     album.DiscCount = 1;
                     album.TrackCount = album.Tracks.Count;
                     var albumTracks = album.Tracks.OrderBy(x => x.Id).ToList();

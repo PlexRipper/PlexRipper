@@ -26,7 +26,10 @@ public class PlexMusicAlbum : BasePlexMedia
 
     public required string? RecordLabel { get; set; }
 
-    public string? Country { get; set; }
+    /// <summary>
+    /// Gets the countries associated with this album from Plex metadata.
+    /// </summary>
+    public ICollection<PlexCountry> Countries { get; init; } = [];
 
     public required int? DiscCount { get; set; }
 

@@ -365,7 +365,6 @@ public class CompareMusicPlexLibraryCommandHandler : ICommandHandler<CompareMusi
     {
         if (
             HaveConflictingMetadata(remote.RecordLabel, owned.RecordLabel)
-            || HaveConflictingMetadata(remote.Country, owned.Country)
             || (
                 remote.ReleaseDate.HasValue
                 && owned.ReleaseDate.HasValue

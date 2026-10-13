@@ -61,6 +61,27 @@ public class RefreshPlexMusicLibraryCommandHandler
             return albumsResult.ToResult().LogError();
         }
 
+        var albumMetadataResult = await Result.Try(() =>
+            _commandExecutor.Send(
+                new InsertMediaMetaDataCommand(
+                    new LibraryMetadata(plexLibrary) { Countries = albumsResult.Value.Countries }
+                ),
+                cancellationToken
+            )
+        );
+
+        if (albumMetadataResult.IsCancelled)
+            return albumMetadataResult.ToResult().LogWarning();
+
+        if (albumMetadataResult.IsFailed)
+        {
+            await _librarySyncProgressStore.UpdateErrorAsync(plexLibraryId, albumMetadataResult.ToResult(), cancellationToken);
+            return albumMetadataResult.ToResult().LogError();
+        }
+
+        foreach (var (key, country) in albumMetadataResult.Value.PlexCountries)
+            command.LibraryMetadata.PlexCountries[key] = country;
+
         var tracksResult = await Result.Try(() =>
             _commandExecutor.Send(
                 new GetLibraryMediaFromPlexApiCommand(plexLibrary, PlexMediaType.MusicTrack),

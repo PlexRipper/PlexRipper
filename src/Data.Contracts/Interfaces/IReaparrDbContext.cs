@@ -169,6 +169,8 @@ public interface IReaparrDbContext : IDisposable
 
     DbSet<PlexMusicArtistCountries> PlexMusicArtistCountries { get; }
 
+    DbSet<PlexMusicAlbumCountries> PlexMusicAlbumCountries { get; }
+
     DbSet<PlexOtherVideoActors> PlexOtherVideoActors { get; }
 
     DbSet<PlexOtherVideoGenres> PlexOtherVideoGenres { get; }

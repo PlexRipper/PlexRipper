@@ -44,6 +44,6 @@ public static partial class PlexMediaDataMapper
             TrackCount = null,
             MusicBrainzReleaseId = GetMusicBrainzId(source),
             RecordLabel = string.IsNullOrWhiteSpace(source.Studio) ? null : source.Studio,
-            Country = null,
+            Countries = source.Country.ToPlexCountry(),
         };
 }

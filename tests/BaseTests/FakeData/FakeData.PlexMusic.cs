@@ -63,7 +63,7 @@ public static partial class FakeData
         .RuleFor(x => x.Guid_TVDB, _ => null)
         .RuleFor(x => x.ReleaseDate, f => f.Date.Past(40))
         .RuleFor(x => x.RecordLabel, f => f.Company.CompanyName())
-        .RuleFor(x => x.Country, f => f.Address.CountryCode())
+        .Ignore(x => x.Countries)
         .Ignore(x => x.DiscCount)
         .Ignore(x => x.TrackCount)
         .Ignore(x => x.Tracks)

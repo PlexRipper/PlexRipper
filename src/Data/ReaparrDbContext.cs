@@ -146,6 +146,8 @@ public sealed class ReaparrDbContext : DbContext, IReaparrDbContext, IReaparrDbC
 
     public DbSet<PlexMusicArtistCountries> PlexMusicArtistCountries { get; set; }
 
+    public DbSet<PlexMusicAlbumCountries> PlexMusicAlbumCountries { get; set; }
+
     public DbSet<PlexOtherVideoActors> PlexOtherVideoActors { get; set; }
 
     public DbSet<PlexOtherVideoGenres> PlexOtherVideoGenres { get; set; }

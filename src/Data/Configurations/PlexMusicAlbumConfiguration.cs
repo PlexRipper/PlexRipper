@@ -35,5 +35,13 @@ public class PlexMusicAlbumConfiguration : IEntityTypeConfiguration<PlexMusicAlb
             .WithMany(x => x.Albums)
             .HasForeignKey(x => x.PlexArtistId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        builder
+            .HasMany(x => x.Countries)
+            .WithMany(x => x.PlexMusicAlbumCountries)
+            .UsingEntity<PlexMusicAlbumCountries>(
+                l => l.HasOne<PlexCountry>().WithMany().HasForeignKey(e => e.CountryId),
+                r => r.HasOne<PlexMusicAlbum>().WithMany().HasForeignKey(e => e.PlexMusicAlbumId)
+            );
     }
 }

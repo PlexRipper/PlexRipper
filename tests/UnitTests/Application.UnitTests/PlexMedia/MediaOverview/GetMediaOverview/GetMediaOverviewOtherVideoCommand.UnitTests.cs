@@ -32,10 +32,10 @@ public class GetMediaOverviewOtherVideoCommandUnitTests : BaseCommandUnitTest<Ge
         var metadataSeed = new Seed(84204);
         var actor = FakeData.GetPlexActors(metadataSeed).Generate();
         var country = FakeData.GetPlexCountries(metadataSeed).Generate();
-        var genre = FakeData.GetPlexGenres(metadataSeed).Generate();
+        var genre = FakeData.GetPlexGenresVideo(metadataSeed).Generate();
         dbContext.PlexActors.Add(actor);
         dbContext.PlexCountries.Add(country);
-        dbContext.PlexGenres.Add(genre);
+        dbContext.PlexGenresVideo.Add(genre);
         await dbContext.SaveChangesAsync(CancellationToken);
         foreach (var video in videos)
         {

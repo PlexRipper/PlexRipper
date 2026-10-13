@@ -19,7 +19,7 @@ public class InsertMediaMetaDataCommandUnitTests : BaseCommandUnitTest<InsertMed
         var plexLibrary = await IDbContext.PlexLibraries.FirstOrDefaultAsync(CancellationToken);
         plexLibrary.ShouldNotBeNull();
         var actors = FakeData.GetPlexActors(seed).GenerateUnique(100, x => x.Key);
-        var genres = FakeData.GetPlexGenres(seed).GenerateUnique(100, x => x.Key);
+        var genres = FakeData.GetPlexGenresVideo(seed).GenerateUnique(100, x => x.Key);
         var countries = FakeData.GetPlexCountries(seed).GenerateUnique(100, x => x.Key);
         var validActors = actors.Where(x => !string.IsNullOrEmpty(x.Key)).DistinctBy(x => x.Key).ToList();
         var validGenres = genres.Where(x => !string.IsNullOrEmpty(x.Key)).DistinctBy(x => x.Key).ToList();
@@ -30,7 +30,7 @@ public class InsertMediaMetaDataCommandUnitTests : BaseCommandUnitTest<InsertMed
             LibraryMetadata: new LibraryMetadata(plexLibrary)
             {
                 Actors = actors,
-                Genres = genres,
+                GenresVideo = genres,
                 Countries = countries,
             }
         );
@@ -47,7 +47,7 @@ public class InsertMediaMetaDataCommandUnitTests : BaseCommandUnitTest<InsertMed
                 $"Actor {actor.Name} with key {actor.Key} not found in database"
             );
 
-        var genresDb = await IDbContext.PlexGenres.ToListAsync(CancellationToken);
+        var genresDb = await IDbContext.PlexGenresVideo.ToListAsync(CancellationToken);
         genresDb.Count.ShouldBe(validGenres.Count);
         foreach (var genre in validGenres)
             genresDb.ShouldContain(x => x.Key == genre.Key, $"Genre {genre.Name} not found in database");
@@ -71,20 +71,64 @@ public class InsertMediaMetaDataCommandUnitTests : BaseCommandUnitTest<InsertMed
             }
         );
         var plexLibrary = await IDbContext.PlexLibraries.FirstAsync(CancellationToken);
-        var genre = new PlexGenre
+        var genre = new PlexGenreVideo
         {
             Name = "Documentaire",
             Key = "documentaire",
             Type = PlexGenreType.Documentary,
         };
-        var command = new InsertMediaMetaDataCommand(new LibraryMetadata(plexLibrary) { Genres = [genre] });
+        var command = new InsertMediaMetaDataCommand(new LibraryMetadata(plexLibrary) { GenresVideo = [genre] });
 
         // Act
         var result = await TestHandlerExecuteAsync<InsertMediaMetaDataCommandResponse>(command);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
-        (await IDbContext.PlexGenres.SingleAsync(CancellationToken)).Type.ShouldBe(PlexGenreType.Documentary);
+        (await IDbContext.PlexGenresVideo.SingleAsync(CancellationToken)).Type.ShouldBe(PlexGenreType.Documentary);
+    }
+
+    [Test]
+    public async Task ShouldKeepAudioAndVideoGenresSeparate_WhenKeysAndNamesOverlap()
+    {
+        // Arrange
+        await SetupDatabase(
+            1225,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexMovieLibraryCount = 1;
+                config.PlexMusicLibraryCount = 1;
+            }
+        );
+        var plexLibrary = await IDbContext.PlexLibraries.Where(x => x.Type == PlexMediaType.Movie).SingleAsync(CancellationToken);
+        var videoGenre = new PlexGenreVideo
+        {
+            Name = "Shared Label",
+            Key = "shared-label",
+            Type = PlexGenreType.Documentary,
+        };
+        var audioGenre = new PlexGenreAudio { Name = "Shared Label", Key = "shared-label" };
+        var command = new InsertMediaMetaDataCommand(
+            new LibraryMetadata(plexLibrary)
+            {
+                GenresVideo = [videoGenre],
+                GenresAudio = [audioGenre],
+            }
+        );
+
+        // Act
+        var result = await TestHandlerExecuteAsync<InsertMediaMetaDataCommandResponse>(command);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        result.Errors.Count.ShouldBe(0);
+        result.Value.PlexGenresVideo.ShouldContainKey("shared-label");
+        result.Value.PlexGenresAudio.ShouldContainKey("shared-label");
+        var storedVideo = await IDbContext.PlexGenresVideo.SingleAsync(CancellationToken);
+        var storedAudio = await IDbContext.PlexGenresAudio.SingleAsync(CancellationToken);
+        (storedVideo.Name, storedVideo.Key, storedVideo.Type).ShouldBe(("Shared Label", "shared-label", PlexGenreType.Documentary));
+        (storedAudio.Name, storedAudio.Key).ShouldBe(("Shared Label", "shared-label"));
+        storedVideo.Id.ShouldBe(storedAudio.Id);
     }
 
     [Test]
@@ -105,19 +149,19 @@ public class InsertMediaMetaDataCommandUnitTests : BaseCommandUnitTest<InsertMed
 
         // Create initial data
         var initialActors = FakeData.GetPlexActors(seed).GenerateUnique(50, x => x.Key);
-        var initialGenres = FakeData.GetPlexGenres(seed).GenerateUnique(50, x => x.Key);
+        var initialGenres = FakeData.GetPlexGenresVideo(seed).GenerateUnique(50, x => x.Key);
         var initialCountries = FakeData.GetPlexCountries(seed).GenerateUnique(50, x => x.Key);
 
         // Insert initial data
         var dbContext = IDbContext;
         await dbContext.PlexActors.AddRangeAsync(initialActors, CancellationToken);
-        await dbContext.PlexGenres.AddRangeAsync(initialGenres, CancellationToken);
+        await dbContext.PlexGenresVideo.AddRangeAsync(initialGenres, CancellationToken);
         await dbContext.PlexCountries.AddRangeAsync(initialCountries, CancellationToken);
         await dbContext.SaveChangesAsync(CancellationToken);
 
         // Create new data with some overlaps
         var newActors = FakeData.GetPlexActors(seed).GenerateUnique(100, x => x.Key);
-        var newGenres = FakeData.GetPlexGenres(seed).GenerateUnique(100, x => x.Key);
+        var newGenres = FakeData.GetPlexGenresVideo(seed).GenerateUnique(100, x => x.Key);
         var newCountries = FakeData.GetPlexCountries(seed).GenerateUnique(100, x => x.Key);
 
         // Act
@@ -125,7 +169,7 @@ public class InsertMediaMetaDataCommandUnitTests : BaseCommandUnitTest<InsertMed
             LibraryMetadata: new LibraryMetadata(plexLibrary)
             {
                 Actors = newActors,
-                Genres = newGenres,
+                GenresVideo = newGenres,
                 Countries = newCountries,
             }
         );
@@ -144,7 +188,7 @@ public class InsertMediaMetaDataCommandUnitTests : BaseCommandUnitTest<InsertMed
         foreach (var actor in newActors)
             actorsDb.ShouldContain(x => x.Name == actor.Name && x.Key == actor.Key);
 
-        var genresDb = await IDbContext.PlexGenres.ToListAsync(CancellationToken);
+        var genresDb = await IDbContext.PlexGenresVideo.ToListAsync(CancellationToken);
         var expectedGenreCount = initialGenres
             .Select(x => x.Key)
             .Concat(newGenres.Select(x => x.Key))
@@ -191,7 +235,7 @@ public class InsertMediaMetaDataCommandUnitTests : BaseCommandUnitTest<InsertMed
         var actorsDb = await IDbContext.PlexActors.ToListAsync(CancellationToken);
         actorsDb.ShouldBeEmpty();
 
-        var genresDb = await IDbContext.PlexGenres.ToListAsync(CancellationToken);
+        var genresDb = await IDbContext.PlexGenresVideo.ToListAsync(CancellationToken);
         genresDb.ShouldBeEmpty();
 
         var countriesDb = await IDbContext.PlexCountries.ToListAsync(CancellationToken);
@@ -290,7 +334,7 @@ public class InsertMediaMetaDataCommandUnitTests : BaseCommandUnitTest<InsertMed
 
         // Create a large dataset
         var actors = FakeData.GetPlexActors(seed).Generate(250);
-        var genres = FakeData.GetPlexGenres(seed).Generate(250);
+        var genres = FakeData.GetPlexGenresVideo(seed).Generate(250);
         var countries = FakeData.GetPlexCountries(seed).Generate(250);
 
         // Act
@@ -298,7 +342,7 @@ public class InsertMediaMetaDataCommandUnitTests : BaseCommandUnitTest<InsertMed
             LibraryMetadata: new LibraryMetadata(plexLibrary)
             {
                 Actors = actors,
-                Genres = genres,
+                GenresVideo = genres,
                 Countries = countries,
             }
         );
@@ -307,7 +351,7 @@ public class InsertMediaMetaDataCommandUnitTests : BaseCommandUnitTest<InsertMed
         // Assert
         result.IsSuccess.ShouldBeTrue();
         var actorsDb = await IDbContext.PlexActors.ToListAsync(CancellationToken);
-        var genresDb = await IDbContext.PlexGenres.ToListAsync(CancellationToken);
+        var genresDb = await IDbContext.PlexGenresVideo.ToListAsync(CancellationToken);
         var countriesDb = await IDbContext.PlexCountries.ToListAsync(CancellationToken);
 
         var expectedActorCount = actors.Select(x => x.Key).Where(x => !string.IsNullOrEmpty(x)).Distinct().Count();
@@ -470,11 +514,11 @@ public class InsertMediaMetaDataCommandUnitTests : BaseCommandUnitTest<InsertMed
         // Assert
         result.IsSuccess.ShouldBeTrue();
         result.Value.PlexActors.Count.ShouldBe(25);
-        result.Value.PlexGenres.ShouldBeEmpty();
+        result.Value.PlexGenresVideo.ShouldBeEmpty();
         result.Value.PlexCountries.ShouldBeEmpty();
 
         var actorsDb = await IDbContext.PlexActors.ToListAsync(CancellationToken);
-        var genresDb = await IDbContext.PlexGenres.ToListAsync(CancellationToken);
+        var genresDb = await IDbContext.PlexGenresVideo.ToListAsync(CancellationToken);
         var countriesDb = await IDbContext.PlexCountries.ToListAsync(CancellationToken);
 
         actorsDb.Count.ShouldBe(25);
@@ -499,7 +543,7 @@ public class InsertMediaMetaDataCommandUnitTests : BaseCommandUnitTest<InsertMed
         plexLibrary.ShouldNotBeNull();
 
         var actors = FakeData.GetPlexActors(seed).GenerateUnique(10, x => x.Key);
-        var genres = FakeData.GetPlexGenres(seed).GenerateUnique(10, x => x.Key);
+        var genres = FakeData.GetPlexGenresVideo(seed).GenerateUnique(10, x => x.Key);
         var countries = FakeData.GetPlexCountries(seed).GenerateUnique(10, x => x.Key);
 
         // Act
@@ -507,7 +551,7 @@ public class InsertMediaMetaDataCommandUnitTests : BaseCommandUnitTest<InsertMed
             LibraryMetadata: new LibraryMetadata(plexLibrary)
             {
                 Actors = actors,
-                Genres = genres,
+                GenresVideo = genres,
                 Countries = countries,
             }
         );
@@ -525,8 +569,8 @@ public class InsertMediaMetaDataCommandUnitTests : BaseCommandUnitTest<InsertMed
 
         foreach (var genre in genres)
         {
-            result.Value.PlexGenres.ShouldContainKey(genre.Key);
-            result.Value.PlexGenres[genre.Key].Key.ShouldBe(genre.Key);
+            result.Value.PlexGenresVideo.ShouldContainKey(genre.Key);
+            result.Value.PlexGenresVideo[genre.Key].Key.ShouldBe(genre.Key);
         }
 
         foreach (var country in countries)
@@ -608,14 +652,14 @@ public class InsertMediaMetaDataCommandUnitTests : BaseCommandUnitTest<InsertMed
         plexLibrary.ShouldNotBeNull();
 
         var actors = FakeData.GetPlexActors(seed).GenerateUnique(20, x => x.Key);
-        var genres = FakeData.GetPlexGenres(seed).GenerateUnique(20, x => x.Key);
+        var genres = FakeData.GetPlexGenresVideo(seed).GenerateUnique(20, x => x.Key);
         var countries = FakeData.GetPlexCountries(seed).GenerateUnique(20, x => x.Key);
 
         var command = new InsertMediaMetaDataCommand(
             LibraryMetadata: new LibraryMetadata(plexLibrary)
             {
                 Actors = actors,
-                Genres = genres,
+                GenresVideo = genres,
                 Countries = countries,
             }
         );
@@ -631,7 +675,7 @@ public class InsertMediaMetaDataCommandUnitTests : BaseCommandUnitTest<InsertMed
         result3.IsSuccess.ShouldBeTrue();
 
         var actorsDb = await IDbContext.PlexActors.ToListAsync(CancellationToken);
-        var genresDb = await IDbContext.PlexGenres.ToListAsync(CancellationToken);
+        var genresDb = await IDbContext.PlexGenresVideo.ToListAsync(CancellationToken);
         var countriesDb = await IDbContext.PlexCountries.ToListAsync(CancellationToken);
 
         // Should not have duplicates
@@ -738,7 +782,7 @@ public class InsertMediaMetaDataCommandUnitTests : BaseCommandUnitTest<InsertMed
         // Assert
         result.IsSuccess.ShouldBeTrue();
         result.Value.PlexActors.ShouldBeEmpty();
-        result.Value.PlexGenres.ShouldBeEmpty();
+        result.Value.PlexGenresVideo.ShouldBeEmpty();
         result.Value.PlexCountries.ShouldBeEmpty();
         result.Value.PlexLibrary.ShouldBe(plexLibrary);
     }
@@ -765,9 +809,9 @@ public class InsertMediaMetaDataCommandUnitTests : BaseCommandUnitTest<InsertMed
             .Select(x => new PlexActor { Key = string.Empty, Name = x.Name })
             .ToList();
 
-        var baseGenres = FakeData.GetPlexGenres(seed).Generate(3);
+        var baseGenres = FakeData.GetPlexGenresVideo(seed).Generate(3);
         var genresWithZeroKeys = baseGenres
-            .Select(x => new PlexGenre { Key = string.Empty, Name = x.Name, Type = x.Type })
+            .Select(x => new PlexGenreVideo { Key = string.Empty, Name = x.Name, Type = x.Type })
             .ToList();
 
         var baseCountries = FakeData.GetPlexCountries(seed).Generate(3);
@@ -780,7 +824,7 @@ public class InsertMediaMetaDataCommandUnitTests : BaseCommandUnitTest<InsertMed
             LibraryMetadata: new LibraryMetadata(plexLibrary)
             {
                 Actors = actorsWithZeroKeys,
-                Genres = genresWithZeroKeys,
+                GenresVideo = genresWithZeroKeys,
                 Countries = countriesWithZeroKeys,
             }
         );
@@ -790,7 +834,7 @@ public class InsertMediaMetaDataCommandUnitTests : BaseCommandUnitTest<InsertMed
         result.IsSuccess.ShouldBeTrue();
 
         var actorsDb = await IDbContext.PlexActors.ToListAsync(CancellationToken);
-        var genresDb = await IDbContext.PlexGenres.ToListAsync(CancellationToken);
+        var genresDb = await IDbContext.PlexGenresVideo.ToListAsync(CancellationToken);
         var countriesDb = await IDbContext.PlexCountries.ToListAsync(CancellationToken);
 
         actorsDb.Count.ShouldBe(0);
@@ -815,7 +859,7 @@ public class InsertMediaMetaDataCommandUnitTests : BaseCommandUnitTest<InsertMed
         plexLibrary.ShouldNotBeNull();
 
         var actors = FakeData.GetPlexActors(seed).GenerateUnique(15, x => x.Key);
-        var genres = FakeData.GetPlexGenres(seed).GenerateUnique(12, x => x.Key);
+        var genres = FakeData.GetPlexGenresVideo(seed).GenerateUnique(12, x => x.Key);
         var countries = FakeData.GetPlexCountries(seed).GenerateUnique(8, x => x.Key);
 
         // Act
@@ -823,7 +867,7 @@ public class InsertMediaMetaDataCommandUnitTests : BaseCommandUnitTest<InsertMed
             LibraryMetadata: new LibraryMetadata(plexLibrary)
             {
                 Actors = actors,
-                Genres = genres,
+                GenresVideo = genres,
                 Countries = countries,
             }
         );
@@ -837,7 +881,7 @@ public class InsertMediaMetaDataCommandUnitTests : BaseCommandUnitTest<InsertMed
             key => !string.IsNullOrEmpty(key),
             "All actor PlexIds should be positive"
         );
-        result.Value.PlexGenres.Keys.ShouldAllBe(
+        result.Value.PlexGenresVideo.Keys.ShouldAllBe(
             key => !string.IsNullOrEmpty(key),
             "All genre PlexIds should be positive"
         );
@@ -848,7 +892,7 @@ public class InsertMediaMetaDataCommandUnitTests : BaseCommandUnitTest<InsertMed
 
         // Verify entities have valid database IDs
         result.Value.PlexActors.Values.ShouldAllBe(actor => actor.Id > 0, "All actors should have valid database IDs");
-        result.Value.PlexGenres.Values.ShouldAllBe(genre => genre.Id > 0, "All genres should have valid database IDs");
+        result.Value.PlexGenresVideo.Values.ShouldAllBe(genre => genre.Id > 0, "All genres should have valid database IDs");
         result.Value.PlexCountries.Values.ShouldAllBe(
             country => country.Id > 0,
             "All countries should have valid database IDs"
@@ -856,11 +900,11 @@ public class InsertMediaMetaDataCommandUnitTests : BaseCommandUnitTest<InsertMed
 
         // Verify database entities match returned entities
         var actorsDb = await IDbContext.PlexActors.ToListAsync(CancellationToken);
-        var genresDb = await IDbContext.PlexGenres.ToListAsync(CancellationToken);
+        var genresDb = await IDbContext.PlexGenresVideo.ToListAsync(CancellationToken);
         var countriesDb = await IDbContext.PlexCountries.ToListAsync(CancellationToken);
 
         actorsDb.Count.ShouldBe(result.Value.PlexActors.Count);
-        genresDb.Count.ShouldBe(result.Value.PlexGenres.Count);
+        genresDb.Count.ShouldBe(result.Value.PlexGenresVideo.Count);
         countriesDb.Count.ShouldBe(result.Value.PlexCountries.Count);
 
         // Verify each returned entity exists in the database
@@ -872,7 +916,7 @@ public class InsertMediaMetaDataCommandUnitTests : BaseCommandUnitTest<InsertMed
             dbActor.Key.ShouldBe(returnedActor.Key);
         }
 
-        foreach (var returnedGenre in result.Value.PlexGenres.Values)
+        foreach (var returnedGenre in result.Value.PlexGenresVideo.Values)
         {
             var dbGenre = genresDb.FirstOrDefault(x => x.Id == returnedGenre.Id);
             dbGenre.ShouldNotBeNull($"Genre with ID {returnedGenre.Id} should exist in database");
@@ -901,11 +945,11 @@ public class InsertMediaMetaDataCommandUnitTests : BaseCommandUnitTest<InsertMed
 
         foreach (var sourceGenre in genres.Where(x => !string.IsNullOrEmpty(x.Key)))
         {
-            result.Value.PlexGenres.ShouldContainKey(
+            result.Value.PlexGenresVideo.ShouldContainKey(
                 sourceGenre.Key,
                 $"Response should contain genre with PlexId {sourceGenre.Key}"
             );
-            var responseGenre = result.Value.PlexGenres[sourceGenre.Key];
+            var responseGenre = result.Value.PlexGenresVideo[sourceGenre.Key];
             responseGenre.Name.ShouldBe(sourceGenre.Name);
         }
 

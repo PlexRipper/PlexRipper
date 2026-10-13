@@ -126,6 +126,11 @@ public class GetMediaByTypeCommandHandler : ICommandHandler<GetMediaByTypeComman
         var hasUserFilters = options.HasFiltersApplied() || filter.ComparisonState.HasValue;
         options = WithServerLibraryScope(options, allowedPlexLibraryIds, plexLibraryId);
 
+        if (filter.MediaType.IsMusicType())
+            options.Sort.RemoveAll(static sort =>
+                string.Equals(sort.Field, nameof(BasePlexMedia.Quality), StringComparison.OrdinalIgnoreCase)
+            );
+
         ApplyDefaultMediaSort(options, plexLibraryId);
         NormalizeAllLibrarySort(options, plexLibraryId);
 
@@ -377,6 +382,7 @@ public class GetMediaByTypeCommandHandler : ICommandHandler<GetMediaByTypeComman
                     .Include(x => x.Actors)
                     .Include(x => x.Countries)
                     .Include(x => x.Genres)
+                    .Include(x => x.Qualities)
                     .ApplyFilter(options)
                     .ApplySort(options);
                 List<PlexMusicArtist> artists;

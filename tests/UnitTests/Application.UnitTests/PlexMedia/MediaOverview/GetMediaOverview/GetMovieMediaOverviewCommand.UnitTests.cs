@@ -262,13 +262,13 @@ public class GetMovieMediaOverviewCommandUnitTests : BaseCommandUnitTest<GetMedi
             CancellationToken
         );
         await setupContext.SaveChangesAsync(CancellationToken);
-        var genre = new PlexGenre
+        var genre = new PlexGenreVideo
         {
             Name = "Drama",
             Key = "drama",
             Type = PlexGenreType.Drama,
         };
-        await setupContext.PlexGenres.AddAsync(genre, CancellationToken);
+        await setupContext.PlexGenresVideo.AddAsync(genre, CancellationToken);
         await setupContext.SaveChangesAsync(CancellationToken);
         await setupContext.PlexMovieGenres.AddAsync(
             new PlexMovieGenres(genre.Id, libraryId, movies[0].Id),

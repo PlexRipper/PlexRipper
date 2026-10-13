@@ -158,13 +158,17 @@ public class GetMediaDetailByIdEndpoint : Endpoint<GetMediaDetailByIdEndpointReq
 
     private async Task<Result<PlexMusicArtist>> GetPlexMusicArtist(int plexMusicArtistId, CancellationToken ct)
     {
-        var plexMusicArtist = _dbContext.PlexMusicArtists.FirstOrDefault(x => x.Id == plexMusicArtistId);
+        var plexMusicArtist = _dbContext
+            .PlexMusicArtists.Include(x => x.Qualities)
+            .Include(x => x.Genres)
+            .FirstOrDefault(x => x.Id == plexMusicArtistId);
 
         if (plexMusicArtist is null)
             return ResultExtensions.EntityNotFound(nameof(PlexMusicArtist), plexMusicArtistId).LogError();
 
         plexMusicArtist.Albums = _dbContext
-            .PlexMusicAlbums.Where(x => x.PlexArtistId == plexMusicArtistId)
+            .PlexMusicAlbums.Include(x => x.Qualities)
+            .Where(x => x.PlexArtistId == plexMusicArtistId)
             .Take(plexMusicArtist.ChildCount)
             .ToList();
 

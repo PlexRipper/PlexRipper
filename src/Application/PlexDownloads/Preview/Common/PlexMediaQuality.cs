@@ -10,7 +10,7 @@ public record PlexMediaQuality
     /// <summary>
     /// The quality of the media data, such as <see cref="VideoQuality.DVD"/> or <see cref="VideoQuality.HD"/>.
     /// </summary>
-    public required VideoQuality Quality { get; init; }
+    public required VideoQuality VideoQuality { get; init; }
 
     /// <summary>
     /// The audio quality for music media. Non-music media uses <see cref="AudioQuality.None"/>.

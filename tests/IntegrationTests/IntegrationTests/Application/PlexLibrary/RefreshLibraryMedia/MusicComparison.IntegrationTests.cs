@@ -1218,6 +1218,7 @@ public class MusicComparisonIntegrationTests : BaseIntegrationTests
                         item["titleSort"] = "Studio edition";
                         item["year"] = 2001;
                         item["originallyAvailableAt"] = "2001-01-01";
+                        item["studio"] = "Fixture label";
                     }
                 }
                 else if (type == "10")

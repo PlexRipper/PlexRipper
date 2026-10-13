@@ -54,4 +54,41 @@ public class GetMetadataFilterUnitTests
                 ? new[] { VideoQuality.FullHD.ToId(), VideoQuality.UHD_4K.ToId() }.Order()
                 : new[] { VideoQuality.FullHD.ToId() });
     }
+
+    [Test]
+    public async Task ShouldKeepAudioAndVideoGenreIdsScoped_WhenNamesAndIdsOverlap()
+    {
+        // Arrange
+        await SetupDatabase(8239, cfg =>
+        {
+            cfg.PlexMovieLibraryCount = 1;
+            cfg.PlexMusicLibraryCount = 1;
+        });
+        var dbContext = IDbContext;
+        var videoLibrary = await dbContext.PlexLibraries.SingleAsync(x => x.Type == PlexMediaType.Movie, CancellationToken);
+        var audioLibrary = await dbContext.PlexLibraries.SingleAsync(x => x.Type == PlexMediaType.MusicArtist, CancellationToken);
+        var videoGenre = new PlexGenreVideo { Name = "Shared", Key = "shared", Type = PlexGenreType.Drama };
+        var audioGenre = new PlexGenreAudio { Name = "Shared", Key = "shared" };
+        dbContext.PlexGenresVideo.Add(videoGenre);
+        dbContext.PlexGenresAudio.Add(audioGenre);
+        await dbContext.SaveChangesAsync(CancellationToken);
+        dbContext.PlexLibraryGenresVideo.Add(new PlexLibraryGenresVideo(videoLibrary.Id, videoGenre.Id));
+        dbContext.PlexLibraryGenresAudio.Add(new PlexLibraryGenresAudio(audioLibrary.Id, audioGenre.Id));
+        await dbContext.SaveChangesAsync(CancellationToken);
+
+        // Act
+        var videoResult = await TestEndpointHandleAsync(
+            new GetMetadataFilterRequest { PlexLibraryId = videoLibrary.Id, MediaType = PlexMediaType.Movie }
+        );
+        var audioResult = await TestEndpointHandleAsync(
+            new GetMetadataFilterRequest { PlexLibraryId = audioLibrary.Id, MediaType = PlexMediaType.MusicArtist }
+        );
+
+        // Assert
+        videoResult.IsValid.ShouldBeTrue();
+        videoResult.Response.ShouldNotBeNull().Value.ShouldNotBeNull().Genres.ShouldBe([videoGenre.Id]);
+        audioResult.IsValid.ShouldBeTrue();
+        audioResult.Response.ShouldNotBeNull().Value.ShouldNotBeNull().Genres.ShouldBe([audioGenre.Id]);
+        videoGenre.Id.ShouldBe(audioGenre.Id);
+    }
 }

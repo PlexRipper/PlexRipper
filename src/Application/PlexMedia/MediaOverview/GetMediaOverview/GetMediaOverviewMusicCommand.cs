@@ -150,7 +150,16 @@ public sealed class GetMediaOverviewMusicCommandHandler
                 HasThumb = x.HasThumb,
                 PlexApiRatingKey = x.PlexApiRatingKey,
                 PlexApiMetaDataKey = x.PlexApiMetaDataKey,
-                Qualities = new List<PlexMediaQualityDTO>(),
+                Qualities = x.Qualities.OrderBy(quality => quality.Id)
+                    .Select(quality => new PlexMediaQualityDTO
+                    {
+                        Quality = VideoQuality.None,
+                        AudioQuality = quality.Quality,
+                        MediaId = quality.PlexMusicArtistId,
+                        DataId = -1,
+                        MediaDataType = PlexMediaType.MusicArtist,
+                    })
+                    .ToList(),
             })
             .ToListAsync(cancellationToken);
         items = items.RestorePageOrder(ids);
@@ -219,12 +228,7 @@ public sealed class GetMediaOverviewMusicCommandHandler
             .OrderBy(x => x)
             .ToListAsync(cancellationToken);
         LogPhase(filter, "Metadata", stopwatch.Elapsed, items.Count);
-        result.Qualities = items
-            .SelectMany(x => x.Qualities)
-            .Select(x => x.Quality.ToId())
-            .Distinct()
-            .OrderBy(x => x)
-            .ToList();
+        result.Qualities = [];
         return Result.Ok(result);
     }
 

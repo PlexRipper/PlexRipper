@@ -108,7 +108,8 @@ public class GetLibraryMediaFromPlexApiCommandHandler
                 new LibraryMetadata(library)
                 {
                     Countries = media.SelectMany(x => x.Country).ToPlexCountry(),
-                    Genres = media.SelectMany(x => x.Genre).ToPlexGenre(),
+                    GenresVideo = !mediaType.IsMusicType() ? media.SelectMany(x => x.Genre).ToPlexGenreVideo() : [],
+                    GenresAudio = mediaType.IsMusicType() ? media.SelectMany(x => x.Genre).ToPlexGenreAudio() : [],
                     Actors = media.SelectMany(x => x.Role).ToPlexActor(),
                     PhotoClipCount =
                         mediaType == PlexMediaType.PhotoImage

@@ -48,10 +48,10 @@ public class GetMediaOverviewMusicCommandUnitTests : BaseCommandUnitTest<GetMedi
         var metadataSeed = new Seed(84202);
         var actor = FakeData.GetPlexActors(metadataSeed).Generate();
         var country = FakeData.GetPlexCountries(metadataSeed).Generate();
-        var genre = FakeData.GetPlexGenres(metadataSeed).Generate();
+        var genre = FakeData.GetPlexGenresAudio(metadataSeed).Generate();
         dbContext.PlexActors.Add(actor);
         dbContext.PlexCountries.Add(country);
-        dbContext.PlexGenres.Add(genre);
+        dbContext.PlexGenresAudio.Add(genre);
         await dbContext.SaveChangesAsync(CancellationToken);
         foreach (var artist in artists)
         {
@@ -106,6 +106,20 @@ public class GetMediaOverviewMusicCommandUnitTests : BaseCommandUnitTest<GetMedi
                 );
             }
         }
+        dbContext.PlexMusicArtistMediaQualities.AddRange(
+            new PlexMusicArtistMediaQuality
+            {
+                PlexLibraryId = libraryIds[0],
+                PlexMusicArtistId = target[2].Id,
+                Quality = AudioQuality.MP3_320KbpsPlus,
+            },
+            new PlexMusicArtistMediaQuality
+            {
+                PlexLibraryId = libraryIds[0],
+                PlexMusicArtistId = target[2].Id,
+                Quality = AudioQuality.Unknown,
+            }
+        );
         await dbContext.SaveChangesAsync(CancellationToken);
         var metadataId = metadataField switch
         {
@@ -167,7 +181,13 @@ public class GetMediaOverviewMusicCommandUnitTests : BaseCommandUnitTest<GetMedi
             (libraryIds[0], target[2].PlexServerId, target[2].PlexApiRatingKey, target[2].PlexApiMetaDataKey, true)
         );
         (item.SearchTitle, item.MediaSize).ShouldBe(("charlie", 300L));
-        item.Qualities.ShouldBeEmpty();
+        item.Qualities.Select(x => x.AudioQuality).ShouldBe([AudioQuality.MP3_320KbpsPlus, AudioQuality.Unknown]);
+        item.Qualities.ShouldAllBe(x =>
+            x.MediaDataType == PlexMediaType.MusicArtist
+            && x.MediaId == target[2].Id
+            && x.DataId == -1
+            && x.Quality == VideoQuality.None
+        );
         result.Value.Qualities.ShouldBeEmpty();
         result.Value.Roles.ShouldBe([actor.Id]);
         result.Value.Countries.ShouldBe([country.Id]);

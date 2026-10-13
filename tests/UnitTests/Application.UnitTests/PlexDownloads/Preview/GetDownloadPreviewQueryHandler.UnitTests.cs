@@ -353,7 +353,7 @@ public class GetDownloadPreviewQueryHandlerUnitTests : BaseUnitTest<GetDownloadP
             (clip.Id, album.Id, PlexMediaType.PhotoImage)
         );
         previewClip
-            .Qualities.Select(x => (x.MediaId, x.DataId, x.MediaDataType, x.Quality))
+            .Qualities.Select(x => (x.MediaId, x.DataId, x.MediaDataType, Quality: x.VideoQuality))
             .ShouldBe([(clip.Id, original.Id, PlexMediaType.PhotoImage, VideoQuality.Unknown)]);
         previewClip.Size.ShouldBe(original.Size + secondPart.Size);
         previewClip.ChildCount.ShouldBe(2);
@@ -714,12 +714,19 @@ public class GetDownloadPreviewQueryHandlerUnitTests : BaseUnitTest<GetDownloadP
         previewArtist.Size.ShouldBe(previewTrack.Size);
         previewTrack
             .Qualities.OrderBy(x => x.DataId)
-            .Select(x => (x.MediaId, x.DataId, x.MediaDataType, x.Quality))
+            .Select(x => (x.MediaId, x.DataId, x.MediaDataType, Quality: x.VideoQuality))
             .ShouldBe(
                 expectedTrackData
                     .GroupBy(x => x.PlexApiMediaId)
                     .OrderBy(x => x.Min(y => y.Id))
-                    .Select(x => (track.Id, x.Min(y => y.Id), PlexMediaType.MusicTrack, VideoQuality.Unknown))
+                    .Select(x =>
+                        (
+                            track.Id,
+                            selectorCase is 1 or 2 ? trackParts[1].Id : x.Min(y => y.Id),
+                            PlexMediaType.MusicTrack,
+                            VideoQuality.None
+                        )
+                    )
             );
         var previewPhotoAlbum = result.Value.Single(x => x.MediaType == PlexMediaType.PhotoAlbum);
         var previewImage = previewPhotoAlbum.Children.Single();
@@ -732,7 +739,7 @@ public class GetDownloadPreviewQueryHandlerUnitTests : BaseUnitTest<GetDownloadP
         previewVideo.ChildCount.ShouldBe(expectedVideoData.Count);
         previewVideo
             .Qualities.OrderBy(x => x.DataId)
-            .Select(x => (x.MediaId, x.DataId, x.MediaDataType, x.Quality))
+            .Select(x => (x.MediaId, x.DataId, x.MediaDataType, Quality: x.VideoQuality))
             .ShouldBe(
                 expectedVideoData
                     .GroupBy(x => x.PlexApiMediaId)
@@ -754,13 +761,15 @@ public class GetDownloadPreviewQueryHandlerUnitTests : BaseUnitTest<GetDownloadP
             .ShouldBe(
                 previewTrack
                     .Qualities.OrderBy(x => x.DataId)
-                    .Select(x => (x.MediaId, x.DataId, x.MediaDataType, x.Quality))
+                    .Select(x => (x.MediaId, x.DataId, x.MediaDataType, Quality: x.VideoQuality))
             );
         var dtoPhoto = dto.Previews.Single(x => x.Type == PlexMediaType.PhotoAlbum).Children.Single();
         dtoPhoto.Type.ShouldBe(PlexMediaType.PhotoImage);
         dtoPhoto
             .Qualities.Select(x => (x.MediaId, x.DataId, x.MediaDataType, x.Quality))
-            .ShouldBe(previewImage.Qualities.Select(x => (x.MediaId, x.DataId, x.MediaDataType, x.Quality)));
+            .ShouldBe(
+                previewImage.Qualities.Select(x => (x.MediaId, x.DataId, x.MediaDataType, Quality: x.VideoQuality))
+            );
         var dtoVideo = dto.Previews.Single(x => x.Type == PlexMediaType.OtherVideos);
         dtoVideo
             .Qualities.OrderBy(x => x.DataId)
@@ -768,7 +777,7 @@ public class GetDownloadPreviewQueryHandlerUnitTests : BaseUnitTest<GetDownloadP
             .ShouldBe(
                 previewVideo
                     .Qualities.OrderBy(x => x.DataId)
-                    .Select(x => (x.MediaId, x.DataId, x.MediaDataType, x.Quality))
+                    .Select(x => (x.MediaId, x.DataId, x.MediaDataType, Quality: x.VideoQuality))
             );
         var keys = dto
             .Previews.SelectMany(x => new[] { x }.Concat(x.Children).Concat(x.Children.SelectMany(y => y.Children)))

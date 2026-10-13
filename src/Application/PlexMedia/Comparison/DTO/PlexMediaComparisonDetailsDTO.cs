@@ -25,6 +25,14 @@ public record PlexMediaComparisonDetailsRowDTO
 
     public VideoQuality OwnedQuality { get; init; }
 
+    public AudioQuality RemoteAudioQuality { get; init; } = AudioQuality.None;
+
+    public AudioQuality OwnedAudioQuality { get; init; } = AudioQuality.None;
+
+    public int? RemotePlexMediaDataId { get; init; }
+
+    public int? OwnedPlexMediaDataId { get; init; }
+
     public required int PlexLibraryId { get; init; }
 
     public required int PlexServerId { get; init; }

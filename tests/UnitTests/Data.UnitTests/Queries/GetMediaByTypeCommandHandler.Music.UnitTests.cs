@@ -46,10 +46,10 @@ public class GetMediaByTypeCommandHandlerMusicUnitTests : BaseCommandUnitTest<Ge
         var metadataSeed = new Seed(73102);
         var actor = FakeData.GetPlexActors(metadataSeed).Generate();
         var country = FakeData.GetPlexCountries(metadataSeed).Generate();
-        var genre = FakeData.GetPlexGenres(metadataSeed).Generate();
+        var genre = FakeData.GetPlexGenresAudio(metadataSeed).Generate();
         dbContext.PlexActors.Add(actor);
         dbContext.PlexCountries.Add(country);
-        dbContext.PlexGenres.Add(genre);
+        dbContext.PlexGenresAudio.Add(genre);
         int[] years = [1999, 2000, 2000, 2001, 2001, 2002];
         foreach (var libraryArtists in new[] { targetArtists, controlArtists })
         {
@@ -61,7 +61,6 @@ public class GetMediaByTypeCommandHandlerMusicUnitTests : BaseCommandUnitTest<Ge
                 artist.MediaSize = (i + 1) * 100L;
                 artist.Title = $"{artist.PlexLibraryId}-root-{i}";
                 artist.HasThumb = i % 2 == 0;
-                artist.Quality = VideoQuality.Unknown;
                 if (i > 0)
                 {
                     artist.Actors.Add(actor);
@@ -185,26 +184,67 @@ public class GetMediaByTypeCommandHandlerMusicUnitTests : BaseCommandUnitTest<Ge
         response.Items.Select(x => x.ChildCount).ShouldBe([2, 2]);
         response.Items.Select(x => x.GrandChildCount).ShouldBe([6, 6]);
         response.Items.Select(x => x.ComparisonId).ShouldBe([0, 0]);
-        if (sortByQuality)
-        {
-            response.NavigationIndexes.Select(x => new { x.Label, x.Index }).ShouldBe([new { Label = "#", Index = 0 }]);
-        }
-        else
-        {
-            response
-                .NavigationIndexes.Select(x => new { x.Label, x.Index })
-                .ShouldBe([
-                    new { Label = "2000", Index = 0 },
-                    new { Label = "2001", Index = 2 },
-                    new { Label = "2002", Index = 4 },
-                ]);
-        }
+        response
+            .NavigationIndexes.Select(x => new { x.Label, x.Index })
+            .ShouldBe([
+                new { Label = "2000", Index = 0 },
+                new { Label = "2001", Index = 2 },
+                new { Label = "2002", Index = 4 },
+            ]);
         response.Items.SelectMany(x => x.Qualities).ShouldBeEmpty();
         response.Qualities.ShouldBeEmpty();
         response.Roles.ShouldBe([actor.Id]);
         response.Countries.ShouldBe([country.Id]);
         response.Genres.ShouldBe([genre.Id]);
         Mock.Mock<ICommandExecutor>().Verify();
+    }
+
+    [Test]
+    public async Task ShouldUseCanonicalSortIndexAndPaging_WhenOnlyLegacyVideoQualitySortIsRequestedForMusic()
+    {
+        // Arrange
+        await SetupDatabase(73103, config =>
+        {
+            config.PlexMusicLibraryCount = 1;
+            config.MusicArtistCount = 3;
+            config.MusicAlbumCount = 0;
+        });
+        var dbContext = IDbContext;
+        var libraryId = await dbContext.PlexLibraries.Select(x => x.Id).SingleAsync(CancellationToken);
+        var artists = await dbContext.PlexMusicArtists.AsTracking().OrderBy(x => x.Id).ToListAsync(CancellationToken);
+        int[] sortIndexes = [30, 10, 20];
+        for (var index = 0; index < artists.Count; index++)
+            dbContext.Entry(artists[index]).Property(nameof(BasePlexMedia.SortIndex)).CurrentValue = sortIndexes[index];
+        await dbContext.SaveChangesAsync(CancellationToken);
+        var expectedIds = new[] { artists[1].Id, artists[2].Id };
+        var command = new GetMediaByTypeCommand
+        {
+            Filter = new MediaQueryFilter
+            {
+                MediaType = PlexMediaType.MusicArtist,
+                PlexLibraryId = libraryId,
+                FilterOfflineMedia = false,
+                FilterOwnedMedia = false,
+                Parameters = new FlexQueryParameters { Page = 1, PageSize = 2, Sort = "quality:desc" },
+            },
+        };
+        Mock.Mock<ICommandExecutor>()
+            .Setup(x => x.Send(
+                It.Is<ApplyComparisonStateCommand>(state =>
+                    state.MediaType == PlexMediaType.MusicArtist && state.PlexLibraryId == libraryId
+                ),
+                CancellationToken
+            ))
+            .ReturnsAsync(Result.Ok());
+
+        // Act
+        var result = await TestHandlerExecuteAsync<PagedMediaQueryResult>(command);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.TotalCount.ShouldBe(3);
+        result.Value.Items.Select(x => x.Id).ShouldBe(expectedIds);
+        result.Value.Items.Select(x => x.SortIndex).ShouldBe([1, 2]);
     }
 
     [Test]

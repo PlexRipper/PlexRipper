@@ -49,7 +49,9 @@ public interface IReaparrDbContext : IDisposable
 
     DbSet<PlexActor> PlexActors { get; }
 
-    DbSet<PlexGenre> PlexGenres { get; }
+    DbSet<PlexGenreVideo> PlexGenresVideo { get; }
+
+    DbSet<PlexGenreAudio> PlexGenresAudio { get; }
 
     DbSet<PlexCountry> PlexCountries { get; }
 
@@ -94,6 +96,10 @@ public interface IReaparrDbContext : IDisposable
     DbSet<PlexMusicTrack> PlexMusicTracks { get; }
 
     DbSet<PlexMusicTrackMediaData> PlexMusicTrackData { get; }
+
+    DbSet<PlexMusicArtistMediaQuality> PlexMusicArtistMediaQualities { get; }
+
+    DbSet<PlexMusicAlbumMediaQuality> PlexMusicAlbumMediaQualities { get; }
 
     #endregion
 
@@ -141,7 +147,9 @@ public interface IReaparrDbContext : IDisposable
 
     DbSet<PlexLibraryCountries> PlexLibraryCountries { get; }
 
-    DbSet<PlexLibraryGenres> PlexLibraryGenres { get; }
+    DbSet<PlexLibraryGenresVideo> PlexLibraryGenresVideo { get; }
+
+    DbSet<PlexLibraryGenresAudio> PlexLibraryGenresAudio { get; }
 
     DbSet<PlexMovieActors> PlexMovieActors { get; }
 

@@ -38,10 +38,10 @@ public class GetMediaByTypeCommandHandlerOtherVideoUnitTests : BaseCommandUnitTe
         var metadataSeed = new Seed(73102);
         var actor = FakeData.GetPlexActors(metadataSeed).Generate();
         var country = FakeData.GetPlexCountries(metadataSeed).Generate();
-        var genre = FakeData.GetPlexGenres(metadataSeed).Generate();
+        var genre = FakeData.GetPlexGenresVideo(metadataSeed).Generate();
         dbContext.PlexActors.Add(actor);
         dbContext.PlexCountries.Add(country);
-        dbContext.PlexGenres.Add(genre);
+        dbContext.PlexGenresVideo.Add(genre);
         int[] years = [1999, 2000, 2000, 2001, 2001, 2002];
         foreach (var libraryVideos in new[] { targetVideos, controlVideos })
         {

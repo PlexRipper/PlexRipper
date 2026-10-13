@@ -2529,11 +2529,11 @@ public class GetMediaByTypeCommandHandlerUnitTests : BaseUnitTest<GetMediaByType
         var countryOnlyMovie = movies[2];
         var actorOnlyMovie = movies[3];
 
-        var genre = new PlexGenre { Name = "Regression Genre", Key = "regression-genre", Type = PlexGenreType.Unknown };
+        var genre = new PlexGenreVideo { Name = "Regression Genre", Key = "regression-genre", Type = PlexGenreType.Unknown };
         var country = new PlexCountry { Name = "Regression Country", Key = "regression-country" };
         var actor = new PlexActor { Name = "Regression Actor", Key = "regression-actor" };
 
-        dbContext.PlexGenres.Add(genre);
+        dbContext.PlexGenresVideo.Add(genre);
         dbContext.PlexCountries.Add(country);
         dbContext.PlexActors.Add(actor);
         await dbContext.SaveChangesAsync(CancellationToken);

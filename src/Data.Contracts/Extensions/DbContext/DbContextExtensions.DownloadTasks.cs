@@ -363,6 +363,7 @@ public static partial class DbContextExtensions
                 directories.Add(directory);
         }
     }
+
     public static async Task<DownloadTaskType> GetDownloadTaskTypeAsync(
         this IReaparrDbContext dbContext,
         Guid guid,
@@ -1353,17 +1354,9 @@ public static partial class DbContextExtensions
                 DownloadStatus = row.DownloadStatus,
                 CreatedAt = row.CreatedAt,
                 FileName = string.Empty,
-                IsDownloadable =
-                    row.ParentId.HasValue
-                    && (
-                        row.DownloadTaskType == DownloadTaskType.MovieData
-                        || row.DownloadTaskType == DownloadTaskType.EpisodeData
-                        || row.DownloadTaskType == DownloadTaskType.PhotoData
-                        || row.DownloadTaskType == DownloadTaskType.MusicTrackData
-                        || row.DownloadTaskType == DownloadTaskType.OtherVideoData
-                    ),
+                IsDownloadable = row.ParentId.HasValue && row.DownloadTaskType.IsDataOrPart(),
                 DownloadDirectory = string.Empty,
-                Quality = VideoQuality.None,
+                VideoQuality = VideoQuality.None,
                 DestinationDirectory = string.Empty,
                 FileLocationUrl = string.Empty,
                 DataReceived = row.DataReceived,

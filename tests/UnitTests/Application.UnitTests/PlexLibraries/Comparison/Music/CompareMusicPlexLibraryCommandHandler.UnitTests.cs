@@ -135,6 +135,79 @@ public class CompareMusicPlexLibraryCommandHandlerUnitTests : BaseCommandUnitTes
     }
 
     [Test]
+    [Arguments(false)]
+    [Arguments(true)]
+    public async Task ShouldMatchAlbumsAndTracks_WhenAlbumCountrySetsDiffer(bool fallback)
+    {
+        // Arrange
+        var (remote, owned) = await SetupPairAsync(fallback: fallback);
+        var dbContext = IDbContext;
+        var albums = await dbContext
+            .PlexMusicAlbums.AsTracking()
+            .OrderBy(x => x.PlexLibraryId)
+            .ToListAsync(CancellationToken);
+        var tracks = await dbContext
+            .PlexMusicTracks.AsTracking()
+            .OrderBy(x => x.PlexLibraryId)
+            .ThenBy(x => x.TrackNumber)
+            .ToListAsync(CancellationToken);
+        var firstRemoteCountry = new PlexCountry { Name = "First Remote Comparison Country", Key = "comparison-first-remote" };
+        var remoteCountry = new PlexCountry { Name = "Remote Comparison Country", Key = "comparison-remote" };
+        var ownedCountry = new PlexCountry { Name = "Owned Comparison Country", Key = "comparison-owned" };
+        dbContext.PlexCountries.AddRange(firstRemoteCountry, remoteCountry, ownedCountry);
+        await dbContext.SaveChangesAsync(CancellationToken);
+        dbContext.PlexMusicAlbumCountries.AddRange(
+            new PlexMusicAlbumCountries(firstRemoteCountry.Id, remote.Id, albums[0].Id),
+            new PlexMusicAlbumCountries(remoteCountry.Id, remote.Id, albums[0].Id),
+            new PlexMusicAlbumCountries(ownedCountry.Id, owned.Id, albums[1].Id)
+        );
+        await dbContext.SaveChangesAsync(CancellationToken);
+        var countryLinks = await dbContext
+            .PlexMusicAlbumCountries.OrderBy(x => x.PlexMusicAlbumId).ThenBy(x => x.CountryId)
+            .Select(x => new { x.PlexMusicAlbumId, x.CountryId, x.PlexLibraryId })
+            .ToListAsync(CancellationToken);
+        countryLinks.Select(x => (x.PlexMusicAlbumId, x.CountryId, x.PlexLibraryId)).ShouldBe([
+            (albums[0].Id, firstRemoteCountry.Id, remote.Id),
+            (albums[0].Id, remoteCountry.Id, remote.Id),
+            (albums[1].Id, ownedCountry.Id, owned.Id),
+        ]);
+
+        // Act
+        var result = await TestHandlerExecuteAsync(new CompareMusicPlexLibraryCommand(owned.Id, remote.Id));
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        result.Errors.Count.ShouldBe(0);
+        var albumHit = await dbContext.PlexMusicAlbumComparisons.SingleAsync(CancellationToken);
+        (albumHit.RemotePlexMediaId, albumHit.OwnedPlexMediaId, albumHit.MatchType).ShouldBe(
+            (
+                albums[0].Id,
+                albums[1].Id,
+                fallback
+                    ? PlexMediaComparisonMatchType.NormalizedTitleAndYear
+                    : PlexMediaComparisonMatchType.MusicBrainzReleaseId
+            )
+        );
+        var trackHits = await dbContext.PlexMusicTrackComparisons.OrderBy(x => x.RemotePlexMediaId).ToListAsync(CancellationToken);
+        trackHits.Select(x => (x.RemotePlexMediaId, x.OwnedPlexMediaId, x.MatchType)).ShouldBe([
+            (
+                tracks[0].Id,
+                tracks[2].Id,
+                fallback
+                    ? PlexMediaComparisonMatchType.ParentAndChildNumbers
+                    : PlexMediaComparisonMatchType.MusicBrainzReleaseTrackId
+            ),
+            (
+                tracks[1].Id,
+                tracks[3].Id,
+                fallback
+                    ? PlexMediaComparisonMatchType.ParentAndChildNumbers
+                    : PlexMediaComparisonMatchType.MusicBrainzReleaseTrackId
+            ),
+        ]);
+    }
+
+    [Test]
     public async Task ShouldMatchNonConflictingPartialSubset_WhenStableIdsAreMissing()
     {
         // Arrange

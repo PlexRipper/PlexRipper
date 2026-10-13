@@ -119,6 +119,21 @@ public class RefreshPlexMusicLibraryCommandIntegrationTests : BaseIntegrationTes
             })
             .ToListAsync(CancellationToken);
         (artists.Count, albums.Count, tracks.Count, originals.Count).ShouldBe((2, 4, 8, 8));
+        var albumCountryLinks = await firstContext
+            .PlexMusicAlbumCountries.OrderBy(x => x.PlexMusicAlbumId).ThenBy(x => x.CountryId)
+            .Select(x => new { x.PlexLibraryId, x.PlexMusicAlbumId, x.CountryId })
+            .ToListAsync(CancellationToken);
+        albumCountryLinks.Count.ShouldBe(albums.Count * 2);
+        albumCountryLinks.Select(x => x.PlexLibraryId).Distinct().ShouldBe([library.Id]);
+        albumCountryLinks.GroupBy(x => x.PlexMusicAlbumId).ShouldAllBe(x => x.Count() == 2);
+        albumCountryLinks
+            .Select(x => x.PlexMusicAlbumId)
+            .Distinct()
+            .OrderBy(x => x)
+            .ShouldBe(albums.Select(x => x.Id).OrderBy(x => x));
+        var countryIds = (await firstContext.PlexCountries.Select(x => x.Id).ToListAsync(CancellationToken)).ToHashSet();
+        albumCountryLinks.ShouldAllBe(x => countryIds.Contains(x.CountryId));
+
 
         var repeatResponse = await client.POSTAsync<
             RefreshLibraryMediaEndpoint,
@@ -177,5 +192,11 @@ public class RefreshPlexMusicLibraryCommandIntegrationTests : BaseIntegrationTes
                 })
                 .ToListAsync(CancellationToken)
         ).ShouldBe(originals);
+        (
+            await repeatedContext
+                .PlexMusicAlbumCountries.OrderBy(x => x.PlexMusicAlbumId).ThenBy(x => x.CountryId)
+                .Select(x => new { x.PlexLibraryId, x.PlexMusicAlbumId, x.CountryId })
+                .ToListAsync(CancellationToken)
+        ).ShouldBe(albumCountryLinks);
     }
 }

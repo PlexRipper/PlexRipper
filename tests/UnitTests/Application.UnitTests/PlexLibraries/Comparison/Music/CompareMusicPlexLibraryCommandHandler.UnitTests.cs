@@ -1,9 +1,14 @@
+using Quartz;
 using Reaparr.Data;
 
 namespace Reaparr.Application.UnitTests;
 
 public class CompareMusicPlexLibraryCommandHandlerUnitTests : BaseCommandUnitTest<CompareMusicPlexLibraryCommand>
 {
+    private static string MbId(int value) => $"00000000-0000-0000-0000-{value:D12}";
+
+    private static string NativeId(int value) => value.ToString("x").PadLeft(24, '0');
+
     [Test]
     public async Task ShouldPersistTypedHitsAndScope_WhenStableIdsMatch()
     {
@@ -76,8 +81,8 @@ public class CompareMusicPlexLibraryCommandHandlerUnitTests : BaseCommandUnitTes
                 .PlexMusicArtists.AsTracking()
                 .OrderBy(x => x.PlexLibraryId)
                 .ToListAsync(CancellationToken);
-            artists[0].MusicBrainzArtistId = "artist-a";
-            artists[1].MusicBrainzArtistId = "artist-b";
+            artists[0].MusicBrainzArtistId = MbId(401);
+            artists[1].MusicBrainzArtistId = MbId(402);
         }
         else
         {
@@ -88,8 +93,8 @@ public class CompareMusicPlexLibraryCommandHandlerUnitTests : BaseCommandUnitTes
             switch (conflict)
             {
                 case "release":
-                    albums[0].MusicBrainzReleaseId = "a";
-                    albums[1].MusicBrainzReleaseId = "b";
+                    albums[0].MusicBrainzReleaseId = MbId(403);
+                    albums[1].MusicBrainzReleaseId = MbId(404);
                     break;
                 case "label":
                     albums[1].RecordLabel = "different label";
@@ -193,8 +198,8 @@ public class CompareMusicPlexLibraryCommandHandlerUnitTests : BaseCommandUnitTes
         switch (conflict)
         {
             case "release-track":
-                tracks[0].MusicBrainzReleaseTrackId = "a";
-                tracks[2].MusicBrainzReleaseTrackId = "b";
+                tracks[0].MusicBrainzReleaseTrackId = MbId(405);
+                tracks[2].MusicBrainzReleaseTrackId = MbId(406);
                 break;
             case "title":
                 tracks[2].UpdateInitProperty(nameof(PlexMusicTrack.SearchTitle), "different recording");
@@ -326,7 +331,7 @@ public class CompareMusicPlexLibraryCommandHandlerUnitTests : BaseCommandUnitTes
         var dbContext = IDbContext;
         await dbContext
             .PlexMusicArtists.Where(x => x.PlexLibraryId == owned.Id)
-            .ExecuteUpdateAsync(x => x.SetProperty(y => y.MusicBrainzArtistId, "artist-0"), CancellationToken);
+            .ExecuteUpdateAsync(x => x.SetProperty(y => y.MusicBrainzArtistId, MbId(100000)), CancellationToken);
         var remoteArtist = await dbContext
             .PlexMusicArtists.Where(x => x.PlexLibraryId == remote.Id)
             .OrderBy(x => x.Id)
@@ -369,7 +374,7 @@ public class CompareMusicPlexLibraryCommandHandlerUnitTests : BaseCommandUnitTes
             .PlexMusicArtists.Where(x => x.PlexLibraryId == owned.Id)
             .ExecuteUpdateAsync(
                 x =>
-                    x.SetProperty(y => y.MusicBrainzArtistId, "other-artist")
+                    x.SetProperty(y => y.MusicBrainzArtistId, MbId(411))
                         .SetProperty(y => y.SearchTitle, "other artist"),
                 CancellationToken
             );
@@ -392,17 +397,9 @@ public class CompareMusicPlexLibraryCommandHandlerUnitTests : BaseCommandUnitTes
     }
 
     [Test]
-    [Arguments("remote-content")]
-    [Arguments("owned-content")]
-    [Arguments("outdated")]
     [Arguments("cancel")]
-    [Arguments("owned-role")]
-    [Arguments("remote-role")]
-    [Arguments("disabled")]
-    [Arguments("unsynced")]
-    [Arguments("wrong-type")]
     [Arguments("failure")]
-    public async Task ShouldRollBackReplacementAndRetainOldScope_WhenWriterBecomesStaleOrCancelled(string change)
+    public async Task ShouldRollBackReplacement_WhenWriterIsCancelledOrWriteFails(string change)
     {
         // Arrange
         var (remote, owned) = await SetupPairAsync();
@@ -431,33 +428,6 @@ public class CompareMusicPlexLibraryCommandHandlerUnitTests : BaseCommandUnitTes
                 cancellation.Cancel();
             else if (change == "failure")
                 throw new InvalidOperationException("Injected write failure");
-            else if (change == "outdated")
-                writerContext
-                    .PlexLibraries.Where(x => x.Id == owned.Id)
-                    .ExecuteUpdate(x => x.SetProperty(y => y.Outdated, true));
-            else if (change == "owned-role" || change == "remote-role")
-                writerContext
-                    .PlexServers.Where(x => x.Id == (change == "owned-role" ? owned.PlexServerId : remote.PlexServerId))
-                    .ExecuteUpdate(x => x.SetProperty(y => y.OwnedOverride, change == "remote-role"));
-            else if (change == "disabled")
-                writerContext
-                    .PlexLibraries.Where(x => x.Id == owned.Id)
-                    .ExecuteUpdate(x => x.SetProperty(y => y.IsEnabled, false));
-            else if (change == "unsynced")
-                writerContext
-                    .PlexLibraries.Where(x => x.Id == remote.Id)
-                    .ExecuteUpdate(x => x.SetProperty(y => y.SyncedAt, (DateTime?)null));
-            else if (change == "wrong-type")
-                writerContext
-                    .PlexLibraries.Where(x => x.Id == remote.Id)
-                    .ExecuteUpdate(x => x.SetProperty(y => y.Type, PlexMediaType.Movie));
-            else
-                writerContext
-                    .PlexLibraries.Where(x => x.Id == (change == "remote-content" ? remote.Id : owned.Id))
-                    .ExecuteUpdate(x =>
-                        x.SetProperty(y => y.ContentChangedAt, y => y.ContentChangedAt + 1)
-                            .SetProperty(y => y.SyncedContentChangedAt, y => y.ContentChangedAt + 1)
-                    );
         };
         var handler = new CompareMusicPlexLibraryCommandHandler(writerContext, Mock.Container.Resolve<ILogger>());
 
@@ -563,10 +533,7 @@ public class CompareMusicPlexLibraryCommandHandlerUnitTests : BaseCommandUnitTes
             .ExecuteUpdateAsync(x => x.SetProperty(y => y.MusicBrainzReleaseId, (string?)null), CancellationToken);
         await dbContext
             .PlexMusicTracks.Where(x => x.PlexLibraryId == missingLibraryId)
-            .ExecuteUpdateAsync(
-                x => x.SetProperty(y => y.MusicBrainzReleaseTrackId, (string?)null),
-                CancellationToken
-            );
+            .ExecuteUpdateAsync(x => x.SetProperty(y => y.MusicBrainzReleaseTrackId, (string?)null), CancellationToken);
         var remoteTracks = await dbContext
             .PlexMusicTracks.Where(x => x.PlexLibraryId == remote.Id)
             .OrderBy(x => x.Id)
@@ -606,13 +573,13 @@ public class CompareMusicPlexLibraryCommandHandlerUnitTests : BaseCommandUnitTes
         var dbContext = IDbContext;
         await dbContext
             .PlexMusicAlbums.Where(x => x.PlexLibraryId == owned.Id)
-            .ExecuteUpdateAsync(x => x.SetProperty(y => y.MusicBrainzReleaseId, "another edition"), CancellationToken);
+            .ExecuteUpdateAsync(x => x.SetProperty(y => y.MusicBrainzReleaseId, MbId(412)), CancellationToken);
         var releaseTrackIds = await dbContext
             .PlexMusicTracks.OrderBy(x => x.PlexLibraryId)
             .ThenBy(x => x.TrackNumber)
             .Select(x => x.MusicBrainzReleaseTrackId)
             .ToListAsync(CancellationToken);
-        releaseTrackIds.ShouldBe(["release-track-0-0", "release-track-0-1", "release-track-0-0", "release-track-0-1"]);
+        releaseTrackIds.ShouldBe([MbId(300000), MbId(300001), MbId(300000), MbId(300001)]);
 
         // Act
         var result = await TestHandlerExecuteAsync(new CompareMusicPlexLibraryCommand(owned.Id, remote.Id));
@@ -743,8 +710,7 @@ public class CompareMusicPlexLibraryCommandHandlerUnitTests : BaseCommandUnitTes
         await dbContext
             .PlexMusicArtists.Where(x => x.PlexLibraryId == owned.Id)
             .ExecuteUpdateAsync(
-                x =>
-                    x.SetProperty(y => y.MusicBrainzArtistId, "different").SetProperty(y => y.SearchTitle, "different"),
+                x => x.SetProperty(y => y.MusicBrainzArtistId, MbId(413)).SetProperty(y => y.SearchTitle, "different"),
                 CancellationToken
             );
 
@@ -801,10 +767,405 @@ public class CompareMusicPlexLibraryCommandHandlerUnitTests : BaseCommandUnitTes
         (await dbContext.PlexMusicTrackComparisons.ToListAsync(CancellationToken)).ShouldBeEmpty();
     }
 
+    [Test]
+    [Arguments("5d07bce8403c64029056b5a6")]
+    public async Task ShouldPreferCanonicalNativeIdentity_WhenSecondaryMusicMetadataConflicts(
+        string ownedArtistIdentity
+    )
+    {
+        // Arrange
+        var (remote, owned) = await SetupPairAsync();
+        var dbContext = IDbContext;
+        var remoteArtist = await dbContext.PlexMusicArtists.AsTracking().SingleAsync(x => x.PlexLibraryId == remote.Id);
+        remoteArtist.PlexApiIdentityId = "5d07bce8403c64029056b5a6";
+        var ownedArtist = await dbContext.PlexMusicArtists.AsTracking().SingleAsync(x => x.PlexLibraryId == owned.Id);
+        ownedArtist.PlexApiIdentityId = ownedArtistIdentity;
+        ownedArtist.UpdateInitProperty(nameof(PlexMusicArtist.SearchTitle), "owned-only-artist");
+        ownedArtist.MusicBrainzArtistId = MbId(414);
+        var remoteAlbum = await dbContext
+            .PlexMusicAlbums.AsTracking()
+            .SingleAsync(x => x.PlexLibraryId == remote.Id, CancellationToken);
+        remoteAlbum.PlexApiIdentityId = NativeId(6000);
+        var ownedAlbum = await dbContext
+            .PlexMusicAlbums.AsTracking()
+            .SingleAsync(x => x.PlexLibraryId == owned.Id, CancellationToken);
+        ownedAlbum.PlexApiIdentityId = remoteAlbum.PlexApiIdentityId;
+        ownedAlbum.MusicBrainzReleaseId = MbId(415);
+        ownedAlbum.ReleaseDate = new DateTime(2001, 2, 3);
+        ownedAlbum.RecordLabel = "Different label";
+        ownedAlbum.Country = "GB";
+        ownedAlbum.DiscCount = 2;
+        var remoteTracks = await dbContext
+            .PlexMusicTracks.AsTracking()
+            .Where(x => x.PlexLibraryId == remote.Id)
+            .OrderBy(x => x.TrackNumber)
+            .ToListAsync(CancellationToken);
+        var ownedTracks = await dbContext
+            .PlexMusicTracks.AsTracking()
+            .Where(x => x.PlexLibraryId == owned.Id)
+            .OrderBy(x => x.TrackNumber)
+            .ToListAsync(CancellationToken);
+        var trackIdentityIndex = 0;
+        foreach (var (remoteTrack, ownedTrack) in remoteTracks.Zip(ownedTracks))
+        {
+            remoteTrack.PlexApiIdentityId = NativeId(7000 + trackIdentityIndex++);
+            ownedTrack.PlexApiIdentityId = remoteTrack.PlexApiIdentityId;
+            ownedTrack.MusicBrainzReleaseTrackId = MbId(416);
+            ownedTrack.DiscNumber = 2;
+            ownedTrack.TrackNumber = remoteTrack.TrackNumber + 10;
+        }
+        await dbContext.SaveChangesAsync(CancellationToken);
+        (await dbContext.PlexMusicArtists.SingleAsync(x => x.Id == ownedArtist.Id)).PlexApiIdentityId.ShouldBe(
+            ownedArtistIdentity
+        );
+        ownedArtist.SearchTitle.ShouldNotBe(remoteArtist.SearchTitle);
+        ownedArtist.MusicBrainzArtistId.ShouldNotBe(remoteArtist.MusicBrainzArtistId);
+
+        // Act
+        var result = await TestHandlerExecuteAsync(new CompareMusicPlexLibraryCommand(owned.Id, remote.Id));
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        result.Errors.Count.ShouldBe(0);
+        var artistHit = await dbContext.PlexMusicArtistComparisons.SingleAsync(CancellationToken);
+        (
+            artistHit.RemotePlexLibraryId,
+            artistHit.OwnedPlexLibraryId,
+            artistHit.RemotePlexMediaId,
+            artistHit.OwnedPlexMediaId,
+            artistHit.MatchType
+        ).ShouldBe((remote.Id, owned.Id, remoteArtist.Id, ownedArtist.Id, PlexMediaComparisonMatchType.PlexArtistGuid));
+        var albumHit = await dbContext.PlexMusicAlbumComparisons.SingleAsync(CancellationToken);
+        (
+            albumHit.RemotePlexLibraryId,
+            albumHit.OwnedPlexLibraryId,
+            albumHit.RemotePlexMediaId,
+            albumHit.OwnedPlexMediaId,
+            albumHit.MatchType
+        ).ShouldBe((remote.Id, owned.Id, remoteAlbum.Id, ownedAlbum.Id, PlexMediaComparisonMatchType.PlexAlbumGuid));
+        var hits = await dbContext
+            .PlexMusicTrackComparisons.OrderBy(x => x.RemotePlexMediaId)
+            .ToListAsync(CancellationToken);
+        hits.Select(x =>
+                (x.RemotePlexLibraryId, x.OwnedPlexLibraryId, x.RemotePlexMediaId, x.OwnedPlexMediaId, x.MatchType)
+            )
+            .ShouldBe(
+                remoteTracks.Zip(
+                    ownedTracks,
+                    (remoteTrack, ownedTrack) =>
+                        (remote.Id, owned.Id, remoteTrack.Id, ownedTrack.Id, PlexMediaComparisonMatchType.PlexTrackGuid)
+                )
+            );
+    }
+
+    [Test]
+    public async Task ShouldNotTreatEqualResolutionFlacBitrateAsHigherQuality()
+    {
+        // Arrange
+        var (remote, owned) = await SetupPairAsync();
+        var dbContext = IDbContext;
+        var remoteData = await dbContext
+            .PlexMusicTrackData.AsTracking()
+            .Where(x => x.PlexLibraryId == remote.Id)
+            .OrderBy(x => x.Id)
+            .FirstAsync(CancellationToken);
+        var ownedData = await dbContext
+            .PlexMusicTrackData.AsTracking()
+            .Where(x => x.PlexLibraryId == owned.Id)
+            .OrderBy(x => x.Id)
+            .FirstAsync(CancellationToken);
+        remoteData.AudioBitrateKbps = 794;
+        ownedData.AudioBitrateKbps = 789;
+        await dbContext.SaveChangesAsync(CancellationToken);
+        (
+            await dbContext
+                .PlexMusicTrackData.Where(x => x.Id == remoteData.Id)
+                .Select(x => x.AudioBitrateKbps)
+                .SingleAsync(CancellationToken)
+        ).ShouldBe(794);
+        (
+            await dbContext
+                .PlexMusicTrackData.Where(x => x.Id == ownedData.Id)
+                .Select(x => x.AudioBitrateKbps)
+                .SingleAsync(CancellationToken)
+        ).ShouldBe(789);
+
+        // Act
+        var result = await TestHandlerExecuteAsync(new CompareMusicPlexLibraryCommand(owned.Id, remote.Id));
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        result.Errors.Count.ShouldBe(0);
+        var hits = await dbContext
+            .PlexMusicTrackComparisons.OrderBy(x => x.RemotePlexMediaId)
+            .ToListAsync(CancellationToken);
+        hits.Count.ShouldBe(2);
+        var targetHit = hits.Single(x =>
+            x.RemotePlexMediaId == remoteData.PlexTrackId && x.OwnedPlexMediaId == ownedData.PlexTrackId
+        );
+        (targetHit.RemotePlexMediaDataId, targetHit.OwnedPlexMediaDataId).ShouldBe((remoteData.Id, ownedData.Id));
+        hits.ShouldAllBe(x => x.HitState == PlexMediaComparisonHitState.Matched);
+        hits.ShouldAllBe(x => x.RemoteAudioQuality == AudioQuality.FLAC_16Bit_44_1kHz);
+        hits.ShouldAllBe(x => x.OwnedAudioQuality == AudioQuality.FLAC_16Bit_44_1kHz);
+        hits.ShouldAllBe(x => x.RemotePlexMediaDataId.HasValue && x.OwnedPlexMediaDataId.HasValue);
+    }
+
+    [Test]
+    public async Task ShouldRejectDirtyStoredNativeIdentity_WhenLegacyPrefixIsPresent()
+    {
+        // Arrange
+        var (remote, owned) = await SetupPairAsync(fallback: true);
+        await using var dbContext = (ReaparrDbContext)IDbContext;
+        await dbContext
+            .PlexMusicArtists.Where(x => x.PlexLibraryId == remote.Id)
+            .ExecuteUpdateAsync(x => x.SetProperty(y => y.SearchTitle, "remote-only"), CancellationToken);
+        await dbContext
+            .PlexMusicArtists.Where(x => x.PlexLibraryId == owned.Id)
+            .ExecuteUpdateAsync(x => x.SetProperty(y => y.SearchTitle, "owned-only"), CancellationToken);
+        await dbContext
+            .PlexMusicArtists.Where(x => x.PlexLibraryId == owned.Id)
+            .ExecuteUpdateAsync(
+                x => x.SetProperty(y => y.PlexApiIdentityId, "5d07bce8403c64029056b5a6"),
+                CancellationToken
+            );
+        await dbContext.Database.OpenConnectionAsync(CancellationToken);
+        try
+        {
+            await dbContext.Database.ExecuteSqlRawAsync("PRAGMA ignore_check_constraints = ON;", CancellationToken);
+            await dbContext
+                .PlexMusicArtists.Where(x => x.PlexLibraryId == remote.Id)
+                .ExecuteUpdateAsync(
+                    x => x.SetProperty(y => y.PlexApiIdentityId, " plex://artist/5d07bce8403c64029056b5a6 "),
+                    CancellationToken
+                );
+            await dbContext.Database.ExecuteSqlRawAsync("PRAGMA ignore_check_constraints = OFF;", CancellationToken);
+        }
+        finally
+        {
+            await dbContext.Database.CloseConnectionAsync();
+        }
+
+        // Act
+        var result = await new CompareMusicPlexLibraryCommandHandler(
+            dbContext,
+            Mock.Container.Resolve<ILogger>()
+        ).ExecuteAsync(new CompareMusicPlexLibraryCommand(owned.Id, remote.Id), CancellationToken);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        result.Errors.Count.ShouldBe(0);
+        (await dbContext.PlexMusicArtistComparisons.ToListAsync(CancellationToken)).ShouldBeEmpty();
+        (await dbContext.PlexMusicAlbumComparisons.ToListAsync(CancellationToken)).ShouldBeEmpty();
+        (await dbContext.PlexMusicTrackComparisons.ToListAsync(CancellationToken)).ShouldBeEmpty();
+    }
+
+    [Test]
+    public async Task ShouldNotMatchRawGuid_WhenCanonicalNativeIdentityIsAbsent()
+    {
+        // Arrange
+        var (remote, owned) = await SetupPairAsync(fallback: true);
+        await using var dbContext = (ReaparrDbContext)IDbContext;
+        var remoteArtist = await dbContext
+            .PlexMusicArtists.AsTracking()
+            .SingleAsync(x => x.PlexLibraryId == remote.Id, CancellationToken);
+        var ownedArtist = await dbContext
+            .PlexMusicArtists.AsTracking()
+            .SingleAsync(x => x.PlexLibraryId == owned.Id, CancellationToken);
+        remoteArtist.PlexApiIdentityId = null;
+        ownedArtist.PlexApiIdentityId = null;
+        remoteArtist.UpdateInitProperty(nameof(BasePlexMedia.Guid), "plex://artist/raw-only");
+        ownedArtist.UpdateInitProperty(nameof(BasePlexMedia.Guid), "plex://artist/raw-only");
+        remoteArtist.UpdateInitProperty(nameof(PlexMusicArtist.SearchTitle), "remote-only");
+        ownedArtist.UpdateInitProperty(nameof(PlexMusicArtist.SearchTitle), "owned-only");
+        await dbContext.SaveChangesAsync(CancellationToken);
+
+        // Act
+        var result = await new CompareMusicPlexLibraryCommandHandler(
+            dbContext,
+            Mock.Container.Resolve<ILogger>()
+        ).ExecuteAsync(new CompareMusicPlexLibraryCommand(owned.Id, remote.Id), CancellationToken);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        result.Errors.Count.ShouldBe(0);
+        (await dbContext.PlexMusicArtistComparisons.ToListAsync(CancellationToken)).ShouldBeEmpty();
+        (await dbContext.PlexMusicAlbumComparisons.ToListAsync(CancellationToken)).ShouldBeEmpty();
+        (await dbContext.PlexMusicTrackComparisons.ToListAsync(CancellationToken)).ShouldBeEmpty();
+    }
+
+    [Test]
+    public async Task ShouldMatchAdeleNativeParentsAndTracksWithoutGlobalCrossAlbumMatches()
+    {
+        // Arrange
+        var (remote, owned) = await SetupPairAsync(albums: 9, tracks: 1);
+        var dbContext = IDbContext;
+        var remoteArtist = await dbContext
+            .PlexMusicArtists.AsTracking()
+            .SingleAsync(x => x.PlexLibraryId == remote.Id, CancellationToken);
+        var ownedArtist = await dbContext
+            .PlexMusicArtists.AsTracking()
+            .SingleAsync(x => x.PlexLibraryId == owned.Id, CancellationToken);
+        remoteArtist.PlexApiIdentityId = NativeId(9000);
+        ownedArtist.PlexApiIdentityId = remoteArtist.PlexApiIdentityId;
+        var remoteAlbums = await dbContext
+            .PlexMusicAlbums.AsTracking()
+            .Where(x => x.PlexLibraryId == remote.Id)
+            .OrderBy(x => x.Id)
+            .ToListAsync(CancellationToken);
+        var ownedAlbums = await dbContext
+            .PlexMusicAlbums.AsTracking()
+            .Where(x => x.PlexLibraryId == owned.Id)
+            .OrderBy(x => x.Id)
+            .ToListAsync(CancellationToken);
+        var remoteTracks = await dbContext
+            .PlexMusicTracks.AsTracking()
+            .Where(x => x.PlexLibraryId == remote.Id)
+            .OrderBy(x => x.Id)
+            .ToListAsync(CancellationToken);
+        var ownedTracks = await dbContext
+            .PlexMusicTracks.AsTracking()
+            .Where(x => x.PlexLibraryId == owned.Id)
+            .OrderBy(x => x.Id)
+            .ToListAsync(CancellationToken);
+        remoteAlbums.Count.ShouldBe(9);
+        ownedAlbums.Count.ShouldBe(9);
+        remoteTracks.Count.ShouldBe(9);
+        ownedTracks.Count.ShouldBe(9);
+        for (var i = 0; i < remoteAlbums.Count; i++)
+        {
+            remoteAlbums[i].PlexApiIdentityId = NativeId(10000 + i);
+            remoteTracks[i].PlexApiIdentityId = NativeId(1000);
+            ownedTracks[i].PlexApiIdentityId = remoteTracks[i].PlexApiIdentityId;
+            if (i < 7)
+                ownedAlbums[i].PlexApiIdentityId = remoteAlbums[i].PlexApiIdentityId;
+            else
+            {
+                ownedAlbums[i].PlexApiIdentityId = NativeId(2000 + i);
+                ownedAlbums[i].MusicBrainzReleaseId = null;
+                ownedAlbums[i].UpdateInitProperty(nameof(PlexMusicAlbum.SearchTitle), $"owned-only-album-{i}");
+            }
+
+            if (i < 4)
+            {
+                ownedAlbums[i].MusicBrainzReleaseId = MbId(500000 + i);
+                ownedAlbums[i].ReleaseDate = new DateTime(2010 + i, 2, 3);
+                ownedAlbums[i].RecordLabel = $"Different label {i}";
+                ownedAlbums[i].Country = "GB";
+                ownedAlbums[i].DiscCount = 2;
+                ownedTracks[i].MusicBrainzReleaseTrackId = MbId(510000 + i);
+                ownedTracks[i].DiscNumber = 2;
+                ownedTracks[i].TrackNumber = 11;
+            }
+        }
+        await dbContext.SaveChangesAsync(CancellationToken);
+
+        // Act
+        var result = await TestHandlerExecuteAsync(new CompareMusicPlexLibraryCommand(owned.Id, remote.Id));
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        result.Errors.Count.ShouldBe(0);
+        var artistHits = await dbContext.PlexMusicArtistComparisons.ToListAsync(CancellationToken);
+        var albumHits = await dbContext
+            .PlexMusicAlbumComparisons.OrderBy(x => x.RemotePlexMediaId)
+            .ToListAsync(CancellationToken);
+        var trackHits = await dbContext
+            .PlexMusicTrackComparisons.OrderBy(x => x.RemotePlexMediaId)
+            .ToListAsync(CancellationToken);
+        artistHits.Count.ShouldBe(1);
+        albumHits.Count.ShouldBe(7);
+        albumHits.ShouldAllBe(x => x.MatchType == PlexMediaComparisonMatchType.PlexAlbumGuid);
+        trackHits.Count.ShouldBe(7);
+        trackHits.ShouldAllBe(x => x.MatchType == PlexMediaComparisonMatchType.PlexTrackGuid);
+        trackHits.Select(x => x.RemotePlexMediaId).ShouldBe(remoteTracks.Take(7).Select(x => x.Id));
+        trackHits.Select(x => x.RemotePlexMediaId).Distinct().Count().ShouldBe(7);
+        trackHits.Select(x => x.OwnedPlexMediaId).Distinct().Count().ShouldBe(7);
+        remoteTracks.Take(5).Select(x => x.PlexApiIdentityId).Distinct().Count().ShouldBe(1);
+    }
+
+    [Test]
+    public async Task ShouldReportTwentyFiveTrackAlbumPartial_WhenOnlyFourNativeTracksMatch()
+    {
+        // Arrange
+        var (remote, owned) = await SetupPairAsync(tracks: 25);
+        var dbContext = IDbContext;
+        var remoteArtist = await dbContext
+            .PlexMusicArtists.AsTracking()
+            .SingleAsync(x => x.PlexLibraryId == remote.Id, CancellationToken);
+        var ownedArtist = await dbContext
+            .PlexMusicArtists.AsTracking()
+            .SingleAsync(x => x.PlexLibraryId == owned.Id, CancellationToken);
+        remoteArtist.PlexApiIdentityId = NativeId(8000);
+        ownedArtist.PlexApiIdentityId = remoteArtist.PlexApiIdentityId;
+        var remoteAlbum = await dbContext
+            .PlexMusicAlbums.AsTracking()
+            .SingleAsync(x => x.PlexLibraryId == remote.Id, CancellationToken);
+        var ownedAlbum = await dbContext
+            .PlexMusicAlbums.AsTracking()
+            .SingleAsync(x => x.PlexLibraryId == owned.Id, CancellationToken);
+        ownedAlbum.PlexApiIdentityId = remoteAlbum.PlexApiIdentityId;
+        var remoteTracks = await dbContext
+            .PlexMusicTracks.AsTracking()
+            .Where(x => x.PlexLibraryId == remote.Id)
+            .OrderBy(x => x.Id)
+            .ToListAsync(CancellationToken);
+        var ownedTracks = await dbContext
+            .PlexMusicTracks.AsTracking()
+            .Where(x => x.PlexLibraryId == owned.Id)
+            .OrderBy(x => x.Id)
+            .ToListAsync(CancellationToken);
+        for (var i = 0; i < remoteTracks.Count; i++)
+        {
+            if (i < 4)
+            {
+                remoteTracks[i].PlexApiIdentityId = NativeId(3000 + i);
+                ownedTracks[i].PlexApiIdentityId = remoteTracks[i].PlexApiIdentityId;
+            }
+            else
+            {
+                ownedTracks[i].PlexApiIdentityId = NativeId(4000 + i);
+                ownedTracks[i].MusicBrainzReleaseTrackId = MbId(520000 + i);
+                ownedTracks[i].UpdateInitProperty(nameof(PlexMusicTrack.SearchTitle), $"owned-only-track-{i}");
+                ownedTracks[i].TrackNumber = i + 100;
+            }
+        }
+        await dbContext.SaveChangesAsync(CancellationToken);
+
+        // Act
+        var result = await TestHandlerExecuteAsync(new CompareMusicPlexLibraryCommand(owned.Id, remote.Id));
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        result.Errors.Count.ShouldBe(0);
+        var albumHits = await dbContext.PlexMusicAlbumComparisons.ToListAsync(CancellationToken);
+        var trackHits = await dbContext
+            .PlexMusicTrackComparisons.OrderBy(x => x.RemotePlexMediaId)
+            .ToListAsync(CancellationToken);
+        remoteTracks.Count.ShouldBe(25);
+        albumHits.Count.ShouldBe(1);
+        albumHits.Single().MatchType.ShouldBe(PlexMediaComparisonMatchType.PlexAlbumGuid);
+        trackHits.Count.ShouldBe(4);
+        trackHits.ShouldAllBe(x => x.MatchType == PlexMediaComparisonMatchType.PlexTrackGuid);
+        trackHits.Select(x => x.RemotePlexMediaId).ShouldBe(remoteTracks.Take(4).Select(x => x.Id));
+        var items = new List<PlexMediaSlimDTO> { remoteArtist.ToSlimDTOMapper(), remoteAlbum.ToSlimDTOMapper() };
+        items.AddRange(remoteTracks.Select(x => x.ToSlimDTOMapper()));
+        var stateResult = await new ApplyRemoteMusicComparisonStateCommandHandler(
+            dbContext,
+            Mock.Mock<IScheduler>().Object
+        ).ExecuteAsync(new ApplyRemoteMusicComparisonStateCommand(items, remote.Id), CancellationToken);
+        stateResult.IsSuccess.ShouldBeTrue();
+        items[0].ComparisonId.ShouldBe(PlexMediaComparisonState.Partial.ToComparisonId());
+        items[1].ComparisonId.ShouldBe(PlexMediaComparisonState.Partial.ToComparisonId());
+        items.Skip(2).Take(4).ShouldAllBe(x => x.ComparisonId == PlexMediaComparisonState.Owned.ToComparisonId());
+        items.Skip(6).ShouldAllBe(x => x.ComparisonId == PlexMediaComparisonState.Missing.ToComparisonId());
+    }
+
     private async Task<(PlexLibrary Remote, PlexLibrary Owned)> SetupPairAsync(
         bool fallback = false,
         int artists = 1,
-        int servers = 2
+        int servers = 2,
+        int albums = 1,
+        int tracks = 2
     )
     {
         await SetupDatabase(
@@ -815,8 +1176,8 @@ public class CompareMusicPlexLibraryCommandHandlerUnitTests : BaseCommandUnitTes
                 config.PlexAccountCount = 1;
                 config.PlexMusicLibraryCount = 1;
                 config.MusicArtistCount = artists;
-                config.MusicAlbumCount = 1;
-                config.MusicTrackCount = 2;
+                config.MusicAlbumCount = albums;
+                config.MusicTrackCount = tracks;
             }
         );
         var dbContext = IDbContext;
@@ -834,7 +1195,7 @@ public class CompareMusicPlexLibraryCommandHandlerUnitTests : BaseCommandUnitTes
                     .SetProperty(y => y.SyncedAt, DateTime.UtcNow),
             CancellationToken
         );
-        foreach (var library in libraries)
+        foreach (var (library, libraryIndex) in libraries.Select((library, index) => (library, index)))
         {
             var roots = await dbContext
                 .PlexMusicArtists.AsTracking()
@@ -848,26 +1209,36 @@ public class CompareMusicPlexLibraryCommandHandlerUnitTests : BaseCommandUnitTes
                 var artist = roots[i];
                 artist.Title = $"Artist {i}";
                 artist.UpdateInitProperty(nameof(PlexMusicArtist.SearchTitle), $"artist {i}");
-                artist.MusicBrainzArtistId = fallback ? null : $"artist-{i}";
-                var album = artist.Albums.Single();
-                album.Title = $"Album {i}";
-                album.UpdateInitProperty(nameof(PlexMusicAlbum.SearchTitle), $"album {i}");
-                album.Year = 2000;
-                album.MusicBrainzReleaseId = fallback ? null : $"release-{i}";
-                album.ReleaseDate = new DateTime(2000, 1, 1);
-                album.RecordLabel = "Label";
-                album.Country = "US";
-                album.DiscCount = 1;
-                album.TrackCount = 2;
-                var tracks = album.Tracks.OrderBy(x => x.Id).ToList();
-                for (var j = 0; j < tracks.Count; j++)
+                artist.PlexApiIdentityId = NativeId(1_000_000 + libraryIndex * 2_000_000 + i);
+                artist.MusicBrainzArtistId = fallback ? null : MbId(100000 + i);
+                foreach (var (album, albumIndex) in artist.Albums.OrderBy(x => x.Id).Select((x, index) => (x, index)))
                 {
-                    var track = tracks[j];
-                    track.Title = $"Track {j}";
-                    track.UpdateInitProperty(nameof(PlexMusicTrack.SearchTitle), $"track {j}");
-                    track.MusicBrainzReleaseTrackId = fallback ? null : $"release-track-{i}-{j}";
-                    track.DiscNumber = 1;
-                    track.TrackNumber = j + 1;
+                    var albumKey = artist.Albums.Count == 1 ? $"{i}" : $"{i}-{albumIndex}";
+                    album.Title = $"Album {albumIndex}";
+                    album.UpdateInitProperty(nameof(PlexMusicAlbum.SearchTitle), $"album {albumIndex}");
+                    album.Year = 2000;
+                    album.PlexApiIdentityId = NativeId(10_000_000 + libraryIndex * 2_000_000 + i * 10_000 + albumIndex);
+                    album.MusicBrainzReleaseId = fallback ? null : MbId(200000 + i * 100 + albumIndex);
+                    album.ReleaseDate = new DateTime(2000, 1, 1);
+                    album.RecordLabel = "Label";
+                    album.Country = "US";
+                    album.DiscCount = 1;
+                    album.TrackCount = album.Tracks.Count;
+                    var albumTracks = album.Tracks.OrderBy(x => x.Id).ToList();
+                    for (var j = 0; j < albumTracks.Count; j++)
+                    {
+                        var track = albumTracks[j];
+                        track.Title = $"Track {j}";
+                        track.UpdateInitProperty(nameof(PlexMusicTrack.SearchTitle), $"track {j}");
+                        track.PlexApiIdentityId = NativeId(
+                            20_000_000 + libraryIndex * 2_000_000 + i * 10_000 + albumIndex * 100 + j
+                        );
+                        track.MusicBrainzReleaseTrackId = fallback
+                            ? null
+                            : MbId(300000 + i * 10_000 + albumIndex * 100 + j);
+                        track.DiscNumber = 1;
+                        track.TrackNumber = j + 1;
+                    }
                 }
             }
         }

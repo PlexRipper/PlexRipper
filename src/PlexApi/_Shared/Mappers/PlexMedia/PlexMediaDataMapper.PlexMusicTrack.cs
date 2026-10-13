@@ -7,54 +7,60 @@ public static partial class PlexMediaDataMapper
 
     public static PlexMusicTrack ToPlexMusicTrack(this LibraryMediaItemDTO source)
     {
-        var mediaDataList = source.Media.SelectMany(x => x.Parts.Select((part, partIndex) =>
-        {
-            var fileName = part.File.GetFileName();
-            var audioStream = part.Stream
-                .Where(stream => stream.StreamType == StreamType.Audio)
-                .OrderByDescending(stream => stream.Selected == true)
-                .ThenByDescending(stream => stream.Default == true)
-                .ThenBy(stream => stream.Index ?? int.MaxValue)
-                .ThenBy(stream => stream.Id)
-                .FirstOrDefault();
-            var mediaData = new PlexMusicTrackMediaData
-            {
-                PlexApiRatingKey = source.RatingKey,
-                PlexApiMediaId = x.Id,
-                PlexApiPartId = part.Id,
-                PartIndex = partIndex,
-                PlexTrackId = 0,
-                PlexTrack = default,
-                VideoResolution = VideoQuality.None,
-                Quality = VideoQuality.None,
-                Container = part.Container,
-                VideoCodec = string.Empty,
-                AudioCodec = FirstMeaningful(audioStream?.Codec, x.AudioCodec) ?? string.Empty,
-                AudioBitrateKbps = PositiveOrNull(audioStream?.Bitrate) ?? PositiveOrNull(x.Bitrate),
-                AudioBitDepth = PositiveOrNull(audioStream?.BitDepth),
-                AudioSampleRateHz = PositiveOrNull(audioStream?.SamplingRate),
-                AudioChannels = PositiveOrNull(audioStream?.Channels) ?? PositiveOrNull(x.AudioChannels),
-                AudioChannelLayout = FirstMeaningful(audioStream?.AudioChannelLayout),
-                AudioProfile = FirstMeaningful(audioStream?.Profile, x.AudioProfile),
-                AudioQuality = AudioQuality.Unknown,
-                Duration =
-                    part.Duration >= 0 ? part.Duration
-                    : x.Parts.Count == 1 && x.Duration > 0 ? x.Duration
-                    : -1,
-                Size = part.Size,
-                Key = part.Key,
-                OriginalFilename = fileName,
-                OriginalFilePath = string.IsNullOrEmpty(part.File) ? null : part.File,
-                SourceRelativePath = null,
-                Source = x.DetermineReleaseSource(),
-                NeedsGeneratedName = !fileName.IsValidMediaFileName(),
-                GeneratedFilename = null,
-                PlexLibraryId = 0,
-                PlexServerId = 0,
-            };
-            mediaData.AudioQuality = mediaData.ClassifyAudioQuality();
-            return mediaData;
-        })).ToList();
+        var mediaDataList = source
+            .Media.SelectMany(x =>
+                x.Parts.Select(
+                    (part, partIndex) =>
+                    {
+                        var fileName = part.File.GetFileName();
+                        var audioStream = part
+                            .Stream.Where(stream => stream.StreamType == StreamType.Audio)
+                            .OrderByDescending(stream => stream.Selected == true)
+                            .ThenByDescending(stream => stream.Default == true)
+                            .ThenBy(stream => stream.Index ?? int.MaxValue)
+                            .ThenBy(stream => stream.Id)
+                            .FirstOrDefault();
+                        var mediaData = new PlexMusicTrackMediaData
+                        {
+                            PlexApiRatingKey = source.RatingKey,
+                            PlexApiMediaId = x.Id,
+                            PlexApiPartId = part.Id,
+                            PartIndex = partIndex,
+                            PlexTrackId = 0,
+                            PlexTrack = default,
+                            VideoResolution = VideoQuality.None,
+                            Quality = VideoQuality.None,
+                            Container = part.Container,
+                            VideoCodec = string.Empty,
+                            AudioCodec = FirstMeaningful(audioStream?.Codec, x.AudioCodec) ?? string.Empty,
+                            AudioBitrateKbps = PositiveOrNull(audioStream?.Bitrate) ?? PositiveOrNull(x.Bitrate),
+                            AudioBitDepth = PositiveOrNull(audioStream?.BitDepth),
+                            AudioSampleRateHz = PositiveOrNull(audioStream?.SamplingRate),
+                            AudioChannels = PositiveOrNull(audioStream?.Channels) ?? PositiveOrNull(x.AudioChannels),
+                            AudioChannelLayout = FirstMeaningful(audioStream?.AudioChannelLayout),
+                            AudioProfile = FirstMeaningful(audioStream?.Profile, x.AudioProfile),
+                            AudioQuality = AudioQuality.Unknown,
+                            Duration =
+                                part.Duration >= 0 ? part.Duration
+                                : x.Parts.Count == 1 && x.Duration > 0 ? x.Duration
+                                : -1,
+                            Size = part.Size,
+                            Key = part.Key,
+                            OriginalFilename = fileName,
+                            OriginalFilePath = string.IsNullOrEmpty(part.File) ? null : part.File,
+                            SourceRelativePath = null,
+                            Source = x.DetermineReleaseSource(),
+                            NeedsGeneratedName = !fileName.IsValidMediaFileName(),
+                            GeneratedFilename = null,
+                            PlexLibraryId = 0,
+                            PlexServerId = 0,
+                        };
+                        mediaData.AudioQuality = mediaData.ClassifyAudioQuality();
+                        return mediaData;
+                    }
+                )
+            )
+            .ToList();
 
         var track = new PlexMusicTrack
         {
@@ -63,7 +69,8 @@ public static partial class PlexMediaDataMapper
             Year = source.Year,
             SortIndex = source.SortIndex,
             SearchTitle = source.SearchTitle,
-            Guid = source.Guid,
+            Guid = string.Empty,
+            PlexApiIdentityId = source.Guid.Replace("plex://track/", string.Empty),
             Guid_IMDB = null,
             Guid_TMDB = null,
             Guid_TVDB = null,
@@ -105,5 +112,4 @@ public static partial class PlexMediaDataMapper
 
     private static string? FirstMeaningful(params string?[] values) =>
         values.FirstOrDefault(value => !string.IsNullOrWhiteSpace(value));
-
 }

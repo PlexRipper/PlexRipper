@@ -21,6 +21,7 @@ public static partial class PlexMediaDataMapper
         var id = guids.Find(x => x.Id.Contains("tvdb"))?.Id.Replace("tvdb://", "");
         return int.TryParse(id, out var result) ? result : null;
     }
+
     private static string? GetMusicBrainzId(LibraryMediaItemDTO source)
     {
         if (TryParseMusicBrainzId(source.Guid, out var musicBrainzId))
@@ -35,13 +36,17 @@ public static partial class PlexMediaDataMapper
         return null;
     }
 
-    private static bool TryParseMusicBrainzId(string value, out Guid musicBrainzId)
+    private static bool TryParseMusicBrainzId(string? value, out Guid musicBrainzId)
     {
         musicBrainzId = default;
-        return value.StartsWith("mbid://", StringComparison.Ordinal)
-            && Guid.TryParse(value.AsSpan(7), out musicBrainzId);
-    }
+        if (string.IsNullOrWhiteSpace(value))
+            return false;
 
+        const string prefix = "mbid://";
+        var normalized = value.Trim();
+        return normalized.StartsWith(prefix, StringComparison.OrdinalIgnoreCase)
+            && Guid.TryParse(normalized.AsSpan(prefix.Length), out musicBrainzId);
+    }
 
     /// <summary>
     /// Retrieves the MetaDataKey from either the ThumbUrl,BannerUrl, ArtUrl or ThemeUrl.

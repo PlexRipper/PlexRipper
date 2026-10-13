@@ -13,6 +13,13 @@ public class PlexMusicTrack : BasePlexMedia
 
     public PlexMusicAlbum? PlexAlbum { get; set; }
 
+    /// <summary>
+    /// Native Plex track identifier extracted from a <c>plex://track/...</c> metadata GUID.
+    /// Stores the lowercase identifier suffix, not the GUID URI or library-local <see cref="BasePlexMedia.PlexApiRatingKey"/>.
+    /// Null when Plex does not provide a valid native track GUID.
+    /// </summary>
+    public string? PlexApiIdentityId { get; set; }
+
     public string? MusicBrainzReleaseTrackId { get; set; }
 
     public int? DiscNumber { get; set; }

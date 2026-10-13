@@ -13,7 +13,8 @@ public static partial class PlexMediaDataMapper
             Year = source.Year,
             SortIndex = source.SortIndex,
             SearchTitle = source.SearchTitle,
-            Guid = source.Guid,
+            Guid = string.Empty,
+            PlexApiIdentityId = source.Guid.Replace("plex://artist/", string.Empty),
             Guid_IMDB = null,
             Guid_TMDB = null,
             Guid_TVDB = null,
@@ -40,5 +41,4 @@ public static partial class PlexMediaDataMapper
             PlexServerId = 0,
             MusicBrainzArtistId = GetMusicBrainzId(source),
         };
-
 }

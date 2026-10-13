@@ -32,7 +32,9 @@ public class PlexLibraryComparisonJobUnitTests : BaseUnitTest<PlexLibraryCompari
             CancellationToken
         );
         await dbContext.PlexMusicArtists.ExecuteUpdateAsync(
-            x => x.SetProperty(y => y.MusicBrainzArtistId, "test-artist"),
+            x =>
+                x.SetProperty(y => y.PlexApiIdentityId, (string?)null)
+                    .SetProperty(y => y.MusicBrainzArtistId, "00000000-0000-0000-0000-000000000201"),
             CancellationToken
         );
         var artists = await dbContext.PlexMusicArtists.OrderBy(x => x.PlexLibraryId).ToListAsync(CancellationToken);

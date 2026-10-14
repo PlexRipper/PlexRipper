@@ -19,18 +19,20 @@ export function generateLibrarySyncProgress({
 	total: number;
 	items: LibrarySyncProgressItemDTO[];
 }): LibrarySyncProgressDTO {
-	const percentage = Math.round((received / total) * 100);
-	const remainingPercentage = 100 - percentage;
-	const timeRemainingInSeconds = Math.round(remainingPercentage / 10);
+	const aggregateReceived = items.reduce((sum, item) => sum + item.received, 0);
+	const aggregateTotal = items.reduce((sum, item) => sum + Math.max(item.total, 0), 0);
+	const hasUnknownTotal = items.some(item => item.total < 0);
+	const percentage = hasUnknownTotal ? 0 : aggregateTotal === 0 ? 100 : Math.round((aggregateReceived / aggregateTotal) * 100);
+	const isComplete = items.length > 0 && items.every(item => item.isComplete);
 
 	return {
 		plexLibraryId: libraryId,
-		received,
-		total,
-		isComplete: received === total,
+		received: items.length > 0 ? aggregateReceived : received,
+		total: items.length > 0 ? aggregateTotal : total,
+		isComplete,
 		timeStamp: randRecentDate().toISOString(),
 		percentage,
-		timeRemaining: generateTimeRemaining(timeRemainingInSeconds * 1000),
+		timeRemaining: generateTimeRemaining((100 - percentage) / 10 * 1000),
 		items: items,
 		errors: [],
 	};
@@ -54,9 +56,8 @@ export function generateLibrarySyncProgressItem(mediaType: PlexMediaType, partia
 		total: 0,
 		...partial,
 	};
-
-	dto.percentage = Math.round((dto.received / dto.total) * 100);
-	dto.isComplete = dto.received === dto.total;
+	dto.percentage = dto.total < 0 ? 0 : dto.total === 0 ? 100 : Math.round((dto.received / dto.total) * 100);
+	dto.isComplete = dto.total >= 0 && dto.received >= dto.total;
 
 	return dto;
 }

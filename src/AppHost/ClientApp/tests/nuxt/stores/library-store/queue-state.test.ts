@@ -1,6 +1,7 @@
 import { beforeAll, beforeEach, describe, expect, test, vi } from 'vitest';
 import { createPinia, setActivePinia } from 'pinia';
 import { LibrarySyncJobStatus, PlexConnectionTypes, type PlexServerConnectionDTO, type PlexServerStatusDTO } from '@dto';
+import { LibrarySyncWaitingReason } from '@enums';
 import { PlexLibraryPaths } from '@api/api-paths';
 import { generateFailedResultDTO, generateLibrarySyncJobQueue, generateResultDTO } from '@mock';
 import { useLibraryStore, useServerConnectionStore } from '@store';
@@ -53,7 +54,7 @@ describe('LibraryStore queue state', () => {
 		const result = libraryStore.getLibrarySyncWaitingReason(11);
 
 		// Assert
-		expect(result).toBe('busy');
+		expect(result).toBe(LibrarySyncWaitingReason.Busy);
 	});
 
 	test('Should report offline before a same-server blocker when the current connection is known offline', () => {
@@ -70,7 +71,7 @@ describe('LibraryStore queue state', () => {
 		const result = libraryStore.getLibrarySyncWaitingReason(11);
 
 		// Assert
-		expect(result).toBe('offline');
+		expect(result).toBe(LibrarySyncWaitingReason.Offline);
 	});
 
 	test('Should use waiting when connectivity is unknown and no same-server processor is visible', () => {
@@ -84,7 +85,7 @@ describe('LibraryStore queue state', () => {
 		const result = libraryStore.getLibrarySyncWaitingReason(11);
 
 		// Assert
-		expect(result).toBe('waiting');
+		expect(result).toBe(LibrarySyncWaitingReason.Waiting);
 	});
 
 	test('Should let current online connectivity override a stale offline queue flag', () => {
@@ -100,7 +101,7 @@ describe('LibraryStore queue state', () => {
 		const result = libraryStore.getLibrarySyncWaitingReason(11);
 
 		// Assert
-		expect(result).toBe('waiting');
+		expect(result).toBe(LibrarySyncWaitingReason.Waiting);
 	});
 
 	test('Should apply the authoritative refresh queue result without a second status lookup', async () => {

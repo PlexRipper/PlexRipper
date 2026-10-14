@@ -15,6 +15,7 @@ import {
 import { StoreNames, type IServerStats, type ISetupResult } from '@interfaces';
 import { plexLibraryApi } from '@api';
 import { RefreshDataType } from '@dto';
+import { LibrarySyncWaitingReason } from '@enums';
 import {
 	useBackgroundJobsStore,
 	useMediaOverviewStore,
@@ -25,8 +26,6 @@ import {
 } from '@store';
 import { cloneDeep, orderBy } from 'lodash-es';
 import Log from 'consola';
-
-type LibrarySyncWaitingReason = 'offline' | 'busy' | 'waiting';
 
 interface ILibraryStoreState {
 	libraries: PlexLibraryDTO[];
@@ -231,19 +230,19 @@ export const useLibraryStore = defineStore(StoreNames.LibraryStore, () => {
 		getLibrarySyncWaitingReason: (libraryId: number): LibrarySyncWaitingReason => {
 			const queue = getters.getLibrarySyncQueue(libraryId);
 			if (!queue || queue.status !== LibrarySyncJobStatus.Queued) {
-				return 'waiting';
+				return LibrarySyncWaitingReason.Waiting;
 			}
 
 			const serverConnectivity = getServerConnectivity(queue.plexServerId);
 			if (serverConnectivity === false) {
-				return 'offline';
+				return LibrarySyncWaitingReason.Offline;
 			}
 
 			if (getters.getProcessingLibrarySyncQueue(queue.plexServerId)) {
-				return 'busy';
+				return LibrarySyncWaitingReason.Busy;
 			}
 
-			return 'waiting';
+			return LibrarySyncWaitingReason.Waiting;
 		},
 		/**
      * Get the enabled Plex libraries

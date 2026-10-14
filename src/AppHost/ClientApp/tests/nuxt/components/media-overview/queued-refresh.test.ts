@@ -6,13 +6,17 @@ import { createI18n } from 'vue-i18n';
 import { baseSetup } from '@services-test-base';
 import { generateLibrarySyncJobQueue, generatePlexLibrary, Seed } from '@mock';
 import { LibrarySyncJobStatus, PlexMediaType } from '@dto';
+import { LibrarySyncWaitingReason } from '@enums';
 import { useDialogStore, useLibraryStore, useServerStore } from '@store';
 import MediaOverviewRefresh from '@/components/MediaOverview/MediaOverviewRefresh.vue';
 import messages from '@/lang/en-US.json';
 
 const passthrough = defineComponent({
 	inheritAttrs: false,
-	template: '<div v-bind="$attrs"><slot name="avatar" /><slot /></div>',
+	props: {
+		cy: { type: String, default: undefined },
+	},
+	template: '<div v-bind="$attrs" :data-cy="cy"><slot /></div>',
 });
 
 const buttonStub = defineComponent({
@@ -64,7 +68,7 @@ describe('MediaOverviewRefresh queued presentation', () => {
 		});
 		libraryStore.updateSyncQueue(processingQueue);
 		libraryStore.updateSyncQueue(queuedQueue);
-		vi.spyOn(libraryStore, 'getLibrarySyncWaitingReason').mockReturnValue('busy');
+		vi.spyOn(libraryStore, 'getLibrarySyncWaitingReason').mockReturnValue(LibrarySyncWaitingReason.Busy);
 		vi.spyOn(libraryStore, 'getProcessingLibrarySyncQueue').mockReturnValue(processingQueue);
 		vi.spyOn(serverStore, 'getServerName').mockReturnValue('My Plex Server');
 		return { libraryStore, queuedLibrary };
@@ -76,7 +80,7 @@ describe('MediaOverviewRefresh queued presentation', () => {
 			global: {
 				plugins: [pinia, createI18n({ legacy: false, locale: 'en-US', messages: { 'en-US': messages } })],
 				stubs: {
-					QBanner: passthrough,
+					QAlert: passthrough,
 					QCol: passthrough,
 					QIcon: passthrough,
 					QRow: passthrough,

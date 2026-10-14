@@ -124,7 +124,7 @@ import {
 	LibrarySyncJobStatus,
 	type PlexMediaType,
 } from '@dto';
-import { DialogType } from '@enums';
+import { DialogType, LibrarySyncWaitingReason } from '@enums';
 import { sum, meanBy } from 'lodash-es';
 import { useLibraryStore, useServerStore } from '@store';
 import { useI18n } from '#imports';
@@ -232,11 +232,11 @@ function shouldShowProgress(node: IPlexMediaSyncServerNode): boolean {
 function getStatusText(status?: LibrarySyncJobStatus, libraryId?: number): string {
 	if (status === LibrarySyncJobStatus.Queued && libraryId !== undefined) {
 		const reason = libraryStore.getLibrarySyncWaitingReason(libraryId);
-		if (reason === 'offline') {
+		if (reason === LibrarySyncWaitingReason.Offline) {
 			return t('components.sync-server-media-dialog.status.queued-offline');
 		}
 
-		if (reason === 'busy') {
+		if (reason === LibrarySyncWaitingReason.Busy) {
 			const queue = libraryStore.getLibrarySyncQueue(libraryId);
 			const processing = queue
 				? libraryStore.getProcessingLibrarySyncQueue(queue.plexServerId)

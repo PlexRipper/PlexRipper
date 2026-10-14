@@ -9,12 +9,21 @@
 		<template #top-row>
 			<!-- The total progress -->
 			<ProgressComponent
+				v-if="hasProcessingNodes || !hasQueuedNodes"
 				class="q-ma-md"
 				circular-mode
 				:percentage="totalPercentage"
 				:completed="totalPercentage === 100"
 				:text="getProgressText"
 				:indeterminate="openedAt === null" />
+			<div
+				v-else
+				class="q-pa-md text-center"
+				role="status"
+				aria-live="polite"
+				data-cy="sync-server-media-dialog-queued-status">
+				{{ t('components.sync-server-media-dialog.queued-summary') }}
+			</div>
 		</template>
 		<template #default>
 			<div>
@@ -41,7 +50,7 @@
 									<QMediaTypeIcon
 										v-else
 										:active="node.completed"
-										:loading="node.percentage > 0 && !node.completed"
+										:loading="node.status === LibrarySyncJobStatus.Processing && node.percentage > 0 && !node.completed"
 										:media-type="node.mediaType" />
 									<!-- Row Title	-->
 									<span
@@ -71,8 +80,10 @@
 										:value="node.progress.timeRemaining" />
 									<div
 										v-else
+										role="status"
+										aria-live="polite"
 										data-cy="sync-server-media-dialog-library-status">
-										{{ getStatusText(node.status) }}
+										{{ getStatusText(node.status, node.id) }}
 									</div>
 									<div
 										v-if="node.status === LibrarySyncJobStatus.Failed && node.errorMessage"
@@ -84,7 +95,9 @@
 							</QCol>
 							<!-- Plex Media Sync Progress -->
 							<QCol cols="4">
-								<QProgressBar :value="node.percentage" />
+								<QProgressBar
+									v-if="shouldShowProgress(node)"
+									:value="node.percentage" />
 							</QCol>
 						</QRow>
 					</template>
@@ -113,11 +126,8 @@ import {
 } from '@dto';
 import { DialogType } from '@enums';
 import { sum, meanBy } from 'lodash-es';
-import {
-	useI18n,
-	useServerStore,
-	useLibraryStore,
-} from '#imports';
+import { useLibraryStore, useServerStore } from '@store';
+import { useI18n } from '#imports';
 
 const { t } = useI18n();
 const serverStore = useServerStore();
@@ -132,6 +142,8 @@ const plexServerId = ref<number | null>(null);
 const openedAt = ref<Date | null>(null);
 
 const libraryNodes = computed(() => get(plexServerNodes).flatMap((x) => x.children));
+const hasProcessingNodes = computed(() => get(libraryNodes).some((x) => x.status === LibrarySyncJobStatus.Processing));
+const hasQueuedNodes = computed(() => get(libraryNodes).some((x) => x.status === LibrarySyncJobStatus.Queued));
 
 const totalPercentage = computed(() => {
 	const nodes = get(plexServerNodes);
@@ -194,7 +206,7 @@ const plexServerNodes = computed((): IPlexMediaSyncServerNode[] => {
 						type: 'library',
 						mediaType: library?.type,
 						percentage: libraryProgress.percentage ?? 0,
-						title: library?.title ?? t('general.error.unknown'),
+						title: library ? libraryStore.getLibraryName(libraryProgress.plexLibraryId) : t('general.error.unknown'),
 						completed: libraryProgress.status === LibrarySyncJobStatus.Completed,
 						status: libraryProgress.status,
 						errorMessage: libraryProgress.errorMessage,
@@ -209,8 +221,37 @@ const plexServerNodes = computed((): IPlexMediaSyncServerNode[] => {
 function isServer(node: IPlexMediaSyncServerNode): boolean {
 	return node.type === 'server';
 }
+function shouldShowProgress(node: IPlexMediaSyncServerNode): boolean {
+	if (isServer(node)) {
+		return node.children.some((child) => child.status !== LibrarySyncJobStatus.Queued);
+	}
 
-function getStatusText(status?: LibrarySyncJobStatus): string {
+	return node.status !== LibrarySyncJobStatus.Queued;
+}
+
+function getStatusText(status?: LibrarySyncJobStatus, libraryId?: number): string {
+	if (status === LibrarySyncJobStatus.Queued && libraryId !== undefined) {
+		const reason = libraryStore.getLibrarySyncWaitingReason(libraryId);
+		if (reason === 'offline') {
+			return t('components.sync-server-media-dialog.status.queued-offline');
+		}
+
+		if (reason === 'busy') {
+			const queue = libraryStore.getLibrarySyncQueue(libraryId);
+			const processing = queue
+				? libraryStore.getProcessingLibrarySyncQueue(queue.plexServerId)
+				: null;
+			if (queue && processing) {
+				return t('components.sync-server-media-dialog.status.queued-busy', {
+					library: libraryStore.getLibraryName(processing.plexLibraryId),
+					server: serverStore.getServerName(queue.plexServerId),
+				});
+			}
+		}
+
+		return t('components.sync-server-media-dialog.status.queued-waiting');
+	}
+
 	switch (status) {
 		case LibrarySyncJobStatus.Queued:
 			return t('components.sync-server-media-dialog.status.queued');
@@ -247,7 +288,7 @@ interface IPlexMediaSyncServerNode {
 	completed: boolean;
 	status?: LibrarySyncJobStatus;
 	errorMessage?: string | null;
-	progress?: LibrarySyncProgressDTO;
+	progress?: Partial<LibrarySyncProgressDTO>;
 	mediaType?: PlexMediaType;
 	children: IPlexMediaSyncServerNode[];
 }

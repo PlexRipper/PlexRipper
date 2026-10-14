@@ -42,14 +42,20 @@ describe('Test the refreshing of a PlexLibrary', () => {
 			const movieLibrary = data.plexLibraries.find((x) => x.type === PlexMediaType.Movie)!;
 			const server = data.plexServers.find((x) => x.id === movieLibrary.plexServerId)!;
 
-			cy.intercept('GET', PlexLibraryPaths.refreshLibraryMediaEndpoint(movieLibrary.id), {
+			cy.intercept('POST', PlexLibraryPaths.refreshLibraryMediaEndpoint(movieLibrary.id), {
 				statusCode: 200,
-				body: generateResultDTO(movieLibrary),
-			});
+				body: generateResultDTO(generateLibrarySyncJobQueue({
+					plexLibraryId: movieLibrary.id,
+					plexServerId: server.id,
+					status: LibrarySyncJobStatus.Queued,
+				})),
+			}).as('refreshMovies');
 
 			// Verify the refresh button is visible before clicking
 			cy.getCy('media-overview-refresh-library-btn').should('be.visible');
 			cy.getCy('media-overview-refresh-library-btn').click();
+			cy.getCy('refresh-mode-incremental-button').click();
+			cy.wait('@refreshMovies');
 
 			// Verify the refresh container is NOT yet visible before the job starts
 			cy.getCy('refresh-library-container').should('not.exist');
@@ -150,14 +156,20 @@ describe('Test the refreshing of a PlexLibrary', () => {
 			const tvShowLibrary = data.plexLibraries.find((x) => x.type === PlexMediaType.TvShow)!;
 			const server = data.plexServers.find((x) => x.id === tvShowLibrary.plexServerId)!;
 
-			cy.intercept('GET', PlexLibraryPaths.refreshLibraryMediaEndpoint(tvShowLibrary.id), {
+			cy.intercept('POST', PlexLibraryPaths.refreshLibraryMediaEndpoint(tvShowLibrary.id), {
 				statusCode: 200,
-				body: generateResultDTO(tvShowLibrary),
-			});
+				body: generateResultDTO(generateLibrarySyncJobQueue({
+					plexLibraryId: tvShowLibrary.id,
+					plexServerId: server.id,
+					status: LibrarySyncJobStatus.Queued,
+				})),
+			}).as('refreshTvShows');
 
 			// Verify the refresh button is visible before clicking
 			cy.getCy('media-overview-refresh-library-btn').should('be.visible');
 			cy.getCy('media-overview-refresh-library-btn').click();
+			cy.getCy('refresh-mode-incremental-button').click();
+			cy.wait('@refreshTvShows');
 
 			// Verify the refresh container is NOT yet visible before the job starts
 			cy.getCy('refresh-library-container').should('not.exist');

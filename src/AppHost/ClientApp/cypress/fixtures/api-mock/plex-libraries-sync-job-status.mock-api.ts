@@ -7,8 +7,8 @@ import { type LibrarySyncJobQueueDTO, LibrarySyncJobStatus } from '@dto';
 export function setupMockPlexLibrarySyncJobStatusEndpoints(this: BasePageSetupResult, config: MockConfig): BasePageSetupResult {
 	this.plexLibrarySyncJobStatuses = this.plexLibraries.map<LibrarySyncJobQueueDTO>((x) => ({
 		plexLibraryId: x.id,
-		status: LibrarySyncJobStatus.Queued,
-		completedAt: null,
+		status: LibrarySyncJobStatus.Completed,
+		completedAt: '1970-01-01T00:00:00.000Z',
 		createdAt: new Date().toISOString(),
 		errorMessage: null,
 		plexServerId: x.plexServerId,

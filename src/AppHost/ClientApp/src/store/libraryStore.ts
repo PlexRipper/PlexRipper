@@ -2,7 +2,7 @@ import { acceptHMRUpdate, defineStore } from 'pinia';
 import { reactive, toRefs } from 'vue';
 import { forkJoin, type Observable } from 'rxjs';
 import { of } from 'rxjs';
-import { concatMap, map, switchMap, tap } from 'rxjs/operators';
+import { concatMap, map, switchMap, tap, catchError } from 'rxjs/operators';
 import { get } from '@vueuse/core';
 import {
 	type LibrarySyncProgressDTO,
@@ -18,12 +18,15 @@ import { RefreshDataType } from '@dto';
 import {
 	useBackgroundJobsStore,
 	useMediaOverviewStore,
+	useServerConnectionStore,
 	useServerStore,
 	useSettingsStore,
 	useSignalrStore,
 } from '@store';
 import { cloneDeep, orderBy } from 'lodash-es';
 import Log from 'consola';
+
+type LibrarySyncWaitingReason = 'offline' | 'busy' | 'waiting';
 
 interface ILibraryStoreState {
 	libraries: PlexLibraryDTO[];
@@ -41,6 +44,7 @@ export const useLibraryStore = defineStore(StoreNames.LibraryStore, () => {
 	const serverStore = useServerStore();
 	const settingsStore = useSettingsStore();
 	const signalRStore = useSignalrStore();
+	const serverConnectionStore = useServerConnectionStore();
 	const backgroundJobsStore = useBackgroundJobsStore();
 
 	const actions = {
@@ -96,28 +100,45 @@ export const useLibraryStore = defineStore(StoreNames.LibraryStore, () => {
 			}), tap((library) => actions.updateLibrary(library)));
 		},
 		refreshLibrarySyncStatus(): Observable<LibrarySyncJobQueueDTO[]> {
-			return plexLibraryApi.getLibrarySyncStatusEndpoint().pipe(map(({ isSuccess, value }) => {
-				if (isSuccess && value) {
-					return value;
-				}
-				return [];
-			}), tap((libraryQueues) => {
-				state.syncQueues.splice(0, state.syncQueues.length, ...libraryQueues);
-			}));
+			return plexLibraryApi.getLibrarySyncStatusEndpoint().pipe(
+				tap(({ isSuccess, value }) => {
+					if (isSuccess) {
+						state.syncQueues = value ?? [];
+					}
+				}),
+				map(({ isSuccess, value }) => isSuccess ? value ?? [] : [...state.syncQueues]),
+				catchError((error) => {
+					Log.error('Failed to refresh library sync status', error);
+					return of([...state.syncQueues]);
+				}),
+			);
 		},
 		/**
      * Re-syncs a library by re-requesting all media from the Plex server.
      * @param libraryId
      * @param forceMediaRefresh Whether to replace all stored media entries before rebuilding the library.
      */
-		reSyncLibrary(libraryId: number, forceMediaRefresh = false): Observable<PlexLibraryDTO | null> {
+		reSyncLibrary(libraryId: number, forceMediaRefresh = false): Observable<LibrarySyncJobQueueDTO | null> {
 			return plexLibraryApi.refreshLibraryMediaEndpoint(libraryId, {
 				forceLibrarySync: true,
 				forceMediaRefresh,
-			}).pipe(tap((library) => actions.updateLibrary(library.value)), switchMap((library): Observable<PlexLibraryDTO | null> => of(getters.getLibrary(library.value?.id ?? 0))));
+			}).pipe(
+				tap(({ isSuccess, value }) => {
+					if (isSuccess && value) {
+						actions.updateSyncQueue(value);
+					}
+				}),
+				map(({ isSuccess, value }) => isSuccess && value ? value : null),
+			);
 		},
 		cancelLibrarySync(libraryId: number) {
-			return plexLibraryApi.cancelLibrarySyncEndpoint(libraryId);
+			return plexLibraryApi.cancelLibrarySyncEndpoint(libraryId).pipe(
+				switchMap((response) =>
+					response.isSuccess
+						? actions.refreshLibrarySyncStatus().pipe(map(() => response))
+						: of(response),
+				),
+			);
 		},
 		updateDefaultDestination(libraryId: number, folderPathId: number): void {
 			plexLibraryApi.setPlexLibraryDefaultDestinationByIdEndpoint(libraryId, folderPathId).subscribe((result) => {
@@ -177,7 +198,53 @@ export const useLibraryStore = defineStore(StoreNames.LibraryStore, () => {
 			Object.assign(state, cloneDeep(defaultState));
 		},
 	};
+	function getServerConnectivity(plexServerId: number): boolean | null {
+		if (serverStore.getServerStatus(plexServerId)) {
+			return true;
+		}
+
+		const connections = serverConnectionStore.getServerConnectionsByServerId(plexServerId);
+		if (connections.length === 0 || connections.some((connection) => {
+			const status = connection.latestConnectionStatus;
+			return typeof status?.isSuccessful !== 'boolean';
+		})) {
+			return null;
+		}
+
+		return false;
+	}
+
 	const getters = {
+		/**
+     * Get a queue item for a library.
+     */
+		getLibrarySyncQueue: (libraryId: number): LibrarySyncJobQueueDTO | null =>
+			state.syncQueues.find((x) => x.plexLibraryId === libraryId) ?? null,
+		/**
+     * Get the currently processing queue item for a server.
+     */
+		getProcessingLibrarySyncQueue: (plexServerId: number): LibrarySyncJobQueueDTO | null =>
+			state.syncQueues.find((x) => x.plexServerId === plexServerId && x.status === LibrarySyncJobStatus.Processing) ?? null,
+		/**
+     * Explain why a queued library is waiting.
+     */
+		getLibrarySyncWaitingReason: (libraryId: number): LibrarySyncWaitingReason => {
+			const queue = getters.getLibrarySyncQueue(libraryId);
+			if (!queue || queue.status !== LibrarySyncJobStatus.Queued) {
+				return 'waiting';
+			}
+
+			const serverConnectivity = getServerConnectivity(queue.plexServerId);
+			if (serverConnectivity === false) {
+				return 'offline';
+			}
+
+			if (getters.getProcessingLibrarySyncQueue(queue.plexServerId)) {
+				return 'busy';
+			}
+
+			return 'waiting';
+		},
 		/**
      * Get the enabled Plex libraries
      * @param plexServerId
@@ -276,12 +343,19 @@ export const useLibraryStore = defineStore(StoreNames.LibraryStore, () => {
 				.reduce<ILibrarySyncProgress[]>((acc, queue) => {
 					const progress = state.progress.find((p) => p.plexLibraryId === queue.plexLibraryId);
 					const isTerminal = [LibrarySyncJobStatus.Completed, LibrarySyncJobStatus.Failed, LibrarySyncJobStatus.Cancelled].includes(queue.status);
-					const queueWithProgress = {
-						...queue,
-						...progress,
-						percentage: isTerminal ? 100 : progress?.percentage,
-						isComplete: isTerminal || progress?.isComplete,
-					} as LibrarySyncJobQueueDTO & LibrarySyncProgressDTO;
+					const queueWithProgress: LibrarySyncJobQueueDTO & Partial<LibrarySyncProgressDTO> = queue.status === LibrarySyncJobStatus.Queued
+						? {
+								...queue,
+								percentage: undefined,
+								isComplete: false,
+								timeRemaining: undefined,
+							}
+						: {
+								...queue,
+								...progress,
+								percentage: isTerminal ? 100 : progress?.percentage,
+								isComplete: isTerminal || progress?.isComplete,
+							};
 					const existing = acc.find((x) => x.serverId === queue.plexServerId);
 					if (existing) {
 						existing.progress.push(queueWithProgress);
@@ -305,5 +379,5 @@ if (import.meta.hot) {
 
 interface ILibrarySyncProgress {
 	serverId: number;
-	progress: (LibrarySyncJobQueueDTO & LibrarySyncProgressDTO)[];
+	progress: (LibrarySyncJobQueueDTO & Partial<LibrarySyncProgressDTO>)[];
 }

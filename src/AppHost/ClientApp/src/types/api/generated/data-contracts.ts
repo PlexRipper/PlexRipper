@@ -1560,6 +1560,15 @@ export interface ResultDTOOfInt32 {
   value: number;
 }
 
+export interface ResultDTOOfLibrarySyncJobQueueDTO {
+  errors: ErrorDTO[];
+  isSuccess: boolean;
+  /** @format int32 */
+  statusCode: number;
+  successes: SuccessDTO[];
+  value?: LibrarySyncJobQueueDTO | null;
+}
+
 export interface ResultDTOOfListOfDownloadTaskLogDTO {
   errors: ErrorDTO[];
   isSuccess: boolean;

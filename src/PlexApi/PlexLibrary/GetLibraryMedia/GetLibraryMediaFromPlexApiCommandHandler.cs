@@ -29,29 +29,42 @@ public class GetLibraryMediaFromPlexApiCommandHandler
     )
     {
         var plexLibrary = command.PlexLibrary;
-
         var result = await Result.Try(async Task<Result<LibraryMetadata>> () =>
         {
             var library = plexLibrary;
             if (command.MediaType is null)
             {
-                await _librarySyncProgressStore.StartAsync(plexLibrary.Id, plexLibrary.Type, ct);
-
                 // Retrieve an updated version of the PlexLibrary
                 var sectionsResult = await _commandExecutor.Send(
                     new GetLibrarySectionsCommand(plexLibrary.PlexServerId),
                     ct
                 );
                 if (sectionsResult.IsFailed)
+                {
+                    await _librarySyncProgressStore.StartAsync(plexLibrary.Id, plexLibrary.Type);
                     return sectionsResult.ToResult();
+                }
 
                 library = sectionsResult.Value.Find(x => x.Key == plexLibrary.Key);
                 if (library is null)
+                {
+                    await _librarySyncProgressStore.StartAsync(plexLibrary.Id, plexLibrary.Type);
                     return ResultExtensions.EntityNotFound(nameof(PlexLibrary), plexLibrary.Id);
+                }
 
                 library.Id = plexLibrary.Id;
                 library.PlexServerId = plexLibrary.PlexServerId;
                 library.DefaultDestinationId = library.Type.ToDefaultDestinationFolderId();
+
+                var totalsResult = await _commandExecutor.Send(new GetLibraryMediaTotalsCommand(library), ct);
+                if (totalsResult.IsCancelled)
+                {
+                    await _librarySyncProgressStore.StartAsync(plexLibrary.Id, plexLibrary.Type);
+                    return totalsResult.ToResult();
+                }
+
+                var progressTotals = totalsResult.IsSuccess ? totalsResult.Value : new Dictionary<PlexMediaType, int>();
+                await _librarySyncProgressStore.StartAsync(plexLibrary.Id, plexLibrary.Type, progressTotals);
             }
 
             var mediaType = command.MediaType ?? library.Type;

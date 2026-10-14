@@ -80,6 +80,107 @@ public class GetAllMediaByTypeFromPlexApiCommandHandlerUnitTests
         Mock.Mock<ILibrarySyncProgressStore>().Verify();
     }
 
+
+    [Test]
+    public async Task ShouldRequestIndependentTotal_AndUpdateTheDenominatorWhenPlexChanges()
+    {
+        // Arrange
+        await SetupDatabase(
+            9206,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexAccountCount = 1;
+                config.PlexMovieLibraryCount = 1;
+                config.PlexTvShowLibraryCount = 0;
+                config.MovieCount = 0;
+            }
+        );
+        var library = await IDbContext.PlexLibraries.SingleAsync(CancellationToken);
+        var items = new[] { CreateItem(1, "movie"), CreateItem(2, "movie"), CreateItem(3, "movie") };
+        var requests = new List<IDictionary<string, string>>();
+        var transport = new Mock<IPlexApiClient>(MockBehavior.Strict);
+        var sdk = new PlexAPI(client: transport.Object, serverUrl: "http://plex.test", token: "test-token");
+
+        transport
+            .Setup(x =>
+                x.CloneAsync(
+                    It.Is<HttpRequestMessage>(r =>
+                        r.Method == HttpMethod.Get
+                        && r.RequestUri!.AbsolutePath == $"/library/sections/{library.Key}/all"
+                    )
+                )
+            )
+            .ReturnsAsync((HttpRequestMessage request) => request)
+            .Verifiable(Times.Exactly(3));
+        transport
+            .Setup(x =>
+                x.SendAsync(
+                    It.Is<HttpRequestMessage>(r =>
+                        r.Method == HttpMethod.Get
+                        && r.RequestUri!.AbsolutePath == $"/library/sections/{library.Key}/all"
+                    )
+                )
+            )
+            .ReturnsAsync(
+                (HttpRequestMessage request) =>
+                {
+                    var query = request.ParseQueryToDictionary();
+                    requests.Add(query);
+                    var start = int.Parse(query["X-Plex-Container-Start"]);
+                    var size = int.Parse(query["X-Plex-Container-Size"]);
+                    var page = items.Skip(start).Take(size).ToArray();
+                    return CreateResponse(items.Length, start, page)
+                        .MediaContainerWithMetadata.ToJsonHttpResponse(request, HttpStatusCode.OK);
+                }
+            )
+            .Verifiable(Times.Exactly(3));
+        Mock.Mock<IPlexApiClientFactory>()
+            .Setup(x => x.CreateClient(It.IsAny<string>(), It.IsAny<PlexApiClientOptions>()))
+            .Returns(sdk)
+            .Verifiable(Times.Once());
+        var progress = new LibraryProgress
+        {
+            PlexLibraryId = library.Id,
+            PlexLibraryType = library.Type,
+            Items =
+            [
+                new LibraryProgressItem
+                {
+                    MediaType = PlexMediaType.Movie,
+                    Received = 0,
+                    Total = 2,
+                    TimeRemaining = TimeSpan.Zero,
+                },
+            ],
+        };
+        Mock.Mock<ILibrarySyncProgressStore>()
+            .Setup(x => x.Get(library.Id))
+            .Returns(progress);
+
+
+        Mock.Mock<ILibrarySyncProgressStore>()
+            .Setup(x => x.UpdateItemAsync(library.Id, It.IsAny<LibraryProgressItem>(), CancellationToken))
+            .Callback<int, LibraryProgressItem, CancellationToken>((_, item, _) => item.Total.ShouldBe(3))
+            .Returns(Task.CompletedTask);
+
+        // Act
+        var result = await TestHandlerExecuteAsync<List<LibraryMediaItemDTO>>(
+            new GetAllMediaByTypeFromPlexApiCommand(library, PlexMediaType.Movie, 2)
+        );
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.Count.ShouldBe(3);
+        requests
+            .Select(q => (q["X-Plex-Container-Start"], q["X-Plex-Container-Size"]))
+            .ShouldBe([("0", "0"), ("0", "2"), ("2", "1")]);
+        transport.Verify();
+        Mock.Mock<IPlexApiClientFactory>().Verify();
+        Mock.Mock<ILibrarySyncProgressStore>().Verify(x => x.Get(library.Id), Times.Never());
+        Mock.Mock<ILibrarySyncProgressStore>().Verify();
+    }
+
     [Test]
     [Arguments(PlexMediaType.Movie)]
     [Arguments(PlexMediaType.OtherVideos)]

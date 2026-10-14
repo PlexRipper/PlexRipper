@@ -23,6 +23,7 @@
 					:media-type="mediaItem.type"
 					show-tooltip
 					dense
+					flat
 					:clickable="artistComparisonClickable"
 					:cy="`music-comparison-artist-${mediaItem.id}`"
 					@click="openArtistComparison" />
@@ -51,42 +52,45 @@
 						:model-value="albumSelectionState(album)"
 						@click.stop
 						@update:model-value="setAlbumSelected(album, Boolean($event))" />
-					<div class="text-weight-bold">
-						{{ album.title }}
-					</div>
-					<div class="text-caption">
-						{{ t('components.music-media-list.track-count', { count: album.children.length }) }}
-					</div>
-					<div
-						v-if="album.recordLabel || album.releaseDate"
-						class="music-album-row__metadata text-caption">
-						<div v-if="album.recordLabel">
+					<QRow
+						justify="between">
+						<QCol
+							cols="4">
+							<MediaComparisonStateButton
+								class="q-mr-sm"
+								:comparison-state="getPlexMediaComparisonState(album)"
+								:media-type="album.type"
+								show-tooltip
+								dense
+								flat
+								:cy="`music-comparison-album-${album.id}`"
+								@click.stop />
+							<span>{{ album.title }}&nbsp;</span>
+							<span>({{ t('components.music-media-list.track-count', { count: album.children.length }) }})</span>
+						</QCol>
+						<QCol
+							v-if="album.recordLabel"
+							cols="2">
 							{{ t('components.music-media-list.record-label') }}: {{ album.recordLabel }}
-						</div>
-						<div v-if="album.releaseDate">
+						</QCol>
+						<QCol
+							cols="1"
+							class="music-album-row__duration"
+							@click.stop>
+							<QDuration
+								short
+								:value="album.duration" />
+						</QCol>
+
+						<QCol
+							v-if="album.releaseDate"
+							cols="1">
 							{{ t('components.music-media-list.release-date') }}:
 							<QDateTime
 								:text="album.releaseDate"
 								short-date />
-						</div>
-					</div>
-					<div
-						class="music-album-row__comparison"
-						@click.stop>
-						<MediaComparisonStateButton
-							:comparison-state="getPlexMediaComparisonState(album)"
-							:media-type="album.type"
-							show-tooltip
-							dense
-							:cy="`music-comparison-album-${album.id}`" />
-					</div>
-					<div
-						class="music-album-row__duration"
-						@click.stop>
-						<QDuration
-							short
-							:value="album.duration" />
-					</div>
+						</QCol>
+					</QRow>
 				</div>
 			</template>
 
@@ -118,7 +122,14 @@
 <script setup lang="ts">
 import { get, set } from '@vueuse/core';
 import { orderBy } from 'lodash-es';
-import { PlexMediaComparisonState, PlexMediaType, type DownloadMediaDTO, type PlexMediaDTO, type PlexMediaQualityDTO, type PlexMediaSlimDTO } from '@dto';
+import {
+	PlexMediaComparisonState,
+	PlexMediaType,
+	type DownloadMediaDTO,
+	type PlexMediaDTO,
+	type PlexMediaQualityDTO,
+	type PlexMediaSlimDTO,
+} from '@dto';
 import type { ISelection } from '@interfaces';
 import { useDialogStore, useMediaOverviewStore } from '@store';
 import { sendMediaOverviewDownloadCommand, useMediaOverviewBarDownloadCommandBus } from '@composables/event-bus';
@@ -323,45 +334,44 @@ onBeforeUnmount(() => {
 @use '@/assets/scss/variables.scss' as *;
 
 .music-media-list {
-	&__checkbox {
-		min-width: 44px;
-		min-height: 44px;
-	}
+  &__checkbox {
+    min-width: 44px;
+    min-height: 44px;
+  }
 
-	&__root {
-		min-height: 56px;
-	}
+  &__root {
+    min-height: 56px;
+  }
 
-	&__tracks {
-		border-top: 1px solid rgb(255 255 255 / 12%);
-	}
+  &__tracks {
+    border-top: 1px solid rgb(255 255 255 / 12%);
+  }
 }
 
 .music-album-row {
-	display: grid;
-	grid-template-columns: 44px minmax(0, 1fr) 44px auto;
-	align-items: center;
-	gap: 0.75rem;
-	width: 100%;
-	min-width: 0;
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr) 44px auto;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  min-width: 0;
 
-	&__details {
-		min-width: 0;
-	}
+  &__details {
+    min-width: 0;
+  }
 
-	&__metadata {
-		display: flex;
-		flex-wrap: wrap;
-		align-items: center;
-		gap: 0.5rem;
-		min-width: 0;
-		overflow-wrap: anywhere;
-	}
+  &__metadata {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
 
-	&__comparison,
-	&__duration {
-		justify-self: end;
-		white-space: nowrap;
-	}
+  &__duration {
+    justify-self: end;
+    white-space: nowrap;
+  }
 }
 </style>

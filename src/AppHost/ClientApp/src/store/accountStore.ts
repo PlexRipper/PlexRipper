@@ -159,18 +159,13 @@ export const useAccountStore = defineStore(StoreNames.AccountStore, () => {
 			return account.username;
 		},
 		/**
-     * Checks if there is any enabled account that has access to at least one library on the server
+     * Checks if there is any enabled account that has access to the server
      * NOTE: This will only check enabled accounts
      * @param plexServerId
      */
 		getHasAccountServerAccess(plexServerId: number): boolean {
-			const serverLibraries = libraryStore.getAllLibrariesByServerId(plexServerId);
-
 			for (const account of state.accounts.filter((x) => x.isEnabled)) {
-				if (
-					account.plexServerAccess.includes(plexServerId)
-					&& serverLibraries.some((library) => account.plexLibraryAccess.includes(library.id))
-				) {
+				if (account.plexServerAccess.includes(plexServerId)) {
 					return true;
 				}
 			}

@@ -10,6 +10,8 @@
 			<MediaAudioQuality
 				v-if="isAudioMediaType(quality.mediaDataType)"
 				:quality="quality.audioQuality ?? AudioQuality.Unknown"
+				:truncated="truncated"
+				:count="displayQualities.length"
 				:clickable="clickable"
 				@click="$emit('download', [quality])" />
 			<MediaVideoQuality

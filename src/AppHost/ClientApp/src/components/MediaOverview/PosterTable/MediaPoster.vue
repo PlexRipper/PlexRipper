@@ -170,7 +170,7 @@
 			</div>
 
 			<MediaQuality
-				v-if="supportsVideoQuality"
+				v-if="supportsMediaQuality"
 				class="media-poster-quality-bar"
 				:qualities="mediaItem.qualities"
 				clickable
@@ -261,7 +261,7 @@ const mediaType = computed(() => props.mediaItem?.type ?? PlexMediaType.Unknown)
 
 const hasDetailsAction = computed(() => Convert.mediaTypeToDetailsPath(props.mediaItem) !== null);
 const supportsComparison = computed(() => [PlexMediaType.Movie, PlexMediaType.TvShow, PlexMediaType.MusicArtist].includes(get(mediaType)));
-const supportsVideoQuality = computed(() => [PlexMediaType.Movie, PlexMediaType.TvShow, PlexMediaType.OtherVideos].includes(get(mediaType)));
+const supportsMediaQuality = computed(() => [PlexMediaType.Movie, PlexMediaType.TvShow, PlexMediaType.MusicArtist, PlexMediaType.OtherVideos].includes(get(mediaType)));
 
 const comparisonBadgeClickable = computed(() => {
 	return [

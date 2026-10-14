@@ -4,7 +4,6 @@ public class PlexGenreAudioConfiguration : IEntityTypeConfiguration<PlexGenreAud
 {
     public void Configure(EntityTypeBuilder<PlexGenreAudio> builder)
     {
-        builder.ToTable(nameof(PlexGenreAudio));
         builder.HasIndex(x => x.Key).IsUnique();
     }
 }

@@ -163,4 +163,90 @@ public class DbContextExtensionsPlexMediaUnitTests : BaseUnitTest
         // Assert
         result.IsFailed.ShouldBeTrue();
     }
+
+    [Test]
+    public async Task ShouldInsertVideoGenresIntoMappedTableAndReturnExistingIds_WhenKeysDuplicate()
+    {
+        // Arrange
+        await SetupDatabase(12403);
+        var dbContext = IDbContext;
+        var existingGenre = new PlexGenreVideo
+        {
+            Name = "Existing Drama",
+            Key = "genre-drama",
+            Type = PlexGenreType.Drama,
+        };
+        await dbContext.PlexGenresVideo.AddAsync(existingGenre, CancellationToken);
+        await dbContext.SaveChangesAsync(CancellationToken);
+        var existingGenreId = existingGenre.Id;
+
+        var before = await dbContext
+            .PlexGenresVideo.Select(x => new { x.Id, x.Key, x.Name, x.Type })
+            .ToListAsync(CancellationToken);
+        before.ShouldBe(
+            [
+                new
+                {
+                    Id = existingGenreId,
+                    Key = "genre-drama",
+                    Name = "Existing Drama",
+                    Type = PlexGenreType.Drama,
+                },
+            ]
+        );
+
+        var genres = new[]
+        {
+            new PlexGenreVideo
+            {
+                Name = "Action",
+                Key = "genre-action",
+                Type = PlexGenreType.Action,
+            },
+            new PlexGenreVideo
+            {
+                Name = "Ignored Duplicate",
+                Key = "genre-action",
+                Type = PlexGenreType.Adventure,
+            },
+            new PlexGenreVideo
+            {
+                Name = "Ignored Existing",
+                Key = "genre-drama",
+                Type = PlexGenreType.Comedy,
+            },
+        };
+
+        // Act
+        var result = await dbContext.InsertOrIgnorePlexGenresVideoAsync(genres, CancellationToken);
+
+        // Assert
+        result.Keys.OrderBy(x => x).ShouldBe(["genre-action", "genre-drama"]);
+        result["genre-drama"].ShouldBe(existingGenreId);
+        result["genre-action"].ShouldBeGreaterThan(0);
+        result["genre-action"].ShouldNotBe(existingGenreId);
+
+        var persisted = await dbContext
+            .PlexGenresVideo.OrderBy(x => x.Key)
+            .Select(x => new { x.Id, x.Key, x.Name, x.Type })
+            .ToListAsync(CancellationToken);
+        persisted.ShouldBe(
+            [
+                new
+                {
+                    Id = result["genre-action"],
+                    Key = "genre-action",
+                    Name = "Action",
+                    Type = PlexGenreType.Action,
+                },
+                new
+                {
+                    Id = existingGenreId,
+                    Key = "genre-drama",
+                    Name = "Existing Drama",
+                    Type = PlexGenreType.Drama,
+                },
+            ]
+        );
+    }
 }

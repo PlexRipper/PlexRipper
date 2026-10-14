@@ -76,7 +76,7 @@ public static partial class DbContextExtensions
             }
 
             var sql = FormattableStringFactory.Create(
-                $"INSERT OR IGNORE INTO PlexGenreVideo (Name, Key, Type) VALUES {string.Join(", ", values)}",
+                $"INSERT OR IGNORE INTO {nameof(IReaparrDbContext.PlexGenresVideo)} (Name, Key, Type) VALUES {string.Join(", ", values)}",
                 arguments.ToArray()
             );
             await dbContext.ExecuteSqlInterpolatedAsync(sql, ct);
@@ -116,7 +116,7 @@ public static partial class DbContextExtensions
             }
 
             var sql = FormattableStringFactory.Create(
-                $"INSERT OR IGNORE INTO PlexGenreAudio (Name, Key) VALUES {string.Join(", ", values)}",
+                $"INSERT OR IGNORE INTO {nameof(IReaparrDbContext.PlexGenresAudio)} (Name, Key) VALUES {string.Join(", ", values)}",
                 arguments.ToArray()
             );
             await dbContext.ExecuteSqlInterpolatedAsync(sql, ct);

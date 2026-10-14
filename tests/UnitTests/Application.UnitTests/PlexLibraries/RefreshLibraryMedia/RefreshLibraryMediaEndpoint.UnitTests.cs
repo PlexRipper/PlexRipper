@@ -1,10 +1,16 @@
 namespace Reaparr.Application.UnitTests;
 
 public class RefreshLibraryMediaEndpointUnitTests
-    : BaseEndpointUnitTest<RefreshLibraryMediaEndpoint, RefreshLibraryMediaEndpointRequest, ResultDTO<PlexLibraryDTO>>
+    : BaseEndpointUnitTest<
+        RefreshLibraryMediaEndpoint,
+        RefreshLibraryMediaEndpointRequest,
+        ResultDTO<LibrarySyncJobQueueDTO>
+    >
 {
     [Test]
-    public async Task ShouldReturnSuccess_WhenLibrarySyncJobQueued()
+    [Arguments(LibrarySyncJobStatus.Queued)]
+    [Arguments(LibrarySyncJobStatus.Processing)]
+    public async Task ShouldReturnActualQueueState_WhenLibrarySyncJobAccepted(LibrarySyncJobStatus status)
     {
         // Arrange
         await SetupDatabase(
@@ -16,6 +22,18 @@ public class RefreshLibraryMediaEndpointUnitTests
         );
 
         var plexLibrary = IDbContext.PlexLibraries.First();
+        var createdAt = new DateTime(2026, 10, 14, 12, 0, 0, DateTimeKind.Utc);
+        var queueItem = new LibrarySyncJobQueue
+        {
+            PlexLibraryId = plexLibrary.Id,
+            PlexServerId = plexLibrary.PlexServerId,
+            Priority = 1,
+            Status = status,
+            CreatedAt = createdAt,
+            StartedAt = status == LibrarySyncJobStatus.Processing ? createdAt.AddMinutes(1) : null,
+        };
+        await IDbContext.LibrarySyncJobQueues.AddAsync(queueItem, CancellationToken);
+        await IDbContext.SaveChangesAsync(CancellationToken);
 
         Mock.Mock<ICommandExecutor>()
             .Setup(x =>
@@ -45,6 +63,17 @@ public class RefreshLibraryMediaEndpointUnitTests
         // Assert
         resultDTO.ShouldNotBeNull();
         resultDTO.IsSuccess.ShouldBeTrue();
+        resultDTO.Errors.Count.ShouldBe(0);
+        resultDTO.Value.ShouldNotBeNull();
+        resultDTO.Value.PlexLibraryId.ShouldBe(plexLibrary.Id);
+        resultDTO.Value.PlexServerId.ShouldBe(plexLibrary.PlexServerId);
+        resultDTO.Value.Priority.ShouldBe(queueItem.Priority);
+        resultDTO.Value.Status.ShouldBe(status);
+        resultDTO.Value.CreatedAt.ShouldBe(createdAt);
+        resultDTO.Value.StartedAt.ShouldBe(queueItem.StartedAt);
+        resultDTO.Value.CompletedAt.ShouldBeNull();
+        resultDTO.Value.IsServerOffline.ShouldBeFalse();
+        resultDTO.Value.ErrorMessage.ShouldBeNull();
         Mock.Mock<ICommandExecutor>().Verify();
     }
 
@@ -87,10 +116,12 @@ public class RefreshLibraryMediaEndpointUnitTests
         );
         var resultDTO = endpointResult.Response;
 
-        // Assert
         resultDTO.ShouldNotBeNull();
         resultDTO.IsSuccess.ShouldBeFalse();
+        resultDTO.Errors.Count.ShouldBe(1);
+        resultDTO.Value.ShouldBeNull();
         resultDTO.Errors.ShouldContain(x => x.Message.Contains("Failed to refresh library"));
+        (await IDbContext.LibrarySyncJobQueues.AsNoTracking().ToListAsync(CancellationToken)).ShouldBeEmpty();
         Mock.Mock<ICommandExecutor>().Verify();
     }
 

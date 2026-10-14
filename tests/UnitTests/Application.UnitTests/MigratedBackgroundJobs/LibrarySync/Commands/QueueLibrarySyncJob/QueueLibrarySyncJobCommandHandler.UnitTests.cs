@@ -1217,4 +1217,98 @@ public class QueueLibrarySyncJobCommandHandlerUnitTests : BaseUnitTest<QueueLibr
                 Times.Once()
             );
     }
+    [Test]
+    public async Task ShouldKeepDurableQueueAdmission_WhenCheckerFails()
+    {
+        // Arrange
+        await SetupDatabase(
+            3040,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexMovieLibraryCount = 1;
+            }
+        );
+
+        var library = IDbContext.PlexLibraries.Single();
+        Mock.Mock<ICommandExecutor>()
+            .Setup(x =>
+                x.Send(It.IsAny<CheckQueuedPlexLibraryToSyncCommand>(), It.IsAny<CancellationToken>())
+            )
+            .ReturnsAsync(Result.Fail("checker failed"))
+            .Verifiable(Times.Once());
+        Mock.Mock<INotificationHubService>()
+            .Setup(x =>
+                x.SendRefreshNotificationAsync(
+                    It.Is<List<RefreshDataType>>(types =>
+                        types.Count == 1 && types[0] == RefreshDataType.PlexLibrarySyncStatus
+                    )
+                )
+            )
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.Once());
+
+        // Act
+        var result = await Sut.ExecuteAsync(
+            new QueueLibrarySyncJobCommand([library.Id], ForceLibrarySync: true),
+            CancellationToken
+        );
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        result.Errors.Count.ShouldBe(0);
+        var queueItem = await IDbContext.LibrarySyncJobQueues.AsNoTracking().SingleAsync(CancellationToken);
+        queueItem.PlexLibraryId.ShouldBe(library.Id);
+        queueItem.PlexServerId.ShouldBe(library.PlexServerId);
+        queueItem.Status.ShouldBe(LibrarySyncJobStatus.Queued);
+        Mock.Mock<ICommandExecutor>().Verify();
+        Mock.Mock<INotificationHubService>().Verify();
+    }
+
+    [Test]
+    public async Task ShouldKeepDurableQueueAdmission_WhenNotificationFails()
+    {
+        // Arrange
+        await SetupDatabase(
+            3041,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexMovieLibraryCount = 1;
+            }
+        );
+
+        var library = IDbContext.PlexLibraries.Single();
+        Mock.Mock<INotificationHubService>()
+            .Setup(x =>
+                x.SendRefreshNotificationAsync(
+                    It.Is<List<RefreshDataType>>(types =>
+                        types.Count == 1 && types[0] == RefreshDataType.PlexLibrarySyncStatus
+                    )
+                )
+            )
+            .ThrowsAsync(new InvalidOperationException("notification failed"))
+            .Verifiable(Times.Once());
+        Mock.Mock<ICommandExecutor>()
+            .Setup(x =>
+                x.Send(It.IsAny<CheckQueuedPlexLibraryToSyncCommand>(), It.IsAny<CancellationToken>())
+            )
+            .ReturnsAsync(Result.Ok())
+            .Verifiable(Times.Once());
+
+        // Act
+        var result = await Sut.ExecuteAsync(
+            new QueueLibrarySyncJobCommand([library.Id], ForceLibrarySync: true),
+            CancellationToken
+        );
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        result.Errors.Count.ShouldBe(0);
+        var queueItem = await IDbContext.LibrarySyncJobQueues.AsNoTracking().SingleAsync(CancellationToken);
+        queueItem.PlexLibraryId.ShouldBe(library.Id);
+        queueItem.Status.ShouldBe(LibrarySyncJobStatus.Queued);
+        Mock.Mock<ICommandExecutor>().Verify();
+        Mock.Mock<INotificationHubService>().Verify();
+    }
 }

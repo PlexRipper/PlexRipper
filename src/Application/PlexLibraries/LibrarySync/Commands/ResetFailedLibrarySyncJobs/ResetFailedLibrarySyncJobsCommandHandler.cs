@@ -15,16 +15,19 @@ public class ResetFailedLibrarySyncJobsCommandHandler : ICommandHandler<ResetFai
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
     private readonly ICommandExecutor _commandExecutor;
+    private readonly INotificationHubService _notificationHubService;
 
     public ResetFailedLibrarySyncJobsCommandHandler(
         ILogger log,
         IReaparrDbContext dbContext,
-        ICommandExecutor commandExecutor
+        ICommandExecutor commandExecutor,
+        INotificationHubService notificationHubService
     )
     {
         _log = log.ForContext<ResetFailedLibrarySyncJobsCommandHandler>();
         _dbContext = dbContext;
         _commandExecutor = commandExecutor;
+        _notificationHubService = notificationHubService;
     }
 
     public async Task<Result> ExecuteAsync(
@@ -50,9 +53,17 @@ public class ResetFailedLibrarySyncJobsCommandHandler : ICommandHandler<ResetFai
                     plexServerName
                 );
 
-            await _commandExecutor.Send(new CheckQueuedPlexLibraryToSyncCommand(), cancellationToken);
-        }
+            var notificationResult = await Result.Try(async Task () =>
+                await _notificationHubService.SendRefreshNotificationAsync([RefreshDataType.PlexLibrarySyncStatus])
+            );
+            notificationResult.LogIfFailed();
 
+            var checkQueuedResult = await _commandExecutor.Send(
+                new CheckQueuedPlexLibraryToSyncCommand(),
+                cancellationToken
+            );
+            checkQueuedResult.LogIfFailed();
+        }
         return Result.Ok();
     }
 }

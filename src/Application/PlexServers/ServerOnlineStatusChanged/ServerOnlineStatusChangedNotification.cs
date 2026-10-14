@@ -56,10 +56,11 @@ public class ServerOnlineStatusChangedHandler : IEventHandler<ServerOnlineStatus
                 );
 
             await _downloadQueue.CheckDownloadQueue([notification.PlexServerId], cancellationToken);
-            await _commandExecutor.Send(
+            var resetResult = await _commandExecutor.Send(
                 new ResetFailedLibrarySyncJobsCommand(notification.PlexServerId),
                 cancellationToken
             );
+            resetResult.LogIfFailed();
         }
     }
 }

@@ -13,19 +13,16 @@ public class GetAllMediaByTypeFromPlexApiCommandHandler
     : ICommandHandler<GetAllMediaByTypeFromPlexApiCommand, Result<List<LibraryMediaItemDTO>>>
 {
     private readonly ILogger _log;
-    private readonly IReaparrDbContext _dbContext;
     private readonly ILibrarySyncProgressStore _librarySyncProgressStore;
     private readonly IPlexApiClientFactory _plexApiClientFactory;
 
     public GetAllMediaByTypeFromPlexApiCommandHandler(
         ILogger log,
-        IReaparrDbContext dbContext,
         ILibrarySyncProgressStore librarySyncProgressStore,
         IPlexApiClientFactory plexApiClientFactory
     )
     {
         _log = log.ForContext<GetAllMediaByTypeFromPlexApiCommandHandler>();
-        _dbContext = dbContext;
         _librarySyncProgressStore = librarySyncProgressStore;
         _plexApiClientFactory = plexApiClientFactory;
     }

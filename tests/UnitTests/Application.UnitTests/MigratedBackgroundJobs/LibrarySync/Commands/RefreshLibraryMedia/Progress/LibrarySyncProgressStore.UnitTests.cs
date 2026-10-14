@@ -62,6 +62,75 @@ public class LibrarySyncProgressStoreUnitTests : BaseUnitTest<LibrarySyncProgres
     }
 
     [Test]
+    public async Task ShouldPreserveKnownTotals_OnEveryProgressUpdate()
+    {
+        // Arrange
+        var sentProgress = new List<LibrarySyncProgressDTO>();
+        Mock.Mock<IProgressHubService>()
+            .Setup(x => x.SendLibraryProgressUpdateAsync(It.IsAny<LibrarySyncProgressDTO>()))
+            .Callback<LibrarySyncProgressDTO>(dto => sentProgress.Add(dto))
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.Exactly(3));
+
+        await Sut.StartAsync(
+            7,
+            PlexMediaType.TvShow,
+            new Dictionary<PlexMediaType, int>
+            {
+                [PlexMediaType.TvShow] = 208,
+                [PlexMediaType.Season] = 1088,
+                [PlexMediaType.Episode] = 17185,
+            }
+        );
+
+        // Act
+        await Sut.UpdateItemAsync(
+            7,
+            new LibraryProgressItem
+            {
+                MediaType = PlexMediaType.TvShow,
+                Received = 10,
+                Total = 999,
+                TimeRemaining = TimeSpan.Zero,
+            },
+            CancellationToken
+        );
+        await Sut.UpdateItemAsync(
+            7,
+            new LibraryProgressItem
+            {
+                MediaType = PlexMediaType.Season,
+                Received = 20,
+                Total = 999,
+                TimeRemaining = TimeSpan.Zero,
+            },
+            CancellationToken
+        );
+
+        // Assert
+        sentProgress
+            .Select(dto => dto.Items.Select(item => (item.MediaType, item.Total)).ToArray())
+            .ShouldBe([
+                [
+                    (PlexMediaType.TvShow, 208),
+                    (PlexMediaType.Season, 1088),
+                    (PlexMediaType.Episode, 17185),
+                ],
+                [
+                    (PlexMediaType.TvShow, 208),
+                    (PlexMediaType.Season, 1088),
+                    (PlexMediaType.Episode, 17185),
+                ],
+                [
+                    (PlexMediaType.TvShow, 208),
+                    (PlexMediaType.Season, 1088),
+                    (PlexMediaType.Episode, 17185),
+                ],
+            ]);
+        Mock.Mock<IProgressHubService>().Verify();
+    }
+
+    [Test]
     [Arguments(PlexMediaType.Movie, PlexMediaType.Movie, PlexMediaType.None, PlexMediaType.None)]
     [Arguments(PlexMediaType.TvShow, PlexMediaType.TvShow, PlexMediaType.Season, PlexMediaType.Episode)]
     [Arguments(

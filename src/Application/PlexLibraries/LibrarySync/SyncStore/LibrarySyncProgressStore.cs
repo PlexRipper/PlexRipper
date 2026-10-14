@@ -55,21 +55,23 @@ public class LibrarySyncProgressStore : ILibrarySyncProgressStore
         CancellationToken cancellationToken = default
     )
     {
-        _store.AddOrUpdate(
+        var updated = _store.AddOrUpdate(
             plexLibraryId,
             _ => throw new InvalidOperationException("Library not initialized."),
             (_, existing) =>
             {
-                // Upsert: replace if the media type already exists, otherwise append
+                // Keep the preflight total for this refresh. A per-type retrieval total is
+                // only used when the preflight could not determine that layer's total.
                 var replaced = false;
                 var updatedItems = existing
-                    .Items.Select(i =>
+                    .Items.Select(existingItem =>
                     {
-                        if (i.MediaType != item.MediaType)
-                            return i;
+                        if (existingItem.MediaType != item.MediaType)
+                            return existingItem;
 
                         replaced = true;
-                        return item;
+                        var total = existingItem.Total >= 0 ? existingItem.Total : item.Total;
+                        return item with { Total = total };
                     })
                     .ToList();
 
@@ -83,7 +85,7 @@ public class LibrarySyncProgressStore : ILibrarySyncProgressStore
             }
         );
 
-        await SendProgressUpdateAsync(plexLibraryId);
+        await SendProgressUpdateAsync(updated);
     }
 
     public async Task UpdateErrorAsync(

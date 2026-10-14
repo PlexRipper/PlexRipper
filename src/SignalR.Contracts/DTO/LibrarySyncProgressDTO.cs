@@ -12,7 +12,11 @@ public record LibrarySyncProgressDTO
 
     public int Total => Items.Sum(i => Math.Max(i.Total, 0));
 
-    public decimal Percentage => IsComplete ? 100 : Total == 0 ? 0 : DataFormat.GetPercentage(Received, Total);
+    public decimal Percentage =>
+        IsComplete ? 100
+        : Items.Any(i => i.Total < 0) ? 0
+        : Total == 0 ? 0
+        : DataFormat.GetPercentage(Received, Total);
 
     public DateTime TimeStamp { get; } = DateTime.UtcNow;
 

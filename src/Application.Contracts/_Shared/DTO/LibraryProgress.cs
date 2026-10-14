@@ -18,6 +18,7 @@ public record LibraryProgress
 
     public decimal Percentage =>
         IsComplete ? 100
+        : Items.Any(i => i.Total < 0) ? 0
         : Total == 0 ? 0
         : DataFormat.GetPercentage(Received, Total);
 

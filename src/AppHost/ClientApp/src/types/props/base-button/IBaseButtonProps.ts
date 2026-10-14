@@ -11,6 +11,7 @@ export interface IBaseButtonProps extends Record<string, unknown> {
 	vertical: boolean;
 	// Quasar native
 	label: string;
+	ariaLabel: string;
 	icon: string;
 	size: string | 'xs' | 'sm' | 'md' | 'lg' | 'xl';
 	flat: boolean;

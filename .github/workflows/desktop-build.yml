@@ -20,7 +20,7 @@ on:
                 type: boolean
                 default: false
             publish_release:
-                description: 'Publish/finalize the GitHub Release while uploading desktop assets'
+                description: 'Publish/finalize the GitHub Release after all desktop assets are uploaded'
                 required: false
                 type: boolean
                 default: false
@@ -191,10 +191,9 @@ jobs:
         timeout-minutes: 30
         strategy:
             fail-fast: false
-            # Release creation is verified above. Platform channels and asset names are
-            # disjoint, so non-publishing uploads can proceed two at a time. Keep
-            # publish-release serial because each invocation may finalize the release.
-            max-parallel: ${{ inputs.publish_release && 1 || 2 }}
+            # Uploads use disjoint asset names. Publishing is handled by the
+            # dependent publish-release job after every platform upload completes.
+            max-parallel: 2
             matrix:
                 include:
                     -   rid: win-x64
@@ -243,7 +242,6 @@ jobs:
             -   name: Upload installer to GitHub Release
                 shell: bash
                 env:
-                    PUBLISH_RELEASE: ${{ inputs.publish_release }}
                     GITHUB_TOKEN: ${{ secrets.RELEASE_GITHUB_TOKEN }}
                     RID: ${{ matrix.rid }}
                     VERSION: ${{ inputs.version }}
@@ -260,7 +258,44 @@ jobs:
                         --tag "v$VERSION"
                         --token "$GITHUB_TOKEN"
                     )
-                    if [[ "$PUBLISH_RELEASE" == 'true' ]]; then
-                        upload_args+=(--publish)
-                    fi
                     "${upload_args[@]}"
+
+    publish-release:
+        name: Publish GitHub Release
+        needs: [ upload-release ]
+        if: inputs.push && inputs.publish_release
+        runs-on: ubuntu-latest
+        permissions:
+            contents: write
+
+        steps:
+            -   name: Verify all desktop assets uploaded
+                shell: bash
+                env:
+                    GH_TOKEN: ${{ secrets.RELEASE_GITHUB_TOKEN }}
+                    RELEASE_TAG: v${{ inputs.version }}
+                run: |
+                    set -euo pipefail
+
+                    asset_names="$(gh release view "$RELEASE_TAG" \
+                        --repo "$GITHUB_REPOSITORY" \
+                        --json assets \
+                        --jq '.assets[].name')"
+
+                    if [[ -z "$asset_names" ]]; then
+                        echo "::error::Release $RELEASE_TAG has no uploaded desktop assets." >&2
+                        exit 1
+                    fi
+
+                    for rid in win-x64 win-arm64 linux-x64 linux-arm64 osx-x64 osx-arm64; do
+                        if ! grep -F -- "$rid" <<< "$asset_names" >/dev/null; then
+                            echo "::error::Release $RELEASE_TAG is missing desktop assets for $rid." >&2
+                            exit 1
+                        fi
+                    done
+            -   name: Publish GitHub Release after asset verification
+                shell: bash
+                env:
+                    GH_TOKEN: ${{ secrets.RELEASE_GITHUB_TOKEN }}
+                    RELEASE_TAG: v${{ inputs.version }}
+                run: gh release edit "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --draft=false

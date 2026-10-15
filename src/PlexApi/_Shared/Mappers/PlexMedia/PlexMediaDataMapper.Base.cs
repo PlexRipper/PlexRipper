@@ -35,19 +35,6 @@ public static partial class PlexMediaDataMapper
 
         return null;
     }
-    private static string? GetPlexApiIdentitySuffix(string? value, string entity)
-    {
-        if (string.IsNullOrWhiteSpace(value))
-            return null;
-
-        var identity = value.Trim();
-        var prefix = $"plex://{entity}/";
-        if (!identity.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
-            return null;
-
-        identity = identity[prefix.Length..].Trim();
-        return string.IsNullOrWhiteSpace(identity) ? null : identity.ToLowerInvariant();
-    }
 
     private static bool TryParseMusicBrainzId(string? value, out Guid musicBrainzId)
     {

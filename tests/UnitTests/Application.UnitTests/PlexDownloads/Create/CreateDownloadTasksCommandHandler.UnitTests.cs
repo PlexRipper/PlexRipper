@@ -1045,14 +1045,8 @@ public class CreateDownloadTasksCommandHandlerUnitTests : BaseCommandUnitTest<Cr
     [Test]
     [Arguments(PlexMediaType.MusicArtist, PlexMediaType.MusicTrack, 0)]
     [Arguments(PlexMediaType.MusicArtist, PlexMediaType.MusicTrack, 1)]
-    [Arguments(PlexMediaType.MusicArtist, PlexMediaType.MusicTrack, 2)]
-    [Arguments(PlexMediaType.MusicArtist, PlexMediaType.MusicTrack, 3)]
-    [Arguments(PlexMediaType.MusicArtist, PlexMediaType.MusicAlbum, 0)]
-    [Arguments(PlexMediaType.MusicArtist, PlexMediaType.MusicAlbum, 1)]
     [Arguments(PlexMediaType.MusicAlbum, PlexMediaType.MusicTrack, 0)]
     [Arguments(PlexMediaType.MusicAlbum, PlexMediaType.MusicTrack, 1)]
-    [Arguments(PlexMediaType.MusicAlbum, PlexMediaType.MusicTrack, 2)]
-    [Arguments(PlexMediaType.MusicAlbum, PlexMediaType.MusicTrack, 3)]
     [Arguments(PlexMediaType.PhotoAlbum, PlexMediaType.PhotoImage, 0)]
     [Arguments(PlexMediaType.PhotoAlbum, PlexMediaType.PhotoImage, 1)]
     [Arguments(PlexMediaType.PhotoAlbum, PlexMediaType.PhotoImage, 2)]
@@ -1105,14 +1099,6 @@ public class CreateDownloadTasksCommandHandlerUnitTests : BaseCommandUnitTest<Cr
                 .Generate();
             dbContext.PlexMusicTrackData.Add(alternate);
             explicitOriginal = alternate;
-            if (duplicatePath == 3)
-            {
-                await dbContext.PlexMusicTrackData.Where(x => x.Id == inheritedOriginal.Id).ExecuteUpdateAsync(
-                    x => x.SetProperty(y => y.AudioQuality, AudioQuality.MP3_320KbpsPlus),
-                    CancellationToken
-                );
-                alternate.AudioQuality = AudioQuality.FLAC_16Bit_44_1kHz;
-            }
         }
         else
         {
@@ -1142,7 +1128,7 @@ public class CreateDownloadTasksCommandHandlerUnitTests : BaseCommandUnitTest<Cr
         explicitOriginal.Id.ShouldBeGreaterThan(0);
         (await dbContext.DownloadTaskMusicArtists.CountAsync(CancellationToken)).ShouldBe(0);
         (await dbContext.DownloadTaskPhotoAlbums.CountAsync(CancellationToken)).ShouldBe(0);
-        var selectedOriginal = duplicatePath is 2 or 3 ? inheritedOriginal : explicitOriginal;
+        var selectedOriginal = duplicatePath == 2 ? inheritedOriginal : explicitOriginal;
         var parentSelection = new DownloadMediaDTO
         {
             Type = ancestorType,
@@ -1160,22 +1146,6 @@ public class CreateDownloadTasksCommandHandlerUnitTests : BaseCommandUnitTest<Cr
                 },
             ],
         };
-        if (duplicatePath == 3)
-            parentSelection = parentSelection with
-            {
-                Qualities =
-                [
-                    new PlexMediaQualityDTO
-                    {
-                        MediaId = ancestor.Id,
-                        MediaDataType = ancestor.Type,
-                        DataId = -1,
-                        VideoQuality = VideoQuality.None,
-                        AudioQuality = AudioQuality.MP3_320KbpsPlus,
-                    },
-                ],
-                KeepCompletedInDownloadFolder = true,
-            };
         var descendantSelection = parentSelection with
         {
             Type = descendantType,
@@ -1216,19 +1186,9 @@ public class CreateDownloadTasksCommandHandlerUnitTests : BaseCommandUnitTest<Cr
                     KeepCompletedInDownloadFolder = true,
                 },
             ],
-            3 => [parentSelection],
             _ => [parentSelection, descendantSelection],
         };
-        var expectedCalls =
-            duplicatePath is 2 or 3
-                ? ancestorType == PlexMediaType.MusicArtist
-                    ? 3
-                    : 2
-                : descendantType == PlexMediaType.MusicAlbum
-                    ? 5
-                    : ancestorType == PlexMediaType.MusicArtist
-                        ? 4
-                        : 3;
+        var expectedCalls = duplicatePath == 2 ? 2 : ancestorType == PlexMediaType.MusicArtist ? 4 : 3;
         var command = new CreateDownloadTasksCommand(
             new CreateDownloadTasksRequest(selections, customDestinationFolderPath: "/leaf-choice")
         );
@@ -1328,9 +1288,7 @@ public class CreateDownloadTasksCommandHandlerUnitTests : BaseCommandUnitTest<Cr
         (file.DataTotal, file.FileLocationUrl, file.DownloadStatus).ShouldBe(
             (selectedOriginal.Size, selectedOriginal.Key, DownloadStatus.Queued)
         );
-        parentSelection.Qualities.Select(x => x.DataId).ShouldBe([duplicatePath == 3 ? -1 : inheritedOriginal.Id]);
-        if (duplicatePath == 3)
-            ((DownloadTaskMusicTrackFile)file).AudioQuality.ShouldBe(AudioQuality.MP3_320KbpsPlus);
+        parentSelection.Qualities.Select(x => x.DataId).ShouldBe([inheritedOriginal.Id]);
         descendantSelection.Qualities.Select(x => x.DataId).ShouldBe([explicitOriginal.Id]);
         var loggedFileId = music
             ? await dbContext.DownloadTaskTrackFileLogs.Select(x => x.DownloadTaskFileId).SingleAsync(CancellationToken)

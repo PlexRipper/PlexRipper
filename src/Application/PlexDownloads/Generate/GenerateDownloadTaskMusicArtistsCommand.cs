@@ -126,7 +126,7 @@ public class GenerateDownloadTaskMusicArtistsCommandHandler
                             PlexServerId = album.PlexServerId,
                             PlexLibraryId = album.PlexLibraryId,
                             MediaIds = [album.Id],
-                            Qualities = directAlbum?.Qualities.Count > 0 ? directAlbum.Qualities : selection.Qualities,
+                            Qualities = directAlbum?.Qualities ?? [],
                             KeepCompletedInDownloadFolder =
                                 directAlbum?.KeepCompletedInDownloadFolder ?? selection.KeepCompletedInDownloadFolder,
                         }

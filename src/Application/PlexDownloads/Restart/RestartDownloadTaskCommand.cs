@@ -471,10 +471,12 @@ public class RestartDownloadTaskCommandHandler : ICommandHandler<RestartDownload
                 x.Key,
                 x.Size,
                 Quality = x.VideoResolution,
+                x.AudioQuality,
                 MusicArtistFolder = x.PlexTrack.PlexAlbum!.PlexArtist!.Title.SanitizeFolderName(),
                 MusicAlbumFolder = x.PlexTrack.PlexAlbum.Title.SanitizeFolderName(),
             })
             .FirstOrDefaultAsync(cancellationToken);
+
         if (source is null)
         {
             await _downloadTaskUpdateDispatcher.OnStatusChangedAsync(
@@ -506,6 +508,7 @@ public class RestartDownloadTaskCommandHandler : ICommandHandler<RestartDownload
                     source.FileName,
                     FileLocationUrl = source.Key,
                     source.Quality,
+                    source.AudioQuality,
                     DataReceived = 0L,
                     DownloadSpeed = 0L,
                     DownloadClientType = PlexDownloadClientType.Direct,

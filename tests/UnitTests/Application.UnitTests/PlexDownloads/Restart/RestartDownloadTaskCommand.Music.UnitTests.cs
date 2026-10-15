@@ -40,7 +40,7 @@ public class RestartDownloadTaskCommandMusicUnitTests : BaseCommandUnitTest<Rest
             .ToArrayAsync(CancellationToken);
         DownloadTaskFileBase target = musicFiles[0];
         DownloadTaskFileBase retained = musicFiles[1];
-        BasePlexMediaData source = await dbContext
+        PlexMusicTrackMediaData source = await dbContext
             .PlexMusicTrackData.Include(x => x.PlexTrack)
                 .ThenInclude(x => x!.PlexAlbum)
                     .ThenInclude(x => x!.PlexArtist)
@@ -67,6 +67,7 @@ public class RestartDownloadTaskCommandMusicUnitTests : BaseCommandUnitTest<Rest
                     Percentage = 50m,
                     HashId = "retained-hash",
                     DownloadClientType = PlexDownloadClientType.Direct,
+                    AudioQuality = AudioQuality.None,
                 }
             );
         target.DirectoryMeta.KeepCompletedInDownloadFolder = true;
@@ -122,6 +123,7 @@ public class RestartDownloadTaskCommandMusicUnitTests : BaseCommandUnitTest<Rest
         after.Percentage.ShouldBe(sourceMissing ? 50 : 0);
         after.HashId.ShouldBe("retained-hash");
         after.DownloadClientType.ShouldBe(PlexDownloadClientType.Direct);
+        ((DownloadTaskMusicTrackFile)after).AudioQuality.ShouldBe(sourceMissing ? AudioQuality.None : source.AudioQuality);
         after.DirectoryMeta.DownloadRootPath.ShouldBe(before.DirectoryMeta.DownloadRootPath);
         after.DirectoryMeta.DestinationRootPath.ShouldBe(before.DirectoryMeta.DestinationRootPath);
         after.DirectoryMeta.KeepCompletedInDownloadFolder.ShouldBeTrue();

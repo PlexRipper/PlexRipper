@@ -204,12 +204,17 @@ jobs:
                     path: ~/.cache/Cypress
                     key: ${{ runner.os }}-cypress-${{ hashFiles('**/package.json') }}
                     restore-keys: ${{ runner.os }}-cypress-
+            -   name: Setup pinned Chrome
+                id: chrome
+                uses: browser-actions/setup-chrome@v2
+                with:
+                    chrome-version: '155.0.8059.39'
             -   name: Run Cypress tests
                 uses: cypress-io/github-action@v7.4.3
                 with:
                     install: false
                     record: true
-                    browser: chrome
+                    browser: ${{ steps.chrome.outputs.chrome-path }}
                     start: bun run static-server
                     parallel: true
                     working-directory: ./src/AppHost/ClientApp/

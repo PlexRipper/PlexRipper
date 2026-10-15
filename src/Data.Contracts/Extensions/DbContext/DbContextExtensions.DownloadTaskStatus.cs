@@ -162,7 +162,6 @@ public static partial class DbContextExtensions
 
                     // The DownloadStatus here is determined by PlexDownloadClient and the MoveDownloadFileJob
                     case DownloadTaskType.MovieData:
-                    case DownloadTaskType.MoviePart:
                     {
                         var movieDataParentId = currentParentKey.Id;
 
@@ -175,7 +174,6 @@ public static partial class DbContextExtensions
 
                     // The DownloadStatus here is determined by PlexDownloadClient and the MoveDownloadFileJob
                     case DownloadTaskType.EpisodeData:
-                    case DownloadTaskType.EpisodePart:
                     {
                         var episodeDataParentId = currentParentKey.Id;
 
@@ -230,7 +228,6 @@ public static partial class DbContextExtensions
                         break;
                     }
                     case DownloadTaskType.PhotoData:
-                    case DownloadTaskType.PhotoPart:
                     {
                         var fileId = currentParentKey.Id;
                         parentKey = await dbContext
@@ -310,7 +307,6 @@ public static partial class DbContextExtensions
                         break;
                     }
                     case DownloadTaskType.MusicTrackData:
-                    case DownloadTaskType.MusicTrackPart:
                         parentKey = await dbContext
                             .DownloadTaskMusicTrackFiles.Where(x => x.Id == currentParentKey.Id)
                             .ProjectToParentKey()
@@ -337,7 +333,6 @@ public static partial class DbContextExtensions
                         break;
                     }
                     case DownloadTaskType.OtherVideoData:
-                    case DownloadTaskType.OtherVideoPart:
                         parentKey = await dbContext
                             .DownloadTaskOtherVideoFiles.Where(x => x.Id == currentParentKey.Id)
                             .ProjectToParentKey()
@@ -384,7 +379,6 @@ public static partial class DbContextExtensions
                     .ExecuteUpdateAsync(p => p.SetProperty(x => x.DownloadStatus, status), CancellationToken.None);
                 break;
             case DownloadTaskType.MovieData:
-            case DownloadTaskType.MoviePart:
                 await dbContext
                     .DownloadTaskMovieFile.Where(x => x.Id == key.Id)
                     .ExecuteUpdateAsync(p => p.SetProperty(x => x.DownloadStatus, status), CancellationToken.None);
@@ -405,7 +399,6 @@ public static partial class DbContextExtensions
                     .ExecuteUpdateAsync(p => p.SetProperty(x => x.DownloadStatus, status), CancellationToken.None);
                 break;
             case DownloadTaskType.EpisodeData:
-            case DownloadTaskType.EpisodePart:
                 await dbContext
                     .DownloadTaskTvShowEpisodeFile.Where(x => x.Id == key.Id)
                     .ExecuteUpdateAsync(p => p.SetProperty(x => x.DownloadStatus, status), CancellationToken.None);
@@ -421,7 +414,6 @@ public static partial class DbContextExtensions
                     .ExecuteUpdateAsync(p => p.SetProperty(x => x.DownloadStatus, status), CancellationToken.None);
                 break;
             case DownloadTaskType.PhotoData:
-            case DownloadTaskType.PhotoPart:
                 await dbContext
                     .DownloadTaskPhotoImageFiles.Where(x => x.Id == key.Id)
                     .ExecuteUpdateAsync(p => p.SetProperty(x => x.DownloadStatus, status), CancellationToken.None);
@@ -442,7 +434,6 @@ public static partial class DbContextExtensions
                     .ExecuteUpdateAsync(p => p.SetProperty(x => x.DownloadStatus, status), CancellationToken.None);
                 break;
             case DownloadTaskType.MusicTrackData:
-            case DownloadTaskType.MusicTrackPart:
                 await dbContext
                     .DownloadTaskMusicTrackFiles.Where(x => x.Id == key.Id)
                     .ExecuteUpdateAsync(p => p.SetProperty(x => x.DownloadStatus, status), CancellationToken.None);
@@ -453,7 +444,6 @@ public static partial class DbContextExtensions
                     .ExecuteUpdateAsync(p => p.SetProperty(x => x.DownloadStatus, status), CancellationToken.None);
                 break;
             case DownloadTaskType.OtherVideoData:
-            case DownloadTaskType.OtherVideoPart:
                 await dbContext
                     .DownloadTaskOtherVideoFiles.Where(x => x.Id == key.Id)
                     .ExecuteUpdateAsync(p => p.SetProperty(x => x.DownloadStatus, status), CancellationToken.None);
@@ -476,7 +466,6 @@ public static partial class DbContextExtensions
                     .Select(x => (DownloadStatus?)x.DownloadStatus)
                     .FirstOrDefaultAsync(CancellationToken.None);
             case DownloadTaskType.MovieData:
-            case DownloadTaskType.MoviePart:
                 return await dbContext
                     .DownloadTaskMovieFile.Where(x => x.Id == key.Id)
                     .Select(x => (DownloadStatus?)x.DownloadStatus)
@@ -497,7 +486,6 @@ public static partial class DbContextExtensions
                     .Select(x => (DownloadStatus?)x.DownloadStatus)
                     .FirstOrDefaultAsync(CancellationToken.None);
             case DownloadTaskType.EpisodeData:
-            case DownloadTaskType.EpisodePart:
                 return await dbContext
                     .DownloadTaskTvShowEpisodeFile.Where(x => x.Id == key.Id)
                     .Select(x => (DownloadStatus?)x.DownloadStatus)
@@ -513,7 +501,6 @@ public static partial class DbContextExtensions
                     .Select(x => (DownloadStatus?)x.DownloadStatus)
                     .FirstOrDefaultAsync(CancellationToken.None);
             case DownloadTaskType.PhotoData:
-            case DownloadTaskType.PhotoPart:
                 return await dbContext
                     .DownloadTaskPhotoImageFiles.Where(x => x.Id == key.Id)
                     .Select(x => (DownloadStatus?)x.DownloadStatus)
@@ -534,7 +521,6 @@ public static partial class DbContextExtensions
                     .Select(x => (DownloadStatus?)x.DownloadStatus)
                     .FirstOrDefaultAsync(CancellationToken.None);
             case DownloadTaskType.MusicTrackData:
-            case DownloadTaskType.MusicTrackPart:
                 return await dbContext
                     .DownloadTaskMusicTrackFiles.Where(x => x.Id == key.Id)
                     .Select(x => (DownloadStatus?)x.DownloadStatus)
@@ -545,7 +531,6 @@ public static partial class DbContextExtensions
                     .Select(x => (DownloadStatus?)x.DownloadStatus)
                     .FirstOrDefaultAsync(CancellationToken.None);
             case DownloadTaskType.OtherVideoData:
-            case DownloadTaskType.OtherVideoPart:
                 return await dbContext
                     .DownloadTaskOtherVideoFiles.Where(x => x.Id == key.Id)
                     .Select(x => (DownloadStatus?)x.DownloadStatus)

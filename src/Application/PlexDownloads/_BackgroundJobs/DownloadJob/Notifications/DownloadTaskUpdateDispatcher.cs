@@ -700,7 +700,7 @@ public class DownloadTaskUpdateDispatcher : BackgroundService, IDownloadTaskUpda
                 .DownloadTaskMovie.Where(x => x.Id == key.Id)
                 .Select(x => x.Title)
                 .FirstOrDefaultAsync(cancellationToken),
-            DownloadTaskType.MovieData or DownloadTaskType.MoviePart => await dbContext
+            DownloadTaskType.MovieData => await dbContext
                 .DownloadTaskMovieFile.Where(x => x.Id == key.Id)
                 .Select(x => x.FileName)
                 .FirstOrDefaultAsync(cancellationToken),
@@ -716,7 +716,7 @@ public class DownloadTaskUpdateDispatcher : BackgroundService, IDownloadTaskUpda
                 .DownloadTaskTvShowEpisode.Where(x => x.Id == key.Id)
                 .Select(x => x.Title)
                 .FirstOrDefaultAsync(cancellationToken),
-            DownloadTaskType.EpisodeData or DownloadTaskType.EpisodePart => await dbContext
+            DownloadTaskType.EpisodeData => await dbContext
                 .DownloadTaskTvShowEpisodeFile.Where(x => x.Id == key.Id)
                 .Select(x => x.FileName)
                 .FirstOrDefaultAsync(cancellationToken),
@@ -728,7 +728,7 @@ public class DownloadTaskUpdateDispatcher : BackgroundService, IDownloadTaskUpda
                 .DownloadTaskPhotoImages.Where(x => x.Id == key.Id)
                 .Select(x => x.Title)
                 .FirstOrDefaultAsync(cancellationToken),
-            DownloadTaskType.PhotoData or DownloadTaskType.PhotoPart => await dbContext
+            DownloadTaskType.PhotoData => await dbContext
                 .DownloadTaskPhotoImageFiles.Where(x => x.Id == key.Id)
                 .Select(x => x.FileName)
                 .FirstOrDefaultAsync(cancellationToken),
@@ -744,7 +744,7 @@ public class DownloadTaskUpdateDispatcher : BackgroundService, IDownloadTaskUpda
                 .DownloadTaskMusicTracks.Where(x => x.Id == key.Id)
                 .Select(x => x.Title)
                 .FirstOrDefaultAsync(cancellationToken),
-            DownloadTaskType.MusicTrackData or DownloadTaskType.MusicTrackPart => await dbContext
+            DownloadTaskType.MusicTrackData => await dbContext
                 .DownloadTaskMusicTrackFiles.Where(x => x.Id == key.Id)
                 .Select(x => x.FileName)
                 .FirstOrDefaultAsync(cancellationToken),
@@ -752,7 +752,7 @@ public class DownloadTaskUpdateDispatcher : BackgroundService, IDownloadTaskUpda
                 .DownloadTaskOtherVideos.Where(x => x.Id == key.Id)
                 .Select(x => x.Title)
                 .FirstOrDefaultAsync(cancellationToken),
-            DownloadTaskType.OtherVideoData or DownloadTaskType.OtherVideoPart => await dbContext
+            DownloadTaskType.OtherVideoData => await dbContext
                 .DownloadTaskOtherVideoFiles.Where(x => x.Id == key.Id)
                 .Select(x => x.FileName)
                 .FirstOrDefaultAsync(cancellationToken),

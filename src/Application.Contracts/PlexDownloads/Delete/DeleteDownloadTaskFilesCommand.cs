@@ -6,6 +6,8 @@ namespace Reaparr.Application.Contracts;
 /// and Reaparr receives a delete-torrent request with <c>deleteFiles=true</c> for tasks that are
 /// not actively downloading/moving. Those non-active tasks are deleted without stop semantics,
 /// so this command explicitly removes files that may still be present in the download directory.
-/// Only file-type keys (<see cref="DownloadTaskType.MovieData"/>, <see cref="DownloadTaskType.MoviePart"/>,
+/// Only file-type keys (<see cref="DownloadTaskType.MovieData"/>, <see cref="DownloadTaskType.EpisodeData"/>,
+/// <see cref="DownloadTaskType.MusicTrackData"/>, <see cref="DownloadTaskType.PhotoData"/>, and
+/// <see cref="DownloadTaskType.OtherVideoData"/> are supported.
 /// </summary>
 public record DeleteDownloadTaskFilesCommand(List<DownloadTaskKey> Keys) : ICommand<Result>;

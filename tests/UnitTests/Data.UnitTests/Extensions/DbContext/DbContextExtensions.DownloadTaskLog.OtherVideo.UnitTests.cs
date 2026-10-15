@@ -4,7 +4,6 @@ public class DbContextExtensionsDownloadTaskLogOtherVideoUnitTests : BaseUnitTes
 {
     [Test]
     [Arguments(DownloadTaskType.OtherVideoData)]
-    [Arguments(DownloadTaskType.OtherVideoPart)]
     public async Task ShouldPersistOtherVideoLogWithParentId_WhenMovieLogUsesTheSameId(DownloadTaskType type)
     {
         // Arrange
@@ -41,7 +40,6 @@ public class DbContextExtensionsDownloadTaskLogOtherVideoUnitTests : BaseUnitTes
     [Arguments(DownloadTaskType.OtherVideo, false)]
     [Arguments(DownloadTaskType.OtherVideo, true)]
     [Arguments(DownloadTaskType.OtherVideoData, false)]
-    [Arguments(DownloadTaskType.OtherVideoPart, false)]
     public async Task ShouldReturnOrderedOtherVideoLogsForRequestedScope_WhenSiblingLogsExist(DownloadTaskType type, bool incremental)
     {
         // Arrange
@@ -80,7 +78,6 @@ public class DbContextExtensionsDownloadTaskLogOtherVideoUnitTests : BaseUnitTes
     [Test]
     [Arguments(DownloadTaskType.OtherVideo)]
     [Arguments(DownloadTaskType.OtherVideoData)]
-    [Arguments(DownloadTaskType.OtherVideoPart)]
     public async Task ShouldDeleteOnlyRequestedOtherVideoLogs_WhenSiblingLogsExist(DownloadTaskType type)
     {
         // Arrange

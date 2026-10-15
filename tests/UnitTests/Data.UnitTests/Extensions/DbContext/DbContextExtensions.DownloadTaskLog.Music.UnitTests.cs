@@ -4,7 +4,6 @@ public class DbContextExtensionsDownloadTaskLogMusicUnitTests : BaseUnitTest
 {
     [Test]
     [Arguments(DownloadTaskType.MusicTrackData)]
-    [Arguments(DownloadTaskType.MusicTrackPart)]
     public async Task ShouldPersistMusicLogWithAncestorIds_WhenMovieLogUsesTheSameId(DownloadTaskType type)
     {
         // Arrange
@@ -68,7 +67,6 @@ public class DbContextExtensionsDownloadTaskLogMusicUnitTests : BaseUnitTest
     [Arguments(DownloadTaskType.MusicAlbum, false)]
     [Arguments(DownloadTaskType.MusicTrack, false)]
     [Arguments(DownloadTaskType.MusicTrackData, false)]
-    [Arguments(DownloadTaskType.MusicTrackPart, false)]
     public async Task ShouldReturnOrderedMusicLogsForRequestedScope_WhenSiblingLogsExist(
         DownloadTaskType type,
         bool incremental
@@ -139,7 +137,6 @@ public class DbContextExtensionsDownloadTaskLogMusicUnitTests : BaseUnitTest
     [Arguments(DownloadTaskType.MusicAlbum)]
     [Arguments(DownloadTaskType.MusicTrack)]
     [Arguments(DownloadTaskType.MusicTrackData)]
-    [Arguments(DownloadTaskType.MusicTrackPart)]
     public async Task ShouldDeleteOnlyRequestedMusicLogs_WhenSiblingLogsExist(DownloadTaskType type)
     {
         // Arrange

@@ -115,7 +115,6 @@ public class DbContextExtensionsDownloadTasksPhotoUnitTests : BaseUnitTest
 
     [Test]
     [Arguments(DownloadTaskType.PhotoData)]
-    [Arguments(DownloadTaskType.PhotoPart)]
     public async Task ShouldAggregateFileStatusThroughImageAndAlbum_WithoutChangingOtherAlbums(DownloadTaskType type)
     {
         var seed = await SetupDatabase(62403, config => config.PlexPhotoLibraryCount = 1);
@@ -142,7 +141,6 @@ public class DbContextExtensionsDownloadTasksPhotoUnitTests : BaseUnitTest
 
     [Test]
     [Arguments(DownloadTaskType.PhotoData)]
-    [Arguments(DownloadTaskType.PhotoPart)]
     public async Task ShouldPersistTransferAndResetPhotoProgress_WithoutLosingSourceOrParent(DownloadTaskType type)
     {
         var seed = await SetupDatabase(62404, config => config.PlexPhotoLibraryCount = 1);

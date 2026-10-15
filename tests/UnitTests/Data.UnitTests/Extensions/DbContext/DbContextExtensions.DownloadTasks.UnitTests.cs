@@ -242,9 +242,7 @@ public class DbContextExtensionsDownloadTasksUnitTests : BaseUnitTest
 
     [Test]
     [Arguments(DownloadTaskType.MusicTrackData)]
-    [Arguments(DownloadTaskType.MusicTrackPart)]
     [Arguments(DownloadTaskType.OtherVideoData)]
-    [Arguments(DownloadTaskType.OtherVideoPart)]
     public async Task ShouldPersistOnlySelectedFileState_WhenSettingNewMediaStatus(DownloadTaskType type)
     {
         // Arrange
@@ -263,7 +261,7 @@ public class DbContextExtensionsDownloadTasksUnitTests : BaseUnitTest
             }
         );
         var dbContext = IDbContext;
-        var music = type is DownloadTaskType.MusicTrackData or DownloadTaskType.MusicTrackPart;
+        var music = type is DownloadTaskType.MusicTrackData;
         var musicFiles = await dbContext
             .DownloadTaskMusicTrackFiles.OrderBy(x => x.PlexApiRatingKey)
             .ToArrayAsync(CancellationToken);
@@ -289,9 +287,7 @@ public class DbContextExtensionsDownloadTasksUnitTests : BaseUnitTest
 
     [Test]
     [Arguments(DownloadTaskType.MusicTrackData)]
-    [Arguments(DownloadTaskType.MusicTrackPart)]
     [Arguments(DownloadTaskType.OtherVideoData)]
-    [Arguments(DownloadTaskType.OtherVideoPart)]
     public async Task ShouldPersistOnlySelectedFileAndAggregateItsAncestors_WhenUpdatingNewMediaProgress(
         DownloadTaskType type
     )
@@ -312,7 +308,7 @@ public class DbContextExtensionsDownloadTasksUnitTests : BaseUnitTest
             }
         );
         var dbContext = IDbContext;
-        var music = type is DownloadTaskType.MusicTrackData or DownloadTaskType.MusicTrackPart;
+        var music = type is DownloadTaskType.MusicTrackData;
         var musicFiles = await dbContext
             .DownloadTaskMusicTrackFiles.Include(x => x.Parent)
                 .ThenInclude(x => x!.Parent)
@@ -539,9 +535,9 @@ public class DbContextExtensionsDownloadTasksUnitTests : BaseUnitTest
     }
 
     [Test]
-    [Arguments(DownloadTaskType.MoviePart)]
-    [Arguments(DownloadTaskType.EpisodePart)]
-    public async Task ShouldPersistOnlySelectedPartStatus_WhenSettingStatus(DownloadTaskType type)
+    [Arguments(DownloadTaskType.MovieData)]
+    [Arguments(DownloadTaskType.EpisodeData)]
+    public async Task ShouldPersistOnlySelectedFileStatus_WhenSettingStatus(DownloadTaskType type)
     {
         // Arrange
         await SetupDatabase(
@@ -556,7 +552,7 @@ public class DbContextExtensionsDownloadTasksUnitTests : BaseUnitTest
         );
         using var dbContext = IDbContext;
         DownloadTaskFileBase target =
-            type == DownloadTaskType.MoviePart
+            type == DownloadTaskType.MovieData
                 ? await dbContext.DownloadTaskMovieFile.OrderBy(x => x.Id).FirstAsync(CancellationToken)
                 : await dbContext.DownloadTaskTvShowEpisodeFile.OrderBy(x => x.Id).FirstAsync(CancellationToken);
         var statuses = dbContext

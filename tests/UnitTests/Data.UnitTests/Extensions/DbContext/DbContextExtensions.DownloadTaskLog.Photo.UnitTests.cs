@@ -4,7 +4,6 @@ public class DbContextExtensionsDownloadTaskLogPhotoUnitTests : BaseUnitTest
 {
     [Test]
     [Arguments(DownloadTaskType.PhotoData)]
-    [Arguments(DownloadTaskType.PhotoPart)]
     public async Task ShouldPersistPhotoLogWithParentId_WhenMovieLogUsesTheSameId(DownloadTaskType type)
     {
         // Arrange
@@ -60,7 +59,6 @@ public class DbContextExtensionsDownloadTaskLogPhotoUnitTests : BaseUnitTest
     [Arguments(DownloadTaskType.PhotoImage, false)]
     [Arguments(DownloadTaskType.PhotoImage, true)]
     [Arguments(DownloadTaskType.PhotoData, false)]
-    [Arguments(DownloadTaskType.PhotoPart, false)]
     public async Task ShouldReturnOrderedPhotoLogsForRequestedScope_WhenSiblingLogsExist(
         DownloadTaskType type,
         bool incremental
@@ -113,7 +111,6 @@ public class DbContextExtensionsDownloadTaskLogPhotoUnitTests : BaseUnitTest
     [Arguments(DownloadTaskType.PhotoAlbum)]
     [Arguments(DownloadTaskType.PhotoImage)]
     [Arguments(DownloadTaskType.PhotoData)]
-    [Arguments(DownloadTaskType.PhotoPart)]
     public async Task ShouldDeleteOnlyRequestedPhotoLogs_WhenSiblingLogsExist(DownloadTaskType type)
     {
         // Arrange

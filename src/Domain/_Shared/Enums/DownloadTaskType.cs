@@ -3,13 +3,12 @@
 [JsonConverter(typeof(JsonStringEnumConverter))]
 public enum DownloadTaskType
 {
-    // NOTE: Make sure the indexes are correct, 1,2,3,4,5 etc. and that there is no skip in between
-    // Otherwise the TypeScript DTO translator in the front-end starts messing up
+    // NOTE: Keep these values contiguous. The TypeScript DTO translator depends on the ordering.
     [JsonStringEnumMemberName(nameof(None))]
     None = 0,
 
     /// <summary>
-    /// Functions as a wrapper for a MovieData and MoviePart <see cref="DownloadTaskGeneric"/>.
+    /// Functions as a wrapper for a MovieData <see cref="DownloadTaskGeneric"/>.
     /// </summary>
     [JsonStringEnumMemberName(nameof(Movie))]
     Movie = 1,
@@ -21,60 +20,42 @@ public enum DownloadTaskType
     [JsonStringEnumMemberName(nameof(MovieData))]
     MovieData = 2,
 
-    /// <summary>
-    /// A movie that consists of multiple file parts where each file part is a movie part.
-    /// </summary>
-    [JsonStringEnumMemberName(nameof(MoviePart))]
-    MoviePart = 3, // TODO Parts can most likely be removed in the future, as they are not used in the current implementation. The MovieData type is used instead.
-
     [JsonStringEnumMemberName(nameof(TvShow))]
-    TvShow = 4,
+    TvShow = 3,
 
     [JsonStringEnumMemberName(nameof(Season))]
-    Season = 5,
+    Season = 4,
 
     [JsonStringEnumMemberName(nameof(Episode))]
-    Episode = 6,
+    Episode = 5,
 
     [JsonStringEnumMemberName(nameof(EpisodeData))]
-    EpisodeData = 7,
-
-    [JsonStringEnumMemberName(nameof(EpisodePart))]
-    EpisodePart = 8,
+    EpisodeData = 6,
 
     [JsonStringEnumMemberName(nameof(MusicArtist))]
-    MusicArtist = 9,
+    MusicArtist = 7,
 
     [JsonStringEnumMemberName(nameof(MusicAlbum))]
-    MusicAlbum = 10,
+    MusicAlbum = 8,
 
     [JsonStringEnumMemberName(nameof(MusicTrack))]
-    MusicTrack = 11,
+    MusicTrack = 9,
 
     [JsonStringEnumMemberName(nameof(MusicTrackData))]
-    MusicTrackData = 12,
-
-    [JsonStringEnumMemberName(nameof(MusicTrackPart))]
-    MusicTrackPart = 13,
+    MusicTrackData = 10,
 
     [JsonStringEnumMemberName(nameof(PhotoAlbum))]
-    PhotoAlbum = 14,
+    PhotoAlbum = 11,
 
     [JsonStringEnumMemberName(nameof(PhotoImage))]
-    PhotoImage = 15,
+    PhotoImage = 12,
 
     [JsonStringEnumMemberName(nameof(PhotoData))]
-    PhotoData = 16,
-
-    [JsonStringEnumMemberName(nameof(PhotoPart))]
-    PhotoPart = 17,
+    PhotoData = 13,
 
     [JsonStringEnumMemberName(nameof(OtherVideo))]
-    OtherVideo = 18,
+    OtherVideo = 14,
 
     [JsonStringEnumMemberName(nameof(OtherVideoData))]
-    OtherVideoData = 19,
-
-    [JsonStringEnumMemberName(nameof(OtherVideoPart))]
-    OtherVideoPart = 20,
+    OtherVideoData = 15,
 }

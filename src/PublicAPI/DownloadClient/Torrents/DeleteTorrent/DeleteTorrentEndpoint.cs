@@ -185,12 +185,12 @@ public sealed class DeleteTorrentEndpoint : Endpoint<DeleteTorrentRequest>
     )
     {
         var movieFileIds = leafKeys
-            .Where(k => k.Type is DownloadTaskType.MovieData or DownloadTaskType.MoviePart)
+            .Where(k => k.Type is DownloadTaskType.MovieData)
             .Select(k => k.Id)
             .ToList();
 
         var episodeFileIds = leafKeys
-            .Where(k => k.Type is DownloadTaskType.EpisodeData or DownloadTaskType.EpisodePart)
+            .Where(k => k.Type is DownloadTaskType.EpisodeData)
             .Select(k => k.Id)
             .ToList();
 
@@ -215,7 +215,7 @@ public sealed class DeleteTorrentEndpoint : Endpoint<DeleteTorrentRequest>
         if (episodeFileIds.Count > 0)
         {
             var episodeLeafKeys = leafKeys.Where(k =>
-                k.Type is DownloadTaskType.EpisodeData or DownloadTaskType.EpisodePart
+                k.Type is DownloadTaskType.EpisodeData
             );
             foreach (var episodeLeafKey in episodeLeafKeys)
             {

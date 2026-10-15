@@ -9,24 +9,19 @@ public static partial class EnumMapperExtensions
         ["None"] = DownloadTaskType.None,
         ["Movie"] = DownloadTaskType.Movie,
         ["MovieData"] = DownloadTaskType.MovieData,
-        ["MoviePart"] = DownloadTaskType.MoviePart,
         ["TvShow"] = DownloadTaskType.TvShow,
         ["Season"] = DownloadTaskType.Season,
         ["Episode"] = DownloadTaskType.Episode,
         ["EpisodeData"] = DownloadTaskType.EpisodeData,
-        ["EpisodePart"] = DownloadTaskType.EpisodePart,
         ["Artist"] = DownloadTaskType.MusicArtist,
         ["Album"] = DownloadTaskType.MusicAlbum,
         ["Track"] = DownloadTaskType.MusicTrack,
         ["TrackData"] = DownloadTaskType.MusicTrackData,
-        ["TrackPart"] = DownloadTaskType.MusicTrackPart,
         ["PhotoAlbum"] = DownloadTaskType.PhotoAlbum,
         ["PhotoImage"] = DownloadTaskType.PhotoImage,
         ["PhotoData"] = DownloadTaskType.PhotoData,
-        ["PhotoPart"] = DownloadTaskType.PhotoPart,
         ["OtherVideo"] = DownloadTaskType.OtherVideo,
         ["OtherVideoData"] = DownloadTaskType.OtherVideoData,
-        ["OtherVideoPart"] = DownloadTaskType.OtherVideoPart,
     };
 
     /// <summary>
@@ -62,24 +57,19 @@ public static partial class EnumMapperExtensions
             DownloadTaskType.None => "None",
             DownloadTaskType.Movie => "Movie",
             DownloadTaskType.MovieData => "MovieData",
-            DownloadTaskType.MoviePart => "MoviePart",
             DownloadTaskType.TvShow => "TvShow",
             DownloadTaskType.Season => "Season",
             DownloadTaskType.Episode => "Episode",
             DownloadTaskType.EpisodeData => "EpisodeData",
-            DownloadTaskType.EpisodePart => "EpisodePart",
             DownloadTaskType.MusicArtist => "Artist",
             DownloadTaskType.MusicAlbum => "Album",
             DownloadTaskType.MusicTrack => "Track",
             DownloadTaskType.MusicTrackData => "TrackData",
-            DownloadTaskType.MusicTrackPart => "TrackPart",
             DownloadTaskType.PhotoAlbum => "PhotoAlbum",
             DownloadTaskType.PhotoImage => "PhotoImage",
             DownloadTaskType.PhotoData => "PhotoData",
-            DownloadTaskType.PhotoPart => "PhotoPart",
             DownloadTaskType.OtherVideo => "OtherVideo",
             DownloadTaskType.OtherVideoData => "OtherVideoData",
-            DownloadTaskType.OtherVideoPart => "OtherVideoPart",
             _ => DefaultException(),
         };
 
@@ -111,15 +101,10 @@ public static partial class EnumMapperExtensions
             or DownloadTaskType.None => false,
 
             DownloadTaskType.MovieData
-            or DownloadTaskType.MoviePart
             or DownloadTaskType.EpisodeData
-            or DownloadTaskType.EpisodePart
             or DownloadTaskType.MusicTrackData
-            or DownloadTaskType.MusicTrackPart
             or DownloadTaskType.PhotoData
-            or DownloadTaskType.PhotoPart
-            or DownloadTaskType.OtherVideoData
-            or DownloadTaskType.OtherVideoPart => true,
+            or DownloadTaskType.OtherVideoData => true,
             var _ => throw new ArgumentOutOfRangeException(nameof(value), value, null),
         };
 
@@ -127,20 +112,16 @@ public static partial class EnumMapperExtensions
     {
         return value switch
         {
-            DownloadTaskType.Movie or DownloadTaskType.MovieData or DownloadTaskType.MoviePart => PlexMediaType.Movie,
+            DownloadTaskType.Movie or DownloadTaskType.MovieData => PlexMediaType.Movie,
             DownloadTaskType.TvShow => PlexMediaType.TvShow,
             DownloadTaskType.Season => PlexMediaType.Season,
-            DownloadTaskType.Episode or DownloadTaskType.EpisodeData or DownloadTaskType.EpisodePart =>
-                PlexMediaType.Episode,
+            DownloadTaskType.Episode or DownloadTaskType.EpisodeData => PlexMediaType.Episode,
             DownloadTaskType.MusicArtist => PlexMediaType.MusicArtist,
             DownloadTaskType.MusicAlbum => PlexMediaType.MusicAlbum,
-            DownloadTaskType.MusicTrack or DownloadTaskType.MusicTrackData or DownloadTaskType.MusicTrackPart =>
-                PlexMediaType.MusicTrack,
+            DownloadTaskType.MusicTrack or DownloadTaskType.MusicTrackData => PlexMediaType.MusicTrack,
             DownloadTaskType.PhotoAlbum => PlexMediaType.PhotoAlbum,
-            DownloadTaskType.PhotoImage or DownloadTaskType.PhotoData or DownloadTaskType.PhotoPart =>
-                PlexMediaType.PhotoImage,
-            DownloadTaskType.OtherVideo or DownloadTaskType.OtherVideoData or DownloadTaskType.OtherVideoPart =>
-                PlexMediaType.OtherVideos,
+            DownloadTaskType.PhotoImage or DownloadTaskType.PhotoData => PlexMediaType.PhotoImage,
+            DownloadTaskType.OtherVideo or DownloadTaskType.OtherVideoData => PlexMediaType.OtherVideos,
             DownloadTaskType.None => PlexMediaType.None,
             _ => throw new ArgumentOutOfRangeException(nameof(value), value, null),
         };

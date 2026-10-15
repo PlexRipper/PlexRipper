@@ -66,7 +66,7 @@ public class CleanUpDownloadTaskFoldersCommandHandler : ICommandHandler<CleanUpD
         if (result.IsFailed)
             return result;
 
-        if (downloadTask.DownloadTaskType is DownloadTaskType.MovieData or DownloadTaskType.MoviePart)
+        if (downloadTask.DownloadTaskType is DownloadTaskType.MovieData)
             return Result.Ok();
 
         var deleteResult = DeleteDirectoryFromFilePath(downloadTask.DownloadDirectory, protectedCategoryDirectory);

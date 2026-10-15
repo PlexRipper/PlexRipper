@@ -1,5 +1,40 @@
 Reaparr Changelog
 
+# [0.41.0-dev.4](https://github.com/Reaparr/Reaparr/compare/v0.41.0-dev.3...v0.41.0-dev.4) (2026-10-15)
+
+
+### Bug Fixes
+
+* **Web-UI:** Align media quality contracts and browser workflows ([818f9f9](https://github.com/Reaparr/Reaparr/commit/818f9f9aa0b426a44aa2a567a0c18af66920c783))
+* **WebAPI:** Handle Plex thumbnail not found response ([6e9e447](https://github.com/Reaparr/Reaparr/commit/6e9e447eba076f78c81dc60368a0924490df5027))
+* **WebAPI:** Inherit caller workflow permissions ([53c6f4c](https://github.com/Reaparr/Reaparr/commit/53c6f4c5fdde3cc2cc56b7c25e0208195c4b5e4b))
+* **WebAPI:** Pin Chrome across parallel Cypress workers ([735f671](https://github.com/Reaparr/Reaparr/commit/735f671751955ad24698bc29a9558d30e7d4fc75))
+* **WebAPI:** Preserve comparisons when job cancellation fails ([f53f4b6](https://github.com/Reaparr/Reaparr/commit/f53f4b672c0cd530207861011ac723d68274f69f))
+* **WebAPI:** Preserve quality sorting after video quality rename ([d9bbd5e](https://github.com/Reaparr/Reaparr/commit/d9bbd5e05a47000885d46f35735dd41c755ad9b2))
+* **Web-UI:** Preserve server access before library discovery ([0cfae85](https://github.com/Reaparr/Reaparr/commit/0cfae85fbc23c4c24fc9ea8be8887c686baf9c52))
+* **Web-UI:** Stabilize frontend integration coverage ([70260cc](https://github.com/Reaparr/Reaparr/commit/70260cc0c721e948d38fc610782d62b6f77311dd))
+
+
+### Features
+
+* **Web-UI:** Add media comparison details and error handling ([0c02c4b](https://github.com/Reaparr/Reaparr/commit/0c02c4b963e08c77b89b4f986e1d5dc315eacdf6))
+* **WebAPI:** Add support for additional download task types in processing ([dd8bbcb](https://github.com/Reaparr/Reaparr/commit/dd8bbcbcc1daae2c5265f78aaa0c4fa67da20e0b))
+* **Web-UI:** Add support for music, photos, and other videos folder paths ([177cf5b](https://github.com/Reaparr/Reaparr/commit/177cf5baa8b6b6d6b8155fb5c3e7d35858e94292))
+* **Web-UI:** Enhance download management with original media selection ([53cbb4d](https://github.com/Reaparr/Reaparr/commit/53cbb4d396e70113012009e826ad707a83e20a0d))
+* **Web-UI:** Enhance library sync job handling and UI feedback when a Library is already syncing ([3183f55](https://github.com/Reaparr/Reaparr/commit/3183f553b68513f998080a9b7733687f4791894a))
+* **Web-UI:** Enhance media confirmation settings for music and photos ([c251e3e](https://github.com/Reaparr/Reaparr/commit/c251e3ec55a3d015fae574c85459e2d8bb2fba5a))
+* **WebAPI:** Enhance user settings management with additional confirmation options ([104ad08](https://github.com/Reaparr/Reaparr/commit/104ad08ce4a869f6fc41b8c56869940e64ea2a7a))
+* **Web-UI:** Implement media overview for music and photos ([3a3d8d1](https://github.com/Reaparr/Reaparr/commit/3a3d8d157a93f02a185ba56a1f37500f127f74e6))
+* **WebAPI:** Implement music library comparison functionality ([3c66600](https://github.com/Reaparr/Reaparr/commit/3c666006c561e5cea23c2473b348791b290728e5))
+* **WebAPI:** Implement music library comparison functionality ([1f7023e](https://github.com/Reaparr/Reaparr/commit/1f7023ec9a81b25fc33ad19dd759ba6e195a2607))
+* **Web-UI:** Improve account dialog accessibility and layout responsiveness ([6fd9f34](https://github.com/Reaparr/Reaparr/commit/6fd9f34ed3f57eab5f11046b7d7b46ebcfc6609d))
+* **WebAPI:** The library sync totals shown and ETA are now much more accurate ([1949df7](https://github.com/Reaparr/Reaparr/commit/1949df7701472c3fc6ecb60e6c8189ae942a77b9))
+
+
+### Performance Improvements
+
+* **Web-UI:** Enhance download table rendering and state management making download updates much faster ([9ebaaa2](https://github.com/Reaparr/Reaparr/commit/9ebaaa2dd2bc58d42aaaaa2be845edc812b6646b))
+
 # [0.41.0-dev.3](https://github.com/Reaparr/Reaparr/compare/v0.41.0-dev.2...v0.41.0-dev.3) (2026-10-05)
 
 

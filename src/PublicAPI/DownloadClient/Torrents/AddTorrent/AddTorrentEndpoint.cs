@@ -53,7 +53,7 @@ public class TorrentMetadataDTOValidator : Validator<TorrentMetadataDTO>
             .Must(type => type is PlexMediaType.Episode or PlexMediaType.Movie)
             .WithMessage("Type must be Episode or Movie.");
 
-        RuleFor(x => x.Quality).IsInEnum().WithMessage("Quality must be a valid VideoQuality value.");
+        RuleFor(x => x.VideoQuality).IsInEnum().WithMessage("Quality must be a valid VideoQuality value.");
     }
 }
 
@@ -167,7 +167,7 @@ public class AddTorrentEndpoint : Endpoint<AddTorrentEndpointRequest>
                         MediaDataType = metadata.Type,
                         MediaId = metadata.MediaId,
                         DataId = metadata.DataId,
-                        Quality = metadata.Quality,
+                        VideoQuality = metadata.VideoQuality,
                     },
                 ],
                 MediaIds = [metadata.MediaId],
@@ -185,12 +185,7 @@ public class AddTorrentEndpoint : Endpoint<AddTorrentEndpointRequest>
         }
 
         var createResult = await _commandExecutor.Send(
-            new CreateDownloadTasksCommand(
-                new CreateDownloadTasksRequest(
-                    list,
-                    integration: identity
-                )
-            ),
+            new CreateDownloadTasksCommand(new CreateDownloadTasksRequest(list, integration: identity)),
             ct
         );
         if (createResult.IsFailed)

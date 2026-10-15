@@ -12,7 +12,7 @@ public static partial class FakeData
             .RuleFor(x => x.VideoCodec, f => f.System.FileType())
             .RuleFor(x => x.AudioCodec, _ => "dca")
             .RuleFor(x => x.VideoResolution, f => f.PickRandom(VideoQuality.SD, VideoQuality.HD, VideoQuality.FullHD))
-            .RuleFor(x => x.Quality, (_, x) => x.VideoResolution)
+            .RuleFor(x => x.VideoQuality, (_, x) => x.VideoResolution)
             .RuleFor(x => x.Duration, f => f.Random.Int(50000, 55124400))
             .RuleFor(x => x.Container, f => f.System.FileType())
             .RuleFor(x => x.Source, _ => ReleaseSource.WebDl)

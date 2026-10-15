@@ -164,8 +164,8 @@ public class SyncPlexMoviesCommandHandler : ICommandHandler<SyncPlexMoviesComman
 
         var deleted = currentMovies.Where(x => !incomingKeys.Contains(x.PlexApiRatingKey)).ToList();
         foreach (var movie in created.Concat(updated))
-            movie.Quality =
-                movie.MediaDataList.Count == 0 ? VideoQuality.Unknown : movie.MediaDataList.Max(x => x.Quality);
+            movie.VideoQuality =
+                movie.MediaDataList.Count == 0 ? VideoQuality.Unknown : movie.MediaDataList.Max(x => x.VideoQuality);
 
         report.CreatedMovies = created.Count;
         report.UpdatedMovies = updated.Count;

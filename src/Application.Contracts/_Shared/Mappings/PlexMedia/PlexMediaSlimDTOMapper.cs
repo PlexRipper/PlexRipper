@@ -26,7 +26,7 @@ public static class PlexMediaSlimDTOMapper
                 .MediaDataList.SortByQuality()
                 .Select(x => new PlexMediaQualityDTO
                 {
-                    Quality = x.Quality,
+                    VideoQuality = x.VideoQuality,
                     MediaDataType = x.Type,
                     DataId = x.Id,
                     MediaId = source.Id,
@@ -66,7 +66,7 @@ public static class PlexMediaSlimDTOMapper
             Qualities = x
                 .Qualities.Select(q => new PlexMediaQualityDTO
                 {
-                    Quality = q.Quality,
+                    VideoQuality = q.VideoQuality,
                     MediaDataType = q.Type,
                     DataId = q.Id,
                     MediaId = x.Id,
@@ -147,7 +147,7 @@ public static class PlexMediaSlimDTOMapper
                 .MediaDataList.SortByQuality()
                 .Select(x => new PlexMediaQualityDTO
                 {
-                    Quality = x.Quality,
+                    VideoQuality = x.VideoQuality,
                     MediaDataType = x.Type,
                     DataId = x.Id,
                     MediaId = source.Id,

@@ -20,7 +20,7 @@ public static class TorznabMovieMappers
             Title = !string.IsNullOrEmpty(x.GeneratedFilename) ? x.GeneratedFilename : x.OriginalFilename,
             AddedAt = x.PlexMovie!.AddedAt,
             Size = x.Size,
-            Quality = x.Quality,
+            Quality = x.VideoQuality,
             VideoResolution = x.VideoResolution,
             Source = x.Source,
             VideoCodec = x.VideoCodec,

@@ -51,7 +51,7 @@ public class GetMediaByTypeCommandHandlerPhotoAlbumUnitTests : BaseCommandUnitTe
                 album.MediaSize = (i + 1) * 100L;
                 album.Title = $"{album.PlexLibraryId}-root-{i}";
                 album.HasThumb = i % 2 == 0;
-                album.Quality = VideoQuality.Unknown;
+                album.VideoQuality = VideoQuality.Unknown;
             }
         }
         await dbContext.SaveChangesAsync(CancellationToken);

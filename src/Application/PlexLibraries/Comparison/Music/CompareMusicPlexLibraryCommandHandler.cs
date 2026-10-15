@@ -252,7 +252,7 @@ public class CompareMusicPlexLibraryCommandHandler : ICommandHandler<CompareMusi
             .GroupBy(x => x.PlexAlbumId)
             .ToDictionary(x => x.Key, x => new AlbumTracks(x.ToArray()));
         var compatiblePairs = new Dictionary<(int Remote, int Owned), bool>();
-        var audioSelections = new Dictionary<int, (PlexMusicTrackMediaData? File, AudioQuality Quality)>();
+        var audioSelections = new Dictionary<int, (PlexMusicTrackMediaData? File, AudioQuality audioQuality)>();
 
         AlbumTracks Tracks(PlexMusicAlbum album) =>
             tracksByAlbum.TryGetValue(album.Id, out var tracks) ? tracks : AlbumTracks.Empty;
@@ -408,7 +408,7 @@ public class CompareMusicPlexLibraryCommandHandler : ICommandHandler<CompareMusi
         PlexMusicAlbum ownedAlbum,
         AlbumTracks remoteTracks,
         AlbumTracks ownedTracks,
-        Dictionary<int, (PlexMusicTrackMediaData? File, AudioQuality Quality)> audioSelections,
+        Dictionary<int, (PlexMusicTrackMediaData? File, AudioQuality audioQuality)> audioSelections,
         DateTime comparedAt,
         CancellationToken ct
     )
@@ -475,8 +475,8 @@ public class CompareMusicPlexLibraryCommandHandler : ICommandHandler<CompareMusi
                             && remoteSelection.File.IsHigherAudioQualityThan(ownedSelection.File)
                                 ? PlexMediaComparisonHitState.HigherQuality
                                 : PlexMediaComparisonHitState.Matched,
-                        RemoteAudioQuality = remoteSelection.Quality,
-                        OwnedAudioQuality = ownedSelection.Quality,
+                        RemoteAudioQuality = remoteSelection.audioQuality,
+                        OwnedAudioQuality = ownedSelection.audioQuality,
                         RemotePlexMediaDataId = remoteSelection.File?.Id,
                         OwnedPlexMediaDataId = ownedSelection.File?.Id,
                         MatchType = matchType,
@@ -487,9 +487,9 @@ public class CompareMusicPlexLibraryCommandHandler : ICommandHandler<CompareMusi
         }
     }
 
-    private static (PlexMusicTrackMediaData? File, AudioQuality Quality) SelectAudio(
+    private static (PlexMusicTrackMediaData? File, AudioQuality audioQuality) SelectAudio(
         PlexMusicTrack track,
-        Dictionary<int, (PlexMusicTrackMediaData? File, AudioQuality Quality)> selections
+        Dictionary<int, (PlexMusicTrackMediaData? File, AudioQuality audioQuality)> selections
     )
     {
         if (!selections.TryGetValue(track.Id, out var selection))

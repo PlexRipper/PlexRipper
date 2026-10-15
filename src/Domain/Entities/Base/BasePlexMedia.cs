@@ -46,7 +46,7 @@ public class BasePlexMedia : BaseEntity
     /// Gets or sets the highest available video quality for this media item or based on its children
     /// </summary>
     [Column(Order = 17)]
-    public VideoQuality Quality { get; set; } = VideoQuality.Unknown;
+    public VideoQuality VideoQuality { get; set; } = VideoQuality.Unknown;
 
     /// <summary>
     /// Gets or sets the key used to retrieve thumbnails, art or banners.

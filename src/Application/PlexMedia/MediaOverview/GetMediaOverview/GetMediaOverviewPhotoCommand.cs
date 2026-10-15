@@ -179,7 +179,7 @@ public sealed class GetMediaOverviewPhotoCommandHandler
         LogPhase(filter, "Metadata", stopwatch.Elapsed, items.Count);
         result.Qualities = items
             .SelectMany(x => x.Qualities)
-            .Select(x => x.Quality.ToId())
+            .Select(x => x.VideoQuality.ToId())
             .Distinct()
             .OrderBy(x => x)
             .ToList();

@@ -61,7 +61,7 @@ public sealed record TorznabFeedItemProjection
             DataId = DataId,
             PartId = DataId,
             PlexApiPartId = PlexApiPartId,
-            Quality = Quality,
+            VideoQuality = Quality,
             LibraryId = PlexLibraryId,
             ServerId = PlexServerId,
         };

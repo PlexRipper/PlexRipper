@@ -122,11 +122,7 @@ public class AudioQualityExtensionsUnitTests : BaseUnitTest
     [Arguments("opus", 192, AudioQuality.Opus_192Kbps)]
     [Arguments("opus", 256, AudioQuality.Opus_256Kbps)]
     [Arguments("opus", 320, AudioQuality.Opus_320KbpsPlus)]
-    public void ShouldClassifyEveryLossyBitrateBand(
-        string codec,
-        int bitrateKbps,
-        AudioQuality expectedQuality
-    )
+    public void ShouldClassifyEveryLossyBitrateBand(string codec, int bitrateKbps, AudioQuality expectedQuality)
     {
         // Arrange
         var file = CreateFile(codec, bitrateKbps: bitrateKbps);
@@ -144,17 +140,53 @@ public class AudioQualityExtensionsUnitTests : BaseUnitTest
         // Arrange
         var pairs = new[]
         {
-            (16, 44100, AudioQuality.FLAC_16Bit_44_1kHz, AudioQuality.ALAC_16Bit_44_1kHz, AudioQuality.PCM_16Bit_44_1kHz),
+            (
+                16,
+                44100,
+                AudioQuality.FLAC_16Bit_44_1kHz,
+                AudioQuality.ALAC_16Bit_44_1kHz,
+                AudioQuality.PCM_16Bit_44_1kHz
+            ),
             (16, 48000, AudioQuality.FLAC_16Bit_48kHz, AudioQuality.ALAC_16Bit_48kHz, AudioQuality.PCM_16Bit_48kHz),
-            (16, 88200, AudioQuality.FLAC_16Bit_88_2kHz, AudioQuality.ALAC_16Bit_88_2kHz, AudioQuality.PCM_16Bit_88_2kHz),
+            (
+                16,
+                88200,
+                AudioQuality.FLAC_16Bit_88_2kHz,
+                AudioQuality.ALAC_16Bit_88_2kHz,
+                AudioQuality.PCM_16Bit_88_2kHz
+            ),
             (16, 96000, AudioQuality.FLAC_16Bit_96kHz, AudioQuality.ALAC_16Bit_96kHz, AudioQuality.PCM_16Bit_96kHz),
-            (16, 176400, AudioQuality.FLAC_16Bit_176_4kHz, AudioQuality.ALAC_16Bit_176_4kHz, AudioQuality.PCM_16Bit_176_4kHz),
+            (
+                16,
+                176400,
+                AudioQuality.FLAC_16Bit_176_4kHz,
+                AudioQuality.ALAC_16Bit_176_4kHz,
+                AudioQuality.PCM_16Bit_176_4kHz
+            ),
             (16, 192000, AudioQuality.FLAC_16Bit_192kHz, AudioQuality.ALAC_16Bit_192kHz, AudioQuality.PCM_16Bit_192kHz),
-            (24, 44100, AudioQuality.FLAC_24Bit_44_1kHz, AudioQuality.ALAC_24Bit_44_1kHz, AudioQuality.PCM_24Bit_44_1kHz),
+            (
+                24,
+                44100,
+                AudioQuality.FLAC_24Bit_44_1kHz,
+                AudioQuality.ALAC_24Bit_44_1kHz,
+                AudioQuality.PCM_24Bit_44_1kHz
+            ),
             (24, 48000, AudioQuality.FLAC_24Bit_48kHz, AudioQuality.ALAC_24Bit_48kHz, AudioQuality.PCM_24Bit_48kHz),
-            (24, 88200, AudioQuality.FLAC_24Bit_88_2kHz, AudioQuality.ALAC_24Bit_88_2kHz, AudioQuality.PCM_24Bit_88_2kHz),
+            (
+                24,
+                88200,
+                AudioQuality.FLAC_24Bit_88_2kHz,
+                AudioQuality.ALAC_24Bit_88_2kHz,
+                AudioQuality.PCM_24Bit_88_2kHz
+            ),
             (24, 96000, AudioQuality.FLAC_24Bit_96kHz, AudioQuality.ALAC_24Bit_96kHz, AudioQuality.PCM_24Bit_96kHz),
-            (24, 176400, AudioQuality.FLAC_24Bit_176_4kHz, AudioQuality.ALAC_24Bit_176_4kHz, AudioQuality.PCM_24Bit_176_4kHz),
+            (
+                24,
+                176400,
+                AudioQuality.FLAC_24Bit_176_4kHz,
+                AudioQuality.ALAC_24Bit_176_4kHz,
+                AudioQuality.PCM_24Bit_176_4kHz
+            ),
             (24, 192000, AudioQuality.FLAC_24Bit_192kHz, AudioQuality.ALAC_24Bit_192kHz, AudioQuality.PCM_24Bit_192kHz),
         };
 
@@ -198,7 +230,10 @@ public class AudioQualityExtensionsUnitTests : BaseUnitTest
     [Test]
     [Arguments("mp3", AudioQuality.MP3_128Kbps)]
     [Arguments("aac", AudioQuality.AAC_128Kbps)]
-    public void ShouldClassifyLossyBitrateWithoutAssumingMissingComparisonProperties(string codec, AudioQuality expected)
+    public void ShouldClassifyLossyBitrateWithoutAssumingMissingComparisonProperties(
+        string codec,
+        AudioQuality expected
+    )
     {
         // Arrange
         var incomplete = CreateFile(codec, bitrateKbps: 128, sampleRateHz: null, channels: null, layout: null);
@@ -214,20 +249,8 @@ public class AudioQualityExtensionsUnitTests : BaseUnitTest
     public void ShouldTreatLosslessResolutionAsEquivalentRegardlessOfCompressionBitrate()
     {
         // Arrange
-        var flac = CreateFile(
-            "flac",
-            bitrateKbps: 737,
-            bitDepth: 16,
-            sampleRateHz: 44100,
-            id: 1
-        );
-        var alac = CreateFile(
-            "alac",
-            bitrateKbps: 1200,
-            bitDepth: 16,
-            sampleRateHz: 44100,
-            id: 2
-        );
+        var flac = CreateFile("flac", bitrateKbps: 737, bitDepth: 16, sampleRateHz: 44100, id: 1);
+        var alac = CreateFile("alac", bitrateKbps: 1200, bitDepth: 16, sampleRateHz: 44100, id: 2);
 
         // Act
         var equivalent = flac.IsEquivalentAudioQualityTo(alac);
@@ -302,7 +325,10 @@ public class AudioQualityExtensionsUnitTests : BaseUnitTest
     [Arguments(16, 44100, 24, 96000)]
     [Arguments(16, 44100, 24, 44100)]
     public void ShouldRecognizeLosslessResolutionUpgradeWithoutRegressions(
-        int ownedDepth, int ownedRate, int remoteDepth, int remoteRate
+        int ownedDepth,
+        int ownedRate,
+        int remoteDepth,
+        int remoteRate
     )
     {
         // Arrange
@@ -499,33 +525,34 @@ public class AudioQualityExtensionsUnitTests : BaseUnitTest
         int mediaId = 1,
         int partId = 1,
         int id = 1
-    ) => new()
-    {
-        Id = id,
-        PlexApiRatingKey = 1,
-        PlexApiMediaId = mediaId,
-        PlexApiPartId = partId,
-        PlexTrackId = 1,
-        PartIndex = 0,
-        VideoResolution = VideoQuality.None,
-        Quality = VideoQuality.None,
-        Container = "test",
-        Duration = 1,
-        Size = 1,
-        Key = "/library/parts/1/file",
-        Source = source,
-        VideoCodec = string.Empty,
-        AudioCodec = codec,
-        OriginalFilename = "track.test",
-        NeedsGeneratedName = false,
-        PlexLibraryId = 1,
-        PlexServerId = 1,
-        AudioBitrateKbps = bitrateKbps,
-        AudioBitDepth = bitDepth,
-        AudioSampleRateHz = sampleRateHz,
-        AudioChannels = channels,
-        AudioChannelLayout = layout,
-        AudioProfile = profile,
-        AudioQuality = AudioQuality.Unknown,
-    };
+    ) =>
+        new()
+        {
+            Id = id,
+            PlexApiRatingKey = 1,
+            PlexApiMediaId = mediaId,
+            PlexApiPartId = partId,
+            PlexTrackId = 1,
+            PartIndex = 0,
+            VideoResolution = VideoQuality.None,
+            VideoQuality = VideoQuality.None,
+            Container = "test",
+            Duration = 1,
+            Size = 1,
+            Key = "/library/parts/1/file",
+            Source = source,
+            VideoCodec = string.Empty,
+            AudioCodec = codec,
+            OriginalFilename = "track.test",
+            NeedsGeneratedName = false,
+            PlexLibraryId = 1,
+            PlexServerId = 1,
+            AudioBitrateKbps = bitrateKbps,
+            AudioBitDepth = bitDepth,
+            AudioSampleRateHz = sampleRateHz,
+            AudioChannels = channels,
+            AudioChannelLayout = layout,
+            AudioProfile = profile,
+            AudioQuality = AudioQuality.Unknown,
+        };
 }

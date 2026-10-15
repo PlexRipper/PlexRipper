@@ -46,5 +46,5 @@ public class MediaOverviewMovieSnapshot : BaseEntity
     public long MediaSize { get; set; }
 
     [NotMapped]
-    public VideoQuality Quality { get; set; }
+    public VideoQuality VideoQuality { get; set; }
 }

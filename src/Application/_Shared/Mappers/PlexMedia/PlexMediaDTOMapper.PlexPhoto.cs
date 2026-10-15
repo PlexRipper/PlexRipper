@@ -72,7 +72,7 @@ public static partial class PlexMediaDTOMapper
                         .OrderBy(x => x.Id)
                         .Select(x => new PlexMediaQualityDTO
                         {
-                            Quality = VideoQuality.Unknown,
+                            VideoQuality = VideoQuality.Unknown,
                             MediaDataType = PlexMediaType.PhotoImage,
                             DataId = x.Id,
                             MediaId = source.Id,

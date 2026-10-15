@@ -150,11 +150,12 @@ public sealed class GetMediaOverviewMusicCommandHandler
                 HasThumb = x.HasThumb,
                 PlexApiRatingKey = x.PlexApiRatingKey,
                 PlexApiMetaDataKey = x.PlexApiMetaDataKey,
-                Qualities = x.Qualities.OrderBy(quality => quality.Id)
+                Qualities = x
+                    .Qualities.OrderBy(quality => quality.Id)
                     .Select(quality => new PlexMediaQualityDTO
                     {
-                        Quality = VideoQuality.None,
-                        AudioQuality = quality.Quality,
+                        VideoQuality = VideoQuality.None,
+                        AudioQuality = quality.AudioQuality,
                         MediaId = quality.PlexMusicArtistId,
                         DataId = -1,
                         MediaDataType = PlexMediaType.MusicArtist,

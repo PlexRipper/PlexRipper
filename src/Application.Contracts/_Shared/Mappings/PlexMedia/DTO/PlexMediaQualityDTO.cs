@@ -10,7 +10,7 @@ public record PlexMediaQualityDTO
     /// <summary>
     /// The video quality for video media. Music uses <see cref="AudioQuality"/> instead.
     /// </summary>
-    public required VideoQuality Quality { get; init; }
+    public required VideoQuality VideoQuality { get; init; }
 
     /// <summary>
     /// The audio quality for music media. Non-music media uses <see cref="AudioQuality.None"/>.

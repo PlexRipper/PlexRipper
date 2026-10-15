@@ -5,7 +5,7 @@ public class PlexMusicAlbumConfiguration : IEntityTypeConfiguration<PlexMusicAlb
     public void Configure(EntityTypeBuilder<PlexMusicAlbum> builder)
     {
         // TODO Remove these from the base class
-        builder.Ignore(x => x.Quality);
+        builder.Ignore(x => x.VideoQuality);
         builder.Ignore(x => x.Studio);
         builder.Ignore(x => x.Guid);
         builder.Ignore(x => x.Guid_IMDB);

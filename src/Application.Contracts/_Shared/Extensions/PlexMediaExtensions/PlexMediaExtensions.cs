@@ -81,10 +81,8 @@ public static partial class PlexMediaExtensions
             Parent = null,
             FileTransferSpeed = 0,
             FileDataTransferred = 0,
-            SonarrIntegrationId =
-                integrationIdentity?.Type == IntegrationType.Sonarr ? integrationIdentity.Id : null,
-            RadarrIntegrationId =
-                integrationIdentity?.Type == IntegrationType.Radarr ? integrationIdentity.Id : null,
+            SonarrIntegrationId = integrationIdentity?.Type == IntegrationType.Sonarr ? integrationIdentity.Id : null,
+            RadarrIntegrationId = integrationIdentity?.Type == IntegrationType.Radarr ? integrationIdentity.Id : null,
         };
 
     public static DownloadTaskTvShowEpisode MapToDownloadTask(
@@ -112,10 +110,8 @@ public static partial class PlexMediaExtensions
             Parent = null,
             FileTransferSpeed = 0,
             FileDataTransferred = 0,
-            SonarrIntegrationId =
-                integrationIdentity?.Type == IntegrationType.Sonarr ? integrationIdentity.Id : null,
-            RadarrIntegrationId =
-                integrationIdentity?.Type == IntegrationType.Radarr ? integrationIdentity.Id : null,
+            SonarrIntegrationId = integrationIdentity?.Type == IntegrationType.Sonarr ? integrationIdentity.Id : null,
+            RadarrIntegrationId = integrationIdentity?.Type == IntegrationType.Radarr ? integrationIdentity.Id : null,
         };
 
     public static DownloadTaskMovieFile MapToDownloadTask(
@@ -146,7 +142,7 @@ public static partial class PlexMediaExtensions
             TimeRemaining = 0,
             FileName = plexMediaData.GetFileName,
             FileLocationUrl = plexMediaData.Key,
-            Quality = plexMediaData.VideoResolution,
+            VideoQuality = plexMediaData.VideoResolution,
             DirectoryMeta = new DownloadTaskDirectory
             {
                 DownloadRootPath = downloadRootPath,
@@ -205,7 +201,7 @@ public static partial class PlexMediaExtensions
             TimeRemaining = 0,
             FileName = plexMediaData.GetFileName,
             FileLocationUrl = plexMediaData.Key,
-            Quality = plexMediaData.VideoResolution,
+            VideoQuality = plexMediaData.VideoResolution,
             DirectoryMeta = new DownloadTaskDirectory
             {
                 DownloadRootPath = downloadRootPath,

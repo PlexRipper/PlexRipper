@@ -12,7 +12,8 @@ public static partial class MediaOverviewRankBuilder
         AssignRank(
             snapshots,
             permutation,
-            static (left, right) => Compare(left.Quality, right.Quality, left.PlexOtherVideoId, right.PlexOtherVideoId),
+            static (left, right) =>
+                Compare(left.VideoQuality, right.VideoQuality, left.PlexOtherVideoId, right.PlexOtherVideoId),
             static (x, rank) => x.QualityRank = rank
         );
         return snapshots;

@@ -323,7 +323,7 @@ public class CreateDownloadTasksEndpointIntegrationTests : BaseIntegrationTests
                         MediaDataType = PlexMediaType.Movie,
                         MediaId = x.PlexMovieId,
                         DataId = x.Id,
-                        Quality = x.Quality,
+                        VideoQuality = x.VideoQuality,
                     })
                     .ToList(),
             },

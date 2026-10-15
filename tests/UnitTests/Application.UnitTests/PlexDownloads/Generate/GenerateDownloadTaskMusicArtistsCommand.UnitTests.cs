@@ -28,7 +28,7 @@ public class GenerateDownloadTaskMusicArtistsCommandUnitTests
             MediaId = track.Id,
             DataId = 101,
             MediaDataType = PlexMediaType.MusicTrack,
-            Quality = VideoQuality.Unknown,
+            VideoQuality = VideoQuality.Unknown,
         };
         var direct = inherited with { DataId = 202 };
         GenerateDownloadTaskMusicAlbumsCommand? forwarded = null;

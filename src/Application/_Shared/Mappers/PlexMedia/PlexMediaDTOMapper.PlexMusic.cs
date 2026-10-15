@@ -106,8 +106,8 @@ public static partial class PlexMediaDTOMapper
             PlexServerId = source.PlexServerId,
             Type = source.Type,
             HasThumb = source.HasThumb,
-            Qualities = source.MediaDataList
-                .GroupBy(x => x.PlexApiMediaId)
+            Qualities = source
+                .MediaDataList.GroupBy(x => x.PlexApiMediaId)
                 .OrderBy(x => x.Key)
                 .Select(group => ToMusicQuality(source.Id, group))
                 .ToList(),
@@ -143,20 +143,17 @@ public static partial class PlexMediaDTOMapper
             Size = source.Size,
             VideoResolution = VideoQuality.None,
             VideoCodec = string.Empty,
-            AudioCodec = string.Empty,
+            AudioCodec = source.AudioCodec,
             AudioQuality = source.AudioQuality,
         };
 
-    private static PlexMediaQualityDTO ToMusicQuality(
-        int trackId,
-        IEnumerable<PlexMusicTrackMediaData> files
-    )
+    private static PlexMediaQualityDTO ToMusicQuality(int trackId, IEnumerable<PlexMusicTrackMediaData> files)
     {
         var (representative, quality) = files.PickAudioQuality();
 
         return new PlexMediaQualityDTO
         {
-            Quality = VideoQuality.None,
+            VideoQuality = VideoQuality.Unknown,
             AudioQuality = quality,
             MediaDataType = PlexMediaType.MusicTrack,
             DataId = representative!.Id,

@@ -144,7 +144,7 @@ public class RefreshPlexPhotoLibraryCommandHandler
             album.ChildCount = 0;
             album.Duration = 0;
             album.MediaSize = 0;
-            album.Quality = VideoQuality.Unknown;
+            album.VideoQuality = VideoQuality.Unknown;
         }
 
         foreach (var photo in photos)
@@ -159,7 +159,7 @@ public class RefreshPlexPhotoLibraryCommandHandler
             album.ChildCount = album.Photos.Count;
             album.Duration = album.Photos.Sum(x => x.Duration);
             album.MediaSize = album.Photos.Sum(x => x.MediaSize);
-            album.Quality = album.Photos.Count == 0 ? VideoQuality.Unknown : album.Photos.Max(x => x.Quality);
+            album.VideoQuality = album.Photos.Count == 0 ? VideoQuality.Unknown : album.Photos.Max(x => x.VideoQuality);
         }
 
         return Result.Ok();

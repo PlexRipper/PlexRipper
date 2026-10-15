@@ -5,9 +5,9 @@ public class PlexTvShowConfiguration : IEntityTypeConfiguration<PlexTvShow>
     public void Configure(EntityTypeBuilder<PlexTvShow> builder)
     {
         builder.HasIndex(x => x.SortIndex);
-        builder.HasIndex(x => x.Quality);
+        builder.HasIndex(x => x.VideoQuality);
         builder.HasIndex(x => new { x.PlexLibraryId, x.SortIndex });
-        builder.HasIndex(x => new { x.PlexLibraryId, x.Quality });
+        builder.HasIndex(x => new { x.PlexLibraryId, Quality = x.VideoQuality });
         // SearchTvShowCommandHandler and SearchGenericCommandHandler use LIKE '<normalized-title>%';
         // NOCASE lets SQLite turn that case-insensitive prefix predicate into an index range.
         builder.Property(x => x.SearchTitle).UseCollation("NOCASE");

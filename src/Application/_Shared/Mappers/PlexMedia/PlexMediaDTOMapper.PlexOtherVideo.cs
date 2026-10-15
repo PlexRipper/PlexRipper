@@ -27,11 +27,11 @@ public static partial class PlexMediaDTOMapper
             Qualities = source
                 .MediaDataList.GroupBy(x => x.PlexApiMediaId)
                 .Select(group => group.OrderBy(x => x.PartIndex).ThenBy(x => x.Id).First())
-                .OrderByDescending(x => x.Quality)
+                .OrderByDescending(x => x.VideoQuality)
                 .ThenBy(x => x.PlexApiMediaId)
                 .Select(x => new PlexMediaQualityDTO
                 {
-                    Quality = x.Quality,
+                    VideoQuality = x.VideoQuality,
                     MediaDataType = PlexMediaType.OtherVideos,
                     DataId = x.Id,
                     MediaId = source.Id,

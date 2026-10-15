@@ -303,7 +303,7 @@ public class GetMediaDetailByIdEndpointUnitTests
                         originalTrack.MediaDataList.Select(x => (x.Id, x.PlexApiMediaId, x.PlexApiPartId, x.AudioCodec))
                     );
                 track
-                    .Qualities.Select(x => (x.DataId, x.MediaId, x.MediaDataType, x.Quality))
+                    .Qualities.Select(x => (x.DataId, x.MediaId, x.MediaDataType, Quality: x.VideoQuality))
                     .ShouldBe(
                         originalTrack.MediaDataList.Select(x =>
                             (x.Id, originalTrack.Id, PlexMediaType.MusicTrack, VideoQuality.Unknown)

@@ -141,10 +141,10 @@ public sealed class GetMediaOverviewMovieCommandHandler
             .ToListAsync(cancellationToken);
         var qualities = await context
             .PlexMovieData.Where(x => ids.Contains(x.PlexMovieId))
-            .OrderBy(x => x.Quality)
+            .OrderBy(x => x.VideoQuality)
             .Select(x => new PlexMediaQualityDTO
             {
-                Quality = x.Quality,
+                VideoQuality = x.VideoQuality,
                 MediaDataType = PlexMediaType.Movie,
                 DataId = x.Id,
                 MediaId = x.PlexMovieId,
@@ -186,7 +186,7 @@ public sealed class GetMediaOverviewMovieCommandHandler
                     new MediaNavigationIndexRow(
                         movie.SearchTitle,
                         movie.Year,
-                        (int?)movie.Quality,
+                        (int?)movie.VideoQuality,
                         movie.Duration,
                         movie.AddedAt,
                         movie.UpdatedAt,
@@ -225,7 +225,7 @@ public sealed class GetMediaOverviewMovieCommandHandler
         LogPhase(filter, "Metadata", stopwatch.Elapsed, items.Count);
         result.Qualities = items
             .SelectMany(x => x.Qualities)
-            .Select(x => x.Quality.ToId())
+            .Select(x => x.VideoQuality.ToId())
             .Distinct()
             .OrderBy(x => x)
             .ToList();

@@ -9,7 +9,7 @@ public class PlexMusicAlbumMediaQuality : BaseEntity
     public required int PlexMusicAlbumId { get; set; }
 
     [Column(Order = 3)]
-    public required AudioQuality Quality { get; set; }
+    public required AudioQuality AudioQuality { get; set; }
 
     public PlexLibrary? PlexLibrary { get; set; }
 

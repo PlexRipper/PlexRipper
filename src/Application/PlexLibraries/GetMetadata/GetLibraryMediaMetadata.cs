@@ -223,7 +223,7 @@ public class GetLibraryMediaMetadata : Endpoint<GetLibraryMediaMetadataRequest, 
         {
             uniqueQualities = await _dbContext
                 .PlexMovieData.ApplyWhere(plexLibraryId > 0, x => x.PlexLibraryId == plexLibraryId)
-                .GroupBy(x => x.Quality)
+                .GroupBy(x => x.VideoQuality)
                 .Select(g => new PlexQualityDTO
                 {
                     Name = ((int)g.Key).ToString(),
@@ -237,7 +237,7 @@ public class GetLibraryMediaMetadata : Endpoint<GetLibraryMediaMetadataRequest, 
         {
             uniqueQualities = await _dbContext
                 .PlexTvShowMediaQualities.ApplyWhere(plexLibraryId > 0, x => x.PlexLibraryId == plexLibraryId)
-                .GroupBy(x => x.Quality)
+                .GroupBy(x => x.VideoQuality)
                 .Select(g => new PlexQualityDTO
                 {
                     Name = ((int)g.Key).ToString(),
@@ -251,7 +251,7 @@ public class GetLibraryMediaMetadata : Endpoint<GetLibraryMediaMetadataRequest, 
         {
             uniqueQualities = await _dbContext
                 .PlexOtherVideoData.ApplyWhere(plexLibraryId > 0, x => x.PlexLibraryId == plexLibraryId)
-                .GroupBy(x => x.Quality)
+                .GroupBy(x => x.VideoQuality)
                 .Select(g => new PlexQualityDTO
                 {
                     Name = ((int)g.Key).ToString(),

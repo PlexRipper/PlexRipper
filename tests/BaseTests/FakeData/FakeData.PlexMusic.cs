@@ -33,7 +33,7 @@ public static partial class FakeData
                 artist.ChildCount = artist.Albums.Count;
                 artist.Duration = artist.Albums.Sum(x => x.Duration);
                 artist.MediaSize = artist.Albums.Sum(x => x.MediaSize);
-                artist.Quality = VideoQuality.None;
+                artist.VideoQuality = VideoQuality.None;
                 artist.FullTitle = artist.Title;
             }
         );
@@ -85,7 +85,7 @@ public static partial class FakeData
                 album.DiscCount = album.Tracks.Count == 0 ? 0 : 1;
                 album.Duration = album.Tracks.Sum(x => x.Duration);
                 album.MediaSize = album.Tracks.Sum(x => x.MediaSize);
-                album.Quality = VideoQuality.None;
+                album.VideoQuality = VideoQuality.None;
                 album.FullTitle = album.Title;
             }
         );
@@ -127,7 +127,7 @@ public static partial class FakeData
                 track.ChildCount = 0;
                 track.Duration = original.Duration / 1000;
                 track.MediaSize = original.Size;
-                track.Quality = VideoQuality.None;
+                track.VideoQuality = VideoQuality.None;
                 track.FullTitle = track.Title;
             }
         );
@@ -158,7 +158,7 @@ public static partial class FakeData
             .RuleFor(x => x.AudioProfile, _ => null)
             .RuleFor(x => x.AudioQuality, _ => AudioQuality.FLAC_16Bit_44_1kHz)
             .RuleFor(x => x.VideoResolution, _ => VideoQuality.None)
-            .RuleFor(x => x.Quality, _ => VideoQuality.None)
+            .RuleFor(x => x.VideoQuality, _ => VideoQuality.None)
             .RuleFor(x => x.Duration, f => f.Random.Int(90_000, 600_000))
             .RuleFor(x => x.Container, _ => "flac")
             .RuleFor(x => x.Source, _ => ReleaseSource.None)

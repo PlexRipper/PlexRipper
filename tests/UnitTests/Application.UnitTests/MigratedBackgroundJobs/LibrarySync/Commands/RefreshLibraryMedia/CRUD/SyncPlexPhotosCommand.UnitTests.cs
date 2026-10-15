@@ -111,7 +111,7 @@ public class SyncPlexPhotosCommandUnitTests : BaseCommandUnitTest<SyncPlexPhotos
             albums[0].ChildCount = 1;
             albums[0].Duration = photos[0].Duration;
             albums[0].MediaSize = photos[0].MediaSize;
-            albums[0].Quality = photos[0].Quality;
+            albums[0].VideoQuality = photos[0].VideoQuality;
         }
         if (scenario == "move")
         {
@@ -205,7 +205,7 @@ public class SyncPlexPhotosCommandUnitTests : BaseCommandUnitTest<SyncPlexPhotos
                 x.ChildCount,
                 x.Duration,
                 x.MediaSize,
-                x.Quality,
+                Quality = x.VideoQuality,
             })
             .ToListAsync(CancellationToken);
         afterAlbums.ShouldBe(
@@ -217,7 +217,7 @@ public class SyncPlexPhotosCommandUnitTests : BaseCommandUnitTest<SyncPlexPhotos
                     x.ChildCount,
                     x.Duration,
                     x.MediaSize,
-                    x.Quality,
+                    Quality = x.VideoQuality,
                 })
         );
         var afterData = await db

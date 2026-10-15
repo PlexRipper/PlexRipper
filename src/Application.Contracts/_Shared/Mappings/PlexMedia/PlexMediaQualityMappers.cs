@@ -9,8 +9,8 @@ public static class PlexMediaQualityMappers
     public static PlexMediaQualityDTO ToDTO(this PlexMusicArtistMediaQuality source) =>
         new()
         {
-            Quality = VideoQuality.None,
-            AudioQuality = source.Quality,
+            VideoQuality = VideoQuality.None,
+            AudioQuality = source.AudioQuality,
             MediaId = source.PlexMusicArtistId,
             DataId = NO_MEDIA_DATA_ID,
             MediaDataType = source.Type,
@@ -26,8 +26,8 @@ public static class PlexMediaQualityMappers
     public static PlexMediaQualityDTO ToDTO(this PlexMusicAlbumMediaQuality source) =>
         new()
         {
-            Quality = VideoQuality.None,
-            AudioQuality = source.Quality,
+            VideoQuality = VideoQuality.None,
+            AudioQuality = source.AudioQuality,
             MediaId = source.PlexMusicAlbumId,
             DataId = NO_MEDIA_DATA_ID,
             MediaDataType = source.Type,
@@ -43,7 +43,7 @@ public static class PlexMediaQualityMappers
     public static PlexMediaQualityDTO ToDTO(this PlexTvShowMediaQuality source) =>
         new()
         {
-            Quality = source.Quality,
+            VideoQuality = source.VideoQuality,
             MediaId = NO_MEDIA_DATA_ID,
             DataId = NO_MEDIA_DATA_ID,
             MediaDataType = source.Type,
@@ -59,7 +59,7 @@ public static class PlexMediaQualityMappers
     public static PlexMediaQualityDTO ToDTO(this PlexTvShowSeasonMediaQuality source) =>
         new()
         {
-            Quality = source.Quality,
+            VideoQuality = source.VideoQuality,
             MediaDataType = source.Type,
             MediaId = source.PlexTvShowSeasonId,
             DataId = NO_MEDIA_DATA_ID,
@@ -77,7 +77,7 @@ public static class PlexMediaQualityMappers
         {
             DataId = source.Id,
             MediaDataType = PlexMediaType.Episode,
-            Quality = source.Quality,
+            VideoQuality = source.VideoQuality,
             MediaId = source.PlexTvShowEpisodeId,
         };
 

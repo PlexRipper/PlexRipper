@@ -9,7 +9,7 @@ public static partial class FakeData
             .Ignore(x => x.Parent)
             .Ignore(x => x.ParentId)
             .Ignore(x => x.Logs)
-            .RuleFor(x => x.Quality, _ => VideoQuality.FullHD)
+            .RuleFor(x => x.VideoQuality, _ => VideoQuality.FullHD)
             .RuleFor(x => x.FileName, (_, x) => $"video-{x.PlexApiPartId}.mp4");
 
     public static Faker<DownloadTaskOtherVideoFile> GetDownloadTaskOtherVideoFile(

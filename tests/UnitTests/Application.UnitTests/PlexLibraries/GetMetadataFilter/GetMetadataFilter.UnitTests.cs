@@ -14,26 +14,46 @@ public class GetMetadataFilterUnitTests
     )
     {
         // Arrange
-        await SetupDatabase(8238, cfg =>
-        {
-            cfg.PlexMovieLibraryCount = 2;
-            cfg.PlexOtherVideoLibraryCount = 2;
-            cfg.MovieCount = 2;
-            cfg.OtherVideoCount = 2;
-        });
+        await SetupDatabase(
+            8238,
+            cfg =>
+            {
+                cfg.PlexMovieLibraryCount = 2;
+                cfg.PlexOtherVideoLibraryCount = 2;
+                cfg.MovieCount = 2;
+                cfg.OtherVideoCount = 2;
+            }
+        );
         var dbContext = IDbContext;
-        var libraryIds = await dbContext.PlexLibraries.Where(x => x.Type == mediaType)
-            .OrderBy(x => x.Id).Select(x => x.Id).ToListAsync(CancellationToken);
+        var libraryIds = await dbContext
+            .PlexLibraries.Where(x => x.Type == mediaType)
+            .OrderBy(x => x.Id)
+            .Select(x => x.Id)
+            .ToListAsync(CancellationToken);
         libraryIds.Count.ShouldBe(2);
         var targetId = libraryIds[0];
-        await dbContext.PlexMovieData.ExecuteUpdateAsync(x => x.SetProperty(y => y.Quality,
-            y => mediaType == PlexMediaType.Movie
-                ? (y.PlexLibraryId == targetId ? VideoQuality.FullHD : VideoQuality.UHD_4K)
-                : VideoQuality.SD), CancellationToken);
-        await dbContext.PlexOtherVideoData.ExecuteUpdateAsync(x => x.SetProperty(y => y.Quality,
-            y => mediaType == PlexMediaType.OtherVideos
-                ? (y.PlexLibraryId == targetId ? VideoQuality.FullHD : VideoQuality.UHD_4K)
-                : VideoQuality.SD), CancellationToken);
+        await dbContext.PlexMovieData.ExecuteUpdateAsync(
+            x =>
+                x.SetProperty(
+                    y => y.VideoQuality,
+                    y =>
+                        mediaType == PlexMediaType.Movie
+                            ? (y.PlexLibraryId == targetId ? VideoQuality.FullHD : VideoQuality.UHD_4K)
+                            : VideoQuality.SD
+                ),
+            CancellationToken
+        );
+        await dbContext.PlexOtherVideoData.ExecuteUpdateAsync(
+            x =>
+                x.SetProperty(
+                    y => y.VideoQuality,
+                    y =>
+                        mediaType == PlexMediaType.OtherVideos
+                            ? (y.PlexLibraryId == targetId ? VideoQuality.FullHD : VideoQuality.UHD_4K)
+                            : VideoQuality.SD
+                ),
+            CancellationToken
+        );
         var request = new GetMetadataFilterRequest
         {
             PlexLibraryId = allLibraries ? 0 : targetId,
@@ -49,25 +69,43 @@ public class GetMetadataFilterUnitTests
         var response = endpointResult.Response.ShouldNotBeNull();
         response.IsSuccess.ShouldBeTrue();
         response.Errors.Count.ShouldBe(0);
-        response.Value.ShouldNotBeNull().Qualities.Order().ShouldBe(
-            allLibraries
-                ? new[] { VideoQuality.FullHD.ToId(), VideoQuality.UHD_4K.ToId() }.Order()
-                : new[] { VideoQuality.FullHD.ToId() });
+        response
+            .Value.ShouldNotBeNull()
+            .Qualities.Order()
+            .ShouldBe(
+                allLibraries
+                    ? new[] { VideoQuality.FullHD.ToId(), VideoQuality.UHD_4K.ToId() }.Order()
+                    : new[] { VideoQuality.FullHD.ToId() }
+            );
     }
 
     [Test]
     public async Task ShouldKeepAudioAndVideoGenreIdsScoped_WhenNamesAndIdsOverlap()
     {
         // Arrange
-        await SetupDatabase(8239, cfg =>
-        {
-            cfg.PlexMovieLibraryCount = 1;
-            cfg.PlexMusicLibraryCount = 1;
-        });
+        await SetupDatabase(
+            8239,
+            cfg =>
+            {
+                cfg.PlexMovieLibraryCount = 1;
+                cfg.PlexMusicLibraryCount = 1;
+            }
+        );
         var dbContext = IDbContext;
-        var videoLibrary = await dbContext.PlexLibraries.SingleAsync(x => x.Type == PlexMediaType.Movie, CancellationToken);
-        var audioLibrary = await dbContext.PlexLibraries.SingleAsync(x => x.Type == PlexMediaType.MusicArtist, CancellationToken);
-        var videoGenre = new PlexGenreVideo { Name = "Shared", Key = "shared", Type = PlexGenreType.Drama };
+        var videoLibrary = await dbContext.PlexLibraries.SingleAsync(
+            x => x.Type == PlexMediaType.Movie,
+            CancellationToken
+        );
+        var audioLibrary = await dbContext.PlexLibraries.SingleAsync(
+            x => x.Type == PlexMediaType.MusicArtist,
+            CancellationToken
+        );
+        var videoGenre = new PlexGenreVideo
+        {
+            Name = "Shared",
+            Key = "shared",
+            Type = PlexGenreType.Drama,
+        };
         var audioGenre = new PlexGenreAudio { Name = "Shared", Key = "shared" };
         dbContext.PlexGenresVideo.Add(videoGenre);
         dbContext.PlexGenresAudio.Add(audioGenre);

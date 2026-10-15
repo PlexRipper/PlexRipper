@@ -25,7 +25,7 @@ public static partial class FakeData
                 video.FullTitle = video.Title;
                 video.Duration = original.Duration / 1000;
                 video.MediaSize = original.Size;
-                video.Quality = original.Quality;
+                video.VideoQuality = original.VideoQuality;
             }
         );
 
@@ -51,7 +51,7 @@ public static partial class FakeData
             .RuleFor(x => x.VideoProfile, _ => "high")
             .RuleFor(x => x.VideoFrameRate, _ => 24m)
             .RuleFor(x => x.VideoResolution, _ => VideoQuality.FullHD)
-            .RuleFor(x => x.Quality, (_, x) => x.VideoResolution)
+            .RuleFor(x => x.VideoQuality, (_, x) => x.VideoResolution)
             .RuleFor(x => x.Container, _ => "mp4")
             .RuleFor(x => x.Source, _ => ReleaseSource.None)
             .RuleFor(x => x.OriginalFilename, (_, x) => $"video-{x.PlexApiPartId}.mp4")

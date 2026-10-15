@@ -19,7 +19,7 @@ public static class DownloadPreviewMapper
             Qualities = source
                 .Qualities.Select(x => new PlexMediaQualityDTO
                 {
-                    Quality = x.VideoQuality,
+                    VideoQuality = x.VideoQuality,
                     AudioQuality = x.AudioQuality,
                     MediaDataType = x.MediaDataType,
                     DataId = x.DataId,
@@ -87,7 +87,7 @@ public static class DownloadPreviewMapper
                 .MediaDataList.SortByQuality()
                 .Select(x => new PlexMediaQuality
                 {
-                    VideoQuality = x.Quality,
+                    VideoQuality = x.VideoQuality,
                     MediaDataType = x.Type,
                     DataId = x.Id,
                     MediaId = source.Id,
@@ -121,7 +121,7 @@ public static class DownloadPreviewMapper
                 .Qualities.SortByQuality()
                 .Select(x => new PlexMediaQuality
                 {
-                    VideoQuality = x.Quality,
+                    VideoQuality = x.VideoQuality,
                     MediaDataType = x.Type,
                     DataId = NO_MEDIA_DATA_ID,
                     MediaId = source.Id,
@@ -154,7 +154,7 @@ public static class DownloadPreviewMapper
                 .Qualities.SortByQuality()
                 .Select(x => new PlexMediaQuality
                 {
-                    VideoQuality = x.Quality,
+                    VideoQuality = x.VideoQuality,
                     MediaDataType = x.Type,
                     DataId = NO_MEDIA_DATA_ID,
                     MediaId = source.Id,
@@ -187,7 +187,7 @@ public static class DownloadPreviewMapper
                 .MediaDataList.SortByQuality()
                 .Select(x => new PlexMediaQuality
                 {
-                    VideoQuality = x.Quality,
+                    VideoQuality = x.VideoQuality,
                     MediaDataType = x.Type,
                     MediaId = source.Id,
                     DataId = x.Id,
@@ -330,7 +330,7 @@ public static class DownloadPreviewMapper
             Qualities = groups
                 .Select(group => new PlexMediaQuality
                 {
-                    VideoQuality = group.First().Quality,
+                    VideoQuality = group.First().VideoQuality,
                     MediaDataType = source.Type,
                     DataId = group.Min(x => x.Id),
                     MediaId = source.Id,

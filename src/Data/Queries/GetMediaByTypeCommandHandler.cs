@@ -128,7 +128,7 @@ public class GetMediaByTypeCommandHandler : ICommandHandler<GetMediaByTypeComman
 
         if (filter.MediaType.IsMusicType())
             options.Sort.RemoveAll(static sort =>
-                string.Equals(sort.Field, nameof(BasePlexMedia.Quality), StringComparison.OrdinalIgnoreCase)
+                string.Equals(sort.Field, nameof(BasePlexMedia.VideoQuality), StringComparison.OrdinalIgnoreCase)
             );
 
         ApplyDefaultMediaSort(options, plexLibraryId);
@@ -171,7 +171,7 @@ public class GetMediaByTypeCommandHandler : ICommandHandler<GetMediaByTypeComman
                         filteredMovies.Select(x => new MediaNavigationIndexRow(
                             x.SearchTitle,
                             x.Year,
-                            (int?)x.Quality,
+                            (int?)x.VideoQuality,
                             x.Duration,
                             x.AddedAt,
                             x.UpdatedAt,
@@ -201,7 +201,7 @@ public class GetMediaByTypeCommandHandler : ICommandHandler<GetMediaByTypeComman
                     response.Qualities.AddRange(
                         pagedMovies
                             .SelectMany(x => x.MediaDataList)
-                            .Select(x => x.Quality.ToId())
+                            .Select(x => x.VideoQuality.ToId())
                             .Distinct()
                             .OrderBy(x => x)
                     );
@@ -217,7 +217,7 @@ public class GetMediaByTypeCommandHandler : ICommandHandler<GetMediaByTypeComman
                         movieQuery.Select(x => new MediaNavigationIndexRow(
                             x.SearchTitle,
                             x.Year,
-                            (int?)x.Quality,
+                            (int?)x.VideoQuality,
                             x.Duration,
                             x.AddedAt,
                             x.UpdatedAt,
@@ -250,7 +250,11 @@ public class GetMediaByTypeCommandHandler : ICommandHandler<GetMediaByTypeComman
                         movies.SelectMany(x => x.Genres).Select(x => x.Id).Distinct().OrderBy(x => x)
                     );
                     response.Qualities.AddRange(
-                        movies.SelectMany(x => x.MediaDataList).Select(x => x.Quality.ToId()).Distinct().OrderBy(x => x)
+                        movies
+                            .SelectMany(x => x.MediaDataList)
+                            .Select(x => x.VideoQuality.ToId())
+                            .Distinct()
+                            .OrderBy(x => x)
                     );
                 }
 
@@ -290,7 +294,7 @@ public class GetMediaByTypeCommandHandler : ICommandHandler<GetMediaByTypeComman
                         filteredTvShows.Select(x => new MediaNavigationIndexRow(
                             x.SearchTitle,
                             x.Year,
-                            (int?)x.Quality,
+                            (int?)x.VideoQuality,
                             x.Duration,
                             x.AddedAt,
                             x.UpdatedAt,
@@ -320,7 +324,7 @@ public class GetMediaByTypeCommandHandler : ICommandHandler<GetMediaByTypeComman
                     response.Qualities.AddRange(
                         pagedTvShows
                             .SelectMany(x => x.Qualities)
-                            .Select(x => x.Quality.ToId())
+                            .Select(x => x.VideoQuality.ToId())
                             .Distinct()
                             .OrderBy(x => x)
                     );
@@ -336,7 +340,7 @@ public class GetMediaByTypeCommandHandler : ICommandHandler<GetMediaByTypeComman
                         tvShowQuery.Select(x => new MediaNavigationIndexRow(
                             x.SearchTitle,
                             x.Year,
-                            (int?)x.Quality,
+                            (int?)x.VideoQuality,
                             x.Duration,
                             x.AddedAt,
                             x.UpdatedAt,
@@ -369,7 +373,11 @@ public class GetMediaByTypeCommandHandler : ICommandHandler<GetMediaByTypeComman
                         tvShows.SelectMany(x => x.Genres).Select(x => x.Id).Distinct().OrderBy(x => x)
                     );
                     response.Qualities.AddRange(
-                        tvShows.SelectMany(x => x.Qualities).Select(x => x.Quality.ToId()).Distinct().OrderBy(x => x)
+                        tvShows
+                            .SelectMany(x => x.Qualities)
+                            .Select(x => x.VideoQuality.ToId())
+                            .Distinct()
+                            .OrderBy(x => x)
                     );
                 }
 
@@ -499,7 +507,7 @@ public class GetMediaByTypeCommandHandler : ICommandHandler<GetMediaByTypeComman
                     videoQuery.Select(x => new MediaNavigationIndexRow(
                         x.SearchTitle,
                         x.Year,
-                        (int?)x.Quality,
+                        (int?)x.VideoQuality,
                         x.Duration,
                         x.AddedAt,
                         x.UpdatedAt,
@@ -515,7 +523,7 @@ public class GetMediaByTypeCommandHandler : ICommandHandler<GetMediaByTypeComman
                 response.Genres = videos.SelectMany(x => x.Genres).Select(x => x.Id).Distinct().Order().ToList();
                 response.Qualities = response
                     .Items.SelectMany(x => x.Qualities)
-                    .Select(x => x.Quality.ToId())
+                    .Select(x => x.VideoQuality.ToId())
                     .Distinct()
                     .OrderBy(x => x)
                     .ToList();

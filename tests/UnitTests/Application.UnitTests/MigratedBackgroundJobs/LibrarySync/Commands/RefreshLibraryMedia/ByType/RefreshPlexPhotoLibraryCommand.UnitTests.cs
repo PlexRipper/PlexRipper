@@ -28,7 +28,7 @@ public class RefreshPlexPhotoLibraryCommandUnitTests : BaseCommandUnitTest<Refre
         album.Photos.Add(photo);
         library.PhotoAlbums.Add(album);
         library.PhotoImages.Add(photo);
-        var albumState = (album.ChildCount, album.Duration, album.MediaSize, album.Quality);
+        var albumState = (album.ChildCount, album.Duration, album.MediaSize, Quality: album.VideoQuality);
         var response = new InsertMediaMetaDataCommandResponse(library) { PhotoClipCount = 5 };
 
         Mock.Mock<ICommandExecutor>()
@@ -60,7 +60,7 @@ public class RefreshPlexPhotoLibraryCommandUnitTests : BaseCommandUnitTest<Refre
         library.PhotoImages.ShouldBe([photo]);
         album.Photos.ShouldBe([photo]);
         photo.PlexPhotoAlbum.ShouldBeSameAs(album);
-        (album.ChildCount, album.Duration, album.MediaSize, album.Quality).ShouldBe(albumState);
+        (album.ChildCount, album.Duration, album.MediaSize, Quality: album.VideoQuality).ShouldBe(albumState);
         response.PhotoClipCount.ShouldBe(5);
         Mock.Mock<ICommandExecutor>()
             .Verify(x => x.Send(It.IsAny<SyncPlexPhotosCommand>(), It.IsAny<CancellationToken>()), Times.Never());
@@ -356,7 +356,7 @@ public class RefreshPlexPhotoLibraryCommandUnitTests : BaseCommandUnitTest<Refre
         album.MediaSize.ShouldBe(photos.Sum(x => x.MediaSize));
         album.ChildCount.ShouldBe(photos.Count);
         album.Duration.ShouldBe(photos.Sum(x => x.Duration));
-        album.Quality.ShouldBe(photos.Max(x => x.Quality));
+        album.VideoQuality.ShouldBe(photos.Max(x => x.VideoQuality));
         Mock.Mock<ILibrarySyncProgressStore>()
             .Verify(
                 x => x.UpdateErrorAsync(It.IsAny<int>(), It.IsAny<Result>(), It.IsAny<CancellationToken>()),

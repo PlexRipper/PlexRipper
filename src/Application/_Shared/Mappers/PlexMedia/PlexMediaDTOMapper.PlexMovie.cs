@@ -28,7 +28,7 @@ public static partial class PlexMediaDTOMapper
                 .MediaDataList.SortByQuality()
                 .Select(x => new PlexMediaQualityDTO
                 {
-                    Quality = x.Quality,
+                    VideoQuality = x.VideoQuality,
                     MediaDataType = x.Type,
                     DataId = x.Id,
                     MediaId = source.Id,

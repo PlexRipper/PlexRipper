@@ -3,7 +3,8 @@ using FlexQuery.NET.Parsers;
 
 namespace Reaparr.Application;
 
-public sealed record GetMediaOverviewOtherVideoCommand(MediaQueryFilter Filter) : ICommand<Result<PagedMediaQueryResult>>;
+public sealed record GetMediaOverviewOtherVideoCommand(MediaQueryFilter Filter)
+    : ICommand<Result<PagedMediaQueryResult>>;
 
 public sealed class GetMediaOverviewOtherVideoCommandValidator : AbstractValidator<GetMediaOverviewOtherVideoCommand>
 {
@@ -56,7 +57,11 @@ public sealed class GetMediaOverviewOtherVideoCommandHandler
         }
 
         using var context = await _dbContextFactory.CreateAsync();
-        var allowedLibraryIds = await context.ResolveAllowedLibraryIdsAsync(filter, PlexMediaType.OtherVideos, cancellationToken);
+        var allowedLibraryIds = await context.ResolveAllowedLibraryIdsAsync(
+            filter,
+            PlexMediaType.OtherVideos,
+            cancellationToken
+        );
         LogPhase(filter, "ResolveLibraries", stopwatch.Elapsed, allowedLibraryIds.Count);
         stopwatch.Restart();
         if (allowedLibraryIds.Count == 0)
@@ -142,10 +147,10 @@ public sealed class GetMediaOverviewOtherVideoCommandHandler
             .ToListAsync(cancellationToken);
         var qualities = await context
             .PlexOtherVideoData.Where(x => ids.Contains(x.PlexOtherVideoId))
-            .OrderBy(x => x.Quality)
+            .OrderBy(x => x.VideoQuality)
             .Select(x => new PlexMediaQualityDTO
             {
-                Quality = x.Quality,
+                VideoQuality = x.VideoQuality,
                 MediaDataType = PlexMediaType.OtherVideos,
                 DataId = x.Id,
                 MediaId = x.PlexOtherVideoId,
@@ -176,7 +181,7 @@ public sealed class GetMediaOverviewOtherVideoCommandHandler
                     new MediaNavigationIndexRow(
                         otherVideo.SearchTitle,
                         otherVideo.Year,
-                        (int?)otherVideo.Quality,
+                        (int?)otherVideo.VideoQuality,
                         otherVideo.Duration,
                         otherVideo.AddedAt,
                         otherVideo.UpdatedAt,
@@ -190,19 +195,28 @@ public sealed class GetMediaOverviewOtherVideoCommandHandler
         );
         LogPhase(filter, "Statistics", stopwatch.Elapsed, allowedLibraryIds.Count);
         stopwatch.Restart();
-        result.Roles = await context.PlexOtherVideoActors
-            .Where(x => ids.Contains(x.PlexOtherVideoId))
-            .Select(x => x.PlexActorId).Distinct().OrderBy(x => x).ToListAsync(cancellationToken);
-        result.Countries = await context.PlexOtherVideoCountries
-            .Where(x => ids.Contains(x.PlexOtherVideoId))
-            .Select(x => x.CountryId).Distinct().OrderBy(x => x).ToListAsync(cancellationToken);
-        result.Genres = await context.PlexOtherVideoGenres
-            .Where(x => ids.Contains(x.PlexOtherVideoId))
-            .Select(x => x.GenresId).Distinct().OrderBy(x => x).ToListAsync(cancellationToken);
+        result.Roles = await context
+            .PlexOtherVideoActors.Where(x => ids.Contains(x.PlexOtherVideoId))
+            .Select(x => x.PlexActorId)
+            .Distinct()
+            .OrderBy(x => x)
+            .ToListAsync(cancellationToken);
+        result.Countries = await context
+            .PlexOtherVideoCountries.Where(x => ids.Contains(x.PlexOtherVideoId))
+            .Select(x => x.CountryId)
+            .Distinct()
+            .OrderBy(x => x)
+            .ToListAsync(cancellationToken);
+        result.Genres = await context
+            .PlexOtherVideoGenres.Where(x => ids.Contains(x.PlexOtherVideoId))
+            .Select(x => x.GenresId)
+            .Distinct()
+            .OrderBy(x => x)
+            .ToListAsync(cancellationToken);
         LogPhase(filter, "Metadata", stopwatch.Elapsed, items.Count);
         result.Qualities = items
             .SelectMany(x => x.Qualities)
-            .Select(x => x.Quality.ToId())
+            .Select(x => x.VideoQuality.ToId())
             .Distinct()
             .OrderBy(x => x)
             .ToList();

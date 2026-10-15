@@ -24,7 +24,8 @@ public static partial class FakeData
                 album.ChildCount = album.Photos.Count;
                 album.MediaSize = album.Photos.Sum(x => x.MediaSize);
                 album.Duration = album.Photos.Sum(x => x.Duration);
-                album.Quality = album.Photos.Count == 0 ? VideoQuality.Unknown : album.Photos.Max(x => x.Quality);
+                album.VideoQuality =
+                    album.Photos.Count == 0 ? VideoQuality.Unknown : album.Photos.Max(x => x.VideoQuality);
                 album.FullTitle = album.Title;
             }
         );
@@ -73,7 +74,7 @@ public static partial class FakeData
                 photo.FullTitle = photo.Title;
                 photo.Duration = original.Duration / 1000;
                 photo.MediaSize = original.Size;
-                photo.Quality = original.Quality;
+                photo.VideoQuality = original.VideoQuality;
             }
         );
 
@@ -96,7 +97,7 @@ public static partial class FakeData
         .RuleFor(x => x.VideoCodec, _ => string.Empty)
         .RuleFor(x => x.AudioCodec, _ => string.Empty)
         .RuleFor(x => x.VideoResolution, _ => VideoQuality.Unknown)
-        .RuleFor(x => x.Quality, (_, x) => x.VideoResolution)
+        .RuleFor(x => x.VideoQuality, (_, x) => x.VideoResolution)
         .RuleFor(x => x.Duration, _ => 0)
         .RuleFor(x => x.Container, _ => "jpg")
         .RuleFor(x => x.OriginalFilename, (_, x) => $"photo-{x.PlexApiPartId}.{x.Container}")

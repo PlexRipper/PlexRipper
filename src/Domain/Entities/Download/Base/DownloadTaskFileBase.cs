@@ -37,7 +37,7 @@ public abstract class DownloadTaskFileBase : DownloadTaskBase, IDownloadTaskProg
     /// Gets or sets get or sets the media quality of this <see cref="DownloadTaskGeneric"/>.
     /// </summary>
     [Column(Order = 13)]
-    public required VideoQuality Quality { get; init; }
+    public required VideoQuality VideoQuality { get; init; }
 
     [Column(Order = 14)]
     public required DownloadTaskDirectory DirectoryMeta { get; init; }
@@ -140,7 +140,6 @@ public abstract class DownloadTaskFileBase : DownloadTaskBase, IDownloadTaskProg
 
     [NotMapped]
     public long Speed => DownloadTaskPhaseExtensions.Speed(DownloadTaskPhase, this, this);
-
 
     public override string ToString() =>
         $"[MoveDownloadFileProgress {Title} - {Percentage:F2}% - {DataFormat.FormatSpeedString(Speed)} - {DataFormat.FormatSizeString(DownloadTaskPhase == DownloadTaskPhase.FileTransfer ? FileDataTransferred : DataReceived)} / {DataFormat.FormatSizeString(DataTotal)} - {DataFormat.FormatTimeSpanString(TimeSpan.FromSeconds(TimeRemaining))}]";

@@ -5,9 +5,9 @@ public class PlexMusicArtist : BasePlexMedia
     public override PlexMediaType Type => PlexMediaType.MusicArtist;
 
     /// <summary>
-    /// Native Plex artist identifier extracted from a <c>plex://artist/...</c> metadata GUID.
-    /// Stores the lowercase identifier suffix, not the GUID URI or library-local <see cref="BasePlexMedia.PlexApiRatingKey"/>.
-    /// Null when Plex does not provide a valid native artist GUID.
+    /// Native Plex artist identifier normalized from Plex metadata.
+    /// Stores the lowercase identifier suffix without a Plex URI prefix or library-local <see cref="BasePlexMedia.PlexApiRatingKey"/>.
+    /// Null when Plex does not provide a valid native artist identifier.
     /// </summary>
     public string? PlexApiIdentityId { get; set; }
 

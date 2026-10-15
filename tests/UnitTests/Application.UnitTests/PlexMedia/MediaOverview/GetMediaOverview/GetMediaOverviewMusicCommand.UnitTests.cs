@@ -111,13 +111,13 @@ public class GetMediaOverviewMusicCommandUnitTests : BaseCommandUnitTest<GetMedi
             {
                 PlexLibraryId = libraryIds[0],
                 PlexMusicArtistId = target[2].Id,
-                Quality = AudioQuality.MP3_320KbpsPlus,
+                AudioQuality = AudioQuality.MP3_320KbpsPlus,
             },
             new PlexMusicArtistMediaQuality
             {
                 PlexLibraryId = libraryIds[0],
                 PlexMusicArtistId = target[2].Id,
-                Quality = AudioQuality.Unknown,
+                AudioQuality = AudioQuality.Unknown,
             }
         );
         await dbContext.SaveChangesAsync(CancellationToken);
@@ -186,7 +186,7 @@ public class GetMediaOverviewMusicCommandUnitTests : BaseCommandUnitTest<GetMedi
             x.MediaDataType == PlexMediaType.MusicArtist
             && x.MediaId == target[2].Id
             && x.DataId == -1
-            && x.Quality == VideoQuality.None
+            && x.VideoQuality == VideoQuality.None
         );
         result.Value.Qualities.ShouldBeEmpty();
         result.Value.Roles.ShouldBe([actor.Id]);

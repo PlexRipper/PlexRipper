@@ -29,8 +29,12 @@ public class DbContextExtensionsDownloadTasksUnitTests : BaseUnitTest
         var dbContext = IDbContext;
         var musicRoots = await dbContext.DownloadTaskMusicArtists.IncludeAll().ToArrayAsync(CancellationToken);
         var videoRoots = await dbContext.DownloadTaskOtherVideos.IncludeAll().ToArrayAsync(CancellationToken);
-        var musicFiles = musicRoots.SelectMany(x => x.Children).SelectMany(x => x.Children)
-            .SelectMany(x => x.Children).OrderBy(x => x.PlexApiRatingKey).ToArray();
+        var musicFiles = musicRoots
+            .SelectMany(x => x.Children)
+            .SelectMany(x => x.Children)
+            .SelectMany(x => x.Children)
+            .OrderBy(x => x.PlexApiRatingKey)
+            .ToArray();
         var otherVideoFiles = videoRoots.SelectMany(x => x.Children).OrderBy(x => x.PlexApiRatingKey).ToArray();
         DownloadTaskFileBase target = music ? musicFiles[0] : otherVideoFiles[0];
         DownloadTaskFileBase control = music ? musicFiles[1] : otherVideoFiles[1];
@@ -78,8 +82,9 @@ public class DbContextExtensionsDownloadTasksUnitTests : BaseUnitTest
             }
         );
         var dbContext = IDbContext;
-        var music = await dbContext.DownloadTaskMusicTrackFiles
-            .Include(x => x.Parent).ThenInclude(x => x!.Parent)
+        var music = await dbContext
+            .DownloadTaskMusicTrackFiles.Include(x => x.Parent)
+                .ThenInclude(x => x!.Parent)
             .SingleAsync(CancellationToken);
         var video = await dbContext.DownloadTaskOtherVideoFiles.SingleAsync(CancellationToken);
         (await dbContext.DownloadTaskTrackFileLogs.CountAsync(CancellationToken)).ShouldBe(0);
@@ -169,12 +174,14 @@ public class DbContextExtensionsDownloadTasksUnitTests : BaseUnitTest
             }
         );
         var dbContext = IDbContext;
-        var musicFiles = await dbContext.DownloadTaskMusicTrackFiles
-            .Include(x => x.Parent).ThenInclude(x => x!.Parent).ThenInclude(x => x!.Parent)
+        var musicFiles = await dbContext
+            .DownloadTaskMusicTrackFiles.Include(x => x.Parent)
+                .ThenInclude(x => x!.Parent)
+                    .ThenInclude(x => x!.Parent)
             .OrderBy(x => x.PlexApiRatingKey)
             .ToArrayAsync(CancellationToken);
-        var otherVideoFiles = await dbContext.DownloadTaskOtherVideoFiles
-            .OrderBy(x => x.PlexApiRatingKey)
+        var otherVideoFiles = await dbContext
+            .DownloadTaskOtherVideoFiles.OrderBy(x => x.PlexApiRatingKey)
             .ToArrayAsync(CancellationToken);
         DownloadTaskFileBase target = music ? musicFiles[0] : otherVideoFiles[0];
         DownloadTaskFileBase control = music ? musicFiles[1] : otherVideoFiles[1];
@@ -185,7 +192,8 @@ public class DbContextExtensionsDownloadTasksUnitTests : BaseUnitTest
             await dbContext.GetRootDownloadTaskKeyAsync(control.ToKey(), cancellationToken: CancellationToken)
         )!;
         var beforeRootIds = (await dbContext.GetAllDownloadTasksByServerAsync(cancellationToken: CancellationToken))
-            .Select(x => x.Id).ToArray();
+            .Select(x => x.Id)
+            .ToArray();
         (await dbContext.GetDownloadTaskKeysAsync([targetRoot.Id, controlRoot.Id], CancellationToken))
             .Select(x => x.Id)
             .Order()
@@ -207,7 +215,8 @@ public class DbContextExtensionsDownloadTasksUnitTests : BaseUnitTest
         // Assert
         count.ShouldBe(music ? 3 : 1);
         (await dbContext.GetAllDownloadTasksByServerAsync(cancellationToken: CancellationToken))
-            .Select(x => x.Id).Order()
+            .Select(x => x.Id)
+            .Order()
             .ShouldBe(beforeRootIds.Where(id => id != targetRoot.Id).Order());
         (await dbContext.GetDownloadTaskKeyAsync(targetRoot.Id, CancellationToken)).ShouldBeNull();
         (await dbContext.GetDownloadTaskFileAsync(control.ToKey(), CancellationToken))!.Id.ShouldBe(control.Id);
@@ -255,11 +264,11 @@ public class DbContextExtensionsDownloadTasksUnitTests : BaseUnitTest
         );
         var dbContext = IDbContext;
         var music = type is DownloadTaskType.MusicTrackData or DownloadTaskType.MusicTrackPart;
-        var musicFiles = await dbContext.DownloadTaskMusicTrackFiles
-            .OrderBy(x => x.PlexApiRatingKey)
+        var musicFiles = await dbContext
+            .DownloadTaskMusicTrackFiles.OrderBy(x => x.PlexApiRatingKey)
             .ToArrayAsync(CancellationToken);
-        var otherVideoFiles = await dbContext.DownloadTaskOtherVideoFiles
-            .OrderBy(x => x.PlexApiRatingKey)
+        var otherVideoFiles = await dbContext
+            .DownloadTaskOtherVideoFiles.OrderBy(x => x.PlexApiRatingKey)
             .ToArrayAsync(CancellationToken);
         DownloadTaskFileBase target = music ? musicFiles[0] : otherVideoFiles[0];
         DownloadTaskFileBase control = music ? musicFiles[1] : otherVideoFiles[1];
@@ -304,12 +313,14 @@ public class DbContextExtensionsDownloadTasksUnitTests : BaseUnitTest
         );
         var dbContext = IDbContext;
         var music = type is DownloadTaskType.MusicTrackData or DownloadTaskType.MusicTrackPart;
-        var musicFiles = await dbContext.DownloadTaskMusicTrackFiles
-            .Include(x => x.Parent).ThenInclude(x => x!.Parent).ThenInclude(x => x!.Parent)
+        var musicFiles = await dbContext
+            .DownloadTaskMusicTrackFiles.Include(x => x.Parent)
+                .ThenInclude(x => x!.Parent)
+                    .ThenInclude(x => x!.Parent)
             .OrderBy(x => x.PlexApiRatingKey)
             .ToArrayAsync(CancellationToken);
-        var otherVideoFiles = await dbContext.DownloadTaskOtherVideoFiles
-            .Include(x => x.Parent)
+        var otherVideoFiles = await dbContext
+            .DownloadTaskOtherVideoFiles.Include(x => x.Parent)
             .OrderBy(x => x.PlexApiRatingKey)
             .ToArrayAsync(CancellationToken);
         DownloadTaskFileBase target = music ? musicFiles[0] : otherVideoFiles[0];
@@ -458,12 +469,14 @@ public class DbContextExtensionsDownloadTasksUnitTests : BaseUnitTest
             }
         );
         var dbContext = IDbContext;
-        var musicFiles = await dbContext.DownloadTaskMusicTrackFiles
-            .Include(x => x.Parent).ThenInclude(x => x!.Parent).ThenInclude(x => x!.Parent)
+        var musicFiles = await dbContext
+            .DownloadTaskMusicTrackFiles.Include(x => x.Parent)
+                .ThenInclude(x => x!.Parent)
+                    .ThenInclude(x => x!.Parent)
             .OrderBy(x => x.PlexApiRatingKey)
             .ToArrayAsync(CancellationToken);
-        var otherVideoFiles = await dbContext.DownloadTaskOtherVideoFiles
-            .Include(x => x.Parent)
+        var otherVideoFiles = await dbContext
+            .DownloadTaskOtherVideoFiles.Include(x => x.Parent)
             .OrderBy(x => x.PlexApiRatingKey)
             .ToArrayAsync(CancellationToken);
         DownloadTaskFileBase target = music ? musicFiles[0] : otherVideoFiles[0];
@@ -484,7 +497,8 @@ public class DbContextExtensionsDownloadTasksUnitTests : BaseUnitTest
             }
             : new[] { root, target.ToKey() };
         var beforeRootIds = (await dbContext.GetAllDownloadTasksByServerAsync(cancellationToken: CancellationToken))
-            .Select(x => x.Id).ToArray();
+            .Select(x => x.Id)
+            .ToArray();
         var found = await dbContext.GetDownloadTaskKeysAsync(keys.Select(x => x.Id).ToList(), CancellationToken);
         found.OrderBy(x => x.Id).ShouldBe(keys.OrderBy(x => x.Id));
         foreach (var key in keys)
@@ -495,9 +509,7 @@ public class DbContextExtensionsDownloadTasksUnitTests : BaseUnitTest
             inferred.ShouldNotBeNull();
             inferred.DownloadTaskType.ShouldBe(key.Type);
             inferred.Id.ShouldBe(key.Id);
-            inferred.ParentId.ShouldBe(
-                key.Id == root.Id ? Guid.Empty : keys[Array.IndexOf(keys, key) - 1].Id
-            );
+            inferred.ParentId.ShouldBe(key.Id == root.Id ? Guid.Empty : keys[Array.IndexOf(keys, key) - 1].Id);
             (await dbContext.GetDownloadableChildTaskKeys(key, CancellationToken)).ShouldBe([target.ToKey()]);
             (await dbContext.GetDownloadTaskKeyAsync(key.Id, CancellationToken)).ShouldBe(key);
         }
@@ -521,7 +533,8 @@ public class DbContextExtensionsDownloadTasksUnitTests : BaseUnitTest
             .ToParentKey()!
             .Id.ShouldBe(control.ToParentKey()!.Id);
         (await dbContext.GetAllDownloadTasksByServerAsync(cancellationToken: CancellationToken))
-            .Select(x => x.Id).Order()
+            .Select(x => x.Id)
+            .Order()
             .ShouldBe(beforeRootIds.Where(id => id != root.Id).Order());
     }
 
@@ -561,9 +574,7 @@ public class DbContextExtensionsDownloadTasksUnitTests : BaseUnitTest
         var after = await statuses.ToListAsync(CancellationToken);
         after
             .Select(x => (x.Id, x.DownloadStatus))
-            .ShouldBe(
-                before.Select(x => (x.Id, x.Id == target.Id ? DownloadStatus.Error : x.DownloadStatus))
-            );
+            .ShouldBe(before.Select(x => (x.Id, x.Id == target.Id ? DownloadStatus.Error : x.DownloadStatus)));
     }
 
     [Test]
@@ -803,7 +814,7 @@ public class DbContextExtensionsDownloadTasksUnitTests : BaseUnitTest
         downloadTaskDb.DestinationDirectory.ShouldBe(testDownloadTask.DestinationDirectory);
         downloadTaskDb.FileLocationUrl.ShouldBe(testDownloadTask.FileLocationUrl);
         downloadTaskDb.CreatedAt.ShouldBe(testDownloadTask.CreatedAt);
-        downloadTaskDb.Quality.ShouldBe(testDownloadTask.Quality);
+        downloadTaskDb.VideoQuality.ShouldBe(testDownloadTask.VideoQuality);
         downloadTaskDb.IsDownloadable.ShouldBe(testDownloadTask.IsDownloadable);
         downloadTaskDb.MediaType.ShouldBe(testDownloadTask.MediaType);
         downloadTaskDb.FullTitle.ShouldBe(testDownloadTask.FullTitle);
@@ -859,7 +870,7 @@ public class DbContextExtensionsDownloadTasksUnitTests : BaseUnitTest
         downloadTaskDb.DestinationDirectory.ShouldBe(testDownloadTask.DestinationDirectory);
         downloadTaskDb.FileLocationUrl.ShouldBe(testDownloadTask.FileLocationUrl);
         downloadTaskDb.CreatedAt.ShouldBe(testDownloadTask.CreatedAt);
-        downloadTaskDb.Quality.ShouldBe(testDownloadTask.Quality);
+        downloadTaskDb.VideoQuality.ShouldBe(testDownloadTask.VideoQuality);
         downloadTaskDb.IsDownloadable.ShouldBe(testDownloadTask.IsDownloadable);
         downloadTaskDb.MediaType.ShouldBe(testDownloadTask.MediaType);
         downloadTaskDb.FullTitle.ShouldBe(testDownloadTask.FullTitle);

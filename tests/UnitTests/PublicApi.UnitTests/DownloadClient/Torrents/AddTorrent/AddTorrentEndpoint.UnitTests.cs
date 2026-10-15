@@ -53,7 +53,7 @@ public class AddTorrentEndpointUnitTests : BaseEndpointUnitTest<AddTorrentEndpoi
                             && cmd.Request.DownloadMedias[0].MediaIds.Contains(validMetadata.MediaId)
                             && cmd.Request.DownloadMedias[0].Qualities.Count == 1
                             && cmd.Request.DownloadMedias[0].Qualities[0].MediaDataType == validMetadata.Type
-                            && cmd.Request.DownloadMedias[0].Qualities[0].Quality == validMetadata.Quality
+                            && cmd.Request.DownloadMedias[0].Qualities[0].VideoQuality == validMetadata.VideoQuality
                             && cmd.Request.DownloadMedias[0].Qualities[0].MediaId == validMetadata.MediaId
                             && cmd.Request.DownloadMedias[0].Qualities[0].DataId == validMetadata.DataId
                         ),
@@ -78,7 +78,7 @@ public class AddTorrentEndpointUnitTests : BaseEndpointUnitTest<AddTorrentEndpoi
             DataId = -1, // Invalid - should be > 0
             PartId = 0, // Invalid - should be > 0
             PlexApiPartId = 0, // Invalid - should be > 0
-            Quality = VideoQuality.HD,
+            VideoQuality = VideoQuality.HD,
             LibraryId = 0, // Invalid - should be > 0
             ServerId = 0, // Invalid - should be > 0
         };
@@ -167,7 +167,7 @@ public class AddTorrentEndpointUnitTests : BaseEndpointUnitTest<AddTorrentEndpoi
             DataId = 0,
             PartId = 0,
             PlexApiPartId = 0,
-            Quality = (VideoQuality)999, // Invalid enum value
+            VideoQuality = (VideoQuality)999, // Invalid enum value
             LibraryId = 0,
             ServerId = 0,
         };
@@ -187,7 +187,7 @@ public class AddTorrentEndpointUnitTests : BaseEndpointUnitTest<AddTorrentEndpoi
         result.Errors.ShouldContain(x => x.PropertyName == nameof(TorrentMetadataDTO.PartId));
         result.Errors.ShouldContain(x => x.PropertyName == nameof(TorrentMetadataDTO.PlexApiPartId));
         result.Errors.ShouldContain(x => x.PropertyName == nameof(TorrentMetadataDTO.Type));
-        result.Errors.ShouldContain(x => x.PropertyName == nameof(TorrentMetadataDTO.Quality));
+        result.Errors.ShouldContain(x => x.PropertyName == nameof(TorrentMetadataDTO.VideoQuality));
     }
 
     [Test]
@@ -241,18 +241,29 @@ public class AddTorrentEndpointUnitTests : BaseEndpointUnitTest<AddTorrentEndpoi
     )
     {
         // Arrange
-        await SetupDatabase(88390, config =>
-        {
-            config.MovieDownloadTasksCount = 1;
-            config.SonarrIntegrationCount = 1;
-            config.RadarrIntegrationCount = 1;
-        });
+        await SetupDatabase(
+            88390,
+            config =>
+            {
+                config.MovieDownloadTasksCount = 1;
+                config.SonarrIntegrationCount = 1;
+                config.RadarrIntegrationCount = 1;
+            }
+        );
         var dbContext = IDbContext;
-        var integrationId = integrationType == IntegrationType.Sonarr
-            ? await dbContext.SonarrIntegrations.Select(x => x.Id).SingleAsync(CancellationToken)
-            : await dbContext.RadarrIntegrations.Select(x => x.Id).SingleAsync(CancellationToken);
-        var before = await dbContext.DownloadTaskMovieFile.OrderBy(x => x.Id)
-            .Select(x => new { x.Id, x.ParentId, x.HashId, x.DownloadStatus })
+        var integrationId =
+            integrationType == IntegrationType.Sonarr
+                ? await dbContext.SonarrIntegrations.Select(x => x.Id).SingleAsync(CancellationToken)
+                : await dbContext.RadarrIntegrations.Select(x => x.Id).SingleAsync(CancellationToken);
+        var before = await dbContext
+            .DownloadTaskMovieFile.OrderBy(x => x.Id)
+            .Select(x => new
+            {
+                x.Id,
+                x.ParentId,
+                x.HashId,
+                x.DownloadStatus,
+            })
             .ToArrayAsync(CancellationToken);
         before.Length.ShouldBe(1);
         var metadata = CreateValidTorrentMetadata(mediaType);
@@ -275,13 +286,20 @@ public class AddTorrentEndpointUnitTests : BaseEndpointUnitTest<AddTorrentEndpoi
             response.ValidationErrors.Single().PropertyName.ShouldBe("GeneralErrors");
             response.ValidationErrors.Single().ErrorMessage.ShouldBe("Type");
         }
-        (await dbContext.DownloadTaskMovieFile.OrderBy(x => x.Id)
-            .Select(x => new { x.Id, x.ParentId, x.HashId, x.DownloadStatus })
-            .ToArrayAsync(CancellationToken)).ShouldBe(before);
-        Mock.Mock<ICommandExecutor>().Verify(
-            x => x.Send(It.IsAny<CreateDownloadTasksCommand>(), It.IsAny<CancellationToken>()),
-            Times.Never()
-        );
+        (
+            await dbContext
+                .DownloadTaskMovieFile.OrderBy(x => x.Id)
+                .Select(x => new
+                {
+                    x.Id,
+                    x.ParentId,
+                    x.HashId,
+                    x.DownloadStatus,
+                })
+                .ToArrayAsync(CancellationToken)
+        ).ShouldBe(before);
+        Mock.Mock<ICommandExecutor>()
+            .Verify(x => x.Send(It.IsAny<CreateDownloadTasksCommand>(), It.IsAny<CancellationToken>()), Times.Never());
         torrentFileMock.Verify(x => x.OpenReadStream(), Times.Once());
     }
 
@@ -324,7 +342,7 @@ public class AddTorrentEndpointUnitTests : BaseEndpointUnitTest<AddTorrentEndpoi
             DataId = 1,
             PartId = 1,
             PlexApiPartId = movieFile.PlexApiPartId,
-            Quality = VideoQuality.HD,
+            VideoQuality = VideoQuality.HD,
             LibraryId = library.Id,
             ServerId = server.Id,
         };
@@ -413,7 +431,7 @@ public class AddTorrentEndpointUnitTests : BaseEndpointUnitTest<AddTorrentEndpoi
             DataId = 1,
             PartId = 1,
             PlexApiPartId = episodeFile.PlexApiPartId,
-            Quality = VideoQuality.HD,
+            VideoQuality = VideoQuality.HD,
             LibraryId = library.Id,
             ServerId = server.Id,
         };
@@ -469,7 +487,7 @@ public class AddTorrentEndpointUnitTests : BaseEndpointUnitTest<AddTorrentEndpoi
             DataId = 1,
             PartId = 1,
             PlexApiPartId = 12345,
-            Quality = VideoQuality.HD,
+            VideoQuality = VideoQuality.HD,
             LibraryId = 1,
             ServerId = 1,
         };
@@ -491,7 +509,7 @@ public class AddTorrentEndpointUnitTests : BaseEndpointUnitTest<AddTorrentEndpoi
             [nameof(TorrentMetadataDTO.DataId)] = new BString(metadata.DataId.ToString()),
             [nameof(TorrentMetadataDTO.PartId)] = new BString(metadata.PartId.ToString()),
             [nameof(TorrentMetadataDTO.PlexApiPartId)] = new BString(metadata.PlexApiPartId.ToString()),
-            [nameof(TorrentMetadataDTO.Quality)] = new BString(metadata.Quality.ToString()),
+            [nameof(TorrentMetadataDTO.VideoQuality)] = new BString(metadata.VideoQuality.ToString()),
             [nameof(TorrentMetadataDTO.LibraryId)] = new BString(metadata.LibraryId.ToString()),
             [nameof(TorrentMetadataDTO.ServerId)] = new BString(metadata.ServerId.ToString()),
         };

@@ -1146,7 +1146,7 @@ public class CreateDownloadTasksCommandHandlerUnitTests : BaseCommandUnitTest<Cr
                     MediaId = leaf.Id,
                     MediaDataType = leaf.Type,
                     DataId = inheritedOriginal.Id,
-                    Quality = inheritedOriginal.Quality,
+                    VideoQuality = inheritedOriginal.VideoQuality,
                 },
             ],
         };
@@ -1161,7 +1161,7 @@ public class CreateDownloadTasksCommandHandlerUnitTests : BaseCommandUnitTest<Cr
                     MediaId = leaf.Id,
                     MediaDataType = leaf.Type,
                     DataId = explicitOriginal.Id,
-                    Quality = explicitOriginal.Quality,
+                    VideoQuality = explicitOriginal.VideoQuality,
                 },
             ],
             KeepCompletedInDownloadFolder = true,

@@ -16,7 +16,7 @@ public class DownloadTaskMovieFileValidator : AbstractValidator<DownloadTaskMovi
         RuleFor(x => x.DownloadDirectory).NotEmpty();
         RuleFor(x => x.FileName).NotEmpty();
         RuleFor(x => x.FileLocationUrl).NotEmpty();
-        RuleFor(x => x.Quality).NotEmpty();
+        RuleFor(x => x.VideoQuality).NotEmpty();
         RuleFor(x => x.ParentId).NotEqual(Guid.Empty);
     }
 }

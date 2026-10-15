@@ -171,7 +171,7 @@ public class GetMetadataFilter : Endpoint<GetMetadataFilterRequest, ResultDTO<Pl
         {
             var qualities = await _dbContext
                 .PlexMovieData.ApplyWhere(plexLibraryId > 0, x => x.PlexLibraryId == plexLibraryId)
-                .GroupBy(x => x.Quality)
+                .GroupBy(x => x.VideoQuality)
                 .Select(g => g.Key)
                 .ToListAsync(ct);
 
@@ -182,7 +182,7 @@ public class GetMetadataFilter : Endpoint<GetMetadataFilterRequest, ResultDTO<Pl
         {
             var qualities = await _dbContext
                 .PlexTvShowMediaQualities.ApplyWhere(plexLibraryId > 0, x => x.PlexLibraryId == plexLibraryId)
-                .GroupBy(x => x.Quality)
+                .GroupBy(x => x.VideoQuality)
                 .Select(g => g.Key)
                 .ToListAsync(ct);
 
@@ -193,7 +193,7 @@ public class GetMetadataFilter : Endpoint<GetMetadataFilterRequest, ResultDTO<Pl
         {
             var qualities = await _dbContext
                 .PlexOtherVideoData.ApplyWhere(plexLibraryId > 0, x => x.PlexLibraryId == plexLibraryId)
-                .GroupBy(x => x.Quality)
+                .GroupBy(x => x.VideoQuality)
                 .Select(g => g.Key)
                 .ToListAsync(ct);
 

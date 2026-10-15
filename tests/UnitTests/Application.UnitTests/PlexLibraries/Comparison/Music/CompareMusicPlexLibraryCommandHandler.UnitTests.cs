@@ -979,55 +979,6 @@ public class CompareMusicPlexLibraryCommandHandlerUnitTests : BaseCommandUnitTes
     }
 
     [Test]
-    public async Task ShouldRejectDirtyStoredNativeIdentity_WhenLegacyPrefixIsPresent()
-    {
-        // Arrange
-        var (remote, owned) = await SetupPairAsync(fallback: true);
-        await using var dbContext = (ReaparrDbContext)IDbContext;
-        await dbContext
-            .PlexMusicArtists.Where(x => x.PlexLibraryId == remote.Id)
-            .ExecuteUpdateAsync(x => x.SetProperty(y => y.SearchTitle, "remote-only"), CancellationToken);
-        await dbContext
-            .PlexMusicArtists.Where(x => x.PlexLibraryId == owned.Id)
-            .ExecuteUpdateAsync(x => x.SetProperty(y => y.SearchTitle, "owned-only"), CancellationToken);
-        await dbContext
-            .PlexMusicArtists.Where(x => x.PlexLibraryId == owned.Id)
-            .ExecuteUpdateAsync(
-                x => x.SetProperty(y => y.PlexApiIdentityId, "5d07bce8403c64029056b5a6"),
-                CancellationToken
-            );
-        await dbContext.Database.OpenConnectionAsync(CancellationToken);
-        try
-        {
-            await dbContext.Database.ExecuteSqlRawAsync("PRAGMA ignore_check_constraints = ON;", CancellationToken);
-            await dbContext
-                .PlexMusicArtists.Where(x => x.PlexLibraryId == remote.Id)
-                .ExecuteUpdateAsync(
-                    x => x.SetProperty(y => y.PlexApiIdentityId, " plex://artist/5d07bce8403c64029056b5a6 "),
-                    CancellationToken
-                );
-            await dbContext.Database.ExecuteSqlRawAsync("PRAGMA ignore_check_constraints = OFF;", CancellationToken);
-        }
-        finally
-        {
-            await dbContext.Database.CloseConnectionAsync();
-        }
-
-        // Act
-        var result = await new CompareMusicPlexLibraryCommandHandler(
-            dbContext,
-            Mock.Container.Resolve<ILogger>()
-        ).ExecuteAsync(new CompareMusicPlexLibraryCommand(owned.Id, remote.Id), CancellationToken);
-
-        // Assert
-        result.IsSuccess.ShouldBeTrue();
-        result.Errors.Count.ShouldBe(0);
-        (await dbContext.PlexMusicArtistComparisons.ToListAsync(CancellationToken)).ShouldBeEmpty();
-        (await dbContext.PlexMusicAlbumComparisons.ToListAsync(CancellationToken)).ShouldBeEmpty();
-        (await dbContext.PlexMusicTrackComparisons.ToListAsync(CancellationToken)).ShouldBeEmpty();
-    }
-
-    [Test]
     public async Task ShouldNotMatchRawGuid_WhenCanonicalNativeIdentityIsAbsent()
     {
         // Arrange
@@ -1041,8 +992,8 @@ public class CompareMusicPlexLibraryCommandHandlerUnitTests : BaseCommandUnitTes
             .SingleAsync(x => x.PlexLibraryId == owned.Id, CancellationToken);
         remoteArtist.PlexApiIdentityId = null;
         ownedArtist.PlexApiIdentityId = null;
-        remoteArtist.UpdateInitProperty(nameof(BasePlexMedia.Guid), "plex://artist/raw-only");
-        ownedArtist.UpdateInitProperty(nameof(BasePlexMedia.Guid), "plex://artist/raw-only");
+        remoteArtist.UpdateInitProperty(nameof(BasePlexMedia.Guid), "raw-only");
+        ownedArtist.UpdateInitProperty(nameof(BasePlexMedia.Guid), "raw-only");
         remoteArtist.UpdateInitProperty(nameof(PlexMusicArtist.SearchTitle), "remote-only");
         ownedArtist.UpdateInitProperty(nameof(PlexMusicArtist.SearchTitle), "owned-only");
         await dbContext.SaveChangesAsync(CancellationToken);

@@ -114,7 +114,9 @@ public class SyncPlexMusicCommandHandler : ICommandHandler<SyncPlexMusicCommand,
                         albumByKey.TryGetValue(incomingAlbum.PlexApiRatingKey, out var album);
                         incomingAlbum.Id = album?.Id ?? 0;
                         var albumIsUnchanged =
-                            album is not null && incomingAlbum.UpdatedAt == album.UpdatedAt && album.PlexArtistId == artist.Id;
+                            album is not null
+                            && incomingAlbum.UpdatedAt == album.UpdatedAt
+                            && album.PlexArtistId == artist.Id;
 
                         incomingAlbum.PlexArtist = incomingArtist;
                         incomingAlbum.PlexArtistId = artist.Id;
@@ -332,12 +334,12 @@ public class SyncPlexMusicCommandHandler : ICommandHandler<SyncPlexMusicCommand,
         CancellationToken ct
     )
     {
-        var albumQualityKeys = new HashSet<(int AlbumId, AudioQuality Quality)>();
+        var albumQualityKeys = new HashSet<(int AlbumId, AudioQuality AudioQuality)>();
         foreach (var album in albums)
         foreach (var track in album.Tracks)
         foreach (var data in track.MediaDataList)
             albumQualityKeys.Add((album.Id, data.AudioQuality));
-        var artistQualityKeys = new HashSet<(int ArtistId, AudioQuality Quality)>();
+        var artistQualityKeys = new HashSet<(int ArtistId, AudioQuality AudioQuality)>();
         foreach (var artist in artists)
         foreach (var album in artist.Albums)
         foreach (var track in album.Tracks)
@@ -354,7 +356,7 @@ public class SyncPlexMusicCommandHandler : ICommandHandler<SyncPlexMusicCommand,
             {
                 x.Id,
                 x.PlexMusicAlbumId,
-                x.Quality,
+                Quality = x.AudioQuality,
             })
             .ToListAsync(ct);
         var obsoleteAlbumQualityIds = new List<int>();
@@ -372,7 +374,7 @@ public class SyncPlexMusicCommandHandler : ICommandHandler<SyncPlexMusicCommand,
                     {
                         PlexLibraryId = libraryId,
                         PlexMusicAlbumId = quality.AlbumId,
-                        Quality = quality.Quality,
+                        AudioQuality = quality.AudioQuality,
                     })
                     .ToList(),
                 bulkConfig,
@@ -387,12 +389,12 @@ public class SyncPlexMusicCommandHandler : ICommandHandler<SyncPlexMusicCommand,
             {
                 x.Id,
                 x.PlexMusicArtistId,
-                x.Quality,
+                x.AudioQuality,
             })
             .ToListAsync(ct);
         var obsoleteArtistQualityIds = new List<int>();
         foreach (var quality in existingArtistQualities)
-            if (!artistQualityKeys.Remove((quality.PlexMusicArtistId, quality.Quality)))
+            if (!artistQualityKeys.Remove((quality.PlexMusicArtistId, quality.AudioQuality)))
                 obsoleteArtistQualityIds.Add(quality.Id);
         if (obsoleteArtistQualityIds.Count > 0)
             await ctx
@@ -405,7 +407,7 @@ public class SyncPlexMusicCommandHandler : ICommandHandler<SyncPlexMusicCommand,
                     {
                         PlexLibraryId = libraryId,
                         PlexMusicArtistId = quality.ArtistId,
-                        Quality = quality.Quality,
+                        AudioQuality = quality.AudioQuality,
                     })
                     .ToList(),
                 bulkConfig,
@@ -512,7 +514,6 @@ public class SyncPlexMusicCommandHandler : ICommandHandler<SyncPlexMusicCommand,
         if (rows.Count > 0)
             await ctx.BulkInsertAsync(rows, bulkConfig, ct);
     }
-
 
     private static (int MediaId, int PartId) DataKey(PlexMusicTrackMediaData data) =>
         (data.PlexApiMediaId, data.PlexApiPartId);

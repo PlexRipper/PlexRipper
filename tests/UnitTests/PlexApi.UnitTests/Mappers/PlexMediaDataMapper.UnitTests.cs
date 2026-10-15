@@ -33,84 +33,6 @@ public class PlexMediaDataMapperUnitTests : BaseUnitTest
     }
 
     [Test]
-    public void ShouldMapCanonicalNativeIdentity_WhenPlexGuidUsesEntityNamespace()
-    {
-        // Arrange
-        var source = FakeData
-            .GetLibraryMediaItemDTO(new Seed(9200), mediaType: PlexMediaType.MusicArtist)
-            .Generate() with
-        {
-            Guid = "PLEX://ARTIST/5D07BCE8403C64029056B5A6",
-            Guids = [new MetaDataGuidsDTO("mbid://CC2C9C3C-B7BC-4B8B-84D8-4FBD8779E493")],
-        };
-
-        // Act
-        var result = source.ToPlexMusicArtist();
-
-        // Assert
-        result.PlexApiIdentityId.ShouldBe("5d07bce8403c64029056b5a6");
-        result.MusicBrainzArtistId.ShouldBe("cc2c9c3c-b7bc-4b8b-84d8-4fbd8779e493");
-        result.Guid.ShouldBe(string.Empty);
-    }
-
-    [Test]
-    [Arguments("")]
-    [Arguments("local://artist/5d07bce8403c64029056b5a6")]
-    [Arguments("mbid://5d07bce8403c64029056b5a6")]
-    [Arguments("plex://album/5d07bce8403c64029056b5a6")]
-    [Arguments("plex://artist/")]
-    public void ShouldLeaveNativeIdentityNull_WhenPlexGuidIsMissingMalformedOrWrongNamespace(string guid)
-    {
-        // Arrange
-        var source = FakeData
-            .GetLibraryMediaItemDTO(new Seed(9202), mediaType: PlexMediaType.MusicArtist)
-            .Generate() with
-        {
-            Guid = guid,
-            Guids = [],
-        };
-
-        // Act
-        var result = source.ToPlexMusicArtist();
-
-        // Assert
-        result.PlexApiIdentityId.ShouldBeNull();
-    }
-
-    [Test]
-    [Arguments(PlexMediaType.MusicAlbum, "plex://artist/5d07bce8403c64029056b5a6")]
-    [Arguments(PlexMediaType.MusicTrack, "")]
-    public void ShouldLeaveAlbumAndTrackNativeIdentityNull_WhenPlexGuidIsWrongNamespaceOrAbsent(
-        PlexMediaType mediaType,
-        string guid
-    )
-    {
-        // Arrange
-        var source = FakeData
-            .GetLibraryMediaItemDTO(new Seed(9204), mediaType: mediaType)
-            .RuleFor(
-                x => x.Title,
-                mediaType == PlexMediaType.MusicAlbum ? "Unsupported album identity" : "Unsupported track identity"
-            )
-            .RuleFor(x => x.Guid, guid)
-            .Generate() with
-        {
-            Guids = [],
-        };
-
-        // Act
-        var identity = mediaType switch
-        {
-            PlexMediaType.MusicAlbum => source.ToPlexMusicAlbum().PlexApiIdentityId,
-            PlexMediaType.MusicTrack => source.ToPlexMusicTrack().PlexApiIdentityId,
-            _ => throw new ArgumentOutOfRangeException(nameof(mediaType), mediaType, null),
-        };
-
-        // Assert
-        identity.ShouldBeNull();
-    }
-
-    [Test]
     public void ShouldPreferPrimaryMusicBrainzId_WhenPrimaryAndSupplementaryIdsAreValid()
     {
         // Arrange
@@ -140,11 +62,11 @@ public class PlexMediaDataMapperUnitTests : BaseUnitTest
             .GetLibraryMediaItemDTO(new Seed(9203), mediaType: PlexMediaType.MusicArtist)
             .Generate() with
         {
-            Guid = "plex://artist/primary",
+            Guid = "primary",
             Guids =
             [
                 new MetaDataGuidsDTO("mbid://not-a-uuid"),
-                new MetaDataGuidsDTO("plex://artist/supplementary"),
+                new MetaDataGuidsDTO("not-a-mbid"),
                 new MetaDataGuidsDTO($"mbid://{expectedId}"),
             ],
         };
@@ -268,10 +190,10 @@ public class PlexMediaDataMapperUnitTests : BaseUnitTest
         var result = source.ToPlexMusicTrack();
 
         // Assert
-        result.Quality.ShouldBe(VideoQuality.None);
+        result.VideoQuality.ShouldBe(VideoQuality.None);
         var file = result.MediaDataList.ShouldHaveSingleItem();
         file.VideoResolution.ShouldBe(VideoQuality.None);
-        file.Quality.ShouldBe(VideoQuality.None);
+        file.VideoQuality.ShouldBe(VideoQuality.None);
         file.AudioCodec.ShouldBe("flac");
         file.AudioBitrateKbps.ShouldBe(737);
         file.AudioBitDepth.ShouldBe(16);
@@ -352,25 +274,25 @@ public class PlexMediaDataMapperUnitTests : BaseUnitTest
         var seed = new Seed(9209);
         var artist = FakeData.GetLibraryMediaItemDTO(seed, mediaType: PlexMediaType.MusicArtist).Generate() with
         {
-            Guid = "PLEX://ARTIST/5D07BCE8403C64029056B5A6",
+            Guid = "5D07BCE8403C64029056B5A6",
             Guids = [new MetaDataGuidsDTO($"mbid://{artistId}")],
         };
         var album = FakeData
             .GetLibraryMediaItemDTO(seed, mediaType: PlexMediaType.MusicAlbum)
             .RuleFor(x => x.Title, "Catalog album")
-            .RuleFor(x => x.Guid, "plex://album/catalog")
+            .RuleFor(x => x.Guid, "catalog")
             .Generate() with
         {
-            Guid = "PLEX://ALBUM/5D07C2D8403C640290914CF7",
+            Guid = "5D07C2D8403C640290914CF7",
             Guids = [new MetaDataGuidsDTO($"mbid://{releaseId}")],
         };
         var track = FakeData
             .GetLibraryMediaItemDTO(seed, mediaType: PlexMediaType.MusicTrack)
             .RuleFor(x => x.Title, "Catalog track")
-            .RuleFor(x => x.Guid, "plex://track/catalog")
+            .RuleFor(x => x.Guid, "catalog")
             .Generate() with
         {
-            Guid = "PLEX://TRACK/5D07C9A1403C640290CA914A",
+            Guid = "5D07C9A1403C640290CA914A",
             Guids = [new MetaDataGuidsDTO($"mbid://{releaseTrackId}")],
         };
 

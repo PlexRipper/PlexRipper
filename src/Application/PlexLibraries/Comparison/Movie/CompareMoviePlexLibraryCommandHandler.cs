@@ -101,7 +101,7 @@ public class CompareMoviePlexLibraryCommandHandler : ICommandHandler<CompareMovi
                 SearchTitle = m.SearchTitle,
                 Year = m.Year,
                 Duration = m.Duration,
-                Quality = m.Quality,
+                VideoQuality = m.VideoQuality,
                 Guid_IMDB = m.Guid_IMDB,
                 Guid_TMDB = m.Guid_TMDB,
                 Guid_TVDB = m.Guid_TVDB,
@@ -116,7 +116,7 @@ public class CompareMoviePlexLibraryCommandHandler : ICommandHandler<CompareMovi
                 SearchTitle = m.SearchTitle,
                 Year = m.Year,
                 Duration = m.Duration,
-                Quality = m.Quality,
+                VideoQuality = m.VideoQuality,
                 Guid_IMDB = m.Guid_IMDB,
                 Guid_TMDB = m.Guid_TMDB,
                 Guid_TVDB = m.Guid_TVDB,
@@ -158,8 +158,8 @@ public class CompareMoviePlexLibraryCommandHandler : ICommandHandler<CompareMovi
 
             foreach (var (owned, matchType) in matches)
             {
-                var remoteQuality = remote.Quality;
-                var ownedQuality = owned.Quality;
+                var remoteQuality = remote.VideoQuality;
+                var ownedQuality = owned.VideoQuality;
 
                 hitRows.Add(
                     new PlexMovieComparison
@@ -310,7 +310,7 @@ public class CompareMoviePlexLibraryCommandHandler : ICommandHandler<CompareMovi
         public required string SearchTitle { get; init; }
         public required int Year { get; init; }
         public required int Duration { get; init; }
-        public required VideoQuality Quality { get; init; }
+        public required VideoQuality VideoQuality { get; init; }
 
         // ReSharper disable once InconsistentNaming
         public required string? Guid_IMDB { get; init; }

@@ -15,7 +15,7 @@ public static partial class FakeData
             .Ignore(x => x.Parent)
             .Ignore(x => x.ParentId)
             .Ignore(x => x.Logs)
-            .RuleFor(x => x.Quality, _ => VideoQuality.None)
+            .RuleFor(x => x.VideoQuality, _ => VideoQuality.None)
             .RuleFor(x => x.FileName, (_, x) => $"photo-{x.PlexApiPartId}.jpg")
             .RuleFor(
                 x => x.DataTotal,

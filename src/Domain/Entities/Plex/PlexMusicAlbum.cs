@@ -14,9 +14,9 @@ public class PlexMusicAlbum : BasePlexMedia
     public PlexMusicArtist? PlexArtist { get; set; }
 
     /// <summary>
-    /// Native Plex album identifier extracted from a <c>plex://album/...</c> metadata GUID.
-    /// Stores the lowercase identifier suffix, not the GUID URI or library-local <see cref="BasePlexMedia.PlexApiRatingKey"/>.
-    /// Null when Plex does not provide a valid native album GUID.
+    /// Native Plex album identifier normalized from Plex metadata.
+    /// Stores the lowercase identifier suffix without a Plex URI prefix or library-local <see cref="BasePlexMedia.PlexApiRatingKey"/>.
+    /// Null when Plex does not provide a valid native album identifier.
     /// </summary>
     public required string? PlexApiIdentityId { get; set; }
 

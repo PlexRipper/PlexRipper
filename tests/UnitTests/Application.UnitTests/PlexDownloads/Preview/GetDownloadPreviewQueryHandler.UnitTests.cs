@@ -191,7 +191,7 @@ public class GetDownloadPreviewQueryHandlerUnitTests : BaseUnitTest<GetDownloadP
                         MediaId = outsider.Id,
                         DataId = outsiderOriginal.Id,
                         MediaDataType = PlexMediaType.PhotoImage,
-                        Quality = VideoQuality.Unknown,
+                        VideoQuality = VideoQuality.Unknown,
                     },
                 ],
             },
@@ -318,14 +318,14 @@ public class GetDownloadPreviewQueryHandlerUnitTests : BaseUnitTest<GetDownloadP
                         MediaId = clip.Id,
                         DataId = secondPart.Id,
                         MediaDataType = mismatchedSelectorType ? PlexMediaType.Movie : PlexMediaType.PhotoImage,
-                        Quality = VideoQuality.Unknown,
+                        VideoQuality = VideoQuality.Unknown,
                     },
                     new PlexMediaQualityDTO
                     {
                         MediaId = clip.Id,
                         DataId = alternate.Id,
                         MediaDataType = PlexMediaType.PhotoImage,
-                        Quality = VideoQuality.Unknown,
+                        VideoQuality = VideoQuality.Unknown,
                     },
                 ],
             },
@@ -398,14 +398,14 @@ public class GetDownloadPreviewQueryHandlerUnitTests : BaseUnitTest<GetDownloadP
                         MediaId = target.Id,
                         DataId = stale ? int.MaxValue : wrongData.Id,
                         MediaDataType = PlexMediaType.PhotoImage,
-                        Quality = VideoQuality.Unknown,
+                        VideoQuality = VideoQuality.Unknown,
                     },
                     new PlexMediaQualityDTO
                     {
                         MediaId = target.Id,
                         DataId = target.MediaDataList.Single().Id,
                         MediaDataType = PlexMediaType.PhotoImage,
-                        Quality = VideoQuality.Unknown,
+                        VideoQuality = VideoQuality.Unknown,
                     },
                 ],
             },
@@ -574,7 +574,7 @@ public class GetDownloadPreviewQueryHandlerUnitTests : BaseUnitTest<GetDownloadP
             .RuleFor(x => x.PlexApiRatingKey, _ => video.PlexApiRatingKey)
             .RuleFor(x => x.PlexApiMediaId, _ => video.MediaDataList.Single().PlexApiMediaId + 1)
             .RuleFor(x => x.PartIndex, f => f.IndexFaker)
-            .RuleFor(x => x.Quality, _ => VideoQuality.UHD_4K)
+            .RuleFor(x => x.VideoQuality, _ => VideoQuality.UHD_4K)
             .RuleFor(x => x.Size, _ => 300)
             .Generate(2);
         dbContext.PlexMusicTrackData.AddRange(trackParts);
@@ -623,14 +623,14 @@ public class GetDownloadPreviewQueryHandlerUnitTests : BaseUnitTest<GetDownloadP
                                 MediaId = track.Id,
                                 DataId = selectorCase == 3 ? int.MaxValue : trackParts[1].Id,
                                 MediaDataType = selectorCase == 2 ? PlexMediaType.Movie : PlexMediaType.MusicTrack,
-                                Quality = VideoQuality.Unknown,
+                                VideoQuality = VideoQuality.Unknown,
                             },
                             new PlexMediaQualityDTO
                             {
                                 MediaId = track.Id,
                                 DataId = track.MediaDataList.Single().Id,
                                 MediaDataType = PlexMediaType.MusicTrack,
-                                Quality = VideoQuality.Unknown,
+                                VideoQuality = VideoQuality.Unknown,
                             },
                         ],
             },
@@ -658,14 +658,14 @@ public class GetDownloadPreviewQueryHandlerUnitTests : BaseUnitTest<GetDownloadP
                                 MediaId = video.Id,
                                 DataId = selectorCase == 3 ? int.MaxValue : videoParts[1].Id,
                                 MediaDataType = selectorCase == 2 ? PlexMediaType.Movie : PlexMediaType.OtherVideos,
-                                Quality = VideoQuality.UHD_4K,
+                                VideoQuality = VideoQuality.UHD_4K,
                             },
                             new PlexMediaQualityDTO
                             {
                                 MediaId = video.Id,
                                 DataId = video.MediaDataList.Single().Id,
                                 MediaDataType = PlexMediaType.OtherVideos,
-                                Quality = VideoQuality.Unknown,
+                                VideoQuality = VideoQuality.Unknown,
                             },
                         ],
             },
@@ -744,7 +744,9 @@ public class GetDownloadPreviewQueryHandlerUnitTests : BaseUnitTest<GetDownloadP
                 expectedVideoData
                     .GroupBy(x => x.PlexApiMediaId)
                     .OrderBy(x => x.Min(y => y.Id))
-                    .Select(x => (video.Id, x.Min(y => y.Id), PlexMediaType.OtherVideos, x.First().Quality))
+                    .Select(x =>
+                        (video.Id, x.Min(y => y.Id), PlexMediaType.OtherVideos, Quality: x.First().VideoQuality)
+                    )
             );
         result.Value.Single(x => x.MediaType == PlexMediaType.Movie).Children.ShouldBeEmpty();
         var dto = result.Value.ToDTO();
@@ -757,7 +759,7 @@ public class GetDownloadPreviewQueryHandlerUnitTests : BaseUnitTest<GetDownloadP
         dtoTrack.Type.ShouldBe(PlexMediaType.MusicTrack);
         dtoTrack
             .Qualities.OrderBy(x => x.DataId)
-            .Select(x => (x.MediaId, x.DataId, x.MediaDataType, x.Quality))
+            .Select(x => (x.MediaId, x.DataId, x.MediaDataType, Quality: x.VideoQuality))
             .ShouldBe(
                 previewTrack
                     .Qualities.OrderBy(x => x.DataId)
@@ -766,14 +768,14 @@ public class GetDownloadPreviewQueryHandlerUnitTests : BaseUnitTest<GetDownloadP
         var dtoPhoto = dto.Previews.Single(x => x.Type == PlexMediaType.PhotoAlbum).Children.Single();
         dtoPhoto.Type.ShouldBe(PlexMediaType.PhotoImage);
         dtoPhoto
-            .Qualities.Select(x => (x.MediaId, x.DataId, x.MediaDataType, x.Quality))
+            .Qualities.Select(x => (x.MediaId, x.DataId, x.MediaDataType, Quality: x.VideoQuality))
             .ShouldBe(
                 previewImage.Qualities.Select(x => (x.MediaId, x.DataId, x.MediaDataType, Quality: x.VideoQuality))
             );
         var dtoVideo = dto.Previews.Single(x => x.Type == PlexMediaType.OtherVideos);
         dtoVideo
             .Qualities.OrderBy(x => x.DataId)
-            .Select(x => (x.MediaId, x.DataId, x.MediaDataType, x.Quality))
+            .Select(x => (x.MediaId, x.DataId, x.MediaDataType, Quality: x.VideoQuality))
             .ShouldBe(
                 previewVideo
                     .Qualities.OrderBy(x => x.DataId)
@@ -961,7 +963,7 @@ public class GetDownloadPreviewQueryHandlerUnitTests : BaseUnitTest<GetDownloadP
                     MediaId = movie.Id,
                     DataId = md.Id,
                     MediaDataType = PlexMediaType.Movie,
-                    Quality = VideoQuality.UHD_4K,
+                    VideoQuality = VideoQuality.UHD_4K,
                 })
             )
             .ToList();
@@ -1021,7 +1023,7 @@ public class GetDownloadPreviewQueryHandlerUnitTests : BaseUnitTest<GetDownloadP
                         MediaId = movie.Id,
                         DataId = md.Id,
                         MediaDataType = PlexMediaType.Movie,
-                        Quality = VideoQuality.FullHD,
+                        VideoQuality = VideoQuality.FullHD,
                     })
             )
             .ToList();
@@ -1259,7 +1261,7 @@ public class GetDownloadPreviewQueryHandlerUnitTests : BaseUnitTest<GetDownloadP
                         MediaId = episode.Id,
                         DataId = md.Id,
                         MediaDataType = PlexMediaType.Episode,
-                        Quality = VideoQuality.HD,
+                        VideoQuality = VideoQuality.HD,
                     })
             )
             .ToList();
@@ -1525,7 +1527,7 @@ public class GetDownloadPreviewQueryHandlerUnitTests : BaseUnitTest<GetDownloadP
                         MediaId = movie.Id,
                         DataId = md.Id,
                         MediaDataType = PlexMediaType.Movie,
-                        Quality = VideoQuality.UHD_4K,
+                        VideoQuality = VideoQuality.UHD_4K,
                     })
             )
             .ToList();
@@ -1539,7 +1541,7 @@ public class GetDownloadPreviewQueryHandlerUnitTests : BaseUnitTest<GetDownloadP
                         MediaId = episode.Id,
                         DataId = md.Id,
                         MediaDataType = PlexMediaType.Episode,
-                        Quality = VideoQuality.HD,
+                        VideoQuality = VideoQuality.HD,
                     })
             )
             .ToList();

@@ -5,7 +5,12 @@ public class PlexMusicAlbumMediaQualityConfiguration : IEntityTypeConfiguration<
     public void Configure(EntityTypeBuilder<PlexMusicAlbumMediaQuality> builder)
     {
         builder
-            .HasIndex(x => new { x.PlexLibraryId, x.PlexMusicAlbumId, x.Quality })
+            .HasIndex(x => new
+            {
+                x.PlexLibraryId,
+                x.PlexMusicAlbumId,
+                Quality = x.AudioQuality,
+            })
             .IsUnique();
         builder
             .HasOne(x => x.PlexLibrary)

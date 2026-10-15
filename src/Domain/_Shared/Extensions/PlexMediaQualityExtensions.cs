@@ -23,9 +23,7 @@ public static class PlexMediaQualityExtensions
         if (best is not null)
             return (best, best.AudioQuality);
 
-        var representative = files.MinBy(x =>
-            ((int)x.Source, x.PlexApiMediaId, x.PlexApiPartId, x.PartIndex, x.Id)
-        );
+        var representative = files.MinBy(x => ((int)x.Source, x.PlexApiMediaId, x.PlexApiPartId, x.PartIndex, x.Id));
         return (representative, AudioQuality.Unknown);
     }
 
@@ -35,5 +33,5 @@ public static class PlexMediaQualityExtensions
     /// <param name="qualities">The collection of BasePlexMediaQuality instances to sort.</param>
     /// <returns>A sorted sequence of BasePlexMediaQuality instances, ordered by resolution.</returns>
     public static IEnumerable<T> SortByQuality<T>(this IEnumerable<T> qualities)
-        where T : BasePlexMediaQuality => qualities.OrderBy(q => (int)q.Quality);
+        where T : BasePlexMediaQuality => qualities.OrderBy(q => (int)q.VideoQuality);
 }

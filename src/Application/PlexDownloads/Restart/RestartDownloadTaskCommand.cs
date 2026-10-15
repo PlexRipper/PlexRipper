@@ -206,7 +206,7 @@ public class RestartDownloadTaskCommandHandler : ICommandHandler<RestartDownload
                 FileName = x.GetFileName,
                 FileLocationUrl = x.Key,
                 HashId = downloadTask.HashId,
-                Quality = x.VideoResolution,
+                VideoQuality = x.VideoResolution,
                 DirectoryMeta = new DownloadTaskDirectory
                 {
                     DownloadRootPath = downloadTask.DirectoryMeta.DownloadRootPath,
@@ -299,7 +299,7 @@ public class RestartDownloadTaskCommandHandler : ICommandHandler<RestartDownload
                 FileName = x.GetFileName,
                 FileLocationUrl = x.Key,
                 HashId = downloadTask.HashId,
-                Quality = x.VideoResolution,
+                VideoQuality = x.VideoResolution,
                 DirectoryMeta = new DownloadTaskDirectory
                 {
                     DownloadRootPath = downloadTask.DirectoryMeta.DownloadRootPath,

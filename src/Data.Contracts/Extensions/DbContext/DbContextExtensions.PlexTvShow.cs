@@ -91,12 +91,12 @@ public static partial class DbContextExtensions
                     .Select(x => new PlexTvShowSeasonMediaQuality
                     {
                         Id = 0,
-                        Quality = x.Quality,
+                        VideoQuality = x.VideoQuality,
                         PlexLibraryId = x.PlexLibraryId,
                         PlexTvShowSeasonId = x.PlexTvShowEpisode?.TvShowSeasonId ?? 0,
                         PlexTvShowSeason = x.PlexTvShowEpisode?.TvShowSeason,
                     })
-                    .DistinctBy(x => (x.Quality, x.PlexTvShowSeasonId))
+                    .DistinctBy(x => (Quality: x.VideoQuality, x.PlexTvShowSeasonId))
                     .ToList();
 
                 await ctx.BulkInsertAsync(seasonQualities, BulkConfigPreset.Default, txCt);
@@ -106,11 +106,11 @@ public static partial class DbContextExtensions
                     .Select(x => new PlexTvShowMediaQuality
                     {
                         Id = 0,
-                        Quality = x.Quality,
+                        VideoQuality = x.VideoQuality,
                         PlexLibraryId = x.PlexLibraryId,
                         PlexTvShowId = x.PlexTvShowSeason?.TvShowId ?? 0,
                     })
-                    .DistinctBy(x => (x.Quality, x.PlexTvShowId))
+                    .DistinctBy(x => (Quality: x.VideoQuality, x.PlexTvShowId))
                     .ToList();
 
                 await ctx.BulkInsertAsync(tvShowQualities, BulkConfigPreset.Default, txCt);
@@ -119,10 +119,10 @@ public static partial class DbContextExtensions
                 {
                     var highestQuality = tvShowQualities
                         .Where(x => x.PlexTvShowId == tvShow.Id)
-                        .Select(x => (VideoQuality?)x.Quality)
+                        .Select(x => (VideoQuality?)x.VideoQuality)
                         .Max();
 
-                    tvShow.Quality = highestQuality ?? VideoQuality.Unknown;
+                    tvShow.VideoQuality = highestQuality ?? VideoQuality.Unknown;
                 }
 
                 await ctx.BulkUpdateAsync(plexTvShows, BulkConfigPreset.Default, txCt);

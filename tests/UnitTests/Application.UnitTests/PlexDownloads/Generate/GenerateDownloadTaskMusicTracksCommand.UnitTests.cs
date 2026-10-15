@@ -144,7 +144,7 @@ public class GenerateDownloadTaskMusicTracksCommandUnitTests
                     MediaId = track.Id,
                     DataId = alternate.Id,
                     MediaDataType = PlexMediaType.MusicTrack,
-                    Quality = VideoQuality.Unknown,
+                    VideoQuality = VideoQuality.Unknown,
                 },
             ],
         };
@@ -215,7 +215,7 @@ public class GenerateDownloadTaskMusicTracksCommandUnitTests
             .RuleFor(x => x.PlexLibraryId, _ => target.PlexLibraryId)
             .RuleFor(x => x.PlexApiRatingKey, _ => target.PlexApiRatingKey)
             .RuleFor(x => x.PlexApiMediaId, _ => automatic.PlexApiMediaId + 1)
-            .RuleFor(x => x.Quality, _ => VideoQuality.Unknown)
+            .RuleFor(x => x.VideoQuality, _ => VideoQuality.Unknown)
             .Generate();
         dbContext.PlexMusicTrackData.Add(requested);
         await dbContext.SaveChangesAsync(CancellationToken);
@@ -235,21 +235,21 @@ public class GenerateDownloadTaskMusicTracksCommandUnitTests
                     MediaId = control.Id,
                     DataId = automatic.Id,
                     MediaDataType = PlexMediaType.MusicTrack,
-                    Quality = VideoQuality.Unknown,
+                    VideoQuality = VideoQuality.Unknown,
                 },
                 new PlexMediaQualityDTO
                 {
                     MediaId = target.Id,
                     DataId = firstDataIdFromAnotherTrack ? foreignOriginal.Id : requested.Id,
                     MediaDataType = PlexMediaType.MusicArtist,
-                    Quality = VideoQuality.Unknown,
+                    VideoQuality = VideoQuality.Unknown,
                 },
                 new PlexMediaQualityDTO
                 {
                     MediaId = target.Id,
                     DataId = firstDataIdFromAnotherTrack ? requested.Id : automatic.Id,
                     MediaDataType = PlexMediaType.MusicTrack,
-                    Quality = VideoQuality.Unknown,
+                    VideoQuality = VideoQuality.Unknown,
                 },
             ],
         };
@@ -331,7 +331,7 @@ public class GenerateDownloadTaskMusicTracksCommandUnitTests
                     MediaId = track.Id,
                     DataId = int.MaxValue,
                     MediaDataType = PlexMediaType.MusicTrack,
-                    Quality = VideoQuality.Unknown,
+                    VideoQuality = VideoQuality.Unknown,
                 },
             ],
         };

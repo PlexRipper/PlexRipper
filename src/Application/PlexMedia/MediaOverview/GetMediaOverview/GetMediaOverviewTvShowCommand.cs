@@ -141,10 +141,10 @@ public sealed class GetMediaOverviewTvShowCommandHandler
             .ToListAsync(cancellationToken);
         var qualities = await context
             .PlexTvShowMediaQualities.Where(x => ids.Contains(x.PlexTvShowId))
-            .OrderBy(x => x.Quality)
+            .OrderBy(x => x.VideoQuality)
             .Select(x => new PlexMediaQualityDTO
             {
-                Quality = x.Quality,
+                VideoQuality = x.VideoQuality,
                 MediaDataType = PlexMediaType.TvShow,
                 DataId = x.Id,
                 MediaId = x.PlexTvShowId,
@@ -185,7 +185,7 @@ public sealed class GetMediaOverviewTvShowCommandHandler
                     new MediaNavigationIndexRow(
                         tvShow.SearchTitle,
                         tvShow.Year,
-                        (int?)tvShow.Quality,
+                        (int?)tvShow.VideoQuality,
                         tvShow.Duration,
                         tvShow.AddedAt,
                         tvShow.UpdatedAt,
@@ -224,7 +224,7 @@ public sealed class GetMediaOverviewTvShowCommandHandler
         LogPhase(filter, "Metadata", stopwatch.Elapsed, items.Count);
         result.Qualities = items
             .SelectMany(x => x.Qualities)
-            .Select(x => x.Quality.ToId())
+            .Select(x => x.VideoQuality.ToId())
             .Distinct()
             .OrderBy(x => x)
             .ToList();

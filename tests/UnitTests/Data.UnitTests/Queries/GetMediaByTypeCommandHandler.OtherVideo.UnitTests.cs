@@ -12,7 +12,10 @@ public class GetMediaByTypeCommandHandlerOtherVideoUnitTests : BaseCommandUnitTe
     [Arguments(true, "Countries")]
     [Arguments(false, "Genres")]
     [Arguments(true, "Genres")]
-    public async Task ShouldReturnExactScopedOtherVideoPage_WhenFilteringAndSortingCanonicalMedia(bool sortByQuality, string metadataField)
+    public async Task ShouldReturnExactScopedOtherVideoPage_WhenFilteringAndSortingCanonicalMedia(
+        bool sortByQuality,
+        string metadataField
+    )
     {
         // Arrange
         await SetupDatabase(
@@ -26,7 +29,10 @@ public class GetMediaByTypeCommandHandlerOtherVideoUnitTests : BaseCommandUnitTe
         );
 
         var dbContext = IDbContext;
-        var libraryIds = await dbContext.PlexLibraries.OrderBy(x => x.Id).Select(x => x.Id).ToListAsync(CancellationToken);
+        var libraryIds = await dbContext
+            .PlexLibraries.OrderBy(x => x.Id)
+            .Select(x => x.Id)
+            .ToListAsync(CancellationToken);
         libraryIds.Count.ShouldBe(2);
         var targetLibraryId = libraryIds[0];
         var controlLibraryId = libraryIds[1];
@@ -53,7 +59,7 @@ public class GetMediaByTypeCommandHandlerOtherVideoUnitTests : BaseCommandUnitTe
                 video.MediaSize = (i + 1) * 100L;
                 video.Title = $"{video.PlexLibraryId}-root-{i}";
                 video.HasThumb = i % 2 == 0;
-                video.Quality = VideoQuality.FullHD;
+                video.VideoQuality = VideoQuality.FullHD;
                 if (i > 0)
                 {
                     video.Actors.Add(actor);
@@ -66,14 +72,28 @@ public class GetMediaByTypeCommandHandlerOtherVideoUnitTests : BaseCommandUnitTe
         dbContext.ClearChangeTracker();
 
         var expectedVideos = new[] { targetVideos[4], targetVideos[3] };
-        var qualityRows = await dbContext.PlexOtherVideoData
-            .Where(x => x.PlexLibraryId == targetLibraryId &&
-                (x.PlexOtherVideoId == expectedVideos[0].Id || x.PlexOtherVideoId == expectedVideos[1].Id))
-            .OrderBy(x => x.PlexOtherVideoId).ThenBy(x => x.Id)
-            .Select(x => new { x.PlexOtherVideoId, x.Id, x.Quality, x.Type })
+        var qualityRows = await dbContext
+            .PlexOtherVideoData.Where(x =>
+                x.PlexLibraryId == targetLibraryId
+                && (x.PlexOtherVideoId == expectedVideos[0].Id || x.PlexOtherVideoId == expectedVideos[1].Id)
+            )
+            .OrderBy(x => x.PlexOtherVideoId)
+            .ThenBy(x => x.Id)
+            .Select(x => new
+            {
+                x.PlexOtherVideoId,
+                x.Id,
+                Quality = x.VideoQuality,
+                x.Type,
+            })
             .ToListAsync(CancellationToken);
         qualityRows.Count.ShouldBe(2);
-        var metadataId = metadataField switch { "Actors" => actor.Id, "Countries" => country.Id, _ => genre.Id };
+        var metadataId = metadataField switch
+        {
+            "Actors" => actor.Id,
+            "Countries" => country.Id,
+            _ => genre.Id,
+        };
 
         var command = new GetMediaByTypeCommand
         {
@@ -117,46 +137,88 @@ public class GetMediaByTypeCommandHandlerOtherVideoUnitTests : BaseCommandUnitTe
         response.TotalEpisodeCount.ShouldBe(0);
         response.Items.Select(x => x.Id).ShouldBe(expectedVideos.Select(x => x.Id));
         response.Items.Select(x => x.SortIndex).ShouldBe([3, 4]);
-        response.Items.Select(x => new
-        {
-            x.Id, x.Title, x.SearchTitle, x.Year, x.Duration, x.MediaSize,
-            x.PlexApiRatingKey, x.PlexApiMetaDataKey, x.AddedAt, x.UpdatedAt,
-            x.PlexLibraryId, x.PlexServerId, x.Type, x.HasThumb,
-        }).ShouldBe(expectedVideos.Select(x => new
-        {
-            x.Id, x.Title, x.SearchTitle, x.Year, x.Duration, x.MediaSize,
-            x.PlexApiRatingKey, x.PlexApiMetaDataKey, x.AddedAt, x.UpdatedAt,
-            x.PlexLibraryId, x.PlexServerId, Type = PlexMediaType.OtherVideos, x.HasThumb,
-        }));
+        response
+            .Items.Select(x => new
+            {
+                x.Id,
+                x.Title,
+                x.SearchTitle,
+                x.Year,
+                x.Duration,
+                x.MediaSize,
+                x.PlexApiRatingKey,
+                x.PlexApiMetaDataKey,
+                x.AddedAt,
+                x.UpdatedAt,
+                x.PlexLibraryId,
+                x.PlexServerId,
+                x.Type,
+                x.HasThumb,
+            })
+            .ShouldBe(
+                expectedVideos.Select(x => new
+                {
+                    x.Id,
+                    x.Title,
+                    x.SearchTitle,
+                    x.Year,
+                    x.Duration,
+                    x.MediaSize,
+                    x.PlexApiRatingKey,
+                    x.PlexApiMetaDataKey,
+                    x.AddedAt,
+                    x.UpdatedAt,
+                    x.PlexLibraryId,
+                    x.PlexServerId,
+                    Type = PlexMediaType.OtherVideos,
+                    x.HasThumb,
+                })
+            );
         response.Items.Select(x => x.ParentId).ShouldBe(new int?[] { null, null });
         response.Items.Select(x => x.ChildCount).ShouldBe([0, 0]);
         response.Items.Select(x => x.GrandChildCount).ShouldBe([0, 0]);
         response.Items.Select(x => x.ComparisonId).ShouldBe([0, 0]);
         if (sortByQuality)
         {
-            response.NavigationIndexes.Select(x => new { x.Label, x.Index }).ShouldBe([
-                new { Label = "1080", Index = 0 },
-            ]);
+            response
+                .NavigationIndexes.Select(x => new { x.Label, x.Index })
+                .ShouldBe([new { Label = "1080", Index = 0 }]);
         }
         else
         {
-            response.NavigationIndexes.Select(x => new { x.Label, x.Index }).ShouldBe([
-                new { Label = "2000", Index = 0 },
-                new { Label = "2001", Index = 2 },
-                new { Label = "2002", Index = 4 },
-            ]);
+            response
+                .NavigationIndexes.Select(x => new { x.Label, x.Index })
+                .ShouldBe([
+                    new { Label = "2000", Index = 0 },
+                    new { Label = "2001", Index = 2 },
+                    new { Label = "2002", Index = 4 },
+                ]);
         }
-        response.Items.SelectMany(x => x.Qualities).OrderBy(x => x.MediaId).ThenBy(x => x.DataId)
-            .Select(x => new { x.MediaId, x.DataId, x.Quality, x.MediaDataType })
-            .ShouldBe(qualityRows.Select(x => new
+        response
+            .Items.SelectMany(x => x.Qualities)
+            .OrderBy(x => x.MediaId)
+            .ThenBy(x => x.DataId)
+            .Select(x => new
             {
-                MediaId = x.PlexOtherVideoId, DataId = x.Id, x.Quality, MediaDataType = x.Type,
-            }));
+                x.MediaId,
+                x.DataId,
+                Quality = x.VideoQuality,
+                x.MediaDataType,
+            })
+            .ShouldBe(
+                qualityRows.Select(x => new
+                {
+                    MediaId = x.PlexOtherVideoId,
+                    DataId = x.Id,
+                    x.Quality,
+                    MediaDataType = x.Type,
+                })
+            );
         response.Qualities.ShouldBe(new[] { VideoQuality.FullHD.ToId() });
         response.Roles.ShouldBe([actor.Id]);
         response.Countries.ShouldBe([country.Id]);
         response.Genres.ShouldBe([genre.Id]);
-        Mock.Mock<ICommandExecutor>().Verify(
-            x => x.Send(It.IsAny<ApplyComparisonStateCommand>(), It.IsAny<CancellationToken>()), Times.Never());
+        Mock.Mock<ICommandExecutor>()
+            .Verify(x => x.Send(It.IsAny<ApplyComparisonStateCommand>(), It.IsAny<CancellationToken>()), Times.Never());
     }
 }

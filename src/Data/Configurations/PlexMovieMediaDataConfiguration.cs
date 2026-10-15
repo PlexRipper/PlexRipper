@@ -4,8 +4,8 @@ public class PlexMovieMediaDataConfiguration : IEntityTypeConfiguration<PlexMovi
 {
     public void Configure(EntityTypeBuilder<PlexMovieMediaData> builder)
     {
-        builder.HasIndex(x => x.Quality);
-        builder.HasIndex(x => new { x.PlexMovieId, x.Quality });
+        builder.HasIndex(x => x.VideoQuality);
+        builder.HasIndex(x => new { x.PlexMovieId, Quality = x.VideoQuality });
         builder.HasIndex(x => x.PlexApiRatingKey);
 
         builder

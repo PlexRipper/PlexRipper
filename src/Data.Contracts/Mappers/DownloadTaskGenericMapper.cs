@@ -92,7 +92,7 @@ public static class DownloadTaskGenericMapper
             Children = [],
             VideoQuality = file is DownloadTaskTvShowEpisodeFile or DownloadTaskMusicTrackFile
                 ? VideoQuality.None
-                : file.Quality,
+                : file.VideoQuality,
             AudioQuality = file is DownloadTaskMusicTrackFile musicFile ? musicFile.AudioQuality : AudioQuality.None,
             ParentId = file.ToParentKey()!.Id,
             PlexServer = file.PlexServer,

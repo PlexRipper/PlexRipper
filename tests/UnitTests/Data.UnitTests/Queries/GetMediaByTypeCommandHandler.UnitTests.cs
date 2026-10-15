@@ -2482,7 +2482,7 @@ public class GetMediaByTypeCommandHandlerUnitTests : BaseUnitTest<GetMediaByType
         result.IsSuccess.ShouldBeTrue();
         result.IsFailed.ShouldBeFalse();
         AssertReturnedExactMovies(result.Value, [expectedMovie.MovieId]);
-        result.Value.Items.ShouldAllBe(x => x.Qualities.Any(y => y.Quality == VideoQuality.FullHD));
+        result.Value.Items.ShouldAllBe(x => x.Qualities.Any(y => y.VideoQuality == VideoQuality.FullHD));
 
         var returnedMovieId = result.Value.Items.Single().Id;
         var hasMatchingGenre = await dbContext.PlexMovieGenres.AnyAsync(
@@ -2529,7 +2529,12 @@ public class GetMediaByTypeCommandHandlerUnitTests : BaseUnitTest<GetMediaByType
         var countryOnlyMovie = movies[2];
         var actorOnlyMovie = movies[3];
 
-        var genre = new PlexGenreVideo { Name = "Regression Genre", Key = "regression-genre", Type = PlexGenreType.Unknown };
+        var genre = new PlexGenreVideo
+        {
+            Name = "Regression Genre",
+            Key = "regression-genre",
+            Type = PlexGenreType.Unknown,
+        };
         var country = new PlexCountry { Name = "Regression Country", Key = "regression-country" };
         var actor = new PlexActor { Name = "Regression Actor", Key = "regression-actor" };
 
@@ -2556,7 +2561,9 @@ public class GetMediaByTypeCommandHandlerUnitTests : BaseUnitTest<GetMediaByType
         await dbContext
             .PlexMovieData.Where(x => x.PlexMovieId == expectedMovie.Id)
             .ExecuteUpdateAsync(
-                x => x.SetProperty(y => y.Quality, targetQuality).SetProperty(y => y.VideoResolution, targetQuality),
+                x =>
+                    x.SetProperty(y => y.VideoQuality, targetQuality)
+                        .SetProperty(y => y.VideoResolution, targetQuality),
                 CancellationToken
             );
 
@@ -2564,7 +2571,8 @@ public class GetMediaByTypeCommandHandlerUnitTests : BaseUnitTest<GetMediaByType
             .PlexMovieData.Where(x => x.PlexMovieId != expectedMovie.Id)
             .ExecuteUpdateAsync(
                 x =>
-                    x.SetProperty(y => y.Quality, VideoQuality.HD).SetProperty(y => y.VideoResolution, VideoQuality.HD),
+                    x.SetProperty(y => y.VideoQuality, VideoQuality.HD)
+                        .SetProperty(y => y.VideoResolution, VideoQuality.HD),
                 CancellationToken
             );
 
@@ -2617,21 +2625,21 @@ public class GetMediaByTypeCommandHandlerUnitTests : BaseUnitTest<GetMediaByType
         await dbContext
             .PlexMovies.Where(x => x.Id == movieIds[0])
             .ExecuteUpdateAsync(
-                x => x.SetProperty(y => y.Title, "SD Movie").SetProperty(y => y.Quality, VideoQuality.SD),
+                x => x.SetProperty(y => y.Title, "SD Movie").SetProperty(y => y.VideoQuality, VideoQuality.SD),
                 CancellationToken
             );
 
         await dbContext
             .PlexMovies.Where(x => x.Id == movieIds[1])
             .ExecuteUpdateAsync(
-                x => x.SetProperty(y => y.Title, "4K Movie").SetProperty(y => y.Quality, VideoQuality.UHD_4K),
+                x => x.SetProperty(y => y.Title, "4K Movie").SetProperty(y => y.VideoQuality, VideoQuality.UHD_4K),
                 CancellationToken
             );
 
         await dbContext
             .PlexMovies.Where(x => x.Id == movieIds[2])
             .ExecuteUpdateAsync(
-                x => x.SetProperty(y => y.Title, "HD Movie").SetProperty(y => y.Quality, VideoQuality.FullHD),
+                x => x.SetProperty(y => y.Title, "HD Movie").SetProperty(y => y.VideoQuality, VideoQuality.FullHD),
                 CancellationToken
             );
     }
@@ -2641,21 +2649,21 @@ public class GetMediaByTypeCommandHandlerUnitTests : BaseUnitTest<GetMediaByType
         await dbContext
             .PlexTvShows.Where(x => x.Id == tvShowIds[0])
             .ExecuteUpdateAsync(
-                x => x.SetProperty(y => y.Title, "SD Show").SetProperty(y => y.Quality, VideoQuality.SD),
+                x => x.SetProperty(y => y.Title, "SD Show").SetProperty(y => y.VideoQuality, VideoQuality.SD),
                 CancellationToken
             );
 
         await dbContext
             .PlexTvShows.Where(x => x.Id == tvShowIds[1])
             .ExecuteUpdateAsync(
-                x => x.SetProperty(y => y.Title, "4K Show").SetProperty(y => y.Quality, VideoQuality.UHD_4K),
+                x => x.SetProperty(y => y.Title, "4K Show").SetProperty(y => y.VideoQuality, VideoQuality.UHD_4K),
                 CancellationToken
             );
 
         await dbContext
             .PlexTvShows.Where(x => x.Id == tvShowIds[2])
             .ExecuteUpdateAsync(
-                x => x.SetProperty(y => y.Title, "HD Show").SetProperty(y => y.Quality, VideoQuality.FullHD),
+                x => x.SetProperty(y => y.Title, "HD Show").SetProperty(y => y.VideoQuality, VideoQuality.FullHD),
                 CancellationToken
             );
     }

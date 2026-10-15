@@ -30,11 +30,8 @@ describe('Convert media identities', () => {
 
 	test.each([
 		[DownloadTaskType.MusicTrackData, PlexMediaType.MusicTrack],
-		[DownloadTaskType.MusicTrackPart, PlexMediaType.MusicTrack],
 		[DownloadTaskType.PhotoData, PlexMediaType.PhotoImage],
-		[DownloadTaskType.PhotoPart, PlexMediaType.PhotoImage],
 		[DownloadTaskType.OtherVideoData, PlexMediaType.OtherVideos],
-		[DownloadTaskType.OtherVideoPart, PlexMediaType.OtherVideos],
 	])('Should retain the source media family for %s file tasks', (taskType, mediaType) => {
 		// Act
 		const convertedMediaType = Convert.toPlexMediaType(taskType);

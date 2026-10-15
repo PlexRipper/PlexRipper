@@ -531,24 +531,19 @@ export enum DownloadTaskType {
   None = "None",
   Movie = "Movie",
   MovieData = "MovieData",
-  MoviePart = "MoviePart",
   TvShow = "TvShow",
   Season = "Season",
   Episode = "Episode",
   EpisodeData = "EpisodeData",
-  EpisodePart = "EpisodePart",
   MusicArtist = "MusicArtist",
   MusicAlbum = "MusicAlbum",
   MusicTrack = "MusicTrack",
   MusicTrackData = "MusicTrackData",
-  MusicTrackPart = "MusicTrackPart",
   PhotoAlbum = "PhotoAlbum",
   PhotoImage = "PhotoImage",
   PhotoData = "PhotoData",
-  PhotoPart = "PhotoPart",
   OtherVideo = "OtherVideo",
   OtherVideoData = "OtherVideoData",
-  OtherVideoPart = "OtherVideoPart",
 }
 
 export interface ErrorDTO {
@@ -1216,7 +1211,7 @@ export interface PlexMediaQualityDTO {
   mediaDataType: PlexMediaType;
   /** @format int32 */
   mediaId: number;
-  quality: VideoQuality;
+  videoQuality: VideoQuality;
 }
 
 export interface PlexMediaSlimDTO {

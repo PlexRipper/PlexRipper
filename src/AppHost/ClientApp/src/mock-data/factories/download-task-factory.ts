@@ -47,7 +47,7 @@ export function generateDownloadTask({
 }): DownloadTaskDTO {
 	checkConfig(config);
 	incrementSeed();
-	const audioQuality = [DownloadTaskType.MusicTrack, DownloadTaskType.MusicTrackData, DownloadTaskType.MusicTrackPart].includes(type)
+	const audioQuality = [DownloadTaskType.MusicTrack, DownloadTaskType.MusicTrackData].includes(type)
 		? AudioQuality.Unknown
 		: AudioQuality.None;
 	const title = randMovie();

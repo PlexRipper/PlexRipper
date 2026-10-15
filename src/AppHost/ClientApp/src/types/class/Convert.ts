@@ -163,17 +163,14 @@ export const Convert = {
 				return PlexMediaType.MusicAlbum;
 			case DownloadTaskType.MusicTrack:
 			case DownloadTaskType.MusicTrackData:
-			case DownloadTaskType.MusicTrackPart:
 				return PlexMediaType.MusicTrack;
 			case DownloadTaskType.PhotoAlbum:
 				return PlexMediaType.PhotoAlbum;
 			case DownloadTaskType.PhotoImage:
 			case DownloadTaskType.PhotoData:
-			case DownloadTaskType.PhotoPart:
 				return PlexMediaType.PhotoImage;
 			case DownloadTaskType.OtherVideo:
 			case DownloadTaskType.OtherVideoData:
-			case DownloadTaskType.OtherVideoPart:
 				return PlexMediaType.OtherVideos;
 			default:
 				return PlexMediaType.Unknown;

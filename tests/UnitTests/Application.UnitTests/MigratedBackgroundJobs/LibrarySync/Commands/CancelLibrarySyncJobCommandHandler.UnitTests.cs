@@ -205,11 +205,12 @@ public class CancelLibrarySyncJobCommandHandlerUnitTests : BaseCommandUnitTest<C
         Mock.Mock<IScheduler>()
             .Setup(x => x.Interrupt(jobKey, It.IsAny<CancellationToken>()))
             .ReturnsAsync(false)
-            .Verifiable(Times.Once());
+            .Verifiable(Times.Exactly(2));
         Mock.Mock<IScheduler>()
             .Setup(x => x.DeleteJob(jobKey, It.IsAny<CancellationToken>()))
             .ReturnsAsync(true)
             .Verifiable(Times.Once());
+        Mock.Mock<IScheduler>().Setup(x => x.GetCurrentlyExecutingJobs(It.IsAny<CancellationToken>())).ReturnsAsync([]);
         Mock.Mock<INotificationHubService>()
             .Setup(x =>
                 x.SendRefreshNotificationAsync(

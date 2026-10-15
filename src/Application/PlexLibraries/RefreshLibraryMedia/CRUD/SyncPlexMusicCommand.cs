@@ -84,18 +84,13 @@ public class SyncPlexMusicCommandHandler : ICommandHandler<SyncPlexMusicCommand,
                     new List<(PlexMusicArtist Incoming, PlexMusicArtist Stored, List<PlexMusicAlbum> Albums)>();
                 var refreshedAlbums =
                     new List<(PlexMusicAlbum Incoming, PlexMusicAlbum Stored, List<PlexMusicTrack> Tracks)>();
+                var reconciledAlbums = new List<(PlexMusicAlbum Stored, List<PlexMusicTrack> Tracks)>();
                 var createdTracks = new List<(PlexMusicTrack Incoming, PlexMusicTrack Stored)>();
                 foreach (var incomingArtist in incomingArtists)
                 {
                     artistByKey.TryGetValue(incomingArtist.PlexApiRatingKey, out var artist);
                     incomingArtist.Id = artist?.Id ?? 0;
-                    if (artist is not null && incomingArtist.UpdatedAt == artist.UpdatedAt)
-                    {
-                        artists.Add(artist);
-                        albums.AddRange(artist.Albums);
-                        tracks.AddRange(artist.Albums.SelectMany(x => x.Tracks));
-                        continue;
-                    }
+                    var artistIsUnchanged = artist is not null && incomingArtist.UpdatedAt == artist.UpdatedAt;
 
                     incomingArtist.PlexLibraryId = library.Id;
                     incomingArtist.PlexServerId = library.PlexServerId;
@@ -105,7 +100,7 @@ public class SyncPlexMusicCommandHandler : ICommandHandler<SyncPlexMusicCommand,
                         ctx.Entry(artist).State = EntityState.Added;
                         report.CreatedArtists++;
                     }
-                    else
+                    else if (!artistIsUnchanged)
                     {
                         ctx.Entry(artist).CurrentValues.SetValues(incomingArtist);
                         report.UpdatedArtists++;
@@ -118,13 +113,8 @@ public class SyncPlexMusicCommandHandler : ICommandHandler<SyncPlexMusicCommand,
                     {
                         albumByKey.TryGetValue(incomingAlbum.PlexApiRatingKey, out var album);
                         incomingAlbum.Id = album?.Id ?? 0;
-                        if (album is not null && incomingAlbum.UpdatedAt == album.UpdatedAt)
-                        {
-                            artistAlbums.Add(album);
-                            albums.Add(album);
-                            tracks.AddRange(album.Tracks);
-                            continue;
-                        }
+                        var albumIsUnchanged =
+                            album is not null && incomingAlbum.UpdatedAt == album.UpdatedAt && album.PlexArtistId == artist.Id;
 
                         incomingAlbum.PlexArtist = incomingArtist;
                         incomingAlbum.PlexArtistId = artist.Id;
@@ -138,7 +128,7 @@ public class SyncPlexMusicCommandHandler : ICommandHandler<SyncPlexMusicCommand,
                             ctx.Entry(album).State = EntityState.Added;
                             report.CreatedAlbums++;
                         }
-                        else
+                        else if (!albumIsUnchanged)
                         {
                             ctx.Entry(album).CurrentValues.SetValues(incomingAlbum);
                             album.PlexArtist = artist;
@@ -148,12 +138,18 @@ public class SyncPlexMusicCommandHandler : ICommandHandler<SyncPlexMusicCommand,
                         artistAlbums.Add(album);
                         albums.Add(album);
                         var albumTracks = new List<PlexMusicTrack>(incomingAlbum.Tracks.Count);
-                        refreshedAlbums.Add((incomingAlbum, album, albumTracks));
+                        reconciledAlbums.Add((album, albumTracks));
+                        if (!albumIsUnchanged)
+                            refreshedAlbums.Add((incomingAlbum, album, albumTracks));
                         foreach (var incomingTrack in incomingAlbum.Tracks)
                         {
                             trackByKey.TryGetValue(incomingTrack.PlexApiRatingKey, out var track);
                             incomingTrack.Id = track?.Id ?? 0;
-                            if (track is not null && incomingTrack.UpdatedAt == track.UpdatedAt)
+                            if (
+                                track is not null
+                                && incomingTrack.UpdatedAt == track.UpdatedAt
+                                && track.PlexAlbumId == album.Id
+                            )
                             {
                                 albumTracks.Add(track);
                                 tracks.Add(track);
@@ -199,7 +195,7 @@ public class SyncPlexMusicCommandHandler : ICommandHandler<SyncPlexMusicCommand,
                 // Resolve moves before severing required relationships, so EF does not delete moved children as orphans.
                 foreach (var (_, stored, children) in refreshedArtists)
                     stored.Albums = children;
-                foreach (var (_, stored, children) in refreshedAlbums)
+                foreach (var (stored, children) in reconciledAlbums)
                     stored.Tracks = children;
 
                 var artistKeys = artists.Select(x => x.PlexApiRatingKey).ToHashSet();
@@ -516,6 +512,7 @@ public class SyncPlexMusicCommandHandler : ICommandHandler<SyncPlexMusicCommand,
         if (rows.Count > 0)
             await ctx.BulkInsertAsync(rows, bulkConfig, ct);
     }
+
 
     private static (int MediaId, int PartId) DataKey(PlexMusicTrackMediaData data) =>
         (data.PlexApiMediaId, data.PlexApiPartId);

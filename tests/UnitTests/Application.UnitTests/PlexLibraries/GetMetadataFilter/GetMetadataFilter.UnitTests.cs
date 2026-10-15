@@ -80,7 +80,9 @@ public class GetMetadataFilterUnitTests
     }
 
     [Test]
-    public async Task ShouldKeepAudioAndVideoGenreIdsScoped_WhenNamesAndIdsOverlap()
+    [Arguments(false)]
+    [Arguments(true)]
+    public async Task ShouldKeepAudioAndVideoGenreIdsScoped_WhenNamesAndIdsOverlap(bool omitMediaType)
     {
         // Arrange
         await SetupDatabase(
@@ -116,17 +118,33 @@ public class GetMetadataFilterUnitTests
 
         // Act
         var videoResult = await TestEndpointHandleAsync(
-            new GetMetadataFilterRequest { PlexLibraryId = videoLibrary.Id, MediaType = PlexMediaType.Movie }
+            new GetMetadataFilterRequest
+            {
+                PlexLibraryId = videoLibrary.Id,
+                MediaType = omitMediaType ? PlexMediaType.None : PlexMediaType.Movie,
+            }
         );
         var audioResult = await TestEndpointHandleAsync(
-            new GetMetadataFilterRequest { PlexLibraryId = audioLibrary.Id, MediaType = PlexMediaType.MusicArtist }
+            new GetMetadataFilterRequest
+            {
+                PlexLibraryId = audioLibrary.Id,
+                MediaType = omitMediaType ? PlexMediaType.None : PlexMediaType.MusicArtist,
+            }
         );
 
         // Assert
         videoResult.IsValid.ShouldBeTrue();
-        videoResult.Response.ShouldNotBeNull().Value.ShouldNotBeNull().Genres.ShouldBe([videoGenre.Id]);
+        videoResult.StatusCode.ShouldBe(200);
+        var videoResponse = videoResult.Response.ShouldNotBeNull();
+        videoResponse.IsSuccess.ShouldBeTrue();
+        videoResponse.Errors.Count.ShouldBe(0);
+        videoResponse.Value.ShouldNotBeNull().Genres.ShouldBe([videoGenre.Id]);
         audioResult.IsValid.ShouldBeTrue();
-        audioResult.Response.ShouldNotBeNull().Value.ShouldNotBeNull().Genres.ShouldBe([audioGenre.Id]);
+        audioResult.StatusCode.ShouldBe(200);
+        var audioResponse = audioResult.Response.ShouldNotBeNull();
+        audioResponse.IsSuccess.ShouldBeTrue();
+        audioResponse.Errors.Count.ShouldBe(0);
+        audioResponse.Value.ShouldNotBeNull().Genres.ShouldBe([audioGenre.Id]);
         videoGenre.Id.ShouldBe(audioGenre.Id);
     }
 }

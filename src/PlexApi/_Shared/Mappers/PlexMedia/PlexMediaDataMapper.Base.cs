@@ -42,14 +42,12 @@ public static partial class PlexMediaDataMapper
 
         var identity = value.Trim();
         var prefix = $"plex://{entity}/";
-        if (identity.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
-            identity = identity[prefix.Length..].Trim();
-        else if (identity.Contains("://", StringComparison.Ordinal))
+        if (!identity.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
             return null;
 
+        identity = identity[prefix.Length..].Trim();
         return string.IsNullOrWhiteSpace(identity) ? null : identity.ToLowerInvariant();
     }
-
 
     private static bool TryParseMusicBrainzId(string? value, out Guid musicBrainzId)
     {

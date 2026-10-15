@@ -38,7 +38,7 @@ public interface IPlexApiClientFactory
     /// <param name="retryCount">The number of times to retry the request.</param>
     /// <param name="retryProgressAction">The action to invoke when a retry is made.</param>
     /// <returns>A task that represents the asynchronous client creation operation.</returns>
-    Task<IPlexAPI> CreateClientAsync(
+    Task<Result<IPlexAPI>> CreateClientAsync(
         int plexServerId,
         int timeout = 10,
         int retryCount = 1,

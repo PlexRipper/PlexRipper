@@ -86,7 +86,7 @@ public class GetMetadataFilter : Endpoint<GetMetadataFilterRequest, ResultDTO<Pl
                 .Distinct()
                 .ToListAsync(ct);
 
-            var isAudioLibrary = req.MediaType.IsMusicType();
+            var isAudioLibrary = plexLibrary.Type.IsMusicType();
             var genres = isAudioLibrary
                 ? await _dbContext
                     .PlexLibraryGenresAudio.Where(x => x.PlexLibraryId == req.PlexLibraryId)

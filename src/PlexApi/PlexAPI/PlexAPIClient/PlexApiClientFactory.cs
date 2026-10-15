@@ -21,7 +21,7 @@ public class PlexApiClientFactory : IPlexApiClientFactory
         new PlexAPI(client: _clientFactory(options), serverUrl: options.ConnectionUrl, token: authToken);
 
     /// <inheritdoc/>
-    public async Task<IPlexAPI> CreateClientAsync(
+    public async Task<Result<IPlexAPI>> CreateClientAsync(
         int plexServerId,
         int timeout = 10,
         int retryCount = 1,
@@ -29,17 +29,20 @@ public class PlexApiClientFactory : IPlexApiClientFactory
     )
     {
         using var dbContext = await _dbContextFactory.CreateAsync();
-        var authToken = await dbContext.GetPlexServerTokenAsync(plexServerId, CancellationToken.None);
-        authToken.LogIfFailed();
+
+        var authTokenResult = await dbContext.GetPlexServerTokenAsync(plexServerId, CancellationToken.None);
+        if (authTokenResult.IsFailed)
+            return authTokenResult.ToResult().LogIfFailed();
 
         var plexServerConnectionResult = await dbContext.ChoosePlexServerConnection(
             plexServerId,
             CancellationToken.None
         );
-        plexServerConnectionResult.LogIfFailed();
+        if (plexServerConnectionResult.IsFailed)
+            return plexServerConnectionResult.ToResult().LogIfFailed();
 
-        return CreateClient(
-            authToken.Value,
+        var client = CreateClient(
+            authTokenResult.Value,
             new PlexApiClientOptions
             {
                 ConnectionUrl = plexServerConnectionResult.Value.Url,
@@ -48,6 +51,8 @@ public class PlexApiClientFactory : IPlexApiClientFactory
                 RetryProgressAction = retryProgressAction,
             }
         );
+
+        return Result.Ok(client);
     }
 
     /// <inheritdoc/>

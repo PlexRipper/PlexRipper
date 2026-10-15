@@ -20,7 +20,11 @@ public class GetLibraryMediaTotalsCommandHandler
         CancellationToken ct
     )
     {
-        var client = await _plexApiClientFactory.CreateClientAsync(command.PlexLibrary.PlexServerId);
+        var clientResult = await _plexApiClientFactory.CreateClientAsync(command.PlexLibrary.PlexServerId);
+        if (clientResult.IsFailed)
+            return clientResult.ToResult().LogIfFailed();
+
+        var client = clientResult.Value;
 
         if (!long.TryParse(command.PlexLibrary.Key, out var libraryKey))
         {

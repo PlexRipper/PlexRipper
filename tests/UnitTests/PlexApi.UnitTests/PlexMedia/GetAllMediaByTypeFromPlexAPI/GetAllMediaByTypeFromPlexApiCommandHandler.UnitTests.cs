@@ -47,7 +47,7 @@ public class GetAllMediaByTypeFromPlexApiCommandHandlerUnitTests
             .Verifiable(Times.Once());
         Mock.Mock<IPlexApiClientFactory>()
             .Setup(x => x.CreateClientAsync(library.PlexServerId, 30, 3, null))
-            .ReturnsAsync(sdk.Object)
+            .ReturnsAsync(Result.Ok<IPlexAPI>(sdk.Object))
             .Verifiable(Times.Once());
         Mock.Mock<ILibrarySyncProgressStore>()
             .Setup(x =>
@@ -79,7 +79,6 @@ public class GetAllMediaByTypeFromPlexApiCommandHandlerUnitTests
         );
         Mock.Mock<ILibrarySyncProgressStore>().Verify();
     }
-
 
     [Test]
     public async Task ShouldRequestIndependentTotal_AndUpdateTheDenominatorWhenPlexChanges()
@@ -137,7 +136,7 @@ public class GetAllMediaByTypeFromPlexApiCommandHandlerUnitTests
             .Verifiable(Times.Exactly(3));
         Mock.Mock<IPlexApiClientFactory>()
             .Setup(x => x.CreateClientAsync(library.PlexServerId, 30, 3, null))
-            .ReturnsAsync(sdk)
+            .ReturnsAsync(Result.Ok<IPlexAPI>(sdk))
             .Verifiable(Times.Once());
         var progress = new LibraryProgress
         {
@@ -154,10 +153,7 @@ public class GetAllMediaByTypeFromPlexApiCommandHandlerUnitTests
                 },
             ],
         };
-        Mock.Mock<ILibrarySyncProgressStore>()
-            .Setup(x => x.Get(library.Id))
-            .Returns(progress);
-
+        Mock.Mock<ILibrarySyncProgressStore>().Setup(x => x.Get(library.Id)).Returns(progress);
 
         Mock.Mock<ILibrarySyncProgressStore>()
             .Setup(x => x.UpdateItemAsync(library.Id, It.IsAny<LibraryProgressItem>(), CancellationToken))
@@ -243,7 +239,7 @@ public class GetAllMediaByTypeFromPlexApiCommandHandlerUnitTests
             .Verifiable(Times.Exactly(3));
         Mock.Mock<IPlexApiClientFactory>()
             .Setup(x => x.CreateClientAsync(library.PlexServerId, 30, 3, null))
-            .ReturnsAsync(sdk)
+            .ReturnsAsync(Result.Ok<IPlexAPI>(sdk))
             .Verifiable(Times.Once());
         Mock.Mock<ILibrarySyncProgressStore>()
             .Setup(x =>

@@ -36,7 +36,11 @@ public class GetAllMediaByTypeFromPlexApiCommandHandler
         var mediaType = command.MediaType;
         var batchSize = command.BatchSize;
 
-        var client = await _plexApiClientFactory.CreateClientAsync(plexLibrary.PlexServerId, 30, 3);
+        var clientResult = await _plexApiClientFactory.CreateClientAsync(plexLibrary.PlexServerId, 30, 3);
+        if (clientResult.IsFailed)
+            return clientResult.ToResult().LogIfFailed();
+
+        var client = clientResult.Value;
 
         var mediaList = new List<LibraryMediaItemDTO>();
         var libraryKey = long.Parse(plexLibrary.Key);

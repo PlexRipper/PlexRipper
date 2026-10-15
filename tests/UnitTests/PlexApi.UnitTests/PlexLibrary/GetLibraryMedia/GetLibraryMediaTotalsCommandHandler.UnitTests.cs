@@ -50,8 +50,8 @@ public class GetLibraryMediaTotalsCommandUnitTests : BaseUnitTest<GetLibraryMedi
         }
 
         Mock.Mock<IPlexApiClientFactory>()
-            .Setup(x => x.CreateClient(It.IsAny<string>(), It.IsAny<PlexApiClientOptions>()))
-            .Returns(sdk.Object)
+            .Setup(x => x.CreateClientAsync(library.PlexServerId, 10, 1, null))
+            .ReturnsAsync(sdk.Object)
             .Verifiable(Times.Once());
 
         // Act

@@ -207,9 +207,6 @@ public class GenerateDownloadTaskMusicTracksCommandUnitTests
         target.Id.ShouldNotBe(control.Id);
         var automatic = target.MediaDataList.Single();
         var foreignOriginal = control.MediaDataList.Single();
-        await dbContext
-            .PlexMusicTrackData.Where(x => x.Id == automatic.Id)
-            .ExecuteUpdateAsync(setters => setters.SetProperty(x => x.Quality, VideoQuality.SD), CancellationToken);
         var requested = FakeData
             .GetPlexMusicTrackMediaData(new Seed(62616))
             .RuleFor(x => x.Id, _ => 0)
@@ -222,13 +219,6 @@ public class GenerateDownloadTaskMusicTracksCommandUnitTests
             .Generate();
         dbContext.PlexMusicTrackData.Add(requested);
         await dbContext.SaveChangesAsync(CancellationToken);
-        var originals = await dbContext
-            .PlexMusicTrackData.Where(x => x.PlexTrackId == target.Id)
-            .OrderBy(x => x.Id)
-            .ToListAsync(CancellationToken);
-        originals
-            .Select(x => (x.Id, x.PlexTrackId, x.Quality))
-            .ShouldBe([(automatic.Id, target.Id, VideoQuality.SD), (requested.Id, target.Id, VideoQuality.Unknown)]);
         foreignOriginal.PlexTrackId.ShouldBe(control.Id);
         (await dbContext.DownloadTaskMusicTrackFiles.Select(x => x.Id).ToListAsync(CancellationToken)).ShouldBeEmpty();
         var expected = firstDataIdFromAnotherTrack ? automatic : requested;

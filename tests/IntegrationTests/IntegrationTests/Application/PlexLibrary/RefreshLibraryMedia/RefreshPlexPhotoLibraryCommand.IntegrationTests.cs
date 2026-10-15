@@ -123,7 +123,7 @@ public class RefreshPlexPhotoLibraryCommandIntegrationTests : BaseIntegrationTes
         var response = await client.POSTAsync<
             RefreshLibraryMediaEndpoint,
             RefreshLibraryMediaEndpointRequest,
-            ResultDTO<PlexLibraryDTO>
+            ResultDTO<LibrarySyncJobQueueDTO>
         >(new RefreshLibraryMediaEndpointRequest { PlexLibraryId = photoLibrary.Id });
         response.Response.IsSuccessStatusCode.ShouldBeTrue();
         response.Result.IsSuccess.ShouldBeTrue();
@@ -189,7 +189,7 @@ public class RefreshPlexPhotoLibraryCommandIntegrationTests : BaseIntegrationTes
         var repeatResponse = await client.POSTAsync<
             RefreshLibraryMediaEndpoint,
             RefreshLibraryMediaEndpointRequest,
-            ResultDTO<PlexLibraryDTO>
+            ResultDTO<LibrarySyncJobQueueDTO>
         >(new RefreshLibraryMediaEndpointRequest { PlexLibraryId = photoLibrary.Id, ForceLibrarySync = true });
         repeatResponse.Response.IsSuccessStatusCode.ShouldBeTrue();
         repeatResponse.Result.IsSuccess.ShouldBeTrue();

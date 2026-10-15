@@ -21,7 +21,8 @@ public class RefreshLibraryMediaEndpointUnitTests
             }
         );
 
-        var plexLibrary = IDbContext.PlexLibraries.First();
+        var dbContext = IDbContext;
+        var plexLibrary = dbContext.PlexLibraries.First();
         var createdAt = new DateTime(2026, 10, 14, 12, 0, 0, DateTimeKind.Utc);
         var queueItem = new LibrarySyncJobQueue
         {
@@ -32,8 +33,8 @@ public class RefreshLibraryMediaEndpointUnitTests
             CreatedAt = createdAt,
             StartedAt = status == LibrarySyncJobStatus.Processing ? createdAt.AddMinutes(1) : null,
         };
-        await IDbContext.LibrarySyncJobQueues.AddAsync(queueItem, CancellationToken);
-        await IDbContext.SaveChangesAsync(CancellationToken);
+        await dbContext.LibrarySyncJobQueues.AddAsync(queueItem, CancellationToken);
+        await dbContext.SaveChangesAsync(CancellationToken);
 
         Mock.Mock<ICommandExecutor>()
             .Setup(x =>

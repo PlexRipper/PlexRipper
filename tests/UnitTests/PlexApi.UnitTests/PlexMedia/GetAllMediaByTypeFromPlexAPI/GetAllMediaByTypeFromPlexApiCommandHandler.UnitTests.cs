@@ -46,8 +46,8 @@ public class GetAllMediaByTypeFromPlexApiCommandHandlerUnitTests
             .ReturnsAsync(CreateResponse(0, 0))
             .Verifiable(Times.Once());
         Mock.Mock<IPlexApiClientFactory>()
-            .Setup(x => x.CreateClient(It.IsAny<string>(), It.IsAny<PlexApiClientOptions>()))
-            .Returns(sdk.Object)
+            .Setup(x => x.CreateClientAsync(library.PlexServerId, 30, 3, null))
+            .ReturnsAsync(sdk.Object)
             .Verifiable(Times.Once());
         Mock.Mock<ILibrarySyncProgressStore>()
             .Setup(x =>
@@ -136,8 +136,8 @@ public class GetAllMediaByTypeFromPlexApiCommandHandlerUnitTests
             )
             .Verifiable(Times.Exactly(3));
         Mock.Mock<IPlexApiClientFactory>()
-            .Setup(x => x.CreateClient(It.IsAny<string>(), It.IsAny<PlexApiClientOptions>()))
-            .Returns(sdk)
+            .Setup(x => x.CreateClientAsync(library.PlexServerId, 30, 3, null))
+            .ReturnsAsync(sdk)
             .Verifiable(Times.Once());
         var progress = new LibraryProgress
         {
@@ -242,8 +242,8 @@ public class GetAllMediaByTypeFromPlexApiCommandHandlerUnitTests
             )
             .Verifiable(Times.Exactly(3));
         Mock.Mock<IPlexApiClientFactory>()
-            .Setup(x => x.CreateClient(It.IsAny<string>(), It.IsAny<PlexApiClientOptions>()))
-            .Returns(sdk)
+            .Setup(x => x.CreateClientAsync(library.PlexServerId, 30, 3, null))
+            .ReturnsAsync(sdk)
             .Verifiable(Times.Once());
         Mock.Mock<ILibrarySyncProgressStore>()
             .Setup(x =>

@@ -245,13 +245,13 @@ public class MusicComparisonIntegrationTests : BaseIntegrationTests
             var sync = await client.POSTAsync<
                 RefreshLibraryMediaEndpoint,
                 RefreshLibraryMediaEndpointRequest,
-                ResultDTO<PlexLibraryDTO>
+                ResultDTO<LibrarySyncJobQueueDTO>
             >(new RefreshLibraryMediaEndpointRequest { PlexLibraryId = library.Id });
             sync.Response.StatusCode.ShouldBe(HttpStatusCode.OK);
             sync.Result.IsSuccess.ShouldBeTrue();
             sync.Result.Errors.Count.ShouldBe(0);
             sync.Result.Value.ShouldNotBeNull();
-            sync.Result.Value.Id.ShouldBe(library.Id);
+            sync.Result.Value.PlexLibraryId.ShouldBe(library.Id);
             await WaitForDatabaseConditionAsync(
                 async () =>
                 {
@@ -421,7 +421,7 @@ public class MusicComparisonIntegrationTests : BaseIntegrationTests
             .ShouldAllBe(x => x == scope.CompletedAt);
         (await compared.PlexMusicTrackData.CountAsync(CancellationToken)).ShouldBe(11);
         var requestCountBeforeBrowse = fixture.Requests.Count;
-        requestCountBeforeBrowse.ShouldBe(12);
+        requestCountBeforeBrowse.ShouldBe(18);
 
         // Wait for real snapshot publication so the sorted HTTP request must use the cached browse path.
         await WaitForDatabaseConditionAsync(() => Task.FromResult(!snapshotObserver.Completed.IsEmpty), 60, 200);
@@ -682,7 +682,7 @@ public class MusicComparisonIntegrationTests : BaseIntegrationTests
         var resync = await client.POSTAsync<
             RefreshLibraryMediaEndpoint,
             RefreshLibraryMediaEndpointRequest,
-            ResultDTO<PlexLibraryDTO>
+            ResultDTO<LibrarySyncJobQueueDTO>
         >(new RefreshLibraryMediaEndpointRequest { PlexLibraryId = remote.Id, ForceLibrarySync = true });
         resync.Response.StatusCode.ShouldBe(HttpStatusCode.OK);
         resync.Result.IsSuccess.ShouldBeTrue();
@@ -1087,7 +1087,7 @@ public class MusicComparisonIntegrationTests : BaseIntegrationTests
             .ShouldBe([fixture.RemoteLibraryPath]);
         fixture.Requests.Select(x => x.Method).Distinct().ShouldBe([HttpMethod.Get]);
         fixture.Requests.Select(x => x.TokenPresent).Distinct().ShouldBe([true]);
-        fixture.Requests.Count.ShouldBe(18);
+        fixture.Requests.Count.ShouldBe(27);
         fixture
             .Requests.GroupBy(x => (x.Path, x.Type))
             .Select(x => (x.Key.Path, x.Key.Type, Count: x.Count()))
@@ -1097,7 +1097,7 @@ public class MusicComparisonIntegrationTests : BaseIntegrationTests
                 new[] { fixture.OwnedLibraryPath, fixture.RemoteLibraryPath }
                     .SelectMany(path =>
                         new[] { "8", "9", "10" }.Select(type =>
-                            (Path: path, Type: type, Count: path == fixture.OwnedLibraryPath ? 2 : 4)
+                            (Path: path, Type: type, Count: path == fixture.OwnedLibraryPath ? 3 : 6)
                         )
                     )
                     .OrderBy(x => x.Path)

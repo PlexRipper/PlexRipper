@@ -43,7 +43,7 @@ public class RefreshPlexMusicLibraryCommandIntegrationTests : BaseIntegrationTes
         var response = await client.POSTAsync<
             RefreshLibraryMediaEndpoint,
             RefreshLibraryMediaEndpointRequest,
-            ResultDTO<PlexLibraryDTO>
+            ResultDTO<LibrarySyncJobQueueDTO>
         >(new RefreshLibraryMediaEndpointRequest { PlexLibraryId = library.Id });
         await container.BackgroundJobScheduler.AwaitScheduler(CancellationToken);
 
@@ -138,7 +138,7 @@ public class RefreshPlexMusicLibraryCommandIntegrationTests : BaseIntegrationTes
         var repeatResponse = await client.POSTAsync<
             RefreshLibraryMediaEndpoint,
             RefreshLibraryMediaEndpointRequest,
-            ResultDTO<PlexLibraryDTO>
+            ResultDTO<LibrarySyncJobQueueDTO>
         >(new RefreshLibraryMediaEndpointRequest { PlexLibraryId = library.Id, ForceLibrarySync = true });
         repeatResponse.Response.IsSuccessStatusCode.ShouldBeTrue();
         repeatResponse.Result.IsSuccess.ShouldBeTrue();

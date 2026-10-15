@@ -44,6 +44,11 @@ public class ResetFailedLibrarySyncJobsCommandHandler : ICommandHandler<ResetFai
             )
             .ResetJobsToQueuedAsync(cancellationToken);
 
+        var hasQueuedJobs = await _dbContext.LibrarySyncJobQueues.AnyAsync(
+            x => x.PlexServerId == command.PlexServerId && x.Status == LibrarySyncJobStatus.Queued,
+            cancellationToken
+        );
+
         if (resetCount > 0)
         {
             _log.Here()
@@ -57,7 +62,10 @@ public class ResetFailedLibrarySyncJobsCommandHandler : ICommandHandler<ResetFai
                 await _notificationHubService.SendRefreshNotificationAsync([RefreshDataType.PlexLibrarySyncStatus])
             );
             notificationResult.LogIfFailed();
+        }
 
+        if (resetCount > 0 || hasQueuedJobs)
+        {
             var checkQueuedResult = await _commandExecutor.Send(
                 new CheckQueuedPlexLibraryToSyncCommand(),
                 cancellationToken

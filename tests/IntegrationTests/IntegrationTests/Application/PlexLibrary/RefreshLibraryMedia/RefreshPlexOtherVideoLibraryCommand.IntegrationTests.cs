@@ -40,7 +40,7 @@ public class RefreshPlexOtherVideoLibraryCommandIntegrationTests : BaseIntegrati
         var response = await client.POSTAsync<
             RefreshLibraryMediaEndpoint,
             RefreshLibraryMediaEndpointRequest,
-            ResultDTO<PlexLibraryDTO>
+            ResultDTO<LibrarySyncJobQueueDTO>
         >(new RefreshLibraryMediaEndpointRequest { PlexLibraryId = library.Id });
         await WaitForDatabaseConditionAsync(async () =>
         {
@@ -113,7 +113,7 @@ public class RefreshPlexOtherVideoLibraryCommandIntegrationTests : BaseIntegrati
         var repeatResponse = await client.POSTAsync<
             RefreshLibraryMediaEndpoint,
             RefreshLibraryMediaEndpointRequest,
-            ResultDTO<PlexLibraryDTO>
+            ResultDTO<LibrarySyncJobQueueDTO>
         >(new RefreshLibraryMediaEndpointRequest { PlexLibraryId = library.Id, ForceLibrarySync = true });
         repeatResponse.Response.IsSuccessStatusCode.ShouldBeTrue();
         repeatResponse.Result.IsSuccess.ShouldBeTrue();

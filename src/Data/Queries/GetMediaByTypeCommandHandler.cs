@@ -127,10 +127,20 @@ public class GetMediaByTypeCommandHandler : ICommandHandler<GetMediaByTypeComman
         options = WithServerLibraryScope(options, allowedPlexLibraryIds, plexLibraryId);
 
         if (filter.MediaType.IsMusicType())
+        {
             options.Sort.RemoveAll(static sort =>
-                string.Equals(sort.Field, nameof(BasePlexMedia.VideoQuality), StringComparison.OrdinalIgnoreCase)
+                string.Equals(sort.Field, "quality", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(sort.Field, nameof(BasePlexMedia.VideoQuality), StringComparison.OrdinalIgnoreCase)
             );
-
+        }
+        else
+        {
+            options.Sort.ForEach(static sort =>
+            {
+                if (string.Equals(sort.Field, "quality", StringComparison.OrdinalIgnoreCase))
+                    sort.Field = nameof(BasePlexMedia.VideoQuality);
+            });
+        }
         ApplyDefaultMediaSort(options, plexLibraryId);
         NormalizeAllLibrarySort(options, plexLibraryId);
 

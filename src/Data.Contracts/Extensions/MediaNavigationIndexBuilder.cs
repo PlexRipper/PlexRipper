@@ -33,7 +33,7 @@ public static class MediaNavigationIndexBuilder
                 row.SearchTitle
             ),
             nameof(BasePlexMedia.Year) or "year" => row.Year?.ToString(CultureInfo.InvariantCulture) ?? UNKNOWN_LABEL,
-            "quality" => row.QualityValue?.ToString(CultureInfo.InvariantCulture) ?? UNKNOWN_LABEL,
+            nameof(BasePlexMedia.VideoQuality) or "quality" => row.QualityValue?.ToString(CultureInfo.InvariantCulture) ?? UNKNOWN_LABEL,
             nameof(BasePlexMedia.Duration) or "duration" => row.Duration.HasValue
                 ? GetDurationLabel(row.Duration.Value)
                 : UNKNOWN_LABEL,

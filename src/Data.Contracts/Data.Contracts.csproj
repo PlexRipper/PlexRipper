@@ -14,9 +14,9 @@
         </PackageReference>
         <PackageReference Include="EFCore.BulkExtensions.SQLite" Version="10.0.1" />
         <PackageReference Include="FlexQuery.NET.EFCore" Version="2.5.0" />
-        <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.10" />
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.10" />
-        <PackageReference Include="SQLitePCLRaw.lib.e_sqlite3" Version="2.1.12" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.13" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.13" />
+        <PackageReference Include="SQLitePCLRaw.lib.e_sqlite3" Version="2.1.13" />
     </ItemGroup>
     <ItemGroup>
         <Using Include="Reaparr.FluentResults" />
@@ -25,5 +25,8 @@
         <Using Include="Reaparr.Application.Contracts" />
         <Using Include="Reaparr.Domain" />
         <Using Include="Reaparr.Logging" />
+    </ItemGroup>
+    <ItemGroup>
+        <Folder Include="Interfaces\IReaparrDbContext.cs:100-180 &amp;&amp; src\Data\Extensions\DbSet\" />
     </ItemGroup>
 </Project>
